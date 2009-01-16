@@ -1,0 +1,48 @@
+#ifndef datavector_h
+#define datavector_h
+
+using namespace std;
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <map>
+
+class RAbundVector;
+class SAbundVector;
+class OrderVector;
+
+class DataVector {
+	
+public:
+	DataVector(){};// : maxRank(0), numBins(0), numSeqs(0){};
+	DataVector(string l) : label(l) {};
+	DataVector(const DataVector& dv) : label(dv.label){};//, maxRank(dv.maxRank), numBins(dv.numBins), numSeqs(dv.numSeqs) {};
+	DataVector(ifstream&);
+	~DataVector(){};
+	
+//	virtual int getNumBins()	{	return numBins;		}
+//	virtual int getNumSeqs()	{	return numSeqs;		}
+//	virtual int getMaxRank()	{	return maxRank;		}
+	
+	virtual void resize(int) = 0;
+	virtual int size()	= 0;
+	virtual void print(ostream&) = 0;
+	
+	void setLabel(string l)		{	label = l;			}
+	string getLabel()			{	return label;		}
+
+	//virtual RAbundVector getRAbundVector() = 0;
+	virtual SAbundVector getSAbundVector() = 0;
+	virtual OrderVector getOrderVector(map<string,int>* hold = NULL) = 0;
+	
+protected:
+	string label;
+//	int maxRank;
+//	int numBins;
+//	int numSeqs;	
+};
+
+/***********************************************************************/
+
+#endif
