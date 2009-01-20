@@ -33,10 +33,10 @@ class ErrorCheck {
 		void splitAtDash(string&, set<string>&);
 		void validateReadFiles();
 		void validateReadDist();
-		void validateReadPhil(string);
-		void validateParseFiles(string);
+		void validateReadPhil();
+		void validateParseFiles();
 		void clear();
-		string distfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, cutoff, format; 
+		string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, cutoff, format; 
 		string precision, method, fileroot, label, line, iters, jumble, freq, single, rarefaction, shared, summary;
 		string commandName, optionText;
 		bool errorFree;

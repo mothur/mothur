@@ -23,41 +23,26 @@ int HelpCommand::execute(){
 
 	globaldata = GlobalData::getInstance();
 	
-	if (globaldata->helpRequest == "read.phylip") {
-		cout << "The read.phylip command parameter options are distfile, namefile, cutoff and precision" << "\n";
-		cout << "The read.phylip command should be in the following format: " << "\n";
-		cout << "read.phylip(distfile=yourDistFile, namefile=yourNameFile, cutoff=yourCutoff, precision=yourPrecision) " << "\n";
-		cout << "The distfile parameter is required.  If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed." << "\n";
+	if (globaldata->helpRequest == "read.dist") {
+		cout << "The read.dist command parameter options are phylipfile or columnfile, namefile, cutoff and precision" << "\n";
+		cout << "The read.dist command should be in the following format: " << "\n";
+		cout << "read.dist(phylipfile=yourDistFile, namefile=yourNameFile, cutoff=yourCutoff, precision=yourPrecision) " << "\n";
+		cout << "The phylipfile or columnfile parameter is required, but only one may be used.  If you use a columnfile the namefile is required. " << "\n";
+		cout << "If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. distfile), '=' and parameters (i.e.yourDistfile)." << "\n" << "\n";
-	}else if (globaldata->helpRequest == "read.column") {
-		cout << "The read.column command parameter options are distfile, namefile, cutoff and precision" << "\n";
-		cout << "The read.column command should be in the following format: " << "\n";
-		cout << "read.column(distfile=yourDistFile, namefile=yourNameFile, cutoff=yourCutoff, precision=yourPrecision) " << "\n";
-		cout << "The distfile and namefile parameters are required.  If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. distfile), '=' and parameters (i.e.yourDistfile)." << "\n" << "\n";
-	}else if (globaldata->helpRequest == "read.list") {
-		cout << "The read.list command parameter options are listfile and orderfile." << "\n";
-		cout << "The read.list command should be in the following format: " << "\n";
-		cout << "read.list(listfile=yourListFile, orderfile=yourOrderFile) " << "\n";
-		cout << "The listfile parameter is required." << "\n";
+	}else if (globaldata->helpRequest == "read.otu") {
+		cout << "The read.otu command parameter options are listfile, rabundfile, sabundfile or orderfile." << "\n";
+		cout << "The read.otu command should be in the following format: " << "\n";
+		cout << "read.otu(listfile=yourListFile, orderfile=yourOrderFile) " << "\n";
+		cout << "The read.otu requires one of hte following parameters: listfile, rabundfile or sabundfile. Only one may be used at a time." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. listfile), '=' and parameters (i.e.yourListfile)." << "\n" << "\n";
-	}else if (globaldata->helpRequest == "read.rabund") {
-		cout << "The read.rabund command parameter options are rabundfile and orderfile." << "\n";
-		cout << "The read.rabund command should be in the following format: " << "\n";
-		cout << "read.rabund(rabundfile=yourRAbundFile, orderfile=yourOrderFile) " << "\n";
-		cout << "The rabundfile parameter is required." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. rabundfile), '=' and parameters (i.e.yourRAbundfile)." << "\n" << "\n";
-	}else if (globaldata->helpRequest == "read.sabund") {
-		cout << "The read.sabund command parameter options are sabundfile and orderfile." << "\n";
-		cout << "The read.sabund command should be in the following format: " << "\n";
-		cout << "read.sabund(sabundfile=yourSAbundFile, orderfile=yourOrderFile) " << "\n";
-		cout << "The sabundfile parameter is required." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. sabundfile), '=' and parameters (i.e.yourSAbundfile)." << "\n" << "\n";
-	}else if (globaldata->helpRequest == "read.shared") {
-		cout << "The read.shared command parameter options are listfile and groupfile." << "\n";
-		cout << "The read.shared command should be in the following format: " << "\n";
-		cout << "read.shared(listfile=yourListFile, groupfile=yourGroupFile) " << "\n";
+	}else if (globaldata->helpRequest == "read.list") {
+		cout << "The read.list command parameter options are listfile and groupfile." << "\n";
+		cout << "The read.list command should be in the following format: " << "\n";
+		cout << "read.list(listfile=yourListFile, groupfile=yourGroupFile) " << "\n";
 		cout << "The listfile parameter and groupfile paramaters are required." << "\n";
+		cout << "The read.list command parses a list file and separates it into groups." << "\n";
+		cout << "It outputs a .shared file containing the otu information for each group as well as a .list file for each group." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. listfile), '=' and parameters (i.e.yourListfile)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "cluster") {
 		cout << "The cluster command can only be executed after a successful read.phylip or read.column command." << "\n";
@@ -122,25 +107,11 @@ int HelpCommand::execute(){
 		cout << "The default value for jumble is 0 (meaning don’t jumble, if it’s set to 1 then it will jumble) and sharedsummary is sharedChao-sharedAce-sharedJabund-sharedSorensonAbund-sharedJclass-sharedSorClass-sharedJest-sharedSorEst-SharedThetaYC-SharedThetaN" << "\n";
 		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. listfile), '=' and parameters (i.e.yourListfile)." << "\n" << "\n";
-	}else if (globaldata->helpRequest == "shared") { 
-		cout << "The shared command can only be executed after a successful read.shared command." << "\n";
-		cout << "The shared command parses a list file and separates it into groups." << "\n";
-		cout << "It outputs a shared file containing the otu information for each group.  There are no shared command parameters." << "\n";
-		cout << "The shared command should be in the following format: shared()." << "\n";
-		cout << "Example shared()." << "\n";
-	}else if (globaldata->helpRequest == "parselist") { 
-		cout << "The parselist command parses a list file and separates it into groups." << "\n";
-		cout << "It outputs a list file for each group." << "\n";
-		cout << "The parselist command parameter options are listfile and groupfile." << "\n";
-		cout << "The parselist command should be in the following format: " << "\n";
-		cout << "parselist(listfile=yourListFile, groupfile=yourGroupFile) " << "\n";
-		cout << "The listfile parameter and groupfile paramater are required." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. listfile), '=' and parameters (i.e.yourListfile)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "quit") {
 		cout << "The quit command will terminate Dotur and should be in the following format: " << "\n";
 		cout << "quit()" << "\n" << "\n";
 	}else if (globaldata->helpRequest == "") {
-		cout << "Valid commands are read.phylip(), read.column(), read.list(), read.rabund(), read.sabund(), cluster(), collect.single(), rarefaction.single(), summary.single(), collect.shared(), rarefaction.shared(), summary.shared(), shared(), pareselist(), quit(), help()." << "\n";
+		cout << "Valid commands are read.dist(), read.list(), read.otu(), cluster(), collect.single(), rarefaction.single(), summary.single(), collect.shared(), rarefaction.shared(), summary.shared(), quit(), help()." << "\n";
 		cout << "For more information about a specific command type 'help(commandName)' i.e. 'help(read.phylip)'" << endl;
 	}else {
 		cout << "not a valid command" << endl;

@@ -27,12 +27,7 @@ ParseListCommand::ParseListCommand(){
 		}
 		
 		//set fileroot
-		if(globaldata->getFileRoot() != ""){
-			fileroot = globaldata->getFileRoot();
-		}
-		else{
-			fileroot = getRootName(globaldata->getDistFile());
-		}
+		fileroot = getRootName(globaldata->getListFile());
 		
 		//open output list files
 		for (i=0; i<groupMap->getNumGroups(); i++) {//opens an output file for each group
@@ -130,6 +125,10 @@ int ParseListCommand::execute(){
 				}
 				list = input->getListVector();
 			}
+			
+			//set groupmap for .shared commands
+			globaldata->gGroupmap = groupMap; 
+			
 			return 0;
 	}
 	catch(exception& e) {
@@ -146,7 +145,6 @@ int ParseListCommand::execute(){
 
 ParseListCommand::~ParseListCommand(){
 	delete list;
-	delete groupMap;
 	delete input;
 	delete read;	
 }

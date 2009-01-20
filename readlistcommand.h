@@ -1,10 +1,19 @@
+/*
+ *  readlistcommand.h
+ *  Mothur
+ *
+ *  Created by Sarah Westcott on 1/20/09.
+ *  Copyright 2009 Schloss Lab UMASS Amherst. All rights reserved.
+ *
+ */
+
 #ifndef READLISTFILECOMMAND_H
 #define READLISTFILECOMMAND_H
 /*
- *  readlistfilecommand.h
- *  Dotur
+ *  readlistcommand.h
+ *  Mothur
  *
- *  Created by Sarah Westcott on 1/2/09.
+ *  Created by Sarah Westcott on 1/20/09.
  *  Copyright 2009 Schloss Lab UMASS Amherst. All rights reserved.
  *
  */
@@ -15,10 +24,16 @@
 #include "command.hpp"
 #include "readmatrix.hpp"
 #include "inputdata.h"
+#include "groupmap.h"
+#include "sharedcommand.h"
+#include "parselistcommand.h"
 
-/* The read.list command parameter options are listfile and orderfile.  
+
+/* The read.list command parameter options are listfile and groupfile.  
 The read.list command should be in the following format: 
-read.list(listfile=yourListFile, orderfile=yourOrderFile). The listfile parameter is required. */
+read.shared(listfile=yourListFile, groupfile=yourGroupFile).  
+The listfile parameter and groupfile paramaters are required. */		
+
 
 class GlobalData;
 
@@ -30,6 +45,9 @@ public:
 	
 private:
 	GlobalData* globaldata;
+	Command* shared;
+	Command* parselist;
+	GroupMap* groupMap;
 	ReadMatrix* read;
 	InputData* input;
 	string filename;

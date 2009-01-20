@@ -31,7 +31,8 @@ public:
 	set<int> lines; //hold lines to be used
 	set<string> labels; //holds labels to be used
 	
-	string getDistFile();
+	string getPhylipFile();
+	string getColumnFile();
 	string getListFile();
 	string getRabundFile();
 	string getSabundFile();
@@ -47,7 +48,8 @@ public:
 	string getJumble();
 	string getFreq();
 	void setListFile(string);
-	void setDistFile(string);
+	void setPhylipFile(string);
+	void setColumnFile(string);
 	void setNameFile(string);
 	void setRabundFile(string);
 	void setSabundFile(string);
@@ -66,7 +68,7 @@ public:
 	void splitAtDash(string&, set<string>&);
 	
 private:
-	string distfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, line, label;
+	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, line, label;
 	string cutoff, format, precision, method, fileroot, iters, jumble, freq, single, rarefaction, shared, summary, sharedsummary, sharedrarefaction;
 	static GlobalData* _uniqueInstance;
 	GlobalData( const GlobalData& ); // Disable copy constructor
