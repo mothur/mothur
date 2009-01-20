@@ -14,7 +14,8 @@
 ValidParameters::ValidParameters() {
 	try {
 	
-		parameters["distfile"]			= "distfile"; 
+		parameters["phylipfile"]		= "phylipfile";
+		parameters["columnfile"]		= "columnfile";
 		parameters["listfile"]			= "listfile"; 
 		parameters["rabundfile"]		= "rabundfile"; 
 		parameters["sabundfile"]		= "sabundfile"; 

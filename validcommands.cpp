@@ -14,24 +14,19 @@
 ValidCommands::ValidCommands() {
 	try {
 	
-		commands["read.phylip"]			= "read.phylip"; 
-		commands["read.column"]			= "read.column"; 
+		commands["read.dist"]			= "read.dist"; 
+		commands["read.otu"]			= "read.otu"; 
 		commands["read.list"]			= "read.list"; 
-		commands["read.rabund"]			= "read.rabund"; 
-		commands["read.sabund"]			= "read.sabund"; 
-		commands["read.shared"]			= "read.shared"; 
 		commands["cluster"]				= "cluster"; 
 		commands["help"]				= "help"; 
 		commands["quit"]				= "quit"; 
 		commands["collect.single"]		= "collect.single"; 
-		commands["shared"]				= "shared"; 
 		commands["collect.shared"]		= "collect.shared"; 
 		commands["rarefaction.single"]	= "rarefaction.single"; 
 		commands["rarefaction.shared"]	= "rarefaction.shared"; 
 		commands["summary.single"]		= "summary.single"; 
 		commands["summary.shared"]		= "summary.shared"; 
-		commands["parselist"]			= "parselist"; 
-		
+				
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidCommands class Function ValidCommands. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -55,7 +50,7 @@ bool ValidCommands::isValidCommand(string command) {
 		if ((commands.find(command)) != (commands.end())) {
 			return true;
 		}else{
-			cout << command << " is not a valid command in Mothur.  Valid commands are read.phylip(), read.column(), read.list(), read.rabund(), read.sabund(), read.shared(), cluster(), collect.single(), collect.shared(), parselist(), shared(), rarefaction.single(), rarefaction.shared(), summary.single(), summary.shared(), quit(), help()." << endl;
+			cout << command << " is not a valid command in Mothur.  Valid commands are read.dist(), read.list(), cluster(), collect.single(), collect.shared(), rarefaction.single(), rarefaction.shared(), summary.single(), summary.shared(), quit(), help()." << endl;
 			return false;
 		}
 		

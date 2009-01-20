@@ -94,10 +94,11 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				splitAtComma(value, optionText);
 				splitAtEquals(key, value);
 				
-				if (key == "distfile" )		{ distfile = value; inputFileName = value; fileroot = value;}
-				if (key == "listfile" )		{ listfile = value; inputFileName = value; fileroot = value;}
-				if (key == "rabundfile" )	{ rabundfile = value; inputFileName = value; fileroot = value;}
-				if (key == "sabundfile" )	{ sabundfile = value; inputFileName = value; fileroot = value;}
+				if (key == "phylipfile" )	{ phylipfile = value; inputFileName = value; fileroot = value; format = "phylip";}
+				if (key == "columnfile" )	{ columnfile = value; inputFileName = value; fileroot = value; format = "column";}
+				if (key == "listfile" )		{ listfile = value; inputFileName = value; fileroot = value; format = "list"; }
+				if (key == "rabundfile" )	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund"; }
+				if (key == "sabundfile" )	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund"; } 
 				if (key == "namefile" )		{ namefile = value; }
 				if (key == "orderfile" )	{ orderfile = value; }
 				if (key == "groupfile" )	{ groupfile = value; }
@@ -156,10 +157,11 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			//saves the last parameter
 			value = optionText;
 			splitAtEquals(key, value);
-			if (key == "distfile" )		{ distfile = value; inputFileName = value; fileroot = value; }
-			if (key == "listfile" )		{ listfile = value; inputFileName = value; fileroot = value; }
-			if (key == "rabundfile" )	{ rabundfile = value; inputFileName = value; fileroot = value; }
-			if (key == "sabundfile" )	{ sabundfile = value; inputFileName = value; fileroot = value; }
+			if (key == "phylipfile" )	{ phylipfile = value; inputFileName = value; fileroot = value; format = "phylip"; }
+			if (key == "columnfile" )	{ columnfile = value; inputFileName = value; fileroot = value; format = "column"; }
+			if (key == "listfile" )		{ listfile = value; inputFileName = value; fileroot = value; format = "list"; }
+			if (key == "rabundfile" )	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund"; }
+			if (key == "sabundfile" )	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund"; }
 			if (key == "namefile" )		{ namefile = value; }
 			if (key == "orderfile" )	{ orderfile = value; }
 			if (key == "groupfile" )	{ groupfile = value; }
@@ -254,21 +256,10 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 /******************************************************/
 void GlobalData::setReadFormat(string command){
 	try {
-		if (command == "read.phylip") { 
+		if (command == "read.dist") { 
 			clear();
-			format = "phylip";
-		}else if (command == "read.column") { 
+		}else if (command == "read.otu") { 
 			clear();
-			format = "column";
-		}else if (command == "read.list") { 
-			clear();
-			format = "list";
-		}else if (command == "read.rabund") { 
-			clear();
-			format = "rabund";
-		}else if (command == "read.sabund") { 
-			clear();
-			format = "sabund";
 		}else if (command == "read.shared") { 
 			clear();
 			format = "shared";
@@ -288,7 +279,8 @@ void GlobalData::setReadFormat(string command){
 
 /******************************************************/
 // These functions give you the option parameters of the commands
-string GlobalData::getDistFile()		{	return distfile;	}
+string GlobalData::getPhylipFile()		{	return phylipfile;	}
+string GlobalData::getColumnFile()		{	return columnfile;	}
 string GlobalData::getListFile()		{	return listfile;	}
 string GlobalData::getRabundFile()		{	return rabundfile;	}
 string GlobalData::getSabundFile()		{	return sabundfile;	}
@@ -306,7 +298,9 @@ string GlobalData::getFreq()			{	return freq;		}
 void GlobalData::setListFile(string file)	{	listfile = file;	inputFileName = file;}
 void GlobalData::setRabundFile(string file)	{	rabundfile = file;	inputFileName = file;}
 void GlobalData::setSabundFile(string file)	{	sabundfile = file;	inputFileName = file;}
-void GlobalData::setDistFile(string file)	{	distfile = file;    inputFileName = file;}
+void GlobalData::setPhylipFile(string file)	{	phylipfile = file;    inputFileName = file;}
+void GlobalData::setColumnFile(string file)	{	columnfile = file;    inputFileName = file;}
+//void GlobalData::setGroupFile(string file)	{	groupfile = file;	}
 void GlobalData::setNameFile(string file)	{	namefile = file;	}
 void GlobalData::setFormat(string Format)	{	format = Format; 	}
 
@@ -326,12 +320,13 @@ GlobalData::GlobalData() {
 
 void GlobalData::clear() {
 	//option definitions should go here...
-	distfile		=	"";
-	listfile		=	"";///users/westcott/desktop/s.list
+	phylipfile		=	"";
+	columnfile		=	"";
+	listfile		=	"";
 	rabundfile		=	"";
 	sabundfile		=	"";
 	namefile		=	"";
-	groupfile		=	""; ///users/westcott/desktop/s.names
+	groupfile		=	""; 
 	orderfile		=	"";
 	cutoff			=	"10.00";
 	format			=	"";

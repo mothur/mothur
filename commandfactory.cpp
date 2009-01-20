@@ -8,15 +8,11 @@
  */
 
 #include "command.hpp"
-#include "readdistphylipfilecommand.h"
-#include "readdistcolumnfilecommand.h"
-#include "readlistfilecommand.h"
-#include "readrabundfilecommand.h"
-#include "readsabundfilecommand.h"
-#include "readsharedfilecommand.h"
+#include "readdistcommand.h"
+#include "readotucommand.h"
+#include "readlistcommand.h"
 #include "clustercommand.h"
 #include "parselistcommand.h"
-#include "sharedcommand.h"
 #include "collectcommand.h"
 #include "collectsharedcommand.h"
 #include "rarefactcommand.h"
@@ -52,23 +48,18 @@ Command* CommandFactory::getCommand(string commandName){
 	try {
 		delete command;   //delete the old command
 
-			 if(commandName == "read.phylip")			{	command = new ReadDistPhylipFileCommand();	}
-		else if(commandName == "read.column")			{	command = new ReadDistColumnFileCommand();	}
+			 if(commandName == "read.dist")				{	command = new ReadDistCommand();	}
+		else if(commandName == "read.otu")				{	command = new ReadOtuCommand();	}
 		else if(commandName == "read.list")				{	command = new ReadListFileCommand();	}
-		else if(commandName == "read.rabund")			{	command = new ReadRAbundFileCommand();	}
-		else if(commandName == "read.sabund")			{	command = new ReadSAbundFileCommand();	}
-		else if(commandName == "read.shared")			{	command = new ReadSharedFileCommand();	}
 		else if(commandName == "cluster")				{	command = new ClusterCommand();			}
 		else if(commandName == "help")					{	command = new HelpCommand();			}
 		else if(commandName == "quit")					{	command = new QuitCommand();			}
 		else if(commandName == "collect.single")		{	command = new CollectCommand();			}
-		else if(commandName == "shared")				{	command = new SharedCommand();			}
 		else if(commandName == "collect.shared")		{	command = new CollectSharedCommand();	}
 		else if(commandName == "rarefaction.single")	{	command = new RareFactCommand();		}
 		else if(commandName == "rarefaction.shared")	{	command = new RareFactSharedCommand();	}
 		else if(commandName == "summary.single")		{	command = new SummaryCommand();			}
 		else if(commandName == "summary.shared")		{	command = new SummarySharedCommand();	}
-		else if(commandName == "parselist")				{	command = new ParseListCommand();		}
 		else											{	command = new NoCommand();				}
 
 		return command;

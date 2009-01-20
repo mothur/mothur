@@ -18,7 +18,8 @@ ErrorCheck::ErrorCheck() {
 	validCommand = new ValidCommands();
 	validParameter = new ValidParameters();
 	validCalculator = new ValidCalculators();
-	distfile = globaldata->getDistFile();
+	columnfile = globaldata->getColumnFile();
+	phylipfile = globaldata->getPhylipFile();
 	listfile = globaldata->getListFile();
 	rabundfile = globaldata->getRabundFile();
 	sabundfile = globaldata->getSabundFile();
@@ -69,7 +70,8 @@ bool ErrorCheck::checkInput(string input) {
 				//is it a valid parameter
 				if (validParameter->isValidParameter(parameter) != true) { return false; }
 				
-				if (parameter == "distfile" )		{ distfile = value; }
+				if (parameter == "phylipfile" )		{ phylipfile = value; }
+				if (parameter == "columnfile" )		{ columnfile = value; }
 				if (parameter == "listfile" )		{ listfile = value; }
 				if (parameter == "rabundfile" )		{ rabundfile = value; }
 				if (parameter == "sabundfile" )		{ sabundfile = value; }
@@ -135,7 +137,8 @@ bool ErrorCheck::checkInput(string input) {
 				//is it a valid parameter
 				if (validParameter->isValidParameter(parameter) != true) { return false; }
 				
-				if (parameter == "distfile" )		{ distfile = value; }
+				if (parameter == "phylipfile" )		{ phylipfile = value; }
+				if (parameter == "columnfile" )		{ columnfile = value; }				
 				if (parameter == "listfile" )		{ listfile = value; }
 				if (parameter == "rabundfile" )		{ rabundfile = value; }
 				if (parameter == "sabundfile" )		{ sabundfile = value; }
@@ -198,20 +201,16 @@ bool ErrorCheck::checkInput(string input) {
 		
 		//make sure the user does not use both the line and label parameters
 		if ((line != "") && (label != "")) { cout << "You may use either the line or label parameters, but not both." << endl; return false; }
+	
 		
-		//validate files
-		if (commandName == "parselist") {
-			validateParseFiles(commandName);
-		}
-		if ((commandName == "read.phylip") || (commandName == "read.column")) { 
+		if (commandName == "read.dist") { 
 			validateReadFiles();
 			validateReadDist();
-		}else if ((commandName == "read.list") || (commandName == "read.rabund") || (commandName == "read.sabund")){ 
+		}else if (commandName == "read.otu") { 
 			validateReadFiles();
-			validateReadPhil(commandName);	
-		}else if (commandName == "read.shared") { 
-			validateReadFiles();
-			validateParseFiles(commandName); //checks the listfile and groupfile parameters
+			validateReadPhil();	
+		}else if (commandName == "read.list") { 
+			validateParseFiles(); //checks the listfile and groupfile parameters
 		}
 		
 		//are you trying to cluster before you have read something			
@@ -251,13 +250,20 @@ void ErrorCheck::validateReadFiles() {
 		ifstream filehandle;
 		int ableToOpen;
 	
-		//are we reading a distfile
-		if (distfile != "") {
-			ableToOpen = openInputFile(distfile, filehandle);
+		//are we reading a phylipfile
+		if (phylipfile != "") {
+			ableToOpen = openInputFile(phylipfile, filehandle);
 			filehandle.close();
 			//unable to open
 			if (ableToOpen == 1) { errorFree = false; }
-			else { globaldata->inputFileName = distfile; }
+			else { globaldata->inputFileName = phylipfile; }
+		//are we reading a phylipfile
+		}else if (columnfile != "") {
+			ableToOpen = openInputFile(columnfile, filehandle);
+			filehandle.close();
+			//unable to open
+			if (ableToOpen == 1) { errorFree = false; }
+			else { globaldata->inputFileName = columnfile; }
 		//are we reading a listfile
 		}else if (listfile!= "") {
 			ableToOpen = openInputFile(listfile, filehandle);
@@ -303,9 +309,10 @@ void ErrorCheck::validateReadDist() {
 		ifstream filehandle;
 		int ableToOpen;
 		
-		if (distfile == "") { cout << "When executing a read.phylip or read.column you must enter a distfile." << endl; errorFree = false; }
+		if ((phylipfile == "") && (columnfile == "")) { cout << "When executing a read.dist you must enter a phylipfile or a columnfile." << endl; errorFree = false; }
+		else if ((phylipfile != "") && (columnfile != "")) { cout << "When executing a read.dist you must enter ONLY ONE of the following: phylipfile or columnfile." << endl; errorFree = false; }
 		
-		if (commandName == "read.column") {
+		if (columnfile != "") {
 			if (namefile == "") {
 				cout << "You need to provide a namefile name if you are going to use the column format." << endl;
 				errorFree = false; 
@@ -331,20 +338,16 @@ void ErrorCheck::validateReadDist() {
 /******************************************************/
 //This function checks to make sure the user entered appropriate
 // format parameters on a parselistcommand
-void ErrorCheck::validateParseFiles(string command) {
+void ErrorCheck::validateParseFiles() {
 	try {
 		ifstream filehandle;
 		int ableToOpen;
 		
 		//checks for valid files
-		if (command == "read.shared" ) {
-			if (listfile == "") { cout << "When executing a read.shared you must enter a listfile and a groupfile." << endl; errorFree = false; }
-			else if (groupfile == "") { cout << "When executing a read.shared you must enter a listfile and a groupfile." << endl; errorFree = false; }
-		}else if (command == "parselist" ) {
-			if (listfile == "") { cout << "When executing a parselist you must enter a listfile and a groupfile." << endl; errorFree = false; }
-			else if (groupfile == "") { cout << "When executing a parselist you must enter a listfile and a groupfile." << endl; errorFree = false; }
-		}
-		
+	
+		if (listfile == "") { cout << "When executing a read.list you must enter a listfile and a groupfile." << endl; errorFree = false; }
+		else if (groupfile == "") { cout << "When executing a read.list you must enter a listfile and a groupfile." << endl; errorFree = false; }
+	
 		//checks parameters on the read command
 		if (listfile != "") {
 			ableToOpen = openInputFile(listfile, filehandle);
@@ -376,18 +379,23 @@ void ErrorCheck::validateParseFiles(string command) {
 /******************************************************/
 //This function checks to make sure the user entered appropriate
 // format parameters on a distfile read
-void ErrorCheck::validateReadPhil(string command) {
+void ErrorCheck::validateReadPhil() {
 	try {
 		ifstream filehandle;
 		int ableToOpen;
 		
-		//checks for valid files
-		if (command == "read.list" ) {
-			if (listfile == "") { cout << "When executing a read.list you must enter a listfile." << endl; errorFree = false; }
-		}else if (command == "read.sabund" ) {
-			if (sabundfile == "") { cout << "When executing a read.sabund you must enter a sabundfile." << endl; errorFree = false; }
-		}else if (command == "read.rabund" ) {
-			if (rabundfile == "") { cout << "When executing a read.rabund you must enter a rabundfile." << endl; errorFree = false; }
+		//checks to make sure only one file type is given
+		if (listfile != "") { 
+			if ((rabundfile != "") || (sabundfile != "")) { 
+				cout << "When executing a read.otu you must enter ONLY ONE of the following: listfile, rabundfile or sabundfile." << endl; errorFree = false; }
+		}else if (rabundfile != "") { 
+			if ((listfile != "") || (sabundfile != "")) { 
+				cout << "When executing a read.otu you must enter ONLY ONE of the following: listfile, rabundfile or sabundfile." << endl; errorFree = false; }
+		}else if (sabundfile != "") { 
+			if ((listfile != "") || (rabundfile != "")) { 
+				cout << "When executing a read.otu you must enter ONLY ONE of the following: listfile, rabundfile or sabundfile." << endl; errorFree = false; }
+		}else if ((listfile == "") && (rabundfile == "") && (sabundfile == "")) {
+			    cout << "When executing a read.otu you must enter one of the following: listfile, rabundfile or sabundfile." << endl; errorFree = false; 
 		}
 		
 		//checks parameters on the read command
@@ -414,7 +422,8 @@ void ErrorCheck::validateReadPhil(string command) {
 
 void ErrorCheck::clear() {
 	//option definitions should go here...
-	distfile		=	"";
+	phylipfile		=	"";
+	columnfile		=	"";
 	listfile		=	"";
 	rabundfile		=	"";
 	sabundfile		=	"";

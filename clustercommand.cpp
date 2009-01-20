@@ -108,7 +108,9 @@ int ClusterCommand::execute(){
 		}
 	
 		//saves .list file so you can do the collect, rarefaction and summary commands without doing a read.list
-		globaldata->setDistFile("");
+		if (globaldata->getFormat() == "phylip") { globaldata->setPhylipFile(""); }
+		else if (globaldata->getFormat() == "column") { globaldata->setColumnFile(""); }
+		
 		globaldata->setListFile(fileroot+ tag + ".list");
 		globaldata->setNameFile("");
 		globaldata->setFormat("list");

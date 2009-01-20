@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		372E12700F26365B0095CF7E /* readotucommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E126F0F26365B0095CF7E /* readotucommand.cpp */; };
+		372E12960F263D5A0095CF7E /* readdistcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E12950F263D5A0095CF7E /* readdistcommand.cpp */; };
+		372E12C10F2648250095CF7E /* readlistcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E12C00F2648250095CF7E /* readlistcommand.cpp */; };
+		372E12ED0F264D320095CF7E /* commandfactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E12EC0F264D320095CF7E /* commandfactory.cpp */; };
 		37D928550F21331F001D4494 /* ace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927B80F21331F001D4494 /* ace.cpp */; };
 		37D928560F21331F001D4494 /* averagelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927BA0F21331F001D4494 /* averagelinkage.cpp */; };
 		37D928570F21331F001D4494 /* bootstrap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927BB0F21331F001D4494 /* bootstrap.cpp */; };
@@ -17,7 +21,6 @@
 		37D9285C0F21331F001D4494 /* collect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927C50F21331F001D4494 /* collect.cpp */; };
 		37D9285D0F21331F001D4494 /* collectcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927C70F21331F001D4494 /* collectcommand.cpp */; };
 		37D9285E0F21331F001D4494 /* collectsharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927CB0F21331F001D4494 /* collectsharedcommand.cpp */; };
-		37D9285F0F21331F001D4494 /* commandfactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927CE0F21331F001D4494 /* commandfactory.cpp */; };
 		37D928600F21331F001D4494 /* commandoptionparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927D00F21331F001D4494 /* commandoptionparser.cpp */; };
 		37D928610F21331F001D4494 /* completelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927D20F21331F001D4494 /* completelinkage.cpp */; };
 		37D928620F21331F001D4494 /* database.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927D30F21331F001D4494 /* database.cpp */; };
@@ -47,13 +50,7 @@
 		37D9287A0F21331F001D4494 /* rarefact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D928050F21331F001D4494 /* rarefact.cpp */; };
 		37D9287B0F21331F001D4494 /* rarefactcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D928070F21331F001D4494 /* rarefactcommand.cpp */; };
 		37D9287C0F21331F001D4494 /* rarefactsharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D9280A0F21331F001D4494 /* rarefactsharedcommand.cpp */; };
-		37D9287D0F21331F001D4494 /* readdistcolumnfilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D9280C0F21331F001D4494 /* readdistcolumnfilecommand.cpp */; };
-		37D9287E0F21331F001D4494 /* readdistphylipfilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D9280E0F21331F001D4494 /* readdistphylipfilecommand.cpp */; };
-		37D9287F0F21331F001D4494 /* readlistfilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D928100F21331F001D4494 /* readlistfilecommand.cpp */; };
 		37D928800F21331F001D4494 /* readmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D928120F21331F001D4494 /* readmatrix.cpp */; };
-		37D928810F21331F001D4494 /* readrabundfilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D928140F21331F001D4494 /* readrabundfilecommand.cpp */; };
-		37D928820F21331F001D4494 /* readsabundfilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D928160F21331F001D4494 /* readsabundfilecommand.cpp */; };
-		37D928830F21331F001D4494 /* readsharedfilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D928180F21331F001D4494 /* readsharedfilecommand.cpp */; };
 		37D928840F21331F001D4494 /* sabundvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D9281A0F21331F001D4494 /* sabundvector.cpp */; };
 		37D928850F21331F001D4494 /* sequence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D9281C0F21331F001D4494 /* sequence.cpp */; };
 		37D928860F21331F001D4494 /* shannon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D9281E0F21331F001D4494 /* shannon.cpp */; };
@@ -99,6 +96,13 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		372E126E0F26365B0095CF7E /* readotucommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readotucommand.h; sourceTree = "<group>"; };
+		372E126F0F26365B0095CF7E /* readotucommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readotucommand.cpp; sourceTree = "<group>"; };
+		372E12940F263D5A0095CF7E /* readdistcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readdistcommand.h; sourceTree = "<group>"; };
+		372E12950F263D5A0095CF7E /* readdistcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readdistcommand.cpp; sourceTree = "<group>"; };
+		372E12BF0F2648250095CF7E /* readlistcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readlistcommand.h; sourceTree = "<group>"; };
+		372E12C00F2648250095CF7E /* readlistcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readlistcommand.cpp; sourceTree = "<group>"; };
+		372E12EC0F264D320095CF7E /* commandfactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = commandfactory.cpp; sourceTree = "<group>"; };
 		37D927B80F21331F001D4494 /* ace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ace.cpp; sourceTree = "<group>"; };
 		37D927B90F21331F001D4494 /* ace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ace.h; sourceTree = "<group>"; };
 		37D927BA0F21331F001D4494 /* averagelinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = averagelinkage.cpp; sourceTree = "<group>"; };
@@ -121,7 +125,6 @@
 		37D927CB0F21331F001D4494 /* collectsharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = collectsharedcommand.cpp; sourceTree = "<group>"; };
 		37D927CC0F21331F001D4494 /* collectsharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = collectsharedcommand.h; sourceTree = "<group>"; };
 		37D927CD0F21331F001D4494 /* command.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = command.hpp; sourceTree = "<group>"; };
-		37D927CE0F21331F001D4494 /* commandfactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = commandfactory.cpp; sourceTree = "<group>"; };
 		37D927CF0F21331F001D4494 /* commandfactory.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = commandfactory.hpp; sourceTree = "<group>"; };
 		37D927D00F21331F001D4494 /* commandoptionparser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = commandoptionparser.cpp; sourceTree = "<group>"; };
 		37D927D10F21331F001D4494 /* commandoptionparser.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = commandoptionparser.hpp; sourceTree = "<group>"; };
@@ -183,20 +186,8 @@
 		37D928090F21331F001D4494 /* rarefactioncurvedata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rarefactioncurvedata.h; sourceTree = "<group>"; };
 		37D9280A0F21331F001D4494 /* rarefactsharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rarefactsharedcommand.cpp; sourceTree = "<group>"; };
 		37D9280B0F21331F001D4494 /* rarefactsharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rarefactsharedcommand.h; sourceTree = "<group>"; };
-		37D9280C0F21331F001D4494 /* readdistcolumnfilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readdistcolumnfilecommand.cpp; sourceTree = "<group>"; };
-		37D9280D0F21331F001D4494 /* readdistcolumnfilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readdistcolumnfilecommand.h; sourceTree = "<group>"; };
-		37D9280E0F21331F001D4494 /* readdistphylipfilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readdistphylipfilecommand.cpp; sourceTree = "<group>"; };
-		37D9280F0F21331F001D4494 /* readdistphylipfilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readdistphylipfilecommand.h; sourceTree = "<group>"; };
-		37D928100F21331F001D4494 /* readlistfilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readlistfilecommand.cpp; sourceTree = "<group>"; };
-		37D928110F21331F001D4494 /* readlistfilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readlistfilecommand.h; sourceTree = "<group>"; };
 		37D928120F21331F001D4494 /* readmatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readmatrix.cpp; sourceTree = "<group>"; };
 		37D928130F21331F001D4494 /* readmatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = readmatrix.hpp; sourceTree = "<group>"; };
-		37D928140F21331F001D4494 /* readrabundfilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readrabundfilecommand.cpp; sourceTree = "<group>"; };
-		37D928150F21331F001D4494 /* readrabundfilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readrabundfilecommand.h; sourceTree = "<group>"; };
-		37D928160F21331F001D4494 /* readsabundfilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readsabundfilecommand.cpp; sourceTree = "<group>"; };
-		37D928170F21331F001D4494 /* readsabundfilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readsabundfilecommand.h; sourceTree = "<group>"; };
-		37D928180F21331F001D4494 /* readsharedfilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readsharedfilecommand.cpp; sourceTree = "<group>"; };
-		37D928190F21331F001D4494 /* readsharedfilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readsharedfilecommand.h; sourceTree = "<group>"; };
 		37D9281A0F21331F001D4494 /* sabundvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sabundvector.cpp; sourceTree = "<group>"; };
 		37D9281B0F21331F001D4494 /* sabundvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = sabundvector.hpp; sourceTree = "<group>"; };
 		37D9281C0F21331F001D4494 /* sequence.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sequence.cpp; sourceTree = "<group>"; };
@@ -294,8 +285,8 @@
 				37D927C90F21331F001D4494 /* collectdisplay.h */,
 				37D928AC0F213420001D4494 /* containers */,
 				37D927CA0F21331F001D4494 /* collectorscurvedata.h */,
-				37D927CE0F21331F001D4494 /* commandfactory.cpp */,
 				37D927CF0F21331F001D4494 /* commandfactory.hpp */,
+				372E12EC0F264D320095CF7E /* commandfactory.cpp */,
 				37D927D00F21331F001D4494 /* commandoptionparser.cpp */,
 				37D927D10F21331F001D4494 /* commandoptionparser.hpp */,
 				37D927D20F21331F001D4494 /* completelinkage.cpp */,
@@ -422,18 +413,12 @@
 				37D928080F21331F001D4494 /* rarefactcommand.h */,
 				37D9280A0F21331F001D4494 /* rarefactsharedcommand.cpp */,
 				37D9280B0F21331F001D4494 /* rarefactsharedcommand.h */,
-				37D9280C0F21331F001D4494 /* readdistcolumnfilecommand.cpp */,
-				37D9280D0F21331F001D4494 /* readdistcolumnfilecommand.h */,
-				37D9280E0F21331F001D4494 /* readdistphylipfilecommand.cpp */,
-				37D9280F0F21331F001D4494 /* readdistphylipfilecommand.h */,
-				37D928100F21331F001D4494 /* readlistfilecommand.cpp */,
-				37D928110F21331F001D4494 /* readlistfilecommand.h */,
-				37D928140F21331F001D4494 /* readrabundfilecommand.cpp */,
-				37D928150F21331F001D4494 /* readrabundfilecommand.h */,
-				37D928160F21331F001D4494 /* readsabundfilecommand.cpp */,
-				37D928170F21331F001D4494 /* readsabundfilecommand.h */,
-				37D928180F21331F001D4494 /* readsharedfilecommand.cpp */,
-				37D928190F21331F001D4494 /* readsharedfilecommand.h */,
+				372E12940F263D5A0095CF7E /* readdistcommand.h */,
+				372E12950F263D5A0095CF7E /* readdistcommand.cpp */,
+				372E126E0F26365B0095CF7E /* readotucommand.h */,
+				372E126F0F26365B0095CF7E /* readotucommand.cpp */,
+				372E12BF0F2648250095CF7E /* readlistcommand.h */,
+				372E12C00F2648250095CF7E /* readlistcommand.cpp */,
 				37D928260F21331F001D4494 /* sharedcommand.cpp */,
 				37D928270F21331F001D4494 /* sharedcommand.h */,
 				37D928460F21331F001D4494 /* summarycommand.cpp */,
@@ -546,7 +531,6 @@
 				37D9285C0F21331F001D4494 /* collect.cpp in Sources */,
 				37D9285D0F21331F001D4494 /* collectcommand.cpp in Sources */,
 				37D9285E0F21331F001D4494 /* collectsharedcommand.cpp in Sources */,
-				37D9285F0F21331F001D4494 /* commandfactory.cpp in Sources */,
 				37D928600F21331F001D4494 /* commandoptionparser.cpp in Sources */,
 				37D928610F21331F001D4494 /* completelinkage.cpp in Sources */,
 				37D928620F21331F001D4494 /* database.cpp in Sources */,
@@ -576,13 +560,7 @@
 				37D9287A0F21331F001D4494 /* rarefact.cpp in Sources */,
 				37D9287B0F21331F001D4494 /* rarefactcommand.cpp in Sources */,
 				37D9287C0F21331F001D4494 /* rarefactsharedcommand.cpp in Sources */,
-				37D9287D0F21331F001D4494 /* readdistcolumnfilecommand.cpp in Sources */,
-				37D9287E0F21331F001D4494 /* readdistphylipfilecommand.cpp in Sources */,
-				37D9287F0F21331F001D4494 /* readlistfilecommand.cpp in Sources */,
 				37D928800F21331F001D4494 /* readmatrix.cpp in Sources */,
-				37D928810F21331F001D4494 /* readrabundfilecommand.cpp in Sources */,
-				37D928820F21331F001D4494 /* readsabundfilecommand.cpp in Sources */,
-				37D928830F21331F001D4494 /* readsharedfilecommand.cpp in Sources */,
 				37D928840F21331F001D4494 /* sabundvector.cpp in Sources */,
 				37D928850F21331F001D4494 /* sequence.cpp in Sources */,
 				37D928860F21331F001D4494 /* shannon.cpp in Sources */,
@@ -611,6 +589,10 @@
 				37D9289D0F21331F001D4494 /* validcalculator.cpp in Sources */,
 				37D9289E0F21331F001D4494 /* validcommands.cpp in Sources */,
 				37D9289F0F21331F001D4494 /* validparameter.cpp in Sources */,
+				372E12700F26365B0095CF7E /* readotucommand.cpp in Sources */,
+				372E12960F263D5A0095CF7E /* readdistcommand.cpp in Sources */,
+				372E12C10F2648250095CF7E /* readlistcommand.cpp in Sources */,
+				372E12ED0F264D320095CF7E /* commandfactory.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
