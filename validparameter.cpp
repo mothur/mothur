@@ -22,6 +22,7 @@ ValidParameters::ValidParameters() {
 		parameters["namefile"]			= "namefile"; 
 		parameters["groupfile"]			= "groupfile"; 
 		parameters["orderfile"]			= "orderfile"; 
+		parameters["fastafile"]			= "fastafile"; 
 		parameters["fileroot"]			= "fileroot";
 		parameters["cutoff"]			= "cutoff"; 
 		parameters["method"]			= "method";

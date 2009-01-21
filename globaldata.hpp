@@ -39,6 +39,7 @@ public:
 	string getNameFile();
 	string getGroupFile();
 	string getOrderFile();
+	string getFastaFile();
 	string getCutOff();
 	string getFormat();
 	string getPrecision();
@@ -68,7 +69,7 @@ public:
 	void splitAtDash(string&, set<string>&);
 	
 private:
-	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, line, label;
+	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile,line, label;
 	string cutoff, format, precision, method, fileroot, iters, jumble, freq, single, rarefaction, shared, summary, sharedsummary, sharedrarefaction;
 	static GlobalData* _uniqueInstance;
 	GlobalData( const GlobalData& ); // Disable copy constructor
@@ -77,9 +78,8 @@ private:
 	~GlobalData();
 	ListVector* gListVector;
 	SparseMatrix* gSparseMatrix;
-	void setReadFormat(string);
 	
-	};
+};
 
 //**********************************************************************************************************************
 
