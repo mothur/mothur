@@ -50,6 +50,13 @@ int HelpCommand::execute(){
 		cout << "The cluster command should be in the following format: " << "\n";
 		cout << "cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) " << "\n";
 		cout << "The acceptable cluster methods are furthest, nearest and average.  If no method is provided then furthest is assumed." << "\n" << "\n";
+	}else if (globaldata->helpRequest == "deconvolute") {
+		cout << "The deconvolute command reads a fastafile and creates a namesfile." << "\n";
+		cout << "It creates a file where the first column is the groupname and the second column is a list of sequence names who have the same sequence. " << "\n";
+		cout << "If the sequence is unique the second column will just contain its name. " << "\n";
+		cout << "The deconvolute command parameter is fastafile and it is required." << "\n";
+		cout << "The deconvolute command should be in the following format: " << "\n";
+		cout << "deconvolute(fastafile=yourFastaFile) " << "\n";
 	}else if (globaldata->helpRequest == "collect.single") {
 		cout << "The collect.single command can only be executed after a successful read.list read.rabund or rad.sabund command. WITH ONE EXECEPTION. " << "\n";
 		cout << "The collect.single command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster." << "\n";
@@ -114,7 +121,7 @@ int HelpCommand::execute(){
 		cout << "Valid commands are read.dist(), read.list(), read.otu(), cluster(), collect.single(), rarefaction.single(), summary.single(), collect.shared(), rarefaction.shared(), summary.shared(), quit(), help()." << "\n";
 		cout << "For more information about a specific command type 'help(commandName)' i.e. 'help(read.phylip)'" << endl;
 	}else {
-		cout << "not a valid command" << endl;
+		cout << globaldata->helpRequest << " is not a valid command" << endl;
 	}
 	
 	cout << endl << "For further assistance please refer to the Mothur manual, or contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";

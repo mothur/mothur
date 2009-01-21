@@ -18,6 +18,7 @@ ValidCommands::ValidCommands() {
 		commands["read.otu"]			= "read.otu"; 
 		commands["read.list"]			= "read.list"; 
 		commands["cluster"]				= "cluster"; 
+		commands["deconvolute"]			= "deconvolute"; 
 		commands["help"]				= "help"; 
 		commands["quit"]				= "quit"; 
 		commands["collect.single"]		= "collect.single"; 

@@ -79,8 +79,10 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 		allLines = 1;
 		commandName = commandString; //save command name to be used by other classes
 		
-		//clears out data from previous read and sets format
-		setReadFormat(commandName);
+		//clears out data from previous read
+		if ((commandName == "read.dist") || (commandName == "read.otu") || (commandName == "read.list")) { 
+			clear();
+		}
 		
 		//saves help request
 		if (commandName =="help") {
@@ -99,6 +101,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if (key == "listfile" )		{ listfile = value; inputFileName = value; fileroot = value; format = "list"; }
 				if (key == "rabundfile" )	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund"; }
 				if (key == "sabundfile" )	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund"; } 
+				if (key == "fastafile" )	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta"; } 
 				if (key == "namefile" )		{ namefile = value; }
 				if (key == "orderfile" )	{ orderfile = value; }
 				if (key == "groupfile" )	{ groupfile = value; }
@@ -162,6 +165,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if (key == "listfile" )		{ listfile = value; inputFileName = value; fileroot = value; format = "list"; }
 			if (key == "rabundfile" )	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund"; }
 			if (key == "sabundfile" )	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund"; }
+			if (key == "fastafile" )	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta"; } 
 			if (key == "namefile" )		{ namefile = value; }
 			if (key == "orderfile" )	{ orderfile = value; }
 			if (key == "groupfile" )	{ groupfile = value; }
@@ -254,30 +258,6 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 /*******************************************************/
 
 /******************************************************/
-void GlobalData::setReadFormat(string command){
-	try {
-		if (command == "read.dist") { 
-			clear();
-		}else if (command == "read.otu") { 
-			clear();
-		}else if (command == "read.shared") { 
-			clear();
-			format = "shared";
-		}else if (command == "parselist") { format = "list"; }
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the GlobalData class Function setReadFormat. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the GlobalData class function setReadFormat. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-}
-
-/*******************************************************/
-
-/******************************************************/
 // These functions give you the option parameters of the commands
 string GlobalData::getPhylipFile()		{	return phylipfile;	}
 string GlobalData::getColumnFile()		{	return columnfile;	}
@@ -287,6 +267,7 @@ string GlobalData::getSabundFile()		{	return sabundfile;	}
 string GlobalData::getNameFile()		{	return namefile;	}
 string GlobalData::getGroupFile()		{	return groupfile;	}
 string GlobalData::getOrderFile()		{	return orderfile;	}
+string GlobalData::getFastaFile()		{	return fastafile;	}
 string GlobalData::getCutOff()			{	return cutoff;		}
 string GlobalData::getFormat()			{	return format;		}
 string GlobalData::getPrecision()		{	return precision;	}
@@ -328,6 +309,7 @@ void GlobalData::clear() {
 	namefile		=	"";
 	groupfile		=	""; 
 	orderfile		=	"";
+	fastafile		=   "";
 	cutoff			=	"10.00";
 	format			=	"";
 	precision		=	"100";

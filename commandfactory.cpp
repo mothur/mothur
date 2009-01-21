@@ -23,6 +23,7 @@
 #include "quitcommand.h"
 #include "helpcommand.h"
 #include "commandfactory.hpp"
+#include "deconvolutecommand.h"
 #include <exception>
 
 
@@ -48,10 +49,11 @@ Command* CommandFactory::getCommand(string commandName){
 	try {
 		delete command;   //delete the old command
 
-			 if(commandName == "read.dist")				{	command = new ReadDistCommand();	}
-		else if(commandName == "read.otu")				{	command = new ReadOtuCommand();	}
+			 if(commandName == "read.dist")				{	command = new ReadDistCommand();		}
+		else if(commandName == "read.otu")				{	command = new ReadOtuCommand();			}
 		else if(commandName == "read.list")				{	command = new ReadListFileCommand();	}
 		else if(commandName == "cluster")				{	command = new ClusterCommand();			}
+		else if(commandName == "deconvolute")			{	command = new DeconvoluteCommand();		}
 		else if(commandName == "help")					{	command = new HelpCommand();			}
 		else if(commandName == "quit")					{	command = new QuitCommand();			}
 		else if(commandName == "collect.single")		{	command = new CollectCommand();			}

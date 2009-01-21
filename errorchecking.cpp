@@ -26,6 +26,7 @@ ErrorCheck::ErrorCheck() {
 	namefile = globaldata->getNameFile();
 	groupfile = globaldata->getGroupFile();
 	orderfile = globaldata->getOrderFile();
+	fastafile = globaldata->getFastaFile();
 	cutoff = globaldata->getCutOff();
 	format = globaldata->getFormat();
 	method = globaldata->getMethod();
@@ -77,6 +78,7 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "sabundfile" )		{ sabundfile = value; }
 				if (parameter == "namefile" )		{ namefile = value; }
 				if (parameter == "orderfile" )		{ orderfile = value; }
+				if (parameter == "fastafile" )		{ fastafile = value; }
 				if (parameter == "groupfile" )		{ groupfile = value; }
 				if (parameter == "cutoff" )			{ cutoff = value; }
 				if (parameter == "precision" )		{ precision = value; }
@@ -145,6 +147,7 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "namefile" )		{ namefile = value; }
 				if (parameter == "orderfile" )		{ orderfile = value; }
 				if (parameter == "groupfile" )		{ groupfile = value; }
+				if (parameter == "fastafile" )		{ fastafile = value; }
 				if (parameter == "cutoff" )			{ cutoff = value; }
 				if (parameter == "precision" )		{ precision = value; }
 				if (parameter == "iters" )			{ iters = value; }
@@ -211,6 +214,8 @@ bool ErrorCheck::checkInput(string input) {
 			validateReadPhil();	
 		}else if (commandName == "read.list") { 
 			validateParseFiles(); //checks the listfile and groupfile parameters
+		}else if (commandName == "deconvolute") {
+			validateReadFiles();
 		}
 		
 		//are you trying to cluster before you have read something			
@@ -285,6 +290,12 @@ void ErrorCheck::validateReadFiles() {
 			//unable to open
 			if (ableToOpen == 1) {  errorFree = false; }
 			else { globaldata->inputFileName = sabundfile; }
+		}else if (fastafile != "") {
+			ableToOpen = openInputFile(fastafile, filehandle);
+			filehandle.close();
+			//unable to open
+			if (ableToOpen == 1) {  errorFree = false; }
+			else { globaldata->inputFileName = fastafile; }
 		}else{ //no file given
 			errorFree = false;
 		}
