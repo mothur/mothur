@@ -96,22 +96,22 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				splitAtComma(value, optionText);
 				splitAtEquals(key, value);
 				
-				if (key == "phylipfile" )	{ phylipfile = value; inputFileName = value; fileroot = value; format = "phylip";}
-				if (key == "columnfile" )	{ columnfile = value; inputFileName = value; fileroot = value; format = "column";}
-				if (key == "listfile" )		{ listfile = value; inputFileName = value; fileroot = value; format = "list"; }
-				if (key == "rabundfile" )	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund"; }
-				if (key == "sabundfile" )	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund"; } 
-				if (key == "fastafile" )	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta"; } 
-				if (key == "namefile" )		{ namefile = value; }
-				if (key == "orderfile" )	{ orderfile = value; }
-				if (key == "groupfile" )	{ groupfile = value; }
-				if (key == "cutoff" )		{ cutoff = value; }
-				if (key == "precision" )	{ precision = value; }
-				if (key == "iters" )		{ iters = value; }
-				if (key == "jumble" )		{ jumble = value; }
-				if (key == "freq" )			{ freq = value; }
-				if (key == "method" )		{ method = value; }
-				if (key == "fileroot" )		{ fileroot = value; }
+				if (key == "phylipfile" )	{ phylipfile = value; inputFileName = value; fileroot = value; format = "phylip";	}
+				if (key == "columnfile" )	{ columnfile = value; inputFileName = value; fileroot = value; format = "column";	}
+				if (key == "listfile" )		{ listfile = value; inputFileName = value; fileroot = value; format = "list";		}
+				if (key == "rabundfile" )	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund";	}
+				if (key == "sabundfile" )	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund";	} 
+				if (key == "fastafile" )	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta";		} 
+				if (key == "namefile" )		{ namefile = value;		}
+				if (key == "orderfile" )	{ orderfile = value;	}
+				if (key == "groupfile" )	{ groupfile = value;	}
+				if (key == "cutoff" )		{ cutoff = value;		}
+				if (key == "precision" )	{ precision = value;	}
+				if (key == "iters" )		{ iters = value;		}
+				if (key == "jumble" )		{ jumble = value;		}
+				if (key == "freq" )			{ freq = value;			}
+				if (key == "method" )		{ method = value;		}
+				if (key == "fileroot" )		{ fileroot = value;		}
 				
 				if (key == "single") {//stores estimators in a vector
 					singleEstimators.clear(); //clears out old values
@@ -160,22 +160,22 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			//saves the last parameter
 			value = optionText;
 			splitAtEquals(key, value);
-			if (key == "phylipfile" )	{ phylipfile = value; inputFileName = value; fileroot = value; format = "phylip"; }
-			if (key == "columnfile" )	{ columnfile = value; inputFileName = value; fileroot = value; format = "column"; }
-			if (key == "listfile" )		{ listfile = value; inputFileName = value; fileroot = value; format = "list"; }
-			if (key == "rabundfile" )	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund"; }
-			if (key == "sabundfile" )	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund"; }
-			if (key == "fastafile" )	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta"; } 
-			if (key == "namefile" )		{ namefile = value; }
-			if (key == "orderfile" )	{ orderfile = value; }
-			if (key == "groupfile" )	{ groupfile = value; }
-			if (key == "cutoff" )		{ cutoff = value; }
-			if (key == "precision" )	{ precision = value; }
-			if (key == "iters" )		{ iters = value; }
-			if (key == "jumble" )		{ jumble = value; }
-			if (key == "freq" )			{ freq = value; }
-			if (key == "method" )		{ method = value; }
-			if (key == "fileroot" )		{ fileroot = value; }
+			if (key == "phylipfile" )	{ phylipfile = value; inputFileName = value; fileroot = value; format = "phylip";	}
+			if (key == "columnfile" )	{ columnfile = value; inputFileName = value; fileroot = value; format = "column";	}
+			if (key == "listfile" )		{ listfile = value; inputFileName = value; fileroot = value; format = "list";		}
+			if (key == "rabundfile" )	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund";	}
+			if (key == "sabundfile" )	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund";	}
+			if (key == "fastafile" )	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta";		} 
+			if (key == "namefile" )		{ namefile = value;		}
+			if (key == "orderfile" )	{ orderfile = value;	}
+			if (key == "groupfile" )	{ groupfile = value;	}
+			if (key == "cutoff" )		{ cutoff = value;		}
+			if (key == "precision" )	{ precision = value;	}
+			if (key == "iters" )		{ iters = value;		}
+			if (key == "jumble" )		{ jumble = value;		}
+			if (key == "freq" )			{ freq = value;			}
+			if (key == "method" )		{ method = value;		}
+			if (key == "fileroot" )		{ fileroot = value;		}
 
 			if (key == "single") {//stores estimators in a vector
 				singleEstimators.clear(); //clears out old values
@@ -222,6 +222,8 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			}
 		}
 		
+		//set format for shared
+		if ((listfile != "") && (groupfile != "")) { format = "shared"; }
 				
 		//input defaults
 		if (commandString == "collect.single") {
@@ -322,8 +324,8 @@ void GlobalData::clear() {
 	fileroot		=	"";
 	single			=	"sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson-rarefraction";
 	rarefaction		=	"rarefaction";
-	shared			=	"sharedChao-sharedAce-sharedJabund-sharedSorensonAbund-sharedJclass-sharedSorClass-sharedJest-sharedSorEst-SharedThetaYC-SharedThetaN";
-	sharedsummary	=   "sharedChao-sharedAce-sharedJabund-sharedSorensonAbund-sharedJclass-sharedSorClass-sharedJest-sharedSorEst-SharedThetaYC-SharedThetaN";
+	shared			=	"sharedSobs-sharedChao-sharedAce-sharedJabund-sharedSorensonAbund-sharedJclass-sharedSorClass-sharedJest-sharedSorEst-SharedThetaYC-SharedThetaN";
+	sharedsummary	=   "sharedSobs-sharedChao-sharedAce-sharedJabund-sharedSorensonAbund-sharedJclass-sharedSorClass-sharedJest-sharedSorEst-SharedThetaYC-SharedThetaN";
 	summary			=	"summary-chao-ace-jack-bootstrap-shannon-npshannon-simpson";
 	sharedrarefaction = "sharedobserved";
 }

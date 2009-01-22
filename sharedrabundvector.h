@@ -1,8 +1,8 @@
-#ifndef SHAREDVECTOR_H
-#define SHAREDVECTOR_H
+#ifndef SHAREDRABUNDVECTOR_H
+#define SHAREDRABUNDVECTOR_H
 
 /*
- *  sharedvector.h
+ *  sharedrabundvector.h
  *  Dotur
  *
  *  Created by Sarah Westcott on 12/5/08.
@@ -13,7 +13,14 @@
 #include <Carbon/Carbon.h>
 #include "datavector.hpp"
 #include "sharedordervector.h"
+#include "sharedsabundvector.h"
+#include "rabundvector.hpp"
 
+/* This class is a child to datavector.  It represents OTU information at a certain distance. 
+	It is similiar to an rabundvector except each member of data knows which group it belongs to.
+	Each member of the internal container "data" is a struct of type individual. 
+	An individual which knows the OTU from which it came, 
+	the group it is in and its abundance.  */
 
 
 
@@ -33,10 +40,10 @@ public:
 	string getGroup();
 	void setGroup(string);							
 
-	void set(int, int, string);	
+	void set(int, int, string);			//OTU, abundance, groupname
 	individual get(int);
 	int getAbundance(int);
-	void push_back(int, int, string);
+	void push_back(int, int, string);  //abundance, OTU, groupname
 	void pop_back();
 	void resize(int);
 	int size();
@@ -45,10 +52,12 @@ public:
 	
 	void print(ostream&);
 		
-	SharedRAbundVector getSharedRAbundVector();
+	RAbundVector getRAbundVector();
 	SAbundVector getSAbundVector();
 	OrderVector getOrderVector(map<string,int>*);
 	SharedOrderVector getSharedOrderVector();
+	SharedSAbundVector getSharedSAbundVector();
+	SharedRAbundVector getSharedRAbundVector();
 	
 private:
 	vector<individual>  data; 

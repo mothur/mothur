@@ -12,8 +12,10 @@
 #include <Carbon/Carbon.h>
 #include <iostream>
 #include <fstream>
+#include "globaldata.hpp"
 #include "command.hpp"
 #include "rabundvector.hpp"
+#include "sabundvector.hpp"
 #include "listvector.hpp"
 #include "cluster.hpp"
 #include "sparsematrix.hpp"

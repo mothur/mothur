@@ -15,6 +15,10 @@ ReadOtuCommand::ReadOtuCommand(){
 		globaldata = GlobalData::getInstance();
 		filename = globaldata->inputFileName;
 		read = new ReadPhilFile(filename);
+		if (globaldata->getFormat() == "shared") {
+			//read in group map info.
+			groupMap = new GroupMap(globaldata->getGroupFile());
+		}
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ReadOtuCommand class Function ReadOtuCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -37,6 +41,15 @@ ReadOtuCommand::~ReadOtuCommand(){
 int ReadOtuCommand::execute(){
 	try {
 		read->read(&*globaldata); 
+		if (globaldata->getFormat() == "shared") {
+			groupMap->readMap();
+			globaldata->gGroupmap = groupMap;
+		
+			shared = new SharedCommand();
+			shared->execute();
+			parselist = new ParseListCommand();
+			parselist->execute();
+		}
 		return 0;
 	}
 	catch(exception& e) {

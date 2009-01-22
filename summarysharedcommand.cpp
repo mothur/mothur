@@ -8,6 +8,7 @@
  */
 
 #include "summarysharedcommand.h"
+#include "sharedsobs.h"
 #include "sharedchao1.h"
 #include "sharedace.h"
 #include "sharedjabund.h"
@@ -27,7 +28,9 @@ SummarySharedCommand::SummarySharedCommand(){
 		
 		int i;
 		for (i=0; i<globaldata->sharedSummaryEstimators.size(); i++) {
-			if (globaldata->sharedSummaryEstimators[i] == "sharedChao") { 
+			if (globaldata->sharedSummaryEstimators[i] == "sharedSobs") { 
+				sumCalculators.push_back(new SharedSobs());
+			}else if (globaldata->sharedEstimators[i] == "sharedChao") { 
 				sumCalculators.push_back(new SharedChao1());
 			}else if (globaldata->sharedSummaryEstimators[i] == "sharedAce") { 
 				sumCalculators.push_back(new SharedAce());
@@ -70,21 +73,21 @@ SummarySharedCommand::~SummarySharedCommand(){
 
 int SummarySharedCommand::execute(){
 	try {
-		outputFileName = ((getRootName(globaldata->inputFileName)) + "sharedSummary");
+		outputFileName = ((getRootName(globaldata->inputFileName)) + "shared.summary");
 		openOutputFile(outputFileName, outputFileHandle);
 	
 		read = new ReadPhilFile(globaldata->inputFileName);	
 		read->read(&*globaldata); 
 		
-		outputFileHandle << '\t' << '\t' << '\t' << '\t'; //pads file for labels and groupnames
+		outputFileHandle << "label" <<'\t' << "comparison" << '\t'; 
 		for(int i=0;i<sumCalculators.size();i++){
 			outputFileHandle << '\t' << sumCalculators[i]->getName();
 		}
 		outputFileHandle << endl;
 		
-		list = globaldata->glist;
+		SharedList = globaldata->gSharedList;
 		input = globaldata->ginput;
-		order = list->getSharedOrderVector();
+		order = SharedList->getSharedOrderVector();
 		getGroupComb();
 		
 		int count = 1;
@@ -101,7 +104,7 @@ int SummarySharedCommand::execute(){
 				int n = 1; 
 				for (int k = 0; k < (lookup.size() - 1); k++) { // pass cdd each set of groups to commpare
 					for (int l = n; l < lookup.size(); l++) {
-						outputFileHandle << order->getLabel() << '\t' << groupComb[n-1] << '\t'; //print out label and group
+						outputFileHandle << order->getLabel() << '\t' << groupComb[n-1] << '\t' << '\t'; //print out label and group
 						for(int i=0;i<sumCalculators.size();i++){
 							sumCalculators[i]->getValues(lookup[k], lookup[l]); //saves the calculator outputs
 							outputFileHandle << '\t';
@@ -113,9 +116,9 @@ int SummarySharedCommand::execute(){
 				}
 			}
 		
-			list = input->getListVector(); //get new list vector to process
-			if (list != NULL) {
-				order = list->getSharedOrderVector(); //gets new order vector with group info.
+			SharedList = input->getSharedListVector(); //get new list vector to process
+			if (SharedList != NULL) {
+				order = SharedList->getSharedOrderVector(); //gets new order vector with group info.
 				count++;
 			}else {
 				break;

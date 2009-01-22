@@ -358,8 +358,8 @@ void ReadPhilFile::read(GlobalData* globaldata){
 			sabund = inputSabund->getSAbundVector(); 
 			globaldata->sabund = sabund; //saving to be used by summary command.
 		}else {
-			list = input->getListVector(); //you are reading for parselist command, or shared commands.
-			globaldata->glist = list;
+			SharedList = input->getSharedListVector(); //you are reading for parselist command, or shared commands.
+			globaldata->gSharedList = SharedList;
 		}
 	}
 	catch(exception& e) {

@@ -7,6 +7,17 @@ using namespace std;
 #include "rabundvector.hpp"
 #include "ordervector.hpp"
 
+
+/* This class is a child to datavector.  It represents OTU information at a certain distance. 
+	A sabundvector can be converted into and ordervector, listvector or rabundvector.
+	Each member of the internal container "data" represents the number of OTU's with that many members, but staring at 1.
+	So data[1] = 2, because there are two OTUs with 1 member.
+	example: listvector		=	a,b,c,d,e,f		g,h,i		j,k		l		m  
+			 rabundvector	=	6				3			2		1		1
+			 sabundvector	=	2		1		1		0		0		1
+			 ordervector	=	1	1	1	1	1	1	2	2	2	3	3	4	5 */
+
+
 class SAbundVector : public DataVector {
 	
 public:

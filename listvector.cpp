@@ -233,32 +233,6 @@ SAbundVector ListVector::getSAbundVector(){
 }
 
 /***********************************************************************/
-SharedOrderVector* ListVector::getSharedOrderVector(){
-	globaldata = GlobalData::getInstance();
-	string groupName, names, name;
-	groupmap = globaldata->gGroupmap;
-	SharedOrderVector* order;
-	order = new SharedOrderVector();
-	order->setLabel(label);
-	
-	for(int i=0;i<numBins;i++){
-		int binSize = getNumNames(get(i));	//find number of individual in given bin	
-		names = get(i);
-		while (names.find_first_of(',') != -1) { 
-			name = names.substr(0,names.find_first_of(','));
-			names = names.substr(names.find_first_of(',')+1, names.length());
-			groupName = groupmap->getGroup(name);
-			order->push_back(i, binSize, groupName);  //i represents what bin you are in
-		}
-		//get last name
-		groupName = groupmap->getGroup(names);
-		order->push_back(i, binSize, groupName);
-	}
-	random_shuffle(order->begin(), order->end());
-	return order;
-}
-
-/***********************************************************************/
 
 OrderVector ListVector::getOrderVector(map<string,int>* orderMap = NULL){
 	

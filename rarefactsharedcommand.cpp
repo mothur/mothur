@@ -28,7 +28,7 @@ RareFactSharedCommand::RareFactSharedCommand(){
 		int i;
 		for (i=0; i<globaldata->sharedRareEstimators.size(); i++) {
 			if (globaldata->sharedRareEstimators[i] == "sharedobserved") { 
-				rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(fileNameRoot+"sharedObserved", groups)));
+				rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(fileNameRoot+"r_shared.observed", groups)));
 			}
 		}
 	}
@@ -61,8 +61,8 @@ int RareFactSharedCommand::execute(){
 		read->read(&*globaldata); 
 		
 		input = globaldata->ginput;
-		list = globaldata->glist;
-		order = list->getSharedOrderVector();
+		SharedList = globaldata->gSharedList;
+		order = SharedList->getSharedOrderVector();
 		
 		while(order != NULL){
 		
@@ -78,9 +78,9 @@ int RareFactSharedCommand::execute(){
 				cout << order->getLabel() << '\t' << count << endl;
 			}
 			
-			list = input->getListVector(); //get new list vector to process
-			if (list != NULL) {
-				order = list->getSharedOrderVector(); //gets new order vector with group info.
+			SharedList = input->getSharedListVector(); //get new list vector to process
+			if (SharedList != NULL) {
+				order = SharedList->getSharedOrderVector(); //gets new order vector with group info.
 				count++;
 			}else {
 				break;

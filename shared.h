@@ -22,6 +22,7 @@ using namespace std;
 #include <map>
 #include "sharedrabundvector.h"
 #include "listvector.hpp"
+#include "globaldata.hpp"
 
 class Shared {
 	public:

@@ -19,6 +19,11 @@ using namespace std;
 #include "utilities.hpp"
 
 
+/* This class represents the fasta file.  It reads a fasta file a populates the internal data structure "data".
+Data is a map where the key is the sequence and the value is a struct containing the sequences groupname, 
+a list of the sequences names who have the same sequence and a number of how many sequence names there are. */
+
+
 class FastaMap  {
 
 public:
@@ -32,7 +37,7 @@ public:
 	void set(string, string, string); //sequencename, groupname, groupnumber, names.
 	void clear();
 	int size();					//returns number of unique sequences
-	void print(ostream&);
+	void print(ostream&);		//produces a 2 column file with the groupname in the first column and the names in the second column.
 	void readFastaFile(ifstream&);
 
 private:

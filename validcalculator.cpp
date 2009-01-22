@@ -114,6 +114,7 @@ void ValidCalculators::initialSingle() {
 /********************************************************************/
 void ValidCalculators::initialShared() {
 	try {	
+		shared["sharedSobs"]			= "sharedSobs";
 		shared["sharedChao"]			= "sharedChao";
 		shared["sharedAce"]				= "sharedAce";
 		shared["sharedJabund"]			= "sharedJabund";
@@ -186,6 +187,7 @@ void ValidCalculators::initialSummary() {
 /********************************************************************/
 void ValidCalculators::initialSharedSummary() {
 	try {	
+		sharedsummary["sharedSobs"]				= "sharedSobs";
 		sharedsummary["sharedChao"]				= "sharedChao";
 		sharedsummary["sharedAce"]				= "sharedAce";
 		sharedsummary["sharedJabund"]			= "sharedJabund";

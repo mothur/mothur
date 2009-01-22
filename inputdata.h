@@ -6,6 +6,7 @@
 #include <string>
 #include <fstream>
 #include "ordervector.hpp"
+#include "sharedlistvector.h"
 #include "listvector.hpp"
 
 
@@ -18,6 +19,7 @@ public:
 	InputData(string, string, string);
 	~InputData();
 	ListVector* getListVector();
+	SharedListVector* getSharedListVector();
 	OrderVector* getOrderVector();
 	SAbundVector* getSAbundVector();
 	
@@ -26,6 +28,7 @@ private:
 	ifstream fileHandle;
 	DataVector* input;
 	ListVector* list;
+	SharedListVector* SharedList;
 	OrderVector* output;
 	SAbundVector* sabund;
 	map<string,int> orderMap;

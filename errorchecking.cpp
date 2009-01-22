@@ -210,10 +210,13 @@ bool ErrorCheck::checkInput(string input) {
 			validateReadFiles();
 			validateReadDist();
 		}else if (commandName == "read.otu") { 
-			validateReadFiles();
-			validateReadPhil();	
-		}else if (commandName == "read.list") { 
-			validateParseFiles(); //checks the listfile and groupfile parameters
+			//you want to do shared commands
+			if ((listfile != "") && (groupfile != ""))	{
+				validateParseFiles(); //checks the listfile and groupfile parameters
+			}else { //you want to do single commands
+				validateReadFiles();
+				validateReadPhil();
+			}
 		}else if (commandName == "deconvolute") {
 			validateReadFiles();
 		}

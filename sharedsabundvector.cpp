@@ -264,7 +264,7 @@ bool compareMembers (individual member, individual member2){
 }
 
 /***********************************************************************/
-SharedRAbundVector SharedSAbundVector::getSharedVector(){
+SharedRAbundVector SharedSAbundVector::getSharedRAbundVector(){
 	try {
 		SharedRAbundVector rav;
 		
@@ -300,7 +300,26 @@ SharedSAbundVector SharedSAbundVector::getSharedSAbundVector(){
 }
 
 /***********************************************************************/
-
+SharedOrderVector SharedSAbundVector::getSharedOrderVector() {
+	try {
+		SharedRAbundVector rav;
+		SharedOrderVector ov;
+		
+		rav = this->getSharedRAbundVector();
+		ov = rav.getSharedOrderVector();
+		
+		return ov;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the SharedSAbundVector class Function getSharedOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the SharedSAbundVector class function getSharedOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}		
+}
+/***********************************************************************/
 OrderVector SharedSAbundVector::getOrderVector(map<string,int>* hold = NULL){
 	try {
 		OrderVector ov;

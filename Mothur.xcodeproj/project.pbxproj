@@ -9,8 +9,8 @@
 /* Begin PBXBuildFile section */
 		372E12700F26365B0095CF7E /* readotucommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E126F0F26365B0095CF7E /* readotucommand.cpp */; };
 		372E12960F263D5A0095CF7E /* readdistcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E12950F263D5A0095CF7E /* readdistcommand.cpp */; };
-		372E12C10F2648250095CF7E /* readlistcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E12C00F2648250095CF7E /* readlistcommand.cpp */; };
 		372E12ED0F264D320095CF7E /* commandfactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E12EC0F264D320095CF7E /* commandfactory.cpp */; };
+		37AD4CE40F28AEA300AA2D49 /* sharedlistvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37AD4CE30F28AEA300AA2D49 /* sharedlistvector.cpp */; };
 		37B28F680F27590100808A62 /* deconvolutecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37B28F670F27590100808A62 /* deconvolutecommand.cpp */; };
 		37D928550F21331F001D4494 /* ace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927B80F21331F001D4494 /* ace.cpp */; };
 		37D928560F21331F001D4494 /* averagelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927BA0F21331F001D4494 /* averagelinkage.cpp */; };
@@ -101,9 +101,9 @@
 		372E126F0F26365B0095CF7E /* readotucommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readotucommand.cpp; sourceTree = "<group>"; };
 		372E12940F263D5A0095CF7E /* readdistcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readdistcommand.h; sourceTree = "<group>"; };
 		372E12950F263D5A0095CF7E /* readdistcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readdistcommand.cpp; sourceTree = "<group>"; };
-		372E12BF0F2648250095CF7E /* readlistcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readlistcommand.h; sourceTree = "<group>"; };
-		372E12C00F2648250095CF7E /* readlistcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readlistcommand.cpp; sourceTree = "<group>"; };
 		372E12EC0F264D320095CF7E /* commandfactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = commandfactory.cpp; sourceTree = "<group>"; };
+		37AD4CE20F28AEA300AA2D49 /* sharedlistvector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedlistvector.h; sourceTree = "<group>"; };
+		37AD4CE30F28AEA300AA2D49 /* sharedlistvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedlistvector.cpp; sourceTree = "<group>"; };
 		37B28F660F27590100808A62 /* deconvolutecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = deconvolutecommand.h; sourceTree = "<group>"; };
 		37B28F670F27590100808A62 /* deconvolutecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = deconvolutecommand.cpp; sourceTree = "<group>"; };
 		37D927B80F21331F001D4494 /* ace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ace.cpp; sourceTree = "<group>"; };
@@ -422,8 +422,6 @@
 				372E12950F263D5A0095CF7E /* readdistcommand.cpp */,
 				372E126E0F26365B0095CF7E /* readotucommand.h */,
 				372E126F0F26365B0095CF7E /* readotucommand.cpp */,
-				372E12BF0F2648250095CF7E /* readlistcommand.h */,
-				372E12C00F2648250095CF7E /* readlistcommand.cpp */,
 				37D928270F21331F001D4494 /* sharedcommand.h */,
 				37D928260F21331F001D4494 /* sharedcommand.cpp */,
 				37D928470F21331F001D4494 /* summarycommand.h */,
@@ -450,6 +448,8 @@
 				37D927FF0F21331F001D4494 /* rabundvector.cpp */,
 				37D9281B0F21331F001D4494 /* sabundvector.hpp */,
 				37D9281A0F21331F001D4494 /* sabundvector.cpp */,
+				37AD4CE20F28AEA300AA2D49 /* sharedlistvector.h */,
+				37AD4CE30F28AEA300AA2D49 /* sharedlistvector.cpp */,
 				37D9282F0F21331F001D4494 /* sharedordervector.h */,
 				37D9282E0F21331F001D4494 /* sharedordervector.cpp */,
 				37D928310F21331F001D4494 /* sharedrabundvector.h */,
@@ -596,9 +596,9 @@
 				37D9289F0F21331F001D4494 /* validparameter.cpp in Sources */,
 				372E12700F26365B0095CF7E /* readotucommand.cpp in Sources */,
 				372E12960F263D5A0095CF7E /* readdistcommand.cpp in Sources */,
-				372E12C10F2648250095CF7E /* readlistcommand.cpp in Sources */,
 				372E12ED0F264D320095CF7E /* commandfactory.cpp in Sources */,
 				37B28F680F27590100808A62 /* deconvolutecommand.cpp in Sources */,
+				37AD4CE40F28AEA300AA2D49 /* sharedlistvector.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

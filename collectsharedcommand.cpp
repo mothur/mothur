@@ -8,6 +8,7 @@
  */
 
 #include "collectsharedcommand.h"
+#include "sharedsobs.h"
 #include "sharedchao1.h"
 #include "sharedace.h"
 #include "sharedjabund.h"
@@ -32,25 +33,27 @@ CollectSharedCommand::CollectSharedCommand(){
 		int i;
 		for (i=0; i<globaldata->sharedEstimators.size(); i++) {
 			if (globaldata->sharedEstimators[i] == "sharedChao") { 
-				cDisplays.push_back(new CollectDisplay(new SharedChao1(), new SharedOneColumnFile(fileNameRoot+"sharedChao", groupmap->namesOfGroups)));
+				cDisplays.push_back(new CollectDisplay(new SharedChao1(), new SharedOneColumnFile(fileNameRoot+"shared.chao", groupmap->namesOfGroups)));
+			}else if (globaldata->sharedEstimators[i] == "sharedSobs") { 
+				cDisplays.push_back(new CollectDisplay(new SharedSobs(), new SharedOneColumnFile(fileNameRoot+"shared.sobs", groupmap->namesOfGroups)));
 			}else if (globaldata->sharedEstimators[i] == "sharedAce") { 
-				cDisplays.push_back(new CollectDisplay(new SharedAce(), new SharedOneColumnFile(fileNameRoot+"sharedAce", groupmap->namesOfGroups)));
+				cDisplays.push_back(new CollectDisplay(new SharedAce(), new SharedOneColumnFile(fileNameRoot+"shared.ace", groupmap->namesOfGroups)));
 			}else if (globaldata->sharedEstimators[i] == "sharedJabund") { 	
-				cDisplays.push_back(new CollectDisplay(new SharedJAbund(), new SharedOneColumnFile(fileNameRoot+"SharedJabund", groupmap->namesOfGroups)));
+				cDisplays.push_back(new CollectDisplay(new SharedJAbund(), new SharedOneColumnFile(fileNameRoot+"shared.jabund", groupmap->namesOfGroups)));
 			}else if (globaldata->sharedEstimators[i] == "sharedSorensonAbund") { 
-				cDisplays.push_back(new CollectDisplay(new SharedSorAbund(), new SharedOneColumnFile(fileNameRoot+"SharedSorensonAbund", groupmap->namesOfGroups)));
+				cDisplays.push_back(new CollectDisplay(new SharedSorAbund(), new SharedOneColumnFile(fileNameRoot+"shared.sorensonabund", groupmap->namesOfGroups)));
 			}else if (globaldata->sharedEstimators[i] == "sharedJclass") { 
-				cDisplays.push_back(new CollectDisplay(new SharedJclass(), new SharedOneColumnFile(fileNameRoot+"SharedJclass", groupmap->namesOfGroups)));
+				cDisplays.push_back(new CollectDisplay(new SharedJclass(), new SharedOneColumnFile(fileNameRoot+"shared.jclass", groupmap->namesOfGroups)));
 			}else if (globaldata->sharedEstimators[i] == "sharedSorClass") { 
-				cDisplays.push_back(new CollectDisplay(new SharedSorClass(), new SharedOneColumnFile(fileNameRoot+"SharedSorClass", groupmap->namesOfGroups)));
+				cDisplays.push_back(new CollectDisplay(new SharedSorClass(), new SharedOneColumnFile(fileNameRoot+"shared.sorclass", groupmap->namesOfGroups)));
 			}else if (globaldata->sharedEstimators[i] == "sharedJest") { 
-				cDisplays.push_back(new CollectDisplay(new SharedJest(), new SharedOneColumnFile(fileNameRoot+"SharedJest", groupmap->namesOfGroups)));
+				cDisplays.push_back(new CollectDisplay(new SharedJest(), new SharedOneColumnFile(fileNameRoot+"shared.jest", groupmap->namesOfGroups)));
 			}else if (globaldata->sharedEstimators[i] == "sharedSorEst") { 
-				cDisplays.push_back(new CollectDisplay(new SharedSorEst(), new SharedOneColumnFile(fileNameRoot+"SharedSorEst", groupmap->namesOfGroups)));
+				cDisplays.push_back(new CollectDisplay(new SharedSorEst(), new SharedOneColumnFile(fileNameRoot+"shared.sorest", groupmap->namesOfGroups)));
 			}else if (globaldata->sharedEstimators[i] == "SharedThetaYC") { 
-				cDisplays.push_back(new CollectDisplay(new SharedThetaYC(), new SharedOneColumnFile(fileNameRoot+"SharedThetaYC", groupmap->namesOfGroups)));
+				cDisplays.push_back(new CollectDisplay(new SharedThetaYC(), new SharedOneColumnFile(fileNameRoot+"shared.thetayc", groupmap->namesOfGroups)));
 			}else if (globaldata->sharedEstimators[i] == "SharedThetaN") { 
-				cDisplays.push_back(new CollectDisplay(new SharedThetaN(), new SharedOneColumnFile(fileNameRoot+"SharedThetaN", groupmap->namesOfGroups)));
+				cDisplays.push_back(new CollectDisplay(new SharedThetaN(), new SharedOneColumnFile(fileNameRoot+"shared.thetan", groupmap->namesOfGroups)));
 			}
 		}
 	}
@@ -83,8 +86,8 @@ int CollectSharedCommand::execute(){
 		read->read(&*globaldata); 
 		
 		input = globaldata->ginput;
-		list = globaldata->glist;
-		order = list->getSharedOrderVector();
+		SharedList = globaldata->gSharedList;
+		order = SharedList->getSharedOrderVector();
 		
 		while(order != NULL){
 		
@@ -99,9 +102,9 @@ int CollectSharedCommand::execute(){
 				cout << order->getLabel() << '\t' << count << endl;
 			}
 			
-			list = input->getListVector(); //get new list vector to process
-			if (list != NULL) {
-				order = list->getSharedOrderVector(); //gets new order vector with group info.
+			SharedList = input->getSharedListVector(); //get new list vector to process
+			if (SharedList != NULL) {
+				order = SharedList->getSharedOrderVector(); //gets new order vector with group info.
 				count++;
 			}else {
 				break;

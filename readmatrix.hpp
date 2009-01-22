@@ -12,6 +12,7 @@
 
 #include "rabundvector.hpp"
 #include "listvector.hpp"
+#include "sharedlistvector.h"
 #include "sparsematrix.hpp"
 #include "nameassignment.hpp"
 #include "inputdata.h"
@@ -82,6 +83,7 @@ private:
 	InputData* input;
 	InputData* inputSabund;
 	ListVector* list;
+	SharedListVector* SharedList;
 	OrderVector* order;
 	SAbundVector* sabund;
 	GlobalData* globaldata;

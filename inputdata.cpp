@@ -63,7 +63,7 @@ InputData::InputData(string fName, string orderFileName, string f) : format(f){
 ListVector* InputData::getListVector(){
 	try {
 		if(fileHandle){
-			if((format == "list") || (format == "shared")){
+			if(format == "list") {
 				list = new ListVector(fileHandle);
 			}
 					
@@ -84,6 +84,31 @@ ListVector* InputData::getListVector(){
 	}	
 }
 
+/***********************************************************************/
+
+SharedListVector* InputData::getSharedListVector(){
+	try {
+		if(fileHandle){
+			if (format == "shared"){
+				SharedList = new SharedListVector(fileHandle);
+			}
+					
+			gobble(fileHandle);
+			return SharedList;
+		}
+		else{
+			return 0;
+		}
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the InputData class function getOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
 
 
 /***********************************************************************/
@@ -91,8 +116,11 @@ ListVector* InputData::getListVector(){
 OrderVector* InputData::getOrderVector(){
 	try {
 		if(fileHandle){
-			if((format == "list") || (format == "shared")){
+			if(format == "list") {
 				input = new ListVector(fileHandle);
+			}
+			else if(format == "shared") {
+				input = new SharedListVector(fileHandle);
 			}
 			else if(format == "rabund"){
 				input = new RAbundVector(fileHandle);
@@ -132,8 +160,11 @@ OrderVector* InputData::getOrderVector(){
 SAbundVector* InputData::getSAbundVector(){
 	try {
 		if(fileHandle){
-			if((format == "list") || (format == "shared")){
+			if (format == "list") {
 				input = new ListVector(fileHandle);
+			}
+			else if(format == "shared") {
+				input = new SharedListVector(fileHandle);
 			}
 			else if(format == "rabund"){
 				input = new RAbundVector(fileHandle);
