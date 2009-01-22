@@ -5,6 +5,16 @@
 #include "sabundvector.hpp"
 #include "rabundvector.hpp"
 
+/* This class is a child to datavector.  It represents OTU information at a certain distance. 
+	A order vector can be converted into and listvector, rabundvector or sabundvector.
+	Each member of the internal container "data" represents the OTU from which it came. 
+	So in the example below since there are 6 sequences in OTU 1 there are six 1's in the ordervector.
+	and since there are 2 sequences in OTU 3 there are two 3's in the ordervector.
+	example: listvector		=	a,b,c,d,e,f		g,h,i		j,k		l		m  
+			 rabundvector	=	6				3			2		1		1
+			 sabundvector	=	2		1		1		0		0		1
+			 ordervector	=	1	1	1	1	1	1	2	2	2	3	3	4	5	*/
+
 
 class OrderVector : public DataVector {
 	

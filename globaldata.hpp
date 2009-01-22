@@ -9,6 +9,7 @@
 using namespace std;
 
 class ListVector;
+class SharedListVector;
 class SparseMatrix;
 class OrderVector;
 class InputData;
@@ -23,6 +24,7 @@ public:
 	InputData* ginput;
 	OrderVector* gorder;
 	ListVector* glist;
+	SharedListVector* gSharedList;
 	SAbundVector* sabund;
 	GroupMap* gGroupmap;
 	string inputFileName, helpRequest, commandName;

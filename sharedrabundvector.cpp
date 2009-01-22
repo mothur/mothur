@@ -224,7 +224,6 @@ void SharedRAbundVector::setGroup(string groupName){
 	group = groupName;
 }
 
-
 /***********************************************************************/
 int SharedRAbundVector::getNumBins(){
 	return numBins;
@@ -247,7 +246,54 @@ int SharedRAbundVector::getMaxRank(){
 SharedRAbundVector SharedRAbundVector::getSharedRAbundVector(){
 	return *this;			
 }
+/***********************************************************************/
 
+RAbundVector SharedRAbundVector::getRAbundVector() {
+	try {
+		RAbundVector rav(data.size());
+		
+		for (int i = 0; i < data.size(); i++) {
+			rav.set(i, data[i].abundance);
+		}
+	
+		return rav;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the SharedRAbundVector class Function getRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the SharedRAbundVector class function getRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+
+/***********************************************************************/
+
+SharedSAbundVector SharedRAbundVector::getSharedSAbundVector(){
+	try {
+		SharedSAbundVector sav(maxRank+1);
+		
+		for(int i=0;i<data.size();i++){
+			int abund = data[i].abundance;
+			sav.set(abund, sav.getAbundance(abund) + 1, group);
+		}
+		
+		sav.set(0, 0, group);
+		sav.setLabel(label);
+		sav.setGroup(group);
+		
+		return sav;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the SharedRAbundVector class Function getSharedSAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the SharedRAbundVector class function getSharedSAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
 /***********************************************************************/
 
 SAbundVector SharedRAbundVector::getSAbundVector() {

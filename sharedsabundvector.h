@@ -7,7 +7,7 @@
  *  Dotur
  *
  *  Created by Sarah Westcott on 12/10/08.
- *  Copyright 2008 __MyCompanyName__. All rights reserved.
+ *  Copyright 2008 Schloss Lab UMASS Amherst. All rights reserved.
  *
  */
 
@@ -18,6 +18,12 @@
 #include "ordervector.hpp"
 #include "sharedordervector.h"
 #include "sharedrabundvector.h"
+
+/* This class is a child to datavector.  It represents OTU information at a certain distance. 
+	It is similiar to an sabundvector except each member of data knows which group it belongs to.
+	Each member of the internal container "data" is a struct of type individual. 
+	An individual which knows the OTU from which it came, 
+	the group it is in and its abundance.  */
 
 using namespace std;
 
@@ -35,10 +41,10 @@ public:
 	string getGroup();
 	void setGroup(string);	
 	
-	void set(int, int, string);	
+	void set(int, int, string);	 //OTU, abundance, group
 	individual get(int);
 	int getAbundance(int);
-	void push_back(int, int, string);
+	void push_back(int, int, string);	//abundance, OTU, group
 	void pop_back();
 	void resize(int);
 	int size();
@@ -47,9 +53,10 @@ public:
 		
 	RAbundVector getRAbundVector();	
 	SAbundVector getSAbundVector();
-	SharedSAbundVector getSharedSAbundVector();
-	SharedRAbundVector getSharedVector();
 	OrderVector getOrderVector(map<string,int>*);
+	SharedSAbundVector getSharedSAbundVector();
+	SharedRAbundVector getSharedRAbundVector();
+	SharedOrderVector getSharedOrderVector();
 	
 private:
 	vector<individual> data;

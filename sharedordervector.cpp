@@ -3,7 +3,7 @@
  *  Dotur
  *
  *  Created by Sarah Westcott on 12/9/08.
- *  Copyright 2008 __MyCompanyName__. All rights reserved.
+ *  Copyright 2008 Schloss Lab UMASS Amherst. All rights reserved.
  *
  */
 
@@ -11,7 +11,6 @@ using namespace std;
 
 
 #include "sharedordervector.h"
-#include "datavector.hpp"
 #include "utilities.hpp"
 #include <exception>
 
@@ -29,6 +28,8 @@ SharedOrderVector::SharedOrderVector(string id, vector<individual>  ov) :
 
 /***********************************************************************
 
+//does not work since we don't have a shared order file format yet.
+
 SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {
 	try {
 		int hold;
@@ -42,7 +43,7 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {
 	
 		for(int i=0;i<hold;i++){
 			f >> inputData;
-			set(i, inputData);
+			set(i, inputData, inputData, group);
 		}
 	
 		updateStats();
@@ -221,6 +222,49 @@ SAbundVector SharedOrderVector::getSAbundVector(){
 	RAbundVector rav(this->getRAbundVector());
 	return rav.getSAbundVector();
 
+}
+/***********************************************************************/
+SharedRAbundVector SharedOrderVector::getSharedRAbundVector(string group) {
+	try {
+		SharedRAbundVector sharedRav(data.size());
+		
+		sharedRav.setLabel(label);
+		sharedRav.setGroup(group);
+		
+		for (int i = 0; i < data.size(); i++) {
+			if (data[i].group == group) {
+				sharedRav.set(data[i].abundance, sharedRav.getAbundance(data[i].abundance) + 1, data[i].group);
+			}
+		}
+		return sharedRav;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the SharedOrderVector class Function getSharedRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the SharedOrderVector class function getSharedRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	
+}
+/***********************************************************************/
+SharedSAbundVector SharedOrderVector::getSharedSAbundVector(string group) {
+	try {
+		
+		SharedRAbundVector sharedRav(this->getSharedRAbundVector(group));
+		return sharedRav.getSharedSAbundVector();
+				
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the SharedOrderVector class Function getSharedRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the SharedOrderVector class function getSharedRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	
 }
 
 /***********************************************************************/

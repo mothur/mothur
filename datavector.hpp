@@ -8,9 +8,17 @@ using namespace std;
 #include <vector>
 #include <map>
 
+/* This class is parent to listvector, ordervector, rabundvector, sabundvector, sharedordervector, sharedrabundvector, sharedsabundvector. 
+	The child classes all contain OTU information in different forms. */
+	
+
 class RAbundVector;
 class SAbundVector;
 class OrderVector;
+class SharedListVector;
+class SharedOrderVector;
+class SharedSAbundVector;
+class SharedRAbundVector;
 
 class DataVector {
 	

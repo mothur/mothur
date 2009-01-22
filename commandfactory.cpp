@@ -10,7 +10,6 @@
 #include "command.hpp"
 #include "readdistcommand.h"
 #include "readotucommand.h"
-#include "readlistcommand.h"
 #include "clustercommand.h"
 #include "parselistcommand.h"
 #include "collectcommand.h"
@@ -51,7 +50,6 @@ Command* CommandFactory::getCommand(string commandName){
 
 			 if(commandName == "read.dist")				{	command = new ReadDistCommand();		}
 		else if(commandName == "read.otu")				{	command = new ReadOtuCommand();			}
-		else if(commandName == "read.list")				{	command = new ReadListFileCommand();	}
 		else if(commandName == "cluster")				{	command = new ClusterCommand();			}
 		else if(commandName == "deconvolute")			{	command = new DeconvoluteCommand();		}
 		else if(commandName == "help")					{	command = new HelpCommand();			}

@@ -3,6 +3,15 @@
 
 #include "datavector.hpp"
 
+/* This class is a child to datavector.  It represents OTU information at a certain distance. 
+	A rabundvector can be converted into and ordervector, listvector or sabundvector.
+	Each member of the internal container "data" represents an individual OTU.
+	So data[0] = 6, because there are six member in that OTU.
+	example: listvector		=	a,b,c,d,e,f		g,h,i		j,k		l		m  
+			 rabundvector	=	6				3			2		1		1
+			 sabundvector	=	2		1		1		0		0		1
+			 ordervector	=	1	1	1	1	1	1	2	2	2	3	3	4	5 */
+
 class RAbundVector : public DataVector {
 	
 public:
