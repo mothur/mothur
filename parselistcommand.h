@@ -15,7 +15,7 @@
 #include <map>
 #include "command.hpp"
 #include "rabundvector.hpp"
-#include "listvector.hpp"
+#include "sharedlistvector.h"
 #include "inputdata.h"
 #include "groupmap.h"
 #include "readmatrix.hpp"
@@ -43,11 +43,11 @@ private:
 	InputData* input;
 	ReadMatrix* read;
 	map<string, ofstream*> filehandles;
-	map<string, ListVector*> groupOfLists;
-	ListVector* list;
+	map<string, SharedListVector*> groupOfLists;
+	SharedListVector* list;
 	map<string, string> listGroups; //maps group name to sequences from that group in a specific OTU
 	map<string, string>::iterator it;
-	map<string, ListVector*>::iterator it2;
+	map<string, SharedListVector*>::iterator it2;
 	map<string, ofstream*>::iterator it3;
 	void parse(int);
 	string fileroot;

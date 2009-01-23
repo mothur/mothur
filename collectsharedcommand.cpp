@@ -41,7 +41,7 @@ CollectSharedCommand::CollectSharedCommand(){
 			}else if (globaldata->sharedEstimators[i] == "sharedJabund") { 	
 				cDisplays.push_back(new CollectDisplay(new SharedJAbund(), new SharedOneColumnFile(fileNameRoot+"shared.jabund", groupmap->namesOfGroups)));
 			}else if (globaldata->sharedEstimators[i] == "sharedSorensonAbund") { 
-				cDisplays.push_back(new CollectDisplay(new SharedSorAbund(), new SharedOneColumnFile(fileNameRoot+"shared.sorensonabund", groupmap->namesOfGroups)));
+				cDisplays.push_back(new CollectDisplay(new SharedSorAbund(), new SharedOneColumnFile(fileNameRoot+"shared.sorabund", groupmap->namesOfGroups)));
 			}else if (globaldata->sharedEstimators[i] == "sharedJclass") { 
 				cDisplays.push_back(new CollectDisplay(new SharedJclass(), new SharedOneColumnFile(fileNameRoot+"shared.jclass", groupmap->namesOfGroups)));
 			}else if (globaldata->sharedEstimators[i] == "sharedSorClass") { 

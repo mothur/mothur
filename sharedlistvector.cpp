@@ -20,6 +20,9 @@ using namespace std;
 #include "sharedlistvector.h"
 #include "sharedordervector.h"
 
+/***********************************************************************/
+
+SharedListVector::SharedListVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){};
 
 /***********************************************************************/
 

@@ -91,8 +91,7 @@ int ParseListCommand::execute(){
 			read = new ReadPhilFile(globaldata->inputFileName);	
 			read->read(&*globaldata); 
 			input = globaldata->ginput;
-			//list = input->getListVector();
-			list = globaldata->glist;
+			list = globaldata->gSharedList;
 
 			//read in group map info.
 			groupMap = new GroupMap(globaldata->getGroupFile());
@@ -102,7 +101,7 @@ int ParseListCommand::execute(){
 			int i;
 			//create new list vectors to fill with parsed data
 			for (i=0; i<groupMap->getNumGroups(); i++) {
-				groupOfLists[groupMap->namesOfGroups[i]] = new ListVector();
+				groupOfLists[groupMap->namesOfGroups[i]] = new SharedListVector();
 			}
 			
 			//parses and sets each groups listvector
@@ -123,7 +122,7 @@ int ParseListCommand::execute(){
 					groupOfLists[groupMap->namesOfGroups[i]]->print(*(filehandles[groupMap->namesOfGroups[i]]));
 					groupOfLists[groupMap->namesOfGroups[i]]->clear();
 				}
-				list = input->getListVector();
+				list = input->getSharedListVector();
 			}
 			
 			//set groupmap for .shared commands

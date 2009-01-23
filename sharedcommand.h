@@ -14,7 +14,7 @@
 #include <fstream>
 #include <map>
 #include "command.hpp"
-#include "listvector.hpp"
+#include "sharedlistvector.h"
 #include "inputdata.h"
 #include "shared.h"
 #include "readmatrix.hpp"
@@ -39,7 +39,7 @@ private:
 	void printSharedData();
 	GlobalData* globaldata;
 	ReadMatrix* read;
-	ListVector* list;
+	SharedListVector* SharedList;
 	InputData* input;
 	Shared* shared;
 	map<string, SharedRAbundVector*>::iterator it;

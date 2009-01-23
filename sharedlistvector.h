@@ -33,6 +33,7 @@
 class SharedListVector : public DataVector {
 	
 public:
+	SharedListVector();
 	SharedListVector(int);
 	SharedListVector(ifstream&);
 	SharedListVector(const SharedListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs){};

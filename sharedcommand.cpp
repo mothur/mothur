@@ -41,13 +41,13 @@ int SharedCommand::execute(){
 		read = new ReadPhilFile(globaldata->inputFileName);	
 		read->read(&*globaldata); 
 		input = globaldata->ginput;
-		list = globaldata->glist;
+		SharedList = globaldata->gSharedList;
 		
 		shared = new Shared();
 		int i = 0;
-		while(list != NULL){
-			shared->getSharedVectors(i, list); //fills sharedGroups with new info and updates sharedVector
-			list = input->getListVector(); //get new list vector to process
+		while(SharedList != NULL){
+			shared->getSharedVectors(i, SharedList); //fills sharedGroups with new info and updates sharedVector
+			SharedList = input->getSharedListVector(); //get new list vector to process
 			printSharedData(); //prints info to the .shared file
 			i++;
 		}
