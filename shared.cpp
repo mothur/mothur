@@ -16,7 +16,7 @@ Shared::Shared(){
 }
 
 /**************************************************************************************************/
-void Shared::getSharedVectors(int index, ListVector* list) {
+void Shared::getSharedVectors(int index, SharedListVector* list) {
 		string label, group;
 		int i,j;
 		label = list->getLabel();
@@ -45,7 +45,7 @@ void Shared::getSharedVectors(int index, ListVector* list) {
 
 
 /***********************************************************************/
-void Shared::parse(int index, ListVector* list) {
+void Shared::parse(int index, SharedListVector* list) {
 
 		string prefix, suffix, groupsName;
 		suffix = list->get(index);

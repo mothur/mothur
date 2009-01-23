@@ -21,19 +21,19 @@ using namespace std;
 #include <sstream>
 #include <map>
 #include "sharedrabundvector.h"
-#include "listvector.hpp"
+#include "sharedlistvector.h"
 #include "globaldata.hpp"
 
 class Shared {
 	public:
 		Shared();
 		~Shared();
-		void getSharedVectors(int, ListVector*);
+		void getSharedVectors(int, SharedListVector*);
 		map<string, SharedRAbundVector*> sharedGroups; //string is groupname, SharedVector* is out info for that group
 		
 	private:
 		GlobalData* globaldata;
-		void parse(int, ListVector*);
+		void parse(int, SharedListVector*);
 		vector< map<string, SharedRAbundVector*> > sharedRAbund;  //contains all the info needed to create the .shared file not sure if we will need 
 };
 
