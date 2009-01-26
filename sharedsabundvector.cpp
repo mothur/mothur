@@ -30,59 +30,7 @@ SharedSAbundVector::SharedSAbundVector(int size) :	DataVector(), maxRank(0), num
 			newGuy.abundance = 0;
 			data.push_back(newGuy);
 		}
-	//	for(int i=0;i<data.size();i++){
-	//		if(data[i].abundance != 0){	maxRank = i;	}
-	//		numSeqs += i*data[i].abundance;
-	//		numBins += data[i].abundance;
-	//	}
-
 };
-
-/***********************************************************************
-
-SharedSAbundVector::SharedSAbundVector(string id, vector<int> sav) : DataVector(id), data(sav) {
-	try {
-		
-		for(int i=0;i<sav.size();i++){
-			if(data[i] != 0){	maxRank = i;	}
-			numSeqs += i*data[i];
-			numBins += data[i];
-		}
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedSAbundVector class Function SharedSAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedSAbundVector class function SharedSAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-}
-
-/***********************************************************************
-
-SharedSAbundVector::SharedSAbundVector(ifstream& f): DataVector(), maxRank(0), numBins(0), numSeqs(0) {
-	try {
-		int hold;
-		f >> label >> hold;
-	
-		data.assign(hold+1, 0);
-		int inputData;
-	
-		for(int i=1;i<=hold;i++){
-			f >> inputData;
-			set(i, inputData);
-		}
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedSAbundVector class Function SharedSAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedSAbundVector class function SharedSAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-}
 
 /***********************************************************************/
 

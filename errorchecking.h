@@ -35,8 +35,9 @@ class ErrorCheck {
 		void validateReadDist();
 		void validateReadPhil();
 		void validateParseFiles();
+		void validateTreeFiles();
 		void clear();
-		string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, cutoff, format; 
+		string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, treefile, cutoff, format; 
 		string precision, method, fileroot, label, line, iters, jumble, freq, single, rarefaction, shared, summary;
 		string commandName, optionText;
 		bool errorFree;

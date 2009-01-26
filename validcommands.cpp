@@ -15,7 +15,8 @@ ValidCommands::ValidCommands() {
 	try {
 	
 		commands["read.dist"]			= "read.dist"; 
-		commands["read.otu"]			= "read.otu"; 
+		commands["read.otu"]			= "read.otu";
+	//	commands["read.tree"]			= "read.tree"; 
 		commands["cluster"]				= "cluster"; 
 		commands["deconvolute"]			= "deconvolute"; 
 		commands["help"]				= "help"; 

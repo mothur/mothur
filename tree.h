@@ -15,37 +15,33 @@ using namespace std;
 #include <string>
 #include <iostream>
 #include <vector>
+#include "treenode.h"
+#include "globaldata.hpp"
 
-struct Node  {
-		string	name;
-		string	group;
-		float	branchLength;
-		Node*	parent;
-		Node*	lchild;
-		Node*	rchild;
-};		
+/* This class represents the treefile. */
 
 
 
 class Tree {
 	public: 
-		Tree();
-		~Tree();
-		
-		Node* getParent(Node);
-		Node* getLChild(Node);
-		Node* getRChild(Node);
-		
-		void setParent(Node);
-		void setLChild(Node);
-		void setRChild(Node);
-		
+		Tree();  
+		~Tree() {};
 		
 		Tree generateRandomTree();
-		
-		vector<Node> leaves;		//gives you easy access to the leaves of the tree to generate the parsimony score
+		void createNewickFile();
+		int getIndex(string);
+		void setIndex(string, int);
+		int getNumNodes() { return numNodes; }
+		int getNumLeaves(){	return numLeaves;}
+		vector<Node> tree;		//the first n nodes are the leaves, where n is the number of sequences.
 		
 	private:
+		GlobalData* globaldata;
+		int findRoot();  //return index of root node
+		void printBranch(int);  //recursively print out tree
+		int numNodes, numLeaves;
+		ofstream out;
+		string filename;
 };
 
 

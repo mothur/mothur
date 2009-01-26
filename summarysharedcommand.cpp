@@ -30,7 +30,7 @@ SummarySharedCommand::SummarySharedCommand(){
 		for (i=0; i<globaldata->sharedSummaryEstimators.size(); i++) {
 			if (globaldata->sharedSummaryEstimators[i] == "sharedSobs") { 
 				sumCalculators.push_back(new SharedSobs());
-			}else if (globaldata->sharedEstimators[i] == "sharedChao") { 
+			}else if (globaldata->sharedSummaryEstimators[i] == "sharedChao") { 
 				sumCalculators.push_back(new SharedChao1());
 			}else if (globaldata->sharedSummaryEstimators[i] == "sharedAce") { 
 				sumCalculators.push_back(new SharedAce());
