@@ -27,6 +27,7 @@ ErrorCheck::ErrorCheck() {
 	groupfile = globaldata->getGroupFile();
 	orderfile = globaldata->getOrderFile();
 	fastafile = globaldata->getFastaFile();
+	treefile = globaldata->getTreeFile();
 	cutoff = globaldata->getCutOff();
 	format = globaldata->getFormat();
 	method = globaldata->getMethod();
@@ -79,6 +80,7 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "namefile" )		{ namefile = value; }
 				if (parameter == "orderfile" )		{ orderfile = value; }
 				if (parameter == "fastafile" )		{ fastafile = value; }
+				if (parameter == "treefile" )		{ treefile = value; }
 				if (parameter == "groupfile" )		{ groupfile = value; }
 				if (parameter == "cutoff" )			{ cutoff = value; }
 				if (parameter == "precision" )		{ precision = value; }
@@ -148,6 +150,7 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "orderfile" )		{ orderfile = value; }
 				if (parameter == "groupfile" )		{ groupfile = value; }
 				if (parameter == "fastafile" )		{ fastafile = value; }
+				if (parameter == "treefile" )		{ treefile = value; }
 				if (parameter == "cutoff" )			{ cutoff = value; }
 				if (parameter == "precision" )		{ precision = value; }
 				if (parameter == "iters" )			{ iters = value; }
@@ -217,6 +220,8 @@ bool ErrorCheck::checkInput(string input) {
 				validateReadFiles();
 				validateReadPhil();
 			}
+		}else if (commandName == "read.tree") { 
+			validateTreeFiles(); //checks the treefile and groupfile parameters
 		}else if (commandName == "deconvolute") {
 			validateReadFiles();
 		}
@@ -384,6 +389,46 @@ void ErrorCheck::validateParseFiles() {
 	}
 	catch(...) {
 		cout << "An unknown error has occurred in the ErrorCheck class function validateReadPhil. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+/*******************************************************/
+
+/******************************************************/
+//This function checks to make sure the user entered appropriate
+// format parameters on a parselistcommand
+void ErrorCheck::validateTreeFiles() {
+	try {
+		ifstream filehandle;
+		int ableToOpen;
+		
+		//checks for valid files
+	
+		if (treefile == "") { cout << "When executing a read.tree you must enter a treefile and a groupfile." << endl; errorFree = false; }
+		else if (groupfile == "") { cout << "When executing a read.tree you must enter a treefile and a groupfile." << endl; errorFree = false; }
+	
+		//checks parameters on the read command
+		if (treefile != "") {
+			ableToOpen = openInputFile(treefile, filehandle);
+			filehandle.close();
+			if (ableToOpen == 1) { //unable to open
+				errorFree = false;
+			}
+			if (groupfile != "") {
+				ableToOpen = openInputFile(groupfile, filehandle);
+				filehandle.close();
+				if (ableToOpen == 1) { //unable to open
+					errorFree = false;;
+				}
+			}
+		}
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ErrorCheck class Function validateTreeFiles. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ErrorCheck class function validateTreeFiles. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 }

@@ -5,15 +5,18 @@
 #include <vector>
 #include <set>
 #include "groupmap.h"
+#include "treemap.h"
 
 using namespace std;
 
 class ListVector;
 class SharedListVector;
 class SparseMatrix;
+class Tree;
 class OrderVector;
 class InputData;
 class GroupMap;
+class TreeMap;
 class SAbundVector;
 
 class GlobalData {
@@ -24,9 +27,11 @@ public:
 	InputData* ginput;
 	OrderVector* gorder;
 	ListVector* glist;
+	Tree* gTree;
 	SharedListVector* gSharedList;
 	SAbundVector* sabund;
 	GroupMap* gGroupmap;
+	TreeMap* gTreemap;
 	string inputFileName, helpRequest, commandName;
 	bool allLines;
 	vector<string> singleEstimators, summaryEstimators, sharedEstimators, rareEstimators, sharedRareEstimators, sharedSummaryEstimators; //holds estimators to be used
@@ -42,6 +47,7 @@ public:
 	string getGroupFile();
 	string getOrderFile();
 	string getFastaFile();
+	string getTreeFile();
 	string getCutOff();
 	string getFormat();
 	string getPrecision();
@@ -71,7 +77,7 @@ public:
 	void splitAtDash(string&, set<string>&);
 	
 private:
-	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile,line, label;
+	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, treefile, line, label;
 	string cutoff, format, precision, method, fileroot, iters, jumble, freq, single, rarefaction, shared, summary, sharedsummary, sharedrarefaction;
 	static GlobalData* _uniqueInstance;
 	GlobalData( const GlobalData& ); // Disable copy constructor
@@ -80,6 +86,7 @@ private:
 	~GlobalData();
 	ListVector* gListVector;
 	SparseMatrix* gSparseMatrix;
+	
 	
 };
 

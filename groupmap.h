@@ -5,7 +5,7 @@
  *  Dotur
  *
  *  Created by Sarah Westcott on 12/1/08.
- *  Copyright 2008 __MyCompanyName__. All rights reserved.
+ *  Copyright 2008 Schloss Lab UMASS Amherst. All rights reserved.
  *
  */
 
@@ -16,6 +16,8 @@
 #include <fstream>
 #include "utilities.hpp"
 
+/* This class is a representation of the groupfile.  It is used by all the shared commands to determine what group a 
+	certain sequence belongs to. */
 
 class GroupMap {
 public:
@@ -25,8 +27,7 @@ public:
 	int getNumGroups();
 	string getGroup(string);
 	vector<string> namesOfGroups;
-	
-	
+		
 private:
 	ifstream fileHandle;
 	string groupFileName;

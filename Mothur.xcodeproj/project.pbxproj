@@ -10,6 +10,7 @@
 		372E12700F26365B0095CF7E /* readotucommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E126F0F26365B0095CF7E /* readotucommand.cpp */; };
 		372E12960F263D5A0095CF7E /* readdistcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E12950F263D5A0095CF7E /* readdistcommand.cpp */; };
 		372E12ED0F264D320095CF7E /* commandfactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E12EC0F264D320095CF7E /* commandfactory.cpp */; };
+		379293C30F2DE73400B9034A /* treemap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 379293C20F2DE73400B9034A /* treemap.cpp */; };
 		37AD4CE40F28AEA300AA2D49 /* sharedlistvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37AD4CE30F28AEA300AA2D49 /* sharedlistvector.cpp */; };
 		37AD4DBB0F28E2FE00AA2D49 /* tree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37AD4DBA0F28E2FE00AA2D49 /* tree.cpp */; };
 		37AD4DCA0F28F3DD00AA2D49 /* readtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37AD4DC90F28F3DD00AA2D49 /* readtree.cpp */; };
@@ -82,6 +83,8 @@
 		37D9289D0F21331F001D4494 /* validcalculator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D9284F0F21331F001D4494 /* validcalculator.cpp */; };
 		37D9289E0F21331F001D4494 /* validcommands.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D928510F21331F001D4494 /* validcommands.cpp */; };
 		37D9289F0F21331F001D4494 /* validparameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D928530F21331F001D4494 /* validparameter.cpp */; };
+		37E5F3E30F29FD4200F8D827 /* treenode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37E5F3E20F29FD4200F8D827 /* treenode.cpp */; };
+		37E5F4920F2A3DA800F8D827 /* readtreecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37E5F4910F2A3DA800F8D827 /* readtreecommand.cpp */; };
 		8DD76F6A0486A84900D96B5E /* Mothur.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6859E8B029090EE04C91782 /* Mothur.1 */; };
 /* End PBXBuildFile section */
 
@@ -104,6 +107,8 @@
 		372E12940F263D5A0095CF7E /* readdistcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readdistcommand.h; sourceTree = "<group>"; };
 		372E12950F263D5A0095CF7E /* readdistcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readdistcommand.cpp; sourceTree = "<group>"; };
 		372E12EC0F264D320095CF7E /* commandfactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = commandfactory.cpp; sourceTree = "<group>"; };
+		379293C10F2DE73400B9034A /* treemap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = treemap.h; sourceTree = "<group>"; };
+		379293C20F2DE73400B9034A /* treemap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = treemap.cpp; sourceTree = "<group>"; };
 		37AD4CE20F28AEA300AA2D49 /* sharedlistvector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedlistvector.h; sourceTree = "<group>"; };
 		37AD4CE30F28AEA300AA2D49 /* sharedlistvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedlistvector.cpp; sourceTree = "<group>"; };
 		37AD4DB90F28E2FE00AA2D49 /* tree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tree.h; sourceTree = "<group>"; };
@@ -256,6 +261,10 @@
 		37D928520F21331F001D4494 /* validcommands.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = validcommands.h; sourceTree = "<group>"; };
 		37D928530F21331F001D4494 /* validparameter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = validparameter.cpp; sourceTree = "<group>"; };
 		37D928540F21331F001D4494 /* validparameter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = validparameter.h; sourceTree = "<group>"; };
+		37E5F3E10F29FD4200F8D827 /* treenode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = treenode.h; sourceTree = "<group>"; };
+		37E5F3E20F29FD4200F8D827 /* treenode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = treenode.cpp; sourceTree = "<group>"; };
+		37E5F4900F2A3DA800F8D827 /* readtreecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readtreecommand.h; sourceTree = "<group>"; };
+		37E5F4910F2A3DA800F8D827 /* readtreecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readtreecommand.cpp; sourceTree = "<group>"; };
 		8DD76F6C0486A84900D96B5E /* mothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = mothur; sourceTree = BUILT_PRODUCTS_DIR; };
 		C6859E8B029090EE04C91782 /* Mothur.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = Mothur.1; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -430,6 +439,8 @@
 				372E12950F263D5A0095CF7E /* readdistcommand.cpp */,
 				372E126E0F26365B0095CF7E /* readotucommand.h */,
 				372E126F0F26365B0095CF7E /* readotucommand.cpp */,
+				37E5F4900F2A3DA800F8D827 /* readtreecommand.h */,
+				37E5F4910F2A3DA800F8D827 /* readtreecommand.cpp */,
 				37D928270F21331F001D4494 /* sharedcommand.h */,
 				37D928260F21331F001D4494 /* sharedcommand.cpp */,
 				37D928470F21331F001D4494 /* summarycommand.h */,
@@ -466,6 +477,10 @@
 				37D928320F21331F001D4494 /* sharedsabundvector.cpp */,
 				37AD4DB90F28E2FE00AA2D49 /* tree.h */,
 				37AD4DBA0F28E2FE00AA2D49 /* tree.cpp */,
+				379293C10F2DE73400B9034A /* treemap.h */,
+				379293C20F2DE73400B9034A /* treemap.cpp */,
+				37E5F3E10F29FD4200F8D827 /* treenode.h */,
+				37E5F3E20F29FD4200F8D827 /* treenode.cpp */,
 			);
 			name = containers;
 			sourceTree = "<group>";
@@ -611,6 +626,9 @@
 				37AD4CE40F28AEA300AA2D49 /* sharedlistvector.cpp in Sources */,
 				37AD4DBB0F28E2FE00AA2D49 /* tree.cpp in Sources */,
 				37AD4DCA0F28F3DD00AA2D49 /* readtree.cpp in Sources */,
+				37E5F3E30F29FD4200F8D827 /* treenode.cpp in Sources */,
+				37E5F4920F2A3DA800F8D827 /* readtreecommand.cpp in Sources */,
+				379293C30F2DE73400B9034A /* treemap.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

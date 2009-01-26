@@ -9,6 +9,7 @@ using namespace std;
 
 #include "globaldata.hpp"
 #include "sparsematrix.hpp"
+#include "tree.h"
 #include "rabundvector.hpp"
 #include "sabundvector.hpp"
 #include "listvector.hpp"
@@ -80,7 +81,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 		commandName = commandString; //save command name to be used by other classes
 		
 		//clears out data from previous read
-		if ((commandName == "read.dist") || (commandName == "read.otu") || (commandName == "read.list")) { 
+		if ((commandName == "read.dist") || (commandName == "read.otu") || (commandName == "read.tree")) { 
 			clear();
 		}
 		
@@ -102,6 +103,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if (key == "rabundfile" )	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund";	}
 				if (key == "sabundfile" )	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund";	} 
 				if (key == "fastafile" )	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta";		} 
+				if (key == "treefile" )		{ treefile = value; inputFileName = value; fileroot = value; format = "tree";		}
 				if (key == "namefile" )		{ namefile = value;		}
 				if (key == "orderfile" )	{ orderfile = value;	}
 				if (key == "groupfile" )	{ groupfile = value;	}
@@ -165,7 +167,8 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if (key == "listfile" )		{ listfile = value; inputFileName = value; fileroot = value; format = "list";		}
 			if (key == "rabundfile" )	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund";	}
 			if (key == "sabundfile" )	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund";	}
-			if (key == "fastafile" )	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta";		} 
+			if (key == "fastafile" )	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta";		}
+			if (key == "treefile" )		{ treefile = value; inputFileName = value; fileroot = value; format = "tree";		}  
 			if (key == "namefile" )		{ namefile = value;		}
 			if (key == "orderfile" )	{ orderfile = value;	}
 			if (key == "groupfile" )	{ groupfile = value;	}
@@ -226,25 +229,32 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 		if ((listfile != "") && (groupfile != "")) { format = "shared"; }
 				
 		//input defaults
-		if (commandString == "collect.single") {
-			if (singleEstimators.size() == 0) { splitAtDash(single, singleEstimators); }	
+		if (commandName == "collect.single") {
+			if (singleEstimators.size() == 0) { splitAtDash(single, singleEstimators); }
 		}
-		if (commandString == "rarefaction.single") {
+		if (commandName == "rarefaction.single") {
 			if (rareEstimators.size() == 0) { splitAtDash(rarefaction, rareEstimators);  }	
 		}
-		if (commandString == "collect.shared") {
+		if (commandName == "collect.shared") {
 			if (sharedEstimators.size() == 0) { splitAtDash(shared, sharedEstimators); }	
 		}
-		if (commandString == "summary.single") {
+		if (commandName == "summary.single") {
 			if (summaryEstimators.size() == 0) { splitAtDash(summary, summaryEstimators); }
 		}
-		if (commandString == "summary.shared") {
+		if (commandName == "summary.shared") {
 			if (sharedSummaryEstimators.size() == 0) { splitAtDash(sharedsummary, sharedSummaryEstimators); }
 		}
-		if (commandString == "rarefaction.shared") {
+		if (commandName == "rarefaction.shared") {
 			if (sharedRareEstimators.size() == 0) { splitAtDash(sharedrarefaction, sharedRareEstimators); }
 		}
 
+
+		//if you have done a read.otu with a groupfile but don't want to use it anymore because you want to do single commands
+		if ((commandName == "collect.single") || (commandName == "rarefaction.single") || (commandName == "summary.single")) {
+			if (listfile != "") { format = "list"; }
+			else if (sabundfile != "") { format = "sabund"; }
+			else if (rabundfile != "") { format = "rabund"; }
+		}
 				
 	}
 	catch(exception& e) {
@@ -269,6 +279,7 @@ string GlobalData::getSabundFile()		{	return sabundfile;	}
 string GlobalData::getNameFile()		{	return namefile;	}
 string GlobalData::getGroupFile()		{	return groupfile;	}
 string GlobalData::getOrderFile()		{	return orderfile;	}
+string GlobalData::getTreeFile()		{	return treefile;	}
 string GlobalData::getFastaFile()		{	return fastafile;	}
 string GlobalData::getCutOff()			{	return cutoff;		}
 string GlobalData::getFormat()			{	return format;		}
@@ -312,13 +323,14 @@ void GlobalData::clear() {
 	groupfile		=	""; 
 	orderfile		=	"";
 	fastafile		=   "";
+	treefile		=	"";
 	cutoff			=	"10.00";
 	format			=	"";
 	precision		=	"100";
 	iters			=	"1000"; 
 	line			=   "";
 	label			=	"";
-	jumble			=	"0";
+	jumble			=	"1";
 	freq			=	"100";
 	method			=	"furthest";
 	fileroot		=	"";

@@ -3,7 +3,7 @@
  *  Dotur
  *
  *  Created by Sarah Westcott on 12/1/08.
- *  Copyright 2008 __MyCompanyName__. All rights reserved.
+ *  Copyright 2008 Schloss Lab UMASS Amherst. All rights reserved.
  *
  */
 
@@ -71,4 +71,3 @@ void GroupMap::setNamesOfGroups(string seqGroup) {
 				namesOfGroups.push_back(seqGroup); //new group
 			}
 }
-/************************************************************/
