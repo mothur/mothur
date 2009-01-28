@@ -352,12 +352,12 @@ void ReadPhilFile::read(GlobalData* globaldata){
 		}
 		globaldata->ginput = input;	//saving to be used by collector and rarefact commands.
 		
-		if (globaldata->getGroupFile() == "") {//you are reading a list, rabund or sabund file for collect, rarefaction or summary.
+		if ((globaldata->getFormat() == "list") || (globaldata->getFormat() == "rabund") || (globaldata->getFormat() == "sabund")) {//you are reading a list, rabund or sabund file for collect, rarefaction or summary.
 			order = input->getOrderVector();
 			globaldata->gorder = order;	//saving to be used by collect and rarefact commands.
 			sabund = inputSabund->getSAbundVector(); 
 			globaldata->sabund = sabund; //saving to be used by summary command.
-		}else {
+		}else if (globaldata->getFormat() == "shared") {
 			SharedList = input->getSharedListVector(); //you are reading for parselist command, or shared commands.
 			globaldata->gSharedList = SharedList;
 		}
