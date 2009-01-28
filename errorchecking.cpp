@@ -223,6 +223,7 @@ bool ErrorCheck::checkInput(string input) {
 		}else if (commandName == "read.tree") { 
 			validateTreeFiles(); //checks the treefile and groupfile parameters
 		}else if (commandName == "deconvolute") {
+			if (fastafile == "") { cout << "You must enter a fastafile with the deconvolute() command." << endl; return false; }
 			validateReadFiles();
 		}
 		
@@ -243,9 +244,9 @@ bool ErrorCheck::checkInput(string input) {
 			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { cout << "You must read a listfile, sabundfile or rabundfile before you can use the collect.single, rarefaction.single or summary.single commands." << endl; return false; }
 		}
 		
-		if ((commandName == "collect.shared") || (commandName == "rarefaction.shared") || (commandName == "summary.shared") || (commandName == "shared") ){ 
-			if (globaldata->getListFile() == "") { cout << "You must read a listfile and a groupfile before you can use the collect.shared, rarefaction.shared, summary.shared or shared commands." << endl; return false; }
-			else if (globaldata->getGroupFile() == "") { cout << "You must read a listfile and a groupfile before you can use the collect.shared, rarefaction.shared, summary.shared or shared commands." << endl; return false; }
+		if ((commandName == "collect.shared") || (commandName == "rarefaction.shared") || (commandName == "summary.shared") ){ 
+			if (globaldata->getListFile() == "") { cout << "You must read a listfile and a groupfile before you can use the collect.shared, rarefaction.shared or summary.shared commands." << endl; return false; }
+			else if (globaldata->getGroupFile() == "") { cout << "You must read a listfile and a groupfile before you can use the collect.shared, rarefaction.shared or summary.shared commands." << endl; return false; }
 		}
  
 		
