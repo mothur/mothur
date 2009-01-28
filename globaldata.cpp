@@ -335,7 +335,7 @@ void GlobalData::clear() {
 	method			=	"furthest";
 	fileroot		=	"";
 	single			=	"sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson-rarefraction";
-	rarefaction		=	"rarefaction";
+	rarefaction		=	"sobs";
 	shared			=	"sharedSobs-sharedChao-sharedAce-sharedJabund-sharedSorensonAbund-sharedJclass-sharedSorClass-sharedJest-sharedSorEst-SharedThetaYC-SharedThetaN";
 	sharedsummary	=   "sharedSobs-sharedChao-sharedAce-sharedJabund-sharedSorensonAbund-sharedJclass-sharedSorClass-sharedJest-sharedSorEst-SharedThetaYC-SharedThetaN";
 	summary			=	"summary-chao-ace-jack-bootstrap-shannon-npshannon-simpson";

@@ -429,8 +429,6 @@
 				37D927F30F21331F001D4494 /* nocommand.h */,
 				37D927FA0F21331F001D4494 /* parselistcommand.h */,
 				37D927F90F21331F001D4494 /* parselistcommand.cpp */,
-				37D927FE0F21331F001D4494 /* quitcommand.h */,
-				37D927FD0F21331F001D4494 /* quitcommand.cpp */,
 				37D928080F21331F001D4494 /* rarefactcommand.h */,
 				37D928070F21331F001D4494 /* rarefactcommand.cpp */,
 				37D9280B0F21331F001D4494 /* rarefactsharedcommand.h */,
@@ -447,6 +445,8 @@
 				37D928460F21331F001D4494 /* summarycommand.cpp */,
 				37D9284B0F21331F001D4494 /* summarysharedcommand.h */,
 				37D9284A0F21331F001D4494 /* summarysharedcommand.cpp */,
+				37D927FE0F21331F001D4494 /* quitcommand.h */,
+				37D927FD0F21331F001D4494 /* quitcommand.cpp */,
 			);
 			name = commands;
 			sourceTree = "<group>";
