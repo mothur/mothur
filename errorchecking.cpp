@@ -241,12 +241,12 @@ bool ErrorCheck::checkInput(string input) {
 		}
 		
 		if ((commandName == "collect.single") || (commandName == "rarefaction.single") || (commandName == "summary.single") ){ 
-			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { cout << "You must read a listfile, sabundfile or rabundfile before you can use the collect.single, rarefaction.single or summary.single commands." << endl; return false; }
+			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { cout << "You must read a list, sabund or rabund before you can use the collect.single, rarefaction.single or summary.single commands." << endl; return false; }
 		}
 		
 		if ((commandName == "collect.shared") || (commandName == "rarefaction.shared") || (commandName == "summary.shared") ){ 
-			if (globaldata->getListFile() == "") { cout << "You must read a listfile and a groupfile before you can use the collect.shared, rarefaction.shared or summary.shared commands." << endl; return false; }
-			else if (globaldata->getGroupFile() == "") { cout << "You must read a listfile and a groupfile before you can use the collect.shared, rarefaction.shared or summary.shared commands." << endl; return false; }
+			if (globaldata->getListFile() == "") { cout << "You must read a list and a group before you can use the collect.shared, rarefaction.shared or summary.shared commands." << endl; return false; }
+			else if (globaldata->getGroupFile() == "") { cout << "You must read a list and a group before you can use the collect.shared, rarefaction.shared or summary.shared commands." << endl; return false; }
 		}
  
 		
@@ -329,12 +329,12 @@ void ErrorCheck::validateReadDist() {
 		ifstream filehandle;
 		int ableToOpen;
 		
-		if ((phylipfile == "") && (columnfile == "")) { cout << "When executing a read.dist you must enter a phylipfile or a columnfile." << endl; errorFree = false; }
-		else if ((phylipfile != "") && (columnfile != "")) { cout << "When executing a read.dist you must enter ONLY ONE of the following: phylipfile or columnfile." << endl; errorFree = false; }
+		if ((phylipfile == "") && (columnfile == "")) { cout << "When executing a read.dist you must enter a phylip or a column." << endl; errorFree = false; }
+		else if ((phylipfile != "") && (columnfile != "")) { cout << "When executing a read.dist you must enter ONLY ONE of the following: phylip or column." << endl; errorFree = false; }
 		
 		if (columnfile != "") {
 			if (namefile == "") {
-				cout << "You need to provide a namefile name if you are going to use the column format." << endl;
+				cout << "You need to provide a namefile if you are going to use the column format." << endl;
 				errorFree = false; 
 			}else {
 				ableToOpen = openInputFile(namefile, filehandle);
@@ -365,8 +365,8 @@ void ErrorCheck::validateParseFiles() {
 		
 		//checks for valid files
 	
-		if (listfile == "") { cout << "When executing a read.list you must enter a listfile and a groupfile." << endl; errorFree = false; }
-		else if (groupfile == "") { cout << "When executing a read.list you must enter a listfile and a groupfile." << endl; errorFree = false; }
+		if (listfile == "") { cout << "When executing a read.otu for groups you must enter a list and a group." << endl; errorFree = false; }
+		else if (groupfile == "") { cout << "When executing a read.otu for groups you must enter a list and a group." << endl; errorFree = false; }
 	
 		//checks parameters on the read command
 		if (listfile != "") {
@@ -447,15 +447,15 @@ void ErrorCheck::validateReadPhil() {
 		//checks to make sure only one file type is given
 		if (listfile != "") { 
 			if ((rabundfile != "") || (sabundfile != "")) { 
-				cout << "When executing a read.otu you must enter ONLY ONE of the following: listfile, rabundfile or sabundfile." << endl; errorFree = false; }
+				cout << "When executing a read.otu you must enter ONLY ONE of the following: list, rabund or sabund." << endl; errorFree = false; }
 		}else if (rabundfile != "") { 
 			if ((listfile != "") || (sabundfile != "")) { 
-				cout << "When executing a read.otu you must enter ONLY ONE of the following: listfile, rabundfile or sabundfile." << endl; errorFree = false; }
+				cout << "When executing a read.otu you must enter ONLY ONE of the following: list, rabund or sabund." << endl; errorFree = false; }
 		}else if (sabundfile != "") { 
 			if ((listfile != "") || (rabundfile != "")) { 
-				cout << "When executing a read.otu you must enter ONLY ONE of the following: listfile, rabundfile or sabundfile." << endl; errorFree = false; }
+				cout << "When executing a read.otu you must enter ONLY ONE of the following: list, rabund or sabund." << endl; errorFree = false; }
 		}else if ((listfile == "") && (rabundfile == "") && (sabundfile == "")) {
-			    cout << "When executing a read.otu you must enter one of the following: listfile, rabundfile or sabundfile." << endl; errorFree = false; 
+			    cout << "When executing a read.otu you must enter one of the following: list, rabund or sabund." << endl; errorFree = false; 
 		}
 		
 		//checks parameters on the read command

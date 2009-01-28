@@ -14,15 +14,15 @@
 ValidParameters::ValidParameters() {
 	try {
 	
-		parameters["phylip"]			= "phylip";
-		parameters["columnfile"]		= "columnfile";
-		parameters["listfile"]			= "listfile"; 
-		parameters["rabundfile"]		= "rabundfile"; 
-		parameters["sabundfile"]		= "sabundfile"; 
-		parameters["namefile"]			= "namefile"; 
-		parameters["groupfile"]			= "groupfile"; 
-		parameters["orderfile"]			= "orderfile"; 
-		parameters["fastafile"]			= "fastafile"; 
+		parameters["phylip"]		= "phylip";
+		parameters["column"]		= "column";
+		parameters["list"]			= "list"; 
+		parameters["rabund"]		= "rabund"; 
+		parameters["sabund"]		= "sabund"; 
+		parameters["name"]			= "name"; 
+		parameters["group"]			= "group"; 
+		parameters["order"]			= "order"; 
+		parameters["fasta"]			= "fasta"; 
 		parameters["treefile"]			= "treefile";
 		parameters["fileroot"]			= "fileroot";
 		parameters["cutoff"]			= "cutoff"; 
