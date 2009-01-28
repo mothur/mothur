@@ -24,12 +24,12 @@ int HelpCommand::execute(){
 	globaldata = GlobalData::getInstance();
 	
 	if (globaldata->helpRequest == "read.dist") {
-		cout << "The read.dist command parameter options are phylipfile or columnfile, namefile, cutoff and precision" << "\n";
+		cout << "The read.dist command parameter options are phylip or column, name, cutoff and precision" << "\n";
 		cout << "The read.dist command should be in the following format: " << "\n";
-		cout << "read.dist(phylipfile=yourDistFile, namefile=yourNameFile, cutoff=yourCutoff, precision=yourPrecision) " << "\n";
-		cout << "The phylipfile or columnfile parameter is required, but only one may be used.  If you use a columnfile the namefile is required. " << "\n";
+		cout << "read.dist(phylip=yourDistFile, name=yourNameFile, cutoff=yourCutoff, precision=yourPrecision) " << "\n";
+		cout << "The phylip or column parameter is required, but only one may be used.  If you use a column file the name filename is required. " << "\n";
 		cout << "If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. distfile), '=' and parameters (i.e.yourDistfile)." << "\n" << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. dist), '=' and parameters (i.e.yourDistfile)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "read.otu") {
 		cout << "The read.otu command parameter options are listfile, rabundfile, sabundfile or orderfile." << "\n";
 		cout << "The read.otu command should be in the following format: " << "\n";
