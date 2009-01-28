@@ -97,16 +97,16 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				splitAtComma(value, optionText);
 				splitAtEquals(key, value);
 				
-				if (key == "phylipfile" )	{ phylipfile = value; inputFileName = value; fileroot = value; format = "phylip";	}
-				if (key == "columnfile" )	{ columnfile = value; inputFileName = value; fileroot = value; format = "column";	}
-				if (key == "listfile" )		{ listfile = value; inputFileName = value; fileroot = value; format = "list";		}
-				if (key == "rabundfile" )	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund";	}
-				if (key == "sabundfile" )	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund";	} 
-				if (key == "fastafile" )	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta";		} 
+				if (key == "phylip" )	{ phylipfile = value; inputFileName = value; fileroot = value; format = "phylip";	}
+				if (key == "column" )	{ columnfile = value; inputFileName = value; fileroot = value; format = "column";	}
+				if (key == "list" )		{ listfile = value; inputFileName = value; fileroot = value; format = "list";		}
+				if (key == "rabund" )	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund";	}
+				if (key == "sabund" )	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund";	} 
+				if (key == "fasta" )	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta";		} 
 				if (key == "treefile" )		{ treefile = value; inputFileName = value; fileroot = value; format = "tree";		}
-				if (key == "namefile" )		{ namefile = value;		}
-				if (key == "orderfile" )	{ orderfile = value;	}
-				if (key == "groupfile" )	{ groupfile = value;	}
+				if (key == "name" )		{ namefile = value;		}
+				if (key == "order" )	{ orderfile = value;	}
+				if (key == "group" )	{ groupfile = value;	}
 				if (key == "cutoff" )		{ cutoff = value;		}
 				if (key == "precision" )	{ precision = value;	}
 				if (key == "iters" )		{ iters = value;		}
@@ -162,16 +162,16 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			//saves the last parameter
 			value = optionText;
 			splitAtEquals(key, value);
-			if (key == "phylipfile" )	{ phylipfile = value; inputFileName = value; fileroot = value; format = "phylip";	}
-			if (key == "columnfile" )	{ columnfile = value; inputFileName = value; fileroot = value; format = "column";	}
-			if (key == "listfile" )		{ listfile = value; inputFileName = value; fileroot = value; format = "list";		}
-			if (key == "rabundfile" )	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund";	}
-			if (key == "sabundfile" )	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund";	}
-			if (key == "fastafile" )	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta";		}
+			if (key == "phylip" )	{ phylipfile = value; inputFileName = value; fileroot = value; format = "phylip";	}
+			if (key == "column" )	{ columnfile = value; inputFileName = value; fileroot = value; format = "column";	}
+			if (key == "list" )		{ listfile = value; inputFileName = value; fileroot = value; format = "list";		}
+			if (key == "rabund" )	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund";	}
+			if (key == "sabund" )	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund";	}
+			if (key == "fasta" )	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta";		}
 			if (key == "treefile" )		{ treefile = value; inputFileName = value; fileroot = value; format = "tree";		}  
-			if (key == "namefile" )		{ namefile = value;		}
-			if (key == "orderfile" )	{ orderfile = value;	}
-			if (key == "groupfile" )	{ groupfile = value;	}
+			if (key == "name" )		{ namefile = value;		}
+			if (key == "order" )	{ orderfile = value;	}
+			if (key == "group" )	{ groupfile = value;	}
 			if (key == "cutoff" )		{ cutoff = value;		}
 			if (key == "precision" )	{ precision = value;	}
 			if (key == "iters" )		{ iters = value;		}

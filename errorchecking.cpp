@@ -72,16 +72,16 @@ bool ErrorCheck::checkInput(string input) {
 				//is it a valid parameter
 				if (validParameter->isValidParameter(parameter) != true) { return false; }
 				
-				if (parameter == "phylipfile" )		{ phylipfile = value; }
-				if (parameter == "columnfile" )		{ columnfile = value; }
-				if (parameter == "listfile" )		{ listfile = value; }
-				if (parameter == "rabundfile" )		{ rabundfile = value; }
-				if (parameter == "sabundfile" )		{ sabundfile = value; }
-				if (parameter == "namefile" )		{ namefile = value; }
-				if (parameter == "orderfile" )		{ orderfile = value; }
-				if (parameter == "fastafile" )		{ fastafile = value; }
+				if (parameter == "phylip" )		{ phylipfile = value; }
+				if (parameter == "column" )		{ columnfile = value; }
+				if (parameter == "list" )		{ listfile = value; }
+				if (parameter == "rabund" )		{ rabundfile = value; }
+				if (parameter == "sabund" )		{ sabundfile = value; }
+				if (parameter == "name" )		{ namefile = value; }
+				if (parameter == "order" )		{ orderfile = value; }
+				if (parameter == "fasta" )		{ fastafile = value; }
 				if (parameter == "treefile" )		{ treefile = value; }
-				if (parameter == "groupfile" )		{ groupfile = value; }
+				if (parameter == "group" )		{ groupfile = value; }
 				if (parameter == "cutoff" )			{ cutoff = value; }
 				if (parameter == "precision" )		{ precision = value; }
 				if (parameter == "iters" )			{ iters = value; }
@@ -141,15 +141,15 @@ bool ErrorCheck::checkInput(string input) {
 				//is it a valid parameter
 				if (validParameter->isValidParameter(parameter) != true) { return false; }
 				
-				if (parameter == "phylipfile" )		{ phylipfile = value; }
-				if (parameter == "columnfile" )		{ columnfile = value; }				
-				if (parameter == "listfile" )		{ listfile = value; }
-				if (parameter == "rabundfile" )		{ rabundfile = value; }
-				if (parameter == "sabundfile" )		{ sabundfile = value; }
-				if (parameter == "namefile" )		{ namefile = value; }
-				if (parameter == "orderfile" )		{ orderfile = value; }
-				if (parameter == "groupfile" )		{ groupfile = value; }
-				if (parameter == "fastafile" )		{ fastafile = value; }
+				if (parameter == "phylip" )		{ phylipfile = value; }
+				if (parameter == "column" )		{ columnfile = value; }				
+				if (parameter == "list" )		{ listfile = value; }
+				if (parameter == "rabund" )		{ rabundfile = value; }
+				if (parameter == "sabund" )		{ sabundfile = value; }
+				if (parameter == "name" )		{ namefile = value; }
+				if (parameter == "order" )		{ orderfile = value; }
+				if (parameter == "group" )		{ groupfile = value; }
+				if (parameter == "fasta" )		{ fastafile = value; }
 				if (parameter == "treefile" )		{ treefile = value; }
 				if (parameter == "cutoff" )			{ cutoff = value; }
 				if (parameter == "precision" )		{ precision = value; }
