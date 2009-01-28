@@ -148,12 +148,14 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if (key == "line") {//stores lines to be used in a vector
 					lines.clear();
 					line = value;
+					label = "";
 					splitAtDash(value, lines);
 					allLines = 0;
 				}
 				if (key == "label") {//stores lines to be used in a vector
 					labels.clear();
 					label = value;
+					line = "";
 					splitAtDash(value, labels);
 					allLines = 0;
 				}
@@ -214,12 +216,14 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if (key == "line") {//stores lines to be used in a vector
 				lines.clear();
 				line = value;
+				label = "";
 				splitAtDash(value, lines);
 				allLines = 0;
 			}
 			if (key == "label") {//stores lines to be used in a vector
 				labels.clear();
 				label = value;
+				line = "";
 				splitAtDash(value, labels);
 				allLines = 0;
 			}
