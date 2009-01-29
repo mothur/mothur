@@ -17,7 +17,6 @@
 #include "sharedordervector.h"
 #include "sharedlistvector.h"
 #include "inputdata.h"
-#include "groupmap.h"
 #include "rarefact.h"
 #include "display.h"
 #include "readmatrix.hpp"
@@ -45,7 +44,6 @@ public:
 	
 private:
 	GlobalData* globaldata;
-	GroupMap* groupmap;
 	SharedListVector* SharedList;
 	ReadMatrix* read;
 	SharedOrderVector* order;

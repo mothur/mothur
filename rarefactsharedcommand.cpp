@@ -15,20 +15,13 @@
 RareFactSharedCommand::RareFactSharedCommand(){
 	try {
 		globaldata = GlobalData::getInstance();
-		string fileNameRoot, groups;
+		string fileNameRoot;
 		fileNameRoot = getRootName(globaldata->inputFileName);
-		groupmap = globaldata->gGroupmap;
-		
-		//initialize groups for label
-		groups = "";
-		for (int i = 0; i < groupmap->namesOfGroups.size(); i++) {
-			groups = groups + groupmap->namesOfGroups[i];
-		}
-		
+				
 		int i;
 		for (i=0; i<globaldata->sharedRareEstimators.size(); i++) {
 			if (globaldata->sharedRareEstimators[i] == "sharedobserved") { 
-				rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(fileNameRoot+"r_shared.observed", groups)));
+				rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(fileNameRoot+"shared.rarefaction", "")));
 			}
 		}
 	}

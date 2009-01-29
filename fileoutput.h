@@ -69,7 +69,7 @@ class SharedOneColumnFile : public FileOutput {
 	
 	
 public:
-	SharedOneColumnFile(string n, vector<string> g) : inName(n), counter(0), outName(getPathName(n) + ".temp." + getSimpleName(n)) {};
+	SharedOneColumnFile(string n) : inName(n), counter(0), outName(getPathName(n) + ".temp." + getSimpleName(n)) {};
 	~SharedOneColumnFile();
 	void output(int, vector<double>);
 	void initFile(string);

@@ -28,32 +28,32 @@ CollectSharedCommand::CollectSharedCommand(){
 		globaldata = GlobalData::getInstance();
 		string fileNameRoot;
 		fileNameRoot = getRootName(globaldata->inputFileName);
-		groupmap = globaldata->gGroupmap;
+		//groupmap = globaldata->gGroupmap;
 		
 		int i;
 		for (i=0; i<globaldata->sharedEstimators.size(); i++) {
 			if (globaldata->sharedEstimators[i] == "sharedChao") { 
-				cDisplays.push_back(new CollectDisplay(new SharedChao1(), new SharedOneColumnFile(fileNameRoot+"shared.chao", groupmap->namesOfGroups)));
+				cDisplays.push_back(new CollectDisplay(new SharedChao1(), new SharedOneColumnFile(fileNameRoot+"shared.chao")));
 			}else if (globaldata->sharedEstimators[i] == "sharedSobs") { 
-				cDisplays.push_back(new CollectDisplay(new SharedSobs(), new SharedOneColumnFile(fileNameRoot+"shared.sobs", groupmap->namesOfGroups)));
+				cDisplays.push_back(new CollectDisplay(new SharedSobs(), new SharedOneColumnFile(fileNameRoot+"shared.sobs")));
 			}else if (globaldata->sharedEstimators[i] == "sharedAce") { 
-				cDisplays.push_back(new CollectDisplay(new SharedAce(), new SharedOneColumnFile(fileNameRoot+"shared.ace", groupmap->namesOfGroups)));
+				cDisplays.push_back(new CollectDisplay(new SharedAce(), new SharedOneColumnFile(fileNameRoot+"shared.ace")));
 			}else if (globaldata->sharedEstimators[i] == "sharedJabund") { 	
-				cDisplays.push_back(new CollectDisplay(new SharedJAbund(), new SharedOneColumnFile(fileNameRoot+"shared.jabund", groupmap->namesOfGroups)));
+				cDisplays.push_back(new CollectDisplay(new SharedJAbund(), new SharedOneColumnFile(fileNameRoot+"shared.jabund")));
 			}else if (globaldata->sharedEstimators[i] == "sharedSorensonAbund") { 
-				cDisplays.push_back(new CollectDisplay(new SharedSorAbund(), new SharedOneColumnFile(fileNameRoot+"shared.sorabund", groupmap->namesOfGroups)));
+				cDisplays.push_back(new CollectDisplay(new SharedSorAbund(), new SharedOneColumnFile(fileNameRoot+"shared.sorabund")));
 			}else if (globaldata->sharedEstimators[i] == "sharedJclass") { 
-				cDisplays.push_back(new CollectDisplay(new SharedJclass(), new SharedOneColumnFile(fileNameRoot+"shared.jclass", groupmap->namesOfGroups)));
+				cDisplays.push_back(new CollectDisplay(new SharedJclass(), new SharedOneColumnFile(fileNameRoot+"shared.jclass")));
 			}else if (globaldata->sharedEstimators[i] == "sharedSorClass") { 
-				cDisplays.push_back(new CollectDisplay(new SharedSorClass(), new SharedOneColumnFile(fileNameRoot+"shared.sorclass", groupmap->namesOfGroups)));
+				cDisplays.push_back(new CollectDisplay(new SharedSorClass(), new SharedOneColumnFile(fileNameRoot+"shared.sorclass")));
 			}else if (globaldata->sharedEstimators[i] == "sharedJest") { 
-				cDisplays.push_back(new CollectDisplay(new SharedJest(), new SharedOneColumnFile(fileNameRoot+"shared.jest", groupmap->namesOfGroups)));
+				cDisplays.push_back(new CollectDisplay(new SharedJest(), new SharedOneColumnFile(fileNameRoot+"shared.jest")));
 			}else if (globaldata->sharedEstimators[i] == "sharedSorEst") { 
-				cDisplays.push_back(new CollectDisplay(new SharedSorEst(), new SharedOneColumnFile(fileNameRoot+"shared.sorest", groupmap->namesOfGroups)));
+				cDisplays.push_back(new CollectDisplay(new SharedSorEst(), new SharedOneColumnFile(fileNameRoot+"shared.sorest")));
 			}else if (globaldata->sharedEstimators[i] == "SharedThetaYC") { 
-				cDisplays.push_back(new CollectDisplay(new SharedThetaYC(), new SharedOneColumnFile(fileNameRoot+"shared.thetayc", groupmap->namesOfGroups)));
+				cDisplays.push_back(new CollectDisplay(new SharedThetaYC(), new SharedOneColumnFile(fileNameRoot+"shared.thetayc")));
 			}else if (globaldata->sharedEstimators[i] == "SharedThetaN") { 
-				cDisplays.push_back(new CollectDisplay(new SharedThetaN(), new SharedOneColumnFile(fileNameRoot+"shared.thetan", groupmap->namesOfGroups)));
+				cDisplays.push_back(new CollectDisplay(new SharedThetaN(), new SharedOneColumnFile(fileNameRoot+"shared.thetan")));
 			}
 		}
 	}

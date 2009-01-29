@@ -3,7 +3,7 @@
  *  Dotur
  *
  *  Created by Sarah Westcott on 11/18/08.
- *  Copyright 2008 __MyCompanyName__. All rights reserved.
+ *  Copyright 2008 Schloss Lab UMASS Amherst. All rights reserved.
  *
  */
 
@@ -115,17 +115,10 @@ try {
 			//randomize the groups
 			random_shuffle(lookup.begin(), lookup.end());
 		
-			//send the first group
-			rcd->updateSharedData(lookup[0], lookup[0], 1, numGroupComb);
-				
-			//send each additional group one at a time
-			int n = 1;
-			for (int k = 0; k < (lookup.size() - 1); k++) { 
-				for (int l = n; l < lookup.size(); l++) {
-					rcd->updateSharedData(lookup[k], lookup[l], l+1, numGroupComb);
-					mergeVectors(lookup[0], lookup[l]);
-				}
-				n++;
+			//send each group one at a time
+			for (int k = 0; k < lookup.size(); k++) { 
+				rcd->updateSharedData(lookup[0], lookup[k], k+1, numGroupComb);
+				mergeVectors(lookup[0], lookup[k]);
 			}
 
 			//resets output files
