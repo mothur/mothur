@@ -11,7 +11,6 @@
 
 /* This class is designed to aid the user in running mothur. */
 
-#include <Carbon/Carbon.h>
 #include "command.hpp"
 #include "globaldata.hpp"
 

@@ -13,7 +13,6 @@
 /* This class implements the Ace estimator on a single group. 
 It is a child of the calculator class. */
 
-#include <Carbon/Carbon.h>
 #include "calculator.h"
 
 /***********************************************************************/

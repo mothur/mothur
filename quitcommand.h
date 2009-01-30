@@ -9,7 +9,6 @@
  *
  */
 
-#include <Carbon/Carbon.h>
 #include "command.hpp"
 
 /* The quit() command:
@@ -27,4 +26,5 @@ public:
 private:
 		
 };
+
 #endif

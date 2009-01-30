@@ -1,7 +1,6 @@
 #ifndef LIST_H
 #define LIST_H
 
-#include <Carbon/Carbon.h>
 #include "datavector.hpp"
 #include <iostream>
 #include <map>

@@ -10,7 +10,6 @@
  *
  */
 
-#include <Carbon/Carbon.h>
 #include "datavector.hpp"
 #include "groupmap.h"
 #include "globaldata.hpp"
@@ -69,4 +68,3 @@ private:
 };
 
 #endif
-

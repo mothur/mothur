@@ -12,8 +12,6 @@
 /* This class implements the SharedAce estimator on two groups. 
 It is a child of the calculator class. */
 
-
-#include <Carbon/Carbon.h>
 #include "calculator.h"
 
 /***********************************************************************/
@@ -29,5 +27,5 @@ private:
 };
 
 /***********************************************************************/
-#endif
 
+#endif

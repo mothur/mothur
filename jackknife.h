@@ -10,7 +10,6 @@
  *
  */
 
-#include <Carbon/Carbon.h>
 #include "calculator.h"
 
 /* This class implements the JackKnife estimator on single group. 

@@ -68,4 +68,5 @@ EstOutput SharedChao1::getValues(SharedRAbundVector* sharedA, SharedRAbundVector
 	}	
 
 }
+
 /***********************************************************************/

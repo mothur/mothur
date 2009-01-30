@@ -3,7 +3,7 @@
 
 #include <set>
 #include "sabundvector.hpp"
-#include "sharedRAbundvector.h"
+#include "sharedrabundvector.h"
 #include "display.h"
 #include "observable.h"
 

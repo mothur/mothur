@@ -15,10 +15,11 @@ It is used by sharedJAbund and SharedSorensonAbund. */
  
 using namespace std;
 
-#include <Carbon/Carbon.h>
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <cmath>
+
 #include "sharedrabundvector.h"
 
 typedef vector<double> EstOutput;

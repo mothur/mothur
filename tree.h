@@ -44,7 +44,4 @@ class Tree {
 		string filename;
 };
 
-
-
-
 #endif
