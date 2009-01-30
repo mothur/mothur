@@ -1,3 +1,6 @@
+#ifndef VALIDCOMMANDS_H
+#define VALIDCOMMANDS_H
+
 /*
  *  validcommands.h
  *  Dotur
@@ -8,7 +11,6 @@
  */
 using namespace std;
 
-#include <Carbon/Carbon.h>
 #include <string>
 #include <iostream>
 #include <map>
@@ -27,3 +29,5 @@ class ValidCommands {
 		map<string, string> commands;
 
 };
+
+#endif

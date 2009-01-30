@@ -9,7 +9,6 @@
  *
  */
 
-#include <Carbon/Carbon.h>
 #include <iostream>
 #include <map>
 #include "globaldata.hpp"

@@ -11,8 +11,6 @@
 
 /* This class is not currently used by Mothur */
 
-
-#include <Carbon/Carbon.h>
 #include "calculator.h"
 
 /***********************************************************************/

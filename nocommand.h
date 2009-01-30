@@ -11,7 +11,6 @@
 
 /* This command is run if the user enters an invalid command. */
 
-#include <Carbon/Carbon.h>
 #include "command.hpp"
 
 class NoCommand : public Command {

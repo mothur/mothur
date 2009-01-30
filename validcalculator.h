@@ -1,3 +1,6 @@
+#ifndef VALIDCALCULATOR_H
+#define VALIDCALCULATOR_H
+
 /*
  *  validcalculator.h
  *  Dotur
@@ -8,7 +11,6 @@
  */
 using namespace std;
 
-#include <Carbon/Carbon.h>
 #include <string>
 #include <iostream>
 #include <map>
@@ -37,6 +39,6 @@ class ValidCalculators {
 		void initialSharedRarefact();
 		void initialSummary();
 		void initialSharedSummary();
-		
-		
 };
+
+#endif

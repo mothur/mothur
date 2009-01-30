@@ -59,4 +59,5 @@ EstOutput SharedThetaN::getValues(SharedRAbundVector* shared1, SharedRAbundVecto
 		exit(1);
 	}	
 }
+
 /***********************************************************************/

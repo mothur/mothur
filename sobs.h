@@ -1,5 +1,6 @@
 #ifndef SOBS_H
 #define SOBS_H
+
 /*
  *  sobs.h
  *  Dotur
@@ -13,7 +14,6 @@
 It is a child of the calculator class. */
 
 
-#include <Carbon/Carbon.h>
 #include "calculator.h"
 
 /***********************************************************************/

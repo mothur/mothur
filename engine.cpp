@@ -59,15 +59,14 @@ bool InteractEngine::getInput(){
 		bool errorFree;
 		ErrorCheck* errorCheckor = new ErrorCheck();
 		
-		cout << "MOTHUR v2.0 (Martha)" << endl;
-		cout << "Last updated: 1/07/2009" << endl << endl;
-		cout << "(Distance-based OTU and Richness)" << endl << endl;
+		cout << "mothur v1.0" << endl;
+		cout << "Last updated: 1/29/2009" << endl << endl;
 		cout << "by" << endl;
 		cout << "Patrick D. Schloss" << endl << endl;
 		cout << "Department of Microbiology" << endl;
 		cout << "The University of Massachusetts" << endl;
 		cout << "pschloss@micro.umass.edu" << endl;
-		cout << "http://schloss.micro.umass.edu" << endl << endl << endl;
+		cout << "http://schloss.micro.umass.edu/mothur" << endl << endl << endl;
 		cout << "Distributed under the GNU General Public License" << endl << endl;
 		cout << "Type 'help()' for information on the commands that are available" << endl << endl;
 		cout << "Type 'quit()' to exit program" << endl;

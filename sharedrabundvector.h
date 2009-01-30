@@ -10,7 +10,6 @@
  *
  */
 
-#include <Carbon/Carbon.h>
 #include "datavector.hpp"
 #include "sharedordervector.h"
 #include "sharedsabundvector.h"

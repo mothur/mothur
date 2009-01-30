@@ -9,7 +9,6 @@
  *
  */
 
-#include <Carbon/Carbon.h>
 #include "calculator.h"
 
 /* This class implements the Ace estimator on single group. 

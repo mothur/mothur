@@ -11,8 +11,6 @@
  *
  */
 
-
-#include <Carbon/Carbon.h>
 #include "datavector.hpp"
 #include "rabundvector.hpp"
 #include "ordervector.hpp"

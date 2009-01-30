@@ -10,7 +10,6 @@
  *
  */
 
-#include <Carbon/Carbon.h>
 #include <iostream>
 #include <fstream>
 #include "command.hpp"
@@ -31,12 +30,6 @@ private:
 	TreeMap* treeMap;
 	string filename;
 };
-
-
-
-
-
-
 
 
 #endif

@@ -12,7 +12,6 @@
  
 using namespace std;
 
-#include <Carbon/Carbon.h>
 #include <iostream>
 #include <fstream>
 #include <iomanip>

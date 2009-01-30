@@ -283,7 +283,7 @@ void OneColumnFile::resetFile(){
 /***********************************************************************/
 /***********************************************************************/
 
-SharedOneColumnFile::~OneColumnFile(){
+SharedOneColumnFile::~SharedOneColumnFile(){
 	
 	inFile.close();
 	outFile.close();

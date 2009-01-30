@@ -54,6 +54,5 @@ EstOutput SharedJest::getValues(SharedRAbundVector* shared1, SharedRAbundVector*
 		exit(1);
 	}	
 }
+
 /***********************************************************************/
-
-

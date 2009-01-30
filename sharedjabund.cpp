@@ -35,4 +35,5 @@ EstOutput SharedJAbund::getValues(SharedRAbundVector* shared1, SharedRAbundVecto
 		exit(1);
 	}	
 }
+
 /***********************************************************************/

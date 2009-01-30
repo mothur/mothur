@@ -25,7 +25,6 @@ struct individual {
 		int abundance;
 };
 
-#include <Carbon/Carbon.h>
 #include "sabundvector.hpp"
 #include "rabundvector.hpp"
 #include "sharedrabundvector.h"

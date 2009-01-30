@@ -1,3 +1,6 @@
+#ifndef VALIDPARAMETERS_H
+#define VALIDPARAMETERS_H
+
 /*
  *  validparameter.h
  *  Dotur
@@ -8,7 +11,6 @@
  */
 using namespace std;
 
-#include <Carbon/Carbon.h>
 #include <iostream>
 #include <string>
 #include <map>
@@ -28,3 +30,5 @@ class ValidParameters {
 		map<string, string> parameters;
 
 };
+
+#endif

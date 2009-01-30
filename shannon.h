@@ -13,7 +13,6 @@
 It is a child of the calculator class. */
 
 
-#include <Carbon/Carbon.h>
 #include "calculator.h"
 
 /***********************************************************************/
