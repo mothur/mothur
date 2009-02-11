@@ -114,6 +114,8 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if (key == "freq" )			{ freq = value;			}
 				if (key == "method" )		{ method = value;		}
 				if (key == "fileroot" )		{ fileroot = value;		}
+				if (key == "randomtree" )	{ randomtree = value;	}
+				if (key == "groups" )		{ groups = value;	}
 				
 				if (key == "single") {//stores estimators in a vector
 					singleEstimators.clear(); //clears out old values
@@ -145,20 +147,26 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 					if (value == "default") { value = "sharedobserved"; }
 					splitAtDash(value, sharedRareEstimators);
 				}
-				if (key == "line") {//stores lines to be used in a vector
+				if (key == "line") {//stores lines to be used in a set
 					lines.clear();
 					line = value;
 					label = "";
 					splitAtDash(value, lines);
 					allLines = 0;
 				}
-				if (key == "label") {//stores lines to be used in a vector
+				if (key == "label") {//stores lines to be used in a set
 					labels.clear();
 					label = value;
 					line = "";
 					splitAtDash(value, labels);
 					allLines = 0;
 				}
+				if (key == "groups") {//stores lines to be used in a vector
+					Groups.clear();
+					groups = value;
+					splitAtDash(value, Groups);
+				}
+
 			}
 			
 			//saves the last parameter
@@ -181,7 +189,8 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if (key == "freq" )			{ freq = value;			}
 			if (key == "method" )		{ method = value;		}
 			if (key == "fileroot" )		{ fileroot = value;		}
-
+			if (key == "randomtree" )	{ randomtree = value;	}
+			
 			if (key == "single") {//stores estimators in a vector
 				singleEstimators.clear(); //clears out old values
 				if (value == "default") { value = "sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson-rarefraction"; }
@@ -293,14 +302,16 @@ string GlobalData::getFileRoot()		{	return fileroot;	}
 string GlobalData::getIters()			{	return iters;		}
 string GlobalData::getJumble()			{	return jumble;		}
 string GlobalData::getFreq()			{	return freq;		}
+string GlobalData::getRandomTree()		{	return randomtree;	}
 void GlobalData::setListFile(string file)	{	listfile = file;	inputFileName = file;}
 void GlobalData::setRabundFile(string file)	{	rabundfile = file;	inputFileName = file;}
 void GlobalData::setSabundFile(string file)	{	sabundfile = file;	inputFileName = file;}
 void GlobalData::setPhylipFile(string file)	{	phylipfile = file;    inputFileName = file;}
 void GlobalData::setColumnFile(string file)	{	columnfile = file;    inputFileName = file;}
-//void GlobalData::setGroupFile(string file)	{	groupfile = file;	}
-void GlobalData::setNameFile(string file)	{	namefile = file;	}
-void GlobalData::setFormat(string Format)	{	format = Format; 	}
+//void GlobalData::setGroupFile(string file)	{	groupfile = file;		}
+void GlobalData::setNameFile(string file)		{	namefile = file;		}
+void GlobalData::setFormat(string Format)		{	format = Format;		}
+void GlobalData::setRandomTree(string Random)	{	randomtree = Random;	}
 
 
 /*******************************************************/
@@ -334,7 +345,8 @@ void GlobalData::clear() {
 	iters			=	"1000"; 
 	line			=   "";
 	label			=	"";
-	jumble			=	"1";
+	jumble			=	"1";	//0 means don't jumble, 1 means jumble.
+	randomtree		=	"0";  //0 means user will enter some user trees, 1 means they just want the random tree distribution.
 	freq			=	"100";
 	method			=	"furthest";
 	fileroot		=	"";

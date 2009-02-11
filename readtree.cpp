@@ -10,15 +10,10 @@
 #include "readtree.h"
 
 /***********************************************************************/
-//Parent Class
-// The following functions are used by all reading formats.
-/***********************************************************************/
-ReadTree::ReadTree() { 
+ReadTree::ReadTree() {
 	try {
-		globaldata = GlobalData::getInstance(); 
-		T = new Tree(); 
-		numNodes = T->getNumNodes();
-		numLeaves = T->getNumLeaves();
+		globaldata = GlobalData::getInstance();
+		globaldata->gTree.clear();
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ReadTree class Function ReadTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -117,6 +112,115 @@ float ReadTree::readBranchLength(istream& f) {
 
 void ReadNewickTree::read() {
 	try {
+		int c;
+		int comment = 0;
+		
+		//if you are not a nexus file 
+		if ((c = filehandle.peek()) != '#') {  
+			while((c = filehandle.peek()) != EOF) { 
+				//make new tree
+				T = new Tree(); 
+				numNodes = T->getNumNodes();
+				numLeaves = T->getNumLeaves();
+				
+				readTreeString();  
+				//save trees for later commands
+				globaldata->gTree.push_back(T); 
+			}
+		//if you are a nexus file
+		}else if ((c = filehandle.peek()) == '#') {
+			nexusTranslation();  //reads file through the translation and updates treemap
+			while((c = filehandle.peek()) != EOF) { 
+				// get past comments
+				while ((c = filehandle.peek()) != EOF) {	
+					if(holder == "[" || holder == "[!"){
+						comment = 1;
+					}
+					if(holder == "]"){
+						comment = 0;
+					}
+					if((holder == "tree" || holder == "end;") && comment != 1){ holder = ""; comment = 0; break;}
+					filehandle >> holder;
+				}
+			
+				//pass over the "tree rep.6878900 = "
+				while (((c = filehandle.get()) != '(') && ((c = filehandle.peek()) != EOF) ) {;}
+					
+				if (c == EOF ) { break; }
+				filehandle.putback(c);  //put back first ( of tree.
+				
+				//make new tree
+				T = new Tree(); 
+				numNodes = T->getNumNodes();
+				numLeaves = T->getNumLeaves();
+				
+				//read tree info
+				readTreeString();  
+				//save trees for later commands
+				globaldata->gTree.push_back(T); 
+			}
+		}
+		
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ReadNewickTree class Function read. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ReadNewickTree class function read. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}		
+}
+/**************************************************************************************************/
+//This function read the file through the translation of the sequences names and updates treemap.
+void ReadNewickTree::nexusTranslation() {
+	try {
+		
+		holder = "";
+		int numSeqs = globaldata->gTreemap->getNumSeqs(); //must save this some when we clear old names we can still know how many sequences there were
+		int comment = 0;
+		
+		// get past comments
+		while(holder != "translate" && holder != "Translate"){	
+			if(holder == "[" || holder == "[!"){
+				comment = 1;
+			}
+			if(holder == "]"){
+				comment = 0;
+			}
+			filehandle >> holder; 
+			if(holder == "tree" && comment != 1){return;}
+		}
+		
+		//update treemap
+		globaldata->gTreemap->namesOfSeqs.clear();
+		for(int i=0;i<numSeqs;i++){
+			string number, name;
+			filehandle >> number;
+			filehandle >> name;
+			name.erase(name.end()-1);  //erase the comma
+			//insert new one with new name
+			globaldata->gTreemap->treemap[toString(number)].groupname = globaldata->gTreemap->treemap[name].groupname;
+			globaldata->gTreemap->treemap[toString(number)].vectorIndex = globaldata->gTreemap->treemap[name].vectorIndex;
+			//erase old one.  so treemap[sarah].groupnumber is now treemap[1].groupnumber. if number is 1 and name is sarah.
+			globaldata->gTreemap->treemap.erase(name);
+			globaldata->gTreemap->namesOfSeqs.push_back(number);
+		}
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ReadNewickTree class Function nexus. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ReadNewickTree class function nexus. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}		
+}
+
+/**************************************************************************************************/
+void ReadNewickTree::readTreeString() {
+	try {
+		
 		int n = 0;
 		int lc, rc; 
 		
@@ -143,7 +247,7 @@ void ReadNewickTree::read() {
 			}												
 		}
 		//note: treeclimber had the code below added - not sure why?
-		 else{
+		else{
 			filehandle.putback(ch);
 			char name[MAX_LINE];
 			filehandle.get(name, MAX_LINE,'\n');
@@ -166,18 +270,17 @@ void ReadNewickTree::read() {
 			if(lc!=-1){		T->tree[lc].setParent(n);		}
 			if(rc!=-1){		T->tree[rc].setParent(n);		}
 		}
-		
-		//save tree for later commands
-		globaldata->gTree = T;
+	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReadNewickTree class Function read. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the ReadNewickTree class Function readTreeString. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the ReadNewickTree class function read. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the ReadNewickTree class function readTreeString. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}		
+
 }
 /**************************************************************************************************/
 

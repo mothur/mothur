@@ -18,6 +18,12 @@ ErrorCheck::ErrorCheck() {
 	validCommand = new ValidCommands();
 	validParameter = new ValidParameters();
 	validCalculator = new ValidCalculators();
+}
+/*******************************************************/
+
+/******************************************************/
+
+void ErrorCheck::refresh() {
 	columnfile = globaldata->getColumnFile();
 	phylipfile = globaldata->getPhylipFile();
 	listfile = globaldata->getListFile();
@@ -31,8 +37,9 @@ ErrorCheck::ErrorCheck() {
 	cutoff = globaldata->getCutOff();
 	format = globaldata->getFormat();
 	method = globaldata->getMethod();
-
+	randomtree = globaldata->getRandomTree();
 }
+
 /*******************************************************/
 
 /******************************************************/
@@ -46,7 +53,10 @@ ErrorCheck::~ErrorCheck() {}
 bool ErrorCheck::checkInput(string input) {
 		errorFree = true;
 		clear();
-
+		
+		//refresh variable
+		refresh();
+		
 		//get command name and parameters
 		int openParen = input.find_first_of('(');
 		int closeParen = input.find_last_of(')');
@@ -91,6 +101,7 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "fileroot" )		{ fileroot = value; }
 				if (parameter == "line" )			{ line = value; }
 				if (parameter == "label" )			{ label = value; }
+				if (parameter == "randomtree" )		{ randomtree = value;	}
 
 				if (parameter == "single") {//stores estimators in a vector
 					singleEsimators.clear(); //clears out old values
@@ -160,6 +171,7 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "fileroot" )		{ fileroot = value; }
 				if (parameter == "line" )			{ line = value; }
 				if (parameter == "label" )			{ label = value; }
+				if (parameter == "randomtree" )		{ randomtree = value;	}
 
 				if (parameter == "single") {//stores estimators in a vector
 					singleEsimators.clear(); //clears out old values
@@ -233,6 +245,14 @@ bool ErrorCheck::checkInput(string input) {
 				cout << "Before you use the cluster command, you first need to read in a distance matrix." << endl; 
 				errorFree = false;
 		} 
+		
+		if (commandName == "parsimony") {
+			//are you trying to use parsimony without reading a tree or saying you want random distribution
+			if (randomtree == "0")  {
+				if ((globaldata->getTreeFile() == "") || (globaldata->getGroupFile() == "")) {
+					cout << "You must read a treefile and a groupfile or set the randomtree parameter to 1, before you may execute the parsimony command." << endl; return false;  }
+			}
+		}
 		
 		//check for valid method
 		if (commandName == "cluster") {

@@ -46,8 +46,12 @@ int ReadTreeCommand::execute(){
 	
 		read->read(); 
 		
-		Tree* T = globaldata->gTree;
-//		T->createNewickFile();
+		vector<Tree*> T = globaldata->gTree;
+		
+		//assemble users trees
+		for (int i = 0; i < T.size(); i++) {
+			T[i]->assembleTree();
+		}
 		
 		return 0;
 	}

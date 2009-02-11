@@ -3,7 +3,7 @@
  *  Dotur
  *
  *  Created by John Westcott on 1/7/09.
- *  Copyright 2009 __MyCompanyName__. All rights reserved.
+ *  Copyright 2009 Schloss Lab UMASS Amherst. All rights reserved.
  *
  */
 

@@ -26,6 +26,7 @@ struct GroupIndex {
 
 class TreeMap {
 public:
+	TreeMap() {};
 	TreeMap(string);
 	~TreeMap();
 	void readMap();
@@ -36,6 +37,8 @@ public:
 	string getGroup(string);
 	vector<string> namesOfGroups;
 	vector<string> namesOfSeqs;
+    map<string,int> seqsPerGroup;	//groupname, number of seqs in that group.
+	map<string, GroupIndex> treemap; //sequence name and groupname
 	void print(ostream&);
 	
 private:
@@ -43,8 +46,9 @@ private:
 	string groupFileName;
 	int numGroups;
 	map<string, GroupIndex>::iterator it;
+	map<string, int>::iterator it2;
 	void setNamesOfGroups(string); 
-	map<string, GroupIndex> treemap; //sequence name and groupname
+	
 };
 
 #endif

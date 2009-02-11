@@ -15,33 +15,50 @@ using namespace std;
 #include <string>
 #include <iostream>
 #include <vector>
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+#include <map>
+
 #include "treenode.h"
 #include "globaldata.hpp"
 
 /* This class represents the treefile. */
 
-
-
 class Tree {
 	public: 
-		Tree();  
+		Tree();		//to generate a tree from a file
 		~Tree() {};
 		
-		Tree generateRandomTree();
+		
+		void getCopy(Tree*);  //makes tree a copy of the one passed in.
+		void assembleRandomTree();
+		void assembleRandomUnifracTree();
 		void createNewickFile();
 		int getIndex(string);
 		void setIndex(string, int);
 		int getNumNodes() { return numNodes; }
-		int getNumLeaves(){	return numLeaves;}
+		int getNumLeaves(){	return numLeaves; }
+		
+		//this function takes the leaf info and populates the non leaf nodes
+		void assembleTree();		
+		
 		vector<Node> tree;		//the first n nodes are the leaves, where n is the number of sequences.
 		
 	private:
 		GlobalData* globaldata;
-		int findRoot();  //return index of root node
-		void printBranch(int);  //recursively print out tree
 		int numNodes, numLeaves;
 		ofstream out;
 		string filename;
+		
+		map<string, int>::iterator it;
+		map<string, int> mergeGroups(int);  //returns a map with a groupname and the number of times that group was seen in the children
+		map<string,int> Tree::mergeGcounts(int);
+		void randomTopology();
+		void randomBlengths();
+		void randomLabels();
+		int findRoot();  //return index of root node
+		void printBranch(int);  //recursively print out tree
 };
 
 #endif

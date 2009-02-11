@@ -27,7 +27,7 @@ public:
 	InputData* ginput;
 	OrderVector* gorder;
 	ListVector* glist;
-	Tree* gTree;
+	vector<Tree*> gTree;
 	SharedListVector* gSharedList;
 	SAbundVector* sabund;
 	GroupMap* gGroupmap;
@@ -37,6 +37,7 @@ public:
 	vector<string> singleEstimators, summaryEstimators, sharedEstimators, rareEstimators, sharedRareEstimators, sharedSummaryEstimators; //holds estimators to be used
 	set<int> lines; //hold lines to be used
 	set<string> labels; //holds labels to be used
+	vector<string> Groups;
 	
 	string getPhylipFile();
 	string getColumnFile();
@@ -56,6 +57,7 @@ public:
 	string getIters();
 	string getJumble();
 	string getFreq();
+	string getRandomTree();
 	void setListFile(string);
 	void setPhylipFile(string);
 	void setColumnFile(string);
@@ -63,6 +65,7 @@ public:
 	void setRabundFile(string);
 	void setSabundFile(string);
 	void setFormat(string);
+	void setRandomTree(string);
 
 	
 	void setListVector(ListVector*);
@@ -77,7 +80,7 @@ public:
 	void splitAtDash(string&, set<string>&);
 	
 private:
-	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, treefile, line, label;
+	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, treefile, line, label, randomtree, groups;
 	string cutoff, format, precision, method, fileroot, iters, jumble, freq, single, rarefaction, shared, summary, sharedsummary, sharedrarefaction;
 	static GlobalData* _uniqueInstance;
 	GlobalData( const GlobalData& ); // Disable copy constructor

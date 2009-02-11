@@ -23,8 +23,7 @@ Node::Node() {
 /****************************************************************/
 void Node::setName(string Name) {  name = Name; }
 /****************************************************************/
-//non leaf nodes will belong to multiple groups, leaf nodes will only belong to one.
-void Node::setGroup(string groups)  { group.push_back(groups); }
+void Node::setGroup(string groups)  { group =groups; }
 /****************************************************************/
 void Node::setBranchLength(float l) { branchLength = l; }
 /****************************************************************/
@@ -36,7 +35,7 @@ void Node::setChildren(int lc, int rc) { lchild = lc; rchild = rc; }	//leftchild
 /****************************************************************/
 string Node::getName() { return name; }
 /****************************************************************/
-vector<string> Node::getGroup() { return group; }
+string Node::getGroup() { return group; }
 /****************************************************************/
 float Node::getBranchLength() { return branchLength; }
 /****************************************************************/

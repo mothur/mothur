@@ -40,7 +40,9 @@ ValidParameters::ValidParameters() {
 		parameters["shared"]			= "shared"; 
 		parameters["summary"]			= "summary"; 
 		parameters["sharedsummary"]		= "sharedsummary";
-
+		parameters["randomtree"]		= "randomtree";
+		parameters["groups"]			= "groups";
+		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidParameters class Function ValidParameters. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
