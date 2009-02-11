@@ -103,7 +103,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if (key == "rabund" )	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund";	}
 				if (key == "sabund" )	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund";	} 
 				if (key == "fasta" )	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta";		} 
-				if (key == "treefile" )		{ treefile = value; inputFileName = value; fileroot = value; format = "tree";		}
+				if (key == "tree" )		{ treefile = value; inputFileName = value; fileroot = value; format = "tree";		}
 				if (key == "name" )		{ namefile = value;		}
 				if (key == "order" )	{ orderfile = value;	}
 				if (key == "group" )	{ groupfile = value;	}
@@ -154,14 +154,14 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 					splitAtDash(value, lines);
 					allLines = 0;
 				}
-				if (key == "label") {//stores lines to be used in a set
+				if (key == "label") {//stores labels to be used in a set
 					labels.clear();
 					label = value;
 					line = "";
 					splitAtDash(value, labels);
 					allLines = 0;
 				}
-				if (key == "groups") {//stores lines to be used in a vector
+				if (key == "groups") {//stores groups to be used in a vector
 					Groups.clear();
 					groups = value;
 					splitAtDash(value, Groups);
@@ -178,7 +178,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if (key == "rabund" )	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund";	}
 			if (key == "sabund" )	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund";	}
 			if (key == "fasta" )	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta";		}
-			if (key == "treefile" )		{ treefile = value; inputFileName = value; fileroot = value; format = "tree";		}  
+			if (key == "tree" )		{ treefile = value; inputFileName = value; fileroot = value; format = "tree";		}  
 			if (key == "name" )		{ namefile = value;		}
 			if (key == "order" )	{ orderfile = value;	}
 			if (key == "group" )	{ groupfile = value;	}
@@ -190,6 +190,8 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if (key == "method" )		{ method = value;		}
 			if (key == "fileroot" )		{ fileroot = value;		}
 			if (key == "randomtree" )	{ randomtree = value;	}
+			if (key == "groups" )		{ groups = value;	}
+
 			
 			if (key == "single") {//stores estimators in a vector
 				singleEstimators.clear(); //clears out old values
@@ -236,6 +238,12 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				splitAtDash(value, labels);
 				allLines = 0;
 			}
+			if (key == "groups") {//stores groups to be used in a vector
+					Groups.clear();
+					groups = value;
+					splitAtDash(value, Groups);
+			}
+
 		}
 		
 		//set format for shared
@@ -345,6 +353,7 @@ void GlobalData::clear() {
 	iters			=	"1000"; 
 	line			=   "";
 	label			=	"";
+	groups			=	"";
 	jumble			=	"1";	//0 means don't jumble, 1 means jumble.
 	randomtree		=	"0";  //0 means user will enter some user trees, 1 means they just want the random tree distribution.
 	freq			=	"100";

@@ -55,7 +55,7 @@ bool ValidCommands::isValidCommand(string command) {
 		if ((commands.find(command)) != (commands.end())) {
 			return true;
 		}else{
-			cout << command << " is not a valid command in Mothur.  Valid commands are read.dist(), read.otu(), cluster(), collect.single(), collect.shared(), rarefaction.single(), rarefaction.shared(), summary.single(), summary.shared(), quit(), help()." << endl;
+			cout << command << " is not a valid command in Mothur.  Valid commands are read.dist(), read.otu(), read.tree(), cluster(), deconvolute(), collect.single(), collect.shared(), rarefaction.single(), rarefaction.shared(), summary.single(), summary.shared(), parsimony(), unifrac.weighted(), unifrac.unweighted(), quit(), help()." << endl;
 			return false;
 		}
 		

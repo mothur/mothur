@@ -24,6 +24,7 @@ class Weighted : public TreeCalculator  {
 		EstOutput getValues(Tree*);
 		
 	private:
+		GlobalData* globaldata;
 		EstOutput data;
 		TreeMap* tmap;
 		map<string, int>::iterator it;

@@ -100,7 +100,24 @@ void TreeMap::setNamesOfGroups(string seqGroup) {
 				namesOfGroups.push_back(seqGroup); //new group
 			}
 }
-
+/************************************************************/
+bool TreeMap::isValidGroup(string groupname) {
+	try {
+		for (int i = 0; i < namesOfGroups.size(); i++) {
+			if (groupname == namesOfGroups[i]) { return true; }
+		}
+		
+		return false;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the TreeMap class Function isValidGroup. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the TreeMap class function isValidGroup. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
 /***********************************************************************/
 
 void TreeMap::print(ostream& output){

@@ -42,6 +42,12 @@ int HelpCommand::execute(){
 		cout << "The list parameter and group paramaters are required. When using the command the second way read.otu command parses the .list file" << "\n";
 		cout << "and separates it into groups.  It outputs a .shared file containing the OTU information for each group. The read.otu command also outputs a .list file for each group. " << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile)." << "\n" << "\n";
+	}else if (globaldata->helpRequest == "read.tree") {
+		cout << "The read.tree command must be run before you execute a unifrac.weighted, unifrac.unweighted. " << "\n";
+		cout << "It also must be run before using the parsimony command, unless you are using the randomtree parameter." << "\n";
+		cout << "The read.tree command should be in the following format: read.tree(tree=yourTreeFile, group=yourGroupFile)." << "\n";
+		cout << "The tree and group parameters are both required." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "cluster") {
 		cout << "The cluster command can only be executed after a successful read.dist command." << "\n";
 		cout << "The cluster command parameter options are method, cuttoff and precision. No parameters are required." << "\n";
@@ -112,17 +118,45 @@ int HelpCommand::execute(){
 		cout << "The default value for jumble is 1 (meaning jumble, if it’s set to 0 then it will not jumble) and sharedsummary is sharedsobs-sharedChao-sharedAce-sharedJabund-sharedSorensonAbund-sharedJclass-sharedSorClass-sharedJest-sharedSorEst-SharedThetaYC-SharedThetaN" << "\n";
 		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile)." << "\n" << "\n";
+	}else if (globaldata->helpRequest == "parsimony") { 
+		cout << "The parsimony command can only be executed after a successful read.tree command, unless you use the randomtree parameter." << "\n";
+		cout << "The parsimony command parameters are randomtree and iters.  No parameters are required." << "\n";
+		cout << "The parsimony command should be in the following format: parsimony(randomtree=yourRandomTreeValue, iters=yourIters)." << "\n";
+		cout << "Example parsimony(randomtree=1, iters=500)." << "\n";
+		cout << "The default value for randomTree is 0 (meaning you want to use the trees in your inputfile, randomtree=1 means you just want the random distribution of trees)," << "\n";
+		cout << "and iters is 1000.  The parsimony command output three files: .parsimony, .psummary and .pdistrib, their descriptions are in the manual." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile)." << "\n" << "\n";
+	}else if (globaldata->helpRequest == "unifrac.weighted") { 
+		cout << "The unifrac.weighted command can only be executed after a successful read.tree command." << "\n";
+		cout << "The unifrac.weighted command parameters are groups and iters.  No parameters are required." << "\n";
+		cout << "The groups paramter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups." << "\n";
+		cout << "The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree." << "\n";
+		cout << "The unifrac.weighted command should be in the following format: unifrac.weighted(groups=yourGroups, iters=yourIters)." << "\n";
+		cout << "Example unifrac.weighted(groups=A-B-C, iters=500)." << "\n";
+		cout << "The default value for groups is all the groups in your groupfile, and iters is 1000." << "\n";
+		cout << "The unifrac.weighted command output three files: .weighted, .wsummary and .wdistrib, their descriptions are in the manual." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile)." << "\n" << "\n";
+	}else if (globaldata->helpRequest == "unifrac.unweighted") { 
+		cout << "The unifrac.unweighted command can only be executed after a successful read.tree command." << "\n";
+		cout << "The unifrac.unweighted command parameters are groups and iters.  No parameters are required." << "\n";
+		cout << "The groups paramter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 1 valid group." << "\n";
+		cout << "The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree." << "\n";
+		cout << "The unifrac.unweighted command should be in the following format: unifrac.unweighted(groups=yourGroups, iters=yourIters)." << "\n";
+		cout << "Example unifrac.unweighted(groups=A-B-C, iters=500)." << "\n";
+		cout << "The default value for groups is all the groups in your groupfile, and iters is 1000." << "\n";
+		cout << "The unifrac.unweighted command output three files: .unweighted, .uwsummary and .uwdistrib, their descriptions are in the manual." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "quit") {
 		cout << "The quit command will terminate Dotur and should be in the following format: " << "\n";
 		cout << "quit()" << "\n" << "\n";
 	}else if (globaldata->helpRequest == "") {
-		cout << "Valid commands are read.dist(), read.otu(), cluster(), deconvolute(), collect.single(), rarefaction.single(), summary.single(), collect.shared(), rarefaction.shared(), summary.shared(), quit(), help()." << "\n";
+		cout << "Valid commands are read.dist(), read.otu(), read.tree(), cluster(), deconvolute(), collect.single(), rarefaction.single(), summary.single(), collect.shared(), rarefaction.shared(), summary.shared(), parsimony(), unifrac.weighted(), unifrac.unweighted(), quit(), help()." << "\n";
 		cout << "For more information about a specific command type 'help(commandName)' i.e. 'help(read.dist)'" << endl;
 	}else {
 		cout << globaldata->helpRequest << " is not a valid command" << endl;
 	}
 	
-	cout << endl << "For further assistance please refer to the Mothur manual, or contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+	cout << endl << "For further assistance please refer to the Mothur manual on our wiki at http://schloss.micro.umass.edu/mothur/, or contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 	return 0;
 }
 
