@@ -23,6 +23,23 @@ UnifracUnweightedCommand::UnifracUnweightedCommand() {
 		distFile = globaldata->getTreeFile() + ".uwdistrib";
 		openOutputFile(distFile, outDist);
 
+		//if the user has not entered specific groups to analyze then do them all
+		if (globaldata->Groups.size() != 0) {
+			//check that groups are valid
+			for (int i = 0; i < globaldata->Groups.size(); i++) {
+				if (tmap->isValidGroup(globaldata->Groups[i]) != true) {
+					cout << globaldata->Groups[i] << " is not a valid group, and will be disregarded." << endl;
+					// erase the invalid group from globaldata->Groups
+					globaldata->Groups.erase (globaldata->Groups.begin()+i);
+				}
+			}
+			
+			//if the user only entered invalid groups
+			if (globaldata->Groups.size() == 0) { 
+				cout << "When using the groups parameter you must have at least 1 valid group. I will run the command using all the groups in your groupfile." << endl; 
+			}		
+		}
+
 		convert(globaldata->getIters(), iters);  //how many random trees to generate
 		unweighted = new Unweighted(tmap);
 
@@ -93,6 +110,8 @@ int UnifracUnweightedCommand::execute() {
 				outDist << i+1 << '\t' << '\t'<< j+1 << '\t' << '\t' << randomData[0] << endl;
 			}
 			
+			saveRandomScores(); //save all random scores for unweighted file
+			
 			//find the signifigance of the score
 			float rcumul = 0.0000;
 			for (it = rscoreFreq.begin(); it != rscoreFreq.end(); it++) { 
@@ -105,8 +124,7 @@ int UnifracUnweightedCommand::execute() {
 			//save the signifigance of the users score for printing later
 			UWScoreSig.push_back(rCumul[userData[0]]);
 			
-			saveRandomScores(); //save all random scores for unweighted file
-		
+			
 			//clear random data
 			rscoreFreq.clear();  //you clear this because in the summary file you want the unweighted signifinance to be relative to these 1000 trees.
 			rCumul.clear();
@@ -207,15 +225,14 @@ void UnifracUnweightedCommand::printUWSummaryFile() {
 /***********************************************************/
 void UnifracUnweightedCommand::saveRandomScores() {
 	try {
-		//update total map with new random scores
 		for (it = rscoreFreq.begin(); it != rscoreFreq.end(); it++) { 
 			//does this score already exist in the total map
 			it2 = totalrscoreFreq.find(it->first);
 			//if yes then add them
 			if (it2 != totalrscoreFreq.end()) { 
-				it2->second += it->second;
+				totalrscoreFreq[it->first] += rscoreFreq[it->first];
 			}else{ //its a new score
-				totalrscoreFreq[it->first] = 1;
+				totalrscoreFreq[it->first] = rscoreFreq[it->first];
 			}
 		}
 	}

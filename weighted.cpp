@@ -13,15 +13,26 @@
 
 EstOutput Weighted::getValues(Tree* t) {
     try {
-	
-		int numGroups = tmap->getNumGroups();
+		globaldata = GlobalData::getInstance();
+		int numGroups;
+		
+		//if the user has not entered specific groups to analyze then do them all
+		if (globaldata->Groups.size() == 0) {
+			numGroups = tmap->getNumGroups();
+		}else {
+			numGroups = globaldata->Groups.size();
+		}
 		
 		//calculate number of comparisons i.e. with groups A,B,C = AB, AC, BC = 3;
 		int n = 1;
 		for (int i=1; i<numGroups; i++) { 
 			for (int l = n; l < numGroups; l++) {
 				//initialize weighted scores
-				WScore[tmap->namesOfGroups[i-1]+tmap->namesOfGroups[l]] = 0.0;
+				if (globaldata->Groups.size() == 0) {
+					WScore[tmap->namesOfGroups[i-1]+tmap->namesOfGroups[l]] = 0.0;
+				}else {
+					WScore[globaldata->Groups[i-1]+globaldata->Groups[l]] = 0.0;
+				}
 			}
 		}
 
@@ -70,25 +81,48 @@ EstOutput Weighted::getValues(Tree* t) {
 			for (int b=1; b<numGroups; b++) { 
 				for (int l = n; l < numGroups; l++) {
 					double u;
-					//does this node have descendants from group b-1
-					it = t->tree[i].pcount.find(tmap->namesOfGroups[b-1]);
-					//if it does u = # of its descendants with a certain group / total number in tree with a certain group
-					if (it != t->tree[i].pcount.end()) {
-						u = (double) t->tree[i].pcount[tmap->namesOfGroups[b-1]] / (double) tmap->seqsPerGroup[tmap->namesOfGroups[b-1]];
-					}else { u = 0.00; }
+					//the user has not entered specific groups
+					if (globaldata->Groups.size() == 0) {
+						//does this node have descendants from group b-1
+						it = t->tree[i].pcount.find(tmap->namesOfGroups[b-1]);
+						//if it does u = # of its descendants with a certain group / total number in tree with a certain group
+						if (it != t->tree[i].pcount.end()) {
+							u = (double) t->tree[i].pcount[tmap->namesOfGroups[b-1]] / (double) tmap->seqsPerGroup[tmap->namesOfGroups[b-1]];
+						}else { u = 0.00; }
 		
-					//does this node have descendants from group l
-					it = t->tree[i].pcount.find(tmap->namesOfGroups[l]);
-					//if it does subtract their percentage from u
-					if (it != t->tree[i].pcount.end()) {
-						u -= (double) t->tree[i].pcount[tmap->namesOfGroups[l]] / (double) tmap->seqsPerGroup[tmap->namesOfGroups[l]];
-					}
+						//does this node have descendants from group l
+						it = t->tree[i].pcount.find(tmap->namesOfGroups[l]);
+						//if it does subtract their percentage from u
+						if (it != t->tree[i].pcount.end()) {
+							u -= (double) t->tree[i].pcount[tmap->namesOfGroups[l]] / (double) tmap->seqsPerGroup[tmap->namesOfGroups[l]];
+						}
 						
-					u = abs(u) * t->tree[i].getBranchLength();
+						u = abs(u) * t->tree[i].getBranchLength();
 					
-					//save groupcombs u value
-					WScore[tmap->namesOfGroups[b-1]+tmap->namesOfGroups[l]] += u;
-
+						//save groupcombs u value
+						WScore[tmap->namesOfGroups[b-1]+tmap->namesOfGroups[l]] += u;
+						
+					//the user has entered specific groups	
+					}else {
+						//does this node have descendants from group b-1
+						it = t->tree[i].pcount.find(globaldata->Groups[b-1]);
+						//if it does u = # of its descendants with a certain group / total number in tree with a certain group
+						if (it != t->tree[i].pcount.end()) {
+							u = (double) t->tree[i].pcount[globaldata->Groups[b-1]] / (double) tmap->seqsPerGroup[globaldata->Groups[b-1]];
+						}else { u = 0.00; }
+		
+						//does this node have descendants from group l
+						it = t->tree[i].pcount.find(globaldata->Groups[l]);
+						//if it does subtract their percentage from u
+						if (it != t->tree[i].pcount.end()) {
+							u -= (double) t->tree[i].pcount[globaldata->Groups[l]] / (double) tmap->seqsPerGroup[globaldata->Groups[l]];
+						}
+						
+						u = abs(u) * t->tree[i].getBranchLength();
+					
+						//save groupcombs u value
+						WScore[globaldata->Groups[b-1]+globaldata->Groups[l]] += u;
+					}
 				}
 				n++;
 			}
@@ -99,7 +133,12 @@ EstOutput Weighted::getValues(Tree* t) {
 		n = 1;
 		for (int i=1; i<numGroups; i++) { 
 			for (int l = n; l < numGroups; l++) {
-				UN = (WScore[tmap->namesOfGroups[i-1]+tmap->namesOfGroups[l]] / D);
+				//the user has not entered specific groups
+				if (globaldata->Groups.size() == 0) {
+					UN = (WScore[tmap->namesOfGroups[i-1]+tmap->namesOfGroups[l]] / D);
+				}else {//they have entered specific groups
+					UN = (WScore[globaldata->Groups[i-1]+globaldata->Groups[l]] / D);
+				}
 				if (isnan(UN) || isinf(UN)) { UN = 0; } 
 				data.push_back(UN);
 			}

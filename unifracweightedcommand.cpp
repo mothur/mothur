@@ -22,8 +22,30 @@ UnifracWeightedCommand::UnifracWeightedCommand() {
 		openOutputFile(sumFile, outSum);
 		distFile = globaldata->getTreeFile() + ".wdistrib";
 		openOutputFile(distFile, outDist);
-
-		numGroups = tmap->getNumGroups();
+		
+		//if the user has not entered specific groups to analyze then do them all
+		if (globaldata->Groups.size() == 0) {
+			numGroups = tmap->getNumGroups();
+		}else {
+			//check that groups are valid
+			for (int i = 0; i < globaldata->Groups.size(); i++) {
+				if (tmap->isValidGroup(globaldata->Groups[i]) != true) {
+					cout << globaldata->Groups[i] << " is not a valid group, and will be disregarded." << endl;
+					// erase the invalid group from globaldata->Groups
+					globaldata->Groups.erase (globaldata->Groups.begin()+i);
+				}
+			}
+			
+			//if the user only entered invalid groups
+			if (globaldata->Groups.size() == 0) { 
+				numGroups = tmap->getNumGroups();
+				cout << "When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile." << endl; 
+			}else if (globaldata->Groups.size() == 1) { 
+				cout << "When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile." << endl;
+				numGroups = tmap->getNumGroups();
+				globaldata->Groups.clear();
+			}else { numGroups = globaldata->Groups.size(); }
+		}
 		
 		//calculate number of comparisons i.e. with groups A,B,C = AB, AC, BC = 3;
 		numComp = 0;
@@ -32,7 +54,11 @@ UnifracWeightedCommand::UnifracWeightedCommand() {
 			numComp += i; 
 			for (int l = n; l < numGroups; l++) {
 				//set group comparison labels
-				groupComb.push_back(tmap->namesOfGroups[i-1]+tmap->namesOfGroups[l]);
+				if (globaldata->Groups.size() != 0) {
+					groupComb.push_back(globaldata->Groups[i-1]+globaldata->Groups[l]);
+				}else {
+					groupComb.push_back(tmap->namesOfGroups[i-1]+tmap->namesOfGroups[l]);
+				}
 			}
 			n++;
 		}
@@ -174,6 +200,8 @@ int UnifracWeightedCommand::execute() {
 		
 		//reset randomTree parameter to 0
 		globaldata->setRandomTree("0");
+		//clear out users groups
+		globaldata->Groups.clear();
 		
 		delete randT;
 		

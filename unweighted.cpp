@@ -13,7 +13,8 @@
 
 EstOutput Unweighted::getValues(Tree* t) {
 	try {
-	
+		globaldata = GlobalData::getInstance();
+		
 		//clear out old values
 		data.resize(1,0); 
 		penalty.resize(t->getNumLeaves(), 0);
@@ -60,7 +61,7 @@ EstOutput Unweighted::getValues(Tree* t) {
     
 		map<string,double>::iterator pos;
 		for(pos=unique.begin();pos!=unique.end();pos++){
-			if(pos->first!="xxx"){	    
+			if((pos->first!="xxx") && (inUsersGroups(pos->first))){	    
 				UW += unique[pos->first];
 			}
 		}
@@ -86,3 +87,19 @@ EstOutput Unweighted::getValues(Tree* t) {
 }
 
 /**************************************************************************************************/
+bool Unweighted::inUsersGroups(string groupname) {
+	try {
+		for (int i = 0; i < globaldata->Groups.size(); i++) {
+			if (groupname == globaldata->Groups[i]) { return true; }
+		}
+		return false;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the Unweighted class Function inUsersGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the Unweighted class function inUsersGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}

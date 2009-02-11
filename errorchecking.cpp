@@ -90,7 +90,7 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "name" )		{ namefile = value; }
 				if (parameter == "order" )		{ orderfile = value; }
 				if (parameter == "fasta" )		{ fastafile = value; }
-				if (parameter == "treefile" )		{ treefile = value; }
+				if (parameter == "tree" )		{ treefile = value; }
 				if (parameter == "group" )		{ groupfile = value; }
 				if (parameter == "cutoff" )			{ cutoff = value; }
 				if (parameter == "precision" )		{ precision = value; }
@@ -161,7 +161,7 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "order" )		{ orderfile = value; }
 				if (parameter == "group" )		{ groupfile = value; }
 				if (parameter == "fasta" )		{ fastafile = value; }
-				if (parameter == "treefile" )		{ treefile = value; }
+				if (parameter == "tree" )		{ treefile = value; }
 				if (parameter == "cutoff" )			{ cutoff = value; }
 				if (parameter == "precision" )		{ precision = value; }
 				if (parameter == "iters" )			{ iters = value; }
@@ -252,6 +252,11 @@ bool ErrorCheck::checkInput(string input) {
 				if ((globaldata->getTreeFile() == "") || (globaldata->getGroupFile() == "")) {
 					cout << "You must read a treefile and a groupfile or set the randomtree parameter to 1, before you may execute the parsimony command." << endl; return false;  }
 			}
+		}
+		
+		if ((commandName == "unifrac.weighted") || (commandName == "unifrac.unweighted")) {
+			if (globaldata->gTree.size() == 0) {//no trees were read
+				cout << "You must execute the read.tree command, before you may execute the unifrac.weighted or unifrac.unweighted command." << endl; return false;  }
 		}
 		
 		//check for valid method

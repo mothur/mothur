@@ -34,11 +34,12 @@ public:
 	int getNumSeqs();
 	void setIndex(string, int);  //sequencename, index
 	int getIndex(string);		//returns vector index of sequence
+	bool isValidGroup(string);  //return true if string is a valid group
 	string getGroup(string);
 	vector<string> namesOfGroups;
 	vector<string> namesOfSeqs;
     map<string,int> seqsPerGroup;	//groupname, number of seqs in that group.
-	map<string, GroupIndex> treemap; //sequence name and groupname
+	map<string, GroupIndex> treemap; //sequence name and <groupname, vector index>
 	void print(ostream&);
 	
 private:
