@@ -32,15 +32,11 @@ class ReadTree {
 		int readSpecialChar(istream&, char, string);
 		int readNodeChar(istream& f);
 		float readBranchLength(istream& f);
-
-				
-		Tree* getTree()  { return T; }
-		
-		int numNodes, numLeaves;
-		GlobalData* globaldata;
 		
 	protected:
-		Tree* T;
+		GlobalData* globaldata;
+		int numNodes, numLeaves;
+		
 };
 
 /****************************************************************************/
@@ -48,14 +44,18 @@ class ReadTree {
 class ReadNewickTree : public ReadTree {
 	
 public:
-	ReadNewickTree(string file) : treeFile(file) { openInputFile(file, filehandle); }
+	ReadNewickTree(string file) : treeFile(file) { openInputFile(file, filehandle);  } 
 	~ReadNewickTree() {};
 	void read();
 	
 private:
+	Tree* T;
 	int readNewickInt(istream&, int&, Tree*);
+	void readTreeString();
+	void nexusTranslation();
 	ifstream filehandle;
 	string treeFile;
+	string holder;
 };
 
 /****************************************************************************/

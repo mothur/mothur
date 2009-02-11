@@ -16,9 +16,10 @@ ValidCommands::ValidCommands() {
 	
 		commands["read.dist"]			= "read.dist"; 
 		commands["read.otu"]			= "read.otu";
-	//	commands["read.tree"]			= "read.tree"; 
+		commands["read.tree"]			= "read.tree"; 
 		commands["cluster"]				= "cluster"; 
 		commands["deconvolute"]			= "deconvolute"; 
+		commands["parsimony"]			= "parsimony";
 		commands["help"]				= "help"; 
 		commands["quit"]				= "quit"; 
 		commands["collect.single"]		= "collect.single"; 
@@ -27,6 +28,9 @@ ValidCommands::ValidCommands() {
 		commands["rarefaction.shared"]	= "rarefaction.shared"; 
 		commands["summary.single"]		= "summary.single"; 
 		commands["summary.shared"]		= "summary.shared"; 
+		commands["unifrac.weighted"]	= "unifrac.weighted"; 
+		commands["unifrac.unweighted"]	= "unifrac.unweighted"; 
+
 				
 	}
 	catch(exception& e) {

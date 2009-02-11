@@ -36,8 +36,9 @@ class ErrorCheck {
 		void validateParseFiles();
 		void validateTreeFiles();
 		void clear();
+		void refresh();
 		string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, treefile, cutoff, format; 
-		string precision, method, fileroot, label, line, iters, jumble, freq, single, rarefaction, shared, summary;
+		string precision, method, fileroot, label, line, iters, jumble, freq, single, rarefaction, shared, summary, randomtree;
 		string commandName, optionText;
 		bool errorFree;
 		vector<string> singleEsimators, sharedEstimators, rareEstimators, summaryEstimators, sharedRareEstimators;

@@ -24,6 +24,9 @@
 #include "helpcommand.h"
 #include "commandfactory.hpp"
 #include "deconvolutecommand.h"
+#include "parsimonycommand.h"
+#include "unifracunweightedcommand.h"
+#include "unifracweightedcommand.h"
 #include <exception>
 
 
@@ -49,21 +52,24 @@ Command* CommandFactory::getCommand(string commandName){
 	try {
 		delete command;   //delete the old command
 
-			 if(commandName == "read.dist")				{	command = new ReadDistCommand();		}
-		else if(commandName == "read.otu")				{	command = new ReadOtuCommand();			}
-		//else if(commandName == "read.tree")				{	command = new ReadTreeCommand();		}
-		else if(commandName == "cluster")				{	command = new ClusterCommand();			}
-		else if(commandName == "deconvolute")			{	command = new DeconvoluteCommand();		}
-		else if(commandName == "help")					{	command = new HelpCommand();			}
-		else if(commandName == "quit")					{	command = new QuitCommand();			}
-		else if(commandName == "collect.single")		{	command = new CollectCommand();			}
-		else if(commandName == "collect.shared")		{	command = new CollectSharedCommand();	}
-		else if(commandName == "rarefaction.single")	{	command = new RareFactCommand();		}
-		else if(commandName == "rarefaction.shared")	{	command = new RareFactSharedCommand();	}
-		else if(commandName == "summary.single")		{	command = new SummaryCommand();			}
-		else if(commandName == "summary.shared")		{	command = new SummarySharedCommand();	}
-		else											{	command = new NoCommand();				}
-
+			 if(commandName == "read.dist")				{	command = new ReadDistCommand();			}
+		else if(commandName == "read.otu")				{	command = new ReadOtuCommand();				}
+		else if(commandName == "read.tree")				{	command = new ReadTreeCommand();			}
+		else if(commandName == "cluster")				{	command = new ClusterCommand();				}
+		else if(commandName == "deconvolute")			{	command = new DeconvoluteCommand();			}
+		else if(commandName == "parsimony")				{	command = new ParsimonyCommand();			}
+		else if(commandName == "help")					{	command = new HelpCommand();				}
+		else if(commandName == "quit")					{	command = new QuitCommand();				}
+		else if(commandName == "collect.single")		{	command = new CollectCommand();				}
+		else if(commandName == "collect.shared")		{	command = new CollectSharedCommand();		}
+		else if(commandName == "rarefaction.single")	{	command = new RareFactCommand();			}
+		else if(commandName == "rarefaction.shared")	{	command = new RareFactSharedCommand();		}
+		else if(commandName == "summary.single")		{	command = new SummaryCommand();				}
+		else if(commandName == "summary.shared")		{	command = new SummarySharedCommand();		}
+		else if(commandName == "unifrac.weighted")		{	command = new UnifracWeightedCommand();		}
+		else if(commandName == "unifrac.unweighted")	{	command = new UnifracUnweightedCommand();	}
+		else											{	command = new NoCommand();					}
+			
 		return command;
 	}
 	catch(exception& e) {
