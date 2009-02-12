@@ -488,7 +488,7 @@ void GlobalData::splitAtComma(string& prefix, string& suffix){
 /*******************************************************/
 
 /******************************************************/
-//This function separates the key value from the option value i.e. distfile = "96_..."
+//This function separates the key value from the option value i.e. dist=96_...
 void GlobalData::splitAtEquals(string& key, string& value){		
 	try {
 		if(value.find_first_of('=') != -1){

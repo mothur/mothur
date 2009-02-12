@@ -8,7 +8,7 @@
  */
 
 #include "summarysharedcommand.h"
-#include "sharedsobs.h"
+#include "sharedsobscollectsummary.h"
 #include "sharedchao1.h"
 #include "sharedace.h"
 #include "sharedjabund.h"
@@ -29,7 +29,7 @@ SummarySharedCommand::SummarySharedCommand(){
 		int i;
 		for (i=0; i<globaldata->sharedSummaryEstimators.size(); i++) {
 			if (globaldata->sharedSummaryEstimators[i] == "sharedSobs") { 
-				sumCalculators.push_back(new SharedSobs());
+				sumCalculators.push_back(new SharedSobsCS());
 			}else if (globaldata->sharedSummaryEstimators[i] == "sharedChao") { 
 				sumCalculators.push_back(new SharedChao1());
 			}else if (globaldata->sharedSummaryEstimators[i] == "sharedAce") { 
@@ -88,7 +88,6 @@ int SummarySharedCommand::execute(){
 		SharedList = globaldata->gSharedList;
 		input = globaldata->ginput;
 		order = SharedList->getSharedOrderVector();
-		getGroupComb();
 		
 		int count = 1;
 		while(order != NULL){
@@ -104,7 +103,7 @@ int SummarySharedCommand::execute(){
 				int n = 1; 
 				for (int k = 0; k < (lookup.size() - 1); k++) { // pass cdd each set of groups to commpare
 					for (int l = n; l < lookup.size(); l++) {
-						outputFileHandle << order->getLabel() << '\t' << groupComb[n-1] << '\t' << '\t'; //print out label and group
+						outputFileHandle << order->getLabel() << '\t' << (lookup[k]->getGroup() + lookup[l]->getGroup()) << '\t' << '\t'; //print out label and group
 						for(int i=0;i<sumCalculators.size();i++){
 							sumCalculators[i]->getValues(lookup[k], lookup[l]); //saves the calculator outputs
 							outputFileHandle << '\t';
@@ -179,28 +178,4 @@ try {
 
 }
 
-/**************************************************************************************/
-void SummarySharedCommand::getGroupComb() {
-	try {
-		string group;
-		
-		int n = 1;
-		for (int i = 0; i < (globaldata->gGroupmap->getNumGroups() - 1); i++) {
-			for (int l = n; l < globaldata->gGroupmap->getNumGroups(); l++) {
-				group = globaldata->gGroupmap->namesOfGroups[i] + globaldata->gGroupmap->namesOfGroups[l];
-				groupComb.push_back(group);	
-			}
-			n++;
-		}
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SummarySharedCommand class Function getGroupComb. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SummarySharedCommand class function getGroupComb. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
-}
-
+//**********************************************************************************************************************

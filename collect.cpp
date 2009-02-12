@@ -70,6 +70,7 @@ try {
 			SharedRAbundVector* temp = new SharedRAbundVector(sharedorder->getNumBins());
 			temp->setLabel(sharedorder->getLabel());
 			temp->setGroup(globaldata->gGroupmap->namesOfGroups[i]);
+			temp->setGroupIndex(globaldata->gGroupmap->groupIndex[globaldata->gGroupmap->namesOfGroups[i]]);
 			lookup.push_back(temp);
 		}
 
@@ -111,7 +112,7 @@ try {
 				int n = 1;
 				for (int k = 0; k < (lookup.size() - 1); k++) { // pass cdd each set of groups to commpare
 					for (int l = n; l < lookup.size(); l++) {
-						ccd->updateSharedData(lookup[k], lookup[l], i+1, numGroupComb);
+						ccd->updateSharedData(lookup[k], lookup[l], i+1, globaldata->gGroupmap->namesOfGroups.size());
 					}
 					n++;
 				}
@@ -125,7 +126,7 @@ try {
 			int n = 1;
 			for (int k = 0; k < (lookup.size() - 1); k++) { // pass cdd each set of groups to commpare
 				for (int l = n; l < lookup.size(); l++) {
-					ccd->updateSharedData(lookup[k], lookup[l], totalNumSeq, numGroupComb);
+					ccd->updateSharedData(lookup[k], lookup[l], totalNumSeq, globaldata->gGroupmap->namesOfGroups.size());
 				}
 				n++;
 			}

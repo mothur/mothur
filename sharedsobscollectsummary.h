@@ -1,25 +1,23 @@
-#ifndef SHAREDSOBS_H
-#define SHAREDSOBS_H
+#ifndef SHAREDSOBSCOLLECTSUMMARY_H
+#define SHAREDSOBSCOLLECTSUMMARY_H
+
 /*
- *  sharedsobs.h
- *  Dotur
+ *  sharedsobscollectsummary.h
+ *  Mothur
  *
- *  Created by Sarah Westcott on 1/7/09.
+ *  Created by Sarah Westcott on 2/12/09.
  *  Copyright 2009 Schloss Lab UMASS Amherst. All rights reserved.
  *
  */
-
-/* This class implements the SharedSobs estimator on two groups for the shared rarefaction command. 
-It is a child of the calculator class. */
 
 
 #include "calculator.h"
 
 /***********************************************************************/
-class SharedSobs : public Calculator {
+class SharedSobsCS : public Calculator {
 
 public:
-	SharedSobs() : Calculator("SharedSobs", 1) {};
+	SharedSobsCS() : Calculator("SharedSobs", 1) {};
 	EstOutput getValues(SAbundVector* rank){ return data; };
 	EstOutput getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2);
 };
@@ -27,4 +25,3 @@ public:
 /***********************************************************************/
 
 #endif
-

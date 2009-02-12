@@ -26,11 +26,12 @@ public:
 	int getNumGroups();
 	string getGroup(string);
 	vector<string> namesOfGroups;
+	map<string, int> groupIndex;  //groupname, vectorIndex in namesOfGroups. - used by collectdisplays.
 		
 private:
 	ifstream fileHandle;
 	string groupFileName;
-	int numGroups;
+	int numGroups, index;
 	map<string, string>::iterator it;
 	void setNamesOfGroups(string); 
 	map<string, string> groupmap; //sequence name and groupname
