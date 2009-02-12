@@ -37,7 +37,9 @@ public:
 	int getNumSeqs();							
 	int getMaxRank();
 	string getGroup();
-	void setGroup(string);							
+	void setGroup(string);
+	int getGroupIndex();
+	void setGroupIndex(int);								
 
 	void set(int, int, string);			//OTU, abundance, groupname
 	individual get(int);
@@ -63,7 +65,8 @@ private:
 	int maxRank;
 	int numBins;
 	int numSeqs;
-	string group;	
+	string group;
+	int index;	
 };
 
 

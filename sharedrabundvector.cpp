@@ -223,7 +223,10 @@ string SharedRAbundVector::getGroup(){
 void SharedRAbundVector::setGroup(string groupName){
 	group = groupName;
 }
-
+/***********************************************************************/
+int SharedRAbundVector::getGroupIndex()  { return index; }
+/***********************************************************************/
+void SharedRAbundVector::setGroupIndex(int vIndex)	{ index = vIndex; }
 /***********************************************************************/
 int SharedRAbundVector::getNumBins(){
 	return numBins;

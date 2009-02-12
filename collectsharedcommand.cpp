@@ -8,7 +8,7 @@
  */
 
 #include "collectsharedcommand.h"
-#include "sharedsobs.h"
+#include "sharedsobscollectsummary.h"
 #include "sharedchao1.h"
 #include "sharedace.h"
 #include "sharedjabund.h"
@@ -35,7 +35,7 @@ CollectSharedCommand::CollectSharedCommand(){
 			if (globaldata->sharedEstimators[i] == "sharedChao") { 
 				cDisplays.push_back(new CollectDisplay(new SharedChao1(), new SharedOneColumnFile(fileNameRoot+"shared.chao")));
 			}else if (globaldata->sharedEstimators[i] == "sharedSobs") { 
-				cDisplays.push_back(new CollectDisplay(new SharedSobs(), new SharedOneColumnFile(fileNameRoot+"shared.sobs")));
+				cDisplays.push_back(new CollectDisplay(new SharedSobsCS(), new SharedOneColumnFile(fileNameRoot+"shared.sobs")));
 			}else if (globaldata->sharedEstimators[i] == "sharedAce") { 
 				cDisplays.push_back(new CollectDisplay(new SharedAce(), new SharedOneColumnFile(fileNameRoot+"shared.ace")));
 			}else if (globaldata->sharedEstimators[i] == "sharedJabund") { 	

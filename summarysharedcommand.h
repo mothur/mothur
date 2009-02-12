@@ -44,7 +44,6 @@ public:
 	int execute();
 	
 private:
-	void getGroupComb();
 	void getSharedVectors();
 	
 	GlobalData* globaldata;
@@ -57,7 +56,6 @@ private:
 	SharedRAbundVector* shared1, shared2;
 	string outputFileName;
 	ofstream outputFileHandle;
-	vector<string> groupComb;
 
 };
 

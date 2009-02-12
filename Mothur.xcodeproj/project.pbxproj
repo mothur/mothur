@@ -20,6 +20,7 @@
 		37AD4CE40F28AEA300AA2D49 /* sharedlistvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37AD4CE30F28AEA300AA2D49 /* sharedlistvector.cpp */; };
 		37AD4DBB0F28E2FE00AA2D49 /* tree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37AD4DBA0F28E2FE00AA2D49 /* tree.cpp */; };
 		37AD4DCA0F28F3DD00AA2D49 /* readtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37AD4DC90F28F3DD00AA2D49 /* readtree.cpp */; };
+		37AFC71F0F445386005F492D /* sharedsobscollectsummary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37AFC71E0F445386005F492D /* sharedsobscollectsummary.cpp */; };
 		37B28F680F27590100808A62 /* deconvolutecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37B28F670F27590100808A62 /* deconvolutecommand.cpp */; };
 		37D928550F21331F001D4494 /* ace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927B80F21331F001D4494 /* ace.cpp */; };
 		37D928560F21331F001D4494 /* averagelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927BA0F21331F001D4494 /* averagelinkage.cpp */; };
@@ -134,6 +135,8 @@
 		37AD4DBA0F28E2FE00AA2D49 /* tree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tree.cpp; sourceTree = "<group>"; };
 		37AD4DC80F28F3DD00AA2D49 /* readtree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readtree.h; sourceTree = "<group>"; };
 		37AD4DC90F28F3DD00AA2D49 /* readtree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readtree.cpp; sourceTree = "<group>"; };
+		37AFC71D0F445386005F492D /* sharedsobscollectsummary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedsobscollectsummary.h; sourceTree = "<group>"; };
+		37AFC71E0F445386005F492D /* sharedsobscollectsummary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedsobscollectsummary.cpp; sourceTree = "<group>"; };
 		37B28F660F27590100808A62 /* deconvolutecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = deconvolutecommand.h; sourceTree = "<group>"; };
 		37B28F670F27590100808A62 /* deconvolutecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = deconvolutecommand.cpp; sourceTree = "<group>"; };
 		37D927B80F21331F001D4494 /* ace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ace.cpp; sourceTree = "<group>"; };
@@ -414,6 +417,8 @@
 				37D9282C0F21331F001D4494 /* sharedjest.cpp */,
 				37D928350F21331F001D4494 /* sharedsobs.h */,
 				37D928340F21331F001D4494 /* sharedsobs.cpp */,
+				37AFC71D0F445386005F492D /* sharedsobscollectsummary.h */,
+				37AFC71E0F445386005F492D /* sharedsobscollectsummary.cpp */,
 				37D928370F21331F001D4494 /* sharedsorabund.h */,
 				37D928360F21331F001D4494 /* sharedsorabund.cpp */,
 				37D928390F21331F001D4494 /* sharedsorclass.h */,
@@ -667,6 +672,7 @@
 				3746107E0F4064D100460C57 /* weighted.cpp in Sources */,
 				374610830F40652400460C57 /* unweighted.cpp in Sources */,
 				3746109D0F40657600460C57 /* unifracunweightedcommand.cpp in Sources */,
+				37AFC71F0F445386005F492D /* sharedsobscollectsummary.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -14,6 +14,7 @@
  GroupMap::GroupMap(string filename) {
 	groupFileName = filename;
 	openInputFile(filename, fileHandle);
+	index = 0;
 }
 
 /************************************************************/
@@ -69,5 +70,7 @@ void GroupMap::setNamesOfGroups(string seqGroup) {
 			}
 			if (count == namesOfGroups.size()) {
 				namesOfGroups.push_back(seqGroup); //new group
+				groupIndex[seqGroup] = index;
+				index++;
 			}
 }
