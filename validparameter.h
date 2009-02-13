@@ -28,6 +28,7 @@ class ValidParameters {
 		bool isValidParameter(string);
 	private:
 		map<string, string> parameters;
+		map<string, string>::iterator it;
 
 };
 

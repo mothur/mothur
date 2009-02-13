@@ -10,6 +10,7 @@ using namespace std;
 #include <cmath>
 #include <vector>
 #include <stdexcept>
+#include <set>
 
 typedef unsigned long long ull;
 
@@ -195,5 +196,135 @@ inline int openOutputFile(string fileName, ofstream& fileHandle){
 }
 
 /***********************************************************************/
+
+//This function parses the estimator options and puts them in a vector
+inline void splitAtDash(string& estim, vector<string>& container) {
+	try {
+		string individual;
+		
+		while (estim.find_first_of('-') != -1) {
+			individual = estim.substr(0,estim.find_first_of('-'));
+			if ((estim.find_first_of('-')+1) <= estim.length()) { //checks to make sure you don't have dash at end of string
+				estim = estim.substr(estim.find_first_of('-')+1, estim.length());
+				container.push_back(individual);
+			}
+		}
+		//get last one
+		container.push_back(estim);
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the utilities class Function splitAtDash. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the utilities class function splitAtDash. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+
+}
+
+/***********************************************************************/
+//This function parses the label options and puts them in a set
+inline void splitAtDash(string& estim, set<string>& container) {
+	try {
+		string individual;
+		
+		while (estim.find_first_of('-') != -1) {
+			individual = estim.substr(0,estim.find_first_of('-'));
+			if ((estim.find_first_of('-')+1) <= estim.length()) { //checks to make sure you don't have dash at end of string
+				estim = estim.substr(estim.find_first_of('-')+1, estim.length());
+				container.insert(individual);
+			}
+		}
+		//get last one
+		container.insert(estim);
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the utilities class Function splitAtDash. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the utilities class function splitAtDash. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+
+}
+/***********************************************************************/
+//This function parses the line options and puts them in a set
+inline void splitAtDash(string& estim, set<int>& container) {
+	try {
+		string individual;
+		int lineNum;
+		
+		while (estim.find_first_of('-') != -1) {
+			individual = estim.substr(0,estim.find_first_of('-'));
+			if ((estim.find_first_of('-')+1) <= estim.length()) { //checks to make sure you don't have dash at end of string
+				estim = estim.substr(estim.find_first_of('-')+1, estim.length());
+				convert(individual, lineNum); //convert the string to int
+				container.insert(lineNum);
+			}
+		}
+		//get last one
+		convert(estim, lineNum); //convert the string to int
+		container.insert(lineNum);
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the utilities class Function splitAtDash. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the utilities class function splitAtDash. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+
+}
+/***********************************************************************/
+
+//This function splits up the various option parameters
+inline void splitAtComma(string& prefix, string& suffix){
+	try {
+		prefix = suffix.substr(0,suffix.find_first_of(','));
+		if ((suffix.find_first_of(',')+2) <= suffix.length()) {  //checks to make sure you don't have comma at end of string
+			suffix = suffix.substr(suffix.find_first_of(',')+2, suffix.length());
+		}
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the utilities class Function splitAtComma. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the utilities class function splitAtComma. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+
+}
+/***********************************************************************/
+
+//This function separates the key value from the option value i.e. dist=96_...
+inline void splitAtEquals(string& key, string& value){		
+	try {
+		if(value.find_first_of('=') != -1){
+			key = value.substr(0,value.find_first_of('='));
+			if ((value.find_first_of('=')+1) <= value.length()) {
+				value = value.substr(value.find_first_of('=')+1, value.length());
+			}
+		}else{
+			key = value;
+			value = 1;
+		}
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the utilities class Function splitAtEquals. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the utilities class function splitAtEquals. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+
+}
+/*******************************************************/
+
+
 
 #endif

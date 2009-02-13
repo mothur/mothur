@@ -17,6 +17,7 @@ ValidCommands::ValidCommands() {
 		commands["read.dist"]			= "read.dist"; 
 		commands["read.otu"]			= "read.otu";
 		commands["read.tree"]			= "read.tree"; 
+		commands["read.shared"]			= "read.shared";
 		commands["cluster"]				= "cluster"; 
 		commands["deconvolute"]			= "deconvolute"; 
 		commands["parsimony"]			= "parsimony";
@@ -55,7 +56,11 @@ bool ValidCommands::isValidCommand(string command) {
 		if ((commands.find(command)) != (commands.end())) {
 			return true;
 		}else{
-			cout << command << " is not a valid command in Mothur.  Valid commands are read.dist(), read.otu(), read.tree(), cluster(), deconvolute(), collect.single(), collect.shared(), rarefaction.single(), rarefaction.shared(), summary.single(), summary.shared(), parsimony(), unifrac.weighted(), unifrac.unweighted(), quit(), help()." << endl;
+			cout << command << " is not a valid command in Mothur.  Valid commands are ";
+			for (it = commands.begin(); it != commands.end(); it++) {
+				cout << it->first << ", ";
+			}
+			cout << endl;
 			return false;
 		}
 		
@@ -71,3 +76,24 @@ bool ValidCommands::isValidCommand(string command) {
 }
 
 /***********************************************************************/
+void ValidCommands::printCommands(ostream& out) {
+	try {	
+		out << "Valid commands are ";
+		for (it = commands.begin(); it != commands.end(); it++) {
+			out << it->first << ", ";
+		}
+		out << endl;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ValidCommands class Function printCommands. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ValidCommands class function printCommands. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+
+
+
+

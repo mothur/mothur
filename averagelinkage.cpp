@@ -1,3 +1,5 @@
+#ifndef AVERAGE_H
+#define AVERAGE_H
 
 #include "cluster.hpp"
 #include "rabundvector.hpp"
@@ -76,3 +78,7 @@ void AverageLinkage::update(){
 }
 
 /***********************************************************************/
+
+#endif
+
+

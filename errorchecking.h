@@ -14,7 +14,7 @@
 #include "globaldata.hpp"
 #include "validcommands.h"
 #include "validparameter.h"
-#include "validcalculator.h"
+#include "utilities.hpp"
 
 class ErrorCheck {
 	public:
@@ -26,10 +26,6 @@ class ErrorCheck {
 		GlobalData* globaldata;
 		ValidCommands* validCommand;
 		ValidParameters* validParameter;
-		ValidCalculators* validCalculator;
-		void splitAtDash(string&, vector<string>&);
-		void splitAtDash(string&, set<int>&);
-		void splitAtDash(string&, set<string>&);
 		void validateReadFiles();
 		void validateReadDist();
 		void validateReadPhil();
@@ -37,11 +33,10 @@ class ErrorCheck {
 		void validateTreeFiles();
 		void clear();
 		void refresh();
-		string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, treefile, cutoff, format; 
+		string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, treefile, sharedfile, cutoff, format; 
 		string precision, method, fileroot, label, line, iters, jumble, freq, single, rarefaction, shared, summary, randomtree;
 		string commandName, optionText;
 		bool errorFree;
-		vector<string> singleEsimators, sharedEstimators, rareEstimators, summaryEstimators, sharedRareEstimators;
 		
 };
 #endif

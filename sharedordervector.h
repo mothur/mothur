@@ -29,6 +29,8 @@ struct individual {
 #include "rabundvector.hpp"
 #include "sharedrabundvector.h"
 #include "sharedsabundvector.h"
+#include "globaldata.hpp"
+#include "groupmap.h"
 
 class SharedOrderVector : public DataVector {
 	
@@ -38,7 +40,7 @@ public:
 	SharedOrderVector(const SharedOrderVector& ov)	: DataVector(ov.label), data(ov.data), maxRank(ov.maxRank), numBins(ov.numBins), numSeqs(ov.numSeqs), needToUpdate(ov.needToUpdate) {if(needToUpdate == 1){	updateStats();}};
 
 	SharedOrderVector(string, vector<individual>);
-//	SharedOrderVector(ifstream&);
+	SharedOrderVector(ifstream&);
 	~SharedOrderVector(){};
 	
 	void set(int, int, int, string);	//index, OTU, abundance, group
@@ -63,6 +65,8 @@ public:
 	SharedSAbundVector getSharedSAbundVector(string);	//get the sharedSabundvector for a sepecific group
 	
 private:
+	GlobalData* globaldata;
+	GroupMap* groupmap;
 	vector<individual>  data; 
 	map< int, vector<individual> >::iterator it;
 	int maxRank;

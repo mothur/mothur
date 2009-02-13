@@ -4,6 +4,13 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <iostream>
+#include <iomanip>
+#include <map>
+#include <sstream>
+#include <stdexcept>
+#include <exception>
+
 #include "groupmap.h"
 #include "treemap.h"
 
@@ -34,7 +41,7 @@ public:
 	TreeMap* gTreemap;
 	string inputFileName, helpRequest, commandName;
 	bool allLines;
-	vector<string> singleEstimators, summaryEstimators, sharedEstimators, rareEstimators, sharedRareEstimators, sharedSummaryEstimators; //holds estimators to be used
+	vector<string> Estimators; //holds estimators to be used
 	set<int> lines; //hold lines to be used
 	set<string> labels; //holds labels to be used
 	vector<string> Groups;
@@ -49,6 +56,7 @@ public:
 	string getOrderFile();
 	string getFastaFile();
 	string getTreeFile();
+	string getSharedFile();
 	string getCutOff();
 	string getFormat();
 	string getPrecision();
@@ -66,22 +74,16 @@ public:
 	void setSabundFile(string);
 	void setFormat(string);
 	void setRandomTree(string);
+	void setCalc(string);
 
 	
 	void setListVector(ListVector*);
 	void setSparseMatrix(SparseMatrix*);
-	void clear(); 
-	
 	void parseGlobalData(string, string);
-	void splitAtEquals(string&, string&);
-	void splitAtComma(string&, string&);
-	void splitAtDash(string&, vector<string>&);
-	void splitAtDash(string&, set<int>&);
-	void splitAtDash(string&, set<string>&);
-	
+		
 private:
-	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, treefile, line, label, randomtree, groups;
-	string cutoff, format, precision, method, fileroot, iters, jumble, freq, single, rarefaction, shared, summary, sharedsummary, sharedrarefaction;
+	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, treefile, sharedfile, line, label, randomtree, groups;
+	string cutoff, format, precision, method, fileroot, iters, jumble, freq, calc;
 	static GlobalData* _uniqueInstance;
 	GlobalData( const GlobalData& ); // Disable copy constructor
 	void operator=( const GlobalData& ); // Disable assignment operator
@@ -89,10 +91,11 @@ private:
 	~GlobalData();
 	ListVector* gListVector;
 	SparseMatrix* gSparseMatrix;
+	void clear();  //clears all parameters
+	void reset();	//clears all non filename parameters
+	
 	
 	
 };
-
-//**********************************************************************************************************************
 
 #endif

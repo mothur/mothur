@@ -10,6 +10,7 @@
  *
  */
 
+/* This calculator returns the number of shared species between 2 groups. */
 
 #include "calculator.h"
 

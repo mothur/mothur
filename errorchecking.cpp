@@ -17,7 +17,6 @@ ErrorCheck::ErrorCheck() {
 	globaldata = GlobalData::getInstance();
 	validCommand = new ValidCommands();
 	validParameter = new ValidParameters();
-	validCalculator = new ValidCalculators();
 }
 /*******************************************************/
 
@@ -38,6 +37,7 @@ void ErrorCheck::refresh() {
 	format = globaldata->getFormat();
 	method = globaldata->getMethod();
 	randomtree = globaldata->getRandomTree();
+	sharedfile = globaldata->getSharedFile();
 }
 
 /*******************************************************/
@@ -76,8 +76,8 @@ bool ErrorCheck::checkInput(string input) {
 		//reads in parameters and values
 		if((optionText != "") && (commandName != "help")){
 			while((optionText.find_first_of(',') != -1) && (errorFree)) {  //while there are parameters
-				globaldata->splitAtComma(value, optionText);
-				globaldata->splitAtEquals(parameter, value);
+				splitAtComma(value, optionText);
+				splitAtEquals(parameter, value);
 				
 				//is it a valid parameter
 				if (validParameter->isValidParameter(parameter) != true) { return false; }
@@ -92,6 +92,7 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "fasta" )		{ fastafile = value; }
 				if (parameter == "tree" )		{ treefile = value; }
 				if (parameter == "group" )		{ groupfile = value; }
+				if (parameter == "shared" )		{ sharedfile = value; }
 				if (parameter == "cutoff" )			{ cutoff = value; }
 				if (parameter == "precision" )		{ precision = value; }
 				if (parameter == "iters" )			{ iters = value; }
@@ -103,52 +104,12 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "label" )			{ label = value; }
 				if (parameter == "randomtree" )		{ randomtree = value;	}
 
-				if (parameter == "single") {//stores estimators in a vector
-					singleEsimators.clear(); //clears out old values
-					globaldata->splitAtDash(value, singleEsimators);
-					for (int i = 0; i < singleEsimators.size(); i++) { //loop through estimators
-						//is it a valid calculator
-						if (validCalculator->isValidCalculator(parameter, singleEsimators[i]) != true) { return false; }
-					}
-				}
-				if (parameter == "rarefaction") {//stores estimators in a vector
-					rareEstimators.clear(); //clears out old values
-					globaldata->splitAtDash(value, rareEstimators);
-					for (int i = 0; i < rareEstimators.size(); i++) { //loop through estimators
-						//is it a valid calculator
-						if (validCalculator->isValidCalculator(parameter, rareEstimators[i]) != true) { return false; }
-					}
-				}
-				if (parameter == "shared") {//stores estimators in a vector
-					sharedEstimators.clear(); //clears out old values
-					globaldata->splitAtDash(value, sharedEstimators);
-					for (int i = 0; i < sharedEstimators.size(); i++) { //loop through estimators
-						//is it a valid calculator
-						if (validCalculator->isValidCalculator(parameter, sharedEstimators[i]) != true) { return false; }
-					}
-				}
-				if (parameter == "summary") { //stores summaries to be used in a vector
-					summaryEstimators.clear(); //clears out old values
-					globaldata->splitAtDash(value, summaryEstimators);
-					for (int i = 0; i < summaryEstimators.size(); i++) { //loop through estimators
-						//is it a valid calculator
-						if (validCalculator->isValidCalculator(parameter, summaryEstimators[i]) != true) { return false; }
-					}
-				}
-				if (parameter == "sharedrarefaction") { //stores summaries to be used in a vector
-					sharedRareEstimators.clear(); //clears out old values
-					globaldata->splitAtDash(value, sharedRareEstimators);
-					for (int i = 0; i < sharedRareEstimators.size(); i++) { //loop through estimators
-						//is it a valid calculator
-						if (validCalculator->isValidCalculator(parameter, sharedRareEstimators[i]) != true) { return false; }
-					}
-				}
 			}
 			
 			//gets the last parameter and value
 			if (errorFree)  { //gets the last parameter and value
 				value = optionText;
-				globaldata->splitAtEquals(parameter, value);
+				splitAtEquals(parameter, value);
 				//is it a valid parameter
 				if (validParameter->isValidParameter(parameter) != true) { return false; }
 				
@@ -160,6 +121,7 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "name" )		{ namefile = value; }
 				if (parameter == "order" )		{ orderfile = value; }
 				if (parameter == "group" )		{ groupfile = value; }
+				if (parameter == "shared" )		{ sharedfile = value; }
 				if (parameter == "fasta" )		{ fastafile = value; }
 				if (parameter == "tree" )		{ treefile = value; }
 				if (parameter == "cutoff" )			{ cutoff = value; }
@@ -172,47 +134,6 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "line" )			{ line = value; }
 				if (parameter == "label" )			{ label = value; }
 				if (parameter == "randomtree" )		{ randomtree = value;	}
-
-				if (parameter == "single") {//stores estimators in a vector
-					singleEsimators.clear(); //clears out old values
-					globaldata->splitAtDash(value, singleEsimators);
-					for (int i = 0; i < singleEsimators.size(); i++) { //loop through estimators
-						//is it a valid calculator
-						if (validCalculator->isValidCalculator(parameter, singleEsimators[i]) != true) { return false; }
-					}
-				}
-				if (parameter == "rarefaction") {//stores estimators in a vector
-					rareEstimators.clear(); //clears out old values
-					globaldata->splitAtDash(value, rareEstimators);
-					for (int i = 0; i < rareEstimators.size(); i++) { //loop through estimators
-						//is it a valid calculator
-						if (validCalculator->isValidCalculator(parameter, rareEstimators[i]) != true) { return false; }
-					}
-				}
-				if (parameter == "shared") {//stores estimators in a vector
-					sharedEstimators.clear(); //clears out old values
-					globaldata->splitAtDash(value, sharedEstimators);
-					for (int i = 0; i < sharedEstimators.size(); i++) { //loop through estimators
-						//is it a valid calculator
-						if (validCalculator->isValidCalculator(parameter, sharedEstimators[i]) != true) { return false; }
-					}
-				}
-				if (parameter == "summary") { //stores summaries to be used in a vector
-					summaryEstimators.clear(); //clears out old values
-					globaldata->splitAtDash(value, summaryEstimators);
-					for (int i = 0; i < summaryEstimators.size(); i++) { //loop through estimators
-						//is it a valid calculator
-						if (validCalculator->isValidCalculator(parameter, summaryEstimators[i]) != true) { return false; }
-					}
-				}
-				if (parameter == "sharedrarefaction") { //stores summaries to be used in a vector
-					sharedRareEstimators.clear(); //clears out old values
-					globaldata->splitAtDash(value, sharedRareEstimators);
-					for (int i = 0; i < sharedRareEstimators.size(); i++) { //loop through estimators
-						//is it a valid calculator
-						if (validCalculator->isValidCalculator(parameter, sharedRareEstimators[i]) != true) { return false; }
-					}
-				}
 
 			}
 		}
@@ -232,6 +153,9 @@ bool ErrorCheck::checkInput(string input) {
 				validateReadFiles();
 				validateReadPhil();
 			}
+		}else if (commandName == "read.shared") { 
+			//you want to do shared commands with just the shared file
+			validateReadFiles();
 		}else if (commandName == "read.tree") { 
 			validateTreeFiles(); //checks the treefile and groupfile parameters
 		}else if (commandName == "deconvolute") {
@@ -270,11 +194,12 @@ bool ErrorCheck::checkInput(string input) {
 		}
 		
 		if ((commandName == "collect.shared") || (commandName == "rarefaction.shared") || (commandName == "summary.shared") ){ 
-			if (globaldata->getListFile() == "") { cout << "You must read a list and a group before you can use the collect.shared, rarefaction.shared or summary.shared commands." << endl; return false; }
-			else if (globaldata->getGroupFile() == "") { cout << "You must read a list and a group before you can use the collect.shared, rarefaction.shared or summary.shared commands." << endl; return false; }
+			if (globaldata->getSharedFile() == "") {
+				if (globaldata->getListFile() == "") { cout << "You must read a list and a group, or a shared before you can use the collect.shared, rarefaction.shared or summary.shared commands." << endl; return false; }
+				else if (globaldata->getGroupFile() == "") { cout << "You must read a list and a group, or a shared before you can use the collect.shared, rarefaction.shared or summary.shared commands." << endl; return false; }
+			}
 		}
  
-		
 		return errorFree;
 }
 
@@ -330,6 +255,12 @@ void ErrorCheck::validateReadFiles() {
 			//unable to open
 			if (ableToOpen == 1) {  errorFree = false; }
 			else { globaldata->inputFileName = fastafile; }
+		}else if (sharedfile != "") {
+			ableToOpen = openInputFile(sharedfile, filehandle);
+			filehandle.close();
+			//unable to open
+			if (ableToOpen == 1) {  errorFree = false; }
+			else { globaldata->inputFileName = sharedfile; }
 		}else{ //no file given
 			errorFree = false;
 		}
@@ -515,6 +446,7 @@ void ErrorCheck::clear() {
 	namefile		=	"";
 	groupfile		=	""; 
 	orderfile		=	"";
+	sharedfile		=	"";
 	line			=	"";
 	label			=	"";
 	method			=   "furthest";
