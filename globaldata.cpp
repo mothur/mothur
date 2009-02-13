@@ -74,6 +74,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 		if ((commandName == "read.dist") || (commandName == "read.otu") || (commandName == "read.tree") || (commandName == "read.shared")) { 
 			clear();
 			gGroupmap = NULL;
+			gTree.clear();
 		}
 		
 		//saves help request
