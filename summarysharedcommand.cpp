@@ -25,33 +25,43 @@
 SummarySharedCommand::SummarySharedCommand(){
 	try {
 		globaldata = GlobalData::getInstance();
+		outputFileName = ((getRootName(globaldata->inputFileName)) + "shared.summary");
+		openOutputFile(outputFileName, outputFileHandle);
+		format = globaldata->getFormat();
+		validCalculator = new ValidCalculators();
 		
 		int i;
-		for (i=0; i<globaldata->sharedSummaryEstimators.size(); i++) {
-			if (globaldata->sharedSummaryEstimators[i] == "sharedSobs") { 
-				sumCalculators.push_back(new SharedSobsCS());
-			}else if (globaldata->sharedSummaryEstimators[i] == "sharedChao") { 
-				sumCalculators.push_back(new SharedChao1());
-			}else if (globaldata->sharedSummaryEstimators[i] == "sharedAce") { 
-				sumCalculators.push_back(new SharedAce());
-			}else if (globaldata->sharedSummaryEstimators[i] == "sharedJabund") { 	
-				sumCalculators.push_back(new SharedJAbund());
-			}else if (globaldata->sharedSummaryEstimators[i] == "sharedSorensonAbund") { 
-				sumCalculators.push_back(new SharedSorAbund());
-			}else if (globaldata->sharedSummaryEstimators[i] == "sharedJclass") { 
-				sumCalculators.push_back(new SharedJclass());
-			}else if (globaldata->sharedSummaryEstimators[i] == "sharedSorClass") { 
-				sumCalculators.push_back(new SharedSorClass());
-			}else if (globaldata->sharedSummaryEstimators[i] == "sharedJest") { 
-				sumCalculators.push_back(new SharedJest());
-			}else if (globaldata->sharedSummaryEstimators[i] == "sharedSorEst") { 
-				sumCalculators.push_back(new SharedSorEst());
-			}else if (globaldata->sharedSummaryEstimators[i] == "SharedThetaYC") { 
-				sumCalculators.push_back(new SharedThetaYC());
-			}else if (globaldata->sharedSummaryEstimators[i] == "SharedThetaN") { 
-				sumCalculators.push_back(new SharedThetaN());
+		for (i=0; i<globaldata->Estimators.size(); i++) {
+			if (validCalculator->isValidCalculator("sharedsummary", globaldata->Estimators[i]) == true) { 
+				if (globaldata->Estimators[i] == "sharedsobs") { 
+					sumCalculators.push_back(new SharedSobsCS());
+				}else if (globaldata->Estimators[i] == "sharedchao") { 
+					sumCalculators.push_back(new SharedChao1());
+				}else if (globaldata->Estimators[i] == "sharedace") { 
+					sumCalculators.push_back(new SharedAce());
+				}else if (globaldata->Estimators[i] == "sharedjabund") { 	
+					sumCalculators.push_back(new SharedJAbund());
+				}else if (globaldata->Estimators[i] == "sharedsorensonabund") { 
+					sumCalculators.push_back(new SharedSorAbund());
+				}else if (globaldata->Estimators[i] == "sharedjclass") { 
+					sumCalculators.push_back(new SharedJclass());
+				}else if (globaldata->Estimators[i] == "sharedsorclass") { 
+					sumCalculators.push_back(new SharedSorClass());
+				}else if (globaldata->Estimators[i] == "sharedjest") { 
+					sumCalculators.push_back(new SharedJest());
+				}else if (globaldata->Estimators[i] == "sharedsorest") { 
+					sumCalculators.push_back(new SharedSorEst());
+				}else if (globaldata->Estimators[i] == "sharedthetayc") { 
+					sumCalculators.push_back(new SharedThetaYC());
+				}else if (globaldata->Estimators[i] == "sharedthetan") { 
+					sumCalculators.push_back(new SharedThetaN());
+				}
 			}
 		}
+		
+		//reset calc for next command
+		globaldata->setCalc("");
+
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the SummarySharedCommand class Function SummarySharedCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -73,23 +83,34 @@ SummarySharedCommand::~SummarySharedCommand(){
 
 int SummarySharedCommand::execute(){
 	try {
-		outputFileName = ((getRootName(globaldata->inputFileName)) + "shared.summary");
-		openOutputFile(outputFileName, outputFileHandle);
-	
-		read = new ReadPhilFile(globaldata->inputFileName);	
-		read->read(&*globaldata); 
+		int count = 1;	
 		
+		//if the users entered no valid calculators don't execute command
+		if (sumCalculators.size() == 0) { return 0; }
+
+		if (format == "sharedfile") {
+			read = new ReadPhilFile(globaldata->inputFileName);	
+			read->read(&*globaldata); 
+			
+			input = globaldata->ginput;
+			order = input->getSharedOrderVector();
+		}else {
+			//you are using a list and a groupfile
+			read = new ReadPhilFile(globaldata->inputFileName);	
+			read->read(&*globaldata); 
+		
+			input = globaldata->ginput;
+			SharedList = globaldata->gSharedList;
+			order = SharedList->getSharedOrderVector();
+		}
+		
+		//output estimator names as column headers
 		outputFileHandle << "label" <<'\t' << "comparison" << '\t'; 
 		for(int i=0;i<sumCalculators.size();i++){
 			outputFileHandle << '\t' << sumCalculators[i]->getName();
 		}
 		outputFileHandle << endl;
-		
-		SharedList = globaldata->gSharedList;
-		input = globaldata->ginput;
-		order = SharedList->getSharedOrderVector();
-		
-		int count = 1;
+
 		while(order != NULL){
 		
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(order->getLabel()) == 1){			
@@ -115,13 +136,19 @@ int SummarySharedCommand::execute(){
 				}
 			}
 		
-			SharedList = input->getSharedListVector(); //get new list vector to process
-			if (SharedList != NULL) {
-				order = SharedList->getSharedOrderVector(); //gets new order vector with group info.
-				count++;
+			//get next line to process
+			if (format == "sharedfile") {
+				order = input->getSharedOrderVector();
 			}else {
-				break;
+				//you are using a list and a groupfile
+				SharedList = input->getSharedListVector(); //get new list vector to process
+				if (SharedList != NULL) {
+					order = SharedList->getSharedOrderVector(); //gets new order vector with group info.
+				}else {
+					break;
+				}
 			}
+			count++;
 		}
 	
 		return 0;

@@ -65,10 +65,11 @@ SharedRAbundVector::SharedRAbundVector(string id, vector<individual> rav) : Data
 
 SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
 	try {
-		int i, hold;
+		int i, num;
+		string holdLabel, group
 		individual newGuy;
 		
-		f >> label >> hold;
+		f >> label >> group >> num;
 		
 		//initialize data
 		for (i=0; i<hold; i++) {

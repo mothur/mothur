@@ -32,21 +32,22 @@ SharedListVector::SharedListVector(int n):	DataVector(), data(n, "") , maxRank(0
 SharedListVector::SharedListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
 	try {
 		globaldata = GlobalData::getInstance();
-		
+
 		//set up groupmap for later.
 		groupmap = new GroupMap(globaldata->getGroupFile());
 		groupmap->readMap();
 
 		int hold;
+		string inputData;
 		f >> label >> hold;
 	
 		data.assign(hold, "");
-		string inputData = "";
 	
 		for(int i=0;i<hold;i++){
 			f >> inputData;
 			set(i, inputData);
 		}
+	
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the SharedListVector class Function SharedListVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";

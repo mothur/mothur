@@ -19,6 +19,7 @@
 #include "collect.h"
 #include "display.h"
 #include "readmatrix.hpp"
+#include "validcalculator.h"
 
 /*The collect() command:
 	The collect command generates a collector's curve from the given file.  
@@ -49,6 +50,7 @@ private:
 	OrderVector* order;
 	InputData* input;
 	Collect* cCurve;
+	ValidCalculators* validCalculator;
 	vector<Display*> cDisplays;
 	int freq;
 

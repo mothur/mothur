@@ -37,12 +37,7 @@ void GroupMap::readMap() {
 		fileHandle.close();
 }
 /************************************************************/
-
-int GroupMap::getNumGroups() {
-			
-	return namesOfGroups.size();	
-		
-}
+int GroupMap::getNumGroups() { return namesOfGroups.size();	}
 /************************************************************/
 
 string GroupMap::getGroup(string sequenceName) {
@@ -53,11 +48,13 @@ string GroupMap::getGroup(string sequenceName) {
 	}else {
 		return "not found";
 	}
-		
 }
 
 /************************************************************/
-
+void GroupMap::setGroup(string sequenceName, string groupN) {
+	groupmap[sequenceName] = groupN;
+}
+/************************************************************/
 void GroupMap::setNamesOfGroups(string seqGroup) {
 			int i, count;
 			count = 0;

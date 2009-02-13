@@ -12,14 +12,6 @@
 
 using namespace std;
 
-#include <string>
-#include <iostream>
-#include <vector>
-#include <fstream>
-#include <iomanip>
-#include <sstream>
-#include <map>
-
 #include "treenode.h"
 #include "globaldata.hpp"
 

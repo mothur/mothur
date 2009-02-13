@@ -26,25 +26,74 @@ SharedOrderVector::SharedOrderVector(string id, vector<individual>  ov) :
 		updateStats();
 }
 
-/***********************************************************************
-
-//does not work since we don't have a shared order file format yet.
+/***********************************************************************/
+//This function is used to read a .shared file for the collect.shared, rarefaction.shared and summary.shared commands
+//if you don't use a list and groupfile.  
 
 SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {
 	try {
-		int hold;
-	
-		f >> label;
-		f >> hold;
-	
-		data.assign(hold, -1);
-	
-		int inputData;
-	
-		for(int i=0;i<hold;i++){
-			f >> inputData;
-			set(i, inputData, inputData, group);
+		globaldata = GlobalData::getInstance();
+		
+		if (globaldata->gGroupmap == NULL) {  groupmap = new GroupMap(); }
+		
+		int num, inputData, pos, count;
+		count = 0;  numSeqs = 0;
+		string holdLabel, nextLabel, groupN;
+		individual newguy;
+		
+		//read in first row since you know there is at least 1 group.
+		f >> label >> groupN >> num;
+		holdLabel = label;
+		
+		if (globaldata->gGroupmap == NULL) { 
+			//save group in groupmap
+			groupmap->namesOfGroups.push_back(groupN);
+			groupmap->groupIndex[groupN] = 0;
 		}
+		
+		for(int i=0;i<num;i++){
+			f >> inputData;
+			for (int j = 0; j < inputData; j++) {
+				push_back(i+1, i+1, groupN);
+				numSeqs++;
+			}
+		}
+		
+		//save position in file in case next line is a new label.
+		pos = f.tellg();
+		
+		if (f.eof() != true) { f >> nextLabel; }
+		
+		//read the rest of the groups info in
+		while ((nextLabel == holdLabel) && (f.eof() != true)) {
+			f >> groupN >> num;
+			count++;
+			
+			if (globaldata->gGroupmap == NULL) { 
+				//save group in groupmap
+				groupmap->namesOfGroups.push_back(groupN);
+				groupmap->groupIndex[groupN] = count;
+			}
+			
+			for(int i=0;i<num;i++){
+				f >> inputData;
+				for (int j = 0; j < inputData; j++) {
+					push_back(i+1, i+1, groupN);
+					numSeqs++;
+				}
+			}
+			
+			//save position in file in case next line is a new label.
+			pos = f.tellg();
+	
+			if (f.eof() != true) { f >> nextLabel; }
+
+		}
+		
+		//put file pointer back since you are now at a new distance label
+		f.seekg(pos, ios::beg);
+	
+		if (globaldata->gGroupmap == NULL) { globaldata->gGroupmap = groupmap; }
 	
 		updateStats();
 	}
@@ -57,9 +106,7 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {
 		exit(1);
 	}
 }
-
 /***********************************************************************/
-
 
 int SharedOrderVector::getNumBins(){
 	if(needToUpdate == 1){	updateStats();	}

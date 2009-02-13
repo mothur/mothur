@@ -25,8 +25,10 @@ class ValidCommands {
 		ValidCommands();
 		~ValidCommands();
 		bool isValidCommand(string);
+		void printCommands(ostream&);
 	private:
 		map<string, string> commands;
+		map<string, string>::iterator it;
 
 };
 

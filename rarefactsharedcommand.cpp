@@ -17,13 +17,21 @@ RareFactSharedCommand::RareFactSharedCommand(){
 		globaldata = GlobalData::getInstance();
 		string fileNameRoot;
 		fileNameRoot = getRootName(globaldata->inputFileName);
+		format = globaldata->getFormat();
+		validCalculator = new ValidCalculators();
 				
 		int i;
-		for (i=0; i<globaldata->sharedRareEstimators.size(); i++) {
-			if (globaldata->sharedRareEstimators[i] == "sharedobserved") { 
-				rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(fileNameRoot+"shared.rarefaction", "")));
+		for (i=0; i<globaldata->Estimators.size(); i++) {
+			if (validCalculator->isValidCalculator("sharedrarefaction", globaldata->Estimators[i]) == true) { 
+				if (globaldata->Estimators[i] == "sharedobserved") { 
+					rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(fileNameRoot+"shared.rarefaction", "")));
+				}
 			}
 		}
+		
+		//reset calc for next command
+		globaldata->setCalc("");
+
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the RareFactSharedCommand class Function RareFactSharedCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -50,12 +58,25 @@ RareFactSharedCommand::~RareFactSharedCommand(){
 int RareFactSharedCommand::execute(){
 	try {
 		int count = 1;
-		read = new ReadPhilFile(globaldata->inputFileName);	
-		read->read(&*globaldata); 
 		
-		input = globaldata->ginput;
-		SharedList = globaldata->gSharedList;
-		order = SharedList->getSharedOrderVector();
+		//if the users entered no valid calculators don't execute command
+		if (rDisplays.size() == 0) { return 0; }
+
+		if (format == "sharedfile") {
+			read = new ReadPhilFile(globaldata->inputFileName);	
+			read->read(&*globaldata); 
+			
+			input = globaldata->ginput;
+			order = input->getSharedOrderVector();
+		}else {
+			//you are using a list and a groupfile
+			read = new ReadPhilFile(globaldata->inputFileName);	
+			read->read(&*globaldata); 
+		
+			input = globaldata->ginput;
+			SharedList = globaldata->gSharedList;
+			order = SharedList->getSharedOrderVector();
+		}
 		
 		while(order != NULL){
 		
@@ -71,14 +92,20 @@ int RareFactSharedCommand::execute(){
 				cout << order->getLabel() << '\t' << count << endl;
 			}
 			
-			SharedList = input->getSharedListVector(); //get new list vector to process
-			if (SharedList != NULL) {
-				order = SharedList->getSharedOrderVector(); //gets new order vector with group info.
-				count++;
+			//get next line to process
+			if (format == "sharedfile") {
+				order = input->getSharedOrderVector();
 			}else {
-				break;
+				//you are using a list and a groupfile
+				SharedList = input->getSharedListVector(); //get new list vector to process
+				if (SharedList != NULL) {
+					order = SharedList->getSharedOrderVector(); //gets new order vector with group info.
+				}else {
+					break;
+				}
 			}
-		
+			
+			count++;
 		}
 	
 		for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}	

@@ -18,6 +18,7 @@
 #include "calculator.h"
 #include "readmatrix.hpp"
 #include "sharedlistvector.h"
+#include "validcalculator.h"
 
 /*The summary.shared() command
 	The summary.shared command can only be executed after a successful read.shared command. 
@@ -50,11 +51,12 @@ private:
 	ReadMatrix* read;
 	vector<Calculator*> sumCalculators;	
 	InputData* input;
+	ValidCalculators* validCalculator;
 	SharedListVector* SharedList;
 	SharedOrderVector* order;
 	vector<SharedRAbundVector*> lookup;
 	SharedRAbundVector* shared1, shared2;
-	string outputFileName;
+	string outputFileName, format;
 	ofstream outputFileHandle;
 
 };

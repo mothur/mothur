@@ -13,6 +13,7 @@
 
 #include "command.hpp"
 #include "globaldata.hpp"
+#include "validcommands.h"
 
 
 class HelpCommand : public Command {
@@ -23,6 +24,7 @@ public:
 	int execute();
 private:
 	GlobalData* globaldata;
+	ValidCommands* validCommands;
 	
 private:
 		

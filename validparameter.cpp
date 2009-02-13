@@ -42,6 +42,7 @@ ValidParameters::ValidParameters() {
 		parameters["sharedsummary"]		= "sharedsummary";
 		parameters["randomtree"]		= "randomtree";
 		parameters["groups"]			= "groups";
+		parameters["calc"]				= "calc";
 		
 	}
 	catch(exception& e) {
@@ -66,7 +67,12 @@ bool ValidParameters::isValidParameter(string parameter) {
 		if ((parameters.find(parameter)) != (parameters.end())) {
 			return true;
 		}else{
-			cout << parameter << " is not a valid parameter in Mothur." << endl;
+			cout << parameter << " is not a valid parameter in Mothur. Valid parameters are " << endl;
+			for (it = parameters.begin(); it != parameters.end(); it++) {
+				cout << it->first << ", ";
+			}
+			cout << endl;
+
 			return false;
 		}
 		

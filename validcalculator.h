@@ -33,6 +33,8 @@ class ValidCalculators {
 		map<string, string> summary;
 		map<string, string> sharedrarefaction;
 		map<string, string> sharedsummary;
+		map<string, string>::iterator it;
+		
 		void initialSingle();
 		void initialShared();
 		void initialRarefaction();

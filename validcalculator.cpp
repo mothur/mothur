@@ -42,37 +42,72 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 			//is it valid
 			if ((single.find(calculator)) != (single.end())) {
 				return true;
-			}else { cout << calculator << " is not a valid single estimator. Valid single estimators are collect-chao-ace-jack-bootstrap-shannon-npshannon-simpson." << endl; return false; }
+			}else { 
+				cout << calculator << " is not a valid estimator for the collect.single command and will be disregarded. Valid estimators are ";
+				for (it = single.begin(); it != single.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
 		//are you looking for a calculator for a shared parameter
 		}else if (parameter == "shared") {
 			//is it valid
 			if ((shared.find(calculator)) != (shared.end())) {
 				return true;
-			}else { cout << calculator << " is not a valid shared estimator.  Valid shared estimators are sharedChao-sharedAce-sharedJabund-sharedSorensonAbund-sharedJclass-sharedSorClass-sharedJest-sharedSorEst-SharedThetaYC-SharedThetaN." << endl; return false; }
+			}else { 
+				cout << calculator << " is not a valid estimator for the collect.shared command and will be disregarded.  Valid estimators are ";
+				for (it = shared.begin(); it != shared.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
 		//are you looking for a calculator for a rarefaction parameter
 		}else if (parameter == "rarefaction") {
 			//is it valid
 			if ((rarefaction.find(calculator)) != (rarefaction.end())) {
 				return true;
-			}else { cout << calculator << " is not a valid rarefaction estimator. Valid rarefaction estimators are rarefaction-rchao-race-rjack-rbootstrap-rshannon-rnpshannon-rsimpson." << endl; return false; }
+			}else { 
+				cout << calculator << " is not a valid estimator for the rarefaction.single command and will be disregarded. Valid estimators are ";
+				for (it = rarefaction.begin(); it != rarefaction.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
 		//are you looking for a calculator for a summary parameter
 		}else if (parameter == "summary") {
 			//is it valid
 			if ((summary.find(calculator)) != (summary.end())) {
 				return true;
-			}else { cout << calculator << " is not a valid summary estimator. Valid summary estimators are collect-chao-ace-jack-bootstrap-shannon-npshannon-simpson." << endl; return false; }
+			}else { 
+				cout << calculator << " is not a valid estimator for the summary.shared command and will be disregarded. Valid estimators are ";
+				for (it = summary.begin(); it != summary.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
 		//are you looking for a calculator for a sharedsummary parameter
 		}else if (parameter == "sharedsummary") {
 			//is it valid
 			if ((sharedsummary.find(calculator)) != (sharedsummary.end())) {
 				return true;
-			}else { cout << calculator << " is not a valid sharedsummary estimator. Valid sharedsummary estimators are: sharedChao-sharedAce-sharedJabund-sharedSorensonAbund-sharedJclass-sharedSorClass-sharedJest-sharedSorEst-SharedThetaYC-SharedThetaN." << endl; return false; }
-
+			}else { 
+				cout << calculator << " is not a valid estimator for the summary.shared command and will be disregarded. Valid estimators are ";
+				for (it = sharedsummary.begin(); it != sharedsummary.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
 		}else if (parameter == "sharedrarefaction") {
 			//is it valid
 			if ((sharedrarefaction.find(calculator)) != (sharedrarefaction.end())) {
 				return true;
-			}else { cout << calculator << " is not a valid sharedrarefaction estimator. Valid sharedrarefaction estimator is sharedobserved." << endl; return false; }
+			}else { 
+				cout << calculator << " is not a valid estimator for the rarefaction.shared command and will be disregarded. Valid estimator is ";
+				for (it = sharedrarefaction.begin(); it != sharedrarefaction.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
 		//not a valid paramter
 		}else { return false; }
 		
@@ -114,17 +149,17 @@ void ValidCalculators::initialSingle() {
 /********************************************************************/
 void ValidCalculators::initialShared() {
 	try {	
-		shared["sharedSobs"]			= "sharedSobs";
-		shared["sharedChao"]			= "sharedChao";
-		shared["sharedAce"]				= "sharedAce";
-		shared["sharedJabund"]			= "sharedJabund";
-		shared["sharedSorensonAbund"]	= "sharedSorensonAbund";
-		shared["sharedJclass"]			= "sharedJclass";
-		shared["sharedSorClass"]		= "sharedSorClass";
-		shared["sharedJest"]			= "sharedJest";
-		shared["sharedSorEst"]			= "sharedSorEst";
-		shared["SharedThetaYC"]			= "SharedThetaYC";
-		shared["SharedThetaN"]			= "SharedThetaN";
+		shared["sharedsobs"]			= "sharedsobs";
+		shared["sharedchao"]			= "sharedchao";
+		shared["sharedace"]				= "sharedace";
+		shared["sharedjabund"]			= "sharedjabund";
+		shared["sharedsorensonabund"]	= "sharedsorensonabund";
+		shared["sharedjclass"]			= "sharedjclass";
+		shared["sharedsorclass"]		= "sharedsorclass";
+		shared["sharedjest"]			= "sharedjest";
+		shared["sharedsorest"]			= "sharedsorest";
+		shared["sharedthetayc"]			= "sharedthetayc";
+		shared["sharedthetan"]			= "sharedthetan";
 		shared["default"]	            = "default";
 	}
 	catch(exception& e) {
@@ -187,17 +222,17 @@ void ValidCalculators::initialSummary() {
 /********************************************************************/
 void ValidCalculators::initialSharedSummary() {
 	try {	
-		sharedsummary["sharedSobs"]				= "sharedSobs";
-		sharedsummary["sharedChao"]				= "sharedChao";
-		sharedsummary["sharedAce"]				= "sharedAce";
-		sharedsummary["sharedJabund"]			= "sharedJabund";
-		sharedsummary["sharedSorensonAbund"]	= "sharedSorensonAbund";
-		sharedsummary["sharedJclass"]			= "sharedJclass";
-		sharedsummary["sharedSorClass"]			= "sharedSorClass";
-		sharedsummary["sharedJest"]				= "sharedJest";
-		sharedsummary["sharedSorEst"]			= "sharedSorEst";
-		sharedsummary["SharedThetaYC"]			= "SharedThetaYC";
-		sharedsummary["SharedThetaN"]			= "SharedThetaN";
+		sharedsummary["sharedsobs"]				= "sharedsobs";
+		sharedsummary["sharedchao"]				= "sharedchao";
+		sharedsummary["sharedace"]				= "sharedace";
+		sharedsummary["sharedjabund"]			= "sharedjabund";
+		sharedsummary["sharedsorensonabund"]	= "sharedsorensonabund";
+		sharedsummary["sharedjclass"]			= "sharedjclass";
+		sharedsummary["sharedsorclass"]			= "sharedsorclass";
+		sharedsummary["sharedjest"]				= "sharedjest";
+		sharedsummary["sharedsorest"]			= "sharedsorest";
+		sharedsummary["sharedthetayc"]			= "sharedthetayc";
+		sharedsummary["sharedthetan"]			= "sharedthetan";
 		sharedsummary["default"]				= "default";
 	}
 	catch(exception& e) {

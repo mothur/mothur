@@ -17,6 +17,7 @@
 #include "inputdata.h"
 #include "calculator.h"
 #include "readmatrix.hpp"
+#include "validcalculator.h"
 
 /* The summary() command:
 	The summary command can only be executed after a successful read.list, read.sabund or read.rabund command, with one exception. 
@@ -44,6 +45,7 @@ private:
 	ReadMatrix* read;
 	vector<Calculator*> sumCalculators;	
 	InputData* input;
+	ValidCalculators* validCalculator;
 	SAbundVector* sabund;
 	string outputFileName;
 	ofstream outputFileHandle;

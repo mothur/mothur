@@ -18,6 +18,7 @@
 #include "rarefact.h"
 #include "display.h"
 #include "readmatrix.hpp"
+#include "validcalculator.h"
 
 
 /*The rarefaction() command:
@@ -49,6 +50,7 @@ private:
 	ReadMatrix* read;
 	OrderVector* order;
 	InputData* input;
+	ValidCalculators* validCalculator;
 	Rarefact* rCurve;
 	int freq, nIters;
 };

@@ -20,6 +20,7 @@
 #include "collect.h"
 #include "display.h"
 #include "readmatrix.hpp"
+#include "validcalculator.h"
 
 /* The collect.shared() command:
 	The collect command generates a collector's curve from the given file representing several groups.  
@@ -50,9 +51,11 @@ private:
 	ReadMatrix* read;
 	SharedOrderVector* order;
 	InputData* input;
+	ValidCalculators* validCalculator;
 	Collect* cCurve;
 	vector<Display*> cDisplays;
 	int freq;
+	string format;
 
 };
 

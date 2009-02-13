@@ -25,28 +25,34 @@ RareFactCommand::RareFactCommand(){
 		globaldata = GlobalData::getInstance();
 		string fileNameRoot;
 		fileNameRoot = getRootName(globaldata->inputFileName);
+		validCalculator = new ValidCalculators();
+		
 		int i;
-		for (i=0; i<globaldata->rareEstimators.size(); i++) {
-			if (globaldata->rareEstimators[i] == "sobs") { 
-				rDisplays.push_back(new RareDisplay(new Sobs(), new ThreeColumnFile(fileNameRoot+"rarefaction")));
-			}else if (globaldata->rareEstimators[i] == "chao") { 
-				rDisplays.push_back(new RareDisplay(new Chao1(), new ThreeColumnFile(fileNameRoot+"r_chao")));
-			}else if (globaldata->rareEstimators[i] == "ace") { 
-				rDisplays.push_back(new RareDisplay(new Ace(), new ThreeColumnFile(fileNameRoot+"r_ace")));
-			}else if (globaldata->rareEstimators[i] == "jack") { 
-				rDisplays.push_back(new RareDisplay(new Jackknife(), new ThreeColumnFile(fileNameRoot+"r_jack")));
-			}else if (globaldata->rareEstimators[i] == "shannon") { 
-				rDisplays.push_back(new RareDisplay(new Shannon(), new ThreeColumnFile(fileNameRoot+"r_shannon")));
-			}else if (globaldata->rareEstimators[i] == "npshannon") { 
-				rDisplays.push_back(new RareDisplay(new NPShannon(), new ThreeColumnFile(fileNameRoot+"r_npshannon")));
-			}else if (globaldata->rareEstimators[i] == "simpson") { 
-				rDisplays.push_back(new RareDisplay(new Simpson(), new ThreeColumnFile(fileNameRoot+"r_simpson")));
-			}else if (globaldata->rareEstimators[i] == "bootstrap") { 
-				rDisplays.push_back(new RareDisplay(new Bootstrap(), new ThreeColumnFile(fileNameRoot+"r_bootstrap")));
+		for (i=0; i<globaldata->Estimators.size(); i++) {
+			if (validCalculator->isValidCalculator("rarefaction", globaldata->Estimators[i]) == true) { 
+				if (globaldata->Estimators[i] == "sobs") { 
+					rDisplays.push_back(new RareDisplay(new Sobs(), new ThreeColumnFile(fileNameRoot+"rarefaction")));
+				}else if (globaldata->Estimators[i] == "chao") { 
+					rDisplays.push_back(new RareDisplay(new Chao1(), new ThreeColumnFile(fileNameRoot+"r_chao")));
+				}else if (globaldata->Estimators[i] == "ace") { 
+					rDisplays.push_back(new RareDisplay(new Ace(), new ThreeColumnFile(fileNameRoot+"r_ace")));
+				}else if (globaldata->Estimators[i] == "jack") { 
+					rDisplays.push_back(new RareDisplay(new Jackknife(), new ThreeColumnFile(fileNameRoot+"r_jack")));
+				}else if (globaldata->Estimators[i] == "shannon") { 
+					rDisplays.push_back(new RareDisplay(new Shannon(), new ThreeColumnFile(fileNameRoot+"r_shannon")));
+				}else if (globaldata->Estimators[i] == "npshannon") { 
+					rDisplays.push_back(new RareDisplay(new NPShannon(), new ThreeColumnFile(fileNameRoot+"r_npshannon")));
+				}else if (globaldata->Estimators[i] == "simpson") { 
+					rDisplays.push_back(new RareDisplay(new Simpson(), new ThreeColumnFile(fileNameRoot+"r_simpson")));
+				}else if (globaldata->Estimators[i] == "bootstrap") { 
+					rDisplays.push_back(new RareDisplay(new Bootstrap(), new ThreeColumnFile(fileNameRoot+"r_bootstrap")));
+				}
 			}
 		}
-	
-	
+		
+		//reset calc for next command
+		globaldata->setCalc("");
+
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the RareFactCommand class Function RareFactCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -73,6 +79,10 @@ RareFactCommand::~RareFactCommand(){
 int RareFactCommand::execute(){
 	try {
 		int count = 1;
+		
+		//if the users entered no valid calculators don't execute command
+		if (rDisplays.size() == 0) { return 0; }
+
 		read = new ReadPhilFile(globaldata->inputFileName);	
 		read->read(&*globaldata); 
 

@@ -20,18 +20,20 @@
 
 class GroupMap {
 public:
+	GroupMap() {};
 	GroupMap(string);
 	~GroupMap();
 	void readMap();
 	int getNumGroups();
 	string getGroup(string);
+	void setGroup(string, string);
 	vector<string> namesOfGroups;
 	map<string, int> groupIndex;  //groupname, vectorIndex in namesOfGroups. - used by collectdisplays.
 		
 private:
 	ifstream fileHandle;
 	string groupFileName;
-	int numGroups, index;
+	int index;
 	map<string, string>::iterator it;
 	void setNamesOfGroups(string); 
 	map<string, string> groupmap; //sequence name and groupname

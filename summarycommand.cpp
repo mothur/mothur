@@ -22,26 +22,34 @@
 SummaryCommand::SummaryCommand(){
 	try {
 		globaldata = GlobalData::getInstance();
+		validCalculator = new ValidCalculators();
 		int i;
-		for (i=0; i<globaldata->summaryEstimators.size(); i++) {
-			if(globaldata->summaryEstimators[i] == "sobs"){
-				sumCalculators.push_back(new Sobs());
-			}else if(globaldata->summaryEstimators[i] == "chao"){
-				sumCalculators.push_back(new Chao1());
-			}else if(globaldata->summaryEstimators[i] == "ace"){
-				sumCalculators.push_back(new Ace());
-			}else if(globaldata->summaryEstimators[i] == "jack"){
-				sumCalculators.push_back(new Jackknife());
-			}else if(globaldata->summaryEstimators[i] == "shannon"){
-				sumCalculators.push_back(new Shannon());
-			}else if(globaldata->summaryEstimators[i] == "npshannon"){
-				sumCalculators.push_back(new NPShannon());
-			}else if(globaldata->summaryEstimators[i] == "simpson"){
-				sumCalculators.push_back(new Simpson());
-			}else if(globaldata->summaryEstimators[i] == "bootstrap"){
-				sumCalculators.push_back(new Bootstrap());
+		
+		for (i=0; i<globaldata->Estimators.size(); i++) {
+			if (validCalculator->isValidCalculator("summary", globaldata->Estimators[i]) == true) { 
+				if(globaldata->Estimators[i] == "sobs"){
+					sumCalculators.push_back(new Sobs());
+				}else if(globaldata->Estimators[i] == "chao"){
+					sumCalculators.push_back(new Chao1());
+				}else if(globaldata->Estimators[i] == "ace"){
+					sumCalculators.push_back(new Ace());
+				}else if(globaldata->Estimators[i] == "jack"){
+					sumCalculators.push_back(new Jackknife());
+				}else if(globaldata->Estimators[i] == "shannon"){
+					sumCalculators.push_back(new Shannon());
+				}else if(globaldata->Estimators[i] == "npshannon"){
+					sumCalculators.push_back(new NPShannon());
+				}else if(globaldata->Estimators[i] == "simpson"){
+					sumCalculators.push_back(new Simpson());
+				}else if(globaldata->Estimators[i] == "bootstrap"){
+					sumCalculators.push_back(new Bootstrap());
+				}
 			}
 		}
+		
+		//reset calc for next command
+		globaldata->setCalc("");
+
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the SummaryCommand class Function SummaryCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -64,6 +72,10 @@ SummaryCommand::~SummaryCommand(){
 
 int SummaryCommand::execute(){
 	try {
+	
+		//if the users entered no valid calculators don't execute command
+		if (sumCalculators.size() == 0) { return 0; }
+
 		outputFileName = ((getRootName(globaldata->inputFileName)) + "summary");
 		openOutputFile(outputFileName, outputFileHandle);
 		outputFileHandle << "label";
