@@ -140,7 +140,9 @@ bool ErrorCheck::checkInput(string input) {
 		
 		//make sure the user does not use both the line and label parameters
 		if ((line != "") && (label != "")) { cout << "You may use either the line or label parameters, but not both." << endl; return false; }
-	
+		
+		//make sure you have a valid random tree value
+		if ((randomtree != "0") && (randomtree != "1")) { cout << randomtree << " is not a valid randomtree value.  Valid values for randomtree are 0, (meaning you have read your own trees) or 1 (meaning you want to random distribution of trees)." << endl; return false; }
 		
 		if (commandName == "read.dist") { 
 			validateReadFiles();
@@ -173,7 +175,7 @@ bool ErrorCheck::checkInput(string input) {
 		if (commandName == "parsimony") {
 			//are you trying to use parsimony without reading a tree or saying you want random distribution
 			if (randomtree == "0")  {
-				if ((globaldata->getTreeFile() == "") || (globaldata->getGroupFile() == "")) {
+				if (globaldata->gTree.size() == 0) {
 					cout << "You must read a treefile and a groupfile or set the randomtree parameter to 1, before you may execute the parsimony command." << endl; return false;  }
 			}
 		}
