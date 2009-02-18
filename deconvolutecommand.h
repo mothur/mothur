@@ -32,8 +32,8 @@ private:
 	GlobalData* globaldata;
 	FastaMap* fastamap;
 	ifstream in;
-	ofstream out;
-	string filename, outputFileName;
+	ofstream out, outFasta;
+	string filename, outputFileName, outFastafile;
 
 };
 

@@ -67,7 +67,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 		allLines = 1;
 		commandName = commandString; //save command name to be used by other classes
 		
-		//set all non filename paramters to default values
+		//set all non filename paramters to default
 		reset();
 		
 		//clears out data from previous read
@@ -75,6 +75,8 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			clear();
 			gGroupmap = NULL;
 			gTree.clear();
+			labels.clear(); lines.clear(); groups.clear();
+			
 		}
 		
 		//saves help request
@@ -107,7 +109,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if (key == "freq" )			{ freq = value;			}
 				if (key == "method" )		{ method = value;		}
 				if (key == "fileroot" )		{ fileroot = value;		}
-				if (key == "randomtree" )	{ randomtree = value;	}
+				if (key == "random" )		{ randomtree = value;	}
 				if (key == "groups" )		{ groups = value;	}
 				if (key == "calc")			{ calc = value;		}
 				
@@ -153,7 +155,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if (key == "freq" )			{ freq = value;			}
 			if (key == "method" )		{ method = value;		}
 			if (key == "fileroot" )		{ fileroot = value;		}
-			if (key == "randomtree" )	{ randomtree = value;	}
+			if (key == "random" )		{ randomtree = value;	}
 			if (key == "groups" )		{ groups = value;	}
 			if (key == "calc")			{ calc = value;		}
 
@@ -296,7 +298,7 @@ void GlobalData::clear() {
 	label			=	"";
 	groups			=	"";
 	jumble			=	"1";	//0 means don't jumble, 1 means jumble.
-	randomtree		=	"0";  //0 means user will enter some user trees, 1 means they just want the random tree distribution.
+	randomtree		=	"";  //"" means user will enter some user trees, "outputfile" means they just want the random tree distribution to be outputted to outputfile.
 	freq			=	"100";
 	method			=	"furthest";
 	fileroot		=	"";
@@ -313,7 +315,7 @@ void GlobalData::reset() {
 	label			=	"";
 	groups			=	"";
 	jumble			=	"1";	//0 means don't jumble, 1 means jumble.
-	randomtree		=	"0";  //0 means user will enter some user trees, 1 means they just want the random tree distribution.
+	randomtree		=	"";  //"" means user will enter some user trees, "outputfile" means they just want the random tree distribution to be outputted to outputfile.
 	freq			=	"100";
 	method			=	"furthest";
 	calc			=	"";

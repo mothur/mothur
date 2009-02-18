@@ -33,10 +33,11 @@ class ParsimonyCommand : public Command {
 		GlobalData* globaldata;
 		vector<Tree*> T;	   //user trees
 		Tree* randT;  //random tree
-		TreeMap* tmap;
+		TreeMap* tmap; 
+		TreeMap* savetmap;
 		Parsimony* pars;
-		string parsFile, sumFile, distFile;
-		int iters, randomtree, numGroups;
+		string parsFile, sumFile, distFile, randomtree;
+		int iters, numGroups;
 		vector<int> numEachGroup; //vector containing the number of sequences in each group the users wants for random distrib.
 		vector<float> userTreeScores; //scores for users trees
 		vector<float> UScoreSig;  //tree score signifigance when compared to random trees - percentage of random trees with that score or lower.

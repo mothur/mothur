@@ -40,7 +40,7 @@ ValidParameters::ValidParameters() {
 		parameters["shared"]			= "shared"; 
 		parameters["summary"]			= "summary"; 
 		parameters["sharedsummary"]		= "sharedsummary";
-		parameters["randomtree"]		= "randomtree";
+		parameters["random"]			= "random";
 		parameters["groups"]			= "groups";
 		parameters["calc"]				= "calc";
 		

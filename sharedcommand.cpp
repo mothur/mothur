@@ -46,9 +46,14 @@ int SharedCommand::execute(){
 		shared = new Shared();
 		int i = 0;
 		while(SharedList != NULL){
-			shared->getSharedVectors(i, SharedList); //fills sharedGroups with new info and updates sharedVector
+		
+			if(globaldata->allLines == 1 || globaldata->lines.count(i+1) == 1 || globaldata->labels.count(SharedList->getLabel()) == 1){
+			
+				shared->getSharedVectors(i, SharedList); //fills sharedGroups with new info and updates sharedVector
+				printSharedData(); //prints info to the .shared file
+			}
+			
 			SharedList = input->getSharedListVector(); //get new list vector to process
-			printSharedData(); //prints info to the .shared file
 			i++;
 		}
 		return 0;

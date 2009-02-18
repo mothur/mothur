@@ -38,6 +38,7 @@ public:
 	void clear();
 	int size();					//returns number of unique sequences
 	void print(ostream&);		//produces a 2 column file with the groupname in the first column and the names in the second column.
+	void printCondensedFasta(ostream&);		//produces a fasta file.
 	void readFastaFile(ifstream&);
 
 private:
