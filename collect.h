@@ -34,7 +34,7 @@ private:
 	vector<Display*> displays;
 	int numSeqs, numGroupComb, totalNumSeq;
 	string label, groupLabel;
-	void getGroupComb(vector<string>);
+	void getGroupComb();
 	vector<string> groupComb;
 	bool validGroup(vector<string>, string);
 };

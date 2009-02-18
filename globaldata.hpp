@@ -97,7 +97,6 @@ private:
 	~GlobalData();
 	ListVector* gListVector;
 	SparseMatrix* gSparseMatrix;
-	void clear();  //clears all parameters
 	void reset();	//clears all non filename parameters
 	
 	
