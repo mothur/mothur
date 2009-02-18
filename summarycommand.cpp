@@ -32,6 +32,9 @@ SummaryCommand::SummaryCommand(){
 				}else if(globaldata->Estimators[i] == "chao"){
 					sumCalculators.push_back(new Chao1());
 				}else if(globaldata->Estimators[i] == "ace"){
+					convert(globaldata->getAbund(), abund);
+					if(abund < 5)
+						abund = 10;
 					sumCalculators.push_back(new Ace());
 				}else if(globaldata->Estimators[i] == "jack"){
 					sumCalculators.push_back(new Jackknife());

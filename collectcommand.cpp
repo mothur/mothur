@@ -36,6 +36,7 @@ CollectCommand::CollectCommand(){
 				}else if (globaldata->Estimators[i] == "chao") { 
 					cDisplays.push_back(new CollectDisplay(new Chao1(), new ThreeColumnFile(fileNameRoot+"chao")));
 				}else if (globaldata->Estimators[i] == "ace") { 
+				convert(globaldata->getAbund(), abund);
 					cDisplays.push_back(new CollectDisplay(new Ace(), new ThreeColumnFile(fileNameRoot+"ace")));
 				}else if (globaldata->Estimators[i] == "jack") { 
 					cDisplays.push_back(new CollectDisplay(new Jackknife(), new ThreeColumnFile(fileNameRoot+"jack")));
@@ -88,11 +89,12 @@ int CollectCommand::execute(){
 		
 		order = globaldata->gorder;
 		input = globaldata->ginput;
-			
+		set<string> orderList;	
+		
 		while(order != NULL){
 		
+			orderList.insert(order->getLabel());
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(order->getLabel()) == 1){
-			
 				cCurve = new Collect(order, cDisplays);
 				convert(globaldata->getFreq(), freq);
 				cCurve->getCurve(freq);
@@ -101,12 +103,14 @@ int CollectCommand::execute(){
 			
 				cout << order->getLabel() << '\t' << count << endl;
 			}
-		
 			order = (input->getOrderVector());
 			count++;
-		
 		}
-	
+		set<string>::iterator i;
+		for(i = globaldata->labels.begin(); i != globaldata->labels.end(); ++i)
+			if(orderList.count(*i) == 0)
+				cout << "'" << *i << "'" << " is not a valid label.\n";
+		globaldata->clearLabels();
 		for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}	
 		return 0;
 	}

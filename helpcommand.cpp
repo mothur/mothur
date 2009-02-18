@@ -87,6 +87,25 @@ int HelpCommand::execute(){
 		cout << "Example collect.shared(label=unique-.01-.03, line=0,5,10, freq=10, jumble=1, calc=sharedChao-sharedAce-sharedJabund-sharedSorensonAbund-sharedJclass-sharedSorClass-sharedJest-sharedSorEst-SharedThetaYC-SharedThetaN)." << "\n";
 		cout << "The default values for jumble is 1 (meaning jumble, if it’s set to 0 then it will not jumble), freq is 100 and calc are sharedsobs-sharedChao-sharedAce-sharedJabund-sharedSorensonAbund-sharedJclass-sharedSorClass-sharedJest-sharedSorEst-SharedThetaYC-SharedThetaN." << "\n";
 		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile)." << "\n" << "\n";
+	}else if (globaldata->helpRequest == "get.group") {
+		cout << "The get.group command can only be executed after a successful read.otu command of a group file." << "\n";
+		cout << "You may not use any parameters with the get.group command." << "\n";
+		cout << "The get.group command should be in the following format: " << "\n";
+		cout << "get.group()" << "\n";
+		cout << "Example get.group()." << "\n";
+	}else if (globaldata->helpRequest == "get.label") {
+		cout << "The get.label command can only be executed after a successful read.otu command." << "\n";
+		cout << "You may not use any parameters with the get.label command." << "\n";
+		cout << "The get.label command should be in the following format: " << "\n";
+		cout << "get.label()" << "\n";
+		cout << "Example get.label()." << "\n";
+	}else if (globaldata->helpRequest == "get.line") {
+		cout << "The get.line command can only be executed after a successful read.otu command." << "\n";
+		cout << "You may not use any parameters with the get.line command." << "\n";
+		cout << "The get.line command should be in the following format: " << "\n";
+		cout << "get.line()" << "\n";
+		cout << "Example get.line()." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "rarefaction.single") {
 		cout << "The rarefaction.single command can only be executed after a successful read.otu WTIH ONE EXECEPTION." << "\n";

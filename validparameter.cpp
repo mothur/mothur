@@ -30,7 +30,7 @@ ValidParameters::ValidParameters() {
 		parameters["format"]			= "format"; 
 		parameters["precision"]			= "precision"; 
 		parameters["label"]				= "label"; 
-		parameters["line"]				= "line"; 
+		parameters["line"]				= "line";
 		parameters["iters"]				= "iters"; 
 		parameters["jumble"]			= "jumble"; 
 		parameters["freq"]				= "freq"; 
@@ -40,10 +40,11 @@ ValidParameters::ValidParameters() {
 		parameters["shared"]			= "shared"; 
 		parameters["summary"]			= "summary"; 
 		parameters["sharedsummary"]		= "sharedsummary";
+		parameters["abund"]             = "abund";
 		parameters["random"]			= "random";
 		parameters["groups"]			= "groups";
 		parameters["calc"]				= "calc";
-		
+
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidParameters class Function ValidParameters. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";

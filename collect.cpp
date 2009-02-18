@@ -64,7 +64,8 @@ void Collect::getSharedCurve(int increment = 1){
 try {
 		globaldata = GlobalData::getInstance();
 		vector<SharedRAbundVector*> lookup; 
-
+		vector<string> chosenGroups = globaldata->sharedGroups;
+		
 		//create and initialize vector of sharedvectors, one for each group
 		for (int i = 0; i < globaldata->gGroupmap->getNumGroups(); i++) { 
 			SharedRAbundVector* temp = new SharedRAbundVector(sharedorder->getNumBins());
@@ -78,7 +79,7 @@ try {
 	
 		//initialize labels for output
 		//makes  'uniqueAB	 uniqueAC  uniqueBC' if your groups are A, B, C
-		getGroupComb();
+		getGroupComb(chosenGroups);
 		groupLabel = "";
 		for (int s = 0; s < groupComb.size(); s++) {
 			groupLabel = groupLabel + label + groupComb[s] + "\t";
@@ -94,7 +95,6 @@ try {
 			//get first sample
 			individual chosen = sharedorder->get(i);
 			int abundance; 
-					
 			//set info for sharedvector in chosens group
 			for (int j = 0; j < lookup.size(); j++) { 
 				if (chosen.group == lookup[j]->getGroup()) {
@@ -103,7 +103,7 @@ try {
 					 break;
 				}
 			}
-			
+
 			//calculate at 0 and the given increment
 			if((i == 0) || (i+1) % increment == 0){
 				//randomize group order
@@ -116,8 +116,8 @@ try {
 					}
 					n++;
 				}
-			}
 			totalNumSeq = i+1;
+			}
 		}
 		
 		//calculate last line if you haven't already
@@ -150,7 +150,7 @@ try {
 
 /**************************************************************************************/
 
-void Collect::getGroupComb() {
+void Collect::getGroupComb(vector<string> chosen) {
 		string group;
 		
 		numGroupComb = 0;
@@ -158,13 +158,28 @@ void Collect::getGroupComb() {
 		int n = 1;
 		for (int i = 0; i < (globaldata->gGroupmap->getNumGroups() - 1); i++) {
 			for (int l = n; l < globaldata->gGroupmap->getNumGroups(); l++) {
-				group = globaldata->gGroupmap->namesOfGroups[i] + globaldata->gGroupmap->namesOfGroups[l];
-				groupComb.push_back(group);	
-				numGroupComb++;
+				string g1 = globaldata->gGroupmap->namesOfGroups[i];
+				string g2 = globaldata->gGroupmap->namesOfGroups[l];
+				if(validGroup(chosen, g1) && validGroup(chosen, g2)) { 
+					group = g1 + g2;
+					groupComb.push_back(group);	
+					numGroupComb++;
+				}
 			}
 			n++;
 		}
-
 }
 
 /**************************************************************************************/
+
+bool Collect::validGroup(vector<string> chosen, string group) {
+	if(chosen.size() == 0)
+		return true;
+	for(int i = 0; i < chosen.size(); i++)
+		if(chosen.at(i).compare(group) == 0)
+			return true;
+	return false;
+}
+					
+
+

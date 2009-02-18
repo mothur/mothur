@@ -33,6 +33,19 @@ inline void convert(const string& s, T& x, bool failIfLeftoverChars = true){
 	if (!(i >> x) || (failIfLeftoverChars && i.get(c)))
 		throw BadConversion(s);
 }
+//**********************************************************************************************************************
+
+template<typename T>
+inline bool convertTest(const string& s, T& x, bool failIfLeftoverChars = true){
+	istringstream i(s);
+	char c;
+	if (!(i >> x) || (failIfLeftoverChars && i.get(c)))
+	{
+		cout << "'" << s << "' is unable to be converted into an integer.\n";
+		return false;
+	} 
+	return true;
+}
 
 //**********************************************************************************************************************
 
@@ -285,8 +298,12 @@ inline void splitAtComma(string& prefix, string& suffix){
 	try {
 		prefix = suffix.substr(0,suffix.find_first_of(','));
 		if ((suffix.find_first_of(',')+2) <= suffix.length()) {  //checks to make sure you don't have comma at end of string
-			suffix = suffix.substr(suffix.find_first_of(',')+2, suffix.length());
+			suffix = suffix.substr(suffix.find_first_of(',')+1, suffix.length());
+			string space = " ";
+			while(suffix.at(0) == ' ')
+				suffix = suffix.substr(1, suffix.length());
 		}
+
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the utilities class Function splitAtComma. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
