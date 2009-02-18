@@ -27,9 +27,10 @@ ReadTree::ReadTree() {
 /***********************************************************************/
 int ReadTree::readSpecialChar(istream& f, char c, string name) {
     try {
-		char d;
 	
-		while(isspace(d=f.get()))		{;}
+		gobble(f);
+		char d = f.get();
+	
 		if(d == EOF){
 			cerr << "Error: Input file ends prematurely, expecting a " << name << "\n";
 			exit(1);
@@ -39,10 +40,8 @@ int ReadTree::readSpecialChar(istream& f, char c, string name) {
 			exit(1);
 		}
 		if(d == ')' && f.peek() == '\n'){
-			while(isspace(d=f.get()))		{;}
-			f.putback(d);
+			gobble(f);
 		}	
-	
 		return d;
 	}
 	catch(exception& e) {
@@ -58,8 +57,10 @@ int ReadTree::readSpecialChar(istream& f, char c, string name) {
 
 int ReadTree::readNodeChar(istream& f) {
 	try {
-		char d;
-		while(isspace(d=f.get()))		{;}
+//		while(isspace(d=f.get()))		{;}
+		gobble(f);
+		char d = f.get();
+
 		if(d == EOF){
 			cerr << "Error: Input file ends prematurely, expecting a left parenthesis\n";
 			exit(1);
@@ -86,7 +87,7 @@ float ReadTree::readBranchLength(istream& f) {
 			cerr << "Error: Missing branch length in input tree.\n";
 			exit(1);
 		}
-    
+		gobble(f);
 		return b;
 	}
 	catch(exception& e) {
@@ -126,6 +127,7 @@ void ReadNewickTree::read() {
 				readTreeString();  
 				//save trees for later commands
 				globaldata->gTree.push_back(T); 
+				gobble(filehandle);
 			}
 		//if you are a nexus file
 		}else if ((c = filehandle.peek()) == '#') {
@@ -230,6 +232,7 @@ void ReadNewickTree::readTreeString() {
 		
 		if(ch == '('){
 			n = numLeaves;  //number of leaves / sequences, we want node 1 to start where the leaves left off
+
 			lc = readNewickInt(filehandle, n, T);
 		
 			if(filehandle.peek()==','){							
@@ -253,8 +256,8 @@ void ReadNewickTree::readTreeString() {
 			filehandle.get(name, MAX_LINE,'\n');
 			SKIPLINE(filehandle, ch);
 		
-		
 			n = T->getIndex(name);
+
 			if(n!=0){
 				cerr << "Internal error: The only taxon is not taxon 0.\n";
 				exit(1);
@@ -263,7 +266,7 @@ void ReadNewickTree::readTreeString() {
 		} 
 		
 		while((ch=filehandle.get())!=';'){;}						
-			if(rooted != 1){									
+		if(rooted != 1){									
 			T->tree[n].setChildren(lc,rc);
 			T->tree[n].setBranchLength(0);
 			T->tree[n].setParent(-1);
@@ -291,7 +294,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 		if(c == '('){
 			int lc = readNewickInt(f, n, T);
 			readSpecialChar(f,',',"comma");
-		
+
 			int rc = readNewickInt(f, n, T);		
 			if(f.peek()==')'){	
 				readSpecialChar(f,')',"right parenthesis");					

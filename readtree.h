@@ -14,6 +14,7 @@ using namespace std;
 #include <string>
 #include <iostream>
 #include "globaldata.hpp"
+#include "utilities.hpp"
 #include "tree.h"
 
 #define MAX_LINE		513

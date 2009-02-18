@@ -58,7 +58,7 @@ string toString(const T&x, int i){
 
 /***********************************************************************/
 
-inline void gobble(ifstream& f){
+inline void gobble(istream& f){
 	
 	char d;
     while(isspace(d=f.get()))		{;}
