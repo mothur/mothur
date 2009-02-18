@@ -89,6 +89,7 @@ int ParsimonyCommand::execute() {
 			for (int i = 0; i < T.size(); i++) {
 				cout << "Processing tree " << i+1 << endl;
 				userData = pars->getValues(T[i]);  //userData[0] = pscore
+				cout << "Tree " << i+1 << " parsimony score = " << userData[0] << endl;
 				//update uscoreFreq
 				it = uscoreFreq.find(userData[0]);
 				if (it == uscoreFreq.end()) {//new score
