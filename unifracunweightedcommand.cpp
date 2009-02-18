@@ -37,9 +37,16 @@ UnifracUnweightedCommand::UnifracUnweightedCommand() {
 			//if the user only entered invalid groups
 			if (globaldata->Groups.size() == 0) { 
 				cout << "When using the groups parameter you must have at least 1 valid group. I will run the command using all the groups in your groupfile." << endl; 
-			}		
+				for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
+					globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+				}
+			}
+		}else {
+			for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
+				globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+			}
 		}
-
+		
 		convert(globaldata->getIters(), iters);  //how many random trees to generate
 		unweighted = new Unweighted(tmap);
 
@@ -153,6 +160,9 @@ int UnifracUnweightedCommand::execute() {
 		
 		printUnweightedFile();
 		printUWSummaryFile();
+		
+		//reset groups parameter
+		globaldata->Groups.clear();
 		
 		delete randT;
 		

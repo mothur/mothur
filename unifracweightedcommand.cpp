@@ -200,6 +200,7 @@ int UnifracWeightedCommand::execute() {
 		
 		//reset randomTree parameter to 0
 		globaldata->setRandomTree("0");
+		
 		//clear out users groups
 		globaldata->Groups.clear();
 		

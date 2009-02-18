@@ -13,6 +13,7 @@
 
 #include "treecalculator.h"
 #include "treemap.h"
+#include "globaldata.hpp"
 
 /***********************************************************************/
 
@@ -24,8 +25,11 @@ class Parsimony : public TreeCalculator  {
 		EstOutput getValues(Tree*);
 		
 	private:
+		GlobalData* globaldata;
 		EstOutput data;
 		TreeMap* tmap;
+		bool inUsersGroups(string);
+		map<string, int>::iterator it;
 };
 
 /***********************************************************************/
