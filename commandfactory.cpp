@@ -16,6 +16,9 @@
 #include "parselistcommand.h"
 #include "collectcommand.h"
 #include "collectsharedcommand.h"
+#include "getgroupcommand.h"
+#include "getlabelcommand.h"
+#include "getlinecommand.h"
 #include "rarefactcommand.h"
 #include "summarycommand.h"
 #include "summarysharedcommand.h"
@@ -70,8 +73,11 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "summary.shared")		{	command = new SummarySharedCommand();		}
 		else if(commandName == "unifrac.weighted")		{	command = new UnifracWeightedCommand();		}
 		else if(commandName == "unifrac.unweighted")	{	command = new UnifracUnweightedCommand();	}
+		else if(commandName == "get.group")             {   command = new GetgroupCommand();        }
+		else if(commandName == "get.label")             {   command = new GetlabelCommand();        }
+		else if(commandName == "get.line")              {   command = new GetlineCommand();         }
 		else											{	command = new NoCommand();					}
-			
+
 		return command;
 	}
 	catch(exception& e) {

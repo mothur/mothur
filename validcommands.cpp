@@ -25,6 +25,9 @@ ValidCommands::ValidCommands() {
 		commands["quit"]				= "quit"; 
 		commands["collect.single"]		= "collect.single"; 
 		commands["collect.shared"]		= "collect.shared"; 
+		commands["get.group"]           = "get.group";
+		commands["get.label"]           = "get.label";
+		commands["get.line"]            = "get.line";
 		commands["rarefaction.single"]	= "rarefaction.single"; 
 		commands["rarefaction.shared"]	= "rarefaction.shared"; 
 		commands["summary.single"]		= "summary.single"; 

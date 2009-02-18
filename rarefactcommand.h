@@ -52,7 +52,7 @@ private:
 	InputData* input;
 	ValidCalculators* validCalculator;
 	Rarefact* rCurve;
-	int freq, nIters;
+	int freq, nIters, abund;
 };
 
 #endif

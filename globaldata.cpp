@@ -76,7 +76,6 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			gGroupmap = NULL;
 			gTree.clear();
 			labels.clear(); lines.clear(); groups.clear();
-			
 		}
 		
 		//saves help request
@@ -109,9 +108,11 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if (key == "freq" )			{ freq = value;			}
 				if (key == "method" )		{ method = value;		}
 				if (key == "fileroot" )		{ fileroot = value;		}
+				if (key == "abund" )        { abund = value;        }
 				if (key == "random" )		{ randomtree = value;	}
 				if (key == "groups" )		{ groups = value;	}
 				if (key == "calc")			{ calc = value;		}
+
 				
 				if (key == "line") {//stores lines to be used in a set
 					lines.clear();
@@ -127,11 +128,13 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 					splitAtDash(value, labels);
 					allLines = 0;
 				}
+
 				if (key == "groups") {//stores groups to be used in a vector
 					Groups.clear();
 					groups = value;
 					splitAtDash(value, Groups);
 				}
+
 			}
 			
 			//saves the last parameter
@@ -155,6 +158,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if (key == "freq" )			{ freq = value;			}
 			if (key == "method" )		{ method = value;		}
 			if (key == "fileroot" )		{ fileroot = value;		}
+			if (key == "abund" )        { abund = value;        }
 			if (key == "random" )		{ randomtree = value;	}
 			if (key == "groups" )		{ groups = value;	}
 			if (key == "calc")			{ calc = value;		}
@@ -255,6 +259,7 @@ string GlobalData::getFileRoot()		{	return fileroot;	}
 string GlobalData::getIters()			{	return iters;		}
 string GlobalData::getJumble()			{	return jumble;		}
 string GlobalData::getFreq()			{	return freq;		}
+string GlobalData::getAbund()           {   return abund;       }
 string GlobalData::getRandomTree()		{	return randomtree;	}
 void GlobalData::setListFile(string file)	{	listfile = file;	inputFileName = file;}
 void GlobalData::setRabundFile(string file)	{	rabundfile = file;	inputFileName = file;}
@@ -302,9 +307,10 @@ void GlobalData::clear() {
 	freq			=	"100";
 	method			=	"furthest";
 	fileroot		=	"";
-	calc			=	"";
+	abund           =   "10";
 }
-/*******************************************************/
+
+//*******************************************************/
 
 /******************************************************/
 void GlobalData::reset() {
@@ -319,6 +325,7 @@ void GlobalData::reset() {
 	freq			=	"100";
 	method			=	"furthest";
 	calc			=	"";
+	abund = "10";
 }
 /*******************************************************/
 
@@ -330,6 +337,3 @@ GlobalData::~GlobalData() {
 	if(gorder != NULL)			{	delete gorder;		}
 }
 /*******************************************************/
-
-/******************************************************/
-

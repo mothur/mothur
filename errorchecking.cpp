@@ -8,6 +8,7 @@
  */
 
 #include "errorchecking.h"
+#include <math.h>
 
 /*******************************************************/
 
@@ -36,6 +37,127 @@ void ErrorCheck::refresh() {
 	cutoff = globaldata->getCutOff();
 	format = globaldata->getFormat();
 	method = globaldata->getMethod();
+
+	
+	string p[] = {
+		"phylip",              //0
+		"column",             //1
+		"list",               //2
+		"rabund",             //3
+		"sabund",             //4
+		"name",               //5
+		"order",              //6
+		"group",              //7
+		"fasta",              //8
+		"treefile",           //9
+		"cutoff",             //10
+		"precision",          //11
+		"iters",              //12
+		"jumble",             //13
+		"freq",               //14
+		"method",             //15
+		"fileroot",           //16
+		"line",               //17
+		"label",              //18
+		"single",             //19
+		"rarefaction",        //20
+		"shared",             //21
+		"summary",            //22
+		"sharedrarefaction",  //23
+		"sharedsummary",      //24
+		"comparegroups",      //25
+		"abund",              //26
+		};
+	
+	string c0[] = {p[0],p[5],p[10],p[11]};
+	string c1[] = {p[2],p[6],p[7]}; 
+	string c2[] = {p[10],p[11],p[15]}; 
+	string c3[] = {p[8]};  
+	string c4[] = {p[14],p[17],p[18],p[19],p[26]};
+	string c5[] = {p[13],p[14],p[17],p[18],p[21],p[25]};
+	string c6[] = {""}; 
+	string c7[] = {""}; 
+	string c8[] = {""}; 
+	string c9[] = {p[12],p[14],p[17],p[18],p[20],p[26]};
+	string c10[] = {p[12],p[13],p[17],p[18],p[23]};
+	string c11[] = {p[17],p[18],p[22],p[26]};   
+	string c12[] =  {p[13],p[17],p[18],p[24]}; 
+	string c13[] = {""}; 	
+	
+	vector<string> v0 (c0, c0+sizeof(c0)/sizeof(string)); 
+	vector<string> v1 (c1, c1+sizeof(c1)/sizeof(string));
+	vector<string> v2 (c2, c2+sizeof(c2)/sizeof(string));
+	vector<string> v3 (c3, c3+sizeof(c3)/sizeof(string));
+	vector<string> v4 (c4, c4+sizeof(c4)/sizeof(string));
+	vector<string> v5 (c5, c5+sizeof(c5)/sizeof(string));
+	vector<string> v6 (c6, c6+sizeof(c6)/sizeof(string));
+	vector<string> v7 (c7, c7+sizeof(c7)/sizeof(string));
+	vector<string> v8 (c8, c8+sizeof(c8)/sizeof(string));
+	vector<string> v9 (c9, c9+sizeof(c9)/sizeof(string));
+	vector<string> v10 (c10, c10+sizeof(c10)/sizeof(string));
+	vector<string> v11 (c11, c11+sizeof(c11)/sizeof(string));
+	vector<string> v12 (c12, c12+sizeof(c12)/sizeof(string));
+	vector<string> v13 (c13, c13+sizeof(c13)/sizeof(string));
+	
+	vector<vector<string> > allCommands;
+	allCommands.push_back(v0);
+	allCommands.push_back(v1);
+	allCommands.push_back(v2);
+	allCommands.push_back(v3);
+	allCommands.push_back(v4);
+	allCommands.push_back(v5);
+	allCommands.push_back(v6);
+	allCommands.push_back(v7);
+	allCommands.push_back(v8);
+	allCommands.push_back(v9);
+	allCommands.push_back(v10);
+	allCommands.push_back(v11);
+	allCommands.push_back(v12);
+	allCommands.push_back(v13);
+	
+	string commands[] = {
+	"read.dist",          //0
+	"read.otu",           //1
+	"cluster",            //2
+	"deconvolute",        //3
+	"collect.single",     //4
+	"collect.shared",     //5
+	"get.group",          //6
+	"get.label",          //7
+	"get.line",           //8
+	"rarefaction.single", //9
+	"rarefaction.shared", //10
+	"summary.single",     //11
+	"summary.shared",     //12
+	"quit"                //13
+	};
+	
+	for(int i = 0; i < allCommands.size(); i++)
+		commandParameters[commands[i]] = allCommands.at(i);
+	
+	 //{Lowerbound(piSent if no lowerbound), Upperbound(piSent if no upperbound), 1 if only the first 2 values, 0 if greater than, 0 if less than};
+	piSent = 3.14159;
+	double ip0[] = {10, piSent, 0, 1, 0};
+	double ip1[] = {10, piSent, 0, 1, 0};
+	double ip2[] = {0, 1, 1, 0, 0};
+	double ip3[] =  {1, piSent, 0, 0, 0};
+	double ip4[] = {1, piSent, 0, 1, 0};
+	double ip5[] = {5, piSent, 0, 1, 0};
+	
+	vector<double> ipv0 (ip0, ip0+sizeof(ip0)/sizeof(double)); 
+	vector<double> ipv1 (ip1, ip1+sizeof(ip1)/sizeof(double)); 
+	vector<double> ipv2 (ip2, ip2+sizeof(ip2)/sizeof(double)); 
+	vector<double> ipv3 (ip3, ip3+sizeof(ip3)/sizeof(double)); 
+	vector<double> ipv4 (ip4, ip4+sizeof(ip4)/sizeof(double)); 
+	vector<double> ipv5 (ip5, ip5+sizeof(ip5)/sizeof(double));
+
+	intParams[p[11]] = ipv0;
+	intParams[p[12]] = ipv1;
+	intParams[p[13]] = ipv2;
+	intParams[p[14]] = ipv3;
+	intParams[p[17]] = ipv4;
+	intParams[p[26]] = ipv5;
+	
 	randomtree = globaldata->getRandomTree();
 	sharedfile = globaldata->getSharedFile();
 }
@@ -73,6 +195,7 @@ bool ErrorCheck::checkInput(string input) {
 		if (validCommand->isValidCommand(commandName) != true) { return false; }
 		
 		string parameter, value;
+		
 		//reads in parameters and values
 		if((optionText != "") && (commandName != "help")){
 			while((optionText.find_first_of(',') != -1) && (errorFree)) {  //while there are parameters
@@ -81,7 +204,48 @@ bool ErrorCheck::checkInput(string input) {
 				
 				//is it a valid parameter
 				if (validParameter->isValidParameter(parameter) != true) { return false; }
-				
+				if(!validCommandParameter(parameter,commandName)) { 
+					cout << "'" << parameter << "' is not a valid parameter for the " << commandName << " command.\n";
+					return false; 
+				}
+				if(!validParameterValue(value, parameter)) {
+					if(parameter.compare("precision") == 0)
+						cout << "The precision parameter can only take powers of 10 as a value (e.g. 10,1000,1000, etc.)\n";
+					else {
+					vector<double> bounds = intParams[parameter];
+					double a = bounds.at(0);
+					double b = bounds.at(1);
+					double c = bounds.at(2);
+					double d = bounds.at(3);
+					double e = bounds.at(4);
+					cout << "The '" << parameter << "' parameter needs to be ";
+					if(c == 1)
+							cout << "either '" << a << "' or '" << b << "'.\n";
+					else
+					{
+						if(a != piSent)
+						{
+							cout << ">";
+							if(d != 0)
+								cout << "=";
+							cout << " '" << a << "'";
+						}
+						if(b == piSent)
+							cout << ".\n";
+						else if(a != piSent)
+							cout << " and ";
+						if(b != piSent)
+						{
+							cout << "<";
+							if(e != 0)
+								cout << "=";
+							cout << " '" << b << ".\n";
+						}
+					}
+					}
+					return false;
+				}
+
 				if (parameter == "phylip" )		{ phylipfile = value; }
 				if (parameter == "column" )		{ columnfile = value; }
 				if (parameter == "list" )		{ listfile = value; }
@@ -102,7 +266,13 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "fileroot" )		{ fileroot = value; }
 				if (parameter == "line" )			{ line = value; }
 				if (parameter == "label" )			{ label = value; }
+				if (parameter == "abund" )          { abund = value; }
 				if (parameter == "random" )			{ randomtree = value;	}
+
+				if (parameter == "comparegroups") { //stores groups to be compared
+					sharedGroups.clear(); //clears out old values
+					globaldata->splitAtDash(value, sharedGroups);
+				}
 
 			}
 			
@@ -112,7 +282,47 @@ bool ErrorCheck::checkInput(string input) {
 				splitAtEquals(parameter, value);
 				//is it a valid parameter
 				if (validParameter->isValidParameter(parameter) != true) { return false; }
-				
+				if(!validCommandParameter(parameter,commandName)) { 
+					cout << "'" << parameter << "' is not a valid parameter for the " << commandName << " command.\n";
+					return false; 
+				}
+				if(!validParameterValue(value, parameter)) {
+					if(parameter.compare("precision") == 0)
+						cout << "The precision parameter can only take powers of 10 as a value (e.g. 10,1000,1000, etc.)\n";
+					else {
+					vector<double> bounds = intParams[parameter];
+					double a = bounds.at(0);
+					double b = bounds.at(1);
+					double c = bounds.at(2);
+					double d = bounds.at(3);
+					double e = bounds.at(4);
+					cout << "The '" << parameter << "' parameter needs to be ";
+					if(c == 1)
+							cout << "either '" << a << "' or '" << b << "'.\n";
+					else
+					{
+						if(a != piSent)
+						{
+							cout << ">";
+							if(d != 0)
+								cout << "=";
+							cout << " '" << a << "'";
+						}
+						if(b == piSent)
+							cout << ".\n";
+						else if(a != piSent)
+							cout << " and ";
+						if(b != piSent)
+						{
+							cout << "<";
+							if(e != 0)
+								cout << "=";
+							cout << " '" << b << ".\n";
+						}
+					}
+					}
+					return false;
+				}
 				if (parameter == "phylip" )		{ phylipfile = value; }
 				if (parameter == "column" )		{ columnfile = value; }				
 				if (parameter == "list" )		{ listfile = value; }
@@ -134,7 +344,12 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "line" )			{ line = value; }
 				if (parameter == "label" )			{ label = value; }
 				if (parameter == "random" )			{ randomtree = value;	}
+				if (parameter == "abund" )          { abund = value; }
 
+				if (parameter == "comparegroups") { //stores groups to be compared
+					sharedGroups.clear(); //clears out old values
+					globaldata->splitAtDash(value, sharedGroups);
+				}
 			}
 		}
 		
@@ -183,6 +398,12 @@ bool ErrorCheck::checkInput(string input) {
 		}
 		
 		//check for valid method
+		if(commandName == "get.group") {
+			if ((globaldata->getGroupFile() == "")) { cout << "You must read a group before you can use the get.group command." << endl; return false; }
+		}
+		if (commandName == "get.label" || commandName == "get.line") {
+			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { cout << "You must read a list, sabund or rabund before you can use the get.label or get.line command." << endl; return false; }
+		}
 		if (commandName == "cluster") {
 			if ((method == "furthest") || (method == "nearest") || (method == "average")) { }
 			else {cout << "Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average." << endl; return false; }
@@ -198,7 +419,9 @@ bool ErrorCheck::checkInput(string input) {
 				else if (globaldata->getGroupFile() == "") { cout << "You must read a list and a group, or a shared before you can use the collect.shared, rarefaction.shared or summary.shared commands." << endl; return false; }
 			}
 		}
- 
+
+		globaldata->clearAbund();
+
 		return errorFree;
 }
 
@@ -274,6 +497,113 @@ void ErrorCheck::validateReadFiles() {
 	}
 	
 }
+/*******************************************************/
+
+/******************************************************/
+//This function checks to see if the given paramter
+//is a valid paramter for the given command.
+bool ErrorCheck::validCommandParameter(string parameter, string commandName) {
+	try {
+		for(int i = 0; i < commandParameters[commandName].size(); i++)
+			if(parameter.compare(commandParameters[commandName][i]) == 0)
+				return true;
+		return false;
+	}
+		
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ErrorCheck class Function validateReadFiles. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ErrorCheck class function validateReadFiles. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+/*******************************************************/
+
+/******************************************************/
+//This function checks to see if the given paramter value
+//is convertable into an int if that parameter requires it.
+bool ErrorCheck::validParameterValue(string value, string parameter) {
+	try {
+		int pVal;
+		if(intParams.count(parameter) == 1)
+		{
+			vector<double> bounds = intParams[parameter];
+			bool valid = convertTest(value, pVal);
+			if(!valid)
+				return false;
+			if(parameter.compare("precision") == 0)
+			{
+				double logNum = log10((double)pVal);
+				double diff = (double)((int)logNum - logNum);
+				if(diff != 0)
+					return false;
+			}
+			double a = bounds.at(0);
+			double b = bounds.at(1);
+			double c = bounds.at(2);
+			double d = bounds.at(3);
+			double e = bounds.at(4);
+			bool a0 = pVal > a;
+			bool a1 = pVal >= a;
+			bool b0 = pVal < b;
+			bool b1 = pVal <= b;
+			
+			if(c != 1)
+			{
+				if(a == piSent && b == piSent)
+					return true;
+				if(a != piSent && b == piSent)
+				{
+					if(d == 0)
+						return a0;
+					else
+						return a1;
+				}
+				else if(a == piSent && b != piSent)
+				{
+					if(e == 0)
+						return b0;
+					else
+						return b1;
+				}
+				else
+				{
+					if(d == 0 && e == 0)
+						return (a0 && b0);
+					else if(d == 0 && e == 1)
+						return (a0 && b1);
+					else if(d == 1 && e == 0)
+						return (a1 && b0);
+					else
+						return (a1 && b1);
+				}
+			}
+			else
+			{
+				if(a == piSent && b == piSent)
+					return true;
+				if(a != piSent && b == piSent)
+					return (pVal == a);
+				else if(a == piSent && b != piSent)
+					return (pVal == b);
+				else
+					return (pVal == a || pVal == b);
+			}
+		}
+		return true;
+	}
+		
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ErrorCheck class Function validateReadFiles. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ErrorCheck class function validateReadFiles. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}		
 /*******************************************************/
 
 /******************************************************/

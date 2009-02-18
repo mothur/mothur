@@ -41,10 +41,9 @@ public:
 	TreeMap* gTreemap;
 	string inputFileName, helpRequest, commandName;
 	bool allLines;
-	vector<string> Estimators; //holds estimators to be used
+	vector<string>  Estimators, Groups; //holds estimators to be used
 	set<int> lines; //hold lines to be used
 	set<string> labels; //holds labels to be used
-	vector<string> Groups;
 	
 	string getPhylipFile();
 	string getColumnFile();
@@ -65,7 +64,9 @@ public:
 	string getIters();
 	string getJumble();
 	string getFreq();
+	string getAbund();
 	string getRandomTree();
+
 	void setListFile(string);
 	void setPhylipFile(string);
 	void setColumnFile(string);
@@ -79,11 +80,16 @@ public:
 	
 	void setListVector(ListVector*);
 	void setSparseMatrix(SparseMatrix*);
+	void clear(); 
+	void clearLabels();
+	void clearAbund();
+	
 	void parseGlobalData(string, string);
 		
 private:
 	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, treefile, sharedfile, line, label, randomtree, groups;
-	string cutoff, format, precision, method, fileroot, iters, jumble, freq, calc;
+	string cutoff, format, precision, method, fileroot, iters, jumble, freq, calc, abund;
+
 	static GlobalData* _uniqueInstance;
 	GlobalData( const GlobalData& ); // Disable copy constructor
 	void operator=( const GlobalData& ); // Disable assignment operator

@@ -35,6 +35,9 @@ RareFactCommand::RareFactCommand(){
 				}else if (globaldata->Estimators[i] == "chao") { 
 					rDisplays.push_back(new RareDisplay(new Chao1(), new ThreeColumnFile(fileNameRoot+"r_chao")));
 				}else if (globaldata->Estimators[i] == "ace") { 
+					convert(globaldata->getAbund(), abund);
+					if(abund < 5)
+						abund = 10;
 					rDisplays.push_back(new RareDisplay(new Ace(), new ThreeColumnFile(fileNameRoot+"r_ace")));
 				}else if (globaldata->Estimators[i] == "jack") { 
 					rDisplays.push_back(new RareDisplay(new Jackknife(), new ThreeColumnFile(fileNameRoot+"r_jack")));

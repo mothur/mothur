@@ -27,6 +27,8 @@ class ErrorCheck {
 		ValidCommands* validCommand;
 		ValidParameters* validParameter;
 		void validateReadFiles();
+		bool validCommandParameter(string, string);
+		bool validParameterValue(string, string);
 		void validateReadDist();
 		void validateReadPhil();
 		void validateParseFiles();
@@ -34,9 +36,14 @@ class ErrorCheck {
 		void clear();
 		void refresh();
 		string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, treefile, sharedfile, cutoff, format; 
-		string precision, method, fileroot, label, line, iters, jumble, freq, single, rarefaction, shared, summary, randomtree;
+		string precision, method, fileroot, label, line, iters, jumble, freq, single, rarefaction, shared, summary, randomtree, abund;
 		string commandName, optionText;
 		bool errorFree;
-		
+
+		vector<string> sharedGroups;
+		map <string, vector<string> > commandParameters;
+		map <string, vector<double> > intParams;
+		double piSent;
+
 };
 #endif
