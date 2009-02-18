@@ -128,8 +128,10 @@ int HelpCommand::execute(){
 		cout << "Note: No spaces between parameter labels (i.e. line), '=' and parameters (i.e.yourLines)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "parsimony") { 
 		cout << "The parsimony command can only be executed after a successful read.tree command, unless you use the random parameter." << "\n";
-		cout << "The parsimony command parameters are random and iters.  No parameters are required." << "\n";
-		cout << "The parsimony command should be in the following format: parsimony(random=yourOutputFilename, iters=yourIters)." << "\n";
+		cout << "The parsimony command parameters are random, groups and iters.  No parameters are required." << "\n";
+		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 1 valid group." << "\n";
+		cout << "The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree." << "\n";
+		cout << "The parsimony command should be in the following format: parsimony(random=yourOutputFilename, groups=yourGroups, iters=yourIters)." << "\n";
 		cout << "Example parsimony(random=out, iters=500)." << "\n";
 		cout << "The default value for random is "" (meaning you want to use the trees in your inputfile, randomtree=out means you just want the random distribution of trees outputted to out.rd_parsimony)," << "\n";
 		cout << "and iters is 1000.  The parsimony command output three files: .parsimony, .psummary and .pdistrib, their descriptions are in the manual." << "\n";
@@ -137,7 +139,7 @@ int HelpCommand::execute(){
 	}else if (globaldata->helpRequest == "unifrac.weighted") { 
 		cout << "The unifrac.weighted command can only be executed after a successful read.tree command." << "\n";
 		cout << "The unifrac.weighted command parameters are groups and iters.  No parameters are required." << "\n";
-		cout << "The groups paramter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups." << "\n";
+		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups." << "\n";
 		cout << "The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree." << "\n";
 		cout << "The unifrac.weighted command should be in the following format: unifrac.weighted(groups=yourGroups, iters=yourIters)." << "\n";
 		cout << "Example unifrac.weighted(groups=A-B-C, iters=500)." << "\n";
@@ -147,7 +149,7 @@ int HelpCommand::execute(){
 	}else if (globaldata->helpRequest == "unifrac.unweighted") { 
 		cout << "The unifrac.unweighted command can only be executed after a successful read.tree command." << "\n";
 		cout << "The unifrac.unweighted command parameters are groups and iters.  No parameters are required." << "\n";
-		cout << "The groups paramter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 1 valid group." << "\n";
+		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 1 valid group." << "\n";
 		cout << "The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree." << "\n";
 		cout << "The unifrac.unweighted command should be in the following format: unifrac.unweighted(groups=yourGroups, iters=yourIters)." << "\n";
 		cout << "Example unifrac.unweighted(groups=A-B-C, iters=500)." << "\n";

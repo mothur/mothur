@@ -27,6 +27,30 @@ ParsimonyCommand::ParsimonyCommand() {
 			openOutputFile(sumFile, outSum);
 			distFile = globaldata->getTreeFile() + ".pdistrib";
 			openOutputFile(distFile, outDist);
+			
+			//if the user has not entered specific groups to analyze then do them all
+			if (globaldata->Groups.size() != 0) {
+				//check that groups are valid
+				for (int i = 0; i < globaldata->Groups.size(); i++) {
+					if (tmap->isValidGroup(globaldata->Groups[i]) != true) {
+						cout << globaldata->Groups[i] << " is not a valid group, and will be disregarded." << endl;
+						// erase the invalid group from globaldata->Groups
+						globaldata->Groups.erase (globaldata->Groups.begin()+i);
+					}
+				}
+			
+				//if the user only entered invalid groups
+				if (globaldata->Groups.size() == 0) { 
+					cout << "When using the groups parameter you must have at least 1 valid group. I will run the command using all the groups in your groupfile." << endl; 
+					for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
+						globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+					}
+				}		
+			}else {
+				for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
+					globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+				}
+			}
 
 		}else { //user wants random distribution
 			savetmap = globaldata->gTreemap;
@@ -164,6 +188,8 @@ int ParsimonyCommand::execute() {
 		
 		//reset randomTree parameter to ""
 		globaldata->setRandomTree("");
+		//reset groups parameter
+		globaldata->Groups.clear();
 		
 		return 0;
 		
