@@ -122,7 +122,7 @@ int UnifracWeightedCommand::execute() {
 			//copy T[i]'s info.
 			randT->getCopy(T[i]); 
 			
-			//get pscores for random trees
+			//get scores for random trees
 			for (int j = 0; j < iters; j++) {
 				//create a random tree with same topology as T[i], but different labels
 				randT->assembleRandomUnifracTree();
@@ -178,7 +178,7 @@ int UnifracWeightedCommand::execute() {
 			float ucumul = 0.0000;
 			float rcumul = 0.0000;
 			//this loop fills the cumulative maps and put 0.0000 in the score freq map to make it easier to print.
-			for (it = validScores[b].begin(); it != validScores[b].end(); it++) { 
+			for (it = validScores[b].end(); it == validScores[b].begin(); it--) { 
 				it2 = uscoreFreq[b].find(it->first);
 				//user data has that score 
 				if (it2 != uscoreFreq[b].end()) { uscoreFreq[b][it->first] /= T.size(); ucumul+= it2->second;  }
