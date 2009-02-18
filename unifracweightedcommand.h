@@ -47,8 +47,8 @@ class UnifracWeightedCommand : public Command {
 		vector< map<float, float> > rscoreFreq;  //vector<weighted score, number of random trees with that score.> each group comb has an entry
 		vector< map<float, float> > uscoreFreq;  //vector<weighted, number of user trees with that score.> each group comb has an entry
 		vector< map<float, float> > totalrscoreFreq;  //vector<weighted score, number of random trees with that score.> each group comb has an entry
-		vector< map<float, float> > rCumul;  //vector<weighted score, number of random trees with that score.> each group comb has an entry
-		vector< map<float, float> > uCumul;  //vector<weighted, cumulative percentage of number of user trees with that score or lower.> each group comb has an entry
+		vector< map<float, float> > rCumul;  //vector<weighted score, number of random trees with that score or higher.> each group comb has an entry
+		vector< map<float, float> > uCumul;  //vector<weighted, cumulative percentage of number of user trees with that score or higher.> each group comb has an entry
 		map<float, float>::iterator it;
 		map<float, float>::iterator it2;
 		
