@@ -86,6 +86,7 @@ void ParseListCommand::parse(int index) {
 int ParseListCommand::execute(){
 	try{
 			globaldata = GlobalData::getInstance();
+			int count = 1;
 			
 			//read in listfile
 			read = new ReadPhilFile(globaldata->inputFileName);	
@@ -107,22 +108,30 @@ int ParseListCommand::execute(){
 			//parses and sets each groups listvector
 			while(list != NULL){
 				label = list->getLabel();
-				for(i=0; i<list->size(); i++) {
-					parse(i); //parses data[i] list of sequence names
-					for (it=listGroups.begin(); it != listGroups.end(); it++) {  //loop through map and set new list vectors
-						seq = it->second;
-						seq = seq.substr(1, seq.length()); //rips off extra comma
-						groupOfLists[it->first]->push_back(seq); //sets new listvector for each group
+				
+				if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(label) == 1){
+				
+					for(i=0; i<list->size(); i++) {
+						parse(i); //parses data[i] list of sequence names
+						for (it=listGroups.begin(); it != listGroups.end(); it++) {  //loop through map and set new list vectors
+							seq = it->second;
+							seq = seq.substr(1, seq.length()); //rips off extra comma
+							groupOfLists[it->first]->push_back(seq); //sets new listvector for each group
+						}
+						listGroups.clear();
 					}
-					listGroups.clear();
+					//prints each new list file
+					for (i=0; i<groupMap->getNumGroups(); i++) {
+						groupOfLists[groupMap->namesOfGroups[i]]->setLabel(label);
+						groupOfLists[groupMap->namesOfGroups[i]]->print(*(filehandles[groupMap->namesOfGroups[i]]));
+						groupOfLists[groupMap->namesOfGroups[i]]->clear();
+					}
+					
+					cout << label << '\t' << count << endl;
 				}
-				//prints each new list file
-				for (i=0; i<groupMap->getNumGroups(); i++) {
-					groupOfLists[groupMap->namesOfGroups[i]]->setLabel(label);
-					groupOfLists[groupMap->namesOfGroups[i]]->print(*(filehandles[groupMap->namesOfGroups[i]]));
-					groupOfLists[groupMap->namesOfGroups[i]]->clear();
-				}
+				
 				list = input->getSharedListVector();
+				count++;
 			}
 			
 			//set groupmap for .shared commands

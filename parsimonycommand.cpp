@@ -15,10 +15,10 @@ ParsimonyCommand::ParsimonyCommand() {
 		globaldata = GlobalData::getInstance();
 		
 		//randomtree will tell us if user had their own treefile or if they just want the random distribution
-		convert(globaldata->getRandomTree(), randomtree);
+		randomtree = globaldata->getRandomTree();
 		
 		//user has entered their own tree
-		if (randomtree == 0) { 
+		if (randomtree == "") { 
 			T = globaldata->gTree;
 			tmap = globaldata->gTreemap;
 			parsFile = globaldata->getTreeFile() + ".parsimony";
@@ -29,8 +29,9 @@ ParsimonyCommand::ParsimonyCommand() {
 			openOutputFile(distFile, outDist);
 
 		}else { //user wants random distribution
+			savetmap = globaldata->gTreemap;
 			getUserInput();
-			parsFile = "rd_parsimony";
+			parsFile = randomtree + ".rd_parsimony";
 			openOutputFile(parsFile, out);
 		}
 		
@@ -59,7 +60,7 @@ int ParsimonyCommand::execute() {
 		outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
 		outDist << "RandomTree#" << '\t' << "ParsScore" << endl;
 		
-		if (randomtree == 0) {
+		if (randomtree == "") {
 			//get pscores for users trees
 			for (int i = 0; i < T.size(); i++) {
 				cout << "Processing tree " << i+1 << endl;
@@ -133,7 +134,7 @@ int ParsimonyCommand::execute() {
 		
 		//this loop fills the cumulative maps and put 0.0000 in the score freq map to make it easier to print.
 		for (it = validScores.begin(); it != validScores.end(); it++) { 
-			if (randomtree == 0) {
+			if (randomtree == "") {
 				it2 = uscoreFreq.find(it->first);
 				//user data has that score 
 				if (it2 != uscoreFreq.end()) { uscoreFreq[it->first] /= T.size(); ucumul+= it2->second;  }
@@ -158,8 +159,11 @@ int ParsimonyCommand::execute() {
 		printParsimonyFile();
 		printUSummaryFile();
 		
-		//reset randomTree parameter to 0
-		globaldata->setRandomTree("0");
+		//reset globaldata's treemap if you just did random distrib
+		if (randomtree != "") { globaldata->gTreemap = savetmap; }
+		
+		//reset randomTree parameter to ""
+		globaldata->setRandomTree("");
 		
 		return 0;
 		
@@ -178,7 +182,7 @@ int ParsimonyCommand::execute() {
 void ParsimonyCommand::printParsimonyFile() {
 	try {
 		//column headers
-		if (randomtree == 0) {
+		if (randomtree == "") {
 			out << "Score" << '\t' << "UserFreq" << '\t' << "UserCumul" << '\t' << "RandFreq" << '\t' << "RandCumul" << endl;
 		}else {
 			out << "Score" << '\t' << "RandFreq" << '\t' << "RandCumul" << endl;
@@ -189,7 +193,7 @@ void ParsimonyCommand::printParsimonyFile() {
 		
 		//print each line
 		for (it = validScores.begin(); it != validScores.end(); it++) { 
-			if (randomtree == 0) {
+			if (randomtree == "") {
 				out << setprecision(6) << it->first << '\t' << '\t' << uscoreFreq[it->first] << '\t' << uCumul[it->first] << '\t' << rscoreFreq[it->first] << '\t' << rCumul[it->first] << endl; 
 			}else{
 				out << setprecision(6) << it->first << '\t' << '\t' << rscoreFreq[it->first] << '\t' << rCumul[it->first] << endl; 	

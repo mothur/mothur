@@ -34,12 +34,14 @@ int HelpCommand::execute(){
 	}else if (globaldata->helpRequest == "read.otu") {
 		cout << "The read.otu command must be run before you execute a collect.single, rarefaction.single, summary.single, " << "\n";
 		cout << "collect.shared, rarefaction.shared or summary.shared command.   Mothur will generate a .list, .rabund and .sabund upon completion of the cluster command " << "\n";
-		cout << "or you may use your own. The read.otu command parameter options are list, rabund, sabund, group and order." << "\n";
+		cout << "or you may use your own. The read.otu command parameter options are list, rabund, sabund, group, order, line and label." << "\n";
 		cout << "The read.otu command can be used in two ways.  The first is to read a list, rabund or sabund and run the collect.single, rarefaction.single or summary.single." << "\n";
-		cout << "For this use the read.otu command should be in the following format: read.otu(list=yourListFile, order=yourOrderFile)." << "\n";
+		cout << "For this use the read.otu command should be in the following format: read.otu(list=yourListFile, order=yourOrderFile, label=yourLabels)." << "\n";
 		cout << "The list, rabund or sabund parameter is required, but you may only use one of them." << "\n";
+		cout << "The line and label parameters are optional but you may not use both the line and label parameters at the same time." << "\n";
+		cout << "The label and line parameters are used to read specific lines in your input." << "\n";
 		cout << "The second way to use the read.otu command is to read a list and a group so you can use the collect.shared, rarefaction.shared or summary.shared commands." << "\n";
-		cout << "In this case the read.otu command should be in the following format: read.otu(list=yourListFile, group=yourGroupFile).  " << "\n";
+		cout << "In this case the read.otu command should be in the following format: read.otu(list=yourListFile, group=yourGroupFile, line=yourLines).  " << "\n";
 		cout << "The list parameter and group paramaters are required. When using the command the second way read.otu command parses the .list file" << "\n";
 		cout << "and separates it into groups.  It outputs a .shared file containing the OTU information for each group. The read.otu command also outputs a .list file for each group. " << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile)." << "\n" << "\n";
@@ -125,13 +127,13 @@ int HelpCommand::execute(){
 		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. line), '=' and parameters (i.e.yourLines)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "parsimony") { 
-		cout << "The parsimony command can only be executed after a successful read.tree command, unless you use the randomtree parameter." << "\n";
-		cout << "The parsimony command parameters are randomtree and iters.  No parameters are required." << "\n";
-		cout << "The parsimony command should be in the following format: parsimony(randomtree=yourRandomTreeValue, iters=yourIters)." << "\n";
-		cout << "Example parsimony(randomtree=1, iters=500)." << "\n";
-		cout << "The default value for randomTree is 0 (meaning you want to use the trees in your inputfile, randomtree=1 means you just want the random distribution of trees)," << "\n";
+		cout << "The parsimony command can only be executed after a successful read.tree command, unless you use the random parameter." << "\n";
+		cout << "The parsimony command parameters are random and iters.  No parameters are required." << "\n";
+		cout << "The parsimony command should be in the following format: parsimony(random=yourOutputFilename, iters=yourIters)." << "\n";
+		cout << "Example parsimony(random=out, iters=500)." << "\n";
+		cout << "The default value for random is "" (meaning you want to use the trees in your inputfile, randomtree=out means you just want the random distribution of trees outputted to out.rd_parsimony)," << "\n";
 		cout << "and iters is 1000.  The parsimony command output three files: .parsimony, .psummary and .pdistrib, their descriptions are in the manual." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile)." << "\n" << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. random), '=' and parameters (i.e.yourOutputFilename)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "unifrac.weighted") { 
 		cout << "The unifrac.weighted command can only be executed after a successful read.tree command." << "\n";
 		cout << "The unifrac.weighted command parameters are groups and iters.  No parameters are required." << "\n";

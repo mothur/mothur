@@ -17,8 +17,11 @@ int DeconvoluteCommand::execute() {
 		//prepare filenames and open files
 		filename = globaldata->getFastaFile();
 		outputFileName = (getRootName(filename) + "names");
+		outFastafile = (getRootName(filename) + "uni_fasta");
+		
 		openInputFile(filename, in);
 		openOutputFile(outputFileName, out);
+		openOutputFile(outFastafile, outFasta);
 	
 		//constructor reads in file and store internally
 		fastamap = new FastaMap();
@@ -30,6 +33,7 @@ int DeconvoluteCommand::execute() {
 		//file contains 2 columns separated by tabs.  the first column is the groupname(name of first sequence found.
 		//the second column is the list of names of identical sequences separated by ','.
 		fastamap->print(out);
+		fastamap->printCondensedFasta(outFasta);
 	
 		return 0;
 	}

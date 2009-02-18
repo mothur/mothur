@@ -107,3 +107,22 @@ void FastaMap::print(ostream& out){ //prints data
 	}
 }
 /*******************************************************************************/
+void FastaMap::printCondensedFasta(ostream& out){ //prints data
+	try {
+		// two column file created with groupname and them list of identical sequence names
+		for (it = data.begin(); it != data.end(); it++) {
+			out << ">" << it->second.groupname << endl;
+			out << it->first << endl;
+		}
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the FastaMap class Function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the FastaMap class function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+/*******************************************************************************/
+

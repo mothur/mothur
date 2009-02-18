@@ -75,6 +75,8 @@ bool InteractEngine::getInput(){
 
 			cout << endl << "mothur > ";
 			getline(cin, input);
+			if (cin.eof()) { input = "quit()"; }
+			
 			errorFree = errorCheckor->checkInput(input);
 			if (errorFree == true) {
 				CommandOptionParser parser(input);
@@ -148,7 +150,9 @@ bool BatchEngine::getInput(){
 		while(quitCommandCalled == 0){
 		
 			getline(inputBatchFile, input);
-			cout << endl << "dotur > " << input << endl;
+			if (inputBatchFile.eof()) { input = "quit()"; }
+			
+			cout << endl << "mothur > " << input << endl;
 			errorFree = errorCheckor->checkInput(input);
 			if (errorFree == true) {
 				CommandOptionParser parser(input);
