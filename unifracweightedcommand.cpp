@@ -151,14 +151,14 @@ int UnifracWeightedCommand::execute() {
 			
 			//find the signifigance of the score for summary file
 			for (int t = 0; t < numComp; t++) {
-				float rcumul = 0.0000;
+				float rcumul = 1.0000;
 				for (it = validScores[t].begin(); it != validScores[t].end(); it++) { 
 					//make rscoreFreq map and rCumul
 					it2 = rscoreFreq[t].find(it->first);
-					//get percentage of random trees with that info
-					if (it2 != rscoreFreq[t].end()) {  rscoreFreq[t][it->first] /= iters; rcumul+= it2->second;  }
-					else { rscoreFreq[t][it->first] = 0.0000; } //no random trees with that score
 					rCumul[t][it->first] = rcumul;
+					//get percentage of random trees with that info
+					if (it2 != rscoreFreq[t].end()) {  rscoreFreq[t][it->first] /= iters; rcumul-= it2->second;  }
+					else { rscoreFreq[t][it->first] = 0.0000; } //no random trees with that score
 				}
 			}
 			
@@ -175,24 +175,24 @@ int UnifracWeightedCommand::execute() {
 		
 		rCumul.resize(numComp);
 		for (int b = 0; b < numComp; b++) {
-			float ucumul = 0.0000;
-			float rcumul = 0.0000;
+			float ucumul = 1.0000;
+			float rcumul = 1.0000;
 			//this loop fills the cumulative maps and put 0.0000 in the score freq map to make it easier to print.
-			for (it = validScores[b].end(); it == validScores[b].begin(); it--) { 
+			for (it = validScores[b].begin(); it != validScores[b].end(); it++) { 
 				it2 = uscoreFreq[b].find(it->first);
-				//user data has that score 
-				if (it2 != uscoreFreq[b].end()) { uscoreFreq[b][it->first] /= T.size(); ucumul+= it2->second;  }
-				else { uscoreFreq[b][it->first] = 0.0000; } //no user trees with that score
 				//make uCumul map
 				uCumul[b][it->first] = ucumul;
+				//user data has that score 
+				if (it2 != uscoreFreq[b].end()) { uscoreFreq[b][it->first] /= T.size(); ucumul-= it2->second;  }
+				else { uscoreFreq[b][it->first] = 0.0000; } //no user trees with that score
 			
 				//make rscoreFreq map and rCumul
 				it2 = totalrscoreFreq[b].find(it->first);
-				//get percentage of random trees with that info
-				if (it2 != totalrscoreFreq[b].end()) {  totalrscoreFreq[b][it->first] /= (iters * T.size()); rcumul+= it2->second;  }
-				else { totalrscoreFreq[b][it->first] = 0.0000; } //no random trees with that score
 				rCumul[b][it->first] = rcumul;
-			}
+				//get percentage of random trees with that info
+				if (it2 != totalrscoreFreq[b].end()) {  totalrscoreFreq[b][it->first] /= (iters * T.size()); rcumul-= it2->second;  }
+				else { totalrscoreFreq[b][it->first] = 0.0000; } //no random trees with that score
+							}
 		}
 		
 		printWeightedFile();

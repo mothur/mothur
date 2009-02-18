@@ -46,8 +46,8 @@ class UnifracUnweightedCommand : public Command {
 		map<float, float> rscoreFreq;  //unweighted score, number of random trees with that score.
 		map<float, float> uscoreFreq;  //unweighted, number of user trees with that score.
 		map<float, float> totalrscoreFreq;  //unweighted score, number of random trees with that score.
-		map<float, float> rCumul;		//unweighted score, cumulative percentage of number of random trees with that score or lower.
-		map<float, float> uCumul;  //unweighted, cumulative percentage of number of user trees with that score or lower .
+		map<float, float> rCumul;		//unweighted score, cumulative percentage of number of random trees with that score or higher.
+		map<float, float> uCumul;  //unweighted, cumulative percentage of number of user trees with that score or higher .
 		map<float, float>::iterator it;
 		map<float, float>::iterator it2;
 		

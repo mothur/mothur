@@ -113,12 +113,13 @@ int UnifracUnweightedCommand::execute() {
 			saveRandomScores(); //save all random scores for unweighted file
 			
 			//find the signifigance of the score
-			float rcumul = 0.0000;
+			float rcumul = 1.0000;
 			for (it = rscoreFreq.begin(); it != rscoreFreq.end(); it++) { 
+				rCumul[it->first] = rcumul;
 				//get percentage of random trees with that info
 				rscoreFreq[it->first] /= iters; 
-				rcumul+= it->second;  
-				rCumul[it->first] = rcumul;
+				rcumul-= it->second;  
+				
 			}
 			
 			//save the signifigance of the users score for printing later
@@ -130,30 +131,28 @@ int UnifracUnweightedCommand::execute() {
 			rCumul.clear();
 		}
 		
-		float ucumul = 0.0000;
-		float rcumul = 0.0000;
+		float ucumul = 1.0000;
+		float rcumul = 1.0000;
 		//this loop fills the cumulative maps and put 0.0000 in the score freq map to make it easier to print.
 		for (it = validScores.begin(); it != validScores.end(); it++) { 
 			it2 = uscoreFreq.find(it->first);
-			//user data has that score 
-			if (it2 != uscoreFreq.end()) { uscoreFreq[it->first] /= T.size(); ucumul+= it2->second;  }
-			else { uscoreFreq[it->first] = 0.0000; } //no user trees with that score
 			//make uCumul map
 			uCumul[it->first] = ucumul;
-			
+			//user data has that score 
+			if (it2 != uscoreFreq.end()) { uscoreFreq[it->first] /= T.size(); ucumul-= it2->second;  }
+			else { uscoreFreq[it->first] = 0.0000; } //no user trees with that score
+						
 			//make rscoreFreq map and rCumul
 			it2 = totalrscoreFreq.find(it->first);
-			//get percentage of random trees with that info
-			if (it2 != totalrscoreFreq.end()) {  totalrscoreFreq[it->first] /= (iters*T.size()); rcumul+= it2->second;  }
-			else { totalrscoreFreq[it->first] = 0.0000; } //no random trees with that score
 			rCumul[it->first] = rcumul;
+			//get percentage of random trees with that info
+			if (it2 != totalrscoreFreq.end()) {  totalrscoreFreq[it->first] /= (iters*T.size()); rcumul-= it2->second;  }
+			else { totalrscoreFreq[it->first] = 0.0000; } //no random trees with that score
+			
 		}
 		
 		printUnweightedFile();
 		printUWSummaryFile();
-		
-		//reset randomTree parameter to 0
-		globaldata->setRandomTree("0");
 		
 		delete randT;
 		
