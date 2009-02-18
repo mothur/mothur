@@ -268,12 +268,6 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "label" )			{ label = value; }
 				if (parameter == "abund" )          { abund = value; }
 				if (parameter == "random" )			{ randomtree = value;	}
-
-				if (parameter == "comparegroups") { //stores groups to be compared
-					sharedGroups.clear(); //clears out old values
-					globaldata->splitAtDash(value, sharedGroups);
-				}
-
 			}
 			
 			//gets the last parameter and value
@@ -345,11 +339,6 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "label" )			{ label = value; }
 				if (parameter == "random" )			{ randomtree = value;	}
 				if (parameter == "abund" )          { abund = value; }
-
-				if (parameter == "comparegroups") { //stores groups to be compared
-					sharedGroups.clear(); //clears out old values
-					globaldata->splitAtDash(value, sharedGroups);
-				}
 			}
 		}
 		

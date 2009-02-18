@@ -85,7 +85,6 @@
 		37D9289F0F21331F001D4494 /* validparameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D928530F21331F001D4494 /* validparameter.cpp */; };
 		37E5F3E30F29FD4200F8D827 /* treenode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37E5F3E20F29FD4200F8D827 /* treenode.cpp */; };
 		37E5F4920F2A3DA800F8D827 /* readtreecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37E5F4910F2A3DA800F8D827 /* readtreecommand.cpp */; };
-		7E44EBD10F3235D900B0D45D /* makefile in Sources */ = {isa = PBXBuildFile; fileRef = 7E44EBD00F32358B00B0D45D /* makefile */; };
 		8DD76F6A0486A84900D96B5E /* Mothur.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6859E8B029090EE04C91782 /* Mothur.1 */; };
 		EBA52D2C0F378B0F00122C15 /* getgroupcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EBA52D2B0F378B0F00122C15 /* getgroupcommand.cpp */; };
 		EBFD67840F33876C00883537 /* getlabelcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EBFD67830F33876C00883537 /* getlabelcommand.cpp */; };
@@ -269,7 +268,6 @@
 		37E5F3E20F29FD4200F8D827 /* treenode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = treenode.cpp; sourceTree = SOURCE_ROOT; };
 		37E5F4900F2A3DA800F8D827 /* readtreecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readtreecommand.h; sourceTree = SOURCE_ROOT; };
 		37E5F4910F2A3DA800F8D827 /* readtreecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readtreecommand.cpp; sourceTree = SOURCE_ROOT; };
-		7E44EBD00F32358B00B0D45D /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
 		8DD76F6C0486A84900D96B5E /* mothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = mothur; sourceTree = BUILT_PRODUCTS_DIR; };
 		C6859E8B029090EE04C91782 /* Mothur.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = Mothur.1; sourceTree = "<group>"; };
 		EBA52D2A0F378B0F00122C15 /* getgroupcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getgroupcommand.h; sourceTree = "<group>"; };
@@ -324,7 +322,6 @@
 				37D927D60F21331F001D4494 /* display.h */,
 				37D927D80F21331F001D4494 /* engine.hpp */,
 				37D927D70F21331F001D4494 /* engine.cpp */,
-				7E44EBD00F32358B00B0D45D /* makefile */,
 				37D928B10F213472001D4494 /* errorcheckor */,
 				37D927DE0F21331F001D4494 /* fileoutput.h */,
 				37D927DD0F21331F001D4494 /* fileoutput.cpp */,
@@ -647,7 +644,6 @@
 				37E5F3E30F29FD4200F8D827 /* treenode.cpp in Sources */,
 				37E5F4920F2A3DA800F8D827 /* readtreecommand.cpp in Sources */,
 				379293C30F2DE73400B9034A /* treemap.cpp in Sources */,
-				7E44EBD10F3235D900B0D45D /* makefile in Sources */,
 				EBFD67840F33876C00883537 /* getlabelcommand.cpp in Sources */,
 				EBFD67E80F339AAA00883537 /* getlinecommand.cpp in Sources */,
 				EBA52D2C0F378B0F00122C15 /* getgroupcommand.cpp in Sources */,

@@ -35,7 +35,7 @@ SummaryCommand::SummaryCommand(){
 					convert(globaldata->getAbund(), abund);
 					if(abund < 5)
 						abund = 10;
-					sumCalculators.push_back(new Ace());
+					sumCalculators.push_back(new Ace(abund));
 				}else if(globaldata->Estimators[i] == "jack"){
 					sumCalculators.push_back(new Jackknife());
 				}else if(globaldata->Estimators[i] == "shannon"){
