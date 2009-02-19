@@ -142,7 +142,6 @@ int CollectSharedCommand::execute(){
 		for(i = globaldata->labels.begin(); i != globaldata->labels.end(); ++i)
 			if(orderList.count(*i) == 0)
 				cout << "'" << *i << "'" << " is not a valid label.\n";
-		globaldata->clearLabels();
 		for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}	
 		return 0;
 	}
