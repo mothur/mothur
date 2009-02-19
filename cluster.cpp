@@ -10,7 +10,6 @@
 #include "cluster.hpp"
 #include "rabundvector.hpp"
 #include "listvector.hpp"
-#include <exception>
 
 /***********************************************************************/
 

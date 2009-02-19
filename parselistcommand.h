@@ -9,9 +9,6 @@
  *
  */
 
-#include <iostream>
-#include <fstream>
-#include <map>
 #include "command.hpp"
 #include "rabundvector.hpp"
 #include "sharedlistvector.h"

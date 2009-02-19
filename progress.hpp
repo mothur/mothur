@@ -1,7 +1,8 @@
 #ifndef PROGRESS_H
 #define PROGRESS_H
 
-#include <string>
+#include "mothur.h"
+
 using namespace std;
 
 class Progress {

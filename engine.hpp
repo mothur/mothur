@@ -12,9 +12,7 @@
  
 
 
-#include <vector>
-#include <set>
-#include <string>
+#include "mothur.h"
 
 using namespace std;
 

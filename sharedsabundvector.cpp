@@ -9,9 +9,7 @@
 
 #include "sharedsabundvector.h"
 #include "sabundvector.hpp"
-#include "datavector.hpp"
 #include "utilities.hpp"
-#include <exception>
 
 using namespace std;
 

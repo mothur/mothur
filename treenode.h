@@ -12,12 +12,7 @@
 
 using namespace std;
 
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <iomanip>
-#include <vector>
-#include <map>
+#include "mothur.h"
 
 /* This class represents a node on a tree. */
 

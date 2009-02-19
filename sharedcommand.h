@@ -9,9 +9,6 @@
  *
  */
 
-#include <iostream>
-#include <fstream>
-#include <map>
 #include "command.hpp"
 #include "sharedlistvector.h"
 #include "inputdata.h"

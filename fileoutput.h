@@ -1,10 +1,7 @@
 #ifndef FILEOUTPUT_H
 #define FILEOUTPUT_H
 
-#include <iostream>
-#include <fstream>
-#include <iomanip>
-#include <vector>
+#include "mothur.h"
 #include "utilities.hpp"
 #include "globaldata.hpp"
 

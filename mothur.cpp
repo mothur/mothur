@@ -6,13 +6,8 @@
  *  Copyright 2008 Patrick D. Schloss. All rights reserved.
  *
  */
-#include <string>
-#include <iostream>
-#include <iomanip>
-#include <fstream>
-#include <sstream>
-#include <exception>
-
+ 
+#include "mothur.h"
 #include "engine.hpp"
 #include "globaldata.hpp"
 

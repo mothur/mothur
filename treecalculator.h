@@ -12,12 +12,7 @@
 
 using namespace std;
 
-#include <vector>
-#include <cmath>
-#include <math.h>
-#include <string>
-#include <map>
-#include <algorithm>
+#include "mothur.h"
 #include "utilities.hpp"
 #include "tree.h"
 

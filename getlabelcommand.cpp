@@ -11,9 +11,6 @@
 
 
 
-
-
-
 GetlabelCommand::GetlabelCommand(){
 	try {
 		globaldata = GlobalData::getInstance();

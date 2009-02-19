@@ -2,7 +2,7 @@
 #define SPARSEMATRIX_H
 
 #include "utilities.hpp"
-#include <list>
+#include "mothur.h"
 
 
 class ListVector;

@@ -9,10 +9,8 @@
  *
  */
 
-#include <iostream>
-#include <fstream>
-#include "globaldata.hpp"
 #include "command.hpp"
+#include "globaldata.hpp"
 #include "rabundvector.hpp"
 #include "sabundvector.hpp"
 #include "listvector.hpp"

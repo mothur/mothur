@@ -14,9 +14,7 @@
 
 using namespace std;
 
-#include <iostream>
-#include <fstream>
-
+#include "mothur.h"
 
 class Command {
 	public:

@@ -3,10 +3,7 @@
 
 using namespace std;
 
-#include <iostream>
-#include <string>
-#include <vector>
-#include <map>
+#include "mothur.h"
 
 /* This class is parent to listvector, ordervector, rabundvector, sabundvector, sharedordervector, sharedrabundvector, sharedsabundvector. 
 	The child classes all contain OTU information in different forms. */

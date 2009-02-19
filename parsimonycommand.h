@@ -9,11 +9,6 @@
  *
  */
 
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <map>
-#include <cmath>
 #include "command.hpp"
 #include "parsimony.h"
 #include "treemap.h"

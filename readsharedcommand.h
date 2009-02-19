@@ -8,8 +8,7 @@
  *  Copyright 2009 Schloss Lab UMASS Amherst. All rights reserved.
  *
  */
-#include <iostream>
-#include <fstream>
+
 #include "command.hpp"
 #include "readmatrix.hpp"
 #include "inputdata.h"

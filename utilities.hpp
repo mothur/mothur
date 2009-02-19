@@ -3,14 +3,7 @@
 
 using namespace std;
 
-#include <iostream>
-#include <iomanip>
-#include <fstream>
-#include <sstream>
-#include <cmath>
-#include <vector>
-#include <stdexcept>
-#include <set>
+#include "mothur.h"
 
 typedef unsigned long long ull;
 

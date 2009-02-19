@@ -12,10 +12,7 @@
  
 using namespace std;
  
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <map>
+#include "mothur.h"
 #include "utilities.hpp"
 
 

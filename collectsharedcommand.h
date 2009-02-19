@@ -9,9 +9,7 @@
  *
  */
 
-#include <iostream>
-#include <fstream>
-#include <vector>
+
 #include "command.hpp"
 #include "sharedordervector.h"
 #include "sharedlistvector.h"

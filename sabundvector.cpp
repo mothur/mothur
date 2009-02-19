@@ -9,9 +9,7 @@
 using namespace std;
 
 #include "sabundvector.hpp"
-#include "datavector.hpp"
 #include "utilities.hpp"
-#include <exception>
 
 /***********************************************************************/
 

@@ -11,9 +11,7 @@
  */
 using namespace std;
 
-#include <iostream>
-#include <string>
-#include <map>
+#include "mothur.h"
 
 //This class contains a list of all valid parameters in Mothur.  
 //It has a function which will tell you if your parameter is valid.

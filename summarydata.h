@@ -1,7 +1,7 @@
 #ifndef SUMMARYDATA_H
 #define SUMMARYDATA_H
 
-#include <set>
+#include "mothur.h"
 #include "sabundvector.hpp"
 #include "display.h"
 #include "observable.h"

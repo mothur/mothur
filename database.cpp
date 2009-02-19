@@ -9,11 +9,7 @@
 
 using namespace std;
 
-#include <string>
-#include <vector>
-#include <fstream>
-#include <iostream>
-
+#include "mothur.h"
 #include "sequence.hpp"
 #include "database.hpp"
 

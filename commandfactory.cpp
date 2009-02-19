@@ -31,7 +31,7 @@
 #include "parsimonycommand.h"
 #include "unifracunweightedcommand.h"
 #include "unifracweightedcommand.h"
-#include <exception>
+#include "mothur.h"
 
 
 /***********************************************************/

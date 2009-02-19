@@ -9,15 +9,11 @@
 
 using namespace std;
 
-#include <string>
-#include <map>
 #include "utilities.hpp"
 #include "sparsematrix.hpp"
 #include "progress.hpp"
 #include "listvector.hpp"
 #include "rabundvector.hpp"
-#include <exception>
-
 #include "readmatrix.hpp"
 
 

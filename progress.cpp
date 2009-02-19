@@ -7,10 +7,8 @@
  *
  */
 
-#include <iostream>
-#include <string>
+
 #include "progress.hpp"
-#include <exception>
 
 using namespace std;
 

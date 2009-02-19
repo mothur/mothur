@@ -1,7 +1,7 @@
 #ifndef COLLECTORSCURVEDATA_H
 #define COLLECTORSCURVEDATA_H
 
-#include <set>
+#include "mothur.h"
 #include "sabundvector.hpp"
 #include "sharedrabundvector.h"
 #include "display.h"

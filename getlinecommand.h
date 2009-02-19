@@ -10,8 +10,6 @@
  *
  */
 
-#include <iostream>
-#include <fstream>
 #include "command.hpp"
 #include "readmatrix.hpp"
 

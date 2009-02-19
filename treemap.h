@@ -9,10 +9,7 @@
  *
  */
 
-#include <map>
-#include <string>
-#include <iostream>
-#include <fstream>
+#include "mothur.h"
 #include "utilities.hpp"
 
 /* This class is used by the read.tree command to build the tree container. */

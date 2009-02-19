@@ -1,10 +1,6 @@
-#include <vector>
-#include <iostream>
-#include <list>
 #include "utilities.hpp"
 #include "sparsematrix.hpp"
 #include "listvector.hpp"
-#include <exception>
 
 using namespace std;
 
