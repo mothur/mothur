@@ -12,13 +12,6 @@
  
 using namespace std;
 
-#include <iostream>
-#include <fstream>
-#include <iomanip>
-#include <vector>
-#include <string>
-#include <sstream>
-#include <map>
 #include "sharedrabundvector.h"
 #include "sharedlistvector.h"
 #include "globaldata.hpp"

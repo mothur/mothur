@@ -3,9 +3,7 @@
 
 using namespace std;
 
-#include <iostream>
-#include <list>
-
+#include "mothur.h"
 #include "utilities.hpp"
 #include "sparsematrix.hpp"
 #include "rabundvector.hpp"

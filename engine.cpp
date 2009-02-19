@@ -12,13 +12,6 @@
  */
 using namespace std;
 
-#include <string>
-#include <iostream>
-#include <iomanip>
-#include <fstream>
-#include <vector>
-#include <set>
-#include <exception>
 
 #include "utilities.hpp"
 #include "globaldata.hpp"

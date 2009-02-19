@@ -5,7 +5,7 @@
 #include "calculator.h"
 #include "fileoutput.h"
 #include "display.h"
-#include <vector>
+
 
 using namespace std;
 

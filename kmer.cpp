@@ -9,9 +9,7 @@
 
 using namespace std;
 
-#include <string>
-#include <vector>
-
+#include "mothur.h"
 #include "kmer.hpp"
 
 /**************************************************************************************************/

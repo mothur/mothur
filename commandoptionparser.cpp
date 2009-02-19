@@ -7,14 +7,12 @@
  *
  */
 
-#include <string>
 
 using namespace std;
 
 #include "globaldata.hpp"
 #include "commandoptionparser.hpp"
-#include <exception>
-#include <iostream>
+#include "mothur.h"
 
 //**********************************************************************************************************************
 //This Function parses through the command line and pulls out the command then sends the options to  the parseGlobalData

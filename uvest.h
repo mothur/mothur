@@ -15,11 +15,7 @@ It is used by sharedJAbund and SharedSorensonAbund. */
  
 using namespace std;
 
-#include <vector>
-#include <iostream>
-#include <fstream>
-#include <cmath>
-
+#include "mothur.h"
 #include "sharedrabundvector.h"
 
 typedef vector<double> EstOutput;

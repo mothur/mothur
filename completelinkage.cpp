@@ -1,6 +1,6 @@
 
 #include "cluster.hpp"
-#include <exception>
+#include "mothur.h"
 
 /***********************************************************************/
 

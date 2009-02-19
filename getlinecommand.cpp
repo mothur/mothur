@@ -10,10 +10,6 @@
 #include "getlinecommand.h"
 
 
-
-
-
-
 GetlineCommand::GetlineCommand(){
 	try {
 		globaldata = GlobalData::getInstance();

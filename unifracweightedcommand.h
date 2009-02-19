@@ -10,11 +10,6 @@
  *
  */
 
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <map>
-#include <cmath>
 #include "command.hpp"
 #include "weighted.h"
 #include "treemap.h"

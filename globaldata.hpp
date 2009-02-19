@@ -1,16 +1,7 @@
 #ifndef GLOBALDATA_HPP
 #define GLOBALDATA_HPP
 
-#include <string>
-#include <vector>
-#include <set>
-#include <iostream>
-#include <iomanip>
-#include <map>
-#include <sstream>
-#include <stdexcept>
-#include <exception>
-
+#include "mothur.h"
 #include "groupmap.h"
 #include "treemap.h"
 

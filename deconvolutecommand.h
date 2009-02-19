@@ -9,8 +9,6 @@
  *
  */
 
-#include <iostream>
-#include <fstream>
 #include "command.hpp"
 #include "utilities.hpp"
 #include "fastamap.h"

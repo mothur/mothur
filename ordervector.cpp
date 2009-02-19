@@ -10,9 +10,8 @@
 using namespace std;
 
 #include "ordervector.hpp"
-#include "datavector.hpp"
 #include "utilities.hpp"
-#include <exception>
+
 
 /***********************************************************************/
 

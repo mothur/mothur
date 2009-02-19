@@ -8,9 +8,8 @@
  */
 using namespace std;
  
-#include "datavector.hpp"
+
 #include "utilities.hpp"
-#include <exception>
 #include "rabundvector.hpp"
 #include "sabundvector.hpp"
 #include "ordervector.hpp"

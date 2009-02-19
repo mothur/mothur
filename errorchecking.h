@@ -9,8 +9,7 @@
  *
  */
 
-#include <iostream>
-#include <map>
+#include "mothur.h"
 #include "globaldata.hpp"
 #include "validcommands.h"
 #include "validparameter.h"

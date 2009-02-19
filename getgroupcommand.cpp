@@ -10,9 +10,6 @@
 #include "getgroupcommand.h"
 
 
-
-
-
 GetgroupCommand::GetgroupCommand(){
 	try {
 		globaldata = GlobalData::getInstance();

@@ -9,12 +9,10 @@
 
 using namespace std;
 
-#include <map>
-#include <exception>
+
 #include "sabundvector.hpp"
 #include "rabundvector.hpp"
 #include "ordervector.hpp"
-#include "datavector.hpp"
 #include "utilities.hpp"
 #include "listvector.hpp"
 

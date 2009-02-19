@@ -21,7 +21,7 @@ NoCommand::~NoCommand(){}
 
 int NoCommand::execute(){
 	//Could choose to give more help here?fdsah
-	cout << "Invalid command - choices are read.dist(), read.otu(), read.tree(), cluster(), deconvolute(), collect.single(), collect.shared(), rarefaction.single(), summary.single(), summary.shared(), quit(), help()." << "\n";
+	cout << "Invalid command." << "\n";
 	cout << "For more information on command parameters use the help() command." << "\n";
 	return 0;
 }

@@ -1,9 +1,5 @@
 using namespace std;
 
-#include <string>
-#include <map>
-#include <exception>
-
 #include "nameassignment.hpp"
 
 //**********************************************************************************************************************

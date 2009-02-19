@@ -1,10 +1,7 @@
 #ifndef SUMMARY_H
 #define SUMMARY_H
 
-#include <iostream>
-#include <iomanip>
-#include <fstream>
-#include <string>
+#include "mothur.h"
 #include "display.h"
 
 

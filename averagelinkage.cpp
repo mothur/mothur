@@ -4,7 +4,7 @@
 #include "cluster.hpp"
 #include "rabundvector.hpp"
 #include "sparsematrix.hpp"
-#include <exception>
+#include "mothur.h"
 
 /* This class implements the average UPGMA, average neighbor clustering algorithm */
 

@@ -2,8 +2,6 @@
 #define LIST_H
 
 #include "datavector.hpp"
-#include <iostream>
-#include <map>
 
 /* This class is a child to datavector.  It represents OTU information at a certain distance. 
 	A list vector can be converted into and ordervector, rabundvector or sabundvector.

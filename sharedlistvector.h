@@ -15,8 +15,6 @@
 #include "globaldata.hpp"
 #include "sharedrabundvector.h"
 #include "sharedsabundvector.h"
-#include <iostream>
-#include <map>
 
 /* This class is a child to datavector.  It represents OTU information at a certain distance. 
 	A sharedlistvector can be converted into a sharedordervector, sharedrabundvector or sharedsabundvectorand 

@@ -8,7 +8,6 @@
  */
 
 #include "errorchecking.h"
-#include <math.h>
 
 /*******************************************************/
 
@@ -65,7 +64,7 @@ void ErrorCheck::refresh() {
 		"summary",            //22
 		"sharedrarefaction",  //23
 		"sharedsummary",      //24
-		"comparegroups",      //25
+		"groups",			  //25
 		"abund",              //26
 		};
 	

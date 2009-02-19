@@ -1,10 +1,7 @@
 #ifndef INPUTDATA_H
 #define INPUTDATA_H
 
-#include <iostream>
-#include <iomanip>
-#include <string>
-#include <fstream>
+#include "mothur.h"
 #include "ordervector.hpp"
 #include "sharedlistvector.h"
 #include "sharedordervector.h"

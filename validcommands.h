@@ -11,9 +11,7 @@
  */
 using namespace std;
 
-#include <string>
-#include <iostream>
-#include <map>
+#include "mothur.h"
 
 //This class contains a list of all valid commands in Mothur.  
 //It has a function which will tell you if your command is valid.

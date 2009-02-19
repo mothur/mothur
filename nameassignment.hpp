@@ -3,8 +3,7 @@
 
 using namespace std;
 
-#include <string>
-#include <map>
+#include "mothur.h"
 #include "utilities.hpp"
 #include "listvector.hpp"
 
