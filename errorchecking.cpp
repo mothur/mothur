@@ -409,8 +409,6 @@ bool ErrorCheck::checkInput(string input) {
 			}
 		}
 
-		globaldata->clearAbund();
-
 		return errorFree;
 }
 
