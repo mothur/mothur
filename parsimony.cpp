@@ -28,7 +28,7 @@ EstOutput Parsimony::getValues(Tree* t) {
 
 			//add in all the groups the users wanted
 			for (it = t->tree[i].pGroups.begin(); it != t->tree[i].pGroups.end(); it++) {
-				if (inUsersGroups(it->first) == true) {  iSize++;  }
+				if (inUsersGroups(it->first, globaldata->Groups) == true) {  iSize++;  }
 			}
 
 			//if that leaves no groups give it 1 so it will cause no change to parent
@@ -37,7 +37,7 @@ EstOutput Parsimony::getValues(Tree* t) {
 			//add in all the groups the users wanted
 			for (it = t->tree[rc].pGroups.begin(); it != t->tree[rc].pGroups.end(); it++) {
 
-				if (inUsersGroups(it->first) == true) {  rcSize++;  }
+				if (inUsersGroups(it->first, globaldata->Groups) == true) {  rcSize++;  }
 			}
 			
 			//if that leaves no groups give it 1 so it will cause no change to parent
@@ -47,7 +47,7 @@ EstOutput Parsimony::getValues(Tree* t) {
 			//add in all the groups the users wanted
 			for (it = t->tree[lc].pGroups.begin(); it != t->tree[lc].pGroups.end(); it++) {
 
-				if (inUsersGroups(it->first) == true) {  lcSize++;  }
+				if (inUsersGroups(it->first, globaldata->Groups) == true) {  lcSize++;  }
 			}
 			
 			//if that leaves no groups give it 1 so it will cause no change to parent
@@ -75,22 +75,4 @@ EstOutput Parsimony::getValues(Tree* t) {
 	}
 
 }
-/**************************************************************************************************/
 
-bool Parsimony::inUsersGroups(string groupname) {
-	try {
-		for (int i = 0; i < globaldata->Groups.size(); i++) {
-			if (groupname == globaldata->Groups[i]) { return true; }
-		}
-		return false;
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Parsimony class Function inUsersGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Parsimony class function inUsersGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-}
-/**************************************************************************************************/

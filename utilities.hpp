@@ -4,6 +4,7 @@
 using namespace std;
 
 #include "mothur.h"
+#include "treemap.h"
 
 typedef unsigned long long ull;
 
@@ -333,8 +334,23 @@ inline void splitAtEquals(string& key, string& value){
 	}
 
 }
-/*******************************************************/
+/**************************************************************************************************/
 
-
+inline bool inUsersGroups(string groupname, vector<string> Groups) {
+	try {
+		for (int i = 0; i < Groups.size(); i++) {
+			if (groupname == Groups[i]) { return true; }
+		}
+		return false;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the utilities class Function inUsersGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the utilities class function inUsersGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
 
 #endif

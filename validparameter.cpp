@@ -34,12 +34,6 @@ ValidParameters::ValidParameters() {
 		parameters["iters"]				= "iters"; 
 		parameters["jumble"]			= "jumble"; 
 		parameters["freq"]				= "freq"; 
-		parameters["single"]			= "single"; 
-		parameters["rarefaction"]		= "rarefaction"; 
-		parameters["sharedrarefaction"]	= "sharedrarefaction";
-		parameters["shared"]			= "shared"; 
-		parameters["summary"]			= "summary"; 
-		parameters["sharedsummary"]		= "sharedsummary";
 		parameters["abund"]             = "abund";
 		parameters["random"]			= "random";
 		parameters["groups"]			= "groups";

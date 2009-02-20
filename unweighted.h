@@ -26,9 +26,7 @@ class Unweighted : public TreeCalculator  {
 	private:
 		GlobalData* globaldata;
 		EstOutput data;
-		vector<int> penalty;
 		TreeMap* tmap;
-		bool inUsersGroups(string);
 
 };
 

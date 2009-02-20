@@ -36,9 +36,12 @@ void ErrorCheck::refresh() {
 	cutoff = globaldata->getCutOff();
 	format = globaldata->getFormat();
 	method = globaldata->getMethod();
+	randomtree = globaldata->getRandomTree();
+	sharedfile = globaldata->getSharedFile();
+
 
 	
-	string p[] = {
+/*	string p[] = {
 		"phylip",              //0
 		"column",             //1
 		"list",               //2
@@ -155,10 +158,8 @@ void ErrorCheck::refresh() {
 	intParams[p[13]] = ipv2;
 	intParams[p[14]] = ipv3;
 	intParams[p[17]] = ipv4;
-	intParams[p[26]] = ipv5;
+	intParams[p[26]] = ipv5;   */
 	
-	randomtree = globaldata->getRandomTree();
-	sharedfile = globaldata->getSharedFile();
 }
 
 /*******************************************************/
@@ -203,15 +204,15 @@ bool ErrorCheck::checkInput(string input) {
 				
 				//is it a valid parameter
 				if (validParameter->isValidParameter(parameter) != true) { return false; }
-				if(!validCommandParameter(parameter,commandName)) { 
-					cout << "'" << parameter << "' is not a valid parameter for the " << commandName << " command.\n";
-					return false; 
-				}
-				if(!validParameterValue(value, parameter)) {
-					if(parameter.compare("precision") == 0)
-						cout << "The precision parameter can only take powers of 10 as a value (e.g. 10,1000,1000, etc.)\n";
-					else {
-					vector<double> bounds = intParams[parameter];
+				//if(!validCommandParameter(parameter,commandName)) { 
+				//	cout << "'" << parameter << "' is not a valid parameter for the " << commandName << " command.\n";
+				//	return false; 
+				//}
+				//if(!validParameterValue(value, parameter)) {
+				//	if(parameter.compare("precision") == 0)
+				//		cout << "The precision parameter can only take powers of 10 as a value (e.g. 10,1000,1000, etc.)\n";
+				//	else {
+				/*	vector<double> bounds = intParams[parameter];
 					double a = bounds.at(0);
 					double b = bounds.at(1);
 					double c = bounds.at(2);
@@ -243,7 +244,7 @@ bool ErrorCheck::checkInput(string input) {
 					}
 					}
 					return false;
-				}
+				} */
 
 				if (parameter == "phylip" )		{ phylipfile = value; }
 				if (parameter == "column" )		{ columnfile = value; }
@@ -275,11 +276,11 @@ bool ErrorCheck::checkInput(string input) {
 				splitAtEquals(parameter, value);
 				//is it a valid parameter
 				if (validParameter->isValidParameter(parameter) != true) { return false; }
-				if(!validCommandParameter(parameter,commandName)) { 
-					cout << "'" << parameter << "' is not a valid parameter for the " << commandName << " command.\n";
-					return false; 
-				}
-				if(!validParameterValue(value, parameter)) {
+			//	if(!validCommandParameter(parameter,commandName)) { 
+			//		cout << "'" << parameter << "' is not a valid parameter for the " << commandName << " command.\n";
+			//		return false; 
+			//	}
+			/*	if(!validParameterValue(value, parameter)) {
 					if(parameter.compare("precision") == 0)
 						cout << "The precision parameter can only take powers of 10 as a value (e.g. 10,1000,1000, etc.)\n";
 					else {
@@ -315,7 +316,7 @@ bool ErrorCheck::checkInput(string input) {
 					}
 					}
 					return false;
-				}
+				}*/
 				if (parameter == "phylip" )		{ phylipfile = value; }
 				if (parameter == "column" )		{ columnfile = value; }				
 				if (parameter == "list" )		{ listfile = value; }
@@ -485,7 +486,7 @@ void ErrorCheck::validateReadFiles() {
 }
 /*******************************************************/
 
-/******************************************************/
+/******************************************************
 //This function checks to see if the given paramter
 //is a valid paramter for the given command.
 bool ErrorCheck::validCommandParameter(string parameter, string commandName) {
@@ -507,7 +508,7 @@ bool ErrorCheck::validCommandParameter(string parameter, string commandName) {
 }
 /*******************************************************/
 
-/******************************************************/
+/******************************************************
 //This function checks to see if the given paramter value
 //is convertable into an int if that parameter requires it.
 bool ErrorCheck::validParameterValue(string value, string parameter) {

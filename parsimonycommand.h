@@ -51,6 +51,7 @@ class ParsimonyCommand : public Command {
 		void printParsimonyFile();  
 		void printUSummaryFile();
 		void getUserInput();
+		void setGroups();
 		
 };
 
