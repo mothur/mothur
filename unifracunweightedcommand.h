@@ -50,7 +50,8 @@ class UnifracUnweightedCommand : public Command {
 		
 		void printUWSummaryFile();
 		void printUnweightedFile();
-		void saveRandomScores();    
+		void saveRandomScores(); 
+		void setGroups();   
 		
 };
 

@@ -22,31 +22,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand() {
 		openOutputFile(sumFile, outSum);
 		distFile = globaldata->getTreeFile() + ".uwdistrib";
 		openOutputFile(distFile, outDist);
-
-		//if the user has not entered specific groups to analyze then do them all
-		if (globaldata->Groups.size() != 0) {
-			//check that groups are valid
-			for (int i = 0; i < globaldata->Groups.size(); i++) {
-				if (tmap->isValidGroup(globaldata->Groups[i]) != true) {
-					cout << globaldata->Groups[i] << " is not a valid group, and will be disregarded." << endl;
-					// erase the invalid group from globaldata->Groups
-					globaldata->Groups.erase (globaldata->Groups.begin()+i);
-				}
-			}
-			
-			//if the user only entered invalid groups
-			if (globaldata->Groups.size() == 0) { 
-				cout << "When using the groups parameter you must have at least 1 valid group. I will run the command using all the groups in your groupfile." << endl; 
-				for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
-					globaldata->Groups.push_back(tmap->namesOfGroups[i]);
-				}
-			}
-		}else {
-			for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
-				globaldata->Groups.push_back(tmap->namesOfGroups[i]);
-			}
-		}
-		
+		setGroups(); //sets users groups to analyze
 		convert(globaldata->getIters(), iters);  //how many random trees to generate
 		unweighted = new Unweighted(tmap);
 
@@ -70,11 +46,18 @@ int UnifracUnweightedCommand::execute() {
 		
 		//format output
 		outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
+		
+		outDist << "Groups Used ";
+		for (int m = 0; m < globaldata->Groups.size(); m++) {
+			outDist << globaldata->Groups[m] << " ";
+		}
+		outDist << endl;
+		
 		outDist << "Tree#" << '\t' << "Iter" << '\t' << "UWScore" << endl;
 		
 		//create new tree with same num nodes and leaves as users
 		randT = new Tree();
- 			
+				
 		//get pscores for users trees
 		for (int i = 0; i < T.size(); i++) {
 			cout << "Processing tree " << i+1 << endl;
@@ -183,6 +166,12 @@ void UnifracUnweightedCommand::printUnweightedFile() {
 	try {
 		//column headers
 		
+		out << "Groups Used ";
+		for (int m = 0; m < globaldata->Groups.size(); m++) {
+			out << globaldata->Groups[m] << " ";
+		}
+		out << endl;
+
 		out << "Score" << '\t' << "UserFreq" << '\t' << "UserCumul" << '\t' << "RandFreq" << '\t' << "RandCumul" << endl;
 				
 		//format output
@@ -210,6 +199,13 @@ void UnifracUnweightedCommand::printUnweightedFile() {
 void UnifracUnweightedCommand::printUWSummaryFile() {
 	try {
 		//column headers
+		
+		outSum << "Groups Used ";
+		for (int m = 0; m < globaldata->Groups.size(); m++) {
+			outSum << globaldata->Groups[m] << " ";
+		}
+		outSum << endl;
+
 		outSum << "Tree#" << '\t'  <<  "UWScore" << '\t' << '\t' << "UWSig" <<  endl;
 		
 		//format output
@@ -256,3 +252,43 @@ void UnifracUnweightedCommand::saveRandomScores() {
 }
 
 /***********************************************************/
+
+void UnifracUnweightedCommand::setGroups() {
+	try {
+		//if the user has not entered specific groups to analyze then do them all
+		if (globaldata->Groups.size() != 0) {
+			//check that groups are valid
+			for (int i = 0; i < globaldata->Groups.size(); i++) {
+				if (tmap->isValidGroup(globaldata->Groups[i]) != true) {
+					cout << globaldata->Groups[i] << " is not a valid group, and will be disregarded." << endl;
+					// erase the invalid group from globaldata->Groups
+					globaldata->Groups.erase (globaldata->Groups.begin()+i);
+				}
+			}
+			
+			//if the user only entered invalid groups
+			if (globaldata->Groups.size() == 0) { 
+				cout << "When using the groups parameter you must have at least 1 valid group. I will run the command using all the groups in your groupfile." << endl; 
+				for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
+					globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+				}
+			}
+					
+		}else {
+			for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
+				globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+			}
+		}
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the UnifracUnweightedCommand class Function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the UnifracUnweightedCommand class function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}		
+
+}
+/*****************************************************************/
+

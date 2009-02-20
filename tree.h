@@ -51,6 +51,7 @@ class Tree {
 		void randomLabels();
 		int findRoot();  //return index of root node
 		void printBranch(int);  //recursively print out tree
+		void setGroups();
 };
 
 #endif
