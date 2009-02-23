@@ -155,7 +155,6 @@ void Tree::getCopy(Tree* copy) {
 
 map<string, int> Tree::mergeGroups(int i) {
 	try {
-	
 		int lc = tree[i].getLChild();
 		int rc = tree[i].getRChild();
 		
@@ -166,7 +165,12 @@ map<string, int> Tree::mergeGroups(int i) {
 
 		//look at right child groups and update maxPars if right child has something higher for that group.
 		for(it=tree[rc].pGroups.begin();it!=tree[rc].pGroups.end();it++){
-			parsimony[it->first]++;
+			it2 = parsimony.find(it->first);
+			if (it2 != parsimony.end()) {
+				parsimony[it->first]++;
+			}else {
+				parsimony[it->first] = 1;
+			}
 			
 			if(parsimony[it->first] > maxPars){
 				maxPars = parsimony[it->first];
@@ -201,6 +205,76 @@ map<string, int> Tree::mergeGroups(int i) {
 		exit(1);
 	}		
 }
+/*****************************************************************/
+//returns a map with a groupname and the number of times that group was seen in the children
+//for instance if your children are white and black then it would return a map with 2 entries
+// p[white] = 1 and p[black] = 1.  Now go up a level and merge that with a node who has p[white] = 1
+//and you get p[white] = 2, p[black] = 1, but you erase the p[black] because you have a p value higher than 1.
+
+map<string, int> Tree::mergeUserGroups(int i) {
+	try {
+	
+		int lc = tree[i].getLChild();
+		int rc = tree[i].getRChild();
+		
+		//loop through nodes groups removing the ones the user doesn't want
+		for (it = tree[lc].pGroups.begin(); it != tree[lc].pGroups.end(); it++) {
+			if (inUsersGroups(it->first, globaldata->Groups) != true) { tree[lc].pGroups.erase(it->first); }
+		}
+		
+		//loop through nodes groups removing the ones the user doesn't want
+		for (it = tree[rc].pGroups.begin(); it != tree[rc].pGroups.end(); it++) {
+			if (inUsersGroups(it->first, globaldata->Groups) != true) { tree[rc].pGroups.erase(it->first); }
+		}
+
+		//set parsimony groups to left child
+		map<string,int> parsimony = tree[lc].pGroups;
+		
+		int maxPars = 1;
+
+		//look at right child groups and update maxPars if right child has something higher for that group.
+		for(it=tree[rc].pGroups.begin();it!=tree[rc].pGroups.end();it++){
+			it2 = parsimony.find(it->first);
+			if (it2 != parsimony.end()) {
+				parsimony[it->first]++;
+			}else {
+				parsimony[it->first] = 1;
+			}
+			
+			if(parsimony[it->first] > maxPars){
+				maxPars = parsimony[it->first];
+			}
+		}
+	
+		// this is true if right child had a greater parsimony for a certain group
+		if(maxPars > 1){
+			//erase all the groups that are only 1 because you found something with 2.
+			for(it=parsimony.begin();it!=parsimony.end();it++){
+				if(it->second == 1){
+					parsimony.erase(it->first);
+					it--;
+				}
+			}
+			//set one remaining groups to 1
+			//so with our above example p[white] = 2 would be left and it would become p[white] = 1
+			for(it=parsimony.begin();it!=parsimony.end();it++){
+				parsimony[it->first] = 1;
+			}
+		
+		}
+	
+		return parsimony;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function mergeGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the Tree class function mergeGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}		
+}
+
 
 /**************************************************************************************************/
 

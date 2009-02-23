@@ -62,10 +62,13 @@ int ParsimonyCommand::execute() {
 		outDist << "RandomTree#" << '\t' << "ParsScore" << endl;
 		
 		if (randomtree == "") {
+			copyUserTree = new Tree();
 			//get pscores for users trees
 			for (int i = 0; i < T.size(); i++) {
+				//copy users tree so that you can redo pgroups 
+				copyUserTree->getCopy(T[i]);
 				cout << "Processing tree " << i+1 << endl;
-				userData = pars->getValues(T[i]);  //userData[0] = pscore
+				userData = pars->getValues(copyUserTree);  //userData[0] = pscore
 				cout << "Tree " << i+1 << " parsimony score = " << userData[0] << endl;
 				//update uscoreFreq
 				it = uscoreFreq.find(userData[0]);

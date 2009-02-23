@@ -31,6 +31,7 @@ class Tree {
 		void setIndex(string, int);
 		int getNumNodes() { return numNodes; }
 		int getNumLeaves(){	return numLeaves; }
+		map<string, int> mergeUserGroups(int);  //returns a map with a groupname and the number of times that group was seen in the children
 		
 		//this function takes the leaf info and populates the non leaf nodes
 		void assembleTree();		
@@ -43,8 +44,9 @@ class Tree {
 		ofstream out;
 		string filename;
 		
-		map<string, int>::iterator it;
+		map<string, int>::iterator it, it2;
 		map<string, int> mergeGroups(int);  //returns a map with a groupname and the number of times that group was seen in the children
+		
 		map<string,int> Tree::mergeGcounts(int);
 		void randomTopology();
 		void randomBlengths();

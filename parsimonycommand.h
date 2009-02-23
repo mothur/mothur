@@ -28,6 +28,7 @@ class ParsimonyCommand : public Command {
 		GlobalData* globaldata;
 		vector<Tree*> T;	   //user trees
 		Tree* randT;  //random tree
+		Tree* copyUserTree; 
 		TreeMap* tmap; 
 		TreeMap* savetmap;
 		Parsimony* pars;
