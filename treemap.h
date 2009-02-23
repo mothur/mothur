@@ -39,6 +39,7 @@ public:
 	map<string, GroupIndex> treemap; //sequence name and <groupname, vector index>
 	void print(ostream&);
 	
+	
 private:
 	ifstream fileHandle;
 	string groupFileName;
@@ -46,6 +47,7 @@ private:
 	map<string, GroupIndex>::iterator it;
 	map<string, int>::iterator it2;
 	void setNamesOfGroups(string); 
+	
 	
 };
 
