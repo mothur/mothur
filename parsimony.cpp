@@ -17,47 +17,35 @@ EstOutput Parsimony::getValues(Tree* t) {
 		data.resize(1,0);
 			
 		int score = 0;
-			
+					
 		for(int i=t->getNumLeaves();i<t->getNumNodes();i++){
 			int lc = t->tree[i].getLChild();
 			int rc = t->tree[i].getRChild();
 			
-			int iSize = 0;
-			int rcSize = 0;
-			int lcSize = 0;
-
+			int iSize = t->tree[i].pGroups.size();
+			int rcSize = t->tree[rc].pGroups.size();
+			int lcSize = t->tree[lc].pGroups.size();
+			
 			//add in all the groups the users wanted
 			for (it = t->tree[i].pGroups.begin(); it != t->tree[i].pGroups.end(); it++) {
-				if (inUsersGroups(it->first, globaldata->Groups) == true) {  iSize++;  }
+				if (inUsersGroups(it->first, globaldata->Groups) != true) {  iSize--;  }
 			}
-
-			//if that leaves no groups give it 1 so it will cause no change to parent
-			if (iSize == 0) { iSize++; }
-			
 			//add in all the groups the users wanted
 			for (it = t->tree[rc].pGroups.begin(); it != t->tree[rc].pGroups.end(); it++) {
-
-				if (inUsersGroups(it->first, globaldata->Groups) == true) {  rcSize++;  }
+				if (inUsersGroups(it->first, globaldata->Groups) != true) {  rcSize--;  }
 			}
 			
-			//if that leaves no groups give it 1 so it will cause no change to parent
-			if (rcSize == 0) { rcSize++; }
-
-				
 			//add in all the groups the users wanted
 			for (it = t->tree[lc].pGroups.begin(); it != t->tree[lc].pGroups.end(); it++) {
-
-				if (inUsersGroups(it->first, globaldata->Groups) == true) {  lcSize++;  }
+				if (inUsersGroups(it->first, globaldata->Groups) != true) {  lcSize--;  }
 			}
 			
-			//if that leaves no groups give it 1 so it will cause no change to parent
-			if (lcSize == 0) { lcSize++; }
-
-
+			//if isize are 0 then that branch is to be ignored
+			if (iSize == 0) { }
+			else if ((rcSize == 0) || (lcSize == 0)) { }
 			//if you have more groups than either of your kids then theres been a change.
-			 if(iSize > rcSize || iSize > lcSize){
+			else if(iSize > rcSize || iSize > lcSize){
 				score++;
-
 			}
 		} 
 		

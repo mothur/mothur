@@ -331,9 +331,28 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 			//find index in tree of name
 			int n1 = T->getIndex(name);
 			
-			if(n1 == -1){cerr << "Name: " << name << " not found\n"; exit(1);}
+			//adds sequence names that are not in group file to the "xxx" group
+			if(n1 == -1) {
+				cerr << "Name: " << name << " not found in your groupfile and it will be ignored. \n";
+				globaldata->gTreemap->namesOfSeqs.push_back(name);
+				globaldata->gTreemap->treemap[name].groupname = "xxx";
+				globaldata->gTreemap->treemap[name].vectorIndex = (globaldata->gTreemap->namesOfSeqs.size() - 1);
+				
+				map<string, int>::iterator it;
+				it = globaldata->gTreemap->seqsPerGroup.find("xxx");
+				if (it == globaldata->gTreemap->seqsPerGroup.end()) { //its a new group
+					globaldata->gTreemap->namesOfGroups.push_back("xxx");
+					globaldata->gTreemap->seqsPerGroup["xxx"] = 1;
+				}else {
+					globaldata->gTreemap->seqsPerGroup["xxx"]++;
+				}
+				
+				//find index in tree of name
+				n1 = T->getIndex(name);
+				group = "xxx";
+			}
 			
-			else T->tree[n1].setGroup(group);
+			T->tree[n1].setGroup(group);
 		
 			T->tree[n1].setChildren(-1,-1);
 		
