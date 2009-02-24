@@ -36,8 +36,52 @@ EstOutput Weighted::getValues(Tree* t) {
 					WScore[globaldata->Groups[i-1]+globaldata->Groups[l]] = 0.0;
 					D.push_back(0.0000); //initialize a spot in D for each combination
 				}
+				
+				/********************************************************/
+				//calculate a D value for each group combo
+				for(int v=0;v<t->getNumLeaves();v++){
+					int index = v;
+					double sum = 0.0000;
+		
+					//while you aren't at root
+					while(t->tree[index].getParent() != -1){
+							
+						//if you have a BL
+						if(t->tree[index].getBranchLength() != -1){
+							sum += t->tree[index].getBranchLength();
+						}
+						index = t->tree[index].getParent();
+					}
+						
+					//get last breanch length added
+					if(t->tree[index].getBranchLength() != -1){
+						sum += t->tree[index].getBranchLength();
+					}
+						
+					if (globaldata->Groups.size() == 0) {
+						//is this sum from a sequence which is in one of the users groups
+						if (inUsersGroups(t->tree[v].getGroup(), tmap->namesOfGroups) == true) {
+							//is this sum from a sequence which is in this groupCombo
+							if ((t->tree[v].getGroup() == tmap->namesOfGroups[i-1]) || (t->tree[v].getGroup() == tmap->namesOfGroups[l])) {
+								sum /= (double)tmap->seqsPerGroup[t->tree[v].getGroup()];
+								D[n-1] += sum; 
+							}
+						}
+					}else {
+						//is this sum from a sequence which is in one of the users groups
+						if (inUsersGroups(t->tree[v].getGroup(), globaldata->Groups) == true) {
+							//is this sum from a sequence which is in this groupCombo
+							if ((t->tree[v].getGroup() == globaldata->Groups[i-1]) || (t->tree[v].getGroup() == globaldata->Groups[l])) {
+								sum /= (double)tmap->seqsPerGroup[t->tree[v].getGroup()];
+								D[n-1] += sum; 
+							}
+						}
+					}
+				}
+				/*********************************************************/
 			}
 		}
+		
 		
 		data.clear(); //clear out old values
 	
@@ -46,51 +90,7 @@ EstOutput Weighted::getValues(Tree* t) {
 			n = 1;
 			for (int b=1; b<numGroups; b++) { 
 				for (int l = n; l < numGroups; l++) {
-				
-				/********************************************************/
-				//calculate a D value for each group combo
-					for(int v=0;v<t->getNumLeaves();v++){
-						int index = v;
-						double sum = 0.0000;
-		
-						//while you aren't at root
-						while(t->tree[index].getParent() != -1){
-							
-							//if you have a BL
-							if(t->tree[index].getBranchLength() != -1){
-								sum += t->tree[index].getBranchLength();
-							}
-			
-							index = t->tree[index].getParent();
-						}
-						
-						//get last breanch length added
-						if(t->tree[index].getBranchLength() != -1){
-								sum += t->tree[index].getBranchLength();
-						}
-						
-						if (globaldata->Groups.size() == 0) {
-							//is this sum from a sequence which is in one of the users groups
-							if (inUsersGroups(t->tree[v].getGroup(), tmap->namesOfGroups) == true) {
-								//is this sum from a sequence which is in this groupCombo
-								if ((t->tree[v].getGroup() == tmap->namesOfGroups[b-1]) || (t->tree[v].getGroup() == tmap->namesOfGroups[l])) {
-									sum /= (double)tmap->seqsPerGroup[t->tree[v].getGroup()];
-									D[n-1] += sum; 
-								}
-							}
-						}else {
-							//is this sum from a sequence which is in one of the users groups
-							if (inUsersGroups(t->tree[v].getGroup(), globaldata->Groups) == true) {
-								//is this sum from a sequence which is in this groupCombo
-								if ((t->tree[v].getGroup() == globaldata->Groups[b-1]) || (t->tree[v].getGroup() == globaldata->Groups[l])) {
-									sum /= (double)tmap->seqsPerGroup[t->tree[v].getGroup()];
-									D[n-1] += sum; 
-								}
-							}
-						}
-					}
-				/*********************************************************/
-				//calculate a u value for each combo
+					//calculate a u value for each combo
 					double u;
 					//the user has not entered specific groups
 					if (globaldata->Groups.size() == 0) {
@@ -148,9 +148,12 @@ EstOutput Weighted::getValues(Tree* t) {
 				//the user has not entered specific groups
 				if (globaldata->Groups.size() == 0) {
 					UN = (WScore[tmap->namesOfGroups[i-1]+tmap->namesOfGroups[l]] / D[n-1]);
+cout << "W score = " << WScore[tmap->namesOfGroups[i-1]+tmap->namesOfGroups[l]] << endl;
 				}else {//they have entered specific groups
 					UN = (WScore[globaldata->Groups[i-1]+globaldata->Groups[l]] / D[n-1]);
+cout << "W score = " << WScore[globaldata->Groups[i-1]+globaldata->Groups[l]] << endl;
 				}
+cout << " D = "<< D[n-1] << endl;
 				if (isnan(UN) || isinf(UN)) { UN = 0; } 
 				data.push_back(UN);
 			}
