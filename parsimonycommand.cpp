@@ -25,8 +25,6 @@ ParsimonyCommand::ParsimonyCommand() {
 			openOutputFile(parsFile, out);
 			sumFile = globaldata->getTreeFile() + ".psummary";
 			openOutputFile(sumFile, outSum);
-			distFile = globaldata->getTreeFile() + ".pdistrib";
-			openOutputFile(distFile, outDist);
 			//set users groups to analyze
 			setGroups();
 		}else { //user wants random distribution
@@ -56,10 +54,6 @@ int ParsimonyCommand::execute() {
 		//get pscore for users tree
 		userData.resize(1,0);  //data[0] = pscore.
 		randomData.resize(1,0);  //data[0] = pscore.
-		
-		//format output
-		outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
-		outDist << "RandomTree#" << '\t' << "ParsScore" << endl;
 		
 		if (randomtree == "") {
 			copyUserTree = new Tree();
@@ -104,9 +98,6 @@ int ParsimonyCommand::execute() {
 				//add randoms score to validscores
 				validScores[randomData[0]] = randomData[0];
 				
-				//output info to pdistrib file
-				outDist << j+1 << '\t'<< '\t' << randomData[0] << endl;
-					
 				delete randT;
 			}
 		}else {
@@ -170,7 +161,7 @@ int ParsimonyCommand::execute() {
 		//reset randomTree parameter to ""
 		globaldata->setRandomTree("");
 		//reset groups parameter
-		globaldata->Groups.clear();
+		globaldata->Groups.clear();  globaldata->setGroups("");
 		
 		return 0;
 		
@@ -297,23 +288,29 @@ void ParsimonyCommand::setGroups() {
 	try {
 		//if the user has not entered specific groups to analyze then do them all
 		if (globaldata->Groups.size() != 0) {
-			//check that groups are valid
-			for (int i = 0; i < globaldata->Groups.size(); i++) {
-				if (tmap->isValidGroup(globaldata->Groups[i]) != true) {
-					cout << globaldata->Groups[i] << " is not a valid group, and will be disregarded." << endl;
-					// erase the invalid group from globaldata->Groups
-					globaldata->Groups.erase (globaldata->Groups.begin()+i);
+			if (globaldata->Groups[0] != "all") {
+				//check that groups are valid
+				for (int i = 0; i < globaldata->Groups.size(); i++) {
+					if (tmap->isValidGroup(globaldata->Groups[i]) != true) {
+						cout << globaldata->Groups[i] << " is not a valid group, and will be disregarded." << endl;
+						// erase the invalid group from globaldata->Groups
+						globaldata->Groups.erase (globaldata->Groups.begin()+i);
+					}
 				}
-			}
 			
-			//if the user only entered invalid groups
-			if (globaldata->Groups.size() == 0) { 
-				cout << "When using the groups parameter you must have at least 1 valid group. I will run the command using all the groups in your groupfile." << endl; 
+				//if the user only entered invalid groups
+				if (globaldata->Groups.size() == 0) { 
+					cout << "When using the groups parameter you must have at least 1 valid group. I will run the command using all the groups in your groupfile." << endl; 
+					for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
+						globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+					}
+				}
+			}else{//user has enter "all" and wants the default groups
 				for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
 					globaldata->Groups.push_back(tmap->namesOfGroups[i]);
 				}
+				globaldata->setGroups("");
 			}
-					
 		}else {
 			for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
 				globaldata->Groups.push_back(tmap->namesOfGroups[i]);

@@ -57,6 +57,7 @@ public:
 	string getFreq();
 	string getAbund();
 	string getRandomTree();
+	string getGroups();
 
 	void setListFile(string);
 	void setPhylipFile(string);
@@ -66,6 +67,7 @@ public:
 	void setSabundFile(string);
 	void setFormat(string);
 	void setRandomTree(string);
+	void setGroups(string);
 	void setCalc(string);
 
 	
