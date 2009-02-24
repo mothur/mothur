@@ -32,7 +32,7 @@ class ParsimonyCommand : public Command {
 		TreeMap* tmap; 
 		TreeMap* savetmap;
 		Parsimony* pars;
-		string parsFile, sumFile, distFile, randomtree;
+		string parsFile, sumFile, randomtree;
 		int iters, numGroups;
 		vector<int> numEachGroup; //vector containing the number of sequences in each group the users wants for random distrib.
 		vector<float> userTreeScores; //scores for users trees
@@ -47,7 +47,7 @@ class ParsimonyCommand : public Command {
 		map<int, float>::iterator it;
 		map<int, float>::iterator it2;
 		
-		ofstream out, outSum, outDist;
+		ofstream out, outSum;
 		
 		void printParsimonyFile();  
 		void printUSummaryFile();

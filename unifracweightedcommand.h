@@ -34,7 +34,7 @@ class UnifracWeightedCommand : public Command {
 		Tree* randT;  //random tree
 		TreeMap* tmap;
 		Weighted* weighted;
-		string weightedFile, sumFile, distFile;
+		string weightedFile, sumFile;
 		int iters, numGroups, numComp;
 		EstOutput userData;			//weighted score info for user tree
 		EstOutput randomData;		//weighted score info for random trees
@@ -47,11 +47,12 @@ class UnifracWeightedCommand : public Command {
 		map<float, float>::iterator it;
 		map<float, float>::iterator it2;
 		
-		ofstream outSum, outDist, out;
+		ofstream outSum, out;
 		
 		void printWSummaryFile();
 		void printWeightedFile();  
-		void saveRandomScores(); 
+		void saveRandomScores();
+		void setGroups(); 
 };
 
 
