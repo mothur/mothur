@@ -36,7 +36,7 @@ class Node  {
 		int getLChild();
 		int getRChild();
 		int getIndex();
-		void printNode(ostream&);   //prints out the name and the branch length
+		void printNode();   //prints out the name and the branch length
 		
 		
 		//pGroup is the parsimony group info.  i.e. for a leaf node it would contain 1 enter pGroup["groupname"] = 1;

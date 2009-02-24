@@ -38,7 +38,12 @@ EstOutput Parsimony::getValues(Tree* t) {
 			else if(iSize > rcSize || iSize > lcSize){
 				score++;
 			}
+			cout << i << ' ' << score << ": ";
+			t->tree[i].printNode();
 		} 
+		
+		string hold;
+		cin >> hold;
 		
 		data[0] = score;
 		

@@ -493,7 +493,7 @@ void Tree::printBranch(int node) {
 			printBranch(tree[node].getRChild());
 			out << ")";
 		}else { //you are a leaf
-			tree[node].printNode(out);  //prints out name and branch length
+			tree[node].printNode();  //prints out name and branch length
 		}
 		
 	}
@@ -508,6 +508,7 @@ void Tree::printBranch(int node) {
 }
 
 /*****************************************************************/
+
 void Tree::setGroups() {
 	try {
 		//if the user has not entered specific groups to analyze then do them all
@@ -545,4 +546,18 @@ void Tree::setGroups() {
 	}		
 
 }
+
+/*****************************************************************/
+
+void Tree::printTree() {
+	
+	for(int i=0;i<numNodes;i++){
+		cout << i << '\t';
+		tree[i].printNode();
+	}
+	
+}
+
+/*****************************************************************/
+
 
