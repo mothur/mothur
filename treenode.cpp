@@ -48,14 +48,23 @@ int Node::getRChild() { return rchild; }
 int Node::getIndex() { return vectorIndex; }
 /****************************************************************/
 //to be used by printTree in the Tree class to print the leaf info			
-void Node::printNode(ostream& out) {
+void Node::printNode() {
 	try{
-		out << name;
-		
+		cout << parent << ' ' << lchild << ' ' << rchild << ' ' << group;
 		//there is a branch length
 		if (branchLength != -1) { 
-			out << ":" << setprecision(4) << branchLength; 
+			cout << ' ' << setprecision(4) << branchLength; 
 		}
+		cout << " |";
+		map<string, int>::iterator it;
+		for(it=pGroups.begin();it!=pGroups.end();it++){
+			cout << ' ' << it->first << ':' << it->second;
+		}
+		cout << " |";
+		for(it=pcount.begin();it!=pcount.end();it++){
+			cout << ' ' << it->first << ':' << it->second;
+		}
+		cout << endl;
 		
 	}
 	catch(exception& e) {
