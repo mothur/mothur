@@ -22,7 +22,7 @@ EstOutput Parsimony::getValues(Tree* t) {
 		for(int i=t->getNumLeaves();i<t->getNumNodes();i++){
 			t->tree[i].pGroups = (t->mergeUserGroups(i));
 		}
-		
+		//hjkl
 		for(int i=t->getNumLeaves();i<t->getNumNodes();i++){
 			int lc = t->tree[i].getLChild();
 			int rc = t->tree[i].getRChild();
