@@ -22,7 +22,7 @@ EstOutput Parsimony::getValues(Tree* t) {
 		for(int i=t->getNumLeaves();i<t->getNumNodes();i++){
 			t->tree[i].pGroups = (t->mergeUserGroups(i));
 		}
-
+		
 		for(int i=t->getNumLeaves();i<t->getNumNodes();i++){
 			int lc = t->tree[i].getLChild();
 			int rc = t->tree[i].getRChild();
@@ -30,25 +30,7 @@ EstOutput Parsimony::getValues(Tree* t) {
 			int iSize = t->tree[i].pGroups.size();
 			int rcSize = t->tree[rc].pGroups.size();
 			int lcSize = t->tree[lc].pGroups.size();
-cout << " i groups ";			
-			//add in all the groups the users wanted
-			for (it = t->tree[i].pGroups.begin(); it != t->tree[i].pGroups.end(); it++) {
-cout << it->first << " ";
-			//	if (inUsersGroups(it->first, globaldata->Groups) != true) {  iSize--;  }
-			}
-cout << endl << " rc groups ";
-			//add in all the groups the users wanted
-			for (it = t->tree[rc].pGroups.begin(); it != t->tree[rc].pGroups.end(); it++) {
-cout << it->first << " ";
-				//if (inUsersGroups(it->first, globaldata->Groups) != true) {  rcSize--;  }
-			}
-cout << endl << " lc groups ";			
-			//add in all the groups the users wanted
-			for (it = t->tree[lc].pGroups.begin(); it != t->tree[lc].pGroups.end(); it++) {
-cout << it->first << " ";
-				//if (inUsersGroups(it->first, globaldata->Groups) != true) {  lcSize--;  }
-			}
-cout << endl;			
+		
 			//if isize are 0 then that branch is to be ignored
 			if (iSize == 0) { }
 			else if ((rcSize == 0) || (lcSize == 0)) { }
@@ -72,4 +54,6 @@ cout << endl;
 	}
 
 }
+
+/**************************************************************************************************/
 
