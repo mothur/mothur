@@ -26,16 +26,17 @@ EstOutput Weighted::getValues(Tree* t) {
 		
 		//calculate number of comparisons i.e. with groups A,B,C = AB, AC, BC = 3;
 		int n = 1;
+		int count = 0;
 		for (int i=1; i<numGroups; i++) { 
-			for (int l = n; l < numGroups; l++) {
+			for (int l = n; l < numGroups; l++) {	
 				//initialize weighted scores
 				if (globaldata->Groups.size() == 0) {
 					WScore[tmap->namesOfGroups[i-1]+tmap->namesOfGroups[l]] = 0.0;
-					D.push_back(0.0000);  //initialize a spot in D for each combination
 				}else {
 					WScore[globaldata->Groups[i-1]+globaldata->Groups[l]] = 0.0;
-					D.push_back(0.0000); //initialize a spot in D for each combination
 				}
+				
+				D.push_back(0.0000); //initialize a spot in D for each combination
 				
 				/********************************************************/
 				//calculate a D value for each group combo
@@ -64,7 +65,7 @@ EstOutput Weighted::getValues(Tree* t) {
 							//is this sum from a sequence which is in this groupCombo
 							if ((t->tree[v].getGroup() == tmap->namesOfGroups[i-1]) || (t->tree[v].getGroup() == tmap->namesOfGroups[l])) {
 								sum /= (double)tmap->seqsPerGroup[t->tree[v].getGroup()];
-								D[n-1] += sum; 
+								D[count] += sum; 
 							}
 						}
 					}else {
@@ -73,15 +74,16 @@ EstOutput Weighted::getValues(Tree* t) {
 							//is this sum from a sequence which is in this groupCombo
 							if ((t->tree[v].getGroup() == globaldata->Groups[i-1]) || (t->tree[v].getGroup() == globaldata->Groups[l])) {
 								sum /= (double)tmap->seqsPerGroup[t->tree[v].getGroup()];
-								D[n-1] += sum; 
+								D[count] += sum; 
 							}
 						}
 					}
 				}
 				/*********************************************************/
+				count++;
 			}
+			n++;
 		}
-		
 		
 		data.clear(); //clear out old values
 	
@@ -143,22 +145,21 @@ EstOutput Weighted::getValues(Tree* t) {
 		//calculate weighted score for each group combination
 		double UN;	
 		n = 1;
+		count = 0;
 		for (int i=1; i<numGroups; i++) { 
 			for (int l = n; l < numGroups; l++) {
 				//the user has not entered specific groups
 				if (globaldata->Groups.size() == 0) {
-					UN = (WScore[tmap->namesOfGroups[i-1]+tmap->namesOfGroups[l]] / D[n-1]);
-cout << "W score = " << WScore[tmap->namesOfGroups[i-1]+tmap->namesOfGroups[l]] << endl;
+					UN = (WScore[tmap->namesOfGroups[i-1]+tmap->namesOfGroups[l]] / D[count]);
 				}else {//they have entered specific groups
-					UN = (WScore[globaldata->Groups[i-1]+globaldata->Groups[l]] / D[n-1]);
-cout << "W score = " << WScore[globaldata->Groups[i-1]+globaldata->Groups[l]] << endl;
+					UN = (WScore[globaldata->Groups[i-1]+globaldata->Groups[l]] / D[count]);
 				}
-cout << " D = "<< D[n-1] << endl;
 				if (isnan(UN) || isinf(UN)) { UN = 0; } 
 				data.push_back(UN);
+				count++;
 			}
+			n++;
 		}
-
 		return data;
 	}
 	catch(exception& e) {
