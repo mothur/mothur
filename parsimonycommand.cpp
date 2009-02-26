@@ -51,31 +51,39 @@ ParsimonyCommand::ParsimonyCommand() {
 int ParsimonyCommand::execute() {
 	try {
 		
-		//get pscore for users tree
-		userData.resize(1,0);  //data[0] = pscore.
-		randomData.resize(1,0);  //data[0] = pscore.
-		
+				
 		if (randomtree == "") {
-			copyUserTree = new Tree();
+			//get pscore for users tree
+			userData.resize(numComp,0);  //data = AB, AC, BC, ABC.
+			randomData.resize(numComp,0);  //data = AB, AC, BC, ABC.
+			rscoreFreq.resize(numComp);  
+			uscoreFreq.resize(numComp);  
+			rCumul.resize(numComp);  
+			uCumul.resize(numComp);  
+			validScores.resize(numComp); 
+			userTreeScores.resize(numComp);  
+			UScoreSig.resize(numComp); 
+
 			//get pscores for users trees
 			for (int i = 0; i < T.size(); i++) {
-				//copy users tree so that you can redo pgroups 
-				copyUserTree->getCopy(T[i]);
 				cout << "Processing tree " << i+1 << endl;
-				userData = pars->getValues(copyUserTree);  //userData[0] = pscore
-				cout << "Tree " << i+1 << " parsimony score = " << userData[0] << endl;
-				//update uscoreFreq
-				it = uscoreFreq.find(userData[0]);
-				if (it == uscoreFreq.end()) {//new score
-					uscoreFreq[userData[0]] = 1;
-				}else{ uscoreFreq[userData[0]]++; }
-			
-				//add users score to valid scores
-				validScores[userData[0]] = userData[0];
+				userData = pars->getValues(T[i]);  //data = AB, AC, BC, ABC.
 				
-				//save score for summary file
-				userTreeScores.push_back(userData[0]);
-			
+				//output scores for each combination
+				for(int k = 0; k < numComp; k++) {
+					cout << "Tree " << i+1 << " Combination " << groupComb[k] << " parsimony score = " << userData[k] << endl;
+					//update uscoreFreq
+					it = uscoreFreq[k].find(userData[k]);
+					if (it == uscoreFreq[k].end()) {//new score
+						uscoreFreq[k][userData[k]] = 1;
+					}else{ uscoreFreq[k][userData[k]]++; }
+					
+					//add users score to valid scores
+					validScores[k][userData[k]] = userData[k];
+					
+					//save score for summary file
+					userTreeScores[k].push_back(userData[k]);
+				}
 			}
 			
 			//get pscores for random trees
@@ -86,17 +94,19 @@ int ParsimonyCommand::execute() {
 				randT->assembleRandomTree();
 				//get pscore of random tree
 				randomData = pars->getValues(randT);
+				
+				for(int r = 0; r < numComp; r++) {
+					//add trees pscore to map of scores
+					it2 = rscoreFreq[r].find(randomData[r]);
+					if (it2 != rscoreFreq[r].end()) {//already have that score
+						rscoreFreq[r][randomData[r]]++;
+					}else{//first time we have seen this score
+						rscoreFreq[r][randomData[r]] = 1;
+					}
 			
-				//add trees pscore to map of scores
-				it2 = rscoreFreq.find(randomData[0]);
-				if (it2 != rscoreFreq.end()) {//already have that score
-					rscoreFreq[randomData[0]]++;
-				}else{//first time we have seen this score
-					rscoreFreq[randomData[0]] = 1;
+					//add randoms score to validscores
+					validScores[r][randomData[r]] = randomData[r];
 				}
-			
-				//add randoms score to validscores
-				validScores[randomData[0]] = randomData[0];
 				
 				delete randT;
 			}
@@ -109,18 +119,20 @@ int ParsimonyCommand::execute() {
 				randT->assembleRandomTree();
 				//get pscore of random tree
 				randomData = pars->getValues(randT);
+				
+				for(int r = 0; r < numComp; r++) {
+					//add trees pscore to map of scores
+					it2 = rscoreFreq[r].find(randomData[r]);
+					if (it2 != rscoreFreq[r].end()) {//already have that score
+						rscoreFreq[r][randomData[r]]++;
+					}else{//first time we have seen this score
+						rscoreFreq[r][randomData[r]] = 1;
+					}
 			
-				//add trees pscore to map of scores
-				it2 = rscoreFreq.find(randomData[0]);
-				if (it2 != rscoreFreq.end()) {//already have that score
-					rscoreFreq[randomData[0]]++;
-				}else{//first time we have seen this score
-					rscoreFreq[randomData[0]] = 1;
+					//add randoms score to validscores
+					validScores[r][randomData[r]] = randomData[r];
 				}
-			
-				//add randoms score to validscores
-				validScores[randomData[0]] = randomData[0];
-					
+				
 				delete randT;
 			}
 		}
@@ -128,30 +140,32 @@ int ParsimonyCommand::execute() {
 		float rcumul = 0.0000;
 		float ucumul = 0.0000;
 		
+		for(int a = 0; a < numComp; a++) {
 		//this loop fills the cumulative maps and put 0.0000 in the score freq map to make it easier to print.
-		for (it = validScores.begin(); it != validScores.end(); it++) { 
-			if (randomtree == "") {
-				it2 = uscoreFreq.find(it->first);
-				//user data has that score 
-				if (it2 != uscoreFreq.end()) { uscoreFreq[it->first] /= T.size(); ucumul+= it2->second;  }
-				else { uscoreFreq[it->first] = 0.0000; } //no user trees with that score
-				//make uCumul map
-				uCumul[it->first] = ucumul;
+			for (it = validScores[a].begin(); it != validScores[a].end(); it++) { 
+				if (randomtree == "") {
+					it2 = uscoreFreq[a].find(it->first);
+					//user data has that score 
+					if (it2 != uscoreFreq[a].end()) { uscoreFreq[a][it->first] /= T.size(); ucumul+= it2->second;  }
+					else { uscoreFreq[a][it->first] = 0.0000; } //no user trees with that score
+					//make uCumul map
+					uCumul[a][it->first] = ucumul-a;
+				}
+			
+				//make rscoreFreq map and rCumul
+				it2 = rscoreFreq[a].find(it->first);
+				//get percentage of random trees with that info
+				if (it2 != rscoreFreq[a].end()) {  rscoreFreq[a][it->first] /= iters; rcumul+= it2->second;  }
+				else { rscoreFreq[a][it->first] = 0.0000; } //no random trees with that score
+				rCumul[a][it->first] = rcumul-a;
 			}
 			
-			//make rscoreFreq map and rCumul
-			it2 = rscoreFreq.find(it->first);
-			//get percentage of random trees with that info
-			if (it2 != rscoreFreq.end()) {  rscoreFreq[it->first] /= iters; rcumul+= it2->second;  }
-			else { rscoreFreq[it->first] = 0.0000; } //no random trees with that score
-			rCumul[it->first] = rcumul;
+			//find the signifigance of each user trees score when compared to the random trees and save for printing the summary file
+			for (int h = 0; h < userTreeScores[a].size(); h++) {
+				UScoreSig[a].push_back(rCumul[a][userTreeScores[a][h]]);
+			}
 		}
 		
-		//find the signifigance of each user trees score when compared to the random trees and save for printing the summary file
-		for (int h = 0; h < userTreeScores.size(); h++) {
-			UScoreSig.push_back(rCumul[userTreeScores[h]]);
-		}
-
 		printParsimonyFile();
 		printUSummaryFile();
 		
@@ -181,23 +195,24 @@ void ParsimonyCommand::printParsimonyFile() {
 	try {
 		//column headers
 		if (randomtree == "") {
-			out << "Score" << '\t' << "UserFreq" << '\t' << "UserCumul" << '\t' << "RandFreq" << '\t' << "RandCumul" << endl;
+			out << "Comb" << '\t' << "Score" << '\t' << "UserFreq" << '\t' << "UserCumul" << '\t' << "RandFreq" << '\t' << "RandCumul" << endl;
 		}else {
-			out << "Score" << '\t' << "RandFreq" << '\t' << "RandCumul" << endl;
+			out << "Comb" << '\t' << "Score" << '\t' << "RandFreq" << '\t' << "RandCumul" << endl;
 		}
 		
 		//format output
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
-		//print each line
-		for (it = validScores.begin(); it != validScores.end(); it++) { 
-			if (randomtree == "") {
-				out << setprecision(6) << it->first << '\t' << '\t' << uscoreFreq[it->first] << '\t' << uCumul[it->first] << '\t' << rscoreFreq[it->first] << '\t' << rCumul[it->first] << endl; 
-			}else{
-				out << setprecision(6) << it->first << '\t' << '\t' << rscoreFreq[it->first] << '\t' << rCumul[it->first] << endl; 	
-			}
-		} 
-		
+		for(int a = 0; a < numComp; a++) {
+			//print each line
+			for (it = validScores[a].begin(); it != validScores[a].end(); it++) { 
+				if (randomtree == "") {
+					out << setprecision(6)  << groupComb[a] << '\t' << it->first << '\t' << '\t'<< uscoreFreq[a][it->first] << '\t' << uCumul[a][it->first] << '\t' << rscoreFreq[a][it->first] << '\t' << rCumul[a][it->first] << endl; 
+				}else{
+					out << setprecision(6) << groupComb[a] << '\t' << it->first << '\t' << '\t' << rscoreFreq[a][it->first] << '\t' << rCumul[a][it->first] << endl; 	
+				}
+			} 
+		}
 		out.close();
 		
 	}
@@ -214,14 +229,17 @@ void ParsimonyCommand::printParsimonyFile() {
 void ParsimonyCommand::printUSummaryFile() {
 	try {
 		//column headers
-		outSum << "Tree#" << '\t'  <<  "ParsScore" << '\t' << '\t' << "ParsSig" <<  endl;
+		outSum << "Tree#" << '\t' << "Comb" << '\t'  <<  "ParsScore" << '\t' << '\t' << "ParsSig" <<  endl;
 		
 		//format output
 		outSum.setf(ios::fixed, ios::floatfield); outSum.setf(ios::showpoint);
 		
+		
 		//print each line
 		for (int i = 0; i< T.size(); i++) {
-			outSum << setprecision(6) << i+1 << '\t' << '\t' << userTreeScores[i] << '\t' << UScoreSig[i] << endl; 
+			for(int a = 0; a < numComp; a++) {
+				outSum << setprecision(6) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << userTreeScores[a][i] << '\t' << UScoreSig[a][i] << endl;
+			}
 		}
 		
 		outSum.close();
@@ -286,6 +304,8 @@ void ParsimonyCommand::getUserInput() {
 
 void ParsimonyCommand::setGroups() {
 	try {
+		string allGroups = "";
+		numGroups = 0;
 		//if the user has not entered specific groups to analyze then do them all
 		if (globaldata->Groups.size() != 0) {
 			if (globaldata->Groups[0] != "all") {
@@ -294,7 +314,7 @@ void ParsimonyCommand::setGroups() {
 					if (tmap->isValidGroup(globaldata->Groups[i]) != true) {
 						cout << globaldata->Groups[i] << " is not a valid group, and will be disregarded." << endl;
 						// erase the invalid group from globaldata->Groups
-						globaldata->Groups.erase (globaldata->Groups.begin()+i);
+						globaldata->Groups.erase(globaldata->Groups.begin()+i);
 					}
 				}
 			
@@ -303,19 +323,43 @@ void ParsimonyCommand::setGroups() {
 					cout << "When using the groups parameter you must have at least 1 valid group. I will run the command using all the groups in your groupfile." << endl; 
 					for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
 						globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+						numGroups++;
+						allGroups += tmap->namesOfGroups[i];
+					}
+				}else {
+					for (int i = 0; i < globaldata->Groups.size(); i++) {
+						allGroups += tmap->namesOfGroups[i];
+						numGroups++;
 					}
 				}
 			}else{//user has enter "all" and wants the default groups
 				for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
 					globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+					numGroups++;
+					allGroups += tmap->namesOfGroups[i];
 				}
 				globaldata->setGroups("");
 			}
 		}else {
 			for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
-				globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+				allGroups += tmap->namesOfGroups[i];
+			}
+			numGroups = 1;
+		}
+		
+		//calculate number of comparsions
+		numComp = 0;
+		for (int r=0; r<numGroups; r++) { 
+			for (int l = r+1; l < numGroups; l++) {
+				groupComb.push_back(globaldata->Groups[r]+globaldata->Groups[l]);
+				numComp++;
 			}
 		}
+		
+		//ABC
+		groupComb.push_back(allGroups);
+		numComp++;
+		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ParsimonyCommand class Function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";

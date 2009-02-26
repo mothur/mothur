@@ -211,7 +211,7 @@ map<string, int> Tree::mergeGroups(int i) {
 // p[white] = 1 and p[black] = 1.  Now go up a level and merge that with a node who has p[white] = 1
 //and you get p[white] = 2, p[black] = 1, but you erase the p[black] because you have a p value higher than 1.
 
-map<string, int> Tree::mergeUserGroups(int i) {
+map<string, int> Tree::mergeUserGroups(int i, vector<string> g) {
 	try {
 	
 		int lc = tree[i].getLChild();
@@ -219,12 +219,12 @@ map<string, int> Tree::mergeUserGroups(int i) {
 		
 		//loop through nodes groups removing the ones the user doesn't want
 		for (it = tree[lc].pGroups.begin(); it != tree[lc].pGroups.end(); it++) {
-			if (inUsersGroups(it->first, globaldata->Groups) != true) { tree[lc].pGroups.erase(it->first); }
+			if (inUsersGroups(it->first, g) != true) { tree[lc].pGroups.erase(it->first); }
 		}
 		
 		//loop through nodes groups removing the ones the user doesn't want
 		for (it = tree[rc].pGroups.begin(); it != tree[rc].pGroups.end(); it++) {
-			if (inUsersGroups(it->first, globaldata->Groups) != true) { tree[rc].pGroups.erase(it->first); }
+			if (inUsersGroups(it->first, g) != true) { tree[rc].pGroups.erase(it->first); }
 		}
 
 		//set parsimony groups to left child

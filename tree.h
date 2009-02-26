@@ -32,7 +32,7 @@ public:
 	void setIndex(string, int);
 	int getNumNodes() { return numNodes; }
 	int getNumLeaves(){	return numLeaves; }
-	map<string, int> mergeUserGroups(int);  //returns a map with a groupname and the number of times that group was seen in the children
+	map<string, int> mergeUserGroups(int, vector<string>);  //returns a map with a groupname and the number of times that group was seen in the children
 	void printTree();
 	
 	//this function takes the leaf info and populates the non leaf nodes

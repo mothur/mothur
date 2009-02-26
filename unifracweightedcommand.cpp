@@ -72,7 +72,6 @@ int UnifracWeightedCommand::execute() {
 			
 			//get scores for random trees
 			for (int j = 0; j < iters; j++) {
-//				int n = 1;
 				int count = 0;
 				for (int r=0; r<numGroups; r++) { 
 					for (int l = r+1; l < numGroups; l++) {
@@ -90,14 +89,11 @@ int UnifracWeightedCommand::execute() {
 							//get wscore of random tree
 							randomData = weighted->getValues(randT, tmap->namesOfGroups[r], tmap->namesOfGroups[l]);
 						}
-//						randT->createNewickFile("hold"+toString(r)+toString(l)+toString(j));
-
 						//save scores
 						rScores[count].push_back(randomData[0]);
 						validScores[count][randomData[0]] = randomData[0];
 						count++;
 					}
-//					n++;
 				}
 			}
 
