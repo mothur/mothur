@@ -72,10 +72,10 @@ int UnifracWeightedCommand::execute() {
 			
 			//get scores for random trees
 			for (int j = 0; j < iters; j++) {
-				int n = 1;
+//				int n = 1;
 				int count = 0;
 				for (int r=0; r<numGroups; r++) { 
-					for (int l = n; l < numGroups; l++) {
+					for (int l = r+1; l < numGroups; l++) {
 						//copy T[i]'s info.
 						randT->getCopy(T[i]);
 						 
@@ -90,18 +90,18 @@ int UnifracWeightedCommand::execute() {
 							//get wscore of random tree
 							randomData = weighted->getValues(randT, tmap->namesOfGroups[r], tmap->namesOfGroups[l]);
 						}
+//						randT->createNewickFile("hold"+toString(r)+toString(l)+toString(j));
 
 						//save scores
 						rScores[count].push_back(randomData[0]);
 						validScores[count][randomData[0]] = randomData[0];
 						count++;
 					}
-					n++;
+//					n++;
 				}
 			}
 
 			removeValidScoresDuplicates(); 
-			
 			//find the signifigance of the score for summary file
 			for (int f = 0; f < numComp; f++) {
 				//sort random scores
@@ -111,7 +111,7 @@ int UnifracWeightedCommand::execute() {
 				//so if you have 1000 random trees the index returned is 100 
 				//then there are 900 trees with a score greater then you. 
 				//giving you a signifigance of 0.900
-				int index = findIndex(userData[f]);    if (index == -1) { cout << "error in UnifracWeightedCommand" << endl; exit(1); } //error code
+				int index = findIndex(userData[f], f);    if (index == -1) { cout << "error in UnifracWeightedCommand" << endl; exit(1); } //error code
 			
 				//the signifigance is the number of trees with the users score or higher 
 				WScoreSig.push_back((iters-index)/(float)iters);
@@ -228,15 +228,12 @@ void UnifracWeightedCommand::removeValidScoresDuplicates() {
 }
 
 /***********************************************************/
-int UnifracWeightedCommand::findIndex(float score) {
+int UnifracWeightedCommand::findIndex(float score, int index) {
 	try{
-		for (int e = 0; e < numComp; e++) {
-			for (int i = 0; i < rScores[e].size(); i++) {
-//cout << rScores[e][i] << " number " << i << endl;
-				if (rScores[e][i] >= score) { return i; }
-			}
+		for (int i = 0; i < rScores[index].size(); i++) {
+			if (rScores[index][i] >= score)	{	return i;	}
 		}
-		return -1;
+		return rScores[index].size();
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the UnifracWeightedCommand class Function findIndex. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";

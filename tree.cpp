@@ -354,33 +354,27 @@ void Tree::randomLabels() {
 
 void Tree::randomLabels(string groupA, string groupB) {
 	try {
-		for(int i = 0; i < numLeaves; i++) {
-			int z;
-			//get random index to switch with
-			z = int((float)(i+1) * (float)(rand()) / ((float)RAND_MAX+1.0));	
-			
-			//you only want to randomize the nodes that are from a group the user wants analyzed, so
-			//if either of the leaf nodes you are about to switch are not in the users groups then you don't want to switch them.
-			if (((tree[z].getGroup() == groupA) || (tree[z].getGroup() == groupB)) && ((tree[i].getGroup() == groupA) || (tree[i].getGroup() == groupB))) {
-				//switches node i and node z's info.
-				map<string,int> lib_hold = tree[z].pGroups;
-				tree[z].pGroups = (tree[i].pGroups);
-				tree[i].pGroups = (lib_hold);
+		int numSeqsA = globaldata->gTreemap->seqsPerGroup[groupA];
+		int numSeqsB = globaldata->gTreemap->seqsPerGroup[groupB];
+
+		vector<string> randomGroups(numSeqsA+numSeqsB, groupA);
+		for(int i=numSeqsA;i<randomGroups.size();i++){
+			randomGroups[i] = groupB;
+		}
+		random_shuffle(randomGroups.begin(), randomGroups.end());
 				
-				string zgroup = tree[z].getGroup();
-				tree[z].setGroup(tree[i].getGroup());
-				tree[i].setGroup(zgroup);
-				
-				string zname = tree[z].getName();
-				tree[z].setName(tree[i].getName());
-				tree[i].setName(zname);
-				
-				map<string,int> gcount_hold = tree[z].pcount;
-				tree[z].pcount = (tree[i].pcount);
-				tree[i].pcount = (gcount_hold);
+		int randomCounter = 0;				
+		for(int i=0;i<numLeaves;i++){
+			if(tree[i].getGroup() == groupA || tree[i].getGroup() == groupB){
+				tree[i].setGroup(randomGroups[randomCounter]);
+				tree[i].pcount.clear();
+				tree[i].pcount[randomGroups[randomCounter]] = 1;
+				tree[i].pGroups.clear();
+				tree[i].pGroups[randomGroups[randomCounter]] = 1;
+				randomCounter++;
 			}
 		}
-	}
+	}		
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function randomLabels. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
@@ -528,7 +522,7 @@ void Tree::printBranch(int node) {
 			printBranch(tree[node].getRChild());
 			out << ")";
 		}else { //you are a leaf
-			out << tree[node].getName() << ":" << tree[node].getBranchLength();
+			out << tree[node].getGroup() << ":" << tree[node].getBranchLength();
 		}
 		
 	}
