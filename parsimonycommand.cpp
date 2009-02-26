@@ -25,8 +25,6 @@ ParsimonyCommand::ParsimonyCommand() {
 			openOutputFile(parsFile, out);
 			sumFile = globaldata->getTreeFile() + ".psummary";
 			openOutputFile(sumFile, outSum);
-			//set users groups to analyze
-			setGroups();
 		}else { //user wants random distribution
 			savetmap = globaldata->gTreemap;
 			getUserInput();
@@ -34,6 +32,8 @@ ParsimonyCommand::ParsimonyCommand() {
 			openOutputFile(parsFile, out);
 		}
 		
+		//set users groups to analyze
+		setGroups();
 		convert(globaldata->getIters(), iters);  //how many random trees to generate
 		pars = new Parsimony(tmap);
 
@@ -50,20 +50,19 @@ ParsimonyCommand::ParsimonyCommand() {
 /***********************************************************/
 int ParsimonyCommand::execute() {
 	try {
-		
+	
+		//get pscore for users tree
+		userData.resize(numComp,0);  //data = AB, AC, BC, ABC.
+		randomData.resize(numComp,0);  //data = AB, AC, BC, ABC.
+		rscoreFreq.resize(numComp);  
+		uscoreFreq.resize(numComp);  
+		rCumul.resize(numComp);  
+		uCumul.resize(numComp);  
+		validScores.resize(numComp); 
+		userTreeScores.resize(numComp);  
+		UScoreSig.resize(numComp); 
 				
 		if (randomtree == "") {
-			//get pscore for users tree
-			userData.resize(numComp,0);  //data = AB, AC, BC, ABC.
-			randomData.resize(numComp,0);  //data = AB, AC, BC, ABC.
-			rscoreFreq.resize(numComp);  
-			uscoreFreq.resize(numComp);  
-			rCumul.resize(numComp);  
-			uCumul.resize(numComp);  
-			validScores.resize(numComp); 
-			userTreeScores.resize(numComp);  
-			UScoreSig.resize(numComp); 
-
 			//get pscores for users trees
 			for (int i = 0; i < T.size(); i++) {
 				cout << "Processing tree " << i+1 << endl;
@@ -167,10 +166,10 @@ int ParsimonyCommand::execute() {
 		}
 		
 		printParsimonyFile();
-		printUSummaryFile();
+		if (randomtree != "") { printUSummaryFile(); }
 		
 		//reset globaldata's treemap if you just did random distrib
-		if (randomtree != "") { globaldata->gTreemap = savetmap; }
+		if (randomtree == "") { globaldata->gTreemap = savetmap; }
 		
 		//reset randomTree parameter to ""
 		globaldata->setRandomTree("");
@@ -274,6 +273,7 @@ void ParsimonyCommand::getUserInput() {
 				
 			//set tmaps seqsPerGroup
 			tmap->seqsPerGroup[toString(i)] = num;
+			tmap->namesOfGroups.push_back(toString(i));
 			
 			//set tmaps namesOfSeqs
 			for (int j = 0; j < num; j++) {
