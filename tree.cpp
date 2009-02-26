@@ -309,43 +309,32 @@ void Tree::randomLabels() {
 		//set up the groups the user wants to include
 		setGroups();
 		
-		for(int i=numLeaves-1;i>=0;i--){
-			if(tree[i].pGroups.size() == 0){
-				continue;
-			}
-			
-			int escape = 1;
+		for(int i = 0; i < numLeaves; i++){
 			int z;
-		
-			while(escape == 1){
-				//get random index to switch with
-				z = int((float)(i+1) * (float)(rand()) / ((float)RAND_MAX+1.0));	
-			
-				if(tree[z].pGroups.size() != 0){
-					escape = 0;
-				}
-			}
+			//get random index to switch with
+			z = int((float)(i+1) * (float)(rand()) / ((float)RAND_MAX+1.0));	
 			
 			//you only want to randomize the nodes that are from a group the user wants analyzed, so
 			//if either of the leaf nodes you are about to switch are not in the users groups then you don't want to switch them.
 			bool treez, treei;
-			
-			//leaves have only one group so you can just set it to begin()
-			it = tree[z].pGroups.begin();
-			treez = inUsersGroups(it->first, globaldata->Groups);
-			
-			it = tree[i].pGroups.begin();
-			treei = inUsersGroups(it->first, globaldata->Groups);
+		
+			treez = inUsersGroups(tree[z].getGroup(), globaldata->Groups);
+			treei = inUsersGroups(tree[i].getGroup(), globaldata->Groups);
 			
 			if ((treez == true) && (treei == true)) {
 				//switches node i and node z's info.
 				map<string,int> lib_hold = tree[z].pGroups;
 				tree[z].pGroups = (tree[i].pGroups);
 				tree[i].pGroups = (lib_hold);
-		
-				tree[z].setGroup(tree[z].pGroups.begin()->first);
-				tree[i].setGroup(tree[i].pGroups.begin()->first);
-		
+				
+				string zgroup = tree[z].getGroup();
+				tree[z].setGroup(tree[i].getGroup());
+				tree[i].setGroup(zgroup);
+				
+				string zname = tree[z].getName();
+				tree[z].setName(tree[i].getName());
+				tree[i].setName(zname);
+				
 				map<string,int> gcount_hold = tree[z].pcount;
 				tree[z].pcount = (tree[i].pcount);
 				tree[i].pcount = (gcount_hold);
@@ -363,6 +352,45 @@ void Tree::randomLabels() {
 }
 /**************************************************************************************************/
 
+void Tree::randomLabels(string groupA, string groupB) {
+	try {
+		for(int i = 0; i < numLeaves; i++) {
+			int z;
+			//get random index to switch with
+			z = int((float)(i+1) * (float)(rand()) / ((float)RAND_MAX+1.0));	
+			
+			//you only want to randomize the nodes that are from a group the user wants analyzed, so
+			//if either of the leaf nodes you are about to switch are not in the users groups then you don't want to switch them.
+			if (((tree[z].getGroup() == groupA) || (tree[z].getGroup() == groupB)) && ((tree[i].getGroup() == groupA) || (tree[i].getGroup() == groupB))) {
+				//switches node i and node z's info.
+				map<string,int> lib_hold = tree[z].pGroups;
+				tree[z].pGroups = (tree[i].pGroups);
+				tree[i].pGroups = (lib_hold);
+				
+				string zgroup = tree[z].getGroup();
+				tree[z].setGroup(tree[i].getGroup());
+				tree[i].setGroup(zgroup);
+				
+				string zname = tree[z].getName();
+				tree[z].setName(tree[i].getName());
+				tree[i].setName(zname);
+				
+				map<string,int> gcount_hold = tree[z].pcount;
+				tree[z].pcount = (tree[i].pcount);
+				tree[i].pcount = (gcount_hold);
+			}
+		}
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function randomLabels. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the Tree class function randomLabels. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}		
+}
+/**************************************************************************************************/
 void Tree::randomBlengths()  {
 	try {
 		for(int i=numNodes-1;i>=0;i--){
@@ -385,6 +413,11 @@ void Tree::randomBlengths()  {
 /*************************************************************************************************/
 void Tree::assembleRandomUnifracTree() {
 	randomLabels();
+	assembleTree();
+}
+/*************************************************************************************************/
+void Tree::assembleRandomUnifracTree(string groupA, string groupB) {
+	randomLabels(groupA, groupB);
 	assembleTree();
 }
 
@@ -439,16 +472,18 @@ void Tree::randomTopology() {
 
 /*****************************************************************/
 // This prints out the tree in Newick form.
-void Tree::createNewickFile() {
+void Tree::createNewickFile(string f) {
 	try {
 		int root = findRoot();
-		filename = getRootName(globaldata->getTreeFile()) + "newick";
+		//filename = getRootName(globaldata->getTreeFile()) + "newick";
+		filename = f;
 		openOutputFile(filename, out);
 		
 		printBranch(root);
 		
 		// you are at the end of the tree
 		out << ";" << endl;
+		out.close();
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function createNewickFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -493,7 +528,7 @@ void Tree::printBranch(int node) {
 			printBranch(tree[node].getRChild());
 			out << ")";
 		}else { //you are a leaf
-			tree[node].printNode();  //prints out name and branch length
+			out << tree[node].getName() << ":" << tree[node].getBranchLength();
 		}
 		
 	}

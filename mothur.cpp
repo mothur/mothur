@@ -17,7 +17,7 @@ GlobalData* GlobalData::_uniqueInstance = 0;
 
 int main(int argc, char *argv[]){
 	try {
-	//	srand(54321);
+		//srand(54321);
 		srand( (unsigned)time( NULL ) );
 
 		Engine* dotur;

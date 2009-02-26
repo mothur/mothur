@@ -38,20 +38,16 @@ class UnifracWeightedCommand : public Command {
 		int iters, numGroups, numComp;
 		EstOutput userData;			//weighted score info for user tree
 		EstOutput randomData;		//weighted score info for random trees
-		vector< map<float, float> > validScores;  //vector<contains scores from both user and random> each group comb has an entry
-		vector< map<float, float> > rscoreFreq;  //vector<weighted score, number of random trees with that score.> each group comb has an entry
-		vector< map<float, float> > uscoreFreq;  //vector<weighted, number of user trees with that score.> each group comb has an entry
-		vector< map<float, float> > totalrscoreFreq;  //vector<weighted score, number of random trees with that score.> each group comb has an entry
-		vector< map<float, float> > rCumul;  //vector<weighted score, number of random trees with that score or higher.> each group comb has an entry
-		vector< map<float, float> > uCumul;  //vector<weighted, cumulative percentage of number of user trees with that score or higher.> each group comb has an entry
-		map<float, float>::iterator it;
-		map<float, float>::iterator it2;
-		
+		vector< vector<float> > validScores;  //vector<contains scores from both user and random> each group comb has an entry
+		vector< vector<float> > rScores;  //vector<weighted scores for random trees.> each group comb has an entry
+		vector< vector<float> > uScores;  //vector<weighted scores for user trees.> each group comb has an entry
+								
 		ofstream outSum, out;
 		
 		void printWSummaryFile();
-		void printWeightedFile();  
-		void saveRandomScores();
+	//	void printWeightedFile();  
+		void removeValidScoresDuplicates();
+		int findIndex(float);
 		void setGroups(); 
 };
 

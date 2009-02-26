@@ -18,6 +18,9 @@ UnifracWeightedCommand::UnifracWeightedCommand() {
 		tmap = globaldata->gTreemap;
 		weightedFile = globaldata->getTreeFile() + ".weighted";
 		openOutputFile(weightedFile, out);
+		//column headers
+		out << "Group" << '\t' << "Score" << '\t' << "UserFreq" << '\t' << "UserCumul" << '\t' << "RandFreq" << '\t' << "RandCumul" << endl;
+
 		sumFile = globaldata->getTreeFile() + ".wsummary";
 		openOutputFile(sumFile, outSum);
 				
@@ -42,111 +45,87 @@ int UnifracWeightedCommand::execute() {
 		//get weighted for users tree
 		userData.resize(numComp,0);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
 		randomData.resize(numComp,0); //data[0] = weightedscore AB, data[1] = weightedscore AC...
-		uscoreFreq.resize(numComp);  
-		validScores.resize(numComp);  
-		totalrscoreFreq.resize(numComp); 
-		uCumul.resize(numComp); 	
-		
+				
 		//create new tree with same num nodes and leaves as users
 		randT = new Tree();
 		
 		//get pscores for users trees
 		for (int i = 0; i < T.size(); i++) {
-			rscoreFreq.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
-			rCumul.resize(numComp); //data[0] = weightedscore AB, data[1] = weightedscore AC...	
-				
+			rScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
+			uScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
+			validScores.resize(numComp); 
+							
 			cout << "Processing tree " << i+1 << endl;
 			userData = weighted->getValues(T[i]);  //userData[0] = weightedscore
 			
 			//save users score
 			for (int s=0; s<numComp; s++) {
-				//update uscoreFreq
-				it = uscoreFreq[s].find(userData[s]);
-				if (it == uscoreFreq[s].end()) {//new score
-					uscoreFreq[s][userData[s]] = 1;
-				}else{ uscoreFreq[s][userData[s]]++; }
+				//add users score to vector of user scores
+				uScores[s].push_back(userData[s]);
 				
-				//add user score to valid scores
-				validScores[s][userData[s]] = userData[s];
+				//add users score to vector of valid scores
+				validScores[s].push_back(userData[s]);
 
 				//save users tree score for summary file
 				utreeScores.push_back(userData[s]);
 			}
 			
-			//copy T[i]'s info.
-			randT->getCopy(T[i]); 
-			
 			//get scores for random trees
 			for (int j = 0; j < iters; j++) {
-				//create a random tree with same topology as T[i], but different labels
-				randT->assembleRandomUnifracTree();
-				//get pscore of random tree
-				randomData = weighted->getValues(randT);
-				
-				//save ramdoms score
-				for (int p=0; p<numComp; p++) {
-					//add trees weighted score random score freq
-					it2 = rscoreFreq[p].find(randomData[p]);
-					if (it2 != rscoreFreq[p].end()) {//already have that score
-						rscoreFreq[p][randomData[p]]++;
-					}else{//first time we have seen this score
-						rscoreFreq[p][randomData[p]] = 1;
+				int n = 1;
+				int count = 0;
+				for (int r=0; r<numGroups; r++) { 
+					for (int l = n; l < numGroups; l++) {
+						//copy T[i]'s info.
+						randT->getCopy(T[i]);
+						 
+						if (globaldata->Groups.size() != 0) {
+							//create a random tree with same topology as T[i], but different labels
+							randT->assembleRandomUnifracTree(globaldata->Groups[r], globaldata->Groups[l]);
+							//get wscore of random tree
+							randomData = weighted->getValues(randT, globaldata->Groups[r], globaldata->Groups[l]);
+						}else {
+							//create a random tree with same topology as T[i], but different labels
+							randT->assembleRandomUnifracTree(tmap->namesOfGroups[r], tmap->namesOfGroups[l]);
+							//get wscore of random tree
+							randomData = weighted->getValues(randT, tmap->namesOfGroups[r], tmap->namesOfGroups[l]);
+						}
+
+						//save scores
+						rScores[count].push_back(randomData[0]);
+						validScores[count][randomData[0]] = randomData[0];
+						count++;
 					}
-					
-					//add random score to valid scores
-					validScores[p][randomData[p]] = randomData[p];
+					n++;
 				}
 			}
-			
-			saveRandomScores(); //save all random scores for weighted file
+
+			removeValidScoresDuplicates(); 
 			
 			//find the signifigance of the score for summary file
-			for (int t = 0; t < numComp; t++) {
-				float rcumul = 1.0000;
-				for (it = validScores[t].begin(); it != validScores[t].end(); it++) { 
-					//make rscoreFreq map and rCumul
-					it2 = rscoreFreq[t].find(it->first);
-					rCumul[t][it->first] = rcumul;
-					//get percentage of random trees with that info
-					if (it2 != rscoreFreq[t].end()) {  rscoreFreq[t][it->first] /= iters; rcumul-= it2->second;  }
-					else { rscoreFreq[t][it->first] = 0.0000; } //no random trees with that score
-				}
-			}
-			
-			//save the signifigance of the users score for printing later
 			for (int f = 0; f < numComp; f++) {
-				WScoreSig.push_back(rCumul[f][userData[f]]);
+				//sort random scores
+				sort(rScores[f].begin(), rScores[f].end());
+				
+				//the index of the score higher than yours is returned 
+				//so if you have 1000 random trees the index returned is 100 
+				//then there are 900 trees with a score greater then you. 
+				//giving you a signifigance of 0.900
+				int index = findIndex(userData[f]);    if (index == -1) { cout << "error in UnifracWeightedCommand" << endl; exit(1); } //error code
+			
+				//the signifigance is the number of trees with the users score or higher 
+				WScoreSig.push_back((iters-index)/(float)iters);
 			}
 			
+			out << "Tree# " << i << endl;
+			//printWeightedFile();
 			
-			//clear random data
-			rscoreFreq.clear();
-			rCumul.clear();
+			//clear data
+			rScores.clear();
+			uScores.clear();
+			validScores.clear();
 		}
 		
-		rCumul.resize(numComp);
-		for (int b = 0; b < numComp; b++) {
-			float ucumul = 1.0000;
-			float rcumul = 1.0000;
-			//this loop fills the cumulative maps and put 0.0000 in the score freq map to make it easier to print.
-			for (it = validScores[b].begin(); it != validScores[b].end(); it++) { 
-				it2 = uscoreFreq[b].find(it->first);
-				//make uCumul map
-				uCumul[b][it->first] = ucumul;
-				//user data has that score 
-				if (it2 != uscoreFreq[b].end()) { uscoreFreq[b][it->first] /= T.size(); ucumul-= it2->second;  }
-				else { uscoreFreq[b][it->first] = 0.0000; } //no user trees with that score
-			
-				//make rscoreFreq map and rCumul
-				it2 = totalrscoreFreq[b].find(it->first);
-				rCumul[b][it->first] = rcumul;
-				//get percentage of random trees with that info
-				if (it2 != totalrscoreFreq[b].end()) {  totalrscoreFreq[b][it->first] /= (iters * T.size()); rcumul-= it2->second;  }
-				else { totalrscoreFreq[b][it->first] = 0.0000; } //no random trees with that score
-							}
-		}
-		
-		printWeightedFile();
 		printWSummaryFile();
 		
 		//clear out users groups
@@ -166,21 +145,18 @@ int UnifracWeightedCommand::execute() {
 		exit(1);
 	}
 }
-/***********************************************************/
+/***********************************************************
 void UnifracWeightedCommand::printWeightedFile() {
 	try {
-		//column headers
-		
-		out << "Group" << '\t' << "Score" << '\t' << "UserFreq" << '\t' << "UserCumul" << '\t' << "RandFreq" << '\t' << "RandCumul" << endl;
-				
+						
 		//format output
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
 		//for each group
 		for (int e = 0; e < numComp; e++) {
 			//print each line in that group
-			for (it = validScores[e].begin(); it != validScores[e].end(); it++) { 
-				out << setprecision(6) <<  groupComb[e] << '\t' << it->first << '\t' << '\t' << uscoreFreq[e][it->first] << '\t' << uCumul[e][it->first] << '\t' << totalrscoreFreq[e][it->first] << '\t' << rCumul[e][it->first] << endl; 
+			for (i = 0; i < validScores[e].size(); i++) { 
+				out << setprecision(6) <<  groupComb[e] << '\t' << validScores[e][i] << '\t' << '\t' << uscoreFreq[e][it->first] << '\t' << uCumul[e][it->first] << '\t' << rscoreFreq[e][it->first] << '\t' << rCumul[e][it->first] << endl; 
 			} 
 		}
 		
@@ -230,28 +206,44 @@ void UnifracWeightedCommand::printWSummaryFile() {
 }
 
 /***********************************************************/
-void UnifracWeightedCommand::saveRandomScores() {
+void UnifracWeightedCommand::removeValidScoresDuplicates() {
 	try {
 		for (int e = 0; e < numComp; e++) {
-			//update total map with new random scores
-			for (it = rscoreFreq[e].begin(); it != rscoreFreq[e].end(); it++) { 
-				//does this score already exist in the total map
-				it2 = totalrscoreFreq[e].find(it->first);
-				//if yes then add them
-				if (it2 != totalrscoreFreq[e].end()) { 
-					totalrscoreFreq[e][it->first] += rscoreFreq[e][it->first];
-				}else{ //its a new score
-					totalrscoreFreq[e][it->first] = rscoreFreq[e][it->first];
-				}
+			//sort valid scores
+			sort(validScores[e].begin(), validScores[e].end());
+			
+			for (int i = 0; i< validScores[e].size()-1; i++) { 
+				if (validScores[e][i] == validScores[e][i+1]) { validScores[e].erase(validScores[e].begin()+i); }
 			}
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the UnifracWeightedCommand class Function saveRandomScores. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the UnifracWeightedCommand class Function removeValidScoresDuplicates. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the UnifracWeightedCommand class function saveRandomScores. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the UnifracWeightedCommand class function removeValidScoresDuplicates. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+
+/***********************************************************/
+int UnifracWeightedCommand::findIndex(float score) {
+	try{
+		for (int e = 0; e < numComp; e++) {
+			for (int i = 0; i < rScores[e].size(); i++) {
+//cout << rScores[e][i] << " number " << i << endl;
+				if (rScores[e][i] >= score) { return i; }
+			}
+		}
+		return -1;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the UnifracWeightedCommand class Function findIndex. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the UnifracWeightedCommand class function findIndex. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 }

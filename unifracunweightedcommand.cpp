@@ -109,7 +109,6 @@ int UnifracUnweightedCommand::execute() {
 				//get percentage of random trees with that info
 				rscoreFreq[it->first] /= iters; 
 				rcumul-= it->second;  
-				
 			}
 			
 			//save the signifigance of the users score for printing later
