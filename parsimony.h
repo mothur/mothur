@@ -27,6 +27,7 @@ class Parsimony : public TreeCalculator  {
 		
 	private:
 		GlobalData* globaldata;
+		Tree* copyTree;
 		EstOutput data;
 		TreeMap* tmap;
 		map<string, int>::iterator it;

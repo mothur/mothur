@@ -29,7 +29,7 @@ class Weighted : public TreeCalculator  {
 		EstOutput data;
 		TreeMap* tmap;
 		map<string, int>::iterator it;
-		map<string, float> WScore; //a score for each group combination i.e. AB, AC, BC.
+		map<string, double> WScore; //a score for each group combination i.e. AB, AC, BC.
 };
 
 /***********************************************************************/

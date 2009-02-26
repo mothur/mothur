@@ -28,8 +28,8 @@ class UnifracWeightedCommand : public Command {
 	private:
 		GlobalData* globaldata;
 		vector<Tree*> T;	   //user trees
-		vector<float> utreeScores;  //user tree unweighted scores
-		vector<float> WScoreSig;  //tree weighted score signifigance when compared to random trees - percentage of random trees with that score or lower.
+		vector<double> utreeScores;  //user tree unweighted scores
+		vector<double> WScoreSig;  //tree weighted score signifigance when compared to random trees - percentage of random trees with that score or lower.
 		vector<string> groupComb; // AB. AC, BC...
 		Tree* randT;  //random tree
 		TreeMap* tmap;
@@ -38,9 +38,9 @@ class UnifracWeightedCommand : public Command {
 		int iters, numGroups, numComp;
 		EstOutput userData;			//weighted score info for user tree
 		EstOutput randomData;		//weighted score info for random trees
-		vector< vector<float> > validScores;  //vector<contains scores from both user and random> each group comb has an entry
-		vector< vector<float> > rScores;  //vector<weighted scores for random trees.> each group comb has an entry
-		vector< vector<float> > uScores;  //vector<weighted scores for user trees.> each group comb has an entry
+		vector< vector<double> > validScores;  //vector<contains scores from both user and random> each group comb has an entry
+		vector< vector<double> > rScores;  //vector<weighted scores for random trees.> each group comb has an entry
+		vector< vector<double> > uScores;  //vector<weighted scores for user trees.> each group comb has an entry
 								
 		ofstream outSum, out;
 		

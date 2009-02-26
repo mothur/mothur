@@ -32,20 +32,21 @@ class ParsimonyCommand : public Command {
 		TreeMap* tmap; 
 		TreeMap* savetmap;
 		Parsimony* pars;
+		vector<string> groupComb; // AB. AC, BC...
 		string parsFile, sumFile, randomtree;
-		int iters, numGroups;
+		int iters, numGroups, numComp;
 		vector<int> numEachGroup; //vector containing the number of sequences in each group the users wants for random distrib.
-		vector<float> userTreeScores; //scores for users trees
-		vector<float> UScoreSig;  //tree score signifigance when compared to random trees - percentage of random trees with that score or lower.
+		vector< vector<float> > userTreeScores; //scores for users trees for each comb.
+		vector< vector<float> > UScoreSig;  //tree score signifigance when compared to random trees - percentage of random trees with that score or lower.
 		EstOutput userData;			//pscore info for user tree
 		EstOutput randomData;		//pscore info for random trees
-		map<int, float> validScores;  //contains scores from both user and random
-		map<int, float> rscoreFreq;  //pscore, number of random trees with that score.
-		map<int, float> uscoreFreq;  //pscore, number of user trees with that score.
-		map<int, float> rCumul;  //pscore, cumulative percentage of number of random trees with that score or lower.
-		map<int, float> uCumul;  //pscore, cumulative percentage of number of user trees with that score or lower .
-		map<int, float>::iterator it;
-		map<int, float>::iterator it2;
+		vector< map<int, double> > validScores;  //map contains scores from both user and random
+		vector< map<int, double> > rscoreFreq;  //map <pscore, number of random trees with that score.> -vector entry for each combination.
+		vector< map<int, double> > uscoreFreq;  //map <pscore, number of user trees with that score.> -vector entry for each combination.
+		vector< map<int, double> > rCumul;  //map <pscore, cumulative percentage of number of random trees with that score or lower.> -vector entry for each combination.
+		vector< map<int, double> > uCumul;  //map <pscore, cumulative percentage of number of user trees with that score or lower .> -vector entry for each combination.
+		map<int, double>::iterator it;
+		map<int, double>::iterator it2;
 		
 		ofstream out, outSum;
 		
