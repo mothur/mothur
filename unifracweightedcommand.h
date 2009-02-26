@@ -47,7 +47,7 @@ class UnifracWeightedCommand : public Command {
 		void printWSummaryFile();
 	//	void printWeightedFile();  
 		void removeValidScoresDuplicates();
-		int findIndex(float);
+		int findIndex(float, int);
 		void setGroups(); 
 };
 
