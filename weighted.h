@@ -22,6 +22,7 @@ class Weighted : public TreeCalculator  {
 		Weighted(TreeMap* t) : tmap(t) {};
 		~Weighted() {};
 		EstOutput getValues(Tree*);
+		EstOutput getValues(Tree*, string, string);
 		
 	private:
 		GlobalData* globaldata;

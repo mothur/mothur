@@ -174,3 +174,96 @@ EstOutput Weighted::getValues(Tree* t) {
 }
 
 /**************************************************************************************************/
+EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) { 
+ try {
+		globaldata = GlobalData::getInstance();
+		
+		data.clear(); //clear out old values
+		
+		//initialize weighted score
+		WScore[(groupA+groupB)] = 0.0;
+		float D = 0.0;
+		
+						
+		/********************************************************/
+		//calculate a D value for the group combo
+		for(int v=0;v<t->getNumLeaves();v++){
+			int index = v;
+			double sum = 0.0000;
+		
+			//while you aren't at root
+			while(t->tree[index].getParent() != -1){
+							
+				//if you have a BL
+				if(t->tree[index].getBranchLength() != -1){
+					sum += t->tree[index].getBranchLength();
+				}
+				index = t->tree[index].getParent();
+			}
+						
+			//get last breanch length added
+			if(t->tree[index].getBranchLength() != -1){
+				sum += t->tree[index].getBranchLength();
+			}
+						
+			if ((t->tree[v].getGroup() == groupA) || (t->tree[v].getGroup() == groupB)) {
+				sum /= (double)tmap->seqsPerGroup[t->tree[v].getGroup()];
+				D += sum; 
+			}
+		}
+		/********************************************************/				
+		
+		//calculate u for the group comb 
+		for(int i=0;i<t->getNumNodes();i++){
+			double u;
+			//does this node have descendants from groupA
+			it = t->tree[i].pcount.find(groupA);
+			//if it does u = # of its descendants with a certain group / total number in tree with a certain group
+			if (it != t->tree[i].pcount.end()) {
+				u = (double) t->tree[i].pcount[groupA] / (double) tmap->seqsPerGroup[groupA];
+			}else { u = 0.00; }
+		
+						
+			//does this node have descendants from group l
+			it = t->tree[i].pcount.find(groupB);
+			//if it does subtract their percentage from u
+			if (it != t->tree[i].pcount.end()) {
+				u -= (double) t->tree[i].pcount[groupB] / (double) tmap->seqsPerGroup[groupB];
+			}
+						
+			u = abs(u) * t->tree[i].getBranchLength();
+					
+			//save groupcombs u value
+			WScore[(groupA+groupB)] += u;
+		}
+		
+		/********************************************************/
+		
+		//calculate weighted score for the group combination
+		double UN;	
+		UN = (WScore[(groupA+groupB)] / D);
+		
+		if (isnan(UN) || isinf(UN)) { UN = 0; } 
+		data.push_back(UN);
+				
+		return data; 
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the Weighted class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the Weighted class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+
+}
+
+
+
+
+
+
+
+
+

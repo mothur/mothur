@@ -22,6 +22,7 @@ class Unweighted : public TreeCalculator  {
 		Unweighted(TreeMap* t) : tmap(t) {};
 		~Unweighted() {};
 		EstOutput getValues(Tree*);
+		EstOutput getValues(Tree*, string, string) { return data; };
 		
 	private:
 		GlobalData* globaldata;

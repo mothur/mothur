@@ -29,6 +29,7 @@ public:
 	TreeCalculator(string n) : name(n) {};
 	~TreeCalculator(){};
 	virtual EstOutput getValues(Tree*) = 0;	
+	virtual EstOutput getValues(Tree*, string, string) = 0;
 	
 	virtual string getName()		{	return name;	}
 		

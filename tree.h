@@ -26,7 +26,8 @@ public:
 	void getCopy(Tree*);  //makes tree a copy of the one passed in.
 	void assembleRandomTree();
 	void assembleRandomUnifracTree();
-	void createNewickFile();
+	void assembleRandomUnifracTree(string, string);
+	void createNewickFile(string);
 	int getIndex(string);
 	void setIndex(string, int);
 	int getNumNodes() { return numNodes; }
@@ -51,6 +52,7 @@ private:
 	void randomTopology();
 	void randomBlengths();
 	void randomLabels();
+	void randomLabels(string, string);
 	int findRoot();  //return index of root node
 	void printBranch(int);  //recursively print out tree
 	void setGroups();

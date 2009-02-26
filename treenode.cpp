@@ -64,7 +64,8 @@ void Node::printNode() {
 		for(it=pcount.begin();it!=pcount.end();it++){
 			cout << ' ' << it->first << ':' << it->second;
 		}
-		cout << endl;
+		cout << endl; 
+		
 		
 	}
 	catch(exception& e) {
