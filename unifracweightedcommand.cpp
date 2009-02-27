@@ -16,10 +16,10 @@ UnifracWeightedCommand::UnifracWeightedCommand() {
 		
 		T = globaldata->gTree;
 		tmap = globaldata->gTreemap;
-		weightedFile = globaldata->getTreeFile() + ".weighted";
-		openOutputFile(weightedFile, out);
+		//weightedFile = globaldata->getTreeFile() + ".weighted";
+		//openOutputFile(weightedFile, out);
 		//column headers
-		out << "Group" << '\t' << "Score" << '\t' << "UserFreq" << '\t' << "UserCumul" << '\t' << "RandFreq" << '\t' << "RandCumul" << endl;
+		//out << "Group" << '\t' << "Score" << '\t' << "UserFreq" << '\t' << "UserCumul" << '\t' << "RandFreq" << '\t' << "RandCumul" << endl;
 
 		sumFile = globaldata->getTreeFile() + ".wsummary";
 		openOutputFile(sumFile, outSum);
@@ -78,17 +78,11 @@ int UnifracWeightedCommand::execute() {
 						//copy T[i]'s info.
 						randT->getCopy(T[i]);
 						 
-						if (globaldata->Groups.size() != 0) {
-							//create a random tree with same topology as T[i], but different labels
-							randT->assembleRandomUnifracTree(globaldata->Groups[r], globaldata->Groups[l]);
-							//get wscore of random tree
-							randomData = weighted->getValues(randT, globaldata->Groups[r], globaldata->Groups[l]);
-						}else {
-							//create a random tree with same topology as T[i], but different labels
-							randT->assembleRandomUnifracTree(tmap->namesOfGroups[r], tmap->namesOfGroups[l]);
-							//get wscore of random tree
-							randomData = weighted->getValues(randT, tmap->namesOfGroups[r], tmap->namesOfGroups[l]);
-						}
+						//create a random tree with same topology as T[i], but different labels
+						randT->assembleRandomUnifracTree(globaldata->Groups[r], globaldata->Groups[l]);
+						//get wscore of random tree
+						randomData = weighted->getValues(randT, globaldata->Groups[r], globaldata->Groups[l]);
+						
 						//save scores
 						rScores[count].push_back(randomData[0]);
 						validScores[count][randomData[0]] = randomData[0];
@@ -113,7 +107,7 @@ int UnifracWeightedCommand::execute() {
 				WScoreSig.push_back((iters-index)/(float)iters);
 			}
 			
-			out << "Tree# " << i << endl;
+			//out << "Tree# " << i << endl;
 			//printWeightedFile();
 			
 			//clear data
@@ -247,6 +241,9 @@ void UnifracWeightedCommand::setGroups() {
 		//if the user has not entered specific groups to analyze then do them all
 		if (globaldata->Groups.size() == 0) {
 			numGroups = tmap->getNumGroups();
+			for (int i=0; i < numGroups; i++) { 
+				globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+			}
 		}else {
 			if (globaldata->getGroups() != "all") {
 				//check that groups are valid
@@ -261,33 +258,36 @@ void UnifracWeightedCommand::setGroups() {
 				//if the user only entered invalid groups
 				if (globaldata->Groups.size() == 0) { 
 					numGroups = tmap->getNumGroups();
+					for (int i=0; i < numGroups; i++) { 
+						globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+					}
 					cout << "When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile." << endl; 
 				}else if (globaldata->Groups.size() == 1) { 
 					cout << "When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile." << endl;
 					numGroups = tmap->getNumGroups();
 					globaldata->Groups.clear();
+					for (int i=0; i < numGroups; i++) { 
+						globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+					}
 				}else { numGroups = globaldata->Groups.size(); }
 			}else { //users wants all groups
 				numGroups = tmap->getNumGroups();
 				globaldata->Groups.clear();
 				globaldata->setGroups("");
+				for (int i=0; i < numGroups; i++) { 
+					globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+				}
 			}
 		}
 		
 		//calculate number of comparisons i.e. with groups A,B,C = AB, AC, BC = 3;
 		numComp = 0;
-		int n = 1;
-		for (int i=1; i<numGroups; i++) { 
+		for (int i=0; i<numGroups; i++) { 
 			numComp += i; 
-			for (int l = n; l < numGroups; l++) {
+			for (int l = i+1; l < numGroups; l++) {
 				//set group comparison labels
-				if (globaldata->Groups.size() != 0) {
-					groupComb.push_back(globaldata->Groups[i-1]+globaldata->Groups[l]);
-				}else {
-					groupComb.push_back(tmap->namesOfGroups[i-1]+tmap->namesOfGroups[l]);
-				}
+				groupComb.push_back(globaldata->Groups[i]+globaldata->Groups[l]);
 			}
-			n++;
 		}
 	}
 	catch(exception& e) {

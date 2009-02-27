@@ -28,29 +28,28 @@ class UnifracUnweightedCommand : public Command {
 	private:
 		GlobalData* globaldata;
 		vector<Tree*> T;	   //user trees
-		vector<float> utreeScores;  //user tree unweighted scores
-		vector<float> UWScoreSig;  //tree unweighted score signifigance when compared to random trees - percentage of random trees with that score or lower.
 		Tree* randT;  //random tree
 		TreeMap* tmap;
 		Unweighted* unweighted;
-		string sumFile, distFile, unweightedFile;
-		int iters;
+		string sumFile, unweightedFile;
+		vector<string> groupComb; // AB. AC, BC...
+		int iters, numGroups, numComp;
 		EstOutput userData;			//unweighted score info for user tree
 		EstOutput randomData;		//unweighted score info for random trees
-		map<float, float> validScores;  //contains scores from both user and random
-		map<float, float> rscoreFreq;  //unweighted score, number of random trees with that score.
-		map<float, float> uscoreFreq;  //unweighted, number of user trees with that score.
-		map<float, float> totalrscoreFreq;  //unweighted score, number of random trees with that score.
-		map<float, float> rCumul;		//unweighted score, cumulative percentage of number of random trees with that score or higher.
-		map<float, float> uCumul;  //unweighted, cumulative percentage of number of user trees with that score or higher .
-		map<float, float>::iterator it;
+		vector< vector<float> > utreeScores; //scores for users trees for each comb.
+		vector< vector<float> > UWScoreSig;  //tree score signifigance when compared to random trees - percentage of random trees with that score or higher.
+		vector< map<float, float> > validScores;  //map contains scores from both user and random
+		vector< map<float, float> > rscoreFreq;  //map <unweighted score, number of random trees with that score.> -vector entry for each combination.
+		vector< map<float, float> > uscoreFreq;  //map <unweighted score, number of user trees with that score.> -vector entry for each combination.
+		vector< map<float, float> > rCumul;  //map <unweighted score, cumulative percentage of number of random trees with that score or higher.> -vector entry for each combination.
+		vector< map<float, float> > uCumul;  //map <unweighted score, cumulative percentage of number of user trees with that score or higher.> -vector entry for each combination.		map<float, float>::iterator it;
 		map<float, float>::iterator it2;
+		map<float, float>::iterator it;
 		
-		ofstream outSum, outDist, out;
+		ofstream outSum, out;
 		
 		void printUWSummaryFile();
 		void printUnweightedFile();
-		void saveRandomScores(); 
 		void setGroups();   
 		
 };

@@ -18,10 +18,14 @@ UnifracUnweightedCommand::UnifracUnweightedCommand() {
 		tmap = globaldata->gTreemap;
 		unweightedFile = globaldata->getTreeFile() + ".unweighted";
 		openOutputFile(unweightedFile, out);
+		//column headers
+		out << "Comb" << '\t' << "Score" << '\t' << "UserFreq" << '\t' << "UserCumul" << '\t' << "RandFreq" << '\t' << "RandCumul" << endl;
+				
 		sumFile = globaldata->getTreeFile() + ".uwsummary";
 		openOutputFile(sumFile, outSum);
-		distFile = globaldata->getTreeFile() + ".uwdistrib";
-		openOutputFile(distFile, outDist);
+		//column headers
+		outSum << "Tree#" << '\t' << "Comb" << '\t'  <<  "UWScore" << '\t' << '\t' << "UWSig" <<  endl;
+
 		setGroups(); //sets users groups to analyze
 		convert(globaldata->getIters(), iters);  //how many random trees to generate
 		unweighted = new Unweighted(tmap);
@@ -39,112 +43,104 @@ UnifracUnweightedCommand::UnifracUnweightedCommand() {
 /***********************************************************/
 int UnifracUnweightedCommand::execute() {
 	try {
-		
-		//get unweighted for users tree
-		userData.resize(1,0);  //data[0] = unweightedscore 
-		randomData.resize(1,0); //data[0] = unweightedscore
-		
-		//format output
-		outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
-		
-		outDist << "Groups Used ";
-		for (int m = 0; m < globaldata->Groups.size(); m++) {
-			outDist << globaldata->Groups[m] << " ";
-		}
-		outDist << endl;
-		
-		outDist << "Tree#" << '\t' << "Iter" << '\t' << "UWScore" << endl;
-		
+	
+		userData.resize(numComp,0);  //data[0] = unweightedscore 
+		randomData.resize(numComp,0); //data[0] = unweightedscore
 		//create new tree with same num nodes and leaves as users
 		randT = new Tree();
 				
 		//get pscores for users trees
 		for (int i = 0; i < T.size(); i++) {
+			//get unweighted for users tree
+			rscoreFreq.resize(numComp);  
+			uscoreFreq.resize(numComp);  
+			rCumul.resize(numComp);  
+			uCumul.resize(numComp);  
+			validScores.resize(numComp); 
+			utreeScores.resize(numComp);  
+			UWScoreSig.resize(numComp); 
+
 			cout << "Processing tree " << i+1 << endl;
+			outSum << "Tree#" << i+1 << endl;
+			out << "Tree#" << i+1 << endl;
 			userData = unweighted->getValues(T[i]);  //userData[0] = unweightedscore
 			
-			//update uscoreFreq
-			it = uscoreFreq.find(userData[0]);
-			if (it == uscoreFreq.end()) {//new score
-				uscoreFreq[userData[0]] = 1;
-			}else{ uscoreFreq[userData[0]]++; }
+			//output scores for each combination
+			for(int k = 0; k < numComp; k++) {
+				//update uscoreFreq
+				it = uscoreFreq[k].find(userData[k]);
+				if (it == uscoreFreq[k].end()) {//new score
+					uscoreFreq[k][userData[k]] = 1;
+				}else{ uscoreFreq[k][userData[k]]++; }
 			
-			//add users score to valid scores
-			validScores[userData[0]] = userData[0];
+				//add users score to valid scores
+				validScores[k][userData[k]] = userData[k];
 			
-			//saves users score
-			utreeScores.push_back(userData[0]);
+				//saves users score
+				utreeScores[k].push_back(userData[k]);
+			}
 			
 			//copy T[i]'s info.
 			randT->getCopy(T[i]); 
 			
 			//get unweighted scores for random trees
 			for (int j = 0; j < iters; j++) {
-				//create a random tree with same topology as T[i], but different labels
-				randT->assembleRandomUnifracTree();
-				//get pscore of random tree
-				randomData = unweighted->getValues(randT);
+				int count = 0;
+				for (int r=0; r<numGroups; r++) { 
+					for (int l = r+1; l < numGroups; l++) {
+						//we need a different getValues because when we swap the labels we only want to swap those in each parwise comparison
+						randomData = unweighted->getValues(randT, "", "");
 			
-				//add trees unweighted score to map of scores
-				it2 = rscoreFreq.find(randomData[0]);
-				if (it2 != rscoreFreq.end()) {//already have that score
-					rscoreFreq[randomData[0]]++;
-				}else{//first time we have seen this score
-					rscoreFreq[randomData[0]] = 1;
+						//add trees unweighted score to map of scores
+						it2 = rscoreFreq[count].find(randomData[count]);
+						if (it2 != rscoreFreq[count].end()) {//already have that score
+							rscoreFreq[count][randomData[count]]++;
+						}else{//first time we have seen this score
+							rscoreFreq[count][randomData[count]] = 1;
+						}
+				
+						//add randoms score to validscores
+						validScores[count][randomData[count]] = randomData[count];
+						count++;
+					}
 				}
-				
-				//add randoms score to validscores
-				validScores[randomData[0]] = randomData[0];
-				
-				//output info to uwdistrib file
-				outDist << i+1 << '\t' << '\t'<< j+1 << '\t' << '\t' << randomData[0] << endl;
 			}
-			
-			saveRandomScores(); //save all random scores for unweighted file
-			
-			//find the signifigance of the score
-			float rcumul = 1.0000;
-			for (it = rscoreFreq.begin(); it != rscoreFreq.end(); it++) { 
-				rCumul[it->first] = rcumul;
-				//get percentage of random trees with that info
-				rscoreFreq[it->first] /= iters; 
-				rcumul-= it->second;  
-			}
-			
-			//save the signifigance of the users score for printing later
-			UWScoreSig.push_back(rCumul[userData[0]]);
-			
-			
-			//clear random data
-			rscoreFreq.clear();  //you clear this because in the summary file you want the unweighted signifinance to be relative to these 1000 trees.
-			rCumul.clear();
-		}
 		
-		float ucumul = 1.0000;
-		float rcumul = 1.0000;
-		//this loop fills the cumulative maps and put 0.0000 in the score freq map to make it easier to print.
-		for (it = validScores.begin(); it != validScores.end(); it++) { 
-			it2 = uscoreFreq.find(it->first);
-			//make uCumul map
-			uCumul[it->first] = ucumul;
-			//user data has that score 
-			if (it2 != uscoreFreq.end()) { uscoreFreq[it->first] /= T.size(); ucumul-= it2->second;  }
-			else { uscoreFreq[it->first] = 0.0000; } //no user trees with that score
+		for(int a = 0; a < numComp; a++) {
+			float ucumul = 1.0000;
+			float rcumul = 1.0000;
+			//this loop fills the cumulative maps and put 0.0000 in the score freq map to make it easier to print.
+			for (it = validScores[a].begin(); it != validScores[a].end(); it++) { 
+				it2 = uscoreFreq[a].find(it->first);
+				//make uCumul map
+				uCumul[a][it->first] = ucumul;
+				//user data has that score 
+				if (it2 != uscoreFreq[a].end()) { uscoreFreq[a][it->first] /= T.size(); ucumul-= it2->second;  }
+				else { uscoreFreq[a][it->first] = 0.0000; } //no user trees with that score
 						
-			//make rscoreFreq map and rCumul
-			it2 = totalrscoreFreq.find(it->first);
-			rCumul[it->first] = rcumul;
-			//get percentage of random trees with that info
-			if (it2 != totalrscoreFreq.end()) {  totalrscoreFreq[it->first] /= (iters*T.size()); rcumul-= it2->second;  }
-			else { totalrscoreFreq[it->first] = 0.0000; } //no random trees with that score
-			
+				//make rscoreFreq map and rCumul
+				it2 = rscoreFreq[a].find(it->first);
+				rCumul[a][it->first] = rcumul;
+				//get percentage of random trees with that info
+				if (it2 != rscoreFreq[a].end()) {  rscoreFreq[a][it->first] /= iters; rcumul-= it2->second;  }
+				else { rscoreFreq[a][it->first] = 0.0000; } //no random trees with that score
+			}
+			UWScoreSig[a].push_back(rCumul[a][userData[a]]);
 		}
 		
 		printUnweightedFile();
 		printUWSummaryFile();
 		
+		rscoreFreq.clear();  
+		uscoreFreq.clear();  
+		rCumul.clear();  
+		uCumul.clear();  
+		validScores.clear(); 
+		utreeScores.clear();  
+		UWScoreSig.clear(); 
+	}
 		//reset groups parameter
-		globaldata->Groups.clear();
+		globaldata->Groups.clear(); globaldata->setGroups("");
 		
 		delete randT;
 		
@@ -163,24 +159,15 @@ int UnifracUnweightedCommand::execute() {
 /***********************************************************/
 void UnifracUnweightedCommand::printUnweightedFile() {
 	try {
-		//column headers
-		
-		out << "Groups Used ";
-		for (int m = 0; m < globaldata->Groups.size(); m++) {
-			out << globaldata->Groups[m] << " ";
-		}
-		out << endl;
-
-		out << "Score" << '\t' << "UserFreq" << '\t' << "UserCumul" << '\t' << "RandFreq" << '\t' << "RandCumul" << endl;
-				
 		//format output
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
-		//print each line
-		for (it = validScores.begin(); it != validScores.end(); it++) { 
-			out << setprecision(6) << it->first << '\t' << '\t' << uscoreFreq[it->first] << '\t' << uCumul[it->first] << '\t' << totalrscoreFreq[it->first] << '\t' << rCumul[it->first] << endl; 
-		} 
-		
+		for(int a = 0; a < numComp; a++) {
+			//print each line
+			for (it = validScores[a].begin(); it != validScores[a].end(); it++) { 
+				out << setprecision(6) << groupComb[a] << '\t' << it->first << '\t' << '\t' << uscoreFreq[a][it->first] << '\t' << uCumul[a][it->first] << '\t' << rscoreFreq[a][it->first] << '\t' << rCumul[a][it->first] << endl; 
+			} 
+		}
 		out.close();
 		
 	}
@@ -197,22 +184,16 @@ void UnifracUnweightedCommand::printUnweightedFile() {
 /***********************************************************/
 void UnifracUnweightedCommand::printUWSummaryFile() {
 	try {
-		//column headers
-		
-		outSum << "Groups Used ";
-		for (int m = 0; m < globaldata->Groups.size(); m++) {
-			outSum << globaldata->Groups[m] << " ";
-		}
-		outSum << endl;
-
-		outSum << "Tree#" << '\t'  <<  "UWScore" << '\t' << '\t' << "UWSig" <<  endl;
-		
+				
 		//format output
 		outSum.setf(ios::fixed, ios::floatfield); outSum.setf(ios::showpoint);
 		
 		//print each line
 		for (int i = 0; i< T.size(); i++) {
-			outSum << setprecision(6) << i+1 << '\t' << '\t' << utreeScores[i] << '\t' << UWScoreSig[i] << endl; 
+			for(int a = 0; a < numComp; a++) {
+				outSum << setprecision(6) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << utreeScores[a][i] << '\t' << UWScoreSig[a][i] << endl;
+				cout << setprecision(6) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << utreeScores[a][i] << '\t' << UWScoreSig[a][i] << endl; 
+			}	
 		}
 		
 		outSum.close();
@@ -227,56 +208,65 @@ void UnifracUnweightedCommand::printUWSummaryFile() {
 	}
 }
 /***********************************************************/
-void UnifracUnweightedCommand::saveRandomScores() {
-	try {
-		for (it = rscoreFreq.begin(); it != rscoreFreq.end(); it++) { 
-			//does this score already exist in the total map
-			it2 = totalrscoreFreq.find(it->first);
-			//if yes then add them
-			if (it2 != totalrscoreFreq.end()) { 
-				totalrscoreFreq[it->first] += rscoreFreq[it->first];
-			}else{ //its a new score
-				totalrscoreFreq[it->first] = rscoreFreq[it->first];
-			}
-		}
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the UnifracUnweightedCommand class Function saveRandomScores. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the UnifracUnweightedCommand class function saveRandomScores. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-}
-
-/***********************************************************/
 
 void UnifracUnweightedCommand::setGroups() {
 	try {
+		string allGroups = "";
+		numGroups = 0;
 		//if the user has not entered specific groups to analyze then do them all
 		if (globaldata->Groups.size() != 0) {
-			//check that groups are valid
-			for (int i = 0; i < globaldata->Groups.size(); i++) {
-				if (tmap->isValidGroup(globaldata->Groups[i]) != true) {
-					cout << globaldata->Groups[i] << " is not a valid group, and will be disregarded." << endl;
-					// erase the invalid group from globaldata->Groups
-					globaldata->Groups.erase (globaldata->Groups.begin()+i);
+			if (globaldata->Groups[0] != "all") {
+				//check that groups are valid
+				for (int i = 0; i < globaldata->Groups.size(); i++) {
+					if (tmap->isValidGroup(globaldata->Groups[i]) != true) {
+						cout << globaldata->Groups[i] << " is not a valid group, and will be disregarded." << endl;
+						// erase the invalid group from globaldata->Groups
+						globaldata->Groups.erase(globaldata->Groups.begin()+i);
+					}
 				}
-			}
 			
-			//if the user only entered invalid groups
-			if (globaldata->Groups.size() == 0) { 
-				cout << "When using the groups parameter you must have at least 1 valid group. I will run the command using all the groups in your groupfile." << endl; 
+				//if the user only entered invalid groups
+				if (globaldata->Groups.size() == 0) { 
+					cout << "When using the groups parameter you must have at least 1 valid group. I will run the command using all the groups in your groupfile." << endl; 
+					for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
+						globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+						numGroups++;
+						allGroups += tmap->namesOfGroups[i];
+					}
+				}else {
+					for (int i = 0; i < globaldata->Groups.size(); i++) {
+						allGroups += tmap->namesOfGroups[i];
+						numGroups++;
+					}
+				}
+			}else{//user has enter "all" and wants the default groups
 				for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
 					globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+					numGroups++;
+					allGroups += tmap->namesOfGroups[i];
 				}
+				globaldata->setGroups("");
 			}
-					
 		}else {
 			for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
-				globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+				allGroups += tmap->namesOfGroups[i];
 			}
+			numGroups = 1;
+		}
+		
+		//calculate number of comparsions
+		numComp = 0;
+		for (int r=0; r<numGroups; r++) { 
+			for (int l = r+1; l < numGroups; l++) {
+				groupComb.push_back(globaldata->Groups[r]+globaldata->Groups[l]);
+				numComp++;
+			}
+		}
+		
+		//ABC
+		if (numComp != 1) {
+			groupComb.push_back(allGroups);
+			numComp++;
 		}
 	}
 	catch(exception& e) {
