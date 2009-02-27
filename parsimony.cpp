@@ -14,17 +14,12 @@
 EstOutput Parsimony::getValues(Tree* t) {
 	try {
 		globaldata = GlobalData::getInstance();
+		vector<string> groups;
 		
 		copyTree = new Tree();
 		
 		//if the users enters no groups then give them the score of all groups
 		int numGroups = globaldata->Groups.size();
-		if (numGroups == 0) { 
-			numGroups++; 
-			for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
-				globaldata->Groups.push_back(tmap->namesOfGroups[i]);
-			}
-		}
 		
 		//calculate number of comparsions
 		int numComp = 0;
@@ -36,7 +31,6 @@ EstOutput Parsimony::getValues(Tree* t) {
 
 		//numComp+1 for AB, AC, BC, ABC
 		data.resize(numComp+1,0);
-		vector<string> groups;
 		
 		int count = 0;
 		for (int a=0; a<numGroups; a++) { 
@@ -77,35 +71,46 @@ EstOutput Parsimony::getValues(Tree* t) {
 			}
 		}
 		
-		//get score for all users groups
-		
-		//copy users tree so that you can redo pgroups 
-		copyTree->getCopy(t);
-		int score = 0;
-		
-		//create pgroups that reflect the groups the user want to use
-		for(int i=copyTree->getNumLeaves();i<copyTree->getNumNodes();i++){
-			copyTree->tree[i].pGroups = (copyTree->mergeUserGroups(i, globaldata->Groups));
-		}
-		
-		for(int i=copyTree->getNumLeaves();i<copyTree->getNumNodes();i++){
-			int lc = copyTree->tree[i].getLChild();
-			int rc = copyTree->tree[i].getRChild();
-			
-			int iSize = copyTree->tree[i].pGroups.size();
-			int rcSize = copyTree->tree[rc].pGroups.size();
-			int lcSize = copyTree->tree[lc].pGroups.size();
-		
-			//if isize are 0 then that branch is to be ignored
-			if (iSize == 0) { }
-			else if ((rcSize == 0) || (lcSize == 0)) { }
-			//if you have more groups than either of your kids then theres been a change.
-			else if(iSize > rcSize || iSize > lcSize){
-				score++;
+		if (numComp != 1) {
+			if (numGroups == 0) {
+				//get score for all users groups
+				for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
+					groups.push_back(tmap->namesOfGroups[i]);
+				}
+			}else {
+				for (int i = 0; i < globaldata->Groups.size(); i++) {
+					groups.push_back(globaldata->Groups[i]);
+				}
 			}
-		} 
+			
+			//copy users tree so that you can redo pgroups 
+			copyTree->getCopy(t);
+			int score = 0;
 		
-		data[count] = score;
+			//create pgroups that reflect the groups the user want to use
+			for(int i=copyTree->getNumLeaves();i<copyTree->getNumNodes();i++){
+				copyTree->tree[i].pGroups = (copyTree->mergeUserGroups(i, groups));
+			}
+		
+			for(int i=copyTree->getNumLeaves();i<copyTree->getNumNodes();i++){
+				int lc = copyTree->tree[i].getLChild();
+				int rc = copyTree->tree[i].getRChild();
+			
+				int iSize = copyTree->tree[i].pGroups.size();
+				int rcSize = copyTree->tree[rc].pGroups.size();
+				int lcSize = copyTree->tree[lc].pGroups.size();
+		
+				//if isize are 0 then that branch is to be ignored
+				if (iSize == 0) { }
+				else if ((rcSize == 0) || (lcSize == 0)) { }
+				//if you have more groups than either of your kids then theres been a change.
+				else if(iSize > rcSize || iSize > lcSize){
+					score++;
+				}
+			} 
+		
+			data[count] = score;
+		}
 		
 		return data;
 	}

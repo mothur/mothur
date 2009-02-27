@@ -70,7 +70,6 @@ int ParsimonyCommand::execute() {
 				
 				//output scores for each combination
 				for(int k = 0; k < numComp; k++) {
-					cout << "Tree " << i+1 << " Combination " << groupComb[k] << " parsimony score = " << userData[k] << endl;
 					//update uscoreFreq
 					it = uscoreFreq[k].find(userData[k]);
 					if (it == uscoreFreq[k].end()) {//new score
@@ -166,10 +165,10 @@ int ParsimonyCommand::execute() {
 		}
 		
 		printParsimonyFile();
-		if (randomtree != "") { printUSummaryFile(); }
+		if (randomtree == "") { printUSummaryFile(); }
 		
 		//reset globaldata's treemap if you just did random distrib
-		if (randomtree == "") { globaldata->gTreemap = savetmap; }
+		if (randomtree != "") { globaldata->gTreemap = savetmap; }
 		
 		//reset randomTree parameter to ""
 		globaldata->setRandomTree("");
@@ -238,6 +237,7 @@ void ParsimonyCommand::printUSummaryFile() {
 		for (int i = 0; i< T.size(); i++) {
 			for(int a = 0; a < numComp; a++) {
 				outSum << setprecision(6) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << userTreeScores[a][i] << '\t' << UScoreSig[a][i] << endl;
+				cout << setprecision(6) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << userTreeScores[a][i] << '\t' << UScoreSig[a][i] << endl;
 			}
 		}
 		
@@ -357,8 +357,10 @@ void ParsimonyCommand::setGroups() {
 		}
 		
 		//ABC
-		groupComb.push_back(allGroups);
-		numComp++;
+		if (numComp != 1) {
+			groupComb.push_back(allGroups);
+			numComp++;
+		}
 		
 	}
 	catch(exception& e) {
