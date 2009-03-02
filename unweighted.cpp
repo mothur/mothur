@@ -77,7 +77,7 @@ EstOutput Unweighted::getValues(Tree* t) {
 					//if i's chidren are leaves
 					if (t->tree[rc].getRChild() == -1) {
 						//if rc is a valid group and rc has a BL
-						if ((inUsersGroups(t->tree[rc].getGroup(), globaldata->Groups) == true) && (t->tree[rc].getBranchLength() != -1)) {
+						if ((inUsersGroups(t->tree[rc].getGroup(), groups) == true) && (t->tree[rc].getBranchLength() != -1)) {
 							UniqueBL += t->tree[rc].getBranchLength();
 							totalBL += t->tree[rc].getBranchLength(); 
 						}
@@ -85,7 +85,7 @@ EstOutput Unweighted::getValues(Tree* t) {
 			
 					if (t->tree[lc].getLChild() == -1) {
 						//if lc is a valid group and lc has a BL
-						if ((inUsersGroups(t->tree[lc].getGroup(), globaldata->Groups) == true) && (t->tree[lc].getBranchLength() != -1)) {
+						if ((inUsersGroups(t->tree[lc].getGroup(), groups) == true) && (t->tree[lc].getBranchLength() != -1)) {
 							UniqueBL += t->tree[lc].getBranchLength();
 							totalBL += t->tree[lc].getBranchLength(); 
 						}
@@ -151,7 +151,7 @@ EstOutput Unweighted::getValues(Tree* t) {
 				//if i's chidren are leaves
 				if (t->tree[rc].getRChild() == -1) {
 					//if rc is a valid group and rc has a BL
-					if ((inUsersGroups(t->tree[rc].getGroup(), globaldata->Groups) == true) && (t->tree[rc].getBranchLength() != -1)) {
+					if ((inUsersGroups(t->tree[rc].getGroup(), groups) == true) && (t->tree[rc].getBranchLength() != -1)) {
 						UniqueBL += t->tree[rc].getBranchLength();
 						totalBL += t->tree[rc].getBranchLength(); 
 					}
@@ -159,7 +159,7 @@ EstOutput Unweighted::getValues(Tree* t) {
 			
 				if (t->tree[lc].getLChild() == -1) {
 					//if lc is a valid group and lc has a BL
-					if ((inUsersGroups(t->tree[lc].getGroup(), globaldata->Groups) == true) && (t->tree[lc].getBranchLength() != -1)) {
+					if ((inUsersGroups(t->tree[lc].getGroup(), groups) == true) && (t->tree[lc].getBranchLength() != -1)) {
 						UniqueBL += t->tree[lc].getBranchLength();
 						totalBL += t->tree[lc].getBranchLength(); 
 					}
@@ -263,7 +263,7 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 					//if i's chidren are leaves
 					if (t->tree[rc].getRChild() == -1) {
 						//if rc is a valid group and rc has a BL
-						if ((inUsersGroups(t->tree[rc].getGroup(), globaldata->Groups) == true) && (t->tree[rc].getBranchLength() != -1)) {
+						if ((inUsersGroups(t->tree[rc].getGroup(), groups) == true) && (t->tree[rc].getBranchLength() != -1)) {
 							UniqueBL += t->tree[rc].getBranchLength();
 							totalBL += t->tree[rc].getBranchLength(); 
 						}
@@ -271,7 +271,7 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 			
 					if (t->tree[lc].getLChild() == -1) {
 						//if lc is a valid group and lc has a BL
-						if ((inUsersGroups(t->tree[lc].getGroup(), globaldata->Groups) == true) && (t->tree[lc].getBranchLength() != -1)) {
+						if ((inUsersGroups(t->tree[lc].getGroup(), groups) == true) && (t->tree[lc].getBranchLength() != -1)) {
 							UniqueBL += t->tree[lc].getBranchLength();
 							totalBL += t->tree[lc].getBranchLength(); 
 						}
@@ -343,7 +343,7 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 				//if i's chidren are leaves
 				if (t->tree[rc].getRChild() == -1) {
 					//if rc is a valid group and rc has a BL
-					if ((inUsersGroups(t->tree[rc].getGroup(), globaldata->Groups) == true) && (t->tree[rc].getBranchLength() != -1)) {
+					if ((inUsersGroups(t->tree[rc].getGroup(), groups) == true) && (t->tree[rc].getBranchLength() != -1)) {
 						UniqueBL += t->tree[rc].getBranchLength();
 						totalBL += t->tree[rc].getBranchLength(); 
 					}
@@ -351,7 +351,7 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 			
 				if (t->tree[lc].getLChild() == -1) {
 					//if lc is a valid group and lc has a BL
-					if ((inUsersGroups(t->tree[lc].getGroup(), globaldata->Groups) == true) && (t->tree[lc].getBranchLength() != -1)) {
+					if ((inUsersGroups(t->tree[lc].getGroup(), groups) == true) && (t->tree[lc].getBranchLength() != -1)) {
 						UniqueBL += t->tree[lc].getBranchLength();
 						totalBL += t->tree[lc].getBranchLength(); 
 					}
