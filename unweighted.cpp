@@ -205,7 +205,7 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 
 		//if the users enters no groups then give them the score of all groups
 		int numGroups = globaldata->Groups.size();
-		
+cout << "NumGroups = " << numGroups << endl;
 		//calculate number of comparsions
 		int numComp = 0;
 		for (int r=0; r<numGroups; r++) { 
@@ -227,12 +227,13 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 				
 				//copy random tree passed in
 				copyTree->getCopy(t);
-				
-				//swap labels in the groups you want to compare
-				copyTree->assembleRandomUnifracTree(globaldata->Groups[a], globaldata->Groups[l]);
-				
+								
 				//groups in this combo
 				groups.push_back(globaldata->Groups[a]); groups.push_back(globaldata->Groups[l]);
+				
+				//swap labels in the groups you want to compare
+				copyTree->assembleRandomUnifracTree(groups[0], groups[1]);
+
 		
 				for(int i=t->getNumLeaves();i<t->getNumNodes();i++){
 		
@@ -312,7 +313,7 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 			copyTree->getCopy(t);
 				
 			//swap labels in all the groups you want to compare
-			copyTree->assembleRandomUnifracTree();
+			copyTree->assembleRandomUnifracTree(groups);
 
 			for(int i=t->getNumLeaves();i<t->getNumNodes();i++){
 		
