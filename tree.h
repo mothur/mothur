@@ -25,7 +25,7 @@ public:
 	
 	void getCopy(Tree*);  //makes tree a copy of the one passed in.
 	void assembleRandomTree();
-	void assembleRandomUnifracTree();
+	void assembleRandomUnifracTree(vector<string>);
 	void assembleRandomUnifracTree(string, string);
 	void createNewickFile(string);
 	int getIndex(string);
@@ -51,11 +51,10 @@ private:
 	map<string,int> Tree::mergeGcounts(int);
 	void randomTopology();
 	void randomBlengths();
-	void randomLabels();
+	void randomLabels(vector<string>);
 	void randomLabels(string, string);
 	int findRoot();  //return index of root node
 	void printBranch(int);  //recursively print out tree
-	void setGroups();
 };
 
 #endif

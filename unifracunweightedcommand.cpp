@@ -85,24 +85,21 @@ int UnifracUnweightedCommand::execute() {
 			
 			//get unweighted scores for random trees
 			for (int j = 0; j < iters; j++) {
-				int count = 0;
-				for (int r=0; r<numGroups; r++) { 
-					for (int l = r+1; l < numGroups; l++) {
-						//we need a different getValues because when we swap the labels we only want to swap those in each parwise comparison
-						randomData = unweighted->getValues(randT, "", "");
-			
-						//add trees unweighted score to map of scores
-						it2 = rscoreFreq[count].find(randomData[count]);
-						if (it2 != rscoreFreq[count].end()) {//already have that score
-							rscoreFreq[count][randomData[count]]++;
-						}else{//first time we have seen this score
-							rscoreFreq[count][randomData[count]] = 1;
-						}
+				//we need a different getValues because when we swap the labels we only want to swap those in each parwise comparison
+				randomData = unweighted->getValues(randT, "", "");
 				
-						//add randoms score to validscores
-						validScores[count][randomData[count]] = randomData[count];
-						count++;
+				for(int k = 0; k < numComp; k++) {	
+cout << "iter " << j << " comp " << k << " = " << randomData[k] << endl;
+					//add trees unweighted score to map of scores
+					it2 = rscoreFreq[k].find(randomData[k]);
+					if (it2 != rscoreFreq[k].end()) {//already have that score
+						rscoreFreq[k][randomData[k]]++;
+					}else{//first time we have seen this score
+						rscoreFreq[k][randomData[k]] = 1;
 					}
+				
+					//add randoms score to validscores
+					validScores[k][randomData[k]] = randomData[k];
 				}
 			}
 		
@@ -235,7 +232,7 @@ void UnifracUnweightedCommand::setGroups() {
 					}
 				}else {
 					for (int i = 0; i < globaldata->Groups.size(); i++) {
-						allGroups += tmap->namesOfGroups[i];
+						allGroups += globaldata->Groups[i];
 						numGroups++;
 					}
 				}

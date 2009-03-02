@@ -303,11 +303,8 @@ map<string,int> Tree::mergeGcounts(int position) {
 }
 /**************************************************************************************************/
 
-void Tree::randomLabels() {
+void Tree::randomLabels(vector<string> g) {
 	try {
-		
-		//set up the groups the user wants to include
-		setGroups();
 		
 		for(int i = 0; i < numLeaves; i++){
 			int z;
@@ -318,8 +315,8 @@ void Tree::randomLabels() {
 			//if either of the leaf nodes you are about to switch are not in the users groups then you don't want to switch them.
 			bool treez, treei;
 		
-			treez = inUsersGroups(tree[z].getGroup(), globaldata->Groups);
-			treei = inUsersGroups(tree[i].getGroup(), globaldata->Groups);
+			treez = inUsersGroups(tree[z].getGroup(), g);
+			treei = inUsersGroups(tree[i].getGroup(), g);
 			
 			if ((treez == true) && (treei == true)) {
 				//switches node i and node z's info.
@@ -405,8 +402,8 @@ void Tree::randomBlengths()  {
 	}		
 }
 /*************************************************************************************************/
-void Tree::assembleRandomUnifracTree() {
-	randomLabels();
+void Tree::assembleRandomUnifracTree(vector<string> g) {
+	randomLabels(g);
 	assembleTree();
 }
 /*************************************************************************************************/
@@ -534,46 +531,6 @@ void Tree::printBranch(int node) {
 		cout << "An unknown error has occurred in the Tree class function printBranch. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}		
-}
-
-/*****************************************************************/
-
-void Tree::setGroups() {
-	try {
-		//if the user has not entered specific groups to analyze then do them all
-		if (globaldata->Groups.size() != 0) {
-			//check that groups are valid
-			for (int i = 0; i < globaldata->Groups.size(); i++) {
-				if (globaldata->gTreemap->isValidGroup(globaldata->Groups[i]) != true) {
-					cout << globaldata->Groups[i] << " is not a valid group, and will be disregarded." << endl;
-					// erase the invalid group from globaldata->Groups
-					globaldata->Groups.erase (globaldata->Groups.begin()+i);
-				}
-			}
-			
-			//if the user only entered invalid groups
-			if (globaldata->Groups.size() == 0) { 
-				cout << "When using the groups parameter you must have at least 1 valid group. I will run the command using all the groups in your groupfile." << endl; 
-				for (int i = 0; i < globaldata->gTreemap->namesOfGroups.size(); i++) {
-					globaldata->Groups.push_back(globaldata->gTreemap->namesOfGroups[i]);
-				}
-			}
-					
-		}else {
-			for (int i = 0; i < globaldata->gTreemap->namesOfGroups.size(); i++) {
-				globaldata->Groups.push_back(globaldata->gTreemap->namesOfGroups[i]);
-			}
-		}
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Tree class function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
-
 }
 
 /*****************************************************************/
