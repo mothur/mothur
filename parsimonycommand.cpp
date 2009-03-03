@@ -22,7 +22,7 @@ ParsimonyCommand::ParsimonyCommand() {
 			T = globaldata->gTree;
 			tmap = globaldata->gTreemap;
 			parsFile = globaldata->getTreeFile() + ".parsimony";
-			openOutputFile(parsFile, out);
+			parsFileout = globaldata->getTreeFile() + "temp" + ".parsimony";
 			sumFile = globaldata->getTreeFile() + ".psummary";
 			openOutputFile(sumFile, outSum);
 		}else { //user wants random distribution
@@ -36,6 +36,7 @@ ParsimonyCommand::ParsimonyCommand() {
 		setGroups();
 		convert(globaldata->getIters(), iters);  //how many random trees to generate
 		pars = new Parsimony(tmap);
+		counter = 0;
 
 	}
 	catch(exception& e) {
@@ -58,7 +59,6 @@ int ParsimonyCommand::execute() {
 		uscoreFreq.resize(numComp);  
 		rCumul.resize(numComp);  
 		uCumul.resize(numComp);  
-		validScores.resize(numComp); 
 		userTreeScores.resize(numComp);  
 		UScoreSig.resize(numComp); 
 				
@@ -77,7 +77,7 @@ int ParsimonyCommand::execute() {
 					}else{ uscoreFreq[k][userData[k]]++; }
 					
 					//add users score to valid scores
-					validScores[k][userData[k]] = userData[k];
+					validScores[userData[k]] = userData[k];
 					
 					//save score for summary file
 					userTreeScores[k].push_back(userData[k]);
@@ -103,7 +103,7 @@ int ParsimonyCommand::execute() {
 					}
 			
 					//add randoms score to validscores
-					validScores[r][randomData[r]] = randomData[r];
+					validScores[randomData[r]] = randomData[r];
 				}
 				
 				delete randT;
@@ -128,26 +128,25 @@ int ParsimonyCommand::execute() {
 					}
 			
 					//add randoms score to validscores
-					validScores[r][randomData[r]] = randomData[r];
+					validScores[randomData[r]] = randomData[r];
 				}
 				
 				delete randT;
 			}
 		}
 		
-		float rcumul = 0.0000;
-		float ucumul = 0.0000;
-		
 		for(int a = 0; a < numComp; a++) {
-		//this loop fills the cumulative maps and put 0.0000 in the score freq map to make it easier to print.
-			for (it = validScores[a].begin(); it != validScores[a].end(); it++) { 
+			float rcumul = 0.0000;
+			float ucumul = 0.0000;
+			//this loop fills the cumulative maps and put 0.0000 in the score freq map to make it easier to print.
+			for (it = validScores.begin(); it != validScores.end(); it++) { 
 				if (randomtree == "") {
 					it2 = uscoreFreq[a].find(it->first);
 					//user data has that score 
 					if (it2 != uscoreFreq[a].end()) { uscoreFreq[a][it->first] /= T.size(); ucumul+= it2->second;  }
 					else { uscoreFreq[a][it->first] = 0.0000; } //no user trees with that score
 					//make uCumul map
-					uCumul[a][it->first] = ucumul-a;
+					uCumul[a][it->first] = ucumul;
 				}
 			
 				//make rscoreFreq map and rCumul
@@ -155,7 +154,7 @@ int ParsimonyCommand::execute() {
 				//get percentage of random trees with that info
 				if (it2 != rscoreFreq[a].end()) {  rscoreFreq[a][it->first] /= iters; rcumul+= it2->second;  }
 				else { rscoreFreq[a][it->first] = 0.0000; } //no random trees with that score
-				rCumul[a][it->first] = rcumul-a;
+				rCumul[a][it->first] = rcumul;
 			}
 			
 			//find the signifigance of each user trees score when compared to the random trees and save for printing the summary file
@@ -191,28 +190,29 @@ int ParsimonyCommand::execute() {
 /***********************************************************/
 void ParsimonyCommand::printParsimonyFile() {
 	try {
-		//column headers
-		if (randomtree == "") {
-			out << "Comb" << '\t' << "Score" << '\t' << "UserFreq" << '\t' << "UserCumul" << '\t' << "RandFreq" << '\t' << "RandCumul" << endl;
-		}else {
-			out << "Comb" << '\t' << "Score" << '\t' << "RandFreq" << '\t' << "RandCumul" << endl;
-		}
+		vector<double> data;
 		
 		//format output
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
-		
+
 		for(int a = 0; a < numComp; a++) {
+			initFile(groupComb[a]);
 			//print each line
-			for (it = validScores[a].begin(); it != validScores[a].end(); it++) { 
+			for (it = validScores.begin(); it != validScores.end(); it++) { 
 				if (randomtree == "") {
-					out << setprecision(6)  << groupComb[a] << '\t' << it->first << '\t' << '\t'<< uscoreFreq[a][it->first] << '\t' << uCumul[a][it->first] << '\t' << rscoreFreq[a][it->first] << '\t' << rCumul[a][it->first] << endl; 
+					data.push_back(it->first);  data.push_back(uscoreFreq[a][it->first]); data.push_back(uCumul[a][it->first]); data.push_back(rscoreFreq[a][it->first]); data.push_back(rCumul[a][it->first]); 
 				}else{
-					out << setprecision(6) << groupComb[a] << '\t' << it->first << '\t' << '\t' << rscoreFreq[a][it->first] << '\t' << rCumul[a][it->first] << endl; 	
+					data.push_back(it->first);  data.push_back(rscoreFreq[a][it->first]); data.push_back(rCumul[a][it->first]); 
 				}
+				output(data);
+				data.clear();
 			} 
+			resetFile();
 		}
-		out.close();
 		
+		out.close();
+		inFile.close();
+		remove(parsFileout.c_str());
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ParsimonyCommand class Function printParsimonyFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -374,5 +374,101 @@ void ParsimonyCommand::setGroups() {
 
 }
 /*****************************************************************/
+
+void ParsimonyCommand::initFile(string label){
+	try {
+		if(counter != 0){
+			openOutputFile(parsFileout, out);
+			openInputFile(parsFile, inFile);
+
+			string inputBuffer;
+			getline(inFile, inputBuffer);
+			
+			if (randomtree == "") {
+				out <<  inputBuffer << '\t' << label + "Score" << '\t' << label + "UserFreq" << '\t' << label + "UserCumul" << '\t' << label + "RandFreq" << '\t' << label + "RandCumul" << endl;
+			}else {
+				out <<  inputBuffer << '\t' << label + "Score" << '\t' << label + "RandFreq" << '\t' << label + "RandCumul" << endl;
+			}
+		}else{
+			openOutputFile(parsFileout, out);
+			//column headers
+			if (randomtree == "") {
+				out << label + "Score" << '\t' << label + "UserFreq" << '\t' << label + "UserCumul" << '\t' << label + "RandFreq" << '\t' << label + "RandCumul" << endl;
+			}else {
+				out << label + "Score" << '\t' << label + "RandFreq" << '\t' << label + "RandCumul" << endl;
+			}
+		}
+
+		out.setf(ios::fixed, ios::floatfield);
+		out.setf(ios::showpoint);
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ParsimonyCommand class Function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ParsimonyCommand class function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+
+/***********************************************************************/
+
+void ParsimonyCommand::output(vector<double> data){
+	try {
+		if(counter != 0){		
+			string inputBuffer;
+			getline(inFile, inputBuffer);
+		
+			if (randomtree == "") {
+				out << inputBuffer << '\t' << setprecision(6) << data[0] << '\t' << data[1] << '\t' << data[2] << '\t' << data[3] << '\t' << data[4] << endl;
+			}else{
+				out << inputBuffer << '\t' << setprecision(6) << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
+			}
+		}
+		else{
+			if (randomtree == "") {
+				out << setprecision(6) << data[0] << '\t' << data[1] << '\t' << data[2] << '\t' << data[3] << '\t' << data[4] << endl;
+			}else{
+				out << setprecision(6) << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
+			}
+		}
+
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ParsimonyCommand class Function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ParsimonyCommand class function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+
+/***********************************************************************/
+
+void ParsimonyCommand::resetFile(){
+	try {
+		if(counter != 0){
+			out.close();
+			inFile.close();
+		}
+		else{
+			out.close();
+		}
+		counter = 1;
+		
+		remove(parsFile.c_str());
+		rename(parsFileout.c_str(), parsFile.c_str());
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ParsimonyCommand class Function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ParsimonyCommand class function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
 
 

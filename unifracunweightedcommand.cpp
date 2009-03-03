@@ -22,6 +22,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand() {
 		setGroups(); //sets users groups to analyze
 		convert(globaldata->getIters(), iters);  //how many random trees to generate
 		unweighted = new Unweighted(tmap);
+		counter = 0;
 
 	}
 	catch(exception& e) {
