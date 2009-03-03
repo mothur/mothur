@@ -28,29 +28,31 @@ class UnifracUnweightedCommand : public Command {
 	private:
 		GlobalData* globaldata;
 		vector<Tree*> T;	   //user trees
-		Tree* randT;  //random tree
 		TreeMap* tmap;
 		Unweighted* unweighted;
-		string sumFile, unweightedFile;
+		string sumFile, unweightedFile, unweightedFileout;
 		vector<string> groupComb; // AB. AC, BC...
-		int iters, numGroups, numComp;
+		int iters, numGroups, numComp, counter;
 		EstOutput userData;			//unweighted score info for user tree
 		EstOutput randomData;		//unweighted score info for random trees
 		vector< vector<float> > utreeScores; //scores for users trees for each comb.
 		vector< vector<float> > UWScoreSig;  //tree score signifigance when compared to random trees - percentage of random trees with that score or higher.
 		vector< map<float, float> > validScores;  //map contains scores from both user and random
 		vector< map<float, float> > rscoreFreq;  //map <unweighted score, number of random trees with that score.> -vector entry for each combination.
-		vector< map<float, float> > uscoreFreq;  //map <unweighted score, number of user trees with that score.> -vector entry for each combination.
 		vector< map<float, float> > rCumul;  //map <unweighted score, cumulative percentage of number of random trees with that score or higher.> -vector entry for each combination.
-		vector< map<float, float> > uCumul;  //map <unweighted score, cumulative percentage of number of user trees with that score or higher.> -vector entry for each combination.		map<float, float>::iterator it;
 		map<float, float>::iterator it2;
 		map<float, float>::iterator it;
 		
 		ofstream outSum, out;
+		ifstream inFile;
 		
 		void printUWSummaryFile();
 		void printUnweightedFile();
-		void setGroups();   
+		void setGroups();  
+		void initFile(string);
+		void output(vector<double>);
+		void resetFile();
+ 
 		
 };
 

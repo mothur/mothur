@@ -205,7 +205,7 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 
 		//if the users enters no groups then give them the score of all groups
 		int numGroups = globaldata->Groups.size();
-cout << "NumGroups = " << numGroups << endl;
+
 		//calculate number of comparsions
 		int numComp = 0;
 		for (int r=0; r<numGroups; r++) { 
@@ -233,17 +233,18 @@ cout << "NumGroups = " << numGroups << endl;
 				
 				//swap labels in the groups you want to compare
 				copyTree->assembleRandomUnifracTree(groups[0], groups[1]);
-
+				
+				//copyTree->createNewickFile("random"+groupA+toString(count));
 		
-				for(int i=t->getNumLeaves();i<t->getNumNodes();i++){
+				for(int i=copyTree->getNumLeaves();i<copyTree->getNumNodes();i++){
 		
-					int lc = t->tree[i].getLChild();  //lc = vector index of left child
-					int rc = t->tree[i].getRChild();  //rc = vector index of right child
+					int lc = copyTree->tree[i].getLChild();  //lc = vector index of left child
+					int rc = copyTree->tree[i].getRChild();  //rc = vector index of right child
 			
 					/**********************************************************************/
 					//This section adds in all lengths that are non leaf
 			
-					copyIpcount = t->tree[i].pcount;
+					copyIpcount = copyTree->tree[i].pcount;
 					for (it = copyIpcount.begin(); it != copyIpcount.end(); it++) {
 						if (inUsersGroups(it->first, groups) != true) {	copyIpcount.erase(it->first);	}
 					}
@@ -251,30 +252,30 @@ cout << "NumGroups = " << numGroups << endl;
 					//if i's children are from the same group then i's pcount size will be 1 
 					//if copyIpcount.size() = 0 they are from a branch that is entirely from a group the user doesn't want
 					if (copyIpcount.size() == 0) { }
-					else if ((t->tree[i].getBranchLength() != -1) && (copyIpcount.size() == 1)) {  UniqueBL += t->tree[i].getBranchLength();	}
+					else if ((copyTree->tree[i].getBranchLength() != -1) && (copyIpcount.size() == 1)) {  UniqueBL += copyTree->tree[i].getBranchLength();	}
 			
 					//add i's BL to total if it is from the groups the user wants
-					if ((t->tree[i].getBranchLength() != -1) && (copyIpcount.size() != 0)) {  
-						totalBL += t->tree[i].getBranchLength(); 
+					if ((copyTree->tree[i].getBranchLength() != -1) && (copyIpcount.size() != 0)) {  
+						totalBL += copyTree->tree[i].getBranchLength(); 
 					}
 			
 					/**********************************************************************/
 					//This section adds in all lengths that are leaf
 			
 					//if i's chidren are leaves
-					if (t->tree[rc].getRChild() == -1) {
+					if (copyTree->tree[rc].getRChild() == -1) {
 						//if rc is a valid group and rc has a BL
-						if ((inUsersGroups(t->tree[rc].getGroup(), groups) == true) && (t->tree[rc].getBranchLength() != -1)) {
-							UniqueBL += t->tree[rc].getBranchLength();
-							totalBL += t->tree[rc].getBranchLength(); 
+						if ((inUsersGroups(copyTree->tree[rc].getGroup(), groups) == true) && (copyTree->tree[rc].getBranchLength() != -1)) {
+							UniqueBL += copyTree->tree[rc].getBranchLength();
+							totalBL += copyTree->tree[rc].getBranchLength(); 
 						}
 					}
 			
-					if (t->tree[lc].getLChild() == -1) {
+					if (copyTree->tree[lc].getLChild() == -1) {
 						//if lc is a valid group and lc has a BL
-						if ((inUsersGroups(t->tree[lc].getGroup(), groups) == true) && (t->tree[lc].getBranchLength() != -1)) {
-							UniqueBL += t->tree[lc].getBranchLength();
-							totalBL += t->tree[lc].getBranchLength(); 
+						if ((inUsersGroups(copyTree->tree[lc].getGroup(), groups) == true) && (copyTree->tree[lc].getBranchLength() != -1)) {
+							UniqueBL += copyTree->tree[lc].getBranchLength();
+							totalBL += copyTree->tree[lc].getBranchLength(); 
 						}
 					}
 			
@@ -315,15 +316,15 @@ cout << "NumGroups = " << numGroups << endl;
 			//swap labels in all the groups you want to compare
 			copyTree->assembleRandomUnifracTree(groups);
 
-			for(int i=t->getNumLeaves();i<t->getNumNodes();i++){
+			for(int i=copyTree->getNumLeaves();i<copyTree->getNumNodes();i++){
 		
-				int lc = t->tree[i].getLChild();  //lc = vector index of left child
-				int rc = t->tree[i].getRChild();  //rc = vector index of right child
+				int lc = copyTree->tree[i].getLChild();  //lc = vector index of left child
+				int rc = copyTree->tree[i].getRChild();  //rc = vector index of right child
 			
 				/**********************************************************************/
 				//This section adds in all lengths that are non leaf
 			
-				copyIpcount = t->tree[i].pcount;
+				copyIpcount = copyTree->tree[i].pcount;
 				for (it = copyIpcount.begin(); it != copyIpcount.end(); it++) {
 					if (inUsersGroups(it->first, groups) != true) {	copyIpcount.erase(it->first);	}
 				}
@@ -331,30 +332,30 @@ cout << "NumGroups = " << numGroups << endl;
 				//if i's children are from the same group then i's pcount size will be 1 
 				//if copyIpcount.size() = 0 they are from a branch that is entirely from a group the user doesn't want
 				if (copyIpcount.size() == 0) { }
-				else if ((t->tree[i].getBranchLength() != -1) && (copyIpcount.size() == 1)) {  UniqueBL += t->tree[i].getBranchLength();	}
+				else if ((copyTree->tree[i].getBranchLength() != -1) && (copyIpcount.size() == 1)) {  UniqueBL += copyTree->tree[i].getBranchLength();	}
 			
 				//add i's BL to total if it is from the groups the user wants
-				if ((t->tree[i].getBranchLength() != -1) && (copyIpcount.size() != 0)) {  
-					totalBL += t->tree[i].getBranchLength(); 
+				if ((copyTree->tree[i].getBranchLength() != -1) && (copyIpcount.size() != 0)) {  
+					totalBL += copyTree->tree[i].getBranchLength(); 
 				}
 			
 				/**********************************************************************/
 				//This section adds in all lengths that are leaf
 			
 				//if i's chidren are leaves
-				if (t->tree[rc].getRChild() == -1) {
+				if (copyTree->tree[rc].getRChild() == -1) {
 					//if rc is a valid group and rc has a BL
-					if ((inUsersGroups(t->tree[rc].getGroup(), groups) == true) && (t->tree[rc].getBranchLength() != -1)) {
-						UniqueBL += t->tree[rc].getBranchLength();
-						totalBL += t->tree[rc].getBranchLength(); 
+					if ((inUsersGroups(copyTree->tree[rc].getGroup(), groups) == true) && (copyTree->tree[rc].getBranchLength() != -1)) {
+						UniqueBL += copyTree->tree[rc].getBranchLength();
+						totalBL += copyTree->tree[rc].getBranchLength(); 
 					}
 				}
 			
-				if (t->tree[lc].getLChild() == -1) {
+				if (copyTree->tree[lc].getLChild() == -1) {
 					//if lc is a valid group and lc has a BL
-					if ((inUsersGroups(t->tree[lc].getGroup(), groups) == true) && (t->tree[lc].getBranchLength() != -1)) {
-						UniqueBL += t->tree[lc].getBranchLength();
-						totalBL += t->tree[lc].getBranchLength(); 
+					if ((inUsersGroups(copyTree->tree[lc].getGroup(), groups) == true) && (copyTree->tree[lc].getBranchLength() != -1)) {
+						UniqueBL += copyTree->tree[lc].getBranchLength();
+						totalBL += copyTree->tree[lc].getBranchLength(); 
 					}
 				}
 			
