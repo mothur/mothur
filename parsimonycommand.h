@@ -33,14 +33,14 @@ class ParsimonyCommand : public Command {
 		TreeMap* savetmap;
 		Parsimony* pars;
 		vector<string> groupComb; // AB. AC, BC...
-		string parsFile, sumFile, randomtree;
-		int iters, numGroups, numComp;
+		string parsFile, parsFileout, sumFile, randomtree;
+		int iters, numGroups, numComp, counter;
 		vector<int> numEachGroup; //vector containing the number of sequences in each group the users wants for random distrib.
 		vector< vector<float> > userTreeScores; //scores for users trees for each comb.
 		vector< vector<float> > UScoreSig;  //tree score signifigance when compared to random trees - percentage of random trees with that score or lower.
 		EstOutput userData;			//pscore info for user tree
 		EstOutput randomData;		//pscore info for random trees
-		vector< map<int, double> > validScores;  //map contains scores from both user and random
+		map<int, double>  validScores;  //map contains scores from both user and random
 		vector< map<int, double> > rscoreFreq;  //map <pscore, number of random trees with that score.> -vector entry for each combination.
 		vector< map<int, double> > uscoreFreq;  //map <pscore, number of user trees with that score.> -vector entry for each combination.
 		vector< map<int, double> > rCumul;  //map <pscore, cumulative percentage of number of random trees with that score or lower.> -vector entry for each combination.
@@ -49,11 +49,16 @@ class ParsimonyCommand : public Command {
 		map<int, double>::iterator it2;
 		
 		ofstream out, outSum;
+		ifstream inFile;
 		
 		void printParsimonyFile();  
 		void printUSummaryFile();
 		void getUserInput();
 		void setGroups();
+		void initFile(string);
+		void output(vector<double>);
+		void resetFile();
+
 		
 };
 
