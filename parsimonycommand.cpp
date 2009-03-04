@@ -236,8 +236,8 @@ void ParsimonyCommand::printUSummaryFile() {
 		//print each line
 		for (int i = 0; i< T.size(); i++) {
 			for(int a = 0; a < numComp; a++) {
-				outSum << setprecision(6) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << userTreeScores[a][i] << '\t' << UScoreSig[a][i] << endl;
-				cout << setprecision(6) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << userTreeScores[a][i] << '\t' << UScoreSig[a][i] << endl;
+				outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << userTreeScores[a][i] << '\t' << UScoreSig[a][i] << endl;
+				cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << userTreeScores[a][i] << '\t' << UScoreSig[a][i] << endl;
 			}
 		}
 		
@@ -421,16 +421,16 @@ void ParsimonyCommand::output(vector<double> data){
 			getline(inFile, inputBuffer);
 		
 			if (randomtree == "") {
-				out << inputBuffer << '\t' << setprecision(6) << data[0] << '\t' << data[1] << '\t' << data[2] << '\t' << data[3] << '\t' << data[4] << endl;
+				out << inputBuffer << '\t' << setprecision(globaldata->getIters().length()) << data[0] << '\t' << data[1] << '\t' << data[2] << '\t' << data[3] << '\t' << data[4] << endl;
 			}else{
-				out << inputBuffer << '\t' << setprecision(6) << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
+				out << inputBuffer << '\t' << setprecision(globaldata->getIters().length()) << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
 			}
 		}
 		else{
 			if (randomtree == "") {
-				out << setprecision(6) << data[0] << '\t' << data[1] << '\t' << data[2] << '\t' << data[3] << '\t' << data[4] << endl;
+				out << setprecision(globaldata->getIters().length()) << data[0] << '\t' << data[1] << '\t' << data[2] << '\t' << data[3] << '\t' << data[4] << endl;
 			}else{
-				out << setprecision(6) << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
+				out << setprecision(globaldata->getIters().length()) << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
 			}
 		}
 

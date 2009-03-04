@@ -16,11 +16,6 @@ UnifracWeightedCommand::UnifracWeightedCommand() {
 		
 		T = globaldata->gTree;
 		tmap = globaldata->gTreemap;
-		//weightedFile = globaldata->getTreeFile() + ".weighted";
-		//openOutputFile(weightedFile, out);
-		//column headers
-		//out << "Group" << '\t' << "Score" << '\t' << "UserFreq" << '\t' << "UserCumul" << '\t' << "RandFreq" << '\t' << "RandCumul" << endl;
-
 		sumFile = globaldata->getTreeFile() + ".wsummary";
 		openOutputFile(sumFile, outSum);
 				
@@ -49,11 +44,13 @@ int UnifracWeightedCommand::execute() {
 		//create new tree with same num nodes and leaves as users
 		randT = new Tree();
 		
-		//get pscores for users trees
+		//get weighted scores for users trees
 		for (int i = 0; i < T.size(); i++) {
+			counter = 0;
 			rScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
 			uScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
-			validScores.resize(numComp); 
+			weightedFile = globaldata->getTreeFile()  + toString(i+1) + ".weighted";
+			weightedFileout = globaldata->getTreeFile() + "temp." + toString(i+1) + ".weighted";
 							
 			cout << "Processing tree " << i+1 << endl;
 			userData = weighted->getValues(T[i]);  //userData[0] = weightedscore
@@ -63,9 +60,6 @@ int UnifracWeightedCommand::execute() {
 				//add users score to vector of user scores
 				uScores[s].push_back(userData[s]);
 				
-				//add users score to vector of valid scores
-				validScores[s].push_back(userData[s]);
-
 				//save users tree score for summary file
 				utreeScores.push_back(userData[s]);
 			}
@@ -85,13 +79,12 @@ int UnifracWeightedCommand::execute() {
 						
 						//save scores
 						rScores[count].push_back(randomData[0]);
-						validScores[count][randomData[0]] = randomData[0];
 						count++;
 					}
 				}
 			}
 
-			removeValidScoresDuplicates(); 
+			//removeValidScoresDuplicates(); 
 			//find the signifigance of the score for summary file
 			for (int f = 0; f < numComp; f++) {
 				//sort random scores
@@ -108,7 +101,8 @@ int UnifracWeightedCommand::execute() {
 			}
 			
 			//out << "Tree# " << i << endl;
-			//printWeightedFile();
+			calculateFreqsCumuls();
+			printWeightedFile();
 			
 			//clear data
 			rScores.clear();
@@ -135,22 +129,25 @@ int UnifracWeightedCommand::execute() {
 		exit(1);
 	}
 }
-/***********************************************************
+/***********************************************************/
 void UnifracWeightedCommand::printWeightedFile() {
 	try {
-						
-		//format output
-		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+		vector<double> data;
 		
-		//for each group
-		for (int e = 0; e < numComp; e++) {
-			//print each line in that group
-			for (i = 0; i < validScores[e].size(); i++) { 
-				out << setprecision(6) <<  groupComb[e] << '\t' << validScores[e][i] << '\t' << '\t' << uscoreFreq[e][it->first] << '\t' << uCumul[e][it->first] << '\t' << rscoreFreq[e][it->first] << '\t' << rCumul[e][it->first] << endl; 
+		for(int a = 0; a < numComp; a++) {
+			initFile(groupComb[a]);
+			//print each line
+			for (it = validScores.begin(); it != validScores.end(); it++) { 
+				data.push_back(it->first);  data.push_back(rScoreFreq[a][it->first]); data.push_back(rCumul[a][it->first]); 
+				output(data);
+				data.clear();
 			} 
+			resetFile();
 		}
 		
 		out.close();
+		inFile.close();
+		remove(weightedFileout.c_str());
 		
 	}
 	catch(exception& e) {
@@ -178,8 +175,8 @@ void UnifracWeightedCommand::printWSummaryFile() {
 		int count = 0;
 		for (int i = 0; i < T.size(); i++) { 
 			for (int j = 0; j < numComp; j++) {
-				outSum << setprecision(6) << i+1 << '\t' << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << WScoreSig[count] << endl; 
-				cout << setprecision(6) << i+1 << '\t' << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << WScoreSig[count] << endl; 
+				outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << WScoreSig[count] << endl; 
+				cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << WScoreSig[count] << endl; 
 				count++;
 			}
 		}
@@ -191,28 +188,6 @@ void UnifracWeightedCommand::printWSummaryFile() {
 	}
 	catch(...) {
 		cout << "An unknown error has occurred in the UnifracWeightedCommand class function printWeightedFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-}
-
-/***********************************************************/
-void UnifracWeightedCommand::removeValidScoresDuplicates() {
-	try {
-		for (int e = 0; e < numComp; e++) {
-			//sort valid scores
-			sort(validScores[e].begin(), validScores[e].end());
-			
-			for (int i = 0; i< validScores[e].size()-1; i++) { 
-				if (validScores[e][i] == validScores[e][i+1]) { validScores[e].erase(validScores[e].begin()+i); }
-			}
-		}
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the UnifracWeightedCommand class Function removeValidScoresDuplicates. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the UnifracWeightedCommand class function removeValidScoresDuplicates. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 }
@@ -298,5 +273,136 @@ void UnifracWeightedCommand::setGroups() {
 		cout << "An unknown error has occurred in the UnifracWeightedCommand class function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
+}
+
+/***********************************************************/
+
+void UnifracWeightedCommand::calculateFreqsCumuls() {
+	try {
+		//clear out old tree values
+		rScoreFreq.clear();
+		rScoreFreq.resize(numComp);
+		rCumul.clear();
+		rCumul.resize(numComp);
+		validScores.clear();
+	
+		//calculate frequency
+		for (int f = 0; f < numComp; f++) {
+			for (int i = 0; i < rScores[f].size(); i++) { //looks like 0,0,1,1,1,2,4,7...  you want to make a map that say rScoreFreq[0] = 2, rScoreFreq[1] = 3...
+				validScores[rScores[f][i]] = rScores[f][i];
+				it = rScoreFreq[f].find(rScores[f][i]);
+				if (it != rScoreFreq[f].end()) {
+					rScoreFreq[f][rScores[f][i]]++;
+				}else{
+					rScoreFreq[f][rScores[f][i]] = 1;
+				}
+			}
+		}
+		
+		//calculate rcumul
+		for(int a = 0; a < numComp; a++) {
+			float rcumul = 1.0000;
+			//this loop fills the cumulative maps and put 0.0000 in the score freq map to make it easier to print.
+			for (it = validScores.begin(); it != validScores.end(); it++) {
+				//make rscoreFreq map and rCumul
+				it2 = rScoreFreq[a].find(it->first);
+				rCumul[a][it->first] = rcumul;
+				//get percentage of random trees with that info
+				if (it2 != rScoreFreq[a].end()) {  rScoreFreq[a][it->first] /= iters; rcumul-= it2->second;  }
+				else { rScoreFreq[a][it->first] = 0.0000; } //no random trees with that score
+			}
+		}
+
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the UnifracWeightedCommand class Function calculateFreqsCums. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the UnifracWeightedCommand class function calculateFreqsCums. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+
+}
+
+/*****************************************************************/
+
+void UnifracWeightedCommand::initFile(string label){
+	try {
+		if(counter != 0){
+			openOutputFile(weightedFileout, out);
+			openInputFile(weightedFile, inFile);
+
+			string inputBuffer;
+			getline(inFile, inputBuffer);
+		
+			out	<<  inputBuffer << '\t' << label + "Score" << '\t' << label + "RandFreq" << '\t' << label + "RandCumul" << endl;		
+		}else{
+			openOutputFile(weightedFileout, out);
+			out	<< label + "Score" << '\t' << label + "RandFreq" << '\t' << label + "RandCumul" << endl;
+		}
+
+		out.setf(ios::fixed, ios::floatfield);
+		out.setf(ios::showpoint);
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the UnifracWeightedCommand class Function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the UnifracWeightedCommand class function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+
+/***********************************************************************/
+
+void UnifracWeightedCommand::output(vector<double> data){
+	try {
+		if(counter != 0){		
+			string inputBuffer;
+			getline(inFile, inputBuffer);
+		
+			out	<<  inputBuffer << setprecision(globaldata->getIters().length()) << '\t' << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
+		}
+		else{
+			out << setprecision(globaldata->getIters().length()) << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
+		}
+
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the UnifracWeightedCommand class Function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the UnifracWeightedCommand class function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+};
+
+/***********************************************************************/
+
+void UnifracWeightedCommand::resetFile(){
+	try {
+		if(counter != 0){
+			out.close();
+			inFile.close();
+		}
+		else{
+			out.close();
+		}
+		counter = 1;
+		
+		remove(weightedFile.c_str());
+		rename(weightedFileout.c_str(), weightedFile.c_str());
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the UnifracWeightedCommand class Function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the UnifracWeightedCommand class function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
 }
 

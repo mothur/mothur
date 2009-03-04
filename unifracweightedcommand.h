@@ -34,21 +34,31 @@ class UnifracWeightedCommand : public Command {
 		Tree* randT;  //random tree
 		TreeMap* tmap;
 		Weighted* weighted;
-		string weightedFile, sumFile;
-		int iters, numGroups, numComp;
+		string weightedFile, weightedFileout, sumFile;
+		int iters, numGroups, numComp, counter;
 		EstOutput userData;			//weighted score info for user tree
 		EstOutput randomData;		//weighted score info for random trees
-		vector< vector<double> > validScores;  //vector<contains scores from both user and random> each group comb has an entry
 		vector< vector<double> > rScores;  //vector<weighted scores for random trees.> each group comb has an entry
 		vector< vector<double> > uScores;  //vector<weighted scores for user trees.> each group comb has an entry
-								
+		vector< map<float, float> > rScoreFreq;  //map <weighted score, number of random trees with that score.> -vector entry for each combination.
+		vector< map<float, float> > rCumul;  //map <weighted score, cumulative percentage of number of random trees with that score or higher.> -vector entry for each c								
+		map<float, float>  validScores;  //map contains scores from random
+		map<float, float>::iterator it2;
+		map<float, float>::iterator it;
+		
 		ofstream outSum, out;
+		ifstream inFile;
 		
 		void printWSummaryFile();
-	//	void printWeightedFile();  
-		void removeValidScoresDuplicates();
+		void printWeightedFile();  
+		//void removeValidScoresDuplicates();
 		int findIndex(float, int);
 		void setGroups(); 
+		void calculateFreqsCumuls();
+		void initFile(string);
+		void output(vector<double>);
+		void resetFile();
+
 };
 
 
