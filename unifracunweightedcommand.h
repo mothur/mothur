@@ -37,7 +37,7 @@ class UnifracUnweightedCommand : public Command {
 		EstOutput randomData;		//unweighted score info for random trees
 		vector< vector<float> > utreeScores; //scores for users trees for each comb.
 		vector< vector<float> > UWScoreSig;  //tree score signifigance when compared to random trees - percentage of random trees with that score or higher.
-		vector< map<float, float> > validScores;  //map contains scores from both user and random
+		map<float, float>  validScores;  //map contains scores from random
 		vector< map<float, float> > rscoreFreq;  //map <unweighted score, number of random trees with that score.> -vector entry for each combination.
 		vector< map<float, float> > rCumul;  //map <unweighted score, cumulative percentage of number of random trees with that score or higher.> -vector entry for each combination.
 		map<float, float>::iterator it2;
