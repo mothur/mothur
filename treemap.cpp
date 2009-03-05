@@ -47,7 +47,7 @@ void TreeMap::readMap() {
 
 int TreeMap::getNumGroups() {
 			
-	return seqsPerGroup.size();	
+	return namesOfGroups.size();	
 		
 }
 /************************************************************/
