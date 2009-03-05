@@ -22,7 +22,6 @@ UnifracUnweightedCommand::UnifracUnweightedCommand() {
 		setGroups(); //sets users groups to analyze
 		convert(globaldata->getIters(), iters);  //how many random trees to generate
 		unweighted = new Unweighted(tmap);
-		counter = 0;
 
 	}
 	catch(exception& e) {
@@ -44,6 +43,7 @@ int UnifracUnweightedCommand::execute() {
 				
 		//get pscores for users trees
 		for (int i = 0; i < T.size(); i++) {
+			counter = 0;
 			unweightedFile = globaldata->getTreeFile()  + toString(i+1) + ".unweighted";
 			unweightedFileout = globaldata->getTreeFile() + "temp." + toString(i+1) + ".unweighted";
 						//column headers
@@ -53,7 +53,6 @@ int UnifracUnweightedCommand::execute() {
 			//get unweighted for users tree
 			rscoreFreq.resize(numComp);  
 			rCumul.resize(numComp);  
-			validScores.resize(numComp); 
 			utreeScores.resize(numComp);  
 			UWScoreSig.resize(numComp); 
 
@@ -62,9 +61,6 @@ int UnifracUnweightedCommand::execute() {
 			
 			//output scores for each combination
 			for(int k = 0; k < numComp; k++) {
-				//add users score to valid scores
-				validScores[k][userData[k]] = userData[k];
-			
 				//saves users score
 				utreeScores[k].push_back(userData[k]);
 			}
@@ -85,14 +81,14 @@ int UnifracUnweightedCommand::execute() {
 					}
 				
 					//add randoms score to validscores
-					validScores[k][randomData[k]] = randomData[k];
+					validScores[randomData[k]] = randomData[k];
 				}
 			}
 		
 		for(int a = 0; a < numComp; a++) {
 			float rcumul = 1.0000;
 			//this loop fills the cumulative maps and put 0.0000 in the score freq map to make it easier to print.
-			for (it = validScores[a].begin(); it != validScores[a].end(); it++) { 
+			for (it = validScores.begin(); it != validScores.end(); it++) { 
 				//make rscoreFreq map and rCumul
 				it2 = rscoreFreq[a].find(it->first);
 				rCumul[a][it->first] = rcumul;
@@ -136,7 +132,7 @@ void UnifracUnweightedCommand::printUnweightedFile() {
 		for(int a = 0; a < numComp; a++) {
 			initFile(groupComb[a]);
 			//print each line
-			for (it = validScores[a].begin(); it != validScores[a].end(); it++) { 
+			for (it = validScores.begin(); it != validScores.end(); it++) { 
 				data.push_back(it->first);  data.push_back(rscoreFreq[a][it->first]); data.push_back(rCumul[a][it->first]); 
 				output(data);
 				data.clear();

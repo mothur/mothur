@@ -124,7 +124,8 @@ void ReadNewickTree::read() {
 				numNodes = T->getNumNodes();
 				numLeaves = T->getNumLeaves();
 				
-				readTreeString();  
+				readTreeString(); 
+				
 				//save trees for later commands
 				globaldata->gTree.push_back(T); 
 				gobble(filehandle);
@@ -157,12 +158,12 @@ void ReadNewickTree::read() {
 				numLeaves = T->getNumLeaves();
 				
 				//read tree info
-				readTreeString();  
+				readTreeString(); 
+				 
 				//save trees for later commands
 				globaldata->gTree.push_back(T); 
 			}
 		}
-		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ReadNewickTree class Function read. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -272,6 +273,7 @@ void ReadNewickTree::readTreeString() {
 			T->tree[n].setParent(-1);
 			if(lc!=-1){		T->tree[lc].setParent(n);		}
 			if(rc!=-1){		T->tree[rc].setParent(n);		}
+			cout << "new loop "<< endl;
 		}
 	
 	}
@@ -334,6 +336,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 			//adds sequence names that are not in group file to the "xxx" group
 			if(n1 == -1) {
 				cerr << "Name: " << name << " not found in your groupfile and it will be ignored. \n";
+				
 				globaldata->gTreemap->namesOfSeqs.push_back(name);
 				globaldata->gTreemap->treemap[name].groupname = "xxx";
 				globaldata->gTreemap->treemap[name].vectorIndex = (globaldata->gTreemap->namesOfSeqs.size() - 1);
@@ -350,10 +353,13 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 				//find index in tree of name
 				n1 = T->getIndex(name);
 				group = "xxx";
+				numLeaves++;
+				numNodes = 2*numLeaves - 1;
+				T->resetTree();
 			}
 			
 			T->tree[n1].setGroup(group);
-		
+			T->printTree();
 			T->tree[n1].setChildren(-1,-1);
 		
 			if(blen == 1){	

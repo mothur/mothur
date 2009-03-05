@@ -106,7 +106,14 @@ int ClusterCommand::execute(){
 		else if(rndPreviousDist<cutoff){
 			printData(toString(rndPreviousDist, length-1));
 		}
-	
+		
+		//delete globaldata's copy of the sparsematrix and listvector to free up memory
+		SparseMatrix* clearM = NULL;
+		globaldata->setSparseMatrix(clearM);
+		ListVector* clearL = NULL;
+		globaldata->setListVector(clearL);
+
+		
 		//saves .list file so you can do the collect, rarefaction and summary commands without doing a read.list
 		if (globaldata->getFormat() == "phylip") { globaldata->setPhylipFile(""); }
 		else if (globaldata->getFormat() == "column") { globaldata->setColumnFile(""); }
