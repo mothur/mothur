@@ -340,6 +340,7 @@ void ParsimonyCommand::setGroups() {
 					allGroups = allGroups.substr(0, allGroups.length()-1);
 				}
 			}else{//user has enter "all" and wants the default groups
+				globaldata->Groups.clear();
 				for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
 					globaldata->Groups.push_back(tmap->namesOfGroups[i]);
 					numGroups++;

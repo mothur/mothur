@@ -10,11 +10,23 @@
 #include "fullmatrix.h"
 
 
-/**************************************************************************
-FullMatrix::FullMatrix(ifstream& in) {
-
-}
-~FullMatrix::FullMatrix(){}
+/**************************************************************************/
+//This constructor reads a distance matrix file and stores the data in the matrix.
+FullMatrix::FullMatrix(ifstream& f) {
+	try{
+		f >> numSeqs;
+		
 	
-	int FullMatrix::getNumSeqs(){}
-*/
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the FullMatrix class Function FullMatrix. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the FullMatrix class function FullMatrix. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+/**************************************************************************/	
+int FullMatrix::getNumSeqs(){ return numSeqs; }
+/**************************************************************************/
