@@ -28,8 +28,8 @@ ParsimonyCommand::ParsimonyCommand() {
 		}else { //user wants random distribution
 			savetmap = globaldata->gTreemap;
 			getUserInput();
-			parsFile = randomtree + ".rd_parsimony";
-			parsFileout = globaldata->getTreeFile() + "temp" + ".rd_parsimony";
+			parsFile = randomtree;
+			parsFileout = globaldata->getTreeFile() + "temp";
 		}
 		
 		//set users groups to analyze
