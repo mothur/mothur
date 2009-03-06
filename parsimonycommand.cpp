@@ -29,7 +29,7 @@ ParsimonyCommand::ParsimonyCommand() {
 			savetmap = globaldata->gTreemap;
 			getUserInput();
 			parsFile = randomtree + ".rd_parsimony";
-			openOutputFile(parsFile, out);
+			parsFileout = globaldata->getTreeFile() + "temp" + ".rd_parsimony";
 		}
 		
 		//set users groups to analyze
