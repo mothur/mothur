@@ -273,7 +273,6 @@ void ReadNewickTree::readTreeString() {
 			T->tree[n].setParent(-1);
 			if(lc!=-1){		T->tree[lc].setParent(n);		}
 			if(rc!=-1){		T->tree[rc].setParent(n);		}
-			cout << "new loop "<< endl;
 		}
 	
 	}
@@ -335,7 +334,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 			
 			//adds sequence names that are not in group file to the "xxx" group
 			if(n1 == -1) {
-				cerr << "Name: " << name << " not found in your groupfile and it will be ignored. \n";
+				cerr << "Name: " << name << " not found in your groupfile.. \n"; exit(1);
 				
 				globaldata->gTreemap->namesOfSeqs.push_back(name);
 				globaldata->gTreemap->treemap[name].groupname = "xxx";
@@ -355,11 +354,10 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 				group = "xxx";
 				numLeaves++;
 				numNodes = 2*numLeaves - 1;
-				T->resetTree();
+				//T->resetTree();
 			}
 			
 			T->tree[n1].setGroup(group);
-			T->printTree();
 			T->tree[n1].setChildren(-1,-1);
 		
 			if(blen == 1){	
