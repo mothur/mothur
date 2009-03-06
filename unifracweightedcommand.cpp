@@ -52,7 +52,6 @@ int UnifracWeightedCommand::execute() {
 			weightedFile = globaldata->getTreeFile()  + toString(i+1) + ".weighted";
 			weightedFileout = globaldata->getTreeFile() + "temp." + toString(i+1) + ".weighted";
 							
-			cout << "Processing tree " << i+1 << endl;
 			userData = weighted->getValues(T[i]);  //userData[0] = weightedscore
 			
 			//save users score
@@ -175,8 +174,13 @@ void UnifracWeightedCommand::printWSummaryFile() {
 		int count = 0;
 		for (int i = 0; i < T.size(); i++) { 
 			for (int j = 0; j < numComp; j++) {
-				outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << WScoreSig[count] << endl; 
-				cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << WScoreSig[count] << endl; 
+				if (WScoreSig[count] > (1/(float)iters)) {
+					outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << WScoreSig[count] << endl; 
+					cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << WScoreSig[count] << endl; 
+				}else{
+					outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << "<" << (1/float(iters)) << endl; 
+					cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << "<" << (1/float(iters)) << endl; 
+				}
 				count++;
 			}
 		}
@@ -261,7 +265,7 @@ void UnifracWeightedCommand::setGroups() {
 			numComp += i; 
 			for (int l = i+1; l < numGroups; l++) {
 				//set group comparison labels
-				groupComb.push_back(globaldata->Groups[i]+globaldata->Groups[l]);
+				groupComb.push_back(globaldata->Groups[i] + "-" + globaldata->Groups[l]);
 			}
 		}
 	}
