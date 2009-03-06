@@ -50,43 +50,6 @@ Tree::Tree() {
 }
 
 /*****************************************************************/
-void Tree::resetTree(){
-try {
-		numLeaves = globaldata->gTreemap->getNumSeqs();
-		numNodes = 2*numLeaves - 1;
-		
-		tree.resize(numNodes);
-
-		//initialize tree with correct number of nodes, name and group info.
-		for (int i = 0; i < numNodes; i++) {
-			//initialize leaf nodes
-			if (i <= (numLeaves-1)) {
-				tree[i].setName(globaldata->gTreemap->namesOfSeqs[i]);
-				tree[i].setGroup(globaldata->gTreemap->getGroup(globaldata->gTreemap->namesOfSeqs[i]));
-				//set pcount and pGroup for groupname to 1.
-				tree[i].pcount[globaldata->gTreemap->getGroup(globaldata->gTreemap->namesOfSeqs[i])] = 1;
-				tree[i].pGroups[globaldata->gTreemap->getGroup(globaldata->gTreemap->namesOfSeqs[i])] = 1;
-				//Treemap knows name, group and index to speed up search
-				globaldata->gTreemap->setIndex(globaldata->gTreemap->namesOfSeqs[i], i);
-	
-			//intialize non leaf nodes
-			}else if (i > (numLeaves-1)) {
-				tree[i].setName("");
-				tree[i].setGroup("");
-			}
-		}
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function resetTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Tree class function resetTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
-
-}
-/*****************************************************************/
 int Tree::getIndex(string searchName) {
 	try {
 		//Treemap knows name, group and index to speed up search
@@ -189,7 +152,7 @@ map<string, int> Tree::mergeGroups(int i) {
 	try {
 		int lc = tree[i].getLChild();
 		int rc = tree[i].getRChild();
-cout << i << lc << rc << endl;
+
 		//set parsimony groups to left child
 		map<string,int> parsimony = tree[lc].pGroups;
 		

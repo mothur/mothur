@@ -336,25 +336,24 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 			if(n1 == -1) {
 				cerr << "Name: " << name << " not found in your groupfile.. \n"; exit(1);
 				
-				globaldata->gTreemap->namesOfSeqs.push_back(name);
-				globaldata->gTreemap->treemap[name].groupname = "xxx";
-				globaldata->gTreemap->treemap[name].vectorIndex = (globaldata->gTreemap->namesOfSeqs.size() - 1);
+				//globaldata->gTreemap->namesOfSeqs.push_back(name);
+				//globaldata->gTreemap->treemap[name].groupname = "xxx";
+				//globaldata->gTreemap->treemap[name].vectorIndex = (globaldata->gTreemap->namesOfSeqs.size() - 1);
 				
-				map<string, int>::iterator it;
-				it = globaldata->gTreemap->seqsPerGroup.find("xxx");
-				if (it == globaldata->gTreemap->seqsPerGroup.end()) { //its a new group
-					globaldata->gTreemap->namesOfGroups.push_back("xxx");
-					globaldata->gTreemap->seqsPerGroup["xxx"] = 1;
-				}else {
-					globaldata->gTreemap->seqsPerGroup["xxx"]++;
-				}
+				//map<string, int>::iterator it;
+				//it = globaldata->gTreemap->seqsPerGroup.find("xxx");
+				//if (it == globaldata->gTreemap->seqsPerGroup.end()) { //its a new group
+				//	globaldata->gTreemap->namesOfGroups.push_back("xxx");
+				//	globaldata->gTreemap->seqsPerGroup["xxx"] = 1;
+				//}else {
+				//	globaldata->gTreemap->seqsPerGroup["xxx"]++;
+				//}
 				
 				//find index in tree of name
-				n1 = T->getIndex(name);
-				group = "xxx";
-				numLeaves++;
-				numNodes = 2*numLeaves - 1;
-				//T->resetTree();
+				//n1 = T->getIndex(name);
+				//group = "xxx";
+				//numLeaves++;
+				//numNodes = 2*numLeaves - 1;
 			}
 			
 			T->tree[n1].setGroup(group);

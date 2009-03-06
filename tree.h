@@ -24,7 +24,6 @@ public:
 	
 	
 	void getCopy(Tree*);  //makes tree a copy of the one passed in.
-	void resetTree(); //this is needed to allow user to omit names from the group file
 	void assembleRandomTree();
 	void assembleRandomUnifracTree(vector<string>);
 	void assembleRandomUnifracTree(string, string);
