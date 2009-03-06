@@ -14,7 +14,11 @@
 //This constructor reads a distance matrix file and stores the data in the matrix.
 FullMatrix::FullMatrix(ifstream& f) {
 	try{
-		f >> numSeqs;
+		string name;
+		f >> numSeqs >> name;
+		
+		matrix.resize(numSeqs);  
+		
 		
 	
 	}
