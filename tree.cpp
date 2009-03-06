@@ -178,7 +178,7 @@ map<string, int> Tree::mergeGroups(int i) {
 			for(it=parsimony.begin();it!=parsimony.end();it++){
 				if(it->second == 1){
 					parsimony.erase(it->first);
-					it--;
+//					it--;
 				}
 			}
 			//set one remaining groups to 1
@@ -240,24 +240,20 @@ map<string, int> Tree::mergeUserGroups(int i, vector<string> g) {
 				maxPars = parsimony[it->first];
 			}
 		}
-	
+			
 		// this is true if right child had a greater parsimony for a certain group
 		if(maxPars > 1){
 			//erase all the groups that are only 1 because you found something with 2.
 			for(it=parsimony.begin();it!=parsimony.end();it++){
 				if(it->second == 1){
 					parsimony.erase(it->first);
-					it--;
 				}
 			}
-			//set one remaining groups to 1
-			//so with our above example p[white] = 2 would be left and it would become p[white] = 1
 			for(it=parsimony.begin();it!=parsimony.end();it++){
 				parsimony[it->first] = 1;
 			}
+		}		
 		
-		}
-	
 		return parsimony;
 	}
 	catch(exception& e) {
