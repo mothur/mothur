@@ -17,7 +17,7 @@ class FullMatrix {
 public:
 	FullMatrix(){};
 	FullMatrix(ifstream&);
-	~FullMatrix();
+	~FullMatrix(){};
 	
 	int getNumSeqs();
 	
