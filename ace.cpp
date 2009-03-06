@@ -13,9 +13,7 @@
 
 EstOutput Ace::getValues(SAbundVector* rank) {
 	try {
-		cout << "abund = " << abund << "\n";
 		data.resize(3,0);
-	//	vector<double> aceData(3,0);
 		double ace, acelci, acehci;
 	
 		int nrare = 0;
