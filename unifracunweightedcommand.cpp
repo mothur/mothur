@@ -46,9 +46,13 @@ int UnifracUnweightedCommand::execute() {
 			counter = 0;
 			unweightedFile = globaldata->getTreeFile()  + toString(i+1) + ".unweighted";
 			unweightedFileout = globaldata->getTreeFile() + "temp." + toString(i+1) + ".unweighted";
-						//column headers
+			
+			//column headers
 			outSum << "Tree# " << i+1 << endl;
 			outSum << "Comb" << '\t'  <<  "UWScore" << '\t' << '\t' << "UWSig" <<  endl;
+			cout << "Tree# " << i+1 << endl;
+			cout << "Comb" << '\t'  <<  "UWScore" << '\t' << '\t' << "UWSig" <<  endl;
+
 
 			//get unweighted for users tree
 			rscoreFreq.resize(numComp);  
@@ -56,7 +60,6 @@ int UnifracUnweightedCommand::execute() {
 			utreeScores.resize(numComp);  
 			UWScoreSig.resize(numComp); 
 
-			cout << "Processing tree " << i+1 << endl;
 			userData = unweighted->getValues(T[i]);  //userData[0] = unweightedscore
 			
 			//output scores for each combination
@@ -71,7 +74,6 @@ int UnifracUnweightedCommand::execute() {
 				randomData = unweighted->getValues(T[i], "", "");
 				
 				for(int k = 0; k < numComp; k++) {	
-//cout << "iter " << j << " comp " << k << " = " << randomData[k] << endl;
 					//add trees unweighted score to map of scores
 					it2 = rscoreFreq[k].find(randomData[k]);
 					if (it2 != rscoreFreq[k].end()) {//already have that score
@@ -164,8 +166,13 @@ void UnifracUnweightedCommand::printUWSummaryFile() {
 		
 		//print each line
 		for(int a = 0; a < numComp; a++) {
-			outSum << setprecision(6) << groupComb[a] << '\t' << '\t' << utreeScores[a][0] << '\t' << UWScoreSig[a][0] << endl;
-			cout << setprecision(6)  << groupComb[a] << '\t' << '\t' << utreeScores[a][0] << '\t' << UWScoreSig[a][0] << endl; 
+			if (UWScoreSig[a][0] > (1/(float)iters)) {
+				outSum << setprecision(globaldata->getIters().length()) << groupComb[a] << '\t' << '\t' << utreeScores[a][0] << '\t' << UWScoreSig[a][0] << endl;
+				cout << setprecision(globaldata->getIters().length())  << groupComb[a] << '\t' << '\t' << utreeScores[a][0] << '\t' << UWScoreSig[a][0] << endl; 
+			}else {
+				outSum << setprecision(globaldata->getIters().length()) << groupComb[a] << '\t' << '\t' << utreeScores[a][0] << '\t' << "<" << (1/float(iters)) << endl;
+				cout << setprecision(globaldata->getIters().length())  << groupComb[a] << '\t' << '\t' << utreeScores[a][0] << '\t' << "<" << (1/float(iters)) << endl; 
+			}
 		}
 		
 	}
@@ -202,26 +209,30 @@ void UnifracUnweightedCommand::setGroups() {
 					for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
 						globaldata->Groups.push_back(tmap->namesOfGroups[i]);
 						numGroups++;
-						allGroups += tmap->namesOfGroups[i];
+						allGroups += tmap->namesOfGroups[i] + "-";
 					}
+					allGroups = allGroups.substr(0, allGroups.length()-1);
 				}else {
 					for (int i = 0; i < globaldata->Groups.size(); i++) {
-						allGroups += globaldata->Groups[i];
+						allGroups += globaldata->Groups[i] + "-";
 						numGroups++;
 					}
+					allGroups = allGroups.substr(0, allGroups.length()-1);
 				}
 			}else{//user has enter "all" and wants the default groups
 				for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
 					globaldata->Groups.push_back(tmap->namesOfGroups[i]);
 					numGroups++;
-					allGroups += tmap->namesOfGroups[i];
+					allGroups += tmap->namesOfGroups[i] + "-";
 				}
+				allGroups = allGroups.substr(0, allGroups.length()-1);
 				globaldata->setGroups("");
 			}
 		}else {
 			for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
-				allGroups += tmap->namesOfGroups[i];
+				allGroups += tmap->namesOfGroups[i] + "-";
 			}
+			allGroups = allGroups.substr(0, allGroups.length()-1);
 			numGroups = 1;
 		}
 		
@@ -229,7 +240,7 @@ void UnifracUnweightedCommand::setGroups() {
 		numComp = 0;
 		for (int r=0; r<numGroups; r++) { 
 			for (int l = r+1; l < numGroups; l++) {
-				groupComb.push_back(globaldata->Groups[r]+globaldata->Groups[l]);
+				groupComb.push_back(globaldata->Groups[r]+ "-" + globaldata->Groups[l]);
 				numComp++;
 			}
 		}
@@ -288,10 +299,10 @@ void UnifracUnweightedCommand::output(vector<double> data){
 			string inputBuffer;
 			getline(inFile, inputBuffer);
 		
-			out	<<  inputBuffer << setprecision(6) << '\t' << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
+			out	<<  inputBuffer << setprecision(globaldata->getIters().length()) << '\t' << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
 		}
 		else{
-			out << setprecision(6) << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
+			out << setprecision(globaldata->getIters().length()) << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
 		}
 
 	}

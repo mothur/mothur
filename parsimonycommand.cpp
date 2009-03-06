@@ -65,7 +65,6 @@ int ParsimonyCommand::execute() {
 		if (randomtree == "") {
 			//get pscores for users trees
 			for (int i = 0; i < T.size(); i++) {
-				cout << "Processing tree " << i+1 << endl;
 				userData = pars->getValues(T[i]);  //data = AB, AC, BC, ABC.
 				
 				//output scores for each combination
@@ -228,6 +227,7 @@ void ParsimonyCommand::printUSummaryFile() {
 	try {
 		//column headers
 		outSum << "Tree#" << '\t' << "Comb" << '\t'  <<  "ParsScore" << '\t' << '\t' << "ParsSig" <<  endl;
+		cout << "Tree#" << '\t' << "Comb" << '\t'  <<  "ParsScore" << '\t' << '\t' << "ParsSig" <<  endl;
 		
 		//format output
 		outSum.setf(ios::fixed, ios::floatfield); outSum.setf(ios::showpoint);
@@ -236,8 +236,13 @@ void ParsimonyCommand::printUSummaryFile() {
 		//print each line
 		for (int i = 0; i< T.size(); i++) {
 			for(int a = 0; a < numComp; a++) {
-				outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << userTreeScores[a][i] << '\t' << UScoreSig[a][i] << endl;
-				cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << userTreeScores[a][i] << '\t' << UScoreSig[a][i] << endl;
+				if (UScoreSig[a][i] > (1/(float)iters)) {
+					outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << userTreeScores[a][i] << '\t' << UScoreSig[a][i] << endl;
+					cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << userTreeScores[a][i] << '\t' << UScoreSig[a][i] << endl;
+				}else {
+					outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << userTreeScores[a][i] << '\t' << "<" << (1/float(iters)) << endl;
+					cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << userTreeScores[a][i] << '\t' << "<" << (1/float(iters)) << endl;
+				}
 			}
 		}
 		
@@ -324,26 +329,30 @@ void ParsimonyCommand::setGroups() {
 					for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
 						globaldata->Groups.push_back(tmap->namesOfGroups[i]);
 						numGroups++;
-						allGroups += tmap->namesOfGroups[i];
+						allGroups += tmap->namesOfGroups[i] + "-";
 					}
+					allGroups = allGroups.substr(0, allGroups.length()-1);
 				}else {
 					for (int i = 0; i < globaldata->Groups.size(); i++) {
-						allGroups += tmap->namesOfGroups[i];
+						allGroups += globaldata->Groups[i] + "-";
 						numGroups++;
 					}
+					allGroups = allGroups.substr(0, allGroups.length()-1);
 				}
 			}else{//user has enter "all" and wants the default groups
 				for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
 					globaldata->Groups.push_back(tmap->namesOfGroups[i]);
 					numGroups++;
-					allGroups += tmap->namesOfGroups[i];
+					allGroups += tmap->namesOfGroups[i] + "-";
 				}
+				allGroups = allGroups.substr(0, allGroups.length()-1);
 				globaldata->setGroups("");
 			}
 		}else {
 			for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
-				allGroups += tmap->namesOfGroups[i];
+				allGroups += tmap->namesOfGroups[i] + "-";
 			}
+			allGroups = allGroups.substr(0, allGroups.length()-1);
 			numGroups = 1;
 		}
 		
@@ -351,7 +360,7 @@ void ParsimonyCommand::setGroups() {
 		numComp = 0;
 		for (int r=0; r<numGroups; r++) { 
 			for (int l = r+1; l < numGroups; l++) {
-				groupComb.push_back(globaldata->Groups[r]+globaldata->Groups[l]);
+				groupComb.push_back(globaldata->Groups[r]+ "-" +globaldata->Groups[l]);
 				numComp++;
 			}
 		}
