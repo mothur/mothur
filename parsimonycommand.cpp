@@ -226,8 +226,8 @@ void ParsimonyCommand::printParsimonyFile() {
 void ParsimonyCommand::printUSummaryFile() {
 	try {
 		//column headers
-		outSum << "Tree#" << '\t' << "Comb" << '\t'  <<  "ParsScore" << '\t' << '\t' << "ParsSig" <<  endl;
-		cout << "Tree#" << '\t' << "Comb" << '\t'  <<  "ParsScore" << '\t' << '\t' << "ParsSig" <<  endl;
+		outSum << "Tree#" << '\t' << "Groups" << '\t'  <<  "ParsScore" << '\t' << "ParsSig" <<  endl;
+		cout << "Tree#" << '\t' << "Groups" << '\t'  <<  "ParsScore" << '\t' << "ParsSig" <<  endl;
 		
 		//format output
 		outSum.setf(ios::fixed, ios::floatfield); outSum.setf(ios::showpoint);
@@ -237,11 +237,11 @@ void ParsimonyCommand::printUSummaryFile() {
 		for (int i = 0; i< T.size(); i++) {
 			for(int a = 0; a < numComp; a++) {
 				if (UScoreSig[a][i] > (1/(float)iters)) {
-					outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << userTreeScores[a][i] << '\t' << UScoreSig[a][i] << endl;
-					cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << userTreeScores[a][i] << '\t' << UScoreSig[a][i] << endl;
+					outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << userTreeScores[a][i] << '\t' << UScoreSig[a][i] << endl;
+					cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << userTreeScores[a][i] << '\t' << UScoreSig[a][i] << endl;
 				}else {
-					outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << userTreeScores[a][i] << '\t' << "<" << (1/float(iters)) << endl;
-					cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << userTreeScores[a][i] << '\t' << "<" << (1/float(iters)) << endl;
+					outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << userTreeScores[a][i] << '\t' << "<" << (1/float(iters)) << endl;
+					cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << userTreeScores[a][i] << '\t' << "<" << (1/float(iters)) << endl;
 				}
 			}
 		}
@@ -397,7 +397,7 @@ void ParsimonyCommand::initFile(string label){
 			if (randomtree == "") {
 				out <<  inputBuffer << '\t' << label + "Score" << '\t' << label + "UserFreq" << '\t' << label + "UserCumul" << '\t' << label + "RandFreq" << '\t' << label + "RandCumul" << endl;
 			}else {
-				out <<  inputBuffer << '\t' << label + "Score" << '\t' << label + "RandFreq" << '\t' << label + "RandCumul" << endl;
+				out <<  inputBuffer << '\t' << "Score" << '\t' << "RandFreq" << '\t' << "RandCumul" << endl;
 			}
 		}else{
 			openOutputFile(parsFileout, out);
@@ -405,7 +405,7 @@ void ParsimonyCommand::initFile(string label){
 			if (randomtree == "") {
 				out << label + "Score" << '\t' << label + "UserFreq" << '\t' << label + "UserCumul" << '\t' << label + "RandFreq" << '\t' << label + "RandCumul" << endl;
 			}else {
-				out << label + "Score" << '\t' << label + "RandFreq" << '\t' << label + "RandCumul" << endl;
+				out << "Score" << '\t' << "RandFreq" << '\t' << "RandCumul" << endl;
 			}
 		}
 

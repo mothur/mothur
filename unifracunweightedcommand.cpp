@@ -48,10 +48,10 @@ int UnifracUnweightedCommand::execute() {
 			unweightedFileout = globaldata->getTreeFile() + "temp." + toString(i+1) + ".unweighted";
 			
 			//column headers
-			outSum << "Tree# " << i+1 << endl;
-			outSum << "Comb" << '\t'  <<  "UWScore" << '\t' << '\t' << "UWSig" <<  endl;
-			cout << "Tree# " << i+1 << endl;
-			cout << "Comb" << '\t'  <<  "UWScore" << '\t' << '\t' << "UWSig" <<  endl;
+//			outSum << "Tree# " << i+1 << endl;
+			outSum << "Tree#" << '\t' << "Groups" << '\t'  <<  "UWScore" <<'\t' << "UWSig" <<  endl;
+//			cout << "Tree# " << i+1 << endl;
+			cout << "Tree#" << '\t' << "Groups" << '\t'  <<  "UWScore" << '\t' << "UWSig" <<  endl;
 
 
 			//get unweighted for users tree
@@ -163,15 +163,17 @@ void UnifracUnweightedCommand::printUWSummaryFile() {
 				
 		//format output
 		outSum.setf(ios::fixed, ios::floatfield); outSum.setf(ios::showpoint);
-		
+			
 		//print each line
-		for(int a = 0; a < numComp; a++) {
-			if (UWScoreSig[a][0] > (1/(float)iters)) {
-				outSum << setprecision(globaldata->getIters().length()) << groupComb[a] << '\t' << '\t' << utreeScores[a][0] << '\t' << UWScoreSig[a][0] << endl;
-				cout << setprecision(globaldata->getIters().length())  << groupComb[a] << '\t' << '\t' << utreeScores[a][0] << '\t' << UWScoreSig[a][0] << endl; 
-			}else {
-				outSum << setprecision(globaldata->getIters().length()) << groupComb[a] << '\t' << '\t' << utreeScores[a][0] << '\t' << "<" << (1/float(iters)) << endl;
-				cout << setprecision(globaldata->getIters().length())  << groupComb[a] << '\t' << '\t' << utreeScores[a][0] << '\t' << "<" << (1/float(iters)) << endl; 
+		for (int i = 0; i< T.size(); i++) {
+			for(int a = 0; a < numComp; a++) {
+				if (UWScoreSig[a][i] > (1/(float)iters)) {
+					outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << utreeScores[a][i] << '\t' << UWScoreSig[a][i] << endl;
+					cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << utreeScores[a][i] << '\t' << UWScoreSig[a][i] << endl;
+				}else {
+					outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << utreeScores[a][i] << '\t' << "<" << (1/float(iters)) << endl;
+					cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << utreeScores[a][i] << '\t' << "<" << (1/float(iters)) << endl;
+				}
 			}
 		}
 		
@@ -273,7 +275,7 @@ void UnifracUnweightedCommand::initFile(string label){
 			string inputBuffer;
 			getline(inFile, inputBuffer);
 		
-			out	<<  inputBuffer << '\t' << label + "Score" << '\t' << label + "RandFreq" << '\t' << label + "RandCumul" << endl;		
+			out	<<  inputBuffer << '\t' << label + "RandFreq" << '\t' << label + "RandCumul" << endl;		
 		}else{
 			openOutputFile(unweightedFileout, out);
 			out	<< label + "Score" << '\t' << label + "RandFreq" << '\t' << label + "RandCumul" << endl;
@@ -299,11 +301,12 @@ void UnifracUnweightedCommand::output(vector<double> data){
 		if(counter != 0){		
 			string inputBuffer;
 			getline(inFile, inputBuffer);
+//			out	<<  inputBuffer << setprecision(6) << '\t' << data[0] << setprecision(globaldata->getIters().length()) << '\t' << data[1] << '\t' << data[2] << endl;
 		
-			out	<<  inputBuffer << setprecision(globaldata->getIters().length()) << '\t' << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
+			out	<<  inputBuffer << setprecision(globaldata->getIters().length()-1) << '\t' << data[1] << '\t' << data[2] << endl;
 		}
 		else{
-			out << setprecision(globaldata->getIters().length()) << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
+			out << setprecision(6) << data[0] << setprecision(globaldata->getIters().length()-1) << '\t' << data[1] << '\t' << data[2] << endl;
 		}
 
 	}

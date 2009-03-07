@@ -52,7 +52,6 @@ int ReadTreeCommand::execute(){
 		for (int i = 0; i < T.size(); i++) {
 			T[i]->assembleTree();
 		}
-T[0]->createNewickFile("treeout");		
 		return 0;
 	}
 	catch(exception& e) {
