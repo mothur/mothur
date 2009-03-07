@@ -164,8 +164,8 @@ void UnifracWeightedCommand::printWeightedFile() {
 void UnifracWeightedCommand::printWSummaryFile() {
 	try {
 		//column headers
-		outSum << "Tree#" << '\t' << "Groups" << '\t' << '\t' << "WScore" << '\t' << '\t' << "WSig" <<  endl;
-		cout << "Tree#" << '\t' << "Groups" << '\t' << '\t' << "WScore" << '\t' << '\t' << "WSig" <<  endl;
+		outSum << "Tree#" << '\t' << "Groups" << '\t' << "WScore" << '\t' << "WSig" <<  endl;
+		cout << "Tree#" << '\t' << "Groups" << '\t' << "WScore" << '\t' << "WSig" <<  endl;
 		
 		//format output
 		outSum.setf(ios::fixed, ios::floatfield); outSum.setf(ios::showpoint);
@@ -175,11 +175,11 @@ void UnifracWeightedCommand::printWSummaryFile() {
 		for (int i = 0; i < T.size(); i++) { 
 			for (int j = 0; j < numComp; j++) {
 				if (WScoreSig[count] > (1/(float)iters)) {
-					outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << WScoreSig[count] << endl; 
-					cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << WScoreSig[count] << endl; 
+					outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << WScoreSig[count] << endl; 
+					cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << WScoreSig[count] << endl; 
 				}else{
-					outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << "<" << (1/float(iters)) << endl; 
-					cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << "<" << (1/float(iters)) << endl; 
+					outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << "<" << (1/float(iters)) << endl; 
+					cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << "<" << (1/float(iters)) << endl; 
 				}
 				count++;
 			}
@@ -340,7 +340,7 @@ void UnifracWeightedCommand::initFile(string label){
 			string inputBuffer;
 			getline(inFile, inputBuffer);
 		
-			out	<<  inputBuffer << '\t' << label + "Score" << '\t' << label + "RandFreq" << '\t' << label + "RandCumul" << endl;		
+			out	<<  inputBuffer << '\t' << label + "RandFreq" << '\t' << label + "RandCumul" << endl;		
 		}else{
 			openOutputFile(weightedFileout, out);
 			out	<< label + "Score" << '\t' << label + "RandFreq" << '\t' << label + "RandCumul" << endl;
@@ -366,13 +366,13 @@ void UnifracWeightedCommand::output(vector<double> data){
 		if(counter != 0){		
 			string inputBuffer;
 			getline(inFile, inputBuffer);
-		
-			out	<<  inputBuffer << setprecision(globaldata->getIters().length()) << '\t' << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
+			
+			out	<<  inputBuffer << setprecision(globaldata->getIters().length()-1) << '\t' << data[1] << '\t' << data[2] << endl;
 		}
 		else{
-			out << setprecision(globaldata->getIters().length()) << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
+			out << setprecision(6) << data[0] << setprecision(globaldata->getIters().length()-1) << '\t' << data[1] << '\t' << data[2] << endl;
 		}
-
+		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the UnifracWeightedCommand class Function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
