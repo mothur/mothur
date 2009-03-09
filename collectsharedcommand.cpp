@@ -31,9 +31,6 @@ CollectSharedCommand::CollectSharedCommand(){
 		format = globaldata->getFormat();
 		validCalculator = new ValidCalculators();
 		
-		//set users groups
-		setGroups();
-		
 		int i;
 		for (i=0; i<globaldata->Estimators.size(); i++) {
 			if (validCalculator->isValidCalculator("shared", globaldata->Estimators[i]) == true) { 
@@ -112,6 +109,9 @@ int CollectSharedCommand::execute(){
 			order = SharedList->getSharedOrderVector();
 		}
 		set<string> orderList;
+		
+		//set users groups
+		setGroups();
 
 		while(order != NULL){
 			orderList.insert(order->getLabel());

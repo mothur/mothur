@@ -40,9 +40,9 @@ int HelpCommand::execute(){
 		cout << "The list, rabund or sabund parameter is required, but you may only use one of them." << "\n";
 		cout << "The line and label parameters are optional but you may not use both the line and label parameters at the same time." << "\n";
 		cout << "The label and line parameters are used to read specific lines in your input." << "\n";
-		cout << "The second way to use the read.otu command is to read a list and a group so you can use the collect.shared, rarefaction.shared or summary.shared commands." << "\n";
-		cout << "In this case the read.otu command should be in the following format: read.otu(list=yourListFile, group=yourGroupFile, line=yourLines).  " << "\n";
-		cout << "The list parameter and group paramaters are required. When using the command the second way read.otu command parses the .list file" << "\n";
+		cout << "The second way to use the read.otu command is to read a list and a group, or a shared so you can use the collect.shared, rarefaction.shared or summary.shared commands." << "\n";
+		cout << "In this case the read.otu command should be in the following format: read.otu(list=yourListFile, group=yourGroupFile, line=yourLines) or read.otu(shared=yourSharedFile).  " << "\n";
+		cout << "The list parameter and group paramaters or the shared paremeter is required. When using the command the second way with a list and group file read.otu command parses the .list file" << "\n";
 		cout << "and separates it into groups.  It outputs a .shared file containing the OTU information for each group. The read.otu command also outputs a .list file for each group. " << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "read.tree") {
@@ -51,11 +51,6 @@ int HelpCommand::execute(){
 		cout << "The read.tree command should be in the following format: read.tree(tree=yourTreeFile, group=yourGroupFile)." << "\n";
 		cout << "The tree and group parameters are both required." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. tree), '=' and parameters (i.e.yourTreefile)." << "\n" << "\n";
-	}else if (globaldata->helpRequest == "read.shared") {
-		cout << "The read.shared must be run before you execute a collect.shared, rarefaction.shared or summary.shared command." << "\n";
-		cout << "The read.shared command is used to read a shared file. The read.shared should be entered in the following format:" << "\n";
-		cout << "read.shared(shared=yourSharedFile). The shared parameter is required." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. shared), '=' and parameters (i.e.yourSharedfile)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "cluster") {
 		cout << "The cluster command can only be executed after a successful read.dist command." << "\n";
 		cout << "The cluster command parameter options are method, cuttoff and precision. No parameters are required." << "\n";

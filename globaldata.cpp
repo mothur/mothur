@@ -27,7 +27,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 		reset();
 		
 		//clears out data from previous read
-		if ((commandName == "read.dist") || (commandName == "read.otu") || (commandName == "read.tree") || (commandName == "read.shared")) { 
+		if ((commandName == "read.dist") || (commandName == "read.otu") || (commandName == "read.tree")) { 
 			clear();
 			gGroupmap = NULL;
 			gTree.clear();

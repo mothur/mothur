@@ -31,9 +31,6 @@ SummarySharedCommand::SummarySharedCommand(){
 		format = globaldata->getFormat();
 		validCalculator = new ValidCalculators();
 		
-		//set users groups
-		setGroups();
-		
 		int i;
 		for (i=0; i<globaldata->Estimators.size(); i++) {
 			if (validCalculator->isValidCalculator("sharedsummary", globaldata->Estimators[i]) == true) { 
@@ -114,6 +111,9 @@ int SummarySharedCommand::execute(){
 			outputFileHandle << '\t' << sumCalculators[i]->getName();
 		}
 		outputFileHandle << endl;
+		
+		//set users groups
+		setGroups();
 
 		while(order != NULL){
 		
