@@ -17,7 +17,7 @@ int DeconvoluteCommand::execute() {
 		//prepare filenames and open files
 		filename = globaldata->getFastaFile();
 		outputFileName = (getRootName(filename) + "names");
-		outFastafile = (getRootName(filename) + "uni_fasta");
+		outFastafile = (getRootName(filename) + "unique.fasta");
 		
 		openInputFile(filename, in);
 		openOutputFile(outputFileName, out);
