@@ -72,8 +72,8 @@ int ReadDistCommand::execute(){
 			globaldata->gMatrix = matrix; //save matrix for coverage commands
 		}else {
 			read->read(nameMap);
-			globaldata->setListVector(read->getListVector());
-			globaldata->setSparseMatrix(read->getMatrix());
+			globaldata->gListVector = read->getListVector();
+			globaldata->gSparseMatrix = read->getMatrix();
 		}
 		return 0;
 	}
