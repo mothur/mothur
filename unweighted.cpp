@@ -64,11 +64,11 @@ EstOutput Unweighted::getValues(Tree* t) {
 					//if i's children are from the same group then i's pcount size will be 1 
 					//if copyIpcount.size() = 0 they are from a branch that is entirely from a group the user doesn't want
 					if (copyIpcount.size() == 0) { }
-					else if ((t->tree[i].getBranchLength() != -1) && (copyIpcount.size() == 1)) {  UniqueBL += t->tree[i].getBranchLength();	}
+					else if ((t->tree[i].getBranchLength() != -1) && (copyIpcount.size() == 1)) {  UniqueBL += abs(t->tree[i].getBranchLength());	}
 			
 					//add i's BL to total if it is from the groups the user wants
 					if ((t->tree[i].getBranchLength() != -1) && (copyIpcount.size() != 0)) {  
-						totalBL += t->tree[i].getBranchLength(); 
+						totalBL += abs(t->tree[i].getBranchLength()); 
 					}
 			
 					/**********************************************************************/
@@ -78,16 +78,16 @@ EstOutput Unweighted::getValues(Tree* t) {
 					if (t->tree[rc].getRChild() == -1) {
 						//if rc is a valid group and rc has a BL
 						if ((inUsersGroups(t->tree[rc].getGroup(), groups) == true) && (t->tree[rc].getBranchLength() != -1)) {
-							UniqueBL += t->tree[rc].getBranchLength();
-							totalBL += t->tree[rc].getBranchLength(); 
+							UniqueBL += abs(t->tree[rc].getBranchLength());
+							totalBL += abs(t->tree[rc].getBranchLength()); 
 						}
 					}
 			
 					if (t->tree[lc].getLChild() == -1) {
 						//if lc is a valid group and lc has a BL
 						if ((inUsersGroups(t->tree[lc].getGroup(), groups) == true) && (t->tree[lc].getBranchLength() != -1)) {
-							UniqueBL += t->tree[lc].getBranchLength();
-							totalBL += t->tree[lc].getBranchLength(); 
+							UniqueBL += abs(t->tree[lc].getBranchLength());
+							totalBL += abs(t->tree[lc].getBranchLength()); 
 						}
 					}
 			
@@ -138,11 +138,11 @@ EstOutput Unweighted::getValues(Tree* t) {
 				//if i's children are from the same group then i's pcount size will be 1 
 				//if copyIpcount.size() = 0 they are from a branch that is entirely from a group the user doesn't want
 				if (copyIpcount.size() == 0) { }
-				else if ((t->tree[i].getBranchLength() != -1) && (copyIpcount.size() == 1)) {  UniqueBL += t->tree[i].getBranchLength();	}
+				else if ((t->tree[i].getBranchLength() != -1) && (copyIpcount.size() == 1)) {  UniqueBL += abs(t->tree[i].getBranchLength());	}
 			
 				//add i's BL to total if it is from the groups the user wants
 				if ((t->tree[i].getBranchLength() != -1) && (copyIpcount.size() != 0)) {  
-					totalBL += t->tree[i].getBranchLength(); 
+					totalBL += abs(t->tree[i].getBranchLength()); 
 				}
 			
 				/**********************************************************************/
@@ -152,16 +152,16 @@ EstOutput Unweighted::getValues(Tree* t) {
 				if (t->tree[rc].getRChild() == -1) {
 					//if rc is a valid group and rc has a BL
 					if ((inUsersGroups(t->tree[rc].getGroup(), groups) == true) && (t->tree[rc].getBranchLength() != -1)) {
-						UniqueBL += t->tree[rc].getBranchLength();
-						totalBL += t->tree[rc].getBranchLength(); 
+						UniqueBL += abs(t->tree[rc].getBranchLength());
+						totalBL += abs(t->tree[rc].getBranchLength()); 
 					}
 				}
 			
 				if (t->tree[lc].getLChild() == -1) {
 					//if lc is a valid group and lc has a BL
 					if ((inUsersGroups(t->tree[lc].getGroup(), groups) == true) && (t->tree[lc].getBranchLength() != -1)) {
-						UniqueBL += t->tree[lc].getBranchLength();
-						totalBL += t->tree[lc].getBranchLength(); 
+						UniqueBL += abs(t->tree[lc].getBranchLength());
+						totalBL += abs(t->tree[lc].getBranchLength()); 
 					}
 				}
 			
@@ -252,11 +252,11 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 					//if i's children are from the same group then i's pcount size will be 1 
 					//if copyIpcount.size() = 0 they are from a branch that is entirely from a group the user doesn't want
 					if (copyIpcount.size() == 0) { }
-					else if ((copyTree->tree[i].getBranchLength() != -1) && (copyIpcount.size() == 1)) {  UniqueBL += copyTree->tree[i].getBranchLength();	}
+					else if ((copyTree->tree[i].getBranchLength() != -1) && (copyIpcount.size() == 1)) {  UniqueBL += abs(copyTree->tree[i].getBranchLength());	}
 			
 					//add i's BL to total if it is from the groups the user wants
 					if ((copyTree->tree[i].getBranchLength() != -1) && (copyIpcount.size() != 0)) {  
-						totalBL += copyTree->tree[i].getBranchLength(); 
+						totalBL += abs(copyTree->tree[i].getBranchLength()); 
 					}
 			
 					/**********************************************************************/
@@ -266,16 +266,16 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 					if (copyTree->tree[rc].getRChild() == -1) {
 						//if rc is a valid group and rc has a BL
 						if ((inUsersGroups(copyTree->tree[rc].getGroup(), groups) == true) && (copyTree->tree[rc].getBranchLength() != -1)) {
-							UniqueBL += copyTree->tree[rc].getBranchLength();
-							totalBL += copyTree->tree[rc].getBranchLength(); 
+							UniqueBL += abs(copyTree->tree[rc].getBranchLength());
+							totalBL += abs(copyTree->tree[rc].getBranchLength()); 
 						}
 					}
 			
 					if (copyTree->tree[lc].getLChild() == -1) {
 						//if lc is a valid group and lc has a BL
 						if ((inUsersGroups(copyTree->tree[lc].getGroup(), groups) == true) && (copyTree->tree[lc].getBranchLength() != -1)) {
-							UniqueBL += copyTree->tree[lc].getBranchLength();
-							totalBL += copyTree->tree[lc].getBranchLength(); 
+							UniqueBL += abs(copyTree->tree[lc].getBranchLength());
+							totalBL += abs(copyTree->tree[lc].getBranchLength()); 
 						}
 					}
 			
@@ -332,11 +332,11 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 				//if i's children are from the same group then i's pcount size will be 1 
 				//if copyIpcount.size() = 0 they are from a branch that is entirely from a group the user doesn't want
 				if (copyIpcount.size() == 0) { }
-				else if ((copyTree->tree[i].getBranchLength() != -1) && (copyIpcount.size() == 1)) {  UniqueBL += copyTree->tree[i].getBranchLength();	}
+				else if ((copyTree->tree[i].getBranchLength() != -1) && (copyIpcount.size() == 1)) {  abs(UniqueBL += copyTree->tree[i].getBranchLength());	}
 			
 				//add i's BL to total if it is from the groups the user wants
 				if ((copyTree->tree[i].getBranchLength() != -1) && (copyIpcount.size() != 0)) {  
-					totalBL += copyTree->tree[i].getBranchLength(); 
+					totalBL += abs(copyTree->tree[i].getBranchLength()); 
 				}
 			
 				/**********************************************************************/
@@ -346,16 +346,16 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 				if (copyTree->tree[rc].getRChild() == -1) {
 					//if rc is a valid group and rc has a BL
 					if ((inUsersGroups(copyTree->tree[rc].getGroup(), groups) == true) && (copyTree->tree[rc].getBranchLength() != -1)) {
-						UniqueBL += copyTree->tree[rc].getBranchLength();
-						totalBL += copyTree->tree[rc].getBranchLength(); 
+						UniqueBL += abs(copyTree->tree[rc].getBranchLength());
+						totalBL += abs(copyTree->tree[rc].getBranchLength()); 
 					}
 				}
 			
 				if (copyTree->tree[lc].getLChild() == -1) {
 					//if lc is a valid group and lc has a BL
 					if ((inUsersGroups(copyTree->tree[lc].getGroup(), groups) == true) && (copyTree->tree[lc].getBranchLength() != -1)) {
-						UniqueBL += copyTree->tree[lc].getBranchLength();
-						totalBL += copyTree->tree[lc].getBranchLength(); 
+						UniqueBL += abs(copyTree->tree[lc].getBranchLength());
+						totalBL += abs(copyTree->tree[lc].getBranchLength()); 
 					}
 				}
 			

@@ -39,14 +39,14 @@ EstOutput Weighted::getValues(Tree* t) {
 							
 						//if you have a BL
 						if(t->tree[index].getBranchLength() != -1){
-							sum += t->tree[index].getBranchLength();
+							sum += abs(t->tree[index].getBranchLength());
 						}
 						index = t->tree[index].getParent();
 					}
 						
 					//get last breanch length added
 					if(t->tree[index].getBranchLength() != -1){
-						sum += t->tree[index].getBranchLength();
+						sum += abs(t->tree[index].getBranchLength());
 					}
 						
 					//is this sum from a sequence which is in one of the users groups
@@ -85,7 +85,7 @@ EstOutput Weighted::getValues(Tree* t) {
 						u -= (double) t->tree[i].pcount[globaldata->Groups[l]] / (double) tmap->seqsPerGroup[globaldata->Groups[l]];
 					}
 						
-					u = abs(u) * t->tree[i].getBranchLength();
+					u = abs(u * t->tree[i].getBranchLength());
 					
 					//save groupcombs u value
 					WScore[globaldata->Groups[b]+globaldata->Groups[l]] += u;
@@ -142,14 +142,14 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 							
 				//if you have a BL
 				if(t->tree[index].getBranchLength() != -1){
-					sum += t->tree[index].getBranchLength();
+					sum += abs(t->tree[index].getBranchLength());
 				}
 				index = t->tree[index].getParent();
 			}
 						
 			//get last breanch length added
 			if(t->tree[index].getBranchLength() != -1){
-				sum += t->tree[index].getBranchLength();
+				sum += abs(t->tree[index].getBranchLength());
 			}
 						
 			if ((t->tree[v].getGroup() == groupA) || (t->tree[v].getGroup() == groupB)) {
@@ -177,7 +177,7 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 				u -= (double) t->tree[i].pcount[groupB] / (double) tmap->seqsPerGroup[groupB];
 			}
 						
-			u = abs(u) * t->tree[i].getBranchLength();
+			u = abs(u * t->tree[i].getBranchLength());
 					
 			//save groupcombs u value
 			WScore[(groupA+groupB)] += u;
