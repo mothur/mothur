@@ -40,20 +40,19 @@ int UnifracUnweightedCommand::execute() {
 		userData.resize(numComp,0);  //data[0] = unweightedscore 
 		randomData.resize(numComp,0); //data[0] = unweightedscore
 		//create new tree with same num nodes and leaves as users
-				
+		
+		outSum << "Tree#" << '\t' << "Groups" << '\t'  <<  "UWScore" <<'\t' << "UWSig" <<  endl;
+		cout << "Tree#" << '\t' << "Groups" << '\t'  <<  "UWScore" << '\t' << "UWSig" <<  endl;
+		
 		//get pscores for users trees
 		for (int i = 0; i < T.size(); i++) {
 			counter = 0;
 			unweightedFile = globaldata->getTreeFile()  + toString(i+1) + ".unweighted";
 			unweightedFileout = globaldata->getTreeFile() + "temp." + toString(i+1) + ".unweighted";
 			
-			//column headers
-//			outSum << "Tree# " << i+1 << endl;
-			outSum << "Tree#" << '\t' << "Groups" << '\t'  <<  "UWScore" <<'\t' << "UWSig" <<  endl;
-//			cout << "Tree# " << i+1 << endl;
-			cout << "Tree#" << '\t' << "Groups" << '\t'  <<  "UWScore" << '\t' << "UWSig" <<  endl;
-
-
+			outSum << i+1 << '\t';
+			cout << i+1 << '\t';
+			
 			//get unweighted for users tree
 			rscoreFreq.resize(numComp);  
 			rCumul.resize(numComp);  
