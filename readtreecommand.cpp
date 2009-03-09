@@ -43,8 +43,11 @@ ReadTreeCommand::~ReadTreeCommand(){
 
 int ReadTreeCommand::execute(){
 	try {
-	
-		read->read(); 
+		int readOk;
+		
+		readOk = read->read(); 
+		
+		if (readOk != 0) { cout << "Read Terminated." << endl; globaldata->gTree.clear(); delete globaldata->gTreemap; return 0; }
 		
 		vector<Tree*> T = globaldata->gTree;
 		
@@ -52,6 +55,7 @@ int ReadTreeCommand::execute(){
 		for (int i = 0; i < T.size(); i++) {
 			T[i]->assembleTree();
 		}
+
 		return 0;
 	}
 	catch(exception& e) {

@@ -11,6 +11,8 @@
 
 #include "command.hpp"
 #include "readmatrix.hpp"
+#include "fullmatrix.h"
+#include "groupmap.h"
 
 /* The read.dist command is used to read a distance matrix file.  
 The read.dist command parameter options are phylipfile, columnfile, namefile, cutoff and precision. 
@@ -33,6 +35,8 @@ private:
 	double cutoff;
 	int precision;
 	ReadMatrix* read;
+	FullMatrix* matrix;
+	GroupMap* groupMap;
 	string filename, format, method;
 	NameAssignment* nameMap;
 };

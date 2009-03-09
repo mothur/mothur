@@ -32,12 +32,12 @@ int ReadTree::readSpecialChar(istream& f, char c, string name) {
 		char d = f.get();
 	
 		if(d == EOF){
-			cerr << "Error: Input file ends prematurely, expecting a " << name << "\n";
-			exit(1);
+			cerr << "Error: Input file ends prematurely, expecting a " << name << "\n";  return -1;
+			//exit(1);
 		}
 		if(d != c){
-			cerr << "Error: Expected " << name << " in input file.  Found " << d << ".\n";
-			exit(1);
+			cerr << "Error: Expected " << name << " in input file.  Found " << d << ".\n";  return -1;
+			//exit(1);
 		}
 		if(d == ')' && f.peek() == '\n'){
 			gobble(f);
@@ -62,8 +62,8 @@ int ReadTree::readNodeChar(istream& f) {
 		char d = f.get();
 
 		if(d == EOF){
-			cerr << "Error: Input file ends prematurely, expecting a left parenthesis\n";
-			exit(1);
+			cerr << "Error: Input file ends prematurely, expecting a left parenthesis\n";  return -1;
+			//exit(1);
 		}
 		return d;
 	}
@@ -84,8 +84,8 @@ float ReadTree::readBranchLength(istream& f) {
 		float b;
 	
 		if(!(f >> b)){
-			cerr << "Error: Missing branch length in input tree.\n";
-			exit(1);
+			cerr << "Error: Missing branch length in input tree.\n";  return -1;
+			//exit(1);
 		}
 		gobble(f);
 		return b;
@@ -111,9 +111,9 @@ float ReadTree::readBranchLength(istream& f) {
 /***********************************************************************/
 //This class reads a file in Newick form and stores it in a tree.
 
-void ReadNewickTree::read() {
+int ReadNewickTree::read() {
 	try {
-		int c;
+		int c, error;
 		int comment = 0;
 		
 		//if you are not a nexus file 
@@ -124,7 +124,7 @@ void ReadNewickTree::read() {
 				numNodes = T->getNumNodes();
 				numLeaves = T->getNumLeaves();
 				
-				readTreeString(); 
+				error = readTreeString(); 
 				
 				//save trees for later commands
 				globaldata->gTree.push_back(T); 
@@ -158,12 +158,13 @@ void ReadNewickTree::read() {
 				numLeaves = T->getNumLeaves();
 				
 				//read tree info
-				readTreeString(); 
+				error = readTreeString(); 
 				 
 				//save trees for later commands
 				globaldata->gTree.push_back(T); 
 			}
 		}
+		return readOk;
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ReadNewickTree class Function read. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -221,11 +222,11 @@ void ReadNewickTree::nexusTranslation() {
 }
 
 /**************************************************************************************************/
-void ReadNewickTree::readTreeString() {
+int ReadNewickTree::readTreeString() {
 	try {
 		
 		int n = 0;
-		int lc, rc; 
+		int lc, rc, error; 
 		
 		int rooted = 0;
 	
@@ -235,9 +236,11 @@ void ReadNewickTree::readTreeString() {
 			n = numLeaves;  //number of leaves / sequences, we want node 1 to start where the leaves left off
 
 			lc = readNewickInt(filehandle, n, T);
+			if (lc == -1) { return -1; } //reports an error in reading
 		
 			if(filehandle.peek()==','){							
-				readSpecialChar(filehandle,',',"comma");
+				error = readSpecialChar(filehandle,',',"comma");
+				if (error == -1) { readOk = -1; return -1; }
 			}
 			// ';' means end of tree.												
 			else if((ch=filehandle.peek())==';' || ch=='['){		
@@ -245,8 +248,10 @@ void ReadNewickTree::readTreeString() {
 			}												
 			if(rooted != 1){								
 				rc = readNewickInt(filehandle, n, T);
+				if (rc == -1) { return -1; } //reports an error in reading
 				if(filehandle.peek() == ')'){					
-					readSpecialChar(filehandle,')',"right parenthesis");
+					error = readSpecialChar(filehandle,')',"right parenthesis");
+					if (error == -1) { readOk = -1; return -1; }
 				}											
 			}												
 		}
@@ -261,7 +266,8 @@ void ReadNewickTree::readTreeString() {
 
 			if(n!=0){
 				cerr << "Internal error: The only taxon is not taxon 0.\n";
-				exit(1);
+				//exit(1);
+				readOk = -1; return -1;
 			}
 			lc = rc = -1;
 		} 
@@ -274,6 +280,7 @@ void ReadNewickTree::readTreeString() {
 			if(lc!=-1){		T->tree[lc].setParent(n);		}
 			if(rc!=-1){		T->tree[rc].setParent(n);		}
 		}
+		return 0;
 	
 	}
 	catch(exception& e) {
@@ -290,21 +297,31 @@ void ReadNewickTree::readTreeString() {
 
 int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 	try {
+		int error;
+		
 		int c = readNodeChar(f);
+		if (c == -1) { readOk = -1; return -1; }
     
 		if(c == '('){
 			int lc = readNewickInt(f, n, T);
-			readSpecialChar(f,',',"comma");
+			if (lc == -1) { return -1; } //reports an error in reading
+			error = readSpecialChar(f,',',"comma");
+			if (error == -1) { readOk = -1; return -1; }
 
-			int rc = readNewickInt(f, n, T);		
+			int rc = readNewickInt(f, n, T);
+			if (rc == -1) { return -1; }  //reports an error in reading	
 			if(f.peek()==')'){	
-				readSpecialChar(f,')',"right parenthesis");					
+				error = readSpecialChar(f,')',"right parenthesis");	
+				if (error == -1) { readOk = -1; return -1; }				
 			}			
 		
 			if(f.peek() == ':'){									      
-				readSpecialChar(f,':',"colon");							
-				if(n >= numNodes){	cerr << "Error: Too many nodes in input tree\n";  exit(1); }
-				T->tree[n].setBranchLength(readBranchLength(f));
+				error = readSpecialChar(f,':',"colon");	
+				if (error == -1) { readOk = -1; return -1; }						
+				if(n >= numNodes){	cerr << "Error: Too many nodes in input tree\n";  readOk = -1; return -1; }
+				error = readBranchLength(f);
+				if (error == -1) { readOk = -1; return -1; }
+				T->tree[n].setBranchLength(error);
 			}else{T->tree[n].setBranchLength(0.0); }						
 		
 			T->tree[n].setChildren(lc,rc);
@@ -334,7 +351,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 			
 			//adds sequence names that are not in group file to the "xxx" group
 			if(n1 == -1) {
-				cerr << "Name: " << name << " not found in your groupfile.. \n"; exit(1);
+				cerr << "Name: " << name << " not found in your groupfile. \n"; readOk = -1; return n1;
 				
 				//globaldata->gTreemap->namesOfSeqs.push_back(name);
 				//globaldata->gTreemap->treemap[name].groupname = "xxx";
@@ -360,8 +377,10 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 			T->tree[n1].setChildren(-1,-1);
 		
 			if(blen == 1){	
-				f.get();		
-				T->tree[n1].setBranchLength(readBranchLength(f));
+				f.get();
+				error = readBranchLength(f);	
+				if (error == -1) { readOk = -1; return -1; }	
+				T->tree[n1].setBranchLength(error);
 			}else{
 				T->tree[n1].setBranchLength(0.0);
 			}

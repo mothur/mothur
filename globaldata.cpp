@@ -185,6 +185,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 		
 		//set format for shared
 		if ((listfile != "") && (groupfile != "")) { format = "shared"; }
+		if ((phylipfile != "") && (groupfile != "")) { format = "matrix"; }
 				
 		//input defaults for calculators
 		if (commandName == "collect.single") {

@@ -153,7 +153,7 @@ int HelpCommand::execute(){
 		cout << "The parsimony command should be in the following format: parsimony(random=yourOutputFilename, groups=yourGroups, iters=yourIters)." << "\n";
 		cout << "Example parsimony(random=out, iters=500)." << "\n";
 		cout << "The default value for random is "" (meaning you want to use the trees in your inputfile, randomtree=out means you just want the random distribution of trees outputted to out.rd_parsimony)," << "\n";
-		cout << "and iters is 1000.  The parsimony command output three files: .parsimony, .psummary and .pdistrib, their descriptions are in the manual." << "\n";
+		cout << "and iters is 1000.  The parsimony command output two files: .parsimony and .psummary their descriptions are in the manual." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. random), '=' and parameters (i.e.yourOutputFilename)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "unifrac.weighted") { 
 		cout << "The unifrac.weighted command can only be executed after a successful read.tree command." << "\n";
@@ -163,7 +163,7 @@ int HelpCommand::execute(){
 		cout << "The unifrac.weighted command should be in the following format: unifrac.weighted(groups=yourGroups, iters=yourIters)." << "\n";
 		cout << "Example unifrac.weighted(groups=A-B-C, iters=500)." << "\n";
 		cout << "The default value for groups is all the groups in your groupfile, and iters is 1000." << "\n";
-		cout << "The unifrac.weighted command output three files: .weighted, .wsummary and .wdistrib, their descriptions are in the manual." << "\n";
+		cout << "The unifrac.weighted command output two files: .weighted and .wsummary their descriptions are in the manual." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "unifrac.unweighted") { 
 		cout << "The unifrac.unweighted command can only be executed after a successful read.tree command." << "\n";
@@ -173,7 +173,7 @@ int HelpCommand::execute(){
 		cout << "The unifrac.unweighted command should be in the following format: unifrac.unweighted(groups=yourGroups, iters=yourIters)." << "\n";
 		cout << "Example unifrac.unweighted(groups=A-B-C, iters=500)." << "\n";
 		cout << "The default value for groups is all the groups in your groupfile, and iters is 1000." << "\n";
-		cout << "The unifrac.unweighted command output three files: .unweighted, .uwsummary and .uwdistrib, their descriptions are in the manual." << "\n";
+		cout << "The unifrac.unweighted command output two files: .unweighted and .uwsummary their descriptions are in the manual." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "quit") {
 		cout << "The quit command will terminate Dotur and should be in the following format: " << "\n";

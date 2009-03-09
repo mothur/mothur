@@ -17,24 +17,31 @@ ReadDistCommand::ReadDistCommand(){
 		format = globaldata->getFormat();	
 		
 		if (format == "column") { read = new ReadColumnMatrix(filename); }	
-		else if (format == "phylip") { read = new ReadPhylipMatrix(filename); }	
-			
-		if(globaldata->getPrecision() != ""){
-			convert(globaldata->getPrecision(), precision);	
+		else if (format == "phylip") { read = new ReadPhylipMatrix(filename); }
+		else if (format == "matrix") { 
+				groupMap = new GroupMap(globaldata->getGroupFile());
+				groupMap->readMap();
+				globaldata->gGroupmap = groupMap;
 		}
 		
-		if(globaldata->getCutOff() != ""){
-			convert(globaldata->getCutOff(), cutoff);	
-			cutoff += (5 / (precision * 10.0));
-		}
-		read->setCutoff(cutoff);
+		if (format != "matrix" ) {
+			if(globaldata->getPrecision() != ""){
+				convert(globaldata->getPrecision(), precision);	
+			}
+		
+			if(globaldata->getCutOff() != ""){
+				convert(globaldata->getCutOff(), cutoff);	
+				cutoff += (5 / (precision * 10.0));
+			}
+			read->setCutoff(cutoff);
 	
-		if(globaldata->getNameFile() != ""){	
-			nameMap = new NameAssignment(globaldata->getNameFile());
-			nameMap->readMap(1,2);
-		}
-		else{
-			nameMap = NULL;
+			if(globaldata->getNameFile() != ""){	
+				nameMap = new NameAssignment(globaldata->getNameFile());
+				nameMap->readMap(1,2);
+			}
+			else{
+				nameMap = NULL;
+			}
 		}
 			
 	}
@@ -57,9 +64,17 @@ ReadDistCommand::~ReadDistCommand(){
 //**********************************************************************************************************************
 int ReadDistCommand::execute(){
 	try {
-		read->read(nameMap);
-		globaldata->setListVector(read->getListVector());
-		globaldata->setSparseMatrix(read->getMatrix());
+		
+		if (format == "matrix") {
+			ifstream in;
+			openInputFile(filename, in);
+			matrix = new FullMatrix(in); //reads the matrix file
+			globaldata->gMatrix = matrix; //save matrix for coverage commands
+		}else {
+			read->read(nameMap);
+			globaldata->setListVector(read->getListVector());
+			globaldata->setSparseMatrix(read->getMatrix());
+		}
 		return 0;
 	}
 	catch(exception& e) {

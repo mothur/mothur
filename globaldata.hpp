@@ -10,6 +10,7 @@ using namespace std;
 class ListVector;
 class SharedListVector;
 class SparseMatrix;
+class FullMatrix;
 class Tree;
 class OrderVector;
 class InputData;
@@ -29,6 +30,7 @@ public:
 	SharedListVector* gSharedList;
 	SAbundVector* sabund;
 	GroupMap* gGroupmap;
+	FullMatrix* gMatrix;
 	TreeMap* gTreemap;
 	string inputFileName, helpRequest, commandName;
 	bool allLines;
