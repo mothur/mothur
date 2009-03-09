@@ -15,13 +15,13 @@ ClusterCommand::ClusterCommand(){
 	try{
 		globaldata = GlobalData::getInstance();
 	
-		if(globaldata->getSparseMatrix() != NULL)	{	matrix = new SparseMatrix(*globaldata->getSparseMatrix());		}
+		if(globaldata->gSparseMatrix != NULL)	{	matrix = new SparseMatrix(*globaldata->gSparseMatrix);		}
 	//  Not sure if we want the address or an entire new memory allocation.  Might be nice to have new memory so data
 	//  doesn't need to be re-read, but then again, it could suck up a ton of memory.  Dunno.
 	//	if(globaldata->getSparseMatrix() != NULL)	{	matrix = globaldata->getSparseMatrix();		}
 	
-		if(globaldata->getListVector() != NULL){
-			list = new ListVector(*globaldata->getListVector());
+		if(globaldata->gListVector != NULL){
+			list = new ListVector(*globaldata->gListVector);
 			rabund = new RAbundVector(list->getRAbundVector());
 			//rabund->print(cout);
 		}
@@ -108,11 +108,8 @@ int ClusterCommand::execute(){
 		}
 		
 		//delete globaldata's copy of the sparsematrix and listvector to free up memory
-		SparseMatrix* clearM = NULL;
-		globaldata->setSparseMatrix(clearM);
-		ListVector* clearL = NULL;
-		globaldata->setListVector(clearL);
-
+		delete globaldata->gSparseMatrix;  globaldata->gSparseMatrix = NULL;
+		delete globaldata->gListVector;	 globaldata->gListVector = NULL;
 		
 		//saves .list file so you can do the collect, rarefaction and summary commands without doing a read.list
 		if (globaldata->getFormat() == "phylip") { globaldata->setPhylipFile(""); }

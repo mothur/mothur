@@ -367,8 +367,8 @@ bool ErrorCheck::checkInput(string input) {
 		}
 		
 		//are you trying to cluster before you have read something			
-		if (((commandName == "cluster") && (globaldata->getSparseMatrix() == NULL)) ||
-			((commandName == "cluster") && (globaldata->getListVector() == NULL))) {
+		if (((commandName == "cluster") && (globaldata->gSparseMatrix == NULL)) ||
+			((commandName == "cluster") && (globaldata->gListVector == NULL))) {
 				cout << "Before you use the cluster command, you first need to read in a distance matrix." << endl; 
 				errorFree = false;
 		} 

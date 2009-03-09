@@ -21,8 +21,8 @@ class SAbundVector;
 class GlobalData {
 public:
 	static GlobalData* getInstance();
-	ListVector* getListVector();
-	SparseMatrix* getSparseMatrix();
+	ListVector* gListVector;
+	SparseMatrix* gSparseMatrix;
 	InputData* ginput;
 	OrderVector* gorder;
 	ListVector* glist;
@@ -72,9 +72,6 @@ public:
 	void setGroups(string);
 	void setCalc(string);
 
-	
-	void setListVector(ListVector*);
-	void setSparseMatrix(SparseMatrix*);
 	void clear(); 
 	void clearLabels();
 	void clearAbund();
@@ -90,8 +87,6 @@ private:
 	void operator=( const GlobalData& ); // Disable assignment operator
 	GlobalData();
 	~GlobalData();
-	ListVector* gListVector;
-	SparseMatrix* gSparseMatrix;
 	void reset();	//clears all non filename parameters
 	
 	

@@ -17,50 +17,6 @@ GlobalData* GlobalData::getInstance() {
 /*******************************************************/
 
 /******************************************************/
-
-ListVector* GlobalData::getListVector()		{	return gListVector;		}
-/*******************************************************/
-
-/******************************************************/
-void GlobalData::setListVector(ListVector* lv){
-	try {
-		if(gListVector != NULL){	delete gListVector;	}
-		gListVector = new ListVector(*lv);
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the GlobalData class Function setListVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the GlobalData class function setListVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-}
-/*******************************************************/
-
-/******************************************************/
-
-SparseMatrix* GlobalData::getSparseMatrix()	{	return gSparseMatrix;	}
-/*******************************************************/
-
-/******************************************************/
-void GlobalData::setSparseMatrix(SparseMatrix* sm){
-	try{
-		if(gSparseMatrix != NULL){	delete gSparseMatrix;	}
-		gSparseMatrix = new SparseMatrix(*sm);
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the GlobalData class Function setSparseMatrix. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the GlobalData class function setSparseMatrix. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-}
-/*******************************************************/
-
-/******************************************************/
 //This function parses through the option string of the command to remove its parameters
 void GlobalData::parseGlobalData(string commandString, string optionText){
 	try {
