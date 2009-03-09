@@ -16,6 +16,7 @@ FullMatrix::FullMatrix(ifstream& filehandle) {
 		globaldata = GlobalData::getInstance();
 		groupmap = globaldata->gGroupmap;
 		
+		float minSoFar = 0.0;
 		string name, group;
 		filehandle >> numSeqs >> name;
 		
@@ -39,9 +40,18 @@ FullMatrix::FullMatrix(ifstream& filehandle) {
 			if(isalnum(d)){ 
 				square = true;
 				filehandle.putback(d);
-				for(int i=0;i<numSeqs;i++){
-					filehandle >> matrix[0][i];
+				
+				if (numSeqs >= 2) {
+					//save first distance that is not distance to itself as minimum
+					filehandle >> matrix[0][0] >> minSoFar;
+					matrix[0][1] = minSoFar;
 				}
+				
+				for(int i=2;i<numSeqs;i++){
+					filehandle >> matrix[0][i];
+					if (matrix[0][i] < minSoFar) { minSoFar = matrix[0][i]; }
+				}
+				index[0].minDist = minSoFar;
 				break;
 			}
 			
@@ -77,7 +87,8 @@ void FullMatrix::readSquareMatrix(ifstream& filehandle) {
 		reading = new Progress("Reading matrix:    ", numSeqs * numSeqs);
 		
 		int count = 0;
-		float distance;
+		float distance, minSoFar;
+		minSoFar = 0.0;
 		string group, name;
 		
 		for(int i=1;i<numSeqs;i++){
@@ -87,15 +98,23 @@ void FullMatrix::readSquareMatrix(ifstream& filehandle) {
 			index[i].groupname = group;
 			index[i].seqName = name;
 			
+			filehandle >> minSoFar;
+			matrix[i][0] = minSoFar;
+			
 			if(group == "not found") {	cout << "Error: Sequence '" << name << "' was not found in the group file, please correct." << endl; exit(1); }
 				
-			for(int j=0;j<numSeqs;j++){
+			for(int j=1;j<numSeqs;j++){
 				filehandle >> distance;
+				
+				if ((distance < minSoFar) && (i != j)) { minSoFar = distance; }
 					
 				matrix[i][j] = distance;
 				count++;
 				reading->update(count);
 			}
+			
+			//save minimum value for each row
+			index[i].minDist = minSoFar;
 		}
 		reading->finish();
 		delete reading;
@@ -117,7 +136,9 @@ void FullMatrix::readLTMatrix(ifstream& filehandle) {
 		reading = new Progress("Reading matrix:    ", numSeqs * (numSeqs - 1) / 2);
 		
 		int count = 0;
-		float distance;
+		float distance, minSoFar;
+		minSoFar = 0.0;
+
 		string group, name;
 		
 		for(int i=1;i<numSeqs;i++){
@@ -126,16 +147,24 @@ void FullMatrix::readLTMatrix(ifstream& filehandle) {
 			group = groupmap->getGroup(name);
 			index[i].groupname = group;
 			index[i].seqName = name;
+			
+			filehandle >> minSoFar;
+			matrix[i][0] = minSoFar;
 	
 			if(group == "not found") {	cout << "Error: Sequence '" << name << "' was not found in the group file, please correct." << endl;  exit(1); }
 				
-			for(int j=0;j<i;j++){
+			for(int j=1;j<i;j++){
 				filehandle >> distance;
+				
+				if (distance < minSoFar)  { minSoFar = distance; }
 					
 				matrix[i][j] = distance;  matrix[j][i] = distance;
 				count++;
 				reading->update(count);
 			}
+			
+			//save minimum value for each row
+			index[i].minDist = minSoFar;
 		}
 		reading->finish();
 		delete reading;
