@@ -175,11 +175,11 @@ void UnifracWeightedCommand::printWSummaryFile() {
 		for (int i = 0; i < T.size(); i++) { 
 			for (int j = 0; j < numComp; j++) {
 				if (WScoreSig[count] > (1/(float)iters)) {
-					outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << WScoreSig[count] << endl; 
-					cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << WScoreSig[count] << endl; 
+					outSum << setprecision(6) << i+1 << '\t' << '\t' << groupComb[j] << '\t' << '\t'  << utreeScores[count] << '\t' << setprecision(globaldata->getIters().length()) << WScoreSig[count] << endl; 
+					cout << setprecision(6) << i+1 << '\t' << '\t' << groupComb[j] << '\t' << '\t'  << utreeScores[count] << '\t' << setprecision(globaldata->getIters().length()) << WScoreSig[count] << endl; 
 				}else{
-					outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << "<" << (1/float(iters)) << endl; 
-					cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << "<" << (1/float(iters)) << endl; 
+					outSum << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << setprecision(globaldata->getIters().length()) << "<" << (1/float(iters)) << endl; 
+					cout << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << setprecision(globaldata->getIters().length()) << "<" << (1/float(iters)) << endl; 
 				}
 				count++;
 			}
@@ -366,11 +366,12 @@ void UnifracWeightedCommand::output(vector<double> data){
 		if(counter != 0){		
 			string inputBuffer;
 			getline(inFile, inputBuffer);
-			
-			out	<<  inputBuffer << setprecision(globaldata->getIters().length()-1) << '\t' << data[1] << '\t' << data[2] << endl;
+
+			out << inputBuffer << '\t' << setprecision(6) << data[0] << setprecision(globaldata->getIters().length())  << '\t' << data[1] << '\t' << data[2] << endl;
 		}
 		else{
-			out << setprecision(6) << data[0] << setprecision(globaldata->getIters().length()-1) << '\t' << data[1] << '\t' << data[2] << endl;
+			out << setprecision(6) << data[0] << setprecision(globaldata->getIters().length())  << '\t' << data[1] << '\t' << data[2] << endl;
+
 		}
 		
 	}

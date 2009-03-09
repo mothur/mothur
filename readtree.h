@@ -27,7 +27,7 @@ class ReadTree {
 		ReadTree(); 
 		~ReadTree() {};
 		
-		virtual void read() {};
+		virtual int read() = 0;
 		int readSpecialChar(istream&, char, string);
 		int readNodeChar(istream& f);
 		float readBranchLength(istream& f);
@@ -36,6 +36,7 @@ class ReadTree {
 		GlobalData* globaldata;
 		int numNodes, numLeaves;
 		
+		
 };
 
 /****************************************************************************/
@@ -43,18 +44,20 @@ class ReadTree {
 class ReadNewickTree : public ReadTree {
 	
 public:
-	ReadNewickTree(string file) : treeFile(file) { openInputFile(file, filehandle); } 
+	ReadNewickTree(string file) : treeFile(file) { openInputFile(file, filehandle); readOk = 0; } 
 	~ReadNewickTree() {};
-	void read();
+	int read();
 	
 private:
 	Tree* T;
 	int readNewickInt(istream&, int&, Tree*);
-	void readTreeString();
+	int readTreeString();
 	void nexusTranslation();
 	ifstream filehandle;
 	string treeFile;
 	string holder;
+	int readOk;  // readOk = 0 means success, readOk = 1 means errors.
+	
 };
 
 /****************************************************************************/

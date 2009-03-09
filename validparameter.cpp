@@ -18,7 +18,8 @@ ValidParameters::ValidParameters() {
 		parameters["column"]		= "column";
 		parameters["list"]			= "list"; 
 		parameters["rabund"]		= "rabund"; 
-		parameters["sabund"]		= "sabund"; 
+		parameters["sabund"]		= "sabund";
+		parameters["shared"]		= "shared";
 		parameters["name"]			= "name"; 
 		parameters["group"]			= "group"; 
 		parameters["order"]			= "order"; 

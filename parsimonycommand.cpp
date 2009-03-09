@@ -237,11 +237,11 @@ void ParsimonyCommand::printUSummaryFile() {
 		for (int i = 0; i< T.size(); i++) {
 			for(int a = 0; a < numComp; a++) {
 				if (UScoreSig[a][i] > (1/(float)iters)) {
-					outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << userTreeScores[a][i] << '\t' << UScoreSig[a][i] << endl;
-					cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << userTreeScores[a][i] << '\t' << UScoreSig[a][i] << endl;
+					outSum << setprecision(6) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << userTreeScores[a][i] << setprecision(globaldata->getIters().length()) << '\t' << UScoreSig[a][i] << endl;
+					cout << setprecision(6) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << userTreeScores[a][i] << setprecision(globaldata->getIters().length()) << '\t' << UScoreSig[a][i] << endl;
 				}else {
-					outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << userTreeScores[a][i] << '\t' << "<" << (1/float(iters)) << endl;
-					cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << userTreeScores[a][i] << '\t' << "<" << (1/float(iters)) << endl;
+					outSum << setprecision(6) << i+1 << '\t' << groupComb[a] << '\t' << userTreeScores[a][i] << setprecision(globaldata->getIters().length())  << '\t' << "<" << (1/float(iters)) << endl;
+					cout << setprecision(6) << i+1 << '\t' << groupComb[a] << '\t' << userTreeScores[a][i] << setprecision(globaldata->getIters().length()) << '\t' << "<" << (1/float(iters)) << endl;
 				}
 			}
 		}
@@ -431,16 +431,16 @@ void ParsimonyCommand::output(vector<double> data){
 			getline(inFile, inputBuffer);
 		
 			if (randomtree == "") {
-				out << inputBuffer << '\t' << setprecision(globaldata->getIters().length()) << data[0] << '\t' << data[1] << '\t' << data[2] << '\t' << data[3] << '\t' << data[4] << endl;
+				out << inputBuffer << '\t' << setprecision(6) << data[0] << setprecision(globaldata->getIters().length())  << '\t' << data[1] << '\t' << data[2] << '\t' << data[3] << '\t' << data[4] << endl;
 			}else{
-				out << inputBuffer << '\t' << setprecision(globaldata->getIters().length()) << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
+				out << inputBuffer << '\t' << setprecision(6) << data[0] << setprecision(globaldata->getIters().length())  << '\t' << data[1] << '\t' << data[2] << endl;
 			}
 		}
 		else{
 			if (randomtree == "") {
-				out << setprecision(globaldata->getIters().length()) << data[0] << '\t' << data[1] << '\t' << data[2] << '\t' << data[3] << '\t' << data[4] << endl;
+				out << setprecision(6) << data[0] << setprecision(globaldata->getIters().length())  << '\t' << data[1] << '\t' << data[2] << '\t' << data[3] << '\t' << data[4] << endl;
 			}else{
-				out << setprecision(globaldata->getIters().length()) << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
+				out << setprecision(6) << data[0] << setprecision(globaldata->getIters().length())  << '\t' << data[1] << '\t' << data[2] << endl;
 			}
 		}
 

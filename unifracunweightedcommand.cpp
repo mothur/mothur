@@ -165,15 +165,14 @@ void UnifracUnweightedCommand::printUWSummaryFile() {
 		outSum.setf(ios::fixed, ios::floatfield); outSum.setf(ios::showpoint);
 			
 		//print each line
-		for (int i = 0; i< T.size(); i++) {
-			for(int a = 0; a < numComp; a++) {
-				if (UWScoreSig[a][i] > (1/(float)iters)) {
-					outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << utreeScores[a][i] << '\t' << UWScoreSig[a][i] << endl;
-					cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << utreeScores[a][i] << '\t' << UWScoreSig[a][i] << endl;
-				}else {
-					outSum << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << utreeScores[a][i] << '\t' << "<" << (1/float(iters)) << endl;
-					cout << setprecision(globaldata->getIters().length()) << i+1 << '\t' << groupComb[a] << '\t' << utreeScores[a][i] << '\t' << "<" << (1/float(iters)) << endl;
-				}
+
+		for(int a = 0; a < numComp; a++) {
+			if (UWScoreSig[a][0] > (1/(float)iters)) {
+				outSum << setprecision(6) << groupComb[a] << '\t' << '\t' << utreeScores[a][0] << '\t' << setprecision(globaldata->getIters().length()) << UWScoreSig[a][0] << endl;
+				cout << setprecision(6)  << groupComb[a] << '\t' << '\t' << utreeScores[a][0] << '\t' << setprecision(globaldata->getIters().length()) << UWScoreSig[a][0] << endl; 
+			}else {
+				outSum << setprecision(6) << groupComb[a] << '\t' << '\t' << utreeScores[a][0] << '\t' << setprecision(globaldata->getIters().length()) << "<" << (1/float(iters)) << endl;
+				cout << setprecision(6)  << groupComb[a] << '\t' << '\t' << utreeScores[a][0] << '\t' << setprecision(globaldata->getIters().length()) << "<" << (1/float(iters)) << endl; 
 			}
 		}
 		
@@ -303,10 +302,10 @@ void UnifracUnweightedCommand::output(vector<double> data){
 			getline(inFile, inputBuffer);
 //			out	<<  inputBuffer << setprecision(6) << '\t' << data[0] << setprecision(globaldata->getIters().length()) << '\t' << data[1] << '\t' << data[2] << endl;
 		
-			out	<<  inputBuffer << setprecision(globaldata->getIters().length()-1) << '\t' << data[1] << '\t' << data[2] << endl;
+			out << inputBuffer << '\t' << setprecision(6) << data[0] << setprecision(globaldata->getIters().length())  << '\t' << data[1] << '\t' << data[2] << endl;
 		}
 		else{
-			out << setprecision(6) << data[0] << setprecision(globaldata->getIters().length()-1) << '\t' << data[1] << '\t' << data[2] << endl;
+			out << setprecision(6) << data[0] << setprecision(globaldata->getIters().length())  << '\t' << data[1] << '\t' << data[2] << endl;
 		}
 
 	}
