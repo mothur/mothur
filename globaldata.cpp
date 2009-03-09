@@ -20,7 +20,6 @@ GlobalData* GlobalData::getInstance() {
 //This function parses through the option string of the command to remove its parameters
 void GlobalData::parseGlobalData(string commandString, string optionText){
 	try {
-		allLines = 1;
 		commandName = commandString; //save command name to be used by other classes
 		
 		//set all non filename paramters to default
@@ -32,6 +31,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			gGroupmap = NULL;
 			gTree.clear();
 			labels.clear(); lines.clear(); groups.clear();
+			allLines = 1;
 		}
 		
 		//saves help request
@@ -122,16 +122,17 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				lines.clear();
 				line = value;
 				label = "";
-				splitAtDash(value, lines);
-				allLines = 0;
+				if (line != "all") {  splitAtDash(value, lines);  allLines = 0;  }
+				else { allLines = 1;  }
 			}
 			if (key == "label") {//stores lines to be used in a vector
 				labels.clear();
 				label = value;
 				line = "";
-				splitAtDash(value, labels);
-				allLines = 0;
+				if (label != "all") {  splitAtDash(value, labels);  allLines = 0;  }
+				else { allLines = 1;  }
 			}
+			
 			if (key == "groups") {//stores groups to be used in a vector
 					Groups.clear();
 					groups = value;
@@ -274,8 +275,6 @@ void GlobalData::reset() {
 	cutoff			=	"10.00";
 	precision		=	"100";
 	iters			=	"1000"; 
-	line			=   "";
-	label			=	"";
 	groups			=	"";
 	jumble			=	"1";	//0 means don't jumble, 1 means jumble.
 	randomtree		=	"";  //"" means user will enter some user trees, "outputfile" means they just want the random tree distribution to be outputted to outputfile.

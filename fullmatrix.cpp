@@ -27,7 +27,8 @@ FullMatrix::FullMatrix(ifstream& filehandle) {
 		
 		group = groupmap->getGroup(name);
 		if(group == "not found") {	cout << "Error: Sequence '" << name << "' was not found in the group file, please correct." << endl; exit(1); }
-		index[0] = group; 
+		index[0].groupname = group; 
+		index[0].seqName = name;
 		
 		//determine if matrix is square or lower triangle
 		//if it is square read the distances for the first sequence
@@ -59,7 +60,7 @@ FullMatrix::FullMatrix(ifstream& filehandle) {
 		
 	printMatrix(cout);
 		//sort sequences so they are gathered in groups for processing
-		sortGroups();
+		sortGroups(0, numSeqs-1);
 		cout << "after sort" << endl;
 	printMatrix(cout);
 		
@@ -88,7 +89,8 @@ void FullMatrix::readSquareMatrix(ifstream& filehandle) {
 			filehandle >> name;		
 			
 			group = groupmap->getGroup(name);
-			index[i] = group;
+			index[i].groupname = group;
+			index[i].seqName = name;
 			
 			if(group == "not found") {	cout << "Error: Sequence '" << name << "' was not found in the group file, please correct." << endl; exit(1); }
 				
@@ -127,7 +129,8 @@ void FullMatrix::readLTMatrix(ifstream& filehandle) {
 			filehandle >> name;		
 						
 			group = groupmap->getGroup(name);
-			index[i] = group;
+			index[i].groupname = group;
+			index[i].seqName = name;
 	
 			if(group == "not found") {	cout << "Error: Sequence '" << name << "' was not found in the group file, please correct." << endl;  exit(1); }
 				
@@ -154,12 +157,66 @@ void FullMatrix::readLTMatrix(ifstream& filehandle) {
 }
 
 /**************************************************************************/
-void FullMatrix::sortGroups(){
+void FullMatrix::sortGroups(int low, int high){
 	try{
-		//sort each row by group and when you do, swap rows too.
-		for (int i = 0; i < numSeqs; i++) {
-			quicksort(0, numSeqs-1, i);
-		}
+	
+		int i = low;
+		int j = high;
+		int y = 0;
+		string name;
+		
+		/* compare value */
+		//what group does this row belong to
+		string z = index[(low + high) / 2].groupname;
+
+		/* partition */
+		do {
+			/* find member above ... */
+			while(index[i].groupname < z) i++;
+
+			/* find element below ... */
+			while(index[j].groupname > z) j--;
+			
+			if(i <= j) {
+				/* swap rows*/
+				for (int h = 0; h < numSeqs; h++) {
+					y = matrix[i][h];
+					matrix[i][h] = matrix[j][h]; 
+					matrix[j][h] = y;
+				}
+				
+				/* swap columns*/
+				for (int b = 0; b < numSeqs; b++) {
+					y = matrix[b][i];
+					matrix[b][i] = matrix[b][j]; 
+					matrix[b][j] = y;
+				}
+				
+				//swap map elements
+				z = index[i].groupname;
+				index[i].groupname = index[j].groupname;
+				index[j].groupname = z;
+				
+				name = index[i].seqName;
+				index[i].seqName = index[j].seqName;
+				index[j].seqName = name;
+
+				
+				i++; 
+				j--;
+cout << "swapping rows " << i << " " << j << endl;
+printMatrix(cout); cout << endl;
+			}
+		} while(i <= j);
+
+		/* recurse */
+		if(low < j) 
+		sortGroups(low, j);
+
+		if(i < high) 
+		sortGroups(i, high); 
+
+	
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the FullMatrix class Function sortGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -171,66 +228,6 @@ void FullMatrix::sortGroups(){
 	}
 
 }
-/**************************************************************************/
-//this is a version of quicksort taken from http://www.c.happycodings.com/Sorting_Searching/code13.html
-/* sort everything inbetween `low' <-> `high' */
-void FullMatrix::quicksort(int low, int high, int row) {
-	try {
-		int i = low;
-		int j = high;
-		int y = 0;
-		
-		/* compare value */
-		//what group does this row belong to
-		string z = index[(low + high) / 2];
-
-		/* partition */
-		do {
-			/* find member above ... */
-			while(index[i] < z) i++;
-
-			/* find element below ... */
-			while(index[j] > z) j--;
-			
-			if(i <= j) {
-				/* swap two elements in row*/
-				y = matrix[row][i];
-				matrix[row][i] = matrix[row][j]; 
-				matrix[row][j] = y;
-				
-				/* swap two elements in column*/
-				y = matrix[i][row];
-				matrix[i][row] = matrix[j][row]; 
-				matrix[j][row] = y;
-				
-				//swap map elements
-				z = index[i];
-				index[i] = index[j];
-				index[j] = z;
-				
-				i++; 
-				j--;
-//cout << "swapping elements " << i << " " << j << endl;
-//printMatrix(cout); cout << endl;
-			}
-		} while(i <= j);
-
-		/* recurse */
-		if(low < j) 
-		quicksort(low, j, row);
-
-		if(i < high) 
-		quicksort(i, high, row); 
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the FullMatrix class Function quicksort. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the FullMatrix class function quicksort. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-}
 
 /**************************************************************************/	
 int FullMatrix::getNumSeqs(){ return numSeqs; }
@@ -239,7 +236,7 @@ int FullMatrix::getNumSeqs(){ return numSeqs; }
 void FullMatrix::printMatrix(ostream& out) {
 	try{
 		for (int i = 0; i < numSeqs; i++) {
-			out << "row " << i << " group = " << index[i] << endl;
+			out << "row " << i << " group = " << index[i].groupname << " name = " << index[i].seqName << endl;
 			for (int j = 0; j < numSeqs; j++) {
 				out << matrix[i][j] << " ";
 			}
