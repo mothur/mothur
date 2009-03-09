@@ -352,13 +352,12 @@ bool ErrorCheck::checkInput(string input) {
 			//you want to do shared commands
 			if ((listfile != "") && (groupfile != ""))	{
 				validateParseFiles(); //checks the listfile and groupfile parameters
-			}else { //you want to do single commands
+			}else if (listfile != "") { //you want to do single commands
 				validateReadFiles();
 				validateReadPhil();
+			}else {//you are reading a shared file
+				validateReadFiles();
 			}
-		}else if (commandName == "read.shared") { 
-			//you want to do shared commands with just the shared file
-			validateReadFiles();
 		}else if (commandName == "read.tree") { 
 			validateTreeFiles(); //checks the treefile and groupfile parameters
 		}else if (commandName == "deconvolute") {

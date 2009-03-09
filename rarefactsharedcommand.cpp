@@ -19,8 +19,6 @@ RareFactSharedCommand::RareFactSharedCommand(){
 		fileNameRoot = getRootName(globaldata->inputFileName);
 		format = globaldata->getFormat();
 		validCalculator = new ValidCalculators();
-		
-		setGroups();
 				
 		int i;
 		for (i=0; i<globaldata->Estimators.size(); i++) {
@@ -79,6 +77,9 @@ int RareFactSharedCommand::execute(){
 			SharedList = globaldata->gSharedList;
 			order = SharedList->getSharedOrderVector();
 		}
+		
+		//set users groups
+		setGroups();
 		
 		while(order != NULL){
 		
