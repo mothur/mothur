@@ -51,7 +51,7 @@ int UnifracWeightedCommand::execute() {
 			uScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
 			weightedFile = globaldata->getTreeFile()  + toString(i+1) + ".weighted";
 			weightedFileout = globaldata->getTreeFile() + "temp." + toString(i+1) + ".weighted";
-							
+
 			userData = weighted->getValues(T[i]);  //userData[0] = weightedscore
 			
 			//save users score

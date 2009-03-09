@@ -368,7 +368,9 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 	
 			data[count] = UW;
 		}
-
+		
+		delete copyTree;
+		
 		return data;
 	
 	}

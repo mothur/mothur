@@ -32,12 +32,12 @@ int ReadTree::readSpecialChar(istream& f, char c, string name) {
 		char d = f.get();
 	
 		if(d == EOF){
-			cerr << "Error: Input file ends prematurely, expecting a " << name << "\n";  return -1;
-			//exit(1);
+			cerr << "Error: Input file ends prematurely, expecting a " << name << "\n";
+			exit(1);
 		}
 		if(d != c){
-			cerr << "Error: Expected " << name << " in input file.  Found " << d << ".\n";  return -1;
-			//exit(1);
+			cerr << "Error: Expected " << name << " in input file.  Found " << d << ".\n";
+			exit(1);
 		}
 		if(d == ')' && f.peek() == '\n'){
 			gobble(f);
@@ -62,8 +62,8 @@ int ReadTree::readNodeChar(istream& f) {
 		char d = f.get();
 
 		if(d == EOF){
-			cerr << "Error: Input file ends prematurely, expecting a left parenthesis\n";  return -1;
-			//exit(1);
+			cerr << "Error: Input file ends prematurely, expecting a left parenthesis\n";
+			exit(1);
 		}
 		return d;
 	}
@@ -84,8 +84,8 @@ float ReadTree::readBranchLength(istream& f) {
 		float b;
 	
 		if(!(f >> b)){
-			cerr << "Error: Missing branch length in input tree.\n";  return -1;
-			//exit(1);
+			cerr << "Error: Missing branch length in input tree.\n";
+			exit(1);
 		}
 		gobble(f);
 		return b;
@@ -226,7 +226,7 @@ int ReadNewickTree::readTreeString() {
 	try {
 		
 		int n = 0;
-		int lc, rc, error; 
+		int lc, rc; 
 		
 		int rooted = 0;
 	
@@ -239,8 +239,7 @@ int ReadNewickTree::readTreeString() {
 			if (lc == -1) { return -1; } //reports an error in reading
 		
 			if(filehandle.peek()==','){							
-				error = readSpecialChar(filehandle,',',"comma");
-				if (error == -1) { readOk = -1; return -1; }
+				readSpecialChar(filehandle,',',"comma");
 			}
 			// ';' means end of tree.												
 			else if((ch=filehandle.peek())==';' || ch=='['){		
@@ -250,8 +249,7 @@ int ReadNewickTree::readTreeString() {
 				rc = readNewickInt(filehandle, n, T);
 				if (rc == -1) { return -1; } //reports an error in reading
 				if(filehandle.peek() == ')'){					
-					error = readSpecialChar(filehandle,')',"right parenthesis");
-					if (error == -1) { readOk = -1; return -1; }
+					readSpecialChar(filehandle,')',"right parenthesis");
 				}											
 			}												
 		}
@@ -297,31 +295,25 @@ int ReadNewickTree::readTreeString() {
 
 int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 	try {
-		int error;
-		
 		int c = readNodeChar(f);
-		if (c == -1) { readOk = -1; return -1; }
     
 		if(c == '('){
 			int lc = readNewickInt(f, n, T);
 			if (lc == -1) { return -1; } //reports an error in reading
-			error = readSpecialChar(f,',',"comma");
-			if (error == -1) { readOk = -1; return -1; }
+			readSpecialChar(f,',',"comma");
 
 			int rc = readNewickInt(f, n, T);
 			if (rc == -1) { return -1; }  //reports an error in reading	
 			if(f.peek()==')'){	
-				error = readSpecialChar(f,')',"right parenthesis");	
-				if (error == -1) { readOk = -1; return -1; }				
+				readSpecialChar(f,')',"right parenthesis");	
 			}			
 		
 			if(f.peek() == ':'){									      
-				error = readSpecialChar(f,':',"colon");	
-				if (error == -1) { readOk = -1; return -1; }						
+				readSpecialChar(f,':',"colon");	
+										
 				if(n >= numNodes){	cerr << "Error: Too many nodes in input tree\n";  readOk = -1; return -1; }
-				error = readBranchLength(f);
-				if (error == -1) { readOk = -1; return -1; }
-				T->tree[n].setBranchLength(error);
+				
+				T->tree[n].setBranchLength(readBranchLength(f));
 			}else{T->tree[n].setBranchLength(0.0); }						
 		
 			T->tree[n].setChildren(lc,rc);
@@ -378,9 +370,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 		
 			if(blen == 1){	
 				f.get();
-				error = readBranchLength(f);	
-				if (error == -1) { readOk = -1; return -1; }	
-				T->tree[n1].setBranchLength(error);
+				T->tree[n1].setBranchLength(readBranchLength(f));
 			}else{
 				T->tree[n1].setBranchLength(0.0);
 			}

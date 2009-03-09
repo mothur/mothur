@@ -17,8 +17,9 @@
 using namespace std;
 
 struct Names {
-	string	groupname;
+	string		groupname;
 	string		seqName;
+	float		minDist;
 };
 
 

@@ -65,6 +65,7 @@ int UnifracUnweightedCommand::execute() {
 			for(int k = 0; k < numComp; k++) {
 				//saves users score
 				utreeScores[k].push_back(userData[k]);
+
 			}
 			
 			//get unweighted scores for random trees
