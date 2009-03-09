@@ -56,14 +56,9 @@ FullMatrix::FullMatrix(ifstream& filehandle) {
 		if (square == true) { readSquareMatrix(filehandle); }
 		else { readLTMatrix(filehandle); }
 		
-		
-		
-	printMatrix(cout);
 		//sort sequences so they are gathered in groups for processing
 		sortGroups(0, numSeqs-1);
-		cout << "after sort" << endl;
-	printMatrix(cout);
-		
+			
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the FullMatrix class Function FullMatrix. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -204,8 +199,6 @@ void FullMatrix::sortGroups(int low, int high){
 				
 				i++; 
 				j--;
-cout << "swapping rows " << i << " " << j << endl;
-printMatrix(cout); cout << endl;
 			}
 		} while(i <= j);
 

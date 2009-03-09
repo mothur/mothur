@@ -105,6 +105,9 @@ int SummarySharedCommand::execute(){
 			order = SharedList->getSharedOrderVector();
 		}
 		
+		//set users groups
+		setGroups();
+		
 		//output estimator names as column headers
 		outputFileHandle << "label" <<'\t' << "comparison" << '\t'; 
 		for(int i=0;i<sumCalculators.size();i++){
@@ -112,9 +115,6 @@ int SummarySharedCommand::execute(){
 		}
 		outputFileHandle << endl;
 		
-		//set users groups
-		setGroups();
-
 		while(order != NULL){
 		
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(order->getLabel()) == 1){			
@@ -176,10 +176,10 @@ void SummarySharedCommand::getSharedVectors(){
 try {
 		lookup.clear();
 		//create and initialize vector of sharedvectors, one for each group
-		for (int i = 0; i < globaldata->gGroupmap->getNumGroups(); i++) { 
+		for (int i = 0; i < globaldata->Groups.size(); i++) { 
 			SharedRAbundVector* temp = new SharedRAbundVector(order->getNumBins());
 			temp->setLabel(order->getLabel());
-			temp->setGroup(globaldata->gGroupmap->namesOfGroups[i]);
+			temp->setGroup(globaldata->Groups[i]);
 			lookup.push_back(temp);
 		}
 		
@@ -199,14 +199,6 @@ try {
 				}
 			}
 		}
-		
-		//get rid of vectors from groups you don't want to analyze
-		for (int r = 0; r < lookup.size(); r++) { 
-			if (inUsersGroups(lookup[r]->getGroup(), globaldata->Groups) != true) {
-				lookup.erase(lookup.begin()+r);
-			}
-		}
-		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the SummarySharedCommand class Function getSharedVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
