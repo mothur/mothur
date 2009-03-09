@@ -66,11 +66,11 @@ try {
                 vector<SharedRAbundVector*> lookup; 
 
                 //create and initialize vector of sharedvectors, one for each group
-                for (int i = 0; i < globaldata->gGroupmap->getNumGroups(); i++) { 
+                for (int i = 0; i < globaldata->Groups.size(); i++) { 
                         SharedRAbundVector* temp = new SharedRAbundVector(sharedorder->getNumBins());
                         temp->setLabel(sharedorder->getLabel());
-                        temp->setGroup(globaldata->gGroupmap->namesOfGroups[i]);
-                        temp->setGroupIndex(globaldata->gGroupmap->groupIndex[globaldata->gGroupmap->namesOfGroups[i]]);
+                        temp->setGroup(globaldata->Groups[i]);
+                        temp->setGroupIndex(globaldata->gGroupmap->groupIndex[globaldata->Groups[i]]);
                         lookup.push_back(temp);
                 }
 
@@ -97,13 +97,14 @@ try {
                                         
                         //set info for sharedvector in chosens group
                         for (int j = 0; j < lookup.size(); j++) { 
-                                if (chosen.group == lookup[j]->getGroup()) {
-                                         abundance = lookup[j]->getAbundance(chosen.bin);
-                                         lookup[j]->set(chosen.bin, (abundance + 1), chosen.group);
-                                         break;
-                                }
+							if (chosen.group == lookup[j]->getGroup()) {
+								abundance = lookup[j]->getAbundance(chosen.bin);
+								lookup[j]->set(chosen.bin, (abundance + 1), chosen.group);
+								break;
+							}
                         }
                         
+	
                         //calculate at 0 and the given increment
                         if((i == 0) || (i+1) % increment == 0){
                                 //randomize group order
@@ -112,7 +113,7 @@ try {
                                 int n = 1;
                                 for (int k = 0; k < (lookup.size() - 1); k++) { // pass cdd each set of groups to commpare
                                         for (int l = n; l < lookup.size(); l++) {
-                                                ccd->updateSharedData(lookup[k], lookup[l], i+1, globaldata->gGroupmap->namesOfGroups.size());
+                                                ccd->updateSharedData(lookup[k], lookup[l], i+1, globaldata->Groups.size());
                                         }
                                         n++;
                                 }
@@ -126,7 +127,7 @@ try {
                         int n = 1;
                         for (int k = 0; k < (lookup.size() - 1); k++) { // pass cdd each set of groups to commpare
                                 for (int l = n; l < lookup.size(); l++) {
-                                        ccd->updateSharedData(lookup[k], lookup[l], totalNumSeq, globaldata->gGroupmap->namesOfGroups.size());
+                                        ccd->updateSharedData(lookup[k], lookup[l], totalNumSeq, globaldata->Groups.size());
                                 }
                                 n++;
                         }
@@ -151,19 +152,19 @@ try {
 /**************************************************************************************/
 
 void Collect::getGroupComb() {
-                string group;
+	string group;
                 
-                numGroupComb = 0;
+	numGroupComb = 0;
                 
-                int n = 1;
-                for (int i = 0; i < (globaldata->gGroupmap->getNumGroups() - 1); i++) {
-                        for (int l = n; l < globaldata->gGroupmap->getNumGroups(); l++) {
-                                group = globaldata->gGroupmap->namesOfGroups[i] + globaldata->gGroupmap->namesOfGroups[l];
-                                groupComb.push_back(group);        
-                                numGroupComb++;
-                        }
-                        n++;
-                }
+	int n = 1;
+	for (int i = 0; i < (globaldata->Groups.size() - 1); i++) {
+		for (int l = n; l < globaldata->Groups.size(); l++) {
+			group = globaldata->Groups[i] + globaldata->Groups[l];
+			groupComb.push_back(group);        
+			numGroupComb++;
+		}
+		n++;
+	}
 
 }
 

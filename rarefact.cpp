@@ -85,10 +85,10 @@ try {
 			lookup.clear();
 		
 			//create and initialize vector of sharedvectors, one for each group
-			for (int i = 0; i < globaldata->gGroupmap->getNumGroups(); i++) { 
+			for (int i = 0; i < globaldata->Groups.size(); i++) { 
 				SharedRAbundVector* temp = new SharedRAbundVector(sharedorder->getNumBins());
 				temp->setLabel(sharedorder->getLabel());
-				temp->setGroup(globaldata->gGroupmap->namesOfGroups[i]);
+				temp->setGroup(globaldata->Groups[i]);
 				lookup.push_back(temp);
 			}
 			

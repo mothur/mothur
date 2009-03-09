@@ -44,6 +44,7 @@ public:
 	
 private:
 	void getSharedVectors();
+	void setGroups();
 	
 	GlobalData* globaldata;
 	ReadMatrix* read;

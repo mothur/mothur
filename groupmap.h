@@ -22,6 +22,7 @@ public:
 	~GroupMap();
 	void readMap();
 	int getNumGroups();
+	bool isValidGroup(string);  //return true if string is a valid group
 	string getGroup(string);
 	void setGroup(string, string);
 	vector<string> namesOfGroups;

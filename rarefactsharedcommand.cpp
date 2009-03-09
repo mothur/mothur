@@ -19,6 +19,8 @@ RareFactSharedCommand::RareFactSharedCommand(){
 		fileNameRoot = getRootName(globaldata->inputFileName);
 		format = globaldata->getFormat();
 		validCalculator = new ValidCalculators();
+		
+		setGroups();
 				
 		int i;
 		for (i=0; i<globaldata->Estimators.size(); i++) {
@@ -109,6 +111,10 @@ int RareFactSharedCommand::execute(){
 		}
 	
 		for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}	
+		
+		//reset groups parameter
+		globaldata->Groups.clear();  globaldata->setGroups("");
+
 		return 0;
 	}
 	catch(exception& e) {
@@ -123,3 +129,51 @@ int RareFactSharedCommand::execute(){
 
 
 //**********************************************************************************************************************
+
+void RareFactSharedCommand::setGroups() {
+	try {
+		//if the user has not entered specific groups to analyze then do them all
+		if (globaldata->Groups.size() != 0) {
+			if (globaldata->Groups[0] != "all") {
+				//check that groups are valid
+				for (int i = 0; i < globaldata->Groups.size(); i++) {
+					if (globaldata->gGroupmap->isValidGroup(globaldata->Groups[i]) != true) {
+						cout << globaldata->Groups[i] << " is not a valid group, and will be disregarded." << endl;
+						// erase the invalid group from globaldata->Groups
+						globaldata->Groups.erase(globaldata->Groups.begin()+i);
+					}
+				}
+			
+				//if the user only entered invalid groups
+				if ((globaldata->Groups.size() == 0) || (globaldata->Groups.size() == 1)) { 
+					cout << "When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile." << endl; 
+					for (int i = 0; i < globaldata->gGroupmap->namesOfGroups.size(); i++) {
+						globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
+					}
+				}
+			}else{//user has enter "all" and wants the default groups
+				globaldata->Groups.clear();
+				for (int i = 0; i < globaldata->gGroupmap->namesOfGroups.size(); i++) {
+					globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
+				}
+				globaldata->setGroups("");
+			}
+		}else {
+			for (int i = 0; i < globaldata->gGroupmap->namesOfGroups.size(); i++) {
+				globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
+			}
+		}
+		
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the RareFactSharedCommand class Function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the RareFactSharedCommand class function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}		
+
+}
+/***********************************************************/
+

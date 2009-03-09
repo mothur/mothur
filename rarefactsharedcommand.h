@@ -40,6 +40,7 @@ public:
 	int execute();	
 	
 private:
+	void setGroups();
 	GlobalData* globaldata;
 	SharedListVector* SharedList;
 	ReadMatrix* read;
