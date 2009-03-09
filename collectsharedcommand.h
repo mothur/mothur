@@ -54,6 +54,7 @@ private:
 	vector<Display*> cDisplays;
 	int freq;
 	string format;
+	void setGroups();
 
 };
 
