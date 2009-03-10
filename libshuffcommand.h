@@ -11,6 +11,8 @@
  */
 
 #include "command.hpp"
+#include "coverage.h"
+#include "fullmatrix.h"
 
 using namespace std;
 
@@ -24,7 +26,27 @@ class LibShuffCommand : public Command {
 		int execute();	
 	
 	private:
+		vector< vector<float> > cValues; // vector of coverage scores, one for each comparison.
+		vector<float> deltaValues; // vector of delta scores, one for each comparison.
+		vector<float> sumDelta; //sum of delta scores, one for each comparison.
+		vector<float> sumDeltaSig; //number of random  matrixes with that delta value or ??
+		vector< vector<float> > rsumDelta; //vector< vector<sumdelta scores for a given comparison> >
+		vector<string> groupComb;
+		
+		
+		void setGroups();
+		int findIndex(float, int);
+		void printCoverageFile(float);
+		void printSummaryFile();
+
 		GlobalData* globaldata;
+		Coverage* coverage;
+		FullMatrix* matrix;
+		float cutOff;
+		int numGroups, numComp, iters;
+		string coverageFile, summaryFile;
+		ofstream out, outSum;
+				
 		
 };
 
