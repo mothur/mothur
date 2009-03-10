@@ -19,7 +19,6 @@ using namespace std;
 struct Names {
 	string		groupname;
 	string		seqName;
-	float		minDist;
 };
 
 
@@ -32,16 +31,20 @@ class FullMatrix {
 	
 		int getNumSeqs();
 		void printMatrix(ostream&);
+		void getMinsForRowsVectors();  //requires globaldata->Groups to be filled
 	
 	private:
 		void sortGroups(int, int);  //this function sorts the sequences within the matrix.
+		void getBounds(int&, string);
 		void readSquareMatrix(ifstream&);  
 		void readLTMatrix(ifstream&);
 		vector< vector<float> > matrix;  //a 2D distance matrix of all the sequences and their distances to eachother.
+		vector< vector<float> > minsForRows;  //vector< minimum distance for that subrow> -one for each comparison.
 		map<int, Names> index; // row in vector, sequence group.  need to know this so when we sort it can be updated.
+		map<int, Names>::iterator it;
 		GroupMap* groupmap;  //maps sequences to groups they belong to.
 		GlobalData* globaldata;
-		int numSeqs;
+		int numSeqs, numGroups, numUserGroups;
 		bool square;
 
 };
