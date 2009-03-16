@@ -168,11 +168,11 @@ void UnifracUnweightedCommand::printUWSummaryFile() {
 
 		for(int a = 0; a < numComp; a++) {
 			if (UWScoreSig[a][0] > (1/(float)iters)) {
-				outSum << setprecision(6) << groupComb[a] << '\t' << '\t' << utreeScores[a][0] << '\t' << setprecision(globaldata->getIters().length()) << UWScoreSig[a][0] << endl;
-				cout << setprecision(6)  << groupComb[a] << '\t' << '\t' << utreeScores[a][0] << '\t' << setprecision(globaldata->getIters().length()) << UWScoreSig[a][0] << endl; 
+				outSum << setprecision(6) << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(globaldata->getIters().length()) << UWScoreSig[a][0] << endl;
+				cout << setprecision(6)  << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(globaldata->getIters().length()) << UWScoreSig[a][0] << endl; 
 			}else {
-				outSum << setprecision(6) << groupComb[a] << '\t' << '\t' << utreeScores[a][0] << '\t' << setprecision(globaldata->getIters().length()) << "<" << (1/float(iters)) << endl;
-				cout << setprecision(6)  << groupComb[a] << '\t' << '\t' << utreeScores[a][0] << '\t' << setprecision(globaldata->getIters().length()) << "<" << (1/float(iters)) << endl; 
+				outSum << setprecision(6) << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(globaldata->getIters().length()) << "<" << (1/float(iters)) << endl;
+				cout << setprecision(6)  << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(globaldata->getIters().length()) << "<" << (1/float(iters)) << endl; 
 			}
 		}
 		

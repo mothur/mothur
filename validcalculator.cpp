@@ -126,7 +126,7 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 void ValidCalculators::initialSingle() {
 	try {	
 	
-		single["sobs"]	= "sobs";
+		single["sobs"]		= "sobs";
 		single["chao"]		= "chao";
 		single["ace"]		= "ace";
 		single["jack"]		= "jack";
@@ -135,6 +135,7 @@ void ValidCalculators::initialSingle() {
 		single["simpson"]	= "simpson";
 		single["bootstrap"]	= "bootstrap";
 		single["default"]	= "default";
+		single["nseqs"]		= "nseqs";
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialSingle. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -160,6 +161,7 @@ void ValidCalculators::initialShared() {
 		shared["sharedsorest"]			= "sharedsorest";
 		shared["sharedthetayc"]			= "sharedthetayc";
 		shared["sharedthetan"]			= "sharedthetan";
+		shared["sharednseqs"]			= "sharednseqs";
 		shared["default"]	            = "default";
 	}
 	catch(exception& e) {
@@ -183,6 +185,7 @@ void ValidCalculators::initialRarefaction() {
 		rarefaction["npshannon"]	= "npshannon";
 		rarefaction["simpson"]		= "simpson";
 		rarefaction["bootstrap"]	= "bootstrap";
+		rarefaction["nseqs"]		= "nseqs";
 		rarefaction["default"]	    = "default";
 	}
 	catch(exception& e) {
@@ -207,6 +210,7 @@ void ValidCalculators::initialSummary() {
 		summary["npshannon"]	= "npshannon";
 		summary["simpson"]		= "simpson";
 		summary["bootstrap"]	= "bootstrap";
+		summary["nseqs"]		= "nseqs";
 		summary["default"]	    = "default";
 	}
 	catch(exception& e) {
@@ -233,6 +237,7 @@ void ValidCalculators::initialSharedSummary() {
 		sharedsummary["sharedsorest"]			= "sharedsorest";
 		sharedsummary["sharedthetayc"]			= "sharedthetayc";
 		sharedsummary["sharedthetan"]			= "sharedthetan";
+		sharedsummary["sharednseqs"]			= "sharednseqs";
 		sharedsummary["default"]				= "default";
 	}
 	catch(exception& e) {
@@ -251,6 +256,7 @@ void ValidCalculators::initialSharedSummary() {
 void ValidCalculators::initialSharedRarefact() {
 	try {	
 		sharedrarefaction["sharedobserved"]	= "sharedobserved";
+		sharedrarefaction["sharednseqs"]	= "sharednseqs";
 		sharedrarefaction["default"]	    = "default";
 	}
 	catch(exception& e) {

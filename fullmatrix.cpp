@@ -255,7 +255,6 @@ void FullMatrix::printMatrix(ostream& out) {
 void FullMatrix::getMinsForRowsVectors(){
 	try{
 		numGroups = globaldata->gGroupmap->namesOfGroups.size();
-		numUserGroups = globaldata->Groups.size();
 		
 		//sort globaldata->gGroupmap.namesOfGroups so that it will match the matrix
 		sort(globaldata->gGroupmap->namesOfGroups.begin(), globaldata->gGroupmap->namesOfGroups.end());
@@ -263,28 +262,28 @@ void FullMatrix::getMinsForRowsVectors(){
 		/*************************************************/
 		//find where in matrix each group starts and stops
 		/*************************************************/
-		vector<int> bounds;  //bounds[0] = 0, bounds[1] = starting row in matrix from group B, bounds[2] = starting row in matrix from group C, bounds[3] = no need to find C because its numSeqs.
+		vector<int> bounds;  //bounds[1] = starting row in matrix from group B, bounds[2] = starting row in matrix from group C, bounds[3] = no need to find upper bound of C because its numSeqs.
 		bounds.resize(numGroups);
 		
-		bounds[numGroups] = numSeqs;
+		bounds[0] = 0;
+		bounds[numGroups] = numSeqs-1;
 		//for each group find bounds of subgroup/comparison
-		for (int i = 0; i < numGroups; i++) {
+		for (int i = 1; i < numGroups; i++) {
 			getBounds(bounds[i], globaldata->gGroupmap->namesOfGroups[i]);
 		}
 		
 		/************************************************************/
 		//fill the minsForRows vectors for each group the user wants
 		/************************************************************/
-		int countx = bounds[0]; //where second group starts
-		int county = bounds[0]; 
+		int countx = bounds[1]; //where second group starts
+		int county = bounds[1]; 
 		
 		//go through the entire matrix
 		for (int x = 0; x < numSeqs; x++) {
 			for (int y = 0; y < numSeqs; y++) {
 				//if have not changed groups
 				if ((x < countx) && (y < county)) {
-					if (inUsersGroups(index[x].groupname, globaldata->Groups)) {
-					}
+					
 				}
 			}
 		}

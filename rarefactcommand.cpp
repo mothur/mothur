@@ -10,6 +10,7 @@
 #include "rarefactcommand.h"
 #include "ace.h"
 #include "sobs.h"
+#include "nseqs.h"
 #include "chao1.h"
 #include "bootstrap.h"
 #include "simpson.h"
@@ -49,6 +50,8 @@ RareFactCommand::RareFactCommand(){
 					rDisplays.push_back(new RareDisplay(new Simpson(), new ThreeColumnFile(fileNameRoot+"r_simpson")));
 				}else if (globaldata->Estimators[i] == "bootstrap") { 
 					rDisplays.push_back(new RareDisplay(new Bootstrap(), new ThreeColumnFile(fileNameRoot+"r_bootstrap")));
+				}else if (globaldata->Estimators[i] == "nseqs") { 
+					rDisplays.push_back(new RareDisplay(new NSeqs(), new ThreeColumnFile(fileNameRoot+"r_nseqs")));
 				}
 			}
 		}

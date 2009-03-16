@@ -237,8 +237,8 @@ void ParsimonyCommand::printUSummaryFile() {
 		for (int i = 0; i< T.size(); i++) {
 			for(int a = 0; a < numComp; a++) {
 				if (UScoreSig[a][i] > (1/(float)iters)) {
-					outSum << setprecision(6) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << userTreeScores[a][i] << setprecision(globaldata->getIters().length()) << '\t' << UScoreSig[a][i] << endl;
-					cout << setprecision(6) << i+1 << '\t' << groupComb[a] << '\t' << '\t' << userTreeScores[a][i] << setprecision(globaldata->getIters().length()) << '\t' << UScoreSig[a][i] << endl;
+					outSum << setprecision(6) << i+1 << '\t' << groupComb[a]  << '\t' << userTreeScores[a][i] << setprecision(globaldata->getIters().length()) << '\t' << UScoreSig[a][i] << endl;
+					cout << setprecision(6) << i+1 << '\t' << groupComb[a]  << '\t' << userTreeScores[a][i] << setprecision(globaldata->getIters().length()) << '\t' << UScoreSig[a][i] << endl;
 				}else {
 					outSum << setprecision(6) << i+1 << '\t' << groupComb[a] << '\t' << userTreeScores[a][i] << setprecision(globaldata->getIters().length())  << '\t' << "<" << (1/float(iters)) << endl;
 					cout << setprecision(6) << i+1 << '\t' << groupComb[a] << '\t' << userTreeScores[a][i] << setprecision(globaldata->getIters().length()) << '\t' << "<" << (1/float(iters)) << endl;

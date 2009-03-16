@@ -10,6 +10,7 @@
 #include "collectcommand.h"
 #include "ace.h"
 #include "sobs.h"
+#include "nseqs.h"
 #include "chao1.h"
 #include "bootstrap.h"
 #include "simpson.h"
@@ -35,8 +36,10 @@ CollectCommand::CollectCommand(){
 					cDisplays.push_back(new CollectDisplay(new Sobs(), new OneColumnFile(fileNameRoot+"sobs")));
 				}else if (globaldata->Estimators[i] == "chao") { 
 					cDisplays.push_back(new CollectDisplay(new Chao1(), new ThreeColumnFile(fileNameRoot+"chao")));
+				}else if (globaldata->Estimators[i] == "nseqs") { 
+					cDisplays.push_back(new CollectDisplay(new NSeqs(), new OneColumnFile(fileNameRoot+"nseqs")));
 				}else if (globaldata->Estimators[i] == "ace") { 
-				convert(globaldata->getAbund(), abund);
+					convert(globaldata->getAbund(), abund);
 					cDisplays.push_back(new CollectDisplay(new Ace(abund), new ThreeColumnFile(fileNameRoot+"ace")));
 				}else if (globaldata->Estimators[i] == "jack") { 
 					cDisplays.push_back(new CollectDisplay(new Jackknife(), new ThreeColumnFile(fileNameRoot+"jack")));

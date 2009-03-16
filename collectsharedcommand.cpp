@@ -19,6 +19,7 @@
 #include "sharedsorest.h"
 #include "sharedthetayc.h"
 #include "sharedthetan.h"
+#include "sharednseqs.h"
 
 
 //**********************************************************************************************************************
@@ -56,7 +57,10 @@ CollectSharedCommand::CollectSharedCommand(){
 					cDisplays.push_back(new CollectDisplay(new SharedThetaYC(), new SharedOneColumnFile(fileNameRoot+"shared.thetayc")));
 				}else if (globaldata->Estimators[i] == "sharedthetan") { 
 					cDisplays.push_back(new CollectDisplay(new SharedThetaN(), new SharedOneColumnFile(fileNameRoot+"shared.thetan")));
+				}else if (globaldata->Estimators[i] == "sharednseqs") { 
+					cDisplays.push_back(new CollectDisplay(new SharedNSeqs(), new SharedOneColumnFile(fileNameRoot+"shared.nseqs")));
 				}
+
 			}
 		}
 		
