@@ -115,6 +115,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		370936DE0F6E7A4A00EB4C2C /* nseqs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nseqs.h; sourceTree = "<group>"; };
+		3709370A0F6E7FC100EB4C2C /* sharednseqs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharednseqs.h; sourceTree = "<group>"; };
 		372E126E0F26365B0095CF7E /* readotucommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readotucommand.h; sourceTree = "<group>"; };
 		372E126F0F26365B0095CF7E /* readotucommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readotucommand.cpp; sourceTree = "<group>"; };
 		372E12940F263D5A0095CF7E /* readdistcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readdistcommand.h; sourceTree = "<group>"; };
@@ -419,6 +421,7 @@
 				37D927E70F21331F001D4494 /* jackknife.cpp */,
 				37D927F50F21331F001D4494 /* npshannon.h */,
 				37D927F40F21331F001D4494 /* npshannon.cpp */,
+				370936DE0F6E7A4A00EB4C2C /* nseqs.h */,
 				379294880F2E258500B9034A /* parsimony.h */,
 				379294890F2E258500B9034A /* parsimony.cpp */,
 				37D928020F21331F001D4494 /* rarecalc.h */,
@@ -435,6 +438,7 @@
 				37D9282A0F21331F001D4494 /* sharedjclass.cpp */,
 				37D9282D0F21331F001D4494 /* sharedjest.h */,
 				37D9282C0F21331F001D4494 /* sharedjest.cpp */,
+				3709370A0F6E7FC100EB4C2C /* sharednseqs.h */,
 				37D928350F21331F001D4494 /* sharedsobs.h */,
 				37D928340F21331F001D4494 /* sharedsobs.cpp */,
 				37AFC71D0F445386005F492D /* sharedsobscollectsummary.h */,

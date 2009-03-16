@@ -175,8 +175,8 @@ void UnifracWeightedCommand::printWSummaryFile() {
 		for (int i = 0; i < T.size(); i++) { 
 			for (int j = 0; j < numComp; j++) {
 				if (WScoreSig[count] > (1/(float)iters)) {
-					outSum << setprecision(6) << i+1 << '\t' << '\t' << groupComb[j] << '\t' << '\t'  << utreeScores[count] << '\t' << setprecision(globaldata->getIters().length()) << WScoreSig[count] << endl; 
-					cout << setprecision(6) << i+1 << '\t' << '\t' << groupComb[j] << '\t' << '\t'  << utreeScores[count] << '\t' << setprecision(globaldata->getIters().length()) << WScoreSig[count] << endl; 
+					outSum << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << setprecision(globaldata->getIters().length()) << WScoreSig[count] << endl; 
+					cout << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << setprecision(globaldata->getIters().length()) << WScoreSig[count] << endl; 
 				}else{
 					outSum << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << setprecision(globaldata->getIters().length()) << "<" << (1/float(iters)) << endl; 
 					cout << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << setprecision(globaldata->getIters().length()) << "<" << (1/float(iters)) << endl; 

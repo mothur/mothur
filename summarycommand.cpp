@@ -10,6 +10,7 @@
 #include "summarycommand.h"
 #include "ace.h"
 #include "sobs.h"
+#include "nseqs.h"
 #include "chao1.h"
 #include "bootstrap.h"
 #include "simpson.h"
@@ -46,6 +47,8 @@ SummaryCommand::SummaryCommand(){
 					sumCalculators.push_back(new Simpson());
 				}else if(globaldata->Estimators[i] == "bootstrap"){
 					sumCalculators.push_back(new Bootstrap());
+				}else if (globaldata->Estimators[i] == "nseqs") { 
+					sumCalculators.push_back(new NSeqs());
 				}
 			}
 		}

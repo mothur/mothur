@@ -11,6 +11,7 @@
 #include "sharedsobscollectsummary.h"
 #include "sharedchao1.h"
 #include "sharedace.h"
+#include "sharednseqs.h"
 #include "sharedjabund.h"
 #include "sharedsorabund.h"
 #include "sharedjclass.h"
@@ -56,6 +57,8 @@ SummarySharedCommand::SummarySharedCommand(){
 					sumCalculators.push_back(new SharedThetaYC());
 				}else if (globaldata->Estimators[i] == "sharedthetan") { 
 					sumCalculators.push_back(new SharedThetaN());
+				}else if (globaldata->Estimators[i] == "sharednseqs") { 
+					sumCalculators.push_back(new SharedNSeqs());
 				}
 			}
 		}
@@ -128,7 +131,15 @@ int SummarySharedCommand::execute(){
 				int n = 1; 
 				for (int k = 0; k < (lookup.size() - 1); k++) { // pass cdd each set of groups to commpare
 					for (int l = n; l < lookup.size(); l++) {
-						outputFileHandle << order->getLabel() << '\t' << (lookup[k]->getGroup() + lookup[l]->getGroup()) << '\t' << '\t'; //print out label and group
+						outputFileHandle << order->getLabel() << '\t';
+						
+						//sort groups to be alphanumeric
+						if (lookup[k]->getGroup() > lookup[l]->getGroup()) {
+							outputFileHandle << (lookup[l]->getGroup() +'\t' + lookup[k]->getGroup()) << '\t'; //print out groups
+						}else{
+							outputFileHandle << (lookup[k]->getGroup() +'\t' + lookup[l]->getGroup()) << '\t'; //print out groups
+						}
+						
 						for(int i=0;i<sumCalculators.size();i++){
 							sumCalculators[i]->getValues(lookup[k], lookup[l]); //saves the calculator outputs
 							outputFileHandle << '\t';

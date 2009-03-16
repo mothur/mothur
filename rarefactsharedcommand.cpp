@@ -9,6 +9,7 @@
 
 #include "rarefactsharedcommand.h"
 #include "sharedsobs.h"
+#include "sharednseqs.h"
 
 //**********************************************************************************************************************
 
@@ -25,7 +26,10 @@ RareFactSharedCommand::RareFactSharedCommand(){
 			if (validCalculator->isValidCalculator("sharedrarefaction", globaldata->Estimators[i]) == true) { 
 				if (globaldata->Estimators[i] == "sharedobserved") { 
 					rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(fileNameRoot+"shared.rarefaction", "")));
+				}else if (globaldata->Estimators[i] == "sharednseqs") { 
+					rDisplays.push_back(new RareDisplay(new SharedNSeqs(), new SharedThreeColumnFile(fileNameRoot+"shared.r_nseqs", "")));
 				}
+
 			}
 		}
 		
