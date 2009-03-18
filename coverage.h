@@ -21,14 +21,14 @@ using namespace std;
 class Coverage  {
 	
 	public: 
-		Coverage(){};
+		Coverage();
 		~Coverage(){};
-		vector< vector<float> > getValues(FullMatrix*, float);	
+		void getValues(FullMatrix*, float, vector< vector<float> >&);
+		void getValues(FullMatrix*, float, vector< vector<float> >&, string);	//for random matrices
 		
 	private:
 		GlobalData* globaldata;
-		vector< vector<float> > data;
-		int numGroups;
+		int numGroups, numUserGroups;
 
 };
 

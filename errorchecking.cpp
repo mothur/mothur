@@ -355,7 +355,9 @@ bool ErrorCheck::checkInput(string input) {
 			}else if (listfile != "") { //you want to do single commands
 				validateReadFiles();
 				validateReadPhil();
-			}else {//you are reading a shared file
+			}else if ((listfile == "") && (sharedfile == "")) {
+				cout << "You must enter either a listfile or a sharedfile with the read.otu command. " << endl; return false; 
+			}else{//you are reading a shared file
 				validateReadFiles();
 			}
 		}else if (commandName == "read.tree") { 
@@ -371,6 +373,10 @@ bool ErrorCheck::checkInput(string input) {
 				cout << "Before you use the cluster command, you first need to read in a distance matrix." << endl; 
 				errorFree = false;
 		} 
+		
+		if ((commandName == "libshuff") && (globaldata->gMatrix == NULL)) {
+			 cout << "You must read in a matrix before you use the libshuff command. " << endl; return false; 
+		}
 		
 		if (commandName == "parsimony") {
 			//are you trying to use parsimony without reading a tree or saying you want random distribution
@@ -429,7 +435,7 @@ void ErrorCheck::validateReadFiles() {
 			//unable to open
 			if (ableToOpen == 1) { errorFree = false; }
 			else { globaldata->inputFileName = phylipfile; }
-		//are we reading a phylipfile
+		//are we reading a columnfile
 		}else if (columnfile != "") {
 			ableToOpen = openInputFile(columnfile, filehandle);
 			filehandle.close();
@@ -599,6 +605,13 @@ void ErrorCheck::validateReadDist() {
 	try {
 		ifstream filehandle;
 		int ableToOpen;
+		
+		if (groupfile != "") {
+			ableToOpen = openInputFile(groupfile, filehandle);
+			filehandle.close();
+			//unable to open
+			if (ableToOpen == 1) {  errorFree = false; }
+		}
 		
 		if ((phylipfile == "") && (columnfile == "")) { cout << "When executing a read.dist you must enter a phylip or a column." << endl; errorFree = false; }
 		else if ((phylipfile != "") && (columnfile != "")) { cout << "When executing a read.dist you must enter ONLY ONE of the following: phylip or column." << endl; errorFree = false; }
