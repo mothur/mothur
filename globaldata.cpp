@@ -39,6 +39,11 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			helpRequest = optionText;
 		}
 		
+		if (commandName == "libshuff") {
+			iters = "10000";
+			cutoff = "1.0";
+		}
+		
 		string key, value;		
 		//reads in parameters and values
 		if((optionText != "") && (commandName != "help")){
@@ -66,7 +71,10 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if (key == "fileroot" )		{ fileroot = value;		}
 				if (key == "abund" )        { abund = value;        }
 				if (key == "random" )		{ randomtree = value;	}
-				if (key == "calc")			{ calc = value;		}
+				if (key == "calc")			{ calc = value;			}
+				if (key == "step")			{ step = value;			}
+				if (key == "form")			{ form = value;			}
+				
 
 				
 				if (key == "line") {//stores lines to be used in a set
@@ -116,7 +124,8 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if (key == "abund" )        { abund = value;        }
 			if (key == "random" )		{ randomtree = value;	}
 			if (key == "calc")			{ calc = value;		}
-
+			if (key == "step")			{ step = value;			}
+			if (key == "form")			{ form = value;			}
 
 			if (key == "line") {//stores lines to be used in a vector
 				lines.clear();
@@ -218,6 +227,8 @@ string GlobalData::getFreq()			{	return freq;		}
 string GlobalData::getAbund()           {   return abund;       }
 string GlobalData::getRandomTree()		{	return randomtree;	}
 string GlobalData::getGroups()			{	return groups;		}
+string GlobalData::getStep()			{	return step;		}
+string GlobalData::getForm()			{	return form;		}
 void GlobalData::setListFile(string file)	{	listfile = file;	inputFileName = file;}
 void GlobalData::setRabundFile(string file)	{	rabundfile = file;	inputFileName = file;}
 void GlobalData::setSabundFile(string file)	{	sabundfile = file;	inputFileName = file;}
@@ -266,6 +277,8 @@ void GlobalData::clear() {
 	method			=	"furthest";
 	fileroot		=	"";
 	abund           =   "10";
+	step			=	"0.01";
+	form			=	"integral";
 }
 
 //*******************************************************/
@@ -281,7 +294,9 @@ void GlobalData::reset() {
 	freq			=	"100";
 	method			=	"furthest";
 	calc			=	"";
-	abund = "10";
+	abund			=   "10";
+	step			=	"0.01";
+	form			=	"integral";
 }
 /*******************************************************/
 

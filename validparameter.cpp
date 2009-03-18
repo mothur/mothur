@@ -39,6 +39,8 @@ ValidParameters::ValidParameters() {
 		parameters["random"]			= "random";
 		parameters["groups"]			= "groups";
 		parameters["calc"]				= "calc";
+		parameters["step"]				= "step";
+		parameters["form"]				= "form";
 
 	}
 	catch(exception& e) {

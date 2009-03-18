@@ -17,6 +17,8 @@ LibShuffCommand::LibShuffCommand(){
 		globaldata = GlobalData::getInstance();
 		convert(globaldata->getCutOff(), cutOff);
 		convert(globaldata->getIters(), iters);
+		convert(globaldata->getStep(), step);
+		form = globaldata->getForm();
 		matrix = globaldata->gMatrix;
 		coverageFile = getRootName(globaldata->getPhylipFile()) + "coverage";
 		summaryFile = getRootName(globaldata->getPhylipFile()) + "slsummary";
@@ -70,19 +72,28 @@ int LibShuffCommand::execute(){
 	try {
 		//deltaValues[0] = scores for the difference between AA and AB.
 		//cValues[0][0] = AA, cValues[0][1] = AB, cValues[0][2] = AC, cValues[1][0] = BA, cValues[1][1] = BB...
+		vector<float> dist;
+		int next;
 		
 		sumDelta.resize(numComp-numGroups, 0.0);
-				
-		float D = 0.0;
 		
+		float D = 0.0;
+	
 		/*****************************/
 		//get values for users matrix
 		/*****************************/
-		matrix->getMinsForRowsVectors();
+		matrix->setBounds();
 		
+		if (form != "discrete") { matrix->getDist(dist); next = 1; }
+//cout << "Distances" << endl;
+//for (int i = 0; i < dist.size(); i++) { cout << dist[i] << " "; }	
+//cout << endl;
+	
 		//get values for users matrix
 		while (D <= cutOff) {
-			cValues = coverage->getValues(matrix, D);
+			//clear out old Values
+			deltaValues.clear();			
+			coverage->getValues(matrix, D, cValues);
 			
 			//find delta values
 			int count = 0;
@@ -98,15 +109,33 @@ int LibShuffCommand::execute(){
 				}
 			}
 			
-			D += 0.01;
-			
 			printCoverageFile(D);
 			
-			//clear out old Values
-			cValues.clear();
-			deltaValues.clear();
+			//check form
+			if (form != "discrete") {   
+				if (next == dist.size()) { break; }
+				else {  D = dist[next];  next++;	}
+			}else {  D += step;  }
+			
+
 		}
 		
+		//output sum Deltas
+		for (int i = 0; i < numGroups; i++) {
+			for (int j = 0; j < numGroups; j++) {
+				//don't output AA to AA
+				if (i != j) {
+					cout << "Delta " + globaldata->Groups[i] + "-" + globaldata->Groups[j] << '\t';
+				}
+			}
+		}
+		cout << endl;
+		
+		for (int i = 0; i < sumDelta.size(); i++) {
+			cout << setprecision(6) << sumDelta[i] << '\t';
+		}
+		cout << endl;
+				
 		/*******************************************************************************/
 		//create and score random matrixes finding the sumDelta values for summary file
 		/******************************************************************************/
@@ -119,11 +148,16 @@ int LibShuffCommand::execute(){
 			}
 		}
 		
+		
 		for (int m = 0; m < iters; m++) {
 			//generate random matrix in getValues
 			//values for random matrix
+			cout << "Iteration " << m+1 << endl;
+			D = 0.0;
+			next = 1;
+			
 			while (D <= cutOff) {
-				cValues = coverage->getValues(matrix, D);
+				coverage->getValues(matrix, D, cValues, "random");
 			
 				//find delta values
 				int count = 0;
@@ -132,17 +166,29 @@ int LibShuffCommand::execute(){
 						//don't save AA to AA
 						if (i != j) {
 							//(Caa - Cab)^2
-							rsumDelta[count][m] += (abs(cValues[i][i]-cValues[i][j]) * abs(cValues[i][i]-cValues[i][j]));
+							rsumDelta[count][m] += ((abs(cValues[i][i]-cValues[i][j]) * abs(cValues[i][i]-cValues[i][j])));
+//cout << "iter " << m << " box " << i << j << " delta = " << ((abs(cValues[i][i]-cValues[i][j]) * abs(cValues[i][i]-cValues[i][j]))) << endl;
 							count++;
 						}
 					}
 				}
-			
-				D += 0.01;
+
+				//check form
+				if (form != "discrete") {   
+					if (next == dist.size()) { break; }
+					else {  D = dist[next];  next++;	}
+				}else {  D += step;  }
+
 			
 				//clear out old Values
 				cValues.clear();
 			}
+cout << "random sum delta for iter " << m << endl;
+for (int i = 0; i < rsumDelta.size(); i++) {
+	cout << setprecision(6) << rsumDelta[i][m] << '\t';
+}
+cout << endl;
+
 		}
 		
 		/**********************************************************/
@@ -186,7 +232,7 @@ void LibShuffCommand::printCoverageFile(float d) {
 		//format output
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
-		out << setprecision(globaldata->getIters().length()) << d << '\t';
+		out << setprecision(6) << d << '\t';
 		
 		//print out coverage values
 		for (int i = 0; i < numGroups; i++) {
@@ -222,18 +268,22 @@ void LibShuffCommand::printSummaryFile() {
 			for (int j = 0; j < numGroups; j++) {
 				//don't output AA to AA
 				if (i != j) {
-					outSum << "Delta" + globaldata->Groups[i] + "-" + globaldata->Groups[j] << '\t'<< "DeltaSig" + globaldata->Groups[i] + "-" + globaldata->Groups[j] << '\t';
+					outSum << "Delta " + globaldata->Groups[i] + "-" + globaldata->Groups[j] << '\t'<< "DeltaSig " + globaldata->Groups[i] + "-" + globaldata->Groups[j] << '\t';
+					cout << "Delta " + globaldata->Groups[i] + "-" + globaldata->Groups[j] << '\t'<< "DeltaSig " + globaldata->Groups[i] + "-" + globaldata->Groups[j] << '\t';
 				}
 			}
 		}
 		outSum << endl;
+		cout << endl;
 		
 		//print out delta values
 		for (int i = 0; i < sumDelta.size(); i++) {
 			outSum << setprecision(6) << sumDelta[i] << '\t' << setprecision(globaldata->getIters().length()) << sumDeltaSig[i] << '\t';
+			cout << setprecision(6) << sumDelta[i] << '\t' << setprecision(globaldata->getIters().length()) << sumDeltaSig[i] << '\t';
 		}
 		
 		outSum << endl;
+		cout << endl;
 	
 	}
 	catch(exception& e) {
@@ -282,6 +332,9 @@ void LibShuffCommand::setGroups() {
 				}
 			}
 		}
+		
+		//sort so labels match
+		sort(globaldata->Groups.begin(), globaldata->Groups.end());
 		
 		// number of comparisons i.e. with groups A,B,C = AA, AB, AC, BA, BB, BC...;
 		for (int i=0; i<numGroups; i++) { 

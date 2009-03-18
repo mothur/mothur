@@ -33,6 +33,7 @@ ValidCommands::ValidCommands() {
 		commands["summary.shared"]		= "summary.shared"; 
 		commands["unifrac.weighted"]	= "unifrac.weighted"; 
 		commands["unifrac.unweighted"]	= "unifrac.unweighted"; 
+		commands["libshuff"]			= "libshuff";
 
 				
 	}

@@ -42,9 +42,9 @@ class LibShuffCommand : public Command {
 		GlobalData* globaldata;
 		Coverage* coverage;
 		FullMatrix* matrix;
-		float cutOff;
+		float cutOff, step;
 		int numGroups, numComp, iters;
-		string coverageFile, summaryFile;
+		string coverageFile, summaryFile, form;
 		ofstream out, outSum;
 				
 		
