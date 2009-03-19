@@ -233,7 +233,7 @@ void FullMatrix::printMatrix(ostream& out) {
 		for (int i = 0; i < numSeqs; i++) {
 			out << "row " << i << " group = " << index[i].groupname << " name = " << index[i].seqName << endl;
 			for (int j = 0; j < numSeqs; j++) {
-				//out << matrix[i][j] << " ";
+				out << matrix[i][j] << " ";
 			}
 			out << endl;
 		}
@@ -393,49 +393,27 @@ void FullMatrix::printMinsForRows(ostream& out) {
 	}
 
 }
+
 /**************************************************************************/
 //shuffles the sequences in the 2 groups passed in.
-void FullMatrix::shuffle(int box){
+void FullMatrix::shuffle(string groupA, string groupB){
 	try{
 		vector<int> rows2Swap;
 		vector<int> shuffled;
 		float y = 0;
 		string name = "";
 		
-		/****************************/
-		//find the box the user wants
-		/****************************/
-		int count = 0;
-		int lowBoundy = bounds[0]; //where first group starts
-		int highBoundy = bounds[1]; //where second group starts
-		int county = 1;	//index in bound
-		
-		//find the bounds for the box the user wants
-		for (int i = 0; i < (numGroups * numGroups); i++) {
-		
-			//are you at the box?
-			if (count == box) { break; }
-			else { count++; }
 			
-			//move to next box
-			if (county < numGroups) {
-				county++;
-				highBoundy = bounds[county];
-				lowBoundy = bounds[county-1];
-			}else{ //you are moving to a new row of "boxes"
-				county = 1;
-				highBoundy = bounds[county];
-				lowBoundy = bounds[county-1];
-			}
-		}
-	
-		/************************/
-		//save its rows locations
-		/************************/
+		/********************************/
+		//save rows you want to randomize
+		/********************************/
 		//go through the matrix map to find the rows from groups you want to randomize
-		for (int y = lowBoundy; y < highBoundy; y++) {
-			rows2Swap.push_back(y);
-			shuffled.push_back(y);
+		for (it = index.begin(); it != index.end(); it++) {
+			//is this row from group A or B?
+			if ((it->second.groupname == groupA) || (it->second.groupname == groupB)) {
+				rows2Swap.push_back(it->first);
+				shuffled.push_back(it->first);
+			}
 		}
 		
 		//randomize rows to shuffle in shuffled
@@ -445,6 +423,7 @@ void FullMatrix::shuffle(int box){
 		//swap rows and columns to randomize box
 		/***************************************/
 		for (int i = 0; i < shuffled.size(); i++) {
+
 			//record the swaps you are making so you can undo them in restore function
 			restoreIndex[i].a = shuffled[i];
 			restoreIndex[i].b = rows2Swap[i];
@@ -467,6 +446,7 @@ void FullMatrix::shuffle(int box){
 			name = index[shuffled[i]].seqName;
 			index[shuffled[i]].seqName = index[rows2Swap[i]].seqName;
 			index[rows2Swap[i]].seqName = name;
+
 		}
 	}
 	catch(exception& e) {
@@ -488,6 +468,7 @@ void FullMatrix::restore(){
 		//reverse iterate through swaps and undo them to restore original matrix and index map.
 		for(it2 = restoreIndex.rbegin(); it2 != restoreIndex.rend(); it2++) {
 			/* swap rows */
+
 			for (int h = 0; h < numSeqs; h++) {
 				y = matrix[it2->second.a][h];
 				matrix[it2->second.a][h] = matrix[it2->second.b][h]; 
@@ -506,6 +487,7 @@ void FullMatrix::restore(){
 			name = index[it2->second.a].seqName;
 			index[it2->second.a].seqName = index[it2->second.b].seqName;
 			index[it2->second.b].seqName = name;
+
 		}
 
 		//clear restore for next shuffle

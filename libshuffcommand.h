@@ -26,17 +26,18 @@ class LibShuffCommand : public Command {
 		int execute();	
 	
 	private:
-		vector< vector<float> > cValues; // vector of coverage scores, one for each comparison.
-		vector<float> deltaValues; // vector of delta scores, one for each comparison.
+		vector< vector< vector<float> > > cValues; // vector<vector of coverage scores, one for each comparison.> -one for each distance level.
+		vector< vector<float> > deltaValues; // vector< vector of delta scores, one for each comparison.> -one at each distance
 		vector<float> sumDelta; //sum of delta scores, one for each comparison.
 		vector<float> sumDeltaSig; //number of random  matrixes with that delta value or ??
 		vector< vector<float> > rsumDelta; //vector< vector<sumdelta scores for a given comparison> >
 		vector<string> groupComb;
+		vector<float> dist;
 		
 		
 		void setGroups();
 		int findIndex(float, int);
-		void printCoverageFile(float);
+		void printCoverageFile();
 		void printSummaryFile();
 
 		GlobalData* globaldata;
