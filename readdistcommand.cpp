@@ -21,6 +21,7 @@ ReadDistCommand::ReadDistCommand(){
 		else if (format == "matrix") { 
 				groupMap = new GroupMap(globaldata->getGroupFile());
 				groupMap->readMap();
+				if (globaldata->gGroupmap != NULL) { delete globaldata->gGroupmap;  }
 				globaldata->gGroupmap = groupMap;
 		}
 		

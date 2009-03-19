@@ -75,7 +75,7 @@ void FullMatrix::readSquareMatrix(ifstream& filehandle) {
 	try {
 	
 		Progress* reading;
-		reading = new Progress("Reading matrix:    ", numSeqs * numSeqs);
+		reading = new Progress("Reading matrix:     ", numSeqs * numSeqs);
 		
 		int count = 0;
 		
@@ -114,7 +114,7 @@ void FullMatrix::readSquareMatrix(ifstream& filehandle) {
 void FullMatrix::readLTMatrix(ifstream& filehandle) {
 	try {
 		Progress* reading;
-		reading = new Progress("Reading matrix:    ", numSeqs * (numSeqs - 1) / 2);
+		reading = new Progress("Reading matrix:     ", numSeqs * (numSeqs - 1) / 2);
 		
 		int count = 0;
 		float distance;

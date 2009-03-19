@@ -72,6 +72,8 @@ int LibShuffCommand::execute(){
 	try {
 		//deltaValues[0] = scores for the difference between AA and AB.
 		//cValues[0][0][0] = AA at distance 0.0, cValues[0][0][1] = AB at distance 0.0, cValues[0][0][2] = AC at distance 0.0, cValues[0][1][0] = BA at distance 0.0, cValues[0][1][1] = BB...
+		Progress* reading;
+		reading = new Progress("Comparing to random:", iters);
 		
 		sumDelta.resize(numComp-numGroups, 0.0);
 		
@@ -153,6 +155,7 @@ int LibShuffCommand::execute(){
 			}
 //cout << "iter " << m << endl;
 			//clear out old Values
+			reading->update(m);
 			cValues.clear();
 			
 //cout << "random sum delta for iter " << m << endl;
@@ -163,6 +166,8 @@ int LibShuffCommand::execute(){
 
 		}
 		
+		reading->finish();
+		delete reading;
 				
 		/**********************************************************/
 		//find the signifigance of the user matrix' sumdelta values

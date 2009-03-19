@@ -69,7 +69,7 @@ void ReadPhylipMatrix::read(NameAssignment* nameMap){
 	
 			if(square == 0){
 
-				reading = new Progress("Reading matrix:    ", nseqs * (nseqs - 1) / 2);
+				reading = new Progress("Reading matrix:     ", nseqs * (nseqs - 1) / 2);
 		
 				int	index = 0;
 		
@@ -111,7 +111,7 @@ void ReadPhylipMatrix::read(NameAssignment* nameMap){
 			}
 			else{
 
-				reading = new Progress("Reading matrix:    ", nseqs * nseqs);
+				reading = new Progress("Reading matrix:     ", nseqs * nseqs);
 			
 				int index = nseqs;
 		
@@ -202,7 +202,7 @@ void ReadColumnMatrix::read(NameAssignment* nameMap){
 
 			list = new ListVector(nameMap->getListVector());
 		
-			Progress* reading = new Progress("Reading matrix:    ", nseqs * nseqs);
+			Progress* reading = new Progress("Reading matrix:     ", nseqs * nseqs);
 	
 			int lt = 1;
 			int refRow = 0;	//we'll keep track of one cell - Cell(refRow,refCol) - and see if it's transpose

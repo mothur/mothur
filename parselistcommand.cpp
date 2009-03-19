@@ -135,6 +135,7 @@ int ParseListCommand::execute(){
 			}
 			
 			//set groupmap for .shared commands
+			if (globaldata->gGroupmap != NULL) { delete globaldata->gGroupmap; }
 			globaldata->gGroupmap = groupMap; 
 			
 			return 0;
