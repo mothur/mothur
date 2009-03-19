@@ -70,6 +70,8 @@ int ReadDistCommand::execute(){
 			ifstream in;
 			openInputFile(filename, in);
 			matrix = new FullMatrix(in); //reads the matrix file
+			//memory leak prevention
+			if (globaldata->gMatrix != NULL) { delete globaldata->gMatrix;  }
 			globaldata->gMatrix = matrix; //save matrix for coverage commands
 		}else {
 			read->read(nameMap);

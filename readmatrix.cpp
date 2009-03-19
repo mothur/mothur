@@ -346,15 +346,22 @@ void ReadPhilFile::read(GlobalData* globaldata){
 		}else {//there is an orderfile
 			input = new InputData(philFile, globaldata->getOrderFile(), globaldata->getFormat());
 		}
+		
+		//memory leak prevention
+		if (globaldata->ginput != NULL) { delete globaldata->ginput;  }
 		globaldata->ginput = input;	//saving to be used by collector and rarefact commands.
 		
 		if ((globaldata->getFormat() == "list") || (globaldata->getFormat() == "rabund") || (globaldata->getFormat() == "sabund")) {//you are reading a list, rabund or sabund file for collect, rarefaction or summary.
 			order = input->getOrderVector();
+			//memory leak prevention
+			if (globaldata->gorder != NULL) { delete globaldata->gorder;  }
 			globaldata->gorder = order;	//saving to be used by collect and rarefact commands.
 			sabund = inputSabund->getSAbundVector(); 
 			globaldata->sabund = sabund; //saving to be used by summary command.
 		}else if (globaldata->getFormat() == "shared") {
 			SharedList = input->getSharedListVector(); //you are reading for collect.shared, rarefaction.shared, summary.shared, parselist command, or shared commands.
+			//memory leak prevention
+			if (globaldata->gSharedList != NULL) { delete globaldata->gSharedList;  }
 			globaldata->gSharedList = SharedList;
 		}
 	}

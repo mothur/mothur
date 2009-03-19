@@ -18,6 +18,9 @@ ReadTreeCommand::ReadTreeCommand(){
 		//read in group map info.
 		treeMap = new TreeMap(globaldata->getGroupFile());
 		treeMap->readMap();
+		
+		//memory leak prevention
+		if (globaldata->gTreemap != NULL) { delete globaldata->gTreemap;  }
 		globaldata->gTreemap = treeMap;
 
 		read = new ReadNewickTree(filename);
