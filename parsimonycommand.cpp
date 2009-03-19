@@ -166,7 +166,11 @@ int ParsimonyCommand::execute() {
 		if (randomtree == "") { printUSummaryFile(); }
 		
 		//reset globaldata's treemap if you just did random distrib
-		if (randomtree != "") { globaldata->gTreemap = savetmap; }
+		if (randomtree != "") {
+			//memory leak prevention
+			if (globaldata->gTreemap != NULL) { delete globaldata->gTreemap;  }
+			globaldata->gTreemap = savetmap;
+		}
 		
 		//reset randomTree parameter to ""
 		globaldata->setRandomTree("");
@@ -293,6 +297,8 @@ void ParsimonyCommand::getUserInput() {
 		getline(cin, s);
 		
 		//save tmap for later
+		//memory leak prevention
+		if (globaldata->gTreemap != NULL) { delete globaldata->gTreemap;  }
 		globaldata->gTreemap = tmap;
 		
 	}
