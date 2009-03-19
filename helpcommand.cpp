@@ -25,12 +25,17 @@ HelpCommand::~HelpCommand(){}
 int HelpCommand::execute(){
 
 	if (globaldata->helpRequest == "read.dist") {
-		cout << "The read.dist command parameter options are phylip or column, name, cutoff and precision" << "\n";
-		cout << "The read.dist command should be in the following format: " << "\n";
+		cout << "The read.dist command parameter options are phylip or column, group, name, cutoff and precision" << "\n";
+		cout << "The read.dist command must be run before using the cluster or libshuff commands" << "\n";
+		cout << "The read.dist command can be used in two ways.  The first is to read a phylip or column and run the cluster command" << "\n";
+		cout << "For this use the read.dist command should be in the following format: " << "\n";
 		cout << "read.dist(phylip=yourDistFile, name=yourNameFile, cutoff=yourCutoff, precision=yourPrecision) " << "\n";
 		cout << "The phylip or column parameter is required, but only one may be used.  If you use a column file the name filename is required. " << "\n";
 		cout << "If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. dist), '=' and parameters (i.e.yourDistfile)." << "\n" << "\n";
+		cout << "The second way to use the read.dist command is to read a phylip or column and a group, so you can use the libshuff command." << "\n";
+		cout << "For this use the read.dist command should be in the following format: " << "\n";
+		cout << "read.dist(phylip=yourPhylipfile, group=yourGroupFile). The cutoff and precision parameters are not valid with this use.  " << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. phylip), '=' and parameters (i.e.yourPhylipfile)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "read.otu") {
 		cout << "The read.otu command must be run before you execute a collect.single, rarefaction.single, summary.single, " << "\n";
 		cout << "collect.shared, rarefaction.shared or summary.shared command.   Mothur will generate a .list, .rabund and .sabund upon completion of the cluster command " << "\n";
@@ -170,6 +175,18 @@ int HelpCommand::execute(){
 		cout << "The default value for groups is all the groups in your groupfile, and iters is 1000." << "\n";
 		cout << "The unifrac.unweighted command output two files: .unweighted and .uwsummary their descriptions are in the manual." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile)." << "\n" << "\n";
+	}else if (globaldata->helpRequest == "libshuff") { 
+		cout << "The libshuff command can only be executed after a successful read.dist command." << "\n";
+		cout << "The libshuff command parameters are groups, iters, step, form and cutoff.  No parameters are required." << "\n";
+		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups." << "\n";
+		cout << "The group names are separated by dashes.  The iters parameter allows you to specify how many random matrices you would like compared to your matrix." << "\n";
+		cout << "The step parameter allows you to specify change in distance you would like between each output if you are using the discrete form." << "\n";
+		cout << "The form parameter allows you to specify if you would like to analyze your matrix using the discrete or integral form. Your options are integral or discrete." << "\n";
+		cout << "The libshuff command should be in the following format: libshuff(groups=yourGroups, iters=yourIters, cutOff=yourCutOff, form=yourForm, step=yourStep)." << "\n";
+		cout << "Example libshuff(groups=A-B-C, iters=500, form=discrete, step=0.01, cutOff=2.0)." << "\n";
+		cout << "The default value for groups is all the groups in your groupfile, iters is 10000, cutoff is 1.0, form is integral and step is 0.01." << "\n";
+		cout << "The libshuff command output two files: .coverage and .slsummary their descriptions are in the manual." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. iters), '=' and parameters (i.e.yourIters)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "quit") {
 		cout << "The quit command will terminate Dotur and should be in the following format: " << "\n";
 		cout << "quit()" << "\n" << "\n";

@@ -23,8 +23,7 @@ class Coverage  {
 	public: 
 		Coverage();
 		~Coverage(){};
-		void getValues(FullMatrix*, float, vector< vector<float> >&);
-		void getValues(FullMatrix*, float, vector< vector<float> >&, string);	//for random matrices
+		void getValues(FullMatrix*, vector< vector< vector<float> > >&, vector<float>, string);	//matrix, container for results, vector of distances, mode
 		
 	private:
 		GlobalData* globaldata;
