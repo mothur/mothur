@@ -171,8 +171,8 @@ bool ErrorCheck::checkInput(string input) {
 				errorFree = false;
 		} 
 		
-		if ((commandName == "libshuff") && (globaldata->gMatrix == NULL)) {
-			 cout << "You must read in a matrix before you use the libshuff command. " << endl; return false; 
+		if ((commandName == "libshuff") && ((globaldata->gMatrix == NULL) || (globaldata->gGroupmap == NULL))) {
+			 cout << "You must read in a matrix and groupfile before you use the libshuff command. " << endl; return false; 
 		}
 		
 		if (commandName == "parsimony") {
