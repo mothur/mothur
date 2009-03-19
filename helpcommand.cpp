@@ -39,7 +39,7 @@ int HelpCommand::execute(){
 	}else if (globaldata->helpRequest == "read.otu") {
 		cout << "The read.otu command must be run before you execute a collect.single, rarefaction.single, summary.single, " << "\n";
 		cout << "collect.shared, rarefaction.shared or summary.shared command.   Mothur will generate a .list, .rabund and .sabund upon completion of the cluster command " << "\n";
-		cout << "or you may use your own. The read.otu command parameter options are list, rabund, sabund, group, order, line and label." << "\n";
+		cout << "or you may use your own. The read.otu command parameter options are list, rabund, sabund, shared, group, order, line and label." << "\n";
 		cout << "The read.otu command can be used in two ways.  The first is to read a list, rabund or sabund and run the collect.single, rarefaction.single or summary.single." << "\n";
 		cout << "For this use the read.otu command should be in the following format: read.otu(list=yourListFile, order=yourOrderFile, label=yourLabels)." << "\n";
 		cout << "The list, rabund or sabund parameter is required, but you may only use one of them." << "\n";
@@ -106,7 +106,6 @@ int HelpCommand::execute(){
 		cout << "The get.line command should be in the following format: " << "\n";
 		cout << "get.line()" << "\n";
 		cout << "Example get.line()." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "rarefaction.single") {
 		cout << "The rarefaction.single command can only be executed after a successful read.otu WTIH ONE EXECEPTION." << "\n";
 		cout << "The rarefaction.single command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster." << "\n";

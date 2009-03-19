@@ -13,35 +13,21 @@
 
 ValidParameters::ValidParameters() {
 	try {
-	
-		parameters["phylip"]		= "phylip";
-		parameters["column"]		= "column";
-		parameters["list"]			= "list"; 
-		parameters["rabund"]		= "rabund"; 
-		parameters["sabund"]		= "sabund";
-		parameters["shared"]		= "shared";
-		parameters["name"]			= "name"; 
-		parameters["group"]			= "group"; 
-		parameters["order"]			= "order"; 
-		parameters["fasta"]			= "fasta"; 
-		parameters["tree"]			= "tree";
-		parameters["fileroot"]			= "fileroot";
-		parameters["cutoff"]			= "cutoff"; 
-		parameters["method"]			= "method";
-		parameters["format"]			= "format"; 
-		parameters["precision"]			= "precision"; 
-		parameters["label"]				= "label"; 
-		parameters["line"]				= "line";
-		parameters["iters"]				= "iters"; 
-		parameters["jumble"]			= "jumble"; 
-		parameters["freq"]				= "freq"; 
-		parameters["abund"]             = "abund";
-		parameters["random"]			= "random";
-		parameters["groups"]			= "groups";
-		parameters["calc"]				= "calc";
-		parameters["step"]				= "step";
-		parameters["form"]				= "form";
-
+		initialReaddist();
+		initialReadotu();
+		initialReadtree();
+		initialCluster();
+		initialDeconvolute();
+		initialParsimony();
+		initialCollectsingle();
+		initialCollectshared();
+		initialRarefactsingle();
+		initialRarefactshared();
+		initialSummarysingle();
+		initialSummaryshared();
+		initialUnifracweighted();
+		initialUnifracunweighted();
+		initialLibshuff();
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidParameters class Function ValidParameters. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -58,21 +44,184 @@ ValidParameters::ValidParameters() {
 ValidParameters::~ValidParameters() {}
 
 /***********************************************************************/
-bool ValidParameters::isValidParameter(string parameter) {
+bool ValidParameters::isValidParameter(string parameter, string command) {
 	try {	
 	
-		//is the parameter in the map
-		if ((parameters.find(parameter)) != (parameters.end())) {
-			return true;
-		}else{
-			cout << parameter << " is not a valid parameter in Mothur. Valid parameters are " << endl;
-			for (it = parameters.begin(); it != parameters.end(); it++) {
-				cout << it->first << ", ";
-			}
-			cout << endl;
-
-			return false;
-		}
+		if (command == "read.dist") {
+			//is it valid
+			if ((readdist.find(parameter)) != (readdist.end())) {
+				return true;
+			}else { 
+				cout << parameter << " is not a valid parameter for the read.dist command. Valid parameters are ";
+				for (it = readdist.begin(); it != readdist.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
+		}else if (command == "read.otu") {
+			//is it valid
+			if ((readotu.find(parameter)) != (readotu.end())) {
+				return true;
+			}else { 
+				cout << parameter << " is not a valid parameter for the read.otu command. Valid parameters are ";
+				for (it = readotu.begin(); it != readotu.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
+		//are you looking for a calculator for a rarefaction parameter
+		}else if (command == "read.tree") {
+			//is it valid
+			if ((readtree.find(parameter)) != (readtree.end())) {
+				return true;
+			}else { 
+				cout << parameter << " is not a valid parameter for the read.tree command. Valid parameters are ";
+				for (it = readtree.begin(); it != readtree.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
+		//are you looking for a calculator for a summary parameter
+		}else if (command == "cluster") {
+			//is it valid
+			if ((cluster.find(parameter)) != (cluster.end())) {
+				return true;
+			}else { 
+				cout << parameter << " is not a valid parameter for the cluster command. Valid parameters are ";
+				for (it = cluster.begin(); it != cluster.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }		//are you looking for a calculator for a sharedsummary parameter
+		}else if (command == "deconvolute") {
+			//is it valid
+			if ((deconvolute.find(parameter)) != (deconvolute.end())) {
+				return true;
+			}else { 
+				cout << parameter << " is not a valid parameter for the deconvolute command. Valid parameter is ";
+				for (it = deconvolute.begin(); it != deconvolute.end(); it++) {
+					cout << it->first;
+				}
+				cout << endl;
+				return false; }
+		}else if (command == "parsimony") {
+			//is it valid
+			if ((parsimony.find(parameter)) != (parsimony.end())) {
+				return true;
+			}else { 
+				cout << parameter << " is not a valid parameter for the parsimony command. Valid parameters are ";
+				for (it = parsimony.begin(); it != parsimony.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
+		}else if (command == "collect.single") {
+			//is it valid
+			if ((collectsingle.find(parameter)) != (collectsingle.end())) {
+				return true;
+			}else { 
+				cout << parameter << " is not a valid parameter for the collect.single command. Valid parameters are ";
+				for (it = collectsingle.begin(); it != collectsingle.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
+		}else if (command == "collect.shared") {
+			//is it valid
+			if ((collectshared.find(parameter)) != (collectshared.end())) {
+				return true;
+			}else { 
+				cout << parameter << " is not a valid parameter for the collect.shared command. Valid parameters are ";
+				for (it = collectshared.begin(); it != collectshared.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
+		}else if (command == "rarefaction.single") {
+			//is it valid
+			if ((rarefactsingle.find(parameter)) != (rarefactsingle.end())) {
+				return true;
+			}else { 
+				cout << parameter << " is not a valid parameter for the rarefaction.single command. Valid parameters are ";
+				for (it = rarefactsingle.begin(); it != rarefactsingle.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
+		}else if (command == "rarefaction.shared") {
+			//is it valid
+			if ((rarefactshared.find(parameter)) != (rarefactshared.end())) {
+				return true;
+			}else { 
+				cout << parameter << " is not a valid parameter for the rarefaction.shared command. Valid parameters are ";
+				for (it = rarefactshared.begin(); it != rarefactshared.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
+		}else if (command == "summary.single") {
+			//is it valid
+			if ((summarysingle.find(parameter)) != (summarysingle.end())) {
+				return true;
+			}else { 
+				cout << parameter << " is not a valid parameter for the summary.single command. Valid parameters are ";
+				for (it = summarysingle.begin(); it != summarysingle.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
+		}else if (command == "summary.shared") {
+			//is it valid
+			if ((summaryshared.find(parameter)) != (summaryshared.end())) {
+				return true;
+			}else { 
+				cout << parameter << " is not a valid parameter for the summary.shared command. Valid parameters are ";
+				for (it = summaryshared.begin(); it != summaryshared.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
+		}else if (command == "unifrac.weighted") {
+			//is it valid
+			if ((unifracweighted.find(parameter)) != (unifracweighted.end())) {
+				return true;
+			}else { 
+				cout << parameter << " is not a valid parameter for the unifrac.weighted command. Valid parameters are ";
+				for (it = unifracweighted.begin(); it != unifracweighted.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
+		}else if (command == "unifrac.unweighted") {
+			//is it valid
+			if ((unifracunweighted.find(parameter)) != (unifracunweighted.end())) {
+				return true;
+			}else { 
+				cout << parameter << " is not a valid parameter for the unifrac.unweighted command. Valid parameters are ";
+				for (it = unifracunweighted.begin(); it != unifracunweighted.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
+		}else if (command == "libshuff") {
+			//is it valid
+			if ((libshuff.find(parameter)) != (libshuff.end())) {
+				return true;
+			}else { 
+				cout << parameter << " is not a valid parameter for the libshuff command. Valid parameters are ";
+				for (it = libshuff.begin(); it != libshuff.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
+		//not a valid paramter
+		}else if (command == "help") { cout << parameter << " is not a valid parameter for the help command. There are no vaild parameters.";  
+		}else if (command == "quit") { cout << parameter << " is not a valid parameter for the quit command. There are no vaild parameters."; 
+		}else if (command == "get.group") { cout << parameter << " is not a valid parameter for the get.group command. There are no vaild parameters."; 
+		}else if (command == "get.label") { cout << parameter << " is not a valid parameter for the get.label command. There are no vaild parameters."; 
+		}else if (command == "get.line") { cout << parameter << " is not a valid parameter for the get.line command. There are no vaild parameters.";  }
+		
+		return false; 
 		
 	}
 	catch(exception& e) {
@@ -85,4 +234,108 @@ bool ValidParameters::isValidParameter(string parameter) {
 	}
 }
 
+/***********************************************************************/
+void ValidParameters::initialReaddist() {
+	readdist["phylip"]		= "phylip";
+	readdist["column"]		= "column";
+	readdist["name"]		= "name"; 
+	readdist["group"]		= "group"; 
+	readdist["cutoff"]		= "cutoff"; 
+	readdist["precision"]	= "precision"; 
+}
+/***********************************************************************/
+void ValidParameters::initialReadotu() {
+	readotu["list"]			= "list"; 
+	readotu["rabund"]		= "rabund"; 
+	readotu["sabund"]		= "sabund";
+	readotu["shared"]		= "shared";
+	readotu["group"]		= "group"; 
+	readotu["order"]		= "order"; 
+	readotu["label"]		= "label"; 
+	readotu["line"]			= "line";
+}
+/***********************************************************************/
+void ValidParameters::initialReadtree() {
+	readtree["group"]	= "group"; 
+	readtree["tree"]	= "tree";
+}
+/***********************************************************************/
+void ValidParameters::initialCluster() {
+	cluster["cutoff"]		= "cutoff"; 
+	cluster["method"]		= "method";
+	cluster["precision"]	= "precision"; 
+}
+/***********************************************************************/
+void ValidParameters::initialDeconvolute() {
+	deconvolute["fasta"]	= "fasta"; 
+}
+/***********************************************************************/
+void ValidParameters::initialParsimony() {
+	parsimony["iters"]		= "iters"; 
+	parsimony["random"]		= "random";
+	parsimony["groups"]		= "groups";
+}
+/***********************************************************************/
+void ValidParameters::initialCollectsingle() {
+	collectsingle["label"]		= "label"; 
+	collectsingle["line"]		= "line";
+	collectsingle["freq"]		= "freq"; 
+	collectsingle["calc"]		= "calc";
+}
+/***********************************************************************/
+void ValidParameters::initialCollectshared() {
+	collectshared["label"]		= "label"; 
+	collectshared["line"]		= "line";
+	collectshared["freq"]		= "freq"; 
+	collectshared["calc"]		= "calc";
+	collectshared["jumble"]		= "jumble";
+}
+/***********************************************************************/
+void ValidParameters::initialRarefactsingle() {
+	rarefactsingle["label"]		= "label"; 
+	rarefactsingle["line"]		= "line";
+	rarefactsingle["freq"]		= "freq"; 
+	rarefactsingle["calc"]		= "calc";
+	rarefactsingle["iters"]		= "iters"; 
+}
+/***********************************************************************/
+void ValidParameters::initialRarefactshared() {
+	rarefactshared["label"]		= "label"; 
+	rarefactshared["line"]		= "line";
+	rarefactshared["jumble"]	= "jumble";
+	rarefactshared["calc"]		= "calc";
+	rarefactshared["iters"]		= "iters"; 
+}
+/***********************************************************************/
+void ValidParameters::initialSummarysingle() {
+	summarysingle["label"]		= "label"; 
+	summarysingle["line"]		= "line";
+	summarysingle["calc"]		= "calc";
+}
+/***********************************************************************/
+void ValidParameters::initialSummaryshared() {
+	summaryshared["label"]		= "label"; 
+	summaryshared["line"]		= "line";
+	summaryshared["calc"]		= "calc";
+	summaryshared["jumble"]		= "jumble";
+
+}
+/***********************************************************************/
+void ValidParameters::initialUnifracweighted() {
+	unifracweighted["iters"]		= "iters"; 
+	unifracweighted["groups"]		= "groups";
+}
+/***********************************************************************/
+void ValidParameters::initialUnifracunweighted() {
+	unifracunweighted["iters"]		= "iters"; 
+	unifracunweighted["groups"]		= "groups";
+}
+/***********************************************************************/
+void ValidParameters::initialLibshuff() {
+	libshuff["cutoff"]		= "cutoff"; 
+	libshuff["iters"]		= "iters"; 
+	libshuff["groups"]		= "groups";
+	libshuff["step"]		= "step";
+	libshuff["form"]		= "form";
+}
 /***********************************************************************/

@@ -19,21 +19,21 @@ ValidCommands::ValidCommands() {
 		commands["read.tree"]			= "read.tree"; 
 		commands["cluster"]				= "cluster"; 
 		commands["deconvolute"]			= "deconvolute"; 
-		commands["parsimony"]			= "parsimony";
-		commands["help"]				= "help"; 
-		commands["quit"]				= "quit"; 
 		commands["collect.single"]		= "collect.single"; 
 		commands["collect.shared"]		= "collect.shared"; 
-		commands["get.group"]           = "get.group";
-		commands["get.label"]           = "get.label";
-		commands["get.line"]            = "get.line";
 		commands["rarefaction.single"]	= "rarefaction.single"; 
 		commands["rarefaction.shared"]	= "rarefaction.shared"; 
 		commands["summary.single"]		= "summary.single"; 
 		commands["summary.shared"]		= "summary.shared"; 
+		commands["parsimony"]			= "parsimony";
 		commands["unifrac.weighted"]	= "unifrac.weighted"; 
 		commands["unifrac.unweighted"]	= "unifrac.unweighted"; 
 		commands["libshuff"]			= "libshuff";
+		commands["get.group"]           = "get.group";
+		commands["get.label"]           = "get.label";
+		commands["get.line"]            = "get.line";
+		commands["help"]				= "help"; 
+		commands["quit"]				= "quit"; 
 
 				
 	}
