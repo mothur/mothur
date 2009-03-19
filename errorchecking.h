@@ -26,8 +26,6 @@ class ErrorCheck {
 		ValidCommands* validCommand;
 		ValidParameters* validParameter;
 		void validateReadFiles();
-	//	bool validCommandParameter(string, string);
-	//	bool validParameterValue(string, string);
 		void validateReadDist();
 		void validateReadPhil();
 		void validateParseFiles();
@@ -40,9 +38,5 @@ class ErrorCheck {
 		bool errorFree;
 
 		vector<string> sharedGroups;
-	//	map <string, vector<string> > commandParameters;
-	///	map <string, vector<double> > intParams;
-	//	double piSent;
-
 };
 #endif

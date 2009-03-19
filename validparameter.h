@@ -23,10 +23,42 @@ class ValidParameters {
 	public:
 		ValidParameters();
 		~ValidParameters();
-		bool isValidParameter(string);
+		bool isValidParameter(string, string);
+		
 	private:
-		map<string, string> parameters;
+		map<string, string> readdist;
+		map<string, string> readotu;
+		map<string, string> readtree;
+		map<string, string> cluster;
+		map<string, string> deconvolute;
+		map<string, string> parsimony;
+		map<string, string> collectsingle;
+		map<string, string> collectshared;
+		map<string, string> rarefactsingle;
+		map<string, string> rarefactshared;
+		map<string, string> summarysingle;
+		map<string, string> summaryshared;
+		map<string, string> unifracweighted;
+		map<string, string> unifracunweighted;
+		map<string, string> libshuff;
+		
 		map<string, string>::iterator it;
+		
+		void initialReaddist();
+		void initialReadotu();
+		void initialReadtree();
+		void initialCluster();
+		void initialDeconvolute();
+		void initialParsimony();
+		void initialCollectsingle();
+		void initialCollectshared();
+		void initialRarefactsingle();
+		void initialRarefactshared();
+		void initialSummarysingle();
+		void initialSummaryshared();
+		void initialUnifracweighted();
+		void initialUnifracunweighted();
+		void initialLibshuff();
 
 };
 
