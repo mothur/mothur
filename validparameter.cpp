@@ -52,7 +52,7 @@ bool ValidParameters::isValidParameter(string parameter, string command) {
 			if ((readdist.find(parameter)) != (readdist.end())) {
 				return true;
 			}else { 
-				cout << parameter << " is not a valid parameter for the read.dist command. Valid parameters are ";
+				cout << parameter << " is not a valid parameter for the " + command + " command. Valid parameters are ";
 				for (it = readdist.begin(); it != readdist.end(); it++) {
 					cout << it->first << ", ";
 				}
@@ -63,7 +63,7 @@ bool ValidParameters::isValidParameter(string parameter, string command) {
 			if ((readotu.find(parameter)) != (readotu.end())) {
 				return true;
 			}else { 
-				cout << parameter << " is not a valid parameter for the read.otu command. Valid parameters are ";
+				cout << parameter << " is not a valid parameter for the " + command + " command. Valid parameters are ";
 				for (it = readotu.begin(); it != readotu.end(); it++) {
 					cout << it->first << ", ";
 				}
@@ -75,7 +75,7 @@ bool ValidParameters::isValidParameter(string parameter, string command) {
 			if ((readtree.find(parameter)) != (readtree.end())) {
 				return true;
 			}else { 
-				cout << parameter << " is not a valid parameter for the read.tree command. Valid parameters are ";
+				cout << parameter << " is not a valid parameter for the " + command + " command. Valid parameters are ";
 				for (it = readtree.begin(); it != readtree.end(); it++) {
 					cout << it->first << ", ";
 				}
@@ -87,7 +87,7 @@ bool ValidParameters::isValidParameter(string parameter, string command) {
 			if ((cluster.find(parameter)) != (cluster.end())) {
 				return true;
 			}else { 
-				cout << parameter << " is not a valid parameter for the cluster command. Valid parameters are ";
+				cout << parameter << " is not a valid parameter for the " + command + " command. Valid parameters are ";
 				for (it = cluster.begin(); it != cluster.end(); it++) {
 					cout << it->first << ", ";
 				}
@@ -98,7 +98,7 @@ bool ValidParameters::isValidParameter(string parameter, string command) {
 			if ((deconvolute.find(parameter)) != (deconvolute.end())) {
 				return true;
 			}else { 
-				cout << parameter << " is not a valid parameter for the deconvolute command. Valid parameter is ";
+				cout << parameter << " is not a valid parameter for the " + command + " command. Valid parameters are ";
 				for (it = deconvolute.begin(); it != deconvolute.end(); it++) {
 					cout << it->first;
 				}
@@ -109,7 +109,7 @@ bool ValidParameters::isValidParameter(string parameter, string command) {
 			if ((parsimony.find(parameter)) != (parsimony.end())) {
 				return true;
 			}else { 
-				cout << parameter << " is not a valid parameter for the parsimony command. Valid parameters are ";
+				cout << parameter << " is not a valid parameter for the " + command + " command. Valid parameters are ";
 				for (it = parsimony.begin(); it != parsimony.end(); it++) {
 					cout << it->first << ", ";
 				}
@@ -120,7 +120,7 @@ bool ValidParameters::isValidParameter(string parameter, string command) {
 			if ((collectsingle.find(parameter)) != (collectsingle.end())) {
 				return true;
 			}else { 
-				cout << parameter << " is not a valid parameter for the collect.single command. Valid parameters are ";
+				cout << parameter << " is not a valid parameter for the " + command + " command. Valid parameters are ";
 				for (it = collectsingle.begin(); it != collectsingle.end(); it++) {
 					cout << it->first << ", ";
 				}
@@ -131,7 +131,7 @@ bool ValidParameters::isValidParameter(string parameter, string command) {
 			if ((collectshared.find(parameter)) != (collectshared.end())) {
 				return true;
 			}else { 
-				cout << parameter << " is not a valid parameter for the collect.shared command. Valid parameters are ";
+				cout << parameter << " is not a valid parameter for the " + command + " command. Valid parameters are ";
 				for (it = collectshared.begin(); it != collectshared.end(); it++) {
 					cout << it->first << ", ";
 				}
@@ -142,7 +142,7 @@ bool ValidParameters::isValidParameter(string parameter, string command) {
 			if ((rarefactsingle.find(parameter)) != (rarefactsingle.end())) {
 				return true;
 			}else { 
-				cout << parameter << " is not a valid parameter for the rarefaction.single command. Valid parameters are ";
+				cout << parameter << " is not a valid parameter for the " + command + " command. Valid parameters are ";
 				for (it = rarefactsingle.begin(); it != rarefactsingle.end(); it++) {
 					cout << it->first << ", ";
 				}
@@ -153,7 +153,7 @@ bool ValidParameters::isValidParameter(string parameter, string command) {
 			if ((rarefactshared.find(parameter)) != (rarefactshared.end())) {
 				return true;
 			}else { 
-				cout << parameter << " is not a valid parameter for the rarefaction.shared command. Valid parameters are ";
+				cout << parameter << " is not a valid parameter for the " + command + " command. Valid parameters are ";
 				for (it = rarefactshared.begin(); it != rarefactshared.end(); it++) {
 					cout << it->first << ", ";
 				}
@@ -164,7 +164,7 @@ bool ValidParameters::isValidParameter(string parameter, string command) {
 			if ((summarysingle.find(parameter)) != (summarysingle.end())) {
 				return true;
 			}else { 
-				cout << parameter << " is not a valid parameter for the summary.single command. Valid parameters are ";
+				cout << parameter << " is not a valid parameter for the " + command + " command. Valid parameters are ";
 				for (it = summarysingle.begin(); it != summarysingle.end(); it++) {
 					cout << it->first << ", ";
 				}
@@ -175,7 +175,7 @@ bool ValidParameters::isValidParameter(string parameter, string command) {
 			if ((summaryshared.find(parameter)) != (summaryshared.end())) {
 				return true;
 			}else { 
-				cout << parameter << " is not a valid parameter for the summary.shared command. Valid parameters are ";
+				cout << parameter << " is not a valid parameter for the " + command + " command. Valid parameters are ";
 				for (it = summaryshared.begin(); it != summaryshared.end(); it++) {
 					cout << it->first << ", ";
 				}
@@ -186,7 +186,7 @@ bool ValidParameters::isValidParameter(string parameter, string command) {
 			if ((unifracweighted.find(parameter)) != (unifracweighted.end())) {
 				return true;
 			}else { 
-				cout << parameter << " is not a valid parameter for the unifrac.weighted command. Valid parameters are ";
+				cout << parameter << " is not a valid parameter for the " + command + " command. Valid parameters are ";
 				for (it = unifracweighted.begin(); it != unifracweighted.end(); it++) {
 					cout << it->first << ", ";
 				}
@@ -197,7 +197,7 @@ bool ValidParameters::isValidParameter(string parameter, string command) {
 			if ((unifracunweighted.find(parameter)) != (unifracunweighted.end())) {
 				return true;
 			}else { 
-				cout << parameter << " is not a valid parameter for the unifrac.unweighted command. Valid parameters are ";
+				cout << parameter << " is not a valid parameter for the " + command + " command. Valid parameters are ";
 				for (it = unifracunweighted.begin(); it != unifracunweighted.end(); it++) {
 					cout << it->first << ", ";
 				}
@@ -208,18 +208,18 @@ bool ValidParameters::isValidParameter(string parameter, string command) {
 			if ((libshuff.find(parameter)) != (libshuff.end())) {
 				return true;
 			}else { 
-				cout << parameter << " is not a valid parameter for the libshuff command. Valid parameters are ";
+				cout << parameter << " is not a valid parameter for the " + command + " command. Valid parameters are ";
 				for (it = libshuff.begin(); it != libshuff.end(); it++) {
 					cout << it->first << ", ";
 				}
 				cout << endl;
 				return false; }
 		//not a valid paramter
-		}else if (command == "help") { cout << parameter << " is not a valid parameter for the help command. There are no vaild parameters.";  
-		}else if (command == "quit") { cout << parameter << " is not a valid parameter for the quit command. There are no vaild parameters."; 
-		}else if (command == "get.group") { cout << parameter << " is not a valid parameter for the get.group command. There are no vaild parameters."; 
-		}else if (command == "get.label") { cout << parameter << " is not a valid parameter for the get.label command. There are no vaild parameters."; 
-		}else if (command == "get.line") { cout << parameter << " is not a valid parameter for the get.line command. There are no vaild parameters.";  }
+		}else if (command == "help") { cout << parameter << " is not a valid parameter for the " + command + " command. There are no vaild parameters." << endl;  
+		}else if (command == "quit") { cout << parameter << " is not a valid parameter for the " + command + " command. There are no vaild parameters." << endl; 
+		}else if (command == "get.group") { cout << parameter << " is not a valid parameter for the " + command + " command. There are no vaild parameters." << endl; 
+		}else if (command == "get.label") { cout << parameter << " is not a valid parameter for the " + command + " command. There are no vaild parameters." << endl; 
+		}else if (command == "get.line") { cout << parameter << " is not a valid parameter for the " + command + " command. There are no vaild parameters." << endl; }
 		
 		return false; 
 		
