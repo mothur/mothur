@@ -22,7 +22,6 @@
 #include "summarycommand.h"
 #include "summarysharedcommand.h"
 #include "rarefactsharedcommand.h"
-#include "nocommand.h"
 #include "quitcommand.h"
 #include "helpcommand.h"
 #include "commandfactory.hpp"
@@ -37,9 +36,7 @@
 /***********************************************************/
 
 /***********************************************************/
-CommandFactory::CommandFactory(){
-	command = new NoCommand();
-}
+CommandFactory::CommandFactory(){}
 
 /***********************************************************/
 
@@ -76,7 +73,6 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "get.label")             {   command = new GetlabelCommand();			}
 		else if(commandName == "get.line")              {   command = new GetlineCommand();				}
 		else if(commandName == "libshuff")              {   command = new LibShuffCommand();			}
-		else											{	command = new NoCommand();					}
 
 		return command;
 	}
