@@ -7,6 +7,12 @@
  *
  */
 
+/* This class library coverage at the given distances of the Cramer-von Mises statistic.
+	you may refer to the "Integration of Microbial Ecology and Statistics: A Test To Compare Gene Libraries" 
+	paper in Applied and Environmental Microbiology, Sept. 2004, p. 5485-5492 0099-2240/04/$8.00+0  
+	DOI: 10.1128/AEM.70.9.5485-5492.2004 Copyright 2004 American Society for Microbiology for more information. */
+	
+	
 #include "coverage.h"
 
 //**********************************************************************************************************************
