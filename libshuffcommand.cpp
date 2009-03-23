@@ -103,11 +103,11 @@ int LibShuffCommand::execute(){
 		deltaValues.clear();
 		deltaValues.resize(dist.size());			
 		
-		coverage->getValues(matrix, cValues, dist, "user");
+		coverage->getValues(matrix, cValues, dist);
 		
-		float distDiff = dist[0];
+		float distDiff = 0;
 		
-		//loop through each distance and load rsumdelta
+		//loop through each distance and load sumdelta
 		for (int p = 0; p < cValues.size(); p++) {	
 			//find delta values
 			int count = 0;
@@ -115,16 +115,15 @@ int LibShuffCommand::execute(){
 				for (int j = 0; j < numGroups; j++) {
 					//don't save AA to AA
 					if (i != j) {
-						//(Caa - Cab)^2
-						deltaValues[p].push_back(((cValues[p][i][i]-cValues[p][i][j]) * (cValues[p][i][i]-cValues[p][i][j])) * distDiff);
+						//(Caa - Cab)^2 * distDiff
+						deltaValues[p].push_back(((cValues[p][i][i]-cValues[p][i][j]) * (cValues[p][i][i]-cValues[p][i][j])) * distDiff); //* distDiff
 						sumDelta[count] += deltaValues[p][count];
 						count++;
 					}
 				}
 			}
 			if (p < cValues.size() - 1) {
-					distDiff = dist[p+1] - dist[p];	
-//cout << distDiff << endl;
+				distDiff = dist[p+1] - dist[p];	
 			}
 		}
 			
@@ -149,8 +148,6 @@ int LibShuffCommand::execute(){
 		
 			coverage->getValues(matrix, cValues, dist, "random");
 			
-			distDiff = 1;
-			
 			//loop through each distance and load rsumdelta
 			for (int p = 0; p < cValues.size(); p++) {
 				//find delta values
@@ -159,15 +156,11 @@ int LibShuffCommand::execute(){
 					for (int j = 0; j < numGroups; j++) {
 						//don't save AA to AA
 						if (i != j) {
-							//(Caa - Cab)^2
-							rsumDelta[count][m] += (((cValues[p][i][i]-cValues[p][i][j]) * (cValues[p][i][i]-cValues[p][i][j])) * distDiff);
+							//rsumDelta[3][500] = the sum of the delta scores for BB-BC for random matrix # 500.
+							rsumDelta[count][m] += cValues[p][i][j];  // where cValues[p][0][1] = delta value at distance p of AA-AB, cValues[p][1][2] = delta value at distance p of BB-BC. 
 							count++;
 						}
 					}
-				}
-				
-				if (p < cValues.size() - 1) {
-					distDiff = dist[p+1] - dist[p];	
 				}
 			}
 
@@ -330,6 +323,10 @@ void LibShuffCommand::setGroups() {
 		
 		//sort so labels match
 		sort(globaldata->Groups.begin(), globaldata->Groups.end());
+		
+		//sort
+		sort(globaldata->gGroupmap->namesOfGroups.begin(), globaldata->gGroupmap->namesOfGroups.end());
+
 		
 		// number of comparisons i.e. with groups A,B,C = AA, AB, AC, BA, BB, BC...;
 		for (int i=0; i<numGroups; i++) { 

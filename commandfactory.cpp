@@ -31,7 +31,7 @@
 #include "unifracweightedcommand.h"
 #include "libshuffcommand.h"
 #include "mothur.h"
-#include "nocommand.h"
+#include "nocommands.h"
 
 
 /***********************************************************/
