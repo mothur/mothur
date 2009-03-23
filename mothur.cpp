@@ -20,19 +20,19 @@ int main(int argc, char *argv[]){
 		//srand(54321);
 		srand( (unsigned)time( NULL ) );
 
-		Engine* dotur;
+		Engine* mothur;
 		bool bail = 0;
 
 		if(argc>1){
-			dotur = new BatchEngine(argv[1]);
+			mothur = new BatchEngine(argv[1]);
 		}
 		else{
-			dotur = new InteractEngine();		
+			mothur = new InteractEngine();		
 		}
 
-		while(bail == 0)		{	bail = dotur->getInput();			}
+		while(bail == 0)		{	bail = mothur->getInput();			}
 	
-		delete dotur;
+		delete mothur;
 	
 		return 0;
 	}

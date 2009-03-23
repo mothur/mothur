@@ -20,7 +20,7 @@ ReadTreeCommand::ReadTreeCommand(){
 		treeMap->readMap();
 		
 		//memory leak prevention
-		if (globaldata->gTreemap != NULL) { delete globaldata->gTreemap;  }
+		//if (globaldata->gTreemap != NULL) { delete globaldata->gTreemap;  }
 		globaldata->gTreemap = treeMap;
 
 		read = new ReadNewickTree(filename);
