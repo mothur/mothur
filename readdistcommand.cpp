@@ -21,7 +21,7 @@ ReadDistCommand::ReadDistCommand(){
 		else if (format == "matrix") { 
 				groupMap = new GroupMap(globaldata->getGroupFile());
 				groupMap->readMap();
-				if (globaldata->gGroupmap != NULL) { delete globaldata->gGroupmap;  }
+				//if (globaldata->gGroupmap != NULL) { delete globaldata->gGroupmap;  }
 				globaldata->gGroupmap = groupMap;
 		}
 		
@@ -71,7 +71,7 @@ int ReadDistCommand::execute(){
 			openInputFile(filename, in);
 			matrix = new FullMatrix(in); //reads the matrix file
 			//memory leak prevention
-			if (globaldata->gMatrix != NULL) { delete globaldata->gMatrix;  }
+			//if (globaldata->gMatrix != NULL) { delete globaldata->gMatrix;  }
 			globaldata->gMatrix = matrix; //save matrix for coverage commands
 		}else {
 			read->read(nameMap);

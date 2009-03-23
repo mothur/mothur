@@ -16,6 +16,7 @@
 		3746109D0F40657600460C57 /* unifracunweightedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3746109C0F40657600460C57 /* unifracunweightedcommand.cpp */; };
 		374CD63F0F65832000D90B4A /* libshuffcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 374CD63E0F65832000D90B4A /* libshuffcommand.cpp */; };
 		374CD6F10F65A4C100D90B4A /* coverage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 374CD6F00F65A4C100D90B4A /* coverage.cpp */; };
+		3765B47A0F77D15900C3EDC5 /* nocommands.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3765B4780F77D15900C3EDC5 /* nocommands.cpp */; };
 		3782163D0F616079008E1F6D /* fullmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3782163C0F616079008E1F6D /* fullmatrix.cpp */; };
 		379293C30F2DE73400B9034A /* treemap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 379293C20F2DE73400B9034A /* treemap.cpp */; };
 		379294700F2E191800B9034A /* parsimonycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3792946F0F2E191800B9034A /* parsimonycommand.cpp */; };
@@ -133,6 +134,8 @@
 		374CD63E0F65832000D90B4A /* libshuffcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = libshuffcommand.cpp; sourceTree = "<group>"; };
 		374CD6EF0F65A4C100D90B4A /* coverage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = coverage.h; sourceTree = "<group>"; };
 		374CD6F00F65A4C100D90B4A /* coverage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = coverage.cpp; sourceTree = "<group>"; };
+		3765B4780F77D15900C3EDC5 /* nocommands.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nocommands.cpp; sourceTree = "<group>"; };
+		3765B4790F77D15900C3EDC5 /* nocommands.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nocommands.h; sourceTree = "<group>"; };
 		3782163B0F616079008E1F6D /* fullmatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fullmatrix.h; sourceTree = "<group>"; };
 		3782163C0F616079008E1F6D /* fullmatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fullmatrix.cpp; sourceTree = "<group>"; };
 		379293C10F2DE73400B9034A /* treemap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = treemap.h; sourceTree = "<group>"; };
@@ -485,6 +488,8 @@
 				37D927E30F21331F001D4494 /* helpcommand.cpp */,
 				374CD63D0F65832000D90B4A /* libshuffcommand.h */,
 				374CD63E0F65832000D90B4A /* libshuffcommand.cpp */,
+				3765B4790F77D15900C3EDC5 /* nocommands.h */,
+				3765B4780F77D15900C3EDC5 /* nocommands.cpp */,
 				37D927FA0F21331F001D4494 /* parselistcommand.h */,
 				37D927F90F21331F001D4494 /* parselistcommand.cpp */,
 				3792946E0F2E191800B9034A /* parsimonycommand.h */,
@@ -709,6 +714,7 @@
 				3782163D0F616079008E1F6D /* fullmatrix.cpp in Sources */,
 				374CD63F0F65832000D90B4A /* libshuffcommand.cpp in Sources */,
 				374CD6F10F65A4C100D90B4A /* coverage.cpp in Sources */,
+				3765B47A0F77D15900C3EDC5 /* nocommands.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

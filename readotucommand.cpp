@@ -44,7 +44,7 @@ int ReadOtuCommand::execute(){
 		if (globaldata->getFormat() == "shared") {
 			groupMap->readMap();
 			
-			if (globaldata->gGroupmap != NULL) { delete globaldata->gGroupmap;  }
+			//if (globaldata->gGroupmap != NULL) { delete globaldata->gGroupmap;  }
 			globaldata->gGroupmap = groupMap;
 		
 			shared = new SharedCommand();

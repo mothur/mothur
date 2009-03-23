@@ -31,13 +31,15 @@
 #include "unifracweightedcommand.h"
 #include "libshuffcommand.h"
 #include "mothur.h"
+#include "nocommand.h"
 
 
 /***********************************************************/
 
 /***********************************************************/
-CommandFactory::CommandFactory(){}
-
+CommandFactory::CommandFactory(){
+	command = new NoCommand();
+}
 /***********************************************************/
 
 /***********************************************************/
@@ -73,6 +75,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "get.label")             {   command = new GetlabelCommand();			}
 		else if(commandName == "get.line")              {   command = new GetlineCommand();				}
 		else if(commandName == "libshuff")              {   command = new LibShuffCommand();			}
+		else											{	command = new NoCommand();					}
 
 		return command;
 	}

@@ -44,7 +44,10 @@ void ErrorCheck::refresh() {
 
 /******************************************************/
 
-ErrorCheck::~ErrorCheck() {}
+ErrorCheck::~ErrorCheck() {
+	delete validCommand;
+	delete validParameter;
+}
 
 /*******************************************************/
 
@@ -80,7 +83,7 @@ bool ErrorCheck::checkInput(string input) {
 				splitAtComma(value, optionText);
 				splitAtEquals(parameter, value);
 				
-				//is it a valid parameter
+				//is it a valid parameter for the command
 				if (validParameter->isValidParameter(parameter, commandName) != true) { return false; }
 				
 				if (parameter == "phylip" )		{ phylipfile = value; }
@@ -111,7 +114,8 @@ bool ErrorCheck::checkInput(string input) {
 			if (errorFree)  { //gets the last parameter and value
 				value = optionText;
 				splitAtEquals(parameter, value);
-				//is it a valid parameter
+				
+				//is it a valid parameter for the command
 				if (validParameter->isValidParameter(parameter, commandName) != true) { return false; }
 				
 				if (parameter == "phylip" )		{ phylipfile = value; }
@@ -142,6 +146,7 @@ bool ErrorCheck::checkInput(string input) {
 		//make sure the user does not use both the line and label parameters
 		if ((line != "") && (label != "")) { cout << "You may use either the line or label parameters, but not both." << endl; return false; }
 		
+		//check for valid files 
 		if (commandName == "read.dist") { 
 			validateReadFiles();
 			validateReadDist();
@@ -149,12 +154,15 @@ bool ErrorCheck::checkInput(string input) {
 			//you want to do shared commands
 			if ((listfile != "") && (groupfile != ""))	{
 				validateParseFiles(); //checks the listfile and groupfile parameters
-			}else if (listfile != "") { //you want to do single commands
+			//you want to do single commands
+			}else if ((listfile != "") || (rabundfile != "") || (sabundfile != "")){ 
 				validateReadFiles();
 				validateReadPhil();
-			}else if ((listfile == "") && (sharedfile == "")) {
-				cout << "You must enter either a listfile or a sharedfile with the read.otu command. " << endl; return false; 
-			}else{//you are reading a shared file
+			//you have not given a file
+			}else if ((listfile == "") && (sharedfile == "") && (rabundfile == "") && (sabundfile == "")) {
+				cout << "You must enter either a listfile, rabundfile, sabundfile or a sharedfile with the read.otu command. " << endl; return false; 
+			//you want to do shared commands with a shared file
+			}else if (sharedfile != "") {//you are reading a shared file
 				validateReadFiles();
 			}
 		}else if (commandName == "read.tree") { 
@@ -172,7 +180,7 @@ bool ErrorCheck::checkInput(string input) {
 		} 
 		
 		if ((commandName == "libshuff") && ((globaldata->gMatrix == NULL) || (globaldata->gGroupmap == NULL))) {
-			 cout << "You must read in a matrix and groupfile before you use the libshuff command. " << endl; return false; 
+			 cout << "You must read in a matrix and groupfile using the read.dist command, before you use the libshuff command. " << endl; return false; 
 		}
 		
 		if (commandName == "parsimony") {

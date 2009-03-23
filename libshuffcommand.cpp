@@ -105,6 +105,8 @@ int LibShuffCommand::execute(){
 		
 		coverage->getValues(matrix, cValues, dist, "user");
 		
+		float distDiff = dist[0];
+		
 		//loop through each distance and load rsumdelta
 		for (int p = 0; p < cValues.size(); p++) {	
 			//find delta values
@@ -114,11 +116,15 @@ int LibShuffCommand::execute(){
 					//don't save AA to AA
 					if (i != j) {
 						//(Caa - Cab)^2
-						deltaValues[p].push_back((cValues[p][i][i]-cValues[p][i][j]) * (cValues[p][i][i]-cValues[p][i][j]));
+						deltaValues[p].push_back(((cValues[p][i][i]-cValues[p][i][j]) * (cValues[p][i][i]-cValues[p][i][j])) * distDiff);
 						sumDelta[count] += deltaValues[p][count];
 						count++;
 					}
 				}
+			}
+			if (p < cValues.size() - 1) {
+					distDiff = dist[p+1] - dist[p];	
+//cout << distDiff << endl;
 			}
 		}
 			
@@ -143,6 +149,8 @@ int LibShuffCommand::execute(){
 		
 			coverage->getValues(matrix, cValues, dist, "random");
 			
+			distDiff = 1;
+			
 			//loop through each distance and load rsumdelta
 			for (int p = 0; p < cValues.size(); p++) {
 				//find delta values
@@ -152,12 +160,15 @@ int LibShuffCommand::execute(){
 						//don't save AA to AA
 						if (i != j) {
 							//(Caa - Cab)^2
-							rsumDelta[count][m] += ((cValues[p][i][i]-cValues[p][i][j]) * (cValues[p][i][i]-cValues[p][i][j]));
+							rsumDelta[count][m] += (((cValues[p][i][i]-cValues[p][i][j]) * (cValues[p][i][i]-cValues[p][i][j])) * distDiff);
 							count++;
 						}
 					}
 				}
 				
+				if (p < cValues.size() - 1) {
+					distDiff = dist[p+1] - dist[p];	
+				}
 			}
 
 			//clear out old Values
