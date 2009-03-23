@@ -20,6 +20,8 @@
 #include "sharedthetayc.h"
 #include "sharedthetan.h"
 #include "sharednseqs.h"
+#include "sharedochiai.h"
+#include "sharedanderberg.h"
 
 
 //**********************************************************************************************************************
@@ -59,6 +61,10 @@ CollectSharedCommand::CollectSharedCommand(){
 					cDisplays.push_back(new CollectDisplay(new SharedThetaN(), new SharedOneColumnFile(fileNameRoot+"shared.thetan")));
 				}else if (globaldata->Estimators[i] == "sharednseqs") { 
 					cDisplays.push_back(new CollectDisplay(new SharedNSeqs(), new SharedOneColumnFile(fileNameRoot+"shared.nseqs")));
+				}else if (globaldata->Estimators[i] == "sharedochiai") { 
+					cDisplays.push_back(new CollectDisplay(new SharedOchiai(), new SharedOneColumnFile(fileNameRoot+"shared.ochiai")));
+				}else if (globaldata->Estimators[i] == "sharedanderberg") { 
+					cDisplays.push_back(new CollectDisplay(new SharedAnderberg(), new SharedOneColumnFile(fileNameRoot+"shared.anderberg")));
 				}
 
 			}

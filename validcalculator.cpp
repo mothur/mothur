@@ -162,6 +162,8 @@ void ValidCalculators::initialShared() {
 		shared["sharedthetayc"]			= "sharedthetayc";
 		shared["sharedthetan"]			= "sharedthetan";
 		shared["sharednseqs"]			= "sharednseqs";
+		shared["sharedochiai"]			= "sharedochiai";
+		shared["sharedanderberg"]		= "sharedanderberg";
 		shared["default"]	            = "default";
 	}
 	catch(exception& e) {
@@ -238,6 +240,8 @@ void ValidCalculators::initialSharedSummary() {
 		sharedsummary["sharedthetayc"]			= "sharedthetayc";
 		sharedsummary["sharedthetan"]			= "sharedthetan";
 		sharedsummary["sharednseqs"]			= "sharednseqs";
+		sharedsummary["sharedochiai"]			= "sharedochiai";
+		sharedsummary["sharedanderberg"]		= "sharedanderberg";
 		sharedsummary["default"]				= "default";
 	}
 	catch(exception& e) {

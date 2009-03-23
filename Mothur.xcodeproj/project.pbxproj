@@ -17,6 +17,8 @@
 		374CD63F0F65832000D90B4A /* libshuffcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 374CD63E0F65832000D90B4A /* libshuffcommand.cpp */; };
 		374CD6F10F65A4C100D90B4A /* coverage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 374CD6F00F65A4C100D90B4A /* coverage.cpp */; };
 		3765B47A0F77D15900C3EDC5 /* nocommands.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3765B4780F77D15900C3EDC5 /* nocommands.cpp */; };
+		3765B4E20F78055000C3EDC5 /* sharedochiai.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3765B4E10F78055000C3EDC5 /* sharedochiai.cpp */; };
+		3765B5160F780A7F00C3EDC5 /* sharedanderberg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3765B5150F780A7F00C3EDC5 /* sharedanderberg.cpp */; };
 		3782163D0F616079008E1F6D /* fullmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3782163C0F616079008E1F6D /* fullmatrix.cpp */; };
 		379293C30F2DE73400B9034A /* treemap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 379293C20F2DE73400B9034A /* treemap.cpp */; };
 		379294700F2E191800B9034A /* parsimonycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3792946F0F2E191800B9034A /* parsimonycommand.cpp */; };
@@ -136,6 +138,10 @@
 		374CD6F00F65A4C100D90B4A /* coverage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = coverage.cpp; sourceTree = "<group>"; };
 		3765B4780F77D15900C3EDC5 /* nocommands.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nocommands.cpp; sourceTree = "<group>"; };
 		3765B4790F77D15900C3EDC5 /* nocommands.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nocommands.h; sourceTree = "<group>"; };
+		3765B4E00F78055000C3EDC5 /* sharedochiai.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedochiai.h; sourceTree = "<group>"; };
+		3765B4E10F78055000C3EDC5 /* sharedochiai.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedochiai.cpp; sourceTree = "<group>"; };
+		3765B5140F780A7F00C3EDC5 /* sharedanderberg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedanderberg.h; sourceTree = "<group>"; };
+		3765B5150F780A7F00C3EDC5 /* sharedanderberg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedanderberg.cpp; sourceTree = "<group>"; };
 		3782163B0F616079008E1F6D /* fullmatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fullmatrix.h; sourceTree = "<group>"; };
 		3782163C0F616079008E1F6D /* fullmatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fullmatrix.cpp; sourceTree = "<group>"; };
 		379293C10F2DE73400B9034A /* treemap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = treemap.h; sourceTree = "<group>"; };
@@ -430,6 +436,8 @@
 				37D9281E0F21331F001D4494 /* shannon.cpp */,
 				37D928230F21331F001D4494 /* sharedace.h */,
 				37D928220F21331F001D4494 /* sharedace.cpp */,
+				3765B5140F780A7F00C3EDC5 /* sharedanderberg.h */,
+				3765B5150F780A7F00C3EDC5 /* sharedanderberg.cpp */,
 				37D928250F21331F001D4494 /* sharedchao1.h */,
 				37D928240F21331F001D4494 /* sharedchao1.cpp */,
 				37D928290F21331F001D4494 /* sharedjabund.h */,
@@ -439,6 +447,8 @@
 				37D9282D0F21331F001D4494 /* sharedjest.h */,
 				37D9282C0F21331F001D4494 /* sharedjest.cpp */,
 				3709370A0F6E7FC100EB4C2C /* sharednseqs.h */,
+				3765B4E00F78055000C3EDC5 /* sharedochiai.h */,
+				3765B4E10F78055000C3EDC5 /* sharedochiai.cpp */,
 				37D928350F21331F001D4494 /* sharedsobs.h */,
 				37D928340F21331F001D4494 /* sharedsobs.cpp */,
 				37AFC71D0F445386005F492D /* sharedsobscollectsummary.h */,
@@ -715,6 +725,8 @@
 				374CD63F0F65832000D90B4A /* libshuffcommand.cpp in Sources */,
 				374CD6F10F65A4C100D90B4A /* coverage.cpp in Sources */,
 				3765B47A0F77D15900C3EDC5 /* nocommands.cpp in Sources */,
+				3765B4E20F78055000C3EDC5 /* sharedochiai.cpp in Sources */,
+				3765B5160F780A7F00C3EDC5 /* sharedanderberg.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

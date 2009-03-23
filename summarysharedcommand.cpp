@@ -20,6 +20,8 @@
 #include "sharedsorest.h"
 #include "sharedthetayc.h"
 #include "sharedthetan.h"
+#include "sharedochiai.h"
+#include "sharedanderberg.h"
 
 
 //**********************************************************************************************************************
@@ -59,7 +61,13 @@ SummarySharedCommand::SummarySharedCommand(){
 					sumCalculators.push_back(new SharedThetaN());
 				}else if (globaldata->Estimators[i] == "sharednseqs") { 
 					sumCalculators.push_back(new SharedNSeqs());
+				}else if (globaldata->Estimators[i] == "sharedochiai") { 
+					sumCalculators.push_back(new SharedOchiai());
+				}else if (globaldata->Estimators[i] == "sharedanderberg") { 
+					sumCalculators.push_back(new SharedAnderberg());
 				}
+
+
 			}
 		}
 		
