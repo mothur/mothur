@@ -100,10 +100,7 @@ void Coverage::getValues(FullMatrix* matrix, vector< vector< vector<float> > >& 
 				data[l][k].push_back(0.0);
 			}
 		}
-
-		/**************************************/
-		//get the minimums for each comparision
-		/**************************************/
+		
 		int count = 0;
 		int count2 = 0;
 		
@@ -169,7 +166,6 @@ void Coverage::getValues(FullMatrix* matrix, vector< vector< vector<float> > >& 
 						matrix->restore();
 					}
 				}
-				
 				count2++;
 			}
 			count += numGroups+1; //go from AA to BB to CC
