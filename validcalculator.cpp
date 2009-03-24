@@ -164,6 +164,11 @@ void ValidCalculators::initialShared() {
 		shared["sharednseqs"]			= "sharednseqs";
 		shared["sharedochiai"]			= "sharedochiai";
 		shared["sharedanderberg"]		= "sharedanderberg";
+		shared["sharedkulczynski"]		= "sharedkulczynski";
+		shared["sharedkulczynskicody"]	= "sharedkulczynskicody";
+		shared["sharedlennon"]			= "sharedlennon";
+		shared["sharedmorisitahorn"]	= "sharedmorisitahorn";
+		shared["sharedbraycurtis"]		= "sharedbraycurtis";
 		shared["default"]	            = "default";
 	}
 	catch(exception& e) {
@@ -242,6 +247,11 @@ void ValidCalculators::initialSharedSummary() {
 		sharedsummary["sharednseqs"]			= "sharednseqs";
 		sharedsummary["sharedochiai"]			= "sharedochiai";
 		sharedsummary["sharedanderberg"]		= "sharedanderberg";
+		sharedsummary["sharedkulczynski"]		= "sharedkulczynski";
+		sharedsummary["sharedkulczynskicody"]	= "sharedkulczynskicody";
+		sharedsummary["sharedlennon"]			= "sharedlennon";
+		sharedsummary["sharedmorisitahorn"]		= "sharedmorisitahorn";
+		sharedsummary["sharedbraycurtis"]		= "sharedbraycurtis";
 		sharedsummary["default"]				= "default";
 	}
 	catch(exception& e) {

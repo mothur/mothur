@@ -22,6 +22,11 @@
 #include "sharednseqs.h"
 #include "sharedochiai.h"
 #include "sharedanderberg.h"
+#include "sharedkulczynski.h"
+#include "sharedkulczynskicody.h"
+#include "sharedlennon.h"
+#include "sharedmorisitahorn.h"
+#include "sharedbraycurtis.h"
 
 
 //**********************************************************************************************************************
@@ -65,8 +70,17 @@ CollectSharedCommand::CollectSharedCommand(){
 					cDisplays.push_back(new CollectDisplay(new SharedOchiai(), new SharedOneColumnFile(fileNameRoot+"shared.ochiai")));
 				}else if (globaldata->Estimators[i] == "sharedanderberg") { 
 					cDisplays.push_back(new CollectDisplay(new SharedAnderberg(), new SharedOneColumnFile(fileNameRoot+"shared.anderberg")));
+				}else if (globaldata->Estimators[i] == "sharedkulczynski") { 
+					cDisplays.push_back(new CollectDisplay(new SharedKulczynski(), new SharedOneColumnFile(fileNameRoot+"shared.kulczynski")));
+				}else if (globaldata->Estimators[i] == "sharedkulczynskicody") { 
+					cDisplays.push_back(new CollectDisplay(new SharedKulczynskiCody(), new SharedOneColumnFile(fileNameRoot+"shared.kulczynskicody")));
+				}else if (globaldata->Estimators[i] == "sharedlennon") { 
+					cDisplays.push_back(new CollectDisplay(new SharedLennon(), new SharedOneColumnFile(fileNameRoot+"shared.lennon")));
+				}else if (globaldata->Estimators[i] == "sharedmorisitahorn") { 
+					cDisplays.push_back(new CollectDisplay(new SharedMorHorn(), new SharedOneColumnFile(fileNameRoot+"shared.morisitahorn")));
+				}else if (globaldata->Estimators[i] == "sharedbraycurtis") { 
+					cDisplays.push_back(new CollectDisplay(new SharedBrayCurtis(), new SharedOneColumnFile(fileNameRoot+"shared.braycurtis")));
 				}
-
 			}
 		}
 		

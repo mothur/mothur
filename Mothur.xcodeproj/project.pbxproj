@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		217595330F791EEE001CC3C6 /* sharedkulczynski.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 217595320F791EEE001CC3C6 /* sharedkulczynski.cpp */; };
+		2175953F0F792111001CC3C6 /* sharedkulczynskicody.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2175953E0F792111001CC3C6 /* sharedkulczynskicody.cpp */; };
+		217595590F792490001CC3C6 /* sharedlennon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 217595580F792490001CC3C6 /* sharedlennon.cpp */; };
+		217595640F7927BB001CC3C6 /* sharedmorisitahorn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 217595630F7927BB001CC3C6 /* sharedmorisitahorn.cpp */; };
+		217595710F792A33001CC3C6 /* sharedbraycurtis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 217595700F792A33001CC3C6 /* sharedbraycurtis.cpp */; };
 		372E12700F26365B0095CF7E /* readotucommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E126F0F26365B0095CF7E /* readotucommand.cpp */; };
 		372E12960F263D5A0095CF7E /* readdistcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E12950F263D5A0095CF7E /* readdistcommand.cpp */; };
 		372E12ED0F264D320095CF7E /* commandfactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E12EC0F264D320095CF7E /* commandfactory.cpp */; };
@@ -117,6 +122,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		217595310F791EEE001CC3C6 /* sharedkulczynski.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedkulczynski.h; sourceTree = "<group>"; };
+		217595320F791EEE001CC3C6 /* sharedkulczynski.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedkulczynski.cpp; sourceTree = "<group>"; };
+		2175953D0F792111001CC3C6 /* sharedkulczynskicody.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedkulczynskicody.h; sourceTree = "<group>"; };
+		2175953E0F792111001CC3C6 /* sharedkulczynskicody.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedkulczynskicody.cpp; sourceTree = "<group>"; };
+		217595570F792490001CC3C6 /* sharedlennon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedlennon.h; sourceTree = "<group>"; };
+		217595580F792490001CC3C6 /* sharedlennon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedlennon.cpp; sourceTree = "<group>"; };
+		217595620F7927BB001CC3C6 /* sharedmorisitahorn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedmorisitahorn.h; sourceTree = "<group>"; };
+		217595630F7927BB001CC3C6 /* sharedmorisitahorn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedmorisitahorn.cpp; sourceTree = "<group>"; };
+		2175956F0F792A33001CC3C6 /* sharedbraycurtis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedbraycurtis.h; sourceTree = "<group>"; };
+		217595700F792A33001CC3C6 /* sharedbraycurtis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedbraycurtis.cpp; sourceTree = "<group>"; };
 		370936DE0F6E7A4A00EB4C2C /* nseqs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nseqs.h; sourceTree = "<group>"; };
 		3709370A0F6E7FC100EB4C2C /* sharednseqs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharednseqs.h; sourceTree = "<group>"; };
 		372E126E0F26365B0095CF7E /* readotucommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readotucommand.h; sourceTree = "<group>"; };
@@ -438,6 +453,8 @@
 				37D928220F21331F001D4494 /* sharedace.cpp */,
 				3765B5140F780A7F00C3EDC5 /* sharedanderberg.h */,
 				3765B5150F780A7F00C3EDC5 /* sharedanderberg.cpp */,
+				2175956F0F792A33001CC3C6 /* sharedbraycurtis.h */,
+				217595700F792A33001CC3C6 /* sharedbraycurtis.cpp */,
 				37D928250F21331F001D4494 /* sharedchao1.h */,
 				37D928240F21331F001D4494 /* sharedchao1.cpp */,
 				37D928290F21331F001D4494 /* sharedjabund.h */,
@@ -446,6 +463,14 @@
 				37D9282A0F21331F001D4494 /* sharedjclass.cpp */,
 				37D9282D0F21331F001D4494 /* sharedjest.h */,
 				37D9282C0F21331F001D4494 /* sharedjest.cpp */,
+				217595310F791EEE001CC3C6 /* sharedkulczynski.h */,
+				217595320F791EEE001CC3C6 /* sharedkulczynski.cpp */,
+				2175953D0F792111001CC3C6 /* sharedkulczynskicody.h */,
+				2175953E0F792111001CC3C6 /* sharedkulczynskicody.cpp */,
+				217595570F792490001CC3C6 /* sharedlennon.h */,
+				217595580F792490001CC3C6 /* sharedlennon.cpp */,
+				217595620F7927BB001CC3C6 /* sharedmorisitahorn.h */,
+				217595630F7927BB001CC3C6 /* sharedmorisitahorn.cpp */,
 				3709370A0F6E7FC100EB4C2C /* sharednseqs.h */,
 				3765B4E00F78055000C3EDC5 /* sharedochiai.h */,
 				3765B4E10F78055000C3EDC5 /* sharedochiai.cpp */,
@@ -727,6 +752,11 @@
 				3765B47A0F77D15900C3EDC5 /* nocommands.cpp in Sources */,
 				3765B4E20F78055000C3EDC5 /* sharedochiai.cpp in Sources */,
 				3765B5160F780A7F00C3EDC5 /* sharedanderberg.cpp in Sources */,
+				217595330F791EEE001CC3C6 /* sharedkulczynski.cpp in Sources */,
+				2175953F0F792111001CC3C6 /* sharedkulczynskicody.cpp in Sources */,
+				217595590F792490001CC3C6 /* sharedlennon.cpp in Sources */,
+				217595640F7927BB001CC3C6 /* sharedmorisitahorn.cpp in Sources */,
+				217595710F792A33001CC3C6 /* sharedbraycurtis.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

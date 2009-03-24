@@ -1,23 +1,23 @@
 /*
- *  sharedthetayc.cpp
- *  Dotur
+ *  sharedmorisitahorn.cpp
+ *  Mothur
  *
- *  Created by Sarah Westcott on 1/8/09.
+ *  Created by Sarah Westcott on 3/24/09.
  *  Copyright 2009 Schloss Lab UMASS Amherst. All rights reserved.
  *
  */
 
-#include "sharedthetayc.h"
+#include "sharedmorisitahorn.h"
 
 /***********************************************************************/
-EstOutput SharedThetaYC::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2) {
+EstOutput SharedMorHorn::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2) {
 	try {	
 		data.resize(1,0);
 		
 		int Atotal, Btotal, tempA, tempB;
 		Atotal = 0; Btotal = 0; 
-		float thetaYC, sumSharedA, sumSharedB, a, b, d;
-		thetaYC = 0.0; sumSharedA = 0.0; sumSharedB = 0.0; a = 0.0; b = 0.0; d = 0.0;
+		float  morhorn, sumSharedA, sumSharedB, a, b, d;
+		morhorn = 0.0; sumSharedA = 0.0; sumSharedB = 0.0; a = 0.0; b = 0.0; d = 0.0;
 		
 		//get the total values we need to calculate the theta denominator sums
 		for (int i = 0; i < shared1->size(); i++) {
@@ -43,20 +43,20 @@ EstOutput SharedThetaYC::getValues(SharedRAbundVector* shared1, SharedRAbundVect
 			}
 		}
 
-		thetaYC = d / (float) (a + b - d);
+		morhorn = (2 * d) / (float) (a + b);
 		
-		if (isnan(thetaYC) || isinf(thetaYC)) { thetaYC = 0; }
+		if (isnan(morhorn) || isinf(morhorn)) { morhorn = 0; }
 		
-		data[0] = thetaYC;
+		data[0] = morhorn;
 		
 		return data;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedThetaYC class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the SharedMorHorn class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the SharedThetaYC class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the SharedMorHorn class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
 }
