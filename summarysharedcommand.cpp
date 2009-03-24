@@ -22,6 +22,11 @@
 #include "sharedthetan.h"
 #include "sharedochiai.h"
 #include "sharedanderberg.h"
+#include "sharedkulczynski.h"
+#include "sharedkulczynskicody.h"
+#include "sharedlennon.h"
+#include "sharedmorisitahorn.h"
+#include "sharedbraycurtis.h"
 
 
 //**********************************************************************************************************************
@@ -65,9 +70,17 @@ SummarySharedCommand::SummarySharedCommand(){
 					sumCalculators.push_back(new SharedOchiai());
 				}else if (globaldata->Estimators[i] == "sharedanderberg") { 
 					sumCalculators.push_back(new SharedAnderberg());
+				}else if (globaldata->Estimators[i] == "sharedkulczynski") { 
+					sumCalculators.push_back(new SharedKulczynski());
+				}else if (globaldata->Estimators[i] == "sharedkulczynskicody") { 
+					sumCalculators.push_back(new SharedKulczynskiCody());
+				}else if (globaldata->Estimators[i] == "sharedlennon") { 
+					sumCalculators.push_back(new SharedLennon());
+				}else if (globaldata->Estimators[i] == "sharedmorisitahorn") { 
+					sumCalculators.push_back(new SharedMorHorn());
+				}else if (globaldata->Estimators[i] == "sharedbraycurtis") { 
+					sumCalculators.push_back(new SharedBrayCurtis());
 				}
-
-
 			}
 		}
 		
