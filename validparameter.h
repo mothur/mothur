@@ -41,6 +41,7 @@ class ValidParameters {
 		map<string, string> unifracweighted;
 		map<string, string> unifracunweighted;
 		map<string, string> libshuff;
+		map<string, string> heatmap;
 		
 		map<string, string>::iterator it;
 		
@@ -59,6 +60,7 @@ class ValidParameters {
 		void initialUnifracweighted();
 		void initialUnifracunweighted();
 		void initialLibshuff();
+		void initialHeatmap();
 
 };
 

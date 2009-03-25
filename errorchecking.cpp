@@ -218,6 +218,12 @@ bool ErrorCheck::checkInput(string input) {
 				else if (globaldata->getGroupFile() == "") { cout << "You must read a list and a group, or a shared before you can use the collect.shared, rarefaction.shared or summary.shared commands." << endl; return false; }
 			}
 		}
+		
+		if (commandName == "heatmap"){ 
+			if ((globaldata->getListFile() == "") && (globaldata->getSharedFile() == "")) {
+				 cout << "You must read a list, or a list and a group, or a shared before you can use the heatmap command." << endl; return false; 
+			}
+		}
 
 		return errorFree;
 }

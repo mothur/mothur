@@ -24,6 +24,8 @@
 		3765B47A0F77D15900C3EDC5 /* nocommands.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3765B4780F77D15900C3EDC5 /* nocommands.cpp */; };
 		3765B4E20F78055000C3EDC5 /* sharedochiai.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3765B4E10F78055000C3EDC5 /* sharedochiai.cpp */; };
 		3765B5160F780A7F00C3EDC5 /* sharedanderberg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3765B5150F780A7F00C3EDC5 /* sharedanderberg.cpp */; };
+		3765B5380F7A5A9E00C3EDC5 /* heatmapcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3765B5370F7A5A9E00C3EDC5 /* heatmapcommand.cpp */; };
+		3765B5460F7A62A000C3EDC5 /* heatmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3765B5450F7A62A000C3EDC5 /* heatmap.cpp */; };
 		3782163D0F616079008E1F6D /* fullmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3782163C0F616079008E1F6D /* fullmatrix.cpp */; };
 		379293C30F2DE73400B9034A /* treemap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 379293C20F2DE73400B9034A /* treemap.cpp */; };
 		379294700F2E191800B9034A /* parsimonycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3792946F0F2E191800B9034A /* parsimonycommand.cpp */; };
@@ -157,6 +159,10 @@
 		3765B4E10F78055000C3EDC5 /* sharedochiai.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedochiai.cpp; sourceTree = "<group>"; };
 		3765B5140F780A7F00C3EDC5 /* sharedanderberg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedanderberg.h; sourceTree = "<group>"; };
 		3765B5150F780A7F00C3EDC5 /* sharedanderberg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedanderberg.cpp; sourceTree = "<group>"; };
+		3765B5360F7A5A9E00C3EDC5 /* heatmapcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = heatmapcommand.h; sourceTree = "<group>"; };
+		3765B5370F7A5A9E00C3EDC5 /* heatmapcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = heatmapcommand.cpp; sourceTree = "<group>"; };
+		3765B5440F7A62A000C3EDC5 /* heatmap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = heatmap.h; sourceTree = "<group>"; };
+		3765B5450F7A62A000C3EDC5 /* heatmap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = heatmap.cpp; sourceTree = "<group>"; };
 		3782163B0F616079008E1F6D /* fullmatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fullmatrix.h; sourceTree = "<group>"; };
 		3782163C0F616079008E1F6D /* fullmatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fullmatrix.cpp; sourceTree = "<group>"; };
 		379293C10F2DE73400B9034A /* treemap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = treemap.h; sourceTree = "<group>"; };
@@ -382,6 +388,8 @@
 				37D927DD0F21331F001D4494 /* fileoutput.cpp */,
 				37D927E00F21331F001D4494 /* globaldata.hpp */,
 				37D927DF0F21331F001D4494 /* globaldata.cpp */,
+				3765B5440F7A62A000C3EDC5 /* heatmap.h */,
+				3765B5450F7A62A000C3EDC5 /* heatmap.cpp */,
 				37D927E60F21331F001D4494 /* inputdata.h */,
 				37D927E50F21331F001D4494 /* inputdata.cpp */,
 				37D927EA0F21331F001D4494 /* kmer.hpp */,
@@ -519,6 +527,8 @@
 				A70B53A60F4CD7AD0064797E /* getlabelcommand.cpp */,
 				A70B53A90F4CD7AD0064797E /* getlinecommand.h */,
 				A70B53A80F4CD7AD0064797E /* getlinecommand.cpp */,
+				3765B5360F7A5A9E00C3EDC5 /* heatmapcommand.h */,
+				3765B5370F7A5A9E00C3EDC5 /* heatmapcommand.cpp */,
 				37D927E40F21331F001D4494 /* helpcommand.h */,
 				37D927E30F21331F001D4494 /* helpcommand.cpp */,
 				374CD63D0F65832000D90B4A /* libshuffcommand.h */,
@@ -757,6 +767,8 @@
 				217595590F792490001CC3C6 /* sharedlennon.cpp in Sources */,
 				217595640F7927BB001CC3C6 /* sharedmorisitahorn.cpp in Sources */,
 				217595710F792A33001CC3C6 /* sharedbraycurtis.cpp in Sources */,
+				3765B5380F7A5A9E00C3EDC5 /* heatmapcommand.cpp in Sources */,
+				3765B5460F7A62A000C3EDC5 /* heatmap.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

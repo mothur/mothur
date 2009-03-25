@@ -214,6 +214,18 @@ bool ValidParameters::isValidParameter(string parameter, string command) {
 				}
 				cout << endl;
 				return false; }
+		}else if (command == "heatmap") {
+			//is it valid
+			if ((heatmap.find(parameter)) != (heatmap.end())) {
+				return true;
+			}else { 
+				cout << parameter << " is not a valid parameter for the " + command + " command. Valid parameters are ";
+				for (it = heatmap.begin(); it != heatmap.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
+
 		//not a valid paramter
 		}else if (command == "help") { cout << parameter << " is not a valid parameter for the " + command + " command. There are no vaild parameters." << endl;  
 		}else if (command == "quit") { cout << parameter << " is not a valid parameter for the " + command + " command. There are no vaild parameters." << endl; 
@@ -338,4 +350,10 @@ void ValidParameters::initialLibshuff() {
 	libshuff["step"]		= "step";
 	libshuff["form"]		= "form";
 }
+/***********************************************************************/
+void ValidParameters::initialHeatmap() {
+	heatmap["label"]	= "label"; 
+	heatmap["line"]		= "line";
+}
+
 /***********************************************************************/
