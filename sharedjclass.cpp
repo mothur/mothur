@@ -25,9 +25,10 @@ EstOutput SharedJclass::getValues(SharedRAbundVector* shared1, SharedRAbundVecto
 			//store in temps to avoid multiple repetitive function calls
 			tempA = shared1->getAbundance(i);
 			tempB = shared2->getAbundance(i);
-
-			S1 += tempA;
-			S2 += tempB;
+			
+			//find number of bins in shared1 and shared2
+			if (tempA != 0) { S1++; }
+			if (tempB != 0) { S2++; } 
 			
 			//they are shared
 			if ((tempA != 0) && (tempB != 0)) {	S12++; }
