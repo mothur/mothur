@@ -33,6 +33,7 @@ SharedOrderVector::SharedOrderVector(string id, vector<individual>  ov) :
 SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {
 	try {
 		globaldata = GlobalData::getInstance();
+		maxRank = 0; numBins = 0; numSeqs = 0;
 		
 		if (globaldata->gGroupmap == NULL) {  groupmap = new GroupMap(); }
 		
@@ -53,6 +54,7 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {
 		
 		for(int i=0;i<num;i++){
 			f >> inputData;
+			
 			for (int j = 0; j < inputData; j++) {
 				push_back(i+1, i+1, groupN);
 				numSeqs++;
@@ -77,6 +79,7 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {
 			
 			for(int i=0;i<num;i++){
 				f >> inputData;
+				
 				for (int j = 0; j < inputData; j++) {
 					push_back(i+1, i+1, groupN);
 					numSeqs++;

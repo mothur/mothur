@@ -31,7 +31,7 @@ HeatMap::HeatMap(){
 void HeatMap::getPic(OrderVector* order) {
 	try {
 		sabund = order->getSAbundVector();
-		string filename = getRootName(globaldata->inputFileName) + order->getLabel();
+		string filename = getRootName(globaldata->inputFileName) + "heatmap" + order->getLabel();
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the HeatMap class Function getPic. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -45,7 +45,10 @@ void HeatMap::getPic(OrderVector* order) {
 //**********************************************************************************************************************
 void HeatMap::getPic(SharedOrderVector* sharedorder) {
 	try {
+		//fills vector of sharedsabunds - lookup
 		getSharedVectors(sharedorder);
+		
+		string filename = getRootName(globaldata->inputFileName) + "heatmap" + sharedorder->getLabel();
 		
 		
 	}
@@ -67,7 +70,7 @@ void HeatMap::getSharedVectors(SharedOrderVector* order){
 		
 		//create and initialize vector of sharedvectors, one for each group
 		for (int i = 0; i < globaldata->Groups.size(); i++) { 
-			SharedRAbundVector* temp = new SharedRAbundVector(order->getNumBins());
+			SharedRAbundVector* temp = new SharedRAbundVector(order->getMaxRank());
 			temp->setLabel(order->getLabel());
 			temp->setGroup(globaldata->Groups[i]);
 			templookup.push_back(temp);
