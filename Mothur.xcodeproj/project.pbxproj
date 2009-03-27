@@ -14,18 +14,6 @@
 		3746107E0F4064D100460C57 /* weighted.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3746107D0F4064D100460C57 /* weighted.cpp */; };
 		374610830F40652400460C57 /* unweighted.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 374610820F40652400460C57 /* unweighted.cpp */; };
 		3746109D0F40657600460C57 /* unifracunweightedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3746109C0F40657600460C57 /* unifracunweightedcommand.cpp */; };
-		375873A70F7D61240040F377 /* coverage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3758738B0F7D61240040F377 /* coverage.cpp */; };
-		375873A80F7D61240040F377 /* fullmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3758738D0F7D61240040F377 /* fullmatrix.cpp */; };
-		375873A90F7D61240040F377 /* heatmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3758738F0F7D61240040F377 /* heatmap.cpp */; };
-		375873AA0F7D61240040F377 /* heatmapcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 375873910F7D61240040F377 /* heatmapcommand.cpp */; };
-		375873AB0F7D61240040F377 /* libshuffcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 375873930F7D61240040F377 /* libshuffcommand.cpp */; };
-		375873AC0F7D61240040F377 /* nocommands.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 375873950F7D61240040F377 /* nocommands.cpp */; };
-		375873AE0F7D61240040F377 /* sharedbraycurtis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3758739A0F7D61240040F377 /* sharedbraycurtis.cpp */; };
-		375873AF0F7D61240040F377 /* sharedkulczynski.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3758739C0F7D61240040F377 /* sharedkulczynski.cpp */; };
-		375873B00F7D61240040F377 /* sharedkulczynskicody.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3758739E0F7D61240040F377 /* sharedkulczynskicody.cpp */; };
-		375873B10F7D61240040F377 /* sharedlennon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 375873A00F7D61240040F377 /* sharedlennon.cpp */; };
-		375873B20F7D61240040F377 /* sharedmorisitahorn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 375873A20F7D61240040F377 /* sharedmorisitahorn.cpp */; };
-		375873B30F7D61240040F377 /* sharedochiai.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 375873A50F7D61240040F377 /* sharedochiai.cpp */; };
 		375873E70F7D63E90040F377 /* coverage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 375873E50F7D63E90040F377 /* coverage.cpp */; };
 		375873EC0F7D64520040F377 /* fullmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 375873EB0F7D64520040F377 /* fullmatrix.cpp */; };
 		375873EF0F7D646F0040F377 /* heatmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 375873EE0F7D646F0040F377 /* heatmap.cpp */; };
@@ -155,32 +143,6 @@
 		374610820F40652400460C57 /* unweighted.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = unweighted.cpp; sourceTree = "<group>"; };
 		3746109B0F40657600460C57 /* unifracunweightedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = unifracunweightedcommand.h; sourceTree = "<group>"; };
 		3746109C0F40657600460C57 /* unifracunweightedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = unifracunweightedcommand.cpp; sourceTree = "<group>"; };
-		3758738B0F7D61240040F377 /* coverage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = coverage.cpp; sourceTree = "<group>"; };
-		3758738C0F7D61240040F377 /* coverage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = coverage.h; sourceTree = "<group>"; };
-		3758738D0F7D61240040F377 /* fullmatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = fullmatrix.cpp; sourceTree = "<group>"; };
-		3758738E0F7D61240040F377 /* fullmatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fullmatrix.h; sourceTree = "<group>"; };
-		3758738F0F7D61240040F377 /* heatmap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = heatmap.cpp; sourceTree = "<group>"; };
-		375873900F7D61240040F377 /* heatmap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = heatmap.h; sourceTree = "<group>"; };
-		375873910F7D61240040F377 /* heatmapcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = heatmapcommand.cpp; sourceTree = "<group>"; };
-		375873920F7D61240040F377 /* heatmapcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = heatmapcommand.h; sourceTree = "<group>"; };
-		375873930F7D61240040F377 /* libshuffcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = libshuffcommand.cpp; sourceTree = "<group>"; };
-		375873940F7D61240040F377 /* libshuffcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libshuffcommand.h; sourceTree = "<group>"; };
-		375873950F7D61240040F377 /* nocommands.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nocommands.cpp; sourceTree = "<group>"; };
-		375873960F7D61240040F377 /* nocommands.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nocommands.h; sourceTree = "<group>"; };
-		375873970F7D61240040F377 /* nseqs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nseqs.h; sourceTree = "<group>"; };
-		3758739A0F7D61240040F377 /* sharedbraycurtis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedbraycurtis.cpp; sourceTree = "<group>"; };
-		3758739B0F7D61240040F377 /* sharedbraycurtis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedbraycurtis.h; sourceTree = "<group>"; };
-		3758739C0F7D61240040F377 /* sharedkulczynski.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedkulczynski.cpp; sourceTree = "<group>"; };
-		3758739D0F7D61240040F377 /* sharedkulczynski.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedkulczynski.h; sourceTree = "<group>"; };
-		3758739E0F7D61240040F377 /* sharedkulczynskicody.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedkulczynskicody.cpp; sourceTree = "<group>"; };
-		3758739F0F7D61240040F377 /* sharedkulczynskicody.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedkulczynskicody.h; sourceTree = "<group>"; };
-		375873A00F7D61240040F377 /* sharedlennon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedlennon.cpp; sourceTree = "<group>"; };
-		375873A10F7D61240040F377 /* sharedlennon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedlennon.h; sourceTree = "<group>"; };
-		375873A20F7D61240040F377 /* sharedmorisitahorn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedmorisitahorn.cpp; sourceTree = "<group>"; };
-		375873A30F7D61240040F377 /* sharedmorisitahorn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedmorisitahorn.h; sourceTree = "<group>"; };
-		375873A40F7D61240040F377 /* sharednseqs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharednseqs.h; sourceTree = "<group>"; };
-		375873A50F7D61240040F377 /* sharedochiai.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedochiai.cpp; sourceTree = "<group>"; };
-		375873A60F7D61240040F377 /* sharedochiai.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedochiai.h; sourceTree = "<group>"; };
 		375873E50F7D63E90040F377 /* coverage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = coverage.cpp; sourceTree = "<group>"; };
 		375873E60F7D63E90040F377 /* coverage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = coverage.h; sourceTree = "<group>"; };
 		375873EA0F7D64520040F377 /* fullmatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fullmatrix.h; sourceTree = "<group>"; };
@@ -456,32 +418,6 @@
 				37D927EF0F21331F001D4494 /* mothur.cpp */,
 				37D927F10F21331F001D4494 /* nameassignment.hpp */,
 				37D927F00F21331F001D4494 /* nameassignment.cpp */,
-				3758738B0F7D61240040F377 /* coverage.cpp */,
-				3758738C0F7D61240040F377 /* coverage.h */,
-				3758738D0F7D61240040F377 /* fullmatrix.cpp */,
-				3758738E0F7D61240040F377 /* fullmatrix.h */,
-				3758738F0F7D61240040F377 /* heatmap.cpp */,
-				375873900F7D61240040F377 /* heatmap.h */,
-				375873910F7D61240040F377 /* heatmapcommand.cpp */,
-				375873920F7D61240040F377 /* heatmapcommand.h */,
-				375873930F7D61240040F377 /* libshuffcommand.cpp */,
-				375873940F7D61240040F377 /* libshuffcommand.h */,
-				375873950F7D61240040F377 /* nocommands.cpp */,
-				375873960F7D61240040F377 /* nocommands.h */,
-				375873970F7D61240040F377 /* nseqs.h */,
-				3758739A0F7D61240040F377 /* sharedbraycurtis.cpp */,
-				3758739B0F7D61240040F377 /* sharedbraycurtis.h */,
-				3758739C0F7D61240040F377 /* sharedkulczynski.cpp */,
-				3758739D0F7D61240040F377 /* sharedkulczynski.h */,
-				3758739E0F7D61240040F377 /* sharedkulczynskicody.cpp */,
-				3758739F0F7D61240040F377 /* sharedkulczynskicody.h */,
-				375873A00F7D61240040F377 /* sharedlennon.cpp */,
-				375873A10F7D61240040F377 /* sharedlennon.h */,
-				375873A20F7D61240040F377 /* sharedmorisitahorn.cpp */,
-				375873A30F7D61240040F377 /* sharedmorisitahorn.h */,
-				375873A40F7D61240040F377 /* sharednseqs.h */,
-				375873A50F7D61240040F377 /* sharedochiai.cpp */,
-				375873A60F7D61240040F377 /* sharedochiai.h */,
 				37D927F60F21331F001D4494 /* observable.h */,
 				37D927FC0F21331F001D4494 /* progress.hpp */,
 				37D927FB0F21331F001D4494 /* progress.cpp */,
@@ -857,18 +793,6 @@
 				EB1216E50F61ACFB004A865F /* bstick.cpp in Sources */,
 				EB1217230F61C9AC004A865F /* sharedkstest.cpp in Sources */,
 				EB6F015B0F6AC1670048081A /* sharedbdiversity.cpp in Sources */,
-				375873A70F7D61240040F377 /* coverage.cpp in Sources */,
-				375873A80F7D61240040F377 /* fullmatrix.cpp in Sources */,
-				375873A90F7D61240040F377 /* heatmap.cpp in Sources */,
-				375873AA0F7D61240040F377 /* heatmapcommand.cpp in Sources */,
-				375873AB0F7D61240040F377 /* libshuffcommand.cpp in Sources */,
-				375873AC0F7D61240040F377 /* nocommands.cpp in Sources */,
-				375873AE0F7D61240040F377 /* sharedbraycurtis.cpp in Sources */,
-				375873AF0F7D61240040F377 /* sharedkulczynski.cpp in Sources */,
-				375873B00F7D61240040F377 /* sharedkulczynskicody.cpp in Sources */,
-				375873B10F7D61240040F377 /* sharedlennon.cpp in Sources */,
-				375873B20F7D61240040F377 /* sharedmorisitahorn.cpp in Sources */,
-				375873B30F7D61240040F377 /* sharedochiai.cpp in Sources */,
 				375873E70F7D63E90040F377 /* coverage.cpp in Sources */,
 				375873EC0F7D64520040F377 /* fullmatrix.cpp in Sources */,
 				375873EF0F7D646F0040F377 /* heatmap.cpp in Sources */,
