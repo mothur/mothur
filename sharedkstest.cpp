@@ -42,7 +42,7 @@ EstOutput SharedKSTest::getValues(SharedRAbundVector* shared1, SharedRAbundVecto
 		
 		double DStatistic = maxDiff*numNZ1*numNZ2;
 		double a = pow((double)(numNZ1 + numNZ2)/(numNZ1*numNZ2),.5);
-		double pVal = exp(-2*pow(maxDiff/a,2));
+		//double pVal = exp(-2*pow(maxDiff/a,2));
 		double critVal = 1.36*a*numNZ1*numNZ2;
 		
 		/*cout << "Kolmogorov-Smirnov 2-sample test:\n";

@@ -53,6 +53,17 @@ string toString(const T&x){
 //**********************************************************************************************************************
 
 template<typename T>
+string toHex(const T&x){
+	stringstream output;
+	
+	output << hex << x;
+
+    return output.str();
+}
+
+//**********************************************************************************************************************
+
+template<typename T>
 string toString(const T&x, int i){
 	stringstream output;
 	

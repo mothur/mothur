@@ -19,10 +19,8 @@
 #include "sharedsorest.h"
 #include "sharedthetayc.h"
 #include "sharedthetan.h"
-<<<<<<< collectsharedcommand.cpp
 #include "sharedkstest.h"
 #include "sharedbdiversity.h"
-=======
 #include "sharednseqs.h"
 #include "sharedochiai.h"
 #include "sharedanderberg.h"
@@ -31,7 +29,7 @@
 #include "sharedlennon.h"
 #include "sharedmorisitahorn.h"
 #include "sharedbraycurtis.h"
->>>>>>> 1.13
+
 
 
 //**********************************************************************************************************************
