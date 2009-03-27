@@ -13,38 +13,9 @@
 
 ValidParameters::ValidParameters() {
 	try {
-		parameters["phylip"]	      	= "phylip";
-		parameters["column"]		    = "column";
-		parameters["list"]		    	= "list"; 
-		parameters["rabund"]	    	= "rabund"; 
-		parameters["sabund"]	    	= "sabund"; 
-		parameters["name"]		    	= "name"; 
-		parameters["group"]		     	= "group"; 
-		parameters["order"]             = "order"; 
-		parameters["fasta"]			    = "fasta"; 
-		parameters["tree"]		     	= "tree";
-		parameters["fileroot"]			= "fileroot";
-		parameters["cutoff"]			= "cutoff"; 
-		parameters["method"]			= "method";
-		parameters["format"]			= "format"; 
-		parameters["precision"]			= "precision"; 
-		parameters["label"]				= "label"; 
-		parameters["line"]				= "line";
-		parameters["iters"]				= "iters"; 
-		parameters["jumble"]			= "jumble"; 
-		parameters["freq"]				= "freq"; 
-		parameters["abund"]             = "abund";
-		parameters["random"]			= "random";
-		parameters["groups"]			= "groups";
-		parameters["calc"]				= "calc";
-		parameters["sharedrarefaction"] = "sharedrarefaction";
-		parameters["sharedsummary"]     = "sharedsummary";
-		parameters["shared"]            = "shared";
-		parameters["single"]            = "single";
-		parameters["rarefaction"]       = "rarefaction";
-		
 		initCommandParameters();		
 		initParameterRanges();
+
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidParameters class Function ValidParameters. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -284,7 +255,10 @@ void ValidParameters::initCommandParameters() {
 
 		string rarefactionsharedArray[] =  {"iters","jumble","line","label","sharedrarefaction"};
 		commandParameters["rarefaction.shared"] = addParameters(rarefactionsharedArray, sizeof(rarefactionsharedArray)/sizeof(string));
-
+		
+		string libshuffArray[] =  {"iters","groups","step","form","cutoff"};
+		commandParameters["libshuff"] = addParameters(libshuffArray, sizeof(libshuffArray)/sizeof(string));
+		
 		string summarysingleArray[] =  {"line","label","summary","abund"};
 		commandParameters["summary.single"] = addParameters(summarysingleArray, sizeof(summarysingleArray)/sizeof(string));
 
@@ -369,5 +343,4 @@ vector<string> ValidParameters::addParameters(string parameters[], int size) {
 	}
 }
 
-/***********************************************************************/
 

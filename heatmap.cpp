@@ -15,8 +15,6 @@ HeatMap::HeatMap(){
 		globaldata = GlobalData::getInstance();
 		format = globaldata->getFormat();
 		
-		if (format != "list") {	 setGroups();  }
-		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the HeatMap class Function HeatMap. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -30,8 +28,47 @@ HeatMap::HeatMap(){
 //**********************************************************************************************************************
 void HeatMap::getPic(OrderVector* order) {
 	try {
-		sabund = order->getSAbundVector();
-		string filename = getRootName(globaldata->inputFileName) + "heatmap" + order->getLabel();
+		colorScale.clear();
+		
+		rabund = order->getRAbundVector();
+		
+		for (int i = 0; i < rabund.size(); i++) {
+			colorScale[rabund.get(i)] = "";
+		}
+		
+		float scaler = 255 / (float) colorScale.size();
+		
+		//go through map and give each score a color value
+		for (it = colorScale.begin(); it != colorScale.end(); it++) {
+			it->second = toHex(int(float(it->first) * scaler));
+			if(it->second.length() == 1) {  it->second = "0" + it->second;  }
+		}
+
+		string filenamesvg = globaldata->inputFileName + ".heatmap." + order->getLabel() + ".svg";
+		
+		openOutputFile(filenamesvg, outsvg);
+		
+		//scale max rank so the maxrank = bright red
+			
+		//svg image
+		outsvg << "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 300 " + toString((rabund.getNumBins()*5 + 15))  + "\">\n";
+		outsvg << "<g>\n";
+		
+		int x = 15;
+		int y = 15;
+		string color;
+
+		for (int i = 0; i <= rabund.getNumBins(); i++) {
+		
+			color = colorScale[rabund.get(i)];
+			
+			outsvg << "<rect fill=\"#" + color + "0000\" stroke=\"#" + color + "0000\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\" width=\"300\" height=\"5\"/>\n";
+			y += 5;
+		}
+		outsvg << "</g>\n</svg>\n";
+		
+		outsvg.close();
+		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the HeatMap class Function getPic. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -45,10 +82,54 @@ void HeatMap::getPic(OrderVector* order) {
 //**********************************************************************************************************************
 void HeatMap::getPic(SharedOrderVector* sharedorder) {
 	try {
+		colorScale.clear();
+		
 		//fills vector of sharedsabunds - lookup
 		getSharedVectors(sharedorder);
 		
-		string filename = getRootName(globaldata->inputFileName) + "heatmap" + sharedorder->getLabel();
+		//get maxBin
+		for (int i = 0; i < lookup.size(); i++) {
+			for (int j = 0; j < lookup[i]->size(); j++) {
+				colorScale[lookup[i]->getAbundance(j)] = "";
+			}
+		}
+		
+		//get scaler
+		float scaler = 255 / (float) colorScale.size();
+		
+		//go through map and give each score a color value
+		for (it = colorScale.begin(); it != colorScale.end(); it++) {
+			it->second = toHex(int(float(it->first) * scaler));
+			if(it->second.length() == 1) {  it->second = "0" + it->second;  }
+		}
+		
+		string filenamesvg = globaldata->inputFileName + ".heatmap." + sharedorder->getLabel() + "." + groupComb + ".svg";
+		openOutputFile(filenamesvg, outsvg);
+		
+		//svg image
+		outsvg << "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 " + toString(lookup.size() * 300) + " " + toString((lookup[0]->getNumBins()*5 + 15))  + "\">\n";
+		outsvg << "<g>\n";
+		
+		int x = 15;
+		int y = 15;
+		string color;
+
+		for (int i = 0; i <= lookup[0]->getNumBins(); i++) {
+		
+			for (int j = 0; j < lookup.size(); j++) {
+			
+				color = colorScale[lookup[j]->getAbundance(i)];	
+						
+				outsvg << "<rect fill=\"#" + color + "0000\" stroke=\"#" + color + "0000\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\" width=\"300\" height=\"5\"/>\n";
+				x += 300;
+			}
+			x = 15;
+			y += 5;
+		}
+		outsvg << "</g>\n</svg>\n";
+		
+		outsvg.close();
+
 		
 		
 	}
@@ -66,14 +147,15 @@ void HeatMap::getSharedVectors(SharedOrderVector* order){
 	try {
 		lookup.clear();
 		
-		vector<SharedRAbundVector*> templookup;
+		groupComb = "";
 		
 		//create and initialize vector of sharedvectors, one for each group
 		for (int i = 0; i < globaldata->Groups.size(); i++) { 
-			SharedRAbundVector* temp = new SharedRAbundVector(order->getMaxRank());
+			SharedRAbundVector* temp = new SharedRAbundVector(order->getNumBins());
 			temp->setLabel(order->getLabel());
 			temp->setGroup(globaldata->Groups[i]);
-			templookup.push_back(temp);
+			groupComb += globaldata->Groups[i];
+			lookup.push_back(temp);
 		}
 		
 		int numSeqs = order->size();
@@ -84,21 +166,14 @@ void HeatMap::getSharedVectors(SharedOrderVector* order){
 			int abundance; 
 					
 			//set info for sharedvector in chosens group
-			for (int j = 0; j < templookup.size(); j++) { 
-				if (chosen.group == templookup[j]->getGroup()) {
-					 abundance = templookup[j]->getAbundance(chosen.bin);
-					 templookup[j]->set(chosen.bin, (abundance + 1), chosen.group);
+			for (int j = 0; j < lookup.size(); j++) { 
+				if (chosen.group == lookup[j]->getGroup()) {
+					 abundance = lookup[j]->getAbundance(chosen.bin);
+					 lookup[j]->set(chosen.bin, (abundance + 1), chosen.group);
 					 break;
 				}
 			}
 		}
-		
-		//convert templookups rabunds to lookups sabunds
-		for (int j = 0; j < templookup.size(); j++) { 
-			lookup.push_back(templookup[j]->getSharedSAbundVector());
-			delete templookup[j];
-		}
-		
 		
 	}
 	catch(exception& e) {
@@ -113,49 +188,6 @@ void HeatMap::getSharedVectors(SharedOrderVector* order){
 }
 
 //**********************************************************************************************************************
-void HeatMap::setGroups() {
-	try {
-		//if the user has not entered specific groups to analyze then do them all
-		if (globaldata->Groups.size() != 0) {
-			if (globaldata->Groups[0] != "all") {
-				//check that groups are valid
-				for (int i = 0; i < globaldata->Groups.size(); i++) {
-					if (globaldata->gGroupmap->isValidGroup(globaldata->Groups[i]) != true) {
-						cout << globaldata->Groups[i] << " is not a valid group, and will be disregarded." << endl;
-						// erase the invalid group from globaldata->Groups
-						globaldata->Groups.erase(globaldata->Groups.begin()+i);
-					}
-				}
-			
-				//if the user only entered invalid groups
-				if (globaldata->Groups.size() == 0) { 
-					cout << "When using the groups parameter you must have at least 1 valid groups. I will run the command using all the groups in your groupfile." << endl; 
-					for (int i = 0; i < globaldata->gGroupmap->namesOfGroups.size(); i++) {
-						globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
-					}
-				}
-			}else{//user has enter "all" and wants the default groups
-				globaldata->Groups.clear();
-				for (int i = 0; i < globaldata->gGroupmap->namesOfGroups.size(); i++) {
-					globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
-				}
-				globaldata->setGroups("");
-			}
-		}else {
-			for (int i = 0; i < globaldata->gGroupmap->namesOfGroups.size(); i++) {
-				globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
-			}
-		}
-		
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the HeatMap class Function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the HeatMap class function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 
-}
-/***********************************************************/
+
+

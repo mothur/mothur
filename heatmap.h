@@ -12,8 +12,8 @@
 using namespace std;
 
 #include "ordervector.hpp"
-#include "sabundvector.hpp"
-#include "sharedsabundvector.h"
+#include "rabundvector.hpp"
+#include "sharedrabundvector.h"
 #include "sharedordervector.h"
 #include "datavector.hpp"
 #include "globaldata.hpp"
@@ -31,15 +31,21 @@ class HeatMap {
 
 	private:
 		void getSharedVectors(SharedOrderVector*);
-		void setGroups();
 	
 		GlobalData* globaldata;
-		vector<SharedSAbundVector> lookup;
-		SAbundVector sabund;
+		vector<SharedRAbundVector*> lookup;
+		RAbundVector rabund;
 		string format;
+		ofstream outsvg;
+		map<int, string> colorScale;
+		map<int, string>::iterator it;
+		string groupComb;
 
 			
 };
+/***********************************************************************/
 
 #endif
+
+
 

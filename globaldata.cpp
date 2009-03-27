@@ -79,6 +79,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				
 				if (key == "line") {//stores lines to be used in a set
 					lines.clear();
+					labels.clear();
 					line = value;
 					label = "";
 					splitAtDash(value, lines);
@@ -86,6 +87,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				}
 				if (key == "label") {//stores labels to be used in a set
 					labels.clear();
+					lines.clear();
 					label = value;
 					line = "";
 					splitAtDash(value, labels);
@@ -129,6 +131,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 
 			if (key == "line") {//stores lines to be used in a vector
 				lines.clear();
+				labels.clear();
 				line = value;
 				label = "";
 				if (line != "all") {  splitAtDash(value, lines);  allLines = 0;  }
@@ -136,6 +139,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			}
 			if (key == "label") {//stores lines to be used in a vector
 				labels.clear();
+				lines.clear();
 				label = value;
 				line = "";
 				if (label != "all") {  splitAtDash(value, labels);  allLines = 0;  }

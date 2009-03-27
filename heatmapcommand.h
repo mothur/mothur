@@ -15,6 +15,7 @@
 #include "inputdata.h"
 #include "readmatrix.hpp"
 #include "sharedlistvector.h"
+#include "heatmap.h"
 
 
 class GlobalData;
@@ -34,7 +35,10 @@ private:
 	SharedListVector* SharedList;
 	SharedOrderVector* order;
 	OrderVector* ordersingle;
+	HeatMap* heatmap;
 	string format;
+	
+	void setGroups();
 
 };
 
