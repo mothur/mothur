@@ -49,6 +49,7 @@
 		37D9286E0F21331F001D4494 /* listvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927ED0F21331F001D4494 /* listvector.cpp */; };
 		37D9286F0F21331F001D4494 /* mothur.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927EF0F21331F001D4494 /* mothur.cpp */; };
 		37D928700F21331F001D4494 /* nameassignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927F00F21331F001D4494 /* nameassignment.cpp */; };
+		37D928710F21331F001D4494 /* nocommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927F20F21331F001D4494 /* nocommand.cpp */; };
 		37D928720F21331F001D4494 /* npshannon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927F40F21331F001D4494 /* npshannon.cpp */; };
 		37D928730F21331F001D4494 /* ordervector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927F70F21331F001D4494 /* ordervector.cpp */; };
 		37D928740F21331F001D4494 /* parselistcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927F90F21331F001D4494 /* parselistcommand.cpp */; };
@@ -206,6 +207,8 @@
 		37D927EF0F21331F001D4494 /* mothur.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mothur.cpp; sourceTree = "<group>"; };
 		37D927F00F21331F001D4494 /* nameassignment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nameassignment.cpp; sourceTree = "<group>"; };
 		37D927F10F21331F001D4494 /* nameassignment.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = nameassignment.hpp; sourceTree = "<group>"; };
+		37D927F20F21331F001D4494 /* nocommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nocommand.cpp; sourceTree = "<group>"; };
+		37D927F30F21331F001D4494 /* nocommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nocommand.h; sourceTree = "<group>"; };
 		37D927F40F21331F001D4494 /* npshannon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = npshannon.cpp; sourceTree = "<group>"; };
 		37D927F50F21331F001D4494 /* npshannon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = npshannon.h; sourceTree = "<group>"; };
 		37D927F60F21331F001D4494 /* observable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = observable.h; sourceTree = "<group>"; };
@@ -510,6 +513,8 @@
 				A70B53A80F4CD7AD0064797E /* getlinecommand.cpp */,
 				37D927E40F21331F001D4494 /* helpcommand.h */,
 				37D927E30F21331F001D4494 /* helpcommand.cpp */,
+				37D927F30F21331F001D4494 /* nocommand.h */,
+				37D927F20F21331F001D4494 /* nocommand.cpp */,
 				37D927FA0F21331F001D4494 /* parselistcommand.h */,
 				37D927F90F21331F001D4494 /* parselistcommand.cpp */,
 				3792946E0F2E191800B9034A /* parsimonycommand.h */,
@@ -667,6 +672,7 @@
 				37D9286E0F21331F001D4494 /* listvector.cpp in Sources */,
 				37D9286F0F21331F001D4494 /* mothur.cpp in Sources */,
 				37D928700F21331F001D4494 /* nameassignment.cpp in Sources */,
+				37D928710F21331F001D4494 /* nocommand.cpp in Sources */,
 				37D928720F21331F001D4494 /* npshannon.cpp in Sources */,
 				37D928730F21331F001D4494 /* ordervector.cpp in Sources */,
 				37D928740F21331F001D4494 /* parselistcommand.cpp in Sources */,
