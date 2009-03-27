@@ -83,6 +83,38 @@ double VecCalc::stError(vector<double> vec){
 	}	
 }
 /***********************************************************************/
+int VecCalc::sumElements(vector<int> vec){
+	try {
+		return sumElements(vec,0);
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the VecCalc class Function sumElements. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the VecCalc class function sumElements. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+/***********************************************************************/
+int VecCalc::sumElements(vector<int> vec, int index){
+	try {
+		int sum = 0;
+		for(int i = index; i < vec.size(); i++)
+			sum += vec.at(i);
+		return sum;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the VecCalc class Function sumElements. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the VecCalc class function sumElements. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
+/***********************************************************************/
 double VecCalc::sumElements(vector<double> vec){
 	try {
 		double sum = 0;
@@ -131,6 +163,24 @@ double VecCalc::findMax(vector<double> vec){
 	}
 	catch(...) {
 		cout << "An unknown error has occurred in the VecCalc class function findMax. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+/***********************************************************************/
+int VecCalc::numNZ(vector<int> vec){
+	try {
+		int numNZ = 0;
+		for(int i = 0; i < vec.size(); i++)
+			if(vec.at(i) != 0)
+				numNZ++;
+		return numNZ;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the VecCalc class Function numNZ. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the VecCalc class function numNZ. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
 }
@@ -510,181 +560,6 @@ vector<string> VecCalc::getSData(char name[]){
 	}	
 }
 /***********************************************************************/	
-double BDiversity::getWhitt(vector<double> vec1, vector<double> vec2){
-	try {
-		VecCalc vecCalc;
-		double numSpec = vecCalc.numNZ(vecCalc.addVecs(vec1,vec2));
-		return 2*numSpec/(vecCalc.numNZ(vec1)+vecCalc.numNZ(vec2))-1;
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the BDiversity class Function getWhitt. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the BDiversity class function getWhitt. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-}
-/***********************************************************************/
-double BDiversity::getMS(vector<double> vec1, vector<double> vec2){
-	try {
-		VecCalc vecCalc;
-		double a = vecCalc.numNZ(vecCalc.multVecs(vec1, vec2));
-		double b = vecCalc.numPos(vecCalc.addVecs(vecCalc.addVecs(vec1, vecCalc.multiply(vec2, -1)), vecCalc.multiply(vecCalc.multVecs(vec1, vec2), -1)));
-		double c = vecCalc.numPos(vecCalc.addVecs(vecCalc.addVecs(vec2, vecCalc.multiply(vec1, -1)), vecCalc.multiply(vecCalc.multVecs(vec2, vec1), -1)));
-		return a/(a+b+c);
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the BDiversity class Function getMS. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the BDiversity class function getMS. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-}
-/***********************************************************************/
-double BDiversity::getSor(vector<double> vec1, vector<double> vec2){
-	try {
-		double sum = 0;
-		double asum = 0;
-		double bsum = 0;
-		for(int i = 0; i < vec1.size(); i++)
-		{
-			asum += vec1.at(i);
-			bsum += vec2.at(i);
-			if(vec1.at(i) >= vec2.at(i))
-				sum += vec2.at(i);
-			else
-				sum += vec1.at(i);
-		}
-		return 2*sum/(asum+bsum);
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the BDiversity class Function getSor. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the BDiversity class function getSor. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-}
-/***********************************************************************/
-double BDiversity::getMor(vector<double> vec1, vector<double> vec2){
-	try {
-		double sum = 0;
-		double asum = 0;
-		double bsum = 0;
-		double sum1 = 0;
-		double sum2 = 0;
-		for(int i = 0; i < vec1.size(); i++)
-		{
-			sum += vec1.at(i)*vec2.at(i);
-			asum += pow(vec1.at(i),2);
-			bsum += pow(vec2.at(i),2);
-			sum1 += vec1.at(i);
-			sum2 += vec2.at(i);
-		}
-		return 2*sum/((asum/pow(sum1,2)+bsum/pow(sum2,2))*(sum1*sum2));
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the BDiversity class Function getMor. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the BDiversity class function getMor. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-}
-/***********************************************************************/
-void BDiversity::printD(vector<vector<double> > columns, int type){
-	try {
-		cout << "         ";
-		for(int i = 0; i < columns.size(); i++)
-			cout << "Column:" << i << "    ";
-		cout << "\n";
-		for(int i = 0; i < columns.size(); i++)
-		{
-			cout << "Column " << i << ":";
-			for(int j = 0; j < columns.size(); j++)
-			{
-				if(j > i)
-				{
-					double B;
-					if(type == 1)
-						B = getWhitt(columns.at(i), columns.at(j));
-					else if(type == 2)
-						B = 1-getMS(columns.at(i), columns.at(j));
-					else if(type == 3)
-						B = 1-getSor(columns.at(i), columns.at(j));
-					else if(type == 4)
-						B = 1-getMor(columns.at(i), columns.at(j));
-
-					cout << B << "    ";
-				}
-				else
-					cout << "            ";
-			}	
-			cout << "\n";
-		}
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the BDiversity class Function printD. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the BDiversity class function printD. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-}
-/***********************************************************************/
-void BDiversity::doBD(vector<double> vec, double cols)//vec = The data vector if the data table was read left-to-right, top-to-bottom. cols = the number of columns in the data table.
-{	try {
-		VecCalc vecCalc;
-		vector<vector<double> > columns = vecCalc.gen2DVec(vec,cols,1);
-	
-		cout.setf(ios_base::fixed, ios_base::floatfield);
-		cout.precision(6);//This formats the data so the tables look pretty.
-	
-		//Whittaker's measure Bw (presence/absence data)
-		cout << "Whittaker's measure Bw (presence/absence data):\n";
-		printD(columns, 1);
-		double sum = 0;
-		for(int i = 0; i < cols; i++)
-			sum += vecCalc.numNZ(columns.at(i));
-		double meanRichness = sum/cols;
-		vector<double> totVec = vecCalc.genTotVec(columns);
-		double totRichness = vecCalc.numNZ(totVec);
-		cout << "\nOverall B Diversity = " << totRichness/meanRichness << "\n\n\n";//The overall B Diversity
-	
-		//Marczewski-Steinhaus(MS) distance(Jaccard index) (presence/abscence data)
-		cout << "Marczewski-Steinhaus(MS) distance(Jaccard index) (presence/abscence data):\n";
-		printD(columns, 2);
-		sum = 0;
-		for(int i = 0; i < cols; i++)
-			for(int j = 0; j < cols; j++)
-				if(j > i)
-					sum += vecCalc.numNZ(columns.at(i))+vecCalc.numNZ(columns.at(j)) - 2*vecCalc.numNZ(vecCalc.multVecs(columns.at(i), columns.at(j)));
-		cout << "\nOverall B Diversity = " << sum/cols << "\n\n\n";//The overall B Diversity
-	
-		//Sorensen quantitative index (abundance data)
-		cout << "Sorensen quantitative index (abundance data):\n";
-		printD(columns, 3);
-		cout << "\n\n";
-	
-		//Sorensen quantitative index (abundance data)
-		cout << "Morisita-Horn index (abundance data):\n";
-		printD(columns,4);
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the BDiversity class Function doBD. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the BDiversity class function doBD. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-}
 
 /***********************************************************************/
 void BrokenStick::doBStick(vector<double> vec)//vec = The data vector.
@@ -731,7 +606,7 @@ double kEq(double k, double spec)
 	return k/(1-k)*pow(1-k, spec)/(1-pow(1-k, spec));
 }
 /***********************************************************************/
-void GeometricSeries::doGeomTest(vector<double> vec)//vec = the data vector
+/*void GeometricSeries::doGeomTest(vector<double> vec)//vec = the data vector
 {	try {
 		VecCalc vecCalc;
 		vec = vecCalc.quicksort(vec);//Sorts vec
@@ -775,7 +650,7 @@ void GeometricSeries::doGeomTest(vector<double> vec)//vec = the data vector
 		cout << "An unknown error has occurred in the GeometricSeries class function doGeomTest. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
-}
+}*/
 
 /***********************************************************************/
 void Jackknifing::doJK(vector<double> vec, double cols)//vec = the data vector if the data table was read left-to-right, top-to-bottom. cols = The number of columns in the data table.
@@ -877,7 +752,7 @@ double logS(double num)
 }
 
 /***********************************************************************/
-void LogSD::doLogSD(vector<double> indVec, vector<double> specVec) //indVec = individuals vector, specVec = species vector
+/*void LogSD::doLogSD(vector<double> indVec, vector<double> specVec) //indVec = individuals vector, specVec = species vector
 {	try {
 		VecCalc vecCalc;
 		double numSpec = vecCalc.sumElements(specVec);//numSpec = The total number of species
@@ -959,7 +834,7 @@ void LogSD::doLogSD(vector<double> indVec, vector<double> specVec) //indVec = in
 		cout << "An unknown error has occurred in the LogSD class function doLogSD. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
-}
+}*/
 /***********************************************************************/
 void QStatistic::doQStat(vector<double> vec)//vec = The data vector.
 {	try {
@@ -1074,40 +949,42 @@ void SSBPDiversityIndices::doSSBP(vector<double> vec)//vec = The data vector.
 /***********************************************************************/
 double TDTable::getConfLimit(int row, int col) //Rows are the degrees of freedom
 {    try {                       
-		//Confidence Level        .80    .90     .95     .98     .99     .998     .999
+		//Found on http://www.vgtu.lt/leidiniai/elektroniniai/Probability.pdf/Table%203.pdf
+
+		//Confidence Level        .90    .95     .975     .99    .995     .999    .9995
 		double values[33][7] = {{3.078, 6.314,	12.706,	31.821,	63.656,	318.289, 636.578},
-						    {1.886,	2.920,	4.303,	6.965,	9.925,	22.328,	31.600},
-							{1.638,	2.353,	3.182,	4.541,	5.841,	10.214,	12.924},
-							{1.533,	2.132,	2.776,	3.747,	4.604,	7.173,	8.610},
-							{1.476,	2.015,	2.571,	3.365,	4.032,	5.894,	6.869},
-							{1.440,	1.943,	2.447,	3.143,	3.707,	5.208,	5.959},
-							{1.415,	1.895,	2.365,	2.998,	3.499,	4.785,	5.408},
-							{1.397,	1.860,	2.306,	2.896,	3.355,	4.501,	5.041},
-							{1.383,	1.833,	2.262,	2.821,	3.250,	4.297,	4.781},
-							{1.372,	1.812,	2.228,	2.764,	3.169,	4.144,	4.587},
-							{1.363,	1.796,	2.201,	2.718,	3.106,	4.025,	4.437},
-							{1.356,	1.782,	2.179,	2.681,	3.055,	3.930,	4.318},
-							{1.350,	1.771,	2.160,	2.650,	3.012,	3.852,	4.221},
-							{1.345,	1.761,	2.145,	2.624,	2.977,	3.787,	4.140},
-							{1.341,	1.753,	2.131,	2.602,	2.947,	3.733,	4.073},
-							{1.337,	1.746,	2.120,	2.583,	2.921,	3.686,	4.015},
-							{1.333,	1.740,	2.110,	2.567,	2.898,	3.646,	3.965},
-							{1.330,	1.734,	2.101,	2.552,	2.878,	3.610,	3.922},
-							{1.328,	1.729,	2.093,	2.539,	2.861,	3.579,	3.883},
-							{1.325,	1.725,	2.086,	2.528,	2.845,	3.552,	3.850},
-							{1.323,	1.721,	2.080,	2.518,	2.831,	3.527,	3.819},
-							{1.321,	1.717,	2.074,	2.508,	2.819,	3.505,	3.792},
-							{1.319,	1.714,	2.069,	2.500,	2.807,	3.485,	3.768},
-							{1.318,	1.711,	2.064,	2.492,	2.797,	3.467,	3.745},
-							{1.316,	1.708,	2.060,	2.485,	2.787,	3.450,	3.725},
-							{1.315,	1.706,	2.056,	2.479,	2.779,	3.435,	3.707},
-							{1.314,	1.703,	2.052,	2.473,	2.771,	3.421,	3.689},
-							{1.313,	1.701,	2.048,	2.467,	2.763,	3.408,	3.674},
-							{1.311,	1.699,	2.045,	2.462,	2.756,	3.396,	3.660},
-							{1.310,	1.697,	2.042,	2.457,	2.750,	3.385,	3.646},
-							{1.296,	1.671,	2.000,	2.390,	2.660,	3.232,	3.460},
-							{1.289,	1.658,	1.980,	2.358,	2.617,	3.160,	3.373},
-							{1.282,	1.645,	1.960,	2.326,	2.576,	3.091,	3.291}};
+						        {1.886,	2.920,	4.303,	6.965,	9.925,	22.328,	31.600},
+							    {1.638,	2.353,	3.182,	4.541,	5.841,	10.214,	12.924},
+							    {1.533,	2.132,	2.776,	3.747,	4.604,	7.173,	8.610},
+								{1.476,	2.015,	2.571,	3.365,	4.032,	5.894,	6.869},
+								{1.440,	1.943,	2.447,	3.143,	3.707,	5.208,	5.959},
+								{1.415,	1.895,	2.365,	2.998,	3.499,	4.785,	5.408},
+								{1.397,	1.860,	2.306,	2.896,	3.355,	4.501,	5.041},
+								{1.383,	1.833,	2.262,	2.821,	3.250,	4.297,	4.781},
+								{1.372,	1.812,	2.228,	2.764,	3.169,	4.144,	4.587},
+								{1.363,	1.796,	2.201,	2.718,	3.106,	4.025,	4.437},
+								{1.356,	1.782,	2.179,	2.681,	3.055,	3.930,	4.318},
+								{1.350,	1.771,	2.160,	2.650,	3.012,	3.852,	4.221},
+								{1.345,	1.761,	2.145,	2.624,	2.977,	3.787,	4.140},
+								{1.341,	1.753,	2.131,	2.602,	2.947,	3.733,	4.073},
+								{1.337,	1.746,	2.120,	2.583,	2.921,	3.686,	4.015},
+								{1.333,	1.740,	2.110,	2.567,	2.898,	3.646,	3.965},
+								{1.330,	1.734,	2.101,	2.552,	2.878,	3.610,	3.922},
+								{1.328,	1.729,	2.093,	2.539,	2.861,	3.579,	3.883},
+								{1.325,	1.725,	2.086,	2.528,	2.845,	3.552,	3.850},
+								{1.323,	1.721,	2.080,	2.518,	2.831,	3.527,	3.819},
+								{1.321,	1.717,	2.074,	2.508,	2.819,	3.505,	3.792},
+								{1.319,	1.714,	2.069,	2.500,	2.807,	3.485,	3.768},
+								{1.318,	1.711,	2.064,	2.492,	2.797,	3.467,	3.745},
+								{1.316,	1.708,	2.060,	2.485,	2.787,	3.450,	3.725},
+								{1.315,	1.706,	2.056,	2.479,	2.779,	3.435,	3.707},
+								{1.314,	1.703,	2.052,	2.473,	2.771,	3.421,	3.689},
+								{1.313,	1.701,	2.048,	2.467,	2.763,	3.408,	3.674},
+								{1.311,	1.699,	2.045,	2.462,	2.756,	3.396,	3.660},
+								{1.310,	1.697,	2.042,	2.457,	2.750,	3.385,	3.646},
+								{1.296,	1.671,	2.000,	2.390,	2.660,	3.232,	3.460},
+								{1.289,	1.658,	1.980,	2.358,	2.617,	3.160,	3.373},
+								{1.282,	1.645,	1.960,	2.326,	2.576,	3.091,	3.291}};
 		return values[row][col];
 	}
 	catch(exception& e) {
@@ -1119,6 +996,48 @@ double TDTable::getConfLimit(int row, int col) //Rows are the degrees of freedom
 		exit(1);
 	}	
 }
+
+/***********************************************************************/
+double KOSTable::getConfLimit(int index) //Table of Critical values for N = 4-20 for One-Sample Kolmogorov-Smirnov Test
+{    try {                       
+		//Confidence Level = .05
+		//Sample size = 4-20.
+		//Found on http://www.utdallas.edu/~herve/MolinAbdi1998-LillieforsTechReport.pdf
+
+		double values[21] = {.9011,
+							 .6372,
+							 .5203,
+							 .4506,
+							 0.3754,    
+					         0.3427,                                    
+							 0.3245,
+					         0.3041,
+					         0.2875,
+					         0.2744,
+					         0.2616,
+					         0.2506,
+					         0.2426,
+					         0.2337,
+					         0.2257,
+					         0.2196,
+					         0.2128,
+					         0.2071,
+					         0.2018,
+					         0.1965,
+					         0.1920,
+							 };
+		return values[index];
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the TDTable class Function getConfLimit. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the TDTable class function getConfLimit. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
 /***********************************************************************
 void TrunLN::doTrunLN(vector<double> indVec, vector<double> specVec) //indVec = individuals vector, specVec = species vector
 {	

@@ -14,6 +14,7 @@ using namespace std;
 #include "utilities.hpp"
 #include "sabundvector.hpp"
 #include "ordervector.hpp"
+#include <algorithm>
 
 
 /***********************************************************************/
@@ -119,6 +120,11 @@ void SharedRAbundVector::set(int binNumber, int newBinSize, string groupname){
 		exit(1);
 	}
 }
+/***********************************************************************/
+
+void SharedRAbundVector::setData(vector <individual> newData){
+	data = newData;
+}
 
 /***********************************************************************/
 
@@ -126,14 +132,32 @@ int SharedRAbundVector::getAbundance(int index){
 	return data[index].abundance;
 	
 }
+/***********************************************************************/
 
+int SharedRAbundVector::numNZ(){
+	int sum = 0;
+	for(int i = 1; i < numBins; i++)
+		if(data[i].abundance > 0)
+			sum++;
+	return sum;
+}
+/***********************************************************************/
+
+void SharedRAbundVector::sortD(){
+	struct individual indObj;
+	sort(data.begin()+1, data.end(), indObj);
+}
 /***********************************************************************/
 
 individual SharedRAbundVector::get(int index){
 	return data[index];
 	
 }
+/***********************************************************************/
 
+vector <individual> SharedRAbundVector::getData(){
+	return data;
+}
 /***********************************************************************/
 
 void SharedRAbundVector::push_back(int binSize, int otu, string groupName){
@@ -241,7 +265,6 @@ int SharedRAbundVector::getNumSeqs(){
 int SharedRAbundVector::getMaxRank(){
 	return maxRank;
 }
-
 /***********************************************************************/
 
 SharedRAbundVector SharedRAbundVector::getSharedRAbundVector(){
@@ -268,7 +291,25 @@ RAbundVector SharedRAbundVector::getRAbundVector() {
 		exit(1);
 	}
 }
+/***********************************************************************/
 
+RAbundVector SharedRAbundVector::getRAbundVector2() {
+	try {
+		RAbundVector rav;
+		for(int i = 0; i < numBins; i++)
+			if(data[i].abundance != 0)
+				rav.push_back(data[i].abundance-1);
+		return rav;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the SharedRAbundVector class Function getRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the SharedRAbundVector class function getRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
 /***********************************************************************/
 
 SharedSAbundVector SharedRAbundVector::getSharedSAbundVector(){

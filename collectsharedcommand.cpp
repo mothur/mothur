@@ -19,6 +19,10 @@
 #include "sharedsorest.h"
 #include "sharedthetayc.h"
 #include "sharedthetan.h"
+<<<<<<< collectsharedcommand.cpp
+#include "sharedkstest.h"
+#include "sharedbdiversity.h"
+=======
 #include "sharednseqs.h"
 #include "sharedochiai.h"
 #include "sharedanderberg.h"
@@ -27,6 +31,7 @@
 #include "sharedlennon.h"
 #include "sharedmorisitahorn.h"
 #include "sharedbraycurtis.h"
+>>>>>>> 1.13
 
 
 //**********************************************************************************************************************
@@ -64,6 +69,10 @@ CollectSharedCommand::CollectSharedCommand(){
 					cDisplays.push_back(new CollectDisplay(new SharedThetaYC(), new SharedOneColumnFile(fileNameRoot+"shared.thetayc")));
 				}else if (globaldata->Estimators[i] == "sharedthetan") { 
 					cDisplays.push_back(new CollectDisplay(new SharedThetaN(), new SharedOneColumnFile(fileNameRoot+"shared.thetan")));
+				}else if (globaldata->Estimators[i] == "sharedkstest") { 
+					cDisplays.push_back(new CollectDisplay(new SharedKSTest(), new SharedOneColumnFile(fileNameRoot+"shared.kstest")));
+				}else if (globaldata->Estimators[i] == "sharedbdiversity") { 
+					cDisplays.push_back(new CollectDisplay(new SharedBDiversity(), new SharedOneColumnFile(fileNameRoot+"shared.bdiversity")));
 				}else if (globaldata->Estimators[i] == "sharednseqs") { 
 					cDisplays.push_back(new CollectDisplay(new SharedNSeqs(), new SharedOneColumnFile(fileNameRoot+"shared.nseqs")));
 				}else if (globaldata->Estimators[i] == "sharedochiai") { 

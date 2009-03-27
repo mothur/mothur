@@ -17,6 +17,11 @@
 #include "npshannon.h"
 #include "shannon.h"
 #include "jackknife.h"
+#include "geom.h"
+#include "qstat.h"
+#include "logsd.h"
+#include "bergerparker.h"
+#include "bstick.h"
 
 
 //**********************************************************************************************************************
@@ -29,7 +34,6 @@ CollectCommand::CollectCommand(){
 		fileNameRoot = getRootName(globaldata->inputFileName);
 		int i;
 		validCalculator = new ValidCalculators();
-		
 		for (i=0; i<globaldata->Estimators.size(); i++) {
 			if (validCalculator->isValidCalculator("single", globaldata->Estimators[i]) == true) { 
 				if (globaldata->Estimators[i] == "sobs") { 
@@ -51,6 +55,16 @@ CollectCommand::CollectCommand(){
 					cDisplays.push_back(new CollectDisplay(new Simpson(), new ThreeColumnFile(fileNameRoot+"simpson")));
 				}else if (globaldata->Estimators[i] == "bootstrap") { 
 					cDisplays.push_back(new CollectDisplay(new Bootstrap(), new OneColumnFile(fileNameRoot+"bootstrap")));
+				}else if (globaldata->Estimators[i] == "geom") { 
+					cDisplays.push_back(new CollectDisplay(new Geom(), new OneColumnFile(fileNameRoot+"geom")));
+				}else if (globaldata->Estimators[i] == "qstat") { 
+					cDisplays.push_back(new CollectDisplay(new QStat(), new OneColumnFile(fileNameRoot+"qstat")));
+				}else if (globaldata->Estimators[i] == "logsd") { 
+					cDisplays.push_back(new CollectDisplay(new LogSD(), new OneColumnFile(fileNameRoot+"logsd")));
+				}else if (globaldata->Estimators[i] == "bergerparker") { 
+					cDisplays.push_back(new CollectDisplay(new BergerParker(), new OneColumnFile(fileNameRoot+"bergerparker")));
+				}else if (globaldata->Estimators[i] == "bstick") { 
+					cDisplays.push_back(new CollectDisplay(new BStick(), new OneColumnFile(fileNameRoot+"bstick")));
 				}
 			}
 		}

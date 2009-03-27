@@ -47,14 +47,18 @@ class VecCalc
 {
 	// The methods seen in the order here is how they are ordered throughout the class.
 	public:
+		VecCalc(){};
 		void printElements(vector<double>); //This prints the values of the vector on one line with a space between each value.
 		void printElements(vector<string>); //This prints the values of the vector on one line with a space between each value.
 		int findString(vector<string>, string);//This returns the index of the given string in the given <string> vector, if the string does not exist in the vector it returns -1.
 		double mean(vector<double>); //This returns the mean value of the vector.
 		double stError(vector<double>); //This returns the standard error of the vector.
+		int sumElements(vector<int>, int);
+		int sumElements(vector<int>);
 		double sumElements(vector<double>); //This returns the sum of all the values in the vector.
 		double sumElements(vector<double>, int); //This returns the sum of all the values in the vector excluding those whose index is before the given index.  
 		double findMax(vector<double>); //This returns the maximum value in the vector.
+		int numNZ(vector<int>); //This returns the number of non-zero values in the vector.
 		double numNZ(vector<double>); //This returns the number of non-zero values in the vector.
 		double numPos(vector<double>); //This returns the number of positive values in the vector.
 		double findMaxDiff(vector<double>, vector<double>); //This returns the absolute value of the maximum difference between the two vectors.
@@ -86,7 +90,7 @@ each combination. It also calculates the overall diversity for Whittaker's measu
 the Marczewski-Steinhaus distance.*/
 
 
-class BDiversity
+/*class BDiversity
 {
 	public:
 		void doBD(vector<double>, double);//Main method
@@ -95,7 +99,7 @@ class BDiversity
 		double getSor(vector<double>, vector<double>);//Sorensen quantitative index
 		double getMor(vector<double>, vector<double>);//Morisita-Horn index
 		void printD(vector<vector<double> >, int);//This prints a table that represents the given 2D vector, the second paramter specifies which method is to be used (1 for Whitt, 2 for MS, 3 for Sor, and 4 for Mor)
-};
+};*/
 
 /**************************************************************************************************/
 
@@ -115,11 +119,11 @@ class BrokenStick
 It prints the D-Statistic and the critical values for the Kolmogorov-Smirnov
 1-sample test at the 95% confidence interval.*/
 
-class GeometricSeries
+/*class GeometricSeries
 {
 	public:
 		void doGeomTest(vector<double>);
-};
+};*/
 
 /**************************************************************************************************/
 //This Class calculates the jackknifed estimate of the data and
@@ -145,11 +149,11 @@ class KS2SampleTest
 It then generates a D-Statistic and prints the D-Statistic and
 the critical values for the Kolmogorov-Smirnov 1 sample test.*/
 
-class LogSD
+/*class LogSD
 {
 	public:
 		void doLogSD(vector<double>, vector<double>);
-};
+};*/
 
 /**************************************************************************************************/
 //This Class calculates and prints the Q-Statistic for the data.
@@ -173,6 +177,14 @@ class TDTable
 {
 	public:
 		double getConfLimit(int,int);
+};
+
+/**************************************************************************************************/
+//This Class stores the table of the confidence limits of the One-Sample Kolmogorov-Smirnov Test.
+class KOSTable
+{
+	public:
+		double getConfLimit(int);
 };
 
 /**************************************************************************************************/

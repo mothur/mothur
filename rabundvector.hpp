@@ -17,6 +17,7 @@ class RAbundVector : public DataVector {
 public:
 	RAbundVector();
 	RAbundVector(int);
+	RAbundVector(vector<int>, int, int, int);
 //	RAbundVector(const RAbundVector&);
 	RAbundVector(string, vector<int>);
 	RAbundVector(const RAbundVector& bv) : DataVector(bv), data(bv.data), maxRank(bv.maxRank), numBins(bv.numBins), numSeqs(bv.numSeqs){};
@@ -33,6 +34,10 @@ public:
 	void pop_back();
 	void resize(int);
 	int size();
+	void quicksort();
+	int sum();
+	int sum(int);
+	int numNZ();
 	vector<int>::reverse_iterator rbegin();
 	vector<int>::reverse_iterator rend();
 	

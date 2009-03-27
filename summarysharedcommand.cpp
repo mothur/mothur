@@ -20,6 +20,8 @@
 #include "sharedsorest.h"
 #include "sharedthetayc.h"
 #include "sharedthetan.h"
+#include "sharedkstest.h"
+#include "sharedbdiversity.h"
 #include "sharedochiai.h"
 #include "sharedanderberg.h"
 #include "sharedkulczynski.h"
@@ -64,6 +66,8 @@ SummarySharedCommand::SummarySharedCommand(){
 					sumCalculators.push_back(new SharedThetaYC());
 				}else if (globaldata->Estimators[i] == "sharedthetan") { 
 					sumCalculators.push_back(new SharedThetaN());
+				}else if (globaldata->Estimators[i] == "sharedkstest") { 
+					sumCalculators.push_back(new SharedKSTest());
 				}else if (globaldata->Estimators[i] == "sharednseqs") { 
 					sumCalculators.push_back(new SharedNSeqs());
 				}else if (globaldata->Estimators[i] == "sharedochiai") { 
@@ -81,9 +85,12 @@ SummarySharedCommand::SummarySharedCommand(){
 				}else if (globaldata->Estimators[i] == "sharedbraycurtis") { 
 					sumCalculators.push_back(new SharedBrayCurtis());
 				}
+				else if (globaldata->Estimators[i] == "sharedbdiversity") { 
+					sumCalculators.push_back(new SharedBDiversity());
+				}
+				
 			}
 		}
-		
 		//reset calc for next command
 		globaldata->setCalc("");
 
@@ -152,6 +159,7 @@ int SummarySharedCommand::execute(){
 				int n = 1; 
 				for (int k = 0; k < (lookup.size() - 1); k++) { // pass cdd each set of groups to commpare
 					for (int l = n; l < lookup.size(); l++) {
+						outputFileHandle << order->getLabel() << '\t' << (lookup[k]->getGroup() + lookup[l]->getGroup()) << '\t' << '\t'; //print out label and group
 						outputFileHandle << order->getLabel() << '\t';
 						
 						//sort groups to be alphanumeric
