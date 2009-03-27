@@ -23,7 +23,7 @@
 #include "sharedbdiversity.h"
 #include "sharednseqs.h"
 #include "sharedochiai.h"
-#include "sharedanderberg.h"
+//#include "sharedanderberg.h"
 #include "sharedkulczynski.h"
 #include "sharedkulczynskicody.h"
 #include "sharedlennon.h"
@@ -75,8 +75,8 @@ CollectSharedCommand::CollectSharedCommand(){
 					cDisplays.push_back(new CollectDisplay(new SharedNSeqs(), new SharedOneColumnFile(fileNameRoot+"shared.nseqs")));
 				}else if (globaldata->Estimators[i] == "sharedochiai") { 
 					cDisplays.push_back(new CollectDisplay(new SharedOchiai(), new SharedOneColumnFile(fileNameRoot+"shared.ochiai")));
-				}else if (globaldata->Estimators[i] == "sharedanderberg") { 
-					cDisplays.push_back(new CollectDisplay(new SharedAnderberg(), new SharedOneColumnFile(fileNameRoot+"shared.anderberg")));
+				//}else if (globaldata->Estimators[i] == "sharedanderberg") { 
+				//	cDisplays.push_back(new CollectDisplay(new SharedAnderberg(), new SharedOneColumnFile(fileNameRoot+"shared.anderberg")));
 				}else if (globaldata->Estimators[i] == "sharedkulczynski") { 
 					cDisplays.push_back(new CollectDisplay(new SharedKulczynski(), new SharedOneColumnFile(fileNameRoot+"shared.kulczynski")));
 				}else if (globaldata->Estimators[i] == "sharedkulczynskicody") { 
