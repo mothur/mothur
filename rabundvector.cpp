@@ -13,6 +13,7 @@ using namespace std;
 #include "rabundvector.hpp"
 #include "sabundvector.hpp"
 #include "ordervector.hpp"
+#include "calculator.h"
 
 
 /***********************************************************************/
@@ -51,6 +52,26 @@ RAbundVector::RAbundVector(string id, vector<int> rav) : DataVector(id), data(ra
 		exit(1);
 	}
 }
+
+/***********************************************************************/
+
+RAbundVector::RAbundVector(vector<int> rav, int mr, int nb, int ns) {
+	try {
+		numBins = nb;
+		maxRank = mr;
+		numSeqs = ns;
+		data = rav;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the RAbundVector class Function RAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the RAbundVector class function RAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+
 
 
 /***********************************************************************/
@@ -156,6 +177,33 @@ void RAbundVector::resize(int size){
 
 int RAbundVector::size(){
 	return data.size();
+}
+
+/***********************************************************************/
+
+void RAbundVector::quicksort(){
+	sort(data.rbegin(), data.rend());
+}
+
+/***********************************************************************/
+
+int RAbundVector::sum(){
+	VecCalc vecCalc;
+	return vecCalc.sumElements(data);
+}
+
+/***********************************************************************/
+
+int RAbundVector::sum(int index){
+	VecCalc vecCalc;
+	return vecCalc.sumElements(data, index);
+}
+
+/***********************************************************************/
+
+int RAbundVector::numNZ(){
+	VecCalc vecCalc;
+	return vecCalc.numNZ(data);
 }
 
 /***********************************************************************/

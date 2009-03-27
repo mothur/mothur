@@ -126,16 +126,22 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 void ValidCalculators::initialSingle() {
 	try {	
 	
-		single["sobs"]		= "sobs";
-		single["chao"]		= "chao";
-		single["ace"]		= "ace";
-		single["jack"]		= "jack";
-		single["shannon"]	= "shannon";
-		single["npshannon"]	= "npshannon";
-		single["simpson"]	= "simpson";
-		single["bootstrap"]	= "bootstrap";
-		single["default"]	= "default";
+		single["sobs"]	        = "sobs";
+		single["chao"]		    = "chao";
+		single["ace"]		    = "ace";
+		single["jack"]		    = "jack";
+		single["shannon"]	    = "shannon";
+		single["npshannon"]    	= "npshannon";
+		single["simpson"]	    = "simpson";
+		single["bergerparker"]  = "bergerparker";
+		single["bootstrap"]    	= "bootstrap";
+		single["geom"]          = "geom";
+		single["logsd"]         = "logsd";
+		single["qstat"]         = "qstat";
+		single["bstick"]        = "bstick";
 		single["nseqs"]		= "nseqs";
+		single["default"]	    = "default";
+		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialSingle. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -161,6 +167,8 @@ void ValidCalculators::initialShared() {
 		shared["sharedsorest"]			= "sharedsorest";
 		shared["sharedthetayc"]			= "sharedthetayc";
 		shared["sharedthetan"]			= "sharedthetan";
+		shared["sharedkstest"]          = "sharedkstest";
+		shared["sharedbdiversity"]      = "sharedbdiversity";
 		shared["sharednseqs"]			= "sharednseqs";
 		shared["sharedochiai"]			= "sharedochiai";
 		shared["sharedanderberg"]		= "sharedanderberg";
@@ -216,7 +224,12 @@ void ValidCalculators::initialSummary() {
 		summary["shannon"]		= "shannon";
 		summary["npshannon"]	= "npshannon";
 		summary["simpson"]		= "simpson";
+		summary["bergerparker"] = "bergerparker";
+		summary["geom"]         = "geom";
 		summary["bootstrap"]	= "bootstrap";
+		summary["logsd"]        = "logsd";
+		summary["qstat"]        = "qstat";
+		summary["bstick"]       = "bstick";
 		summary["nseqs"]		= "nseqs";
 		summary["default"]	    = "default";
 	}
@@ -244,6 +257,8 @@ void ValidCalculators::initialSharedSummary() {
 		sharedsummary["sharedsorest"]			= "sharedsorest";
 		sharedsummary["sharedthetayc"]			= "sharedthetayc";
 		sharedsummary["sharedthetan"]			= "sharedthetan";
+		sharedsummary["sharedkstest"]           = "sharedkstest";
+		sharedsummary["sharedbdiversity"]       = "sharedbdiversity";
 		sharedsummary["sharednseqs"]			= "sharednseqs";
 		sharedsummary["sharedochiai"]			= "sharedochiai";
 		sharedsummary["sharedanderberg"]		= "sharedanderberg";

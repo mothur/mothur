@@ -12,6 +12,7 @@
 using namespace std;
 
 #include "mothur.h"
+#include "utilities.hpp"
 
 //This class contains a list of all valid parameters in Mothur.  
 //It has a function which will tell you if your parameter is valid.
@@ -23,8 +24,12 @@ class ValidParameters {
 	public:
 		ValidParameters();
 		~ValidParameters();
-		bool isValidParameter(string, string);
-		
+		bool isValidParameter(string);
+		bool isValidParameter(string, string, string);
+		vector <string> addParameters(string[], int);
+		void initCommandParameters();
+		void initParameterRanges();
+
 	private:
 		map<string, string> readdist;
 		map<string, string> readotu;
@@ -44,23 +49,8 @@ class ValidParameters {
 		map<string, string> heatmap;
 		
 		map<string, string>::iterator it;
-		
-		void initialReaddist();
-		void initialReadotu();
-		void initialReadtree();
-		void initialCluster();
-		void initialDeconvolute();
-		void initialParsimony();
-		void initialCollectsingle();
-		void initialCollectshared();
-		void initialRarefactsingle();
-		void initialRarefactshared();
-		void initialSummarysingle();
-		void initialSummaryshared();
-		void initialUnifracweighted();
-		void initialUnifracunweighted();
-		void initialLibshuff();
-		void initialHeatmap();
+		map<string, vector<string> > commandParameters;
+		map<string, vector<string> > parameterRanges;
 
 };
 

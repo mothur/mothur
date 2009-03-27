@@ -155,7 +155,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				
 		//input defaults for calculators
 		if (commandName == "collect.single") {
-			if ((calc == "default") || (calc == "")) { calc = "sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson"; }
+			if ((calc == "default") || (calc == "")) { calc = "sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson-geom-qstat-logsd-bergerparker-bstick"; }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
@@ -165,17 +165,17 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			splitAtDash(calc, Estimators); 
 		}
 		if (commandName == "collect.shared") {
-			if ((calc == "default") || (calc == "")) { calc = "sharedsobs-sharedchao-sharedace-sharedjabund-sharedsorensonabund-sharedjclass-sharedsorclass-sharedjest-sharedsorest-sharedthetayc-sharedthetan"; }
+			if ((calc == "default") || (calc == "")) { calc = "sharedsobs-sharedchao-sharedace-sharedjabund-sharedsorensonabund-sharedjclass-sharedsorclass-sharedjest-sharedsorest-sharedthetayc-sharedthetan-sharedkstest-sharedbdiversity"; }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
 		if (commandName == "summary.single") {
-			if ((calc == "default") || (calc == "")) { calc = "sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson"; }
+			if ((calc == "default") || (calc == "")) { calc = "sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson-geom-logsd-qstat-bergerparker-bstick"; }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
 		if (commandName == "summary.shared") {
-			if ((calc == "default") || (calc == "")) { calc = "sharedsobs-sharedchao-sharedace-sharedjabund-sharedsorensonabund-sharedjclass-sharedsorclass-sharedjest-sharedsorest-sharedthetayc-sharedthetan"; }
+			if ((calc == "default") || (calc == "")) { calc = "sharedsobs-sharedchao-sharedace-sharedjabund-sharedsorensonabund-sharedjclass-sharedsorclass-sharedjest-sharedsorest-sharedthetayc-sharedthetan-sharedkstest-sharedbdiversity"; }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}

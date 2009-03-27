@@ -17,6 +17,11 @@
 #include "npshannon.h"
 #include "shannon.h"
 #include "jackknife.h"
+#include "geom.h"
+#include "logsd.h"
+#include "qstat.h"
+#include "bergerparker.h"
+#include "bstick.h"
 
 //**********************************************************************************************************************
 
@@ -28,10 +33,21 @@ SummaryCommand::SummaryCommand(){
 		
 		for (i=0; i<globaldata->Estimators.size(); i++) {
 			if (validCalculator->isValidCalculator("summary", globaldata->Estimators[i]) == true) { 
+			
 				if(globaldata->Estimators[i] == "sobs"){
 					sumCalculators.push_back(new Sobs());
 				}else if(globaldata->Estimators[i] == "chao"){
 					sumCalculators.push_back(new Chao1());
+				}else if(globaldata->Estimators[i] == "geom"){
+					sumCalculators.push_back(new Geom());
+				}else if(globaldata->Estimators[i] == "logsd"){
+					sumCalculators.push_back(new LogSD());
+				}else if(globaldata->Estimators[i] == "qstat"){
+					sumCalculators.push_back(new QStat());
+				}else if(globaldata->Estimators[i] == "bergerparker"){
+					sumCalculators.push_back(new BergerParker());
+				}else if(globaldata->Estimators[i] == "bstick"){
+					sumCalculators.push_back(new BStick());
 				}else if(globaldata->Estimators[i] == "ace"){
 					convert(globaldata->getAbund(), abund);
 					if(abund < 5)
@@ -107,16 +123,16 @@ int SummaryCommand::execute(){
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(sabund->getLabel()) == 1){			
 	
 				cout << sabund->getLabel() << '\t' << count << endl;
-			
+				
 				outputFileHandle << sabund->getLabel();
 				for(int i=0;i<sumCalculators.size();i++){
 					vector<double> data = sumCalculators[i]->getValues(sabund);
 					outputFileHandle << '\t';
-					sumCalculators[i]->print(outputFileHandle);
+					//sumCalculators[i]->print(outputFileHandle);
 				}
+				
 				outputFileHandle << endl;
 			}
-		
 			sabund = input->getSAbundVector();
 			count++;
 		}

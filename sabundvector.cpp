@@ -10,6 +10,7 @@ using namespace std;
 
 #include "sabundvector.hpp"
 #include "utilities.hpp"
+#include "calculator.h"
 
 /***********************************************************************/
 
@@ -23,7 +24,6 @@ SAbundVector::SAbundVector(int size) :	DataVector(), data(size, 0), maxRank(0), 
 
 SAbundVector::SAbundVector(string id, vector<int> sav) : DataVector(id), data(sav) {
 	try {
-		
 		for(int i=0;i<sav.size();i++){
 			if(data[i] != 0){	maxRank = i;	}
 			numSeqs += i*data[i];
@@ -40,6 +40,24 @@ SAbundVector::SAbundVector(string id, vector<int> sav) : DataVector(id), data(sa
 	}
 }
 
+/***********************************************************************/
+
+SAbundVector::SAbundVector(vector <int> dataVec, int mr, int nb, int ns) {
+	try {
+		data = dataVec;
+		maxRank = mr;
+		numBins = nb;
+		numSeqs = ns;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the SAbundVector class Function SAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the SAbundVector class function SAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
 /***********************************************************************/
 
 SAbundVector::SAbundVector(ifstream& f): DataVector(), maxRank(0), numBins(0), numSeqs(0) {
@@ -64,6 +82,7 @@ SAbundVector::SAbundVector(ifstream& f): DataVector(), maxRank(0), numBins(0), n
 		exit(1);
 	}
 }
+
 
 /***********************************************************************/
 
@@ -91,6 +110,7 @@ void SAbundVector::set(int sabund, int abundance){
 	}	
 }
 
+
 /***********************************************************************/
 
 int SAbundVector::get(int index){
@@ -117,6 +137,18 @@ void SAbundVector::push_back(int abundance){
 		cout << "An unknown error has occurred in the SAbundVector class function push_back. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}		
+}
+/***********************************************************************/
+
+void SAbundVector::quicksort(){
+	sort(data.rbegin(), data.rend());
+}
+
+/***********************************************************************/
+
+int SAbundVector::sum(){
+	VecCalc vecCalc;
+	return vecCalc.sumElements(data);
 }
 
 /***********************************************************************/

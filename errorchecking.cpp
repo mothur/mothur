@@ -83,8 +83,10 @@ bool ErrorCheck::checkInput(string input) {
 				splitAtComma(value, optionText);
 				splitAtEquals(parameter, value);
 				
-				//is it a valid parameter for the command
-				if (validParameter->isValidParameter(parameter, commandName) != true) { return false; }
+				//is it a valid parameter
+				if (validParameter->isValidParameter(parameter, commandName, value) != true) { return false; }
+
+
 				
 				if (parameter == "phylip" )		{ phylipfile = value; }
 				if (parameter == "column" )		{ columnfile = value; }
@@ -114,9 +116,9 @@ bool ErrorCheck::checkInput(string input) {
 			if (errorFree)  { //gets the last parameter and value
 				value = optionText;
 				splitAtEquals(parameter, value);
-				
-				//is it a valid parameter for the command
-				if (validParameter->isValidParameter(parameter, commandName) != true) { return false; }
+				//is it a valid parameter
+				if (validParameter->isValidParameter(parameter, commandName, value) != true) { return false; }
+	
 				
 				if (parameter == "phylip" )		{ phylipfile = value; }
 				if (parameter == "column" )		{ columnfile = value; }				
@@ -442,7 +444,7 @@ void ErrorCheck::validateReadPhil() {
 		}else if (sabundfile != "") { 
 			if ((listfile != "") || (rabundfile != "")) { 
 				cout << "When executing a read.otu you must enter ONLY ONE of the following: list, rabund or sabund." << endl; errorFree = false; }
-		}else if ((listfile == "") && (rabundfile == "") && (sabundfile == "")) {
+		}else if ((listfile == "") && (rabundfile == "") && (sabundfile == "") && (sharedfile == "")) {
 			    cout << "When executing a read.otu you must enter one of the following: list, rabund or sabund." << endl; errorFree = false; 
 		}
 		

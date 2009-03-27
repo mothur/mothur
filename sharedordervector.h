@@ -23,6 +23,9 @@ struct individual {
 		string group;
 		int bin;
 		int abundance;
+		bool operator()(const individual& i1, const individual& i2) {
+		return (i1.abundance > i2.abundance);
+		}
 };
 
 #include "sabundvector.hpp"

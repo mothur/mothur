@@ -30,7 +30,7 @@ public:
 	SharedRAbundVector(int);
 	//SharedRAbundVector(string, vector<int>);
 	SharedRAbundVector(const SharedRAbundVector& bv) : DataVector(bv), data(bv.data), maxRank(bv.maxRank), numBins(bv.numBins), numSeqs(bv.numSeqs){};
-//	SharedRAbundVector(ifstream&);
+    //SharedRAbundVector(ifstream&);
 	~SharedRAbundVector();
 
 	int getNumBins();		
@@ -42,8 +42,12 @@ public:
 	void setGroupIndex(int);								
 
 	void set(int, int, string);			//OTU, abundance, groupname
+	void setData(vector <individual>);
 	individual get(int);
+	vector <individual> getData();
 	int getAbundance(int);
+	int numNZ();
+	void sortD();  //Sorts the data in descending order.
 	void push_back(int, int, string);  //abundance, OTU, groupname
 	void pop_back();
 	void resize(int);
@@ -54,6 +58,7 @@ public:
 	void print(ostream&);
 		
 	RAbundVector getRAbundVector();
+	RAbundVector getRAbundVector2();
 	SAbundVector getSAbundVector();
 	OrderVector getOrderVector(map<string,int>*);
 	SharedOrderVector getSharedOrderVector();

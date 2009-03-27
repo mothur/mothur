@@ -6,6 +6,7 @@ using namespace std;
 #include "datavector.hpp"
 #include "rabundvector.hpp"
 #include "ordervector.hpp"
+#include "calculator.h"
 
 
 /* This class is a child to datavector.  It represents OTU information at a certain distance. 
@@ -24,6 +25,7 @@ public:
 	SAbundVector();
 	SAbundVector(int);
 //	SAbundVector(const SAbundVector&);
+	SAbundVector(vector<int>, int, int, int);
 	SAbundVector(string, vector<int>);
 	SAbundVector(const SAbundVector& rv) : DataVector(rv.label), data(rv.data), maxRank(rv.maxRank), numBins(rv.numBins), numSeqs(rv.numSeqs){};
 	SAbundVector(ifstream&);
@@ -36,13 +38,15 @@ public:
 	void set(int, int);
 	int get(int);
 	void push_back(int);
+	void quicksort();
+	int sum();
 	void resize(int);
 	int size();
 
 	void print(ostream&);
 	void print(string, ostream&);
 		
-	RAbundVector getRAbundVector();	
+	RAbundVector getRAbundVector();		
 	SAbundVector getSAbundVector();
 	OrderVector getOrderVector(map<string,int>*);
 	
@@ -50,6 +54,7 @@ private:
 	vector<int> data;
 //	bool needToUpdate;
 //	void updateStats();
+	
 	int maxRank;
 	int numBins;
 	int numSeqs;
