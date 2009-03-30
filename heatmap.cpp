@@ -87,6 +87,9 @@ void HeatMap::getPic(SharedOrderVector* sharedorder) {
 		//fills vector of sharedsabunds - lookup
 		getSharedVectors(sharedorder);
 		
+		//sort lookup so shared bins are on top
+		sortSharedVectors();
+		
 		//get maxBin
 		for (int i = 0; i < lookup.size(); i++) {
 			for (int j = 0; j < lookup[i]->size(); j++) {
@@ -145,6 +148,12 @@ void HeatMap::getPic(SharedOrderVector* sharedorder) {
 //**********************************************************************************************************************
 void HeatMap::getSharedVectors(SharedOrderVector* order){
 	try {
+	
+		//delete lookup
+		for (int j = 0; j < lookup.size(); j++) {
+			delete lookup[j];
+		}
+
 		lookup.clear();
 		
 		groupComb = "";
@@ -187,7 +196,75 @@ void HeatMap::getSharedVectors(SharedOrderVector* order){
 
 }
 
+
 //**********************************************************************************************************************
+void HeatMap::sortSharedVectors(){
+	try {
+		//copy lookup and then clear it to refill with sorted.
+		//loop though lookup and determine if they are shared
+		//if they are then insert in the front
+		//if not push to back
+		
+		bool shared;
+		vector<SharedRAbundVector*> looktemp;
+		
+		//create and initialize looktemp as a copy of lookup
+		for (int i = 0; i < lookup.size(); i++) { 
+			SharedRAbundVector* temp = new SharedRAbundVector(lookup[i]->getNumBins());
+			temp->setLabel(lookup[i]->getLabel());
+			temp->setGroup(lookup[i]->getGroup());
+			//copy lookup i's info
+			for (int j = 0; j < lookup[i]->size(); j++) {
+				temp->set(j, lookup[i]->getAbundance(j), lookup[i]->getGroup());
+			}
+			looktemp.push_back(temp);
+		}
+		
+		//clear out lookup to create sorted lookup
+		lookup.clear();
+		
+		//create and initialize lookup to empty vectors
+		for (int i = 0; i < looktemp.size(); i++) { 
+			SharedRAbundVector* temp = new SharedRAbundVector();
+			lookup.push_back(temp);
+		}
+		
+		//for each bin
+		for (int i = 0; i < looktemp[0]->size(); i++) {
+			shared = true;
+			//for each group
+			for (int j = 0; j < looktemp.size(); j++) {
+				if (looktemp[j]->getAbundance(i) == 0) { shared = false; }
+			}
+			
+			//fill lookup
+			for (int j = 0; j < looktemp.size(); j++) {
+				//if they are not shared then push to back, if they are not insert in front
+				if (shared == false)  { lookup[j]->push_back(looktemp[j]->getAbundance(i), i, looktemp[j]->getGroup()); }
+				else { lookup[j]->push_front(looktemp[j]->getAbundance(i), i, looktemp[j]->getGroup()); }
+			}
+		}
+		
+		//delete looktemp
+		for (int j = 0; j < looktemp.size(); j++) {
+			delete looktemp[j];
+		}
+		
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the HeatMap class Function sortSharedVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the HeatMap class function sortSharedVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+
+}
+
+//**********************************************************************************************************************
+
+
 
 
 

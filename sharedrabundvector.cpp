@@ -186,8 +186,36 @@ void SharedRAbundVector::push_back(int binSize, int otu, string groupName){
 	}
 }
 
+
 /***********************************************************************/
 
+void SharedRAbundVector::push_front(int binSize, int otu, string groupName){
+	try {
+		individual newGuy;
+		newGuy.abundance = binSize;
+		newGuy.group = groupName;
+		newGuy.bin = otu;
+		
+		data.insert(data.begin(), newGuy);
+		numBins++;
+	
+		if(binSize > maxRank){
+			maxRank = binSize;
+		}
+	
+		numSeqs += binSize;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the SharedRAbundVector class Function push_front. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the SharedRAbundVector class function push_front. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+
+/***********************************************************************/
 void SharedRAbundVector::pop_back(){
 
 	return data.pop_back();

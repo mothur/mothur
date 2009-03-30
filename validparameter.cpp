@@ -223,11 +223,14 @@ void ValidParameters::initCommandParameters() {
 	try {	
 		//{"parameter1","parameter2",...,"last parameter"};
 		
-		string readdistArray[] = {"phylip","name","cutoff","precision"};
+		string readdistArray[] = {"phylip","column", "name","cutoff","precision"};
 		commandParameters["read.dist"] = addParameters(readdistArray, sizeof(readdistArray)/sizeof(string));
 
-		string readotuArray[] =  {"list","order","group","shared", "sabund"};
+		string readotuArray[] =  {"list","order","shared", "line", "label","group","shared", "sabund", "rabund"};
 		commandParameters["read.otu"] = addParameters(readotuArray, sizeof(readotuArray)/sizeof(string));
+		
+		string readtreeArray[] = {"tree","group"};
+		commandParameters["read.tree"] = addParameters(readtreeArray, sizeof(readtreeArray)/sizeof(string));
 		
 		string clusterArray[] =  {"cutoff","precision","method"};
 		commandParameters["cluster"] = addParameters(clusterArray, sizeof(clusterArray)/sizeof(string));
@@ -235,10 +238,10 @@ void ValidParameters::initCommandParameters() {
 		string deconvoluteArray[] =  {"fasta"};
 		commandParameters["deconvolute"] = addParameters(deconvoluteArray, sizeof(deconvoluteArray)/sizeof(string));
 		
-		string collectsingleArray[] =  {"freq","line","label","single","precision","abund"};
+		string collectsingleArray[] =  {"freq","line","label","calc","precision","abund"};
 		commandParameters["collect.single"] = addParameters(collectsingleArray, sizeof(collectsingleArray)/sizeof(string));
 
-		string collectsharedArray[] =  {"jumble","freq","line","label","shared","groups"};
+		string collectsharedArray[] =  {"jumble","freq","line","label","calc","groups"};
 		commandParameters["collect.shared"] = addParameters(collectsharedArray, sizeof(collectsharedArray)/sizeof(string));
 
 		string getgroupArray[] =  {};
@@ -250,20 +253,32 @@ void ValidParameters::initCommandParameters() {
 		string getlineArray[] =  {};
 		commandParameters["get.line"] = addParameters(getlineArray, sizeof(getlineArray)/sizeof(string));
 
-		string rarefactionsingleArray[] =  {"iters","freq","line","label","rarefaction","abund"};
+		string rarefactionsingleArray[] =  {"iters","freq","line","label","calc","abund"};
 		commandParameters["rarefaction.single"] = addParameters(rarefactionsingleArray, sizeof(rarefactionsingleArray)/sizeof(string));
 
-		string rarefactionsharedArray[] =  {"iters","jumble","line","label","sharedrarefaction"};
+		string rarefactionsharedArray[] =  {"iters","jumble","line","label","calc"};
 		commandParameters["rarefaction.shared"] = addParameters(rarefactionsharedArray, sizeof(rarefactionsharedArray)/sizeof(string));
 		
 		string libshuffArray[] =  {"iters","groups","step","form","cutoff"};
 		commandParameters["libshuff"] = addParameters(libshuffArray, sizeof(libshuffArray)/sizeof(string));
 		
-		string summarysingleArray[] =  {"line","label","summary","abund"};
+		string summarysingleArray[] =  {"line","label","calc","abund"};
 		commandParameters["summary.single"] = addParameters(summarysingleArray, sizeof(summarysingleArray)/sizeof(string));
 
-		string summarysharedArray[] =  {"jumble","line","label","sharedsummary"};
+		string summarysharedArray[] =  {"jumble","line","label","calc"};
 		commandParameters["summary.shared"] = addParameters(summarysharedArray, sizeof(summarysharedArray)/sizeof(string));
+
+		string parsimonyArray[] =  {"random","group","iters"};
+		commandParameters["parsimony"] = addParameters(parsimonyArray, sizeof(parsimonyArray)/sizeof(string));
+
+		string unifracWeightedArray[] =  {"group","iters"};
+		commandParameters["unifrac.weighted"] = addParameters(unifracWeightedArray, sizeof(unifracWeightedArray)/sizeof(string));
+
+		string unifracUnweightedArray[] =  {"group","iters"};
+		commandParameters["unifrac.unweighted"] = addParameters(unifracUnweightedArray, sizeof(unifracUnweightedArray)/sizeof(string));
+
+		string heatmapArray[] =  {"group","line","label"};
+		commandParameters["heatmap"] = addParameters(heatmapArray, sizeof(heatmapArray)/sizeof(string));
 
 		string quitArray[] = {};
 		commandParameters["quit"] = addParameters(quitArray, sizeof(quitArray)/sizeof(string));

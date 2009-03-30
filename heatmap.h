@@ -31,7 +31,8 @@ class HeatMap {
 
 	private:
 		void getSharedVectors(SharedOrderVector*);
-	
+		void sortSharedVectors();
+		
 		GlobalData* globaldata;
 		vector<SharedRAbundVector*> lookup;
 		RAbundVector rabund;

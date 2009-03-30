@@ -23,7 +23,7 @@
 #include "sharedkstest.h"
 #include "sharedbdiversity.h"
 #include "sharedochiai.h"
-//#include "sharedanderberg.h"
+#include "sharedanderbergs.h"
 #include "sharedkulczynski.h"
 #include "sharedkulczynskicody.h"
 #include "sharedlennon.h"
@@ -72,8 +72,8 @@ SummarySharedCommand::SummarySharedCommand(){
 					sumCalculators.push_back(new SharedNSeqs());
 				}else if (globaldata->Estimators[i] == "sharedochiai") { 
 					sumCalculators.push_back(new SharedOchiai());
-				//}else if (globaldata->Estimators[i] == "sharedanderberg") { 
-					//sumCalculators.push_back(new SharedAnderberg());
+				}else if (globaldata->Estimators[i] == "sharedanderberg") { 
+					sumCalculators.push_back(new SharedAnderberg());
 				}else if (globaldata->Estimators[i] == "sharedkulczynski") { 
 					sumCalculators.push_back(new SharedKulczynski());
 				}else if (globaldata->Estimators[i] == "sharedkulczynskicody") { 
