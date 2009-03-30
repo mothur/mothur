@@ -14,6 +14,7 @@
 		3746107E0F4064D100460C57 /* weighted.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3746107D0F4064D100460C57 /* weighted.cpp */; };
 		374610830F40652400460C57 /* unweighted.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 374610820F40652400460C57 /* unweighted.cpp */; };
 		3746109D0F40657600460C57 /* unifracunweightedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3746109C0F40657600460C57 /* unifracunweightedcommand.cpp */; };
+		37519A6B0F80E6EB00FED5E8 /* sharedanderbergs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37519A6A0F80E6EB00FED5E8 /* sharedanderbergs.cpp */; };
 		375873E70F7D63E90040F377 /* coverage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 375873E50F7D63E90040F377 /* coverage.cpp */; };
 		375873EC0F7D64520040F377 /* fullmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 375873EB0F7D64520040F377 /* fullmatrix.cpp */; };
 		375873EF0F7D646F0040F377 /* heatmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 375873EE0F7D646F0040F377 /* heatmap.cpp */; };
@@ -143,6 +144,8 @@
 		374610820F40652400460C57 /* unweighted.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = unweighted.cpp; sourceTree = "<group>"; };
 		3746109B0F40657600460C57 /* unifracunweightedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = unifracunweightedcommand.h; sourceTree = "<group>"; };
 		3746109C0F40657600460C57 /* unifracunweightedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = unifracunweightedcommand.cpp; sourceTree = "<group>"; };
+		37519A690F80E6EB00FED5E8 /* sharedanderbergs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedanderbergs.h; sourceTree = "<group>"; };
+		37519A6A0F80E6EB00FED5E8 /* sharedanderbergs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedanderbergs.cpp; sourceTree = "<group>"; };
 		375873E50F7D63E90040F377 /* coverage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = coverage.cpp; sourceTree = "<group>"; };
 		375873E60F7D63E90040F377 /* coverage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = coverage.h; sourceTree = "<group>"; };
 		375873EA0F7D64520040F377 /* fullmatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fullmatrix.h; sourceTree = "<group>"; };
@@ -489,6 +492,8 @@
 				37D9281E0F21331F001D4494 /* shannon.cpp */,
 				37D928230F21331F001D4494 /* sharedace.h */,
 				37D928220F21331F001D4494 /* sharedace.cpp */,
+				37519A690F80E6EB00FED5E8 /* sharedanderbergs.h */,
+				37519A6A0F80E6EB00FED5E8 /* sharedanderbergs.cpp */,
 				375873FB0F7D64DA0040F377 /* sharedbraycurtis.h */,
 				375873FC0F7D64DA0040F377 /* sharedbraycurtis.cpp */,
 				EB6F01590F6AC1670048081A /* sharedbdiversity.h */,
@@ -805,6 +810,7 @@
 				375874060F7D64EF0040F377 /* sharedkulczynskicody.cpp in Sources */,
 				3758740C0F7D64FC0040F377 /* sharedmorisitahorn.cpp in Sources */,
 				3758740D0F7D64FC0040F377 /* sharedochiai.cpp in Sources */,
+				37519A6B0F80E6EB00FED5E8 /* sharedanderbergs.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
