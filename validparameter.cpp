@@ -277,7 +277,7 @@ void ValidParameters::initCommandParameters() {
 		string unifracUnweightedArray[] =  {"group","iters"};
 		commandParameters["unifrac.unweighted"] = addParameters(unifracUnweightedArray, sizeof(unifracUnweightedArray)/sizeof(string));
 
-		string heatmapArray[] =  {"group","line","label"};
+		string heatmapArray[] =  {"group","line","label","sorted"};
 		commandParameters["heatmap"] = addParameters(heatmapArray, sizeof(heatmapArray)/sizeof(string));
 
 		string quitArray[] = {};

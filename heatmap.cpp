@@ -14,6 +14,7 @@ HeatMap::HeatMap(){
 	try {
 		globaldata = GlobalData::getInstance();
 		format = globaldata->getFormat();
+		sorted = globaldata->getSorted();
 		
 	}
 	catch(exception& e) {
@@ -88,7 +89,7 @@ void HeatMap::getPic(SharedOrderVector* sharedorder) {
 		getSharedVectors(sharedorder);
 		
 		//sort lookup so shared bins are on top
-		sortSharedVectors();
+		if (sorted == "1") {  sortSharedVectors();  }
 		
 		//get maxBin
 		for (int i = 0; i < lookup.size(); i++) {

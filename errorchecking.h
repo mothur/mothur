@@ -33,7 +33,7 @@ class ErrorCheck {
 		void clear();
 		void refresh();
 		string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, treefile, sharedfile, cutoff, format; 
-		string precision, method, fileroot, label, line, iters, jumble, freq, single, rarefaction, shared, summary, randomtree, abund;
+		string precision, method, fileroot, label, line, iters, jumble, freq, single, rarefaction, shared, summary, randomtree, abund, sorted;
 		string commandName, optionText;
 		bool errorFree;
 

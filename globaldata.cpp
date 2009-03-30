@@ -74,6 +74,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if (key == "calc")			{ calc = value;			}
 				if (key == "step")			{ step = value;			}
 				if (key == "form")			{ form = value;			}
+				if (key == "sorted")		{ sorted = value;		}
 				
 
 				
@@ -125,9 +126,10 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if (key == "fileroot" )		{ fileroot = value;		}
 			if (key == "abund" )        { abund = value;        }
 			if (key == "random" )		{ randomtree = value;	}
-			if (key == "calc")			{ calc = value;		}
+			if (key == "calc")			{ calc = value;			}
 			if (key == "step")			{ step = value;			}
 			if (key == "form")			{ form = value;			}
+			if (key == "sorted")		{ sorted = value;		}
 
 			if (key == "line") {//stores lines to be used in a vector
 				lines.clear();
@@ -233,6 +235,7 @@ string GlobalData::getRandomTree()		{	return randomtree;	}
 string GlobalData::getGroups()			{	return groups;		}
 string GlobalData::getStep()			{	return step;		}
 string GlobalData::getForm()			{	return form;		}
+string GlobalData::getSorted()			{	return sorted;		}
 void GlobalData::setListFile(string file)	{	listfile = file;	inputFileName = file;}
 void GlobalData::setRabundFile(string file)	{	rabundfile = file;	inputFileName = file;}
 void GlobalData::setSabundFile(string file)	{	sabundfile = file;	inputFileName = file;}
@@ -283,6 +286,7 @@ void GlobalData::clear() {
 	abund           =   "10";
 	step			=	"0.01";
 	form			=	"integral";
+	sorted			=	"1";  //0 means don't sort, 1 means sort.
 }
 
 //*******************************************************/
@@ -294,6 +298,7 @@ void GlobalData::reset() {
 	iters			=	"1000"; 
 	groups			=	"";
 	jumble			=	"1";	//0 means don't jumble, 1 means jumble.
+	sorted			=	"1";  //0 means don't sort, 1 means sort.
 	randomtree		=	"";  //"" means user will enter some user trees, "outputfile" means they just want the random tree distribution to be outputted to outputfile.
 	freq			=	"100";
 	method			=	"furthest";
