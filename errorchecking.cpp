@@ -110,6 +110,7 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "label" )			{ label = value; }
 				if (parameter == "abund" )          { abund = value; }
 				if (parameter == "random" )			{ randomtree = value;	}
+				if (parameter == "sorted" )			{ sorted = value;	}
 			}
 			
 			//gets the last parameter and value
@@ -142,6 +143,7 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "label" )			{ label = value; }
 				if (parameter == "random" )			{ randomtree = value;	}
 				if (parameter == "abund" )          { abund = value; }
+				if (parameter == "sorted" )			{ sorted = value;	}
 			}
 		}
 		

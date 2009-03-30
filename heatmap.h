@@ -36,11 +36,10 @@ class HeatMap {
 		GlobalData* globaldata;
 		vector<SharedRAbundVector*> lookup;
 		RAbundVector rabund;
-		string format;
+		string format, sorted, groupComb;
 		ofstream outsvg;
 		map<int, string> colorScale;
 		map<int, string>::iterator it;
-		string groupComb;
 
 			
 };
