@@ -49,6 +49,10 @@ bool ValidParameters::isValidParameter(string parameter, string command, string 
 		if(!valid)
 		{
 			cout << "'" << parameter << "' is not a valid parameter for the " << command << " command.\n";
+			cout << "The valid paramters for the " << command << " command are: ";
+			for(int i = 0; i < numParams-1; i++)
+				cout << cParams.at(i) << ", ";
+			cout << "and " << cParams.at(numParams-1) << ".\n";
 			return false;
 		}
 		
@@ -58,153 +62,155 @@ bool ValidParameters::isValidParameter(string parameter, string command, string 
 		int pVal;
 		double piSentinel = 3.14159;
 		vector<string> range = parameterRanges[parameter];
-
-		valid = convertTest(value, pVal);
 		
-		if(!valid)
-			return false;
+		vector<string> values;
+		splitAtDash(value, values);
 		
-		
-		
-		/********************************************************************************************************
-		       Special Cases
-	    *********************************************************************************************************/
-		
-		if(parameter.compare("precision") == 0)
+		for(int i = 0; i < values.size(); i++)
 		{
-			double logNum = log10((double)pVal);
-			double diff = (double)((int)logNum - logNum);
-			if(diff != 0)
+			value = values.at(i);
+			valid = convertTest(value, pVal);
+		
+			if(!valid)
+				return false;
+			
+			
+			
+			/********************************************************************************************************
+				   Special Cases
+			*********************************************************************************************************/
+			
+			if(parameter.compare("precision") == 0)
 			{
-				cout << "The precision parameter can only take powers of 10 as a value (e.g. 10,1000,1000, etc.)\n";
+				double logNum = log10((double)pVal);
+				double diff = (double)((int)logNum - logNum);
+				if(diff != 0)
+				{
+					cout << "The precision parameter can only take powers of 10 as a value (e.g. 10,1000,1000, etc.)\n";
+					return false;
+				}
+			}
+			
+			/************************************************************************************************************/
+			
+			
+			
+			double a,b,c,d,e;
+			
+			if(range.at(1).compare("NA") == 0)
+				a = piSentinel;
+			else
+				a = atoi(range.at(1).c_str()); 
+				
+			if(range.at(3).compare("NA") == 0)
+				b = piSentinel;
+			else
+				b = atoi(range.at(3).c_str()); 
+						
+			if(range.at(4).compare("between") == 0)
+				c = 0;
+			else if(range.at(4).compare("only") == 0)
+				c = 1;
+			else
+			{
+				cout << "The range can only be 'between' or 'only' the bounding numbers.\n";
+				return false;
+			}
+			
+			if(range.at(0).compare(">") == 0)
+				d = 0;
+			else if(range.at(0).compare(">=") == 0 || range[3].compare("=>") == 0)
+				d = 1;
+			else
+			{
+				cout << "The parameter value can only be '>', '>=', or '=>' the lower bounding number.\n";
+				return false;
+			}
+			
+			if(range.at(2).compare("<") == 0)
+				e = 0;
+			else if(range.at(2).compare("<=") == 0 || range[4].compare("=<") == 0)
+				e = 1;
+			else
+			{
+				cout << "The parameter value can only be '<', '<=', or '=<' the upper bounding number.\n";
+				return false;
+			}
+			
+			bool a0 = pVal > a;
+			bool a1 = pVal >= a;
+			bool b0 = pVal < b;
+			bool b1 = pVal <= b;
+			
+			if(c != 1)
+			{
+				if(a != piSentinel && b == piSentinel)
+				{
+					if(d == 0)
+						valid = a0;
+					else
+						valid = a1;
+				}
+				else if(a == piSentinel && b != piSentinel)
+				{
+					if(e == 0)
+						valid = b0;
+					else
+						valid = b1;
+				}
+				else
+				{
+					if(d == 0 && e == 0)
+						valid = (a0 && b0);
+					else if(d == 0 && e == 1)
+						valid = (a0 && b1);
+					else if(d == 1 && e == 0)
+						valid = (a1 && b0);
+					else
+						valid = (a1 && b1);
+				}
+			}
+			else
+			{
+				if(a != piSentinel && b == piSentinel)
+					valid = (pVal == a);
+				else if(a == piSentinel && b != piSentinel)
+					valid = (pVal == b);
+				else
+					valid = (pVal == a || pVal == b);
+			}
+			
+			
+			if(!valid)
+			{
+				cout << "The '" << parameter << "' parameter needs to be ";
+				if(c == 1)
+					cout << "either '" << a << "' or '" << b << "'.\n";
+				else
+				{
+					if(a != piSentinel)
+					{
+						cout << ">";
+						if(d != 0)
+							cout << "=";
+						cout << " '" << a << "'";
+					}
+					if(b == piSentinel)
+						cout << ".\n";
+					else if(a != piSentinel)
+						cout << " and ";
+					if(b != piSentinel)
+					{
+						cout << "<";
+						if(e != 0)
+							cout << "=";
+						cout << " '" << b << ".\n";
+					}
+				}
 				return false;
 			}
 		}
-		
-		/************************************************************************************************************/
-		
-		
-		
-		double a,b,c,d,e;
-		
-		if(range.at(1).compare("NA") == 0)
-			a = piSentinel;
-		else
-			a = atoi(range.at(1).c_str()); 
-			
-		if(range.at(3).compare("NA") == 0)
-			b = piSentinel;
-		else
-			b = atoi(range.at(3).c_str()); 
-					
-		if(range.at(4).compare("between") == 0)
-			c = 0;
-		else if(range.at(4).compare("only") == 0)
-			c = 1;
-		else
-		{
-			cout << "The range can only be 'between' or 'only' the bounding numbers.\n";
-			return false;
-		}
-		
-		if(range.at(0).compare(">") == 0)
-			d = 0;
-		else if(range.at(0).compare(">=") == 0 || range[3].compare("=>") == 0)
-			d = 1;
-		else
-		{
-			cout << "The parameter value can only be '>', '>=', or '=>' the lower bounding number.\n";
-			return false;
-		}
-		
-		if(range.at(2).compare("<") == 0)
-			e = 0;
-		else if(range.at(2).compare("<=") == 0 || range[4].compare("=<") == 0)
-			e = 1;
-		else
-		{
-			cout << "The parameter value can only be '<', '<=', or '=<' the upper bounding number.\n";
-			return false;
-		}
-		
-		bool a0 = pVal > a;
-		bool a1 = pVal >= a;
-		bool b0 = pVal < b;
-		bool b1 = pVal <= b;
-		
-		if(c != 1)
-		{
-			if(a == piSentinel && b == piSentinel)
-				return true;
-			if(a != piSentinel && b == piSentinel)
-			{
-				if(d == 0)
-					valid = a0;
-				else
-					valid = a1;
-			}
-			else if(a == piSentinel && b != piSentinel)
-			{
-				if(e == 0)
-					valid = b0;
-				else
-					valid = b1;
-			}
-			else
-			{
-				if(d == 0 && e == 0)
-					valid = (a0 && b0);
-				else if(d == 0 && e == 1)
-					valid = (a0 && b1);
-				else if(d == 1 && e == 0)
-					valid = (a1 && b0);
-				else
-					valid = (a1 && b1);
-			}
-		}
-		else
-		{
-			if(a == piSentinel && b == piSentinel)
-				return true;
-			if(a != piSentinel && b == piSentinel)
-				valid = (pVal == a);
-			else if(a == piSentinel && b != piSentinel)
-				valid = (pVal == b);
-			else
-				valid = (pVal == a || pVal == b);
-		}
-		
-		if(valid)
-			return true;
-		
-		else
-		{
-			cout << "The '" << parameter << "' parameter needs to be ";
-			if(c == 1)
-				cout << "either '" << a << "' or '" << b << "'.\n";
-			else
-			{
-				if(a != piSentinel)
-				{
-					cout << ">";
-					if(d != 0)
-						cout << "=";
-					cout << " '" << a << "'";
-				}
-				if(b == piSentinel)
-					cout << ".\n";
-				else if(a != piSentinel)
-					cout << " and ";
-				if(b != piSentinel)
-				{
-					cout << "<";
-					if(e != 0)
-						cout << "=";
-					cout << " '" << b << ".\n";
-				}
-			}
-			return false;
-		}
+		return true;
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidParameters class Function isValidParameter. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
