@@ -115,6 +115,7 @@
 		EB6F015B0F6AC1670048081A /* sharedbdiversity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB6F015A0F6AC1670048081A /* sharedbdiversity.cpp */; };
 		EB9303EB0F534D9400E8EF26 /* logsd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB9303EA0F534D9400E8EF26 /* logsd.cpp */; };
 		EB9303F90F53517300E8EF26 /* geom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB9303F80F53517300E8EF26 /* geom.cpp */; };
+		EBC564190F81479000A5AC46 /* sharedjackknife.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EBC564180F81479000A5AC46 /* sharedjackknife.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -358,6 +359,8 @@
 		EB9303EA0F534D9400E8EF26 /* logsd.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = logsd.cpp; sourceTree = "<group>"; };
 		EB9303F70F53517300E8EF26 /* geom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = geom.h; sourceTree = "<group>"; };
 		EB9303F80F53517300E8EF26 /* geom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = geom.cpp; sourceTree = "<group>"; };
+		EBC564170F81479000A5AC46 /* sharedjackknife.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedjackknife.h; sourceTree = "<group>"; };
+		EBC564180F81479000A5AC46 /* sharedjackknife.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedjackknife.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -502,6 +505,8 @@
 				37D928240F21331F001D4494 /* sharedchao1.cpp */,
 				37D928290F21331F001D4494 /* sharedjabund.h */,
 				37D928280F21331F001D4494 /* sharedjabund.cpp */,
+				EBC564170F81479000A5AC46 /* sharedjackknife.h */,
+				EBC564180F81479000A5AC46 /* sharedjackknife.cpp */,
 				37D9282B0F21331F001D4494 /* sharedjclass.h */,
 				37D9282A0F21331F001D4494 /* sharedjclass.cpp */,
 				37D9282D0F21331F001D4494 /* sharedjest.h */,
@@ -811,6 +816,7 @@
 				3758740C0F7D64FC0040F377 /* sharedmorisitahorn.cpp in Sources */,
 				3758740D0F7D64FC0040F377 /* sharedochiai.cpp in Sources */,
 				37519A6B0F80E6EB00FED5E8 /* sharedanderbergs.cpp in Sources */,
+				EBC564190F81479000A5AC46 /* sharedjackknife.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
