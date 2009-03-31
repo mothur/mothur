@@ -188,12 +188,14 @@ int HelpCommand::execute(){
 		cout << "Note: No spaces between parameter labels (i.e. iters), '=' and parameters (i.e.yourIters)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "heatmap") { 
 		cout << "The heatmap command can only be executed after a successful read.otu command." << "\n";
-		cout << "The heatmap command parameters are groups, line and label.  No parameters are required, but you may not use line and label at the same time." << "\n";
+		cout << "The heatmap command parameters are groups, sorted, line and label.  No parameters are required, but you may not use line and label at the same time." << "\n";
 		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like included in your heatmap." << "\n";
+		cout << "The sorted parameter allows you to choose to see the file with the shared otus at the top or the exact representation of your input file. " << "\n";
 		cout << "The group names are separated by dashes. The line and label allow you to select what distance levels you would like a heatmap created for, and are also separated by dashes." << "\n";
-		cout << "The heatmap command should be in the following format: heatmap(groups=yourGroups, line=yourLines, label=yourLabels)." << "\n";
-		cout << "Example heatmap(groups=A-B-C, line=1-3-5)." << "\n";
+		cout << "The heatmap command should be in the following format: heatmap(groups=yourGroups, sorted=yourSorted, line=yourLines, label=yourLabels)." << "\n";
+		cout << "Example heatmap(groups=A-B-C, line=1-3-5, sorted=0)." << "\n";
 		cout << "The default value for groups is all the groups in your groupfile, and all lines in your inputfile will be used." << "\n";
+		cout << "The default value for sorted is 1 meaning you want the shared otus on top, you may change it to 0 meaning the exact representation of your input file." << "\n";
 		cout << "The heatmap command outputs a .svg file for each line or label you specify." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "quit") {

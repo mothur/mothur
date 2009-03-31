@@ -31,6 +31,7 @@
 #include "unifracweightedcommand.h"
 #include "libshuffcommand.h"
 #include "heatmapcommand.h"
+#include "venncommand.h"
 #include "mothur.h"
 #include "nocommands.h"
 
@@ -77,6 +78,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "get.line")              {   command = new GetlineCommand();				}
 		else if(commandName == "libshuff")              {   command = new LibShuffCommand();			}
 		else if(commandName == "heatmap")				{   command = new HeatMapCommand();				}
+		else if(commandName == "venn")					{   command = new VennCommand();				}
 		else											{	command = new NoCommand();					}
 
 		return command;

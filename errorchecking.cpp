@@ -223,9 +223,9 @@ bool ErrorCheck::checkInput(string input) {
 			}
 		}
 		
-		if (commandName == "heatmap"){ 
+		if ((commandName == "heatmap") || (commandName == "venn")) { 
 			if ((globaldata->getListFile() == "") && (globaldata->getSharedFile() == "")) {
-				 cout << "You must read a list, or a list and a group, or a shared before you can use the heatmap command." << endl; return false; 
+				 cout << "You must read a list, or a list and a group, or a shared before you can use the heatmap or venn commands." << endl; return false; 
 			}
 		}
 
