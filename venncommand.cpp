@@ -141,10 +141,18 @@ void VennCommand::setGroups() {
 			
 				//if the user only entered invalid groups
 				if (globaldata->Groups.size() == 0) { 
-					cout << "When using the groups parameter you must have at least 1 valid group. I will run the command using the first three groups in your groupfile." << endl; 
-					for (int i = 0; i < globaldata->gGroupmap->namesOfGroups.size(); i++) {
-						globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
+					if (globaldata->gGroupmap->namesOfGroups.size() > 4) {
+						cout << "When using the groups parameter you must have at least 1 valid group. I will run the command using the first four groups in your groupfile." << endl; 
+						for (int i = 0; i < 4; i++) {
+							globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
+						}
+					}else {
+						cout << "When using the groups parameter you must have at least 1 valid group. I will run the command using all the groups in your groupfile." << endl; 
+						for (int i = 0; i < globaldata->gGroupmap->namesOfGroups.size(); i++) {
+							globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
+						}
 					}
+
 				}
 			}else{//user has enter "all" and wants the default groups
 				globaldata->Groups.clear();
@@ -161,9 +169,9 @@ void VennCommand::setGroups() {
 		
 		
 		//check to make sure their are only 3 groups
-		if (globaldata->Groups.size() > 3) {
-			cout << "You may only use 3 groups at a time with this command.  I will choose the first three and disregard the rest." << endl;
-			for (int i = 3; i < globaldata->Groups.size(); i++) {
+		if (globaldata->Groups.size() > 4) {
+			cout << "You may only use up to 4 groups at a time with this command.  I will choose the first four and disregard the rest." << endl;
+			for (int i = 4; i < globaldata->Groups.size(); i++) {
 				globaldata->Groups.erase(globaldata->Groups.begin()+i);
 			}
 		}
