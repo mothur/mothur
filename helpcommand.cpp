@@ -198,6 +198,17 @@ int HelpCommand::execute(){
 		cout << "The default value for sorted is 1 meaning you want the shared otus on top, you may change it to 0 meaning the exact representation of your input file." << "\n";
 		cout << "The heatmap command outputs a .svg file for each line or label you specify." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups)." << "\n" << "\n";
+	}else if (globaldata->helpRequest == "venn") { 
+		cout << "The venn command can only be executed after a successful read.otu command." << "\n";
+		cout << "The venn command parameters are groups, calc, line and label.  No parameters are required, but you may not use line and label at the same time." << "\n";
+		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like included in your venn diagram, you may only use a maximum of 4 groups." << "\n";
+		cout << "The group names are separated by dashes. The line and label allow you to select what distance levels you would like a venn diagram created for, and are also separated by dashes." << "\n";
+		cout << "The venn command should be in the following format: venn(groups=yourGroups, calc=yourSorted, line=yourLines, label=yourLabels)." << "\n";
+		cout << "Example venn(groups=A-B-C, line=1-3-5, calc=sharedsobs-sharedchao)." << "\n";
+		cout << "The default value for groups is all the groups in your groupfile up to 4, and all lines in your inputfile will be used." << "\n";
+		cout << "The default value for calc is sobs if you have only read a list file or if you have selected only one group, and sharedsobs if you have multiple groups." << "\n";
+		cout << "The venn command outputs a .svg file for each calculator you specify at each distance you choose." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "quit") {
 		cout << "The quit command will terminate Dotur and should be in the following format: " << "\n";
 		cout << "quit()" << "\n" << "\n";

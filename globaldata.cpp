@@ -190,6 +190,14 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
+		if (commandName == "venn") {
+			if ((calc == "default") || (calc == "")) { 
+				if (format == "list") { calc = "sobs"; }
+				else { calc = "sharedsobs"; }
+			}
+			Estimators.clear();
+			splitAtDash(calc, Estimators); 
+		}
 
 		//if you have done a read.otu with a groupfile but don't want to use it anymore because you want to do single commands
 		if ((commandName == "collect.single") || (commandName == "rarefaction.single") || (commandName == "summary.single")) {

@@ -18,6 +18,8 @@ ValidCalculators::ValidCalculators() {
 		 initialSharedRarefact();
 		 initialSummary();
 		 initialSharedSummary();
+		 initialVennSingle();
+		 initialVennShared();
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function ValidCalculator. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -108,7 +110,29 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 				}
 				cout << endl;
 				return false; }
-		//not a valid paramter
+		}else if (parameter == "vennsingle") {
+			//is it valid
+			if ((vennsingle.find(calculator)) != (vennsingle.end())) {
+				return true;
+			}else { 
+				cout << calculator << " is not a valid estimator for the venn command in single mode and will be disregarded. Valid estimators are ";
+				for (it = vennsingle.begin(); it != vennsingle.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
+		}else if (parameter == "vennshared") {
+			//is it valid
+			if ((vennshared.find(calculator)) != (vennshared.end())) {
+				return true;
+			}else { 
+				cout << calculator << " is not a valid estimator for the venn command in shared mode and will be disregarded. Valid estimators are ";
+				for (it = vennshared.begin(); it != vennshared.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
+		//not a valid parameter
 		}else { return false; }
 		
 	}
@@ -125,7 +149,6 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 /********************************************************************/
 void ValidCalculators::initialSingle() {
 	try {	
-	
 		single["sobs"]	        = "sobs";
 		single["chao"]		    = "chao";
 		single["ace"]		    = "ace";
@@ -141,7 +164,6 @@ void ValidCalculators::initialSingle() {
 		single["bstick"]        = "bstick";
 		single["nseqs"]		= "nseqs";
 		single["default"]	    = "default";
-		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialSingle. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -294,6 +316,44 @@ void ValidCalculators::initialSharedRarefact() {
 	}
 	catch(...) {
 		cout << "An unknown error has occurred in the ValidCalculator class function initialSharedRarefact. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
+
+/********************************************************************/
+void ValidCalculators::initialVennSingle() {
+	try {
+		vennsingle["sobs"]	        = "sobs";
+		vennsingle["chao"]		    = "chao";
+		vennsingle["ace"]				= "ace";
+		vennsingle["jack"]		    = "jack";
+		vennsingle["default"]			= "default";
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialSingle. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ValidCalculator class function initialSingle. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
+/********************************************************************/
+void ValidCalculators::initialVennShared() {
+	try {
+		vennshared["sharedsobs"]	= "sharedsobs";
+		vennshared["sharedchao"]	= "sharedchao";
+		vennshared["sharedace"]		= "sharedace";
+		vennshared["default"]		= "default";
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialSingle. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ValidCalculator class function initialSingle. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
 }

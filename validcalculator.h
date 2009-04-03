@@ -31,6 +31,8 @@ class ValidCalculators {
 		map<string, string> summary;
 		map<string, string> sharedrarefaction;
 		map<string, string> sharedsummary;
+		map<string, string> vennsingle;
+		map<string, string> vennshared;
 		map<string, string>::iterator it;
 		
 		void initialSingle();
@@ -39,6 +41,9 @@ class ValidCalculators {
 		void initialSharedRarefact();
 		void initialSummary();
 		void initialSharedSummary();
+		void initialVennSingle();
+		void initialVennShared();
+
 };
 
 #endif

@@ -33,7 +33,6 @@ SummaryCommand::SummaryCommand(){
 		
 		for (i=0; i<globaldata->Estimators.size(); i++) {
 			if (validCalculator->isValidCalculator("summary", globaldata->Estimators[i]) == true) { 
-			
 				if(globaldata->Estimators[i] == "sobs"){
 					sumCalculators.push_back(new Sobs());
 				}else if(globaldata->Estimators[i] == "chao"){
@@ -128,7 +127,7 @@ int SummaryCommand::execute(){
 				for(int i=0;i<sumCalculators.size();i++){
 					vector<double> data = sumCalculators[i]->getValues(sabund);
 					outputFileHandle << '\t';
-					//sumCalculators[i]->print(outputFileHandle);
+					sumCalculators[i]->print(outputFileHandle);
 				}
 				
 				outputFileHandle << endl;

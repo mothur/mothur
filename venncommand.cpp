@@ -8,14 +8,61 @@
  */
 
 #include "venncommand.h"
+#include "ace.h"
+#include "sobs.h"
+#include "chao1.h"
+#include "jackknife.h"
+#include "sharedsobscollectsummary.h"
+#include "sharedchao1.h"
+#include "sharedace.h"
+
 
 //**********************************************************************************************************************
 
 VennCommand::VennCommand(){
 	try {
 		globaldata = GlobalData::getInstance();
-		venn = new Venn();
 		format = globaldata->getFormat();
+		validCalculator = new ValidCalculators();
+		
+		int i;
+		
+		if (format == "list") {
+			for (i=0; i<globaldata->Estimators.size(); i++) {
+				if (validCalculator->isValidCalculator("vennsingle", globaldata->Estimators[i]) == true) { 
+					if (globaldata->Estimators[i] == "sobs") { 
+						vennCalculators.push_back(new Sobs());
+					}else if (globaldata->Estimators[i] == "chao") { 
+						vennCalculators.push_back(new Chao1());
+					}else if (globaldata->Estimators[i] == "ace") {
+						convert(globaldata->getAbund(), abund);
+						if(abund < 5)
+							abund = 10;
+						vennCalculators.push_back(new Ace(abund));
+					}else if (globaldata->Estimators[i] == "jack") { 	
+						vennCalculators.push_back(new Jackknife());
+					}
+				}
+			}
+		}else {
+			for (i=0; i<globaldata->Estimators.size(); i++) {
+				if (validCalculator->isValidCalculator("vennshared", globaldata->Estimators[i]) == true) { 
+					if (globaldata->Estimators[i] == "sharedsobs") { 
+						vennCalculators.push_back(new SharedSobsCS());
+					}else if (globaldata->Estimators[i] == "sharedchao") { 
+						vennCalculators.push_back(new SharedChao1());
+					}else if (globaldata->Estimators[i] == "sharedace") { 
+						vennCalculators.push_back(new SharedAce());
+					}
+				}
+			}
+		}
+		
+		venn = new Venn();
+		
+		//reset calc for next command
+		globaldata->setCalc("");
+
 		
 	}
 	catch(exception& e) {
@@ -40,6 +87,9 @@ VennCommand::~VennCommand(){
 int VennCommand::execute(){
 	try {
 		int count = 1;	
+		
+		//if the users entered no valid calculators don't execute command
+		if (vennCalculators.size() == 0) { return 0; }
 		
 		if (format == "sharedfile") {
 			//you have groups
@@ -75,7 +125,7 @@ int VennCommand::execute(){
 				if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(order->getLabel()) == 1){			
 	
 					cout << order->getLabel() << '\t' << count << endl;
-					venn->getPic(order);
+					venn->getPic(order, vennCalculators);
 
 				}
 						
@@ -103,7 +153,7 @@ int VennCommand::execute(){
 				if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(ordersingle->getLabel()) == 1){			
 	
 					cout << ordersingle->getLabel() << '\t' << count << endl;
-					venn->getPic(ordersingle);
+					venn->getPic(ordersingle, vennCalculators);
 					
 				}
 				
