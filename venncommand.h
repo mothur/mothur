@@ -14,6 +14,7 @@
 #include "readmatrix.hpp"
 #include "sharedlistvector.h"
 #include "venn.h"
+#include "validcalculator.h"
 
 
 class GlobalData;
@@ -35,6 +36,9 @@ private:
 	OrderVector* ordersingle;
 	Venn* venn;
 	string format;
+	vector<Calculator*> vennCalculators;	
+	ValidCalculators* validCalculator;
+	int abund;
 	
 	void setGroups();
 

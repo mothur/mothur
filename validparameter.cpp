@@ -286,7 +286,7 @@ void ValidParameters::initCommandParameters() {
 		string heatmapArray[] =  {"group","line","label","sorted"};
 		commandParameters["heatmap"] = addParameters(heatmapArray, sizeof(heatmapArray)/sizeof(string));
 
-		string vennArray[] =  {"groups","line","label"};
+		string vennArray[] =  {"groups","line","label","calc"};
 		commandParameters["venn"] = addParameters(vennArray, sizeof(vennArray)/sizeof(string));
 		
 		string quitArray[] = {};

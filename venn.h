@@ -12,11 +12,12 @@
 using namespace std;
 
 #include "ordervector.hpp"
-#include "rabundvector.hpp"
+#include "Sabundvector.hpp"
 #include "sharedrabundvector.h"
 #include "sharedordervector.h"
 #include "datavector.hpp"
 #include "globaldata.hpp"
+#include "calculator.h"
 
 /***********************************************************************/
 
@@ -26,13 +27,13 @@ class Venn {
 		Venn();
 		~Venn(){};
 	
-		void getPic(OrderVector*);
-		void getPic(SharedOrderVector*);
+		void getPic(OrderVector*, vector<Calculator*>);
+		void getPic(SharedOrderVector*, vector<Calculator*>);
 
 	private:
 		void getSharedVectors(SharedOrderVector*);
 		
-		RAbundVector rabund;
+		SAbundVector* sabund;
 		GlobalData* globaldata;
 		vector<SharedRAbundVector*> lookup;
 		string format, groupComb;
