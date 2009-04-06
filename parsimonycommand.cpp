@@ -51,7 +51,9 @@ ParsimonyCommand::ParsimonyCommand() {
 /***********************************************************/
 int ParsimonyCommand::execute() {
 	try {
-	
+		Progress* reading;
+		reading = new Progress("Comparing to random:", iters);
+		
 		//get pscore for users tree
 		userData.resize(numComp,0);  //data = AB, AC, BC, ABC.
 		randomData.resize(numComp,0);  //data = AB, AC, BC, ABC.
@@ -66,9 +68,10 @@ int ParsimonyCommand::execute() {
 			//get pscores for users trees
 			for (int i = 0; i < T.size(); i++) {
 				userData = pars->getValues(T[i]);  //data = AB, AC, BC, ABC.
-				
+
 				//output scores for each combination
 				for(int k = 0; k < numComp; k++) {
+
 					//update uscoreFreq
 					it = uscoreFreq[k].find(userData[k]);
 					if (it == uscoreFreq[k].end()) {//new score
@@ -87,11 +90,13 @@ int ParsimonyCommand::execute() {
 			for (int j = 0; j < iters; j++) {
 				//create new tree with same num nodes and leaves as users
 				randT = new Tree();
+
 				//create random relationships between nodes
 				randT->assembleRandomTree();
+
 				//get pscore of random tree
 				randomData = pars->getValues(randT);
-				
+					
 				for(int r = 0; r < numComp; r++) {
 					//add trees pscore to map of scores
 					it2 = rscoreFreq[r].find(randomData[r]);
@@ -105,18 +110,24 @@ int ParsimonyCommand::execute() {
 					validScores[randomData[r]] = randomData[r];
 				}
 				
+				//update progress bar
+				reading->update(j);
+				
 				delete randT;
 			}
+
 		}else {
 			//get pscores for random trees
 			for (int j = 0; j < iters; j++) {
 				//create new tree with same num nodes and leaves as users
 				randT = new Tree();
 				//create random relationships between nodes
+
 				randT->assembleRandomTree();
+
 				//get pscore of random tree
 				randomData = pars->getValues(randT);
-				
+			
 				for(int r = 0; r < numComp; r++) {
 					//add trees pscore to map of scores
 					it2 = rscoreFreq[r].find(randomData[r]);
@@ -130,10 +141,13 @@ int ParsimonyCommand::execute() {
 					validScores[randomData[r]] = randomData[r];
 				}
 				
+				//update progress bar
+				reading->update(j);
+				
 				delete randT;
 			}
 		}
-		
+
 		for(int a = 0; a < numComp; a++) {
 			float rcumul = 0.0000;
 			float ucumul = 0.0000;
@@ -161,6 +175,11 @@ int ParsimonyCommand::execute() {
 				UScoreSig[a].push_back(rCumul[a][userTreeScores[a][h]]);
 			}
 		}
+		
+		//finish progress bar
+		reading->finish();
+		delete reading;
+
 		
 		printParsimonyFile();
 		if (randomtree == "") { printUSummaryFile(); }

@@ -342,6 +342,7 @@ void ReadPhilFile::read(GlobalData* globaldata){
 			//you have two inputs because in the next if statement if you only have one then it moves ahead in the same file.  
 			//So when you run the collect or summary commands you miss a line.
 			input = new InputData(philFile, globaldata->getFormat()); //format tells you whether philFile is list, rabund, sabund.
+			inputList = new InputData(philFile, globaldata->getFormat()); //format tells you whether philFile is list, rabund, sabund.
 			inputSabund = new InputData(philFile, globaldata->getFormat()); //format tells you whether philFile is list, rabund, sabund or shared.
 		}else {//there is an orderfile
 			input = new InputData(philFile, globaldata->getOrderFile(), globaldata->getFormat());
@@ -358,6 +359,8 @@ void ReadPhilFile::read(GlobalData* globaldata){
 			globaldata->gorder = order;	//saving to be used by collect and rarefact commands.
 			sabund = inputSabund->getSAbundVector(); 
 			globaldata->sabund = sabund; //saving to be used by summary command.
+			list = inputList->getListVector();
+			globaldata->gListVector = list;
 		}else if (globaldata->getFormat() == "shared") {
 			SharedList = input->getSharedListVector(); //you are reading for collect.shared, rarefaction.shared, summary.shared, parselist command, or shared commands.
 			//memory leak prevention

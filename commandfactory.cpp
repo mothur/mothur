@@ -34,6 +34,7 @@
 #include "venncommand.h"
 #include "mothur.h"
 #include "nocommands.h"
+#include "binsequencecommand.h"
 
 
 /***********************************************************/
@@ -79,6 +80,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "libshuff")              {   command = new LibShuffCommand();			}
 		else if(commandName == "heatmap")				{   command = new HeatMapCommand();				}
 		else if(commandName == "venn")					{   command = new VennCommand();				}
+		else if(commandName == "bin.seqs")				{   command = new BinSeqCommand();				}
 		else											{	command = new NoCommand();					}
 
 		return command;

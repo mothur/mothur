@@ -20,7 +20,7 @@ using namespace std;
 class Node  {
 	public:
 		Node();  //pass it the sequence name
-		~Node() {};
+		~Node() { pGroups.clear(); pcount.clear(); };
 		
 		void setName(string);
 		void setGroup(string);  

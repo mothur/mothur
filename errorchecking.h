@@ -30,6 +30,7 @@ class ErrorCheck {
 		void validateReadPhil();
 		void validateParseFiles();
 		void validateTreeFiles();
+		void validateBinFiles();
 		void clear();
 		void refresh();
 		string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, treefile, sharedfile, cutoff, format; 

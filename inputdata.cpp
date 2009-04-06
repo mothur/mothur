@@ -33,6 +33,7 @@ InputData::~InputData(){
 
 InputData::InputData(string fName, string orderFileName, string f) : format(f){
 	try {
+		
 		ifstream ofHandle;
 		openInputFile(orderFileName, ofHandle);
 		string name;

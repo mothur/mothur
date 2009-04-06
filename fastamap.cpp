@@ -26,6 +26,7 @@ void FastaMap::readFastaFile(ifstream& in) {
 				}
 				else{
 				//input sequence info into map
+					seqmap[name] = sequence;  
 					it = data.find(sequence);
 					if (it == data.end()) { 	//it's unique.
 						data[sequence].groupname = name;  //group name will be the name of the first duplicate sequence found.
@@ -42,6 +43,7 @@ void FastaMap::readFastaFile(ifstream& in) {
 		}
 	
 		//store last sequence and name info.
+		seqmap[name] = sequence;
 		it = data.find(sequence);
 		if (it == data.end()) { 	//it's unique.
 			data[sequence].groupname = name;  //group name will be the name of the first duplicate sequence found.
@@ -50,7 +52,8 @@ void FastaMap::readFastaFile(ifstream& in) {
 		}else { // its a duplicate.
 			data[sequence].names += "," + name;
 			data[sequence].groupnumber++;
-		}	
+		}
+			
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the FastaMap class Function readFastaFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -74,25 +77,34 @@ int FastaMap::getGroupNumber(string seq) {	//pass a sequence get the number of i
 	return data[seq].groupnumber;
 }
 /*******************************************************************************/
-void FastaMap::push_back(string seq, string Name) {//sequencename, name
-	data[seq].groupname = Name;
-	data[seq].names = Name;
+string FastaMap::getSequence(string name) {
+	it2 = seqmap.find(name);
+	if (it2 == seqmap.end()) { 	//it's not found
+		return "not found";
+	}else { // found it
+		return it2->second;
+	}
+}	
+/*******************************************************************************/
+void FastaMap::push_back(string name, string seq) {
+	it = data.find(seq);
+	if (it == data.end()) { 	//it's unique.
+		data[seq].groupname = name;  //group name will be the name of the first duplicate sequence found.
+		data[seq].groupnumber = 1;
+		data[seq].names = name;
+	}else { // its a duplicate.
+		data[seq].names += "," + name;
+		data[seq].groupnumber++;
+	}
+	
+	seqmap[name] = seq;
 }
 /*******************************************************************************/
-void FastaMap::set(string seq, string groupName, string Names) {
-	data[seq].groupname = groupName;
-	data[seq].names = Names;
-}
-/*******************************************************************************/
-void FastaMap::clear() { //clears out data
-	data.clear();
-}
-/*******************************************************************************/
-int FastaMap::size(){ //returns datas size which is the number of unique sequences
+int FastaMap::sizeUnique(){ //returns datas size which is the number of unique sequences
 	return data.size();
 }
 /*******************************************************************************/
-void FastaMap::print(ostream& out){ //prints data
+void FastaMap::printNamesFile(ostream& out){ //prints data
 	try {
 		// two column file created with groupname and them list of identical sequence names
 		for (it = data.begin(); it != data.end(); it++) {

@@ -30,13 +30,12 @@ public:
 	string getGroupName(string);  //pass a sequence name get its group
 	int getGroupNumber(string);  //pass a sequence name get number of sequence in its group
 	string getNames(string);	//pass a sequence get the string of names in the group separated by ','s.
-	void push_back(string, string); //sequencename, groupname
-	void set(string, string, string); //sequencename, groupname, groupnumber, names.
-	void clear();
-	int size();					//returns number of unique sequences
-	void print(ostream&);		//produces a 2 column file with the groupname in the first column and the names in the second column.
+	void push_back(string, string); //sequencename, sequence
+	int sizeUnique();					//returns number of unique sequences
+	void printNamesFile(ostream&);		//produces a 2 column file with the groupname in the first column and the names in the second column - a names file.
 	void printCondensedFasta(ostream&);		//produces a fasta file.
 	void readFastaFile(ifstream&);
+	string getSequence(string);		//pass it a name of a sequence, it returns the sequence.
 
 private:
 	struct group {
@@ -45,8 +44,10 @@ private:
 		string names;						//the names of the sequence separated by ','.
 	};
 
-	map<string, group>  data;  //sequence, groupinfo
+	map<string, group>  data;  //sequence, groupinfo	- condensed representation of file
+	map<string, string>  seqmap;  //name, sequence  -  uncondensed representation of file
 	map<string, group>::iterator it;
+	map<string, string>::iterator it2;
 };
 
 #endif

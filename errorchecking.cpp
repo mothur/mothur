@@ -228,6 +228,11 @@ bool ErrorCheck::checkInput(string input) {
 				 cout << "You must read a list, or a list and a group, or a shared before you can use the heatmap or venn commands." << endl; return false; 
 			}
 		}
+		
+		if ((commandName == "bin.seqs")) { 
+			if ((globaldata->getListFile() == "")) { cout << "You must read a list file before you can use the bin.seqs command." << endl; return false; }
+			validateBinFiles();
+		}
 
 		return errorFree;
 }
@@ -468,6 +473,52 @@ void ErrorCheck::validateReadPhil() {
 		exit(1);
 	}
 }
+/*******************************************************/
+
+/******************************************************/
+//This function checks to make sure the user entered appropriate
+// format parameters on a bin.seq command
+void ErrorCheck::validateBinFiles() {
+	try {
+		ifstream filehandle;
+		int ableToOpen;
+		
+		if (fastafile == "") {
+				cout << "fasta is a required parameter for bin.seqs." << endl; errorFree = false; 
+		}else if (fastafile != "") {
+			//is it a valid filename'
+			ableToOpen = openInputFile(fastafile, filehandle);
+			filehandle.close();
+			//unable to open
+			if (ableToOpen == 1) {  errorFree = false; }
+		}else if (globaldata->getNameFile() != "") {
+			//is it a valid filename'
+			ifstream filehandle;
+			int ableToOpen = openInputFile(globaldata->getNameFile(), filehandle);
+			filehandle.close();
+			//unable to open
+			if (ableToOpen == 1) {  errorFree = false; }
+		}else if (namefile != "") {
+			//is it a valid filename'
+			ifstream filehandle;
+			int ableToOpen = openInputFile(namefile, filehandle);
+			filehandle.close();
+			//unable to open
+			if (ableToOpen == 1) {  errorFree = false; }
+		}
+
+
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ErrorCheck class Function validateBinFiles. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ErrorCheck class function validateBinFiles. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+
 /*******************************************************/
 
 /******************************************************/
