@@ -36,6 +36,8 @@ UnifracWeightedCommand::UnifracWeightedCommand() {
 /***********************************************************/
 int UnifracWeightedCommand::execute() {
 	try {
+		Progress* reading;
+		reading = new Progress("Comparing to random:", iters);
 		
 		//get weighted for users tree
 		userData.resize(numComp,0);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
@@ -81,6 +83,10 @@ int UnifracWeightedCommand::execute() {
 						count++;
 					}
 				}
+				
+				//update progress bar
+				reading->update(j);
+
 			}
 
 			//removeValidScoresDuplicates(); 
@@ -108,6 +114,10 @@ int UnifracWeightedCommand::execute() {
 			uScores.clear();
 			validScores.clear();
 		}
+		
+		//finish progress bar
+		reading->finish();
+		delete reading;
 		
 		printWSummaryFile();
 		

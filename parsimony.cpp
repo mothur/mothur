@@ -126,6 +126,8 @@ EstOutput Parsimony::getValues(Tree* t) {
 //			cin >> hold;
 		}
 		
+		delete copyTree;
+		
 		return data;
 	}
 	catch(exception& e) {

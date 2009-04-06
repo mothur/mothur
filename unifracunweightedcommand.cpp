@@ -36,7 +36,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand() {
 /***********************************************************/
 int UnifracUnweightedCommand::execute() {
 	try {
-	
+
 		userData.resize(numComp,0);  //data[0] = unweightedscore 
 		randomData.resize(numComp,0); //data[0] = unweightedscore
 		//create new tree with same num nodes and leaves as users
@@ -85,6 +85,7 @@ int UnifracUnweightedCommand::execute() {
 					//add randoms score to validscores
 					validScores[randomData[k]] = randomData[k];
 				}
+				
 			}
 		
 		for(int a = 0; a < numComp; a++) {
@@ -100,6 +101,8 @@ int UnifracUnweightedCommand::execute() {
 			}
 			UWScoreSig[a].push_back(rCumul[a][userData[a]]);
 		}
+		
+		
 		
 		printUnweightedFile();
 		printUWSummaryFile();

@@ -20,7 +20,7 @@ using namespace std;
 class Tree {
 public: 
 	Tree();		//to generate a tree from a file
-	~Tree() {};
+	~Tree();
 	
 	
 	void getCopy(Tree*);  //makes tree a copy of the one passed in.

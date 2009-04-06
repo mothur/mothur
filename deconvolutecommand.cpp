@@ -32,7 +32,7 @@ int DeconvoluteCommand::execute() {
 		//print out new names file 
 		//file contains 2 columns separated by tabs.  the first column is the groupname(name of first sequence found.
 		//the second column is the list of names of identical sequences separated by ','.
-		fastamap->print(out);
+		fastamap->printNamesFile(out);
 		fastamap->printCondensedFasta(outFasta);
 	
 		return 0;

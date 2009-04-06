@@ -50,6 +50,8 @@ Tree::Tree() {
 }
 
 /*****************************************************************/
+Tree::~Tree() {}
+/*****************************************************************/
 int Tree::getIndex(string searchName) {
 	try {
 		//Treemap knows name, group and index to speed up search

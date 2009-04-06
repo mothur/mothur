@@ -37,6 +37,7 @@
 		37AD4DCA0F28F3DD00AA2D49 /* readtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37AD4DC90F28F3DD00AA2D49 /* readtree.cpp */; };
 		37AFC71F0F445386005F492D /* sharedsobscollectsummary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37AFC71E0F445386005F492D /* sharedsobscollectsummary.cpp */; };
 		37B28F680F27590100808A62 /* deconvolutecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37B28F670F27590100808A62 /* deconvolutecommand.cpp */; };
+		37C1D9730F86506E0059E3F0 /* binsequencecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37C1D9720F86506E0059E3F0 /* binsequencecommand.cpp */; };
 		37D928550F21331F001D4494 /* ace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927B80F21331F001D4494 /* ace.cpp */; };
 		37D928560F21331F001D4494 /* averagelinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927BA0F21331F001D4494 /* averagelinkage.cpp */; };
 		37D928570F21331F001D4494 /* bootstrap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927BB0F21331F001D4494 /* bootstrap.cpp */; };
@@ -195,6 +196,8 @@
 		37AFC71E0F445386005F492D /* sharedsobscollectsummary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedsobscollectsummary.cpp; sourceTree = "<group>"; };
 		37B28F660F27590100808A62 /* deconvolutecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = deconvolutecommand.h; sourceTree = "<group>"; };
 		37B28F670F27590100808A62 /* deconvolutecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = deconvolutecommand.cpp; sourceTree = "<group>"; };
+		37C1D9710F86506E0059E3F0 /* binsequencecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = binsequencecommand.h; sourceTree = "<group>"; };
+		37C1D9720F86506E0059E3F0 /* binsequencecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = binsequencecommand.cpp; sourceTree = "<group>"; };
 		37D927B80F21331F001D4494 /* ace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ace.cpp; sourceTree = "<group>"; };
 		37D927B90F21331F001D4494 /* ace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ace.h; sourceTree = "<group>"; };
 		37D927BA0F21331F001D4494 /* averagelinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = averagelinkage.cpp; sourceTree = "<group>"; };
@@ -444,8 +447,6 @@
 				37D928210F21331F001D4494 /* shared.h */,
 				37D928200F21331F001D4494 /* shared.cpp */,
 				37D928420F21331F001D4494 /* singlelinkage.cpp */,
-				37D928450F21331F001D4494 /* sparsematrix.hpp */,
-				37D928440F21331F001D4494 /* sparsematrix.cpp */,
 				37D928480F21331F001D4494 /* summarydata.h */,
 				37D928490F21331F001D4494 /* summarydisplay.h */,
 				37D9284C0F21331F001D4494 /* utilities.hpp */,
@@ -558,6 +559,8 @@
 			isa = PBXGroup;
 			children = (
 				37D927CD0F21331F001D4494 /* command.hpp */,
+				37C1D9710F86506E0059E3F0 /* binsequencecommand.h */,
+				37C1D9720F86506E0059E3F0 /* binsequencecommand.cpp */,
 				37D927C40F21331F001D4494 /* clustercommand.h */,
 				37D927C30F21331F001D4494 /* clustercommand.cpp */,
 				37D927C80F21331F001D4494 /* collectcommand.h */,
@@ -576,8 +579,8 @@
 				375873F00F7D64800040F377 /* heatmapcommand.cpp */,
 				37D927E40F21331F001D4494 /* helpcommand.h */,
 				37D927E30F21331F001D4494 /* helpcommand.cpp */,
-				375873F30F7D648F0040F377 /* libshuffcommand.cpp */,
 				375873F40F7D648F0040F377 /* libshuffcommand.h */,
+				375873F30F7D648F0040F377 /* libshuffcommand.cpp */,
 				375873F60F7D649C0040F377 /* nocommands.cpp */,
 				375873F70F7D649C0040F377 /* nocommands.h */,
 				37D927FA0F21331F001D4494 /* parselistcommand.h */,
@@ -638,6 +641,8 @@
 				37D928300F21331F001D4494 /* sharedrabundvector.cpp */,
 				37D928330F21331F001D4494 /* sharedsabundvector.h */,
 				37D928320F21331F001D4494 /* sharedsabundvector.cpp */,
+				37D928450F21331F001D4494 /* sparsematrix.hpp */,
+				37D928440F21331F001D4494 /* sparsematrix.cpp */,
 				37AD4DB90F28E2FE00AA2D49 /* tree.h */,
 				37AD4DBA0F28E2FE00AA2D49 /* tree.cpp */,
 				379293C10F2DE73400B9034A /* treemap.h */,
@@ -823,6 +828,7 @@
 				37519A6B0F80E6EB00FED5E8 /* sharedanderbergs.cpp in Sources */,
 				37519AA10F810D0200FED5E8 /* venncommand.cpp in Sources */,
 				37519AB50F810FAE00FED5E8 /* venn.cpp in Sources */,
+				37C1D9730F86506E0059E3F0 /* binsequencecommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

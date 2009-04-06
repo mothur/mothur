@@ -12,6 +12,7 @@
 #include "command.hpp"
 #include "parsimony.h"
 #include "treemap.h"
+#include "progress.hpp"
 
 using namespace std;
 

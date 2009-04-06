@@ -209,6 +209,15 @@ int HelpCommand::execute(){
 		cout << "The default value for calc is sobs if you have only read a list file or if you have selected only one group, and sharedsobs if you have multiple groups." << "\n";
 		cout << "The venn command outputs a .svg file for each calculator you specify at each distance you choose." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups)." << "\n" << "\n";
+	}else if (globaldata->helpRequest == "bin.seqs") { 
+		cout << "The bin.seqs command can only be executed after a successful read.otu command of a list file." << "\n";
+		cout << "The bin.seqs command parameters are fasta, name, line and label.  The fasta parameter is required, and you may not use line and label at the same time." << "\n";
+		cout << "The line and label allow you to select what distance levels you would like a output files created for, and are separated by dashes." << "\n";
+		cout << "The bin.seqs command should be in the following format: bin.seqs(fasta=yourFastaFile, name=yourNamesFile, line=yourLines, label=yourLabels)." << "\n";
+		cout << "Example bin.seqs(fasta=amazon.fasta, line=1-3-5, name=amazon.names)." << "\n";
+		cout << "The default value for line and label are all lines in your inputfile." << "\n";
+		cout << "The bin.seqs command outputs a .fasta file for each distance you specify appending the OTU number to each name." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "quit") {
 		cout << "The quit command will terminate Dotur and should be in the following format: " << "\n";
 		cout << "quit()" << "\n" << "\n";

@@ -289,6 +289,9 @@ void ValidParameters::initCommandParameters() {
 		string vennArray[] =  {"groups","line","label","calc"};
 		commandParameters["venn"] = addParameters(vennArray, sizeof(vennArray)/sizeof(string));
 		
+		string binseqsArray[] =  {"fasta","line","label","name"};
+		commandParameters["bin.seqs"] = addParameters(binseqsArray, sizeof(binseqsArray)/sizeof(string));
+		
 		string quitArray[] = {};
 		commandParameters["quit"] = addParameters(quitArray, sizeof(quitArray)/sizeof(string));
 

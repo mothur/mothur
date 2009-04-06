@@ -82,6 +82,7 @@ private:
 	string philFile;
 	InputData* input;
 	InputData* inputSabund;
+	InputData* inputList;
 	ListVector* list;
 	SharedListVector* SharedList;
 	OrderVector* order;

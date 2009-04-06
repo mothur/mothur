@@ -13,6 +13,7 @@
 #include "command.hpp"
 #include "weighted.h"
 #include "treemap.h"
+#include "progress.hpp"
 
 using namespace std;
 

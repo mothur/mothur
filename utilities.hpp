@@ -297,6 +297,31 @@ inline void splitAtDash(string& estim, set<int>& container) {
 
 }
 /***********************************************************************/
+//This function parses the a string and puts peices in a vector
+inline void splitAtComma(string& estim, vector<string>& container) {
+	try {
+		string individual;
+		
+		while (estim.find_first_of(',') != -1) {
+			individual = estim.substr(0,estim.find_first_of(','));
+			if ((estim.find_first_of(',')+1) <= estim.length()) { //checks to make sure you don't have comma at end of string
+				estim = estim.substr(estim.find_first_of(',')+1, estim.length());
+				container.push_back(individual);
+			}
+		}
+		//get last one
+		container.push_back(estim);
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the utilities class Function splitAtComma. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the utilities class function splitAtComma. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+/***********************************************************************/
 
 //This function splits up the various option parameters
 inline void splitAtComma(string& prefix, string& suffix){
