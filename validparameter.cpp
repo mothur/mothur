@@ -292,6 +292,9 @@ void ValidParameters::initCommandParameters() {
 		string binseqsArray[] =  {"fasta","line","label","name"};
 		commandParameters["bin.seqs"] = addParameters(binseqsArray, sizeof(binseqsArray)/sizeof(string));
 		
+		string getOTURepArray[] =  {"fasta","list","line","label","name"};
+		commandParameters["get.oturep"] = addParameters(getOTURepArray, sizeof(getOTURepArray)/sizeof(string));
+		
 		string quitArray[] = {};
 		commandParameters["quit"] = addParameters(quitArray, sizeof(quitArray)/sizeof(string));
 
