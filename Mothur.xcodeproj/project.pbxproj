@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		370B88070F8A4EE4005AB382 /* getoturepcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 370B88060F8A4EE4005AB382 /* getoturepcommand.cpp */; };
 		372E12700F26365B0095CF7E /* readotucommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E126F0F26365B0095CF7E /* readotucommand.cpp */; };
 		372E12960F263D5A0095CF7E /* readdistcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E12950F263D5A0095CF7E /* readdistcommand.cpp */; };
 		372E12ED0F264D320095CF7E /* commandfactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E12EC0F264D320095CF7E /* commandfactory.cpp */; };
@@ -134,6 +135,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		370B88050F8A4EE4005AB382 /* getoturepcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getoturepcommand.h; sourceTree = "<group>"; };
+		370B88060F8A4EE4005AB382 /* getoturepcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getoturepcommand.cpp; sourceTree = "<group>"; };
 		372E126E0F26365B0095CF7E /* readotucommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readotucommand.h; sourceTree = "<group>"; };
 		372E126F0F26365B0095CF7E /* readotucommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readotucommand.cpp; sourceTree = "<group>"; };
 		372E12940F263D5A0095CF7E /* readdistcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readdistcommand.h; sourceTree = "<group>"; };
@@ -575,6 +578,8 @@
 				A70B53A60F4CD7AD0064797E /* getlabelcommand.cpp */,
 				A70B53A90F4CD7AD0064797E /* getlinecommand.h */,
 				A70B53A80F4CD7AD0064797E /* getlinecommand.cpp */,
+				370B88050F8A4EE4005AB382 /* getoturepcommand.h */,
+				370B88060F8A4EE4005AB382 /* getoturepcommand.cpp */,
 				375873F10F7D64800040F377 /* heatmapcommand.h */,
 				375873F00F7D64800040F377 /* heatmapcommand.cpp */,
 				37D927E40F21331F001D4494 /* helpcommand.h */,
@@ -829,6 +834,7 @@
 				37519AA10F810D0200FED5E8 /* venncommand.cpp in Sources */,
 				37519AB50F810FAE00FED5E8 /* venn.cpp in Sources */,
 				37C1D9730F86506E0059E3F0 /* binsequencecommand.cpp in Sources */,
+				370B88070F8A4EE4005AB382 /* getoturepcommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -18,6 +18,7 @@ ValidCommands::ValidCommands() {
 		commands["read.otu"]			= "read.otu";
 		commands["read.tree"]			= "read.tree"; 
 		commands["bin.seqs"]			= "bin.seqs"; 
+		commands["get.oturep"]			= "get.oturep";
 		commands["cluster"]				= "cluster"; 
 		commands["deconvolute"]			= "deconvolute"; 
 		commands["collect.single"]		= "collect.single"; 

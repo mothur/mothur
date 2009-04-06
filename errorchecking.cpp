@@ -233,6 +233,16 @@ bool ErrorCheck::checkInput(string input) {
 			if ((globaldata->getListFile() == "")) { cout << "You must read a list file before you can use the bin.seqs command." << endl; return false; }
 			validateBinFiles();
 		}
+		
+		if ((commandName == "get.oturep")) { 
+			if ((globaldata->gSparseMatrix == NULL) || (globaldata->gListVector == NULL)) {
+				cout << "Before you use the get.oturep command, you first need to read in a distance matrix." << endl; 
+				errorFree = false;
+			}
+			if (listfile == "") { cout << "list is a required parameter for the get.oturep command." << endl; errorFree = false; }
+			validateBinFiles();
+		} 
+
 
 		return errorFree;
 }
@@ -484,10 +494,16 @@ void ErrorCheck::validateBinFiles() {
 		int ableToOpen;
 		
 		if (fastafile == "") {
-				cout << "fasta is a required parameter for bin.seqs." << endl; errorFree = false; 
+				cout << "fasta is a required parameter for bin.seqs and get.oturep commands." << endl; errorFree = false; 
 		}else if (fastafile != "") {
 			//is it a valid filename'
 			ableToOpen = openInputFile(fastafile, filehandle);
+			filehandle.close();
+			//unable to open
+			if (ableToOpen == 1) {  errorFree = false; }
+		}else if (listfile != "") {
+			//is it a valid filename'
+			ableToOpen = openInputFile(listfile, filehandle);
 			filehandle.close();
 			//unable to open
 			if (ableToOpen == 1) {  errorFree = false; }

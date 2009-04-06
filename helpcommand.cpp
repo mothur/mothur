@@ -218,6 +218,15 @@ int HelpCommand::execute(){
 		cout << "The default value for line and label are all lines in your inputfile." << "\n";
 		cout << "The bin.seqs command outputs a .fasta file for each distance you specify appending the OTU number to each name." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile)." << "\n" << "\n";
+	}else if (globaldata->helpRequest == "get.oturep") { 
+		cout << "The get.oturep command can only be executed after a successful read.dist command." << "\n";
+		cout << "The get.oturep command parameters are list, fasta, name, line and label.  The fasta and list parameters are required, and you may not use line and label at the same time." << "\n";
+		cout << "The line and label allow you to select what distance levels you would like a output files created for, and are separated by dashes." << "\n";
+		cout << "The get.oturep command should be in the following format: get.oturep(fasta=yourFastaFile, list=yourListFile, name=yourNamesFile, line=yourLines, label=yourLabels)." << "\n";
+		cout << "Example get.oturep(fasta=amazon.fasta, list=amazon.fn.list, line=1-3-5, name=amazon.names)." << "\n";
+		cout << "The default value for line and label are all lines in your inputfile." << "\n";
+		cout << "The get.oturep command outputs a .fastarep file for each distance you specify, selecting one OTU representative for each bin." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "quit") {
 		cout << "The quit command will terminate Dotur and should be in the following format: " << "\n";
 		cout << "quit()" << "\n" << "\n";

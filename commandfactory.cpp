@@ -35,6 +35,7 @@
 #include "mothur.h"
 #include "nocommands.h"
 #include "binsequencecommand.h"
+#include "getoturepcommand.h"
 
 
 /***********************************************************/
@@ -81,6 +82,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "heatmap")				{   command = new HeatMapCommand();				}
 		else if(commandName == "venn")					{   command = new VennCommand();				}
 		else if(commandName == "bin.seqs")				{   command = new BinSeqCommand();				}
+		else if(commandName == "get.oturep")			{   command = new GetOTURepCommand();			}
 		else											{	command = new NoCommand();					}
 
 		return command;
