@@ -100,10 +100,8 @@ float ReadTree::readBranchLength(istream& f) {
 	}		
 }
 
-
 /***********************************************************************/
 /***********************************************************************/
-
 
 //Child Classes Below
 
@@ -113,12 +111,25 @@ float ReadTree::readBranchLength(istream& f) {
 
 int ReadNewickTree::read() {
 	try {
+		holder = "";
 		int c, error;
 		int comment = 0;
 		
 		//if you are not a nexus file 
 		if ((c = filehandle.peek()) != '#') {  
 			while((c = filehandle.peek()) != EOF) { 
+				while ((c = filehandle.peek()) != EOF) {
+					// get past comments
+					if(c == '[') {
+						comment = 1;
+					}
+					if(c == ']'){
+						comment = 0;
+					}
+					if((c == '(') && (comment != 1)){ break; }
+					filehandle.get();
+				}
+
 				//make new tree
 				T = new Tree(); 
 				numNodes = T->getNumNodes();
@@ -164,6 +175,8 @@ int ReadNewickTree::read() {
 				globaldata->gTree.push_back(T); 
 			}
 		}
+		
+		if (error != 0) { readOk = error; } 
 		return readOk;
 	}
 	catch(exception& e) {
@@ -236,7 +249,7 @@ int ReadNewickTree::readTreeString() {
 			n = numLeaves;  //number of leaves / sequences, we want node 1 to start where the leaves left off
 
 			lc = readNewickInt(filehandle, n, T);
-			if (lc == -1) { return -1; } //reports an error in reading
+			if (lc == -1) { cout << "error with lc" << endl; return -1; } //reports an error in reading
 		
 			if(filehandle.peek()==','){							
 				readSpecialChar(filehandle,',',"comma");
@@ -247,7 +260,7 @@ int ReadNewickTree::readTreeString() {
 			}												
 			if(rooted != 1){								
 				rc = readNewickInt(filehandle, n, T);
-				if (rc == -1) { return -1; } //reports an error in reading
+				if (rc == -1) { cout << "error with rc" << endl; return -1; } //reports an error in reading
 				if(filehandle.peek() == ')'){					
 					readSpecialChar(filehandle,')',"right parenthesis");
 				}											
@@ -331,7 +344,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 			}
 		
 			int blen = 0;
-			if(d == ':')	{		blen = 1;			}		
+			if(d == ':')	{		blen = 1;	}		
 		
 			f.putback(d);
 		
@@ -342,27 +355,22 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 			int n1 = T->getIndex(name);
 			
 			//adds sequence names that are not in group file to the "xxx" group
-			if(n1 == -1) {
-				cerr << "Name: " << name << " not found in your groupfile. \n"; readOk = -1; return n1;
+			if(group == "not found") {
+				cout << "Name: " << name << " is not in your groupfile, and will be disregarded. \n";  //readOk = -1; return n1;
 				
-				//globaldata->gTreemap->namesOfSeqs.push_back(name);
-				//globaldata->gTreemap->treemap[name].groupname = "xxx";
-				//globaldata->gTreemap->treemap[name].vectorIndex = (globaldata->gTreemap->namesOfSeqs.size() - 1);
+				globaldata->gTreemap->namesOfSeqs.push_back(name);
+				globaldata->gTreemap->treemap[name].groupname = "xxx";
 				
-				//map<string, int>::iterator it;
-				//it = globaldata->gTreemap->seqsPerGroup.find("xxx");
-				//if (it == globaldata->gTreemap->seqsPerGroup.end()) { //its a new group
-				//	globaldata->gTreemap->namesOfGroups.push_back("xxx");
-				//	globaldata->gTreemap->seqsPerGroup["xxx"] = 1;
-				//}else {
-				//	globaldata->gTreemap->seqsPerGroup["xxx"]++;
-				//}
+				map<string, int>::iterator it;
+				it = globaldata->gTreemap->seqsPerGroup.find("xxx");
+				if (it == globaldata->gTreemap->seqsPerGroup.end()) { //its a new group
+					globaldata->gTreemap->namesOfGroups.push_back("xxx");
+					globaldata->gTreemap->seqsPerGroup["xxx"] = 1;
+				}else {
+					globaldata->gTreemap->seqsPerGroup["xxx"]++;
+				}
 				
-				//find index in tree of name
-				//n1 = T->getIndex(name);
-				//group = "xxx";
-				//numLeaves++;
-				//numNodes = 2*numLeaves - 1;
+				group = "xxx";
 			}
 			
 			T->tree[n1].setGroup(group);

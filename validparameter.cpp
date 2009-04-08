@@ -229,10 +229,10 @@ void ValidParameters::initCommandParameters() {
 	try {	
 		//{"parameter1","parameter2",...,"last parameter"};
 		
-		string readdistArray[] = {"phylip","column", "name","cutoff","precision"};
+		string readdistArray[] = {"phylip","column","name","cutoff","precision","group"};
 		commandParameters["read.dist"] = addParameters(readdistArray, sizeof(readdistArray)/sizeof(string));
 
-		string readotuArray[] =  {"list","order","shared", "line", "label","group","shared", "sabund", "rabund"};
+		string readotuArray[] =  {"list","order","shared", "line", "label","group","sabund", "rabund"};
 		commandParameters["read.otu"] = addParameters(readotuArray, sizeof(readotuArray)/sizeof(string));
 		
 		string readtreeArray[] = {"tree","group"};
@@ -244,7 +244,7 @@ void ValidParameters::initCommandParameters() {
 		string deconvoluteArray[] =  {"fasta"};
 		commandParameters["deconvolute"] = addParameters(deconvoluteArray, sizeof(deconvoluteArray)/sizeof(string));
 		
-		string collectsingleArray[] =  {"freq","line","label","calc","precision","abund"};
+		string collectsingleArray[] =  {"freq","line","label","calc","abund"};
 		commandParameters["collect.single"] = addParameters(collectsingleArray, sizeof(collectsingleArray)/sizeof(string));
 
 		string collectsharedArray[] =  {"jumble","freq","line","label","calc","groups"};
@@ -262,7 +262,7 @@ void ValidParameters::initCommandParameters() {
 		string rarefactionsingleArray[] =  {"iters","freq","line","label","calc","abund"};
 		commandParameters["rarefaction.single"] = addParameters(rarefactionsingleArray, sizeof(rarefactionsingleArray)/sizeof(string));
 
-		string rarefactionsharedArray[] =  {"iters","jumble","line","label","calc"};
+		string rarefactionsharedArray[] =  {"iters","jumble","line","label","calc","groups"};
 		commandParameters["rarefaction.shared"] = addParameters(rarefactionsharedArray, sizeof(rarefactionsharedArray)/sizeof(string));
 		
 		string libshuffArray[] =  {"iters","groups","step","form","cutoff"};
@@ -271,19 +271,19 @@ void ValidParameters::initCommandParameters() {
 		string summarysingleArray[] =  {"line","label","calc","abund"};
 		commandParameters["summary.single"] = addParameters(summarysingleArray, sizeof(summarysingleArray)/sizeof(string));
 
-		string summarysharedArray[] =  {"jumble","line","label","calc"};
+		string summarysharedArray[] =  {"jumble","line","label","calc","groups"};
 		commandParameters["summary.shared"] = addParameters(summarysharedArray, sizeof(summarysharedArray)/sizeof(string));
 
-		string parsimonyArray[] =  {"random","group","iters"};
+		string parsimonyArray[] =  {"random","groups","iters"};
 		commandParameters["parsimony"] = addParameters(parsimonyArray, sizeof(parsimonyArray)/sizeof(string));
 
-		string unifracWeightedArray[] =  {"group","iters"};
+		string unifracWeightedArray[] =  {"groups","iters"};
 		commandParameters["unifrac.weighted"] = addParameters(unifracWeightedArray, sizeof(unifracWeightedArray)/sizeof(string));
 
-		string unifracUnweightedArray[] =  {"group","iters"};
+		string unifracUnweightedArray[] =  {"groups","iters"};
 		commandParameters["unifrac.unweighted"] = addParameters(unifracUnweightedArray, sizeof(unifracUnweightedArray)/sizeof(string));
 
-		string heatmapArray[] =  {"group","line","label","sorted"};
+		string heatmapArray[] =  {"groups","line","label","sorted"};
 		commandParameters["heatmap"] = addParameters(heatmapArray, sizeof(heatmapArray)/sizeof(string));
 
 		string vennArray[] =  {"groups","line","label","calc"};
@@ -339,8 +339,8 @@ void ValidParameters::initParameterRanges() {
 		string freqArray[] = {">","1", "<","NA", "between"};
 		parameterRanges["freq"] = addParameters(freqArray, rangeSize);
 
-		string lineArray[] = {">=","1", "<","NA", "between"};
-		parameterRanges["line"] = addParameters(lineArray, rangeSize);
+		//string lineArray[] = {">=","1", "<","NA", "between"};
+		//parameterRanges["line"] = addParameters(lineArray, rangeSize);
 
 		string abundArray[] = {">=","5", "<","NA", "between"};
 		parameterRanges["abund"] = addParameters(abundArray, rangeSize);

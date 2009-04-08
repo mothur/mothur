@@ -75,7 +75,9 @@ EstOutput Parsimony::getValues(Tree* t) {
 			if (numGroups == 0) {
 				//get score for all users groups
 				for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
-					groups.push_back(tmap->namesOfGroups[i]);
+					if (tmap->namesOfGroups[i] != "xxx") {
+						groups.push_back(tmap->namesOfGroups[i]);
+					}
 				}
 			}else {
 				for (int i = 0; i < globaldata->Groups.size(); i++) {
