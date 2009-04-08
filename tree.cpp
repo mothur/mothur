@@ -13,9 +13,9 @@
 /*****************************************************************/
 Tree::Tree() {
 	try {
-	
 		globaldata = GlobalData::getInstance();
-		numLeaves = globaldata->gTreemap->getNumSeqs();
+		
+		numLeaves = globaldata->Treenames.size();
 		numNodes = 2*numLeaves - 1;
 		
 		tree.resize(numNodes);
@@ -24,13 +24,13 @@ Tree::Tree() {
 		for (int i = 0; i < numNodes; i++) {
 			//initialize leaf nodes
 			if (i <= (numLeaves-1)) {
-				tree[i].setName(globaldata->gTreemap->namesOfSeqs[i]);
-				tree[i].setGroup(globaldata->gTreemap->getGroup(globaldata->gTreemap->namesOfSeqs[i]));
+				tree[i].setName(globaldata->Treenames[i]);
+				tree[i].setGroup(globaldata->gTreemap->getGroup(globaldata->Treenames[i]));
 				//set pcount and pGroup for groupname to 1.
-				tree[i].pcount[globaldata->gTreemap->getGroup(globaldata->gTreemap->namesOfSeqs[i])] = 1;
-				tree[i].pGroups[globaldata->gTreemap->getGroup(globaldata->gTreemap->namesOfSeqs[i])] = 1;
+				tree[i].pcount[globaldata->gTreemap->getGroup(globaldata->Treenames[i])] = 1;
+				tree[i].pGroups[globaldata->gTreemap->getGroup(globaldata->Treenames[i])] = 1;
 				//Treemap knows name, group and index to speed up search
-				globaldata->gTreemap->setIndex(globaldata->gTreemap->namesOfSeqs[i], i);
+				globaldata->gTreemap->setIndex(globaldata->Treenames[i], i);
 	
 			//intialize non leaf nodes
 			}else if (i > (numLeaves-1)) {
@@ -486,7 +486,7 @@ int Tree::findRoot() {
 	try {
 		for (int i = 0; i < numNodes; i++) {
 			//you found the root
-			if (tree[i].getParent() == -1) { return i; }
+			if (tree[i].getParent() == -1) { return i; }  
 		}
 		return -1;
 	}

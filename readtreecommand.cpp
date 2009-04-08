@@ -22,6 +22,9 @@ ReadTreeCommand::ReadTreeCommand(){
 		//memory leak prevention
 		//if (globaldata->gTreemap != NULL) { delete globaldata->gTreemap;  }
 		globaldata->gTreemap = treeMap;
+		
+		//get names in tree
+		globaldata->parseTreeFile();
 
 		read = new ReadNewickTree(filename);
 		
@@ -59,6 +62,23 @@ int ReadTreeCommand::execute(){
 			T[i]->assembleTree();
 		}
 
+		//output any names that are in names file but not in tree
+		if (globaldata->Treenames.size() < treeMap->getNumSeqs()) {
+			for (int i = 0; i < treeMap->namesOfSeqs.size(); i++) {
+				//is that name in the tree?
+				int count = 0;
+				for (int j = 0; j < globaldata->Treenames.size(); j++) {
+					if (treeMap->namesOfSeqs[i] == globaldata->Treenames[j]) { break; } //found it
+					count++;
+				}
+				
+				//then you did not find it so report it 
+				if (count == globaldata->Treenames.size()) { 
+					cout << treeMap->namesOfSeqs[i] << " is in your namefile and not in your tree. It will be disregarded." << endl;
+				}
+			}
+		}
+		
 		return 0;
 	}
 	catch(exception& e) {

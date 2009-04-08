@@ -211,9 +211,11 @@ void UnifracUnweightedCommand::setGroups() {
 				if (globaldata->Groups.size() == 0) { 
 					cout << "When using the groups parameter you must have at least 1 valid group. I will run the command using all the groups in your groupfile." << endl; 
 					for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
-						globaldata->Groups.push_back(tmap->namesOfGroups[i]);
-						numGroups++;
-						allGroups += tmap->namesOfGroups[i] + "-";
+						if (tmap->namesOfGroups[i] != "xxx") {
+							globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+							numGroups++;
+							allGroups += tmap->namesOfGroups[i] + "-";
+						}
 					}
 					allGroups = allGroups.substr(0, allGroups.length()-1);
 				}else {
@@ -226,16 +228,20 @@ void UnifracUnweightedCommand::setGroups() {
 			}else{//user has enter "all" and wants the default groups
 				globaldata->Groups.clear();
 				for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
-					globaldata->Groups.push_back(tmap->namesOfGroups[i]);
-					numGroups++;
-					allGroups += tmap->namesOfGroups[i] + "-";
+					if (tmap->namesOfGroups[i] != "xxx") {
+						globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+						numGroups++;
+						allGroups += tmap->namesOfGroups[i] + "-";
+					}
 				}
 				allGroups = allGroups.substr(0, allGroups.length()-1);
 				globaldata->setGroups("");
 			}
 		}else {
 			for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
-				allGroups += tmap->namesOfGroups[i] + "-";
+				if (tmap->namesOfGroups[i] != "xxx") {
+					allGroups += tmap->namesOfGroups[i] + "-";
+				}
 			}
 			allGroups = allGroups.substr(0, allGroups.length()-1);
 			numGroups = 1;

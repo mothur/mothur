@@ -227,11 +227,14 @@ int UnifracWeightedCommand::findIndex(float score, int index) {
 /***********************************************************/
 void UnifracWeightedCommand::setGroups() {
 	try {
+		numGroups = 0;
 		//if the user has not entered specific groups to analyze then do them all
 		if (globaldata->Groups.size() == 0) {
-			numGroups = tmap->getNumGroups();
-			for (int i=0; i < numGroups; i++) { 
-				globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+			for (int i=0; i < tmap->getNumGroups(); i++) { 
+				if (tmap->namesOfGroups[i] != "xxx") {
+					globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+					numGroups++;
+				}
 			}
 		}else {
 			if (globaldata->getGroups() != "all") {
@@ -246,25 +249,31 @@ void UnifracWeightedCommand::setGroups() {
 			
 				//if the user only entered invalid groups
 				if (globaldata->Groups.size() == 0) { 
-					numGroups = tmap->getNumGroups();
-					for (int i=0; i < numGroups; i++) { 
-						globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+					for (int i=0; i < tmap->getNumGroups(); i++) { 
+						if (tmap->namesOfGroups[i] != "xxx") {
+							globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+							numGroups++;
+						}
 					}
 					cout << "When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile." << endl; 
 				}else if (globaldata->Groups.size() == 1) { 
 					cout << "When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile." << endl;
-					numGroups = tmap->getNumGroups();
 					globaldata->Groups.clear();
-					for (int i=0; i < numGroups; i++) { 
-						globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+					for (int i=0; i < tmap->getNumGroups(); i++) { 
+						if (tmap->namesOfGroups[i] != "xxx") {
+							globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+							numGroups++;
+						}
 					}
 				}else { numGroups = globaldata->Groups.size(); }
 			}else { //users wants all groups
-				numGroups = tmap->getNumGroups();
 				globaldata->Groups.clear();
 				globaldata->setGroups("");
-				for (int i=0; i < numGroups; i++) { 
-					globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+				for (int i=0; i < tmap->getNumGroups(); i++) { 
+					if (tmap->namesOfGroups[i] != "xxx") {
+						globaldata->Groups.push_back(tmap->namesOfGroups[i]);
+						numGroups++;
+					}
 				}
 			}
 		}

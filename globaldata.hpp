@@ -37,6 +37,7 @@ public:
 	vector<string>  Estimators, Groups; //holds estimators to be used
 	set<int> lines; //hold lines to be used
 	set<string> labels; //holds labels to be used
+	vector<string> Treenames;
 	
 	string getPhylipFile();
 	string getColumnFile();
@@ -80,6 +81,12 @@ public:
 	void clearAbund();
 	
 	void parseGlobalData(string, string);
+	
+	void parseTreeFile();		//parses through tree file to find names of nodes and number of them
+							//this is required in case user has sequences in the names file that are
+							//not included in the tree. 
+							//only takes names from the first tree in the tree file and assumes that all trees use the same names.
+
 		
 private:
 	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, treefile, sharedfile, line, label, randomtree, groups;
@@ -91,6 +98,7 @@ private:
 	GlobalData();
 	~GlobalData();
 	void reset();	//clears all non filename parameters
+	void readTreeString(ifstream&);
 	
 	
 	
