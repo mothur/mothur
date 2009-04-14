@@ -14,46 +14,29 @@
 
 
 #include "libshuffcommand.h"
+#include "libshuff.h"
+#include "slibshuff.h"
+#include "dlibshuff.h"
 
 //**********************************************************************************************************************
 
-
 LibShuffCommand::LibShuffCommand(){
 	try {
+		srand( (unsigned)time( NULL ) );
+		
 		globaldata = GlobalData::getInstance();
-		convert(globaldata->getCutOff(), cutOff);
-		convert(globaldata->getIters(), iters);
-		convert(globaldata->getStep(), step);
-		form = globaldata->getForm();
-		matrix = globaldata->gMatrix;
-		coverageFile = getRootName(globaldata->getPhylipFile()) + "coverage";
-		summaryFile = getRootName(globaldata->getPhylipFile()) + "slsummary";
-		openOutputFile(coverageFile, out);
-		openOutputFile(summaryFile, outSum);
-		
-		//set the groups to be analyzed
-		setGroups();
+		convert(globaldata->getCutOff(), cutOff);	//get the cutoff
+		convert(globaldata->getIters(), iters);		//get the number of iterations
+		convert(globaldata->getStep(), step);		//get the step size for the discrete command
+		matrix = globaldata->gMatrix;				//get the distance matrix
+		setGroups();								//set the groups to be analyzed
 
-		//file headers for coverage file
-		out << "D" << '\t';
-		for (int i = 0; i < groupComb.size(); i++) {
-			out << "C" + groupComb[i] << '\t';
+		if(globaldata->getForm() == "discrete"){
+			form = new DLibshuff(matrix, iters, step, cutOff);
 		}
-		
-		for (int i = 0; i < numGroups; i++) {
-			for (int j = 0; j < numGroups; j++) {
-				//don't output AA to AA
-				if (i != j) {
-					out << "Delta" + globaldata->Groups[i] + "-" + globaldata->Groups[j] << '\t';
-				}
-			}
+		else{
+			form = new SLibshuff(matrix, iters, cutOff);
 		}
-		out << endl;
-
-		numComp = numGroups*numGroups;
-		
-		coverage = new Coverage();
-		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the LibShuffCommand class Function LibShuffCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -68,134 +51,42 @@ LibShuffCommand::LibShuffCommand(){
 
 //**********************************************************************************************************************
 
-LibShuffCommand::~LibShuffCommand(){
-	delete coverage;
-}
-
-//**********************************************************************************************************************
-
 int LibShuffCommand::execute(){
 	try {
-		//deltaValues[0] = scores for the difference between AA and AB.
-		//cValues[0][0][0] = AA at distance 0.0, cValues[0][0][1] = AB at distance 0.0, cValues[0][0][2] = AC at distance 0.0, cValues[0][1][0] = BA at distance 0.0, cValues[0][1][1] = BB...
-		Progress* reading;
-		reading = new Progress("Comparing to random:", iters);
-		
-		sumDelta.resize(numComp-numGroups, 0.0);
-		
-		matrix->setBounds();
-		
-		//load distances
-		if (form != "discrete") { matrix->getDist(dist); }
-		else {
-			float f = 0.0;
-			while (f <= cutOff) {
-				dist.push_back(f);
-				f += step;
-			}
-		}
-	
-		/*****************************/
-		//get values for users matrix
-		/*****************************/
-			
-		//clear out old Values
-		deltaValues.clear();
-		deltaValues.resize(dist.size());			
-		
-		coverage->getValues(matrix, cValues, dist);
-		
-		float distDiff = 0;
-		
-		//loop through each distance and load sumdelta
-		for (int p = 0; p < cValues.size(); p++) {	
-			//find delta values
-			int count = 0;
-			for (int i = 0; i < numGroups; i++) {
-				for (int j = 0; j < numGroups; j++) {
-					//don't save AA to AA
-					if (i != j) {
-						//(Caa - Cab)^2 * distDiff
-						deltaValues[p].push_back(((cValues[p][i][i]-cValues[p][i][j]) * (cValues[p][i][i]-cValues[p][i][j])) * distDiff); //* distDiff
-						sumDelta[count] += deltaValues[p][count];
-						count++;
-					}
-				}
-			}
-			if (p < cValues.size() - 1) {
-				distDiff = dist[p+1] - dist[p];	
-			}
-		}
-			
-		printCoverageFile();
-			
-		/*******************************************************************************/
-		//create and score random matrixes finding the sumDelta values for summary file
-		/******************************************************************************/
 
-		//initialize rsumDelta
-		rsumDelta.resize(numComp-numGroups);
-		for (int l = 0; l < rsumDelta.size(); l++) {
-			for (int w = 0; w < iters; w++) {
-				rsumDelta[l].push_back(0.0);
-			}
+		savedDXYValues = form->evaluateAll();
+		savedMinValues = form->getSavedMins();
+		
+		pValueCounts.assign(numGroups, 0);
+		for(int i=0;i<numGroups;i++){
+			pValueCounts[i].assign(numGroups, 0);
 		}
 		
+		Progress* reading = new Progress();
 		
-		for (int m = 0; m < iters; m++) {
-			//generate random matrix in getValues
-			//values for random matrix
-		
-			coverage->getValues(matrix, cValues, dist, "random");
-			
-			//loop through each distance and load rsumdelta
-			for (int p = 0; p < cValues.size(); p++) {
-				//find delta values
-				int count = 0;
-				for (int i = 0; i < numGroups; i++) {
-					for (int j = 0; j < numGroups; j++) {
-						//don't save AA to AA
-						if (i != j) {
-							//rsumDelta[3][500] = the sum of the delta scores for BB-BC for random matrix # 500.
-							rsumDelta[count][m] += cValues[p][i][j];  // where cValues[p][0][1] = delta value at distance p of AA-AB, cValues[p][1][2] = delta value at distance p of BB-BC. 
-							count++;
-						}
-					}
+		for(int i=0;i<numGroups-1;i++) {
+			for(int j=i+1;j<numGroups;j++) {
+				reading->newLine(groupNames[i]+'-'+groupNames[j], iters);
+				for(int p=0;p<iters;p++) {		
+					form->randomizeGroups(i,j);
+					if(form->evaluatePair(i,j) >= savedDXYValues[i][j])	{	pValueCounts[i][j]++;	}
+					if(form->evaluatePair(j,i) >= savedDXYValues[j][i])	{	pValueCounts[j][i]++;	}
+					reading->update(p);			
 				}
+				form->resetGroup(i);
+				form->resetGroup(j);
 			}
-
-			//clear out old Values
-			reading->update(m);
-			cValues.clear();
-			
 		}
-		
 		reading->finish();
 		delete reading;
-				
-		/**********************************************************/
-		//find the signifigance of the user matrix' sumdelta values
-		/**********************************************************/
-		
-		for (int t = 0; t < rsumDelta.size(); t++) {
-			//sort rsumDelta t
-			sort(rsumDelta[t].begin(), rsumDelta[t].end());
-			
-			//the index of the score higher than yours is returned 
-			//so if you have 1000 random matrices the index returned is 100 
-			//then there are 900 matrices with a score greater then you. 
-			//giving you a signifigance of 0.900
-			int index = findIndex(sumDelta[t], t);    
-			
-			//the signifigance is the number of trees with the users score or higher 
-			sumDeltaSig.push_back((iters-index)/(float)iters);
 
-		}
-		
+		cout << endl;
 		printSummaryFile();
+		printCoverageFile();
 		
 		//clear out users groups
 		globaldata->Groups.clear();
+		delete form;
 		
 		return 0;
 	}
@@ -208,27 +99,81 @@ int LibShuffCommand::execute(){
 		exit(1);
 	}	
 }
+
 //**********************************************************************************************************************
+
 void LibShuffCommand::printCoverageFile() {
 	try {
-		//format output
-		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+
+		ofstream outCov;
+		summaryFile = getRootName(globaldata->getPhylipFile()) + "libshuff.coverage";
+		openOutputFile(summaryFile, outCov);
+		outCov.setf(ios::fixed, ios::floatfield); outCov.setf(ios::showpoint);
+		cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
 		
-		//loop through each distance 
-		for (int p = 0; p < cValues.size(); p++) {
-			out << setprecision(6) << dist[p] << '\t';
-			//print out coverage values
-			for (int i = 0; i < numGroups; i++) {
-				for (int j = 0; j < numGroups; j++) {
-					out << cValues[p][i][j] << '\t';
+		map<double,vector<int> > allDistances;
+		map<double,vector<int> >::iterator it;
+
+		vector<vector<int> > indices(numGroups);
+		int numIndices = numGroups * numGroups;
+		
+		int index = 0;
+		for(int i=0;i<numGroups;i++){
+			indices[i].assign(numGroups,0);
+			for(int j=0;j<numGroups;j++){
+				indices[i][j] = index++;
+				for(int k=0;k<savedMinValues[i][j].size();k++){
+					if(allDistances[savedMinValues[i][j][k]].size() != 0){
+						allDistances[savedMinValues[i][j][k]][indices[i][j]]++;
+					}
+					else{
+						allDistances[savedMinValues[i][j][k]].assign(numIndices, 0);
+						allDistances[savedMinValues[i][j][k]][indices[i][j]] = 1;
+					}
 				}
 			}
-			
-			for (int h = 0; h < deltaValues[p].size(); h++) {
-				out << deltaValues[p][h] << '\t';
+		}
+		it=allDistances.begin();
+		
+		cout << setprecision(8);
+
+		vector<int> prevRow = it->second;
+		it++;
+		
+		for(it;it!=allDistances.end();it++){
+			for(int i=0;i<it->second.size();i++){
+				it->second[i] += prevRow[i];
 			}
-			
-			out << endl;
+			prevRow = it->second;
+		}
+		
+		vector<int> lastRow = allDistances.rbegin()->second;
+		outCov << setprecision(8);
+		
+		outCov << "dist";
+		for (int i = 0; i < numGroups; i++){
+			outCov << '\t' << groupNames[i];
+		}
+		for (int i=0;i<numGroups;i++){
+			for(int j=i+1;j<numGroups;j++){
+				outCov << '\t' << groupNames[i] << '-' << groupNames[j] << '\t';
+				outCov << groupNames[j] << '-' << groupNames[i];
+			}
+		}
+		outCov << endl;
+		
+		for(it=allDistances.begin();it!=allDistances.end();it++){
+			outCov << it->first << '\t';
+			for(int i=0;i<numGroups;i++){
+				outCov << it->second[indices[i][i]]/(float)lastRow[indices[i][i]] << '\t';
+			}
+			for(int i=0;i<numGroups;i++){
+				for(int j=i+1;j<numGroups;j++){
+					outCov << it->second[indices[i][j]]/(float)lastRow[indices[i][j]] << '\t';
+					outCov << it->second[indices[j][i]]/(float)lastRow[indices[j][i]] << '\t';
+				}
+			}
+			outCov << endl;
 		}
 		
 	}
@@ -241,38 +186,45 @@ void LibShuffCommand::printCoverageFile() {
 		exit(1);
 	}	
 } 
+
 //**********************************************************************************************************************
+
 void LibShuffCommand::printSummaryFile() {
 	try {
-		//format output
+
+		ofstream outSum;
+		summaryFile = getRootName(globaldata->getPhylipFile()) + "libshuff.summary";
+		openOutputFile(summaryFile, outSum);
+
 		outSum.setf(ios::fixed, ios::floatfield); outSum.setf(ios::showpoint);
+		cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
 		
-		for (int i = 0; i < numGroups; i++) {
-			for (int j = 0; j < numGroups; j++) {
-				//don't output AA to AA
-				if (i != j) {
-					outSum << "Delta " + globaldata->Groups[i] + "-" + globaldata->Groups[j] << '\t'<< "DeltaSig " + globaldata->Groups[i] + "-" + globaldata->Groups[j] << '\t';
-					cout << "Delta " + globaldata->Groups[i] + "-" + globaldata->Groups[j] << '\t'<< "DeltaSig " + globaldata->Groups[i] + "-" + globaldata->Groups[j] << '\t';
+		cout << setw(20) << left << "Comparison" << '\t' << setprecision(8) << "dCXYScore" << '\t' << "Significance" << endl;
+		outSum << setw(20) << left << "Comparison" << '\t' << setprecision(8) << "dCXYScore" << '\t' << "Significance" << endl;
+	
+		int precision = (int)log10(iters);
+		for(int i=0;i<numGroups;i++){
+			for(int j=i+1;j<numGroups;j++){
+				if(pValueCounts[i][j]){
+					cout << setw(20) << left << groupNames[i]+'-'+groupNames[j] << '\t' << setprecision(8) << savedDXYValues[i][j] << '\t' << setprecision(precision) << pValueCounts[i][j]/(float)iters << endl;
+					outSum << setw(20) << left << groupNames[i]+'-'+groupNames[j] << '\t' << setprecision(8) << savedDXYValues[i][j] << '\t' << setprecision(precision) << pValueCounts[i][j]/(float)iters << endl;
+				}
+				else{
+					cout << setw(20) << left << groupNames[i]+'-'+groupNames[j] << '\t' << setprecision(8) << savedDXYValues[i][j] << '\t' << '<' <<setprecision(precision) << 1/(float)iters << endl;
+					outSum << setw(20) << left << groupNames[i]+'-'+groupNames[j] << '\t' << setprecision(8) << savedDXYValues[i][j] << '\t' << '<' <<setprecision(precision) << 1/(float)iters << endl;
+				}
+				if(pValueCounts[j][i]){
+					cout << setw(20) << left << groupNames[j]+'-'+groupNames[i] << '\t' << setprecision(8) << savedDXYValues[j][i] << '\t' << setprecision (precision) << pValueCounts[j][i]/(float)iters << endl;
+					outSum << setw(20) << left << groupNames[j]+'-'+groupNames[i] << '\t' << setprecision(8) << savedDXYValues[j][i] << '\t' << setprecision (precision) << pValueCounts[j][i]/(float)iters << endl;
+				}
+				else{
+					cout << setw(20) << left << groupNames[j]+'-'+groupNames[i] << '\t' << setprecision(8) << savedDXYValues[j][i] << '\t' << '<' <<setprecision (precision) << 1/(float)iters << endl;
+					outSum << setw(20) << left << groupNames[j]+'-'+groupNames[i] << '\t' << setprecision(8) << savedDXYValues[j][i] << '\t' << '<' <<setprecision (precision) << 1/(float)iters << endl;
 				}
 			}
 		}
-		outSum << endl;
-		cout << endl;
 		
-		//print out delta values
-		for (int i = 0; i < sumDelta.size(); i++) {
-			if (sumDeltaSig[i] > (1/(float)iters)) {
-				outSum << setprecision(6) << sumDelta[i] << '\t' << setprecision(globaldata->getIters().length()) << sumDeltaSig[i] << '\t';
-				cout << setprecision(6) << sumDelta[i] << '\t' << setprecision(globaldata->getIters().length()) << sumDeltaSig[i] << '\t';
-			}else {
-				outSum << setprecision(6) << sumDelta[i] << '\t' << setprecision(globaldata->getIters().length()) << "<" << (1/float(iters)) << '\t';
-				cout << setprecision(6) << sumDelta[i] << '\t' << setprecision(globaldata->getIters().length()) << "<" << (1/float(iters)) << '\t';
-			}
-		}
 		
-		outSum << endl;
-		cout << endl;
-	
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the LibShuffCommand class Function printSummaryFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -285,6 +237,7 @@ void LibShuffCommand::printSummaryFile() {
 } 
 
 //**********************************************************************************************************************
+
 void LibShuffCommand::setGroups() {
 	try {
 		//if the user has not entered specific groups to analyze then do them all
@@ -293,7 +246,7 @@ void LibShuffCommand::setGroups() {
 			for (int i=0; i < numGroups; i++) { 
 				globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
 			}
-		}else {
+		} else {
 			if (globaldata->getGroups() != "all") {
 				//check that groups are valid
 				for (int i = 0; i < globaldata->Groups.size(); i++) {
@@ -311,8 +264,8 @@ void LibShuffCommand::setGroups() {
 						globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
 					}
 					cout << "When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile." << endl; 
-				}else { numGroups = globaldata->Groups.size(); }
-			}else { //users wants all groups
+				} else { numGroups = globaldata->Groups.size(); }
+			} else { //users wants all groups
 				numGroups = globaldata->gGroupmap->getNumGroups();
 				globaldata->Groups.clear();
 				for (int i=0; i < numGroups; i++) { 
@@ -320,21 +273,22 @@ void LibShuffCommand::setGroups() {
 				}
 			}
 		}
-		
+
 		//sort so labels match
 		sort(globaldata->Groups.begin(), globaldata->Groups.end());
 		
 		//sort
 		sort(globaldata->gGroupmap->namesOfGroups.begin(), globaldata->gGroupmap->namesOfGroups.end());
 
-		
+		groupNames = globaldata->Groups;
+
 		// number of comparisons i.e. with groups A,B,C = AA, AB, AC, BA, BB, BC...;
-		for (int i=0; i<numGroups; i++) { 
-			for (int l = 0; l < numGroups; l++) {
-				//set group comparison labels
-				groupComb.push_back(globaldata->Groups[i] + "-" + globaldata->Groups[l]);
-			}
-		}
+//		for (int i=0; i<numGroups; i++) { 
+//			for (int l = 0; l < numGroups; l++) {
+//				//set group comparison labels
+//				groupComb.push_back(globaldata->Groups[i] + "-" + globaldata->Groups[l]);
+//			}
+//		}
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the LibShuffCommand class Function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -345,23 +299,5 @@ void LibShuffCommand::setGroups() {
 		exit(1);
 	}
 }
-/***********************************************************/
-int LibShuffCommand::findIndex(float score, int index) {
-	try{
-		for (int i = 0; i < rsumDelta[index].size(); i++) {
-			if (rsumDelta[index][i] >= score)	{	return i;	}
-		}
-		return rsumDelta[index].size();
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the LibShuffCommand class Function findIndex. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the LibShuffCommand class function findIndex. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-}
 
 /***********************************************************/
-

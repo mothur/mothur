@@ -18,12 +18,31 @@ const char marker = '|';
 
 /***********************************************************************/
 
+Progress::Progress(){
+	try {
+		cout << "********************#****#****#****#****#****#****#****#****#****#****#";
+		
+		nTicks = 0;
+		finalPos = 0;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the Progress class Function Progress. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the Progress class function Progress. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+
+/***********************************************************************/
+
 Progress::Progress(string job, int end){
 	try {
 		cout << "********************#****#****#****#****#****#****#****#****#****#****#\n";
-		cout << job << marker;
+		cout << setw(20) << left << job << setw(1) << marker;
 		cout.flush();
-	
+
 		nTicks = 0;
 		finalPos = end;
 	}
@@ -37,6 +56,27 @@ Progress::Progress(string job, int end){
 	}
 }
 
+/***********************************************************************/
+
+void Progress::newLine(string job, int end){
+	try {
+		cout << endl;
+		cout << setw(20) << left << job << setw(1) << marker;
+		cout.flush();
+		
+		nTicks = 0;
+		finalPos = end;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the Progress class Function newline. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the Progress class function newline. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+	
 /***********************************************************************/
 
 void Progress::update(const int currentPos){

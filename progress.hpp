@@ -8,8 +8,10 @@ using namespace std;
 class Progress {
 	
 public:
+	Progress();
 	Progress(string, int);
 	void update(int);
+	void newLine(string, int);
 	void finish();
 	
 private:

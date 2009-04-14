@@ -31,7 +31,6 @@ ValidParameters::ValidParameters() {
 
 ValidParameters::~ValidParameters() {}
 
-
 /***********************************************************************/
 bool ValidParameters::isValidParameter(string parameter, string command, string value) {
 	try {	
@@ -229,7 +228,8 @@ void ValidParameters::initCommandParameters() {
 	try {	
 		//{"parameter1","parameter2",...,"last parameter"};
 		
-		string readdistArray[] = {"phylip","column","name","cutoff","precision","group"};
+		string readdistArray[] = {"phylip","column", "name","cutoff","precision", "group"};
+
 		commandParameters["read.dist"] = addParameters(readdistArray, sizeof(readdistArray)/sizeof(string));
 
 		string readotuArray[] =  {"list","order","shared", "line", "label","group","sabund", "rabund"};
