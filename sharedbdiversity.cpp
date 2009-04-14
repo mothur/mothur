@@ -8,7 +8,6 @@
  */
 
 #include "sharedbdiversity.h"
-#include "calculator.h"
 
 /***********************************************************************/
 

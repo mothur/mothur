@@ -6,7 +6,7 @@ using namespace std;
 #include "rarefactioncurvedata.h"
 #include "raredisplay.h"
 #include "ordervector.hpp"
-
+#include "mothur.h"
 
 
 class Rarefact {

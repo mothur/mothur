@@ -10,7 +10,6 @@
  */
 
 #include "command.hpp"
-#include "utilities.hpp"
 #include "fastamap.h"
 #include "globaldata.hpp"
 

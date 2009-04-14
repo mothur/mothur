@@ -12,6 +12,9 @@
 			 sabundvector	=	2		1		1		0		0		1
 			 ordervector	=	1	1	1	1	1	1	2	2	2	3	3	4	5 */
 
+//class SAbundVector;
+//class OrderVector;
+
 class RAbundVector : public DataVector {
 	
 public:

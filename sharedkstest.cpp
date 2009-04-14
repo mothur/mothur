@@ -8,8 +8,6 @@
  */
 
 #include "sharedkstest.h"
-#include "calculator.h"
-#include <algorithm>
 
 /***********************************************************************/
 

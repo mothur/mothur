@@ -10,7 +10,6 @@
  */
 
 #include "mothur.h"
-#include "utilities.hpp"
 
 /* This class is a representation of the groupfile.  It is used by all the shared commands to determine what group a 
 	certain sequence belongs to. */

@@ -15,6 +15,7 @@ HeatMap::HeatMap(){
 		globaldata = GlobalData::getInstance();
 		format = globaldata->getFormat();
 		sorted = globaldata->getSorted();
+		util = new SharedUtil();
 		
 	}
 	catch(exception& e) {
@@ -45,7 +46,7 @@ void HeatMap::getPic(OrderVector* order) {
 			if(it->second.length() == 1) {  it->second = "0" + it->second;  }
 		}
 
-		string filenamesvg = globaldata->inputFileName + ".heatmap." + order->getLabel() + ".svg";
+		string filenamesvg = getRootName(globaldata->inputFileName) + order->getLabel() + ".heatmap.svg";
 		
 		openOutputFile(filenamesvg, outsvg);
 		
@@ -86,50 +87,104 @@ void HeatMap::getPic(SharedOrderVector* sharedorder) {
 		colorScale.clear();
 		
 		//fills vector of sharedsabunds - lookup
-		getSharedVectors(sharedorder);
+		util->getSharedVectors(globaldata->Groups, lookup, sharedorder);  //fills group vectors from order vector.
 		
 		//sort lookup so shared bins are on top
 		if (sorted == "1") {  sortSharedVectors();  }
 		
-		//get maxBin
+		//get users scaling method
+		scaler = globaldata->getScaler();
+		
+		int maxbin = 0;
 		for (int i = 0; i < lookup.size(); i++) {
 			for (int j = 0; j < lookup[i]->size(); j++) {
-				colorScale[lookup[i]->getAbundance(j)] = "";
+				//if (lookup[i]->getAbundance(j) != 0) { //don't want log value of 0.
+					//if (scaler == "log10") {
+					//	colorScale[-log((log10(lookup[i]->getAbundance(j)) / (float)lookup[i]->getNumSeqs()))] = "";  
+	//cout << "abundance  = " << lookup[i]->getAbundance(j) << '\t' << " relative adundance = " << (lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) << '\t';
+	//cout << -log((log10(lookup[i]->getAbundance(j)) / lookup[i]->getNumSeqs())) << endl;
+					//}else if (scaler == "log2") {
+						//colorScale[-log((log2(lookup[i]->getAbundance(j)) / (float)lookup[i]->getNumSeqs()))] = "";  //cout << (int)log2(lookup[i]->getAbundance(j)) << endl;
+	//cout << "abundance  = " << lookup[i]->getAbundance(j) << '\t' << " relative adundance = " << lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs() << '\t';
+	//cout << -log((log2(lookup[i]->getAbundance(j)) / lookup[i]->getNumSeqs())) << endl;
+				//	}else if (scaler == "linear") {
+						colorScale[lookup[i]->getAbundance(j)] = "";
+						if (maxbin < lookup[i]->getAbundance(j)) { maxbin = lookup[i]->getAbundance(j); }
+	//cout << "abundance  = " << lookup[i]->getAbundance(j) << '\t' << " relative adundance = " << lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs() << '\t';
+	//cout << lookup[i]->getAbundance(j) /(float) lookup[i]->getNumSeqs() << endl;
+					//}else {  //if user enters invalid scaler option.
+					//	cout << scaler << " is not a valid scaler option. I will use log10." << endl;
+					//	colorScale[-log(log10(lookup[i]->getAbundance(j) / lookup[i]->getNumSeqs()))] = "";   
+					//} 
+				//}else { colorScale[0] = "00";  }
+				
 			}
 		}
 		
 		//get scaler
-		float scaler = 255 / (float) colorScale.size();
+		float scalers = 255 / (float) maxbin;
 		
 		//go through map and give each score a color value
 		for (it = colorScale.begin(); it != colorScale.end(); it++) {
-			it->second = toHex(int(float(it->first) * scaler));
+			it->second = toHex(int(float(it->first) * scalers));
 			if(it->second.length() == 1) {  it->second = "0" + it->second;  }
+//cout << it->first << " " << it->second << endl;
 		}
 		
-		string filenamesvg = globaldata->inputFileName + ".heatmap." + sharedorder->getLabel() + "." + groupComb + ".svg";
+		string filenamesvg = getRootName(globaldata->inputFileName) + sharedorder->getLabel() + ".heatmap.svg";
 		openOutputFile(filenamesvg, outsvg);
 		
 		//svg image
-		outsvg << "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 " + toString(lookup.size() * 300) + " " + toString((lookup[0]->getNumBins()*5 + 15))  + "\">\n";
+		outsvg << "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 " + toString(lookup.size() * 300) + " " + toString((lookup[0]->getNumBins()*5 + 120))  + "\">\n";
 		outsvg << "<g>\n";
 		
-		int x = 15;
-		int y = 15;
-		string color;
-
-		for (int i = 0; i <= lookup[0]->getNumBins(); i++) {
+		//white backround
+		outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"" + toString(lookup.size() * 300) + "\" height=\"" + toString((lookup[0]->getNumBins()*5 + 120))  + "\"/>"; 
+		outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString((lookup.size() * 150) - 40) + "\" y=\"25\">Heatmap at distance " + sharedorder->getLabel() + "</text>\n";
 		
+		//column labels
+		for (int h = 0; h < lookup.size(); h++) {
+			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(((300 * (h+1)) - 150) - ((int)lookup[h]->getGroup().length() / 2)) + "\" y=\"50\">" + lookup[h]->getGroup() + "</text>\n"; 
+		}
+		
+		
+		//output legend and color labels
+		//go through map and give each score a color value
+		string color;
+		int x = 0;
+		int y = 90 + (lookup[0]->getNumBins()*5);
+		for (it = colorScale.begin(); it != colorScale.end(); it++) {
+			color = it->second;	
+			outsvg << "<rect fill=\"#" + color + "0000\" stroke=\"#" + color + "0000\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\" width=\"25\" height=\"10\"/>\n";
+			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\">" + toString(it->first) + "</text>\n";
+			x += 25;
+		}
+		
+		x = 0;
+		y = 70;
+		
+		//start at 1 since bin 0 is nothing
+		for (int i = 1; i <= lookup[0]->getNumBins(); i++) {
 			for (int j = 0; j < lookup.size(); j++) {
-			
-				color = colorScale[lookup[j]->getAbundance(i)];	
-						
+				
+				//if (lookup[j]->getAbundance(i) != 0) { //don't want log value of 0.
+					//if (scaler == "log10") {
+					//	color = colorScale[(int)log10(lookup[j]->getAbundance(i))];  
+					//}else if (scaler == "log2") {
+					//	color = colorScale[(int)log2(lookup[j]->getAbundance(i))];  
+				//	}else if (scaler == "linear") {
+						color = colorScale[lookup[j]->getAbundance(i)]; 
+					//}else {  color = colorScale[(int)log10(lookup[j]->getAbundance(i))];	} 
+				//}else { color = "OO";  }
+
+				
 				outsvg << "<rect fill=\"#" + color + "0000\" stroke=\"#" + color + "0000\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\" width=\"300\" height=\"5\"/>\n";
 				x += 300;
 			}
-			x = 15;
+			x = 0;
 			y += 5;
 		}
+		
 		outsvg << "</g>\n</svg>\n";
 		
 		outsvg.close();
@@ -146,57 +201,6 @@ void HeatMap::getPic(SharedOrderVector* sharedorder) {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-void HeatMap::getSharedVectors(SharedOrderVector* order){
-	try {
-	
-		//delete lookup
-		for (int j = 0; j < lookup.size(); j++) {
-			delete lookup[j];
-		}
-
-		lookup.clear();
-		
-		groupComb = "";
-		
-		//create and initialize vector of sharedvectors, one for each group
-		for (int i = 0; i < globaldata->Groups.size(); i++) { 
-			SharedRAbundVector* temp = new SharedRAbundVector(order->getNumBins());
-			temp->setLabel(order->getLabel());
-			temp->setGroup(globaldata->Groups[i]);
-			groupComb += globaldata->Groups[i];
-			lookup.push_back(temp);
-		}
-		
-		int numSeqs = order->size();
-		//sample all the members
-		for(int i=0;i<numSeqs;i++){
-			//get first sample
-			individual chosen = order->get(i);
-			int abundance; 
-					
-			//set info for sharedvector in chosens group
-			for (int j = 0; j < lookup.size(); j++) { 
-				if (chosen.group == lookup[j]->getGroup()) {
-					 abundance = lookup[j]->getAbundance(chosen.bin);
-					 lookup[j]->set(chosen.bin, (abundance + 1), chosen.group);
-					 break;
-				}
-			}
-		}
-		
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the HeatMap class Function getSharedVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the HeatMap class function getSharedVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
-}
-
 
 //**********************************************************************************************************************
 void HeatMap::sortSharedVectors(){
@@ -206,8 +210,10 @@ void HeatMap::sortSharedVectors(){
 		//if they are then insert in the front
 		//if not push to back
 		
-		bool shared;
 		vector<SharedRAbundVector*> looktemp;
+		map<int, int> place; //spot in lookup where you insert shared by, ie, 3 -> 2 if they are shared by 3 inset into location 2.
+		map<int, int>::iterator it;
+		int count;
 		
 		//create and initialize looktemp as a copy of lookup
 		for (int i = 0; i < lookup.size(); i++) { 
@@ -227,22 +233,37 @@ void HeatMap::sortSharedVectors(){
 		//create and initialize lookup to empty vectors
 		for (int i = 0; i < looktemp.size(); i++) { 
 			SharedRAbundVector* temp = new SharedRAbundVector();
-			lookup.push_back(temp);
+			temp->setLabel(looktemp[i]->getLabel());
+			temp->setGroup(looktemp[i]->getGroup());
+			lookup.push_back(temp); 
+			
+			//initialize place map
+			place[i] = 0;
 		}
+		
 		
 		//for each bin
 		for (int i = 0; i < looktemp[0]->size(); i++) {
-			shared = true;
+			count = 0;
+			bool updatePlace = false;
 			//for each group
 			for (int j = 0; j < looktemp.size(); j++) {
-				if (looktemp[j]->getAbundance(i) == 0) { shared = false; }
+				if (looktemp[j]->getAbundance(i) != 0) { count++; }
 			}
 			
 			//fill lookup
 			for (int j = 0; j < looktemp.size(); j++) {
 				//if they are not shared then push to back, if they are not insert in front
-				if (shared == false)  { lookup[j]->push_back(looktemp[j]->getAbundance(i), i, looktemp[j]->getGroup()); }
-				else { lookup[j]->push_front(looktemp[j]->getAbundance(i), i, looktemp[j]->getGroup()); }
+				if (count < 2)  { lookup[j]->push_back(looktemp[j]->getAbundance(i), i, looktemp[j]->getGroup()); }
+				//they are shared by some
+				else {  lookup[j]->insert(looktemp[j]->getAbundance(i), place[count], looktemp[j]->getGroup());   updatePlace = true; }
+			}
+			
+			if (updatePlace == true) {
+				//move place holders below where you entered up to "make space" for you entry
+				for (it = place.begin(); it!= place.end(); it++) {  
+					if (it->first < count) { it->second++; }
+				}
 			}
 		}
 		

@@ -18,6 +18,7 @@ using namespace std;
 #include "datavector.hpp"
 #include "globaldata.hpp"
 #include "calculator.h"
+#include "sharedutilities.h"
 
 /***********************************************************************/
 
@@ -31,8 +32,7 @@ class Venn {
 		void getPic(SharedOrderVector*, vector<Calculator*>);
 
 	private:
-		void getSharedVectors(SharedOrderVector*);
-		
+		SharedUtil* util;
 		SAbundVector* sabund;
 		GlobalData* globaldata;
 		vector<SharedRAbundVector*> lookup;

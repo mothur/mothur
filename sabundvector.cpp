@@ -9,7 +9,6 @@
 using namespace std;
 
 #include "sabundvector.hpp"
-#include "utilities.hpp"
 #include "calculator.h"
 
 /***********************************************************************/

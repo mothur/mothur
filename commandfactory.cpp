@@ -32,10 +32,10 @@
 #include "libshuffcommand.h"
 #include "heatmapcommand.h"
 #include "venncommand.h"
-#include "mothur.h"
 #include "nocommands.h"
 #include "binsequencecommand.h"
 #include "getoturepcommand.h"
+#include "treegroupscommand.h"
 
 
 /***********************************************************/
@@ -83,6 +83,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "venn")					{   command = new VennCommand();				}
 		else if(commandName == "bin.seqs")				{   command = new BinSeqCommand();				}
 		else if(commandName == "get.oturep")			{   command = new GetOTURepCommand();			}
+		else if(commandName == "tree.groups")			{   command = new TreeGroupCommand();			}
 		else											{	command = new NoCommand();					}
 
 		return command;

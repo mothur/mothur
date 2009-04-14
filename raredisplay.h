@@ -31,6 +31,7 @@ private:
 	string tempInName, tempOutName;
 	ifstream tempInFile;
 	ofstream tempOutFile;
+	int renameOk;
 
 };
 

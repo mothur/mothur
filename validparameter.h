@@ -12,7 +12,6 @@
 using namespace std;
 
 #include "mothur.h"
-#include "utilities.hpp"
 
 //This class contains a list of all valid parameters in Mothur.  
 //It has a function which will tell you if your parameter is valid.

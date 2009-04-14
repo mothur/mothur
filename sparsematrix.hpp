@@ -1,7 +1,6 @@
 #ifndef SPARSEMATRIX_H
 #define SPARSEMATRIX_H
 
-#include "utilities.hpp"
 #include "mothur.h"
 
 

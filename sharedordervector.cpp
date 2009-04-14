@@ -11,7 +11,6 @@ using namespace std;
 
 
 #include "sharedordervector.h"
-#include "utilities.hpp"
 
 
 /***********************************************************************/

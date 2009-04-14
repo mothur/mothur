@@ -1,9 +1,6 @@
 #include "globaldata.hpp"
-#include "sparsematrix.hpp"
 #include "tree.h"
-#include "rabundvector.hpp"
-#include "sabundvector.hpp"
-#include "listvector.hpp"
+#include "sparsematrix.hpp"
 
 /*******************************************************/
 
@@ -76,6 +73,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if (key == "step")			{ step = value;			}
 				if (key == "form")			{ form = value;			}
 				if (key == "sorted")		{ sorted = value;		}
+				if (key == "scaler")		{ scaler = value;		}
 				
 
 				
@@ -131,6 +129,8 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if (key == "step")			{ step = value;			}
 			if (key == "form")			{ form = value;			}
 			if (key == "sorted")		{ sorted = value;		}
+			if (key == "scaler")		{ scaler = value;		}
+			
 
 			if (key == "line") {//stores lines to be used in a vector
 				lines.clear();
@@ -140,6 +140,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if (line != "all") {  splitAtDash(value, lines);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
+			
 			if (key == "label") {//stores lines to be used in a vector
 				labels.clear();
 				lines.clear();
@@ -199,6 +200,13 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
+		if (commandName == "tree.groups") {
+			if (calc != "") { 
+				Estimators.clear();
+				splitAtDash(calc, Estimators);			
+			}else { cout << "You have not specified any calculators." << endl; }
+		}
+
 
 		//if you have done a read.otu with a groupfile but don't want to use it anymore because you want to do single commands
 		if ((commandName == "collect.single") || (commandName == "rarefaction.single") || (commandName == "summary.single")) {
@@ -245,6 +253,7 @@ string GlobalData::getGroups()			{	return groups;		}
 string GlobalData::getStep()			{	return step;		}
 string GlobalData::getForm()			{	return form;		}
 string GlobalData::getSorted()			{	return sorted;		}
+string GlobalData::getScaler()			{	return scaler;		}
 void GlobalData::setListFile(string file)	{	listfile = file;	inputFileName = file;}
 void GlobalData::setRabundFile(string file)	{	rabundfile = file;	inputFileName = file;}
 void GlobalData::setSabundFile(string file)	{	sabundfile = file;	inputFileName = file;}
@@ -296,6 +305,7 @@ void GlobalData::clear() {
 	step			=	"0.01";
 	form			=	"integral";
 	sorted			=	"1";  //0 means don't sort, 1 means sort.
+	scaler			=	"log2";
 }
 
 //*******************************************************/

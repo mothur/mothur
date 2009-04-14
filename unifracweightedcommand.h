@@ -14,6 +14,8 @@
 #include "weighted.h"
 #include "treemap.h"
 #include "progress.hpp"
+#include "sharedutilities.h"
+#include "fileoutput.h"
 
 using namespace std;
 
@@ -23,11 +25,13 @@ class UnifracWeightedCommand : public Command {
 	
 	public:
 		UnifracWeightedCommand();	
-		~UnifracWeightedCommand() { delete weighted; }
+		~UnifracWeightedCommand() { delete weighted; delete util; }
 		int execute();	
 	
 	private:
 		GlobalData* globaldata;
+		SharedUtil* util;
+		FileOutput* output;
 		vector<Tree*> T;	   //user trees
 		vector<double> utreeScores;  //user tree unweighted scores
 		vector<double> WScoreSig;  //tree weighted score signifigance when compared to random trees - percentage of random trees with that score or lower.
@@ -54,11 +58,10 @@ class UnifracWeightedCommand : public Command {
 		void printWeightedFile();  
 		//void removeValidScoresDuplicates();
 		int findIndex(float, int);
-		void setGroups(); 
 		void calculateFreqsCumuls();
-		void initFile(string);
-		void output(vector<double>);
-		void resetFile();
+		//void initFile(string);
+		//void output(vector<double>);
+		//void resetFile();
 
 };
 

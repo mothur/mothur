@@ -28,10 +28,12 @@ class Node  {
 		void setParent(int);
 		void setChildren(int, int);		//leftchild, rightchild
 		void setIndex(int);
+		void setLengthToLeaves(float);
 		
 		string getName();
 		string getGroup();  
 		float getBranchLength();
+		float getLengthToLeaves();
 		int getParent();
 		int getLChild();
 		int getRChild();
@@ -51,7 +53,7 @@ class Node  {
 	private:
 		string			name;
 		string			group;
-		float			branchLength;
+		float			branchLength, length2leaf;
 		int				parent;
 		int				lchild;
 		int				rchild;

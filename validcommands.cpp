@@ -31,6 +31,7 @@ ValidCommands::ValidCommands() {
 		commands["unifrac.weighted"]	= "unifrac.weighted"; 
 		commands["unifrac.unweighted"]	= "unifrac.unweighted"; 
 		commands["libshuff"]			= "libshuff";
+		commands["tree.groups"]			= "tree.groups";
 		commands["heatmap"]				= "heatmap";
 		commands["venn"]				= "venn";
 		commands["get.group"]           = "get.group";

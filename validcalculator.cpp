@@ -20,6 +20,7 @@ ValidCalculators::ValidCalculators() {
 		 initialSharedSummary();
 		 initialVennSingle();
 		 initialVennShared();
+		 initialTreeGroups();
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function ValidCalculator. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -132,6 +133,18 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 				}
 				cout << endl;
 				return false; }
+		}else if (parameter == "treegroup") {
+			//is it valid
+			if ((treegroup.find(calculator)) != (treegroup.end())) {
+				return true;
+			}else { 
+				cout << calculator << " is not a valid estimator for the tree.groups command in shared mode and will be disregarded. Valid estimators are ";
+				for (it = treegroup.begin(); it != treegroup.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
+
 		//not a valid parameter
 		}else { return false; }
 		
@@ -359,6 +372,31 @@ void ValidCalculators::initialVennShared() {
 }
 
 /********************************************************************/
+void ValidCalculators::initialTreeGroups() {
+	try {	
+		treegroup["sharedjabund"]			= "sharedjabund";
+		treegroup["sharedsorensonabund"]	= "sharedsorensonabund";
+		treegroup["sharedjclass"]			= "sharedjclass";
+		treegroup["sharedsorclass"]			= "sharedsorclass";
+		treegroup["sharedjest"]				= "sharedjest";
+		treegroup["sharedsorest"]			= "sharedsorest";
+		treegroup["sharedthetayc"]			= "sharedthetayc";
+		treegroup["sharedthetan"]			= "sharedthetan";
+		treegroup["sharedmorisitahorn"]		= "sharedmorisitahorn";
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialTreeGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ValidCalculator class function initialTreeGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
+
+/********************************************************************/
+
 
 
 

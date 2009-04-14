@@ -13,6 +13,12 @@
 
 
 #include "mothur.h"
+#include "globaldata.hpp"
+#include "commandoptionparser.hpp"
+#include "command.hpp"
+#include "commandfactory.hpp"
+#include "errorchecking.h"
+
 
 using namespace std;
 

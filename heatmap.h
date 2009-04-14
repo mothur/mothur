@@ -17,6 +17,7 @@ using namespace std;
 #include "sharedordervector.h"
 #include "datavector.hpp"
 #include "globaldata.hpp"
+#include "sharedutilities.h"
 
 /***********************************************************************/
 
@@ -24,22 +25,22 @@ class HeatMap {
 	
 	public:
 		HeatMap();
-		~HeatMap(){};
+		~HeatMap(){ delete util; };
 	
 		void getPic(OrderVector*);
 		void getPic(SharedOrderVector*);
 
 	private:
-		void getSharedVectors(SharedOrderVector*);
 		void sortSharedVectors();
 		
 		GlobalData* globaldata;
+		SharedUtil* util;
 		vector<SharedRAbundVector*> lookup;
 		RAbundVector rabund;
-		string format, sorted, groupComb;
+		string format, sorted, groupComb, scaler;
 		ofstream outsvg;
-		map<int, string> colorScale;
-		map<int, string>::iterator it;
+		map<float, string> colorScale;
+		map<float, string>::iterator it;
 
 			
 };

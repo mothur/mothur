@@ -4,9 +4,7 @@
 using namespace std;
 
 #include "mothur.h"
-#include "utilities.hpp"
 #include "sparsematrix.hpp"
-#include "rabundvector.hpp"
 
 class RAbundVector;
 class ListVector;

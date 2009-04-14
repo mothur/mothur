@@ -4,7 +4,6 @@
 using namespace std;
 
 #include "mothur.h"
-#include "utilities.hpp"
 #include "listvector.hpp"
 
 class NameAssignment : public map<string,int> {

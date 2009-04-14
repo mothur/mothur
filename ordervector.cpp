@@ -10,7 +10,6 @@
 using namespace std;
 
 #include "ordervector.hpp"
-#include "utilities.hpp"
 
 
 /***********************************************************************/

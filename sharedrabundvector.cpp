@@ -11,10 +11,8 @@
 using namespace std;
 
 #include "sharedrabundvector.h" 
-#include "utilities.hpp"
 #include "sabundvector.hpp"
 #include "ordervector.hpp"
-#include <algorithm>
 
 
 /***********************************************************************/
@@ -186,6 +184,33 @@ void SharedRAbundVector::push_back(int binSize, int otu, string groupName){
 	}
 }
 
+/***********************************************************************/
+
+void SharedRAbundVector::insert(int binSize, int otu, string groupName){
+	try {
+		individual newGuy;
+		newGuy.abundance = binSize;
+		newGuy.group = groupName;
+		newGuy.bin = otu;
+		
+		data.insert(data.begin()+otu, newGuy);
+		numBins++;
+	
+		if(binSize > maxRank){
+			maxRank = binSize;
+		}
+	
+		numSeqs += binSize;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the SharedRAbundVector class Function insert. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the SharedRAbundVector class function insert. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
 
 /***********************************************************************/
 

@@ -8,7 +8,7 @@
  */
 
 #include "bstick.h"
-#include "calculator.h"
+
 
 /***********************************************************************/
 double BStick::invSum(int index, double numSpec)

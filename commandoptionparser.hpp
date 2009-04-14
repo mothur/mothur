@@ -1,6 +1,8 @@
 #ifndef COMMANDOPTIONPARSER_HPP
 #define COMMANDOPTIONPARSER_HPP
 
+#include "mothur.h"
+
 //**********************************************************************************************************************
 
 class CommandOptionParser {

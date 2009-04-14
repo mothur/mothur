@@ -17,6 +17,7 @@
 #include "display.h"
 #include "readmatrix.hpp"
 #include "validcalculator.h"
+#include "sharedutilities.h"
 
 /* The rarefaction.shared() command:
 	The rarefaction command generates a rarefaction curve from a given file representing several groups.  
@@ -40,8 +41,8 @@ public:
 	int execute();	
 	
 private:
-	void setGroups();
 	GlobalData* globaldata;
+	SharedUtil* util;
 	SharedListVector* SharedList;
 	ReadMatrix* read;
 	SharedOrderVector* order;

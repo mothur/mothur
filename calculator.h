@@ -4,7 +4,6 @@
 using namespace std;
 
 #include "mothur.h"
-#include "utilities.hpp"
 #include "sabundvector.hpp"
 #include "sharedsabundvector.h"
 #include "rabundvector.hpp"

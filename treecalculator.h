@@ -13,7 +13,6 @@
 using namespace std;
 
 #include "mothur.h"
-#include "utilities.hpp"
 #include "tree.h"
 
 /* The tree calculator class is the parent class for tree calculators in mothur. */ 

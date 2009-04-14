@@ -2,7 +2,7 @@
 #define SHAREDORDER_H
 /*
  *  sharedorder.h
- *  Dotur
+ *  Mothur
  *
  *  Created by Sarah Westcott on 12/9/08.
  *  Copyright 2008 Schloss Lab UMASS Amherst. All rights reserved.
@@ -34,6 +34,9 @@ struct individual {
 #include "sharedsabundvector.h"
 #include "globaldata.hpp"
 #include "groupmap.h"
+//#include "globaldata.hpp"
+
+class GlobalData;
 
 class SharedOrderVector : public DataVector {
 	

@@ -9,7 +9,6 @@
 
 #include "collect.h"
 
-
 /***********************************************************************/
 
 void Collect::getCurve(int increment = 1){
