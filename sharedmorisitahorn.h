@@ -1,5 +1,5 @@
-#ifndef SHAREDMORHORN_H
-#define SHAREDMORHORN_H
+#ifndef MORHORN_H
+#define MORHORN_H
 /*
  *  sharedmorisitahorn.h
  *  Mothur
@@ -14,10 +14,10 @@
 
 /***********************************************************************/
 
-class SharedMorHorn : public Calculator  {
+class MorHorn : public Calculator  {
 	
 public:
-	SharedMorHorn() :  Calculator("SharedMorisitaHorn", 1) {};
+	MorHorn() :  Calculator("MorisitaHorn", 1) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
 private:

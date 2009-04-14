@@ -175,7 +175,7 @@ void ValidCalculators::initialSingle() {
 		single["logsd"]         = "logsd";
 		single["qstat"]         = "qstat";
 		single["bstick"]        = "bstick";
-		single["nseqs"]		= "nseqs";
+		single["nseqs"]			= "nseqs";
 		single["default"]	    = "default";
 	}
 	catch(exception& e) {
@@ -194,24 +194,24 @@ void ValidCalculators::initialShared() {
 		shared["sharedsobs"]			= "sharedsobs";
 		shared["sharedchao"]			= "sharedchao";
 		shared["sharedace"]				= "sharedace";
-		shared["sharedjabund"]			= "sharedjabund";
-		shared["sharedsorensonabund"]	= "sharedsorensonabund";
-		shared["sharedjclass"]			= "sharedjclass";
-		shared["sharedsorclass"]		= "sharedsorclass";
-		shared["sharedjest"]			= "sharedjest";
-		shared["sharedsorest"]			= "sharedsorest";
-		shared["sharedthetayc"]			= "sharedthetayc";
-		shared["sharedthetan"]			= "sharedthetan";
-		shared["sharedkstest"]          = "sharedkstest";
-		shared["sharedbdiversity"]      = "sharedbdiversity";
+		shared["jabund"]				= "jabund";
+		shared["sorensonabund"]			= "sorensonabund";
+		shared["jclass"]				= "jclass";
+		shared["sorclass"]				= "sorclass";
+		shared["jest"]					= "jest";
+		shared["sorest"]				= "sorest";
+		shared["thetayc"]				= "thetayc";
+		shared["thetan"]				= "thetan";
+		shared["kstest"]				= "kstest";
+		shared["bdiversity"]			= "bdiversity";
 		shared["sharednseqs"]			= "sharednseqs";
-		shared["sharedochiai"]			= "sharedochiai";
-		shared["sharedanderberg"]		= "sharedanderberg";
-		shared["sharedkulczynski"]		= "sharedkulczynski";
-		shared["sharedkulczynskicody"]	= "sharedkulczynskicody";
-		shared["sharedlennon"]			= "sharedlennon";
-		shared["sharedmorisitahorn"]	= "sharedmorisitahorn";
-		shared["sharedbraycurtis"]		= "sharedbraycurtis";
+		shared["ochiai"]				= "ochiai";
+		shared["anderberg"]				= "anderberg";
+		shared["kulczynski"]			= "kulczynski";
+		shared["kulczynskicody"]		= "kulczynskicody";
+		shared["lennon"]				= "lennon";
+		shared["morisitahorn"]			= "morisitahorn";
+		shared["braycurtis"]			= "braycurtis";
 		shared["default"]	            = "default";
 	}
 	catch(exception& e) {
@@ -284,24 +284,24 @@ void ValidCalculators::initialSharedSummary() {
 		sharedsummary["sharedsobs"]				= "sharedsobs";
 		sharedsummary["sharedchao"]				= "sharedchao";
 		sharedsummary["sharedace"]				= "sharedace";
-		sharedsummary["sharedjabund"]			= "sharedjabund";
-		sharedsummary["sharedsorensonabund"]	= "sharedsorensonabund";
-		sharedsummary["sharedjclass"]			= "sharedjclass";
-		sharedsummary["sharedsorclass"]			= "sharedsorclass";
-		sharedsummary["sharedjest"]				= "sharedjest";
-		sharedsummary["sharedsorest"]			= "sharedsorest";
-		sharedsummary["sharedthetayc"]			= "sharedthetayc";
-		sharedsummary["sharedthetan"]			= "sharedthetan";
-		sharedsummary["sharedkstest"]           = "sharedkstest";
-		sharedsummary["sharedbdiversity"]       = "sharedbdiversity";
+		sharedsummary["jabund"]					= "jabund";
+		sharedsummary["sorensonabund"]			= "sorensonabund";
+		sharedsummary["jclass"]					= "jclass";
+		sharedsummary["sorclass"]				= "sorclass";
+		sharedsummary["jest"]					= "jest";
+		sharedsummary["sorest"]					= "sorest";
+		sharedsummary["thetayc"]				= "thetayc";
+		sharedsummary["thetan"]					= "thetan";
+		sharedsummary["kstest"]					= "kstest";
+		sharedsummary["bdiversity"]				= "bdiversity";
 		sharedsummary["sharednseqs"]			= "sharednseqs";
-		sharedsummary["sharedochiai"]			= "sharedochiai";
-		sharedsummary["sharedanderberg"]		= "sharedanderberg";
-		sharedsummary["sharedkulczynski"]		= "sharedkulczynski";
-		sharedsummary["sharedkulczynskicody"]	= "sharedkulczynskicody";
-		sharedsummary["sharedlennon"]			= "sharedlennon";
-		sharedsummary["sharedmorisitahorn"]		= "sharedmorisitahorn";
-		sharedsummary["sharedbraycurtis"]		= "sharedbraycurtis";
+		sharedsummary["ochiai"]					= "ochiai";
+		sharedsummary["anderberg"]				= "anderberg";
+		sharedsummary["kulczynski"]				= "kulczynski";
+		sharedsummary["kulczynskicody"]			= "kulczynskicody";
+		sharedsummary["lennon"]					= "lennon";
+		sharedsummary["morisitahorn"]			= "morisitahorn";
+		sharedsummary["braycurtis"]				= "braycurtis";
 		sharedsummary["default"]				= "default";
 	}
 	catch(exception& e) {
@@ -339,9 +339,9 @@ void ValidCalculators::initialVennSingle() {
 	try {
 		vennsingle["sobs"]	        = "sobs";
 		vennsingle["chao"]		    = "chao";
-		vennsingle["ace"]				= "ace";
+		vennsingle["ace"]			= "ace";
 		vennsingle["jack"]		    = "jack";
-		vennsingle["default"]			= "default";
+		vennsingle["default"]		= "default";
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialSingle. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -374,15 +374,15 @@ void ValidCalculators::initialVennShared() {
 /********************************************************************/
 void ValidCalculators::initialTreeGroups() {
 	try {	
-		treegroup["sharedjabund"]			= "sharedjabund";
-		treegroup["sharedsorensonabund"]	= "sharedsorensonabund";
-		treegroup["sharedjclass"]			= "sharedjclass";
-		treegroup["sharedsorclass"]			= "sharedsorclass";
-		treegroup["sharedjest"]				= "sharedjest";
-		treegroup["sharedsorest"]			= "sharedsorest";
-		treegroup["sharedthetayc"]			= "sharedthetayc";
-		treegroup["sharedthetan"]			= "sharedthetan";
-		treegroup["sharedmorisitahorn"]		= "sharedmorisitahorn";
+		treegroup["jabund"]					= "jabund";
+		treegroup["sorensonabund"]			= "sorensonabund";
+		treegroup["jclass"]					= "jclass";
+		treegroup["sorclass"]				= "sorclass";
+		treegroup["jest"]					= "jest";
+		treegroup["sorest"]					= "sorest";
+		treegroup["thetayc"]				= "thetayc";
+		treegroup["thetan"]					= "thetan";
+		treegroup["morisitahorn"]			= "morisitahorn";
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialTreeGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";

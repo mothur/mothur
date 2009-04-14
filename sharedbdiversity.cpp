@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 
-double SharedBDiversity::whitt(SharedRAbundVector* shared1, SharedRAbundVector* shared2){
+double BDiversity::whitt(SharedRAbundVector* shared1, SharedRAbundVector* shared2){
 	double nz1 = (double)shared1->numNZ();
 	double nz2 = (double)shared2->numNZ();
 	double sum = nz1;
@@ -25,7 +25,7 @@ double SharedBDiversity::whitt(SharedRAbundVector* shared1, SharedRAbundVector* 
 
 /***********************************************************************/
 
-double SharedBDiversity::ms(SharedRAbundVector* shared1, SharedRAbundVector* shared2){
+double BDiversity::ms(SharedRAbundVector* shared1, SharedRAbundVector* shared2){
 	double a = 0;
 	double b = 0;
 	double c = 0;
@@ -46,7 +46,7 @@ double SharedBDiversity::ms(SharedRAbundVector* shared1, SharedRAbundVector* sha
 
 /***********************************************************************/
 
-double SharedBDiversity::sor(SharedRAbundVector* shared1, SharedRAbundVector* shared2){
+double BDiversity::sor(SharedRAbundVector* shared1, SharedRAbundVector* shared2){
 	double sum = 0;
 	double asum = 0;
 	double bsum = 0;
@@ -67,7 +67,7 @@ double SharedBDiversity::sor(SharedRAbundVector* shared1, SharedRAbundVector* sh
 
 /***********************************************************************/
 
-double SharedBDiversity::mor(SharedRAbundVector* shared1, SharedRAbundVector* shared2){
+double BDiversity::mor(SharedRAbundVector* shared1, SharedRAbundVector* shared2){
 	double multSum = 0;
 	double powSum1 = 0;
 	double powSum2 = 0;
@@ -87,7 +87,7 @@ double SharedBDiversity::mor(SharedRAbundVector* shared1, SharedRAbundVector* sh
 }
 /***********************************************************************/
 	
-EstOutput SharedBDiversity::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2){
+EstOutput BDiversity::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2){
 	try {
 		data.resize(4,0);
 		
@@ -113,11 +113,11 @@ EstOutput SharedBDiversity::getValues(SharedRAbundVector* shared1, SharedRAbundV
 	}
 		
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the NPShannon class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the BDiversity class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the NPShannon class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the BDiversity class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
 }

@@ -31,24 +31,24 @@ TreeGroupCommand::TreeGroupCommand(){
 		int i;
 		for (i=0; i<globaldata->Estimators.size(); i++) {
 			if (validCalculator->isValidCalculator("treegroup", globaldata->Estimators[i]) == true) { 
-				if (globaldata->Estimators[i] == "sharedjabund") { 	
-					treeCalculators.push_back(new SharedJAbund());
-				}else if (globaldata->Estimators[i] == "sharedsorensonabund") { 
-					treeCalculators.push_back(new SharedSorAbund());
-				}else if (globaldata->Estimators[i] == "sharedjclass") { 
-					treeCalculators.push_back(new SharedJclass());
-				}else if (globaldata->Estimators[i] == "sharedsorclass") { 
-					treeCalculators.push_back(new SharedSorClass());
-				}else if (globaldata->Estimators[i] == "sharedjest") { 
-					treeCalculators.push_back(new SharedJest());
-				}else if (globaldata->Estimators[i] == "sharedsorest") { 
-					treeCalculators.push_back(new SharedSorEst());
-				}else if (globaldata->Estimators[i] == "sharedthetayc") { 
-					treeCalculators.push_back(new SharedThetaYC());
-				}else if (globaldata->Estimators[i] == "sharedthetan") { 
-					treeCalculators.push_back(new SharedThetaN());
-				}else if (globaldata->Estimators[i] == "sharedmorisitahorn") { 
-					treeCalculators.push_back(new SharedMorHorn());
+				if (globaldata->Estimators[i] == "jabund") { 	
+					treeCalculators.push_back(new JAbund());
+				}else if (globaldata->Estimators[i] == "sorensonabund") { 
+					treeCalculators.push_back(new SorAbund());
+				}else if (globaldata->Estimators[i] == "jclass") { 
+					treeCalculators.push_back(new Jclass());
+				}else if (globaldata->Estimators[i] == "sorclass") { 
+					treeCalculators.push_back(new SorClass());
+				}else if (globaldata->Estimators[i] == "jest") { 
+					treeCalculators.push_back(new Jest());
+				}else if (globaldata->Estimators[i] == "sorest") { 
+					treeCalculators.push_back(new SorEst());
+				}else if (globaldata->Estimators[i] == "thetayc") { 
+					treeCalculators.push_back(new ThetaYC());
+				}else if (globaldata->Estimators[i] == "thetan") { 
+					treeCalculators.push_back(new ThetaN());
+				}else if (globaldata->Estimators[i] == "morisitahorn") { 
+					treeCalculators.push_back(new MorHorn());
 				}
 			}
 		}

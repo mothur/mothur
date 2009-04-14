@@ -1,5 +1,5 @@
-#ifndef SHAREDJABUND_H
-#define SHAREDJABUND_H
+#ifndef JABUND_H
+#define JABUND_H
 /*
  *  sharedjabund.h
  *  Dotur
@@ -17,10 +17,10 @@ It is a child of the calculator class. */
 
 /***********************************************************************/
 
-class SharedJAbund : public Calculator  {
+class JAbund : public Calculator  {
 	
 public:
-	SharedJAbund() :  Calculator("SharedJAbund", 3) {};
+	JAbund() :  Calculator("JAbund", 3) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
 private:

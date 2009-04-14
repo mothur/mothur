@@ -1,5 +1,5 @@
-#ifndef SHAREDBRAYCURTIS_H
-#define SHAREDBRAYCURTIS_H
+#ifndef BRAYCURTIS_H
+#define BRAYCURTIS_H
 /*
  *  sharedbraycurtis.h
  *  Mothur
@@ -12,10 +12,10 @@
 
 /***********************************************************************/
 
-class SharedBrayCurtis : public Calculator  {
+class BrayCurtis : public Calculator  {
 	
 public:
-	SharedBrayCurtis() :  Calculator("SharedBrayCurtis", 1) {};
+	BrayCurtis() :  Calculator("BrayCurtis", 1) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
 private:

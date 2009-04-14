@@ -1,5 +1,5 @@
-#ifndef SHAREDJEST_H
-#define SHAREDJEST_H
+#ifndef JEST_H
+#define JEST_H
 /*
  *  sharedjest.h
  *  Dotur
@@ -17,10 +17,10 @@ It is a child of the calculator class. */
 
 /***********************************************************************/
 
-class SharedJest : public Calculator  {
+class Jest : public Calculator  {
 	
 public:
-	SharedJest() :  Calculator("SharedJest", 3) {};
+	Jest() :  Calculator("Jest", 3) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
 private:

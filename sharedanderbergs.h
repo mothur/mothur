@@ -1,5 +1,5 @@
-#ifndef SHAREDANDERBERG_H
-#define SHAREDANDERBERG_H
+#ifndef ANDERBERG_H
+#define ANDERBERG_H
 /*
  *  sharedanderberg.h
  *  Mothur
@@ -13,10 +13,10 @@
 
 /***********************************************************************/
 
-class SharedAnderberg : public Calculator  {
+class Anderberg : public Calculator  {
 	
 	public:
-		SharedAnderberg() :  Calculator("SharedAnderberg", 1) {};
+		Anderberg() :  Calculator("Anderberg", 1) {};
 		EstOutput getValues(SAbundVector*) {return data;};
 		EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
 	private:

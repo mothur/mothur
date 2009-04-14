@@ -51,43 +51,43 @@ SummarySharedCommand::SummarySharedCommand(){
 					sumCalculators.push_back(new SharedChao1());
 				}else if (globaldata->Estimators[i] == "sharedace") { 
 					sumCalculators.push_back(new SharedAce());
-				}else if (globaldata->Estimators[i] == "sharedjabund") { 	
-					sumCalculators.push_back(new SharedJAbund());
-				}else if (globaldata->Estimators[i] == "sharedsorensonabund") { 
-					sumCalculators.push_back(new SharedSorAbund());
-				}else if (globaldata->Estimators[i] == "sharedjclass") { 
-					sumCalculators.push_back(new SharedJclass());
-				}else if (globaldata->Estimators[i] == "sharedsorclass") { 
-					sumCalculators.push_back(new SharedSorClass());
-				}else if (globaldata->Estimators[i] == "sharedjest") { 
-					sumCalculators.push_back(new SharedJest());
-				}else if (globaldata->Estimators[i] == "sharedsorest") { 
-					sumCalculators.push_back(new SharedSorEst());
-				}else if (globaldata->Estimators[i] == "sharedthetayc") { 
-					sumCalculators.push_back(new SharedThetaYC());
-				}else if (globaldata->Estimators[i] == "sharedthetan") { 
-					sumCalculators.push_back(new SharedThetaN());
-				}else if (globaldata->Estimators[i] == "sharedkstest") { 
-					sumCalculators.push_back(new SharedKSTest());
+				}else if (globaldata->Estimators[i] == "jabund") { 	
+					sumCalculators.push_back(new JAbund());
+				}else if (globaldata->Estimators[i] == "sorensonabund") { 
+					sumCalculators.push_back(new SorAbund());
+				}else if (globaldata->Estimators[i] == "jclass") { 
+					sumCalculators.push_back(new Jclass());
+				}else if (globaldata->Estimators[i] == "sorclass") { 
+					sumCalculators.push_back(new SorClass());
+				}else if (globaldata->Estimators[i] == "jest") { 
+					sumCalculators.push_back(new Jest());
+				}else if (globaldata->Estimators[i] == "sorest") { 
+					sumCalculators.push_back(new SorEst());
+				}else if (globaldata->Estimators[i] == "thetayc") { 
+					sumCalculators.push_back(new ThetaYC());
+				}else if (globaldata->Estimators[i] == "thetan") { 
+					sumCalculators.push_back(new ThetaN());
+				}else if (globaldata->Estimators[i] == "kstest") { 
+					sumCalculators.push_back(new KSTest());
 				}else if (globaldata->Estimators[i] == "sharednseqs") { 
 					sumCalculators.push_back(new SharedNSeqs());
-				}else if (globaldata->Estimators[i] == "sharedochiai") { 
-					sumCalculators.push_back(new SharedOchiai());
-				}else if (globaldata->Estimators[i] == "sharedanderberg") { 
-					sumCalculators.push_back(new SharedAnderberg());
-				}else if (globaldata->Estimators[i] == "sharedkulczynski") { 
-					sumCalculators.push_back(new SharedKulczynski());
-				}else if (globaldata->Estimators[i] == "sharedkulczynskicody") { 
-					sumCalculators.push_back(new SharedKulczynskiCody());
-				}else if (globaldata->Estimators[i] == "sharedlennon") { 
-					sumCalculators.push_back(new SharedLennon());
-				}else if (globaldata->Estimators[i] == "sharedmorisitahorn") { 
-					sumCalculators.push_back(new SharedMorHorn());
-				}else if (globaldata->Estimators[i] == "sharedbraycurtis") { 
-					sumCalculators.push_back(new SharedBrayCurtis());
+				}else if (globaldata->Estimators[i] == "ochiai") { 
+					sumCalculators.push_back(new Ochiai());
+				}else if (globaldata->Estimators[i] == "anderberg") { 
+					sumCalculators.push_back(new Anderberg());
+				}else if (globaldata->Estimators[i] == "kulczynski") { 
+					sumCalculators.push_back(new Kulczynski());
+				}else if (globaldata->Estimators[i] == "kulczynskicody") { 
+					sumCalculators.push_back(new KulczynskiCody());
+				}else if (globaldata->Estimators[i] == "lennon") { 
+					sumCalculators.push_back(new Lennon());
+				}else if (globaldata->Estimators[i] == "morisitahorn") { 
+					sumCalculators.push_back(new MorHorn());
+				}else if (globaldata->Estimators[i] == "braycurtis") { 
+					sumCalculators.push_back(new BrayCurtis());
 				}
-				else if (globaldata->Estimators[i] == "sharedbdiversity") { 
-					sumCalculators.push_back(new SharedBDiversity());
+				else if (globaldata->Estimators[i] == "bdiversity") { 
+					sumCalculators.push_back(new BDiversity());
 				}
 				
 			}

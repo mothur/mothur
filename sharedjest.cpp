@@ -14,7 +14,7 @@
 
 /***********************************************************************/
 
-EstOutput SharedJest::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2) {
+EstOutput Jest::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2) {
 	try {
 		EstOutput S1, S2, S12;
 		S12.resize(1,0);
@@ -46,11 +46,11 @@ EstOutput SharedJest::getValues(SharedRAbundVector* shared1, SharedRAbundVector*
 		return data;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedJest class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the Jest class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the SharedJest class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the Jest class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
 }

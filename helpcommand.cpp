@@ -76,7 +76,7 @@ int HelpCommand::execute(){
 		cout << "both the line and label parameters at the same time. The collect.single command should be in the following format: " << "\n";
 		cout << "collect.single(label=yourLabel, line=yourLines, iters=yourIters, freq=yourFreq, calc=yourEstimators)." << "\n";
 		cout << "Example collect(label=unique-.01-.03, line=0-5-10, iters=10000, freq=10, calc=sobs-chao-ace-jack)." << "\n";
-		cout << "The default values for freq is 100, and calc are sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson." << "\n";
+		cout << "The default values for freq is 100, and calc are sobs-chao-ace-jack-shannon-npshannon-simpson." << "\n";
 		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "collect.shared") {
@@ -84,8 +84,8 @@ int HelpCommand::execute(){
 		cout << "The collect.shared command parameters are label, line, freq, jumble, calc and groups.  No parameters are required, but you may not use " << "\n";
 		cout << "both the line and label parameters at the same time. The collect.shared command should be in the following format: " << "\n";
 		cout << "collect.shared(label=yourLabel, line=yourLines, freq=yourFreq, jumble=yourJumble, calc=yourEstimators, groups=yourGroups)." << "\n";
-		cout << "Example collect.shared(label=unique-.01-.03, line=0-5-10, freq=10, jumble=1, groups=B-C, calc=sharedChao-sharedAce-sharedJabund-sharedSorensonAbund-sharedJclass-sharedSorClass-sharedJest-sharedSorEst-SharedThetaYC-SharedThetaN)." << "\n";
-		cout << "The default values for jumble is 1 (meaning jumble, if it’s set to 0 then it will not jumble), freq is 100 and calc are sharedsobs-sharedChao-sharedAce-sharedJabund-sharedSorensonAbund-sharedJclass-sharedSorClass-sharedJest-sharedSorEst-SharedThetaYC-SharedThetaN." << "\n";
+		cout << "Example collect.shared(label=unique-.01-.03, line=0-5-10, freq=10, jumble=1, groups=B-C, calc=sharedChao-sharedAce-Jabund-SorensonAbund-Jclass-SorClass-Jest-SorEst-ThetaYC-ThetaN)." << "\n";
+		cout << "The default values for jumble is 1 (meaning jumble, if it’s set to 0 then it will not jumble), freq is 100 and calc are sharedsobs-sharedChao-sharedAce-Jabund-SorensonAbund-Jclass-SorClass-Jest-SorEst-ThetaYC-ThetaN." << "\n";
 		cout << "The default value for groups is all the groups in your groupfile." << "\n";
 		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
 		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups." << "\n";
@@ -136,7 +136,7 @@ int HelpCommand::execute(){
 		cout << "both the line and label parameters at the same time. The summary.single command should be in the following format: " << "\n";
 		cout << "summary.single(label=yourLabel, line=yourLines, calc=yourEstimators)." << "\n";
 		cout << "Example summary.single(label=unique-.01-.03, line=0,5,10, calc=sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson)." << "\n";
-		cout << "The default value calc is sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson" << "\n";
+		cout << "The default value calc is sobs-chao-ace-jack-shannon-npshannon-simpson" << "\n";
 		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. line), '=' and parameters (i.e.yourLines)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "summary.shared") { 
@@ -144,8 +144,8 @@ int HelpCommand::execute(){
 		cout << "The summary.shared command parameters are label, line, jumble and calc.  No parameters are required, but you may not use " << "\n";
 		cout << "both the line and label parameters at the same time. The summary.shared command should be in the following format: " << "\n";
 		cout << "summary.shared(label=yourLabel, line=yourLines, jumble=yourJumble, calc=yourEstimators, groups=yourGroups)." << "\n";
-		cout << "Example summary.shared(label=unique-.01-.03, line=0,5,10, jumble=1, groups=B-C, calc=sharedChao-sharedAce-sharedJabund-sharedSorensonAbund-sharedJclass-sharedSorClass-sharedJest-sharedSorEst-SharedThetaYC-SharedThetaN)." << "\n";
-		cout << "The default value for jumble is 1 (meaning jumble, if it’s set to 0 then it will not jumble) and calc is sharedsobs-sharedChao-sharedAce-sharedJabund-sharedSorensonAbund-sharedJclass-sharedSorClass-sharedJest-sharedSorEst-SharedThetaYC-SharedThetaN" << "\n";
+		cout << "Example summary.shared(label=unique-.01-.03, line=0,5,10, jumble=1, groups=B-C, calc=sharedChao-sharedAce-Jabund-SorensonAbund-Jclass-SorClass-Jest-SorEst-ThetaYC-ThetaN)." << "\n";
+		cout << "The default value for jumble is 1 (meaning jumble, if it’s set to 0 then it will not jumble) and calc is sharedsobs-sharedChao-sharedAce-Jabund-SorensonAbund-Jclass-SorClass-Jest-SorEst-ThetaYC-ThetaN" << "\n";
 		cout << "The default value for groups is all the groups in your groupfile." << "\n";
 		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
 		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups." << "\n";

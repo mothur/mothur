@@ -52,42 +52,42 @@ CollectSharedCommand::CollectSharedCommand(){
 					cDisplays.push_back(new CollectDisplay(new SharedSobsCS(), new SharedOneColumnFile(fileNameRoot+"shared.sobs")));
 				}else if (globaldata->Estimators[i] == "sharedace") { 
 					cDisplays.push_back(new CollectDisplay(new SharedAce(), new SharedOneColumnFile(fileNameRoot+"shared.ace")));
-				}else if (globaldata->Estimators[i] == "sharedjabund") { 	
-					cDisplays.push_back(new CollectDisplay(new SharedJAbund(), new SharedOneColumnFile(fileNameRoot+"shared.jabund")));
-				}else if (globaldata->Estimators[i] == "sharedsorensonabund") { 
-					cDisplays.push_back(new CollectDisplay(new SharedSorAbund(), new SharedOneColumnFile(fileNameRoot+"shared.sorabund")));
-				}else if (globaldata->Estimators[i] == "sharedjclass") { 
-					cDisplays.push_back(new CollectDisplay(new SharedJclass(), new SharedOneColumnFile(fileNameRoot+"shared.jclass")));
-				}else if (globaldata->Estimators[i] == "sharedsorclass") { 
-					cDisplays.push_back(new CollectDisplay(new SharedSorClass(), new SharedOneColumnFile(fileNameRoot+"shared.sorclass")));
-				}else if (globaldata->Estimators[i] == "sharedjest") { 
-					cDisplays.push_back(new CollectDisplay(new SharedJest(), new SharedOneColumnFile(fileNameRoot+"shared.jest")));
-				}else if (globaldata->Estimators[i] == "sharedsorest") { 
-					cDisplays.push_back(new CollectDisplay(new SharedSorEst(), new SharedOneColumnFile(fileNameRoot+"shared.sorest")));
-				}else if (globaldata->Estimators[i] == "sharedthetayc") { 
-					cDisplays.push_back(new CollectDisplay(new SharedThetaYC(), new SharedOneColumnFile(fileNameRoot+"shared.thetayc")));
-				}else if (globaldata->Estimators[i] == "sharedthetan") { 
-					cDisplays.push_back(new CollectDisplay(new SharedThetaN(), new SharedOneColumnFile(fileNameRoot+"shared.thetan")));
-				}else if (globaldata->Estimators[i] == "sharedkstest") { 
-					cDisplays.push_back(new CollectDisplay(new SharedKSTest(), new SharedOneColumnFile(fileNameRoot+"shared.kstest")));
-				}else if (globaldata->Estimators[i] == "sharedbdiversity") { 
-					cDisplays.push_back(new CollectDisplay(new SharedBDiversity(), new SharedOneColumnFile(fileNameRoot+"shared.bdiversity")));
+				}else if (globaldata->Estimators[i] == "jabund") { 	
+					cDisplays.push_back(new CollectDisplay(new JAbund(), new SharedOneColumnFile(fileNameRoot+"jabund")));
+				}else if (globaldata->Estimators[i] == "sorensonabund") { 
+					cDisplays.push_back(new CollectDisplay(new SorAbund(), new SharedOneColumnFile(fileNameRoot+"sorabund")));
+				}else if (globaldata->Estimators[i] == "jclass") { 
+					cDisplays.push_back(new CollectDisplay(new Jclass(), new SharedOneColumnFile(fileNameRoot+"jclass")));
+				}else if (globaldata->Estimators[i] == "sorclass") { 
+					cDisplays.push_back(new CollectDisplay(new SorClass(), new SharedOneColumnFile(fileNameRoot+"sorclass")));
+				}else if (globaldata->Estimators[i] == "jest") { 
+					cDisplays.push_back(new CollectDisplay(new Jest(), new SharedOneColumnFile(fileNameRoot+"jest")));
+				}else if (globaldata->Estimators[i] == "sorest") { 
+					cDisplays.push_back(new CollectDisplay(new SorEst(), new SharedOneColumnFile(fileNameRoot+"sorest")));
+				}else if (globaldata->Estimators[i] == "thetayc") { 
+					cDisplays.push_back(new CollectDisplay(new ThetaYC(), new SharedOneColumnFile(fileNameRoot+"thetayc")));
+				}else if (globaldata->Estimators[i] == "thetan") { 
+					cDisplays.push_back(new CollectDisplay(new ThetaN(), new SharedOneColumnFile(fileNameRoot+"thetan")));
+				}else if (globaldata->Estimators[i] == "kstest") { 
+					cDisplays.push_back(new CollectDisplay(new KSTest(), new SharedOneColumnFile(fileNameRoot+"kstest")));
+				}else if (globaldata->Estimators[i] == "bdiversity") { 
+					cDisplays.push_back(new CollectDisplay(new BDiversity(), new SharedOneColumnFile(fileNameRoot+"bdiversity")));
 				}else if (globaldata->Estimators[i] == "sharednseqs") { 
 					cDisplays.push_back(new CollectDisplay(new SharedNSeqs(), new SharedOneColumnFile(fileNameRoot+"shared.nseqs")));
-				}else if (globaldata->Estimators[i] == "sharedochiai") { 
-					cDisplays.push_back(new CollectDisplay(new SharedOchiai(), new SharedOneColumnFile(fileNameRoot+"shared.ochiai")));
-				}else if (globaldata->Estimators[i] == "sharedanderberg") { 
-					cDisplays.push_back(new CollectDisplay(new SharedAnderberg(), new SharedOneColumnFile(fileNameRoot+"shared.anderberg")));
-				}else if (globaldata->Estimators[i] == "sharedkulczynski") { 
-					cDisplays.push_back(new CollectDisplay(new SharedKulczynski(), new SharedOneColumnFile(fileNameRoot+"shared.kulczynski")));
-				}else if (globaldata->Estimators[i] == "sharedkulczynskicody") { 
-					cDisplays.push_back(new CollectDisplay(new SharedKulczynskiCody(), new SharedOneColumnFile(fileNameRoot+"shared.kulczynskicody")));
-				}else if (globaldata->Estimators[i] == "sharedlennon") { 
-					cDisplays.push_back(new CollectDisplay(new SharedLennon(), new SharedOneColumnFile(fileNameRoot+"shared.lennon")));
-				}else if (globaldata->Estimators[i] == "sharedmorisitahorn") { 
-					cDisplays.push_back(new CollectDisplay(new SharedMorHorn(), new SharedOneColumnFile(fileNameRoot+"shared.morisitahorn")));
-				}else if (globaldata->Estimators[i] == "sharedbraycurtis") { 
-					cDisplays.push_back(new CollectDisplay(new SharedBrayCurtis(), new SharedOneColumnFile(fileNameRoot+"shared.braycurtis")));
+				}else if (globaldata->Estimators[i] == "ochiai") { 
+					cDisplays.push_back(new CollectDisplay(new Ochiai(), new SharedOneColumnFile(fileNameRoot+"ochiai")));
+				}else if (globaldata->Estimators[i] == "anderberg") { 
+					cDisplays.push_back(new CollectDisplay(new Anderberg(), new SharedOneColumnFile(fileNameRoot+"anderberg")));
+				}else if (globaldata->Estimators[i] == "skulczynski") { 
+					cDisplays.push_back(new CollectDisplay(new Kulczynski(), new SharedOneColumnFile(fileNameRoot+"kulczynski")));
+				}else if (globaldata->Estimators[i] == "kulczynskicody") { 
+					cDisplays.push_back(new CollectDisplay(new KulczynskiCody(), new SharedOneColumnFile(fileNameRoot+"kulczynskicody")));
+				}else if (globaldata->Estimators[i] == "lennon") { 
+					cDisplays.push_back(new CollectDisplay(new Lennon(), new SharedOneColumnFile(fileNameRoot+"lennon")));
+				}else if (globaldata->Estimators[i] == "morisitahorn") { 
+					cDisplays.push_back(new CollectDisplay(new MorHorn(), new SharedOneColumnFile(fileNameRoot+"morisitahorn")));
+				}else if (globaldata->Estimators[i] == "braycurtis") { 
+					cDisplays.push_back(new CollectDisplay(new BrayCurtis(), new SharedOneColumnFile(fileNameRoot+"braycurtis")));
 				}
 			}
 		}

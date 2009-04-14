@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 
-EstOutput SharedLennon::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2) {
+EstOutput Lennon::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2) {
 	try {
 		int S1, S2, S12, tempA, tempB, min;
 		S1 = 0; S2 = 0; S12 = 0; tempA = 0; tempB = 0; min = 0;
@@ -46,11 +46,11 @@ EstOutput SharedLennon::getValues(SharedRAbundVector* shared1, SharedRAbundVecto
 		return data;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedLennon class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the Lennon class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the SharedLennon class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the Lennon class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
 }

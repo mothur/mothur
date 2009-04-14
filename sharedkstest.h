@@ -1,5 +1,5 @@
-#ifndef SHAREDKSTEST_H
-#define SHAREDKSTEST_H
+#ifndef KSTEST_H
+#define KSTEST_H
 /*
  *  kstest.h
  *  Mothur
@@ -15,10 +15,10 @@ It is a child of the calculator class.*/
 
 /***********************************************************************/
 
-class SharedKSTest : public Calculator  {
+class KSTest : public Calculator  {
 	
 public:
-	SharedKSTest() : Calculator("sharedkstest", 3) {};
+	KSTest() : Calculator("kstest", 3) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
 private:

@@ -1,5 +1,5 @@
-#ifndef SHAREDSOREST_H
-#define SHAREDSOREST_H
+#ifndef SOREST_H
+#define SOREST_H
 /*
  *  sharedsorest.h
  *  Dotur
@@ -17,10 +17,10 @@ It is a child of the calculator class. */
 
 /***********************************************************************/
 
-class SharedSorEst : public Calculator  {
+class SorEst : public Calculator  {
 	
 public:
-	SharedSorEst() :  Calculator("SharedSorEst", 3) {};
+	SorEst() :  Calculator("SorEst", 3) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
 private:
