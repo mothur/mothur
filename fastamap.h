@@ -13,7 +13,6 @@
 using namespace std;
  
 #include "mothur.h"
-#include "utilities.hpp"
 
 
 /* This class represents the fasta file.  It reads a fasta file a populates the internal data structure "data".

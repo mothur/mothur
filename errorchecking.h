@@ -13,7 +13,7 @@
 #include "globaldata.hpp"
 #include "validcommands.h"
 #include "validparameter.h"
-#include "utilities.hpp"
+
 
 class ErrorCheck {
 	public:
@@ -34,7 +34,7 @@ class ErrorCheck {
 		void clear();
 		void refresh();
 		string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, treefile, sharedfile, cutoff, format; 
-		string precision, method, fileroot, label, line, iters, jumble, freq, single, rarefaction, shared, summary, randomtree, abund, sorted;
+		string precision, method, fileroot, label, line, iters, jumble, freq, single, rarefaction, shared, summary, randomtree, abund, sorted, scaler;
 		string commandName, optionText;
 		bool errorFree;
 

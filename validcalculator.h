@@ -33,6 +33,7 @@ class ValidCalculators {
 		map<string, string> sharedsummary;
 		map<string, string> vennsingle;
 		map<string, string> vennshared;
+		map<string, string> treegroup;
 		map<string, string>::iterator it;
 		
 		void initialSingle();
@@ -43,7 +44,7 @@ class ValidCalculators {
 		void initialSharedSummary();
 		void initialVennSingle();
 		void initialVennShared();
-
+		void initialTreeGroups();
 };
 
 #endif

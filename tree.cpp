@@ -511,8 +511,16 @@ void Tree::printBranch(int node) {
 			out << ",";
 			printBranch(tree[node].getRChild());
 			out << ")";
+			//if there is a branch length then print it
+			if (tree[node].getBranchLength() != -1) {
+				out << ":" << tree[node].getBranchLength();
+			}
 		}else { //you are a leaf
-			out << tree[node].getGroup() << ":" << tree[node].getBranchLength();
+			out << tree[node].getGroup(); 
+			//if there is a branch length then print it
+			if (tree[node].getBranchLength() != -1) {
+				out << ":" << tree[node].getBranchLength();
+			}
 		}
 		
 	}

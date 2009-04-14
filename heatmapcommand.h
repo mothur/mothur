@@ -16,6 +16,7 @@
 #include "readmatrix.hpp"
 #include "sharedlistvector.h"
 #include "heatmap.h"
+#include "sharedutilities.h"
 
 
 class GlobalData;
@@ -31,14 +32,13 @@ public:
 private:
 	GlobalData* globaldata;
 	ReadMatrix* read;
+	SharedUtil* util;
 	InputData* input;
 	SharedListVector* SharedList;
 	SharedOrderVector* order;
 	OrderVector* ordersingle;
 	HeatMap* heatmap;
 	string format;
-	
-	void setGroups();
 
 };
 

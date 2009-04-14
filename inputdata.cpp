@@ -10,7 +10,6 @@
 #include "inputdata.h"
 #include "ordervector.hpp"
 #include "listvector.hpp"
-#include "utilities.hpp"
 
 /***********************************************************************/
 

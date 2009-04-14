@@ -9,7 +9,6 @@
 
 using namespace std;
 
-#include "utilities.hpp"
 #include "sparsematrix.hpp"
 #include "progress.hpp"
 #include "listvector.hpp"

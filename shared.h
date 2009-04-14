@@ -12,6 +12,7 @@
  
 using namespace std;
 
+#include "mothur.h"
 #include "sharedrabundvector.h"
 #include "sharedlistvector.h"
 #include "globaldata.hpp"

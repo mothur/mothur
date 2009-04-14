@@ -11,7 +11,7 @@
 #include "ace.h"
 #include "sobs.h"
 #include "chao1.h"
-#include "jackknife.h"
+//#include "jackknife.h"
 #include "sharedsobscollectsummary.h"
 #include "sharedchao1.h"
 #include "sharedace.h"
@@ -24,6 +24,7 @@ VennCommand::VennCommand(){
 		globaldata = GlobalData::getInstance();
 		format = globaldata->getFormat();
 		validCalculator = new ValidCalculators();
+		util = new SharedUtil();
 		
 		int i;
 		
@@ -39,8 +40,8 @@ VennCommand::VennCommand(){
 						if(abund < 5)
 							abund = 10;
 						vennCalculators.push_back(new Ace(abund));
-					}else if (globaldata->Estimators[i] == "jack") { 	
-						vennCalculators.push_back(new Jackknife());
+					//}else if (globaldata->Estimators[i] == "jack") { 	
+						//vennCalculators.push_back(new Jackknife());
 					}
 				}
 			}
@@ -80,6 +81,7 @@ VennCommand::~VennCommand(){
 	delete input;
 	delete read;
 	delete venn;
+	delete util;
 }
 
 //**********************************************************************************************************************
@@ -118,7 +120,8 @@ int VennCommand::execute(){
 		
 		if (format != "list") {	
 			
-			setGroups();
+			util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups, "venn");
+			globaldata->setGroups("");
 			
 			while(order != NULL){
 		
@@ -145,7 +148,7 @@ int VennCommand::execute(){
 			}
 			
 			//reset groups parameter
-			globaldata->Groups.clear();  globaldata->setGroups("");
+			globaldata->Groups.clear();  
 			
 		}else{
 			while(ordersingle != NULL){
@@ -175,67 +178,4 @@ int VennCommand::execute(){
 }
 
 //**********************************************************************************************************************
-void VennCommand::setGroups() {
-	try {
-		//if the user has not entered specific groups to analyze then do them all
-		if (globaldata->Groups.size() != 0) {
-			if (globaldata->Groups[0] != "all") {
-				//check that groups are valid
-				for (int i = 0; i < globaldata->Groups.size(); i++) {
-					if (globaldata->gGroupmap->isValidGroup(globaldata->Groups[i]) != true) {
-						cout << globaldata->Groups[i] << " is not a valid group, and will be disregarded." << endl;
-						// erase the invalid group from globaldata->Groups
-						globaldata->Groups.erase(globaldata->Groups.begin()+i);
-					}
-				}
-			
-				//if the user only entered invalid groups
-				if (globaldata->Groups.size() == 0) { 
-					if (globaldata->gGroupmap->namesOfGroups.size() > 4) {
-						cout << "When using the groups parameter you must have at least 1 valid group. I will run the command using the first four groups in your groupfile." << endl; 
-						for (int i = 0; i < 4; i++) {
-							globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
-						}
-					}else {
-						cout << "When using the groups parameter you must have at least 1 valid group. I will run the command using all the groups in your groupfile." << endl; 
-						for (int i = 0; i < globaldata->gGroupmap->namesOfGroups.size(); i++) {
-							globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
-						}
-					}
-
-				}
-			}else{//user has enter "all" and wants the default groups
-				globaldata->Groups.clear();
-				for (int i = 0; i < globaldata->gGroupmap->namesOfGroups.size(); i++) {
-					globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
-				}
-				globaldata->setGroups("");
-			}
-		}else {
-			for (int i = 0; i < globaldata->gGroupmap->namesOfGroups.size(); i++) {
-				globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
-			}
-		}
-		
-		
-		//check to make sure their are only 3 groups
-		if (globaldata->Groups.size() > 4) {
-			cout << "You may only use up to 4 groups at a time with this command.  I will choose the first four and disregard the rest." << endl;
-			for (int i = 4; i < globaldata->Groups.size(); i++) {
-				globaldata->Groups.erase(globaldata->Groups.begin()+i);
-			}
-		}
-		
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the VennCommand class Function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the VennCommand class function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
-
-}
-/***********************************************************/
 

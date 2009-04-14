@@ -10,6 +10,7 @@
  *
  */
 
+#include "mothur.h"
 #include "rabundvector.hpp"
 #include "listvector.hpp"
 #include "sharedlistvector.h"

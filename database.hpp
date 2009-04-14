@@ -10,6 +10,8 @@
  *
  */
 
+#include "mothur.h"
+
 class Database {
 public:
 	Database(string);

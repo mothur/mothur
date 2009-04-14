@@ -10,7 +10,7 @@
  */
 
 #include "mothur.h"
-#include "utilities.hpp"
+#include "groupmap.h"
 
 /* This class is used by the read.tree command to build the tree container. */
 
@@ -19,7 +19,7 @@ struct GroupIndex {
 	int		vectorIndex;
 };
 
-
+class GroupMap;
 
 class TreeMap {
 public:
@@ -38,6 +38,7 @@ public:
     map<string,int> seqsPerGroup;	//groupname, number of seqs in that group.
 	map<string, GroupIndex> treemap; //sequence name and <groupname, vector index>
 	void print(ostream&);
+	void makeSim(GroupMap*);  //takes groupmap info and fills treemap for use by tree.groups command.
 	
 	
 private:

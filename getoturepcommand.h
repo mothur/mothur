@@ -8,6 +8,8 @@
  *  Copyright 2009 Schloss Lab UMASS Amherst. All rights reserved.
  *
  */
+ 
+ /* The get.oturep command outputs a .fastarep file for each distance you specify, selecting one OTU representative for each bin. */
 
 #include "command.hpp"
 #include "globaldata.hpp"

@@ -2,7 +2,6 @@
 #define FILEOUTPUT_H
 
 #include "mothur.h"
-#include "utilities.hpp"
 #include "globaldata.hpp"
 
 using namespace std;
@@ -18,6 +17,12 @@ public:
 	virtual void initFile(string) = 0;
 	virtual void resetFile() = 0;
 	virtual string getFileName() = 0;
+	virtual void initFile(string, vector<string>) = 0;
+	virtual void output(vector<double>) = 0;
+
+protected:
+	GlobalData* globaldata;
+	int renameOk;
 
 };	
 	
@@ -32,6 +37,10 @@ public:
 	void output(int, vector<double>);
 	void resetFile();
 	string getFileName()	{ return inName;	};
+	
+	void initFile(string, vector<string>) {};
+	void output(vector<double>) {};
+
 private:
 	string inName;
 	string outName;
@@ -52,6 +61,10 @@ public:
 	void initFile(string);
 	void resetFile();
 	string getFileName()	{ return inName;	};
+	
+	void initFile(string, vector<string>) {};
+	void output(vector<double>) {};
+
 
 private:
 	string outName;
@@ -72,6 +85,10 @@ public:
 	void initFile(string);
 	void resetFile();
 	string getFileName()	{ return inName;	};
+	
+	void initFile(string, vector<string>) {};
+	void output(vector<double>) {};
+
 
 private:
 	string outName;
@@ -93,6 +110,11 @@ public:
 	void output(int, vector<double>);
 	void resetFile();
 	string getFileName()	{ return inName;	};
+	
+	
+	void initFile(string, vector<string>) {};
+	void output(vector<double>) {};
+
 private:
 	string inName, groupLabel;
 	string outName;
@@ -101,6 +123,30 @@ private:
 	int counter, numGroup;
 };
 
+/***********************************************************************/
 
+class ThreeColumnFile2 : public FileOutput {
+	
+public:
+	ThreeColumnFile2(string n) : FileOutput(), inName(n), counter(0), outName(getPathName(n) + ".temp." + getSimpleName(n)) { globaldata = GlobalData::getInstance(); };
+	~ThreeColumnFile2();
+	
+	//to make compatible with parent class
+	void output(int, vector<double>){};
+	void initFile(string){};
+	
+	void initFile(string, vector<string>);
+	void output(vector<double>);
+	void resetFile();
+	string getFileName()	{ return inName;	};
+private:
+	string inName;
+	string outName;
+	ifstream inFile;
+	ofstream outFile;
+	int counter;
+};
+
+/***********************************************************************/
 
 #endif

@@ -12,7 +12,7 @@
 #include "command.hpp"
 #include "ordervector.hpp"
 #include "inputdata.h"
-//#include "groupmap.h"
+#include "groupmap.h"
 #include "collect.h"
 #include "display.h"
 #include "readmatrix.hpp"

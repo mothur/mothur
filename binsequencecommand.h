@@ -9,6 +9,7 @@
  *
  */
 
+/* The bin.seqs command outputs a .fasta file for each distance you specify appending the OTU number to each name. */
 
 #include "command.hpp"
 #include "inputdata.h"

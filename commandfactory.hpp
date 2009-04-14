@@ -10,6 +10,8 @@
  *
  */
 
+#include "mothur.h"
+
 class Command;
 
 class CommandFactory {

@@ -115,7 +115,10 @@ void RareDisplay::reset(){
 		nIters++;
 	
 		remove(tempInName.c_str());
-		rename(tempOutName.c_str(), tempInName.c_str());	
+		renameOk = rename(tempOutName.c_str(), tempInName.c_str());	
+		
+		//checks to make sure user was able to rename and remove successfully
+		if (renameOk != 0) { cout << "Unable to rename the necessary temp files." << endl; }
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the RareDisplay class Function reset. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -157,7 +160,7 @@ void RareDisplay::close(){
 	
 		remove(tempInName.c_str());
 		remove(tempOutName.c_str());
-	
+		
 		nIters = 1;
 		output->resetFile();
 	}

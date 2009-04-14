@@ -40,6 +40,7 @@ SummarySharedCommand::SummarySharedCommand(){
 		openOutputFile(outputFileName, outputFileHandle);
 		format = globaldata->getFormat();
 		validCalculator = new ValidCalculators();
+		util = new SharedUtil();
 		
 		int i;
 		for (i=0; i<globaldata->Estimators.size(); i++) {
@@ -109,6 +110,7 @@ SummarySharedCommand::SummarySharedCommand(){
 SummarySharedCommand::~SummarySharedCommand(){
 	delete input;
 	delete read;
+	delete util;
 }
 
 //**********************************************************************************************************************
@@ -137,7 +139,7 @@ int SummarySharedCommand::execute(){
 		}
 		
 		//set users groups
-		setGroups();
+		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups, "summary");
 		
 		//output estimator names as column headers
 		outputFileHandle << "label" <<'\t' << "comparison" << '\t'; 
@@ -151,7 +153,7 @@ int SummarySharedCommand::execute(){
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(order->getLabel()) == 1){			
 	
 				cout << order->getLabel() << '\t' << count << endl;
-				getSharedVectors();  //fills group vectors from order vector.
+				util->getSharedVectors(globaldata->Groups, lookup, order);  //fills group vectors from order vector.  //fills group vectors from order vector.
 				
 				//randomize group order
 				if (globaldata->getJumble() == "1") { random_shuffle(lookup.begin(), lookup.end()); }
@@ -159,7 +161,7 @@ int SummarySharedCommand::execute(){
 				int n = 1; 
 				for (int k = 0; k < (lookup.size() - 1); k++) { // pass cdd each set of groups to commpare
 					for (int l = n; l < lookup.size(); l++) {
-						outputFileHandle << order->getLabel() << '\t' << (lookup[k]->getGroup() + lookup[l]->getGroup()) << '\t' << '\t'; //print out label and group
+						
 						outputFileHandle << order->getLabel() << '\t';
 						
 						//sort groups to be alphanumeric
@@ -210,91 +212,4 @@ int SummarySharedCommand::execute(){
 	}		
 }
 
-//**********************************************************************************************************************
-
-void SummarySharedCommand::getSharedVectors(){
-try {
-		lookup.clear();
-		//create and initialize vector of sharedvectors, one for each group
-		for (int i = 0; i < globaldata->Groups.size(); i++) { 
-			SharedRAbundVector* temp = new SharedRAbundVector(order->getNumBins());
-			temp->setLabel(order->getLabel());
-			temp->setGroup(globaldata->Groups[i]);
-			lookup.push_back(temp);
-		}
-		
-		int numSeqs = order->size();
-		//sample all the members
-		for(int i=0;i<numSeqs;i++){
-			//get first sample
-			individual chosen = order->get(i);
-			int abundance; 
-					
-			//set info for sharedvector in chosens group
-			for (int j = 0; j < lookup.size(); j++) { 
-				if (chosen.group == lookup[j]->getGroup()) {
-					 abundance = lookup[j]->getAbundance(chosen.bin);
-					 lookup[j]->set(chosen.bin, (abundance + 1), chosen.group);
-					 break;
-				}
-			}
-		}
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SummarySharedCommand class Function getSharedVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SummarySharedCommand class function getSharedVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
-}
-
-//**********************************************************************************************************************
-void SummarySharedCommand::setGroups() {
-	try {
-		//if the user has not entered specific groups to analyze then do them all
-		if (globaldata->Groups.size() != 0) {
-			if (globaldata->Groups[0] != "all") {
-				//check that groups are valid
-				for (int i = 0; i < globaldata->Groups.size(); i++) {
-					if (globaldata->gGroupmap->isValidGroup(globaldata->Groups[i]) != true) {
-						cout << globaldata->Groups[i] << " is not a valid group, and will be disregarded." << endl;
-						// erase the invalid group from globaldata->Groups
-						globaldata->Groups.erase(globaldata->Groups.begin()+i);
-					}
-				}
-			
-				//if the user only entered invalid groups
-				if ((globaldata->Groups.size() == 0) || (globaldata->Groups.size() == 1)) { 
-					cout << "When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile." << endl; 
-					for (int i = 0; i < globaldata->gGroupmap->namesOfGroups.size(); i++) {
-						globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
-					}
-				}
-			}else{//user has enter "all" and wants the default groups
-				globaldata->Groups.clear();
-				for (int i = 0; i < globaldata->gGroupmap->namesOfGroups.size(); i++) {
-					globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
-				}
-				globaldata->setGroups("");
-			}
-		}else {
-			for (int i = 0; i < globaldata->gGroupmap->namesOfGroups.size(); i++) {
-				globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
-			}
-		}
-		
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SummarySharedCommand class Function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SummarySharedCommand class function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
-
-}
 /***********************************************************/

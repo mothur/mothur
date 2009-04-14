@@ -85,8 +85,13 @@ void ThreeColumnFile::resetFile(){
 			outFile.close();
 		}
 		counter = 1;
+		
 		remove(inName.c_str());
-		rename(outName.c_str(), inName.c_str());
+		renameOk = rename(outName.c_str(), inName.c_str());
+		
+		//checks to make sure user was able to rename and remove successfully
+		if ((renameOk != 0)) { cout << "Unable to rename necessary files." << endl; }
+
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ThreeColumnFile class Function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -94,6 +99,112 @@ void ThreeColumnFile::resetFile(){
 	}
 	catch(...) {
 		cout << "An unknown error has occurred in the ThreeColumnFile class function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
+/***********************************************************************/
+/***********************************************************************/
+
+ThreeColumnFile2::~ThreeColumnFile2(){
+	
+	inFile.close();
+	outFile.close();
+	remove(outName.c_str());
+};
+
+/***********************************************************************/
+
+void ThreeColumnFile2::initFile(string label, vector<string> tags){
+	try {
+		if(counter != 0){
+			openOutputFile(outName, outFile);
+			openInputFile(inName, inFile);
+
+			string inputBuffer;
+			getline(inFile, inputBuffer);
+		
+			outFile	<<  inputBuffer << '\t'; 
+			for(int i = 1; i < tags.size(); i++) {
+				outFile << label + tags[i] << '\t';
+			}
+			outFile << endl;
+		}
+		else{
+			openOutputFile(outName, outFile);
+			for(int i = 0; i < tags.size(); i++) {
+				outFile << label + tags[i] << '\t';
+			}
+			outFile << endl;
+
+		}
+
+		outFile.setf(ios::fixed, ios::floatfield);
+		outFile.setf(ios::showpoint);
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ThreeColumnFile class Function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ThreeColumnFile class function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+
+/***********************************************************************/
+
+void ThreeColumnFile2::output(vector<double> data){
+	try {
+	
+		if(counter != 0){		
+			string inputBuffer;
+			getline(inFile, inputBuffer);
+
+			outFile << inputBuffer << '\t' << setprecision(6) << data[0] << setprecision(globaldata->getIters().length())  << '\t' << data[1] << '\t' << data[2] << endl;
+		}
+		else{
+			outFile << setprecision(6) << data[0] << setprecision(globaldata->getIters().length())  << '\t' << data[1] << '\t' << data[2] << endl;
+
+		}
+
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ThreeColumnFile2 class Function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ThreeColumnFile2 class function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+};
+
+/***********************************************************************/
+
+void ThreeColumnFile2::resetFile(){
+	try {
+		if(counter != 0){
+			outFile.close();
+			inFile.close();
+		}
+		else{
+			outFile.close();
+		}
+		counter = 1;
+		
+		remove(inName.c_str());
+		renameOk = rename(outName.c_str(), inName.c_str());
+		
+		//checks to make sure user was able to rename and remove successfully
+		if ((renameOk != 0)) { cout << "Unable to rename necessary files." << endl; }
+
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ThreeColumnFile2 class Function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ThreeColumnFile2 class function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
 }
@@ -177,7 +288,11 @@ void SharedThreeColumnFile::resetFile(){
 		}
 		counter = 1;
 		remove(inName.c_str());
-		rename(outName.c_str(), inName.c_str());
+		renameOk = rename(outName.c_str(), inName.c_str());
+		
+		//checks to make sure user was able to rename and remove successfully
+		if ((renameOk != 0)) { cout << "Unable to rename necessary files." << endl; }
+
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the SharedThreeColumnFile class Function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -268,7 +383,11 @@ void OneColumnFile::resetFile(){
 		}	
 		counter = 1;
 		remove(inName.c_str());
-		rename(outName.c_str(), inName.c_str());
+		renameOk = rename(outName.c_str(), inName.c_str());
+		
+		//checks to make sure user was able to rename and remove successfully
+		if ((renameOk != 0)) { cout << "Unable to rename necessary files." << endl; }
+
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the OneColumnFile class Function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -366,8 +485,14 @@ void SharedOneColumnFile::resetFile(){
 			outFile.close();
 		}	
 		counter = 1;
+		
 		remove(inName.c_str());
-		rename(outName.c_str(), inName.c_str());
+		renameOk = rename(outName.c_str(), inName.c_str());
+		
+		//checks to make sure user was able to rename and remove successfully
+		if ((renameOk != 0)) { cout << "Unable to rename necessary files." << endl; }
+
+		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the OneColumnFile class Function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";

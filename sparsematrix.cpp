@@ -1,4 +1,4 @@
-#include "utilities.hpp"
+
 #include "sparsematrix.hpp"
 #include "listvector.hpp"
 

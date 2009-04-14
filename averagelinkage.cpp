@@ -1,10 +1,11 @@
 #ifndef AVERAGE_H
 #define AVERAGE_H
 
+
+#include "mothur.h"
 #include "cluster.hpp"
 #include "rabundvector.hpp"
 #include "sparsematrix.hpp"
-#include "mothur.h"
 
 /* This class implements the average UPGMA, average neighbor clustering algorithm */
 

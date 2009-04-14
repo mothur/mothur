@@ -15,6 +15,7 @@
 #include "sharedlistvector.h"
 #include "venn.h"
 #include "validcalculator.h"
+#include "sharedutilities.h"
 
 
 class GlobalData;
@@ -30,6 +31,7 @@ public:
 private:
 	GlobalData* globaldata;
 	ReadMatrix* read;
+	SharedUtil* util;
 	InputData* input;
 	SharedListVector* SharedList;
 	SharedOrderVector* order;
@@ -39,8 +41,6 @@ private:
 	vector<Calculator*> vennCalculators;	
 	ValidCalculators* validCalculator;
 	int abund;
-	
-	void setGroups();
 
 };
 

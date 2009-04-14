@@ -10,6 +10,8 @@
  *
  */
 
+#include "mothur.h"
+
 class KmerDB : public Database {
 	
 public:

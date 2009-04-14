@@ -144,3 +144,31 @@ void TreeMap::print(ostream& output){
 }
 
 /************************************************************/
+void TreeMap::makeSim(GroupMap* groupmap) {
+	try {
+		//set names of groups
+		namesOfGroups = groupmap->namesOfGroups;
+		
+		//set names of seqs to names of groups
+		namesOfSeqs = groupmap->namesOfGroups;
+		
+		// make map where key and value are both the group name since that what the tree.groups command wants
+		for (int i = 0; i < namesOfGroups.size(); i++) {
+			treemap[namesOfGroups[i]].groupname = namesOfGroups[i];
+			seqsPerGroup[namesOfGroups[i]] = 1;
+		}
+		
+		numGroups = namesOfGroups.size();
+		
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the TreeMap class Function make. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the TreeMap class function make. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+/************************************************************/
+

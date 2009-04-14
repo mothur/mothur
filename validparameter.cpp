@@ -283,7 +283,7 @@ void ValidParameters::initCommandParameters() {
 		string unifracUnweightedArray[] =  {"groups","iters"};
 		commandParameters["unifrac.unweighted"] = addParameters(unifracUnweightedArray, sizeof(unifracUnweightedArray)/sizeof(string));
 
-		string heatmapArray[] =  {"groups","line","label","sorted"};
+		string heatmapArray[] =  {"groups","line","label","sorted","scaler"};
 		commandParameters["heatmap"] = addParameters(heatmapArray, sizeof(heatmapArray)/sizeof(string));
 
 		string vennArray[] =  {"groups","line","label","calc"};
@@ -294,6 +294,9 @@ void ValidParameters::initCommandParameters() {
 		
 		string getOTURepArray[] =  {"fasta","list","line","label","name"};
 		commandParameters["get.oturep"] = addParameters(getOTURepArray, sizeof(getOTURepArray)/sizeof(string));
+		
+		string treeGroupsArray[] =  {"line","label","calc","groups"};
+		commandParameters["tree.groups"] = addParameters(treeGroupsArray, sizeof(treeGroupsArray)/sizeof(string));
 		
 		string quitArray[] = {};
 		commandParameters["quit"] = addParameters(quitArray, sizeof(quitArray)/sizeof(string));

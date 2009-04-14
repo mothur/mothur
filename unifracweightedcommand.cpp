@@ -19,7 +19,12 @@ UnifracWeightedCommand::UnifracWeightedCommand() {
 		sumFile = globaldata->getTreeFile() + ".wsummary";
 		openOutputFile(sumFile, outSum);
 				
-		setGroups();	//sets the groups the user wants to analyze			
+		util = new SharedUtil();
+		string s; //to make work with setgroups
+		util->setGroups(globaldata->Groups, tmap->namesOfGroups, s, numGroups, "weighted");	//sets the groups the user wants to analyze
+		util->getCombos(groupComb, globaldata->Groups, numComp);
+		globaldata->setGroups("");
+				
 		convert(globaldata->getIters(), iters);  //how many random trees to generate
 		weighted = new Weighted(tmap);
 
@@ -51,8 +56,9 @@ int UnifracWeightedCommand::execute() {
 			counter = 0;
 			rScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
 			uScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
-			weightedFile = globaldata->getTreeFile()  + toString(i+1) + ".weighted";
-			weightedFileout = globaldata->getTreeFile() + "temp." + toString(i+1) + ".weighted";
+			//weightedFile = globaldata->getTreeFile()  + toString(i+1) + ".weighted";
+			//weightedFileout = globaldata->getTreeFile() + "temp." + toString(i+1) + ".weighted";
+			output = new ThreeColumnFile2(globaldata->getTreeFile()  + toString(i+1) + ".weighted");
 
 			userData = weighted->getValues(T[i]);  //userData[0] = weightedscore
 			
@@ -109,6 +115,8 @@ int UnifracWeightedCommand::execute() {
 			calculateFreqsCumuls();
 			printWeightedFile();
 			
+			delete output;
+			
 			//clear data
 			rScores.clear();
 			uScores.clear();
@@ -142,21 +150,23 @@ int UnifracWeightedCommand::execute() {
 void UnifracWeightedCommand::printWeightedFile() {
 	try {
 		vector<double> data;
+		vector<string> tags;
+		tags.push_back("Score"); tags.push_back("RandFreq"); tags.push_back("RandCumul");
 		
 		for(int a = 0; a < numComp; a++) {
-			initFile(groupComb[a]);
+			output->initFile(groupComb[a], tags);
 			//print each line
 			for (it = validScores.begin(); it != validScores.end(); it++) { 
 				data.push_back(it->first);  data.push_back(rScoreFreq[a][it->first]); data.push_back(rCumul[a][it->first]); 
-				output(data);
+				output->output(data);
 				data.clear();
 			} 
-			resetFile();
+			output->resetFile();
 		}
 		
-		out.close();
-		inFile.close();
-		remove(weightedFileout.c_str());
+		//out.close();
+		//inFile.close();
+		//remove(weightedFileout.c_str());
 		
 	}
 	catch(exception& e) {
@@ -225,80 +235,6 @@ int UnifracWeightedCommand::findIndex(float score, int index) {
 }
 
 /***********************************************************/
-void UnifracWeightedCommand::setGroups() {
-	try {
-		numGroups = 0;
-		//if the user has not entered specific groups to analyze then do them all
-		if (globaldata->Groups.size() == 0) {
-			for (int i=0; i < tmap->getNumGroups(); i++) { 
-				if (tmap->namesOfGroups[i] != "xxx") {
-					globaldata->Groups.push_back(tmap->namesOfGroups[i]);
-					numGroups++;
-				}
-			}
-		}else {
-			if (globaldata->getGroups() != "all") {
-				//check that groups are valid
-				for (int i = 0; i < globaldata->Groups.size(); i++) {
-					if (tmap->isValidGroup(globaldata->Groups[i]) != true) {
-						cout << globaldata->Groups[i] << " is not a valid group, and will be disregarded." << endl;
-						// erase the invalid group from globaldata->Groups
-						globaldata->Groups.erase (globaldata->Groups.begin()+i);
-					}
-				}
-			
-				//if the user only entered invalid groups
-				if (globaldata->Groups.size() == 0) { 
-					for (int i=0; i < tmap->getNumGroups(); i++) { 
-						if (tmap->namesOfGroups[i] != "xxx") {
-							globaldata->Groups.push_back(tmap->namesOfGroups[i]);
-							numGroups++;
-						}
-					}
-					cout << "When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile." << endl; 
-				}else if (globaldata->Groups.size() == 1) { 
-					cout << "When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile." << endl;
-					globaldata->Groups.clear();
-					for (int i=0; i < tmap->getNumGroups(); i++) { 
-						if (tmap->namesOfGroups[i] != "xxx") {
-							globaldata->Groups.push_back(tmap->namesOfGroups[i]);
-							numGroups++;
-						}
-					}
-				}else { numGroups = globaldata->Groups.size(); }
-			}else { //users wants all groups
-				globaldata->Groups.clear();
-				globaldata->setGroups("");
-				for (int i=0; i < tmap->getNumGroups(); i++) { 
-					if (tmap->namesOfGroups[i] != "xxx") {
-						globaldata->Groups.push_back(tmap->namesOfGroups[i]);
-						numGroups++;
-					}
-				}
-			}
-		}
-		
-		//calculate number of comparisons i.e. with groups A,B,C = AB, AC, BC = 3;
-		numComp = 0;
-		for (int i=0; i<numGroups; i++) { 
-			numComp += i; 
-			for (int l = i+1; l < numGroups; l++) {
-				//set group comparison labels
-				groupComb.push_back(globaldata->Groups[i] + "-" + globaldata->Groups[l]);
-			}
-		}
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the UnifracWeightedCommand class Function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the UnifracWeightedCommand class function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-}
-
-/***********************************************************/
 
 void UnifracWeightedCommand::calculateFreqsCumuls() {
 	try {
@@ -348,7 +284,7 @@ void UnifracWeightedCommand::calculateFreqsCumuls() {
 
 }
 
-/*****************************************************************/
+/*****************************************************************
 
 void UnifracWeightedCommand::initFile(string label){
 	try {
@@ -378,7 +314,7 @@ void UnifracWeightedCommand::initFile(string label){
 	}
 }
 
-/***********************************************************************/
+/***********************************************************************
 
 void UnifracWeightedCommand::output(vector<double> data){
 	try {
@@ -404,7 +340,7 @@ void UnifracWeightedCommand::output(vector<double> data){
 	}
 };
 
-/***********************************************************************/
+/***********************************************************************
 
 void UnifracWeightedCommand::resetFile(){
 	try {
@@ -427,6 +363,14 @@ void UnifracWeightedCommand::resetFile(){
 	catch(...) {
 		cout << "An unknown error has occurred in the UnifracWeightedCommand class function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
-	}	
+	}
+	
+	
+			
 }
+
+*/
+
+
+
 

@@ -5,6 +5,11 @@
 #include "groupmap.h"
 #include "treemap.h"
 
+#include "rabundvector.hpp"
+#include "sabundvector.hpp"
+#include "listvector.hpp"
+
+
 using namespace std;
 
 class ListVector;
@@ -17,6 +22,7 @@ class InputData;
 class GroupMap;
 class TreeMap;
 class SAbundVector;
+class RAbundVector;
 
 class GlobalData {
 public:
@@ -64,6 +70,7 @@ public:
 	string getStep();
 	string getForm();
 	string getSorted();
+	string getScaler();
 
 	void setListFile(string);
 	void setPhylipFile(string);
@@ -90,7 +97,7 @@ public:
 		
 private:
 	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, treefile, sharedfile, line, label, randomtree, groups;
-	string cutoff, format, precision, method, fileroot, iters, jumble, freq, calc, abund, step, form, sorted;
+	string cutoff, format, precision, method, fileroot, iters, jumble, freq, calc, abund, step, form, sorted, scaler;
 
 	static GlobalData* _uniqueInstance;
 	GlobalData( const GlobalData& ); // Disable copy constructor
