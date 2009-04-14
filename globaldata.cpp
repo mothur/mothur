@@ -305,7 +305,7 @@ void GlobalData::clear() {
 	step			=	"0.01";
 	form			=	"integral";
 	sorted			=	"1";  //0 means don't sort, 1 means sort.
-	scaler			=	"log2";
+	scaler			=	"log10";
 }
 
 //*******************************************************/

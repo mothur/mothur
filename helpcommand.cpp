@@ -203,7 +203,7 @@ int HelpCommand::execute(){
 		cout << "Example heatmap(groups=A-B-C, line=1-3-5, sorted=0, scaler=log10)." << "\n";
 		cout << "The default value for groups is all the groups in your groupfile, and all lines in your inputfile will be used." << "\n";
 		cout << "The default value for sorted is 1 meaning you want the shared otus on top, you may change it to 0 meaning the exact representation of your input file." << "\n";
-		cout << "The default value for scaler is log2; your other options are log10 and linear." << "\n";
+		cout << "The default value for scaler is log10; your other options are log2 and linear." << "\n";
 		cout << "The heatmap command outputs a .svg file for each line or label you specify." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "venn") { 
