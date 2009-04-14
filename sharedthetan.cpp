@@ -10,7 +10,7 @@
 #include "sharedthetan.h"
 
 /***********************************************************************/
-EstOutput SharedThetaN::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2) {
+EstOutput ThetaN::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2) {
 	try {	
 		data.resize(1,0);
 		
@@ -51,11 +51,11 @@ EstOutput SharedThetaN::getValues(SharedRAbundVector* shared1, SharedRAbundVecto
 		return data;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedThetaN class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the ThetaN class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the SharedThetaN class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the ThetaN class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
 }

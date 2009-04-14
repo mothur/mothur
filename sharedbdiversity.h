@@ -1,5 +1,5 @@
-#ifndef SHAREDBDIVERSITY_H
-#define SHAREDBDIVERSITY_H
+#ifndef BDIVERSITY_H
+#define BDIVERSITY_H
 /*
  *  bdiversity.h
  *  Mothur
@@ -15,10 +15,10 @@ It is a child of the calculator class.*/
 
 /***********************************************************************/
 
-class SharedBDiversity : public Calculator  {
+class BDiversity : public Calculator  {
 	
 public:
-	SharedBDiversity() : Calculator("sharedbdiversity", 3) {};
+	BDiversity() : Calculator("bdiversity", 3) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
 private:

@@ -1,5 +1,5 @@
-#ifndef SHAREDTHETAN_H
-#define SHAREDTHETAN_H
+#ifndef THETAN_H
+#define THETAN_H
 /*
  *  sharedthetan.h
  *  Dotur
@@ -17,10 +17,10 @@ It is a child of the calculator class. */
 
 /***********************************************************************/
 
-class SharedThetaN : public Calculator  {
+class ThetaN : public Calculator  {
 	
 public:
-	SharedThetaN() :  Calculator("SharedThetaN", 3) {};
+	ThetaN() :  Calculator("ThetaN", 3) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
 private:

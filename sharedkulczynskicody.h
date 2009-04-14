@@ -1,5 +1,5 @@
-#ifndef SHAREDKULCZYNSKICODY_H
-#define SHAREDKULCZYNSKICODY_H
+#ifndef KULCZYNSKICODY_H
+#define KULCZYNSKICODY_H
 
 /*
  *  sharedkulczynskicody.h
@@ -15,10 +15,10 @@
 
 /***********************************************************************/
 
-class SharedKulczynskiCody : public Calculator  {
+class KulczynskiCody : public Calculator  {
 	
 public:
-	SharedKulczynskiCody() :  Calculator("SharedKulczynskiCody", 1) {};
+	KulczynskiCody() :  Calculator("KulczynskiCody", 1) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
 private:

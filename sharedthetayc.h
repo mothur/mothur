@@ -1,5 +1,5 @@
-#ifndef SHAREDTHETAYC_H
-#define SHAREDTHETAYC_H
+#ifndef THETAYC_H
+#define THETAYC_H
 /*
  *  sharedthetayc.h
  *  Dotur
@@ -17,10 +17,10 @@ It is a child of the calculator class. */
 
 /***********************************************************************/
 
-class SharedThetaYC : public Calculator  {
+class ThetaYC : public Calculator  {
 	
 public:
-	SharedThetaYC() :  Calculator("SharedThetaYC", 3) {};
+	ThetaYC() :  Calculator("ThetaYC", 3) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
 private:

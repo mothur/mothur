@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 
-EstOutput SharedJAbund::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2) {
+EstOutput JAbund::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2) {
 	try {
 		EstOutput UVest;
 		UVest.resize(2,0);
@@ -27,11 +27,11 @@ EstOutput SharedJAbund::getValues(SharedRAbundVector* shared1, SharedRAbundVecto
 		return data;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedJAbund class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the JAbund class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the SharedJAbund class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the JAbund class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
 }

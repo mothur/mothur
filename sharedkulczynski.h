@@ -1,5 +1,5 @@
-#ifndef SHAREDKULCZYNSKI_H
-#define SHAREDKULCZYNSKI_H
+#ifndef KULCZYNSKI_H
+#define KULCZYNSKI_H
 /*
  *  sharedkulczynski.h
  *  Mothur
@@ -14,10 +14,10 @@
 
 /***********************************************************************/
 
-class SharedKulczynski : public Calculator  {
+class Kulczynski : public Calculator  {
 	
 public:
-	SharedKulczynski() :  Calculator("SharedKulczynski", 1) {};
+	Kulczynski() :  Calculator("Kulczynski", 1) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
 private:

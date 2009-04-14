@@ -83,7 +83,7 @@ int GetOTURepCommand::execute(){
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(list->getLabel()) == 1){
 				
 				//create output file
-				string outputFileName = getRootName(globaldata->getListFile()) + list->getLabel() + ".fastarep";
+				string outputFileName = getRootName(globaldata->getListFile()) + list->getLabel() + ".rep.fasta";
 				openOutputFile(outputFileName, out);
 
 				cout << list->getLabel() << '\t' << count << endl;
@@ -96,7 +96,7 @@ int GetOTURepCommand::execute(){
 					sequence = fasta->getSequence(nameRep);
 
 					if (sequence != "not found") {
-						nameRep = nameRep + "bin" + toString(i+1);
+						nameRep = nameRep + "|" + toString(i+1);
 						out << ">" << nameRep << endl;
 						out << sequence << endl;
 					}else { 
@@ -105,6 +105,8 @@ int GetOTURepCommand::execute(){
 						return 0;
 					}
 				}
+				
+				out.close();
 			}
 			
 			list = input->getListVector();

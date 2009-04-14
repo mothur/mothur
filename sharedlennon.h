@@ -1,5 +1,5 @@
-#ifndef SHAREDLENNON_H
-#define SHAREDLENNON_H
+#ifndef LENNON_H
+#define LENNON_H
 
 /*
  *  sharedlennon.h
@@ -15,10 +15,10 @@
 
 /***********************************************************************/
 
-class SharedLennon : public Calculator  {
+class Lennon : public Calculator  {
 	
 public:
-	SharedLennon() :  Calculator("SharedLennon", 1) {};
+	Lennon() :  Calculator("Lennon", 1) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
 private:

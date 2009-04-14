@@ -1,5 +1,5 @@
-#ifndef SHAREDJCLASS_H
-#define SHAREDJCLASS_H
+#ifndef JCLASS_H
+#define JCLASS_H
 /*
  *  sharedjclass.h
  *  Dotur
@@ -16,10 +16,10 @@ It is a child of the calculator class. */
 
 /***********************************************************************/
 
-class SharedJclass : public Calculator  {
+class Jclass : public Calculator  {
 	
 public:
-	SharedJclass() :  Calculator("SharedJclass", 3) {};
+	Jclass() :  Calculator("Jclass", 3) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
 private:

@@ -1,5 +1,5 @@
-#ifndef SHAREDOCHIAI_H
-#define SHAREDOCHIAI_H
+#ifndef OCHIAI_H
+#define OCHIAI_H
 /*
  *  sharedochiai.h
  *  Mothur
@@ -13,10 +13,10 @@
 
 /***********************************************************************/
 
-class SharedOchiai : public Calculator  {
+class Ochiai : public Calculator  {
 	
 public:
-	SharedOchiai() :  Calculator("SharedOchiai", 1) {};
+	Ochiai() :  Calculator("Ochiai", 1) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
 private:
