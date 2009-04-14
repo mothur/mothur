@@ -95,34 +95,38 @@ void HeatMap::getPic(SharedOrderVector* sharedorder) {
 		//get users scaling method
 		scaler = globaldata->getScaler();
 		
-		int maxbin = 0;
+		float maxbin = 0.0;
 		for (int i = 0; i < lookup.size(); i++) {
 			for (int j = 0; j < lookup[i]->size(); j++) {
-				//if (lookup[i]->getAbundance(j) != 0) { //don't want log value of 0.
-					//if (scaler == "log10") {
-					//	colorScale[-log((log10(lookup[i]->getAbundance(j)) / (float)lookup[i]->getNumSeqs()))] = "";  
+				if (lookup[i]->getAbundance(j) != 0) { //don't want log value of 0.
+					if (scaler == "log10") {
+						colorScale[(log10((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 100))] = "";  
+						if (maxbin < (log10((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 100))) { maxbin = (log10((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 100)); }
 	//cout << "abundance  = " << lookup[i]->getAbundance(j) << '\t' << " relative adundance = " << (lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) << '\t';
-	//cout << -log((log10(lookup[i]->getAbundance(j)) / lookup[i]->getNumSeqs())) << endl;
-					//}else if (scaler == "log2") {
-						//colorScale[-log((log2(lookup[i]->getAbundance(j)) / (float)lookup[i]->getNumSeqs()))] = "";  //cout << (int)log2(lookup[i]->getAbundance(j)) << endl;
+	//cout << (log10((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 100)) << endl;
+					}else if (scaler == "log2") {
+						colorScale[(log2((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 100))] = "";  
+						if (maxbin < (log2((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 100))) { maxbin = (log2((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 100)); }
 	//cout << "abundance  = " << lookup[i]->getAbundance(j) << '\t' << " relative adundance = " << lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs() << '\t';
-	//cout << -log((log2(lookup[i]->getAbundance(j)) / lookup[i]->getNumSeqs())) << endl;
-				//	}else if (scaler == "linear") {
+	//cout << (log2((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 100)) << endl;
+					}else if (scaler == "linear") {
 						colorScale[lookup[i]->getAbundance(j)] = "";
 						if (maxbin < lookup[i]->getAbundance(j)) { maxbin = lookup[i]->getAbundance(j); }
-	//cout << "abundance  = " << lookup[i]->getAbundance(j) << '\t' << " relative adundance = " << lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs() << '\t';
-	//cout << lookup[i]->getAbundance(j) /(float) lookup[i]->getNumSeqs() << endl;
-					//}else {  //if user enters invalid scaler option.
-					//	cout << scaler << " is not a valid scaler option. I will use log10." << endl;
-					//	colorScale[-log(log10(lookup[i]->getAbundance(j) / lookup[i]->getNumSeqs()))] = "";   
-					//} 
-				//}else { colorScale[0] = "00";  }
+	//cout << "abundance  = " << lookup[i]->getAbundance(j) << '\t' << " relative adundance = " << lookup[i]->getAbundance(j) << '\t';
+	//cout << lookup[i]->getAbundance(j) << endl;
+					}else {  //if user enters invalid scaler option.
+						cout << scaler << " is not a valid scaler option. I will use log10." << endl;
+						colorScale[(log10((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 100))] = ""; 
+						if (maxbin < (log10((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 100))) { maxbin = (log10((lookup[i]->getAbundance(j)) / (float)lookup[i]->getNumSeqs()) * 100); }  
+					} 
+				}else { colorScale[0] = "00";  }
 				
 			}
 		}
-		
+//cout << "maxbin = "	<< maxbin << endl;	
 		//get scaler
 		float scalers = 255 / (float) maxbin;
+		
 		
 		//go through map and give each score a color value
 		for (it = colorScale.begin(); it != colorScale.end(); it++) {
@@ -155,8 +159,23 @@ void HeatMap::getPic(SharedOrderVector* sharedorder) {
 		int y = 90 + (lookup[0]->getNumBins()*5);
 		for (it = colorScale.begin(); it != colorScale.end(); it++) {
 			color = it->second;	
+			float value = it->first;
+			
+			//convert it->first to relative abundance again
+			if (scaler == "log10") {
+				value = pow(10, value) / 100;
+			}else if (scaler == "log2") {
+				value = pow(2, value) / 100;
+			}else {  value = pow(10, value) / 100;	} 
+			
+			string itprec = toString(value);
+			
+			//set precision of relative abundance to 2
+			int pos = itprec.find_first_of('.');
+			itprec = itprec.substr(0,pos+3);
+
 			outsvg << "<rect fill=\"#" + color + "0000\" stroke=\"#" + color + "0000\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\" width=\"25\" height=\"10\"/>\n";
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\">" + toString(it->first) + "</text>\n";
+			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\">" + itprec + "</text>\n";
 			x += 25;
 		}
 		
@@ -167,15 +186,15 @@ void HeatMap::getPic(SharedOrderVector* sharedorder) {
 		for (int i = 1; i <= lookup[0]->getNumBins(); i++) {
 			for (int j = 0; j < lookup.size(); j++) {
 				
-				//if (lookup[j]->getAbundance(i) != 0) { //don't want log value of 0.
-					//if (scaler == "log10") {
-					//	color = colorScale[(int)log10(lookup[j]->getAbundance(i))];  
-					//}else if (scaler == "log2") {
-					//	color = colorScale[(int)log2(lookup[j]->getAbundance(i))];  
-				//	}else if (scaler == "linear") {
+				if (lookup[j]->getAbundance(i) != 0) { //don't want log value of 0.
+					if (scaler == "log10") {
+						color = colorScale[(log10((lookup[j]->getAbundance(i) / (float)lookup[j]->getNumSeqs()) * 100))];  
+					}else if (scaler == "log2") {
+						color = colorScale[(log2((lookup[j]->getAbundance(i) / (float)lookup[j]->getNumSeqs()) * 100))];  
+					}else if (scaler == "linear") {
 						color = colorScale[lookup[j]->getAbundance(i)]; 
-					//}else {  color = colorScale[(int)log10(lookup[j]->getAbundance(i))];	} 
-				//}else { color = "OO";  }
+					}else {  color = colorScale[(log10((lookup[j]->getAbundance(i) / (float)lookup[j]->getNumSeqs()) * 100))];	} 
+				}else { color = "OO";  }
 
 				
 				outsvg << "<rect fill=\"#" + color + "0000\" stroke=\"#" + color + "0000\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\" width=\"300\" height=\"5\"/>\n";
@@ -185,11 +204,9 @@ void HeatMap::getPic(SharedOrderVector* sharedorder) {
 			y += 5;
 		}
 		
+		
 		outsvg << "</g>\n</svg>\n";
-		
 		outsvg.close();
-
-		
 		
 	}
 	catch(exception& e) {
