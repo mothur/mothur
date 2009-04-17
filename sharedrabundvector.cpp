@@ -242,7 +242,8 @@ void SharedRAbundVector::push_front(int binSize, int otu, string groupName){
 
 /***********************************************************************/
 void SharedRAbundVector::pop_back(){
-
+	numSeqs -= data[data.size()-1].abundance;
+	numBins--;
 	return data.pop_back();
 }
 
@@ -276,7 +277,7 @@ void SharedRAbundVector::print(ostream& output){
 	try {
 		output << numBins << '\t';
 	
-		for(int i=0;i<numBins;i++){		output << data[i].abundance << '\t';		}
+		for(int i=0;i<data.size();i++){		output << data[i].abundance << '\t';		}
 		output << endl;
 	}
 	catch(exception& e) {

@@ -32,6 +32,7 @@ class HeatMap {
 
 	private:
 		void sortSharedVectors();
+		void printLegend(int, float);
 		
 		GlobalData* globaldata;
 		SharedUtil* util;

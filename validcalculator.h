@@ -23,6 +23,7 @@ class ValidCalculators {
 		ValidCalculators();
 		~ValidCalculators();
 		bool isValidCalculator(string, string);
+		void printCalc(string, ostream&);
 		
 	private:
 		map<string, string> single;
@@ -34,6 +35,7 @@ class ValidCalculators {
 		map<string, string> vennsingle;
 		map<string, string> vennshared;
 		map<string, string> treegroup;
+		map<string, string> boot;
 		map<string, string>::iterator it;
 		
 		void initialSingle();
@@ -45,6 +47,7 @@ class ValidCalculators {
 		void initialVennSingle();
 		void initialVennShared();
 		void initialTreeGroups();
+		void initialBoot();
 };
 
 #endif

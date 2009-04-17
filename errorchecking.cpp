@@ -111,7 +111,7 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "abund" )          { abund = value; }
 				if (parameter == "random" )			{ randomtree = value;	}
 				if (parameter == "sorted" )			{ sorted = value;	}
-				if (parameter == "scaler" )			{ scaler = value;	}
+				if (parameter == "scale" )			{ scale = value;	}
 				
 			}
 			
@@ -146,7 +146,7 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "random" )			{ randomtree = value;	}
 				if (parameter == "abund" )          { abund = value; }
 				if (parameter == "sorted" )			{ sorted = value;	}
-				if (parameter == "scaler" )			{ scaler = value;	}
+				if (parameter == "scale" )			{ scale = value;	}
 			}
 		}
 		
@@ -219,10 +219,10 @@ bool ErrorCheck::checkInput(string input) {
 			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { cout << "You must read a list, sabund or rabund before you can use the collect.single, rarefaction.single or summary.single commands." << endl; return false; }
 		}
 		
-		if ((commandName == "collect.shared") || (commandName == "rarefaction.shared") || (commandName == "summary.shared") || (commandName == "tree.groups") ){ 
+		if ((commandName == "collect.shared") || (commandName == "rarefaction.shared") || (commandName == "summary.shared") || (commandName == "tree.shared") || (commandName == "bootstrap.shared")){ 
 			if (globaldata->getSharedFile() == "") {
-				if (globaldata->getListFile() == "") { cout << "You must read a list and a group, or a shared before you can use the collect.shared, rarefaction.shared, summary.shared or tree.groups commands." << endl; return false; }
-				else if (globaldata->getGroupFile() == "") { cout << "You must read a list and a group, or a shared before you can use the collect.shared, rarefaction.shared, summary.shared or tree.groups commands." << endl; return false; }
+				if (globaldata->getListFile() == "") { cout << "You must read a list and a group, or a shared before you can use the collect.shared, rarefaction.shared, summary.shared, tree.shared or bootstrap.shared commands." << endl; return false; }
+				else if (globaldata->getGroupFile() == "") { cout << "You must read a list and a group, or a shared before you can use the collect.shared, rarefaction.shared, summary.shared, tree.shared or bootstrap.shared commands." << endl; return false; }
 			}
 		}
 		

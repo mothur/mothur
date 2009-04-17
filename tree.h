@@ -34,6 +34,7 @@ public:
 	int getNumLeaves(){	return numLeaves; }
 	map<string, int> mergeUserGroups(int, vector<string>);  //returns a map with a groupname and the number of times that group was seen in the children
 	void printTree();
+	void print(ostream&);
 	
 	//this function takes the leaf info and populates the non leaf nodes
 	void assembleTree();		
@@ -54,7 +55,7 @@ private:
 	void randomLabels(vector<string>);
 	void randomLabels(string, string);
 	int findRoot();  //return index of root node
-	void printBranch(int);  //recursively print out tree
+	void printBranch(int, ostream&);  //recursively print out tree
 };
 
 #endif

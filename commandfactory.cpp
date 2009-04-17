@@ -36,6 +36,7 @@
 #include "binsequencecommand.h"
 #include "getoturepcommand.h"
 #include "treegroupscommand.h"
+#include "bootstrapsharedcommand.h"
 
 
 /***********************************************************/
@@ -83,7 +84,8 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "venn")					{   command = new VennCommand();				}
 		else if(commandName == "bin.seqs")				{   command = new BinSeqCommand();				}
 		else if(commandName == "get.oturep")			{   command = new GetOTURepCommand();			}
-		else if(commandName == "tree.groups")			{   command = new TreeGroupCommand();			}
+		else if(commandName == "tree.shared")			{   command = new TreeGroupCommand();			}
+		else if(commandName == "bootstrap.shared")		{   command = new BootSharedCommand();			}
 		else											{	command = new NoCommand();					}
 
 		return command;

@@ -38,7 +38,7 @@ public:
     map<string,int> seqsPerGroup;	//groupname, number of seqs in that group.
 	map<string, GroupIndex> treemap; //sequence name and <groupname, vector index>
 	void print(ostream&);
-	void makeSim(GroupMap*);  //takes groupmap info and fills treemap for use by tree.groups command.
+	void makeSim(GroupMap*);  //takes groupmap info and fills treemap for use by tree.shared command.
 	
 	
 private:

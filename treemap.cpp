@@ -152,7 +152,7 @@ void TreeMap::makeSim(GroupMap* groupmap) {
 		//set names of seqs to names of groups
 		namesOfSeqs = groupmap->namesOfGroups;
 		
-		// make map where key and value are both the group name since that what the tree.groups command wants
+		// make map where key and value are both the group name since that what the tree.shared command wants
 		for (int i = 0; i < namesOfGroups.size(); i++) {
 			treemap[namesOfGroups[i]].groupname = namesOfGroups[i];
 			seqsPerGroup[namesOfGroups[i]] = 1;

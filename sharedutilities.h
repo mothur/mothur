@@ -22,6 +22,7 @@ class SharedUtil {
 		~SharedUtil() {};
 		
 		void getSharedVectors(vector<string>, vector<SharedRAbundVector*>&, SharedOrderVector*);
+		void getSharedVectorswithReplacement(vector<string>, vector<SharedRAbundVector*>&, SharedOrderVector*);
 		void setGroups(vector<string>&, vector<string>&, string);  //globaldata->Groups, your tree or group map, mode
 		void setGroups(vector<string>&, vector<string>&, string&, int&, string);  //globaldata->Groups, your tree or group map, allgroups, numGroups, mode
 		void getCombos(vector<string>&, vector<string>, int&); //groupcomb, globaldata->Groups, numcomb

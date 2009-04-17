@@ -35,24 +35,24 @@ void HeatMap::getPic(OrderVector* order) {
 		rabund = order->getRAbundVector();
 		
 		//get users scaling method
-		scaler = globaldata->getScaler();
+		scaler = globaldata->getScale();
 		
 		float maxbin = 0.0;
 		for (int i = 0; i < rabund.size(); i++) {
 			if (rabund.get(i) != 0) { //don't want log value of 0.
 					if (scaler == "log10") {
-						colorScale[(log10((rabund.get(i) / (float)rabund.getNumSeqs()) * 100))] = "";  
-						if (maxbin < (log10((rabund.get(i) / (float)rabund.getNumSeqs()) * 100))) { maxbin = (log10((rabund.get(i) / (float)rabund.getNumSeqs()) * 100)); }
+						colorScale[(log10((rabund.get(i) / (float)rabund.getNumSeqs()) * 1000))] = "";  
+						if (maxbin < (log10((rabund.get(i) / (float)rabund.getNumSeqs()) * 1000))) { maxbin = (log10((rabund.get(i) / (float)rabund.getNumSeqs()) * 1000)); }
 					}else if (scaler == "log2") {
-						colorScale[(log2((rabund.get(i) / (float)rabund.getNumSeqs()) * 100))] = "";  
-						if (maxbin < (log2((rabund.get(i) / (float)rabund.getNumSeqs()) * 100))) { maxbin = (log2((rabund.get(i) / (float)rabund.getNumSeqs()) * 100)); }
+						colorScale[(log2((rabund.get(i) / (float)rabund.getNumSeqs()) * 1000))] = "";  
+						if (maxbin < (log2((rabund.get(i) / (float)rabund.getNumSeqs()) * 1000))) { maxbin = (log2((rabund.get(i) / (float)rabund.getNumSeqs()) * 1000)); }
 					}else if (scaler == "linear") {
 						colorScale[rabund.get(i)] = "";
 						if (maxbin < rabund.get(i)) { maxbin = rabund.get(i); }
 					}else {  //if user enters invalid scaler option.
 						cout << scaler << " is not a valid scaler option. I will use log10." << endl;
-						colorScale[(log10((rabund.get(i) / (float)rabund.getNumSeqs()) * 100))] = ""; 
-						if (maxbin < (log10((rabund.get(i) / (float)rabund.getNumSeqs()) * 100))) { maxbin = (log10((rabund.get(i)) / (float)rabund.getNumSeqs()) * 100); }  
+						colorScale[(log10((rabund.get(i) / (float)rabund.getNumSeqs()) * 1000))] = ""; 
+						if (maxbin < (log10((rabund.get(i) / (float)rabund.getNumSeqs()) * 1000))) { maxbin = (log10((rabund.get(i)) / (float)rabund.getNumSeqs()) * 1000); }  
 					} 
 			}else { colorScale[0] = "00";  }
 		}
@@ -77,46 +77,21 @@ void HeatMap::getPic(OrderVector* order) {
 		outsvg << "<text fill=\"black\" class=\"seri\" x=\"100\" y=\"25\">Heatmap at distance " + order->getLabel() + "</text>\n";
 		
 		//output legend and color labels
-		//go through map and give each score a color value
 		string color;
 		int x = 0;
 		int y = 103 + (rabund.getNumBins()*5);
-		if (maxbin != 0) {
-			//convert maxbin to relative abundance again
-			if (scaler == "log10") {
-				maxbin = pow(10, maxbin) / 100;
-			}else if (scaler == "log2") {
-				maxbin = pow(2, maxbin) / 100;
-			}else {  maxbin = pow(10, maxbin) / 100;	} 
-		}else { maxbin = 0.00; }
+		printLegend(y, maxbin);
 		
-		//5 is the number of boxes in the legend
-		float maxbinScaler = maxbin / 10;
-		float colorScaler = 255 / 10;
-					
-		for (int i = 0; i < 10; i++) {
-			string label = toString(((i+1) * maxbinScaler));
-			//set precision of relative abundance to 3
-			int pos = label.find_first_of('.');
-			label = label.substr(0,pos+4);
-			color = toHex(int((float)(i+1) * colorScaler));
-
-			outsvg << "<rect fill=\"#" + color + "0000\" stroke=\"#" + color + "0000\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\" width=\"30\" height=\"10\"/>\n";
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\">" + label + "</text>\n";
-			x += 30;
-		}
-	
-		x = 0;
 		y = 70;
 		for (int i = 0; i <= rabund.getNumBins(); i++) {
 			if (rabund.get(i) != 0) { //don't want log value of 0.
 				if (scaler == "log10") {
-					color = colorScale[(log10((rabund.get(i) / (float)rabund.getNumSeqs()) * 100))];  
+					color = colorScale[(log10((rabund.get(i) / (float)rabund.getNumSeqs()) * 1000))];  
 				}else if (scaler == "log2") {
-					color = colorScale[(log2((rabund.get(i) / (float)rabund.getNumSeqs()) * 100))];  
+					color = colorScale[(log2((rabund.get(i) / (float)rabund.getNumSeqs()) * 1000))];  
 				}else if (scaler == "linear") {
 					color = colorScale[rabund.get(i)]; 
-				}else {  color = colorScale[(log10((rabund.get(i) / (float)rabund.getNumSeqs()) * 100))];	} 
+				}else {  color = colorScale[(log10((rabund.get(i) / (float)rabund.getNumSeqs()) * 1000))];	} 
 			}else { color = "OO";  }
 			
 			outsvg << "<rect fill=\"#" + color + "0000\" stroke=\"#" + color + "0000\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\" width=\"300\" height=\"5\"/>\n";
@@ -143,30 +118,30 @@ void HeatMap::getPic(SharedOrderVector* sharedorder) {
 		
 		//fills vector of sharedsabunds - lookup
 		util->getSharedVectors(globaldata->Groups, lookup, sharedorder);  //fills group vectors from order vector.
-		
+
 		//sort lookup so shared bins are on top
-		if (sorted == "1") {  sortSharedVectors();  }
-		
+		if (sorted == "T") {  sortSharedVectors();  }
+	
 		//get users scaling method
-		scaler = globaldata->getScaler();
+		scaler = globaldata->getScale();
 		
 		float maxbin = 0.0;
 		for (int i = 0; i < lookup.size(); i++) {
 			for (int j = 0; j < lookup[i]->size(); j++) {
 				if (lookup[i]->getAbundance(j) != 0) { //don't want log value of 0.
 					if (scaler == "log10") {
-						colorScale[(log10((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 100))] = "";  
-						if (maxbin < (log10((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 100))) { maxbin = (log10((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 100)); }
+						colorScale[(log10((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 1000))] = "";  
+						if (maxbin < (log10((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 1000))) { maxbin = (log10((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 1000)); }
 					}else if (scaler == "log2") {
-						colorScale[(log2((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 100))] = "";  
-						if (maxbin < (log2((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 100))) { maxbin = (log2((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 100)); }
+						colorScale[(log2((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 1000))] = "";  
+						if (maxbin < (log2((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 1000))) { maxbin = (log2((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 1000)); }
 					}else if (scaler == "linear") {
 						colorScale[lookup[i]->getAbundance(j)] = "";
 						if (maxbin < lookup[i]->getAbundance(j)) { maxbin = lookup[i]->getAbundance(j); }
 					}else {  //if user enters invalid scaler option.
 						cout << scaler << " is not a valid scaler option. I will use log10." << endl;
-						colorScale[(log10((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 100))] = ""; 
-						if (maxbin < (log10((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 100))) { maxbin = (log10((lookup[i]->getAbundance(j)) / (float)lookup[i]->getNumSeqs()) * 100); }  
+						colorScale[(log10((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 1000))] = ""; 
+						if (maxbin < (log10((lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs()) * 1000))) { maxbin = (log10((lookup[i]->getAbundance(j)) / (float)lookup[i]->getNumSeqs()) * 1000); }  
 					} 
 				}else { colorScale[0] = "00";  }
 			}
@@ -199,49 +174,23 @@ void HeatMap::getPic(SharedOrderVector* sharedorder) {
 		}
 		
 		//output legend and color labels
-		//go through map and give each score a color value
 		string color;
 		int x = 0;
 		int y = 103 + (lookup[0]->getNumBins()*5);
-		if (maxbin != 0) {
-			//convert maxbin to relative abundance again
-			if (scaler == "log10") {
-				maxbin = pow(10, maxbin) / 100;
-			}else if (scaler == "log2") {
-				maxbin = pow(2, maxbin) / 100;
-			}else {  maxbin = pow(10, maxbin) / 100;	} 
-		}else { maxbin = 0.00; }
-		
-		//((lookup.size() * 300) / 60) is the number of boxes in the legend
-		float maxbinScaler = maxbin / ((lookup.size() * 300) / 60);
-		float colorScaler = 255 / ((lookup.size() * 300) / 60);
-					
-		for (int i = 0; i < ((lookup.size() * 300) / 60); i++) {
-			string label = toString(((i+1) * maxbinScaler));
-			//set precision of relative abundance to 3
-			int pos = label.find_first_of('.');
-			label = label.substr(0,pos+4);
+		printLegend(y, maxbin);
 
-			color = toHex(int(((i+1) * colorScaler) + 15));
-			outsvg << "<rect fill=\"#" + color + "0000\" stroke=\"#" + color + "0000\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\" width=\"30\" height=\"10\"/>\n";
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\">" + label + "</text>\n";
-			x += 30;
-		}
-		
-		x = 0;
 		y = 70;
-		
-		for (int i = 0; i <= lookup[0]->getNumBins(); i++) {
+		for (int i = 0; i < lookup[0]->size(); i++) {
 			for (int j = 0; j < lookup.size(); j++) {
 				
 				if (lookup[j]->getAbundance(i) != 0) { //don't want log value of 0.
 					if (scaler == "log10") {
-						color = colorScale[(log10((lookup[j]->getAbundance(i) / (float)lookup[j]->getNumSeqs()) * 100))];  
+						color = colorScale[(log10((lookup[j]->getAbundance(i) / (float)lookup[j]->getNumSeqs()) * 1000))];  
 					}else if (scaler == "log2") {
-						color = colorScale[(log2((lookup[j]->getAbundance(i) / (float)lookup[j]->getNumSeqs()) * 100))];  
+						color = colorScale[(log2((lookup[j]->getAbundance(i) / (float)lookup[j]->getNumSeqs()) * 1000))];  
 					}else if (scaler == "linear") {
 						color = colorScale[lookup[j]->getAbundance(i)]; 
-					}else {  color = colorScale[(log10((lookup[j]->getAbundance(i) / (float)lookup[j]->getNumSeqs()) * 100))];	} 
+					}else {  color = colorScale[(log10((lookup[j]->getAbundance(i) / (float)lookup[j]->getNumSeqs()) * 1000))];	} 
 				}else { color = "OO";  }
 
 				
@@ -350,7 +299,55 @@ void HeatMap::sortSharedVectors(){
 }
 
 //**********************************************************************************************************************
+void HeatMap::printLegend(int y, float maxbin) {
+	try {
+	
+		//output legend and color labels
+		//go through map and give each score a color value
+		string color;
+		int x = 0;
+		if (maxbin != 0) {
+			//convert maxbin to relative abundance again
+			if (scaler == "log10") {
+				maxbin = pow(10, maxbin) / 1000;
+			}else if (scaler == "log2") {
+				maxbin = pow(2, maxbin) / 1000;
+			}else {  maxbin = pow(10, maxbin) / 1000;	} 
+		}else { maxbin = 0.00; }
+		
+		//5 is the number of boxes in the legend
+		float maxbinScaler = maxbin / 10;
+		float colorScaler = 255 / 10;
+		
+		//prints legend
+		for (int i = 0; i < 10; i++) {
+			color = toHex(int((float)(i+1) * colorScaler));
+			outsvg << "<rect fill=\"#" + color + "0000\" stroke=\"#" + color + "0000\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\" width=\"30\" height=\"10\"/>\n";
+			x += 30;
+		}
+		
+		//prints legend labels
+		x -= 30;
+		for (int i = 10; i > 0; i = i-2) {
+			string label = toString((i * maxbinScaler));
+			//set precision of relative abundance to 3
+			int pos = label.find_first_of('.');
+			label = label.substr(0,pos+4);
+			
+			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(x) + "\" y=\"" + toString(y-3) + "\">" + label + "</text>\n";
+			x -= 60;
+		}
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the HeatMap class Function printLegend. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the HeatMap class function printLegend. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
 
+}
 
 
 
