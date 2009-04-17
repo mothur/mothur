@@ -13,12 +13,13 @@ class FileOutput {
 public:
 	FileOutput(){};
 	~FileOutput(){};
-	virtual void output(int, vector<double>) = 0;
+	
 	virtual void initFile(string) = 0;
+	virtual void initFile(string, vector<string>) = 0;
+	virtual void output(int, vector<double>) = 0;
+	virtual void output(vector<double>) = 0;
 	virtual void resetFile() = 0;
 	virtual string getFileName() = 0;
-	virtual void initFile(string, vector<string>) = 0;
-	virtual void output(vector<double>) = 0;
 
 protected:
 	GlobalData* globaldata;
@@ -38,7 +39,7 @@ public:
 	void resetFile();
 	string getFileName()	{ return inName;	};
 	
-	void initFile(string, vector<string>) {};
+	void initFile(string, vector<string>){};
 	void output(vector<double>) {};
 
 private:
@@ -125,11 +126,11 @@ private:
 
 /***********************************************************************/
 
-class ThreeColumnFile2 : public FileOutput {
+class ColumnFile : public FileOutput {
 	
 public:
-	ThreeColumnFile2(string n) : FileOutput(), inName(n), counter(0), outName(getPathName(n) + ".temp." + getSimpleName(n)) { globaldata = GlobalData::getInstance(); };
-	~ThreeColumnFile2();
+	ColumnFile(string n) : FileOutput(), inName(n), counter(0), outName(getPathName(n) + ".temp." + getSimpleName(n)) { globaldata = GlobalData::getInstance(); };
+	~ColumnFile();
 	
 	//to make compatible with parent class
 	void output(int, vector<double>){};

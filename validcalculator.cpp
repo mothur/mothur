@@ -21,6 +21,7 @@ ValidCalculators::ValidCalculators() {
 		 initialVennSingle();
 		 initialVennShared();
 		 initialTreeGroups();
+		 initialBoot();
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function ValidCalculator. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -138,13 +139,23 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 			if ((treegroup.find(calculator)) != (treegroup.end())) {
 				return true;
 			}else { 
-				cout << calculator << " is not a valid estimator for the tree.groups command in shared mode and will be disregarded. Valid estimators are ";
+				cout << calculator << " is not a valid estimator for the tree.shared command in shared mode and will be disregarded. Valid estimators are ";
 				for (it = treegroup.begin(); it != treegroup.end(); it++) {
 					cout << it->first << ", ";
 				}
 				cout << endl;
 				return false; }
-
+		}else if (parameter == "boot") {
+			//is it valid
+			if ((boot.find(calculator)) != (boot.end())) {
+				return true;
+			}else { 
+				cout << calculator << " is not a valid estimator for the bootstrap.shared command in shared mode and will be disregarded. Valid estimators are ";
+				for (it = boot.begin(); it != boot.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
 		//not a valid parameter
 		}else { return false; }
 		
@@ -393,10 +404,90 @@ void ValidCalculators::initialTreeGroups() {
 		exit(1);
 	}	
 }
-
+/********************************************************************/
+void ValidCalculators::initialBoot() {
+	try {	
+		boot["jabund"]				= "jabund";
+		boot["sorensonabund"]		= "sorensonabund";
+		boot["jclass"]				= "jclass";
+		boot["sorclass"]			= "orclass";
+		boot["jest"]				= "jest";
+		boot["sorest"]				= "sorest";
+		boot["thetayc"]				= "thetayc";
+		boot["thetan"]				= "thetan";
+		boot["morisitahorn"]		= "morisitahorn";
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialBoot. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ValidCalculator class function initialBoot. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
 
 /********************************************************************/
+void ValidCalculators::printCalc(string parameter, ostream& out) {
+	try{
+		out << "The available estimators for calc are ";
+		//are you looking for a calculator for a single parameter
+		if (parameter == "single") {
+			for (it = single.begin(); it != single.end(); it++) {
+				out << it->first << ", ";
+			}
+		//are you looking for a calculator for a shared parameter
+		}else if (parameter == "shared") {
+			for (it = shared.begin(); it != shared.end(); it++) {
+				out << it->first << ", ";
+			}
+		//are you looking for a calculator for a rarefaction parameter
+		}else if (parameter == "rarefaction") {
+			for (it = rarefaction.begin(); it != rarefaction.end(); it++) {
+				out << it->first << ", ";
+			}
+		//are you looking for a calculator for a summary parameter
+		}else if (parameter == "summary") {
+			for (it = summary.begin(); it != summary.end(); it++) {
+				out << it->first << ", ";
+			}
+		//are you looking for a calculator for a sharedsummary parameter
+		}else if (parameter == "sharedsummary") {
+			for (it = sharedsummary.begin(); it != sharedsummary.end(); it++) {
+				out << it->first << ", ";
+			}
+		}else if (parameter == "sharedrarefaction") {
+			for (it = sharedrarefaction.begin(); it != sharedrarefaction.end(); it++) {
+				out << it->first << ", ";
+			}
+		}else if (parameter == "vennsingle") {
+			for (it = vennsingle.begin(); it != vennsingle.end(); it++) {
+				out << it->first << ", ";
+			}
+		}else if (parameter == "vennshared") {
+			for (it = vennshared.begin(); it != vennshared.end(); it++) {
+				out << it->first << ", ";
+			}
+		}else if (parameter == "treegroup") {
+			for (it = treegroup.begin(); it != treegroup.end(); it++) {
+				out << it->first << ", ";
+			}
+		}else if (parameter == "boot") {
+			for (it = boot.begin(); it != boot.end(); it++) {
+				out << it->first << ", ";
+			}
+		}
+		out << endl;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function printCalc. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ValidCalculator class function printCalc. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
 
-
-
+}
+/********************************************************************/
 

@@ -39,7 +39,7 @@ class UnifracWeightedCommand : public Command {
 		Tree* randT;  //random tree
 		TreeMap* tmap;
 		Weighted* weighted;
-		string weightedFile, weightedFileout, sumFile;
+		string sumFile;
 		int iters, numGroups, numComp, counter;
 		EstOutput userData;			//weighted score info for user tree
 		EstOutput randomData;		//weighted score info for random trees
@@ -59,10 +59,7 @@ class UnifracWeightedCommand : public Command {
 		//void removeValidScoresDuplicates();
 		int findIndex(float, int);
 		void calculateFreqsCumuls();
-		//void initFile(string);
-		//void output(vector<double>);
-		//void resetFile();
-
+		
 };
 
 

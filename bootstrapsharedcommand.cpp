@@ -1,13 +1,13 @@
 /*
- *  treegroupscommand.cpp
+ *  bootstrapsharedcommand.cpp
  *  Mothur
  *
- *  Created by Sarah Westcott on 4/8/09.
+ *  Created by Sarah Westcott on 4/16/09.
  *  Copyright 2009 Schloss Lab UMASS Amherst. All rights reserved.
  *
  */
 
-#include "treegroupscommand.h"
+#include "bootstrapsharedcommand.h"
 #include "sharedjabund.h"
 #include "sharedsorabund.h"
 #include "sharedjclass.h"
@@ -21,16 +21,18 @@
 
 //**********************************************************************************************************************
 
-TreeGroupCommand::TreeGroupCommand(){
+BootSharedCommand::BootSharedCommand(){
 	try {
 		globaldata = GlobalData::getInstance();
 		format = globaldata->getFormat();
+		convert(globaldata->getIters(), iters);
 		validCalculator = new ValidCalculators();
 		util = new SharedUtil();
 		
+		
 		int i;
 		for (i=0; i<globaldata->Estimators.size(); i++) {
-			if (validCalculator->isValidCalculator("treegroup", globaldata->Estimators[i]) == true) { 
+			if (validCalculator->isValidCalculator("boot", globaldata->Estimators[i]) == true) { 
 				if (globaldata->Estimators[i] == "jabund") { 	
 					treeCalculators.push_back(new JAbund());
 				}else if (globaldata->Estimators[i] == "sorensonabund") { 
@@ -53,22 +55,28 @@ TreeGroupCommand::TreeGroupCommand(){
 			}
 		}
 		
+		ofstream* temp;
+		for (int i=0; i < treeCalculators.size(); i++) {
+			temp = new ofstream;
+			out.push_back(temp);
+		}
+		
 		//reset calc for next command
 		globaldata->setCalc("");
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the TreeGroupCommand class Function TreeGroupCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the BootSharedCommand class Function BootSharedCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the TreeGroupCommand class function TreeGroupCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the BootSharedCommand class function BootSharedCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
 }
 //**********************************************************************************************************************
 
-TreeGroupCommand::~TreeGroupCommand(){
+BootSharedCommand::~BootSharedCommand(){
 	delete input;
 	delete read;
 	delete util;
@@ -76,7 +84,7 @@ TreeGroupCommand::~TreeGroupCommand(){
 
 //**********************************************************************************************************************
 
-int TreeGroupCommand::execute(){
+int BootSharedCommand::execute(){
 	try {
 		int count = 1;	
 		EstOutput data;
@@ -103,8 +111,6 @@ int TreeGroupCommand::execute(){
 		//set users groups
 		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups, "treegroup");
 		numGroups = globaldata->Groups.size();
-		groupNames = "";
-		for (int i = 0; i < numGroups; i++) { groupNames += globaldata->Groups[i]; }
 		
 		//clear globaldatas old tree names if any
 		globaldata->Treenames.clear();
@@ -122,42 +128,53 @@ int TreeGroupCommand::execute(){
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(order->getLabel()) == 1){			
 				
 				cout << order->getLabel() << '\t' << count << endl;
-				util->getSharedVectors(globaldata->Groups, lookup, order);  //fills group vectors from order vector.
 				
-				//for each calculator												
-				for(int i = 0 ; i < treeCalculators.size(); i++) {
-					
-					//initialize simMatrix
-					simMatrix.clear();
-					simMatrix.resize(numGroups);
-					for (int m = 0; m < simMatrix.size(); m++)	{
-						for (int j = 0; j < simMatrix.size(); j++)	{
-							simMatrix[m].push_back(0.0);
-						}
-					}
-				
-					//initialize index
-					index.clear();
-					for (int g = 0; g < numGroups; g++) {	index[g] = g;	}
-		
+				//open an ostream for each calc to print to
+				for (int z = 0; z < treeCalculators.size(); z++) {
 					//create a new filename
-					outputFile = getRootName(globaldata->inputFileName) + treeCalculators[i]->getName() + "." + order->getLabel() + ".tre";
-							
-					for (int k = 0; k < lookup.size(); k++) { 
-						for (int l = k; l < lookup.size(); l++) {
-							if (k != l) { //we dont need to similiarity of a groups to itself
-								//get estimated similarity between 2 groups
-								data = treeCalculators[i]->getValues(lookup[k], lookup[l]); //saves the calculator outputs
-								//save values in similarity matrix
-								simMatrix[k][l] = data[0];
-								simMatrix[l][k] = data[0];
+					outputFile = getRootName(globaldata->inputFileName) + treeCalculators[z]->getName() + ".boot" + order->getLabel() + ".tre";
+					openOutputFile(outputFile, *(out[z]));
+				}
+				
+				//create a file for each calculator with the 1000 trees in it.
+				for (int p = 0; p < iters; p++) {
+					
+					util->getSharedVectorswithReplacement(globaldata->Groups, lookup, order);  //fills group vectors from order vector.
+				
+					//for each calculator												
+					for(int i = 0 ; i < treeCalculators.size(); i++) {
+					
+						//initialize simMatrix
+						simMatrix.clear();
+						simMatrix.resize(numGroups);
+						for (int m = 0; m < simMatrix.size(); m++)	{
+							for (int j = 0; j < simMatrix.size(); j++)	{
+								simMatrix[m].push_back(0.0);
 							}
 						}
-					}
+				
+						//initialize index
+						index.clear();
+						for (int g = 0; g < numGroups; g++) {	index[g] = g;	}
+							
+						for (int k = 0; k < lookup.size(); k++) { // pass cdd each set of groups to commpare
+							for (int l = k; l < lookup.size(); l++) {
+								if (k != l) { //we dont need to similiarity of a groups to itself
+									//get estimated similarity between 2 groups
+									data = treeCalculators[i]->getValues(lookup[k], lookup[l]); //saves the calculator outputs
+									//save values in similarity matrix
+									simMatrix[k][l] = data[0];
+									simMatrix[l][k] = data[0];
+								}
+							}
+						}
 					
-					//creates tree from similarity matrix and write out file
-					createTree();
+						//creates tree from similarity matrix and write out file
+						createTree(out[i]);
+					}
 				}
+				//close ostream for each calc
+				for (int z = 0; z < treeCalculators.size(); z++) { out[z]->close(); }
 			}
 		
 			//get next line to process
@@ -181,17 +198,17 @@ int TreeGroupCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the TreeGroupCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the BootSharedCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the TreeGroupCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the BootSharedCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}		
 }
 //**********************************************************************************************************************
 
-void TreeGroupCommand::createTree(){
+void BootSharedCommand::createTree(ostream* out){
 	try {
 		//create tree
 		t = new Tree();
@@ -251,23 +268,23 @@ void TreeGroupCommand::createTree(){
 		t->assembleTree();
 		
 		//print newick file
-		t->createNewickFile(outputFile);
+		t->print(*out);
 		
 		//delete tree
 		delete t;
 	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the TreeGroupCommand class Function createTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the BootSharedCommand class Function createTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the TreeGroupCommand class function createTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the BootSharedCommand class function createTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 }
 /***********************************************************/
-void TreeGroupCommand::printSims() {
+void BootSharedCommand::printSims() {
 	try {
 		cout << "simsMatrix" << endl;
 		for (int m = 0; m < simMatrix.size(); m++)	{
@@ -279,11 +296,11 @@ void TreeGroupCommand::printSims() {
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the TreeGroupCommand class Function printSims. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the BootSharedCommand class Function printSims. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the TreeGroupCommand class function printSims. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the BootSharedCommand class function printSims. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}		
 }

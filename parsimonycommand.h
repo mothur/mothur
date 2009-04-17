@@ -14,6 +14,7 @@
 #include "treemap.h"
 #include "progress.hpp"
 #include "sharedutilities.h"
+#include "fileoutput.h"
 
 using namespace std;
 
@@ -23,12 +24,13 @@ class ParsimonyCommand : public Command {
 	
 	public:
 		ParsimonyCommand();	
-		~ParsimonyCommand() { delete pars; delete util; }
+		~ParsimonyCommand() { delete pars; delete util; delete output; }
 		int execute();	
 	
 	private:
 		GlobalData* globaldata;
 		SharedUtil* util;
+		FileOutput* output;
 		vector<Tree*> T;	   //user trees
 		Tree* randT;  //random tree
 		Tree* copyUserTree; 
@@ -36,7 +38,7 @@ class ParsimonyCommand : public Command {
 		TreeMap* savetmap;
 		Parsimony* pars;
 		vector<string> groupComb; // AB. AC, BC...
-		string parsFile, parsFileout, sumFile, randomtree, allGroups;
+		string sumFile, randomtree, allGroups;
 		int iters, numGroups, numComp, counter;
 		vector<int> numEachGroup; //vector containing the number of sequences in each group the users wants for random distrib.
 		vector< vector<float> > userTreeScores; //scores for users trees for each comb.
@@ -57,10 +59,6 @@ class ParsimonyCommand : public Command {
 		void printParsimonyFile();  
 		void printUSummaryFile();
 		void getUserInput();
-		void initFile(string);
-		void output(vector<double>);
-		void resetFile();
-
 		
 };
 

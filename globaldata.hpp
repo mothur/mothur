@@ -70,7 +70,7 @@ public:
 	string getStep();
 	string getForm();
 	string getSorted();
-	string getScaler();
+	string getScale();
 
 	void setListFile(string);
 	void setPhylipFile(string);
@@ -97,7 +97,7 @@ public:
 		
 private:
 	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, treefile, sharedfile, line, label, randomtree, groups;
-	string cutoff, format, precision, method, fileroot, iters, jumble, freq, calc, abund, step, form, sorted, scaler;
+	string cutoff, format, precision, method, fileroot, iters, jumble, freq, calc, abund, step, form, sorted, scale;
 
 	static GlobalData* _uniqueInstance;
 	GlobalData( const GlobalData& ); // Disable copy constructor

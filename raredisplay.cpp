@@ -134,6 +134,7 @@ void RareDisplay::reset(){
 
 void RareDisplay::close(){
 	try {
+		
 		output->initFile(label);
 	
 		openInputFile(tempInName, tempInFile);

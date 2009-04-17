@@ -453,7 +453,22 @@ void Tree::randomTopology() {
 		exit(1);
 	}		
 }
-
+/*****************************************************************/
+void Tree::print(ostream& out) {
+	try {
+		int root = findRoot();
+		printBranch(root, out);
+		out << ";" << endl;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the Tree class function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}		
+}
 /*****************************************************************/
 // This prints out the tree in Newick form.
 void Tree::createNewickFile(string f) {
@@ -463,7 +478,7 @@ void Tree::createNewickFile(string f) {
 		filename = f;
 		openOutputFile(filename, out);
 		
-		printBranch(root);
+		printBranch(root, out);
 		
 		// you are at the end of the tree
 		out << ";" << endl;
@@ -501,15 +516,15 @@ int Tree::findRoot() {
 }
 
 /*****************************************************************/
-void Tree::printBranch(int node) {
+void Tree::printBranch(int node, ostream& out) {
 	try {
 		
 		// you are not a leaf
 		if (tree[node].getLChild() != -1) {
 			out << "(";
-			printBranch(tree[node].getLChild());
+			printBranch(tree[node].getLChild(), out);
 			out << ",";
-			printBranch(tree[node].getRChild());
+			printBranch(tree[node].getRChild(), out);
 			out << ")";
 			//if there is a branch length then print it
 			if (tree[node].getBranchLength() != -1) {

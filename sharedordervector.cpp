@@ -29,7 +29,7 @@ SharedOrderVector::SharedOrderVector(string id, vector<individual>  ov) :
 //This function is used to read a .shared file for the collect.shared, rarefaction.shared and summary.shared commands
 //if you don't use a list and groupfile.  
 
-SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {
+SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a shared file
 	try {
 		globaldata = GlobalData::getInstance();
 		maxRank = 0; numBins = 0; numSeqs = 0;
@@ -55,7 +55,7 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {
 			f >> inputData;
 			
 			for (int j = 0; j < inputData; j++) {
-				push_back(i+1, i+1, groupN);
+				push_back(i, i, groupN);
 				numSeqs++;
 			}
 		}
@@ -80,7 +80,7 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {
 				f >> inputData;
 				
 				for (int j = 0; j < inputData; j++) {
-					push_back(i+1, i+1, groupN);
+					push_back(i, i, groupN);
 					numSeqs++;
 				}
 			}
@@ -96,8 +96,9 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {
 		f.seekg(pos, ios::beg);
 	
 		if (globaldata->gGroupmap == NULL) { globaldata->gGroupmap = groupmap; }
-	
+		
 		updateStats();
+		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the SharedOrderVector class Function SharedOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -111,21 +112,18 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {
 /***********************************************************************/
 
 int SharedOrderVector::getNumBins(){
-	if(needToUpdate == 1){	updateStats();	}
 	return numBins;
 }
 
 /***********************************************************************/
 
 int SharedOrderVector::getNumSeqs(){
-	if(needToUpdate == 1){	updateStats();	}
 	return numSeqs;
 }
 
 /***********************************************************************/
 
 int SharedOrderVector::getMaxRank(){
-	if(needToUpdate == 1){	updateStats();	}
 	return maxRank;
 }
 
@@ -139,8 +137,8 @@ void SharedOrderVector::set(int index, int binNumber, int abund, string groupNam
 	data[index].group = groupName;
 	data[index].bin = binNumber;
 	data[index].abundance = abund;
-	needToUpdate = 1;
-	
+	//if (abund > maxRank) { maxRank = abund; }
+	updateStats();
 }
 
 /***********************************************************************/
@@ -158,8 +156,10 @@ void SharedOrderVector::push_back(int binNumber, int abund, string groupName){
 	newGuy.abundance = abund;
 	newGuy.bin = binNumber;
 	data.push_back(newGuy);
-	needToUpdate = 1;
-	
+	//numSeqs++;
+	//numBins++;
+	//if (abund > maxRank) { maxRank = abund; }
+	updateStats();
 }
 
 /***********************************************************************/

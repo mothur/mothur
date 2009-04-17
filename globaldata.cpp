@@ -73,7 +73,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if (key == "step")			{ step = value;			}
 				if (key == "form")			{ form = value;			}
 				if (key == "sorted")		{ sorted = value;		}
-				if (key == "scaler")		{ scaler = value;		}
+				if (key == "scale")			{ scale = value;		}
 				
 
 				
@@ -129,7 +129,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if (key == "step")			{ step = value;			}
 			if (key == "form")			{ form = value;			}
 			if (key == "sorted")		{ sorted = value;		}
-			if (key == "scaler")		{ scaler = value;		}
+			if (key == "scale")			{ scale = value;		}
 			
 
 			if (key == "line") {//stores lines to be used in a vector
@@ -200,7 +200,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
-		if (commandName == "tree.groups") {
+		if ((commandName == "tree.shared") || (commandName == "bootstrap.shared")) {
 			if (calc != "") { 
 				Estimators.clear();
 				splitAtDash(calc, Estimators);			
@@ -253,7 +253,7 @@ string GlobalData::getGroups()			{	return groups;		}
 string GlobalData::getStep()			{	return step;		}
 string GlobalData::getForm()			{	return form;		}
 string GlobalData::getSorted()			{	return sorted;		}
-string GlobalData::getScaler()			{	return scaler;		}
+string GlobalData::getScale()			{	return scale;		}
 void GlobalData::setListFile(string file)	{	listfile = file;	inputFileName = file;}
 void GlobalData::setRabundFile(string file)	{	rabundfile = file;	inputFileName = file;}
 void GlobalData::setSabundFile(string file)	{	sabundfile = file;	inputFileName = file;}
@@ -304,8 +304,8 @@ void GlobalData::clear() {
 	abund           =   "10";
 	step			=	"0.01";
 	form			=	"integral";
-	sorted			=	"1";  //0 means don't sort, 1 means sort.
-	scaler			=	"log10";
+	sorted			=	"T";  //F means don't sort, T means sort.
+	scale			=	"log10";
 }
 
 //*******************************************************/
@@ -317,7 +317,7 @@ void GlobalData::reset() {
 	iters			=	"1000"; 
 	groups			=	"";
 	jumble			=	"1";	//0 means don't jumble, 1 means jumble.
-	sorted			=	"1";  //0 means don't sort, 1 means sort.
+	sorted			=	"T";  //F means don't sort, T means sort.
 	randomtree		=	"";  //"" means user will enter some user trees, "outputfile" means they just want the random tree distribution to be outputted to outputfile.
 	freq			=	"100";
 	method			=	"furthest";
@@ -392,7 +392,7 @@ void GlobalData::parseTreeFile() {
 			
 			//use nexus translation rather than parsing tree to save time
 			if ((holder == "translate") || (holder == "Translate")) {
-cout << "there is a translate " << endl;
+
 				string number, name, h;
 				h = ""; // so it enters the loop the first time
 				while((h != ";") && (number != ";")) { 

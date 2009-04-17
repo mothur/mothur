@@ -56,9 +56,8 @@ int UnifracWeightedCommand::execute() {
 			counter = 0;
 			rScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
 			uScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
-			//weightedFile = globaldata->getTreeFile()  + toString(i+1) + ".weighted";
-			//weightedFileout = globaldata->getTreeFile() + "temp." + toString(i+1) + ".weighted";
-			output = new ThreeColumnFile2(globaldata->getTreeFile()  + toString(i+1) + ".weighted");
+			
+			output = new ColumnFile(globaldata->getTreeFile()  + toString(i+1) + ".weighted");
 
 			userData = weighted->getValues(T[i]);  //userData[0] = weightedscore
 			
@@ -163,11 +162,6 @@ void UnifracWeightedCommand::printWeightedFile() {
 			} 
 			output->resetFile();
 		}
-		
-		//out.close();
-		//inFile.close();
-		//remove(weightedFileout.c_str());
-		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the UnifracWeightedCommand class Function printWeightedFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -284,92 +278,8 @@ void UnifracWeightedCommand::calculateFreqsCumuls() {
 
 }
 
-/*****************************************************************
+/***********************************************************/
 
-void UnifracWeightedCommand::initFile(string label){
-	try {
-		if(counter != 0){
-			openOutputFile(weightedFileout, out);
-			openInputFile(weightedFile, inFile);
-
-			string inputBuffer;
-			getline(inFile, inputBuffer);
-		
-			out	<<  inputBuffer << '\t' << label + "RandFreq" << '\t' << label + "RandCumul" << endl;		
-		}else{
-			openOutputFile(weightedFileout, out);
-			out	<< label + "Score" << '\t' << label + "RandFreq" << '\t' << label + "RandCumul" << endl;
-		}
-
-		out.setf(ios::fixed, ios::floatfield);
-		out.setf(ios::showpoint);
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the UnifracWeightedCommand class Function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the UnifracWeightedCommand class function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-}
-
-/***********************************************************************
-
-void UnifracWeightedCommand::output(vector<double> data){
-	try {
-		if(counter != 0){		
-			string inputBuffer;
-			getline(inFile, inputBuffer);
-
-			out << inputBuffer << '\t' << setprecision(6) << data[0] << setprecision(globaldata->getIters().length())  << '\t' << data[1] << '\t' << data[2] << endl;
-		}
-		else{
-			out << setprecision(6) << data[0] << setprecision(globaldata->getIters().length())  << '\t' << data[1] << '\t' << data[2] << endl;
-
-		}
-		
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the UnifracWeightedCommand class Function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the UnifracWeightedCommand class function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-};
-
-/***********************************************************************
-
-void UnifracWeightedCommand::resetFile(){
-	try {
-		if(counter != 0){
-			out.close();
-			inFile.close();
-		}
-		else{
-			out.close();
-		}
-		counter = 1;
-		
-		remove(weightedFile.c_str());
-		rename(weightedFileout.c_str(), weightedFile.c_str());
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the UnifracWeightedCommand class Function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the UnifracWeightedCommand class function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	
-	
-			
-}
-
-*/
 
 
 

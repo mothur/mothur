@@ -31,12 +31,13 @@ ValidCommands::ValidCommands() {
 		commands["unifrac.weighted"]	= "unifrac.weighted"; 
 		commands["unifrac.unweighted"]	= "unifrac.unweighted"; 
 		commands["libshuff"]			= "libshuff";
-		commands["tree.groups"]			= "tree.groups";
+		commands["tree.shared"]			= "tree.shared";
 		commands["heatmap"]				= "heatmap";
 		commands["venn"]				= "venn";
 		commands["get.group"]           = "get.group";
 		commands["get.label"]           = "get.label";
 		commands["get.line"]            = "get.line";
+		commands["bootstrap.shared"]	= "bootstrap.shared";
 		commands["help"]				= "help"; 
 		commands["quit"]				= "quit"; 
 

@@ -30,7 +30,7 @@ void SharedUtil::getSharedVectors(vector<string> Groups, vector<SharedRAbundVect
 			temp->setGroup(Groups[i]);
 			lookup.push_back(temp);
 		}
-		
+	
 		int numSeqs = order->size();
 		//sample all the members
 		for(int i=0;i<numSeqs;i++){
@@ -54,6 +54,55 @@ void SharedUtil::getSharedVectors(vector<string> Groups, vector<SharedRAbundVect
 	}
 	catch(...) {
 		cout << "An unknown error has occurred in the SharedUtil class function getSharedVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+
+void SharedUtil::getSharedVectorswithReplacement(vector<string> Groups, vector<SharedRAbundVector*>& lookup, SharedOrderVector* order) {
+	try {
+	
+		//delete each sharedrabundvector in lookup
+		for (int j = 0; j < lookup.size(); j++) {
+			delete lookup[j];
+		}
+		
+		lookup.clear();
+		
+		//create and initialize vector of sharedvectors, one for each group
+		for (int i = 0; i < Groups.size(); i++) { 
+			SharedRAbundVector* temp = new SharedRAbundVector(order->getNumBins());
+			temp->setLabel(order->getLabel());
+			temp->setGroup(Groups[i]);
+			lookup.push_back(temp);
+		}
+	
+		int numSeqs = order->size();
+		
+		//sample all the members
+		for(int i=0;i<numSeqs;i++){
+			//get random number
+			int random = int((float)(i+1) * (float)(rand()) / ((float)RAND_MAX+1.0));
+			individual chosen = order->get(random);
+
+			int abundance; 
+			//set info for sharedvector in chosens group
+			for (int j = 0; j < lookup.size(); j++) { 
+				if (chosen.group == lookup[j]->getGroup()) {
+					 abundance = lookup[j]->getAbundance(chosen.bin);
+					 lookup[j]->set(chosen.bin, (abundance + 1), chosen.group);
+					 break;
+				}
+			}
+		}
+		
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the SharedUtil class Function getSharedVectorswithReplacement. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the SharedUtil class function getSharedVectorswithReplacement. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 }

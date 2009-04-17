@@ -14,6 +14,7 @@
 #include "unweighted.h"
 #include "treemap.h"
 #include "sharedutilities.h"
+#include "fileoutput.h"
 
 
 using namespace std;
@@ -30,10 +31,11 @@ class UnifracUnweightedCommand : public Command {
 	private:
 		GlobalData* globaldata;
 		SharedUtil* util;
+		FileOutput* output;
 		vector<Tree*> T;	   //user trees
 		TreeMap* tmap;
 		Unweighted* unweighted;
-		string sumFile, unweightedFile, unweightedFileout, allGroups;
+		string sumFile, allGroups;
 		vector<string> groupComb; // AB. AC, BC...
 		int iters, numGroups, numComp, counter;
 		EstOutput userData;			//unweighted score info for user tree
@@ -51,10 +53,7 @@ class UnifracUnweightedCommand : public Command {
 		
 		void printUWSummaryFile();
 		void printUnweightedFile();
-		void initFile(string);
-		void output(vector<double>);
-		void resetFile();
- 
+		 
 		
 };
 

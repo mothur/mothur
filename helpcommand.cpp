@@ -14,6 +14,7 @@
 HelpCommand::HelpCommand(){
 	globaldata = GlobalData::getInstance();
 	validCommands = new ValidCommands();
+	validCalcs = new ValidCalculators();
 }
 
 //**********************************************************************************************************************
@@ -77,6 +78,7 @@ int HelpCommand::execute(){
 		cout << "collect.single(label=yourLabel, line=yourLines, iters=yourIters, freq=yourFreq, calc=yourEstimators)." << "\n";
 		cout << "Example collect(label=unique-.01-.03, line=0-5-10, iters=10000, freq=10, calc=sobs-chao-ace-jack)." << "\n";
 		cout << "The default values for freq is 100, and calc are sobs-chao-ace-jack-shannon-npshannon-simpson." << "\n";
+		validCalcs->printCalc("single", cout);
 		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "collect.shared") {
@@ -84,9 +86,10 @@ int HelpCommand::execute(){
 		cout << "The collect.shared command parameters are label, line, freq, jumble, calc and groups.  No parameters are required, but you may not use " << "\n";
 		cout << "both the line and label parameters at the same time. The collect.shared command should be in the following format: " << "\n";
 		cout << "collect.shared(label=yourLabel, line=yourLines, freq=yourFreq, jumble=yourJumble, calc=yourEstimators, groups=yourGroups)." << "\n";
-		cout << "Example collect.shared(label=unique-.01-.03, line=0-5-10, freq=10, jumble=1, groups=B-C, calc=sharedChao-sharedAce-Jabund-SorensonAbund-Jclass-SorClass-Jest-SorEst-ThetaYC-ThetaN)." << "\n";
-		cout << "The default values for jumble is 1 (meaning jumble, if it’s set to 0 then it will not jumble), freq is 100 and calc are sharedsobs-sharedChao-sharedAce-Jabund-SorensonAbund-Jclass-SorClass-Jest-SorEst-ThetaYC-ThetaN." << "\n";
+		cout << "Example collect.shared(label=unique-.01-.03, line=0-5-10, freq=10, jumble=1, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan)." << "\n";
+		cout << "The default values for jumble is 1 (meaning jumble, if it’s set to 0 then it will not jumble), freq is 100 and calc are sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan." << "\n";
 		cout << "The default value for groups is all the groups in your groupfile." << "\n";
+		validCalcs->printCalc("shared", cout);
 		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
 		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile)." << "\n" << "\n";
@@ -116,6 +119,7 @@ int HelpCommand::execute(){
 		cout << "rarefaction.single(label=yourLabel, line=yourLines, iters=yourIters, freq=yourFreq, calc=yourEstimators)." << "\n";
 		cout << "Example rarefaction.single(label=unique-.01-.03, line=0-5-10, iters=10000, freq=10, calc=sobs-rchao-race-rjack-rbootstrap-rshannon-rnpshannon-rsimpson)." << "\n";
 		cout << "The default values for iters is 1000, freq is 100, and calc is rarefaction which calculates the rarefaction curve for the observed richness." << "\n";
+		validCalcs->printCalc("rarefaction", cout);
 		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "rarefaction.shared") {
@@ -126,6 +130,7 @@ int HelpCommand::execute(){
 		cout << "Example rarefaction.shared(label=unique-.01-.03, line=0-5-10, iters=10000, jumble=1, groups=B-C, calc=sharedobserved)." << "\n";
 		cout << "The default values for iters is 1000, jumble is 1 (meaning jumble, if it’s set to 0 then it will not jumble), freq is 100, and calc is sharedobserved which calculates the shared rarefaction curve for the observed richness." << "\n";
 		cout << "The default value for groups is all the groups in your groupfile." << "\n";
+		validCalcs->printCalc("sharedrarefaction", cout);
 		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
 		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq)." << "\n" << "\n";
@@ -136,6 +141,7 @@ int HelpCommand::execute(){
 		cout << "both the line and label parameters at the same time. The summary.single command should be in the following format: " << "\n";
 		cout << "summary.single(label=yourLabel, line=yourLines, calc=yourEstimators)." << "\n";
 		cout << "Example summary.single(label=unique-.01-.03, line=0,5,10, calc=sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson)." << "\n";
+		validCalcs->printCalc("summary", cout);
 		cout << "The default value calc is sobs-chao-ace-jack-shannon-npshannon-simpson" << "\n";
 		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. line), '=' and parameters (i.e.yourLines)." << "\n" << "\n";
@@ -144,8 +150,9 @@ int HelpCommand::execute(){
 		cout << "The summary.shared command parameters are label, line, jumble and calc.  No parameters are required, but you may not use " << "\n";
 		cout << "both the line and label parameters at the same time. The summary.shared command should be in the following format: " << "\n";
 		cout << "summary.shared(label=yourLabel, line=yourLines, jumble=yourJumble, calc=yourEstimators, groups=yourGroups)." << "\n";
-		cout << "Example summary.shared(label=unique-.01-.03, line=0,5,10, jumble=1, groups=B-C, calc=sharedChao-sharedAce-Jabund-SorensonAbund-Jclass-SorClass-Jest-SorEst-ThetaYC-ThetaN)." << "\n";
-		cout << "The default value for jumble is 1 (meaning jumble, if it’s set to 0 then it will not jumble) and calc is sharedsobs-sharedChao-sharedAce-Jabund-SorensonAbund-Jclass-SorClass-Jest-SorEst-ThetaYC-ThetaN" << "\n";
+		cout << "Example summary.shared(label=unique-.01-.03, line=0,5,10, jumble=1, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan)." << "\n";
+		validCalcs->printCalc("sharedsummary", cout);
+		cout << "The default value for jumble is 1 (meaning jumble, if it’s set to 0 then it will not jumble) and calc is sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan" << "\n";
 		cout << "The default value for groups is all the groups in your groupfile." << "\n";
 		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
 		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups." << "\n";
@@ -194,16 +201,16 @@ int HelpCommand::execute(){
 		cout << "Note: No spaces between parameter labels (i.e. iters), '=' and parameters (i.e.yourIters)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "heatmap") { 
 		cout << "The heatmap command can only be executed after a successful read.otu command." << "\n";
-		cout << "The heatmap command parameters are groups, sorted, scaler, line and label.  No parameters are required, but you may not use line and label at the same time." << "\n";
+		cout << "The heatmap command parameters are groups, sorted, scale, line and label.  No parameters are required, but you may not use line and label at the same time." << "\n";
 		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like included in your heatmap." << "\n";
 		cout << "The sorted parameter allows you to choose to see the file with the shared otus at the top or the otus in the order they appear in your input file. " << "\n";
-		cout << "The scaler parameter allows you to choose the range of color your bin information will be displayed with." << "\n";
+		cout << "The scale parameter allows you to choose the range of color your bin information will be displayed with." << "\n";
 		cout << "The group names are separated by dashes. The line and label allow you to select what distance levels you would like a heatmap created for, and are also separated by dashes." << "\n";
 		cout << "The heatmap command should be in the following format: heatmap(groups=yourGroups, sorted=yourSorted, line=yourLines, label=yourLabels)." << "\n";
-		cout << "Example heatmap(groups=A-B-C, line=1-3-5, sorted=0, scaler=log10)." << "\n";
+		cout << "Example heatmap(groups=A-B-C, line=1-3-5, sorted=F, scale=log10)." << "\n";
 		cout << "The default value for groups is all the groups in your groupfile, and all lines in your inputfile will be used." << "\n";
-		cout << "The default value for sorted is 1 meaning you want the shared otus on top, you may change it to 0 meaning the exact representation of your input file." << "\n";
-		cout << "The default value for scaler is log10; your other options are log2 and linear." << "\n";
+		cout << "The default value for sorted is T meaning you want the shared otus on top, you may change it to F meaning the exact representation of your input file." << "\n";
+		cout << "The default value for scale is log10; your other options are log2 and linear." << "\n";
 		cout << "The heatmap command outputs a .svg file for each line or label you specify." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "venn") { 
@@ -211,13 +218,37 @@ int HelpCommand::execute(){
 		cout << "The venn command parameters are groups, calc, line and label.  No parameters are required, but you may not use line and label at the same time." << "\n";
 		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like included in your venn diagram, you may only use a maximum of 4 groups." << "\n";
 		cout << "The group names are separated by dashes. The line and label allow you to select what distance levels you would like a venn diagram created for, and are also separated by dashes." << "\n";
-		cout << "The venn command should be in the following format: venn(groups=yourGroups, calc=yourSorted, line=yourLines, label=yourLabels)." << "\n";
+		cout << "The venn command should be in the following format: venn(groups=yourGroups, calc=yourCalcs, line=yourLines, label=yourLabels)." << "\n";
 		cout << "Example venn(groups=A-B-C, line=1-3-5, calc=sharedsobs-sharedchao)." << "\n";
 		cout << "The default value for groups is all the groups in your groupfile up to 4, and all lines in your inputfile will be used." << "\n";
 		cout << "The default value for calc is sobs if you have only read a list file or if you have selected only one group, and sharedsobs if you have multiple groups." << "\n";
 		cout << "The default available estimators for calc are sobs, chao and ace if you have only read a list file, and sharedsobs, sharedchao and sharedace if you have read a list and group file or a shared file." << "\n";
 		cout << "The only estmiator available four 4 groups is sharedsobs." << "\n";
 		cout << "The venn command outputs a .svg file for each calculator you specify at each distance you choose." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups)." << "\n" << "\n";
+	}else if (globaldata->helpRequest == "tree.shared") { 
+		cout << "The tree.shared command can only be executed after a successful read.otu command." << "\n";
+		cout << "The tree.shared command parameters are groups, calc, line and label.  The calc parameter is required, and you may not use line and label at the same time." << "\n";
+		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like included used." << "\n";
+		cout << "The group names are separated by dashes. The line and label allow you to select what distance levels you would like trees created for, and are also separated by dashes." << "\n";
+		cout << "The tree.shared command should be in the following format: tree.shared(groups=yourGroups, calc=yourCalcs, line=yourLines, label=yourLabels)." << "\n";
+		cout << "Example tree.shared(groups=A-B-C, line=1-3-5, calc=jabund-sorensonabund)." << "\n";
+		cout << "The default value for groups is all the groups in your groupfile." << "\n";
+		cout << "There is no default value for calc." << "\n";
+		validCalcs->printCalc("treegroup", cout);
+		cout << "The tree.shared command outputs a .tre file for each calculator you specify at each distance you choose." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups)." << "\n" << "\n";
+	}else if (globaldata->helpRequest == "bootstrap.shared") { 
+		cout << "The bootstrap.shared command can only be executed after a successful read.otu command." << "\n";
+		cout << "The bootstrap.shared command parameters are groups, calc, iters, line and label.  The calc parameter is required, and you may not use line and label at the same time." << "\n";
+		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like included used." << "\n";
+		cout << "The group names are separated by dashes. The line and label allow you to select what distance levels you would like trees created for, and are also separated by dashes." << "\n";
+		cout << "The bootstrap.shared command should be in the following format: bootstrap.shared(groups=yourGroups, calc=yourCalcs, line=yourLines, label=yourLabels, iters=yourIters)." << "\n";
+		cout << "Example bootstrap.shared(groups=A-B-C, line=1-3-5, calc=jabund-sorensonabund, iters=100)." << "\n";
+		cout << "The default value for groups is all the groups in your groupfile." << "\n";
+		cout << "There is no default value for calc. The default for iters is 1000." << "\n";
+		validCalcs->printCalc("boot", cout);
+		cout << "The bootstrap.shared command outputs a .tre file for each calculator you specify at each distance you choose containing iters number of trees." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "bin.seqs") { 
 		cout << "The bin.seqs command can only be executed after a successful read.otu command of a list file." << "\n";

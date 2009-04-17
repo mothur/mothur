@@ -58,8 +58,8 @@ int UnifracUnweightedCommand::execute() {
 		//get pscores for users trees
 		for (int i = 0; i < T.size(); i++) {
 			counter = 0;
-			unweightedFile = globaldata->getTreeFile()  + toString(i+1) + ".unweighted";
-			unweightedFileout = globaldata->getTreeFile() + "temp." + toString(i+1) + ".unweighted";
+			
+			output = new ColumnFile(globaldata->getTreeFile()  + toString(i+1) + ".unweighted");
 			
 			outSum << i+1 << '\t';
 			cout << i+1 << '\t';
@@ -99,31 +99,33 @@ int UnifracUnweightedCommand::execute() {
 				
 			}
 		
-		for(int a = 0; a < numComp; a++) {
-			float rcumul = 1.0000;
-			//this loop fills the cumulative maps and put 0.0000 in the score freq map to make it easier to print.
-			for (it = validScores.begin(); it != validScores.end(); it++) { 
-				//make rscoreFreq map and rCumul
-				it2 = rscoreFreq[a].find(it->first);
-				rCumul[a][it->first] = rcumul;
-				//get percentage of random trees with that info
-				if (it2 != rscoreFreq[a].end()) {  rscoreFreq[a][it->first] /= iters; rcumul-= it2->second;  }
-				else { rscoreFreq[a][it->first] = 0.0000; } //no random trees with that score
+			for(int a = 0; a < numComp; a++) {
+				float rcumul = 1.0000;
+				//this loop fills the cumulative maps and put 0.0000 in the score freq map to make it easier to print.
+				for (it = validScores.begin(); it != validScores.end(); it++) { 
+					//make rscoreFreq map and rCumul
+					it2 = rscoreFreq[a].find(it->first);
+					rCumul[a][it->first] = rcumul;
+					//get percentage of random trees with that info
+					if (it2 != rscoreFreq[a].end()) {  rscoreFreq[a][it->first] /= iters; rcumul-= it2->second;  }
+					else { rscoreFreq[a][it->first] = 0.0000; } //no random trees with that score
+				}
+				UWScoreSig[a].push_back(rCumul[a][userData[a]]);
 			}
-			UWScoreSig[a].push_back(rCumul[a][userData[a]]);
+		
+		
+		
+			printUnweightedFile();
+			printUWSummaryFile();
+			
+			delete output;
+			rscoreFreq.clear(); 
+			rCumul.clear();  
+			validScores.clear(); 
+			utreeScores.clear();  
+			UWScoreSig.clear(); 
 		}
 		
-		
-		
-		printUnweightedFile();
-		printUWSummaryFile();
-		
-		rscoreFreq.clear(); 
-		rCumul.clear();  
-		validScores.clear(); 
-		utreeScores.clear();  
-		UWScoreSig.clear(); 
-	}
 		//reset groups parameter
 		globaldata->Groups.clear(); 
 		outSum.close();
@@ -144,22 +146,19 @@ int UnifracUnweightedCommand::execute() {
 void UnifracUnweightedCommand::printUnweightedFile() {
 	try {
 		vector<double> data;
+		vector<string> tags;
+		tags.push_back("Score"); tags.push_back("RandFreq"); tags.push_back("RandCumul");
 		
 		for(int a = 0; a < numComp; a++) {
-			initFile(groupComb[a]);
+			output->initFile(groupComb[a], tags);
 			//print each line
 			for (it = validScores.begin(); it != validScores.end(); it++) { 
 				data.push_back(it->first);  data.push_back(rscoreFreq[a][it->first]); data.push_back(rCumul[a][it->first]); 
-				output(data);
+				output->output(data);
 				data.clear();
 			} 
-			resetFile();
+			output->resetFile();
 		}
-		
-		out.close();
-		inFile.close();
-		remove(unweightedFileout.c_str());
-		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the UnifracUnweightedCommand class Function printUnweightedFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -200,85 +199,7 @@ void UnifracUnweightedCommand::printUWSummaryFile() {
 		exit(1);
 	}
 }
-/*****************************************************************/
 
-void UnifracUnweightedCommand::initFile(string label){
-	try {
-		if(counter != 0){
-			openOutputFile(unweightedFileout, out);
-			openInputFile(unweightedFile, inFile);
+/***********************************************************/
 
-			string inputBuffer;
-			getline(inFile, inputBuffer);
-		
-			out	<<  inputBuffer << '\t' << label + "RandFreq" << '\t' << label + "RandCumul" << endl;		
-		}else{
-			openOutputFile(unweightedFileout, out);
-			out	<< label + "Score" << '\t' << label + "RandFreq" << '\t' << label + "RandCumul" << endl;
-		}
-
-		out.setf(ios::fixed, ios::floatfield);
-		out.setf(ios::showpoint);
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the UnifracUnweightedCommand class Function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the UnifracUnweightedCommand class function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-}
-
-/***********************************************************************/
-
-void UnifracUnweightedCommand::output(vector<double> data){
-	try {
-		if(counter != 0){		
-			string inputBuffer;
-			getline(inFile, inputBuffer);
-//			out	<<  inputBuffer << setprecision(6) << '\t' << data[0] << setprecision(globaldata->getIters().length()) << '\t' << data[1] << '\t' << data[2] << endl;
-		
-			out << inputBuffer << '\t' << setprecision(6) << data[0] << setprecision(globaldata->getIters().length())  << '\t' << data[1] << '\t' << data[2] << endl;
-		}
-		else{
-			out << setprecision(6) << data[0] << setprecision(globaldata->getIters().length())  << '\t' << data[1] << '\t' << data[2] << endl;
-		}
-
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the UnifracUnweightedCommand class Function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the UnifracUnweightedCommand class function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-};
-
-/***********************************************************************/
-
-void UnifracUnweightedCommand::resetFile(){
-	try {
-		if(counter != 0){
-			out.close();
-			inFile.close();
-		}
-		else{
-			out.close();
-		}
-		counter = 1;
-		
-		remove(unweightedFile.c_str());
-		rename(unweightedFileout.c_str(), unweightedFile.c_str());
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the UnifracUnweightedCommand class Function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the UnifracUnweightedCommand class function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-}
 

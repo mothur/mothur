@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		211C38320F961DD400FEE541 /* sharedutilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 211C38300F961DD400FEE541 /* sharedutilities.cpp */; };
+		211C38380F961E1F00FEE541 /* treegroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 211C38360F961E1F00FEE541 /* treegroupscommand.cpp */; };
+		21DDC01B0F97A8FE0060691C /* bootstrapsharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 21DDC01A0F97A8FE0060691C /* bootstrapsharedcommand.cpp */; };
 		370B88070F8A4EE4005AB382 /* getoturepcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 370B88060F8A4EE4005AB382 /* getoturepcommand.cpp */; };
 		372E12700F26365B0095CF7E /* readotucommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E126F0F26365B0095CF7E /* readotucommand.cpp */; };
 		372E12960F263D5A0095CF7E /* readdistcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E12950F263D5A0095CF7E /* readdistcommand.cpp */; };
@@ -137,6 +140,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		211C38300F961DD400FEE541 /* sharedutilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedutilities.cpp; sourceTree = "<group>"; };
+		211C38310F961DD400FEE541 /* sharedutilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedutilities.h; sourceTree = "<group>"; };
+		211C38360F961E1F00FEE541 /* treegroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = treegroupscommand.cpp; sourceTree = "<group>"; };
+		211C38370F961E1F00FEE541 /* treegroupscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = treegroupscommand.h; sourceTree = "<group>"; };
+		21DDC0190F97A8FE0060691C /* bootstrapsharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bootstrapsharedcommand.h; sourceTree = "<group>"; };
+		21DDC01A0F97A8FE0060691C /* bootstrapsharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bootstrapsharedcommand.cpp; sourceTree = "<group>"; };
 		370B88050F8A4EE4005AB382 /* getoturepcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getoturepcommand.h; sourceTree = "<group>"; };
 		370B88060F8A4EE4005AB382 /* getoturepcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getoturepcommand.cpp; sourceTree = "<group>"; };
 		372E126E0F26365B0095CF7E /* readotucommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readotucommand.h; sourceTree = "<group>"; };
@@ -334,7 +343,6 @@
 		37D928490F21331F001D4494 /* summarydisplay.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = summarydisplay.h; sourceTree = "<group>"; };
 		37D9284A0F21331F001D4494 /* summarysharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = summarysharedcommand.cpp; sourceTree = "<group>"; };
 		37D9284B0F21331F001D4494 /* summarysharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = summarysharedcommand.h; sourceTree = "<group>"; };
-		37D9284C0F21331F001D4494 /* utilities.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = utilities.hpp; sourceTree = "<group>"; };
 		37D9284D0F21331F001D4494 /* uvest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uvest.cpp; sourceTree = "<group>"; };
 		37D9284E0F21331F001D4494 /* uvest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uvest.h; sourceTree = "<group>"; };
 		37D9284F0F21331F001D4494 /* validcalculator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = validcalculator.cpp; sourceTree = "<group>"; };
@@ -461,10 +469,11 @@
 				37D9281C0F21331F001D4494 /* sequence.cpp */,
 				37D928210F21331F001D4494 /* shared.h */,
 				37D928200F21331F001D4494 /* shared.cpp */,
+				211C38310F961DD400FEE541 /* sharedutilities.h */,
+				211C38300F961DD400FEE541 /* sharedutilities.cpp */,
 				37D928420F21331F001D4494 /* singlelinkage.cpp */,
 				37D928480F21331F001D4494 /* summarydata.h */,
 				37D928490F21331F001D4494 /* summarydisplay.h */,
-				37D9284C0F21331F001D4494 /* utilities.hpp */,
 				37519AB30F810FAE00FED5E8 /* venn.h */,
 				37519AB40F810FAE00FED5E8 /* venn.cpp */,
 			);
@@ -574,6 +583,8 @@
 				37D927CD0F21331F001D4494 /* command.hpp */,
 				37C1D9710F86506E0059E3F0 /* binsequencecommand.h */,
 				37C1D9720F86506E0059E3F0 /* binsequencecommand.cpp */,
+				21DDC0190F97A8FE0060691C /* bootstrapsharedcommand.h */,
+				21DDC01A0F97A8FE0060691C /* bootstrapsharedcommand.cpp */,
 				37D927C40F21331F001D4494 /* clustercommand.h */,
 				37D927C30F21331F001D4494 /* clustercommand.cpp */,
 				37D927C80F21331F001D4494 /* collectcommand.h */,
@@ -620,6 +631,8 @@
 				37D928460F21331F001D4494 /* summarycommand.cpp */,
 				37D9284B0F21331F001D4494 /* summarysharedcommand.h */,
 				37D9284A0F21331F001D4494 /* summarysharedcommand.cpp */,
+				211C38370F961E1F00FEE541 /* treegroupscommand.h */,
+				211C38360F961E1F00FEE541 /* treegroupscommand.cpp */,
 				3746109B0F40657600460C57 /* unifracunweightedcommand.h */,
 				3746109C0F40657600460C57 /* unifracunweightedcommand.cpp */,
 				374610760F40645300460C57 /* unifracweightedcommand.h */,
@@ -847,6 +860,9 @@
 				7E412F490F8D21B600381DD0 /* slibshuff.cpp in Sources */,
 				7E412FEA0F8D3E2C00381DD0 /* libshuff.cpp in Sources */,
 				7E4130F80F8E58FA00381DD0 /* dlibshuff.cpp in Sources */,
+				211C38320F961DD400FEE541 /* sharedutilities.cpp in Sources */,
+				211C38380F961E1F00FEE541 /* treegroupscommand.cpp in Sources */,
+				21DDC01B0F97A8FE0060691C /* bootstrapsharedcommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -90,7 +90,7 @@ void ThreeColumnFile::resetFile(){
 		renameOk = rename(outName.c_str(), inName.c_str());
 		
 		//checks to make sure user was able to rename and remove successfully
-		if ((renameOk != 0)) { cout << "Unable to rename necessary files." << endl; }
+		if ((renameOk != 0)) {	cout << "Unable to rename necessary files." << endl;  cout << outName << "  g   " << inName << endl;}
 
 	}
 	catch(exception& e) {
@@ -106,7 +106,7 @@ void ThreeColumnFile::resetFile(){
 /***********************************************************************/
 /***********************************************************************/
 
-ThreeColumnFile2::~ThreeColumnFile2(){
+ColumnFile::~ColumnFile(){
 	
 	inFile.close();
 	outFile.close();
@@ -115,7 +115,7 @@ ThreeColumnFile2::~ThreeColumnFile2(){
 
 /***********************************************************************/
 
-void ThreeColumnFile2::initFile(string label, vector<string> tags){
+void ColumnFile::initFile(string label, vector<string> tags){
 	try {
 		if(counter != 0){
 			openOutputFile(outName, outFile);
@@ -125,7 +125,7 @@ void ThreeColumnFile2::initFile(string label, vector<string> tags){
 			getline(inFile, inputBuffer);
 		
 			outFile	<<  inputBuffer << '\t'; 
-			for(int i = 1; i < tags.size(); i++) {
+			for(int i = 0; i < tags.size(); i++) {
 				outFile << label + tags[i] << '\t';
 			}
 			outFile << endl;
@@ -136,52 +136,58 @@ void ThreeColumnFile2::initFile(string label, vector<string> tags){
 				outFile << label + tags[i] << '\t';
 			}
 			outFile << endl;
-
 		}
 
 		outFile.setf(ios::fixed, ios::floatfield);
 		outFile.setf(ios::showpoint);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ThreeColumnFile class Function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the ColumnFile class Function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the ThreeColumnFile class function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the ColumnFile class function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 }
 
 /***********************************************************************/
 
-void ThreeColumnFile2::output(vector<double> data){
+void ColumnFile::output(vector<double> data){
 	try {
 	
 		if(counter != 0){		
 			string inputBuffer;
 			getline(inFile, inputBuffer);
 
-			outFile << inputBuffer << '\t' << setprecision(6) << data[0] << setprecision(globaldata->getIters().length())  << '\t' << data[1] << '\t' << data[2] << endl;
+			outFile << inputBuffer << '\t' << setprecision(6) << data[0] << setprecision(globaldata->getIters().length());
+			for (int i = 1; i< data.size(); i++) {
+				outFile << '\t' << data[i]; 
+			}
+			outFile << endl;
 		}
 		else{
-			outFile << setprecision(6) << data[0] << setprecision(globaldata->getIters().length())  << '\t' << data[1] << '\t' << data[2] << endl;
-
+			outFile << setprecision(6) << data[0] << setprecision(globaldata->getIters().length());
+			for (int i = 1; i< data.size(); i++) {
+				outFile << '\t' << data[i]; 
+			}
+			outFile << endl;
 		}
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ThreeColumnFile2 class Function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the ColumnFile class Function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the ThreeColumnFile2 class function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the ColumnFile class function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 };
 
 /***********************************************************************/
 
-void ThreeColumnFile2::resetFile(){
+void ColumnFile::resetFile(){
 	try {
 		if(counter != 0){
 			outFile.close();
@@ -200,11 +206,11 @@ void ThreeColumnFile2::resetFile(){
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ThreeColumnFile2 class Function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the ColumnFile class Function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the ThreeColumnFile2 class function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the ColumnFile class function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
 }
