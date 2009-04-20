@@ -87,13 +87,13 @@ void Venn::getPic(SharedOrderVector* sharedorder, vector<Calculator*> vCalcs) {
 				openOutputFile(filenamesvg, outsvg);
 			
 				//in essence you want to run it like a single 
-				if (vCalcs[i]->getName() == "SharedSobs") {
+				if (vCalcs[i]->getName() == "sharedsobs") {
 					delete vCalcs[i];
 					vCalcs[i] = new Sobs();
-				}else if (vCalcs[i]->getName() == "SharedChao") {
+				}else if (vCalcs[i]->getName() == "sharedchao") {
 					delete vCalcs[i];
 					vCalcs[i] = new Chao1();
-				}else if (vCalcs[i]->getName() == "SharedAce") {
+				}else if (vCalcs[i]->getName() == "sharedace") {
 					delete vCalcs[i];
 					vCalcs[i] = new Ace(10);
 				}
@@ -126,8 +126,8 @@ void Venn::getPic(SharedOrderVector* sharedorder, vector<Calculator*> vCalcs) {
 			//one for each group
 			SAbundVector sA, sB;
 			SAbundVector* sabundA; SAbundVector* sabundB;
-			sA = lookup[0]->getSAbundVector();  sabundA = &sA;
-			sB = lookup[1]->getSAbundVector();  sabundB = &sB;
+			sabundA = new SAbundVector(lookup[0]->getSAbundVector());//  sabundA = &sA;
+			sabundB = new SAbundVector(lookup[1]->getSAbundVector());//  sabundB = &sB;
 			
 			//make a file for each calculator
 			for(int i=0;i<vCalcs.size();i++){
@@ -138,23 +138,23 @@ void Venn::getPic(SharedOrderVector* sharedorder, vector<Calculator*> vCalcs) {
 				vector<double> shared = vCalcs[i]->getValues(lookup[0], lookup[1]);
 				
 				//in essence you want to run it like a single 
-				if (vCalcs[i]->getName() == "SharedSobs") {
+				if (vCalcs[i]->getName() == "sharedsobs") {
 					delete vCalcs[i];
 					vCalcs[i] = new Sobs();
-				}else if (vCalcs[i]->getName() == "SharedChao") {
+				}else if (vCalcs[i]->getName() == "sharedchao") {
 					delete vCalcs[i];
 					vCalcs[i] = new Chao1();
-				}else if (vCalcs[i]->getName() == "SharedAce") {
+				}else if (vCalcs[i]->getName() == "sharedace") {
 					delete vCalcs[i];
 					vCalcs[i] = new Ace(10);
 				}
 				
 				//get estimates for numA
 				vector<double> numA = vCalcs[i]->getValues(sabundA);
-				
+
 				//get estimates for numB
 				vector<double> numB = vCalcs[i]->getValues(sabundB);
-				
+				cout << numA[0] << '\t' << numB[0] << '\t' << shared[0] << endl;				
 						
 				//image window
 				outsvg << "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 700 700\" >\n";
@@ -187,7 +187,8 @@ void Venn::getPic(SharedOrderVector* sharedorder, vector<Calculator*> vCalcs) {
 				//close file
 				outsvg << "</g>\n</svg>\n";
 				outsvg.close();
-
+				delete sabundA;
+				delete sabundB;
 			}
 			
 		/******************* 3 Groups **************************/
@@ -239,13 +240,13 @@ void Venn::getPic(SharedOrderVector* sharedorder, vector<Calculator*> vCalcs) {
  				
 				
 				//in essence you want to run it like a single 
-				if (vCalcs[i]->getName() == "SharedSobs") {
+				if (vCalcs[i]->getName() == "sharedsobs") {
 					delete vCalcs[i];
 					vCalcs[i] = new Sobs();
-				}else if (vCalcs[i]->getName() == "SharedChao") {
+				}else if (vCalcs[i]->getName() == "sharedchao") {
 					delete vCalcs[i];
 					vCalcs[i] = new Chao1();
-				}else if (vCalcs[i]->getName() == "SharedAce") {
+				}else if (vCalcs[i]->getName() == "sharedace") {
 					delete vCalcs[i];
 					vCalcs[i] = new Ace(10);
 				}
@@ -338,7 +339,7 @@ void Venn::getPic(SharedOrderVector* sharedorder, vector<Calculator*> vCalcs) {
 			
 			//A = red, B = green, C = blue, D = yellow
 			
-			if ((vCalcs.size() > 1) || (vCalcs[0]->getName() != "SharedSobs")) { cout << "The only calculator able to be used with 4 groups is sharedsobs. I will run that for you. " << endl; }
+			if ((vCalcs.size() > 1) || (vCalcs[0]->getName() != "sharedsobs")) { cout << "The only calculator able to be used with 4 groups is sharedsobs. I will run that for you. " << endl; }
 			
 			//for each bin
 			for (int i = 0; i < lookup[0]->size(); i++) {
@@ -363,7 +364,7 @@ void Venn::getPic(SharedOrderVector* sharedorder, vector<Calculator*> vCalcs) {
 				if ((lookup[0]->getAbundance(i) != 0) && (lookup[1]->getAbundance(i) != 0) && (lookup[2]->getAbundance(i) != 0) && (lookup[3]->getAbundance(i) != 0)) { sharedABCD++; }
 			}
 				
-			string filenamesvg = getRootName(globaldata->inputFileName) + sharedorder->getLabel() + ".venn.SharedSobs.svg";
+			string filenamesvg = getRootName(globaldata->inputFileName) + sharedorder->getLabel() + ".venn.sharedsobs.svg";
 			openOutputFile(filenamesvg, outsvg);
 		
 			//image window

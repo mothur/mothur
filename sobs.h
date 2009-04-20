@@ -21,7 +21,7 @@ It is a child of the calculator class. */
 class Sobs : public Calculator {
 
 public:
-	Sobs() : Calculator("Sobs", 1) {};
+	Sobs() : Calculator("sobs", 1) {};
 	EstOutput getValues(SAbundVector* rank){
 		data.resize(1,0);
 		data[0] = (double)rank->getNumBins();

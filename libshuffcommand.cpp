@@ -57,7 +57,7 @@ int LibShuffCommand::execute(){
 		savedDXYValues = form->evaluateAll();
 		savedMinValues = form->getSavedMins();
 		
-		pValueCounts.assign(numGroups, 0);
+		pValueCounts.resize(numGroups);
 		for(int i=0;i<numGroups;i++){
 			pValueCounts[i].assign(numGroups, 0);
 		}
