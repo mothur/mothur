@@ -49,7 +49,7 @@ private:
 	map<string, int>::iterator it, it2;
 	map<string, int> mergeGroups(int);  //returns a map with a groupname and the number of times that group was seen in the children
 	
-	map<string,int> Tree::mergeGcounts(int);
+	map<string,int> mergeGcounts(int);
 	void randomTopology();
 	void randomBlengths();
 	void randomLabels(vector<string>);

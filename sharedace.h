@@ -19,7 +19,7 @@ It is a child of the calculator class. */
 class SharedAce : public Calculator  {
 	
 public:
-	SharedAce(int n=10) : abund(n),  Calculator("SharedAce", 3) {};
+	SharedAce(int n=10) : abund(n),  Calculator("sharedace", 3) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
 private:

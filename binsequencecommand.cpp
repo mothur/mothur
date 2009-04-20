@@ -105,7 +105,7 @@ int BinSeqCommand::execute(){
 					//get last name
 					sequence = fasta->getSequence(binnames);
 					if (sequence != "not found") {
-						name = binnames + "bin" + toString(i+1);
+						name = binnames + '|' + toString(i+1);
 						out << ">" << name << endl;
 						out << sequence << endl;
 					}else { 

@@ -19,7 +19,7 @@ It is a child of the calculator class. */
 class SharedSobs : public Calculator {
 
 public:
-	SharedSobs() : Calculator("SharedSobs", 1) {};
+	SharedSobs() : Calculator("sharedsobs", 1) {};
 	EstOutput getValues(SAbundVector* rank){ return data; };
 	EstOutput getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2);
 };

@@ -45,8 +45,8 @@ bool InteractEngine::getInput(){
 		bool errorFree;
 		ErrorCheck* errorCheckor = new ErrorCheck();
 		
-		cout << "mothur v1.0" << endl;
-		cout << "Last updated: 1/29/2009" << endl << endl;
+		cout << "mothur v1.2.0" << endl;
+		cout << "Last updated: 4/14/2009" << endl << endl;
 		cout << "by" << endl;
 		cout << "Patrick D. Schloss" << endl << endl;
 		cout << "Department of Microbiology" << endl;

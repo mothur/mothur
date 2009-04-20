@@ -63,12 +63,11 @@ int HeatMapCommand::execute(){
 			//you are using just a list file and have only one group
 			read = new ReadPhilFile(globaldata->inputFileName);	
 			read->read(&*globaldata); 
-		
+			
 			ordersingle = globaldata->gorder;
 			input = globaldata->ginput;
 		}
 		
-				
 		if (format != "list") {	
 		
 			util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups, "heat");

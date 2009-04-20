@@ -31,20 +31,16 @@ class HeatMap {
 		void getPic(SharedOrderVector*);
 
 	private:
-		void sortSharedVectors();
+		void sortSharedVectors(vector<SharedRAbundVector*>& );
 		void printLegend(int, float);
-		
+
 		GlobalData* globaldata;
 		SharedUtil* util;
-		vector<SharedRAbundVector*> lookup;
-		RAbundVector rabund;
 		string format, sorted, groupComb, scaler;
 		ofstream outsvg;
-		map<float, string> colorScale;
-		map<float, string>::iterator it;
-
 			
 };
+
 /***********************************************************************/
 
 #endif
