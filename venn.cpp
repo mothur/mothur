@@ -88,17 +88,14 @@ void Venn::getPic(SharedOrderVector* sharedorder, vector<Calculator*> vCalcs) {
 			
 				//in essence you want to run it like a single 
 				if (vCalcs[i]->getName() == "sharedsobs") {
-					delete vCalcs[i];
-					vCalcs[i] = new Sobs();
+					singleCalc = new Sobs();
 				}else if (vCalcs[i]->getName() == "sharedchao") {
-					delete vCalcs[i];
-					vCalcs[i] = new Chao1();
+					singleCalc = new Chao1();
 				}else if (vCalcs[i]->getName() == "sharedace") {
-					delete vCalcs[i];
-					vCalcs[i] = new Ace(10);
+					singleCalc = new Ace(10);
 				}
 				
-				vector<double> data = vCalcs[i]->getValues(sabund);
+				vector<double> data = singleCalc->getValues(sabund);
 			
 				//svg image
 				outsvg << "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 700 700\" >\n";
@@ -117,6 +114,8 @@ void Venn::getPic(SharedOrderVector* sharedorder, vector<Calculator*> vCalcs) {
 			
 				outsvg << "</g>\n</svg>\n";
 				outsvg.close();
+				delete singleCalc;
+				
 			}
 			
 		/******************* 2 Groups **************************/	
@@ -139,22 +138,18 @@ void Venn::getPic(SharedOrderVector* sharedorder, vector<Calculator*> vCalcs) {
 				
 				//in essence you want to run it like a single 
 				if (vCalcs[i]->getName() == "sharedsobs") {
-					delete vCalcs[i];
-					vCalcs[i] = new Sobs();
+					singleCalc = new Sobs();
 				}else if (vCalcs[i]->getName() == "sharedchao") {
-					delete vCalcs[i];
-					vCalcs[i] = new Chao1();
+					singleCalc = new Chao1();
 				}else if (vCalcs[i]->getName() == "sharedace") {
-					delete vCalcs[i];
-					vCalcs[i] = new Ace(10);
+					singleCalc = new Ace(10);
 				}
 				
 				//get estimates for numA
-				vector<double> numA = vCalcs[i]->getValues(sabundA);
+				vector<double> numA = singleCalc->getValues(sabundA);
 
 				//get estimates for numB
-				vector<double> numB = vCalcs[i]->getValues(sabundB);
-				cout << numA[0] << '\t' << numB[0] << '\t' << shared[0] << endl;				
+				vector<double> numB = singleCalc->getValues(sabundB);
 						
 				//image window
 				outsvg << "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 700 700\" >\n";
@@ -189,6 +184,7 @@ void Venn::getPic(SharedOrderVector* sharedorder, vector<Calculator*> vCalcs) {
 				outsvg.close();
 				delete sabundA;
 				delete sabundB;
+				delete singleCalc;
 			}
 			
 		/******************* 3 Groups **************************/
@@ -237,28 +233,25 @@ void Venn::getPic(SharedOrderVector* sharedorder, vector<Calculator*> vCalcs) {
 				}
 				
 				vector<double> sharedCwithAB = vCalcs[i]->getValues(lookup[2], merge);
- 				
+ 				delete merge;
 				
 				//in essence you want to run it like a single 
 				if (vCalcs[i]->getName() == "sharedsobs") {
-					delete vCalcs[i];
-					vCalcs[i] = new Sobs();
+					singleCalc = new Sobs();
 				}else if (vCalcs[i]->getName() == "sharedchao") {
-					delete vCalcs[i];
-					vCalcs[i] = new Chao1();
+					singleCalc = new Chao1();
 				}else if (vCalcs[i]->getName() == "sharedace") {
-					delete vCalcs[i];
-					vCalcs[i] = new Ace(10);
+					singleCalc = new Ace(10);
 				}
 				
 				//get estimates for numA
-				vector<double> numA = vCalcs[i]->getValues(sabundA);
+				vector<double> numA = singleCalc->getValues(sabundA);
  			
 				//get estimates for numB
-				vector<double> numB = vCalcs[i]->getValues(sabundB);
+				vector<double> numB = singleCalc->getValues(sabundB);
  				
 				//get estimates for numC
-				vector<double> numC = vCalcs[i]->getValues(sabundC);
+				vector<double> numC = singleCalc->getValues(sabundC);
  				
 				//find possible sharedABC values
 				float sharedABC1, sharedABC2, sharedABC3, sharedABC;
@@ -287,7 +280,9 @@ void Venn::getPic(SharedOrderVector* sharedorder, vector<Calculator*> vCalcs) {
 				outsvg << "<circle fill=\"rgb(255,0,0)\" opacity=\".3\" stroke=\"black\" cx=\"230\" cy=\"200\" r=\"150\"/>"; 
 				outsvg << "<circle fill=\"rgb(0,255,0)\" opacity=\".3\" stroke=\"black\" cx=\"455\" cy=\"200\" r=\"150\"/>"; 
 				outsvg << "<circle fill=\"rgb(0,0,255)\" opacity=\".3\" stroke=\"black\" cx=\"343\" cy=\"400\" r=\"150\"/>"; 
-			
+//cout << "numA = " << numA[0] << " numB = " << numB[0] 	<< " numC = " << numC[0] << endl;
+//cout << "sharedAB = " << sharedAB[0] << " sharedAC = " << sharedAC[0] << " sharedBC = " << sharedBC[0] << endl;
+//cout << "sharedAwithBC = " << sharedAwithBC[0]	<< " sharedBwithAC = " << sharedBwithAC[0] << " sharedCwithAB = " << sharedCwithAB[0] << endl;	
 				//place labels within overlaps
 				outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(200 - ((int)toString(numA[0]-sharedAwithBC[0]).length() / 2)) + "\" y=\"170\">" + toString(numA[0]-sharedAwithBC[0]) + "</text>\n"; 
 				outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(200 - ((int)lookup[0]->getGroup().length() / 2)) + "\" y=\"150\">" + lookup[0]->getGroup() + "</text>\n";  
@@ -326,6 +321,7 @@ void Venn::getPic(SharedOrderVector* sharedorder, vector<Calculator*> vCalcs) {
 				//close file
 				outsvg << "</g>\n</svg>\n";
 				outsvg.close();
+				delete singleCalc;
 			}
 			
 		/******************* 4 Groups **************************/
