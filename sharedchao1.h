@@ -20,7 +20,7 @@ It is a child of the calculator class. */
 class SharedChao1 : public Calculator  {
 	
 public: 
-	SharedChao1() : Calculator("SharedChao", 3) {};
+	SharedChao1() : Calculator("sharedchao", 3) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
 };

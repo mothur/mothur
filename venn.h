@@ -35,6 +35,7 @@ class Venn {
 		SharedUtil* util;
 		SAbundVector* sabund;
 		GlobalData* globaldata;
+		Calculator* singleCalc;
 		vector<SharedRAbundVector*> lookup;
 		string format, groupComb;
 		ofstream outsvg;
