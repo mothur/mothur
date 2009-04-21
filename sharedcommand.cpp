@@ -38,7 +38,7 @@ int SharedCommand::execute(){
 		globaldata = GlobalData::getInstance();
 			
 		//read in listfile
-		read = new ReadPhilFile(globaldata->inputFileName);	
+		read = new ReadOTUFile(globaldata->inputFileName);	
 		read->read(&*globaldata); 
 		input = globaldata->ginput;
 		SharedList = globaldata->gSharedList;

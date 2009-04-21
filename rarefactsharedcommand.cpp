@@ -69,14 +69,14 @@ int RareFactSharedCommand::execute(){
 		if (rDisplays.size() == 0) { return 0; }
 
 		if (format == "sharedfile") {
-			read = new ReadPhilFile(globaldata->inputFileName);	
+			read = new ReadOTUFile(globaldata->inputFileName);	
 			read->read(&*globaldata); 
 			
 			input = globaldata->ginput;
 			order = input->getSharedOrderVector();
 		}else {
 			//you are using a list and a groupfile
-			read = new ReadPhilFile(globaldata->inputFileName);	
+			read = new ReadOTUFile(globaldata->inputFileName);	
 			read->read(&*globaldata); 
 		
 			input = globaldata->ginput;

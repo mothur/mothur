@@ -101,7 +101,7 @@ int SummaryCommand::execute(){
 		openOutputFile(outputFileName, outputFileHandle);
 		outputFileHandle << "label";
 	
-		read = new ReadPhilFile(globaldata->inputFileName);	
+		read = new ReadOTUFile(globaldata->inputFileName);	
 		read->read(&*globaldata); 
 
 		for(int i=0;i<sumCalculators.size();i++){

@@ -15,7 +15,7 @@
 #include "sharedlistvector.h"
 #include "inputdata.h"
 #include "groupmap.h"
-#include "readmatrix.hpp"
+#include "readotu.h"
 #include "validcalculator.h"
 #include "tree.h"
 #include "treemap.h"
@@ -41,7 +41,7 @@ private:
 	
 	GlobalData* globaldata;
 	SharedUtil* util;
-	ReadMatrix* read;
+	ReadOTUFile* read;
 	TreeMap* tmap;
 	Tree* t;
 	vector<Calculator*> treeCalculators;

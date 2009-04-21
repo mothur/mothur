@@ -14,7 +14,7 @@
 #include "inputdata.h"
 #include "rarefact.h"
 #include "display.h"
-#include "readmatrix.hpp"
+#include "readotu.h"
 #include "validcalculator.h"
 
 
@@ -44,7 +44,7 @@ public:
 private:
 	GlobalData* globaldata;
 	vector<Display*> rDisplays;
-	ReadMatrix* read;
+	ReadOTUFile* read;
 	OrderVector* order;
 	InputData* input;
 	ValidCalculators* validCalculator;

@@ -11,7 +11,7 @@
  
 #include "command.hpp"
 #include "inputdata.h"
-#include "readmatrix.hpp"
+#include "readotu.h"
 #include "sharedlistvector.h"
 #include "venn.h"
 #include "validcalculator.h"
@@ -30,7 +30,7 @@ public:
 	
 private:
 	GlobalData* globaldata;
-	ReadMatrix* read;
+	ReadOTUFile* read;
 	SharedUtil* util;
 	InputData* input;
 	SharedListVector* SharedList;

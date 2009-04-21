@@ -15,7 +15,7 @@
 #include "inputdata.h"
 #include "rarefact.h"
 #include "display.h"
-#include "readmatrix.hpp"
+#include "readotu.h"
 #include "validcalculator.h"
 #include "sharedutilities.h"
 
@@ -44,7 +44,7 @@ private:
 	GlobalData* globaldata;
 	SharedUtil* util;
 	SharedListVector* SharedList;
-	ReadMatrix* read;
+	ReadOTUFile* read;
 	SharedOrderVector* order;
 	InputData* input;
 	ValidCalculators* validCalculator;

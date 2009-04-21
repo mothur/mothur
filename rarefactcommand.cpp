@@ -89,7 +89,7 @@ int RareFactCommand::execute(){
 		//if the users entered no valid calculators don't execute command
 		if (rDisplays.size() == 0) { return 0; }
 
-		read = new ReadPhilFile(globaldata->inputFileName);	
+		read = new ReadOTUFile(globaldata->inputFileName);	
 		read->read(&*globaldata); 
 
 		order = globaldata->gorder;

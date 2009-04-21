@@ -8,6 +8,8 @@
  */
 
 #include "readdistcommand.h"
+#include "readphylip.h"
+#include "readcolumn.h"
 
 ReadDistCommand::ReadDistCommand(){
 	try {
