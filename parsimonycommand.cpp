@@ -36,12 +36,8 @@ ParsimonyCommand::ParsimonyCommand() {
 		util->getCombos(groupComb, globaldata->Groups, numComp);
 		globaldata->setGroups("");
 		
-		//ABC
-		if (numComp != 1) {
-			groupComb.push_back(allGroups);
-			numComp++;
-		}
-
+		if (numGroups == 1) { numComp++; groupComb.push_back(allGroups); }
+		
 		convert(globaldata->getIters(), iters);  //how many random trees to generate
 		pars = new Parsimony(tmap);
 		counter = 0;
