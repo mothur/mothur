@@ -51,7 +51,7 @@ class UnifracUnweightedCommand : public Command {
 		ofstream outSum, out;
 		ifstream inFile;
 		
-		void printUWSummaryFile();
+		void printUWSummaryFile(int);
 		void printUnweightedFile();
 		 
 		

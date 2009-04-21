@@ -24,13 +24,8 @@ UnifracUnweightedCommand::UnifracUnweightedCommand() {
 		util->getCombos(groupComb, globaldata->Groups, numComp);
 		globaldata->setGroups("");
 		
-		//ABC
-		if (numComp != 1) {
-			groupComb.push_back(allGroups);
-			numComp++;
-		}
-
-		
+		if (numGroups == 1) { numComp++; groupComb.push_back(allGroups); }
+				
 		convert(globaldata->getIters(), iters);  //how many random trees to generate
 		unweighted = new Unweighted(tmap);
 
@@ -60,9 +55,6 @@ int UnifracUnweightedCommand::execute() {
 			counter = 0;
 			
 			output = new ColumnFile(globaldata->getTreeFile()  + toString(i+1) + ".unweighted");
-			
-			outSum << i+1 << '\t';
-			cout << i+1 << '\t';
 			
 			//get unweighted for users tree
 			rscoreFreq.resize(numComp);  
@@ -116,7 +108,7 @@ int UnifracUnweightedCommand::execute() {
 		
 		
 			printUnweightedFile();
-			printUWSummaryFile();
+			printUWSummaryFile(i);
 			
 			delete output;
 			rscoreFreq.clear(); 
@@ -171,7 +163,7 @@ void UnifracUnweightedCommand::printUnweightedFile() {
 }
 
 /***********************************************************/
-void UnifracUnweightedCommand::printUWSummaryFile() {
+void UnifracUnweightedCommand::printUWSummaryFile(int i) {
 	try {
 				
 		//format output
@@ -180,6 +172,9 @@ void UnifracUnweightedCommand::printUWSummaryFile() {
 		//print each line
 
 		for(int a = 0; a < numComp; a++) {
+			outSum << i+1 << '\t';
+			cout << i+1 << '\t';
+			
 			if (UWScoreSig[a][0] > (1/(float)iters)) {
 				outSum << setprecision(6) << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(globaldata->getIters().length()) << UWScoreSig[a][0] << endl;
 				cout << setprecision(6)  << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(globaldata->getIters().length()) << UWScoreSig[a][0] << endl; 

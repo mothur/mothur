@@ -211,23 +211,23 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 				for (int i=0; i < allGroups.size(); i++) { 
 					if (allGroups[i] != "xxx") {
 						userGroups.push_back(allGroups[i]);
-						label += allGroups[i] + "-";
 					}
 				}
 			}
 		}else { //the user has not entered groups
 			for (int i=0; i < allGroups.size(); i++) { 
 				if (allGroups[i] != "xxx") {
-					label += allGroups[i] + "-";
 					if (mode == "weighted") {
 						userGroups.push_back(allGroups[i]);
 					}else {
 						numGroups = 1;
+						label += allGroups[i] + "-";
 					}
 				}
 			}
+			//rip extra - off allgroups 
+			label = label.substr(0, label.length()-1);
 		}
-		
 		
 		if (mode == "weighted") {
 			//if the user only entered invalid groups
@@ -256,20 +256,11 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 					for (int i = 0; i < allGroups.size(); i++) {
 						if (allGroups[i] != "xxx") {
 							userGroups.push_back(allGroups[i]);
-							label += allGroups[i] + "-";
 						}
-					}
-				}else {
-					for (int i = 0; i < userGroups.size(); i++) {
-						label += userGroups[i] + "-";
 					}
 				}
 				
-				//rip extra - off allgroups 
-				label = label.substr(0, label.length()-1);
-				
 				if (numGroups != 1) { numGroups = userGroups.size(); }
-		
 		}
 	}
 	catch(exception& e) {
