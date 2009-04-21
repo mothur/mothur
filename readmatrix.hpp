@@ -11,15 +11,10 @@
  */
 
 #include "mothur.h"
-#include "rabundvector.hpp"
 #include "listvector.hpp"
-#include "sharedlistvector.h"
 #include "sparsematrix.hpp"
 #include "nameassignment.hpp"
-#include "inputdata.h"
 #include "globaldata.hpp"
-#include "sabundvector.hpp"
-#include "groupmap.h"
 
 class SparseMatrix;
 
@@ -40,56 +35,7 @@ protected:
 	SparseMatrix* D;
 	ListVector* list;
 	GlobalData* globaldata;
-	OrderVector* order;
-	InputData* input;
 	float cutoff;
-};
-
-
-
-class ReadPhylipMatrix : public ReadMatrix {
-	
-public:
-	ReadPhylipMatrix(string);
-	~ReadPhylipMatrix();
-	void read(NameAssignment*);
-private:
-	ifstream fileHandle;
-	string distFile;
-};
-
-
-
-class ReadColumnMatrix : public ReadMatrix {
-	
-public:
-	ReadColumnMatrix(string);
-	~ReadColumnMatrix();
-	void read(NameAssignment*);
-private:
-	ifstream fileHandle;
-	string distFile;
-};
-
-
-class ReadPhilFile : public ReadMatrix {
-	
-public:
-	ReadPhilFile(string);
-	~ReadPhilFile();
-	void read(GlobalData* globaldata);
-private:
-	ifstream fileHandle;
-	string philFile;
-	InputData* input;
-	InputData* inputSabund;
-	InputData* inputList;
-	ListVector* list;
-	SharedListVector* SharedList;
-	OrderVector* order;
-	SAbundVector* sabund;
-	GlobalData* globaldata;
-	// InputData* getInput()			{	return input;	}
 };
 
 

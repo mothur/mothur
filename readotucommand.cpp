@@ -14,7 +14,7 @@ ReadOtuCommand::ReadOtuCommand(){
 	try {
 		globaldata = GlobalData::getInstance();
 		filename = globaldata->inputFileName;
-		read = new ReadPhilFile(filename);
+		read = new ReadOTUFile(filename);
 		if (globaldata->getFormat() == "shared") {
 			//read in group map info.
 			groupMap = new GroupMap(globaldata->getGroupFile());

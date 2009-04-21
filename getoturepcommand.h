@@ -16,7 +16,7 @@
 #include "sparsematrix.hpp"
 #include "listvector.hpp"
 #include "inputdata.h"
-#include "readmatrix.hpp"
+#include "readotu.h"
 #include "fastamap.h"
 
 
@@ -36,7 +36,7 @@ private:
 	SparseMatrix* matrix;
 	ListVector* list;
 	ListVector* listOfNames;
-	ReadMatrix* read;
+	ReadOTUFile* read;
 	InputData* input;
 	FastaMap* fasta;
 	string filename, fastafile, namesfile;

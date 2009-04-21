@@ -32,6 +32,9 @@
 		375874060F7D64EF0040F377 /* sharedkulczynskicody.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 375874020F7D64EF0040F377 /* sharedkulczynskicody.cpp */; };
 		3758740C0F7D64FC0040F377 /* sharedmorisitahorn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 375874080F7D64FC0040F377 /* sharedmorisitahorn.cpp */; };
 		3758740D0F7D64FC0040F377 /* sharedochiai.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3758740B0F7D64FC0040F377 /* sharedochiai.cpp */; };
+		375AA1390F9E433D008EF9B8 /* readcolumn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 375AA1330F9E433D008EF9B8 /* readcolumn.cpp */; };
+		375AA13A0F9E433D008EF9B8 /* readotu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 375AA1350F9E433D008EF9B8 /* readotu.cpp */; };
+		375AA13B0F9E433D008EF9B8 /* readphylip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 375AA1370F9E433D008EF9B8 /* readphylip.cpp */; };
 		379293C30F2DE73400B9034A /* treemap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 379293C20F2DE73400B9034A /* treemap.cpp */; };
 		379294700F2E191800B9034A /* parsimonycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3792946F0F2E191800B9034A /* parsimonycommand.cpp */; };
 		3792948A0F2E258500B9034A /* parsimony.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 379294890F2E258500B9034A /* parsimony.cpp */; };
@@ -79,7 +82,6 @@
 		37D9287A0F21331F001D4494 /* rarefact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D928050F21331F001D4494 /* rarefact.cpp */; };
 		37D9287B0F21331F001D4494 /* rarefactcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D928070F21331F001D4494 /* rarefactcommand.cpp */; };
 		37D9287C0F21331F001D4494 /* rarefactsharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D9280A0F21331F001D4494 /* rarefactsharedcommand.cpp */; };
-		37D928800F21331F001D4494 /* readmatrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D928120F21331F001D4494 /* readmatrix.cpp */; };
 		37D928840F21331F001D4494 /* sabundvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D9281A0F21331F001D4494 /* sabundvector.cpp */; };
 		37D928850F21331F001D4494 /* sequence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D9281C0F21331F001D4494 /* sequence.cpp */; };
 		37D928860F21331F001D4494 /* shannon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D9281E0F21331F001D4494 /* shannon.cpp */; };
@@ -191,6 +193,12 @@
 		375874090F7D64FC0040F377 /* sharedochiai.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedochiai.h; sourceTree = "<group>"; };
 		3758740A0F7D64FC0040F377 /* sharednseqs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharednseqs.h; sourceTree = "<group>"; };
 		3758740B0F7D64FC0040F377 /* sharedochiai.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedochiai.cpp; sourceTree = "<group>"; };
+		375AA1330F9E433D008EF9B8 /* readcolumn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readcolumn.cpp; sourceTree = "<group>"; };
+		375AA1340F9E433D008EF9B8 /* readcolumn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readcolumn.h; sourceTree = "<group>"; };
+		375AA1350F9E433D008EF9B8 /* readotu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readotu.cpp; sourceTree = "<group>"; };
+		375AA1360F9E433D008EF9B8 /* readotu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readotu.h; sourceTree = "<group>"; };
+		375AA1370F9E433D008EF9B8 /* readphylip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readphylip.cpp; sourceTree = "<group>"; };
+		375AA1380F9E433D008EF9B8 /* readphylip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readphylip.h; sourceTree = "<group>"; };
 		379293C10F2DE73400B9034A /* treemap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = treemap.h; sourceTree = "<group>"; };
 		379293C20F2DE73400B9034A /* treemap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = treemap.cpp; sourceTree = "<group>"; };
 		3792946E0F2E191800B9034A /* parsimonycommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parsimonycommand.h; sourceTree = "<group>"; };
@@ -291,7 +299,6 @@
 		37D928090F21331F001D4494 /* rarefactioncurvedata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rarefactioncurvedata.h; sourceTree = "<group>"; };
 		37D9280A0F21331F001D4494 /* rarefactsharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rarefactsharedcommand.cpp; sourceTree = "<group>"; };
 		37D9280B0F21331F001D4494 /* rarefactsharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rarefactsharedcommand.h; sourceTree = "<group>"; };
-		37D928120F21331F001D4494 /* readmatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readmatrix.cpp; sourceTree = "<group>"; };
 		37D928130F21331F001D4494 /* readmatrix.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = readmatrix.hpp; sourceTree = "<group>"; };
 		37D9281A0F21331F001D4494 /* sabundvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sabundvector.cpp; sourceTree = "<group>"; };
 		37D9281B0F21331F001D4494 /* sabundvector.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = sabundvector.hpp; sourceTree = "<group>"; };
@@ -461,8 +468,13 @@
 				37D928060F21331F001D4494 /* rarefact.h */,
 				37D928050F21331F001D4494 /* rarefact.cpp */,
 				37D928090F21331F001D4494 /* rarefactioncurvedata.h */,
+				375AA1340F9E433D008EF9B8 /* readcolumn.h */,
+				375AA1330F9E433D008EF9B8 /* readcolumn.cpp */,
 				37D928130F21331F001D4494 /* readmatrix.hpp */,
-				37D928120F21331F001D4494 /* readmatrix.cpp */,
+				375AA1360F9E433D008EF9B8 /* readotu.h */,
+				375AA1350F9E433D008EF9B8 /* readotu.cpp */,
+				375AA1380F9E433D008EF9B8 /* readphylip.h */,
+				375AA1370F9E433D008EF9B8 /* readphylip.cpp */,
 				37AD4DC80F28F3DD00AA2D49 /* readtree.h */,
 				37AD4DC90F28F3DD00AA2D49 /* readtree.cpp */,
 				37D9281D0F21331F001D4494 /* sequence.hpp */,
@@ -785,7 +797,6 @@
 				37D9287A0F21331F001D4494 /* rarefact.cpp in Sources */,
 				37D9287B0F21331F001D4494 /* rarefactcommand.cpp in Sources */,
 				37D9287C0F21331F001D4494 /* rarefactsharedcommand.cpp in Sources */,
-				37D928800F21331F001D4494 /* readmatrix.cpp in Sources */,
 				37D928840F21331F001D4494 /* sabundvector.cpp in Sources */,
 				37D928850F21331F001D4494 /* sequence.cpp in Sources */,
 				37D928860F21331F001D4494 /* shannon.cpp in Sources */,
@@ -863,6 +874,9 @@
 				211C38320F961DD400FEE541 /* sharedutilities.cpp in Sources */,
 				211C38380F961E1F00FEE541 /* treegroupscommand.cpp in Sources */,
 				21DDC01B0F97A8FE0060691C /* bootstrapsharedcommand.cpp in Sources */,
+				375AA1390F9E433D008EF9B8 /* readcolumn.cpp in Sources */,
+				375AA13A0F9E433D008EF9B8 /* readotu.cpp in Sources */,
+				375AA13B0F9E433D008EF9B8 /* readphylip.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

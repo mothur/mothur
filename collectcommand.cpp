@@ -99,7 +99,7 @@ int CollectCommand::execute(){
 		//if the users entered no valid calculators don't execute command
 		if (cDisplays.size() == 0) { return 0; }
 
-		read = new ReadPhilFile(globaldata->inputFileName);	
+		read = new ReadOTUFile(globaldata->inputFileName);	
 		read->read(&*globaldata); 
 		
 		order = globaldata->gorder;

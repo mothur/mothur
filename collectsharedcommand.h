@@ -17,7 +17,7 @@
 #include "groupmap.h"
 #include "collect.h"
 #include "display.h"
-#include "readmatrix.hpp"
+#include "readotu.h"
 #include "validcalculator.h"
 #include "sharedutilities.h"
 
@@ -48,7 +48,7 @@ private:
 	SharedUtil* util;
 	GroupMap* groupmap;
 	SharedListVector* SharedList;
-	ReadMatrix* read;
+	ReadOTUFile* read;
 	SharedOrderVector* order;
 	InputData* input;
 	ValidCalculators* validCalculator;

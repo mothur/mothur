@@ -14,7 +14,7 @@
 #include "sharedlistvector.h"
 #include "inputdata.h"
 #include "groupmap.h"
-#include "readmatrix.hpp"
+#include "readotu.h"
 
 
 /* The parselist() command:
@@ -37,7 +37,7 @@ private:
 	GlobalData* globaldata;
 	GroupMap* groupMap;
 	InputData* input;
-	ReadMatrix* read;
+	ReadOTUFile* read;
 	map<string, ofstream*> filehandles;
 	map<string, SharedListVector*> groupOfLists;
 	SharedListVector* list;

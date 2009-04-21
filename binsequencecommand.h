@@ -14,7 +14,7 @@
 #include "command.hpp"
 #include "inputdata.h"
 #include "listvector.hpp"
-#include "readmatrix.hpp"
+#include "readotu.h"
 #include "fastamap.h"
 
 
@@ -30,7 +30,7 @@ public:
 private:
 	GlobalData* globaldata;
 	ListVector* list;
-	ReadMatrix* read;
+	ReadOTUFile* read;
 	InputData* input;
 	FastaMap* fasta;
 	string filename, fastafile, namesfile;

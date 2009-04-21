@@ -95,14 +95,14 @@ int VennCommand::execute(){
 		
 		if (format == "sharedfile") {
 			//you have groups
-			read = new ReadPhilFile(globaldata->inputFileName);	
+			read = new ReadOTUFile(globaldata->inputFileName);	
 			read->read(&*globaldata); 
 			
 			input = globaldata->ginput;
 			order = input->getSharedOrderVector();
 		}else if (format == "shared") {
 			//you are using a list and a groupfile
-			read = new ReadPhilFile(globaldata->inputFileName);	
+			read = new ReadOTUFile(globaldata->inputFileName);	
 			read->read(&*globaldata); 
 		
 			input = globaldata->ginput;
@@ -110,7 +110,7 @@ int VennCommand::execute(){
 			order = SharedList->getSharedOrderVector();
 		}else if (format == "list") {
 			//you are using just a list file and have only one group
-			read = new ReadPhilFile(globaldata->inputFileName);	
+			read = new ReadOTUFile(globaldata->inputFileName);	
 			read->read(&*globaldata); 
 		
 			ordersingle = globaldata->gorder;

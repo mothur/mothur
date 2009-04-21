@@ -80,7 +80,7 @@ int GetOTURepCommand::execute(){
 		}
 		
 		//read list file
-		read = new ReadPhilFile(globaldata->getListFile());	
+		read = new ReadOTUFile(globaldata->getListFile());	
 		read->read(&*globaldata); 
 		
 		input = globaldata->ginput;

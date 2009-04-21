@@ -13,7 +13,7 @@
 #include "sabundvector.hpp"
 #include "inputdata.h"
 #include "calculator.h"
-#include "readmatrix.hpp"
+#include "readotu.h"
 #include "validcalculator.h"
 
 /* The summary() command:
@@ -39,7 +39,7 @@ public:
 	
 private:
 	GlobalData* globaldata;
-	ReadMatrix* read;
+	ReadOTUFile* read;
 	vector<Calculator*> sumCalculators;	
 	InputData* input;
 	ValidCalculators* validCalculator;

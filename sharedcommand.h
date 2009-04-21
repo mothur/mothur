@@ -13,7 +13,7 @@
 #include "sharedlistvector.h"
 #include "inputdata.h"
 #include "shared.h"
-#include "readmatrix.hpp"
+#include "readotu.h"
 
 /* The shared() command:
 	The shared command can only be executed after a successful read.shared command.  
@@ -34,7 +34,7 @@ public:
 private:
 	void printSharedData();
 	GlobalData* globaldata;
-	ReadMatrix* read;
+	ReadOTUFile* read;
 	SharedListVector* SharedList;
 	InputData* input;
 	Shared* shared;

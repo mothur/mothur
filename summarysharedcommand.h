@@ -14,7 +14,7 @@
 #include "sharedrabundvector.h"
 #include "inputdata.h"
 #include "calculator.h"
-#include "readmatrix.hpp"
+#include "readotu.h"
 #include "sharedlistvector.h"
 #include "validcalculator.h"
 #include "sharedutilities.h"
@@ -45,7 +45,7 @@ public:
 	
 private:
 	GlobalData* globaldata;
-	ReadMatrix* read;
+	ReadOTUFile* read;
 	SharedUtil* util;
 	vector<Calculator*> sumCalculators;	
 	InputData* input;

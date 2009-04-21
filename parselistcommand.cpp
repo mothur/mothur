@@ -89,7 +89,7 @@ int ParseListCommand::execute(){
 			int count = 1;
 			
 			//read in listfile
-			read = new ReadPhilFile(globaldata->inputFileName);	
+			read = new ReadOTUFile(globaldata->inputFileName);	
 			read->read(&*globaldata); 
 			input = globaldata->ginput;
 			list = globaldata->gSharedList;

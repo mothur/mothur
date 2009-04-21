@@ -15,7 +15,7 @@
 #include "groupmap.h"
 #include "collect.h"
 #include "display.h"
-#include "readmatrix.hpp"
+#include "readotu.h"
 #include "validcalculator.h"
 
 /*The collect() command:
@@ -43,7 +43,7 @@ public:
 	
 private:
 	GlobalData* globaldata;
-	ReadMatrix* read;
+	ReadOTUFile* read;
 	OrderVector* order;
 	InputData* input;
 	Collect* cCurve;

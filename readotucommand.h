@@ -10,7 +10,7 @@
  */
 
 #include "command.hpp"
-#include "readmatrix.hpp"
+#include "readotu.h"
 #include "inputdata.h"
 #include "groupmap.h"
 #include "sharedcommand.h"
@@ -39,7 +39,7 @@ public:
 	
 private:
 	GlobalData* globaldata;
-	ReadMatrix* read;
+	ReadOTUFile* read;
 	InputData* input;
 	Command* shared;
 	Command* parselist;
