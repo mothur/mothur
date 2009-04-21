@@ -20,11 +20,19 @@ GetOTURepCommand::GetOTURepCommand(){
 		if(globaldata->gListVector != NULL)		{	
 			listOfNames = new ListVector(*globaldata->gListVector);	
 			
+			vector<string> names;
+			string binnames;
 			//map names to rows in sparsematrix
 			for (int i = 0; i < listOfNames->size(); i++) {
-				nameToIndex[listOfNames->get(i)] = i;
+				names.clear();
+				binnames = listOfNames->get(i);
+				splitAtComma(binnames, names);
+				
+				for (int j = 0; j < names.size(); j++) {
+					nameToIndex[names[j]] = i;
+				}
 			}
-		}else { cout << "error" << endl; }
+		}else { cout << "error, no listvector." << endl; }
 
 		
 		fastafile = globaldata->getFastaFile();
@@ -176,7 +184,7 @@ string GetOTURepCommand::FindRep(int bin) {
 		string minName;
 		
 		binnames = list->get(bin);
-		
+	
 		//parse names into vector
 		splitAtComma(binnames, names);
 		
@@ -186,6 +194,7 @@ string GetOTURepCommand::FindRep(int bin) {
 			//fill binMap
 			for (int i = 0; i < names.size(); i++) {
 				for (it3 = nameToIndex.begin(); it3 != nameToIndex.end(); it3++) {
+
 					if (it3->first == names[i]) {  
 						binMap[it3->second] = it3->first;
 

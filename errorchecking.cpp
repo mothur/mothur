@@ -23,21 +23,21 @@ ErrorCheck::ErrorCheck() {
 /******************************************************/
 
 void ErrorCheck::refresh() {
-	columnfile = globaldata->getColumnFile();
-	phylipfile = globaldata->getPhylipFile();
-	listfile = globaldata->getListFile();
-	rabundfile = globaldata->getRabundFile();
-	sabundfile = globaldata->getSabundFile();
-	namefile = globaldata->getNameFile();
-	groupfile = globaldata->getGroupFile();
-	orderfile = globaldata->getOrderFile();
-	fastafile = globaldata->getFastaFile();
-	treefile = globaldata->getTreeFile();
-	cutoff = globaldata->getCutOff();
-	format = globaldata->getFormat();
-	method = globaldata->getMethod();
-	randomtree = globaldata->getRandomTree();
-	sharedfile = globaldata->getSharedFile();
+	//columnfile = globaldata->getColumnFile();
+	//phylipfile = globaldata->getPhylipFile();
+	//listfile = globaldata->getListFile();
+	//rabundfile = globaldata->getRabundFile();
+	//sabundfile = globaldata->getSabundFile();
+	//namefile = globaldata->getNameFile();
+	//groupfile = globaldata->getGroupFile();
+	//orderfile = globaldata->getOrderFile();
+	//fastafile = globaldata->getFastaFile();
+	//treefile = globaldata->getTreeFile();
+	//cutoff = globaldata->getCutOff();
+	//format = globaldata->getFormat();
+	//method = globaldata->getMethod();
+	//randomtree = globaldata->getRandomTree();
+	//sharedfile = globaldata->getSharedFile();
 }
 
 /*******************************************************/
@@ -85,8 +85,6 @@ bool ErrorCheck::checkInput(string input) {
 				
 				//is it a valid parameter
 				if (validParameter->isValidParameter(parameter, commandName, value) != true) { return false; }
-
-
 				
 				if (parameter == "phylip" )		{ phylipfile = value; }
 				if (parameter == "column" )		{ columnfile = value; }
