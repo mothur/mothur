@@ -15,8 +15,7 @@ EstOutput BergerParker::getValues(SAbundVector* rank){
 	try {
 		data.resize(1,0);
 		//Berger-Parker index
-		double BP = (double)rank->getNumSeqs()/(double)rank->getMaxRank();
-		//cout << "BP index = " << 1/BP << "\n\n";
+		double BP = (double)rank->getMaxRank() / (double)rank->getNumSeqs();
 		
 		data[0] = BP;
 		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }

@@ -19,7 +19,7 @@ It is a child of the calculator class. */
 class Geom : public Calculator  {
 	
 public:
-	Geom() : Calculator("geom", 3) {};
+	Geom() : Calculator("geometric", 3) {};
 	EstOutput getValues(SAbundVector*);
 	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*) {return data;};
 

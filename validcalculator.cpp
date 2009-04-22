@@ -182,11 +182,13 @@ void ValidCalculators::initialSingle() {
 		single["simpson"]	    = "simpson";
 		single["bergerparker"]  = "bergerparker";
 		single["bootstrap"]    	= "bootstrap";
-		single["geom"]          = "geom";
-		single["logsd"]         = "logsd";
+		single["geometric"]     = "geometric";
+		single["logseries"]         = "logseries";
 		single["qstat"]         = "qstat";
 		single["bstick"]        = "bstick";
 		single["nseqs"]			= "nseqs";
+		single["coverage"]		= "coverage";
+		
 		single["default"]	    = "default";
 	}
 	catch(exception& e) {
@@ -247,6 +249,7 @@ void ValidCalculators::initialRarefaction() {
 		rarefaction["simpson"]		= "simpson";
 		rarefaction["bootstrap"]	= "bootstrap";
 		rarefaction["nseqs"]		= "nseqs";
+		rarefaction["coverage"]		= "coverage";
 		rarefaction["default"]	    = "default";
 	}
 	catch(exception& e) {
@@ -271,12 +274,13 @@ void ValidCalculators::initialSummary() {
 		summary["npshannon"]	= "npshannon";
 		summary["simpson"]		= "simpson";
 		summary["bergerparker"] = "bergerparker";
-		summary["geom"]         = "geom";
+		summary["geometric"]    = "geometric";
 		summary["bootstrap"]	= "bootstrap";
 		summary["logsd"]        = "logsd";
 		summary["qstat"]        = "qstat";
 		summary["bstick"]       = "bstick";
 		summary["nseqs"]		= "nseqs";
+		summary["coverage"]		= "coverage";
 		summary["default"]	    = "default";
 	}
 	catch(exception& e) {

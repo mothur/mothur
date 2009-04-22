@@ -22,6 +22,7 @@
 #include "qstat.h"
 #include "bergerparker.h"
 #include "bstick.h"
+#include "coverage.h"
 
 //**********************************************************************************************************************
 
@@ -37,9 +38,11 @@ SummaryCommand::SummaryCommand(){
 					sumCalculators.push_back(new Sobs());
 				}else if(globaldata->Estimators[i] == "chao"){
 					sumCalculators.push_back(new Chao1());
-				}else if(globaldata->Estimators[i] == "geom"){
+				}else if(globaldata->Estimators[i] == "coverage"){
+					sumCalculators.push_back(new Coverage());
+				}else if(globaldata->Estimators[i] == "geometric"){
 					sumCalculators.push_back(new Geom());
-				}else if(globaldata->Estimators[i] == "logsd"){
+				}else if(globaldata->Estimators[i] == "logseries"){
 					sumCalculators.push_back(new LogSD());
 				}else if(globaldata->Estimators[i] == "qstat"){
 					sumCalculators.push_back(new QStat());

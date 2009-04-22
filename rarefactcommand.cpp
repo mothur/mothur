@@ -17,6 +17,7 @@
 #include "npshannon.h"
 #include "shannon.h"
 #include "jackknife.h"
+#include "coverage.h"
 
 //**********************************************************************************************************************
 
@@ -50,6 +51,8 @@ RareFactCommand::RareFactCommand(){
 					rDisplays.push_back(new RareDisplay(new Simpson(), new ThreeColumnFile(fileNameRoot+"r_simpson")));
 				}else if (globaldata->Estimators[i] == "bootstrap") { 
 					rDisplays.push_back(new RareDisplay(new Bootstrap(), new ThreeColumnFile(fileNameRoot+"r_bootstrap")));
+				}else if (globaldata->Estimators[i] == "coverage") { 
+					rDisplays.push_back(new RareDisplay(new Coverage(), new ThreeColumnFile(fileNameRoot+"r_coverage")));
 				}else if (globaldata->Estimators[i] == "nseqs") { 
 					rDisplays.push_back(new RareDisplay(new NSeqs(), new ThreeColumnFile(fileNameRoot+"r_nseqs")));
 				}

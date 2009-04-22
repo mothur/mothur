@@ -30,7 +30,7 @@ EstOutput Shannon::getValues(SAbundVector* rank){
 		}
 		shannon = -shannon;
     
-		double hvar = (hvara-pow(shannon,2))/(double)sampled+(double)sobs/(double)(2*sampled*sampled);
+		double hvar = (hvara-pow(shannon,2))/(double)sampled+(double)(sobs-1)/(double)(2*sampled*sampled);
     
 		double ci = 0;
 	
