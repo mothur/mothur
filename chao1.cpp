@@ -20,27 +20,33 @@ EstOutput Chao1::getValues(SAbundVector* rank){
 		double doubles = (double)rank->get(2);
 		double chaovar = 0.0000;
 	
-		double chao = sobs + pow(singles,2)/(2*(doubles+1)) - (singles*doubles/(2*pow(doubles+1,2)));
+		double chao = sobs + singles*(singles-1)/(2*(doubles+1));
 	
-		if(doubles==0){chaovar=0;}
-		else{
-			double g=singles/doubles;
-			chaovar = doubles*(0.25*pow(g,4)+pow(g,3)+0.5*pow(g,2));
+		if(singles > 0 && doubles > 0){
+			chaovar = singles*(singles-1)/(2*(doubles+1))
+					+ singles*pow(2*singles-1, 2)/(4*pow(doubles+1,2))
+					+ pow(singles, 2)*doubles*pow(singles-1, 2)/(4*pow(doubles+1,4));
 		}
-
-	
+		else if(singles > 0 && doubles == 0){
+			chaovar = singles*(singles-1)/2 + singles*pow(2*singles-1, 2)/4 - pow(singles, 4)/(4*chao); 
+		}
+		else if(singles == 0){
+			chaovar = sobs*exp(-1*rank->getNumSeqs()/sobs)*(1-exp(-1*rank->getNumSeqs()/sobs));
+		}
+			
 		double chaohci, chaolci;
 	
-		if(chao==sobs){
-			double ci = 1.96*pow(chaovar,0.5);
-			chaolci = chao-ci;//chao lci
-			chaohci = chao+ci;//chao hci
-		}
-		else{
+		if(singles>0){
 			double denom = pow(chao-sobs,2);
 			double c = exp(1.96*pow((log(1+chaovar/denom)),0.5));
 			chaolci = sobs+(chao-sobs)/c;//chao lci
 			chaohci = sobs+(chao-sobs)*c;//chao hci
+		}
+		else{
+			double p = exp(-1*rank->getNumSeqs()/sobs);
+			chaolci = sobs/(1-p)-1.96*pow(sobs*p/(1-p), 0.5);
+			chaohci = sobs/(1-p)+1.96*pow(sobs*p/(1-p), 0.5);
+			if(chaolci < sobs){	chaolci = sobs;	}
 		}
 		
 		data[0] = chao;

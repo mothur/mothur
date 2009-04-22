@@ -22,7 +22,7 @@
 #include "logsd.h"
 #include "bergerparker.h"
 #include "bstick.h"
-
+#include "coverage.h"
 
 //**********************************************************************************************************************
 CollectCommand::CollectCommand(){
@@ -40,6 +40,8 @@ CollectCommand::CollectCommand(){
 					cDisplays.push_back(new CollectDisplay(new Chao1(), new ThreeColumnFile(fileNameRoot+"chao")));
 				}else if (globaldata->Estimators[i] == "nseqs") { 
 					cDisplays.push_back(new CollectDisplay(new NSeqs(), new OneColumnFile(fileNameRoot+"nseqs")));
+				}else if (globaldata->Estimators[i] == "coverage") { 
+					cDisplays.push_back(new CollectDisplay(new Coverage(), new OneColumnFile(fileNameRoot+"coverage")));
 				}else if (globaldata->Estimators[i] == "ace") { 
 					convert(globaldata->getAbund(), abund);
 					cDisplays.push_back(new CollectDisplay(new Ace(abund), new ThreeColumnFile(fileNameRoot+"ace")));
@@ -53,12 +55,12 @@ CollectCommand::CollectCommand(){
 					cDisplays.push_back(new CollectDisplay(new Simpson(), new ThreeColumnFile(fileNameRoot+"simpson")));
 				}else if (globaldata->Estimators[i] == "bootstrap") { 
 					cDisplays.push_back(new CollectDisplay(new Bootstrap(), new OneColumnFile(fileNameRoot+"bootstrap")));
-				}else if (globaldata->Estimators[i] == "geom") { 
-					cDisplays.push_back(new CollectDisplay(new Geom(), new OneColumnFile(fileNameRoot+"geom")));
+				}else if (globaldata->Estimators[i] == "geometric") { 
+					cDisplays.push_back(new CollectDisplay(new Geom(), new OneColumnFile(fileNameRoot+"geometric")));
 				}else if (globaldata->Estimators[i] == "qstat") { 
 					cDisplays.push_back(new CollectDisplay(new QStat(), new OneColumnFile(fileNameRoot+"qstat")));
-				}else if (globaldata->Estimators[i] == "logsd") { 
-					cDisplays.push_back(new CollectDisplay(new LogSD(), new OneColumnFile(fileNameRoot+"logsd")));
+				}else if (globaldata->Estimators[i] == "logseries") { 
+					cDisplays.push_back(new CollectDisplay(new LogSD(), new OneColumnFile(fileNameRoot+"logseries")));
 				}else if (globaldata->Estimators[i] == "bergerparker") { 
 					cDisplays.push_back(new CollectDisplay(new BergerParker(), new OneColumnFile(fileNameRoot+"bergerparker")));
 				}else if (globaldata->Estimators[i] == "bstick") { 

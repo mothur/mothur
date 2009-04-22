@@ -19,9 +19,9 @@ It is a child of the calculator class.*/
 class LogSD : public Calculator  {
 	
 public:
-	LogSD() : Calculator("logsd", 3) {};
+	LogSD() : Calculator("logseries", 3) {};
 	EstOutput getValues(SAbundVector*);
-	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*) {return data;};
+	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*) { return data; };
 
 private:
 	double logS(double);

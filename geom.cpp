@@ -42,7 +42,7 @@ RAbundVector Geom::getRAbundVector(SAbundVector* rank){
 /***********************************************************************************/
 EstOutput Geom::getValues(SAbundVector* rank){
 	try {
-		data.resize(2,0);
+		data.resize(3,0);
 		
 		rdata = getRAbundVector(rank);
 		int numInd = rdata.getNumSeqs();
@@ -64,14 +64,15 @@ EstOutput Geom::getValues(SAbundVector* rank){
 		double sumExp = 0;
 		double sumObs = 0;
 		double maxDiff = 0;
-
-		for(int i = 0; i < rdata.size(); i++)
+		
+		for(int i = 0; i < numSpec; i++)
 		{
 			sumObs += rdata.get(i);
 			sumExp += numInd*cK*k*pow(1-k, i);
+			
 			double diff = fabs(sumObs-sumExp);
-			if(diff > maxDiff)
-				maxDiff = diff;
+			if(diff > maxDiff)	{	maxDiff = diff;		}
+			
 		}
 
 		double DStatistic = maxDiff/numInd;
@@ -81,7 +82,8 @@ EstOutput Geom::getValues(SAbundVector* rank){
 		cout << "Critical value for 95% confidence interval = ";*/
 		if(rdata.size() > 20)
 		{
-			critVal = .886/sqrt(rdata.size());
+			data[1] = 1.031/sqrt(rdata.size());
+			data[2] = 0.886/sqrt(rdata.size());
 		}
 		else
 		{
@@ -92,10 +94,10 @@ EstOutput Geom::getValues(SAbundVector* rank){
 		cout << "If D-Statistic is less than the critical value then the data fits the Geometric Series model w/ 95% confidence.\n\n";*/
 		
 		data[0] = DStatistic;
-		data[1] = critVal;
 		
 		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
 		if (isnan(data[1]) || isinf(data[1])) { data[1] = 0; }
+		if (isnan(data[2]) || isinf(data[2])) { data[2] = 0; }
 		
 		return data;
 	}

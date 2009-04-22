@@ -42,7 +42,7 @@ EstOutput Ace::getValues(SAbundVector* rank) {
 	
 		if(denom <= 0.0){	term1=0.0000;	} else {	term1 = (double)(srare * numsum)/(double)denom - 1.0;	}
 		if(term1 >= 0.0){	gamace = term1;	} else {	gamace = 0.0;											}
-
+		
 		if(gamace >= 0.64){
 			gamace = gamace * (1 + (nrare * (1 - Cace) * numsum) / denom);
 			if(gamace<0){			gamace = 0;			}

@@ -10,7 +10,7 @@
  */
 #include "calculator.h"
 
-/*This class implements the LogSD estimator on single group. 
+/*This class implements the q statistic on single group. 
 It is a child of the calculator class.*/ 
 
 /***********************************************************************/
@@ -18,7 +18,7 @@ It is a child of the calculator class.*/
 class QStat : public Calculator  {
 	
 public:
-	QStat() : Calculator("qstat", 3) {};
+	QStat() : Calculator("qstat", 1) {};
 	EstOutput getValues(SAbundVector*);
 	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*) {return data;};
 

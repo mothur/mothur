@@ -80,27 +80,6 @@ class VecCalc
 };
 
 /**************************************************************************************************/
-/*This Class contains methods that return the B Diverstiy of two sets
-of data. The four methods are the Whittaker's measure, the Marczewski-Stainhaus distance,
-the Sorensen quantitative index, and the Morisita-Horn index.
-The main method takes a number of columns of data and performs all 4 methods on each
-combination of columns. It prints a table for every method that shows the B Diverstiy for 
-each combination. It also calculates the overall diversity for Whittaker's measure and 
-the Marczewski-Steinhaus distance.*/
-
-
-/*class BDiversity
-{
-	public:
-		void doBD(vector<double>, double);//Main method
-		double getWhitt(vector<double>,vector<double>);//Whittacker's measure
-		double getMS(vector<double>, vector<double>);//Marczewski-Stainhaus distance
-		double getSor(vector<double>, vector<double>);//Sorensen quantitative index
-		double getMor(vector<double>, vector<double>);//Morisita-Horn index
-		void printD(vector<vector<double> >, int);//This prints a table that represents the given 2D vector, the second paramter specifies which method is to be used (1 for Whitt, 2 for MS, 3 for Sor, and 4 for Mor)
-};*/
-
-/**************************************************************************************************/
 
 /*This Class is similar to the GeometricSeries.h class. It calculates
 the broken stick distribution of the table and prints the D-Statistic 
@@ -143,16 +122,6 @@ class KS2SampleTest
 	public:
 		void doKSTest(vector<double>, vector<double>);
 };
-/**************************************************************************************************/
-/*This Class calculates the Log Series Distribution for the data.
-It then generates a D-Statistic and prints the D-Statistic and
-the critical values for the Kolmogorov-Smirnov 1 sample test.*/
-
-/*class LogSD
-{
-	public:
-		void doLogSD(vector<double>, vector<double>);
-};*/
 
 /**************************************************************************************************/
 //This Class calculates and prints the Q-Statistic for the data.

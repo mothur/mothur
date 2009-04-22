@@ -28,7 +28,7 @@ EstOutput LogSD::getValues(SAbundVector* rank){
 		SAbundVector rankw = SAbundVector(dvec, mr,nb,ns);
 		SAbundVector *rank = &rankw;*/
 		
-		data.resize(2,0);
+		data.resize(3,0);
 		int numInd = rank->getNumSeqs();
 		int numSpec = rank->getNumBins();
 		double snRatio = (double)numSpec/numInd;
