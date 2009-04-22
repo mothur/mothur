@@ -37,7 +37,7 @@ public:
 	void setLabel(string l)		{	label = l;			}
 	string getLabel()			{	return label;		}
 
-	//virtual RAbundVector getRAbundVector() = 0;
+	virtual RAbundVector getRAbundVector() = 0;
 	virtual SAbundVector getSAbundVector() = 0;
 	virtual OrderVector getOrderVector(map<string,int>* hold = NULL) = 0;
 	

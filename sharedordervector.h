@@ -69,6 +69,7 @@ public:
 	SharedOrderVector getSharedOrderVector();
 	SharedRAbundVector getSharedRAbundVector(string);  //get the sharedRabundvector for a sepecific group
 	SharedSAbundVector getSharedSAbundVector(string);	//get the sharedSabundvector for a sepecific group
+	vector<SharedRAbundVector*> getSharedRAbundVector(); //returns sharedRabundVectors for all the users groups
 	
 private:
 	GlobalData* globaldata;

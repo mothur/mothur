@@ -35,6 +35,7 @@ public:
 	vector<Tree*> gTree;
 	SharedListVector* gSharedList;
 	SAbundVector* sabund;
+	RAbundVector* rabund;
 	GroupMap* gGroupmap;
 	FullMatrix* gMatrix;
 	TreeMap* gTreemap;

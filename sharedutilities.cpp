@@ -109,6 +109,53 @@ void SharedUtil::getSharedVectorswithReplacement(vector<string> Groups, vector<S
 
 /**************************************************************************************************/
 //need to have mode because different commands require different number of valid groups
+void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups) {
+	try {
+		if (userGroups.size() != 0) {
+			if (userGroups[0] != "all") {
+				//check that groups are valid
+				for (int i = 0; i < userGroups.size(); i++) {
+					if (isValidGroup(userGroups[i], allGroups) != true) {
+						cout << userGroups[i] << " is not a valid group, and will be disregarded." << endl;
+						// erase the invalid group from userGroups
+						userGroups.erase(userGroups.begin()+i);
+						i--;
+					}
+				}
+				
+				//if the user only entered invalid groups
+				if (userGroups.size() == 0) { 
+					cout << "When using the groups parameter you must have at least 1 valid groups. I will run the command using all the groups in your groupfile." << endl; 
+					for (int i = 0; i < allGroups.size(); i++) {
+						userGroups.push_back(allGroups[i]);
+					}
+				}
+
+			}else{//user has enter "all" and wants the default groups
+				userGroups.clear();
+				for (int i = 0; i < allGroups.size(); i++) {
+					userGroups.push_back(allGroups[i]);
+				}
+			}
+		}else { //the user has not entered groups
+			for (int i = 0; i < allGroups.size(); i++) {
+				userGroups.push_back(allGroups[i]);
+			}
+		}
+			
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the SharedUtil class Function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the SharedUtil class function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+
+}
+/**************************************************************************************************/
+//need to have mode because different commands require different number of valid groups
 void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups, string mode) {
 	try {
 		if (userGroups.size() != 0) {
@@ -135,38 +182,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 			}
 		}
 			
-		if (mode == "venn")  {
-				//if the user only entered invalid groups
-				if (userGroups.size() == 0) { 
-					if (allGroups.size() > 4) {
-						cout << "When using the groups parameter you must have at least 1 valid group. I will run the command using the first four groups in your groupfile." << endl; 
-						for (int i = 0; i < 4; i++) {
-							userGroups.push_back(allGroups[i]);
-						}
-					}else {
-						cout << "When using the groups parameter you must have at least 1 valid group. I will run the command using all the groups in your groupfile." << endl; 
-						for (int i = 0; i < allGroups.size(); i++) {
-							userGroups.push_back(allGroups[i]);
-						}
-					}
-				}
-				
-				//check to make sure their are only 4 groups
-				if (userGroups.size() > 4) {
-					cout << "You may only use up to 4 groups at a time with this command.  I will choose the first four and disregard the rest." << endl;
-					for (int i = 4; i < userGroups.size(); i++) {
-						userGroups.erase(userGroups.begin()+i);
-					}
-				}
-		}else if (mode == "heat") {
-				//if the user only entered invalid groups
-				if (userGroups.size() == 0) { 
-					cout << "When using the groups parameter you must have at least 1 valid groups. I will run the command using all the groups in your groupfile." << endl; 
-					for (int i = 0; i < allGroups.size(); i++) {
-						userGroups.push_back(allGroups[i]);
-					}
-				}
-		}else if ((mode == "collect") || (mode == "rarefact") || (mode == "summary") || (mode == "treegroup")) {
+		if ((mode == "collect") || (mode == "rarefact") || (mode == "summary") || (mode == "treegroup")) {
 				//if the user only entered invalid groups
 				if ((userGroups.size() == 0) || (userGroups.size() == 1)) { 
 					cout << "When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile." << endl; 
@@ -187,6 +203,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 	}
 
 }
+
 
 /**************************************************************************************/
 //for parsimony and unifrac commands you set pairwise groups as well as an allgroups in calc

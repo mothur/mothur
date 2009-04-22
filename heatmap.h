@@ -11,13 +11,10 @@
 
 using namespace std;
 
-#include "ordervector.hpp"
 #include "rabundvector.hpp"
 #include "sharedrabundvector.h"
-#include "sharedordervector.h"
 #include "datavector.hpp"
 #include "globaldata.hpp"
-#include "sharedutilities.h"
 
 /***********************************************************************/
 
@@ -25,17 +22,16 @@ class HeatMap {
 	
 	public:
 		HeatMap();
-		~HeatMap(){ delete util; };
+		~HeatMap(){};
 	
-		void getPic(OrderVector*);
-		void getPic(SharedOrderVector*);
+		void getPic(RAbundVector*);
+		void getPic(vector<SharedRAbundVector*>);
 
 	private:
 		void sortSharedVectors(vector<SharedRAbundVector*>& );
 		void printLegend(int, float);
 
 		GlobalData* globaldata;
-		SharedUtil* util;
 		string format, sorted, groupComb, scaler;
 		ofstream outsvg;
 			
@@ -44,6 +40,7 @@ class HeatMap {
 /***********************************************************************/
 
 #endif
+
 
 
 

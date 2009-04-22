@@ -17,8 +17,6 @@ HeatMapCommand::HeatMapCommand(){
 		globaldata = GlobalData::getInstance();
 		heatmap = new HeatMap();
 		format = globaldata->getFormat();
-		util = new SharedUtil();
-		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the HeatMapCommand class Function HeatMapCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -35,7 +33,6 @@ HeatMapCommand::~HeatMapCommand(){
 	delete input;
 	delete read;
 	delete heatmap;
-	delete util;
 }
 
 //**********************************************************************************************************************
@@ -50,7 +47,7 @@ int HeatMapCommand::execute(){
 			read->read(&*globaldata); 
 			
 			input = globaldata->ginput;
-			order = input->getSharedOrderVector();
+			lookup = input->getSharedRAbundVectors();
 		}else if (format == "shared") {
 			//you are using a list and a groupfile
 			read = new ReadOTUFile(globaldata->inputFileName);	
@@ -58,43 +55,28 @@ int HeatMapCommand::execute(){
 		
 			input = globaldata->ginput;
 			SharedList = globaldata->gSharedList;
-			order = SharedList->getSharedOrderVector();
+			lookup = SharedList->getSharedRAbundVector();
 		}else if (format == "list") {
 			//you are using just a list file and have only one group
 			read = new ReadOTUFile(globaldata->inputFileName);	
 			read->read(&*globaldata); 
 			
-			ordersingle = globaldata->gorder;
-			input = globaldata->ginput;
+			rabund = globaldata->rabund;
+			input = globaldata->ginput;		
 		}
 		
 		if (format != "list") {	
 		
-			util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups, "heat");
-			globaldata->setGroups("");
-
-
-			while(order != NULL){
+			while(lookup[0] != NULL){
 		
-				if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(order->getLabel()) == 1){			
+				if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(lookup[0]->getLabel()) == 1){			
 	
-					cout << order->getLabel() << '\t' << count << endl;
-					heatmap->getPic(order);
-
+					cout << lookup[0]->getLabel() << '\t' << count << endl;
+					heatmap->getPic(lookup);
 				}
 						
 				//get next line to process
-				if (format == "sharedfile") {
-					order = input->getSharedOrderVector();
-				}else {
-					//you are using a list and a groupfile
-					SharedList = input->getSharedListVector(); //get new list vector to process
-					if (SharedList != NULL) {
-						order = SharedList->getSharedOrderVector(); //gets new order vector with group info.
-					}else {
-						break;
-					}
-				}
+				lookup = input->getSharedRAbundVectors();				
 				count++;
 			}
 			
@@ -102,20 +84,21 @@ int HeatMapCommand::execute(){
 			globaldata->Groups.clear();  
 			
 		}else{
-			while(ordersingle != NULL){
 		
-				if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(ordersingle->getLabel()) == 1){			
+			while(rabund != NULL){
+		
+				if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(rabund->getLabel()) == 1){			
 	
-					cout << ordersingle->getLabel() << '\t' << count << endl;
-					heatmap->getPic(ordersingle);
-					
+					cout << rabund->getLabel() << '\t' << count << endl;
+					heatmap->getPic(rabund);
 				}
 				
-				ordersingle = (input->getOrderVector());
+				rabund = input->getRAbundVector();
 				count++;
 			}
 		}
 		
+		globaldata->setGroups("");
 		return 0;
 	}
 	catch(exception& e) {

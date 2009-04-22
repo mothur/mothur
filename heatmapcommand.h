@@ -16,11 +16,9 @@
 #include "readotu.h"
 #include "sharedlistvector.h"
 #include "heatmap.h"
-#include "sharedutilities.h"
-
+#include "rabundvector.hpp"
 
 class GlobalData;
-
 
 class HeatMapCommand : public Command {
 
@@ -32,11 +30,10 @@ public:
 private:
 	GlobalData* globaldata;
 	ReadOTUFile* read;
-	SharedUtil* util;
 	InputData* input;
 	SharedListVector* SharedList;
-	SharedOrderVector* order;
-	OrderVector* ordersingle;
+	RAbundVector* rabund;
+	vector<SharedRAbundVector*> lookup;
 	HeatMap* heatmap;
 	string format;
 

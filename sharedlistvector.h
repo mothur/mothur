@@ -54,6 +54,7 @@ public:
 	SharedOrderVector* getSharedOrderVector();
 	SharedRAbundVector getSharedRAbundVector(string);  //get sharedrabundvector for a certain group
 	SharedSAbundVector getSharedSAbundVector(string);			//get sharedsabundvector for a certain group
+	vector<SharedRAbundVector*> getSharedRAbundVector(); //returns sharedRabundVectors for all the users groups
 	
 private:
 	vector<string> data;  //data[i] is a list of names of sequences in the ith OTU.
