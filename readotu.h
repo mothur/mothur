@@ -31,11 +31,13 @@ private:
 	string philFile;
 	InputData* input;
 	InputData* inputSabund;
+	InputData* inputRabund;
 	InputData* inputList;
 	ListVector* list;
 	SharedListVector* SharedList;
 	OrderVector* order;
 	SAbundVector* sabund;
+	RAbundVector* rabund;
 	GlobalData* globaldata;
 	// InputData* getInput()			{	return input;	}
 };

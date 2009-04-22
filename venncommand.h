@@ -15,7 +15,6 @@
 #include "sharedlistvector.h"
 #include "venn.h"
 #include "validcalculator.h"
-#include "sharedutilities.h"
 
 
 class GlobalData;
@@ -31,15 +30,14 @@ public:
 private:
 	GlobalData* globaldata;
 	ReadOTUFile* read;
-	SharedUtil* util;
 	InputData* input;
 	SharedListVector* SharedList;
-	SharedOrderVector* order;
-	OrderVector* ordersingle;
 	Venn* venn;
 	string format;
 	vector<Calculator*> vennCalculators;	
 	ValidCalculators* validCalculator;
+	vector<SharedRAbundVector*> lookup;
+	SAbundVector* sabund;
 	int abund;
 
 };

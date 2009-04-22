@@ -11,7 +11,7 @@ using namespace std;
 
 
 #include "sharedordervector.h"
-
+#include "sharedutilities.h"
 
 /***********************************************************************/
 
@@ -286,6 +286,28 @@ SharedRAbundVector SharedOrderVector::getSharedRAbundVector(string group) {
 			}
 		}
 		return sharedRav;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the SharedOrderVector class Function getSharedRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the SharedOrderVector class function getSharedRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	
+}
+/***********************************************************************/
+vector<SharedRAbundVector*> SharedOrderVector::getSharedRAbundVector() {
+	try {
+		SharedUtil* util;
+		util = new SharedUtil();
+		vector<SharedRAbundVector*> lookup;
+		
+		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups);
+		util->getSharedVectors(globaldata->Groups, lookup, this);
+		
+		return lookup;
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the SharedOrderVector class Function getSharedRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";

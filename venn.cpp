@@ -18,7 +18,6 @@ Venn::Venn(){
 	try {
 		globaldata = GlobalData::getInstance();
 		format = globaldata->getFormat();
-		util = new SharedUtil();
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the Venn class Function Venn. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -30,13 +29,11 @@ Venn::Venn(){
 	}
 }
 //**********************************************************************************************************************
-void Venn::getPic(OrderVector* order, vector<Calculator*> vCalcs) {
+void Venn::getPic(SAbundVector* sabund, vector<Calculator*> vCalcs) {
 	try {
-		SAbundVector s;
-		s = order->getSAbundVector();  sabund = &s;
-		
+				
 		for(int i=0;i<vCalcs.size();i++){
-			string filenamesvg = globaldata->inputFileName + ".venn." + order->getLabel() + vCalcs[i]->getName() + ".svg";
+			string filenamesvg = globaldata->inputFileName + ".venn." + sabund->getLabel() + vCalcs[i]->getName() + ".svg";
 			openOutputFile(filenamesvg, outsvg);
 
 			vector<double> data = vCalcs[i]->getValues(sabund);
@@ -46,7 +43,7 @@ void Venn::getPic(OrderVector* order, vector<Calculator*> vCalcs) {
 			outsvg << "<g>\n";
 				
 			outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"700\" height=\"700\"/>"; 
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"265\" y=\"30\">Venn Diagram at distance " + order->getLabel() + "</text>\n";
+			outsvg << "<text fill=\"black\" class=\"seri\" x=\"265\" y=\"30\">Venn Diagram at distance " + sabund->getLabel() + "</text>\n";
 			outsvg << "<circle fill=\"red\" opacity=\".5\" stroke=\"black\" cx=\"350\" cy=\"200\" r=\"150\"/>"; 
 			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(343 - ((int)toString(data[0]).length() / 2)) + "\" y=\"195\">" + toString(data[0]) + "</text>\n";  
 			
@@ -69,21 +66,21 @@ void Venn::getPic(OrderVector* order, vector<Calculator*> vCalcs) {
 	}
 }
 //**********************************************************************************************************************
-void Venn::getPic(SharedOrderVector* sharedorder, vector<Calculator*> vCalcs) {
+void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs) {
 	try {
 		
 		//fills vector of sharedsabunds - lookup
-		util->getSharedVectors(globaldata->Groups, lookup, sharedorder);  //fills group vectors from order vector.
+		//util->getSharedVectors(globaldata->Groups, lookup, sharedorder);  //fills group vectors from order vector.
 		
 		/******************* 1 Group **************************/
 		if (lookup.size() == 1) {
 					
 			SAbundVector s;
-			s = lookup[0]->getSAbundVector();  sabund = &s;
+			s = lookup[0]->getSAbundVector();  SAbundVector* sabund = &s;
 			
 			//make a file for each calculator
 			for(int i=0;i<vCalcs.size();i++){
-				string filenamesvg = getRootName(globaldata->inputFileName) + sharedorder->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
+				string filenamesvg = getRootName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
 				openOutputFile(filenamesvg, outsvg);
 			
 				//in essence you want to run it like a single 
@@ -102,7 +99,7 @@ void Venn::getPic(SharedOrderVector* sharedorder, vector<Calculator*> vCalcs) {
 				outsvg << "<g>\n";
 				
 				outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"700\" height=\"700\"/>"; 
-				outsvg << "<text fill=\"black\" class=\"seri\" x=\"265\" y=\"30\">Venn Diagram at distance " + sharedorder->getLabel() + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\" x=\"265\" y=\"30\">Venn Diagram at distance " + lookup[0]->getLabel() + "</text>\n";
 				outsvg << "<circle fill=\"red\" opacity=\".5\" stroke=\"black\" cx=\"350\" cy=\"200\" r=\"150\"/>"; 
 				outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(343 - ((int)lookup[0]->getGroup().length() / 2)) + "\" y=\"165\">" + lookup[0]->getGroup() + "</text>\n";
 				outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(343 - ((int)toString(data[0]).length() / 2)) + "\" y=\"195\">" + toString(data[0]) + "</text>\n";  
@@ -130,7 +127,7 @@ void Venn::getPic(SharedOrderVector* sharedorder, vector<Calculator*> vCalcs) {
 			
 			//make a file for each calculator
 			for(int i=0;i<vCalcs.size();i++){
-				string filenamesvg = getRootName(globaldata->inputFileName) + sharedorder->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
+				string filenamesvg = getRootName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
 				openOutputFile(filenamesvg, outsvg);
 				
 				//get estimates for sharedAB
@@ -157,7 +154,7 @@ void Venn::getPic(SharedOrderVector* sharedorder, vector<Calculator*> vCalcs) {
 
 				//draw circles
 				outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"700\" height=\"700\"/>"; 
-				outsvg << "<text fill=\"black\" class=\"seri\" x=\"265\" y=\"30\">Venn Diagram at distance " + sharedorder->getLabel() + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\" x=\"265\" y=\"30\">Venn Diagram at distance " + lookup[0]->getLabel() + "</text>\n";
 				outsvg << "<circle fill=\"rgb(255,0,0)\" opacity=\".3\" stroke=\"black\" cx=\"250\" cy=\"200\" r=\"150\"/>"; 
 				outsvg << "<circle fill=\"rgb(0,255,0)\" opacity=\".3\" stroke=\"black\" cx=\"435\" cy=\"200\" r=\"150\"/>"; 
 				outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(200 - ((int)toString(numA[0]).length() / 2)) + "\" y=\"195\">" + toString(numA[0] - shared[0]) + "</text>\n";
@@ -200,7 +197,7 @@ void Venn::getPic(SharedOrderVector* sharedorder, vector<Calculator*> vCalcs) {
 			
 			//make a file for each calculator
 			for(int i=0;i<vCalcs.size();i++){
-				string filenamesvg = getRootName(globaldata->inputFileName) + sharedorder->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
+				string filenamesvg = getRootName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
 				openOutputFile(filenamesvg, outsvg);
 				
 				//get estimates for sharedAB, sharedAC and sharedBC
@@ -276,7 +273,7 @@ void Venn::getPic(SharedOrderVector* sharedorder, vector<Calculator*> vCalcs) {
 
 				//draw circles
 				outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"800\" height=\"800\"/>"; 
-				outsvg << "<text fill=\"black\" class=\"seri\" x=\"265\" y=\"30\">Venn Diagram at distance " + sharedorder->getLabel() + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\" x=\"265\" y=\"30\">Venn Diagram at distance " + lookup[0]->getLabel() + "</text>\n";
 				outsvg << "<circle fill=\"rgb(255,0,0)\" opacity=\".3\" stroke=\"black\" cx=\"230\" cy=\"200\" r=\"150\"/>"; 
 				outsvg << "<circle fill=\"rgb(0,255,0)\" opacity=\".3\" stroke=\"black\" cx=\"455\" cy=\"200\" r=\"150\"/>"; 
 				outsvg << "<circle fill=\"rgb(0,0,255)\" opacity=\".3\" stroke=\"black\" cx=\"343\" cy=\"400\" r=\"150\"/>"; 
@@ -360,7 +357,7 @@ void Venn::getPic(SharedOrderVector* sharedorder, vector<Calculator*> vCalcs) {
 				if ((lookup[0]->getAbundance(i) != 0) && (lookup[1]->getAbundance(i) != 0) && (lookup[2]->getAbundance(i) != 0) && (lookup[3]->getAbundance(i) != 0)) { sharedABCD++; }
 			}
 				
-			string filenamesvg = getRootName(globaldata->inputFileName) + sharedorder->getLabel() + ".venn.sharedsobs.svg";
+			string filenamesvg = getRootName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn.sharedsobs.svg";
 			openOutputFile(filenamesvg, outsvg);
 		
 			//image window
@@ -369,7 +366,7 @@ void Venn::getPic(SharedOrderVector* sharedorder, vector<Calculator*> vCalcs) {
 
 			//draw circles
 			outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"700\" height=\"700\"/>"; 
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"265\" y=\"30\">Venn Diagram at distance " + sharedorder->getLabel() + "</text>\n";
+			outsvg << "<text fill=\"black\" class=\"seri\" x=\"265\" y=\"30\">Venn Diagram at distance " + lookup[0]->getLabel() + "</text>\n";
 			outsvg << "<ellipse fill=\"red\" stroke=\"black\" opacity=\".35\" transform=\"rotate(-45 355 215) \" cx=\"355\" cy=\"215\" rx=\"200\" ry=\"115\"/>\n "; 
 			outsvg << "<ellipse fill=\"green\" stroke=\"black\" opacity=\".35\" transform=\"rotate(+45 355 215) \" cx=\"355\" cy=\"215\" rx=\"200\" ry=\"115\"/>\n ";
 			outsvg << "<ellipse fill=\"blue\" stroke=\"black\" opacity=\".35\" transform=\"rotate(-40 440 315) \" cx=\"440\" cy=\"315\" rx=\"200\" ry=\"115\"/>\n ";

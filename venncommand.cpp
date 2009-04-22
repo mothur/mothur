@@ -24,7 +24,6 @@ VennCommand::VennCommand(){
 		globaldata = GlobalData::getInstance();
 		format = globaldata->getFormat();
 		validCalculator = new ValidCalculators();
-		util = new SharedUtil();
 		
 		int i;
 		
@@ -81,7 +80,6 @@ VennCommand::~VennCommand(){
 	delete input;
 	delete read;
 	delete venn;
-	delete util;
 }
 
 //**********************************************************************************************************************
@@ -99,7 +97,7 @@ int VennCommand::execute(){
 			read->read(&*globaldata); 
 			
 			input = globaldata->ginput;
-			order = input->getSharedOrderVector();
+			lookup = input->getSharedRAbundVectors();
 		}else if (format == "shared") {
 			//you are using a list and a groupfile
 			read = new ReadOTUFile(globaldata->inputFileName);	
@@ -107,43 +105,36 @@ int VennCommand::execute(){
 		
 			input = globaldata->ginput;
 			SharedList = globaldata->gSharedList;
-			order = SharedList->getSharedOrderVector();
+			lookup = SharedList->getSharedRAbundVector();
 		}else if (format == "list") {
 			//you are using just a list file and have only one group
 			read = new ReadOTUFile(globaldata->inputFileName);	
 			read->read(&*globaldata); 
 		
-			ordersingle = globaldata->gorder;
+			sabund = globaldata->sabund;
 			input = globaldata->ginput;
 		}
 
 		
 		if (format != "list") {	
 			
-			util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups, "venn");
-			globaldata->setGroups("");
-			
-			while(order != NULL){
+			while(lookup[0] != NULL){
 		
-				if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(order->getLabel()) == 1){			
+				if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(lookup[0]->getLabel()) == 1){			
 	
-					cout << order->getLabel() << '\t' << count << endl;
-					venn->getPic(order, vennCalculators);
-
+					cout << lookup[0]->getLabel() << '\t' << count << endl;
+					
+					if (lookup.size() > 4) {
+						cout << "Error: Too many groups chosen.  You may use up to 4 groups with the venn command.  I will use the first four groups in your groupfile." << endl;
+						for (int i = lookup.size(); i > 3; i--) { delete lookup[i]; lookup.pop_back(); }
+					}
+					
+					//util->getSharedVectors(globaldata->Groups, lookup, order);  //fills group vectors from order vector.
+					venn->getPic(lookup, vennCalculators);
 				}
 						
 				//get next line to process
-				if (format == "sharedfile") {
-					order = input->getSharedOrderVector();
-				}else {
-					//you are using a list and a groupfile
-					SharedList = input->getSharedListVector(); //get new list vector to process
-					if (SharedList != NULL) {
-						order = SharedList->getSharedOrderVector(); //gets new order vector with group info.
-					}else {
-						break;
-					}
-				}
+				lookup = input->getSharedRAbundVectors();
 				count++;
 			}
 			
@@ -151,20 +142,21 @@ int VennCommand::execute(){
 			globaldata->Groups.clear();  
 			
 		}else{
-			while(ordersingle != NULL){
 		
-				if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(ordersingle->getLabel()) == 1){			
+			while(sabund != NULL){
+		
+				if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(sabund->getLabel()) == 1){			
 	
-					cout << ordersingle->getLabel() << '\t' << count << endl;
-					venn->getPic(ordersingle, vennCalculators);
-					
+					cout << sabund->getLabel() << '\t' << count << endl;
+					venn->getPic(sabund, vennCalculators);
 				}
 				
-				ordersingle = (input->getOrderVector());
+				sabund = input->getSAbundVector();
 				count++;
 			}
 		}
 		
+		globaldata->setGroups("");
 		return 0;
 	}
 	catch(exception& e) {
@@ -178,4 +170,3 @@ int VennCommand::execute(){
 }
 
 //**********************************************************************************************************************
-

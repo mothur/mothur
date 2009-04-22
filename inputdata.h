@@ -21,6 +21,8 @@ public:
 	OrderVector* getOrderVector();
 	SharedOrderVector* getSharedOrderVector();
 	SAbundVector* getSAbundVector();
+	RAbundVector* getRAbundVector();
+	vector<SharedRAbundVector*> getSharedRAbundVectors();
 	
 private:
 	string format;
@@ -31,6 +33,7 @@ private:
 	OrderVector* output;
 	SharedOrderVector* SharedOrder;
 	SAbundVector* sabund;
+	RAbundVector* rabund;
 	map<string,int> orderMap;
 };
 

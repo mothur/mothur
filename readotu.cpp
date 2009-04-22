@@ -26,6 +26,7 @@ void ReadOTUFile::read(GlobalData* globaldata){
 			input = new InputData(philFile, globaldata->getFormat()); //format tells you whether philFile is list, rabund, sabund.
 			inputList = new InputData(philFile, globaldata->getFormat()); //format tells you whether philFile is list, rabund, sabund.
 			inputSabund = new InputData(philFile, globaldata->getFormat()); //format tells you whether philFile is list, rabund, sabund or shared.
+			inputRabund = new InputData(philFile, globaldata->getFormat());
 		}else {//there is an orderfile
 			input = new InputData(philFile, globaldata->getOrderFile(), globaldata->getFormat());
 		}
@@ -41,6 +42,8 @@ void ReadOTUFile::read(GlobalData* globaldata){
 			globaldata->gorder = order;	//saving to be used by collect and rarefact commands.
 			sabund = inputSabund->getSAbundVector(); 
 			globaldata->sabund = sabund; //saving to be used by summary command.
+			rabund = inputRabund->getRAbundVector(); 
+			globaldata->rabund = rabund; //saving to be used by heatmap command.
 			list = inputList->getListVector();
 			globaldata->gListVector = list;
 		}else if (globaldata->getFormat() == "shared") {

@@ -10,6 +10,7 @@
 #include "inputdata.h"
 #include "ordervector.hpp"
 #include "listvector.hpp"
+#include "rabundvector.hpp"
 
 /***********************************************************************/
 
@@ -181,6 +182,39 @@ OrderVector* InputData::getOrderVector(){
 		exit(1);
 	}	
 }
+/***********************************************************************/
+
+vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(){
+	try {
+		if(fileHandle){
+			if (format == "sharedfile")  {
+				SharedOrder = new SharedOrderVector(fileHandle);
+				if (SharedOrder != NULL) {
+					return SharedOrder->getSharedRAbundVector();
+				}
+			}else if (format == "shared") {
+				SharedList = new SharedListVector(fileHandle);
+				if (SharedList != NULL) {
+					return SharedList->getSharedRAbundVector();
+				}
+			}
+			gobble(fileHandle);
+		}
+				
+		//this is created to signal to calling function that the input file is at eof
+		vector<SharedRAbundVector*> null;  null.push_back(NULL);
+		return null;
+		
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getSharedRAbundVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the InputData class function getSharedRAbundVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
 
 /***********************************************************************/
 
@@ -225,3 +259,46 @@ SAbundVector* InputData::getSAbundVector(){
 }
 
 /***********************************************************************/
+RAbundVector* InputData::getRAbundVector(){
+	try {
+		if(fileHandle){
+			if (format == "list") {
+				input = new ListVector(fileHandle);
+			}
+			else if (format == "shared")  {
+				input = new SharedListVector(fileHandle);
+			}
+			else if(format == "rabund"){
+				input = new RAbundVector(fileHandle);
+			}
+			else if(format == "order"){			
+				input = new OrderVector(fileHandle);
+			}
+			else if(format == "sabund"){
+				input = new SAbundVector(fileHandle);
+			}
+					
+			gobble(fileHandle);
+
+			rabund = new RAbundVector();
+			*rabund = (input->getRAbundVector());
+
+			return rabund;
+		}
+		else{
+			return NULL;
+		}
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the InputData class function getRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+/***********************************************************************/
+
+
+

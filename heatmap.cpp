@@ -15,8 +15,6 @@ HeatMap::HeatMap(){
 		globaldata = GlobalData::getInstance();
 		format = globaldata->getFormat();
 		sorted = globaldata->getSorted();
-		util = new SharedUtil();
-		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the HeatMap class Function HeatMap. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -30,29 +28,26 @@ HeatMap::HeatMap(){
 
 //**********************************************************************************************************************
 
-void HeatMap::getPic(OrderVector* order) {
+void HeatMap::getPic(RAbundVector* rabund) {
 	try {
-		
-		RAbundVector rabund = order->getRAbundVector();
-		
 		//get users scaling method
 		scaler = globaldata->getScale();
 		
 		float maxRelAbund = 0.0;		
 		
-		for(int i=0;i<rabund.size();i++){				
-			float relAbund = rabund.get(i) / (float)rabund.getNumSeqs();
+		for(int i=0;i<rabund->size();i++){				
+			float relAbund = rabund->get(i) / (float)rabund->getNumSeqs();
 			if(relAbund > maxRelAbund){	maxRelAbund = relAbund;	}
 		}
 		
 		scaler = globaldata->getScale();
 		
-		vector<string> scaleRelAbund(rabund.size(), "");
+		vector<string> scaleRelAbund(rabund->size(), "");
 		
-		for(int i=0;i<rabund.size();i++){
-			float relAbund = rabund.get(i) / (float)rabund.getNumSeqs();
+		for(int i=0;i<rabund->size();i++){
+			float relAbund = rabund->get(i) / (float)rabund->getNumSeqs();
 			
-			if (rabund.get(i) != 0) { //don't want log value of 0.
+			if (rabund->get(i) != 0) { //don't want log value of 0.
 				if (scaler == "log10") {
 					scaleRelAbund[i] = toHex(int(255 * log10(relAbund) / log10(maxRelAbund))) + "0000";  
 				}else if (scaler == "log2") {
@@ -67,21 +62,21 @@ void HeatMap::getPic(OrderVector* order) {
 		}
 		
 		
-		string filenamesvg = getRootName(globaldata->inputFileName) + rabund.getLabel() + ".heatmap.svg";
+		string filenamesvg = getRootName(globaldata->inputFileName) + rabund->getLabel() + ".heatmap.svg";
 		openOutputFile(filenamesvg, outsvg);
 		
 		//svg image
-		outsvg << "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 " + toString(300) + " " + toString((rabund.getNumBins()*5 + 120))  + "\">\n";
+		outsvg << "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 " + toString(300) + " " + toString((rabund->getNumBins()*5 + 120))  + "\">\n";
 		outsvg << "<g>\n";
 		
 		//white backround
-		outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"" + toString(300) + "\" height=\"" + toString((rabund.getNumBins()*5 + 120))  + "\"/>"; 
-		outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString((150) - 40) + "\" y=\"25\">Heatmap at distance " + rabund.getLabel() + "</text>\n";
+		outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"" + toString(300) + "\" height=\"" + toString((rabund->getNumBins()*5 + 120))  + "\"/>"; 
+		outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString((150) - 40) + "\" y=\"25\">Heatmap at distance " + rabund->getLabel() + "</text>\n";
 				
 		//output legend and color labels
 		string color;
 		int x = 0;
-		int y = 103 + (rabund.getNumBins()*5);
+		int y = 103 + (rabund->getNumBins()*5);
 		printLegend(y, maxRelAbund);
 		
 		y = 70;
@@ -108,13 +103,8 @@ void HeatMap::getPic(OrderVector* order) {
 
 //**********************************************************************************************************************
 
-void HeatMap::getPic(SharedOrderVector* sharedorder) {
+void HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 	try {
-		
-		//fills vector of sharedsabunds - lookup
-		vector<SharedRAbundVector*> lookup;
-
-		util->getSharedVectors(globaldata->Groups, lookup, sharedorder);  //fills group vectors from order vector.
 		
 		//sort lookup so shared bins are on top
 		if (sorted == "T") {  sortSharedVectors(lookup);  }
@@ -155,7 +145,7 @@ void HeatMap::getPic(SharedOrderVector* sharedorder) {
 			}
 		}
 		
-		string filenamesvg = getRootName(globaldata->inputFileName) + sharedorder->getLabel() + ".heatmap.svg";
+		string filenamesvg = getRootName(globaldata->inputFileName) + lookup[0]->getLabel() + ".heatmap.svg";
 		openOutputFile(filenamesvg, outsvg);
 		
 		//svg image
@@ -164,7 +154,7 @@ void HeatMap::getPic(SharedOrderVector* sharedorder) {
 		
 		//white backround
 		outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"" + toString(lookup.size() * 300) + "\" height=\"" + toString((lookup[0]->getNumBins()*5 + 120))  + "\"/>"; 
-		outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString((lookup.size() * 150) - 40) + "\" y=\"25\">Heatmap at distance " + sharedorder->getLabel() + "</text>\n";
+		outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString((lookup.size() * 150) - 40) + "\" y=\"25\">Heatmap at distance " + lookup[0]->getLabel() + "</text>\n";
 		
 		//column labels
 		for (int h = 0; h < lookup.size(); h++) {
@@ -309,7 +299,7 @@ void HeatMap::printLegend(int y, float maxbin) {
 			else if(scaler== "log2")	{	label = maxbin * log2(51*i) / log2(255);	}
 			else if(scaler== "linear")	{	label = maxbin * 51 * i / 255;				}
 			else						{	label = maxbin * log10(51*i) / log10(255);	}
-			
+			file://localhost/Users/westcott/Desktop/c.amazon.fn.0.19.rep.fasta
 			label = int(label * 1000 + 0.5);
 			label /= 1000.0;
 			string text = toString(label, 3);
