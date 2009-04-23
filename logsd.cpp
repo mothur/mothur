@@ -78,17 +78,21 @@ EstOutput LogSD::getValues(SAbundVector* rank){
 			if(diff > maxDiff)
 				maxDiff = diff;
 		}
-		
-		double DStatistic = (maxDiff + .5)/numSpec;
+
+
 		/*cout << "LogSD:\n";
 		cout << "D Test Statistic = " << DStatistic << "\n";
 		cout << ".05 confidence value = " << .89196/sqrt(numSpec) << "\n";
 		cout << "If D Test Statistic is greater than the critical value then the data fits the Log Series Distribution model w/ 95% confidence.\n\n";*/
 		
-		data[0] = DStatistic;
-		data[1] = .89196/sqrt(numSpec);
+		data[0] = (maxDiff + .5)/numSpec;
+		data[1] = 0.886/sqrt(numSpec);
+		data[2] = 1.031/sqrt(numSpec);
+		
 		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
 		if (isnan(data[1]) || isinf(data[1])) { data[1] = 0; }
+		if (isnan(data[2]) || isinf(data[2])) { data[2] = 0; }
+		
 		return data;
 	}
 	catch(exception& e) {

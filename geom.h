@@ -11,7 +11,7 @@
  */
 #include "calculator.h"
 
-/* This class implements the LogSD estimator on single group. 
+/* This class implements the geometric estimator on single group. 
 It is a child of the calculator class. */
 
 /***********************************************************************/

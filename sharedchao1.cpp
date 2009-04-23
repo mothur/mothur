@@ -39,6 +39,7 @@ EstOutput SharedChao1::getValues(SharedRAbundVector* sharedA, SharedRAbundVector
 				//does B have one or two
 				if (tempB == 1)			{ f1B++; }
 				else if (tempB == 2)	{ f2B++; }
+
 			}
 		}
 		

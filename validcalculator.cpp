@@ -208,7 +208,7 @@ void ValidCalculators::initialShared() {
 		shared["sharedchao"]			= "sharedchao";
 		shared["sharedace"]				= "sharedace";
 		shared["jabund"]				= "jabund";
-		shared["sorensonabund"]			= "sorensonabund";
+		shared["sorabund"]			= "sorabund";
 		shared["jclass"]				= "jclass";
 		shared["sorclass"]				= "sorclass";
 		shared["jest"]					= "jest";
@@ -216,7 +216,7 @@ void ValidCalculators::initialShared() {
 		shared["thetayc"]				= "thetayc";
 		shared["thetan"]				= "thetan";
 		shared["kstest"]				= "kstest";
-		shared["bdiversity"]			= "bdiversity";
+		shared["whittaker"]			    = "whittaker";
 		shared["sharednseqs"]			= "sharednseqs";
 		shared["ochiai"]				= "ochiai";
 		shared["anderberg"]				= "anderberg";
@@ -276,7 +276,7 @@ void ValidCalculators::initialSummary() {
 		summary["bergerparker"] = "bergerparker";
 		summary["geometric"]    = "geometric";
 		summary["bootstrap"]	= "bootstrap";
-		summary["logsd"]        = "logsd";
+		summary["logseries"]    = "logseries";
 		summary["qstat"]        = "qstat";
 		summary["bstick"]       = "bstick";
 		summary["nseqs"]		= "nseqs";
@@ -300,7 +300,7 @@ void ValidCalculators::initialSharedSummary() {
 		sharedsummary["sharedchao"]				= "sharedchao";
 		sharedsummary["sharedace"]				= "sharedace";
 		sharedsummary["jabund"]					= "jabund";
-		sharedsummary["sorensonabund"]			= "sorensonabund";
+		sharedsummary["sorabund"]			= "sorabund";
 		sharedsummary["jclass"]					= "jclass";
 		sharedsummary["sorclass"]				= "sorclass";
 		sharedsummary["jest"]					= "jest";
@@ -308,7 +308,7 @@ void ValidCalculators::initialSharedSummary() {
 		sharedsummary["thetayc"]				= "thetayc";
 		sharedsummary["thetan"]					= "thetan";
 		sharedsummary["kstest"]					= "kstest";
-		sharedsummary["bdiversity"]				= "bdiversity";
+		sharedsummary["whittaker"]				= "whittaker";
 		sharedsummary["sharednseqs"]			= "sharednseqs";
 		sharedsummary["ochiai"]					= "ochiai";
 		sharedsummary["anderberg"]				= "anderberg";
@@ -390,7 +390,7 @@ void ValidCalculators::initialVennShared() {
 void ValidCalculators::initialTreeGroups() {
 	try {	
 		treegroup["jabund"]					= "jabund";
-		treegroup["sorensonabund"]			= "sorensonabund";
+		treegroup["sorabund"]			= "sorabund";
 		treegroup["jclass"]					= "jclass";
 		treegroup["sorclass"]				= "sorclass";
 		treegroup["jest"]					= "jest";
@@ -412,7 +412,7 @@ void ValidCalculators::initialTreeGroups() {
 void ValidCalculators::initialBoot() {
 	try {	
 		boot["jabund"]				= "jabund";
-		boot["sorensonabund"]		= "sorensonabund";
+		boot["sorabund"]		= "sorabund";
 		boot["jclass"]				= "jclass";
 		boot["sorclass"]			= "orclass";
 		boot["jest"]				= "jest";
