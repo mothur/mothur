@@ -115,6 +115,8 @@
 		7E412F490F8D21B600381DD0 /* slibshuff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E412F480F8D21B600381DD0 /* slibshuff.cpp */; };
 		7E412FEA0F8D3E2C00381DD0 /* libshuff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E412FE90F8D3E2C00381DD0 /* libshuff.cpp */; };
 		7E4130F80F8E58FA00381DD0 /* dlibshuff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E4130F60F8E58FA00381DD0 /* dlibshuff.cpp */; };
+		7EC3D4550FA0FFF900338DA5 /* coverage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7EC3D4500FA0FFF900338DA5 /* coverage.cpp */; };
+		7EC3D4560FA0FFF900338DA5 /* whittaker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7EC3D4530FA0FFF900338DA5 /* whittaker.cpp */; };
 		8DD76F6A0486A84900D96B5E /* Mothur.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6859E8B029090EE04C91782 /* Mothur.1 */; };
 		A70B53AA0F4CD7AD0064797E /* getgroupcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70B53A40F4CD7AD0064797E /* getgroupcommand.cpp */; };
 		A70B53AB0F4CD7AD0064797E /* getlabelcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70B53A60F4CD7AD0064797E /* getlabelcommand.cpp */; };
@@ -123,7 +125,6 @@
 		EB1216E50F61ACFB004A865F /* bstick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB1216E40F61ACFB004A865F /* bstick.cpp */; };
 		EB1217230F61C9AC004A865F /* sharedkstest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB1217220F61C9AC004A865F /* sharedkstest.cpp */; };
 		EB6E68190F5F1C780044E17B /* qstat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB6E68180F5F1C780044E17B /* qstat.cpp */; };
-		EB6F015B0F6AC1670048081A /* sharedbdiversity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB6F015A0F6AC1670048081A /* sharedbdiversity.cpp */; };
 		EB9303EB0F534D9400E8EF26 /* logsd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB9303EA0F534D9400E8EF26 /* logsd.cpp */; };
 		EB9303F90F53517300E8EF26 /* geom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB9303F80F53517300E8EF26 /* geom.cpp */; };
 /* End PBXBuildFile section */
@@ -369,6 +370,11 @@
 		7E412FE90F8D3E2C00381DD0 /* libshuff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = libshuff.cpp; sourceTree = "<group>"; };
 		7E4130F60F8E58FA00381DD0 /* dlibshuff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dlibshuff.cpp; sourceTree = "<group>"; };
 		7E4130F70F8E58FA00381DD0 /* dlibshuff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dlibshuff.h; sourceTree = "<group>"; };
+		7EC3D4500FA0FFF900338DA5 /* coverage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = coverage.cpp; sourceTree = "<group>"; };
+		7EC3D4510FA0FFF900338DA5 /* coverage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = coverage.h; sourceTree = "<group>"; };
+		7EC3D4520FA0FFF900338DA5 /* sharedanderberg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedanderberg.h; sourceTree = "<group>"; };
+		7EC3D4530FA0FFF900338DA5 /* whittaker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = whittaker.cpp; sourceTree = "<group>"; };
+		7EC3D4540FA0FFF900338DA5 /* whittaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = whittaker.h; sourceTree = "<group>"; };
 		8DD76F6C0486A84900D96B5E /* mothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = mothur; sourceTree = BUILT_PRODUCTS_DIR; };
 		A70B53A40F4CD7AD0064797E /* getgroupcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getgroupcommand.cpp; sourceTree = "<group>"; };
 		A70B53A50F4CD7AD0064797E /* getgroupcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getgroupcommand.h; sourceTree = "<group>"; };
@@ -385,8 +391,6 @@
 		EB1217220F61C9AC004A865F /* sharedkstest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedkstest.cpp; sourceTree = "<group>"; };
 		EB6E68170F5F1C780044E17B /* qstat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = qstat.h; sourceTree = "<group>"; };
 		EB6E68180F5F1C780044E17B /* qstat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = qstat.cpp; sourceTree = "<group>"; };
-		EB6F01590F6AC1670048081A /* sharedbdiversity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedbdiversity.h; sourceTree = "<group>"; };
-		EB6F015A0F6AC1670048081A /* sharedbdiversity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedbdiversity.cpp; sourceTree = "<group>"; };
 		EB9303E90F534D9400E8EF26 /* logsd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = logsd.h; sourceTree = "<group>"; };
 		EB9303EA0F534D9400E8EF26 /* logsd.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = logsd.cpp; sourceTree = "<group>"; };
 		EB9303F70F53517300E8EF26 /* geom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = geom.h; sourceTree = "<group>"; };
@@ -537,10 +541,13 @@
 				37D928220F21331F001D4494 /* sharedace.cpp */,
 				37519A690F80E6EB00FED5E8 /* sharedanderbergs.h */,
 				37519A6A0F80E6EB00FED5E8 /* sharedanderbergs.cpp */,
+				7EC3D4500FA0FFF900338DA5 /* coverage.cpp */,
+				7EC3D4510FA0FFF900338DA5 /* coverage.h */,
+				7EC3D4520FA0FFF900338DA5 /* sharedanderberg.h */,
+				7EC3D4530FA0FFF900338DA5 /* whittaker.cpp */,
+				7EC3D4540FA0FFF900338DA5 /* whittaker.h */,
 				375873FB0F7D64DA0040F377 /* sharedbraycurtis.h */,
 				375873FC0F7D64DA0040F377 /* sharedbraycurtis.cpp */,
-				EB6F01590F6AC1670048081A /* sharedbdiversity.h */,
-				EB6F015A0F6AC1670048081A /* sharedbdiversity.cpp */,
 				37D928250F21331F001D4494 /* sharedchao1.h */,
 				37D928240F21331F001D4494 /* sharedchao1.cpp */,
 				37D928290F21331F001D4494 /* sharedjabund.h */,
@@ -851,7 +858,6 @@
 				EB1216880F619B83004A865F /* bergerparker.cpp in Sources */,
 				EB1216E50F61ACFB004A865F /* bstick.cpp in Sources */,
 				EB1217230F61C9AC004A865F /* sharedkstest.cpp in Sources */,
-				EB6F015B0F6AC1670048081A /* sharedbdiversity.cpp in Sources */,
 				375873EC0F7D64520040F377 /* fullmatrix.cpp in Sources */,
 				375873EF0F7D646F0040F377 /* heatmap.cpp in Sources */,
 				375873F20F7D64800040F377 /* heatmapcommand.cpp in Sources */,
@@ -877,6 +883,8 @@
 				375AA1390F9E433D008EF9B8 /* readcolumn.cpp in Sources */,
 				375AA13A0F9E433D008EF9B8 /* readotu.cpp in Sources */,
 				375AA13B0F9E433D008EF9B8 /* readphylip.cpp in Sources */,
+				7EC3D4550FA0FFF900338DA5 /* coverage.cpp in Sources */,
+				7EC3D4560FA0FFF900338DA5 /* whittaker.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

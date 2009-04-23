@@ -21,7 +21,7 @@
 #include "sharedthetayc.h"
 #include "sharedthetan.h"
 #include "sharedkstest.h"
-#include "sharedbdiversity.h"
+#include "whittaker.h"
 #include "sharedochiai.h"
 #include "sharedanderbergs.h"
 #include "sharedkulczynski.h"
@@ -53,7 +53,7 @@ SummarySharedCommand::SummarySharedCommand(){
 					sumCalculators.push_back(new SharedAce());
 				}else if (globaldata->Estimators[i] == "jabund") { 	
 					sumCalculators.push_back(new JAbund());
-				}else if (globaldata->Estimators[i] == "sorensonabund") { 
+				}else if (globaldata->Estimators[i] == "sorabund") { 
 					sumCalculators.push_back(new SorAbund());
 				}else if (globaldata->Estimators[i] == "jclass") { 
 					sumCalculators.push_back(new Jclass());
@@ -86,8 +86,8 @@ SummarySharedCommand::SummarySharedCommand(){
 				}else if (globaldata->Estimators[i] == "braycurtis") { 
 					sumCalculators.push_back(new BrayCurtis());
 				}
-				else if (globaldata->Estimators[i] == "bdiversity") { 
-					sumCalculators.push_back(new BDiversity());
+				else if (globaldata->Estimators[i] == "whittaker") { 
+					sumCalculators.push_back(new Whittaker());
 				}
 				
 			}

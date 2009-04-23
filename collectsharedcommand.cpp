@@ -20,7 +20,7 @@
 #include "sharedthetayc.h"
 #include "sharedthetan.h"
 #include "sharedkstest.h"
-#include "sharedbdiversity.h"
+#include "whittaker.h"
 #include "sharednseqs.h"
 #include "sharedochiai.h"
 #include "sharedanderbergs.h"
@@ -54,7 +54,7 @@ CollectSharedCommand::CollectSharedCommand(){
 					cDisplays.push_back(new CollectDisplay(new SharedAce(), new SharedOneColumnFile(fileNameRoot+"shared.ace")));
 				}else if (globaldata->Estimators[i] == "jabund") { 	
 					cDisplays.push_back(new CollectDisplay(new JAbund(), new SharedOneColumnFile(fileNameRoot+"jabund")));
-				}else if (globaldata->Estimators[i] == "sorensonabund") { 
+				}else if (globaldata->Estimators[i] == "sorabund") { 
 					cDisplays.push_back(new CollectDisplay(new SorAbund(), new SharedOneColumnFile(fileNameRoot+"sorabund")));
 				}else if (globaldata->Estimators[i] == "jclass") { 
 					cDisplays.push_back(new CollectDisplay(new Jclass(), new SharedOneColumnFile(fileNameRoot+"jclass")));
@@ -70,8 +70,8 @@ CollectSharedCommand::CollectSharedCommand(){
 					cDisplays.push_back(new CollectDisplay(new ThetaN(), new SharedOneColumnFile(fileNameRoot+"thetan")));
 				}else if (globaldata->Estimators[i] == "kstest") { 
 					cDisplays.push_back(new CollectDisplay(new KSTest(), new SharedOneColumnFile(fileNameRoot+"kstest")));
-				}else if (globaldata->Estimators[i] == "bdiversity") { 
-					cDisplays.push_back(new CollectDisplay(new BDiversity(), new SharedOneColumnFile(fileNameRoot+"bdiversity")));
+				}else if (globaldata->Estimators[i] == "whittaker") { 
+					cDisplays.push_back(new CollectDisplay(new Whittaker(), new SharedOneColumnFile(fileNameRoot+"whittaker")));
 				}else if (globaldata->Estimators[i] == "sharednseqs") { 
 					cDisplays.push_back(new CollectDisplay(new SharedNSeqs(), new SharedOneColumnFile(fileNameRoot+"shared.nseqs")));
 				}else if (globaldata->Estimators[i] == "ochiai") { 

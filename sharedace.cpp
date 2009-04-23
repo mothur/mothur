@@ -77,13 +77,13 @@ EstOutput SharedAce::getValues(SharedRAbundVector* shared1, SharedRAbundVector* 
 		C12 = 1 - (C12Numerator /(float) t11);
 		part1 = S12Rare / (float)C12;
 		part2 = 1 / (float)C12;
-	
+
 		//calculate gammas
 		Gamma1 = ((S12Rare * t21) / (float)((C12 * t10 * t11)) - 1);
 		Gamma2 = ((S12Rare * t12) / (float)((C12 * t01 * t11)) - 1);
 		Gamma3 = ((S12Rare / C12) * (S12Rare / C12)) * ( t22 / (float)(t10 * t01 * t11));
 		Gamma3 = Gamma3 - ((S12Rare * t11) / (float)(C12 * t01 * t10)) - Gamma1 - Gamma2;	
-	
+
 		if (isnan(Gamma1) || isinf(Gamma1)) { Gamma1 = 0; }
 		if (isnan(Gamma2) || isinf(Gamma2)) { Gamma2 = 0; }
 		if (isnan(Gamma3) || isinf(Gamma3)) { Gamma3 = 0; }

@@ -86,8 +86,8 @@ int HelpCommand::execute(){
 		cout << "The collect.shared command parameters are label, line, freq, jumble, calc and groups.  No parameters are required, but you may not use " << "\n";
 		cout << "both the line and label parameters at the same time. The collect.shared command should be in the following format: " << "\n";
 		cout << "collect.shared(label=yourLabel, line=yourLines, freq=yourFreq, jumble=yourJumble, calc=yourEstimators, groups=yourGroups)." << "\n";
-		cout << "Example collect.shared(label=unique-.01-.03, line=0-5-10, freq=10, jumble=1, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan)." << "\n";
-		cout << "The default values for jumble is 1 (meaning jumble, if it’s set to 0 then it will not jumble), freq is 100 and calc are sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan." << "\n";
+		cout << "Example collect.shared(label=unique-.01-.03, line=0-5-10, freq=10, jumble=1, groups=B-C, calc=sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan)." << "\n";
+		cout << "The default values for jumble is 1 (meaning jumble, if it’s set to 0 then it will not jumble), freq is 100 and calc are sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan." << "\n";
 		cout << "The default value for groups is all the groups in your groupfile." << "\n";
 		validCalcs->printCalc("shared", cout);
 		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
@@ -150,9 +150,9 @@ int HelpCommand::execute(){
 		cout << "The summary.shared command parameters are label, line, jumble and calc.  No parameters are required, but you may not use " << "\n";
 		cout << "both the line and label parameters at the same time. The summary.shared command should be in the following format: " << "\n";
 		cout << "summary.shared(label=yourLabel, line=yourLines, jumble=yourJumble, calc=yourEstimators, groups=yourGroups)." << "\n";
-		cout << "Example summary.shared(label=unique-.01-.03, line=0,5,10, jumble=1, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan)." << "\n";
+		cout << "Example summary.shared(label=unique-.01-.03, line=0,5,10, jumble=1, groups=B-C, calc=sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan)." << "\n";
 		validCalcs->printCalc("sharedsummary", cout);
-		cout << "The default value for jumble is 1 (meaning jumble, if it’s set to 0 then it will not jumble) and calc is sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan" << "\n";
+		cout << "The default value for jumble is 1 (meaning jumble, if it’s set to 0 then it will not jumble) and calc is sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan" << "\n";
 		cout << "The default value for groups is all the groups in your groupfile." << "\n";
 		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
 		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups." << "\n";
@@ -232,7 +232,7 @@ int HelpCommand::execute(){
 		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like included used." << "\n";
 		cout << "The group names are separated by dashes. The line and label allow you to select what distance levels you would like trees created for, and are also separated by dashes." << "\n";
 		cout << "The tree.shared command should be in the following format: tree.shared(groups=yourGroups, calc=yourCalcs, line=yourLines, label=yourLabels)." << "\n";
-		cout << "Example tree.shared(groups=A-B-C, line=1-3-5, calc=jabund-sorensonabund)." << "\n";
+		cout << "Example tree.shared(groups=A-B-C, line=1-3-5, calc=jabund-sorabund)." << "\n";
 		cout << "The default value for groups is all the groups in your groupfile." << "\n";
 		cout << "There is no default value for calc." << "\n";
 		validCalcs->printCalc("treegroup", cout);
@@ -244,7 +244,7 @@ int HelpCommand::execute(){
 		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like included used." << "\n";
 		cout << "The group names are separated by dashes. The line and label allow you to select what distance levels you would like trees created for, and are also separated by dashes." << "\n";
 		cout << "The bootstrap.shared command should be in the following format: bootstrap.shared(groups=yourGroups, calc=yourCalcs, line=yourLines, label=yourLabels, iters=yourIters)." << "\n";
-		cout << "Example bootstrap.shared(groups=A-B-C, line=1-3-5, calc=jabund-sorensonabund, iters=100)." << "\n";
+		cout << "Example bootstrap.shared(groups=A-B-C, line=1-3-5, calc=jabund-sorabund, iters=100)." << "\n";
 		cout << "The default value for groups is all the groups in your groupfile." << "\n";
 		cout << "There is no default value for calc. The default for iters is 1000." << "\n";
 		validCalcs->printCalc("boot", cout);

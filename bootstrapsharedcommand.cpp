@@ -35,7 +35,7 @@ BootSharedCommand::BootSharedCommand(){
 			if (validCalculator->isValidCalculator("boot", globaldata->Estimators[i]) == true) { 
 				if (globaldata->Estimators[i] == "jabund") { 	
 					treeCalculators.push_back(new JAbund());
-				}else if (globaldata->Estimators[i] == "sorensonabund") { 
+				}else if (globaldata->Estimators[i] == "sorabund") { 
 					treeCalculators.push_back(new SorAbund());
 				}else if (globaldata->Estimators[i] == "jclass") { 
 					treeCalculators.push_back(new Jclass());

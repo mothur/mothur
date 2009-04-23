@@ -46,7 +46,7 @@ RAbundVector BStick::getRAbundVector(SAbundVector* rank){
 /***************************************************************************/
 EstOutput BStick::getValues(SAbundVector* rank){
 	try {
-		data.resize(2,0);
+		data.resize(3,0);
 		rdata = getRAbundVector(rank);
 		double numInd = (double)rdata.getNumSeqs();
 		double numSpec = (double)rdata.getNumBins();
@@ -64,27 +64,16 @@ EstOutput BStick::getValues(SAbundVector* rank){
 				maxDiff = diff;
 		}
 		
-		double DStatistic = maxDiff/numInd;
-		double critVal = 0;
-		/*cout << "BStick:\n";
-		cout << "D-Statistic = " << DStatistic << "\n";
-		cout << "Critical value for 95% confidence interval = ";*/
-		if(rdata.size() > 20)
-		{
-			critVal = .886/sqrt(rdata.size());
-		}
-		else
-		{
-			KOSTable table;
-			critVal = table.getConfLimit(numSpec);
-		}
+		data[0] = maxDiff/numInd;
+		data[1] = 0.886/sqrt(rdata.size());
+		data[2] = 1.031/sqrt(rdata.size());
+
 		/*cout << critVal << "\n";
 		cout << "If D-Statistic is less than the critical value then the data fits the Broken Stick model w/ 95% confidence.\n\n";*/
 		
-		data[0] = DStatistic;
-		data[1] = critVal;
 		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
 		if (isnan(data[1]) || isinf(data[1])) { data[1] = 0; }
+		if (isnan(data[2]) || isinf(data[2])) { data[2] = 0; }
 		
 		return data;
 	}

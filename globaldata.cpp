@@ -173,7 +173,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			splitAtDash(calc, Estimators); 
 		}
 		if (commandName == "collect.shared") {
-			if ((calc == "default") || (calc == "")) { calc = "sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan"; }
+			if ((calc == "default") || (calc == "")) { calc = "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan"; }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
@@ -183,7 +183,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			splitAtDash(calc, Estimators); 
 		}
 		if (commandName == "summary.shared") {
-			if ((calc == "default") || (calc == "")) { calc = "sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan"; }
+			if ((calc == "default") || (calc == "")) { calc = "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan"; }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
