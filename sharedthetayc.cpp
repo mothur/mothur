@@ -14,10 +14,13 @@ EstOutput ThetaYC::getValues(SharedRAbundVector* shared1, SharedRAbundVector* sh
 	try {	
 		data.resize(1,0);
 		
-		int Atotal, Btotal, tempA, tempB;
-		Atotal = 0; Btotal = 0; 
-		float thetaYC, sumSharedA, sumSharedB, a, b, d;
-		thetaYC = 0.0; sumSharedA = 0.0; sumSharedB = 0.0; a = 0.0; b = 0.0; d = 0.0;
+		int Atotal = 0;
+		int Btotal = 0;
+		float thetaYC = 0;
+		float relA = 0;
+		float relB = 0;
+		float a = 0;
+		float b = 0;
 		
 		//get the total values we need to calculate the theta denominator sums
 		for (int i = 0; i < shared1->size(); i++) {
@@ -29,21 +32,14 @@ EstOutput ThetaYC::getValues(SharedRAbundVector* shared1, SharedRAbundVector* sh
 		//calculate the theta denominator sums
 		for (int j = 0; j < shared1->size(); j++) {
 			//store in temps to avoid multiple repetitive function calls
-			tempA = shared1->getAbundance(j);
-			tempB = shared2->getAbundance(j);
-			
-			//they are shared
-			if ((tempA != 0) && (tempB != 0)) {
-				if (Atotal != 0)	{ sumSharedA = (tempA / (float)Atotal); }
-				if (Btotal != 0)	{ sumSharedB = (tempB / (float)Btotal); }
-			
-				a += sumSharedA * sumSharedA;
-				b += sumSharedB * sumSharedB;
-				d += sumSharedA * sumSharedB;
-			}
+			relA = shared1->getAbundance(j) / (float)Atotal;
+			relB = shared2->getAbundance(j) / (float)Btotal;
+					
+			a += relA * relB;
+			b += pow((relA-relB),2);
 		}
 
-		thetaYC = d / (float) (a + b - d);
+		thetaYC = a / (float) (b+a);
 		
 		if (isnan(thetaYC) || isinf(thetaYC)) { thetaYC = 0; }
 		

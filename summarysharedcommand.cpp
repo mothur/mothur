@@ -85,8 +85,7 @@ SummarySharedCommand::SummarySharedCommand(){
 					sumCalculators.push_back(new MorHorn());
 				}else if (globaldata->Estimators[i] == "braycurtis") { 
 					sumCalculators.push_back(new BrayCurtis());
-				}
-				else if (globaldata->Estimators[i] == "whittaker") { 
+				}else if (globaldata->Estimators[i] == "whittaker") { 
 					sumCalculators.push_back(new Whittaker());
 				}
 				

@@ -17,6 +17,7 @@
 #include "sharedthetayc.h"
 #include "sharedthetan.h"
 #include "sharedmorisitahorn.h"
+#include "sharedbraycurtis.h"
 
 
 //**********************************************************************************************************************
@@ -49,6 +50,8 @@ TreeGroupCommand::TreeGroupCommand(){
 					treeCalculators.push_back(new ThetaN());
 				}else if (globaldata->Estimators[i] == "morisitahorn") { 
 					treeCalculators.push_back(new MorHorn());
+				}else if (globaldata->Estimators[i] == "braycurtis") { 
+					treeCalculators.push_back(new BrayCurtis());
 				}
 			}
 		}
