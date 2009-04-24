@@ -10,17 +10,16 @@
 #include "sharedbraycurtis.h"
 
 /***********************************************************************/
-//This is used by SharedJAbund and SharedSorAbund
+
 EstOutput BrayCurtis::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2) {
 	try {	
-		EstOutput data;
 		data.resize(1,0);
 		
 		int sumSharedA, sumSharedB, sumSharedAB, tempA, tempB;
 		sumSharedA = 0; sumSharedB = 0; sumSharedAB = 0; 
 		
 		/*Xi, Yi = abundance of the ith shared OTU in A and B 
-		sumSharedA = the sum of all shared otus in A
+		sumSharedA = the number of otus in A
 		sumSharedB = the sum of all shared otus in B
 		sumSharedAB = the sum of the minimum otus int all shared otus in AB.
 		*/
@@ -29,16 +28,13 @@ EstOutput BrayCurtis::getValues(SharedRAbundVector* shared1, SharedRAbundVector*
 			//store in temps to avoid multiple repetitive function calls
 			tempA = shared1->getAbundance(i);
 			tempB = shared2->getAbundance(i);
-
 			
-			if ((tempA != 0) && (tempB != 0)) {//they are shared
-				sumSharedA += tempA;
-				sumSharedB += tempB;
+			sumSharedA += tempA;
+			sumSharedB += tempB;
 				
-				//sum the min of tempA and tempB
-				if (tempA < tempB) { sumSharedAB += tempA; }
-				else  { sumSharedAB += tempB; }				
-			}
+			//sum the min of tempA and tempB
+			if (tempA < tempB) { sumSharedAB += tempA; }
+			else  { sumSharedAB += tempB; }				
 		}
 		
 		data[0] = (2 * sumSharedAB) / (float)( sumSharedA + sumSharedB);

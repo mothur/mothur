@@ -32,18 +32,16 @@ EstOutput MorHorn::getValues(SharedRAbundVector* shared1, SharedRAbundVector* sh
 			tempA = shared1->getAbundance(j);
 			tempB = shared2->getAbundance(j);
 			
-			//they are shared
-			if ((tempA != 0) && (tempB != 0)) {
-				if (Atotal != 0)	{ sumSharedA = (tempA / (float)Atotal); }
-				if (Btotal != 0)	{ sumSharedB = (tempB / (float)Btotal); }
-			
-				a += sumSharedA * sumSharedA;
-				b += sumSharedB * sumSharedB;
-				d += sumSharedA * sumSharedB;
-			}
+			a += tempA * tempA;
+			b += tempB * tempB;
+			d += tempA * tempB;
 		}
 
-		morhorn = (2 * d) / (float) (a + b);
+		a /= double(Atotal * Atotal);
+		b /= double(Btotal * Btotal);
+		d /= double(Atotal * Btotal);
+		
+		morhorn = (2 * d) / (a + b);
 		
 		if (isnan(morhorn) || isinf(morhorn)) { morhorn = 0; }
 		

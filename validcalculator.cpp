@@ -398,6 +398,7 @@ void ValidCalculators::initialTreeGroups() {
 		treegroup["thetayc"]				= "thetayc";
 		treegroup["thetan"]					= "thetan";
 		treegroup["morisitahorn"]			= "morisitahorn";
+		treegroup["braycurtis"]			= "braycurtis";
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialTreeGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -420,6 +421,7 @@ void ValidCalculators::initialBoot() {
 		boot["thetayc"]				= "thetayc";
 		boot["thetan"]				= "thetan";
 		boot["morisitahorn"]		= "morisitahorn";
+		boot["braycurtis"]			= "braycurtis";
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialBoot. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
