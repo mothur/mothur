@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 //This is used by SharedJAbund and SharedSorAbund
-EstOutput UVEst::getUVest(SharedRAbundVector* shared1, SharedRAbundVector* shared2) {
+EstOutput UVEst::getUVest(vector<SharedRAbundVector*> shared) {
 	try {	
 		EstOutput results;
 		results.resize(2,0);
@@ -29,10 +29,10 @@ EstOutput UVEst::getUVest(SharedRAbundVector* shared1, SharedRAbundVector* share
 		sumSharedA1 = the sum of all shared otus in A where B = 1
 		sumSharedB1 = the sum of all shared otus in B where A = 1 */
 		
-		for (int i = 0; i < shared1->size(); i++) {
+		for (int i = 0; i < shared[0]->size(); i++) {
 			//store in temps to avoid multiple repetitive function calls
-			tempA = shared1->getAbundance(i);
-			tempB = shared2->getAbundance(i);
+			tempA = shared[0]->getAbundance(i);
+			tempB = shared[1]->getAbundance(i);
 
 			Atotal += tempA;
 			Btotal += tempB;

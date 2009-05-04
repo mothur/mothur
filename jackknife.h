@@ -20,9 +20,9 @@ It is a child of the calculator class. */
 class Jackknife : public Calculator  {
 	
 public:
-	Jackknife() : Calculator("Jackknife", 3) {	getAMatrix(); };
+	Jackknife() : Calculator("Jackknife", 3, false) {	getAMatrix(); };
 	EstOutput getValues(SAbundVector*);
-	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*) {return data;};
+	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
 
 private:
 	static const int maxOrder = 30;

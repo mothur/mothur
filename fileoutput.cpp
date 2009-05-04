@@ -90,7 +90,7 @@ void ThreeColumnFile::resetFile(){
 		renameOk = rename(outName.c_str(), inName.c_str());
 		
 		//checks to make sure user was able to rename and remove successfully
-		if ((renameOk != 0)) {	cout << "Unable to rename necessary files." << endl;  cout << outName << "  g   " << inName << endl;}
+		if ((renameOk != 0)) {	cout << "Unable to rename necessary files." << endl; }
 
 	}
 	catch(exception& e) {

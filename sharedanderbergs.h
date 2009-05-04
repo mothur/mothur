@@ -16,9 +16,9 @@
 class Anderberg : public Calculator  {
 	
 	public:
-		Anderberg() :  Calculator("Anderberg", 1) {};
+		Anderberg() :  Calculator("Anderberg", 1, false) {};
 		EstOutput getValues(SAbundVector*) {return data;};
-		EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
+		EstOutput getValues(vector<SharedRAbundVector*>);
 	private:
 
 };

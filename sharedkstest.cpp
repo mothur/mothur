@@ -11,28 +11,28 @@
 
 /***********************************************************************/
 
-EstOutput KSTest::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2){
+EstOutput KSTest::getValues(vector<SharedRAbundVector*> shared){
 	try {
 		data.resize(2,0);
 		
 		//Must return shared1 and shared2 to original order at conclusion of kstest
-		vector <individual> initData1 = shared1->getData();
-		vector <individual> initData2 = shared2->getData();
-		shared1->sortD();
-		shared2->sortD();
+		vector <individual> initData1 = shared[0]->getData();
+		vector <individual> initData2 = shared[1]->getData();
+		shared[0]->sortD();
+		shared[1]->sortD();
 
-		int numNZ1 = shared1->numNZ();
-		int numNZ2 = shared2->numNZ();
-		double numInd1 = (double)shared1->getNumSeqs();
-		double numInd2 = (double)shared2->getNumSeqs();
+		int numNZ1 = shared[0]->numNZ();
+		int numNZ2 = shared[1]->numNZ();
+		double numInd1 = (double)shared[0]->getNumSeqs();
+		double numInd2 = (double)shared[1]->getNumSeqs();
 		
 		double maxDiff = -1;
 		double sum1 = 0;
 		double sum2 = 0;
-		for(int i = 1; i < shared1->getNumBins(); i++)
+		for(int i = 1; i < shared[0]->getNumBins(); i++)
 		{
-			sum1 += shared1->get(i).abundance;
-			sum2 += shared2->get(i).abundance;
+			sum1 += shared[0]->get(i).abundance;
+			sum2 += shared[1]->get(i).abundance;
 			double diff = fabs((double)sum1/numInd1 - (double)sum2/numInd2);
 			if(diff > maxDiff)
 				maxDiff = diff;
@@ -54,8 +54,8 @@ EstOutput KSTest::getValues(SharedRAbundVector* shared1, SharedRAbundVector* sha
 			cout << "If D-Statistic is greater than the critical value then the data sets are significantly different at the 95% confidence level.\n\n";
 		}*/
 		
-		shared1->setData(initData1);
-		shared2->setData(initData2);
+		shared[0]->setData(initData1);
+		shared[1]->setData(initData2);
 		
 		data[0] = DStatistic;
 		data[1] = critVal;

@@ -69,8 +69,7 @@ void Venn::getPic(SAbundVector* sabund, vector<Calculator*> vCalcs) {
 void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs) {
 	try {
 		
-		//fills vector of sharedsabunds - lookup
-		//util->getSharedVectors(globaldata->Groups, lookup, sharedorder);  //fills group vectors from order vector.
+		vector<SharedRAbundVector*> subset;
 		
 		/******************* 1 Group **************************/
 		if (lookup.size() == 1) {
@@ -125,13 +124,16 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 			sabundA = new SAbundVector(lookup[0]->getSAbundVector());//  sabundA = &sA;
 			sabundB = new SAbundVector(lookup[1]->getSAbundVector());//  sabundB = &sB;
 			
+			subset.clear();
+			subset.push_back(lookup[0]); subset.push_back(lookup[1]);
+			
 			//make a file for each calculator
 			for(int i=0;i<vCalcs.size();i++){
 				string filenamesvg = getRootName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
 				openOutputFile(filenamesvg, outsvg);
 				
 				//get estimates for sharedAB
-				vector<double> shared = vCalcs[i]->getValues(lookup[0], lookup[1]);
+				vector<double> shared = vCalcs[i]->getValues(subset);
 				
 				//in essence you want to run it like a single 
 				if (vCalcs[i]->getName() == "sharedsobs") {
@@ -199,11 +201,19 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 			for(int i=0;i<vCalcs.size();i++){
 				string filenamesvg = getRootName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
 				openOutputFile(filenamesvg, outsvg);
-				
+
 				//get estimates for sharedAB, sharedAC and sharedBC
-				vector<double> sharedAB = vCalcs[i]->getValues(lookup[0], lookup[1]);
-				vector<double> sharedAC = vCalcs[i]->getValues(lookup[0], lookup[2]);
-				vector<double> sharedBC = vCalcs[i]->getValues(lookup[1], lookup[2]);
+				subset.clear();
+				subset.push_back(lookup[0]); subset.push_back(lookup[1]);
+				vector<double> sharedAB = vCalcs[i]->getValues(subset);
+				
+				subset.clear();
+				subset.push_back(lookup[0]); subset.push_back(lookup[2]);
+				vector<double> sharedAC = vCalcs[i]->getValues(subset);
+				
+				subset.clear();
+				subset.push_back(lookup[1]); subset.push_back(lookup[2]);
+				vector<double> sharedBC = vCalcs[i]->getValues(subset);
 			
 				//merge BC and estimate with shared with A
 				SharedRAbundVector* merge = new SharedRAbundVector();
@@ -211,7 +221,9 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 					merge->push_back((lookup[1]->getAbundance(j) + lookup[2]->getAbundance(j)), j, "");
 				}
 				
-				vector<double> sharedAwithBC = vCalcs[i]->getValues(lookup[0], merge);
+				subset.clear();
+				subset.push_back(lookup[0]); subset.push_back(merge);
+				vector<double> sharedAwithBC = vCalcs[i]->getValues(subset);
 			
 				delete merge;
 				//merge AC and estimate with shared with B
@@ -219,8 +231,10 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 				for (int j = 0; j < lookup[0]->size(); j++) {
 					merge->push_back((lookup[0]->getAbundance(j) + lookup[2]->getAbundance(j)), j, "");
 				}
-		
-				vector<double> sharedBwithAC = vCalcs[i]->getValues(lookup[1], merge);
+				
+				subset.clear();
+				subset.push_back(merge); subset.push_back(lookup[1]);
+				vector<double> sharedBwithAC = vCalcs[i]->getValues(subset);
 			
 				delete merge;
 				//merge AB and estimate with shared with C
@@ -229,7 +243,9 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 					merge->push_back((lookup[0]->getAbundance(j) + lookup[1]->getAbundance(j)), j, "");
 				}
 				
-				vector<double> sharedCwithAB = vCalcs[i]->getValues(lookup[2], merge);
+				subset.clear();
+				subset.push_back(lookup[2]); subset.push_back(merge);
+				vector<double> sharedCwithAB = vCalcs[i]->getValues(subset);
  				delete merge;
 				
 				//in essence you want to run it like a single 

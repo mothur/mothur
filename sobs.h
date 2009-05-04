@@ -21,13 +21,13 @@ It is a child of the calculator class. */
 class Sobs : public Calculator {
 
 public:
-	Sobs() : Calculator("sobs", 1) {};
+	Sobs() : Calculator("sobs", 1, false) {};
 	EstOutput getValues(SAbundVector* rank){
 		data.resize(1,0);
 		data[0] = (double)rank->getNumBins();
 		return data;
 	}
-	EstOutput getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2) {return data;};
+	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
 };
 
 /***********************************************************************/

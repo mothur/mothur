@@ -18,9 +18,9 @@ It is a child of the calculator class.*/
 class KSTest : public Calculator  {
 	
 public:
-	KSTest() : Calculator("kstest", 3) {};
+	KSTest() : Calculator("kstest", 3, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
-	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
+	EstOutput getValues(vector<SharedRAbundVector*>);
 private:
 };
 

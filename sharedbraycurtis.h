@@ -15,9 +15,9 @@
 class BrayCurtis : public Calculator  {
 	
 public:
-	BrayCurtis() :  Calculator("BrayCurtis", 1) {};
+	BrayCurtis() :  Calculator("BrayCurtis", 1, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
-	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
+	EstOutput getValues(vector<SharedRAbundVector*>);
 private:
 	
 };

@@ -16,9 +16,9 @@
 class Ochiai : public Calculator  {
 	
 public:
-	Ochiai() :  Calculator("Ochiai", 1) {};
+	Ochiai() :  Calculator("Ochiai", 1, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
-	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
+	EstOutput getValues(vector<SharedRAbundVector*>);
 private:
 	
 };

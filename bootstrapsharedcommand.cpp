@@ -91,6 +91,7 @@ int BootSharedCommand::execute(){
 	try {
 		int count = 1;	
 		EstOutput data;
+		vector<SharedRAbundVector*> subset;
 	
 		//if the users entered no valid calculators don't execute command
 		if (treeCalculators.size() == 0) { return 0; }
@@ -163,15 +164,19 @@ int BootSharedCommand::execute(){
 						for (int k = 0; k < lookup.size(); k++) { // pass cdd each set of groups to commpare
 							for (int l = k; l < lookup.size(); l++) {
 								if (k != l) { //we dont need to similiarity of a groups to itself
+									subset.clear(); //clear out old pair of sharedrabunds
+									//add new pair of sharedrabunds
+									subset.push_back(lookup[k]); subset.push_back(lookup[l]); 
+									
 									//get estimated similarity between 2 groups
-									data = treeCalculators[i]->getValues(lookup[k], lookup[l]); //saves the calculator outputs
+									data = treeCalculators[i]->getValues(subset); //saves the calculator outputs
 									//save values in similarity matrix
 									simMatrix[k][l] = data[0];
 									simMatrix[l][k] = data[0];
 								}
 							}
 						}
-					
+				
 						//creates tree from similarity matrix and write out file
 						createTree(out[i]);
 					}
@@ -219,8 +224,8 @@ void BootSharedCommand::createTree(ostream* out){
 		//do merges and create tree structure by setting parents and children
 		//there are numGroups - 1 merges to do
 		for (int i = 0; i < (numGroups - 1); i++) {
-			
-			float largest = 0.0;
+		
+			float largest = -1.0;
 			int row, column;
 			//find largest value in sims matrix by searching lower triangle
 			for (int j = 1; j < simMatrix.size(); j++) {
@@ -232,7 +237,7 @@ void BootSharedCommand::createTree(ostream* out){
 			//set non-leaf node info and update leaves to know their parents
 			//non-leaf
 			t->tree[numGroups + i].setChildren(index[row], index[column]);
-			
+		
 			//parents
 			t->tree[index[row]].setParent(numGroups + i);
 			t->tree[index[column]].setParent(numGroups + i);
@@ -243,36 +248,36 @@ void BootSharedCommand::createTree(ostream* out){
 			//branchlengths
 			t->tree[index[row]].setBranchLength(blength - t->tree[index[row]].getLengthToLeaves());
 			t->tree[index[column]].setBranchLength(blength - t->tree[index[column]].getLengthToLeaves());
-			
+		
 			//set your length to leaves to your childs length plus branchlength
 			t->tree[numGroups + i].setLengthToLeaves(t->tree[index[row]].getLengthToLeaves() + t->tree[index[row]].getBranchLength());
 			
-			
+		
 			//update index 
 			index[row] = numGroups+i;
 			index[column] = numGroups+i;
 			
 			//zero out highest value that caused the merge.
-			simMatrix[row][column] = 0.0;
-			simMatrix[column][row] = 0.0;
-			
+			simMatrix[row][column] = -1.0;
+			simMatrix[column][row] = -1.0;
+		
 			//merge values in simsMatrix
 			for (int n = 0; n < simMatrix.size(); n++)	{
 				//row becomes merge of 2 groups
 				simMatrix[row][n] = (simMatrix[row][n] + simMatrix[column][n]) / 2;
 				simMatrix[n][row] = simMatrix[row][n];
 				//delete column
-				simMatrix[column][n] = 0.0;
-				simMatrix[n][column] = 0.0;
+				simMatrix[column][n] = -1.0;
+				simMatrix[n][column] = -1.0;
 			}
 		}
-	
+
 		//assemble tree
 		t->assembleTree();
-		
+	
 		//print newick file
 		t->print(*out);
-		
+	
 		//delete tree
 		delete t;
 	

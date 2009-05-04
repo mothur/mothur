@@ -18,9 +18,9 @@ It is a child of the calculator class.*/
 class BStick : public Calculator  {
 	
 public:
-	BStick() : Calculator("bstick", 3) {};
+	BStick() : Calculator("bstick", 3, false) {};
 	EstOutput getValues(SAbundVector*);
-	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*) {return data;};
+	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
 
 private:
 	double invSum(int, double);

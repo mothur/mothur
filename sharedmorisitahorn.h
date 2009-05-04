@@ -17,9 +17,9 @@
 class MorHorn : public Calculator  {
 	
 public:
-	MorHorn() :  Calculator("MorisitaHorn", 1) {};
+	MorHorn() :  Calculator("MorisitaHorn", 1, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
-	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
+	EstOutput getValues(vector<SharedRAbundVector*>);
 private:
 	
 };

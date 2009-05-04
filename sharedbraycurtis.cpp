@@ -10,8 +10,8 @@
 #include "sharedbraycurtis.h"
 
 /***********************************************************************/
-
-EstOutput BrayCurtis::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2) {
+//This is used by SharedJAbund and SharedSorAbund
+EstOutput BrayCurtis::getValues(vector<SharedRAbundVector*> shared) {
 	try {	
 		data.resize(1,0);
 		
@@ -24,10 +24,10 @@ EstOutput BrayCurtis::getValues(SharedRAbundVector* shared1, SharedRAbundVector*
 		sumSharedAB = the sum of the minimum otus int all shared otus in AB.
 		*/
 		
-		for (int i = 0; i < shared1->size(); i++) {
+		for (int i = 0; i < shared[0]->size(); i++) {
 			//store in temps to avoid multiple repetitive function calls
-			tempA = shared1->getAbundance(i);
-			tempB = shared2->getAbundance(i);
+			tempA = shared[0]->getAbundance(i);
+			tempB = shared[1]->getAbundance(i);
 			
 			sumSharedA += tempA;
 			sumSharedB += tempB;

@@ -42,7 +42,15 @@ using namespace std;
 
 typedef unsigned long long ull;
 
-
+struct IntNode {
+	int lvalue;
+	int rvalue;
+	int lcoef;
+	int rcoef;
+	IntNode* left;
+	IntNode* right;
+};
+	
 /***********************************************************************/
 
 // snagged from http://www.parashift.com/c++-faq-lite/misc-technical-issues.html#faq-39.2
@@ -95,7 +103,6 @@ string toHex(const T&x){
 
     return output.str();
 }
-
 //**********************************************************************************************************************
 
 template<typename T>
@@ -202,6 +209,17 @@ inline string getSimpleName(string longName){
 	}
 
 	return simpleName;
+}
+/***********************************************************************/
+
+inline int factorial(int num){
+	int total = 1;
+	
+	for (int i = 1; i <= num; i++) {
+		total *= i;
+	}
+	
+	return total;
 }
 
 /***********************************************************************/

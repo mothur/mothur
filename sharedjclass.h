@@ -19,9 +19,9 @@ It is a child of the calculator class. */
 class Jclass : public Calculator  {
 	
 public:
-	Jclass() :  Calculator("Jclass", 3) {};
+	Jclass() :  Calculator("Jclass", 3, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
-	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
+	EstOutput getValues(vector<SharedRAbundVector*>);
 private:
 	
 };

@@ -247,7 +247,7 @@ void ValidParameters::initCommandParameters() {
 		string collectsingleArray[] =  {"freq","line","label","calc","abund"};
 		commandParameters["collect.single"] = addParameters(collectsingleArray, sizeof(collectsingleArray)/sizeof(string));
 
-		string collectsharedArray[] =  {"jumble","freq","line","label","calc","groups"};
+		string collectsharedArray[] =  {"freq","line","label","calc","groups"};
 		commandParameters["collect.shared"] = addParameters(collectsharedArray, sizeof(collectsharedArray)/sizeof(string));
 
 		string getgroupArray[] =  {};
@@ -271,7 +271,7 @@ void ValidParameters::initCommandParameters() {
 		string summarysingleArray[] =  {"line","label","calc","abund"};
 		commandParameters["summary.single"] = addParameters(summarysingleArray, sizeof(summarysingleArray)/sizeof(string));
 
-		string summarysharedArray[] =  {"jumble","line","label","calc","groups"};
+		string summarysharedArray[] =  {"line","label","calc","groups"};
 		commandParameters["summary.shared"] = addParameters(summarysharedArray, sizeof(summarysharedArray)/sizeof(string));
 
 		string parsimonyArray[] =  {"random","groups","iters"};
@@ -300,6 +300,9 @@ void ValidParameters::initCommandParameters() {
 		
 		string bootstrapArray[] =  {"line","label","calc","groups","iters"};
 		commandParameters["bootstrap.shared"] = addParameters(bootstrapArray, sizeof(bootstrapArray)/sizeof(string));
+		
+		string concensusArray[] =  {};
+		commandParameters["concensus"] = addParameters(concensusArray, sizeof(concensusArray)/sizeof(string));
 		
 		string quitArray[] = {};
 		commandParameters["quit"] = addParameters(quitArray, sizeof(quitArray)/sizeof(string));

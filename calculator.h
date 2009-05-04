@@ -23,17 +23,19 @@ class Calculator {
 
 public:
 	Calculator(){};
-	Calculator(string n, int c) : name(n), cols(c) {};
+	Calculator(string n, int c, bool m) : name(n), cols(c), multiple(m) {};
 	virtual EstOutput getValues(SAbundVector*) = 0;	
-	virtual EstOutput getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2) = 0;
+	virtual EstOutput getValues(vector<SharedRAbundVector*>) = 0;
 	virtual void print(ostream& f)	{ f.setf(ios::fixed, ios::floatfield); f.setf(ios::showpoint);
 									  f << data[0]; for(int i=1;i<data.size();i++){	f << '\t' << data[i];	}}
 	virtual string getName()		{	return name;	}
 	virtual int getCols()		{	return cols;	}
+	virtual bool getMultiple()  {   return multiple;   }
 protected:
 	EstOutput data;
 	string name;
 	int cols;
+	bool multiple;
 
 };
 

@@ -11,16 +11,16 @@
 
 /***********************************************************************/
 
-EstOutput Whittaker::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2){
+EstOutput Whittaker::getValues(vector<SharedRAbundVector*> shared){
 	try{
 		data.resize(1);
 
 		int countA = 0;
 		int countB = 0;
-		int sTotal = shared1->getNumBins();
+		int sTotal = shared[0]->getNumBins();
 		for(int i=0;i<sTotal;i++){
-			if(shared1->getAbundance(i) != 0){	countA++;	}
-			if(shared2->getAbundance(i) != 0){	countB++;	}		
+			if(shared[0]->getAbundance(i) != 0){	countA++;	}
+			if(shared[1]->getAbundance(i) != 0){	countB++;	}		
 		}
 		
 		data[0] = 2*sTotal/(float)(countA+countB)-1;

@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 
-EstOutput Ochiai::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2) {
+EstOutput Ochiai::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		int S1, S2, S12, tempA, tempB;
 		S1 = 0; S2 = 0; S12 = 0; tempA = 0; tempB = 0; 
@@ -21,10 +21,10 @@ EstOutput Ochiai::getValues(SharedRAbundVector* shared1, SharedRAbundVector* sha
 
 		data.resize(1,0);
 		
-		for (int i = 0; i < shared1->size(); i++) {
+		for (int i = 0; i < shared[0]->size(); i++) {
 			//store in temps to avoid multiple repetitive function calls
-			tempA = shared1->getAbundance(i);
-			tempB = shared2->getAbundance(i);
+			tempA = shared[0]->getAbundance(i);
+			tempB = shared[1]->getAbundance(i);
 			
 			if (tempA != 0) { S1++; }
 			if (tempB != 0) { S2++; } 

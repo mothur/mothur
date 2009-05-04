@@ -63,6 +63,7 @@ void Collect::getSharedCurve(int increment = 1){
 try {
                 globaldata = GlobalData::getInstance();
                 vector<SharedRAbundVector*> lookup; 
+				vector<SharedRAbundVector*> subset;
 
                 //create and initialize vector of sharedvectors, one for each group
                 for (int i = 0; i < globaldata->Groups.size(); i++) { 
@@ -78,14 +79,18 @@ try {
                 //initialize labels for output
                 //makes  'uniqueAB         uniqueAC  uniqueBC' if your groups are A, B, C
                 getGroupComb();
-                groupLabel = "";
+                groupLabel = ""; 
                 for (int s = 0; s < groupComb.size(); s++) {
                         groupLabel = groupLabel + label + groupComb[s] + "\t";
                 }
-
+				
+				//for multi displays
+				string groupLabelAll = groupLabel + label + "all\t";
+				
                 for(int i=0;i<displays.size();i++){
                         ccd->registerDisplay(displays[i]); //adds a display[i] to cdd
-                        displays[i]->init(groupLabel);                  
+						if (displays[i]->isCalcMultiple() == true)  {   displays[i]->init(groupLabelAll); }
+						else {  displays[i]->init(groupLabel);  }           
                 }
                 
                 //sample all the members
@@ -106,16 +111,19 @@ try {
 	
                         //calculate at 0 and the given increment
                         if((i == 0) || (i+1) % increment == 0){
-                                //randomize group order
-                                if (globaldata->getJumble() == "1") { random_shuffle(lookup.begin(), lookup.end()); }
-                                //how many comparisons to make i.e. for group a, b, c = ab, ac, bc.
+								//how many comparisons to make i.e. for group a, b, c = ab, ac, bc.
                                 int n = 1;
                                 for (int k = 0; k < (lookup.size() - 1); k++) { // pass cdd each set of groups to commpare
                                         for (int l = n; l < lookup.size(); l++) {
-                                                ccd->updateSharedData(lookup[k], lookup[l], i+1, globaldata->Groups.size());
+												subset.clear(); //clear out old pair of sharedrabunds
+												//add new pair of sharedrabund vectors
+												subset.push_back(lookup[k]); subset.push_back(lookup[l]);
+                                                ccd->updateSharedData(subset, i+1, globaldata->Groups.size());
                                         }
                                         n++;
                                 }
+								//if this is a calculator that can do multiples then do them
+								ccd->updateSharedData(lookup, i+1, globaldata->Groups.size()); 
                         }
                         totalNumSeq = i+1;
                 }
@@ -126,10 +134,15 @@ try {
                         int n = 1;
                         for (int k = 0; k < (lookup.size() - 1); k++) { // pass cdd each set of groups to commpare
                                 for (int l = n; l < lookup.size(); l++) {
-                                        ccd->updateSharedData(lookup[k], lookup[l], totalNumSeq, globaldata->Groups.size());
+										subset.clear(); //clear out old pair of sharedrabunds
+										//add new pair of sharedrabund vectors
+										subset.push_back(lookup[k]); subset.push_back(lookup[l]);
+										ccd->updateSharedData(subset, totalNumSeq, globaldata->Groups.size());
                                 }
                                 n++;
                         }
+						//if this is a calculator that can do multiples then do them
+						ccd->updateSharedData(lookup, totalNumSeq, globaldata->Groups.size()); 
                 }
                 
                 //resets output files

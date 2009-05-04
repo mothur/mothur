@@ -20,9 +20,9 @@ It is a child of the calculator class. */
 class Simpson : public Calculator  {
 
 public:
-	Simpson() : Calculator("Simpson", 3) {};
+	Simpson() : Calculator("Simpson", 3, false) {};
 	EstOutput getValues(SAbundVector*);
-	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*) {return data;};
+	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
 };
 
 /***********************************************************************/

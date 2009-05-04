@@ -18,9 +18,10 @@ It is a child of the calculator class.*/
 class QStat : public Calculator  {
 	
 public:
-	QStat() : Calculator("qstat", 1) {};
+	QStat() : Calculator("qstat", 1, false) {};
+
 	EstOutput getValues(SAbundVector*);
-	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*) {return data;};
+	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
 
 private:
 	RAbundVector rdata;

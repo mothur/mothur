@@ -20,9 +20,9 @@ It is a child of the calculator class. */
 class SorEst : public Calculator  {
 	
 public:
-	SorEst() :  Calculator("SorEst", 3) {};
+	SorEst() :  Calculator("SorEst", 3, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
-	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
+	EstOutput getValues(vector<SharedRAbundVector*>);
 private:
 	
 };

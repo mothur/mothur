@@ -68,9 +68,9 @@ void RareDisplay::update(SAbundVector* rank){
 };
 
 /***********************************************************************/
-void RareDisplay::update(SharedRAbundVector* shared1, SharedRAbundVector* shared2, int numSeqs, int numGroupComb) {
+void RareDisplay::update(vector<SharedRAbundVector*> shared, int numSeqs, int numGroupComb) {
 	try {
-		vector<double> data = estimate->getValues(shared1, shared2); 
+		vector<double> data = estimate->getValues(shared); 
 		double newNSeqs = data[0];
 		
 		if(nIters != 1){

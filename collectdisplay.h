@@ -23,15 +23,15 @@ public:
 		output->output(nSeqs, data);	
 	};
 	
-	void update(SharedRAbundVector* shared1, SharedRAbundVector* shared2, int numSeqs, int numGroups){
+	void update(vector<SharedRAbundVector*> shared, int numSeqs, int numGroups){
 		timesCalled++;
-		data = estimate->getValues(shared1, shared2);  //passes estimators a shared vector from each group to be compared
+		data = estimate->getValues(shared);  //passes estimators a shared vector from each group to be compared
 		
 		//figure out what groups are being compared in getValues
 		//because the jumble parameter randomizes the order we need to put the results in the correct column in the output file
 		int group1Index, group2Index, pos;
-		group1Index = shared1->getGroupIndex();
-		group2Index = shared2->getGroupIndex();
+		group1Index = shared[0]->getGroupIndex();
+		group2Index = shared[1]->getGroupIndex();
 		
 		numGroupComb = 0;
 		int n = 1;
@@ -46,12 +46,25 @@ public:
 			}
 			n++;
 		}
-
-		groupData.resize((numGroupComb*data.size()), 0);
 		
-		//fills groupdata with datas info
-		for (int i = 0; i < data.size(); i++) {
-			groupData[pos+i] = data[i];
+		if (estimate->getMultiple() == true) { 
+			numGroupComb++; 
+			groupData.resize((numGroupComb*data.size()), 0);
+			//is this the time its called with all values
+			if  ((timesCalled % numGroupComb) == 0) { 
+				//last spot
+				pos = ((groupData.size()-1) * data.size());
+			}
+			//fills groupdata with datas info
+			for (int i = 0; i < data.size(); i++) {
+				groupData[pos+i] = data[i];
+			}
+		}else {
+			groupData.resize((numGroupComb*data.size()), 0);
+			//fills groupdata with datas info
+			for (int i = 0; i < data.size(); i++) {
+				groupData[pos+i] = data[i];
+			}
 		}
 		
 		//when you get all your groups info then output
@@ -63,6 +76,7 @@ public:
 	void init(string s)		{	output->initFile(s);	};
 	void reset()			{	output->resetFile();	};
 	void close()			{	output->resetFile();	};
+	bool isCalcMultiple() { return estimate->getMultiple(); }
 	
 private:
 	Calculator* estimate;

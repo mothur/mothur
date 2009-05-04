@@ -23,7 +23,7 @@ typedef vector<double> EstOutput;
 /***********************************************************************/
 class UVEst {
 	public:
-		EstOutput getUVest(SharedRAbundVector* shared1, SharedRAbundVector* shared2);		
+		EstOutput getUVest(vector<SharedRAbundVector*>);		
 };
 /***********************************************************************/
 

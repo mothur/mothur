@@ -13,16 +13,16 @@
 //This returns the number of unique species observed in several groups.  
 //The shared vector is each groups sharedrabundvector.
 
-EstOutput SharedSobs::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2){
+EstOutput SharedSobs::getValues(vector<SharedRAbundVector*> shared){
 	try {
 		data.resize(1,0);
 		int observed = 0;
 
 		//loop through the species in each group
-		for (int k = 0; k < shared1->size(); k++) {
+		for (int k = 0; k < shared[0]->size(); k++) {
 			//if you have found a new species
-			if (shared1->getAbundance(k) != 0) { observed++; } 
-			else if ((shared1->getAbundance(k) == 0) && (shared2->getAbundance(k) != 0)) { observed++; }
+			if (shared[0]->getAbundance(k) != 0) { observed++; } 
+			else if ((shared[0]->getAbundance(k) == 0) && (shared[1]->getAbundance(k) != 0)) { observed++; }
 		}
 
 		data[0] = observed;

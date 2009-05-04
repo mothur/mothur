@@ -10,7 +10,7 @@
 #include "sharedthetayc.h"
 
 /***********************************************************************/
-EstOutput ThetaYC::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2) {
+EstOutput ThetaYC::getValues(vector<SharedRAbundVector*> shared) {
 	try {	
 		data.resize(1,0);
 		
@@ -23,17 +23,17 @@ EstOutput ThetaYC::getValues(SharedRAbundVector* shared1, SharedRAbundVector* sh
 		float b = 0;
 		
 		//get the total values we need to calculate the theta denominator sums
-		for (int i = 0; i < shared1->size(); i++) {
+		for (int i = 0; i < shared[0]->size(); i++) {
 			//store in temps to avoid multiple repetitive function calls
-			Atotal += shared1->getAbundance(i);
-			Btotal += shared2->getAbundance(i);
+			Atotal += shared[0]->getAbundance(i);
+			Btotal += shared[1]->getAbundance(i);
 		}
 		
 		//calculate the theta denominator sums
-		for (int j = 0; j < shared1->size(); j++) {
+		for (int j = 0; j < shared[0]->size(); j++) {
 			//store in temps to avoid multiple repetitive function calls
-			relA = shared1->getAbundance(j) / (float)Atotal;
-			relB = shared2->getAbundance(j) / (float)Btotal;
+			relA = shared[0]->getAbundance(j) / (float)Atotal;
+			relB = shared[1]->getAbundance(j) / (float)Btotal;
 					
 			a += relA * relB;
 			b += pow((relA-relB),2);

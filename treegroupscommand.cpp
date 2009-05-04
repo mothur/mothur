@@ -83,7 +83,8 @@ int TreeGroupCommand::execute(){
 	try {
 		int count = 1;	
 		EstOutput data;
-	
+		vector<SharedRAbundVector*> subset;
+		
 		//if the users entered no valid calculators don't execute command
 		if (treeCalculators.size() == 0) { return 0; }
 
@@ -150,7 +151,12 @@ int TreeGroupCommand::execute(){
 						for (int l = k; l < lookup.size(); l++) {
 							if (k != l) { //we dont need to similiarity of a groups to itself
 								//get estimated similarity between 2 groups
-								data = treeCalculators[i]->getValues(lookup[k], lookup[l]); //saves the calculator outputs
+								
+								subset.clear(); //clear out old pair of sharedrabunds
+								//add new pair of sharedrabunds
+								subset.push_back(lookup[k]); subset.push_back(lookup[l]); 
+								
+								data = treeCalculators[i]->getValues(subset); //saves the calculator outputs
 								//save values in similarity matrix
 								simMatrix[k][l] = data[0];
 								simMatrix[l][k] = data[0];

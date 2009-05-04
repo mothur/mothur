@@ -15,13 +15,14 @@ class RareDisplay : public Display {
 	
 public:
 	RareDisplay(Calculator* calc, FileOutput* file) : estimate(calc), output(file), nIters(1),
-							tempInName(getPathName(output->getFileName()) + ".tempin."+ getSimpleName(output->getFileName())), tempOutName(getPathName(output->getFileName()) + ".tempout."+ getSimpleName(output->getFileName())) {};
+							tempInName(getPathName(output->getFileName()) + ".tempin"), tempOutName(getPathName(output->getFileName()) + ".tempout") {};
 	~RareDisplay()					{	delete estimate; delete output;		};
 	void init(string);
 	void reset();
 	void update(SAbundVector*);
-	void update(SharedRAbundVector* shared1, SharedRAbundVector* shared2, int numSeqs, int numGroupComb);
+	void update(vector<SharedRAbundVector*> shared, int numSeqs, int numGroupComb);
 	void close();
+	bool isCalcMultiple() { return estimate->getMultiple(); }
 	
 private:
 	Calculator* estimate;
