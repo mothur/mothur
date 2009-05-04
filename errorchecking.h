@@ -33,8 +33,9 @@ class ErrorCheck {
 		void validateBinFiles();
 		void clear();
 		void refresh();
-		string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, treefile, sharedfile, cutoff, format; 
-		string precision, method, fileroot, label, line, iters, jumble, freq, single, rarefaction, shared, summary, randomtree, abund, sorted, scale;
+		string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, nexusfile, clustalfile, treefile, sharedfile, cutoff, format; 
+		string precision, method, fileroot, label, line, iters, jumble, freq, single, rarefaction, shared, summary, randomtree, abund, sorted, trump, soft, filter, scale;
+
 		string commandName, optionText;
 		bool errorFree;
 

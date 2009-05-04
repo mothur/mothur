@@ -39,7 +39,7 @@ public:
 	GroupMap* gGroupmap;
 	FullMatrix* gMatrix;
 	TreeMap* gTreemap;
-	string inputFileName, helpRequest, commandName;
+	string inputFileName, helpRequest, commandName, vertical;
 	bool allLines;
 	vector<string>  Estimators, Groups; //holds estimators to be used
 	set<int> lines; //hold lines to be used
@@ -55,6 +55,8 @@ public:
 	string getGroupFile();
 	string getOrderFile();
 	string getFastaFile();
+	string getNexusFile();
+	string getClustalFile();
 	string getTreeFile();
 	string getSharedFile();
 	string getCutOff();
@@ -71,7 +73,14 @@ public:
 	string getStep();
 	string getForm();
 	string getSorted();
+
+	string getTrump();
+	string getSoft();
+	string getFilter();
+	
+
 	string getScale();
+
 
 	void setListFile(string);
 	void setPhylipFile(string);
@@ -97,8 +106,10 @@ public:
 
 		
 private:
-	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, treefile, sharedfile, line, label, randomtree, groups;
-	string cutoff, format, precision, method, fileroot, iters, jumble, freq, calc, abund, step, form, sorted, scale;
+
+	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, nexusfile, clustalfile, treefile, sharedfile, line, label, randomtree, groups;
+	string cutoff, format, precision, method, fileroot, iters, jumble, freq, calc, abund, step, form, sorted, trump, soft, filter, scale;
+
 
 	static GlobalData* _uniqueInstance;
 	GlobalData( const GlobalData& ); // Disable copy constructor

@@ -11,6 +11,7 @@
 #include "readdistcommand.h"
 #include "readtreecommand.h"
 #include "readotucommand.h"
+#include "readseqscommand.h"
 #include "clustercommand.h"
 #include "parselistcommand.h"
 #include "collectcommand.h"
@@ -31,6 +32,8 @@
 #include "unifracweightedcommand.h"
 #include "libshuffcommand.h"
 #include "heatmapcommand.h"
+#include "filterseqscommand.h"
+#include "mothur.h"
 #include "venncommand.h"
 #include "nocommands.h"
 #include "binsequencecommand.h"
@@ -63,6 +66,7 @@ Command* CommandFactory::getCommand(string commandName){
 
 			 if(commandName == "read.dist")				{	command = new ReadDistCommand();			}
 		else if(commandName == "read.otu")				{	command = new ReadOtuCommand();				}
+		else if(commandName == "read.seqs")				{	command = new ReadSeqsCommand();			}
 		else if(commandName == "read.tree")				{	command = new ReadTreeCommand();			}
 		else if(commandName == "cluster")				{	command = new ClusterCommand();				}
 		else if(commandName == "deconvolute")			{	command = new DeconvoluteCommand();			}
@@ -82,6 +86,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "get.line")              {   command = new GetlineCommand();				}
 		else if(commandName == "libshuff")              {   command = new LibShuffCommand();			}
 		else if(commandName == "heatmap")				{   command = new HeatMapCommand();				}
+		else if(commandName == "filter.seqs")			{   command = new FilterSeqsCommand();          }
 		else if(commandName == "venn")					{   command = new VennCommand();				}
 		else if(commandName == "bin.seqs")				{   command = new BinSeqCommand();				}
 		else if(commandName == "get.oturep")			{   command = new GetOTURepCommand();			}

@@ -22,7 +22,11 @@
 #include "logsd.h"
 #include "bergerparker.h"
 #include "bstick.h"
+#include "goodscoverage.h"
+
+
 #include "coverage.h"
+
 
 //**********************************************************************************************************************
 CollectCommand::CollectCommand(){
@@ -64,7 +68,9 @@ CollectCommand::CollectCommand(){
 				}else if (globaldata->Estimators[i] == "bergerparker") { 
 					cDisplays.push_back(new CollectDisplay(new BergerParker(), new OneColumnFile(fileNameRoot+"bergerparker")));
 				}else if (globaldata->Estimators[i] == "bstick") { 
-					cDisplays.push_back(new CollectDisplay(new BStick(), new OneColumnFile(fileNameRoot+"bstick")));
+					cDisplays.push_back(new CollectDisplay(new BStick(), new ThreeColumnFile(fileNameRoot+"bstick")));
+				}else if (globaldata->Estimators[i] == "goodscoverage") { 
+					cDisplays.push_back(new CollectDisplay(new GoodsCoverage(), new OneColumnFile(fileNameRoot+"goodscoverage")));
 				}
 			}
 		}

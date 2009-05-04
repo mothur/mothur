@@ -29,6 +29,8 @@
 #include "sharedlennon.h"
 #include "sharedmorisitahorn.h"
 #include "sharedbraycurtis.h"
+#include "sharedjackknife.h"
+#include "sharedwhittaker.h"
 
 
 
@@ -74,6 +76,7 @@ CollectSharedCommand::CollectSharedCommand(){
 					cDisplays.push_back(new CollectDisplay(new Whittaker(), new SharedOneColumnFile(fileNameRoot+"whittaker")));
 				}else if (globaldata->Estimators[i] == "sharednseqs") { 
 					cDisplays.push_back(new CollectDisplay(new SharedNSeqs(), new SharedOneColumnFile(fileNameRoot+"shared.nseqs")));
+
 				}else if (globaldata->Estimators[i] == "ochiai") { 
 					cDisplays.push_back(new CollectDisplay(new Ochiai(), new SharedOneColumnFile(fileNameRoot+"ochiai")));
 				}else if (globaldata->Estimators[i] == "anderberg") { 

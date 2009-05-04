@@ -21,8 +21,7 @@ RAbundVector Geom::getRAbundVector(SAbundVector* rank){
 		int nb = 0;
 		int ns = 0;
 		
-		for(int i = rank->size()-1; i > 0; i--)
-		{
+		for(int i = rank->size()-1; i > 0; i--) {
 			int cur = rank->get(i);
 			if(mr == 1 && cur > 0)
 				mr = i;
@@ -51,8 +50,7 @@ EstOutput Geom::getValues(SAbundVector* rank){
 		double k = .5;
 		double step = .49999;
 		
-		while(fabs(min - numInd*kEq(k, (double)numSpec)) > .0001) //This uses a binary search to find the value of k.
-		{
+		while(fabs(min - numInd*kEq(k, (double)numSpec)) > .0001) { //This uses a binary search to find the value of k.
 			if(numInd*kEq(k, numSpec) > min)
 				k += step;
 			else
@@ -86,7 +84,7 @@ EstOutput Geom::getValues(SAbundVector* rank){
 
 		/*cout << critVal << "\n";
 		cout << "If D-Statistic is less than the critical value then the data fits the Geometric Series model w/ 95% confidence.\n\n";*/
-				
+
 		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
 		if (isnan(data[1]) || isinf(data[1])) { data[1] = 0; }
 		if (isnan(data[2]) || isinf(data[2])) { data[2] = 0; }
@@ -94,11 +92,11 @@ EstOutput Geom::getValues(SAbundVector* rank){
 		return data;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the NPShannon class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the Geom class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the NPShannon class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the Geom class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
 }

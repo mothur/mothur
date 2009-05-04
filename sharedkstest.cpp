@@ -13,8 +13,8 @@
 
 EstOutput KSTest::getValues(vector<SharedRAbundVector*> shared){
 	try {
-		data.resize(2,0);
-		
+		data.resize(3,0);
+
 		//Must return shared1 and shared2 to original order at conclusion of kstest
 		vector <individual> initData1 = shared[0]->getData();
 		vector <individual> initData2 = shared[1]->getData();
@@ -59,6 +59,8 @@ EstOutput KSTest::getValues(vector<SharedRAbundVector*> shared){
 		
 		data[0] = DStatistic;
 		data[1] = critVal;
+		data[2] = 0;
+		
 		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
 		if (isnan(data[1]) || isinf(data[1])) { data[1] = 0; }
 

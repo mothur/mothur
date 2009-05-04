@@ -23,6 +23,7 @@ ErrorCheck::ErrorCheck() {
 /******************************************************/
 
 void ErrorCheck::refresh() {
+
 	//columnfile = globaldata->getColumnFile();
 	//phylipfile = globaldata->getPhylipFile();
 	//listfile = globaldata->getListFile();
@@ -38,6 +39,7 @@ void ErrorCheck::refresh() {
 	//method = globaldata->getMethod();
 	//randomtree = globaldata->getRandomTree();
 	//sharedfile = globaldata->getSharedFile();
+
 }
 
 /*******************************************************/
@@ -74,7 +76,6 @@ bool ErrorCheck::checkInput(string input) {
 		
 		//is it a valid command
 		if (validCommand->isValidCommand(commandName) != true) { return false; }
-		
 		string parameter, value;
 		
 		//reads in parameters and values
@@ -94,9 +95,11 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "name" )		{ namefile = value; }
 				if (parameter == "order" )		{ orderfile = value; }
 				if (parameter == "fasta" )		{ fastafile = value; }
+				if (parameter == "nexus" )		{ nexusfile = value; }
+				if (parameter == "clustal" )	{ clustalfile = value; }
 				if (parameter == "tree" )		{ treefile = value; }
-				if (parameter == "group" )		{ groupfile = value; }
-				if (parameter == "shared" )		{ sharedfile = value; }
+				if (parameter == "group" )			{ groupfile = value; }
+				if (parameter == "shared" )			{ sharedfile = value; }
 				if (parameter == "cutoff" )			{ cutoff = value; }
 				if (parameter == "precision" )		{ precision = value; }
 				if (parameter == "iters" )			{ iters = value; }
@@ -107,10 +110,13 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "line" )			{ line = value; }
 				if (parameter == "label" )			{ label = value; }
 				if (parameter == "abund" )          { abund = value; }
-				if (parameter == "random" )			{ randomtree = value;	}
-				if (parameter == "sorted" )			{ sorted = value;	}
+				if (parameter == "random" )			{ randomtree = value; }
+				if (parameter == "sorted" )			{ sorted = value; }
+				if (parameter == "trump" )          { trump = value; }
+				if (parameter == "soft" )			{ soft = value; }
+				if (parameter == "filter" )         { filter = value; }
 				if (parameter == "scale" )			{ scale = value;	}
-				
+
 			}
 			
 			//gets the last parameter and value
@@ -131,6 +137,8 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "group" )		{ groupfile = value; }
 				if (parameter == "shared" )		{ sharedfile = value; }
 				if (parameter == "fasta" )		{ fastafile = value; }
+				if (parameter == "nexus" )		{ nexusfile = value; }
+				if (parameter == "clustal" )	{ clustalfile = value; }
 				if (parameter == "tree" )		{ treefile = value; }
 				if (parameter == "cutoff" )			{ cutoff = value; }
 				if (parameter == "precision" )		{ precision = value; }
@@ -144,7 +152,11 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "random" )			{ randomtree = value;	}
 				if (parameter == "abund" )          { abund = value; }
 				if (parameter == "sorted" )			{ sorted = value;	}
+				if (parameter == "trump" )          { trump = value; }
+				if (parameter == "soft" )			{ soft = value; }
+				if (parameter == "filter" )         { filter = value; }
 				if (parameter == "scale" )			{ scale = value;	}
+
 			}
 		}
 		
@@ -172,6 +184,8 @@ bool ErrorCheck::checkInput(string input) {
 			}
 		}else if (commandName == "read.tree") { 
 			validateTreeFiles(); //checks the treefile and groupfile parameters
+		}else if (commandName == "read.seqs") {
+			if ((fastafile == "") && (nexusfile == "") && (clustalfile == "") && (phylipfile == "")) { cout << "You must enter a fastafile, nexusfile, or clustalfile with the read.seqs() command." << endl; return false; }
 		}else if (commandName == "deconvolute") {
 			if (fastafile == "") { cout << "You must enter a fastafile with the deconvolute() command." << endl; return false; }
 			validateReadFiles();
@@ -227,6 +241,12 @@ bool ErrorCheck::checkInput(string input) {
 		if ((commandName == "heatmap") || (commandName == "venn")) { 
 			if ((globaldata->getListFile() == "") && (globaldata->getSharedFile() == "")) {
 				 cout << "You must read a list, or a list and a group, or a shared before you can use the heatmap or venn commands." << endl; return false; 
+			}
+		}
+		
+		if (commandName == "filter.seqs"){ 
+			if ((globaldata->getFastaFile() == "") && (globaldata->getNexusFile() == "") && (globaldata->getClustalFile() == "") && (globaldata->getPhylipFile() == "")) {
+				 cout << "You must read either a fasta, nexus, clustal, or phylip file before you can use the filter.seqs command." << endl; return false; 
 			}
 		}
 		
@@ -551,6 +571,9 @@ void ErrorCheck::clear() {
 	groupfile		=	""; 
 	orderfile		=	"";
 	sharedfile		=	"";
+	fastafile       =   "";
+	nexusfile       =   "";
+	clustalfile     =   "";
 	line			=	"";
 	label			=	"";
 	method			=   "furthest";

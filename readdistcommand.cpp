@@ -10,6 +10,7 @@
 #include "readdistcommand.h"
 #include "readphylip.h"
 #include "readcolumn.h"
+#include "readmatrix.hpp"
 
 ReadDistCommand::ReadDistCommand(){
 	try {

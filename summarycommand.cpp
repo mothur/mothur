@@ -22,6 +22,7 @@
 #include "qstat.h"
 #include "bergerparker.h"
 #include "bstick.h"
+#include "goodscoverage.h"
 #include "coverage.h"
 
 //**********************************************************************************************************************
@@ -67,6 +68,8 @@ SummaryCommand::SummaryCommand(){
 					sumCalculators.push_back(new Bootstrap());
 				}else if (globaldata->Estimators[i] == "nseqs") { 
 					sumCalculators.push_back(new NSeqs());
+				}else if (globaldata->Estimators[i] == "goodscoverage") { 
+					sumCalculators.push_back(new GoodsCoverage());
 				}
 			}
 		}

@@ -111,7 +111,9 @@ try {
 	
                         //calculate at 0 and the given increment
                         if((i == 0) || (i+1) % increment == 0){
+
 								//how many comparisons to make i.e. for group a, b, c = ab, ac, bc.
+
                                 int n = 1;
                                 for (int k = 0; k < (lookup.size() - 1); k++) { // pass cdd each set of groups to commpare
                                         for (int l = n; l < lookup.size(); l++) {

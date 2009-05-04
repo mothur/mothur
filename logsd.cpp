@@ -35,8 +35,7 @@ EstOutput LogSD::getValues(SAbundVector* rank){
 		double x = .5;
 		double step = .4999999999;
 		
-		while(fabs(snRatio - logS(x)) > .00001) //This uses a binary search to find the value of x.
-		{
+		while(fabs(snRatio - logS(x)) > .00001) { //This uses a binary search to find the value of x.
 			if(logS(x) > snRatio)
 				x += step;
 			else
@@ -51,15 +50,12 @@ EstOutput LogSD::getValues(SAbundVector* rank){
 		double octSumExp = 0;
 		double sumExp = 0;
 		double maxDiff = 0;
-		for(int y = 1; y < rank->size(); y++)
-		{
-			if(y - .5 < pow(2.0, oct))
-			{
+		for(int y = 1; y < rank->size(); y++) {
+			if(y - .5 < pow(2.0, oct)) {
 				octSumObs += rank->get(y);
 				octSumExp += alpha*pow(x,y)/(y);
 			}	
-			else
-			{
+			else {
 				sumObs += octSumObs;
 				octSumObs = rank->get(y);
 
@@ -68,8 +64,7 @@ EstOutput LogSD::getValues(SAbundVector* rank){
 				oct++;
 			}
 	
-			if(y == rank->size()-1)
-			{
+			if(y == rank->size()-1) {
 				sumObs += octSumObs;
 				sumExp += octSumExp;
 			}
@@ -85,6 +80,7 @@ EstOutput LogSD::getValues(SAbundVector* rank){
 		cout << ".05 confidence value = " << .89196/sqrt(numSpec) << "\n";
 		cout << "If D Test Statistic is greater than the critical value then the data fits the Log Series Distribution model w/ 95% confidence.\n\n";*/
 		
+
 		data[0] = (maxDiff + .5)/numSpec;
 		data[1] = 0.886/sqrt(numSpec);
 		data[2] = 1.031/sqrt(numSpec);
@@ -96,11 +92,11 @@ EstOutput LogSD::getValues(SAbundVector* rank){
 		return data;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the NPShannon class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the LogSD class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the NPShannon class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the LogSD class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
 }

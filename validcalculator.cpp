@@ -186,9 +186,9 @@ void ValidCalculators::initialSingle() {
 		single["logseries"]         = "logseries";
 		single["qstat"]         = "qstat";
 		single["bstick"]        = "bstick";
+		single["goodscoverage"] = "goodscoverage";
 		single["nseqs"]			= "nseqs";
 		single["coverage"]		= "coverage";
-		
 		single["default"]	    = "default";
 	}
 	catch(exception& e) {
@@ -280,6 +280,7 @@ void ValidCalculators::initialSummary() {
 		summary["qstat"]        = "qstat";
 		summary["bstick"]       = "bstick";
 		summary["nseqs"]		= "nseqs";
+		summary["goodscoverage"]= "goodscoverage";
 		summary["coverage"]		= "coverage";
 		summary["default"]	    = "default";
 	}

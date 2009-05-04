@@ -41,12 +41,10 @@ int GetlabelCommand::execute(){
 		string label;
 		int numBins = 0;
 		int count = -1;
-		while(in.good())
-		{
+		while(in.good()) {
 			if(count > numBins)
 				count = 0;
-			if(count == 0)
-			{
+			if(count == 0) {
 				cout << label << "\n";
 				in >> numBins;
 			}
