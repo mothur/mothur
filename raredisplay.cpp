@@ -15,6 +15,7 @@ void RareDisplay::init(string label){
 	try {
 		this->label = label;
 		if(nIters != 1){
+			tempInFile.clear();
 			openOutputFile(tempOutName, tempOutFile);
 			openInputFile(tempInName, tempInFile);
 		}
