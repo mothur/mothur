@@ -37,16 +37,13 @@ bool ValidParameters::isValidParameter(string parameter, string command, string 
 		bool valid = false;
 		vector<string> cParams = commandParameters[command];
 		int numParams = cParams.size(); 
-		for(int i = 0; i < numParams; i++)
-		{
-			if(cParams.at(i).compare(parameter) == 0)
-			{
+		for(int i = 0; i < numParams; i++) {
+			if(cParams.at(i).compare(parameter) == 0) {
 				valid = true;
 				i = numParams;
 			}
 		}
-		if(!valid)
-		{
+		if(!valid) {
 			cout << "'" << parameter << "' is not a valid parameter for the " << command << " command.\n";
 			cout << "The valid paramters for the " << command << " command are: ";
 			for(int i = 0; i < numParams-1; i++)
@@ -65,8 +62,7 @@ bool ValidParameters::isValidParameter(string parameter, string command, string 
 		vector<string> values;
 		splitAtDash(value, values);
 		
-		for(int i = 0; i < values.size(); i++)
-		{
+		for(int i = 0; i < values.size(); i++) {
 			value = values.at(i);
 			valid = convertTest(value, pVal);
 		
@@ -79,12 +75,10 @@ bool ValidParameters::isValidParameter(string parameter, string command, string 
 				   Special Cases
 			*********************************************************************************************************/
 			
-			if(parameter.compare("precision") == 0)
-			{
+			if(parameter.compare("precision") == 0) {
 				double logNum = log10((double)pVal);
 				double diff = (double)((int)logNum - logNum);
-				if(diff != 0)
-				{
+				if(diff != 0) {
 					cout << "The precision parameter can only take powers of 10 as a value (e.g. 10,1000,1000, etc.)\n";
 					return false;
 				}
@@ -110,8 +104,7 @@ bool ValidParameters::isValidParameter(string parameter, string command, string 
 				c = 0;
 			else if(range.at(4).compare("only") == 0)
 				c = 1;
-			else
-			{
+			else {
 				cout << "The range can only be 'between' or 'only' the bounding numbers.\n";
 				return false;
 			}
@@ -120,8 +113,7 @@ bool ValidParameters::isValidParameter(string parameter, string command, string 
 				d = 0;
 			else if(range.at(0).compare(">=") == 0 || range[3].compare("=>") == 0)
 				d = 1;
-			else
-			{
+			else {
 				cout << "The parameter value can only be '>', '>=', or '=>' the lower bounding number.\n";
 				return false;
 			}
@@ -130,8 +122,7 @@ bool ValidParameters::isValidParameter(string parameter, string command, string 
 				e = 0;
 			else if(range.at(2).compare("<=") == 0 || range[4].compare("=<") == 0)
 				e = 1;
-			else
-			{
+			else {
 				cout << "The parameter value can only be '<', '<=', or '=<' the upper bounding number.\n";
 				return false;
 			}
@@ -141,24 +132,20 @@ bool ValidParameters::isValidParameter(string parameter, string command, string 
 			bool b0 = pVal < b;
 			bool b1 = pVal <= b;
 			
-			if(c != 1)
-			{
-				if(a != piSentinel && b == piSentinel)
-				{
+			if(c != 1) {
+				if(a != piSentinel && b == piSentinel) {
 					if(d == 0)
 						valid = a0;
 					else
 						valid = a1;
 				}
-				else if(a == piSentinel && b != piSentinel)
-				{
+				else if(a == piSentinel && b != piSentinel) {
 					if(e == 0)
 						valid = b0;
 					else
 						valid = b1;
 				}
-				else
-				{
+				else {
 					if(d == 0 && e == 0)
 						valid = (a0 && b0);
 					else if(d == 0 && e == 1)
@@ -169,8 +156,7 @@ bool ValidParameters::isValidParameter(string parameter, string command, string 
 						valid = (a1 && b1);
 				}
 			}
-			else
-			{
+			else {
 				if(a != piSentinel && b == piSentinel)
 					valid = (pVal == a);
 				else if(a == piSentinel && b != piSentinel)
@@ -180,30 +166,26 @@ bool ValidParameters::isValidParameter(string parameter, string command, string 
 			}
 			
 			
-			if(!valid)
-			{
+			if(!valid) {
 				cout << "The '" << parameter << "' parameter needs to be ";
 				if(c == 1)
 					cout << "either '" << a << "' or '" << b << "'.\n";
-				else
-				{
-					if(a != piSentinel)
-					{
+				else {
+					if(a != piSentinel) {
 						cout << ">";
 						if(d != 0)
 							cout << "=";
 						cout << " '" << a << "'";
 					}
 					if(b == piSentinel)
-						cout << ".\n";
+						cout << "'.\n";
 					else if(a != piSentinel)
 						cout << " and ";
-					if(b != piSentinel)
-					{
+					if(b != piSentinel) {
 						cout << "<";
 						if(e != 0)
 							cout << "=";
-						cout << " '" << b << ".\n";
+						cout << " '" << b << "'.\n";
 					}
 				}
 				return false;
@@ -237,6 +219,9 @@ void ValidParameters::initCommandParameters() {
 		
 		string readtreeArray[] = {"tree","group"};
 		commandParameters["read.tree"] = addParameters(readtreeArray, sizeof(readtreeArray)/sizeof(string));
+		
+		string readseqsArray[] = {"fasta","phylip","clustal","nexus","line"};
+		commandParameters["read.seqs"] = addParameters(readseqsArray, sizeof(readseqsArray)/sizeof(string));
 		
 		string clusterArray[] =  {"cutoff","precision","method"};
 		commandParameters["cluster"] = addParameters(clusterArray, sizeof(clusterArray)/sizeof(string));
@@ -285,6 +270,9 @@ void ValidParameters::initCommandParameters() {
 
 		string heatmapArray[] =  {"groups","line","label","sorted","scale"};
 		commandParameters["heatmap"] = addParameters(heatmapArray, sizeof(heatmapArray)/sizeof(string));
+		
+		string filterseqsArray[] =  {"trump", "soft", "filter"};
+		commandParameters["filter.seqs"] = addParameters(filterseqsArray, sizeof(filterseqsArray)/sizeof(string));
 
 		string vennArray[] =  {"groups","line","label","calc"};
 		commandParameters["venn"] = addParameters(vennArray, sizeof(vennArray)/sizeof(string));
@@ -345,7 +333,7 @@ void ValidParameters::initParameterRanges() {
 		string jumbleArray[] = {">","0", "<","1", "only"};
 		parameterRanges["jumble"] = addParameters(jumbleArray, rangeSize);
 
-		string freqArray[] = {">","1", "<","NA", "between"};
+		string freqArray[] = {">=","1", "<","NA", "between"};
 		parameterRanges["freq"] = addParameters(freqArray, rangeSize);
 
 		//string lineArray[] = {">=","1", "<","NA", "between"};
@@ -353,6 +341,9 @@ void ValidParameters::initParameterRanges() {
 
 		string abundArray[] = {">=","5", "<","NA", "between"};
 		parameterRanges["abund"] = addParameters(abundArray, rangeSize);
+		
+		string softArray[] = {">=","0", "<=","100", "between"};
+		parameterRanges["soft"] = addParameters(softArray, rangeSize);
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidParameters class Function isValidParameter. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";

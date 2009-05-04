@@ -25,8 +25,7 @@ RAbundVector BStick::getRAbundVector(SAbundVector* rank){
 		int nb = 0;
 		int ns = 0;
 		
-		for(int i = rank->size()-1; i > 0; i--)
-		{
+		for(int i = rank->size()-1; i > 0; i--) {
 			int cur = rank->get(i);
 			if(mr == 1 && cur > 0)
 				mr = i;
@@ -55,8 +54,7 @@ EstOutput BStick::getValues(SAbundVector* rank){
 		double sumObs = 0;
 		double maxDiff = 0;
 
-		for(int i = 0; i < rdata.size(); i++)
-		{
+		for(int i = 0; i < rdata.size(); i++) {
 			sumObs += rdata.get(i);
 			sumExp += numInd/numSpec*invSum(i+1,numSpec);
 			double diff = fabs(sumObs-sumExp);
@@ -64,6 +62,7 @@ EstOutput BStick::getValues(SAbundVector* rank){
 				maxDiff = diff;
 		}
 		
+
 		data[0] = maxDiff/numInd;
 		data[1] = 0.886/sqrt(rdata.size());
 		data[2] = 1.031/sqrt(rdata.size());
@@ -71,6 +70,7 @@ EstOutput BStick::getValues(SAbundVector* rank){
 		/*cout << critVal << "\n";
 		cout << "If D-Statistic is less than the critical value then the data fits the Broken Stick model w/ 95% confidence.\n\n";*/
 		
+
 		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
 		if (isnan(data[1]) || isinf(data[1])) { data[1] = 0; }
 		if (isnan(data[2]) || isinf(data[2])) { data[2] = 0; }
@@ -78,11 +78,11 @@ EstOutput BStick::getValues(SAbundVector* rank){
 		return data;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the NPShannon class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the BStick class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the NPShannon class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the BStick class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
 }

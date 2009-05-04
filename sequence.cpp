@@ -11,50 +11,29 @@ using namespace std;
 
 #include "sequence.hpp"
 
-//********************************************************************************************************************
+/***********************************************************************/
 
-Sequence::Sequence(){}
+Sequence::Sequence()  {}
 
-//********************************************************************************************************************
+/***********************************************************************/
 
-Sequence::Sequence(ifstream& fastaFile){
-	
-	string accession;
-	fastaFile >> accession;
-	setName(accession);
-
-	char letter;
-	string sequence;
-	
-	while(fastaFile && letter != '>'){
-	
-		letter = fastaFile.get();
-		
-		if(isalpha(letter)){
-		
-			sequence += letter;
-			
-		}
-		
-	}
-	fastaFile.putback(letter);
-
-	if(sequence.find_first_of('-') != string::npos){
+Sequence::Sequence(string newName, string sequence) {
+	name = newName;
+	if(sequence.find_first_of('-') != string::npos) {
 		setAligned(sequence);
 	}
 	setUnaligned(sequence);
 }
 
-
 //********************************************************************************************************************
 
-string Sequence::convert2ints(){
+string Sequence::convert2ints() {
 	
 	if(unaligned == "")	{	/* need to throw an error */	}
 	
 	string processed;
 	
-	for(int i=0;i<unaligned.length();i++){
+	for(int i=0;i<unaligned.length();i++) {
 		if(toupper(unaligned[i]) == 'A')			{	processed += '0';	}
 		else if(toupper(unaligned[i]) == 'C')	{	processed += '1';	}
 		else if(toupper(unaligned[i]) == 'G')	{	processed += '2';	}
@@ -67,7 +46,7 @@ string Sequence::convert2ints(){
 
 //********************************************************************************************************************
 
-void Sequence::setName(string seqName){
+void Sequence::setName(string seqName) {
 	if(seqName[0] == '>')	{	name = seqName.substr(1);	}
 	else					{	name = seqName;				}
 }
@@ -76,14 +55,14 @@ void Sequence::setName(string seqName){
 
 void Sequence::setUnaligned(string sequence){
 	
-	if(sequence.find_first_of('-') != string::npos){
+	if(sequence.find_first_of('-') != string::npos) {
 		string temp = "";
-		for(int j=0;j<sequence.length();j++){
+		for(int j=0;j<sequence.length();j++) {
 			if(isalpha(sequence[j]))	{	temp += sequence[j];	}
 		}
 		unaligned = temp;
 	}
-	else{
+	else {
 		unaligned = sequence;
 	}
 	
@@ -103,7 +82,7 @@ void Sequence::setPairwise(string sequence){
 
 //********************************************************************************************************************
 
-string Sequence::getSeqName(){
+string Sequence::getName(){
 	return name;
 }
 
@@ -123,6 +102,23 @@ string Sequence::getPairwise(){
 
 string Sequence::getUnaligned(){
 	return unaligned;
+}
+
+//********************************************************************************************************************
+
+int Sequence::getLength(){
+	if(unaligned.length() > aligned.length())
+		return unaligned.length();
+	return aligned.length();
+}
+
+//********************************************************************************************************************
+
+void Sequence::printSequence(ostream& out){
+	string toPrint = unaligned;
+	if(aligned.length() > unaligned.length())
+		toPrint = aligned;
+	out << ">" << name << "\n" << toPrint << "\n";
 }
 
 //********************************************************************************************************************

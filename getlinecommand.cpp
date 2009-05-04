@@ -41,12 +41,10 @@ int GetlineCommand::execute(){
 		int numBins = 0;
 		int count = -1;
 		int line = 1;
-		while(in.good())
-		{
+		while(in.good()) {
 			if(count > numBins)
 				count = 0;
-			if(count == 0)
-			{
+			if(count == 0) {
 				cout << line << "\n";
 				in >> numBins;
 				line++;

@@ -19,21 +19,29 @@ using namespace std;
 class Sequence {
 public:
 	Sequence();
-	Sequence(ifstream&);
+	Sequence(string, string);
+	
 	void setName(string);
 	void setUnaligned(string);
 	void setPairwise(string);
 	void setAligned(string);
+	void setLength();
+	
 	string convert2ints();
-	string getSeqName();
+	string getName();
 	string getAligned();
 	string getPairwise();
 	string getUnaligned();
+	int getLength();
+	void printSequence(ostream&);
+	
 private:
 	string name;
 	string unaligned;
-	string pairwise;
 	string aligned;
+	string pairwise;
+	int length;
+	int lengthAligned;
 };
 
 /**************************************************************************************************/

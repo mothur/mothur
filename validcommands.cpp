@@ -17,6 +17,7 @@ ValidCommands::ValidCommands() {
 		commands["read.dist"]			= "read.dist"; 
 		commands["read.otu"]			= "read.otu";
 		commands["read.tree"]			= "read.tree"; 
+		commands["read.seqs"]           = "read.seqs";
 		commands["bin.seqs"]			= "bin.seqs"; 
 		commands["get.oturep"]			= "get.oturep";
 		commands["cluster"]				= "cluster"; 
@@ -40,6 +41,7 @@ ValidCommands::ValidCommands() {
 		commands["bootstrap.shared"]	= "bootstrap.shared";
 		commands["concensus"]			= "concensus";
 		commands["help"]				= "help"; 
+		commands["filter.seqs"]			= "filter.seqs";
 		commands["quit"]				= "quit"; 
 
 				

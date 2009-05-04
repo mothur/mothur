@@ -54,7 +54,9 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if (key == "list" )		{ listfile = value; inputFileName = value; fileroot = value; format = "list";		}
 				if (key == "rabund" )	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund";	}
 				if (key == "sabund" )	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund";	} 
-				if (key == "fasta" )	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta";		} 
+				if (key == "fasta" )	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta";		}
+				if (key == "nexus" )	{ nexusfile = value; inputFileName = value; fileroot = value; format = "nexus";		} 
+				if (key == "clustal" )	{ clustalfile = value; inputFileName = value; fileroot = value; format = "clustal"; }
 				if (key == "tree" )		{ treefile = value; inputFileName = value; fileroot = value; format = "tree";		}
 				if (key == "shared" )	{ sharedfile = value; inputFileName = value; fileroot = value; format = "sharedfile";	}
 				if (key == "name" )		{ namefile = value;		}
@@ -73,7 +75,13 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if (key == "step")			{ step = value;			}
 				if (key == "form")			{ form = value;			}
 				if (key == "sorted")		{ sorted = value;		}
+				if (key == "vertical")		{ vertical = value;		}
+				if (key == "trump")		    { trump = value;		}
+				if (key == "filter")		{ filter = value;		}
+				if (key == "soft")		    { soft = value;		    }
 				if (key == "scale")			{ scale = value;		}
+				
+
 				
 
 				
@@ -111,6 +119,8 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if (key == "rabund" )	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund";	}
 			if (key == "sabund" )	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund";	}
 			if (key == "fasta" )	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta";		}
+			if (key == "nexus" )	{ nexusfile = value; inputFileName = value; fileroot = value; format = "nexus";		}
+			if (key == "clustal" )	{ clustalfile = value; inputFileName = value; fileroot = value; format = "clustal"; } 
 			if (key == "tree" )		{ treefile = value; inputFileName = value; fileroot = value; format = "tree";		} 
 			if (key == "shared" )	{ sharedfile = value; inputFileName = value; fileroot = value; format = "sharedfile";	} 
 			if (key == "name" )		{ namefile = value;		}
@@ -129,8 +139,15 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if (key == "step")			{ step = value;			}
 			if (key == "form")			{ form = value;			}
 			if (key == "sorted")		{ sorted = value;		}
+			if (key == "vertical")		{ vertical = value;		}
+			if (key == "trump")		    { trump = value;		}
+			if (key == "filter")		{ filter = value;		}
+			if (key == "soft")		    { soft = value;		    }
 			if (key == "scale")			{ scale = value;		}
+
 			
+			
+
 
 			if (key == "line") {//stores lines to be used in a vector
 				lines.clear();
@@ -163,6 +180,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				
 		//input defaults for calculators
 		if (commandName == "collect.single") {
+
 			if ((calc == "default") || (calc == "")) { calc = "sobs-chao-ace-jack-shannon-npshannon-simpson"; }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
@@ -173,6 +191,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			splitAtDash(calc, Estimators); 
 		}
 		if (commandName == "collect.shared") {
+
 			if ((calc == "default") || (calc == "")) { calc = "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan"; }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
@@ -239,6 +258,8 @@ string GlobalData::getOrderFile()		{	return orderfile;	}
 string GlobalData::getTreeFile()		{	return treefile;	}
 string GlobalData::getSharedFile()		{	return sharedfile;	}
 string GlobalData::getFastaFile()		{	return fastafile;	}
+string GlobalData::getNexusFile()		{	return nexusfile;	}
+string GlobalData::getClustalFile()     {   return clustalfile; }
 string GlobalData::getCutOff()			{	return cutoff;		}
 string GlobalData::getFormat()			{	return format;		}
 string GlobalData::getPrecision()		{	return precision;	}
@@ -253,7 +274,11 @@ string GlobalData::getGroups()			{	return groups;		}
 string GlobalData::getStep()			{	return step;		}
 string GlobalData::getForm()			{	return form;		}
 string GlobalData::getSorted()			{	return sorted;		}
+string GlobalData::getTrump()			{   return trump;       }
+string GlobalData::getSoft()			{   return soft;		}
+string GlobalData::getFilter()			{   return filter;		}
 string GlobalData::getScale()			{	return scale;		}
+
 void GlobalData::setListFile(string file)	{	listfile = file;	inputFileName = file;}
 void GlobalData::setRabundFile(string file)	{	rabundfile = file;	inputFileName = file;}
 void GlobalData::setSabundFile(string file)	{	sabundfile = file;	inputFileName = file;}
@@ -289,6 +314,8 @@ void GlobalData::clear() {
 	groupfile		=	""; 
 	orderfile		=	"";
 	fastafile		=   "";
+	nexusfile		=   "";
+	clustalfile		=   "";
 	treefile		=	"";
 	sharedfile		=	"";
 	cutoff			=	"10.00";
@@ -307,7 +334,12 @@ void GlobalData::clear() {
 	step			=	"0.01";
 	form			=	"integral";
 	sorted			=	"T";  //F means don't sort, T means sort.
-	scale			=	"log10";
+	vertical        =   "";		
+	trump           =   "";		
+	filter          =   "";		
+	soft            =   "";	
+	scale			=	"log10";	    
+
 }
 
 //*******************************************************/

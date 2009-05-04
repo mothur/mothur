@@ -33,20 +33,17 @@ EstOutput QStat::getValues(SAbundVector* rank){
 		int r3Ind = 0;
 		int sumSpec = 0;
 		int iqSum = 0;
-		for(int i = 1; i < rank->size(); i++)
-		{
+		for(int i = 1; i < rank->size(); i++) {
 			if(r1 != -1 && r3 != -1)
 				i = rank->size();
 				
 			sumSpec += rank->get(i);
 			
-			if(r1 == -1 && sumSpec >= numSpec*.25)
-			{
+			if(r1 == -1 && sumSpec >= numSpec*.25) {
 				r1 = rank->get(i);
 				r1Ind = i;
 			}
-			else if(r3 == -1 && sumSpec >= numSpec*.75)
-			{
+			else if(r3 == -1 && sumSpec >= numSpec*.75) {
 				r3 = rank->get(i);
 				r3Ind = i;
 			}
@@ -63,11 +60,11 @@ EstOutput QStat::getValues(SAbundVector* rank){
 		return data;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the NPShannon class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the QStat class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the NPShannon class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the QStat class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
 }
