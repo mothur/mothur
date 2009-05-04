@@ -40,23 +40,25 @@ private:
 class SharedCollectorsCurveData : public Observable {
 	
 public:
-	SharedCollectorsCurveData() : shared1(0), shared2(0) {};
+	SharedCollectorsCurveData() { }; //: shared1(0), shared2(0)
 	
 	void registerDisplay(Display* o)		{	displays.insert(o);				};
 	void removeDisplay(Display* o)			{	displays.erase(o);	delete o;	};
-	void SharedDataChanged()					{	notifyDisplays();				};
-	void updateSharedData(SharedRAbundVector* rv, SharedRAbundVector* rv2, int numSeqs, int numGroupComb)	{	shared1 = rv; shared2 = rv2; NumSeqs = numSeqs; NumGroupComb = numGroupComb; SharedDataChanged();	};
-
+	void SharedDataChanged()				{	notifyDisplays();				};
+	void updateSharedData(vector<SharedRAbundVector*> s, int numSeqs, int numGroupComb)	{	shared = s; NumSeqs = numSeqs; NumGroupComb = numGroupComb; SharedDataChanged();	};
+	
 	void notifyDisplays(){	
 		for(set<Display*>::iterator pos=displays.begin();pos!=displays.end();pos++){
-			(*pos)->update(shared1, shared2, NumSeqs, NumGroupComb);
+			if ( ((*pos)->isCalcMultiple() == true) || ( ((*pos)->isCalcMultiple() == false) && (shared.size() == 2) ) ) {
+				(*pos)->update(shared, NumSeqs, NumGroupComb);
+			}
 		}	
 	};
 	
 private:
 	set<Display*> displays;
-	SharedRAbundVector* shared1;
-	SharedRAbundVector* shared2;
+	vector<Display*> multiDisplays;
+	vector<SharedRAbundVector*> shared;
 	int NumSeqs, NumGroupComb;
 };
 

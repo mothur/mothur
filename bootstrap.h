@@ -20,9 +20,9 @@ It is a child of the calculator class. */
 class Bootstrap : public Calculator  {
 	
 public:
-	Bootstrap() : Calculator("Bootstrap", 1) {};
+	Bootstrap() : Calculator("Bootstrap", 1, false) {};
 	EstOutput getValues(SAbundVector*);
-	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*) {return data;};
+	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
 	
 };
 

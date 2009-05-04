@@ -10,7 +10,7 @@
 #include "sharedmorisitahorn.h"
 
 /***********************************************************************/
-EstOutput MorHorn::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2) {
+EstOutput MorHorn::getValues(vector<SharedRAbundVector*> shared) {
 	try {	
 		data.resize(1,0);
 		
@@ -20,17 +20,17 @@ EstOutput MorHorn::getValues(SharedRAbundVector* shared1, SharedRAbundVector* sh
 		morhorn = 0.0; sumSharedA = 0.0; sumSharedB = 0.0; a = 0.0; b = 0.0; d = 0.0;
 		
 		//get the total values we need to calculate the theta denominator sums
-		for (int i = 0; i < shared1->size(); i++) {
+		for (int i = 0; i < shared[0]->size(); i++) {
 			//store in temps to avoid multiple repetitive function calls
-			Atotal += shared1->getAbundance(i);
-			Btotal += shared2->getAbundance(i);
+			Atotal += shared[0]->getAbundance(i);
+			Btotal += shared[1]->getAbundance(i);
 		}
 		
 		//calculate the theta denominator sums
-		for (int j = 0; j < shared1->size(); j++) {
+		for (int j = 0; j < shared[0]->size(); j++) {
 			//store in temps to avoid multiple repetitive function calls
-			tempA = shared1->getAbundance(j);
-			tempB = shared2->getAbundance(j);
+			tempA = shared[0]->getAbundance(j);
+			tempB = shared[1]->getAbundance(j);
 			
 			a += tempA * tempA;
 			b += tempB * tempB;

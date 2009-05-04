@@ -13,7 +13,7 @@
 
 /***********************************************************************/
 
-EstOutput SorEst::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2) {
+EstOutput SorEst::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		EstOutput S1, S2, S12;
 		S12.resize(1,0);
@@ -31,10 +31,10 @@ EstOutput SorEst::getValues(SharedRAbundVector* shared1, SharedRAbundVector* sha
 		SAbundVector* chaoS1Sabund = new SAbundVector();
 		SAbundVector* chaoS2Sabund = new SAbundVector();
 		
-		*chaoS1Sabund = shared1->getSAbundVector();
-		*chaoS2Sabund = shared2->getSAbundVector();
+		*chaoS1Sabund = shared[0]->getSAbundVector();
+		*chaoS2Sabund = shared[1]->getSAbundVector();
 		
-		S12 = sharedChao->getValues(shared1, shared2);
+		S12 = sharedChao->getValues(shared);
 		S1 = chaoS1->getValues(chaoS1Sabund);
 		S2 = chaoS2->getValues(chaoS2Sabund);
 		

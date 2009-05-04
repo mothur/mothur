@@ -18,9 +18,9 @@
 class SharedSobsCS : public Calculator {
 
 public:
-	SharedSobsCS() : Calculator("sharedsobs", 1) {};
+	SharedSobsCS() : Calculator("sharedsobs", 1, true) {};
 	EstOutput getValues(SAbundVector* rank){ return data; };
-	EstOutput getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2);
+	EstOutput getValues(vector<SharedRAbundVector*>);
 };
 
 /***********************************************************************/

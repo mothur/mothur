@@ -37,6 +37,7 @@
 #include "getoturepcommand.h"
 #include "treegroupscommand.h"
 #include "bootstrapsharedcommand.h"
+#include "concensuscommand.h"
 
 
 /***********************************************************/
@@ -86,6 +87,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "get.oturep")			{   command = new GetOTURepCommand();			}
 		else if(commandName == "tree.shared")			{   command = new TreeGroupCommand();			}
 		else if(commandName == "bootstrap.shared")		{   command = new BootSharedCommand();			}
+		else if(commandName == "concensus")				{   command = new ConcensusCommand();			}
 		else											{	command = new NoCommand();					}
 
 		return command;

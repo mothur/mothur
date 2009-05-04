@@ -41,6 +41,7 @@ SummarySharedCommand::SummarySharedCommand(){
 		format = globaldata->getFormat();
 		validCalculator = new ValidCalculators();
 		util = new SharedUtil();
+		mult = false;
 		
 		int i;
 		for (i=0; i<globaldata->Estimators.size(); i++) {
@@ -88,7 +89,6 @@ SummarySharedCommand::SummarySharedCommand(){
 				}else if (globaldata->Estimators[i] == "whittaker") { 
 					sumCalculators.push_back(new Whittaker());
 				}
-				
 			}
 		}
 		//reset calc for next command
@@ -120,7 +120,13 @@ int SummarySharedCommand::execute(){
 		
 		//if the users entered no valid calculators don't execute command
 		if (sumCalculators.size() == 0) { return 0; }
-
+		//check if any calcs can do multiples
+		else{
+			for (int i = 0; i < sumCalculators.size(); i++) {
+				if (sumCalculators[i]->getMultiple() == true) { mult = true; }
+			}
+		}
+		
 		if (format == "sharedfile") {
 			read = new ReadOTUFile(globaldata->inputFileName);	
 			read->read(&*globaldata); 
@@ -147,6 +153,20 @@ int SummarySharedCommand::execute(){
 		}
 		outputFileHandle << endl;
 		
+		//create file and put column headers for multiple groups file
+		if (mult = true) {
+			outAllFileName = ((getRootName(globaldata->inputFileName)) + "sharedmultiple.summary");
+			openOutputFile(outAllFileName, outAll);
+			
+			outAll << "label" <<'\t' << "comparison" << '\t'; 
+			for(int i=0;i<sumCalculators.size();i++){
+				if (sumCalculators[i]->getMultiple() == true) { 
+					outAll << '\t' << sumCalculators[i]->getName();
+				}
+			}
+			outAll << endl;
+		}
+		
 		while(order != NULL){
 		
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(order->getLabel()) == 1){			
@@ -154,14 +174,39 @@ int SummarySharedCommand::execute(){
 				cout << order->getLabel() << '\t' << count << endl;
 				util->getSharedVectors(globaldata->Groups, lookup, order);  //fills group vectors from order vector.  //fills group vectors from order vector.
 				
-				//randomize group order
-				if (globaldata->getJumble() == "1") { random_shuffle(lookup.begin(), lookup.end()); }
+				//loop through calculators and add to file all for all calcs that can do mutiple groups
+				if (mult = true) {
+					//output label
+					outAll << order->getLabel() << '\t';
+					
+					//output groups names
+					string outNames = "";
+					for (int j = 0; j < lookup.size(); j++) {
+						outNames += lookup[j]->getGroup() +  "-";
+					}
+					outNames = outNames.substr(0, outNames.length()-1); //rip off extra '-';
+					outAll << outNames << '\t';
+					
+					for(int i=0;i<sumCalculators.size();i++){
+						if (sumCalculators[i]->getMultiple() == true) { 
+							sumCalculators[i]->getValues(lookup);
+							outAll << '\t';
+							sumCalculators[i]->print(outAll);
+						}
+					}
+					outAll << endl;
+				}
 
 				int n = 1; 
+				vector<SharedRAbundVector*> subset;
 				for (int k = 0; k < (lookup.size() - 1); k++) { // pass cdd each set of groups to commpare
 					for (int l = n; l < lookup.size(); l++) {
 						
 						outputFileHandle << order->getLabel() << '\t';
+						
+						subset.clear(); //clear out old pair of sharedrabunds
+						//add new pair of sharedrabunds
+						subset.push_back(lookup[k]); subset.push_back(lookup[l]); 
 						
 						//sort groups to be alphanumeric
 						if (lookup[k]->getGroup() > lookup[l]->getGroup()) {
@@ -170,8 +215,8 @@ int SummarySharedCommand::execute(){
 							outputFileHandle << (lookup[k]->getGroup() +'\t' + lookup[l]->getGroup()) << '\t'; //print out groups
 						}
 						
-						for(int i=0;i<sumCalculators.size();i++){
-							sumCalculators[i]->getValues(lookup[k], lookup[l]); //saves the calculator outputs
+						for(int i=0;i<sumCalculators.size();i++) {
+							sumCalculators[i]->getValues(subset); //saves the calculator outputs
 							outputFileHandle << '\t';
 							sumCalculators[i]->print(outputFileHandle);
 						}

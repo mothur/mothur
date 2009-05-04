@@ -17,9 +17,9 @@
 class Kulczynski : public Calculator  {
 	
 public:
-	Kulczynski() :  Calculator("Kulczynski", 1) {};
+	Kulczynski() :  Calculator("Kulczynski", 1, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
-	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*);
+	EstOutput getValues(vector<SharedRAbundVector*>);
 private:
 	
 };

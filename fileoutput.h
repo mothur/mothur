@@ -32,7 +32,7 @@ protected:
 class ThreeColumnFile : public FileOutput {
 	
 public:
-	ThreeColumnFile(string n) : FileOutput(), inName(n), counter(0), outName(getPathName(n) + ".temp." + getSimpleName(n)) { };
+	ThreeColumnFile(string n) : FileOutput(), inName(n), counter(0), outName(getPathName(n) + ".temp") { };
 	~ThreeColumnFile();
 	void initFile(string);
 	void output(int, vector<double>);
@@ -56,7 +56,7 @@ class OneColumnFile : public FileOutput {
 	
 	
 public:
-	OneColumnFile(string n) : inName(n), counter(0), outName(getPathName(n) + ".temp." + getSimpleName(n)) {};
+	OneColumnFile(string n) : inName(n), counter(0), outName(getPathName(n) + ".temp") {};
 	~OneColumnFile();
 	void output(int, vector<double>);
 	void initFile(string);
@@ -80,7 +80,7 @@ class SharedOneColumnFile : public FileOutput {
 	
 	
 public:
-	SharedOneColumnFile(string n) : inName(n), counter(0), outName(getPathName(n) + ".temp." + getSimpleName(n)) {};
+	SharedOneColumnFile(string n) : inName(n), counter(0), outName(getPathName(n) + ".temp") {};
 	~SharedOneColumnFile();
 	void output(int, vector<double>);
 	void initFile(string);
@@ -105,7 +105,7 @@ private:
 class SharedThreeColumnFile : public FileOutput {
 	
 public:
-	SharedThreeColumnFile(string n, string groups) : FileOutput(), groupLabel(groups), inName(n), counter(0), numGroup(1), outName(getPathName(n) + ".temp." + getSimpleName(n)) {	};
+	SharedThreeColumnFile(string n, string groups) : FileOutput(), groupLabel(groups), inName(n), counter(0), numGroup(1), outName(getPathName(n) + ".temp") {	};
 	~SharedThreeColumnFile();
 	void initFile(string);
 	void output(int, vector<double>);
@@ -125,11 +125,11 @@ private:
 };
 
 /***********************************************************************/
-
+//used by parsimony, unifrac.weighted and unifrac.unweighted
 class ColumnFile : public FileOutput {
 	
 public:
-	ColumnFile(string n) : FileOutput(), inName(n), counter(0), outName(getPathName(n) + ".temp." + getSimpleName(n)) { globaldata = GlobalData::getInstance(); };
+	ColumnFile(string n) : FileOutput(), inName(n), counter(0), outName(getPathName(n) + ".temp") { globaldata = GlobalData::getInstance(); };
 	~ColumnFile();
 	
 	//to make compatible with parent class

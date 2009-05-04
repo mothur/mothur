@@ -12,16 +12,16 @@
 
 /***********************************************************************/
 
-EstOutput SharedAce::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2) {
+EstOutput SharedAce::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		data.resize(1,0);
 		string label;
-		label = shared1->getLabel();
+		label = shared[0]->getLabel();
 
 		int fARare, fBRare, S12Rare, S12Abund, S12, f11, tempA, tempB, t10, t01, t11, t21, t12, t22, C12Numerator;
 		fARare = 0; fBRare = 0; S12Rare = 0; S12Abund = 0; S12 = 0; f11 = 0; t10 = 0; t01 = 0; t11= 0; t21= 0; t12= 0; t22= 0; C12Numerator = 0;
 	
-		float SharedAce, C12, part1, part2, part3, part4, part5, Gamma1, Gamma2, Gamma3;
+		float Sharedace, C12, part1, part2, part3, part4, part5, Gamma1, Gamma2, Gamma3;
 	
 		/*fARare = number of OTUs with one individual found in A and less than or equal to 10 in B. 
 		fBRare = number of OTUs with one individual found in B and less than or equal to 10 in A. 
@@ -32,10 +32,10 @@ EstOutput SharedAce::getValues(SharedRAbundVector* shared1, SharedRAbundVector* 
 		S12 = number of shared OTUs in A and B
 		This estimator was changed to reflect Caldwell's changes, eliminating the nrare / nrare - 1 */
 
-		for (int i = 0; i < shared1->size(); i++) {
+		for (int i = 0; i < shared[0]->size(); i++) {
 			//store in temps to avoid multiple repetitive function calls
-			tempA = shared1->getAbundance(i);
-			tempB = shared2->getAbundance(i);
+			tempA = shared[0]->getAbundance(i);
+			tempB = shared[1]->getAbundance(i);
 			if ((tempA != 0) && (tempB != 0)) {//they are shared
 				S12++;
 				//do both A and B have one
@@ -94,8 +94,8 @@ EstOutput SharedAce::getValues(SharedRAbundVector* shared1, SharedRAbundVector* 
 		part4 = fBRare * Gamma2;
 		part5 = f11 * Gamma3;
 
-		SharedAce = S12Abund + part1 + (part2 * (part3 + part4 + part5));
-		data[0] = SharedAce;
+		Sharedace = S12Abund + part1 + (part2 * (part3 + part4 + part5));
+		data[0] = Sharedace;
 	
 		return data;
 	}

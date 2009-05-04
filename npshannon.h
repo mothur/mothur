@@ -20,9 +20,9 @@ It is a child of the calculator class. */
 class NPShannon : public Calculator  {
 	
 public:
-	NPShannon() : Calculator("NPShannon", 1) {};
+	NPShannon() : Calculator("NPShannon", 1, false) {};
 	EstOutput getValues(SAbundVector*);
-	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*) {return data;};
+	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
 private:
 	
 };

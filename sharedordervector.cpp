@@ -341,6 +341,7 @@ SharedSAbundVector SharedOrderVector::getSharedSAbundVector(string group) {
 /***********************************************************************/
 
 SharedOrderVector SharedOrderVector::getSharedOrderVector(){
+	random_shuffle(data.begin(), data.end());
 	return *this;			
 }
 

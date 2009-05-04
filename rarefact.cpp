@@ -114,10 +114,15 @@ try {
 			
 			//randomize the groups
 			random_shuffle(lookup.begin(), lookup.end());
-		
+			
+			vector<SharedRAbundVector*> subset;
 			//send each group one at a time
 			for (int k = 0; k < lookup.size(); k++) { 
-				rcd->updateSharedData(lookup[0], lookup[k], k+1, numGroupComb);
+				subset.clear(); //clears out old pair of sharedrabunds
+				//add in new pair of sharedrabunds
+				subset.push_back(lookup[0]); subset.push_back(lookup[k]);
+				
+				rcd->updateSharedData(subset, k+1, numGroupComb);
 				mergeVectors(lookup[0], lookup[k]);
 			}
 

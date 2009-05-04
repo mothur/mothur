@@ -83,11 +83,11 @@ int HelpCommand::execute(){
 		cout << "Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "collect.shared") {
 		cout << "The collect.shared command can only be executed after a successful read.otu command." << "\n";
-		cout << "The collect.shared command parameters are label, line, freq, jumble, calc and groups.  No parameters are required, but you may not use " << "\n";
+		cout << "The collect.shared command parameters are label, line, freq, calc and groups.  No parameters are required, but you may not use " << "\n";
 		cout << "both the line and label parameters at the same time. The collect.shared command should be in the following format: " << "\n";
-		cout << "collect.shared(label=yourLabel, line=yourLines, freq=yourFreq, jumble=yourJumble, calc=yourEstimators, groups=yourGroups)." << "\n";
-		cout << "Example collect.shared(label=unique-.01-.03, line=0-5-10, freq=10, jumble=1, groups=B-C, calc=sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan)." << "\n";
-		cout << "The default values for jumble is 1 (meaning jumble, if it’s set to 0 then it will not jumble), freq is 100 and calc are sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan." << "\n";
+		cout << "collect.shared(label=yourLabel, line=yourLines, freq=yourFreq, calc=yourEstimators, groups=yourGroups)." << "\n";
+		cout << "Example collect.shared(label=unique-.01-.03, line=0-5-10, freq=10, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan)." << "\n";
+		cout << "The default values for freq is 100 and calc are sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan." << "\n";
 		cout << "The default value for groups is all the groups in your groupfile." << "\n";
 		validCalcs->printCalc("shared", cout);
 		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
@@ -147,12 +147,12 @@ int HelpCommand::execute(){
 		cout << "Note: No spaces between parameter labels (i.e. line), '=' and parameters (i.e.yourLines)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "summary.shared") { 
 		cout << "The summary.shared command can only be executed after a successful read.otu command." << "\n";
-		cout << "The summary.shared command parameters are label, line, jumble and calc.  No parameters are required, but you may not use " << "\n";
+		cout << "The summary.shared command parameters are label, line and calc.  No parameters are required, but you may not use " << "\n";
 		cout << "both the line and label parameters at the same time. The summary.shared command should be in the following format: " << "\n";
-		cout << "summary.shared(label=yourLabel, line=yourLines, jumble=yourJumble, calc=yourEstimators, groups=yourGroups)." << "\n";
-		cout << "Example summary.shared(label=unique-.01-.03, line=0,5,10, jumble=1, groups=B-C, calc=sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan)." << "\n";
+		cout << "summary.shared(label=yourLabel, line=yourLines, calc=yourEstimators, groups=yourGroups)." << "\n";
+		cout << "Example summary.shared(label=unique-.01-.03, line=0,5,10, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan)." << "\n";
 		validCalcs->printCalc("sharedsummary", cout);
-		cout << "The default value for jumble is 1 (meaning jumble, if it’s set to 0 then it will not jumble) and calc is sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan" << "\n";
+		cout << "The default value for calc is sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan" << "\n";
 		cout << "The default value for groups is all the groups in your groupfile." << "\n";
 		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
 		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups." << "\n";
@@ -250,6 +250,15 @@ int HelpCommand::execute(){
 		validCalcs->printCalc("boot", cout);
 		cout << "The bootstrap.shared command outputs a .tre file for each calculator you specify at each distance you choose containing iters number of trees." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups)." << "\n" << "\n";
+	}else if (globaldata->helpRequest == "concensus") { 
+		cout << "The concensus command can only be executed after a successful read.tree command." << "\n";
+		cout << "The concensus command has no parameters." << "\n";
+		cout << "The concensus command should be in the following format: concensus()." << "\n";
+		cout << "The concensus command output two files: .concensus.tre and .concensuspairs." << "\n";
+		cout << "The .concensus.tre file contains the concensus tree of the trees in your input file." << "\n";
+		cout << "The branch lengths are the percentage of trees in your input file that had the given pair." << "\n";
+		cout << "The .concensuspairs file contains a list of the internal nodes in your tree.  For each node, the pair that was used in the concensus tree " << "\n";
+		cout << "is reported with its percentage, as well as the other pairs that were seen for that node but not used and their percentages." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "bin.seqs") { 
 		cout << "The bin.seqs command can only be executed after a successful read.otu command of a list file." << "\n";
 		cout << "The bin.seqs command parameters are fasta, name, line and label.  The fasta parameter is required, and you may not use line and label at the same time." << "\n";

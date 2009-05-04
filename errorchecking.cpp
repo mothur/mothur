@@ -196,9 +196,9 @@ bool ErrorCheck::checkInput(string input) {
 			}
 		}
 		
-		if ((commandName == "unifrac.weighted") || (commandName == "unifrac.unweighted")) {
+		if ((commandName == "unifrac.weighted") || (commandName == "unifrac.unweighted") || (commandName == "concensus")) {
 			if (globaldata->gTree.size() == 0) {//no trees were read
-				cout << "You must execute the read.tree command, before you may execute the unifrac.weighted or unifrac.unweighted command." << endl; return false;  }
+				cout << "You must execute the read.tree command, before you may execute the unifrac.weighted, unifrac.unweighted or concensus command." << endl; return false;  }
 		}
 		
 		//check for valid method

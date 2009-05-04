@@ -20,9 +20,9 @@ It is a child of the calculator class. */
 class Ace : public Calculator  {
 	
 public:
-	Ace(int n) : abund(n), Calculator("ace", 3) {};
+	Ace(int n) : abund(n), Calculator("ace", 3, false) {};
 	EstOutput getValues(SAbundVector*);
-	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*) {return data;};
+	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
 private:
 	int abund;
 };

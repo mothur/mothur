@@ -53,8 +53,9 @@ private:
 	SharedListVector* SharedList;
 	SharedOrderVector* order;
 	vector<SharedRAbundVector*> lookup;
-	string outputFileName, format;
-	ofstream outputFileHandle;
+	string outputFileName, format, outAllFileName;
+	ofstream outputFileHandle, outAll;
+	bool mult;
 
 };
 

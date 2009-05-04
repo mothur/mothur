@@ -19,13 +19,13 @@
 class NSeqs : public Calculator {
 
 public:
-	NSeqs() : Calculator("NSeqs", 1) {};
+	NSeqs() : Calculator("NSeqs", 1, false) {};
 	EstOutput getValues(SAbundVector* rank){
 		data.resize(1,0);
 		data[0] = (double)rank->getNumSeqs();
 		return data;
 	}
-	EstOutput getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2) {return data;};
+	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
 };
 
 /***********************************************************************/

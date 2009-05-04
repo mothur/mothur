@@ -11,13 +11,13 @@
 
 /***********************************************************************/
 
-EstOutput JAbund::getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2) {
+EstOutput JAbund::getValues(vector<SharedRAbundVector*> shared) {
 	try {
 		EstOutput UVest;
 		UVest.resize(2,0);
 		data.resize(1,0);
 		
-		UVest = uv->getUVest(shared1, shared2);
+		UVest = uv->getUVest(shared);
 		
 		//UVest[0] is Uest UVest[1] is Vest
 		data[0] = (UVest[0] * UVest[1]) / ((float)(UVest[0] + UVest[1] - (UVest[0] * UVest[1])));

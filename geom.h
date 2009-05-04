@@ -19,9 +19,11 @@ It is a child of the calculator class. */
 class Geom : public Calculator  {
 	
 public:
-	Geom() : Calculator("geometric", 3) {};
+
+	Geom() : Calculator("geometric", 3, false) {};
+
 	EstOutput getValues(SAbundVector*);
-	EstOutput getValues(SharedRAbundVector*, SharedRAbundVector*) {return data;};
+	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
 
 private:
 	double kEq(double, double);
