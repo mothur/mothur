@@ -201,18 +201,6 @@
 		375AA1360F9E433D008EF9B8 /* readotu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readotu.h; sourceTree = "<group>"; };
 		375AA1370F9E433D008EF9B8 /* readphylip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readphylip.cpp; sourceTree = "<group>"; };
 		375AA1380F9E433D008EF9B8 /* readphylip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readphylip.h; sourceTree = "<group>"; };
-		377326560FAF16DF007ABB8B /* categories.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = categories.pbxbtree; sourceTree = "<group>"; };
-		377326570FAF16DF007ABB8B /* cdecls.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = cdecls.pbxbtree; sourceTree = "<group>"; };
-		377326580FAF16DF007ABB8B /* decls.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = decls.pbxbtree; sourceTree = "<group>"; };
-		377326590FAF16DF007ABB8B /* files.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = files.pbxbtree; sourceTree = "<group>"; };
-		3773265A0FAF16DF007ABB8B /* imports.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = imports.pbxbtree; sourceTree = "<group>"; };
-		3773265B0FAF16DF007ABB8B /* pbxindex.header */ = {isa = PBXFileReference; lastKnownFileType = file; path = pbxindex.header; sourceTree = "<group>"; };
-		3773265C0FAF16DF007ABB8B /* protocols.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = protocols.pbxbtree; sourceTree = "<group>"; };
-		3773265D0FAF16DF007ABB8B /* refs.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = refs.pbxbtree; sourceTree = "<group>"; };
-		3773265F0FAF16DF007ABB8B /* control */ = {isa = PBXFileReference; lastKnownFileType = file; path = control; sourceTree = "<group>"; };
-		377326600FAF16DF007ABB8B /* strings */ = {isa = PBXFileReference; lastKnownFileType = file; path = strings; sourceTree = "<group>"; };
-		377326610FAF16E0007ABB8B /* subclasses.pbxbtree */ = {isa = PBXFileReference; lastKnownFileType = file; path = subclasses.pbxbtree; sourceTree = "<group>"; };
-		377326620FAF16E0007ABB8B /* symbols0.pbxsymbols */ = {isa = PBXFileReference; lastKnownFileType = file; path = symbols0.pbxsymbols; sourceTree = "<group>"; };
 		377326630FAF16E0007ABB8B /* concensuscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = concensuscommand.cpp; sourceTree = "<group>"; };
 		377326640FAF16E0007ABB8B /* concensuscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = concensuscommand.h; sourceTree = "<group>"; };
 		379293C10F2DE73400B9034A /* treemap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = treemap.h; sourceTree = "<group>"; };
@@ -426,7 +414,6 @@
 		08FB7794FE84155DC02AAC07 /* Mothur */ = {
 			isa = PBXGroup;
 			children = (
-				377326530FAF16DF007ABB8B /* build */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				C6859E8C029090F304C91782 /* Documentation */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
@@ -520,49 +507,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		377326530FAF16DF007ABB8B /* build */ = {
-			isa = PBXGroup;
-			children = (
-				377326540FAF16DF007ABB8B /* Mothur.build */,
-			);
-			path = build;
-			sourceTree = "<group>";
-		};
-		377326540FAF16DF007ABB8B /* Mothur.build */ = {
-			isa = PBXGroup;
-			children = (
-				377326550FAF16DF007ABB8B /* Mothur.pbxindex */,
-			);
-			path = Mothur.build;
-			sourceTree = "<group>";
-		};
-		377326550FAF16DF007ABB8B /* Mothur.pbxindex */ = {
-			isa = PBXGroup;
-			children = (
-				377326560FAF16DF007ABB8B /* categories.pbxbtree */,
-				377326570FAF16DF007ABB8B /* cdecls.pbxbtree */,
-				377326580FAF16DF007ABB8B /* decls.pbxbtree */,
-				377326590FAF16DF007ABB8B /* files.pbxbtree */,
-				3773265A0FAF16DF007ABB8B /* imports.pbxbtree */,
-				3773265B0FAF16DF007ABB8B /* pbxindex.header */,
-				3773265C0FAF16DF007ABB8B /* protocols.pbxbtree */,
-				3773265D0FAF16DF007ABB8B /* refs.pbxbtree */,
-				3773265E0FAF16DF007ABB8B /* strings.pbxstrings */,
-				377326610FAF16E0007ABB8B /* subclasses.pbxbtree */,
-				377326620FAF16E0007ABB8B /* symbols0.pbxsymbols */,
-			);
-			path = Mothur.pbxindex;
-			sourceTree = "<group>";
-		};
-		3773265E0FAF16DF007ABB8B /* strings.pbxstrings */ = {
-			isa = PBXGroup;
-			children = (
-				3773265F0FAF16DF007ABB8B /* control */,
-				377326600FAF16DF007ABB8B /* strings */,
-			);
-			path = strings.pbxstrings;
-			sourceTree = "<group>";
-		};
 		37D928A60F2133C0001D4494 /* calculators */ = {
 			isa = PBXGroup;
 			children = (
@@ -579,6 +523,8 @@
 				EB1216E40F61ACFB004A865F /* bstick.cpp */,
 				37D927C00F21331F001D4494 /* chao1.h */,
 				37D927BF0F21331F001D4494 /* chao1.cpp */,
+				7EC3D4510FA0FFF900338DA5 /* coverage.h */,
+				7EC3D4500FA0FFF900338DA5 /* coverage.cpp */,
 				EB9303F70F53517300E8EF26 /* geom.h */,
 				EB9303F80F53517300E8EF26 /* geom.cpp */,
 				EB9303E90F534D9400E8EF26 /* logsd.h */,
@@ -600,11 +546,7 @@
 				37D928220F21331F001D4494 /* sharedace.cpp */,
 				37519A690F80E6EB00FED5E8 /* sharedanderbergs.h */,
 				37519A6A0F80E6EB00FED5E8 /* sharedanderbergs.cpp */,
-				7EC3D4500FA0FFF900338DA5 /* coverage.cpp */,
-				7EC3D4510FA0FFF900338DA5 /* coverage.h */,
 				7EC3D4520FA0FFF900338DA5 /* sharedanderberg.h */,
-				7EC3D4530FA0FFF900338DA5 /* whittaker.cpp */,
-				7EC3D4540FA0FFF900338DA5 /* whittaker.h */,
 				375873FB0F7D64DA0040F377 /* sharedbraycurtis.h */,
 				375873FC0F7D64DA0040F377 /* sharedbraycurtis.cpp */,
 				37D928250F21331F001D4494 /* sharedchao1.h */,
@@ -651,6 +593,8 @@
 				37D9284D0F21331F001D4494 /* uvest.cpp */,
 				3746107C0F4064D100460C57 /* weighted.h */,
 				3746107D0F4064D100460C57 /* weighted.cpp */,
+				7EC3D4540FA0FFF900338DA5 /* whittaker.h */,
+				7EC3D4530FA0FFF900338DA5 /* whittaker.cpp */,
 			);
 			name = calculators;
 			sourceTree = "<group>";
