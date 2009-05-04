@@ -272,6 +272,8 @@ GlobalData::GlobalData() {
 	//option definitions should go here...
 	helpRequest = "";
 	clear();
+	gListVector == NULL;		
+	gSparseMatrix == NULL;	
 }
 /*******************************************************/
 

@@ -177,7 +177,7 @@ bool ErrorCheck::checkInput(string input) {
 			validateReadFiles();
 		}
 		
-		//are you trying to cluster before you have read something			
+		//are you trying to cluster before you have read something	
 		if (((commandName == "cluster") && (globaldata->gSparseMatrix == NULL)) ||
 			((commandName == "cluster") && (globaldata->gListVector == NULL))) {
 				cout << "Before you use the cluster command, you first need to read in a distance matrix." << endl; 

@@ -28,7 +28,7 @@ EstOutput NPShannon::getValues(SAbundVector* rank){
 				double ChatPi = Chat*pi;
 				if(ChatPi>0){
 					npShannon += rank->get(i) * ChatPi*log(ChatPi)/(1-pow(1-ChatPi,(double)sampled));
-					cout << ChatPi << '\t' << rank->get(i) * ChatPi*log(ChatPi)/(1-pow(1-ChatPi,(double)sampled)) << endl;
+					//cout << ChatPi << '\t' << rank->get(i) * ChatPi*log(ChatPi)/(1-pow(1-ChatPi,(double)sampled)) << endl;
 				}
 			}
 			npShannon = -npShannon;
