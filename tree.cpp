@@ -457,7 +457,7 @@ void Tree::randomTopology() {
 void Tree::print(ostream& out) {
 	try {
 		int root = findRoot();
-		printBranch(root, out);
+		printBranch(root, out, "branch");
 		out << ";" << endl;
 	}
 	catch(exception& e) {
@@ -470,6 +470,23 @@ void Tree::print(ostream& out) {
 	}		
 }
 /*****************************************************************/
+void Tree::printForBoot(ostream& out) {
+	try {
+		int root = findRoot();
+		printBranch(root, out, "boot");
+		out << ";" << endl;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function printForBoot. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the Tree class function printForBoot. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}		
+}
+
+/*****************************************************************/
 // This prints out the tree in Newick form.
 void Tree::createNewickFile(string f) {
 	try {
@@ -478,7 +495,7 @@ void Tree::createNewickFile(string f) {
 		filename = f;
 		openOutputFile(filename, out);
 		
-		printBranch(root, out);
+		printBranch(root, out, "branch");
 		
 		// you are at the end of the tree
 		out << ";" << endl;
@@ -516,25 +533,39 @@ int Tree::findRoot() {
 }
 
 /*****************************************************************/
-void Tree::printBranch(int node, ostream& out) {
+void Tree::printBranch(int node, ostream& out, string mode) {
 	try {
 		
 		// you are not a leaf
 		if (tree[node].getLChild() != -1) {
 			out << "(";
-			printBranch(tree[node].getLChild(), out);
+			printBranch(tree[node].getLChild(), out, mode);
 			out << ",";
-			printBranch(tree[node].getRChild(), out);
+			printBranch(tree[node].getRChild(), out, mode);
 			out << ")";
-			//if there is a branch length then print it
-			if (tree[node].getBranchLength() != -1) {
-				out << ":" << tree[node].getBranchLength();
+			if (mode == "branch") {
+				//if there is a branch length then print it
+				if (tree[node].getBranchLength() != -1) {
+					out << ":" << tree[node].getBranchLength();
+				}
+			}else if (mode == "boot") {
+				//if there is a label then print it
+				if (tree[node].getLabel() != -1) {
+					out << tree[node].getLabel();
+				}
 			}
 		}else { //you are a leaf
 			out << tree[node].getGroup(); 
-			//if there is a branch length then print it
-			if (tree[node].getBranchLength() != -1) {
-				out << ":" << tree[node].getBranchLength();
+			if (mode == "branch") {
+				//if there is a branch length then print it
+				if (tree[node].getBranchLength() != -1) {
+					out << ":" << tree[node].getBranchLength();
+				}
+			}else if (mode == "boot") {
+				//if there is a label then print it
+				if (tree[node].getLabel() != -1) {
+					out << tree[node].getLabel();
+				}
 			}
 		}
 		

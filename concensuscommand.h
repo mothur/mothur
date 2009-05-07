@@ -28,15 +28,25 @@ private:
 	SharedUtil* util;
 	vector<Tree*> t;
 	Tree* concensusTree;
-	vector< map<string, int> > nodePairs;  //<maps a pair of nodes joined, number of times that pair occurred>	-one entry in vector for each internal node.
-										// i.e. if node 7's child pairs are 1,2 ten times and 1,3 20 times then the map would be [12, 10] and [13, 20];
+	vector<string> treeSet;		//set containing all members of the tree to start recursion.  filled in getSets().
+	map< vector<string>, int > nodePairs;  //<map of possible combinations these combos are the pcounts or descendants info, to how many times they occured
+										// ie. combos FI and EGK would create nodePairs[vector containing F and I] = 1; nodePairs[vector containing E, G and K] = 1
+										// if you saw the combo FI again in another tree you would then update nodePairs[vector containing F and I] = 2;
+										// requires vectors to be sorted to find key.
+	map< vector<string>, int > nodePairsInTree;
 	map<string, int>::iterator it;
-	map<string, int>::iterator it2;
+	map< vector<string>, int>::iterator it2;
 	string outputFile, notIncluded;
 	ofstream out, out2;
-	int numNodes, numLeaves;
+	int numNodes, numLeaves, count;  //count is the next available spot in the tree vector
+									 	
+	void getSets();
+	vector<string> getNextAvailableSet(vector<string>);  //gets next largest and highest rated set that is a subset of the set passed in.
+	vector<string> getRestSet(vector<string>, vector<string>);
+	bool isSubset(vector<string>, vector<string>); 
+	int findSpot(string); 
+	int buildConcensusTree(vector<string>);
 	
-	void getNames(string, string&, string&);
 };
 
 #endif

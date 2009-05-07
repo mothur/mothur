@@ -19,6 +19,7 @@ Node::Node() {
 	lchild = -1;
 	rchild = -1;
 	length2leaf = 0.0;
+	label = -1;
 	
 }
 /****************************************************************/
@@ -27,6 +28,8 @@ void Node::setName(string Name) {  name = Name; }
 void Node::setGroup(string groups)  { group =groups; }
 /****************************************************************/
 void Node::setBranchLength(float l) { branchLength = l; }
+/****************************************************************/
+void Node::setLabel(float l) { label = l; }
 /****************************************************************/
 void Node::setLengthToLeaves(float l) { length2leaf = l; }
 /****************************************************************/
@@ -41,6 +44,8 @@ string Node::getName() { return name; }
 string Node::getGroup() { return group; }
 /****************************************************************/
 float Node::getBranchLength() { return branchLength; }
+/****************************************************************/
+float Node::getLabel() { return label; }
 /****************************************************************/
 float Node::getLengthToLeaves() { return length2leaf; }
 /****************************************************************/

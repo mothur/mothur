@@ -40,36 +40,18 @@ int ConcensusCommand::execute(){
 			numLeaves = t[0]->getNumLeaves();
 		}
 		
-		//initialize nodepairs
-		nodePairs.resize(numNodes-numLeaves);
-		
-		//process each tree and fill counts
-		for (int i = 0; i < t.size(); i++) {
-			//process each nonleaf node
-			for (int j = numLeaves; j < numNodes; j++) {
-				//get pairing
-				int leftChild = t[i]->tree[j].getLChild();
-				int rightChild = t[i]->tree[j].getRChild();
-				string pair = toString(leftChild) + "-" + toString(rightChild);
-				
-				//if this is an existing pairing for this node then increment the count otherwise add new pairing.
-				it = nodePairs[j-numLeaves].find(pair);
-				if (it != nodePairs[j-numLeaves].end()) {//already have that score
-					nodePairs[j-numLeaves][pair]++;
-				}else{//first time we have seen this score
-					nodePairs[j-numLeaves][pair] = 1;
-				}
-			}
-		}
-		
+		//get the possible pairings
+		getSets();		
 		
 		//print out pairings for testing
-		/*for (int i = 0; i < nodePairs.size(); i++) {
-			cout << "pairs for node " << i+numLeaves << endl;
-			for (it = nodePairs[i].begin(); it != nodePairs[i].end(); it++) {
-				cout << " pair = " << it->first <<  " count = " << it->second << endl;
+		/*cout << "possible pairing " <<  endl;
+		for (it2 = nodePairs.begin(); it2 != nodePairs.end(); it2++) {
+			for (int i = 0; i < it2->first.size(); i++) {
+				cout << it2->first[i] << " ";
 			}
+			cout << '\t' << it2->second << endl;
 		}*/
+		
 		
 		//open file for pairing not included in the tree
 		notIncluded = getRootName(globaldata->inputFileName) + "concensuspairs";
@@ -77,66 +59,78 @@ int ConcensusCommand::execute(){
 		
 		concensusTree = new Tree();
 		
-		//set relationships for nonleaf nodes
-		for (int j = numLeaves; j < numNodes; j++) {
-			
-			//find that nodes pairing with the highest count
-			int large = 0;
-			for (it = nodePairs[j-numLeaves].begin(); it != nodePairs[j-numLeaves].end(); it++) {
-				if (it->second > large) { large = it->second;  it2 = it; }
-			}
-			
-			string pair = it2->first;
-			int pos = pair.find_first_of('-');
-			string lefts =  pair.substr(0, pos);
-			string rights =  pair.substr(pos+1, pair.length());
-
-			//converts string to int
-			int left = atoi(lefts.c_str());
-			int right = atoi(rights.c_str());
-			
-			//set parents and children
-			concensusTree->tree[j].setChildren(left, right);
-			concensusTree->tree[left].setParent(j);
-			concensusTree->tree[right].setParent(j);
-			
-			// set Branchlengths //
-			//if your children are leaves remove their branchlengths
-			if (concensusTree->tree[left].getLChild() == -1) {  concensusTree->tree[left].setBranchLength(1.0); }
-			if (concensusTree->tree[right].getLChild() == -1) {  concensusTree->tree[right].setBranchLength(1.0); }
-			
-			//set your branch length to the percentage of trees with this pairing
-			float bLength = (float) it2->second / (float) t.size();
-			concensusTree->tree[j].setBranchLength(bLength);
-			
-			//print out set used
-			string leftName, rightName;
-			getNames(it2->first, leftName, rightName);
-			
-			out2 << "Node " << j+1 << " in concensus tree: " << leftName << "-" << rightName << '\t' << (float)it2->second / (float) t.size() << endl; 
-			out2 << "Node " << j+1 << " sets not included in concensus tree: " << endl; 
-			
-			//print out sets not included
-			for (it = nodePairs[j-numLeaves].begin(); it != nodePairs[j-numLeaves].end(); it++) {
-				if (it != it2) { 
-					getNames(it->first, leftName, rightName);
-					out2 << leftName << "-" << rightName << '\t' << (float)it->second / (float) t.size() << endl; 
-				}
-			}
-			out2 << endl;
-
-		}
+		it2 = nodePairs.find(treeSet);
+		
+		nodePairsInTree[treeSet] = it2->second; 
+		
+		//erase treeset because you are adding it
+		nodePairs.erase(treeSet);
+		
+		//set count to numLeaves;
+		count = numLeaves;
+		
+		buildConcensusTree(treeSet);
 		
 		concensusTree->assembleTree();
+		
+		//output species in order
+		out2 << "Species in Order: " << endl << endl;
+		for (int i = 0; i < treeSet.size(); i++) {  out2 << i+1 << ".  " << treeSet[i] << endl; }
+		
+		vector<string> temp; 
+		//output sets included
+		out2 << endl << "Sets included in the concensus tree:" << endl << endl;
+		for (it2 = nodePairsInTree.begin(); it2 != nodePairsInTree.end(); it2++) {
+			//only output pairs not leaves
+			if (it2->first.size() > 1) { 
+				temp.clear();
+				//initialize temp to all "."
+				temp.resize(treeSet.size(), ".");
+				
+				//set the spot in temp that represents it2->first[i] to a "*" 
+				for (int i = 0; i < it2->first.size(); i++) {
+					//find spot 
+					int index = findSpot(it2->first[i]);
+					temp[index] = "*";
+				}
+				
+				//output temp
+				for (int j = 0; j < temp.size(); j++) { 
+					out2 << temp[j];
+				}
+				out2 << '\t' << it2->second << endl;
+			}
+		}
+		
+		//output sets not included
+		out2 << endl << "Sets NOT included in the concensus tree:" << endl << endl;
+		for (it2 = nodePairs.begin(); it2 != nodePairs.end(); it2++) {
+			temp.clear();
+			//initialize temp to all "."
+			temp.resize(treeSet.size(), ".");
+				
+			//set the spot in temp that represents it2->first[i] to a "*" 
+			for (int i = 0; i < it2->first.size(); i++) {
+				//find spot 
+				int index = findSpot(it2->first[i]);
+				temp[index] = "*";
+			}
+				
+			//output temp
+			for (int j = 0; j < temp.size(); j++) { 
+				out2 << temp[j];
+			}
+			out2 << '\t' << it2->second << endl;
+		}
 		
 		outputFile = getRootName(globaldata->inputFileName) + "concensus.tre";
 		openOutputFile(outputFile, out);
 		
-		concensusTree->print(out);
+		concensusTree->printForBoot(out);
 		
 		out.close(); out2.close();
 		
-		delete concensusTree;
+		delete concensusTree; 
 		
 		return 0;
 	}
@@ -149,36 +143,226 @@ int ConcensusCommand::execute(){
 		exit(1);
 	}		
 }
+
 //**********************************************************************************************************************
-
-void ConcensusCommand::getNames(string pair, string& leftName, string& rightName) {
+int ConcensusCommand::buildConcensusTree(vector<string> nodeSet) {
 	try {
-		int pos = pair.find_first_of('-');
-		string lefts =  pair.substr(0, pos);
-		string rights =  pair.substr(pos+1, pair.length());
-
-		//converts string to int
-		int	left = atoi(lefts.c_str());
-		int	right = atoi(rights.c_str());
-					
-		//get name
-		leftName = concensusTree->tree[left].getName();  
-		rightName = concensusTree->tree[right].getName();
-		 
-		//if you are not a leaf use node number as name
-		if (leftName == "") {  leftName = toString(left+1); }
-		if (rightName == "") {  rightName = toString(right+1); }
+		vector<string> leftChildSet;
+		vector<string> rightChildSet;
+		
+		//if you are at a leaf
+		if (nodeSet.size() == 1) {
+			//return the vector index of the leaf you are at
+			return concensusTree->getIndex(nodeSet[0]);
+		//terminate recursion
+		}else if (count == numNodes) { return 0; }
+		else {
+			leftChildSet = getNextAvailableSet(nodeSet);
+			rightChildSet = getRestSet(nodeSet, leftChildSet);
+			int left = buildConcensusTree(leftChildSet);
+			int right = buildConcensusTree(rightChildSet);
+			concensusTree->tree[count].setChildren(left, right);
+			concensusTree->tree[count].setLabel(nodePairsInTree[nodeSet]); 
+			concensusTree->tree[left].setParent(count);
+			concensusTree->tree[right].setParent(count);
+			count++;
+			return (count-1);
+		}
+	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ConcensusCommand class Function getNames. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the ConcensusCommand class Function buildConcensusTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the ConcensusCommand class function getNames. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the ConcensusCommand class function buildConcensusTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}		
 }
 
 //**********************************************************************************************************************
+void ConcensusCommand::getSets() {
+	try {
+		vector<string> temp;
+		treeSet.clear();
+		
+		//for each tree add the possible pairs you find
+		for (int i = 0; i < t.size(); i++) {
+			
+			//for each non-leaf node get descendant info.
+			for (int j = numLeaves; j < numNodes; j++) {
+				temp.clear();
+				//go through pcounts and pull out descendants
+				for (it = t[i]->tree[j].pcount.begin(); it != t[i]->tree[j].pcount.end(); it++) {
+					temp.push_back(it->first);
+				}
+				
+				//sort temp
+				sort(temp.begin(), temp.end());
+				
+				it2 = nodePairs.find(temp);
+				if (it2 != nodePairs.end()) {
+					nodePairs[temp]++;
+				}else{
+					nodePairs[temp] = 1;
+				}
+			}
+		}
+		
+		//add each leaf to terminate recursion in concensus
+		//you want the leaves in there but with insignifigant sightings value so it is added last
+		//for each leaf node get descendant info.
+		for (int j = 0; j < numLeaves; j++) {
+			
+			//only need the first one since leaves have no descendants but themselves
+			it = t[0]->tree[j].pcount.begin(); 
+			temp.clear();  temp.push_back(it->first);
+			
+			//fill treeSet
+			treeSet.push_back(it->first);
+			
+			//add leaf to list but with sighting value less then all non leaf pairs 
+			nodePairs[temp] = 0;
+		}
+
+		sort(treeSet.begin(), treeSet.end());
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ConcensusCommand class Function getSets. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ConcensusCommand class function getSets. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}		
+}
+
+//**********************************************************************************************************************
+vector<string> ConcensusCommand::getNextAvailableSet(vector<string> bigset) {
+	try {
+		vector<string> largest; largest.clear();
+		int largestSighting = -1;
+		
+		//go through the sets
+		for (it2 = nodePairs.begin(); it2 != nodePairs.end(); it2++) {
+			//are you a subset of bigset
+			if (isSubset(bigset, it2->first) == true) {
+			
+				//are you the largest. if you are the same size as current largest refer to sighting
+				if (it2->first.size() > largest.size()) { largest = it2->first;  largestSighting = it2->second; }
+				else if (it2->first.size() == largest.size()) {
+					if (it2->second > largestSighting) { largest = it2->first;  largestSighting = it2->second; }
+				}
+				
+			}
+		}
+		
+		//save for printing out later and for branch lengths
+		nodePairsInTree[largest] = nodePairs[largest];
+		
+		//delete whatever set you return because it is no longer available
+		nodePairs.erase(largest);
+		
+		return largest;
+	
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ConcensusCommand class Function getNextAvailableSet. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ConcensusCommand class function getNextAvailableSet. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}		
+
+}
+
+//**********************************************************************************************************************
+vector<string> ConcensusCommand::getRestSet(vector<string> bigset, vector<string> subset) {
+	try {
+		vector<string> rest;
+		
+		for (int i = 0; i < bigset.size(); i++) {
+			bool inSubset = false;
+			for (int j = 0; j < subset.size(); j++) {
+				if (bigset[i] == subset[j]) { inSubset = true; break; }
+			}
+			
+			//its not in the subset so put it in the rest
+			if (inSubset == false) { rest.push_back(bigset[i]); }
+		}
+		
+		//save for printing out later and for branch lengths
+		nodePairsInTree[rest] = nodePairs[rest];
+		
+		//delete whatever set you return because it is no longer available
+		nodePairs.erase(rest);
+
+		return rest;
+	
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ConcensusCommand class Function getRestSet. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ConcensusCommand class function getRestSet. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}		
+
+}
+
+//**********************************************************************************************************************
+bool ConcensusCommand::isSubset(vector<string> bigset, vector<string> subset) {
+	try {
+		
+		//check if each guy in suset is also in bigset
+		for (int i = 0; i < subset.size(); i++) {
+			bool match = false;
+			for (int j = 0; j < bigset.size(); j++) {
+				if (subset[i] == bigset[j]) { match = true; break; }
+			}
+			
+			//you have a guy in subset that had no match in bigset
+			if (match == false) { return false; }
+		}
+		
+		return true;
+	
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ConcensusCommand class Function isSubset. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ConcensusCommand class function isSubset. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}		
+}
+//**********************************************************************************************************************
+int ConcensusCommand::findSpot(string node) {
+	try {
+		int spot;
+		
+		//check if each guy in suset is also in bigset
+		for (int i = 0; i < treeSet.size(); i++) {
+			if (treeSet[i] == node) { spot = i; break; }
+		}
+		
+		return spot;
+	
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ConcensusCommand class Function findSpot. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ConcensusCommand class function findSpot. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}		
+}
+//**********************************************************************************************************************
+
+
 
 
