@@ -25,6 +25,7 @@ class Node  {
 		void setName(string);
 		void setGroup(string);  
 		void setBranchLength(float);
+		void setLabel(float);
 		void setParent(int);
 		void setChildren(int, int);		//leftchild, rightchild
 		void setIndex(int);
@@ -34,6 +35,7 @@ class Node  {
 		string getGroup();  
 		float getBranchLength();
 		float getLengthToLeaves();
+		float getLabel();
 		int getParent();
 		int getLChild();
 		int getRChild();
@@ -53,7 +55,7 @@ class Node  {
 	private:
 		string			name;
 		string			group;
-		float			branchLength, length2leaf;
+		float			branchLength, length2leaf, label;
 		int				parent;
 		int				lchild;
 		int				rchild;
