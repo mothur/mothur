@@ -42,6 +42,9 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			cutoff = "1.0";
 		}
 		
+		//set default value for cutoff
+		if (commandName == "distance") {	cutoff = "1.0";		}
+
 		string key, value;		
 		//reads in parameters and values
 		if((optionText != "") && (commandName != "help")){
@@ -80,6 +83,8 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if (key == "filter")		{ filter = value;		}
 				if (key == "soft")		    { soft = value;		    }
 				if (key == "scale")			{ scale = value;		}
+				if (key == "ends" )			{ ends = value;			}
+				if (key == "processors" )	{ processors = value;	}
 				
 
 				
@@ -144,9 +149,8 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if (key == "filter")		{ filter = value;		}
 			if (key == "soft")		    { soft = value;		    }
 			if (key == "scale")			{ scale = value;		}
-
-			
-			
+			if (key == "ends" )			{ ends = value;			}
+			if (key == "processors" )	{ processors = value;	}
 
 
 			if (key == "line") {//stores lines to be used in a vector
@@ -208,6 +212,11 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 		}
 		if (commandName == "rarefaction.shared") {
 			if ((calc == "default") || (calc == "")) { calc = "sharedobserved"; }
+			Estimators.clear();
+			splitAtDash(calc, Estimators); 
+		}
+		if (commandName == "distance") {
+			if ((calc == "default") || (calc == "")) {  calc = "onegap";  }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
@@ -278,6 +287,8 @@ string GlobalData::getTrump()			{   return trump;       }
 string GlobalData::getSoft()			{   return soft;		}
 string GlobalData::getFilter()			{   return filter;		}
 string GlobalData::getScale()			{	return scale;		}
+string GlobalData::getEnds()			{   return ends;		}
+string GlobalData::getProcessors()		{	return processors;	}
 
 void GlobalData::setListFile(string file)	{	listfile = file;	inputFileName = file;}
 void GlobalData::setRabundFile(string file)	{	rabundfile = file;	inputFileName = file;}
@@ -289,6 +300,9 @@ void GlobalData::setFormat(string Format)		{	format = Format;		}
 void GlobalData::setRandomTree(string Random)	{	randomtree = Random;	}
 void GlobalData::setGroups(string g)			{	groups = g;				}
 void GlobalData::setCalc(string Calc)			{	calc = Calc;			}
+void GlobalData::setEnds(string e)				{   ends = e;				}
+void GlobalData::setProcessors(string p)		{	processors = p;			}
+
 
 /*******************************************************/
 
@@ -338,7 +352,9 @@ void GlobalData::clear() {
 	trump           =   "";		
 	filter          =   "";		
 	soft            =   "";	
-	scale			=	"log10";	    
+	scale			=	"log10";
+	ends			=   "T";  //yes
+	processors		=	"1";
 
 }
 
@@ -359,6 +375,8 @@ void GlobalData::reset() {
 	abund			=   "10";
 	step			=	"0.01";
 	form			=	"integral";
+	ends			=   "T";
+	processors		=	"1";
 }
 /*******************************************************/
 

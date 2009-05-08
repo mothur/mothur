@@ -24,6 +24,9 @@ public:
 private:
 	GlobalData* globaldata;
 	GroupMap* groupMap;
+	string outputFile;
+	ofstream out;
+
 };
 
 #endif

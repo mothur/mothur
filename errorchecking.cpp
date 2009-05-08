@@ -116,6 +116,8 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "soft" )			{ soft = value; }
 				if (parameter == "filter" )         { filter = value; }
 				if (parameter == "scale" )			{ scale = value;	}
+				if (parameter == "ends" )			{ ends = value; }
+				if (parameter == "processors" )		{ processors = value;	}
 
 			}
 			
@@ -156,6 +158,8 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "soft" )			{ soft = value; }
 				if (parameter == "filter" )         { filter = value; }
 				if (parameter == "scale" )			{ scale = value;	}
+				if (parameter == "ends" )			{ ends = value; }
+				if (parameter == "processors" )		{ processors = value;	}
 
 			}
 		}

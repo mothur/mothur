@@ -11,6 +11,8 @@
 #include "ace.h"
 #include "sobs.h"
 #include "chao1.h"
+#include "sharedchao1.h"
+#include "sharedsobscollectsummary.h"
 
 
 //**********************************************************************************************************************
@@ -199,55 +201,7 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 			
 			//make a file for each calculator
 			for(int i=0;i<vCalcs.size();i++){
-				string filenamesvg = getRootName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
-				openOutputFile(filenamesvg, outsvg);
-
-				//get estimates for sharedAB, sharedAC and sharedBC
-				subset.clear();
-				subset.push_back(lookup[0]); subset.push_back(lookup[1]);
-				vector<double> sharedAB = vCalcs[i]->getValues(subset);
-				
-				subset.clear();
-				subset.push_back(lookup[0]); subset.push_back(lookup[2]);
-				vector<double> sharedAC = vCalcs[i]->getValues(subset);
-				
-				subset.clear();
-				subset.push_back(lookup[1]); subset.push_back(lookup[2]);
-				vector<double> sharedBC = vCalcs[i]->getValues(subset);
 			
-				//merge BC and estimate with shared with A
-				SharedRAbundVector* merge = new SharedRAbundVector();
-				for (int j = 0; j < lookup[1]->size(); j++) {
-					merge->push_back((lookup[1]->getAbundance(j) + lookup[2]->getAbundance(j)), j, "");
-				}
-				
-				subset.clear();
-				subset.push_back(lookup[0]); subset.push_back(merge);
-				vector<double> sharedAwithBC = vCalcs[i]->getValues(subset);
-			
-				delete merge;
-				//merge AC and estimate with shared with B
-				merge = new SharedRAbundVector();
-				for (int j = 0; j < lookup[0]->size(); j++) {
-					merge->push_back((lookup[0]->getAbundance(j) + lookup[2]->getAbundance(j)), j, "");
-				}
-				
-				subset.clear();
-				subset.push_back(merge); subset.push_back(lookup[1]);
-				vector<double> sharedBwithAC = vCalcs[i]->getValues(subset);
-			
-				delete merge;
-				//merge AB and estimate with shared with C
-				merge = new SharedRAbundVector();
-				for (int j = 0; j < lookup[0]->size(); j++) {
-					merge->push_back((lookup[0]->getAbundance(j) + lookup[1]->getAbundance(j)), j, "");
-				}
-				
-				subset.clear();
-				subset.push_back(lookup[2]); subset.push_back(merge);
-				vector<double> sharedCwithAB = vCalcs[i]->getValues(subset);
- 				delete merge;
-				
 				//in essence you want to run it like a single 
 				if (vCalcs[i]->getName() == "sharedsobs") {
 					singleCalc = new Sobs();
@@ -265,23 +219,85 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
  				
 				//get estimates for numC
 				vector<double> numC = singleCalc->getValues(sabundC);
- 				
+
+				
+				string filenamesvg = getRootName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
+				openOutputFile(filenamesvg, outsvg);
+
+				//get estimates for sharedAB, sharedAC and sharedBC
+				subset.clear();
+				subset.push_back(lookup[0]); subset.push_back(lookup[1]);
+				vector<double> sharedAB = vCalcs[i]->getValues(subset);
+				
+				subset.clear();
+				subset.push_back(lookup[0]); subset.push_back(lookup[2]);
+				vector<double> sharedAC = vCalcs[i]->getValues(subset);
+				
+				subset.clear();
+				subset.push_back(lookup[1]); subset.push_back(lookup[2]);
+				vector<double> sharedBC = vCalcs[i]->getValues(subset);
+				
+				vector<double> sharedAwithBC;
+				vector<double> sharedBwithAC;
+				vector<double> sharedCwithAB;
+				
 				//find possible sharedABC values
 				float sharedABC1, sharedABC2, sharedABC3, sharedABC;
+
+				if (vCalcs[i]->getName() != "sharedchao") {
+					//merge BC and estimate with shared with A
+					SharedRAbundVector* merge = new SharedRAbundVector();
+					for (int j = 0; j < lookup[1]->size(); j++) {
+						merge->push_back((lookup[1]->getAbundance(j) + lookup[2]->getAbundance(j)), j, "");
+					}
 				
-				sharedABC1 = sharedAB[0] + sharedAC[0] - sharedAwithBC[0];
-				sharedABC2 = sharedAB[0] + sharedBC[0] - sharedBwithAC[0];
-				sharedABC3 = sharedAC[0] + sharedBC[0] - sharedCwithAB[0];
+					subset.clear();
+					subset.push_back(lookup[0]); subset.push_back(merge);
+					sharedAwithBC = vCalcs[i]->getValues(subset);
+			
+					delete merge;
+					//merge AC and estimate with shared with B
+					merge = new SharedRAbundVector();
+					for (int j = 0; j < lookup[0]->size(); j++) {
+						merge->push_back((lookup[0]->getAbundance(j) + lookup[2]->getAbundance(j)), j, "");
+					}
+				
+					subset.clear();
+					subset.push_back(merge); subset.push_back(lookup[1]);
+					sharedBwithAC = vCalcs[i]->getValues(subset);
+			
+					delete merge;
+					//merge AB and estimate with shared with C
+					merge = new SharedRAbundVector();
+					for (int j = 0; j < lookup[0]->size(); j++) {
+						merge->push_back((lookup[0]->getAbundance(j) + lookup[1]->getAbundance(j)), j, "");
+					}
+				
+					subset.clear();
+					subset.push_back(lookup[2]); subset.push_back(merge);
+					sharedCwithAB = vCalcs[i]->getValues(subset);
+					delete merge;
+				
+					sharedABC1 = sharedAB[0] + sharedAC[0] - sharedAwithBC[0];
+					sharedABC2 = sharedAB[0] + sharedBC[0] - sharedBwithAC[0];
+					sharedABC3 = sharedAC[0] + sharedBC[0] - sharedCwithAB[0];
  
-				//if any of the possible m's are - throw them out
-				if (sharedABC1 < 0.0) { sharedABC1 = 0; }
-				if (sharedABC2 < 0.0) { sharedABC2 = 0; }
-				if (sharedABC3 < 0.0) { sharedABC3 = 0; }
+					//if any of the possible m's are - throw them out
+					if (sharedABC1 < 0.0) { sharedABC1 = 0; }
+					if (sharedABC2 < 0.0) { sharedABC2 = 0; }
+					if (sharedABC3 < 0.0) { sharedABC3 = 0; }
 		
-				//sharedABC is the minimum of the 3 possibilities
-				if ((sharedABC1 < sharedABC2) && (sharedABC1 < sharedABC3)) { sharedABC = sharedABC1; }
-				else if ((sharedABC2 < sharedABC1) && (sharedABC2 < sharedABC3)) { sharedABC = sharedABC2; }
-				else if ((sharedABC3 < sharedABC1) && (sharedABC3 < sharedABC2)) { sharedABC = sharedABC3; }	
+					//sharedABC is the minimum of the 3 possibilities
+					if ((sharedABC1 < sharedABC2) && (sharedABC1 < sharedABC3)) { sharedABC = sharedABC1; }
+					else if ((sharedABC2 < sharedABC1) && (sharedABC2 < sharedABC3)) { sharedABC = sharedABC2; }
+					else if ((sharedABC3 < sharedABC1) && (sharedABC3 < sharedABC2)) { sharedABC = sharedABC3; }	
+				}else{
+					vector<double> data = vCalcs[i]->getValues(lookup);
+					sharedABC = data[0];
+					sharedAwithBC.push_back(sharedAB[0] + sharedAC[0] - sharedABC);
+					sharedBwithAC.push_back(sharedAB[0] + sharedBC[0] - sharedABC);
+					sharedCwithAB.push_back(sharedAC[0] + sharedBC[0] - sharedABC);
+				}
 			
 				//image window
 				outsvg << "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 800 800\" >\n";
@@ -341,90 +357,165 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 		
 		}else if (lookup.size() == 4) {
 			//calc the shared otu
-			int sharedABCD = 0;
-			int numA = 0; int numB = 0; int numC = 0; int numD = 0;
-			int sharedAB = 0; int sharedAC = 0; int sharedBC = 0; int sharedAD = 0; int sharedBD = 0; int sharedCD = 0;
-			int sharedABC = 0; int sharedACD = 0; int sharedBCD = 0; int sharedABD = 0;
+			float sharedABCD = 0;
+			float numA = 0; float numB = 0; float numC = 0; float numD = 0;
+			float sharedAB = 0; float sharedAC = 0; float sharedBC = 0; float sharedAD = 0; float sharedBD = 0; float sharedCD = 0;
+			float sharedABC = 0; float sharedACD = 0; float sharedBCD = 0; float sharedABD = 0;
+			vector<double> data;
+			//get sabund vector pointers so you can use the single calculators
+			//one for each group
+			SAbundVector sA, sB, sC, sD;
+			SAbundVector* sabundA; SAbundVector* sabundB; SAbundVector* sabundC; SAbundVector* sabundD;
+			sA = lookup[0]->getSAbundVector();  sabundA = &sA;
+			sB = lookup[1]->getSAbundVector();  sabundB = &sB;
+			sC = lookup[2]->getSAbundVector();  sabundC = &sC;
+			sD = lookup[3]->getSAbundVector();  sabundD = &sD;
 			
 			//A = red, B = green, C = blue, D = yellow
 			
-			if ((vCalcs.size() > 1) || (vCalcs[0]->getName() != "sharedsobs")) { cout << "The only calculator able to be used with 4 groups is sharedsobs. I will run that for you. " << endl; }
-			
-			//for each bin
-			for (int i = 0; i < lookup[0]->size(); i++) {
-				//are they only in one
-				if ((lookup[0]->getAbundance(i) != 0) && (lookup[1]->getAbundance(i) == 0) && (lookup[2]->getAbundance(i) == 0) && (lookup[3]->getAbundance(i) == 0)) { numA++; }
-				if ((lookup[1]->getAbundance(i) != 0) && (lookup[0]->getAbundance(i) == 0) && (lookup[2]->getAbundance(i) == 0) && (lookup[3]->getAbundance(i) == 0)) { numB++; }
-				if ((lookup[2]->getAbundance(i) != 0) && (lookup[0]->getAbundance(i) == 0) && (lookup[1]->getAbundance(i) == 0) && (lookup[3]->getAbundance(i) == 0)) { numC++; }
-				if ((lookup[3]->getAbundance(i) != 0) && (lookup[0]->getAbundance(i) == 0) && (lookup[1]->getAbundance(i) == 0) && (lookup[2]->getAbundance(i) == 0)) { numD++; }
-				//are they shared by 2
-				if ((lookup[0]->getAbundance(i) != 0) && (lookup[1]->getAbundance(i) != 0) && (lookup[2]->getAbundance(i) == 0) && (lookup[3]->getAbundance(i) == 0)) { sharedAB++; }
-				if ((lookup[0]->getAbundance(i) != 0) && (lookup[2]->getAbundance(i) != 0) && (lookup[1]->getAbundance(i) == 0) && (lookup[3]->getAbundance(i) == 0)) { sharedAC++; }
-				if ((lookup[1]->getAbundance(i) != 0) && (lookup[2]->getAbundance(i) != 0) && (lookup[0]->getAbundance(i) == 0) && (lookup[3]->getAbundance(i) == 0)) { sharedBC++; }
-				if ((lookup[0]->getAbundance(i) != 0) && (lookup[3]->getAbundance(i) != 0) && (lookup[2]->getAbundance(i) == 0) && (lookup[1]->getAbundance(i) == 0)) { sharedAD++; }
-				if ((lookup[3]->getAbundance(i) != 0) && (lookup[1]->getAbundance(i) != 0) && (lookup[2]->getAbundance(i) == 0) && (lookup[0]->getAbundance(i) == 0)) { sharedBD++; }
-				if ((lookup[2]->getAbundance(i) != 0) && (lookup[3]->getAbundance(i) != 0) && (lookup[1]->getAbundance(i) == 0) && (lookup[0]->getAbundance(i) == 0)) { sharedCD++; }
-				//are they shared by 3
-				if ((lookup[0]->getAbundance(i) != 0) && (lookup[1]->getAbundance(i) != 0) && (lookup[2]->getAbundance(i) != 0) && (lookup[3]->getAbundance(i) == 0)) { sharedABC++; }
-				if ((lookup[0]->getAbundance(i) != 0) && (lookup[2]->getAbundance(i) != 0) && (lookup[3]->getAbundance(i) != 0) && (lookup[1]->getAbundance(i) == 0)) { sharedACD++; }
-				if ((lookup[1]->getAbundance(i) != 0) && (lookup[2]->getAbundance(i) != 0) && (lookup[3]->getAbundance(i) != 0) && (lookup[0]->getAbundance(i) == 0)) { sharedBCD++; }
-				if ((lookup[0]->getAbundance(i) != 0) && (lookup[3]->getAbundance(i) != 0) && (lookup[1]->getAbundance(i) != 0) && (lookup[2]->getAbundance(i) == 0)) { sharedABD++; }
-				//are they shared by all
-				if ((lookup[0]->getAbundance(i) != 0) && (lookup[1]->getAbundance(i) != 0) && (lookup[2]->getAbundance(i) != 0) && (lookup[3]->getAbundance(i) != 0)) { sharedABCD++; }
-			}
+			//make a file for each calculator
+			for(int i=0;i<vCalcs.size();i++){
 				
-			string filenamesvg = getRootName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn.sharedsobs.svg";
-			openOutputFile(filenamesvg, outsvg);
-		
-			//image window
-			outsvg << "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 700 700\" >\n";
-			outsvg << "<g>\n";
+				if ((vCalcs[i]->getName() != "sharedsobs") && (vCalcs[i]->getName() != "sharedchao")) { cout << vCalcs[i]->getName() << " is not a valid calculator with four groups.  It will be disregarded. " << endl; }
+				else{
+					string filenamesvg = getRootName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
+					openOutputFile(filenamesvg, outsvg);
 
-			//draw circles
-			outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"700\" height=\"700\"/>"; 
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"265\" y=\"30\">Venn Diagram at distance " + lookup[0]->getLabel() + "</text>\n";
-			outsvg << "<ellipse fill=\"red\" stroke=\"black\" opacity=\".35\" transform=\"rotate(-45 355 215) \" cx=\"355\" cy=\"215\" rx=\"200\" ry=\"115\"/>\n "; 
-			outsvg << "<ellipse fill=\"green\" stroke=\"black\" opacity=\".35\" transform=\"rotate(+45 355 215) \" cx=\"355\" cy=\"215\" rx=\"200\" ry=\"115\"/>\n ";
-			outsvg << "<ellipse fill=\"blue\" stroke=\"black\" opacity=\".35\" transform=\"rotate(-40 440 315) \" cx=\"440\" cy=\"315\" rx=\"200\" ry=\"115\"/>\n ";
-			outsvg << "<ellipse fill=\"yellow\" stroke=\"black\" opacity=\".35\" transform=\"rotate(+40 270 315) \" cx=\"270\" cy=\"315\" rx=\"200\" ry=\"115\"/>\n ";
-			
-			//A = red, B = green, C = blue, D = yellow
-			
-			//place labels within overlaps
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(460 - ((int)toString(numA).length() / 2)) + "\" y=\"110\">" + toString(numA) + "</text>\n"; 
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(460 - ((int)lookup[0]->getGroup().length() / 2)) + "\" y=\"90\">" + lookup[0]->getGroup() + "</text>\n";  
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(350 - ((int)toString(sharedAB).length() / 2)) + "\"  y=\"160\">" + toString(sharedAB) + "</text>\n";  
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(250 - ((int)toString(numB).length() / 2)) + "\"  y=\"110\">" + toString(numB) + "</text>\n";  
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(250 - ((int)lookup[1]->getGroup().length() / 2)) + "\"  y=\"90\">" + lookup[1]->getGroup() + "</text>\n"; 
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(490 - ((int)toString(sharedAC).length() / 2)) + "\"  y=\"190\">" + toString(sharedAC) + "</text>\n";  
-			outsvg << "<text fill=\"black\" class=\"seri\"  x=\"" + toString(550 - ((int)toString(numC).length() / 2)) + "\"   y=\"230\">" + toString(numC) + "</text>\n";  
-			outsvg << "<text fill=\"black\" class=\"seri\"  x=\"" + toString(550 - ((int)lookup[2]->getGroup().length() / 2)) + "\"   y=\"210\">" + lookup[2]->getGroup() + "</text>\n";
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(215 - ((int)toString(sharedBC).length() / 2)) + "\" y=\"190\">" + toString(sharedBC) + "</text>\n";  
-			outsvg << "<text fill=\"black\" class=\"seri\"  x=\"" + toString(150 - ((int)toString(numD).length() / 2)) + "\"   y=\"230\">" + toString(numD) + "</text>\n";  
-			outsvg << "<text fill=\"black\" class=\"seri\"  x=\"" + toString(150 - ((int)lookup[3]->getGroup().length() / 2)) + "\"   y=\"210\">" + lookup[3]->getGroup() + "</text>\n"; 
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(240 - ((int)toString(sharedBC).length() / 2)) + "\" y=\"325\">" + toString(sharedAD) + "</text>\n"; 
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(470 - ((int)toString(sharedBC).length() / 2)) + "\" y=\"325\">" + toString(sharedBD) + "</text>\n";
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(350 - ((int)toString(sharedCD).length() / 2)) + "\" y=\"430\">" + toString(sharedCD) + "</text>\n"; 
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(275 - ((int)toString(sharedABD).length() / 2)) + "\" y=\"240\">" + toString(sharedABD) + "</text>\n"; 
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(400 - ((int)toString(sharedBCD).length() / 2)) + "\" y=\"360\">" + toString(sharedBCD) + "</text>\n";
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(305 - ((int)toString(sharedACD).length() / 2)) + "\" y=\"360\">" + toString(sharedACD) + "</text>\n"; 
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(440 - ((int)toString(sharedABC).length() / 2)) + "\"  y=\"240\">" + toString(sharedABC) + "</text>\n"; 
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(350 - ((int)toString(sharedABCD).length() / 2)) + "\"  y=\"320\">" + toString(sharedABCD) + "</text>\n"; 
-			outsvg << "<text fill=\"black\" class=\"seri\" x=\"250\" y=\"490\">The total richness of all the groups is " + toString((float)(numA + numB + numC + numD + sharedAB + sharedAC + sharedAD + sharedBC + sharedBD + sharedCD + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD)) + "</text>\n";
-			
-			//outsvg << "<text fill=\"black\" class=\"seri\" x=\"100\" y=\"510\">Percentage of species that are shared in groups " + globaldata->Groups[0] + " and " + globaldata->Groups[2] + " is " + toString(((sharedAC + sharedACD + sharedABC + sharedABCD) / (float)(numA + numC + sharedAB + sharedAC + sharedAD + sharedBC + sharedCD + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD))) + "</text>\n";
-			//outsvg << "<text fill=\"black\" class=\"seri\" x=\"100\" y=\"530\">Percentage of species that are shared in groups " + globaldata->Groups[0] + " and " + globaldata->Groups[3] + " is " + toString(((sharedAD + sharedACD + sharedABD + sharedABCD) / (float)(numA + numD + sharedAB + sharedAC + sharedAD + sharedBD + sharedCD + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD))) + "</text>\n";
-			//outsvg << "<text fill=\"black\" class=\"seri\" x=\"100\" y=\"550\">Percentage of species that are shared in groups " + globaldata->Groups[1] + " and " + globaldata->Groups[2] + " is " + toString(((sharedBC + sharedABC + sharedBCD + sharedABCD) / (float)(numB + numC + sharedAB + sharedAC + sharedCD + sharedBD + sharedBC + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD))) + "</text>\n";
-			//outsvg << "<text fill=\"black\" class=\"seri\" x=\"100\" y=\"570\">Percentage of species that are shared in groups " + globaldata->Groups[1] + " and " + globaldata->Groups[3] + " is " + toString(((sharedBD + sharedABD + sharedBCD + sharedABCD) / (float)(numB + numD + sharedAB + sharedAD + sharedCD + sharedBD + sharedBC + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD))) + "</text>\n";
-			//outsvg << "<text fill=\"black\" class=\"seri\" x=\"100\" y=\"590\">Percentage of species that are shared in groups " + globaldata->Groups[2] + " and " + globaldata->Groups[3] + " is " + toString(((sharedCD + sharedBCD + sharedACD + sharedABCD) / (float)(numC + numD + sharedAC + sharedAD + sharedCD + sharedBD + sharedBC + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD))) + "</text>\n";
-			//outsvg << "<text fill=\"black\" class=\"seri\" x=\"100\" y=\"610\">Percentage of species that are shared in groups " + globaldata->Groups[0] + ", " + globaldata->Groups[1] + " and " + globaldata->Groups[2] + " is " + toString(((sharedABC + sharedABCD) / (float)(numA + numB + numC + sharedAB + sharedAC + sharedAD + sharedBC + sharedBD + sharedCD + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD))) + "</text>\n";
-			//outsvg << "<text fill=\"black\" class=\"seri\" x=\"100\" y=\"630\">Percentage of species that are shared in groups " + globaldata->Groups[0] + ", " + globaldata->Groups[1] + " and " + globaldata->Groups[3] + " is " + toString(((sharedABD + sharedABCD) / (float)(numA + numB + numD + sharedAB + sharedAC + sharedAD + sharedBC + sharedBD + sharedCD + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD))) + "</text>\n";
-			//outsvg << "<text fill=\"black\" class=\"seri\" x=\"100\" y=\"650\">Percentage of species that are shared in groups " + globaldata->Groups[0] + ", " + globaldata->Groups[2] + " and " + globaldata->Groups[3] + " is " + toString(((sharedACD + sharedABCD) / (float)(numA + numC + numD + sharedAB + sharedAC + sharedAD + sharedBC + sharedBD + sharedCD + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD))) + "</text>\n";
-			//outsvg << "<text fill=\"black\" class=\"seri\" x=\"100\" y=\"670\">Percentage of species that are shared in groups " + globaldata->Groups[1] + ", " + globaldata->Groups[2] + " and " + globaldata->Groups[3] + " is " + toString(((sharedBCD + sharedABCD) / (float)(numB + numC + numD + sharedAB + sharedAC + sharedAD + sharedBC + sharedBD + sharedCD + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD))) + "</text>\n";
-			//outsvg << "<text fill=\"black\" class=\"seri\" x=\"100\" y=\"690\">Percentage of species that are shared in groups " + globaldata->Groups[0] + ", " + globaldata->Groups[1] + ", " + globaldata->Groups[2] + " and " + globaldata->Groups[3] + " is " + toString((sharedABCD / (float)(numA + numB + numC + numD + sharedAB + sharedAC + sharedAD + sharedBC + sharedBD + sharedCD + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD))) + "</text>\n";
+				
+					//in essence you want to run it like a single 
+					if (vCalcs[i]->getName() == "sharedsobs") {
+						singleCalc = new Sobs();
+					}else if (vCalcs[i]->getName() == "sharedchao") {
+						singleCalc = new Chao1();
+					}
+				
+					//get estimates for numA
+					data = singleCalc->getValues(sabundA);
+					numA = data[0];
+ 			
+					//get estimates for numB
+					data = singleCalc->getValues(sabundB);
+					numB = data[0];
+ 				
+					//get estimates for numC
+					data = singleCalc->getValues(sabundC);
+					numC = data[0];
+				
+					//get estimates for numD
+					data = singleCalc->getValues(sabundD);
+					numD = data[0];
+
+
+					//get estimates for pairs
+					subset.clear();
+					subset.push_back(lookup[0]); subset.push_back(lookup[1]);
+					data = vCalcs[i]->getValues(subset);
+					sharedAB = data[0];
+				
+					subset.clear();
+					subset.push_back(lookup[0]); subset.push_back(lookup[2]);
+					data = vCalcs[i]->getValues(subset);
+					sharedAC = data[0];
+				
+					subset.clear();
+					subset.push_back(lookup[0]); subset.push_back(lookup[3]);
+					data = vCalcs[i]->getValues(subset);
+					sharedAD = data[0];
+				
+					subset.clear();
+					subset.push_back(lookup[1]); subset.push_back(lookup[2]);
+					data = vCalcs[i]->getValues(subset);
+					sharedBC = data[0];
+				
+					subset.clear();
+					subset.push_back(lookup[1]); subset.push_back(lookup[3]);
+					data = vCalcs[i]->getValues(subset);
+					sharedBD = data[0];
+				
+					subset.clear();
+					subset.push_back(lookup[2]); subset.push_back(lookup[3]);
+					data = vCalcs[i]->getValues(subset);
+					sharedCD = data[0];
+				
+				
+					//get estimates for combos of 3
+					subset.clear();
+					subset.push_back(lookup[0]); subset.push_back(lookup[1]); subset.push_back(lookup[2]);
+					data = vCalcs[i]->getValues(subset);
+					sharedABC = data[0];
+				
+					subset.clear();
+					subset.push_back(lookup[0]); subset.push_back(lookup[2]); subset.push_back(lookup[3]);
+					data = vCalcs[i]->getValues(subset);
+					sharedACD = data[0];
+				
+					subset.clear();
+					subset.push_back(lookup[1]); subset.push_back(lookup[2]); subset.push_back(lookup[3]);
+					data = vCalcs[i]->getValues(subset);
+					sharedBCD = data[0];
+				
+					subset.clear();
+					subset.push_back(lookup[0]); subset.push_back(lookup[1]); subset.push_back(lookup[3]);
+					data = vCalcs[i]->getValues(subset);
+					sharedABD = data[0];
+
+					//get estimate for all four
+					data = vCalcs[i]->getValues(lookup);
+					sharedABCD = data[0];
+
 		
-			outsvg << "</g>\n</svg>\n";
-			outsvg.close();
+					//image window
+					outsvg << "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 700 700\" >\n";
+					outsvg << "<g>\n";
+
+					//draw circles
+					outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"700\" height=\"700\"/>"; 
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"265\" y=\"30\">Venn Diagram at distance " + lookup[0]->getLabel() + "</text>\n";
+					outsvg << "<ellipse fill=\"red\" stroke=\"black\" opacity=\".35\" transform=\"rotate(-45 355 215) \" cx=\"355\" cy=\"215\" rx=\"200\" ry=\"115\"/>\n "; 
+					outsvg << "<ellipse fill=\"green\" stroke=\"black\" opacity=\".35\" transform=\"rotate(+45 355 215) \" cx=\"355\" cy=\"215\" rx=\"200\" ry=\"115\"/>\n ";
+					outsvg << "<ellipse fill=\"blue\" stroke=\"black\" opacity=\".35\" transform=\"rotate(-40 440 315) \" cx=\"440\" cy=\"315\" rx=\"200\" ry=\"115\"/>\n ";
+					outsvg << "<ellipse fill=\"yellow\" stroke=\"black\" opacity=\".35\" transform=\"rotate(+40 270 315) \" cx=\"270\" cy=\"315\" rx=\"200\" ry=\"115\"/>\n ";
+			
+					//A = red, B = green, C = blue, D = yellow
+			
+					//place labels within overlaps
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(460 - ((int)toString(numA).length() / 2)) + "\" y=\"110\">" + toString(numA) + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(460 - ((int)lookup[0]->getGroup().length() / 2)) + "\" y=\"90\">" + lookup[0]->getGroup() + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(350 - ((int)toString(sharedAB).length() / 2)) + "\"  y=\"160\">" + toString(sharedAB) + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(250 - ((int)toString(numB).length() / 2)) + "\"  y=\"110\">" + toString(numB) + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(250 - ((int)lookup[1]->getGroup().length() / 2)) + "\"  y=\"90\">" + lookup[1]->getGroup() + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(490 - ((int)toString(sharedAC).length() / 2)) + "\"  y=\"190\">" + toString(sharedAC) + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\"  x=\"" + toString(550 - ((int)toString(numC).length() / 2)) + "\"   y=\"230\">" + toString(numC) + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\"  x=\"" + toString(550 - ((int)lookup[2]->getGroup().length() / 2)) + "\"   y=\"210\">" + lookup[2]->getGroup() + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(215 - ((int)toString(sharedBC).length() / 2)) + "\" y=\"190\">" + toString(sharedBC) + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\"  x=\"" + toString(150 - ((int)toString(numD).length() / 2)) + "\"   y=\"230\">" + toString(numD) + "</text>\n";  
+					outsvg << "<text fill=\"black\" class=\"seri\"  x=\"" + toString(150 - ((int)lookup[3]->getGroup().length() / 2)) + "\"   y=\"210\">" + lookup[3]->getGroup() + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(240 - ((int)toString(sharedBC).length() / 2)) + "\" y=\"325\">" + toString(sharedAD) + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(470 - ((int)toString(sharedBC).length() / 2)) + "\" y=\"325\">" + toString(sharedBD) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(350 - ((int)toString(sharedCD).length() / 2)) + "\" y=\"430\">" + toString(sharedCD) + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(275 - ((int)toString(sharedABD).length() / 2)) + "\" y=\"240\">" + toString(sharedABD) + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(400 - ((int)toString(sharedBCD).length() / 2)) + "\" y=\"360\">" + toString(sharedBCD) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(305 - ((int)toString(sharedACD).length() / 2)) + "\" y=\"360\">" + toString(sharedACD) + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(440 - ((int)toString(sharedABC).length() / 2)) + "\"  y=\"240\">" + toString(sharedABC) + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(350 - ((int)toString(sharedABCD).length() / 2)) + "\"  y=\"320\">" + toString(sharedABCD) + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"250\" y=\"490\">The total richness of all the groups is " + toString((float)(numA + numB + numC + numD + sharedAB + sharedAC + sharedAD + sharedBC + sharedBD + sharedCD + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD)) + "</text>\n";
+			
+					//outsvg << "<text fill=\"black\" class=\"seri\" x=\"100\" y=\"510\">Percentage of species that are shared in groups " + globaldata->Groups[0] + " and " + globaldata->Groups[2] + " is " + toString(((sharedAC + sharedACD + sharedABC + sharedABCD) / (float)(numA + numC + sharedAB + sharedAC + sharedAD + sharedBC + sharedCD + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD))) + "</text>\n";
+					//outsvg << "<text fill=\"black\" class=\"seri\" x=\"100\" y=\"530\">Percentage of species that are shared in groups " + globaldata->Groups[0] + " and " + globaldata->Groups[3] + " is " + toString(((sharedAD + sharedACD + sharedABD + sharedABCD) / (float)(numA + numD + sharedAB + sharedAC + sharedAD + sharedBD + sharedCD + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD))) + "</text>\n";
+					//outsvg << "<text fill=\"black\" class=\"seri\" x=\"100\" y=\"550\">Percentage of species that are shared in groups " + globaldata->Groups[1] + " and " + globaldata->Groups[2] + " is " + toString(((sharedBC + sharedABC + sharedBCD + sharedABCD) / (float)(numB + numC + sharedAB + sharedAC + sharedCD + sharedBD + sharedBC + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD))) + "</text>\n";
+					//outsvg << "<text fill=\"black\" class=\"seri\" x=\"100\" y=\"570\">Percentage of species that are shared in groups " + globaldata->Groups[1] + " and " + globaldata->Groups[3] + " is " + toString(((sharedBD + sharedABD + sharedBCD + sharedABCD) / (float)(numB + numD + sharedAB + sharedAD + sharedCD + sharedBD + sharedBC + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD))) + "</text>\n";
+					//outsvg << "<text fill=\"black\" class=\"seri\" x=\"100\" y=\"590\">Percentage of species that are shared in groups " + globaldata->Groups[2] + " and " + globaldata->Groups[3] + " is " + toString(((sharedCD + sharedBCD + sharedACD + sharedABCD) / (float)(numC + numD + sharedAC + sharedAD + sharedCD + sharedBD + sharedBC + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD))) + "</text>\n";
+					//outsvg << "<text fill=\"black\" class=\"seri\" x=\"100\" y=\"610\">Percentage of species that are shared in groups " + globaldata->Groups[0] + ", " + globaldata->Groups[1] + " and " + globaldata->Groups[2] + " is " + toString(((sharedABC + sharedABCD) / (float)(numA + numB + numC + sharedAB + sharedAC + sharedAD + sharedBC + sharedBD + sharedCD + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD))) + "</text>\n";
+					//outsvg << "<text fill=\"black\" class=\"seri\" x=\"100\" y=\"630\">Percentage of species that are shared in groups " + globaldata->Groups[0] + ", " + globaldata->Groups[1] + " and " + globaldata->Groups[3] + " is " + toString(((sharedABD + sharedABCD) / (float)(numA + numB + numD + sharedAB + sharedAC + sharedAD + sharedBC + sharedBD + sharedCD + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD))) + "</text>\n";
+					//outsvg << "<text fill=\"black\" class=\"seri\" x=\"100\" y=\"650\">Percentage of species that are shared in groups " + globaldata->Groups[0] + ", " + globaldata->Groups[2] + " and " + globaldata->Groups[3] + " is " + toString(((sharedACD + sharedABCD) / (float)(numA + numC + numD + sharedAB + sharedAC + sharedAD + sharedBC + sharedBD + sharedCD + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD))) + "</text>\n";
+					//outsvg << "<text fill=\"black\" class=\"seri\" x=\"100\" y=\"670\">Percentage of species that are shared in groups " + globaldata->Groups[1] + ", " + globaldata->Groups[2] + " and " + globaldata->Groups[3] + " is " + toString(((sharedBCD + sharedABCD) / (float)(numB + numC + numD + sharedAB + sharedAC + sharedAD + sharedBC + sharedBD + sharedCD + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD))) + "</text>\n";
+					//outsvg << "<text fill=\"black\" class=\"seri\" x=\"100\" y=\"690\">Percentage of species that are shared in groups " + globaldata->Groups[0] + ", " + globaldata->Groups[1] + ", " + globaldata->Groups[2] + " and " + globaldata->Groups[3] + " is " + toString((sharedABCD / (float)(numA + numB + numC + numD + sharedAB + sharedAC + sharedAD + sharedBC + sharedBD + sharedCD + sharedABC + sharedABD + sharedACD + sharedBCD + sharedABCD))) + "</text>\n";
+		
+					outsvg << "</g>\n</svg>\n";
+					outsvg.close();
+					delete singleCalc;
+				}
+			}
 
 		}
 		
