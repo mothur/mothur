@@ -36,7 +36,7 @@ public:
 	void changeSize(int);      //resizes data
 	void clear();              //clears data - remeber to loop through and delete the sequences inside or you will have a memory leak
 	int size();                //returns datas size
-	void print(ostream&);      //loops through data using sequence class print
+	void print(ofstream&);      //loops through data using sequence class print
 		
 private:
 	vector<Sequence> data;

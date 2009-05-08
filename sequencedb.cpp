@@ -72,7 +72,7 @@ int SequenceDB::size() {
 
 /***********************************************************************/
 
-void SequenceDB::print(ostream& out) {
+void SequenceDB::print(ofstream& out) {
 	for(int i = 0; i < data.size(); i++)
 		data[i].printSequence(out);
 }
