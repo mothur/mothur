@@ -22,6 +22,7 @@ ValidCalculators::ValidCalculators() {
 		 initialVennShared();
 		 initialTreeGroups();
 		 initialBoot();
+		 initialDistance();
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function ValidCalculator. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -139,7 +140,7 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 			if ((treegroup.find(calculator)) != (treegroup.end())) {
 				return true;
 			}else { 
-				cout << calculator << " is not a valid estimator for the tree.shared command in shared mode and will be disregarded. Valid estimators are ";
+				cout << calculator << " is not a valid estimator for the tree.shared command and will be disregarded. Valid estimators are ";
 				for (it = treegroup.begin(); it != treegroup.end(); it++) {
 					cout << it->first << ", ";
 				}
@@ -150,8 +151,19 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 			if ((boot.find(calculator)) != (boot.end())) {
 				return true;
 			}else { 
-				cout << calculator << " is not a valid estimator for the bootstrap.shared command in shared mode and will be disregarded. Valid estimators are ";
+				cout << calculator << " is not a valid estimator for the bootstrap.shared command and will be disregarded. Valid estimators are ";
 				for (it = boot.begin(); it != boot.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
+		}else if (parameter == "distance") {
+			//is it valid
+			if ((distance.find(calculator)) != (distance.end())) {
+				return true;
+			}else { 
+				cout << calculator << " is not a valid estimator for the distance command and will be disregarded. Valid calculators are ";
+				for (it = distance.begin(); it != distance.end(); it++) {
 					cout << it->first << ", ";
 				}
 				cout << endl;
@@ -208,7 +220,7 @@ void ValidCalculators::initialShared() {
 		shared["sharedchao"]			= "sharedchao";
 		shared["sharedace"]				= "sharedace";
 		shared["jabund"]				= "jabund";
-		shared["sorabund"]			= "sorabund";
+		shared["sorabund"]				= "sorabund";
 		shared["jclass"]				= "jclass";
 		shared["sorclass"]				= "sorclass";
 		shared["jest"]					= "jest";
@@ -391,7 +403,7 @@ void ValidCalculators::initialVennShared() {
 void ValidCalculators::initialTreeGroups() {
 	try {	
 		treegroup["jabund"]					= "jabund";
-		treegroup["sorabund"]			= "sorabund";
+		treegroup["sorabund"]				= "sorabund";
 		treegroup["jclass"]					= "jclass";
 		treegroup["sorclass"]				= "sorclass";
 		treegroup["jest"]					= "jest";
@@ -399,7 +411,7 @@ void ValidCalculators::initialTreeGroups() {
 		treegroup["thetayc"]				= "thetayc";
 		treegroup["thetan"]					= "thetan";
 		treegroup["morisitahorn"]			= "morisitahorn";
-		treegroup["braycurtis"]			= "braycurtis";
+		treegroup["braycurtis"]				= "braycurtis";
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialTreeGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -414,7 +426,7 @@ void ValidCalculators::initialTreeGroups() {
 void ValidCalculators::initialBoot() {
 	try {	
 		boot["jabund"]				= "jabund";
-		boot["sorabund"]		= "sorabund";
+		boot["sorabund"]			= "sorabund";
 		boot["jclass"]				= "jclass";
 		boot["sorclass"]			= "orclass";
 		boot["jest"]				= "jest";
@@ -430,6 +442,22 @@ void ValidCalculators::initialBoot() {
 	}
 	catch(...) {
 		cout << "An unknown error has occurred in the ValidCalculator class function initialBoot. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+/********************************************************************/
+void ValidCalculators::initialDistance() {
+	try {	
+		distance["nogaps"]		= "nogaps";
+		distance["eachgap"]		= "eachgap";
+		distance["onegap"]		= "onegap";
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialDistance. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ValidCalculator class function initialDistance. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
 }
@@ -483,7 +511,12 @@ void ValidCalculators::printCalc(string parameter, ostream& out) {
 			for (it = boot.begin(); it != boot.end(); it++) {
 				out << it->first << ", ";
 			}
+		}else if (parameter == "distance") {
+			for (it = distance.begin(); it != distance.end(); it++) {
+				out << it->first << ", ";
+			}
 		}
+
 		out << endl;
 	}
 	catch(exception& e) {

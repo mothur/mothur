@@ -15,11 +15,12 @@ void FastaMap::readFastaFile(ifstream& in) {
 		string name, sequence, line;
 		sequence = "";
 	
-		getline(in, line);
+		in >> line;
 		name = line.substr(1, line.length());  //rips off '>'
 	
 		//read through file
-		while (getline(in, line)) {
+		while (in.eof() != true) {
+			in >> line;
 			if (line != "") {
 				if (isalnum(line.at(0))) {  //if it's a sequence line
 					sequence += line;

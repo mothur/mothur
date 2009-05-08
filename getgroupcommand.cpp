@@ -14,6 +14,8 @@ GetgroupCommand::GetgroupCommand(){
 	try {
 		globaldata = GlobalData::getInstance();
 		groupMap = globaldata->gGroupmap;
+		outputFile = globaldata->inputFileName + ".bootGroups";
+		openOutputFile(outputFile, out);
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the GetgroupCommand class Function GetgroupCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -36,8 +38,11 @@ GetgroupCommand::~GetgroupCommand(){
 int GetgroupCommand::execute(){
 	try {
 		vector<string> groupNames = groupMap->namesOfGroups;	
-		for(int i = 0; i < groupNames.size(); i++)
+		for(int i = 0; i < groupNames.size(); i++) {
 			cout << groupNames[i] << "\n";
+			out << groupNames[i] << "\t" << groupNames[i] << "\n";
+		}
+		out.close();
 		return 0;	
 	}
 

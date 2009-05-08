@@ -5,7 +5,7 @@
  *  Dotur
  *
  *  Created by Sarah Westcott on 1/7/09.
- *  Copyright 2009 Schloss Lab Umass Amherst. All rights reserved.
+ *  Copyright 2009 Schloss Lab UMASS Amherst. All rights reserved.
  *
  */
 

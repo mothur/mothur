@@ -75,6 +75,8 @@ public:
 	string getStep();
 	string getForm();
 	string getSorted();
+	string getEnds();
+	string getProcessors();
 
 	string getTrump();
 	string getSoft();
@@ -94,6 +96,8 @@ public:
 	void setRandomTree(string);
 	void setGroups(string);
 	void setCalc(string);
+	void setEnds(string);
+	void setProcessors(string);
 
 	void clear(); 
 	void clearLabels();
@@ -110,7 +114,7 @@ public:
 private:
 
 	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, nexusfile, clustalfile, treefile, sharedfile, line, label, randomtree, groups;
-	string cutoff, format, precision, method, fileroot, iters, jumble, freq, calc, abund, step, form, sorted, trump, soft, filter, scale;
+	string cutoff, format, precision, method, fileroot, iters, jumble, freq, calc, abund, step, form, sorted, trump, soft, filter, scale, ends, processors;
 
 
 	static GlobalData* _uniqueInstance;
