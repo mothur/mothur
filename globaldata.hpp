@@ -23,6 +23,7 @@ class GroupMap;
 class TreeMap;
 class SAbundVector;
 class RAbundVector;
+class SequenceDB;
 
 class GlobalData {
 public:
@@ -39,6 +40,7 @@ public:
 	GroupMap* gGroupmap;
 	FullMatrix* gMatrix;
 	TreeMap* gTreemap;
+	SequenceDB* gSequenceDB;
 	string inputFileName, helpRequest, commandName, vertical;
 	bool allLines;
 	vector<string>  Estimators, Groups; //holds estimators to be used

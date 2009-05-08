@@ -33,7 +33,7 @@ public:
 	string getPairwise();
 	string getUnaligned();
 	int getLength();
-	void printSequence(ostream&);
+	void printSequence(ofstream&);
 	
 private:
 	string name;

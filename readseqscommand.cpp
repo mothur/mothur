@@ -13,14 +13,34 @@
 ReadSeqsCommand::ReadSeqsCommand(){
 	try {
 		globaldata = GlobalData::getInstance();
-		
+		filename = globaldata->inputFileName;
+		if(globaldata->getFastaFile().compare("") != 0) {
+			readFasta = new ReadFasta(filename);
+			readFasta->read();
+			globaldata->gSequenceDB = readFasta->getDB();
+		}
+		else if(globaldata->getNexusFile().compare("") != 0) {
+			readNexus = new ReadNexus(filename);
+			readNexus->read();
+			globaldata->gSequenceDB = readNexus->getDB();
+		}
+		else if(globaldata->getClustalFile().compare("") != 0) {
+			readClustal = new ReadClustal(filename);
+			readClustal->read();
+			globaldata->gSequenceDB = readClustal->getDB();
+		}
+		else if(globaldata->getPhylipFile().compare("") != 0) {
+			readPhylip = new ReadPhylip(filename);
+			readPhylip->read();
+			globaldata->gSequenceDB = readPhylip->getDB();
+		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReadOtuCommand class Function ReadOtuCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the ReadSeqsCommand class Function ReadSeqsCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the ReadOtuCommand class function ReadOtuCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the ReadSeqsCommand class function ReadSeqsCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 }
@@ -41,7 +61,7 @@ int ReadSeqsCommand::execute(){
 		filebuf fb;
 		
 		//fb.open ("fasta.txt",ios::out);
-//		readFasta->read();
+		//readFasta->read();
 //		SequenceDB* db = readFasta->getDB();
 		
 		//fb.open("nexus.txt",ios::out);
@@ -59,7 +79,7 @@ int ReadSeqsCommand::execute(){
 		
 		
 		//for(int i = 0; i < db->size(); i++) {
-//			cout << db->get(i).getLength() << "\n" << db->get(i).getName() << ": " << db->get(i).getUnaligned() << "\n\n";
+//			cout << db->get(i).getLength() << "\n" << db->get(i).getName() << ": " << db->get(i).getAligned() << "\n\n";
 //		}
 
 		//ostream os(&fb);
