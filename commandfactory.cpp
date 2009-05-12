@@ -11,7 +11,6 @@
 #include "readdistcommand.h"
 #include "readtreecommand.h"
 #include "readotucommand.h"
-#include "readseqscommand.h"
 #include "clustercommand.h"
 #include "parselistcommand.h"
 #include "collectcommand.h"
@@ -41,6 +40,7 @@
 #include "treegroupscommand.h"
 #include "bootstrapsharedcommand.h"
 #include "concensuscommand.h"
+#include "distancecommand.h"
 
 
 /***********************************************************/
@@ -66,7 +66,6 @@ Command* CommandFactory::getCommand(string commandName){
 
 			 if(commandName == "read.dist")				{	command = new ReadDistCommand();			}
 		else if(commandName == "read.otu")				{	command = new ReadOtuCommand();				}
-		else if(commandName == "read.seqs")				{	command = new ReadSeqsCommand();			}
 		else if(commandName == "read.tree")				{	command = new ReadTreeCommand();			}
 		else if(commandName == "cluster")				{	command = new ClusterCommand();				}
 		else if(commandName == "deconvolute")			{	command = new DeconvoluteCommand();			}
@@ -93,6 +92,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "tree.shared")			{   command = new TreeGroupCommand();			}
 		else if(commandName == "bootstrap.shared")		{   command = new BootSharedCommand();			}
 		else if(commandName == "concensus")				{   command = new ConcensusCommand();			}
+		else if(commandName == "distance")				{   command = new DistanceCommand();			}
 		else											{	command = new NoCommand();					}
 
 		return command;

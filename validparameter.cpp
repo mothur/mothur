@@ -220,9 +220,6 @@ void ValidParameters::initCommandParameters() {
 		string readtreeArray[] = {"tree","group"};
 		commandParameters["read.tree"] = addParameters(readtreeArray, sizeof(readtreeArray)/sizeof(string));
 		
-		string readseqsArray[] = {"fasta","phylip","clustal","nexus","line"};
-		commandParameters["read.seqs"] = addParameters(readseqsArray, sizeof(readseqsArray)/sizeof(string));
-		
 		string clusterArray[] =  {"cutoff","precision","method"};
 		commandParameters["cluster"] = addParameters(clusterArray, sizeof(clusterArray)/sizeof(string));
 		
@@ -271,7 +268,7 @@ void ValidParameters::initCommandParameters() {
 		string heatmapArray[] =  {"groups","line","label","sorted","scale"};
 		commandParameters["heatmap"] = addParameters(heatmapArray, sizeof(heatmapArray)/sizeof(string));
 		
-		string filterseqsArray[] =  {"trump", "soft", "filter"};
+		string filterseqsArray[] =  {"fasta","phylip","clustal","nexus", "trump", "soft", "filter"};
 		commandParameters["filter.seqs"] = addParameters(filterseqsArray, sizeof(filterseqsArray)/sizeof(string));
 
 		string vennArray[] =  {"groups","line","label","calc"};
@@ -292,7 +289,7 @@ void ValidParameters::initCommandParameters() {
 		string concensusArray[] =  {};
 		commandParameters["concensus"] = addParameters(concensusArray, sizeof(concensusArray)/sizeof(string));
 		
-		string distanceArray[] =  {"calc", "ends", "cutoff", "processors"};
+		string distanceArray[] =  {"fasta","phylip","clustal","nexus", "calc", "ends", "cutoff", "processors"};
 		commandParameters["distance"] = addParameters(distanceArray, sizeof(distanceArray)/sizeof(string));
 		
 		string quitArray[] = {};

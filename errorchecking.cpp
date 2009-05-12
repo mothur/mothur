@@ -188,8 +188,6 @@ bool ErrorCheck::checkInput(string input) {
 			}
 		}else if (commandName == "read.tree") { 
 			validateTreeFiles(); //checks the treefile and groupfile parameters
-		}else if (commandName == "read.seqs") {
-			if ((fastafile == "") && (nexusfile == "") && (clustalfile == "") && (phylipfile == "")) { cout << "You must enter a fastafile, nexusfile, or clustalfile with the read.seqs() command." << endl; return false; }
 		}else if (commandName == "deconvolute") {
 			if (fastafile == "") { cout << "You must enter a fastafile with the deconvolute() command." << endl; return false; }
 			validateReadFiles();
@@ -248,10 +246,11 @@ bool ErrorCheck::checkInput(string input) {
 			}
 		}
 		
-		if (commandName == "filter.seqs"){ 
-			if ((globaldata->getFastaFile() == "") && (globaldata->getNexusFile() == "") && (globaldata->getClustalFile() == "") && (globaldata->getPhylipFile() == "")) {
+		if ((commandName == "filter.seqs") || (commandName == "distance")) { 
+			if ((fastafile == "") && (nexusfile == "") && (clustalfile == "") && (phylipfile == "")) {
 				 cout << "You must read either a fasta, nexus, clustal, or phylip file before you can use the filter.seqs command." << endl; return false; 
 			}
+			validateSeqsFiles();
 		}
 		
 		if ((commandName == "bin.seqs")) { 
@@ -508,6 +507,71 @@ void ErrorCheck::validateReadPhil() {
 		exit(1);
 	}
 }
+/*******************************************************/
+
+/******************************************************/
+//This function checks to make sure the user entered appropriate
+// format parameters on a distfile read
+void ErrorCheck::validateSeqsFiles() {
+	try {
+		ifstream filehandle;
+		int ableToOpen;
+		
+		//checks to make sure only one file type is given
+		if (phylipfile != "") { 
+			if ((nexusfile != "") || (fastafile != "") || (clustalfile != "")) { 
+				cout << "You may enter ONLY ONE of the following: phylip, fasta, nexus or clustal." << endl; errorFree = false; }
+			else {
+				ableToOpen = openInputFile(phylipfile, filehandle);
+				filehandle.close();
+				if (ableToOpen == 1) { //unable to open
+					errorFree = false;
+				}
+			}
+		}else if (nexusfile != "") { 
+			if ((phylipfile != "") || (fastafile != "") || (clustalfile != "")) { 
+				cout << "You may enter ONLY ONE of the following: phylip, fasta, nexus or clustal." << endl; errorFree = false; }
+			else {
+				ableToOpen = openInputFile(nexusfile, filehandle);
+				filehandle.close();
+				if (ableToOpen == 1) { //unable to open
+					errorFree = false;
+				}
+			}
+		}else if (fastafile != "") { 
+			if ((phylipfile != "") || (nexusfile != "") || (clustalfile != "")) { 
+				cout << "You may enter ONLY ONE of the following: phylip, fasta, nexus or clustal." << endl; errorFree = false; }
+			else {
+				ableToOpen = openInputFile(fastafile, filehandle);
+				filehandle.close();
+				if (ableToOpen == 1) { //unable to open
+					errorFree = false;
+				}
+			}
+		}else if (clustalfile != "") { 
+			if ((phylipfile != "") || (nexusfile != "") || (fastafile != "")) { 
+				cout << "You may enter ONLY ONE of the following: phylip, fasta, nexus or clustal." << endl; errorFree = false; }
+			else {
+				ableToOpen = openInputFile(clustalfile, filehandle);
+				filehandle.close();
+				if (ableToOpen == 1) { //unable to open
+					errorFree = false;
+				}
+			}
+
+		}
+		
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ErrorCheck class Function validateSeqsFiles. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ErrorCheck class function validateSeqsFiles. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+
 /*******************************************************/
 
 /******************************************************/

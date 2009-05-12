@@ -31,6 +31,7 @@ class ErrorCheck {
 		void validateParseFiles();
 		void validateTreeFiles();
 		void validateBinFiles();
+		void validateSeqsFiles();
 		void clear();
 		void refresh();
 		string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, nexusfile, clustalfile, treefile, sharedfile, cutoff, format; 

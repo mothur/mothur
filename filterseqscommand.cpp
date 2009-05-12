@@ -8,15 +8,13 @@
  */
 
 #include "filterseqscommand.h"
-#include <iostream>
-#include <fstream>
 
 /**************************************************************************************/
 void FilterSeqsCommand::doTrump() {
 	trump = globaldata->getTrump();
 	for(int i = 0; i < db->size(); i++) {
 		Sequence cur = db->get(i);
-		string curAligned = cur.getAligned();
+		string curAligned = cur.getUnaligned();
 		for(int j = 0; j < curAligned.length(); j++) {
 			string curChar = curAligned.substr(j, 1);
 			if(curChar.compare(trump) == 0) 
@@ -39,7 +37,7 @@ void FilterSeqsCommand::doSoft() {
 	
 	for(int i = 0; i < db->size(); i++) {
 		Sequence cur = db->get(i);
-		string curAligned = cur.getAligned();
+		string curAligned = cur.getUnaligned();
 		
 		for(int j = 0; j < curAligned.length(); j++) {
 			string curChar = curAligned.substr(j, 1);
@@ -99,8 +97,24 @@ void FilterSeqsCommand::doFilter() {
 int FilterSeqsCommand::execute() {	
 	try {
 		globaldata = GlobalData::getInstance();
-		db = globaldata->gSequenceDB;
+		filename = globaldata->inputFileName;
 		
+		if(globaldata->getFastaFile() != "") {
+			readSeqs =  new ReadFasta(filename); }
+		else if(globaldata->getNexusFile() != "") {
+			readSeqs = new ReadNexus(filename); }
+		else if(globaldata->getClustalFile() != "") {
+			readSeqs = new ReadClustal(filename); }
+		else if(globaldata->getPhylipFile() != "") {
+			readSeqs = new ReadPhylip(filename); }
+			
+		readSeqs->read();
+		db = readSeqs->getDB();
+		
+		//for(int i = 0; i < db->size(); i++) {
+//			cout << db->get(i).getLength() << "\n" << db->get(i).getName() << ": " << db->get(i).getUnaligned() << "\n\n";
+//		}
+
 		for(int i = 0; i < db->get(0).getLength(); i++) 
 			columnsToRemove.push_back(false);
 		
@@ -109,7 +123,6 @@ int FilterSeqsCommand::execute() {
 			doTrump();
 		else if(globaldata->getSoft().compare("") != 0)
 			doSoft();
-			
 		else if(globaldata->getFilter().compare("") != 0) 
 			doFilter();
 		
@@ -121,11 +134,13 @@ int FilterSeqsCommand::execute() {
 //			else
 //				cout << "false\n";
 //		}
+
+
 		//Creating the new SequenceDB 
 		SequenceDB newDB;
 		for(int i = 0; i < db->size(); i++) {
 			Sequence curSeq = db->get(i);
-			string curAligned = curSeq.getAligned();
+			string curAligned = curSeq.getUnaligned();
 			string curName = curSeq.getName();
 			string newAligned = "";
 			for(int j = 0; j < curAligned.length(); j++) 
@@ -136,11 +151,16 @@ int FilterSeqsCommand::execute() {
 			newDB.add(newSeq);
 		}
 		
+		string newFileName = getRootName(filename) + "filter.fa";
 		ofstream outfile;
-		outfile.open("filtertest.txt");
+		outfile.open(newFileName.c_str());
 		newDB.print(outfile);
 		outfile.close();
 			
+		globaldata->clear();
+		//delete db;
+		//delete newDB;
+		
 		return 0;
 	}
 	catch(exception& e) {
@@ -152,4 +172,3 @@ int FilterSeqsCommand::execute() {
 		exit(1);
 	}
 }
-/**************************************************************************************/

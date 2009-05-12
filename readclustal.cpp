@@ -12,11 +12,8 @@
 #include <fstream>
 
 /*******************************************************************************/
-ReadClustal::ReadClustal(string file) {
+ReadClustal::ReadClustal(string file) : ReadSeqs(file){
 	try {
-		openInputFile(file, filehandle);
-		clustalFile = file;
-		globaldata = GlobalData::getInstance();
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ReadTree class Function ReadTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -43,6 +40,7 @@ void ReadClustal::read() {
 	
 	int count = 0;
 	int numSeqs = 0;
+	int lastSeqLength = 0;
 	bool firstDone = false;	
 	
 	while(!filehandle.eof()) {
@@ -61,16 +59,20 @@ void ReadClustal::read() {
 
 		if(name.find_first_of("*") == -1) {
 			filehandle >> sequence;
+			lastSeqLength = sequence.length();
 			if(!firstDone) {
 				Sequence newSeq(name, sequence);
 				sequencedb.add(newSeq);
 			} 
 			else 
-				sequencedb.set(count, sequencedb.get(count).getAligned() + sequence);
+				sequencedb.set(count, sequencedb.get(count).getUnaligned() + sequence);
 				
 			count++;
 		}
 	}
+	if(count == 1)
+		sequencedb.set(0, sequencedb.get(0).getUnaligned().substr(0, sequencedb.get(0).getUnaligned().length() - lastSeqLength));
+		
 	filehandle.close();
 }
 

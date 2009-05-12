@@ -11,13 +11,14 @@
  */
 using namespace std;
 
+#include "readseqs.h"
 #include "globaldata.hpp"
 #include "sequencedb.h"
 #include "mothur.h"
 
 /**********************************************************************************/
 
-class ReadPhylip {
+class ReadPhylip : public ReadSeqs {
 
 	public:
 		ReadPhylip(string);
@@ -26,12 +27,6 @@ class ReadPhylip {
 		SequenceDB* getDB();		
 	
 	private:
-		GlobalData* globaldata;
-		string phylipFile;
-		ifstream filehandle;
-		SequenceDB sequencedb;
-		int readOk; // readOk = 0 means success, readOk = 1 means error(s).
-		
 		bool isSeq(string);
 };
 

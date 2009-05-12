@@ -273,6 +273,21 @@ inline int openOutputFile(string fileName, ofstream& fileHandle){
 	}
 
 }
+/***********************************************************************/
+
+inline int openOutputFileAppend(string fileName, ofstream& fileHandle){
+	
+	fileHandle.open(fileName.c_str(), ios::app);
+	if(!fileHandle) {
+		cerr << "Error: Could not open " << fileName << endl;
+		return 1;
+	}
+	else {
+		return 0;
+	}
+
+}
+
 
 /***********************************************************************/
 
