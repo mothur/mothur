@@ -16,6 +16,10 @@
 #include "validcalculator.h"
 #include "dist.h"
 #include "sequencedb.h"
+#include "readfasta.h"
+#include "readnexus.h"
+#include "readclustal.h"
+#include "readseqsphylip.h"
 
 
 using namespace std;
@@ -32,12 +36,14 @@ private:
 	ValidCalculators* validCalculator;
 	Dist* distCalculator;
 	SequenceDB* seqDB;
+	ReadSeqs* readSeqs;
 	ofstream out;
 	string outputFileName;
-	string ends, distFile;
+	string ends;
 	int processors;
 	float cutoff;
 	
+	void appendFiles(string, string);
 	int driver(Dist*, SequenceDB*, int, int, string, float);
 
 };

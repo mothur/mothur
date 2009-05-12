@@ -12,11 +12,8 @@
 #include <fstream>
 
 /*******************************************************************************/
-ReadNexus::ReadNexus(string file) {
+ReadNexus::ReadNexus(string file) : ReadSeqs(file) {
 	try {
-		openInputFile(file, filehandle);
-		nexusFile = file;
-		globaldata = GlobalData::getInstance();
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ReadTree class Function ReadTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -56,7 +53,7 @@ void ReadNexus::read() {
 				sequencedb.add(newSeq);
 			} 
 			else 
-				sequencedb.set(count, sequencedb.get(count).getAligned() + sequence);
+				sequencedb.set(count, sequencedb.get(count).getUnaligned() + sequence);
 			
 			count++;
 			if(count == numSeqs) {

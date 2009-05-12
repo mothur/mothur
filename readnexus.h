@@ -11,28 +11,20 @@
  */
 using namespace std;
 
+#include "readseqs.h"
 #include "globaldata.hpp"
 #include "sequencedb.h"
 #include "mothur.h"
 
 /**********************************************************************************/
 
-class ReadNexus {
+class ReadNexus : public ReadSeqs {
 
 	public:
 		ReadNexus(string);
 		~ReadNexus();
 		void read();
-		SequenceDB* getDB();		
-	
-	private:
-		GlobalData* globaldata;
-		string nexusFile;
-		ifstream filehandle;
-		SequenceDB sequencedb;
-		int readOk; // readOk = 0 means success, readOk = 1 means error(s).
-		
-			
+		SequenceDB* getDB();				
 };
 
 #endif

@@ -21,10 +21,8 @@ DistanceCommand::DistanceCommand(){
 		globaldata = GlobalData::getInstance();
 		validCalculator = new ValidCalculators();
 		ends = globaldata->getEnds();
-		seqDB = globaldata->gSequenceDB;
 		convert(globaldata->getProcessors(), processors);
 		convert(globaldata->getCutOff(), cutoff);
-		distFile = getRootName(globaldata->getFastaFile()) + "dist";
 		
 		int i;
 		if (ends != "T") {
@@ -52,7 +50,6 @@ DistanceCommand::DistanceCommand(){
 			}
 		}
 				
-				
 		//reset calc for next command
 		globaldata->setCalc("");
 
@@ -71,9 +68,28 @@ DistanceCommand::DistanceCommand(){
 
 int DistanceCommand::execute(){
 	try {
+		
+		//read file
+		string filename = globaldata->inputFileName;
+		
+		if(globaldata->getFastaFile() != "") {
+			readSeqs =  new ReadFasta(filename); }
+		else if(globaldata->getNexusFile() != "") {
+			readSeqs = new ReadNexus(filename); }
+		else if(globaldata->getClustalFile() != "") {
+			readSeqs = new ReadClustal(filename); }
+		else if(globaldata->getPhylipFile() != "") {
+			readSeqs = new ReadPhylip(filename); }
+			
+		readSeqs->read();
+		seqDB = readSeqs->getDB();
+	
 		int numSeqs = seqDB->getNumSeqs();
 		
-		system(("rm "+distFile).c_str() );
+		string distFile = getRootName(globaldata->getFastaFile()) + "dist";
+		
+		remove(distFile.c_str());
+		
 		if(processors == 1){
 			driver(distCalculator, seqDB, 0, numSeqs, distFile, cutoff);	
 		}	
@@ -82,13 +98,13 @@ int DistanceCommand::execute(){
 			int pid = fork();
 			if(pid > 0){
 				driver(distCalculator, seqDB, 0, (numSeqs/sqrt(2)), distFile + "tempa", cutoff);	
-//				system(("cat " + distFile + "tempa" + " >> " + distFile).c_str());
-//				system(("rm " + distFile + "tempa").c_str());				
+				appendFiles((distFile+"tempa"), distFile);
+				remove((distFile + "tempa").c_str());	
 			}
 			else{
 				driver(distCalculator, seqDB, (numSeqs/sqrt(2)), numSeqs, distFile + "tempb", cutoff);	
-//				system(("cat " + distFile + "tempb" + " >> " + distFile).c_str());
-//				system(("rm " + distFile + "tempb").c_str());				
+				appendFiles((distFile+"tempb"), distFile);
+				remove((distFile + "tempb").c_str());	
 			}
 			wait(NULL);
 
@@ -99,37 +115,20 @@ int DistanceCommand::execute(){
 				int pid2 = fork();
 				if(pid2 > 0){
 					driver(distCalculator, seqDB, 0, sqrt(3) * numSeqs / 3, distFile + "tempa", cutoff);
-					#ifdef HAVE_CAT
-						system(("cat " + distFile + "tempa" + " >> " + distFile).c_str());
-					#else
-						#ifdef HAVE_COPY
-//get system call from pat system(("copy " + distFile + "tempa").c_str());
-						#else
-							cout << "Sorry but I can't continue because this operating system doesn't appear to support the cat() or copy() system calls." << endl;
-						#endif
-					#endif
-					
-					#ifdef HAVE_RM
-						system(("rm " + distFile + "tempa").c_str());	
-					#else
-						#ifdef HAVE_ERASE
-							system(("erase " + distFile + "tempa").c_str());
-						#else
-							cout << "Sorry but I can't remove the required files because this operating system doesn't appear to support the rm() or erase() system calls." << endl;
-						#endif
-					#endif
+					appendFiles(distFile+"tempa", distFile);
+					remove((distFile + "tempa").c_str());	
 				}
 				else{
 					driver(distCalculator, seqDB, sqrt(3) * numSeqs / 3, sqrt(6) * numSeqs / 3, distFile + "tempb", cutoff);	
-					system(("cat " + distFile + "tempb" + " >> " + distFile).c_str());
-					system(("rm " + distFile + "tempb").c_str());				
+					appendFiles(distFile+"tempb", distFile);
+					remove((distFile + "tempb").c_str());				
 				}
 				wait(NULL);
 			}
 			else{
 				driver(distCalculator, seqDB, sqrt(6) * numSeqs / 3, numSeqs, distFile + "tempc", cutoff);	
-				system(("cat " + distFile + "tempc" + " >> " + distFile).c_str());
-				system(("rm " + distFile + "tempc").c_str());				
+				appendFiles(distFile+"tempc", distFile);
+				remove((distFile + "tempc").c_str());			
 			}
 			wait(NULL);
 		}
@@ -139,13 +138,17 @@ int DistanceCommand::execute(){
 				int pid2 = fork();
 				if(pid2 > 0){
 					driver(distCalculator, seqDB, 0, numSeqs / 2, distFile + "tempa", cutoff);	
-					system(("cat " + distFile + "tempa" + " >> " + distFile).c_str());
-					system(("rm " + distFile + "tempa").c_str());				
+					//system(("cat " + distFile + "tempa" + " >> " + distFile).c_str());
+					appendFiles(distFile+"tempa", distFile);
+					//system(("rm " + distFile + "tempa").c_str());	
+					remove((distFile + "tempa").c_str());			
 				}
 				else{
 					driver(distCalculator, seqDB, numSeqs / 2, (numSeqs/sqrt(2)), distFile + "tempb", cutoff);	
-					system(("cat " + distFile + "tempb" + " >> " + distFile).c_str());
-					system(("rm " + distFile + "tempb").c_str());				
+					//system(("cat " + distFile + "tempb" + " >> " + distFile).c_str());
+					appendFiles(distFile+"tempb", distFile);
+					//system(("rm " + distFile + "tempb").c_str());
+					remove((distFile + "tempb").c_str());				
 				}
 				wait(NULL);
 			}
@@ -153,13 +156,17 @@ int DistanceCommand::execute(){
 				int pid3 = fork();
 				if(pid3 > 0){
 					driver(distCalculator, seqDB, (numSeqs/sqrt(2)), (sqrt(3) * numSeqs / 2), distFile + "tempc", cutoff);	
-					system(("cat " + distFile + "tempc" + " >> " + distFile).c_str());
-					system(("rm " + distFile + "tempc").c_str());				
+					//system(("cat " + distFile + "tempc" + " >> " + distFile).c_str());
+					appendFiles(distFile+"tempc", distFile);
+					//system(("rm " + distFile + "tempc").c_str());
+					remove((distFile + "tempc").c_str());				
 				}
 				else{
 					driver(distCalculator, seqDB, (sqrt(3) * numSeqs / 2), numSeqs, distFile + "tempd", cutoff);	
-					system(("cat " + distFile + "tempd" + " >> " + distFile).c_str());
-					system(("rm " + distFile + "tempd").c_str());				
+					//system(("cat " + distFile + "tempd" + " >> " + distFile).c_str());
+					appendFiles(distFile+"tempd", distFile);
+					//system(("rm " + distFile + "tempd").c_str());
+					remove((distFile + "tempd").c_str());				
 				}
 				wait(NULL);
 			}
@@ -194,12 +201,13 @@ int DistanceCommand::driver(Dist* distCalculator, SequenceDB* align, int startLi
 	
 		for(int i=startLine;i<endLine;i++){
 		
-			for(int j=0;j<i;j++){
-			
+			for(int j=0;j<i;j++){	
 				distCalculator->calcDist(align->get(i), align->get(j));
 				double dist = distCalculator->getDist();
+
 				if(dist <= cutoff){
-				distFile << align->get(i).getName() << ' ' << align->get(j).getName() << ' ' << dist << endl;
+					distFile << align->get(i).getName() << ' ' << align->get(j).getName() << ' ' << dist << endl;
+//cout << align->get(i).getName() << ' ' << align->get(j).getName() << ' ' << dist << endl;
 				}
 			
 			}
@@ -224,4 +232,35 @@ int DistanceCommand::driver(Dist* distCalculator, SequenceDB* align, int startLi
 }
 
 /**************************************************************************************************/
-
+void DistanceCommand::appendFiles(string temp, string filename) {
+	try{
+		ofstream output;
+		ifstream input;
+		
+		//open output file in append mode
+		openOutputFileAppend(filename, output);
+		
+		//open temp file for reading
+		openInputFile(temp, input);
+		
+		string line;
+		//read input file and write to output file
+		while(input.eof() != true) {
+			getline(input, line); //getline removes the newline char
+			if (line != "") {
+				output << line << endl;   // Appending back newline char 
+			}
+		}	
+			
+		input.close();
+		output.close();
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the DistanceCommand class Function appendFiles. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the DistanceCommand class function appendFiles. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}

@@ -31,11 +31,8 @@ bool ReadPhylip::isSeq(string seq) {
 }
 
 /*******************************************************************************/
-ReadPhylip::ReadPhylip(string file) {
+ReadPhylip::ReadPhylip(string file) : ReadSeqs(file) {
 	try {
-		openInputFile(file, filehandle);
-		phylipFile = file;
-		globaldata = GlobalData::getInstance();
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ReadTree class Function ReadTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -107,7 +104,7 @@ void ReadPhylip::read() {
 				}
 			}
 			if(!(last && count == 0))
-				sequencedb.set(count, sequencedb.get(count).getAligned() + sequence);
+				sequencedb.set(count, sequencedb.get(count).getUnaligned() + sequence);
 			if(letterCount == numLetters && count == 0)
 				last = true;
 		}

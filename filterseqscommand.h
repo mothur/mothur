@@ -35,10 +35,7 @@ private:
 	GlobalData* globaldata;
 	string filename, trump, filter;
 	
-	ReadFasta* readFasta;
-	ReadNexus* readNexus;
-	ReadClustal* readClustal;
-	ReadPhylip* readPhylip;
+	ReadSeqs* readSeqs;
 	
 	vector<bool> columnsToRemove;
 	SequenceDB* db;

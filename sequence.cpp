@@ -114,7 +114,7 @@ int Sequence::getLength(){
 
 //********************************************************************************************************************
 
-void Sequence::printSequence(ofstream& out){
+void Sequence::printSequence(ostream& out){
 	string toPrint = unaligned;
 	if(aligned.length() > unaligned.length())
 		toPrint = aligned;
