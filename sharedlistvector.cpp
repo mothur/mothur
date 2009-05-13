@@ -234,6 +234,7 @@ SharedOrderVector* SharedListVector::getSharedOrderVector(){
 			groupName = groupmap->getGroup(names);
 			order->push_back(i, binSize, groupName);
 		}
+
 		random_shuffle(order->begin(), order->end());
 		return order;
 	}
@@ -293,8 +294,13 @@ vector<SharedRAbundVector*> SharedListVector::getSharedRAbundVector() {
 		vector<SharedRAbundVector*> lookup;
 		
 		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups);
-		util->getSharedVectors(globaldata->Groups, lookup, this->getSharedOrderVector());
-		
+
+		for (int i = 0; i < globaldata->Groups.size(); i++) {
+			SharedRAbundVector* temp = new SharedRAbundVector();
+			*temp = getSharedRAbundVector(globaldata->Groups[i]);
+			lookup.push_back(temp);
+		}
+
 		return lookup;
 	}
 	catch(exception& e) {

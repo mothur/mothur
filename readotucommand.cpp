@@ -45,10 +45,10 @@ int ReadOtuCommand::execute(){
 			groupMap->readMap();
 			
 			//if (globaldata->gGroupmap != NULL) { delete globaldata->gGroupmap;  }
-			globaldata->gGroupmap = groupMap;
-		
+			globaldata->gGroupmap = groupMap;		
 			shared = new SharedCommand();
 			shared->execute();
+
 			parselist = new ParseListCommand();
 			parselist->execute();
 		}

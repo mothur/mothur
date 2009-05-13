@@ -52,8 +52,6 @@ DistanceCommand::DistanceCommand(){
 				
 		//reset calc for next command
 		globaldata->setCalc("");
-
-		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the DistanceCommand class Function DistanceCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -138,16 +136,12 @@ int DistanceCommand::execute(){
 				int pid2 = fork();
 				if(pid2 > 0){
 					driver(distCalculator, seqDB, 0, numSeqs / 2, distFile + "tempa", cutoff);	
-					//system(("cat " + distFile + "tempa" + " >> " + distFile).c_str());
 					appendFiles(distFile+"tempa", distFile);
-					//system(("rm " + distFile + "tempa").c_str());	
 					remove((distFile + "tempa").c_str());			
 				}
 				else{
 					driver(distCalculator, seqDB, numSeqs / 2, (numSeqs/sqrt(2)), distFile + "tempb", cutoff);	
-					//system(("cat " + distFile + "tempb" + " >> " + distFile).c_str());
 					appendFiles(distFile+"tempb", distFile);
-					//system(("rm " + distFile + "tempb").c_str());
 					remove((distFile + "tempb").c_str());				
 				}
 				wait(NULL);
@@ -156,16 +150,12 @@ int DistanceCommand::execute(){
 				int pid3 = fork();
 				if(pid3 > 0){
 					driver(distCalculator, seqDB, (numSeqs/sqrt(2)), (sqrt(3) * numSeqs / 2), distFile + "tempc", cutoff);	
-					//system(("cat " + distFile + "tempc" + " >> " + distFile).c_str());
 					appendFiles(distFile+"tempc", distFile);
-					//system(("rm " + distFile + "tempc").c_str());
 					remove((distFile + "tempc").c_str());				
 				}
 				else{
 					driver(distCalculator, seqDB, (sqrt(3) * numSeqs / 2), numSeqs, distFile + "tempd", cutoff);	
-					//system(("cat " + distFile + "tempd" + " >> " + distFile).c_str());
 					appendFiles(distFile+"tempd", distFile);
-					//system(("rm " + distFile + "tempd").c_str());
 					remove((distFile + "tempd").c_str());				
 				}
 				wait(NULL);
@@ -207,7 +197,6 @@ int DistanceCommand::driver(Dist* distCalculator, SequenceDB* align, int startLi
 
 				if(dist <= cutoff){
 					distFile << align->get(i).getName() << ' ' << align->get(j).getName() << ' ' << dist << endl;
-//cout << align->get(i).getName() << ' ' << align->get(j).getName() << ' ' << dist << endl;
 				}
 			
 			}
@@ -264,3 +253,4 @@ void DistanceCommand::appendFiles(string temp, string filename) {
 		exit(1);
 	}	
 }
+/**************************************************************************************************/

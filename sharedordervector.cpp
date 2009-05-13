@@ -355,18 +355,18 @@ void SharedOrderVector::updateStats(){
 		maxRank = 0;
 	
 		for(int i=0;i<data.size();i++){
+
 			if(data[i].bin != -1){
 				numSeqs++;
 			}
 		}
+		//vector<individual> hold(numSeqs, 0);
 	
-		vector<individual> hold(numSeqs);
-	
-		for(int i=0;i<numSeqs;i++){
-			if(data[i].bin != -1){
-				hold[data[i].bin].bin = hold[data[i].bin].bin+1;
-			}
-		}	
+		//for(int i=0;i<numSeqs;i++){
+			//if(data[i].bin != -1){
+				//hold[data[i].bin].bin = hold[data[i].bin].bin+1;
+			//}
+		//}	
 
 		for(int i=0;i<numSeqs;i++){
 			if(data[i].bin > numBins) { numBins = data[i].bin;	} 

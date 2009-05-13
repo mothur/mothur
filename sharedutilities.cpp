@@ -125,7 +125,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 				
 				//if the user only entered invalid groups
 				if (userGroups.size() == 0) { 
-					cout << "When using the groups parameter you must have at least 1 valid groups. I will run the command using all the groups in your groupfile." << endl; 
+					cout << "You provided no valid groups. I will run the command using all the groups in your groupfile." << endl; 
 					for (int i = 0; i < allGroups.size(); i++) {
 						userGroups.push_back(allGroups[i]);
 					}

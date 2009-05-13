@@ -28,10 +28,11 @@ class SharedUtil {
 		void setGroups(vector<string>&, vector<string>&, string&, int&, string);  //globaldata->Groups, your tree or group map, allgroups, numGroups, mode
 		void getCombos(vector<string>&, vector<string>, int&); //groupcomb, globaldata->Groups, numcomb
 		void updateGroupIndex(vector<string>&, map<string, int>&); //globaldata->Groups, groupmap->groupIndex
+		bool isValidGroup(string, vector<string>);
 		
 	private:
 	
-		bool isValidGroup(string, vector<string>);
+		
 };
 
 /**************************************************************************************************/

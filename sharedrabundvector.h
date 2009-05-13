@@ -14,6 +14,7 @@
 #include "sharedordervector.h"
 #include "sharedsabundvector.h"
 #include "rabundvector.hpp"
+#include "groupmap.h"
 
 /* This class is a child to datavector.  It represents OTU information at a certain distance. 
 	It is similiar to an rabundvector except each member of data knows which group it belongs to.
@@ -21,7 +22,7 @@
 	An individual which knows the OTU from which it came, 
 	the group it is in and its abundance.  */
 
-
+class GlobalData;
 
 class SharedRAbundVector : public DataVector {
 	
@@ -30,7 +31,7 @@ public:
 	SharedRAbundVector(int);
 	//SharedRAbundVector(string, vector<int>);
 	SharedRAbundVector(const SharedRAbundVector& bv) : DataVector(bv), data(bv.data), maxRank(bv.maxRank), numBins(bv.numBins), numSeqs(bv.numSeqs){};
-    //SharedRAbundVector(ifstream&);
+    SharedRAbundVector(ifstream&);
 	~SharedRAbundVector();
 
 	int getNumBins();		
@@ -66,9 +67,13 @@ public:
 	SharedOrderVector getSharedOrderVector();
 	SharedSAbundVector getSharedSAbundVector();
 	SharedRAbundVector getSharedRAbundVector();
+	vector<SharedRAbundVector*> getSharedRAbundVectors();
 	
 private:
 	vector<individual>  data; 
+	vector<SharedRAbundVector*> lookup;
+	GlobalData* globaldata;
+	GroupMap* groupmap;
 	int maxRank;
 	int numBins;
 	int numSeqs;

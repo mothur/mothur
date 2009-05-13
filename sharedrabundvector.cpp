@@ -13,6 +13,7 @@ using namespace std;
 #include "sharedrabundvector.h" 
 #include "sabundvector.hpp"
 #include "ordervector.hpp"
+#include "sharedutilities.h"
 
 
 /***********************************************************************/
@@ -56,30 +57,87 @@ SharedRAbundVector::SharedRAbundVector(string id, vector<individual> rav) : Data
 }
 
 
-/***********************************************************************
-
-
+/***********************************************************************/
+//reads a shared file
 SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
 	try {
-		int i, num;
-		string holdLabel, group
-		individual newGuy;
+		globaldata = GlobalData::getInstance();
 		
-		f >> label >> group >> num;
+		if (globaldata->gGroupmap == NULL) {  groupmap = new GroupMap(); }
 		
-		//initialize data
-		for (i=0; i<hold; i++) {
-			newGuy = new individual;
-			newGuy.abundance = 0;
-			newGuy.bin = i;
-			data.push_back(newGuy);
+		int num, inputData, pos, count;
+		count = 0;  
+		string holdLabel, nextLabel, groupN;
+		individual newguy;
+		
+		for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+		lookup.clear();
+		
+		//read in first row since you know there is at least 1 group.
+		f >> label >> groupN >> num;
+		holdLabel = label;
+		
+		//add new vector to lookup
+		lookup.push_back(new SharedRAbundVector(num));
+		lookup[0]->setLabel(label);
+		lookup[0]->setGroup(groupN);
+		
+		if (globaldata->gGroupmap == NULL) { 
+			//save group in groupmap
+			groupmap->namesOfGroups.push_back(groupN);
+			groupmap->groupIndex[groupN] = 0;
 		}
-		int inputData;
-	
-		for(int i=0;i<hold;i++){
+		
+		//fill vector.  data = first sharedrabund in file
+		for(int i=0;i<num;i++){
 			f >> inputData;
-			set(i, inputData);
+			
+			lookup[0]->push_back(inputData, i, groupN); //abundance, bin, group
+			push_back(inputData, i, groupN);
+			numSeqs += inputData;
+			numBins++;
+			if (inputData > maxRank) { maxRank = inputData; }
+			
 		}
+		
+		//save position in file in case next line is a new label.
+		pos = f.tellg();
+		
+		if (f.eof() != true) { f >> nextLabel; }
+		
+		//read the rest of the groups info in
+		while ((nextLabel == holdLabel) && (f.eof() != true)) {
+			f >> groupN >> num;
+			count++;
+			
+			if (globaldata->gGroupmap == NULL) { 
+				//save group in groupmap
+				groupmap->namesOfGroups.push_back(groupN);
+				groupmap->groupIndex[groupN] = count;
+			}
+			
+			//add new vector to lookup
+			lookup.push_back(new SharedRAbundVector(num));
+			lookup[count]->setLabel(label);
+			lookup[count]->setGroup(groupN);
+
+			//fill vector.  
+			for(int i=0;i<num;i++){
+				f >> inputData;
+				lookup[count]->push_back(inputData, i, groupN); //abundance, bin, group
+			}
+			
+			//save position in file in case next line is a new label.
+			pos = f.tellg();
+	
+			if (f.eof() != true) { f >> nextLabel; }
+		}
+		
+		//put file pointer back since you are now at a new distance label
+		f.seekg(pos, ios::beg);
+	
+		if (globaldata->gGroupmap == NULL) { globaldata->gGroupmap = groupmap; }
+		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the SharedRAbundVector class Function SharedRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -323,6 +381,34 @@ int SharedRAbundVector::getMaxRank(){
 
 SharedRAbundVector SharedRAbundVector::getSharedRAbundVector(){
 	return *this;			
+}
+/***********************************************************************/
+vector<SharedRAbundVector*> SharedRAbundVector::getSharedRAbundVectors(){
+	try {
+		SharedUtil* util;
+		util = new SharedUtil();
+		
+		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups);
+
+		for (int i = 0; i < lookup.size(); i++) {
+			//if this sharedrabund is not from a group the user wants then delete it.
+			if (util->isValidGroup(lookup[i]->getGroup(), globaldata->Groups) == false) { 
+				delete lookup[i]; 
+				lookup.erase(lookup.begin()+i); 
+				i--; 
+			}
+		}
+
+		return lookup;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the SharedRAbundVector class Function getSharedRAbundVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the SharedRAbundVector class function getSharedRAbundVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
 }
 /***********************************************************************/
 

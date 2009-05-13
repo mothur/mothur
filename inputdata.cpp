@@ -183,14 +183,14 @@ OrderVector* InputData::getOrderVector(){
 	}	
 }
 /***********************************************************************/
-
+//this is used when you don't need the order vector
 vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(){
 	try {
 		if(fileHandle){
 			if (format == "sharedfile")  {
-				SharedOrder = new SharedOrderVector(fileHandle);
-				if (SharedOrder != NULL) {
-					return SharedOrder->getSharedRAbundVector();
+				SharedRAbundVector* SharedRAbund = new SharedRAbundVector(fileHandle);
+				if (SharedRAbund != NULL) {
+					return SharedRAbund->getSharedRAbundVectors();
 				}
 			}else if (format == "shared") {
 				SharedList = new SharedListVector(fileHandle);
@@ -215,6 +215,7 @@ vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(){
 		exit(1);
 	}	
 }
+
 
 /***********************************************************************/
 
