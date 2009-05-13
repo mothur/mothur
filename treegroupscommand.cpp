@@ -89,11 +89,12 @@ int TreeGroupCommand::execute(){
 		if (treeCalculators.size() == 0) { return 0; }
 
 		if (format == "sharedfile") {
+			//you have groups
 			read = new ReadOTUFile(globaldata->inputFileName);	
 			read->read(&*globaldata); 
 			
 			input = globaldata->ginput;
-			order = input->getSharedOrderVector();
+			lookup = input->getSharedRAbundVectors();
 		}else {
 			//you are using a list and a groupfile
 			read = new ReadOTUFile(globaldata->inputFileName);	
@@ -101,11 +102,11 @@ int TreeGroupCommand::execute(){
 		
 			input = globaldata->ginput;
 			SharedList = globaldata->gSharedList;
-			order = SharedList->getSharedOrderVector();
+			lookup = SharedList->getSharedRAbundVector();
 		}
 		
-		//set users groups
-		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups, "treegroup");
+		if (lookup.size() < 2) { cout << "You have not provided enough valid groups.  I cannot run the command." << endl; }
+		
 		numGroups = globaldata->Groups.size();
 		groupNames = "";
 		for (int i = 0; i < numGroups; i++) { groupNames += globaldata->Groups[i]; }
@@ -121,12 +122,11 @@ int TreeGroupCommand::execute(){
 		tmap->makeSim(globaldata->gGroupmap);
 		globaldata->gTreemap = tmap;
 			
-		while(order != NULL){
+		while(lookup[0] != NULL){
 		
-			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(order->getLabel()) == 1){			
+			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(lookup[0]->getLabel()) == 1){			
 				
-				cout << order->getLabel() << '\t' << count << endl;
-				util->getSharedVectors(globaldata->Groups, lookup, order);  //fills group vectors from order vector.
+				cout << lookup[0]->getLabel() << '\t' << count << endl;
 				
 				//for each calculator												
 				for(int i = 0 ; i < treeCalculators.size(); i++) {
@@ -145,7 +145,7 @@ int TreeGroupCommand::execute(){
 					for (int g = 0; g < numGroups; g++) {	index[g] = g;	}
 		
 					//create a new filename
-					outputFile = getRootName(globaldata->inputFileName) + treeCalculators[i]->getName() + "." + order->getLabel() + ".tre";
+					outputFile = getRootName(globaldata->inputFileName) + treeCalculators[i]->getName() + "." + lookup[0]->getLabel() + ".tre";
 							
 					for (int k = 0; k < lookup.size(); k++) { 
 						for (int l = k; l < lookup.size(); l++) {
@@ -170,17 +170,7 @@ int TreeGroupCommand::execute(){
 			}
 		
 			//get next line to process
-			if (format == "sharedfile") {
-				order = input->getSharedOrderVector();
-			}else {
-				//you are using a list and a groupfile
-				SharedList = input->getSharedListVector(); //get new list vector to process
-				if (SharedList != NULL) {
-					order = SharedList->getSharedOrderVector(); //gets new order vector with group info.
-				}else {
-					break;
-				}
-			}
+			lookup = input->getSharedRAbundVectors();
 			count++;
 		}
 		
