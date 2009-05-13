@@ -246,7 +246,7 @@ bool ErrorCheck::checkInput(string input) {
 			}
 		}
 		
-		if ((commandName == "filter.seqs") || (commandName == "distance")) { 
+		if ((commandName == "filter.seqs") || (commandName == "dist.seq")) { 
 			if ((fastafile == "") && (nexusfile == "") && (clustalfile == "") && (phylipfile == "")) {
 				 cout << "You must read either a fasta, nexus, clustal, or phylip file before you can use the filter.seqs command." << endl; return false; 
 			}
