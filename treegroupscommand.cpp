@@ -88,23 +88,13 @@ int TreeGroupCommand::execute(){
 		//if the users entered no valid calculators don't execute command
 		if (treeCalculators.size() == 0) { return 0; }
 
-		if (format == "sharedfile") {
-			//you have groups
-			read = new ReadOTUFile(globaldata->inputFileName);	
-			read->read(&*globaldata); 
+		//you have groups
+		read = new ReadOTUFile(globaldata->inputFileName);	
+		read->read(&*globaldata); 
 			
-			input = globaldata->ginput;
-			lookup = input->getSharedRAbundVectors();
-		}else {
-			//you are using a list and a groupfile
-			read = new ReadOTUFile(globaldata->inputFileName);	
-			read->read(&*globaldata); 
-		
-			input = globaldata->ginput;
-			SharedList = globaldata->gSharedList;
-			lookup = SharedList->getSharedRAbundVector();
-		}
-		
+		input = globaldata->ginput;
+		lookup = input->getSharedRAbundVectors();
+				
 		if (lookup.size() < 2) { cout << "You have not provided enough valid groups.  I cannot run the command." << endl; }
 		
 		numGroups = globaldata->Groups.size();

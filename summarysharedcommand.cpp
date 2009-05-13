@@ -129,22 +129,12 @@ int SummarySharedCommand::execute(){
 			}
 		}
 		
-		if (format == "sharedfile") {
-			read = new ReadOTUFile(globaldata->inputFileName);	
-			read->read(&*globaldata); 
+		read = new ReadOTUFile(globaldata->inputFileName);	
+		read->read(&*globaldata); 
 			
-			input = globaldata->ginput;
-			order = input->getSharedOrderVector();
-		}else {
-			//you are using a list and a groupfile
-			read = new ReadOTUFile(globaldata->inputFileName);	
-			read->read(&*globaldata); 
-		
-			input = globaldata->ginput;
-			SharedList = globaldata->gSharedList;
-			order = SharedList->getSharedOrderVector();
-		}
-		
+		input = globaldata->ginput;
+		order = input->getSharedOrderVector();
+				
 		//set users groups
 		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups, "summary");
 		
@@ -229,17 +219,7 @@ int SummarySharedCommand::execute(){
 			}
 		
 			//get next line to process
-			if (format == "sharedfile") {
-				order = input->getSharedOrderVector();
-			}else {
-				//you are using a list and a groupfile
-				SharedList = input->getSharedListVector(); //get new list vector to process
-				if (SharedList != NULL) {
-					order = SharedList->getSharedOrderVector(); //gets new order vector with group info.
-				}else {
-					break;
-				}
-			}
+			order = input->getSharedOrderVector();
 			count++;
 		}
 		
