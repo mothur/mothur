@@ -40,7 +40,7 @@ HeatMapCommand::~HeatMapCommand(){
 int HeatMapCommand::execute(){
 	try {
 		int count = 1;	
-		
+	
 		if (format == "sharedfile") {
 			//you have groups
 			read = new ReadOTUFile(globaldata->inputFileName);	
@@ -48,14 +48,6 @@ int HeatMapCommand::execute(){
 			
 			input = globaldata->ginput;
 			lookup = input->getSharedRAbundVectors();
-		}else if (format == "shared") {
-			//you are using a list and a groupfile
-			read = new ReadOTUFile(globaldata->inputFileName);	
-			read->read(&*globaldata); 
-		
-			input = globaldata->ginput;
-			SharedList = globaldata->gSharedList;
-			lookup = SharedList->getSharedRAbundVector();
 		}else if (format == "list") {
 			//you are using just a list file and have only one group
 			read = new ReadOTUFile(globaldata->inputFileName);	

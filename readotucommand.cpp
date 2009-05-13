@@ -51,6 +51,12 @@ int ReadOtuCommand::execute(){
 
 			parselist = new ParseListCommand();
 			parselist->execute();
+			
+			//change format to shared  to speed up commands
+			globaldata->setFormat("sharedfile");
+			globaldata->setListFile("");
+			globaldata->setGroupFile("");
+			globaldata->setSharedFile(getRootName(filename) + "shared");
 		}
 		return 0;
 	}

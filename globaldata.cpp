@@ -290,11 +290,13 @@ string GlobalData::getScale()			{	return scale;		}
 string GlobalData::getEnds()			{   return ends;		}
 string GlobalData::getProcessors()		{	return processors;	}
 
-void GlobalData::setListFile(string file)	{	listfile = file;	inputFileName = file;}
-void GlobalData::setRabundFile(string file)	{	rabundfile = file;	inputFileName = file;}
-void GlobalData::setSabundFile(string file)	{	sabundfile = file;	inputFileName = file;}
-void GlobalData::setPhylipFile(string file)	{	phylipfile = file;    inputFileName = file;}
-void GlobalData::setColumnFile(string file)	{	columnfile = file;    inputFileName = file;}
+void GlobalData::setListFile(string file)		{	listfile = file;	inputFileName = file;}
+void GlobalData::setGroupFile(string file)		{	groupfile = file;	}
+void GlobalData::setRabundFile(string file)		{	rabundfile = file;	inputFileName = file;}
+void GlobalData::setSabundFile(string file)		{	sabundfile = file;	inputFileName = file;}
+void GlobalData::setPhylipFile(string file)		{	phylipfile = file;    inputFileName = file;}
+void GlobalData::setColumnFile(string file)		{	columnfile = file;    inputFileName = file;}
+void GlobalData::setSharedFile(string file)		{	sharedfile = file;	inputFileName = file; fileroot = file;}
 void GlobalData::setNameFile(string file)		{	namefile = file;		}
 void GlobalData::setFormat(string Format)		{	format = Format;		}
 void GlobalData::setRandomTree(string Random)	{	randomtree = Random;	}

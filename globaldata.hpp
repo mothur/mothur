@@ -87,11 +87,13 @@ public:
 
 
 	void setListFile(string);
+	void setGroupFile(string file);	
 	void setPhylipFile(string);
 	void setColumnFile(string);
 	void setNameFile(string);
 	void setRabundFile(string);
 	void setSabundFile(string);
+	void setSharedFile(string);
 	void setFormat(string);
 	void setRandomTree(string);
 	void setGroups(string);
