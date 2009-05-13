@@ -290,7 +290,7 @@ void ValidParameters::initCommandParameters() {
 		commandParameters["concensus"] = addParameters(concensusArray, sizeof(concensusArray)/sizeof(string));
 		
 		string distanceArray[] =  {"fasta","phylip","clustal","nexus", "calc", "ends", "cutoff", "processors"};
-		commandParameters["distance"] = addParameters(distanceArray, sizeof(distanceArray)/sizeof(string));
+		commandParameters["dist.seqs"] = addParameters(distanceArray, sizeof(distanceArray)/sizeof(string));
 		
 		string quitArray[] = {};
 		commandParameters["quit"] = addParameters(quitArray, sizeof(quitArray)/sizeof(string));
