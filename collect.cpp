@@ -46,6 +46,10 @@ void Collect::getCurve(int increment = 1){
                 for(int i=0;i<displays.size();i++){
                         displays[i]->reset();
                 }
+				
+				delete lookup;
+				delete rank;
+				delete ccd;
         }
         catch(exception& e) {
                 cout << "Standard Error: " << e.what() << " has occurred in the Collect class Function getCurve. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -151,6 +155,13 @@ try {
                 for(int i=0;i<displays.size();i++){
                         displays[i]->reset();
                 }
+				
+				//memory cleanup
+				delete ccd;
+				for (int i = 0; i < lookup.size(); i++) {
+					delete lookup[i];
+				}
+
         }
         catch(exception& e) {
                 cout << "Standard Error: " << e.what() << " has occurred in the Collect class Function getSharedCurve. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
