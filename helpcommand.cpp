@@ -70,17 +70,17 @@ int HelpCommand::execute(){
 		cout << "The deconvolute command parameter is fasta and it is required." << "\n";
 		cout << "The deconvolute command should be in the following format: " << "\n";
 		cout << "deconvolute(fasta=yourFastaFile) " << "\n";
-	}else if (globaldata->helpRequest == "dist.seq") {
-		cout << "The dist.seq command reads a file containing sequences and creates a distance file." << "\n";
-		cout << "The dist.seq command parameters are fasta, phylip, clustal, nexus, calc, ends, cutoff and processors.  " << "\n";
+	}else if (globaldata->helpRequest == "dist.seqs") {
+		cout << "The dist.seqs command reads a file containing sequences and creates a distance file." << "\n";
+		cout << "The dist.seqs command parameters are fasta, phylip, clustal, nexus, calc, ends, cutoff and processors.  " << "\n";
 		cout << "You must use one of the following parameters for your filename: fasta, phylip, clustal or nexus. " << "\n";
 		cout << "The calc parameter allows you to specify the method of calculating the distances.  Your options are: nogaps, onegap or eachgap. The default is onegap." << "\n";
 		cout << "The ends parameter allows you to specify whether to include terminal gaps in distance.  Your options are: T or F. The default is T." << "\n";
 		cout << "The cutoff parameter allows you to specify maximum distance to keep. The default is 1.0." << "\n";
 		cout << "The processors parameter allows you to specify number of processors to use.  The default is 1, but you can use up to 4 processors." << "\n";
-		cout << "The dist.seq command should be in the following format: " << "\n";
-		cout << "dist.seq(fasta=yourFastaFile, calc=yourCalc, ends=yourEnds, cutoff= yourCutOff, processors=yourProcessors) " << "\n";
-		cout << "Example dist.seq(fasta=amazon.fasta, calc=eachgap, ends=F, cutoff= 2.0, processors=3)." << "\n";
+		cout << "The dist.seqs command should be in the following format: " << "\n";
+		cout << "dist.seqs(fasta=yourFastaFile, calc=yourCalc, ends=yourEnds, cutoff= yourCutOff, processors=yourProcessors) " << "\n";
+		cout << "Example dist.seqs(fasta=amazon.fasta, calc=eachgap, ends=F, cutoff= 2.0, processors=3)." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. calc), '=' and parameters (i.e.yourCalc)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "collect.single") {
 		cout << "The collect.single command can only be executed after a successful read.otu command. WITH ONE EXECEPTION. " << "\n";

@@ -92,7 +92,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "tree.shared")			{   command = new TreeGroupCommand();			}
 		else if(commandName == "bootstrap.shared")		{   command = new BootSharedCommand();			}
 		else if(commandName == "concensus")				{   command = new ConcensusCommand();			}
-		else if(commandName == "dist.seq")				{   command = new DistanceCommand();			}
+		else if(commandName == "dist.seqs")				{   command = new DistanceCommand();			}
 		else											{	command = new NoCommand();					}
 
 		return command;
