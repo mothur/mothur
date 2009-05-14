@@ -43,7 +43,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 		}
 		
 		//set default value for cutoff
-		if (commandName == "dist.seq") {	cutoff = "1.0";		}
+		if (commandName == "dist.seqs") {	cutoff = "1.0";		}
 
 		string key, value;		
 		//reads in parameters and values
@@ -215,7 +215,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
-		if (commandName == "dist.seq") {
+		if (commandName == "dist.seqs") {
 			if ((calc == "default") || (calc == "")) {  calc = "onegap";  }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 

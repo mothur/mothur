@@ -115,7 +115,7 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 				delete singleCalc;
 				
 			}
-			
+			delete sabund;
 		/******************* 2 Groups **************************/	
 		
 		}else if (lookup.size() == 2) {
@@ -183,11 +183,10 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 				//close file
 				outsvg << "</g>\n</svg>\n";
 				outsvg.close();
-				delete sabundA;
-				delete sabundB;
 				delete singleCalc;
 			}
-			
+			delete sabundA;
+			delete sabundB;
 		/******************* 3 Groups **************************/
 						
 		}else if (lookup.size() == 3) {
@@ -352,7 +351,9 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 				outsvg.close();
 				delete singleCalc;
 			}
-			
+			delete sabundA;
+			delete sabundB;
+			delete sabundC;
 		/******************* 4 Groups **************************/
 		
 		}else if (lookup.size() == 4) {
@@ -516,7 +517,10 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 					delete singleCalc;
 				}
 			}
-
+			delete sabundA;
+			delete sabundB;
+			delete sabundC;
+			delete sabundD;
 		}
 		
 	}

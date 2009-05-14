@@ -26,7 +26,7 @@ public:
 		int start = 0;
 		
 		for(int i=0;i<A.getLength();i++){
-			if(A.getUnaligned()[i] == '.' && B.getUnaligned()[i] == '.'){
+			if(A.getAligned()[i] == '.' && B.getAligned()[i] == '.'){
 			}
 			else{
 				start = i;
@@ -34,8 +34,8 @@ public:
 			}
 		}
 		for(int i=start;i<A.getLength();i++){
-			if((A.getUnaligned()[i] == '-' || B.getUnaligned()[i] == '-') && (A.getUnaligned()[i] == '.' || B.getUnaligned()[i] == '.')){}
-			else if(A.getUnaligned()[i] == '-' && B.getUnaligned()[i] != '-' && B.getUnaligned()[i] != '.'){
+			if((A.getAligned()[i] == '-' || B.getAligned()[i] == '-') && (A.getAligned()[i] == '.' || B.getAligned()[i] == '.')){}
+			else if(A.getAligned()[i] == '-' && B.getAligned()[i] != '-' && B.getAligned()[i] != '.'){
 				if(openGapA == 0){
 					difference++;
 					minLength++;
@@ -43,7 +43,7 @@ public:
 					openGapB = 0;
 				}
 			}
-			else if(A.getUnaligned()[i] != '-' && B.getUnaligned()[i] == '-' && A.getUnaligned()[i] != '.'){
+			else if(A.getAligned()[i] != '-' && B.getAligned()[i] == '-' && A.getAligned()[i] != '.'){
 				if(openGapB == 0){
 					difference++;
 					minLength++;
@@ -51,8 +51,8 @@ public:
 					openGapB = 1;
 				}
 			}
-			else if(A.getUnaligned()[i] != '-' && B.getUnaligned()[i] != '-'){
-				if(A.getUnaligned()[i] != B.getUnaligned()[i]){
+			else if(A.getAligned()[i] != '-' && B.getAligned()[i] != '-'){
+				if(A.getAligned()[i] != B.getAligned()[i]){
 					difference++;
 					minLength++;
 					openGapA = 0;
@@ -64,7 +64,7 @@ public:
 					openGapB = 0;
 				}
 			}
-			else if(A.getUnaligned()[i] == '.' && B.getUnaligned()[i] == '.'){
+			else if(A.getAligned()[i] == '.' && B.getAligned()[i] == '.'){
 				break;
 			}
 		}
