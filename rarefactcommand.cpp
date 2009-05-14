@@ -111,7 +111,8 @@ int RareFactCommand::execute(){
 			
 				cout << order->getLabel() << '\t' << count << endl;
 			}
-		
+			
+			delete order;
 			order = (input->getOrderVector());
 			count++;
 		

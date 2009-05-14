@@ -52,11 +52,15 @@ void Rarefact::getCurve(int increment = 1, int nIters = 1000){
 			for(int i=0;i<displays.size();i++){
 				displays[i]->reset();
 			}
+			
+			delete lookup;
+			delete rank;
 		}
 
 		for(int i=0;i<displays.size();i++){
 			displays[i]->close();
 		}
+		delete rcd;
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the Rarefact class Function getCurve. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -130,12 +134,17 @@ try {
 			for(int i=0;i<displays.size();i++){
 				displays[i]->reset();
 			}
+			
+			for (int i = 0; i < lookup.size(); i++) {
+				delete lookup[i];
+			}
 		}
 		
 		for(int i=0;i<displays.size();i++){
 			displays[i]->close();
 		}
-
+		
+		delete rcd;
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the Rarefact class Function getSharedCurve. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";

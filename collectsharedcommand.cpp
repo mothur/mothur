@@ -155,6 +155,7 @@ int CollectSharedCommand::execute(){
 			}
 			
 			//get next line to process
+			delete order;
 			order = input->getSharedOrderVector();
 			count++;
 		}
