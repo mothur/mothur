@@ -78,7 +78,7 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 		holdLabel = label;
 		
 		//add new vector to lookup
-		lookup.push_back(new SharedRAbundVector(num));
+		lookup.push_back(new SharedRAbundVector());
 		lookup[0]->setLabel(label);
 		lookup[0]->setGroup(groupN);
 		
@@ -117,7 +117,7 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 			}
 			
 			//add new vector to lookup
-			lookup.push_back(new SharedRAbundVector(num));
+			lookup.push_back(new SharedRAbundVector());
 			lookup[count]->setLabel(label);
 			lookup[count]->setGroup(groupN);
 

@@ -218,6 +218,9 @@ void HeatMap::sortSharedVectors(vector<SharedRAbundVector*>& lookup){
 		}
 		
 		//clear out lookup to create sorted lookup
+		for (int j = 0; j < lookup.size(); j++) {
+			delete lookup[j];
+		}
 		lookup.clear();
 		
 		//create and initialize lookup to empty vectors
