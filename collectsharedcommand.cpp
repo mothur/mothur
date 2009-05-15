@@ -142,7 +142,7 @@ int CollectSharedCommand::execute(){
 		util->updateGroupIndex(globaldata->Groups, globaldata->gGroupmap->groupIndex);
 
 		while(order != NULL){
-		
+
 			orderList.insert(order->getLabel());
 			
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(order->getLabel()) == 1){
