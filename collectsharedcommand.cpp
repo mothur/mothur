@@ -142,8 +142,11 @@ int CollectSharedCommand::execute(){
 		util->updateGroupIndex(globaldata->Groups, globaldata->gGroupmap->groupIndex);
 
 		while(order != NULL){
+		
 			orderList.insert(order->getLabel());
+			
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(order->getLabel()) == 1){
+				
 				//create collectors curve
 				cCurve = new Collect(order, cDisplays);
 				convert(globaldata->getFreq(), freq);
@@ -163,6 +166,7 @@ int CollectSharedCommand::execute(){
 		for(i = globaldata->labels.begin(); i != globaldata->labels.end(); ++i)
 			if(orderList.count(*i) == 0)
 				cout << "'" << *i << "'" << " is not a valid label.\n";
+				
 		for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}	
 		
 		//reset groups parameter

@@ -78,6 +78,11 @@ EstOutput SharedChao1::getValues(vector<SharedRAbundVector*> shared){
 			Chao += leftvalue + rightvalue;
 		}
 		
+		for (int i = 0; i < numNodes; i++) {
+			delete f1leaves[i];
+			delete f2leaves[i];
+		}
+		
 	//	cout << "exiting " << endl;
 		data[0] = Chao;
 		return data;
