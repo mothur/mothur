@@ -92,7 +92,7 @@ int DistanceCommand::execute(){
 		//	driver(distCalculator, seqDB, 0, numSeqs, distFile, cutoff);
 	//	#	endif
 		
-	//	#	if defined (LINUX_VERSION)
+		#	if defined (__APPLE__) || (__MACH__)
 			if(processors == 1){
 				driver(distCalculator, seqDB, 0, numSeqs, distFile, cutoff);	
 			}	
@@ -168,7 +168,7 @@ int DistanceCommand::execute(){
 				wait(NULL);
 			}
 			wait(NULL);
-		//#	endif
+		#	endif
 	
 		delete distCalculator;
 	
