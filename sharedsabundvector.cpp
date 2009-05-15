@@ -253,6 +253,8 @@ SharedOrderVector SharedSAbundVector::getSharedOrderVector() {
 		rav = this->getSharedRAbundVector();
 		ov = rav.getSharedOrderVector();
 		
+		ov.updateStats();
+		
 		return ov;
 	}
 	catch(exception& e) {

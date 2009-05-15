@@ -149,7 +149,7 @@ individual SharedOrderVector::get(int index){
 
 
 /***********************************************************************/
-
+//commented updateStats out to improve speed, but whoever calls this must remember to update when they are done with all the pushbacks they are doing 
 void SharedOrderVector::push_back(int binNumber, int abund, string groupName){
 	individual newGuy;
 	newGuy.group = groupName;
@@ -159,7 +159,8 @@ void SharedOrderVector::push_back(int binNumber, int abund, string groupName){
 	//numSeqs++;
 	//numBins++;
 	//if (abund > maxRank) { maxRank = abund; }
-	updateStats();
+	
+	//updateStats();
 }
 
 /***********************************************************************/
@@ -354,25 +355,18 @@ void SharedOrderVector::updateStats(){
 		numBins = 0;
 		maxRank = 0;
 	
-		for(int i=0;i<data.size();i++){
-
-			if(data[i].bin != -1){
-				numSeqs++;
-			}
-		}
-		//vector<individual> hold(numSeqs, 0);
-	
-		//for(int i=0;i<numSeqs;i++){
-			//if(data[i].bin != -1){
-				//hold[data[i].bin].bin = hold[data[i].bin].bin+1;
-			//}
-		//}	
-
+		numSeqs = data.size();
+				
+		vector<int> hold(numSeqs, 0);
 		for(int i=0;i<numSeqs;i++){
-			if(data[i].bin > numBins) { numBins = data[i].bin;	} 
-			if(data[i].abundance > maxRank)	{	maxRank = data[i].abundance;	}
+			hold[data[i].bin] = hold[data[i].bin]+1;
+		}	
+		
+		for(int i=0;i<numSeqs;i++){
+			if(hold[i] > 0)				{	numBins++;				}
+			if(hold[i] > maxRank)		{	maxRank = hold[i];		}
 		}
-		numBins++; //if you have 10 bins largest .bin is 9 since we start at 0.
+		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the SharedOrderVector class Function updateStats. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
