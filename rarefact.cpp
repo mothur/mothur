@@ -76,46 +76,21 @@ void Rarefact::getCurve(int increment = 1, int nIters = 1000){
 
 void Rarefact::getSharedCurve(int increment = 1, int nIters = 1000){
 try {
-		globaldata = GlobalData::getInstance();
 		SharedRarefactionCurveData* rcd = new SharedRarefactionCurveData();
+		
+		label = lookup[0]->getLabel();
 		
 		//register the displays
 		for(int i=0;i<displays.size();i++){
 			rcd->registerDisplay(displays[i]);
 		}
-
-		for(int iter=0;iter<nIters;iter++){
-			//clear out old values for new iter
-			lookup.clear();
 		
-			//create and initialize vector of sharedvectors, one for each group
-			for (int i = 0; i < globaldata->Groups.size(); i++) { 
-				SharedRAbundVector* temp = new SharedRAbundVector(sharedorder->getNumBins());
-				temp->setLabel(sharedorder->getLabel());
-				temp->setGroup(globaldata->Groups[i]);
-				lookup.push_back(temp);
-			}
-			
+		for(int iter=0;iter<nIters;iter++){
+		
 			for(int i=0;i<displays.size();i++){
 				displays[i]->init(label);		  
 			}
-		
-			//sample all the members
-			for(int i=0;i<numSeqs;i++){
-				//get first sample
-				individual chosen = sharedorder->get(i);
-				int abundance; 
-					
-				//set info for sharedvector in chosens group
-				for (int j = 0; j < lookup.size(); j++) { 
-					if (chosen.group == lookup[j]->getGroup()) {
-						abundance = lookup[j]->getAbundance(chosen.bin);
-						lookup[j]->set(chosen.bin, (abundance + 1), chosen.group);
-						break;
-					}
-				}
-			}
-			
+
 			//randomize the groups
 			random_shuffle(lookup.begin(), lookup.end());
 			
@@ -135,9 +110,6 @@ try {
 				displays[i]->reset();
 			}
 			
-			for (int i = 0; i < lookup.size(); i++) {
-				delete lookup[i];
-			}
 		}
 		
 		for(int i=0;i<displays.size();i++){

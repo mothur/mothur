@@ -66,7 +66,10 @@ int HeatMapCommand::execute(){
 					cout << lookup[0]->getLabel() << '\t' << count << endl;
 					heatmap->getPic(lookup);
 				}
-						
+				
+				//prevent memory leak
+				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+				
 				//get next line to process
 				lookup = input->getSharedRAbundVectors();				
 				count++;
@@ -85,6 +88,7 @@ int HeatMapCommand::execute(){
 					heatmap->getPic(rabund);
 				}
 				
+				delete rabund;
 				rabund = input->getRAbundVector();
 				count++;
 			}

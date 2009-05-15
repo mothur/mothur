@@ -514,6 +514,8 @@ SharedOrderVector SharedRAbundVector::getSharedOrderVector() {
 		random_shuffle(ov.begin(), ov.end());
 
 		ov.setLabel(label);	
+		ov.updateStats();
+		
 		return ov;
 	}
 	catch(exception& e) {

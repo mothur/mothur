@@ -10,14 +10,11 @@
  */
 
 #include "command.hpp"
-#include "sharedordervector.h"
-#include "sharedlistvector.h"
 #include "inputdata.h"
 #include "rarefact.h"
 #include "display.h"
 #include "readotu.h"
 #include "validcalculator.h"
-#include "sharedutilities.h"
 
 /* The rarefaction.shared() command:
 	The rarefaction command generates a rarefaction curve from a given file representing several groups.  
@@ -42,10 +39,8 @@ public:
 	
 private:
 	GlobalData* globaldata;
-	SharedUtil* util;
-	SharedListVector* SharedList;
 	ReadOTUFile* read;
-	SharedOrderVector* order;
+	vector<SharedRAbundVector*> lookup;
 	InputData* input;
 	ValidCalculators* validCalculator;
 	Rarefact* rCurve;

@@ -14,16 +14,14 @@ class Rarefact {
 public:
 	Rarefact(OrderVector* o, vector<Display*> disp) :
 			numSeqs(o->getNumSeqs()), order(o), displays(disp), label(o->getLabel())  {};
-	Rarefact(SharedOrderVector* sharedorder, vector<Display*> disp) :
-					numSeqs(sharedorder->getNumSeqs()), sharedorder(sharedorder), displays(disp), label(sharedorder->getLabel())  {};
+	Rarefact(vector<SharedRAbundVector*> shared, vector<Display*> disp) :
+					 lookup(shared), displays(disp) {};
 
 	~Rarefact(){};
 	void getCurve(int, int);
 	void getSharedCurve(int, int);
 	
 private:
-	SharedOrderVector* sharedorder;
-	GlobalData* globaldata;
 	OrderVector* order;
 	vector<Display*> displays;
 	int numSeqs, numGroupComb;

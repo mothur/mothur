@@ -236,6 +236,8 @@ SharedOrderVector* SharedListVector::getSharedOrderVector(){
 		}
 
 		random_shuffle(order->begin(), order->end());
+		order->updateStats();
+		
 		return order;
 	}
 	catch(exception& e) {

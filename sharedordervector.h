@@ -49,15 +49,15 @@ public:
 	SharedOrderVector(ifstream&);
 	~SharedOrderVector(){};
 	
-	void set(int, int, int, string);	//index, OTU, abundance, group
+	
 	individual get(int);
-	void push_back(int, int, string);  //OTU, abundance, group
 	void resize(int);
 	int size();
 	void print(ostream&);
 	vector<individual>::iterator begin();
 	vector<individual>::iterator end();
-
+	void push_back(int, int, string);  //OTU, abundance, group  MUST CALL UPDATE STATS AFTER PUSHBACK!!!
+	void updateStats();
 
 	int getNumBins();
 	int getNumSeqs();
@@ -80,7 +80,8 @@ private:
 	int numBins;
 	int numSeqs;
 	bool needToUpdate;
-	void updateStats();
+	void set(int, int, int, string);	//index, OTU, abundance, group
+	
 };
 
 #endif

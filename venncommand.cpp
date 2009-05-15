@@ -80,6 +80,7 @@ VennCommand::~VennCommand(){
 	delete input;
 	delete read;
 	delete venn;
+	for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
 }
 
 //**********************************************************************************************************************
@@ -124,7 +125,10 @@ int VennCommand::execute(){
 					//util->getSharedVectors(globaldata->Groups, lookup, order);  //fills group vectors from order vector.
 					venn->getPic(lookup, vennCalculators);
 				}
-						
+				
+				//prevent memory leak
+				for (int i = 0; i < lookup.size(); i++) {	delete lookup[i];	}
+				
 				//get next line to process
 				lookup = input->getSharedRAbundVectors();
 				count++;
@@ -143,6 +147,7 @@ int VennCommand::execute(){
 					venn->getPic(sabund, vennCalculators);
 				}
 				
+				delete sabund;
 				sabund = input->getSAbundVector();
 				count++;
 			}

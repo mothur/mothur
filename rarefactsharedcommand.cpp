@@ -20,7 +20,6 @@ RareFactSharedCommand::RareFactSharedCommand(){
 		fileNameRoot = getRootName(globaldata->inputFileName);
 		format = globaldata->getFormat();
 		validCalculator = new ValidCalculators();
-		util = new SharedUtil();
 				
 		int i;
 		for (i=0; i<globaldata->Estimators.size(); i++) {
@@ -52,11 +51,9 @@ RareFactSharedCommand::RareFactSharedCommand(){
 //**********************************************************************************************************************
 
 RareFactSharedCommand::~RareFactSharedCommand(){
-	delete order;
 	delete input;
 	delete rCurve;
 	delete read;
-	delete util;
 }
 
 //**********************************************************************************************************************
@@ -72,28 +69,34 @@ int RareFactSharedCommand::execute(){
 		read->read(&*globaldata); 
 			
 		input = globaldata->ginput;
-		order = input->getSharedOrderVector();
-				
-		//set users groups
-		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups, "rarefact");
+		lookup = input->getSharedRAbundVectors();
 		
-		while(order != NULL){
+		if (lookup.size() < 2) { 
+			cout << "I cannot run the command without at least 2 valid groups."; 
+			for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; }
+			return 0;
+		}
+					
 		
-			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(order->getLabel()) == 1){
+		while(lookup[0] != NULL){
+		
+			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(lookup[0]->getLabel()) == 1){
 				//create collectors curve
-				rCurve = new Rarefact(order, rDisplays);
+				rCurve = new Rarefact(lookup, rDisplays);
 				convert(globaldata->getFreq(), freq);
 				convert(globaldata->getIters(), nIters);
 				rCurve->getSharedCurve(freq, nIters);
 			
 				delete rCurve;
 			
-				cout << order->getLabel() << '\t' << count << endl;
+				cout << lookup[0]->getLabel() << '\t' << count << endl;
 			}
 			
+			//prevent memory leak
+			for (int i = 0; i < lookup.size(); i++) {	delete lookup[i];	}
+				
 			//get next line to process
-			delete order;
-			order = input->getSharedOrderVector();
+			lookup = input->getSharedRAbundVectors();
 			count++;
 		}
 	
