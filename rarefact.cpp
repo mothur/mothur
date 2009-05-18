@@ -94,15 +94,23 @@ try {
 			//randomize the groups
 			random_shuffle(lookup.begin(), lookup.end());
 			
+			//make merge the size of lookup[0]
+			SharedRAbundVector* merge = new SharedRAbundVector(lookup[0]->size());
+			
+			//make copy of lookup zero
+			for(int i = 0; i<lookup[0]->size(); i++) {
+				merge->set(i, lookup[0]->getAbundance(i), "merge");
+			}
+			
 			vector<SharedRAbundVector*> subset;
 			//send each group one at a time
 			for (int k = 0; k < lookup.size(); k++) { 
 				subset.clear(); //clears out old pair of sharedrabunds
 				//add in new pair of sharedrabunds
-				subset.push_back(lookup[0]); subset.push_back(lookup[k]);
+				subset.push_back(merge); subset.push_back(lookup[k]);
 				
 				rcd->updateSharedData(subset, k+1, numGroupComb);
-				mergeVectors(lookup[0], lookup[k]);
+				mergeVectors(merge, lookup[k]);
 			}
 
 			//resets output files
@@ -134,9 +142,7 @@ void Rarefact::mergeVectors(SharedRAbundVector* shared1, SharedRAbundVector* sha
 	try{
 		for (int k = 0; k < shared1->size(); k++) {
 			//merge new species into shared1
-			if ((shared1->getAbundance(k) == 0) && (shared2->getAbundance(k) != 0)) {
-				shared1->set(k, shared2->getAbundance(k), "combo");  //set to 'combo' since this vector now contains multiple groups
-			}
+			shared1->set(k, (shared1->getAbundance(k) + shared2->getAbundance(k)), "combo");  //set to 'combo' since this vector now contains multiple groups
 		}
 	}
 	catch(exception& e) {

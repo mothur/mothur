@@ -85,10 +85,14 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if (key == "scale")			{ scale = value;		}
 				if (key == "ends" )			{ ends = value;			}
 				if (key == "processors" )	{ processors = value;	}
-				
-
-				
-
+				if (key == "template")		{ templatefile = value;	}
+				if (key == "search")		{ search = value;		}
+				if (key == "ksize")			{ ksize = value;		}
+				if (key == "align")		    { align = value;		}
+				if (key == "match")			{ match = value;		}
+				if (key == "mismatch")		{ mismatch = value;	    }
+				if (key == "gapopen")		{ gapopen = value;		}
+				if (key == "gapextend" )	{ gapextend = value;	}
 				
 				if (key == "line") {//stores lines to be used in a set
 					lines.clear();
@@ -151,7 +155,14 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if (key == "scale")			{ scale = value;		}
 			if (key == "ends" )			{ ends = value;			}
 			if (key == "processors" )	{ processors = value;	}
-
+			if (key == "template")		{ templatefile = value;	}
+			if (key == "search")		{ search = value;		}
+			if (key == "ksize")			{ ksize = value;		}
+			if (key == "align")		    { align = value;		}
+			if (key == "match")			{ match = value;		}
+			if (key == "mismatch")		{ mismatch = value;	    }
+			if (key == "gapopen")		{ gapopen = value;		}
+			if (key == "gapextend" )	{ gapextend = value;	}
 
 			if (key == "line") {//stores lines to be used in a vector
 				lines.clear();
@@ -289,6 +300,14 @@ string GlobalData::getFilter()			{   return filter;		}
 string GlobalData::getScale()			{	return scale;		}
 string GlobalData::getEnds()			{   return ends;		}
 string GlobalData::getProcessors()		{	return processors;	}
+string GlobalData::getTemplateFile()	{	return templatefile;}
+string GlobalData::getSearch()			{	return search;		}
+string GlobalData::getKSize()			{	return ksize;		}
+string GlobalData::getAlign()			{	return align;		}
+string GlobalData::getMatch()			{	return match;		}
+string GlobalData::getMismatch()		{	return mismatch;	}
+string GlobalData::getGapopen()			{	return gapopen;		}
+string GlobalData::getGapextend()		{	return gapextend;	}
 
 void GlobalData::setListFile(string file)		{	listfile = file;	inputFileName = file;}
 void GlobalData::setGroupFile(string file)		{	groupfile = file;	}
@@ -334,6 +353,7 @@ void GlobalData::clear() {
 	clustalfile		=   "";
 	treefile		=	"";
 	sharedfile		=	"";
+	templatefile	=	"";
 	cutoff			=	"10.00";
 	format			=	"";
 	precision		=	"100";
@@ -357,6 +377,14 @@ void GlobalData::clear() {
 	scale			=	"log10";
 	ends			=   "T";  //yes
 	processors		=	"1";
+	search			=	"suffix";
+	ksize			=	"7";
+	align			=	"blast";
+	match			=	"1.0";
+	mismatch		=	"-1.0";
+	gapopen			=	"-5.0";
+	gapextend		=	"-2.0";
+	
 
 }
 
@@ -379,6 +407,13 @@ void GlobalData::reset() {
 	form			=	"integral";
 	ends			=   "T";
 	processors		=	"1";
+	search			=	"suffix";
+	ksize			=	"7";
+	align			=	"blast";
+	match			=	"1.0";
+	mismatch		=	"-1.0";
+	gapopen			=	"-5.0";
+	gapextend		=	"-2.0";
 }
 /*******************************************************/
 

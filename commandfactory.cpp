@@ -41,6 +41,7 @@
 #include "bootstrapsharedcommand.h"
 #include "concensuscommand.h"
 #include "distancecommand.h"
+#include "aligncommand.h"
 
 
 /***********************************************************/
@@ -93,6 +94,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "bootstrap.shared")		{   command = new BootSharedCommand();			}
 		else if(commandName == "concensus")				{   command = new ConcensusCommand();			}
 		else if(commandName == "dist.seqs")				{   command = new DistanceCommand();			}
+		else if(commandName == "align.seqs")			{   command = new AlignCommand();				}
 		else											{	command = new NoCommand();					}
 
 		return command;

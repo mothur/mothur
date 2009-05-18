@@ -211,7 +211,6 @@ void ValidParameters::initCommandParameters() {
 		//{"parameter1","parameter2",...,"last parameter"};
 		
 		string readdistArray[] = {"phylip","column", "name","cutoff","precision", "group"};
-
 		commandParameters["read.dist"] = addParameters(readdistArray, sizeof(readdistArray)/sizeof(string));
 
 		string readotuArray[] =  {"list","order","shared", "line", "label","group","sabund", "rabund"};
@@ -291,6 +290,9 @@ void ValidParameters::initCommandParameters() {
 		
 		string distanceArray[] =  {"fasta","phylip","clustal","nexus", "calc", "ends", "cutoff", "processors"};
 		commandParameters["dist.seqs"] = addParameters(distanceArray, sizeof(distanceArray)/sizeof(string));
+		
+		string AlignArray[] =  {"fasta","phylip","clustal","nexus", "template", "ksize", "align", "match", "mismatch", "gapopen", "gapextend"};
+		commandParameters["align.seqs"] = addParameters(AlignArray, sizeof(AlignArray)/sizeof(string));
 		
 		string quitArray[] = {};
 		commandParameters["quit"] = addParameters(quitArray, sizeof(quitArray)/sizeof(string));
