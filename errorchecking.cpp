@@ -118,6 +118,8 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "scale" )			{ scale = value;	}
 				if (parameter == "ends" )			{ ends = value; }
 				if (parameter == "processors" )		{ processors = value;	}
+				if (parameter == "size" )			{ size = value; }
+
 				if (parameter == "template")		{ templatefile = value;	}
 				if (parameter == "search")			{ search = value;		}
 				if (parameter == "ksize")			{ ksize = value;		}
@@ -167,6 +169,7 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "scale" )			{ scale = value;	}
 				if (parameter == "ends" )			{ ends = value; }
 				if (parameter == "processors" )		{ processors = value;	}
+				if (parameter == "size" )			{ size = value; }
 				if (parameter == "template")		{ templatefile = value;	}
 				if (parameter == "search")			{ search = value;		}
 				if (parameter == "ksize")			{ ksize = value;		}

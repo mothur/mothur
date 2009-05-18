@@ -46,6 +46,6 @@ private:
 	SAbundVector* sabund;
 	string outputFileName;
 	ofstream outputFileHandle;
-	int abund;
+	int abund, size;
 };
 #endif

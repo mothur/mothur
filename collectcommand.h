@@ -49,7 +49,7 @@ private:
 	Collect* cCurve;
 	ValidCalculators* validCalculator;
 	vector<Display*> cDisplays;
-	int freq, abund;
+	int freq, abund, size;
 
 };
 

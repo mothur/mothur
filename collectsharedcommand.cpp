@@ -30,7 +30,7 @@
 #include "sharedmorisitahorn.h"
 #include "sharedbraycurtis.h"
 #include "sharedjackknife.h"
-#include "sharedwhittaker.h"
+#include "whittaker.h"
 
 
 

@@ -201,6 +201,9 @@ void ValidCalculators::initialSingle() {
 		single["goodscoverage"] = "goodscoverage";
 		single["nseqs"]			= "nseqs";
 		single["coverage"]		= "coverage";
+		single["efron"]         = "efron";
+		single["boneh"]         = "boneh";
+		single["solow"]         = "solow";
 		single["default"]	    = "default";
 	}
 	catch(exception& e) {
@@ -294,6 +297,9 @@ void ValidCalculators::initialSummary() {
 		summary["nseqs"]		= "nseqs";
 		summary["goodscoverage"]= "goodscoverage";
 		summary["coverage"]		= "coverage";
+		summary["efron"]        = "efron";
+		summary["boneh"]        = "boneh";
+		summary["solow"]        = "solow";
 		summary["default"]	    = "default";
 	}
 	catch(exception& e) {

@@ -24,6 +24,9 @@
 #include "bstick.h"
 #include "goodscoverage.h"
 #include "coverage.h"
+#include "efron.h"
+#include "boneh.h"
+#include "solow.h"
 
 //**********************************************************************************************************************
 
@@ -70,6 +73,15 @@ SummaryCommand::SummaryCommand(){
 					sumCalculators.push_back(new NSeqs());
 				}else if (globaldata->Estimators[i] == "goodscoverage") { 
 					sumCalculators.push_back(new GoodsCoverage());
+				}else if (globaldata->Estimators[i] == "efron") { 
+					convert(globaldata->getSize(), size);
+					sumCalculators.push_back(new Efron(size));
+				}else if (globaldata->Estimators[i] == "boneh") { 
+					convert(globaldata->getSize(), size);
+					sumCalculators.push_back(new Boneh(size));
+				}else if (globaldata->Estimators[i] == "solow") { 
+					convert(globaldata->getSize(), size);
+					sumCalculators.push_back(new Solow(size));
 				}
 			}
 		}
