@@ -204,6 +204,7 @@ void ValidCalculators::initialSingle() {
 		single["efron"]         = "efron";
 		single["boneh"]         = "boneh";
 		single["solow"]         = "solow";
+		single["shen"]          = "shen";
 		single["default"]	    = "default";
 	}
 	catch(exception& e) {
@@ -300,6 +301,7 @@ void ValidCalculators::initialSummary() {
 		summary["efron"]        = "efron";
 		summary["boneh"]        = "boneh";
 		summary["solow"]        = "solow";
+		summary["shen"]         = "shen";
 		summary["default"]	    = "default";
 	}
 	catch(exception& e) {

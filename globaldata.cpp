@@ -203,7 +203,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 		//input defaults for calculators
 		if (commandName == "collect.single") {
 
-			if ((calc == "default") || (calc == "")) { calc = "sobs-chao-ace-jack-shannon-npshannon-simpson-efron-boneh-solow"; }
+			if ((calc == "default") || (calc == "")) { calc = "sobs-chao-ace-jack-shannon-npshannon-simpson-efron-boneh-solow-shen"; }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
@@ -219,7 +219,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			splitAtDash(calc, Estimators); 
 		}
 		if (commandName == "summary.single") {
-			if ((calc == "default") || (calc == "")) { calc = "sobs-chao-ace-jack-shannon-npshannon-simpson-efron-boneh-solow"; }
+			if ((calc == "default") || (calc == "")) { calc = "sobs-chao-ace-jack-shannon-npshannon-simpson-efron-boneh-solow-shen"; }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}

@@ -27,6 +27,7 @@
 #include "efron.h"
 #include "boneh.h"
 #include "solow.h"
+#include "shen.h"
 
 //**********************************************************************************************************************
 
@@ -82,6 +83,9 @@ SummaryCommand::SummaryCommand(){
 				}else if (globaldata->Estimators[i] == "solow") { 
 					convert(globaldata->getSize(), size);
 					sumCalculators.push_back(new Solow(size));
+				}else if (globaldata->Estimators[i] == "shen") { 
+					convert(globaldata->getSize(), size);
+					sumCalculators.push_back(new Shen(size));
 				}
 			}
 		}
