@@ -11,9 +11,13 @@
 #include <math.h>
 
 /***********************************************************************/
+//This solves for the value of 'v' using a binary search.
 double Boneh::getV(double f1, double n, double rs) {
 
 	//cout << "f1 = " << f1 << "\nn = " << n << "\nrs = " << rs << "\n\n";
+	
+	if(rs == 0)
+		return 0;
 	
 	double accuracy = .0001;
 	double v = 100000.0;
@@ -31,7 +35,7 @@ double Boneh::getV(double f1, double n, double rs) {
 		ls = v* (1 - pow((1 - f1/(n*v)), n));
 		step /= 2;
 		
-	//	cout << "ls = " << ls << "\n";
+		//cout << "ls = " << ls << "\n";
 	}
 	
 	return v;
@@ -45,7 +49,7 @@ EstOutput Boneh::getValues(SAbundVector* rank){
 		
 		bool valid = false;
 		double sum = 0;
-		double n = (double)rank->size() - 1;
+		double n = (double)rank->getNumSeqs();
 		double f1 = (double)rank->get(1);
 		
 		for(int i = 1; i < rank->size(); i++)
@@ -61,12 +65,16 @@ EstOutput Boneh::getValues(SAbundVector* rank){
 			
 			double v = getV(f1, n, sum);
 			
-		//	cout << "v = " << v << "\n";
+			//cout << "v = " << v << "\n";
+			
 			
 			sum = 0;
-			for(int j = 1; j < rank->size(); j++)
-				sum += pow(1 - (double)rank->get(j) / n, n) * (1 - pow(1 - (double)rank->get(j) / n, m)) + v * pow(1 - f1/(n*v), n) * (1 - pow(1 - f1/(n*v), m));
-				
+			for(int j = 1; j < rank->size(); j++) {
+				double Xi = 0; //I didn't know what this was, simply replace the 0
+							   //with the appropriate expression for the boneh calculator
+							   //to work.
+				sum += pow(1 - Xi / n, n) * (1 - pow(1 - Xi / n, m)) + v * pow(1 - f1/(n*v), n) * (1 - pow(1 - f1/(n*v), m));
+			}
 		}
 
 		data[0] = sum;

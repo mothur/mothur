@@ -26,7 +26,7 @@
 #include "efron.h"
 #include "boneh.h"
 #include "solow.h"
-
+#include "shen.h"
 #include "coverage.h"
 
 
@@ -82,6 +82,9 @@ CollectCommand::CollectCommand(){
 				}else if (globaldata->Estimators[i] == "solow") {
 					convert(globaldata->getSize(), size); 
 					cDisplays.push_back(new CollectDisplay(new Solow(size), new OneColumnFile(fileNameRoot+"solow")));
+				}else if (globaldata->Estimators[i] == "shen") {
+					convert(globaldata->getSize(), size); 
+					cDisplays.push_back(new CollectDisplay(new Shen(size), new OneColumnFile(fileNameRoot+"shen")));
 				}
 			}
 		}

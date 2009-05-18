@@ -16,15 +16,16 @@ EstOutput Efron::getValues(SAbundVector* rank){
 	try {
 		data.resize(1,0);
 		
-		if(m > rank->size()-1) {
-			cout << "Error in the 'efron' calculator. 'size' must be less than the length of the smalled sabund vector.\n";
+		double n = (double)rank->getNumSeqs();
+		if(m > n) {
+			cout << "Error in the 'efron' calculator. 'size' must be less than the length of the smallest sabund vector.\n";
 			data[0] = 0;
 			return data;
 		}
 		
 		double sum = 0;
 		for(int i = 1; i < rank->size(); i++)
-			sum += pow(-1, (double)(i+1)) * pow(((double)m / (double)(rank->size()-1)), i) * (double)(rank->get(i));
+			sum += pow(-1, (double)(i+1)) * pow(((double)m / n), i) * (double)(rank->get(i));
 
 		data[0] = sum;
 		

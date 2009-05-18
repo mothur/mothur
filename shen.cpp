@@ -1,28 +1,33 @@
 /*
- *  solow.cpp
+ *  shen.cpp
  *  Mothur
  *
- *  Created by Thomas Ryabin on 5/13/09.
+ *  Created by Thomas Ryabin on 5/18/09.
  *  Copyright 2009 __MyCompanyName__. All rights reserved.
  *
  */
 
-#include "solow.h"
+#include "shen.h"
 #include <math.h>
 
 	
 /***********************************************************************/	
-EstOutput Solow::getValues(SAbundVector* rank){
+EstOutput Shen::getValues(SAbundVector* rank){
 
 	try {
 		data.resize(1,0);
 		
 		double n = (double)rank->getNumSeqs();
 		double f1 = (double)rank->get(1);
-		double f2 = (double)rank->get(2);
-
-		data[0] = f1*f1/2/f2 * (1 - pow(1 - 2*f2/n/f1, m));
 		
+		double D_rare = 0; //I didn't know what this was. Simply replace the '0' with the appropriate expression.
+		double C_rare = 1; //I didn't know what this was. Simply replace the '1' with the appropriate expression.
+		double Y_rare = 1; //I didn't know what this was. Simply replace the '1' with the appropriate expression.
+		
+		double f0 = D_rare/C_rare + f1/C_rare * Y_rare*Y_rare - D_rare;
+		
+		data[0] = f0 * (1 - pow(1 - f1/n/f0, m));
+
 		return data;
 	}
 	catch(exception& e) {
