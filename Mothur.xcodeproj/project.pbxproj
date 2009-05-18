@@ -155,6 +155,7 @@
 		EB1216E50F61ACFB004A865F /* bstick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB1216E40F61ACFB004A865F /* bstick.cpp */; };
 		EB1217230F61C9AC004A865F /* sharedkstest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB1217220F61C9AC004A865F /* sharedkstest.cpp */; };
 		EB6E68190F5F1C780044E17B /* qstat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB6E68180F5F1C780044E17B /* qstat.cpp */; };
+		EB72FE260FC1F5CA0051AC11 /* shen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB72FE240FC1F5CA0051AC11 /* shen.cpp */; };
 		EB9303EB0F534D9400E8EF26 /* logsd.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB9303EA0F534D9400E8EF26 /* logsd.cpp */; };
 		EB9303F90F53517300E8EF26 /* geom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB9303F80F53517300E8EF26 /* geom.cpp */; };
 /* End PBXBuildFile section */
@@ -488,6 +489,8 @@
 		EB1217220F61C9AC004A865F /* sharedkstest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedkstest.cpp; sourceTree = "<group>"; };
 		EB6E68170F5F1C780044E17B /* qstat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = qstat.h; sourceTree = "<group>"; };
 		EB6E68180F5F1C780044E17B /* qstat.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = qstat.cpp; sourceTree = "<group>"; };
+		EB72FE240FC1F5CA0051AC11 /* shen.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shen.cpp; sourceTree = "<group>"; };
+		EB72FE250FC1F5CA0051AC11 /* shen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shen.h; sourceTree = "<group>"; };
 		EB9303E90F534D9400E8EF26 /* logsd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = logsd.h; sourceTree = "<group>"; };
 		EB9303EA0F534D9400E8EF26 /* logsd.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = logsd.cpp; sourceTree = "<group>"; };
 		EB9303F70F53517300E8EF26 /* geom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = geom.h; sourceTree = "<group>"; };
@@ -508,6 +511,8 @@
 		08FB7794FE84155DC02AAC07 /* Mothur */ = {
 			isa = PBXGroup;
 			children = (
+				EB72FE240FC1F5CA0051AC11 /* shen.cpp */,
+				EB72FE250FC1F5CA0051AC11 /* shen.h */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				C6859E8C029090F304C91782 /* Documentation */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
@@ -1087,6 +1092,7 @@
 				373C699A0FC1E63600137ACD /* boneh.cpp in Sources */,
 				373C699B0FC1E63600137ACD /* efron.cpp in Sources */,
 				373C699C0FC1E63600137ACD /* solow.cpp in Sources */,
+				EB72FE260FC1F5CA0051AC11 /* shen.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
