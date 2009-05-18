@@ -14,7 +14,7 @@ void FilterSeqsCommand::doTrump() {
 	trump = globaldata->getTrump();
 	for(int i = 0; i < db->size(); i++) {
 		Sequence cur = db->get(i);
-		string curAligned = cur.getUnaligned();
+		string curAligned = cur.getAligned();
 		for(int j = 0; j < curAligned.length(); j++) {
 			string curChar = curAligned.substr(j, 1);
 			if(curChar.compare(trump) == 0) 
@@ -37,7 +37,7 @@ void FilterSeqsCommand::doSoft() {
 	
 	for(int i = 0; i < db->size(); i++) {
 		Sequence cur = db->get(i);
-		string curAligned = cur.getUnaligned();
+		string curAligned = cur.getAligned();
 		
 		for(int j = 0; j < curAligned.length(); j++) {
 			string curChar = curAligned.substr(j, 1);
@@ -112,7 +112,7 @@ int FilterSeqsCommand::execute() {
 		db = readSeqs->getDB();
 		
 		//for(int i = 0; i < db->size(); i++) {
-//			cout << db->get(i).getLength() << "\n" << db->get(i).getName() << ": " << db->get(i).getUnaligned() << "\n\n";
+//			cout << db->get(i).getLength() << "\n" << db->get(i).getName() << ": " << db->get(i).getAligned() << "\n\n";
 //		}
 
 		for(int i = 0; i < db->get(0).getLength(); i++) 
@@ -140,7 +140,7 @@ int FilterSeqsCommand::execute() {
 		SequenceDB newDB;
 		for(int i = 0; i < db->size(); i++) {
 			Sequence curSeq = db->get(i);
-			string curAligned = curSeq.getUnaligned();
+			string curAligned = curSeq.getAligned();
 			string curName = curSeq.getName();
 			string newAligned = "";
 			for(int j = 0; j < curAligned.length(); j++) 

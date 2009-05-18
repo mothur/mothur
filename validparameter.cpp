@@ -225,7 +225,7 @@ void ValidParameters::initCommandParameters() {
 		string deconvoluteArray[] =  {"fasta"};
 		commandParameters["deconvolute"] = addParameters(deconvoluteArray, sizeof(deconvoluteArray)/sizeof(string));
 		
-		string collectsingleArray[] =  {"freq","line","label","calc","abund"};
+		string collectsingleArray[] =  {"freq","line","label","calc","abund","size"};
 		commandParameters["collect.single"] = addParameters(collectsingleArray, sizeof(collectsingleArray)/sizeof(string));
 
 		string collectsharedArray[] =  {"freq","line","label","calc","groups"};
@@ -249,7 +249,7 @@ void ValidParameters::initCommandParameters() {
 		string libshuffArray[] =  {"iters","groups","step","form","cutoff"};
 		commandParameters["libshuff"] = addParameters(libshuffArray, sizeof(libshuffArray)/sizeof(string));
 		
-		string summarysingleArray[] =  {"line","label","calc","abund"};
+		string summarysingleArray[] =  {"line","label","calc","abund","size"};
 		commandParameters["summary.single"] = addParameters(summarysingleArray, sizeof(summarysingleArray)/sizeof(string));
 
 		string summarysharedArray[] =  {"line","label","calc","groups"};
@@ -346,6 +346,9 @@ void ValidParameters::initParameterRanges() {
 		
 		string softArray[] = {">=","0", "<=","100", "between"};
 		parameterRanges["soft"] = addParameters(softArray, rangeSize);
+		
+		string sizeArray[] = {">=","1", "<","NA", "between"};
+		parameterRanges["size"] = addParameters(sizeArray, rangeSize);
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidParameters class Function isValidParameter. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";

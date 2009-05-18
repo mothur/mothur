@@ -85,6 +85,11 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if (key == "scale")			{ scale = value;		}
 				if (key == "ends" )			{ ends = value;			}
 				if (key == "processors" )	{ processors = value;	}
+				if (key == "size" )         { size = value;         }
+				
+
+				
+
 				if (key == "template")		{ templatefile = value;	}
 				if (key == "search")		{ search = value;		}
 				if (key == "ksize")			{ ksize = value;		}
@@ -155,6 +160,8 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if (key == "scale")			{ scale = value;		}
 			if (key == "ends" )			{ ends = value;			}
 			if (key == "processors" )	{ processors = value;	}
+			if (key == "size" )         { size = value;         }
+
 			if (key == "template")		{ templatefile = value;	}
 			if (key == "search")		{ search = value;		}
 			if (key == "ksize")			{ ksize = value;		}
@@ -196,7 +203,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 		//input defaults for calculators
 		if (commandName == "collect.single") {
 
-			if ((calc == "default") || (calc == "")) { calc = "sobs-chao-ace-jack-shannon-npshannon-simpson"; }
+			if ((calc == "default") || (calc == "")) { calc = "sobs-chao-ace-jack-shannon-npshannon-simpson-efron-boneh-solow"; }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
@@ -212,7 +219,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			splitAtDash(calc, Estimators); 
 		}
 		if (commandName == "summary.single") {
-			if ((calc == "default") || (calc == "")) { calc = "sobs-chao-ace-jack-shannon-npshannon-simpson"; }
+			if ((calc == "default") || (calc == "")) { calc = "sobs-chao-ace-jack-shannon-npshannon-simpson-efron-boneh-solow"; }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
@@ -300,6 +307,13 @@ string GlobalData::getFilter()			{   return filter;		}
 string GlobalData::getScale()			{	return scale;		}
 string GlobalData::getEnds()			{   return ends;		}
 string GlobalData::getProcessors()		{	return processors;	}
+string GlobalData::getSize()            {   return size;        }
+
+void GlobalData::setListFile(string file)	{	listfile = file;	inputFileName = file;}
+void GlobalData::setRabundFile(string file)	{	rabundfile = file;	inputFileName = file;}
+void GlobalData::setSabundFile(string file)	{	sabundfile = file;	inputFileName = file;}
+void GlobalData::setPhylipFile(string file)	{	phylipfile = file;    inputFileName = file;}
+void GlobalData::setColumnFile(string file)	{	columnfile = file;    inputFileName = file;}
 string GlobalData::getTemplateFile()	{	return templatefile;}
 string GlobalData::getSearch()			{	return search;		}
 string GlobalData::getKSize()			{	return ksize;		}
@@ -309,12 +323,7 @@ string GlobalData::getMismatch()		{	return mismatch;	}
 string GlobalData::getGapopen()			{	return gapopen;		}
 string GlobalData::getGapextend()		{	return gapextend;	}
 
-void GlobalData::setListFile(string file)		{	listfile = file;	inputFileName = file;}
 void GlobalData::setGroupFile(string file)		{	groupfile = file;	}
-void GlobalData::setRabundFile(string file)		{	rabundfile = file;	inputFileName = file;}
-void GlobalData::setSabundFile(string file)		{	sabundfile = file;	inputFileName = file;}
-void GlobalData::setPhylipFile(string file)		{	phylipfile = file;    inputFileName = file;}
-void GlobalData::setColumnFile(string file)		{	columnfile = file;    inputFileName = file;}
 void GlobalData::setSharedFile(string file)		{	sharedfile = file;	inputFileName = file; fileroot = file;}
 void GlobalData::setNameFile(string file)		{	namefile = file;		}
 void GlobalData::setFormat(string Format)		{	format = Format;		}
@@ -377,6 +386,7 @@ void GlobalData::clear() {
 	scale			=	"log10";
 	ends			=   "T";  //yes
 	processors		=	"1";
+	size            =   "1000";
 	search			=	"suffix";
 	ksize			=	"7";
 	align			=	"blast";
@@ -384,8 +394,6 @@ void GlobalData::clear() {
 	mismatch		=	"-1.0";
 	gapopen			=	"-5.0";
 	gapextend		=	"-2.0";
-	
-
 }
 
 //*******************************************************/
@@ -407,6 +415,7 @@ void GlobalData::reset() {
 	form			=	"integral";
 	ends			=   "T";
 	processors		=	"1";
+	size            =   "1000";
 	search			=	"suffix";
 	ksize			=	"7";
 	align			=	"blast";

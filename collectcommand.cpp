@@ -23,7 +23,9 @@
 #include "bergerparker.h"
 #include "bstick.h"
 #include "goodscoverage.h"
-
+#include "efron.h"
+#include "boneh.h"
+#include "solow.h"
 
 #include "coverage.h"
 
@@ -71,6 +73,15 @@ CollectCommand::CollectCommand(){
 					cDisplays.push_back(new CollectDisplay(new BStick(), new ThreeColumnFile(fileNameRoot+"bstick")));
 				}else if (globaldata->Estimators[i] == "goodscoverage") { 
 					cDisplays.push_back(new CollectDisplay(new GoodsCoverage(), new OneColumnFile(fileNameRoot+"goodscoverage")));
+				}else if (globaldata->Estimators[i] == "efron") {
+					convert(globaldata->getSize(), size); 
+					cDisplays.push_back(new CollectDisplay(new Efron(size), new OneColumnFile(fileNameRoot+"efron")));
+				}else if (globaldata->Estimators[i] == "boneh") {
+					convert(globaldata->getSize(), size); 
+					cDisplays.push_back(new CollectDisplay(new Boneh(size), new OneColumnFile(fileNameRoot+"boneh")));
+				}else if (globaldata->Estimators[i] == "solow") {
+					convert(globaldata->getSize(), size); 
+					cDisplays.push_back(new CollectDisplay(new Solow(size), new OneColumnFile(fileNameRoot+"solow")));
 				}
 			}
 		}
