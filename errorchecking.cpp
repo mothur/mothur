@@ -118,7 +118,14 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "scale" )			{ scale = value;	}
 				if (parameter == "ends" )			{ ends = value; }
 				if (parameter == "processors" )		{ processors = value;	}
-
+				if (parameter == "template")		{ templatefile = value;	}
+				if (parameter == "search")			{ search = value;		}
+				if (parameter == "ksize")			{ ksize = value;		}
+				if (parameter == "align")		    { align = value;		}
+				if (parameter == "match")			{ match = value;		}
+				if (parameter == "mismatch")		{ mismatch = value;	    }
+				if (parameter == "gapopen")			{ gapopen = value;		}
+				if (parameter == "gapextend" )		{ gapextend = value;	}
 			}
 			
 			//gets the last parameter and value
@@ -160,6 +167,14 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "scale" )			{ scale = value;	}
 				if (parameter == "ends" )			{ ends = value; }
 				if (parameter == "processors" )		{ processors = value;	}
+				if (parameter == "template")		{ templatefile = value;	}
+				if (parameter == "search")			{ search = value;		}
+				if (parameter == "ksize")			{ ksize = value;		}
+				if (parameter == "align")		    { align = value;		}
+				if (parameter == "match")			{ match = value;		}
+				if (parameter == "mismatch")		{ mismatch = value;	    }
+				if (parameter == "gapopen")			{ gapopen = value;		}
+				if (parameter == "gapextend" )		{ gapextend = value;	}
 
 			}
 		}
@@ -246,9 +261,11 @@ bool ErrorCheck::checkInput(string input) {
 			}
 		}
 		
-		if ((commandName == "filter.seqs") || (commandName == "dist.seqs")) { 
+		if ((commandName == "filter.seqs") || (commandName == "dist.seqs") || (commandName == "align.seqs")) { 
 			if ((fastafile == "") && (nexusfile == "") && (clustalfile == "") && (phylipfile == "")) {
-				 cout << "You must read either a fasta, nexus, clustal, or phylip file before you can use the filter.seqs command." << endl; return false; 
+				 cout << "You must enter either a fasta, nexus, clustal, or phylip file before you can use the filter.seqs, dist.seqs or align.seqs command." << endl; return false; 
+			}else if ((commandName == "align.seqs") && (templatefile == "")) {
+				cout << "You must enter a template to use the align.seqs command." << endl; return false; 
 			}
 			validateSeqsFiles();
 		}
@@ -558,8 +575,14 @@ void ErrorCheck::validateSeqsFiles() {
 					errorFree = false;
 				}
 			}
-
+		}else if (templatefile != "") {
+			ableToOpen = openInputFile(templatefile, filehandle);
+			filehandle.close();
+			if (ableToOpen == 1) { //unable to open
+				errorFree = false;
+			}
 		}
+		
 		
 	}
 	catch(exception& e) {
@@ -642,6 +665,7 @@ void ErrorCheck::clear() {
 	fastafile       =   "";
 	nexusfile       =   "";
 	clustalfile     =   "";
+	templatefile	=	"";
 	line			=	"";
 	label			=	"";
 	method			=   "furthest";

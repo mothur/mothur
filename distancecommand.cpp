@@ -88,11 +88,12 @@ int DistanceCommand::execute(){
 		
 		remove(distFile.c_str());
 		
-	//	#	if defined (WIN_VERSION)
+		//#	if defined (_WIN32)
+			//figure out how to implement the fork and wait commands in windows
 		//	driver(distCalculator, seqDB, 0, numSeqs, distFile, cutoff);
-	//	#	endif
+		//#	endif
 		
-		#	if defined (__APPLE__) || (__MACH__)
+		#	if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			if(processors == 1){
 				driver(distCalculator, seqDB, 0, numSeqs, distFile, cutoff);	
 			}	
@@ -168,6 +169,8 @@ int DistanceCommand::execute(){
 				wait(NULL);
 			}
 			wait(NULL);
+		#	else
+			driver(distCalculator, seqDB, 0, numSeqs, distFile, cutoff);
 		#	endif
 	
 		delete distCalculator;

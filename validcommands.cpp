@@ -43,6 +43,7 @@ ValidCommands::ValidCommands() {
 		commands["concensus"]			= "concensus";
 		commands["help"]				= "help"; 
 		commands["filter.seqs"]			= "filter.seqs";
+		commands["align.seqs"]			= "align.seqs";
 		commands["quit"]				= "quit"; 
 
 				

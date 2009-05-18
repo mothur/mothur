@@ -12,14 +12,17 @@
 
 #include "mothur.h"
 
+class Sequence;
+
 class Database {
 public:
 	Database(string);
 	virtual Sequence* findClosestSequence(Sequence*) = 0;
-	
+	virtual float getSearchScore();
 protected:
 	int numSeqs;
-	vector<Sequence*> templateSequences;	
+	float searchScore;
+	vector<Sequence*> templateSequences;
 };
 
 #endif

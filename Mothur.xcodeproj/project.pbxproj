@@ -14,6 +14,20 @@
 		372E12700F26365B0095CF7E /* readotucommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E126F0F26365B0095CF7E /* readotucommand.cpp */; };
 		372E12960F263D5A0095CF7E /* readdistcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E12950F263D5A0095CF7E /* readdistcommand.cpp */; };
 		372E12ED0F264D320095CF7E /* commandfactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E12EC0F264D320095CF7E /* commandfactory.cpp */; };
+		373C68A40FC1C07D00137ACD /* alignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373C68A00FC1C07D00137ACD /* alignment.cpp */; };
+		373C68A50FC1C07D00137ACD /* alignmentcell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373C68A20FC1C07D00137ACD /* alignmentcell.cpp */; };
+		373C68BC0FC1C1A600137ACD /* gotohoverlap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373C68BA0FC1C1A600137ACD /* gotohoverlap.cpp */; };
+		373C68C50FC1C25F00137ACD /* overlap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373C68C30FC1C25F00137ACD /* overlap.cpp */; };
+		373C68CF0FC1C2D900137ACD /* needlemanoverlap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373C68CD0FC1C2D900137ACD /* needlemanoverlap.cpp */; };
+		373C68DD0FC1C38D00137ACD /* blastalign.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373C68DB0FC1C38D00137ACD /* blastalign.cpp */; };
+		373C68E50FC1C4A500137ACD /* noalign.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373C68E30FC1C4A500137ACD /* noalign.cpp */; };
+		373C68F90FC1C6A800137ACD /* suffixdb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373C68F30FC1C6A800137ACD /* suffixdb.cpp */; };
+		373C68FA0FC1C6A800137ACD /* suffixnodes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373C68F50FC1C6A800137ACD /* suffixnodes.cpp */; };
+		373C68FB0FC1C6A800137ACD /* suffixtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373C68F70FC1C6A800137ACD /* suffixtree.cpp */; };
+		373C69180FC1C8AF00137ACD /* blastdb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373C69160FC1C8AF00137ACD /* blastdb.cpp */; };
+		373C691F0FC1C98600137ACD /* nast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373C691D0FC1C98600137ACD /* nast.cpp */; };
+		373C692B0FC1C9EB00137ACD /* nastreport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373C69290FC1C9EB00137ACD /* nastreport.cpp */; };
+		373C69340FC1CA9E00137ACD /* distancedb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373C69320FC1CA9E00137ACD /* distancedb.cpp */; };
 		374610780F40645300460C57 /* unifracweightedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 374610770F40645300460C57 /* unifracweightedcommand.cpp */; };
 		3746107E0F4064D100460C57 /* weighted.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3746107D0F4064D100460C57 /* weighted.cpp */; };
 		374610830F40652400460C57 /* unweighted.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 374610820F40652400460C57 /* unweighted.cpp */; };
@@ -45,6 +59,7 @@
 		378C1B0A0FB0644E004D63F5 /* sequencedb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 378C1AFD0FB0644D004D63F5 /* sequencedb.cpp */; };
 		378C1B0B0FB0644E004D63F5 /* sharedjackknife.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 378C1AFF0FB0644D004D63F5 /* sharedjackknife.cpp */; };
 		378C1B0C0FB0644E004D63F5 /* sharedmarczewski.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 378C1B010FB0644D004D63F5 /* sharedmarczewski.cpp */; };
+		378DC5CF0FBDE1C8003B8607 /* aligncommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 378DC5CE0FBDE1C8003B8607 /* aligncommand.cpp */; };
 		379293C30F2DE73400B9034A /* treemap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 379293C20F2DE73400B9034A /* treemap.cpp */; };
 		379294700F2E191800B9034A /* parsimonycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3792946F0F2E191800B9034A /* parsimonycommand.cpp */; };
 		3792948A0F2E258500B9034A /* parsimony.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 379294890F2E258500B9034A /* parsimony.cpp */; };
@@ -168,6 +183,34 @@
 		372E12940F263D5A0095CF7E /* readdistcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readdistcommand.h; sourceTree = "<group>"; };
 		372E12950F263D5A0095CF7E /* readdistcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readdistcommand.cpp; sourceTree = "<group>"; };
 		372E12EC0F264D320095CF7E /* commandfactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = commandfactory.cpp; sourceTree = "<group>"; };
+		373C68A00FC1C07D00137ACD /* alignment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alignment.cpp; sourceTree = "<group>"; };
+		373C68A10FC1C07D00137ACD /* alignment.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = alignment.hpp; sourceTree = "<group>"; };
+		373C68A20FC1C07D00137ACD /* alignmentcell.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alignmentcell.cpp; sourceTree = "<group>"; };
+		373C68A30FC1C07D00137ACD /* alignmentcell.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = alignmentcell.hpp; sourceTree = "<group>"; };
+		373C68BA0FC1C1A600137ACD /* gotohoverlap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gotohoverlap.cpp; sourceTree = "<group>"; };
+		373C68BB0FC1C1A600137ACD /* gotohoverlap.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = gotohoverlap.hpp; sourceTree = "<group>"; };
+		373C68C30FC1C25F00137ACD /* overlap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = overlap.cpp; sourceTree = "<group>"; };
+		373C68C40FC1C25F00137ACD /* overlap.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = overlap.hpp; sourceTree = "<group>"; };
+		373C68CD0FC1C2D900137ACD /* needlemanoverlap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = needlemanoverlap.cpp; sourceTree = "<group>"; };
+		373C68CE0FC1C2D900137ACD /* needlemanoverlap.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = needlemanoverlap.hpp; sourceTree = "<group>"; };
+		373C68DB0FC1C38D00137ACD /* blastalign.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = blastalign.cpp; sourceTree = "<group>"; };
+		373C68DC0FC1C38D00137ACD /* blastalign.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = blastalign.hpp; sourceTree = "<group>"; };
+		373C68E30FC1C4A500137ACD /* noalign.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = noalign.cpp; sourceTree = "<group>"; };
+		373C68E40FC1C4A500137ACD /* noalign.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = noalign.hpp; sourceTree = "<group>"; };
+		373C68F30FC1C6A800137ACD /* suffixdb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = suffixdb.cpp; sourceTree = "<group>"; };
+		373C68F40FC1C6A800137ACD /* suffixdb.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = suffixdb.hpp; sourceTree = "<group>"; };
+		373C68F50FC1C6A800137ACD /* suffixnodes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = suffixnodes.cpp; sourceTree = "<group>"; };
+		373C68F60FC1C6A800137ACD /* suffixnodes.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = suffixnodes.hpp; sourceTree = "<group>"; };
+		373C68F70FC1C6A800137ACD /* suffixtree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = suffixtree.cpp; sourceTree = "<group>"; };
+		373C68F80FC1C6A800137ACD /* suffixtree.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = suffixtree.hpp; sourceTree = "<group>"; };
+		373C69160FC1C8AF00137ACD /* blastdb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = blastdb.cpp; sourceTree = "<group>"; };
+		373C69170FC1C8AF00137ACD /* blastdb.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = blastdb.hpp; sourceTree = "<group>"; };
+		373C691D0FC1C98600137ACD /* nast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nast.cpp; sourceTree = "<group>"; };
+		373C691E0FC1C98600137ACD /* nast.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = nast.hpp; sourceTree = "<group>"; };
+		373C69290FC1C9EB00137ACD /* nastreport.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nastreport.cpp; sourceTree = "<group>"; };
+		373C692A0FC1C9EB00137ACD /* nastreport.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = nastreport.hpp; sourceTree = "<group>"; };
+		373C69320FC1CA9E00137ACD /* distancedb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = distancedb.cpp; sourceTree = "<group>"; };
+		373C69330FC1CA9E00137ACD /* distancedb.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = distancedb.hpp; sourceTree = "<group>"; };
 		374610760F40645300460C57 /* unifracweightedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = unifracweightedcommand.h; sourceTree = "<group>"; };
 		374610770F40645300460C57 /* unifracweightedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = unifracweightedcommand.cpp; sourceTree = "<group>"; };
 		3746107C0F4064D100460C57 /* weighted.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = weighted.h; sourceTree = "<group>"; };
@@ -233,6 +276,8 @@
 		378C1B000FB0644D004D63F5 /* sharedjackknife.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedjackknife.h; sourceTree = "<group>"; };
 		378C1B010FB0644D004D63F5 /* sharedmarczewski.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedmarczewski.cpp; sourceTree = "<group>"; };
 		378C1B020FB0644D004D63F5 /* sharedmarczewski.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedmarczewski.h; sourceTree = "<group>"; };
+		378DC5CD0FBDE1C8003B8607 /* aligncommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aligncommand.h; sourceTree = "<group>"; };
+		378DC5CE0FBDE1C8003B8607 /* aligncommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = aligncommand.cpp; sourceTree = "<group>"; };
 		379293C10F2DE73400B9034A /* treemap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = treemap.h; sourceTree = "<group>"; };
 		379293C20F2DE73400B9034A /* treemap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = treemap.cpp; sourceTree = "<group>"; };
 		3792946E0F2E191800B9034A /* parsimonycommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parsimonycommand.h; sourceTree = "<group>"; };
@@ -465,6 +510,8 @@
 			isa = PBXGroup;
 			children = (
 				37D927BA0F21331F001D4494 /* averagelinkage.cpp */,
+				373C68DC0FC1C38D00137ACD /* blastalign.hpp */,
+				373C68DB0FC1C38D00137ACD /* blastalign.cpp */,
 				37D928A60F2133C0001D4494 /* calculators */,
 				37D927C20F21331F001D4494 /* cluster.hpp */,
 				37D927C10F21331F001D4494 /* cluster.cpp */,
@@ -479,8 +526,6 @@
 				37D927D10F21331F001D4494 /* commandoptionparser.hpp */,
 				37D927D00F21331F001D4494 /* commandoptionparser.cpp */,
 				37D927D20F21331F001D4494 /* completelinkage.cpp */,
-				37D927D40F21331F001D4494 /* database.hpp */,
-				37D927D30F21331F001D4494 /* database.cpp */,
 				7E4130F70F8E58FA00381DD0 /* dlibshuff.h */,
 				7E4130F60F8E58FA00381DD0 /* dlibshuff.cpp */,
 				37D927D60F21331F001D4494 /* display.h */,
@@ -491,21 +536,29 @@
 				37D927DD0F21331F001D4494 /* fileoutput.cpp */,
 				37D927E00F21331F001D4494 /* globaldata.hpp */,
 				37D927DF0F21331F001D4494 /* globaldata.cpp */,
+				373C68BB0FC1C1A600137ACD /* gotohoverlap.hpp */,
+				373C68BA0FC1C1A600137ACD /* gotohoverlap.cpp */,
 				375873ED0F7D646F0040F377 /* heatmap.h */,
 				375873EE0F7D646F0040F377 /* heatmap.cpp */,
 				37D927E60F21331F001D4494 /* inputdata.h */,
 				37D927E50F21331F001D4494 /* inputdata.cpp */,
-				37D927EA0F21331F001D4494 /* kmer.hpp */,
-				37D927E90F21331F001D4494 /* kmer.cpp */,
-				37D927EC0F21331F001D4494 /* kmerdb.hpp */,
-				37D927EB0F21331F001D4494 /* kmerdb.cpp */,
 				7E412F420F8D213C00381DD0 /* libshuff.h */,
 				7E412FE90F8D3E2C00381DD0 /* libshuff.cpp */,
 				37E3ED800F4D9D0D00B5DF02 /* mothur.h */,
 				37D927EF0F21331F001D4494 /* mothur.cpp */,
 				37D927F10F21331F001D4494 /* nameassignment.hpp */,
 				37D927F00F21331F001D4494 /* nameassignment.cpp */,
+				373C691E0FC1C98600137ACD /* nast.hpp */,
+				373C691D0FC1C98600137ACD /* nast.cpp */,
+				373C692A0FC1C9EB00137ACD /* nastreport.hpp */,
+				373C69290FC1C9EB00137ACD /* nastreport.cpp */,
+				373C68CE0FC1C2D900137ACD /* needlemanoverlap.hpp */,
+				373C68CD0FC1C2D900137ACD /* needlemanoverlap.cpp */,
+				373C68E40FC1C4A500137ACD /* noalign.hpp */,
+				373C68E30FC1C4A500137ACD /* noalign.cpp */,
 				37D927F60F21331F001D4494 /* observable.h */,
+				373C68C40FC1C25F00137ACD /* overlap.hpp */,
+				373C68C30FC1C25F00137ACD /* overlap.cpp */,
 				37D927FC0F21331F001D4494 /* progress.hpp */,
 				37D927FB0F21331F001D4494 /* progress.cpp */,
 				37D928040F21331F001D4494 /* raredisplay.h */,
@@ -672,6 +725,8 @@
 			isa = PBXGroup;
 			children = (
 				37D927CD0F21331F001D4494 /* command.hpp */,
+				378DC5CD0FBDE1C8003B8607 /* aligncommand.h */,
+				378DC5CE0FBDE1C8003B8607 /* aligncommand.cpp */,
 				37C1D9710F86506E0059E3F0 /* binsequencecommand.h */,
 				37C1D9720F86506E0059E3F0 /* binsequencecommand.cpp */,
 				21DDC0190F97A8FE0060691C /* bootstrapsharedcommand.h */,
@@ -743,13 +798,27 @@
 		37D928AC0F213420001D4494 /* containers */ = {
 			isa = PBXGroup;
 			children = (
+				373C68A10FC1C07D00137ACD /* alignment.hpp */,
+				373C68A00FC1C07D00137ACD /* alignment.cpp */,
+				373C68A30FC1C07D00137ACD /* alignmentcell.hpp */,
+				373C68A20FC1C07D00137ACD /* alignmentcell.cpp */,
+				373C69170FC1C8AF00137ACD /* blastdb.hpp */,
+				373C69160FC1C8AF00137ACD /* blastdb.cpp */,
+				37D927D40F21331F001D4494 /* database.hpp */,
+				37D927D30F21331F001D4494 /* database.cpp */,
 				37D927D50F21331F001D4494 /* datavector.hpp */,
+				373C69330FC1CA9E00137ACD /* distancedb.hpp */,
+				373C69320FC1CA9E00137ACD /* distancedb.cpp */,
 				37D927DC0F21331F001D4494 /* fastamap.h */,
 				37D927DB0F21331F001D4494 /* fastamap.cpp */,
 				375873EA0F7D64520040F377 /* fullmatrix.h */,
 				375873EB0F7D64520040F377 /* fullmatrix.cpp */,
 				37D927E20F21331F001D4494 /* groupmap.h */,
 				37D927E10F21331F001D4494 /* groupmap.cpp */,
+				37D927EA0F21331F001D4494 /* kmer.hpp */,
+				37D927E90F21331F001D4494 /* kmer.cpp */,
+				37D927EC0F21331F001D4494 /* kmerdb.hpp */,
+				37D927EB0F21331F001D4494 /* kmerdb.cpp */,
 				37D927EE0F21331F001D4494 /* listvector.hpp */,
 				37D927ED0F21331F001D4494 /* listvector.cpp */,
 				37D927F80F21331F001D4494 /* ordervector.hpp */,
@@ -772,6 +841,12 @@
 				37D928320F21331F001D4494 /* sharedsabundvector.cpp */,
 				37D928450F21331F001D4494 /* sparsematrix.hpp */,
 				37D928440F21331F001D4494 /* sparsematrix.cpp */,
+				373C68F40FC1C6A800137ACD /* suffixdb.hpp */,
+				373C68F30FC1C6A800137ACD /* suffixdb.cpp */,
+				373C68F60FC1C6A800137ACD /* suffixnodes.hpp */,
+				373C68F50FC1C6A800137ACD /* suffixnodes.cpp */,
+				373C68F80FC1C6A800137ACD /* suffixtree.hpp */,
+				373C68F70FC1C6A800137ACD /* suffixtree.cpp */,
 				37AD4DB90F28E2FE00AA2D49 /* tree.h */,
 				37AD4DBA0F28E2FE00AA2D49 /* tree.cpp */,
 				379293C10F2DE73400B9034A /* treemap.h */,
@@ -979,6 +1054,21 @@
 				378C1B0C0FB0644E004D63F5 /* sharedmarczewski.cpp in Sources */,
 				37C753CE0FB3415200DBD02E /* distancecommand.cpp in Sources */,
 				379643ED0FB9B5A80081FDB6 /* readseqs.cpp in Sources */,
+				378DC5CF0FBDE1C8003B8607 /* aligncommand.cpp in Sources */,
+				373C68A40FC1C07D00137ACD /* alignment.cpp in Sources */,
+				373C68A50FC1C07D00137ACD /* alignmentcell.cpp in Sources */,
+				373C68BC0FC1C1A600137ACD /* gotohoverlap.cpp in Sources */,
+				373C68C50FC1C25F00137ACD /* overlap.cpp in Sources */,
+				373C68CF0FC1C2D900137ACD /* needlemanoverlap.cpp in Sources */,
+				373C68DD0FC1C38D00137ACD /* blastalign.cpp in Sources */,
+				373C68E50FC1C4A500137ACD /* noalign.cpp in Sources */,
+				373C68F90FC1C6A800137ACD /* suffixdb.cpp in Sources */,
+				373C68FA0FC1C6A800137ACD /* suffixnodes.cpp in Sources */,
+				373C68FB0FC1C6A800137ACD /* suffixtree.cpp in Sources */,
+				373C69180FC1C8AF00137ACD /* blastdb.cpp in Sources */,
+				373C691F0FC1C98600137ACD /* nast.cpp in Sources */,
+				373C692B0FC1C9EB00137ACD /* nastreport.cpp in Sources */,
+				373C69340FC1CA9E00137ACD /* distancedb.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

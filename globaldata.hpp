@@ -77,7 +77,14 @@ public:
 	string getSorted();
 	string getEnds();
 	string getProcessors();
-
+	string getTemplateFile();
+	string getSearch();
+	string getKSize();
+	string getAlign();
+	string getMatch();
+	string getMismatch();
+	string getGapopen();
+	string getGapextend();
 	string getTrump();
 	string getSoft();
 	string getFilter();
@@ -116,7 +123,8 @@ public:
 private:
 
 	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, nexusfile, clustalfile, treefile, sharedfile, line, label, randomtree, groups;
-	string cutoff, format, precision, method, fileroot, iters, jumble, freq, calc, abund, step, form, sorted, trump, soft, filter, scale, ends, processors;
+	string cutoff, format, precision, method, fileroot, iters, jumble, freq, calc, abund, step, form, sorted, trump, soft, filter, scale, ends, processors, templatefile, search, ksize, align, match;
+	string mismatch, gapopen, gapextend;
 
 
 	static GlobalData* _uniqueInstance;

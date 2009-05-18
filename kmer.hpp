@@ -20,11 +20,10 @@ public:
 	Kmer(int);
 	string getKmerString(string);
 	int getKmerNumber(string, int);
+	string getKmerBases(int);
 	
 	
 private:
-	string getKmerBases(int);
-	
 	char getASCII(int);
 	int getNumber(char);
 	int kmerSize;
@@ -33,5 +32,6 @@ private:
 };
 
 /**************************************************************************************************/
+
 
 #endif

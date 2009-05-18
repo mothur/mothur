@@ -24,6 +24,36 @@ Sequence::Sequence(string newName, string sequence) {
 	}
 	setUnaligned(sequence);
 }
+//********************************************************************************************************************
+
+Sequence::Sequence(ifstream& fastaFile){
+	
+	string accession;				//	provided a file handle to a fasta-formatted sequence file, read in the next
+	fastaFile >> accession;			//	accession number and sequence we find...
+	setName(accession);
+
+	char letter;
+	string sequence;
+	
+	while(fastaFile){
+		letter= fastaFile.get();
+		if(letter == '>'){
+			fastaFile.putback(letter);
+			break;
+		}
+		else if(isprint(letter)){
+			letter = toupper(letter);
+			if(letter == 'U'){letter = 'T';}
+			sequence += letter;
+		}
+		
+	}
+
+	if(sequence.find_first_of('-') != string::npos){	//	if there are any gaps in the sequence, assume that it is
+		setAligned(sequence);							//	an alignment file
+	}
+	setUnaligned(sequence);								//	also set the unaligned sequence file
+}
 
 //********************************************************************************************************************
 
@@ -122,3 +152,18 @@ void Sequence::printSequence(ostream& out){
 }
 
 //********************************************************************************************************************
+
+int Sequence::getUnalignLength(){
+	return unaligned.length();
+}
+
+//********************************************************************************************************************
+
+int Sequence::getAlignLength(){
+	return aligned.length();
+}
+
+//********************************************************************************************************************
+
+
+

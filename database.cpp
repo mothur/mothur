@@ -15,24 +15,23 @@ using namespace std;
 
 /**************************************************************************************************/
 
-Database::Database(string fastaFileName){
-	
-	ifstream fastaFile(fastaFileName.c_str());
-	if(!fastaFile) {
-		cerr << "Error: Could not open " << fastaFileName << endl;
-		exit(1);
-	}
+Database::Database(string fastaFileName){		//	This assumes that the template database is in fasta format, may 
+												//	need to alter this in the future?
+
+	ifstream fastaFile;
+	openInputFile(fastaFileName, fastaFile);
+
 	cout << endl << "Reading in the " << fastaFileName << " template sequences...\t";	cout.flush();
 
-	numSeqs=count(istreambuf_iterator<char>(fastaFile),istreambuf_iterator<char>(), '>');
-	fastaFile.seekg(0);
+	numSeqs=count(istreambuf_iterator<char>(fastaFile),istreambuf_iterator<char>(), '>');	//	count the number of
+	fastaFile.seekg(0);																		//	sequences
 	
 	templateSequences.resize(numSeqs);
 	
 	string seqName, sequence;
 	for(int i=0;i<numSeqs;i++){
-		templateSequences[i] = new Sequence();
-		
+		templateSequences[i] = new Sequence();		//	We're storing the aligned template sequences as a vector of
+													//	pointers to Sequence objects
 		fastaFile >> seqName;
 		templateSequences[i]->setName(seqName);
 		
@@ -42,17 +41,22 @@ Database::Database(string fastaFileName){
 		while(fastaFile && (letter=fastaFile.get()) != '>'){
 			if(isprint(letter)){
 				letter = toupper(letter);
+				if(letter == 'U'){letter = 'T';}
 				aligned += letter;
 			}
 		}
-		templateSequences[i]->setAligned(aligned);
-		templateSequences[i]->setUnaligned(aligned);
-		fastaFile.putback(letter);
+		templateSequences[i]->setAligned(aligned);	//	Obviously, we need the fully aligned template sequence
+		templateSequences[i]->setUnaligned(aligned);//	We will also need the unaligned sequence for pairwise alignments
+		fastaFile.putback(letter);					//	and database searches
 	}
 	
 	fastaFile.close();
 	cout << "DONE." << endl;	cout.flush();
 
 }
+
+/**************************************************************************************************/
+
+float Database::getSearchScore()	{	return searchScore;		}	//	we're assuming that the search is already done
 
 /**************************************************************************************************/
