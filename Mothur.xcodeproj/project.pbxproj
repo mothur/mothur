@@ -28,6 +28,9 @@
 		373C691F0FC1C98600137ACD /* nast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373C691D0FC1C98600137ACD /* nast.cpp */; };
 		373C692B0FC1C9EB00137ACD /* nastreport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373C69290FC1C9EB00137ACD /* nastreport.cpp */; };
 		373C69340FC1CA9E00137ACD /* distancedb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373C69320FC1CA9E00137ACD /* distancedb.cpp */; };
+		373C699A0FC1E63600137ACD /* boneh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373C69940FC1E63600137ACD /* boneh.cpp */; };
+		373C699B0FC1E63600137ACD /* efron.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373C69960FC1E63600137ACD /* efron.cpp */; };
+		373C699C0FC1E63600137ACD /* solow.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 373C69980FC1E63600137ACD /* solow.cpp */; };
 		374610780F40645300460C57 /* unifracweightedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 374610770F40645300460C57 /* unifracweightedcommand.cpp */; };
 		3746107E0F4064D100460C57 /* weighted.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3746107D0F4064D100460C57 /* weighted.cpp */; };
 		374610830F40652400460C57 /* unweighted.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 374610820F40652400460C57 /* unweighted.cpp */; };
@@ -211,6 +214,12 @@
 		373C692A0FC1C9EB00137ACD /* nastreport.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = nastreport.hpp; sourceTree = "<group>"; };
 		373C69320FC1CA9E00137ACD /* distancedb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = distancedb.cpp; sourceTree = "<group>"; };
 		373C69330FC1CA9E00137ACD /* distancedb.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = distancedb.hpp; sourceTree = "<group>"; };
+		373C69940FC1E63600137ACD /* boneh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = boneh.cpp; sourceTree = "<group>"; };
+		373C69950FC1E63600137ACD /* boneh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = boneh.h; sourceTree = "<group>"; };
+		373C69960FC1E63600137ACD /* efron.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = efron.cpp; sourceTree = "<group>"; };
+		373C69970FC1E63600137ACD /* efron.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = efron.h; sourceTree = "<group>"; };
+		373C69980FC1E63600137ACD /* solow.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = solow.cpp; sourceTree = "<group>"; };
+		373C69990FC1E63600137ACD /* solow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = solow.h; sourceTree = "<group>"; };
 		374610760F40645300460C57 /* unifracweightedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = unifracweightedcommand.h; sourceTree = "<group>"; };
 		374610770F40645300460C57 /* unifracweightedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = unifracweightedcommand.cpp; sourceTree = "<group>"; };
 		3746107C0F4064D100460C57 /* weighted.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = weighted.h; sourceTree = "<group>"; };
@@ -621,6 +630,8 @@
 			isa = PBXGroup;
 			children = (
 				37D927BE0F21331F001D4494 /* calculator.h */,
+				373C69950FC1E63600137ACD /* boneh.h */,
+				373C69940FC1E63600137ACD /* boneh.cpp */,
 				3792948D0F2E271100B9034A /* treecalculator.h */,
 				37D927BD0F21331F001D4494 /* calculator.cpp */,
 				37D927B90F21331F001D4494 /* ace.h */,
@@ -638,6 +649,8 @@
 				37C753DF0FB3492400DBD02E /* dist.h */,
 				37C753F00FB34AE800DBD02E /* eachgapdist.h */,
 				37C753F40FB34C0300DBD02E /* eachgapignore.h */,
+				373C69960FC1E63600137ACD /* efron.cpp */,
+				373C69970FC1E63600137ACD /* efron.h */,
 				EB9303F70F53517300E8EF26 /* geom.h */,
 				EB9303F80F53517300E8EF26 /* geom.cpp */,
 				378C1AF10FB0644D004D63F5 /* goodscoverage.h */,
@@ -709,6 +722,8 @@
 				37D928410F21331F001D4494 /* simpson.h */,
 				37D928400F21331F001D4494 /* simpson.cpp */,
 				37D928430F21331F001D4494 /* sobs.h */,
+				373C69980FC1E63600137ACD /* solow.cpp */,
+				373C69990FC1E63600137ACD /* solow.h */,
 				374610810F40652400460C57 /* unweighted.h */,
 				374610820F40652400460C57 /* unweighted.cpp */,
 				37D9284E0F21331F001D4494 /* uvest.h */,
@@ -1069,6 +1084,9 @@
 				373C691F0FC1C98600137ACD /* nast.cpp in Sources */,
 				373C692B0FC1C9EB00137ACD /* nastreport.cpp in Sources */,
 				373C69340FC1CA9E00137ACD /* distancedb.cpp in Sources */,
+				373C699A0FC1E63600137ACD /* boneh.cpp in Sources */,
+				373C699B0FC1E63600137ACD /* efron.cpp in Sources */,
+				373C699C0FC1E63600137ACD /* solow.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
