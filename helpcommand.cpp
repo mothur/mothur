@@ -87,7 +87,7 @@ int HelpCommand::execute(){
 		cout << "The align.seqs command parameters are fasta, phylip, clustal, nexus, template, search, ksize, align, match, mismatch, gapopen and gapextend.  " << "\n";
 		cout << "You must use one of the following parameters for your candidate filename: fasta, phylip, clustal or nexus. " << "\n";
 		cout << "The template parameter is also required." << "\n";
-		cout << "The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer, blast and distance. The default is suffix." << "\n";
+		cout << "The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer and blast. The default is suffix." << "\n";
 		cout << "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is blast." << "\n";
 		cout << "The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 7." << "\n";
 		cout << "The match parameter allows you to specify the bonus for having the same base. The default is 1.0." << "\n";
@@ -295,6 +295,17 @@ int HelpCommand::execute(){
 		cout << "Example bin.seqs(fasta=amazon.fasta, line=1-3-5, name=amazon.names)." << "\n";
 		cout << "The default value for line and label are all lines in your inputfile." << "\n";
 		cout << "The bin.seqs command outputs a .fasta file for each distance you specify appending the OTU number to each name." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile)." << "\n" << "\n";
+	}else if (globaldata->helpRequest == "get.repseqs") { 
+		cout << "The get.repseqs command can only be executed after a successful read.otu command of a list file." << "\n";
+		cout << "The get.repseqs command parameters are fasta, name, group, line and label.  The fasta and group parameters are required, and you may not use line and label at the same time." << "\n";
+		cout << "The line and label allow you to select what distance levels you would like a output files created for, and are separated by dashes." << "\n";
+		cout << "The get.repseqss command should be in the following format: get.repseqs(fasta=yourFastaFile, name=yourNamesFile, group=yourGroupfile, line=yourLines, label=yourLabels)." << "\n";
+		cout << "Example get.repseqs(fasta=amazon.fasta, group=amazon.groups, line=1-3-5, name=amazon.names)." << "\n";
+		cout << "The default value for line and label are all lines in your inputfile." << "\n";
+		cout << "The get.repseqs command outputs several .fasta files for each distance you specify.  " << "\n";
+		cout << "If the distance level you choose has bins that contain only sequences unique to a specific group those sequences are outputted to a file for that group." << "\n";
+		cout << "If the bin contains sequences from multiple groups then the bin is outputted to the shared fasta file." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "get.oturep") { 
 		cout << "The get.oturep command can only be executed after a successful read.dist command." << "\n";

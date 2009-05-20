@@ -276,6 +276,9 @@ void ValidParameters::initCommandParameters() {
 		string binseqsArray[] =  {"fasta","line","label","name"};
 		commandParameters["bin.seqs"] = addParameters(binseqsArray, sizeof(binseqsArray)/sizeof(string));
 		
+		string getrepseqsArray[] =  {"fasta","line","label","name", "group"};
+		commandParameters["get.repseqs"] = addParameters(getrepseqsArray, sizeof(getrepseqsArray)/sizeof(string));
+		
 		string getOTURepArray[] =  {"fasta","list","line","label","name"};
 		commandParameters["get.oturep"] = addParameters(getOTURepArray, sizeof(getOTURepArray)/sizeof(string));
 		

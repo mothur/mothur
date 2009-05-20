@@ -89,8 +89,6 @@ public:
 	string getTrump();
 	string getSoft();
 	string getFilter();
-	
-
 	string getScale();
 
 

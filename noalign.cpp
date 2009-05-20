@@ -3,7 +3,7 @@
  *  
  *
  *  Created by Pat Schloss on 2/19/09.
- *  Copyright 2009 __MyCompanyName__. All rights reserved.
+ *  Copyright 2009Schloss Lab UMASS Amherst. All rights reserved.
  *
  */
 

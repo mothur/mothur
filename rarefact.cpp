@@ -118,6 +118,7 @@ try {
 				displays[i]->reset();
 			}
 			
+			delete merge;
 		}
 		
 		for(int i=0;i<displays.size();i++){
