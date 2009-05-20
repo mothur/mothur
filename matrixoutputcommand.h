@@ -1,23 +1,19 @@
-#ifndef TREEGROUPCOMMAND_H
-#define TREEGROUPCOMMAND_H
+#ifndef MATRIXOUTPUTCOMMAND_H
+#define MATRIXOUTPUTCOMMAND_H
 
 /*
- *  treegroupscommand.h
+ *  matrixoutputcommand.h
  *  Mothur
  *
- *  Created by Sarah Westcott on 4/8/09.
+ *  Created by Sarah Westcott on 5/20/09.
  *  Copyright 2009 Schloss Lab UMASS Amherst. All rights reserved.
  *
- */
- 
+ */ 
 #include "command.hpp"
 #include "inputdata.h"
 #include "groupmap.h"
 #include "readotu.h"
 #include "validcalculator.h"
-#include "tree.h"
-#include "treemap.h"
-
 
 /* This command create a tree file for each similarity calculator at distance level, using various calculators to find the similiarity between groups. 
 	The user can select the lines or labels they wish to use as well as the groups they would like included.
@@ -25,28 +21,24 @@
 	
 class GlobalData;
 
-class TreeGroupCommand : public Command {
+class MatrixOutputCommand : public Command {
 	
 public:
-	TreeGroupCommand();	
-	~TreeGroupCommand();
+	MatrixOutputCommand();	
+	~MatrixOutputCommand();
 	int execute();	
 	
 private:
-	void createTree();
 	void printSims(ostream&);
 	
 	GlobalData* globaldata;
 	ReadOTUFile* read;
-	TreeMap* tmap;
-	Tree* t;
-	vector<Calculator*> treeCalculators;
+	vector<Calculator*> matrixCalculators;
 	vector< vector<float> > simMatrix;
-	map<int, int> index;  //maps row in simMatrix to vector index in the tree	
 	InputData* input;
 	ValidCalculators* validCalculator;
 	vector<SharedRAbundVector*> lookup;
-	string format, outputFile, groupNames;
+	string exportFileName;
 	int numGroups;
 	ofstream out;
 
@@ -54,5 +46,4 @@ private:
 	
 	
 #endif
-
 

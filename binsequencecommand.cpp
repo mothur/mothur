@@ -67,10 +67,6 @@ int BinSeqCommand::execute(){
 			
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(list->getLabel()) == 1){
 				
-				//make new folder for bin info
-				//string foldername = "/" + getRootName(globaldata->getListFile()) + list->getLabel() + ".bins/";
-			//	mkdir(foldername.c_str()); 
-			
 				string outputFileName = getRootName(globaldata->getListFile()) + list->getLabel() + ".fasta";
 				openOutputFile(outputFileName, out);
 
@@ -78,10 +74,6 @@ int BinSeqCommand::execute(){
 				
 				//for each bin in the list vector
 				for (int i = 0; i < list->size(); i++) {
-				
-					//create output file
-					//string outputFileName = foldername + getRootName(globaldata->getListFile()) + "bin" + toString(i+1) + ".fasta";
-					//openOutputFile(outputFileName, out);
 
 					binnames = list->get(i);
 					while (binnames.find_first_of(',') != -1) { 
@@ -113,11 +105,12 @@ int BinSeqCommand::execute(){
 						remove(outputFileName.c_str());
 						return 0;
 					}
-					//out.close();
+					
 				}
 				out.close();
 			}
 			
+			delete list;
 			list = input->getListVector();
 			count++;
 		}

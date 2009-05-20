@@ -23,6 +23,7 @@ ValidCalculators::ValidCalculators() {
 		 initialTreeGroups();
 		 initialBoot();
 		 initialDistance();
+		 initialMatrix();
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function ValidCalculator. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -142,6 +143,17 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 			}else { 
 				cout << calculator << " is not a valid estimator for the tree.shared command and will be disregarded. Valid estimators are ";
 				for (it = treegroup.begin(); it != treegroup.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
+		}else if (parameter == "matrix") {
+			//is it valid
+			if ((matrix.find(calculator)) != (matrix.end())) {
+				return true;
+			}else { 
+				cout << calculator << " is not a valid estimator for the matrix.output command and will be disregarded. Valid estimators are ";
+				for (it = matrix.begin(); it != matrix.end(); it++) {
 					cout << it->first << ", ";
 				}
 				cout << endl;
@@ -430,6 +442,30 @@ void ValidCalculators::initialTreeGroups() {
 		exit(1);
 	}	
 }
+/********************************************************************/
+void ValidCalculators::initialMatrix() {
+	try {	
+		matrix["jabund"]				= "jabund";
+		matrix["sorabund"]				= "sorabund";
+		matrix["jclass"]				= "jclass";
+		matrix["sorclass"]				= "sorclass";
+		matrix["jest"]					= "jest";
+		matrix["sorest"]				= "sorest";
+		matrix["thetayc"]				= "thetayc";
+		matrix["thetan"]				= "thetan";
+		matrix["morisitahorn"]			= "morisitahorn";
+		matrix["braycurtis"]			= "braycurtis";
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialMatrix. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ValidCalculator class function initialMatrix. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
 /********************************************************************/
 void ValidCalculators::initialBoot() {
 	try {	

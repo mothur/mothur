@@ -27,8 +27,7 @@ TreeGroupCommand::TreeGroupCommand(){
 		globaldata = GlobalData::getInstance();
 		format = globaldata->getFormat();
 		validCalculator = new ValidCalculators();
-		util = new SharedUtil();
-		
+			
 		int i;
 		for (i=0; i<globaldata->Estimators.size(); i++) {
 			if (validCalculator->isValidCalculator("treegroup", globaldata->Estimators[i]) == true) { 
@@ -74,7 +73,6 @@ TreeGroupCommand::TreeGroupCommand(){
 TreeGroupCommand::~TreeGroupCommand(){
 	delete input;
 	delete read;
-	delete util;
 }
 
 //**********************************************************************************************************************
@@ -95,7 +93,7 @@ int TreeGroupCommand::execute(){
 		input = globaldata->ginput;
 		lookup = input->getSharedRAbundVectors();
 				
-		if (lookup.size() < 2) { cout << "You have not provided enough valid groups.  I cannot run the command." << endl; }
+		if (lookup.size() < 2) { cout << "You have not provided enough valid groups.  I cannot run the command." << endl; return 0; }
 		
 		numGroups = globaldata->Groups.size();
 		groupNames = "";
@@ -136,7 +134,8 @@ int TreeGroupCommand::execute(){
 		
 					//create a new filename
 					outputFile = getRootName(globaldata->inputFileName) + treeCalculators[i]->getName() + "." + lookup[0]->getLabel() + ".tre";
-							
+					
+												
 					for (int k = 0; k < lookup.size(); k++) { 
 						for (int l = k; l < lookup.size(); l++) {
 							if (k != l) { //we dont need to similiarity of a groups to itself
@@ -158,7 +157,10 @@ int TreeGroupCommand::execute(){
 					createTree();
 				}
 			}
-		
+			
+			//prevent memory leak
+			for (int i = 0; i < lookup.size(); i++) {	delete lookup[i];	}
+			
 			//get next line to process
 			lookup = input->getSharedRAbundVectors();
 			count++;
@@ -256,14 +258,21 @@ void TreeGroupCommand::createTree(){
 	}
 }
 /***********************************************************/
-void TreeGroupCommand::printSims() {
+void TreeGroupCommand::printSims(ostream& out) {
 	try {
-		cout << "simsMatrix" << endl;
+		
+		//output column headers
+		out << '\t';
+		for (int i = 0; i < lookup.size(); i++) {	out << lookup[i]->getGroup() << '\t';		}
+		out << endl;
+		
+		
 		for (int m = 0; m < simMatrix.size(); m++)	{
+			out << lookup[m]->getGroup() << '\t';
 			for (int n = 0; n < simMatrix.size(); n++)	{
-				cout << simMatrix[m][n] << '\t'; 
+				out << simMatrix[m][n] << '\t'; 
 			}
-			cout << endl;
+			out << endl;
 		}
 
 	}

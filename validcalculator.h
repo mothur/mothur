@@ -35,6 +35,7 @@ class ValidCalculators {
 		map<string, string> vennsingle;
 		map<string, string> vennshared;
 		map<string, string> treegroup;
+		map<string, string> matrix;
 		map<string, string> boot;
 		map<string, string> distance;
 		map<string, string>::iterator it;
@@ -48,6 +49,7 @@ class ValidCalculators {
 		void initialVennSingle();
 		void initialVennShared();
 		void initialTreeGroups();
+		void initialMatrix();
 		void initialBoot();
 		void initialDistance();
 };

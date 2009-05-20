@@ -42,6 +42,7 @@
 #include "concensuscommand.h"
 #include "distancecommand.h"
 #include "aligncommand.h"
+#include "getrepseqscommand.h"
 
 
 /***********************************************************/
@@ -89,6 +90,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "filter.seqs")			{   command = new FilterSeqsCommand();          }
 		else if(commandName == "venn")					{   command = new VennCommand();				}
 		else if(commandName == "bin.seqs")				{   command = new BinSeqCommand();				}
+		else if(commandName == "get.repseqs")			{   command = new GetRepSeqsCommand();			}
 		else if(commandName == "get.oturep")			{   command = new GetOTURepCommand();			}
 		else if(commandName == "tree.shared")			{   command = new TreeGroupCommand();			}
 		else if(commandName == "bootstrap.shared")		{   command = new BootSharedCommand();			}

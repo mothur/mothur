@@ -32,7 +32,6 @@
 #include "kmerdb.hpp"
 #include "suffixdb.hpp"
 #include "blastdb.hpp"
-#include "distancedb.hpp"
 
 #include "nast.hpp"
 #include "nastreport.hpp"
@@ -50,7 +49,6 @@ AlignCommand::AlignCommand(){
 		convert(globaldata->getMismatch(), misMatch);
 		convert(globaldata->getGapopen(), gapOpen);
 		convert(globaldata->getGapextend(), gapExtend);
-		distanceFileName = "????";
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the AlignCommand class Function AlignCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -78,7 +76,6 @@ int AlignCommand::execute(){
 		if(globaldata->getSearch() == "kmer")			{	templateDB = new KmerDB(templateFileName, kmerSize);								}
 		else if(globaldata->getSearch() == "suffix")	{	templateDB = new SuffixDB(templateFileName);										}
 		else if(globaldata->getSearch() == "blast")		{	templateDB = new BlastDB(templateFileName, gapOpen, gapExtend, match, misMatch);	}
-		else if(globaldata->getSearch() == "distance")	{	templateDB = new DistanceDB(templateFileName, distanceFileName);					}
 		else {	cout << globaldata->getSearch() << " is not a valid search option. I will run the command using suffix." << endl;
 				templateDB = new SuffixDB(templateFileName);		}
 	

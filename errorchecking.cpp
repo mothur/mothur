@@ -119,7 +119,6 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "ends" )			{ ends = value; }
 				if (parameter == "processors" )		{ processors = value;	}
 				if (parameter == "size" )			{ size = value; }
-
 				if (parameter == "template")		{ templatefile = value;	}
 				if (parameter == "search")			{ search = value;		}
 				if (parameter == "ksize")			{ ksize = value;		}
@@ -178,7 +177,7 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "mismatch")		{ mismatch = value;	    }
 				if (parameter == "gapopen")			{ gapopen = value;		}
 				if (parameter == "gapextend" )		{ gapextend = value;	}
-
+				
 			}
 		}
 		
@@ -277,6 +276,13 @@ bool ErrorCheck::checkInput(string input) {
 			if ((globaldata->getListFile() == "")) { cout << "You must read a list file before you can use the bin.seqs command." << endl; return false; }
 			validateBinFiles();
 		}
+		
+		if ((commandName == "get.repseqs")) { 
+			if ((globaldata->getListFile() == "")) { cout << "You must read a list file before you can use the get.repseqs command." << endl; return false; }
+			else if (groupfile == "") { cout << "You must provide a groupfile before you can use the get.repseqs command." << endl; return false; }
+			validateBinFiles();
+		}
+
 		
 		if ((commandName == "get.oturep")) { 
 			if ((globaldata->gSparseMatrix == NULL) || (globaldata->gListVector == NULL)) {
@@ -609,7 +615,7 @@ void ErrorCheck::validateBinFiles() {
 		int ableToOpen;
 		
 		if (fastafile == "") {
-				cout << "fasta is a required parameter for bin.seqs and get.oturep commands." << endl; errorFree = false; 
+				cout << "fasta is a required parameter for bin.seqs, get.oturep and get.repseqs commands." << endl; errorFree = false; 
 		}else if (fastafile != "") {
 			//is it a valid filename'
 			ableToOpen = openInputFile(fastafile, filehandle);
@@ -636,7 +642,15 @@ void ErrorCheck::validateBinFiles() {
 			filehandle.close();
 			//unable to open
 			if (ableToOpen == 1) {  errorFree = false; }
+		}else if (groupfile != "") {
+			//is it a valid filename'
+			ifstream filehandle;
+			int ableToOpen = openInputFile(groupfile, filehandle);
+			filehandle.close();
+			//unable to open
+			if (ableToOpen == 1) {  errorFree = false; }
 		}
+
 
 
 	}

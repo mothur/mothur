@@ -19,6 +19,7 @@ ValidCommands::ValidCommands() {
 		commands["read.tree"]			= "read.tree"; 
 		commands["read.seqs"]           = "read.seqs";
 		commands["bin.seqs"]			= "bin.seqs"; 
+		commands["get.repseqs"]			= "get.repseqs"; 
 		commands["get.oturep"]			= "get.oturep";
 		commands["cluster"]				= "cluster"; 
 		commands["deconvolute"]			= "deconvolute"; 
