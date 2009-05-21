@@ -43,6 +43,7 @@
 #include "distancecommand.h"
 #include "aligncommand.h"
 #include "getrepseqscommand.h"
+#include "matrixoutputcommand.h"
 
 
 /***********************************************************/
@@ -93,6 +94,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "get.repseqs")			{   command = new GetRepSeqsCommand();			}
 		else if(commandName == "get.oturep")			{   command = new GetOTURepCommand();			}
 		else if(commandName == "tree.shared")			{   command = new TreeGroupCommand();			}
+		else if(commandName == "dist.shared")			{   command = new MatrixOutputCommand();		}
 		else if(commandName == "bootstrap.shared")		{   command = new BootSharedCommand();			}
 		else if(commandName == "concensus")				{   command = new ConcensusCommand();			}
 		else if(commandName == "dist.seqs")				{   command = new DistanceCommand();			}

@@ -23,7 +23,8 @@ ValidCommands::ValidCommands() {
 		commands["get.oturep"]			= "get.oturep";
 		commands["cluster"]				= "cluster"; 
 		commands["deconvolute"]			= "deconvolute"; 
-		commands["dist.seqs"]			= "dist.seqs"; 
+		commands["dist.seqs"]			= "dist.seqs";
+		commands["dist.shared"]			= "dist.shared";  //matrix output
 		commands["collect.single"]		= "collect.single"; 
 		commands["collect.shared"]		= "collect.shared"; 
 		commands["rarefaction.single"]	= "rarefaction.single"; 
