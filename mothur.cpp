@@ -26,10 +26,10 @@ int main(int argc, char *argv[]){
 		bool bail = 0;
 
 		if(argc>1){
-			mothur = new BatchEngine(argv[1]);
+			mothur = new BatchEngine(argv[0], argv[1]);
 		}
 		else{
-			mothur = new InteractEngine();		
+			mothur = new InteractEngine(argv[0]);		
 		}
 
 		while(bail == 0)		{	bail = mothur->getInput();			}

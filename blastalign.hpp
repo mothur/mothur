@@ -12,6 +12,7 @@
  */
  
 #include "mothur.h"
+#include "globaldata.hpp"
 
 class BlastAlignment : public Alignment {
 
@@ -24,11 +25,13 @@ private:
 	string candidateFileName;
 	string templateFileName;
 	string blastFileName;
+	string path;
 
 	void setPairwiseSeqs();
 	float match;
 	float mismatch;
 	float gapOpen;
 	float gapExtend;
+	GlobalData* globaldata;
 };
 

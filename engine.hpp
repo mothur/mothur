@@ -39,7 +39,7 @@ protected:
 
 class BatchEngine : public Engine {
 public:
-	BatchEngine(string);
+	BatchEngine(string, string);
 	~BatchEngine();
 	virtual bool getInput();
 	int openedBatch;
@@ -53,7 +53,7 @@ private:
 
 class InteractEngine : public Engine {
 public:
-	InteractEngine();
+	InteractEngine(string);
 	~InteractEngine();
 	virtual bool getInput();
 private:

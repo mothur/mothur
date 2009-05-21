@@ -18,7 +18,9 @@ using namespace std;
 
 BlastDB::BlastDB(string fastaFileName, float gO, float gE, float m, float mM) : Database(fastaFileName), 
 gapOpen(gO), gapExtend(gE), match(m), misMatch(mM) {
-
+	
+	globaldata = GlobalData::getInstance();
+	
 	cout << "Generating the temporary BLAST database...\t";	cout.flush();
 
 	int randNumber = rand();
@@ -36,7 +38,10 @@ gapOpen(gO), gapExtend(gE), match(m), misMatch(mM) {
 	}
 	unalignedFastaFile.close();
 	
-	string formatdbCommand = "~/Pipeline/src/cpp/production/blast/bin/formatdb -p F -o T -i " + dbFileName;	//	format the database, -o option gives us the ability
+	path = globaldata->argv;
+	path = path.substr(0, (path.find_last_of('m')));
+	
+	string formatdbCommand = path + "blast/bin/formatdb -p F -o T -i " + dbFileName;	//	format the database, -o option gives us the ability
 	system(formatdbCommand.c_str());								//	to get the right sequence names, i think. -p F
 																	//	option tells formatdb that seqs are DNA, not prot
 	cout << "DONE." << endl << endl;	cout.flush();
@@ -71,7 +76,7 @@ Sequence* BlastDB::findClosestSequence(Sequence* candidate){
 //	wordsize used in megablast.  I'm sure we're sacrificing accuracy for speed, but anyother way would take way too
 //	long.  With this setting, it seems comparable in speed to the suffix tree approach.
 
-	string blastCommand = "~/Pipeline/src/cpp/production/blast/bin/blastall -p blastn -d " + dbFileName + " -b 1 -m 8 -W 28";
+	string blastCommand = path + "blast/bin/blastall -p blastn -d " + dbFileName + " -b 1 -m 8 -W 28";
 	blastCommand += (" -i " + queryFileName + " -o " + blastFileName);
 	system(blastCommand.c_str());
 	
