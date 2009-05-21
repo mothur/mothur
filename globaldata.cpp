@@ -241,7 +241,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
-		if ((commandName == "tree.shared") || (commandName == "bootstrap.shared")) {
+		if ((commandName == "tree.shared") || (commandName == "bootstrap.shared") || (commandName == "dist.shared")) {
 			if (calc != "") { 
 				Estimators.clear();
 				splitAtDash(calc, Estimators);			

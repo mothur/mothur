@@ -125,8 +125,8 @@ int MatrixOutputCommand::execute(){
 								
 								data = matrixCalculators[i]->getValues(subset); //saves the calculator outputs
 								//save values in similarity matrix
-								simMatrix[k][l] = data[0];
-								simMatrix[l][k] = data[0];
+								simMatrix[k][l] = 1.0 - data[0];  //convert similiarity to distance
+								simMatrix[l][k] = 1.0 - data[0];  //convert similiarity to distance
 							}
 						}
 					}

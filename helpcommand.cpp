@@ -266,6 +266,18 @@ int HelpCommand::execute(){
 		validCalcs->printCalc("treegroup", cout);
 		cout << "The tree.shared command outputs a .tre file for each calculator you specify at each distance you choose." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups)." << "\n" << "\n";
+	}else if (globaldata->helpRequest == "dist.shared") { 
+		cout << "The dist.shared command can only be executed after a successful read.otu command." << "\n";
+		cout << "The dist.shared command parameters are groups, calc, line and label.  The calc parameter is required, and you may not use line and label at the same time." << "\n";
+		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like included used." << "\n";
+		cout << "The group names are separated by dashes. The line and label allow you to select what distance levels you would like distance matrices created for, and are also separated by dashes." << "\n";
+		cout << "The dist.shared command should be in the following format: dist.shared(groups=yourGroups, calc=yourCalcs, line=yourLines, label=yourLabels)." << "\n";
+		cout << "Example dist.shared(groups=A-B-C, line=1-3-5, calc=jabund-sorabund)." << "\n";
+		cout << "The default value for groups is all the groups in your groupfile." << "\n";
+		cout << "There is no default value for calc." << "\n";
+		validCalcs->printCalc("matrix", cout);
+		cout << "The dist.shared command outputs a .matrix file for each calculator you specify at each distance you choose." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "bootstrap.shared") { 
 		cout << "The bootstrap.shared command can only be executed after a successful read.otu command." << "\n";
 		cout << "The bootstrap.shared command parameters are groups, calc, iters, line and label.  The calc parameter is required, and you may not use line and label at the same time." << "\n";
@@ -317,7 +329,7 @@ int HelpCommand::execute(){
 		cout << "The get.oturep command outputs a .fastarep file for each distance you specify, selecting one OTU representative for each bin." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "quit") {
-		cout << "The quit command will terminate Dotur and should be in the following format: " << "\n";
+		cout << "The quit command will terminate mothur and should be in the following format: " << "\n";
 		cout << "quit()" << "\n" << "\n";
 	}else if (globaldata->helpRequest == "") {
 		validCommands->printCommands(cout);

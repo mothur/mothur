@@ -551,6 +551,10 @@ void ValidCalculators::printCalc(string parameter, ostream& out) {
 			for (it = treegroup.begin(); it != treegroup.end(); it++) {
 				out << it->first << ", ";
 			}
+		}else if (parameter == "matrix") {
+			for (it = matrix.begin(); it != matrix.end(); it++) {
+				out << it->first << ", ";
+			}
 		}else if (parameter == "boot") {
 			for (it = boot.begin(); it != boot.end(); it++) {
 				out << it->first << ", ";

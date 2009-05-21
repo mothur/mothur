@@ -250,10 +250,10 @@ bool ErrorCheck::checkInput(string input) {
 			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { cout << "You must read a list, sabund or rabund before you can use the collect.single, rarefaction.single or summary.single commands." << endl; return false; }
 		}
 		
-		if ((commandName == "collect.shared") || (commandName == "rarefaction.shared") || (commandName == "summary.shared") || (commandName == "tree.shared") || (commandName == "bootstrap.shared")){ 
+		if ((commandName == "collect.shared") || (commandName == "rarefaction.shared") || (commandName == "summary.shared") || (commandName == "tree.shared") || (commandName == "bootstrap.shared") || (commandName == "dist.shared")){ 
 			if (globaldata->getSharedFile() == "") {
-				if (globaldata->getListFile() == "") { cout << "You must read a list and a group, or a shared before you can use the collect.shared, rarefaction.shared, summary.shared, tree.shared or bootstrap.shared commands." << endl; return false; }
-				else if (globaldata->getGroupFile() == "") { cout << "You must read a list and a group, or a shared before you can use the collect.shared, rarefaction.shared, summary.shared, tree.shared or bootstrap.shared commands." << endl; return false; }
+				if (globaldata->getListFile() == "") { cout << "You must read a list and a group, or a shared before you can use the collect.shared, rarefaction.shared, summary.shared, tree.shared, bootstrap.shared or dist.shared commands." << endl; return false; }
+				else if (globaldata->getGroupFile() == "") { cout << "You must read a list and a group, or a shared before you can use the collect.shared, rarefaction.shared, summary.shared, tree.shared, bootstrap.shared or dist.shared commands." << endl; return false; }
 			}
 		}
 		
@@ -273,7 +273,7 @@ bool ErrorCheck::checkInput(string input) {
 		}
 		
 		if ((commandName == "bin.seqs")) { 
-			if ((globaldata->getListFile() == "")) { cout << "You must read a list file before you can use the bin.seqs command." << endl; return false; }
+			if ((globaldata->getListFile() == "")) { cout << "You must read a list file before you can use the bin.seqs commands." << endl; return false; }
 			validateBinFiles();
 		}
 		
