@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		211A24EB0FC306BC00769A33 /* getrepseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 211A24EA0FC306BC00769A33 /* getrepseqscommand.cpp */; };
 		211C38320F961DD400FEE541 /* sharedutilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 211C38300F961DD400FEE541 /* sharedutilities.cpp */; };
 		211C38380F961E1F00FEE541 /* treegroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 211C38360F961E1F00FEE541 /* treegroupscommand.cpp */; };
 		21DDC01B0F97A8FE0060691C /* bootstrapsharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 21DDC01A0F97A8FE0060691C /* bootstrapsharedcommand.cpp */; };
@@ -175,8 +174,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		211A24E90FC306BC00769A33 /* getrepseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getrepseqscommand.h; sourceTree = "<group>"; };
-		211A24EA0FC306BC00769A33 /* getrepseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getrepseqscommand.cpp; sourceTree = "<group>"; };
 		211C38300F961DD400FEE541 /* sharedutilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedutilities.cpp; sourceTree = "<group>"; };
 		211C38310F961DD400FEE541 /* sharedutilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedutilities.h; sourceTree = "<group>"; };
 		211C38360F961E1F00FEE541 /* treegroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = treegroupscommand.cpp; sourceTree = "<group>"; };
@@ -776,8 +773,6 @@
 				A70B53A80F4CD7AD0064797E /* getlinecommand.cpp */,
 				370B88050F8A4EE4005AB382 /* getoturepcommand.h */,
 				370B88060F8A4EE4005AB382 /* getoturepcommand.cpp */,
-				211A24E90FC306BC00769A33 /* getrepseqscommand.h */,
-				211A24EA0FC306BC00769A33 /* getrepseqscommand.cpp */,
 				375873F10F7D64800040F377 /* heatmapcommand.h */,
 				375873F00F7D64800040F377 /* heatmapcommand.cpp */,
 				37D927E40F21331F001D4494 /* helpcommand.h */,
@@ -1097,7 +1092,6 @@
 				373C699B0FC1E63600137ACD /* efron.cpp in Sources */,
 				373C699C0FC1E63600137ACD /* solow.cpp in Sources */,
 				EB72FE260FC1F5CA0051AC11 /* shen.cpp in Sources */,
-				211A24EB0FC306BC00769A33 /* getrepseqscommand.cpp in Sources */,
 				21E859D80FC4632E005E1A48 /* matrixoutputcommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

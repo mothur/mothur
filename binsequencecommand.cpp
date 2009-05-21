@@ -15,7 +15,14 @@ BinSeqCommand::BinSeqCommand(){
 		globaldata = GlobalData::getInstance();
 		fastafile = globaldata->getFastaFile();
 		namesfile = globaldata->getNameFile();
+		groupfile = globaldata->getGroupFile();
 		openInputFile(fastafile, in);
+		
+		if (groupfile != "") {
+			//read in group map info.
+			groupMap = new GroupMap(groupfile);
+			groupMap->readMap();
+		}
 		
 		fasta = new FastaMap();
 	}
@@ -36,6 +43,9 @@ BinSeqCommand::~BinSeqCommand(){
 	delete read;
 	delete fasta;
 	delete list;
+	if (groupfile != "") {
+		delete groupMap;
+	}
 }
 
 //**********************************************************************************************************************
@@ -83,9 +93,23 @@ int BinSeqCommand::execute(){
 						//do work for that name
 						sequence = fasta->getSequence(name);
 						if (sequence != "not found") {
-							name = name + "|" + toString(i+1);
-							out << ">" << name << endl;
-							out << sequence << endl;
+							//if you don't have groups
+							if (groupfile == "") {
+								name = name + "|" + toString(i+1);
+								out << ">" << name << endl;
+								out << sequence << endl;
+							}else {//if you do have groups
+								string group = groupMap->getGroup(name);
+								if (group == "not found") {  
+									cout << name << " is missing from your group file. Please correct. " << endl;
+									remove(outputFileName.c_str());
+									return 0;
+								}else{
+									name = name + "|" + group + "|" + toString(i+1);
+									out << ">" << name << endl;
+									out << sequence << endl;
+								}
+							}
 						}else { 
 							cout << name << " is missing from your fasta or name file. Please correct. " << endl; 
 							remove(outputFileName.c_str());
@@ -97,9 +121,23 @@ int BinSeqCommand::execute(){
 					//get last name
 					sequence = fasta->getSequence(binnames);
 					if (sequence != "not found") {
-						name = binnames + '|' + toString(i+1);
-						out << ">" << name << endl;
-						out << sequence << endl;
+						//if you don't have groups
+						if (groupfile == "") {
+							binnames = binnames + "|" + toString(i+1);
+							out << ">" << binnames << endl;
+							out << sequence << endl;
+						}else {//if you do have groups
+							string group = groupMap->getGroup(binnames);
+							if (group == "not found") {  
+								cout << binnames << " is missing from your group file. Please correct. " << endl;
+								remove(outputFileName.c_str());
+								return 0;
+							}else{
+								binnames = binnames + "|" + group + "|" + toString(i+1);
+								out << ">" << binnames << endl;
+								out << sequence << endl;
+							}
+						}
 					}else { 
 						cout << binnames << " is missing from your fasta or name file. Please correct. " << endl; 
 						remove(outputFileName.c_str());
