@@ -138,28 +138,30 @@ bool BatchEngine::getInput(){
 		while(quitCommandCalled == 0){
 		
 			getline(inputBatchFile, input);
-			if (inputBatchFile.eof()) { input = "quit()"; }
+			if (input[0] != '#') {
+				if (inputBatchFile.eof()) { input = "quit()"; }
 			
-			cout << endl << "mothur > " << input << endl;
-			errorFree = errorCheckor->checkInput(input);
-			if (errorFree == true) {
-				CommandOptionParser parser(input);
-				commandName = parser.getCommandString();
-				ifstream filehandle;
+				cout << endl << "mothur > " << input << endl;
+				errorFree = errorCheckor->checkInput(input);
+				if (errorFree == true) {
+					CommandOptionParser parser(input);
+					commandName = parser.getCommandString();
+					ifstream filehandle;
 		
-				if (openedBatch == 0) { //able to open batchfile
-					//executes valid command
-					CommandFactory cFactory;
-					Command* command = cFactory.getCommand(commandName);
-					quitCommandCalled = command->execute();
+					if (openedBatch == 0) { //able to open batchfile
+						//executes valid command
+						CommandFactory cFactory;
+						Command* command = cFactory.getCommand(commandName);
+						quitCommandCalled = command->execute();
+					}
+					else {
+						cout << "Invalid." << endl;
+					}
 				}
 				else {
-					cout << "Invalid." << endl;
+					cout << "Unable to open batchfile." << endl;
 				}
-			}
-			else {
-				cout << "Unable to open batchfile." << endl;
-			}
+			}else { if (inputBatchFile.eof()) { input = "quit()"; } }
 		}
 		return 1;
 	}
