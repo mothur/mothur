@@ -636,14 +636,14 @@
 			isa = PBXGroup;
 			children = (
 				37D927BE0F21331F001D4494 /* calculator.h */,
-				373C69950FC1E63600137ACD /* boneh.h */,
-				373C69940FC1E63600137ACD /* boneh.cpp */,
-				3792948D0F2E271100B9034A /* treecalculator.h */,
 				37D927BD0F21331F001D4494 /* calculator.cpp */,
+				3792948D0F2E271100B9034A /* treecalculator.h */,
 				37D927B90F21331F001D4494 /* ace.h */,
 				37D927B80F21331F001D4494 /* ace.cpp */,
 				EB1216860F619B83004A865F /* bergerparker.h */,
 				EB1216870F619B83004A865F /* bergerparker.cpp */,
+				373C69950FC1E63600137ACD /* boneh.h */,
+				373C69940FC1E63600137ACD /* boneh.cpp */,
 				37D927BC0F21331F001D4494 /* bootstrap.h */,
 				37D927BB0F21331F001D4494 /* bootstrap.cpp */,
 				EB1216E30F61ACFB004A865F /* bstick.h */,

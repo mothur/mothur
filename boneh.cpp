@@ -70,10 +70,9 @@ EstOutput Boneh::getValues(SAbundVector* rank){
 			
 			sum = 0;
 			for(int j = 1; j < rank->size(); j++) {
-				double Xi = 0; //I didn't know what this was, simply replace the 0
-							   //with the appropriate expression for the boneh calculator
-							   //to work.
-				sum += pow(1 - Xi / n, n) * (1 - pow(1 - Xi / n, m)) + v * pow(1 - f1/(n*v), n) * (1 - pow(1 - f1/(n*v), m));
+				for (int i = 0; i < rank->get(j); i++) {
+					sum += pow(1 - j / n, n) * (1 - pow(1 - j / n, m)) + v * pow(1 - f1/(n*v), n) * (1 - pow(1 - f1/(n*v), m));
+				}
 			}
 		}
 
