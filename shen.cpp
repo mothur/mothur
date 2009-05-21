@@ -8,23 +8,27 @@
  */
 
 #include "shen.h"
-#include <math.h>
+#include "ace.h"
 
 	
 /***********************************************************************/	
 EstOutput Shen::getValues(SAbundVector* rank){
 
 	try {
+		globaldata = GlobalData::getInstance();
+		
 		data.resize(1,0);
 		
 		double n = (double)rank->getNumSeqs();
 		double f1 = (double)rank->get(1);
 		
-		double D_rare = 0; //I didn't know what this was. Simply replace the '0' with the appropriate expression.
-		double C_rare = 1; //I didn't know what this was. Simply replace the '1' with the appropriate expression.
-		double Y_rare = 1; //I didn't know what this was. Simply replace the '1' with the appropriate expression.
+		int abund;
+		convert(globaldata->getAbund(), abund);
 		
-		double f0 = D_rare/C_rare + f1/C_rare * Y_rare*Y_rare - D_rare;
+		Ace* calc = new Ace(abund);
+		EstOutput ace = calc->getValues(rank);
+		
+		double f0 = n - ace[0];
 		
 		data[0] = f0 * (1 - pow(1 - f1/n/f0, m));
 

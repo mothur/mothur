@@ -11,6 +11,7 @@
  */
 
 #include "calculator.h"
+#include "globaldata.hpp"
 
 /* This class implements the shen calculator on single group. 
  It is a child of the calculator class. */
@@ -25,6 +26,7 @@ public:
 	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
 private:
 	int m;
+	GlobalData* globaldata;
 };
 
 
