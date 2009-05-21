@@ -16,10 +16,11 @@ using namespace std;
 
 /***********************************************************************/
 
-InteractEngine::InteractEngine(){
+InteractEngine::InteractEngine(string path){
 
 	globaldata = GlobalData::getInstance();
-
+	globaldata->argv = path;
+	
 	system("clear");
 //	char buffer = ' ';
 //	ifstream header("introtext.txt");
@@ -92,10 +93,11 @@ bool InteractEngine::getInput(){
 
 /***********************************************************************/
 //This function opens the batchfile to be used by BatchEngine::getInput.
-BatchEngine::BatchEngine(string batchFileName){
+BatchEngine::BatchEngine(string path, string batchFileName){
 	try {
 		globaldata = GlobalData::getInstance();
 		openedBatch = openInputFile(batchFileName, inputBatchFile);
+		globaldata->argv = path;
 
 		system("clear");
 	

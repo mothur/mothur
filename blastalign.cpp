@@ -23,6 +23,10 @@ BlastAlignment::BlastAlignment(float go, float ge, float m, float mm) :
 			match(m),				//	This is the score to award for two nucleotides matching (match >= 0)
 			mismatch(mm)			//	This is the penalty to assess for a mismatch (mismatch <= 0)
 {
+	globaldata = GlobalData::getInstance();
+	path = globaldata->argv;
+	path = path.substr(0, (path.find_last_of('m')));
+	
 	gapOpen = abs(go);				//	This is the penalty to assess for opening a gap (gapOpen >= 0)
 	gapExtend = abs(ge);				//	This is the penalty to assess for extending a gap (gapExtend >= 0)
 		
@@ -54,7 +58,7 @@ void BlastAlignment::align(string seqA, string seqB){	//Use blastn to align the 
 	
 	//	The blastCommand assumes that we have DNA sequences (blastn) and that they are fairly similar (-e 0.001) and
 	//	that we don't want to apply any kind of complexity filtering (-F F)
-	string blastCommand = "~/Pipeline/src/cpp/production/blast/bin/bl2seq -p blastn -i " + candidateFileName + " -j " + templateFileName + " -e 0.0001 -F F -o " + blastFileName + " -W 11";
+	string blastCommand = path + "blast/bin/bl2seq -p blastn -i " + candidateFileName + " -j " + templateFileName + " -e 0.0001 -F F -o " + blastFileName + " -W 11";
 	blastCommand += " -r " + toString(match) + " -q " + toString(mismatch);
 	blastCommand +=	" -G " + toString(gapOpen) + " -E " + toString(gapExtend);
 	

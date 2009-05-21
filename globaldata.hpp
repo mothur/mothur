@@ -41,7 +41,7 @@ public:
 	FullMatrix* gMatrix;
 	TreeMap* gTreemap;
 	SequenceDB* gSequenceDB;
-	string inputFileName, helpRequest, commandName, vertical;
+	string inputFileName, helpRequest, commandName, vertical, argv;
 	bool allLines;
 	vector<string>  Estimators, Groups; //holds estimators to be used
 	set<int> lines; //hold lines to be used

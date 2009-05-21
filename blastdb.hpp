@@ -12,6 +12,7 @@
  */
 
 #include "mothur.h"
+#include "globaldata.hpp"
 
 class BlastDB : public Database {
 public:
@@ -23,12 +24,14 @@ private:
 	string dbFileName;
 	string queryFileName;
 	string blastFileName;
+	string path;
 	
 	float gapOpen;
 	float gapExtend;
 	float match;
 	float misMatch;
 	Sequence* emptySequence;
+	GlobalData* globaldata;
 };
 
 #endif
