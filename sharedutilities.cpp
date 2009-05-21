@@ -111,6 +111,7 @@ void SharedUtil::getSharedVectorswithReplacement(vector<string> Groups, vector<S
 //need to have mode because different commands require different number of valid groups
 void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups) {
 	try {
+//cout << "groups size" << userGroups.size() << endl;
 		if (userGroups.size() != 0) {
 			if (userGroups[0] != "all") {
 				//check that groups are valid

@@ -28,7 +28,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			gGroupmap = NULL;
 			gTree.clear();
 			Treenames.clear();
-			labels.clear(); lines.clear(); groups.clear();
+			labels.clear(); lines.clear(); Groups.clear();
 			allLines = 1;
 		}
 		
