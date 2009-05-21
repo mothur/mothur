@@ -37,6 +37,14 @@ GetOTURepCommand::GetOTURepCommand(){
 		
 		fastafile = globaldata->getFastaFile();
 		namesfile = globaldata->getNameFile();
+		groupfile = globaldata->getGroupFile();
+		
+		if (groupfile != "") {
+			//read in group map info.
+			groupMap = new GroupMap(groupfile);
+			groupMap->readMap();
+		}
+
 		openInputFile(fastafile, in);
 		
 		fasta = new FastaMap();
@@ -59,6 +67,9 @@ GetOTURepCommand::~GetOTURepCommand(){
 	delete input;
 	delete read;
 	delete fasta;
+	if (groupfile != "") {
+		delete groupMap;
+	}
 }
 
 //**********************************************************************************************************************
@@ -98,15 +109,22 @@ int GetOTURepCommand::execute(){
 				
 				//for each bin in the list vector
 				for (int i = 0; i < list->size(); i++) {
-					nameRep = FindRep(i);
+					string groups;
+					nameRep = FindRep(i, groups);
 					
 					//print out name and sequence for that bin
 					sequence = fasta->getSequence(nameRep);
 
 					if (sequence != "not found") {
-						nameRep = nameRep + "|" + toString(i+1);
-						out << ">" << nameRep << endl;
-						out << sequence << endl;
+						if (groupfile == "") {
+							nameRep = nameRep + "|" + toString(i+1);
+							out << ">" << nameRep << endl;
+							out << sequence << endl;
+						}else {
+							nameRep = nameRep + "|" + groups + "|" + toString(i+1);
+							out << ">" << nameRep << endl;
+							out << sequence << endl;
+						}
 					}else { 
 						cout << nameRep << " is missing from your fasta or name file. Please correct. " << endl; 
 						remove(outputFileName.c_str());
@@ -173,7 +191,7 @@ void GetOTURepCommand::readNamesFile() {
 	}	
 }
 //**********************************************************************************************************************
-string GetOTURepCommand::FindRep(int bin) {
+string GetOTURepCommand::FindRep(int bin, string& group) {
 	try{
 		vector<string> names;
 		map<string, float> sums;
@@ -182,11 +200,33 @@ string GetOTURepCommand::FindRep(int bin) {
 		string binnames;
 		float min = 10000;
 		string minName;
+		map<string, string> groups;
+		map<string, string>::iterator groupIt;
 		
 		binnames = list->get(bin);
 	
 		//parse names into vector
 		splitAtComma(binnames, names);
+		
+		//if you have a groupfile
+		if(groupfile != "") {
+			//find the groups that are in this bin
+			for (int i = 0; i < names.size(); i++) {
+				string groupName = groupMap->getGroup(names[i]);
+				if (groupName == "not found") {  
+					cout << names[i] << " is missing from your group file. Please correct. " << endl;
+					groupError = true;
+				}else{
+					groups[groupName] = groupName;
+				}
+			}
+			
+			//turn the groups into a string
+			for(groupIt = groups.begin(); groupIt != groups.end(); groupIt++) { group += groupIt->first + "-"; }
+			
+			//rip off last dash
+			group = group.substr(0, group.length()-1);
+		}
 		
 		//if only 1 sequence in bin then that's the rep
 		if (names.size() == 1) { return names[0]; }

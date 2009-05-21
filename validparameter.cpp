@@ -273,16 +273,13 @@ void ValidParameters::initCommandParameters() {
 		string vennArray[] =  {"groups","line","label","calc"};
 		commandParameters["venn"] = addParameters(vennArray, sizeof(vennArray)/sizeof(string));
 		
-		string binseqsArray[] =  {"fasta","line","label","name"};
+		string binseqsArray[] =  {"fasta","line","label","name", "group"};
 		commandParameters["bin.seqs"] = addParameters(binseqsArray, sizeof(binseqsArray)/sizeof(string));
 		
 		string distsharedArray[] =  {"line","label","calc","groups"};
 		commandParameters["dist.shared"] = addParameters(distsharedArray, sizeof(distsharedArray)/sizeof(string));
 		
-		string getrepseqsArray[] =  {"fasta","line","label","name", "group"};
-		commandParameters["get.repseqs"] = addParameters(getrepseqsArray, sizeof(getrepseqsArray)/sizeof(string));
-		
-		string getOTURepArray[] =  {"fasta","list","line","label","name"};
+		string getOTURepArray[] =  {"fasta","list","line","label","name", "group"};
 		commandParameters["get.oturep"] = addParameters(getOTURepArray, sizeof(getOTURepArray)/sizeof(string));
 		
 		string treeGroupsArray[] =  {"line","label","calc","groups"};

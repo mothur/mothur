@@ -301,32 +301,23 @@ int HelpCommand::execute(){
 		cout << "is reported with its percentage, as well as the other pairs that were seen for that node but not used and their percentages." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "bin.seqs") { 
 		cout << "The bin.seqs command can only be executed after a successful read.otu command of a list file." << "\n";
-		cout << "The bin.seqs command parameters are fasta, name, line and label.  The fasta parameter is required, and you may not use line and label at the same time." << "\n";
+		cout << "The bin.seqs command parameters are fasta, name, line, label and group.  The fasta parameter is required, and you may not use line and label at the same time." << "\n";
 		cout << "The line and label allow you to select what distance levels you would like a output files created for, and are separated by dashes." << "\n";
-		cout << "The bin.seqs command should be in the following format: bin.seqs(fasta=yourFastaFile, name=yourNamesFile, line=yourLines, label=yourLabels)." << "\n";
-		cout << "Example bin.seqs(fasta=amazon.fasta, line=1-3-5, name=amazon.names)." << "\n";
+		cout << "The bin.seqs command should be in the following format: bin.seqs(fasta=yourFastaFile, name=yourNamesFile, group=yourGroupFile, line=yourLines, label=yourLabels)." << "\n";
+		cout << "Example bin.seqs(fasta=amazon.fasta, group=amazon.groups, line=1-3-5, name=amazon.names)." << "\n";
 		cout << "The default value for line and label are all lines in your inputfile." << "\n";
 		cout << "The bin.seqs command outputs a .fasta file for each distance you specify appending the OTU number to each name." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile)." << "\n" << "\n";
-	}else if (globaldata->helpRequest == "get.repseqs") { 
-		cout << "The get.repseqs command can only be executed after a successful read.otu command of a list file." << "\n";
-		cout << "The get.repseqs command parameters are fasta, name, group, line and label.  The fasta and group parameters are required, and you may not use line and label at the same time." << "\n";
-		cout << "The line and label allow you to select what distance levels you would like a output files created for, and are separated by dashes." << "\n";
-		cout << "The get.repseqss command should be in the following format: get.repseqs(fasta=yourFastaFile, name=yourNamesFile, group=yourGroupfile, line=yourLines, label=yourLabels)." << "\n";
-		cout << "Example get.repseqs(fasta=amazon.fasta, group=amazon.groups, line=1-3-5, name=amazon.names)." << "\n";
-		cout << "The default value for line and label are all lines in your inputfile." << "\n";
-		cout << "The get.repseqs command outputs several .fasta files for each distance you specify.  " << "\n";
-		cout << "If the distance level you choose has bins that contain only sequences unique to a specific group those sequences are outputted to a file for that group." << "\n";
-		cout << "If the bin contains sequences from multiple groups then the bin is outputted to the shared fasta file." << "\n";
+		cout << "If you provide a groupfile, then it also appends the sequences group to the name." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "get.oturep") { 
 		cout << "The get.oturep command can only be executed after a successful read.dist command." << "\n";
-		cout << "The get.oturep command parameters are list, fasta, name, line and label.  The fasta and list parameters are required, and you may not use line and label at the same time." << "\n";
+		cout << "The get.oturep command parameters are list, fasta, name, group, line and label.  The fasta and list parameters are required, and you may not use line and label at the same time." << "\n";
 		cout << "The line and label allow you to select what distance levels you would like a output files created for, and are separated by dashes." << "\n";
-		cout << "The get.oturep command should be in the following format: get.oturep(fasta=yourFastaFile, list=yourListFile, name=yourNamesFile, line=yourLines, label=yourLabels)." << "\n";
-		cout << "Example get.oturep(fasta=amazon.fasta, list=amazon.fn.list, line=1-3-5, name=amazon.names)." << "\n";
+		cout << "The get.oturep command should be in the following format: get.oturep(fasta=yourFastaFile, list=yourListFile, name=yourNamesFile, group=yourGroupFile, line=yourLines, label=yourLabels)." << "\n";
+		cout << "Example get.oturep(fasta=amazon.fasta, list=amazon.fn.list, group=amazon.groups, line=1-3-5, name=amazon.names)." << "\n";
 		cout << "The default value for line and label are all lines in your inputfile." << "\n";
 		cout << "The get.oturep command outputs a .fastarep file for each distance you specify, selecting one OTU representative for each bin." << "\n";
+		cout << "If you provide a groupfile, then it also appends the names of the groups present in that bin." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "quit") {
 		cout << "The quit command will terminate mothur and should be in the following format: " << "\n";

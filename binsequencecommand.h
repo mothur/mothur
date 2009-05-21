@@ -16,6 +16,7 @@
 #include "listvector.hpp"
 #include "readotu.h"
 #include "fastamap.h"
+#include "groupmap.h"
 
 
 class GlobalData;
@@ -33,7 +34,8 @@ private:
 	ReadOTUFile* read;
 	InputData* input;
 	FastaMap* fasta;
-	string filename, fastafile, namesfile;
+	GroupMap* groupMap;
+	string filename, fastafile, namesfile, groupfile;
 	ofstream out;
 	ifstream in, inNames;
 	

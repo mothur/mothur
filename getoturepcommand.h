@@ -18,7 +18,7 @@
 #include "inputdata.h"
 #include "readotu.h"
 #include "fastamap.h"
-
+#include "groupmap.h"
 
 class GlobalData;
 
@@ -39,9 +39,11 @@ private:
 	ReadOTUFile* read;
 	InputData* input;
 	FastaMap* fasta;
-	string filename, fastafile, namesfile;
+	GroupMap* groupMap;
+	string filename, fastafile, namesfile, groupfile;
 	ofstream out;
 	ifstream in, inNames;
+	bool groupError;
 	
 	 
 	map<string, int> nameToIndex;  //maps sequence name to index in sparsematrix
@@ -50,7 +52,7 @@ private:
 	map<string, int>::iterator it3;
 	
 	void readNamesFile();
-	string FindRep(int); // returns name of "representative" sequence of given bin.
+	string FindRep(int, string&); // returns name of "representative" sequence of given bin. //and fill a string containing the groups in that bin if a groupfile is given
 
 };
 

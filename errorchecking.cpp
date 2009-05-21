@@ -277,12 +277,6 @@ bool ErrorCheck::checkInput(string input) {
 			validateBinFiles();
 		}
 		
-		if ((commandName == "get.repseqs")) { 
-			if ((globaldata->getListFile() == "")) { cout << "You must read a list file before you can use the get.repseqs command." << endl; return false; }
-			else if (groupfile == "") { cout << "You must provide a groupfile before you can use the get.repseqs command." << endl; return false; }
-			validateBinFiles();
-		}
-
 		
 		if ((commandName == "get.oturep")) { 
 			if ((globaldata->gSparseMatrix == NULL) || (globaldata->gListVector == NULL)) {
