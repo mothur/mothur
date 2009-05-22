@@ -86,7 +86,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if (key == "ends" )			{ ends = value;			}
 				if (key == "processors" )	{ processors = value;	}
 				if (key == "size" )         { size = value;         }
-				if (key == "template")		{ templatefile = value;	}
+				if (key == "candidate")		{ candidatefile = value;	}
 				if (key == "search")		{ search = value;		}
 				if (key == "ksize")			{ ksize = value;		}
 				if (key == "align")		    { align = value;		}
@@ -157,7 +157,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if (key == "ends" )			{ ends = value;			}
 			if (key == "processors" )	{ processors = value;	}
 			if (key == "size" )         { size = value;         }
-			if (key == "template")		{ templatefile = value;	}
+			if (key == "candidate")		{ candidatefile = value;	}
 			if (key == "search")		{ search = value;		}
 			if (key == "ksize")			{ ksize = value;		}
 			if (key == "align")		    { align = value;		}
@@ -303,7 +303,7 @@ string GlobalData::getScale()			{	return scale;		}
 string GlobalData::getEnds()			{   return ends;		}
 string GlobalData::getProcessors()		{	return processors;	}
 string GlobalData::getSize()            {   return size;        }
-string GlobalData::getTemplateFile()	{	return templatefile;}
+string GlobalData::getCandidateFile()	{	return candidatefile;}
 string GlobalData::getSearch()			{	return search;		}
 string GlobalData::getKSize()			{	return ksize;		}
 string GlobalData::getAlign()			{	return align;		}
@@ -357,7 +357,7 @@ void GlobalData::clear() {
 	clustalfile		=   "";
 	treefile		=	"";
 	sharedfile		=	"";
-	templatefile	=	"";
+	candidatefile	=	"";
 	cutoff			=	"10.00";
 	format			=	"";
 	precision		=	"100";
@@ -382,12 +382,12 @@ void GlobalData::clear() {
 	ends			=   "T";  //yes
 	processors		=	"1";
 	size            =   "1000";
-	search			=	"suffix";
+	search			=	"kmer";
 	ksize			=	"7";
-	align			=	"blast";
+	align			=	"needleman";
 	match			=	"1.0";
 	mismatch		=	"-1.0";
-	gapopen			=	"-5.0";
+	gapopen			=	"-1.0";
 	gapextend		=	"-2.0";
 }
 
@@ -411,12 +411,12 @@ void GlobalData::reset() {
 	ends			=   "T";
 	processors		=	"1";
 	size            =   "1000";
-	search			=	"suffix";
+	search			=	"kmer";
 	ksize			=	"7";
-	align			=	"blast";
+	align			=	"needleman";
 	match			=	"1.0";
 	mismatch		=	"-1.0";
-	gapopen			=	"-5.0";
+	gapopen			=	"-1.0";
 	gapextend		=	"-2.0";
 }
 /*******************************************************/

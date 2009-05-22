@@ -119,7 +119,7 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "ends" )			{ ends = value; }
 				if (parameter == "processors" )		{ processors = value;	}
 				if (parameter == "size" )			{ size = value; }
-				if (parameter == "template")		{ templatefile = value;	}
+				if (parameter == "candidate")		{ candidatefile = value;	}
 				if (parameter == "search")			{ search = value;		}
 				if (parameter == "ksize")			{ ksize = value;		}
 				if (parameter == "align")		    { align = value;		}
@@ -169,7 +169,7 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "ends" )			{ ends = value; }
 				if (parameter == "processors" )		{ processors = value;	}
 				if (parameter == "size" )			{ size = value; }
-				if (parameter == "template")		{ templatefile = value;	}
+				if (parameter == "candidate")		{ candidatefile = value;	}
 				if (parameter == "search")			{ search = value;		}
 				if (parameter == "ksize")			{ ksize = value;		}
 				if (parameter == "align")		    { align = value;		}
@@ -263,11 +263,16 @@ bool ErrorCheck::checkInput(string input) {
 			}
 		}
 		
-		if ((commandName == "filter.seqs") || (commandName == "dist.seqs") || (commandName == "align.seqs")) { 
+		if ((commandName == "filter.seqs") || (commandName == "dist.seqs")) { 
 			if ((fastafile == "") && (nexusfile == "") && (clustalfile == "") && (phylipfile == "")) {
-				 cout << "You must enter either a fasta, nexus, clustal, or phylip file before you can use the filter.seqs, dist.seqs or align.seqs command." << endl; return false; 
-			}else if ((commandName == "align.seqs") && (templatefile == "")) {
-				cout << "You must enter a template to use the align.seqs command." << endl; return false; 
+				 cout << "You must enter either a fasta, nexus, clustal, or phylip file before you can use the filter.seqs or dist.seqs command." << endl; return false; 
+			}
+			validateSeqsFiles();
+		}
+		
+		if (commandName == "align.seqs") {
+			if ((fastafile == "") || (candidatefile == "")) {
+				cout << "You must enter fasta and a candidate file to use the align.seqs command." << endl; return false; 
 			}
 			validateSeqsFiles();
 		}
@@ -578,8 +583,8 @@ void ErrorCheck::validateSeqsFiles() {
 					errorFree = false;
 				}
 			}
-		}else if (templatefile != "") {
-			ableToOpen = openInputFile(templatefile, filehandle);
+		}else if (candidatefile != "") {
+			ableToOpen = openInputFile(candidatefile, filehandle);
 			filehandle.close();
 			if (ableToOpen == 1) { //unable to open
 				errorFree = false;
@@ -676,7 +681,7 @@ void ErrorCheck::clear() {
 	fastafile       =   "";
 	nexusfile       =   "";
 	clustalfile     =   "";
-	templatefile	=	"";
+	candidatefile	=	"";
 	line			=	"";
 	label			=	"";
 	method			=   "furthest";

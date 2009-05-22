@@ -41,8 +41,8 @@
 AlignCommand::AlignCommand(){
 	try {
 		globaldata = GlobalData::getInstance();
-		candidateFileName = globaldata->inputFileName;
-		templateFileName = globaldata->getTemplateFile();
+		candidateFileName = globaldata->getCandidateFile();
+		templateFileName = globaldata->getFastaFile();
 		openInputFile(candidateFileName, in);
 		convert(globaldata->getKSize(), kmerSize);
 		convert(globaldata->getMatch(), match);

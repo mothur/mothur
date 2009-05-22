@@ -121,7 +121,7 @@ int VennCommand::execute(){
 						cout << "Error: Too many groups chosen.  You may use up to 4 groups with the venn command.  I will use the first four groups in your groupfile." << endl;
 						for (int i = lookup.size(); i > 3; i--) { delete lookup[i]; lookup.pop_back(); }
 					}
-					
+				
 					//util->getSharedVectors(globaldata->Groups, lookup, order);  //fills group vectors from order vector.
 					venn->getPic(lookup, vennCalculators);
 				}

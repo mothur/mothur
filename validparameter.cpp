@@ -294,7 +294,7 @@ void ValidParameters::initCommandParameters() {
 		string distanceArray[] =  {"fasta","phylip","clustal","nexus", "calc", "ends", "cutoff", "processors"};
 		commandParameters["dist.seqs"] = addParameters(distanceArray, sizeof(distanceArray)/sizeof(string));
 		
-		string AlignArray[] =  {"fasta","phylip","clustal","nexus", "template", "search", "ksize", "align", "match", "mismatch", "gapopen", "gapextend"};
+		string AlignArray[] =  {"fasta", "candidate", "search", "ksize", "align", "match", "mismatch", "gapopen", "gapextend"};
 		commandParameters["align.seqs"] = addParameters(AlignArray, sizeof(AlignArray)/sizeof(string));
 		
 		string quitArray[] = {};

@@ -78,7 +78,7 @@ public:
 	string getEnds();
 	string getProcessors();
 	string getSize();
-	string getTemplateFile();
+	string getCandidateFile();
 	string getSearch();
 	string getKSize();
 	string getAlign();
@@ -122,7 +122,7 @@ public:
 private:
 
 	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, nexusfile, clustalfile, treefile, sharedfile, line, label, randomtree, groups;
-	string cutoff, format, precision, method, fileroot, iters, jumble, freq, calc, abund, step, form, sorted, trump, soft, filter, scale, ends, processors, templatefile, search, ksize, align, match, size;
+	string cutoff, format, precision, method, fileroot, iters, jumble, freq, calc, abund, step, form, sorted, trump, soft, filter, scale, ends, processors, candidatefile, search, ksize, align, match, size;
 	string mismatch, gapopen, gapextend;
 
 
