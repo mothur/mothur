@@ -84,19 +84,18 @@ int HelpCommand::execute(){
 		cout << "Note: No spaces between parameter labels (i.e. calc), '=' and parameters (i.e.yourCalc)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "align.seqs") {
 		cout << "The align.seqs command reads a file containing sequences and creates an alignment file and a report file." << "\n";
-		cout << "The align.seqs command parameters are fasta, phylip, clustal, nexus, template, search, ksize, align, match, mismatch, gapopen and gapextend.  " << "\n";
-		cout << "You must use one of the following parameters for your candidate filename: fasta, phylip, clustal or nexus. " << "\n";
+		cout << "The align.seqs command parameters are fasta, candidate, search, ksize, align, match, mismatch, gapopen and gapextend.  " << "\n";
 		cout << "The template parameter is also required." << "\n";
-		cout << "The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer and blast. The default is suffix." << "\n";
-		cout << "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is blast." << "\n";
+		cout << "The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer and blast. The default is kmer." << "\n";
+		cout << "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman." << "\n";
 		cout << "The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 7." << "\n";
 		cout << "The match parameter allows you to specify the bonus for having the same base. The default is 1.0." << "\n";
 		cout << "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0." << "\n";
-		cout << "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -5.0." << "\n";
+		cout << "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -1.0." << "\n";
 		cout << "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -2.0." << "\n";
 		cout << "The align.seqs command should be in the following format: " << "\n";
-		cout << "align.seqs(fasta=yourFastaFile, template=yourTemplateFile, align=yourAlignmentMethod, search=yourSearchmethod, ksize=yourKmerSize, match=yourMatchBonus, mismatch=yourMismatchpenalty, gapopen=yourGapopenPenalty, gapextend=yourGapExtendPenalty) " << "\n";
-		cout << "Example align.seqs(fasta=candidate.fasta, template=core.filtered, align=kmer, search=gotoh, ksize=8, match=2.0, mismatch=3.0, gapopen=-2.0, gapextend=-1.0)" << "\n";
+		cout << "align.seqs(fasta=yourTemplateFile, candidate=yourCandidateFile, align=yourAlignmentMethod, search=yourSearchmethod, ksize=yourKmerSize, match=yourMatchBonus, mismatch=yourMismatchpenalty, gapopen=yourGapopenPenalty, gapextend=yourGapExtendPenalty) " << "\n";
+		cout << "Example align.seqs(candidate=candidate.fasta, fasta=core.filtered, align=kmer, search=gotoh, ksize=8, match=2.0, mismatch=3.0, gapopen=-2.0, gapextend=-1.0)" << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "collect.single") {
 		cout << "The collect.single command can only be executed after a successful read.otu command. WITH ONE EXECEPTION. " << "\n";
