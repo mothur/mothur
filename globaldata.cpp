@@ -375,7 +375,7 @@ void GlobalData::clear() {
 	form			=	"integral";
 	sorted			=	"T";  //F means don't sort, T means sort.
 	vertical        =   "";		
-	trump           =   "";		
+	trump           =   ".";		
 	filter          =   "";		
 	soft            =   "";	
 	scale			=	"log10";
@@ -418,6 +418,11 @@ void GlobalData::reset() {
 	mismatch		=	"-1.0";
 	gapopen			=	"-1.0";
 	gapextend		=	"-2.0";
+	vertical        =   "";		
+	trump           =   ".";		
+	filter          =   "";		
+	soft            =   "";	
+
 }
 /*******************************************************/
 

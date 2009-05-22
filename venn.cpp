@@ -238,7 +238,7 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 				vector<double> sharedCwithAB;
 				
 				//find possible sharedABC values
-				float sharedABC1, sharedABC2, sharedABC3, sharedABC;
+				float sharedABC1 = 0.0; float sharedABC2 = 0.0; float sharedABC3 = 0.0; float sharedABC = 0.0;
 
 				if (vCalcs[i]->getName() != "sharedchao") {
 					//merge BC and estimate with shared with A
