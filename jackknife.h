@@ -20,7 +20,7 @@ It is a child of the calculator class. */
 class Jackknife : public Calculator  {
 	
 public:
-	Jackknife() : Calculator("Jackknife", 3, false) {	getAMatrix(); };
+	Jackknife() : Calculator("jackknife", 3, false) {	getAMatrix(); };
 	EstOutput getValues(SAbundVector*);
 	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
 

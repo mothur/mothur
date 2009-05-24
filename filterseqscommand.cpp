@@ -10,158 +10,160 @@
 #include "filterseqscommand.h"
 
 /**************************************************************************************/
-void FilterSeqsCommand::doTrump() {
-	trump = globaldata->getTrump();
-	for(int i = 0; i < db->size(); i++) {
-		Sequence cur = db->get(i);
-		string curAligned = cur.getAligned();
-		for(int j = 0; j < curAligned.length(); j++) {
-			string curChar = curAligned.substr(j, 1);
-			if(curChar.compare(trump) == 0) 
-				columnsToRemove[j] = true;
-		}
-	}
+
+FilterSeqsCommand::FilterSeqsCommand(){
+	globaldata = GlobalData::getInstance();
+	
+	if(globaldata->getFastaFile() != "")		{	readSeqs =  new ReadFasta(globaldata->inputFileName);	}
+	else if(globaldata->getNexusFile() != "")	{	readSeqs = new ReadNexus(globaldata->inputFileName);	}
+	else if(globaldata->getClustalFile() != "") {	readSeqs = new ReadClustal(globaldata->inputFileName);	}
+	else if(globaldata->getPhylipFile() != "")	{	readSeqs = new ReadPhylip(globaldata->inputFileName);	}
+	
+	readSeqs->read();
+	db = readSeqs->getDB();
+	numSeqs = db->size();
+	
+	alignmentLength = db->get(0).getLength();
+
+	filter = string(alignmentLength, '1');
 }
 
 /**************************************************************************************/
-void FilterSeqsCommand::doSoft() {
-	soft = atoi(globaldata->getSoft().c_str());
-	vector<vector<int> > columnSymbolSums;
-	vector<vector<string> > columnSymbols;
-	for(int i = 0; i < db->get(0).getLength(); i++) {
-		vector<string> symbols;
-		vector<int> sums;
-		columnSymbols.push_back(symbols);
-		columnSymbolSums.push_back(sums);
+
+void FilterSeqsCommand::doHard() {
+	
+	string hardName = globaldata->getHard();
+	string hardFilter = "";
+		
+	ifstream fileHandle;
+	openInputFile(hardName, fileHandle);
+	
+	fileHandle >> hardFilter;
+	
+	if(hardFilter.length() != filter.length()){
+		cout << "The hard filter is not the same length as the alignment: Hard filter will not be applied." << endl;
+	}
+	else{
+		filter = hardFilter;
 	}
 	
-	for(int i = 0; i < db->size(); i++) {
-		Sequence cur = db->get(i);
-		string curAligned = cur.getAligned();
-		
-		for(int j = 0; j < curAligned.length(); j++) {
-			string curChar = curAligned.substr(j, 1);
-			vector<string> curColumnSymbols = columnSymbols[j];
-			bool newSymbol = true;
-			
-			for(int k = 0; k < curColumnSymbols.size(); k++) 
-				if(curChar.compare(curColumnSymbols[k]) == 0) {
-					newSymbol = false;
-					columnSymbolSums[j][k]++;
-				}
-			
-			if(newSymbol) {
-				columnSymbols[j].push_back(curChar);
-				columnSymbolSums[j].push_back(1);
+}
+
+/**************************************************************************************/
+
+void FilterSeqsCommand::doTrump() {
+
+	char trump = globaldata->getTrump()[0];
+	
+	for(int i = 0; i < numSeqs; i++) {
+		string curAligned = db->get(i).getAligned();;
+
+		for(int j = 0; j < alignmentLength; j++) {
+			if(curAligned[j] == trump){
+				filter[j] = '0';
 			}
 		}
 	}
+
+}
+
+/**************************************************************************************/
+
+void FilterSeqsCommand::doVertical() {
+
+	vector<int> counts(alignmentLength, 0);
 	
-	
-	for(int i = 0; i < columnSymbolSums.size(); i++) {
-		int totalSum = 0;
-		int max = 0;
-		vector<int> curColumnSymbols = columnSymbolSums[i];
+	for(int i = 0; i < numSeqs; i++) {
+		string curAligned = db->get(i).getAligned();;
 		
-		for(int j = 0; j < curColumnSymbols.size(); j++) {
-			int curSum = curColumnSymbols[j];
-			//cout << columnSymbols[i][j] << ": " << curSum << "\n";
-			if(curSum > max)
-				max = curSum;
-			totalSum += curSum;
+		for(int j = 0; j < alignmentLength; j++) {
+			if(curAligned[j] == '-' || curAligned[j] == '.'){
+				counts[j]++;
+			}
 		}
-		//cout << "\n";
-		
-		if((double)max/(double)totalSum * 100 < soft)
-			columnsToRemove[i] = true;
+	}
+	for(int i=0;i<alignmentLength;i++){
+		if(counts[i] == numSeqs)	{	filter[i] = '0';		}
 	}
 }
 
 /**************************************************************************************/
-void FilterSeqsCommand::doFilter() {
-	filter = globaldata->getFilter();
-	ifstream filehandle;
-	openInputFile(filter, filehandle);
+
+void FilterSeqsCommand::doSoft() {
+
+	int softThreshold = numSeqs * (float)atoi(globaldata->getSoft().c_str()) / 100.0;
+
+	vector<int> a(alignmentLength, 0);
+	vector<int> t(alignmentLength, 0);
+	vector<int> g(alignmentLength, 0);
+	vector<int> c(alignmentLength, 0);
+	vector<int> x(alignmentLength, 0);
 	
-	char c;
-	int count = 0;
-	while(!filehandle.eof()) {
-		c = filehandle.get();
-		if(c == '0') 
-			columnsToRemove[count] = true;
-		count++;
+	for(int i=0;i<numSeqs;i++){
+		string curAligned = db->get(i).getAligned();;
+
+		for(int j=0;j<alignmentLength;j++){
+			if(toupper(curAligned[j]) == 'A')										{	a[j]++;	}
+			else if(toupper(curAligned[j]) == 'T' || toupper(curAligned[i]) == 'U')	{	t[j]++;	}
+			else if(toupper(curAligned[j]) == 'G')									{	g[j]++;	}
+			else if(toupper(curAligned[j]) == 'C')									{	c[j]++;	}
+		}
+	}
+
+	for(int i=0;i<alignmentLength;i++){
+		if(a[i] < softThreshold && t[i] < softThreshold && g[i] < softThreshold && c[i] < softThreshold){
+			filter[i] = '0';			
+		}
 	}
 }
 
 /**************************************************************************************/
+
 int FilterSeqsCommand::execute() {	
 	try {
-		globaldata = GlobalData::getInstance();
-		filename = globaldata->inputFileName;
-		
-		if(globaldata->getFastaFile() != "") {
-			readSeqs =  new ReadFasta(filename); }
-		else if(globaldata->getNexusFile() != "") {
-			readSeqs = new ReadNexus(filename); }
-		else if(globaldata->getClustalFile() != "") {
-			readSeqs = new ReadClustal(filename); }
-		else if(globaldata->getPhylipFile() != "") {
-			readSeqs = new ReadPhylip(filename); }
-			
-		readSeqs->read();
-		db = readSeqs->getDB();
-		
-		//for(int i = 0; i < db->size(); i++) {
-//			cout << db->get(i).getLength() << "\n" << db->get(i).getName() << ": " << db->get(i).getAligned() << "\n\n";
-//		}
+						
+		if(globaldata->getHard().compare("") != 0)		{	doHard();		}	//	has to be applied first!
+		if(globaldata->getTrump().compare("") != 0)		{	doTrump();		}
+		if(globaldata->getVertical() == "T")			{	doVertical();	}
+		if(globaldata->getSoft().compare("") != 0)		{	doSoft();		}
 
-		for(int i = 0; i < db->get(0).getLength(); i++) 
-			columnsToRemove.push_back(false);
-		
-				
-		if(globaldata->getTrump().compare("") != 0) 
-			doTrump();
-		else if(globaldata->getSoft().compare("") != 0)
-			doSoft();
-		else if(globaldata->getFilter().compare("") != 0) 
-			doFilter();
-		
-		//for(int i = 0; i < columnsToRemove.size(); i++)
-//		{
-//			cout << "Remove Column " << i << " = ";
-//			if(columnsToRemove[i])
-//				cout << "true\n";
-//			else
-//				cout << "false\n";
-//		}
+		ofstream outfile;
+		string filterFile = getRootName(globaldata->inputFileName) + "filter";
+		openOutputFile(filterFile, outfile);
 
+		outfile << filter << endl;
+		outfile.close();
+		
+		string filteredFasta = getRootName(globaldata->inputFileName) + "filter.fasta";
+		openOutputFile(filteredFasta, outfile);
 
-		//Creating the new SequenceDB 
-		SequenceDB newDB;
-		for(int i = 0; i < db->size(); i++) {
-			Sequence curSeq = db->get(i);
-			string curAligned = curSeq.getAligned();
-			string curName = curSeq.getName();
-			string newAligned = "";
-			for(int j = 0; j < curAligned.length(); j++) 
-				if(!columnsToRemove[j]) 
-					newAligned += curAligned.substr(j, 1);
-			
-			Sequence newSeq(curName, newAligned);
-			newDB.add(newSeq);
+		for(int i=0;i<numSeqs;i++){
+			string curAligned = db->get(i).getAligned();
+			outfile << '>' << db->get(i).getName() << endl;
+			for(int j=0;j<alignmentLength;j++){
+				if(filter[j] == '1'){
+					outfile << curAligned[j];
+				}
+			}
+			outfile << endl;
+		}
+		outfile.close();
+		
+		int filteredLength = 0;
+		for(int i=0;i<alignmentLength;i++){
+			if(filter[i] == '1'){	filteredLength++;	}
 		}
 		
-		string newFileName = getRootName(filename) + "filter.fa";
-		ofstream outfile;
-		outfile.open(newFileName.c_str());
-		newDB.print(outfile);
-		outfile.close();
-			
+		cout << endl;
+		cout << "Length of filtered alignment: " << filteredLength << endl;
+		cout << "Number of columns removed: " << alignmentLength-filteredLength << endl;
+		cout << "Length of the original alignment: " << alignmentLength << endl;
+		cout << "Number of sequences used to construct filter: " << numSeqs << endl;
+		
 		globaldata->clear();
-		//delete db;
-		//delete newDB;
 		
 		return 0;
+		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the FilterSeqsCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -172,3 +174,5 @@ int FilterSeqsCommand::execute() {
 		exit(1);
 	}
 }
+
+/**************************************************************************************/

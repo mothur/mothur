@@ -131,7 +131,7 @@ int MatrixOutputCommand::execute(){
 						}
 					}
 					
-					exportFileName = getRootName(globaldata->inputFileName) + matrixCalculators[i]->getName() + "." + lookup[0]->getLabel() + ".matrix";
+					exportFileName = getRootName(globaldata->inputFileName) + matrixCalculators[i]->getName() + "." + lookup[0]->getLabel() + ".dist";
 					openOutputFile(exportFileName, out);
 					printSims(out);
 					out.close();
@@ -166,14 +166,11 @@ void MatrixOutputCommand::printSims(ostream& out) {
 	try {
 		
 		//output column headers
-		out << '\t';
-		for (int i = 0; i < lookup.size(); i++) {	out << lookup[i]->getGroup() << '\t';		}
-		out << endl;
-		
+		out << simMatrix.size() << endl;
 		
 		for (int m = 0; m < simMatrix.size(); m++)	{
 			out << lookup[m]->getGroup() << '\t';
-			for (int n = 0; n < simMatrix.size(); n++)	{
+			for (int n = 0; n < m; n++)	{
 				out << simMatrix[m][n] << '\t'; 
 			}
 			out << endl;

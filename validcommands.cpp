@@ -22,7 +22,7 @@ ValidCommands::ValidCommands() {
 		commands["cluster"]				= "cluster"; 
 		commands["deconvolute"]			= "deconvolute"; 
 		commands["dist.seqs"]			= "dist.seqs";
-		commands["dist.shared"]			= "dist.shared";  //matrix output
+		commands["dist.shared"]			= "dist.shared";
 		commands["collect.single"]		= "collect.single"; 
 		commands["collect.shared"]		= "collect.shared"; 
 		commands["rarefaction.single"]	= "rarefaction.single"; 

@@ -18,7 +18,7 @@
 class Lennon : public Calculator  {
 	
 public:
-	Lennon() :  Calculator("Lennon", 1, false) {};
+	Lennon() :  Calculator("lennon", 1, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(vector<SharedRAbundVector*>);
 private:

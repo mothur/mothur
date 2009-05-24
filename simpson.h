@@ -20,7 +20,7 @@ It is a child of the calculator class. */
 class Simpson : public Calculator  {
 
 public:
-	Simpson() : Calculator("Simpson", 3, false) {};
+	Simpson() : Calculator("simpson", 3, false) {};
 	EstOutput getValues(SAbundVector*);
 	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
 };

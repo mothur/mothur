@@ -24,37 +24,30 @@ public:
 		int diff = 0;
 		int length = 0;
 		int start = 0;
-		int end = 0;
 		
-		for(int i=0;i<A.getLength();i++){
-			if(A.getAligned()[i] == '.' || B.getAligned()[i] == '.' || A.getAligned()[i] == '-' || B.getAligned()[i] == '-'){
-			}
-			else{
+		string seqA = A.getAligned();
+		string seqB = B.getAligned();
+		int alignLength = seqA.length();
+		
+		for(int i=0;i<alignLength;i++){
+			if(seqA[i] != '.' && seqB[i] != '.'){
 				start = i;
 				break;
 			}
 		}
-		for(int i=A.getLength()-1;i>=0;i--){
-			if(A.getAligned()[i] == '.' || B.getAligned()[i] == '.' || A.getAligned()[i] == '-' || B.getAligned()[i] == '-'){
-			}
-			else{
-				end = i;
-				break;
-			}
-		}
 		
-		for(int i=start; i<=end; i++){
-			if(A.getAligned()[i] == '.' || B.getAligned()[i] == '.'){
+		for(int i=start; i<alignLength; i++){
+			if(seqA[i] == '.' || seqB[i] == '.'){
 				break;
 			}
-			else if((A.getAligned()[i] != '-' && B.getAligned()[i] != '-')){
-				if(A.getAligned()[i] != B.getAligned()[i]){
+			else if((seqA[i] != '-' && seqB[i] != '-')){
+				if(seqA[i] != seqB[i]){
 					diff++;
 				}
 				length++;
 			}
 		}
-		
+
 		if(length == 0)		{	dist = 1.0000;								}
 		else				{	dist = ((double)diff  / (double)length);	}
 		

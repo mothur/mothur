@@ -20,12 +20,12 @@ DistanceCommand::DistanceCommand(){
 	try {
 		globaldata = GlobalData::getInstance();
 		validCalculator = new ValidCalculators();
-		ends = globaldata->getEnds();
+		countends = globaldata->getCountEnds();
 		convert(globaldata->getProcessors(), processors);
 		convert(globaldata->getCutOff(), cutoff);
 		
 		int i;
-		if (ends != "T") {
+		if (countends == "T") {
 			for (i=0; i<globaldata->Estimators.size(); i++) {
 				if (validCalculator->isValidCalculator("distance", globaldata->Estimators[i]) == true) { 
 					if (globaldata->Estimators[i] == "nogaps") { 
@@ -83,7 +83,8 @@ int DistanceCommand::execute(){
 		seqDB = readSeqs->getDB();
 	
 		int numSeqs = seqDB->getNumSeqs();
-		
+		cutoff += 0.005;
+
 		string distFile = getRootName(globaldata->getFastaFile()) + "dist";
 		
 		remove(distFile.c_str());
@@ -201,10 +202,6 @@ int DistanceCommand::driver(Dist* distCalculator, SequenceDB* align, int startLi
 		for(int i=startLine;i<endLine;i++){
 		
 			for(int j=0;j<i;j++){
-//cout << "unaligned" << endl;
-//cout << align->get(i).getUnaligned() << "  " << align->get(j).getUnaligned() << endl;
-//cout << "aligned" << endl;
-//cout << align->get(i).getAligned() << "  " << align->get(j).getAligned() << endl;
 				distCalculator->calcDist(align->get(i), align->get(j));
 				double dist = distCalculator->getDist();
 

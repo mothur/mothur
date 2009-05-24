@@ -42,7 +42,6 @@ EstOutput SharedChao1::getValues(vector<SharedRAbundVector*> shared){
 			
 			//they are shared
 			if (sharedByAll == true) { 
-				 
 				// cout << "temp = ";
 				// for (int h = 0; h < temp.size(); h++) { cout << temp[h] << " "; } cout << endl;
 				//find f1 and f2values
@@ -53,29 +52,35 @@ EstOutput SharedChao1::getValues(vector<SharedRAbundVector*> shared){
 			
 		//cout << "Entering " << endl;
 		//calculate chao1, (numleaves-1) because numleaves contains the ++ values.
-		for (int i = 0; i < numLeaves; i++) {
-			//divide by zero error
-			if (f2leaves[i]->lvalue == 0) { f2leaves[i]->lvalue++; }
-			if (f2leaves[i]->rvalue == 0) { f2leaves[i]->rvalue++; }
-			
-			//cout << "f2 leaves ";
-			//cout << f2leaves[i]->lvalue << f2leaves[i]->rvalue << endl;
-			
-		//	cout << "f2 leaf coef ";
-			//cout << f2leaves[i]->lcoef << '\t' << f2leaves[i]->rcoef << endl;
-			
-		//	cout << "f1 leaves ";
-		//	cout << f1leaves[i]->lvalue << f1leaves[i]->rvalue << endl;
-			
-			
-			leftvalue = (float)(f1leaves[i]->lvalue * f1leaves[i]->lvalue) / (float)((pow(2, (float)f2leaves[i]->lcoef)) * f2leaves[i]->lvalue);
-			if (i != (numLeaves-1)) {
-				rightvalue = (float)(f1leaves[i]->rvalue * f1leaves[i]->rvalue) / (float)((pow(2, (float)f2leaves[i]->rcoef)) * f2leaves[i]->rvalue);
-			}else{
-				rightvalue = (float)(f1leaves[i]->rvalue);
+		bool bias;
+		for(int i=0;i<numLeaves;i++){
+			if (f2leaves[i]->lvalue == 0) { bias = true;}// break;}
+		}
+
+		if(bias){
+			for (int i = 0; i < numLeaves; i++) {
+				
+				leftvalue = (float)(f1leaves[i]->lvalue * (f1leaves[i]->lvalue - 1)) / (float)((pow(2, (float)f2leaves[i]->lcoef)) * (f2leaves[i]->lvalue + 1));
+				if (i != (numLeaves-1)) {
+					rightvalue = (float)(f1leaves[i]->rvalue * (f1leaves[i]->rvalue - 1)) / (float)((pow(2, (float)f2leaves[i]->rcoef)) * (f2leaves[i]->rvalue + 1));
+				}else{
+					rightvalue = (float)(f1leaves[i]->rvalue);
+				}
+				Chao += leftvalue + rightvalue;
 			}
-			//cout << "left = " << leftvalue << " right = " << rightvalue << endl;
-			Chao += leftvalue + rightvalue;
+		}
+		else{
+			
+			for (int i = 0; i < numLeaves; i++) {
+				
+				leftvalue = (float)(f1leaves[i]->lvalue * f1leaves[i]->lvalue) / (float)((pow(2, (float)f2leaves[i]->lcoef)) * f2leaves[i]->lvalue);
+				if (i != (numLeaves-1)) {
+					rightvalue = (float)(f1leaves[i]->rvalue * f1leaves[i]->rvalue) / (float)((pow(2, (float)f2leaves[i]->rcoef)) * f2leaves[i]->rvalue);
+				}else{
+					rightvalue = (float)(f1leaves[i]->rvalue);
+				}
+				Chao += leftvalue + rightvalue;
+			}
 		}
 		
 		for (int i = 0; i < numNodes; i++) {

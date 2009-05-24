@@ -20,7 +20,7 @@ It is a child of the calculator class. */
 class JAbund : public Calculator  {
 	
 public:
-	JAbund() :  Calculator("JAbund", 3, false) {};
+	JAbund() :  Calculator("jabund", 3, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(vector<SharedRAbundVector*>);
 private:

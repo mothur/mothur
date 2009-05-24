@@ -72,15 +72,15 @@ int HelpCommand::execute(){
 		cout << "deconvolute(fasta=yourFastaFile) " << "\n";
 	}else if (globaldata->helpRequest == "dist.seqs") {
 		cout << "The dist.seqs command reads a file containing sequences and creates a distance file." << "\n";
-		cout << "The dist.seqs command parameters are fasta, phylip, clustal, nexus, calc, ends, cutoff and processors.  " << "\n";
+		cout << "The dist.seqs command parameters are fasta, phylip, clustal, nexus, calc, countends, cutoff and processors.  " << "\n";
 		cout << "You must use one of the following parameters for your filename: fasta, phylip, clustal or nexus. " << "\n";
 		cout << "The calc parameter allows you to specify the method of calculating the distances.  Your options are: nogaps, onegap or eachgap. The default is onegap." << "\n";
-		cout << "The ends parameter allows you to specify whether to include terminal gaps in distance.  Your options are: T or F. The default is T." << "\n";
+		cout << "The countends parameter allows you to specify whether to include terminal gaps in distance.  Your options are: T or F. The default is T." << "\n";
 		cout << "The cutoff parameter allows you to specify maximum distance to keep. The default is 1.0." << "\n";
 		cout << "The processors parameter allows you to specify number of processors to use.  The default is 1, but you can use up to 4 processors." << "\n";
 		cout << "The dist.seqs command should be in the following format: " << "\n";
-		cout << "dist.seqs(fasta=yourFastaFile, calc=yourCalc, ends=yourEnds, cutoff= yourCutOff, processors=yourProcessors) " << "\n";
-		cout << "Example dist.seqs(fasta=amazon.fasta, calc=eachgap, ends=F, cutoff= 2.0, processors=3)." << "\n";
+		cout << "dist.seqs(fasta=yourFastaFile, calc=yourCalc, countends=yourEnds, cutoff= yourCutOff, processors=yourProcessors) " << "\n";
+		cout << "Example dist.seqs(fasta=amazon.fasta, calc=eachgap, countends=F, cutoff= 2.0, processors=3)." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. calc), '=' and parameters (i.e.yourCalc)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "align.seqs") {
 		cout << "The align.seqs command reads a file containing sequences and creates an alignment file and a report file." << "\n";
@@ -273,9 +273,9 @@ int HelpCommand::execute(){
 		cout << "The dist.shared command should be in the following format: dist.shared(groups=yourGroups, calc=yourCalcs, line=yourLines, label=yourLabels)." << "\n";
 		cout << "Example dist.shared(groups=A-B-C, line=1-3-5, calc=jabund-sorabund)." << "\n";
 		cout << "The default value for groups is all the groups in your groupfile." << "\n";
-		cout << "There is no default value for calc." << "\n";
+		cout << "The default value for calc is jclass and thetayc." << "\n";
 		validCalcs->printCalc("matrix", cout);
-		cout << "The dist.shared command outputs a .matrix file for each calculator you specify at each distance you choose." << "\n";
+		cout << "The dist.shared command outputs a .dist file for each calculator you specify at each distance you choose." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "bootstrap.shared") { 
 		cout << "The bootstrap.shared command can only be executed after a successful read.otu command." << "\n";

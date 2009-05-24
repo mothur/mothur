@@ -267,7 +267,7 @@ void ValidParameters::initCommandParameters() {
 		string heatmapArray[] =  {"groups","line","label","sorted","scale"};
 		commandParameters["heatmap"] = addParameters(heatmapArray, sizeof(heatmapArray)/sizeof(string));
 		
-		string filterseqsArray[] =  {"fasta","phylip","clustal","nexus", "trump", "soft", "filter"};
+		string filterseqsArray[] =  {"fasta","phylip","clustal","nexus", "trump", "soft", "hard", "vertical"};
 		commandParameters["filter.seqs"] = addParameters(filterseqsArray, sizeof(filterseqsArray)/sizeof(string));
 
 		string vennArray[] =  {"groups","line","label","calc"};
@@ -291,7 +291,7 @@ void ValidParameters::initCommandParameters() {
 		string concensusArray[] =  {};
 		commandParameters["concensus"] = addParameters(concensusArray, sizeof(concensusArray)/sizeof(string));
 		
-		string distanceArray[] =  {"fasta","phylip","clustal","nexus", "calc", "ends", "cutoff", "processors"};
+		string distanceArray[] =  {"fasta","phylip","clustal","nexus", "calc", "countends", "cutoff", "processors"};
 		commandParameters["dist.seqs"] = addParameters(distanceArray, sizeof(distanceArray)/sizeof(string));
 		
 		string AlignArray[] =  {"fasta", "candidate", "search", "ksize", "align", "match", "mismatch", "gapopen", "gapextend"};
