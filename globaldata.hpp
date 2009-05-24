@@ -75,7 +75,7 @@ public:
 	string getStep();
 	string getForm();
 	string getSorted();
-	string getEnds();
+	string getCountEnds();
 	string getProcessors();
 	string getSize();
 	string getCandidateFile();
@@ -86,9 +86,10 @@ public:
 	string getMismatch();
 	string getGapopen();
 	string getGapextend();
+	string getVertical();
 	string getTrump();
 	string getSoft();
-	string getFilter();
+	string getHard();
 	string getScale();
 
 
@@ -104,7 +105,7 @@ public:
 	void setRandomTree(string);
 	void setGroups(string);
 	void setCalc(string);
-	void setEnds(string);
+	void setCountEnds(string);
 	void setProcessors(string);
 
 	void clear(); 
@@ -122,7 +123,7 @@ public:
 private:
 
 	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, nexusfile, clustalfile, treefile, sharedfile, line, label, randomtree, groups;
-	string cutoff, format, precision, method, fileroot, iters, jumble, freq, calc, abund, step, form, sorted, trump, soft, filter, scale, ends, processors, candidatefile, search, ksize, align, match, size;
+	string cutoff, format, precision, method, fileroot, iters, jumble, freq, calc, abund, step, form, sorted, trump, soft, hard, scale, countends, processors, candidatefile, search, ksize, align, match, size;
 	string mismatch, gapopen, gapextend;
 
 

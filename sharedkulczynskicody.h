@@ -18,7 +18,7 @@
 class KulczynskiCody : public Calculator  {
 	
 public:
-	KulczynskiCody() :  Calculator("KulczynskiCody", 1, false) {};
+	KulczynskiCody() :  Calculator("kulczynskicody", 1, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(vector<SharedRAbundVector*>);
 private:

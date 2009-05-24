@@ -20,22 +20,25 @@ public:
 	void calcDist(Sequence A, Sequence B){
 		
 		int difference = 0;
+		int minLength = 0;
 		int openGapA = 0;
 		int openGapB = 0;
-		int minLength = 0;
 		int start = 0;
 		
-		for(int i=0;i<A.getLength();i++){
-			if(A.getAligned()[i] == '.' && B.getAligned()[i] == '.'){
-			}
-			else{
+		string seqA = A.getAligned();
+		string seqB = B.getAligned();
+		int alignLength = seqA.length();
+		
+		for(int i=0;i<alignLength;i++){
+			if((seqA[i] != '.' || seqB[i] != '.')){
 				start = i;
 				break;
 			}
 		}
-		for(int i=start;i<A.getLength();i++){
-			if((A.getAligned()[i] == '-' || B.getAligned()[i] == '-') && (A.getAligned()[i] == '.' || B.getAligned()[i] == '.')){}
-			else if(A.getAligned()[i] == '-' && B.getAligned()[i] != '-' && B.getAligned()[i] != '.'){
+
+		for(int i=start;i<alignLength;i++){
+			if((seqA[i] == '-' && seqB[i] == '-') || (seqA[i] == '.' && seqB[i] == '-') || (seqA[i] == '-' && seqB[i] == '.')){	;	}
+			else if(seqB[i] != '-' && (seqA[i] == '-' || seqA[i] == '.')){
 				if(openGapA == 0){
 					difference++;
 					minLength++;
@@ -43,7 +46,7 @@ public:
 					openGapB = 0;
 				}
 			}
-			else if(A.getAligned()[i] != '-' && B.getAligned()[i] == '-' && A.getAligned()[i] != '.'){
+			else if(seqA[i] != '-' && (seqB[i] == '-' || seqB[i] == '.')){
 				if(openGapB == 0){
 					difference++;
 					minLength++;
@@ -51,8 +54,8 @@ public:
 					openGapB = 1;
 				}
 			}
-			else if(A.getAligned()[i] != '-' && B.getAligned()[i] != '-'){
-				if(A.getAligned()[i] != B.getAligned()[i]){
+			else if(seqA[i] != '-' && seqB[i] != '-'){
+				if(seqA[i] != seqB[i]){
 					difference++;
 					minLength++;
 					openGapA = 0;
@@ -64,10 +67,12 @@ public:
 					openGapB = 0;
 				}
 			}
-			else if(A.getAligned()[i] == '.' && B.getAligned()[i] == '.'){
+
+			else if(seqA[i] == '.' && seqB[i] == '.'){
 				break;
 			}
 		}
+	
 		if(minLength == 0)	{	dist = 1.0000;							}
 		else				{	dist = (double)difference / minLength;	}
 	}

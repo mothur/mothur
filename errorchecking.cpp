@@ -116,7 +116,7 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "soft" )			{ soft = value; }
 				if (parameter == "filter" )         { filter = value; }
 				if (parameter == "scale" )			{ scale = value;	}
-				if (parameter == "ends" )			{ ends = value; }
+				if (parameter == "countends" )		{ countends = value; }
 				if (parameter == "processors" )		{ processors = value;	}
 				if (parameter == "size" )			{ size = value; }
 				if (parameter == "candidate")		{ candidatefile = value;	}
@@ -166,7 +166,7 @@ bool ErrorCheck::checkInput(string input) {
 				if (parameter == "soft" )			{ soft = value; }
 				if (parameter == "filter" )         { filter = value; }
 				if (parameter == "scale" )			{ scale = value;	}
-				if (parameter == "ends" )			{ ends = value; }
+				if (parameter == "countends" )		{ countends = value; }
 				if (parameter == "processors" )		{ processors = value;	}
 				if (parameter == "size" )			{ size = value; }
 				if (parameter == "candidate")		{ candidatefile = value;	}

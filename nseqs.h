@@ -19,7 +19,7 @@
 class NSeqs : public Calculator {
 
 public:
-	NSeqs() : Calculator("NSeqs", 1, false) {};
+	NSeqs() : Calculator("nseqs", 1, false) {};
 	EstOutput getValues(SAbundVector* rank){
 		data.resize(1,0);
 		data[0] = (double)rank->getNumSeqs();

@@ -19,7 +19,7 @@ It is a child of the calculator class. */
 class Jclass : public Calculator  {
 	
 public:
-	Jclass() :  Calculator("Jclass", 3, false) {};
+	Jclass() :  Calculator("jclass", 3, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(vector<SharedRAbundVector*>);
 private:

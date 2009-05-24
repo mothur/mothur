@@ -105,7 +105,6 @@ void HeatMap::getPic(RAbundVector* rabund) {
 
 void HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 	try {
-		
 		//sort lookup so shared bins are on top
 		if (sorted == "T") {  sortSharedVectors(lookup);  }
 		
@@ -141,10 +140,10 @@ void HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 						scaleRelAbund[i][j] = toHex(int(255 * log10(relAbund / log10(maxRelAbund[i]))))  + "0000"; 
 					} 
 				}else { scaleRelAbund[i][j] = "FFFFFF";  }
-				
+
 			}
 		}
-		
+
 		string filenamesvg = getRootName(globaldata->inputFileName) + lookup[0]->getLabel() + ".heatmap.svg";
 		openOutputFile(filenamesvg, outsvg);
 		
@@ -180,7 +179,7 @@ void HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 		
 		outsvg << "</g>\n</svg>\n";
 		outsvg.close();
-		
+
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the HeatMap class Function getPic. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -217,11 +216,11 @@ void HeatMap::sortSharedVectors(vector<SharedRAbundVector*>& lookup){
 			looktemp.push_back(temp);
 		}
 		
-		//clear out lookup to create sorted lookup
+		//clear out lookup to create sorted lookup -- Sarah look at - this is causing segmentation faults
 		for (int j = 0; j < lookup.size(); j++) {
-			delete lookup[j];
+//			delete lookup[j];
 		}
-		lookup.clear();
+		lookup.clear();  //doesn't this do the job?
 		
 		//create and initialize lookup to empty vectors
 		for (int i = 0; i < looktemp.size(); i++) { 
@@ -260,9 +259,9 @@ void HeatMap::sortSharedVectors(vector<SharedRAbundVector*>& lookup){
 			}
 		}
 		
-		//delete looktemp
+		//delete looktemp -- Sarah look at - this is causing segmentation faults
 		for (int j = 0; j < looktemp.size(); j++) {
-			delete looktemp[j];
+//			delete looktemp[j];
 		}
 		
 	}

@@ -39,7 +39,7 @@ private:
 	ReadSeqs* readSeqs;
 	ofstream out;
 	string outputFileName;
-	string ends;
+	string countends;
 	int processors;
 	float cutoff;
 	

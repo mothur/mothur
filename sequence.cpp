@@ -64,7 +64,7 @@ string Sequence::convert2ints() {
 	string processed;
 	
 	for(int i=0;i<unaligned.length();i++) {
-		if(toupper(unaligned[i]) == 'A')			{	processed += '0';	}
+		if(toupper(unaligned[i]) == 'A')		{	processed += '0';	}
 		else if(toupper(unaligned[i]) == 'C')	{	processed += '1';	}
 		else if(toupper(unaligned[i]) == 'G')	{	processed += '2';	}
 		else if(toupper(unaligned[i]) == 'T')	{	processed += '3';	}
@@ -101,6 +101,27 @@ void Sequence::setUnaligned(string sequence){
 //********************************************************************************************************************
 
 void Sequence::setAligned(string sequence){
+	
+	//if the alignment starts or ends with a gap, replace it with a period to indicate missing data
+	
+	if(sequence[0] == '-'){
+		for(int i=0;i<sequence.length();i++){
+			if(sequence[i] == '-'){
+				sequence[i] = '.';
+			}
+			else{
+				break;
+			}
+		}
+		for(int i=sequence.length()-1;i>=0;i--){
+			if(sequence[i] == '-'){
+				sequence[i] = '.';
+			}
+			else{
+				break;
+			}
+		}
+	}
 	aligned = sequence;
 }
 

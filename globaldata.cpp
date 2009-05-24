@@ -80,10 +80,10 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if (key == "sorted")		{ sorted = value;		}
 				if (key == "vertical")		{ vertical = value;		}
 				if (key == "trump")		    { trump = value;		}
-				if (key == "filter")		{ filter = value;		}
+				if (key == "hard")			{ hard = value;		}
 				if (key == "soft")		    { soft = value;		    }
 				if (key == "scale")			{ scale = value;		}
-				if (key == "ends" )			{ ends = value;			}
+				if (key == "countends" )	{ countends = value;	}
 				if (key == "processors" )	{ processors = value;	}
 				if (key == "size" )         { size = value;         }
 				if (key == "candidate")		{ candidatefile = value;	}
@@ -151,10 +151,10 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if (key == "sorted")		{ sorted = value;		}
 			if (key == "vertical")		{ vertical = value;		}
 			if (key == "trump")		    { trump = value;		}
-			if (key == "filter")		{ filter = value;		}
+			if (key == "hard")			{ hard = value;		}
 			if (key == "soft")		    { soft = value;		    }
 			if (key == "scale")			{ scale = value;		}
-			if (key == "ends" )			{ ends = value;			}
+			if (key == "countends" )	{ countends = value;	}
 			if (key == "processors" )	{ processors = value;	}
 			if (key == "size" )         { size = value;         }
 			if (key == "candidate")		{ candidatefile = value;	}
@@ -229,7 +229,8 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			splitAtDash(calc, Estimators); 
 		}
 		if (commandName == "dist.seqs") {
-			if ((calc == "default") || (calc == "")) {  calc = "onegap";  }
+			if ((calc == "default") || (calc == "")) {  calc = "onegap";	}
+			if (countends == "")	{ countends = "T"; }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
@@ -242,12 +243,17 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			splitAtDash(calc, Estimators); 
 		}
 		if ((commandName == "tree.shared") || (commandName == "bootstrap.shared") || (commandName == "dist.shared")) {
-			if (calc != "") { 
-				Estimators.clear();
-				splitAtDash(calc, Estimators);			
-			}else { cout << "You have not specified any calculators." << endl; }
+			if ((calc == "default") || (calc == "")) { 
+				calc = "jclass-thetayc";
+			}
+			Estimators.clear();
+			splitAtDash(calc, Estimators); 
 		}
-
+		if(commandName == "filter.seqs"){
+			if(trump == "" && vertical == "" && hard == "" && soft == ""){
+				trump = '.';
+			}
+		}
 
 		//if you have done a read.otu with a groupfile but don't want to use it anymore because you want to do single commands
 		if ((commandName == "collect.single") || (commandName == "rarefaction.single") || (commandName == "summary.single")) {
@@ -296,11 +302,12 @@ string GlobalData::getGroups()			{	return groups;		}
 string GlobalData::getStep()			{	return step;		}
 string GlobalData::getForm()			{	return form;		}
 string GlobalData::getSorted()			{	return sorted;		}
+string GlobalData::getVertical()		{   return vertical;    }
 string GlobalData::getTrump()			{   return trump;       }
 string GlobalData::getSoft()			{   return soft;		}
-string GlobalData::getFilter()			{   return filter;		}
+string GlobalData::getHard()			{   return hard;		}
 string GlobalData::getScale()			{	return scale;		}
-string GlobalData::getEnds()			{   return ends;		}
+string GlobalData::getCountEnds()		{   return countends;	}
 string GlobalData::getProcessors()		{	return processors;	}
 string GlobalData::getSize()            {   return size;        }
 string GlobalData::getCandidateFile()	{	return candidatefile;}
@@ -313,19 +320,19 @@ string GlobalData::getGapopen()			{	return gapopen;		}
 string GlobalData::getGapextend()		{	return gapextend;	}
 
 
-void GlobalData::setListFile(string file)	{	listfile = file;	inputFileName = file;}
-void GlobalData::setRabundFile(string file)	{	rabundfile = file;	inputFileName = file;}
-void GlobalData::setSabundFile(string file)	{	sabundfile = file;	inputFileName = file;}
-void GlobalData::setPhylipFile(string file)	{	phylipfile = file;    inputFileName = file;}
-void GlobalData::setColumnFile(string file)	{	columnfile = file;    inputFileName = file;}
-void GlobalData::setGroupFile(string file)		{	groupfile = file;	}
-void GlobalData::setSharedFile(string file)		{	sharedfile = file;	inputFileName = file; fileroot = file;}
+void GlobalData::setListFile(string file)		{	listfile = file;	inputFileName = file;					}
+void GlobalData::setRabundFile(string file)		{	rabundfile = file;	inputFileName = file;					}
+void GlobalData::setSabundFile(string file)		{	sabundfile = file;	inputFileName = file;					}
+void GlobalData::setPhylipFile(string file)		{	phylipfile = file;    inputFileName = file;					}
+void GlobalData::setColumnFile(string file)		{	columnfile = file;    inputFileName = file;					}
+void GlobalData::setGroupFile(string file)		{	groupfile = file;											}
+void GlobalData::setSharedFile(string file)		{	sharedfile = file;	inputFileName = file; fileroot = file;	}
 void GlobalData::setNameFile(string file)		{	namefile = file;		}
 void GlobalData::setFormat(string Format)		{	format = Format;		}
 void GlobalData::setRandomTree(string Random)	{	randomtree = Random;	}
 void GlobalData::setGroups(string g)			{	groups = g;				}
 void GlobalData::setCalc(string Calc)			{	calc = Calc;			}
-void GlobalData::setEnds(string e)				{   ends = e;				}
+void GlobalData::setCountEnds(string e)			{   countends = e;			}
 void GlobalData::setProcessors(string p)		{	processors = p;			}
 
 
@@ -375,13 +382,13 @@ void GlobalData::clear() {
 	form			=	"integral";
 	sorted			=	"T";  //F means don't sort, T means sort.
 	vertical        =   "";		
-	trump           =   ".";		
-	filter          =   "";		
+	trump           =	"";		
+	hard			=   "";		
 	soft            =   "";	
 	scale			=	"log10";
-	ends			=   "T";  //yes
+	countends		=   "T";  //yes
 	processors		=	"1";
-	size            =   "1000";
+	size            =   "0";
 	search			=	"kmer";
 	ksize			=	"7";
 	align			=	"needleman";
@@ -408,9 +415,9 @@ void GlobalData::reset() {
 	abund			=   "10";
 	step			=	"0.01";
 	form			=	"integral";
-	ends			=   "T";
+	countends		=   "T";
 	processors		=	"1";
-	size            =   "1000";
+	size            =   "0";
 	search			=	"kmer";
 	ksize			=	"7";
 	align			=	"needleman";
@@ -419,8 +426,8 @@ void GlobalData::reset() {
 	gapopen			=	"-1.0";
 	gapextend		=	"-2.0";
 	vertical        =   "";		
-	trump           =   ".";		
-	filter          =   "";		
+	trump           =   "";		
+	hard			=   "";		
 	soft            =   "";	
 
 }

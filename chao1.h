@@ -19,7 +19,7 @@ It is a child of the calculator class. */
 class Chao1 : public Calculator  {
 	
 public: 
-	Chao1() : Calculator("Chao", 3, false) {};
+	Chao1() : Calculator("chao", 3, false) {};
 	EstOutput getValues(SAbundVector*);	
 	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
 };

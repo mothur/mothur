@@ -20,7 +20,7 @@ It is a child of the calculator class. */
 class SorAbund : public Calculator  {
 	
 public:
-	SorAbund() :  Calculator("SorAbund", 3, false) {};
+	SorAbund() :  Calculator("sorabund", 3, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(vector<SharedRAbundVector*>);
 private:

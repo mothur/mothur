@@ -25,27 +25,27 @@ public:
 		int start = 0;
 		int end = 0;
 		
-		for(int i=0;i<A.getLength();i++){
-			if(A.getAligned()[i] == '.' || B.getAligned()[i] == '.' || A.getAligned()[i] == '-' || B.getAligned()[i] == '-'){
-			}
-			else{
+		string seqA = A.getAligned();
+		string seqB = B.getAligned();
+		int alignLength = seqA.length();
+		
+		// this assumes that sequences start and end with '.'s instead of'-'s.
+		for(int i=0;i<alignLength;i++){
+			if(seqA[i] != '.' && seqB[i] != '.'){
 				start = i;
 				break;
 			}
 		}
-		for(int i=A.getLength()-1;i>=0;i--){
-			if(A.getAligned()[i] == '.' || B.getAligned()[i] == '.' || A.getAligned()[i] == '-' || B.getAligned()[i] == '-'){
-			}
-			else{
+		for(int i=alignLength-1;i>=0;i--){
+			if(seqA[i] != '.' && seqB[i] != '.'){
 				end = i;
 				break;
 			}
 		}
 		
-		
 		for(int i=start;i<=end;i++){
-			if(A.getAligned()[i] == '-' && B.getAligned()[i] == '-'){}
-			else if(A.getAligned()[i] == '-' && B.getAligned()[i] != '-'){
+			if(seqA[i] == '-' && seqB[i] == '-'){	;	}
+			else if(seqB[i] != '-' && seqA[i] == '-'){
 				if(openGapA == 0){
 					difference++;
 					minLength++;
@@ -53,7 +53,7 @@ public:
 					openGapB = 0;
 				}
 			}
-			else if(A.getAligned()[i] != '-' && B.getAligned()[i] == '-'){
+			else if(seqA[i] != '-' && seqB[i] == '-'){
 				if(openGapB == 0){
 					difference++;
 					minLength++;
@@ -61,20 +61,16 @@ public:
 					openGapB = 1;
 				}
 			}
-			else if(A.getAligned()[i] != '-' && B.getAligned()[i] != '-'){
-				if(A.getAligned()[i] != B.getAligned()[i]){
+			else if(seqA[i] != '-' && seqB[i] != '-'){
+				if(seqA[i] != seqB[i]){
 					difference++;
-					minLength++;
-					openGapA = 0;
-					openGapB = 0;
 				}
-				else{
-					minLength++;
-					openGapA = 0;
-					openGapB = 0;
-				}
+				minLength++;
+				openGapA = 0;
+				openGapB = 0;
 			}
 		}
+
 		if(minLength == 0)	{	dist = 1.0000;							}
 		else				{	dist = (double)difference / minLength;	}
 	}

@@ -20,7 +20,7 @@ It is a child of the calculator class. */
 class ThetaN : public Calculator  {
 	
 public:
-	ThetaN() :  Calculator("ThetaN", 3, false) {};
+	ThetaN() :  Calculator("thetan", 3, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(vector<SharedRAbundVector*>);
 private:

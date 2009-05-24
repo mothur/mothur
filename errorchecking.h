@@ -35,7 +35,7 @@ class ErrorCheck {
 		void clear();
 		void refresh();
 		string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, nexusfile, clustalfile, treefile, sharedfile, cutoff, format; 
-		string precision, method, fileroot, label, line, iters, jumble, freq, single, rarefaction, shared, summary, randomtree, abund, sorted, trump, soft, filter, scale, ends, processors, size;
+		string precision, method, fileroot, label, line, iters, jumble, freq, single, rarefaction, shared, summary, randomtree, abund, sorted, trump, soft, filter, scale, countends, processors, size;
 		string candidatefile, search, ksize, align, match, mismatch, gapopen, gapextend;
 		string commandName, optionText;
 		bool errorFree;

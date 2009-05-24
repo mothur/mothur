@@ -23,23 +23,25 @@ using namespace std;
 class FilterSeqsCommand : public Command {
 
 public:
-	FilterSeqsCommand() {};
+	FilterSeqsCommand();
 	~FilterSeqsCommand() {};
 	int execute();	
 	
 private:
 	void doTrump();
 	void doSoft();
-	void doFilter();
+	void doHard();
+	void doVertical();
 	
-	GlobalData* globaldata;
-	string filename, trump, filter;
+	int alignmentLength;
+	int numSeqs;
 	
+	GlobalData* globaldata;	
 	ReadSeqs* readSeqs;
-	
-	vector<bool> columnsToRemove;
 	SequenceDB* db;
-	double soft;
+	
+	string filter;
+
 };
 
 #endif
