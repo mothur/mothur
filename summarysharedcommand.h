@@ -15,9 +15,8 @@
 #include "inputdata.h"
 #include "calculator.h"
 #include "readotu.h"
-#include "sharedlistvector.h"
 #include "validcalculator.h"
-#include "sharedutilities.h"
+
 
 /*The summary.shared() command
 	The summary.shared command can only be executed after a successful read.shared command. 
@@ -46,12 +45,10 @@ public:
 private:
 	GlobalData* globaldata;
 	ReadOTUFile* read;
-	SharedUtil* util;
 	vector<Calculator*> sumCalculators;	
 	InputData* input;
 	ValidCalculators* validCalculator;
 	SharedListVector* SharedList;
-	SharedOrderVector* order;
 	vector<SharedRAbundVector*> lookup;
 	string outputFileName, format, outAllFileName;
 	ofstream outputFileHandle, outAll;

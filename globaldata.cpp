@@ -249,10 +249,12 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
+		
 		if(commandName == "filter.seqs"){
 			if(trump == "" && vertical == "" && hard == "" && soft == ""){
 				trump = '.';
 			}
+
 		}
 
 		//if you have done a read.otu with a groupfile but don't want to use it anymore because you want to do single commands

@@ -518,7 +518,9 @@ int Tree::findRoot() {
 	try {
 		for (int i = 0; i < numNodes; i++) {
 			//you found the root
-			if (tree[i].getParent() == -1) { return i; }  
+			if (tree[i].getParent() == -1) { return i; }
+			//cout << "i = " << i << endl;
+			//cout << "i's parent = " << tree[i].getParent() << endl;  
 		}
 		return -1;
 	}
