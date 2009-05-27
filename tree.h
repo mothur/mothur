@@ -36,6 +36,7 @@ public:
 	void printTree();
 	void print(ostream&);
 	void printForBoot(ostream&);
+	int findRoot();  //return index of root node
 	
 	//this function takes the leaf info and populates the non leaf nodes
 	void assembleTree();		
@@ -55,7 +56,6 @@ private:
 	void randomBlengths();
 	void randomLabels(vector<string>);
 	void randomLabels(string, string);
-	int findRoot();  //return index of root node
 	void printBranch(int, ostream&, string);  //recursively print out tree
 };
 

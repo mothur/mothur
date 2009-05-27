@@ -17,6 +17,10 @@
 #include "validcalculator.h"
 #include "tree.h"
 #include "treemap.h"
+#include "readmatrix.hpp"
+#include "readcolumn.h"
+#include "readphylip.h"
+#include "sparsematrix.hpp"
 
 
 /* This command create a tree file for each similarity calculator at distance level, using various calculators to find the similiarity between groups. 
@@ -24,6 +28,8 @@
 	They can also use as many or as few calculators as they wish. */
 	
 class GlobalData;
+
+typedef list<PCell>::iterator MatData;
 
 class TreeGroupCommand : public Command {
 	
@@ -35,9 +41,15 @@ public:
 private:
 	void createTree();
 	void printSims(ostream&);
+	void makeSimsShared();
+	void makeSimsDist();
 	
 	GlobalData* globaldata;
 	ReadOTUFile* read;
+	ReadMatrix* readMatrix;
+	SparseMatrix* matrix;
+	NameAssignment* nameMap;
+	ListVector* list;
 	TreeMap* tmap;
 	Tree* t;
 	vector<Calculator*> treeCalculators;
@@ -46,9 +58,10 @@ private:
 	InputData* input;
 	ValidCalculators* validCalculator;
 	vector<SharedRAbundVector*> lookup;
-	string format, outputFile, groupNames;
+	string format, outputFile, groupNames, filename;
 	int numGroups;
 	ofstream out;
+	float precision, cutoff;
 
 };
 	

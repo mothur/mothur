@@ -11,6 +11,7 @@
 
 #include "mothur.h"
 #include "groupmap.h"
+#include "listvector.hpp"
 
 /* This class is used by the read.tree command to build the tree container. */
 
@@ -20,6 +21,7 @@ struct GroupIndex {
 };
 
 class GroupMap;
+class ListVector;
 
 class TreeMap {
 public:
@@ -39,7 +41,7 @@ public:
 	map<string, GroupIndex> treemap; //sequence name and <groupname, vector index>
 	void print(ostream&);
 	void makeSim(GroupMap*);  //takes groupmap info and fills treemap for use by tree.shared command.
-	
+	void makeSim(ListVector*);  //takes listvector info and fills treemap for use by tree.shared command.	
 	
 private:
 	ifstream fileHandle;

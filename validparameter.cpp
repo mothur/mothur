@@ -282,7 +282,7 @@ void ValidParameters::initCommandParameters() {
 		string getOTURepArray[] =  {"fasta","list","line","label","name", "group"};
 		commandParameters["get.oturep"] = addParameters(getOTURepArray, sizeof(getOTURepArray)/sizeof(string));
 		
-		string treeGroupsArray[] =  {"line","label","calc","groups"};
+		string treeGroupsArray[] =  {"line","label","calc","groups", "phylip", "column", "name"};
 		commandParameters["tree.shared"] = addParameters(treeGroupsArray, sizeof(treeGroupsArray)/sizeof(string));
 		
 		string bootstrapArray[] =  {"line","label","calc","groups","iters"};

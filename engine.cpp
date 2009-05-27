@@ -127,6 +127,9 @@ BatchEngine::~BatchEngine(){
 //This Function allows the user to run a batchfile containing several commands on Dotur
 bool BatchEngine::getInput(){
 	try {
+		//check if this is a valid batchfile
+		if (openedBatch == 1) {  cout << "unable to open batchfile" << endl;  return 1; }
+	
 		string input = "";
 		string commandName = "";
 		bool errorFree;

@@ -11,9 +11,7 @@
  */
 
 #include "command.hpp"
-#include "readmatrix.hpp"
-
-class GlobalData;
+#include "globaldata.hpp"
 
 class GetgroupCommand : public Command {
 public:
@@ -24,8 +22,9 @@ public:
 private:
 	GlobalData* globaldata;
 	GroupMap* groupMap;
-	string outputFile;
+	string outputFile, sharedfile;
 	ofstream out;
+	ifstream in;
 
 };
 

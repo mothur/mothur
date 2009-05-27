@@ -13,8 +13,13 @@
 GetgroupCommand::GetgroupCommand(){
 	try {
 		globaldata = GlobalData::getInstance();
-		groupMap = globaldata->gGroupmap;
-		outputFile = globaldata->inputFileName + ".bootGroups";
+		
+		//open shared file
+		sharedfile = globaldata->getSharedFile();
+		openInputFile(sharedfile, in);
+		
+		//open output file
+		outputFile = getRootName(globaldata->inputFileName) + "bootGroups";
 		openOutputFile(outputFile, out);
 	}
 	catch(exception& e) {
@@ -37,11 +42,42 @@ GetgroupCommand::~GetgroupCommand(){
 
 int GetgroupCommand::execute(){
 	try {
-		vector<string> groupNames = groupMap->namesOfGroups;	
-		for(int i = 0; i < groupNames.size(); i++) {
-			cout << groupNames[i] << "\n";
-			out << groupNames[i] << "\t" << groupNames[i] << "\n";
+		int num, inputData, count;
+		count = 0;  
+		string holdLabel, nextLabel, groupN, label;
+		
+		//read in first row since you know there is at least 1 group.
+		in >> label >> groupN >> num;
+		holdLabel = label;
+		
+		//output first group
+		cout << groupN << endl;
+		out << groupN << '\t' << groupN << endl;	
+			
+		//get rest of line
+		for(int i=0;i<num;i++){
+			in >> inputData;
 		}
+		
+		if (in.eof() != true) { in >> nextLabel; }
+		
+		//read the rest of the groups info in
+		while ((nextLabel == holdLabel) && (in.eof() != true)) {
+			in >> groupN >> num;
+			count++;
+			
+			//output next group
+			cout << groupN << endl;
+			out << groupN << '\t' << groupN << endl;				
+			
+			//fill vector.  
+			for(int i=0;i<num;i++){
+				in >> inputData;
+			}
+			
+			if (in.eof() != true) { in >> nextLabel; }
+		}
+		
 		out.close();
 		return 0;	
 	}

@@ -236,7 +236,7 @@ bool ErrorCheck::checkInput(string input) {
 		
 		//check for valid method
 		if(commandName == "get.group") {
-			if ((globaldata->getGroupFile() == "")) { cout << "You must read a group before you can use the get.group command." << endl; return false; }
+			if ((globaldata->getSharedFile() == "")) { cout << "You must read a groupfile or a sharedfile before you can use the get.group command." << endl; return false; }
 		}
 		if (commandName == "get.label" || commandName == "get.line") {
 			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { cout << "You must read a list, sabund or rabund before you can use the get.label or get.line command." << endl; return false; }
@@ -250,10 +250,19 @@ bool ErrorCheck::checkInput(string input) {
 			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { cout << "You must read a list, sabund or rabund before you can use the collect.single, rarefaction.single or summary.single commands." << endl; return false; }
 		}
 		
-		if ((commandName == "collect.shared") || (commandName == "rarefaction.shared") || (commandName == "summary.shared") || (commandName == "tree.shared") || (commandName == "bootstrap.shared") || (commandName == "dist.shared")){ 
+		if ((commandName == "collect.shared") || (commandName == "rarefaction.shared") || (commandName == "summary.shared") || (commandName == "bootstrap.shared") || (commandName == "dist.shared")){ 
 			if (globaldata->getSharedFile() == "") {
 				if (globaldata->getListFile() == "") { cout << "You must read a list and a group, or a shared before you can use the collect.shared, rarefaction.shared, summary.shared, tree.shared, bootstrap.shared or dist.shared commands." << endl; return false; }
 				else if (globaldata->getGroupFile() == "") { cout << "You must read a list and a group, or a shared before you can use the collect.shared, rarefaction.shared, summary.shared, tree.shared, bootstrap.shared or dist.shared commands." << endl; return false; }
+			}
+		}
+		
+		if  (commandName == "tree.shared")  {
+			//given no files			
+			if ((globaldata->getSharedFile() == "") && ((phylipfile == "") && (columnfile == "")))	{ cout << "You must run the read.otu command or provide a distance file before running the tree.shared command." << endl; return false; }
+			//you want to do single commands
+			else if ((globaldata->getSharedFile() == "") && ((phylipfile != "") || (columnfile != ""))) {
+				validateReadDist();
 			}
 		}
 		
@@ -354,6 +363,12 @@ void ErrorCheck::validateReadFiles() {
 			//unable to open
 			if (ableToOpen == 1) {  errorFree = false; }
 			else { globaldata->inputFileName = sharedfile; }
+		}else if (groupfile != "") {
+			ableToOpen = openInputFile(groupfile, filehandle);
+			filehandle.close();
+			if (ableToOpen == 1) { //unable to open
+				errorFree = false;
+			}
 		}else{ //no file given
 			errorFree = false;
 		}
@@ -385,8 +400,8 @@ void ErrorCheck::validateReadDist() {
 			if (ableToOpen == 1) {  errorFree = false; }
 		}
 		
-		if ((phylipfile == "") && (columnfile == "")) { cout << "When executing a read.dist you must enter a phylip or a column." << endl; errorFree = false; }
-		else if ((phylipfile != "") && (columnfile != "")) { cout << "When executing a read.dist you must enter ONLY ONE of the following: phylip or column." << endl; errorFree = false; }
+		if ((phylipfile == "") && (columnfile == "")) { cout << "When executing a read.dist or a tree.shared command with a distance file you must enter a phylip or a column." << endl; errorFree = false; }
+		else if ((phylipfile != "") && (columnfile != "")) { cout << "When executing a read.dist or a tree.shared command with a distance file you must enter ONLY ONE of the following: phylip or column." << endl; errorFree = false; }
 		
 		if (columnfile != "") {
 			if (namefile == "") {
@@ -435,7 +450,7 @@ void ErrorCheck::validateParseFiles() {
 				ableToOpen = openInputFile(groupfile, filehandle);
 				filehandle.close();
 				if (ableToOpen == 1) { //unable to open
-					errorFree = false;;
+					errorFree = false;
 				}
 			}
 		}

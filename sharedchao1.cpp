@@ -12,8 +12,7 @@
 /***********************************************************************/
 EstOutput SharedChao1::getValues(vector<SharedRAbundVector*> shared){
 	try {
-		data.resize(1,0);
-		
+		data.resize(1,0);		
 		vector<int> temp; 
 		int numGroups = shared.size();
 		float Chao = 0.0; float leftvalue, rightvalue;

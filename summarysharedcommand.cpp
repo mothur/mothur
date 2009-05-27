@@ -42,7 +42,6 @@ SummarySharedCommand::SummarySharedCommand(){
 		openOutputFile(outputFileName, outputFileHandle);
 		format = globaldata->getFormat();
 		validCalculator = new ValidCalculators();
-		util = new SharedUtil();
 		mult = false;
 		
 		int i;
@@ -111,7 +110,6 @@ SummarySharedCommand::SummarySharedCommand(){
 SummarySharedCommand::~SummarySharedCommand(){
 	delete input;
 	delete read;
-	delete util;
 }
 
 //**********************************************************************************************************************
@@ -119,7 +117,7 @@ SummarySharedCommand::~SummarySharedCommand(){
 int SummarySharedCommand::execute(){
 	try {
 		int count = 1;	
-		
+	
 		//if the users entered no valid calculators don't execute command
 		if (sumCalculators.size() == 0) { return 0; }
 		//check if any calcs can do multiples
@@ -129,14 +127,12 @@ int SummarySharedCommand::execute(){
 			}
 		}
 		
+		//read first line
 		read = new ReadOTUFile(globaldata->inputFileName);	
 		read->read(&*globaldata); 
 			
 		input = globaldata->ginput;
-		order = input->getSharedOrderVector();
-				
-		//set users groups
-		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups, "summary");
+		lookup = input->getSharedRAbundVectors();
 		
 		//output estimator names as column headers
 		outputFileHandle << "label" <<'\t' << "comparison" << '\t'; 
@@ -146,7 +142,7 @@ int SummarySharedCommand::execute(){
 		outputFileHandle << endl;
 		
 		//create file and put column headers for multiple groups file
-		if (mult = true) {
+		if (mult == true) {
 			outAllFileName = ((getRootName(globaldata->inputFileName)) + "sharedmultiple.summary");
 			openOutputFile(outAllFileName, outAll);
 			
@@ -159,17 +155,27 @@ int SummarySharedCommand::execute(){
 			outAll << endl;
 		}
 		
-		while(order != NULL){
+		if (lookup.size() < 2) { 
+			cout << "I cannot run the command without at least 2 valid groups."; 
+			for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; }
+			
+			//close files and clean up
+			outputFileHandle.close();  remove(outputFileName.c_str());
+			if (mult == true) {  outAll.close();  remove(outAllFileName.c_str());  }
+			return 0;
+		}
+					
 		
-			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(order->getLabel()) == 1){			
+		while(lookup[0] != NULL){
+		
+			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(lookup[0]->getLabel()) == 1){			
 	
-				cout << order->getLabel() << '\t' << count << endl;
-				util->getSharedVectors(globaldata->Groups, lookup, order);  //fills group vectors from order vector.  //fills group vectors from order vector.
+				cout << lookup[0]->getLabel() << '\t' << count << endl;
 				
 				//loop through calculators and add to file all for all calcs that can do mutiple groups
-				if (mult = true) {
+				if (mult == true) {
 					//output label
-					outAll << order->getLabel() << '\t';
+					outAll << lookup[0]->getLabel() << '\t';
 					
 					//output groups names
 					string outNames = "";
@@ -188,13 +194,13 @@ int SummarySharedCommand::execute(){
 					}
 					outAll << endl;
 				}
-
+	
 				int n = 1; 
 				vector<SharedRAbundVector*> subset;
 				for (int k = 0; k < (lookup.size() - 1); k++) { // pass cdd each set of groups to commpare
 					for (int l = n; l < lookup.size(); l++) {
 						
-						outputFileHandle << order->getLabel() << '\t';
+						outputFileHandle << lookup[0]->getLabel() << '\t';
 						
 						subset.clear(); //clear out old pair of sharedrabunds
 						//add new pair of sharedrabunds
@@ -208,6 +214,7 @@ int SummarySharedCommand::execute(){
 						}
 						
 						for(int i=0;i<sumCalculators.size();i++) {
+
 							sumCalculators[i]->getValues(subset); //saves the calculator outputs
 							outputFileHandle << '\t';
 							sumCalculators[i]->print(outputFileHandle);
@@ -218,13 +225,20 @@ int SummarySharedCommand::execute(){
 				}
 			}
 		
+			//prevent memory leak
+			for (int i = 0; i < lookup.size(); i++) {	delete lookup[i];	}
+				
 			//get next line to process
-			order = input->getSharedOrderVector();
+			lookup = input->getSharedRAbundVectors();
 			count++;
 		}
 		
 		//reset groups parameter
 		globaldata->Groups.clear();  globaldata->setGroups("");
+		
+		//close files
+		outputFileHandle.close();
+		if (mult == true) {  outAll.close();  }
 
 		return 0;
 	}
