@@ -26,6 +26,8 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 		if ((commandName == "read.dist") || (commandName == "read.otu") || (commandName == "read.tree")) { 
 			clear();
 			gGroupmap = NULL;
+			gListVector = NULL;
+			gSparseMatrix = NULL;
 			gTree.clear();
 			Treenames.clear();
 			labels.clear(); lines.clear(); Groups.clear();
