@@ -36,26 +36,70 @@ SharedCommand::SharedCommand(){
 int SharedCommand::execute(){
 	try {
 		globaldata = GlobalData::getInstance();
+		int count = 1;
+		string errorOff = "no error";
 			
 		//read in listfile
 		read = new ReadOTUFile(globaldata->inputFileName);	
 		read->read(&*globaldata); 
 		input = globaldata->ginput;
 		SharedList = globaldata->gSharedList;
+		SharedListVector* lastList = SharedList;
+		
+		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+		set<string> processedLabels;
+		set<string> userLabels = globaldata->labels;
 		
 		shared = new Shared();
-		int i = 0;
-		while(SharedList != NULL){
 		
-			if(globaldata->allLines == 1 || globaldata->lines.count(i+1) == 1 || globaldata->labels.count(SharedList->getLabel()) == 1){
+		while((SharedList != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
 			
-				shared->getSharedVectors(i, SharedList); //fills sharedGroups with new info and updates sharedVector
-				printSharedData(); //prints info to the .shared file
+						
+			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(SharedList->getLabel()) == 1){
+			
+					shared->getSharedVectors(SharedList); //fills sharedGroups with new info and updates sharedVector
+					printSharedData(); //prints info to the .shared file
+				
+					processedLabels.insert(SharedList->getLabel());
+					userLabels.erase(SharedList->getLabel());
 			}
 			
+			if ((anyLabelsToProcess(SharedList->getLabel(), userLabels, errorOff) == true) && (processedLabels.count(lastList->getLabel()) != 1)) {
+					shared->getSharedVectors(lastList); //fills sharedGroups with new info and updates sharedVector
+					printSharedData(); //prints info to the .shared file
+
+					processedLabels.insert(lastList->getLabel());
+					userLabels.erase(lastList->getLabel());
+			}
+			
+			if (count != 1) { delete lastList; }
+			lastList = SharedList;			
+
 			SharedList = input->getSharedListVector(); //get new list vector to process
-			i++;
 		}
+		
+		//output error messages about any remaining user labels
+		set<string>::iterator it;
+		bool needToRun = false;
+		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+			//cout << "Your file does not include the label "<< *it; 
+			if (processedLabels.count(lastList->getLabel()) != 1) {
+				//cout << ". I will use " << lastList->getLabel() << "." << endl;
+				needToRun = true;
+			}else {
+				//cout << ". Please refer to " << lastList->getLabel() << "." << endl;
+			}
+		}
+		
+		//run last line if you need to
+		if (needToRun == true)  {
+			shared->getSharedVectors(lastList); //fills sharedGroups with new info and updates sharedVector
+			printSharedData(); //prints info to the .shared file
+		}
+		
+		delete lastList;
+		delete shared;
+		
 		return 0;
 	}
 	catch(exception& e) {
@@ -93,6 +137,7 @@ void SharedCommand::printSharedData() {
 SharedCommand::~SharedCommand(){
 	//delete list;
 	delete read;
+	
 }
 
 //**********************************************************************************************************************

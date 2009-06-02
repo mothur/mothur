@@ -16,7 +16,7 @@ Shared::Shared(){
 }
 
 /**************************************************************************************************/
-void Shared::getSharedVectors(int index, SharedListVector* list) {
+void Shared::getSharedVectors(SharedListVector* list) {
 		string label, group;
 		int i,j;
 		label = list->getLabel();

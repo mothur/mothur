@@ -17,7 +17,8 @@ ParseListCommand::ParseListCommand(){
 		//read in group map info.
 		groupMap = new GroupMap(globaldata->getGroupFile());
 		groupMap->readMap();
-			
+
+		
 		//fill filehandles with neccessary ofstreams
 		int i;
 		ofstream* temp;
@@ -44,7 +45,7 @@ ParseListCommand::ParseListCommand(){
 	}
 }
 /***********************************************************************/
-void ParseListCommand::parse(int index) {
+void ParseListCommand::parse(int index, SharedListVector* list) {
 	try {
 		string prefix, suffix, groupsName;
 		suffix = list->get(index);
@@ -93,49 +94,71 @@ int ParseListCommand::execute(){
 			read->read(&*globaldata); 
 			input = globaldata->ginput;
 			list = globaldata->gSharedList;
+			SharedListVector* lastList = list;
+		
+			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+			set<string> processedLabels;
+			set<string> userLabels = globaldata->labels;
 
 			//read in group map info.
 			groupMap = new GroupMap(globaldata->getGroupFile());
 			groupMap->readMap();
 			
-			string seq, label;
-			int i;
 			//create new list vectors to fill with parsed data
-			for (i=0; i<groupMap->getNumGroups(); i++) {
+			for (int i=0; i<groupMap->getNumGroups(); i++) {
 				groupOfLists[groupMap->namesOfGroups[i]] = new SharedListVector();
 			}
 			
+						
 			//parses and sets each groups listvector
-			while(list != NULL){
-				label = list->getLabel();
-				
-				if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(label) == 1){
-				
-					for(i=0; i<list->size(); i++) {
-						parse(i); //parses data[i] list of sequence names
-						for (it=listGroups.begin(); it != listGroups.end(); it++) {  //loop through map and set new list vectors
-							seq = it->second;
-							seq = seq.substr(1, seq.length()); //rips off extra comma
-							groupOfLists[it->first]->push_back(seq); //sets new listvector for each group
-						}
-						listGroups.clear();
-					}
-					//prints each new list file
-					for (i=0; i<groupMap->getNumGroups(); i++) {
-						groupOfLists[groupMap->namesOfGroups[i]]->setLabel(label);
-						groupOfLists[groupMap->namesOfGroups[i]]->print(*(filehandles[groupMap->namesOfGroups[i]]));
-						groupOfLists[groupMap->namesOfGroups[i]]->clear();
-					}
+			//as long as you are not at the end of the file or done wih the lines you want
+			while((list != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
+								
+				if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(list->getLabel()) == 1){
+					cout << list->getLabel() << '\t' << count << endl;
+					process(list);
 					
-					cout << label << '\t' << count << endl;
+					processedLabels.insert(list->getLabel());
+					userLabels.erase(list->getLabel());
 				}
 				
+				if ((anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastList->getLabel()) != 1)) {
+					cout << lastList->getLabel() << '\t' << count << endl;
+					process(lastList);
+					
+					processedLabels.insert(lastList->getLabel());
+					userLabels.erase(lastList->getLabel());
+				}
+
+				if (count != 1) { delete lastList; }
+				lastList = list;			
+
 				list = input->getSharedListVector();
 				count++;
 			}
 			
+			//output error messages about any remaining user labels
+			set<string>::iterator it;
+			bool needToRun = false;
+			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+				cout << "Your file does not include the label "<< *it; 
+				if (processedLabels.count(lastList->getLabel()) != 1) {
+					cout << ". I will use " << lastList->getLabel() << "." << endl;
+					needToRun = true;
+				}else {
+					cout << ". Please refer to " << lastList->getLabel() << "." << endl;
+				}
+			}
+		
+			//run last line if you need to
+			if (needToRun == true)  {
+				cout << lastList->getLabel() << '\t' << count << endl;
+				process(lastList);
+			}
+			delete lastList;
+
 			//set groupmap for .shared commands
-			//if (globaldata->gGroupmap != NULL) { delete globaldata->gGroupmap; }
+			if (globaldata->gGroupmap != NULL) { delete globaldata->gGroupmap; }
 			globaldata->gGroupmap = groupMap; 
 			
 			return 0;
@@ -158,3 +181,33 @@ ParseListCommand::~ParseListCommand(){
 	delete read;	
 }
 //**********************************************************************************************************************
+void ParseListCommand::process(SharedListVector* thisList) {
+	try {
+			string seq;
+
+			for(int i=0; i<thisList->size(); i++) {
+				parse(i, thisList); //parses data[i] list of sequence names
+				for (it=listGroups.begin(); it != listGroups.end(); it++) {  //loop through map and set new list vectors
+					seq = it->second;
+					seq = seq.substr(1, seq.length()); //rips off extra comma
+					groupOfLists[it->first]->push_back(seq); //sets new listvector for each group
+				}
+				listGroups.clear();
+			}
+			//prints each new list file
+			for (int i=0; i<groupMap->getNumGroups(); i++) {
+				groupOfLists[groupMap->namesOfGroups[i]]->setLabel(thisList->getLabel());
+				groupOfLists[groupMap->namesOfGroups[i]]->print(*(filehandles[groupMap->namesOfGroups[i]]));
+				groupOfLists[groupMap->namesOfGroups[i]]->clear();
+			}
+
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ParseListCommand class Function process. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ParseListCommand class function process. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}

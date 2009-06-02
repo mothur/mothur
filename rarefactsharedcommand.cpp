@@ -19,6 +19,8 @@ RareFactSharedCommand::RareFactSharedCommand(){
 		string fileNameRoot;
 		fileNameRoot = getRootName(globaldata->inputFileName);
 		format = globaldata->getFormat();
+		convert(globaldata->getFreq(), freq);
+		convert(globaldata->getIters(), nIters);
 		validCalculator = new ValidCalculators();
 				
 		int i;
@@ -70,36 +72,74 @@ int RareFactSharedCommand::execute(){
 			
 		input = globaldata->ginput;
 		lookup = input->getSharedRAbundVectors();
+		vector<SharedRAbundVector*> lastLookup = lookup;
 		
 		if (lookup.size() < 2) { 
 			cout << "I cannot run the command without at least 2 valid groups."; 
 			for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; }
 			return 0;
 		}
-					
 		
-		while(lookup[0] != NULL){
-		
-			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(lookup[0]->getLabel()) == 1){
-				//create collectors curve
-				rCurve = new Rarefact(lookup, rDisplays);
-				convert(globaldata->getFreq(), freq);
-				convert(globaldata->getIters(), nIters);
-				rCurve->getSharedCurve(freq, nIters);
+		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+		set<string> processedLabels;
+		set<string> userLabels = globaldata->labels;
+	
+		//as long as you are not at the end of the file or done wih the lines you want
+		while((lookup[0] != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
 			
+			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(lookup[0]->getLabel()) == 1){
+				
+				rCurve = new Rarefact(lookup, rDisplays);
+				rCurve->getSharedCurve(freq, nIters);
 				delete rCurve;
 			
 				cout << lookup[0]->getLabel() << '\t' << count << endl;
+				processedLabels.insert(lookup[0]->getLabel());
+				userLabels.erase(lookup[0]->getLabel());
 			}
 			
-			//prevent memory leak
-			for (int i = 0; i < lookup.size(); i++) {	delete lookup[i];	}
+			if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLookup[0]->getLabel()) != 1)) {
+					cout << lastLookup[0]->getLabel() << '\t' << count << endl;
+					rCurve = new Rarefact(lastLookup, rDisplays);
+					rCurve->getSharedCurve(freq, nIters);
+					delete rCurve;
+
+					processedLabels.insert(lastLookup[0]->getLabel());
+					userLabels.erase(lastLookup[0]->getLabel());
+			}
 				
+			//prevent memory leak
+			if (count != 1) { for (int i = 0; i < lastLookup.size(); i++) {  delete lastLookup[i];  } }
+			lastLookup = lookup;
+			
 			//get next line to process
 			lookup = input->getSharedRAbundVectors();
 			count++;
 		}
-	
+		
+		//output error messages about any remaining user labels
+		set<string>::iterator it;
+		bool needToRun = false;
+		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+			cout << "Your file does not include the label "<< *it; 
+			if (processedLabels.count(lastLookup[0]->getLabel()) != 1) {
+				cout << ". I will use " << lastLookup[0]->getLabel() << "." << endl;
+				needToRun = true;
+			}else {
+				cout << ". Please refer to " << lastLookup[0]->getLabel() << "." << endl;
+			}
+		}
+		
+		//run last line if you need to
+		if (needToRun == true)  {
+			cout << lastLookup[0]->getLabel() << '\t' << count << endl;
+			rCurve = new Rarefact(lastLookup, rDisplays);
+			rCurve->getSharedCurve(freq, nIters);
+			delete rCurve;
+		}
+		
+		for (int i = 0; i < lastLookup.size(); i++) {  delete lastLookup[i];  }
+
 		for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}	
 		
 		//reset groups parameter

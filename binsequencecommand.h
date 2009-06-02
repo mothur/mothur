@@ -40,6 +40,7 @@ private:
 	ifstream in, inNames;
 	
 	void readNamesFile();
+	int process(ListVector*, int);
 };
 
 #endif

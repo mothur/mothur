@@ -12,7 +12,6 @@
  
 #include "command.hpp"
 #include "sharedordervector.h"
-#include "sharedlistvector.h"
 #include "inputdata.h"
 #include "groupmap.h"
 #include "readotu.h"
@@ -33,6 +32,8 @@ public:
 private:
 	void createTree(ostream*);
 	void printSims();
+	void process(SharedOrderVector*);
+	
 	
 	GlobalData* globaldata;
 	SharedUtil* util;
@@ -45,7 +46,6 @@ private:
 	map<int, int> index;  //maps row in simMatrix to vector index in the tree	
 	InputData* input;
 	ValidCalculators* validCalculator;
-	SharedListVector* SharedList;
 	SharedOrderVector* order;
 	vector<SharedRAbundVector*> lookup;
 	string format, outputFile;

@@ -52,7 +52,8 @@ private:
 	map<string, int>::iterator it3;
 	
 	void readNamesFile();
-	string FindRep(int, string&); // returns name of "representative" sequence of given bin. //and fill a string containing the groups in that bin if a groupfile is given
+	int process(ListVector*);
+	string FindRep(int, string&, ListVector*); // returns name of "representative" sequence of given bin. //and fill a string containing the groups in that bin if a groupfile is given
 
 };
 

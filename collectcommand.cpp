@@ -36,8 +36,10 @@ CollectCommand::CollectCommand(){
 		globaldata = GlobalData::getInstance();
 		string fileNameRoot;
 		fileNameRoot = getRootName(globaldata->inputFileName);
+		convert(globaldata->getFreq(), freq);
 		int i;
 		validCalculator = new ValidCalculators();
+		
 		for (i=0; i<globaldata->Estimators.size(); i++) {
 			if (validCalculator->isValidCalculator("single", globaldata->Estimators[i]) == true) { 
 				if (globaldata->Estimators[i] == "sobs") { 
@@ -125,31 +127,68 @@ int CollectCommand::execute(){
 		read->read(&*globaldata); 
 		
 		order = globaldata->gorder;
+		lastOrder = order;
 		input = globaldata->ginput;
-		set<string> orderList;	
 		
-		while(order != NULL){
+		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+		set<string> processedLabels;
+		set<string> userLabels = globaldata->labels;
 		
-			orderList.insert(order->getLabel());
+		while((order != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
+		
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(order->getLabel()) == 1){
+				
 				cCurve = new Collect(order, cDisplays);
-				convert(globaldata->getFreq(), freq);
 				cCurve->getCurve(freq);
-			
 				delete cCurve;
 			
 				cout << order->getLabel() << '\t' << count << endl;
+				processedLabels.insert(order->getLabel());
+				userLabels.erase(order->getLabel());
+			
+			//you have a label the user want that is smaller than this line and the last line has not already been processed 
 			}
 			
-			delete order;
+			if ((anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastOrder->getLabel()) != 1)) {
+				cCurve = new Collect(lastOrder, cDisplays);
+				cCurve->getCurve(freq);
+				delete cCurve;
+			
+				cout << lastOrder->getLabel() << '\t' << count << endl;
+				processedLabels.insert(lastOrder->getLabel());
+				userLabels.erase(lastOrder->getLabel());
+			}
+			
+			if (count != 1) { delete lastOrder; }
+			lastOrder = order;			
 			order = (input->getOrderVector());
 			count++;
 		}
-		set<string>::iterator i;
-		for(i = globaldata->labels.begin(); i != globaldata->labels.end(); ++i)
-			if(orderList.count(*i) == 0)
-				cout << "'" << *i << "'" << " is not a valid label.\n";
-		for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}	
+		
+		//output error messages about any remaining user labels
+		set<string>::iterator it;
+		bool needToRun = false;
+		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+			cout << "Your file does not include the label "<< *it; 
+			if (processedLabels.count(lastOrder->getLabel()) != 1) {
+				cout << ". I will use " << lastOrder->getLabel() << "." << endl;
+				needToRun = true;
+			}else {
+				cout << ". Please refer to " << lastOrder->getLabel() << "." << endl;
+			}
+		}
+		
+		//run last line if you need to
+		if (needToRun == true)  {
+			cCurve = new Collect(lastOrder, cDisplays);
+			cCurve->getCurve(freq);
+			delete cCurve;
+			
+			cout << lastOrder->getLabel() << '\t' << count << endl;
+		}
+		
+		delete lastOrder;
+		for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 		return 0;
 	}
 	catch(exception& e) {

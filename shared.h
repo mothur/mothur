@@ -20,8 +20,8 @@ using namespace std;
 class Shared {
 	public:
 		Shared();
-		~Shared();
-		void getSharedVectors(int, SharedListVector*);
+		~Shared() {};
+		void getSharedVectors(SharedListVector*);
 		map<string, SharedRAbundVector*> sharedGroups; //string is groupname, SharedVector* is out info for that group
 		
 	private:

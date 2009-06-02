@@ -27,6 +27,8 @@ RareFactCommand::RareFactCommand(){
 		globaldata = GlobalData::getInstance();
 		string fileNameRoot;
 		fileNameRoot = getRootName(globaldata->inputFileName);
+		convert(globaldata->getFreq(), freq);
+		convert(globaldata->getIters(), nIters);
 		validCalculator = new ValidCalculators();
 		
 		int i;
@@ -96,28 +98,68 @@ int RareFactCommand::execute(){
 		read->read(&*globaldata); 
 
 		order = globaldata->gorder;
+		OrderVector* lastOrder = order;
 		input = globaldata->ginput;
-	
-		while(order != NULL){
 		
+		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+		set<string> processedLabels;
+		set<string> userLabels = globaldata->labels;
+	
+		//as long as you are not at the end of the file or done wih the lines you want
+		while((order != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
+			
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(order->getLabel()) == 1){
 			
 				rCurve = new Rarefact(order, rDisplays);
-				convert(globaldata->getFreq(), freq);
-				convert(globaldata->getIters(), nIters);
 				rCurve->getCurve(freq, nIters);
-			
 				delete rCurve;
 			
 				cout << order->getLabel() << '\t' << count << endl;
+				processedLabels.insert(order->getLabel());
+				userLabels.erase(order->getLabel());
 			}
 			
-			delete order;
+			if ((anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastOrder->getLabel()) != 1)) {
+				rCurve = new Rarefact(lastOrder, rDisplays);
+				rCurve->getCurve(freq, nIters);
+				delete rCurve;
+			
+				cout << lastOrder->getLabel() << '\t' << count << endl;
+				processedLabels.insert(lastOrder->getLabel());
+				userLabels.erase(lastOrder->getLabel());
+			}
+			
+			if (count != 1) { delete lastOrder; }
+			lastOrder = order;			
+
 			order = (input->getOrderVector());
 			count++;
-		
 		}
-	
+		
+		//output error messages about any remaining user labels
+		set<string>::iterator it;
+		bool needToRun = false;
+		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+			cout << "Your file does not include the label "<< *it; 
+			if (processedLabels.count(lastOrder->getLabel()) != 1) {
+				cout << ". I will use " << lastOrder->getLabel() << "." << endl;
+				needToRun = true;
+			}else {
+				cout << ". Please refer to " << lastOrder->getLabel() << "." << endl;
+			}
+		}
+		
+		//run last line if you need to
+		if (needToRun == true)  {
+			rCurve = new Rarefact(lastOrder, rDisplays);
+			rCurve->getCurve(freq, nIters);
+			delete rCurve;
+			
+			cout << lastOrder->getLabel() << '\t' << count << endl;
+		}
+		
+		delete lastOrder;
+
 		for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}	
 		return 0;
 	}

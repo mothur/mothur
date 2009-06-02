@@ -58,10 +58,13 @@ private:
 	InputData* input;
 	ValidCalculators* validCalculator;
 	vector<SharedRAbundVector*> lookup;
+	vector<SharedRAbundVector*> lastLookup;
 	string format, outputFile, groupNames, filename;
 	int numGroups;
 	ofstream out;
 	float precision, cutoff;
+	//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+	void process(vector<SharedRAbundVector*>);
 
 };
 	

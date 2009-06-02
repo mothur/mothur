@@ -97,21 +97,22 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if (key == "gapopen")		{ gapopen = value;		}
 				if (key == "gapextend" )	{ gapextend = value;	}
 				
-				if (key == "line") {//stores lines to be used in a set
+				if (key == "line") {//stores lines to be used in a vector
 					lines.clear();
 					labels.clear();
 					line = value;
 					label = "";
-					splitAtDash(value, lines);
-					allLines = 0;
+					if (line != "all") {  splitAtDash(value, lines);  allLines = 0;  }
+					else { allLines = 1;  }
 				}
-				if (key == "label") {//stores labels to be used in a set
+			
+				if (key == "label") {//stores lines to be used in a vector
 					labels.clear();
 					lines.clear();
 					label = value;
 					line = "";
-					splitAtDash(value, labels);
-					allLines = 0;
+					if (label != "all") {  splitAtDash(value, labels);  allLines = 0;  }
+					else { allLines = 1;  }
 				}
 
 				if (key == "groups") {//stores groups to be used in a vector

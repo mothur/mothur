@@ -62,8 +62,6 @@ GetOTURepCommand::GetOTURepCommand(){
 //**********************************************************************************************************************
 
 GetOTURepCommand::~GetOTURepCommand(){
-	delete matrix;
-	delete list;
 	delete input;
 	delete read;
 	delete fasta;
@@ -77,7 +75,7 @@ GetOTURepCommand::~GetOTURepCommand(){
 int GetOTURepCommand::execute(){
 	try {
 		int count = 1;
-		string nameRep, name, sequence;
+		int error;
 		
 		//read fastafile
 		fasta->readFastaFile(in);
@@ -96,50 +94,66 @@ int GetOTURepCommand::execute(){
 		
 		input = globaldata->ginput;
 		list = globaldata->gListVector;
+		ListVector* lastList = list;
 		
-		while(list != NULL){
+		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+		set<string> processedLabels;
+		set<string> userLabels = globaldata->labels;
+
+		
+		while((list != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
 			
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(list->getLabel()) == 1){
-				
-				//create output file
-				string outputFileName = getRootName(globaldata->getListFile()) + list->getLabel() + ".rep.fasta";
-				openOutputFile(outputFileName, out);
-
-				cout << list->getLabel() << '\t' << count << endl;
-				
-				//for each bin in the list vector
-				for (int i = 0; i < list->size(); i++) {
-					string groups;
-					nameRep = FindRep(i, groups);
+					cout << list->getLabel() << '\t' << count << endl;
+					error = process(list);
+					if (error == 1) { return 0; } //there is an error in hte input files, abort command
 					
-					//print out name and sequence for that bin
-					sequence = fasta->getSequence(nameRep);
-
-					if (sequence != "not found") {
-						if (groupfile == "") {
-							nameRep = nameRep + "|" + toString(i+1);
-							out << ">" << nameRep << endl;
-							out << sequence << endl;
-						}else {
-							nameRep = nameRep + "|" + groups + "|" + toString(i+1);
-							out << ">" << nameRep << endl;
-							out << sequence << endl;
-						}
-					}else { 
-						cout << nameRep << " is missing from your fasta or name file. Please correct. " << endl; 
-						remove(outputFileName.c_str());
-						return 0;
-					}
-				}
-				
-				out.close();
+					processedLabels.insert(list->getLabel());
+					userLabels.erase(list->getLabel());
 			}
+			
+			if ((anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastList->getLabel()) != 1)) {
+					cout << lastList->getLabel() << '\t' << count << endl;
+					error = process(lastList);
+					if (error == 1) { return 0; } //there is an error in hte input files, abort command
+					
+					processedLabels.insert(lastList->getLabel());
+					userLabels.erase(lastList->getLabel());
+			}
+			
+			if (count != 1) { delete lastList; }
+			lastList = list;			
 			
 			list = input->getListVector();
 			count++;
 		}
-
 		
+		//output error messages about any remaining user labels
+		set<string>::iterator it;
+		bool needToRun = false;
+		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+			cout << "Your file does not include the label "<< *it; 
+			if (processedLabels.count(lastList->getLabel()) != 1) {
+				cout << ". I will use " << lastList->getLabel() << "." << endl;
+				needToRun = true;
+			}else {
+				cout << ". Please refer to " << lastList->getLabel() << "." << endl;
+			}
+		}
+		
+		//run last line if you need to
+		if (needToRun == true)  {
+			cout << lastList->getLabel() << '\t' << count << endl;
+			error = process(lastList);
+			if (error == 1) { return 0; } //there is an error in hte input files, abort command
+		}
+		delete lastList;
+		
+		delete matrix;
+		globaldata->gSparseMatrix = NULL;
+		delete list;
+		globaldata->gListVector = NULL;
+
 		return 0;
 	}
 	catch(exception& e) {
@@ -191,7 +205,7 @@ void GetOTURepCommand::readNamesFile() {
 	}	
 }
 //**********************************************************************************************************************
-string GetOTURepCommand::FindRep(int bin, string& group) {
+string GetOTURepCommand::FindRep(int bin, string& group, ListVector* thisList) {
 	try{
 		vector<string> names;
 		map<string, float> sums;
@@ -203,7 +217,7 @@ string GetOTURepCommand::FindRep(int bin, string& group) {
 		map<string, string> groups;
 		map<string, string>::iterator groupIt;
 		
-		binnames = list->get(bin);
+		binnames = thisList->get(bin);
 	
 		//parse names into vector
 		splitAtComma(binnames, names);
@@ -281,6 +295,56 @@ string GetOTURepCommand::FindRep(int bin, string& group) {
 		exit(1);
 	}	
 }
+
+//**********************************************************************************************************************
+int GetOTURepCommand::process(ListVector* processList) {
+	try{
+				string nameRep, name, sequence;
+
+				//create output file
+				string outputFileName = getRootName(globaldata->getListFile()) + processList->getLabel() + ".rep.fasta";
+				openOutputFile(outputFileName, out);
+				
+				//for each bin in the list vector
+				for (int i = 0; i < processList->size(); i++) {
+					string groups;
+					nameRep = FindRep(i, groups, processList);
+					
+					//print out name and sequence for that bin
+					sequence = fasta->getSequence(nameRep);
+
+					if (sequence != "not found") {
+						if (groupfile == "") {
+							nameRep = nameRep + "|" + toString(i+1);
+							out << ">" << nameRep << endl;
+							out << sequence << endl;
+						}else {
+							nameRep = nameRep + "|" + groups + "|" + toString(i+1);
+							out << ">" << nameRep << endl;
+							out << sequence << endl;
+						}
+					}else { 
+						cout << nameRep << " is missing from your fasta or name file. Please correct. " << endl; 
+						remove(outputFileName.c_str());
+						return 1;
+					}
+				}
+				
+				out.close();
+				return 0;
+	
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the GetOTURepCommand class Function process. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the GetOTURepCommand class function process. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
+//**********************************************************************************************************************
 
 
 
