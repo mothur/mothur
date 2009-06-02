@@ -64,6 +64,9 @@ bool InteractEngine::getInput(){
 			getline(cin, input);
 			if (cin.eof()) { input = "quit()"; }
 			
+			//allow user to omit the () on the quit command
+			if (input == "quit") { input = "quit()"; }
+			
 			errorFree = errorCheckor->checkInput(input);
 			if (errorFree == true) {
 				CommandOptionParser parser(input);
@@ -145,6 +148,10 @@ bool BatchEngine::getInput(){
 				if (inputBatchFile.eof()) { input = "quit()"; }
 			
 				cout << endl << "mothur > " << input << endl;
+				
+				//allow user to omit the () on the quit command
+				if (input == "quit") { input = "quit()"; }
+
 				errorFree = errorCheckor->checkInput(input);
 				if (errorFree == true) {
 					CommandOptionParser parser(input);
