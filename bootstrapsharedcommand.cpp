@@ -90,8 +90,6 @@ BootSharedCommand::~BootSharedCommand(){
 int BootSharedCommand::execute(){
 	try {
 		int count = 1;	
-		EstOutput data;
-		vector<SharedRAbundVector*> subset;
 	
 		//if the users entered no valid calculators don't execute command
 		if (treeCalculators.size() == 0) { return 0; }
@@ -101,6 +99,11 @@ int BootSharedCommand::execute(){
 		read->read(&*globaldata); 
 		input = globaldata->ginput;
 		order = input->getSharedOrderVector();
+		SharedOrderVector* lastOrder = order;
+		
+		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+		set<string> processedLabels;
+		set<string> userLabels = globaldata->labels;
 				
 		//set users groups
 		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups, "treegroup");
@@ -117,69 +120,57 @@ int BootSharedCommand::execute(){
 		tmap->makeSim(globaldata->gGroupmap);
 		globaldata->gTreemap = tmap;
 			
-		while(order != NULL){
+		while((order != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
 		
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(order->getLabel()) == 1){			
 				
 				cout << order->getLabel() << '\t' << count << endl;
+				process(order);
 				
-				//open an ostream for each calc to print to
-				for (int z = 0; z < treeCalculators.size(); z++) {
-					//create a new filename
-					outputFile = getRootName(globaldata->inputFileName) + treeCalculators[z]->getName() + ".boot" + order->getLabel() + ".tre";
-					openOutputFile(outputFile, *(out[z]));
-				}
+				processedLabels.insert(order->getLabel());
+				userLabels.erase(order->getLabel());
 				
-				//create a file for each calculator with the 1000 trees in it.
-				for (int p = 0; p < iters; p++) {
-					
-					util->getSharedVectorswithReplacement(globaldata->Groups, lookup, order);  //fills group vectors from order vector.
-				
-					//for each calculator												
-					for(int i = 0 ; i < treeCalculators.size(); i++) {
-					
-						//initialize simMatrix
-						simMatrix.clear();
-						simMatrix.resize(numGroups);
-						for (int m = 0; m < simMatrix.size(); m++)	{
-							for (int j = 0; j < simMatrix.size(); j++)	{
-								simMatrix[m].push_back(0.0);
-							}
-						}
-				
-						//initialize index
-						index.clear();
-						for (int g = 0; g < numGroups; g++) {	index[g] = g;	}
-							
-						for (int k = 0; k < lookup.size(); k++) { // pass cdd each set of groups to commpare
-							for (int l = k; l < lookup.size(); l++) {
-								if (k != l) { //we dont need to similiarity of a groups to itself
-									subset.clear(); //clear out old pair of sharedrabunds
-									//add new pair of sharedrabunds
-									subset.push_back(lookup[k]); subset.push_back(lookup[l]); 
-									
-									//get estimated similarity between 2 groups
-									data = treeCalculators[i]->getValues(subset); //saves the calculator outputs
-									//save values in similarity matrix
-									simMatrix[k][l] = data[0];
-									simMatrix[l][k] = data[0];
-								}
-							}
-						}
-				
-						//creates tree from similarity matrix and write out file
-						createTree(out[i]);
-					}
-				}
-				//close ostream for each calc
-				for (int z = 0; z < treeCalculators.size(); z++) { out[z]->close(); }
+			//you have a label the user want that is smaller than this line and the last line has not already been processed 
 			}
-		
+			
+			if ((anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastOrder->getLabel()) != 1)) {
+											
+				cout << lastOrder->getLabel() << '\t' << count << endl;
+				process(lastOrder);
+
+				processedLabels.insert(lastOrder->getLabel());
+				userLabels.erase(lastOrder->getLabel());
+			}
+			
+			if (count != 1) { delete lastOrder; }
+			lastOrder = order;			
+
 			//get next line to process
 			order = input->getSharedOrderVector();
 			count++;
 		}
 		
+		//output error messages about any remaining user labels
+		set<string>::iterator it;
+		bool needToRun = false;
+		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+			cout << "Your file does not include the label "<< *it; 
+			if (processedLabels.count(lastOrder->getLabel()) != 1) {
+				cout << ". I will use " << lastOrder->getLabel() << "." << endl;
+				needToRun = true;
+			}else {
+				cout << ". Please refer to " << lastOrder->getLabel() << "." << endl;
+			}
+		}
+		
+		//run last line if you need to
+		if (needToRun == true)  {
+			process(lastOrder);			
+			cout << lastOrder->getLabel() << '\t' << count << endl;
+		}
+		
+		delete lastOrder;
+
 		//reset groups parameter
 		globaldata->Groups.clear();  globaldata->setGroups("");
 
@@ -293,5 +284,73 @@ void BootSharedCommand::printSims() {
 	}		
 }
 /***********************************************************/
+void BootSharedCommand::process(SharedOrderVector* order) {
+	try{
+				EstOutput data;
+				vector<SharedRAbundVector*> subset;
+				
+				//open an ostream for each calc to print to
+				for (int z = 0; z < treeCalculators.size(); z++) {
+					//create a new filename
+					outputFile = getRootName(globaldata->inputFileName) + treeCalculators[z]->getName() + ".boot" + order->getLabel() + ".tre";
+					openOutputFile(outputFile, *(out[z]));
+				}
+				
+				//create a file for each calculator with the 1000 trees in it.
+				for (int p = 0; p < iters; p++) {
+					
+					util->getSharedVectorswithReplacement(globaldata->Groups, lookup, order);  //fills group vectors from order vector.
+				
+					//for each calculator												
+					for(int i = 0 ; i < treeCalculators.size(); i++) {
+					
+						//initialize simMatrix
+						simMatrix.clear();
+						simMatrix.resize(numGroups);
+						for (int m = 0; m < simMatrix.size(); m++)	{
+							for (int j = 0; j < simMatrix.size(); j++)	{
+								simMatrix[m].push_back(0.0);
+							}
+						}
+				
+						//initialize index
+						index.clear();
+						for (int g = 0; g < numGroups; g++) {	index[g] = g;	}
+							
+						for (int k = 0; k < lookup.size(); k++) { // pass cdd each set of groups to commpare
+							for (int l = k; l < lookup.size(); l++) {
+								if (k != l) { //we dont need to similiarity of a groups to itself
+									subset.clear(); //clear out old pair of sharedrabunds
+									//add new pair of sharedrabunds
+									subset.push_back(lookup[k]); subset.push_back(lookup[l]); 
+									
+									//get estimated similarity between 2 groups
+									data = treeCalculators[i]->getValues(subset); //saves the calculator outputs
+									//save values in similarity matrix
+									simMatrix[k][l] = data[0];
+									simMatrix[l][k] = data[0];
+								}
+							}
+						}
+				
+						//creates tree from similarity matrix and write out file
+						createTree(out[i]);
+					}
+				}
+				//close ostream for each calc
+				for (int z = 0; z < treeCalculators.size(); z++) { out[z]->close(); }
+
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the BootSharedCommand class Function process. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the BootSharedCommand class function process. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}		
+}
+/***********************************************************/
+
 
 

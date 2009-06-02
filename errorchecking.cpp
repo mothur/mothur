@@ -298,6 +298,7 @@ bool ErrorCheck::checkInput(string input) {
 				errorFree = false;
 			}
 			if (listfile == "") { cout << "list is a required parameter for the get.oturep command." << endl; errorFree = false; }
+			if (fastafile == "") { cout << "fasta is a required parameter for the get.oturep command." << endl; errorFree = false; }
 			validateBinFiles();
 		} 
 

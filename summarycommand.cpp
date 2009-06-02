@@ -115,7 +115,8 @@ SummaryCommand::~SummaryCommand(){
 
 int SummaryCommand::execute(){
 	try {
-	
+		int count = 1;
+		
 		//if the users entered no valid calculators don't execute command
 		if (sumCalculators.size() == 0) { return 0; }
 
@@ -125,7 +126,11 @@ int SummaryCommand::execute(){
 	
 		read = new ReadOTUFile(globaldata->inputFileName);	
 		read->read(&*globaldata); 
-
+		
+		sabund = globaldata->sabund;
+		SAbundVector* lastSAbund = sabund;
+		input = globaldata->ginput;
+		
 		for(int i=0;i<sumCalculators.size();i++){
 			if(sumCalculators[i]->getCols() == 1){
 				outputFileHandle << '\t' << sumCalculators[i]->getName();
@@ -136,14 +141,18 @@ int SummaryCommand::execute(){
 		}
 		outputFileHandle << endl;
 		
-		sabund = globaldata->sabund;
-		input = globaldata->ginput;
-		int count = 1;
-		while(sabund != NULL){
+		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+		set<string> processedLabels;
+		set<string> userLabels = globaldata->labels;
 		
+		while((sabund != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
+			
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(sabund->getLabel()) == 1){			
 	
 				cout << sabund->getLabel() << '\t' << count << endl;
+				processedLabels.insert(sabund->getLabel());
+				userLabels.erase(sabund->getLabel());
+
 				
 				outputFileHandle << sabund->getLabel();
 				for(int i=0;i<sumCalculators.size();i++){
@@ -151,13 +160,57 @@ int SummaryCommand::execute(){
 					outputFileHandle << '\t';
 					sumCalculators[i]->print(outputFileHandle);
 				}
-				
 				outputFileHandle << endl;
 			}
+			
+			if ((anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastSAbund->getLabel()) != 1)) {
+
+				cout << lastSAbund->getLabel() << '\t' << count << endl;
+				processedLabels.insert(lastSAbund->getLabel());
+				userLabels.erase(lastSAbund->getLabel());
+				
+				outputFileHandle << lastSAbund->getLabel();
+				for(int i=0;i<sumCalculators.size();i++){
+					vector<double> data = sumCalculators[i]->getValues(lastSAbund);
+					outputFileHandle << '\t';
+					sumCalculators[i]->print(outputFileHandle);
+				}
+				outputFileHandle << endl;
+			}		
+
+			if (count != 1) { delete lastSAbund; }
+			lastSAbund = sabund;			
+
 			sabund = input->getSAbundVector();
 			count++;
 		}
-	
+		
+		//output error messages about any remaining user labels
+		set<string>::iterator it;
+		bool needToRun = false;
+		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+			cout << "Your file does not include the label "<< *it; 
+			if (processedLabels.count(lastSAbund->getLabel()) != 1) {
+				cout << ". I will use " << lastSAbund->getLabel() << "." << endl;
+				needToRun = true;
+			}else {
+				cout << ". Please refer to " << lastSAbund->getLabel() << "." << endl;
+			}
+		}
+		
+		//run last line if you need to
+		if (needToRun == true)  {
+			cout << lastSAbund->getLabel() << '\t' << count << endl;
+			outputFileHandle << lastSAbund->getLabel();
+			for(int i=0;i<sumCalculators.size();i++){
+				vector<double> data = sumCalculators[i]->getValues(lastSAbund);
+				outputFileHandle << '\t';
+				sumCalculators[i]->print(outputFileHandle);
+			}
+			outputFileHandle << endl;
+		}
+		
+		delete lastSAbund;
 		return 0;
 	}
 	catch(exception& e) {

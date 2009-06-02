@@ -53,6 +53,7 @@ private:
 	string outputFileName, format, outAllFileName;
 	ofstream outputFileHandle, outAll;
 	bool mult;
+	void process(vector<SharedRAbundVector*>);
 
 };
 

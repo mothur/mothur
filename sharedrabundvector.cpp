@@ -153,12 +153,6 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 
 /***********************************************************************/
 
-SharedRAbundVector::~SharedRAbundVector() {
-
-}
-
-/***********************************************************************/
-
 void SharedRAbundVector::set(int binNumber, int newBinSize, string groupname){
 	try {
 		int oldBinSize = data[binNumber].abundance;

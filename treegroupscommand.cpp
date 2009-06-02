@@ -94,6 +94,7 @@ int TreeGroupCommand::execute(){
 			
 			input = globaldata->ginput;
 			lookup = input->getSharedRAbundVectors();
+			lastLookup = lookup;
 			
 			if (lookup.size() < 2) { cout << "You have not provided enough valid groups.  I cannot run the command." << endl; return 0; }
 		
@@ -314,11 +315,7 @@ void TreeGroupCommand::makeSimsDist() {
 void TreeGroupCommand::makeSimsShared() {
 	try {
 		int count = 1;	
-		EstOutput data;
-		vector<SharedRAbundVector*> subset;
 	
-		numGroups = globaldata->Groups.size();
-		
 		//clear globaldatas old tree names if any
 		globaldata->Treenames.clear();
 		
@@ -330,11 +327,75 @@ void TreeGroupCommand::makeSimsShared() {
 		tmap->makeSim(globaldata->gGroupmap);
 		globaldata->gTreemap = tmap;
 		
-		while(lookup[0] != NULL){
+		set<string> processedLabels;
+		set<string> userLabels = globaldata->labels;
+
+		//as long as you are not at the end of the file or done wih the lines you want
+		while((lookup[0] != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
 		
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(lookup[0]->getLabel()) == 1){			
-				
 				cout << lookup[0]->getLabel() << '\t' << count << endl;
+				process(lookup);
+				
+				processedLabels.insert(lookup[0]->getLabel());
+				userLabels.erase(lookup[0]->getLabel());
+			}
+			
+			if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLookup[0]->getLabel()) != 1)) {
+				cout << lastLookup[0]->getLabel() << '\t' << count << endl;
+				process(lastLookup);
+					
+				processedLabels.insert(lastLookup[0]->getLabel());
+				userLabels.erase(lastLookup[0]->getLabel());
+			}
+
+			//prevent memory leak
+			if (count != 1) { for (int i = 0; i < lastLookup.size(); i++) {  delete lastLookup[i];  } }
+			lastLookup = lookup;			
+			
+			//get next line to process
+			lookup = input->getSharedRAbundVectors();
+			count++;
+		}
+		
+		//output error messages about any remaining user labels
+		set<string>::iterator it;
+		bool needToRun = false;
+		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+			cout << "Your file does not include the label "<< *it; 
+			if (processedLabels.count(lastLookup[0]->getLabel()) != 1) {
+				cout << ". I will use " << lastLookup[0]->getLabel() << "." << endl;
+				needToRun = true;
+			}else {
+				cout << ". Please refer to " << lastLookup[0]->getLabel() << "." << endl;
+			}
+		}
+		
+		//run last line if you need to
+		if (needToRun == true)  {
+			cout << lastLookup[0]->getLabel() << '\t' << count << endl;
+			process(lastLookup);
+		}
+		
+		for (int i = 0; i < lastLookup.size(); i++) {  delete lastLookup[i];  }
+		for(int i = 0 ; i < treeCalculators.size(); i++) {  delete treeCalculators[i]; }
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the TreeGroupCommand class Function makeSimsShared. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the TreeGroupCommand class function makeSimsShared. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}		
+}
+
+/***********************************************************/
+void TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
+	try{
+				EstOutput data;
+				vector<SharedRAbundVector*> subset;
+				numGroups = globaldata->Groups.size();
 				
 				//for each calculator												
 				for(int i = 0 ; i < treeCalculators.size(); i++) {
@@ -352,16 +413,16 @@ void TreeGroupCommand::makeSimsShared() {
 					for (int g = 0; g < numGroups; g++) {	index[g] = g;	}
 		
 					//create a new filename
-					outputFile = getRootName(globaldata->inputFileName) + treeCalculators[i]->getName() + "." + lookup[0]->getLabel() + ".tre";				
+					outputFile = getRootName(globaldata->inputFileName) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".tre";				
 												
-					for (int k = 0; k < lookup.size(); k++) { 
-						for (int l = k; l < lookup.size(); l++) {
+					for (int k = 0; k < thisLookup.size(); k++) { 
+						for (int l = k; l < thisLookup.size(); l++) {
 							if (k != l) { //we dont need to similiarity of a groups to itself
 								//get estimated similarity between 2 groups
 								
 								subset.clear(); //clear out old pair of sharedrabunds
 								//add new pair of sharedrabunds
-								subset.push_back(lookup[k]); subset.push_back(lookup[l]); 
+								subset.push_back(thisLookup[k]); subset.push_back(thisLookup[l]); 
 								
 								data = treeCalculators[i]->getValues(subset); //saves the calculator outputs
 								//save values in similarity matrix
@@ -374,28 +435,18 @@ void TreeGroupCommand::makeSimsShared() {
 					//creates tree from similarity matrix and write out file
 					createTree();
 				}
-			}
-			
-			//prevent memory leak
-			for (int i = 0; i < lookup.size(); i++) {	delete lookup[i];	}
-			
-			//get next line to process
-			lookup = input->getSharedRAbundVectors();
-			count++;
-		}
-		
-		for(int i = 0 ; i < treeCalculators.size(); i++) {  delete treeCalculators[i]; }
+
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the TreeGroupCommand class Function makeSimsShared. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the TreeGroupCommand class Function process. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the TreeGroupCommand class function makeSimsShared. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the TreeGroupCommand class function process. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}		
 }
-
 /***********************************************************/
 
+	
 

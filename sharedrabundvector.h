@@ -32,7 +32,7 @@ public:
 	//SharedRAbundVector(string, vector<int>);
 	SharedRAbundVector(const SharedRAbundVector& bv) : DataVector(bv), data(bv.data), maxRank(bv.maxRank), numBins(bv.numBins), numSeqs(bv.numSeqs){};
     SharedRAbundVector(ifstream&);
-	~SharedRAbundVector();
+	~SharedRAbundVector(){};
 
 	int getNumBins();		
 	int getNumSeqs();							

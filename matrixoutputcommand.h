@@ -30,6 +30,7 @@ public:
 	
 private:
 	void printSims(ostream&);
+	void process(vector<SharedRAbundVector*>);
 	
 	GlobalData* globaldata;
 	ReadOTUFile* read;
@@ -41,6 +42,7 @@ private:
 	string exportFileName;
 	int numGroups;
 	ofstream out;
+	
 
 };
 	

@@ -74,6 +74,19 @@ inline void convert(const string& s, T& x, bool failIfLeftoverChars = true){
 //**********************************************************************************************************************
 
 template<typename T>
+inline bool convertTestFloat(const string& s, T& x, bool failIfLeftoverChars = true){
+	istringstream i(s);
+	char c;
+	if (!(i >> x) || (failIfLeftoverChars && i.get(c)))
+	{
+		return false;
+	} 
+	return true;
+}
+
+//**********************************************************************************************************************
+
+template<typename T>
 inline bool convertTest(const string& s, T& x, bool failIfLeftoverChars = true){
 	istringstream i(s);
 	char c;
@@ -465,8 +478,87 @@ inline bool inUsersGroups(string groupname, vector<string> Groups) {
 	}
 }
 
+/***********************************************************************/
+//this function determines if the user has given us labels that are smaller than the given label.
+//if so then it returns true so that the calling function can run the previous valid distance.
+//it's a "smart" distance function.  It also checks for invalid labels.
+inline bool anyLabelsToProcess(string label, set<string>& userLabels, string errorOff) {
+	try {
+		set<string>::iterator it;
+		vector<float> orderFloat;
+		map<string, float> userMap;  //the conversion process removes trailing 0's which we need to put back
+		map<string, float>::iterator it2;
+		float labelFloat;
+		bool smaller = false;
+		
+		//unique is the smallest line
+		if (label == "unique") {  return false;  }
+		else { convert(label, labelFloat); }
+		
+		//go through users set and make them floats
+		for(it = userLabels.begin(); it != userLabels.end(); ++it) {
+			
+			float temp;
+			if ((*it != "unique") && (convertTestFloat(*it, temp) == true)){
+				convert(*it, temp);
+				orderFloat.push_back(temp);
+				userMap[*it] = temp;
+			}else if (*it == "unique") { 
+				orderFloat.push_back(-1.0);
+				userMap["unique"] = -1.0;
+			}else {
+				if (errorOff == "") {  cout << *it << " is not a valid label." << endl;  }
+				userLabels.erase(*it); 
+				it--;
+			}
+		}
+		
+		//sort order
+		sort(orderFloat.begin(), orderFloat.end());
+		
+		/*************************************************/
+		//is this label bigger than any of the users labels
+		/*************************************************/
+				
+		//loop through order until you find a label greater than label
+		for (int i = 0; i < orderFloat.size(); i++) {
+			if (orderFloat[i] < labelFloat) {
+				smaller = true;
+				if (orderFloat[i] == -1) { 
+					if (errorOff == "") { cout << "Your file does not include the label unique." <<  endl; }
+					userLabels.erase("unique");
+				}
+				else {  
+					if (errorOff == "") { cout << "Your file does not include the label "; }
+					string s = "";
+					for (it2 = userMap.begin(); it2!= userMap.end(); it2++) {  
+						if (it2->second == orderFloat[i]) {  
+							s = it2->first;  
+							//remove small labels
+							userLabels.erase(s);
+							break;
+						}
+					}
+					if (errorOff == "") { cout << s << ". I will use the next smallest distance. "  <<  endl; }
+				}
+			//since they are sorted once you find a bigger one stop looking
+			}else { break; }
+		}
+		
+		return smaller;
+						
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the mothur class Function anyLabelsToProcess. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the mothur class function anyLabelsToProcess. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+
+}
+
 /**************************************************************************************************/
-
-
 #endif
 

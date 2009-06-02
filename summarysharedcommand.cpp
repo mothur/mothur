@@ -133,6 +133,7 @@ int SummarySharedCommand::execute(){
 			
 		input = globaldata->ginput;
 		lookup = input->getSharedRAbundVectors();
+		vector<SharedRAbundVector*> lastLookup = lookup;
 		
 		//output estimator names as column headers
 		outputFileHandle << "label" <<'\t' << "comparison" << '\t'; 
@@ -165,74 +166,60 @@ int SummarySharedCommand::execute(){
 			return 0;
 		}
 					
+		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+		set<string> processedLabels;
+		set<string> userLabels = globaldata->labels;
 		
-		while(lookup[0] != NULL){
+		//as long as you are not at the end of the file or done wih the lines you want
+		while((lookup[0] != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
 		
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(lookup[0]->getLabel()) == 1){			
-	
 				cout << lookup[0]->getLabel() << '\t' << count << endl;
+				process(lookup);
 				
-				//loop through calculators and add to file all for all calcs that can do mutiple groups
-				if (mult == true) {
-					//output label
-					outAll << lookup[0]->getLabel() << '\t';
-					
-					//output groups names
-					string outNames = "";
-					for (int j = 0; j < lookup.size(); j++) {
-						outNames += lookup[j]->getGroup() +  "-";
-					}
-					outNames = outNames.substr(0, outNames.length()-1); //rip off extra '-';
-					outAll << outNames << '\t';
-					
-					for(int i=0;i<sumCalculators.size();i++){
-						if (sumCalculators[i]->getMultiple() == true) { 
-							sumCalculators[i]->getValues(lookup);
-							outAll << '\t';
-							sumCalculators[i]->print(outAll);
-						}
-					}
-					outAll << endl;
-				}
-	
-				int n = 1; 
-				vector<SharedRAbundVector*> subset;
-				for (int k = 0; k < (lookup.size() - 1); k++) { // pass cdd each set of groups to commpare
-					for (int l = n; l < lookup.size(); l++) {
-						
-						outputFileHandle << lookup[0]->getLabel() << '\t';
-						
-						subset.clear(); //clear out old pair of sharedrabunds
-						//add new pair of sharedrabunds
-						subset.push_back(lookup[k]); subset.push_back(lookup[l]); 
-						
-						//sort groups to be alphanumeric
-						if (lookup[k]->getGroup() > lookup[l]->getGroup()) {
-							outputFileHandle << (lookup[l]->getGroup() +'\t' + lookup[k]->getGroup()) << '\t'; //print out groups
-						}else{
-							outputFileHandle << (lookup[k]->getGroup() +'\t' + lookup[l]->getGroup()) << '\t'; //print out groups
-						}
-						
-						for(int i=0;i<sumCalculators.size();i++) {
-
-							sumCalculators[i]->getValues(subset); //saves the calculator outputs
-							outputFileHandle << '\t';
-							sumCalculators[i]->print(outputFileHandle);
-						}
-						outputFileHandle << endl;
-					}
-					n++;
-				}
+				processedLabels.insert(lookup[0]->getLabel());
+				userLabels.erase(lookup[0]->getLabel());
 			}
+			
+			if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLookup[0]->getLabel()) != 1)) {
+					cout << lastLookup[0]->getLabel() << '\t' << count << endl;
+					process(lastLookup);
+					
+					processedLabels.insert(lastLookup[0]->getLabel());
+					userLabels.erase(lastLookup[0]->getLabel());
+			}
+
 		
 			//prevent memory leak
-			for (int i = 0; i < lookup.size(); i++) {	delete lookup[i];	}
+			if (count != 1) { for (int i = 0; i < lastLookup.size(); i++) {  delete lastLookup[i];  } }
+			lastLookup = lookup;			
 				
 			//get next line to process
 			lookup = input->getSharedRAbundVectors();
 			count++;
 		}
 		
+		//output error messages about any remaining user labels
+		set<string>::iterator it;
+		bool needToRun = false;
+		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+			cout << "Your file does not include the label "<< *it; 
+			if (processedLabels.count(lastLookup[0]->getLabel()) != 1) {
+				cout << ". I will use " << lastLookup[0]->getLabel() << "." << endl;
+				needToRun = true;
+			}else {
+				cout << ". Please refer to " << lastLookup[0]->getLabel() << "." << endl;
+			}
+		}
+		
+		//run last line if you need to
+		if (needToRun == true)  {
+			cout << lastLookup[0]->getLabel() << '\t' << count << endl;
+			process(lastLookup);
+		}
+		
+		for (int i = 0; i < lastLookup.size(); i++) {  delete lastLookup[i];  }
+
 		//reset groups parameter
 		globaldata->Groups.clear();  globaldata->setGroups("");
 		
@@ -248,6 +235,72 @@ int SummarySharedCommand::execute(){
 	}
 	catch(...) {
 		cout << "An unknown error has occurred in the SummarySharedCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}		
+}
+
+/***********************************************************/
+void SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup) {
+	try {
+				//loop through calculators and add to file all for all calcs that can do mutiple groups
+				if (mult == true) {
+					//output label
+					outAll << thisLookup[0]->getLabel() << '\t';
+					
+					//output groups names
+					string outNames = "";
+					for (int j = 0; j < thisLookup.size(); j++) {
+						outNames += thisLookup[j]->getGroup() +  "-";
+					}
+					outNames = outNames.substr(0, outNames.length()-1); //rip off extra '-';
+					outAll << outNames << '\t';
+					
+					for(int i=0;i<sumCalculators.size();i++){
+						if (sumCalculators[i]->getMultiple() == true) { 
+							sumCalculators[i]->getValues(thisLookup);
+							outAll << '\t';
+							sumCalculators[i]->print(outAll);
+						}
+					}
+					outAll << endl;
+				}
+	
+				int n = 1; 
+				vector<SharedRAbundVector*> subset;
+				for (int k = 0; k < (thisLookup.size() - 1); k++) { // pass cdd each set of groups to commpare
+					for (int l = n; l < thisLookup.size(); l++) {
+						
+						outputFileHandle << thisLookup[0]->getLabel() << '\t';
+						
+						subset.clear(); //clear out old pair of sharedrabunds
+						//add new pair of sharedrabunds
+						subset.push_back(thisLookup[k]); subset.push_back(thisLookup[l]); 
+						
+						//sort groups to be alphanumeric
+						if (thisLookup[k]->getGroup() > thisLookup[l]->getGroup()) {
+							outputFileHandle << (thisLookup[l]->getGroup() +'\t' + thisLookup[k]->getGroup()) << '\t'; //print out groups
+						}else{
+							outputFileHandle << (thisLookup[k]->getGroup() +'\t' + thisLookup[l]->getGroup()) << '\t'; //print out groups
+						}
+						
+						for(int i=0;i<sumCalculators.size();i++) {
+
+							sumCalculators[i]->getValues(subset); //saves the calculator outputs
+							outputFileHandle << '\t';
+							sumCalculators[i]->print(outputFileHandle);
+						}
+						outputFileHandle << endl;
+					}
+					n++;
+				}
+
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the SummarySharedCommand class Function process. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the SummarySharedCommand class function process. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}		
 }
