@@ -48,14 +48,14 @@ void NastReport::print(){
 
 void NastReport::setCandidate(Sequence* candSeq){ 
 	queryName = candSeq->getName();
-	queryLength = candSeq->getUnalignLength();
+	queryLength = candSeq->getNumBases();
 }
 
 /******************************************************************************************************************/
 
 void NastReport::setTemplate(Sequence* tempSeq){ 
 	templateName = tempSeq->getName();
-	templateLength = tempSeq->getUnalignLength();
+	templateLength = tempSeq->getNumBases();
 }
 
 /******************************************************************************************************************/

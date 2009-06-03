@@ -19,7 +19,7 @@ void FastaMap::readFastaFile(ifstream& in) {
 		name = line.substr(1, line.length());  //rips off '>'
 	
 		//read through file
-		while (in.eof() != true) {
+		while (!in.eof()) {
 			in >> line;
 			if (line != "") {
 				if (isalnum(line.at(0))) {  //if it's a sequence line
@@ -41,19 +41,9 @@ void FastaMap::readFastaFile(ifstream& in) {
 					sequence = "";
 				}
 			}
+			gobble(in);
 		}
 	
-		//store last sequence and name info.
-		seqmap[name] = sequence;
-		it = data.find(sequence);
-		if (it == data.end()) { 	//it's unique.
-			data[sequence].groupname = name;  //group name will be the name of the first duplicate sequence found.
-			data[sequence].groupnumber = 1;
-			data[sequence].names = name;
-		}else { // its a duplicate.
-			data[sequence].names += "," + name;
-			data[sequence].groupnumber++;
-		}
 			
 	}
 	catch(exception& e) {

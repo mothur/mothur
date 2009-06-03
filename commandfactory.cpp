@@ -43,7 +43,7 @@
 #include "distancecommand.h"
 #include "aligncommand.h"
 #include "matrixoutputcommand.h"
-
+#include "seqsummarycommand.h"
 
 /***********************************************************/
 
@@ -97,6 +97,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "concensus")				{   command = new ConcensusCommand();			}
 		else if(commandName == "dist.seqs")				{   command = new DistanceCommand();			}
 		else if(commandName == "align.seqs")			{   command = new AlignCommand();				}
+		else if(commandName == "summary.seqs")			{	command = new SeqSummaryCommand();			}
 		else											{	command = new NoCommand();					}
 
 		return command;

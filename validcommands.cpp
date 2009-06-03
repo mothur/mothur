@@ -44,6 +44,7 @@ ValidCommands::ValidCommands() {
 		commands["help"]				= "help"; 
 		commands["filter.seqs"]			= "filter.seqs";
 		commands["align.seqs"]			= "align.seqs";
+		commands["summary.seqs"]		= "summary.seqs";
 		commands["quit"]				= "quit"; 
 
 				
