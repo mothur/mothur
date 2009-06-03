@@ -75,8 +75,8 @@ void Sequence::initialize(){
 	isAligned = 0;
 	startPos = -1;
 	endPos = -1;
-	longHomoPolymer = 0;
-	ambigBases = 0;
+	longHomoPolymer = -1;
+	ambigBases = -1;
 	
 }	
 
@@ -212,7 +212,7 @@ int Sequence::getAlignLength(){
 
 int Sequence::getAmbigBases(){
 	if(ambigBases == -1){
-	
+		ambigBases = 0;
 		for(int j=0;j<numBases;j++){
 			if(unaligned[j] != 'A' && unaligned[j] != 'T' && unaligned[j] != 'G' && unaligned[j] != 'C'){
 				ambigBases++;
@@ -226,8 +226,8 @@ int Sequence::getAmbigBases(){
 //********************************************************************************************************************
 
 int Sequence::getLongHomoPolymer(){
-	if(longHomoPolymer == 0){
-
+	if(longHomoPolymer == -1){
+		longHomoPolymer = 1;
 		int homoPolymer = 1;
 		for(int j=1;j<numBases;j++){
 			if(unaligned[j] == unaligned[j-1]){
