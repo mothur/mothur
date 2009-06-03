@@ -249,12 +249,26 @@ inline string getPathName(string longName){
  
 	string rootPathName = longName;
 	
-	if(longName.find_last_of("/") != longName.npos){
+	if(longName.find_last_of('/') != longName.npos){
 		int pos = longName.find_last_of('/')+1;
 		rootPathName = longName.substr(0, pos);
 	}
 
 	return rootPathName;
+}
+
+/***********************************************************************/
+
+inline string getExtension(string longName){
+	
+	string extension = longName;
+	
+	if(longName.find_last_of('.') != longName.npos){
+		int pos = longName.find_last_of('.');
+		extension = longName.substr(pos, longName.length());
+	}
+	
+	return extension;
 }
 
 /***********************************************************************/
