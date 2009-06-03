@@ -46,6 +46,7 @@
 #include "getsabundcommand.h"
 #include "getrabundcommand.h"
 #include "seqsummarycommand.h"
+#include "screenseqscommand.h"
 
 
 /***********************************************************/
@@ -69,7 +70,7 @@ Command* CommandFactory::getCommand(string commandName){
 	try {
 		delete command;   //delete the old command
 
-			 if(commandName == "read.dist")				{	command = new ReadDistCommand();			}
+		if(commandName == "read.dist")					{	command = new ReadDistCommand();			}
 		else if(commandName == "read.otu")				{	command = new ReadOtuCommand();				}
 		else if(commandName == "read.tree")				{	command = new ReadTreeCommand();			}
 		else if(commandName == "cluster")				{	command = new ClusterCommand();				}
@@ -103,6 +104,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "dist.seqs")				{   command = new DistanceCommand();			}
 		else if(commandName == "align.seqs")			{   command = new AlignCommand();				}
 		else if(commandName == "summary.seqs")			{	command = new SeqSummaryCommand();			}
+		else if(commandName == "screen.seqs")			{	command = new ScreenSeqsCommand();			}
 		else											{	command = new NoCommand();					}
 
 		return command;

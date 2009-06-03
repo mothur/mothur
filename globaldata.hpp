@@ -91,7 +91,12 @@ public:
 	string getSoft();
 	string getHard();
 	string getScale();
-
+	string getStartPos();
+	string getEndPos();
+	string getMaxAmbig();
+	string getMaxHomoPolymer();
+	string getMinLength();
+	string getMaxLength();
 
 	void setListFile(string);
 	void setGroupFile(string file);	
@@ -114,7 +119,7 @@ public:
 	
 	void parseGlobalData(string, string);
 	
-	void parseTreeFile();		//parses through tree file to find names of nodes and number of them
+	void parseTreeFile();	//parses through tree file to find names of nodes and number of them
 							//this is required in case user has sequences in the names file that are
 							//not included in the tree. 
 							//only takes names from the first tree in the tree file and assumes that all trees use the same names.
@@ -122,9 +127,7 @@ public:
 		
 private:
 
-	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, nexusfile, clustalfile, treefile, sharedfile, line, label, randomtree, groups;
-	string cutoff, format, precision, method, fileroot, iters, jumble, freq, calc, abund, step, form, sorted, trump, soft, hard, scale, countends, processors, candidatefile, search, ksize, align, match, size;
-	string mismatch, gapopen, gapextend;
+	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, nexusfile, clustalfile, treefile, sharedfile, line, label, randomtree, groups, cutoff, format, precision, method, fileroot, iters, jumble, freq, calc, abund, step, form, sorted, trump, soft, hard, scale, countends, processors, candidatefile, search, ksize, align, match, size, mismatch, gapopen, gapextend, minLength, maxLength, startPos, endPos, maxAmbig, maxHomoPolymer;
 
 
 	static GlobalData* _uniqueInstance;

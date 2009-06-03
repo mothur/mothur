@@ -96,6 +96,12 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if (key == "mismatch")		{ mismatch = value;	    }
 				if (key == "gapopen")		{ gapopen = value;		}
 				if (key == "gapextend" )	{ gapextend = value;	}
+				if (key == "start" )		{ startPos = value;	}
+				if (key == "end" )			{ endPos = value;	}
+				if (key == "maxambig" )		{ maxAmbig = value;	}
+				if (key == "maxhomop" )		{ maxHomoPolymer = value;	}
+				if (key == "minlength" )	{ minLength = value;	}
+				if (key == "maxlength" )	{ maxLength = value;	}
 				
 				if (key == "line") {//stores lines to be used in a vector
 					lines.clear();
@@ -168,6 +174,13 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if (key == "mismatch")		{ mismatch = value;	    }
 			if (key == "gapopen")		{ gapopen = value;		}
 			if (key == "gapextend" )	{ gapextend = value;	}
+			if (key == "start" )		{ startPos = value;	}
+			if (key == "end" )			{ endPos = value;	}
+			if (key == "maxambig" )		{ maxAmbig = value;	}
+			if (key == "maxhomop" )		{ maxHomoPolymer = value;	}
+			if (key == "minlength" )	{ minLength = value;	}
+			if (key == "maxlength" )	{ maxLength = value;	}
+
 
 			if (key == "line") {//stores lines to be used in a vector
 				lines.clear();
@@ -211,7 +224,6 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			splitAtDash(calc, Estimators); 
 		}
 		if (commandName == "collect.shared") {
-
 			if ((calc == "default") || (calc == "")) { calc = "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan"; }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
@@ -323,6 +335,12 @@ string GlobalData::getMatch()			{	return match;		}
 string GlobalData::getMismatch()		{	return mismatch;	}
 string GlobalData::getGapopen()			{	return gapopen;		}
 string GlobalData::getGapextend()		{	return gapextend;	}
+string GlobalData::getStartPos()		{	return startPos;	}
+string GlobalData::getEndPos()			{	return endPos;		}
+string GlobalData::getMaxAmbig()		{	return maxAmbig;	}
+string GlobalData::getMaxHomoPolymer()	{	return maxHomoPolymer;	}
+string GlobalData::getMinLength()		{	return minLength;	}
+string GlobalData::getMaxLength()		{	return maxLength;	}
 
 
 void GlobalData::setListFile(string file)		{	listfile = file;	inputFileName = file;					}
@@ -401,6 +419,13 @@ void GlobalData::clear() {
 	mismatch		=	"-1.0";
 	gapopen			=	"-1.0";
 	gapextend		=	"-2.0";
+	startPos		=	"-1";
+	endPos			=	"-1";
+	maxAmbig		=	"-1";
+	maxHomoPolymer	=	"-1";
+	minLength		=	"-1";
+	maxLength		=	"-1";
+	
 }
 
 //*******************************************************/
@@ -434,7 +459,13 @@ void GlobalData::reset() {
 	trump           =   "";		
 	hard			=   "";		
 	soft            =   "";	
-
+	startPos		=	"-1";
+	endPos			=	"-1";
+	maxAmbig		=	"-1";
+	maxHomoPolymer	=	"-1";
+	minLength		=	"-1";
+	maxLength		=	"-1";
+	
 }
 /*******************************************************/
 
@@ -449,6 +480,8 @@ GlobalData::~GlobalData() {
 
 /*******************************************************/
 void GlobalData::parseTreeFile() {
+	//Why is THIS in GlobalData??? - PDS
+	
 	//only takes names from the first tree and assumes that all trees use the same names.
 	try {
 		string filename = treefile;
