@@ -246,8 +246,16 @@ bool ErrorCheck::checkInput(string input) {
 			else {cout << "Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average." << endl; return false; }
 		}
 		
-		if ((commandName == "collect.single") || (commandName == "rarefaction.single") || (commandName == "summary.single") ){ 
+		if ((commandName == "collect.single") || (commandName == "rarefaction.single") || (commandName == "summary.single")){ 
 			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { cout << "You must read a list, sabund or rabund before you can use the collect.single, rarefaction.single or summary.single commands." << endl; return false; }
+		}
+		
+		if (commandName == "get.rabund") {
+			if (globaldata->getListFile() == "") { cout << "You must read a listfile before you can use the get.rabund command." << endl; return false; }
+		}
+		
+		if (commandName == "get.sabund") {
+			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "")) { cout << "You must read a list or rabund before you can use the get.sabund command." << endl; return false; }
 		}
 		
 		if ((commandName == "collect.shared") || (commandName == "rarefaction.shared") || (commandName == "summary.shared") || (commandName == "bootstrap.shared") || (commandName == "dist.shared")){ 

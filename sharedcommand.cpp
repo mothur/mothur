@@ -49,10 +49,11 @@ int SharedCommand::execute(){
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = globaldata->labels;
+		set<int> userLines = globaldata->lines;
 		
 		shared = new Shared();
 		
-		while((SharedList != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
+		while((SharedList != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 			
 						
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(SharedList->getLabel()) == 1){
@@ -62,6 +63,7 @@ int SharedCommand::execute(){
 				
 					processedLabels.insert(SharedList->getLabel());
 					userLabels.erase(SharedList->getLabel());
+					userLines.erase(count);
 			}
 			
 			if ((anyLabelsToProcess(SharedList->getLabel(), userLabels, errorOff) == true) && (processedLabels.count(lastList->getLabel()) != 1)) {

@@ -39,6 +39,8 @@ ValidCommands::ValidCommands() {
 		commands["get.group"]           = "get.group";
 		commands["get.label"]           = "get.label";
 		commands["get.line"]            = "get.line";
+		commands["get.sabund"]          = "get.sabund";
+		commands["get.rabund"]          = "get.rabund";
 		commands["bootstrap.shared"]	= "bootstrap.shared";
 		commands["concensus"]			= "concensus";
 		commands["help"]				= "help"; 

@@ -115,16 +115,18 @@ int VennCommand::execute(){
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = globaldata->labels;
+		set<int> userLines = globaldata->lines;
 		
 		if (format != "list") {	
 			
 			//as long as you are not at the end of the file or done wih the lines you want
-			while((lookup[0] != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
+			while((lookup[0] != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 		
 				if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(lookup[0]->getLabel()) == 1){			
 					cout << lookup[0]->getLabel() << '\t' << count << endl;
 					processedLabels.insert(lookup[0]->getLabel());
 					userLabels.erase(lookup[0]->getLabel());
+					userLines.erase(count);
 					
 					if (lookup.size() > 4) {
 						cout << "Error: Too many groups chosen.  You may use up to 4 groups with the venn command.  I will use the first four groups in your groupfile." << endl;
@@ -184,7 +186,7 @@ int VennCommand::execute(){
 			
 		}else{
 		
-			while((sabund != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
+			while((sabund != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 		
 				if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(sabund->getLabel()) == 1){			
 	
@@ -193,6 +195,7 @@ int VennCommand::execute(){
 					
 					processedLabels.insert(sabund->getLabel());
 					userLabels.erase(sabund->getLabel());
+					userLines.erase(count);
 				}
 				
 				if ((anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastSAbund->getLabel()) != 1)) {

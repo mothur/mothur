@@ -144,14 +144,16 @@ int SummaryCommand::execute(){
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = globaldata->labels;
+		set<int> userLines = globaldata->lines;
 		
-		while((sabund != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
+		while((sabund != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 			
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(sabund->getLabel()) == 1){			
 	
 				cout << sabund->getLabel() << '\t' << count << endl;
 				processedLabels.insert(sabund->getLabel());
 				userLabels.erase(sabund->getLabel());
+				userLines.erase(count);
 
 				
 				outputFileHandle << sabund->getLabel();

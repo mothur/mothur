@@ -99,6 +99,7 @@ int ParseListCommand::execute(){
 			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 			set<string> processedLabels;
 			set<string> userLabels = globaldata->labels;
+			set<int> userLines = globaldata->lines;
 
 			//read in group map info.
 			groupMap = new GroupMap(globaldata->getGroupFile());
@@ -112,7 +113,7 @@ int ParseListCommand::execute(){
 						
 			//parses and sets each groups listvector
 			//as long as you are not at the end of the file or done wih the lines you want
-			while((list != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
+			while((list != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 								
 				if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(list->getLabel()) == 1){
 					cout << list->getLabel() << '\t' << count << endl;
@@ -120,6 +121,7 @@ int ParseListCommand::execute(){
 					
 					processedLabels.insert(list->getLabel());
 					userLabels.erase(list->getLabel());
+					userLines.erase(count);
 				}
 				
 				if ((anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastList->getLabel()) != 1)) {

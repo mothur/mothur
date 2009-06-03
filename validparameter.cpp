@@ -239,6 +239,12 @@ void ValidParameters::initCommandParameters() {
 
 		string getlineArray[] =  {};
 		commandParameters["get.line"] = addParameters(getlineArray, sizeof(getlineArray)/sizeof(string));
+		
+		string getsabundArray[] =  {"line", "label"};
+		commandParameters["get.sabund"] = addParameters(getsabundArray, sizeof(getsabundArray)/sizeof(string));
+		
+		string getrabundArray[] =  {"line", "label"};
+		commandParameters["get.rabund"] = addParameters(getrabundArray, sizeof(getrabundArray)/sizeof(string));
 
 		string rarefactionsingleArray[] =  {"iters","freq","line","label","calc","abund"};
 		commandParameters["rarefaction.single"] = addParameters(rarefactionsingleArray, sizeof(rarefactionsingleArray)/sizeof(string));
