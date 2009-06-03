@@ -43,7 +43,10 @@
 #include "distancecommand.h"
 #include "aligncommand.h"
 #include "matrixoutputcommand.h"
+#include "getsabundcommand.h"
+#include "getrabundcommand.h"
 #include "seqsummarycommand.h"
+
 
 /***********************************************************/
 
@@ -85,6 +88,8 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "get.group")             {   command = new GetgroupCommand();			}
 		else if(commandName == "get.label")             {   command = new GetlabelCommand();			}
 		else if(commandName == "get.line")              {   command = new GetlineCommand();				}
+		else if(commandName == "get.sabund")            {   command = new GetSAbundCommand();			}
+		else if(commandName == "get.rabund")            {   command = new GetRAbundCommand();			}
 		else if(commandName == "libshuff")              {   command = new LibShuffCommand();			}
 		else if(commandName == "heatmap")				{   command = new HeatMapCommand();				}
 		else if(commandName == "filter.seqs")			{   command = new FilterSeqsCommand();          }

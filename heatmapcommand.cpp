@@ -64,11 +64,12 @@ int HeatMapCommand::execute(){
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = globaldata->labels;
+		set<int> userLines = globaldata->lines;
 
 		if (format != "list") {	
 		
 			//as long as you are not at the end of the file or done wih the lines you want
-			while((lookup[0] != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
+			while((lookup[0] != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 		
 				if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(lookup[0]->getLabel()) == 1){			
 	
@@ -77,6 +78,7 @@ int HeatMapCommand::execute(){
 					
 					processedLabels.insert(lookup[0]->getLabel());
 					userLabels.erase(lookup[0]->getLabel());
+					userLines.erase(count);
 				}
 				
 				if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLookup[0]->getLabel()) != 1)) {
@@ -122,7 +124,7 @@ int HeatMapCommand::execute(){
 			
 		}else{
 		
-			while((rabund != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
+			while((rabund != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 
 				if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(rabund->getLabel()) == 1){			
 	
@@ -131,6 +133,7 @@ int HeatMapCommand::execute(){
 					
 					processedLabels.insert(rabund->getLabel());
 					userLabels.erase(rabund->getLabel());
+					userLines.erase(count);
 				}
 				
 				if ((anyLabelsToProcess(rabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastRAbund->getLabel()) != 1)) {

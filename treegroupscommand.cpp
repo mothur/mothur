@@ -329,9 +329,10 @@ void TreeGroupCommand::makeSimsShared() {
 		
 		set<string> processedLabels;
 		set<string> userLabels = globaldata->labels;
+		set<int> userLines = globaldata->lines;
 
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
+		while((lookup[0] != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 		
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(lookup[0]->getLabel()) == 1){			
 				cout << lookup[0]->getLabel() << '\t' << count << endl;
@@ -339,6 +340,7 @@ void TreeGroupCommand::makeSimsShared() {
 				
 				processedLabels.insert(lookup[0]->getLabel());
 				userLabels.erase(lookup[0]->getLabel());
+				userLines.erase(count);
 			}
 			
 			if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLookup[0]->getLabel()) != 1)) {

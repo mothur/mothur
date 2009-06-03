@@ -140,12 +140,13 @@ int CollectSharedCommand::execute(){
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = globaldata->labels;
+		set<int> userLines = globaldata->lines;
 				
 		//set users groups
 		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups, "collect");
 		util->updateGroupIndex(globaldata->Groups, globaldata->gGroupmap->groupIndex);
 
-		while((order != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
+		while((order != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(order->getLabel()) == 1){
 				
@@ -157,6 +158,7 @@ int CollectSharedCommand::execute(){
 				cout << order->getLabel() << '\t' << count << endl;
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
+				userLines.erase(count);
 
 			//you have a label the user want that is smaller than this line and the last line has not already been processed 
 			}
