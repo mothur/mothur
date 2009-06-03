@@ -270,6 +270,9 @@ void ValidParameters::initCommandParameters() {
 		string filterseqsArray[] =  {"fasta","phylip","clustal","nexus", "trump", "soft", "hard", "vertical"};
 		commandParameters["filter.seqs"] = addParameters(filterseqsArray, sizeof(filterseqsArray)/sizeof(string));
 
+		string summaryseqsArray[] =  {"fasta","phylip","clustal","nexus"};
+		commandParameters["summary.seqs"] = addParameters(summaryseqsArray, sizeof(summaryseqsArray)/sizeof(string));
+
 		string vennArray[] =  {"groups","line","label","calc"};
 		commandParameters["venn"] = addParameters(vennArray, sizeof(vennArray)/sizeof(string));
 		

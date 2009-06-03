@@ -37,18 +37,27 @@ public:
 	string getAligned();
 	string getPairwise();
 	string getUnaligned();
-	int getLength();  //the greater of the lengths of unaligned and aligned
-	int getUnalignLength();
+	int getNumBases();
+	int getStartPos();
+	int getEndPos();
 	int getAlignLength();
+	int getAmbigBases();
+	int getLongHomoPolymer();
+	bool getIsAligned();
 	void printSequence(ostream&);
 	
 private:
+	void initialize();
 	string name;
 	string unaligned;
 	string aligned;
 	string pairwise;
-	int length;
-	int lengthAligned;
+	int numBases;
+	int alignmentLength;
+	bool isAligned;
+	int longHomoPolymer;
+	int ambigBases;
+	int startPos, endPos;
 };
 
 /**************************************************************************************************/

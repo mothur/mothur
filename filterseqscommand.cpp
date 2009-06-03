@@ -23,7 +23,7 @@ FilterSeqsCommand::FilterSeqsCommand(){
 	db = readSeqs->getDB();
 	numSeqs = db->size();
 	
-	alignmentLength = db->get(0).getLength();
+	alignmentLength = db->get(0).getAlignLength();
 
 	filter = string(alignmentLength, '1');
 }

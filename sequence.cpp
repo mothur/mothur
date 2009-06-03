@@ -13,16 +13,22 @@ using namespace std;
 
 /***********************************************************************/
 
-Sequence::Sequence()  {}
+Sequence::Sequence(){
+	initialize();
+}
 
 /***********************************************************************/
 
 Sequence::Sequence(string newName, string sequence) {
+
+	initialize();	
 	name = newName;
 	if(sequence.find_first_of('-') != string::npos) {
 		setAligned(sequence);
+		isAligned = 1;
 	}
 	setUnaligned(sequence);
+	
 }
 //********************************************************************************************************************
 
@@ -57,22 +63,22 @@ Sequence::Sequence(ifstream& fastaFile){
 
 //********************************************************************************************************************
 
-string Sequence::convert2ints() {
+void Sequence::initialize(){
 	
-	if(unaligned == "")	{	/* need to throw an error */	}
+	name = "";
+	unaligned = "";
+	aligned = "";
+	pairwise = "";
 	
-	string processed;
+	numBases = 0;
+	alignmentLength = 0;
+	isAligned = 0;
+	startPos = -1;
+	endPos = -1;
+	longHomoPolymer = 0;
+	ambigBases = 0;
 	
-	for(int i=0;i<unaligned.length();i++) {
-		if(toupper(unaligned[i]) == 'A')		{	processed += '0';	}
-		else if(toupper(unaligned[i]) == 'C')	{	processed += '1';	}
-		else if(toupper(unaligned[i]) == 'G')	{	processed += '2';	}
-		else if(toupper(unaligned[i]) == 'T')	{	processed += '3';	}
-		else if(toupper(unaligned[i]) == 'U')	{	processed += '3';	}
-		else									{	processed += '4';	}
-	}
-	return processed;
-}
+}	
 
 //********************************************************************************************************************
 
@@ -95,6 +101,7 @@ void Sequence::setUnaligned(string sequence){
 	else {
 		unaligned = sequence;
 	}
+	numBases = unaligned.length();
 	
 }
 
@@ -103,32 +110,53 @@ void Sequence::setUnaligned(string sequence){
 void Sequence::setAligned(string sequence){
 	
 	//if the alignment starts or ends with a gap, replace it with a period to indicate missing data
-	
-	if(sequence[0] == '-'){
-		for(int i=0;i<sequence.length();i++){
-			if(sequence[i] == '-'){
-				sequence[i] = '.';
+	aligned = sequence;
+	alignmentLength = aligned.length();
+
+	if(aligned[0] == '-'){
+		for(int i=0;i<alignmentLength;i++){
+			if(aligned[i] == '-'){
+				aligned[i] = '.';
 			}
 			else{
 				break;
 			}
 		}
-		for(int i=sequence.length()-1;i>=0;i--){
-			if(sequence[i] == '-'){
-				sequence[i] = '.';
+		for(int i=alignmentLength-1;i>=0;i--){
+			if(aligned[i] == '-'){
+				aligned[i] = '.';
 			}
 			else{
 				break;
 			}
 		}
 	}
-	aligned = sequence;
+	
 }
 
 //********************************************************************************************************************
 
 void Sequence::setPairwise(string sequence){
 	pairwise = sequence;
+}
+
+//********************************************************************************************************************
+
+string Sequence::convert2ints() {
+	
+	if(unaligned == "")	{	/* need to throw an error */	}
+	
+	string processed;
+	
+	for(int i=0;i<unaligned.length();i++) {
+		if(toupper(unaligned[i]) == 'A')		{	processed += '0';	}
+		else if(toupper(unaligned[i]) == 'C')	{	processed += '1';	}
+		else if(toupper(unaligned[i]) == 'G')	{	processed += '2';	}
+		else if(toupper(unaligned[i]) == 'T')	{	processed += '3';	}
+		else if(toupper(unaligned[i]) == 'U')	{	processed += '3';	}
+		else									{	processed += '4';	}
+	}
+	return processed;
 }
 
 //********************************************************************************************************************
@@ -157,34 +185,96 @@ string Sequence::getUnaligned(){
 
 //********************************************************************************************************************
 
-int Sequence::getLength(){
-	if(unaligned.length() > aligned.length())
-		return unaligned.length();
-	return aligned.length();
+int Sequence::getNumBases(){
+	return numBases;
 }
 
 //********************************************************************************************************************
 
 void Sequence::printSequence(ostream& out){
-	string toPrint = unaligned;
-	if(aligned.length() > unaligned.length())
-		toPrint = aligned;
-	out << ">" << name << "\n" << toPrint << "\n";
-}
 
-//********************************************************************************************************************
-
-int Sequence::getUnalignLength(){
-	return unaligned.length();
+	out << ">" << name << endl;
+	if(isAligned){
+		out << aligned << endl;
+	}
+	else{
+		out << unaligned << endl;
+	}
 }
 
 //********************************************************************************************************************
 
 int Sequence::getAlignLength(){
-	return aligned.length();
+	return alignmentLength;
 }
 
 //********************************************************************************************************************
 
+int Sequence::getAmbigBases(){
+	if(ambigBases == -1){
+	
+		for(int j=0;j<numBases;j++){
+			if(unaligned[j] != 'A' && unaligned[j] != 'T' && unaligned[j] != 'G' && unaligned[j] != 'C'){
+				ambigBases++;
+			}
+		}
+	}	
+	
+	return ambigBases;
+}
 
+//********************************************************************************************************************
 
+int Sequence::getLongHomoPolymer(){
+	if(longHomoPolymer == 0){
+
+		int homoPolymer = 1;
+		for(int j=1;j<numBases;j++){
+			if(unaligned[j] == unaligned[j-1]){
+				homoPolymer++;
+			}
+			else{
+				if(homoPolymer > longHomoPolymer){	longHomoPolymer = homoPolymer;	}
+				homoPolymer = 1;
+			}
+		}
+		if(homoPolymer > longHomoPolymer){	longHomoPolymer = homoPolymer;	}
+	}
+	return longHomoPolymer;
+}
+
+//********************************************************************************************************************
+
+int Sequence::getStartPos(){
+	if(endPos == -1){
+		for(int j = 0; j < alignmentLength; j++) {
+			if(aligned[j] != '.'){
+				startPos = j;
+				break;
+			}
+		}
+	}	
+	return startPos;
+}
+
+//********************************************************************************************************************
+
+int Sequence::getEndPos(){
+	if(endPos == -1){
+		for(int j=alignmentLength-1;j>=0;j--){
+			if(aligned[j] != '.'){
+				endPos = j;
+				break;
+			}
+		}
+	}
+	return endPos;
+}
+
+//********************************************************************************************************************
+
+bool Sequence::getIsAligned(){
+	return isAligned;
+}
+
+//********************************************************************************************************************

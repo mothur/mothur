@@ -30,10 +30,10 @@ Database::Database(string fastaFileName){		//	This assumes that the template dat
 	
 	string seqName, sequence;
 	for(int i=0;i<numSeqs;i++){
-		templateSequences[i] = new Sequence();		//	We're storing the aligned template sequences as a vector of
+//		templateSequences[i] = new Sequence();		//	We're storing the aligned template sequences as a vector of
 													//	pointers to Sequence objects
 		fastaFile >> seqName;
-		templateSequences[i]->setName(seqName);
+//		templateSequences[i]->setName(seqName);
 		
 		char letter;
 		string aligned;
@@ -45,8 +45,9 @@ Database::Database(string fastaFileName){		//	This assumes that the template dat
 				aligned += letter;
 			}
 		}
-		templateSequences[i]->setAligned(aligned);	//	Obviously, we need the fully aligned template sequence
-		templateSequences[i]->setUnaligned(aligned);//	We will also need the unaligned sequence for pairwise alignments
+		templateSequences[i] = new Sequence(seqName, aligned);
+//		templateSequences[i]->setAligned(aligned);	//	Obviously, we need the fully aligned template sequence
+//		templateSequences[i]->setUnaligned(aligned);//	We will also need the unaligned sequence for pairwise alignments
 		fastaFile.putback(letter);					//	and database searches
 	}
 	
