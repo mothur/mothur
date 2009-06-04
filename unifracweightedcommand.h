@@ -17,7 +17,6 @@
 #include "sharedutilities.h"
 #include "fileoutput.h"
 
-using namespace std;
 
 class GlobalData;
 

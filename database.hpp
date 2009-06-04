@@ -10,6 +10,9 @@
  *
  */
 
+
+/* This class is a parent to blastdb, distancedb, kmerdb, suffixdb.  Which are used to convert a squencedb object into that form. */
+
 #include "mothur.h"
 
 class Sequence;

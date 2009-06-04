@@ -9,8 +9,6 @@
  *
  */
 
-using namespace std;
-
 #include "rabundvector.hpp"
 #include "sharedrabundvector.h"
 #include "datavector.hpp"

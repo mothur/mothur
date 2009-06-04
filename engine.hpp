@@ -19,9 +19,6 @@
 #include "commandfactory.hpp"
 #include "errorchecking.h"
 
-
-using namespace std;
-
 class GlobalData;
 
 class Engine {

@@ -7,9 +7,6 @@
  *
  */
 
-
-using namespace std;
-
 #include "sharedrabundvector.h" 
 #include "sabundvector.hpp"
 #include "ordervector.hpp"
@@ -18,7 +15,7 @@ using namespace std;
 
 /***********************************************************************/
 
-SharedRAbundVector::SharedRAbundVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0) {};
+SharedRAbundVector::SharedRAbundVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0) {}
 
 /***********************************************************************/
 
@@ -30,7 +27,7 @@ SharedRAbundVector::SharedRAbundVector(int n) : DataVector(), maxRank(0), numBin
 			newGuy.abundance = 0;
 			data.push_back(newGuy);
 		}
-};
+}
 
 /***********************************************************************
 

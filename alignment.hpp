@@ -12,7 +12,6 @@
  *	As of 12/18/08 these included alignments based on blastn, needleman-wunsch, and the	Gotoh algorithms
  * 
  */
-using namespace std;
 
 #include "mothur.h"
 #include "alignmentcell.hpp"

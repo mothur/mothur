@@ -17,8 +17,6 @@
  *
  */
 
-using namespace std;
-
 #include "alignmentcell.hpp"
 #include "alignment.hpp"
 #include "overlap.hpp"

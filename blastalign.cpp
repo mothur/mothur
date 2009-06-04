@@ -11,7 +11,6 @@
  *
  */
 
-using namespace std;
 
 #include "alignment.hpp"
 #include "blastalign.hpp"
@@ -83,10 +82,10 @@ void BlastAlignment::setPairwiseSeqs(){	//	This method call assigns the blast ge
 	
 	string candidateName, templateName;
 	
-	while(d=blastFile.get() != '='){};
+	while(d=blastFile.get() != '='){}
 	blastFile >> candidateName;					//	Get the candidate sequence name from flatfile
 	
-	while(d=blastFile.get() != '('){};
+	while(d=blastFile.get() != '('){}
 	blastFile >> candidateLength;				//	Get the candidate sequence length from flatfile
 	
 	while(d=blastFile.get()){
@@ -115,10 +114,10 @@ void BlastAlignment::setPairwiseSeqs(){	//	This method call assigns the blast ge
 		}
 	}
 	
-	while(d=blastFile.get() != '='){};
+	while(d=blastFile.get() != '='){}
 	blastFile >> templateLength;				//	Get the template sequence length from flatfile
 		
-	while(d=blastFile.get() != 'Q'){};			//	Suck up everything else until we get to the start of the alignment
+	while(d=blastFile.get() != 'Q'){}			//	Suck up everything else until we get to the start of the alignment
 	int queryStart, sbjctStart, queryEnd, sbjctEnd;
 	string queryLabel, sbjctLabel, query, sbjct;
 

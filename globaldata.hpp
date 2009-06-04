@@ -4,13 +4,9 @@
 #include "mothur.h"
 #include "groupmap.h"
 #include "treemap.h"
-
 #include "rabundvector.hpp"
 #include "sabundvector.hpp"
 #include "listvector.hpp"
-
-
-using namespace std;
 
 class ListVector;
 class SharedListVector;

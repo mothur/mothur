@@ -118,7 +118,6 @@ void FilterSeqsCommand::doSoft() {
 
 int FilterSeqsCommand::execute() {	
 	try {
-		
 		ifstream inFASTA;
 		openInputFile(globaldata->getFastaFile(), inFASTA);
 		
@@ -130,14 +129,8 @@ int FilterSeqsCommand::execute() {
 		
 		if(globaldata->getHard().compare("") != 0)	{	doHard();		}	//	has to be applied first!
 		if(globaldata->getTrump().compare("") != 0)	{	doTrump();		}
-		if(isTrue(globaldata->getVertical()))		{	doVertical();	}
+		if(isTrue(globaldata->getVertical()) == true)		{	doVertical();	}
 		if(globaldata->getSoft().compare("") != 0)	{	doSoft();		}
-
-		
-		
-		
-		
-		
 		
 		ofstream outfile;
 		string filterFile = getRootName(globaldata->inputFileName) + "filter";

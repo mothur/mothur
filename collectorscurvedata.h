@@ -1,13 +1,11 @@
 #ifndef COLLECTORSCURVEDATA_H
 #define COLLECTORSCURVEDATA_H
 
-#include "mothur.h"
 #include "sabundvector.hpp"
 #include "sharedrabundvector.h"
 #include "display.h"
 #include "observable.h"
 
-using namespace std;
 
 /***********************************************************************/
 

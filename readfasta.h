@@ -10,8 +10,6 @@
  *
  */
 
-using namespace std;
-
 #include "readseqs.h"
 #include "globaldata.hpp"
 #include "sequencedb.h"
@@ -25,7 +23,11 @@ class ReadFasta : public ReadSeqs {
 		ReadFasta(string);
 		~ReadFasta();
 		void read();
-		SequenceDB* getDB();		
+		SequenceDB* getDB();
+	private:
+		string readName(ifstream&);
+		string readSequence(ifstream&);
+
 };
 
 #endif

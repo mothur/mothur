@@ -6,7 +6,6 @@
  *  Copyright 2008 Patrick D. Schloss. All rights reserved.
  *
  */
-using namespace std;
  
 #include "rabundvector.hpp"
 #include "sabundvector.hpp"
@@ -16,15 +15,15 @@ using namespace std;
 
 /***********************************************************************/
 
-RAbundVector::RAbundVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0) {};
+RAbundVector::RAbundVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0) {}
 
 /***********************************************************************/
 
-RAbundVector::RAbundVector(int n) : DataVector(), data(n,0) , maxRank(0), numBins(0), numSeqs(0) {};
+RAbundVector::RAbundVector(int n) : DataVector(), data(n,0) , maxRank(0), numBins(0), numSeqs(0) {}
 
 /***********************************************************************/
 
-//RAbundVector::RAbundVector(const RAbundVector& rav) : DataVector(rav), data(rav.data), (rav.label),  (rav.maxRank), (rav.numBins), (rav.numSeqs){};
+//RAbundVector::RAbundVector(const RAbundVector& rav) : DataVector(rav), data(rav.data), (rav.label),  (rav.maxRank), (rav.numBins), (rav.numSeqs){}
 
 
 /***********************************************************************/

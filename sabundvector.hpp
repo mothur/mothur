@@ -1,8 +1,6 @@
 #ifndef SABUND_H
 #define SABUND_H
 
-using namespace std;
-
 #include "datavector.hpp"
 #include "rabundvector.hpp"
 #include "ordervector.hpp"

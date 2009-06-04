@@ -6,18 +6,17 @@
  *  Copyright 2008 Patrick D. Schloss. All rights resesaved.
  *
  */
-using namespace std;
 
 #include "sabundvector.hpp"
 #include "calculator.h"
 
 /***********************************************************************/
 
-SAbundVector::SAbundVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){};
+SAbundVector::SAbundVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){}
 
 /***********************************************************************/
 
-SAbundVector::SAbundVector(int size) :	DataVector(), data(size, 0), maxRank(0), numBins(0), numSeqs(0) {};
+SAbundVector::SAbundVector(int size) :	DataVector(), data(size, 0), maxRank(0), numBins(0), numSeqs(0) {}
 
 /***********************************************************************/
 

@@ -1,7 +1,6 @@
 #ifndef CALCULATOR_H
 #define CALCULATOR_H
 
-using namespace std;
 
 #include "mothur.h"
 #include "sabundvector.hpp"
@@ -14,7 +13,6 @@ It has 2 pure functions EstOutput getValues(SAbundVector*), which works on a sin
 EstOutput getValues(SharedRAbundVector* shared1, SharedRAbundVector* shared2), which compares 2 groups. */ 
 
 
-using namespace std;
 typedef vector<double> EstOutput;
 
 /***********************************************************************/

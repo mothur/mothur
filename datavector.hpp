@@ -1,7 +1,6 @@
 #ifndef datavector_h
 #define datavector_h
 
-using namespace std;
 
 #include "mothur.h"
 

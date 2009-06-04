@@ -14,7 +14,6 @@
 #include "fullmatrix.h"
 #include "libshuff.h"
 
-using namespace std;
 
 class GlobalData;
 

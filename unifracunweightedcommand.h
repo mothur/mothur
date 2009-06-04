@@ -17,8 +17,6 @@
 #include "fileoutput.h"
 
 
-using namespace std;
-
 class GlobalData;
 
 class UnifracUnweightedCommand : public Command {

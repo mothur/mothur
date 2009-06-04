@@ -8,8 +8,6 @@
 #include "display.h"
 
 
-using namespace std;
-
 /***********************************************************************/
 
 class CollectDisplay : public Display {

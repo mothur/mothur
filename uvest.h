@@ -12,8 +12,6 @@
 /* This class implements the UVEst estimator on two groups. 
 It is used by sharedJAbund and SharedSorensonAbund. */
  
- 
-using namespace std;
 
 #include "mothur.h"
 #include "sharedrabundvector.h"

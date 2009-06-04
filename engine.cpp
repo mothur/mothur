@@ -10,7 +10,7 @@
  *  Fix later, don't have time now.
  *
  */
-using namespace std;
+
 
 #include "engine.hpp"
 
@@ -47,7 +47,7 @@ bool InteractEngine::getInput(){
 		ErrorCheck* errorCheckor = new ErrorCheck();
 		
 		cout << "mothur v.1.3.0" << endl;
-		cout << "Last updated: 4/25/2009" << endl << endl;
+		cout << "Last updated: 5/29/2009" << endl << endl;
 		cout << "by" << endl;
 		cout << "Patrick D. Schloss" << endl << endl;
 		cout << "Department of Microbiology" << endl;

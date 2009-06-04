@@ -11,12 +11,11 @@
  */
 
 
-using namespace std;
+/* This class is a container to store the sequences. */
+
 
 #include "sequence.hpp"
 #include "calculator.h"
-
-
 
 
 class SequenceDB {

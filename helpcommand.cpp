@@ -63,17 +63,17 @@ int HelpCommand::execute(){
 		cout << "The cluster command should be in the following format: " << "\n";
 		cout << "cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) " << "\n";
 		cout << "The acceptable cluster methods are furthest, nearest and average.  If no method is provided then furthest is assumed." << "\n" << "\n";
-	}else if (globaldata->helpRequest == "deconvolute") {
-		cout << "The deconvolute command reads a fastafile and creates a namesfile." << "\n";
+	}else if (globaldata->helpRequest == "unique.seqs") {
+		cout << "The unique.seqs command reads a fastafile and creates a namesfile." << "\n";
 		cout << "It creates a file where the first column is the groupname and the second column is a list of sequence names who have the same sequence. " << "\n";
 		cout << "If the sequence is unique the second column will just contain its name. " << "\n";
-		cout << "The deconvolute command parameter is fasta and it is required." << "\n";
-		cout << "The deconvolute command should be in the following format: " << "\n";
-		cout << "deconvolute(fasta=yourFastaFile) " << "\n";
+		cout << "The unique.seqs command parameter is fasta and it is required." << "\n";
+		cout << "The unique.seqs command should be in the following format: " << "\n";
+		cout << "unique.seqs(fasta=yourFastaFile) " << "\n";
 	}else if (globaldata->helpRequest == "dist.seqs") {
 		cout << "The dist.seqs command reads a file containing sequences and creates a distance file." << "\n";
-		cout << "The dist.seqs command parameters are fasta, phylip, clustal, nexus, calc, countends, cutoff and processors.  " << "\n";
-		cout << "You must use one of the following parameters for your filename: fasta, phylip, clustal or nexus. " << "\n";
+		cout << "The dist.seqs command parameters are fasta, calc, countends, cutoff and processors.  " << "\n";
+		cout << "The fasta parameter is required." << "\n";
 		cout << "The calc parameter allows you to specify the method of calculating the distances.  Your options are: nogaps, onegap or eachgap. The default is onegap." << "\n";
 		cout << "The countends parameter allows you to specify whether to include terminal gaps in distance.  Your options are: T or F. The default is T." << "\n";
 		cout << "The cutoff parameter allows you to specify maximum distance to keep. The default is 1.0." << "\n";
@@ -85,7 +85,7 @@ int HelpCommand::execute(){
 	}else if (globaldata->helpRequest == "align.seqs") {
 		cout << "The align.seqs command reads a file containing sequences and creates an alignment file and a report file." << "\n";
 		cout << "The align.seqs command parameters are fasta, candidate, search, ksize, align, match, mismatch, gapopen and gapextend.  " << "\n";
-		cout << "The template parameter is also required." << "\n";
+		cout << "The fasta and candidate parameters are required." << "\n";
 		cout << "The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer and blast. The default is kmer." << "\n";
 		cout << "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman." << "\n";
 		cout << "The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 7." << "\n";
@@ -309,6 +309,18 @@ int HelpCommand::execute(){
 		cout << "The bin.seqs command outputs a .fasta file for each distance you specify appending the OTU number to each name." << "\n";
 		cout << "If you provide a groupfile, then it also appends the sequences group to the name." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile)." << "\n" << "\n";
+	}else if (globaldata->helpRequest == "filter.seqs") { 
+		cout << "The filter.seqs command reads a file containing sequences and creates a .filter and .filter.fasta file." << "\n";
+		cout << "The filter.seqs command parameters are fasta, trump, soft, hard and vertical.  " << "\n";
+		cout << "The fasta parameter is required." << "\n";
+		cout << "The trump parameter .... The default is ...." << "\n";
+		cout << "The soft parameter .... The default is ...." << "\n";
+		cout << "The hard parameter .... The default is ...." << "\n";
+		cout << "The vertical parameter .... The default is ...." << "\n";
+		cout << "The filter.seqs command should be in the following format: " << "\n";
+		cout << "filter.seqs(fasta=yourFastaFile, trump=yourTrump, soft=yourSoft, hard=yourHard, vertical=yourVertical) " << "\n";
+		cout << "Example filter.seqs(fasta=abrecovery.fasta, trump=..., soft=..., hard=..., vertical=...)." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "get.oturep") { 
 		cout << "The get.oturep command can only be executed after a successful read.dist command." << "\n";
 		cout << "The get.oturep command parameters are list, fasta, name, group, line and label.  The fasta and list parameters are required, and you may not use line and label at the same time." << "\n";

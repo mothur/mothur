@@ -14,47 +14,35 @@ void FastaMap::readFastaFile(ifstream& in) {
 	try {
 		string name, sequence, line;
 		sequence = "";
-	
-		in >> line;
-		name = line.substr(1, line.length());  //rips off '>'
-	
+		int c;
+		string temp;
+		
+		
 		//read through file
-		while (!in.eof()) {
-			in >> line;
+		while ((c = in.get()) != EOF) {
+			name = ""; sequence = ""; 
+			//is this a name
+			if (c == '>') { 
+				name = readName(in); 
+				sequence = readSequence(in); 
+			}else {  cout << "Error fasta in your file. Please correct." << endl; }
 
-			if (line[0] != '>') {  //if it's a sequence line
-				sequence += line;
-			}
-			else{
+			//store info in map
 			//input sequence info into map
-				seqmap[name] = sequence;  
-
-				it = data.find(sequence);
-				if (it == data.end()) { 	//it's unique.
-					data[sequence].groupname = name;  //group name will be the name of the first duplicate sequence found.
-					data[sequence].groupnumber = 1;
-					data[sequence].names = name;
-				}else { // its a duplicate.
-					data[sequence].names += "," + name;
-					data[sequence].groupnumber++;
-				}
-				name = (line.substr(1, (line.npos))); //The line you just read is a new name so rip off '>'
-				sequence = "";
-			}
+			seqmap[name] = sequence;  
+			it = data.find(sequence);
+			if (it == data.end()) { 	//it's unique.
+				data[sequence].groupname = name;  //group name will be the name of the first duplicate sequence found.
+				data[sequence].groupnumber = 1;
+				data[sequence].names = name;
+			}else { // its a duplicate.
+				data[sequence].names += "," + name;
+				data[sequence].groupnumber++;
+			}	
 			
 			gobble(in);
 		}
-		it = data.find(sequence);
-		if (it == data.end()) { 	//it's unique.
-			data[sequence].groupname = name;  //group name will be the name of the first duplicate sequence found.
-			data[sequence].groupnumber = 1;
-			data[sequence].names = name;
-		}else { // its a duplicate.
-			data[sequence].names += "," + name;
-			data[sequence].groupnumber++;
-		}
-		
-			
+					
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the FastaMap class Function readFastaFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -62,6 +50,64 @@ void FastaMap::readFastaFile(ifstream& in) {
 	}
 	catch(...) {
 		cout << "An unknown error has occurred in the FastaMap class function readFastaFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+/*******************************************************************************/
+string FastaMap::readName(ifstream& in) {
+	try{
+		string name = "";
+		int c;
+		string temp;
+		
+		while ((c = in.get()) != EOF) {
+			//if c is not a line return
+			if (c != 10) {
+				name += c;
+			}else { break;  }
+		}
+			
+		return name;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the FastaMap class Function readName. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the FastaMap class function readName. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+
+/*******************************************************************************/
+string FastaMap::readSequence(ifstream& in) {
+	try{
+		string sequence = "";
+		string line;
+		int pos, c;
+		
+		while (!in.eof()) {
+			//save position in file in case next line is a new name.
+			pos = in.tellg();
+			line = "";
+			in >> line;			
+			//if you are at a new name
+			if (line[0] == '>') {
+				//put file pointer back since you are now at a new name
+				in.seekg(pos, ios::beg);
+				c = in.get();  //because you put it back to a newline char
+				break;
+			}else {  sequence += line;	}
+		}
+			
+		return sequence;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the FastaMap class Function readSequence. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the FastaMap class function readSequence. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 }
@@ -124,7 +170,7 @@ void FastaMap::printNamesFile(ostream& out){ //prints data
 /*******************************************************************************/
 void FastaMap::printCondensedFasta(ostream& out){ //prints data
 	try {
-		// two column file created with groupname and them list of identical sequence names
+		//creates a fasta file
 		for (it = data.begin(); it != data.end(); it++) {
 			out << ">" << it->second.groupname << endl;
 			out << it->first << endl;

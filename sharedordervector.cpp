@@ -7,9 +7,6 @@
  *
  */
 
-using namespace std;
-
-
 #include "sharedordervector.h"
 #include "sharedutilities.h"
 

@@ -1,8 +1,6 @@
 #ifndef NAMEASSIGNMENT_HPP
 #define NAMEASSIGNMENT_HPP
 
-using namespace std;
-
 #include "mothur.h"
 #include "listvector.hpp"
 

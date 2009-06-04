@@ -6,9 +6,6 @@
 #include "fileoutput.h"
 #include "display.h"
 
-
-using namespace std;
-
 /***********************************************************************/
 
 class RareDisplay : public Display {

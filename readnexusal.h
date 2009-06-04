@@ -10,11 +10,9 @@
  *
  */
 
-using namespace std;
-
 #include "globaldata.hpp"
 #include "sequencedb.h"
-#include "utilities.hpp"
+//#include "utilities.hpp"
 
 /**********************************************************************************/
 

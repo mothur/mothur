@@ -1,8 +1,6 @@
 #ifndef RAREFACT_H
 #define RAREFACT_H
 
-using namespace std;
-
 #include "rarefactioncurvedata.h"
 #include "raredisplay.h"
 #include "ordervector.hpp"

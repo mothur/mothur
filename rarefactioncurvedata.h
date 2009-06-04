@@ -6,8 +6,6 @@
 #include "display.h"
 #include "observable.h"
 
-using namespace std;
-
 /***********************************************************************/
 
 class RarefactionCurveData : public Observable {

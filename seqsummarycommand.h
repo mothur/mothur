@@ -18,7 +18,6 @@
 #include "readclustal.h"
 #include "readseqsphylip.h"
 
-using namespace std;
 
 class SeqSummaryCommand : public Command {
 public:

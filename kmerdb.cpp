@@ -22,9 +22,6 @@
 
  */
 
-using namespace std;
-
-
 #include "sequence.hpp"
 #include "kmer.hpp"
 #include "database.hpp"

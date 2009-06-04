@@ -10,8 +10,6 @@
  *
  */
  
-using namespace std;
- 
 #include "mothur.h"
 
 
@@ -47,6 +45,9 @@ private:
 	map<string, string>  seqmap;  //name, sequence  -  uncondensed representation of file
 	map<string, group>::iterator it;
 	map<string, string>::iterator it2;
+	
+	string readName(ifstream&);
+	string readSequence(ifstream&);
 };
 
 #endif

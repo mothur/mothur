@@ -9,7 +9,6 @@
  *  Copyright 2009 Schloss Lab UMASS Amherst. All rights reserved.
  *
  */
-using namespace std;
 
 #include "mothur.h"
 
@@ -30,23 +29,6 @@ class ValidParameters {
 		void initParameterRanges();
 
 	private:
-		map<string, string> readdist;
-		map<string, string> readotu;
-		map<string, string> readtree;
-		map<string, string> cluster;
-		map<string, string> deconvolute;
-		map<string, string> parsimony;
-		map<string, string> collectsingle;
-		map<string, string> collectshared;
-		map<string, string> rarefactsingle;
-		map<string, string> rarefactshared;
-		map<string, string> summarysingle;
-		map<string, string> summaryshared;
-		map<string, string> unifracweighted;
-		map<string, string> unifracunweighted;
-		map<string, string> libshuff;
-		map<string, string> heatmap;
-		
 		map<string, string>::iterator it;
 		map<string, vector<string> > commandParameters;
 		map<string, vector<string> > parameterRanges;

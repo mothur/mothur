@@ -8,9 +8,6 @@
  */
 
 #include "readseqs.h"
-#include <iostream>
-#include <fstream>
-
 
 /*******************************************************************************/
 ReadSeqs::ReadSeqs(string file) {
@@ -20,11 +17,11 @@ ReadSeqs::ReadSeqs(string file) {
 		globaldata = GlobalData::getInstance();
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReadTree class Function ReadTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the ReadSeqs class Function ReadSeqs. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the ReadTree class function ReadTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the ReadSeqs class function ReadSeqs. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}		
 }

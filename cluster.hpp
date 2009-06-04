@@ -1,7 +1,6 @@
 #ifndef CLUSTER_H
 #define CLUSTER_H
 
-using namespace std;
 
 #include "mothur.h"
 #include "sparsematrix.hpp"

@@ -205,8 +205,8 @@ bool ErrorCheck::checkInput(string input) {
 			}
 		}else if (commandName == "read.tree") { 
 			validateTreeFiles(); //checks the treefile and groupfile parameters
-		}else if (commandName == "deconvolute") {
-			if (fastafile == "") { cout << "You must enter a fastafile with the deconvolute() command." << endl; return false; }
+		}else if (commandName == "unique.seqs") {
+			if (fastafile == "") { cout << "You must enter a fastafile with the unique.seqs() command." << endl; return false; }
 			validateReadFiles();
 		}
 		
@@ -281,8 +281,8 @@ bool ErrorCheck::checkInput(string input) {
 		}
 		
 		if ((commandName == "filter.seqs") || (commandName == "dist.seqs")) { 
-			if ((fastafile == "") && (nexusfile == "") && (clustalfile == "") && (phylipfile == "")) {
-				 cout << "You must enter either a fasta, nexus, clustal, or phylip file before you can use the filter.seqs or dist.seqs command." << endl; return false; 
+			if (fastafile == "") {
+				 cout << "You must enter either a fasta file before you can use the filter.seqs or dist.seqs command." << endl; return false; 
 			}
 			validateSeqsFiles();
 		}

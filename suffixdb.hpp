@@ -9,7 +9,7 @@
  *  Copyright 2008 Patrick D. Schloss. All rights reserved.
  *
  *	This is a child class of the Database abstract datatype.  The class is basically a database of suffix trees and an
- *	encapsulation of the method for finding the most similar tree to an inputted sequence.  the suffixForest objecct
+ *	encapsulation of the method for finding the most similar tree to an inputted sequence.  the suffixForest object
  *	is a vector of SuffixTrees, with each template sequence being represented by a different SuffixTree.  The class also
  *	provides a method to take an unaligned sequence and find the closest sequence in the suffixForest.  The search
  *	method is inspired by the article and Perl source code provided at http://www.ddj.com/web-development/184416093.  I 

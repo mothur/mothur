@@ -16,7 +16,7 @@ ThreeColumnFile::~ThreeColumnFile(){
 	inFile.close();
 	outFile.close();
 	remove(outName.c_str());
-};
+}
 
 /***********************************************************************/
 
@@ -71,7 +71,7 @@ void ThreeColumnFile::output(int nSeqs, vector<double> data){
 		cout << "An unknown error has occurred in the ThreeColumnFile class function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
-};
+}
 
 /***********************************************************************/
 
@@ -111,7 +111,7 @@ ColumnFile::~ColumnFile(){
 	inFile.close();
 	outFile.close();
 	remove(outName.c_str());
-};
+}
 
 /***********************************************************************/
 
@@ -183,7 +183,7 @@ void ColumnFile::output(vector<double> data){
 		cout << "An unknown error has occurred in the ColumnFile class function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
-};
+}
 
 /***********************************************************************/
 
@@ -223,7 +223,7 @@ SharedThreeColumnFile::~SharedThreeColumnFile(){
 	inFile.close();
 	outFile.close();
 	remove(outName.c_str());
-};
+}
 
 /***********************************************************************/
 
@@ -279,7 +279,7 @@ void SharedThreeColumnFile::output(int nSeqs, vector<double> data){
 		cout << "An unknown error has occurred in the SharedThreeColumnFile class function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
-};
+}
 
 /***********************************************************************/
 
@@ -319,7 +319,7 @@ OneColumnFile::~OneColumnFile(){
 	inFile.close();
 	outFile.close();
 	remove(outName.c_str());	
-};
+}
 
 /***********************************************************************/
 
@@ -374,7 +374,7 @@ void OneColumnFile::output(int nSeqs, vector<double> data){
 		cout << "An unknown error has occurred in the OneColumnFile class function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
-};
+}
 
 /***********************************************************************/
 
@@ -413,7 +413,7 @@ SharedOneColumnFile::~SharedOneColumnFile(){
 	inFile.close();
 	outFile.close();
 	remove(outName.c_str());	
-};
+}
 
 /***********************************************************************/
 
@@ -477,7 +477,7 @@ void SharedOneColumnFile::output(int nSeqs, vector<double> data){
 		cout << "An unknown error has occurred in the OneColumnFile class function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
-};
+}
 
 /***********************************************************************/
 

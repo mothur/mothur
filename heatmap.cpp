@@ -106,7 +106,7 @@ void HeatMap::getPic(RAbundVector* rabund) {
 void HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 	try {
 		//sort lookup so shared bins are on top
-		if (sorted == "T") {  sortSharedVectors(lookup);  }
+		if (isTrue(sorted) == true) {  sortSharedVectors(lookup);  }
 		
 		vector<vector<string> > scaleRelAbund;
 		vector<float> maxRelAbund(lookup.size(), 0.0);		
@@ -301,7 +301,6 @@ void HeatMap::printLegend(int y, float maxbin) {
 			else if(scaler== "log2")	{	label = maxbin * log2(51*i) / log2(255);	}
 			else if(scaler== "linear")	{	label = maxbin * 51 * i / 255;				}
 			else						{	label = maxbin * log10(51*i) / log10(255);	}
-			file://localhost/Users/westcott/Desktop/c.amazon.fn.0.19.rep.fasta
 			label = int(label * 1000 + 0.5);
 			label /= 1000.0;
 			string text = toString(label, 3);

@@ -10,8 +10,6 @@
  *
  */
 
-using namespace std;
-
 #include "treenode.h"
 #include "globaldata.hpp"
 

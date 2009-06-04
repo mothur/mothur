@@ -2,13 +2,11 @@
 #include "sparsematrix.hpp"
 #include "listvector.hpp"
 
-using namespace std;
-
 typedef list<PCell>::iterator MatData;
 
 /***********************************************************************/
 
-SparseMatrix::SparseMatrix() : numNodes(0), minsIndex(0), smallDist(1e6){};
+SparseMatrix::SparseMatrix() : numNodes(0), minsIndex(0), smallDist(1e6){}
 
 /***********************************************************************/
 
