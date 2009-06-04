@@ -318,6 +318,16 @@ inline int openOutputFileAppend(string fileName, ofstream& fileHandle){
 
 /***********************************************************************/
 
+inline int getNumSeqs(ifstream& file){
+	
+	int numSeqs = count(istreambuf_iterator<char>(file),istreambuf_iterator<char>(), '>');
+	file.seekg(0);
+	return numSeqs;
+
+}
+
+/***********************************************************************/
+
 //This function parses the estimator options and puts them in a vector
 inline void splitAtDash(string& estim, vector<string>& container) {
 	try {

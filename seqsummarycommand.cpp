@@ -14,15 +14,7 @@
 SeqSummaryCommand::SeqSummaryCommand(){
 	try {
 		globaldata = GlobalData::getInstance();
-		
-		if(globaldata->getFastaFile() != "")		{	readSeqs = new ReadFasta(globaldata->inputFileName);	}
-		else if(globaldata->getNexusFile() != "")	{	readSeqs = new ReadNexus(globaldata->inputFileName);	}
-		else if(globaldata->getClustalFile() != "") {	readSeqs = new ReadClustal(globaldata->inputFileName);	}
-		else if(globaldata->getPhylipFile() != "")	{	readSeqs = new ReadPhylip(globaldata->inputFileName);	}
-		
-		readSeqs->read();
-		db = readSeqs->getDB();
-		numSeqs = db->size();
+		if(globaldata->getFastaFile() == "")		{	cout << "you need to at least enter a fasta file name" << endl;	}
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the SeqCoordCommand class Function SeqCoordCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -36,83 +28,69 @@ SeqSummaryCommand::SeqSummaryCommand(){
 
 //***************************************************************************************************************
 
-SeqSummaryCommand::~SeqSummaryCommand(){
-	delete readSeqs;
-}
+SeqSummaryCommand::~SeqSummaryCommand(){	/*	do nothing	*/	}
 
 //***************************************************************************************************************
 
 int SeqSummaryCommand::execute(){
 	try{
-		
-		ofstream outfile;
-		string summaryFile = getRootName(globaldata->inputFileName) + "summary";
-		openOutputFile(summaryFile, outfile);
 
-		vector<int> startPosition(numSeqs, 0);
-		vector<int> endPosition(numSeqs, 0);
-		vector<int> seqLength(numSeqs, 0);
-		vector<int> ambigBases(numSeqs, 0);
-		vector<int> longHomoPolymer(numSeqs, 0);
+		ifstream inFASTA;
+		openInputFile(globaldata->getFastaFile(), inFASTA);
+		int numSeqs = 0;
+
+		ofstream outSummary;
+		string summaryFile = globaldata->getFastaFile() + ".summary";
+		openOutputFile(summaryFile, outSummary);
 		
-		if(db->get(0).getIsAligned() == 1){
-			outfile << "seqname\tstart\tend\tlength\tambiguities\tlonghomopolymer" << endl;			
-			for(int i = 0; i < numSeqs; i++) {
-				Sequence current = db->get(i);
-				startPosition[i] = current.getStartPos();
-				endPosition[i] = current.getEndPos();
-				seqLength[i] = current.getNumBases();
-				ambigBases[i] = current.getAmbigBases();
-				longHomoPolymer[i] = current.getLongHomoPolymer();
-				outfile << current.getName() << '\t' << startPosition[i] << '\t' << endPosition[i] << '\t' << seqLength[i] << '\t' << ambigBases[i] << '\t' << longHomoPolymer[i] << endl;
-			}
-		}
-		else{
-			outfile << "seqname\tlength\tambiguities\tlonghomopolymer" << endl;
-			for(int i=0;i<numSeqs;i++){
-				Sequence current = db->get(i);
-				seqLength[i] = current.getNumBases();
-				ambigBases[i] = current.getAmbigBases();
-				longHomoPolymer[i] = current.getLongHomoPolymer();
-				outfile << current.getName() << '\t' << seqLength[i] << '\t' << ambigBases[i] << '\t' << longHomoPolymer[i] << endl;
-			}
-		}
+		vector<int> startPosition;
+		vector<int> endPosition;
+		vector<int> seqLength;
+		vector<int> ambigBases;
+		vector<int> longHomoPolymer;
 		
+		outSummary << "seqname\tstart\tend\tnbases\tambigs\tpolymer" << endl;			
+
+		while(!inFASTA.eof()){
+			Sequence current(inFASTA);
+			startPosition.push_back(current.getStartPos());
+			endPosition.push_back(current.getEndPos());
+			seqLength.push_back(current.getNumBases());
+			ambigBases.push_back(current.getAmbigBases());
+			longHomoPolymer.push_back(current.getLongHomoPolymer());
+
+			outSummary << current.getName() << '\t';
+			outSummary << current.getStartPos() << '\t' << current.getEndPos() << '\t';
+			outSummary << current.getNumBases() << '\t' << current.getAmbigBases() << '\t';
+			outSummary << current.getLongHomoPolymer() << endl;
+			
+			numSeqs++;
+			gobble(inFASTA);
+		}
+		inFASTA.close();
+		
+		sort(startPosition.begin(), startPosition.end());
+		sort(endPosition.begin(), endPosition.end());
 		sort(seqLength.begin(), seqLength.end());
 		sort(ambigBases.begin(), ambigBases.end());
 		sort(longHomoPolymer.begin(), longHomoPolymer.end());
 		
-		int median			= int(numSeqs * 0.500);
-		int lowestPtile		= int(numSeqs * 0.025);
-		int lowPtile		= int(numSeqs * 0.250);
-		int highPtile		= int(numSeqs * 0.750);
-		int highestPtile	= int(numSeqs * 0.975);
-		int max				= numSeqs - 1;
+		int ptile0_25	= int(numSeqs * 0.025);
+		int ptile25		= int(numSeqs * 0.250);
+		int ptile50		= int(numSeqs * 0.500);
+		int ptile75		= int(numSeqs * 0.750);
+		int ptile97_5	= int(numSeqs * 0.975);
+		int ptile100	= numSeqs - 1;
 		
 		cout << endl;
-		if(db->get(0).getIsAligned() == 1){
-			sort(startPosition.begin(), startPosition.end());
-			sort(endPosition.begin(), endPosition.end());
-					
-			cout << "\t\tStart\tEnd\tLength\tN's\tPolymer" << endl;
-			cout << "Minimum:\t" << startPosition[0] << '\t' << endPosition[0] << '\t' << seqLength[0] << '\t' << ambigBases[0] << '\t' << longHomoPolymer[0] << endl;
-			cout << "2.5%-tile:\t" << startPosition[lowestPtile] << '\t' << endPosition[lowestPtile] << '\t' << seqLength[lowestPtile] << '\t' << ambigBases[lowestPtile] << '\t' << longHomoPolymer[lowestPtile] << endl;
-			cout << "25%-tile:\t" << startPosition[lowPtile] << '\t' << endPosition[lowPtile] << '\t' << seqLength[lowPtile] << '\t' << ambigBases[lowPtile] << '\t' << longHomoPolymer[lowPtile] << endl;
-			cout << "Median: \t" << startPosition[median] << '\t' << endPosition[median] << '\t' << seqLength[median] << '\t' << ambigBases[median] << '\t' << longHomoPolymer[median] << endl;
-			cout << "75%-tile:\t" << startPosition[highPtile] << '\t' << endPosition[highPtile] << '\t' << seqLength[highPtile] << '\t' << ambigBases[highPtile] << '\t' << longHomoPolymer[highPtile] << endl;
-			cout << "97.5%-tile:\t" << startPosition[highestPtile] << '\t' << endPosition[highestPtile] << '\t' << seqLength[highestPtile] << '\t' << ambigBases[highestPtile] << '\t' << longHomoPolymer[highestPtile] << endl;
-			cout << "Maximum:\t" << startPosition[max] << '\t' << endPosition[max] << '\t' << seqLength[max] << '\t' << ambigBases[max] << '\t' << longHomoPolymer[max] << endl;
-		}
-		else{
-			cout << "\t\tLength\tN's\tPolymer" << endl;
-			cout << "Minimum:\t" << seqLength[0] << '\t' << ambigBases[0] << '\t' << longHomoPolymer[0] << endl;
-			cout << "2.5%-tile:\t" << seqLength[lowestPtile] << '\t' << ambigBases[lowestPtile] << '\t' << longHomoPolymer[lowestPtile] << endl;
-			cout << "25%-tile:\t" << seqLength[lowPtile] << '\t' << ambigBases[lowPtile] << '\t' << longHomoPolymer[lowPtile] << endl;
-			cout << "Median: \t" << seqLength[median] << '\t' << ambigBases[median] << '\t' << longHomoPolymer[median] << endl;
-			cout << "75%-tile:\t"<< seqLength[highPtile] << '\t' << ambigBases[highPtile] << '\t' << longHomoPolymer[highPtile] << endl;
-			cout << "97.5%-tile:\t"<< seqLength[highestPtile] << '\t' << ambigBases[highestPtile] << '\t' << longHomoPolymer[highestPtile] << endl;
-			cout << "Maximum:\t" << seqLength[max] << '\t' << ambigBases[max] << '\t' << longHomoPolymer[max] << endl;
-		}
+		cout << "\t\tStart\tEnd\tNBases\tAmbigs\tPolymer" << endl;
+		cout << "Minimum:\t" << startPosition[0] << '\t' << endPosition[0] << '\t' << seqLength[0] << '\t' << ambigBases[0] << '\t' << longHomoPolymer[0] << endl;
+		cout << "2.5%-tile:\t" << startPosition[ptile0_25] << '\t' << endPosition[ptile0_25] << '\t' << seqLength[ptile0_25] << '\t' << ambigBases[ptile0_25] << '\t' << longHomoPolymer[ptile0_25] << endl;
+		cout << "25%-tile:\t" << startPosition[ptile25] << '\t' << endPosition[ptile25] << '\t' << seqLength[ptile25] << '\t' << ambigBases[ptile25] << '\t' << longHomoPolymer[ptile25] << endl;
+		cout << "Median: \t" << startPosition[ptile50] << '\t' << endPosition[ptile50] << '\t' << seqLength[ptile50] << '\t' << ambigBases[ptile50] << '\t' << longHomoPolymer[ptile50] << endl;
+		cout << "75%-tile:\t" << startPosition[ptile75] << '\t' << endPosition[ptile75] << '\t' << seqLength[ptile75] << '\t' << ambigBases[ptile75] << '\t' << longHomoPolymer[ptile75] << endl;
+		cout << "97.5%-tile:\t" << startPosition[ptile97_5] << '\t' << endPosition[ptile97_5] << '\t' << seqLength[ptile97_5] << '\t' << ambigBases[ptile97_5] << '\t' << longHomoPolymer[ptile97_5] << endl;
+		cout << "Maximum:\t" << startPosition[ptile100] << '\t' << endPosition[ptile100] << '\t' << seqLength[ptile100] << '\t' << ambigBases[ptile100] << '\t' << longHomoPolymer[ptile100] << endl;
 		cout << "# of Seqs:\t" << numSeqs << endl;
 		
 		return 0;

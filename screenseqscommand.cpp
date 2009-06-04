@@ -14,15 +14,7 @@
 ScreenSeqsCommand::ScreenSeqsCommand(){
 	try {
 		globaldata = GlobalData::getInstance();
-		
-		if(globaldata->getFastaFile() != "")		{	readSeqs = new ReadFasta(globaldata->inputFileName);	}
-		else if(globaldata->getNexusFile() != "")	{	readSeqs = new ReadNexus(globaldata->inputFileName);	}
-		else if(globaldata->getClustalFile() != "") {	readSeqs = new ReadClustal(globaldata->inputFileName);	}
-		else if(globaldata->getPhylipFile() != "")	{	readSeqs = new ReadPhylip(globaldata->inputFileName);	}
-		
-		readSeqs->read();
-		db = readSeqs->getDB();
-		numSeqs = db->size();
+		if(globaldata->getFastaFile() == "")		{	cout << "you must provide a fasta formatted file" << endl;	}
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the SeqCoordCommand class Function SeqCoordCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -36,9 +28,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(){
 
 //***************************************************************************************************************
 
-ScreenSeqsCommand::~ScreenSeqsCommand(){
-	delete readSeqs;
-}
+ScreenSeqsCommand::~ScreenSeqsCommand(){	/*	do nothing	*/	}
 
 //***************************************************************************************************************
 
@@ -52,6 +42,9 @@ int ScreenSeqsCommand::execute(){
 		convert(globaldata->getMinLength(), minLength);
 		convert(globaldata->getMaxLength(), maxLength);
 		
+		ifstream inFASTA;
+		openInputFile(globaldata->getFastaFile(), inFASTA);
+		
 		set<string> badSeqNames;
 		
 		string goodSeqFile = getRootName(globaldata->inputFileName) + "good" + getExtension(globaldata->inputFileName);
@@ -59,16 +52,16 @@ int ScreenSeqsCommand::execute(){
 		
 		ofstream goodSeqOut;	openOutputFile(goodSeqFile, goodSeqOut);
 		ofstream badSeqOut;		openOutputFile(badSeqFile, badSeqOut);		
-
-		for(int i=0;i<numSeqs;i++){
-			Sequence currSeq = db->get(i);
+		
+		while(!inFASTA.eof()){
+			Sequence currSeq(inFASTA);
 			bool goodSeq = 1;		//	innocent until proven guilty
-			if(goodSeq == 1 && startPos != -1 && startPos < currSeq.getStartPos())		{	goodSeq = 0;	}
-			if(goodSeq == 1 && endPos != -1 && endPos > currSeq.getEndPos())			{	goodSeq = 0;	}
-			if(goodSeq == 1 && maxAmbig != -1 && maxAmbig <	currSeq.getAmbigBases())	{	goodSeq = 0;	}
-			if(goodSeq == 1 && maxHomoP != -1 && maxHomoP < currSeq.getLongHomoPolymer()){	goodSeq = 0;	}
-			if(goodSeq == 1 && minLength != -1 && minLength > currSeq.getNumBases())	{	goodSeq = 0;	}
-			if(goodSeq == 1 && maxLength != -1 && maxLength < currSeq.getNumBases())	{	goodSeq = 0;	}
+			if(goodSeq == 1 && startPos != -1 && startPos < currSeq.getStartPos())			{	goodSeq = 0;	}
+			if(goodSeq == 1 && endPos != -1 && endPos > currSeq.getEndPos())				{	goodSeq = 0;	}
+			if(goodSeq == 1 && maxAmbig != -1 && maxAmbig <	currSeq.getAmbigBases())		{	goodSeq = 0;	}
+			if(goodSeq == 1 && maxHomoP != -1 && maxHomoP < currSeq.getLongHomoPolymer())	{	goodSeq = 0;	}
+			if(goodSeq == 1 && minLength != -1 && minLength > currSeq.getNumBases())		{	goodSeq = 0;	}
+			if(goodSeq == 1 && maxLength != -1 && maxLength < currSeq.getNumBases())		{	goodSeq = 0;	}
 			
 			if(goodSeq == 1){
 				currSeq.printSequence(goodSeqOut);	
@@ -77,12 +70,8 @@ int ScreenSeqsCommand::execute(){
 				currSeq.printSequence(badSeqOut);	
 				badSeqNames.insert(currSeq.getName());
 			}
-		}
-		
-		if(globaldata->getNameFile() != ""){
-			screenNameGroupFile(badSeqNames);
-			
-		}
+			gobble(inFASTA);
+		}	
 		
 		return 0;
 	}
@@ -169,6 +158,40 @@ void ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 		goodGroupOut.close();
 		badGroupOut.close();
 	}
+}
+
+//***************************************************************************************************************
+
+void ScreenSeqsCommand::screenGroupFile(set<string> badSeqNames){
+
+	ifstream inputGroups;
+	openInputFile(globaldata->getGroupFile(), inputGroups);
+	string seqName, group;
+	set<string>::iterator it;
+	
+	string goodGroupFile = getRootName(globaldata->getGroupFile()) + "good" + getExtension(globaldata->getGroupFile());
+	string badGroupFile = getRootName(globaldata->getGroupFile()) + "bad" + getExtension(globaldata->getGroupFile());
+	
+	ofstream goodGroupOut;	openOutputFile(goodGroupFile, goodGroupOut);
+	ofstream badGroupOut;	openOutputFile(badGroupFile, badGroupOut);		
+	
+	while(!inputGroups.eof()){
+		inputGroups >> seqName >> group;
+		it = badSeqNames.find(seqName);
+		
+		if(it != badSeqNames.end()){
+			badSeqNames.erase(it);
+			badGroupOut << seqName << '\t' << group << endl;
+		}
+		else{
+			goodGroupOut << seqName << '\t' << group << endl;
+		}
+		gobble(inputGroups);
+	}
+	inputGroups.close();
+	goodGroupOut.close();
+	badGroupOut.close();
+	
 }
 
 //***************************************************************************************************************
