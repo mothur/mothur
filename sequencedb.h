@@ -24,21 +24,24 @@ public:
 	SequenceDB();
 	SequenceDB(int);           //makes data that size
 	SequenceDB(ifstream&);	   //reads file to fill data
-//	~SequenceDB();             //loops through data and delete each sequence
+	SequenceDB(const SequenceDB& sdb) : data(sdb.data) {};
+	~SequenceDB();             //loops through data and delete each sequence
 
 	int getNumSeqs();
 	
 	void set(int, string);     //unaligned - should also set length
-	void set(int, Sequence);   //unaligned - should also set length
-	Sequence get(int);         //returns sequence name at that location
-	void add(Sequence);        //adds unaligned sequence
-	void changeSize(int);      //resizes data
+	void set(int, Sequence*);   //unaligned - should also set length
+	Sequence* get(int);         //returns sequence name at that location
+	void push_back(Sequence*);        //adds unaligned sequence
+	void resize(int);      //resizes data
 	void clear();              //clears data - remeber to loop through and delete the sequences inside or you will have a memory leak
 	int size();                //returns datas size
 	void print(ostream&);      //loops through data using sequence class print
 		
 private:
-	vector<Sequence> data;
+	vector<Sequence*> data;
+	string readName(ifstream&);
+	string readSequence(ifstream&);
 
 };
 

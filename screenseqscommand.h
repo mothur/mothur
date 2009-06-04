@@ -12,11 +12,6 @@
 #include "mothur.h"
 #include "command.hpp"
 #include "globaldata.hpp"
-#include "readfasta.h"
-#include "readnexus.h"
-#include "readclustal.h"
-#include "readseqsphylip.h"
-
 
 class ScreenSeqsCommand : public Command {
 	

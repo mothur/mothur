@@ -58,10 +58,6 @@
 		377326650FAF16E0007ABB8B /* concensuscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 377326630FAF16E0007ABB8B /* concensuscommand.cpp */; };
 		378C1B030FB0644E004D63F5 /* filterseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 378C1AEE0FB0644D004D63F5 /* filterseqscommand.cpp */; };
 		378C1B040FB0644E004D63F5 /* goodscoverage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 378C1AF00FB0644D004D63F5 /* goodscoverage.cpp */; };
-		378C1B050FB0644E004D63F5 /* readclustal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 378C1AF20FB0644D004D63F5 /* readclustal.cpp */; };
-		378C1B060FB0644E004D63F5 /* readfasta.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 378C1AF40FB0644D004D63F5 /* readfasta.cpp */; };
-		378C1B070FB0644E004D63F5 /* readnexus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 378C1AF60FB0644D004D63F5 /* readnexus.cpp */; };
-		378C1B090FB0644E004D63F5 /* readseqsphylip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 378C1AFB0FB0644D004D63F5 /* readseqsphylip.cpp */; };
 		378C1B0A0FB0644E004D63F5 /* sequencedb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 378C1AFD0FB0644D004D63F5 /* sequencedb.cpp */; };
 		378C1B0B0FB0644E004D63F5 /* sharedjackknife.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 378C1AFF0FB0644D004D63F5 /* sharedjackknife.cpp */; };
 		378C1B0C0FB0644E004D63F5 /* sharedmarczewski.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 378C1B010FB0644D004D63F5 /* sharedmarczewski.cpp */; };
@@ -69,7 +65,6 @@
 		379293C30F2DE73400B9034A /* treemap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 379293C20F2DE73400B9034A /* treemap.cpp */; };
 		379294700F2E191800B9034A /* parsimonycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3792946F0F2E191800B9034A /* parsimonycommand.cpp */; };
 		3792948A0F2E258500B9034A /* parsimony.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 379294890F2E258500B9034A /* parsimony.cpp */; };
-		379643ED0FB9B5A80081FDB6 /* readseqs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 379643EB0FB9B5A80081FDB6 /* readseqs.cpp */; };
 		3799A9500FD6A58C00E33EDE /* distancedb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3799A94C0FD6A58C00E33EDE /* distancedb.cpp */; };
 		3799A9510FD6A58C00E33EDE /* seqsummarycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3799A94E0FD6A58C00E33EDE /* seqsummarycommand.cpp */; };
 		37AD4CE40F28AEA300AA2D49 /* sharedlistvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37AD4CE30F28AEA300AA2D49 /* sharedlistvector.cpp */; };
@@ -189,8 +184,8 @@
 		21E859D70FC4632E005E1A48 /* matrixoutputcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = matrixoutputcommand.cpp; sourceTree = SOURCE_ROOT; };
 		370B88050F8A4EE4005AB382 /* getoturepcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getoturepcommand.h; sourceTree = SOURCE_ROOT; };
 		370B88060F8A4EE4005AB382 /* getoturepcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getoturepcommand.cpp; sourceTree = SOURCE_ROOT; };
-		371B30B20FD7EE67000414CA /* screenseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = screenseqscommand.cpp; sourceTree = SOURCE_ROOT; };
-		371B30B30FD7EE67000414CA /* screenseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = screenseqscommand.h; sourceTree = SOURCE_ROOT; };
+		371B30B20FD7EE67000414CA /* screenseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = screenseqscommand.cpp; sourceTree = "<group>"; };
+		371B30B30FD7EE67000414CA /* screenseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = screenseqscommand.h; sourceTree = "<group>"; };
 		372E126E0F26365B0095CF7E /* readotucommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readotucommand.h; sourceTree = SOURCE_ROOT; };
 		372E126F0F26365B0095CF7E /* readotucommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readotucommand.cpp; sourceTree = SOURCE_ROOT; };
 		372E12940F263D5A0095CF7E /* readdistcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readdistcommand.h; sourceTree = SOURCE_ROOT; };
@@ -236,10 +231,10 @@
 		374610820F40652400460C57 /* unweighted.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = unweighted.cpp; sourceTree = SOURCE_ROOT; };
 		3746109B0F40657600460C57 /* unifracunweightedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = unifracunweightedcommand.h; sourceTree = SOURCE_ROOT; };
 		3746109C0F40657600460C57 /* unifracunweightedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = unifracunweightedcommand.cpp; sourceTree = SOURCE_ROOT; };
-		3749271B0FD58C840031C06B /* getsabundcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getsabundcommand.h; sourceTree = SOURCE_ROOT; };
-		3749271C0FD58C840031C06B /* getsabundcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getsabundcommand.cpp; sourceTree = SOURCE_ROOT; };
-		3749273D0FD5956B0031C06B /* getrabundcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getrabundcommand.h; sourceTree = SOURCE_ROOT; };
-		3749273E0FD5956B0031C06B /* getrabundcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getrabundcommand.cpp; sourceTree = SOURCE_ROOT; };
+		3749271B0FD58C840031C06B /* getsabundcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getsabundcommand.h; sourceTree = "<group>"; };
+		3749271C0FD58C840031C06B /* getsabundcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getsabundcommand.cpp; sourceTree = "<group>"; };
+		3749273D0FD5956B0031C06B /* getrabundcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getrabundcommand.h; sourceTree = "<group>"; };
+		3749273E0FD5956B0031C06B /* getrabundcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getrabundcommand.cpp; sourceTree = "<group>"; };
 		37519A690F80E6EB00FED5E8 /* sharedanderbergs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedanderbergs.h; sourceTree = SOURCE_ROOT; };
 		37519A6A0F80E6EB00FED5E8 /* sharedanderbergs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedanderbergs.cpp; sourceTree = SOURCE_ROOT; };
 		37519A9F0F810D0200FED5E8 /* venncommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = venncommand.h; sourceTree = SOURCE_ROOT; };
@@ -282,15 +277,6 @@
 		378C1AEF0FB0644D004D63F5 /* filterseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = filterseqscommand.h; sourceTree = SOURCE_ROOT; };
 		378C1AF00FB0644D004D63F5 /* goodscoverage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = goodscoverage.cpp; sourceTree = SOURCE_ROOT; };
 		378C1AF10FB0644D004D63F5 /* goodscoverage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = goodscoverage.h; sourceTree = SOURCE_ROOT; };
-		378C1AF20FB0644D004D63F5 /* readclustal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readclustal.cpp; sourceTree = SOURCE_ROOT; };
-		378C1AF30FB0644D004D63F5 /* readclustal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readclustal.h; sourceTree = SOURCE_ROOT; };
-		378C1AF40FB0644D004D63F5 /* readfasta.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readfasta.cpp; sourceTree = SOURCE_ROOT; };
-		378C1AF50FB0644D004D63F5 /* readfasta.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readfasta.h; sourceTree = SOURCE_ROOT; };
-		378C1AF60FB0644D004D63F5 /* readnexus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readnexus.cpp; sourceTree = SOURCE_ROOT; };
-		378C1AF70FB0644D004D63F5 /* readnexus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readnexus.h; sourceTree = SOURCE_ROOT; };
-		378C1AF80FB0644D004D63F5 /* readnexusal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readnexusal.h; sourceTree = SOURCE_ROOT; };
-		378C1AFB0FB0644D004D63F5 /* readseqsphylip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readseqsphylip.cpp; sourceTree = SOURCE_ROOT; };
-		378C1AFC0FB0644D004D63F5 /* readseqsphylip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readseqsphylip.h; sourceTree = SOURCE_ROOT; };
 		378C1AFD0FB0644D004D63F5 /* sequencedb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sequencedb.cpp; sourceTree = SOURCE_ROOT; };
 		378C1AFE0FB0644D004D63F5 /* sequencedb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sequencedb.h; sourceTree = SOURCE_ROOT; };
 		378C1AFF0FB0644D004D63F5 /* sharedjackknife.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedjackknife.cpp; sourceTree = SOURCE_ROOT; };
@@ -306,12 +292,10 @@
 		379294880F2E258500B9034A /* parsimony.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parsimony.h; sourceTree = SOURCE_ROOT; };
 		379294890F2E258500B9034A /* parsimony.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parsimony.cpp; sourceTree = SOURCE_ROOT; };
 		3792948D0F2E271100B9034A /* treecalculator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = treecalculator.h; sourceTree = SOURCE_ROOT; };
-		379643EB0FB9B5A80081FDB6 /* readseqs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readseqs.cpp; sourceTree = SOURCE_ROOT; };
-		379643EC0FB9B5A80081FDB6 /* readseqs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readseqs.h; sourceTree = SOURCE_ROOT; };
-		3799A94C0FD6A58C00E33EDE /* distancedb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = distancedb.cpp; sourceTree = SOURCE_ROOT; };
-		3799A94D0FD6A58C00E33EDE /* distancedb.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = distancedb.hpp; sourceTree = SOURCE_ROOT; };
-		3799A94E0FD6A58C00E33EDE /* seqsummarycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = seqsummarycommand.cpp; sourceTree = SOURCE_ROOT; };
-		3799A94F0FD6A58C00E33EDE /* seqsummarycommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = seqsummarycommand.h; sourceTree = SOURCE_ROOT; };
+		3799A94C0FD6A58C00E33EDE /* distancedb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = distancedb.cpp; sourceTree = "<group>"; };
+		3799A94D0FD6A58C00E33EDE /* distancedb.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = distancedb.hpp; sourceTree = "<group>"; };
+		3799A94E0FD6A58C00E33EDE /* seqsummarycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = seqsummarycommand.cpp; sourceTree = "<group>"; };
+		3799A94F0FD6A58C00E33EDE /* seqsummarycommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = seqsummarycommand.h; sourceTree = "<group>"; };
 		37AD4CE20F28AEA300AA2D49 /* sharedlistvector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedlistvector.h; sourceTree = SOURCE_ROOT; };
 		37AD4CE30F28AEA300AA2D49 /* sharedlistvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedlistvector.cpp; sourceTree = SOURCE_ROOT; };
 		37AD4DB90F28E2FE00AA2D49 /* tree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tree.h; sourceTree = SOURCE_ROOT; };
@@ -620,24 +604,13 @@
 		3796441D0FB9B9650081FDB6 /* read */ = {
 			isa = PBXGroup;
 			children = (
-				378C1AF30FB0644D004D63F5 /* readclustal.h */,
-				378C1AF20FB0644D004D63F5 /* readclustal.cpp */,
 				375AA1340F9E433D008EF9B8 /* readcolumn.h */,
 				375AA1330F9E433D008EF9B8 /* readcolumn.cpp */,
-				378C1AF50FB0644D004D63F5 /* readfasta.h */,
-				378C1AF40FB0644D004D63F5 /* readfasta.cpp */,
 				37D928130F21331F001D4494 /* readmatrix.hpp */,
-				378C1AF70FB0644D004D63F5 /* readnexus.h */,
-				378C1AF60FB0644D004D63F5 /* readnexus.cpp */,
-				378C1AF80FB0644D004D63F5 /* readnexusal.h */,
 				375AA1360F9E433D008EF9B8 /* readotu.h */,
 				375AA1350F9E433D008EF9B8 /* readotu.cpp */,
 				375AA1380F9E433D008EF9B8 /* readphylip.h */,
 				375AA1370F9E433D008EF9B8 /* readphylip.cpp */,
-				378C1AFC0FB0644D004D63F5 /* readseqsphylip.h */,
-				378C1AFB0FB0644D004D63F5 /* readseqsphylip.cpp */,
-				379643EB0FB9B5A80081FDB6 /* readseqs.cpp */,
-				379643EC0FB9B5A80081FDB6 /* readseqs.h */,
 				37AD4DC80F28F3DD00AA2D49 /* readtree.h */,
 				37AD4DC90F28F3DD00AA2D49 /* readtree.cpp */,
 			);
@@ -1090,15 +1063,10 @@
 				377326650FAF16E0007ABB8B /* concensuscommand.cpp in Sources */,
 				378C1B030FB0644E004D63F5 /* filterseqscommand.cpp in Sources */,
 				378C1B040FB0644E004D63F5 /* goodscoverage.cpp in Sources */,
-				378C1B050FB0644E004D63F5 /* readclustal.cpp in Sources */,
-				378C1B060FB0644E004D63F5 /* readfasta.cpp in Sources */,
-				378C1B070FB0644E004D63F5 /* readnexus.cpp in Sources */,
-				378C1B090FB0644E004D63F5 /* readseqsphylip.cpp in Sources */,
 				378C1B0A0FB0644E004D63F5 /* sequencedb.cpp in Sources */,
 				378C1B0B0FB0644E004D63F5 /* sharedjackknife.cpp in Sources */,
 				378C1B0C0FB0644E004D63F5 /* sharedmarczewski.cpp in Sources */,
 				37C753CE0FB3415200DBD02E /* distancecommand.cpp in Sources */,
-				379643ED0FB9B5A80081FDB6 /* readseqs.cpp in Sources */,
 				378DC5CF0FBDE1C8003B8607 /* aligncommand.cpp in Sources */,
 				373C68A40FC1C07D00137ACD /* alignment.cpp in Sources */,
 				373C68A50FC1C07D00137ACD /* alignmentcell.cpp in Sources */,

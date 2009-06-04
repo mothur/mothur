@@ -41,7 +41,7 @@
 AlignCommand::AlignCommand(){
 	try {
 		globaldata = GlobalData::getInstance();
-		if(globaldata->getFastaFile() == "" && globaldata->getPhylipFile() == "" && globaldata->getNexusFile() == "" && globaldata->getClustalFile() == ""){
+		if(globaldata->getFastaFile() == ""){
 			cout << "you forgot a template file" << endl;
 		}
 		openInputFile(globaldata->getCandidateFile(), in);
