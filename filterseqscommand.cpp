@@ -12,18 +12,13 @@
 /**************************************************************************************/
 
 FilterSeqsCommand::FilterSeqsCommand(){
+
 	globaldata = GlobalData::getInstance();
 	
 	if(globaldata->getFastaFile() == "")		{	cout << "You must enter a fasta formatted file" << endl;	}
 	trump = globaldata->getTrump()[0];
-//	vertical = 
-//	readSeqs->read();
-//	db = readSeqs->getDB();
-//	numSeqs = db->size();
-//	
-//	alignmentLength = db->get(0).getAlignLength();
-//
-//	filter = string(alignmentLength, '1');
+	numSeqs = 0;
+
 }
 
 /**************************************************************************************/
@@ -36,82 +31,66 @@ void FilterSeqsCommand::doHard() {
 	ifstream fileHandle;
 	openInputFile(hardName, fileHandle);
 	
-	fileHandle >> hardFilter;
-	
-	if(hardFilter.length() != filter.length()){
-		cout << "The hard filter is not the same length as the alignment: Hard filter will not be applied." << endl;
-	}
-	else{
-		filter = hardFilter;
-	}
+	fileHandle >> filter;
 
 }
 
 /**************************************************************************************/
 
 void FilterSeqsCommand::doTrump(Sequence seq) {
-
 	
-//	for(int i = 0; i < numSeqs; i++) {
-//		string curAligned = db->get(i).getAligned();;
-//
-//		for(int j = 0; j < alignmentLength; j++) {
-//			if(curAligned[j] == trump){
-//				filter[j] = '0';
-//			}
-//		}
-//	}
+	string curAligned = seq.getAligned();
+	
+	for(int j = 0; j < alignmentLength; j++) {
+		if(curAligned[j] == trump){
+			filter[j] = '0';
+		}
+	}
 
 }
 
 /**************************************************************************************/
 
-void FilterSeqsCommand::doVertical(Sequence seq) {
+void FilterSeqsCommand::doVertical() {
 
-//	vector<int> counts(alignmentLength, 0);
-//	
-//	for(int i = 0; i < numSeqs; i++) {
-//		string curAligned = db->get(i).getAligned();;
-//		
-//		for(int j = 0; j < alignmentLength; j++) {
-//			if(curAligned[j] == '-' || curAligned[j] == '.'){
-//				counts[j]++;
-//			}
-//		}
-//	}
-//	for(int i=0;i<alignmentLength;i++){
-//		if(counts[i] == numSeqs)	{	filter[i] = '0';		}
-//	}
+	for(int i=0;i<alignmentLength;i++){
+		if(gap[i] == numSeqs)	{	filter[i] = '0';	}
+	}
+	
 }
 
 /**************************************************************************************/
 
-void FilterSeqsCommand::doSoft(Sequence seq) {
+void FilterSeqsCommand::doSoft() {
+	
+	int threshold = int (soft * numSeqs);
+	bool keep = 0;
+	
+	for(int i=0;i<alignmentLength;i++){
+		if(a[i] >= threshold)		{	keep = 1;	}
+		else if(t[i] >= threshold)	{	keep = 1;	}
+		else if(g[i] >= threshold)	{	keep = 1;	}
+		else if(c[i] >= threshold)	{	keep = 1;	}
+		
+		if(keep == 0)	{	filter[i] = 0;		}
+	}
+	
+}
 
-//	int softThreshold = numSeqs * (float)atoi(globaldata->getSoft().c_str()) / 100.0;
-//
-//	vector<int> a(alignmentLength, 0);
-//	vector<int> t(alignmentLength, 0);
-//	vector<int> g(alignmentLength, 0);
-//	vector<int> c(alignmentLength, 0);
-//	vector<int> x(alignmentLength, 0);
-//	
-//	for(int i=0;i<numSeqs;i++){
-//		string curAligned = db->get(i).getAligned();;
-//
-//		for(int j=0;j<alignmentLength;j++){
-//			if(toupper(curAligned[j]) == 'A')										{	a[j]++;	}
-//			else if(toupper(curAligned[j]) == 'T' || toupper(curAligned[i]) == 'U')	{	t[j]++;	}
-//			else if(toupper(curAligned[j]) == 'G')									{	g[j]++;	}
-//			else if(toupper(curAligned[j]) == 'C')									{	c[j]++;	}
-//		}
-//	}
-//
-//	for(int i=0;i<alignmentLength;i++){
-//		if(a[i] < softThreshold && t[i] < softThreshold && g[i] < softThreshold && c[i] < softThreshold){
-//			filter[i] = '0';			
-//		}
-//	}
+/**************************************************************************************/
+
+void FilterSeqsCommand::getFreqs(Sequence seq) {
+
+	string curAligned = seq.getAligned();;
+	
+	for(int j=0;j<alignmentLength;j++){
+		if(toupper(curAligned[j]) == 'A')										{	a[j]++;		}
+		else if(toupper(curAligned[j]) == 'T' || toupper(curAligned[j]) == 'U')	{	t[j]++;		}
+		else if(toupper(curAligned[j]) == 'G')									{	g[j]++;		}
+		else if(toupper(curAligned[j]) == 'C')									{	c[j]++;		}
+		else if(curAligned[j] == '-' || curAligned[j] == '.')					{	gap[j]++;	}
+	}
+	
 }
 
 /**************************************************************************************/
@@ -124,39 +103,68 @@ int FilterSeqsCommand::execute() {
 		Sequence testSeq(inFASTA);
 		alignmentLength = testSeq.getAlignLength();
 		inFASTA.seekg(0);
-		int numSeqs = 0;
+		
+		if(globaldata->getSoft() != "" || isTrue(globaldata->getVertical())){
+			a.assign(alignmentLength, 0);
+			t.assign(alignmentLength, 0);
+			g.assign(alignmentLength, 0);
+			c.assign(alignmentLength, 0);
+			gap.assign(alignmentLength, 0);
+		}
+		if(globaldata->getSoft() != ""){
+			soft = (float)atoi(globaldata->getSoft().c_str()) / 100.0;
+		}
 		
 		if(globaldata->getHard().compare("") != 0)	{	doHard();								}
 		else										{	filter = string(alignmentLength, '1');	}
+
+		if(globaldata->getTrump().compare("") != 0 || isTrue(globaldata->getVertical()) || globaldata->getSoft().compare("") != 0){
+		
+			while(!inFASTA.eof()){
+				Sequence seq(inFASTA);
+				if(globaldata->getTrump().compare("") != 0)	{	doTrump(seq);		}
+				if(isTrue(globaldata->getVertical()) || globaldata->getSoft().compare("") != 0){	getFreqs(seq);	}
+				numSeqs++;
+				cout.flush();
+			}
+		
+		}
+		inFASTA.close();
+		
+		if(isTrue(globaldata->getVertical()) == 1)	{	doVertical();	}
+		if(globaldata->getSoft().compare("") != 0)	{	doSoft();		}			
+
+		ofstream outFilter;
+		string filterFile = getRootName(globaldata->inputFileName) + "filter";
+		openOutputFile(filterFile, outFilter);
+		outFilter << filter << endl;
+		outFilter.close();
+		
+
+		openInputFile(globaldata->getFastaFile(), inFASTA);
+		string filteredFasta = getRootName(globaldata->inputFileName) + "filter.fasta";
+		ofstream outFASTA;
+		openOutputFile(filteredFasta, outFASTA);
+
+		numSeqs = 0;
 		while(!inFASTA.eof()){
 			Sequence seq(inFASTA);
-			if(globaldata->getTrump().compare("") != 0)	{	doTrump(seq);		}
-			if(isTrue(globaldata->getVertical()) == 1)	{	doVertical(seq);	}
-//			if(globaldata->getSoft().compare("") != 0)	{	doSoft(seq);		}			
+			string align = seq.getAligned();
+			string filterSeq = "";
+	
+			for(int j=0;j<alignmentLength;j++){
+				if(filter[j] == '1'){
+					filterSeq += align[j];
+				}
+			}
+
+			outFASTA << '>' << seq.getName() << endl << filterSeq << endl;
 			numSeqs++;
+			gobble(inFASTA);
 		}
+		outFASTA.close();
+		inFASTA.close();
 		
-		ofstream outfile;
-		string filterFile = getRootName(globaldata->inputFileName) + "filter";
-		openOutputFile(filterFile, outfile);
-
-		outfile << filter << endl;
-		outfile.close();
-		
-		string filteredFasta = getRootName(globaldata->inputFileName) + "filter.fasta";
-		openOutputFile(filteredFasta, outfile);
-
-//		for(int i=0;i<numSeqs;i++){
-//			string curAligned = db->get(i).getAligned();
-//			outfile << '>' << db->get(i).getName() << endl;
-//			for(int j=0;j<alignmentLength;j++){
-//				if(filter[j] == '1'){
-//					outfile << curAligned[j];
-//				}
-//			}
-//			outfile << endl;
-//		}
-//		outfile.close();
 		
 		int filteredLength = 0;
 		for(int i=0;i<alignmentLength;i++){

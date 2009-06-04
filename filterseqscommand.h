@@ -28,19 +28,19 @@ public:
 private:
 	void doHard();
 	void doTrump(Sequence);
-	void doSoft(Sequence);
-	void doVertical(Sequence);
+	void doVertical();
+	void doSoft();
+	void getFreqs(Sequence);
 	string filter;	
 	int alignmentLength;
 
 	char trump;
 	bool vertical;
+	float soft;
+	int numSeqs;
 	
 	GlobalData* globaldata;	
-//	ReadSeqs* readSeqs;
-//	SequenceDB* db;
-	
-
+	vector<int> a, t, g, c, gap;
 };
 
 #endif
