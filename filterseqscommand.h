@@ -32,15 +32,16 @@ private:
 	void doSoft();
 	void doHard();
 	void doVertical();
-	
+	string filter;	
 	int alignmentLength;
-	int numSeqs;
+
+	char trump;
+	bool vertical;
 	
 	GlobalData* globaldata;	
-	ReadSeqs* readSeqs;
-	SequenceDB* db;
+//	ReadSeqs* readSeqs;
+//	SequenceDB* db;
 	
-	string filter;
 
 };
 

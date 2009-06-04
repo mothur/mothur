@@ -141,7 +141,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if (key == "nexus" )	{ nexusfile = value; inputFileName = value; fileroot = value; format = "nexus";		}
 			if (key == "clustal" )	{ clustalfile = value; inputFileName = value; fileroot = value; format = "clustal"; } 
 			if (key == "tree" )		{ treefile = value; inputFileName = value; fileroot = value; format = "tree";		} 
-			if (key == "shared" )	{ sharedfile = value; inputFileName = value; fileroot = value; format = "sharedfile";	} 
+			if (key == "shared" )	{ sharedfile = value; inputFileName = value; fileroot = value; format = "sharedfile";	}
 			if (key == "name" )		{ namefile = value;		}
 			if (key == "order" )	{ orderfile = value;	}
 			if (key == "group" )	{ groupfile = value;	}
@@ -413,7 +413,7 @@ void GlobalData::clear() {
 	processors		=	"1";
 	size            =   "0";
 	search			=	"kmer";
-	ksize			=	"7";
+	ksize			=	"8";
 	align			=	"needleman";
 	match			=	"1.0";
 	mismatch		=	"-1.0";
@@ -449,7 +449,7 @@ void GlobalData::reset() {
 	processors		=	"1";
 	size            =   "0";
 	search			=	"kmer";
-	ksize			=	"7";
+	ksize			=	"8";
 	align			=	"needleman";
 	match			=	"1.0";
 	mismatch		=	"-1.0";

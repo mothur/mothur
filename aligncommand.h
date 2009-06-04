@@ -15,18 +15,18 @@
 
 class AlignCommand : public Command {
 	
-	public:
-		AlignCommand();	
-		~AlignCommand();
-		int execute();	
-	
-	private:
-		GlobalData* globaldata;
-		string candidateFileName, templateFileName, distanceFileName;
-		int kmerSize;
-		float match, misMatch, gapOpen, gapExtend;
-		ofstream out;
-		ifstream in;
+public:
+	AlignCommand();	
+	~AlignCommand();
+	int execute();	
+
+private:
+	GlobalData* globaldata;
+	string candidateFileName, templateFileName, distanceFileName;
+	int kmerSize;
+	float match, misMatch, gapOpen, gapExtend;
+	ofstream out;
+	ifstream in;
 
 };
 

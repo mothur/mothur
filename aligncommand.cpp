@@ -41,9 +41,11 @@
 AlignCommand::AlignCommand(){
 	try {
 		globaldata = GlobalData::getInstance();
-		candidateFileName = globaldata->getCandidateFile();
-		templateFileName = globaldata->getFastaFile();
-		openInputFile(candidateFileName, in);
+		if(globaldata->getFastaFile() == "" && globaldata->getPhylipFile() == "" && globaldata->getNexusFile() == "" && globaldata->getClustalFile() == ""){
+			cout << "you forgot a template file" << endl;
+		}
+		openInputFile(globaldata->getCandidateFile(), in);
+		
 		convert(globaldata->getKSize(), kmerSize);
 		convert(globaldata->getMatch(), match);
 		convert(globaldata->getMismatch(), misMatch);
@@ -73,28 +75,33 @@ int AlignCommand::execute(){
 		srand( (unsigned)time( NULL ) );  //needed to assign names to temporary files
 		
 		Database* templateDB;
-		if(globaldata->getSearch() == "kmer")			{	templateDB = new KmerDB(templateFileName, kmerSize);								}
-		else if(globaldata->getSearch() == "suffix")	{	templateDB = new SuffixDB(templateFileName);										}
-		else if(globaldata->getSearch() == "blast")		{	templateDB = new BlastDB(templateFileName, gapOpen, gapExtend, match, misMatch);	}
-		else {	cout << globaldata->getSearch() << " is not a valid search option. I will run the command using suffix." << endl;
-				templateDB = new SuffixDB(templateFileName);		}
+		if(globaldata->getSearch() == "kmer")			{	templateDB = new KmerDB(globaldata->getFastaFile() , kmerSize);	}
+		else if(globaldata->getSearch() == "suffix")	{	templateDB = new SuffixDB(globaldata->getFastaFile());			}
+		else if(globaldata->getSearch() == "blast")		{	templateDB = new BlastDB(globaldata->getFastaFile(), gapOpen, gapExtend, match, misMatch);	}
+		else {
+			cout << globaldata->getSearch() << " is not a valid search option. I will run the command using kmer, ksize=8." << endl;
+			templateDB = new KmerDB(globaldata->getFastaFile(), kmerSize);
+		}
 	
 		Alignment* alignment;
-		if(globaldata->getAlign() == "gotoh")					{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, 3000);	}
-		else if(globaldata->getAlign() == "needleman")			{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, 3000);			}
-		else if(globaldata->getAlign() == "blast")				{	alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);		}
-		else if(globaldata->getAlign() == "noalign")			{	alignment = new NoAlign();													}
-		else {	cout << globaldata->getAlign() << " is not a valid alignment option. I will run the command using blast." << endl;
-				alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);	}
+		if(globaldata->getAlign() == "gotoh")			{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, 3000);	}
+		else if(globaldata->getAlign() == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, 3000);			}
+		else if(globaldata->getAlign() == "blast")		{	alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);		}
+		else if(globaldata->getAlign() == "noalign")	{	alignment = new NoAlign();													}
+		else {
+			cout << globaldata->getAlign() << " is not a valid alignment option. I will run the command using needleman." << endl;
+			alignment = new NeedlemanOverlap(gapOpen, match, misMatch, 3000);
+		}
 				
 		int numFastaSeqs=count(istreambuf_iterator<char>(in),istreambuf_iterator<char>(), '>');
 		in.seekg(0);
 	
-		string candidateAligngmentFName = candidateFileName.substr(0,candidateFileName.find_last_of(".")+1) + globaldata->getSearch() + '.' + globaldata->getAlign() + ".nast.align";
+		candidateFileName = globaldata->getCandidateFile();
+		string candidateAligngmentFName = candidateFileName.substr(0,candidateFileName.find_last_of(".")+1) + "align";
 		ofstream candidateAlignmentFile;
 		openOutputFile(candidateAligngmentFName, candidateAlignmentFile);
 
-		string candidateReportFName = candidateFileName.substr(0,candidateFileName.find_last_of(".")+1) + globaldata->getSearch() + '.' + globaldata->getAlign() + ".nast.report";
+		string candidateReportFName = candidateFileName.substr(0,candidateFileName.find_last_of(".")+1) + "align.report";
 		NastReport report(candidateReportFName);
 
 		cout << "We are going to align the " << numFastaSeqs << " sequences in " << candidateFileName << "..." << endl;
@@ -110,6 +117,7 @@ int AlignCommand::execute(){
 			Sequence* templateSeq = templateDB->findClosestSequence(candidateSeq);
 			report.setTemplate(templateSeq);
 			report.setSearchParameters(globaldata->getSearch(), templateDB->getSearchScore());
+			
 				
 			Nast nast(alignment, candidateSeq, templateSeq);
 			report.setAlignmentParameters(globaldata->getAlign(), alignment);

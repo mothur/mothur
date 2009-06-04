@@ -27,10 +27,8 @@ public:
 	int execute();
 	
 private:
-	int numSeqs;	
 	GlobalData* globaldata;	
-	ReadSeqs* readSeqs;
-	SequenceDB* db;
+
 };
 
 #endif

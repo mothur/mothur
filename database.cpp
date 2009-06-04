@@ -23,6 +23,7 @@ Database::Database(string fastaFileName){		//	This assumes that the template dat
 
 	cout << endl << "Reading in the " << fastaFileName << " template sequences...\t";	cout.flush();
 
+	//all of this is elsewhere already!
 	numSeqs=count(istreambuf_iterator<char>(fastaFile),istreambuf_iterator<char>(), '>');	//	count the number of
 	fastaFile.seekg(0);																		//	sequences
 	
@@ -30,11 +31,8 @@ Database::Database(string fastaFileName){		//	This assumes that the template dat
 	
 	string seqName, sequence;
 	for(int i=0;i<numSeqs;i++){
-//		templateSequences[i] = new Sequence();		//	We're storing the aligned template sequences as a vector of
-													//	pointers to Sequence objects
 		fastaFile >> seqName;
-//		templateSequences[i]->setName(seqName);
-		
+		seqName = seqName.substr(1);
 		char letter;
 		string aligned;
 		
@@ -46,12 +44,12 @@ Database::Database(string fastaFileName){		//	This assumes that the template dat
 			}
 		}
 		templateSequences[i] = new Sequence(seqName, aligned);
-//		templateSequences[i]->setAligned(aligned);	//	Obviously, we need the fully aligned template sequence
-//		templateSequences[i]->setUnaligned(aligned);//	We will also need the unaligned sequence for pairwise alignments
-		fastaFile.putback(letter);					//	and database searches
+		fastaFile.putback(letter);
 	}
 	
 	fastaFile.close();
+	//all of this is elsewhere already!
+	
 	cout << "DONE." << endl;	cout.flush();
 
 }

@@ -16,7 +16,6 @@
 #include "readnexus.h"
 #include "readclustal.h"
 #include "readseqsphylip.h"
-#include <set>
 
 using namespace std;
 
@@ -28,10 +27,9 @@ public:
 	int execute();
 private:
 	void screenNameGroupFile(set<string>);
-	int numSeqs;	
+	void screenGroupFile(set<string>);
+
 	GlobalData* globaldata;	
-	ReadSeqs* readSeqs;
-	SequenceDB* db;
 };
 
 #endif

@@ -31,6 +31,7 @@ public:
 	void setPairwise(string);
 	void setAligned(string);
 	void setLength();
+	void reverseComplement();
 	
 	string convert2ints();
 	string getName();

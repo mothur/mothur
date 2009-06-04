@@ -57,20 +57,19 @@ KmerDB::KmerDB(string fastaFileName, int kSize) : Database(fastaFileName), kmerS
 /**************************************************************************************************/
 
 Sequence* KmerDB::findClosestSequence(Sequence* candidateSeq){
-
-	vector<int> matches(numSeqs, 0);						//	a record of the sequences with shared kmers
-	vector<int> timesKmerFound(kmerLocations.size()+1, 0);	//	a record of the kmers that we have already found
+	
+	Kmer kmer(kmerSize);
 	
 	searchScore = 0;
 	int maxSequence = 0;
-	
-	string query = candidateSeq->getUnaligned();			//	we want to search using an unaligned dna sequence
 
-	int numKmers = query.length() - kmerSize + 1;	
-	Kmer kmer(kmerSize);
-	
+	vector<int> matches(numSeqs, 0);						//	a record of the sequences with shared kmers
+	vector<int> timesKmerFound(kmerLocations.size()+1, 0);	//	a record of the kmers that we have already found
+
+	int numKmers = candidateSeq->getNumBases() - kmerSize + 1;	
+
 	for(int i=0;i<numKmers;i++){
-		int kmerNumber = kmer.getKmerNumber(query, i);		//	go through the query sequence and get a kmer number
+		int kmerNumber = kmer.getKmerNumber(candidateSeq->getUnaligned(), i);		//	go through the query sequence and get a kmer number
 		if(timesKmerFound[kmerNumber] == 0){				//	if we haven't seen it before...
 			for(int j=0;j<kmerLocations[kmerNumber].size();j++){//increase the count for each sequence that also has
 				matches[kmerLocations[kmerNumber][j]]++;	//	that kmer
@@ -80,14 +79,14 @@ Sequence* KmerDB::findClosestSequence(Sequence* candidateSeq){
 	}
 
 	for(int i=0;i<numSeqs;i++){								//	find the db sequence that shares the most kmers with
-		if(matches[i] > searchScore){						//	the query sequence
+		if(matches[i] > searchScore){					//	the query sequence
 			searchScore = matches[i];
 			maxSequence = i;
 		}
 	}
-	searchScore = 100 * searchScore / (float)numKmers;
-	return templateSequences[maxSequence];					//	return the Sequence object corresponding to the db
-															//	sequence with the most shared kmers.
+
+	searchScore = 100 * searchScore / (float) numKmers;		//	return the Sequence object corresponding to the db
+	return templateSequences[maxSequence];					//	sequence with the most shared kmers.
 }
 
 /**************************************************************************************************/

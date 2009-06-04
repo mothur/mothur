@@ -25,7 +25,6 @@ Sequence::Sequence(string newName, string sequence) {
 	name = newName;
 	if(sequence.find_first_of('-') != string::npos) {
 		setAligned(sequence);
-		isAligned = 1;
 	}
 	setUnaligned(sequence);
 	
@@ -33,6 +32,7 @@ Sequence::Sequence(string newName, string sequence) {
 //********************************************************************************************************************
 
 Sequence::Sequence(ifstream& fastaFile){
+	initialize();
 	
 	string accession;				//	provided a file handle to a fasta-formatted sequence file, read in the next
 	fastaFile >> accession;			//	accession number and sequence we find...
@@ -131,7 +131,7 @@ void Sequence::setAligned(string sequence){
 			}
 		}
 	}
-	
+	isAligned = 1;	
 }
 
 //********************************************************************************************************************
@@ -249,11 +249,13 @@ int Sequence::getStartPos(){
 	if(endPos == -1){
 		for(int j = 0; j < alignmentLength; j++) {
 			if(aligned[j] != '.'){
-				startPos = j;
+				startPos = j + 1;
 				break;
 			}
 		}
-	}	
+	}
+	if(isAligned == 0){	startPos = 1;	}
+
 	return startPos;
 }
 
@@ -263,11 +265,13 @@ int Sequence::getEndPos(){
 	if(endPos == -1){
 		for(int j=alignmentLength-1;j>=0;j--){
 			if(aligned[j] != '.'){
-				endPos = j;
+				endPos = j + 1;
 				break;
 			}
 		}
 	}
+	if(isAligned == 0){	endPos = numBases;	}
+	
 	return endPos;
 }
 
@@ -275,6 +279,22 @@ int Sequence::getEndPos(){
 
 bool Sequence::getIsAligned(){
 	return isAligned;
+}
+
+//********************************************************************************************************************
+
+void Sequence::reverseComplement(){
+
+	string temp;
+	for(int i=numBases-1;i>=0;i--){
+		if(unaligned[i] == 'A')		{	temp += 'T';	}
+		else if(unaligned[i] == 'T'){	temp += 'A';	}
+		else if(unaligned[i] == 'G'){	temp += 'C';	}
+		else if(unaligned[i] == 'C'){	temp += 'G';	}
+		else						{	temp += 'N';	}
+	}
+	unaligned = temp;
+	
 }
 
 //********************************************************************************************************************
