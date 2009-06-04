@@ -16,11 +16,6 @@
 #include "validcalculator.h"
 #include "dist.h"
 #include "sequencedb.h"
-#include "readfasta.h"
-#include "readnexus.h"
-#include "readclustal.h"
-#include "readseqsphylip.h"
-
 
 class DistanceCommand : public Command {
 
@@ -34,8 +29,8 @@ private:
 	ValidCalculators* validCalculator;
 	Dist* distCalculator;
 	SequenceDB* seqDB;
-	ReadSeqs* readSeqs;
 	ofstream out;
+	ifstream in;
 	string outputFileName;
 	string countends;
 	int processors;

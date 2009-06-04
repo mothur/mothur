@@ -60,8 +60,6 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if (key == "rabund" )	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund";	}
 				if (key == "sabund" )	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund";	} 
 				if (key == "fasta" )	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta";		}
-				if (key == "nexus" )	{ nexusfile = value; inputFileName = value; fileroot = value; format = "nexus";		} 
-				if (key == "clustal" )	{ clustalfile = value; inputFileName = value; fileroot = value; format = "clustal"; }
 				if (key == "tree" )		{ treefile = value; inputFileName = value; fileroot = value; format = "tree";		}
 				if (key == "shared" )	{ sharedfile = value; inputFileName = value; fileroot = value; format = "sharedfile";	}
 				if (key == "name" )		{ namefile = value;		}
@@ -138,8 +136,6 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if (key == "rabund" )	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund";	}
 			if (key == "sabund" )	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund";	}
 			if (key == "fasta" )	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta";		}
-			if (key == "nexus" )	{ nexusfile = value; inputFileName = value; fileroot = value; format = "nexus";		}
-			if (key == "clustal" )	{ clustalfile = value; inputFileName = value; fileroot = value; format = "clustal"; } 
 			if (key == "tree" )		{ treefile = value; inputFileName = value; fileroot = value; format = "tree";		} 
 			if (key == "shared" )	{ sharedfile = value; inputFileName = value; fileroot = value; format = "sharedfile";	}
 			if (key == "name" )		{ namefile = value;		}
@@ -303,8 +299,6 @@ string GlobalData::getOrderFile()		{	return orderfile;	}
 string GlobalData::getTreeFile()		{	return treefile;	}
 string GlobalData::getSharedFile()		{	return sharedfile;	}
 string GlobalData::getFastaFile()		{	return fastafile;	}
-string GlobalData::getNexusFile()		{	return nexusfile;	}
-string GlobalData::getClustalFile()     {   return clustalfile; }
 string GlobalData::getCutOff()			{	return cutoff;		}
 string GlobalData::getFormat()			{	return format;		}
 string GlobalData::getPrecision()		{	return precision;	}
@@ -383,8 +377,6 @@ void GlobalData::clear() {
 	groupfile		=	""; 
 	orderfile		=	"";
 	fastafile		=   "";
-	nexusfile		=   "";
-	clustalfile		=   "";
 	treefile		=	"";
 	sharedfile		=	"";
 	candidatefile	=	"";

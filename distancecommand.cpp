@@ -24,6 +24,11 @@ DistanceCommand::DistanceCommand(){
 		convert(globaldata->getProcessors(), processors);
 		convert(globaldata->getCutOff(), cutoff);
 		
+		//open file
+		string filename = globaldata->getFastaFile();
+		openInputFile(filename, in);
+
+		
 		int i;
 		if (isTrue(countends) == true) {
 			for (i=0; i<globaldata->Estimators.size(); i++) {
@@ -67,21 +72,10 @@ DistanceCommand::DistanceCommand(){
 int DistanceCommand::execute(){
 	try {
 		
-		//read file
-		string filename = globaldata->inputFileName;
-		
-		if(globaldata->getFastaFile() != "") {
-		readSeqs =  new ReadFasta(filename); }
-		else if(globaldata->getNexusFile() != "") {
-		readSeqs = new ReadNexus(filename); }
-		else if(globaldata->getClustalFile() != "") {
-		readSeqs = new ReadClustal(filename); }
-		else if(globaldata->getPhylipFile() != "") {
-		readSeqs = new ReadPhylip(filename); }
-		
-		readSeqs->read();
-		seqDB = readSeqs->getDB();
-		
+		//reads fasta file and fills sequenceDB
+		if(globaldata->getFastaFile() != "") {  seqDB = new SequenceDB(in);  }
+		else { cout << "Error no fasta file." << endl; return 0; }
+				
 		int numSeqs = seqDB->getNumSeqs();
 		cutoff += 0.005;
 		
@@ -279,11 +273,11 @@ int DistanceCommand::driver(Dist* distCalculator, SequenceDB* align, int startLi
 		for(int i=startLine;i<endLine;i++){
 			
 			for(int j=0;j<i;j++){
-				distCalculator->calcDist(align->get(i), align->get(j));
+				distCalculator->calcDist(*(align->get(i)), *(align->get(j)));
 				double dist = distCalculator->getDist();
 				
 				if(dist <= cutoff){
-					distFile << align->get(i).getName() << ' ' << align->get(j).getName() << ' ' << dist << endl;
+					distFile << align->get(i)->getName() << ' ' << align->get(j)->getName() << ' ' << dist << endl;
 				}
 				
 			}

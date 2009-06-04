@@ -276,7 +276,7 @@ void ValidParameters::initCommandParameters() {
 		string filterseqsArray[] =  {"fasta", "trump", "soft", "hard", "vertical"};
 		commandParameters["filter.seqs"] = addParameters(filterseqsArray, sizeof(filterseqsArray)/sizeof(string));
 
-		string summaryseqsArray[] =  {"fasta","phylip","clustal","nexus"};
+		string summaryseqsArray[] =  {"fasta"};
 		commandParameters["summary.seqs"] = addParameters(summaryseqsArray, sizeof(summaryseqsArray)/sizeof(string));
 
 		string screenseqsArray[] =  {"fasta", "start", "end", "maxambig", "maxhomop", "minlength", "maxlength", "name", "group"};

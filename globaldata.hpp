@@ -53,8 +53,6 @@ public:
 	string getGroupFile();
 	string getOrderFile();
 	string getFastaFile();
-	string getNexusFile();
-	string getClustalFile();
 	string getTreeFile();
 	string getSharedFile();
 	string getCutOff();
@@ -123,7 +121,7 @@ public:
 		
 private:
 
-	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, nexusfile, clustalfile, treefile, sharedfile, line, label, randomtree, groups, cutoff, format, precision, method, fileroot, iters, jumble, freq, calc, abund, step, form, sorted, trump, soft, hard, scale, countends, processors, candidatefile, search, ksize, align, match, size, mismatch, gapopen, gapextend, minLength, maxLength, startPos, endPos, maxAmbig, maxHomoPolymer;
+	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, treefile, sharedfile, line, label, randomtree, groups, cutoff, format, precision, method, fileroot, iters, jumble, freq, calc, abund, step, form, sorted, trump, soft, hard, scale, countends, processors, candidatefile, search, ksize, align, match, size, mismatch, gapopen, gapextend, minLength, maxLength, startPos, endPos, maxAmbig, maxHomoPolymer;
 
 
 	static GlobalData* _uniqueInstance;

@@ -12,11 +12,7 @@
 
 #include "command.hpp"
 #include "globaldata.hpp"
-#include "readfasta.h"
-#include "readnexus.h"
-#include "readclustal.h"
-#include "readseqsphylip.h"
-
+#include "sequence.hpp"
 
 class FilterSeqsCommand : public Command {
 
@@ -41,6 +37,7 @@ private:
 	
 	GlobalData* globaldata;	
 	vector<int> a, t, g, c, gap;
+
 };
 
 #endif
