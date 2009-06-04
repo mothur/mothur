@@ -26,10 +26,10 @@ public:
 	int execute();	
 	
 private:
-	void doTrump();
-	void doSoft();
 	void doHard();
-	void doVertical();
+	void doTrump(Sequence);
+	void doSoft(Sequence);
+	void doVertical(Sequence);
 	string filter;	
 	int alignmentLength;
 
