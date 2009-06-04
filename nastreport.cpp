@@ -7,8 +7,6 @@
  *
  */
 
-using namespace std;
-
 #include "sequence.hpp"
 #include "nast.hpp"
 #include "alignment.hpp"

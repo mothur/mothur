@@ -12,7 +12,6 @@
  *	issues at the 5' end of the alignment seem to take care of themselves in the traceback.
  *
  */
-using namespace std;
 
 #include "alignmentcell.hpp"
 #include "overlap.hpp"

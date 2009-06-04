@@ -31,18 +31,7 @@ bool ReadPhylip::isSeq(string seq) {
 }
 
 /*******************************************************************************/
-ReadPhylip::ReadPhylip(string file) : ReadSeqs(file) {
-	try {
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReadTree class Function ReadTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ReadTree class function ReadTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
-}
+ReadPhylip::ReadPhylip(string file) : ReadSeqs(file) {	}
 /*******************************************************************************/
 ReadPhylip::~ReadPhylip(){
 //	for(int i = 0; i < sequencedb.getNumSeqs(); i++)

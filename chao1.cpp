@@ -67,6 +67,6 @@ EstOutput Chao1::getValues(SAbundVector* rank){
 		cout << "An unknown error has occurred in the Chao1 class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
-};
+}
 
 /***********************************************************************/

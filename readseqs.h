@@ -10,8 +10,6 @@
  *
  */
 
-using namespace std;
-
 #include "globaldata.hpp"
 #include "sequencedb.h"
 #include "mothur.h"

@@ -22,8 +22,6 @@
 #include "readseqsphylip.h"
 
 
-using namespace std;
-
 class DistanceCommand : public Command {
 
 public:

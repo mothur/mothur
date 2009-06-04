@@ -4,8 +4,6 @@
 #include "mothur.h"
 #include "globaldata.hpp"
 
-using namespace std;
-
 /***********************************************************************/
 
 class FileOutput {

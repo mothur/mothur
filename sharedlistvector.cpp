@@ -7,10 +7,6 @@
  *
  */
 
-
-using namespace std;
-
-
 #include "sabundvector.hpp"
 #include "rabundvector.hpp"
 #include "ordervector.hpp"
@@ -20,11 +16,11 @@ using namespace std;
 
 /***********************************************************************/
 
-SharedListVector::SharedListVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){};
+SharedListVector::SharedListVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){}
 
 /***********************************************************************/
 
-SharedListVector::SharedListVector(int n):	DataVector(), data(n, "") , maxRank(0), numBins(0), numSeqs(0){};
+SharedListVector::SharedListVector(int n):	DataVector(), data(n, "") , maxRank(0), numBins(0), numSeqs(0){}
 
 /***********************************************************************/
 SharedListVector::SharedListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {

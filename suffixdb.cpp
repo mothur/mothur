@@ -15,8 +15,6 @@
  *
  */
 
-using namespace std;
-
 #include "database.hpp"
 #include "sequence.hpp"
 #include "suffixtree.hpp"

@@ -11,14 +11,12 @@
  */
 
 #include "command.hpp"
-#include "mothur.h"
 #include "globaldata.hpp"
 #include "readfasta.h"
 #include "readnexus.h"
 #include "readclustal.h"
 #include "readseqsphylip.h"
 
-using namespace std;
 
 class FilterSeqsCommand : public Command {
 

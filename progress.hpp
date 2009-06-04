@@ -3,8 +3,6 @@
 
 #include "mothur.h"
 
-using namespace std;
-
 class Progress {
 	
 public:

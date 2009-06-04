@@ -13,10 +13,9 @@
 #include "fastamap.h"
 #include "globaldata.hpp"
 
-/* The deconvolute command reads a fasta file, finds the duplicate sequences and outputs a names file
+/* The unique.seqs command reads a fasta file, finds the duplicate sequences and outputs a names file
 	containing 2 columns.  The first being the groupname and the second the list of identical sequence names. */ 
 
-using namespace std;
 
 class DeconvoluteCommand : public Command {
 

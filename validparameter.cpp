@@ -223,7 +223,7 @@ void ValidParameters::initCommandParameters() {
 		commandParameters["cluster"] = addParameters(clusterArray, sizeof(clusterArray)/sizeof(string));
 		
 		string deconvoluteArray[] =  {"fasta"};
-		commandParameters["deconvolute"] = addParameters(deconvoluteArray, sizeof(deconvoluteArray)/sizeof(string));
+		commandParameters["unique.seqs"] = addParameters(deconvoluteArray, sizeof(deconvoluteArray)/sizeof(string));
 		
 		string collectsingleArray[] =  {"freq","line","label","calc","abund","size"};
 		commandParameters["collect.single"] = addParameters(collectsingleArray, sizeof(collectsingleArray)/sizeof(string));
@@ -273,7 +273,7 @@ void ValidParameters::initCommandParameters() {
 		string heatmapArray[] =  {"groups","line","label","sorted","scale"};
 		commandParameters["heatmap"] = addParameters(heatmapArray, sizeof(heatmapArray)/sizeof(string));
 		
-		string filterseqsArray[] =  {"fasta","phylip","clustal","nexus", "trump", "soft", "hard", "vertical"};
+		string filterseqsArray[] =  {"fasta", "trump", "soft", "hard", "vertical"};
 		commandParameters["filter.seqs"] = addParameters(filterseqsArray, sizeof(filterseqsArray)/sizeof(string));
 
 		string summaryseqsArray[] =  {"fasta","phylip","clustal","nexus"};
@@ -303,7 +303,7 @@ void ValidParameters::initCommandParameters() {
 		string concensusArray[] =  {};
 		commandParameters["concensus"] = addParameters(concensusArray, sizeof(concensusArray)/sizeof(string));
 		
-		string distanceArray[] =  {"fasta","phylip","clustal","nexus", "calc", "countends", "cutoff", "processors"};
+		string distanceArray[] =  {"fasta", "calc", "countends", "cutoff", "processors"};
 		commandParameters["dist.seqs"] = addParameters(distanceArray, sizeof(distanceArray)/sizeof(string));
 		
 		string AlignArray[] =  {"fasta", "candidate", "search", "ksize", "align", "match", "mismatch", "gapopen", "gapextend"};

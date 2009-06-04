@@ -11,8 +11,6 @@
 #include "engine.hpp"
 #include "globaldata.hpp"
 
-using namespace std;
-
 /**************************************************************************************************/
 
 GlobalData* GlobalData::_uniqueInstance = 0;

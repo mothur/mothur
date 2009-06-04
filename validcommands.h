@@ -9,7 +9,6 @@
  *  Copyright 2009 Schloss Lab UMASS Amherst. All rights reserved.
  *
  */
-using namespace std;
 
 #include "mothur.h"
 

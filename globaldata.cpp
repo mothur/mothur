@@ -366,8 +366,8 @@ GlobalData::GlobalData() {
 	//option definitions should go here...
 	helpRequest = "";
 	clear();
-	gListVector == NULL;		
-	gSparseMatrix == NULL;	
+	gListVector = NULL;		
+	gSparseMatrix = NULL;	
 }
 /*******************************************************/
 
@@ -404,7 +404,7 @@ void GlobalData::clear() {
 	step			=	"0.01";
 	form			=	"integral";
 	sorted			=	"T";  //F means don't sort, T means sort.
-	vertical        =   "";		
+	vertical        =   "F";		
 	trump           =	"";		
 	hard			=   "";		
 	soft            =   "";	

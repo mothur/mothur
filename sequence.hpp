@@ -13,7 +13,6 @@
  *	to set and get these values for the other classes where they are needed.  *
  *
  */
-using namespace std;
 
 #include "mothur.h"
 

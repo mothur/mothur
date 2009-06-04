@@ -8,8 +8,6 @@
 #include "listvector.hpp"
 
 
-using namespace std;
-
 class InputData {
 	
 public:

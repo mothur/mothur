@@ -7,8 +7,6 @@
 #include "fileoutput.h"
 
 
-using namespace std;
-
 /***********************************************************************/
 
 class Display {

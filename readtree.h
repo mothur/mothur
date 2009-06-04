@@ -9,8 +9,6 @@
  *
  */
 
-using namespace std;
-
 #include "mothur.h"
 #include "globaldata.hpp"
 #include "tree.h"

@@ -20,7 +20,7 @@ ValidCommands::ValidCommands() {
 		commands["bin.seqs"]			= "bin.seqs"; 
 		commands["get.oturep"]			= "get.oturep";
 		commands["cluster"]				= "cluster"; 
-		commands["deconvolute"]			= "deconvolute"; 
+		commands["unique.seqs"]			= "unique.seqs"; 
 		commands["dist.seqs"]			= "dist.seqs";
 		commands["dist.shared"]			= "dist.shared";
 		commands["collect.single"]		= "collect.single"; 

@@ -25,7 +25,7 @@ DistanceCommand::DistanceCommand(){
 		convert(globaldata->getCutOff(), cutoff);
 		
 		int i;
-		if (countends == "T") {
+		if (isTrue(countends) == true) {
 			for (i=0; i<globaldata->Estimators.size(); i++) {
 				if (validCalculator->isValidCalculator("distance", globaldata->Estimators[i]) == true) { 
 					if (globaldata->Estimators[i] == "nogaps") { 

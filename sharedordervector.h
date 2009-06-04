@@ -15,8 +15,6 @@
 	the group it is in and the abundance is equal to the OTU number.  */
 
 
-using namespace std;
-
 #include "datavector.hpp"
 
 struct individual {

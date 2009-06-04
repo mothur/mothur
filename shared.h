@@ -9,8 +9,6 @@
  *  Copyright 2008 Schloss Lab UMASS Amherst. All rights reserved.
  *
  */
- 
-using namespace std;
 
 #include "mothur.h"
 #include "sharedrabundvector.h"

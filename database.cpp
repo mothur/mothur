@@ -7,9 +7,7 @@
  *
  */
 
-using namespace std;
-
-
+#include "mothur.h"
 #include "sequence.hpp"
 #include "database.hpp"
 

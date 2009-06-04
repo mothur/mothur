@@ -40,6 +40,15 @@ using namespace std;
 #include <cmath>
 #include <math.h>
 #include <algorithm>
+#include <ctime>
+
+#ifdef _WIN32
+	#define exp(x) (exp((double) x))
+	#define sqrt(x) (sqrt((double) x))
+	#define log10(x) (log10((double) x))
+	#define log2(x) (log10(x)/log10(2))
+#endif
+
 
 typedef unsigned long long ull;
 
@@ -138,6 +147,13 @@ inline void gobble(istream& f){
     while(isspace(d=f.get()))		{;}
 	f.putback(d);
 	
+}
+/***********************************************************************/
+
+inline bool isTrue(string f){
+	
+	if ((f == "TRUE") || (f == "T")	|| (f == "true") || (f == "t")) {	return true;	}
+	else {	return false;  }
 }
 
 /***********************************************************************/

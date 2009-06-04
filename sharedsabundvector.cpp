@@ -10,12 +10,10 @@
 #include "sharedsabundvector.h"
 #include "sabundvector.hpp"
 
-using namespace std;
-
 
 /***********************************************************************/
 
-SharedSAbundVector::SharedSAbundVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){};
+SharedSAbundVector::SharedSAbundVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){}
 
 /***********************************************************************/
 
@@ -27,7 +25,7 @@ SharedSAbundVector::SharedSAbundVector(int size) :	DataVector(), maxRank(0), num
 			newGuy.abundance = 0;
 			data.push_back(newGuy);
 		}
-};
+}
 
 /***********************************************************************/
 

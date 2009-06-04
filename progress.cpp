@@ -10,8 +10,6 @@
 
 #include "progress.hpp"
 
-using namespace std;
-
 const int totalTicks = 50;
 const char marker = '|';
 

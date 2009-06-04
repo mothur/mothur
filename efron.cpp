@@ -35,7 +35,7 @@ EstOutput Efron::getValues(SAbundVector* rank){
 		cout << "An unknown error has occurred in the Coverage class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
-};
+}
 
 
 /***********************************************************************/

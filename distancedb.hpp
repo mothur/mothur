@@ -11,8 +11,6 @@
  */
 
 
-using namespace std;
-
 #include "mothur.h"
 
 class DistanceDB : public Database {

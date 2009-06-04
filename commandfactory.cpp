@@ -74,7 +74,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "read.otu")				{	command = new ReadOtuCommand();				}
 		else if(commandName == "read.tree")				{	command = new ReadTreeCommand();			}
 		else if(commandName == "cluster")				{	command = new ClusterCommand();				}
-		else if(commandName == "deconvolute")			{	command = new DeconvoluteCommand();			}
+		else if(commandName == "unique.seqs")			{	command = new DeconvoluteCommand();			}
 		else if(commandName == "parsimony")				{	command = new ParsimonyCommand();			}
 		else if(commandName == "help")					{	command = new HelpCommand();				}
 		else if(commandName == "quit")					{	command = new QuitCommand();				}

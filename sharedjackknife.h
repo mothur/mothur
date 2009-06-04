@@ -30,7 +30,7 @@ private:
 	int numGroups, callCount, count;
 	bool currentCallDone;
 	vector<SharedRAbundVector*> groups;
-	double simpson(int[], double, int);
+	double simpson(vector<int>, double, int);
 	double* jackknife();
 };
 

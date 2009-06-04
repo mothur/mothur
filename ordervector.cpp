@@ -7,8 +7,6 @@
  *
  */
 
-using namespace std;
-
 #include "ordervector.hpp"
 
 
@@ -18,7 +16,7 @@ OrderVector::OrderVector() : DataVector() {}
 
 /***********************************************************************/
 
-//OrderVector::OrderVector(int ns) : DataVector(), data(ns, -1) {};
+//OrderVector::OrderVector(int ns) : DataVector(), data(ns, -1) {}
 
 /***********************************************************************/
 

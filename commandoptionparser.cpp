@@ -8,9 +8,6 @@
  */
 
 
-using namespace std;
-
-
 #include "globaldata.hpp"
 #include "commandoptionparser.hpp"
 

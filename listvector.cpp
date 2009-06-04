@@ -7,8 +7,6 @@
  *
  */
 
-using namespace std;
-
 
 #include "sabundvector.hpp"
 #include "rabundvector.hpp"
@@ -18,11 +16,11 @@ using namespace std;
 
 /***********************************************************************/
 
-ListVector::ListVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){};
+ListVector::ListVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){}
 
 /***********************************************************************/
 
-ListVector::ListVector(int n):	DataVector(), data(n, "") , maxRank(0), numBins(0), numSeqs(0){};
+ListVector::ListVector(int n):	DataVector(), data(n, "") , maxRank(0), numBins(0), numSeqs(0){}
 
 /***********************************************************************/
 

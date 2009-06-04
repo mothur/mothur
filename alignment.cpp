@@ -9,15 +9,9 @@
  *  
  */
 
-using namespace std;
-
-#include <string>
-#include <vector>
-
 #include "alignmentcell.hpp"
 #include "alignment.hpp"
 
-#include <iostream>
 
 /**************************************************************************************************/
 

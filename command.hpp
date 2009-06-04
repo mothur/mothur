@@ -12,7 +12,6 @@
 
 /*This class is a parent to all the command classes.  It has one pure int execute(). */
 
-using namespace std;
 
 #include "mothur.h"
 

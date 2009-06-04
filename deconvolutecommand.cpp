@@ -34,6 +34,9 @@ int DeconvoluteCommand::execute() {
 		//the second column is the list of names of identical sequences separated by ','.
 		fastamap->printNamesFile(out);
 		fastamap->printCondensedFasta(outFasta);
+		
+		out.close();
+		outFasta.close();
 	
 		return 0;
 	}

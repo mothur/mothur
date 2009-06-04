@@ -15,8 +15,6 @@
  *
  */
 
-using namespace std;
-
 #include "sequence.hpp"
 #include "alignment.hpp"
 #include "nast.hpp"

@@ -1,10 +1,6 @@
 #ifndef COLLECT_H
 #define COLLECT_H
 
-using namespace std;
-
-
-
 #include "collectorscurvedata.h"
 #include "display.h"
 #include "ordervector.hpp"

@@ -12,7 +12,7 @@
 /***************************************************************************************
 
 ***************************************************************************************/
-double SharedJackknife::simpson(int abunds[], double numInd, int numBins){
+double SharedJackknife::simpson(vector<int> abunds, double numInd, int numBins){
 	double denom = numInd*(numInd-1);
 	double sum = 0;
 	for(int i = 0; i < numBins; i++)
@@ -25,7 +25,7 @@ double SharedJackknife::simpson(int abunds[], double numInd, int numBins){
 
 double* SharedJackknife::jackknife(){		
 	int numBins = groups.at(0)->getNumBins()-1;
-	int cArray[numBins];
+	vector<int> cArray(numBins);
 	for(int i = 0; i < numBins; i++)
 		cArray[i] = 0;
 
@@ -39,7 +39,7 @@ double* SharedJackknife::jackknife(){
 
 	double baseD = 1/simpson(cArray, numInd, numBins);
 	
-	double pseudoVals[numBins];
+	vector<double> pseudoVals(numBins);
 	double jackknifeEstimate = 0;
 	for(int i = 0; i < numGroups; i++) {
 		for(int j = 0; j < numBins-1; j++) {

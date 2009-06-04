@@ -10,8 +10,6 @@
  *
  */
 
-using namespace std;
-
 #include "mothur.h"
 #include "tree.h"
 

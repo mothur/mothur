@@ -14,7 +14,6 @@
 #include "globaldata.hpp"
 #include "progress.hpp"
 
-using namespace std;
 
 struct Names {
 	string		seqName;
