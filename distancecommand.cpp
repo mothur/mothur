@@ -80,30 +80,43 @@ int DistanceCommand::execute(){
 		cutoff += 0.005;
 		
 		string distFile = getRootName(globaldata->getFastaFile()) + "dist";
+		string phylipFile = getRootName(globaldata->getFastaFile()) + "phylip.dist";
 		
+		remove(phylipFile.c_str());
 		remove(distFile.c_str());
+		
+		//output numSeqs to phylip formatted dist file
+		openOutputFile(phylipFile, phylipOut);
+		phylipOut << numSeqs << endl;
+		phylipOut.close();
 		
 		//#	if defined (_WIN32)
 		//figure out how to implement the fork and wait commands in windows
-		//	driver(distCalculator, seqDB, 0, numSeqs, distFile, cutoff);
+		//	driver(distCalculator, seqDB, 0, numSeqs, distFile, phylipFile, cutoff);
 		//#	endif
 		
 #if defined (__APPLE__) || (__MACH__)
 		if(processors == 1){
-			driver(distCalculator, seqDB, 0, numSeqs, distFile, cutoff);	
+			driver(distCalculator, seqDB, 0, numSeqs, distFile, phylipFile + "tempPhylipA", cutoff);
+			appendFiles((phylipFile + "tempPhylipA"), phylipFile);
+			remove((phylipFile + "tempPhylipA").c_str());	
 		}	
 		else if(processors == 2){
 			
 			int pid = fork();
 			if(pid > 0){
-				driver(distCalculator, seqDB, 0, (numSeqs/sqrt(2)), distFile + "tempa", cutoff);	
+				driver(distCalculator, seqDB, 0, (numSeqs/sqrt(2)), distFile + "tempa", phylipFile + "tempPhylipA", cutoff);	
 				appendFiles((distFile+"tempa"), distFile);
-				remove((distFile + "tempa").c_str());	
+				remove((distFile + "tempa").c_str());
+				appendFiles((phylipFile + "tempPhylipA"), phylipFile);
+				remove((phylipFile + "tempPhylipA").c_str());
 			}
 			else{
-				driver(distCalculator, seqDB, (numSeqs/sqrt(2)), numSeqs, distFile + "tempb", cutoff);	
+				driver(distCalculator, seqDB, (numSeqs/sqrt(2)), numSeqs, distFile + "tempb", phylipFile + "tempPhylipB", cutoff);	
 				appendFiles((distFile+"tempb"), distFile);
-				remove((distFile + "tempb").c_str());	
+				remove((distFile + "tempb").c_str());
+				appendFiles((phylipFile + "tempPhylipB"), phylipFile);
+				remove((phylipFile + "tempPhylipB").c_str());	
 			}
 			wait(NULL);
 			
@@ -113,21 +126,27 @@ int DistanceCommand::execute(){
 			if(pid1 > 0){
 				int pid2 = fork();
 				if(pid2 > 0){
-					driver(distCalculator, seqDB, 0, sqrt(3) * numSeqs / 3, distFile + "tempa", cutoff);
+					driver(distCalculator, seqDB, 0, sqrt(3) * numSeqs / 3, distFile + "tempa", phylipFile + "tempPhylipA", cutoff);
 					appendFiles(distFile+"tempa", distFile);
-					remove((distFile + "tempa").c_str());	
+					appendFiles((phylipFile + "tempPhylipA"), phylipFile);
+					remove((distFile + "tempa").c_str());
+					remove((phylipFile + "tempPhylipA").c_str());	
 				}
 				else{
-					driver(distCalculator, seqDB, sqrt(3) * numSeqs / 3, sqrt(6) * numSeqs / 3, distFile + "tempb", cutoff);	
+					driver(distCalculator, seqDB, sqrt(3) * numSeqs / 3, sqrt(6) * numSeqs / 3, distFile + "tempb", phylipFile + "tempPhylipB", cutoff);	
 					appendFiles(distFile+"tempb", distFile);
-					remove((distFile + "tempb").c_str());				
+					appendFiles((phylipFile + "tempPhylipB"), phylipFile);
+					remove((distFile + "tempb").c_str());	
+					remove((phylipFile + "tempPhylipB").c_str());			
 				}
 				wait(NULL);
 			}
 			else{
-				driver(distCalculator, seqDB, sqrt(6) * numSeqs / 3, numSeqs, distFile + "tempc", cutoff);	
+				driver(distCalculator, seqDB, sqrt(6) * numSeqs / 3, numSeqs, distFile + "tempc", phylipFile + "tempPhylipC", cutoff);	
 				appendFiles(distFile+"tempc", distFile);
-				remove((distFile + "tempc").c_str());			
+				appendFiles((phylipFile + "tempPhylipC"), phylipFile);
+				remove((distFile + "tempc").c_str());	
+				remove((phylipFile + "tempPhylipC").c_str());		
 			}
 			wait(NULL);
 		}
@@ -136,28 +155,37 @@ int DistanceCommand::execute(){
 			if(pid1 > 0){
 				int pid2 = fork();
 				if(pid2 > 0){
-					driver(distCalculator, seqDB, 0, numSeqs / 2, distFile + "tempa", cutoff);	
+					driver(distCalculator, seqDB, 0, numSeqs / 2, distFile + "tempa", phylipFile + "tempPhylipA", cutoff);	
 					appendFiles(distFile+"tempa", distFile);
-					remove((distFile + "tempa").c_str());			
+					appendFiles((phylipFile + "tempPhylipA"), phylipFile);
+					remove((distFile + "tempa").c_str());
+					remove((phylipFile + "tempPhylipA").c_str());			
 				}
 				else{
-					driver(distCalculator, seqDB, numSeqs / 2, (numSeqs/sqrt(2)), distFile + "tempb", cutoff);	
+					driver(distCalculator, seqDB, numSeqs / 2, (numSeqs/sqrt(2)), distFile + "tempb", phylipFile + "tempPhylipB", cutoff);	
 					appendFiles(distFile+"tempb", distFile);
-					remove((distFile + "tempb").c_str());				
+					appendFiles((phylipFile + "tempPhylipB"), phylipFile);
+					remove((distFile + "tempb").c_str());
+					remove((phylipFile + "tempPhylipB").c_str());				
 				}
 				wait(NULL);
 			}
 			else{
 				int pid3 = fork();
 				if(pid3 > 0){
-					driver(distCalculator, seqDB, (numSeqs/sqrt(2)), (sqrt(3) * numSeqs / 2), distFile + "tempc", cutoff);	
+					driver(distCalculator, seqDB, (numSeqs/sqrt(2)), (sqrt(3) * numSeqs / 2), distFile + "tempc", phylipFile + "tempPhylipC", cutoff);	
 					appendFiles(distFile+"tempc", distFile);
-					remove((distFile + "tempc").c_str());				
+					appendFiles((phylipFile + "tempPhylipC"), phylipFile);
+					remove((distFile + "tempc").c_str());
+					remove((phylipFile + "tempPhylipC").c_str());	
+								
 				}
 				else{
-					driver(distCalculator, seqDB, (sqrt(3) * numSeqs / 2), numSeqs, distFile + "tempd", cutoff);	
+					driver(distCalculator, seqDB, (sqrt(3) * numSeqs / 2), numSeqs, distFile + "tempd", phylipFile + "tempPhylipD", cutoff);	
 					appendFiles(distFile+"tempd", distFile);
-					remove((distFile + "tempd").c_str());				
+					appendFiles((phylipFile + "tempPhylipD"), phylipFile);
+					remove((distFile + "tempd").c_str());	
+					remove((phylipFile + "tempPhylipD").c_str());			
 				}
 				wait(NULL);
 			}
@@ -166,20 +194,27 @@ int DistanceCommand::execute(){
 		wait(NULL);
 #elif (linux) || (__linux)
 		if(processors == 1){
-			driver(distCalculator, seqDB, 0, numSeqs, distFile, cutoff);	
+			driver(distCalculator, seqDB, 0, numSeqs, distFile, phylipFile + "tempPhylipA", cutoff);
+			appendFiles((phylipFile + "tempPhylipA"), phylipFile);	
+			remove((phylipFile + "tempPhylipA").c_str());	
 		}	
 		else if(processors == 2){
 			
 			int pid = fork();
 			if(pid > 0){
-				driver(distCalculator, seqDB, 0, (numSeqs/sqrt(2)), distFile + "tempa", cutoff);	
+				driver(distCalculator, seqDB, 0, (numSeqs/sqrt(2)), distFile + "tempa", phylipFile + "tempPhylipA", cutoff);	
 				appendFiles((distFile+"tempa"), distFile);
+				appendFiles((phylipFile + "tempPhylipA"), phylipFile);
 				remove((distFile + "tempa").c_str());	
+				remove((phylipFile + "tempPhylipA").c_str());
+
 			}
 			else{
-				driver(distCalculator, seqDB, (numSeqs/sqrt(2)), numSeqs, distFile + "tempb", cutoff);	
+				driver(distCalculator, seqDB, (numSeqs/sqrt(2)), numSeqs, distFile + "tempb", phylipFile + "tempPhylipB", cutoff);	
 				appendFiles((distFile+"tempb"), distFile);
-				remove((distFile + "tempb").c_str());	
+				appendFiles((phylipFile + "tempPhylipB"), phylipFile);
+				remove((distFile + "tempb").c_str());
+				remove((phylipFile + "tempPhylipB").c_str());	
 			}
 			wait();
 			
@@ -189,21 +224,28 @@ int DistanceCommand::execute(){
 			if(pid1 > 0){
 				int pid2 = fork();
 				if(pid2 > 0){
-					driver(distCalculator, seqDB, 0, sqrt(3) * numSeqs / 3, distFile + "tempa", cutoff);
-					appendFiles(distFile+"tempa", distFile);
+					driver(distCalculator, seqDB, 0, (numSeqs/sqrt(2)), distFile + "tempa", phylipFile + "tempPhylipA", cutoff);	
+					appendFiles((distFile+"tempa"), distFile);
+					appendFiles((phylipFile + "tempPhylipA"), phylipFile);
 					remove((distFile + "tempa").c_str());	
+					remove((phylipFile + "tempPhylipA").c_str());
+
 				}
 				else{
-					driver(distCalculator, seqDB, sqrt(3) * numSeqs / 3, sqrt(6) * numSeqs / 3, distFile + "tempb", cutoff);	
-					appendFiles(distFile+"tempb", distFile);
-					remove((distFile + "tempb").c_str());				
+					driver(distCalculator, seqDB, (numSeqs/sqrt(2)), numSeqs, distFile + "tempb", phylipFile + "tempPhylipB", cutoff);	
+					appendFiles((distFile+"tempb"), distFile);
+					appendFiles((phylipFile + "tempPhylipB"), phylipFile);
+					remove((distFile + "tempb").c_str());
+					remove((phylipFile + "tempPhylipB").c_str());	
 				}
 				wait();
 			}
 			else{
-				driver(distCalculator, seqDB, sqrt(6) * numSeqs / 3, numSeqs, distFile + "tempc", cutoff);	
+				driver(distCalculator, seqDB, sqrt(6) * numSeqs / 3, numSeqs, distFile + "tempc", phylipFile + "tempPhylipC", cutoff);	
 				appendFiles(distFile+"tempc", distFile);
-				remove((distFile + "tempc").c_str());			
+				appendFiles((phylipFile + "tempPhylipC"), phylipFile);
+				remove((distFile + "tempc").c_str());	
+				remove((phylipFile + "tempPhylipC").c_str());				
 			}
 			wait();
 		}
@@ -212,28 +254,36 @@ int DistanceCommand::execute(){
 			if(pid1 > 0){
 				int pid2 = fork();
 				if(pid2 > 0){
-					driver(distCalculator, seqDB, 0, numSeqs / 2, distFile + "tempa", cutoff);	
-					appendFiles(distFile+"tempa", distFile);
-					remove((distFile + "tempa").c_str());			
+					driver(distCalculator, seqDB, 0, (numSeqs/sqrt(2)), distFile + "tempa", phylipFile + "tempPhylipA", cutoff);	
+					appendFiles((distFile+"tempa"), distFile);
+					appendFiles((phylipFile + "tempPhylipA"), phylipFile);
+					remove((distFile + "tempa").c_str());	
+					remove((phylipFile + "tempPhylipA").c_str());
 				}
 				else{
-					driver(distCalculator, seqDB, numSeqs / 2, (numSeqs/sqrt(2)), distFile + "tempb", cutoff);	
-					appendFiles(distFile+"tempb", distFile);
-					remove((distFile + "tempb").c_str());				
+					driver(distCalculator, seqDB, (numSeqs/sqrt(2)), numSeqs, distFile + "tempb", phylipFile + "tempPhylipB", cutoff);	
+					appendFiles((distFile+"tempb"), distFile);
+					appendFiles((phylipFile + "tempPhylipB"), phylipFile);
+					remove((distFile + "tempb").c_str());
+					remove((phylipFile + "tempPhylipB").c_str());	
 				}
 				wait();
 			}
 			else{
 				int pid3 = fork();
 				if(pid3 > 0){
-					driver(distCalculator, seqDB, (numSeqs/sqrt(2)), (sqrt(3) * numSeqs / 2), distFile + "tempc", cutoff);	
+					driver(distCalculator, seqDB, sqrt(6) * numSeqs / 3, numSeqs, distFile + "tempc", phylipFile + "tempPhylipC", cutoff);	
 					appendFiles(distFile+"tempc", distFile);
-					remove((distFile + "tempc").c_str());				
+					appendFiles((phylipFile + "tempPhylipC"), phylipFile);
+					remove((distFile + "tempc").c_str());	
+					remove((phylipFile + "tempPhylipC").c_str());					
 				}
 				else{
-					driver(distCalculator, seqDB, (sqrt(3) * numSeqs / 2), numSeqs, distFile + "tempd", cutoff);	
+					driver(distCalculator, seqDB, (sqrt(3) * numSeqs / 2), numSeqs, distFile + "tempd", phylipFile + "tempPhylipD", cutoff);	
 					appendFiles(distFile+"tempd", distFile);
-					remove((distFile + "tempd").c_str());				
+					appendFiles((phylipFile + "tempPhylipD"), phylipFile);
+					remove((distFile + "tempd").c_str());	
+					remove((phylipFile + "tempPhylipD").c_str());				
 				}
 				wait();
 			}
@@ -242,7 +292,9 @@ int DistanceCommand::execute(){
 		wait();
 		
 #else
-		driver(distCalculator, seqDB, 0, numSeqs, distFile, cutoff);
+		driver(distCalculator, seqDB, 0, numSeqs, distFile, phylipFile + "tempPhylipA", cutoff);
+		appendFiles((phylipFile + "tempPhylipA"), phylipFile);	
+		remove((phylipFile + "tempPhylipA").c_str());
 #endif
 		
 		delete distCalculator;
@@ -262,13 +314,19 @@ int DistanceCommand::execute(){
 
 /**************************************************************************************************/
 /////// need to fix to work with calcs and sequencedb
-int DistanceCommand::driver(Dist* distCalculator, SequenceDB* align, int startLine, int endLine, string dFileName, float cutoff){
+int DistanceCommand::driver(Dist* distCalculator, SequenceDB* align, int startLine, int endLine, string dFileName, string pFilename, float cutoff){
 	try {
 		int startTime = time(NULL);
 		
+		//column file
 		ofstream distFile(dFileName.c_str(), ios::trunc);
 		distFile.setf(ios::fixed, ios::showpoint);
 		distFile << setprecision(4);
+		
+		//column file
+		ofstream philFile(pFilename.c_str(), ios::trunc);
+		philFile.setf(ios::fixed, ios::showpoint);
+		philFile << setprecision(4);
 		
 		for(int i=startLine;i<endLine;i++){
 			
@@ -279,14 +337,20 @@ int DistanceCommand::driver(Dist* distCalculator, SequenceDB* align, int startLi
 				if(dist <= cutoff){
 					distFile << align->get(i)->getName() << ' ' << align->get(j)->getName() << ' ' << dist << endl;
 				}
-				
+				philFile << dist << '\t';
 			}
+			
+			philFile << endl;
+			
 			if(i % 100 == 0){
 				cout << i << '\t' << time(NULL) - startTime << endl;
 			}
 			
 		}
 		cout << endLine-1 << '\t' << time(NULL) - startTime << endl;
+		
+		//philFile.close();
+		//distFile.close();
 		
 		return 1;
 	}
