@@ -164,6 +164,11 @@ int SummarySharedCommand::execute(){
 			outputFileHandle.close();  remove(outputFileName.c_str());
 			if (mult == true) {  outAll.close();  remove(outAllFileName.c_str());  }
 			return 0;
+		//if you only have 2 groups you don't need a .sharedmultiple file
+		}else if ((lookup.size() == 2) && (mult == true)) { 
+			mult = false;
+			outAll.close();  
+			remove(outAllFileName.c_str());
 		}
 					
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.

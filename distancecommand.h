@@ -29,7 +29,7 @@ private:
 	ValidCalculators* validCalculator;
 	Dist* distCalculator;
 	SequenceDB* seqDB;
-	ofstream out;
+	ofstream out, phylipOut;
 	ifstream in;
 	string outputFileName;
 	string countends;
@@ -37,7 +37,7 @@ private:
 	float cutoff;
 	
 	void appendFiles(string, string);
-	int driver(Dist*, SequenceDB*, int, int, string, float);
+	int driver(Dist*, SequenceDB*, int, int, string, string, float);
 
 };
 

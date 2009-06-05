@@ -424,6 +424,8 @@ void GlobalData::clear() {
 
 /******************************************************/
 void GlobalData::reset() {
+	label			=	"";
+	line			=   "";
 	cutoff			=	"10.00";
 	precision		=	"100";
 	iters			=	"1000"; 
