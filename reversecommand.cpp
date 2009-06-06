@@ -19,11 +19,11 @@ ReverseSeqsCommand::ReverseSeqsCommand(){
 		if(globaldata->getFastaFile() == "")		{	cout << "you need to at least enter a fasta file name" << endl;	}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SeqCoordCommand class Function SeqCoordCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the ReverseSeqsCommand class Function ReverseSeqsCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the SeqCoordCommand class function SeqCoordCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the ReverseSeqsCommand class function ReverseSeqsCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
 }
@@ -57,11 +57,11 @@ int ReverseSeqsCommand::execute(){
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the FilterSeqsCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the ReverseSeqsCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the FilterSeqsCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the ReverseSeqsCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 }

@@ -49,6 +49,7 @@ ValidCommands::ValidCommands() {
 		commands["summary.seqs"]		= "summary.seqs";
 		commands["screen.seqs"]			= "screen.seqs";
 		commands["reverse.seqs"]		= "reverse.seqs";
+		commands["trim.seqs"]			= "trim.seqs";
 		commands["quit"]				= "quit"; 
 
 				

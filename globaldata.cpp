@@ -6,7 +6,7 @@
 
 /******************************************************/
 GlobalData* GlobalData::getInstance() {
-	if( _uniqueInstance == 0 ) {
+	if( _uniqueInstance == 0) {
 		_uniqueInstance = new GlobalData();
 	}
 	return _uniqueInstance;
@@ -23,7 +23,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 		reset();
 		
 		//clears out data from previous read
-		if ((commandName == "read.dist") || (commandName == "read.otu") || (commandName == "read.tree")) { 
+		if((commandName == "read.dist") || (commandName == "read.otu") || (commandName == "read.tree")) { 
 			clear();
 			gGroupmap = NULL;
 			gListVector = NULL;
@@ -35,17 +35,17 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 		}
 		
 		//saves help request
-		if (commandName =="help") {
+		if(commandName =="help") {
 			helpRequest = optionText;
 		}
 		
-		if (commandName == "libshuff") {
+		if(commandName == "libshuff") {
 			iters = "10000";
 			cutoff = "1.0";
 		}
 		
 		//set default value for cutoff
-		if (commandName == "dist.seqs") {	cutoff = "1.0";		}
+		if(commandName == "dist.seqs") {	cutoff = "1.0";		}
 
 		string key, value;		
 		//reads in parameters and values
@@ -54,72 +54,77 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				splitAtComma(value, optionText);
 				splitAtEquals(key, value);
 				
-				if (key == "phylip" )	{ phylipfile = value; inputFileName = value; fileroot = value; format = "phylip";	}
-				if (key == "column" )	{ columnfile = value; inputFileName = value; fileroot = value; format = "column";	}
-				if (key == "list" )		{ listfile = value; inputFileName = value; fileroot = value; format = "list";		}
-				if (key == "rabund" )	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund";	}
-				if (key == "sabund" )	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund";	} 
-				if (key == "fasta" )	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta";		}
-				if (key == "tree" )		{ treefile = value; inputFileName = value; fileroot = value; format = "tree";		}
-				if (key == "shared" )	{ sharedfile = value; inputFileName = value; fileroot = value; format = "sharedfile";	}
-				if (key == "name" )		{ namefile = value;		}
-				if (key == "order" )	{ orderfile = value;	}
-				if (key == "group" )	{ groupfile = value;	}
-				if (key == "cutoff" )		{ cutoff = value;		}
-				if (key == "precision" )	{ precision = value;	}
-				if (key == "iters" )		{ iters = value;		}
-				if (key == "jumble" )		{ jumble = value;		}
-				if (key == "freq" )			{ freq = value;			}
-				if (key == "method" )		{ method = value;		}
-				if (key == "fileroot" )		{ fileroot = value;		}
-				if (key == "abund" )        { abund = value;        }
-				if (key == "random" )		{ randomtree = value;	}
-				if (key == "calc")			{ calc = value;			}
-				if (key == "step")			{ step = value;			}
-				if (key == "form")			{ form = value;			}
-				if (key == "sorted")		{ sorted = value;		}
-				if (key == "vertical")		{ vertical = value;		}
-				if (key == "trump")		    { trump = value;		}
-				if (key == "hard")			{ hard = value;		}
-				if (key == "soft")		    { soft = value;		    }
-				if (key == "scale")			{ scale = value;		}
-				if (key == "countends" )	{ countends = value;	}
-				if (key == "processors" )	{ processors = value;	}
-				if (key == "size" )         { size = value;         }
-				if (key == "candidate")		{ candidatefile = value;	}
-				if (key == "search")		{ search = value;		}
-				if (key == "ksize")			{ ksize = value;		}
-				if (key == "align")		    { align = value;		}
-				if (key == "match")			{ match = value;		}
-				if (key == "mismatch")		{ mismatch = value;	    }
-				if (key == "gapopen")		{ gapopen = value;		}
-				if (key == "gapextend" )	{ gapextend = value;	}
-				if (key == "start" )		{ startPos = value;	}
-				if (key == "end" )			{ endPos = value;	}
-				if (key == "maxambig" )		{ maxAmbig = value;	}
-				if (key == "maxhomop" )		{ maxHomoPolymer = value;	}
-				if (key == "minlength" )	{ minLength = value;	}
-				if (key == "maxlength" )	{ maxLength = value;	}
-				
-				if (key == "line") {//stores lines to be used in a vector
+				if(key == "phylip")	{ phylipfile = value; inputFileName = value; fileroot = value; format = "phylip";		}
+				if(key == "column")	{ columnfile = value; inputFileName = value; fileroot = value; format = "column";		}
+				if(key == "list")	{ listfile = value; inputFileName = value; fileroot = value; format = "list";			}
+				if(key == "rabund")	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund";		}
+				if(key == "sabund")	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund";		} 
+				if(key == "fasta")	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta";			}
+				if(key == "tree")	{ treefile = value; inputFileName = value; fileroot = value; format = "tree";			}
+				if(key == "shared")	{ sharedfile = value; inputFileName = value; fileroot = value; format = "sharedfile";	}
+				if(key == "name")			{	namefile = value;		}
+				if(key == "order")			{	orderfile = value;		}
+				if(key == "group")			{	groupfile = value;		}
+				if(key == "cutoff")			{	cutoff = value;			}
+				if(key == "precision")		{	precision = value;		}
+				if(key == "iters")			{	iters = value;			}
+				if(key == "jumble")			{	jumble = value;			}
+				if(key == "freq")			{	freq = value;			}
+				if(key == "method")			{	method = value;			}
+				if(key == "fileroot")		{	fileroot = value;		}
+				if(key == "abund")			{	abund = value;			}
+				if(key == "random")			{	randomtree = value;		}
+				if(key == "calc")			{	calc = value;			}
+				if(key == "step")			{	step = value;			}
+				if(key == "form")			{	form = value;			}
+				if(key == "sorted")			{	sorted = value;			}
+				if(key == "vertical")		{	vertical = value;		}
+				if(key == "trump")		    {	trump = value;			}
+				if(key == "hard")			{	hard = value;			}
+				if(key == "soft")		    {	soft = value;		    }
+				if(key == "scale")			{	scale = value;			}
+				if(key == "countends")		{	countends = value;		}
+				if(key == "processors")		{	processors = value;		}
+				if(key == "size")			{	size = value;			}
+				if(key == "candidate")		{ 	candidatefile = value;	}
+				if(key == "search")			{	search = value;			}
+				if(key == "ksize")			{	ksize = value;			}
+				if(key == "align")		    {	align = value;			}
+				if(key == "match")			{	match = value;			}
+				if(key == "mismatch")		{	mismatch = value;	    }
+				if(key == "gapopen")		{	gapopen = value;		}
+				if(key == "gapextend")		{	gapextend = value;		}
+				if(key == "start")			{	startPos = value;		}
+				if(key == "end")			{	endPos = value;			}
+				if(key == "maxambig")		{	maxAmbig = value;		}
+				if(key == "maxhomop")		{	maxHomoPolymer = value;	}
+				if(key == "minlength")		{	minLength = value;		}
+				if(key == "maxlength")		{	maxLength = value;		}
+				if(key == "flip"	)		{	flip = value;			}
+				if(key == "oligos"	)		{	oligoFile = value;		}
+				if(key == "forward"	)		{	forMismatch = value;	}
+				if(key == "reverse"	)		{	revMismatch = value;	}
+				if(key == "barcode"	)		{	barMismatch = value;	}
+					
+				if(key == "line") {//stores lines to be used in a vector
 					lines.clear();
 					labels.clear();
 					line = value;
 					label = "";
-					if (line != "all") {  splitAtDash(value, lines);  allLines = 0;  }
+					if(line != "all") {  splitAtDash(value, lines);  allLines = 0;  }
 					else { allLines = 1;  }
 				}
 			
-				if (key == "label") {//stores lines to be used in a vector
+				if(key == "label") {//stores lines to be used in a vector
 					labels.clear();
 					lines.clear();
 					label = value;
 					line = "";
-					if (label != "all") {  splitAtDash(value, labels);  allLines = 0;  }
+					if(label != "all") {  splitAtDash(value, labels);  allLines = 0;  }
 					else { allLines = 1;  }
 				}
 
-				if (key == "groups") {//stores groups to be used in a vector
+				if(key == "groups") {//stores groups to be used in a vector
 					Groups.clear();
 					groups = value;
 					splitAtDash(value, Groups);
@@ -127,76 +132,81 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 
 			}
 			
-			//saves the last parameter
+			//saves the last parameter ==> this seems silly...
 			value = optionText;
 			splitAtEquals(key, value);
-			if (key == "phylip" )	{ phylipfile = value; inputFileName = value; fileroot = value; format = "phylip";	}
-			if (key == "column" )	{ columnfile = value; inputFileName = value; fileroot = value; format = "column";	}
-			if (key == "list" )		{ listfile = value; inputFileName = value; fileroot = value; format = "list";		}
-			if (key == "rabund" )	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund";	}
-			if (key == "sabund" )	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund";	}
-			if (key == "fasta" )	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta";		}
-			if (key == "tree" )		{ treefile = value; inputFileName = value; fileroot = value; format = "tree";		} 
-			if (key == "shared" )	{ sharedfile = value; inputFileName = value; fileroot = value; format = "sharedfile";	}
-			if (key == "name" )		{ namefile = value;		}
-			if (key == "order" )	{ orderfile = value;	}
-			if (key == "group" )	{ groupfile = value;	}
-			if (key == "cutoff" )		{ cutoff = value;		}
-			if (key == "precision" )	{ precision = value;	}
-			if (key == "iters" )		{ iters = value;		}
-			if (key == "jumble" )		{ jumble = value;		}
-			if (key == "freq" )			{ freq = value;			}
-			if (key == "method" )		{ method = value;		}
-			if (key == "fileroot" )		{ fileroot = value;		}
-			if (key == "abund" )        { abund = value;        }
-			if (key == "random" )		{ randomtree = value;	}
-			if (key == "calc")			{ calc = value;			}
-			if (key == "step")			{ step = value;			}
-			if (key == "form")			{ form = value;			}
-			if (key == "sorted")		{ sorted = value;		}
-			if (key == "vertical")		{ vertical = value;		}
-			if (key == "trump")		    { trump = value;		}
-			if (key == "hard")			{ hard = value;		}
-			if (key == "soft")		    { soft = value;		    }
-			if (key == "scale")			{ scale = value;		}
-			if (key == "countends" )	{ countends = value;	}
-			if (key == "processors" )	{ processors = value;	}
-			if (key == "size" )         { size = value;         }
-			if (key == "candidate")		{ candidatefile = value;	}
-			if (key == "search")		{ search = value;		}
-			if (key == "ksize")			{ ksize = value;		}
-			if (key == "align")		    { align = value;		}
-			if (key == "match")			{ match = value;		}
-			if (key == "mismatch")		{ mismatch = value;	    }
-			if (key == "gapopen")		{ gapopen = value;		}
-			if (key == "gapextend" )	{ gapextend = value;	}
-			if (key == "start" )		{ startPos = value;	}
-			if (key == "end" )			{ endPos = value;	}
-			if (key == "maxambig" )		{ maxAmbig = value;	}
-			if (key == "maxhomop" )		{ maxHomoPolymer = value;	}
-			if (key == "minlength" )	{ minLength = value;	}
-			if (key == "maxlength" )	{ maxLength = value;	}
+			if(key == "phylip")	{ phylipfile = value; inputFileName = value; fileroot = value; format = "phylip";		}
+			if(key == "column")	{ columnfile = value; inputFileName = value; fileroot = value; format = "column";		}
+			if(key == "list")	{ listfile = value; inputFileName = value; fileroot = value; format = "list";			}
+			if(key == "rabund")	{ rabundfile = value; inputFileName = value; fileroot = value; format = "rabund";		}
+			if(key == "sabund")	{ sabundfile = value; inputFileName = value; fileroot = value; format = "sabund";		}
+			if(key == "fasta")	{ fastafile = value; inputFileName = value; fileroot = value; format = "fasta";			}
+			if(key == "tree")	{ treefile = value; inputFileName = value; fileroot = value; format = "tree";			}
+			if(key == "shared")	{ sharedfile = value; inputFileName = value; fileroot = value; format = "sharedfile";	}
+			if(key == "name")		{	namefile = value;		}
+			if(key == "order")		{	orderfile = value;		}
+			if(key == "group")		{	groupfile = value;		}
+			if(key == "cutoff")		{	cutoff = value;			}
+			if(key == "precision")	{	precision = value;		}
+			if(key == "iters")		{	iters = value;			}
+			if(key == "jumble")		{	jumble = value;			}
+			if(key == "freq")		{	freq = value;			}
+			if(key == "method")		{	method = value;			}
+			if(key == "fileroot")	{	fileroot = value;		}
+			if(key == "abund")		{	abund = value;			}
+			if(key == "random")		{	randomtree = value;		}
+			if(key == "calc")		{	calc = value;			}
+			if(key == "step")		{	step = value;			}
+			if(key == "form")		{	form = value;			}
+			if(key == "sorted")		{	sorted = value;			}
+			if(key == "vertical")	{	vertical = value;		}
+			if(key == "trump")		{	trump = value;			}
+			if(key == "hard")		{	hard = value;			}
+			if(key == "soft")		{	soft = value;		    }
+			if(key == "scale")		{	scale = value;			}
+			if(key == "countends")	{	countends = value;		}
+			if(key == "processors")	{	processors = value;		}
+			if(key == "size")		{	size = value;			}
+			if(key == "candidate")	{	candidatefile = value;	}
+			if(key == "search")		{	search = value;			}
+			if(key == "ksize")		{	ksize = value;			}
+			if(key == "align")		{	align = value;			}
+			if(key == "match")		{	match = value;			}
+			if(key == "mismatch")	{	mismatch = value;	    }
+			if(key == "gapopen")	{	gapopen = value;		}
+			if(key == "gapextend")	{	gapextend = value;		}
+			if(key == "start")		{	startPos = value;		}
+			if(key == "end")		{	endPos = value;			}
+			if(key == "maxambig")	{	maxAmbig = value;		}
+			if(key == "maxhomop")	{	maxHomoPolymer = value;	}
+			if(key == "minlength")	{	minLength = value;		}
+			if(key == "maxlength")	{	maxLength = value;		}
+			if(key == "flip"	)	{	flip = value;			}
+			if(key == "oligos"	)	{	oligoFile = value;		}
+			if(key == "forward"	)	{	forMismatch = value;	}
+			if(key == "reverse"	)	{	revMismatch = value;	}
+			if(key == "barcode"	)	{	barMismatch = value;	}
+			
 
-
-			if (key == "line") {//stores lines to be used in a vector
+			if(key == "line") {//stores lines to be used in a vector
 				lines.clear();
 				labels.clear();
 				line = value;
 				label = "";
-				if (line != "all") {  splitAtDash(value, lines);  allLines = 0;  }
+				if(line != "all") {  splitAtDash(value, lines);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
-			if (key == "label") {//stores lines to be used in a vector
+			if(key == "label") {//stores lines to be used in a vector
 				labels.clear();
 				lines.clear();
 				label = value;
 				line = "";
-				if (label != "all") {  splitAtDash(value, labels);  allLines = 0;  }
+				if(label != "all") {  splitAtDash(value, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
-			if (key == "groups") {//stores groups to be used in a vector
+			if(key == "groups") {//stores groups to be used in a vector
 					Groups.clear();
 					groups = value;
 					splitAtDash(value, Groups);
@@ -204,57 +214,57 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 		}
 		
 		//set format for shared
-		if ((listfile != "") && (groupfile != "")) { format = "shared"; }
-		if ((phylipfile != "") && (groupfile != "")) { format = "matrix"; }
+		if((listfile != "") && (groupfile != "")) { format = "shared"; }
+		if((phylipfile != "") && (groupfile != "")) { format = "matrix"; }
 				
 		//input defaults for calculators
-		if (commandName == "collect.single") {
+		if(commandName == "collect.single") {
 
-			if ((calc == "default") || (calc == "")) { calc = "sobs-chao-ace-jack-shannon-npshannon-simpson"; }
+			if((calc == "default") || (calc == "")) { calc = "sobs-chao-ace-jack-shannon-npshannon-simpson"; }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
-		if (commandName == "rarefaction.single") {
-			if ((calc == "default") || (calc == "")) { calc = "sobs"; }
+		if(commandName == "rarefaction.single") {
+			if((calc == "default") || (calc == "")) { calc = "sobs"; }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
-		if (commandName == "collect.shared") {
-			if ((calc == "default") || (calc == "")) { calc = "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan"; }
+		if(commandName == "collect.shared") {
+			if((calc == "default") || (calc == "")) { calc = "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan"; }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
-		if (commandName == "summary.single") {
-			if ((calc == "default") || (calc == "")) { calc = "sobs-chao-ace-jack-shannon-npshannon-simpson"; }
+		if(commandName == "summary.single") {
+			if((calc == "default") || (calc == "")) { calc = "sobs-chao-ace-jack-shannon-npshannon-simpson"; }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
-		if (commandName == "summary.shared") {
-			if ((calc == "default") || (calc == "")) { calc = "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan"; }
+		if(commandName == "summary.shared") {
+			if((calc == "default") || (calc == "")) { calc = "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan"; }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
-		if (commandName == "rarefaction.shared") {
-			if ((calc == "default") || (calc == "")) { calc = "sharedobserved"; }
+		if(commandName == "rarefaction.shared") {
+			if((calc == "default") || (calc == "")) { calc = "sharedobserved"; }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
-		if (commandName == "dist.seqs") {
-			if ((calc == "default") || (calc == "")) {  calc = "onegap";	}
-			if (countends == "")	{ countends = "T"; }
+		if(commandName == "dist.seqs") {
+			if((calc == "default") || (calc == "")) {  calc = "onegap";	}
+			if(countends == "")	{ countends = "T"; }
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
-		if (commandName == "venn") {
-			if ((calc == "default") || (calc == "")) { 
-				if (format == "list") { calc = "sobs"; }
+		if(commandName == "venn") {
+			if((calc == "default") || (calc == "")) { 
+				if(format == "list") { calc = "sobs"; }
 				else { calc = "sharedsobs"; }
 			}
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
-		if ((commandName == "tree.shared") || (commandName == "bootstrap.shared") || (commandName == "dist.shared")) {
-			if ((calc == "default") || (calc == "")) { 
+		if((commandName == "tree.shared") || (commandName == "bootstrap.shared") || (commandName == "dist.shared")) {
+			if((calc == "default") || (calc == "")) { 
 				calc = "jclass-thetayc";
 			}
 			Estimators.clear();
@@ -268,11 +278,11 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 
 		}
 
-		//if you have done a read.otu with a groupfile but don't want to use it anymore because you want to do single commands
-		if ((commandName == "collect.single") || (commandName == "rarefaction.single") || (commandName == "summary.single")) {
-			if (listfile != "") { format = "list"; }
-			else if (sabundfile != "") { format = "sabund"; }
-			else if (rabundfile != "") { format = "rabund"; }
+		//ifyou have done a read.otu with a groupfile but don't want to use it anymore because you want to do single commands
+		if((commandName == "collect.single") || (commandName == "rarefaction.single") || (commandName == "summary.single")) {
+			if(listfile != "") { format = "list"; }
+			else if(sabundfile != "") { format = "sabund"; }
+			else if(rabundfile != "") { format = "rabund"; }
 		}
 	}
 	catch(exception& e) {
@@ -288,53 +298,58 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 
 /******************************************************/
 // These functions give you the option parameters of the commands
-string GlobalData::getPhylipFile()		{	return phylipfile;	}
-string GlobalData::getColumnFile()		{	return columnfile;	}
-string GlobalData::getListFile()		{	return listfile;	}
-string GlobalData::getRabundFile()		{	return rabundfile;	}
-string GlobalData::getSabundFile()		{	return sabundfile;	}
-string GlobalData::getNameFile()		{	return namefile;	}
-string GlobalData::getGroupFile()		{	return groupfile;	}
-string GlobalData::getOrderFile()		{	return orderfile;	}
-string GlobalData::getTreeFile()		{	return treefile;	}
-string GlobalData::getSharedFile()		{	return sharedfile;	}
-string GlobalData::getFastaFile()		{	return fastafile;	}
-string GlobalData::getCutOff()			{	return cutoff;		}
-string GlobalData::getFormat()			{	return format;		}
-string GlobalData::getPrecision()		{	return precision;	}
-string GlobalData::getMethod()			{	return method;		}
-string GlobalData::getFileRoot()		{	return fileroot;	}
-string GlobalData::getIters()			{	return iters;		}
-string GlobalData::getJumble()			{	return jumble;		}
-string GlobalData::getFreq()			{	return freq;		}
-string GlobalData::getAbund()           {   return abund;       }
-string GlobalData::getRandomTree()		{	return randomtree;	}
-string GlobalData::getGroups()			{	return groups;		}
-string GlobalData::getStep()			{	return step;		}
-string GlobalData::getForm()			{	return form;		}
-string GlobalData::getSorted()			{	return sorted;		}
-string GlobalData::getVertical()		{   return vertical;    }
-string GlobalData::getTrump()			{   return trump;       }
-string GlobalData::getSoft()			{   return soft;		}
-string GlobalData::getHard()			{   return hard;		}
-string GlobalData::getScale()			{	return scale;		}
-string GlobalData::getCountEnds()		{   return countends;	}
-string GlobalData::getProcessors()		{	return processors;	}
-string GlobalData::getSize()            {   return size;        }
-string GlobalData::getCandidateFile()	{	return candidatefile;}
-string GlobalData::getSearch()			{	return search;		}
-string GlobalData::getKSize()			{	return ksize;		}
-string GlobalData::getAlign()			{	return align;		}
-string GlobalData::getMatch()			{	return match;		}
-string GlobalData::getMismatch()		{	return mismatch;	}
-string GlobalData::getGapopen()			{	return gapopen;		}
-string GlobalData::getGapextend()		{	return gapextend;	}
-string GlobalData::getStartPos()		{	return startPos;	}
-string GlobalData::getEndPos()			{	return endPos;		}
-string GlobalData::getMaxAmbig()		{	return maxAmbig;	}
+string GlobalData::getPhylipFile()		{	return phylipfile;		}
+string GlobalData::getColumnFile()		{	return columnfile;		}
+string GlobalData::getListFile()		{	return listfile;		}
+string GlobalData::getRabundFile()		{	return rabundfile;		}
+string GlobalData::getSabundFile()		{	return sabundfile;		}
+string GlobalData::getNameFile()		{	return namefile;		}
+string GlobalData::getGroupFile()		{	return groupfile;		}
+string GlobalData::getOrderFile()		{	return orderfile;		}
+string GlobalData::getTreeFile()		{	return treefile;		}
+string GlobalData::getSharedFile()		{	return sharedfile;		}
+string GlobalData::getFastaFile()		{	return fastafile;		}	
+string GlobalData::getCutOff()			{	return cutoff;			}
+string GlobalData::getFormat()			{	return format;			}
+string GlobalData::getPrecision()		{	return precision;		}
+string GlobalData::getMethod()			{	return method;			}
+string GlobalData::getFileRoot()		{	return fileroot;		}
+string GlobalData::getIters()			{	return iters;			}
+string GlobalData::getJumble()			{	return jumble;			}
+string GlobalData::getFreq()			{	return freq;			}
+string GlobalData::getAbund()           {   return abund;			}
+string GlobalData::getRandomTree()		{	return randomtree;		}
+string GlobalData::getGroups()			{	return groups;			}
+string GlobalData::getStep()			{	return step;			}
+string GlobalData::getForm()			{	return form;			}
+string GlobalData::getSorted()			{	return sorted;			}
+string GlobalData::getVertical()		{   return vertical;		}
+string GlobalData::getTrump()			{   return trump;			}
+string GlobalData::getSoft()			{   return soft;			}
+string GlobalData::getHard()			{   return hard;			}
+string GlobalData::getScale()			{	return scale;			}
+string GlobalData::getCountEnds()		{   return countends;		}
+string GlobalData::getProcessors()		{	return processors;		}
+string GlobalData::getSize()            {   return size;			}
+string GlobalData::getCandidateFile()	{	return candidatefile;	}
+string GlobalData::getSearch()			{	return search;			}
+string GlobalData::getKSize()			{	return ksize;			}
+string GlobalData::getAlign()			{	return align;			}
+string GlobalData::getMatch()			{	return match;			}
+string GlobalData::getMismatch()		{	return mismatch;		}
+string GlobalData::getGapopen()			{	return gapopen;			}
+string GlobalData::getGapextend()		{	return gapextend;		}
+string GlobalData::getStartPos()		{	return startPos;		}
+string GlobalData::getEndPos()			{	return endPos;			}
+string GlobalData::getMaxAmbig()		{	return maxAmbig;		}
 string GlobalData::getMaxHomoPolymer()	{	return maxHomoPolymer;	}
-string GlobalData::getMinLength()		{	return minLength;	}
-string GlobalData::getMaxLength()		{	return maxLength;	}
+string GlobalData::getMinLength()		{	return minLength;		}
+string GlobalData::getMaxLength()		{	return maxLength;		}
+string GlobalData::getFlip()			{	return flip;			}
+string GlobalData::getOligosFile()		{	return oligoFile;		}
+string GlobalData::getForwardMismatch()	{	return forMismatch;		}
+string GlobalData::getReverseMismatch()	{	return revMismatch;		}
+string GlobalData::getBarcodeMismatch()	{	return barMismatch;		}
 
 
 void GlobalData::setListFile(string file)		{	listfile = file;	inputFileName = file;					}
@@ -417,7 +432,11 @@ void GlobalData::clear() {
 	maxHomoPolymer	=	"-1";
 	minLength		=	"-1";
 	maxLength		=	"-1";
-	
+	flip			=	"0";
+	forMismatch		=	"0";
+	revMismatch		=	"0";
+	barMismatch		=	"0";
+	oligoFile		=	"";
 }
 
 //*******************************************************/
@@ -459,6 +478,11 @@ void GlobalData::reset() {
 	maxHomoPolymer	=	"-1";
 	minLength		=	"-1";
 	maxLength		=	"-1";
+	flip			=	"0";
+	forMismatch		=	"0";
+	revMismatch		=	"0";
+	barMismatch		=	"0";
+	oligoFile		=	"";
 	
 }
 /*******************************************************/
@@ -484,8 +508,8 @@ void GlobalData::parseTreeFile() {
 		int c, comment;
 		comment = 0;
 		
-		//if you are not a nexus file 
-		if ((c = filehandle.peek()) != '#') {  
+		//ifyou are not a nexus file 
+		if((c = filehandle.peek()) != '#') {  
 			while((c = filehandle.peek()) != ';') { 
 				while ((c = filehandle.peek()) != ';') {
 					// get past comments
@@ -501,8 +525,8 @@ void GlobalData::parseTreeFile() {
 
 				readTreeString(filehandle); 
 			}
-		//if you are a nexus file
-		}else if ((c = filehandle.peek()) == '#') {
+		//ifyou are a nexus file
+		}else if((c = filehandle.peek()) == '#') {
 			string holder = "";
 					
 			// get past comments
@@ -515,12 +539,12 @@ void GlobalData::parseTreeFile() {
 				}
 				filehandle >> holder; 
 	
-				//if there is no translate then you must read tree string otherwise use translate to get names
+				//ifthere is no translate then you must read tree string otherwise use translate to get names
 				if(holder == "tree" && comment != 1){	
 					//pass over the "tree rep.6878900 = "
-					while (((c = filehandle.get()) != '(') && ((c = filehandle.peek()) != EOF) ) {;}
+					while (((c = filehandle.get()) != '(') && ((c = filehandle.peek()) != EOF)) {;}
 
-					if (c == EOF ) { break; }
+					if(c == EOF) { break; }
 					filehandle.putback(c);  //put back first ( of tree.
 					readTreeString(filehandle);	
 					break;
@@ -528,7 +552,7 @@ void GlobalData::parseTreeFile() {
 			}
 			
 			//use nexus translation rather than parsing tree to save time
-			if ((holder == "translate") || (holder == "Translate")) {
+			if((holder == "translate") || (holder == "Translate")) {
 
 				string number, name, h;
 				h = ""; // so it enters the loop the first time
@@ -541,7 +565,7 @@ void GlobalData::parseTreeFile() {
 					name.erase(name.end()-1);  //erase the comma
 					Treenames.push_back(number);
 				}
-				if (number == ";") { Treenames.pop_back(); }  //in case ';' from translation is on next line instead of next to last name
+				if(number == ";") { Treenames.pop_back(); }  //in case ';' from translation is on next line instead of next to last name
 			}
 		}
 		
@@ -564,8 +588,8 @@ void GlobalData::readTreeString(ifstream& filehandle)	{
 		string name; //k
 		
 		while((c = filehandle.peek()) != ';') { 
-				//if you are a name
-			if ((c != '(') && (c != ')') && (c != ',') && (c != ':') && (c != '\n') && (c != '\t') && (c != 32)) { //32 is space
+				//ifyou are a name
+			if((c != '(') && (c != ')') && (c != ',') && (c != ':') && (c != '\n') && (c != '\t') && (c != 32)) { //32 is space
 				name = "";
 				c = filehandle.get();
 	//		k = c;
@@ -584,7 +608,7 @@ void GlobalData::readTreeString(ifstream& filehandle)	{
 //cout << " after putback" <<  k << endl;
 			} 
 			
-			if (c  == ':') { //read until you reach the end of the branch length
+			if(c  == ':') { //read until you reach the end of the branch length
 				while ((c != '(') && (c != ')') && (c != ',') && (c != ';') && (c != '\n') && (c != '\t') && (c != 32)) {
 					c = filehandle.get();
 				//	k = c;
@@ -593,7 +617,7 @@ void GlobalData::readTreeString(ifstream& filehandle)	{
 				filehandle.putback(c);
 			}
 			c = filehandle.get();
-			if (c == ';') { break; }
+			if(c == ';') { break; }
 		//	k = c;
 //cout << k << endl;
 
