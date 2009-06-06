@@ -91,7 +91,12 @@ public:
 	string getMaxHomoPolymer();
 	string getMinLength();
 	string getMaxLength();
-
+	string getFlip();
+	string getForwardMismatch();
+	string getReverseMismatch();
+	string getBarcodeMismatch();
+	string getOligosFile();
+	
 	void setListFile(string);
 	void setGroupFile(string file);	
 	void setPhylipFile(string);
@@ -121,7 +126,7 @@ public:
 		
 private:
 
-	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, treefile, sharedfile, line, label, randomtree, groups, cutoff, format, precision, method, fileroot, iters, jumble, freq, calc, abund, step, form, sorted, trump, soft, hard, scale, countends, processors, candidatefile, search, ksize, align, match, size, mismatch, gapopen, gapextend, minLength, maxLength, startPos, endPos, maxAmbig, maxHomoPolymer;
+	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, fastafile, treefile, sharedfile, line, label, randomtree, groups, cutoff, format, precision, method, fileroot, iters, jumble, freq, calc, abund, step, form, sorted, trump, soft, hard, scale, countends, processors, candidatefile, search, ksize, align, match, size, mismatch, gapopen, gapextend, minLength, maxLength, startPos, endPos, maxAmbig, maxHomoPolymer, flip, forMismatch, revMismatch, barMismatch, oligoFile;
 
 
 	static GlobalData* _uniqueInstance;

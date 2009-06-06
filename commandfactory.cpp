@@ -48,6 +48,7 @@
 #include "seqsummarycommand.h"
 #include "screenseqscommand.h"
 #include "reversecommand.h"
+#include "trimseqscommand.h"
 
 /***********************************************************/
 
@@ -106,6 +107,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "summary.seqs")			{	command = new SeqSummaryCommand();			}
 		else if(commandName == "screen.seqs")			{	command = new ScreenSeqsCommand();			}
 		else if(commandName == "reverse.seqs")			{	command = new ReverseSeqsCommand();			}
+		else if(commandName == "trim.seqs")				{	command = new TrimSeqsCommand();			}
 		else											{	command = new NoCommand();					}
 
 		return command;

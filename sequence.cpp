@@ -30,12 +30,14 @@ Sequence::Sequence(string newName, string sequence) {
 //********************************************************************************************************************
 
 Sequence::Sequence(ifstream& fastaFile){
-	initialize();
-	
-	string accession;				//	provided a file handle to a fasta-formatted sequence file, read in the next
-	fastaFile >> accession;			//	accession number and sequence we find...
-	setName(accession);
 
+	initialize();
+	fastaFile >> name;
+	name = name.substr(1);
+	char c;
+	
+	while ((c = fastaFile.get()) != EOF)	{	if (c == 10){	break;	}	} // get rest of line if there's any crap there
+	
 	char letter;
 	string sequence;
 	
@@ -50,7 +52,6 @@ Sequence::Sequence(ifstream& fastaFile){
 			if(letter == 'U'){letter = 'T';}
 			sequence += letter;
 		}
-		
 	}
 
 	if(sequence.find_first_of('-') != string::npos){	//	if there are any gaps in the sequence, assume that it is

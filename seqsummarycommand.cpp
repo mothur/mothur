@@ -18,11 +18,11 @@ SeqSummaryCommand::SeqSummaryCommand(){
 		if(globaldata->getFastaFile() == "")		{	cout << "you need to at least enter a fasta file name" << endl;	}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SeqCoordCommand class Function SeqCoordCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the SeqSummaryCommand class Function SeqSummaryCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the SeqCoordCommand class function SeqCoordCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the SeqSummaryCommand class function SeqSummaryCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
 }
@@ -97,11 +97,11 @@ int SeqSummaryCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the FilterSeqsCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the SeqSummaryCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the FilterSeqsCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the SeqSummaryCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	
