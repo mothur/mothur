@@ -142,6 +142,7 @@
 		37D9289F0F21331F001D4494 /* validparameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D928530F21331F001D4494 /* validparameter.cpp */; };
 		37E5F3E30F29FD4200F8D827 /* treenode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37E5F3E20F29FD4200F8D827 /* treenode.cpp */; };
 		37E5F4920F2A3DA800F8D827 /* readtreecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37E5F4910F2A3DA800F8D827 /* readtreecommand.cpp */; };
+		7E09C5140FDA79C5002ECAE5 /* reversecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E09C5130FDA79C5002ECAE5 /* reversecommand.cpp */; };
 		7E412F490F8D21B600381DD0 /* slibshuff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E412F480F8D21B600381DD0 /* slibshuff.cpp */; };
 		7E412FEA0F8D3E2C00381DD0 /* libshuff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E412FE90F8D3E2C00381DD0 /* libshuff.cpp */; };
 		7E4130F80F8E58FA00381DD0 /* dlibshuff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E4130F60F8E58FA00381DD0 /* dlibshuff.cpp */; };
@@ -461,6 +462,8 @@
 		37E5F3E20F29FD4200F8D827 /* treenode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = treenode.cpp; sourceTree = SOURCE_ROOT; };
 		37E5F4900F2A3DA800F8D827 /* readtreecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readtreecommand.h; sourceTree = SOURCE_ROOT; };
 		37E5F4910F2A3DA800F8D827 /* readtreecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readtreecommand.cpp; sourceTree = SOURCE_ROOT; };
+		7E09C5120FDA79C5002ECAE5 /* reversecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = reversecommand.h; sourceTree = "<group>"; };
+		7E09C5130FDA79C5002ECAE5 /* reversecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = reversecommand.cpp; sourceTree = "<group>"; };
 		7E412F420F8D213C00381DD0 /* libshuff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libshuff.h; sourceTree = SOURCE_ROOT; };
 		7E412F470F8D21B600381DD0 /* slibshuff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = slibshuff.h; sourceTree = SOURCE_ROOT; };
 		7E412F480F8D21B600381DD0 /* slibshuff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = slibshuff.cpp; sourceTree = SOURCE_ROOT; };
@@ -732,6 +735,8 @@
 		37D928A90F2133E5001D4494 /* commands */ = {
 			isa = PBXGroup;
 			children = (
+				7E09C5120FDA79C5002ECAE5 /* reversecommand.h */,
+				7E09C5130FDA79C5002ECAE5 /* reversecommand.cpp */,
 				37D927CD0F21331F001D4494 /* command.hpp */,
 				378DC5CD0FBDE1C8003B8607 /* aligncommand.h */,
 				378DC5CE0FBDE1C8003B8607 /* aligncommand.cpp */,
@@ -1091,6 +1096,7 @@
 				3799A9500FD6A58C00E33EDE /* distancedb.cpp in Sources */,
 				3799A9510FD6A58C00E33EDE /* seqsummarycommand.cpp in Sources */,
 				371B30B40FD7EE67000414CA /* screenseqscommand.cpp in Sources */,
+				7E09C5140FDA79C5002ECAE5 /* reversecommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
