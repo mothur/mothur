@@ -47,7 +47,7 @@
 #include "getrabundcommand.h"
 #include "seqsummarycommand.h"
 #include "screenseqscommand.h"
-
+#include "reversecommand.h"
 
 /***********************************************************/
 
@@ -105,6 +105,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "align.seqs")			{   command = new AlignCommand();				}
 		else if(commandName == "summary.seqs")			{	command = new SeqSummaryCommand();			}
 		else if(commandName == "screen.seqs")			{	command = new ScreenSeqsCommand();			}
+		else if(commandName == "reverse.seqs")			{	command = new ReverseSeqsCommand();			}
 		else											{	command = new NoCommand();					}
 
 		return command;

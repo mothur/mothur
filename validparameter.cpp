@@ -282,6 +282,9 @@ void ValidParameters::initCommandParameters() {
 		string screenseqsArray[] =  {"fasta", "start", "end", "maxambig", "maxhomop", "minlength", "maxlength", "name", "group"};
 		commandParameters["screen.seqs"] = addParameters(screenseqsArray, sizeof(screenseqsArray)/sizeof(string));
 
+		string reverseseqsArray[] =  {"fasta"};
+		commandParameters["reverse.seqs"] = addParameters(reverseseqsArray, sizeof(reverseseqsArray)/sizeof(string));
+
 		string vennArray[] =  {"groups","line","label","calc"};
 		commandParameters["venn"] = addParameters(vennArray, sizeof(vennArray)/sizeof(string));
 		

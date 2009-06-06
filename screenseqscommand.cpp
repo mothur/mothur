@@ -48,8 +48,8 @@ int ScreenSeqsCommand::execute(){
 		
 		set<string> badSeqNames;
 		
-		string goodSeqFile = getRootName(globaldata->inputFileName) + "good" + getExtension(globaldata->inputFileName);
-		string badSeqFile = getRootName(globaldata->inputFileName) + "bad" + getExtension(globaldata->inputFileName);
+		string goodSeqFile = getRootName(globaldata->getFastaFile()) + "good" + getExtension(globaldata->getFastaFile());
+		string badSeqFile = getRootName(globaldata->getFastaFile()) + "bad" + getExtension(globaldata->getFastaFile());
 		
 		ofstream goodSeqOut;	openOutputFile(goodSeqFile, goodSeqOut);
 		ofstream badSeqOut;		openOutputFile(badSeqFile, badSeqOut);		
@@ -73,6 +73,12 @@ int ScreenSeqsCommand::execute(){
 			}
 			gobble(inFASTA);
 		}	
+		if(globaldata->getNameFile() != ""){
+			screenNameGroupFile(badSeqNames);
+		}
+		else if(globaldata->getGroupFile() != ""){
+			screenGroupFile(badSeqNames);
+		}
 		
 		return 0;
 	}
