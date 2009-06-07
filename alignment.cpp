@@ -41,7 +41,7 @@ void Alignment::traceBack(){			//	This traceback routine is used by the dynamic 
 	
 	AlignmentCell currentCell = alignment[row][column];	//	Start the traceback from the bottom-right corner of the
 														//	matrix
-	
+
 	if(currentCell.prevCell == 'x'){	seqAaln = seqBaln = "NOALIGNMENT";		}//If there's an 'x' in the bottom-
 	else{												//	right corner bail out because it means nothing got aligned
 		while(currentCell.prevCell != 'x'){				//	while the previous cell isn't an 'x', keep going...

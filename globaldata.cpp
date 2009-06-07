@@ -102,9 +102,6 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 				if(key == "maxlength")		{	maxLength = value;		}
 				if(key == "flip"	)		{	flip = value;			}
 				if(key == "oligos"	)		{	oligoFile = value;		}
-				if(key == "forward"	)		{	forMismatch = value;	}
-				if(key == "reverse"	)		{	revMismatch = value;	}
-				if(key == "barcode"	)		{	barMismatch = value;	}
 					
 				if(key == "line") {//stores lines to be used in a vector
 					lines.clear();
@@ -183,9 +180,6 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			if(key == "maxlength")	{	maxLength = value;		}
 			if(key == "flip"	)	{	flip = value;			}
 			if(key == "oligos"	)	{	oligoFile = value;		}
-			if(key == "forward"	)	{	forMismatch = value;	}
-			if(key == "reverse"	)	{	revMismatch = value;	}
-			if(key == "barcode"	)	{	barMismatch = value;	}
 			
 
 			if(key == "line") {//stores lines to be used in a vector
@@ -347,9 +341,6 @@ string GlobalData::getMinLength()		{	return minLength;		}
 string GlobalData::getMaxLength()		{	return maxLength;		}
 string GlobalData::getFlip()			{	return flip;			}
 string GlobalData::getOligosFile()		{	return oligoFile;		}
-string GlobalData::getForwardMismatch()	{	return forMismatch;		}
-string GlobalData::getReverseMismatch()	{	return revMismatch;		}
-string GlobalData::getBarcodeMismatch()	{	return barMismatch;		}
 
 
 void GlobalData::setListFile(string file)		{	listfile = file;	inputFileName = file;					}
@@ -433,9 +424,6 @@ void GlobalData::clear() {
 	minLength		=	"-1";
 	maxLength		=	"-1";
 	flip			=	"0";
-	forMismatch		=	"0";
-	revMismatch		=	"0";
-	barMismatch		=	"0";
 	oligoFile		=	"";
 }
 
@@ -479,9 +467,6 @@ void GlobalData::reset() {
 	minLength		=	"-1";
 	maxLength		=	"-1";
 	flip			=	"0";
-	forMismatch		=	"0";
-	revMismatch		=	"0";
-	barMismatch		=	"0";
 	oligoFile		=	"";
 	
 }

@@ -13,6 +13,7 @@
 #include "mothur.h"
 #include "command.hpp"
 #include "globaldata.hpp"
+#include "sequence.hpp"
 
 class TrimSeqsCommand : public Command {
 public:
@@ -27,18 +28,15 @@ private:
 	bool stripReverse(Sequence&);
 	
 	GlobalData* globaldata;
-	
-	int totalBarcodeCount, matchBarcodeCount;
-	int totalFPrimerCount, matchFPrimerCount;
-	int totalRPrimerCount, matchRPrimerCount;
-	
+
+	int totalBarcodeCount, matchBarcodeCount; // to be removed
+	int totalFPrimerCount, matchFPrimerCount; // to be removed
+	int totalRPrimerCount, matchRPrimerCount; // to be removed
 	
 	bool oligos, flip;
-	int forwardPrimerMismatch, reversePrimerMismatch, barcodeMismatch;
 	int numFPrimers, numRPrimers;
 	vector<string> forPrimer, revPrimer;
 	map<string, string> barcodes;
-
 };
 
 #endif

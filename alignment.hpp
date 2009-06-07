@@ -25,7 +25,7 @@ public:
 	Alignment();
 	virtual void align(string, string) = 0;
 	
-	float getAlignmentScore();
+//	float getAlignmentScore();
 	string getSeqAAln();
 	string getSeqBAln();
 	int getCandidateStartPos();
