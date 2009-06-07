@@ -7,7 +7,6 @@
  *
  */
 
-#include "sequence.hpp"
 #include "trimseqscommand.h"
 
 //***************************************************************************************************************
@@ -15,11 +14,7 @@
 TrimSeqsCommand::TrimSeqsCommand(){
 	try {
 		
-		oligos = 0;
-		forwardPrimerMismatch = 0;
-		reversePrimerMismatch = 0;
-		barcodeMismatch = 0;
-		
+		oligos = 0;		
 		totalBarcodeCount = 0;
 		matchBarcodeCount = 0;
 		
@@ -28,18 +23,10 @@ TrimSeqsCommand::TrimSeqsCommand(){
 			cout << "you need to at least enter a fasta file name" << endl;
 		}
 		
-		if(isTrue(globaldata->getFlip()))	{	flip = 1;	}
-		
-		if(globaldata->getOligosFile() != ""){
-			oligos = 1;
-			forwardPrimerMismatch = atoi(globaldata->getForwardMismatch().c_str());
-			reversePrimerMismatch = atoi(globaldata->getReverseMismatch().c_str());
-			barcodeMismatch = atoi(globaldata->getBarcodeMismatch().c_str());
-		}
-		
-		if(!flip && !oligos)	{	cout << "what was the point?" << endl;							}
+		if(isTrue(globaldata->getFlip()))		{	flip = 1;				}
+		if(globaldata->getOligosFile() != "")	{	oligos = 1;				}
+		if(!flip && !oligos)					{	cout << "huh?" << endl;	}
 
-		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the TrimSeqsCommand class Function TrimSeqsCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -80,6 +67,7 @@ int TrimSeqsCommand::execute(){
 		
 		while(!inFASTA.eof()){
 			Sequence currSeq(inFASTA);
+			string origSeq = currSeq.getUnaligned();
 			string group;
 			string trashCode = "";
 
@@ -103,6 +91,7 @@ int TrimSeqsCommand::execute(){
 			}
 			else{
 				currSeq.setName(currSeq.getName() + '|' + trashCode);
+				currSeq.setUnaligned(origSeq);
 				currSeq.printSequence(scrapFASTA);
 			}
 			
@@ -210,8 +199,8 @@ bool TrimSeqsCommand::stripForward(Sequence& seq){
 			success = 1;
 			break;
 		}
-		
 	}
+	
 	totalFPrimerCount++;
 	return success;
 	
@@ -238,8 +227,8 @@ bool TrimSeqsCommand::stripReverse(Sequence& seq){
 			success = 1;
 			break;
 		}
-		
-	}
+	}	
+	
 	totalRPrimerCount++;
 	return success;
 	

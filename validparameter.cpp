@@ -285,7 +285,7 @@ void ValidParameters::initCommandParameters() {
 		string reverseseqsArray[] =  {"fasta"};
 		commandParameters["reverse.seqs"] = addParameters(reverseseqsArray, sizeof(reverseseqsArray)/sizeof(string));
 
-		string trimseqsArray[] =  {"fasta", "flip", "oligos", "forward", "reverse", "barcode"};
+		string trimseqsArray[] =  {"fasta", "flip", "oligos"};
 		commandParameters["trim.seqs"] = addParameters(trimseqsArray, sizeof(trimseqsArray)/sizeof(string));
 
 		string vennArray[] =  {"groups","line","label","calc"};
