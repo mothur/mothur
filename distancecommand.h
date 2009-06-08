@@ -17,6 +17,11 @@
 #include "dist.h"
 #include "sequencedb.h"
 
+struct linePair {
+	int start;
+	int end;
+};
+
 class DistanceCommand : public Command {
 
 public:
@@ -32,11 +37,15 @@ private:
 	ofstream out, phylipOut;
 	ifstream in;
 	string outputFileName;
-	string countends;
+	string countends, phylip;
 	int processors;
 	float cutoff;
+	map<int, int> processIDS;   //end line, processid
+	map<int, int>::iterator it;
+	vector<linePair*> lines;
 	
 	void appendFiles(string, string);
+	void createProcesses(string, string);
 	int driver(Dist*, SequenceDB*, int, int, string, string, float);
 
 };

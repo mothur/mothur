@@ -44,8 +44,8 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			cutoff = "1.0";
 		}
 		
-		//set default value for cutoff
-		if(commandName == "dist.seqs") {	cutoff = "1.0";		}
+		//set default value for cutoff and phylip
+		if (commandName == "dist.seqs") {	cutoff = "1.0";	  phylipfile = "F";	}
 
 		string key, value;		
 		//reads in parameters and values
@@ -208,9 +208,12 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 		}
 		
 		//set format for shared
-		if((listfile != "") && (groupfile != "")) { format = "shared"; }
-		if((phylipfile != "") && (groupfile != "")) { format = "matrix"; }
-				
+		if ((listfile != "") && (groupfile != "")) { format = "shared"; }
+		if ((phylipfile != "") && (groupfile != "")) { format = "matrix"; }
+		
+		//set default value for cutoff
+		if (commandName == "dist.seqs") {	format = "fasta";  inputFileName = fastafile;  fileroot = fastafile;	}
+						
 		//input defaults for calculators
 		if(commandName == "collect.single") {
 
