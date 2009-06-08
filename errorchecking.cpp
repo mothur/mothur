@@ -270,9 +270,9 @@ bool ErrorCheck::checkInput(string input) {
 			}
 		}
 		
-		if ((commandName == "heatmap") || (commandName == "venn")) { 
+		if ((commandName == "heatmap.bin") || (commandName == "venn") || (commandName == "heatmap.sim")) { 
 			if ((globaldata->getListFile() == "") && (globaldata->getSharedFile() == "")) {
-				 cout << "You must read a list, or a list and a group, or a shared before you can use the heatmap or venn commands." << endl; return false; 
+				 cout << "You must read a list, or a list and a group, or a shared before you can use the heatmap.bin, heatmap.sim or venn commands." << endl; return false; 
 			}
 		}
 		

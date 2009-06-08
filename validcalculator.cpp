@@ -24,6 +24,7 @@ ValidCalculators::ValidCalculators() {
 		 initialBoot();
 		 initialDistance();
 		 initialMatrix();
+		 initialHeat();
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function ValidCalculator. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -154,6 +155,17 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 			}else { 
 				cout << calculator << " is not a valid estimator for the matrix.output command and will be disregarded. Valid estimators are ";
 				for (it = matrix.begin(); it != matrix.end(); it++) {
+					cout << it->first << ", ";
+				}
+				cout << endl;
+				return false; }
+		}else if (parameter == "heat") {
+			//is it valid
+			if ((heat.find(calculator)) != (heat.end())) {
+				return true;
+			}else { 
+				cout << calculator << " is not a valid estimator for the heatmap.sim command and will be disregarded. Valid estimators are ";
+				for (it = heat.begin(); it != heat.end(); it++) {
 					cout << it->first << ", ";
 				}
 				cout << endl;
@@ -442,6 +454,30 @@ void ValidCalculators::initialTreeGroups() {
 		exit(1);
 	}	
 }
+/********************************************************************/
+void ValidCalculators::initialHeat() {
+	try {	
+		heat["jabund"]				= "jabund";
+		heat["sorabund"]			= "sorabund";
+		heat["jclass"]				= "jclass";
+		heat["sorclass"]			= "sorclass";
+		heat["jest"]				= "jest";
+		heat["sorest"]				= "sorest";
+		heat["thetayc"]				= "thetayc";
+		heat["thetan"]				= "thetan";
+		heat["morisitahorn"]		= "morisitahorn";
+		heat["braycurtis"]			= "braycurtis";
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialHeat. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ValidCalculator class function initialHeat. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
 /********************************************************************/
 void ValidCalculators::initialMatrix() {
 	try {	

@@ -227,19 +227,19 @@ int HelpCommand::execute(){
 		cout << "The default value for groups is all the groups in your groupfile, iters is 10000, cutoff is 1.0, form is integral and step is 0.01." << "\n";
 		cout << "The libshuff command output two files: .coverage and .slsummary their descriptions are in the manual." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. iters), '=' and parameters (i.e.yourIters)." << "\n" << "\n";
-	}else if (globaldata->helpRequest == "heatmap") { 
-		cout << "The heatmap command can only be executed after a successful read.otu command." << "\n";
-		cout << "The heatmap command parameters are groups, sorted, scale, line and label.  No parameters are required, but you may not use line and label at the same time." << "\n";
+	}else if (globaldata->helpRequest == "heatmap.bin") { 
+		cout << "The heatmap.bin command can only be executed after a successful read.otu command." << "\n";
+		cout << "The heatmap.bin command parameters are groups, sorted, scale, line and label.  No parameters are required, but you may not use line and label at the same time." << "\n";
 		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like included in your heatmap." << "\n";
 		cout << "The sorted parameter allows you to choose to see the file with the shared otus at the top or the otus in the order they appear in your input file. " << "\n";
 		cout << "The scale parameter allows you to choose the range of color your bin information will be displayed with." << "\n";
 		cout << "The group names are separated by dashes. The line and label allow you to select what distance levels you would like a heatmap created for, and are also separated by dashes." << "\n";
-		cout << "The heatmap command should be in the following format: heatmap(groups=yourGroups, sorted=yourSorted, line=yourLines, label=yourLabels)." << "\n";
-		cout << "Example heatmap(groups=A-B-C, line=1-3-5, sorted=F, scale=log10)." << "\n";
+		cout << "The heatmap.bin command should be in the following format: heatmap.bin(groups=yourGroups, sorted=yourSorted, line=yourLines, label=yourLabels)." << "\n";
+		cout << "Example heatmap.bin(groups=A-B-C, line=1-3-5, sorted=F, scale=log10)." << "\n";
 		cout << "The default value for groups is all the groups in your groupfile, and all lines in your inputfile will be used." << "\n";
 		cout << "The default value for sorted is T meaning you want the shared otus on top, you may change it to F meaning the exact representation of your input file." << "\n";
 		cout << "The default value for scale is log10; your other options are log2 and linear." << "\n";
-		cout << "The heatmap command outputs a .svg file for each line or label you specify." << "\n";
+		cout << "The heatmap.bin command outputs a .svg file for each line or label you specify." << "\n";
 		cout << "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups)." << "\n" << "\n";
 	}else if (globaldata->helpRequest == "venn") { 
 		cout << "The venn command can only be executed after a successful read.otu command." << "\n";

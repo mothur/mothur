@@ -43,7 +43,7 @@ void ReadOTUFile::read(GlobalData* globaldata){
 			sabund = inputSabund->getSAbundVector(); 
 			globaldata->sabund = sabund; //saving to be used by summary command.
 			rabund = inputRabund->getRAbundVector(); 
-			globaldata->rabund = rabund; //saving to be used by heatmap command.
+			globaldata->rabund = rabund; //saving to be used by heatmap.bin command.
 			list = inputList->getListVector();
 			globaldata->gListVector = list;
 		}else if (globaldata->getFormat() == "shared") {

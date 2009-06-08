@@ -62,7 +62,7 @@ void HeatMap::getPic(RAbundVector* rabund) {
 		}
 		
 		
-		string filenamesvg = getRootName(globaldata->inputFileName) + rabund->getLabel() + ".heatmap.svg";
+		string filenamesvg = getRootName(globaldata->inputFileName) + rabund->getLabel() + ".heatmap.bin.svg";
 		openOutputFile(filenamesvg, outsvg);
 		
 		//svg image
@@ -144,7 +144,7 @@ void HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 			}
 		}
 
-		string filenamesvg = getRootName(globaldata->inputFileName) + lookup[0]->getLabel() + ".heatmap.svg";
+		string filenamesvg = getRootName(globaldata->inputFileName) + lookup[0]->getLabel() + ".heatmap.bin.svg";
 		openOutputFile(filenamesvg, outsvg);
 		
 		//svg image
