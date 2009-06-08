@@ -34,9 +34,8 @@ private:
 	ValidCalculators* validCalculator;
 	Dist* distCalculator;
 	SequenceDB* seqDB;
-	ofstream out, phylipOut;
+	ofstream out, outFile;
 	ifstream in;
-	string outputFileName;
 	string countends, phylip;
 	int processors;
 	float cutoff;
@@ -45,8 +44,8 @@ private:
 	vector<linePair*> lines;
 	
 	void appendFiles(string, string);
-	void createProcesses(string, string);
-	int driver(Dist*, SequenceDB*, int, int, string, string, float);
+	void createProcesses(string);
+	int driver(Dist*, SequenceDB*, int, int, string, float);
 
 };
 
