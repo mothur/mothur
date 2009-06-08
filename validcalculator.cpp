@@ -591,6 +591,10 @@ void ValidCalculators::printCalc(string parameter, ostream& out) {
 			for (it = matrix.begin(); it != matrix.end(); it++) {
 				out << it->first << ", ";
 			}
+		}else if (parameter == "heat") {
+			for (it = heat.begin(); it != heat.end(); it++) {
+				out << it->first << ", ";
+			}
 		}else if (parameter == "boot") {
 			for (it = boot.begin(); it != boot.end(); it++) {
 				out << it->first << ", ";
