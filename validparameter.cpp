@@ -271,7 +271,10 @@ void ValidParameters::initCommandParameters() {
 		commandParameters["unifrac.unweighted"] = addParameters(unifracUnweightedArray, sizeof(unifracUnweightedArray)/sizeof(string));
 
 		string heatmapArray[] =  {"groups","line","label","sorted","scale"};
-		commandParameters["heatmap"] = addParameters(heatmapArray, sizeof(heatmapArray)/sizeof(string));
+		commandParameters["heatmap.bin"] = addParameters(heatmapArray, sizeof(heatmapArray)/sizeof(string));
+		
+		string heatmapSimArray[] =  {"groups","line","label"};
+		commandParameters["heatmap.sim"] = addParameters(heatmapSimArray, sizeof(heatmapSimArray)/sizeof(string));
 		
 		string filterseqsArray[] =  {"fasta", "trump", "soft", "hard", "vertical"};
 		commandParameters["filter.seqs"] = addParameters(filterseqsArray, sizeof(filterseqsArray)/sizeof(string));

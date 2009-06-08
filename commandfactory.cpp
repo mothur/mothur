@@ -31,6 +31,7 @@
 #include "unifracweightedcommand.h"
 #include "libshuffcommand.h"
 #include "heatmapcommand.h"
+#include "heatmapsimcommand.h"
 #include "filterseqscommand.h"
 #include "mothur.h"
 #include "venncommand.h"
@@ -93,7 +94,8 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "get.sabund")            {   command = new GetSAbundCommand();			}
 		else if(commandName == "get.rabund")            {   command = new GetRAbundCommand();			}
 		else if(commandName == "libshuff")              {   command = new LibShuffCommand();			}
-		else if(commandName == "heatmap")				{   command = new HeatMapCommand();				}
+		else if(commandName == "heatmap.bin")			{   command = new HeatMapCommand();				}
+		else if(commandName == "heatmap.sim")			{   command = new HeatMapSimCommand();			}
 		else if(commandName == "filter.seqs")			{   command = new FilterSeqsCommand();          }
 		else if(commandName == "venn")					{   command = new VennCommand();				}
 		else if(commandName == "bin.seqs")				{   command = new BinSeqCommand();				}

@@ -56,6 +56,8 @@
 		375AA13A0F9E433D008EF9B8 /* readotu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 375AA1350F9E433D008EF9B8 /* readotu.cpp */; };
 		375AA13B0F9E433D008EF9B8 /* readphylip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 375AA1370F9E433D008EF9B8 /* readphylip.cpp */; };
 		377326650FAF16E0007ABB8B /* concensuscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 377326630FAF16E0007ABB8B /* concensuscommand.cpp */; };
+		378598660FDD497000EF9D03 /* heatmapsimcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 378598650FDD497000EF9D03 /* heatmapsimcommand.cpp */; };
+		378598740FDD4C1500EF9D03 /* heatmapsim.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 378598730FDD4C1500EF9D03 /* heatmapsim.cpp */; };
 		378C1B030FB0644E004D63F5 /* filterseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 378C1AEE0FB0644D004D63F5 /* filterseqscommand.cpp */; };
 		378C1B040FB0644E004D63F5 /* goodscoverage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 378C1AF00FB0644D004D63F5 /* goodscoverage.cpp */; };
 		378C1B0A0FB0644E004D63F5 /* sequencedb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 378C1AFD0FB0644D004D63F5 /* sequencedb.cpp */; };
@@ -275,6 +277,10 @@
 		375AA1380F9E433D008EF9B8 /* readphylip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readphylip.h; sourceTree = SOURCE_ROOT; };
 		377326630FAF16E0007ABB8B /* concensuscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = concensuscommand.cpp; sourceTree = SOURCE_ROOT; };
 		377326640FAF16E0007ABB8B /* concensuscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = concensuscommand.h; sourceTree = SOURCE_ROOT; };
+		378598640FDD497000EF9D03 /* heatmapsimcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = heatmapsimcommand.h; sourceTree = "<group>"; };
+		378598650FDD497000EF9D03 /* heatmapsimcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = heatmapsimcommand.cpp; sourceTree = "<group>"; };
+		378598720FDD4C1500EF9D03 /* heatmapsim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = heatmapsim.h; sourceTree = "<group>"; };
+		378598730FDD4C1500EF9D03 /* heatmapsim.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = heatmapsim.cpp; sourceTree = "<group>"; };
 		378C1AEE0FB0644D004D63F5 /* filterseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = filterseqscommand.cpp; sourceTree = SOURCE_ROOT; };
 		378C1AEF0FB0644D004D63F5 /* filterseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = filterseqscommand.h; sourceTree = SOURCE_ROOT; };
 		378C1AF00FB0644D004D63F5 /* goodscoverage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = goodscoverage.cpp; sourceTree = SOURCE_ROOT; };
@@ -557,6 +563,8 @@
 				373C68BA0FC1C1A600137ACD /* gotohoverlap.cpp */,
 				375873ED0F7D646F0040F377 /* heatmap.h */,
 				375873EE0F7D646F0040F377 /* heatmap.cpp */,
+				378598720FDD4C1500EF9D03 /* heatmapsim.h */,
+				378598730FDD4C1500EF9D03 /* heatmapsim.cpp */,
 				37D927E60F21331F001D4494 /* inputdata.h */,
 				37D927E50F21331F001D4494 /* inputdata.cpp */,
 				7E412F420F8D213C00381DD0 /* libshuff.h */,
@@ -738,10 +746,6 @@
 		37D928A90F2133E5001D4494 /* commands */ = {
 			isa = PBXGroup;
 			children = (
-				7E09C5340FDA7F65002ECAE5 /* trimseqscommand.h */,
-				7E09C5350FDA7F65002ECAE5 /* trimseqscommand.cpp */,
-				7E09C5120FDA79C5002ECAE5 /* reversecommand.h */,
-				7E09C5130FDA79C5002ECAE5 /* reversecommand.cpp */,
 				37D927CD0F21331F001D4494 /* command.hpp */,
 				378DC5CD0FBDE1C8003B8607 /* aligncommand.h */,
 				378DC5CE0FBDE1C8003B8607 /* aligncommand.cpp */,
@@ -777,6 +781,8 @@
 				3749271C0FD58C840031C06B /* getsabundcommand.cpp */,
 				375873F10F7D64800040F377 /* heatmapcommand.h */,
 				375873F00F7D64800040F377 /* heatmapcommand.cpp */,
+				378598640FDD497000EF9D03 /* heatmapsimcommand.h */,
+				378598650FDD497000EF9D03 /* heatmapsimcommand.cpp */,
 				37D927E40F21331F001D4494 /* helpcommand.h */,
 				37D927E30F21331F001D4494 /* helpcommand.cpp */,
 				375873F40F7D648F0040F377 /* libshuffcommand.h */,
@@ -801,6 +807,8 @@
 				372E126F0F26365B0095CF7E /* readotucommand.cpp */,
 				37E5F4900F2A3DA800F8D827 /* readtreecommand.h */,
 				37E5F4910F2A3DA800F8D827 /* readtreecommand.cpp */,
+				7E09C5120FDA79C5002ECAE5 /* reversecommand.h */,
+				7E09C5130FDA79C5002ECAE5 /* reversecommand.cpp */,
 				371B30B30FD7EE67000414CA /* screenseqscommand.h */,
 				371B30B20FD7EE67000414CA /* screenseqscommand.cpp */,
 				3799A94E0FD6A58C00E33EDE /* seqsummarycommand.cpp */,
@@ -813,6 +821,8 @@
 				37D9284A0F21331F001D4494 /* summarysharedcommand.cpp */,
 				211C38370F961E1F00FEE541 /* treegroupscommand.h */,
 				211C38360F961E1F00FEE541 /* treegroupscommand.cpp */,
+				7E09C5340FDA7F65002ECAE5 /* trimseqscommand.h */,
+				7E09C5350FDA7F65002ECAE5 /* trimseqscommand.cpp */,
 				3746109B0F40657600460C57 /* unifracunweightedcommand.h */,
 				3746109C0F40657600460C57 /* unifracunweightedcommand.cpp */,
 				374610760F40645300460C57 /* unifracweightedcommand.h */,
@@ -1103,6 +1113,8 @@
 				371B30B40FD7EE67000414CA /* screenseqscommand.cpp in Sources */,
 				7E09C5140FDA79C5002ECAE5 /* reversecommand.cpp in Sources */,
 				7E09C5360FDA7F65002ECAE5 /* trimseqscommand.cpp in Sources */,
+				378598660FDD497000EF9D03 /* heatmapsimcommand.cpp in Sources */,
+				378598740FDD4C1500EF9D03 /* heatmapsim.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

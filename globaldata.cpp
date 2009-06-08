@@ -260,7 +260,7 @@ void GlobalData::parseGlobalData(string commandString, string optionText){
 			Estimators.clear();
 			splitAtDash(calc, Estimators); 
 		}
-		if((commandName == "tree.shared") || (commandName == "bootstrap.shared") || (commandName == "dist.shared")) {
+		if((commandName == "tree.shared") || (commandName == "bootstrap.shared") || (commandName == "dist.shared") || (commandName == "heatmap.sim")) {
 			if((calc == "default") || (calc == "")) { 
 				calc = "jclass-thetayc";
 			}
