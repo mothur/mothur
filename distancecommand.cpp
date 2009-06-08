@@ -114,18 +114,15 @@ int DistanceCommand::execute(){
 			}
 		}else{ //you have multiple processors
 			
-			//create line pairs
-			int numPerGroup = numSeqs / processors;
-			int remainder = numSeqs % processors;
-			
 			for (int i = 0; i < processors; i++) {
 				lines.push_back(new linePair());
-				lines[i]->start = i*numPerGroup;
-				lines[i]->end = (i+1)*numPerGroup;
+				lines[i]->start = int (sqrt(float(i)/float(processors)) * numSeqs);
+				lines[i]->end = int (sqrt(float(i+1)/float(processors)) * numSeqs);
 			}
-			//give the last one any extra line
-			lines[lines.size()-1]->end += remainder;
-			
+
+			cout << lines[0]->start << '\t' << lines[0]->end << endl;
+			cout << lines[1]->start << '\t' << lines[1]->end << endl;
+
 			createProcesses(distFile, phylipFile); 
 		
 			//append and remove temp files
