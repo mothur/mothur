@@ -26,15 +26,14 @@ private:
 	bool stripBarcode(Sequence&, string&);
 	bool stripForward(Sequence&);
 	bool stripReverse(Sequence&);
+	bool cullLength(Sequence&);
+	bool cullHomoP(Sequence&);
+	bool cullAmbigs(Sequence&);
 	
 	GlobalData* globaldata;
 
-	int totalBarcodeCount, matchBarcodeCount; // to be removed
-	int totalFPrimerCount, matchFPrimerCount; // to be removed
-	int totalRPrimerCount, matchRPrimerCount; // to be removed
-	
 	bool oligos, flip;
-	int numFPrimers, numRPrimers;
+	int numFPrimers, numRPrimers, maxAmbig, maxHomoP, minLength, maxLength;
 	vector<string> forPrimer, revPrimer;
 	map<string, string> barcodes;
 };

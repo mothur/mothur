@@ -463,10 +463,10 @@
 		37E5F3E20F29FD4200F8D827 /* treenode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = treenode.cpp; sourceTree = SOURCE_ROOT; };
 		37E5F4900F2A3DA800F8D827 /* readtreecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readtreecommand.h; sourceTree = SOURCE_ROOT; };
 		37E5F4910F2A3DA800F8D827 /* readtreecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readtreecommand.cpp; sourceTree = SOURCE_ROOT; };
-		7E09C5120FDA79C5002ECAE5 /* reversecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = reversecommand.h; sourceTree = "<group>"; };
-		7E09C5130FDA79C5002ECAE5 /* reversecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = reversecommand.cpp; sourceTree = "<group>"; };
-		7E09C5340FDA7F65002ECAE5 /* trimseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trimseqscommand.h; sourceTree = "<group>"; };
-		7E09C5350FDA7F65002ECAE5 /* trimseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = trimseqscommand.cpp; sourceTree = "<group>"; };
+		7E09C5120FDA79C5002ECAE5 /* reversecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = reversecommand.h; sourceTree = SOURCE_ROOT; };
+		7E09C5130FDA79C5002ECAE5 /* reversecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = reversecommand.cpp; sourceTree = SOURCE_ROOT; };
+		7E09C5340FDA7F65002ECAE5 /* trimseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trimseqscommand.h; sourceTree = SOURCE_ROOT; };
+		7E09C5350FDA7F65002ECAE5 /* trimseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = trimseqscommand.cpp; sourceTree = SOURCE_ROOT; };
 		7E412F420F8D213C00381DD0 /* libshuff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libshuff.h; sourceTree = SOURCE_ROOT; };
 		7E412F470F8D21B600381DD0 /* slibshuff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = slibshuff.h; sourceTree = SOURCE_ROOT; };
 		7E412F480F8D21B600381DD0 /* slibshuff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = slibshuff.cpp; sourceTree = SOURCE_ROOT; };

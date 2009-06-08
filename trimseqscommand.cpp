@@ -14,18 +14,30 @@
 TrimSeqsCommand::TrimSeqsCommand(){
 	try {
 		
-		oligos = 0;		
-		totalBarcodeCount = 0;
-		matchBarcodeCount = 0;
-		
 		globaldata = GlobalData::getInstance();
+		
+		oligos = 0;		
+
 		if(globaldata->getFastaFile() == ""){
 			cout << "you need to at least enter a fasta file name" << endl;
 		}
 		
-		if(isTrue(globaldata->getFlip()))		{	flip = 1;				}
-		if(globaldata->getOligosFile() != "")	{	oligos = 1;				}
-		if(!flip && !oligos)					{	cout << "huh?" << endl;	}
+		if(isTrue(globaldata->getFlip()))			{	flip = 1;													}
+		if(globaldata->getOligosFile() != "")		{	oligos = 1;													}
+		
+		if(globaldata->getMaxAmbig() != "-1")		{	maxAmbig = atoi(globaldata->getMaxAmbig().c_str());			}
+		else										{	maxAmbig = -1;												}
+		
+		if(globaldata->getMaxHomoPolymer() != "-1")	{	maxHomoP = atoi(globaldata->getMaxHomoPolymer().c_str());	}
+		else										{	maxHomoP = 0;												}
+		
+		if(globaldata->getMinLength() != "-1")		{	minLength = atoi(globaldata->getMinLength().c_str());		}
+		else										{	minLength = 0;												}
+		
+		if(globaldata->getMaxLength() != "-1")		{	maxLength = atoi(globaldata->getMaxLength().c_str());		}
+		else										{	maxLength = 0;												}
+		
+		if(!flip && !oligos && !maxLength && !minLength && (maxAmbig==-1) && !maxHomoP ){	cout << "huh?" << endl;	}
 
 	}
 	catch(exception& e) {
@@ -83,6 +95,19 @@ int TrimSeqsCommand::execute(){
 				success = stripReverse(currSeq);
 				if(!success){	trashCode += 'r';	}
 			}
+			if(minLength > 0 || maxLength > 0){
+				success = cullLength(currSeq);
+				if(!success){	trashCode += 'l';	}
+			}
+			if(maxHomoP > 0){
+				success = cullHomoP(currSeq);
+				if(!success){	trashCode += 'h';	}
+			}
+			if(maxAmbig != -1){
+				success = cullAmbigs(currSeq);
+				if(!success){	trashCode += 'n';	}
+			}
+			
 			if(flip){	currSeq.reverseComplement();	}		// should go last			
 
 			if(trashCode.length() == 0){
@@ -168,12 +193,10 @@ bool TrimSeqsCommand::stripBarcode(Sequence& seq, string& group){
 		if (rawSequence.compare(0,oligo.length(),oligo) == 0){
 			group = it->second;
 			seq.setUnaligned(rawSequence.substr(oligo.length()));
-			matchBarcodeCount++;
 			success = 1;
 			break;
 		}
 	}
-	totalBarcodeCount++;
 	return success;
 	
 }
@@ -195,13 +218,11 @@ bool TrimSeqsCommand::stripForward(Sequence& seq){
 		
 		if (rawSequence.compare(0,oligo.length(),oligo) == 0){
 			seq.setUnaligned(rawSequence.substr(oligo.length()));
-			matchFPrimerCount++;
 			success = 1;
 			break;
 		}
 	}
 	
-	totalFPrimerCount++;
 	return success;
 	
 }
@@ -223,13 +244,53 @@ bool TrimSeqsCommand::stripReverse(Sequence& seq){
 		
 		if(rawSequence.compare(rawSequence.length()-oligo.length(),oligo.length(),oligo) == 0){
 			seq.setUnaligned(rawSequence.substr(rawSequence.length()-oligo.length()));
-			matchRPrimerCount++;
 			success = 1;
 			break;
 		}
 	}	
+	return success;
 	
-	totalRPrimerCount++;
+}
+
+//***************************************************************************************************************
+
+bool TrimSeqsCommand::cullLength(Sequence& seq){
+	
+	int length = seq.getNumBases();
+	bool success = 0;	//guilty until proven innocent
+	
+	if(length >= minLength && maxLength == 0)			{	success = 1;	}
+	else if(length >= minLength && length <= maxLength)	{	success = 1;	}
+	else												{	success = 0;	}
+	
+	return success;
+	
+}
+
+//***************************************************************************************************************
+
+bool TrimSeqsCommand::cullHomoP(Sequence& seq){
+	
+	int longHomoP = seq.getLongHomoPolymer();
+	bool success = 0;	//guilty until proven innocent
+	
+	if(longHomoP <= maxHomoP){	success = 1;	}
+	else					{	success = 0;	}
+	
+	return success;
+	
+}
+
+//***************************************************************************************************************
+
+bool TrimSeqsCommand::cullAmbigs(Sequence& seq){
+	
+	int numNs = seq.getAmbigBases();
+	bool success = 0;	//guilty until proven innocent
+	
+	if(numNs <= maxAmbig){	success = 1;	}
+	else					{	success = 0;	}
+	
 	return success;
 	
 }
