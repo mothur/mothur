@@ -23,10 +23,12 @@ DistanceCommand::DistanceCommand(){
 		countends = globaldata->getCountEnds();
 		convert(globaldata->getProcessors(), processors);
 		convert(globaldata->getCutOff(), cutoff);
+		phylip = globaldata->getPhylipFile();
 		
 		//open file
 		string filename = globaldata->getFastaFile();
 		openInputFile(filename, in);
+		
 
 		
 		int i;
@@ -79,222 +81,71 @@ int DistanceCommand::execute(){
 		int numSeqs = seqDB->getNumSeqs();
 		cutoff += 0.005;
 		
+		string phylipFile = "";
 		string distFile = getRootName(globaldata->getFastaFile()) + "dist";
-		string phylipFile = getRootName(globaldata->getFastaFile()) + "phylip.dist";
-		
-		remove(phylipFile.c_str());
 		remove(distFile.c_str());
 		
-		//output numSeqs to phylip formatted dist file
-		openOutputFile(phylipFile, phylipOut);
-		phylipOut << numSeqs << endl;
-		phylipOut.close();
+		//doses the user want the phylip formatted file as well
+		if (isTrue(phylip) == true) {
+			phylipFile = getRootName(globaldata->getFastaFile()) + "phylip.dist";
+			remove(phylipFile.c_str());
+			
+			//output numSeqs to phylip formatted dist file
+			openOutputFile(phylipFile, phylipOut);
+			phylipOut << numSeqs << endl;
+			phylipOut.close();
+		}
 		
+				
 		//#	if defined (_WIN32)
 		//figure out how to implement the fork and wait commands in windows
 		//	driver(distCalculator, seqDB, 0, numSeqs, distFile, phylipFile, cutoff);
 		//#	endif
 		
-#if defined (__APPLE__) || (__MACH__)
+				
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		//if you don't need to fork anything
 		if(processors == 1){
 			driver(distCalculator, seqDB, 0, numSeqs, distFile, phylipFile + "tempPhylipA", cutoff);
-			appendFiles((phylipFile + "tempPhylipA"), phylipFile);
-			remove((phylipFile + "tempPhylipA").c_str());	
-		}	
-		else if(processors == 2){
 			
-			int pid = fork();
-			if(pid > 0){
-				driver(distCalculator, seqDB, 0, (numSeqs/sqrt(2)), distFile + "tempa", phylipFile + "tempPhylipA", cutoff);	
-				appendFiles((distFile+"tempa"), distFile);
-				remove((distFile + "tempa").c_str());
+			if (isTrue(phylip) == true) {
 				appendFiles((phylipFile + "tempPhylipA"), phylipFile);
 				remove((phylipFile + "tempPhylipA").c_str());
 			}
-			else{
-				driver(distCalculator, seqDB, (numSeqs/sqrt(2)), numSeqs, distFile + "tempb", phylipFile + "tempPhylipB", cutoff);	
-				appendFiles((distFile+"tempb"), distFile);
-				remove((distFile + "tempb").c_str());
-				appendFiles((phylipFile + "tempPhylipB"), phylipFile);
-				remove((phylipFile + "tempPhylipB").c_str());	
-			}
-			wait(NULL);
+		}else{ //you have multiple processors
 			
-		}
-		else if(processors == 3){
-			int pid1 = fork();
-			if(pid1 > 0){
-				int pid2 = fork();
-				if(pid2 > 0){
-					driver(distCalculator, seqDB, 0, sqrt(3) * numSeqs / 3, distFile + "tempa", phylipFile + "tempPhylipA", cutoff);
-					appendFiles(distFile+"tempa", distFile);
-					appendFiles((phylipFile + "tempPhylipA"), phylipFile);
-					remove((distFile + "tempa").c_str());
-					remove((phylipFile + "tempPhylipA").c_str());	
-				}
-				else{
-					driver(distCalculator, seqDB, sqrt(3) * numSeqs / 3, sqrt(6) * numSeqs / 3, distFile + "tempb", phylipFile + "tempPhylipB", cutoff);	
-					appendFiles(distFile+"tempb", distFile);
-					appendFiles((phylipFile + "tempPhylipB"), phylipFile);
-					remove((distFile + "tempb").c_str());	
-					remove((phylipFile + "tempPhylipB").c_str());			
-				}
-				wait(NULL);
-			}
-			else{
-				driver(distCalculator, seqDB, sqrt(6) * numSeqs / 3, numSeqs, distFile + "tempc", phylipFile + "tempPhylipC", cutoff);	
-				appendFiles(distFile+"tempc", distFile);
-				appendFiles((phylipFile + "tempPhylipC"), phylipFile);
-				remove((distFile + "tempc").c_str());	
-				remove((phylipFile + "tempPhylipC").c_str());		
-			}
-			wait(NULL);
-		}
-		else if(processors == 4){
-			int pid1 = fork();
-			if(pid1 > 0){
-				int pid2 = fork();
-				if(pid2 > 0){
-					driver(distCalculator, seqDB, 0, numSeqs / 2, distFile + "tempa", phylipFile + "tempPhylipA", cutoff);	
-					appendFiles(distFile+"tempa", distFile);
-					appendFiles((phylipFile + "tempPhylipA"), phylipFile);
-					remove((distFile + "tempa").c_str());
-					remove((phylipFile + "tempPhylipA").c_str());			
-				}
-				else{
-					driver(distCalculator, seqDB, numSeqs / 2, (numSeqs/sqrt(2)), distFile + "tempb", phylipFile + "tempPhylipB", cutoff);	
-					appendFiles(distFile+"tempb", distFile);
-					appendFiles((phylipFile + "tempPhylipB"), phylipFile);
-					remove((distFile + "tempb").c_str());
-					remove((phylipFile + "tempPhylipB").c_str());				
-				}
-				wait(NULL);
-			}
-			else{
-				int pid3 = fork();
-				if(pid3 > 0){
-					driver(distCalculator, seqDB, (numSeqs/sqrt(2)), (sqrt(3) * numSeqs / 2), distFile + "tempc", phylipFile + "tempPhylipC", cutoff);	
-					appendFiles(distFile+"tempc", distFile);
-					appendFiles((phylipFile + "tempPhylipC"), phylipFile);
-					remove((distFile + "tempc").c_str());
-					remove((phylipFile + "tempPhylipC").c_str());	
-								
-				}
-				else{
-					driver(distCalculator, seqDB, (sqrt(3) * numSeqs / 2), numSeqs, distFile + "tempd", phylipFile + "tempPhylipD", cutoff);	
-					appendFiles(distFile+"tempd", distFile);
-					appendFiles((phylipFile + "tempPhylipD"), phylipFile);
-					remove((distFile + "tempd").c_str());	
-					remove((phylipFile + "tempPhylipD").c_str());			
-				}
-				wait(NULL);
-			}
-			wait(NULL);
-		}
-		wait(NULL);
-#elif (linux) || (__linux)
-		if(processors == 1){
-			driver(distCalculator, seqDB, 0, numSeqs, distFile, phylipFile + "tempPhylipA", cutoff);
-			appendFiles((phylipFile + "tempPhylipA"), phylipFile);	
-			remove((phylipFile + "tempPhylipA").c_str());	
-		}	
-		else if(processors == 2){
+			//create line pairs
+			int numPerGroup = numSeqs / processors;
+			int remainder = numSeqs % processors;
 			
-			int pid = fork();
-			if(pid > 0){
-				driver(distCalculator, seqDB, 0, (numSeqs/sqrt(2)), distFile + "tempa", phylipFile + "tempPhylipA", cutoff);	
-				appendFiles((distFile+"tempa"), distFile);
-				appendFiles((phylipFile + "tempPhylipA"), phylipFile);
-				remove((distFile + "tempa").c_str());	
-				remove((phylipFile + "tempPhylipA").c_str());
-
+			for (int i = 0; i < processors; i++) {
+				lines.push_back(new linePair());
+				lines[i]->start = i*numPerGroup;
+				lines[i]->end = (i+1)*numPerGroup;
 			}
-			else{
-				driver(distCalculator, seqDB, (numSeqs/sqrt(2)), numSeqs, distFile + "tempb", phylipFile + "tempPhylipB", cutoff);	
-				appendFiles((distFile+"tempb"), distFile);
-				appendFiles((phylipFile + "tempPhylipB"), phylipFile);
-				remove((distFile + "tempb").c_str());
-				remove((phylipFile + "tempPhylipB").c_str());	
-			}
-			wait();
+			//give the last one any extra line
+			lines[lines.size()-1]->end += remainder;
 			
-		}
-		else if(processors == 3){
-			int pid1 = fork();
-			if(pid1 > 0){
-				int pid2 = fork();
-				if(pid2 > 0){
-					driver(distCalculator, seqDB, 0, (numSeqs/sqrt(2)), distFile + "tempa", phylipFile + "tempPhylipA", cutoff);	
-					appendFiles((distFile+"tempa"), distFile);
-					appendFiles((phylipFile + "tempPhylipA"), phylipFile);
-					remove((distFile + "tempa").c_str());	
-					remove((phylipFile + "tempPhylipA").c_str());
-
-				}
-				else{
-					driver(distCalculator, seqDB, (numSeqs/sqrt(2)), numSeqs, distFile + "tempb", phylipFile + "tempPhylipB", cutoff);	
-					appendFiles((distFile+"tempb"), distFile);
-					appendFiles((phylipFile + "tempPhylipB"), phylipFile);
-					remove((distFile + "tempb").c_str());
-					remove((phylipFile + "tempPhylipB").c_str());	
-				}
-				wait();
-			}
-			else{
-				driver(distCalculator, seqDB, sqrt(6) * numSeqs / 3, numSeqs, distFile + "tempc", phylipFile + "tempPhylipC", cutoff);	
-				appendFiles(distFile+"tempc", distFile);
-				appendFiles((phylipFile + "tempPhylipC"), phylipFile);
-				remove((distFile + "tempc").c_str());	
-				remove((phylipFile + "tempPhylipC").c_str());				
-			}
-			wait();
-		}
-		else if(processors == 4){
-			int pid1 = fork();
-			if(pid1 > 0){
-				int pid2 = fork();
-				if(pid2 > 0){
-					driver(distCalculator, seqDB, 0, (numSeqs/sqrt(2)), distFile + "tempa", phylipFile + "tempPhylipA", cutoff);	
-					appendFiles((distFile+"tempa"), distFile);
-					appendFiles((phylipFile + "tempPhylipA"), phylipFile);
-					remove((distFile + "tempa").c_str());	
-					remove((phylipFile + "tempPhylipA").c_str());
-				}
-				else{
-					driver(distCalculator, seqDB, (numSeqs/sqrt(2)), numSeqs, distFile + "tempb", phylipFile + "tempPhylipB", cutoff);	
-					appendFiles((distFile+"tempb"), distFile);
-					appendFiles((phylipFile + "tempPhylipB"), phylipFile);
-					remove((distFile + "tempb").c_str());
-					remove((phylipFile + "tempPhylipB").c_str());	
-				}
-				wait();
-			}
-			else{
-				int pid3 = fork();
-				if(pid3 > 0){
-					driver(distCalculator, seqDB, sqrt(6) * numSeqs / 3, numSeqs, distFile + "tempc", phylipFile + "tempPhylipC", cutoff);	
-					appendFiles(distFile+"tempc", distFile);
-					appendFiles((phylipFile + "tempPhylipC"), phylipFile);
-					remove((distFile + "tempc").c_str());	
-					remove((phylipFile + "tempPhylipC").c_str());					
-				}
-				else{
-					driver(distCalculator, seqDB, (sqrt(3) * numSeqs / 2), numSeqs, distFile + "tempd", phylipFile + "tempPhylipD", cutoff);	
-					appendFiles(distFile+"tempd", distFile);
-					appendFiles((phylipFile + "tempPhylipD"), phylipFile);
-					remove((distFile + "tempd").c_str());	
-					remove((phylipFile + "tempPhylipD").c_str());				
-				}
-				wait();
-			}
-			wait();
-		}
-		wait();
+			createProcesses(distFile, phylipFile); 
 		
+			//append and remove temp files
+			for (it = processIDS.begin(); it != processIDS.end(); it++) {
+				appendFiles((distFile + toString(it->second) + ".temp"), distFile);
+				remove((distFile + toString(it->second) + ".temp").c_str());
+				
+				if (isTrue(phylip) == true) {
+					appendFiles((phylipFile + toString(it->second) + ".temp"), phylipFile);
+					remove((phylipFile + toString(it->second) + ".temp").c_str());
+				}
+			}
+		}
 #else
 		driver(distCalculator, seqDB, 0, numSeqs, distFile, phylipFile + "tempPhylipA", cutoff);
-		appendFiles((phylipFile + "tempPhylipA"), phylipFile);	
-		remove((phylipFile + "tempPhylipA").c_str());
+		
+		if (isTrue(phylip) = true) {
+			appendFiles((phylipFile + "tempPhylipA"), phylipFile);	
+			remove((phylipFile + "tempPhylipA").c_str());
+		}
 #endif
 		
 		delete distCalculator;
@@ -311,11 +162,47 @@ int DistanceCommand::execute(){
 		exit(1);
 	}	
 }
+/**************************************************************************************************/
+void DistanceCommand::createProcesses(string column, string phylip) {
+	try {
+		int process = 0;
+		processIDS.clear();
+		
+		//loop through and create all the processes you want
+		while (process != processors) {
+			int pid = fork();
+			
+			if (pid > 0) {
+				processIDS[lines[process]->end] = pid;  //create map from line number to pid so you can append files in correct order later
+				process++;
+			}else if (pid == 0){
+				driver(distCalculator, seqDB, lines[process]->start, lines[process]->end, column + toString(getpid()) + ".temp", phylip + toString(getpid()) + ".temp", cutoff);
+				exit(0);
+			}else { cout << "unable to spawn the necessary processes." << endl; exit(0); }
+		}
+	
+		//force parent to wait until all the processes are done
+		for (it = processIDS.begin(); it != processIDS.end(); it++) { 
+			int temp = it->second;
+			wait(&temp);
+		}
+		
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the DistanceCommand class Function createProcesses. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the DistanceCommand class function createProcesses. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
 
 /**************************************************************************************************/
 /////// need to fix to work with calcs and sequencedb
 int DistanceCommand::driver(Dist* distCalculator, SequenceDB* align, int startLine, int endLine, string dFileName, string pFilename, float cutoff){
 	try {
+
 		int startTime = time(NULL);
 		
 		//column file
@@ -323,7 +210,6 @@ int DistanceCommand::driver(Dist* distCalculator, SequenceDB* align, int startLi
 		distFile.setf(ios::fixed, ios::showpoint);
 		distFile << setprecision(4);
 		
-		//column file
 		ofstream philFile(pFilename.c_str(), ios::trunc);
 		philFile.setf(ios::fixed, ios::showpoint);
 		philFile << setprecision(4);
@@ -337,10 +223,11 @@ int DistanceCommand::driver(Dist* distCalculator, SequenceDB* align, int startLi
 				if(dist <= cutoff){
 					distFile << align->get(i)->getName() << ' ' << align->get(j)->getName() << ' ' << dist << endl;
 				}
-				philFile << dist << '\t';
+				if (isTrue(phylip) == true) {  philFile << dist << '\t'; }
+				
 			}
 			
-			philFile << endl;
+			if (isTrue(phylip) == true) { philFile << endl; }
 			
 			if(i % 100 == 0){
 				cout << i << '\t' << time(NULL) - startTime << endl;
@@ -348,6 +235,8 @@ int DistanceCommand::driver(Dist* distCalculator, SequenceDB* align, int startLi
 			
 		}
 		cout << endLine-1 << '\t' << time(NULL) - startTime << endl;
+		
+		if (isTrue(phylip) != true) {  remove(pFilename.c_str());  }
 		
 		//philFile.close();
 		//distFile.close();
@@ -370,7 +259,7 @@ void DistanceCommand::appendFiles(string temp, string filename) {
 	try{
 		ofstream output;
 		ifstream input;
-		
+	
 		//open output file in append mode
 		openOutputFileAppend(filename, output);
 		

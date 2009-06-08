@@ -309,7 +309,7 @@ void ValidParameters::initCommandParameters() {
 		string concensusArray[] =  {};
 		commandParameters["concensus"] = addParameters(concensusArray, sizeof(concensusArray)/sizeof(string));
 		
-		string distanceArray[] =  {"fasta", "calc", "countends", "cutoff", "processors"};
+		string distanceArray[] =  {"fasta", "phylip", "calc", "countends", "cutoff", "processors"};
 		commandParameters["dist.seqs"] = addParameters(distanceArray, sizeof(distanceArray)/sizeof(string));
 		
 		string AlignArray[] =  {"fasta", "candidate", "search", "ksize", "align", "match", "mismatch", "gapopen", "gapextend"};

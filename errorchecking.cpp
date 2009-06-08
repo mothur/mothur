@@ -276,11 +276,23 @@ bool ErrorCheck::checkInput(string input) {
 			}
 		}
 		
-		if ((commandName == "filter.seqs") || (commandName == "dist.seqs")) { 
+		if (commandName == "filter.seqs") { 
 			if (fastafile == "") {
-				 cout << "You must enter either a fasta file before you can use the filter.seqs or dist.seqs command." << endl; return false; 
+				 cout << "You must enter either a fasta file before you can use the filter.seqs command." << endl; return false; 
 			}
 			validateReadFiles();
+		}
+		
+		if (commandName == "dist.seqs") {
+			if (fastafile == "") {
+				 cout << "You must enter either a fasta file before you can use the dist.seqs command." << endl; return false; 
+			}else {
+				ifstream filehandle;
+				int ableToOpen = openInputFile(fastafile, filehandle);
+				filehandle.close();
+				//unable to open
+				if (ableToOpen == 1) { return false; }
+			}
 		}
 		
 		if (commandName == "align.seqs") {

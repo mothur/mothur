@@ -60,7 +60,13 @@ struct IntNode {
 	IntNode* left;
 	IntNode* right;
 };
-	
+
+struct ThreadNode {
+	int* pid;
+	IntNode* left;
+	IntNode* right;
+};
+
 /***********************************************************************/
 
 // snagged from http://www.parashift.com/c++-faq-lite/misc-technical-issues.html#faq-39.2
@@ -240,6 +246,7 @@ inline string getSimpleName(string longName){
 
 	return simpleName;
 }
+
 /***********************************************************************/
 
 inline int factorial(int num){

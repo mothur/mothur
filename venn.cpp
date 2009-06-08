@@ -342,6 +342,7 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 				}else { outsvg << "</text>\n"; }
 
 				outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"640\">The total richness of all the groups is " + toString(numA[0] + numB[0] + numC[0] - sharedAB[0] - sharedAC[0] - sharedBC[0] + sharedABC) + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"780\">The total shared richness is " + toString(sharedABC) + "</text>\n";
 				
 				//close file
 				outsvg << "</g>\n</svg>\n";
