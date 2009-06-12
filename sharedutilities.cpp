@@ -212,6 +212,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 	try {
 		numGroups = 0;
 		label = "";
+
 		//if the user has not entered specific groups to analyze then do them all
 		if (userGroups.size() != 0) {
 			if (userGroups[0] != "all") {

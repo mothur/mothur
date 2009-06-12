@@ -17,7 +17,6 @@
 #include "commandoptionparser.hpp"
 #include "command.hpp"
 #include "commandfactory.hpp"
-#include "errorchecking.h"
 
 class GlobalData;
 

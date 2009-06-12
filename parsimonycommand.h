@@ -22,9 +22,10 @@ class GlobalData;
 class ParsimonyCommand : public Command {
 	
 	public:
-		ParsimonyCommand();	
+		ParsimonyCommand(string);	
 		~ParsimonyCommand() { delete pars; delete util; delete output; }
 		int execute();	
+		void help();
 	
 	private:
 		GlobalData* globaldata;
@@ -55,6 +56,13 @@ class ParsimonyCommand : public Command {
 		ofstream out, outSum;
 		ifstream inFile;
 		
+		OptionParser* parser;
+		map<string, string> parameters;
+		map<string, string>::iterator it4;
+		bool abort;
+		string groups, itersString;
+		vector<string> Groups; //holds groups to be used
+
 		void printParsimonyFile();  
 		void printUSummaryFile();
 		void getUserInput();

@@ -31,7 +31,8 @@ class ParseListCommand : public Command {
 public:
 	ParseListCommand();	
 	~ParseListCommand();
-	int execute();	
+	int execute();
+	void help() {}	
 	
 private:
 	GlobalData* globaldata;

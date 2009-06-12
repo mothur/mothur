@@ -33,9 +33,10 @@ class GlobalData;
 
 class ReadOtuCommand : public Command {
 public:
-	ReadOtuCommand();
+	ReadOtuCommand(string);
 	~ReadOtuCommand();
 	int execute();
+	void help();
 	
 private:
 	GlobalData* globaldata;
@@ -44,7 +45,14 @@ private:
 	Command* shared;
 	Command* parselist;
 	GroupMap* groupMap;
-	string filename;
+	string filename, listfile, orderfile, sharedfile, line, label, groupfile, sabundfile, rabundfile, format;
+	OptionParser* parser;
+	map<string, string> parameters;
+	map<string, string>::iterator it;
+	bool abort, allLines;
+	set<int> lines; //hold lines to be used
+	set<string> labels; //holds labels to be used
+
 };
 
 #endif

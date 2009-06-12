@@ -135,7 +135,7 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 		//put file pointer back since you are now at a new distance label
 		f.seekg(pos, ios::beg);
 	
-		if (globaldata->gGroupmap == NULL) { globaldata->gGroupmap = groupmap; }
+		if (globaldata->gGroupmap == NULL) { globaldata->gGroupmap = groupmap;  }
 		
 	}
 	catch(exception& e) {

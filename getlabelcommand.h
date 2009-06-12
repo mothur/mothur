@@ -17,13 +17,15 @@ class GlobalData;
 
 class GetlabelCommand : public Command {
 public:
-	GetlabelCommand();
+	GetlabelCommand(string);
 	~GetlabelCommand();
 	int execute();
+	void help();
 	
 private:
 	GlobalData* globaldata;
 	string filename;
+	bool abort;
 };
 
 #endif

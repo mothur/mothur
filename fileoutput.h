@@ -127,7 +127,7 @@ private:
 class ColumnFile : public FileOutput {
 	
 public:
-	ColumnFile(string n) : FileOutput(), inName(n), counter(0), outName(getPathName(n) + ".temp") { globaldata = GlobalData::getInstance(); };
+	ColumnFile(string n, string i) : FileOutput(), iters(i), inName(n), counter(0), outName(getPathName(n) + ".temp") { globaldata = GlobalData::getInstance(); };
 	~ColumnFile();
 	
 	//to make compatible with parent class
@@ -144,6 +144,7 @@ private:
 	ifstream inFile;
 	ofstream outFile;
 	int counter;
+	string iters;
 };
 
 /***********************************************************************/

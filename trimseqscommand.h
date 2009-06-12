@@ -17,9 +17,10 @@
 
 class TrimSeqsCommand : public Command {
 public:
-	TrimSeqsCommand();
+	TrimSeqsCommand(string);
 	~TrimSeqsCommand();
 	int execute();
+	void help();
 	
 private:
 	void getOligos();
@@ -31,7 +32,11 @@ private:
 	bool cullAmbigs(Sequence&);
 	
 	GlobalData* globaldata;
-
+	OptionParser* parser;
+	map<string, string> parameters;
+	map<string, string>::iterator it;
+	bool abort;
+	string fastafile;
 	bool oligos, flip;
 	int numFPrimers, numRPrimers, maxAmbig, maxHomoP, minLength, maxLength;
 	vector<string> forPrimer, revPrimer;

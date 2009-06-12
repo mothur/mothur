@@ -55,7 +55,8 @@
 
 /***********************************************************/
 CommandFactory::CommandFactory(){
-	command = new NoCommand();
+	string s = "";
+	command = new NoCommand(s);
 }
 /***********************************************************/
 
@@ -68,49 +69,49 @@ CommandFactory::~CommandFactory(){
 
 /***********************************************************/
 //This function calls the appropriate command fucntions based on user input.
-Command* CommandFactory::getCommand(string commandName){
+Command* CommandFactory::getCommand(string commandName, string optionString){
 	try {
 		delete command;   //delete the old command
 
-		if(commandName == "read.dist")					{	command = new ReadDistCommand();			}
-		else if(commandName == "read.otu")				{	command = new ReadOtuCommand();				}
-		else if(commandName == "read.tree")				{	command = new ReadTreeCommand();			}
-		else if(commandName == "cluster")				{	command = new ClusterCommand();				}
-		else if(commandName == "unique.seqs")			{	command = new DeconvoluteCommand();			}
-		else if(commandName == "parsimony")				{	command = new ParsimonyCommand();			}
-		else if(commandName == "help")					{	command = new HelpCommand();				}
-		else if(commandName == "quit")					{	command = new QuitCommand();				}
-		else if(commandName == "collect.single")		{	command = new CollectCommand();				}
-		else if(commandName == "collect.shared")		{	command = new CollectSharedCommand();		}
-		else if(commandName == "rarefaction.single")	{	command = new RareFactCommand();			}
-		else if(commandName == "rarefaction.shared")	{	command = new RareFactSharedCommand();		}
-		else if(commandName == "summary.single")		{	command = new SummaryCommand();				}
-		else if(commandName == "summary.shared")		{	command = new SummarySharedCommand();		}
-		else if(commandName == "unifrac.weighted")		{	command = new UnifracWeightedCommand();		}
-		else if(commandName == "unifrac.unweighted")	{	command = new UnifracUnweightedCommand();	}
-		else if(commandName == "get.group")             {   command = new GetgroupCommand();			}
-		else if(commandName == "get.label")             {   command = new GetlabelCommand();			}
-		else if(commandName == "get.line")              {   command = new GetlineCommand();				}
-		else if(commandName == "get.sabund")            {   command = new GetSAbundCommand();			}
-		else if(commandName == "get.rabund")            {   command = new GetRAbundCommand();			}
-		else if(commandName == "libshuff")              {   command = new LibShuffCommand();			}
-		else if(commandName == "heatmap.bin")			{   command = new HeatMapCommand();				}
-		else if(commandName == "heatmap.sim")			{   command = new HeatMapSimCommand();			}
-		else if(commandName == "filter.seqs")			{   command = new FilterSeqsCommand();          }
-		else if(commandName == "venn")					{   command = new VennCommand();				}
-		else if(commandName == "bin.seqs")				{   command = new BinSeqCommand();				}
-		else if(commandName == "get.oturep")			{   command = new GetOTURepCommand();			}
-		else if(commandName == "tree.shared")			{   command = new TreeGroupCommand();			}
-		else if(commandName == "dist.shared")			{   command = new MatrixOutputCommand();		}
-		else if(commandName == "bootstrap.shared")		{   command = new BootSharedCommand();			}
-		else if(commandName == "concensus")				{   command = new ConcensusCommand();			}
-		else if(commandName == "dist.seqs")				{   command = new DistanceCommand();			}
-		else if(commandName == "align.seqs")			{   command = new AlignCommand();				}
-		else if(commandName == "summary.seqs")			{	command = new SeqSummaryCommand();			}
-		else if(commandName == "screen.seqs")			{	command = new ScreenSeqsCommand();			}
-		else if(commandName == "reverse.seqs")			{	command = new ReverseSeqsCommand();			}
-		else if(commandName == "trim.seqs")				{	command = new TrimSeqsCommand();			}
-		else											{	command = new NoCommand();					}
+		if(commandName == "read.dist")					{	command = new ReadDistCommand(optionString);			}
+		else if(commandName == "read.otu")				{	command = new ReadOtuCommand(optionString);				}
+		else if(commandName == "read.tree")				{	command = new ReadTreeCommand(optionString);			}
+		else if(commandName == "cluster")				{	command = new ClusterCommand(optionString);				}
+		else if(commandName == "unique.seqs")			{	command = new DeconvoluteCommand(optionString);			}
+		else if(commandName == "parsimony")				{	command = new ParsimonyCommand(optionString);			}
+		else if(commandName == "help")					{	command = new HelpCommand(optionString);				}
+		else if(commandName == "quit")					{	command = new QuitCommand(optionString);				}
+		else if(commandName == "collect.single")		{	command = new CollectCommand(optionString);				}
+		else if(commandName == "collect.shared")		{	command = new CollectSharedCommand(optionString);		}
+		else if(commandName == "rarefaction.single")	{	command = new RareFactCommand(optionString);			}
+		else if(commandName == "rarefaction.shared")	{	command = new RareFactSharedCommand(optionString);		}
+		else if(commandName == "summary.single")		{	command = new SummaryCommand(optionString);				}
+		else if(commandName == "summary.shared")		{	command = new SummarySharedCommand(optionString);		}
+		else if(commandName == "unifrac.weighted")		{	command = new UnifracWeightedCommand(optionString);		}
+		else if(commandName == "unifrac.unweighted")	{	command = new UnifracUnweightedCommand(optionString);	}
+		else if(commandName == "get.group")             {   command = new GetgroupCommand(optionString);			}
+		else if(commandName == "get.label")             {   command = new GetlabelCommand(optionString);			}
+		else if(commandName == "get.line")              {   command = new GetlineCommand(optionString);				}
+		else if(commandName == "get.sabund")            {   command = new GetSAbundCommand(optionString);			}
+		else if(commandName == "get.rabund")            {   command = new GetRAbundCommand(optionString);			}
+		else if(commandName == "libshuff")              {   command = new LibShuffCommand(optionString);			}
+		else if(commandName == "heatmap.bin")			{   command = new HeatMapCommand(optionString);				}
+		else if(commandName == "heatmap.sim")			{   command = new HeatMapSimCommand(optionString);			}
+		else if(commandName == "filter.seqs")			{   command = new FilterSeqsCommand(optionString);			}
+		else if(commandName == "venn")					{   command = new VennCommand(optionString);				}
+		else if(commandName == "bin.seqs")				{   command = new BinSeqCommand(optionString);				}
+		else if(commandName == "get.oturep")			{   command = new GetOTURepCommand(optionString);			}
+		else if(commandName == "tree.shared")			{   command = new TreeGroupCommand(optionString);			}
+		else if(commandName == "dist.shared")			{   command = new MatrixOutputCommand(optionString);		}
+		else if(commandName == "bootstrap.shared")		{   command = new BootSharedCommand(optionString);			}
+		else if(commandName == "concensus")				{   command = new ConcensusCommand(optionString);			}
+		else if(commandName == "dist.seqs")				{   command = new DistanceCommand(optionString);			}
+		else if(commandName == "align.seqs")			{   command = new AlignCommand(optionString);				}
+		else if(commandName == "summary.seqs")			{	command = new SeqSummaryCommand(optionString);			}
+		else if(commandName == "screen.seqs")			{	command = new ScreenSeqsCommand(optionString);			}
+		else if(commandName == "reverse.seqs")			{	command = new ReverseSeqsCommand(optionString);			}
+		else if(commandName == "trim.seqs")				{	command = new TrimSeqsCommand(optionString);			}
+		else											{	command = new NoCommand(optionString);					}
 
 		return command;
 	}

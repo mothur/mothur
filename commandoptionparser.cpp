@@ -18,16 +18,18 @@ CommandOptionParser::CommandOptionParser(string input){
 	try {
 		int openParen = input.find_first_of('(');
 		int closeParen = input.find_last_of(')');
-		string optionString = "";
+		optionString = "";
 		commandString = "";
-	
+
 		if(openParen != -1 && closeParen != -1){			
 			commandString = input.substr(0, openParen);   //commandString contains everything before "("
-			optionString = input.substr(openParen+1, closeParen-openParen-1); //optionString contains everything between "(" and ")".
+			optionString = input.substr((openParen+1), (closeParen-openParen-1)); //optionString contains everything between "(" and ")".
 		}
+		else if (openParen == -1) { cout << "You are missing (" << endl; }
+		else if (closeParen == -1) { cout << "You are missing )" << endl; }
 					
-		GlobalData* globaldata = GlobalData::getInstance();
-		globaldata->parseGlobalData(commandString, optionString);			//parser to separate and check options
+		//GlobalData* globaldata = GlobalData::getInstance();
+		//globaldata->parseGlobalData(commandString, optionString);			//parser to separate and check options
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the CommandOptionParser class Function CommandOptionParser. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -43,5 +45,9 @@ CommandOptionParser::CommandOptionParser(string input){
 //**********************************************************************************************************************
 
 string CommandOptionParser::getCommandString()	{	return commandString;	}
+
+//**********************************************************************************************************************
+
+string CommandOptionParser::getOptionString()	{	return optionString;	}
 
 //**********************************************************************************************************************

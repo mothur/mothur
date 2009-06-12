@@ -10,45 +10,122 @@
 #include "getoturepcommand.h"
 
 //**********************************************************************************************************************
-GetOTURepCommand::GetOTURepCommand(){
+GetOTURepCommand::GetOTURepCommand(string option){
 	try{
 		globaldata = GlobalData::getInstance();
-	
-		if(globaldata->gSparseMatrix != NULL)	{	matrix = new SparseMatrix(*globaldata->gSparseMatrix);		}
+		abort = false;
+		allLines = 1;
+		lines.clear();
+		labels.clear();
 		
-		//listOfNames bin 0 = first name read in distance matrix, listOfNames bin 1 = second name read in distance matrix
-		if(globaldata->gListVector != NULL)		{	
-			listOfNames = new ListVector(*globaldata->gListVector);	
+		//allow user to run help
+		if(option == "help") { help(); abort = true; }
+		
+		else {
+			//valid paramters for this command
+			string Array[] =  {"fasta","list","line","label","name", "group"};
+			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
-			vector<string> names;
-			string binnames;
-			//map names to rows in sparsematrix
-			for (int i = 0; i < listOfNames->size(); i++) {
-				names.clear();
-				binnames = listOfNames->get(i);
-				splitAtComma(binnames, names);
-				
-				for (int j = 0; j < names.size(); j++) {
-					nameToIndex[names[j]] = i;
-				}
+			parser = new OptionParser();
+			parser->parse(option, parameters);  delete parser;
+			
+			ValidParameters* validParameter = new ValidParameters();
+		
+			//check to make sure all parameters are valid for command
+			for (it4 = parameters.begin(); it4 != parameters.end(); it4++) { 
+				if (validParameter->isValidParameter(it4->first, myArray, it4->second) != true) {  abort = true;  }
 			}
-		}else { cout << "error, no listvector." << endl; }
+			
+			//make sure the user has already run the read.otu command
+			if ((globaldata->gSparseMatrix == NULL) || (globaldata->gListVector == NULL)) {
+				cout << "Before you use the get.oturep command, you first need to read in a distance matrix." << endl; 
+				abort = true;
+			}
+			
+			//check for required parameters
+			fastafile = validParameter->validFile(parameters, "fasta", true);
+			if (fastafile == "not found") { cout << "fasta is a required parameter for the get.oturep command." << endl; abort = true; }
+			else if (fastafile == "not open") { abort = true; }	
+			else { 
+				globaldata->setFastaFile(fastafile);
+			}
+		
+			listfile = validParameter->validFile(parameters, "list", true);
+			if (listfile == "not found") { cout << "list is a required parameter for the get.oturep command." << endl; abort = true; }
+			else if (listfile == "not open") { abort = true; }	
+			else { 
+				globaldata->setListFile(listfile);
+			}
 
+			//check for optional parameter and set defaults
+			// ...at some point should added some additional type checking...
+			line = validParameter->validFile(parameters, "line", false);				
+			if (line == "not found") { line = "";  }
+			else { 
+				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
+				else { allLines = 1;  }
+			}
+			
+			label = validParameter->validFile(parameters, "label", false);			
+			if (label == "not found") { label = ""; }
+			else { 
+				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				else { allLines = 1;  }
+			}
+			
+			//make sure user did not use both the line and label parameters
+			if ((line != "") && (label != "")) { cout << "You cannot use both the line and label parameters at the same time. " << endl; abort = true; }
+			//if the user has not specified any line or labels use the ones from read.otu
+			else if ((line == "") && (label == "")) {  
+				allLines = globaldata->allLines; 
+				labels = globaldata->labels; 
+				lines = globaldata->lines;
+			}
+			
+			namesfile = validParameter->validFile(parameters, "name", true);
+			if (namesfile == "not open") { abort = true; }	
+			else if (namesfile == "not found") { namesfile = ""; }
+
+			groupfile = validParameter->validFile(parameters, "group", true);
+			if (groupfile == "not open") { abort = true; }
+			else if (groupfile == "not found") { groupfile = ""; }
+			else {
+				//read in group map info.
+				groupMap = new GroupMap(groupfile);
+				groupMap->readMap();
+			}
+	
+			delete validParameter;
+	
+			if (abort == false) {
+			
+				if(globaldata->gSparseMatrix != NULL)	{	matrix = new SparseMatrix(*globaldata->gSparseMatrix);		}	
+					
+				//globaldata->gListVector bin 0 = first name read in distance matrix, globaldata->gListVector bin 1 = second name read in distance matrix
+				if(globaldata->gListVector != NULL)		{
 		
-		fastafile = globaldata->getFastaFile();
-		namesfile = globaldata->getNameFile();
-		groupfile = globaldata->getGroupFile();
+					vector<string> names;
+					string binnames;
+					//map names to rows in sparsematrix
+					for (int i = 0; i < globaldata->gListVector->size(); i++) {
+						names.clear();
+						binnames = globaldata->gListVector->get(i);
+	
+						splitAtComma(binnames, names);
+				
+						for (int j = 0; j < names.size(); j++) {
+							nameToIndex[names[j]] = i;
+						}
+	
+					}
+				}else { cout << "error, no listvector." << endl; }
+				
+				openInputFile(fastafile, in);
+				fasta = new FastaMap();
+			}
 		
-		if (groupfile != "") {
-			//read in group map info.
-			groupMap = new GroupMap(groupfile);
-			groupMap->readMap();
 		}
-
-		openInputFile(fastafile, in);
-		
-		fasta = new FastaMap();
-
+	
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the GetOTURepCommand class Function GetOTURepCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -59,6 +136,31 @@ GetOTURepCommand::GetOTURepCommand(){
 		exit(1);
 	}
 }
+
+//**********************************************************************************************************************
+
+void GetOTURepCommand::help(){
+	try {
+		cout << "The get.oturep command can only be executed after a successful read.dist command." << "\n";
+		cout << "The get.oturep command parameters are list, fasta, name, group, line and label.  The fasta and list parameters are required, and you may not use line and label at the same time." << "\n";
+		cout << "The line and label allow you to select what distance levels you would like a output files created for, and are separated by dashes." << "\n";
+		cout << "The get.oturep command should be in the following format: get.oturep(fasta=yourFastaFile, list=yourListFile, name=yourNamesFile, group=yourGroupFile, line=yourLines, label=yourLabels)." << "\n";
+		cout << "Example get.oturep(fasta=amazon.fasta, list=amazon.fn.list, group=amazon.groups, line=1-3-5, name=amazon.names)." << "\n";
+		cout << "The default value for line and label are all lines in your inputfile." << "\n";
+		cout << "The get.oturep command outputs a .fastarep file for each distance you specify, selecting one OTU representative for each bin." << "\n";
+		cout << "If you provide a groupfile, then it also appends the names of the groups present in that bin." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile)." << "\n" << "\n";
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the GetOTURepCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the GetOTURepCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
 //**********************************************************************************************************************
 
 GetOTURepCommand::~GetOTURepCommand(){
@@ -74,6 +176,9 @@ GetOTURepCommand::~GetOTURepCommand(){
 
 int GetOTURepCommand::execute(){
 	try {
+	
+		if (abort == true) { return 0; }
+		
 		int count = 1;
 		int error;
 		
@@ -89,7 +194,7 @@ int GetOTURepCommand::execute(){
 		}
 		
 		//read list file
-		read = new ReadOTUFile(globaldata->getListFile());	
+		read = new ReadOTUFile(listfile);	
 		read->read(&*globaldata); 
 		
 		input = globaldata->ginput;
@@ -98,13 +203,13 @@ int GetOTURepCommand::execute(){
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
-		set<string> userLabels = globaldata->labels;
-		set<int> userLines = globaldata->lines;
+		set<string> userLabels = labels;
+		set<int> userLines = lines;
 
 		
-		while((list != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
+		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 			
-			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(list->getLabel()) == 1){
+			if(allLines == 1 || lines.count(count) == 1 || labels.count(list->getLabel()) == 1){
 					cout << list->getLabel() << '\t' << count << endl;
 					error = process(list);
 					if (error == 1) { return 0; } //there is an error in hte input files, abort command
@@ -304,7 +409,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 				string nameRep, name, sequence;
 
 				//create output file
-				string outputFileName = getRootName(globaldata->getListFile()) + processList->getLabel() + ".rep.fasta";
+				string outputFileName = getRootName(listfile) + processList->getLabel() + ".rep.fasta";
 				openOutputFile(outputFileName, out);
 				
 				//for each bin in the list vector

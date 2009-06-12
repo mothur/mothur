@@ -16,14 +16,22 @@
 class ScreenSeqsCommand : public Command {
 	
 public:
-	ScreenSeqsCommand();
+	ScreenSeqsCommand(string);
 	~ScreenSeqsCommand();
 	int execute();
+	void help();
+	
 private:
 	void screenNameGroupFile(set<string>);
 	void screenGroupFile(set<string>);
 
 	GlobalData* globaldata;	
+	OptionParser* parser;
+	map<string, string> parameters;
+	map<string, string>::iterator it;
+	bool abort;
+	string fastafile, namefile, groupfile;
+	int startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength;
 };
 
 #endif

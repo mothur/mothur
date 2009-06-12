@@ -17,13 +17,15 @@ class GlobalData;
 
 class GetlineCommand : public Command {
 public:
-	GetlineCommand();
+	GetlineCommand(string);
 	~GetlineCommand();
 	int execute();
+	void help();
 	
 private:
 	GlobalData* globaldata;
 	string filename;
+	bool abort;
 };
 
 #endif

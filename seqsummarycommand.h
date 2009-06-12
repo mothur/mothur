@@ -18,12 +18,19 @@
 
 class SeqSummaryCommand : public Command {
 public:
-	SeqSummaryCommand();
+	SeqSummaryCommand(string);
 	~SeqSummaryCommand();
 	int execute();
+	void help();
 	
 private:
 	GlobalData* globaldata;	
+	OptionParser* parser;
+	map<string, string> parameters;
+	map<string, string>::iterator it;
+	bool abort;
+	string fastafile;
+
 
 };
 

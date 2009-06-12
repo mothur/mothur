@@ -19,12 +19,13 @@
 class QuitCommand : public Command {
 	
 public:
-	QuitCommand();
+	QuitCommand(string);
 	~QuitCommand();
 	int execute();
+	void help();
 	
 private:
-		
+	bool abort;
 };
 
 #endif

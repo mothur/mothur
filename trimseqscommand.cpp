@@ -11,33 +11,63 @@
 
 //***************************************************************************************************************
 
-TrimSeqsCommand::TrimSeqsCommand(){
+TrimSeqsCommand::TrimSeqsCommand(string option){
 	try {
 		
 		globaldata = GlobalData::getInstance();
+		abort = false;
 		
-		oligos = 0;		
+		//allow user to run help
+		if(option == "help") { help(); abort = true; }
+		
+		else {
+			//valid paramters for this command
+			string AlignArray[] =  {"fasta", "flip", "oligos", "maxambig", "maxhomop", "minlength", "maxlength"};
+			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+			
+			parser = new OptionParser();
+			parser->parse(option, parameters);   	delete parser; 
+			
+			ValidParameters* validParameter = new ValidParameters();
+		
+			//check to make sure all parameters are valid for command
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			}
+			
+			//check for required parameters
+			fastafile = validParameter->validFile(parameters, "fasta", true);
+			if (fastafile == "not found") { cout << "fasta is a required parameter for the screen.seqs command." << endl; abort = true; }
+			else if (fastafile == "not open") { abort = true; }	
+			else { globaldata->setFastaFile(fastafile); }
+		
+		
+			//check for optional parameter and set defaults
+			// ...at some point should added some additional type checking...
+			string temp;
+			temp = validParameter->validFile(parameters, "flip", false);			if (temp == "not found") { temp = "0"; }
+			if(isTrue(temp))	{	flip = 1;	}
+		
+			temp = validParameter->validFile(parameters, "oligos", false);			if (temp == "not found") { temp = ""; }
+			if(temp != "")		{	oligos = 1;	 } 
+			else {  oligos = 0;	 }
 
-		if(globaldata->getFastaFile() == ""){
-			cout << "you need to at least enter a fasta file name" << endl;
+			temp = validParameter->validFile(parameters, "maxambig", false);		if (temp == "not found") { temp = "-1"; }
+			convert(temp, maxAmbig);  
+
+			temp = validParameter->validFile(parameters, "maxhomop", false);		if (temp == "not found") { temp = "0"; }
+			convert(temp, maxHomoP);  
+
+			temp = validParameter->validFile(parameters, "minlength", false);		if (temp == "not found") { temp = "0"; }
+			convert(temp, minLength); 
+			
+			temp = validParameter->validFile(parameters, "maxlength", false);		if (temp == "not found") { temp = "0"; }
+			convert(temp, maxLength); 
+			
+			if(!flip && !oligos && !maxLength && !minLength && (maxAmbig==-1) && !maxHomoP ){	cout << "huh?" << endl;	}
+			
+			delete validParameter;
 		}
-		
-		if(isTrue(globaldata->getFlip()))			{	flip = 1;													}
-		if(globaldata->getOligosFile() != "")		{	oligos = 1;													}
-		
-		if(globaldata->getMaxAmbig() != "-1")		{	maxAmbig = atoi(globaldata->getMaxAmbig().c_str());			}
-		else										{	maxAmbig = -1;												}
-		
-		if(globaldata->getMaxHomoPolymer() != "-1")	{	maxHomoP = atoi(globaldata->getMaxHomoPolymer().c_str());	}
-		else										{	maxHomoP = 0;												}
-		
-		if(globaldata->getMinLength() != "-1")		{	minLength = atoi(globaldata->getMinLength().c_str());		}
-		else										{	minLength = 0;												}
-		
-		if(globaldata->getMaxLength() != "-1")		{	maxLength = atoi(globaldata->getMaxLength().c_str());		}
-		else										{	maxLength = 0;												}
-		
-		if(!flip && !oligos && !maxLength && !minLength && (maxAmbig==-1) && !maxHomoP ){	cout << "huh?" << endl;	}
 
 	}
 	catch(exception& e) {
@@ -49,6 +79,36 @@ TrimSeqsCommand::TrimSeqsCommand(){
 		exit(1);
 	}	
 }
+//**********************************************************************************************************************
+
+void TrimSeqsCommand::help(){
+	try {
+		cout << "The trim.seqs command reads a fastafile and creates ....." << "\n";
+		cout << "The trim.seqs command parameters are fasta, flip, oligos, maxambig, maxhomop, minlength and maxlength." << "\n";
+		cout << "The fasta parameter is required." << "\n";
+		cout << "The flip parameter .... The default is 0." << "\n";
+		cout << "The oligos parameter .... The default is ""." << "\n";
+		cout << "The maxambig parameter .... The default is -1." << "\n";
+		cout << "The maxhomop parameter .... The default is 0." << "\n";
+		cout << "The minlength parameter .... The default is 0." << "\n";
+		cout << "The maxlength parameter .... The default is 0." << "\n";
+		cout << "The trim.seqs command should be in the following format: " << "\n";
+		cout << "trim.seqs(fasta=yourFastaFile, flip=yourFlip, oligos=yourOligos, maxambig=yourMaxambig,  " << "\n";
+		cout << "maxhomop=yourMaxhomop, minlength=youMinlength, maxlength=yourMaxlength)  " << "\n";	
+		cout << "Example trim.seqs(fasta=abrecovery.fasta, flip=..., oligos=..., maxambig=..., maxhomop=..., minlength=..., maxlength=...)." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta)." << "\n" << "\n";
+
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the TrimSeqsCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the TrimSeqsCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
 
 //***************************************************************************************************************
 
@@ -58,21 +118,24 @@ TrimSeqsCommand::~TrimSeqsCommand(){	/*	do nothing	*/	}
 
 int TrimSeqsCommand::execute(){
 	try{
+	
+		if (abort == true) { return 0; }
+	
 		getOligos();
 		
 		ifstream inFASTA;
-		openInputFile(globaldata->getFastaFile(), inFASTA);
+		openInputFile(fastafile, inFASTA);
 
 		ofstream outFASTA;
-		string trimSeqFile = getRootName(globaldata->getFastaFile()) + "trim.fasta";
+		string trimSeqFile = getRootName(fastafile) + "trim.fasta";
 		openOutputFile(trimSeqFile, outFASTA);
 		
 		ofstream outGroups;
-		string groupFile = getRootName(globaldata->getFastaFile()) + "groups"; 
+		string groupFile = getRootName(fastafile) + "groups"; 
 		openOutputFile(groupFile, outGroups);
 
 		ofstream scrapFASTA;
-		string scrapSeqFile = getRootName(globaldata->getFastaFile()) + "scrap.fasta";
+		string scrapSeqFile = getRootName(fastafile) + "scrap.fasta";
 		openOutputFile(scrapSeqFile, scrapFASTA);
 
 		bool success;
@@ -144,7 +207,7 @@ int TrimSeqsCommand::execute(){
 void TrimSeqsCommand::getOligos(){
 
 	ifstream inOligos;
-	openInputFile(globaldata->getOligosFile(), inOligos);
+	//openInputFile(globaldata->getOligosFile(), inOligos);
 
 	string type, oligo, group;
 	

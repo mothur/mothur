@@ -13,10 +13,37 @@
 
 //***************************************************************************************************************
 
-ReverseSeqsCommand::ReverseSeqsCommand(){
+ReverseSeqsCommand::ReverseSeqsCommand(string option){
 	try {
 		globaldata = GlobalData::getInstance();
-		if(globaldata->getFastaFile() == "")		{	cout << "you need to at least enter a fasta file name" << endl;	}
+		abort = false;
+		
+		//allow user to run help
+		if(option == "help") { help(); abort = true; }
+		
+		else {
+			//valid paramters for this command
+			string Array[] =  {"fasta"};
+			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			
+			parser = new OptionParser();
+			parser->parse(option, parameters);  delete parser;
+			
+			ValidParameters* validParameter = new ValidParameters();
+		
+			//check to make sure all parameters are valid for command
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			}
+			
+			//check for required parameters
+			fasta = validParameter->validFile(parameters, "fasta", true);
+			if (fasta == "not open") { abort = true; }
+			else if (fasta == "not found") { fasta = ""; cout << "fasta is a required parameter for the reverse.seqs command." << endl; abort = true;  }	
+			else {  globaldata->setFastaFile(fasta);  globaldata->setFormat("fasta"); 	}
+			
+			delete validParameter;
+		}
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ReverseSeqsCommand class Function ReverseSeqsCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -24,6 +51,24 @@ ReverseSeqsCommand::ReverseSeqsCommand(){
 	}
 	catch(...) {
 		cout << "An unknown error has occurred in the ReverseSeqsCommand class function ReverseSeqsCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+//**********************************************************************************************************************
+
+void ReverseSeqsCommand::help(){
+	try {
+		cout << "The reverse.seqs command reads a fastafile and ...." << "\n";
+		cout << "The reverse.seqs command parameter is fasta and it is required." << "\n";
+		cout << "The reverse.seqs command should be in the following format: " << "\n";
+		cout << "reverse.seqs(fasta=yourFastaFile) " << "\n";	
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ReverseSeqsCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ReverseSeqsCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
 }
@@ -38,11 +83,13 @@ ReverseSeqsCommand::~ReverseSeqsCommand(){	/*	do nothing	*/	}
 int ReverseSeqsCommand::execute(){
 	try{
 		
+		if (abort == true) { return 0; }
+		
 		ifstream inFASTA;
-		openInputFile(globaldata->getFastaFile(), inFASTA);
+		openInputFile(fasta, inFASTA);
 		
 		ofstream outFASTA;
-		string reverseFile = getRootName(globaldata->getFastaFile()) + "rc" + getExtension(globaldata->getFastaFile());
+		string reverseFile = getRootName(fasta) + "rc" + getExtension(fasta);
 		openOutputFile(reverseFile, outFASTA);
 		
 		while(!inFASTA.eof()){

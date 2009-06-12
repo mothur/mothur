@@ -15,9 +15,10 @@
 
 class GetgroupCommand : public Command {
 public:
-	GetgroupCommand();
+	GetgroupCommand(string);
 	~GetgroupCommand();
 	int execute();
+	void help();
 	
 private:
 	GlobalData* globaldata;
@@ -25,6 +26,7 @@ private:
 	string outputFile, sharedfile;
 	ofstream out;
 	ifstream in;
+	bool abort;
 
 };
 

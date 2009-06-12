@@ -42,9 +42,10 @@ bool InteractEngine::getInput(){
 	try {
 		string input = "";
 		string commandName = "";
+		string options = "";
 		int quitCommandCalled = 0;
-		bool errorFree;
-		ErrorCheck* errorCheckor = new ErrorCheck();
+		//bool errorFree;
+		//ErrorCheck* errorCheckor = new ErrorCheck();
 		
 		cout << "mothur v.1.3.0" << endl;
 		cout << "Last updated: 5/29/2009" << endl << endl;
@@ -67,18 +68,21 @@ bool InteractEngine::getInput(){
 			//allow user to omit the () on the quit command
 			if (input == "quit") { input = "quit()"; }
 			
-			errorFree = errorCheckor->checkInput(input);
-			if (errorFree == true) {
-				CommandOptionParser parser(input);
-				commandName = parser.getCommandString();
+			//errorFree = errorCheckor->checkInput(input);
+			//if (errorFree == true) {
+			CommandOptionParser parser(input);
+			commandName = parser.getCommandString();
+			options = parser.getOptionString();
+			
+			if (commandName != "") {
 			
 				//executes valid command
 				CommandFactory cFactory;
-				Command* command = cFactory.getCommand(commandName);
+				Command* command = cFactory.getCommand(commandName, options);
 				quitCommandCalled = command->execute();
-		
+				
 			}else {
-					cout << "Your input contains errors. Please try again." << endl;
+				cout << "Your input contains errors. Please try again." << endl;
 			}
 		}	
 		return 1;
@@ -135,43 +139,36 @@ bool BatchEngine::getInput(){
 	
 		string input = "";
 		string commandName = "";
-		bool errorFree;
-		ErrorCheck* errorCheckor = new ErrorCheck();
-
-		CommandFactory cFactory;
+		string options = "";
+		
+		//CommandFactory cFactory;
 		int quitCommandCalled = 0;
 	
 		while(quitCommandCalled == 0){
 		
-			getline(inputBatchFile, input);
+			if (inputBatchFile.eof()) { input = "quit()"; }
+			else { getline(inputBatchFile, input); }
+			
 			if (input[0] != '#') {
-				if (inputBatchFile.eof()) { input = "quit()"; }
 			
 				cout << endl << "mothur > " << input << endl;
 				
 				//allow user to omit the () on the quit command
 				if (input == "quit") { input = "quit()"; }
 
-				errorFree = errorCheckor->checkInput(input);
-				if (errorFree == true) {
-					CommandOptionParser parser(input);
-					commandName = parser.getCommandString();
-					ifstream filehandle;
-		
-					if (openedBatch == 0) { //able to open batchfile
-						//executes valid command
-						CommandFactory cFactory;
-						Command* command = cFactory.getCommand(commandName);
-						quitCommandCalled = command->execute();
-					}
-					else {
-						cout << "Invalid." << endl;
-					}
-				}
-				else {
-					cout << "Unable to open batchfile." << endl;
-				}
-			}else { if (inputBatchFile.eof()) { input = "quit()"; } }
+				CommandOptionParser parser(input);
+				commandName = parser.getCommandString();
+				options = parser.getOptionString();
+										
+				if (commandName != "") {
+
+					//executes valid command
+					CommandFactory cFactory;
+					Command* command = cFactory.getCommand(commandName, options);
+					quitCommandCalled = command->execute();
+				}else {		cout << "Invalid." << endl;		}
+				
+			}
 		}
 		return 1;
 	}

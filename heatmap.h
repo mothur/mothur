@@ -19,7 +19,7 @@
 class HeatMap {
 	
 	public:
-		HeatMap();
+		HeatMap(string, string);
 		~HeatMap(){};
 	
 		void getPic(RAbundVector*);

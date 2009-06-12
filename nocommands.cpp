@@ -8,10 +8,11 @@
  */
 
 #include "nocommands.h"
+#include "validcommands.h"
 
 //**********************************************************************************************************************
 
-NoCommand::NoCommand(){}
+NoCommand::NoCommand(string option){}
 
 //**********************************************************************************************************************
 
@@ -22,7 +23,11 @@ NoCommand::~NoCommand(){}
 int NoCommand::execute(){
 	//Could choose to give more help here?fdsah
 	cout << "Invalid command." << "\n";
-	cout << "For more information on command parameters use the help() command." << "\n";
+	
+	ValidCommands* valid = new ValidCommands();
+	valid->printCommands(cout);
+	delete valid;
+	
 	return 0;
 }
 

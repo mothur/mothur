@@ -17,9 +17,10 @@
 class FilterSeqsCommand : public Command {
 
 public:
-	FilterSeqsCommand();
+	FilterSeqsCommand(string);
 	~FilterSeqsCommand() {};
 	int execute();	
+	void help();
 	
 private:
 	void doHard();
@@ -27,13 +28,16 @@ private:
 	void doVertical();
 	void doSoft();
 	void getFreqs(Sequence);
-	string filter;	
+	string vertical, filter, fastafile, hard;	
 	int alignmentLength;
 
 	char trump;
-	bool vertical;
+	bool abort;
 	float soft;
 	int numSeqs;
+	OptionParser* parser;
+	map<string, string> parameters;
+	map<string, string>::iterator it;
 	
 	GlobalData* globaldata;	
 	vector<int> a, t, g, c, gap;

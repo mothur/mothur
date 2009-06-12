@@ -34,9 +34,10 @@ typedef list<PCell>::iterator MatData;
 class TreeGroupCommand : public Command {
 	
 public:
-	TreeGroupCommand();	
+	TreeGroupCommand(string);	
 	~TreeGroupCommand();
 	int execute();	
+	void help();
 	
 private:
 	void createTree();
@@ -63,8 +64,19 @@ private:
 	int numGroups;
 	ofstream out;
 	float precision, cutoff;
+	OptionParser* parser;
+	map<string, string> parameters;
+	map<string, string>::iterator it;
+	bool abort, allLines;
+	set<int> lines; //hold lines to be used
+	set<string> labels; //holds labels to be used
+	string phylipfile, columnfile, namefile, calc, groups, line, label;
+	vector<string>  Estimators, Groups; //holds estimators to be used
+	
 	//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 	void process(vector<SharedRAbundVector*>);
+	
+	
 
 };
 	

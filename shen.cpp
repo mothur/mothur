@@ -22,9 +22,6 @@ EstOutput Shen::getValues(SAbundVector* rank){
 		double n = (double)rank->getNumSeqs();
 		double f1 = (double)rank->get(1);
 		
-		int abund;
-		convert(globaldata->getAbund(), abund);
-		
 		Ace* calc = new Ace(abund);
 		EstOutput ace = calc->getValues(rank);
 		

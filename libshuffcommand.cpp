@@ -20,23 +20,77 @@
 
 //**********************************************************************************************************************
 
-LibShuffCommand::LibShuffCommand(){
+LibShuffCommand::LibShuffCommand(string option){
 	try {
 		srand( (unsigned)time( NULL ) );
 		
 		globaldata = GlobalData::getInstance();
-		convert(globaldata->getCutOff(), cutOff);	//get the cutoff
-		convert(globaldata->getIters(), iters);		//get the number of iterations
-		convert(globaldata->getStep(), step);		//get the step size for the discrete command
-		matrix = globaldata->gMatrix;				//get the distance matrix
-		setGroups();								//set the groups to be analyzed
+		abort = false;
+		Groups.clear();
+		
+		
+		//allow user to run help
+		if(option == "help") { help(); abort = true; }
+		
+		else {
+			//valid paramters for this command
+			string Array[] =  {"iters","groups","step","form","cutoff"};
+			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			
+			parser = new OptionParser();
+			parser->parse(option, parameters);  delete parser;
+			
+			ValidParameters* validParameter = new ValidParameters();
+		
+			//check to make sure all parameters are valid for command
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			}
+			
+			//make sure the user has already run the read.dist command
+			if ((globaldata->gMatrix == NULL) || (globaldata->gGroupmap == NULL)) {
+				cout << "You must read in a matrix and groupfile using the read.dist command, before you use the libshuff command. " << endl; abort = true;; 
+			}
+						
+			//check for optional parameter and set defaults
+			// ...at some point should added some additional type checking...
+			groups = validParameter->validFile(parameters, "groups", false);			
+			if (groups == "not found") { groups = ""; savegroups = groups; }
+			else { 
+				savegroups = groups;
+				splitAtDash(groups, Groups);
+				globaldata->Groups = Groups;
+			}
+				
+			string temp;
+			temp = validParameter->validFile(parameters, "iters", false);				if (temp == "not found") { temp = "10000"; }
+			convert(temp, iters); 
+			
+			temp = validParameter->validFile(parameters, "cutoff", false);				if (temp == "not found") { temp = "1.0"; }
+			convert(temp, cutOff); 
+			
+			temp = validParameter->validFile(parameters, "step", false);				if (temp == "not found") { temp = "0.01"; }
+			convert(temp, step); 
+	
+			userform = validParameter->validFile(parameters, "form", false);			if (userform == "not found") { userform = "integral"; }
+			
+			delete validParameter;
+			
+			if (abort == false) {
+			
+				matrix = globaldata->gMatrix;				//get the distance matrix
+				setGroups();								//set the groups to be analyzed
 
-		if(globaldata->getForm() == "discrete"){
-			form = new DLibshuff(matrix, iters, step, cutOff);
+				if(userform == "discrete"){
+					form = new DLibshuff(matrix, iters, step, cutOff);
+				}
+				else{
+					form = new SLibshuff(matrix, iters, cutOff);
+				}
+			}
+			
 		}
-		else{
-			form = new SLibshuff(matrix, iters, cutOff);
-		}
+		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the LibShuffCommand class Function LibShuffCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -48,12 +102,39 @@ LibShuffCommand::LibShuffCommand(){
 	}	
 			
 }
+//**********************************************************************************************************************
+
+void LibShuffCommand::help(){
+	try {
+		cout << "The libshuff command can only be executed after a successful read.dist command including a groupfile." << "\n";
+		cout << "The libshuff command parameters are groups, iters, step, form and cutoff.  No parameters are required." << "\n";
+		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups." << "\n";
+		cout << "The group names are separated by dashes.  The iters parameter allows you to specify how many random matrices you would like compared to your matrix." << "\n";
+		cout << "The step parameter allows you to specify change in distance you would like between each output if you are using the discrete form." << "\n";
+		cout << "The form parameter allows you to specify if you would like to analyze your matrix using the discrete or integral form. Your options are integral or discrete." << "\n";
+		cout << "The libshuff command should be in the following format: libshuff(groups=yourGroups, iters=yourIters, cutOff=yourCutOff, form=yourForm, step=yourStep)." << "\n";
+		cout << "Example libshuff(groups=A-B-C, iters=500, form=discrete, step=0.01, cutOff=2.0)." << "\n";
+		cout << "The default value for groups is all the groups in your groupfile, iters is 10000, cutoff is 1.0, form is integral and step is 0.01." << "\n";
+		cout << "The libshuff command output two files: .coverage and .slsummary their descriptions are in the manual." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. iters), '=' and parameters (i.e.yourIters)." << "\n" << "\n";
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the LibShuffCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the LibShuffCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
 
 //**********************************************************************************************************************
 
 int LibShuffCommand::execute(){
 	try {
-
+		
+		if (abort == true) {	return 0;	}
+		
 		savedDXYValues = form->evaluateAll();
 		savedMinValues = form->getSavedMins();
 		
@@ -87,6 +168,9 @@ int LibShuffCommand::execute(){
 		//clear out users groups
 		globaldata->Groups.clear();
 		delete form;
+		
+		//delete globaldata's copy of the gmatrix to free up memory
+		delete globaldata->gMatrix;  globaldata->gMatrix = NULL;
 		
 		return 0;
 	}
@@ -247,13 +331,13 @@ void LibShuffCommand::setGroups() {
 				globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
 			}
 		} else {
-			if (globaldata->getGroups() != "all") {
+			if (savegroups != "all") {
 				//check that groups are valid
 				for (int i = 0; i < globaldata->Groups.size(); i++) {
 					if (globaldata->gGroupmap->isValidGroup(globaldata->Groups[i]) != true) {
 						cout << globaldata->Groups[i] << " is not a valid group, and will be disregarded." << endl;
 						// erase the invalid group from globaldata->Groups
-						globaldata->Groups.erase (globaldata->Groups.begin()+i);
+						globaldata->Groups.erase(globaldata->Groups.begin()+i);
 					}
 				}
 			

@@ -26,9 +26,10 @@ class GlobalData;
 
 class ReadDistCommand : public Command {
 public:
-	ReadDistCommand();
+	ReadDistCommand(string);
 	~ReadDistCommand();
 	int execute();
+	void help();
 	
 private:
 	GlobalData* globaldata;
@@ -38,7 +39,13 @@ private:
 	FullMatrix* matrix;
 	GroupMap* groupMap;
 	string filename, format, method;
+	string phylipfile, columnfile, namefile, groupfile;
 	NameAssignment* nameMap;
+	OptionParser* parser;
+	map<string, string> parameters;
+	map<string, string>::iterator it;
+	bool abort;
+
 };
 
 #endif

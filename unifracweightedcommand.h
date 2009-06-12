@@ -23,9 +23,10 @@ class GlobalData;
 class UnifracWeightedCommand : public Command {
 	
 	public:
-		UnifracWeightedCommand();	
+		UnifracWeightedCommand(string);	
 		~UnifracWeightedCommand() { delete weighted; delete util; }
 		int execute();	
+		void help();
 	
 	private:
 		GlobalData* globaldata;
@@ -49,6 +50,14 @@ class UnifracWeightedCommand : public Command {
 		map<float, float>  validScores;  //map contains scores from random
 		map<float, float>::iterator it2;
 		map<float, float>::iterator it;
+		
+		OptionParser* parser;
+		map<string, string> parameters;
+		map<string, string>::iterator it4;
+		bool abort;
+		string groups, itersString;
+		vector<string> Groups; //holds groups to be used
+
 		
 		ofstream outSum, out;
 		ifstream inFile;

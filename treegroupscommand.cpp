@@ -22,43 +22,144 @@
 
 //**********************************************************************************************************************
 
-TreeGroupCommand::TreeGroupCommand(){
+TreeGroupCommand::TreeGroupCommand(string option){
 	try {
 		globaldata = GlobalData::getInstance();
-		format = globaldata->getFormat();
-		validCalculator = new ValidCalculators();
+		abort = false;
+		allLines = 1;
+		lines.clear();
+		labels.clear();
+		Groups.clear();
+		Estimators.clear();
 		
-		if (format == "sharedfile") {
-			int i;
-			for (i=0; i<globaldata->Estimators.size(); i++) {
-				if (validCalculator->isValidCalculator("treegroup", globaldata->Estimators[i]) == true) { 
-					if (globaldata->Estimators[i] == "jabund") { 	
-						treeCalculators.push_back(new JAbund());
-					}else if (globaldata->Estimators[i] == "sorabund") { 
-						treeCalculators.push_back(new SorAbund());
-					}else if (globaldata->Estimators[i] == "jclass") { 
-						treeCalculators.push_back(new Jclass());
-					}else if (globaldata->Estimators[i] == "sorclass") { 
-						treeCalculators.push_back(new SorClass());
-					}else if (globaldata->Estimators[i] == "jest") { 
-						treeCalculators.push_back(new Jest());
-					}else if (globaldata->Estimators[i] == "sorest") { 
-						treeCalculators.push_back(new SorEst());
-					}else if (globaldata->Estimators[i] == "thetayc") { 
-						treeCalculators.push_back(new ThetaYC());
-					}else if (globaldata->Estimators[i] == "thetan") { 
-						treeCalculators.push_back(new ThetaN());
-					}else if (globaldata->Estimators[i] == "morisitahorn") { 
-						treeCalculators.push_back(new MorHorn());
-					}else if (globaldata->Estimators[i] == "braycurtis") { 
-						treeCalculators.push_back(new BrayCurtis());
+		//allow user to run help
+		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; }
+		
+		else {
+			//valid paramters for this command
+			string Array[] =  {"line","label","calc","groups", "phylip", "column", "name", "precision","cutoff"};
+			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			
+			parser = new OptionParser();
+			parser->parse(option, parameters);  delete parser;
+			
+			ValidParameters* validParameter = new ValidParameters();
+		
+			//check to make sure all parameters are valid for command
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			}
+			
+			//required parameters
+			phylipfile = validParameter->validFile(parameters, "phylip", true);
+			if (phylipfile == "not open") { abort = true; }
+			else if (phylipfile == "not found") { phylipfile = ""; }	
+			else {  globaldata->setPhylipFile(phylipfile);  globaldata->setFormat("phylip"); 	}
+			
+			columnfile = validParameter->validFile(parameters, "column", true);
+			if (columnfile == "not open") { abort = true; }	
+			else if (columnfile == "not found") { columnfile = ""; }
+			else {  globaldata->setColumnFile(columnfile); globaldata->setFormat("column");	}
+			
+			namefile = validParameter->validFile(parameters, "name", true);
+			if (namefile == "not open") { abort = true; }	
+			else if (namefile == "not found") { namefile = ""; }
+			else {  globaldata->setNameFile(namefile);	}
+			
+			format = globaldata->getFormat();
+			
+			//error checking on files			
+			if ((globaldata->getSharedFile() == "") && ((phylipfile == "") && (columnfile == "")))	{ cout << "You must run the read.otu command or provide a distance file before running the tree.shared command." << endl; abort = true; }
+			else if ((phylipfile != "") && (columnfile != "")) { cout << "When running the tree.shared command with a distance file you may not use both the column and the phylip parameters." << endl; abort = true; }
+			
+			if (columnfile != "") {
+				if (namefile == "") {  cout << "You need to provide a namefile if you are going to use the column format." << endl; abort = true; }
+			}
+
+			//check for optional parameter and set defaults
+			// ...at some point should added some additional type checking...
+			line = validParameter->validFile(parameters, "line", false);				
+			if (line == "not found") { line = "";  }
+			else { 
+				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
+				else { allLines = 1;  }
+			}
+			
+			label = validParameter->validFile(parameters, "label", false);			
+			if (label == "not found") { label = ""; }
+			else { 
+				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				else { allLines = 1;  }
+			}
+			
+			//make sure user did not use both the line and label parameters
+			if ((line != "") && (label != "")) { cout << "You cannot use both the line and label parameters at the same time. " << endl; abort = true; }
+			//if the user has not specified any line or labels use the ones from read.otu
+			else if((line == "") && (label == "")) {  
+				allLines = globaldata->allLines; 
+				labels = globaldata->labels; 
+				lines = globaldata->lines;
+			}
+				
+			groups = validParameter->validFile(parameters, "groups", false);			
+			if (groups == "not found") { groups = ""; }
+			else { 
+				splitAtDash(groups, Groups);
+				globaldata->Groups = Groups;
+			}
+				
+			calc = validParameter->validFile(parameters, "calc", false);			
+			if (calc == "not found") { calc = "jclass-thetayc";  }
+			else { 
+				 if (calc == "default")  {  calc = "jclass-thetayc";  }
+			}
+			splitAtDash(calc, Estimators);
+
+			string temp;
+			temp = validParameter->validFile(parameters, "precision", false);			if (temp == "not found") { temp = "100"; }
+			convert(temp, precision); 
+			
+			temp = validParameter->validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "10"; }
+			convert(temp, cutoff); 
+			cutoff += (5 / (precision * 10.0));
+
+	
+			delete validParameter;
+			
+			if (abort == false) {
+			
+				validCalculator = new ValidCalculators();
+				
+				if (format == "sharedfile") {
+					int i;
+					for (i=0; i<Estimators.size(); i++) {
+						if (validCalculator->isValidCalculator("treegroup", Estimators[i]) == true) { 
+							if (Estimators[i] == "jabund") { 	
+								treeCalculators.push_back(new JAbund());
+							}else if (Estimators[i] == "sorabund") { 
+								treeCalculators.push_back(new SorAbund());
+							}else if (Estimators[i] == "jclass") { 
+								treeCalculators.push_back(new Jclass());
+							}else if (Estimators[i] == "sorclass") { 
+								treeCalculators.push_back(new SorClass());
+							}else if (Estimators[i] == "jest") { 
+								treeCalculators.push_back(new Jest());
+							}else if (Estimators[i] == "sorest") { 
+								treeCalculators.push_back(new SorEst());
+							}else if (Estimators[i] == "thetayc") { 
+								treeCalculators.push_back(new ThetaYC());
+							}else if (Estimators[i] == "thetan") { 
+								treeCalculators.push_back(new ThetaN());
+							}else if (Estimators[i] == "morisitahorn") { 
+								treeCalculators.push_back(new MorHorn());
+							}else if (Estimators[i] == "braycurtis") { 
+								treeCalculators.push_back(new BrayCurtis());
+							}
+						}
 					}
 				}
-			}
+			}	
 		}
-		
-		//reset calc for next command
-		globaldata->setCalc("");
 
 	}
 	catch(exception& e) {
@@ -70,6 +171,39 @@ TreeGroupCommand::TreeGroupCommand(){
 		exit(1);
 	}	
 }
+
+//**********************************************************************************************************************
+
+void TreeGroupCommand::help(){
+	try {
+		cout << "The tree.shared command creates a .tre to represent the similiarity between groups or sequences." << "\n";
+		cout << "The tree.shared command can only be executed after a successful read.otu command or by providing a distance file." << "\n";
+		cout << "The tree.shared command parameters are groups, calc, phylip, column, name, cutoff, precision, line and label.  You may not use line and label at the same time." << "\n";
+		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like included used." << "\n";
+		cout << "The group names are separated by dashes. The line and label allow you to select what distance levels you would like trees created for, and are also separated by dashes." << "\n";
+		cout << "The phylip or column parameter are required if you do not run the read.otu command first, and only one may be used.  If you use a column file the name filename is required. " << "\n";
+		cout << "If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed." << "\n";
+		cout << "The tree.shared command should be in the following format: tree.shared(groups=yourGroups, calc=yourCalcs, line=yourLines, label=yourLabels)." << "\n";
+		cout << "Example tree.shared(groups=A-B-C, line=1-3-5, calc=jabund-sorabund)." << "\n";
+		cout << "The default value for groups is all the groups in your groupfile." << "\n";
+		cout << "The default value for calc is jclass-thetayc." << "\n";
+		cout << "The tree.shared command outputs a .tre file for each calculator you specify at each distance you choose." << "\n";
+		validCalculator->printCalc("treegroup", cout);
+		cout << "Or the tree.shared command can be in the following format: tree.shared(phylip=yourPhylipFile)." << "\n";
+		cout << "Example tree.shared(phylip=abrecovery.dist)." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups)." << "\n" << "\n";
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the TreeGroupCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the TreeGroupCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
+
 //**********************************************************************************************************************
 
 TreeGroupCommand::~TreeGroupCommand(){
@@ -77,6 +211,7 @@ TreeGroupCommand::~TreeGroupCommand(){
 	if (format == "sharedfile") {delete read;}
 	else { delete readMatrix;  delete matrix; delete list; }
 	delete tmap;
+	delete validCalculator;
 	
 }
 
@@ -84,6 +219,9 @@ TreeGroupCommand::~TreeGroupCommand(){
 
 int TreeGroupCommand::execute(){
 	try {
+	
+		if (abort == true) { return 0; }
+		
 		if (format == "sharedfile") {
 			//if the users entered no valid calculators don't execute command
 			if (treeCalculators.size() == 0) { cout << "You have given no valid calculators." << endl; return 0; }
@@ -107,18 +245,10 @@ int TreeGroupCommand::execute(){
 			if (format == "column") { readMatrix = new ReadColumnMatrix(filename); }	
 			else if (format == "phylip") { readMatrix = new ReadPhylipMatrix(filename); }
 				
-			if(globaldata->getPrecision() != ""){
-				convert(globaldata->getPrecision(), precision);	
-			}
-		
-			if(globaldata->getCutOff() != ""){
-				convert(globaldata->getCutOff(), cutoff);	
-				cutoff += (5 / (precision * 10.0));
-			}
 			readMatrix->setCutoff(cutoff);
 	
-			if(globaldata->getNameFile() != ""){	
-				nameMap = new NameAssignment(globaldata->getNameFile());
+			if(namefile != ""){	
+				nameMap = new NameAssignment(namefile);
 				nameMap->readMap(1,2);
 			}
 			else{
@@ -148,10 +278,11 @@ int TreeGroupCommand::execute(){
 			outputFile = getRootName(globaldata->inputFileName) + "tre";	
 				
 			createTree();
+			cout << "Tree complete. " << endl;
 		}
 				
 		//reset groups parameter
-		globaldata->Groups.clear();  globaldata->setGroups("");
+		globaldata->Groups.clear();  
 
 		return 0;
 	}
@@ -328,13 +459,13 @@ void TreeGroupCommand::makeSimsShared() {
 		globaldata->gTreemap = tmap;
 		
 		set<string> processedLabels;
-		set<string> userLabels = globaldata->labels;
-		set<int> userLines = globaldata->lines;
+		set<string> userLabels = labels;
+		set<int> userLines = lines;
 
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
+		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 		
-			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(lookup[0]->getLabel()) == 1){			
+			if(allLines == 1 || lines.count(count) == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 				cout << lookup[0]->getLabel() << '\t' << count << endl;
 				process(lookup);
 				
@@ -397,7 +528,7 @@ void TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
 	try{
 				EstOutput data;
 				vector<SharedRAbundVector*> subset;
-				numGroups = globaldata->Groups.size();
+				numGroups = thisLookup.size();
 				
 				//for each calculator												
 				for(int i = 0 ; i < treeCalculators.size(); i++) {

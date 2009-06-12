@@ -160,14 +160,14 @@ void ColumnFile::output(vector<double> data){
 			string inputBuffer;
 			getline(inFile, inputBuffer);
 
-			outFile << inputBuffer << '\t' << setprecision(6) << data[0] << setprecision(globaldata->getIters().length());
+			outFile << inputBuffer << '\t' << setprecision(6) << data[0] << setprecision(iters.length());
 			for (int i = 1; i< data.size(); i++) {
 				outFile << '\t' << data[i]; 
 			}
 			outFile << endl;
 		}
 		else{
-			outFile << setprecision(6) << data[0] << setprecision(globaldata->getIters().length());
+			outFile << setprecision(6) << data[0] << setprecision(iters.length());
 			for (int i = 1; i< data.size(); i++) {
 				outFile << '\t' << data[i]; 
 			}
