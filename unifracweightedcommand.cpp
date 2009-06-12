@@ -10,24 +10,64 @@
 #include "unifracweightedcommand.h"
 
 /***********************************************************/
-UnifracWeightedCommand::UnifracWeightedCommand() {
+UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 	try {
 		globaldata = GlobalData::getInstance();
+		abort = false;
+		Groups.clear();
 		
-		T = globaldata->gTree;
-		tmap = globaldata->gTreemap;
-		sumFile = globaldata->getTreeFile() + ".wsummary";
-		openOutputFile(sumFile, outSum);
+		//allow user to run help
+		if(option == "help") { help(); abort = true; }
+		
+		else {
+			//valid paramters for this command
+			string Array[] =  {"groups","iters"};
+			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			
+			parser = new OptionParser();
+			parser->parse(option, parameters);  delete parser;
+			
+			ValidParameters* validParameter = new ValidParameters();
+		
+			//check to make sure all parameters are valid for command
+			for (it4 = parameters.begin(); it4 != parameters.end(); it4++) { 
+				if (validParameter->isValidParameter(it4->first, myArray, it4->second) != true) {  abort = true;  }
+			}
+			
+			if (globaldata->gTree.size() == 0) {//no trees were read
+				cout << "You must execute the read.tree command, before you may execute the unifrac.weighted command." << endl; abort = true;  }
+										
+			//check for optional parameter and set defaults
+			// ...at some point should added some additional type checking...
+			groups = validParameter->validFile(parameters, "groups", false);			
+			if (groups == "not found") { groups = ""; }
+			else { 
+				splitAtDash(groups, Groups);
+				globaldata->Groups = Groups;
+			}
 				
-		util = new SharedUtil();
-		string s; //to make work with setgroups
-		util->setGroups(globaldata->Groups, tmap->namesOfGroups, s, numGroups, "weighted");	//sets the groups the user wants to analyze
-		util->getCombos(groupComb, globaldata->Groups, numComp);
-		globaldata->setGroups("");
+			itersString = validParameter->validFile(parameters, "iters", false);			if (itersString == "not found") { itersString = "1000"; }
+			convert(itersString, iters); 
+			
+			delete validParameter;
+			
+			if (abort == false) {
+				T = globaldata->gTree;
+				tmap = globaldata->gTreemap;
+				sumFile = globaldata->getTreeFile() + ".wsummary";
+				openOutputFile(sumFile, outSum);
 				
-		convert(globaldata->getIters(), iters);  //how many random trees to generate
-		weighted = new Weighted(tmap);
-
+				util = new SharedUtil();
+				string s; //to make work with setgroups
+				util->setGroups(globaldata->Groups, tmap->namesOfGroups, s, numGroups, "weighted");	//sets the groups the user wants to analyze
+				util->getCombos(groupComb, globaldata->Groups, numComp);
+				
+				weighted = new Weighted(tmap);
+				
+			}
+		}
+		
+		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the UnifracWeightedCommand class Function UnifracWeightedCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -38,9 +78,36 @@ UnifracWeightedCommand::UnifracWeightedCommand() {
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+
+void UnifracWeightedCommand::help(){
+	try {
+		cout << "The unifrac.weighted command can only be executed after a successful read.tree command." << "\n";
+		cout << "The unifrac.weighted command parameters are groups and iters.  No parameters are required." << "\n";
+		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups." << "\n";
+		cout << "The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree." << "\n";
+		cout << "The unifrac.weighted command should be in the following format: unifrac.weighted(groups=yourGroups, iters=yourIters)." << "\n";
+		cout << "Example unifrac.weighted(groups=A-B-C, iters=500)." << "\n";
+		cout << "The default value for groups is all the groups in your groupfile, and iters is 1000." << "\n";
+		cout << "The unifrac.weighted command output two files: .weighted and .wsummary their descriptions are in the manual." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups)." << "\n" << "\n";
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the UnifracWeightedCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the UnifracWeightedCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
 /***********************************************************/
 int UnifracWeightedCommand::execute() {
 	try {
+	
+		if (abort == true) { return 0; }
+		
 		Progress* reading;
 		reading = new Progress("Comparing to random:", iters);
 		
@@ -57,7 +124,7 @@ int UnifracWeightedCommand::execute() {
 			rScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
 			uScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
 			
-			output = new ColumnFile(globaldata->getTreeFile()  + toString(i+1) + ".weighted");
+			output = new ColumnFile(globaldata->getTreeFile()  + toString(i+1) + ".weighted", itersString);
 
 			userData = weighted->getValues(T[i]);  //userData[0] = weightedscore
 			
@@ -189,11 +256,11 @@ void UnifracWeightedCommand::printWSummaryFile() {
 		for (int i = 0; i < T.size(); i++) { 
 			for (int j = 0; j < numComp; j++) {
 				if (WScoreSig[count] > (1/(float)iters)) {
-					outSum << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << setprecision(globaldata->getIters().length()) << WScoreSig[count] << endl; 
-					cout << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << setprecision(globaldata->getIters().length()) << WScoreSig[count] << endl; 
+					outSum << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << setprecision(itersString.length()) << WScoreSig[count] << endl; 
+					cout << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << setprecision(itersString.length()) << WScoreSig[count] << endl; 
 				}else{
-					outSum << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << setprecision(globaldata->getIters().length()) << "<" << (1/float(iters)) << endl; 
-					cout << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << setprecision(globaldata->getIters().length()) << "<" << (1/float(iters)) << endl; 
+					outSum << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << setprecision(itersString.length()) << "<" << (1/float(iters)) << endl; 
+					cout << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << setprecision(itersString.length()) << "<" << (1/float(iters)) << endl; 
 				}
 				count++;
 			}

@@ -20,7 +20,6 @@ public:
 	Tree();		//to generate a tree from a file
 	~Tree();
 	
-	
 	void getCopy(Tree*);  //makes tree a copy of the one passed in.
 	void assembleRandomTree();
 	void assembleRandomUnifracTree(vector<string>);
@@ -55,6 +54,11 @@ private:
 	void randomLabels(vector<string>);
 	void randomLabels(string, string);
 	void printBranch(int, ostream&, string);  //recursively print out tree
+	void parseTreeFile();	//parses through tree file to find names of nodes and number of them
+							//this is required in case user has sequences in the names file that are
+							//not included in the tree. 
+							//only takes names from the first tree in the tree file and assumes that all trees use the same names.
+	void readTreeString(ifstream&);
 };
 
 #endif

@@ -13,9 +13,7 @@
 
 ValidParameters::ValidParameters() {
 	try {
-		initCommandParameters();		
 		initParameterRanges();
-
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ValidParameters class Function ValidParameters. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -32,10 +30,10 @@ ValidParameters::ValidParameters() {
 ValidParameters::~ValidParameters() {}
 
 /***********************************************************************/
-bool ValidParameters::isValidParameter(string parameter, string command, string value) {
+bool ValidParameters::isValidParameter(string parameter, vector<string> cParams, string value) {
 	try {	
 		bool valid = false;
-		vector<string> cParams = commandParameters[command];
+		//vector<string> cParams = commandParameters[command];
 		int numParams = cParams.size(); 
 		for(int i = 0; i < numParams; i++) {
 			if(cParams.at(i).compare(parameter) == 0) {
@@ -44,8 +42,8 @@ bool ValidParameters::isValidParameter(string parameter, string command, string 
 			}
 		}
 		if(!valid) {
-			cout << "'" << parameter << "' is not a valid parameter for the " << command << " command.\n";
-			cout << "The valid paramters for the " << command << " command are: ";
+			cout << "'" << parameter << "' is not a valid parameter." << endl;
+			cout << "The valid parameters are: ";
 			for(int i = 0; i < numParams-1; i++)
 				cout << cParams.at(i) << ", ";
 			cout << "and " << cParams.at(numParams-1) << ".\n";
@@ -202,132 +200,34 @@ bool ValidParameters::isValidParameter(string parameter, string command, string 
 		exit(1);
 	}
 }
+/*******************************************************/
 
-/***********************************************************************/
+/******************************************************/
 
-/***********************************************************************/
-void ValidParameters::initCommandParameters() {
-	try {	
-		//{"parameter1","parameter2",...,"last parameter"};
+string ValidParameters::validFile(map<string, string> container, string parameter, bool isFile) {
+	try {
+		int ableToOpen;
+		ifstream in;
+		map<string, string>::iterator it;
 		
-		string readdistArray[] = {"phylip","column", "name","cutoff","precision", "group"};
-		commandParameters["read.dist"] = addParameters(readdistArray, sizeof(readdistArray)/sizeof(string));
-
-		string readotuArray[] =  {"list","order","shared", "line", "label","group","sabund", "rabund"};
-		commandParameters["read.otu"] = addParameters(readotuArray, sizeof(readotuArray)/sizeof(string));
+		it = container.find(parameter);
+		if(it != container.end()){ //no parameter given
+			if(isFile == true) {
+				ableToOpen = openInputFile(it->second, in);
+				if (ableToOpen == 1) { return "not open"; }
+				in.close();
+			}
+		}else { return "not found"; }
 		
-		string readtreeArray[] = {"tree","group"};
-		commandParameters["read.tree"] = addParameters(readtreeArray, sizeof(readtreeArray)/sizeof(string));
-		
-		string clusterArray[] =  {"cutoff","precision","method"};
-		commandParameters["cluster"] = addParameters(clusterArray, sizeof(clusterArray)/sizeof(string));
-		
-		string deconvoluteArray[] =  {"fasta"};
-		commandParameters["unique.seqs"] = addParameters(deconvoluteArray, sizeof(deconvoluteArray)/sizeof(string));
-		
-		string collectsingleArray[] =  {"freq","line","label","calc","abund","size"};
-		commandParameters["collect.single"] = addParameters(collectsingleArray, sizeof(collectsingleArray)/sizeof(string));
-
-		string collectsharedArray[] =  {"freq","line","label","calc","groups"};
-		commandParameters["collect.shared"] = addParameters(collectsharedArray, sizeof(collectsharedArray)/sizeof(string));
-
-		string getgroupArray[] =  {};
-		commandParameters["get.group"]	 = addParameters(getgroupArray, sizeof(getgroupArray)/sizeof(string));
-		
-		string getlabelArray[] =  {};
-		commandParameters["get.label"]	= addParameters(getlabelArray, sizeof(getlabelArray)/sizeof(string));
-
-		string getlineArray[] =  {};
-		commandParameters["get.line"] = addParameters(getlineArray, sizeof(getlineArray)/sizeof(string));
-		
-		string getsabundArray[] =  {"line", "label"};
-		commandParameters["get.sabund"] = addParameters(getsabundArray, sizeof(getsabundArray)/sizeof(string));
-		
-		string getrabundArray[] =  {"line", "label"};
-		commandParameters["get.rabund"] = addParameters(getrabundArray, sizeof(getrabundArray)/sizeof(string));
-
-		string rarefactionsingleArray[] =  {"iters","freq","line","label","calc","abund"};
-		commandParameters["rarefaction.single"] = addParameters(rarefactionsingleArray, sizeof(rarefactionsingleArray)/sizeof(string));
-
-		string rarefactionsharedArray[] =  {"iters","jumble","line","label","calc","groups"};
-		commandParameters["rarefaction.shared"] = addParameters(rarefactionsharedArray, sizeof(rarefactionsharedArray)/sizeof(string));
-		
-		string libshuffArray[] =  {"iters","groups","step","form","cutoff"};
-		commandParameters["libshuff"] = addParameters(libshuffArray, sizeof(libshuffArray)/sizeof(string));
-		
-		string summarysingleArray[] =  {"line","label","calc","abund","size"};
-		commandParameters["summary.single"] = addParameters(summarysingleArray, sizeof(summarysingleArray)/sizeof(string));
-
-		string summarysharedArray[] =  {"line","label","calc","groups"};
-		commandParameters["summary.shared"] = addParameters(summarysharedArray, sizeof(summarysharedArray)/sizeof(string));
-
-		string parsimonyArray[] =  {"random","groups","iters"};
-		commandParameters["parsimony"] = addParameters(parsimonyArray, sizeof(parsimonyArray)/sizeof(string));
-
-		string unifracWeightedArray[] =  {"groups","iters"};
-		commandParameters["unifrac.weighted"] = addParameters(unifracWeightedArray, sizeof(unifracWeightedArray)/sizeof(string));
-
-		string unifracUnweightedArray[] =  {"groups","iters"};
-		commandParameters["unifrac.unweighted"] = addParameters(unifracUnweightedArray, sizeof(unifracUnweightedArray)/sizeof(string));
-
-		string heatmapArray[] =  {"groups","line","label","sorted","scale"};
-		commandParameters["heatmap.bin"] = addParameters(heatmapArray, sizeof(heatmapArray)/sizeof(string));
-		
-		string heatmapSimArray[] =  {"groups","line","label"};
-		commandParameters["heatmap.sim"] = addParameters(heatmapSimArray, sizeof(heatmapSimArray)/sizeof(string));
-		
-		string filterseqsArray[] =  {"fasta", "trump", "soft", "hard", "vertical"};
-		commandParameters["filter.seqs"] = addParameters(filterseqsArray, sizeof(filterseqsArray)/sizeof(string));
-
-		string summaryseqsArray[] =  {"fasta"};
-		commandParameters["summary.seqs"] = addParameters(summaryseqsArray, sizeof(summaryseqsArray)/sizeof(string));
-
-		string screenseqsArray[] =  {"fasta", "start", "end", "maxambig", "maxhomop", "minlength", "maxlength", "name", "group"};
-		commandParameters["screen.seqs"] = addParameters(screenseqsArray, sizeof(screenseqsArray)/sizeof(string));
-
-		string reverseseqsArray[] =  {"fasta"};
-		commandParameters["reverse.seqs"] = addParameters(reverseseqsArray, sizeof(reverseseqsArray)/sizeof(string));
-
-		string trimseqsArray[] =  {"fasta", "flip", "oligos", "maxambig", "maxhomop", "minlength", "maxlength"};
-		commandParameters["trim.seqs"] = addParameters(trimseqsArray, sizeof(trimseqsArray)/sizeof(string));
-
-		string vennArray[] =  {"groups","line","label","calc"};
-		commandParameters["venn"] = addParameters(vennArray, sizeof(vennArray)/sizeof(string));
-		
-		string binseqsArray[] =  {"fasta","line","label","name", "group"};
-		commandParameters["bin.seqs"] = addParameters(binseqsArray, sizeof(binseqsArray)/sizeof(string));
-		
-		string distsharedArray[] =  {"line","label","calc","groups"};
-		commandParameters["dist.shared"] = addParameters(distsharedArray, sizeof(distsharedArray)/sizeof(string));
-		
-		string getOTURepArray[] =  {"fasta","list","line","label","name", "group"};
-		commandParameters["get.oturep"] = addParameters(getOTURepArray, sizeof(getOTURepArray)/sizeof(string));
-		
-		string treeGroupsArray[] =  {"line","label","calc","groups", "phylip", "column", "name"};
-		commandParameters["tree.shared"] = addParameters(treeGroupsArray, sizeof(treeGroupsArray)/sizeof(string));
-		
-		string bootstrapArray[] =  {"line","label","calc","groups","iters"};
-		commandParameters["bootstrap.shared"] = addParameters(bootstrapArray, sizeof(bootstrapArray)/sizeof(string));
-		
-		string concensusArray[] =  {};
-		commandParameters["concensus"] = addParameters(concensusArray, sizeof(concensusArray)/sizeof(string));
-		
-		string distanceArray[] =  {"fasta", "phylip", "calc", "countends", "cutoff", "processors"};
-		commandParameters["dist.seqs"] = addParameters(distanceArray, sizeof(distanceArray)/sizeof(string));
-		
-		string AlignArray[] =  {"fasta", "candidate", "search", "ksize", "align", "match", "mismatch", "gapopen", "gapextend"};
-		commandParameters["align.seqs"] = addParameters(AlignArray, sizeof(AlignArray)/sizeof(string));
-		
-		string quitArray[] = {};
-		commandParameters["quit"] = addParameters(quitArray, sizeof(quitArray)/sizeof(string));
-
+		return it->second;
+	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ValidParameters class Function isValidParameter. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the ValidParameters class Function validFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the ValidParameters class function isValidParameter. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the ValidParameters class function validFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 }
@@ -355,9 +255,6 @@ void ValidParameters::initParameterRanges() {
 		
 		string itersArray[] = {">=","10", "<","NA", "between"};
 		parameterRanges["iters"] = addParameters(itersArray, rangeSize);
-
-		string jumbleArray[] = {">","0", "<","1", "only"};
-		parameterRanges["jumble"] = addParameters(jumbleArray, rangeSize);
 
 		string freqArray[] = {">=","1", "<","NA", "between"};
 		parameterRanges["freq"] = addParameters(freqArray, rangeSize);

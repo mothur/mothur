@@ -11,45 +11,82 @@
 
 //**********************************************************************************************************************
 //This function checks to make sure the cluster command has no errors and then clusters based on the method chosen.
-ClusterCommand::ClusterCommand(){
+ClusterCommand::ClusterCommand(string option){
 	try{
 		globaldata = GlobalData::getInstance();
-	
-		if(globaldata->gSparseMatrix != NULL)	{	matrix = new SparseMatrix(*globaldata->gSparseMatrix);		}
-	//  Not sure if we want the address or an entire new memory allocation.  Might be nice to have new memory so data
-	//  doesn't need to be re-read, but then again, it could suck up a ton of memory.  Dunno.
-	//	if(globaldata->getSparseMatrix() != NULL)	{	matrix = globaldata->getSparseMatrix();		}
-	
-		if(globaldata->gListVector != NULL){
-			list = new ListVector(*globaldata->gListVector);
-			rabund = new RAbundVector(list->getRAbundVector());
-			//rabund->print(cout);
-		}
-	
-		if(globaldata->getMethod() != "")	{	method = globaldata->getMethod();		}		
-		//if no method given use furthest, initialized in globaldata
-		if(method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, matrix);	tag = "fn";	}
-		else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, matrix);		tag = "nn";	}
-		else if(method == "average"){	cluster = new AverageLinkage(rabund, list, matrix);		tag = "an";	}
-		else						{	cout << "error - not recognized method" << endl;											}
-	
-		if(globaldata->getPrecision() != ""){
-			convert(globaldata->getPrecision(), precision);	
-		}
+		abort = false;
 		
-		//saves precision legnth for formatting below
-		length = globaldata->getPrecision().length();
+		//allow user to run help
+		if(option == "help") { help(); abort = true; }
 		
-		if(globaldata->getCutOff() != ""){
-			convert(globaldata->getCutOff(), cutoff);	
+		else {
+			//valid paramters for this command
+			string Array[] =  {"cutoff","precision","method"};
+			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			
+			parser = new OptionParser();
+			parser->parse(option, parameters);  delete parser;
+			
+			ValidParameters* validParameter = new ValidParameters();
+		
+			//check to make sure all parameters are valid for command
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			}
+			
+			//error checking to make sure they read a distance file
+			if ((globaldata->gSparseMatrix == NULL) || (globaldata->gListVector == NULL)) {
+				cout << "Before you use the cluster command, you first need to read in a distance matrix." << endl;  abort = true;
+			} 
+		
+			//check for optional parameter and set defaults
+			// ...at some point should added some additional type checking...
+			//get user cutoff and precision or use defaults
+			string temp;
+			temp = validParameter->validFile(parameters, "precision", false);		if (temp == "not found") { temp = "100"; }
+			//saves precision legnth for formatting below
+			length = temp.length();
+			convert(temp, precision); 
+			
+			temp = validParameter->validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "10"; }
+			convert(temp, cutoff); 
 			cutoff += (5 / (precision * 10.0));
+			
+			method = validParameter->validFile(parameters, "method", false);			if (method == "not found") { method = "furthest"; }
+
+			delete validParameter;
+			
+			if ((method == "furthest") || (method == "nearest") || (method == "average")) { }
+			else {cout << "Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average." << endl; abort = true; }
+
+			
+			if (abort == false) {
+			
+				//get matrix, list and rabund for execute
+				if(globaldata->gSparseMatrix != NULL)	{	matrix = new SparseMatrix(*globaldata->gSparseMatrix);		}
+			
+				if(globaldata->gListVector != NULL){
+					list = new ListVector(*globaldata->gListVector);
+					rabund = new RAbundVector(list->getRAbundVector());
+				}
+				
+				//create cluster
+				if(method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, matrix);	tag = "fn";	}
+				else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, matrix);		tag = "nn";	}
+				else if(method == "average"){	cluster = new AverageLinkage(rabund, list, matrix);		tag = "an";	}
+				else						{	cout << "error - not recognized method" << endl;	abort = true;	}	
+				
+				fileroot = getRootName(globaldata->inputFileName);
+			
+				openOutputFile(fileroot+ tag + ".sabund",	sabundFile);
+				openOutputFile(fileroot+ tag + ".rabund",	rabundFile);
+				openOutputFile(fileroot+ tag + ".list",		listFile);
+				
+				
+			}
+
 		}
-	
-		fileroot = getRootName(globaldata->getFileRoot());
 		
-		openOutputFile(fileroot+ tag + ".sabund",	sabundFile);
-		openOutputFile(fileroot+ tag + ".rabund",	rabundFile);
-		openOutputFile(fileroot+ tag + ".list",		listFile);
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ClusterCommand class Function ClusterCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -60,6 +97,27 @@ ClusterCommand::ClusterCommand(){
 		exit(1);
 	}
 }
+
+//**********************************************************************************************************************
+
+void ClusterCommand::help(){
+	try {
+		cout << "The cluster command can only be executed after a successful read.dist command." << "\n";
+		cout << "The cluster command parameter options are method, cuttoff and precision. No parameters are required." << "\n";
+		cout << "The cluster command should be in the following format: " << "\n";
+		cout << "cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) " << "\n";
+		cout << "The acceptable cluster methods are furthest, nearest and average.  If no method is provided then furthest is assumed." << "\n" << "\n";	
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ClusterCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ClusterCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
 //**********************************************************************************************************************
 
 ClusterCommand::~ClusterCommand(){
@@ -73,6 +131,9 @@ ClusterCommand::~ClusterCommand(){
 
 int ClusterCommand::execute(){
 	try {
+	
+		if (abort == true) {	return 0;	}
+		
 		float previousDist = 0.00000;
 		float rndPreviousDist = 0.00000;
 		oldRAbund = *rabund;

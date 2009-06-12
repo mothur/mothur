@@ -25,9 +25,10 @@ struct linePair {
 class DistanceCommand : public Command {
 
 public:
-	DistanceCommand();	
+	DistanceCommand(string);	
 	~DistanceCommand() {};
 	int execute();	
+	void help();
 	
 private:
 	GlobalData* globaldata;
@@ -36,12 +37,18 @@ private:
 	SequenceDB* seqDB;
 	ofstream out, outFile;
 	ifstream in;
-	string countends, phylip;
+	string countends, phylip, fastafile, calc;
 	int processors;
 	float cutoff;
 	map<int, int> processIDS;   //end line, processid
 	map<int, int>::iterator it;
 	vector<linePair*> lines;
+	
+	OptionParser* parser;
+	map<string, string> parameters;
+	map<string, string>::iterator it2;
+	bool abort;
+	vector<string>  Estimators; //holds estimators to be used
 	
 	void appendFiles(string, string);
 	void createProcesses(string);

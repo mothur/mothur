@@ -35,65 +35,140 @@
 
 //**********************************************************************************************************************
 
-SummarySharedCommand::SummarySharedCommand(){
+SummarySharedCommand::SummarySharedCommand(string option){
 	try {
 		globaldata = GlobalData::getInstance();
-		outputFileName = ((getRootName(globaldata->inputFileName)) + "shared.summary");
-		openOutputFile(outputFileName, outputFileHandle);
-		format = globaldata->getFormat();
-		validCalculator = new ValidCalculators();
-		mult = false;
+		abort = false;
+		allLines = 1;
+		lines.clear();
+		labels.clear();
+		Estimators.clear();
 		
-		int i;
-		for (i=0; i<globaldata->Estimators.size(); i++) {
-			if (validCalculator->isValidCalculator("sharedsummary", globaldata->Estimators[i]) == true) { 
-				if (globaldata->Estimators[i] == "sharedsobs") { 
-					sumCalculators.push_back(new SharedSobsCS());
-				}else if (globaldata->Estimators[i] == "sharedchao") { 
-					sumCalculators.push_back(new SharedChao1());
-				}else if (globaldata->Estimators[i] == "sharedace") { 
-					sumCalculators.push_back(new SharedAce());
-				}else if (globaldata->Estimators[i] == "jabund") { 	
-					sumCalculators.push_back(new JAbund());
-				}else if (globaldata->Estimators[i] == "sorabund") { 
-					sumCalculators.push_back(new SorAbund());
-				}else if (globaldata->Estimators[i] == "jclass") { 
-					sumCalculators.push_back(new Jclass());
-				}else if (globaldata->Estimators[i] == "sorclass") { 
-					sumCalculators.push_back(new SorClass());
-				}else if (globaldata->Estimators[i] == "jest") { 
-					sumCalculators.push_back(new Jest());
-				}else if (globaldata->Estimators[i] == "sorest") { 
-					sumCalculators.push_back(new SorEst());
-				}else if (globaldata->Estimators[i] == "thetayc") { 
-					sumCalculators.push_back(new ThetaYC());
-				}else if (globaldata->Estimators[i] == "thetan") { 
-					sumCalculators.push_back(new ThetaN());
-				}else if (globaldata->Estimators[i] == "kstest") { 
-					sumCalculators.push_back(new KSTest());
-				}else if (globaldata->Estimators[i] == "sharednseqs") { 
-					sumCalculators.push_back(new SharedNSeqs());
-				}else if (globaldata->Estimators[i] == "ochiai") { 
-					sumCalculators.push_back(new Ochiai());
-				}else if (globaldata->Estimators[i] == "anderberg") { 
-					sumCalculators.push_back(new Anderberg());
-				}else if (globaldata->Estimators[i] == "kulczynski") { 
-					sumCalculators.push_back(new Kulczynski());
-				}else if (globaldata->Estimators[i] == "kulczynskicody") { 
-					sumCalculators.push_back(new KulczynskiCody());
-				}else if (globaldata->Estimators[i] == "lennon") { 
-					sumCalculators.push_back(new Lennon());
-				}else if (globaldata->Estimators[i] == "morisitahorn") { 
-					sumCalculators.push_back(new MorHorn());
-				}else if (globaldata->Estimators[i] == "braycurtis") { 
-					sumCalculators.push_back(new BrayCurtis());
-				}else if (globaldata->Estimators[i] == "whittaker") { 
-					sumCalculators.push_back(new Whittaker());
+		//allow user to run help
+		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; }
+		
+		else {
+			//valid paramters for this command
+			string Array[] =  {"line","label","calc","groups"};
+			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			
+			parser = new OptionParser();
+			parser->parse(option, parameters);  delete parser;
+			
+			ValidParameters* validParameter = new ValidParameters();
+		
+			//check to make sure all parameters are valid for command
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			}
+			
+			//make sure the user has already run the read.otu command
+			if (globaldata->getSharedFile() == "") {
+				if (globaldata->getListFile() == "") { cout << "You must read a list and a group, or a shared before you can use the summary.shared command." << endl; abort = true; }
+				else if (globaldata->getGroupFile() == "") { cout << "You must read a list and a group, or a shared before you can use the summary.shared command." << endl; abort = true; }
+			}
+
+			
+			//check for optional parameter and set defaults
+			// ...at some point should added some additional type checking...
+			line = validParameter->validFile(parameters, "line", false);				
+			if (line == "not found") { line = "";  }
+			else { 
+				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
+				else { allLines = 1;  }
+			}
+			
+			label = validParameter->validFile(parameters, "label", false);			
+			if (label == "not found") { label = ""; }
+			else { 
+				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				else { allLines = 1;  }
+			}
+			
+			//make sure user did not use both the line and label parameters
+			if ((line != "") && (label != "")) { cout << "You cannot use both the line and label parameters at the same time. " << endl; abort = true; }
+			//if the user has not specified any line or labels use the ones from read.otu
+			else if((line == "") && (label == "")) {  
+				allLines = globaldata->allLines; 
+				labels = globaldata->labels; 
+				lines = globaldata->lines;
+			}
+				
+			calc = validParameter->validFile(parameters, "calc", false);			
+			if (calc == "not found") { calc = "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan";  }
+			else { 
+				 if (calc == "default")  {  calc = "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan";  }
+			}
+			splitAtDash(calc, Estimators);
+			
+			groups = validParameter->validFile(parameters, "groups", false);			
+			if (groups == "not found") { groups = ""; }
+			else { 
+				splitAtDash(groups, Groups);
+				globaldata->Groups = Groups;
+			}
+			
+			delete validParameter;
+			
+			if (abort == false) {
+			
+				validCalculator = new ValidCalculators();
+				int i;
+				
+				for (i=0; i<Estimators.size(); i++) {
+					if (validCalculator->isValidCalculator("sharedsummary", Estimators[i]) == true) { 
+						if (Estimators[i] == "sharedsobs") { 
+							sumCalculators.push_back(new SharedSobsCS());
+						}else if (Estimators[i] == "sharedchao") { 
+							sumCalculators.push_back(new SharedChao1());
+						}else if (Estimators[i] == "sharedace") { 
+							sumCalculators.push_back(new SharedAce());
+						}else if (Estimators[i] == "jabund") { 	
+							sumCalculators.push_back(new JAbund());
+						}else if (Estimators[i] == "sorabund") { 
+							sumCalculators.push_back(new SorAbund());
+						}else if (Estimators[i] == "jclass") { 
+							sumCalculators.push_back(new Jclass());
+						}else if (Estimators[i] == "sorclass") { 
+							sumCalculators.push_back(new SorClass());
+						}else if (Estimators[i] == "jest") { 
+							sumCalculators.push_back(new Jest());
+						}else if (Estimators[i] == "sorest") { 
+							sumCalculators.push_back(new SorEst());
+						}else if (Estimators[i] == "thetayc") { 
+							sumCalculators.push_back(new ThetaYC());
+						}else if (Estimators[i] == "thetan") { 
+							sumCalculators.push_back(new ThetaN());
+						}else if (Estimators[i] == "kstest") { 
+							sumCalculators.push_back(new KSTest());
+						}else if (Estimators[i] == "sharednseqs") { 
+							sumCalculators.push_back(new SharedNSeqs());
+						}else if (Estimators[i] == "ochiai") { 
+							sumCalculators.push_back(new Ochiai());
+						}else if (Estimators[i] == "anderberg") { 
+							sumCalculators.push_back(new Anderberg());
+						}else if (Estimators[i] == "kulczynski") { 
+							sumCalculators.push_back(new Kulczynski());
+						}else if (Estimators[i] == "kulczynskicody") { 
+							sumCalculators.push_back(new KulczynskiCody());
+						}else if (Estimators[i] == "lennon") { 
+							sumCalculators.push_back(new Lennon());
+						}else if (Estimators[i] == "morisitahorn") { 
+							sumCalculators.push_back(new MorHorn());
+						}else if (Estimators[i] == "braycurtis") { 
+							sumCalculators.push_back(new BrayCurtis());
+						}else if (Estimators[i] == "whittaker") { 
+							sumCalculators.push_back(new Whittaker());
+						}
+					}
 				}
+				
+				outputFileName = ((getRootName(globaldata->inputFileName)) + "shared.summary");
+				openOutputFile(outputFileName, outputFileHandle);
+				format = globaldata->getFormat();
+				mult = false;
 			}
 		}
-		//reset calc for next command
-		globaldata->setCalc("");
 
 	}
 	catch(exception& e) {
@@ -105,17 +180,48 @@ SummarySharedCommand::SummarySharedCommand(){
 		exit(1);
 	}	
 }
+
+//**********************************************************************************************************************
+
+void SummarySharedCommand::help(){
+	try {
+		cout << "The summary.shared command can only be executed after a successful read.otu command." << "\n";
+		cout << "The summary.shared command parameters are label, line and calc.  No parameters are required, but you may not use " << "\n";
+		cout << "both the line and label parameters at the same time. The summary.shared command should be in the following format: " << "\n";
+		cout << "summary.shared(label=yourLabel, line=yourLines, calc=yourEstimators, groups=yourGroups)." << "\n";
+		cout << "Example summary.shared(label=unique-.01-.03, line=0,5,10, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan)." << "\n";
+		validCalculator->printCalc("sharedsummary", cout);
+		cout << "The default value for calc is sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan" << "\n";
+		cout << "The default value for groups is all the groups in your groupfile." << "\n";
+		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
+		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. line), '=' and parameters (i.e.yourLines)." << "\n" << "\n";
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the SummarySharedCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the SummarySharedCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
 //**********************************************************************************************************************
 
 SummarySharedCommand::~SummarySharedCommand(){
 	delete input;
 	delete read;
+	delete validCalculator;
 }
 
 //**********************************************************************************************************************
 
 int SummarySharedCommand::execute(){
 	try {
+	
+		if (abort == true) { return 0; }
+		
 		int count = 1;	
 	
 		//if the users entered no valid calculators don't execute command
@@ -173,13 +279,13 @@ int SummarySharedCommand::execute(){
 					
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
-		set<string> userLabels = globaldata->labels;
-		set<int> userLines = globaldata->lines;
+		set<string> userLabels = labels;
+		set<int> userLines = lines;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
+		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 		
-			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(lookup[0]->getLabel()) == 1){			
+			if(allLines == 1 || lines.count(count) == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 				cout << lookup[0]->getLabel() << '\t' << count << endl;
 				process(lookup);
 				
@@ -228,7 +334,7 @@ int SummarySharedCommand::execute(){
 		for (int i = 0; i < lastLookup.size(); i++) {  delete lastLookup[i];  }
 
 		//reset groups parameter
-		globaldata->Groups.clear();  globaldata->setGroups("");
+		globaldata->Groups.clear();  
 		
 		//close files
 		outputFileHandle.close();

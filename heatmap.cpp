@@ -10,11 +10,12 @@
 #include "heatmap.h"
 
 //**********************************************************************************************************************
-HeatMap::HeatMap(){
+HeatMap::HeatMap(string sort, string scale){
 	try {
 		globaldata = GlobalData::getInstance();
 		format = globaldata->getFormat();
-		sorted = globaldata->getSorted();
+		sorted = sort;
+		scaler = scale;
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the HeatMap class Function HeatMap. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -30,8 +31,7 @@ HeatMap::HeatMap(){
 
 void HeatMap::getPic(RAbundVector* rabund) {
 	try {
-		//get users scaling method
-		scaler = globaldata->getScale();
+		
 		
 		float maxRelAbund = 0.0;		
 		
@@ -40,7 +40,6 @@ void HeatMap::getPic(RAbundVector* rabund) {
 			if(relAbund > maxRelAbund){	maxRelAbund = relAbund;	}
 		}
 		
-		scaler = globaldata->getScale();
 		
 		vector<string> scaleRelAbund(rabund->size(), "");
 		
@@ -120,8 +119,6 @@ void HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 			}
 			if(maxRelAbund[i] > superMaxRelAbund){	superMaxRelAbund = maxRelAbund[i];	}
 		}
-		
-		scaler = globaldata->getScale();
 		
 		scaleRelAbund.resize(lookup.size());
 		for(int i=0;i<lookup.size();i++){

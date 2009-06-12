@@ -24,9 +24,10 @@ class GlobalData;
 class BinSeqCommand : public Command {
 	
 public:
-	BinSeqCommand();	
+	BinSeqCommand(string);	
 	~BinSeqCommand();
-	int execute();	
+	int execute();
+	void help();	
 	
 private:
 	GlobalData* globaldata;
@@ -35,7 +36,13 @@ private:
 	InputData* input;
 	FastaMap* fasta;
 	GroupMap* groupMap;
-	string filename, fastafile, namesfile, groupfile;
+	OptionParser* parser;
+	map<string, string> parameters;
+	map<string, string>::iterator it;
+	bool abort, allLines;
+	set<int> lines; //hold lines to be used
+	set<string> labels; //holds labels to be used
+	string filename, fastafile, namesfile, groupfile, line, label;
 	ofstream out;
 	ifstream in, inNames;
 	

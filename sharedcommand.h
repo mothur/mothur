@@ -30,6 +30,7 @@ public:
 	SharedCommand();	
 	~SharedCommand();
 	int execute();	
+	void help() {}
 	
 private:
 	void printSharedData();

@@ -20,6 +20,7 @@ ReadOTUFile::ReadOTUFile(string pf): philFile(pf){
 //This function reads the list, rabund or sabund files to be used by collect and rarefact command.
 void ReadOTUFile::read(GlobalData* globaldata){
 	try {
+
 		if (globaldata->getOrderFile() == "") {
 			//you have two inputs because in the next if statement if you only have one then it moves ahead in the same file.  
 			//So when you run the collect or summary commands you miss a line.
@@ -46,6 +47,7 @@ void ReadOTUFile::read(GlobalData* globaldata){
 			globaldata->rabund = rabund; //saving to be used by heatmap.bin command.
 			list = inputList->getListVector();
 			globaldata->gListVector = list;
+
 		}else if (globaldata->getFormat() == "shared") {
 			SharedList = input->getSharedListVector(); //you are reading for collect.shared, rarefaction.shared, summary.shared, parselist command, or shared commands.
 			//memory leak prevention

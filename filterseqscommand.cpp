@@ -11,25 +11,102 @@
 
 /**************************************************************************************/
 
-FilterSeqsCommand::FilterSeqsCommand(){
-
-	globaldata = GlobalData::getInstance();
+FilterSeqsCommand::FilterSeqsCommand(string option){
+	try {
+		globaldata = GlobalData::getInstance();
+		abort = false;
+		
+		//allow user to run help
+		if(option == "help") { help(); abort = true; }
+		
+		else {
+			//valid paramters for this command
+			string Array[] =  {"fasta", "trump", "soft", "hard", "vertical"};
+			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			
+			parser = new OptionParser();
+			parser->parse(option, parameters);  delete parser;
+			
+			ValidParameters* validParameter = new ValidParameters();
+		
+			//check to make sure all parameters are valid for command
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			}
+			
+			//check for required parameters
+			fastafile = validParameter->validFile(parameters, "fasta", true);
+			if (fastafile == "not found") { cout << "fasta is a required parameter for the filter.seqs command." << endl; abort = true; }
+			else if (fastafile == "not open") { abort = true; }	
+			else { 
+				globaldata->setFastaFile(fastafile);
+			}
+			
+			//check for optional parameter and set defaults
+			// ...at some point should added some additional type checking...
+			
+			string temp;
+			temp = validParameter->validFile(parameters, "trump", false);				if (temp == "not found") { temp = "."; }
+			trump = temp[0];
+			
+			temp = validParameter->validFile(parameters, "soft", false);				if (temp == "not found") { soft = 0; }
+			else {  soft = (float)atoi(temp.c_str()) / 100.0;  }
+			
+			hard = validParameter->validFile(parameters, "hard", true);					if (hard == "not found") { hard = ""; }
+			else if (hard == "not open") { abort = true; }	
+			
+			vertical = validParameter->validFile(parameters, "vertical", false);		if (vertical == "not found") { vertical = "F"; }
 	
-	if(globaldata->getFastaFile() == "")		{	cout << "You must enter a fasta formatted file" << endl;	}
-	trump = globaldata->getTrump()[0];
-	numSeqs = 0;
+			delete validParameter;
+			
+			numSeqs = 0;
+			
+		}
+		
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the FilterSeqsCommand class Function FilterSeqsCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the FilterSeqsCommand class function FilterSeqsCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
 
+//**********************************************************************************************************************
+
+void FilterSeqsCommand::help(){
+	try {
+		cout << "The filter.seqs command reads a file containing sequences and creates a .filter and .filter.fasta file." << "\n";
+		cout << "The filter.seqs command parameters are fasta, trump, soft, hard and vertical.  " << "\n";
+		cout << "The fasta parameter is required." << "\n";
+		cout << "The trump parameter .... The default is '.'" << "\n";
+		cout << "The soft parameter .... The default is ...." << "\n";
+		cout << "The hard parameter .... The default is ...." << "\n";
+		cout << "The vertical parameter .... The default is F." << "\n";
+		cout << "The filter.seqs command should be in the following format: " << "\n";
+		cout << "filter.seqs(fasta=yourFastaFile, trump=yourTrump, soft=yourSoft, hard=yourHard, vertical=yourVertical) " << "\n";
+		cout << "Example filter.seqs(fasta=abrecovery.fasta, trump=..., soft=..., hard=..., vertical=T)." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta)." << "\n" << "\n";
+		
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the FilterSeqsCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the FilterSeqsCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
 }
 
 /**************************************************************************************/
 
 void FilterSeqsCommand::doHard() {
 	
-	string hardName = globaldata->getHard();
-	string hardFilter = "";
-		
 	ifstream fileHandle;
-	openInputFile(hardName, fileHandle);
+	openInputFile(hard, fileHandle);
 	
 	fileHandle >> filter;
 
@@ -96,33 +173,33 @@ void FilterSeqsCommand::getFreqs(Sequence seq) {
 
 int FilterSeqsCommand::execute() {	
 	try {
+	
+		if (abort == true) { return 0; }
+		
 		ifstream inFASTA;
-		openInputFile(globaldata->getFastaFile(), inFASTA);
+		openInputFile(fastafile, inFASTA);
 		
 		Sequence testSeq(inFASTA);
 		alignmentLength = testSeq.getAlignLength();
 		inFASTA.seekg(0);
 		
-		if(globaldata->getSoft() != "" || isTrue(globaldata->getVertical())){
+		if(soft != 0 || isTrue(vertical)){
 			a.assign(alignmentLength, 0);
 			t.assign(alignmentLength, 0);
 			g.assign(alignmentLength, 0);
 			c.assign(alignmentLength, 0);
 			gap.assign(alignmentLength, 0);
 		}
-		if(globaldata->getSoft() != ""){
-			soft = (float)atoi(globaldata->getSoft().c_str()) / 100.0;
-		}
 		
-		if(globaldata->getHard().compare("") != 0)	{	doHard();								}
-		else										{	filter = string(alignmentLength, '1');	}
+		if(hard.compare("") != 0)	{	doHard();		}
+		else						{	filter = string(alignmentLength, '1');	}
 
-		if(globaldata->getTrump().compare("") != 0 || isTrue(globaldata->getVertical()) || globaldata->getSoft().compare("") != 0){
+		if(isTrue(vertical) || soft != 0){
 		
 			while(!inFASTA.eof()){
 				Sequence seq(inFASTA);
-				if(globaldata->getTrump().compare("") != 0)	{	doTrump(seq);		}
-				if(isTrue(globaldata->getVertical()) || globaldata->getSoft().compare("") != 0){	getFreqs(seq);	}
+				doTrump(seq);	
+				if(isTrue(vertical) || soft != 0){	getFreqs(seq);	}
 				numSeqs++;
 				cout.flush();
 			}
@@ -130,18 +207,18 @@ int FilterSeqsCommand::execute() {
 		}
 		inFASTA.close();
 		
-		if(isTrue(globaldata->getVertical()) == 1)	{	doVertical();	}
-		if(globaldata->getSoft().compare("") != 0)	{	doSoft();		}			
+		if(isTrue(vertical) == 1)	{	doVertical();	}
+		if(soft != 0)	{	doSoft();		}			
 
 		ofstream outFilter;
-		string filterFile = getRootName(globaldata->inputFileName) + "filter";
+		string filterFile = getRootName(fastafile) + "filter";
 		openOutputFile(filterFile, outFilter);
 		outFilter << filter << endl;
 		outFilter.close();
 		
 
-		openInputFile(globaldata->getFastaFile(), inFASTA);
-		string filteredFasta = getRootName(globaldata->inputFileName) + "filter.fasta";
+		openInputFile(fastafile, inFASTA);
+		string filteredFasta = getRootName(fastafile) + "filter.fasta";
 		ofstream outFASTA;
 		openOutputFile(filteredFasta, outFASTA);
 

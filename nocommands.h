@@ -16,9 +16,10 @@
 class NoCommand : public Command {
 
 public:
-	NoCommand();
+	NoCommand(string);
 	~NoCommand();
 	int execute();
+	void help() {}
 	
 private:
 		

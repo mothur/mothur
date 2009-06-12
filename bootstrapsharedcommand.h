@@ -25,9 +25,10 @@ class GlobalData;
 class BootSharedCommand : public Command {
 	
 public:
-	BootSharedCommand();	
+	BootSharedCommand(string);	
 	~BootSharedCommand();
 	int execute();	
+	void help();
 	
 private:
 	void createTree(ostream*);
@@ -48,8 +49,15 @@ private:
 	ValidCalculators* validCalculator;
 	SharedOrderVector* order;
 	vector<SharedRAbundVector*> lookup;
-	string format, outputFile;
+	OptionParser* parser;
+	map<string, string> parameters;
+	map<string, string>::iterator it;
+	bool abort, allLines;
+	set<int> lines; //hold lines to be used
+	set<string> labels; //holds labels to be used
+	string outputFile, calc, groups, line, label;
 	int numGroups, iters;
+	vector<string>  Estimators, Groups; //holds estimators to be used
 
 };
 	

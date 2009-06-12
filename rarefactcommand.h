@@ -37,9 +37,10 @@ class GlobalData;
 class RareFactCommand : public Command {
 	
 public:
-	RareFactCommand();	
+	RareFactCommand(string);	
 	~RareFactCommand();
-	int execute();	
+	int execute();
+	void help();	
 	
 private:
 	GlobalData* globaldata;
@@ -50,6 +51,15 @@ private:
 	ValidCalculators* validCalculator;
 	Rarefact* rCurve;
 	int freq, nIters, abund;
+	OptionParser* parser;
+	map<string, string> parameters;
+	map<string, string>::iterator it;
+	bool abort, allLines;
+	set<int> lines; //hold lines to be used
+	set<string> labels; //holds labels to be used
+	string line, label, calc;
+	vector<string>  Estimators;
+
 };
 
 #endif

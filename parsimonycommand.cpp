@@ -10,37 +10,80 @@
 #include "parsimonycommand.h"
 
 /***********************************************************/
-ParsimonyCommand::ParsimonyCommand() {
+ParsimonyCommand::ParsimonyCommand(string option) {
 	try {
 		globaldata = GlobalData::getInstance();
+		abort = false;
+		Groups.clear();
 		
-		//randomtree will tell us if user had their own treefile or if they just want the random distribution
-		randomtree = globaldata->getRandomTree();
+		//allow user to run help
+		if(option == "help") { help(); abort = true; }
 		
-		//user has entered their own tree
-		if (randomtree == "") { 
-			T = globaldata->gTree;
-			tmap = globaldata->gTreemap;
-			output = new ColumnFile(globaldata->getTreeFile()  +  ".parsimony");
-			sumFile = globaldata->getTreeFile() + ".psummary";
-			openOutputFile(sumFile, outSum);
-		}else { //user wants random distribution
-			savetmap = globaldata->gTreemap;
-			getUserInput();
-			output = new ColumnFile(randomtree);
+		else {
+			//valid paramters for this command
+			string Array[] =  {"random","groups","iters"};
+			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			
+			parser = new OptionParser();
+			parser->parse(option, parameters);  delete parser;
+			
+			ValidParameters* validParameter = new ValidParameters();
+		
+			//check to make sure all parameters are valid for command
+			for (it4 = parameters.begin(); it4 != parameters.end(); it4++) { 
+				if (validParameter->isValidParameter(it4->first, myArray, it4->second) != true) {  abort = true;  }
+			}
+			
+			randomtree = validParameter->validFile(parameters, "random", false);		if (randomtree == "not found") { randomtree = ""; }
+			
+			//are you trying to use parsimony without reading a tree or saying you want random distribution
+			if (randomtree == "")  {
+				if (globaldata->gTree.size() == 0) {
+					cout << "You must read a treefile and a groupfile or set the randomtree parameter to the output filename you wish, before you may execute the parsimony command." << endl; abort = true;  }
+			}
+						
+			//check for optional parameter and set defaults
+			// ...at some point should added some additional type checking...
+			groups = validParameter->validFile(parameters, "groups", false);			
+			if (groups == "not found") { groups = ""; }
+			else { 
+				splitAtDash(groups, Groups);
+				globaldata->Groups = Groups;
+			}
+				
+			itersString = validParameter->validFile(parameters, "iters", false);			if (itersString == "not found") { itersString = "1000"; }
+			convert(itersString, iters); 
+			
+			delete validParameter;
+			
+			if (abort == false) {
+				//randomtree will tell us if user had their own treefile or if they just want the random distribution
+				//user has entered their own tree
+				if (randomtree == "") { 
+					T = globaldata->gTree;
+					tmap = globaldata->gTreemap;
+					output = new ColumnFile(globaldata->getTreeFile()  +  ".parsimony", itersString);
+					sumFile = globaldata->getTreeFile() + ".psummary";
+					openOutputFile(sumFile, outSum);
+				}else { //user wants random distribution
+					savetmap = globaldata->gTreemap;
+					getUserInput();
+					output = new ColumnFile(randomtree, itersString);
+				}
+				
+				//set users groups to analyze
+				util = new SharedUtil();
+				util->setGroups(globaldata->Groups, tmap->namesOfGroups, allGroups, numGroups, "unweighted");	//sets the groups the user wants to analyze
+				util->getCombos(groupComb, globaldata->Groups, numComp);
+				
+				if (numGroups == 1) { numComp++; groupComb.push_back(allGroups); }
+				
+				pars = new Parsimony(tmap);
+				counter = 0;
+				
+			}
+			
 		}
-		
-		//set users groups to analyze
-		util = new SharedUtil();
-		util->setGroups(globaldata->Groups, tmap->namesOfGroups, allGroups, numGroups, "unweighted");	//sets the groups the user wants to analyze
-		util->getCombos(groupComb, globaldata->Groups, numComp);
-		globaldata->setGroups("");
-		
-		if (numGroups == 1) { numComp++; groupComb.push_back(allGroups); }
-		
-		convert(globaldata->getIters(), iters);  //how many random trees to generate
-		pars = new Parsimony(tmap);
-		counter = 0;
 
 	}
 	catch(exception& e) {
@@ -52,9 +95,38 @@ ParsimonyCommand::ParsimonyCommand() {
 		exit(1);
 	}
 }
+
+//**********************************************************************************************************************
+
+void ParsimonyCommand::help(){
+	try {
+		cout << "The parsimony command can only be executed after a successful read.tree command, unless you use the random parameter." << "\n";
+		cout << "The parsimony command parameters are random, groups and iters.  No parameters are required." << "\n";
+		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 1 valid group." << "\n";
+		cout << "The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree." << "\n";
+		cout << "The parsimony command should be in the following format: parsimony(random=yourOutputFilename, groups=yourGroups, iters=yourIters)." << "\n";
+		cout << "Example parsimony(random=out, iters=500)." << "\n";
+		cout << "The default value for random is "" (meaning you want to use the trees in your inputfile, randomtree=out means you just want the random distribution of trees outputted to out.rd_parsimony)," << "\n";
+		cout << "and iters is 1000.  The parsimony command output two files: .parsimony and .psummary their descriptions are in the manual." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. random), '=' and parameters (i.e.yourOutputFilename)." << "\n" << "\n";
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ParsimonyCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ParsimonyCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
+
 /***********************************************************/
 int ParsimonyCommand::execute() {
 	try {
+	
+		if (abort == true) { return 0; }
+	
 		Progress* reading;
 		reading = new Progress("Comparing to random:", iters);
 		
@@ -195,8 +267,6 @@ int ParsimonyCommand::execute() {
 			globaldata->gTreemap = savetmap;
 		}
 		
-		//reset randomTree parameter to ""
-		globaldata->setRandomTree("");
 		//reset groups parameter
 		globaldata->Groups.clear(); 
 		
@@ -264,11 +334,11 @@ void ParsimonyCommand::printUSummaryFile() {
 		for (int i = 0; i< T.size(); i++) {
 			for(int a = 0; a < numComp; a++) {
 				if (UScoreSig[a][i] > (1/(float)iters)) {
-					outSum << setprecision(6) << i+1 << '\t' << groupComb[a]  << '\t' << userTreeScores[a][i] << setprecision(globaldata->getIters().length()) << '\t' << UScoreSig[a][i] << endl;
-					cout << setprecision(6) << i+1 << '\t' << groupComb[a]  << '\t' << userTreeScores[a][i] << setprecision(globaldata->getIters().length()) << '\t' << UScoreSig[a][i] << endl;
+					outSum << setprecision(6) << i+1 << '\t' << groupComb[a]  << '\t' << userTreeScores[a][i] << setprecision(itersString.length()) << '\t' << UScoreSig[a][i] << endl;
+					cout << setprecision(6) << i+1 << '\t' << groupComb[a]  << '\t' << userTreeScores[a][i] << setprecision(itersString.length()) << '\t' << UScoreSig[a][i] << endl;
 				}else {
-					outSum << setprecision(6) << i+1 << '\t' << groupComb[a] << '\t' << userTreeScores[a][i] << setprecision(globaldata->getIters().length())  << '\t' << "<" << (1/float(iters)) << endl;
-					cout << setprecision(6) << i+1 << '\t' << groupComb[a] << '\t' << userTreeScores[a][i] << setprecision(globaldata->getIters().length()) << '\t' << "<" << (1/float(iters)) << endl;
+					outSum << setprecision(6) << i+1 << '\t' << groupComb[a] << '\t' << userTreeScores[a][i] << setprecision(itersString.length())  << '\t' << "<" << (1/float(iters)) << endl;
+					cout << setprecision(6) << i+1 << '\t' << groupComb[a] << '\t' << userTreeScores[a][i] << setprecision(itersString.length()) << '\t' << "<" << (1/float(iters)) << endl;
 				}
 			}
 		}
@@ -323,6 +393,7 @@ void ParsimonyCommand::getUserInput() {
 		//memory leak prevention
 		//if (globaldata->gTreemap != NULL) { delete globaldata->gTreemap;  }
 		globaldata->gTreemap = tmap;
+		globaldata->Treenames = tmap->namesOfSeqs; 
 		
 	}
 	catch(exception& e) {

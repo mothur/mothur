@@ -18,15 +18,21 @@ class GlobalData;
 
 class ReadTreeCommand : public Command {
 public:
-	ReadTreeCommand();
+	ReadTreeCommand(string);
 	~ReadTreeCommand();
 	int execute();
+	void help();
 	
 private:
 	GlobalData* globaldata;
 	ReadTree* read;
 	TreeMap* treeMap;
-	string filename;
+	string filename, treefile, groupfile;
+	OptionParser* parser;
+	map<string, string> parameters;
+	map<string, string>::iterator it;
+	bool abort;
+
 };
 
 

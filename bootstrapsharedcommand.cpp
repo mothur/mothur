@@ -22,50 +22,125 @@
 
 //**********************************************************************************************************************
 
-BootSharedCommand::BootSharedCommand(){
+BootSharedCommand::BootSharedCommand(string option){
 	try {
 		globaldata = GlobalData::getInstance();
-		format = globaldata->getFormat();
-		convert(globaldata->getIters(), iters);
-		validCalculator = new ValidCalculators();
-		util = new SharedUtil();
+		abort = false;
+		allLines = 1;
+		lines.clear();
+		labels.clear();
+		Groups.clear();
+		Estimators.clear();
 		
+		//allow user to run help
+		if(option == "help") { help(); abort = true; }
 		
-		int i;
-		for (i=0; i<globaldata->Estimators.size(); i++) {
-			if (validCalculator->isValidCalculator("boot", globaldata->Estimators[i]) == true) { 
-				if (globaldata->Estimators[i] == "jabund") { 	
-					treeCalculators.push_back(new JAbund());
-				}else if (globaldata->Estimators[i] == "sorabund") { 
-					treeCalculators.push_back(new SorAbund());
-				}else if (globaldata->Estimators[i] == "jclass") { 
-					treeCalculators.push_back(new Jclass());
-				}else if (globaldata->Estimators[i] == "sorclass") { 
-					treeCalculators.push_back(new SorClass());
-				}else if (globaldata->Estimators[i] == "jest") { 
-					treeCalculators.push_back(new Jest());
-				}else if (globaldata->Estimators[i] == "sorest") { 
-					treeCalculators.push_back(new SorEst());
-				}else if (globaldata->Estimators[i] == "thetayc") { 
-					treeCalculators.push_back(new ThetaYC());
-				}else if (globaldata->Estimators[i] == "thetan") { 
-					treeCalculators.push_back(new ThetaN());
-				}else if (globaldata->Estimators[i] == "morisitahorn") { 
-					treeCalculators.push_back(new MorHorn());
-				}else if (globaldata->Estimators[i] == "braycurtis") { 
-					treeCalculators.push_back(new BrayCurtis());
+		else {
+			//valid paramters for this command
+			string Array[] =  {"line","label","calc","groups","iters"};
+			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			
+			parser = new OptionParser();
+			parser->parse(option, parameters);  delete parser;
+			
+			ValidParameters* validParameter = new ValidParameters();
+		
+			//check to make sure all parameters are valid for command
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			}
+			
+			//make sure the user has already run the read.otu command
+			if (globaldata->getSharedFile() == "") {
+				if (globaldata->getListFile() == "") { cout << "You must read a list and a group, or a shared before you can use the bootstrap.shared command." << endl; abort = true; }
+				else if (globaldata->getGroupFile() == "") { cout << "You must read a list and a group, or a shared before you can use the bootstrap.shared command." << endl; abort = true; }
+			}
+			
+			//check for optional parameter and set defaults
+			// ...at some point should added some additional type checking...
+			line = validParameter->validFile(parameters, "line", false);				
+			if (line == "not found") { line = "";  }
+			else { 
+				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
+				else { allLines = 1;  }
+			}
+			
+			label = validParameter->validFile(parameters, "label", false);			
+			if (label == "not found") { label = ""; }
+			else { 
+				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				else { allLines = 1;  }
+			}
+			
+			//make sure user did not use both the line and label parameters
+			if ((line != "") && (label != "")) { cout << "You cannot use both the line and label parameters at the same time. " << endl; abort = true; }
+			//if the user has not specified any line or labels use the ones from read.otu
+			else if((line == "") && (label == "")) {  
+				allLines = globaldata->allLines; 
+				labels = globaldata->labels; 
+				lines = globaldata->lines;
+			}
+				
+			groups = validParameter->validFile(parameters, "groups", false);			
+			if (groups == "not found") { groups = ""; }
+			else { 
+				splitAtDash(groups, Groups);
+				globaldata->Groups = Groups;
+			}
+				
+			calc = validParameter->validFile(parameters, "calc", false);			
+			if (calc == "not found") { calc = "jclass-thetayc";  }
+			else { 
+				 if (calc == "default")  {  calc = "jclass-thetayc";  }
+			}
+			splitAtDash(calc, Estimators);
+
+			string temp;
+			temp = validParameter->validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
+			convert(temp, iters); 
+	
+			delete validParameter;
+			
+			if (abort == false) {
+			
+				validCalculator = new ValidCalculators();
+				
+				int i;
+				for (i=0; i<Estimators.size(); i++) {
+					if (validCalculator->isValidCalculator("boot", Estimators[i]) == true) { 
+						if (Estimators[i] == "jabund") { 	
+							treeCalculators.push_back(new JAbund());
+						}else if (Estimators[i] == "sorabund") { 
+							treeCalculators.push_back(new SorAbund());
+						}else if (Estimators[i] == "jclass") { 
+							treeCalculators.push_back(new Jclass());
+						}else if (Estimators[i] == "sorclass") { 
+							treeCalculators.push_back(new SorClass());
+						}else if (Estimators[i] == "jest") { 
+							treeCalculators.push_back(new Jest());
+						}else if (Estimators[i] == "sorest") { 
+							treeCalculators.push_back(new SorEst());
+						}else if (Estimators[i] == "thetayc") { 
+							treeCalculators.push_back(new ThetaYC());
+						}else if (Estimators[i] == "thetan") { 
+							treeCalculators.push_back(new ThetaN());
+						}else if (Estimators[i] == "morisitahorn") { 
+							treeCalculators.push_back(new MorHorn());
+						}else if (Estimators[i] == "braycurtis") { 
+							treeCalculators.push_back(new BrayCurtis());
+						}
+					}
 				}
+				
+				delete validCalculator;
+				
+				ofstream* tempo;
+				for (int i=0; i < treeCalculators.size(); i++) {
+					tempo = new ofstream;
+					out.push_back(tempo);
+				}	
 			}
 		}
-		
-		ofstream* temp;
-		for (int i=0; i < treeCalculators.size(); i++) {
-			temp = new ofstream;
-			out.push_back(temp);
-		}
-		
-		//reset calc for next command
-		globaldata->setCalc("");
 
 	}
 	catch(exception& e) {
@@ -77,23 +152,51 @@ BootSharedCommand::BootSharedCommand(){
 		exit(1);
 	}	
 }
+
+//**********************************************************************************************************************
+
+void BootSharedCommand::help(){
+	try {
+		cout << "The bootstrap.shared command can only be executed after a successful read.otu command." << "\n";
+		cout << "The bootstrap.shared command parameters are groups, calc, iters, line and label.  You may not use line and label at the same time." << "\n";
+		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like included used." << "\n";
+		cout << "The group names are separated by dashes. The line and label allow you to select what distance levels you would like trees created for, and are also separated by dashes." << "\n";
+		cout << "The bootstrap.shared command should be in the following format: bootstrap.shared(groups=yourGroups, calc=yourCalcs, line=yourLines, label=yourLabels, iters=yourIters)." << "\n";
+		cout << "Example bootstrap.shared(groups=A-B-C, line=1-3-5, calc=jabund-sorabund, iters=100)." << "\n";
+		cout << "The default value for groups is all the groups in your groupfile." << "\n";
+		cout << "The default value for calc is jclass-thetayc. The default for iters is 1000." << "\n";
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the BootSharedCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the BootSharedCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
 //**********************************************************************************************************************
 
 BootSharedCommand::~BootSharedCommand(){
-	delete input;
-	delete read;
-	delete util;
+	//made new in execute
+	if (abort == false) {
+		delete input;
+		delete read;
+		delete util;
+	}
 }
 
 //**********************************************************************************************************************
 
 int BootSharedCommand::execute(){
 	try {
-		int count = 1;	
 	
-		//if the users entered no valid calculators don't execute command
-		if (treeCalculators.size() == 0) { return 0; }
-		
+		if (abort == true) {	return 0;	}
+	
+		int count = 1;
+		util = new SharedUtil();	
+	
 		//read first line
 		read = new ReadOTUFile(globaldata->inputFileName);	
 		read->read(&*globaldata); 
@@ -101,10 +204,13 @@ int BootSharedCommand::execute(){
 		order = input->getSharedOrderVector();
 		SharedOrderVector* lastOrder = order;
 		
+		//if the users entered no valid calculators don't execute command
+		if (treeCalculators.size() == 0) { return 0; }
+
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
-		set<string> userLabels = globaldata->labels;
-		set<int> userLines = globaldata->lines;
+		set<string> userLabels = labels;
+		set<int> userLines = lines;
 				
 		//set users groups
 		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups, "treegroup");
@@ -121,9 +227,9 @@ int BootSharedCommand::execute(){
 		tmap->makeSim(globaldata->gGroupmap);
 		globaldata->gTreemap = tmap;
 			
-		while((order != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
+		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 		
-			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(order->getLabel()) == 1){			
+			if(allLines == 1 || lines.count(count) == 1 || labels.count(order->getLabel()) == 1){			
 				
 				cout << order->getLabel() << '\t' << count << endl;
 				process(order);
@@ -173,7 +279,7 @@ int BootSharedCommand::execute(){
 		delete lastOrder;
 
 		//reset groups parameter
-		globaldata->Groups.clear();  globaldata->setGroups("");
+		globaldata->Groups.clear();  
 
 		return 0;
 	}
@@ -300,7 +406,7 @@ void BootSharedCommand::process(SharedOrderVector* order) {
 				//create a file for each calculator with the 1000 trees in it.
 				for (int p = 0; p < iters; p++) {
 					
-					util->getSharedVectorswithReplacement(globaldata->Groups, lookup, order);  //fills group vectors from order vector.
+					util->getSharedVectorswithReplacement(Groups, lookup, order);  //fills group vectors from order vector.
 				
 					//for each calculator												
 					for(int i = 0 ; i < treeCalculators.size(); i++) {

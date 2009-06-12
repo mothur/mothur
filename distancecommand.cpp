@@ -16,49 +16,93 @@
 
 //**********************************************************************************************************************
 
-DistanceCommand::DistanceCommand(){
+DistanceCommand::DistanceCommand(string option){
 	try {
 		globaldata = GlobalData::getInstance();
-		validCalculator = new ValidCalculators();
-		countends = globaldata->getCountEnds();
-		convert(globaldata->getProcessors(), processors);
-		convert(globaldata->getCutOff(), cutoff);
-		phylip = globaldata->getPhylipFile();
+		abort = false;
+		Estimators.clear();
 		
-		//open file
-		string filename = globaldata->getFastaFile();
-		openInputFile(filename, in);
+		//allow user to run help
+		if(option == "help") { help(); abort = true; }
 		
-
+		else {
+			//valid paramters for this command
+			string Array[] =  {"fasta", "phylip", "calc", "countends", "cutoff", "processors"};
+			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			
+			parser = new OptionParser();
+			parser->parse(option, parameters);  delete parser;
+			
+			ValidParameters* validParameter = new ValidParameters();
 		
-		int i;
-		if (isTrue(countends) == true) {
-			for (i=0; i<globaldata->Estimators.size(); i++) {
-				if (validCalculator->isValidCalculator("distance", globaldata->Estimators[i]) == true) { 
-					if (globaldata->Estimators[i] == "nogaps") { 
-						distCalculator = new ignoreGaps();
-					}else if (globaldata->Estimators[i] == "eachgap") { 
-						distCalculator = new eachGapDist();	
-					}else if (globaldata->Estimators[i] == "onegap") {
-					distCalculator = new oneGapDist();					}
-				}
+			//check to make sure all parameters are valid for command
+			for (it2 = parameters.begin(); it2 != parameters.end(); it2++) { 
+				if (validParameter->isValidParameter(it2->first, myArray, it2->second) != true) {  abort = true;  }
 			}
-		}else {
-			for (i=0; i<globaldata->Estimators.size(); i++) {
-				if (validCalculator->isValidCalculator("distance", globaldata->Estimators[i]) == true) { 
-					if (globaldata->Estimators[i] == "nogaps") { 
-						distCalculator = new ignoreGaps();	
-					}else if (globaldata->Estimators[i] == "eachgap") { 
-						distCalculator = new eachGapIgnoreTermGapDist();
-					}else if (globaldata->Estimators[i] == "onegap") { 
-						distCalculator = new oneGapIgnoreTermGapDist();	
+			
+			//check for required parameters
+			fastafile = validParameter->validFile(parameters, "fasta", true);
+			if (fastafile == "not found") { cout << "fasta is a required parameter for the dist.seqs command." << endl; abort = true; }
+			else if (fastafile == "not open") { abort = true; }	
+			else { 
+				globaldata->setFastaFile(fastafile);
+				openInputFile(fastafile, in);
+			}
+			
+			//check for optional parameter and set defaults
+			// ...at some point should added some additional type checking...
+			calc = validParameter->validFile(parameters, "calc", false);			
+			if (calc == "not found") { calc = "onegap";  }
+			else { 
+				 if (calc == "default")  {  calc = "onegap";  }
+			}
+			splitAtDash(calc, Estimators);
+
+			string temp;
+			temp = validParameter->validFile(parameters, "countends", false);			if (temp == "not found") { temp = "T"; }
+			convert(temp, countends); 
+			
+			temp = validParameter->validFile(parameters, "cutoff", false);				if (temp == "not found") { temp = "1.0"; }
+			convert(temp, cutoff); 
+			
+			temp = validParameter->validFile(parameters, "processors", false);			if (temp == "not found") { temp = "1"; }
+			convert(temp, processors); 
+			
+			phylip = validParameter->validFile(parameters, "phylip", false);			if (phylip == "not found") { phylip = "F"; }
+	
+			delete validParameter;
+			
+			validCalculator = new ValidCalculators();
+			
+			int i;
+			if (isTrue(countends) == true) {
+				for (i=0; i<Estimators.size(); i++) {
+					if (validCalculator->isValidCalculator("distance", Estimators[i]) == true) { 
+						if (Estimators[i] == "nogaps") { 
+							distCalculator = new ignoreGaps();
+						}else if (Estimators[i] == "eachgap") { 
+							distCalculator = new eachGapDist();	
+						}else if (Estimators[i] == "onegap") {
+						distCalculator = new oneGapDist();					}
+					}
+				}
+			}else {
+				for (i=0; i<Estimators.size(); i++) {
+					if (validCalculator->isValidCalculator("distance", Estimators[i]) == true) { 
+						if (Estimators[i] == "nogaps") { 
+							distCalculator = new ignoreGaps();	
+						}else if (Estimators[i] == "eachgap") { 
+							distCalculator = new eachGapIgnoreTermGapDist();
+						}else if (Estimators[i] == "onegap") { 
+							distCalculator = new oneGapIgnoreTermGapDist();	
+						}
 					}
 				}
 			}
+
+			delete validCalculator;
 		}
-		
-		//reset calc for next command
-		globaldata->setCalc("");
+				
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the DistanceCommand class Function DistanceCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -71,12 +115,40 @@ DistanceCommand::DistanceCommand(){
 }
 //**********************************************************************************************************************
 
+void DistanceCommand::help(){
+	try {
+		cout << "The dist.seqs command reads a file containing sequences and creates a distance file." << "\n";
+		cout << "The dist.seqs command parameters are fasta, calc, countends, cutoff and processors.  " << "\n";
+		cout << "The fasta parameter is required." << "\n";
+		cout << "The calc parameter allows you to specify the method of calculating the distances.  Your options are: nogaps, onegap or eachgap. The default is onegap." << "\n";
+		cout << "The countends parameter allows you to specify whether to include terminal gaps in distance.  Your options are: T or F. The default is T." << "\n";
+		cout << "The cutoff parameter allows you to specify maximum distance to keep. The default is 1.0." << "\n";
+		cout << "The processors parameter allows you to specify number of processors to use.  The default is 1." << "\n";
+		cout << "The dist.seqs command should be in the following format: " << "\n";
+		cout << "dist.seqs(fasta=yourFastaFile, calc=yourCalc, countends=yourEnds, cutoff= yourCutOff, processors=yourProcessors) " << "\n";
+		cout << "Example dist.seqs(fasta=amazon.fasta, calc=eachgap, countends=F, cutoff= 2.0, processors=3)." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. calc), '=' and parameters (i.e.yourCalc)." << "\n" << "\n";
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the DistanceCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the DistanceCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
+
+//**********************************************************************************************************************
+
 int DistanceCommand::execute(){
 	try {
 		
+		if (abort == true) { return 0; }
+		
 		//reads fasta file and fills sequenceDB
-		if(globaldata->getFastaFile() != "") {  seqDB = new SequenceDB(in);  }
-		else { cout << "Error no fasta file." << endl; return 0; }
+		seqDB = new SequenceDB(in); 
 				
 		int numSeqs = seqDB->getNumSeqs();
 		cutoff += 0.005;
@@ -85,7 +157,7 @@ int DistanceCommand::execute(){
 		
 		//doses the user want the phylip formatted file as well
 		if (isTrue(phylip) == true) {
-			outputFile = getRootName(globaldata->getFastaFile()) + "phylip.dist";
+			outputFile = getRootName(fastafile) + "phylip.dist";
 			remove(outputFile.c_str());
 			
 			//output numSeqs to phylip formatted dist file
@@ -93,7 +165,7 @@ int DistanceCommand::execute(){
 			outFile << numSeqs << endl;
 			outFile.close();
 		}else { //user wants column format
-			outputFile = getRootName(globaldata->getFastaFile()) + "dist";
+			outputFile = getRootName(fastafile) + "dist";
 			remove(outputFile.c_str());
 		}
 				

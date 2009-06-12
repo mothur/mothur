@@ -18,7 +18,7 @@ class CommandFactory {
 public:
 	CommandFactory();
 	~CommandFactory();
-	Command* getCommand(string);
+	Command* getCommand(string, string);
 private:
 	Command* command;
 

@@ -11,10 +11,21 @@
 
 //**********************************************************************************************************************
 
-ConcensusCommand::ConcensusCommand(){
+ConcensusCommand::ConcensusCommand(string option){
 	try {
 		globaldata = GlobalData::getInstance();
-		t = globaldata->gTree;
+		abort = false;
+		
+		//allow user to run help
+		if(option == "help") { help(); abort = true; }
+		
+		else {
+			if (option != "") { cout << "There are no valid parameters for the concensus command." << endl; abort = true; }
+			
+			//no trees were read
+			if (globaldata->gTree.size() == 0) {	cout << "You must execute the read.tree command, before you may use the concensus command." << endl; abort = true;  }
+			else {  t = globaldata->gTree;	}
+		}
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ConcensusCommand class Function ConcensusCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -25,6 +36,30 @@ ConcensusCommand::ConcensusCommand(){
 		exit(1);
 	}	
 }
+
+//**********************************************************************************************************************
+
+void ConcensusCommand::help(){
+	try {
+		cout << "The concensus command can only be executed after a successful read.tree command." << "\n";
+		cout << "The concensus command has no parameters." << "\n";
+		cout << "The concensus command should be in the following format: concensus()." << "\n";
+		cout << "The concensus command output two files: .concensus.tre and .concensuspairs." << "\n";
+		cout << "The .concensus.tre file contains the concensus tree of the trees in your input file." << "\n";
+		cout << "The branch lengths are the percentage of trees in your input file that had the given pair." << "\n";
+		cout << "The .concensuspairs file contains a list of the internal nodes in your tree.  For each node, the pair that was used in the concensus tree " << "\n";
+		cout << "is reported with its percentage, as well as the other pairs that were seen for that node but not used and their percentages." << "\n" << "\n";		
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ConcensusCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ConcensusCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
 //**********************************************************************************************************************
 
 ConcensusCommand::~ConcensusCommand(){}
@@ -34,7 +69,7 @@ ConcensusCommand::~ConcensusCommand(){}
 int ConcensusCommand::execute(){
 	try {
 		
-		if (t.size() == 0) { return 0; }
+		if (abort == true) { return 0; }
 		else {  
 			numNodes = t[0]->getNumNodes();
 			numLeaves = t[0]->getNumLeaves();

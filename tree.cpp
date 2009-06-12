@@ -15,6 +15,8 @@ Tree::Tree() {
 	try {
 		globaldata = GlobalData::getInstance();
 		
+		if (globaldata->runParse == true) {  parseTreeFile();  globaldata->runParse = false;  }
+		
 		numLeaves = globaldata->Treenames.size();
 		numNodes = 2*numLeaves - 1;
 		
@@ -595,4 +597,142 @@ void Tree::printTree() {
 
 /*****************************************************************/
 
+void Tree::parseTreeFile() {
+	
+	//only takes names from the first tree and assumes that all trees use the same names.
+	try {
+		string filename = globaldata->getTreeFile();
+		ifstream filehandle;
+		openInputFile(filename, filehandle);
+		int c, comment;
+		comment = 0;
+		
+		//ifyou are not a nexus file 
+		if((c = filehandle.peek()) != '#') {  
+			while((c = filehandle.peek()) != ';') { 
+				while ((c = filehandle.peek()) != ';') {
+					// get past comments
+					if(c == '[') {
+						comment = 1;
+					}
+					if(c == ']'){
+						comment = 0;
+					}
+					if((c == '(') && (comment != 1)){ break; }
+					filehandle.get();
+				}
+
+				readTreeString(filehandle); 
+			}
+		//ifyou are a nexus file
+		}else if((c = filehandle.peek()) == '#') {
+			string holder = "";
+					
+			// get past comments
+			while(holder != "translate" && holder != "Translate"){	
+				if(holder == "[" || holder == "[!"){
+					comment = 1;
+				}
+				if(holder == "]"){
+					comment = 0;
+				}
+				filehandle >> holder; 
+	
+				//ifthere is no translate then you must read tree string otherwise use translate to get names
+				if(holder == "tree" && comment != 1){	
+					//pass over the "tree rep.6878900 = "
+					while (((c = filehandle.get()) != '(') && ((c = filehandle.peek()) != EOF)) {;}
+
+					if(c == EOF) { break; }
+					filehandle.putback(c);  //put back first ( of tree.
+					readTreeString(filehandle);	
+					break;
+				}
+			}
+			
+			//use nexus translation rather than parsing tree to save time
+			if((holder == "translate") || (holder == "Translate")) {
+
+				string number, name, h;
+				h = ""; // so it enters the loop the first time
+				while((h != ";") && (number != ";")) { 
+					filehandle >> number;
+					filehandle >> name;
+	
+					//c = , until done with translation then c = ;
+					h = name.substr(name.length()-1, name.length()); 
+					name.erase(name.end()-1);  //erase the comma
+					globaldata->Treenames.push_back(number);
+				}
+				if(number == ";") { globaldata->Treenames.pop_back(); }  //in case ';' from translation is on next line instead of next to last name
+			}
+		}
+		
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function parseTreeFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the Tree class function parseTreeFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}		
+}
+/*******************************************************/
+
+/*******************************************************/
+void Tree::readTreeString(ifstream& filehandle)	{
+	try {
+		int c;
+		string name; //k
+		
+		while((c = filehandle.peek()) != ';') { 
+				//ifyou are a name
+			if((c != '(') && (c != ')') && (c != ',') && (c != ':') && (c != '\n') && (c != '\t') && (c != 32)) { //32 is space
+				name = "";
+				c = filehandle.get();
+	//		k = c;
+//cout << k << endl;
+				while ((c != '(') && (c != ')') && (c != ',') && (c != ':') && (c != '\n') && (c != 32) && (c != '\t')) {			
+					name += c;
+					c = filehandle.get();
+		//	k = c;
+//cout << " in name while " << k << endl;
+				}
+				
+//cout << "name = " << name << endl;
+				globaldata->Treenames.push_back(name);
+				filehandle.putback(c);
+//k = c;
+//cout << " after putback" <<  k << endl;
+			} 
+			
+			if(c  == ':') { //read until you reach the end of the branch length
+				while ((c != '(') && (c != ')') && (c != ',') && (c != ';') && (c != '\n') && (c != '\t') && (c != 32)) {
+					c = filehandle.get();
+				//	k = c;
+	//cout << " in branch while " << k << endl;
+				}
+				filehandle.putback(c);
+			}
+			c = filehandle.get();
+			if(c == ';') { break; }
+		//	k = c;
+//cout << k << endl;
+
+		}
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function parseTreeFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the Tree class function parseTreeFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}		
+}	
+
+/*******************************************************/
+
+/*******************************************************/
 

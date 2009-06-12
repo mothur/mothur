@@ -14,10 +14,13 @@
 
 
 #include "mothur.h"
+#include "optionparser.h"
+#include "validparameter.h"
 
 class Command {
 	public:
 		virtual int execute() = 0;
+		virtual void help() = 0;
 };
 
 #endif

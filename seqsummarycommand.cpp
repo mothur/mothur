@@ -12,10 +12,37 @@
 
 //***************************************************************************************************************
 
-SeqSummaryCommand::SeqSummaryCommand(){
+SeqSummaryCommand::SeqSummaryCommand(string option){
 	try {
 		globaldata = GlobalData::getInstance();
-		if(globaldata->getFastaFile() == "")		{	cout << "you need to at least enter a fasta file name" << endl;	}
+		abort = false;
+		
+		//allow user to run help
+		if(option == "help") { help(); abort = true; }
+		
+		else {
+			//valid paramters for this command
+			string Array[] =  {"fasta"};
+			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			
+			parser = new OptionParser();
+			parser->parse(option, parameters);  delete parser;
+			
+			ValidParameters* validParameter = new ValidParameters();
+		
+			//check to make sure all parameters are valid for command
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			}
+			
+			//check for required parameters
+			fastafile = validParameter->validFile(parameters, "fasta", true);
+			if (fastafile == "not open") { abort = true; }
+			else if (fastafile == "not found") { fastafile = ""; cout << "fasta is a required parameter for the summary.seqs command." << endl; abort = true;  }	
+			else {  globaldata->setFastaFile(fastafile);  globaldata->setFormat("fasta"); 	}
+			
+			delete validParameter;
+		}
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the SeqSummaryCommand class Function SeqSummaryCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -23,6 +50,25 @@ SeqSummaryCommand::SeqSummaryCommand(){
 	}
 	catch(...) {
 		cout << "An unknown error has occurred in the SeqSummaryCommand class function SeqSummaryCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+//**********************************************************************************************************************
+
+void SeqSummaryCommand::help(){
+	try {
+		cout << "The summary.seqs command reads a fastafile and ...." << "\n";
+		cout << "The summary.seqs command parameter is fasta and it is required." << "\n";
+		cout << "The summary.seqs command should be in the following format: " << "\n";
+		cout << "summary.seqs(fasta=yourFastaFile) " << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile)." << "\n" << "\n";	
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the SeqSummaryCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the SeqSummaryCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
 }
@@ -35,13 +81,15 @@ SeqSummaryCommand::~SeqSummaryCommand(){	/*	do nothing	*/	}
 
 int SeqSummaryCommand::execute(){
 	try{
-
+		
+		if (abort == true) { return 0; }
+		
 		ifstream inFASTA;
-		openInputFile(globaldata->getFastaFile(), inFASTA);
+		openInputFile(fastafile, inFASTA);
 		int numSeqs = 0;
 
 		ofstream outSummary;
-		string summaryFile = globaldata->getFastaFile() + ".summary";
+		string summaryFile = fastafile + ".summary";
 		openOutputFile(summaryFile, outSummary);
 		
 		vector<int> startPosition;

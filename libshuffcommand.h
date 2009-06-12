@@ -20,9 +20,10 @@ class GlobalData;
 class LibShuffCommand : public Command {
 	
 	public:
-		LibShuffCommand();	
+		LibShuffCommand(string);	
 		~LibShuffCommand(){};
-		int execute();	
+		int execute();
+		void help();	
 	
 	private:
 		vector<string> groupNames;
@@ -40,6 +41,12 @@ class LibShuffCommand : public Command {
 		vector<vector<int> > pValueCounts;
 		vector<vector<double> > savedDXYValues;
 		vector<vector<vector<double> > > savedMinValues;
+		OptionParser* parser;
+		map<string, string> parameters;
+		map<string, string>::iterator it;
+		bool abort;
+		string outputFile, groups, userform, savegroups;
+		vector<string> Groups; //holds groups to be used
 };
 
 #endif

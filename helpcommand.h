@@ -14,19 +14,19 @@
 #include "command.hpp"
 #include "globaldata.hpp"
 #include "validcommands.h"
-#include "validcalculator.h"
 
 
 class HelpCommand : public Command {
 	
 public:
-	HelpCommand();
+	HelpCommand(string);
 	~HelpCommand();
 	int execute();
+	void help() {};
+	
 private:
 	GlobalData* globaldata;
 	ValidCommands* validCommands;
-	ValidCalculators* validCalcs;
 	
 private:
 		

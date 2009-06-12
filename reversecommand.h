@@ -16,12 +16,19 @@
 
 class ReverseSeqsCommand : public Command {
 public:
-	ReverseSeqsCommand();
+	ReverseSeqsCommand(string);
 	~ReverseSeqsCommand();
 	int execute();
+	void help();
 	
 private:
 	GlobalData* globaldata;	
+	OptionParser* parser;
+	map<string, string> parameters;
+	map<string, string>::iterator it;
+	bool abort;
+	string fasta;
+
 	
 };
 

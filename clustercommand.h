@@ -31,9 +31,10 @@ class GlobalData;
 class ClusterCommand : public Command {
 	
 public:
-	ClusterCommand();	
+	ClusterCommand(string);	
 	~ClusterCommand();
 	int execute();	
+	void help();
 	
 private:
 	GlobalData* globaldata;
@@ -43,7 +44,11 @@ private:
 	RAbundVector* rabund;
 	RAbundVector oldRAbund;
 	ListVector oldList;
-	
+	OptionParser* parser;
+	map<string, string> parameters;
+	map<string, string>::iterator it;
+	bool abort;
+
 	string method, fileroot, tag;
 	double cutoff;
 	int precision, length;

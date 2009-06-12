@@ -36,68 +36,143 @@
 
 //**********************************************************************************************************************
 
-CollectSharedCommand::CollectSharedCommand(){
+CollectSharedCommand::CollectSharedCommand(string option){
 	try {
 		globaldata = GlobalData::getInstance();
-		string fileNameRoot;
-		fileNameRoot = getRootName(globaldata->inputFileName);
-		format = globaldata->getFormat();
-		convert(globaldata->getFreq(), freq);
-		validCalculator = new ValidCalculators();
-		util = new SharedUtil();
+		abort = false;
+		allLines = 1;
+		lines.clear();
+		labels.clear();
+		Estimators.clear();
 		
-		int i;
-		for (i=0; i<globaldata->Estimators.size(); i++) {
-			if (validCalculator->isValidCalculator("shared", globaldata->Estimators[i]) == true) { 
-				if (globaldata->Estimators[i] == "sharedchao") { 
-					cDisplays.push_back(new CollectDisplay(new SharedChao1(), new SharedOneColumnFile(fileNameRoot+"shared.chao")));
-				}else if (globaldata->Estimators[i] == "sharedsobs") { 
-					cDisplays.push_back(new CollectDisplay(new SharedSobsCS(), new SharedOneColumnFile(fileNameRoot+"shared.sobs")));
-				}else if (globaldata->Estimators[i] == "sharedace") { 
-					cDisplays.push_back(new CollectDisplay(new SharedAce(), new SharedOneColumnFile(fileNameRoot+"shared.ace")));
-				}else if (globaldata->Estimators[i] == "jabund") { 	
-					cDisplays.push_back(new CollectDisplay(new JAbund(), new SharedOneColumnFile(fileNameRoot+"jabund")));
-				}else if (globaldata->Estimators[i] == "sorabund") { 
-					cDisplays.push_back(new CollectDisplay(new SorAbund(), new SharedOneColumnFile(fileNameRoot+"sorabund")));
-				}else if (globaldata->Estimators[i] == "jclass") { 
-					cDisplays.push_back(new CollectDisplay(new Jclass(), new SharedOneColumnFile(fileNameRoot+"jclass")));
-				}else if (globaldata->Estimators[i] == "sorclass") { 
-					cDisplays.push_back(new CollectDisplay(new SorClass(), new SharedOneColumnFile(fileNameRoot+"sorclass")));
-				}else if (globaldata->Estimators[i] == "jest") { 
-					cDisplays.push_back(new CollectDisplay(new Jest(), new SharedOneColumnFile(fileNameRoot+"jest")));
-				}else if (globaldata->Estimators[i] == "sorest") { 
-					cDisplays.push_back(new CollectDisplay(new SorEst(), new SharedOneColumnFile(fileNameRoot+"sorest")));
-				}else if (globaldata->Estimators[i] == "thetayc") { 
-					cDisplays.push_back(new CollectDisplay(new ThetaYC(), new SharedOneColumnFile(fileNameRoot+"thetayc")));
-				}else if (globaldata->Estimators[i] == "thetan") { 
-					cDisplays.push_back(new CollectDisplay(new ThetaN(), new SharedOneColumnFile(fileNameRoot+"thetan")));
-				}else if (globaldata->Estimators[i] == "kstest") { 
-					cDisplays.push_back(new CollectDisplay(new KSTest(), new SharedOneColumnFile(fileNameRoot+"kstest")));
-				}else if (globaldata->Estimators[i] == "whittaker") { 
-					cDisplays.push_back(new CollectDisplay(new Whittaker(), new SharedOneColumnFile(fileNameRoot+"whittaker")));
-				}else if (globaldata->Estimators[i] == "sharednseqs") { 
-					cDisplays.push_back(new CollectDisplay(new SharedNSeqs(), new SharedOneColumnFile(fileNameRoot+"shared.nseqs")));
+		//allow user to run help
+		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; }
+		
+		else {
+			//valid paramters for this command
+			string Array[] =  {"freq","line","label","calc","groups"};
+			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			
+			parser = new OptionParser();
+			parser->parse(option, parameters);  delete parser;
+			
+			ValidParameters* validParameter = new ValidParameters();
+		
+			//check to make sure all parameters are valid for command
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			}
+			
+			//make sure the user has already run the read.otu command
+			if (globaldata->getSharedFile() == "") {
+				if (globaldata->getListFile() == "") { cout << "You must read a list and a group, or a shared before you can use the collect.shared command." << endl; abort = true; }
+				else if (globaldata->getGroupFile() == "") { cout << "You must read a list and a group, or a shared before you can use the collect.shared command." << endl; abort = true; }
+			}
 
-				}else if (globaldata->Estimators[i] == "ochiai") { 
-					cDisplays.push_back(new CollectDisplay(new Ochiai(), new SharedOneColumnFile(fileNameRoot+"ochiai")));
-				}else if (globaldata->Estimators[i] == "anderberg") { 
-					cDisplays.push_back(new CollectDisplay(new Anderberg(), new SharedOneColumnFile(fileNameRoot+"anderberg")));
-				}else if (globaldata->Estimators[i] == "skulczynski") { 
-					cDisplays.push_back(new CollectDisplay(new Kulczynski(), new SharedOneColumnFile(fileNameRoot+"kulczynski")));
-				}else if (globaldata->Estimators[i] == "kulczynskicody") { 
-					cDisplays.push_back(new CollectDisplay(new KulczynskiCody(), new SharedOneColumnFile(fileNameRoot+"kulczynskicody")));
-				}else if (globaldata->Estimators[i] == "lennon") { 
-					cDisplays.push_back(new CollectDisplay(new Lennon(), new SharedOneColumnFile(fileNameRoot+"lennon")));
-				}else if (globaldata->Estimators[i] == "morisitahorn") { 
-					cDisplays.push_back(new CollectDisplay(new MorHorn(), new SharedOneColumnFile(fileNameRoot+"morisitahorn")));
-				}else if (globaldata->Estimators[i] == "braycurtis") { 
-					cDisplays.push_back(new CollectDisplay(new BrayCurtis(), new SharedOneColumnFile(fileNameRoot+"braycurtis")));
-				}
+			
+			//check for optional parameter and set defaults
+			// ...at some point should added some additional type checking...
+			line = validParameter->validFile(parameters, "line", false);				
+			if (line == "not found") { line = "";  }
+			else { 
+				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
+				else { allLines = 1;  }
+			}
+			
+			label = validParameter->validFile(parameters, "label", false);			
+			if (label == "not found") { label = ""; }
+			else { 
+				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				else { allLines = 1;  }
+			}
+			
+			//make sure user did not use both the line and label parameters
+			if ((line != "") && (label != "")) { cout << "You cannot use both the line and label parameters at the same time. " << endl; abort = true; }
+			//if the user has not specified any line or labels use the ones from read.otu
+			else if((line == "") && (label == "")) {  
+				allLines = globaldata->allLines; 
+				labels = globaldata->labels; 
+				lines = globaldata->lines;
+			}
+				
+			calc = validParameter->validFile(parameters, "calc", false);			
+			if (calc == "not found") { calc = "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan";  }
+			else { 
+				 if (calc == "default")  {  calc = "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan";  }
+			}
+			splitAtDash(calc, Estimators);
+			
+			groups = validParameter->validFile(parameters, "groups", false);			
+			if (groups == "not found") { groups = ""; }
+			else { 
+				splitAtDash(groups, Groups);
+				globaldata->Groups = Groups;
+			}
+			
+			string temp;
+			temp = validParameter->validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
+			convert(temp, freq); 
+			
+			delete validParameter;
+			
+			if (abort == false) {
+			
+				string fileNameRoot = getRootName(globaldata->inputFileName);
+				format = globaldata->getFormat();
+				int i;
+				
+				validCalculator = new ValidCalculators();
+				util = new SharedUtil();
+				
+				for (i=0; i<Estimators.size(); i++) {
+					if (validCalculator->isValidCalculator("shared", Estimators[i]) == true) { 
+						if (Estimators[i] == "sharedchao") { 
+							cDisplays.push_back(new CollectDisplay(new SharedChao1(), new SharedOneColumnFile(fileNameRoot+"shared.chao")));
+						}else if (Estimators[i] == "sharedsobs") { 
+							cDisplays.push_back(new CollectDisplay(new SharedSobsCS(), new SharedOneColumnFile(fileNameRoot+"shared.sobs")));
+						}else if (Estimators[i] == "sharedace") { 
+							cDisplays.push_back(new CollectDisplay(new SharedAce(), new SharedOneColumnFile(fileNameRoot+"shared.ace")));
+						}else if (Estimators[i] == "jabund") { 	
+							cDisplays.push_back(new CollectDisplay(new JAbund(), new SharedOneColumnFile(fileNameRoot+"jabund")));
+						}else if (Estimators[i] == "sorabund") { 
+							cDisplays.push_back(new CollectDisplay(new SorAbund(), new SharedOneColumnFile(fileNameRoot+"sorabund")));
+						}else if (Estimators[i] == "jclass") { 
+							cDisplays.push_back(new CollectDisplay(new Jclass(), new SharedOneColumnFile(fileNameRoot+"jclass")));
+						}else if (Estimators[i] == "sorclass") { 
+							cDisplays.push_back(new CollectDisplay(new SorClass(), new SharedOneColumnFile(fileNameRoot+"sorclass")));
+						}else if (Estimators[i] == "jest") { 
+							cDisplays.push_back(new CollectDisplay(new Jest(), new SharedOneColumnFile(fileNameRoot+"jest")));
+						}else if (Estimators[i] == "sorest") { 
+							cDisplays.push_back(new CollectDisplay(new SorEst(), new SharedOneColumnFile(fileNameRoot+"sorest")));
+						}else if (Estimators[i] == "thetayc") { 
+							cDisplays.push_back(new CollectDisplay(new ThetaYC(), new SharedOneColumnFile(fileNameRoot+"thetayc")));
+						}else if (Estimators[i] == "thetan") { 
+							cDisplays.push_back(new CollectDisplay(new ThetaN(), new SharedOneColumnFile(fileNameRoot+"thetan")));
+						}else if (Estimators[i] == "kstest") { 
+							cDisplays.push_back(new CollectDisplay(new KSTest(), new SharedOneColumnFile(fileNameRoot+"kstest")));
+						}else if (Estimators[i] == "whittaker") { 
+							cDisplays.push_back(new CollectDisplay(new Whittaker(), new SharedOneColumnFile(fileNameRoot+"whittaker")));
+						}else if (Estimators[i] == "sharednseqs") { 
+							cDisplays.push_back(new CollectDisplay(new SharedNSeqs(), new SharedOneColumnFile(fileNameRoot+"shared.nseqs")));
+						}else if (Estimators[i] == "ochiai") { 
+							cDisplays.push_back(new CollectDisplay(new Ochiai(), new SharedOneColumnFile(fileNameRoot+"ochiai")));
+						}else if (Estimators[i] == "anderberg") { 
+							cDisplays.push_back(new CollectDisplay(new Anderberg(), new SharedOneColumnFile(fileNameRoot+"anderberg")));
+						}else if (Estimators[i] == "skulczynski") { 
+							cDisplays.push_back(new CollectDisplay(new Kulczynski(), new SharedOneColumnFile(fileNameRoot+"kulczynski")));
+						}else if (Estimators[i] == "kulczynskicody") { 
+							cDisplays.push_back(new CollectDisplay(new KulczynskiCody(), new SharedOneColumnFile(fileNameRoot+"kulczynskicody")));
+						}else if (Estimators[i] == "lennon") { 
+							cDisplays.push_back(new CollectDisplay(new Lennon(), new SharedOneColumnFile(fileNameRoot+"lennon")));
+						}else if (Estimators[i] == "morisitahorn") { 
+							cDisplays.push_back(new CollectDisplay(new MorHorn(), new SharedOneColumnFile(fileNameRoot+"morisitahorn")));
+						}else if (Estimators[i] == "braycurtis") { 
+							cDisplays.push_back(new CollectDisplay(new BrayCurtis(), new SharedOneColumnFile(fileNameRoot+"braycurtis")));
+						}
+					}
+				}	
 			}
 		}
-		
-		//reset calc for next command
-		globaldata->setCalc("");
 
 	}
 	catch(exception& e) {
@@ -110,6 +185,32 @@ CollectSharedCommand::CollectSharedCommand(){
 	}	
 			
 }
+//**********************************************************************************************************************
+
+void CollectSharedCommand::help(){
+	try {
+		cout << "The collect.shared command can only be executed after a successful read.otu command." << "\n";
+		cout << "The collect.shared command parameters are label, line, freq, calc and groups.  No parameters are required, but you may not use " << "\n";
+		cout << "both the line and label parameters at the same time. The collect.shared command should be in the following format: " << "\n";
+		cout << "collect.shared(label=yourLabel, line=yourLines, freq=yourFreq, calc=yourEstimators, groups=yourGroups)." << "\n";
+		cout << "Example collect.shared(label=unique-.01-.03, line=0-5-10, freq=10, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan)." << "\n";
+		cout << "The default values for freq is 100 and calc are sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan." << "\n";
+		cout << "The default value for groups is all the groups in your groupfile." << "\n";
+		validCalculator->printCalc("shared", cout);
+		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
+		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile)." << "\n" << "\n";
+		
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the CollectSharedCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the CollectSharedCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
 
 //**********************************************************************************************************************
 
@@ -119,12 +220,16 @@ CollectSharedCommand::~CollectSharedCommand(){
 	delete cCurve;
 	delete read;
 	delete util;
+	delete validCalculator;
 }
 
 //**********************************************************************************************************************
 
 int CollectSharedCommand::execute(){
 	try {
+		
+		if (abort == true) {	return 0;	}
+		
 		int count = 1;
 		
 		//if the users entered no valid calculators don't execute command
@@ -208,7 +313,7 @@ int CollectSharedCommand::execute(){
 		for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}	
 		
 		//reset groups parameter
-		globaldata->Groups.clear();  globaldata->setGroups("");
+		globaldata->Groups.clear(); 
 		
 		return 0;
 	}

@@ -22,41 +22,116 @@
 
 //**********************************************************************************************************************
 
-MatrixOutputCommand::MatrixOutputCommand(){
+MatrixOutputCommand::MatrixOutputCommand(string option){
 	try {
 		globaldata = GlobalData::getInstance();
-		validCalculator = new ValidCalculators();
+		abort = false;
+		allLines = 1;
+		lines.clear();
+		labels.clear();
+		Groups.clear();
+		Estimators.clear();
+		
+		//allow user to run help
+		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; }
+		
+		else {
+			//valid paramters for this command
+			string Array[] =  {"line","label","calc","groups"};
+			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
-		int i;
-		for (i=0; i<globaldata->Estimators.size(); i++) {
-			if (validCalculator->isValidCalculator("matrix", globaldata->Estimators[i]) == true) { 
-				if (globaldata->Estimators[i] == "jabund") { 	
-					matrixCalculators.push_back(new JAbund());
-				}else if (globaldata->Estimators[i] == "sorabund") { 
-					matrixCalculators.push_back(new SorAbund());
-				}else if (globaldata->Estimators[i] == "jclass") { 
-					matrixCalculators.push_back(new Jclass());
-				}else if (globaldata->Estimators[i] == "sorclass") { 
-					matrixCalculators.push_back(new SorClass());
-				}else if (globaldata->Estimators[i] == "jest") { 
-					matrixCalculators.push_back(new Jest());
-				}else if (globaldata->Estimators[i] == "sorest") { 
-					matrixCalculators.push_back(new SorEst());
-				}else if (globaldata->Estimators[i] == "thetayc") { 
-					matrixCalculators.push_back(new ThetaYC());
-				}else if (globaldata->Estimators[i] == "thetan") { 
-					matrixCalculators.push_back(new ThetaN());
-				}else if (globaldata->Estimators[i] == "morisitahorn") { 
-					matrixCalculators.push_back(new MorHorn());
-				}else if (globaldata->Estimators[i] == "braycurtis") { 
-					matrixCalculators.push_back(new BrayCurtis());
+			parser = new OptionParser();
+			parser->parse(option, parameters);  delete parser;
+			
+			ValidParameters* validParameter = new ValidParameters();
+		
+			//check to make sure all parameters are valid for command
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			}
+			
+			//make sure the user has already run the read.otu command
+			if (globaldata->getSharedFile() == "") {
+				if (globaldata->getListFile() == "") { cout << "You must read a list and a group, or a shared before you can use the dist.shared command." << endl; abort = true; }
+				else if (globaldata->getGroupFile() == "") { cout << "You must read a list and a group, or a shared before you can use the dist.shared command." << endl; abort = true; }
+			}
+			
+			//check for optional parameter and set defaults
+			// ...at some point should added some additional type checking...
+			line = validParameter->validFile(parameters, "line", false);				
+			if (line == "not found") { line = "";  }
+			else { 
+				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
+				else { allLines = 1;  }
+			}
+			
+			label = validParameter->validFile(parameters, "label", false);			
+			if (label == "not found") { label = ""; }
+			else { 
+				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				else { allLines = 1;  }
+			}
+			
+			//make sure user did not use both the line and label parameters
+			if ((line != "") && (label != "")) { cout << "You cannot use both the line and label parameters at the same time. " << endl; abort = true; }
+			//if the user has not specified any line or labels use the ones from read.otu
+			else if((line == "") && (label == "")) {  
+				allLines = globaldata->allLines; 
+				labels = globaldata->labels; 
+				lines = globaldata->lines;
+			}
+				
+			groups = validParameter->validFile(parameters, "groups", false);			
+			if (groups == "not found") { groups = ""; }
+			else { 
+				splitAtDash(groups, Groups);
+				globaldata->Groups = Groups;
+			}
+				
+			calc = validParameter->validFile(parameters, "calc", false);			
+			if (calc == "not found") { calc = "jclass-thetayc";  }
+			else { 
+				 if (calc == "default")  {  calc = "jclass-thetayc";  }
+			}
+			splitAtDash(calc, Estimators);
+
+			delete validParameter;
+			
+			
+			if (abort == false) {
+			
+				validCalculator = new ValidCalculators();
+				
+				int i;
+				for (i=0; i<Estimators.size(); i++) {
+					if (validCalculator->isValidCalculator("matrix", Estimators[i]) == true) { 
+						if (Estimators[i] == "jabund") { 	
+							matrixCalculators.push_back(new JAbund());
+						}else if (Estimators[i] == "sorabund") { 
+							matrixCalculators.push_back(new SorAbund());
+						}else if (Estimators[i] == "jclass") { 
+							matrixCalculators.push_back(new Jclass());
+						}else if (Estimators[i] == "sorclass") { 
+							matrixCalculators.push_back(new SorClass());
+						}else if (Estimators[i] == "jest") { 
+							matrixCalculators.push_back(new Jest());
+						}else if (Estimators[i] == "sorest") { 
+							matrixCalculators.push_back(new SorEst());
+						}else if (Estimators[i] == "thetayc") { 
+							matrixCalculators.push_back(new ThetaYC());
+						}else if (Estimators[i] == "thetan") { 
+							matrixCalculators.push_back(new ThetaN());
+						}else if (Estimators[i] == "morisitahorn") { 
+							matrixCalculators.push_back(new MorHorn());
+						}else if (Estimators[i] == "braycurtis") { 
+							matrixCalculators.push_back(new BrayCurtis());
+						}
+					}
 				}
+				
 			}
 		}
 		
-		//reset calc for next command
-		globaldata->setCalc("");
-
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the MatrixOutputCommand class Function MatrixOutputCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -67,17 +142,49 @@ MatrixOutputCommand::MatrixOutputCommand(){
 		exit(1);
 	}	
 }
+
+//**********************************************************************************************************************
+
+void MatrixOutputCommand::help(){
+	try {
+		cout << "The dist.shared command can only be executed after a successful read.otu command." << "\n";
+		cout << "The dist.shared command parameters are groups, calc, line and label.  The calc parameter is required, and you may not use line and label at the same time." << "\n";
+		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like included used." << "\n";
+		cout << "The group names are separated by dashes. The line and label allow you to select what distance levels you would like distance matrices created for, and are also separated by dashes." << "\n";
+		cout << "The dist.shared command should be in the following format: dist.shared(groups=yourGroups, calc=yourCalcs, line=yourLines, label=yourLabels)." << "\n";
+		cout << "Example dist.shared(groups=A-B-C, line=1-3-5, calc=jabund-sorabund)." << "\n";
+		cout << "The default value for groups is all the groups in your groupfile." << "\n";
+		cout << "The default value for calc is jclass and thetayc." << "\n";
+		validCalculator->printCalc("matrix", cout);
+		cout << "The dist.shared command outputs a .dist file for each calculator you specify at each distance you choose." << "\n";
+		cout << "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups)." << "\n" << "\n";
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the MatrixOutputCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the MatrixOutputCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
+
 //**********************************************************************************************************************
 
 MatrixOutputCommand::~MatrixOutputCommand(){
 	delete input;
 	delete read;
+	delete validCalculator;
 }
 
 //**********************************************************************************************************************
 
 int MatrixOutputCommand::execute(){
 	try {
+		
+		if (abort == true) {	return 0;	}
+	
 		int count = 1;	
 				
 		//if the users entered no valid calculators don't execute command
@@ -93,17 +200,17 @@ int MatrixOutputCommand::execute(){
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
-		set<string> userLabels = globaldata->labels;
-		set<int> userLines = globaldata->lines;
+		set<string> userLabels = labels;
+		set<int> userLines = lines;
 				
 		if (lookup.size() < 2) { cout << "You have not provided enough valid groups.  I cannot run the command." << endl; return 0;}
 		
-		numGroups = globaldata->Groups.size();
+		numGroups = lookup.size();
 				
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
+		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 		
-			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(lookup[0]->getLabel()) == 1){			
+			if(allLines == 1 || lines.count(count) == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 				cout << lookup[0]->getLabel() << '\t' << count << endl;
 				process(lookup);
 				
@@ -152,7 +259,7 @@ int MatrixOutputCommand::execute(){
 
 		
 		//reset groups parameter
-		globaldata->Groups.clear();  globaldata->setGroups("");
+		globaldata->Groups.clear();  
 
 		return 0;
 	}

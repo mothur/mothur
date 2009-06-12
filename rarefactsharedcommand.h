@@ -19,11 +19,11 @@
 /* The rarefaction.shared() command:
 	The rarefaction command generates a rarefaction curve from a given file representing several groups.  
 	The rarefaction.shared command can only be executed after a successful read.shared command. It outputs a file for each estimator you choose to use.  
-	The rarefaction.shared command parameters are label, line, iters, jumble and sharedrarefaction.  
+	The rarefaction.shared command parameters are label, line, iters and sharedrarefaction.  
 	No parameters are required, but you may not use both the line and label  parameters at the same time.  
 	The rarefaction command should be in the following format: rarefaction.shared(label=yourLabel, line=yourLines, iters=yourIters, 
-	jumble= yourJumble, sharedrarefaction=yourEstimators).  Example rarefaction.shared(label=unique-.01-.03, line=0,5,10, iters=10000, 
-	jumble=1, sharedrarefaction =sharedobserved).  The default values for jumble is 0 (meaning don’t jumble, if it’s set to 1 then it will jumble), 
+	 sharedrarefaction=yourEstimators).  Example rarefaction.shared(label=unique-.01-.03, line=0,5,10, iters=10000, 
+	 sharedrarefaction =sharedobserved).  The default values for 
 	iters is 1000 and sharedrarefaction is sharedobserved which calculates the shared rarefaction curve for the observed richness. 
 	 The valid sharedrarefaction estimator is sharedobserved. The label and line parameters are used to analyze specific lines in your input. */
 
@@ -33,9 +33,10 @@ class GlobalData;
 class RareFactSharedCommand : public Command {
 	
 public:
-	RareFactSharedCommand();	
+	RareFactSharedCommand(string);	
 	~RareFactSharedCommand();
 	int execute();	
+	void help();
 	
 private:
 	GlobalData* globaldata;
@@ -47,6 +48,15 @@ private:
 	vector<Display*> rDisplays;
 	int freq, nIters;
 	string format;
+	OptionParser* parser;
+	map<string, string> parameters;
+	map<string, string>::iterator it;
+	bool abort, allLines;
+	set<int> lines; //hold lines to be used
+	set<string> labels; //holds labels to be used
+	string line, label, calc, groups;
+	vector<string>  Estimators, Groups;
+
 
 };
 

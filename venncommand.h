@@ -23,9 +23,10 @@ class GlobalData;
 class VennCommand : public Command {
 
 public:
-	VennCommand();
+	VennCommand(string);
 	~VennCommand();
 	int execute();
+	void help();
 	
 private:
 	GlobalData* globaldata;
@@ -33,12 +34,21 @@ private:
 	InputData* input;
 	SharedListVector* SharedList;
 	Venn* venn;
-	string format;
 	vector<Calculator*> vennCalculators;	
 	ValidCalculators* validCalculator;
 	vector<SharedRAbundVector*> lookup;
 	SAbundVector* sabund;
 	int abund;
+	
+	OptionParser* parser;
+	map<string, string> parameters;
+	map<string, string>::iterator it;
+	bool abort, allLines;
+	set<int> lines; //hold lines to be used
+	set<string> labels; //holds labels to be used
+	string format, groups, calc, line, label;
+	vector<string> Estimators, Groups;
+
 
 };
 

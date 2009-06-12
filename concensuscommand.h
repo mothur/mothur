@@ -19,15 +19,17 @@ class GlobalData;
 class ConcensusCommand : public Command {
 	
 public:
-	ConcensusCommand();	
+	ConcensusCommand(string);	
 	~ConcensusCommand();
-	int execute();	
+	int execute();
+	void help();	
 	
 private:
 	GlobalData* globaldata;
 	SharedUtil* util;
 	vector<Tree*> t;
 	Tree* concensusTree;
+	bool abort;
 	vector<string> treeSet;		//set containing all members of the tree to start recursion.  filled in getSets().
 	map< vector<string>, int > nodePairs;  //<map of possible combinations these combos are the pcounts or descendants info, to how many times they occured
 										// ie. combos FI and EGK would create nodePairs[vector containing F and I] = 1; nodePairs[vector containing E, G and K] = 1

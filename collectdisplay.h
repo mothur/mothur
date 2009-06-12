@@ -26,7 +26,7 @@ public:
 		data = estimate->getValues(shared);  //passes estimators a shared vector from each group to be compared
 		
 		//figure out what groups are being compared in getValues
-		//because the jumble parameter randomizes the order we need to put the results in the correct column in the output file
+		//because we randomizes the order we need to put the results in the correct column in the output file
 		int group1Index, group2Index, pos;
 		group1Index = shared[0]->getGroupIndex();
 		group2Index = shared[1]->getGroupIndex();

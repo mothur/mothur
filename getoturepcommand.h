@@ -27,25 +27,29 @@ typedef list<PCell>::iterator MatData;
 class GetOTURepCommand : public Command {
 	
 public:
-	GetOTURepCommand();	
+	GetOTURepCommand(string);	
 	~GetOTURepCommand();
-	int execute();	
+	int execute();
+	void help();	
 	
 private:
 	GlobalData* globaldata;
 	SparseMatrix* matrix;
 	ListVector* list;
-	ListVector* listOfNames;
 	ReadOTUFile* read;
 	InputData* input;
 	FastaMap* fasta;
 	GroupMap* groupMap;
-	string filename, fastafile, namesfile, groupfile;
+	string filename, fastafile, listfile, namesfile, groupfile, line, label;
 	ofstream out;
 	ifstream in, inNames;
 	bool groupError;
-	
-	 
+	OptionParser* parser;
+	map<string, string> parameters;
+	map<string, string>::iterator it4;
+	bool abort, allLines;
+	set<int> lines; //hold lines to be used
+	set<string> labels; //holds labels to be used
 	map<string, int> nameToIndex;  //maps sequence name to index in sparsematrix
 	map<int, string>::iterator it;
 	map<int, string>::iterator it2;

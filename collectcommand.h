@@ -37,9 +37,10 @@ class GlobalData;
 class CollectCommand : public Command {
 	
 public:
-	CollectCommand();	
+	CollectCommand(string);	
 	~CollectCommand();
 	int execute();	
+	void help();
 	
 private:
 	GlobalData* globaldata;
@@ -51,6 +52,15 @@ private:
 	ValidCalculators* validCalculator;
 	vector<Display*> cDisplays;
 	int freq, abund, size;
+	OptionParser* parser;
+	map<string, string> parameters;
+	map<string, string>::iterator it;
+	bool abort, allLines;
+	set<int> lines; //hold lines to be used
+	set<string> labels; //holds labels to be used
+	string line, label, calc;
+	vector<string>  Estimators;
+
 
 };
 

@@ -9,9 +9,10 @@ class CommandOptionParser {
 public:
 	CommandOptionParser(string);
 	string getCommandString();
+	string getOptionString();
 	
 private:
-	string commandString;
+	string commandString, optionString;
 };
 
 //**********************************************************************************************************************
