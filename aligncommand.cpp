@@ -12,23 +12,16 @@
  *	allows for a global alignment and not the local alignment provided by bLAst.  Furthermore, it has the potential to
  *	provide a better alignment because of the banding method employed by blast (I'm not sure about this).
  *
- *	to compile type:
- *		make
- *
- *	for basic instructions on how to run nastPlus type:
- *		./nastPlus
  */
 
 #include "aligncommand.h"
 #include "sequence.hpp"
 
-#include "alignment.hpp"
 #include "gotohoverlap.hpp"
 #include "needlemanoverlap.hpp"
 #include "blastalign.hpp"
 #include "noalign.hpp"
 
-#include "database.hpp"
 #include "kmerdb.hpp"
 #include "suffixdb.hpp"
 #include "blastdb.hpp"
@@ -38,67 +31,64 @@
 
 
 //**********************************************************************************************************************
+
 AlignCommand::AlignCommand(string option){
 	try {
-		globaldata = GlobalData::getInstance();
+//		globaldata = GlobalData::getInstance();
 		abort = false;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; }
 		
 		else {
+
 			//valid paramters for this command
-			string AlignArray[] =  {"fasta","candidate","search","ksize","align","match","mismatch","gapopen","gapextend"};
+			string AlignArray[] =  {"template","candidate","search","ksize","align","match","mismatch","gapopen","gapextend", "processors"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
-			parser = new OptionParser();
-
-			parser->parse(option, parameters);   	delete parser; 
+			OptionParser parser(option);
+			map<string, string> parameters = parser.getParameters(); 
 			
-			ValidParameters* validParameter = new ValidParameters();
+			ValidParameters validParameter;
 		
 			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			for (map<string, string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
 			//check for required parameters
-			templateFileName = validParameter->validFile(parameters, "fasta", true);
-			if (templateFileName == "not found") { cout << "fasta is a required parameter for the align.seqs command." << endl; abort = true; }
+			templateFileName = validParameter.validFile(parameters, "template", true);
+			if (templateFileName == "not found") { cout << "template is a required parameter for the align.seqs command." << endl; abort = true; }
 			else if (templateFileName == "not open") { abort = true; }	
-			else { globaldata->setFastaFile(templateFileName); }
 		
-			candidateFileName = validParameter->validFile(parameters, "candidate", true);
+			candidateFileName = validParameter.validFile(parameters, "candidate", true);
 			if (candidateFileName == "not found") { cout << "candidate is a required parameter for the align.seqs command." << endl; abort = true; }
 			else if (candidateFileName == "not open") { abort = true; }	
-			else { 
-				globaldata->setCandidateFile(candidateFileName);
-				openInputFile(candidateFileName, in);		
-			}
 			
-		
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			string temp;
-			temp = validParameter->validFile(parameters, "ksize", false);			if (temp == "not found") { temp = "8"; }
+			temp = validParameter.validFile(parameters, "ksize", false);		if (temp == "not found"){	temp = "8";				}
 			convert(temp, kmerSize); 
 		
-			temp = validParameter->validFile(parameters, "match", false);			if (temp == "not found") { temp = "1.0"; }
+			temp = validParameter.validFile(parameters, "match", false);		if (temp == "not found"){	temp = "1.0";			}
 			convert(temp, match);  
 
-			temp = validParameter->validFile(parameters, "mismatch", false);			if (temp == "not found") { temp = "-1.0"; }
+			temp = validParameter.validFile(parameters, "mismatch", false);		if (temp == "not found"){	temp = "-1.0";			}
 			convert(temp, misMatch);  
 
-			temp = validParameter->validFile(parameters, "gapopen", false);			if (temp == "not found") { temp = "-1.0"; }
+			temp = validParameter.validFile(parameters, "gapopen", false);		if (temp == "not found"){	temp = "-1.0";			}
 			convert(temp, gapOpen);  
 
-			temp = validParameter->validFile(parameters, "gapextend", false);		if (temp == "not found") { temp = "-2.0"; }
+			temp = validParameter.validFile(parameters, "gapextend", false);	if (temp == "not found"){	temp = "-2.0";			}
 			convert(temp, gapExtend); 
 		
-			search = validParameter->validFile(parameters, "search", false);			if (search == "not found")	{ search = "kmer";		}
-			align = validParameter->validFile(parameters, "align", false);			if (align == "not found")	{ align = "needleman";	}
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = "1";				}
+			convert(temp, processors); 
+
+			search = validParameter.validFile(parameters, "search", false);		if (search == "not found"){	search = "kmer";		}
 			
-			delete validParameter;
+			align = validParameter.validFile(parameters, "align", false);		if (align == "not found"){	align = "needleman";	}
 		}
 
 	}
@@ -114,9 +104,11 @@ AlignCommand::AlignCommand(string option){
 
 //**********************************************************************************************************************
 
-AlignCommand::~AlignCommand(){
-	
+AlignCommand::~AlignCommand(){			
+	delete templateDB;
+	delete alignment;
 }
+
 //**********************************************************************************************************************
 
 void AlignCommand::help(){
@@ -155,7 +147,7 @@ int AlignCommand::execute(){
 	
 		srand( (unsigned)time( NULL ) );  //needed to assign names to temporary files
 		
-		Database* templateDB;
+
 		if(search == "kmer")			{	templateDB = new KmerDB(templateFileName, kmerSize);	}
 		else if(search == "suffix")		{	templateDB = new SuffixDB(templateFileName);			}
 		else if(search == "blast")		{	templateDB = new BlastDB(templateFileName, gapOpen, gapExtend, match, misMatch);	}
@@ -164,7 +156,6 @@ int AlignCommand::execute(){
 			templateDB = new KmerDB(templateFileName, kmerSize);
 		}
 	
-		Alignment* alignment;
 		if(align == "gotoh")			{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, 3000);	}
 		else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, 3000);			}
 		else if(align == "blast")		{	alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);		}
@@ -173,52 +164,79 @@ int AlignCommand::execute(){
 			cout << align << " is not a valid alignment option. I will run the command using needleman." << endl;
 			alignment = new NeedlemanOverlap(gapOpen, match, misMatch, 3000);
 		}
-				
-		int numFastaSeqs=count(istreambuf_iterator<char>(in),istreambuf_iterator<char>(), '>');
-		in.seekg(0);
-	
-		string candidateAligngmentFName = candidateFileName.substr(0,candidateFileName.find_last_of(".")+1) + "align";
-		ofstream candidateAlignmentFile;
-		openOutputFile(candidateAligngmentFName, candidateAlignmentFile);
-
-		string candidateReportFName = candidateFileName.substr(0,candidateFileName.find_last_of(".")+1) + "align.report";
-		NastReport report(candidateReportFName);
-
-		cout << "We are going to align the " << numFastaSeqs << " sequences in " << candidateFileName << "..." << endl;
-		cout.flush();
-	
+		
+		string alignFileName = candidateFileName.substr(0,candidateFileName.find_last_of(".")+1) + "align";
+		string reportFileName = candidateFileName.substr(0,candidateFileName.find_last_of(".")+1) + "align.report";
+		
+		int numFastaSeqs = 0;
 		int start = time(NULL);
-
-		for(int i=0;i<numFastaSeqs;i++){
-
-			Sequence* candidateSeq = new Sequence(in);
-			report.setCandidate(candidateSeq);
-
-			Sequence* templateSeq = templateDB->findClosestSequence(candidateSeq);
-			report.setTemplate(templateSeq);
-			report.setSearchParameters(search, templateDB->getSearchScore());
+		
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		if(processors == 1){
+			ifstream inFASTA;
+			openInputFile(candidateFileName, inFASTA);
+			numFastaSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+			inFASTA.close();
 			
-				
-			Nast nast(alignment, candidateSeq, templateSeq);
-			report.setAlignmentParameters(align, alignment);
-			report.setNastParameters(nast);
-
-			candidateAlignmentFile << '>' << candidateSeq->getName() << '\n' << candidateSeq->getAligned() << endl;
-			candidateAlignmentFile.flush();
-
-			if((i+1) % 100 == 0){
-				cout << "It has taken " << time(NULL) - start << " secs to align " << i+1 << " sequences" << endl;
-			}
-			report.print();
-		
-			delete candidateSeq;		
+			lines.push_back(new linePair(0, numFastaSeqs));
+			
+			driver(lines[0], alignFileName, reportFileName);
 		}
+		else{
+			vector<int> positions;
+			
+			ifstream inFASTA;
+			openInputFile(candidateFileName, inFASTA);
+
+			while(!inFASTA.eof()){
+				char c = inFASTA.get();
+				if(c == '>'){	positions.push_back(inFASTA.tellg());	}
+				while (!inFASTA.eof())	{	c = inFASTA.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+			}
+			inFASTA.close();
+			
+			numFastaSeqs = positions.size();
+			
+			int numSeqsPerProcessor = numFastaSeqs / processors;
+			
+			for (int i = 0; i < processors; i++) {
+				int startPos = positions[ i * numSeqsPerProcessor ];
+				if(i == processors - 1){
+					numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor;
+				}
+				lines.push_back(new linePair(startPos, numSeqsPerProcessor));
+			}
+			createProcesses(alignFileName, reportFileName); 
+
+			
+			//append and remove temp files
+			map<int, int>::iterator it = processIDS.begin();
+			rename((alignFileName + toString(it->second) + ".temp").c_str(), alignFileName.c_str());
+			rename((reportFileName + toString(it->second) + ".temp").c_str(), alignFileName.c_str());
+			it++;
+			
+			for (; it != processIDS.end(); it++) {
+				appendAlignFiles((alignFileName + toString(it->second) + ".temp"), alignFileName);
+				remove((alignFileName + toString(it->second) + ".temp").c_str());
+
+				appendReportFiles((reportFileName + toString(it->second) + ".temp"), reportFileName);
+				remove((reportFileName + toString(it->second) + ".temp").c_str());
+			}
+		}
+#else
+		ifstream inFASTA;
+		openInputFile(candidateFileName, inFASTA);
+		numFastaSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+		inFASTA.close();
 		
+		lines.push_back(new linePair(0, numFastaSeqs));
+		
+		driver(lines[0], alignFileName, reportFileName);
+#endif
+
 		cout << "It took " << time(NULL) - start << " secs to align " << numFastaSeqs << " sequences" << endl;
 		cout << endl;
 
-		delete templateDB;
-		delete alignment;
 
 				
 		return 0;
@@ -229,6 +247,159 @@ int AlignCommand::execute(){
 	}
 	catch(...) {
 		cout << "An unknown error has occurred in the AlignCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
+//**********************************************************************************************************************
+
+int AlignCommand::driver(linePair* line, string alignFName, string reportFName){
+	try {
+		ofstream alignmentFile;
+		openOutputFile(alignFName, alignmentFile);
+		NastReport report(reportFName);
+		
+		ifstream inFASTA;
+		openInputFile(candidateFileName, inFASTA);
+		inFASTA.seekg(line->start);
+		
+		for(int i=0;i<line->numSeqs;i++){
+			
+			Sequence* candidateSeq = new Sequence(inFASTA);
+			report.setCandidate(candidateSeq);
+			
+			Sequence* templateSeq = templateDB->findClosestSequence(candidateSeq);
+			report.setTemplate(templateSeq);
+			report.setSearchParameters(search, templateDB->getSearchScore());
+			
+			Nast nast(alignment, candidateSeq, templateSeq);
+			report.setAlignmentParameters(align, alignment);
+			report.setNastParameters(nast);
+			
+			alignmentFile << '>' << candidateSeq->getName() << '\n' << candidateSeq->getAligned() << endl;
+			
+			report.print();
+			
+			delete candidateSeq;		
+		}
+			
+		return 1;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the AlignCommand class Function driver. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the AlignCommand class function driver. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
+/**************************************************************************************************/
+
+void AlignCommand::createProcesses(string alignFileName, string reportFileName) {
+	try {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		int process = 0;
+		processIDS.clear();
+		
+		//loop through and create all the processes you want
+		while (process != processors) {
+			int pid = fork();
+						
+			if (pid > 0) {
+				processIDS[lines[process]->numSeqs] = pid;  //create map from line number to pid so you can append files in correct order later
+				process++;
+			}else if (pid == 0){
+				driver(lines[process], alignFileName + toString(getpid()) + ".temp", reportFileName + toString(getpid()) + ".temp");
+				exit(0);
+			}else { cout << "unable to spawn the necessary processes." << endl; exit(0); }
+		}
+		
+		//force parent to wait until all the processes are done
+		for (map<int, int>::iterator it = processIDS.begin(); it != processIDS.end(); it++) { 
+			int temp = it->second;
+			wait(&temp);
+		}
+#endif		
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the AlignCommand class Function createProcesses. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the AlignCommand class function createProcesses. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
+/**************************************************************************************************/
+
+void AlignCommand::appendAlignFiles(string temp, string filename) {
+	try{
+		
+		//open output file in append mode
+		ofstream output;
+		openOutputFileAppend(filename, output);
+		
+		//open temp file for reading
+		ifstream input;
+		openInputFile(temp, input);
+		
+		string line;
+		//read input file and write to output file
+		while(input.eof() != true) {
+			getline(input, line); //getline removes the newline char
+			if (line != "") {
+				output << line << endl;   // Appending back newline char 
+			}
+		}	
+		
+		input.close();
+		output.close();
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the DistanceCommand class Function appendFiles. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the DistanceCommand class function appendFiles. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
+/**************************************************************************************************/
+
+void AlignCommand::appendReportFiles(string temp, string filename) {
+	try{
+		
+		//open output file in append mode
+		ofstream output;
+		openOutputFileAppend(filename, output);
+		
+		//open temp file for reading
+		ifstream input;
+		openInputFile(temp, input);
+		while (!input.eof())	{	char c = input.get(); if (c == 10 || c == 13){	break;	}	} // get header line
+
+		string line;
+		//read input file and write to output file
+		while(input.eof() != true) {
+			getline(input, line); //getline removes the newline char
+			if (line != "") {
+				output << line << endl;   // Appending back newline char 
+			}
+		}	
+		
+		input.close();
+		output.close();
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the DistanceCommand class Function appendFiles. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the DistanceCommand class function appendFiles. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
 }

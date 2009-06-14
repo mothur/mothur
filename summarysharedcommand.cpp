@@ -52,14 +52,14 @@ SummarySharedCommand::SummarySharedCommand(string option){
 			string Array[] =  {"line","label","calc","groups"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
-			parser = new OptionParser();
-			parser->parse(option, parameters);  delete parser;
+			OptionParser parser(option);
+			map<string, string> parameters = parser.getParameters();
 			
-			ValidParameters* validParameter = new ValidParameters();
+			ValidParameters validParameter;
 		
 			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			for (map<string, string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
 			//make sure the user has already run the read.otu command
@@ -71,14 +71,14 @@ SummarySharedCommand::SummarySharedCommand(string option){
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			line = validParameter->validFile(parameters, "line", false);				
+			line = validParameter.validFile(parameters, "line", false);				
 			if (line == "not found") { line = "";  }
 			else { 
 				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
-			label = validParameter->validFile(parameters, "label", false);			
+			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
 				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
@@ -94,21 +94,19 @@ SummarySharedCommand::SummarySharedCommand(string option){
 				lines = globaldata->lines;
 			}
 				
-			calc = validParameter->validFile(parameters, "calc", false);			
+			calc = validParameter.validFile(parameters, "calc", false);			
 			if (calc == "not found") { calc = "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan";  }
 			else { 
 				 if (calc == "default")  {  calc = "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan";  }
 			}
 			splitAtDash(calc, Estimators);
 			
-			groups = validParameter->validFile(parameters, "groups", false);			
+			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
 			else { 
 				splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 			}
-			
-			delete validParameter;
 			
 			if (abort == false) {
 			
@@ -165,7 +163,7 @@ SummarySharedCommand::SummarySharedCommand(string option){
 				
 				outputFileName = ((getRootName(globaldata->inputFileName)) + "shared.summary");
 				openOutputFile(outputFileName, outputFileHandle);
-				format = globaldata->getFormat();
+//				format = globaldata->getFormat();
 				mult = false;
 			}
 		}

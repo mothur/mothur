@@ -44,16 +44,11 @@ private:
 	ofstream out;
 	ifstream in, inNames;
 	bool groupError;
-	OptionParser* parser;
-	map<string, string> parameters;
-	map<string, string>::iterator it4;
+	
 	bool abort, allLines;
 	set<int> lines; //hold lines to be used
 	set<string> labels; //holds labels to be used
 	map<string, int> nameToIndex;  //maps sequence name to index in sparsematrix
-	map<int, string>::iterator it;
-	map<int, string>::iterator it2;
-	map<string, int>::iterator it3;
 	
 	void readNamesFile();
 	int process(ListVector*);

@@ -12,7 +12,6 @@
 
 #include "mothur.h"
 #include "command.hpp"
-#include "globaldata.hpp"
 #include "sequence.hpp"
 
 class TrimSeqsCommand : public Command {
@@ -23,24 +22,25 @@ public:
 	void help();
 	
 private:
-	void getOligos();
-	bool stripBarcode(Sequence&, string&);
+	void getOligos(vector<ofstream*>&, vector<ofstream*>&);
+	bool stripQualThreshold(Sequence&, ifstream&);
+	bool cullQualAverage(Sequence&, ifstream&);
+	bool stripBarcode(Sequence&, int&);
 	bool stripForward(Sequence&);
 	bool stripReverse(Sequence&);
 	bool cullLength(Sequence&);
 	bool cullHomoP(Sequence&);
 	bool cullAmbigs(Sequence&);
-	
-	GlobalData* globaldata;
-	OptionParser* parser;
-	map<string, string> parameters;
-	map<string, string>::iterator it;
+	bool compareDNASeq(string, string);
+
 	bool abort;
-	string fastafile;
-	bool oligos, flip;
-	int numFPrimers, numRPrimers, maxAmbig, maxHomoP, minLength, maxLength;
+	string fastaFile, oligoFile, qFileName;
+	
+	bool flip, allFiles;
+	int numFPrimers, numRPrimers, maxAmbig, maxHomoP, minLength, maxLength, qThreshold, qAverage;
 	vector<string> forPrimer, revPrimer;
-	map<string, string> barcodes;
+	map<string, int> barcodes;
+	vector<string> groupVector;
 };
 
 #endif

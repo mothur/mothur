@@ -28,14 +28,14 @@ HeatMapCommand::HeatMapCommand(string option){
 			string AlignArray[] =  {"groups","line","label","sorted","scale"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
-			parser = new OptionParser();
-			parser->parse(option, parameters);  delete parser;
+			OptionParser parser(option);
+			map<string,string> parameters = parser.getParameters();
 			
-			ValidParameters* validParameter = new ValidParameters();
-		
+			ValidParameters validParameter;
+			
 			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
 			//make sure the user has already run the read.otu command
@@ -45,14 +45,14 @@ HeatMapCommand::HeatMapCommand(string option){
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			line = validParameter->validFile(parameters, "line", false);				
+			line = validParameter.validFile(parameters, "line", false);				
 			if (line == "not found") { line = "";  }
 			else { 
 				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
-			label = validParameter->validFile(parameters, "label", false);			
+			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
 				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
@@ -68,19 +68,16 @@ HeatMapCommand::HeatMapCommand(string option){
 				lines = globaldata->lines;
 			}
 			
-			groups = validParameter->validFile(parameters, "groups", false);			
+			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
 			else { 
 				splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 			}
 			
-			sorted = validParameter->validFile(parameters, "sorted", false);			if (sorted == "not found") { sorted = "T"; }
+			sorted = validParameter.validFile(parameters, "sorted", false);			if (sorted == "not found") { sorted = "T"; }
 		 
-			scale = validParameter->validFile(parameters, "scale", false);				if (scale == "not found") { scale = "log10"; }
-		  
-
-			delete validParameter;
+			scale = validParameter.validFile(parameters, "scale", false);				if (scale == "not found") { scale = "log10"; }
 			
 			if (abort == false) {
 				heatmap = new HeatMap(sorted, scale);

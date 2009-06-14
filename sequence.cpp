@@ -34,10 +34,9 @@ Sequence::Sequence(ifstream& fastaFile){
 	initialize();
 	fastaFile >> name;
 	name = name.substr(1);
-	char c;
 	
-	while ((c = fastaFile.get()) != EOF)	{	if (c == 10){	break;	}	} // get rest of line if there's any crap there
-	
+	while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+
 	char letter;
 	string sequence;
 	

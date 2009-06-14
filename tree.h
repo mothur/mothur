@@ -13,6 +13,7 @@
 #include "treenode.h"
 #include "globaldata.hpp"
 
+class GlobalData;
 /* This class represents the treefile. */
 
 class Tree {

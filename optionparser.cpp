@@ -10,22 +10,23 @@
 #include "optionparser.h"
 
 /***********************************************************************/
-void OptionParser::parse(string option, map<string, string>& container) {
+
+OptionParser::OptionParser(string option) {
 	try {
 		
 		if (option != "") {
-		
+			
 			string key, value;		
 			//reads in parameters and values
 			while((option.find_first_of(',') != -1)) {  //while there are parameters
-					splitAtComma(value, option);
-					splitAtEquals(key, value);
-					container[key] = value;
+				splitAtComma(value, option);
+				splitAtEquals(key, value);
+				parameters[key] = value;
 			}
-		
+			
 			//in case there is no comma and to get last parameter after comma
 			splitAtEquals(key, option);
-			container[key] = option;
+			parameters[key] = option;
 		}
 	}
 	catch(exception& e) {
@@ -37,4 +38,9 @@ void OptionParser::parse(string option, map<string, string>& container) {
 		exit(1);
 	}
 }
+
+/***********************************************************************/
+
+map<string, string> OptionParser::getParameters() {	return parameters;	}
+
 /***********************************************************************/

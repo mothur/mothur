@@ -15,7 +15,6 @@
 
 ReverseSeqsCommand::ReverseSeqsCommand(string option){
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false;
 		
 		//allow user to run help
@@ -26,23 +25,21 @@ ReverseSeqsCommand::ReverseSeqsCommand(string option){
 			string Array[] =  {"fasta"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
-			parser = new OptionParser();
-			parser->parse(option, parameters);  delete parser;
+			OptionParser parser(option);
+			map<string,string> parameters = parser.getParameters();
 			
-			ValidParameters* validParameter = new ValidParameters();
+			ValidParameters validParameter;
 		
 			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
 			//check for required parameters
-			fasta = validParameter->validFile(parameters, "fasta", true);
+			fasta = validParameter.validFile(parameters, "fasta", true);
 			if (fasta == "not open") { abort = true; }
 			else if (fasta == "not found") { fasta = ""; cout << "fasta is a required parameter for the reverse.seqs command." << endl; abort = true;  }	
-			else {  globaldata->setFastaFile(fasta);  globaldata->setFormat("fasta"); 	}
 			
-			delete validParameter;
 		}
 	}
 	catch(exception& e) {

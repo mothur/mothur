@@ -11,9 +11,8 @@
  */
 
 #include "command.hpp"
-#include "globaldata.hpp"
-#include "sequence.hpp"
 
+class Sequence;
 class FilterSeqsCommand : public Command {
 
 public:
@@ -35,11 +34,7 @@ private:
 	bool abort;
 	float soft;
 	int numSeqs;
-	OptionParser* parser;
-	map<string, string> parameters;
-	map<string, string>::iterator it;
 	
-	GlobalData* globaldata;	
 	vector<int> a, t, g, c, gap;
 
 };

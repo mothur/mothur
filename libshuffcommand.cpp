@@ -37,14 +37,14 @@ LibShuffCommand::LibShuffCommand(string option){
 			string Array[] =  {"iters","groups","step","form","cutoff"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
-			parser = new OptionParser();
-			parser->parse(option, parameters);  delete parser;
+			OptionParser parser(option);
+			map<string, string> parameters = parser.getParameters();
 			
-			ValidParameters* validParameter = new ValidParameters();
+			ValidParameters validParameter;
 		
 			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
 			//make sure the user has already run the read.dist command
@@ -54,7 +54,7 @@ LibShuffCommand::LibShuffCommand(string option){
 						
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			groups = validParameter->validFile(parameters, "groups", false);			
+			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; savegroups = groups; }
 			else { 
 				savegroups = groups;
@@ -63,18 +63,16 @@ LibShuffCommand::LibShuffCommand(string option){
 			}
 				
 			string temp;
-			temp = validParameter->validFile(parameters, "iters", false);				if (temp == "not found") { temp = "10000"; }
+			temp = validParameter.validFile(parameters, "iters", false);				if (temp == "not found") { temp = "10000"; }
 			convert(temp, iters); 
 			
-			temp = validParameter->validFile(parameters, "cutoff", false);				if (temp == "not found") { temp = "1.0"; }
+			temp = validParameter.validFile(parameters, "cutoff", false);				if (temp == "not found") { temp = "1.0"; }
 			convert(temp, cutOff); 
 			
-			temp = validParameter->validFile(parameters, "step", false);				if (temp == "not found") { temp = "0.01"; }
+			temp = validParameter.validFile(parameters, "step", false);				if (temp == "not found") { temp = "0.01"; }
 			convert(temp, step); 
 	
-			userform = validParameter->validFile(parameters, "form", false);			if (userform == "not found") { userform = "integral"; }
-			
-			delete validParameter;
+			userform = validParameter.validFile(parameters, "form", false);			if (userform == "not found") { userform = "integral"; }
 			
 			if (abort == false) {
 			

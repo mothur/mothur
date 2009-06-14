@@ -1,6 +1,6 @@
+
+
 #include "globaldata.hpp"
-#include "tree.h"
-#include "sparsematrix.hpp"
 
 /*******************************************************/
 
@@ -25,15 +25,12 @@ string GlobalData::getGroupFile()		{	return groupfile;		}
 string GlobalData::getOrderFile()		{	return orderfile;		}
 string GlobalData::getTreeFile()		{	return treefile;		}
 string GlobalData::getSharedFile()		{	return sharedfile;		}
-string GlobalData::getFastaFile()		{	return fastafile;		}	
+//string GlobalData::getFastaFile()		{	return fastafile;		}	
 string GlobalData::getFormat()			{	return format;			}
-string GlobalData::getCandidateFile()	{	return candidatefile;	}
-
 
 void GlobalData::setListFile(string file)		{	listfile = file;	inputFileName = file;					}
-void GlobalData::setFastaFile(string file)		{	fastafile = file;	inputFileName = file;					}
+//void GlobalData::setFastaFile(string file)		{	fastafile = file;	inputFileName = file;					}
 void GlobalData::setTreeFile(string file)		{	treefile = file;	inputFileName = file;					}
-void GlobalData::setCandidateFile(string file)	{	candidatefile = file;										}
 void GlobalData::setRabundFile(string file)		{	rabundfile = file;	inputFileName = file;					}
 void GlobalData::setSabundFile(string file)		{	sabundfile = file;	inputFileName = file;					}
 void GlobalData::setPhylipFile(string file)		{	phylipfile = file;    inputFileName = file;					}
@@ -59,19 +56,20 @@ GlobalData::GlobalData() {
 /******************************************************/
 void GlobalData::clear() {
 	//option definitions should go here...
-	phylipfile		=	"";
-	columnfile		=	"";
+	phylipfile		=	""; //do we need this?
+	columnfile		=	""; //do we need this?
 	listfile		=	"";
 	rabundfile		=	"";
 	sabundfile		=	"";
-	namefile		=	"";
-	groupfile		=	""; 
+	namefile		=	""; //do we need this?
+	groupfile		=	""; //do we need this?
 	orderfile		=	"";
-	fastafile		=   "";
+//	fastafile		=   ""; //do we need this?
 	treefile		=	"";
 	sharedfile		=	"";
-	candidatefile	=	"";
 }
+
+
 /*******************************************************/
 
 /******************************************************/

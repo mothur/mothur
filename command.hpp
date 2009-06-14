@@ -10,7 +10,7 @@
  *
  */
 
-/*This class is a parent to all the command classes.  It has one pure int execute(). */
+/*This class is a parent to all the command classes.  */
 
 
 #include "mothur.h"

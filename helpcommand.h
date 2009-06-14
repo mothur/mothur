@@ -12,7 +12,6 @@
 /* This class is designed to aid the user in running mothur. */
 
 #include "command.hpp"
-#include "globaldata.hpp"
 #include "validcommands.h"
 
 
@@ -25,7 +24,6 @@ public:
 	void help() {};
 	
 private:
-	GlobalData* globaldata;
 	ValidCommands* validCommands;
 	
 private:

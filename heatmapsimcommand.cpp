@@ -40,14 +40,14 @@ HeatMapSimCommand::HeatMapSimCommand(string option){
 			string AlignArray[] =  {"groups","line","label", "calc"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
-			parser = new OptionParser();
-			parser->parse(option, parameters);  delete parser;
+			OptionParser parser(option);
+			map<string,string> parameters = parser.getParameters();
 			
-			ValidParameters* validParameter = new ValidParameters();
-		
+			ValidParameters validParameter;
+			
 			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
 			//make sure the user has already run the read.otu command
@@ -57,14 +57,14 @@ HeatMapSimCommand::HeatMapSimCommand(string option){
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			line = validParameter->validFile(parameters, "line", false);				
+			line = validParameter.validFile(parameters, "line", false);				
 			if (line == "not found") { line = "";  }
 			else { 
 				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
-			label = validParameter->validFile(parameters, "label", false);			
+			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
 				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
@@ -80,21 +80,19 @@ HeatMapSimCommand::HeatMapSimCommand(string option){
 				lines = globaldata->lines;
 			}
 			
-			calc = validParameter->validFile(parameters, "calc", false);			
+			calc = validParameter.validFile(parameters, "calc", false);			
 			if (calc == "not found") { calc = "jclass-thetayc";  }
 			else { 
 				 if (calc == "default")  {  calc = "jclass-thetayc";  }
 			}
 			splitAtDash(calc, Estimators);
 			
-			groups = validParameter->validFile(parameters, "groups", false);			
+			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
 			else { 
 				splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 			}
-			
-			delete validParameter;
 			
 			if (abort == false) {
 				validCalculator = new ValidCalculators();

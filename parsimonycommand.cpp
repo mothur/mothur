@@ -24,17 +24,17 @@ ParsimonyCommand::ParsimonyCommand(string option) {
 			string Array[] =  {"random","groups","iters"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
-			parser = new OptionParser();
-			parser->parse(option, parameters);  delete parser;
+			OptionParser parser(option);
+			map<string, string> parameters = parser.getParameters();
 			
-			ValidParameters* validParameter = new ValidParameters();
+			ValidParameters validParameter;
 		
 			//check to make sure all parameters are valid for command
-			for (it4 = parameters.begin(); it4 != parameters.end(); it4++) { 
-				if (validParameter->isValidParameter(it4->first, myArray, it4->second) != true) {  abort = true;  }
+			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
-			randomtree = validParameter->validFile(parameters, "random", false);		if (randomtree == "not found") { randomtree = ""; }
+			randomtree = validParameter.validFile(parameters, "random", false);		if (randomtree == "not found") { randomtree = ""; }
 			
 			//are you trying to use parsimony without reading a tree or saying you want random distribution
 			if (randomtree == "")  {
@@ -44,18 +44,16 @@ ParsimonyCommand::ParsimonyCommand(string option) {
 						
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			groups = validParameter->validFile(parameters, "groups", false);			
+			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
 			else { 
 				splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 			}
 				
-			itersString = validParameter->validFile(parameters, "iters", false);			if (itersString == "not found") { itersString = "1000"; }
+			itersString = validParameter.validFile(parameters, "iters", false);			if (itersString == "not found") { itersString = "1000"; }
 			convert(itersString, iters); 
-			
-			delete validParameter;
-			
+						
 			if (abort == false) {
 				//randomtree will tell us if user had their own treefile or if they just want the random distribution
 				//user has entered their own tree
@@ -149,7 +147,7 @@ int ParsimonyCommand::execute() {
 				for(int k = 0; k < numComp; k++) {
 
 					//update uscoreFreq
-					it = uscoreFreq[k].find(userData[k]);
+					map<int,double>::iterator it = uscoreFreq[k].find(userData[k]);
 					if (it == uscoreFreq[k].end()) {//new score
 						uscoreFreq[k][userData[k]] = 1;
 					}else{ uscoreFreq[k][userData[k]]++; }
@@ -175,8 +173,8 @@ int ParsimonyCommand::execute() {
 					
 				for(int r = 0; r < numComp; r++) {
 					//add trees pscore to map of scores
-					it2 = rscoreFreq[r].find(randomData[r]);
-					if (it2 != rscoreFreq[r].end()) {//already have that score
+					map<int,double>::iterator it = rscoreFreq[r].find(randomData[r]);
+					if (it != rscoreFreq[r].end()) {//already have that score
 						rscoreFreq[r][randomData[r]]++;
 					}else{//first time we have seen this score
 						rscoreFreq[r][randomData[r]] = 1;
@@ -206,8 +204,8 @@ int ParsimonyCommand::execute() {
 			
 				for(int r = 0; r < numComp; r++) {
 					//add trees pscore to map of scores
-					it2 = rscoreFreq[r].find(randomData[r]);
-					if (it2 != rscoreFreq[r].end()) {//already have that score
+					map<int,double>::iterator it = rscoreFreq[r].find(randomData[r]);
+					if (it != rscoreFreq[r].end()) {//already have that score
 						rscoreFreq[r][randomData[r]]++;
 					}else{//first time we have seen this score
 						rscoreFreq[r][randomData[r]] = 1;
@@ -228,9 +226,9 @@ int ParsimonyCommand::execute() {
 			float rcumul = 0.0000;
 			float ucumul = 0.0000;
 			//this loop fills the cumulative maps and put 0.0000 in the score freq map to make it easier to print.
-			for (it = validScores.begin(); it != validScores.end(); it++) { 
+			for (map<int,double>::iterator it = validScores.begin(); it != validScores.end(); it++) { 
 				if (randomtree == "") {
-					it2 = uscoreFreq[a].find(it->first);
+					map<int,double>::iterator it2 = uscoreFreq[a].find(it->first);
 					//user data has that score 
 					if (it2 != uscoreFreq[a].end()) { uscoreFreq[a][it->first] /= T.size(); ucumul+= it2->second;  }
 					else { uscoreFreq[a][it->first] = 0.0000; } //no user trees with that score
@@ -239,7 +237,7 @@ int ParsimonyCommand::execute() {
 				}
 			
 				//make rscoreFreq map and rCumul
-				it2 = rscoreFreq[a].find(it->first);
+				map<int,double>::iterator it2 = rscoreFreq[a].find(it->first);
 				//get percentage of random trees with that info
 				if (it2 != rscoreFreq[a].end()) {  rscoreFreq[a][it->first] /= iters; rcumul+= it2->second;  }
 				else { rscoreFreq[a][it->first] = 0.0000; } //no random trees with that score
@@ -298,7 +296,7 @@ void ParsimonyCommand::printParsimonyFile() {
 		for(int a = 0; a < numComp; a++) {
 			output->initFile(groupComb[a], tags);
 			//print each line
-			for (it = validScores.begin(); it != validScores.end(); it++) { 
+			for (map<int,double>::iterator it = validScores.begin(); it != validScores.end(); it++) { 
 				if (randomtree == "") {
 					data.push_back(it->first);  data.push_back(uscoreFreq[a][it->first]); data.push_back(uCumul[a][it->first]); data.push_back(rscoreFreq[a][it->first]); data.push_back(rCumul[a][it->first]); 
 				}else{

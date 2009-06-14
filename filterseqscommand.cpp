@@ -8,12 +8,12 @@
  */
 
 #include "filterseqscommand.h"
+#include "sequence.hpp"
 
 /**************************************************************************************/
 
 FilterSeqsCommand::FilterSeqsCommand(string option){
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false;
 		
 		//allow user to run help
@@ -24,40 +24,35 @@ FilterSeqsCommand::FilterSeqsCommand(string option){
 			string Array[] =  {"fasta", "trump", "soft", "hard", "vertical"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
-			parser = new OptionParser();
-			parser->parse(option, parameters);  delete parser;
+			OptionParser parser(option);
+			map<string,string> parameters = parser.getParameters();
 			
-			ValidParameters* validParameter = new ValidParameters();
-		
+			ValidParameters validParameter;
+			
 			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
 			//check for required parameters
-			fastafile = validParameter->validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not found") { cout << "fasta is a required parameter for the filter.seqs command." << endl; abort = true; }
 			else if (fastafile == "not open") { abort = true; }	
-			else { 
-				globaldata->setFastaFile(fastafile);
-			}
-			
+
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			
 			string temp;
-			temp = validParameter->validFile(parameters, "trump", false);				if (temp == "not found") { temp = "."; }
+			temp = validParameter.validFile(parameters, "trump", false);			if (temp == "not found") { temp = "*"; }
 			trump = temp[0];
 			
-			temp = validParameter->validFile(parameters, "soft", false);				if (temp == "not found") { soft = 0; }
+			temp = validParameter.validFile(parameters, "soft", false);				if (temp == "not found") { soft = 0; }
 			else {  soft = (float)atoi(temp.c_str()) / 100.0;  }
 			
-			hard = validParameter->validFile(parameters, "hard", true);					if (hard == "not found") { hard = ""; }
+			hard = validParameter.validFile(parameters, "hard", true);				if (hard == "not found") { hard = ""; }
 			else if (hard == "not open") { abort = true; }	
 			
-			vertical = validParameter->validFile(parameters, "vertical", false);		if (vertical == "not found") { vertical = "F"; }
-	
-			delete validParameter;
+			vertical = validParameter.validFile(parameters, "vertical", false);		if (vertical == "not found") { vertical = "T"; }
 			
 			numSeqs = 0;
 			
@@ -81,10 +76,10 @@ void FilterSeqsCommand::help(){
 		cout << "The filter.seqs command reads a file containing sequences and creates a .filter and .filter.fasta file." << "\n";
 		cout << "The filter.seqs command parameters are fasta, trump, soft, hard and vertical.  " << "\n";
 		cout << "The fasta parameter is required." << "\n";
-		cout << "The trump parameter .... The default is '.'" << "\n";
+		cout << "The trump parameter .... The default is ..." << "\n";
 		cout << "The soft parameter .... The default is ...." << "\n";
 		cout << "The hard parameter .... The default is ...." << "\n";
-		cout << "The vertical parameter .... The default is F." << "\n";
+		cout << "The vertical parameter .... The default is T." << "\n";
 		cout << "The filter.seqs command should be in the following format: " << "\n";
 		cout << "filter.seqs(fasta=yourFastaFile, trump=yourTrump, soft=yourSoft, hard=yourHard, vertical=yourVertical) " << "\n";
 		cout << "Example filter.seqs(fasta=abrecovery.fasta, trump=..., soft=..., hard=..., vertical=T)." << "\n";
@@ -117,7 +112,7 @@ void FilterSeqsCommand::doHard() {
 void FilterSeqsCommand::doTrump(Sequence seq) {
 	
 	string curAligned = seq.getAligned();
-	
+
 	for(int j = 0; j < alignmentLength; j++) {
 		if(curAligned[j] == trump){
 			filter[j] = '0';
@@ -141,15 +136,9 @@ void FilterSeqsCommand::doVertical() {
 void FilterSeqsCommand::doSoft() {
 	
 	int threshold = int (soft * numSeqs);
-	bool keep = 0;
 	
 	for(int i=0;i<alignmentLength;i++){
-		if(a[i] >= threshold)		{	keep = 1;	}
-		else if(t[i] >= threshold)	{	keep = 1;	}
-		else if(g[i] >= threshold)	{	keep = 1;	}
-		else if(c[i] >= threshold)	{	keep = 1;	}
-		
-		if(keep == 0)	{	filter[i] = 0;		}
+		if(a[i] < threshold && t[i] < threshold && g[i] < threshold && c[i] < threshold){	filter[i] = 0;	}
 	}
 }
 
@@ -194,11 +183,10 @@ int FilterSeqsCommand::execute() {
 		if(hard.compare("") != 0)	{	doHard();		}
 		else						{	filter = string(alignmentLength, '1');	}
 
-		if(isTrue(vertical) || soft != 0){
-		
-			while(!inFASTA.eof()){
+		if(trump != '*' || isTrue(vertical) || soft != 0){
+			while(!inFASTA.eof()){	//read through and create the filter...
 				Sequence seq(inFASTA);
-				doTrump(seq);	
+				if(trump != '*'){	doTrump(seq);	}
 				if(isTrue(vertical) || soft != 0){	getFreqs(seq);	}
 				numSeqs++;
 				cout.flush();
@@ -252,8 +240,6 @@ int FilterSeqsCommand::execute() {
 		cout << "Number of columns removed: " << alignmentLength-filteredLength << endl;
 		cout << "Length of the original alignment: " << alignmentLength << endl;
 		cout << "Number of sequences used to construct filter: " << numSeqs << endl;
-		
-		globaldata->clear();
 		
 		return 0;
 		

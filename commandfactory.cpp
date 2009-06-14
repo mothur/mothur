@@ -33,7 +33,6 @@
 #include "heatmapcommand.h"
 #include "heatmapsimcommand.h"
 #include "filterseqscommand.h"
-#include "mothur.h"
 #include "venncommand.h"
 #include "nocommands.h"
 #include "binsequencecommand.h"
@@ -50,6 +49,7 @@
 #include "screenseqscommand.h"
 #include "reversecommand.h"
 #include "trimseqscommand.h"
+#include "mergefilecommand.h"
 
 /***********************************************************/
 
@@ -111,6 +111,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "screen.seqs")			{	command = new ScreenSeqsCommand(optionString);			}
 		else if(commandName == "reverse.seqs")			{	command = new ReverseSeqsCommand(optionString);			}
 		else if(commandName == "trim.seqs")				{	command = new TrimSeqsCommand(optionString);			}
+		else if(commandName == "merge.files")			{	command = new MergeFileCommand(optionString);			}
 		else											{	command = new NoCommand(optionString);					}
 
 		return command;

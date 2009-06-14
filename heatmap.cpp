@@ -13,7 +13,7 @@
 HeatMap::HeatMap(string sort, string scale){
 	try {
 		globaldata = GlobalData::getInstance();
-		format = globaldata->getFormat();
+//		format = globaldata->getFormat();
 		sorted = sort;
 		scaler = scale;
 	}

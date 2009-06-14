@@ -12,7 +12,6 @@
 
 #include "mothur.h"
 #include "command.hpp"
-#include "globaldata.hpp"
 
 class ReverseSeqsCommand : public Command {
 public:
@@ -22,13 +21,9 @@ public:
 	void help();
 	
 private:
-	GlobalData* globaldata;	
-	OptionParser* parser;
-	map<string, string> parameters;
-	map<string, string>::iterator it;
+
 	bool abort;
 	string fasta;
-
 	
 };
 

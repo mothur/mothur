@@ -24,40 +24,40 @@ ReadOtuCommand::ReadOtuCommand(string option){
 			string Array[] =  {"list","order","shared", "line", "label","group","sabund", "rabund"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
-			parser = new OptionParser();
-			parser->parse(option, parameters);  delete parser;
+			OptionParser parser(option);
+			map<string, string> parameters = parser.getParameters();
 			
-			ValidParameters* validParameter = new ValidParameters();
+			ValidParameters validParameter;
 		
 			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			for (map<string, string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
 			globaldata->newRead();
 			
 			//check for required parameters
-			listfile = validParameter->validFile(parameters, "list", true);
+			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not open") { abort = true; }
 			else if (listfile == "not found") { listfile = ""; }	
 			else {  globaldata->setListFile(listfile);  globaldata->setFormat("list"); 	}
 			
-			sabundfile = validParameter->validFile(parameters, "sabund", true);
+			sabundfile = validParameter.validFile(parameters, "sabund", true);
 			if (sabundfile == "not open") { abort = true; }	
 			else if (sabundfile == "not found") { sabundfile = ""; }
 			else {  globaldata->setSabundFile(sabundfile); globaldata->setFormat("sabund");	}
 
-			rabundfile = validParameter->validFile(parameters, "rabund", true);
+			rabundfile = validParameter.validFile(parameters, "rabund", true);
 			if (rabundfile == "not open") { abort = true; }	
 			else if (rabundfile == "not found") { rabundfile = ""; }
 			else {  globaldata->setRabundFile(rabundfile);	globaldata->setFormat("rabund");}
 			
-			sharedfile = validParameter->validFile(parameters, "shared", true);
+			sharedfile = validParameter.validFile(parameters, "shared", true);
 			if (sharedfile == "not open") { abort = true; }	
 			else if (sharedfile == "not found") { sharedfile = ""; }
 			else {  globaldata->setSharedFile(sharedfile); globaldata->setFormat("sharedfile");	}
 			
-			groupfile = validParameter->validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }	
 			else if (groupfile == "not found") { groupfile = ""; }
 			else {  
@@ -76,7 +76,7 @@ ReadOtuCommand::ReadOtuCommand(string option){
 		
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			line = validParameter->validFile(parameters, "line", false);				
+			line = validParameter.validFile(parameters, "line", false);				
 			if (line == "not found") { line = ""; }
 			else { 
 				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
@@ -84,7 +84,7 @@ ReadOtuCommand::ReadOtuCommand(string option){
 				globaldata->lines = lines;
 			}
 			
-			label = validParameter->validFile(parameters, "label", false);			
+			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
 				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
@@ -97,12 +97,11 @@ ReadOtuCommand::ReadOtuCommand(string option){
 			//make sure user did not use both the line and label parameters
 			if ((line != "") && (label != "")) { cout << "You cannot use both the line and label parameters at the same time. " << endl; abort = true; }
 			
-			orderfile = validParameter->validFile(parameters, "order", true);
+			orderfile = validParameter.validFile(parameters, "order", true);
 			if (orderfile == "not open") { abort = true; }	
 			else if (orderfile == "not found") { orderfile = ""; }
 			else {  globaldata->setOrderFile(orderfile);	}
 			
-			delete validParameter;
 			
 			if (abort == false) {
 				//gets whichever one of the above is set
