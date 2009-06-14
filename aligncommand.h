@@ -10,10 +10,10 @@
  *
  */
 
+#include "mothur.h"
 #include "command.hpp"
-#include "globaldata.hpp"
-
-
+#include "database.hpp"
+#include "alignment.hpp"
 
 class AlignCommand : public Command {
 	
@@ -24,21 +24,27 @@ public:
 	void help();	
 
 private:
-	GlobalData* globaldata;
-	OptionParser* parser;
-	map<string, string> parameters;
-	map<string, string>::iterator it;
-	bool abort;
-	string candidateFileName, templateFileName, distanceFileName, search, align;
-	int kmerSize;
-	float match, misMatch, gapOpen, gapExtend;
-	ofstream out;
-	ifstream in;
-	int ableToOpen;
+	struct linePair {
+		int start;
+		int numSeqs;
+		linePair(int i, int j) : start(i), numSeqs(j) {}
+	};
+	map<int, int> processIDS;   //end line, processid
+	vector<linePair*> lines;
+
+	Database* templateDB;
+	Alignment* alignment;
+
+	int driver(linePair*, string, string);
+	void createProcesses(string, string);
+	void appendAlignFiles(string, string); 
+	void appendReportFiles(string, string);
 	
+	string candidateFileName, templateFileName, distanceFileName, search, align;
+	float match, misMatch, gapOpen, gapExtend;
+	int processors, kmerSize;
 
+	bool abort;
 };
-
-
 
 #endif

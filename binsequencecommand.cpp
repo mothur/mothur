@@ -26,14 +26,14 @@ BinSeqCommand::BinSeqCommand(string option){
 			string AlignArray[] =  {"fasta","line","label","name", "group"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
-			parser = new OptionParser();
-			parser->parse(option, parameters);  delete parser;
+			OptionParser parser(option);
+			map<string, string> parameters = parser.getParameters();
 			
-			ValidParameters* validParameter = new ValidParameters();
+			ValidParameters validParameter;
 		
 			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			for (map<string, string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
 			//make sure the user has already run the read.otu command
@@ -41,11 +41,10 @@ BinSeqCommand::BinSeqCommand(string option){
 			
 			
 			//check for required parameters
-			fastafile = validParameter->validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not found") { cout << "fasta is a required parameter for the bin.seqs command." << endl; abort = true; }
 			else if (fastafile == "not open") { abort = true; }	
 			else { 
-				globaldata->setFastaFile(fastafile);
 				openInputFile(fastafile, in);
 				fasta = new FastaMap();
 			}
@@ -53,14 +52,14 @@ BinSeqCommand::BinSeqCommand(string option){
 		
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			line = validParameter->validFile(parameters, "line", false);				
+			line = validParameter.validFile(parameters, "line", false);				
 			if (line == "not found") { line = "";  }
 			else { 
 				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
-			label = validParameter->validFile(parameters, "label", false);			
+			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
 				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
@@ -76,11 +75,11 @@ BinSeqCommand::BinSeqCommand(string option){
 				lines = globaldata->lines;
 			}
 			
-			namesfile = validParameter->validFile(parameters, "name", true);
+			namesfile = validParameter.validFile(parameters, "name", true);
 			if (namesfile == "not open") { abort = true; }	
 			else if (namesfile == "not found") { namesfile = ""; }
 
-			groupfile = validParameter->validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }
 			else if (groupfile == "not found") { groupfile = ""; }
 			else {
@@ -89,7 +88,6 @@ BinSeqCommand::BinSeqCommand(string option){
 				groupMap->readMap();
 			}
 	
-			delete validParameter;
 		}
 	}
 	catch(exception& e) {
@@ -149,7 +147,6 @@ BinSeqCommand::~BinSeqCommand(){
 
 int BinSeqCommand::execute(){
 	try {
-	
 		if (abort == true) {	return 0;	}
 	
 		int count = 1;
@@ -159,7 +156,7 @@ int BinSeqCommand::execute(){
 		fasta->readFastaFile(in);
 		
 		//set format to list so input can get listvector
-		globaldata->setFormat("list");
+//		globaldata->setFormat("list");
 		
 		//if user gave a namesfile then use it
 		if (namesfile != "") {

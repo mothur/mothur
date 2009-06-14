@@ -40,33 +40,33 @@ TreeGroupCommand::TreeGroupCommand(string option){
 			string Array[] =  {"line","label","calc","groups", "phylip", "column", "name", "precision","cutoff"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
-			parser = new OptionParser();
-			parser->parse(option, parameters);  delete parser;
+			OptionParser parser(option);
+			map<string, string> parameters = parser. getParameters();
 			
-			ValidParameters* validParameter = new ValidParameters();
+			ValidParameters validParameter;
 		
 			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			for (map<string, string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
 			//required parameters
-			phylipfile = validParameter->validFile(parameters, "phylip", true);
+			phylipfile = validParameter.validFile(parameters, "phylip", true);
 			if (phylipfile == "not open") { abort = true; }
 			else if (phylipfile == "not found") { phylipfile = ""; }	
-			else {  globaldata->setPhylipFile(phylipfile);  globaldata->setFormat("phylip"); 	}
+			else {  format = "phylip"; 	}
 			
-			columnfile = validParameter->validFile(parameters, "column", true);
+			columnfile = validParameter.validFile(parameters, "column", true);
 			if (columnfile == "not open") { abort = true; }	
 			else if (columnfile == "not found") { columnfile = ""; }
-			else {  globaldata->setColumnFile(columnfile); globaldata->setFormat("column");	}
+			else {  format = "column";	}
 			
-			namefile = validParameter->validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
 			else {  globaldata->setNameFile(namefile);	}
 			
-			format = globaldata->getFormat();
+//			format = globaldata->getFormat();
 			
 			//error checking on files			
 			if ((globaldata->getSharedFile() == "") && ((phylipfile == "") && (columnfile == "")))	{ cout << "You must run the read.otu command or provide a distance file before running the tree.shared command." << endl; abort = true; }
@@ -78,14 +78,14 @@ TreeGroupCommand::TreeGroupCommand(string option){
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			line = validParameter->validFile(parameters, "line", false);				
+			line = validParameter.validFile(parameters, "line", false);				
 			if (line == "not found") { line = "";  }
 			else { 
 				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
-			label = validParameter->validFile(parameters, "label", false);			
+			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
 				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
@@ -101,14 +101,14 @@ TreeGroupCommand::TreeGroupCommand(string option){
 				lines = globaldata->lines;
 			}
 				
-			groups = validParameter->validFile(parameters, "groups", false);			
+			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
 			else { 
 				splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 			}
 				
-			calc = validParameter->validFile(parameters, "calc", false);			
+			calc = validParameter.validFile(parameters, "calc", false);			
 			if (calc == "not found") { calc = "jclass-thetayc";  }
 			else { 
 				 if (calc == "default")  {  calc = "jclass-thetayc";  }
@@ -116,16 +116,14 @@ TreeGroupCommand::TreeGroupCommand(string option){
 			splitAtDash(calc, Estimators);
 
 			string temp;
-			temp = validParameter->validFile(parameters, "precision", false);			if (temp == "not found") { temp = "100"; }
+			temp = validParameter.validFile(parameters, "precision", false);			if (temp == "not found") { temp = "100"; }
 			convert(temp, precision); 
 			
-			temp = validParameter->validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "10"; }
+			temp = validParameter.validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "10"; }
 			convert(temp, cutoff); 
 			cutoff += (5 / (precision * 10.0));
 
-	
-			delete validParameter;
-			
+				
 			if (abort == false) {
 			
 				validCalculator = new ValidCalculators();

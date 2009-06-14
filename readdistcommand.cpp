@@ -22,33 +22,33 @@ ReadDistCommand::ReadDistCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"phylip","column", "name","cutoff","precision", "group"};
+			string Array[] =  {"phylip", "column", "name", "cutoff", "precision", "group"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
-			parser = new OptionParser();
-			parser->parse(option, parameters);  delete parser;
+			OptionParser parser(option);
+			map<string, string> parameters = parser.getParameters();
 			
-			ValidParameters* validParameter = new ValidParameters();
+			ValidParameters validParameter;
 		
 			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
 			globaldata->newRead();
 			
 			//check for required parameters
-			phylipfile = validParameter->validFile(parameters, "phylip", true);
+			phylipfile = validParameter.validFile(parameters, "phylip", true);
 			if (phylipfile == "not open") { abort = true; }
 			else if (phylipfile == "not found") { phylipfile = ""; }	
 			else {  globaldata->setPhylipFile(phylipfile);  globaldata->setFormat("phylip"); 	}
 			
-			columnfile = validParameter->validFile(parameters, "column", true);
+			columnfile = validParameter.validFile(parameters, "column", true);
 			if (columnfile == "not open") { abort = true; }	
 			else if (columnfile == "not found") { columnfile = ""; }
 			else {  globaldata->setColumnFile(columnfile); globaldata->setFormat("column");	}
 			
-			groupfile = validParameter->validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }	
 			else if (groupfile == "not found") { groupfile = ""; }
 			else {  
@@ -56,15 +56,16 @@ ReadDistCommand::ReadDistCommand(string option){
 				groupMap = new GroupMap(groupfile);
 				groupMap->readMap();
 			}
-			
-			namefile = validParameter->validFile(parameters, "name", true);
+
+			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
 			else {  globaldata->setNameFile(namefile);	}
 
 			
 			//you are doing a list and group shared
-			if ((phylipfile != "") && (groupfile != "")) { globaldata->setFormat("matrix"); }
+			if ((phylipfile != "") && (groupfile != "")) { 
+			globaldata->setFormat("matrix"); }
 			
 			if ((phylipfile == "") && (columnfile == "")) { cout << "When executing a read.dist command you must enter a phylip or a column." << endl; abort = true; }
 			else if ((phylipfile != "") && (columnfile != "")) { cout << "When executing a read.dist command you must enter ONLY ONE of the following: phylip or column." << endl; abort = true; }
@@ -77,21 +78,19 @@ ReadDistCommand::ReadDistCommand(string option){
 			// ...at some point should added some additional type checking...
 			//get user cutoff and precision or use defaults
 			string temp;
-			temp = validParameter->validFile(parameters, "precision", false);			if (temp == "not found") { temp = "100"; }
+			temp = validParameter.validFile(parameters, "precision", false);			if (temp == "not found") { temp = "100"; }
 			convert(temp, precision); 
 			
-			temp = validParameter->validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "10"; }
+			temp = validParameter.validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "10"; }
 			convert(temp, cutoff); 
 			cutoff += (5 / (precision * 10.0));
-
-			delete validParameter;
 			
 			if (abort == false) {
-				filename = globaldata->inputFileName;
+				distFileName = globaldata->inputFileName;
 				format = globaldata->getFormat();	
 		
-				if (format == "column") { read = new ReadColumnMatrix(filename); }	
-				else if (format == "phylip") { read = new ReadPhylipMatrix(filename); }
+				if (format == "column") { read = new ReadColumnMatrix(distFileName); }	
+				else if (format == "phylip") { read = new ReadPhylipMatrix(distFileName); }
 				else if (format == "matrix") { 
 					groupMap = new GroupMap(groupfile);
 					groupMap->readMap();
@@ -149,6 +148,7 @@ void ReadDistCommand::help(){
 }
 
 //**********************************************************************************************************************
+
 ReadDistCommand::~ReadDistCommand(){
 	delete read;
 	delete nameMap;
@@ -162,7 +162,7 @@ int ReadDistCommand::execute(){
 		
 		if (format == "matrix") {
 			ifstream in;
-			openInputFile(filename, in);
+			openInputFile(distFileName, in);
 			matrix = new FullMatrix(in); //reads the matrix file
 			//memory leak prevention
 			//if (globaldata->gMatrix != NULL) { delete globaldata->gMatrix;  }

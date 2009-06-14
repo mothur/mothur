@@ -23,7 +23,7 @@ SequenceDB::~SequenceDB() { clear(); }
 /***********************************************************************/
 
 SequenceDB::SequenceDB(int newSize) {
-	data.resize(newSize, NULL);
+	data.resize(newSize, Sequence());
 }
 
 /***********************************************************************/
@@ -46,7 +46,7 @@ SequenceDB::SequenceDB(ifstream& filehandle) {
 			}else {  cout << "Error fasta in your file. Please correct." << endl; }
 
 			//input sequence info into sequencedb
-			Sequence* newSequence = new Sequence(name, sequence);
+			Sequence newSequence(name, sequence);
 			data.push_back(newSequence);
 			
 			//takes care of white space
@@ -134,10 +134,7 @@ int SequenceDB::getNumSeqs() {
 
 void SequenceDB::set(int index, string newUnaligned) {
 	try {
-		if (data[index] != NULL) {  delete data[index];  } //free memory
-	
-		Sequence* newSeq = new Sequence(data[index]->getName(), newUnaligned);
-		data[index] = newSeq;
+		data[index] = Sequence(data[index].getName(), newUnaligned);
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the SequenceDB class Function set. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -151,9 +148,8 @@ void SequenceDB::set(int index, string newUnaligned) {
 
 /***********************************************************************/
 
-void SequenceDB::set(int index, Sequence* newSeq) {
+void SequenceDB::set(int index, Sequence newSeq) {
 	try {
-		if (data[index] != NULL) {  delete data[index];  } //free memory
 		data[index] = newSeq;
 	}
 	catch(exception& e) {
@@ -168,7 +164,7 @@ void SequenceDB::set(int index, Sequence* newSeq) {
 
 /***********************************************************************/
 
-Sequence* SequenceDB::get(int index) {
+Sequence SequenceDB::get(int index) {
 	return data[index];
 }
 
@@ -176,9 +172,6 @@ Sequence* SequenceDB::get(int index) {
 
 void SequenceDB::resize(int newSize) {
 	try {
-		int size = data.size();
-	
-		for (int i = size; i > newSize; i--) {	delete data[i];	}
 		data.resize(newSize);
 	}
 	catch(exception& e) {
@@ -195,7 +188,6 @@ void SequenceDB::resize(int newSize) {
 
 void SequenceDB::clear() {
 	try {
-		for (int i = 0; i < data.size(); i++) { delete data[i];  }
 		data.clear();
 	}
 	catch(exception& e) {
@@ -219,7 +211,7 @@ int SequenceDB::size() {
 void SequenceDB::print(ostream& out) {
 	try {
 		for(int i = 0; i < data.size(); i++) {
-			data[i]->printSequence(out);
+			data[i].printSequence(out);
 		}
 	}
 	catch(exception& e) {
@@ -234,7 +226,7 @@ void SequenceDB::print(ostream& out) {
 	
 /***********************************************************************/
 
-void SequenceDB::push_back(Sequence* newSequence) {
+void SequenceDB::push_back(Sequence newSequence) {
 	try {
 		data.push_back(newSequence);
 	}

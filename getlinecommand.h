@@ -24,7 +24,6 @@ public:
 	
 private:
 	GlobalData* globaldata;
-	string filename;
 	bool abort;
 };
 

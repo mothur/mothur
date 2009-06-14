@@ -44,12 +44,7 @@ class UnifracUnweightedCommand : public Command {
 		map<float, float>  validScores;  //map contains scores from random
 		vector< map<float, float> > rscoreFreq;  //map <unweighted score, number of random trees with that score.> -vector entry for each combination.
 		vector< map<float, float> > rCumul;  //map <unweighted score, cumulative percentage of number of random trees with that score or higher.> -vector entry for each combination.
-		map<float, float>::iterator it2;
-		map<float, float>::iterator it;
 		
-		OptionParser* parser;
-		map<string, string> parameters;
-		map<string, string>::iterator it4;
 		bool abort;
 		string groups, itersString;
 		vector<string> Groups; //holds groups to be used

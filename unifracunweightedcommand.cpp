@@ -24,14 +24,14 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option) {
 			string Array[] =  {"groups","iters"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
-			parser = new OptionParser();
-			parser->parse(option, parameters);  delete parser;
+			OptionParser parser(option);
+			map<string,string> parameters = parser.getParameters();
 			
-			ValidParameters* validParameter = new ValidParameters();
+			ValidParameters validParameter;
 		
 			//check to make sure all parameters are valid for command
-			for (it4 = parameters.begin(); it4 != parameters.end(); it4++) { 
-				if (validParameter->isValidParameter(it4->first, myArray, it4->second) != true) {  abort = true;  }
+			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
 			if (globaldata->gTree.size() == 0) {//no trees were read
@@ -39,17 +39,16 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option) {
 										
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			groups = validParameter->validFile(parameters, "groups", false);			
+			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
 			else { 
 				splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 			}
 				
-			itersString = validParameter->validFile(parameters, "iters", false);			if (itersString == "not found") { itersString = "1000"; }
+			itersString = validParameter.validFile(parameters, "iters", false);			if (itersString == "not found") { itersString = "1000"; }
 			convert(itersString, iters); 
 			
-			delete validParameter;
 			
 			if (abort == false) {
 				T = globaldata->gTree;
@@ -146,8 +145,8 @@ int UnifracUnweightedCommand::execute() {
 				
 				for(int k = 0; k < numComp; k++) {	
 					//add trees unweighted score to map of scores
-					it2 = rscoreFreq[k].find(randomData[k]);
-					if (it2 != rscoreFreq[k].end()) {//already have that score
+					map<float,float>::iterator it = rscoreFreq[k].find(randomData[k]);
+					if (it != rscoreFreq[k].end()) {//already have that score
 						rscoreFreq[k][randomData[k]]++;
 					}else{//first time we have seen this score
 						rscoreFreq[k][randomData[k]] = 1;
@@ -162,9 +161,9 @@ int UnifracUnweightedCommand::execute() {
 			for(int a = 0; a < numComp; a++) {
 				float rcumul = 1.0000;
 				//this loop fills the cumulative maps and put 0.0000 in the score freq map to make it easier to print.
-				for (it = validScores.begin(); it != validScores.end(); it++) { 
+				for (map<float,float>::iterator it = validScores.begin(); it != validScores.end(); it++) { 
 					//make rscoreFreq map and rCumul
-					it2 = rscoreFreq[a].find(it->first);
+					map<float,float>::iterator it2 = rscoreFreq[a].find(it->first);
 					rCumul[a][it->first] = rcumul;
 					//get percentage of random trees with that info
 					if (it2 != rscoreFreq[a].end()) {  rscoreFreq[a][it->first] /= iters; rcumul-= it2->second;  }
@@ -212,7 +211,7 @@ void UnifracUnweightedCommand::printUnweightedFile() {
 		for(int a = 0; a < numComp; a++) {
 			output->initFile(groupComb[a], tags);
 			//print each line
-			for (it = validScores.begin(); it != validScores.end(); it++) { 
+			for (map<float,float>::iterator it = validScores.begin(); it != validScores.end(); it++) { 
 				data.push_back(it->first);  data.push_back(rscoreFreq[a][it->first]); data.push_back(rCumul[a][it->first]); 
 				output->output(data);
 				data.clear();

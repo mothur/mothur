@@ -28,9 +28,6 @@ private:
 	ReadTree* read;
 	TreeMap* treeMap;
 	string filename, treefile, groupfile;
-	OptionParser* parser;
-	map<string, string> parameters;
-	map<string, string>::iterator it;
 	bool abort;
 
 };

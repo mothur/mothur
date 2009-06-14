@@ -18,7 +18,6 @@
 
 DistanceCommand::DistanceCommand(string option){
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false;
 		Estimators.clear();
 		
@@ -30,28 +29,29 @@ DistanceCommand::DistanceCommand(string option){
 			string Array[] =  {"fasta", "phylip", "calc", "countends", "cutoff", "processors"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
-			parser = new OptionParser();
-			parser->parse(option, parameters);  delete parser;
+			OptionParser parser(option);
+			map<string, string> parameters = parser.getParameters();
 			
-			ValidParameters* validParameter = new ValidParameters();
+			ValidParameters validParameter;
 		
 			//check to make sure all parameters are valid for command
-			for (it2 = parameters.begin(); it2 != parameters.end(); it2++) { 
-				if (validParameter->isValidParameter(it2->first, myArray, it2->second) != true) {  abort = true;  }
+			for (map<string, string>::iterator it2 = parameters.begin(); it2 != parameters.end(); it2++) { 
+				if (validParameter.isValidParameter(it2->first, myArray, it2->second) != true) {  abort = true;  }
 			}
 			
 			//check for required parameters
-			fastafile = validParameter->validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not found") { cout << "fasta is a required parameter for the dist.seqs command." << endl; abort = true; }
 			else if (fastafile == "not open") { abort = true; }	
-			else { 
-				globaldata->setFastaFile(fastafile);
-				openInputFile(fastafile, in);
+			else{
+				ifstream inFASTA;
+				openInputFile(fastafile, inFASTA);
+				alignDB = SequenceDB(inFASTA); 
 			}
-			
+
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			calc = validParameter->validFile(parameters, "calc", false);			
+			calc = validParameter.validFile(parameters, "calc", false);			
 			if (calc == "not found") { calc = "onegap";  }
 			else { 
 				 if (calc == "default")  {  calc = "onegap";  }
@@ -59,48 +59,38 @@ DistanceCommand::DistanceCommand(string option){
 			splitAtDash(calc, Estimators);
 
 			string temp;
-			temp = validParameter->validFile(parameters, "countends", false);			if (temp == "not found") { temp = "T"; }
+			temp = validParameter.validFile(parameters, "countends", false);	if(temp == "not found"){	temp = "T";	}
 			convert(temp, countends); 
 			
-			temp = validParameter->validFile(parameters, "cutoff", false);				if (temp == "not found") { temp = "1.0"; }
+			temp = validParameter.validFile(parameters, "cutoff", false);		if(temp == "not found"){	temp = "1.0"; }
 			convert(temp, cutoff); 
 			
-			temp = validParameter->validFile(parameters, "processors", false);			if (temp == "not found") { temp = "1"; }
+			temp = validParameter.validFile(parameters, "processors", false);	if(temp == "not found"){	temp = "1"; }
 			convert(temp, processors); 
 			
-			phylip = validParameter->validFile(parameters, "phylip", false);			if (phylip == "not found") { phylip = "F"; }
+			phylip = validParameter.validFile(parameters, "phylip", false);		if(phylip == "not found"){	phylip = "F"; }
 	
-			delete validParameter;
 			
-			validCalculator = new ValidCalculators();
+			ValidCalculators validCalculator;
 			
-			int i;
 			if (isTrue(countends) == true) {
-				for (i=0; i<Estimators.size(); i++) {
-					if (validCalculator->isValidCalculator("distance", Estimators[i]) == true) { 
-						if (Estimators[i] == "nogaps") { 
-							distCalculator = new ignoreGaps();
-						}else if (Estimators[i] == "eachgap") { 
-							distCalculator = new eachGapDist();	
-						}else if (Estimators[i] == "onegap") {
-						distCalculator = new oneGapDist();					}
+				for (int i=0; i<Estimators.size(); i++) {
+					if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 
+						if (Estimators[i] == "nogaps")			{	distCalculator = new ignoreGaps();	}
+						else if (Estimators[i] == "eachgap")	{	distCalculator = new eachGapDist();	}
+						else if (Estimators[i] == "onegap")		{	distCalculator = new oneGapDist();	}
 					}
 				}
 			}else {
-				for (i=0; i<Estimators.size(); i++) {
-					if (validCalculator->isValidCalculator("distance", Estimators[i]) == true) { 
-						if (Estimators[i] == "nogaps") { 
-							distCalculator = new ignoreGaps();	
-						}else if (Estimators[i] == "eachgap") { 
-							distCalculator = new eachGapIgnoreTermGapDist();
-						}else if (Estimators[i] == "onegap") { 
-							distCalculator = new oneGapIgnoreTermGapDist();	
-						}
+				for (int i=0; i<Estimators.size(); i++) {
+					if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 
+						if (Estimators[i] == "nogaps")		{	distCalculator = new ignoreGaps();					}
+						else if (Estimators[i] == "eachgap"){	distCalculator = new eachGapIgnoreTermGapDist();	}
+						else if (Estimators[i] == "onegap")	{	distCalculator = new oneGapIgnoreTermGapDist();		}
 					}
 				}
 			}
 
-			delete validCalculator;
 		}
 				
 	}
@@ -113,6 +103,17 @@ DistanceCommand::DistanceCommand(string option){
 		exit(1);
 	}	
 }
+
+//**********************************************************************************************************************
+
+DistanceCommand::~DistanceCommand(){
+	
+	for(int i=0;i<lines.size();i++){
+		delete lines[i];
+	}
+	
+}
+	
 //**********************************************************************************************************************
 
 void DistanceCommand::help(){
@@ -147,10 +148,7 @@ int DistanceCommand::execute(){
 		
 		if (abort == true) { return 0; }
 		
-		//reads fasta file and fills sequenceDB
-		seqDB = new SequenceDB(in); 
-				
-		int numSeqs = seqDB->getNumSeqs();
+		int numSeqs = alignDB.getNumSeqs();
 		cutoff += 0.005;
 		
 		string outputFile;
@@ -161,9 +159,6 @@ int DistanceCommand::execute(){
 			remove(outputFile.c_str());
 			
 			//output numSeqs to phylip formatted dist file
-			openOutputFile(outputFile, outFile);
-			outFile << numSeqs << endl;
-			outFile.close();
 		}else { //user wants column format
 			outputFile = getRootName(fastafile) + "dist";
 			remove(outputFile.c_str());
@@ -178,9 +173,7 @@ int DistanceCommand::execute(){
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		//if you don't need to fork anything
 		if(processors == 1){
-			driver(distCalculator, seqDB, 0, numSeqs, outputFile + ".temp", cutoff);
-			appendFiles((outputFile + ".temp"), outputFile);
-			remove((outputFile + ".temp").c_str());
+			driver(0, numSeqs, outputFile, cutoff);
 		}else{ //you have multiple processors
 			
 			for (int i = 0; i < processors; i++) {
@@ -189,21 +182,21 @@ int DistanceCommand::execute(){
 				lines[i]->end = int (sqrt(float(i+1)/float(processors)) * numSeqs);
 			}
 
-			cout << lines[0]->start << '\t' << lines[0]->end << endl;
-			cout << lines[1]->start << '\t' << lines[1]->end << endl;
-
 			createProcesses(outputFile); 
 		
+			map<int, int>::iterator it = processIDS.begin();
+			rename((outputFile + toString(it->second) + ".temp").c_str(), outputFile.c_str());
+			it++;
+			
 			//append and remove temp files
-			for (it = processIDS.begin(); it != processIDS.end(); it++) {
+			for (; it != processIDS.end(); it++) {
 				appendFiles((outputFile + toString(it->second) + ".temp"), outputFile);
 				remove((outputFile + toString(it->second) + ".temp").c_str());
 			}
 		}
 #else
-		driver(distCalculator, seqDB, 0, numSeqs, outputFile + ".temp", cutoff);
-		appendFiles((outputFile + ".temp"), outputFile);
-		remove((outputFile + ".temp").c_str());
+		ifstream inFASTA
+		driver(0, numSeqs, outputFile, cutoff);
 #endif
 		
 		delete distCalculator;
@@ -223,6 +216,7 @@ int DistanceCommand::execute(){
 /**************************************************************************************************/
 void DistanceCommand::createProcesses(string filename) {
 	try {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 0;
 		processIDS.clear();
 		
@@ -234,17 +228,17 @@ void DistanceCommand::createProcesses(string filename) {
 				processIDS[lines[process]->end] = pid;  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				driver(distCalculator, seqDB, lines[process]->start, lines[process]->end, filename + toString(getpid()) + ".temp", cutoff);
+				driver(lines[process]->start, lines[process]->end, filename + toString(getpid()) + ".temp", cutoff);
 				exit(0);
 			}else { cout << "unable to spawn the necessary processes." << endl; exit(0); }
 		}
 	
 		//force parent to wait until all the processes are done
-		for (it = processIDS.begin(); it != processIDS.end(); it++) { 
+		for (map<int, int>::iterator it = processIDS.begin(); it != processIDS.end(); it++) { 
 			int temp = it->second;
 			wait(&temp);
 		}
-		
+#endif
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the DistanceCommand class Function createProcesses. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -258,7 +252,7 @@ void DistanceCommand::createProcesses(string filename) {
 
 /**************************************************************************************************/
 /////// need to fix to work with calcs and sequencedb
-int DistanceCommand::driver(Dist* distCalculator, SequenceDB* align, int startLine, int endLine, string dFileName, float cutoff){
+int DistanceCommand::driver(int startLine, int endLine, string dFileName, float cutoff){
 	try {
 
 		int startTime = time(NULL);
@@ -268,16 +262,17 @@ int DistanceCommand::driver(Dist* distCalculator, SequenceDB* align, int startLi
 		outFile.setf(ios::fixed, ios::showpoint);
 		outFile << setprecision(4);
 		
+		if(isTrue(phylip) && startLine == 0){	outFile << alignDB.getNumSeqs() << endl;	}
 		for(int i=startLine;i<endLine;i++){
-			
+			if(isTrue(phylip))	{	outFile << alignDB.get(i).getName() << '\t';	}
 			for(int j=0;j<i;j++){
-				distCalculator->calcDist(*(align->get(i)), *(align->get(j)));
+				distCalculator->calcDist(alignDB.get(i), alignDB.get(j));
 				double dist = distCalculator->getDist();
 				
 				if(dist <= cutoff){
-					if (isTrue(phylip) != true) { outFile << align->get(i)->getName() << ' ' << align->get(j)->getName() << ' ' << dist << endl; }
+					if (!isTrue(phylip)) { outFile << alignDB.get(i).getName() << ' ' << alignDB.get(j).getName() << ' ' << dist << endl; }
 				}
-				if (isTrue(phylip) == true) {  outFile << dist << '\t'; }
+				if (isTrue(phylip)) {  outFile << dist << '\t'; }
 				
 			}
 			
@@ -290,8 +285,7 @@ int DistanceCommand::driver(Dist* distCalculator, SequenceDB* align, int startLi
 		}
 		cout << endLine-1 << '\t' << time(NULL) - startTime << endl;
 		
-		//philFile.close();
-		//distFile.close();
+		outFile.close();
 		
 		return 1;
 	}

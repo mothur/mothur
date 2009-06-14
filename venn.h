@@ -19,22 +19,20 @@
 /***********************************************************************/
 
 class Venn {
-	
-	public:
-		Venn();
-		~Venn(){};
-	
-		void getPic(SAbundVector*, vector<Calculator*>);
-		void getPic(vector<SharedRAbundVector*>, vector<Calculator*>);
+public:
+	Venn();
+	~Venn(){};
 
-	private:
-		GlobalData* globaldata;
-		Calculator* singleCalc;
-		string format, groupComb;
-		ofstream outsvg;
+	void getPic(SAbundVector*, vector<Calculator*>);
+	void getPic(vector<SharedRAbundVector*>, vector<Calculator*>);
 
-			
+private:
+	GlobalData* globaldata;
+	Calculator* singleCalc;
+	string groupComb;
+	ofstream outsvg;
 };
+
 /***********************************************************************/
 
 #endif

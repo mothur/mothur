@@ -149,6 +149,7 @@
 		7E412F490F8D21B600381DD0 /* slibshuff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E412F480F8D21B600381DD0 /* slibshuff.cpp */; };
 		7E412FEA0F8D3E2C00381DD0 /* libshuff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E412FE90F8D3E2C00381DD0 /* libshuff.cpp */; };
 		7E4130F80F8E58FA00381DD0 /* dlibshuff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E4130F60F8E58FA00381DD0 /* dlibshuff.cpp */; };
+		7E5A17AF0FE57292003C6A03 /* mergefilecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E5A17AE0FE57292003C6A03 /* mergefilecommand.cpp */; };
 		7EC3D4550FA0FFF900338DA5 /* coverage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7EC3D4500FA0FFF900338DA5 /* coverage.cpp */; };
 		7EC3D4560FA0FFF900338DA5 /* whittaker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7EC3D4530FA0FFF900338DA5 /* whittaker.cpp */; };
 		8DD76F6A0486A84900D96B5E /* Mothur.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6859E8B029090EE04C91782 /* Mothur.1 */; };
@@ -479,6 +480,8 @@
 		7E412FE90F8D3E2C00381DD0 /* libshuff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = libshuff.cpp; sourceTree = SOURCE_ROOT; };
 		7E4130F60F8E58FA00381DD0 /* dlibshuff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dlibshuff.cpp; sourceTree = SOURCE_ROOT; };
 		7E4130F70F8E58FA00381DD0 /* dlibshuff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dlibshuff.h; sourceTree = SOURCE_ROOT; };
+		7E5A17AD0FE57292003C6A03 /* mergefilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mergefilecommand.h; sourceTree = "<group>"; };
+		7E5A17AE0FE57292003C6A03 /* mergefilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mergefilecommand.cpp; sourceTree = "<group>"; };
 		7EC3D4500FA0FFF900338DA5 /* coverage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = coverage.cpp; sourceTree = SOURCE_ROOT; };
 		7EC3D4510FA0FFF900338DA5 /* coverage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = coverage.h; sourceTree = SOURCE_ROOT; };
 		7EC3D4520FA0FFF900338DA5 /* sharedanderberg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedanderberg.h; sourceTree = SOURCE_ROOT; };
@@ -748,6 +751,8 @@
 		37D928A90F2133E5001D4494 /* commands */ = {
 			isa = PBXGroup;
 			children = (
+				7E5A17AE0FE57292003C6A03 /* mergefilecommand.cpp */,
+				7E5A17AD0FE57292003C6A03 /* mergefilecommand.h */,
 				37D927CD0F21331F001D4494 /* command.hpp */,
 				378DC5CD0FBDE1C8003B8607 /* aligncommand.h */,
 				378DC5CE0FBDE1C8003B8607 /* aligncommand.cpp */,
@@ -1115,6 +1120,7 @@
 				378598660FDD497000EF9D03 /* heatmapsimcommand.cpp in Sources */,
 				378598740FDD4C1500EF9D03 /* heatmapsim.cpp in Sources */,
 				378599100FDD7E8E00EF9D03 /* optionparser.cpp in Sources */,
+				7E5A17AF0FE57292003C6A03 /* mergefilecommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

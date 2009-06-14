@@ -18,11 +18,12 @@
 /***********************************************************************/
 
 class OptionParser {
-	public:
-		OptionParser() {}
-		~OptionParser() {}
-		void parse(string, map<string, string>&);  //pass it an option string and a container
-											  //fills the container key=parameter name, value=parameter value
+public:
+	OptionParser(string);
+	~OptionParser() {}
+	map<string, string> getParameters();
+private:
+	map<string, string> parameters;
 };
 
 /***********************************************************************/

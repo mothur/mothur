@@ -12,7 +12,6 @@
 /**************************************************************************************/
 DeconvoluteCommand::DeconvoluteCommand(string option) {	
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false;
 		
 		//allow user to run help
@@ -23,23 +22,21 @@ DeconvoluteCommand::DeconvoluteCommand(string option) {
 			string Array[] =  {"fasta"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
-			parser = new OptionParser();
-			parser->parse(option, parameters);  delete parser;
+			OptionParser parser(option);
+			map<string,string> parameters = parser.getParameters();
 			
-			ValidParameters* validParameter = new ValidParameters();
+			ValidParameters validParameter;
 		
 			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			for (map<string, string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
 			//check for required parameters
-			filename = validParameter->validFile(parameters, "fasta", true);
+			filename = validParameter.validFile(parameters, "fasta", true);
 			if (filename == "not open") { abort = true; }
 			else if (filename == "not found") { filename = ""; cout << "fasta is a required parameter for the unique.seqs command." << endl; abort = true;  }	
-			else {  globaldata->setFastaFile(filename);  globaldata->setFormat("fasta"); 	}
 			
-			delete validParameter;
 		}
 
 	}

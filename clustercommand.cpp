@@ -24,14 +24,14 @@ ClusterCommand::ClusterCommand(string option){
 			string Array[] =  {"cutoff","precision","method"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
-			parser = new OptionParser();
-			parser->parse(option, parameters);  delete parser;
+			OptionParser parser(option);
+			map<string,string> parameters = parser.getParameters();
 			
-			ValidParameters* validParameter = new ValidParameters();
+			ValidParameters validParameter;
 		
 			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
 			//error checking to make sure they read a distance file
@@ -43,18 +43,17 @@ ClusterCommand::ClusterCommand(string option){
 			// ...at some point should added some additional type checking...
 			//get user cutoff and precision or use defaults
 			string temp;
-			temp = validParameter->validFile(parameters, "precision", false);		if (temp == "not found") { temp = "100"; }
+			temp = validParameter.validFile(parameters, "precision", false);		if (temp == "not found") { temp = "100"; }
 			//saves precision legnth for formatting below
 			length = temp.length();
 			convert(temp, precision); 
 			
-			temp = validParameter->validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "10"; }
+			temp = validParameter.validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "10"; }
 			convert(temp, cutoff); 
 			cutoff += (5 / (precision * 10.0));
 			
-			method = validParameter->validFile(parameters, "method", false);			if (method == "not found") { method = "furthest"; }
+			method = validParameter.validFile(parameters, "method", false);			if (method == "not found") { method = "furthest"; }
 
-			delete validParameter;
 			
 			if ((method == "furthest") || (method == "nearest") || (method == "average")) { }
 			else {cout << "Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average." << endl; abort = true; }

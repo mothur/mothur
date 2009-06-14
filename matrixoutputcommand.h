@@ -45,9 +45,7 @@ private:
 	string exportFileName;
 	int numGroups;
 	ofstream out;
-	OptionParser* parser;
-	map<string, string> parameters;
-	map<string, string>::iterator it;
+
 	bool abort, allLines;
 	set<int> lines; //hold lines to be used
 	set<string> labels; //holds labels to be used

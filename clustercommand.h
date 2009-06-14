@@ -44,9 +44,7 @@ private:
 	RAbundVector* rabund;
 	RAbundVector oldRAbund;
 	ListVector oldList;
-	OptionParser* parser;
-	map<string, string> parameters;
-	map<string, string>::iterator it;
+
 	bool abort;
 
 	string method, fileroot, tag;

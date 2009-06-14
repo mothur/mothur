@@ -48,19 +48,13 @@ class UnifracWeightedCommand : public Command {
 		vector< map<float, float> > rScoreFreq;  //map <weighted score, number of random trees with that score.> -vector entry for each combination.
 		vector< map<float, float> > rCumul;  //map <weighted score, cumulative percentage of number of random trees with that score or higher.> -vector entry for each c								
 		map<float, float>  validScores;  //map contains scores from random
-		map<float, float>::iterator it2;
-		map<float, float>::iterator it;
 		
-		OptionParser* parser;
-		map<string, string> parameters;
-		map<string, string>::iterator it4;
 		bool abort;
 		string groups, itersString;
 		vector<string> Groups; //holds groups to be used
 
 		
-		ofstream outSum, out;
-		ifstream inFile;
+		ofstream outSum;
 		
 		void printWSummaryFile();
 		void printWeightedFile();  

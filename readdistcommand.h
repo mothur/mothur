@@ -38,12 +38,10 @@ private:
 	ReadMatrix* read;
 	FullMatrix* matrix;
 	GroupMap* groupMap;
-	string filename, format, method;
+	string distFileName, format, method;
 	string phylipfile, columnfile, namefile, groupfile;
 	NameAssignment* nameMap;
-	OptionParser* parser;
-	map<string, string> parameters;
-	map<string, string>::iterator it;
+
 	bool abort;
 
 };

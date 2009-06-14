@@ -15,7 +15,6 @@
 EstOutput Shen::getValues(SAbundVector* rank){
 
 	try {
-		globaldata = GlobalData::getInstance();
 		
 		data.resize(1,0);
 		

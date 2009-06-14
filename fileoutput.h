@@ -2,7 +2,6 @@
 #define FILEOUTPUT_H
 
 #include "mothur.h"
-#include "globaldata.hpp"
 
 /***********************************************************************/
 
@@ -20,7 +19,6 @@ public:
 	virtual string getFileName() = 0;
 
 protected:
-	GlobalData* globaldata;
 	int renameOk;
 
 };	
@@ -127,7 +125,7 @@ private:
 class ColumnFile : public FileOutput {
 	
 public:
-	ColumnFile(string n, string i) : FileOutput(), iters(i), inName(n), counter(0), outName(getPathName(n) + ".temp") { globaldata = GlobalData::getInstance(); };
+	ColumnFile(string n, string i) : FileOutput(), iters(i), inName(n), counter(0), outName(getPathName(n) + ".temp") {};
 	~ColumnFile();
 	
 	//to make compatible with parent class

@@ -23,25 +23,25 @@ ReadTreeCommand::ReadTreeCommand(string option){
 			string Array[] =  {"tree","group"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
-			parser = new OptionParser();
-			parser->parse(option, parameters);  delete parser;
+			OptionParser parser(option);
+			map<string, string> parameters = parser.getParameters();
 			
-			ValidParameters* validParameter = new ValidParameters();
+			ValidParameters validParameter;
 		
 			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			for (map<string, string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
 			globaldata->newRead();
 			
 			//check for required parameters
-			treefile = validParameter->validFile(parameters, "tree", true);
+			treefile = validParameter.validFile(parameters, "tree", true);
 			if (treefile == "not open") { abort = true; }
 			else if (treefile == "not found") { treefile = ""; cout << "tree is a required parameter for the read.tree command." << endl; abort = true;  }	
-			else {  globaldata->setTreeFile(treefile);  globaldata->setFormat("tree"); 	}
+//			else {  globaldata->setTreeFile(treefile);  globaldata->setFormat("tree"); 	}
 			
-			groupfile = validParameter->validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }	
 			else if (groupfile == "not found") { groupfile = ""; cout << "group is a required parameter for the read.tree command." << endl; abort = true;	}
 			else {  
@@ -57,7 +57,6 @@ ReadTreeCommand::ReadTreeCommand(string option){
 				read = new ReadNewickTree(filename);
 			}
 						
-			delete validParameter;
 		}
 	}
 	catch(exception& e) {

@@ -26,14 +26,14 @@ GetOTURepCommand::GetOTURepCommand(string option){
 			string Array[] =  {"fasta","list","line","label","name", "group"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
-			parser = new OptionParser();
-			parser->parse(option, parameters);  delete parser;
+			OptionParser parser(option);
+			map<string, string> parameters = parser.getParameters();
 			
-			ValidParameters* validParameter = new ValidParameters();
+			ValidParameters validParameter;
 		
 			//check to make sure all parameters are valid for command
-			for (it4 = parameters.begin(); it4 != parameters.end(); it4++) { 
-				if (validParameter->isValidParameter(it4->first, myArray, it4->second) != true) {  abort = true;  }
+			for (map<string, string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
 			//make sure the user has already run the read.otu command
@@ -43,30 +43,24 @@ GetOTURepCommand::GetOTURepCommand(string option){
 			}
 			
 			//check for required parameters
-			fastafile = validParameter->validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not found") { cout << "fasta is a required parameter for the get.oturep command." << endl; abort = true; }
 			else if (fastafile == "not open") { abort = true; }	
-			else { 
-				globaldata->setFastaFile(fastafile);
-			}
 		
-			listfile = validParameter->validFile(parameters, "list", true);
+			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not found") { cout << "list is a required parameter for the get.oturep command." << endl; abort = true; }
 			else if (listfile == "not open") { abort = true; }	
-			else { 
-				globaldata->setListFile(listfile);
-			}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			line = validParameter->validFile(parameters, "line", false);				
+			line = validParameter.validFile(parameters, "line", false);				
 			if (line == "not found") { line = "";  }
 			else { 
 				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
-			label = validParameter->validFile(parameters, "label", false);			
+			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
 				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
@@ -82,11 +76,11 @@ GetOTURepCommand::GetOTURepCommand(string option){
 				lines = globaldata->lines;
 			}
 			
-			namesfile = validParameter->validFile(parameters, "name", true);
+			namesfile = validParameter.validFile(parameters, "name", true);
 			if (namesfile == "not open") { abort = true; }	
 			else if (namesfile == "not found") { namesfile = ""; }
 
-			groupfile = validParameter->validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }
 			else if (groupfile == "not found") { groupfile = ""; }
 			else {
@@ -94,9 +88,7 @@ GetOTURepCommand::GetOTURepCommand(string option){
 				groupMap = new GroupMap(groupfile);
 				groupMap->readMap();
 			}
-	
-			delete validParameter;
-	
+		
 			if (abort == false) {
 			
 				if(globaldata->gSparseMatrix != NULL)	{	matrix = new SparseMatrix(*globaldata->gSparseMatrix);		}	
@@ -186,7 +178,7 @@ int GetOTURepCommand::execute(){
 		fasta->readFastaFile(in);
 		
 		//set format to list so input can get listvector
-		globaldata->setFormat("list");
+//		globaldata->setFormat("list");
 		
 		//if user gave a namesfile then use it
 		if (namesfile != "") {
@@ -236,9 +228,8 @@ int GetOTURepCommand::execute(){
 		}
 		
 		//output error messages about any remaining user labels
-		set<string>::iterator it;
 		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {  
 			cout << "Your file does not include the label "<< *it; 
 			if (processedLabels.count(lastList->getLabel()) != 1) {
 				cout << ". I will use " << lastList->getLabel() << "." << endl;
@@ -316,7 +307,6 @@ string GetOTURepCommand::FindRep(int bin, string& group, ListVector* thisList) {
 	try{
 		vector<string> names;
 		map<string, float> sums;
-		map<string, float>::iterator it4;
 		map<int, string> binMap; //subset of namesToIndex - just member of this bin
 		string binnames;
 		float min = 10000;
@@ -354,13 +344,13 @@ string GetOTURepCommand::FindRep(int bin, string& group, ListVector* thisList) {
 		else {
 			//fill binMap
 			for (int i = 0; i < names.size(); i++) {
-				for (it3 = nameToIndex.begin(); it3 != nameToIndex.end(); it3++) {
+				for (map<string, int>::iterator it = nameToIndex.begin(); it != nameToIndex.end(); it++) {
 
-					if (it3->first == names[i]) {  
-						binMap[it3->second] = it3->first;
+					if (it->first == names[i]) {  
+						binMap[it->second] = it->first;
 
 						//initialize sums map
-						sums[it3->first] = 0.0;
+						sums[it->first] = 0.0;
 						break;
 					}
 				}
@@ -369,8 +359,8 @@ string GetOTURepCommand::FindRep(int bin, string& group, ListVector* thisList) {
 			//go through each cell in the sparsematrix
 			for(MatData currentCell = matrix->begin(); currentCell != matrix->end(); currentCell++){
 				//is this a distance between 2 members of this bin
-				it = binMap.find(currentCell->row);
-				it2 = binMap.find(currentCell->column);
+				map<int, string>::iterator it = binMap.find(currentCell->row);
+				map<int, string>::iterator it2 = binMap.find(currentCell->column);
 				
 				//sum the distance of the sequences in the bin to eachother
 				if ((it != binMap.end()) && (it2 != binMap.end())) {
@@ -381,7 +371,7 @@ string GetOTURepCommand::FindRep(int bin, string& group, ListVector* thisList) {
 			}
 			
 			//smallest sum is the representative
-			for (it4 = sums.begin(); it4 != sums.end(); it4++) {
+			for (map<string, float>::iterator it4 = sums.begin(); it4 != sums.end(); it4++) {
 				if (it4->second < min) {
 					min = it4->second;
 					minName = it4->first;

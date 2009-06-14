@@ -14,7 +14,6 @@
 
 ScreenSeqsCommand::ScreenSeqsCommand(string option){
 	try {
-		globaldata = GlobalData::getInstance();
 		abort = false;
 		
 		//allow user to run help
@@ -25,59 +24,50 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option){
 			string AlignArray[] =  {"fasta", "start", "end", "maxambig", "maxhomop", "minlength", "maxlength", "name", "group"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
-			parser = new OptionParser();
-			parser->parse(option, parameters);   	delete parser; 
+			OptionParser parser(option);
+			map<string,string> parameters = parser.getParameters();
 			
-			ValidParameters* validParameter = new ValidParameters();
-		
+			ValidParameters validParameter;
+			
 			//check to make sure all parameters are valid for command
-			for (it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter->isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
 			//check for required parameters
-			fastafile = validParameter->validFile(parameters, "fasta", true);
+			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not found") { cout << "fasta is a required parameter for the screen.seqs command." << endl; abort = true; }
 			else if (fastafile == "not open") { abort = true; }	
-			else { globaldata->setFastaFile(fastafile); }
 		
-			groupfile = validParameter->validFile(parameters, "group", true);
+			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }	
 			else if (groupfile == "not found") { groupfile = ""; }
-			else { 
-				globaldata->setGroupFile(groupfile);
-			}
 			
-			namefile = validParameter->validFile(parameters, "name", true);
+			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }
 			else if (namefile == "not found") { namefile = ""; }	
-			else { 
-				globaldata->setNameFile(namefile);
-			}
 
 		
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			string temp;
-			temp = validParameter->validFile(parameters, "start", false);			if (temp == "not found") { temp = "-1"; }
+			temp = validParameter.validFile(parameters, "start", false);			if (temp == "not found") { temp = "-1"; }
 			convert(temp, startPos); 
 		
-			temp = validParameter->validFile(parameters, "end", false);				if (temp == "not found") { temp = "-1"; }
+			temp = validParameter.validFile(parameters, "end", false);				if (temp == "not found") { temp = "-1"; }
 			convert(temp, endPos);  
 
-			temp = validParameter->validFile(parameters, "maxambig", false);		if (temp == "not found") { temp = "-1"; }
+			temp = validParameter.validFile(parameters, "maxambig", false);		if (temp == "not found") { temp = "-1"; }
 			convert(temp, maxAmbig);  
 
-			temp = validParameter->validFile(parameters, "maxhomop", false);		if (temp == "not found") { temp = "-1"; }
+			temp = validParameter.validFile(parameters, "maxhomop", false);		if (temp == "not found") { temp = "-1"; }
 			convert(temp, maxHomoP);  
 
-			temp = validParameter->validFile(parameters, "minlength", false);		if (temp == "not found") { temp = "-1"; }
+			temp = validParameter.validFile(parameters, "minlength", false);		if (temp == "not found") { temp = "-1"; }
 			convert(temp, minLength); 
 			
-			temp = validParameter->validFile(parameters, "maxlength", false);		if (temp == "not found") { temp = "-1"; }
+			temp = validParameter.validFile(parameters, "maxlength", false);		if (temp == "not found") { temp = "-1"; }
 			convert(temp, maxLength); 
-		
-			delete validParameter;
 		}
 
 	}
@@ -187,13 +177,13 @@ int ScreenSeqsCommand::execute(){
 void ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 
 	ifstream inputNames;
-	openInputFile(globaldata->getNameFile(), inputNames);
+	openInputFile(namefile, inputNames);
 	set<string> badSeqGroups;
 	string seqName, seqList, group;
 	set<string>::iterator it;
 
-	string goodNameFile = getRootName(globaldata->getNameFile()) + "good" + getExtension(globaldata->getNameFile());
-	string badNameFile = getRootName(globaldata->getNameFile()) + "bad" + getExtension(globaldata->getNameFile());
+	string goodNameFile = getRootName(namefile) + "good" + getExtension(namefile);
+	string badNameFile = getRootName(namefile) + "bad" + getExtension(namefile);
 	
 	ofstream goodNameOut;	openOutputFile(goodNameFile, goodNameOut);
 	ofstream badNameOut;	openOutputFile(badNameFile, badNameOut);		
@@ -205,7 +195,7 @@ void ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 		if(it != badSeqNames.end()){
 			badSeqNames.erase(it);
 			badNameOut << seqName << '\t' << seqList << endl;
-			if(globaldata->getNameFile() != ""){
+			if(namefile != ""){
 				int start = 0;
 				for(int i=0;i<seqList.length();i++){
 					if(seqList[i] == ','){
@@ -225,13 +215,13 @@ void ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 	goodNameOut.close();
 	badNameOut.close();
 	
-	if(globaldata->getGroupFile() != ""){
+	if(groupfile != ""){
 		
 		ifstream inputGroups;
-		openInputFile(globaldata->getGroupFile(), inputGroups);
+		openInputFile(groupfile, inputGroups);
 
-		string goodGroupFile = getRootName(globaldata->getGroupFile()) + "good" + getExtension(globaldata->getGroupFile());
-		string badGroupFile = getRootName(globaldata->getGroupFile()) + "bad" + getExtension(globaldata->getGroupFile());
+		string goodGroupFile = getRootName(groupfile) + "good" + getExtension(groupfile);
+		string badGroupFile = getRootName(groupfile) + "bad" + getExtension(groupfile);
 		
 		ofstream goodGroupOut;	openOutputFile(goodGroupFile, goodGroupOut);
 		ofstream badGroupOut;	openOutputFile(badGroupFile, badGroupOut);		
@@ -261,12 +251,12 @@ void ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 void ScreenSeqsCommand::screenGroupFile(set<string> badSeqNames){
 
 	ifstream inputGroups;
-	openInputFile(globaldata->getGroupFile(), inputGroups);
+	openInputFile(groupfile, inputGroups);
 	string seqName, group;
 	set<string>::iterator it;
 	
-	string goodGroupFile = getRootName(globaldata->getGroupFile()) + "good" + getExtension(globaldata->getGroupFile());
-	string badGroupFile = getRootName(globaldata->getGroupFile()) + "bad" + getExtension(globaldata->getGroupFile());
+	string goodGroupFile = getRootName(groupfile) + "good" + getExtension(groupfile);
+	string badGroupFile = getRootName(groupfile) + "bad" + getExtension(groupfile);
 	
 	ofstream goodGroupOut;	openOutputFile(goodGroupFile, goodGroupOut);
 	ofstream badGroupOut;	openOutputFile(badGroupFile, badGroupOut);		

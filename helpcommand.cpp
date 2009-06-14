@@ -12,12 +12,10 @@
 //**********************************************************************************************************************
 
 HelpCommand::HelpCommand(string option){
-	globaldata = GlobalData::getInstance();
 	
-	if (option != "") { cout << "There are no valid parameters for the help() command." << endl;  }
-	
+	if (option != "") { cout << "There are no valid parameters for the help() command." << endl;  }	
 	validCommands = new ValidCommands();
-	}
+}
 
 //**********************************************************************************************************************
 

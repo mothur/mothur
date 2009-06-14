@@ -11,7 +11,6 @@
 
 #include "command.hpp"
 #include "fastamap.h"
-#include "globaldata.hpp"
 
 /* The unique.seqs command reads a fasta file, finds the duplicate sequences and outputs a names file
 	containing 2 columns.  The first being the groupname and the second the list of identical sequence names. */ 
@@ -26,17 +25,12 @@ public:
 	void help();	
 	
 private:
-	GlobalData* globaldata;
 	FastaMap* fastamap;
 	ifstream in;
 	ofstream out, outFasta;
 	string filename, outputFileName, outFastafile;
-	OptionParser* parser;
-	map<string, string> parameters;
-	map<string, string>::iterator it;
+
 	bool abort;
-
-
 };
 
 #endif

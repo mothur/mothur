@@ -67,9 +67,8 @@ int GetlineCommand::execute(){
 	
 		if (abort == true) { return 0; }
 	
-		filename = globaldata->inputFileName;
 		ifstream in;
-		openInputFile(filename, in);
+		openInputFile(globaldata->inputFileName, in);
 		string label;
 		int numBins = 0;
 		int count = -1;

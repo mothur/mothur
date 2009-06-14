@@ -11,7 +11,6 @@
  */
 
 #include "calculator.h"
-#include "globaldata.hpp"
 
 /* This class implements the shen calculator on single group. 
  It is a child of the calculator class. */
@@ -27,7 +26,6 @@ public:
 private:
 	int m;
 	int abund;
-	GlobalData* globaldata;
 };
 
 

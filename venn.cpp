@@ -19,7 +19,7 @@
 Venn::Venn(){
 	try {
 		globaldata = GlobalData::getInstance();
-		format = globaldata->getFormat();
+
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the Venn class Function Venn. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
