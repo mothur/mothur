@@ -140,7 +140,6 @@
 		37D9289B0F21331F001D4494 /* summarysharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D9284A0F21331F001D4494 /* summarysharedcommand.cpp */; };
 		37D9289C0F21331F001D4494 /* uvest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D9284D0F21331F001D4494 /* uvest.cpp */; };
 		37D9289D0F21331F001D4494 /* validcalculator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D9284F0F21331F001D4494 /* validcalculator.cpp */; };
-		37D9289E0F21331F001D4494 /* validcommands.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D928510F21331F001D4494 /* validcommands.cpp */; };
 		37D9289F0F21331F001D4494 /* validparameter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D928530F21331F001D4494 /* validparameter.cpp */; };
 		37E5F3E30F29FD4200F8D827 /* treenode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37E5F3E20F29FD4200F8D827 /* treenode.cpp */; };
 		37E5F4920F2A3DA800F8D827 /* readtreecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37E5F4910F2A3DA800F8D827 /* readtreecommand.cpp */; };
@@ -461,8 +460,6 @@
 		37D9284E0F21331F001D4494 /* uvest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uvest.h; sourceTree = SOURCE_ROOT; };
 		37D9284F0F21331F001D4494 /* validcalculator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = validcalculator.cpp; sourceTree = SOURCE_ROOT; };
 		37D928500F21331F001D4494 /* validcalculator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = validcalculator.h; sourceTree = SOURCE_ROOT; };
-		37D928510F21331F001D4494 /* validcommands.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = validcommands.cpp; sourceTree = SOURCE_ROOT; };
-		37D928520F21331F001D4494 /* validcommands.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = validcommands.h; sourceTree = SOURCE_ROOT; };
 		37D928530F21331F001D4494 /* validparameter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = validparameter.cpp; sourceTree = SOURCE_ROOT; };
 		37D928540F21331F001D4494 /* validparameter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = validparameter.h; sourceTree = SOURCE_ROOT; };
 		37E3ED800F4D9D0D00B5DF02 /* mothur.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mothur.h; sourceTree = SOURCE_ROOT; };
@@ -907,8 +904,6 @@
 			children = (
 				37D928500F21331F001D4494 /* validcalculator.h */,
 				37D9284F0F21331F001D4494 /* validcalculator.cpp */,
-				37D928520F21331F001D4494 /* validcommands.h */,
-				37D928510F21331F001D4494 /* validcommands.cpp */,
 				37D928540F21331F001D4494 /* validparameter.h */,
 				37D928530F21331F001D4494 /* validparameter.cpp */,
 			);
@@ -1029,7 +1024,6 @@
 				37D9289B0F21331F001D4494 /* summarysharedcommand.cpp in Sources */,
 				37D9289C0F21331F001D4494 /* uvest.cpp in Sources */,
 				37D9289D0F21331F001D4494 /* validcalculator.cpp in Sources */,
-				37D9289E0F21331F001D4494 /* validcommands.cpp in Sources */,
 				37D9289F0F21331F001D4494 /* validparameter.cpp in Sources */,
 				372E12700F26365B0095CF7E /* readotucommand.cpp in Sources */,
 				372E12960F263D5A0095CF7E /* readdistcommand.cpp in Sources */,

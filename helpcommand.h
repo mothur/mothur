@@ -12,8 +12,7 @@
 /* This class is designed to aid the user in running mothur. */
 
 #include "command.hpp"
-#include "validcommands.h"
-
+#include "commandfactory.hpp"
 
 class HelpCommand : public Command {
 	
@@ -24,7 +23,7 @@ public:
 	void help() {};
 	
 private:
-	ValidCommands* validCommands;
+	CommandFactory* validCommands;
 	
 private:
 		

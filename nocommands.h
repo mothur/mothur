@@ -12,6 +12,7 @@
 /* This command is run if the user enters an invalid command. */
 
 #include "command.hpp"
+#include "commandfactory.hpp"
 
 class NoCommand : public Command {
 

@@ -8,7 +8,6 @@
  */
 
 #include "nocommands.h"
-#include "validcommands.h"
 
 //**********************************************************************************************************************
 
@@ -24,7 +23,7 @@ int NoCommand::execute(){
 	//Could choose to give more help here?fdsah
 	cout << "Invalid command." << "\n";
 	
-	ValidCommands* valid = new ValidCommands();
+	CommandFactory* valid = new CommandFactory();
 	valid->printCommands(cout);
 	delete valid;
 	
