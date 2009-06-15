@@ -66,7 +66,6 @@ void SharedUtil::getSharedVectorswithReplacement(vector<string> Groups, vector<S
 		for (int j = 0; j < lookup.size(); j++) {
 			delete lookup[j];
 		}
-		
 		lookup.clear();
 		
 		//create and initialize vector of sharedvectors, one for each group
@@ -111,7 +110,6 @@ void SharedUtil::getSharedVectorswithReplacement(vector<string> Groups, vector<S
 //need to have mode because different commands require different number of valid groups
 void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups) {
 	try {
-//cout << "groups size" << userGroups.size() << endl;
 		if (userGroups.size() != 0) {
 			if (userGroups[0] != "all") {
 				//check that groups are valid

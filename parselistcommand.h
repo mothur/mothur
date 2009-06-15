@@ -44,6 +44,7 @@ private:
 	SharedListVector* list;
 	map<string, string> listGroups; //maps group name to sequences from that group in a specific OTU
 	map<string, string>::iterator it;
+	map<string, SharedListVector*>::iterator it2;
 	map<string, ofstream*>::iterator it3;
 	void parse(int, SharedListVector*);
 	void process(SharedListVector*);

@@ -15,10 +15,8 @@ ParseListCommand::ParseListCommand(){
 		globaldata = GlobalData::getInstance();
 		
 		//read in group map info.
-		groupMap = new GroupMap(globaldata->getGroupFile());
-		groupMap->readMap();
+		groupMap = globaldata->gGroupmap;
 
-		
 		//fill filehandles with neccessary ofstreams
 		int i;
 		ofstream* temp;
@@ -86,7 +84,6 @@ void ParseListCommand::parse(int index, SharedListVector* list) {
 
 int ParseListCommand::execute(){
 	try{
-			globaldata = GlobalData::getInstance();
 			int count = 1;
 			
 			//read in listfile
@@ -100,10 +97,6 @@ int ParseListCommand::execute(){
 			set<string> processedLabels;
 			set<string> userLabels = globaldata->labels;
 			set<int> userLines = globaldata->lines;
-
-			//read in group map info.
-			groupMap = new GroupMap(globaldata->getGroupFile());
-			groupMap->readMap();
 			
 			//create new list vectors to fill with parsed data
 			for (int i=0; i<groupMap->getNumGroups(); i++) {
@@ -163,6 +156,18 @@ int ParseListCommand::execute(){
 			if (globaldata->gGroupmap != NULL) { delete globaldata->gGroupmap; }
 			globaldata->gGroupmap = groupMap; 
 			
+			//close files
+			for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) { 
+				ofstream* temp = it3->second;
+				(*temp).close(); 
+				delete it3->second;
+			}
+			
+			//delete list vectors to fill with parsed data
+			for (it2 = groupOfLists.begin(); it2 != groupOfLists.end(); it2++) {
+				delete it2->second;
+			}
+
 			return 0;
 	}
 	catch(exception& e) {

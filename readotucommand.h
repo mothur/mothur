@@ -40,7 +40,7 @@ public:
 	
 private:
 	GlobalData* globaldata;
-	ReadOTUFile* read;
+	//ReadOTUFile* read;
 	InputData* input;
 	Command* shared;
 	Command* parselist;

@@ -44,6 +44,7 @@ CollectSharedCommand::CollectSharedCommand(string option){
 		lines.clear();
 		labels.clear();
 		Estimators.clear();
+		Groups.clear();
 		
 		//allow user to run help
 		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; }
@@ -106,8 +107,8 @@ CollectSharedCommand::CollectSharedCommand(string option){
 			if (groups == "not found") { groups = ""; }
 			else { 
 				splitAtDash(groups, Groups);
-				globaldata->Groups = Groups;
 			}
+			globaldata->Groups = Groups;
 			
 			string temp;
 			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
@@ -242,16 +243,16 @@ int CollectSharedCommand::execute(){
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
-		set<string> userLabels = globaldata->labels;
-		set<int> userLines = globaldata->lines;
+		set<string> userLabels = labels;
+		set<int> userLines = lines;
 				
 		//set users groups
 		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups, "collect");
 		util->updateGroupIndex(globaldata->Groups, globaldata->gGroupmap->groupIndex);
 
-		while((order != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
+		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 
-			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(order->getLabel()) == 1){
+			if(allLines == 1 || lines.count(count) == 1 || labels.count(order->getLabel()) == 1){
 				
 				//create collectors curve
 				cCurve = new Collect(order, cDisplays);

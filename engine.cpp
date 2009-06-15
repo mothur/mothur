@@ -169,6 +169,7 @@ bool BatchEngine::getInput(){
 				}else {		cout << "Invalid." << endl;		}
 				
 			}
+			gobble(inputBatchFile);
 		}
 		return 1;
 	}

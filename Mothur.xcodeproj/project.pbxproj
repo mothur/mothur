@@ -748,8 +748,6 @@
 		37D928A90F2133E5001D4494 /* commands */ = {
 			isa = PBXGroup;
 			children = (
-				7E5A17AE0FE57292003C6A03 /* mergefilecommand.cpp */,
-				7E5A17AD0FE57292003C6A03 /* mergefilecommand.h */,
 				37D927CD0F21331F001D4494 /* command.hpp */,
 				378DC5CD0FBDE1C8003B8607 /* aligncommand.h */,
 				378DC5CE0FBDE1C8003B8607 /* aligncommand.cpp */,
@@ -793,6 +791,8 @@
 				375873F30F7D648F0040F377 /* libshuffcommand.cpp */,
 				21E859D60FC4632E005E1A48 /* matrixoutputcommand.h */,
 				21E859D70FC4632E005E1A48 /* matrixoutputcommand.cpp */,
+				7E5A17AD0FE57292003C6A03 /* mergefilecommand.h */,
+				7E5A17AE0FE57292003C6A03 /* mergefilecommand.cpp */,
 				375873F70F7D649C0040F377 /* nocommands.h */,
 				375873F60F7D649C0040F377 /* nocommands.cpp */,
 				37D927FA0F21331F001D4494 /* parselistcommand.h */,

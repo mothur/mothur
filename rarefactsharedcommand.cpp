@@ -16,12 +16,14 @@
 RareFactSharedCommand::RareFactSharedCommand(string option){
 	try {
 		globaldata = GlobalData::getInstance();
+		
 		abort = false;
 		allLines = 1;
 		lines.clear();
 		labels.clear();
 		Estimators.clear();
-		
+		Groups.clear();
+				
 		//allow user to run help
 		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; }
 		
@@ -83,8 +85,8 @@ RareFactSharedCommand::RareFactSharedCommand(string option){
 			if (groups == "not found") { groups = ""; }
 			else { 
 				splitAtDash(groups, Groups);
-				globaldata->Groups = Groups;
 			}
+			globaldata->Groups = Groups;
 			
 			string temp;
 			temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
@@ -176,7 +178,7 @@ int RareFactSharedCommand::execute(){
 		input = globaldata->ginput;
 		lookup = input->getSharedRAbundVectors();
 		vector<SharedRAbundVector*> lastLookup = lookup;
-		
+
 		if (lookup.size() < 2) { 
 			cout << "I cannot run the command without at least 2 valid groups."; 
 			for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; }

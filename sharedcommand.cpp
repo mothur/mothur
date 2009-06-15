@@ -36,15 +36,19 @@ SharedCommand::SharedCommand(){
 int SharedCommand::execute(){
 	try {
 		globaldata = GlobalData::getInstance();
+		//lookup.clear();
 		int count = 1;
 		string errorOff = "no error";
 			
 		//read in listfile
 		read = new ReadOTUFile(globaldata->inputFileName);	
 		read->read(&*globaldata); 
+
 		input = globaldata->ginput;
 		SharedList = globaldata->gSharedList;
 		SharedListVector* lastList = SharedList;
+		//lookup = SharedList->getSharedRAbundVector();
+		//vector<SharedRAbundVector*> lastLookup = lookup;
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
@@ -55,9 +59,9 @@ int SharedCommand::execute(){
 		
 		while((SharedList != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 			
-						
+
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(SharedList->getLabel()) == 1){
-			
+					
 					shared->getSharedVectors(SharedList); //fills sharedGroups with new info and updates sharedVector
 					printSharedData(); //prints info to the .shared file
 				
@@ -76,8 +80,11 @@ int SharedCommand::execute(){
 			
 			if (count != 1) { delete lastList; }
 			lastList = SharedList;			
-
 			SharedList = input->getSharedListVector(); //get new list vector to process
+			
+			//if (count != 1) { for (int i = 0; i < lastLookup.size(); i++) {  delete lastLookup[i];  } }
+			//lastLookup = lookup; 
+			//if (SharedList != NULL) { lookup = SharedList->getSharedRAbundVector(); }
 		}
 		
 		//output error messages about any remaining user labels
@@ -101,6 +108,7 @@ int SharedCommand::execute(){
 		
 		delete lastList;
 		delete shared;
+		out.close();
 		
 		return 0;
 	}
@@ -117,6 +125,12 @@ int SharedCommand::execute(){
 //**********************************************************************************************************************
 void SharedCommand::printSharedData() {
 	try {
+	
+		///for (int i = 0; i < thislookup.size(); i++) {
+		//	out << thislookup[i]->getLabel() << '\t' << thislookup[i]->getGroup() << '\t';
+//cout << thislookup[i]->getLabel() << '\t' << thislookup[i]->getGroup() << endl;			
+		//	thislookup[i]->print(out);
+	//	}
 		//prints out horizontally
 		for (it = shared->sharedGroups.begin(); it != shared->sharedGroups.end(); it++) {
 			out << it->second->getLabel() << "\t" << it->first << "\t"; //prints out label and groupname

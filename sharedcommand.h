@@ -40,6 +40,7 @@ private:
 	InputData* input;
 	Shared* shared;
 	map<string, SharedRAbundVector*>::iterator it;
+	//vector<SharedRAbundVector*> lookup;
 	ofstream out;
 	string filename;
 

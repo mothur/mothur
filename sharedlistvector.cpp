@@ -16,11 +16,11 @@
 
 /***********************************************************************/
 
-SharedListVector::SharedListVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){}
+SharedListVector::SharedListVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){globaldata = GlobalData::getInstance();}
 
 /***********************************************************************/
 
-SharedListVector::SharedListVector(int n):	DataVector(), data(n, "") , maxRank(0), numBins(0), numSeqs(0){}
+SharedListVector::SharedListVector(int n):	DataVector(), data(n, "") , maxRank(0), numBins(0), numSeqs(0){globaldata = GlobalData::getInstance();}
 
 /***********************************************************************/
 SharedListVector::SharedListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
@@ -272,6 +272,7 @@ SharedRAbundVector SharedListVector::getSharedRAbundVector(string groupName) {
 		
 		rav.setLabel(label);
 		rav.setGroup(groupName);
+
 		return rav;
 		
 	}
@@ -292,6 +293,8 @@ vector<SharedRAbundVector*> SharedListVector::getSharedRAbundVector() {
 		vector<SharedRAbundVector*> lookup;
 		
 		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups);
+		
+		delete util;
 
 		for (int i = 0; i < globaldata->Groups.size(); i++) {
 			SharedRAbundVector* temp = new SharedRAbundVector();

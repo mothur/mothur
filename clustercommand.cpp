@@ -62,10 +62,10 @@ ClusterCommand::ClusterCommand(string option){
 			if (abort == false) {
 			
 				//get matrix, list and rabund for execute
-				if(globaldata->gSparseMatrix != NULL)	{	matrix = new SparseMatrix(*globaldata->gSparseMatrix);		}
+				if(globaldata->gSparseMatrix != NULL)	{	matrix = globaldata->gSparseMatrix;		}
 			
 				if(globaldata->gListVector != NULL){
-					list = new ListVector(*globaldata->gListVector);
+					list = globaldata->gListVector;
 					rabund = new RAbundVector(list->getRAbundVector());
 				}
 				
@@ -121,8 +121,6 @@ void ClusterCommand::help(){
 
 ClusterCommand::~ClusterCommand(){
 	delete cluster;
-	delete matrix;
-	delete list;
 	delete rabund;
 }
 

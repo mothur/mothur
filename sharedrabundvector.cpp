@@ -15,11 +15,12 @@
 
 /***********************************************************************/
 
-SharedRAbundVector::SharedRAbundVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0) {}
+SharedRAbundVector::SharedRAbundVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0) {globaldata = GlobalData::getInstance();}
 
 /***********************************************************************/
 
 SharedRAbundVector::SharedRAbundVector(int n) : DataVector(), maxRank(0), numBins(n), numSeqs(0) {
+		globaldata = GlobalData::getInstance();
 		individual newGuy;
 		//initialize data
 		for (int i=0; i< n; i++) {
