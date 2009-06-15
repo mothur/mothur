@@ -24,7 +24,7 @@ InputData::InputData(string fName, string f) : format(f){
 
 
 InputData::~InputData(){
-	
+	fileHandle.close();
 //	delete output;
 	
 }

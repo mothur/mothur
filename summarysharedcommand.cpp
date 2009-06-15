@@ -64,10 +64,8 @@ SummarySharedCommand::SummarySharedCommand(string option){
 			
 			//make sure the user has already run the read.otu command
 			if (globaldata->getSharedFile() == "") {
-				if (globaldata->getListFile() == "") { cout << "You must read a list and a group, or a shared before you can use the summary.shared command." << endl; abort = true; }
-				else if (globaldata->getGroupFile() == "") { cout << "You must read a list and a group, or a shared before you can use the summary.shared command." << endl; abort = true; }
+				 cout << "You must read a list and a group, or a shared before you can use the summary.shared command." << endl; abort = true; 
 			}
-
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -163,11 +161,9 @@ SummarySharedCommand::SummarySharedCommand(string option){
 				
 				outputFileName = ((getRootName(globaldata->inputFileName)) + "shared.summary");
 				openOutputFile(outputFileName, outputFileHandle);
-//				format = globaldata->getFormat();
 				mult = false;
 			}
 		}
-
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the SummarySharedCommand class Function SummarySharedCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -208,7 +204,6 @@ void SummarySharedCommand::help(){
 //**********************************************************************************************************************
 
 SummarySharedCommand::~SummarySharedCommand(){
-	delete input;
 	delete read;
 	delete validCalculator;
 }
@@ -337,6 +332,10 @@ int SummarySharedCommand::execute(){
 		//close files
 		outputFileHandle.close();
 		if (mult == true) {  outAll.close();  }
+		
+		for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
+		
+		delete input;
 
 		return 0;
 	}

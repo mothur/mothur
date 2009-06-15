@@ -21,6 +21,7 @@ void Shared::getSharedVectors(SharedListVector* list) {
 		int i,j;
 		label = list->getLabel();
 		
+		for (it = sharedGroups.begin(); it != sharedGroups.end(); it++) {  delete it->second;  }
 		sharedGroups.clear();  //removes old info.
 		
 		//initalize sharedGroups 

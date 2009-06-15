@@ -128,7 +128,7 @@ void HeatMapCommand::help(){
 //**********************************************************************************************************************
 
 HeatMapCommand::~HeatMapCommand(){
-	delete input;
+	
 	delete read;
 	delete heatmap;
 }
@@ -276,6 +276,7 @@ int HeatMapCommand::execute(){
 
 		}
 		
+		delete input;
 		return 0;
 	}
 	catch(exception& e) {

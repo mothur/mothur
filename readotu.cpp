@@ -31,21 +31,24 @@ void ReadOTUFile::read(GlobalData* globaldata){
 		}else {//there is an orderfile
 			input = new InputData(philFile, globaldata->getOrderFile(), globaldata->getFormat());
 		}
-		
+//cout << "made it here"	<< endl;	
 		//memory leak prevention
 		//if (globaldata->ginput != NULL) { delete globaldata->ginput;  }
 		globaldata->ginput = input;	//saving to be used by collector and rarefact commands.
-		
+//cout << "after input" << endl;		
 		if ((globaldata->getFormat() == "list") || (globaldata->getFormat() == "rabund") || (globaldata->getFormat() == "sabund")) {//you are reading a list, rabund or sabund file for collect, rarefaction or summary.
 			order = input->getOrderVector();
 			//memory leak prevention
 			//if (globaldata->gorder != NULL) { delete globaldata->gorder;  }
 			globaldata->gorder = order;	//saving to be used by collect and rarefact commands.
 			sabund = inputSabund->getSAbundVector(); 
+			//if (globaldata->sabund != NULL) { delete globaldata->sabund;  }
 			globaldata->sabund = sabund; //saving to be used by summary command.
 			rabund = inputRabund->getRAbundVector(); 
+			//if (globaldata->rabund != NULL) { delete globaldata->rabund;  }
 			globaldata->rabund = rabund; //saving to be used by heatmap.bin command.
 			list = inputList->getListVector();
+			//if (globaldata->gListVector != NULL) { delete globaldata->gListVector;  }
 			globaldata->gListVector = list;
 
 		}else if (globaldata->getFormat() == "shared") {

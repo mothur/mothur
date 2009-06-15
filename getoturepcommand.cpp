@@ -91,7 +91,7 @@ GetOTURepCommand::GetOTURepCommand(string option){
 		
 			if (abort == false) {
 			
-				if(globaldata->gSparseMatrix != NULL)	{	matrix = new SparseMatrix(*globaldata->gSparseMatrix);		}	
+				if(globaldata->gSparseMatrix != NULL)	{	matrix = globaldata->gSparseMatrix;		}	
 					
 				//globaldata->gListVector bin 0 = first name read in distance matrix, globaldata->gListVector bin 1 = second name read in distance matrix
 				if(globaldata->gListVector != NULL)		{
