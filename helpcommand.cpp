@@ -12,9 +12,11 @@
 //**********************************************************************************************************************
 
 HelpCommand::HelpCommand(string option){
+
 	
-	if (option != "") { cout << "There are no valid parameters for the help() command." << endl;  }	
-	validCommands = new ValidCommands();
+	if (option != "") { cout << "There are no valid parameters for the help() command." << endl;  }
+	
+	validCommands = new CommandFactory();
 }
 
 //**********************************************************************************************************************

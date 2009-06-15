@@ -57,6 +57,48 @@
 CommandFactory::CommandFactory(){
 	string s = "";
 	command = new NoCommand(s);
+	
+	
+	//initialize list of valid commands
+	commands["read.dist"]			= "read.dist"; 
+	commands["read.otu"]			= "read.otu";
+	commands["read.tree"]			= "read.tree"; 
+	commands["bin.seqs"]			= "bin.seqs"; 
+	commands["get.oturep"]			= "get.oturep";
+	commands["cluster"]				= "cluster"; 
+	commands["unique.seqs"]			= "unique.seqs"; 
+	commands["dist.seqs"]			= "dist.seqs";
+	commands["dist.shared"]			= "dist.shared";
+	commands["collect.single"]		= "collect.single"; 
+	commands["collect.shared"]		= "collect.shared"; 
+	commands["rarefaction.single"]	= "rarefaction.single"; 
+	commands["rarefaction.shared"]	= "rarefaction.shared"; 
+	commands["summary.single"]		= "summary.single"; 
+	commands["summary.shared"]		= "summary.shared"; 
+	commands["parsimony"]			= "parsimony";
+	commands["unifrac.weighted"]	= "unifrac.weighted"; 
+	commands["unifrac.unweighted"]	= "unifrac.unweighted"; 
+	commands["libshuff"]			= "libshuff";
+	commands["tree.shared"]			= "tree.shared";
+	commands["heatmap.bin"]			= "heatmap.bin";
+	commands["heatmap.sim"]			= "heatmap.sim";
+	commands["venn"]				= "venn";
+	commands["get.group"]           = "get.group";
+	commands["get.label"]           = "get.label";
+	commands["get.line"]            = "get.line";
+	commands["get.sabund"]          = "get.sabund";
+	commands["get.rabund"]          = "get.rabund";
+	commands["bootstrap.shared"]	= "bootstrap.shared";
+	commands["concensus"]			= "concensus";
+	commands["help"]				= "help"; 
+	commands["filter.seqs"]			= "filter.seqs";
+	commands["align.seqs"]			= "align.seqs";
+	commands["summary.seqs"]		= "summary.seqs";
+	commands["screen.seqs"]			= "screen.seqs";
+	commands["reverse.seqs"]		= "reverse.seqs";
+	commands["trim.seqs"]			= "trim.seqs";
+	commands["quit"]				= "quit"; 
+
 }
 /***********************************************************/
 
@@ -126,5 +168,54 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 	}
 
 }
-/***********************************************************/
+
+/***********************************************************************/
+bool CommandFactory::isValidCommand(string command) {
+	try {	
+	
+		//is the command in the map
+		if ((commands.find(command)) != (commands.end())) {
+			return true;
+		}else{
+			cout << command << " is not a valid command in Mothur.  Valid commands are ";
+			for (it = commands.begin(); it != commands.end(); it++) {
+				cout << it->first << ", ";
+			}
+			cout << endl;
+			return false;
+		}
+		
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the CommandFactory class Function isValidCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the CommandFactory class function isValidCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+
+/***********************************************************************/
+void CommandFactory::printCommands(ostream& out) {
+	try {	
+		out << "Valid commands are ";
+		for (it = commands.begin(); it != commands.end(); it++) {
+			out << it->first << ", ";
+		}
+		out << endl;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the CommandFactory class Function printCommands. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the CommandFactory class function printCommands. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+/***********************************************************************/
+
+
+
 

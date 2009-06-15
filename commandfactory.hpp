@@ -19,8 +19,15 @@ public:
 	CommandFactory();
 	~CommandFactory();
 	Command* getCommand(string, string);
+	bool isValidCommand(string);
+	void printCommands(ostream&);
+
 private:
 	Command* command;
+	map<string, string> commands;
+	map<string, string>::iterator it;
+
+	
 
 };
 
