@@ -51,10 +51,10 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option){
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			string temp;
-			temp = validParameter.validFile(parameters, "start", false);			if (temp == "not found") { temp = "-1"; }
+			temp = validParameter.validFile(parameters, "start", false);		if (temp == "not found") { temp = "-1"; }
 			convert(temp, startPos); 
 		
-			temp = validParameter.validFile(parameters, "end", false);				if (temp == "not found") { temp = "-1"; }
+			temp = validParameter.validFile(parameters, "end", false);			if (temp == "not found") { temp = "-1"; }
 			convert(temp, endPos);  
 
 			temp = validParameter.validFile(parameters, "maxambig", false);		if (temp == "not found") { temp = "-1"; }
@@ -63,10 +63,10 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option){
 			temp = validParameter.validFile(parameters, "maxhomop", false);		if (temp == "not found") { temp = "-1"; }
 			convert(temp, maxHomoP);  
 
-			temp = validParameter.validFile(parameters, "minlength", false);		if (temp == "not found") { temp = "-1"; }
+			temp = validParameter.validFile(parameters, "minlength", false);	if (temp == "not found") { temp = "-1"; }
 			convert(temp, minLength); 
 			
-			temp = validParameter.validFile(parameters, "maxlength", false);		if (temp == "not found") { temp = "-1"; }
+			temp = validParameter.validFile(parameters, "maxlength", false);	if (temp == "not found") { temp = "-1"; }
 			convert(temp, maxLength); 
 		}
 
