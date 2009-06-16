@@ -22,9 +22,16 @@ int main(int argc, char *argv[]){
 
 		Engine* mothur;
 		bool bail = 0;
+		string input;
 
 		if(argc>1){
-			mothur = new BatchEngine(argv[0], argv[1]);
+			input = argv[1];
+
+			if (input[0] == '#') {
+				mothur = new ScriptEngine(argv[0], argv[1]);
+			}else{
+				mothur = new BatchEngine(argv[0], argv[1]);
+			}
 		}
 		else{
 			mothur = new InteractEngine(argv[0]);		

@@ -64,6 +64,7 @@ ReadOtuCommand::ReadOtuCommand(string option){
 				globaldata->setGroupFile(groupfile); 
 				groupMap = new GroupMap(groupfile);
 				groupMap->readMap();
+				globaldata->gGroupmap = groupMap;
 			}
 
 			//you are doing a list and group shared
@@ -168,10 +169,7 @@ int ReadOtuCommand::execute(){
 		
 		//read->read(&*globaldata); 
 		if (globaldata->getFormat() == "shared") {
-			groupMap->readMap();
-			
-			//if (globaldata->gGroupmap != NULL) { delete globaldata->gGroupmap;  }
-			globaldata->gGroupmap = groupMap;
+			//groupMap->readMap();
 			
 			parselist = new ParseListCommand();
 			parselist->execute();

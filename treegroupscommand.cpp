@@ -66,7 +66,7 @@ TreeGroupCommand::TreeGroupCommand(string option){
 			else if (namefile == "not found") { namefile = ""; }
 			else {  globaldata->setNameFile(namefile);	}
 			
-//			format = globaldata->getFormat();
+			format = globaldata->getFormat();
 			
 			//error checking on files			
 			if ((globaldata->getSharedFile() == "") && ((phylipfile == "") && (columnfile == "")))	{ cout << "You must run the read.otu command or provide a distance file before running the tree.shared command." << endl; abort = true; }
@@ -234,6 +234,8 @@ int TreeGroupCommand::execute(){
 			
 			if (lookup.size() < 2) { cout << "You have not provided enough valid groups.  I cannot run the command." << endl; return 0; }
 		
+			globaldata->runParse = false;
+			
 			//create tree file
 			makeSimsShared();
 		}else{
@@ -269,7 +271,9 @@ int TreeGroupCommand::execute(){
 		
 			//fills globaldatas tree names
 			globaldata->Treenames = globaldata->Groups;
-
+			
+			globaldata->runParse = false;
+			
 			makeSimsDist();
 
 			//create a new filename
@@ -562,7 +566,7 @@ void TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
 							}
 						}
 					}
-					
+				
 					//creates tree from similarity matrix and write out file
 					createTree();
 				}
