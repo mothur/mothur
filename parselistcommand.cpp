@@ -15,7 +15,8 @@ ParseListCommand::ParseListCommand(){
 		globaldata = GlobalData::getInstance();
 		
 		//read in group map info.
-		groupMap = globaldata->gGroupmap;
+		groupMap = new GroupMap(globaldata->getGroupFile());
+		groupMap->readMap();
 
 		//fill filehandles with neccessary ofstreams
 		int i;

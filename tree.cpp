@@ -495,6 +495,7 @@ void Tree::createNewickFile(string f) {
 		int root = findRoot();
 		//filename = getRootName(globaldata->getTreeFile()) + "newick";
 		filename = f;
+
 		openOutputFile(filename, out);
 		
 		printBranch(root, out, "branch");

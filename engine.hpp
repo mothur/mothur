@@ -57,4 +57,18 @@ private:
 };
 
 
+class ScriptEngine : public Engine {
+public:
+	ScriptEngine(string, string);
+	~ScriptEngine();
+	virtual bool getInput();
+	int openedBatch;
+private:
+	GlobalData* globaldata;
+	string listOfCommands;
+	string getNextCommand(string&);
+
+};
+
+
 #endif

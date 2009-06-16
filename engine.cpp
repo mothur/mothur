@@ -103,6 +103,7 @@ bool InteractEngine::getInput(){
 BatchEngine::BatchEngine(string path, string batchFileName){
 	try {
 		globaldata = GlobalData::getInstance();
+	
 		openedBatch = openInputFile(batchFileName, inputBatchFile);
 		globaldata->argv = path;
 
@@ -140,6 +141,7 @@ bool BatchEngine::getInput(){
 		string input = "";
 		string commandName = "";
 		string options = "";
+		//int count = 1;
 		
 		//CommandFactory cFactory;
 		int quitCommandCalled = 0;
@@ -148,6 +150,8 @@ bool BatchEngine::getInput(){
 		
 			if (inputBatchFile.eof()) { input = "quit()"; }
 			else { getline(inputBatchFile, input); }
+			
+			//cout << "command number" << count << endl; count++;
 			
 			if (input[0] != '#') {
 			
@@ -185,4 +189,112 @@ bool BatchEngine::getInput(){
 
 
 /***********************************************************************/
+/***********************************************************************/
+//This function opens the batchfile to be used by BatchEngine::getInput.
+ScriptEngine::ScriptEngine(string path, string commandString){
+	try {
+		globaldata = GlobalData::getInstance();
+		
+		//remove quotes
+		listOfCommands = commandString.substr(1, (commandString.length()-1));
 
+		globaldata->argv = path;
+
+		system("clear");
+	
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ScriptEngine class Function ScriptEngine. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ScriptEngine class function ScriptEngine. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+
+/***********************************************************************/
+
+ScriptEngine::~ScriptEngine(){
+	}
+
+/***********************************************************************/
+//This Function allows the user to run a batchfile containing several commands on Dotur
+bool ScriptEngine::getInput(){
+	try {
+			
+		string input = "";
+		string commandName = "";
+		string options = "";
+		//int count = 1;
+		
+		//CommandFactory cFactory;
+		int quitCommandCalled = 0;
+	
+		while(quitCommandCalled == 0){
+		
+			input = getNextCommand(listOfCommands);	
+			
+			if (input == "") { input = "quit()"; }
+			//cout << "command number" << count << endl; count++;
+			
+			cout << endl << "mothur > " << input << endl;
+				
+			//allow user to omit the () on the quit command
+			if (input == "quit") { input = "quit()"; }
+
+			CommandOptionParser parser(input);
+			commandName = parser.getCommandString();
+			options = parser.getOptionString();
+										
+			if (commandName != "") {
+
+				//executes valid command
+				CommandFactory cFactory;
+				Command* command = cFactory.getCommand(commandName, options);
+				quitCommandCalled = command->execute();
+			}else {		cout << "Invalid." << endl;		}
+			
+		}
+		
+		return 1;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ScriptEngine class Function getInput. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ScriptEngine class function getInput. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+/***********************************************************************/
+string ScriptEngine::getNextCommand(string& commandString) {
+	try {
+		string nextcommand = "";
+		
+		nextcommand = commandString.substr(0,commandString.find_first_of(';'));
+
+				
+		if ((commandString.find_first_of(';')+1) <= commandString.length()) {
+			commandString = commandString.substr(commandString.find_first_of(';')+1, commandString.length());
+		}else { commandString = ""; } //you have reached the last command.
+		
+		//get rid of any extra spaces in between commands
+		//string space = " ";
+		
+		//while(commandString.at(0) == ' ')
+			//commandString = commandString.substr(1, commandString.length());
+			
+		return nextcommand;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the ScriptEngine class Function getNextCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the ScriptEngine class function getNextCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
+/***********************************************************************/

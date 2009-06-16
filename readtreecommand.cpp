@@ -33,6 +33,7 @@ ReadTreeCommand::ReadTreeCommand(string option){
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			globaldata->runParse = true;
 			globaldata->newRead();
 			
 			//check for required parameters
