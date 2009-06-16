@@ -27,6 +27,12 @@ NastReport::NastReport(string candidateReportFName) {
 
 /******************************************************************************************************************/
 
+NastReport::~NastReport() {
+	candidateReportFile.close();
+}
+
+/******************************************************************************************************************/
+
 void NastReport::print(){
 	
 	candidateReportFile << queryName << '\t' << queryLength << '\t' << templateName << '\t' << templateLength << '\t';

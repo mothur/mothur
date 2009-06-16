@@ -89,7 +89,7 @@ void Sequence::setName(string seqName) {
 
 void Sequence::setUnaligned(string sequence){
 	
-	if(sequence.find_first_of('-') != string::npos) {
+	if(sequence.find_first_of('.') != string::npos || sequence.find_first_of('-') != string::npos) {
 		string temp = "";
 		for(int j=0;j<sequence.length();j++) {
 			if(isalpha(sequence[j]))	{	temp += sequence[j];	}

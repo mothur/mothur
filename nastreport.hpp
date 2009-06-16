@@ -19,6 +19,7 @@ class NastReport {
 
 public:
 	NastReport(string);
+	~NastReport();
 	void setCandidate(Sequence*);
 	void setTemplate(Sequence*);
 	void setSearchParameters(string, float);

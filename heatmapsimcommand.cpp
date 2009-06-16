@@ -81,9 +81,9 @@ HeatMapSimCommand::HeatMapSimCommand(string option){
 			}
 			
 			calc = validParameter.validFile(parameters, "calc", false);			
-			if (calc == "not found") { calc = "jclass-thetayc";  }
+			if (calc == "not found") { calc = "jest-thetayc";  }
 			else { 
-				 if (calc == "default")  {  calc = "jclass-thetayc";  }
+				 if (calc == "default")  {  calc = "jest-thetayc";  }
 			}
 			splitAtDash(calc, Estimators);
 			

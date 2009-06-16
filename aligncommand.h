@@ -22,19 +22,19 @@ public:
 	~AlignCommand();
 	int execute(); 
 	void help();	
-
+	
 private:
 	struct linePair {
 		int start;
 		int numSeqs;
 		linePair(int i, int j) : start(i), numSeqs(j) {}
 	};
-	map<int, int> processIDS;   //end line, processid
+	vector<int> processIDS;   //processid
 	vector<linePair*> lines;
-
+	
 	Database* templateDB;
 	Alignment* alignment;
-
+	
 	int driver(linePair*, string, string);
 	void createProcesses(string, string);
 	void appendAlignFiles(string, string); 
@@ -43,7 +43,7 @@ private:
 	string candidateFileName, templateFileName, distanceFileName, search, align;
 	float match, misMatch, gapOpen, gapExtend;
 	int processors, kmerSize;
-
+	
 	bool abort;
 };
 
