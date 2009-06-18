@@ -41,7 +41,7 @@ Database::Database(string fastaFileName){		//	This assumes that the template dat
 				aligned += letter;
 			}
 		}
-		templateSequences[i] = new Sequence(seqName, aligned);
+		templateSequences[i] = Sequence(seqName, aligned);
 		fastaFile.putback(letter);
 	}
 	
@@ -50,6 +50,24 @@ Database::Database(string fastaFileName){		//	This assumes that the template dat
 	
 	cout << "DONE." << endl;	cout.flush();
 
+}
+/**************************************************************************************************/
+
+Database::~Database(){														
+	try {
+		
+		//for (int i = 0; i < templateSequences.size(); i++) {  delete templateSequences[i];    }
+		templateSequences.clear();
+
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the Database class Function ~Database. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the Database class function ~Database. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
 }
 
 /**************************************************************************************************/

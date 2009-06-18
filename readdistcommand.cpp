@@ -53,8 +53,8 @@ ReadDistCommand::ReadDistCommand(string option){
 			else if (groupfile == "not found") { groupfile = ""; }
 			else {  
 				globaldata->setGroupFile(groupfile); 
-				groupMap = new GroupMap(groupfile);
-				groupMap->readMap();
+				//groupMap = new GroupMap(groupfile);
+				//groupMap->readMap();
 			}
 
 			namefile = validParameter.validFile(parameters, "name", true);
@@ -150,8 +150,9 @@ void ReadDistCommand::help(){
 //**********************************************************************************************************************
 
 ReadDistCommand::~ReadDistCommand(){
-	delete read;
-	delete nameMap;
+	if (abort == false) {
+		if (format != "matrix") { delete read; delete nameMap; }
+	}
 }
 
 //**********************************************************************************************************************
@@ -164,16 +165,20 @@ int ReadDistCommand::execute(){
 			ifstream in;
 			openInputFile(distFileName, in);
 			matrix = new FullMatrix(in); //reads the matrix file
+			in.close();
 			//memory leak prevention
-			//if (globaldata->gMatrix != NULL) { delete globaldata->gMatrix;  }
+			if (globaldata->gMatrix != NULL) { delete globaldata->gMatrix;  }
 			globaldata->gMatrix = matrix; //save matrix for coverage commands
 		}else {
 			read->read(nameMap);
 			//to prevent memory leak
-			if (globaldata->gListVector != NULL) { delete globaldata->gListVector;  }
+
+			if (globaldata->gListVector != NULL) {  delete globaldata->gListVector;  }
 			globaldata->gListVector = read->getListVector();
+
 			if (globaldata->gSparseMatrix != NULL) { delete globaldata->gSparseMatrix;  }
 			globaldata->gSparseMatrix = read->getMatrix();
+
 		}
 		return 0;
 	}

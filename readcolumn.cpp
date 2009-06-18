@@ -153,8 +153,8 @@ void ReadColumnMatrix::read(NameAssignment* nameMap){
 /***********************************************************************/
 
 ReadColumnMatrix::~ReadColumnMatrix(){
-	delete D;
-	delete list;
+	//delete D;
+	//delete list;
 }
 
 

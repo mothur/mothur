@@ -17,7 +17,7 @@ class DistanceDB : public Database {
 	
 public:
 	DistanceDB(string, string);
-	Sequence* findClosestSequence(Sequence*);
+	Sequence findClosestSequence(Sequence*);
 	
 private:
 

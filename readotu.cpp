@@ -13,7 +13,7 @@
 
 ReadOTUFile::ReadOTUFile(string pf): philFile(pf){
 	
-	openInputFile(philFile, fileHandle);
+	//openInputFile(philFile, fileHandle);
 }
 
 /***********************************************************************/

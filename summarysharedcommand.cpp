@@ -204,8 +204,10 @@ void SummarySharedCommand::help(){
 //**********************************************************************************************************************
 
 SummarySharedCommand::~SummarySharedCommand(){
-	delete read;
-	delete validCalculator;
+	if (abort == false) {
+		delete read;
+		delete validCalculator;
+	}
 }
 
 //**********************************************************************************************************************
@@ -335,7 +337,7 @@ int SummarySharedCommand::execute(){
 		
 		for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
 		
-		delete input;
+		delete input;  globaldata->ginput = NULL;
 
 		return 0;
 	}

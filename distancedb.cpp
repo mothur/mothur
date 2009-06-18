@@ -40,7 +40,7 @@ DistanceDB::DistanceDB(string fastaFileName, string distanceFileName) : Database
 
 /**************************************************************************************************/
 
-Sequence* DistanceDB::findClosestSequence(Sequence* candidateSeq){
+Sequence DistanceDB::findClosestSequence(Sequence* candidateSeq){
 	
 	hit simAccession = mostSimSequenceVector[searchIndex];
 //	string candidateSeqName, closestMatchSeqName, junk;

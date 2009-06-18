@@ -88,6 +88,8 @@ int MergeFileCommand::execute(){
 			
 			inputFile.close();
 		}
+		
+		outputFile.close();
 		return 0;
 	}
 	catch(exception& e) {

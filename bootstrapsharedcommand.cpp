@@ -179,9 +179,10 @@ void BootSharedCommand::help(){
 BootSharedCommand::~BootSharedCommand(){
 	//made new in execute
 	if (abort == false) {
-		delete input;
+		delete input; globaldata->ginput = NULL;
 		delete read;
 		delete util;
+		globaldata->gorder = NULL;
 	}
 }
 

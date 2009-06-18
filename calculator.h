@@ -21,6 +21,7 @@ class Calculator {
 
 public:
 	Calculator(){};
+	virtual ~Calculator(){};
 	Calculator(string n, int c, bool m) : name(n), cols(c), multiple(m) {};
 	virtual EstOutput getValues(SAbundVector*) = 0;	
 	virtual EstOutput getValues(vector<SharedRAbundVector*>) = 0;

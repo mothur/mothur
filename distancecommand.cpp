@@ -47,6 +47,7 @@ DistanceCommand::DistanceCommand(string option){
 				ifstream inFASTA;
 				openInputFile(fastafile, inFASTA);
 				alignDB = SequenceDB(inFASTA); 
+				inFASTA.close();
 			}
 
 			//check for optional parameter and set defaults
@@ -195,7 +196,7 @@ int DistanceCommand::execute(){
 			}
 		}
 #else
-		ifstream inFASTA
+		ifstream inFASTA;
 		driver(0, numSeqs, outputFile, cutoff);
 #endif
 		

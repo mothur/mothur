@@ -156,11 +156,13 @@ void GetOTURepCommand::help(){
 //**********************************************************************************************************************
 
 GetOTURepCommand::~GetOTURepCommand(){
-	delete input;
-	delete read;
-	delete fasta;
-	if (groupfile != "") {
-		delete groupMap;
+	if (abort == false) {
+		delete input;  globaldata->ginput = NULL;
+		delete read;
+		delete fasta;
+		if (groupfile != "") {
+			delete groupMap;  globaldata->gGroupmap = NULL;
+		}
 	}
 }
 
@@ -177,8 +179,10 @@ int GetOTURepCommand::execute(){
 		//read fastafile
 		fasta->readFastaFile(in);
 		
+		in.close();
+		
 		//set format to list so input can get listvector
-//		globaldata->setFormat("list");
+		globaldata->setFormat("list");
 		
 		//if user gave a namesfile then use it
 		if (namesfile != "") {

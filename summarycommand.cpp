@@ -194,10 +194,12 @@ void SummaryCommand::help(){
 //**********************************************************************************************************************
 
 SummaryCommand::~SummaryCommand(){
-	delete sabund;
-	delete input;
-	delete read;
-	delete validCalculator;
+	if (abort == false) {
+		delete input;  globaldata->ginput = NULL;
+		delete read;
+		delete validCalculator;
+		globaldata->sabund = NULL;
+	}
 }
 
 //**********************************************************************************************************************
@@ -272,7 +274,7 @@ int SummaryCommand::execute(){
 				outputFileHandle << endl;
 			}		
 
-			if (count != 1) { delete lastSAbund; }
+			if (count != 1) { delete lastSAbund;  }
 			lastSAbund = sabund;			
 
 			sabund = input->getSAbundVector();
@@ -303,6 +305,8 @@ int SummaryCommand::execute(){
 			}
 			outputFileHandle << endl;
 		}
+		
+		outputFileHandle.close();
 		
 		delete lastSAbund;
 		return 0;

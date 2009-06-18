@@ -84,6 +84,8 @@ int GetlineCommand::execute(){
 			in >> label;
 			count++;
 		}
+		
+		in.close();
 		return 0;		
 	}
 

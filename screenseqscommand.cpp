@@ -160,6 +160,9 @@ int ScreenSeqsCommand::execute(){
 		if(groupfile != "")		{	screenGroupFile(badSeqNames);		}
 		if(alignreport != "")	{	screenAlignReport(badSeqNames);		}
 		
+		goodSeqOut.close();
+		badSeqOut.close();
+		inFASTA.close();
 		return 0;
 	}
 	catch(exception& e) {

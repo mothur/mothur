@@ -154,6 +154,7 @@ void BlastAlignment::setPairwiseSeqs(){	//	This method call assigns the blast ge
 		seqAaln += 'Z';							//	again need ot pad the sequences so that they extend to the length
 		seqBaln += 'X';							//	of the template sequence
 	}
+	blastFile.close();
 }
 
 //**************************************************************************************************/

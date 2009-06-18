@@ -23,7 +23,7 @@ class Tree;
 class ReadTree {
 	public:
 		ReadTree(); 
-		~ReadTree() {};
+		virtual ~ReadTree() {};
 		
 		virtual int read() = 0;
 		int readSpecialChar(istream&, char, string);

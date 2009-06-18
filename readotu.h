@@ -27,7 +27,7 @@ public:
 	~ReadOTUFile();
 	void read(GlobalData* globaldata);
 private:
-	ifstream fileHandle;
+	//ifstream fileHandle;
 	string philFile;
 	InputData* input;
 	InputData* inputSabund;

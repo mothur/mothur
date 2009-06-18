@@ -668,7 +668,7 @@ void Tree::parseTreeFile() {
 				if(number == ";") { globaldata->Treenames.pop_back(); }  //in case ';' from translation is on next line instead of next to last name
 			}
 		}
-		
+		filehandle.close();
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function parseTreeFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";

@@ -195,11 +195,13 @@ void CollectCommand::help(){
 //**********************************************************************************************************************
 
 CollectCommand::~CollectCommand(){
-	delete order;
-	delete input;
-	delete cCurve;
-	delete read;
-	delete validCalculator;
+	if (abort == false) {
+		//delete order;
+		delete input;  globaldata->ginput = NULL;
+		delete read;
+		delete validCalculator;
+		globaldata->gorder = NULL;
+	}
 }
 
 //**********************************************************************************************************************
@@ -252,7 +254,7 @@ int CollectCommand::execute(){
 				userLabels.erase(lastOrder->getLabel());
 			}
 			
-			if (count != 1) { delete lastOrder; }
+			if (count != 1) { delete lastOrder;  }
 			lastOrder = order;			
 			order = (input->getOrderVector());
 			count++;

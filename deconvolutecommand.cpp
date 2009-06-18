@@ -96,6 +96,7 @@ int DeconvoluteCommand::execute() {
 		fastamap->printNamesFile(out);
 		fastamap->printCondensedFasta(outFasta);
 		
+		in.close();
 		out.close();
 		outFasta.close();
 	

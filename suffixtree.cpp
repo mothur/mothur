@@ -41,16 +41,17 @@ SuffixTree::SuffixTree(){}
 
 SuffixTree::~SuffixTree(){
 	for(int i=0;i<nodeVector.size();i++){	delete nodeVector[i];	}	
+	nodeVector.clear();
 }
 
 //********************************************************************************************************************
 
-void SuffixTree::loadSequence(Sequence* seq){
+void SuffixTree::loadSequence(Sequence seq){
 	nodeCounter = 0;							//	initially there are 0 nodes in the tree
 	activeStartPosition = 0;
 	activeEndPosition = -1;						
-	seqName = seq->getName();
-	sequence = seq->convert2ints();
+	seqName = seq.getName();
+	sequence = seq.convert2ints();
 	sequence += '5';							//	this essentially concatenates a '$' to the end of the sequence to
 	int seqLength = sequence.length();			//	make it a cononical suffix tree
 	

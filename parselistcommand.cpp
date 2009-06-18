@@ -184,9 +184,11 @@ int ParseListCommand::execute(){
 //**********************************************************************************************************************
 
 ParseListCommand::~ParseListCommand(){
-	delete list;
-	delete input;
-	delete read;	
+	
+		globaldata->gSharedList = NULL;
+		delete input;  globaldata->ginput = NULL;
+		delete read;
+	
 }
 //**********************************************************************************************************************
 void ParseListCommand::process(SharedListVector* thisList) {

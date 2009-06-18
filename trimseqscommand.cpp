@@ -179,6 +179,7 @@ int TrimSeqsCommand::execute(){
 				if(qThreshold != 0)		{	success = stripQualThreshold(currSeq, qFile);	}
 				else if(qAverage != 0)	{	success = cullQualAverage(currSeq, qFile);		}
 				if(!success)			{	trashCode += 'q';								}
+				qFile.close();
 			}
 			if(barcodes.size() != 0){
 				success = stripBarcode(currSeq, group);
@@ -307,6 +308,8 @@ void TrimSeqsCommand::getOligos(vector<ofstream*>& outFASTAVec){
 			}
 		}
 	}
+	
+	inOligos.close();
 	
 	numFPrimers = forPrimer.size();
 	numRPrimers = revPrimer.size();

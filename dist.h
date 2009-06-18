@@ -18,6 +18,7 @@ class Dist {
 	
 public:
 	Dist(){dist = 0;}
+	virtual ~Dist() {}
 	virtual void calcDist(Sequence, Sequence) = 0;
 	double getDist()	{	return dist;	}
 protected:

@@ -104,9 +104,13 @@ AlignCommand::AlignCommand(string option){
 
 //**********************************************************************************************************************
 
-AlignCommand::~AlignCommand(){			
-	delete templateDB;
-	delete alignment;
+AlignCommand::~AlignCommand(){	
+
+	if (abort == false) {
+		for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
+		delete templateDB;
+		delete alignment;
+	}
 }
 
 //**********************************************************************************************************************
@@ -178,6 +182,7 @@ int AlignCommand::execute(){
 			lines.push_back(new linePair(0, numFastaSeqs));
 			
 			driver(lines[0], alignFileName, reportFileName);
+			
 		}
 		else{
 			vector<int> positions;
@@ -216,6 +221,7 @@ int AlignCommand::execute(){
 				appendReportFiles((reportFileName + toString(processIDS[i]) + ".temp"), reportFileName);
 				remove((reportFileName + toString(processIDS[i]) + ".temp").c_str());
 			}
+			
 		}
 #else
 		ifstream inFASTA;
@@ -262,7 +268,9 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName){
 			Sequence* candidateSeq = new Sequence(inFASTA);
 			report.setCandidate(candidateSeq);
 			
-			Sequence* templateSeq = templateDB->findClosestSequence(candidateSeq);
+			Sequence temp = templateDB->findClosestSequence(candidateSeq);
+			Sequence* templateSeq = &temp;
+			
 			report.setTemplate(templateSeq);
 			report.setSearchParameters(search, templateDB->getSearchScore());
 			

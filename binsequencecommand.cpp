@@ -44,11 +44,6 @@ BinSeqCommand::BinSeqCommand(string option){
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not found") { cout << "fasta is a required parameter for the bin.seqs command." << endl; abort = true; }
 			else if (fastafile == "not open") { abort = true; }	
-			else { 
-				openInputFile(fastafile, in);
-				fasta = new FastaMap();
-			}
-		
 		
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -82,10 +77,14 @@ BinSeqCommand::BinSeqCommand(string option){
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }
 			else if (groupfile == "not found") { groupfile = ""; }
-			else {
-				//read in group map info.
-				groupMap = new GroupMap(groupfile);
-				groupMap->readMap();
+			
+			if (abort == false) { 
+				openInputFile(fastafile, in);
+				fasta = new FastaMap();
+				if (groupfile != "") {
+					groupMap = new GroupMap(groupfile);
+					groupMap->readMap();
+				}
 			}
 	
 		}
@@ -130,17 +129,12 @@ void BinSeqCommand::help(){
 BinSeqCommand::~BinSeqCommand(){
 	//made new in execute
 	if (abort == false) {
-		delete input;
+		delete input;  globaldata->ginput = NULL;
 		delete read;
-		delete list;
+		globaldata->gListVector = NULL;
+		delete fasta;
+		if (groupfile != "") {  delete groupMap;  globaldata->gGroupmap = NULL; }
 	}
-	
-	//made new in constructor
-	delete fasta;
-	if (groupfile != "") {
-			delete groupMap;
-	}
-
 }
 
 //**********************************************************************************************************************
@@ -154,6 +148,8 @@ int BinSeqCommand::execute(){
 		
 		//read fastafile
 		fasta->readFastaFile(in);
+		
+		in.close();
 		
 		//set format to list so input can get listvector
 //		globaldata->setFormat("list");

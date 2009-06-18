@@ -256,7 +256,7 @@ void LibShuffCommand::printCoverageFile() {
 			}
 			outCov << endl;
 		}
-		
+		outCov.close();
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the LibShuffCommand class Function printCoverageFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -305,7 +305,7 @@ void LibShuffCommand::printSummaryFile() {
 			}
 		}
 		
-		
+		outSum.close();
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the LibShuffCommand class Function printSummaryFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";

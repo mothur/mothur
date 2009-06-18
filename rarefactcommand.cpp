@@ -171,11 +171,12 @@ void RareFactCommand::help(){
 //**********************************************************************************************************************
 
 RareFactCommand::~RareFactCommand(){
-	delete order;
-	delete input;
-	delete rCurve;
-	delete read;
-	delete validCalculator;
+	if (abort == false) {
+		globaldata->gorder = NULL;
+		delete input;  globaldata->ginput = NULL;
+		delete read;
+		delete validCalculator;
+	}
 }
 
 //**********************************************************************************************************************

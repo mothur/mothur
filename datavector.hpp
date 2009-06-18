@@ -23,7 +23,7 @@ public:
 	DataVector(string l) : label(l) {};
 	DataVector(const DataVector& dv) : label(dv.label){};//, maxRank(dv.maxRank), numBins(dv.numBins), numSeqs(dv.numSeqs) {};
 	DataVector(ifstream&);
-	~DataVector(){};
+	virtual ~DataVector(){};
 	
 //	virtual int getNumBins()	{	return numBins;		}
 //	virtual int getNumSeqs()	{	return numSeqs;		}

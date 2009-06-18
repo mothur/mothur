@@ -177,6 +177,8 @@ int ReadNewickTree::read() {
 		}
 		
 		if (error != 0) { readOk = error; } 
+		
+		filehandle.close();
 		return readOk;
 	}
 	catch(exception& e) {

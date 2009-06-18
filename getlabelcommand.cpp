@@ -84,6 +84,8 @@ int GetlabelCommand::execute(){
 			in >> label;
 			count++;
 		}	
+		
+		in.close();
 		return 0;	
 	}
 

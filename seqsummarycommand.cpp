@@ -139,6 +139,7 @@ int SeqSummaryCommand::execute(){
 		cout << "Maximum:\t" << startPosition[ptile100] << '\t' << endPosition[ptile100] << '\t' << seqLength[ptile100] << '\t' << ambigBases[ptile100] << '\t' << longHomoPolymer[ptile100] << endl;
 		cout << "# of Seqs:\t" << numSeqs << endl;
 		
+		outSummary.close();
 		return 0;
 	}
 	catch(exception& e) {

@@ -38,7 +38,7 @@ public:
 	~SuffixTree();
 //	SuffixTree(string, string);
 
-	void loadSequence(Sequence*);
+	void loadSequence(Sequence);
 	string getSeqName();
 	void print();	
 	int countSuffixes(string, int&);

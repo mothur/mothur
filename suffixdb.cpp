@@ -35,7 +35,7 @@ SuffixDB::SuffixDB(string fastaFileName) : Database(fastaFileName) {
 
 /**************************************************************************************************/
 
-Sequence* SuffixDB::findClosestSequence(Sequence* candidateSeq){
+Sequence SuffixDB::findClosestSequence(Sequence* candidateSeq){
 
 	int minValue = 2000;
 	int closestSequenceNo = 0;
@@ -51,4 +51,12 @@ Sequence* SuffixDB::findClosestSequence(Sequence* candidateSeq){
 	
 }
 
+/**************************************************************************************************/
+
+SuffixDB::~SuffixDB(){														
+	
+	for (int i = (suffixForest.size()-1); i >= 0; i--) {  suffixForest.pop_back();  }
+	// templateSequences.clear();
+
+}
 /**************************************************************************************************/

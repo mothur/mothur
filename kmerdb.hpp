@@ -25,7 +25,8 @@ class KmerDB : public Database {
 	
 public:
 	KmerDB(string, int);
-	Sequence* findClosestSequence(Sequence*);
+	~KmerDB();
+	Sequence findClosestSequence(Sequence*);
 
 private:
 	void generateKmerDB(string);
