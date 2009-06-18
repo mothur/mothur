@@ -145,9 +145,6 @@ int AlignCommand::execute(){
 	try {
 		if (abort == true) {	return 0;	}
 		
-		srand( (unsigned)time( NULL ) );  //needed to assign names to temporary files
-		
-		
 		if(search == "kmer")			{	templateDB = new KmerDB(templateFileName, kmerSize);	}
 		else if(search == "suffix")		{	templateDB = new SuffixDB(templateFileName);			}
 		else if(search == "blast")		{	templateDB = new BlastDB(templateFileName, gapOpen, gapExtend, match, misMatch);	}

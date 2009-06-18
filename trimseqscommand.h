@@ -22,7 +22,7 @@ public:
 	void help();
 	
 private:
-	void getOligos(vector<ofstream*>&, vector<ofstream*>&);
+	void getOligos(vector<ofstream*>&);
 	bool stripQualThreshold(Sequence&, ifstream&);
 	bool cullQualAverage(Sequence&, ifstream&);
 	bool stripBarcode(Sequence&, int&);
