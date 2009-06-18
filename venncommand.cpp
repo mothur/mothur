@@ -181,10 +181,13 @@ void VennCommand::help(){
 //**********************************************************************************************************************
 
 VennCommand::~VennCommand(){
-	delete input;
-	delete read;
-	delete venn;
-	for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
+	if (abort == false) {
+		delete input; globaldata->ginput = NULL;
+		delete read;
+		delete venn;
+		globaldata->sabund = NULL;
+	}
+	
 }
 
 //**********************************************************************************************************************
@@ -342,6 +345,7 @@ int VennCommand::execute(){
 			delete lastSAbund;
 		}
 		
+		for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
 		return 0;
 	}
 	catch(exception& e) {

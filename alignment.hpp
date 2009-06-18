@@ -23,6 +23,7 @@ class Alignment {
 public:
 	Alignment(int);
 	Alignment();
+	virtual ~Alignment();
 	virtual void align(string, string) = 0;
 	
 //	float getAlignmentScore();

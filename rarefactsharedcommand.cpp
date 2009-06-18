@@ -154,10 +154,11 @@ void RareFactSharedCommand::help(){
 //**********************************************************************************************************************
 
 RareFactSharedCommand::~RareFactSharedCommand(){
-	delete input;
-	delete rCurve;
-	delete read;
-	delete validCalculator;
+	if (abort == false) {
+		delete input;   globaldata->ginput = NULL;
+		delete read;
+		delete validCalculator;
+	}
 }
 
 //**********************************************************************************************************************

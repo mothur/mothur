@@ -50,10 +50,17 @@ KmerDB::KmerDB(string fastaFileName, int kSize) : Database(fastaFileName), kmerS
 	cout << "DONE." << endl << endl;	cout.flush();
 
 }
+/**************************************************************************************************/
+
+KmerDB::~KmerDB(){														
+	
+		//for (int i = 0; i < templateSequences.size(); i++) {  delete templateSequences[i]; }
+		// templateSequences.clear(); 
+}
 
 /**************************************************************************************************/
 
-Sequence* KmerDB::findClosestSequence(Sequence* candidateSeq){
+Sequence KmerDB::findClosestSequence(Sequence* candidateSeq){
 	
 	Kmer kmer(kmerSize);
 	
@@ -94,7 +101,7 @@ void KmerDB::generateKmerDB(string kmerDBName){
 	
 	for(int i=0;i<numSeqs;i++){								//	for all of the template sequences...
 
-		string seq = templateSequences[i]->getUnaligned();	//	...take the unaligned sequence...
+		string seq = templateSequences[i].getUnaligned();	//	...take the unaligned sequence...
 		int numKmers = seq.length() - kmerSize + 1;
 		
 		vector<int> seenBefore(maxKmer+1,0);

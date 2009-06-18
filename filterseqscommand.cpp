@@ -104,6 +104,8 @@ void FilterSeqsCommand::doHard() {
 	openInputFile(hard, fileHandle);
 	
 	fileHandle >> filter;
+	
+	fileHandle.close();
 
 }
 

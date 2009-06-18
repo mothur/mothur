@@ -27,7 +27,9 @@ EstOutput Shen::getValues(SAbundVector* rank){
 		double f0 = ace[0]-rank->getNumBins();
 		
 		data[0] = f0 * (1 - pow(1 - f1/n/f0, m));
-
+		
+		delete calc;
+		
 		return data;
 	}
 	catch(exception& e) {

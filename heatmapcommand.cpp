@@ -128,9 +128,10 @@ void HeatMapCommand::help(){
 //**********************************************************************************************************************
 
 HeatMapCommand::~HeatMapCommand(){
-	
-	delete read;
-	delete heatmap;
+	if (abort == false) {
+		delete read;
+		delete heatmap;
+	}
 }
 
 //**********************************************************************************************************************
@@ -272,11 +273,11 @@ int HeatMapCommand::execute(){
 				heatmap->getPic(lastRAbund);
 			}
 		
-			delete lastRAbund;
+			delete lastRAbund; globaldata->rabund = NULL;
 
 		}
 		
-		delete input;
+		delete input; globaldata->ginput = NULL;
 		return 0;
 	}
 	catch(exception& e) {

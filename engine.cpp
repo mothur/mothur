@@ -47,8 +47,8 @@ bool InteractEngine::getInput(){
 		//bool errorFree;
 		//ErrorCheck* errorCheckor = new ErrorCheck();
 		
-		cout << "mothur v.1.3.0" << endl;
-		cout << "Last updated: 5/29/2009" << endl << endl;
+		cout << "mothur v.1.4.0" << endl;
+		cout << "Last updated: 6/21/2009" << endl << endl;
 		cout << "by" << endl;
 		cout << "Patrick D. Schloss" << endl << endl;
 		cout << "Department of Microbiology" << endl;
@@ -147,7 +147,7 @@ bool BatchEngine::getInput(){
 		int quitCommandCalled = 0;
 	
 		while(quitCommandCalled == 0){
-		
+	
 			if (inputBatchFile.eof()) { input = "quit()"; }
 			else { getline(inputBatchFile, input); }
 			
@@ -175,6 +175,8 @@ bool BatchEngine::getInput(){
 			}
 			gobble(inputBatchFile);
 		}
+		
+		inputBatchFile.close();
 		return 1;
 	}
 	catch(exception& e) {
@@ -280,12 +282,14 @@ string ScriptEngine::getNextCommand(string& commandString) {
 			commandString = commandString.substr(commandString.find_first_of(';')+1, commandString.length());
 		}else { commandString = ""; } //you have reached the last command.
 		
-		//get rid of any extra spaces in between commands
-		//string space = " ";
-		
-		//while(commandString.at(0) == ' ')
-			//commandString = commandString.substr(1, commandString.length());
-			
+		//get rid of spaces in between commands if any
+		if (commandString.length() > 0) {
+			while (commandString[0] == ' ') {  
+				commandString = commandString.substr(1,commandString.length());
+				if (commandString.length() == 0) {  break;  }
+			}
+		}
+					
 		return nextcommand;
 	}
 	catch(exception& e) {

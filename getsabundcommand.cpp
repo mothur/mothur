@@ -186,7 +186,7 @@ int GetSAbundCommand::execute(){
 			sabund->print(out);
 			delete sabund;
 		}
-		delete lastOrder;
+		delete lastOrder;  globaldata->gorder = NULL;
 
 		out.close();
 		return 0;		

@@ -27,7 +27,8 @@ class SuffixDB : public Database {
 	
 public:
 	SuffixDB(string);
-	Sequence* findClosestSequence(Sequence*);
+	~SuffixDB();
+	Sequence findClosestSequence(Sequence*);
 
 private:
 	vector<SuffixTree> suffixForest;

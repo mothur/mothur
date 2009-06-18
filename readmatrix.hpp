@@ -22,6 +22,7 @@ class ReadMatrix {
 
 public:
 	ReadMatrix(){	D = new SparseMatrix();	}
+	virtual ~ReadMatrix() {}
 	virtual void read(NameAssignment*){};
 	virtual void read(GlobalData* globaldata){};
 	void setCutoff(float c)			{	cutoff = c;		}

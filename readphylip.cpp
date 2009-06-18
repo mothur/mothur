@@ -180,6 +180,6 @@ void ReadPhylipMatrix::read(NameAssignment* nameMap){
 /***********************************************************************/
 
 ReadPhylipMatrix::~ReadPhylipMatrix(){
-        delete D;
-        delete list;
+       // delete D;
+       // delete list;
 }

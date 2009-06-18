@@ -1,6 +1,9 @@
 
 
 #include "globaldata.hpp"
+#include "sharedlistvector.h"
+#include "inputdata.h"
+#include "fullmatrix.h"
 
 /*******************************************************/
 
@@ -50,6 +53,16 @@ GlobalData::GlobalData() {
 	clear();
 	gListVector = NULL;		
 	gSparseMatrix = NULL;	
+	ginput = NULL;
+	gorder = NULL;
+	glist = NULL;
+	gSharedList = NULL;
+	sabund = NULL;
+	rabund = NULL;
+	gGroupmap = NULL;
+	gMatrix = NULL;
+	gTreemap = NULL;
+	gSequenceDB = NULL;
 }
 /*******************************************************/
 
@@ -74,11 +87,24 @@ void GlobalData::clear() {
 
 /******************************************************/
 void GlobalData::newRead() {
-	try{
+	try{	
+			//remove old file names
 			clear();
-			gGroupmap = NULL;
-			gListVector = NULL;
-			gSparseMatrix = NULL;
+			
+			//free memory
+			if (gGroupmap != NULL) { delete gGroupmap; gGroupmap = NULL; }
+			if (gListVector != NULL) { delete gListVector; gListVector = NULL;}
+			if (gSparseMatrix != NULL) { delete gSparseMatrix; gSparseMatrix = NULL; }
+			if (ginput != NULL) { delete ginput; ginput = NULL;}
+			if (gorder != NULL) { delete gorder; gorder = NULL; }
+			if (glist != NULL) { delete glist; glist = NULL;}
+			if (gSharedList != NULL) { delete gSharedList; gSharedList = NULL; }
+			if (sabund != NULL) { delete sabund; sabund = NULL;}
+			if (rabund != NULL) { delete rabund; rabund = NULL; }
+			if (gMatrix != NULL) { delete gMatrix; gMatrix = NULL;}
+			if (gTreemap != NULL) { delete gTreemap; gTreemap = NULL; }
+			if (gSequenceDB != NULL) { delete gSequenceDB; gSequenceDB = NULL;}
+
 			gTree.clear();
 			Treenames.clear();
 			labels.clear(); lines.clear(); Groups.clear();
@@ -100,9 +126,28 @@ void GlobalData::newRead() {
 /******************************************************/
 GlobalData::~GlobalData() {
 	_uniqueInstance = 0;
-	if(gListVector != NULL)		{	delete gListVector;		}
-	if(gSparseMatrix != NULL)	{	delete gSparseMatrix;	}
-	if(gorder != NULL)			{	delete gorder;		}
+	try {
+		if (gGroupmap != NULL) { delete gGroupmap; gGroupmap = NULL; }
+		if (gListVector != NULL) { delete gListVector; gListVector = NULL;}
+		if (gSparseMatrix != NULL) { delete gSparseMatrix; gSparseMatrix = NULL; }
+		if (ginput != NULL) { delete ginput; ginput = NULL;}
+		if (gorder != NULL) { delete gorder; gorder = NULL; }
+		if (glist != NULL) { delete glist; glist = NULL;}
+		if (gSharedList != NULL) { delete gSharedList; gSharedList = NULL; }
+		if (sabund != NULL) { delete sabund; sabund = NULL;}
+		if (rabund != NULL) { delete rabund; rabund = NULL; }
+		if (gMatrix != NULL) { delete gMatrix; gMatrix = NULL;}
+		if (gTreemap != NULL) { delete gTreemap; gTreemap = NULL; }
+		if (gSequenceDB != NULL) { delete gSequenceDB; gSequenceDB = NULL;}
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the GlobalData class Function ~GlobalData. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the GlobalData class function ~GlobalData. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
 }
 /*******************************************************/
 

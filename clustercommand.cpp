@@ -120,8 +120,10 @@ void ClusterCommand::help(){
 //**********************************************************************************************************************
 
 ClusterCommand::~ClusterCommand(){
-	delete cluster;
-	delete rabund;
+	if (abort == false) {
+		delete cluster;
+		delete rabund;
+	}
 }
 
 //**********************************************************************************************************************
@@ -176,6 +178,10 @@ int ClusterCommand::execute(){
 		globaldata->setListFile(fileroot+ tag + ".list");
 		globaldata->setNameFile("");
 		globaldata->setFormat("list");
+		
+		sabundFile.close();
+		rabundFile.close();
+		listFile.close();
 		
 		return 0;
 	}

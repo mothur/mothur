@@ -171,10 +171,12 @@ void HeatMapSimCommand::help(){
 //**********************************************************************************************************************
 
 HeatMapSimCommand::~HeatMapSimCommand(){
-	delete input;
-	delete read;
-	delete heatmap;
-	delete validCalculator;
+	if (abort == false) {
+		delete input;  globaldata->ginput = NULL;
+		delete read;
+		delete heatmap;
+		delete validCalculator;
+	}
 }
 
 //**********************************************************************************************************************

@@ -32,7 +32,7 @@ gapOpen(gO), gapExtend(gE), match(m), misMatch(mM) {
 	
 	for(int i=0;i<numSeqs;i++){									//	generating a fasta file with unaligned template
 		unalignedFastaFile << '>' << i << endl;					//	sequences, which will be input to formatdb
-		unalignedFastaFile << templateSequences[i]->getUnaligned() << endl;
+		unalignedFastaFile << templateSequences[i].getUnaligned() << endl;
 	}
 	unalignedFastaFile.close();
 	
@@ -43,10 +43,10 @@ gapOpen(gO), gapExtend(gE), match(m), misMatch(mM) {
 	system(formatdbCommand.c_str());								//	to get the right sequence names, i think. -p F
 																	//	option tells formatdb that seqs are DNA, not prot
 	cout << "DONE." << endl << endl;	cout.flush();
-	emptySequence = new Sequence();
-	emptySequence->setName("no_match");
-	emptySequence->setUnaligned("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-	emptySequence->setAligned("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+	emptySequence = Sequence();
+	emptySequence.setName("no_match");
+	emptySequence.setUnaligned("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+	emptySequence.setAligned("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 
 
 }
@@ -54,6 +54,10 @@ gapOpen(gO), gapExtend(gE), match(m), misMatch(mM) {
 /**************************************************************************************************/
 
 BlastDB::~BlastDB(){
+	//for (int i = 0; i < templateSequences.size(); i++) {  delete templateSequences[i];   }
+	//templateSequences.clear();
+	//delete emptySequence;
+	
 	remove(queryFileName.c_str());				//	let's clean stuff up and remove the temp files
 	remove(dbFileName.c_str());					//	let's clean stuff up and remove the temp files
 	remove(blastFileName.c_str());				//	let's clean stuff up and remove the temp files
@@ -61,7 +65,7 @@ BlastDB::~BlastDB(){
 
 /**************************************************************************************************/
 
-Sequence* BlastDB::findClosestSequence(Sequence* candidate){
+Sequence BlastDB::findClosestSequence(Sequence* candidate){
 
 	ofstream queryFile;
 	openOutputFile(queryFileName, queryFile);
@@ -93,6 +97,7 @@ Sequence* BlastDB::findClosestSequence(Sequence* candidate){
 		searchScore = 0.00;
 		return emptySequence;
 	}
+	m8FileHandle.close();
 }
 
 /**************************************************************************************************/

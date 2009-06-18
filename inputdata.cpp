@@ -72,7 +72,7 @@ ListVector* InputData::getListVector(){
 			return list;
 		}
 		else{
-			return 0;
+			return NULL;
 		}
 	}
 	catch(exception& e) {
@@ -98,7 +98,7 @@ SharedListVector* InputData::getSharedListVector(){
 			return SharedList;
 		}
 		else{
-			return 0;
+			return NULL;
 		}
 	}
 	catch(exception& e) {
@@ -124,7 +124,7 @@ SharedOrderVector* InputData::getSharedOrderVector(){
 			return SharedOrder;
 			
 		}else{
-			return 0;
+			return NULL;
 		}
 	}
 	catch(exception& e) {
@@ -170,7 +170,7 @@ OrderVector* InputData::getOrderVector(){
 			return output;
 		}
 		else{
-			return 0;
+			return NULL;
 		}
 	}
 	catch(exception& e) {
@@ -246,7 +246,7 @@ SAbundVector* InputData::getSAbundVector(){
 			return sabund;
 		}
 		else{
-			return 0;
+			return NULL;
 		}
 	}
 	catch(exception& e) {

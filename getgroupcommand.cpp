@@ -115,6 +115,7 @@ int GetgroupCommand::execute(){
 			if (in.eof() != true) { in >> nextLabel; }
 		}
 		
+		in.close();
 		out.close();
 		return 0;	
 	}

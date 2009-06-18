@@ -20,12 +20,13 @@ class Sequence;
 class Database {
 public:
 	Database(string);
-	virtual Sequence* findClosestSequence(Sequence*) = 0;
+	virtual ~Database();
+	virtual Sequence findClosestSequence(Sequence*) = 0;
 	virtual float getSearchScore();
 protected:
 	int numSeqs;
 	float searchScore;
-	vector<Sequence*> templateSequences;
+	vector<Sequence> templateSequences;
 };
 
 #endif

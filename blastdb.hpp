@@ -18,7 +18,7 @@ class BlastDB : public Database {
 public:
 	BlastDB(string, float, float, float, float);
 	~BlastDB();
-	Sequence* findClosestSequence(Sequence*);
+	Sequence findClosestSequence(Sequence*);
 
 private:
 	string dbFileName;
@@ -30,7 +30,7 @@ private:
 	float gapExtend;
 	float match;
 	float misMatch;
-	Sequence* emptySequence;
+	Sequence emptySequence;
 	GlobalData* globaldata;
 };
 

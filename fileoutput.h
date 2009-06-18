@@ -9,7 +9,7 @@ class FileOutput {
 	
 public:
 	FileOutput(){};
-	~FileOutput(){};
+	virtual ~FileOutput(){};
 	
 	virtual void initFile(string) = 0;
 	virtual void initFile(string, vector<string>) = 0;

@@ -33,14 +33,13 @@ ReadTreeCommand::ReadTreeCommand(string option){
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
-			globaldata->runParse = true;
 			globaldata->newRead();
 			
 			//check for required parameters
 			treefile = validParameter.validFile(parameters, "tree", true);
 			if (treefile == "not open") { abort = true; }
 			else if (treefile == "not found") { treefile = ""; cout << "tree is a required parameter for the read.tree command." << endl; abort = true;  }	
-//			else {  globaldata->setTreeFile(treefile);  globaldata->setFormat("tree"); 	}
+			else {  globaldata->setTreeFile(treefile);  globaldata->setFormat("tree"); 	}
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }	

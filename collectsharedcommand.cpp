@@ -117,7 +117,7 @@ CollectSharedCommand::CollectSharedCommand(string option){
 			if (abort == false) {
 			
 				string fileNameRoot = getRootName(globaldata->inputFileName);
-//				format = globaldata->getFormat();
+				format = globaldata->getFormat();
 				int i;
 				
 				validCalculator = new ValidCalculators();
@@ -214,12 +214,13 @@ void CollectSharedCommand::help(){
 //**********************************************************************************************************************
 
 CollectSharedCommand::~CollectSharedCommand(){
-	delete order;
-	delete input;
-	delete cCurve;
-	delete read;
-	delete util;
-	delete validCalculator;
+	if (abort == false) {
+		delete input; globaldata->ginput = NULL;
+		delete read;
+		delete util;
+		delete validCalculator;
+		globaldata->gorder = NULL;
+	}
 }
 
 //**********************************************************************************************************************

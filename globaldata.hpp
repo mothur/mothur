@@ -9,6 +9,8 @@
 #include "listvector.hpp"
 #include "tree.h"
 #include "sparsematrix.hpp"
+#include "sequencedb.h"
+
 
 class ListVector;
 class SharedListVector;

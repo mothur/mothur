@@ -87,6 +87,23 @@ void Alignment::traceBack(){			//	This traceback routine is used by the dynamic 
 	seqBend = seqB.length() - seqBend - 1;
 
 }
+/**************************************************************************************************/
+
+Alignment::~Alignment(){
+	try {
+		for (int i = 0; i < alignment.size(); i++) {
+			for (int j = (alignment[i].size()-1); j >= 0; j--) {  alignment[i].pop_back();  }
+		}
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the Alignment class Function ~Alignment. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the Alignment class function ~Alignment. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+}
 
 /**************************************************************************************************/
 

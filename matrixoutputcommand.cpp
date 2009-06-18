@@ -170,9 +170,11 @@ void MatrixOutputCommand::help(){
 //**********************************************************************************************************************
 
 MatrixOutputCommand::~MatrixOutputCommand(){
-	delete input;
-	delete read;
-	delete validCalculator;
+	if (abort == false) {
+		delete input; globaldata->ginput = NULL;
+		delete read;
+		delete validCalculator;
+	}
 }
 
 //**********************************************************************************************************************
