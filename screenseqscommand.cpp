@@ -21,7 +21,8 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string AlignArray[] =  {"fasta", "start", "end", "maxambig", "maxhomop", "minlength", "maxlength", "name", "group"};
+			string AlignArray[] =  {"fasta", "start", "end", "maxambig", "maxhomop", "minlength", "maxlength",
+									"name", "group", "alignreport"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -47,7 +48,10 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option){
 			if (namefile == "not open") { abort = true; }
 			else if (namefile == "not found") { namefile = ""; }	
 
-		
+			alignreport = validParameter.validFile(parameters, "alignreport", true);
+			if (alignreport == "not open") { abort = true; }
+			else if (alignreport == "not found") { namefile = ""; }	
+			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			string temp;
@@ -152,12 +156,9 @@ int ScreenSeqsCommand::execute(){
 			}
 			gobble(inFASTA);
 		}	
-		if(namefile != ""){
-			screenNameGroupFile(badSeqNames);
-		}
-		else if(groupfile != ""){
-			screenGroupFile(badSeqNames);
-		}
+		if(namefile != "")		{	screenNameGroupFile(badSeqNames);	}
+		if(groupfile != "")		{	screenGroupFile(badSeqNames);		}
+		if(alignreport != "")	{	screenAlignReport(badSeqNames);		}
 		
 		return 0;
 	}
@@ -277,6 +278,53 @@ void ScreenSeqsCommand::screenGroupFile(set<string> badSeqNames){
 	inputGroups.close();
 	goodGroupOut.close();
 	badGroupOut.close();
+	
+}
+
+//***************************************************************************************************************
+
+void ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){
+	
+	ifstream inputAlignReport;
+	openInputFile(alignreport, inputAlignReport);
+	string seqName, group;
+	set<string>::iterator it;
+	
+	string goodAlignReportFile = getRootName(alignreport) + "good" + getExtension(alignreport);
+	string badAlignReportFile = getRootName(alignreport) + "bad" + getExtension(alignreport);
+	
+	ofstream goodAlignReportOut;	openOutputFile(goodAlignReportFile, goodAlignReportOut);
+	ofstream badAlignReportOut;		openOutputFile(badAlignReportFile, badAlignReportOut);		
+
+	while (!inputAlignReport.eof())	{		//	need to copy header
+		char c = inputAlignReport.get();
+		goodAlignReportOut << c;
+		badAlignReportOut << c;
+		if (c == 10 || c == 13){	break;	}	
+	}
+
+	while(!inputAlignReport.eof()){
+		inputAlignReport >> seqName;
+		it = badSeqNames.find(seqName);
+		string line;		
+		while (!inputAlignReport.eof())	{		//	need to copy header
+			char c = inputAlignReport.get();
+			line += c;
+			if (c == 10 || c == 13){	break;	}	
+		}
+		
+		if(it != badSeqNames.end()){
+			badSeqNames.erase(it);
+			badAlignReportOut << seqName << '\t' << line;;
+		}
+		else{
+			goodAlignReportOut << seqName << '\t' << line;
+		}
+		gobble(inputAlignReport);
+	}
+	inputAlignReport.close();
+	goodAlignReportOut.close();
+	badAlignReportOut.close();
 	
 }
 

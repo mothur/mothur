@@ -78,16 +78,19 @@ TrimSeqsCommand::TrimSeqsCommand(string option){
 			
 			temp = validParameter.validFile(parameters, "allfiles", false);		if (temp == "not found") { temp = "F"; }
 			allFiles = isTrue(temp);
-
+			
 			if(allFiles && oligoFile == ""){
 				cout << "You selected allfiles, but didn't enter an oligos file.  Ignoring the allfiles request." << endl;
 			}
-			
+			if((qAverage != 0 && qThreshold != 0) && qFileName == ""){
+				cout << "You didn't provide a quality file name, quality criteria will be ignored." << endl;
+				qAverage=0;
+				qThreshold=0;
+			}
 			if(!flip && oligoFile=="" && !maxLength && !minLength && (maxAmbig==-1) && !maxHomoP && qFileName == ""){		
 				cout << "You didn't set any options... quiting command." << endl;
 				abort = true;
 			}
-			
 		}
 
 	}
@@ -141,21 +144,21 @@ int TrimSeqsCommand::execute(){
 	try{
 	
 		if (abort == true) { return 0; }
-	
-		vector<ofstream*> groupFileNames;
-		vector<ofstream*> fastaFileNames;
-		if(oligoFile != "")	{	getOligos(fastaFileNames, groupFileNames);	}
 
 		ifstream inFASTA;
 		openInputFile(fastaFile, inFASTA);
-
+		
 		ofstream outFASTA;
 		string trimSeqFile = getRootName(fastaFile) + "trim.fasta";
 		openOutputFile(trimSeqFile, outFASTA);
 		
 		ofstream outGroups;
-		string groupFile = getRootName(fastaFile) + "groups"; 
-		openOutputFile(groupFile, outGroups);
+		vector<ofstream*> fastaFileNames;
+		if(oligoFile != ""){
+			string groupFile = getRootName(fastaFile) + "groups"; 
+			openOutputFile(groupFile, outGroups);
+			getOligos(fastaFileNames);
+		}
 		
 		ofstream scrapFASTA;
 		string scrapSeqFile = getRootName(fastaFile) + "scrap.fasta";
@@ -210,7 +213,6 @@ int TrimSeqsCommand::execute(){
 					outGroups << currSeq.getName() << '\t' << groupVector[group] << endl;
 					
 					if(allFiles){
-						*groupFileNames[group] << currSeq.getName() << '\t' << groupVector[group] << endl;					
 						currSeq.printSequence(*fastaFileNames[group]);					
 					}
 				}
@@ -227,13 +229,28 @@ int TrimSeqsCommand::execute(){
 		scrapFASTA.close();
 		outGroups.close();
 		
-		for(int i=0;i<groupFileNames.size();i++){
-			groupFileNames[i]->close();
-			delete groupFileNames[i];
-
+		for(int i=0;i<fastaFileNames.size();i++){
 			fastaFileNames[i]->close();
 			delete fastaFileNames[i];
+		}		
+		
+		for(int i=0;i<fastaFileNames.size();i++){
+			string seqName;
+			openInputFile(getRootName(fastaFile) + groupVector[i] + ".fasta", inFASTA);
+			ofstream outGroups;
+			openOutputFile(getRootName(fastaFile) + groupVector[i] + ".groups", outGroups);
+			
+			while(!inFASTA.eof()){
+				if(inFASTA.get() == '>'){
+					inFASTA >> seqName;
+					outGroups << seqName << '\t' << groupVector[i] << endl;
+				}
+				while (!inFASTA.eof())	{	char c = inFASTA.get(); if (c == 10 || c == 13){	break;	}	}
+			}
+			outGroups.close();
+			inFASTA.close();
 		}
+		
 		
 		return 0;		
 	}
@@ -249,7 +266,7 @@ int TrimSeqsCommand::execute(){
 
 //***************************************************************************************************************
 
-void TrimSeqsCommand::getOligos(vector<ofstream*>& outFASTAVec, vector<ofstream*>& outGroupsVec){
+void TrimSeqsCommand::getOligos(vector<ofstream*>& outFASTAVec){
 	
 	ifstream inOligos;
 	openInputFile(oligoFile, inOligos);
@@ -258,10 +275,10 @@ void TrimSeqsCommand::getOligos(vector<ofstream*>& outFASTAVec, vector<ofstream*
 	
 	string type, oligo, group;
 	int index=0;
-	
+
 	while(!inOligos.eof()){
 		inOligos >> type;
-		
+
 		if(type[0] == '#'){
 			while (!inOligos.eof())	{	char c = inOligos.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
 		}
@@ -286,7 +303,6 @@ void TrimSeqsCommand::getOligos(vector<ofstream*>& outFASTAVec, vector<ofstream*
 					
 				if(allFiles){
 					outFASTAVec.push_back(new ofstream((getRootName(fastaFile) + group + ".fasta").c_str(), ios::ate));
-					outGroupsVec.push_back(new ofstream((getRootName(fastaFile) + group + ".groups").c_str(), ios::ate));
 				}
 			}
 		}

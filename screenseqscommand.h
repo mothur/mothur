@@ -23,9 +23,10 @@ public:
 private:
 	void screenNameGroupFile(set<string>);
 	void screenGroupFile(set<string>);
-
+	void screenAlignReport(set<string>);
+	
 	bool abort;
-	string fastafile, namefile, groupfile;
+	string fastafile, namefile, groupfile, alignreport;
 	int startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength;
 };
 

@@ -22,7 +22,6 @@
 
 LibShuffCommand::LibShuffCommand(string option){
 	try {
-		srand( (unsigned)time( NULL ) );
 		
 		globaldata = GlobalData::getInstance();
 		abort = false;
