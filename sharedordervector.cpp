@@ -57,9 +57,6 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a
 			}
 		}
 		
-		//save position in file in case next line is a new label.
-		pos = f.tellg();
-		
 		if (f.eof() != true) { f >> nextLabel; }
 		
 		//read the rest of the groups info in
@@ -82,15 +79,13 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a
 				}
 			}
 			
-			//save position in file in case next line is a new label.
-			pos = f.tellg();
-	
+				
 			if (f.eof() != true) { f >> nextLabel; }
 
 		}
 		
 		//put file pointer back since you are now at a new distance label
-		f.seekg(pos, ios::beg);
+		for (int i = 0; i < nextLabel.length(); i++) { f.unget();  }
 	
 		if (globaldata->gGroupmap == NULL) { globaldata->gGroupmap = groupmap; }
 		
