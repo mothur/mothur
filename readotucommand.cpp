@@ -107,7 +107,6 @@ ReadOtuCommand::ReadOtuCommand(string option){
 			if (abort == false) {
 				//gets whichever one of the above is set
 				filename = globaldata->inputFileName;
-				//read = new ReadOTUFile(filename);
 			}
 
 		}
@@ -156,9 +155,7 @@ void ReadOtuCommand::help(){
 //**********************************************************************************************************************
 
 ReadOtuCommand::~ReadOtuCommand(){
-	if (abort == false) {  //delete read; 
-	 }
-}
+	}
 
 //**********************************************************************************************************************
 
@@ -167,9 +164,7 @@ int ReadOtuCommand::execute(){
 	
 		if (abort == true) {	return 0;	}
 		
-		//read->read(&*globaldata); 
 		if (globaldata->getFormat() == "shared") {
-			//groupMap->readMap();
 			
 			parselist = new ParseListCommand();
 			parselist->execute();

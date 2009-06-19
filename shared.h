@@ -26,7 +26,7 @@ class Shared {
 		GlobalData* globaldata;
 		map<string, SharedRAbundVector*>::iterator it;
 		void parse(int, SharedListVector*);
-		vector< map<string, SharedRAbundVector*> > sharedRAbund;  //contains all the info needed to create the .shared file not sure if we will need 
+		//vector< map<string, SharedRAbundVector*> > sharedRAbund;  //contains all the info needed to create the .shared file not sure if we will need 
 };
 
 #endif
