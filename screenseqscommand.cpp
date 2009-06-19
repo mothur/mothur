@@ -39,7 +39,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option){
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not found") { cout << "fasta is a required parameter for the screen.seqs command." << endl; abort = true; }
 			else if (fastafile == "not open") { abort = true; }	
-		
+	
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }	
 			else if (groupfile == "not found") { groupfile = ""; }
@@ -50,7 +50,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option){
 
 			alignreport = validParameter.validFile(parameters, "alignreport", true);
 			if (alignreport == "not open") { abort = true; }
-			else if (alignreport == "not found") { namefile = ""; }	
+			else if (alignreport == "not found") { alignreport = ""; }	
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...

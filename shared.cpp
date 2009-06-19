@@ -40,7 +40,7 @@ void Shared::getSharedVectors(SharedListVector* list) {
 		}
 		
 		//updates sharedVector
-		sharedRAbund.push_back(sharedGroups);
+		//sharedRAbund.push_back(sharedGroups);
 }
 
 

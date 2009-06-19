@@ -81,6 +81,7 @@ int SharedCommand::execute(){
 			if (count != 1) { delete lastList; }
 			lastList = SharedList;			
 			SharedList = input->getSharedListVector(); //get new list vector to process
+			count++;
 			
 			//if (count != 1) { for (int i = 0; i < lastLookup.size(); i++) {  delete lastLookup[i];  } }
 			//lastLookup = lookup; 
@@ -106,7 +107,7 @@ int SharedCommand::execute(){
 			printSharedData(); //prints info to the .shared file
 		}
 		
-		delete lastList;
+		delete lastList; globaldata->gSharedList = NULL;
 		delete shared;
 		out.close();
 		

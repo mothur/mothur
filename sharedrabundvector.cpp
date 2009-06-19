@@ -63,7 +63,7 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 		
 		if (globaldata->gGroupmap == NULL) {  groupmap = new GroupMap(); }
 		
-		int num, inputData, pos, count;
+		int num, inputData, count;
 		count = 0;  
 		string holdLabel, nextLabel, groupN;
 		individual newguy;
@@ -99,9 +99,6 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 			
 		}
 		
-		//save position in file in case next line is a new label.
-		pos = f.tellg();
-		
 		if (f.eof() != true) { f >> nextLabel; }
 		
 		//read the rest of the groups info in
@@ -127,14 +124,12 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 				lookup[count]->push_back(inputData, i, groupN); //abundance, bin, group
 			}
 			
-			//save position in file in case next line is a new label.
-			pos = f.tellg();
-	
+				
 			if (f.eof() != true) { f >> nextLabel; }
 		}
 		
 		//put file pointer back since you are now at a new distance label
-		f.seekg(pos, ios::beg);
+		for (int i = 0; i < nextLabel.length(); i++) { f.unget();  }
 	
 		if (globaldata->gGroupmap == NULL) { globaldata->gGroupmap = groupmap;  }
 		
@@ -392,7 +387,9 @@ vector<SharedRAbundVector*> SharedRAbundVector::getSharedRAbundVectors(){
 				i--; 
 			}
 		}
-
+		
+		delete util;
+	
 		return lookup;
 	}
 	catch(exception& e) {
