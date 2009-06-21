@@ -22,122 +22,109 @@ ReadColumnMatrix::ReadColumnMatrix(string df) : distFile(df){
 
 void ReadColumnMatrix::read(NameAssignment* nameMap){
 	try {		
-	
-			string firstName, secondName;
-			float distance;
-			int nseqs = nameMap->size();
 
-			list = new ListVector(nameMap->getListVector());
+		string firstName, secondName;
+		float distance;
+		int nseqs = nameMap->size();
+
+		list = new ListVector(nameMap->getListVector());
+	
+		Progress* reading = new Progress("Reading matrix:     ", nseqs * nseqs);
+
+		int lt = 1;
+		int refRow = 0;	//we'll keep track of one cell - Cell(refRow,refCol) - and see if it's transpose
+		int refCol = 0; //shows up later - Cell(refCol,refRow).  If it does, then its a square matrix
+
+		//need to see if this is a square or a triangular matrix...
+	
+		while(fileHandle && lt == 1){  //let's assume it's a triangular matrix...
 		
-			Progress* reading = new Progress("Reading matrix:     ", nseqs * nseqs);
+			fileHandle >> firstName >> secondName >> distance;	// get the row and column names and distance
 	
-			int lt = 1;
-			int refRow = 0;	//we'll keep track of one cell - Cell(refRow,refCol) - and see if it's transpose
-			int refCol = 0; //shows up later - Cell(refCol,refRow).  If it does, then its a square matrix
-	
-			//need to see if this is a square or a triangular matrix...
-			while(fileHandle && lt == 1){  //let's assume it's a triangular matrix...
+			map<string,int>::iterator itA = nameMap->find(firstName);
+			map<string,int>::iterator itB = nameMap->find(secondName);
 			
-				fileHandle >> firstName >> secondName >> distance;	// get the row and column names and distance
-		
-				if(nameMap->count(firstName)==0){
-					cerr << "AError: Sequence '" << firstName << "' was not found in the names file, please correct\n";
+			if(itA == nameMap->end()){
+				cerr << "AAError: Sequence '" << firstName << "' was not found in the names file, please correct\n";
+			}
+			if(itB == nameMap->end()){
+				cerr << "ABError: Sequence '" << secondName << "' was not found in the names file, please correct\n";
+			}
+
+			if (distance == -1) { distance = 1000000; }
+			
+			if(distance < cutoff && itA != itB){
+				if(itA->second > itB->second){
+					PCell value(itA->second, itB->second, distance);
+			
+					if(refRow == refCol){		// in other words, if we haven't loaded refRow and refCol...
+						refRow = itA->second;
+						refCol = itB->second;
+						D->addCell(value);
+					}
+					else if(refRow == itA->second && refCol == itB->second){
+						lt = 0;
+					}
+					else{
+						D->addCell(value);
+					}
 				}
-				if(nameMap->count(secondName)==0){
-					cerr << "AError: Sequence '" << secondName << "' was not found in the names file, please correct\n";
+				else if(itA->second < itB->second){
+					PCell value(itB->second, itA->second, distance);
+			
+					if(refRow == refCol){		// in other words, if we haven't loaded refRow and refCol...
+						refRow = itA->second;
+						refCol = itB->second;
+						D->addCell(value);
+					}
+					else if(refRow == itB->second && refCol == itA->second){
+						lt = 0;
+					}
+					else{
+						D->addCell(value);
+					}
+				}
+				reading->update(itA->second * nseqs);
+			}
+			gobble(fileHandle);
+		}
+
+		if(lt == 0){  // oops, it was square
+			fileHandle.close();  //let's start over
+			D->clear();  //let's start over
+		   
+			openInputFile(distFile, fileHandle);  //let's start over
+
+			while(fileHandle){
+				fileHandle >> firstName >> secondName >> distance;
+		
+				map<string,int>::iterator itA = nameMap->find(firstName);
+				map<string,int>::iterator itB = nameMap->find(secondName);
+				
+				if(itA == nameMap->end()){
+					cerr << "BError: Sequence '" << firstName << "' was not found in the names file, please correct\n";
+				}
+				if(itB == nameMap->end()){
+					cerr << "BError: Sequence '" << secondName << "' was not found in the names file, please correct\n";
 				}
 				
 				if (distance == -1) { distance = 1000000; }
 				
-				if(distance < cutoff && nameMap->get(firstName) != nameMap->get(secondName)){
-					if(nameMap->get(firstName) > nameMap->get(secondName)){
-						PCell value(nameMap->get(firstName), nameMap->get(secondName), distance);
-				
-						if(refRow == refCol){		// in other words, if we haven't loaded refRow and refCol...
-							refRow = nameMap->get(firstName);
-							refCol = nameMap->get(secondName);
-							D->addCell(value);
-						}
-						else if(refRow == nameMap->get(firstName) && refCol == nameMap->get(secondName)){
-							lt = 0;
-						}
-						else{
-							D->addCell(value);
-						}
-					}
-					else if(nameMap->get(firstName) < nameMap->get(secondName)){
-						PCell value(nameMap->get(secondName), nameMap->get(firstName), distance);
-				
-						if(refRow == refCol){		// in other words, if we haven't loaded refRow and refCol...
-							refRow = nameMap->get(firstName);
-							refCol = nameMap->get(secondName);
-							D->addCell(value);
-						}
-						else if(refRow == nameMap->get(secondName) && refCol == nameMap->get(firstName)){
-							lt = 0;
-						}
-						else{
-							D->addCell(value);
-						}
-					}
-					reading->update(nameMap->get(firstName) * nseqs);
+				if(distance < cutoff && itA->second > itB->second){
+					PCell value(itA->second, itB->second, distance);
+					D->addCell(value);
+					reading->update(itA->second * nseqs);
 				}
+		
 				gobble(fileHandle);
 			}
+		}
 
-			if(lt == 0){  // oops, it was square
-				fileHandle.close();  //let's start over
-				D->clear();  //let's start over
-			   
-				openInputFile(distFile, fileHandle);  //let's start over
+		reading->finish();
+		fileHandle.close();
 
-				while(fileHandle){
-					fileHandle >> firstName >> secondName >> distance;
-			
-					if(nameMap->count(firstName)==0){
-						cerr << "BError: Sequence '" << firstName << "' was not found in the names file, please correct\n";
-					}
-					if(nameMap->count(secondName)==0){
-						cerr << "BError: Sequence '" << secondName << "' was not found in the names file, please correct\n";
-					}
-					
-					if (distance == -1) { distance = 1000000; }
-					
-					if(distance < cutoff && nameMap->get(firstName) > nameMap->get(secondName)){
-						PCell value(nameMap->get(firstName), nameMap->get(secondName), distance);
-						D->addCell(value);
-						reading->update(nameMap->get(firstName) * nseqs);
-					}
-			
-					gobble(fileHandle);
-				}
-			}
-		//	else if(lt == 0){
-		//		while(fileHandle){
-		//			fileHandle >> firstName >> secondName >> distance;
-		//			
-		//			if(nameMap->count(firstName)==0){
-		//				cerr << "CError: Sequence '" << firstName << "' was not found in the names file, please correct\n";
-		//			}
-		//			if(nameMap->count(secondName)==0){
-		//				cerr << "CError: Sequence '" << secondName << "' was not found in the names file, please correct\n";
-		//			}
-		//			if (distance == -1) { distance = 1000000; }
-		
-		//			if(distance < cutoff && (*nameMap)[firstName].second < (*nameMap)[secondName].second){
-		////				cout << (*nameMap)[secondName] << ' ' << (*nameMap)[firstName] << ' ' << distance << endl;
-		//				D->addCell(Cell((*nameMap)[secondName].second, (*nameMap)[firstName].second, distance));
-		//				reading->update((*nameMap)[secondName].second * nseqs);
-		//			}
-		//
-		//			gobble(fileHandle);
-		//		}
-		//	}	
-			reading->finish();
-			fileHandle.close();
-	
-			list->setLabel("0");
-	
+		list->setLabel("0");
+
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ReadColumnMatrix class Function read. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";

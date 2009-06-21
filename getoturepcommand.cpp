@@ -112,7 +112,7 @@ GetOTURepCommand::GetOTURepCommand(string option){
 					}
 				}else { cout << "error, no listvector." << endl; }
 				
-				openInputFile(fastafile, in);
+//				openInputFile(fastafile, in);
 				fasta = new FastaMap();
 			}
 		
@@ -177,7 +177,7 @@ int GetOTURepCommand::execute(){
 		int error;
 		
 		//read fastafile
-		fasta->readFastaFile(in);
+		fasta->readFastaFile(fastafile);
 		
 		in.close();
 		

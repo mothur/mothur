@@ -309,18 +309,12 @@ void DistanceCommand::appendFiles(string temp, string filename) {
 	
 		//open output file in append mode
 		openOutputFileAppend(filename, output);
-		
-		//open temp file for reading
 		openInputFile(temp, input);
 		
-		string line;
-		//read input file and write to output file
-		while(input.eof() != true) {
-			getline(input, line); //getline removes the newline char
-			if (line != "") {
-				output << line << endl;   // Appending back newline char 
-			}
-		}	
+		while(char c = input.get()){
+			if(input.eof())		{	break;			}
+			else				{	output << c;	}
+		}
 		
 		input.close();
 		output.close();

@@ -58,6 +58,4 @@ class UnifracUnweightedCommand : public Command {
 		
 };
 
-
-
 #endif

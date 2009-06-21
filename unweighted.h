@@ -34,6 +34,4 @@ class Unweighted : public TreeCalculator  {
 
 /***********************************************************************/
 
-
-
 #endif

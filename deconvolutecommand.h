@@ -20,15 +20,12 @@ class DeconvoluteCommand : public Command {
 
 public:
 	DeconvoluteCommand(string);	
-	~DeconvoluteCommand() { delete fastamap; };
+	~DeconvoluteCommand() { };
 	int execute();
 	void help();	
 	
 private:
-	FastaMap* fastamap;
-	ifstream in;
-	ofstream out, outFasta;
-	string filename, outputFileName, outFastafile;
+	string inFastaName, oldNameMapFName;
 
 	bool abort;
 };
