@@ -33,7 +33,7 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a
 		
 		if (globaldata->gGroupmap == NULL) {  groupmap = new GroupMap(); }
 		
-		int num, inputData, pos, count;
+		int num, inputData, count;
 		count = 0;  numSeqs = 0;
 		string holdLabel, nextLabel, groupN;
 		individual newguy;

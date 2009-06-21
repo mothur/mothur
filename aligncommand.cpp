@@ -193,7 +193,7 @@ int AlignCommand::execute(){
 			
 			while(!inFASTA.eof()){
 				char c = inFASTA.get();
-				if(c == '>'){	positions.push_back(inFASTA.tellg());	}
+				if(c == '>'){	int pos = inFASTA.tellg(); positions.push_back(pos-1);	}
 				while (!inFASTA.eof())	{	c = inFASTA.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
 			}
 			inFASTA.close();
@@ -343,22 +343,15 @@ void AlignCommand::createProcesses(string alignFileName, string reportFileName) 
 void AlignCommand::appendAlignFiles(string temp, string filename) {
 	try{
 		
-		//open output file in append mode
 		ofstream output;
-		openOutputFileAppend(filename, output);
-		
-		//open temp file for reading
 		ifstream input;
+		openOutputFileAppend(filename, output);
 		openInputFile(temp, input);
 		
-		string line;
-		//read input file and write to output file
-		while(input.eof() != true) {
-			getline(input, line); //getline removes the newline char
-			if (line != "") {
-				output << line << endl;   // Appending back newline char 
-			}
-		}	
+		while(char c = input.get()){
+			if(input.eof())		{	break;			}
+			else				{	output << c;	}
+		}
 		
 		input.close();
 		output.close();
@@ -378,23 +371,17 @@ void AlignCommand::appendAlignFiles(string temp, string filename) {
 void AlignCommand::appendReportFiles(string temp, string filename) {
 	try{
 		
-		//open output file in append mode
 		ofstream output;
-		openOutputFileAppend(filename, output);
-		
-		//open temp file for reading
 		ifstream input;
+		openOutputFileAppend(filename, output);
 		openInputFile(temp, input);
+
 		while (!input.eof())	{	char c = input.get(); if (c == 10 || c == 13){	break;	}	} // get header line
-		
-		string line;
-		//read input file and write to output file
-		while(input.eof() != true) {
-			getline(input, line); //getline removes the newline char
-			if (line != "") {
-				output << line << endl;   // Appending back newline char 
-			}
-		}	
+				
+		while(char c = input.get()){
+			if(input.eof())		{	break;			}
+			else				{	output << c;	}
+		}
 		
 		input.close();
 		output.close();

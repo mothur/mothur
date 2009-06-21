@@ -156,9 +156,9 @@ int ScreenSeqsCommand::execute(){
 			}
 			gobble(inFASTA);
 		}	
-		if(namefile != "")		{	screenNameGroupFile(badSeqNames);	}
-		if(groupfile != "")		{	screenGroupFile(badSeqNames);		}
-		if(alignreport != "")	{	screenAlignReport(badSeqNames);		}
+		if(namefile != "" && groupfile != "")	{	screenNameGroupFile(badSeqNames);	}	// this screens both names and groups
+		else if(groupfile != "")				{	screenGroupFile(badSeqNames);		}	// this screens just the groups
+		if(alignreport != "")					{	screenAlignReport(badSeqNames);		}
 		
 		goodSeqOut.close();
 		badSeqOut.close();

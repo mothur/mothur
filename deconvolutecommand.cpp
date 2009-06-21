@@ -19,7 +19,7 @@ DeconvoluteCommand::DeconvoluteCommand(string option) {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta"};
+			string Array[] =  {"fasta", "name"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -33,10 +33,13 @@ DeconvoluteCommand::DeconvoluteCommand(string option) {
 			}
 			
 			//check for required parameters
-			filename = validParameter.validFile(parameters, "fasta", true);
-			if (filename == "not open") { abort = true; }
-			else if (filename == "not found") { filename = ""; cout << "fasta is a required parameter for the unique.seqs command." << endl; abort = true;  }	
+			inFastaName = validParameter.validFile(parameters, "fasta", true);
+			if (inFastaName == "not open") { abort = true; }
+			else if (inFastaName == "not found") { inFastaName = ""; cout << "fasta is a required parameter for the unique.seqs command." << endl; abort = true;  }	
 			
+			oldNameMapFName = validParameter.validFile(parameters, "name", true);
+			if (oldNameMapFName == "not open") { abort = true; }
+			else if (oldNameMapFName == "not found"){	oldNameMapFName = "";	}
 		}
 
 	}
@@ -75,31 +78,19 @@ int DeconvoluteCommand::execute() {
 	try {
 		
 		if (abort == true) { return 0; }
-	
-		//prepare filenames and open files
-		outputFileName = (getRootName(filename) + "names");
-		outFastafile = (getRootName(filename) + "unique.fasta");
-		
-		openInputFile(filename, in);
-		openOutputFile(outputFileName, out);
-		openOutputFile(outFastafile, outFasta);
 
-		//constructor reads in file and store internally
-		fastamap = new FastaMap();
-	
-		//two columns separated by tabs sequence name and then sequence
-		fastamap->readFastaFile(in);
+		//prepare filenames and open files
+		string outNameFile = (getRootName(inFastaName) + "names");
+		string outFastaFile = (getRootName(inFastaName) + "unique" + getExtension(inFastaName));
 		
-		//print out new names file 
-		//file contains 2 columns separated by tabs.  the first column is the groupname(name of first sequence found.
-		//the second column is the list of names of identical sequences separated by ','.
-		fastamap->printNamesFile(out);
-		fastamap->printCondensedFasta(outFasta);
-		
-		in.close();
-		out.close();
-		outFasta.close();
+		FastaMap fastamap;
 	
+		if(oldNameMapFName == "")	{	fastamap.readFastaFile(inFastaName);					}
+		else						{	fastamap.readFastaFile(inFastaName, oldNameMapFName);	}
+		
+		fastamap.printCondensedFasta(outFastaFile);
+		fastamap.printNamesFile(outNameFile);
+		
 		return 0;
 	}
 	catch(exception& e) {

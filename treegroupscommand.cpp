@@ -251,7 +251,7 @@ int TreeGroupCommand::execute(){
 	
 			if(namefile != ""){	
 				nameMap = new NameAssignment(namefile);
-				nameMap->readMap(1,2);
+				nameMap->readMap();
 			}
 			else{
 				nameMap = NULL;

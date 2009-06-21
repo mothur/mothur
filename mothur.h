@@ -1,7 +1,6 @@
 #ifndef MOTHUR_H
 #define MOTHUR_H
 
-using namespace std;
 
 
 /*
@@ -40,13 +39,24 @@ using namespace std;
 #include <cmath>
 #include <math.h>
 #include <algorithm>
+
+//misc
+#include <cerrno>
 #include <ctime>
+#include <limits>
+
+using namespace std;
 
 #ifdef _WIN32
 	#define exp(x) (exp((double) x))
 	#define sqrt(x) (sqrt((double) x))
 	#define log10(x) (log10((double) x))
 	#define log2(x) (log10(x)/log10(2))
+	#define isnan(x) ((x) != (x))
+	#define isinf(x) (fabs(x) == std::numeric_limits<double>::infinity())
+#else
+	#include <sys/wait.h>
+	#include <unistd.h>
 #endif
 
 

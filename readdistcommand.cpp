@@ -61,7 +61,6 @@ ReadDistCommand::ReadDistCommand(string option){
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
 			else {  globaldata->setNameFile(namefile);	}
-
 			
 			//you are doing a list and group shared
 			if ((phylipfile != "") && (groupfile != "")) { 
@@ -103,7 +102,7 @@ ReadDistCommand::ReadDistCommand(string option){
 	
 					if(namefile != ""){	
 						nameMap = new NameAssignment(namefile);
-						nameMap->readMap(1,2);
+						nameMap->readMap();
 					}else{
 						nameMap = NULL;
 					}

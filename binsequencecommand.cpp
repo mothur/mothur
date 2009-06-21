@@ -79,7 +79,7 @@ BinSeqCommand::BinSeqCommand(string option){
 			else if (groupfile == "not found") { groupfile = ""; }
 			
 			if (abort == false) { 
-				openInputFile(fastafile, in);
+//				openInputFile(fastafile, in);
 				fasta = new FastaMap();
 				if (groupfile != "") {
 					groupMap = new GroupMap(groupfile);
@@ -147,9 +147,8 @@ int BinSeqCommand::execute(){
 		int error = 0;
 		
 		//read fastafile
-		fasta->readFastaFile(in);
+		fasta->readFastaFile(fastafile);
 		
-		in.close();
 		
 		//set format to list so input can get listvector
 //		globaldata->setFormat("list");

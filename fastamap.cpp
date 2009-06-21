@@ -12,43 +12,35 @@
 
 /*******************************************************************************/
 
-void FastaMap::readFastaFile(ifstream& in) {
+void FastaMap::readFastaFile(string inFileName) {
 	try {
+		ifstream in;
+		openInputFile(inFileName, in);
 		string name, sequence, line;
 		sequence = "";
-//		int c;
 		string temp;
-		
-		
-		//read through file
-//		while ((c = in.get()) != EOF) {
-//			name = ""; sequence = ""; 
-//			//is this a name
-//			if (c == '>') { 
-//				name = readName(in); 
-//				sequence = readSequence(in); 
-//			}else {  cout << "Error fasta in your file. Please correct." << endl; }
 
-			//store info in map
-			//input sequence info into map
 		while(!in.eof()){
 			Sequence currSeq(in);
 			name = currSeq.getName();
-			sequence = currSeq.getUnaligned();
+			
+			if(currSeq.getIsAligned())	{	sequence = currSeq.getAligned();	}
+			else						{	sequence = currSeq.getUnaligned();	}
+			
 			seqmap[name] = sequence;  
-			it = data.find(sequence);
+			map<string,group>::iterator it = data.find(sequence);
 			if (it == data.end()) { 	//it's unique.
 				data[sequence].groupname = name;  //group name will be the name of the first duplicate sequence found.
-				data[sequence].groupnumber = 1;
+//				data[sequence].groupnumber = 1;
 				data[sequence].names = name;
 			}else { // its a duplicate.
 				data[sequence].names += "," + name;
-				data[sequence].groupnumber++;
+//				data[sequence].groupnumber++;
 			}	
 			
 			gobble(in);
 		}
-					
+		in.close();		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the FastaMap class Function readFastaFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -58,6 +50,50 @@ void FastaMap::readFastaFile(ifstream& in) {
 		cout << "An unknown error has occurred in the FastaMap class function readFastaFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
+}
+
+/*******************************************************************************/
+
+void FastaMap::readFastaFile(string inFastaFile, string oldNameFileName){ //prints data
+	
+	ifstream oldNameFile;
+	openInputFile(oldNameFileName, oldNameFile);
+	
+	map<string,string> oldNameMap;
+	string name, list;
+	while(!oldNameFile.eof()){
+		oldNameFile >> name >> list;
+		oldNameMap[name] = list;
+		gobble(oldNameFile);
+	}
+	oldNameFile.close();
+	
+	ifstream inFASTA;
+	openInputFile(inFastaFile, inFASTA);
+	string sequence;
+	while(!inFASTA.eof()){
+		Sequence currSeq(inFASTA);
+		name = currSeq.getName();
+		
+		if(currSeq.getIsAligned())	{	sequence = currSeq.getAligned();	}
+		else						{	sequence = currSeq.getUnaligned();	}
+		
+		seqmap[name] = sequence;  
+		map<string,group>::iterator it = data.find(sequence);
+		if (it == data.end()) { 	//it's unique.
+			data[sequence].groupname = name;  //group name will be the name of the first duplicate sequence found.
+//			data[sequence].groupnumber = 1;
+			data[sequence].names = oldNameMap[name];
+		}else { // its a duplicate.
+			data[sequence].names += "," + oldNameMap[name];
+//			data[sequence].groupnumber++;
+		}	
+		
+		gobble(inFASTA);
+	}
+	
+	
+	inFASTA.close();
 }
 
 /*******************************************************************************/
@@ -74,34 +110,25 @@ string FastaMap::getNames(string seq) {	//pass a sequence get the string of name
 
 /*******************************************************************************/
 
-int FastaMap::getGroupNumber(string seq) {	//pass a sequence get the number of identical sequences.
-	return data[seq].groupnumber;
-}
-
-/*******************************************************************************/
-
 string FastaMap::getSequence(string name) {
-	it2 = seqmap.find(name);
-	if (it2 == seqmap.end()) { 	//it's not found
-		return "not found";
-	}else { // found it
-		return it2->second;
-	}
+	
+	map<string,string>::iterator it = seqmap.find(name);
+	if (it == seqmap.end()) { 	return "not found";		}
+	else					{	return it->second;		}
+	
 }	
 
 /*******************************************************************************/
 
 void FastaMap::push_back(string name, string seq) {
-	it = data.find(seq);
+	
+	map<string,group>::iterator it = data.find(seq);
 	if (it == data.end()) { 	//it's unique.
 		data[seq].groupname = name;  //group name will be the name of the first duplicate sequence found.
-		data[seq].groupnumber = 1;
 		data[seq].names = name;
 	}else { // its a duplicate.
 		data[seq].names += "," + name;
-		data[seq].groupnumber++;
 	}
-	
 	seqmap[name] = seq;
 }
 
@@ -113,12 +140,16 @@ int FastaMap::sizeUnique(){ //returns datas size which is the number of unique s
 
 /*******************************************************************************/
 
-void FastaMap::printNamesFile(ostream& out){ //prints data
+void FastaMap::printNamesFile(string outFileName){ //prints data
 	try {
+		ofstream outFile;
+		openOutputFile(outFileName, outFile);
+		
 		// two column file created with groupname and them list of identical sequence names
-		for (it = data.begin(); it != data.end(); it++) {
-			out << it->second.groupname << '\t' << it->second.names << endl;
+		for (map<string,group>::iterator it = data.begin(); it != data.end(); it++) {
+			outFile << it->second.groupname << '\t' << it->second.names << endl;
 		}
+		outFile.close();
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the FastaMap class Function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -132,13 +163,16 @@ void FastaMap::printNamesFile(ostream& out){ //prints data
 
 /*******************************************************************************/
 
-void FastaMap::printCondensedFasta(ostream& out){ //prints data
+void FastaMap::printCondensedFasta(string outFileName){ //prints data
 	try {
+		ofstream out;
+		openOutputFile(outFileName, out);
 		//creates a fasta file
-		for (it = data.begin(); it != data.end(); it++) {
+		for (map<string,group>::iterator it = data.begin(); it != data.end(); it++) {
 			out << ">" << it->second.groupname << endl;
 			out << it->first << endl;
 		}
+		out.close();
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the FastaMap class Function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
