@@ -16,11 +16,11 @@
 
 /***********************************************************************/
 
-SharedListVector::SharedListVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){globaldata = GlobalData::getInstance();}
+SharedListVector::SharedListVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0){globaldata = GlobalData::getInstance(); groupmap = NULL; }
 
 /***********************************************************************/
 
-SharedListVector::SharedListVector(int n):	DataVector(), data(n, "") , maxRank(0), numBins(0), numSeqs(0){globaldata = GlobalData::getInstance();}
+SharedListVector::SharedListVector(int n):	DataVector(), data(n, "") , maxRank(0), numBins(0), numSeqs(0){globaldata = GlobalData::getInstance(); groupmap = NULL; }
 
 /***********************************************************************/
 SharedListVector::SharedListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numSeqs(0) {
@@ -291,17 +291,38 @@ vector<SharedRAbundVector*> SharedListVector::getSharedRAbundVector() {
 		SharedUtil* util;
 		util = new SharedUtil();
 		vector<SharedRAbundVector*> lookup;
+		map<string, SharedRAbundVector*> finder;
+		string group, names, name;
 		
 		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups);
 		
 		delete util;
 
 		for (int i = 0; i < globaldata->Groups.size(); i++) {
-			SharedRAbundVector* temp = new SharedRAbundVector();
-			*temp = getSharedRAbundVector(globaldata->Groups[i]);
-			lookup.push_back(temp);
+			SharedRAbundVector* temp = new SharedRAbundVector(data.size());
+			finder[globaldata->Groups[i]] = temp;
+			finder[globaldata->Groups[i]]->setLabel(label);
+			finder[globaldata->Groups[i]]->setGroup(globaldata->Groups[i]);
+			//*temp = getSharedRAbundVector(globaldata->Groups[i]);
+			lookup.push_back(finder[globaldata->Groups[i]]);
 		}
-
+		
+		//fill vectors
+		for(int i=0;i<numBins;i++){
+			names = get(i);  
+			while (names.find_first_of(',') != -1) { 
+				name = names.substr(0,names.find_first_of(','));
+				names = names.substr(names.find_first_of(',')+1, names.length());
+				group = groupmap->getGroup(name);
+				finder[group]->set(i, finder[group]->getAbundance(i) + 1, group);  //i represents what bin you are in
+			}
+			
+			//get last name
+			group = groupmap->getGroup(names);
+			finder[group]->set(i, finder[group]->getAbundance(i) + 1, group);  //i represents what bin you are in
+			
+		}
+		
 		return lookup;
 	}
 	catch(exception& e) {

@@ -33,8 +33,8 @@ public:
 	SharedListVector();
 	SharedListVector(int);
 	SharedListVector(ifstream&);
-	SharedListVector(const SharedListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs){globaldata = GlobalData::getInstance();};
-	~SharedListVector(){};
+	SharedListVector(const SharedListVector& lv) : DataVector(lv.label), data(lv.data), maxRank(lv.maxRank), numBins(lv.numBins), numSeqs(lv.numSeqs){globaldata = GlobalData::getInstance(); groupmap = NULL; };
+	~SharedListVector(){ if (groupmap != NULL) { delete groupmap; } };
 	
 	int getNumBins()							{	return numBins;		}
 	int getNumSeqs()							{	return numSeqs;		}

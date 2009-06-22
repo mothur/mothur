@@ -117,7 +117,6 @@
 		37D928840F21331F001D4494 /* sabundvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D9281A0F21331F001D4494 /* sabundvector.cpp */; };
 		37D928850F21331F001D4494 /* sequence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D9281C0F21331F001D4494 /* sequence.cpp */; };
 		37D928860F21331F001D4494 /* shannon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D9281E0F21331F001D4494 /* shannon.cpp */; };
-		37D928870F21331F001D4494 /* shared.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D928200F21331F001D4494 /* shared.cpp */; };
 		37D928880F21331F001D4494 /* sharedace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D928220F21331F001D4494 /* sharedace.cpp */; };
 		37D928890F21331F001D4494 /* sharedchao1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D928240F21331F001D4494 /* sharedchao1.cpp */; };
 		37D9288A0F21331F001D4494 /* sharedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D928260F21331F001D4494 /* sharedcommand.cpp */; };
@@ -412,8 +411,6 @@
 		37D9281D0F21331F001D4494 /* sequence.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = sequence.hpp; sourceTree = SOURCE_ROOT; };
 		37D9281E0F21331F001D4494 /* shannon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shannon.cpp; sourceTree = SOURCE_ROOT; };
 		37D9281F0F21331F001D4494 /* shannon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shannon.h; sourceTree = SOURCE_ROOT; };
-		37D928200F21331F001D4494 /* shared.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shared.cpp; sourceTree = SOURCE_ROOT; };
-		37D928210F21331F001D4494 /* shared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shared.h; sourceTree = SOURCE_ROOT; };
 		37D928220F21331F001D4494 /* sharedace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedace.cpp; sourceTree = SOURCE_ROOT; };
 		37D928230F21331F001D4494 /* sharedace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedace.h; sourceTree = SOURCE_ROOT; };
 		37D928240F21331F001D4494 /* sharedchao1.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedchao1.cpp; sourceTree = SOURCE_ROOT; };
@@ -594,8 +591,6 @@
 				37D928050F21331F001D4494 /* rarefact.cpp */,
 				37D928090F21331F001D4494 /* rarefactioncurvedata.h */,
 				3796441D0FB9B9650081FDB6 /* read */,
-				37D928210F21331F001D4494 /* shared.h */,
-				37D928200F21331F001D4494 /* shared.cpp */,
 				211C38310F961DD400FEE541 /* sharedutilities.h */,
 				211C38300F961DD400FEE541 /* sharedutilities.cpp */,
 				37D928420F21331F001D4494 /* singlelinkage.cpp */,
@@ -1001,7 +996,6 @@
 				37D928840F21331F001D4494 /* sabundvector.cpp in Sources */,
 				37D928850F21331F001D4494 /* sequence.cpp in Sources */,
 				37D928860F21331F001D4494 /* shannon.cpp in Sources */,
-				37D928870F21331F001D4494 /* shared.cpp in Sources */,
 				37D928880F21331F001D4494 /* sharedace.cpp in Sources */,
 				37D928890F21331F001D4494 /* sharedchao1.cpp in Sources */,
 				37D9288A0F21331F001D4494 /* sharedcommand.cpp in Sources */,

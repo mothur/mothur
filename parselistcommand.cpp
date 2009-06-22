@@ -15,24 +15,31 @@ ParseListCommand::ParseListCommand(){
 		globaldata = GlobalData::getInstance();
 		
 		//read in group map info.
-		groupMap = new GroupMap(globaldata->getGroupFile());
-		groupMap->readMap();
+		//groupMap = new GroupMap(globaldata->getGroupFile());
+		//groupMap->readMap();
+		groupMap = globaldata->gGroupmap;
 
 		//fill filehandles with neccessary ofstreams
 		int i;
 		ofstream* temp;
+		SharedListVector* templist;
 		for (i=0; i<groupMap->getNumGroups(); i++) {
 			temp = new ofstream;
+			templist = new SharedListVector();
 			filehandles[groupMap->namesOfGroups[i]] = temp;
+			mapOfLists[groupMap->namesOfGroups[i]] = templist;
 		}
 		
 		//set fileroot
 		fileroot = getRootName(globaldata->getListFile());
 		
-		//open output list files
-		for (i=0; i<groupMap->getNumGroups(); i++) {//opens an output file for each group
+		//clears file before we start to write to it below
+		for (int i=0; i<groupMap->getNumGroups(); i++) {
 			openOutputFile(fileroot + groupMap->namesOfGroups[i] + ".list", *(filehandles[groupMap->namesOfGroups[i]]));
+			(*(filehandles[groupMap->namesOfGroups[i]])).close();
 		}
+
+		
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the ParseListCommand class Function ParseListCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -46,29 +53,29 @@ ParseListCommand::ParseListCommand(){
 /***********************************************************************/
 void ParseListCommand::parse(int index, SharedListVector* list) {
 	try {
-		string prefix, suffix, groupsName;
-		suffix = list->get(index);
-	
-		while (suffix.find_first_of(',') != -1) {//while you still have sequences
-			prefix = suffix.substr(0,suffix.find_first_of(','));
-			if ((suffix.find_first_of(',')+1) <= suffix.length()) {  //checks to make sure you don't have comma at end of string
-				suffix = suffix.substr(suffix.find_first_of(',')+1, suffix.length());
+		string member, bin, groupName;
+		bin = list->get(index);
+		
+		while (bin.find_first_of(',') != -1) {//while you still have sequences
+			member = bin.substr(0,bin.find_first_of(','));
+			if ((bin.find_first_of(',')+1) <= bin.length()) {  //checks to make sure you don't have comma at end of string
+				bin = bin.substr(bin.find_first_of(',')+1, bin.length());
 			}
 			
-			groupsName = groupMap->getGroup(prefix);
-			if (groupsName != "not found") {
-				listGroups[groupsName] = listGroups[groupsName] + "," + prefix; //adds prefix to the correct group.
+			groupName = groupMap->getGroup(member);
+			if (groupName != "not found") {
+				listGroups[groupName] = listGroups[groupName] + "," + member; //adds prefix to the correct group.
 			}else {
-				cerr << "Error: Sequence '" << prefix << "' was not found in the group file, please correct\n";
+				cerr << "Error: Sequence '" << member << "' was not found in the group file, please correct\n";
 			}
 		}
 		
 		//save last name after comma
-		groupsName = groupMap->getGroup(suffix);
-		if (groupsName != "not found") {
-			listGroups[groupsName] = listGroups[groupsName] + "," + suffix; //adds prefix to the correct group.
+		groupName = groupMap->getGroup(bin);
+		if (groupName != "not found") {
+			listGroups[groupName] = listGroups[groupName] + "," + bin; //adds prefix to the correct group.
 		}else {
-			cerr << "Error: Sequence '" << suffix << "' was not found in the group file, please correct\n";
+			cerr << "Error: Sequence '" << bin << "' was not found in the group file, please correct\n";
 		}
 	}
 	catch(exception& e) {
@@ -85,6 +92,7 @@ void ParseListCommand::parse(int index, SharedListVector* list) {
 
 int ParseListCommand::execute(){
 	try{
+		
 			int count = 1;
 			
 			//read in listfile
@@ -99,12 +107,6 @@ int ParseListCommand::execute(){
 			set<string> userLabels = globaldata->labels;
 			set<int> userLines = globaldata->lines;
 			
-			//create new list vectors to fill with parsed data
-			for (int i=0; i<groupMap->getNumGroups(); i++) {
-				groupOfLists[groupMap->namesOfGroups[i]] = new SharedListVector();
-			}
-			
-						
 			//parses and sets each groups listvector
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((list != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
@@ -151,24 +153,20 @@ int ParseListCommand::execute(){
 				cout << lastList->getLabel() << '\t' << count << endl;
 				process(lastList);
 			}
-			delete lastList;
-
-			//set groupmap for .shared commands
-			if (globaldata->gGroupmap != NULL) { delete globaldata->gGroupmap; }
-			globaldata->gGroupmap = groupMap; 
 			
-			//close files
-			for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) { 
-				ofstream* temp = it3->second;
-				(*temp).close(); 
-				delete it3->second;
-			}
-			
+			delete lastList;  globaldata->gSharedList = NULL;
 			//delete list vectors to fill with parsed data
-			for (it2 = groupOfLists.begin(); it2 != groupOfLists.end(); it2++) {
+			for (it2 = mapOfLists.begin(); it2 != mapOfLists.end(); it2++) {
 				delete it2->second;
 			}
+			for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
+				delete it2->second;
+			}
+			
+			delete input;  globaldata->ginput = NULL;
+			delete read;
 
+			
 			return 0;
 	}
 	catch(exception& e) {
@@ -184,11 +182,8 @@ int ParseListCommand::execute(){
 //**********************************************************************************************************************
 
 ParseListCommand::~ParseListCommand(){
-	
-		globaldata->gSharedList = NULL;
-		delete input;  globaldata->ginput = NULL;
-		delete read;
-	
+
+			
 }
 //**********************************************************************************************************************
 void ParseListCommand::process(SharedListVector* thisList) {
@@ -200,15 +195,17 @@ void ParseListCommand::process(SharedListVector* thisList) {
 				for (it=listGroups.begin(); it != listGroups.end(); it++) {  //loop through map and set new list vectors
 					seq = it->second;
 					seq = seq.substr(1, seq.length()); //rips off extra comma
-					groupOfLists[it->first]->push_back(seq); //sets new listvector for each group
+					mapOfLists[it->first]->push_back(seq); //sets new listvector for each group
 				}
 				listGroups.clear();
 			}
 			//prints each new list file
 			for (int i=0; i<groupMap->getNumGroups(); i++) {
-				groupOfLists[groupMap->namesOfGroups[i]]->setLabel(thisList->getLabel());
-				groupOfLists[groupMap->namesOfGroups[i]]->print(*(filehandles[groupMap->namesOfGroups[i]]));
-				groupOfLists[groupMap->namesOfGroups[i]]->clear();
+				openOutputFileAppend(fileroot + groupMap->namesOfGroups[i] + ".list", *(filehandles[groupMap->namesOfGroups[i]]));
+				mapOfLists[groupMap->namesOfGroups[i]]->setLabel(thisList->getLabel());
+				mapOfLists[groupMap->namesOfGroups[i]]->print(*(filehandles[groupMap->namesOfGroups[i]]));
+				mapOfLists[groupMap->namesOfGroups[i]]->clear();
+				(*(filehandles[groupMap->namesOfGroups[i]])).close();
 			}
 
 	}

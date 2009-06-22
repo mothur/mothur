@@ -40,7 +40,7 @@ private:
 	InputData* input;
 	ReadOTUFile* read;
 	map<string, ofstream*> filehandles;
-	map<string, SharedListVector*> groupOfLists;
+	map<string, SharedListVector*> mapOfLists;
 	SharedListVector* list;
 	map<string, string> listGroups; //maps group name to sequences from that group in a specific OTU
 	map<string, string>::iterator it;

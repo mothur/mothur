@@ -35,7 +35,8 @@ SharedCommand::SharedCommand(){
 
 int SharedCommand::execute(){
 	try {
-		globaldata = GlobalData::getInstance();
+		
+		cout << "creating sharedfile...";
 		//lookup.clear();
 		int count = 1;
 		string errorOff = "no error";
@@ -47,23 +48,21 @@ int SharedCommand::execute(){
 		input = globaldata->ginput;
 		SharedList = globaldata->gSharedList;
 		SharedListVector* lastList = SharedList;
-		//lookup = SharedList->getSharedRAbundVector();
-		//vector<SharedRAbundVector*> lastLookup = lookup;
-		
+		vector<SharedRAbundVector*> lookup; 
+				
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = globaldata->labels;
 		set<int> userLines = globaldata->lines;
 		
-		shared = new Shared();
 		
 		while((SharedList != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 			
 
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(SharedList->getLabel()) == 1){
-					
-					shared->getSharedVectors(SharedList); //fills sharedGroups with new info and updates sharedVector
-					printSharedData(); //prints info to the .shared file
+					lookup = SharedList->getSharedRAbundVector();
+					printSharedData(lookup); //prints info to the .shared file
+					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
 				
 					processedLabels.insert(SharedList->getLabel());
 					userLabels.erase(SharedList->getLabel());
@@ -71,21 +70,20 @@ int SharedCommand::execute(){
 			}
 			
 			if ((anyLabelsToProcess(SharedList->getLabel(), userLabels, errorOff) == true) && (processedLabels.count(lastList->getLabel()) != 1)) {
-					shared->getSharedVectors(lastList); //fills sharedGroups with new info and updates sharedVector
-					printSharedData(); //prints info to the .shared file
-
+					lookup = lastList->getSharedRAbundVector();
+					printSharedData(lookup); //prints info to the .shared file
+					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+					
 					processedLabels.insert(lastList->getLabel());
 					userLabels.erase(lastList->getLabel());
 			}
 			
 			if (count != 1) { delete lastList; }
-			lastList = SharedList;			
+			lastList = SharedList;	
+						 		
 			SharedList = input->getSharedListVector(); //get new list vector to process
-			count++;
 			
-			//if (count != 1) { for (int i = 0; i < lastLookup.size(); i++) {  delete lastLookup[i];  } }
-			//lastLookup = lookup; 
-			//if (SharedList != NULL) { lookup = SharedList->getSharedRAbundVector(); }
+			count++;		
 		}
 		
 		//output error messages about any remaining user labels
@@ -103,14 +101,18 @@ int SharedCommand::execute(){
 		
 		//run last line if you need to
 		if (needToRun == true)  {
-			shared->getSharedVectors(lastList); //fills sharedGroups with new info and updates sharedVector
-			printSharedData(); //prints info to the .shared file
+			lookup = lastList->getSharedRAbundVector();
+			printSharedData(lookup); //prints info to the .shared file
+			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+
 		}
 		
 		delete lastList; globaldata->gSharedList = NULL;
-		delete shared;
+		delete read;
+		
 		out.close();
 		
+		cout << "complete." << endl;
 		return 0;
 	}
 	catch(exception& e) {
@@ -124,19 +126,15 @@ int SharedCommand::execute(){
 
 }
 //**********************************************************************************************************************
-void SharedCommand::printSharedData() {
+void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup) {
 	try {
-	
-		///for (int i = 0; i < thislookup.size(); i++) {
-		//	out << thislookup[i]->getLabel() << '\t' << thislookup[i]->getGroup() << '\t';
-//cout << thislookup[i]->getLabel() << '\t' << thislookup[i]->getGroup() << endl;			
-		//	thislookup[i]->print(out);
-	//	}
-		//prints out horizontally
-		for (it = shared->sharedGroups.begin(); it != shared->sharedGroups.end(); it++) {
-			out << it->second->getLabel() << "\t" << it->first << "\t"; //prints out label and groupname
-			it->second->print(out); // prints sharedrabundvector
+		
+		//initialize bin values
+		for (int i = 0; i < thislookup.size(); i++) {
+			out << thislookup[i]->getLabel() << '\t' << thislookup[i]->getGroup() << '\t';
+			thislookup[i]->print(out);
 		}
+ 
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the SharedCommand class Function printSharedData. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -153,7 +151,7 @@ void SharedCommand::printSharedData() {
 
 SharedCommand::~SharedCommand(){
 	//delete list;
-	delete read;
+	
 	
 }
 
