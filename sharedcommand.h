@@ -12,7 +12,6 @@
 #include "command.hpp"
 #include "sharedlistvector.h"
 #include "inputdata.h"
-#include "shared.h"
 #include "readotu.h"
 
 /* The shared() command:
@@ -33,16 +32,16 @@ public:
 	void help() {}
 	
 private:
-	void printSharedData();
+	void printSharedData(vector<SharedRAbundVector*>);
 	GlobalData* globaldata;
 	ReadOTUFile* read;
 	SharedListVector* SharedList;
 	InputData* input;
-	Shared* shared;
-	map<string, SharedRAbundVector*>::iterator it;
+	//map<string, SharedRAbundVector*>::iterator it;
 	//vector<SharedRAbundVector*> lookup;
 	ofstream out;
 	string filename;
+	bool firsttime;
 
 };
 
