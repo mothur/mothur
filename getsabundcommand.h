@@ -31,7 +31,6 @@ private:
 	ofstream out;
 	ReadOTUFile* read;
 	OrderVector* order;
-	OrderVector* lastOrder;
 	InputData* input;
 	SAbundVector* sabund;
 

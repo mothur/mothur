@@ -46,7 +46,6 @@ private:
 	GlobalData* globaldata;
 	ReadOTUFile* read;
 	OrderVector* order;
-	OrderVector* lastOrder;
 	InputData* input;
 	Collect* cCurve;
 	ValidCalculators* validCalculator;

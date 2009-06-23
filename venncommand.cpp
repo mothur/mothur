@@ -198,9 +198,8 @@ int VennCommand::execute(){
 		if (abort == true) { return 0; }
 		
 		int count = 1;
-		SAbundVector* lastSAbund;
-		vector<SharedRAbundVector*> lastLookup;	
-
+		string lastLabel;
+		
 		//if the users entered no valid calculators don't execute command
 		if (vennCalculators.size() == 0) { return 0; }
 		
@@ -211,14 +210,14 @@ int VennCommand::execute(){
 			
 			input = globaldata->ginput;
 			lookup = input->getSharedRAbundVectors();
-			lastLookup = lookup;
+			lastLabel = lookup[0]->getLabel();
 		}else if (format == "list") {
 			//you are using just a list file and have only one group
 			read = new ReadOTUFile(globaldata->inputFileName);	
 			read->read(&*globaldata); 
 		
 			sabund = globaldata->sabund;
-			lastSAbund = globaldata->sabund;
+			lastLabel = sabund->getLabel();
 			input = globaldata->ginput;
 		}
 		
@@ -245,23 +244,26 @@ int VennCommand::execute(){
 					venn->getPic(lookup, vennCalculators);
 				}
 				
-				if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLookup[0]->getLabel()) != 1)) {
-					cout << lastLookup[0]->getLabel() << '\t' << count << endl;
-					processedLabels.insert(lastLookup[0]->getLabel());
-					userLabels.erase(lastLookup[0]->getLabel());
+				if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+					lookup = input->getSharedRAbundVectors(lastLabel);
 
-					if (lastLookup.size() > 4) {
+					cout << lookup[0]->getLabel() << '\t' << count << endl;
+					processedLabels.insert(lookup[0]->getLabel());
+					userLabels.erase(lookup[0]->getLabel());
+
+					if (lookup.size() > 4) {
 						cout << "Error: Too many groups chosen.  You may use up to 4 groups with the venn command.  I will use the first four groups in your groupfile." << endl;
-						for (int i = lastLookup.size(); i > 4; i--) { lastLookup.pop_back(); } //no memmory leak because pop_back calls destructor
+						for (int i = lookup.size(); i > 4; i--) { lookup.pop_back(); } //no memmory leak because pop_back calls destructor
 					}				
-					venn->getPic(lastLookup, vennCalculators);
+					venn->getPic(lookup, vennCalculators);
 				}
 				
-				//prevent memory leak
-				if (count != 1) { for (int i = 0; i < lastLookup.size(); i++) {  delete lastLookup[i];  } }
-				lastLookup = lookup;	
+				
+				lastLabel = lookup[0]->getLabel();	
 						
 				//get next line to process
+				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 				lookup = input->getSharedRAbundVectors();
 				count++;
 			}
@@ -271,25 +273,31 @@ int VennCommand::execute(){
 			bool needToRun = false;
 			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
 				cout << "Your file does not include the label "<< *it; 
-				if (processedLabels.count(lastLookup[0]->getLabel()) != 1) {
-					cout << ". I will use " << lastLookup[0]->getLabel() << "." << endl;
+				if (processedLabels.count(lastLabel) != 1) {
+					cout << ". I will use " << lastLabel << "." << endl;
 					needToRun = true;
 				}else {
-					cout << ". Please refer to " << lastLookup[0]->getLabel() << "." << endl;
+					cout << ". Please refer to " << lastLabel << "." << endl;
 				}
 			}
 		
 			//run last line if you need to
 			if (needToRun == true)  {
-				cout << lastLookup[0]->getLabel() << '\t' << count << endl;
-				if (lastLookup.size() > 4) {
-					cout << "Error: Too many groups chosen.  You may use up to 4 groups with the venn command.  I will use the first four groups in your groupfile." << endl;
-					for (int i = lastLookup.size(); i > 3; i--) { delete lastLookup[i]; lastLookup.pop_back(); }
-				}				
-				venn->getPic(lastLookup, vennCalculators);
+					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+					lookup = input->getSharedRAbundVectors(lastLabel);
+
+					cout << lookup[0]->getLabel() << '\t' << count << endl;
+					processedLabels.insert(lookup[0]->getLabel());
+					userLabels.erase(lookup[0]->getLabel());
+
+					if (lookup.size() > 4) {
+						cout << "Error: Too many groups chosen.  You may use up to 4 groups with the venn command.  I will use the first four groups in your groupfile." << endl;
+						for (int i = lookup.size(); i > 4; i--) { lookup.pop_back(); } //no memmory leak because pop_back calls destructor
+					}				
+					venn->getPic(lookup, vennCalculators);
+					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 			}
 		
-			for (int i = 0; i < lastLookup.size(); i++) {  delete lastLookup[i];  }
 
 			//reset groups parameter
 			globaldata->Groups.clear();  
@@ -308,18 +316,20 @@ int VennCommand::execute(){
 					userLines.erase(count);
 				}
 				
-				if ((anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastSAbund->getLabel()) != 1)) {
-
-					cout << lastSAbund->getLabel() << '\t' << count << endl;
-					venn->getPic(lastSAbund, vennCalculators);
+				if ((anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+					delete sabund;
+					sabund = input->getSAbundVector(lastLabel);
 					
-					processedLabels.insert(lastSAbund->getLabel());
-					userLabels.erase(lastSAbund->getLabel());
+					cout << sabund->getLabel() << '\t' << count << endl;
+					venn->getPic(sabund, vennCalculators);
+					
+					processedLabels.insert(sabund->getLabel());
+					userLabels.erase(sabund->getLabel());
 				}		
 				
-				if (count != 1) { delete lastSAbund; }
-				lastSAbund = sabund;			
-
+				lastLabel = sabund->getLabel();		
+				
+				delete sabund;
 				sabund = input->getSAbundVector();
 				count++;
 			}
@@ -329,20 +339,25 @@ int VennCommand::execute(){
 			bool needToRun = false;
 			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
 				cout << "Your file does not include the label "<< *it; 
-				if (processedLabels.count(lastSAbund->getLabel()) != 1) {
-					cout << ". I will use " << lastSAbund->getLabel() << "." << endl;
+				if (processedLabels.count(lastLabel) != 1) {
+					cout << ". I will use " << lastLabel << "." << endl;
 					needToRun = true;
 				}else {
-					cout << ". Please refer to " << lastSAbund->getLabel() << "." << endl;
+					cout << ". Please refer to " << lastLabel << "." << endl;
 				}
 			}
 		
 			//run last line if you need to
 			if (needToRun == true)  {
-				cout << lastSAbund->getLabel() << '\t' << count << endl;
-				venn->getPic(lastSAbund, vennCalculators);
+				delete sabund;
+				sabund = input->getSAbundVector(lastLabel);
+					
+				cout << sabund->getLabel() << '\t' << count << endl;
+				venn->getPic(sabund, vennCalculators);
+				delete sabund;
+					
 			}
-			delete lastSAbund;
+			
 		}
 		
 		for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}

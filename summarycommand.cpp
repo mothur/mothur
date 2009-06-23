@@ -222,7 +222,7 @@ int SummaryCommand::execute(){
 		read->read(&*globaldata); 
 		
 		sabund = globaldata->sabund;
-		SAbundVector* lastSAbund = sabund;
+		string lastLabel = sabund->getLabel();
 		input = globaldata->ginput;
 		
 		for(int i=0;i<sumCalculators.size();i++){
@@ -259,24 +259,26 @@ int SummaryCommand::execute(){
 				outputFileHandle << endl;
 			}
 			
-			if ((anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastSAbund->getLabel()) != 1)) {
-
-				cout << lastSAbund->getLabel() << '\t' << count << endl;
-				processedLabels.insert(lastSAbund->getLabel());
-				userLabels.erase(lastSAbund->getLabel());
+			if ((anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				delete sabund;
+				sabund = input->getSAbundVector(lastLabel);
 				
-				outputFileHandle << lastSAbund->getLabel();
+				cout << sabund->getLabel() << '\t' << count << endl;
+				processedLabels.insert(sabund->getLabel());
+				userLabels.erase(sabund->getLabel());
+				
+				outputFileHandle << sabund->getLabel();
 				for(int i=0;i<sumCalculators.size();i++){
-					vector<double> data = sumCalculators[i]->getValues(lastSAbund);
+					vector<double> data = sumCalculators[i]->getValues(sabund);
 					outputFileHandle << '\t';
 					sumCalculators[i]->print(outputFileHandle);
 				}
 				outputFileHandle << endl;
 			}		
 
-			if (count != 1) { delete lastSAbund;  }
-			lastSAbund = sabund;			
-
+			lastLabel = sabund->getLabel();			
+			
+			delete sabund;
 			sabund = input->getSAbundVector();
 			count++;
 		}
@@ -286,29 +288,32 @@ int SummaryCommand::execute(){
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
 			cout << "Your file does not include the label "<< *it; 
-			if (processedLabels.count(lastSAbund->getLabel()) != 1) {
-				cout << ". I will use " << lastSAbund->getLabel() << "." << endl;
+			if (processedLabels.count(lastLabel) != 1) {
+				cout << ". I will use " << lastLabel << "." << endl;
 				needToRun = true;
 			}else {
-				cout << ". Please refer to " << lastSAbund->getLabel() << "." << endl;
+				cout << ". Please refer to " << lastLabel << "." << endl;
 			}
 		}
 		
 		//run last line if you need to
 		if (needToRun == true)  {
-			cout << lastSAbund->getLabel() << '\t' << count << endl;
-			outputFileHandle << lastSAbund->getLabel();
+			delete sabund;
+			sabund = input->getSAbundVector(lastLabel);
+			
+			cout << sabund->getLabel() << '\t' << count << endl;
+			outputFileHandle << sabund->getLabel();
 			for(int i=0;i<sumCalculators.size();i++){
-				vector<double> data = sumCalculators[i]->getValues(lastSAbund);
+				vector<double> data = sumCalculators[i]->getValues(sabund);
 				outputFileHandle << '\t';
 				sumCalculators[i]->print(outputFileHandle);
 			}
 			outputFileHandle << endl;
+			delete sabund;
 		}
 		
 		outputFileHandle.close();
 		
-		delete lastSAbund;
 		return 0;
 	}
 	catch(exception& e) {

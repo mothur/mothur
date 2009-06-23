@@ -220,7 +220,7 @@ int CollectCommand::execute(){
 		read->read(&*globaldata); 
 		
 		order = globaldata->gorder;
-		lastOrder = order;
+		string lastLabel = order->getLabel();
 		input = globaldata->ginput;
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -244,18 +244,23 @@ int CollectCommand::execute(){
 			//you have a label the user want that is smaller than this line and the last line has not already been processed 
 			}
 			
-			if ((anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastOrder->getLabel()) != 1)) {
-				cCurve = new Collect(lastOrder, cDisplays);
+			if ((anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				
+				delete order;
+				order = (input->getOrderVector(lastLabel));
+				
+				cCurve = new Collect(order, cDisplays);
 				cCurve->getCurve(freq);
 				delete cCurve;
 			
-				cout << lastOrder->getLabel() << '\t' << count << endl;
-				processedLabels.insert(lastOrder->getLabel());
-				userLabels.erase(lastOrder->getLabel());
+				cout << order->getLabel() << '\t' << count << endl;
+				processedLabels.insert(order->getLabel());
+				userLabels.erase(order->getLabel());
 			}
 			
-			if (count != 1) { delete lastOrder;  }
-			lastOrder = order;			
+			lastLabel = order->getLabel();	
+			
+			delete order;		
 			order = (input->getOrderVector());
 			count++;
 		}
@@ -265,24 +270,28 @@ int CollectCommand::execute(){
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
 			cout << "Your file does not include the label "<< *it; 
-			if (processedLabels.count(lastOrder->getLabel()) != 1) {
-				cout << ". I will use " << lastOrder->getLabel() << "." << endl;
+			if (processedLabels.count(lastLabel) != 1) {
+				cout << ". I will use " << lastLabel << "." << endl;
 				needToRun = true;
 			}else {
-				cout << ". Please refer to " << lastOrder->getLabel() << "." << endl;
+				cout << ". Please refer to " << lastLabel << "." << endl;
 			}
 		}
 		
 		//run last line if you need to
 		if (needToRun == true)  {
-			cCurve = new Collect(lastOrder, cDisplays);
+			delete order;
+			order = (input->getOrderVector(lastLabel));
+			
+			cout << order->getLabel() << '\t' << count << endl;
+			
+			cCurve = new Collect(order, cDisplays);
 			cCurve->getCurve(freq);
 			delete cCurve;
-			
-			cout << lastOrder->getLabel() << '\t' << count << endl;
+			delete order;
 		}
 		
-		delete lastOrder;
+		
 		for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 		return 0;
 	}

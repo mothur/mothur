@@ -178,7 +178,7 @@ int RareFactSharedCommand::execute(){
 			
 		input = globaldata->ginput;
 		lookup = input->getSharedRAbundVectors();
-		vector<SharedRAbundVector*> lastLookup = lookup;
+		string lastLabel = lookup[0]->getLabel();
 
 		if (lookup.size() < 2) { 
 			cout << "I cannot run the command without at least 2 valid groups."; 
@@ -206,21 +206,24 @@ int RareFactSharedCommand::execute(){
 				userLines.erase(count);
 			}
 			
-			if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLookup[0]->getLabel()) != 1)) {
-					cout << lastLookup[0]->getLabel() << '\t' << count << endl;
-					rCurve = new Rarefact(lastLookup, rDisplays);
+			if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+					lookup = input->getSharedRAbundVectors(lastLabel);
+
+					cout << lookup[0]->getLabel() << '\t' << count << endl;
+					rCurve = new Rarefact(lookup, rDisplays);
 					rCurve->getSharedCurve(freq, nIters);
 					delete rCurve;
 
-					processedLabels.insert(lastLookup[0]->getLabel());
-					userLabels.erase(lastLookup[0]->getLabel());
+					processedLabels.insert(lookup[0]->getLabel());
+					userLabels.erase(lookup[0]->getLabel());
 			}
 				
-			//prevent memory leak
-			if (count != 1) { for (int i = 0; i < lastLookup.size(); i++) {  delete lastLookup[i];  } }
-			lastLookup = lookup;
+			
+			lastLabel = lookup[0]->getLabel();
 			
 			//get next line to process
+			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 			lookup = input->getSharedRAbundVectors();
 			count++;
 		}
@@ -230,24 +233,26 @@ int RareFactSharedCommand::execute(){
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
 			cout << "Your file does not include the label "<< *it; 
-			if (processedLabels.count(lastLookup[0]->getLabel()) != 1) {
-				cout << ". I will use " << lastLookup[0]->getLabel() << "." << endl;
+			if (processedLabels.count(lastLabel) != 1) {
+				cout << ". I will use " << lastLabel << "." << endl;
 				needToRun = true;
 			}else {
-				cout << ". Please refer to " << lastLookup[0]->getLabel() << "." << endl;
+				cout << ". Please refer to " << lastLabel << "." << endl;
 			}
 		}
 		
 		//run last line if you need to
 		if (needToRun == true)  {
-			cout << lastLookup[0]->getLabel() << '\t' << count << endl;
-			rCurve = new Rarefact(lastLookup, rDisplays);
+			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+			lookup = input->getSharedRAbundVectors(lastLabel);
+
+			cout << lookup[0]->getLabel() << '\t' << count << endl;
+			rCurve = new Rarefact(lookup, rDisplays);
 			rCurve->getSharedCurve(freq, nIters);
 			delete rCurve;
+			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 		}
 		
-		for (int i = 0; i < lastLookup.size(); i++) {  delete lastLookup[i];  }
-
 		for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}	
 		
 		//reset groups parameter
