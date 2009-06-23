@@ -17,6 +17,7 @@
 InputData::InputData(string fName, string f) : format(f){
 	
 	openInputFile(fName, fileHandle);
+	filename = fName;
 	
 }
 
@@ -76,14 +77,57 @@ ListVector* InputData::getListVector(){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getListVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}
 	catch(...) {
-		cout << "An unknown error has occurred in the InputData class function getOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		cout << "An unknown error has occurred in the InputData class function getListVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
 		exit(1);
 	}	
 }
+
+/***********************************************************************/
+
+ListVector* InputData::getListVector(string label){
+	try {
+		ifstream in;
+		string  thisLabel;
+		openInputFile(filename, in);
+		
+		if(in){
+
+			if (format == "list") {
+			
+				while (in.eof() != true) {
+					
+					list = new ListVector(in);
+					thisLabel = list->getLabel();
+					
+					//if you are at the last label
+					if (thisLabel == label) {  break;  }
+					//so you don't loose this memory
+					else {	delete list;	}
+					gobble(in);
+				}
+			}
+			
+			in.close();
+			return list;
+		}
+		else{
+			return NULL;
+		}
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getListVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the InputData class function getListVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
 
 /***********************************************************************/
 
@@ -110,6 +154,50 @@ SharedListVector* InputData::getSharedListVector(){
 		exit(1);
 	}	
 }
+/***********************************************************************/
+
+SharedListVector* InputData::getSharedListVector(string label){
+	try {
+		ifstream in;
+		string  thisLabel;
+		openInputFile(filename, in);
+		
+		if(in){
+
+			if (format == "shared")  {
+			
+				while (in.eof() != true) {
+					
+					SharedList = new SharedListVector(in);
+					thisLabel = SharedList->getLabel();
+					
+					//if you are at the last label
+					if (thisLabel == label) {  break;  }
+					//so you don't loose this memory
+					else {	delete SharedList;	}
+					gobble(in);
+				}
+
+			}
+				
+			in.close();
+			return SharedList;
+			
+		}else{
+			return NULL;
+		}
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getSharedListVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the InputData class function getSharedListVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
+
 
 /***********************************************************************/
 
@@ -137,6 +225,49 @@ SharedOrderVector* InputData::getSharedOrderVector(){
 	}	
 }
 
+/***********************************************************************/
+
+SharedOrderVector* InputData::getSharedOrderVector(string label){
+	try {
+		ifstream in;
+		string  thisLabel;
+		openInputFile(filename, in);
+		
+		if(in){
+
+			if (format == "sharedfile")  {
+			
+				while (in.eof() != true) {
+					
+					SharedOrder = new SharedOrderVector(in);
+					thisLabel = SharedOrder->getLabel();
+					
+					//if you are at the last label
+					if (thisLabel == label) {  break;  }
+					//so you don't loose this memory
+					else {	delete SharedOrder;	}
+					gobble(in);
+				}
+
+			}
+				
+			in.close();
+			return SharedOrder;
+			
+		}else{
+			return NULL;
+		}
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getSharedOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the InputData class function getSharedOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
 
 
 /***********************************************************************/
@@ -144,7 +275,7 @@ SharedOrderVector* InputData::getSharedOrderVector(){
 OrderVector* InputData::getOrderVector(){
 	try {
 		if(fileHandle){
-			if(format == "list") {
+			if((format == "list") || (format == "listorder")) {
 				input = new ListVector(fileHandle);
 			}
 			else if (format == "shared")  {
@@ -159,10 +290,7 @@ OrderVector* InputData::getOrderVector(){
 			else if(format == "sabund"){
 				input = new SAbundVector(fileHandle);
 			}
-			else if(format == "listorder"){					
-				input = new ListVector(fileHandle); 
-			}
-		
+					
 			gobble(fileHandle);
 			output = new OrderVector();
 			*output = (input->getOrderVector());
@@ -182,6 +310,114 @@ OrderVector* InputData::getOrderVector(){
 		exit(1);
 	}	
 }
+
+/***********************************************************************/
+OrderVector* InputData::getOrderVector(string label){
+	try {
+	
+		ifstream in;
+		string  thisLabel;
+		openInputFile(filename, in);
+		
+		if(in){
+			if((format == "list") || (format == "listorder")) {
+			
+				while (in.eof() != true) {
+					
+					input = new ListVector(in);
+					thisLabel = input->getLabel();
+					
+					//if you are at the last label
+					if (thisLabel == label) {  break;  }
+					//so you don't loose this memory
+					else {	delete input;	}
+					gobble(in);
+				}
+			}
+			else if (format == "shared")  {
+				
+				while (in.eof() != true) {
+					
+					input = new SharedListVector(in);
+					thisLabel = input->getLabel();
+					
+					//if you are at the last label
+					if (thisLabel == label) {  break;  }
+					//so you don't loose this memory
+					else {	delete input;	}
+					gobble(in);
+				}
+
+			}
+			else if(format == "rabund"){
+				
+				while (in.eof() != true) {
+					
+					input = new RAbundVector(in);
+					thisLabel = input->getLabel();
+					
+					//if you are at the last label
+					if (thisLabel == label) {  break;  }
+					//so you don't loose this memory
+					else {	delete input;	}
+					gobble(in);
+				}
+
+			}
+			else if(format == "order"){			
+				
+				while (in.eof() != true) {
+					
+					input = new OrderVector(in);
+					thisLabel = input->getLabel();
+					
+					//if you are at the last label
+					if (thisLabel == label) {  break;  }
+					//so you don't loose this memory
+					else {	delete input;	}
+					gobble(in);
+				}
+
+			}
+			else if(format == "sabund"){
+				
+				while (in.eof() != true) {
+					
+					input = new SAbundVector(in);
+					thisLabel = input->getLabel();
+					
+					//if you are at the last label
+					if (thisLabel == label) {  break;  }
+					//so you don't loose this memory
+					else {	delete input;	}
+					gobble(in);
+					
+				}
+
+			}
+			
+			in.close();		
+
+			output = new OrderVector();
+			*output = (input->getOrderVector());
+			
+			return output;
+
+		}
+		else{
+			return NULL;
+		}
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the InputData class function getOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
 /***********************************************************************/
 //this is used when you don't need the order vector
 vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(){
@@ -205,6 +441,68 @@ vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(){
 		vector<SharedRAbundVector*> null;  null.push_back(NULL);
 		return null;
 		
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getSharedRAbundVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the InputData class function getSharedRAbundVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+/***********************************************************************/
+vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(string label){
+	try {
+		ifstream in;
+		string  thisLabel;
+		
+		openInputFile(filename, in);
+		
+		if(in){
+			if (format == "sharedfile")  {
+				while (in.eof() != true) {
+					
+					SharedRAbundVector* SharedRAbund = new SharedRAbundVector(in);
+					if (SharedRAbund != NULL) {
+						thisLabel = SharedRAbund->getLabel();
+						//if you are at the last label
+						if (thisLabel == label) {  in.close(); return SharedRAbund->getSharedRAbundVectors();  }
+						else {
+							//so you don't loose this memory
+							vector<SharedRAbundVector*> lookup = SharedRAbund->getSharedRAbundVectors(); 
+							for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+							delete SharedRAbund;
+						}
+					}else{  break;  }
+					gobble(in);
+					
+				}
+			}else if (format == "shared") {
+				while (in.eof() != true) {
+					
+					SharedList = new SharedListVector(in);
+					if (SharedList != NULL) {
+						thisLabel = SharedList->getLabel();
+						//if you are at the last label
+						if (thisLabel == label) {  in.close(); return SharedList->getSharedRAbundVector();  }
+						else {
+							//so you don't loose this memory
+							delete SharedList;
+						}
+					}else{  break;  }
+					gobble(in);
+					
+				}
+			
+			}
+		}
+				
+		//this is created to signal to calling function that the input file is at eof
+		vector<SharedRAbundVector*> null;  null.push_back(NULL);
+		in.close();
+		return null;
+	
 	}
 	catch(exception& e) {
 		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getSharedRAbundVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
@@ -244,6 +542,112 @@ SAbundVector* InputData::getSAbundVector(){
 			*sabund = (input->getSAbundVector());
 
 			return sabund;
+		}
+		else{
+			return NULL;
+		}
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getSAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the InputData class function getSAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+/***********************************************************************/
+SAbundVector* InputData::getSAbundVector(string label){
+	try {
+	
+		ifstream in;
+		string  thisLabel;
+		openInputFile(filename, in);
+		
+		if(in){
+			if (format == "list") {
+			
+				while (in.eof() != true) {
+					
+					input = new ListVector(in);
+					thisLabel = input->getLabel();
+					
+					//if you are at the last label
+					if (thisLabel == label) {  break;  }
+					//so you don't loose this memory
+					else {	delete input;	}
+					gobble(in);
+				}
+			}
+			else if (format == "shared")  {
+				
+				while (in.eof() != true) {
+					
+					input = new SharedListVector(in);
+					thisLabel = input->getLabel();
+					
+					//if you are at the last label
+					if (thisLabel == label) {  break;  }
+					//so you don't loose this memory
+					else {	delete input;	}
+					gobble(in);
+				}
+
+			}
+			else if(format == "rabund"){
+				
+				while (in.eof() != true) {
+					
+					input = new RAbundVector(in);
+					thisLabel = input->getLabel();
+					
+					//if you are at the last label
+					if (thisLabel == label) {  break;  }
+					//so you don't loose this memory
+					else {	delete input;	}
+					gobble(in);
+				}
+
+			}
+			else if(format == "order"){			
+				
+				while (in.eof() != true) {
+					
+					input = new OrderVector(in);
+					thisLabel = input->getLabel();
+					
+					//if you are at the last label
+					if (thisLabel == label) {  break;  }
+					//so you don't loose this memory
+					else {	delete input;	}
+					gobble(in);
+				}
+
+			}
+			else if(format == "sabund"){
+				
+				while (in.eof() != true) {
+					
+					input = new SAbundVector(in);
+					thisLabel = input->getLabel();
+					
+					//if you are at the last label
+					if (thisLabel == label) {  break;  }
+					//so you don't loose this memory
+					else {	delete input;	}
+					gobble(in);
+					
+				}
+
+			}
+			
+			in.close();		
+
+			sabund = new SAbundVector();
+			*sabund = (input->getSAbundVector());
+
+			return sabund;
+
 		}
 		else{
 			return NULL;
@@ -299,6 +703,112 @@ RAbundVector* InputData::getRAbundVector(){
 		exit(1);
 	}	
 }
+/***********************************************************************/
+RAbundVector* InputData::getRAbundVector(string label){
+	try {
+	
+		ifstream in;
+		string  thisLabel;
+		openInputFile(filename, in);
+		
+		if(in){
+			if (format == "list") {
+			
+				while (in.eof() != true) {
+					
+					input = new ListVector(in);
+					thisLabel = input->getLabel();
+					
+					//if you are at the last label
+					if (thisLabel == label) {  break;  }
+					//so you don't loose this memory
+					else {	delete input;	}
+					gobble(in);
+				}
+			}
+			else if (format == "shared")  {
+				
+				while (in.eof() != true) {
+					
+					input = new SharedListVector(in);
+					thisLabel = input->getLabel();
+					
+					//if you are at the last label
+					if (thisLabel == label) {  break;  }
+					//so you don't loose this memory
+					else {	delete input;	}
+					gobble(in);
+				}
+
+			}
+			else if(format == "rabund"){
+				
+				while (in.eof() != true) {
+					
+					input = new RAbundVector(in);
+					thisLabel = input->getLabel();
+					
+					//if you are at the last label
+					if (thisLabel == label) {  break;  }
+					//so you don't loose this memory
+					else {	delete input;	}
+					gobble(in);
+				}
+
+			}
+			else if(format == "order"){			
+				
+				while (in.eof() != true) {
+					
+					input = new OrderVector(in);
+					thisLabel = input->getLabel();
+					
+					//if you are at the last label
+					if (thisLabel == label) {  break;  }
+					//so you don't loose this memory
+					else {	delete input;	}
+					gobble(in);
+				}
+
+			}
+			else if(format == "sabund"){
+				
+				while (in.eof() != true) {
+					
+					input = new SAbundVector(in);
+					thisLabel = input->getLabel();
+					
+					//if you are at the last label
+					if (thisLabel == label) {  break;  }
+					//so you don't loose this memory
+					else {	delete input;	}
+					gobble(in);
+					
+				}
+
+			}
+			
+			in.close();		
+
+			rabund = new RAbundVector();
+			*rabund = (input->getRAbundVector());
+
+			return rabund;
+		}
+		else{
+			return NULL;
+		}
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}
+	catch(...) {
+		cout << "An unknown error has occurred in the InputData class function getRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		exit(1);
+	}	
+}
+
 /***********************************************************************/
 
 

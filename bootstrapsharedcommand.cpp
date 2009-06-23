@@ -201,7 +201,7 @@ int BootSharedCommand::execute(){
 		read->read(&*globaldata); 
 		input = globaldata->ginput;
 		order = input->getSharedOrderVector();
-		SharedOrderVector* lastOrder = order;
+		string lastLabel = order->getLabel();
 		
 		//if the users entered no valid calculators don't execute command
 		if (treeCalculators.size() == 0) { return 0; }
@@ -239,19 +239,22 @@ int BootSharedCommand::execute(){
 			}
 			
 			//you have a label the user want that is smaller than this line and the last line has not already been processed
-			if ((anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastOrder->getLabel()) != 1)) {
-											
-				cout << lastOrder->getLabel() << '\t' << count << endl;
-				process(lastOrder);
+			if ((anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				
+				delete order;
+				order = input->getSharedOrderVector(lastLabel);													
+				cout << order->getLabel() << '\t' << count << endl;
+				process(order);
 
-				processedLabels.insert(lastOrder->getLabel());
-				userLabels.erase(lastOrder->getLabel());
+				processedLabels.insert(order->getLabel());
+				userLabels.erase(order->getLabel());
 			}
 			
-			if (count != 1) { delete lastOrder; }
-			lastOrder = order;			
+			
+			lastLabel = order->getLabel();			
 
 			//get next line to process
+			delete order;
 			order = input->getSharedOrderVector();
 			count++;
 		}
@@ -261,21 +264,23 @@ int BootSharedCommand::execute(){
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
 			cout << "Your file does not include the label "<< *it; 
-			if (processedLabels.count(lastOrder->getLabel()) != 1) {
-				cout << ". I will use " << lastOrder->getLabel() << "." << endl;
+			if (processedLabels.count(lastLabel) != 1) {
+				cout << ". I will use " << lastLabel << "." << endl;
 				needToRun = true;
 			}else {
-				cout << ". Please refer to " << lastOrder->getLabel() << "." << endl;
+				cout << ". Please refer to " << lastLabel << "." << endl;
 			}
 		}
 		
 		//run last line if you need to
 		if (needToRun == true)  {
-			process(lastOrder);			
-			cout << lastOrder->getLabel() << '\t' << count << endl;
+				delete order;
+				order = input->getSharedOrderVector(lastLabel);													
+				cout << order->getLabel() << '\t' << count << endl;
+				process(order);
+				delete order;
+
 		}
-		
-		delete lastOrder;
 
 		//reset groups parameter
 		globaldata->Groups.clear();  

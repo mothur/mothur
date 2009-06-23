@@ -124,7 +124,7 @@ int GetSAbundCommand::execute(){
 		read->read(&*globaldata); 
 		
 		order = globaldata->gorder;
-		lastOrder = order;
+		string lastLabel = order->getLabel();
 		input = globaldata->ginput;
 						
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -147,20 +147,24 @@ int GetSAbundCommand::execute(){
 					userLines.erase(count);
 			}
 			
-			if ((anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastOrder->getLabel()) != 1)) {
-					cout << lastOrder->getLabel() << '\t' << count << endl;
+			if ((anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+					delete order;		
+					order = (input->getOrderVector(lastLabel));
+					
+					cout << order->getLabel() << '\t' << count << endl;
 					sabund = new SAbundVector();
-					*sabund = (lastOrder->getSAbundVector());
+					*sabund = (order->getSAbundVector());
 					sabund->print(out);
 					delete sabund;
 
-					processedLabels.insert(lastOrder->getLabel());
-					userLabels.erase(lastOrder->getLabel());
+					processedLabels.insert(order->getLabel());
+					userLabels.erase(order->getLabel());
 			}
 			
-			if (count != 1) { delete lastOrder; }
-			lastOrder = order;	
-					
+			
+			lastLabel = order->getLabel();	
+			
+			delete order;		
 			order = (input->getOrderVector());
 			count++;
 		}
@@ -170,23 +174,27 @@ int GetSAbundCommand::execute(){
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
 			cout << "Your file does not include the label "<< *it; 
-			if (processedLabels.count(lastOrder->getLabel()) != 1) {
-				cout << ". I will use " << lastOrder->getLabel() << "." << endl;
+			if (processedLabels.count(lastLabel) != 1) {
+				cout << ". I will use " << lastLabel << "." << endl;
 				needToRun = true;
 			}else {
-				cout << ". Please refer to " << lastOrder->getLabel() << "." << endl;
+				cout << ". Please refer to " << lastLabel << "." << endl;
 			}
 		}
 		
 		//run last line if you need to
 		if (needToRun == true)  {
-			cout << lastOrder->getLabel() << '\t' << count << endl;
+			delete order;		
+			order = (input->getOrderVector(lastLabel));
+			
+			cout << order->getLabel() << '\t' << count << endl;
 			sabund = new SAbundVector();
-			*sabund = (lastOrder->getSAbundVector());
+			*sabund = (order->getSAbundVector());
 			sabund->print(out);
 			delete sabund;
+			delete order;
 		}
-		delete lastOrder;  globaldata->gorder = NULL;
+		globaldata->gorder = NULL;
 
 		out.close();
 		return 0;		

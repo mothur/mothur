@@ -16,6 +16,12 @@
 /***********************************************************************/
 
 SharedRAbundVector::SharedRAbundVector() : DataVector(), maxRank(0), numBins(0), numSeqs(0) {globaldata = GlobalData::getInstance();}
+/***********************************************************************/
+
+SharedRAbundVector::~SharedRAbundVector() {
+	//for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+
+}
 
 /***********************************************************************/
 

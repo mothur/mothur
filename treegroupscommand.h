@@ -59,7 +59,7 @@ private:
 	InputData* input;
 	ValidCalculators* validCalculator;
 	vector<SharedRAbundVector*> lookup;
-	vector<SharedRAbundVector*> lastLookup;
+	string lastLabel;
 	string format, outputFile, groupNames, filename;
 	int numGroups;
 	ofstream out;

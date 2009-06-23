@@ -47,7 +47,7 @@ int SharedCommand::execute(){
 
 		input = globaldata->ginput;
 		SharedList = globaldata->gSharedList;
-		SharedListVector* lastList = SharedList;
+		string lastLabel = SharedList->getLabel();
 		vector<SharedRAbundVector*> lookup; 
 				
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -69,18 +69,22 @@ int SharedCommand::execute(){
 					userLines.erase(count);
 			}
 			
-			if ((anyLabelsToProcess(SharedList->getLabel(), userLabels, errorOff) == true) && (processedLabels.count(lastList->getLabel()) != 1)) {
-					lookup = lastList->getSharedRAbundVector();
+			if ((anyLabelsToProcess(SharedList->getLabel(), userLabels, errorOff) == true) && (processedLabels.count(lastLabel) != 1)) {
+					delete SharedList;
+					SharedList = input->getSharedListVector(lastLabel); //get new list vector to process
+					
+					lookup = SharedList->getSharedRAbundVector();
 					printSharedData(lookup); //prints info to the .shared file
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
 					
-					processedLabels.insert(lastList->getLabel());
-					userLabels.erase(lastList->getLabel());
+					processedLabels.insert(SharedList->getLabel());
+					userLabels.erase(SharedList->getLabel());
 			}
 			
-			if (count != 1) { delete lastList; }
-			lastList = SharedList;	
-						 		
+		
+			lastLabel = SharedList->getLabel();
+				
+			delete SharedList;
 			SharedList = input->getSharedListVector(); //get new list vector to process
 			
 			count++;		
@@ -91,7 +95,7 @@ int SharedCommand::execute(){
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
 			//cout << "Your file does not include the label "<< *it; 
-			if (processedLabels.count(lastList->getLabel()) != 1) {
+			if (processedLabels.count(lastLabel) != 1) {
 				//cout << ". I will use " << lastList->getLabel() << "." << endl;
 				needToRun = true;
 			}else {
@@ -101,13 +105,16 @@ int SharedCommand::execute(){
 		
 		//run last line if you need to
 		if (needToRun == true)  {
-			lookup = lastList->getSharedRAbundVector();
+			delete SharedList;
+			SharedList = input->getSharedListVector(lastLabel); //get new list vector to process
+					
+			lookup = SharedList->getSharedRAbundVector();
 			printSharedData(lookup); //prints info to the .shared file
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
-
+			delete SharedList;
 		}
 		
-		delete lastList; globaldata->gSharedList = NULL;
+		globaldata->gSharedList = NULL;
 		delete read;
 		
 		out.close();

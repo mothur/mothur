@@ -164,7 +164,7 @@ int BinSeqCommand::execute(){
 		
 		input = globaldata->ginput;
 		list = globaldata->gListVector;
-		ListVector* lastList = list;
+		string lastLabel = list->getLabel();
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
@@ -184,19 +184,21 @@ int BinSeqCommand::execute(){
 				userLines.erase(count);
 			}
 			
-			if ((anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastList->getLabel()) != 1)) {
+			if ((anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				delete list;
+				list = input->getListVector(lastLabel);
 				
-				error = process(lastList, count);	
+				error = process(list, count);	
 				if (error == 1) { return 0; }
 													
-				processedLabels.insert(lastList->getLabel());
-				userLabels.erase(lastList->getLabel());
+				processedLabels.insert(list->getLabel());
+				userLabels.erase(list->getLabel());
 				
 			}
 			
-			if (count != 1) { delete lastList; }
-			lastList = list;			
-
+			lastLabel = list->getLabel();			
+			
+			delete list;
 			list = input->getListVector();
 			count++;
 		}
@@ -207,21 +209,25 @@ int BinSeqCommand::execute(){
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
 			cout << "Your file does not include the label "<< *it; 
-			if (processedLabels.count(lastList->getLabel()) != 1) {
-				cout << ". I will use " << lastList->getLabel() << "." << endl;
+			if (processedLabels.count(lastLabel) != 1) {
+				cout << ". I will use " << lastLabel << "." << endl;
 				needToRun = true;
 			}else {
-				cout << ". Please refer to " << lastList->getLabel() << "." << endl;
+				cout << ". Please refer to " << lastLabel << "." << endl;
 			}
 		}
 		
 		//run last line if you need to
 		if (needToRun == true)  {
-			error = process(lastList, count);	
-			if (error == 1) { return 0; }			
+			delete list;
+			list = input->getListVector(lastLabel);
+				
+			error = process(list, count);	
+			if (error == 1) { return 0; }
+			
+			delete list;  
 		}
 		
-		delete lastList;
 		return 0;
 	}
 	catch(exception& e) {

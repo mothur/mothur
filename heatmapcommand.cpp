@@ -142,8 +142,7 @@ int HeatMapCommand::execute(){
 		if (abort == true) { return 0; }
 	
 		int count = 1;	
-		RAbundVector* lastRAbund;
-		vector<SharedRAbundVector*> lastLookup;
+		string lastLabel;
 	
 		if (format == "sharedfile") {
 			//you have groups
@@ -152,14 +151,14 @@ int HeatMapCommand::execute(){
 			
 			input = globaldata->ginput;
 			lookup = input->getSharedRAbundVectors();
-			lastLookup = lookup;
+			lastLabel = lookup[0]->getLabel();
 		}else if (format == "list") {
 			//you are using just a list file and have only one group
 			read = new ReadOTUFile(globaldata->inputFileName);	
 			read->read(&*globaldata); 
 			
 			rabund = globaldata->rabund;
-			lastRAbund = globaldata->rabund;
+			lastLabel = rabund->getLabel();
 			input = globaldata->ginput;		
 		}
 		
@@ -183,18 +182,21 @@ int HeatMapCommand::execute(){
 					userLines.erase(count);
 				}
 				
-				if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLookup[0]->getLabel()) != 1)) {
-					cout << lastLookup[0]->getLabel() << '\t' << count << endl;
-					heatmap->getPic(lastLookup);
+				if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+					cout << lastLabel << '\t' << count << endl;
+					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
+					lookup = input->getSharedRAbundVectors(lastLabel);
 					
-					processedLabels.insert(lastLookup[0]->getLabel());
-					userLabels.erase(lastLookup[0]->getLabel());
+					heatmap->getPic(lookup);
+					
+					processedLabels.insert(lookup[0]->getLabel());
+					userLabels.erase(lookup[0]->getLabel());
 				}
 				
+				lastLabel = lookup[0]->getLabel();
 				//prevent memory leak
-				if (count != 1) { for (int i = 0; i < lastLookup.size(); i++) {  delete lastLookup[i];  } }
-				lastLookup = lookup;			
-
+				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+							
 				//get next line to process
 				lookup = input->getSharedRAbundVectors();				
 				count++;
@@ -205,21 +207,25 @@ int HeatMapCommand::execute(){
 			bool needToRun = false;
 			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
 				cout << "Your file does not include the label "<< *it; 
-				if (processedLabels.count(lastLookup[0]->getLabel()) != 1) {
-					cout << ". I will use " << lastLookup[0]->getLabel() << "." << endl;
+				if (processedLabels.count(lastLabel) != 1) {
+					cout << ". I will use " << lastLabel << "." << endl;
 					needToRun = true;
 				}else {
-					cout << ". Please refer to " << lastLookup[0]->getLabel() << "." << endl;
+					cout << ". Please refer to " << lastLabel << "." << endl;
 				}
 			}
 		
 			//run last line if you need to
 			if (needToRun == true)  {
-				cout << lastLookup[0]->getLabel() << '\t' << count << endl;
-				heatmap->getPic(lastLookup);
+				cout << lastLabel << '\t' << count << endl;
+				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
+				lookup = input->getSharedRAbundVectors(lastLabel);
+
+				heatmap->getPic(lookup);
+				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
 			}
 		
-			for (int i = 0; i < lastLookup.size(); i++) {  delete lastLookup[i];  }
+			
 			
 			//reset groups parameter
 			globaldata->Groups.clear();  
@@ -238,18 +244,22 @@ int HeatMapCommand::execute(){
 					userLines.erase(count);
 				}
 				
-				if ((anyLabelsToProcess(rabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastRAbund->getLabel()) != 1)) {
+				if ((anyLabelsToProcess(rabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 
-					cout << lastRAbund->getLabel() << '\t' << count << endl;
-					heatmap->getPic(lastRAbund);
+					cout << lastLabel << '\t' << count << endl;
+					delete rabund;
+					rabund = input->getRAbundVector(lastLabel);
 					
-					processedLabels.insert(lastRAbund->getLabel());
-					userLabels.erase(lastRAbund->getLabel());
+					heatmap->getPic(rabund);
+					
+					processedLabels.insert(rabund->getLabel());
+					userLabels.erase(rabund->getLabel());
 				}		
 				
-				if (count != 1) { delete lastRAbund; }
-				lastRAbund = rabund;			
-
+								
+								
+				lastLabel = rabund->getLabel();			
+				delete rabund;
 				rabund = input->getRAbundVector();
 				count++;
 			}
@@ -259,22 +269,24 @@ int HeatMapCommand::execute(){
 			bool needToRun = false;
 			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
 				cout << "Your file does not include the label "<< *it; 
-				if (processedLabels.count(lastRAbund->getLabel()) != 1) {
-					cout << ". I will use " << lastRAbund->getLabel() << "." << endl;
+				if (processedLabels.count(lastLabel) != 1) {
+					cout << ". I will use " << lastLabel << "." << endl;
 					needToRun = true;
 				}else {
-					cout << ". Please refer to " << lastRAbund->getLabel() << "." << endl;
+					cout << ". Please refer to " << lastLabel << "." << endl;
 				}
 			}
 		
 			//run last line if you need to
 			if (needToRun == true)  {
-				cout << lastRAbund->getLabel() << '\t' << count << endl;
-				heatmap->getPic(lastRAbund);
+				cout << lastLabel << '\t' << count << endl;
+				delete rabund;
+				rabund = input->getRAbundVector(lastLabel);
+					
+				heatmap->getPic(rabund);
+				delete rabund; globaldata->rabund = NULL;
 			}
 		
-			delete lastRAbund; globaldata->rabund = NULL;
-
 		}
 		
 		delete input; globaldata->ginput = NULL;

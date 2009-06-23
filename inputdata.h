@@ -15,12 +15,19 @@ public:
 	InputData(string, string, string);
 	~InputData();
 	ListVector* getListVector();
+	ListVector* getListVector(string);  //pass the label you want
 	SharedListVector* getSharedListVector();
-	OrderVector* getOrderVector();
+	SharedListVector* getSharedListVector(string);  //pass the label you want
+	OrderVector* getOrderVector(); 
+	OrderVector* getOrderVector(string); //pass the label you want
 	SharedOrderVector* getSharedOrderVector();
+	SharedOrderVector* getSharedOrderVector(string);  //pass the label you want
 	SAbundVector* getSAbundVector();
+	SAbundVector* getSAbundVector(string);  //pass the label you want
 	RAbundVector* getRAbundVector();
+	RAbundVector* getRAbundVector(string);  //pass the label you want
 	vector<SharedRAbundVector*> getSharedRAbundVectors();
+	vector<SharedRAbundVector*> getSharedRAbundVectors(string);  //pass the label you want
 	
 private:
 	string format;
@@ -33,6 +40,7 @@ private:
 	SAbundVector* sabund;
 	RAbundVector* rabund;
 	map<string,int> orderMap;
+	string filename;
 };
 
 
