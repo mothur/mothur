@@ -20,40 +20,31 @@ GetlabelCommand::GetlabelCommand(string option){
 		if(option == "help") { help(); abort = true; }
 		
 		else {
-			if (option != "") { cout << "There are no valid parameters for the get.label command." << endl; abort = true; }
+			if (option != "") { mothurOut("There are no valid parameters for the get.label command."); mothurOutEndLine(); abort = true; }
 			
-			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { cout << "You must read a list, sabund or rabund before you can use the get.label command." << endl; abort = true; }				
+			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { mothurOut("You must read a list, sabund or rabund before you can use the get.label command."); mothurOutEndLine(); abort = true; }				
 		}
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the GetlabelCommand class Function GetlabelCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "GetlabelCommand", "GetlabelCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the GetlabelCommand class function GetlabelCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-			
 }
 //**********************************************************************************************************************
 
 void GetlabelCommand::help(){
 	try {
-		cout << "The get.label command can only be executed after a successful read.otu command." << "\n";
-		cout << "You may not use any parameters with the get.label command." << "\n";
-		cout << "The get.label command should be in the following format: " << "\n";
-		cout << "get.label()" << "\n";
-		cout << "Example get.label()." << "\n";
+		mothurOut("The get.label command can only be executed after a successful read.otu command.\n");
+		mothurOut("You may not use any parameters with the get.label command.\n");
+		mothurOut("The get.label command should be in the following format: \n");
+		mothurOut("get.label()\n");
+		mothurOut("Example get.label().\n");
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the GetlabelCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "GetlabelCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the GetlabelCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
@@ -78,7 +69,7 @@ int GetlabelCommand::execute(){
 			if(count > numBins)
 				count = 0;
 			if(count == 0) {
-				cout << label << "\n";
+				mothurOut(label); mothurOutEndLine();
 				in >> numBins;
 			}
 			in >> label;
@@ -90,12 +81,8 @@ int GetlabelCommand::execute(){
 	}
 
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the GetlabelCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "GetlabelCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the GetlabelCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 

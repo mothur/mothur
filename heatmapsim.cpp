@@ -21,17 +21,7 @@
 
 //**********************************************************************************************************************
 HeatMapSim::HeatMapSim(){
-	try {
 		globaldata = GlobalData::getInstance();
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the HeatMap class Function HeatMap. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the HeatMap class function HeatMap. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
 }
 //**********************************************************************************************************************
 
@@ -107,11 +97,7 @@ void HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> 
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the HeatMapSim class Function getPic. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the HeatMapSim class function getPic. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "HeatMapSim", "getPic");
 		exit(1);
 	}
 }
@@ -148,14 +134,9 @@ void HeatMapSim::printLegend(int y, float maxSim) {
 	}
 	
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the HeatMapSim class Function printLegend. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "HeatMapSim", "printLegend");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the HeatMapSim class function printLegend. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	
 }
 
 //**********************************************************************************************************************

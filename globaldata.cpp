@@ -112,11 +112,7 @@ void GlobalData::newRead() {
 			runParse = true;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the GlobalData class Function newRead. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the GlobalData class function newRead. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "GlobalData", "newRead");
 		exit(1);
 	}
 }
@@ -141,11 +137,7 @@ GlobalData::~GlobalData() {
 		if (gSequenceDB != NULL) { delete gSequenceDB; gSequenceDB = NULL;}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the GlobalData class Function ~GlobalData. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the GlobalData class function ~GlobalData. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "GlobalData", "~GlobalData");
 		exit(1);
 	}
 }

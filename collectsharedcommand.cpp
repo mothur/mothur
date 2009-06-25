@@ -66,8 +66,8 @@ CollectSharedCommand::CollectSharedCommand(string option){
 			
 			//make sure the user has already run the read.otu command
 			if (globaldata->getSharedFile() == "") {
-				if (globaldata->getListFile() == "") { cout << "You must read a list and a group, or a shared before you can use the collect.shared command." << endl; abort = true; }
-				else if (globaldata->getGroupFile() == "") { cout << "You must read a list and a group, or a shared before you can use the collect.shared command." << endl; abort = true; }
+				if (globaldata->getListFile() == "") { mothurOut("You must read a list and a group, or a shared before you can use the collect.shared command."); mothurOutEndLine(); abort = true; }
+				else if (globaldata->getGroupFile() == "") { mothurOut("You must read a list and a group, or a shared before you can use the collect.shared command."); mothurOutEndLine(); abort = true; }
 			}
 
 			
@@ -88,7 +88,7 @@ CollectSharedCommand::CollectSharedCommand(string option){
 			}
 			
 			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { cout << "You cannot use both the line and label parameters at the same time. " << endl; abort = true; }
+			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
 			//if the user has not specified any line or labels use the ones from read.otu
 			else if((line == "") && (label == "")) {  
 				allLines = globaldata->allLines; 
@@ -175,40 +175,31 @@ CollectSharedCommand::CollectSharedCommand(string option){
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the CollectSharedCommand class Function CollectSharedCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "CollectSharedCommand", "CollectSharedCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the CollectSharedCommand class function CollectSharedCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-			
 }
 //**********************************************************************************************************************
 
 void CollectSharedCommand::help(){
 	try {
-		cout << "The collect.shared command can only be executed after a successful read.otu command." << "\n";
-		cout << "The collect.shared command parameters are label, line, freq, calc and groups.  No parameters are required, but you may not use " << "\n";
-		cout << "both the line and label parameters at the same time. The collect.shared command should be in the following format: " << "\n";
-		cout << "collect.shared(label=yourLabel, line=yourLines, freq=yourFreq, calc=yourEstimators, groups=yourGroups)." << "\n";
-		cout << "Example collect.shared(label=unique-.01-.03, line=0-5-10, freq=10, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan)." << "\n";
-		cout << "The default values for freq is 100 and calc are sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan." << "\n";
-		cout << "The default value for groups is all the groups in your groupfile." << "\n";
+		mothurOut("The collect.shared command can only be executed after a successful read.otu command.\n");
+		mothurOut("The collect.shared command parameters are label, line, freq, calc and groups.  No parameters are required, but you may not use \n");
+		mothurOut("both the line and label parameters at the same time. The collect.shared command should be in the following format: \n");
+		mothurOut("collect.shared(label=yourLabel, line=yourLines, freq=yourFreq, calc=yourEstimators, groups=yourGroups).\n");
+		mothurOut("Example collect.shared(label=unique-.01-.03, line=0-5-10, freq=10, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan).\n");
+		mothurOut("The default values for freq is 100 and calc are sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan.\n");
+		mothurOut("The default value for groups is all the groups in your groupfile.\n");
 		validCalculator->printCalc("shared", cout);
-		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
-		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile)." << "\n" << "\n";
+		mothurOut("The label and line parameters are used to analyze specific lines in your input.\n");
+		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile).\n\n");
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the CollectSharedCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "CollectSharedCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the CollectSharedCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
@@ -260,7 +251,7 @@ int CollectSharedCommand::execute(){
 				cCurve->getSharedCurve(freq);
 				delete cCurve;
 			
-				cout << order->getLabel() << '\t' << count << endl;
+				mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
 				userLines.erase(count);
@@ -277,7 +268,7 @@ int CollectSharedCommand::execute(){
 				cCurve->getSharedCurve(freq);
 				delete cCurve;
 			
-				cout << order->getLabel() << '\t' << count << endl;
+				mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
 			}
@@ -295,12 +286,12 @@ int CollectSharedCommand::execute(){
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			cout << "Your file does not include the label "<< *it; 
+			mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(lastLabel) != 1) {
-				cout << ". I will use " << lastLabel << "." << endl;
+				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
 				needToRun = true;
 			}else {
-				cout << ". Please refer to " << lastLabel << "." << endl;
+				mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
 			}
 		}
 		
@@ -313,7 +304,7 @@ int CollectSharedCommand::execute(){
 			cCurve->getCurve(freq);
 			delete cCurve;
 			
-			cout << order->getLabel() << '\t' << count << endl;
+			mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 			delete order;
 		}
 		
@@ -325,13 +316,9 @@ int CollectSharedCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the CollectSharedCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "CollectSharedCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the CollectSharedCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************/

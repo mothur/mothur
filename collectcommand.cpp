@@ -59,7 +59,7 @@ CollectCommand::CollectCommand(string option){
 			}
 			
 			//make sure the user has already run the read.otu command
-			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { cout << "You must read a list, sabund or rabund before you can use the collect.single command." << endl; abort = true; }
+			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { mothurOut("You must read a list, sabund or rabund before you can use the collect.single command."); mothurOutEndLine(); abort = true; }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -78,7 +78,7 @@ CollectCommand::CollectCommand(string option){
 			}
 			
 			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { cout << "You cannot use both the line and label parameters at the same time. " << endl; abort = true; }
+			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
 			//if the user has not specified any line or labels use the ones from read.otu
 			else if((line == "") && (label == "")) {  
 				allLines = globaldata->allLines; 
@@ -158,38 +158,29 @@ CollectCommand::CollectCommand(string option){
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the CollectCommand class Function CollectCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "CollectCommand", "CollectCommand");
 		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the CollectCommand class function CollectCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-			
+	}			
 }
 //**********************************************************************************************************************
 
 void CollectCommand::help(){
 	try {
-		cout << "The collect.single command can only be executed after a successful read.otu command. WITH ONE EXECEPTION. " << "\n";
-		cout << "The collect.single command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster." << "\n";
-		cout << "The collect.single command parameters are label, line, freq, calc and abund.  No parameters are required, but you may not use " << "\n";
-		cout << "both the line and label parameters at the same time. The collect.single command should be in the following format: " << "\n";
-		cout << "collect.single(label=yourLabel, line=yourLines, iters=yourIters, freq=yourFreq, calc=yourEstimators)." << "\n";
-		cout << "Example collect(label=unique-.01-.03, line=0-5-10, iters=10000, freq=10, calc=sobs-chao-ace-jack)." << "\n";
-		cout << "The default values for freq is 100, and calc are sobs-chao-ace-jack-shannon-npshannon-simpson." << "\n";
+		mothurOut("The collect.single command can only be executed after a successful read.otu command. WITH ONE EXECEPTION. \n");
+		mothurOut("The collect.single command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster.\n");
+		mothurOut("The collect.single command parameters are label, line, freq, calc and abund.  No parameters are required, but you may not use \n");
+		mothurOut("both the line and label parameters at the same time. The collect.single command should be in the following format: \n");
+		mothurOut("collect.single(label=yourLabel, line=yourLines, iters=yourIters, freq=yourFreq, calc=yourEstimators).\n");
+		mothurOut("Example collect(label=unique-.01-.03, line=0-5-10, iters=10000, freq=10, calc=sobs-chao-ace-jack).\n");
+		mothurOut("The default values for freq is 100, and calc are sobs-chao-ace-jack-shannon-npshannon-simpson.\n");
 		validCalculator->printCalc("single", cout);
-		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq)." << "\n" << "\n";
+		mothurOut("The label and line parameters are used to analyze specific lines in your input.\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n\n");
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the CollectCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "CollectCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the CollectCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
@@ -236,7 +227,7 @@ int CollectCommand::execute(){
 				cCurve->getCurve(freq);
 				delete cCurve;
 			
-				cout << order->getLabel() << '\t' << count << endl;
+				mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
 				userLines.erase(count);
@@ -253,7 +244,7 @@ int CollectCommand::execute(){
 				cCurve->getCurve(freq);
 				delete cCurve;
 			
-				cout << order->getLabel() << '\t' << count << endl;
+				mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
 			}
@@ -269,12 +260,12 @@ int CollectCommand::execute(){
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			cout << "Your file does not include the label "<< *it; 
+			mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(lastLabel) != 1) {
-				cout << ". I will use " << lastLabel << "." << endl;
+				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
 				needToRun = true;
 			}else {
-				cout << ". Please refer to " << lastLabel << "." << endl;
+				mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
 			}
 		}
 		
@@ -283,7 +274,7 @@ int CollectCommand::execute(){
 			delete order;
 			order = (input->getOrderVector(lastLabel));
 			
-			cout << order->getLabel() << '\t' << count << endl;
+			mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 			
 			cCurve = new Collect(order, cDisplays);
 			cCurve->getCurve(freq);
@@ -296,13 +287,9 @@ int CollectCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the CollectCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "CollectCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the CollectCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************

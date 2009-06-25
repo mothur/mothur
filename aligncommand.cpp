@@ -58,11 +58,19 @@ AlignCommand::AlignCommand(string option){
 			
 			//check for required parameters
 			templateFileName = validParameter.validFile(parameters, "template", true);
-			if (templateFileName == "not found") { cout << "template is a required parameter for the align.seqs command." << endl; abort = true; }
+			if (templateFileName == "not found") { 
+				mothurOut("template is a required parameter for the align.seqs command."); 
+				mothurOutEndLine();
+				abort = true; 
+			}
 			else if (templateFileName == "not open") { abort = true; }	
 			
 			candidateFileName = validParameter.validFile(parameters, "candidate", true);
-			if (candidateFileName == "not found") { cout << "candidate is a required parameter for the align.seqs command." << endl; abort = true; }
+			if (candidateFileName == "not found") { 
+				mothurOut("candidate is a required parameter for the align.seqs command."); 
+				mothurOutEndLine();
+				abort = true; 
+			}
 			else if (candidateFileName == "not open") { abort = true; }	
 			
 			//check for optional parameter and set defaults
@@ -93,13 +101,9 @@ AlignCommand::AlignCommand(string option){
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the AlignCommand class Function AlignCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "AlignCommand", "AlignCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the AlignCommand class function AlignCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
@@ -117,29 +121,25 @@ AlignCommand::~AlignCommand(){
 
 void AlignCommand::help(){
 	try {
-		cout << "The align.seqs command reads a file containing sequences and creates an alignment file and a report file." << "\n";
-		cout << "The align.seqs command parameters are template, candidate, search, ksize, align, match, mismatch, gapopen and gapextend.  " << "\n";
-		cout << "The template and candidate parameters are required." << "\n";
-		cout << "The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer and blast. The default is kmer." << "\n";
-		cout << "The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman." << "\n";
-		cout << "The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 7." << "\n";
-		cout << "The match parameter allows you to specify the bonus for having the same base. The default is 1.0." << "\n";
-		cout << "The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0." << "\n";
-		cout << "The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -1.0." << "\n";
-		cout << "The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -2.0." << "\n";
-		cout << "The align.seqs command should be in the following format: " << "\n";
-		cout << "align.seqs(template=yourTemplateFile, candidate=yourCandidateFile, align=yourAlignmentMethod, search=yourSearchmethod, ksize=yourKmerSize, match=yourMatchBonus, mismatch=yourMismatchpenalty, gapopen=yourGapopenPenalty, gapextend=yourGapExtendPenalty) " << "\n";
-		cout << "Example align.seqs(candidate=candidate.fasta, template=core.filtered, align=kmer, search=gotoh, ksize=8, match=2.0, mismatch=3.0, gapopen=-2.0, gapextend=-1.0)" << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. candidate), '=' and parameters (i.e.yourFastaFile)." << "\n" << "\n";
+		mothurOut("The align.seqs command reads a file containing sequences and creates an alignment file and a report file.\n");
+		mothurOut("The align.seqs command parameters are template, candidate, search, ksize, align, match, mismatch, gapopen and gapextend.\n");
+		mothurOut("The template and candidate parameters are required.\n");
+		mothurOut("The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer and blast. The default is kmer.\n");
+		mothurOut("The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.\n");
+		mothurOut("The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 7.\n");
+		mothurOut("The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n");
+		mothurOut("The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n");
+		mothurOut("The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -1.0.\n");
+		mothurOut("The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -2.0.\n");
+		mothurOut("The align.seqs command should be in the following format: \n");
+		mothurOut("align.seqs(template=yourTemplateFile, candidate=yourCandidateFile, align=yourAlignmentMethod, search=yourSearchmethod, ksize=yourKmerSize, match=yourMatchBonus, mismatch=yourMismatchpenalty, gapopen=yourGapopenPenalty, gapextend=yourGapExtendPenalty) \n");
+		mothurOut("Example align.seqs(candidate=candidate.fasta, template=core.filtered, align=kmer, search=gotoh, ksize=8, match=2.0, mismatch=3.0, gapopen=-2.0, gapextend=-1.0)\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. candidate), '=' and parameters (i.e.yourFastaFile).\n\n");
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the AlignCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "AlignCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the AlignCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 
@@ -153,7 +153,10 @@ int AlignCommand::execute(){
 		else if(search == "suffix")		{	templateDB = new SuffixDB(templateFileName);			}
 		else if(search == "blast")		{	templateDB = new BlastDB(templateFileName, gapOpen, gapExtend, match, misMatch);	}
 		else {
-			cout << search << " is not a valid search option. I will run the command using kmer, ksize=8." << endl; kmerSize = 8;
+			mothurOut(search + " is not a valid search option. I will run the command using kmer, ksize=8.");
+			mothurOutEndLine();
+			kmerSize = 8;
+			
 			templateDB = new KmerDB(templateFileName, kmerSize);
 		}
 		
@@ -162,7 +165,8 @@ int AlignCommand::execute(){
 		else if(align == "blast")		{	alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);		}
 		else if(align == "noalign")		{	alignment = new NoAlign();													}
 		else {
-			cout << align << " is not a valid alignment option. I will run the command using needleman." << endl;
+			mothurOut(align + " is not a valid alignment option. I will run the command using needleman.");
+			mothurOutEndLine();
 			alignment = new NeedlemanOverlap(gapOpen, match, misMatch, 3000);
 		}
 		
@@ -234,21 +238,16 @@ int AlignCommand::execute(){
 		driver(lines[0], alignFileName, reportFileName);
 #endif
 		
-		cout << "It took " << time(NULL) - start << " secs to align " << numFastaSeqs << " sequences" << endl;
-		cout << endl;
-		
-		
+		mothurOut("It took " + toString(time(NULL) - start) + " secs to align " + toString(numFastaSeqs) + " sequences.");
+		mothurOutEndLine();
+		mothurOutEndLine();
 		
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the AlignCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "AlignCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the AlignCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
@@ -291,13 +290,9 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName){
 		return 1;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the AlignCommand class Function driver. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "AlignCommand", "driver");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the AlignCommand class function driver. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /**************************************************************************************************/
@@ -318,7 +313,7 @@ void AlignCommand::createProcesses(string alignFileName, string reportFileName) 
 			}else if (pid == 0){
 				driver(lines[process], alignFileName + toString(getpid()) + ".temp", reportFileName + toString(getpid()) + ".temp");
 				exit(0);
-			}else { cout << "unable to spawn the necessary processes." << endl; exit(0); }
+			}else { mothurOut("unable to spawn the necessary processes."); mothurOutEndLine(); exit(0); }
 		}
 		
 		//force parent to wait until all the processes are done
@@ -329,13 +324,9 @@ void AlignCommand::createProcesses(string alignFileName, string reportFileName) 
 #endif		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the AlignCommand class Function createProcesses. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "AlignCommand", "createProcesses");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the AlignCommand class function createProcesses. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /**************************************************************************************************/
@@ -357,13 +348,9 @@ void AlignCommand::appendAlignFiles(string temp, string filename) {
 		output.close();
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the DistanceCommand class Function appendFiles. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "AlignCommand", "appendAlignFiles");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the DistanceCommand class function appendFiles. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /**************************************************************************************************/
@@ -387,13 +374,9 @@ void AlignCommand::appendReportFiles(string temp, string filename) {
 		output.close();
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the DistanceCommand class Function appendFiles. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "AlignCommand", "appendReportFiles");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the DistanceCommand class function appendFiles. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************

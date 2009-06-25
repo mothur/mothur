@@ -25,21 +25,16 @@ CommandOptionParser::CommandOptionParser(string input){
 			commandString = input.substr(0, openParen);   //commandString contains everything before "("
 			optionString = input.substr((openParen+1), (closeParen-openParen-1)); //optionString contains everything between "(" and ")".
 		}
-		else if (openParen == -1) { cout << "You are missing (" << endl; }
-		else if (closeParen == -1) { cout << "You are missing )" << endl; }
+		else if (openParen == -1) { mothurOut("You are missing ("); mothurOutEndLine(); }
+		else if (closeParen == -1) { mothurOut("You are missing )"); mothurOutEndLine(); }
 					
 		//GlobalData* globaldata = GlobalData::getInstance();
 		//globaldata->parseGlobalData(commandString, optionString);			//parser to separate and check options
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the CommandOptionParser class Function CommandOptionParser. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "CommandOptionParser", "CommandOptionParser");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the CommandOptionParser class function CommandOptionParser. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 
 //**********************************************************************************************************************

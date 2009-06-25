@@ -59,7 +59,7 @@ SummaryCommand::SummaryCommand(string option){
 			}
 			
 			//make sure the user has already run the read.otu command
-			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { cout << "You must read a list, sabund or rabund before you can use the summary.single command." << endl; abort = true; }
+			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { mothurOut("You must read a list, sabund or rabund before you can use the summary.single command."); mothurOutEndLine(); abort = true; }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -78,7 +78,7 @@ SummaryCommand::SummaryCommand(string option){
 			}
 			
 			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { cout << "You cannot use both the line and label parameters at the same time. " << endl; abort = true; }
+			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
 			//if the user has not specified any line or labels use the ones from read.otu
 			else if((line == "") && (label == "")) {  
 				allLines = globaldata->allLines; 
@@ -158,37 +158,29 @@ SummaryCommand::SummaryCommand(string option){
 				
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SummaryCommand class Function SummaryCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SummaryCommand", "SummaryCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SummaryCommand class function SummaryCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 //**********************************************************************************************************************
 
 void SummaryCommand::help(){
 	try {
-		cout << "The summary.single command can only be executed after a successful read.otu WTIH ONE EXECEPTION." << "\n";
-		cout << "The summary.single command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster." << "\n";
-		cout << "The summary.single command parameters are label, line, calc, abund.  No parameters are required, but you may not use " << "\n";
-		cout << "both the line and label parameters at the same time. The summary.single command should be in the following format: " << "\n";
-		cout << "summary.single(label=yourLabel, line=yourLines, calc=yourEstimators)." << "\n";
-		cout << "Example summary.single(label=unique-.01-.03, line=0,5,10, calc=sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson)." << "\n";
+		mothurOut("The summary.single command can only be executed after a successful read.otu WTIH ONE EXECEPTION.\n");
+		mothurOut("The summary.single command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster.\n");
+		mothurOut("The summary.single command parameters are label, line, calc, abund.  No parameters are required, but you may not use \n");
+		mothurOut("both the line and label parameters at the same time. The summary.single command should be in the following format: \n");
+		mothurOut("summary.single(label=yourLabel, line=yourLines, calc=yourEstimators).\n");
+		mothurOut("Example summary.single(label=unique-.01-.03, line=0,5,10, calc=sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson).\n");
 		validCalculator->printCalc("summary", cout);
-		cout << "The default value calc is sobs-chao-ace-jack-shannon-npshannon-simpson" << "\n";
-		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. line), '=' and parameters (i.e.yourLines)." << "\n" << "\n";
+		mothurOut("The default value calc is sobs-chao-ace-jack-shannon-npshannon-simpson\n");
+		mothurOut("The label and line parameters are used to analyze specific lines in your input.\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. line), '=' and parameters (i.e.yourLines).\n\n");
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SummaryCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SummaryCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SummaryCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
@@ -244,7 +236,7 @@ int SummaryCommand::execute(){
 			
 			if(allLines == 1 || lines.count(count) == 1 || labels.count(sabund->getLabel()) == 1){			
 	
-				cout << sabund->getLabel() << '\t' << count << endl;
+				mothurOut(sabund->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 				processedLabels.insert(sabund->getLabel());
 				userLabels.erase(sabund->getLabel());
 				userLines.erase(count);
@@ -263,7 +255,7 @@ int SummaryCommand::execute(){
 				delete sabund;
 				sabund = input->getSAbundVector(lastLabel);
 				
-				cout << sabund->getLabel() << '\t' << count << endl;
+				mothurOut(sabund->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 				processedLabels.insert(sabund->getLabel());
 				userLabels.erase(sabund->getLabel());
 				
@@ -287,12 +279,12 @@ int SummaryCommand::execute(){
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			cout << "Your file does not include the label "<< *it; 
+			mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(lastLabel) != 1) {
-				cout << ". I will use " << lastLabel << "." << endl;
+				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
 				needToRun = true;
 			}else {
-				cout << ". Please refer to " << lastLabel << "." << endl;
+				mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
 			}
 		}
 		
@@ -301,7 +293,7 @@ int SummaryCommand::execute(){
 			delete sabund;
 			sabund = input->getSAbundVector(lastLabel);
 			
-			cout << sabund->getLabel() << '\t' << count << endl;
+			mothurOut(sabund->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 			outputFileHandle << sabund->getLabel();
 			for(int i=0;i<sumCalculators.size();i++){
 				vector<double> data = sumCalculators[i]->getValues(sabund);
@@ -317,13 +309,9 @@ int SummaryCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SummaryCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SummaryCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SummaryCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 //**********************************************************************************************************************

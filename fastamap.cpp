@@ -43,11 +43,7 @@ void FastaMap::readFastaFile(string inFileName) {
 		in.close();		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the FastaMap class Function readFastaFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the FastaMap class function readFastaFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "FastaMap", "readFastaFile");
 		exit(1);
 	}
 }
@@ -152,11 +148,7 @@ void FastaMap::printNamesFile(string outFileName){ //prints data
 		outFile.close();
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the FastaMap class Function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the FastaMap class function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "FastaMap", "printNamesFile");
 		exit(1);
 	}
 }
@@ -175,11 +167,7 @@ void FastaMap::printCondensedFasta(string outFileName){ //prints data
 		out.close();
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the FastaMap class Function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the FastaMap class function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "FastaMap", "printCondensedFasta");
 		exit(1);
 	}
 }

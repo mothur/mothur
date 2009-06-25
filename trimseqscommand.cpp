@@ -37,7 +37,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option){
 			
 			//check for required parameters
 			fastaFile = validParameter.validFile(parameters, "fasta", true);
-			if (fastaFile == "not found") { cout << "fasta is a required parameter for the screen.seqs command." << endl; abort = true; }
+			if (fastaFile == "not found") { mothurOut("fasta is a required parameter for the screen.seqs command."); mothurOutEndLine(); abort = true; }
 			else if (fastaFile == "not open") { abort = true; }	
 		
 		
@@ -80,57 +80,49 @@ TrimSeqsCommand::TrimSeqsCommand(string option){
 			allFiles = isTrue(temp);
 			
 			if(allFiles && oligoFile == ""){
-				cout << "You selected allfiles, but didn't enter an oligos file.  Ignoring the allfiles request." << endl;
+				mothurOut("You selected allfiles, but didn't enter an oligos file.  Ignoring the allfiles request."); mothurOutEndLine();
 			}
 			if((qAverage != 0 && qThreshold != 0) && qFileName == ""){
-				cout << "You didn't provide a quality file name, quality criteria will be ignored." << endl;
+				mothurOut("You didn't provide a quality file name, quality criteria will be ignored."); mothurOutEndLine();
 				qAverage=0;
 				qThreshold=0;
 			}
 			if(!flip && oligoFile=="" && !maxLength && !minLength && (maxAmbig==-1) && !maxHomoP && qFileName == ""){		
-				cout << "You didn't set any options... quiting command." << endl;
+				mothurOut("You didn't set any options... quiting command."); mothurOutEndLine();
 				abort = true;
 			}
 		}
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the TrimSeqsCommand class Function TrimSeqsCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "TrimSeqsCommand", "TrimSeqsCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the TrimSeqsCommand class function TrimSeqsCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 //**********************************************************************************************************************
 
 void TrimSeqsCommand::help(){
 	try {
-		cout << "The trim.seqs command reads a fastaFile and creates ....." << "\n";
-		cout << "The trim.seqs command parameters are fasta, flip, oligos, maxambig, maxhomop, minlength and maxlength." << "\n";
-		cout << "The fasta parameter is required." << "\n";
-		cout << "The flip parameter .... The default is 0." << "\n";
-		cout << "The oligos parameter .... The default is ""." << "\n";
-		cout << "The maxambig parameter .... The default is -1." << "\n";
-		cout << "The maxhomop parameter .... The default is 0." << "\n";
-		cout << "The minlength parameter .... The default is 0." << "\n";
-		cout << "The maxlength parameter .... The default is 0." << "\n";
-		cout << "The trim.seqs command should be in the following format: " << "\n";
-		cout << "trim.seqs(fasta=yourFastaFile, flip=yourFlip, oligos=yourOligos, maxambig=yourMaxambig,  " << "\n";
-		cout << "maxhomop=yourMaxhomop, minlength=youMinlength, maxlength=yourMaxlength)  " << "\n";	
-		cout << "Example trim.seqs(fasta=abrecovery.fasta, flip=..., oligos=..., maxambig=..., maxhomop=..., minlength=..., maxlength=...)." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta)." << "\n" << "\n";
+		mothurOut("The trim.seqs command reads a fastaFile and creates .....\n");
+		mothurOut("The trim.seqs command parameters are fasta, flip, oligos, maxambig, maxhomop, minlength and maxlength.\n");
+		mothurOut("The fasta parameter is required.\n");
+		mothurOut("The flip parameter .... The default is 0.\n");
+		mothurOut("The oligos parameter .... The default is "".\n");
+		mothurOut("The maxambig parameter .... The default is -1.\n");
+		mothurOut("The maxhomop parameter .... The default is 0.\n");
+		mothurOut("The minlength parameter .... The default is 0.\n");
+		mothurOut("The maxlength parameter .... The default is 0.\n");
+		mothurOut("The trim.seqs command should be in the following format: \n");
+		mothurOut("trim.seqs(fasta=yourFastaFile, flip=yourFlip, oligos=yourOligos, maxambig=yourMaxambig,  \n");
+		mothurOut("maxhomop=yourMaxhomop, minlength=youMinlength, maxlength=yourMaxlength)  \n");	
+		mothurOut("Example trim.seqs(fasta=abrecovery.fasta, flip=..., oligos=..., maxambig=..., maxhomop=..., minlength=..., maxlength=...).\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the TrimSeqsCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "TrimSeqsCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the TrimSeqsCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 
@@ -256,11 +248,7 @@ int TrimSeqsCommand::execute(){
 		return 0;		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the TrimSeqsCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the TrimSeqsCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "TrimSeqsCommand", "execute");
 		exit(1);
 	}
 }
@@ -476,7 +464,7 @@ bool TrimSeqsCommand::stripQualThreshold(Sequence& seq, ifstream& qFile){
 	string name;
 	
 	qFile >> name;
-	if(name.substr(1) != seq.getName())	{	cout << "sequence name mismatch btwn fasta and qual file" << endl;	}
+	if(name.substr(1) != seq.getName())	{	mothurOut("sequence name mismatch btwn fasta and qual file"); mothurOutEndLine();	}
 	while (!qFile.eof())	{	char c = qFile.get(); if (c == 10 || c == 13){	break;	}	}
 	
 	int score;
@@ -509,7 +497,7 @@ bool TrimSeqsCommand::cullQualAverage(Sequence& seq, ifstream& qFile){
 	string name;
 	
 	qFile >> name;
-	if(name.substr(1) != seq.getName())	{	cout << "sequence name mismatch btwn fasta and qual file" << endl;	}
+	if(name.substr(1) != seq.getName())	{	mothurOut("sequence name mismatch btwn fasta and qual file"); mothurOutEndLine();	}
 	while (!qFile.eof())	{	char c = qFile.get(); if (c == 10 || c == 13){	break;	}	}
 	
 	float score;	

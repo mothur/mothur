@@ -43,17 +43,6 @@ EstOutput KSTest::getValues(vector<SharedRAbundVector*> shared){
 		//double pVal = exp(-2*pow(maxDiff/a,2));
 		double critVal = 1.36*a*numNZ1*numNZ2;
 		
-		/*cout << "Kolmogorov-Smirnov 2-sample test:\n";
-		if(numNZ1 > 25 && numNZ2 > 25) //If the sample sizes are both bigger than 25.
-			cout << "P-Value = " << pVal << "\nP-Value is the probability that the data sets are significantly different.\n";
-		else
-		{	
-			//cout << "90% Confidence Critical Value = " << 1.22*a*numNZ1*numNZ2 << "\n";
-			cout << "D-Statistic = " << DStatistic << "\n";
-			cout << "95% Confidence Critical Value = " << critVal << "\n";
-			cout << "If D-Statistic is greater than the critical value then the data sets are significantly different at the 95% confidence level.\n\n";
-		}*/
-		
 		shared[0]->setData(initData1);
 		shared[1]->setData(initData2);
 		
@@ -67,13 +56,9 @@ EstOutput KSTest::getValues(vector<SharedRAbundVector*> shared){
 		return data;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the KSTest class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "KSTest", "getValues");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the KSTest class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/

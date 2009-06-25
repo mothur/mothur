@@ -49,11 +49,7 @@ void SharedUtil::getSharedVectors(vector<string> Groups, vector<SharedRAbundVect
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedUtil class Function getSharedVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedUtil class function getSharedVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedUtil", "getSharedVectors");
 		exit(1);
 	}
 }
@@ -97,11 +93,7 @@ void SharedUtil::getSharedVectorswithReplacement(vector<string> Groups, vector<S
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedUtil class Function getSharedVectorswithReplacement. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedUtil class function getSharedVectorswithReplacement. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedUtil", "getSharedVectorswithReplacement");
 		exit(1);
 	}
 }
@@ -115,7 +107,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 				//check that groups are valid
 				for (int i = 0; i < userGroups.size(); i++) {
 					if (isValidGroup(userGroups[i], allGroups) != true) {
-						cout << userGroups[i] << " is not a valid group, and will be disregarded." << endl;
+						mothurOut(userGroups[i] + " is not a valid group, and will be disregarded."); mothurOutEndLine();
 						// erase the invalid group from userGroups
 						userGroups.erase(userGroups.begin()+i);
 						i--;
@@ -124,7 +116,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 				
 				//if the user only entered invalid groups
 				if (userGroups.size() == 0) { 
-					cout << "You provided no valid groups. I will run the command using all the groups in your groupfile." << endl; 
+					mothurOut("You provided no valid groups. I will run the command using all the groups in your groupfile."); mothurOutEndLine();
 					for (int i = 0; i < allGroups.size(); i++) {
 						userGroups.push_back(allGroups[i]);
 					}
@@ -144,14 +136,9 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 			
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedUtil class Function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedUtil", "setGroups");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedUtil class function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 /**************************************************************************************************/
 //need to have mode because different commands require different number of valid groups
@@ -162,7 +149,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 				//check that groups are valid
 				for (int i = 0; i < userGroups.size(); i++) {
 					if (isValidGroup(userGroups[i], allGroups) != true) {
-						cout << userGroups[i] << " is not a valid group, and will be disregarded." << endl;
+						mothurOut(userGroups[i] + " is not a valid group, and will be disregarded."); mothurOutEndLine();
 						// erase the invalid group from userGroups
 						userGroups.erase(userGroups.begin()+i);
 						i--;
@@ -184,7 +171,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 		if ((mode == "collect") || (mode == "rarefact") || (mode == "summary") || (mode == "treegroup")) {
 				//if the user only entered invalid groups
 				if ((userGroups.size() == 0) || (userGroups.size() == 1)) { 
-					cout << "When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile." << endl; 
+					mothurOut("When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile."); mothurOutEndLine();
 					for (int i = 0; i < allGroups.size(); i++) {
 						userGroups.push_back(allGroups[i]);
 					}
@@ -193,14 +180,9 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedUtil class Function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedUtil", "setGroups");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedUtil class function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 
 
@@ -217,7 +199,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 				//check that groups are valid
 				for (int i = 0; i < userGroups.size(); i++) {
 					if (isValidGroup(userGroups[i], allGroups) != true) {
-						cout << userGroups[i] << " is not a valid group, and will be disregarded." << endl;
+						mothurOut(userGroups[i] + " is not a valid group, and will be disregarded."); mothurOutEndLine();
 						// erase the invalid group from globaldata->Groups
 						userGroups.erase(userGroups.begin()+i);
 						i--;
@@ -254,9 +236,9 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 						userGroups.push_back(allGroups[i]);
 					}
 				}
-				cout << "When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile." << endl; 
+				mothurOut("When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile."); mothurOutEndLine();
 			}else if (userGroups.size() == 1) { 
-				cout << "When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile." << endl;
+				mothurOut("When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile."); mothurOutEndLine();
 				userGroups.clear();
 				for (int i=0; i < allGroups.size(); i++) { 
 					if (allGroups[i] != "xxx") {
@@ -269,7 +251,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 		}else if ((mode == "unweighted") || (mode == "parsimony")) {
 				//if the user only entered invalid groups
 				if ((userGroups.size() == 0) && (numGroups == 0)) { 
-					cout << "When using the groups parameter you must have at least 1 valid group. I will run the command using all the groups in your groupfile." << endl; 
+					mothurOut("When using the groups parameter you must have at least 1 valid group. I will run the command using all the groups in your groupfile."); mothurOutEndLine();
 					for (int i = 0; i < allGroups.size(); i++) {
 						if (allGroups[i] != "xxx") {
 							userGroups.push_back(allGroups[i]);
@@ -281,11 +263,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedUtil class Function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedUtil class function setGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedUtil", "setGroups");
 		exit(1);
 	}
 }
@@ -303,11 +281,7 @@ void SharedUtil::getCombos(vector<string>& groupComb, vector<string> userGroups,
 		} 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedUtil class Function getCombos. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedUtil class function getCombos. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedUtil", "getCombos");
 		exit(1);
 	}
 }
@@ -321,11 +295,7 @@ bool SharedUtil::isValidGroup(string groupname, vector<string> groups) {
 		return false;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedUtil class Function isValidGroup. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedUtil class function isValidGroup. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedUtil", "isValidGroup");
 		exit(1);
 	}
 }
@@ -339,11 +309,7 @@ void SharedUtil::updateGroupIndex(vector<string>& userGroups, map<string, int>& 
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedUtil class Function updateGroupIndex. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedUtil class function updateGroupIndex. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedUtil", "updateGroupIndex");
 		exit(1);
 	}
 }

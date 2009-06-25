@@ -35,13 +35,9 @@ void SparseMatrix::rmCell(MatData data){
 	//  clustering and the clustering algorithm updates smallDist
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SparseMatrix class Function rmCell. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SparseMatrix", "rmCell");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SparseMatrix class function rmCell. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -55,13 +51,9 @@ void SparseMatrix::addCell(PCell value){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SparseMatrix class Function addCell. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SparseMatrix", "addCell");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SparseMatrix class function addCell. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -75,13 +67,9 @@ void SparseMatrix::clear(){
 		smallDist = 1e6;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SparseMatrix class Function clear. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SparseMatrix", "clear");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SparseMatrix class function clear. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -101,22 +89,20 @@ MatData SparseMatrix::end(){
 void SparseMatrix::print(){
 	try {
 		int index = 0;
-	
-		cout << endl << "Index\tRow\tColumn\tDistance" << endl;
+		
+		mothurOutEndLine();
+		mothurOut("Index\tRow\tColumn\tDistance");
+		mothurOutEndLine();
 	
 		for(MatData currentCell=matrix.begin();currentCell!=matrix.end();currentCell++){
-			cout << index << '\t' << currentCell->row  << '\t' << currentCell->column << '\t' << currentCell->dist << endl;
+			mothurOut(toString(index) + "\t" + toString(currentCell->row)  + "\t" + toString(currentCell->column) + "\t" + toString(currentCell->dist)); mothurOutEndLine();
 			index++;
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SparseMatrix class Function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SparseMatrix", "print");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SparseMatrix class function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -125,21 +111,20 @@ void SparseMatrix::print(ListVector* list){
 	try {
 		int index = 0;
 	
-		cout << endl << "Index\tRow\tColumn\tDistance" << endl;
+		mothurOutEndLine();
+		mothurOut("Index\tRow\tColumn\tDistance");
+		mothurOutEndLine();
+
 	
 		for(MatData currentCell=matrix.begin();currentCell!=matrix.end();currentCell++){
-			cout << index << '\t' << list->get(currentCell->row)  << '\t' << list->get(currentCell->column) << '\t' << currentCell->dist << endl;
+			mothurOut(toString(index) + "\t" + toString(list->get(currentCell->row))  + "\t" + toString(list->get(currentCell->column)) + "\t" + toString(currentCell->dist)); mothurOutEndLine();
 			index++;
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SparseMatrix class Function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SparseMatrix", "print");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SparseMatrix class function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -189,13 +174,9 @@ PCell* SparseMatrix::getSmallestCell(){
 		return smallCell;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SparseMatrix class Function getSmallestCell. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SparseMatrix", "getSmallestCell");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SparseMatrix class function getSmallestCell. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/

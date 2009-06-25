@@ -91,7 +91,6 @@ EstOutput Parsimony::getValues(Tree* t) {
 		
 			//create pgroups that reflect the groups the user want to use
 			for(int i=copyTree->getNumLeaves();i<copyTree->getNumNodes();i++){
-//				cout << i << "..." << endl;
 				copyTree->tree[i].pGroups = (copyTree->mergeUserGroups(i, groups));
 			}
 		
@@ -105,13 +104,6 @@ EstOutput Parsimony::getValues(Tree* t) {
 				int rcSize = copyTree->tree[rc].pGroups.size();
 				int lcSize = copyTree->tree[lc].pGroups.size();
 				
-//				cout << i+1 << '\t' << lc+1 << '\t' << rc+1 << ":\t";
-				
-//				for(it=copyTree->tree[i].pGroups.begin();it!=copyTree->tree[i].pGroups.end();it++){
-//					cout << it->first << '\t';
-//				}
-				
-//				cout << " : " << iSize << '\t' << rcSize << '\t' << lcSize << '\t';
 					
 				//if isize are 0 then that branch is to be ignored
 				if (iSize == 0) { }
@@ -120,12 +112,10 @@ EstOutput Parsimony::getValues(Tree* t) {
 				else if(iSize > rcSize || iSize > lcSize){
 					score++;
 				}
-//				cout << score << endl;
 			} 
 		
 			data[count] = score;
-			string hold;
-//			cin >> hold;
+
 		}
 		
 		delete copyTree;
@@ -133,14 +123,9 @@ EstOutput Parsimony::getValues(Tree* t) {
 		return data;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Parsimony class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Parsimony", "getValues");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Parsimony class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 
 /**************************************************************************************************/

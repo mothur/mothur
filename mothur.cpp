@@ -44,11 +44,7 @@ int main(int argc, char *argv[]){
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the dotur class Function main. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the dotur class function main. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "mothur", "main");
 		exit(1);
 	}
 }

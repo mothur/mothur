@@ -81,11 +81,7 @@ bool GroupMap::isValidGroup(string groupname) {
 		return false;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the GroupMap class Function isValidGroup. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the GroupMap class function isValidGroup. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "GroupMap", "isValidGroup");
 		exit(1);
 	}
 }

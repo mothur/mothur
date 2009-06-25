@@ -41,15 +41,12 @@ EstOutput SharedChao1::getValues(vector<SharedRAbundVector*> shared){
 			
 			//they are shared
 			if (sharedByAll == true) { 
-				// cout << "temp = ";
-				// for (int h = 0; h < temp.size(); h++) { cout << temp[h] << " "; } cout << endl;
 				//find f1 and f2values
 				updateTree(temp);
 			}
 		}
 
 			
-		//cout << "Entering " << endl;
 		//calculate chao1, (numleaves-1) because numleaves contains the ++ values.
 		bool bias;
 		for(int i=0;i<numLeaves;i++){
@@ -87,18 +84,14 @@ EstOutput SharedChao1::getValues(vector<SharedRAbundVector*> shared){
 			delete f2leaves[i];
 		}
 		
-	//	cout << "exiting " << endl;
+
 		data[0] = Chao;
 		return data;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedChao1 class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedChao1", "getValues");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedChao1 class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -153,13 +146,9 @@ void SharedChao1::initialTree(int n) {
 		setCoef(f2root, 0);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedChao1 class Function initialTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedChao1", "initialTree");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedChao1 class function initialTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -170,13 +159,9 @@ void SharedChao1::updateTree(vector<int> bin) {
 		updateBranchf2(f2root, bin, 0); 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedChao1 class Function updateTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedChao1", "updateTree");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedChao1 class function updateTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -196,13 +181,9 @@ void SharedChao1::updateBranchf1(IntNode* node, vector<int> bin, int index) {
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedChao1 class Function updateBranchf1. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedChao1", "updateBranchf1");		
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedChao1 class function updateBranchf1. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -222,13 +203,9 @@ void SharedChao1::updateBranchf2(IntNode* node, vector<int> bin, int index) {
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedChao1 class Function updateBranchf2. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedChao1", "updateBranchf2");	
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedChao1 class function updateBranchf2. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -243,23 +220,19 @@ void SharedChao1::setCoef(IntNode* node, int coef) {
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedChao1 class Function getCoef. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedChao1", "setCoef");	
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedChao1 class function getCoef. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
 //for debugging purposes
 void SharedChao1::printTree() {
 	
-	cout << "F1 leaves" << endl;
+	mothurOut("F1 leaves"); mothurOutEndLine();
 	printBranch(f1root);
 	
-	cout << "F2 leaves" << endl;
+	mothurOut("F2 leaves"); mothurOutEndLine();
 	printBranch(f2root);
 
 
@@ -273,19 +246,15 @@ void SharedChao1::printBranch(IntNode* node) {
 			printBranch(node->left);
 			printBranch(node->right);
 		}else { //you are a leaf
-			cout << node->lvalue << endl;
-			cout << node->rvalue << endl;
+			mothurOut(toString(node->lvalue)); mothurOutEndLine();
+			mothurOut(toString(node->rvalue)); mothurOutEndLine();
 		}
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function printBranch. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedChao1", "printBranch");	
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Tree class function printBranch. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 /*****************************************************************/

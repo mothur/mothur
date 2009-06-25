@@ -18,17 +18,13 @@ const char marker = '|';
 
 Progress::Progress(){
 	try {
-		cout << "********************#****#****#****#****#****#****#****#****#****#****#";
+		mothurOut("********************#****#****#****#****#****#****#****#****#****#****#");
 		
 		nTicks = 0;
 		finalPos = 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Progress class Function Progress. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Progress class function Progress. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Progress", "Progress");
 		exit(1);
 	}
 }
@@ -37,19 +33,17 @@ Progress::Progress(){
 
 Progress::Progress(string job, int end){
 	try {
-		cout << "********************#****#****#****#****#****#****#****#****#****#****#\n";
+		mothurOut("********************#****#****#****#****#****#****#****#****#****#****#\n");
 		cout << setw(20) << left << job << setw(1) << marker;
+		mothurOutJustToLog(job);
+		mothurOut(toString(marker));
 		cout.flush();
 
 		nTicks = 0;
 		finalPos = end;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Progress class Function Progress. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Progress class function Progress. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Progress", "Progress");
 		exit(1);
 	}
 }
@@ -58,19 +52,17 @@ Progress::Progress(string job, int end){
 
 void Progress::newLine(string job, int end){
 	try {
-		cout << endl;
+		mothurOutEndLine();
 		cout << setw(20) << left << job << setw(1) << marker;
+		mothurOutJustToLog(job);
+		mothurOut(toString(marker));
 		cout.flush();
 		
 		nTicks = 0;
 		finalPos = end;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Progress class Function newline. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Progress class function newline. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Progress", "newLine");
 		exit(1);
 	}
 }
@@ -83,18 +75,14 @@ void Progress::update(const int currentPos){
 	
 		if(ratio > nTicks){
 			for(int i=nTicks;i<ratio;i++){
-				cout << marker;
+				mothurOut(toString(marker));
 				cout.flush();
 			}
 			nTicks = ratio;
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Progress class Function update. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Progress class function update. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Progress", "update");
 		exit(1);
 	}
 }
@@ -104,21 +92,17 @@ void Progress::update(const int currentPos){
 void Progress::finish(){
 	try {
 		for(int i=nTicks;i<totalTicks;i++){
-			cout << marker;
+			mothurOut(toString(marker));
 			cout.flush();
 		}
 	
 	
-		cout << endl;
-		cout << "***********************************************************************\n";
+		mothurOutEndLine();
+		mothurOut("***********************************************************************\n");
 		cout.flush();
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Progress class Function finish. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Progress class function finish. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Progress", "finish");
 		exit(1);
 	}
 }

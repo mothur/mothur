@@ -19,7 +19,7 @@ gapOpen(gO), gapExtend(gE), match(m), misMatch(mM) {
 	
 	globaldata = GlobalData::getInstance();
 	
-	cout << "Generating the temporary BLAST database...\t";	cout.flush();
+	mothurOut("Generating the temporary BLAST database...\t");	cout.flush();
 
 	int randNumber = rand();
 	dbFileName = toString(randNumber) + ".template.unaligned.fasta";
@@ -42,7 +42,7 @@ gapOpen(gO), gapExtend(gE), match(m), misMatch(mM) {
 	string formatdbCommand = path + "blast/bin/formatdb -p F -o T -i " + dbFileName;	//	format the database, -o option gives us the ability
 	system(formatdbCommand.c_str());								//	to get the right sequence names, i think. -p F
 																	//	option tells formatdb that seqs are DNA, not prot
-	cout << "DONE." << endl << endl;	cout.flush();
+	mothurOut("DONE."); mothurOutEndLine();	mothurOutEndLine(); cout.flush();
 	emptySequence = Sequence();
 	emptySequence.setName("no_match");
 	emptySequence.setUnaligned("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX");

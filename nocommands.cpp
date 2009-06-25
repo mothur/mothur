@@ -21,7 +21,7 @@ NoCommand::~NoCommand(){}
 
 int NoCommand::execute(){
 	//Could choose to give more help here?fdsah
-	cout << "Invalid command." << "\n";
+	mothurOut("Invalid command.\n");
 	
 	CommandFactory* valid = new CommandFactory();
 	valid->printCommands(cout);

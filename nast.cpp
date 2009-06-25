@@ -82,7 +82,7 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 		//	Part C of Fig. 2 from DeSantis et al.
 		if((isalpha(newTemplateAlign[i]) != isalpha(tempAln[i]))){	//if there is a discrepancy between the regapped
 			
-//			cout << i << '\t';cout.flush();
+
 			
 			//	Part D of Fig. 2 from DeSantis et al.		//	template sequence and the official template sequence
 			for(leftIndex=i-1;leftIndex>=0;leftIndex--){	//	then we've got problems...
@@ -92,7 +92,7 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 					break;
 				}
 			}
-//			cout << leftIndex << '\t' << leftRoom << endl;
+
 			
 			for(rightIndex=i+1;rightIndex<longAlignmentLength;rightIndex++){
 				if(!isalpha(candAln[rightIndex])){
@@ -173,7 +173,7 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 			i -= insertLength;
 		} 
 	}
-//	cout << candAln << endl << tempAln << endl << newTemplateAlign << endl;
+
 }
 
 /**************************************************************************************************/
@@ -273,14 +273,14 @@ void Nast::regapSequences(){	//This is essentially part B in Fig 2. of DeSantis 
 			//	would skip the gaps and not progress through full alignment sequence
 			//	not tested yet
 			
-			cout << "We're into D" << ' ' << fullAlignIndex << ' ' << pairwiseAlignIndex <<  endl;
+			mothurOut("We're into D " + toString(fullAlignIndex) + " " +  toString(pairwiseAlignIndex)); mothurOutEndLine();
 			pairwiseAlignIndex++;
 		}
 		else{
 			//	everything has a gap - not possible
 			//	not tested yet
 			
-			cout << "We're into F" << ' ' << fullAlignIndex << ' ' << pairwiseAlignIndex <<  endl;
+			mothurOut("We're into F " +  toString(fullAlignIndex) + " " +  toString(pairwiseAlignIndex)); mothurOutEndLine();
 			pairwiseAlignIndex++;
 			fullAlignIndex++;			
 		}		
@@ -306,17 +306,11 @@ void Nast::regapSequences(){	//This is essentially part B in Fig 2. of DeSantis 
 		candAln[i] = toupper(candAln[i]);			//	everything is upper case
 	}
 
-//	cout << candAln << endl;
-//	cout << tempAln << endl;
-//	cout << newTemplateAlign << endl;
 
 	if(candAln.length() != tempAln.length()){		//	if the regapped candidate sequence is longer than the official
 		removeExtraGaps(candAln, tempAln, newTemplateAlign);//	template alignment then we need to do steps C-F in Fig.
 	}												//	2 of Desantis et al.
 	
-//	cout << candAln << endl;
-//	cout << tempAln << endl;
-//	cout << newTemplateAlign << endl;
 
 	candidateSeq->setAligned(candAln);
 }

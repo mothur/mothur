@@ -66,11 +66,11 @@ ReadDistCommand::ReadDistCommand(string option){
 			if ((phylipfile != "") && (groupfile != "")) { 
 			globaldata->setFormat("matrix"); }
 			
-			if ((phylipfile == "") && (columnfile == "")) { cout << "When executing a read.dist command you must enter a phylip or a column." << endl; abort = true; }
-			else if ((phylipfile != "") && (columnfile != "")) { cout << "When executing a read.dist command you must enter ONLY ONE of the following: phylip or column." << endl; abort = true; }
+			if ((phylipfile == "") && (columnfile == "")) { mothurOut("When executing a read.dist command you must enter a phylip or a column."); mothurOutEndLine(); abort = true; }
+			else if ((phylipfile != "") && (columnfile != "")) { mothurOut("When executing a read.dist command you must enter ONLY ONE of the following: phylip or column."); mothurOutEndLine(); abort = true; }
 		
 			if (columnfile != "") {
-				if (namefile == "") {  cout << "You need to provide a namefile if you are going to use the column format." << endl; abort = true; }
+				if (namefile == "") {  mothurOut("You need to provide a namefile if you are going to use the column format."); mothurOutEndLine(); abort = true; }
 			}
 		
 			//check for optional parameter and set defaults
@@ -113,11 +113,7 @@ ReadDistCommand::ReadDistCommand(string option){
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReadDistCommand class Function ReadDistCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ReadDistCommand class function ReadDistCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ReadDistCommand", "ReadDistCommand");
 		exit(1);
 	}
 }
@@ -125,33 +121,26 @@ ReadDistCommand::ReadDistCommand(string option){
 
 void ReadDistCommand::help(){
 	try {
-		cout << "The read.dist command parameter options are phylip or column, group, name, cutoff and precision" << "\n";
-		cout << "The read.dist command can be used in two ways.  The first is to read a phylip or column and run the cluster command" << "\n";
-		cout << "For this use the read.dist command should be in the following format: " << "\n";
-		cout << "read.dist(phylip=yourDistFile, name=yourNameFile, cutoff=yourCutoff, precision=yourPrecision) " << "\n";
-		cout << "The phylip or column parameter is required, but only one may be used.  If you use a column file the name filename is required. " << "\n";
-		cout << "If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed." << "\n";
-		cout << "The second way to use the read.dist command is to read a phylip or column and a group, so you can use the libshuff command." << "\n";
-		cout << "For this use the read.dist command should be in the following format: " << "\n";
-		cout << "read.dist(phylip=yourPhylipfile, group=yourGroupFile). The cutoff and precision parameters are not valid with this use.  " << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. phylip), '=' and parameters (i.e.yourPhylipfile)." << "\n" << "\n";
+		mothurOut("The read.dist command parameter options are phylip or column, group, name, cutoff and precision\n");
+		mothurOut("The read.dist command can be used in two ways.  The first is to read a phylip or column and run the cluster command\n");
+		mothurOut("For this use the read.dist command should be in the following format: \n");
+		mothurOut("read.dist(phylip=yourDistFile, name=yourNameFile, cutoff=yourCutoff, precision=yourPrecision) \n");
+		mothurOut("The phylip or column parameter is required, but only one may be used.  If you use a column file the name filename is required. \n");
+		mothurOut("If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n");
+		mothurOut("The second way to use the read.dist command is to read a phylip or column and a group, so you can use the libshuff command.\n");
+		mothurOut("For this use the read.dist command should be in the following format: \n");
+		mothurOut("read.dist(phylip=yourPhylipfile, group=yourGroupFile). The cutoff and precision parameters are not valid with this use. \n");
+		mothurOut("Note: No spaces between parameter labels (i.e. phylip), '=' and parameters (i.e.yourPhylipfile).\n\n");
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReadDistCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ReadDistCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ReadDistCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
 
 ReadDistCommand::~ReadDistCommand(){
-	if (abort == false) {
-		if (format != "matrix") { delete read; delete nameMap; }
-	}
 }
 
 //**********************************************************************************************************************
@@ -177,16 +166,13 @@ int ReadDistCommand::execute(){
 
 			if (globaldata->gSparseMatrix != NULL) { delete globaldata->gSparseMatrix;  }
 			globaldata->gSparseMatrix = read->getMatrix();
+			delete read; delete nameMap;
 
 		}
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReadDistCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ReadDistCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ReadDistCommand", "execute");
 		exit(1);
 	}
 }

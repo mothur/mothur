@@ -45,13 +45,9 @@ void SharedSAbundVector::set(int bin, int abundance, string groupName){
 		if(bin > maxRank)	{	maxRank = bin;		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedSAbundVector class Function set. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedSAbundVector", "set");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedSAbundVector class function set. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -83,13 +79,9 @@ void SharedSAbundVector::push_back(int abundance, int bin, string groupName){
 		numSeqs += (maxRank * abundance);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedSAbundVector class Function push_back. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedSAbundVector", "push_back");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedSAbundVector class function push_back. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 /***********************************************************************/
@@ -115,13 +107,9 @@ void SharedSAbundVector::print(ostream& output){
 		output << endl;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedSAbundVector class Function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedSAbundVector", "print");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedSAbundVector class function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /***********************************************************************/
 string SharedSAbundVector::getGroup(){
@@ -166,13 +154,9 @@ RAbundVector SharedSAbundVector::getRAbundVector(){
 		return rav;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedSAbundVector class Function getRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedSAbundVector", "getRAbundVector");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedSAbundVector class function getRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /***********************************************************************/
 SAbundVector SharedSAbundVector::getSAbundVector(){
@@ -186,13 +170,9 @@ SAbundVector SharedSAbundVector::getSAbundVector(){
 	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedSAbundVector class Function getSAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedSAbundVector", "getSAbundVector");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedSAbundVector class function getSAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 /***********************************************************************/
@@ -226,13 +206,9 @@ SharedRAbundVector SharedSAbundVector::getSharedRAbundVector(){
 		return rav;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedSAbundVector class Function getSharedVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedSAbundVector", "getSharedRAbundVector");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedSAbundVector class function getSharedVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 
@@ -256,13 +232,9 @@ SharedOrderVector SharedSAbundVector::getSharedOrderVector() {
 		return ov;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedSAbundVector class Function getSharedOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedSAbundVector", "getSharedOrderVector");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedSAbundVector class function getSharedOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /***********************************************************************/
 OrderVector SharedSAbundVector::getOrderVector(map<string,int>* hold = NULL){
@@ -287,13 +259,9 @@ OrderVector SharedSAbundVector::getOrderVector(map<string,int>* hold = NULL){
 		return ov;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedSAbundVector class Function getOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedSAbundVector", "getOrderVector");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedSAbundVector class function getOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 /***********************************************************************/

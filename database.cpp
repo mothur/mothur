@@ -18,8 +18,9 @@ Database::Database(string fastaFileName){		//	This assumes that the template dat
 
 	ifstream fastaFile;
 	openInputFile(fastaFileName, fastaFile);
-
-	cout << endl << "Reading in the " << fastaFileName << " template sequences...\t";	cout.flush();
+	
+	mothurOutEndLine();
+	mothurOut("Reading in the " + fastaFileName + " template sequences...\t");	cout.flush();
 
 	//all of this is elsewhere already!
 	numSeqs=count(istreambuf_iterator<char>(fastaFile),istreambuf_iterator<char>(), '>');	//	count the number of
@@ -48,26 +49,15 @@ Database::Database(string fastaFileName){		//	This assumes that the template dat
 	fastaFile.close();
 	//all of this is elsewhere already!
 	
-	cout << "DONE." << endl;	cout.flush();
+	mothurOut("DONE.");
+	mothurOutEndLine();	cout.flush();
 
 }
 /**************************************************************************************************/
 
 Database::~Database(){														
-	try {
-		
-		//for (int i = 0; i < templateSequences.size(); i++) {  delete templateSequences[i];    }
-		templateSequences.clear();
 
-	}
-	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Database class Function ~Database. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Database class function ~Database. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
+		templateSequences.clear();
 }
 
 /**************************************************************************************************/

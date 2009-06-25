@@ -117,7 +117,7 @@ inline bool convertTest(const string& s, T& x, bool failIfLeftoverChars = true){
 	char c;
 	if (!(i >> x) || (failIfLeftoverChars && i.get(c)))
 	{
-		cout << "'" << s << "' is unable to be converted into an integer.\n";
+		cout << "unable to be converted into an integer.\n" << endl;
 		return false;
 	} 
 	return true;
@@ -152,6 +152,90 @@ string toString(const T&x, int i){
     output << fixed << x;
 	
     return output.str();
+}
+
+/***********************************************************************/
+
+inline int openOutputFileAppend(string fileName, ofstream& fileHandle){
+	
+	fileHandle.open(fileName.c_str(), ios::app);
+	if(!fileHandle) {
+		cerr << "Error: Could not open " << fileName << endl;
+		return 1;
+	}
+	else {
+		return 0;
+	}
+
+}
+
+
+/**************************************************************************************************/
+
+inline void mothurOut(string message) {
+	try{
+		ofstream out;
+		string logFileName = "mothur.logFile";
+		openOutputFileAppend(logFileName, out);
+		
+		cout << message;
+		out << message;
+		
+		out.close();
+	}
+	catch(exception& e) {
+		cout << "Error in mothur class mothurOut" << endl;
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+
+inline void mothurOut(string message, string precision) {
+	try{
+		ofstream out;
+		string logFileName = "mothur.logFile";
+		openOutputFileAppend(logFileName, out);
+		
+		cout << precision << message;
+		out << precision << message;
+		
+		out.close();
+	}
+	catch(exception& e) {
+		cout << "Error in mothur class mothurOut" << endl;
+		exit(1);
+	}
+}
+
+/**************************************************************************************************/
+
+inline void mothurOutEndLine() {
+	try {
+		ofstream out;
+		string logFileName = "mothur.logFile";
+		openOutputFileAppend(logFileName, out);
+		
+		cout << endl;  
+		out << endl;
+		
+		out.close();
+	}
+	catch(exception& e) {
+		cout << "error in mothur mothurOutEndLine" << endl;
+		exit(1);
+	}
+}
+
+
+/**************************************************************************************************/
+
+inline void errorOut(exception& e, string object, string function) {
+	
+		mothurOut("Error: ");
+		mothurOut(toString(e.what()));
+		mothurOut(" has occurred in the " + object + " class function " + function + "Please contact Pat Schloss at pschloss@microbio.umass.edu, and be sure to include the mothur.logFile with your inquiry.");
+		mothurOutEndLine();
+	
 }
 
 
@@ -333,21 +417,6 @@ inline int openOutputFile(string fileName, ofstream& fileHandle){
 	}
 
 }
-/***********************************************************************/
-
-inline int openOutputFileAppend(string fileName, ofstream& fileHandle){
-	
-	fileHandle.open(fileName.c_str(), ios::app);
-	if(!fileHandle) {
-		cerr << "Error: Could not open " << fileName << endl;
-		return 1;
-	}
-	else {
-		return 0;
-	}
-
-}
-
 
 /***********************************************************************/
 
@@ -377,14 +446,9 @@ inline void splitAtDash(string& estim, vector<string>& container) {
 		container.push_back(estim);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the mothur class Function splitAtDash. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "mothur", "splitAtDash");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the mothur class function splitAtDash. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 
 /***********************************************************************/
@@ -404,14 +468,9 @@ inline void splitAtDash(string& estim, set<string>& container) {
 		container.insert(estim);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the mothur class Function splitAtDash. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "mothur", "splitAtDash");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the mothur class function splitAtDash. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 /***********************************************************************/
 //This function parses the line options and puts them in a set
@@ -433,14 +492,9 @@ inline void splitAtDash(string& estim, set<int>& container) {
 		container.insert(lineNum);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the mothur class Function splitAtDash. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "mothur", "splitAtDash");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the mothur class function splitAtDash. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 /***********************************************************************/
 //This function parses the a string and puts peices in a vector
@@ -459,11 +513,7 @@ inline void splitAtComma(string& estim, vector<string>& container) {
 		container.push_back(estim);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the mothur class Function splitAtComma. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the mothur class function splitAtComma. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "mothur", "splitAtComma");
 		exit(1);
 	}
 }
@@ -482,14 +532,9 @@ inline void splitAtComma(string& prefix, string& suffix){
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the mothur class Function splitAtComma. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "mothur", "splitAtComma");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the mothur class function splitAtComma. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 /***********************************************************************/
 
@@ -507,14 +552,9 @@ inline void splitAtEquals(string& key, string& value){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the mothur class Function splitAtEquals. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "mothur", "splitAtEquals");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the mothur class function splitAtEquals. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 /**************************************************************************************************/
 
@@ -526,11 +566,62 @@ inline bool inUsersGroups(string groupname, vector<string> Groups) {
 		return false;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the mothur class Function inUsersGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "mothur", "inUsersGroups");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the mothur class function inUsersGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+}
+
+/**************************************************************************************************/
+
+inline void mothurOutJustToLog(string message) {
+	try {
+		ofstream out;
+		string logFileName = "mothur.logFile";
+		openOutputFileAppend(logFileName, out);
+		
+		out << message;
+		
+		out.close();
+	}
+	catch(exception& e) {
+		errorOut(e, "mothur", "mothurOutJustToLog");
+		exit(1);
+	}
+}
+
+
+/**************************************************************************************************/
+
+inline void mothurOut(float num) {
+	try {
+		ofstream out;
+		string logFileName = "mothur.logFile";
+		openOutputFileAppend(logFileName, out);
+		
+		cout << num;  
+		out << num;
+		
+		out.close();
+	}
+	catch(exception& e) {
+		cout << "Error in mothur class mothurOut float" << endl;
+		exit(1);
+	}
+}
+/***********************************************************************/
+inline void mothurOut(double value) {
+	try {
+		ofstream out;
+		string logFileName = "mothur.logFile";
+		openOutputFileAppend(logFileName, out);
+		
+		cout << value;  
+		out << value;
+		
+		out.close();
+	}
+	catch(exception& e) {
+		cout << "Error in mothur class mothurOut double" << endl;
 		exit(1);
 	}
 }
@@ -564,7 +655,7 @@ inline bool anyLabelsToProcess(string label, set<string>& userLabels, string err
 				orderFloat.push_back(-1.0);
 				userMap["unique"] = -1.0;
 			}else {
-				if (errorOff == "") {  cout << *it << " is not a valid label." << endl;  }
+				if (errorOff == "") {  mothurOut(*it + " is not a valid label."); mothurOutEndLine();  }
 				userLabels.erase(*it); 
 				it--;
 			}
@@ -582,11 +673,11 @@ inline bool anyLabelsToProcess(string label, set<string>& userLabels, string err
 			if (orderFloat[i] < labelFloat) {
 				smaller = true;
 				if (orderFloat[i] == -1) { 
-					if (errorOff == "") { cout << "Your file does not include the label unique." <<  endl; }
+					if (errorOff == "") { mothurOut("Your file does not include the label unique."); mothurOutEndLine(); }
 					userLabels.erase("unique");
 				}
 				else {  
-					if (errorOff == "") { cout << "Your file does not include the label "; }
+					if (errorOff == "") { mothurOut("Your file does not include the label "); mothurOutEndLine(); }
 					string s = "";
 					for (it2 = userMap.begin(); it2!= userMap.end(); it2++) {  
 						if (it2->second == orderFloat[i]) {  
@@ -596,7 +687,7 @@ inline bool anyLabelsToProcess(string label, set<string>& userLabels, string err
 							break;
 						}
 					}
-					if (errorOff == "") { cout << s << ". I will use the next smallest distance. "  <<  endl; }
+					if (errorOff == "") { mothurOut(s + ". I will use the next smallest distance. "); mothurOutEndLine(); }
 				}
 			//since they are sorted once you find a bigger one stop looking
 			}else { break; }
@@ -606,14 +697,9 @@ inline bool anyLabelsToProcess(string label, set<string>& userLabels, string err
 						
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the mothur class Function anyLabelsToProcess. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "mothur", "anyLabelsToProcess");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the mothur class function anyLabelsToProcess. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 
 /**************************************************************************************************/

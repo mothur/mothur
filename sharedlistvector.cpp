@@ -44,11 +44,7 @@ SharedListVector::SharedListVector(ifstream& f) : DataVector(), maxRank(0), numB
 	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedListVector class Function SharedListVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedListVector class function SharedListVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedListVector", "SharedListVector");
 		exit(1);
 	}
 }
@@ -67,11 +63,7 @@ void SharedListVector::set(int binNumber, string seqNames){
 		numSeqs += (nNames_new - nNames_old);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedListVector class Function set. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedListVector class function set. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedListVector", "set");
 		exit(1);
 	}
 }
@@ -96,11 +88,7 @@ void SharedListVector::push_back(string seqNames){
 		numSeqs += nNames;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedListVector class Function push_back. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedListVector class function push_back. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedListVector", "push_back");
 		exit(1);
 	}
 }
@@ -140,11 +128,7 @@ void SharedListVector::print(ostream& output){
 		output << endl;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedListVector class Function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedListVector class function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedListVector", "print");
 		exit(1);
 	}
 }
@@ -175,11 +159,7 @@ RAbundVector SharedListVector::getRAbundVector(){
 		return rav;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedListVector class Function getRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedListVector class function getRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedListVector", "getRAbundVector");
 		exit(1);
 	}
 }
@@ -200,11 +180,7 @@ SAbundVector SharedListVector::getSAbundVector(){
 		return sav;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedListVector class Function getSAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedListVector class function getSAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedListVector", "getSAbundVector");
 		exit(1);
 	}
 }
@@ -237,14 +213,9 @@ SharedOrderVector* SharedListVector::getSharedOrderVector(){
 		return order;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedListVector class Function getSharedOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedListVector", "getSharedOrderVector");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedListVector class function getSharedOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 /***********************************************************************/
 SharedRAbundVector SharedListVector::getSharedRAbundVector(string groupName) {
@@ -277,11 +248,7 @@ SharedRAbundVector SharedListVector::getSharedRAbundVector(string groupName) {
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedListVector class Function getSharedRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedListVector class function getSharedRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedListVector", "getSharedRAbundVector");
 		exit(1);
 	}
 }
@@ -326,14 +293,9 @@ vector<SharedRAbundVector*> SharedListVector::getSharedRAbundVector() {
 		return lookup;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedListVector class Function getSharedRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedListVector", "getSharedRAbundVector");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedListVector class function getSharedRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	
 }
 
 /***********************************************************************/
@@ -348,11 +310,7 @@ SharedSAbundVector SharedListVector::getSharedSAbundVector(string groupName) {
 		return sav;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedListVector class Function getSharedSAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedListVector class function getSharedSAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedListVector", "getSharedSAbundVector");
 		exit(1);
 	}
 }
@@ -393,7 +351,7 @@ OrderVector SharedListVector::getOrderVector(map<string,int>* orderMap = NULL){
 					}
 					else{
 						if(orderMap->count(seqName) == 0){
-							cerr << seqName << " not found, check *.names file\n";
+							mothurOut(seqName + " not found, check *.names file\n");
 							exit(1);
 						}
 					
@@ -403,7 +361,7 @@ OrderVector SharedListVector::getOrderVector(map<string,int>* orderMap = NULL){
 				}
 			
 				if(orderMap->count(seqName) == 0){
-					cerr << seqName << " not found, check *.names file\n";
+					mothurOut(seqName + " not found, check *.names file\n");
 					exit(1);
 				}
 				ov.set((*orderMap)[seqName], i);	
@@ -416,11 +374,7 @@ OrderVector SharedListVector::getOrderVector(map<string,int>* orderMap = NULL){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedListVector class Function getOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedListVector class function getOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedListVector", "getOrderVector");
 		exit(1);
 	}
 }

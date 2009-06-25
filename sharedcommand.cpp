@@ -22,21 +22,16 @@ SharedCommand::SharedCommand(){
 		openOutputFile(filename, out);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedCommand class Function SharedCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedCommand", "SharedCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedCommand class function SharedCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 //**********************************************************************************************************************
 
 int SharedCommand::execute(){
 	try {
 		
-		cout << "creating sharedfile...";
+		mothurOut("creating sharedfile..."); mothurOutEndLine();
 		//lookup.clear();
 		int count = 1;
 		string errorOff = "no error";
@@ -94,12 +89,8 @@ int SharedCommand::execute(){
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			//cout << "Your file does not include the label "<< *it; 
 			if (processedLabels.count(lastLabel) != 1) {
-				//cout << ". I will use " << lastList->getLabel() << "." << endl;
 				needToRun = true;
-			}else {
-				//cout << ". Please refer to " << lastList->getLabel() << "." << endl;
 			}
 		}
 		
@@ -119,18 +110,13 @@ int SharedCommand::execute(){
 		
 		out.close();
 		
-		cout << "complete." << endl;
+		mothurOut("complete."); mothurOutEndLine();
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 //**********************************************************************************************************************
 void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup) {
@@ -144,14 +130,9 @@ void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup) {
  
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedCommand class Function printSharedData. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedCommand", "printSharedData");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedCommand class function printSharedData. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	
 }
 
 //**********************************************************************************************************************

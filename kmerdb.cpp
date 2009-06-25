@@ -40,14 +40,14 @@ KmerDB::KmerDB(string fastaFileName, int kSize) : Database(fastaFileName), kmerS
 	kmerLocations.resize(maxKmer+1);
 	
 	if(!kmerFileTest){		//	if we can open the kmer db file, then read it in...
-		cout << "Generating the " << kmerDBName << " database...\t";	cout.flush();
+		mothurOut("Generating the " + kmerDBName + " database...\t");	cout.flush();
 		generateKmerDB(kmerDBName);	
 	}
 	else{					//	...otherwise generate it.
-		cout << "Reading in the " << kmerDBName << " database...\t";	cout.flush();
+		mothurOut("Reading in the " + kmerDBName + " database...\t");	cout.flush();
 		readKmerDB(kmerDBName, kmerFileTest);
 	}
-	cout << "DONE." << endl << endl;	cout.flush();
+	mothurOut("DONE."); mothurOutEndLine();	mothurOutEndLine(); cout.flush();
 
 }
 /**************************************************************************************************/

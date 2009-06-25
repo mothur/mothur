@@ -96,11 +96,7 @@ Alignment::~Alignment(){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Alignment class Function ~Alignment. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Alignment class function ~Alignment. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Alignment", "~Alignment");
 		exit(1);
 	}
 }

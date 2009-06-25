@@ -45,13 +45,9 @@ EstOutput RareCalc::getValues(int n){
 		return output;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the RareCalc class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "RareCalc", "getValues");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the RareCalc class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/

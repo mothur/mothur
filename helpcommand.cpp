@@ -14,7 +14,7 @@
 HelpCommand::HelpCommand(string option){
 
 	
-	if (option != "") { cout << "There are no valid parameters for the help() command." << endl;  }
+	if (option != "") { mothurOut("There are no valid parameters for the help() command."); mothurOutEndLine();  }
 	
 	validCommands = new CommandFactory();
 }
@@ -28,11 +28,11 @@ HelpCommand::~HelpCommand(){}
 int HelpCommand::execute(){
 
 	validCommands->printCommands(cout);
-	cout << "For more information about a specific command type 'commandName(help)' i.e. 'read.dist(help)'" << endl;
+	mothurOut("For more information about a specific command type 'commandName(help)' i.e. 'read.dist(help)'"); mothurOutEndLine();
 	
 	delete validCommands;
 	
-	cout << endl << "For further assistance please refer to the Mothur manual on our wiki at http://schloss.micro.umass.edu/mothur/, or contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+	mothurOutEndLine(); mothurOut("For further assistance please refer to the Mothur manual on our wiki at http://schloss.micro.umass.edu/mothur/, or contact Pat Schloss at pschloss@microbio.umass.edu.\n");
 	return 0;
 }
 

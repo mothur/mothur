@@ -28,7 +28,6 @@ EstOutput NPShannon::getValues(SAbundVector* rank){
 				double ChatPi = Chat*pi;
 				if(ChatPi>0){
 					npShannon += rank->get(i) * ChatPi*log(ChatPi)/(1-pow(1-ChatPi,(double)sampled));
-					//cout << ChatPi << '\t' << rank->get(i) * ChatPi*log(ChatPi)/(1-pow(1-ChatPi,(double)sampled)) << endl;
 				}
 			}
 			npShannon = -npShannon;
@@ -44,13 +43,9 @@ EstOutput NPShannon::getValues(SAbundVector* rank){
 		return data;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the NPShannon class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "NPShannon", "getValues");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the NPShannon class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/

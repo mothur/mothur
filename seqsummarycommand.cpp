@@ -37,37 +37,29 @@ SeqSummaryCommand::SeqSummaryCommand(string option){
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
-			else if (fastafile == "not found") { fastafile = ""; cout << "fasta is a required parameter for the summary.seqs command." << endl; abort = true;  }	
+			else if (fastafile == "not found") { fastafile = ""; mothurOut("fasta is a required parameter for the summary.seqs command."); mothurOutEndLine(); abort = true;  }	
 			
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SeqSummaryCommand class Function SeqSummaryCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SeqSummaryCommand", "SeqSummaryCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SeqSummaryCommand class function SeqSummaryCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 //**********************************************************************************************************************
 
 void SeqSummaryCommand::help(){
 	try {
-		cout << "The summary.seqs command reads a fastafile and ...." << "\n";
-		cout << "The summary.seqs command parameter is fasta and it is required." << "\n";
-		cout << "The summary.seqs command should be in the following format: " << "\n";
-		cout << "summary.seqs(fasta=yourFastaFile) " << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile)." << "\n" << "\n";	
+		mothurOut("The summary.seqs command reads a fastafile and ....\n");
+		mothurOut("The summary.seqs command parameter is fasta and it is required.\n");
+		mothurOut("The summary.seqs command should be in the following format: \n");
+		mothurOut("summary.seqs(fasta=yourFastaFile) \n");
+		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SeqSummaryCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SeqSummaryCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SeqSummaryCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //***************************************************************************************************************
@@ -128,29 +120,24 @@ int SeqSummaryCommand::execute(){
 		int ptile97_5	= int(numSeqs * 0.975);
 		int ptile100	= numSeqs - 1;
 		
-		cout << endl;
-		cout << "\t\tStart\tEnd\tNBases\tAmbigs\tPolymer" << endl;
-		cout << "Minimum:\t" << startPosition[0] << '\t' << endPosition[0] << '\t' << seqLength[0] << '\t' << ambigBases[0] << '\t' << longHomoPolymer[0] << endl;
-		cout << "2.5%-tile:\t" << startPosition[ptile0_25] << '\t' << endPosition[ptile0_25] << '\t' << seqLength[ptile0_25] << '\t' << ambigBases[ptile0_25] << '\t' << longHomoPolymer[ptile0_25] << endl;
-		cout << "25%-tile:\t" << startPosition[ptile25] << '\t' << endPosition[ptile25] << '\t' << seqLength[ptile25] << '\t' << ambigBases[ptile25] << '\t' << longHomoPolymer[ptile25] << endl;
-		cout << "Median: \t" << startPosition[ptile50] << '\t' << endPosition[ptile50] << '\t' << seqLength[ptile50] << '\t' << ambigBases[ptile50] << '\t' << longHomoPolymer[ptile50] << endl;
-		cout << "75%-tile:\t" << startPosition[ptile75] << '\t' << endPosition[ptile75] << '\t' << seqLength[ptile75] << '\t' << ambigBases[ptile75] << '\t' << longHomoPolymer[ptile75] << endl;
-		cout << "97.5%-tile:\t" << startPosition[ptile97_5] << '\t' << endPosition[ptile97_5] << '\t' << seqLength[ptile97_5] << '\t' << ambigBases[ptile97_5] << '\t' << longHomoPolymer[ptile97_5] << endl;
-		cout << "Maximum:\t" << startPosition[ptile100] << '\t' << endPosition[ptile100] << '\t' << seqLength[ptile100] << '\t' << ambigBases[ptile100] << '\t' << longHomoPolymer[ptile100] << endl;
-		cout << "# of Seqs:\t" << numSeqs << endl;
+		mothurOutEndLine();
+		mothurOut("\t\tStart\tEnd\tNBases\tAmbigs\tPolymer"); mothurOutEndLine();
+		mothurOut("Minimum:\t" + toString(startPosition[0]) + "\t" + toString(endPosition[0]) + "\t" + toString(seqLength[0]) + "\t" + toString(ambigBases[0]) + "\t" + toString(longHomoPolymer[0])); mothurOutEndLine();
+		mothurOut("2.5%-tile:\t" + toString(startPosition[ptile0_25]) + "\t" + toString(endPosition[ptile0_25]) + "\t" + toString(seqLength[ptile0_25]) + "\t" + toString(ambigBases[ptile0_25]) + "\t"+ toString(longHomoPolymer[ptile0_25])); mothurOutEndLine();
+		mothurOut("25%-tile:\t" + toString(startPosition[ptile25]) + "\t" + toString(endPosition[ptile25]) + "\t" + toString(seqLength[ptile25]) + "\t" + toString(ambigBases[ptile25]) + "\t" + toString(longHomoPolymer[ptile25])); mothurOutEndLine();
+		mothurOut("Median: \t" + toString(startPosition[ptile50]) + "\t" + toString(endPosition[ptile50]) + "\t" + toString(seqLength[ptile50]) + "\t" + toString(ambigBases[ptile50]) + "\t" + toString(longHomoPolymer[ptile50])); mothurOutEndLine();
+		mothurOut("75%-tile:\t" + toString(startPosition[ptile75]) + "\t" + toString(endPosition[ptile75]) + "\t" + toString(seqLength[ptile75]) + "\t" + toString(ambigBases[ptile75]) + "\t" + toString(longHomoPolymer[ptile75])); mothurOutEndLine();
+		mothurOut("97.5%-tile:\t" + toString(startPosition[ptile97_5]) + "\t" + toString(endPosition[ptile97_5]) + "\t" + toString(seqLength[ptile97_5]) + "\t" + toString(ambigBases[ptile97_5]) + "\t" + toString(longHomoPolymer[ptile97_5])); mothurOutEndLine();
+		mothurOut("Maximum:\t" + toString(startPosition[ptile100]) + "\t" + toString(endPosition[ptile100]) + "\t" + toString(seqLength[ptile100]) + "\t" + toString(ambigBases[ptile100]) + "\t" + toString(longHomoPolymer[ptile100])); mothurOutEndLine();
+		mothurOut("# of Seqs:\t" + toString(numSeqs)); mothurOutEndLine();
 		
 		outSummary.close();
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SeqSummaryCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SeqSummaryCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SeqSummaryCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	
 }
 
 //***************************************************************************************************************

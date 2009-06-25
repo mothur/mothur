@@ -24,11 +24,7 @@ void RareDisplay::init(string label){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the RareDisplay class Function init. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the RareDisplay class function init. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "RareDisplay", "init");
 		exit(1);
 	}
 }
@@ -59,11 +55,7 @@ void RareDisplay::update(SAbundVector* rank){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the RareDisplay class Function update. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the RareDisplay class function update. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "RareDisplay", "update");
 		exit(1);
 	}
 }
@@ -92,11 +84,7 @@ void RareDisplay::update(vector<SharedRAbundVector*> shared, int numSeqs, int nu
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the RareDisplay class Function update. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the RareDisplay class function update. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "RareDisplay", "update");
 		exit(1);
 	}
 }
@@ -119,14 +107,10 @@ void RareDisplay::reset(){
 		renameOk = rename(tempOutName.c_str(), tempInName.c_str());	
 		
 		//checks to make sure user was able to rename and remove successfully
-		if (renameOk != 0) { cout << "Unable to rename the necessary temp files." << endl; }
+		if (renameOk != 0) { mothurOut("Unable to rename the necessary temp files."); mothurOutEndLine(); }
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the RareDisplay class Function reset. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the RareDisplay class function reset. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "RareDisplay", "reset");
 		exit(1);
 	}
 }
@@ -167,11 +151,7 @@ void RareDisplay::close(){
 		output->resetFile();
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the RareDisplay class Function close. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the RareDisplay class function close. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "RareDisplay", "close");
 		exit(1);
 	}
 }

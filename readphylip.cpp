@@ -38,7 +38,7 @@ void ReadPhylipMatrix::read(NameAssignment* nameMap){
                         }
                         else{
                                 list = new ListVector(nameMap->getListVector());
-                                if(nameMap->count(name)==0){        cout << "Error: Sequence '" << name << "' was not found in the names file, please correct" << endl; }
+                                if(nameMap->count(name)==0){        mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); mothurOutEndLine(); }
                         }
         
                         char d;
@@ -89,7 +89,7 @@ void ReadPhylipMatrix::read(NameAssignment* nameMap){
                                 
                                         }
                                         else{
-                                                if(nameMap->count(name)==0){        cout << "Error: Sequence '" << name << "' was not found in the names file, please correct" << endl; }
+                                                if(nameMap->count(name)==0){        mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); mothurOutEndLine(); }
                                 
                                                 for(int j=0;j<i;j++){
                                                         fileHandle >> distance;
@@ -133,7 +133,7 @@ void ReadPhylipMatrix::read(NameAssignment* nameMap){
                                         
                                         }
                                         else{
-                                                if(nameMap->count(name)==0){        cout << "Error: Sequence '" << name << "' was not found in the names file, please correct" << endl; }
+                                                if(nameMap->count(name)==0){        mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); mothurOutEndLine(); }
                                 
                                                 for(int j=0;j<nseqs;j++){
                                                         fileHandle >> distance;
@@ -162,20 +162,16 @@ void ReadPhylipMatrix::read(NameAssignment* nameMap){
                                 }
                                 if(nameMap->size() > 0){
                                         //should probably tell them what is missing if we missed something
-                                        cout << "missed something" << '\t' << nameMap->size() << endl;
+                                        mothurOut("missed something\t" + toString(nameMap->size())); mothurOutEndLine();
                                 }
                         }
 
                 }
         catch(exception& e) {
-                cout << "Standard Error: " << e.what() << " has occurred in the ReadPhylipMatrix class Function read. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+               errorOut(e, "ReadPhylipMatrix", "read");
                 exit(1);
         }
-        catch(...) {
-                cout << "An unknown error has occurred in the ReadPhylipMatrix class function read. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-                exit(1);
-        }
-}
+	}
 
 /***********************************************************************/
 

@@ -64,7 +64,7 @@ SummarySharedCommand::SummarySharedCommand(string option){
 			
 			//make sure the user has already run the read.otu command
 			if (globaldata->getSharedFile() == "") {
-				 cout << "You must read a list and a group, or a shared before you can use the summary.shared command." << endl; abort = true; 
+				 mothurOut("You must read a list and a group, or a shared before you can use the summary.shared command."); mothurOutEndLine(); abort = true; 
 			}
 			
 			//check for optional parameter and set defaults
@@ -84,7 +84,7 @@ SummarySharedCommand::SummarySharedCommand(string option){
 			}
 			
 			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { cout << "You cannot use both the line and label parameters at the same time. " << endl; abort = true; }
+			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
 			//if the user has not specified any line or labels use the ones from read.otu
 			else if((line == "") && (label == "")) {  
 				allLines = globaldata->allLines; 
@@ -166,39 +166,31 @@ SummarySharedCommand::SummarySharedCommand(string option){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SummarySharedCommand class Function SummarySharedCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SummarySharedCommand", "SummarySharedCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SummarySharedCommand class function SummarySharedCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
 
 void SummarySharedCommand::help(){
 	try {
-		cout << "The summary.shared command can only be executed after a successful read.otu command." << "\n";
-		cout << "The summary.shared command parameters are label, line and calc.  No parameters are required, but you may not use " << "\n";
-		cout << "both the line and label parameters at the same time. The summary.shared command should be in the following format: " << "\n";
-		cout << "summary.shared(label=yourLabel, line=yourLines, calc=yourEstimators, groups=yourGroups)." << "\n";
-		cout << "Example summary.shared(label=unique-.01-.03, line=0,5,10, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan)." << "\n";
+		mothurOut("The summary.shared command can only be executed after a successful read.otu command.\n");
+		mothurOut("The summary.shared command parameters are label, line and calc.  No parameters are required, but you may not use \n");
+		mothurOut("both the line and label parameters at the same time. The summary.shared command should be in the following format: \n");
+		mothurOut("summary.shared(label=yourLabel, line=yourLines, calc=yourEstimators, groups=yourGroups).\n");
+		mothurOut("Example summary.shared(label=unique-.01-.03, line=0,5,10, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan).\n");
 		validCalculator->printCalc("sharedsummary", cout);
-		cout << "The default value for calc is sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan" << "\n";
-		cout << "The default value for groups is all the groups in your groupfile." << "\n";
-		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
-		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. line), '=' and parameters (i.e.yourLines)." << "\n" << "\n";
+		mothurOut("The default value for calc is sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan\n");
+		mothurOut("The default value for groups is all the groups in your groupfile.\n");
+		mothurOut("The label and line parameters are used to analyze specific lines in your input.\n");
+		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. line), '=' and parameters (i.e.yourLines).\n\n");
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SummarySharedCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SummarySharedCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SummarySharedCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
@@ -258,7 +250,7 @@ int SummarySharedCommand::execute(){
 		}
 		
 		if (lookup.size() < 2) { 
-			cout << "I cannot run the command without at least 2 valid groups."; 
+			mothurOut("I cannot run the command without at least 2 valid groups."); 
 			for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; }
 			
 			//close files and clean up
@@ -281,7 +273,7 @@ int SummarySharedCommand::execute(){
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 		
 			if(allLines == 1 || lines.count(count) == 1 || labels.count(lookup[0]->getLabel()) == 1){			
-				cout << lookup[0]->getLabel() << '\t' << count << endl;
+				mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 				process(lookup);
 				
 				processedLabels.insert(lookup[0]->getLabel());
@@ -293,7 +285,7 @@ int SummarySharedCommand::execute(){
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 					lookup = input->getSharedRAbundVectors(lastLabel);
 
-					cout << lookup[0]->getLabel() << '\t' << count << endl;
+					mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 					process(lookup);
 					
 					processedLabels.insert(lookup[0]->getLabel());
@@ -315,12 +307,12 @@ int SummarySharedCommand::execute(){
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			cout << "Your file does not include the label "<< *it; 
+			mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(lastLabel) != 1) {
-				cout << ". I will use " << lastLabel << "." << endl;
+				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
 				needToRun = true;
 			}else {
-				cout << ". Please refer to " << lastLabel << "." << endl;
+				mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
 			}
 		}
 		
@@ -329,7 +321,7 @@ int SummarySharedCommand::execute(){
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 				lookup = input->getSharedRAbundVectors(lastLabel);
 
-				cout << lookup[0]->getLabel() << '\t' << count << endl;
+				mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 				process(lookup);
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 		}
@@ -349,13 +341,9 @@ int SummarySharedCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SummarySharedCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SummarySharedCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SummarySharedCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 /***********************************************************/
@@ -415,13 +403,9 @@ void SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup) {
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SummarySharedCommand class Function process. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SummarySharedCommand", "process");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SummarySharedCommand class function process. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 /***********************************************************/

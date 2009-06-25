@@ -67,8 +67,8 @@ EstOutput BStick::getValues(SAbundVector* rank){
 		data[1] = 0.886/sqrt(rdata.size());
 		data[2] = 1.031/sqrt(rdata.size());
 
-		/*cout << critVal << "\n";
-		cout << "If D-Statistic is less than the critical value then the data fits the Broken Stick model w/ 95% confidence.\n\n";*/
+		/*mothurOut(critVal); mothurOutEndLine();
+		mothurOut("If D-Statistic is less than the critical value then the data fits the Broken Stick model w/ 95% confidence.\n\n");*/
 		
 
 		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
@@ -78,13 +78,9 @@ EstOutput BStick::getValues(SAbundVector* rank){
 		return data;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the BStick class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "BStick", "getValues");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the BStick class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/

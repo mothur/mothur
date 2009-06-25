@@ -50,7 +50,7 @@ RareFactCommand::RareFactCommand(string option){
 			}
 			
 			//make sure the user has already run the read.otu command
-			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { cout << "You must read a list, sabund or rabund before you can use the rarefaction.single command." << endl; abort = true; }
+			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { mothurOut("You must read a list, sabund or rabund before you can use the rarefaction.single command."); mothurOutEndLine(); abort = true; }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -69,7 +69,7 @@ RareFactCommand::RareFactCommand(string option){
 			}
 			
 			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { cout << "You cannot use both the line and label parameters at the same time. " << endl; abort = true; }
+			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
 			//if the user has not specified any line or labels use the ones from read.otu
 			else if((line == "") && (label == "")) {  
 				allLines = globaldata->allLines; 
@@ -134,38 +134,29 @@ RareFactCommand::RareFactCommand(string option){
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the RareFactCommand class Function RareFactCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "RareFactCommand", "RareFactCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the RareFactCommand class function RareFactCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-			
 }
 //**********************************************************************************************************************
 
 void RareFactCommand::help(){
 	try {
-		cout << "The rarefaction.single command can only be executed after a successful read.otu WTIH ONE EXECEPTION." << "\n";
-		cout << "The rarefaction.single command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster." << "\n";
-		cout << "The rarefaction.single command parameters are label, line, iters, freq, calc and abund.  No parameters are required, but you may not use " << "\n";
-		cout << "both the line and label parameters at the same time. The rarefaction.single command should be in the following format: " << "\n";
-		cout << "rarefaction.single(label=yourLabel, line=yourLines, iters=yourIters, freq=yourFreq, calc=yourEstimators)." << "\n";
-		cout << "Example rarefaction.single(label=unique-.01-.03, line=0-5-10, iters=10000, freq=10, calc=sobs-rchao-race-rjack-rbootstrap-rshannon-rnpshannon-rsimpson)." << "\n";
-		cout << "The default values for iters is 1000, freq is 100, and calc is rarefaction which calculates the rarefaction curve for the observed richness." << "\n";
+		mothurOut("The rarefaction.single command can only be executed after a successful read.otu WTIH ONE EXECEPTION.\n");
+		mothurOut("The rarefaction.single command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster.\n");
+		mothurOut("The rarefaction.single command parameters are label, line, iters, freq, calc and abund.  No parameters are required, but you may not use \n");
+		mothurOut("both the line and label parameters at the same time. The rarefaction.single command should be in the following format: \n");
+		mothurOut("rarefaction.single(label=yourLabel, line=yourLines, iters=yourIters, freq=yourFreq, calc=yourEstimators).\n");
+		mothurOut("Example rarefaction.single(label=unique-.01-.03, line=0-5-10, iters=10000, freq=10, calc=sobs-rchao-race-rjack-rbootstrap-rshannon-rnpshannon-rsimpson).\n");
+		mothurOut("The default values for iters is 1000, freq is 100, and calc is rarefaction which calculates the rarefaction curve for the observed richness.\n");
 		validCalculator->printCalc("rarefaction", cout);
-		cout << "The label and line parameters are used to analyze specific lines in your input." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq)." << "\n" << "\n";
+		mothurOut("The label and line parameters are used to analyze specific lines in your input.\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n\n");
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the RareFactCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "RareFactCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the RareFactCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
@@ -212,7 +203,7 @@ int RareFactCommand::execute(){
 				rCurve->getCurve(freq, nIters);
 				delete rCurve;
 			
-				cout << order->getLabel() << '\t' << count << endl;
+				mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
 				userLines.erase(count);
@@ -226,7 +217,7 @@ int RareFactCommand::execute(){
 				rCurve->getCurve(freq, nIters);
 				delete rCurve;
 			
-				cout << order->getLabel() << '\t' << count << endl;
+				mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
 			}
@@ -242,12 +233,12 @@ int RareFactCommand::execute(){
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			cout << "Your file does not include the label "<< *it; 
+			mothurOut("Your file does not include the label " + *it);
 			if (processedLabels.count(lastLabel) != 1) {
-				cout << ". I will use " << lastLabel << "." << endl;
+				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
 				needToRun = true;
 			}else {
-				cout << ". Please refer to " << lastLabel << "." << endl;
+				mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
 			}
 		}
 		
@@ -260,7 +251,7 @@ int RareFactCommand::execute(){
 			rCurve->getCurve(freq, nIters);
 			delete rCurve;
 			
-			cout << order->getLabel() << '\t' << count << endl;
+			mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 			delete order;
 		}
 		
@@ -269,13 +260,9 @@ int RareFactCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the RareFactCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "RareFactCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the RareFactCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
