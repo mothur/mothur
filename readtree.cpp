@@ -16,13 +16,9 @@ ReadTree::ReadTree() {
 		globaldata->gTree.clear();
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReadTree class Function ReadTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ReadTree", "ReadTree");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ReadTree class function ReadTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /***********************************************************************/
 int ReadTree::readSpecialChar(istream& f, char c, string name) {
@@ -32,11 +28,11 @@ int ReadTree::readSpecialChar(istream& f, char c, string name) {
 		char d = f.get();
 	
 		if(d == EOF){
-			cerr << "Error: Input file ends prematurely, expecting a " << name << "\n";
+			mothurOut("Error: Input file ends prematurely, expecting a " + name + "\n");
 			exit(1);
 		}
 		if(d != c){
-			cerr << "Error: Expected " << name << " in input file.  Found " << d << ".\n";
+			mothurOut("Error: Expected " + name + " in input file.  Found " + toString(d) + ".\n");
 			exit(1);
 		}
 		if(d == ')' && f.peek() == '\n'){
@@ -45,13 +41,9 @@ int ReadTree::readSpecialChar(istream& f, char c, string name) {
 		return d;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReadTree class Function readSpecialChar. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ReadTree", "readSpecialChar");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ReadTree class function readSpecialChar. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /**************************************************************************************************/
 
@@ -62,19 +54,15 @@ int ReadTree::readNodeChar(istream& f) {
 		char d = f.get();
 
 		if(d == EOF){
-			cerr << "Error: Input file ends prematurely, expecting a left parenthesis\n";
+			mothurOut("Error: Input file ends prematurely, expecting a left parenthesis\n");
 			exit(1);
 		}
 		return d;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReadTree class Function readNodeChar. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ReadTree", "readNodeChar");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ReadTree class function readNodeChar. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 /**************************************************************************************************/
@@ -84,20 +72,16 @@ float ReadTree::readBranchLength(istream& f) {
 		float b;
 	
 		if(!(f >> b)){
-			cerr << "Error: Missing branch length in input tree.\n";
+			mothurOut("Error: Missing branch length in input tree.\n");
 			exit(1);
 		}
 		gobble(f);
 		return b;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReadTree class Function readBranchLength. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ReadTree", "readBranchLength");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ReadTree class function readBranchLength. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 /***********************************************************************/
@@ -182,13 +166,9 @@ int ReadNewickTree::read() {
 		return readOk;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReadNewickTree class Function read. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ReadNewickTree", "read");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ReadNewickTree class function read. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /**************************************************************************************************/
 //This function read the file through the translation of the sequences names and updates treemap.
@@ -227,13 +207,9 @@ void ReadNewickTree::nexusTranslation() {
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReadNewickTree class Function nexus. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ReadNewickTree", "nexusTranslation");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ReadNewickTree class function nexus. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 /**************************************************************************************************/
@@ -251,7 +227,7 @@ int ReadNewickTree::readTreeString() {
 			n = numLeaves;  //number of leaves / sequences, we want node 1 to start where the leaves left off
 
 			lc = readNewickInt(filehandle, n, T);
-			if (lc == -1) { cout << "error with lc" << endl; return -1; } //reports an error in reading
+			if (lc == -1) { mothurOut("error with lc"); mothurOutEndLine(); return -1; } //reports an error in reading
 		
 			if(filehandle.peek()==','){							
 				readSpecialChar(filehandle,',',"comma");
@@ -262,7 +238,7 @@ int ReadNewickTree::readTreeString() {
 			}												
 			if(rooted != 1){								
 				rc = readNewickInt(filehandle, n, T);
-				if (rc == -1) { cout << "error with rc" << endl; return -1; } //reports an error in reading
+				if (rc == -1) { mothurOut("error with rc"); mothurOutEndLine(); return -1; } //reports an error in reading
 				if(filehandle.peek() == ')'){					
 					readSpecialChar(filehandle,')',"right parenthesis");
 				}											
@@ -278,14 +254,14 @@ int ReadNewickTree::readTreeString() {
 			n = T->getIndex(name);
 
 			if(n!=0){
-				cerr << "Internal error: The only taxon is not taxon 0.\n";
+				mothurOut("Internal error: The only taxon is not taxon 0.\n");
 				//exit(1);
 				readOk = -1; return -1;
 			}
 			lc = rc = -1;
 		} 
 		
-		while((ch=filehandle.get())!=';'){;}						
+		while(((ch=filehandle.get())!=';') && (filehandle.eof() != true)){;}						
 		if(rooted != 1){									
 			T->tree[n].setChildren(lc,rc);
 			T->tree[n].setBranchLength(0);
@@ -297,14 +273,9 @@ int ReadNewickTree::readTreeString() {
 	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReadNewickTree class Function readTreeString. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ReadNewickTree", "readTreeString");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ReadNewickTree class function readTreeString. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
-
 }
 /**************************************************************************************************/
 
@@ -321,15 +292,22 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 			if (rc == -1) { return -1; }  //reports an error in reading	
 			if(f.peek()==')'){	
 				readSpecialChar(f,')',"right parenthesis");	
+				//to pass over labels in trees
+				c=filehandle.get();
+				while((c!=',') && (c != -1) && (c!= ':') && (c!=';')){ c=filehandle.get(); }
+				filehandle.putback(c);
+
 			}			
 		
 			if(f.peek() == ':'){									      
 				readSpecialChar(f,':',"colon");	
 										
-				if(n >= numNodes){	cerr << "Error: Too many nodes in input tree\n";  readOk = -1; return -1; }
+				if(n >= numNodes){	mothurOut("Error: Too many nodes in input tree\n");  readOk = -1; return -1; }
 				
 				T->tree[n].setBranchLength(readBranchLength(f));
-			}else{T->tree[n].setBranchLength(0.0); }						
+			}else{
+				T->tree[n].setBranchLength(0.0); 
+			}						
 		
 			T->tree[n].setChildren(lc,rc);
 			T->tree[lc].setParent(n);
@@ -358,7 +336,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 			
 			//adds sequence names that are not in group file to the "xxx" group
 			if(group == "not found") {
-				cout << "Name: " << name << " is not in your groupfile, and will be disregarded. \n";  //readOk = -1; return n1;
+				mothurOut("Name: " + name + " is not in your groupfile, and will be disregarded. \n");  //readOk = -1; return n1;
 				
 				globaldata->gTreemap->namesOfSeqs.push_back(name);
 				globaldata->gTreemap->treemap[name].groupname = "xxx";
@@ -392,13 +370,9 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReadNewickTree class Function readNewickInt. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ReadNewickTree", "readNewickInt");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ReadNewickTree class function readNewickInt. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /**************************************************************************************************/
 /**************************************************************************************************/

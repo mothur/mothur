@@ -59,13 +59,9 @@ void SingleLinkage::update(){
 		dMatrix->rmCell(rowCells[0]);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SingleLinkage class Function update. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SingleLinkage", "update");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SingleLinkage class function update. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/

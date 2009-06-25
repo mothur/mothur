@@ -116,11 +116,7 @@ bool TreeMap::isValidGroup(string groupname) {
 		return false;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the TreeMap class Function isValidGroup. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the TreeMap class function isValidGroup. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "TreeMap", "isValidGroup");
 		exit(1);
 	}
 }
@@ -134,11 +130,7 @@ void TreeMap::print(ostream& output){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the TreeMap class Function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the TreeMap class function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "TreeMap", "print");
 		exit(1);
 	}
 }
@@ -162,11 +154,7 @@ void TreeMap::makeSim(GroupMap* groupmap) {
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the TreeMap class Function makeSim. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the TreeMap class function makeSim. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "TreeMap", "makeSim");
 		exit(1);
 	}
 }
@@ -192,11 +180,7 @@ void TreeMap::makeSim(ListVector* list) {
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the TreeMap class Function makeSim. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the TreeMap class function makeSim. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "TreeMap", "makeSim");
 		exit(1);
 	}
 }

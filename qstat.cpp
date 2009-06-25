@@ -52,7 +52,6 @@ EstOutput QStat::getValues(SAbundVector* rank){
 		}
 		
 		double qstat = (.5*r1 + iqSum + .5*r3)/log((double)r3Ind/r1Ind);
-		//cout << "QStat:\nQStatistic = " << qstat << "\n\n";
 		
 		data[0] = qstat;
 		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
@@ -60,13 +59,9 @@ EstOutput QStat::getValues(SAbundVector* rank){
 		return data;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the QStat class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "QStat", "getValues");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the QStat class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/

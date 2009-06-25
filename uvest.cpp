@@ -80,15 +80,9 @@ EstOutput UVEst::getUVest(vector<SharedRAbundVector*> shared) {
 		return results;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the UVEst class Function getUVest. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "UVEst", "getUVest");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the UVEst class Function getUVest. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-
-
 }
 
 /***********************************************************************/

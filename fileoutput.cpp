@@ -40,11 +40,7 @@ void ThreeColumnFile::initFile(string label){
 		outFile.setf(ios::showpoint);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ThreeColumnFile class Function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ThreeColumnFile class function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ThreeColumnFile", "initFile");
 		exit(1);
 	}
 }
@@ -64,11 +60,7 @@ void ThreeColumnFile::output(int nSeqs, vector<double> data){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ThreeColumnFile class Function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ThreeColumnFile class function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ThreeColumnFile", "output");
 		exit(1);
 	}
 }
@@ -90,17 +82,13 @@ void ThreeColumnFile::resetFile(){
 		renameOk = rename(outName.c_str(), inName.c_str());
 		
 		//checks to make sure user was able to rename and remove successfully
-		if ((renameOk != 0)) {	cout << "Unable to rename necessary files." << endl; }
+		if ((renameOk != 0)) {	mothurOut("Unable to rename necessary files."); mothurOutEndLine(); }
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ThreeColumnFile class Function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ThreeColumnFile", "resetFile");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ThreeColumnFile class function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -142,11 +130,7 @@ void ColumnFile::initFile(string label, vector<string> tags){
 		outFile.setf(ios::showpoint);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ColumnFile class Function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ColumnFile class function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ColumnFile", "initFile");
 		exit(1);
 	}
 }
@@ -176,11 +160,7 @@ void ColumnFile::output(vector<double> data){
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ColumnFile class Function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ColumnFile class function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ColumnFile", "output");
 		exit(1);
 	}
 }
@@ -202,17 +182,13 @@ void ColumnFile::resetFile(){
 		renameOk = rename(outName.c_str(), inName.c_str());
 		
 		//checks to make sure user was able to rename and remove successfully
-		if ((renameOk != 0)) { cout << "Unable to rename necessary files." << endl; }
+		if ((renameOk != 0)) { mothurOut("Unable to rename necessary files."); mothurOutEndLine(); }
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ColumnFile class Function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ColumnFile", "resetFile");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ColumnFile class function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -247,11 +223,7 @@ void SharedThreeColumnFile::initFile(string label){
 		outFile.setf(ios::showpoint);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedThreeColumnFile class Function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedThreeColumnFile class function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedThreeColumnFile", "initFile");
 		exit(1);
 	}
 }
@@ -272,11 +244,7 @@ void SharedThreeColumnFile::output(int nSeqs, vector<double> data){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedThreeColumnFile class Function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedThreeColumnFile class function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedThreeColumnFile", "output");
 		exit(1);
 	}
 }
@@ -297,17 +265,13 @@ void SharedThreeColumnFile::resetFile(){
 		renameOk = rename(outName.c_str(), inName.c_str());
 		
 		//checks to make sure user was able to rename and remove successfully
-		if ((renameOk != 0)) { cout << "Unable to rename necessary files." << endl; }
+		if ((renameOk != 0)) { mothurOut("Unable to rename necessary files."); mothurOutEndLine(); }
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedThreeColumnFile class Function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedThreeColumnFile", "resetFile");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedThreeColumnFile class function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -343,13 +307,9 @@ void OneColumnFile::initFile(string label){
 		outFile.setf(ios::showpoint);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the OneColumnFile class Function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "OneColumnFile", "initFile");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the OneColumnFile class function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -367,13 +327,9 @@ void OneColumnFile::output(int nSeqs, vector<double> data){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the OneColumnFile class Function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "OneColumnFile", "output");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the OneColumnFile class function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -392,17 +348,13 @@ void OneColumnFile::resetFile(){
 		renameOk = rename(outName.c_str(), inName.c_str());
 		
 		//checks to make sure user was able to rename and remove successfully
-		if ((renameOk != 0)) { cout << "Unable to rename necessary files." << endl; }
+		if ((renameOk != 0)) { mothurOut("Unable to rename necessary files."); mothurOutEndLine(); }
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the OneColumnFile class Function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "OneColumnFile", "resetFile");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the OneColumnFile class function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -439,13 +391,9 @@ void SharedOneColumnFile::initFile(string label){
 		outFile.setf(ios::showpoint);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the OneColumnFile class Function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedOneColumnFile", "initFile");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the OneColumnFile class function initFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -470,13 +418,9 @@ void SharedOneColumnFile::output(int nSeqs, vector<double> data){
 			}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the OneColumnFile class Function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedOneColumnFile", "output");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the OneColumnFile class function output. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -496,18 +440,14 @@ void SharedOneColumnFile::resetFile(){
 		renameOk = rename(outName.c_str(), inName.c_str());
 		
 		//checks to make sure user was able to rename and remove successfully
-		if ((renameOk != 0)) { cout << "Unable to rename necessary files." << endl; }
+		if ((renameOk != 0)) { mothurOut("Unable to rename necessary files."); mothurOutEndLine(); }
 
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the OneColumnFile class Function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedOneColumnFile", "resetFile");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the OneColumnFile class function resetFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/

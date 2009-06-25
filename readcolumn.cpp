@@ -127,14 +127,9 @@ void ReadColumnMatrix::read(NameAssignment* nameMap){
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReadColumnMatrix class Function read. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ReadColumnMatrix", "read");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ReadColumnMatrix class function read. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 
 /***********************************************************************/

@@ -45,14 +45,9 @@ vector<vector<double> > SLibshuff::evaluateAll(){
 		return dCXYValues;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SLibshuff class Function evaluateAll. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SLibshuff", "evaluateAll");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SLibshuff class function evaluateAll. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-	
 }
 
 /***********************************************************************/
@@ -103,14 +98,9 @@ double SLibshuff::sCalculate(int x, int y){
 		return sum;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SLibshuff class Function sCalculate. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SLibshuff", "sCalculate");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SLibshuff class function sCalculate. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-	
 }
 
 /***********************************************************************/

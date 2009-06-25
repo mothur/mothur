@@ -47,11 +47,7 @@ OrderVector::OrderVector(ifstream& f) : DataVector() {
 		updateStats();
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the OrderVector class Function OrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the OrderVector class function OrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "OrderVector", "OrderVector");
 		exit(1);
 	}
 }
@@ -116,11 +112,7 @@ void OrderVector::print(ostream& output){
 		output << endl;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the OrderVector class Function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the OrderVector class function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "OrderVector", "print");
 		exit(1);
 	}
 }
@@ -137,19 +129,15 @@ void OrderVector::print(string prefix, ostream& output){
 		output << endl;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the OrderVector class Function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "OrderVector", "print");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the OrderVector class function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
 
 void OrderVector::resize(int){
-	cout << "resize() did nothing in class OrderVector";
+	mothurOut("resize() did nothing in class OrderVector");
 }
 
 /***********************************************************************/
@@ -191,13 +179,9 @@ RAbundVector OrderVector::getRAbundVector(){
 		return rav;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the OrderVector class Function getRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "OrderVector", "getRAbundVector");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the OrderVector class function getRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -244,13 +228,9 @@ void OrderVector::updateStats(){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the OrderVector class Function updateStats. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "OrderVector", "updateStats");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the OrderVector class function updateStats. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/

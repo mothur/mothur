@@ -52,13 +52,9 @@ InputData::InputData(string fName, string orderFileName, string f) : format(f){
 		openInputFile(fName, fileHandle);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function InputData. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "InputData", "InputData");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the InputData class function InputData. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 /***********************************************************************/
 
@@ -77,13 +73,9 @@ ListVector* InputData::getListVector(){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getListVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "InputData", "getListVector");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the InputData class function getListVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -119,13 +111,9 @@ ListVector* InputData::getListVector(string label){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getListVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "InputData", "getListVector");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the InputData class function getListVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 
@@ -146,13 +134,9 @@ SharedListVector* InputData::getSharedListVector(){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "InputData", "getSharedListVector");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the InputData class function getOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 /***********************************************************************/
 
@@ -188,13 +172,9 @@ SharedListVector* InputData::getSharedListVector(string label){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getSharedListVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "InputData", "getSharedListVector");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the InputData class function getSharedListVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 
@@ -216,13 +196,9 @@ SharedOrderVector* InputData::getSharedOrderVector(){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getSharedOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "InputData", "getSharedOrderVector");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the InputData class function getSharedOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -259,13 +235,9 @@ SharedOrderVector* InputData::getSharedOrderVector(string label){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getSharedOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "InputData", "getSharedOrderVector");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the InputData class function getSharedOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 
@@ -302,13 +274,9 @@ OrderVector* InputData::getOrderVector(){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "InputData", "getOrderVector");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the InputData class function getOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -409,13 +377,9 @@ OrderVector* InputData::getOrderVector(string label){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "InputData", "getOrderVector");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the InputData class function getOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -443,13 +407,9 @@ vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(){
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getSharedRAbundVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "InputData", "getSharedRAbundVectors");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the InputData class function getSharedRAbundVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 /***********************************************************************/
 vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(string label){
@@ -505,13 +465,9 @@ vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(string label){
 	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getSharedRAbundVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "InputData", "getSharedRAbundVectors");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the InputData class function getSharedRAbundVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 
@@ -548,13 +504,9 @@ SAbundVector* InputData::getSAbundVector(){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getSAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "InputData", "getSAbundVector");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the InputData class function getSAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 /***********************************************************************/
 SAbundVector* InputData::getSAbundVector(string label){
@@ -654,13 +606,9 @@ SAbundVector* InputData::getSAbundVector(string label){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getSAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "InputData", "getSAbundVector");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the InputData class function getSAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -695,13 +643,9 @@ RAbundVector* InputData::getRAbundVector(){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "InputData", "getRAbundVector");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the InputData class function getRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 /***********************************************************************/
 RAbundVector* InputData::getRAbundVector(string label){
@@ -800,13 +744,9 @@ RAbundVector* InputData::getRAbundVector(string label){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the InputData class Function getRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "InputData", "getRAbundVector");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the InputData class function getRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/

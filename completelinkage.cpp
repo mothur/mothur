@@ -58,14 +58,9 @@ void CompleteLinkage::update(){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the CompleteLinkage class Function update. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "CompleteLinkage", "update");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the CompleteLinkage class function update. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 
 /***********************************************************************/

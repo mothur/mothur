@@ -3,7 +3,7 @@
  *  Mothur
  *
  *  Created by Sarah Westcott on 6/2/09.
- *  Copyright 2009 __MyCompanyName__. All rights reserved.
+ *  Copyright 2009 Schloss Lab Umass Amherst. All rights reserved.
  *
  */
 
@@ -38,7 +38,7 @@ GetRAbundCommand::GetRAbundCommand(string option){
 			}
 			
 			//make sure the user has already run the read.otu command
-			if (globaldata->getListFile() == "") { cout << "You must read a listfile before you can use the get.rabund command." << endl; abort = true; }
+			if (globaldata->getListFile() == "") { mothurOut("You must read a listfile before you can use the get.rabund command."); mothurOutEndLine(); abort = true; }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -57,7 +57,7 @@ GetRAbundCommand::GetRAbundCommand(string option){
 			}
 			
 			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { cout << "You cannot use both the line and label parameters at the same time. " << endl; abort = true; }
+			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
 			//if the user has not specified any line or labels use the ones from read.otu
 			else if((line == "") && (label == "")) {  
 				allLines = globaldata->allLines; 
@@ -73,36 +73,27 @@ GetRAbundCommand::GetRAbundCommand(string option){
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the GetRAbundCommand class Function GetRAbundCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "GetRAbundCommand", "GetRAbundCommand");
 		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the GetRAbundCommand class function GetRAbundCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-			
+	}			
 }
 //**********************************************************************************************************************
 
 void GetRAbundCommand::help(){
 	try {
-		cout << "The get.rabund command can only be executed after a successful read.otu of a listfile." << "\n";
-		cout << "The get.rabund command parameters are line and label.  No parameters are required, and you may not use line and label at the same time." << "\n";
-		cout << "The line and label allow you to select what distance levels you would like included in your .rabund file, and are separated by dashes." << "\n";
-		cout << "The get.rabund command should be in the following format: get.rabund(line=yourLines, label=yourLabels)." << "\n";
-		cout << "Example get.rabund(line=1-3-5)." << "\n";
-		cout << "The default value for line and label are all lines in your inputfile." << "\n";
-		cout << "The get.rabund command outputs a .rabund file containing the lines you selected." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. line), '=' and parameters (i.e.yourLines)." << "\n" << "\n";
+		mothurOut("The get.rabund command can only be executed after a successful read.otu of a listfile.\n");
+		mothurOut("The get.rabund command parameters are line and label.  No parameters are required, and you may not use line and label at the same time.\n");
+		mothurOut("The line and label allow you to select what distance levels you would like included in your .rabund file, and are separated by dashes.\n");
+		mothurOut("The get.rabund command should be in the following format: get.rabund(line=yourLines, label=yourLabels).\n");
+		mothurOut("Example get.rabund(line=1-3-5).\n");
+		mothurOut("The default value for line and label are all lines in your inputfile.\n");
+		mothurOut("The get.rabund command outputs a .rabund file containing the lines you selected.\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. line), '=' and parameters (i.e.yourLines).\n\n");
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the GetRAbundCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "GetRAbundCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the GetRAbundCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
@@ -137,7 +128,7 @@ int GetRAbundCommand::execute(){
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 			
 			if(allLines == 1 || lines.count(count) == 1 || labels.count(list->getLabel()) == 1){
-					cout << list->getLabel() << '\t' << count << endl;
+					mothurOut(list->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 					rabund = new RAbundVector();
 					*rabund = (list->getRAbundVector());
 					rabund->print(out);
@@ -152,7 +143,7 @@ int GetRAbundCommand::execute(){
 					delete list;
 					list = input->getListVector(lastLabel);
 					
-					cout << list->getLabel() << '\t' << count << endl;
+					mothurOut(list->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 					rabund = new RAbundVector();
 					*rabund = (list->getRAbundVector());
 					rabund->print(out);
@@ -173,12 +164,12 @@ int GetRAbundCommand::execute(){
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			cout << "Your file does not include the label "<< *it; 
+			mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(lastLabel) != 1) {
-				cout << ". I will use " << lastLabel << "." << endl;
+				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
 				needToRun = true;
 			}else {
-				cout << ". Please refer to " << lastLabel << "." << endl;
+				mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
 			}
 		}
 		
@@ -187,7 +178,7 @@ int GetRAbundCommand::execute(){
 			delete list;
 			list = input->getListVector(lastLabel);
 			
-			cout << list->getLabel() << '\t' << count << endl;
+			mothurOut(list->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 			rabund = new RAbundVector();
 			*rabund = (list->getRAbundVector());
 			rabund->print(out);
@@ -200,13 +191,9 @@ int GetRAbundCommand::execute(){
 	}
 
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the GetRAbundCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "GetRAbundCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the GetRAbundCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************

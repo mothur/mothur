@@ -36,11 +36,7 @@ ListVector::ListVector(string id, vector<string> lv) : DataVector(id), data(lv){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ListVector class Function ListVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ListVector class function ListVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ListVector", "ListVector");
 		exit(1);
 	}
 }
@@ -61,11 +57,7 @@ ListVector::ListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numS
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ListVector class Function ListVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ListVector class function ListVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ListVector", "ListVector");
 		exit(1);
 	}
 }
@@ -85,11 +77,7 @@ void ListVector::set(int binNumber, string seqNames){
 		numSeqs += (nNames_new - nNames_old);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ListVector class Function set. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ListVector class function set. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ListVector", "set");
 		exit(1);
 	}
 }
@@ -114,11 +102,7 @@ void ListVector::push_back(string seqNames){
 		numSeqs += nNames;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ListVector class Function push_back. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ListVector class function push_back. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ListVector", "push_back");
 		exit(1);
 	}
 }
@@ -158,11 +142,7 @@ void ListVector::print(ostream& output){
 		output << endl;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ListVector class Function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ListVector class function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ListVector", "print");
 		exit(1);
 	}
 }
@@ -193,11 +173,7 @@ RAbundVector ListVector::getRAbundVector(){
 		return rav;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ListVector class Function getRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ListVector class function getRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ListVector", "getRAbundVector");
 		exit(1);
 	}
 }
@@ -218,11 +194,7 @@ SAbundVector ListVector::getSAbundVector(){
 		return sav;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ListVector class Function getSAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ListVector class function getSAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ListVector", "getSAbundVector");
 		exit(1);
 	}
 }
@@ -264,7 +236,7 @@ OrderVector ListVector::getOrderVector(map<string,int>* orderMap = NULL){
 					}
 					else{
 						if(orderMap->count(seqName) == 0){
-							cerr << seqName << " not found, check *.names file\n";
+							mothurOut(seqName + " not found, check *.names file\n");
 							exit(1);
 						}
 					
@@ -274,7 +246,7 @@ OrderVector ListVector::getOrderVector(map<string,int>* orderMap = NULL){
 				}
 			
 				if(orderMap->count(seqName) == 0){
-					cerr << seqName << " not found, check *.names file\n";
+					mothurOut(seqName + " not found, check *.names file\n");
 					exit(1);
 				}
 				ov.set((*orderMap)[seqName], i);	
@@ -287,11 +259,7 @@ OrderVector ListVector::getOrderVector(map<string,int>* orderMap = NULL){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ListVector class Function getOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ListVector class function getOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ListVector", "getOrderVector");
 		exit(1);
 	}
 }

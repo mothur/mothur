@@ -25,11 +25,11 @@
 SuffixDB::SuffixDB(string fastaFileName) : Database(fastaFileName) {
 
 	suffixForest.resize(numSeqs);
-	cout << "Generating the suffix tree database...\t";	cout.flush();
+	mothurOut("Generating the suffix tree database...\t");	cout.flush();
 	for(int i=0;i<numSeqs;i++){								//	The parent class' constructor generates the vector of
 		suffixForest[i].loadSequence(templateSequences[i]);	//	template Sequence objects.  Here each of these objects
 	}														//	is used to generate a suffix tree, aka the suffix forest
-	cout << "DONE." << endl << endl;	cout.flush();
+	mothurOut("DONE."); mothurOutEndLine();	mothurOutEndLine(); cout.flush();
 
 }
 

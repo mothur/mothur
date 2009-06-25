@@ -36,7 +36,7 @@ ClusterCommand::ClusterCommand(string option){
 			
 			//error checking to make sure they read a distance file
 			if ((globaldata->gSparseMatrix == NULL) || (globaldata->gListVector == NULL)) {
-				cout << "Before you use the cluster command, you first need to read in a distance matrix." << endl;  abort = true;
+				mothurOut("Before you use the cluster command, you first need to read in a distance matrix."); mothurOutEndLine(); abort = true;
 			} 
 		
 			//check for optional parameter and set defaults
@@ -56,7 +56,7 @@ ClusterCommand::ClusterCommand(string option){
 
 			
 			if ((method == "furthest") || (method == "nearest") || (method == "average")) { }
-			else {cout << "Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average." << endl; abort = true; }
+			else { mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average."); mothurOutEndLine(); abort = true; }
 
 			
 			if (abort == false) {
@@ -73,7 +73,7 @@ ClusterCommand::ClusterCommand(string option){
 				if(method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, matrix);	tag = "fn";	}
 				else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, matrix);		tag = "nn";	}
 				else if(method == "average"){	cluster = new AverageLinkage(rabund, list, matrix);		tag = "an";	}
-				else						{	cout << "error - not recognized method" << endl;	abort = true;	}	
+				else						{	mothurOut("error - not recognized method"); mothurOutEndLine();	abort = true;	}	
 				
 				fileroot = getRootName(globaldata->inputFileName);
 			
@@ -88,11 +88,7 @@ ClusterCommand::ClusterCommand(string option){
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ClusterCommand class Function ClusterCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ClusterCommand class function ClusterCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ClusterCommand", "ClusterCommand");		
 		exit(1);
 	}
 }
@@ -101,20 +97,16 @@ ClusterCommand::ClusterCommand(string option){
 
 void ClusterCommand::help(){
 	try {
-		cout << "The cluster command can only be executed after a successful read.dist command." << "\n";
-		cout << "The cluster command parameter options are method, cuttoff and precision. No parameters are required." << "\n";
-		cout << "The cluster command should be in the following format: " << "\n";
-		cout << "cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) " << "\n";
-		cout << "The acceptable cluster methods are furthest, nearest and average.  If no method is provided then furthest is assumed." << "\n" << "\n";	
+		 mothurOut("The cluster command can only be executed after a successful read.dist command.\n");
+		 mothurOut("The cluster command parameter options are method, cuttoff and precision. No parameters are required.\n");
+		 mothurOut("The cluster command should be in the following format: \n");
+		 mothurOut("cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n");
+		 mothurOut("The acceptable cluster methods are furthest, nearest and average.  If no method is provided then furthest is assumed.\n\n");
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ClusterCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ClusterCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ClusterCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
@@ -186,14 +178,9 @@ int ClusterCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ClusterCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ClusterCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ClusterCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 
 //**********************************************************************************************************************
@@ -209,13 +196,8 @@ void ClusterCommand::printData(string label){
 		oldList.print(listFile);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ClusterCommand class Function printData. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ClusterCommand", "printData");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ClusterCommand class function printData. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 //**********************************************************************************************************************

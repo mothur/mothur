@@ -18,11 +18,7 @@ HeatMap::HeatMap(string sort, string scale){
 		scaler = scale;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the HeatMap class Function HeatMap. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the HeatMap class function HeatMap. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "HeatMap", "HeatMap");
 		exit(1);
 	}
 }
@@ -91,11 +87,7 @@ void HeatMap::getPic(RAbundVector* rabund) {
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the HeatMap class Function getPic. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the HeatMap class function getPic. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "HeatMap", "getPic");
 		exit(1);
 	}
 }
@@ -179,11 +171,7 @@ void HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the HeatMap class Function getPic. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the HeatMap class function getPic. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "HeatMap", "getPic");
 		exit(1);
 	}
 }
@@ -263,14 +251,9 @@ void HeatMap::sortSharedVectors(vector<SharedRAbundVector*>& lookup){
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the HeatMap class Function sortSharedVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "HeatMap", "sortSharedVectors");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the HeatMap class function sortSharedVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	
 }
 
 //**********************************************************************************************************************
@@ -308,14 +291,9 @@ void HeatMap::printLegend(int y, float maxbin) {
 	}
 	
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the HeatMap class Function printLegend. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "HeatMap", "printLegend");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the HeatMap class function printLegend. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	
 }
 
 

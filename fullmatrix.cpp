@@ -27,7 +27,7 @@ FullMatrix::FullMatrix(ifstream& filehandle) {
 		}
 		
 		group = groupmap->getGroup(name);
-		if(group == "not found") {	cout << "Error: Sequence '" << name << "' was not found in the group file, please correct." << endl; exit(1); }
+		if(group == "not found") {	mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); mothurOutEndLine(); exit(1); }
 		index.resize(numSeqs);
 		index[0].groupName = group; 
 		index[0].seqName = name;
@@ -78,11 +78,7 @@ FullMatrix::FullMatrix(ifstream& filehandle) {
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the FullMatrix class Function FullMatrix. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the FullMatrix class function FullMatrix. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "FullMatrix", "FullMatrix");
 		exit(1);
 	}
 }
@@ -104,7 +100,7 @@ void FullMatrix::readSquareMatrix(ifstream& filehandle) {
 			index[i].groupName = group;
 			index[i].seqName = name;
 			
-			if(group == "not found") {	cout << "Error: Sequence '" << name << "' was not found in the group file, please correct." << endl; exit(1); }
+			if(group == "not found") {	mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); mothurOutEndLine(); exit(1); }
 				
 			for(int j=0;j<numSeqs;j++){
 				filehandle >> matrix[i][j];
@@ -117,14 +113,9 @@ void FullMatrix::readSquareMatrix(ifstream& filehandle) {
 		delete reading;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the FullMatrix class Function readSquareMatrix. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "FullMatrix", "readSquareMatrix");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the FullMatrix class function readSquareMatrix. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 } 
 /**************************************************************************/
 void FullMatrix::readLTMatrix(ifstream& filehandle) {
@@ -144,7 +135,7 @@ void FullMatrix::readLTMatrix(ifstream& filehandle) {
 			index[i].groupName = group;
 			index[i].seqName = name;
 	
-			if(group == "not found") {	cout << "Error: Sequence '" << name << "' was not found in the group file, please correct." << endl;  exit(1); }
+			if(group == "not found") {	mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); mothurOutEndLine();  exit(1); }
 				
 			for(int j=0;j<i;j++){
 				filehandle >> distance;
@@ -159,14 +150,9 @@ void FullMatrix::readLTMatrix(ifstream& filehandle) {
 		delete reading;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the FullMatrix class Function readLTMatrix. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "FullMatrix", "readLTMatrix");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the FullMatrix class function readLTMatrix. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 
 /**************************************************************************/
@@ -231,14 +217,9 @@ void FullMatrix::sortGroups(int low, int high){
 	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the FullMatrix class Function sortGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "FullMatrix", "sortGroups");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the FullMatrix class function sortGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 
 /**************************************************************************/	
@@ -274,14 +255,9 @@ void FullMatrix::printMatrix(ostream& out) {
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the FullMatrix class Function printMatrix. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "FullMatrix", "printMatrix");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the FullMatrix class function printMatrix. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 
 /**************************************************************************/

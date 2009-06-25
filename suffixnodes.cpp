@@ -57,14 +57,14 @@ SuffixLeaf::SuffixLeaf(int parent, int start, int end) : SuffixNode(parent, star
 
 void SuffixLeaf::print(string sequence, int nodeNumber){
 	
-	cout << this << '\t' << parentNode << '\t' << nodeNumber << '\t' <<
-	-1 << '\t' << startCharPosition << '\t' << endCharPosition << '\t';
+	mothurOut(toString(this) + "\t" + toString(parentNode) + "\t" + toString(nodeNumber) + "\t" +
+	toString(-1) + "\t" + toString(startCharPosition) + "\t" + toString(endCharPosition) + "\t");
 	
-	cout << '\'';
+	mothurOut("/");
 	for(int i=startCharPosition;i<=endCharPosition;i++){
-		cout << deCodeSequence(sequence[i]);
+		mothurOut(toString(deCodeSequence(sequence[i])));
 	}
-	cout << '\'' << endl;
+	mothurOut("/");  mothurOutEndLine();
 }
 
 //********************************************************************************************************************
@@ -74,14 +74,14 @@ SuffixBranch::SuffixBranch(int parent, int start, int end) : SuffixNode(parent, 
 }
 	
 void SuffixBranch::print(string sequence, int nodeNumber){						//	this method is different that than
-	cout << this << '\t' << parentNode << '\t' << nodeNumber << '\t' <<			//	of a leaf because it prints out a
-	suffixNode << '\t' << startCharPosition << '\t' << endCharPosition << '\t';	//	value for the suffix node	
+	mothurOut(toString(this) + "\t" + toString(parentNode) + "\t" + toString(nodeNumber) + "\t" +		//	of a leaf because it prints out a
+	toString(suffixNode) + "\t" + toString(startCharPosition) + "\t" + toString(endCharPosition) + "\t");  //	value for the suffix node
 	
-	cout << '\'';
+	mothurOut("/");
 	for(int i=startCharPosition;i<=endCharPosition;i++){
-		cout << deCodeSequence(sequence[i]);
+		mothurOut(toString(deCodeSequence(sequence[i])));
 	}
-	cout << '\'' << endl;
+	mothurOut("/");  mothurOutEndLine();
 }
 
 //	we can access the children by subtracting '0' from the the char value from the string, the difference is an int

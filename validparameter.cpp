@@ -16,13 +16,9 @@ ValidParameters::ValidParameters() {
 		initParameterRanges();
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ValidParameters class Function ValidParameters. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ValidParameters", "ValidParameters");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ValidParameters class function ValidParameters. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -42,11 +38,11 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 			}
 		}
 		if(!valid) {
-			cout << "'" << parameter << "' is not a valid parameter." << endl;
-			cout << "The valid parameters are: ";
+			mothurOut(parameter + " is not a valid parameter."); mothurOutEndLine();
+			mothurOut("The valid parameters are: ");
 			for(int i = 0; i < numParams-1; i++)
-				cout << cParams.at(i) << ", ";
-			cout << "and " << cParams.at(numParams-1) << ".\n";
+				mothurOut(cParams.at(i) + ", ");
+			mothurOut("and " + cParams.at(numParams-1) + ".\n");
 			return false;
 		}
 		
@@ -77,7 +73,7 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 				double logNum = log10((double)pVal);
 				double diff = (double)((int)logNum - logNum);
 				if(diff != 0) {
-					cout << "The precision parameter can only take powers of 10 as a value (e.g. 10,1000,1000, etc.)\n";
+					mothurOut("The precision parameter can only take powers of 10 as a value (e.g. 10,1000,1000, etc.)\n");
 					return false;
 				}
 			}
@@ -103,7 +99,7 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 			else if(range.at(4).compare("only") == 0)
 				c = 1;
 			else {
-				cout << "The range can only be 'between' or 'only' the bounding numbers.\n";
+				mothurOut("The range can only be 'between' or 'only' the bounding numbers.\n");
 				return false;
 			}
 			
@@ -112,7 +108,7 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 			else if(range.at(0).compare(">=") == 0 || range[3].compare("=>") == 0)
 				d = 1;
 			else {
-				cout << "The parameter value can only be '>', '>=', or '=>' the lower bounding number.\n";
+				mothurOut("The parameter value can only be '>', '>=', or '=>' the lower bounding number.\n");
 				return false;
 			}
 			
@@ -121,7 +117,7 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 			else if(range.at(2).compare("<=") == 0 || range[4].compare("=<") == 0)
 				e = 1;
 			else {
-				cout << "The parameter value can only be '<', '<=', or '=<' the upper bounding number.\n";
+				mothurOut("The parameter value can only be '<', '<=', or '=<' the upper bounding number.\n");
 				return false;
 			}
 			
@@ -165,25 +161,25 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 			
 			
 			if(!valid) {
-				cout << "The '" << parameter << "' parameter needs to be ";
+				mothurOut("The '" + parameter + "' parameter needs to be ");
 				if(c == 1)
-					cout << "either '" << a << "' or '" << b << "'.\n";
+					mothurOut("either '" + toString(a) + "' or '" + toString(b) + "'.\n");
 				else {
 					if(a != piSentinel) {
-						cout << ">";
+						mothurOut(">");
 						if(d != 0)
-							cout << "=";
-						cout << " '" << a << "'";
+							mothurOut("=");
+						mothurOut(" '" + toString(a) + "'");
 					}
 					if(b == piSentinel)
-						cout << "'.\n";
+						mothurOut( "'.\n");
 					else if(a != piSentinel)
-						cout << " and ";
+						mothurOut(" and ");
 					if(b != piSentinel) {
-						cout << "<";
+						mothurOut("<");
 						if(e != 0)
-							cout << "=";
-						cout << " '" << b << "'.\n";
+							mothurOut("=");
+						mothurOut(" '" + toString(b) + "'.\n");
 					}
 				}
 				return false;
@@ -192,11 +188,7 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 		return true;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ValidParameters class Function isValidParameter. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ValidParameters class function isValidParameter. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ValidParameters", "isValidParameters");
 		exit(1);
 	}
 }
@@ -223,11 +215,7 @@ string ValidParameters::validFile(map<string, string> container, string paramete
 	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ValidParameters class Function validFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ValidParameters class function validFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ValidParameters", "validFile");
 		exit(1);
 	}
 }
@@ -272,11 +260,7 @@ void ValidParameters::initParameterRanges() {
 		parameterRanges["size"] = addParameters(sizeArray, rangeSize);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ValidParameters class Function isValidParameter. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ValidParameters class function isValidParameter. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ValidParameters", "initParameterRanges");
 		exit(1);
 	}
 }
@@ -290,11 +274,7 @@ vector<string> ValidParameters::addParameters(string parameters[], int size) {
 		return pVector;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ValidParameters class Function isValidParameter. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ValidParameters class function isValidParameter. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ValidParameters", "addParameters");
 		exit(1);
 	}
 }

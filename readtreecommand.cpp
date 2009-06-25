@@ -38,12 +38,12 @@ ReadTreeCommand::ReadTreeCommand(string option){
 			//check for required parameters
 			treefile = validParameter.validFile(parameters, "tree", true);
 			if (treefile == "not open") { abort = true; }
-			else if (treefile == "not found") { treefile = ""; cout << "tree is a required parameter for the read.tree command." << endl; abort = true;  }	
+			else if (treefile == "not found") { treefile = ""; mothurOut("tree is a required parameter for the read.tree command."); mothurOutEndLine(); abort = true;  }	
 			else {  globaldata->setTreeFile(treefile);  globaldata->setFormat("tree"); 	}
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }	
-			else if (groupfile == "not found") { groupfile = ""; cout << "group is a required parameter for the read.tree command." << endl; abort = true;	}
+			else if (groupfile == "not found") { groupfile = ""; mothurOut("group is a required parameter for the read.tree command."); mothurOutEndLine(); abort = true;	}
 			else {  
 				globaldata->setGroupFile(groupfile); 
 				//read in group map info.
@@ -60,11 +60,7 @@ ReadTreeCommand::ReadTreeCommand(string option){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReadTreeCommand class Function ReadTreeCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ReadTreeCommand class function ReadTreeCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ReadTreeCommand", "ReadTreeCommand");		
 		exit(1);
 	}
 }
@@ -72,26 +68,22 @@ ReadTreeCommand::ReadTreeCommand(string option){
 
 void ReadTreeCommand::help(){
 	try {
-		cout << "The read.tree command must be run before you execute a unifrac.weighted, unifrac.unweighted. " << "\n";
-		cout << "It also must be run before using the parsimony command, unless you are using the randomtree parameter." << "\n";
-		cout << "The read.tree command should be in the following format: read.tree(tree=yourTreeFile, group=yourGroupFile)." << "\n";
-		cout << "The tree and group parameters are both required." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. tree), '=' and parameters (i.e.yourTreefile)." << "\n" << "\n";
+		mothurOut("The read.tree command must be run before you execute a unifrac.weighted, unifrac.unweighted. \n");
+		mothurOut("It also must be run before using the parsimony command, unless you are using the randomtree parameter.\n");
+		mothurOut("The read.tree command should be in the following format: read.tree(tree=yourTreeFile, group=yourGroupFile).\n");
+		mothurOut("The tree and group parameters are both required.\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. tree), '=' and parameters (i.e.yourTreefile).\n\n");
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReadTreeCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ReadTreeCommand", "help");	
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ReadTreeCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
 
 ReadTreeCommand::~ReadTreeCommand(){
-	delete read;
+	if (abort == false) { delete read; }
 }
 
 //**********************************************************************************************************************
@@ -105,10 +97,10 @@ int ReadTreeCommand::execute(){
 		
 		readOk = read->read(); 
 		
-		if (readOk != 0) { cout << "Read Terminated." << endl; globaldata->gTree.clear(); delete globaldata->gTreemap; return 0; }
+		if (readOk != 0) { mothurOut("Read Terminated."); mothurOutEndLine(); globaldata->gTree.clear(); delete globaldata->gTreemap; return 0; }
 		
 		vector<Tree*> T = globaldata->gTree;
-		
+
 		//assemble users trees
 		for (int i = 0; i < T.size(); i++) {
 			T[i]->assembleTree();
@@ -126,7 +118,7 @@ int ReadTreeCommand::execute(){
 				
 				//then you did not find it so report it 
 				if (count == globaldata->Treenames.size()) { 
-					cout << treeMap->namesOfSeqs[i] << " is in your namefile and not in your tree. It will be disregarded." << endl;
+					mothurOut(treeMap->namesOfSeqs[i] + " is in your namefile and not in your tree. It will be disregarded."); mothurOutEndLine();
 				}
 			}
 		}
@@ -134,11 +126,7 @@ int ReadTreeCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReadTreeCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ReadTreeCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ReadTreeCommand", "execute");	
 		exit(1);
 	}
 }

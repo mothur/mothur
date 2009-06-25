@@ -52,8 +52,8 @@ MatrixOutputCommand::MatrixOutputCommand(string option){
 			
 			//make sure the user has already run the read.otu command
 			if (globaldata->getSharedFile() == "") {
-				if (globaldata->getListFile() == "") { cout << "You must read a list and a group, or a shared before you can use the dist.shared command." << endl; abort = true; }
-				else if (globaldata->getGroupFile() == "") { cout << "You must read a list and a group, or a shared before you can use the dist.shared command." << endl; abort = true; }
+				if (globaldata->getListFile() == "") { mothurOut("You must read a list and a group, or a shared before you can use the dist.shared command."); mothurOutEndLine(); abort = true; }
+				else if (globaldata->getGroupFile() == "") { mothurOut("You must read a list and a group, or a shared before you can use the dist.shared command."); mothurOutEndLine(); abort = true; }
 			}
 			
 			//check for optional parameter and set defaults
@@ -73,7 +73,7 @@ MatrixOutputCommand::MatrixOutputCommand(string option){
 			}
 			
 			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { cout << "You cannot use both the line and label parameters at the same time. " << endl; abort = true; }
+			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
 			//if the user has not specified any line or labels use the ones from read.otu
 			else if((line == "") && (label == "")) {  
 				allLines = globaldata->allLines; 
@@ -131,39 +131,31 @@ MatrixOutputCommand::MatrixOutputCommand(string option){
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the MatrixOutputCommand class Function MatrixOutputCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "MatrixOutputCommand", "MatrixOutputCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the MatrixOutputCommand class function MatrixOutputCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
 
 void MatrixOutputCommand::help(){
 	try {
-		cout << "The dist.shared command can only be executed after a successful read.otu command." << "\n";
-		cout << "The dist.shared command parameters are groups, calc, line and label.  The calc parameter is required, and you may not use line and label at the same time." << "\n";
-		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like included used." << "\n";
-		cout << "The group names are separated by dashes. The line and label allow you to select what distance levels you would like distance matrices created for, and are also separated by dashes." << "\n";
-		cout << "The dist.shared command should be in the following format: dist.shared(groups=yourGroups, calc=yourCalcs, line=yourLines, label=yourLabels)." << "\n";
-		cout << "Example dist.shared(groups=A-B-C, line=1-3-5, calc=jabund-sorabund)." << "\n";
-		cout << "The default value for groups is all the groups in your groupfile." << "\n";
-		cout << "The default value for calc is jclass and thetayc." << "\n";
+		mothurOut("The dist.shared command can only be executed after a successful read.otu command.\n");
+		mothurOut("The dist.shared command parameters are groups, calc, line and label.  The calc parameter is required, and you may not use line and label at the same time.\n");
+		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included used.\n");
+		mothurOut("The group names are separated by dashes. The line and label allow you to select what distance levels you would like distance matrices created for, and are also separated by dashes.\n");
+		mothurOut("The dist.shared command should be in the following format: dist.shared(groups=yourGroups, calc=yourCalcs, line=yourLines, label=yourLabels).\n");
+		mothurOut("Example dist.shared(groups=A-B-C, line=1-3-5, calc=jabund-sorabund).\n");
+		mothurOut("The default value for groups is all the groups in your groupfile.\n");
+		mothurOut("The default value for calc is jclass and thetayc.\n");
 		validCalculator->printCalc("matrix", cout);
-		cout << "The dist.shared command outputs a .dist file for each calculator you specify at each distance you choose." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups)." << "\n" << "\n";
+		mothurOut("The dist.shared command outputs a .dist file for each calculator you specify at each distance you choose.\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the MatrixOutputCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "MatrixOutputCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the MatrixOutputCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 
@@ -187,7 +179,7 @@ int MatrixOutputCommand::execute(){
 		int count = 1;	
 				
 		//if the users entered no valid calculators don't execute command
-		if (matrixCalculators.size() == 0) { cout << "No valid calculators." << endl; return 0; }
+		if (matrixCalculators.size() == 0) { mothurOut("No valid calculators."); mothurOutEndLine();  return 0; }
 
 		//you have groups
 		read = new ReadOTUFile(globaldata->inputFileName);	
@@ -202,7 +194,7 @@ int MatrixOutputCommand::execute(){
 		set<string> userLabels = labels;
 		set<int> userLines = lines;
 				
-		if (lookup.size() < 2) { cout << "You have not provided enough valid groups.  I cannot run the command." << endl; return 0;}
+		if (lookup.size() < 2) { mothurOut("You have not provided enough valid groups.  I cannot run the command."); mothurOutEndLine(); return 0;}
 		
 		numGroups = lookup.size();
 				
@@ -210,7 +202,7 @@ int MatrixOutputCommand::execute(){
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 		
 			if(allLines == 1 || lines.count(count) == 1 || labels.count(lookup[0]->getLabel()) == 1){			
-				cout << lookup[0]->getLabel() << '\t' << count << endl;
+				mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 				process(lookup);
 				
 				processedLabels.insert(lookup[0]->getLabel());
@@ -223,7 +215,7 @@ int MatrixOutputCommand::execute(){
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 				lookup = input->getSharedRAbundVectors(lastLabel);
 
-				cout << lookup[0]->getLabel() << '\t' << count << endl;
+				mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 				process(lookup);
 				
 				processedLabels.insert(lookup[0]->getLabel());
@@ -243,12 +235,12 @@ int MatrixOutputCommand::execute(){
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			cout << "Your file does not include the label "<< *it; 
+			mothurOut("Your file does not include the label " + *it);  
 			if (processedLabels.count(lastLabel) != 1) {
-				cout << ". I will use " << lastLabel << "." << endl;
+				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
 				needToRun = true;
 			}else {
-				cout << ". Please refer to " << lastLabel << "." << endl;
+				mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
 			}
 		}
 		
@@ -257,7 +249,7 @@ int MatrixOutputCommand::execute(){
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 			lookup = input->getSharedRAbundVectors(lastLabel);
 
-			cout << lookup[0]->getLabel() << '\t' << count << endl;
+			mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 			process(lookup);
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 		}
@@ -269,13 +261,9 @@ int MatrixOutputCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the MatrixOutputCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "MatrixOutputCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the MatrixOutputCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /***********************************************************/
 void MatrixOutputCommand::printSims(ostream& out) {
@@ -294,13 +282,9 @@ void MatrixOutputCommand::printSims(ostream& out) {
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the MatrixOutputCommand class Function printSims. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "MatrixOutputCommand", "printSims");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the MatrixOutputCommand class function printSims. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /***********************************************************/
 void MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
@@ -349,13 +333,9 @@ void MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the MatrixOutputCommand class Function process. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "MatrixOutputCommand", "process");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the MatrixOutputCommand class function process. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /***********************************************************/
 

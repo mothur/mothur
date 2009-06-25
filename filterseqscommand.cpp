@@ -36,7 +36,7 @@ FilterSeqsCommand::FilterSeqsCommand(string option){
 			
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not found") { cout << "fasta is a required parameter for the filter.seqs command." << endl; abort = true; }
+			if (fastafile == "not found") { mothurOut("fasta is a required parameter for the filter.seqs command."); mothurOutEndLine(); abort = true; }
 			else if (fastafile == "not open") { abort = true; }	
 
 			//check for optional parameter and set defaults
@@ -60,40 +60,32 @@ FilterSeqsCommand::FilterSeqsCommand(string option){
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the FilterSeqsCommand class Function FilterSeqsCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "FilterSeqsCommand", "FilterSeqsCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the FilterSeqsCommand class function FilterSeqsCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
 
 void FilterSeqsCommand::help(){
 	try {
-		cout << "The filter.seqs command reads a file containing sequences and creates a .filter and .filter.fasta file." << "\n";
-		cout << "The filter.seqs command parameters are fasta, trump, soft, hard and vertical.  " << "\n";
-		cout << "The fasta parameter is required." << "\n";
-		cout << "The trump parameter .... The default is ..." << "\n";
-		cout << "The soft parameter .... The default is ...." << "\n";
-		cout << "The hard parameter .... The default is ...." << "\n";
-		cout << "The vertical parameter .... The default is T." << "\n";
-		cout << "The filter.seqs command should be in the following format: " << "\n";
-		cout << "filter.seqs(fasta=yourFastaFile, trump=yourTrump, soft=yourSoft, hard=yourHard, vertical=yourVertical) " << "\n";
-		cout << "Example filter.seqs(fasta=abrecovery.fasta, trump=..., soft=..., hard=..., vertical=T)." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta)." << "\n" << "\n";
+		mothurOut("The filter.seqs command reads a file containing sequences and creates a .filter and .filter.fasta file.\n");
+		mothurOut("The filter.seqs command parameters are fasta, trump, soft, hard and vertical. \n");
+		mothurOut("The fasta parameter is required.\n");
+		mothurOut("The trump parameter .... The default is ...\n");
+		mothurOut("The soft parameter .... The default is ....\n");
+		mothurOut("The hard parameter .... The default is ....\n");
+		mothurOut("The vertical parameter .... The default is T.\n");
+		mothurOut("The filter.seqs command should be in the following format: \n");
+		mothurOut("filter.seqs(fasta=yourFastaFile, trump=yourTrump, soft=yourSoft, hard=yourHard, vertical=yourVertical) \n");
+		mothurOut("Example filter.seqs(fasta=abrecovery.fasta, trump=..., soft=..., hard=..., vertical=T).\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the FilterSeqsCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "FilterSeqsCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the FilterSeqsCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /**************************************************************************************/
@@ -206,15 +198,15 @@ int FilterSeqsCommand::execute() {
 		outFilter << filter << endl;
 		outFilter.close();
 		
-
-		openInputFile(fastafile, inFASTA);
+		ifstream inFasta2;
+		openInputFile(fastafile, inFasta2);
 		string filteredFasta = getRootName(fastafile) + "filter.fasta";
 		ofstream outFASTA;
 		openOutputFile(filteredFasta, outFASTA);
 
 		numSeqs = 0;
-		while(!inFASTA.eof()){
-			Sequence seq(inFASTA);
+		while(!inFasta2.eof()){
+			Sequence seq(inFasta2);
 			string align = seq.getAligned();
 			string filterSeq = "";
 	
@@ -226,10 +218,10 @@ int FilterSeqsCommand::execute() {
 
 			outFASTA << '>' << seq.getName() << endl << filterSeq << endl;
 			numSeqs++;
-			gobble(inFASTA);
+			gobble(inFasta2);
 		}
 		outFASTA.close();
-		inFASTA.close();
+		inFasta2.close();
 		
 		
 		int filteredLength = 0;
@@ -237,21 +229,17 @@ int FilterSeqsCommand::execute() {
 			if(filter[i] == '1'){	filteredLength++;	}
 		}
 		
-		cout << endl;
-		cout << "Length of filtered alignment: " << filteredLength << endl;
-		cout << "Number of columns removed: " << alignmentLength-filteredLength << endl;
-		cout << "Length of the original alignment: " << alignmentLength << endl;
-		cout << "Number of sequences used to construct filter: " << numSeqs << endl;
+		mothurOutEndLine();
+		mothurOut("Length of filtered alignment: " + toString(filteredLength)); mothurOutEndLine();
+		mothurOut("Number of columns removed: " + toString((alignmentLength-filteredLength))); mothurOutEndLine();
+		mothurOut("Length of the original alignment: " + toString(alignmentLength)); mothurOutEndLine();
+		mothurOut("Number of sequences used to construct filter: " + toString(numSeqs)); mothurOutEndLine();
 		
 		return 0;
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the FilterSeqsCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the FilterSeqsCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "FilterSeqsCommand", "execute");
 		exit(1);
 	}
 }

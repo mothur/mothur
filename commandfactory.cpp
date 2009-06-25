@@ -159,14 +159,9 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		return command;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the CommandFactory class Function getCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "CommandFactory", "getCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the CommandFactory class function getCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 
 /***********************************************************************/
@@ -177,21 +172,17 @@ bool CommandFactory::isValidCommand(string command) {
 		if ((commands.find(command)) != (commands.end())) {
 			return true;
 		}else{
-			cout << command << " is not a valid command in Mothur.  Valid commands are ";
+			mothurOut(command + " is not a valid command in Mothur.  Valid commands are ");
 			for (it = commands.begin(); it != commands.end(); it++) {
-				cout << it->first << ", ";
+				mothurOut(it->first + ", ");
 			}
-			cout << endl;
+			mothurOutEndLine();
 			return false;
 		}
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the CommandFactory class Function isValidCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the CommandFactory class function isValidCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "CommandFactory", "isValidCommand");
 		exit(1);
 	}
 }
@@ -206,11 +197,7 @@ void CommandFactory::printCommands(ostream& out) {
 		out << endl;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the CommandFactory class Function printCommands. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the CommandFactory class function printCommands. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "CommandFactory", "printCommands");
 		exit(1);
 	}
 }

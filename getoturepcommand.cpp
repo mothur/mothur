@@ -19,9 +19,9 @@ GetOTURepCommand::GetOTURepCommand(string option){
 		labels.clear();
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
-		
-		else {
+		if (option == "help") { 
+			help(); abort = true;
+		} else {
 			//valid paramters for this command
 			string Array[] =  {"fasta","list","line","label","name", "group"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
@@ -38,22 +38,22 @@ GetOTURepCommand::GetOTURepCommand(string option){
 			
 			//make sure the user has already run the read.otu command
 			if ((globaldata->gSparseMatrix == NULL) || (globaldata->gListVector == NULL)) {
-				cout << "Before you use the get.oturep command, you first need to read in a distance matrix." << endl; 
+				mothurOut("Before you use the get.oturep command, you first need to read in a distance matrix."); mothurOutEndLine(); 
 				abort = true;
 			}
 			
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not found") { cout << "fasta is a required parameter for the get.oturep command." << endl; abort = true; }
+			if (fastafile == "not found") { mothurOut("fasta is a required parameter for the get.oturep command."); mothurOutEndLine(); abort = true; }
 			else if (fastafile == "not open") { abort = true; }	
 		
 			listfile = validParameter.validFile(parameters, "list", true);
-			if (listfile == "not found") { cout << "list is a required parameter for the get.oturep command." << endl; abort = true; }
+			if (listfile == "not found") { mothurOut("list is a required parameter for the get.oturep command."); mothurOutEndLine(); abort = true; }
 			else if (listfile == "not open") { abort = true; }	
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			line = validParameter.validFile(parameters, "line", false);				
+			line = validParameter.validFile(parameters, "line", false);
 			if (line == "not found") { line = "";  }
 			else { 
 				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
@@ -68,7 +68,7 @@ GetOTURepCommand::GetOTURepCommand(string option){
 			}
 			
 			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { cout << "You cannot use both the line and label parameters at the same time. " << endl; abort = true; }
+			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
 			//if the user has not specified any line or labels use the ones from read.otu
 			else if ((line == "") && (label == "")) {  
 				allLines = globaldata->allLines; 
@@ -91,11 +91,12 @@ GetOTURepCommand::GetOTURepCommand(string option){
 		
 			if (abort == false) {
 			
-				if(globaldata->gSparseMatrix != NULL)	{	matrix = globaldata->gSparseMatrix;		}	
-					
+				if(globaldata->gSparseMatrix != NULL)	{
+					matrix = globaldata->gSparseMatrix;
+				}
+
 				//globaldata->gListVector bin 0 = first name read in distance matrix, globaldata->gListVector bin 1 = second name read in distance matrix
-				if(globaldata->gListVector != NULL)		{
-		
+				if (globaldata->gListVector != NULL) {
 					vector<string> names;
 					string binnames;
 					//map names to rows in sparsematrix
@@ -108,23 +109,24 @@ GetOTURepCommand::GetOTURepCommand(string option){
 						for (int j = 0; j < names.size(); j++) {
 							nameToIndex[names[j]] = i;
 						}
-	
 					}
-				}else { cout << "error, no listvector." << endl; }
-				
-//				openInputFile(fastafile, in);
+				} else { mothurOut("error, no listvector."); mothurOutEndLine(); }
+
+				// Create a data structure to quickly access the distance information.
+				// It consists of a vector of distance maps, where each map contains
+				// all distances of a certain sequence. Vector and maps are accessed
+				// via the index of a sequence in the distance matrix
+				seqVec = vector<SeqMap>(globaldata->gListVector->size()); 
+				for (MatData currentCell = matrix->begin(); currentCell != matrix->end(); currentCell++) {
+					seqVec[currentCell->row][currentCell->column] = currentCell->dist;
+				}
+
 				fasta = new FastaMap();
 			}
-		
 		}
-	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the GetOTURepCommand class Function GetOTURepCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the GetOTURepCommand class function GetOTURepCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "GetOTURepCommand", "GetOTURepCommand");
 		exit(1);
 	}
 }
@@ -133,24 +135,20 @@ GetOTURepCommand::GetOTURepCommand(string option){
 
 void GetOTURepCommand::help(){
 	try {
-		cout << "The get.oturep command can only be executed after a successful read.dist command." << "\n";
-		cout << "The get.oturep command parameters are list, fasta, name, group, line and label.  The fasta and list parameters are required, and you may not use line and label at the same time." << "\n";
-		cout << "The line and label allow you to select what distance levels you would like a output files created for, and are separated by dashes." << "\n";
-		cout << "The get.oturep command should be in the following format: get.oturep(fasta=yourFastaFile, list=yourListFile, name=yourNamesFile, group=yourGroupFile, line=yourLines, label=yourLabels)." << "\n";
-		cout << "Example get.oturep(fasta=amazon.fasta, list=amazon.fn.list, group=amazon.groups, line=1-3-5, name=amazon.names)." << "\n";
-		cout << "The default value for line and label are all lines in your inputfile." << "\n";
-		cout << "The get.oturep command outputs a .fastarep file for each distance you specify, selecting one OTU representative for each bin." << "\n";
-		cout << "If you provide a groupfile, then it also appends the names of the groups present in that bin." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile)." << "\n" << "\n";
+		mothurOut("The get.oturep command can only be executed after a successful read.dist command.\n");
+		mothurOut("The get.oturep command parameters are list, fasta, name, group, line and label.  The fasta and list parameters are required, and you may not use line and label at the same time.\n");
+		mothurOut("The line and label allow you to select what distance levels you would like a output files created for, and are separated by dashes.\n");
+		mothurOut("The get.oturep command should be in the following format: get.oturep(fasta=yourFastaFile, list=yourListFile, name=yourNamesFile, group=yourGroupFile, line=yourLines, label=yourLabels).\n");
+		mothurOut("Example get.oturep(fasta=amazon.fasta, list=amazon.fn.list, group=amazon.groups, line=1-3-5, name=amazon.names).\n");
+		mothurOut("The default value for line and label are all lines in your inputfile.\n");
+		mothurOut("The get.oturep command outputs a .fastarep file for each distance you specify, selecting one OTU representative for each bin.\n");
+		mothurOut("If you provide a groupfile, then it also appends the names of the groups present in that bin.\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the GetOTURepCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "GetOTURepCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the GetOTURepCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
@@ -172,7 +170,7 @@ int GetOTURepCommand::execute(){
 	try {
 	
 		if (abort == true) { return 0; }
-		
+
 		int count = 1;
 		int error;
 		
@@ -190,7 +188,7 @@ int GetOTURepCommand::execute(){
 		}
 		
 		//read list file
-		read = new ReadOTUFile(listfile);	
+		read = new ReadOTUFile(listfile);
 		read->read(&*globaldata); 
 		
 		input = globaldata->ginput;
@@ -205,8 +203,8 @@ int GetOTURepCommand::execute(){
 		
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 			
-			if(allLines == 1 || lines.count(count) == 1 || labels.count(list->getLabel()) == 1){
-					cout << list->getLabel() << '\t' << count << endl;
+			if (allLines == 1 || lines.count(count) == 1 || labels.count(list->getLabel()) == 1){
+					mothurOut(list->getLabel() + "\t" + toString(list->size()) + "\t" + toString(count)); mothurOutEndLine();
 					error = process(list);
 					if (error == 1) { return 0; } //there is an error in hte input files, abort command
 					
@@ -218,8 +216,7 @@ int GetOTURepCommand::execute(){
 			if ((anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 					delete list;
 					list = input->getListVector(lastLabel);
-					
-					cout << list->getLabel() << '\t' << count << endl;
+					mothurOut(list->getLabel() + "\t" + toString(list->size()) + "\t" + toString(count)); mothurOutEndLine();
 					error = process(list);
 					if (error == 1) { return 0; } //there is an error in hte input files, abort command
 					
@@ -227,8 +224,7 @@ int GetOTURepCommand::execute(){
 					userLabels.erase(list->getLabel());
 			}
 			
-			
-			lastLabel = list->getLabel();			
+			lastLabel = list->getLabel();
 			
 			delete list;
 			list = input->getListVector();
@@ -238,12 +234,12 @@ int GetOTURepCommand::execute(){
 		//output error messages about any remaining user labels
 		bool needToRun = false;
 		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {  
-			cout << "Your file does not include the label "<< *it; 
-			if (processedLabels.count(lastLabel) != 1) {
-				cout << ". I will use " << lastLabel << "." << endl;
+			mothurOut("Your file does not include the label " + *it); 
+			if (processedLabels.count(list->getLabel()) != 1) {
+				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
 				needToRun = true;
 			}else {
-				cout << ". Please refer to " << lastLabel << "." << endl;
+				mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
 			}
 		}
 		
@@ -251,28 +247,23 @@ int GetOTURepCommand::execute(){
 		if (needToRun == true)  {
 			delete list;
 			list = input->getListVector(lastLabel);
-
-			cout << list->getLabel() << '\t' << count << endl;
+			mothurOut(list->getLabel() + "\t" + toString(list->size()) + "\t" + toString(count)); mothurOutEndLine();
 			error = process(list);
-			if (error == 1) { return 0; } //there is an error in hte input files, abort command
 			delete list;
+			if (error == 1) { return 0; } //there is an error in hte input files, abort command
 		}
 		
 		delete matrix;
 		globaldata->gSparseMatrix = NULL;
+		delete list;
 		globaldata->gListVector = NULL;
 
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the GetOTURepCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "GetOTURepCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the GetOTURepCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 
 //**********************************************************************************************************************
@@ -304,156 +295,131 @@ void GetOTURepCommand::readNamesFile() {
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the GetOTURepCommand class Function readNamesFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "GetOTURepCommand", "readNamesFile");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the GetOTURepCommand class function readNamesFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 //**********************************************************************************************************************
-string GetOTURepCommand::FindRep(int bin, string& group, ListVector* thisList) {
+string GetOTURepCommand::findRep(int bin, string& group, ListVector* thisList, int& binsize) {
 	try{
 		vector<string> names;
-		map<string, float> sums;
-		map<int, string> binMap; //subset of namesToIndex - just member of this bin
-		string binnames;
-		float min = 10000;
-		string minName;
 		map<string, string> groups;
 		map<string, string>::iterator groupIt;
-		
-		binnames = thisList->get(bin);
-	
+
 		//parse names into vector
+		string binnames = thisList->get(bin);
 		splitAtComma(binnames, names);
-		
+		binsize = names.size();
+
 		//if you have a groupfile
-		if(groupfile != "") {
+		if (groupfile != "") {
 			//find the groups that are in this bin
-			for (int i = 0; i < names.size(); i++) {
+			for (size_t i = 0; i < names.size(); i++) {
 				string groupName = groupMap->getGroup(names[i]);
 				if (groupName == "not found") {  
-					cout << names[i] << " is missing from your group file. Please correct. " << endl;
+					mothurOut(names[i] + " is missing from your group file. Please correct. "); mothurOutEndLine();
 					groupError = true;
-				}else{
+				} else {
 					groups[groupName] = groupName;
 				}
 			}
 			
 			//turn the groups into a string
-			for(groupIt = groups.begin(); groupIt != groups.end(); groupIt++) { group += groupIt->first + "-"; }
-			
+			for (groupIt = groups.begin(); groupIt != groups.end(); groupIt++) {
+				group += groupIt->first + "-";
+			}
 			//rip off last dash
 			group = group.substr(0, group.length()-1);
 		}
-		
-		//if only 1 sequence in bin then that's the rep
-		if (names.size() == 1) { return names[0]; }
-		else {
-			//fill binMap
-			for (int i = 0; i < names.size(); i++) {
-				for (map<string, int>::iterator it = nameToIndex.begin(); it != nameToIndex.end(); it++) {
 
-					if (it->first == names[i]) {  
-						binMap[it->second] = it->first;
+		// if only 1 sequence in bin or processing the "unique" line, then 
+		// the first sequence of the OTU is the representative one
+		if ((names.size() == 1) || (list->getLabel() == "unique")) {
+			return names[0];
+		} else {
+			vector<int> seqIndex(names.size());
+			vector<float> max_dist(names.size());
 
-						//initialize sums map
-						sums[it->first] = 0.0;
-						break;
+			//fill seqIndex and initialize sums
+			for (size_t i = 0; i < names.size(); i++) {
+				seqIndex[i] = nameToIndex[names[i]];
+				max_dist[i] = 0.0;
+			}
+			
+			// loop through all entries in seqIndex
+			SeqMap::iterator it;
+			SeqMap currMap;
+			for (size_t i=0; i < seqIndex.size(); i++) {
+				currMap = seqVec[seqIndex[i]];
+				for (size_t j=0; j < seqIndex.size(); j++) {
+					it = currMap.find(seqIndex[j]);		
+					if (it != currMap.end()) {
+						max_dist[i] = max(max_dist[i], it->second);
+						max_dist[j] = max(max_dist[j], it->second);
 					}
 				}
 			}
 			
-			//go through each cell in the sparsematrix
-			for(MatData currentCell = matrix->begin(); currentCell != matrix->end(); currentCell++){
-				//is this a distance between 2 members of this bin
-				map<int, string>::iterator it = binMap.find(currentCell->row);
-				map<int, string>::iterator it2 = binMap.find(currentCell->column);
-				
-				//sum the distance of the sequences in the bin to eachother
-				if ((it != binMap.end()) && (it2 != binMap.end())) {
-					//this is a cell that repesents the distance between to of this bins members
-					sums[it->second] += currentCell->dist;
-					sums[it2->second] += currentCell->dist;
+			// sequence with the smallest maximum distance is the representative
+			float min = 10000;
+			int minIndex;
+			for (size_t i=0; i < max_dist.size(); i++) {
+				if (max_dist[i] < min) {
+					min = max_dist[i];
+					minIndex = i;
 				}
 			}
-			
-			//smallest sum is the representative
-			for (map<string, float>::iterator it4 = sums.begin(); it4 != sums.end(); it4++) {
-				if (it4->second < min) {
-					min = it4->second;
-					minName = it4->first;
-				}
 
-			}
-			
-			return minName;
+			return(names[minIndex]);
 		}
-	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the GetOTURepCommand class Function FindRep. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "GetOTURepCommand", "FindRep");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the GetOTURepCommand class function FindRep. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
 int GetOTURepCommand::process(ListVector* processList) {
 	try{
-				string nameRep, name, sequence;
+		string nameRep, name, sequence;
 
-				//create output file
-				string outputFileName = getRootName(listfile) + processList->getLabel() + ".rep.fasta";
-				openOutputFile(outputFileName, out);
-				
-				//for each bin in the list vector
-				for (int i = 0; i < processList->size(); i++) {
-					string groups;
-					nameRep = FindRep(i, groups, processList);
-					
-					//print out name and sequence for that bin
-					sequence = fasta->getSequence(nameRep);
+		//create output file
+		string outputFileName = getRootName(listfile) + processList->getLabel() + ".rep.fasta";
+		openOutputFile(outputFileName, out);
 
-					if (sequence != "not found") {
-						if (groupfile == "") {
-							nameRep = nameRep + "|" + toString(i+1);
-							out << ">" << nameRep << endl;
-							out << sequence << endl;
-						}else {
-							nameRep = nameRep + "|" + groups + "|" + toString(i+1);
-							out << ">" << nameRep << endl;
-							out << sequence << endl;
-						}
-					}else { 
-						cout << nameRep << " is missing from your fasta or name file. Please correct. " << endl; 
-						remove(outputFileName.c_str());
-						return 1;
-					}
+		//for each bin in the list vector
+		for (int i = 0; i < processList->size(); i++) {
+			string groups;
+			int binsize;
+			nameRep = findRep(i, groups, processList, binsize);
+
+			//print out name and sequence for that bin
+			sequence = fasta->getSequence(nameRep);
+
+			if (sequence != "not found") {
+				nameRep = nameRep + "|" + toString(i+1);
+				nameRep = nameRep + "|" + toString(binsize);
+				if (groupfile != "") {
+					nameRep = nameRep + "|" + groups;
 				}
-				
-				out.close();
-				return 0;
-	
+				out << ">" << nameRep << endl;
+				out << sequence << endl;
+			} else { 
+				mothurOut(nameRep + " is missing from your fasta or name file. Please correct. "); mothurOutEndLine(); 
+				remove(outputFileName.c_str());
+				return 1;
+			}
+		}
+
+		out.close();
+		return 0;
+
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the GetOTURepCommand class Function process. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "GetOTURepCommand", "process");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the GetOTURepCommand class function process. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
-
-
-
-
-

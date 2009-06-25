@@ -38,36 +38,28 @@ ReverseSeqsCommand::ReverseSeqsCommand(string option){
 			//check for required parameters
 			fasta = validParameter.validFile(parameters, "fasta", true);
 			if (fasta == "not open") { abort = true; }
-			else if (fasta == "not found") { fasta = ""; cout << "fasta is a required parameter for the reverse.seqs command." << endl; abort = true;  }	
+			else if (fasta == "not found") { fasta = ""; mothurOut("fasta is a required parameter for the reverse.seqs command."); mothurOutEndLine(); abort = true;  }	
 			
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReverseSeqsCommand class Function ReverseSeqsCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ReverseSeqsCommand", "ReverseSeqsCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ReverseSeqsCommand class function ReverseSeqsCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 //**********************************************************************************************************************
 
 void ReverseSeqsCommand::help(){
 	try {
-		cout << "The reverse.seqs command reads a fastafile and ...." << "\n";
-		cout << "The reverse.seqs command parameter is fasta and it is required." << "\n";
-		cout << "The reverse.seqs command should be in the following format: " << "\n";
-		cout << "reverse.seqs(fasta=yourFastaFile) " << "\n";	
+		mothurOut("The reverse.seqs command reads a fastafile and ....\n");
+		mothurOut("The reverse.seqs command parameter is fasta and it is required.\n");
+		mothurOut("The reverse.seqs command should be in the following format: \n");
+		mothurOut("reverse.seqs(fasta=yourFastaFile) \n");	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReverseSeqsCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ReverseSeqsCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ReverseSeqsCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //***************************************************************************************************************
@@ -101,11 +93,7 @@ int ReverseSeqsCommand::execute(){
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReverseSeqsCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ReverseSeqsCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ReverseSeqsCommand", "execute");
 		exit(1);
 	}
 }

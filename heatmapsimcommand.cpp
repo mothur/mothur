@@ -52,7 +52,7 @@ HeatMapSimCommand::HeatMapSimCommand(string option){
 			
 			//make sure the user has already run the read.otu command
 			if (globaldata->getSharedFile() == "") {
-				 cout << "You must read a list and a group, or a shared before you can use the heatmap.sim command." << endl; abort = true; 
+				 mothurOut("You must read a list and a group, or a shared before you can use the heatmap.sim command."); mothurOutEndLine(); abort = true; 
 			}
 
 			//check for optional parameter and set defaults
@@ -72,7 +72,7 @@ HeatMapSimCommand::HeatMapSimCommand(string option){
 			}
 			
 			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { cout << "You cannot use both the line and label parameters at the same time. " << endl; abort = true; }
+			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
 			//if the user has not specified any line or labels use the ones from read.otu
 			else if ((line == "") && (label == "")) {  
 				allLines = globaldata->allLines; 
@@ -132,40 +132,32 @@ HeatMapSimCommand::HeatMapSimCommand(string option){
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the HeatMapSimCommand class Function HeatMapSimCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "HeatMapSimCommand", "HeatMapSimCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the HeatMapSimCommand class function HeatMapSimCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
 
 void HeatMapSimCommand::help(){
 	try {
-		cout << "The heatmap.sim command can only be executed after a successful read.otu command." << "\n";
-		cout << "The heatmap.sim command parameters are groups, calc, line and label.  No parameters are required, but you may not use line and label at the same time." << "\n";
-		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like included in your heatmap." << "\n";
-		cout << "The group names are separated by dashes. The line and label allow you to select what distance levels you would like a heatmap created for, and are also separated by dashes." << "\n";
-		cout << "The heatmap.sim command should be in the following format: heatmap.sim(groups=yourGroups, calc=yourCalc, line=yourLines, label=yourLabels)." << "\n";
-		cout << "Example heatmap.sim(groups=A-B-C, line=1-3-5, calc=jabund)." << "\n";
-		cout << "The default value for groups is all the groups in your groupfile, and all lines in your inputfile will be used." << "\n";
+		mothurOut("The heatmap.sim command can only be executed after a successful read.otu command.\n");
+		mothurOut("The heatmap.sim command parameters are groups, calc, line and label.  No parameters are required, but you may not use line and label at the same time.\n");
+		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included in your heatmap.\n");
+		mothurOut("The group names are separated by dashes. The line and label allow you to select what distance levels you would like a heatmap created for, and are also separated by dashes.\n");
+		mothurOut("The heatmap.sim command should be in the following format: heatmap.sim(groups=yourGroups, calc=yourCalc, line=yourLines, label=yourLabels).\n");
+		mothurOut("Example heatmap.sim(groups=A-B-C, line=1-3-5, calc=jabund).\n");
+		mothurOut("The default value for groups is all the groups in your groupfile, and all lines in your inputfile will be used.\n");
 		validCalculator->printCalc("heat", cout);
-		cout << "The default value for calc is jclass-thetayc." << "\n";
-		cout << "The heatmap.sim command outputs a .svg file for each calculator you choose at each line or label you specify." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups)." << "\n" << "\n";
+		mothurOut("The default value for calc is jclass-thetayc.\n");
+		mothurOut("The heatmap.sim command outputs a .svg file for each calculator you choose at each line or label you specify.\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the HeatMapSimCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "HeatMapSimCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the HeatMapSimCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
@@ -189,7 +181,7 @@ int HeatMapSimCommand::execute(){
 		int count = 1;	
 		
 		//if the users entered no valid calculators don't execute command
-		if (heatCalculators.size() == 0) { cout << "No valid calculators." << endl; return 0; }
+		if (heatCalculators.size() == 0) { mothurOut("No valid calculators."); mothurOutEndLine(); return 0; }
 		
 		//you have groups
 		read = new ReadOTUFile(globaldata->inputFileName);	
@@ -199,7 +191,7 @@ int HeatMapSimCommand::execute(){
 		lookup = input->getSharedRAbundVectors();
 		string lastLabel = lookup[0]->getLabel();
 		
-		if (lookup.size() < 2) { cout << "You have not provided enough valid groups.  I cannot run the command." << endl; return 0;}
+		if (lookup.size() < 2) { mothurOut("You have not provided enough valid groups.  I cannot run the command."); mothurOutEndLine(); return 0;}
 				
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
@@ -212,7 +204,7 @@ int HeatMapSimCommand::execute(){
 		
 			if(allLines == 1 || lines.count(count) == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 	
-				cout << lookup[0]->getLabel() << '\t' << count << endl;
+				mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 				heatmap->getPic(lookup, heatCalculators);
 					
 				processedLabels.insert(lookup[0]->getLabel());
@@ -225,7 +217,7 @@ int HeatMapSimCommand::execute(){
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 				lookup = input->getSharedRAbundVectors(lastLabel);				
 
-				cout << lookup[0]->getLabel() << '\t' << count << endl;
+				mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 				heatmap->getPic(lookup, heatCalculators);
 					
 				processedLabels.insert(lookup[0]->getLabel());
@@ -246,12 +238,12 @@ int HeatMapSimCommand::execute(){
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			cout << "Your file does not include the label "<< *it; 
+			mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(lastLabel) != 1) {
-				cout << ". I will use " << lastLabel<< "." << endl;
+				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
 				needToRun = true;
 			}else {
-				cout << ". Please refer to " << lastLabel << "." << endl;
+				mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
 			}
 		}
 		
@@ -260,7 +252,7 @@ int HeatMapSimCommand::execute(){
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 			lookup = input->getSharedRAbundVectors(lastLabel);				
 
-			cout << lookup[0]->getLabel() << '\t' << count << endl;
+			mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 			heatmap->getPic(lookup, heatCalculators);
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 		}
@@ -272,13 +264,9 @@ int HeatMapSimCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the HeatMapSimCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "HeatMapSimCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the HeatMapSimCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 //**********************************************************************************************************************

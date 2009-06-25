@@ -74,13 +74,6 @@ EstOutput LogSD::getValues(SAbundVector* rank){
 				maxDiff = diff;
 		}
 
-
-		/*cout << "LogSD:\n";
-		cout << "D Test Statistic = " << DStatistic << "\n";
-		cout << ".05 confidence value = " << .89196/sqrt(numSpec) << "\n";
-		cout << "If D Test Statistic is greater than the critical value then the data fits the Log Series Distribution model w/ 95% confidence.\n\n";*/
-		
-
 		data[0] = (maxDiff + .5)/numSpec;
 		data[1] = 0.886/sqrt(numSpec);
 		data[2] = 1.031/sqrt(numSpec);
@@ -92,13 +85,9 @@ EstOutput LogSD::getValues(SAbundVector* rank){
 		return data;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the LogSD class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "LogSD", "getValues");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the LogSD class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/

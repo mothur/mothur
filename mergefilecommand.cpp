@@ -35,13 +35,13 @@ MergeFileCommand::MergeFileCommand(string option){
 			}
 			
 			string fileList = validParameter.validFile(parameters, "input", false);			
-			if(fileList == "not found") { cout << "you must enter two or more file names" << endl;  abort=true;  }
+			if(fileList == "not found") { mothurOut("you must enter two or more file names"); mothurOutEndLine();  abort=true;  }
 			else{ 	splitAtDash(fileList, fileNames);	}
 			
 			numInputFiles = fileNames.size();
 			ifstream testFile;
 			if(numInputFiles == 0){
-				cout << "you must enter two or more file names and you entered " << fileNames.size() <<  " file names" << endl;
+				mothurOut("you must enter two or more file names and you entered " + toString(fileNames.size()) +  " file names"); mothurOutEndLine();
 				abort=true;  
 			}
 			else{
@@ -52,18 +52,14 @@ MergeFileCommand::MergeFileCommand(string option){
 			}   
 			
 			outputFileName = validParameter.validFile(parameters, "output", false);			
-			if (outputFileName == "not found") { cout << "you must enter an output file name" << endl;  abort=true;  }
+			if (outputFileName == "not found") { mothurOut("you must enter an output file name"); mothurOutEndLine();  abort=true;  }
 		}
 			
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the MergeFileCommand class Function MergeFileCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "MergeFileCommand", "MergeFileCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the MergeFileCommand class function MergeFileCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
@@ -93,31 +89,21 @@ int MergeFileCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the BinSeqCommand class Function BinSeqCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "MergeFileCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the BinSeqCommand class function BinSeqCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-	
 }
 
 //**********************************************************************************************************************
 
 void MergeFileCommand::help(){
 	try {
-		cout << "The merge.file command..." << endl;
+		mothurOut("The merge.file command..."); mothurOutEndLine();
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the MergeFileCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "MergeFileCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the MergeFileCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-	
 }
 
 //**********************************************************************************************************************

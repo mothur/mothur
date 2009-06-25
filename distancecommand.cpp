@@ -41,7 +41,7 @@ DistanceCommand::DistanceCommand(string option){
 			
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not found") { cout << "fasta is a required parameter for the dist.seqs command." << endl; abort = true; }
+			if (fastafile == "not found") { mothurOut("fasta is a required parameter for the dist.seqs command."); mothurOutEndLine(); abort = true; }
 			else if (fastafile == "not open") { abort = true; }	
 			else{
 				ifstream inFASTA;
@@ -96,13 +96,9 @@ DistanceCommand::DistanceCommand(string option){
 				
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the DistanceCommand class Function DistanceCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "DistanceCommand", "DistanceCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the DistanceCommand class function DistanceCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
@@ -119,29 +115,23 @@ DistanceCommand::~DistanceCommand(){
 
 void DistanceCommand::help(){
 	try {
-		cout << "The dist.seqs command reads a file containing sequences and creates a distance file." << "\n";
-		cout << "The dist.seqs command parameters are fasta, calc, countends, cutoff and processors.  " << "\n";
-		cout << "The fasta parameter is required." << "\n";
-		cout << "The calc parameter allows you to specify the method of calculating the distances.  Your options are: nogaps, onegap or eachgap. The default is onegap." << "\n";
-		cout << "The countends parameter allows you to specify whether to include terminal gaps in distance.  Your options are: T or F. The default is T." << "\n";
-		cout << "The cutoff parameter allows you to specify maximum distance to keep. The default is 1.0." << "\n";
-		cout << "The processors parameter allows you to specify number of processors to use.  The default is 1." << "\n";
-		cout << "The dist.seqs command should be in the following format: " << "\n";
-		cout << "dist.seqs(fasta=yourFastaFile, calc=yourCalc, countends=yourEnds, cutoff= yourCutOff, processors=yourProcessors) " << "\n";
-		cout << "Example dist.seqs(fasta=amazon.fasta, calc=eachgap, countends=F, cutoff= 2.0, processors=3)." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. calc), '=' and parameters (i.e.yourCalc)." << "\n" << "\n";
+		mothurOut("The dist.seqs command reads a file containing sequences and creates a distance file.\n");
+		mothurOut("The dist.seqs command parameters are fasta, calc, countends, cutoff and processors.  \n");
+		mothurOut("The fasta parameter is required.\n");
+		mothurOut("The calc parameter allows you to specify the method of calculating the distances.  Your options are: nogaps, onegap or eachgap. The default is onegap.\n");
+		mothurOut("The countends parameter allows you to specify whether to include terminal gaps in distance.  Your options are: T or F. The default is T.\n");
+		mothurOut("The cutoff parameter allows you to specify maximum distance to keep. The default is 1.0.\n");
+		mothurOut("The processors parameter allows you to specify number of processors to use.  The default is 1.\n");
+		mothurOut("The dist.seqs command should be in the following format: \n");
+		mothurOut("dist.seqs(fasta=yourFastaFile, calc=yourCalc, countends=yourEnds, cutoff= yourCutOff, processors=yourProcessors) \n");
+		mothurOut("Example dist.seqs(fasta=amazon.fasta, calc=eachgap, countends=F, cutoff= 2.0, processors=3).\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. calc), '=' and parameters (i.e.yourCalc).\n\n");
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the DistanceCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "DistanceCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the DistanceCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
-
-
 //**********************************************************************************************************************
 
 int DistanceCommand::execute(){
@@ -206,13 +196,9 @@ int DistanceCommand::execute(){
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the DistanceCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "DistanceCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the DistanceCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 /**************************************************************************************************/
 void DistanceCommand::createProcesses(string filename) {
@@ -231,7 +217,7 @@ void DistanceCommand::createProcesses(string filename) {
 			}else if (pid == 0){
 				driver(lines[process]->start, lines[process]->end, filename + toString(getpid()) + ".temp", cutoff);
 				exit(0);
-			}else { cout << "unable to spawn the necessary processes." << endl; exit(0); }
+			}else { mothurOut("unable to spawn the necessary processes."); mothurOutEndLine(); exit(0); }
 		}
 	
 		//force parent to wait until all the processes are done
@@ -242,13 +228,9 @@ void DistanceCommand::createProcesses(string filename) {
 #endif
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the DistanceCommand class Function createProcesses. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "DistanceCommand", "createProcesses");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the DistanceCommand class function createProcesses. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /**************************************************************************************************/
@@ -280,25 +262,20 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 			if (isTrue(phylip) == true) { outFile << endl; }
 			
 			if(i % 100 == 0){
-				cout << i << '\t' << time(NULL) - startTime << endl;
+				mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); mothurOutEndLine();
 			}
 			
 		}
-		cout << endLine-1 << '\t' << time(NULL) - startTime << endl;
+		mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); mothurOutEndLine();
 		
 		outFile.close();
 		
 		return 1;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the DistanceCommand class Function driver. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "DistanceCommand", "driver");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the DistanceCommand class function driver. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-	
 }
 
 /**************************************************************************************************/
@@ -320,12 +297,8 @@ void DistanceCommand::appendFiles(string temp, string filename) {
 		output.close();
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the DistanceCommand class Function appendFiles. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "DistanceCommand", "appendFiles");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the DistanceCommand class function appendFiles. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 /**************************************************************************************************/

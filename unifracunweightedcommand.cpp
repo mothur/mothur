@@ -35,7 +35,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option) {
 			}
 			
 			if (globaldata->gTree.size() == 0) {//no trees were read
-				cout << "You must execute the read.tree command, before you may execute the unifrac.unweighted command." << endl; abort = true;  }
+				mothurOut("You must execute the read.tree command, before you may execute the unifrac.unweighted command."); mothurOutEndLine(); abort = true;  }
 										
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -70,11 +70,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option) {
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the UnifracUnweightedCommand class Function UnifracUnweightedCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the UnifracUnweightedCommand class function UnifracUnweightedCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "UnifracUnweightedCommand", "UnifracUnweightedCommand");
 		exit(1);
 	}
 }
@@ -83,24 +79,20 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option) {
 
 void UnifracUnweightedCommand::help(){
 	try {
-		cout << "The unifrac.unweighted command can only be executed after a successful read.tree command." << "\n";
-		cout << "The unifrac.unweighted command parameters are groups and iters.  No parameters are required." << "\n";
-		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 1 valid group." << "\n";
-		cout << "The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree." << "\n";
-		cout << "The unifrac.unweighted command should be in the following format: unifrac.unweighted(groups=yourGroups, iters=yourIters)." << "\n";
-		cout << "Example unifrac.unweighted(groups=A-B-C, iters=500)." << "\n";
-		cout << "The default value for groups is all the groups in your groupfile, and iters is 1000." << "\n";
-		cout << "The unifrac.unweighted command output two files: .unweighted and .uwsummary their descriptions are in the manual." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups)." << "\n" << "\n";
+		mothurOut("The unifrac.unweighted command can only be executed after a successful read.tree command.\n");
+		mothurOut("The unifrac.unweighted command parameters are groups and iters.  No parameters are required.\n");
+		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 1 valid group.\n");
+		mothurOut("The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree.\n");
+		mothurOut("The unifrac.unweighted command should be in the following format: unifrac.unweighted(groups=yourGroups, iters=yourIters).\n");
+		mothurOut("Example unifrac.unweighted(groups=A-B-C, iters=500).\n");
+		mothurOut("The default value for groups is all the groups in your groupfile, and iters is 1000.\n");
+		mothurOut("The unifrac.unweighted command output two files: .unweighted and .uwsummary their descriptions are in the manual.\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the UnifracUnweightedCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "UnifracUnweightedCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the UnifracUnweightedCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 
@@ -115,7 +107,7 @@ int UnifracUnweightedCommand::execute() {
 		//create new tree with same num nodes and leaves as users
 		
 		outSum << "Tree#" << '\t' << "Groups" << '\t'  <<  "UWScore" <<'\t' << "UWSig" <<  endl;
-		cout << "Tree#" << '\t' << "Groups" << '\t'  <<  "UWScore" << '\t' << "UWSig" <<  endl;
+		mothurOut("Tree#\tGroups\tUWScore\tUWSig"); mothurOutEndLine();
 		
 		//get pscores for users trees
 		for (int i = 0; i < T.size(); i++) {
@@ -193,11 +185,7 @@ int UnifracUnweightedCommand::execute() {
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the UnifracUnweightedCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the UnifracUnweightedCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "UnifracUnweightedCommand", "execute");
 		exit(1);
 	}
 }
@@ -220,11 +208,7 @@ void UnifracUnweightedCommand::printUnweightedFile() {
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the UnifracUnweightedCommand class Function printUnweightedFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the UnifracUnweightedCommand class function printUnweightedFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "UnifracUnweightedCommand", "printUnweightedFile");
 		exit(1);
 	}
 }
@@ -240,24 +224,22 @@ void UnifracUnweightedCommand::printUWSummaryFile(int i) {
 
 		for(int a = 0; a < numComp; a++) {
 			outSum << i+1 << '\t';
-			cout << i+1 << '\t';
+			mothurOut(toString(i+1) + "\t");
 			
 			if (UWScoreSig[a][0] > (1/(float)iters)) {
 				outSum << setprecision(6) << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(itersString.length()) << UWScoreSig[a][0] << endl;
 				cout << setprecision(6)  << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(itersString.length()) << UWScoreSig[a][0] << endl; 
+				mothurOutJustToLog(groupComb[a]  + "\t" + toString(utreeScores[a][0])  + "\t" + toString(UWScoreSig[a][0])); mothurOutEndLine(); 
 			}else {
 				outSum << setprecision(6) << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(itersString.length()) << "<" << (1/float(iters)) << endl;
 				cout << setprecision(6)  << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(itersString.length()) << "<" << (1/float(iters)) << endl; 
+				mothurOutJustToLog(groupComb[a]  + "\t" + toString(utreeScores[a][0])  + "\t<" + toString((1/float(iters)))); mothurOutEndLine();
 			}
 		}
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the UnifracUnweightedCommand class Function printUWSummaryFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the UnifracUnweightedCommand class function printUWSummaryFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "UnifracUnweightedCommand", "printUWSummaryFile");
 		exit(1);
 	}
 }

@@ -63,11 +63,7 @@ void Rarefact::getCurve(int increment = 1, int nIters = 1000){
 		delete rcd;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Rarefact class Function getCurve. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Rarefact class function getCurve. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Rarefact", "getCurve");
 		exit(1);
 	}
 }
@@ -128,14 +124,9 @@ try {
 		delete rcd;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Rarefact class Function getSharedCurve. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Rarefact", "getSharedCurve");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Rarefact class function getSharedCurve. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 
 /**************************************************************************************/
@@ -147,12 +138,8 @@ void Rarefact::mergeVectors(SharedRAbundVector* shared1, SharedRAbundVector* sha
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Rarefact class Function mergeVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Rarefact", "mergeVectors");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Rarefact class function mergeVectors. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 

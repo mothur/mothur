@@ -20,14 +20,10 @@ InteractEngine::InteractEngine(string path){
 
 	globaldata = GlobalData::getInstance();
 	globaldata->argv = path;
+	string logFileName = "mothur.logFile";
+	remove(logFileName.c_str());
 	
 	system("clear");
-//	char buffer = ' ';
-//	ifstream header("introtext.txt");
-//	while(!header.eof()){
-//		cout << buffer;
-//		buffer = header.get();
-//	}
 }
 
 /***********************************************************************/
@@ -44,32 +40,47 @@ bool InteractEngine::getInput(){
 		string commandName = "";
 		string options = "";
 		int quitCommandCalled = 0;
-		//bool errorFree;
-		//ErrorCheck* errorCheckor = new ErrorCheck();
 		
-		cout << "mothur v.1.4.1" << endl;
-		cout << "Last updated: 6/23/2009" << endl << endl;
-		cout << "by" << endl;
-		cout << "Patrick D. Schloss" << endl << endl;
-		cout << "Department of Microbiology" << endl;
-		cout << "The University of Massachusetts" << endl;
-		cout << "pschloss@micro.umass.edu" << endl;
-		cout << "http://schloss.micro.umass.edu/mothur" << endl << endl << endl;
-		cout << "Distributed under the GNU General Public License" << endl << endl;
-		cout << "Type 'help()' for information on the commands that are available" << endl << endl;
-		cout << "Type 'quit()' to exit program" << endl;
-
+		mothurOut("mothur v.1.4.1");
+		mothurOutEndLine();		
+		mothurOut("Last updated: 6/23/2009");
+		mothurOutEndLine();	
+		mothurOutEndLine();		
+		mothurOut("by");
+		mothurOutEndLine();		
+		mothurOut("Patrick D. Schloss");
+		mothurOutEndLine();
+		mothurOutEndLine();			
+		mothurOut("Department of Microbiology");
+		mothurOutEndLine();		
+		mothurOut("pschloss@micro.umass.edu");
+		mothurOutEndLine();		
+		mothurOut("http://schloss.micro.umass.edu/mothur");
+		mothurOutEndLine();	
+		mothurOutEndLine();	
+		mothurOutEndLine();		
+		mothurOut("Distributed under the GNU General Public License");
+		mothurOutEndLine();
+		mothurOutEndLine();			
+		mothurOut("Type 'help()' for information on the commands that are available");
+		mothurOutEndLine();
+		mothurOutEndLine();			
+		mothurOut("Type 'quit()' to exit program");
+		mothurOutEndLine();	
+		
 		while(quitCommandCalled != 1){
-
-			cout << endl << "mothur > ";
+			
+			mothurOutEndLine();
+			mothurOut("mothur > ");
 			getline(cin, input);
 			if (cin.eof()) { input = "quit()"; }
+			
+			mothurOutJustToLog(input);
+			mothurOutEndLine();
 			
 			//allow user to omit the () on the quit command
 			if (input == "quit") { input = "quit()"; }
 			
-			//errorFree = errorCheckor->checkInput(input);
-			//if (errorFree == true) {
 			CommandOptionParser parser(input);
 			commandName = parser.getCommandString();
 			options = parser.getOptionString();
@@ -82,20 +93,16 @@ bool InteractEngine::getInput(){
 				quitCommandCalled = command->execute();
 				
 			}else {
-				cout << "Your input contains errors. Please try again." << endl;
+				mothurOut("Your input contains errors. Please try again."); 
+				mothurOutEndLine();
 			}
 		}	
 		return 1;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the InteractEngine class Function getInput. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "InteractEngine", "getInput");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the InteractEngine class function getInput. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 
 /***********************************************************************/
@@ -106,7 +113,9 @@ BatchEngine::BatchEngine(string path, string batchFileName){
 	
 		openedBatch = openInputFile(batchFileName, inputBatchFile);
 		globaldata->argv = path;
-
+		string logFileName = "mothur.logFile";
+		remove(logFileName.c_str());
+		
 		system("clear");
 	
 	//	char buffer = ' ';
@@ -117,11 +126,7 @@ BatchEngine::BatchEngine(string path, string batchFileName){
 	//	}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the BatchEngine class Function BatchEngine. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the BatchEngine class function BatchEngine. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "BatchEngine", "BatchEngine");
 		exit(1);
 	}
 }
@@ -136,12 +141,15 @@ BatchEngine::~BatchEngine(){
 bool BatchEngine::getInput(){
 	try {
 		//check if this is a valid batchfile
-		if (openedBatch == 1) {  cout << "unable to open batchfile" << endl;  return 1; }
+		if (openedBatch == 1) {  
+			mothurOut("unable to open batchfile");  
+			mothurOutEndLine();
+			return 1; 
+		}
 	
 		string input = "";
 		string commandName = "";
 		string options = "";
-		//int count = 1;
 		
 		//CommandFactory cFactory;
 		int quitCommandCalled = 0;
@@ -151,11 +159,14 @@ bool BatchEngine::getInput(){
 			if (inputBatchFile.eof()) { input = "quit()"; }
 			else { getline(inputBatchFile, input); }
 			
-			//cout << "command number" << count << endl; count++;
+			
 			
 			if (input[0] != '#') {
-			
-				cout << endl << "mothur > " << input << endl;
+				
+				mothurOutEndLine();
+				mothurOut("mothur > " + input);
+				mothurOutEndLine();
+				
 				
 				//allow user to omit the () on the quit command
 				if (input == "quit") { input = "quit()"; }
@@ -170,7 +181,10 @@ bool BatchEngine::getInput(){
 					CommandFactory cFactory;
 					Command* command = cFactory.getCommand(commandName, options);
 					quitCommandCalled = command->execute();
-				}else {		cout << "Invalid." << endl;		}
+				}else {		
+					mothurOut("Invalid."); 
+					mothurOutEndLine();
+				}
 				
 			}
 			gobble(inputBatchFile);
@@ -180,11 +194,7 @@ bool BatchEngine::getInput(){
 		return 1;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the BatchEngine class Function getInput. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the BatchEngine class function getInput. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "BatchEngine", "getInput");
 		exit(1);
 	}
 }
@@ -201,16 +211,14 @@ ScriptEngine::ScriptEngine(string path, string commandString){
 		listOfCommands = commandString.substr(1, (commandString.length()-1));
 
 		globaldata->argv = path;
+		string logFileName = "mothur.logFile";
+		remove(logFileName.c_str());
 
 		system("clear");
 	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ScriptEngine class Function ScriptEngine. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ScriptEngine class function ScriptEngine. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ScriptEngine", "ScriptEngine");
 		exit(1);
 	}
 }
@@ -221,14 +229,14 @@ ScriptEngine::~ScriptEngine(){
 	}
 
 /***********************************************************************/
-//This Function allows the user to run a batchfile containing several commands on Dotur
+//This Function allows the user to run a batchfile containing several commands on mothur
 bool ScriptEngine::getInput(){
 	try {
 			
 		string input = "";
 		string commandName = "";
 		string options = "";
-		//int count = 1;
+		
 		
 		//CommandFactory cFactory;
 		int quitCommandCalled = 0;
@@ -238,9 +246,12 @@ bool ScriptEngine::getInput(){
 			input = getNextCommand(listOfCommands);	
 			
 			if (input == "") { input = "quit()"; }
-			//cout << "command number" << count << endl; count++;
 			
-			cout << endl << "mothur > " << input << endl;
+			
+			mothurOutEndLine();
+			mothurOut("mothur > " + input);
+			mothurOutEndLine();
+
 				
 			//allow user to omit the () on the quit command
 			if (input == "quit") { input = "quit()"; }
@@ -255,18 +266,17 @@ bool ScriptEngine::getInput(){
 				CommandFactory cFactory;
 				Command* command = cFactory.getCommand(commandName, options);
 				quitCommandCalled = command->execute();
-			}else {		cout << "Invalid." << endl;		}
+			}else {		
+				mothurOut("Invalid."); 
+				mothurOutEndLine();
+			}
 			
 		}
 		
 		return 1;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ScriptEngine class Function getInput. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ScriptEngine class function getInput. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ScriptEngine", "getInput");
 		exit(1);
 	}
 }
@@ -293,11 +303,7 @@ string ScriptEngine::getNextCommand(string& commandString) {
 		return nextcommand;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ScriptEngine class Function getNextCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ScriptEngine class function getNextCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ScriptEngine", "getNextCommand");
 		exit(1);
 	}
 }

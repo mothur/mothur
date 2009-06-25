@@ -29,11 +29,7 @@ SAbundVector::SAbundVector(string id, vector<int> sav) : DataVector(id), data(sa
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SAbundVector class Function SAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SAbundVector class function SAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SAbundVector", "SAbundVector");
 		exit(1);
 	}
 }
@@ -48,11 +44,7 @@ SAbundVector::SAbundVector(vector <int> dataVec, int mr, int nb, int ns) {
 		numSeqs = ns;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SAbundVector class Function SAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SAbundVector class function SAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SAbundVector", "SAbundVector");
 		exit(1);
 	}
 }
@@ -72,11 +64,7 @@ SAbundVector::SAbundVector(ifstream& f): DataVector(), maxRank(0), numBins(0), n
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SAbundVector class Function SAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SAbundVector class function SAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SAbundVector", "SAbundVector");
 		exit(1);
 	}
 }
@@ -99,13 +87,9 @@ void SAbundVector::set(int sabund, int abundance){
 		if(sabund > maxRank)	{	maxRank = sabund;		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SAbundVector class Function set. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SAbundVector", "set");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SAbundVector class function set. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 
@@ -128,13 +112,9 @@ void SAbundVector::push_back(int abundance){
 		numSeqs += (maxRank * abundance);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SAbundVector class Function push_back. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SAbundVector", "push_back");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SAbundVector class function push_back. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /***********************************************************************/
 
@@ -183,13 +163,9 @@ void SAbundVector::print(ostream& output){
 		output << endl;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SAbundVector class Function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SAbundVector", "print");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SAbundVector class function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 /**********************************************************************/
@@ -227,13 +203,9 @@ RAbundVector SAbundVector::getRAbundVector(){
 		return rav;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SAbundVector class Function getRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SAbundVector", "getRAbundVector");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SAbundVector class function getRAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 /***********************************************************************/
@@ -266,13 +238,9 @@ OrderVector SAbundVector::getOrderVector(map<string,int>* hold = NULL){
 		return ov;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SAbundVector class Function getOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SAbundVector", "getOrderVector");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SAbundVector class function getOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 /***********************************************************************/

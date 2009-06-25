@@ -22,11 +22,7 @@ Venn::Venn(){
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Venn class Function Venn. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Venn class function Venn. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Venn", "Venn");
 		exit(1);
 	}
 }
@@ -59,11 +55,7 @@ void Venn::getPic(SAbundVector* sabund, vector<Calculator*> vCalcs) {
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Venn class Function getPic. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Venn class function getPic. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Venn", "getPic");
 		exit(1);
 	}
 }
@@ -305,9 +297,7 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 				outsvg << "<circle fill=\"rgb(255,0,0)\" opacity=\".3\" stroke=\"black\" cx=\"230\" cy=\"200\" r=\"150\"/>"; 
 				outsvg << "<circle fill=\"rgb(0,255,0)\" opacity=\".3\" stroke=\"black\" cx=\"455\" cy=\"200\" r=\"150\"/>"; 
 				outsvg << "<circle fill=\"rgb(0,0,255)\" opacity=\".3\" stroke=\"black\" cx=\"343\" cy=\"400\" r=\"150\"/>"; 
-//cout << "numA = " << numA[0] << " numB = " << numB[0] 	<< " numC = " << numC[0] << endl;
-//cout << "sharedAB = " << sharedAB[0] << " sharedAC = " << sharedAC[0] << " sharedBC = " << sharedBC[0] << endl;
-//cout << "sharedAwithBC = " << sharedAwithBC[0]	<< " sharedBwithAC = " << sharedBwithAC[0] << " sharedCwithAB = " << sharedCwithAB[0] << endl;	
+
 				//place labels within overlaps
 				outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(200 - ((int)toString(numA[0]-sharedAwithBC[0]).length() / 2)) + "\" y=\"170\">" + toString(numA[0]-sharedAwithBC[0]) + "</text>\n"; 
 				outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(200 - ((int)lookup[0]->getGroup().length() / 2)) + "\" y=\"150\">" + lookup[0]->getGroup() + "</text>\n";  
@@ -374,7 +364,7 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 			//make a file for each calculator
 			for(int i=0;i<vCalcs.size();i++){
 				
-				if ((vCalcs[i]->getName() != "sharedsobs") && (vCalcs[i]->getName() != "sharedchao")) { cout << vCalcs[i]->getName() << " is not a valid calculator with four groups.  It will be disregarded. " << endl; }
+				if ((vCalcs[i]->getName() != "sharedsobs") && (vCalcs[i]->getName() != "sharedchao")) { mothurOut(vCalcs[i]->getName() + " is not a valid calculator with four groups.  It will be disregarded. "); mothurOutEndLine(); }
 				else{
 					string filenamesvg = getRootName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
 					openOutputFile(filenamesvg, outsvg);
@@ -507,11 +497,7 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Venn class Function getPic. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Venn class function getPic. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Venn", "getPic");
 		exit(1);
 	}
 }

@@ -41,11 +41,7 @@ RAbundVector::RAbundVector(string id, vector<int> rav) : DataVector(id), data(ra
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the RAbundVector class Function RAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the RAbundVector class function RAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "RAbundVector", "RAbundVector");
 		exit(1);
 	}
 }
@@ -60,16 +56,10 @@ RAbundVector::RAbundVector(vector<int> rav, int mr, int nb, int ns) {
 		data = rav;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the RAbundVector class Function RAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the RAbundVector class function RAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "RAbundVector", "RAbundVector");
 		exit(1);
 	}
 }
-
-
 
 /***********************************************************************/
 
@@ -88,11 +78,7 @@ RAbundVector::RAbundVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), 
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the RAbundVector class Function RAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the RAbundVector class function RAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "RAbundVector", "RAbundVector");
 		exit(1);
 	}
 }
@@ -117,11 +103,7 @@ void RAbundVector::set(int binNumber, int newBinSize){
 		numSeqs += (newBinSize - oldBinSize);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the RAbundVector class Function set. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the RAbundVector class function set. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "RAbundVector", "set");
 		exit(1);
 	}
 }
@@ -147,11 +129,7 @@ void RAbundVector::push_back(int binSize){
 		numSeqs += binSize;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the RAbundVector class Function push_back. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the RAbundVector class function push_back. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "RAbundVector", "push_back");
 		exit(1);
 	}
 }
@@ -227,11 +205,7 @@ void RAbundVector::print(string prefix, ostream& output){
 		output << endl;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the RAbundVector class Function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the RAbundVector class function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "RAbundVector", "print");
 		exit(1);
 	}
 }
@@ -248,11 +222,7 @@ void RAbundVector::print(ostream& output){
 		output << endl;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the RAbundVector class Function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the RAbundVector class function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "RAbundVector", "print");
 		exit(1);
 	}
 }
@@ -295,11 +265,7 @@ SAbundVector RAbundVector::getSAbundVector() {
 		return sav;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the RAbundVector class Function getSAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the RAbundVector class function getSAbundVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "RAbundVector", "getSAbundVector");
 		exit(1);
 	}
 }
@@ -321,11 +287,7 @@ OrderVector RAbundVector::getOrderVector(map<string,int>* nameMap = NULL) {
 		return ov;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the RAbundVector class Function getOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the RAbundVector class function getOrderVector. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "RAbundVector", "getOrderVector");
 		exit(1);
 	}
 }

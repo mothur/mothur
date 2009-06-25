@@ -9,7 +9,7 @@
 
 #include "calculator.h"
 
-/***********************************************************************/
+/***********************************************************************
 void VecCalc::printElements(vector<double> vec){
 	try {
 		for(int i = 0; i < vec.size(); i++)
@@ -26,7 +26,7 @@ void VecCalc::printElements(vector<double> vec){
 	}	
 }
 
-/***********************************************************************/
+/***********************************************************************
 
 void VecCalc::printElements(vector<string> vec){
 	try {
@@ -43,7 +43,7 @@ void VecCalc::printElements(vector<string> vec){
 		exit(1);
 	}	
 }
-/***********************************************************************/
+/***********************************************************************
 int VecCalc::findString(vector<string> vec, string str){
 	try {
 		for(int i = 0; i < vec.size(); i++)
@@ -60,11 +60,11 @@ int VecCalc::findString(vector<string> vec, string str){
 		exit(1);
 	}	
 }
-/***********************************************************************/
+/***********************************************************************
 double VecCalc::mean(vector<double> vec){
 	return sumElements(vec)/vec.size();
 }
-/***********************************************************************/
+/***********************************************************************
 double VecCalc::stError(vector<double> vec){
 	try {
 		double sum = 0;
@@ -88,13 +88,9 @@ int VecCalc::sumElements(vector<int> vec){
 		return sumElements(vec,0);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the VecCalc class Function sumElements. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "VecCalc", "sumElements");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the VecCalc class function sumElements. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 /***********************************************************************/
 int VecCalc::sumElements(vector<int> vec, int index){
@@ -105,13 +101,9 @@ int VecCalc::sumElements(vector<int> vec, int index){
 		return sum;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the VecCalc class Function sumElements. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "VecCalc", "sumElements");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the VecCalc class function sumElements. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -123,13 +115,9 @@ double VecCalc::sumElements(vector<double> vec){
 		return sum;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the VecCalc class Function sumElements. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "VecCalc", "sumElements");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the VecCalc class function sumElements. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 /***********************************************************************/
 double VecCalc::sumElements(vector<double> vec, int index){
@@ -140,15 +128,11 @@ double VecCalc::sumElements(vector<double> vec, int index){
 		return sum;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the VecCalc class Function sumElements. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "VecCalc", "sumElements");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the VecCalc class function sumElements. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
-/***********************************************************************/
+/***********************************************************************
 double VecCalc::findMax(vector<double> vec){
 	try {
 		double max = -1000000.0;
@@ -176,13 +160,9 @@ int VecCalc::numNZ(vector<int> vec){
 		return numNZ;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the VecCalc class Function numNZ. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "VecCalc", "numNZ");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the VecCalc class function numNZ. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 /***********************************************************************/
 double VecCalc::numNZ(vector<double> vec){
@@ -194,15 +174,11 @@ double VecCalc::numNZ(vector<double> vec){
 		return numNZ;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the VecCalc class Function numNZ. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "VecCalc", "numNZ");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the VecCalc class function numNZ. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
-/***********************************************************************/
+/***********************************************************************
 double VecCalc::numPos(vector<double> vec){
 	try {
 		double numPos = 0;
@@ -220,7 +196,7 @@ double VecCalc::numPos(vector<double> vec){
 		exit(1);
 	}	
 }
-/***********************************************************************/
+/***********************************************************************
 double VecCalc::findMaxDiff(vector<double> vec1, vector<double> vec2){
 	try {
 		double maxDiff = -10000000000.0;
@@ -238,7 +214,7 @@ double VecCalc::findMaxDiff(vector<double> vec1, vector<double> vec2){
 		exit(1);
 	}	
 }
-/***********************************************************************/
+/***********************************************************************
 double VecCalc::findDStat(vector<double> vec1, vector<double> vec2, double num){
 	try {
 		double mDiff = findMaxDiff(vec1, vec2);
@@ -253,7 +229,7 @@ double VecCalc::findDStat(vector<double> vec1, vector<double> vec2, double num){
 		exit(1);
 	}	
 }
-/***********************************************************************/
+/***********************************************************************
 vector<int> VecCalc::findQuartiles(vector<double> vec){
 	try {
 		vector<int> quartiles;
@@ -286,7 +262,7 @@ vector<int> VecCalc::findQuartiles(vector<double> vec){
 		exit(1);
 	}	
 }
-/***********************************************************************/
+/***********************************************************************
 vector<double> VecCalc::add(vector<double> vec, double x){
 	try {
 		vector<double> newVec;
@@ -303,7 +279,7 @@ vector<double> VecCalc::add(vector<double> vec, double x){
 		exit(1);
 	}	
 }
-/***********************************************************************/
+/***********************************************************************
 vector<double> VecCalc::multiply(vector<double> vec, double x){
 	try {
 		vector<double> newVec;
@@ -320,7 +296,7 @@ vector<double> VecCalc::multiply(vector<double> vec, double x){
 		exit(1);
 	}	
 }
-/***********************************************************************/
+/***********************************************************************
 vector<double> VecCalc::power(vector<double> vec, double p){
 	try {
 		vector<double> newVec;
@@ -337,7 +313,7 @@ vector<double> VecCalc::power(vector<double> vec, double p){
 		exit(1);
 	}	
 }
-/***********************************************************************/
+/***********************************************************************
 vector<double> VecCalc::addVecs(vector<double> vec1, vector<double> vec2) //Vectors must be the same size.
 {	try {
 		vector<double> newVec;
@@ -354,7 +330,7 @@ vector<double> VecCalc::addVecs(vector<double> vec1, vector<double> vec2) //Vect
 		exit(1);
 	}	
 }
-/***********************************************************************/
+/***********************************************************************
 vector<double> VecCalc::multVecs(vector<double> vec1, vector<double> vec2) //Vectors must be the same size.
 {	try {
 		vector<double> newVec;
@@ -371,7 +347,7 @@ vector<double> VecCalc::multVecs(vector<double> vec1, vector<double> vec2) //Vec
 		exit(1);
 	}	
 }
-/***********************************************************************/
+/***********************************************************************
 vector<double> VecCalc::remDup(vector<double> vec){
 	try {
 		vector<double> newVec;
@@ -390,7 +366,7 @@ vector<double> VecCalc::remDup(vector<double> vec){
 		exit(1);
 	}	
 }	
-/***********************************************************************/	
+/***********************************************************************	
 vector<double> VecCalc::genCVec(vector<double> vec1){
 	try {
 		vector<double> vec2;
@@ -411,7 +387,7 @@ vector<double> VecCalc::genCVec(vector<double> vec1){
 		exit(1);
 	}	
 }
-/***********************************************************************/
+/***********************************************************************
 vector<double> VecCalc::genRelVec(vector<double> vec){	
 	try {
 		vector<double> newVec;
@@ -429,7 +405,7 @@ vector<double> VecCalc::genRelVec(vector<double> vec){
 		exit(1);
 	}	
 }
-/***********************************************************************/
+/***********************************************************************
 vector<double> VecCalc::genDiffVec(vector<double> vec1, vector<double> vec2){
 	try {
 		vector<double> newVec;
@@ -446,7 +422,7 @@ vector<double> VecCalc::genDiffVec(vector<double> vec1, vector<double> vec2){
 		exit(1);
 	}	
 }
-/***********************************************************************/
+/***********************************************************************
 vector<double> VecCalc::genCSVec(vector<double> vec){
 	try {
 		vector<double> newVec;
@@ -478,7 +454,7 @@ vector<double> VecCalc::genCSVec(vector<double> vec){
 		exit(1);
 	}	
 }
-/***********************************************************************/	
+/***********************************************************************	
 vector<double> VecCalc::genTotVec(vector<vector<double> > vec){
 	try {
 		vector<double> newVec = vec.at(0);
@@ -495,7 +471,7 @@ vector<double> VecCalc::genTotVec(vector<vector<double> > vec){
 		exit(1);
 	}	
 }
-/***********************************************************************/
+/***********************************************************************
 vector<double> VecCalc::quicksort(vector<double> vec){
 	try {
 		sort(vec.rbegin(), vec.rend());
@@ -510,7 +486,7 @@ vector<double> VecCalc::quicksort(vector<double> vec){
 		exit(1);
 	}	
 }
-/***********************************************************************/
+/***********************************************************************
 vector<vector<double> > VecCalc::gen2DVec(vector<double> vec, int div, int type){
 	try {
 		vector<vector<double> > vec2D;
@@ -536,7 +512,7 @@ vector<vector<double> > VecCalc::gen2DVec(vector<double> vec, int div, int type)
 		exit(1);
 	}	
 }
-/***********************************************************************/
+/***********************************************************************
 vector<string> VecCalc::getSData(char name[]){
 	try {
 		vector<string> vec;
@@ -561,7 +537,7 @@ vector<string> VecCalc::getSData(char name[]){
 }
 /***********************************************************************/	
 
-/***********************************************************************/
+/***********************************************************************
 void BrokenStick::doBStick(vector<double> vec)//vec = The data vector.
 {	try {
 		VecCalc vecCalc;
@@ -600,7 +576,7 @@ void BrokenStick::doBStick(vector<double> vec)//vec = The data vector.
 	}	
 }
 
-/***********************************************************************/
+/***********************************************************************
 double kEq(double k, double spec)
 {
 	return k/(1-k)*pow(1-k, spec)/(1-pow(1-k, spec));
@@ -652,7 +628,7 @@ double kEq(double k, double spec)
 	}	
 }*/
 
-/***********************************************************************/
+/***********************************************************************
 void Jackknifing::doJK(vector<double> vec, double cols)//vec = the data vector if the data table was read left-to-right, top-to-bottom. cols = The number of columns in the data table.
 {	try {
 		VecCalc vecCalc;
@@ -703,7 +679,7 @@ void Jackknifing::doJK(vector<double> vec, double cols)//vec = the data vector i
 		exit(1);
 	}	
 }
-/***********************************************************************/
+/***********************************************************************
 void KS2SampleTest::doKSTest(vector<double> abun1, vector<double> abun2)//abun1 = 1st vector of abundances, abun2 = 2nd vector of abundances
 {	try {
 		VecCalc vecCalc;
@@ -745,7 +721,7 @@ void KS2SampleTest::doKSTest(vector<double> abun1, vector<double> abun2)//abun1 
 	}	
 }
 
-/***********************************************************************/
+/***********************************************************************
 
 void QStatistic::doQStat(vector<double> vec)//vec = The data vector.
 {	try {
@@ -772,7 +748,7 @@ void QStatistic::doQStat(vector<double> vec)//vec = The data vector.
 		exit(1);
 	}	
 }
-/***********************************************************************/
+/***********************************************************************
 double SSBPDiversityIndices::getShan(vector<double> vec)//vec = The data vector.
 {	try {
 		VecCalc vecCalc;
@@ -793,7 +769,7 @@ double SSBPDiversityIndices::getShan(vector<double> vec)//vec = The data vector.
 		exit(1);
 	}	
 }
-/***********************************************************************/
+/***********************************************************************
 double SSBPDiversityIndices::getSimp(vector<double> vec)//vec = The data vector.
 {	try {
 		VecCalc vecCalc;
@@ -812,7 +788,7 @@ double SSBPDiversityIndices::getSimp(vector<double> vec)//vec = The data vector.
 		exit(1);
 	}	
 }
-/***********************************************************************/
+/***********************************************************************
 double SSBPDiversityIndices::getBP(vector<double> vec)//vec = The data vector.
 {	try {
 		VecCalc vecCalc;
@@ -828,7 +804,7 @@ double SSBPDiversityIndices::getBP(vector<double> vec)//vec = The data vector.
 		exit(1);
 	}	
 }
-/***********************************************************************/
+/***********************************************************************
 void SSBPDiversityIndices::doSSBP(vector<double> vec)//vec = The data vector.
 {	try {
 		VecCalc vecCalc;
@@ -897,16 +873,12 @@ double TDTable::getConfLimit(int row, int col) //Rows are the degrees of freedom
 		return values[row][col];
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the TDTable class Function getConfLimit. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "TDTable", "getConfLimit");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the TDTable class function getConfLimit. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
-/***********************************************************************/
+/***********************************************************************
 double KOSTable::getConfLimit(int index) //Table of Critical values for N = 4-20 for One-Sample Kolmogorov-Smirnov Test
 {    try {                       
 		//Confidence Level = .05

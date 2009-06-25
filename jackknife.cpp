@@ -25,13 +25,9 @@ void Jackknife::getAMatrix(void){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Jackknife class Function getAMatrix. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Jackknife", "getAMatrix");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Jackknife class function getAMatrix. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /**************************************************************************************************/
@@ -57,13 +53,9 @@ double Jackknife::CN(double z){
 		return n;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Jackknife class Function CN. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Jackknife", "CN");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Jackknife class function CN. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -152,13 +144,9 @@ EstOutput Jackknife::getValues(SAbundVector* rank){
 		return data;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Jackknife class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Jackknife", "getValues");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Jackknife class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/

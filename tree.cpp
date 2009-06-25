@@ -42,13 +42,9 @@ Tree::Tree() {
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function Tree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Tree", "Tree");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Tree class function Tree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 /*****************************************************************/
@@ -63,13 +59,9 @@ int Tree::getIndex(string searchName) {
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function getIndex. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Tree", "getIndex");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Tree class function getIndex. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /*****************************************************************/
 
@@ -79,13 +71,9 @@ void Tree::setIndex(string searchName, int index) {
 		globaldata->gTreemap->setIndex(searchName, index);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function setIndex. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Tree", "setIndex");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Tree class function setIndex. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /*****************************************************************/
 void Tree::assembleTree() {
@@ -97,13 +85,9 @@ void Tree::assembleTree() {
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function assembleTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Tree", "assembleTree");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Tree class function assembleTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /*****************************************************************/
 void Tree::getCopy(Tree* copy) {
@@ -138,13 +122,9 @@ void Tree::getCopy(Tree* copy) {
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function getCopy. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Tree", "getCopy");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Tree class function getCopy. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /*****************************************************************/
 //returns a map with a groupname and the number of times that group was seen in the children
@@ -196,13 +176,9 @@ map<string, int> Tree::mergeGroups(int i) {
 		return parsimony;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function mergeGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Tree", "mergeGroups");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Tree class function mergeGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /*****************************************************************/
 //returns a map with a groupname and the number of times that group was seen in the children
@@ -261,13 +237,9 @@ map<string, int> Tree::mergeUserGroups(int i, vector<string> g) {
 		return parsimony;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function mergeGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Tree", "mergeUserGroups");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Tree class function mergeGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 
@@ -288,13 +260,9 @@ map<string,int> Tree::mergeGcounts(int position) {
 		return sum;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function mergeGcounts. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Tree", "mergeGcounts");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Tree class function mergeGcounts. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /**************************************************************************************************/
 
@@ -334,13 +302,9 @@ void Tree::randomLabels(vector<string> g) {
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function randomLabels. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Tree", "randomLabels");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Tree class function randomLabels. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /**************************************************************************************************/
 
@@ -368,13 +332,9 @@ void Tree::randomLabels(string groupA, string groupB) {
 		}
 	}		
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function randomLabels. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Tree", "randomLabels");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Tree class function randomLabels. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /**************************************************************************************************/
 void Tree::randomBlengths()  {
@@ -388,13 +348,9 @@ void Tree::randomBlengths()  {
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function randomBlengths. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Tree", "randomBlengths");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Tree class function randomBlengths. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /*************************************************************************************************/
 void Tree::assembleRandomUnifracTree(vector<string> g) {
@@ -447,13 +403,9 @@ void Tree::randomTopology() {
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function randomTopology. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Tree", "randomTopology");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Tree class function randomTopology. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /*****************************************************************/
 void Tree::print(ostream& out) {
@@ -463,13 +415,9 @@ void Tree::print(ostream& out) {
 		out << ";" << endl;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Tree", "print");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Tree class function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /*****************************************************************/
 void Tree::printForBoot(ostream& out) {
@@ -479,13 +427,9 @@ void Tree::printForBoot(ostream& out) {
 		out << ";" << endl;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function printForBoot. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Tree", "printForBoot");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Tree class function printForBoot. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 /*****************************************************************/
@@ -505,13 +449,9 @@ void Tree::createNewickFile(string f) {
 		out.close();
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function createNewickFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Tree", "createNewickFile");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Tree class function createNewickFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 /*****************************************************************/
@@ -528,13 +468,9 @@ int Tree::findRoot() {
 		return -1;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function findRoot. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Tree", "findRoot");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Tree class function findRoot. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 /*****************************************************************/
@@ -576,13 +512,9 @@ void Tree::printBranch(int node, ostream& out, string mode) {
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function printBranch. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Tree", "printBranch");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Tree class function printBranch. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 /*****************************************************************/
@@ -671,13 +603,9 @@ void Tree::parseTreeFile() {
 		filehandle.close();
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function parseTreeFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Tree", "parseTreeFile");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Tree class function parseTreeFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /*******************************************************/
 
@@ -685,19 +613,28 @@ void Tree::parseTreeFile() {
 void Tree::readTreeString(ifstream& filehandle)	{
 	try {
 		int c;
-		string name; //k
+		string name;// k;
 		
 		while((c = filehandle.peek()) != ';') { 
-				//ifyou are a name
+//k = c;
+//cout << " at beginning of while " <<  k << endl;			
+			if(c == ')')  {    
+				//to pass over labels in trees
+				c=filehandle.get();
+				while((c!=',') && (c != -1) && (c!= ':') && (c!=';')){ c=filehandle.get(); }
+				filehandle.putback(c);
+			}
+			if(c == ';') { break; }
+			//if you are a name
 			if((c != '(') && (c != ')') && (c != ',') && (c != ':') && (c != '\n') && (c != '\t') && (c != 32)) { //32 is space
 				name = "";
 				c = filehandle.get();
-	//		k = c;
+			//k = c;
 //cout << k << endl;
 				while ((c != '(') && (c != ')') && (c != ',') && (c != ':') && (c != '\n') && (c != 32) && (c != '\t')) {			
 					name += c;
 					c = filehandle.get();
-		//	k = c;
+			//k = c;
 //cout << " in name while " << k << endl;
 				}
 				
@@ -711,26 +648,24 @@ void Tree::readTreeString(ifstream& filehandle)	{
 			if(c  == ':') { //read until you reach the end of the branch length
 				while ((c != '(') && (c != ')') && (c != ',') && (c != ';') && (c != '\n') && (c != '\t') && (c != 32)) {
 					c = filehandle.get();
-				//	k = c;
+					//k = c;
 	//cout << " in branch while " << k << endl;
 				}
 				filehandle.putback(c);
 			}
+			
 			c = filehandle.get();
 			if(c == ';') { break; }
-		//	k = c;
+			if(c == ')') { filehandle.putback(c); }
+	//		k = c;
 //cout << k << endl;
 
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Tree class Function parseTreeFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Tree", "readTreeString");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Tree class function parseTreeFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }	
 
 /*******************************************************/

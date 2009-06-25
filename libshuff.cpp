@@ -24,14 +24,9 @@ Libshuff::Libshuff(FullMatrix* D, int it, float step, float co) : matrix(D), ite
 		initializeGroups(matrix);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Libshuff class Function Libshuff. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Libshuff", "Libshuff");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Libshuff class function Libshuff. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-	
 }
 
 /***********************************************************************/
@@ -54,14 +49,9 @@ void Libshuff::initializeGroups(FullMatrix* matrix){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Libshuff class Function initializeGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Libshuff", "initializeGroups");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Libshuff class function initializeGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-	
 }
 
 /***********************************************************************/
@@ -87,14 +77,9 @@ vector<double> Libshuff::getMinX(int x){
 		return minX;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Libshuff class Function getMinX. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Libshuff", "getMinX");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Libshuff class function getMinX. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-	
 }
 
 /***********************************************************************/
@@ -113,13 +98,9 @@ vector<double> Libshuff::getMinXY(int x, int y){
 		return minXY;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Libshuff class Function getMinXY. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Libshuff", "getMinXY");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Libshuff class function getMinXY. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/
@@ -143,13 +124,9 @@ void Libshuff::randomizeGroups(int x, int y){
 		for(int k=0;k<groupSizes[y];k++)	{	groups[y][k]=v[index++];	}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Libshuff class Function randomizeGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Libshuff", "randomizeGroups");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Libshuff class function randomizeGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/

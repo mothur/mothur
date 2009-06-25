@@ -33,13 +33,9 @@ EstOutput Shen::getValues(SAbundVector* rank){
 		return data;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Coverage class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Shen", "getValues");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Coverage class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 };
 
 

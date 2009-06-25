@@ -52,8 +52,8 @@ BootSharedCommand::BootSharedCommand(string option){
 			
 			//make sure the user has already run the read.otu command
 			if (globaldata->getSharedFile() == "") {
-				if (globaldata->getListFile() == "") { cout << "You must read a list and a group, or a shared before you can use the bootstrap.shared command." << endl; abort = true; }
-				else if (globaldata->getGroupFile() == "") { cout << "You must read a list and a group, or a shared before you can use the bootstrap.shared command." << endl; abort = true; }
+				if (globaldata->getListFile() == "") { mothurOut("You must read a list and a group, or a shared before you can use the bootstrap.shared command."); mothurOutEndLine(); abort = true; }
+				else if (globaldata->getGroupFile() == "") { mothurOut("You must read a list and a group, or a shared before you can use the bootstrap.shared command."); mothurOutEndLine(); abort = true; }
 			}
 			
 			//check for optional parameter and set defaults
@@ -73,7 +73,7 @@ BootSharedCommand::BootSharedCommand(string option){
 			}
 			
 			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { cout << "You cannot use both the line and label parameters at the same time. " << endl; abort = true; }
+			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
 			//if the user has not specified any line or labels use the ones from read.otu
 			else if((line == "") && (label == "")) {  
 				allLines = globaldata->allLines; 
@@ -142,36 +142,28 @@ BootSharedCommand::BootSharedCommand(string option){
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the BootSharedCommand class Function BootSharedCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "BootSharedCommand", "BootSharedCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the BootSharedCommand class function BootSharedCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
 
 void BootSharedCommand::help(){
 	try {
-		cout << "The bootstrap.shared command can only be executed after a successful read.otu command." << "\n";
-		cout << "The bootstrap.shared command parameters are groups, calc, iters, line and label.  You may not use line and label at the same time." << "\n";
-		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like included used." << "\n";
-		cout << "The group names are separated by dashes. The line and label allow you to select what distance levels you would like trees created for, and are also separated by dashes." << "\n";
-		cout << "The bootstrap.shared command should be in the following format: bootstrap.shared(groups=yourGroups, calc=yourCalcs, line=yourLines, label=yourLabels, iters=yourIters)." << "\n";
-		cout << "Example bootstrap.shared(groups=A-B-C, line=1-3-5, calc=jabund-sorabund, iters=100)." << "\n";
-		cout << "The default value for groups is all the groups in your groupfile." << "\n";
-		cout << "The default value for calc is jclass-thetayc. The default for iters is 1000." << "\n";
+		mothurOut("The bootstrap.shared command can only be executed after a successful read.otu command.\n");
+		mothurOut("The bootstrap.shared command parameters are groups, calc, iters, line and label.  You may not use line and label at the same time.\n");
+		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included used.\n");
+		mothurOut("The group names are separated by dashes. The line and label allow you to select what distance levels you would like trees created for, and are also separated by dashes.\n");
+		mothurOut("The bootstrap.shared command should be in the following format: bootstrap.shared(groups=yourGroups, calc=yourCalcs, line=yourLines, label=yourLabels, iters=yourIters).\n");
+		mothurOut("Example bootstrap.shared(groups=A-B-C, line=1-3-5, calc=jabund-sorabund, iters=100).\n");
+		mothurOut("The default value for groups is all the groups in your groupfile.\n");
+		mothurOut("The default value for calc is jclass-thetayc. The default for iters is 1000.\n");
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the BootSharedCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "BootSharedCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the BootSharedCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
@@ -230,7 +222,7 @@ int BootSharedCommand::execute(){
 		
 			if(allLines == 1 || lines.count(count) == 1 || labels.count(order->getLabel()) == 1){			
 				
-				cout << order->getLabel() << '\t' << count << endl;
+				mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 				process(order);
 				
 				processedLabels.insert(order->getLabel());
@@ -243,7 +235,7 @@ int BootSharedCommand::execute(){
 				
 				delete order;
 				order = input->getSharedOrderVector(lastLabel);													
-				cout << order->getLabel() << '\t' << count << endl;
+				mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 				process(order);
 
 				processedLabels.insert(order->getLabel());
@@ -263,12 +255,12 @@ int BootSharedCommand::execute(){
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			cout << "Your file does not include the label "<< *it; 
+			mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(lastLabel) != 1) {
-				cout << ". I will use " << lastLabel << "." << endl;
+				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
 				needToRun = true;
 			}else {
-				cout << ". Please refer to " << lastLabel << "." << endl;
+				mothurOut(". Please refer to " + lastLabel + ".");  mothurOutEndLine();
 			}
 		}
 		
@@ -276,7 +268,7 @@ int BootSharedCommand::execute(){
 		if (needToRun == true)  {
 				delete order;
 				order = input->getSharedOrderVector(lastLabel);													
-				cout << order->getLabel() << '\t' << count << endl;
+				mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 				process(order);
 				delete order;
 
@@ -288,13 +280,9 @@ int BootSharedCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the BootSharedCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "BootSharedCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the BootSharedCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 //**********************************************************************************************************************
 
@@ -365,34 +353,26 @@ void BootSharedCommand::createTree(ostream* out){
 	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the BootSharedCommand class Function createTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the BootSharedCommand class function createTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "BootSharedCommand", "createTree");
 		exit(1);
 	}
 }
 /***********************************************************/
 void BootSharedCommand::printSims() {
 	try {
-		cout << "simsMatrix" << endl;
+		mothurOut("simsMatrix"); mothurOutEndLine(); 
 		for (int m = 0; m < simMatrix.size(); m++)	{
 			for (int n = 0; n < simMatrix.size(); n++)	{
-				cout << simMatrix[m][n] << '\t'; 
+				mothurOut(simMatrix[m][n]);  mothurOut("\t"); 
 			}
-			cout << endl;
+			mothurOutEndLine(); 
 		}
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the BootSharedCommand class Function printSims. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "BootSharedCommand", "printSims");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the BootSharedCommand class function printSims. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /***********************************************************/
 void BootSharedCommand::process(SharedOrderVector* order) {
@@ -453,13 +433,9 @@ void BootSharedCommand::process(SharedOrderVector* order) {
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the BootSharedCommand class Function process. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "BootSharedCommand", "process");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the BootSharedCommand class function process. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /***********************************************************/
 

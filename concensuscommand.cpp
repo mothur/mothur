@@ -20,44 +20,36 @@ ConcensusCommand::ConcensusCommand(string option){
 		if(option == "help") { help(); abort = true; }
 		
 		else {
-			if (option != "") { cout << "There are no valid parameters for the concensus command." << endl; abort = true; }
+			if (option != "") { mothurOut("There are no valid parameters for the concensus command."); mothurOutEndLine(); abort = true; }
 			
 			//no trees were read
-			if (globaldata->gTree.size() == 0) {	cout << "You must execute the read.tree command, before you may use the concensus command." << endl; abort = true;  }
+			if (globaldata->gTree.size() == 0) {  mothurOut("You must execute the read.tree command, before you may use the concensus command."); mothurOutEndLine(); abort = true;  }
 			else {  t = globaldata->gTree;	}
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ConcensusCommand class Function ConcensusCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ConcensusCommand", "ConcensusCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ConcensusCommand class function ConcensusCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
 
 void ConcensusCommand::help(){
 	try {
-		cout << "The concensus command can only be executed after a successful read.tree command." << "\n";
-		cout << "The concensus command has no parameters." << "\n";
-		cout << "The concensus command should be in the following format: concensus()." << "\n";
-		cout << "The concensus command output two files: .concensus.tre and .concensuspairs." << "\n";
-		cout << "The .concensus.tre file contains the concensus tree of the trees in your input file." << "\n";
-		cout << "The branch lengths are the percentage of trees in your input file that had the given pair." << "\n";
-		cout << "The .concensuspairs file contains a list of the internal nodes in your tree.  For each node, the pair that was used in the concensus tree " << "\n";
-		cout << "is reported with its percentage, as well as the other pairs that were seen for that node but not used and their percentages." << "\n" << "\n";		
+		mothurOut("The concensus command can only be executed after a successful read.tree command.\n");
+		mothurOut("The concensus command has no parameters.\n");
+		mothurOut("The concensus command should be in the following format: concensus().\n");
+		mothurOut("The concensus command output two files: .concensus.tre and .concensuspairs.\n");
+		mothurOut("The .concensus.tre file contains the concensus tree of the trees in your input file.\n");
+		mothurOut("The branch lengths are the percentage of trees in your input file that had the given pair.\n");
+		mothurOut("The .concensuspairs file contains a list of the internal nodes in your tree.  For each node, the pair that was used in the concensus tree \n");
+		mothurOut("is reported with its percentage, as well as the other pairs that were seen for that node but not used and their percentages.\n\n");		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ConcensusCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ConcensusCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ConcensusCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
@@ -77,16 +69,6 @@ int ConcensusCommand::execute(){
 		
 		//get the possible pairings
 		getSets();		
-		
-		//print out pairings for testing
-		/*cout << "possible pairing " <<  endl;
-		for (it2 = nodePairs.begin(); it2 != nodePairs.end(); it2++) {
-			for (int i = 0; i < it2->first.size(); i++) {
-				cout << it2->first[i] << " ";
-			}
-			cout << '\t' << it2->second << endl;
-		}*/
-		
 		
 		//open file for pairing not included in the tree
 		notIncluded = getRootName(globaldata->inputFileName) + "concensuspairs";
@@ -170,13 +152,9 @@ int ConcensusCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ConcensusCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ConcensusCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ConcensusCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 //**********************************************************************************************************************
@@ -206,13 +184,9 @@ int ConcensusCommand::buildConcensusTree(vector<string> nodeSet) {
 	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ConcensusCommand class Function buildConcensusTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ConcensusCommand", "buildConcensusTree");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ConcensusCommand class function buildConcensusTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 //**********************************************************************************************************************
@@ -263,13 +237,9 @@ void ConcensusCommand::getSets() {
 		sort(treeSet.begin(), treeSet.end());
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ConcensusCommand class Function getSets. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ConcensusCommand", "getSets");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ConcensusCommand class function getSets. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 //**********************************************************************************************************************
@@ -302,14 +272,9 @@ vector<string> ConcensusCommand::getNextAvailableSet(vector<string> bigset) {
 	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ConcensusCommand class Function getNextAvailableSet. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ConcensusCommand", "getNextAvailableSet");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ConcensusCommand class function getNextAvailableSet. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
-
 }
 
 //**********************************************************************************************************************
@@ -337,14 +302,9 @@ vector<string> ConcensusCommand::getRestSet(vector<string> bigset, vector<string
 	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ConcensusCommand class Function getRestSet. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ConcensusCommand", "getRestSet");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ConcensusCommand class function getRestSet. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
-
 }
 
 //**********************************************************************************************************************
@@ -366,13 +326,9 @@ bool ConcensusCommand::isSubset(vector<string> bigset, vector<string> subset) {
 	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ConcensusCommand class Function isSubset. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ConcensusCommand", "isSubset");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ConcensusCommand class function isSubset. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 //**********************************************************************************************************************
 int ConcensusCommand::findSpot(string node) {
@@ -388,13 +344,9 @@ int ConcensusCommand::findSpot(string node) {
 	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ConcensusCommand class Function findSpot. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ConcensusCommand", "findSpot");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ConcensusCommand class function findSpot. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 //**********************************************************************************************************************
 

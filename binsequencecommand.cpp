@@ -37,12 +37,16 @@ BinSeqCommand::BinSeqCommand(string option){
 			}
 			
 			//make sure the user has already run the read.otu command
-			if (globaldata->getListFile() == "") { cout << "You must read a listfile before running the bin.seqs command." << endl; abort = true; }
+			if (globaldata->getListFile() == "") { 
+				mothurOut("You must read a listfile before running the bin.seqs command."); 
+				mothurOutEndLine(); 
+				abort = true; 
+			}
 			
 			
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not found") { cout << "fasta is a required parameter for the bin.seqs command." << endl; abort = true; }
+			if (fastafile == "not found") { mothurOut("fasta is a required parameter for the bin.seqs command.");  mothurOutEndLine(); abort = true; }
 			else if (fastafile == "not open") { abort = true; }	
 		
 			//check for optional parameter and set defaults
@@ -62,7 +66,7 @@ BinSeqCommand::BinSeqCommand(string option){
 			}
 			
 			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { cout << "You cannot use both the line and label parameters at the same time. " << endl; abort = true; }
+			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
 			//if the user has not specified any line or labels use the ones from read.otu
 			else if ((line == "") && (label == "")) {  
 				allLines = globaldata->allLines; 
@@ -90,39 +94,29 @@ BinSeqCommand::BinSeqCommand(string option){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the BinSeqCommand class Function BinSeqCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "BinSeqCommand", "BinSeqCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the BinSeqCommand class function BinSeqCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 //**********************************************************************************************************************
 
 void BinSeqCommand::help(){
 	try {
-		cout << "The bin.seqs command can only be executed after a successful read.otu command of a listfile." << "\n";
-		cout << "The bin.seqs command parameters are fasta, name, line, label and group.  The fasta parameter is required, and you may not use line and label at the same time." << "\n";
-		cout << "The line and label allow you to select what distance levels you would like a output files created for, and are separated by dashes." << "\n";
-		cout << "The bin.seqs command should be in the following format: bin.seqs(fasta=yourFastaFile, name=yourNamesFile, group=yourGroupFile, line=yourLines, label=yourLabels)." << "\n";
-		cout << "Example bin.seqs(fasta=amazon.fasta, group=amazon.groups, line=1-3-5, name=amazon.names)." << "\n";
-		cout << "The default value for line and label are all lines in your inputfile." << "\n";
-		cout << "The bin.seqs command outputs a .fasta file for each distance you specify appending the OTU number to each name." << "\n";
-		cout << "If you provide a groupfile, then it also appends the sequences group to the name." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile)." << "\n" << "\n";
+		mothurOut("The bin.seqs command can only be executed after a successful read.otu command of a listfile.\n");
+		mothurOut("The bin.seqs command parameters are fasta, name, line, label and group.  The fasta parameter is required, and you may not use line and label at the same time.\n");
+		mothurOut("The line and label allow you to select what distance levels you would like a output files created for, and are separated by dashes.\n");
+		mothurOut("The bin.seqs command should be in the following format: bin.seqs(fasta=yourFastaFile, name=yourNamesFile, group=yourGroupFile, line=yourLines, label=yourLabels).\n");
+		mothurOut("Example bin.seqs(fasta=amazon.fasta, group=amazon.groups, line=1-3-5, name=amazon.names).\n");
+		mothurOut("The default value for line and label are all lines in your inputfile.\n");
+		mothurOut("The bin.seqs command outputs a .fasta file for each distance you specify appending the OTU number to each name.\n");
+		mothurOut("If you provide a groupfile, then it also appends the sequences group to the name.\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the BinSeqCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "BinSeqCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the BinSeqCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
-
-
 
 //**********************************************************************************************************************
 
@@ -208,12 +202,12 @@ int BinSeqCommand::execute(){
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			cout << "Your file does not include the label "<< *it; 
+			mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(lastLabel) != 1) {
-				cout << ". I will use " << lastLabel << "." << endl;
+				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
 				needToRun = true;
 			}else {
-				cout << ". Please refer to " << lastLabel << "." << endl;
+				mothurOut(". Please refer to " + lastLabel + ".");  mothurOutEndLine();
 			}
 		}
 		
@@ -231,13 +225,9 @@ int BinSeqCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the BinSeqCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "BinSeqCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the BinSeqCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
@@ -269,13 +259,9 @@ void BinSeqCommand::readNamesFile() {
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the BinSeqCommand class Function readNamesFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "BinSeqCommand", "readNamesFile");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the BinSeqCommand class function readNamesFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 //**********************************************************************************************************************
 //return 1 if error, 0 otherwise
@@ -285,7 +271,7 @@ int BinSeqCommand::process(ListVector* list, int count) {
 				string outputFileName = getRootName(globaldata->getListFile()) + list->getLabel() + ".fasta";
 				openOutputFile(outputFileName, out);
 
-				cout << list->getLabel() << '\t' << count << endl;
+				mothurOut(list->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 				
 				//for each bin in the list vector
 				for (int i = 0; i < list->size(); i++) {
@@ -306,7 +292,7 @@ int BinSeqCommand::process(ListVector* list, int count) {
 							}else {//if you do have groups
 								string group = groupMap->getGroup(name);
 								if (group == "not found") {  
-									cout << name << " is missing from your group file. Please correct. " << endl;
+									mothurOut(name + " is missing from your group file. Please correct. ");  mothurOutEndLine();
 									remove(outputFileName.c_str());
 									return 1;
 								}else{
@@ -316,7 +302,7 @@ int BinSeqCommand::process(ListVector* list, int count) {
 								}
 							}
 						}else { 
-							cout << name << " is missing from your fasta or name file. Please correct. " << endl; 
+							mothurOut(name + " is missing from your fasta or name file. Please correct. "); mothurOutEndLine();
 							remove(outputFileName.c_str());
 							return 1;
 						}
@@ -334,7 +320,7 @@ int BinSeqCommand::process(ListVector* list, int count) {
 						}else {//if you do have groups
 							string group = groupMap->getGroup(binnames);
 							if (group == "not found") {  
-								cout << binnames << " is missing from your group file. Please correct. " << endl;
+								mothurOut(binnames + " is missing from your group file. Please correct. "); mothurOutEndLine();
 								remove(outputFileName.c_str());
 								return 1;
 							}else{
@@ -344,7 +330,7 @@ int BinSeqCommand::process(ListVector* list, int count) {
 							}
 						}
 					}else { 
-						cout << binnames << " is missing from your fasta or name file. Please correct. " << endl; 
+						mothurOut(binnames + " is missing from your fasta or name file. Please correct. "); mothurOutEndLine();
 						remove(outputFileName.c_str());
 						return 1;
 					}
@@ -355,13 +341,9 @@ int BinSeqCommand::process(ListVector* list, int count) {
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the BinSeqCommand class Function readNamesFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "BinSeqCommand", "process");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the BinSeqCommand class function readNamesFile. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 //**********************************************************************************************************************
 

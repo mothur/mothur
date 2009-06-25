@@ -33,7 +33,7 @@ DistanceDB::DistanceDB(string fastaFileName, string distanceFileName) : Database
 //		getline(inputData, junk);	
 		mostSimSequenceVector[i] = closestMatch;
 	}
-	cout << numCandSeqs << endl;
+	mothurOut(toString(numCandSeqs)); mothurOutEndLine();
 	searchIndex = 0;
 	inputData.close();
 }

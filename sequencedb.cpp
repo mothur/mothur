@@ -43,7 +43,7 @@ SequenceDB::SequenceDB(ifstream& filehandle) {
 			if (c == '>') { 
 				name = readName(filehandle); 
 				sequence = readSequence(filehandle); 
-			}else {  cout << "Error fasta in your file. Please correct." << endl; }
+			}else {  mothurOut("Error fasta in your file. Please correct."); mothurOutEndLine(); }
 
 			//input sequence info into sequencedb
 			Sequence newSequence(name, sequence);
@@ -57,11 +57,7 @@ SequenceDB::SequenceDB(ifstream& filehandle) {
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SequenceDB class Function SequenceDB. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SequenceDB class function SequenceDB. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SequenceDB", "SequenceDB");
 		exit(1);
 	}
 }
@@ -82,11 +78,7 @@ string SequenceDB::readName(ifstream& in) {
 		return name;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SequenceDB class Function readName. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SequenceDB class function readName. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SequenceDB", "readName");
 		exit(1);
 	}
 }
@@ -115,11 +107,7 @@ string SequenceDB::readSequence(ifstream& in) {
 		return sequence;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SequenceDB class Function readSequence. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SequenceDB class function readSequence. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SequenceDB", "readSequence");
 		exit(1);
 	}
 }
@@ -137,11 +125,7 @@ void SequenceDB::set(int index, string newUnaligned) {
 		data[index] = Sequence(data[index].getName(), newUnaligned);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SequenceDB class Function set. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SequenceDB class function set. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SequenceDB", "set");
 		exit(1);
 	}
 }
@@ -153,11 +137,7 @@ void SequenceDB::set(int index, Sequence newSeq) {
 		data[index] = newSeq;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SequenceDB class Function set. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SequenceDB class function set. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SequenceDB", "set");
 		exit(1);
 	}
 }
@@ -175,11 +155,7 @@ void SequenceDB::resize(int newSize) {
 		data.resize(newSize);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SequenceDB class Function resize. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SequenceDB class function resize. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SequenceDB", "resize");
 		exit(1);
 	}
 }
@@ -191,11 +167,7 @@ void SequenceDB::clear() {
 		data.clear();
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SequenceDB class Function clear. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SequenceDB class function clear. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SequenceDB", "clear");
 		exit(1);
 	}
 }
@@ -215,11 +187,7 @@ void SequenceDB::print(ostream& out) {
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SequenceDB class Function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SequenceDB class function print. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SequenceDB", "print");
 		exit(1);
 	}
 }
@@ -231,11 +199,7 @@ void SequenceDB::push_back(Sequence newSequence) {
 		data.push_back(newSequence);
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SequenceDB class Function add. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SequenceDB class function add. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SequenceDB", "push_back");
 		exit(1);
 	}
 }

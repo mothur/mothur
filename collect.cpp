@@ -52,14 +52,9 @@ void Collect::getCurve(int increment = 1){
 				delete ccd;
         }
         catch(exception& e) {
-                cout << "Standard Error: " << e.what() << " has occurred in the Collect class Function getCurve. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-                exit(1);
+			errorOut(e, "Collect", "getCurve");
+			exit(1);
         }
-        catch(...) {
-                cout << "An unknown error has occurred in the Collect class function getCurve. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-                exit(1);
-        }
-
 }
 
 /***********************************************************************/
@@ -164,14 +159,9 @@ try {
 
         }
         catch(exception& e) {
-                cout << "Standard Error: " << e.what() << " has occurred in the Collect class Function getSharedCurve. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-                exit(1);
+                errorOut(e, "Collect", "getSharedCurve");
+				exit(1);
         }
-        catch(...) {
-                cout << "An unknown error has occurred in the Collect class function getSharedCurve. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-                exit(1);
-        }
-
 }
 
 /**************************************************************************************/

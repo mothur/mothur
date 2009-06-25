@@ -27,13 +27,9 @@ ValidCalculators::ValidCalculators() {
 		 initialHeat();
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function ValidCalculator. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ValidCalculator", "ValidCalculator");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ValidCalculator class function ValidCalculator. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		 
 }
 
 /********************************************************************/
@@ -50,11 +46,11 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 			if ((single.find(calculator)) != (single.end())) {
 				return true;
 			}else { 
-				cout << calculator << " is not a valid estimator for the collect.single command and will be disregarded. Valid estimators are ";
+				mothurOut(calculator + " is not a valid estimator for the collect.single command and will be disregarded. Valid estimators are ");
 				for (it = single.begin(); it != single.end(); it++) {
-					cout << it->first << ", ";
+					mothurOut(it->first + ", ");
 				}
-				cout << endl;
+				mothurOutEndLine();
 				return false; }
 		//are you looking for a calculator for a shared parameter
 		}else if (parameter == "shared") {
@@ -62,11 +58,11 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 			if ((shared.find(calculator)) != (shared.end())) {
 				return true;
 			}else { 
-				cout << calculator << " is not a valid estimator for the collect.shared command and will be disregarded.  Valid estimators are ";
+				mothurOut(calculator +  " is not a valid estimator for the collect.shared command and will be disregarded.  Valid estimators are ");
 				for (it = shared.begin(); it != shared.end(); it++) {
-					cout << it->first << ", ";
+					mothurOut(it->first + ", ");
 				}
-				cout << endl;
+				mothurOutEndLine();
 				return false; }
 		//are you looking for a calculator for a rarefaction parameter
 		}else if (parameter == "rarefaction") {
@@ -74,11 +70,11 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 			if ((rarefaction.find(calculator)) != (rarefaction.end())) {
 				return true;
 			}else { 
-				cout << calculator << " is not a valid estimator for the rarefaction.single command and will be disregarded. Valid estimators are ";
+				mothurOut(calculator + " is not a valid estimator for the rarefaction.single command and will be disregarded. Valid estimators are ");
 				for (it = rarefaction.begin(); it != rarefaction.end(); it++) {
-					cout << it->first << ", ";
+					mothurOut(it->first + ", ");
 				}
-				cout << endl;
+				mothurOutEndLine();
 				return false; }
 		//are you looking for a calculator for a summary parameter
 		}else if (parameter == "summary") {
@@ -86,11 +82,11 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 			if ((summary.find(calculator)) != (summary.end())) {
 				return true;
 			}else { 
-				cout << calculator << " is not a valid estimator for the summary.shared command and will be disregarded. Valid estimators are ";
+				mothurOut(calculator + " is not a valid estimator for the summary.shared command and will be disregarded. Valid estimators are ");
 				for (it = summary.begin(); it != summary.end(); it++) {
-					cout << it->first << ", ";
+					mothurOut(it->first + ", ");
 				}
-				cout << endl;
+				mothurOutEndLine();
 				return false; }
 		//are you looking for a calculator for a sharedsummary parameter
 		}else if (parameter == "sharedsummary") {
@@ -98,112 +94,108 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 			if ((sharedsummary.find(calculator)) != (sharedsummary.end())) {
 				return true;
 			}else { 
-				cout << calculator << " is not a valid estimator for the summary.shared command and will be disregarded. Valid estimators are ";
+				mothurOut(calculator +  " is not a valid estimator for the summary.shared command and will be disregarded. Valid estimators are ");
 				for (it = sharedsummary.begin(); it != sharedsummary.end(); it++) {
-					cout << it->first << ", ";
+					mothurOut(it->first + ", ");
 				}
-				cout << endl;
+				mothurOutEndLine();
 				return false; }
 		}else if (parameter == "sharedrarefaction") {
 			//is it valid
 			if ((sharedrarefaction.find(calculator)) != (sharedrarefaction.end())) {
 				return true;
 			}else { 
-				cout << calculator << " is not a valid estimator for the rarefaction.shared command and will be disregarded. Valid estimator is ";
+				mothurOut(calculator + " is not a valid estimator for the rarefaction.shared command and will be disregarded. Valid estimator is ");
 				for (it = sharedrarefaction.begin(); it != sharedrarefaction.end(); it++) {
-					cout << it->first << ", ";
+					mothurOut(it->first + ", ");
 				}
-				cout << endl;
+				mothurOutEndLine();
 				return false; }
 		}else if (parameter == "vennsingle") {
 			//is it valid
 			if ((vennsingle.find(calculator)) != (vennsingle.end())) {
 				return true;
 			}else { 
-				cout << calculator << " is not a valid estimator for the venn command in single mode and will be disregarded. Valid estimators are ";
+				mothurOut(calculator + " is not a valid estimator for the venn command in single mode and will be disregarded. Valid estimators are ");
 				for (it = vennsingle.begin(); it != vennsingle.end(); it++) {
-					cout << it->first << ", ";
+					mothurOut(it->first + ", ");
 				}
-				cout << endl;
+				mothurOutEndLine();
 				return false; }
 		}else if (parameter == "vennshared") {
 			//is it valid
 			if ((vennshared.find(calculator)) != (vennshared.end())) {
 				return true;
 			}else { 
-				cout << calculator << " is not a valid estimator for the venn command in shared mode and will be disregarded. Valid estimators are ";
+				mothurOut(calculator + " is not a valid estimator for the venn command in shared mode and will be disregarded. Valid estimators are ");
 				for (it = vennshared.begin(); it != vennshared.end(); it++) {
-					cout << it->first << ", ";
+					mothurOut(it->first + ", ");
 				}
-				cout << endl;
+				mothurOutEndLine();
 				return false; }
 		}else if (parameter == "treegroup") {
 			//is it valid
 			if ((treegroup.find(calculator)) != (treegroup.end())) {
 				return true;
 			}else { 
-				cout << calculator << " is not a valid estimator for the tree.shared command and will be disregarded. Valid estimators are ";
+				mothurOut(calculator + " is not a valid estimator for the tree.shared command and will be disregarded. Valid estimators are ");
 				for (it = treegroup.begin(); it != treegroup.end(); it++) {
-					cout << it->first << ", ";
+					mothurOut(it->first + ", ");
 				}
-				cout << endl;
+				mothurOutEndLine();
 				return false; }
 		}else if (parameter == "matrix") {
 			//is it valid
 			if ((matrix.find(calculator)) != (matrix.end())) {
 				return true;
 			}else { 
-				cout << calculator << " is not a valid estimator for the matrix.output command and will be disregarded. Valid estimators are ";
+				mothurOut(calculator +  " is not a valid estimator for the matrix.output command and will be disregarded. Valid estimators are ");
 				for (it = matrix.begin(); it != matrix.end(); it++) {
-					cout << it->first << ", ";
+					mothurOut(it->first + ", ");
 				}
-				cout << endl;
+				mothurOutEndLine();
 				return false; }
 		}else if (parameter == "heat") {
 			//is it valid
 			if ((heat.find(calculator)) != (heat.end())) {
 				return true;
 			}else { 
-				cout << calculator << " is not a valid estimator for the heatmap.sim command and will be disregarded. Valid estimators are ";
+				mothurOut(calculator + " is not a valid estimator for the heatmap.sim command and will be disregarded. Valid estimators are ");
 				for (it = heat.begin(); it != heat.end(); it++) {
-					cout << it->first << ", ";
+					mothurOut(it->first + ", ");
 				}
-				cout << endl;
+				mothurOutEndLine();
 				return false; }
 		}else if (parameter == "boot") {
 			//is it valid
 			if ((boot.find(calculator)) != (boot.end())) {
 				return true;
 			}else { 
-				cout << calculator << " is not a valid estimator for the bootstrap.shared command and will be disregarded. Valid estimators are ";
+				mothurOut(calculator + " is not a valid estimator for the bootstrap.shared command and will be disregarded. Valid estimators are ");
 				for (it = boot.begin(); it != boot.end(); it++) {
-					cout << it->first << ", ";
+					mothurOut(it->first + ", ");
 				}
-				cout << endl;
+				mothurOutEndLine();
 				return false; }
 		}else if (parameter == "distance") {
 			//is it valid
 			if ((distance.find(calculator)) != (distance.end())) {
 				return true;
 			}else { 
-				cout << calculator << " is not a valid estimator for the distance command and will be disregarded. Valid calculators are ";
+				mothurOut(calculator +  " is not a valid estimator for the distance command and will be disregarded. Valid calculators are ");
 				for (it = distance.begin(); it != distance.end(); it++) {
-					cout << it->first << ", ";
+					mothurOut(it->first + ", ");
 				}
-				cout << endl;
+				mothurOutEndLine();
 				return false; }
 		//not a valid parameter
 		}else { return false; }
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function isValidCalculator. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ValidCalculator", "isValidCalculator");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ValidCalculator class function isValidCalculator. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /********************************************************************/
@@ -232,13 +224,9 @@ void ValidCalculators::initialSingle() {
 		single["default"]	    = "default";
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialSingle. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ValidCalculator", "initialSingle");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ValidCalculator class function initialSingle. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /********************************************************************/
@@ -268,13 +256,9 @@ void ValidCalculators::initialShared() {
 		shared["default"]	            = "default";
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialShared. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ValidCalculator", "initialShared");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ValidCalculator class function initialShared. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /********************************************************************/
@@ -293,13 +277,9 @@ void ValidCalculators::initialRarefaction() {
 		rarefaction["default"]	    = "default";
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialRarefaction. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ValidCalculator", "initialRarefaction");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ValidCalculator class function initialRarefaction. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /********************************************************************/
@@ -329,13 +309,9 @@ void ValidCalculators::initialSummary() {
 		summary["default"]	    = "default";
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialSummary. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ValidCalculator", "initialSummary");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ValidCalculator class function initialSummary. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /********************************************************************/
@@ -365,13 +341,9 @@ void ValidCalculators::initialSharedSummary() {
 		sharedsummary["default"]				= "default";
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialSharedSummary. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ValidCalculator", "initialSharedSummary");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ValidCalculator class function initialSharedSummary. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 
@@ -384,13 +356,9 @@ void ValidCalculators::initialSharedRarefact() {
 		sharedrarefaction["default"]	    = "default";
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialSharedRarefact. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ValidCalculator", "initialSharedRarefact");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ValidCalculator class function initialSharedRarefact. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 
@@ -404,13 +372,9 @@ void ValidCalculators::initialVennSingle() {
 		vennsingle["default"]		= "default";
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialSingle. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ValidCalculator", "initialVennSingle");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ValidCalculator class function initialSingle. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /********************************************************************/
@@ -422,13 +386,9 @@ void ValidCalculators::initialVennShared() {
 		vennshared["default"]		= "default";
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialSingle. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ValidCalculator", "initialVennShared");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ValidCalculator class function initialSingle. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /********************************************************************/
@@ -446,13 +406,9 @@ void ValidCalculators::initialTreeGroups() {
 		treegroup["braycurtis"]				= "braycurtis";
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialTreeGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ValidCalculator", "initialTreeGroups");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ValidCalculator class function initialTreeGroups. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 /********************************************************************/
 void ValidCalculators::initialHeat() {
@@ -469,13 +425,9 @@ void ValidCalculators::initialHeat() {
 		heat["braycurtis"]			= "braycurtis";
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialHeat. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ValidCalculator", "initialHeat");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ValidCalculator class function initialHeat. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /********************************************************************/
@@ -493,13 +445,9 @@ void ValidCalculators::initialMatrix() {
 		matrix["braycurtis"]			= "braycurtis";
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialMatrix. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ValidCalculator", "initialMatrix");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ValidCalculator class function initialMatrix. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /********************************************************************/
@@ -517,13 +465,9 @@ void ValidCalculators::initialBoot() {
 		boot["braycurtis"]			= "braycurtis";
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialBoot. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ValidCalculator", "initialBoot");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ValidCalculator class function initialBoot. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 /********************************************************************/
 void ValidCalculators::initialDistance() {
@@ -533,13 +477,9 @@ void ValidCalculators::initialDistance() {
 		distance["onegap"]		= "onegap";
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function initialDistance. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ValidCalculator", "initialDistance");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ValidCalculator class function initialDistance. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /********************************************************************/
@@ -608,14 +548,9 @@ void ValidCalculators::printCalc(string parameter, ostream& out) {
 		out << endl;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ValidCalculator class Function printCalc. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ValidCalculator", "printCalc");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ValidCalculator class function printCalc. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-
 }
 /********************************************************************/
 

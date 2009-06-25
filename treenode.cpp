@@ -60,31 +60,27 @@ int Node::getIndex() { return vectorIndex; }
 //to be used by printTree in the Tree class to print the leaf info			
 void Node::printNode() {
 	try{
-		cout << parent << ' ' << lchild << ' ' << rchild << ' ' << group;
+		mothurOut(toString(parent) + " " + toString(lchild) + " " + toString(rchild) + " " + group);
 		//there is a branch length
 		if (branchLength != -1) { 
-			cout << ' ' << setprecision(4) << branchLength; 
+			mothurOut(" " + toString(branchLength)); 
 		}
-		cout << " |";
+		mothurOut(" |");
 		map<string, int>::iterator it;
 		for(it=pGroups.begin();it!=pGroups.end();it++){
-			cout << ' ' << it->first << ':' << it->second;
+			mothurOut(" " + it->first + ":" + toString(it->second));
 		}
-		cout << " |";
+		mothurOut(" |");
 		for(it=pcount.begin();it!=pcount.end();it++){
-			cout << ' ' << it->first << ':' << it->second;
+			mothurOut(" " + it->first + ":" + toString(it->second));
 		}
-		cout << endl; 
+		mothurOutEndLine();
 		
 		
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the Node class Function printNode. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "Node", "printNode");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the Node class function printNode. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /****************************************************************/	

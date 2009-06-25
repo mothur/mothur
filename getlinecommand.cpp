@@ -19,40 +19,31 @@ GetlineCommand::GetlineCommand(string option){
 		if(option == "help") { help(); abort = true; }
 		
 		else {
-			if (option != "") { cout << "There are no valid parameters for the get.line command." << endl; abort = true; }
+			if (option != "") { mothurOut("There are no valid parameters for the get.line command."); mothurOutEndLine(); abort = true; }
 			
-			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { cout << "You must read a list, sabund or rabund before you can use the get.line command." << endl; abort = true; }				
+			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { mothurOut("You must read a list, sabund or rabund before you can use the get.line command."); mothurOutEndLine(); abort = true; }				
 		}
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the GetlineCommand class Function GetlineCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "GetlineCommand", "GetlineCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the GetlineCommand class function GetlineCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
-			
 }
 //**********************************************************************************************************************
 
 void GetlineCommand::help(){
 	try {
-		cout << "The get.line command can only be executed after a successful read.otu command." << "\n";
-		cout << "You may not use any parameters with the get.line command." << "\n";
-		cout << "The get.line command should be in the following format: " << "\n";
-		cout << "get.line()" << "\n";
-		cout << "Example get.line()." << "\n";
+		mothurOut("The get.line command can only be executed after a successful read.otu command.\n");
+		mothurOut("You may not use any parameters with the get.line command.\n");
+		mothurOut("The get.line command should be in the following format: \n");
+		mothurOut("get.line()\n");
+		mothurOut("Example get.line().\n");
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the GetlineCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "GetlineCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the GetlineCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
@@ -77,7 +68,7 @@ int GetlineCommand::execute(){
 			if(count > numBins)
 				count = 0;
 			if(count == 0) {
-				cout << line << "\n";
+				mothurOut(toString(line)); mothurOutEndLine();
 				in >> numBins;
 				line++;
 			}
@@ -90,13 +81,9 @@ int GetlineCommand::execute(){
 	}
 
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the GetlineCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "GetlineCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the GetlineCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 

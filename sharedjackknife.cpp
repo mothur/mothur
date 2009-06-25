@@ -116,16 +116,10 @@ EstOutput SharedJackknife::getValues(vector<SharedRAbundVector*> vectorShared){ 
 			data[0] = rdata[0];
 			data[1] = rdata[1];
 			data[2] = rdata[2];
-			
-			//cout << "sT = " << data[0] << "    lower confLimit = " << data[1] << "     upper confLimit = " << data[2] << "\n";
+		
 			if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
 			if (isnan(data[1]) || isinf(data[1])) { data[1] = 0; }
 			if (isnan(data[2]) || isinf(data[0])) { data[2] = 0; }
-			
-			/*for(int i = 0; i < groups.size(); i++)
-				cout << groups.at(i)->getGroup() << " ";
-			cout << "\n";
-			cout << groups.size() << "     " << data[0] << "    " << data[1] << "     " << data[2] << "\n\n";*/
 			
 			return data;
 		}
@@ -142,13 +136,9 @@ EstOutput SharedJackknife::getValues(vector<SharedRAbundVector*> vectorShared){ 
 	}
 		
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the SharedJackknife class Function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "SharedJackknife", "getValues");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the SharedJackknife class function getValues. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 /***********************************************************************/

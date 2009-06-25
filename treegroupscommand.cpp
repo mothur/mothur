@@ -69,11 +69,11 @@ TreeGroupCommand::TreeGroupCommand(string option){
 			format = globaldata->getFormat();
 			
 			//error checking on files			
-			if ((globaldata->getSharedFile() == "") && ((phylipfile == "") && (columnfile == "")))	{ cout << "You must run the read.otu command or provide a distance file before running the tree.shared command." << endl; abort = true; }
-			else if ((phylipfile != "") && (columnfile != "")) { cout << "When running the tree.shared command with a distance file you may not use both the column and the phylip parameters." << endl; abort = true; }
+			if ((globaldata->getSharedFile() == "") && ((phylipfile == "") && (columnfile == "")))	{ mothurOut("You must run the read.otu command or provide a distance file before running the tree.shared command."); mothurOutEndLine(); abort = true; }
+			else if ((phylipfile != "") && (columnfile != "")) { mothurOut("When running the tree.shared command with a distance file you may not use both the column and the phylip parameters."); mothurOutEndLine(); abort = true; }
 			
 			if (columnfile != "") {
-				if (namefile == "") {  cout << "You need to provide a namefile if you are going to use the column format." << endl; abort = true; }
+				if (namefile == "") {  mothurOut("You need to provide a namefile if you are going to use the column format."); mothurOutEndLine(); abort = true; }
 			}
 
 			//check for optional parameter and set defaults
@@ -93,7 +93,7 @@ TreeGroupCommand::TreeGroupCommand(string option){
 			}
 			
 			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { cout << "You cannot use both the line and label parameters at the same time. " << endl; abort = true; }
+			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
 			//if the user has not specified any line or labels use the ones from read.otu
 			else if((line == "") && (label == "")) {  
 				allLines = globaldata->allLines; 
@@ -161,44 +161,36 @@ TreeGroupCommand::TreeGroupCommand(string option){
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the TreeGroupCommand class Function TreeGroupCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "TreeGroupCommand", "TreeGroupCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the TreeGroupCommand class function TreeGroupCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
 
 void TreeGroupCommand::help(){
 	try {
-		cout << "The tree.shared command creates a .tre to represent the similiarity between groups or sequences." << "\n";
-		cout << "The tree.shared command can only be executed after a successful read.otu command or by providing a distance file." << "\n";
-		cout << "The tree.shared command parameters are groups, calc, phylip, column, name, cutoff, precision, line and label.  You may not use line and label at the same time." << "\n";
-		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like included used." << "\n";
-		cout << "The group names are separated by dashes. The line and label allow you to select what distance levels you would like trees created for, and are also separated by dashes." << "\n";
-		cout << "The phylip or column parameter are required if you do not run the read.otu command first, and only one may be used.  If you use a column file the name filename is required. " << "\n";
-		cout << "If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed." << "\n";
-		cout << "The tree.shared command should be in the following format: tree.shared(groups=yourGroups, calc=yourCalcs, line=yourLines, label=yourLabels)." << "\n";
-		cout << "Example tree.shared(groups=A-B-C, line=1-3-5, calc=jabund-sorabund)." << "\n";
-		cout << "The default value for groups is all the groups in your groupfile." << "\n";
-		cout << "The default value for calc is jclass-thetayc." << "\n";
-		cout << "The tree.shared command outputs a .tre file for each calculator you specify at each distance you choose." << "\n";
+		mothurOut("The tree.shared command creates a .tre to represent the similiarity between groups or sequences.\n");
+		mothurOut("The tree.shared command can only be executed after a successful read.otu command or by providing a distance file.\n");
+		mothurOut("The tree.shared command parameters are groups, calc, phylip, column, name, cutoff, precision, line and label.  You may not use line and label at the same time.\n");
+		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included used.\n");
+		mothurOut("The group names are separated by dashes. The line and label allow you to select what distance levels you would like trees created for, and are also separated by dashes.\n");
+		mothurOut("The phylip or column parameter are required if you do not run the read.otu command first, and only one may be used.  If you use a column file the name filename is required. \n");
+		mothurOut("If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n");
+		mothurOut("The tree.shared command should be in the following format: tree.shared(groups=yourGroups, calc=yourCalcs, line=yourLines, label=yourLabels).\n");
+		mothurOut("Example tree.shared(groups=A-B-C, line=1-3-5, calc=jabund-sorabund).\n");
+		mothurOut("The default value for groups is all the groups in your groupfile.\n");
+		mothurOut("The default value for calc is jclass-thetayc.\n");
+		mothurOut("The tree.shared command outputs a .tre file for each calculator you specify at each distance you choose.\n");
 		validCalculator->printCalc("treegroup", cout);
-		cout << "Or the tree.shared command can be in the following format: tree.shared(phylip=yourPhylipFile)." << "\n";
-		cout << "Example tree.shared(phylip=abrecovery.dist)." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups)." << "\n" << "\n";
+		mothurOut("Or the tree.shared command can be in the following format: tree.shared(phylip=yourPhylipFile).\n");
+		mothurOut("Example tree.shared(phylip=abrecovery.dist).\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the TreeGroupCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "TreeGroupCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the TreeGroupCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 
@@ -224,7 +216,7 @@ int TreeGroupCommand::execute(){
 		
 		if (format == "sharedfile") {
 			//if the users entered no valid calculators don't execute command
-			if (treeCalculators.size() == 0) { cout << "You have given no valid calculators." << endl; return 0; }
+			if (treeCalculators.size() == 0) { mothurOut("You have given no valid calculators."); mothurOutEndLine(); return 0; }
 
 			//you have groups
 			read = new ReadOTUFile(globaldata->inputFileName);	
@@ -234,7 +226,7 @@ int TreeGroupCommand::execute(){
 			lookup = input->getSharedRAbundVectors();
 			lastLabel = lookup[0]->getLabel();
 			
-			if (lookup.size() < 2) { cout << "You have not provided enough valid groups.  I cannot run the command." << endl; return 0; }
+			if (lookup.size() < 2) { mothurOut("You have not provided enough valid groups.  I cannot run the command."); mothurOutEndLine(); return 0; }
 		
 			globaldata->runParse = false;
 			
@@ -282,7 +274,7 @@ int TreeGroupCommand::execute(){
 			outputFile = getRootName(globaldata->inputFileName) + "tre";	
 				
 			createTree();
-			cout << "Tree complete. " << endl;
+			mothurOut("Tree complete. "); mothurOutEndLine();
 		}
 				
 		//reset groups parameter
@@ -291,13 +283,9 @@ int TreeGroupCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the TreeGroupCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "TreeGroupCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the TreeGroupCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 //**********************************************************************************************************************
 
@@ -372,11 +360,7 @@ void TreeGroupCommand::createTree(){
 	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the TreeGroupCommand class Function createTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the TreeGroupCommand class function createTree. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "TreeGroupCommand", "createTree");
 		exit(1);
 	}
 }
@@ -400,13 +384,9 @@ void TreeGroupCommand::printSims(ostream& out) {
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the TreeGroupCommand class Function printSims. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "TreeGroupCommand", "printSims");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the TreeGroupCommand class function printSims. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /***********************************************************/
 void TreeGroupCommand::makeSimsDist() {
@@ -437,13 +417,9 @@ void TreeGroupCommand::makeSimsDist() {
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the TreeGroupCommand class Function makeSimsDist. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "TreeGroupCommand", "makeSimsDist");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the TreeGroupCommand class function makeSimsDist. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 /***********************************************************/
@@ -470,7 +446,7 @@ void TreeGroupCommand::makeSimsShared() {
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 		
 			if(allLines == 1 || lines.count(count) == 1 || labels.count(lookup[0]->getLabel()) == 1){			
-				cout << lookup[0]->getLabel() << '\t' << count << endl;
+				mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 				process(lookup);
 				
 				processedLabels.insert(lookup[0]->getLabel());
@@ -482,7 +458,7 @@ void TreeGroupCommand::makeSimsShared() {
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 				lookup = input->getSharedRAbundVectors(lastLabel);
 
-				cout << lookup[0]->getLabel() << '\t' << count << endl;
+				mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 				process(lookup);
 					
 				processedLabels.insert(lookup[0]->getLabel());
@@ -501,12 +477,12 @@ void TreeGroupCommand::makeSimsShared() {
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			cout << "Your file does not include the label "<< *it; 
+			mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(lastLabel) != 1) {
-				cout << ". I will use " << lastLabel << "." << endl;
+				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
 				needToRun = true;
 			}else {
-				cout << ". Please refer to " << lastLabel << "." << endl;
+				mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
 			}
 		}
 		
@@ -515,7 +491,7 @@ void TreeGroupCommand::makeSimsShared() {
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 			lookup = input->getSharedRAbundVectors(lastLabel);
 
-			cout << lookup[0]->getLabel() << '\t' << count << endl;
+			mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 			process(lookup);
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 	
 		}
@@ -523,13 +499,9 @@ void TreeGroupCommand::makeSimsShared() {
 		for(int i = 0 ; i < treeCalculators.size(); i++) {  delete treeCalculators[i]; }
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the TreeGroupCommand class Function makeSimsShared. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "TreeGroupCommand", "makeSimsShared");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the TreeGroupCommand class function makeSimsShared. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 /***********************************************************/
@@ -580,13 +552,9 @@ void TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the TreeGroupCommand class Function process. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "TreeGroupCommand", "process");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the TreeGroupCommand class function process. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 /***********************************************************/
 

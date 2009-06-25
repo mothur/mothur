@@ -31,11 +31,11 @@ void ReadOTUFile::read(GlobalData* globaldata){
 		}else {//there is an orderfile
 			input = new InputData(philFile, globaldata->getOrderFile(), globaldata->getFormat());
 		}
-//cout << "made it here"	<< endl;	
+	
 		//memory leak prevention
 		//if (globaldata->ginput != NULL) { delete globaldata->ginput;  }
 		globaldata->ginput = input;	//saving to be used by collector and rarefact commands.
-//cout << "after input" << endl;		
+		
 		if ((globaldata->getFormat() == "list") || (globaldata->getFormat() == "rabund") || (globaldata->getFormat() == "sabund")) {//you are reading a list, rabund or sabund file for collect, rarefaction or summary.
 			order = input->getOrderVector();
 			//memory leak prevention
@@ -62,11 +62,7 @@ void ReadOTUFile::read(GlobalData* globaldata){
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ReadOTUFile class Function read. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ReadOTUFile class function read. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ReadOTUFile", "read");
 		exit(1);
 	}
 }

@@ -35,20 +35,15 @@ ParseListCommand::ParseListCommand(){
 		
 		//clears file before we start to write to it below
 		for (int i=0; i<groupMap->getNumGroups(); i++) {
-			openOutputFile(fileroot + groupMap->namesOfGroups[i] + ".list", *(filehandles[groupMap->namesOfGroups[i]]));
-			(*(filehandles[groupMap->namesOfGroups[i]])).close();
+			remove((fileroot + groupMap->namesOfGroups[i] + ".list").c_str());
 		}
-
-		
+	
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ParseListCommand class Function ParseListCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ParseListCommand", "ParseListCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ParseListCommand class function ParseListCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
+	
 }
 /***********************************************************************/
 void ParseListCommand::parse(int index, SharedListVector* list) {
@@ -66,7 +61,7 @@ void ParseListCommand::parse(int index, SharedListVector* list) {
 			if (groupName != "not found") {
 				listGroups[groupName] = listGroups[groupName] + "," + member; //adds prefix to the correct group.
 			}else {
-				cerr << "Error: Sequence '" << member << "' was not found in the group file, please correct\n";
+				mothurOut("Error: Sequence '" + toString(member) + "' was not found in the group file, please correct\n");
 			}
 		}
 		
@@ -75,15 +70,11 @@ void ParseListCommand::parse(int index, SharedListVector* list) {
 		if (groupName != "not found") {
 			listGroups[groupName] = listGroups[groupName] + "," + bin; //adds prefix to the correct group.
 		}else {
-			cerr << "Error: Sequence '" << bin << "' was not found in the group file, please correct\n";
+			mothurOut("Error: Sequence '" + toString(bin) + "' was not found in the group file, please correct\n");
 		}
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ParseListCommand class Function parse. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ParseListCommand class function parse. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ParseListCommand", "parse");
 		exit(1);
 	}
 }
@@ -100,19 +91,19 @@ int ParseListCommand::execute(){
 			read->read(&*globaldata); 
 			input = globaldata->ginput;
 			list = globaldata->gSharedList;
-			SharedListVector* lastList = list;
+			string lastLabel = list->getLabel();
 		
 			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 			set<string> processedLabels;
 			set<string> userLabels = globaldata->labels;
 			set<int> userLines = globaldata->lines;
-			
+		
 			//parses and sets each groups listvector
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((list != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 								
-				if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(list->getLabel()) == 1){
-					cout << list->getLabel() << '\t' << count << endl;
+				if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(lastLabel) == 1){
+					mothurOut(list->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 					process(list);
 					
 					processedLabels.insert(list->getLabel());
@@ -120,17 +111,21 @@ int ParseListCommand::execute(){
 					userLines.erase(count);
 				}
 				
-				if ((anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastList->getLabel()) != 1)) {
-					cout << lastList->getLabel() << '\t' << count << endl;
-					process(lastList);
+				if ((anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+					delete list;
+					list = input->getSharedListVector(lastLabel);
 					
-					processedLabels.insert(lastList->getLabel());
-					userLabels.erase(lastList->getLabel());
+					mothurOut(list->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+					process(list);
+					
+					processedLabels.insert(list->getLabel());
+					userLabels.erase(list->getLabel());
 				}
 
-				if (count != 1) { delete lastList; }
-				lastList = list;			
-
+				
+				lastLabel = list->getLabel();			
+				
+				delete list;
 				list = input->getSharedListVector();
 				count++;
 			}
@@ -139,22 +134,26 @@ int ParseListCommand::execute(){
 			set<string>::iterator it;
 			bool needToRun = false;
 			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-				cout << "Your file does not include the label "<< *it; 
-				if (processedLabels.count(lastList->getLabel()) != 1) {
-					cout << ". I will use " << lastList->getLabel() << "." << endl;
+				mothurOut("Your file does not include the label " + *it); 
+				if (processedLabels.count(lastLabel) != 1) {
+					mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
 					needToRun = true;
 				}else {
-					cout << ". Please refer to " << lastList->getLabel() << "." << endl;
+					mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
 				}
 			}
 		
 			//run last line if you need to
 			if (needToRun == true)  {
-				cout << lastList->getLabel() << '\t' << count << endl;
-				process(lastList);
+				delete list;
+				list = input->getSharedListVector(lastLabel);
+					
+				mothurOut(list->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+				process(list);
+				delete list;
 			}
 			
-			delete lastList;  globaldata->gSharedList = NULL;
+			globaldata->gSharedList = NULL;
 			//delete list vectors to fill with parsed data
 			for (it2 = mapOfLists.begin(); it2 != mapOfLists.end(); it2++) {
 				delete it2->second;
@@ -170,14 +169,9 @@ int ParseListCommand::execute(){
 			return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ParseListCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ParseListCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ParseListCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-
 }
 //**********************************************************************************************************************
 
@@ -210,11 +204,7 @@ void ParseListCommand::process(SharedListVector* thisList) {
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ParseListCommand class Function process. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ParseListCommand class function process. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ParseListCommand", "process");
 		exit(1);
 	}
 }

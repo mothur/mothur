@@ -37,7 +37,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option){
 			
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not found") { cout << "fasta is a required parameter for the screen.seqs command." << endl; abort = true; }
+			if (fastafile == "not found") { mothurOut("fasta is a required parameter for the screen.seqs command."); mothurOutEndLine(); abort = true; }
 			else if (fastafile == "not open") { abort = true; }	
 	
 			groupfile = validParameter.validFile(parameters, "group", true);
@@ -76,43 +76,35 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option){
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ScreenSeqsCommand class Function ScreenSeqsCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ScreenSeqsCommand", "ScreenSeqsCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ScreenSeqsCommand class function ScreenSeqsCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 //**********************************************************************************************************************
 
 void ScreenSeqsCommand::help(){
 	try {
-		cout << "The screen.seqs command reads a fastafile and creates ....." << "\n";
-		cout << "The screen.seqs command parameters are fasta, start, end, maxambig, maxhomop, minlength, maxlength, name, and group." << "\n";
-		cout << "The fasta parameter is required." << "\n";
-		cout << "The start parameter .... The default is -1." << "\n";
-		cout << "The end parameter .... The default is -1." << "\n";
-		cout << "The maxambig parameter .... The default is -1." << "\n";
-		cout << "The maxhomop parameter .... The default is -1." << "\n";
-		cout << "The minlength parameter .... The default is -1." << "\n";
-		cout << "The maxlength parameter .... The default is -1." << "\n";
-		cout << "The name parameter allows you to provide a namesfile, and the group parameter allows you to provide a groupfile." << "\n";
-		cout << "The screen.seqs command should be in the following format: " << "\n";
-		cout << "screen.seqs(fasta=yourFastaFile, name=youNameFile, group=yourGroupFIle, start=yourStart, end=yourEnd, maxambig=yourMaxambig,  " << "\n";
-		cout << "maxhomop=yourMaxhomop, minlength=youMinlength, maxlength=yourMaxlength)  " << "\n";	
-		cout << "Example screen.seqs(fasta=abrecovery.fasta, name=abrecovery.names, group=abrecovery.groups, start=..., end=..., maxambig=..., maxhomop=..., minlength=..., maxlength=...)." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta)." << "\n" << "\n";
+		mothurOut("The screen.seqs command reads a fastafile and creates .....\n");
+		mothurOut("The screen.seqs command parameters are fasta, start, end, maxambig, maxhomop, minlength, maxlength, name, and group.\n");
+		mothurOut("The fasta parameter is required.\n");
+		mothurOut("The start parameter .... The default is -1.\n");
+		mothurOut("The end parameter .... The default is -1.\n");
+		mothurOut("The maxambig parameter .... The default is -1.\n");
+		mothurOut("The maxhomop parameter .... The default is -1.\n");
+		mothurOut("The minlength parameter .... The default is -1.\n");
+		mothurOut("The maxlength parameter .... The default is -1.\n");
+		mothurOut("The name parameter allows you to provide a namesfile, and the group parameter allows you to provide a groupfile.\n");
+		mothurOut("The screen.seqs command should be in the following format: \n");
+		mothurOut("screen.seqs(fasta=yourFastaFile, name=youNameFile, group=yourGroupFIle, start=yourStart, end=yourEnd, maxambig=yourMaxambig,  \n");
+		mothurOut("maxhomop=yourMaxhomop, minlength=youMinlength, maxlength=yourMaxlength)  \n");	
+		mothurOut("Example screen.seqs(fasta=abrecovery.fasta, name=abrecovery.names, group=abrecovery.groups, start=..., end=..., maxambig=..., maxhomop=..., minlength=..., maxlength=...).\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ScreenSeqsCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ScreenSeqsCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ScreenSeqsCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //***************************************************************************************************************
@@ -166,14 +158,9 @@ int ScreenSeqsCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the ScreenSeqsCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "ScreenSeqsCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the ScreenSeqsCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}
-	
 }
 
 //***************************************************************************************************************

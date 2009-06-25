@@ -40,7 +40,7 @@ HeatMapCommand::HeatMapCommand(string option){
 			
 			//make sure the user has already run the read.otu command
 			if ((globaldata->getListFile() == "") && (globaldata->getSharedFile() == "")) {
-				 cout << "You must read a list, or a list and a group, or a shared before you can use the heatmap.bin command." << endl; abort = true; 
+				 mothurOut("You must read a list, or a list and a group, or a shared before you can use the heatmap.bin command."); mothurOutEndLine(); abort = true; 
 			}
 
 			//check for optional parameter and set defaults
@@ -60,7 +60,7 @@ HeatMapCommand::HeatMapCommand(string option){
 			}
 			
 			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { cout << "You cannot use both the line and label parameters at the same time. " << endl; abort = true; }
+			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
 			//if the user has not specified any line or labels use the ones from read.otu
 			else if ((line == "") && (label == "")) {  
 				allLines = globaldata->allLines; 
@@ -87,42 +87,34 @@ HeatMapCommand::HeatMapCommand(string option){
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the HeatMapCommand class Function HeatMapCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "HeatMapCommand", "HeatMapCommand");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the HeatMapCommand class function HeatMapCommand. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
 
 void HeatMapCommand::help(){
 	try {
-		cout << "The heatmap.bin command can only be executed after a successful read.otu command." << "\n";
-		cout << "The heatmap.bin command parameters are groups, sorted, scale, line and label.  No parameters are required, but you may not use line and label at the same time." << "\n";
-		cout << "The groups parameter allows you to specify which of the groups in your groupfile you would like included in your heatmap." << "\n";
-		cout << "The sorted parameter allows you to choose to see the file with the shared otus at the top or the otus in the order they appear in your input file. " << "\n";
-		cout << "The scale parameter allows you to choose the range of color your bin information will be displayed with." << "\n";
-		cout << "The group names are separated by dashes. The line and label allow you to select what distance levels you would like a heatmap created for, and are also separated by dashes." << "\n";
-		cout << "The heatmap.bin command should be in the following format: heatmap.bin(groups=yourGroups, sorted=yourSorted, line=yourLines, label=yourLabels)." << "\n";
-		cout << "Example heatmap.bin(groups=A-B-C, line=1-3-5, sorted=F, scale=log10)." << "\n";
-		cout << "The default value for groups is all the groups in your groupfile, and all lines in your inputfile will be used." << "\n";
-		cout << "The default value for sorted is T meaning you want the shared otus on top, you may change it to F meaning the exact representation of your input file." << "\n";
-		cout << "The default value for scale is log10; your other options are log2 and linear." << "\n";
-		cout << "The heatmap.bin command outputs a .svg file for each line or label you specify." << "\n";
-		cout << "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups)." << "\n" << "\n";
+		mothurOut("The heatmap.bin command can only be executed after a successful read.otu command.\n");
+		mothurOut("The heatmap.bin command parameters are groups, sorted, scale, line and label.  No parameters are required, but you may not use line and label at the same time.\n");
+		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included in your heatmap.\n");
+		mothurOut("The sorted parameter allows you to choose to see the file with the shared otus at the top or the otus in the order they appear in your input file. \n");
+		mothurOut("The scale parameter allows you to choose the range of color your bin information will be displayed with.\n");
+		mothurOut("The group names are separated by dashes. The line and label allow you to select what distance levels you would like a heatmap created for, and are also separated by dashes.\n");
+		mothurOut("The heatmap.bin command should be in the following format: heatmap.bin(groups=yourGroups, sorted=yourSorted, line=yourLines, label=yourLabels).\n");
+		mothurOut("Example heatmap.bin(groups=A-B-C, line=1-3-5, sorted=F, scale=log10).\n");
+		mothurOut("The default value for groups is all the groups in your groupfile, and all lines in your inputfile will be used.\n");
+		mothurOut("The default value for sorted is T meaning you want the shared otus on top, you may change it to F meaning the exact representation of your input file.\n");
+		mothurOut("The default value for scale is log10; your other options are log2 and linear.\n");
+		mothurOut("The heatmap.bin command outputs a .svg file for each line or label you specify.\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
 
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the HeatMapCommand class Function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "HeatMapCommand", "help");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the HeatMapCommand class function help. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}	
 }
 
 //**********************************************************************************************************************
@@ -174,7 +166,7 @@ int HeatMapCommand::execute(){
 		
 				if(allLines == 1 || lines.count(count) == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 	
-					cout << lookup[0]->getLabel() << '\t' << count << endl;
+					mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 					heatmap->getPic(lookup);
 					
 					processedLabels.insert(lookup[0]->getLabel());
@@ -183,9 +175,9 @@ int HeatMapCommand::execute(){
 				}
 				
 				if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-					cout << lastLabel << '\t' << count << endl;
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
 					lookup = input->getSharedRAbundVectors(lastLabel);
+					mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 					
 					heatmap->getPic(lookup);
 					
@@ -206,21 +198,21 @@ int HeatMapCommand::execute(){
 			set<string>::iterator it;
 			bool needToRun = false;
 			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-				cout << "Your file does not include the label "<< *it; 
+				mothurOut("Your file does not include the label " + *it); 
 				if (processedLabels.count(lastLabel) != 1) {
-					cout << ". I will use " << lastLabel << "." << endl;
+					mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
 					needToRun = true;
 				}else {
-					cout << ". Please refer to " << lastLabel << "." << endl;
+					mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
 				}
 			}
 		
 			//run last line if you need to
 			if (needToRun == true)  {
-				cout << lastLabel << '\t' << count << endl;
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
 				lookup = input->getSharedRAbundVectors(lastLabel);
-
+				
+				mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 				heatmap->getPic(lookup);
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
 			}
@@ -236,7 +228,7 @@ int HeatMapCommand::execute(){
 
 				if(allLines == 1 || lines.count(count) == 1 || labels.count(rabund->getLabel()) == 1){			
 	
-					cout << rabund->getLabel() << '\t' << count << endl;
+					mothurOut(rabund->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 					heatmap->getPic(rabund);
 					
 					processedLabels.insert(rabund->getLabel());
@@ -246,9 +238,9 @@ int HeatMapCommand::execute(){
 				
 				if ((anyLabelsToProcess(rabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 
-					cout << lastLabel << '\t' << count << endl;
 					delete rabund;
 					rabund = input->getRAbundVector(lastLabel);
+					mothurOut(rabund->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 					
 					heatmap->getPic(rabund);
 					
@@ -268,20 +260,21 @@ int HeatMapCommand::execute(){
 			set<string>::iterator it;
 			bool needToRun = false;
 			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-				cout << "Your file does not include the label "<< *it; 
+				mothurOut("Your file does not include the label " + *it); 
 				if (processedLabels.count(lastLabel) != 1) {
-					cout << ". I will use " << lastLabel << "." << endl;
+					mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
 					needToRun = true;
 				}else {
-					cout << ". Please refer to " << lastLabel << "." << endl;
+					mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
 				}
 			}
 		
 			//run last line if you need to
 			if (needToRun == true)  {
-				cout << lastLabel << '\t' << count << endl;
+		
 				delete rabund;
 				rabund = input->getRAbundVector(lastLabel);
+				mothurOut(rabund->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 					
 				heatmap->getPic(rabund);
 				delete rabund; globaldata->rabund = NULL;
@@ -293,13 +286,9 @@ int HeatMapCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		cout << "Standard Error: " << e.what() << " has occurred in the HeatMapCommand class Function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
+		errorOut(e, "HeatMapCommand", "execute");
 		exit(1);
 	}
-	catch(...) {
-		cout << "An unknown error has occurred in the HeatMapCommand class function execute. Please contact Pat Schloss at pschloss@microbio.umass.edu." << "\n";
-		exit(1);
-	}		
 }
 
 //**********************************************************************************************************************
