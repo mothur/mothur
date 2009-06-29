@@ -1,5 +1,5 @@
 /*
- *  concensuscommand.cpp
+ *  consensuscommand.cpp
  *  Mothur
  *
  *  Created by Sarah Westcott on 4/29/09.
@@ -7,7 +7,7 @@
  *
  */
 
-#include "concensuscommand.h"
+#include "consensuscommand.h"
 
 //**********************************************************************************************************************
 
@@ -21,10 +21,10 @@ ConcensusCommand::ConcensusCommand(string fileroot){
 		//if(option == "help") { help(); abort = true; }
 		
 		//else {
-			//if (option != "") { mothurOut("There are no valid parameters for the concensus command."); mothurOutEndLine(); abort = true; }
+			//if (option != "") { mothurOut("There are no valid parameters for the consensus command."); mothurOutEndLine(); abort = true; }
 			
 		//	//no trees were read
-		//	if (globaldata->gTree.size() == 0) {  mothurOut("You must execute the read.tree command, before you may use the concensus command."); mothurOutEndLine(); abort = true;  }
+		//	if (globaldata->gTree.size() == 0) {  mothurOut("You must execute the read.tree command, before you may use the consensus command."); mothurOutEndLine(); abort = true;  }
 			//else { 
 			 t = globaldata->gTree;
 			 //	}
@@ -40,13 +40,13 @@ ConcensusCommand::ConcensusCommand(string fileroot){
 
 void ConcensusCommand::help(){
 	try {
-		mothurOut("The concensus command can only be executed after a successful read.tree command.\n");
-		mothurOut("The concensus command has no parameters.\n");
-		mothurOut("The concensus command should be in the following format: concensus().\n");
-		mothurOut("The concensus command output two files: .concensus.tre and .concensuspairs.\n");
-		mothurOut("The .concensus.tre file contains the concensus tree of the trees in your input file.\n");
+		mothurOut("The consensus command can only be executed after a successful read.tree command.\n");
+		mothurOut("The consensus command has no parameters.\n");
+		mothurOut("The consensus command should be in the following format: consensus().\n");
+		mothurOut("The consensus command output two files: .consensus.tre and .consensuspairs.\n");
+		mothurOut("The .consensus.tre file contains the consensus tree of the trees in your input file.\n");
 		mothurOut("The branch lengths are the percentage of trees in your input file that had the given pair.\n");
-		mothurOut("The .concensuspairs file contains a list of the internal nodes in your tree.  For each node, the pair that was used in the concensus tree \n");
+		mothurOut("The .consensuspairs file contains a list of the internal nodes in your tree.  For each node, the pair that was used in the consensus tree \n");
 		mothurOut("is reported with its percentage, as well as the other pairs that were seen for that node but not used and their percentages.\n\n");		
 	}
 	catch(exception& e) {
@@ -74,10 +74,10 @@ int ConcensusCommand::execute(){
 		getSets();		
 		
 		//open file for pairing not included in the tree
-		notIncluded = filename + ".concensuspairs";
+		notIncluded = filename + ".cons.pairs";
 		openOutputFile(notIncluded, out2);
 		
-		concensusTree = new Tree();
+		consensusTree = new Tree();
 		
 		it2 = nodePairs.find(treeSet);
 		
@@ -91,7 +91,7 @@ int ConcensusCommand::execute(){
 		
 		buildConcensusTree(treeSet);
 		
-		concensusTree->assembleTree();
+		consensusTree->assembleTree();
 		
 		//output species in order
 		out2 << "Species in Order: " << endl << endl;
@@ -99,7 +99,7 @@ int ConcensusCommand::execute(){
 		
 		vector<string> temp; 
 		//output sets included
-		out2 << endl << "Sets included in the concensus tree:" << endl << endl;
+		out2 << endl << "Sets included in the consensus tree:" << endl << endl;
 		for (it2 = nodePairsInTree.begin(); it2 != nodePairsInTree.end(); it2++) {
 			//only output pairs not leaves
 			if (it2->first.size() > 1) { 
@@ -123,7 +123,7 @@ int ConcensusCommand::execute(){
 		}
 		
 		//output sets not included
-		out2 << endl << "Sets NOT included in the concensus tree:" << endl << endl;
+		out2 << endl << "Sets NOT included in the consensus tree:" << endl << endl;
 		for (it2 = nodePairs.begin(); it2 != nodePairs.end(); it2++) {
 			temp.clear();
 			//initialize temp to all "."
@@ -146,11 +146,11 @@ int ConcensusCommand::execute(){
 		outputFile = filename + ".cons.tre";
 		openOutputFile(outputFile, out);
 		
-		concensusTree->printForBoot(out);
+		consensusTree->printForBoot(out);
 		
 		out.close(); out2.close();
 		
-		delete concensusTree; 
+		delete consensusTree; 
 		
 		return 0;
 	}
@@ -169,7 +169,7 @@ int ConcensusCommand::buildConcensusTree(vector<string> nodeSet) {
 		//if you are at a leaf
 		if (nodeSet.size() == 1) {
 			//return the vector index of the leaf you are at
-			return concensusTree->getIndex(nodeSet[0]);
+			return consensusTree->getIndex(nodeSet[0]);
 		//terminate recursion
 		}else if (count == numNodes) { return 0; }
 		else {
@@ -177,10 +177,10 @@ int ConcensusCommand::buildConcensusTree(vector<string> nodeSet) {
 			rightChildSet = getRestSet(nodeSet, leftChildSet);
 			int left = buildConcensusTree(leftChildSet);
 			int right = buildConcensusTree(rightChildSet);
-			concensusTree->tree[count].setChildren(left, right);
-			concensusTree->tree[count].setLabel(nodePairsInTree[nodeSet]); 
-			concensusTree->tree[left].setParent(count);
-			concensusTree->tree[right].setParent(count);
+			consensusTree->tree[count].setChildren(left, right);
+			consensusTree->tree[count].setLabel(nodePairsInTree[nodeSet]); 
+			consensusTree->tree[left].setParent(count);
+			consensusTree->tree[right].setParent(count);
 			count++;
 			return (count-1);
 		}
@@ -221,7 +221,7 @@ void ConcensusCommand::getSets() {
 			}
 		}
 		
-		//add each leaf to terminate recursion in concensus
+		//add each leaf to terminate recursion in consensus
 		//you want the leaves in there but with insignifigant sightings value so it is added last
 		//for each leaf node get descendant info.
 		for (int j = 0; j < numLeaves; j++) {

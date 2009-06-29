@@ -1,7 +1,7 @@
 #ifndef CONCENSUSCOMMAND_H
 #define CONCENSUSCOMMAND_H
 /*
- *  concensuscommand.h
+ *  consensuscommand.h
  *  Mothur
  *
  *  Created by Sarah Westcott on 4/29/09.
@@ -28,7 +28,7 @@ private:
 	GlobalData* globaldata;
 	SharedUtil* util;
 	vector<Tree*> t;
-	Tree* concensusTree;
+	Tree* consensusTree;
 	bool abort;
 	vector<string> treeSet;		//set containing all members of the tree to start recursion.  filled in getSets().
 	map< vector<string>, int > nodePairs;  //<map of possible combinations these combos are the pcounts or descendants info, to how many times they occured
