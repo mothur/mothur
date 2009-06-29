@@ -153,14 +153,13 @@ string toString(const T&x, int i){
 	
     return output.str();
 }
-
 /***********************************************************************/
 
 inline int openOutputFileAppend(string fileName, ofstream& fileHandle){
 	
 	fileHandle.open(fileName.c_str(), ios::app);
 	if(!fileHandle) {
-		cerr << "Error: Could not open " << fileName << endl;
+		cout << "Error: Could not open " <<  fileName << endl; 
 		return 1;
 	}
 	else {
@@ -168,7 +167,6 @@ inline int openOutputFileAppend(string fileName, ofstream& fileHandle){
 	}
 
 }
-
 
 /**************************************************************************************************/
 
@@ -237,6 +235,8 @@ inline void errorOut(exception& e, string object, string function) {
 		mothurOutEndLine();
 	
 }
+
+
 
 
 /***********************************************************************/
@@ -394,7 +394,7 @@ inline int openInputFile(string fileName, ifstream& fileHandle){
 
 	fileHandle.open(fileName.c_str());
 	if(!fileHandle) {
-		cerr << "Error: Could not open " << fileName << endl;
+		mothurOut("Error: Could not open " + fileName);  mothurOutEndLine();
 		return 1;
 	}
 	else {
@@ -409,7 +409,7 @@ inline int openOutputFile(string fileName, ofstream& fileHandle){
 	
 	fileHandle.open(fileName.c_str(), ios::trunc);
 	if(!fileHandle) {
-		cerr << "Error: Could not open " << fileName << endl;
+		mothurOut("Error: Could not open " + fileName);  mothurOutEndLine();
 		return 1;
 	}
 	else {

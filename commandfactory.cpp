@@ -12,7 +12,6 @@
 #include "readtreecommand.h"
 #include "readotucommand.h"
 #include "clustercommand.h"
-#include "parselistcommand.h"
 #include "collectcommand.h"
 #include "collectsharedcommand.h"
 #include "getgroupcommand.h"
@@ -39,7 +38,7 @@
 #include "getoturepcommand.h"
 #include "treegroupscommand.h"
 #include "bootstrapsharedcommand.h"
-#include "concensuscommand.h"
+//#include "concensuscommand.h"
 #include "distancecommand.h"
 #include "aligncommand.h"
 #include "matrixoutputcommand.h"
@@ -89,7 +88,7 @@ CommandFactory::CommandFactory(){
 	commands["get.sabund"]          = "get.sabund";
 	commands["get.rabund"]          = "get.rabund";
 	commands["bootstrap.shared"]	= "bootstrap.shared";
-	commands["concensus"]			= "concensus";
+	//commands["concensus"]			= "concensus";
 	commands["help"]				= "help"; 
 	commands["filter.seqs"]			= "filter.seqs";
 	commands["align.seqs"]			= "align.seqs";
@@ -146,7 +145,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "tree.shared")			{   command = new TreeGroupCommand(optionString);			}
 		else if(commandName == "dist.shared")			{   command = new MatrixOutputCommand(optionString);		}
 		else if(commandName == "bootstrap.shared")		{   command = new BootSharedCommand(optionString);			}
-		else if(commandName == "concensus")				{   command = new ConcensusCommand(optionString);			}
+		//else if(commandName == "concensus")				{   command = new ConcensusCommand(optionString);			}
 		else if(commandName == "dist.seqs")				{   command = new DistanceCommand(optionString);			}
 		else if(commandName == "align.seqs")			{   command = new AlignCommand(optionString);				}
 		else if(commandName == "summary.seqs")			{	command = new SeqSummaryCommand(optionString);			}

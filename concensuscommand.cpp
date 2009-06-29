@@ -11,21 +11,24 @@
 
 //**********************************************************************************************************************
 
-ConcensusCommand::ConcensusCommand(string option){
+ConcensusCommand::ConcensusCommand(string fileroot){
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
 		
+		filename = fileroot;
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		//if(option == "help") { help(); abort = true; }
 		
-		else {
-			if (option != "") { mothurOut("There are no valid parameters for the concensus command."); mothurOutEndLine(); abort = true; }
+		//else {
+			//if (option != "") { mothurOut("There are no valid parameters for the concensus command."); mothurOutEndLine(); abort = true; }
 			
-			//no trees were read
-			if (globaldata->gTree.size() == 0) {  mothurOut("You must execute the read.tree command, before you may use the concensus command."); mothurOutEndLine(); abort = true;  }
-			else {  t = globaldata->gTree;	}
-		}
+		//	//no trees were read
+		//	if (globaldata->gTree.size() == 0) {  mothurOut("You must execute the read.tree command, before you may use the concensus command."); mothurOutEndLine(); abort = true;  }
+			//else { 
+			 t = globaldata->gTree;
+			 //	}
+		//}
 	}
 	catch(exception& e) {
 		errorOut(e, "ConcensusCommand", "ConcensusCommand");
@@ -71,7 +74,7 @@ int ConcensusCommand::execute(){
 		getSets();		
 		
 		//open file for pairing not included in the tree
-		notIncluded = getRootName(globaldata->inputFileName) + "concensuspairs";
+		notIncluded = filename + ".concensuspairs";
 		openOutputFile(notIncluded, out2);
 		
 		concensusTree = new Tree();
@@ -140,7 +143,7 @@ int ConcensusCommand::execute(){
 			out2 << '\t' << it2->second << endl;
 		}
 		
-		outputFile = getRootName(globaldata->inputFileName) + "concensus.tre";
+		outputFile = filename + ".cons.tre";
 		openOutputFile(outputFile, out);
 		
 		concensusTree->printForBoot(out);

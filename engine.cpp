@@ -21,7 +21,7 @@ InteractEngine::InteractEngine(string path){
 	globaldata = GlobalData::getInstance();
 	globaldata->argv = path;
 	
-	system("clear");
+	
 }
 
 /***********************************************************************/
@@ -86,7 +86,7 @@ BatchEngine::BatchEngine(string path, string batchFileName){
 		openedBatch = openInputFile(batchFileName, inputBatchFile);
 		globaldata->argv = path;
 				
-		system("clear");
+	
 	
 	//	char buffer = ' ';
 	//	ifstream header("introtext.txt");
@@ -182,7 +182,7 @@ ScriptEngine::ScriptEngine(string path, string commandString){
 
 		globaldata->argv = path;
 		
-		system("clear");
+		
 	
 	}
 	catch(exception& e) {

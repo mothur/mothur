@@ -227,7 +227,8 @@ int TreeGroupCommand::execute(){
 			lastLabel = lookup[0]->getLabel();
 			
 			if (lookup.size() < 2) { mothurOut("You have not provided enough valid groups.  I cannot run the command."); mothurOutEndLine(); return 0; }
-		
+			
+			//used in tree constructor 
 			globaldata->runParse = false;
 			
 			//create tree file
@@ -266,6 +267,7 @@ int TreeGroupCommand::execute(){
 			//fills globaldatas tree names
 			globaldata->Treenames = globaldata->Groups;
 			
+			//used in tree constructor 
 			globaldata->runParse = false;
 			
 			makeSimsDist();
