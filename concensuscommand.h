@@ -38,7 +38,7 @@ private:
 	map< vector<string>, int > nodePairsInTree;
 	map<string, int>::iterator it;
 	map< vector<string>, int>::iterator it2;
-	string outputFile, notIncluded;
+	string outputFile, notIncluded, filename;
 	ofstream out, out2;
 	int numNodes, numLeaves, count;  //count is the next available spot in the tree vector
 									 	

@@ -101,6 +101,9 @@ BootSharedCommand::BootSharedCommand(string option){
 				
 			if (abort == false) {
 			
+				//used in tree constructor 
+				globaldata->runParse = false;
+			
 				validCalculator = new ValidCalculators();
 				
 				int i;
@@ -136,7 +139,10 @@ BootSharedCommand::BootSharedCommand(string option){
 				for (int i=0; i < treeCalculators.size(); i++) {
 					tempo = new ofstream;
 					out.push_back(tempo);
-				}	
+				}
+				
+				//make a vector of tree* for each calculator
+				trees.resize(treeCalculators.size());
 			}
 		}
 
@@ -273,7 +279,9 @@ int BootSharedCommand::execute(){
 				delete order;
 
 		}
-
+		
+		
+		
 		//reset groups parameter
 		globaldata->Groups.clear();  
 
@@ -286,16 +294,14 @@ int BootSharedCommand::execute(){
 }
 //**********************************************************************************************************************
 
-void BootSharedCommand::createTree(ostream* out){
+void BootSharedCommand::createTree(ostream* out, Tree* t){
 	try {
-		//create tree
-		t = new Tree();
 		
 		//do merges and create tree structure by setting parents and children
 		//there are numGroups - 1 merges to do
 		for (int i = 0; i < (numGroups - 1); i++) {
 		
-			float largest = -1.0;
+			float largest = -1000.0;
 			int row, column;
 			//find largest value in sims matrix by searching lower triangle
 			for (int j = 1; j < simMatrix.size(); j++) {
@@ -328,8 +334,8 @@ void BootSharedCommand::createTree(ostream* out){
 			index[column] = numGroups+i;
 			
 			//zero out highest value that caused the merge.
-			simMatrix[row][column] = -1.0;
-			simMatrix[column][row] = -1.0;
+			simMatrix[row][column] = -1000.0;
+			simMatrix[column][row] = -1000.0;
 		
 			//merge values in simsMatrix
 			for (int n = 0; n < simMatrix.size(); n++)	{
@@ -337,19 +343,20 @@ void BootSharedCommand::createTree(ostream* out){
 				simMatrix[row][n] = (simMatrix[row][n] + simMatrix[column][n]) / 2;
 				simMatrix[n][row] = simMatrix[row][n];
 				//delete column
-				simMatrix[column][n] = -1.0;
-				simMatrix[n][column] = -1.0;
+				simMatrix[column][n] = -1000.0;
+				simMatrix[n][column] = -1000.0;
 			}
 		}
+		
+		//adjust tree to make sure root to tip length is .5
+		int root = t->findRoot();
+		t->tree[root].setBranchLength((0.5 - t->tree[root].getLengthToLeaves()));
 
 		//assemble tree
 		t->assembleTree();
 	
 		//print newick file
 		t->print(*out);
-	
-		//delete tree
-		delete t;
 	
 	}
 	catch(exception& e) {
@@ -380,6 +387,7 @@ void BootSharedCommand::process(SharedOrderVector* order) {
 				EstOutput data;
 				vector<SharedRAbundVector*> subset;
 				
+				
 				//open an ostream for each calc to print to
 				for (int z = 0; z < treeCalculators.size(); z++) {
 					//create a new filename
@@ -387,10 +395,13 @@ void BootSharedCommand::process(SharedOrderVector* order) {
 					openOutputFile(outputFile, *(out[z]));
 				}
 				
+				mothurOut("Generating bootstrap trees..."); cout.flush();
+				
 				//create a file for each calculator with the 1000 trees in it.
 				for (int p = 0; p < iters; p++) {
 					
-					util->getSharedVectorswithReplacement(Groups, lookup, order);  //fills group vectors from order vector.
+					util->getSharedVectorswithReplacement(globaldata->Groups, lookup, order);  //fills group vectors from order vector.
+
 				
 					//for each calculator												
 					for(int i = 0 ; i < treeCalculators.size(); i++) {
@@ -423,14 +434,47 @@ void BootSharedCommand::process(SharedOrderVector* order) {
 								}
 							}
 						}
-				
+						
+						tempTree = new Tree();
+						
 						//creates tree from similarity matrix and write out file
-						createTree(out[i]);
+						createTree(out[i], tempTree);
+						
+						//save trees for concensus command.
+						trees[i].push_back(tempTree);
 					}
 				}
+				
+				mothurOut("\tDone."); mothurOutEndLine();
+				//delete globaldata's tree
+				for (int m = 0; m < globaldata->gTree.size(); m++) {  delete globaldata->gTree[m];  }
+				globaldata->clear();
+				
+				
+				//create concensus trees for each bootstrapped tree set
+				for (int k = 0; k < trees.size(); k++) {
+					
+					mothurOut("Generating concensus tree for " + treeCalculators[k]->getName()); mothurOutEndLine();
+					
+					//set global data to calc trees
+					globaldata->gTree = trees[k];
+					
+					string filename = getRootName(globaldata->inputFileName) + treeCalculators[k]->getName() + ".boot" + order->getLabel();
+					concensus = new ConcensusCommand(filename);
+					concensus->execute();
+					delete concensus;
+					
+					//delete globaldata's tree
+					for (int m = 0; m < globaldata->gTree.size(); m++) {  delete globaldata->gTree[m];  }
+					globaldata->clear();
+					
+				}
+				
+				
+					
 				//close ostream for each calc
 				for (int z = 0; z < treeCalculators.size(); z++) { out[z]->close(); }
-
+	
 	}
 	catch(exception& e) {
 		errorOut(e, "BootSharedCommand", "process");

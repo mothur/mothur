@@ -19,6 +19,7 @@
 #include "tree.h"
 #include "treemap.h"
 #include "sharedutilities.h"
+#include "concensuscommand.h"
 	
 class GlobalData;
 
@@ -31,7 +32,7 @@ public:
 	void help();
 	
 private:
-	void createTree(ostream*);
+	void createTree(ostream*, Tree*);
 	void printSims();
 	void process(SharedOrderVector*);
 	
@@ -41,6 +42,9 @@ private:
 	ReadOTUFile* read;
 	TreeMap* tmap;
 	Tree* t;
+	Tree* tempTree;
+	ConcensusCommand* concensus;
+	vector< vector<Tree*> > trees;  //a vector of trees for each calculator chosen
 	vector<Calculator*> treeCalculators;
 	vector<ofstream*> out;
 	vector< vector<float> > simMatrix;
