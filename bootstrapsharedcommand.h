@@ -19,7 +19,7 @@
 #include "tree.h"
 #include "treemap.h"
 #include "sharedutilities.h"
-#include "concensuscommand.h"
+#include "consensuscommand.h"
 	
 class GlobalData;
 
@@ -43,7 +43,7 @@ private:
 	TreeMap* tmap;
 	Tree* t;
 	Tree* tempTree;
-	ConcensusCommand* concensus;
+	ConcensusCommand* consensus;
 	vector< vector<Tree*> > trees;  //a vector of trees for each calculator chosen
 	vector<Calculator*> treeCalculators;
 	vector<ofstream*> out;

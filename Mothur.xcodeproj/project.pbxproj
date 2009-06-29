@@ -55,7 +55,7 @@
 		375AA1390F9E433D008EF9B8 /* readcolumn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 375AA1330F9E433D008EF9B8 /* readcolumn.cpp */; };
 		375AA13A0F9E433D008EF9B8 /* readotu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 375AA1350F9E433D008EF9B8 /* readotu.cpp */; };
 		375AA13B0F9E433D008EF9B8 /* readphylip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 375AA1370F9E433D008EF9B8 /* readphylip.cpp */; };
-		377326650FAF16E0007ABB8B /* concensuscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 377326630FAF16E0007ABB8B /* concensuscommand.cpp */; };
+		377326650FAF16E0007ABB8B /* consensuscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 377326630FAF16E0007ABB8B /* consensuscommand.cpp */; };
 		378598660FDD497000EF9D03 /* heatmapsimcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 378598650FDD497000EF9D03 /* heatmapsimcommand.cpp */; };
 		378598740FDD4C1500EF9D03 /* heatmapsim.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 378598730FDD4C1500EF9D03 /* heatmapsim.cpp */; };
 		378599100FDD7E8E00EF9D03 /* optionparser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3785990F0FDD7E8E00EF9D03 /* optionparser.cpp */; };
@@ -273,8 +273,8 @@
 		375AA1360F9E433D008EF9B8 /* readotu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readotu.h; sourceTree = SOURCE_ROOT; };
 		375AA1370F9E433D008EF9B8 /* readphylip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readphylip.cpp; sourceTree = SOURCE_ROOT; };
 		375AA1380F9E433D008EF9B8 /* readphylip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readphylip.h; sourceTree = SOURCE_ROOT; };
-		377326630FAF16E0007ABB8B /* concensuscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = concensuscommand.cpp; sourceTree = SOURCE_ROOT; };
-		377326640FAF16E0007ABB8B /* concensuscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = concensuscommand.h; sourceTree = SOURCE_ROOT; };
+		377326630FAF16E0007ABB8B /* consensuscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = consensuscommand.cpp; sourceTree = "<group>"; };
+		377326640FAF16E0007ABB8B /* consensuscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = consensuscommand.h; sourceTree = "<group>"; };
 		378598640FDD497000EF9D03 /* heatmapsimcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = heatmapsimcommand.h; sourceTree = SOURCE_ROOT; };
 		378598650FDD497000EF9D03 /* heatmapsimcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = heatmapsimcommand.cpp; sourceTree = SOURCE_ROOT; };
 		378598720FDD4C1500EF9D03 /* heatmapsim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = heatmapsim.h; sourceTree = SOURCE_ROOT; };
@@ -753,8 +753,8 @@
 				37D927C70F21331F001D4494 /* collectcommand.cpp */,
 				37D927CC0F21331F001D4494 /* collectsharedcommand.h */,
 				37D927CB0F21331F001D4494 /* collectsharedcommand.cpp */,
-				377326640FAF16E0007ABB8B /* concensuscommand.h */,
-				377326630FAF16E0007ABB8B /* concensuscommand.cpp */,
+				377326640FAF16E0007ABB8B /* consensuscommand.h */,
+				377326630FAF16E0007ABB8B /* consensuscommand.cpp */,
 				37B28F660F27590100808A62 /* deconvolutecommand.h */,
 				37B28F670F27590100808A62 /* deconvolutecommand.cpp */,
 				37C753CC0FB3415200DBD02E /* distancecommand.h */,
@@ -1066,7 +1066,7 @@
 				375AA13B0F9E433D008EF9B8 /* readphylip.cpp in Sources */,
 				7EC3D4550FA0FFF900338DA5 /* coverage.cpp in Sources */,
 				7EC3D4560FA0FFF900338DA5 /* whittaker.cpp in Sources */,
-				377326650FAF16E0007ABB8B /* concensuscommand.cpp in Sources */,
+				377326650FAF16E0007ABB8B /* consensuscommand.cpp in Sources */,
 				378C1B030FB0644E004D63F5 /* filterseqscommand.cpp in Sources */,
 				378C1B040FB0644E004D63F5 /* goodscoverage.cpp in Sources */,
 				378C1B0A0FB0644E004D63F5 /* sequencedb.cpp in Sources */,

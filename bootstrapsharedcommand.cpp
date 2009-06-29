@@ -440,7 +440,7 @@ void BootSharedCommand::process(SharedOrderVector* order) {
 						//creates tree from similarity matrix and write out file
 						createTree(out[i], tempTree);
 						
-						//save trees for concensus command.
+						//save trees for consensus command.
 						trees[i].push_back(tempTree);
 					}
 				}
@@ -451,18 +451,18 @@ void BootSharedCommand::process(SharedOrderVector* order) {
 				globaldata->clear();
 				
 				
-				//create concensus trees for each bootstrapped tree set
+				//create consensus trees for each bootstrapped tree set
 				for (int k = 0; k < trees.size(); k++) {
 					
-					mothurOut("Generating concensus tree for " + treeCalculators[k]->getName()); mothurOutEndLine();
+					mothurOut("Generating consensus tree for " + treeCalculators[k]->getName()); mothurOutEndLine();
 					
 					//set global data to calc trees
 					globaldata->gTree = trees[k];
 					
 					string filename = getRootName(globaldata->inputFileName) + treeCalculators[k]->getName() + ".boot" + order->getLabel();
-					concensus = new ConcensusCommand(filename);
-					concensus->execute();
-					delete concensus;
+					consensus = new ConcensusCommand(filename);
+					consensus->execute();
+					delete consensus;
 					
 					//delete globaldata's tree
 					for (int m = 0; m < globaldata->gTree.size(); m++) {  delete globaldata->gTree[m];  }
