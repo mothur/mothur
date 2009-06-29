@@ -37,11 +37,12 @@ private:
 	ReadOTUFile* read;
 	SharedListVector* SharedList;
 	InputData* input;
-	//map<string, SharedRAbundVector*>::iterator it;
-	//vector<SharedRAbundVector*> lookup;
+	GroupMap* groupMap;
 	ofstream out;
-	string filename;
+	string filename, fileroot;
 	bool firsttime;
+	map<string, ofstream*> filehandles;
+	map<string, ofstream*>::iterator it3;
 
 };
 

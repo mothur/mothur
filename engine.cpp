@@ -20,8 +20,6 @@ InteractEngine::InteractEngine(string path){
 
 	globaldata = GlobalData::getInstance();
 	globaldata->argv = path;
-	string logFileName = "mothur.logFile";
-	remove(logFileName.c_str());
 	
 	system("clear");
 }
@@ -41,33 +39,7 @@ bool InteractEngine::getInput(){
 		string options = "";
 		int quitCommandCalled = 0;
 		
-		mothurOut("mothur v.1.4.1");
-		mothurOutEndLine();		
-		mothurOut("Last updated: 6/23/2009");
-		mothurOutEndLine();	
-		mothurOutEndLine();		
-		mothurOut("by");
-		mothurOutEndLine();		
-		mothurOut("Patrick D. Schloss");
-		mothurOutEndLine();
-		mothurOutEndLine();			
-		mothurOut("Department of Microbiology");
-		mothurOutEndLine();		
-		mothurOut("pschloss@micro.umass.edu");
-		mothurOutEndLine();		
-		mothurOut("http://schloss.micro.umass.edu/mothur");
-		mothurOutEndLine();	
-		mothurOutEndLine();	
-		mothurOutEndLine();		
-		mothurOut("Distributed under the GNU General Public License");
-		mothurOutEndLine();
-		mothurOutEndLine();			
-		mothurOut("Type 'help()' for information on the commands that are available");
-		mothurOutEndLine();
-		mothurOutEndLine();			
-		mothurOut("Type 'quit()' to exit program");
-		mothurOutEndLine();	
-		
+				
 		while(quitCommandCalled != 1){
 			
 			mothurOutEndLine();
@@ -113,9 +85,7 @@ BatchEngine::BatchEngine(string path, string batchFileName){
 	
 		openedBatch = openInputFile(batchFileName, inputBatchFile);
 		globaldata->argv = path;
-		string logFileName = "mothur.logFile";
-		remove(logFileName.c_str());
-		
+				
 		system("clear");
 	
 	//	char buffer = ' ';
@@ -211,9 +181,7 @@ ScriptEngine::ScriptEngine(string path, string commandString){
 		listOfCommands = commandString.substr(1, (commandString.length()-1));
 
 		globaldata->argv = path;
-		string logFileName = "mothur.logFile";
-		remove(logFileName.c_str());
-
+		
 		system("clear");
 	
 	}
