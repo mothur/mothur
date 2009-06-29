@@ -14,7 +14,6 @@
 #include "inputdata.h"
 #include "groupmap.h"
 #include "sharedcommand.h"
-#include "parselistcommand.h"
 
 /* The read.otu must be run before you execute a collect.single, rarefaction.single, summary.single, 
 collect.shared, rarefaction.shared or summary.shared command. Mothur will generate a .list, .rabund and .sabund 
@@ -43,7 +42,6 @@ private:
 	//ReadOTUFile* read;
 	InputData* input;
 	Command* shared;
-	Command* parselist;
 	GroupMap* groupMap;
 	string filename, listfile, orderfile, sharedfile, line, label, groupfile, sabundfile, rabundfile, format;
 

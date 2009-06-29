@@ -158,10 +158,6 @@ int ReadOtuCommand::execute(){
 		
 		if (globaldata->getFormat() == "shared") {
 			
-			parselist = new ParseListCommand();
-			parselist->execute();
-			delete parselist;
-			
 			shared = new SharedCommand();
 			shared->execute();
 			delete shared;

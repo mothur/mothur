@@ -20,6 +20,25 @@ SharedCommand::SharedCommand(){
 		filename = getRootName(filename);
 		filename = filename + "shared";
 		openOutputFile(filename, out);
+		
+		groupMap = globaldata->gGroupmap;
+		
+		//fill filehandles with neccessary ofstreams
+		int i;
+		ofstream* temp;
+		for (i=0; i<groupMap->getNumGroups(); i++) {
+			temp = new ofstream;
+			filehandles[groupMap->namesOfGroups[i]] = temp;
+		}
+		
+		//set fileroot
+		fileroot = getRootName(globaldata->getListFile());
+		
+		//clears file before we start to write to it below
+		for (int i=0; i<groupMap->getNumGroups(); i++) {
+			remove((fileroot + groupMap->namesOfGroups[i] + ".rabund").c_str());
+		}
+
 	}
 	catch(exception& e) {
 		errorOut(e, "SharedCommand", "SharedCommand");
@@ -31,7 +50,6 @@ SharedCommand::SharedCommand(){
 int SharedCommand::execute(){
 	try {
 		
-		mothurOut("creating sharedfile..."); mothurOutEndLine();
 		//lookup.clear();
 		int count = 1;
 		string errorOff = "no error";
@@ -55,7 +73,10 @@ int SharedCommand::execute(){
 			
 
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(SharedList->getLabel()) == 1){
+					
 					lookup = SharedList->getSharedRAbundVector();
+					mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+					
 					printSharedData(lookup); //prints info to the .shared file
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
 				
@@ -69,6 +90,8 @@ int SharedCommand::execute(){
 					SharedList = input->getSharedListVector(lastLabel); //get new list vector to process
 					
 					lookup = SharedList->getSharedRAbundVector();
+					mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+					
 					printSharedData(lookup); //prints info to the .shared file
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
 					
@@ -100,6 +123,8 @@ int SharedCommand::execute(){
 			SharedList = input->getSharedListVector(lastLabel); //get new list vector to process
 					
 			lookup = SharedList->getSharedRAbundVector();
+			mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+			
 			printSharedData(lookup); //prints info to the .shared file
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
 			delete SharedList;
@@ -110,7 +135,11 @@ int SharedCommand::execute(){
 		
 		out.close();
 		
-		mothurOut("complete."); mothurOutEndLine();
+		for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
+			delete it3->second;
+		}
+
+		
 		return 0;
 	}
 	catch(exception& e) {
@@ -126,6 +155,11 @@ void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup) {
 		for (int i = 0; i < thislookup.size(); i++) {
 			out << thislookup[i]->getLabel() << '\t' << thislookup[i]->getGroup() << '\t';
 			thislookup[i]->print(out);
+			
+			openOutputFileAppend(fileroot + thislookup[i]->getGroup() + ".rabund", *(filehandles[thislookup[i]->getGroup()]));
+			(*filehandles[thislookup[i]->getGroup()]) << thislookup[i]->getLabel()  << '\t' << thislookup[i]->getGroup()  << '\t';
+			thislookup[i]->print(*(filehandles[thislookup[i]->getGroup()]));
+			(*(filehandles[thislookup[i]->getGroup()])).close();
 		}
  
 	}
