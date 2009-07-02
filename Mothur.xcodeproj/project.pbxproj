@@ -70,6 +70,7 @@
 		3792948A0F2E258500B9034A /* parsimony.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 379294890F2E258500B9034A /* parsimony.cpp */; };
 		3799A9500FD6A58C00E33EDE /* distancedb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3799A94C0FD6A58C00E33EDE /* distancedb.cpp */; };
 		3799A9510FD6A58C00E33EDE /* seqsummarycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3799A94E0FD6A58C00E33EDE /* seqsummarycommand.cpp */; };
+		379D3D510FF90E090068C1C0 /* chimeraseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 379D3D500FF90E090068C1C0 /* chimeraseqscommand.cpp */; };
 		37AD4CE40F28AEA300AA2D49 /* sharedlistvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37AD4CE30F28AEA300AA2D49 /* sharedlistvector.cpp */; };
 		37AD4DBB0F28E2FE00AA2D49 /* tree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37AD4DBA0F28E2FE00AA2D49 /* tree.cpp */; };
 		37AD4DCA0F28F3DD00AA2D49 /* readtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37AD4DC90F28F3DD00AA2D49 /* readtree.cpp */; };
@@ -304,6 +305,9 @@
 		3799A94D0FD6A58C00E33EDE /* distancedb.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = distancedb.hpp; sourceTree = SOURCE_ROOT; };
 		3799A94E0FD6A58C00E33EDE /* seqsummarycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = seqsummarycommand.cpp; sourceTree = SOURCE_ROOT; };
 		3799A94F0FD6A58C00E33EDE /* seqsummarycommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = seqsummarycommand.h; sourceTree = SOURCE_ROOT; };
+		379D3D4F0FF90E090068C1C0 /* chimeraseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraseqscommand.h; sourceTree = "<group>"; };
+		379D3D500FF90E090068C1C0 /* chimeraseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeraseqscommand.cpp; sourceTree = "<group>"; };
+		379D3D6B0FF917F40068C1C0 /* filters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = filters.h; sourceTree = "<group>"; };
 		37AD4CE20F28AEA300AA2D49 /* sharedlistvector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedlistvector.h; sourceTree = SOURCE_ROOT; };
 		37AD4CE30F28AEA300AA2D49 /* sharedlistvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedlistvector.cpp; sourceTree = SOURCE_ROOT; };
 		37AD4DB90F28E2FE00AA2D49 /* tree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tree.h; sourceTree = SOURCE_ROOT; };
@@ -650,6 +654,7 @@
 				37C753F40FB34C0300DBD02E /* eachgapignore.h */,
 				373C69960FC1E63600137ACD /* efron.cpp */,
 				373C69970FC1E63600137ACD /* efron.h */,
+				379D3D6B0FF917F40068C1C0 /* filters.h */,
 				EB9303F70F53517300E8EF26 /* geom.h */,
 				EB9303F80F53517300E8EF26 /* geom.cpp */,
 				378C1AF10FB0644D004D63F5 /* goodscoverage.h */,
@@ -755,6 +760,8 @@
 				37D927CB0F21331F001D4494 /* collectsharedcommand.cpp */,
 				377326640FAF16E0007ABB8B /* consensuscommand.h */,
 				377326630FAF16E0007ABB8B /* consensuscommand.cpp */,
+				379D3D4F0FF90E090068C1C0 /* chimeraseqscommand.h */,
+				379D3D500FF90E090068C1C0 /* chimeraseqscommand.cpp */,
 				37B28F660F27590100808A62 /* deconvolutecommand.h */,
 				37B28F670F27590100808A62 /* deconvolutecommand.cpp */,
 				37C753CC0FB3415200DBD02E /* distancecommand.h */,
@@ -1103,6 +1110,7 @@
 				378598740FDD4C1500EF9D03 /* heatmapsim.cpp in Sources */,
 				378599100FDD7E8E00EF9D03 /* optionparser.cpp in Sources */,
 				7E5A17AF0FE57292003C6A03 /* mergefilecommand.cpp in Sources */,
+				379D3D510FF90E090068C1C0 /* chimeraseqscommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

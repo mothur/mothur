@@ -17,18 +17,9 @@ ConcensusCommand::ConcensusCommand(string fileroot){
 		abort = false;
 		
 		filename = fileroot;
-		//allow user to run help
-		//if(option == "help") { help(); abort = true; }
 		
-		//else {
-			//if (option != "") { mothurOut("There are no valid parameters for the consensus command."); mothurOutEndLine(); abort = true; }
-			
-		//	//no trees were read
-		//	if (globaldata->gTree.size() == 0) {  mothurOut("You must execute the read.tree command, before you may use the consensus command."); mothurOutEndLine(); abort = true;  }
-			//else { 
-			 t = globaldata->gTree;
-			 //	}
-		//}
+		t = globaldata->gTree;
+	
 	}
 	catch(exception& e) {
 		errorOut(e, "ConcensusCommand", "ConcensusCommand");
@@ -97,9 +88,10 @@ int ConcensusCommand::execute(){
 		out2 << "Species in Order: " << endl << endl;
 		for (int i = 0; i < treeSet.size(); i++) {  out2 << i+1 << ".  " << treeSet[i] << endl; }
 		
-		vector<string> temp; 
 		//output sets included
 		out2 << endl << "Sets included in the consensus tree:" << endl << endl;
+		
+		vector<string> temp;
 		for (it2 = nodePairsInTree.begin(); it2 != nodePairsInTree.end(); it2++) {
 			//only output pairs not leaves
 			if (it2->first.size() > 1) { 
@@ -112,6 +104,7 @@ int ConcensusCommand::execute(){
 					//find spot 
 					int index = findSpot(it2->first[i]);
 					temp[index] = "*";
+					//temp[index] = it2->first[i] + "  ";
 				}
 				
 				//output temp
@@ -173,8 +166,8 @@ int ConcensusCommand::buildConcensusTree(vector<string> nodeSet) {
 		//terminate recursion
 		}else if (count == numNodes) { return 0; }
 		else {
-			leftChildSet = getNextAvailableSet(nodeSet);
-			rightChildSet = getRestSet(nodeSet, leftChildSet);
+			//finds best child pair
+			leftChildSet = getNextAvailableSet(nodeSet, rightChildSet);
 			int left = buildConcensusTree(leftChildSet);
 			int right = buildConcensusTree(rightChildSet);
 			consensusTree->tree[count].setChildren(left, right);
@@ -221,6 +214,7 @@ void ConcensusCommand::getSets() {
 			}
 		}
 		
+		
 		//add each leaf to terminate recursion in consensus
 		//you want the leaves in there but with insignifigant sightings value so it is added last
 		//for each leaf node get descendant info.
@@ -238,33 +232,70 @@ void ConcensusCommand::getSets() {
 		}
 
 		sort(treeSet.begin(), treeSet.end());
+		
+		
+		map< vector<string>, int> nodePairsCopy = nodePairs;
+		
+		
+		//set initial rating on pairs to sightings + subgroup sightings
+		while (nodePairsCopy.size() != 0) {
+		
+			vector<string> small = getSmallest(nodePairsCopy);
+			
+			int subgrouprate = getSubgroupRating(small);
+		
+			nodePairsInitialRate[small] = nodePairs[small] + subgrouprate;
+			
+			nodePairsCopy.erase(small);
+		}
+		
 	}
 	catch(exception& e) {
 		errorOut(e, "ConcensusCommand", "getSets");
 		exit(1);
 	}
 }
-
 //**********************************************************************************************************************
-vector<string> ConcensusCommand::getNextAvailableSet(vector<string> bigset) {
-	try {
-		vector<string> largest; largest.clear();
-		int largestSighting = -1;
+vector<string> ConcensusCommand::getSmallest(map< vector<string>, int> nodes) {
+	try{
+		vector<string> smallest = nodes.begin()->first;
+		int smallsize = smallest.size();
 		
-		//go through the sets
-		for (it2 = nodePairs.begin(); it2 != nodePairs.end(); it2++) {
-			//are you a subset of bigset
-			if (isSubset(bigset, it2->first) == true) {
-			
-				//are you the largest. if you are the same size as current largest refer to sighting
-				if (it2->first.size() > largest.size()) { largest = it2->first;  largestSighting = it2->second; }
-				else if (it2->first.size() == largest.size()) {
-					if (it2->second > largestSighting) { largest = it2->first;  largestSighting = it2->second; }
-				}
-				
-			}
+		for(it2 = nodes.begin(); it2 != nodes.end(); it2++) {
+			if(it2->first.size() < smallsize) { smallsize = it2->first.size();  smallest = it2->first;  }
 		}
 		
+		return smallest;
+	}
+	catch(exception& e) {
+		errorOut(e, "ConcensusCommand", "getSmallest");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
+vector<string> ConcensusCommand::getNextAvailableSet(vector<string> bigset, vector<string>& rest) {
+	try {
+//cout << "new call " << endl << endl << endl;
+		vector<string> largest; largest.clear();
+		rest.clear();
+		
+		//if you are just 2 groups
+		if (bigset.size() == 2)  {   
+			rest.push_back(bigset[0]);
+			largest.push_back(bigset[1]);
+		}else{
+			rest = bestSplit[bigset][0];
+			largest = bestSplit[bigset][1];
+		}
+		
+		
+		//save for printing out later and for branch lengths
+		nodePairsInTree[rest] = nodePairs[rest];
+		
+		//delete whatever set you return because it is no longer available
+		nodePairs.erase(rest);
+
 		//save for printing out later and for branch lengths
 		nodePairsInTree[largest] = nodePairs[largest];
 		
@@ -276,6 +307,73 @@ vector<string> ConcensusCommand::getNextAvailableSet(vector<string> bigset) {
 	}
 	catch(exception& e) {
 		errorOut(e, "ConcensusCommand", "getNextAvailableSet");
+		exit(1);
+	}
+}
+
+/**********************************************************************************************************************/
+int ConcensusCommand::getSubgroupRating(vector<string> group) {
+	try {
+		map< vector<string>, int>::iterator ittemp;
+		map< vector< vector<string> > , int >::iterator it3;
+		int rate = 0;
+		
+		// ***********************************************************************************//
+		//1. this function must be called passing it littlest sets to biggest 
+		//		since it the rating is made from your sighting plus you best splits rating
+		//2. it saves the top pair to use later
+		// ***********************************************************************************//
+
+		
+		if (group.size() < 3) {  return rate;  }
+		
+		map< vector<string>, int> possiblePairing;  //this is all the subsets of group
+		
+		//go through the sets
+		for (it2 = nodePairs.begin(); it2 != nodePairs.end(); it2++) {
+			//are you a subset of bigset, then save in possiblePairings
+			if (isSubset(group, it2->first) == true) {  possiblePairing[it2->first] = it2->second;  }
+		}		
+	
+		map< vector< vector<string> > , int > rating;
+		
+		while (possiblePairing.size() != 0) {
+		
+			it2 = possiblePairing.begin(); 
+			vector<string> temprest = getRestSet(group, it2->first);
+			
+			//is the rest a set available in possiblePairings
+			ittemp = possiblePairing.find(temprest);
+			if (ittemp != possiblePairing.end()) {  //if the rest is in the possible pairings then add this pair to rating map
+				vector< vector<string> > temprate;
+				temprate.push_back(it2->first);  temprate.push_back(temprest);
+				
+				rating[temprate] = (nodePairsInitialRate[it2->first] + nodePairsInitialRate[temprest]);
+				
+				//erase so you dont add 1,2 and 2,1.
+				possiblePairing.erase(temprest);
+			}
+			
+			possiblePairing.erase(it2);
+		}
+
+
+		it3 = rating.begin();
+		rate = it3->second;
+		vector< vector<string> > topPair = it3->first;
+		
+		//choose the split with the best rating
+		for (it3 = rating.begin(); it3 != rating.end(); it3++) {
+			
+			if (it3->second > rate) {  rate = it3->second;  topPair = it3->first;  }
+		}
+		
+		bestSplit[group] = topPair;
+		
+		return rate;
+	}
+	catch(exception& e) {
+		errorOut(e, "ConcensusCommand", "getSubgroupRating");
 		exit(1);
 	}
 }
@@ -294,12 +392,6 @@ vector<string> ConcensusCommand::getRestSet(vector<string> bigset, vector<string
 			//its not in the subset so put it in the rest
 			if (inSubset == false) { rest.push_back(bigset[i]); }
 		}
-		
-		//save for printing out later and for branch lengths
-		nodePairsInTree[rest] = nodePairs[rest];
-		
-		//delete whatever set you return because it is no longer available
-		nodePairs.erase(rest);
 
 		return rest;
 	
@@ -313,6 +405,9 @@ vector<string> ConcensusCommand::getRestSet(vector<string> bigset, vector<string
 //**********************************************************************************************************************
 bool ConcensusCommand::isSubset(vector<string> bigset, vector<string> subset) {
 	try {
+		
+	
+		if (subset.size() > bigset.size()) { return false;  }
 		
 		//check if each guy in suset is also in bigset
 		for (int i = 0; i < subset.size(); i++) {

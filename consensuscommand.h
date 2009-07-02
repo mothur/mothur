@@ -35,6 +35,8 @@ private:
 										// ie. combos FI and EGK would create nodePairs[vector containing F and I] = 1; nodePairs[vector containing E, G and K] = 1
 										// if you saw the combo FI again in another tree you would then update nodePairs[vector containing F and I] = 2;
 										// requires vectors to be sorted to find key.
+	map< vector<string>, vector< vector<string> > > bestSplit;  //maps a group to its best split
+	map< vector<string>, int > nodePairsInitialRate;
 	map< vector<string>, int > nodePairsInTree;
 	map<string, int>::iterator it;
 	map< vector<string>, int>::iterator it2;
@@ -43,7 +45,9 @@ private:
 	int numNodes, numLeaves, count;  //count is the next available spot in the tree vector
 									 	
 	void getSets();
-	vector<string> getNextAvailableSet(vector<string>);  //gets next largest and highest rated set that is a subset of the set passed in.
+	int getSubgroupRating(vector<string>);
+	vector<string> getSmallest(map< vector<string>, int>);
+	vector<string> getNextAvailableSet(vector<string>, vector<string>&);  
 	vector<string> getRestSet(vector<string>, vector<string>);
 	bool isSubset(vector<string>, vector<string>); 
 	int findSpot(string); 

@@ -11,6 +11,7 @@
  */
 
 #include "command.hpp"
+#include "filters.h"
 
 class Sequence;
 class FilterSeqsCommand : public Command {
@@ -22,11 +23,6 @@ public:
 	void help();
 	
 private:
-	void doHard();
-	void doTrump(Sequence);
-	void doVertical();
-	void doSoft();
-	void getFreqs(Sequence);
 	string vertical, filter, fastafile, hard;	
 	int alignmentLength;
 
@@ -35,6 +31,8 @@ private:
 	float soft;
 	int numSeqs;
 	
+	Filters F;
+		
 	vector<int> a, t, g, c, gap;
 
 };
