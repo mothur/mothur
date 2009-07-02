@@ -380,78 +380,105 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 					//get estimates for numA
 					data = singleCalc->getValues(sabundA);
 					numA = data[0];
+	//cout << "num a = " << numA << endl;	
  			
 					//get estimates for numB
 					data = singleCalc->getValues(sabundB);
 					numB = data[0];
- 				
+ 	//cout << "num b = " << numB << endl;				
 					//get estimates for numC
 					data = singleCalc->getValues(sabundC);
 					numC = data[0];
-				
+	//cout << "num c = " << numC << endl;				
 					//get estimates for numD
 					data = singleCalc->getValues(sabundD);
 					numD = data[0];
-
+//cout << "num d = " << numD << endl;	
 
 					//get estimates for pairs
 					subset.clear();
 					subset.push_back(lookup[0]); subset.push_back(lookup[1]);
 					data = vCalcs[i]->getValues(subset);
 					sharedAB = data[0];
-				
+	//cout << "num ab = " << sharedAB << endl;			
 					subset.clear();
 					subset.push_back(lookup[0]); subset.push_back(lookup[2]);
 					data = vCalcs[i]->getValues(subset);
 					sharedAC = data[0];
-				
+	//cout << "num ac = " << sharedAC << endl;				
 					subset.clear();
 					subset.push_back(lookup[0]); subset.push_back(lookup[3]);
 					data = vCalcs[i]->getValues(subset);
 					sharedAD = data[0];
-				
+	//cout << "num ad = " << sharedAD << endl;			
 					subset.clear();
 					subset.push_back(lookup[1]); subset.push_back(lookup[2]);
 					data = vCalcs[i]->getValues(subset);
 					sharedBC = data[0];
-				
+	//cout << "num bc = " << sharedBC << endl;				
 					subset.clear();
 					subset.push_back(lookup[1]); subset.push_back(lookup[3]);
 					data = vCalcs[i]->getValues(subset);
 					sharedBD = data[0];
-				
+		//cout << "num bd = " << sharedBD << endl;						
 					subset.clear();
 					subset.push_back(lookup[2]); subset.push_back(lookup[3]);
 					data = vCalcs[i]->getValues(subset);
 					sharedCD = data[0];
-				
-				
+						
+	//cout << "num cd = " << sharedCD << endl;				
 					//get estimates for combos of 3
 					subset.clear();
 					subset.push_back(lookup[0]); subset.push_back(lookup[1]); subset.push_back(lookup[2]);
 					data = vCalcs[i]->getValues(subset);
 					sharedABC = data[0];
-				
+		//cout << "num abc = " << sharedABC << endl;					
 					subset.clear();
 					subset.push_back(lookup[0]); subset.push_back(lookup[2]); subset.push_back(lookup[3]);
 					data = vCalcs[i]->getValues(subset);
 					sharedACD = data[0];
-				
+			//cout << "num acd = " << sharedACD << endl;	
 					subset.clear();
 					subset.push_back(lookup[1]); subset.push_back(lookup[2]); subset.push_back(lookup[3]);
 					data = vCalcs[i]->getValues(subset);
 					sharedBCD = data[0];
-				
+		//cout << "num bcd = " << sharedBCD << endl;		
 					subset.clear();
 					subset.push_back(lookup[0]); subset.push_back(lookup[1]); subset.push_back(lookup[3]);
 					data = vCalcs[i]->getValues(subset);
 					sharedABD = data[0];
-
+//cout << "num abd = " << sharedABD << endl;
 					//get estimate for all four
 					data = vCalcs[i]->getValues(lookup);
 					sharedABCD = data[0];
-
-		
+		//cout << "num abcd = " << sharedABCD << endl << endl;			
+					//make adjustments
+					sharedABC = sharedABC - sharedABCD;
+			//cout << "num abc = " << sharedABC << endl;		
+					sharedABD = sharedABD - sharedABCD;
+				//cout << "num abd = " << sharedABD << endl;
+					sharedACD = sharedACD - sharedABCD;
+				//cout << "num acd = " << sharedACD << endl;
+					sharedBCD = sharedBCD - sharedABCD;
+				//cout << "num bcd = " << sharedBCD << endl;
+					
+					sharedAB = sharedAB - sharedABC - sharedABCD - sharedABD; // cout << "num ab = " << sharedAB << endl;
+					sharedAC = sharedAC - sharedABC - sharedABCD - sharedACD; // cout << "num ac = " << sharedAC << endl;
+					sharedAD = sharedAD - sharedABD - sharedABCD - sharedACD; // cout << "num ad = " << sharedAD << endl;
+					
+					sharedBC = sharedBC - sharedABC - sharedABCD - sharedBCD; // cout << "num bc = " << sharedBC << endl;
+					sharedBD = sharedBD - sharedABD - sharedABCD - sharedBCD; // cout << "num bd = " << sharedBD << endl; 
+					sharedCD = sharedCD - sharedACD - sharedABCD - sharedBCD; // cout << "num cd = " << sharedCD << endl;
+					
+					numA = numA - sharedAB - sharedAC - sharedAD - sharedABCD - sharedABC - sharedACD - sharedABD;
+			//cout << "num a = " << numA << endl;		
+					numB = numB - sharedAB - sharedBC - sharedBD - sharedABCD - sharedABC - sharedABD - sharedBCD;
+			//cout << "num b = " << numB << endl;		
+					numC = numC - sharedAC - sharedBC - sharedCD - sharedABCD - sharedABC - sharedACD - sharedBCD;
+			//cout << "num c = " << numC << endl;		
+					numD = numD - sharedAD - sharedBD - sharedCD - sharedABCD - sharedBCD - sharedACD - sharedABD;
+			//cout << "num d = " << numD << endl;		
+					
 					//image window
 					outsvg << "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 700 700\" >\n";
 					outsvg << "<g>\n";
@@ -478,8 +505,8 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(215 - ((int)toString(sharedBC).length() / 2)) + "\" y=\"190\">" + toString(sharedBC) + "</text>\n";  
 					outsvg << "<text fill=\"black\" class=\"seri\"  x=\"" + toString(150 - ((int)toString(numD).length() / 2)) + "\"   y=\"230\">" + toString(numD) + "</text>\n";  
 					outsvg << "<text fill=\"black\" class=\"seri\"  x=\"" + toString(150 - ((int)lookup[3]->getGroup().length() / 2)) + "\"   y=\"210\">" + lookup[3]->getGroup() + "</text>\n"; 
-					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(240 - ((int)toString(sharedBC).length() / 2)) + "\" y=\"325\">" + toString(sharedAD) + "</text>\n"; 
-					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(470 - ((int)toString(sharedBC).length() / 2)) + "\" y=\"325\">" + toString(sharedBD) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(240 - ((int)toString(sharedAD).length() / 2)) + "\" y=\"325\">" + toString(sharedAD) + "</text>\n"; 
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(470 - ((int)toString(sharedBD).length() / 2)) + "\" y=\"325\">" + toString(sharedBD) + "</text>\n";
 					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(350 - ((int)toString(sharedCD).length() / 2)) + "\" y=\"430\">" + toString(sharedCD) + "</text>\n"; 
 					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(275 - ((int)toString(sharedABD).length() / 2)) + "\" y=\"240\">" + toString(sharedABD) + "</text>\n"; 
 					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(400 - ((int)toString(sharedBCD).length() / 2)) + "\" y=\"360\">" + toString(sharedBCD) + "</text>\n";

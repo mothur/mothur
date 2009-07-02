@@ -56,6 +56,13 @@ FilterSeqsCommand::FilterSeqsCommand(string option){
 			
 			numSeqs = 0;
 			
+			if (abort == false) {
+			
+				if (soft != 0)			{  F.setSoft(soft);		}
+				if (trump != '*')		{  F.setTrump(trump);	}
+			
+			}
+						
 		}
 		
 	}
@@ -90,70 +97,6 @@ void FilterSeqsCommand::help(){
 
 /**************************************************************************************/
 
-void FilterSeqsCommand::doHard() {
-	
-	ifstream fileHandle;
-	openInputFile(hard, fileHandle);
-	
-	fileHandle >> filter;
-	
-	fileHandle.close();
-
-}
-
-/**************************************************************************************/
-
-void FilterSeqsCommand::doTrump(Sequence seq) {
-	
-	string curAligned = seq.getAligned();
-
-	for(int j = 0; j < alignmentLength; j++) {
-		if(curAligned[j] == trump){
-			filter[j] = '0';
-		}
-	}
-
-}
-
-/**************************************************************************************/
-
-void FilterSeqsCommand::doVertical() {
-
-	for(int i=0;i<alignmentLength;i++){
-		if(gap[i] == numSeqs)	{	filter[i] = '0';	}
-	}
-	
-}
-
-/**************************************************************************************/
-
-void FilterSeqsCommand::doSoft() {
-	
-	int threshold = int (soft * numSeqs);
-	
-	for(int i=0;i<alignmentLength;i++){
-		if(a[i] < threshold && t[i] < threshold && g[i] < threshold && c[i] < threshold){	filter[i] = 0;	}
-	}
-}
-
-/**************************************************************************************/
-
-void FilterSeqsCommand::getFreqs(Sequence seq) {
-
-	string curAligned = seq.getAligned();;
-	
-	for(int j=0;j<alignmentLength;j++){
-		if(toupper(curAligned[j]) == 'A')										{	a[j]++;		}
-		else if(toupper(curAligned[j]) == 'T' || toupper(curAligned[j]) == 'U')	{	t[j]++;		}
-		else if(toupper(curAligned[j]) == 'G')									{	g[j]++;		}
-		else if(toupper(curAligned[j]) == 'C')									{	c[j]++;		}
-		else if(curAligned[j] == '-' || curAligned[j] == '.')					{	gap[j]++;	}
-	}
-	
-}
-
-/**************************************************************************************/
-
 int FilterSeqsCommand::execute() {	
 	try {
 	
@@ -166,31 +109,33 @@ int FilterSeqsCommand::execute() {
 		alignmentLength = testSeq.getAlignLength();
 		inFASTA.seekg(0);
 		
+		F.setLength(alignmentLength);
+		
 		if(soft != 0 || isTrue(vertical)){
-			a.assign(alignmentLength, 0);
-			t.assign(alignmentLength, 0);
-			g.assign(alignmentLength, 0);
-			c.assign(alignmentLength, 0);
-			gap.assign(alignmentLength, 0);
+			F.initialize();
 		}
 		
-		if(hard.compare("") != 0)	{	doHard();		}
-		else						{	filter = string(alignmentLength, '1');	}
+		if(hard.compare("") != 0)	{	F.doHard(hard);		}
+		else						{	F.setFilter(string(alignmentLength, '1'));	}
 
 		if(trump != '*' || isTrue(vertical) || soft != 0){
 			while(!inFASTA.eof()){	//read through and create the filter...
 				Sequence seq(inFASTA);
-				if(trump != '*'){	doTrump(seq);	}
-				if(isTrue(vertical) || soft != 0){	getFreqs(seq);	}
+				if(trump != '*'){	F.doTrump(seq);	}
+				if(isTrue(vertical) || soft != 0){	F.getFreqs(seq);	}
 				numSeqs++;
 				cout.flush();
 			}
 		
 		}
 		inFASTA.close();
+		F.setNumSeqs(numSeqs);
 		
-		if(isTrue(vertical) == 1)	{	doVertical();	}
-		if(soft != 0)	{	doSoft();		}			
+		
+		if(isTrue(vertical) == 1)	{	F.doVertical();	}
+		if(soft != 0)				{	F.doSoft();		}
+		
+		filter = F.getFilter();
 
 		ofstream outFilter;
 		string filterFile = getRootName(fastafile) + "filter";
