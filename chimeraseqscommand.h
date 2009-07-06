@@ -14,8 +14,11 @@
 #include "command.hpp"
 #include "filterseqscommand.h"
 #include "sequence.hpp"
+#include "sparsematrix.hpp"
+#include "dist.h"
 
-
+typedef list<PCell>::iterator MatData;
+typedef map<int, float> SeqMap;  //maps sequence to all distance for that seqeunce
 
 /***********************************************************/
 
@@ -36,7 +39,7 @@ private:
 
 	};
 
-
+	Dist* distCalculator;
 	bool abort;
 	string method, fastafile;
 	bool filter, correction;
@@ -47,6 +50,8 @@ private:
 	
 	int findAverageMidPoint();
 	void readSeqs();
+	void generatePreferences(SparseMatrix*, SparseMatrix*);
+	int createSparseMatrix(int, int, SparseMatrix*, vector<Sequence>);
 	
 
 };
