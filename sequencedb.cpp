@@ -30,23 +30,11 @@ SequenceDB::SequenceDB(int newSize) {
 
 SequenceDB::SequenceDB(ifstream& filehandle) {
 	try{
-		string name, sequence, line;
-		sequence = "";
-		int c;
-		string temp;
-		
-		
+				
 		//read through file
-		while ((c = filehandle.get()) != EOF) {
-			name = ""; sequence = ""; 
-			//is this a name
-			if (c == '>') { 
-				name = readName(filehandle); 
-				sequence = readSequence(filehandle); 
-			}else {  mothurOut("Error fasta in your file. Please correct."); mothurOutEndLine(); }
-
+		while (!filehandle.eof()) {
 			//input sequence info into sequencedb
-			Sequence newSequence(name, sequence);
+			Sequence newSequence(filehandle);
 			data.push_back(newSequence);
 			
 			//takes care of white space

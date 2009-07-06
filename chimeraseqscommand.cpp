@@ -107,9 +107,54 @@ int ChimeraSeqsCommand::execute(){
 		
 		//find average midpoint of seqs
 		midpoint = findAverageMidPoint();
+		
+		//create 2 vectors of sequences, 1 for left side and one for right side
+		vector<Sequence> left;  vector<Sequence> right;
+		
+		for (int i = 0; i < seqs.size(); i++) {
+			//save left side
+			string seqLeft = seqs[i].getAligned();
+			seqLeft = seqLeft.substr(0, midpoint);
+			Sequence tempLeft(seqs[i].getName(), seqLeft);
+			left.push_back(tempLeft);
+			
+			//save right side
+			string seqRight = seqs[i].getAligned();
+			seqRight = seqRight.substr(midpoint+1, (seqRight.length()-midpoint-1));
+			Sequence tempRight(seqs[i].getName(), seqRight);
+			right.push_back(tempRight);
+		}
 				
 		//this should be parallelized
-		//generatePreferences();
+		//perference = sum of (| distance of my left to sequence j's left - distance of my right to sequence j's right | )
+		//create a matrix containing the distance from left to left and right to right
+		//calculate distances
+		SparseMatrix* SparseLeft = new SparseMatrix();
+		SparseMatrix* SparseRight = new SparseMatrix();
+		
+		createSparseMatrix(0, left.size(), SparseLeft, left);
+		createSparseMatrix(0, right.size(), SparseRight, right);
+		
+		
+		//vector<SeqMap> distMapRight;
+		//vector<SeqMap> distMapLeft;
+		
+		// Create a data structure to quickly access the distance information.
+		// It consists of a vector of distance maps, where each map contains
+		// all distances of a certain sequence. Vector and maps are accessed
+		// via the index of a sequence in the distance matrix
+		//distMapRight = vector<SeqMap>(globaldata->gListVector->size()); 
+		//distMapLeft = vector<SeqMap>(globaldata->gListVector->size()); 
+		for (MatData currentCell = SparseLeft->begin(); currentCell != SparseLeft->end(); currentCell++) {
+			//distMapLeft[currentCell->row][currentCell->column] = currentCell->dist;
+		}
+		for (MatData currentCell = SparseRight->begin(); currentCell != SparseRight->end(); currentCell++) {
+			//distMapRight[currentCell->row][currentCell->column] = currentCell->dist;
+		}
+
+		
+		//fill preference structure
+		//generatePreferences(distMapLeft, distMapRight);
 		
 				
 		//output results to screen						
@@ -203,20 +248,22 @@ int ChimeraSeqsCommand::findAverageMidPoint(){
 	}
 }
 
-/***************************************************************************************************************
-int ChimeraSeqsCommand::createSparseMatrix(int startLine, int endLine, SparseMatrix* sparse){
+/***************************************************************************************************************/
+int ChimeraSeqsCommand::createSparseMatrix(int startSeq, int endSeq, SparseMatrix* sparse, vector<Sequence> s){
 	try {
 
-		for(int i=startLine; i<endLine; i++){
+		for(int i=startSeq; i<endSeq; i++){
 			
 			for(int j=0;j<i;j++){
 			
-				distCalculator->calcDist(seqs.get(i), seqs.get(j));
-				double dist = distCalculator->getDist();
+				//distCalculator->calcDist(s.get(i), s.get(j));
+				float dist = distCalculator->getDist();
 				
-				
+				PCell temp(i, j, dist);
+				sparse->addCell(temp);
 				
 			}
+		}
 			
 	
 		return 1;
@@ -226,5 +273,31 @@ int ChimeraSeqsCommand::createSparseMatrix(int startLine, int endLine, SparseMat
 		exit(1);
 	}
 }
+/***************************************************************************************************************
+void ChimeraSeqsCommand::generatePreferences(vector<SeqMap> left, vector<SeqMap> right){
+	try {
+
+		for (int i = 0; i < left.size(); i++) {
+			
+			int iscore = 0;
+			float closestLeft = 100000.0;
+			float closestRight = 100000.0;
+			
+			for (int j = 0; j < left.size(); j++) {
+				
+				//iscore += abs(left
+			
+			}
+		
+		}
+
+	}
+	catch(exception& e) {
+		errorOut(e, "ChimeraSeqsCommand", "generatePreferences");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+
 /**************************************************************************************************/
 

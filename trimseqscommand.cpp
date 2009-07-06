@@ -256,263 +256,319 @@ int TrimSeqsCommand::execute(){
 //***************************************************************************************************************
 
 void TrimSeqsCommand::getOligos(vector<ofstream*>& outFASTAVec){
-	
-	ifstream inOligos;
-	openInputFile(oligoFile, inOligos);
-
-	ofstream test;
-	
-	string type, oligo, group;
-	int index=0;
-
-	while(!inOligos.eof()){
-		inOligos >> type;
-
-		if(type[0] == '#'){
-			while (!inOligos.eof())	{	char c = inOligos.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-		}
-		else{
-			inOligos >> oligo;
+	try {
+		ifstream inOligos;
+		openInputFile(oligoFile, inOligos);
+		
+		ofstream test;
+		
+		string type, oligo, group;
+		int index=0;
+		
+		while(!inOligos.eof()){
+			inOligos >> type;
 			
-			for(int i=0;i<oligo.length();i++){
-				oligo[i] = toupper(oligo[i]);
-				if(oligo[i] == 'U')	{	oligo[i] = 'T';	}
+			if(type[0] == '#'){
+				while (!inOligos.eof())	{	char c = inOligos.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
 			}
-			
-			if(type == "forward"){
-				forPrimer.push_back(oligo);
-			}
-			else if(type == "reverse"){
-				revPrimer.push_back(oligo);
-			}
-			else if(type == "barcode"){
-				inOligos >> group;
-				barcodes[oligo]=index++;
-				groupVector.push_back(group);
+			else{
+				inOligos >> oligo;
+				
+				for(int i=0;i<oligo.length();i++){
+					oligo[i] = toupper(oligo[i]);
+					if(oligo[i] == 'U')	{	oligo[i] = 'T';	}
+				}
+				
+				if(type == "forward"){
+					forPrimer.push_back(oligo);
+				}
+				else if(type == "reverse"){
+					revPrimer.push_back(oligo);
+				}
+				else if(type == "barcode"){
+					inOligos >> group;
+					barcodes[oligo]=index++;
+					groupVector.push_back(group);
 					
-				if(allFiles){
-					outFASTAVec.push_back(new ofstream((getRootName(fastaFile) + group + ".fasta").c_str(), ios::ate));
+					if(allFiles){
+						outFASTAVec.push_back(new ofstream((getRootName(fastaFile) + group + ".fasta").c_str(), ios::ate));
+					}
 				}
 			}
 		}
+		
+		inOligos.close();
+		
+		numFPrimers = forPrimer.size();
+		numRPrimers = revPrimer.size();
+		
 	}
-	
-	inOligos.close();
-	
-	numFPrimers = forPrimer.size();
-	numRPrimers = revPrimer.size();
+	catch(exception& e) {
+		errorOut(e, "TrimSeqsCommand", "getOligos");
+		exit(1);
+	}
+
 }
 
 //***************************************************************************************************************
 
 bool TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
-	
-	string rawSequence = seq.getUnaligned();
-	bool success = 0;	//guilty until proven innocent
-	
-	for(map<string,int>::iterator it=barcodes.begin();it!=barcodes.end();it++){
-		string oligo = it->first;
-		if(rawSequence.length() < oligo.length()){	//let's just assume that the barcodes are the same length
-			success = 0;
-			break;
-		}
+	try {
+		string rawSequence = seq.getUnaligned();
+		bool success = 0;	//guilty until proven innocent
 		
-		if(compareDNASeq(oligo, rawSequence.substr(0,oligo.length()))){
-			group = it->second;
-			seq.setUnaligned(rawSequence.substr(oligo.length()));
-			success = 1;
-			break;
+		for(map<string,int>::iterator it=barcodes.begin();it!=barcodes.end();it++){
+			string oligo = it->first;
+			if(rawSequence.length() < oligo.length()){	//let's just assume that the barcodes are the same length
+				success = 0;
+				break;
+			}
+			
+			if(compareDNASeq(oligo, rawSequence.substr(0,oligo.length()))){
+				group = it->second;
+				seq.setUnaligned(rawSequence.substr(oligo.length()));
+				success = 1;
+				break;
+			}
 		}
+		return success;
+		
 	}
-	return success;
-	
+	catch(exception& e) {
+		errorOut(e, "TrimSeqsCommand", "stripBarcode");
+		exit(1);
+	}
+
 }
 
 //***************************************************************************************************************
 
 bool TrimSeqsCommand::stripForward(Sequence& seq){
-	
-	string rawSequence = seq.getUnaligned();
-	bool success = 0;	//guilty until proven innocent
-	
-	for(int i=0;i<numFPrimers;i++){
-		string oligo = forPrimer[i];
+	try {
+		string rawSequence = seq.getUnaligned();
+		bool success = 0;	//guilty until proven innocent
 		
-		if(rawSequence.length() < oligo.length()){
-			success = 0;
-			break;
+		for(int i=0;i<numFPrimers;i++){
+			string oligo = forPrimer[i];
+			
+			if(rawSequence.length() < oligo.length()){
+				success = 0;
+				break;
+			}
+			
+			if(compareDNASeq(oligo, rawSequence.substr(0,oligo.length()))){
+				seq.setUnaligned(rawSequence.substr(oligo.length()));
+				success = 1;
+				break;
+			}
 		}
-
-		if(compareDNASeq(oligo, rawSequence.substr(0,oligo.length()))){
-			seq.setUnaligned(rawSequence.substr(oligo.length()));
-			success = 1;
-			break;
-		}
+		
+		return success;
+		
 	}
-	
-	return success;
-	
+	catch(exception& e) {
+		errorOut(e, "TrimSeqsCommand", "stripForward");
+		exit(1);
+	}
 }
 
 //***************************************************************************************************************
 
 bool TrimSeqsCommand::stripReverse(Sequence& seq){
-	
-	string rawSequence = seq.getUnaligned();
-	bool success = 0;	//guilty until proven innocent
-	
-	for(int i=0;i<numRPrimers;i++){
-		string oligo = revPrimer[i];
+	try {
+		string rawSequence = seq.getUnaligned();
+		bool success = 0;	//guilty until proven innocent
 		
-		if(rawSequence.length() < oligo.length()){
-			success = 0;
-			break;
-		}
+		for(int i=0;i<numRPrimers;i++){
+			string oligo = revPrimer[i];
+			
+			if(rawSequence.length() < oligo.length()){
+				success = 0;
+				break;
+			}
+			
+			if(compareDNASeq(oligo, rawSequence.substr(rawSequence.length()-oligo.length(),oligo.length()))){
+				seq.setUnaligned(rawSequence.substr(rawSequence.length()-oligo.length()));
+				success = 1;
+				break;
+			}
+		}	
+		return success;
 		
-		if(compareDNASeq(oligo, rawSequence.substr(rawSequence.length()-oligo.length(),oligo.length()))){
-			seq.setUnaligned(rawSequence.substr(rawSequence.length()-oligo.length()));
-			success = 1;
-			break;
-		}
-	}	
-	return success;
-	
+	}
+	catch(exception& e) {
+		errorOut(e, "TrimSeqsCommand", "stripReverse");
+		exit(1);
+	}
 }
 
 //***************************************************************************************************************
 
 bool TrimSeqsCommand::cullLength(Sequence& seq){
+	try {
 	
-	int length = seq.getNumBases();
-	bool success = 0;	//guilty until proven innocent
+		int length = seq.getNumBases();
+		bool success = 0;	//guilty until proven innocent
+		
+		if(length >= minLength && maxLength == 0)			{	success = 1;	}
+		else if(length >= minLength && length <= maxLength)	{	success = 1;	}
+		else												{	success = 0;	}
+		
+		return success;
 	
-	if(length >= minLength && maxLength == 0)			{	success = 1;	}
-	else if(length >= minLength && length <= maxLength)	{	success = 1;	}
-	else												{	success = 0;	}
-	
-	return success;
+	}
+	catch(exception& e) {
+		errorOut(e, "TrimSeqsCommand", "cullLength");
+		exit(1);
+	}
 	
 }
 
 //***************************************************************************************************************
 
 bool TrimSeqsCommand::cullHomoP(Sequence& seq){
-	
-	int longHomoP = seq.getLongHomoPolymer();
-	bool success = 0;	//guilty until proven innocent
-	
-	if(longHomoP <= maxHomoP){	success = 1;	}
-	else					{	success = 0;	}
-	
-	return success;
+	try {
+		int longHomoP = seq.getLongHomoPolymer();
+		bool success = 0;	//guilty until proven innocent
+		
+		if(longHomoP <= maxHomoP){	success = 1;	}
+		else					{	success = 0;	}
+		
+		return success;
+	}
+	catch(exception& e) {
+		errorOut(e, "TrimSeqsCommand", "cullHomoP");
+		exit(1);
+	}
 	
 }
 
 //***************************************************************************************************************
 
 bool TrimSeqsCommand::cullAmbigs(Sequence& seq){
-	
-	int numNs = seq.getAmbigBases();
-	bool success = 0;	//guilty until proven innocent
-	
-	if(numNs <= maxAmbig)	{	success = 1;	}
-	else					{	success = 0;	}
-	
-	return success;
+	try {
+		int numNs = seq.getAmbigBases();
+		bool success = 0;	//guilty until proven innocent
+		
+		if(numNs <= maxAmbig)	{	success = 1;	}
+		else					{	success = 0;	}
+		
+		return success;
+	}
+	catch(exception& e) {
+		errorOut(e, "TrimSeqsCommand", "cullAmbigs");
+		exit(1);
+	}
 	
 }
 
 //***************************************************************************************************************
 
 bool TrimSeqsCommand::compareDNASeq(string oligo, string seq){
-	
-	bool success = 1;
-	int length = oligo.length();
-	
-	for(int i=0;i<length;i++){
+	try {
+		bool success = 1;
+		int length = oligo.length();
 		
-		if(oligo[i] != seq[i]){
-			if(oligo[i] == 'A' || oligo[i] == 'T' || oligo[i] == 'G' || oligo[i] == 'C')	{	success = 0;	}
-			else if((oligo[i] == 'N' || oligo[i] == 'I') && (seq[i] == 'N'))				{	success = 0;	}
-			else if(oligo[i] == 'R' && (seq[i] != 'A' && seq[i] != 'G'))					{	success = 0;	}
-			else if(oligo[i] == 'Y' && (seq[i] != 'C' && seq[i] != 'T'))					{	success = 0;	}
-			else if(oligo[i] == 'M' && (seq[i] != 'C' && seq[i] != 'A'))					{	success = 0;	}
-			else if(oligo[i] == 'K' && (seq[i] != 'T' && seq[i] != 'G'))					{	success = 0;	}
-			else if(oligo[i] == 'W' && (seq[i] != 'T' && seq[i] != 'A'))					{	success = 0;	}
-			else if(oligo[i] == 'S' && (seq[i] != 'C' && seq[i] != 'G'))					{	success = 0;	}
-			else if(oligo[i] == 'B' && (seq[i] != 'C' && seq[i] != 'T' && seq[i] != 'G'))	{	success = 0;	}
-			else if(oligo[i] == 'D' && (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'G'))	{	success = 0;	}
-			else if(oligo[i] == 'H' && (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'C'))	{	success = 0;	}
-			else if(oligo[i] == 'V' && (seq[i] != 'A' && seq[i] != 'C' && seq[i] != 'G'))	{	success = 0;	}			
+		for(int i=0;i<length;i++){
 			
-			if(success == 0)	{	break;	}
+			if(oligo[i] != seq[i]){
+				if(oligo[i] == 'A' || oligo[i] == 'T' || oligo[i] == 'G' || oligo[i] == 'C')	{	success = 0;	}
+				else if((oligo[i] == 'N' || oligo[i] == 'I') && (seq[i] == 'N'))				{	success = 0;	}
+				else if(oligo[i] == 'R' && (seq[i] != 'A' && seq[i] != 'G'))					{	success = 0;	}
+				else if(oligo[i] == 'Y' && (seq[i] != 'C' && seq[i] != 'T'))					{	success = 0;	}
+				else if(oligo[i] == 'M' && (seq[i] != 'C' && seq[i] != 'A'))					{	success = 0;	}
+				else if(oligo[i] == 'K' && (seq[i] != 'T' && seq[i] != 'G'))					{	success = 0;	}
+				else if(oligo[i] == 'W' && (seq[i] != 'T' && seq[i] != 'A'))					{	success = 0;	}
+				else if(oligo[i] == 'S' && (seq[i] != 'C' && seq[i] != 'G'))					{	success = 0;	}
+				else if(oligo[i] == 'B' && (seq[i] != 'C' && seq[i] != 'T' && seq[i] != 'G'))	{	success = 0;	}
+				else if(oligo[i] == 'D' && (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'G'))	{	success = 0;	}
+				else if(oligo[i] == 'H' && (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'C'))	{	success = 0;	}
+				else if(oligo[i] == 'V' && (seq[i] != 'A' && seq[i] != 'C' && seq[i] != 'G'))	{	success = 0;	}			
+				
+				if(success == 0)	{	break;	}
+			}
+			else{
+				success = 1;
+			}
 		}
-		else{
-			success = 1;
-		}
+		
+		return success;
 	}
-	
-	return success;
+	catch(exception& e) {
+		errorOut(e, "TrimSeqsCommand", "compareDNASeq");
+		exit(1);
+	}
+
 }
 
 //***************************************************************************************************************
 
 bool TrimSeqsCommand::stripQualThreshold(Sequence& seq, ifstream& qFile){
-	
-	string rawSequence = seq.getUnaligned();
-	int seqLength = rawSequence.length();
-	string name;
-	
-	qFile >> name;
-	if(name.substr(1) != seq.getName())	{	mothurOut("sequence name mismatch btwn fasta and qual file"); mothurOutEndLine();	}
-	while (!qFile.eof())	{	char c = qFile.get(); if (c == 10 || c == 13){	break;	}	}
-	
-	int score;
-	int end = seqLength;
-	
-	for(int i=0;i<seqLength;i++){
-		qFile >> score;
-
-		if(score <= qThreshold){
-			end = i;
-			break;
+	try {
+		string rawSequence = seq.getUnaligned();
+		int seqLength = rawSequence.length();
+		string name;
+		
+		qFile >> name;
+		if (name.length() != 0) {  if(name.substr(1) != seq.getName())	{	mothurOut("sequence name mismatch btwn fasta and qual file"); mothurOutEndLine();	}  } 
+		while (!qFile.eof())	{	char c = qFile.get(); if (c == 10 || c == 13){	break;	}	}
+		
+		int score;
+		int end = seqLength;
+		
+		for(int i=0;i<seqLength;i++){
+			qFile >> score;
+			
+			if(score <= qThreshold){
+				end = i;
+				break;
+			}
 		}
+		for(int i=end+1;i<seqLength;i++){
+			qFile >> score;
+		}
+		
+		seq.setUnaligned(rawSequence.substr(0,end));
+		
+		return 1;
 	}
-	for(int i=end+1;i<seqLength;i++){
-		qFile >> score;
+	catch(exception& e) {
+		errorOut(e, "TrimSeqsCommand", "stripQualThreshold");
+		exit(1);
 	}
-
-	seq.setUnaligned(rawSequence.substr(0,end));
-
-	return 1;
 }
 
 //***************************************************************************************************************
 
 bool TrimSeqsCommand::cullQualAverage(Sequence& seq, ifstream& qFile){
-	
-	string rawSequence = seq.getUnaligned();
-	int seqLength = seq.getNumBases();
-	bool success = 0;	//guilty until proven innocent
-	string name;
-	
-	qFile >> name;
-	if(name.substr(1) != seq.getName())	{	mothurOut("sequence name mismatch btwn fasta and qual file"); mothurOutEndLine();	}
-	while (!qFile.eof())	{	char c = qFile.get(); if (c == 10 || c == 13){	break;	}	}
-	
-	float score;	
-	float average = 0;
-	
-	for(int i=0;i<seqLength;i++){
-		qFile >> score;
-		average += score;
+	try {
+		string rawSequence = seq.getUnaligned();
+		int seqLength = seq.getNumBases();
+		bool success = 0;	//guilty until proven innocent
+		string name;
+		
+		qFile >> name;
+		if (name.length() != 0) {  if(name.substr(1) != seq.getName())	{	mothurOut("sequence name mismatch btwn fasta and qual file"); mothurOutEndLine();	} }
+		while (!qFile.eof())	{	char c = qFile.get(); if (c == 10 || c == 13){	break;	}	}
+		
+		float score;	
+		float average = 0;
+		
+		for(int i=0;i<seqLength;i++){
+			qFile >> score;
+			average += score;
+		}
+		average /= seqLength;
+		
+		if(average >= qAverage)	{	success = 1;	}
+		else					{	success = 0;	}
+		
+		return success;
 	}
-	average /= seqLength;
-	
-	if(average >= qAverage)	{	success = 1;	}
-	else					{	success = 0;	}
-	
-	return success;
+	catch(exception& e) {
+		errorOut(e, "TrimSeqsCommand", "cullQualAverage");
+		exit(1);
+	}
 }
 
 //***************************************************************************************************************
