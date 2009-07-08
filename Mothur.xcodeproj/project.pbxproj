@@ -79,6 +79,7 @@
 		37B73C761004BEFD008C4B41 /* listseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37B73C751004BEFD008C4B41 /* listseqscommand.cpp */; };
 		37B73CA61004D89A008C4B41 /* getseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37B73CA51004D89A008C4B41 /* getseqscommand.cpp */; };
 		37B73CC01004EB38008C4B41 /* removeseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37B73CBF1004EB38008C4B41 /* removeseqscommand.cpp */; };
+		37B73CCF1004F5E0008C4B41 /* systemcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37B73CCE1004F5E0008C4B41 /* systemcommand.cpp */; };
 		37C1D9730F86506E0059E3F0 /* binsequencecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37C1D9720F86506E0059E3F0 /* binsequencecommand.cpp */; };
 		37C753CE0FB3415200DBD02E /* distancecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37C753CD0FB3415200DBD02E /* distancecommand.cpp */; };
 		37D928550F21331F001D4494 /* ace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D927B80F21331F001D4494 /* ace.cpp */; };
@@ -327,6 +328,8 @@
 		37B73CA51004D89A008C4B41 /* getseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getseqscommand.cpp; sourceTree = "<group>"; };
 		37B73CBE1004EB38008C4B41 /* removeseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = removeseqscommand.h; sourceTree = "<group>"; };
 		37B73CBF1004EB38008C4B41 /* removeseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removeseqscommand.cpp; sourceTree = "<group>"; };
+		37B73CCD1004F5E0008C4B41 /* systemcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = systemcommand.h; sourceTree = "<group>"; };
+		37B73CCE1004F5E0008C4B41 /* systemcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = systemcommand.cpp; sourceTree = "<group>"; };
 		37C1D9710F86506E0059E3F0 /* binsequencecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = binsequencecommand.h; sourceTree = SOURCE_ROOT; };
 		37C1D9720F86506E0059E3F0 /* binsequencecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = binsequencecommand.cpp; sourceTree = SOURCE_ROOT; };
 		37C753CC0FB3415200DBD02E /* distancecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = distancecommand.h; sourceTree = SOURCE_ROOT; };
@@ -835,6 +838,8 @@
 				37D928460F21331F001D4494 /* summarycommand.cpp */,
 				37D9284B0F21331F001D4494 /* summarysharedcommand.h */,
 				37D9284A0F21331F001D4494 /* summarysharedcommand.cpp */,
+				37B73CCD1004F5E0008C4B41 /* systemcommand.h */,
+				37B73CCE1004F5E0008C4B41 /* systemcommand.cpp */,
 				211C38370F961E1F00FEE541 /* treegroupscommand.h */,
 				211C38360F961E1F00FEE541 /* treegroupscommand.cpp */,
 				7E09C5340FDA7F65002ECAE5 /* trimseqscommand.h */,
@@ -1129,6 +1134,7 @@
 				37B73C761004BEFD008C4B41 /* listseqscommand.cpp in Sources */,
 				37B73CA61004D89A008C4B41 /* getseqscommand.cpp in Sources */,
 				37B73CC01004EB38008C4B41 /* removeseqscommand.cpp in Sources */,
+				37B73CCF1004F5E0008C4B41 /* systemcommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
