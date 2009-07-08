@@ -53,6 +53,7 @@
 #include "listseqscommand.h"
 #include "getseqscommand.h"
 #include "removeseqscommand.h"
+#include "systemcommand.h"
 
 /***********************************************************/
 
@@ -104,6 +105,7 @@ CommandFactory::CommandFactory(){
 	commands["list.seqs"]			= "list.seqs";
 	commands["get.seqs"]			= "get.seqs";
 	commands["remove.seqs"]			= "get.seqs";
+	commands["system"]				= "system";
 	commands["quit"]				= "quit"; 
 
 }
@@ -165,6 +167,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "get.seqs")				{	command = new GetSeqsCommand(optionString);				}
 		else if(commandName == "remove.seqs")			{	command = new RemoveSeqsCommand(optionString);			}
 		else if(commandName == "merge.files")			{	command = new MergeFileCommand(optionString);			}
+		else if(commandName == "system")				{	command = new SystemCommand(optionString);				}
 		else											{	command = new NoCommand(optionString);					}
 
 		return command;
