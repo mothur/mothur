@@ -352,8 +352,7 @@ void ChimeraSeqsCommand::generatePreferences(vector<SeqMap> left, vector<SeqMap>
 			pref[i].leftParent[1] = "";
 			pref[i].rightParent[1] = "";
 		}
-
-//cout << "in generate left.size() = " << left.size() << endl;		
+	
 		for (int i = 0; i < left.size(); i++) {
 			
 			SeqMap currentLeft = left[i];    //example i = 3;   currentLeft is a map of 0 to the distance of sequence 3 to sequence 0,

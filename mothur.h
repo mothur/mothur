@@ -60,7 +60,7 @@ using namespace std;
 #endif
 
 
-typedef unsigned long long ull;
+typedef unsigned long ull;
 
 struct IntNode {
 	int lvalue;

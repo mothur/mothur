@@ -36,7 +36,7 @@ EstOutput Shen::getValues(SAbundVector* rank){
 		errorOut(e, "Shen", "getValues");
 		exit(1);
 	}
-};
+}
 
 
 /***********************************************************************/
