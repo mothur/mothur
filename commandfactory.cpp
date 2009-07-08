@@ -51,6 +51,7 @@
 #include "mergefilecommand.h"
 #include "chimeraseqscommand.h"
 #include "listseqscommand.h"
+#include "getseqscommand.h"
 
 /***********************************************************/
 
@@ -100,6 +101,7 @@ CommandFactory::CommandFactory(){
 	commands["trim.seqs"]			= "trim.seqs";
 	commands["chimera.seqs"]		= "chimera.seqs";
 	commands["list.seqs"]			= "list.seqs";
+	commands["get.seqs"]			= "get.seqs";
 	commands["quit"]				= "quit"; 
 
 }
@@ -158,6 +160,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "trim.seqs")				{	command = new TrimSeqsCommand(optionString);			}
 		else if(commandName == "chimera.seqs")			{	command = new ChimeraSeqsCommand(optionString);			}
 		else if(commandName == "list.seqs")				{	command = new ListSeqsCommand(optionString);			}
+		else if(commandName == "get.seqs")				{	command = new GetSeqsCommand(optionString);				}
 		else if(commandName == "merge.files")			{	command = new MergeFileCommand(optionString);			}
 		else											{	command = new NoCommand(optionString);					}
 
