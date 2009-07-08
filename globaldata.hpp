@@ -42,7 +42,7 @@ public:
 	TreeMap* gTreemap;
 	SequenceDB* gSequenceDB;
 	string inputFileName, argv;
-	bool allLines, runParse;
+	bool allLines, runParse, jumble;
 	vector<string>  Estimators, Groups; //holds estimators to be used
 	set<int> lines; //hold lines to be used
 	set<string> labels; //holds labels to be used
@@ -57,18 +57,13 @@ public:
 	string getNameFile();	//do we need this?
 	string getGroupFile();	//do we need this?
 	string getOrderFile();
-//	string getFastaFile();
 	string getTreeFile();
 	string getSharedFile();
 	string getFormat();	//do we need this?
-//	string getCandidateFile();
-//	string getTemplateFile();
+
 
 	void setListFile(string);
-//	void setFastaFile(string);
 	void setTreeFile(string);
-//	void setCandidateFile(string);
-//	void setTemplateFile(string);
 	void setGroupFile(string);		//do we need this?
 	void setPhylipFile(string);
 	void setColumnFile(string);

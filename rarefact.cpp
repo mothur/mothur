@@ -81,14 +81,19 @@ try {
 			rcd->registerDisplay(displays[i]);
 		}
 		
+		//if jumble is false all iters will be the same
+		if (globaldata->jumble == false)  {  nIters = 1;  }
+		
 		for(int iter=0;iter<nIters;iter++){
 		
 			for(int i=0;i<displays.size();i++){
 				displays[i]->init(label);		  
 			}
-
-			//randomize the groups
-			random_shuffle(lookup.begin(), lookup.end());
+			
+			if (globaldata->jumble == true)  {
+				//randomize the groups
+				random_shuffle(lookup.begin(), lookup.end());
+			}
 			
 			//make merge the size of lookup[0]
 			SharedRAbundVector* merge = new SharedRAbundVector(lookup[0]->size());

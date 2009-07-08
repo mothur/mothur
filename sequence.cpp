@@ -53,7 +53,7 @@ Sequence::Sequence(ifstream& fastaFile){
 		}
 	}
 
-	if(sequence.find_first_of('-') != string::npos){	//	if there are any gaps in the sequence, assume that it is
+	if((sequence.find_first_of('-') != string::npos) || (sequence.find_first_of('.') != string::npos)) {	//	if there are any gaps in the sequence, assume that it is
 		setAligned(sequence);							//	an alignment file
 	}
 	setUnaligned(sequence);								//	also set the unaligned sequence file

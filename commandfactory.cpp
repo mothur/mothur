@@ -49,6 +49,8 @@
 #include "reversecommand.h"
 #include "trimseqscommand.h"
 #include "mergefilecommand.h"
+#include "chimeraseqscommand.h"
+#include "listseqscommand.h"
 
 /***********************************************************/
 
@@ -96,6 +98,8 @@ CommandFactory::CommandFactory(){
 	commands["screen.seqs"]			= "screen.seqs";
 	commands["reverse.seqs"]		= "reverse.seqs";
 	commands["trim.seqs"]			= "trim.seqs";
+	commands["chimera.seqs"]		= "chimera.seqs";
+	commands["list.seqs"]			= "list.seqs";
 	commands["quit"]				= "quit"; 
 
 }
@@ -145,13 +149,15 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "tree.shared")			{   command = new TreeGroupCommand(optionString);			}
 		else if(commandName == "dist.shared")			{   command = new MatrixOutputCommand(optionString);		}
 		else if(commandName == "bootstrap.shared")		{   command = new BootSharedCommand(optionString);			}
-		//else if(commandName == "consensus")				{   command = new ConcensusCommand(optionString);			}
+		//else if(commandName == "consensus")			{   command = new ConcensusCommand(optionString);			}
 		else if(commandName == "dist.seqs")				{   command = new DistanceCommand(optionString);			}
 		else if(commandName == "align.seqs")			{   command = new AlignCommand(optionString);				}
 		else if(commandName == "summary.seqs")			{	command = new SeqSummaryCommand(optionString);			}
 		else if(commandName == "screen.seqs")			{	command = new ScreenSeqsCommand(optionString);			}
 		else if(commandName == "reverse.seqs")			{	command = new ReverseSeqsCommand(optionString);			}
 		else if(commandName == "trim.seqs")				{	command = new TrimSeqsCommand(optionString);			}
+		else if(commandName == "chimera.seqs")			{	command = new ChimeraSeqsCommand(optionString);			}
+		else if(commandName == "list.seqs")				{	command = new ListSeqsCommand(optionString);			}
 		else if(commandName == "merge.files")			{	command = new MergeFileCommand(optionString);			}
 		else											{	command = new NoCommand(optionString);					}
 
