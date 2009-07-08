@@ -49,7 +49,7 @@ private:
 	int freq, nIters;
 	string format;
 
-	bool abort, allLines;
+	bool abort, allLines, jumble;
 	set<int> lines; //hold lines to be used
 	set<string> labels; //holds labels to be used
 	string line, label, calc, groups;

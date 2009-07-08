@@ -23,6 +23,7 @@ public:
 		
 		string seqA = A.getAligned();
 		string seqB = B.getAligned();
+
 		int alignLength = seqA.length();
 		
 		for(int i=0; i<alignLength; i++){
@@ -47,6 +48,7 @@ public:
 		
 		if(length == 0)	{	dist = 1.0000;								}
 		else			{	dist = ((double)diff  / (double)length);	}
+
 		
 	}
 };

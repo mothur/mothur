@@ -195,10 +195,12 @@ int AlignCommand::execute(){
 			ifstream inFASTA;
 			openInputFile(candidateFileName, inFASTA);
 			
+			string input;
 			while(!inFASTA.eof()){
-				char c = inFASTA.get();
-				if(c == '>'){	int pos = inFASTA.tellg(); positions.push_back(pos-1);	}
-				while (!inFASTA.eof())	{	c = inFASTA.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+				getline(inFASTA, input);
+				if (input.length() != 0) {
+					if(input[0] == '>'){	int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
+				}
 			}
 			inFASTA.close();
 			

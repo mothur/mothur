@@ -29,7 +29,7 @@ RareFactSharedCommand::RareFactSharedCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"iters","line","label","calc","groups"};
+			string Array[] =  {"iters","line","label","calc","groups", "jumble"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -92,6 +92,11 @@ RareFactSharedCommand::RareFactSharedCommand(string option){
 			temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
 			convert(temp, nIters); 
 			
+			temp = validParameter.validFile(parameters, "jumble", false);			if (temp == "not found") { temp = "T"; }
+			if (isTrue(temp)) { jumble = true; }
+			else { jumble = false; }
+			globaldata->jumble = jumble;
+			
 			if (abort == false) {
 			
 				string fileNameRoot = getRootName(globaldata->inputFileName);
@@ -125,12 +130,12 @@ RareFactSharedCommand::RareFactSharedCommand(string option){
 void RareFactSharedCommand::help(){
 	try {
 		mothurOut("The rarefaction.shared command can only be executed after a successful read.otu command.\n");
-		mothurOut("The rarefaction.shared command parameters are label, line, iters, groups and calc.  No parameters are required, but you may not use \n");
+		mothurOut("The rarefaction.shared command parameters are label, line, iters, groups, jumble and calc.  No parameters are required, but you may not use \n");
 		mothurOut("both the line and label parameters at the same time. The rarefaction command should be in the following format: \n");
-		mothurOut("rarefaction.shared(label=yourLabel, line=yourLines, iters=yourIters, calc=yourEstimators, groups=yourGroups).\n");
-		mothurOut("Example rarefaction.shared(label=unique-.01-.03, line=0-5-10, iters=10000, groups=B-C, calc=sharedobserved).\n");
+		mothurOut("rarefaction.shared(label=yourLabel, line=yourLines, iters=yourIters, calc=yourEstimators, jumble=yourJumble, groups=yourGroups).\n");
+		mothurOut("Example rarefaction.shared(label=unique-.01-.03, line=0-5-10, iters=10000, groups=B-C, jumble=T, calc=sharedobserved).\n");
 		mothurOut("The default values for iters is 1000, freq is 100, and calc is sharedobserved which calculates the shared rarefaction curve for the observed richness.\n");
-		mothurOut("The default value for groups is all the groups in your groupfile.\n");
+		mothurOut("The default value for groups is all the groups in your groupfile, and jumble is true.\n");
 		validCalculator->printCalc("sharedrarefaction", cout);
 		mothurOut("The label and line parameters are used to analyze specific lines in your input.\n");
 		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n");

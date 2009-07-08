@@ -41,7 +41,7 @@ void NastReport::print(){
 	candidateReportFile << alignmentMethod << '\t' << candidateStartPosition << "\t" << candidateEndPosition << '\t';
 	candidateReportFile << templateStartPosition << "\t" << templateEndPosition << '\t';
 	candidateReportFile << pairwiseAlignmentLength << '\t' << totalGapsInQuery << '\t' << totalGapsInTemplate << '\t';
-	candidateReportFile << longestInsert << '\t';;
+	candidateReportFile << longestInsert << '\t';
 	candidateReportFile << setprecision(2) << similarityToTemplate;
 	
 	candidateReportFile << endl;

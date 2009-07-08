@@ -5,6 +5,7 @@
 #include "raredisplay.h"
 #include "ordervector.hpp"
 #include "mothur.h"
+#include "globaldata.hpp"
 
 
 class Rarefact {
@@ -13,13 +14,14 @@ public:
 	Rarefact(OrderVector* o, vector<Display*> disp) :
 			numSeqs(o->getNumSeqs()), order(o), displays(disp), label(o->getLabel())  {};
 	Rarefact(vector<SharedRAbundVector*> shared, vector<Display*> disp) :
-					 lookup(shared), displays(disp) {};
+					 lookup(shared), displays(disp) {  globaldata = GlobalData::getInstance();  };
 
 	~Rarefact(){};
 	void getCurve(int, int);
 	void getSharedCurve(int, int);
 	
 private:
+	GlobalData* globaldata;
 	OrderVector* order;
 	vector<Display*> displays;
 	int numSeqs, numGroupComb;
