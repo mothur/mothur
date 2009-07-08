@@ -122,7 +122,7 @@ EstOutput Jackknife::getValues(SAbundVector* rank){
 			}
 			ci = 1.96 * sqrt(ci - jack);
 		}
-		else if(k=1){
+		else if(k==1){
 			jack = N[1];
 			ci = 1.96*sqrt(variance[1]);
 		}else{

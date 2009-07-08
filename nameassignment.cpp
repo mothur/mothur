@@ -52,8 +52,8 @@ ListVector NameAssignment::getListVector(void){
 
 void NameAssignment::print(void){
 	try {
-		map<string,int>::iterator it = (*this).begin();
-		for(it;it!=(*this).end();it++){
+		map<string,int>::iterator it;
+		for(it = (*this).begin(); it!=(*this).end(); it++){
 			mothurOut(it->first + "\t" + toString(it->second)); mothurOutEndLine();  //prints out keys and values of the map this.
 		}
 	}

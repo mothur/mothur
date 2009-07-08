@@ -82,13 +82,13 @@ void BlastAlignment::setPairwiseSeqs(){	//	This method call assigns the blast ge
 	
 	string candidateName, templateName;
 	
-	while(d=blastFile.get() != '='){}
+	while((d=blastFile.get()) != '='){}
 	blastFile >> candidateName;					//	Get the candidate sequence name from flatfile
 	
-	while(d=blastFile.get() != '('){}
+	while((d=blastFile.get()) != '('){}
 	blastFile >> candidateLength;				//	Get the candidate sequence length from flatfile
 	
-	while(d=blastFile.get()){
+	while((d=blastFile.get())){
 		if(d == '>'){
 			blastFile >> templateName;			//	Get the template sequence name from flatfile
 			break;
@@ -114,10 +114,10 @@ void BlastAlignment::setPairwiseSeqs(){	//	This method call assigns the blast ge
 		}
 	}
 	
-	while(d=blastFile.get() != '='){}
+	while((d=blastFile.get()) != '='){}
 	blastFile >> templateLength;				//	Get the template sequence length from flatfile
 		
-	while(d=blastFile.get() != 'Q'){}			//	Suck up everything else until we get to the start of the alignment
+	while((d=blastFile.get()) != 'Q'){}			//	Suck up everything else until we get to the start of the alignment
 	int queryStart, sbjctStart, queryEnd, sbjctEnd;
 	string queryLabel, sbjctLabel, query, sbjct;
 
@@ -127,7 +127,7 @@ void BlastAlignment::setPairwiseSeqs(){	//	This method call assigns the blast ge
 	while(queryLabel == "Query:"){
 		blastFile >> queryStart >> query >> queryEnd;
 		
-		while(d=blastFile.get() != 'S'){};
+		while((d=blastFile.get()) != 'S'){};
 		
 		blastFile >> sbjctLabel >> sbjctStart >> sbjct >> sbjctEnd;
 		
