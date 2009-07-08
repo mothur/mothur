@@ -1,8 +1,8 @@
-#ifndef GETSEQSCOMMAND_H
-#define GETSEQSCOMMAND_H
+#ifndef REMOVESEQSCOMMAND_H
+#define REMOVESEQSCOMMAND_H
 
 /*
- *  getseqscommand.h
+ *  removeseqscommand.h
  *  Mothur
  *
  *  Created by Sarah Westcott on 7/8/09.
@@ -12,12 +12,12 @@
  
 #include "command.hpp"
 
-class GetSeqsCommand : public Command {
+class RemoveSeqsCommand : public Command {
 	
 	public:
 	
-		GetSeqsCommand(string);	
-		~GetSeqsCommand(){};
+		RemoveSeqsCommand(string);	
+		~RemoveSeqsCommand(){};
 		int execute();
 		void help();	
 		

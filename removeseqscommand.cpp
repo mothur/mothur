@@ -1,5 +1,5 @@
 /*
- *  getseqscommand.cpp
+ *  removeseqscommand.cpp
  *  Mothur
  *
  *  Created by Sarah Westcott on 7/8/09.
@@ -7,12 +7,12 @@
  *
  */
 
-#include "getseqscommand.h"
+#include "removeseqscommand.h"
 #include "sequence.hpp"
 
 //**********************************************************************************************************************
 
-GetSeqsCommand::GetSeqsCommand(string option){
+RemoveSeqsCommand::RemoveSeqsCommand(string option){
 	try {
 		abort = false;
 		
@@ -62,30 +62,30 @@ GetSeqsCommand::GetSeqsCommand(string option){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "GetSeqsCommand", "GetSeqsCommand");
+		errorOut(e, "RemoveSeqsCommand", "RemoveSeqsCommand");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 
-void GetSeqsCommand::help(){
+void RemoveSeqsCommand::help(){
 	try {
-		mothurOut("The get.seqs command reads an .accnos file and one of the following file types: fasta, name, group or alignreport file.\n");
-		mothurOut("It outputs a file containing only the sequences in the .accnos file.\n");
-		mothurOut("The get.seqs command parameters are accnos, fasta, name, group and align.  You must provide accnos and one of the other parameters.\n");
-		mothurOut("The get.seqs command should be in the following format: get.seqs(accnos=yourAccnos, fasta=yourFasta).\n");
-		mothurOut("Example get.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n");
+		mothurOut("The remove.seqs command reads an .accnos file and one of the following file types: fasta, name, group or alignreport file.\n");
+		mothurOut("It outputs a file containing the sequences NOT in the .accnos file.\n");
+		mothurOut("The remove.seqs command parameters are accnos, fasta, name, group and align.  You must provide accnos and one of the other parameters.\n");
+		mothurOut("The remove.seqs command should be in the following format: remove.seqs(accnos=yourAccnos, fasta=yourFasta).\n");
+		mothurOut("Example remove.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n");
 		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "GetSeqsCommand", "help");
+		errorOut(e, "RemoveSeqsCommand", "help");
 		exit(1);
 	}
 }
 
 //**********************************************************************************************************************
 
-int GetSeqsCommand::execute(){
+int RemoveSeqsCommand::execute(){
 	try {
 		
 		if (abort == true) { return 0; }
@@ -103,13 +103,13 @@ int GetSeqsCommand::execute(){
 	}
 
 	catch(exception& e) {
-		errorOut(e, "GetSeqsCommand", "execute");
+		errorOut(e, "RemoveSeqsCommand", "execute");
 		exit(1);
 	}
 }
 
 //**********************************************************************************************************************
-void GetSeqsCommand::readFasta(){
+void RemoveSeqsCommand::readFasta(){
 	try {
 		string outputFileName = getRootName(fastafile) + "pick";
 		ofstream out;
@@ -126,13 +126,11 @@ void GetSeqsCommand::readFasta(){
 			name = currSeq.getName();
 			
 			//if this name is in the accnos file
-			if (names.count(name) == 1) {
+			if (names.count(name) == 0) {
 				wroteSomething = true;
 				
 				currSeq.printSequence(out);
-				
-				names.erase(name);
-			}
+			}else {		names.erase(name);		}
 			
 			gobble(in);
 		}
@@ -140,19 +138,19 @@ void GetSeqsCommand::readFasta(){
 		out.close();
 		
 		if (wroteSomething == false) {
-			mothurOut("Your file does not contain any sequence from the .accnos file."); mothurOutEndLine();
+			mothurOut("Your file contains only sequences from the .accnos file."); mothurOutEndLine();
 			remove(outputFileName.c_str()); 
 		}
 
 	}
 	catch(exception& e) {
-		errorOut(e, "GetSeqsCommand", "readFasta");
+		errorOut(e, "RemoveSeqsCommand", "readFasta");
 		exit(1);
 	}
 }
 
 //**********************************************************************************************************************
-void GetSeqsCommand::readName(){
+void RemoveSeqsCommand::readName(){
 	try {
 	
 		string outputFileName = getRootName(namefile) + "pick";
@@ -164,7 +162,6 @@ void GetSeqsCommand::readName(){
 		string name, firstCol, secondCol;
 		
 		bool wroteSomething = false;
-		
 		
 		while(!in.eof()){
 
@@ -184,16 +181,15 @@ void GetSeqsCommand::readName(){
 			
 			vector<string> validSecond;
 			for (int i = 0; i < parsedNames.size(); i++) {
-				if (names.count(parsedNames[i]) == 1) {
+				if (names.count(parsedNames[i]) == 0) {
 					validSecond.push_back(parsedNames[i]);
-					names.erase(parsedNames[i]);
-				}
+				}else { names.erase(parsedNames[i]); }
 			}
 
 			
 			//if the name in the first column is in the set then print it and any other names in second column also in set
-			if (names.count(firstCol) == 1) {
-			
+			if (names.count(firstCol) == 0) {
+				
 				wroteSomething = true;
 				
 				out << firstCol << '\t';
@@ -201,11 +197,11 @@ void GetSeqsCommand::readName(){
 				//you know you have at least one valid second since first column is valid
 				for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
 				out << validSecond[validSecond.size()-1] << endl;
-				
-				names.erase(firstCol);
 			
 			//make first name in set you come to first column and then add the remaining names to second column
 			}else {
+				names.erase(firstCol);	
+					
 				//you want part of this row
 				if (validSecond.size() != 0) {
 				
@@ -225,19 +221,19 @@ void GetSeqsCommand::readName(){
 		out.close();
 		
 		if (wroteSomething == false) {
-			mothurOut("Your file does not contain any sequence from the .accnos file."); mothurOutEndLine();
+			mothurOut("Your file contains only sequences from the .accnos file."); mothurOutEndLine();
 			remove(outputFileName.c_str()); 
 		}
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "GetSeqsCommand", "readName");
+		errorOut(e, "RemoveSeqsCommand", "readName");
 		exit(1);
 	}
 }
 
 //**********************************************************************************************************************
-void GetSeqsCommand::readGroup(){
+void RemoveSeqsCommand::readGroup(){
 	try {
 	
 		string outputFileName = getRootName(groupfile) + "pick";
@@ -256,13 +252,10 @@ void GetSeqsCommand::readGroup(){
 			in >> group;			//read from second column
 			
 			//if this name is in the accnos file
-			if (names.count(name) == 1) {
+			if (names.count(name) == 0) {
 				wroteSomething = true;
-				
 				out << name << '\t' << group << endl;
-				
-				names.erase(name);
-			}
+			}else {		names.erase(name);		}
 					
 			gobble(in);
 		}
@@ -270,20 +263,20 @@ void GetSeqsCommand::readGroup(){
 		out.close();
 		
 		if (wroteSomething == false) {
-			mothurOut("Your file does not contain any sequence from the .accnos file."); mothurOutEndLine();
+			mothurOut("Your file contains only sequences from the .accnos file."); mothurOutEndLine();
 			remove(outputFileName.c_str()); 
 		}
 
 	}
 	catch(exception& e) {
-		errorOut(e, "GetSeqsCommand", "readGroup");
+		errorOut(e, "RemoveSeqsCommand", "readGroup");
 		exit(1);
 	}
 }
 
 //**********************************************************************************************************************
 //alignreport file has a column header line then all other lines contain 16 columns.  we just want the first column since that contains the name
-void GetSeqsCommand::readAlign(){
+void RemoveSeqsCommand::readAlign(){
 	try {
 		string outputFileName = getRootName(alignfile) + "pick";
 		ofstream out;
@@ -307,7 +300,7 @@ void GetSeqsCommand::readAlign(){
 			in >> name;				//read from first column
 			
 			//if this name is in the accnos file
-			if (names.count(name) == 1) {
+			if (names.count(name) == 0) {
 				wroteSomething = true;
 				
 				out << name << '\t';
@@ -319,9 +312,9 @@ void GetSeqsCommand::readAlign(){
 				}
 				out << endl;
 				
-				names.erase(name);
-				
 			}else {//still read just don't do anything with it
+				names.erase(name);	
+				
 				//read rest
 				for (int i = 0; i < 15; i++) {  
 					if (!in.eof())	{	in >> junk;		}
@@ -335,18 +328,18 @@ void GetSeqsCommand::readAlign(){
 		out.close();
 		
 		if (wroteSomething == false) {
-			mothurOut("Your file does not contain any sequence from the .accnos file."); mothurOutEndLine();
+			mothurOut("Your file contains only sequences from the .accnos file."); mothurOutEndLine();
 			remove(outputFileName.c_str()); 
 		}
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "GetSeqsCommand", "readAlign");
+		errorOut(e, "RemoveSeqsCommand", "readAlign");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-void GetSeqsCommand::readAccnos(){
+void RemoveSeqsCommand::readAccnos(){
 	try {
 		
 		ifstream in;
@@ -364,10 +357,11 @@ void GetSeqsCommand::readAccnos(){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "GetSeqsCommand", "readAccnos");
+		errorOut(e, "RemoveSeqsCommand", "readAccnos");
 		exit(1);
 	}
 }
 
 //**********************************************************************************************************************
+
 
