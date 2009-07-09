@@ -29,8 +29,7 @@ DistanceDB::DistanceDB(string fastaFileName, string distanceFileName) : Database
 	mostSimSequenceVector.resize(numCandSeqs);
 	
 	for(int i=0;i<numCandSeqs;i++){
-		inputData >> candidateSeqName >> closestMatch.seqName >> closestMatch.indexNumber >> closestMatch.simScore;
-//		getline(inputData, junk);	
+		inputData >> candidateSeqName >> closestMatch.seqName >> closestMatch.indexNumber >> closestMatch.simScore;	
 		mostSimSequenceVector[i] = closestMatch;
 	}
 	mothurOut(toString(numCandSeqs)); mothurOutEndLine();

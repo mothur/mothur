@@ -86,14 +86,6 @@ BatchEngine::BatchEngine(string path, string batchFileName){
 		openedBatch = openInputFile(batchFileName, inputBatchFile);
 		globaldata->argv = path;
 				
-	
-	
-	//	char buffer = ' ';
-	//	ifstream header("introtext.txt");
-	//	while(!header.eof()){
-	//		cout << buffer;
-	//		buffer = header.get();
-	//	}
 	}
 	catch(exception& e) {
 		errorOut(e, "BatchEngine", "BatchEngine");
@@ -127,7 +119,7 @@ bool BatchEngine::getInput(){
 		while(quitCommandCalled == 0){
 	
 			if (inputBatchFile.eof()) { input = "quit()"; }
-			else { getline(inputBatchFile, input); }
+			else { input = getline(inputBatchFile); }
 			
 			
 			

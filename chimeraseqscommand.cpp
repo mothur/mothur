@@ -9,6 +9,8 @@
 
 #include "chimeraseqscommand.h"
 #include "eachgapdist.h"
+#include "ignoregaps.h"
+#include "onegapdist.h"
 
 //***************************************************************************************************************
 
@@ -228,13 +230,22 @@ cout << "increment = " << increment << endl;
 		
 		delete distCalculator;
 		
-		//find average pref score across windows
-		//if (increment != 0) {
-		 
-			//for (int i = 0; i < pref.size(); i++) {
-				//pref[i].score[0] = pref[i].score[0] / iters;
-			//}
-		//}
+		//rank preference score to eachother
+		float dme = 0.0;
+		float expectedPercent = 1 / (float) (pref.size());
+		
+		for (int i = 0; i < pref.size(); i++) {	 dme += pref[i].score[0];  }
+	
+		for (int i = 0; i < pref.size(); i++) {
+
+			//gives the actual percentage of the dme this seq adds
+			pref[i].score[0] = pref[i].score[0] / dme;
+			
+			//how much higher or lower is this than expected
+			pref[i].score[0] = pref[i].score[0] / expectedPercent;
+			
+		}
+		
 		
 		//sort Preferences highest to lowest
 		sort(pref.begin(), pref.end(), comparePref);
@@ -364,8 +375,8 @@ void ChimeraSeqsCommand::generatePreferences(vector<SeqMap> left, vector<SeqMap>
 				
 				itL = currentLeft.find(j);
 				itR = currentRight.find(j);
-cout << " i = " << i << " j = " << j << " distLeft = " << itL->second << endl;
-cout << " i = " << i << " j = " << j << " distright = " << itR->second << endl;
+//cout << " i = " << i << " j = " << j << " distLeft = " << itL->second << endl;
+//cout << " i = " << i << " j = " << j << " distright = " << itR->second << endl;
 				
 				//if you can find this entry update the preferences
 				if ((itL != currentLeft.end()) && (itR != currentRight.end())) {
@@ -373,31 +384,31 @@ cout << " i = " << i << " j = " << j << " distright = " << itR->second << endl;
 					if (!correction) {
 						pref[i].score[1] += abs((itL->second - itR->second));
 						pref[j].score[1] += abs((itL->second - itR->second));
-cout << "left " << i << " " << j << " = " << itL->second << " right " << i << " " << j << " = " << itR->second << endl;
-cout << "abs = " << abs((itL->second - itR->second)) << endl;
-cout << i << " score = " << pref[i].score[1] << endl;
-cout << j << " score = " << pref[j].score[1] << endl;
+//cout << "left " << i << " " << j << " = " << itL->second << " right " << i << " " << j << " = " << itR->second << endl;
+//cout << "abs = " << abs((itL->second - itR->second)) << endl;
+//cout << i << " score = " << pref[i].score[1] << endl;
+//cout << j << " score = " << pref[j].score[1] << endl;
 					}else {
 						pref[i].score[1] += abs((sqrt(itL->second) - sqrt(itR->second)));
 						pref[j].score[1] += abs((sqrt(itL->second) - sqrt(itR->second)));
-cout << "left " << i << " " << j << " = " << itL->second << " right " << i << " " << j << " = " << itR->second << endl;
-cout << "abs = " << abs((sqrt(itL->second) - sqrt(itR->second))) << endl;
-cout << i << " score = " << pref[i].score[1] << endl;
-cout << j << " score = " << pref[j].score[1] << endl;
+//cout << "left " << i << " " << j << " = " << itL->second << " right " << i << " " << j << " = " << itR->second << endl;
+//cout << "abs = " << abs((sqrt(itL->second) - sqrt(itR->second))) << endl;
+//cout << i << " score = " << pref[i].score[1] << endl;
+//cout << j << " score = " << pref[j].score[1] << endl;
 					}
-cout << "pref[" << i << "].closestLeft[1] = "	<< 	pref[i].closestLeft[1] << " parent = " << pref[i].leftParent[1] << endl;			
+//cout << "pref[" << i << "].closestLeft[1] = "	<< 	pref[i].closestLeft[1] << " parent = " << pref[i].leftParent[1] << endl;			
 					//are you the closest left sequence
 					if (itL->second < pref[i].closestLeft[1]) {  
 
 						pref[i].closestLeft[1] = itL->second;
 						pref[i].leftParent[1] = seqs[j].getName();
-cout << "updating closest left to " << pref[i].leftParent[1] << endl;
+//cout << "updating closest left to " << pref[i].leftParent[1] << endl;
 					}
-cout << "pref[" << j << "].closestLeft[1] = "	<< 	pref[j].closestLeft[1] << " parent = " << pref[j].leftParent[1] << endl;	
+//cout << "pref[" << j << "].closestLeft[1] = "	<< 	pref[j].closestLeft[1] << " parent = " << pref[j].leftParent[1] << endl;	
 					if (itL->second < pref[j].closestLeft[1]) { 
 						pref[j].closestLeft[1] = itL->second;
 						pref[j].leftParent[1] = seqs[i].getName();
-cout << "updating closest left to " << pref[j].leftParent[1] << endl;
+//cout << "updating closest left to " << pref[j].leftParent[1] << endl;
 					}
 					
 					//are you the closest right sequence
@@ -418,22 +429,25 @@ cout << "updating closest left to " << pref[j].leftParent[1] << endl;
 		
 		  
 		//calculate the dme
+		
 		int count0 = 0;
 		for (int i = 0; i < pref.size(); i++) {	 dme += pref[i].score[1];  if (pref[i].score[1] == 0.0) { count0++; }  }
 		
 		float expectedPercent = 1 / (float) (pref.size() - count0);
-cout << endl << "dme = " << dme << endl;
+//cout << endl << "dme = " << dme << endl;
 		//recalculate prefernences based on dme
 		for (int i = 0; i < pref.size(); i++) {
-cout << "unadjusted pref " << i << " = " << pref[i].score[1] << endl;	
+//cout << "unadjusted pref " << i << " = " << pref[i].score[1] << endl;	
 			// gives the actual percentage of the dme this seq adds
 			pref[i].score[1] = pref[i].score[1] / dme;
 			
 			//how much higher or lower is this than expected
 			pref[i].score[1] = pref[i].score[1] / expectedPercent;
 			
+			//pref[i].score[1] = dme / (dme - 2 * pref[i].score[1]);
+			
 			//so a non chimeric sequence would be around 1, and a chimeric would be signifigantly higher.
-cout << "adjusted pref " << i << " = " << pref[i].score[1] << endl;					
+//cout << "adjusted pref " << i << " = " << pref[i].score[1] << endl;					
 		}
 		
 		//is this score bigger then the last score
@@ -449,8 +463,6 @@ cout << "adjusted pref " << i << " = " << pref[i].score[1] << endl;
 				pref[i].midpoint = mid;
 			}
 			
-			//total of preference scores across windows
-			//pref[i].score[0] += pref[i].score[1];
 		}
 
 	}
