@@ -197,7 +197,7 @@ int AlignCommand::execute(){
 			
 			string input;
 			while(!inFASTA.eof()){
-				getline(inFASTA, input);
+				input = getline(inFASTA);
 				if (input.length() != 0) {
 					if(input[0] == '>'){	int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
 				}

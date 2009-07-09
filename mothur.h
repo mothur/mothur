@@ -167,6 +167,30 @@ inline int openOutputFileAppend(string fileName, ofstream& fileHandle){
 	}
 
 }
+/***********************************************************************/
+
+inline string getline(ifstream& fileHandle) {
+	try {
+	
+		string line = "";
+		
+		while (!fileHandle.eof())	{
+			//get next character
+			char c = fileHandle.get(); 
+			
+			//are you at the end of the line
+			if (c == 10 || c == 13){   break;	}	
+			else {		line += c;		}
+		}
+		
+		return line;
+		
+	}
+	catch(exception& e) {
+		cout << "Error in mothur function getline" << endl;
+		exit(1);
+	}
+}
 
 /**************************************************************************************************/
 

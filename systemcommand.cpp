@@ -19,23 +19,8 @@ SystemCommand::SystemCommand(string option){
 		if(option == "help") { help(); abort = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"command"};
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
-			
-			OptionParser parser(option);
-			map<string,string> parameters = parser.getParameters();
-			
-			ValidParameters validParameter;
-			
-			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
-			}
-			
-			//check for required parameters
-			command = validParameter.validFile(parameters, "command", false);
-			if (command == "not found") { mothurOut("command is a required parameter."); mothurOutEndLine(); abort = true; }
+			if (option = "") { mothurOut("You must enter a command to run."); mothurOutEndLine(); abort = true; }
+			else { command = option; }
 		}	
 
 	}
@@ -49,10 +34,9 @@ SystemCommand::SystemCommand(string option){
 void SystemCommand::help(){
 	try {
 		mothurOut("The system command allows you to execute a system command from within mothur.\n");
-		mothurOut("The system command parameter is command and it is required.\n");
-		mothurOut("The system command should be in the following format: system(command=yourCommand).\n");
-		mothurOut("Example system(command=clear).\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. command), '=' and parameters (i.e.yourCommand).\n\n");
+		mothurOut("The system has no parameters.\n");
+		mothurOut("The system command should be in the following format: system(yourCommand).\n");
+		mothurOut("Example system(clear).\n");
 	}
 	catch(exception& e) {
 		errorOut(e, "SystemCommand", "help");
