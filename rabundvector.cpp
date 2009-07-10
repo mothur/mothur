@@ -194,6 +194,19 @@ vector<int>::reverse_iterator RAbundVector::rend(){
 }
 
 /***********************************************************************/
+void RAbundVector::nonSortedPrint(ostream& output){
+	try {	
+		output << label << '\t' << numBins << '\t';
+	
+		for(int i=0;i<numBins;i++){		output << data[i] << '\t';		}
+		output << endl;
+	}
+	catch(exception& e) {
+		errorOut(e, "RAbundVector", "nonSortedPrint");
+		exit(1);
+	}
+}
+/***********************************************************************/
 void RAbundVector::print(string prefix, ostream& output){
 	try {	
 		output << prefix << '\t' << numBins << '\t';
@@ -209,6 +222,7 @@ void RAbundVector::print(string prefix, ostream& output){
 		exit(1);
 	}
 }
+
 
 /***********************************************************************/
 void RAbundVector::print(ostream& output){

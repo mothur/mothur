@@ -24,7 +24,7 @@ GetRAbundCommand::GetRAbundCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"line","label"};
+			string Array[] =  {"line","label","sorted"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -42,6 +42,11 @@ GetRAbundCommand::GetRAbundCommand(string option){
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
+			
+			string temp;
+			temp = validParameter.validFile(parameters, "sorted", false);			if (temp == "not found") { temp = "T"; }
+			sorted = isTrue(temp);
+			
 			line = validParameter.validFile(parameters, "line", false);				
 			if (line == "not found") { line = "";  }
 			else { 
@@ -82,10 +87,11 @@ GetRAbundCommand::GetRAbundCommand(string option){
 void GetRAbundCommand::help(){
 	try {
 		mothurOut("The get.rabund command can only be executed after a successful read.otu of a listfile.\n");
-		mothurOut("The get.rabund command parameters are line and label.  No parameters are required, and you may not use line and label at the same time.\n");
+		mothurOut("The get.rabund command parameters are line, label and sorted.  No parameters are required, and you may not use line and label at the same time.\n");
 		mothurOut("The line and label allow you to select what distance levels you would like included in your .rabund file, and are separated by dashes.\n");
-		mothurOut("The get.rabund command should be in the following format: get.rabund(line=yourLines, label=yourLabels).\n");
-		mothurOut("Example get.rabund(line=1-3-5).\n");
+		mothurOut("The sorted parameters allows you to print the rabund results sorted by abundance or not.  The default is sorted.\n");
+		mothurOut("The get.rabund command should be in the following format: get.rabund(line=yourLines, label=yourLabels, sorted=yourSorted).\n");
+		mothurOut("Example get.rabund(line=1-3-5, sorted=F).\n");
 		mothurOut("The default value for line and label are all lines in your inputfile.\n");
 		mothurOut("The get.rabund command outputs a .rabund file containing the lines you selected.\n");
 		mothurOut("Note: No spaces between parameter labels (i.e. line), '=' and parameters (i.e.yourLines).\n\n");
@@ -129,9 +135,12 @@ int GetRAbundCommand::execute(){
 			
 			if(allLines == 1 || lines.count(count) == 1 || labels.count(list->getLabel()) == 1){
 					mothurOut(list->getLabel() + "\t" + toString(count)); mothurOutEndLine();
-					rabund = new RAbundVector();
+					rabund = new RAbundVector();				
 					*rabund = (list->getRAbundVector());
-					rabund->print(out);
+					
+					if(sorted)	{   rabund->print(out);				}
+					else		{	rabund->nonSortedPrint(out);	}
+					
 					delete rabund;
 															
 					processedLabels.insert(list->getLabel());
@@ -146,7 +155,10 @@ int GetRAbundCommand::execute(){
 					mothurOut(list->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 					rabund = new RAbundVector();
 					*rabund = (list->getRAbundVector());
-					rabund->print(out);
+					
+					if(sorted)	{   rabund->print(out);				}
+					else		{	rabund->nonSortedPrint(out);	}
+
 					delete rabund;
 
 					processedLabels.insert(list->getLabel());
@@ -181,7 +193,10 @@ int GetRAbundCommand::execute(){
 			mothurOut(list->getLabel() + "\t" + toString(count)); mothurOutEndLine();
 			rabund = new RAbundVector();
 			*rabund = (list->getRAbundVector());
-			rabund->print(out);
+			
+			if(sorted)	{   rabund->print(out);				}
+			else		{	rabund->nonSortedPrint(out);	}
+
 			delete rabund;
 			delete list;
 		}

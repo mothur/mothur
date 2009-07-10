@@ -38,6 +38,8 @@
 		3746109D0F40657600460C57 /* unifracunweightedcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3746109C0F40657600460C57 /* unifracunweightedcommand.cpp */; };
 		3749271D0FD58C840031C06B /* getsabundcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3749271C0FD58C840031C06B /* getsabundcommand.cpp */; };
 		3749273F0FD5956B0031C06B /* getrabundcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3749273E0FD5956B0031C06B /* getrabundcommand.cpp */; };
+		374F2FEB100634B600E97C66 /* bellerophon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 374F2FEA100634B600E97C66 /* bellerophon.cpp */; };
+		374F301310063B6F00E97C66 /* pintail.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 374F301210063B6F00E97C66 /* pintail.cpp */; };
 		37519A6B0F80E6EB00FED5E8 /* sharedanderbergs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37519A6A0F80E6EB00FED5E8 /* sharedanderbergs.cpp */; };
 		37519AA10F810D0200FED5E8 /* venncommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37519AA00F810D0200FED5E8 /* venncommand.cpp */; };
 		37519AB50F810FAE00FED5E8 /* venn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37519AB40F810FAE00FED5E8 /* venn.cpp */; };
@@ -242,6 +244,11 @@
 		3749271C0FD58C840031C06B /* getsabundcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getsabundcommand.cpp; sourceTree = SOURCE_ROOT; };
 		3749273D0FD5956B0031C06B /* getrabundcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getrabundcommand.h; sourceTree = SOURCE_ROOT; };
 		3749273E0FD5956B0031C06B /* getrabundcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getrabundcommand.cpp; sourceTree = SOURCE_ROOT; };
+		374F2FD51006320200E97C66 /* chimera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimera.h; sourceTree = "<group>"; };
+		374F2FE9100634B600E97C66 /* bellerophon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bellerophon.h; sourceTree = "<group>"; };
+		374F2FEA100634B600E97C66 /* bellerophon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bellerophon.cpp; sourceTree = "<group>"; };
+		374F301110063B6F00E97C66 /* pintail.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pintail.h; sourceTree = "<group>"; };
+		374F301210063B6F00E97C66 /* pintail.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pintail.cpp; sourceTree = "<group>"; };
 		37519A690F80E6EB00FED5E8 /* sharedanderbergs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedanderbergs.h; sourceTree = SOURCE_ROOT; };
 		37519A6A0F80E6EB00FED5E8 /* sharedanderbergs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedanderbergs.cpp; sourceTree = SOURCE_ROOT; };
 		37519A9F0F810D0200FED5E8 /* venncommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = venncommand.h; sourceTree = SOURCE_ROOT; };
@@ -546,6 +553,7 @@
 				373C68DC0FC1C38D00137ACD /* blastalign.hpp */,
 				373C68DB0FC1C38D00137ACD /* blastalign.cpp */,
 				37D928A60F2133C0001D4494 /* calculators */,
+				374F2FE81006346600E97C66 /* chimera */,
 				37D927C20F21331F001D4494 /* cluster.hpp */,
 				37D927C10F21331F001D4494 /* cluster.cpp */,
 				37D928A90F2133E5001D4494 /* commands */,
@@ -623,6 +631,18 @@
 				8DD76F6C0486A84900D96B5E /* mothur */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		374F2FE81006346600E97C66 /* chimera */ = {
+			isa = PBXGroup;
+			children = (
+				374F2FD51006320200E97C66 /* chimera.h */,
+				374F2FE9100634B600E97C66 /* bellerophon.h */,
+				374F2FEA100634B600E97C66 /* bellerophon.cpp */,
+				374F301110063B6F00E97C66 /* pintail.h */,
+				374F301210063B6F00E97C66 /* pintail.cpp */,
+			);
+			name = chimera;
 			sourceTree = "<group>";
 		};
 		3796441D0FB9B9650081FDB6 /* read */ = {
@@ -1135,6 +1155,8 @@
 				37B73CA61004D89A008C4B41 /* getseqscommand.cpp in Sources */,
 				37B73CC01004EB38008C4B41 /* removeseqscommand.cpp in Sources */,
 				37B73CCF1004F5E0008C4B41 /* systemcommand.cpp in Sources */,
+				374F2FEB100634B600E97C66 /* bellerophon.cpp in Sources */,
+				374F301310063B6F00E97C66 /* pintail.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

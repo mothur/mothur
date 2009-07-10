@@ -19,7 +19,7 @@ SystemCommand::SystemCommand(string option){
 		if(option == "help") { help(); abort = true; }
 		
 		else {
-			if (option = "") { mothurOut("You must enter a command to run."); mothurOutEndLine(); abort = true; }
+			if (option == "") { mothurOut("You must enter a command to run."); mothurOutEndLine(); abort = true; }
 			else { command = option; }
 		}	
 

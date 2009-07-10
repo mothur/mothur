@@ -34,7 +34,7 @@ private:
 	ListVector* list;
 	RAbundVector* rabund;
 
-	bool abort, allLines;
+	bool abort, allLines, sorted;
 	set<int> lines; //hold lines to be used
 	set<string> labels; //holds labels to be used
 	string line, label;

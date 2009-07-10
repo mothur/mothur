@@ -46,6 +46,7 @@ public:
 	
 	void print(ostream&);
 	void print(string, ostream&);
+	void nonSortedPrint(ostream&);
 	
 	RAbundVector getRAbundVector();
 	SAbundVector getSAbundVector();
