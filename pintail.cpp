@@ -38,7 +38,7 @@ void Pintail::print(ostream& out) {
 	try {
 		
 		for (itCoef = DE.begin(); itCoef != DE.end(); itCoef++) {
-		
+			
 			out << itCoef->first->getName() << '\t' << itCoef->second << endl;
 			out << "Observed\t";
 			
@@ -53,7 +53,8 @@ void Pintail::print(ostream& out) {
 			out << endl;
 			
 		}
-
+		
+		
 	}
 	catch(exception& e) {
 		errorOut(e, "Pintail", "print");
@@ -78,10 +79,14 @@ void Pintail::getChimeras() {
 		//if window is set to default
 		if (window == 0) {  if (querySeqs[0]->getAligned().length() > 800) {  setWindow(200); }
 							else{  setWindow((querySeqs[0]->getAligned().length() / 4)); }  } 
+		else if (window > (querySeqs[0]->getAligned().length() / 4)) { 
+				mothurOut("You have selected to large a window size for you sequences.  I will choose a smaller window."); mothurOutEndLine();
+				setWindow((querySeqs[0]->getAligned().length() / 4)); 
+		}
 	
-		//calculate number of iters
+		//calculate number of iters 
 		iters = (querySeqs[0]->getAligned().length() - window + 1) / increment;
-		
+cout << "length = " << querySeqs[0]->getAligned().length() << " window = " << window << " increment = " << increment << " iters = " << iters << endl;			
 		int linesPerProcess = processors / numSeqs;
 		
 		//find breakup of sequences for all times we will Parallelize
@@ -101,9 +106,7 @@ void Pintail::getChimeras() {
 		if (processors == 1) {   findPairs(lines[0]->start, lines[0]->end);  } 
 		else {		createProcessesPairs();		}
 		mothurOut("Done."); mothurOutEndLine();
-	//	itBest = bestfit.begin();
-	//	itBest++; itBest++;
-//cout << itBest->first->getName() << '\t' << itBest->second->getName()	<< endl;	
+		
 		//find Oqs for each sequence - the observed distance in each window - Parallelized
 		mothurOut("Calculating observed percentage differences for each sequence... "); cout.flush();
 		if (processors == 1) {   calcObserved(lines[0]->start, lines[0]->end);  } 
@@ -116,13 +119,13 @@ void Pintail::getChimeras() {
 		
 		//make P into Q
 		for (int i = 0; i < probabilityProfile.size(); i++)  {	probabilityProfile[i] = 1 - probabilityProfile[i];	}
-//cout << "after p into Q" << endl;		
+
 		//find Qav
 		averageProbability = findQav(probabilityProfile);
-//cout << "after Qav" << endl;		
+	
 		//find Coefficient - maps a sequence to its coefficient
 		seqCoef = getCoef(averageProbability);
-//cout << "after coef" << endl;		
+	
 		//find Eqs for each sequence - the expected distance in each window - Parallelized
 		if (processors == 1) {   calcExpected(lines[0]->start, lines[0]->end);  } 
 		else {		createProcessesExpected();		}
@@ -160,6 +163,8 @@ vector<Sequence*> Pintail::readSeqs(string file) {
 			Sequence* current = new Sequence(in);
 			
 			if (current->getAligned() == "") { current->setAligned(current->getUnaligned()); }
+			//takes out stuff is needed
+			current->setUnaligned(current->getUnaligned());
 			
 			container.push_back(current);
 			
@@ -210,50 +215,43 @@ void Pintail::findPairs(int start, int end) {
 //***************************************************************************************************************
 void Pintail::calcObserved(int start, int end) {
 	try {
-
+	
+						
 		for(int i = start; i < end; i++){
 		
 			itBest = bestfit.find(querySeqs[i]);
 			Sequence* query;
 			Sequence* subject;
-			
+		
 			if (itBest != bestfit.end()) {
 				query = itBest->first;
 				subject = itBest->second;
 			}else{ mothurOut("Error in calcObserved"); mothurOutEndLine(); }
-			
-			vector<Sequence*> queryFragment;
-			vector<Sequence*> subjectFragment;
+//cout << query->getName() << '\t' << subject->getName() << endl;			
 			
 			int startpoint = 0; 
 			for (int m = 0; m < iters; m++) {
+
 				string seqFrag = query->getAligned().substr(startpoint, window);
-				Sequence* temp = new Sequence(query->getName(), seqFrag);
-				queryFragment.push_back(temp);
-				
 				string seqFragsub = subject->getAligned().substr(startpoint, window);
-				Sequence* tempsub = new Sequence(subject->getName(), seqFragsub);
-				subjectFragment.push_back(tempsub);
+								
+				int diff = 0;
+                for (int b = 0; b < seqFrag.length(); b++) {
+                  
+                    //if this is not a gap
+                    if ((isalpha(seqFrag[b])) && (isalpha(seqFragsub[b]))) {
+                        //and they are different - penalize
+                        if (seqFrag[b] != seqFragsub[b]) { diff++; }
+                    }
+                }
+               
+                //percentage of mismatched bases
+                float dist = diff / (float)seqFrag.length();       
+				
+				obsDistance[query].push_back(dist);
 				
 				startpoint += increment;
 			}
-			
-			
-			for(int j = 0; j < iters; j++){
-			
-				distCalculator->calcDist(*(queryFragment[j]), *(subjectFragment[j]));
-				float dist = distCalculator->getDist();
-				
-				//convert to similiarity
-				//dist = 1 - dist;
-				
-				//save oi
-				obsDistance[query].push_back(dist);
-			}
-		
-			//free memory
-			for (int i = 0; i < queryFragment.size(); i++)	{  delete queryFragment[i];		}
-			for (int i = 0; i < subjectFragment.size(); i++) {  delete subjectFragment[i];	}
 		}
 		
 	}
@@ -278,7 +276,8 @@ void Pintail::calcExpected(int start, int end) {
 			vector<float> queryExpected;
 			for (int m = 0; m < iters; m++) {		
 				float expected = averageProbability[m] * coef;
-				queryExpected.push_back(expected);		
+				queryExpected.push_back(expected);	
+//cout << "average variabilty over window = " << averageProbability[m] << " coef = " << coef << " ei = "  << expected << '\t' <<  "window = " << m << endl;
 			}
 			
 			expectedDistance[querySeqs[i]] = queryExpected;
@@ -304,10 +303,10 @@ void Pintail::calcDE(int start, int end) {
 			
 			itExpDist = expectedDistance.find(querySeqs[i]);
 			vector<float> exp = itExpDist->second;
-			
+//	cout << "difference between obs and exp = " << abs(obs[m] - exp[m]) << endl;	
 			//for each window
 			float sum = 0.0;  //sum = sum from 1 to m of (oi-ei)^2
-			for (int m = 0; m < iters; m++) {		sum += ((obs[m] - exp[m]) * (obs[m] - exp[m]));		}
+			for (int m = 0; m < iters; m++) { 		sum += ((obs[m] - exp[m]) * (obs[m] - exp[m]));		}
 			
 			float de = sqrt((sum / (iters - 1)));
 			
@@ -332,6 +331,7 @@ vector<float> Pintail::calcFreq(vector<Sequence*> seqs) {
 		for (int i = 0; i < seqs[0]->getAligned().length(); i++) {
 		
 			vector<int> freq;   freq.resize(4,0);
+			int gaps = 0;
 			
 			//find the frequency of each nucleotide
 			for (int j = 0; j < seqs.size(); j++) {
@@ -342,20 +342,22 @@ vector<float> Pintail::calcFreq(vector<Sequence*> seqs) {
 				else if(toupper(value) == 'T' || toupper(value) == 'U')		{	freq[1]++;	}
 				else if(toupper(value) == 'G')								{	freq[2]++;	}
 				else if(toupper(value) == 'C')								{	freq[3]++;	}
+				else { gaps++; }
 			}
 			
 			//find base with highest frequency
 			int highest = 0;
 			for (int m = 0; m < freq.size(); m++) {    if (freq[m] > highest) {  highest = freq[m];  }		}
-				
+			
+			//add in gaps - so you can effectively "ignore them"
+			highest += gaps;
+			
 			float highFreq = highest / (float) seqs.size();	
+			
 			float Pi;
-			//if this is not a gap column
-			if (highFreq != 0) { Pi =  (highFreq - 0.25) / 0.75;  }
-			else { Pi = 0; }
-			
-			prob.push_back(Pi);
-			
+			Pi =  (highFreq - 0.25) / 0.75;  
+				
+			prob.push_back(Pi); 
 		}
 		
 		return prob;
@@ -379,7 +381,7 @@ vector<float> Pintail::findQav(vector<float> prob) {
 			for (int i = startpoint; i < (startpoint+window); i++) {   average += prob[i];	}
 			
 			average = average / window;
-			
+//cout << average << endl;			
 			//save this windows average
 			averages.push_back(average);
 		
@@ -402,7 +404,7 @@ map<Sequence*, float> Pintail::getCoef(vector<float> prob) {
 		float probAverage = 0.0;
 		for (int i = 0; i < prob.size(); i++) {   probAverage += prob[i];	}
 		probAverage = probAverage / (float) prob.size();
-		
+cout << "(sum of ai) / m = " << probAverage << endl;		
 		//find a coef for each sequence
 		map<Sequence*, vector<float> >::iterator it;
 		for (it = obsDistance.begin(); it != obsDistance.end(); it++) {
@@ -414,9 +416,9 @@ map<Sequence*, float> Pintail::getCoef(vector<float> prob) {
 			float obsAverage = 0.0;
 			for (int i = 0; i < temp.size(); i++) {   obsAverage += temp[i];	}
 			obsAverage = obsAverage / (float) temp.size();
-			
+cout << tempSeq->getName() << '\t' << obsAverage << endl;			
 			float coef = obsAverage / probAverage;
-			
+cout  << tempSeq->getName() << '\t' << "coef = " << coef << endl;			
 			//save this sequences coefficient
 			coefs[tempSeq] = coef;
 		}

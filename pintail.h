@@ -56,7 +56,7 @@ class Pintail : public Chimera {
 		vector<float> averageProbability;			//Qav
 		map<Sequence*, float> seqCoef;				//maps a sequence to its coefficient
 		map<Sequence*, float> DE;					//maps a sequence to its deviation
-		map<Sequence*, float>::iterator itCoef;		
+		map<Sequence*, float>::iterator itCoef;	
 		
 		vector<Sequence*> readSeqs(string);
 		vector<float> findQav(vector<float>);
