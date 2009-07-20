@@ -39,6 +39,8 @@ class Bellerophon : public Chimera {
 		void getChimeras();
 		void print(ostream&);
 		
+		void setCons(string){};
+		
 		
 	private:
 		Dist* distCalculator;

@@ -29,7 +29,7 @@ EstOutput SharedChao1::getValues(vector<SharedRAbundVector*> shared){
 		//create and initialize trees to 0.
 		initialTree(numGroups);	
 		
-		//loop through vectors calculating the f11, f1A, f2A, f1B, f2B, S12 values
+		
 		for (int i = 0; i < shared[0]->size(); i++) {
 			//get bin values and calc shared 
 			bool sharedByAll = true;
@@ -50,7 +50,7 @@ EstOutput SharedChao1::getValues(vector<SharedRAbundVector*> shared){
 		//calculate chao1, (numleaves-1) because numleaves contains the ++ values.
 		bool bias;
 		for(int i=0;i<numLeaves;i++){
-			if (f2leaves[i]->lvalue == 0) { bias = true;}// break;}
+			if ((f2leaves[i]->lvalue == 0) || (f2leaves[i]->rvalue == 0))  { bias = true;  }// break;}
 		}
 
 		if(bias){
@@ -60,6 +60,7 @@ EstOutput SharedChao1::getValues(vector<SharedRAbundVector*> shared){
 				if (i != (numLeaves-1)) {
 					rightvalue = (float)(f1leaves[i]->rvalue * (f1leaves[i]->rvalue - 1)) / (float)((pow(2, (float)f2leaves[i]->rcoef)) * (f2leaves[i]->rvalue + 1));
 				}else{
+					//add in sobs
 					rightvalue = (float)(f1leaves[i]->rvalue);
 				}
 				Chao += leftvalue + rightvalue;
@@ -73,6 +74,7 @@ EstOutput SharedChao1::getValues(vector<SharedRAbundVector*> shared){
 				if (i != (numLeaves-1)) {
 					rightvalue = (float)(f1leaves[i]->rvalue * f1leaves[i]->rvalue) / (float)((pow(2, (float)f2leaves[i]->rcoef)) * f2leaves[i]->rvalue);
 				}else{
+					//add in sobs
 					rightvalue = (float)(f1leaves[i]->rvalue);
 				}
 				Chao += leftvalue + rightvalue;
@@ -84,7 +86,7 @@ EstOutput SharedChao1::getValues(vector<SharedRAbundVector*> shared){
 			delete f2leaves[i];
 		}
 		
-
+		
 		data[0] = Chao;
 		return data;
 	}

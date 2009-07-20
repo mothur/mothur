@@ -22,7 +22,7 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template" };
+			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -44,6 +44,10 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 			if (templatefile == "not open") { abort = true; }
 			else if (templatefile == "not found") { templatefile = "";  }	
 			
+			consfile = validParameter.validFile(parameters, "conservation", true);
+			if (consfile == "not open") { abort = true; }
+			else if (consfile == "not found") { consfile = "";  }	
+			
 
 			string temp;
 			temp = validParameter.validFile(parameters, "filter", false);			if (temp == "not found") { temp = "T"; }
@@ -58,12 +62,12 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 			temp = validParameter.validFile(parameters, "window", false);			if (temp == "not found") { temp = "0"; }
 			convert(temp, window);
 					
-			temp = validParameter.validFile(parameters, "increment", false);			if (temp == "not found") { temp = "10"; }
+			temp = validParameter.validFile(parameters, "increment", false);			if (temp == "not found") { temp = "25"; }
 			convert(temp, increment);
 				
 			method = validParameter.validFile(parameters, "method", false);		if (method == "not found") { method = "pintail"; }
 			
-			if ((method == "pintail") && (templatefile == "")) { mothurOut("You must provide a template file with the pintail method."); mothurOutEndLine(); abort = true;  }
+			if ((method == "pintail") && (templatefile == "") && (consfile == "")) { mothurOut("You must provide a template or conservation file with the pintail method."); mothurOutEndLine(); abort = true;  }
 			
 
 		}
@@ -105,9 +109,11 @@ int ChimeraSeqsCommand::execute(){
 		
 		if (abort == true) { return 0; }
 		
-		if (method == "bellerophon")	{	chimera = new Bellerophon(fastafile);	}
-		else if (method == "pintail")	{	chimera = new Pintail(fastafile);		}
-		else { mothurOut("Not a valid method."); mothurOutEndLine(); return 0;		}
+		if (method == "bellerophon")	{		chimera = new Bellerophon(fastafile);			}
+		else if (method == "pintail")	{		chimera = new Pintail(fastafile, templatefile);	
+			if (consfile != "")			{		chimera->setCons(consfile);						}
+			else						{		chimera->setCons("");							}
+		}else { mothurOut("Not a valid method."); mothurOutEndLine(); return 0;		}
 		
 		//set user options
 		chimera->setFilter(filter);
@@ -115,8 +121,7 @@ int ChimeraSeqsCommand::execute(){
 		chimera->setProcessors(processors);
 		chimera->setWindow(window);
 		chimera->setIncrement(increment);
-		chimera->setTemplate(templatefile); 
-		
+				
 		//find chimeras
 		chimera->getChimeras();
 		
@@ -139,6 +144,5 @@ int ChimeraSeqsCommand::execute(){
 		exit(1);
 	}
 }
-
 /**************************************************************************************************/
 

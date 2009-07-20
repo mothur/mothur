@@ -19,7 +19,7 @@ EstOutput Chao1::getValues(SAbundVector* rank){
 		double singles = (double)rank->get(1);
 		double doubles = (double)rank->get(2);
 		double chaovar = 0.0000;
-	
+//cout << "singles = " << singles << " doubles = " << doubles << " sobs = " << sobs << endl;	
 		double chao = sobs + singles*(singles-1)/(2*(doubles+1));
 	
 		if(singles > 0 && doubles > 0){

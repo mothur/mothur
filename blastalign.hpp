@@ -20,6 +20,8 @@ public:
 	BlastAlignment(float, float, float, float);
 	~BlastAlignment();
 	void align(string, string);
+	void setMatrix(int){};
+	
 private:
 
 	string candidateFileName;
