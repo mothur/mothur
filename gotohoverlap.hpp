@@ -30,6 +30,7 @@ class GotohOverlap : public Alignment {
 public:
 	GotohOverlap(float, float, float, float, int);
 	void align(string, string);
+	
 	~GotohOverlap() {}
 	
 private:

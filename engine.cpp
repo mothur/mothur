@@ -244,13 +244,21 @@ bool ScriptEngine::getInput(){
 string ScriptEngine::getNextCommand(string& commandString) {
 	try {
 		string nextcommand = "";
+		int count = 0;
 		
-		nextcommand = commandString.substr(0,commandString.find_first_of(';'));
-
+		//go through string until you reach ; or end
+		while (count < commandString.length()) { 
+			
+			if (commandString[count] == ';') {  break;   }
+			else {		nextcommand += commandString[count];	}
+			
+			count++;
+		}
+		
+		//if you are not at the end
+		if (count != commandString.length())  {   commandString = commandString.substr(count+1, commandString.length());  }
+		else { commandString = ""; }
 				
-		if ((commandString.find_first_of(';')+1) <= commandString.length()) {
-			commandString = commandString.substr(commandString.find_first_of(';')+1, commandString.length());
-		}else { commandString = ""; } //you have reached the last command.
 		
 		//get rid of spaces in between commands if any
 		if (commandString.length() > 0) {

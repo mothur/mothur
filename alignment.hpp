@@ -26,6 +26,7 @@ public:
 	virtual ~Alignment();
 	virtual void align(string, string) = 0;
 	
+	
 //	float getAlignmentScore();
 	string getSeqAAln();
 	string getSeqBAln();
@@ -33,7 +34,7 @@ public:
 	int getCandidateEndPos();
 	int getTemplateStartPos();
 	int getTemplateEndPos();
-
+	
 	int getPairwiseLength();
 //	int getLongestTemplateGap();
 

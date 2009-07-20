@@ -23,8 +23,10 @@ public:
 	virtual ~Database();
 	virtual Sequence findClosestSequence(Sequence*) = 0;
 	virtual float getSearchScore();
+	virtual int getLongestBase(); 
+	
 protected:
-	int numSeqs;
+	int numSeqs, longest;
 	float searchScore;
 	vector<Sequence> templateSequences;
 };

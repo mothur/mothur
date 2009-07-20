@@ -20,72 +20,81 @@ Alignment::Alignment() {	/*	do nothing	*/	}
 /**************************************************************************************************/
 
 Alignment::Alignment(int A) : nCols(A), nRows(A) {
-	
-	alignment.resize(nRows);			//	For the Gotoh and Needleman-Wunsch we initialize the dynamic programming
-	for(int i=0;i<nRows;i++){			//	matrix by initializing a matrix that is A x A.  By default we will set A
-		alignment[i].resize(nCols);		//	at 2000 for 16S rRNA gene sequences
-	}	
-	
+	try {
+		alignment.resize(nRows);			//	For the Gotoh and Needleman-Wunsch we initialize the dynamic programming
+		for(int i=0;i<nRows;i++){			//	matrix by initializing a matrix that is A x A.  By default we will set A
+			alignment[i].resize(nCols);		//	at 2000 for 16S rRNA gene sequences
+		}	
+	}
+	catch(exception& e) {
+		errorOut(e, "Alignment", "Alignment");
+		exit(1);
+	}
 }
 
 /**************************************************************************************************/
 
 void Alignment::traceBack(){			//	This traceback routine is used by the dynamic programming algorithms
-										//	to fill the values of seqAaln and seqBaln
-	seqAaln = "";
-	seqBaln = "";
-	int row = lB-1;
-	int column = lA-1;
-//	seqAstart = 1;
-//	seqAend = column;
-	
-	AlignmentCell currentCell = alignment[row][column];	//	Start the traceback from the bottom-right corner of the
-														//	matrix
-
-	if(currentCell.prevCell == 'x'){	seqAaln = seqBaln = "NOALIGNMENT";		}//If there's an 'x' in the bottom-
-	else{												//	right corner bail out because it means nothing got aligned
-		while(currentCell.prevCell != 'x'){				//	while the previous cell isn't an 'x', keep going...
-			
-			if(currentCell.prevCell == 'u'){			//	if the pointer to the previous cell is 'u', go up in the
-				seqAaln = '-' + seqAaln;				//	matrix.  this indicates that we need to insert a gap in
-				seqBaln = seqB[row] + seqBaln;			//	seqA and a base in seqB
-				currentCell = alignment[--row][column];
-			}
-			else if(currentCell.prevCell == 'l'){		//	if the pointer to the previous cell is 'l', go to the left
-				seqBaln = '-' + seqBaln;				//	in the matrix.  this indicates that we need to insert a gap
-				seqAaln = seqA[column] + seqAaln;		//	in seqB and a base in seqA
-				currentCell = alignment[row][--column];
-			}
-			else{
-				seqAaln = seqA[column] + seqAaln;		//	otherwise we need to go diagonally up and to the left,
-				seqBaln = seqB[row] + seqBaln;			//	here we add a base to both alignments
-				currentCell = alignment[--row][--column];
+	try {	
+									//	to fill the values of seqAaln and seqBaln
+		seqAaln = "";
+		seqBaln = "";
+		int row = lB-1;
+		int column = lA-1;
+		//	seqAstart = 1;
+		//	seqAend = column;
+		
+		AlignmentCell currentCell = alignment[row][column];	//	Start the traceback from the bottom-right corner of the
+		//	matrix
+		
+		if(currentCell.prevCell == 'x'){	seqAaln = seqBaln = "NOALIGNMENT";		}//If there's an 'x' in the bottom-
+		else{												//	right corner bail out because it means nothing got aligned
+			while(currentCell.prevCell != 'x'){				//	while the previous cell isn't an 'x', keep going...
+				
+				if(currentCell.prevCell == 'u'){			//	if the pointer to the previous cell is 'u', go up in the
+					seqAaln = '-' + seqAaln;				//	matrix.  this indicates that we need to insert a gap in
+					seqBaln = seqB[row] + seqBaln;			//	seqA and a base in seqB
+					currentCell = alignment[--row][column];
+				}
+				else if(currentCell.prevCell == 'l'){		//	if the pointer to the previous cell is 'l', go to the left
+					seqBaln = '-' + seqBaln;				//	in the matrix.  this indicates that we need to insert a gap
+					seqAaln = seqA[column] + seqAaln;		//	in seqB and a base in seqA
+					currentCell = alignment[row][--column];
+				}
+				else{
+					seqAaln = seqA[column] + seqAaln;		//	otherwise we need to go diagonally up and to the left,
+					seqBaln = seqB[row] + seqBaln;			//	here we add a base to both alignments
+					currentCell = alignment[--row][--column];
+				}
 			}
 		}
+		
+		pairwiseLength = seqAaln.length();
+		seqAstart = 1;	seqAend = 0;
+		seqBstart = 1;	seqBend = 0;
+		
+		for(int i=0;i<seqAaln.length();i++){
+			if(seqAaln[i] != '-' && seqBaln[i] == '-')		{	seqAstart++;	}
+			else if(seqAaln[i] == '-' && seqBaln[i] != '-')	{	seqBstart++;	}
+			else											{	break;			}
+		}
+		
+		pairwiseLength -= (seqAstart + seqBstart - 2);
+		
+		for(int i=seqAaln.length()-1; i>=0;i--){
+			if(seqAaln[i] != '-' && seqBaln[i] == '-')		{	seqAend++;		}
+			else if(seqAaln[i] == '-' && seqBaln[i] != '-')	{	seqBend++;		}
+			else											{	break;			}
+		}
+		pairwiseLength -= (seqAend + seqBend);
+		
+		seqAend = seqA.length() - seqAend - 1;
+		seqBend = seqB.length() - seqBend - 1;
 	}
-	
-	pairwiseLength = seqAaln.length();
-	seqAstart = 1;	seqAend = 0;
-	seqBstart = 1;	seqBend = 0;
-	
-	for(int i=0;i<seqAaln.length();i++){
-		if(seqAaln[i] != '-' && seqBaln[i] == '-')		{	seqAstart++;	}
-		else if(seqAaln[i] == '-' && seqBaln[i] != '-')	{	seqBstart++;	}
-		else											{	break;			}
+	catch(exception& e) {
+		errorOut(e, "Alignment", "traceBack");
+		exit(1);
 	}
-	
-	pairwiseLength -= (seqAstart + seqBstart - 2);
-	
-	for(int i=seqAaln.length()-1; i>=0;i--){
-		if(seqAaln[i] != '-' && seqBaln[i] == '-')		{	seqAend++;		}
-		else if(seqAaln[i] == '-' && seqBaln[i] != '-')	{	seqBend++;		}
-		else											{	break;			}
-	}
-	pairwiseLength -= (seqAend + seqBend);
-
-	seqAend = seqA.length() - seqAend - 1;
-	seqBend = seqB.length() - seqBend - 1;
-
 }
 /**************************************************************************************************/
 

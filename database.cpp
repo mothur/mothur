@@ -15,7 +15,8 @@
 
 Database::Database(string fastaFileName){		//	This assumes that the template database is in fasta format, may 
 												//	need to alter this in the future?
-
+	longest = 0;
+	
 	ifstream fastaFile;
 	openInputFile(fastaFileName, fastaFile);
 	
@@ -43,6 +44,13 @@ Database::Database(string fastaFileName){		//	This assumes that the template dat
 			}
 		}
 		templateSequences[i] = Sequence(seqName, aligned);
+		
+		//necessary because Sequence constructor by default sets whatever it reads to unaligned
+		//the setUnaligned function remove gap char.
+		templateSequences[i].setUnaligned(templateSequences[i].getUnaligned());
+		
+		if (templateSequences[i].getUnaligned().length() > longest)  { longest = templateSequences[i].getUnaligned().length(); }
+		
 		fastaFile.putback(letter);
 	}
 	
@@ -64,4 +72,10 @@ Database::~Database(){
 
 float Database::getSearchScore()	{	return searchScore;		}	//	we're assuming that the search is already done
 
+
 /**************************************************************************************************/
+
+int Database::getLongestBase()	{	return longest+1;		}	
+
+/**************************************************************************************************/
+

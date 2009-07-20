@@ -160,14 +160,16 @@ int AlignCommand::execute(){
 			templateDB = new KmerDB(templateFileName, kmerSize);
 		}
 		
-		if(align == "gotoh")			{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, 3000);	}
-		else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, 3000);			}
+		int longestBase = templateDB->getLongestBase();
+		
+		if(align == "gotoh")			{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, longestBase);			}
+		else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);				}
 		else if(align == "blast")		{	alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);		}
 		else if(align == "noalign")		{	alignment = new NoAlign();													}
 		else {
 			mothurOut(align + " is not a valid alignment option. I will run the command using needleman.");
 			mothurOutEndLine();
-			alignment = new NeedlemanOverlap(gapOpen, match, misMatch, 3000);
+			alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);
 		}
 		
 		string alignFileName = candidateFileName.substr(0,candidateFileName.find_last_of(".")+1) + "align";
@@ -184,7 +186,7 @@ int AlignCommand::execute(){
 			inFASTA.close();
 			
 			lines.push_back(new linePair(0, numFastaSeqs));
-			
+		
 			driver(lines[0], alignFileName, reportFileName);
 			
 		}
@@ -262,13 +264,14 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName){
 		
 		ifstream inFASTA;
 		openInputFile(candidateFileName, inFASTA);
+
 		inFASTA.seekg(line->start);
-		
+
 		for(int i=0;i<line->numSeqs;i++){
 			
 			Sequence* candidateSeq = new Sequence(inFASTA);
 			report.setCandidate(candidateSeq);
-			
+	
 			Sequence temp = templateDB->findClosestSequence(candidateSeq);
 			Sequence* templateSeq = &temp;
 			
@@ -276,7 +279,9 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName){
 			report.setSearchParameters(search, templateDB->getSearchScore());
 			
 			Nast nast(alignment, candidateSeq, templateSeq);
+
 			report.setAlignmentParameters(align, alignment);
+
 			report.setNastParameters(nast);
 			
 			alignmentFile << '>' << candidateSeq->getName() << '\n' << candidateSeq->getAligned() << endl;

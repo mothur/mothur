@@ -26,18 +26,25 @@
 
 NeedlemanOverlap::NeedlemanOverlap(float gO, float m, float mm, int r) ://	note that we don't have a gap extend
 gap(gO), match(m), mismatch(mm), Alignment(r) {							//	the gap openning penalty is assessed for
-																		//	every gapped position
-	for(int i=1;i<nCols;i++){
-		alignment[0][i].prevCell = 'l';					//	initialize first row by pointing all poiters to the left
-		alignment[0][i].cValue = 0;						//	and the score to zero
-	}
+	try {																	//	every gapped position
+		for(int i=1;i<nCols;i++){
+			alignment[0][i].prevCell = 'l';					//	initialize first row by pointing all poiters to the left
+			alignment[0][i].cValue = 0;						//	and the score to zero
+		}
+		
+		for(int i=1;i<nRows;i++){
+			alignment[i][0].prevCell = 'u';					//	initialize first column by pointing all poiters upwards
+			alignment[i][0].cValue = 0;						//	and the score to zero
+		}
 	
-	for(int i=1;i<nRows;i++){
-		alignment[i][0].prevCell = 'u';					//	initialize first column by pointing all poiters upwards
-		alignment[i][0].cValue = 0;						//	and the score to zero
 	}
+	catch(exception& e) {
+		errorOut(e, "NeedlemanOverlap", "NeedlemanOverlap");
+		exit(1);
+	}
+																
+																		
 }
-
 /**************************************************************************************************/
 
 NeedlemanOverlap::~NeedlemanOverlap(){	/*	do nothing	*/	}
@@ -45,45 +52,54 @@ NeedlemanOverlap::~NeedlemanOverlap(){	/*	do nothing	*/	}
 /**************************************************************************************************/
 
 void NeedlemanOverlap::align(string A, string B){
-	
-	seqA = ' ' + A;	lA = seqA.length();		//	algorithm requires a dummy space at the beginning of each string
-	seqB = ' ' + B;	lB = seqB.length();		//	algorithm requires a dummy space at the beginning of each string
-	
-	for(int i=1;i<lB;i++){					//	This code was largely translated from Perl code provided in Ex 3.1 
-		for(int j=1;j<lA;j++){				//	of the O'Reilly BLAST book.  I found that the example output had a
-											//	number of errors
-			float diagonal;
-			if(seqB[i] == seqA[j])	{	diagonal = alignment[i-1][j-1].cValue + match;		}
-			else					{	diagonal = alignment[i-1][j-1].cValue + mismatch;	}
-			
-			float up	= alignment[i-1][j].cValue + gap;
-			float left	= alignment[i][j-1].cValue + gap;
-			
-			if(diagonal >= up){
-				if(diagonal >= left){
-					alignment[i][j].cValue = diagonal;
-					alignment[i][j].prevCell = 'd';
+	try {
+		seqA = ' ' + A;	lA = seqA.length();		//	algorithm requires a dummy space at the beginning of each string
+		seqB = ' ' + B;	lB = seqB.length();		//	algorithm requires a dummy space at the beginning of each string
+
+		if (lA > nRows) { mothurOut("Your one of your candidate sequences is longer than you longest template sequence."); mothurOutEndLine();  }
+		
+		for(int i=1;i<lB;i++){					//	This code was largely translated from Perl code provided in Ex 3.1 
+			for(int j=1;j<lA;j++){				//	of the O'Reilly BLAST book.  I found that the example output had a
+				//	number of errors
+				float diagonal;
+				if(seqB[i] == seqA[j])	{	diagonal = alignment[i-1][j-1].cValue + match;		}
+				else					{	diagonal = alignment[i-1][j-1].cValue + mismatch;	}
+				
+				float up	= alignment[i-1][j].cValue + gap;
+				float left	= alignment[i][j-1].cValue + gap;
+				
+				if(diagonal >= up){
+					if(diagonal >= left){
+						alignment[i][j].cValue = diagonal;
+						alignment[i][j].prevCell = 'd';
+					}
+					else{
+						alignment[i][j].cValue = left;
+						alignment[i][j].prevCell = 'l';
+					}
 				}
 				else{
-					alignment[i][j].cValue = left;
-					alignment[i][j].prevCell = 'l';
-				}
-			}
-			else{
-				if(up >= left){
-					alignment[i][j].cValue = up;
-					alignment[i][j].prevCell = 'u';
-				}
-				else{
-					alignment[i][j].cValue = left;
-					alignment[i][j].prevCell = 'l';
+					if(up >= left){
+						alignment[i][j].cValue = up;
+						alignment[i][j].prevCell = 'u';
+					}
+					else{
+						alignment[i][j].cValue = left;
+						alignment[i][j].prevCell = 'l';
+					}
 				}
 			}
 		}
+		Overlap over;						
+		over.setOverlap(alignment, lA, lB, 0);		//	Fix gaps at the beginning and end of the sequences
+		traceBack();								//	Traceback the alignment to populate seqAaln and seqBaln
+		
 	}
-	Overlap over;						
-	over.setOverlap(alignment, lA, lB, 0);		//	Fix gaps at the beginning and end of the sequences
-	traceBack();								//	Traceback the alignment to populate seqAaln and seqBaln
+	catch(exception& e) {
+		errorOut(e, "NeedlemanOverlap", "align");
+		exit(1);
+	}
+
 }
 
 /**************************************************************************************************/

@@ -30,24 +30,31 @@
 /**************************************************************************************************/
 
 KmerDB::KmerDB(string fastaFileName, int kSize) : Database(fastaFileName), kmerSize(kSize) {
-
-	string kmerDBName = fastaFileName.substr(0,fastaFileName.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
-	ifstream kmerFileTest(kmerDBName.c_str());
+	try { 
 	
-	int power4s[14] = { 1, 4, 16, 64, 256, 1024, 4096, 16384, 65536, 262144, 1048576, 4194304, 16777216, 67108864 };
-	
-	maxKmer = power4s[kmerSize];
-	kmerLocations.resize(maxKmer+1);
-	
-	if(!kmerFileTest){		//	if we can open the kmer db file, then read it in...
-		mothurOut("Generating the " + kmerDBName + " database...\t");	cout.flush();
-		generateKmerDB(kmerDBName);	
+		string kmerDBName = fastaFileName.substr(0,fastaFileName.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
+		ifstream kmerFileTest(kmerDBName.c_str());
+		
+		int power4s[14] = { 1, 4, 16, 64, 256, 1024, 4096, 16384, 65536, 262144, 1048576, 4194304, 16777216, 67108864 };
+		
+		maxKmer = power4s[kmerSize];
+		kmerLocations.resize(maxKmer+1);
+		
+		if(!kmerFileTest){		//	if we can open the kmer db file, then read it in...
+			mothurOut("Generating the " + kmerDBName + " database...\t");	cout.flush();
+			generateKmerDB(kmerDBName);	
+		}
+		else{					//	...otherwise generate it.
+			mothurOut("Reading in the " + kmerDBName + " database...\t");	cout.flush();
+			readKmerDB(kmerDBName, kmerFileTest);
+		}
+		mothurOut("DONE."); mothurOutEndLine();	mothurOutEndLine(); cout.flush();
+		
 	}
-	else{					//	...otherwise generate it.
-		mothurOut("Reading in the " + kmerDBName + " database...\t");	cout.flush();
-		readKmerDB(kmerDBName, kmerFileTest);
-	}
-	mothurOut("DONE."); mothurOutEndLine();	mothurOutEndLine(); cout.flush();
+	catch(exception& e) {
+		errorOut(e, "KmerDB", "KmerDB");
+		exit(1);
+	}	
 
 }
 /**************************************************************************************************/
@@ -61,92 +68,114 @@ KmerDB::~KmerDB(){
 /**************************************************************************************************/
 
 Sequence KmerDB::findClosestSequence(Sequence* candidateSeq){
+	try {
 	
-	Kmer kmer(kmerSize);
-	
-	searchScore = 0;
-	int maxSequence = 0;
-
-	vector<int> matches(numSeqs, 0);						//	a record of the sequences with shared kmers
-	vector<int> timesKmerFound(kmerLocations.size()+1, 0);	//	a record of the kmers that we have already found
-
-	int numKmers = candidateSeq->getNumBases() - kmerSize + 1;	
-
-	for(int i=0;i<numKmers;i++){
-		int kmerNumber = kmer.getKmerNumber(candidateSeq->getUnaligned(), i);		//	go through the query sequence and get a kmer number
-		if(timesKmerFound[kmerNumber] == 0){				//	if we haven't seen it before...
-			for(int j=0;j<kmerLocations[kmerNumber].size();j++){//increase the count for each sequence that also has
-				matches[kmerLocations[kmerNumber][j]]++;	//	that kmer
+		Kmer kmer(kmerSize);
+		
+		searchScore = 0;
+		int maxSequence = 0;
+		
+		vector<int> matches(numSeqs, 0);						//	a record of the sequences with shared kmers
+		vector<int> timesKmerFound(kmerLocations.size()+1, 0);	//	a record of the kmers that we have already found
+		
+		int numKmers = candidateSeq->getNumBases() - kmerSize + 1;	
+		
+		for(int i=0;i<numKmers;i++){
+			int kmerNumber = kmer.getKmerNumber(candidateSeq->getUnaligned(), i);		//	go through the query sequence and get a kmer number
+			if(timesKmerFound[kmerNumber] == 0){				//	if we haven't seen it before...
+				for(int j=0;j<kmerLocations[kmerNumber].size();j++){//increase the count for each sequence that also has
+					matches[kmerLocations[kmerNumber][j]]++;	//	that kmer
+				}
+			}
+			timesKmerFound[kmerNumber] = 1;						//	ok, we've seen the kmer now
+		}
+		
+		for(int i=0;i<numSeqs;i++){								//	find the db sequence that shares the most kmers with
+			if(matches[i] > searchScore){					//	the query sequence
+				searchScore = matches[i];
+				maxSequence = i;
 			}
 		}
-		timesKmerFound[kmerNumber] = 1;						//	ok, we've seen the kmer now
+		
+		searchScore = 100 * searchScore / (float) numKmers;		//	return the Sequence object corresponding to the db
+		
+		return templateSequences[maxSequence];					//	sequence with the most shared kmers.
+		
 	}
-
-	for(int i=0;i<numSeqs;i++){								//	find the db sequence that shares the most kmers with
-		if(matches[i] > searchScore){					//	the query sequence
-			searchScore = matches[i];
-			maxSequence = i;
-		}
-	}
-
-	searchScore = 100 * searchScore / (float) numKmers;		//	return the Sequence object corresponding to the db
-	return templateSequences[maxSequence];					//	sequence with the most shared kmers.
+	catch(exception& e) {
+		errorOut(e, "KmerDB", "findClosestSequence");
+		exit(1);
+	}	
 }
 
 /**************************************************************************************************/
 
 void KmerDB::generateKmerDB(string kmerDBName){
+	try {
 	
-	Kmer kmer(kmerSize);
-	
-	for(int i=0;i<numSeqs;i++){								//	for all of the template sequences...
-
-		string seq = templateSequences[i].getUnaligned();	//	...take the unaligned sequence...
-		int numKmers = seq.length() - kmerSize + 1;
+		Kmer kmer(kmerSize);
 		
-		vector<int> seenBefore(maxKmer+1,0);
-		for(int j=0;j<numKmers;j++){						//	...step though the sequence and get each kmer...
-			int kmerNumber = kmer.getKmerNumber(seq, j);
-			if(seenBefore[kmerNumber] == 0){
-				kmerLocations[kmerNumber].push_back(i);		//	...insert the sequence index into kmerLocations for
-			}												//	the appropriate kmer number
-			seenBefore[kmerNumber] = 1;
-		}													
-	}
-	
-	ofstream kmerFile;										//	once we have the kmerLocations folder print it out
-	openOutputFile(kmerDBName, kmerFile);					//	to a file
-	
-	for(int i=0;i<maxKmer;i++){								//	step through all of the possible kmer numbers
-		kmerFile << i << ' ' << kmerLocations[i].size();	//	print the kmer number and the number of sequences with
-		for(int j=0;j<kmerLocations[i].size();j++){			//	that kmer.  then print out the indices of the sequences
-			kmerFile << ' ' << kmerLocations[i][j];			//	with that kmer.
+		for(int i=0;i<numSeqs;i++){								//	for all of the template sequences...
+			
+			string seq = templateSequences[i].getUnaligned();	//	...take the unaligned sequence...
+			int numKmers = seq.length() - kmerSize + 1;
+			
+			vector<int> seenBefore(maxKmer+1,0);
+			for(int j=0;j<numKmers;j++){						//	...step though the sequence and get each kmer...
+				int kmerNumber = kmer.getKmerNumber(seq, j);
+				if(seenBefore[kmerNumber] == 0){
+					kmerLocations[kmerNumber].push_back(i);		//	...insert the sequence index into kmerLocations for
+				}												//	the appropriate kmer number
+				seenBefore[kmerNumber] = 1;
+			}													
 		}
-		kmerFile << endl;
+		
+		ofstream kmerFile;										//	once we have the kmerLocations folder print it out
+		openOutputFile(kmerDBName, kmerFile);					//	to a file
+		
+		for(int i=0;i<maxKmer;i++){								//	step through all of the possible kmer numbers
+			kmerFile << i << ' ' << kmerLocations[i].size();	//	print the kmer number and the number of sequences with
+			for(int j=0;j<kmerLocations[i].size();j++){			//	that kmer.  then print out the indices of the sequences
+				kmerFile << ' ' << kmerLocations[i][j];			//	with that kmer.
+			}
+			kmerFile << endl;
+		}
+		kmerFile.close();
+		
 	}
-	kmerFile.close();
+	catch(exception& e) {
+		errorOut(e, "KmerDB", "generateKmerDB");
+		exit(1);
+	}	
 	
 }
 
 /**************************************************************************************************/
 
 void KmerDB::readKmerDB(string kmerDBName, ifstream& kmerDBFile){
-
-	kmerDBFile.seekg(0);									//	start at the beginning of the file
+	try {
 	
-	string seqName;
-	int seqNumber;
-	
-	for(int i=0;i<maxKmer;i++){
-		int numValues;	
-		kmerDBFile >> seqName >> numValues;
+		kmerDBFile.seekg(0);									//	start at the beginning of the file
 		
-		for(int j=0;j<numValues;j++){						//	for each kmer number get the...
-			kmerDBFile >> seqNumber;						//		1. number of sequences with the kmer number
-			kmerLocations[i].push_back(seqNumber);			//		2. sequence indices
+		string seqName;
+		int seqNumber;
+		
+		for(int i=0;i<maxKmer;i++){
+			int numValues;	
+			kmerDBFile >> seqName >> numValues;
+			
+			for(int j=0;j<numValues;j++){						//	for each kmer number get the...
+				kmerDBFile >> seqNumber;						//		1. number of sequences with the kmer number
+				kmerLocations[i].push_back(seqNumber);			//		2. sequence indices
+			}
 		}
+		kmerDBFile.close();
+		
 	}
-	kmerDBFile.close();
+	catch(exception& e) {
+		errorOut(e, "KmerDB", "readKmerDB");
+		exit(1);
+	}	
 }
 
 /**************************************************************************************************/

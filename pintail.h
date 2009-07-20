@@ -22,11 +22,13 @@
 class Pintail : public Chimera {
 	
 	public:
-		Pintail(string);	
+		Pintail(string, string);	
 		~Pintail();
 		
 		void getChimeras();
 		void print(ostream&);
+		
+		void setCons(string c) { consfile = c;  }
 		
 		
 	private:
@@ -37,41 +39,47 @@ class Pintail : public Chimera {
 			linePair(int i, int j) : start(i), end(j) {}
 		};
 
-	
-		Dist* distCalculator;
-		string fastafile;
+		Dist* distcalculator;
 		int iters;
+		string fastafile, templateFile, consfile;
 		vector<linePair*> lines;
 		vector<Sequence*> querySeqs;
 		vector<Sequence*> templateSeqs;
 		
-		map<Sequence*, Sequence*> bestfit;  //maps a query sequence to its most similiar sequence in the template
-		map<Sequence*, Sequence*>::iterator itBest;
+		vector<Sequence> bestfit;  //bestfit[0] matches queryseqs[0]...
 		
-		map<Sequence*, vector<float> > obsDistance;  //maps a query sequence to its observed distance at each window
-		map<Sequence*, vector<float> > expectedDistance;  //maps a query sequence to its expected distance at each window
-		map<Sequence*, vector<float> >::iterator itObsDist;
-		map<Sequence*, vector<float> >::iterator itExpDist;
+		vector< vector<float> > obsDistance;  //obsDistance[0] is the vector of observed distances for queryseqs[0]... 
+		vector< vector<float> > expectedDistance;  //expectedDistance[0] is the vector of expected distances for queryseqs[0]... 
+		vector<float> deviation;  //deviation[0] is the percentage of mismatched pairs over the whole seq between querySeqs[0] and its best match.
+		vector< vector<int> > windows;  // windows[0] is a vector containing the starting spot in queryseqs[0] aligned sequence for each window.
+										//this is needed so you can move by bases and not just spots in the alignment
+		vector< map<int, int> >  trim;  //trim[0] is the start and end position of trimmed querySeqs[0].  Used to find the variability over each sequence window.
+										
+		vector<int> windowSizes;    //windowSizes[0] = window size of querySeqs[0]
 		
-		vector<float> averageProbability;			//Qav
-		map<Sequence*, float> seqCoef;				//maps a sequence to its coefficient
-		map<Sequence*, float> DE;					//maps a sequence to its deviation
-		map<Sequence*, float>::iterator itCoef;	
+		vector< vector<float> > Qav;	//Qav[0] is the vector of average variablility for queryseqs[0]... 
+		vector<float>  seqCoef;				//seqCoef[0] is the coeff for queryseqs[0]...
+		vector<float> DE;					//DE[0] is the deviaation for queryseqs[0]...
+		vector<float> probabilityProfile;
 		
 		vector<Sequence*> readSeqs(string);
-		vector<float> findQav(vector<float>);
+		void trimSeqs(Sequence*, Sequence&, int);
+		vector<float> readFreq();
+		vector< vector<float> > findQav(int, int);  
 		vector<float> calcFreq(vector<Sequence*>);
-		map<Sequence*, float> getCoef(vector<float>);
+		vector<float> getCoef(int, int);
 		
-		void findPairs(int, int);
-		void calcObserved(int, int);
-		void calcExpected(int, int);
-		void calcDE(int, int);
+		vector<Sequence> findPairs(int, int);
+		vector< vector<int> > findWindows(int, int);
+		vector< vector<float> > calcObserved(int, int);
+		vector< vector<float> > calcExpected(int, int);
+		vector<float> calcDE(int, int);
+		vector<float> calcDist(int, int);
 	
-		void createProcessesPairs();
-		void createProcessesObserved();
-		void createProcessesExpected();
-		void createProcessesDE();
+		void createProcessesSpots();
+		void createProcesses();
+		
+		
 		
 };
 
