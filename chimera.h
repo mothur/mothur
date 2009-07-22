@@ -13,6 +13,7 @@
 
 #include "mothur.h"
 #include "sparsematrix.hpp"
+#include "sequence.hpp"
 
 typedef list<PCell>::iterator MatData;
 typedef map<int, float> SeqMap;  //maps sequence to all distance for that seqeunce
@@ -36,6 +37,29 @@ class Chimera {
 		
 		virtual void setCons(string) {};
 		virtual void setQuantiles(string) {};
+		
+		virtual vector<Sequence*> readSeqs(string file) {
+			try {
+				ifstream in;
+				openInputFile(file, in);
+				vector<Sequence*> container;
+				
+				//read in seqs and store in vector
+				while(!in.eof()){
+
+					Sequence* current = new Sequence(in);
+					container.push_back(current);
+					gobble(in);
+				}
+				
+				in.close();
+				return container;
+			}
+			catch(exception& e) {
+				errorOut(e, "Chimera", "readSeqs");
+				exit(1);
+			}
+		}
 		
 		
 		//pure functions

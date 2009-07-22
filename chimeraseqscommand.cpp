@@ -22,7 +22,7 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantiles" };
+			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -48,9 +48,9 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 			if (consfile == "not open") { abort = true; }
 			else if (consfile == "not found") { consfile = "";  }	
 			
-			quanfile = validParameter.validFile(parameters, "quantiles", true);
+			quanfile = validParameter.validFile(parameters, "quantile", true);
 			if (quanfile == "not open") { abort = true; }
-			else if (quanfile == "not found") { consfile = "";  }	
+			else if (quanfile == "not found") { quanfile = "";  }	
 			
 
 			string temp;
@@ -71,7 +71,7 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 				
 			method = validParameter.validFile(parameters, "method", false);		if (method == "not found") { method = "pintail"; }
 			
-			if ((method == "pintail") && (templatefile == "") && (consfile == "")) { mothurOut("You must provide a template or conservation file with the pintail method."); mothurOutEndLine(); abort = true;  }
+			if ((method == "pintail") && (templatefile == "")) { mothurOut("You must provide a template file with the pintail method."); mothurOutEndLine(); abort = true;  }
 			
 
 		}

@@ -38,6 +38,7 @@ class Pintail : public Chimera {
 			int start;
 			int end;
 			linePair(int i, int j) : start(i), end(j) {}
+			linePair(){}
 		};
 
 		Dist* distcalculator;
@@ -45,6 +46,7 @@ class Pintail : public Chimera {
 		string fastafile, templateFile, consfile, quanfile;
 		
 		vector<linePair*> lines;
+		vector<linePair*> templateLines;
 		vector<Sequence*> querySeqs;
 		vector<Sequence*> templateSeqs;
 		
@@ -53,10 +55,11 @@ class Pintail : public Chimera {
 		vector< vector<float> > obsDistance;  //obsDistance[0] is the vector of observed distances for queryseqs[0]... 
 		vector< vector<float> > expectedDistance;  //expectedDistance[0] is the vector of expected distances for queryseqs[0]... 
 		vector<float> deviation;  //deviation[0] is the percentage of mismatched pairs over the whole seq between querySeqs[0] and its best match.
-		vector< vector<int> > windows;  // windows[0] is a vector containing the starting spot in queryseqs[0] aligned sequence for each window.
+		vector< vector<int> > windowsForeachQuery;  // windowsForeachQuery[0] is a vector containing the starting spot in queryseqs[0] aligned sequence for each window.
 										//this is needed so you can move by bases and not just spots in the alignment
 										
-		vector<int> windowSizes;    //windowSizes[0] = window size of querySeqs[0]
+		vector<int> windowSizes;			//windowSizes[0] = window size of querySeqs[0]
+		vector<int> windowSizesTemplate;    //windowSizesTemplate[0] = window size of templateSeqs[0]
 		
 		vector< map<int, int> > trimmed;    //trimmed[0] = start and stop of trimmed sequences for querySeqs[0]
 		map<int, int>::iterator it;
@@ -67,13 +70,11 @@ class Pintail : public Chimera {
 		vector<float> probabilityProfile;
 		vector< vector<float> > quantiles;  //quantiles[0] is the vector of deviations with ceiling score of 1, quantiles[1] is the vector of deviations with ceiling score of 2...
 		
-		vector<Sequence*> readSeqs(string);
-		map<int, int> trimSeqs(Sequence*, Sequence, int);
+		void trimSeqs(Sequence*, Sequence, map<int, int>&);
 		vector<float> readFreq();
 		vector< vector<float> > readQuantiles();
 		vector< vector<float> > getQuantiles(int, int);
 		vector<float> calcFreq(vector<Sequence*>);
-		
 		
 		vector<Sequence> findPairs(int, int);
 		vector<int> findWindows(Sequence*, int, int, int&);
