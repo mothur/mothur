@@ -40,6 +40,7 @@ class Bellerophon : public Chimera {
 		void print(ostream&);
 		
 		void setCons(string){};
+		void setQuantiles(string) {};
 		
 		
 	private:

@@ -35,6 +35,7 @@ class Chimera {
 		virtual void setIncrement(int i)		{	increment = i;		}
 		
 		virtual void setCons(string) {};
+		virtual void setQuantiles(string) {};
 		
 		
 		//pure functions

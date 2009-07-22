@@ -21,10 +21,10 @@ Sequence::Sequence(string newName, string sequence) {
 
 	initialize();	
 	name = newName;
-	if(sequence.find_first_of('-') != string::npos) {
-		setAligned(sequence);
-	}
+	
+	//setUnaligned removes any gap characters for us
 	setUnaligned(sequence);
+	setAligned(sequence);
 	
 }
 //********************************************************************************************************************
@@ -53,10 +53,9 @@ Sequence::Sequence(ifstream& fastaFile){
 		}
 	}
 
-	if((sequence.find_first_of('-') != string::npos) || (sequence.find_first_of('.') != string::npos)) {	//	if there are any gaps in the sequence, assume that it is
-		setAligned(sequence);							//	an alignment file
-	}
-	setUnaligned(sequence);								//	also set the unaligned sequence file
+	setAligned(sequence);	
+	//setUnaligned removes any gap characters for us						
+	setUnaligned(sequence);								
 }
 
 //********************************************************************************************************************
