@@ -28,7 +28,8 @@ class Pintail : public Chimera {
 		void getChimeras();
 		void print(ostream&);
 		
-		void setCons(string c) { consfile = c;  }
+		void setCons(string c)		{ consfile = c;  }
+		void setQuantiles(string q) { quanfile = q;  }
 		
 		
 	private:
@@ -41,7 +42,8 @@ class Pintail : public Chimera {
 
 		Dist* distcalculator;
 		int iters;
-		string fastafile, templateFile, consfile;
+		string fastafile, templateFile, consfile, quanfile;
+		
 		vector<linePair*> lines;
 		vector<Sequence*> querySeqs;
 		vector<Sequence*> templateSeqs;
@@ -53,31 +55,38 @@ class Pintail : public Chimera {
 		vector<float> deviation;  //deviation[0] is the percentage of mismatched pairs over the whole seq between querySeqs[0] and its best match.
 		vector< vector<int> > windows;  // windows[0] is a vector containing the starting spot in queryseqs[0] aligned sequence for each window.
 										//this is needed so you can move by bases and not just spots in the alignment
-		vector< map<int, int> >  trim;  //trim[0] is the start and end position of trimmed querySeqs[0].  Used to find the variability over each sequence window.
 										
 		vector<int> windowSizes;    //windowSizes[0] = window size of querySeqs[0]
+		
+		vector< map<int, int> > trimmed;    //trimmed[0] = start and stop of trimmed sequences for querySeqs[0]
+		map<int, int>::iterator it;
 		
 		vector< vector<float> > Qav;	//Qav[0] is the vector of average variablility for queryseqs[0]... 
 		vector<float>  seqCoef;				//seqCoef[0] is the coeff for queryseqs[0]...
 		vector<float> DE;					//DE[0] is the deviaation for queryseqs[0]...
 		vector<float> probabilityProfile;
+		vector< vector<float> > quantiles;  //quantiles[0] is the vector of deviations with ceiling score of 1, quantiles[1] is the vector of deviations with ceiling score of 2...
 		
 		vector<Sequence*> readSeqs(string);
-		void trimSeqs(Sequence*, Sequence&, int);
+		map<int, int> trimSeqs(Sequence*, Sequence, int);
 		vector<float> readFreq();
-		vector< vector<float> > findQav(int, int);  
+		vector< vector<float> > readQuantiles();
+		vector< vector<float> > getQuantiles(int, int);
 		vector<float> calcFreq(vector<Sequence*>);
-		vector<float> getCoef(int, int);
+		
 		
 		vector<Sequence> findPairs(int, int);
-		vector< vector<int> > findWindows(int, int);
-		vector< vector<float> > calcObserved(int, int);
-		vector< vector<float> > calcExpected(int, int);
-		vector<float> calcDE(int, int);
-		vector<float> calcDist(int, int);
+		vector<int> findWindows(Sequence*, int, int, int&);
+		vector<float> calcObserved(Sequence*, Sequence, vector<int>, int);
+		vector<float>  calcExpected(vector<float>, float);
+		vector<float>  findQav(vector<int>, int);  
+		float calcDE(vector<float>, vector<float>);
+		float calcDist(Sequence*, Sequence, int, int);
+		float getCoef(vector<float>, vector<float>);
 	
 		void createProcessesSpots();
 		void createProcesses();
+		void createProcessesQuan();
 		
 		
 		

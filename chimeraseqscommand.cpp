@@ -22,7 +22,7 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation" };
+			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantiles" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -47,6 +47,10 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 			consfile = validParameter.validFile(parameters, "conservation", true);
 			if (consfile == "not open") { abort = true; }
 			else if (consfile == "not found") { consfile = "";  }	
+			
+			quanfile = validParameter.validFile(parameters, "quantiles", true);
+			if (quanfile == "not open") { abort = true; }
+			else if (quanfile == "not found") { consfile = "";  }	
 			
 
 			string temp;
@@ -111,8 +115,13 @@ int ChimeraSeqsCommand::execute(){
 		
 		if (method == "bellerophon")	{		chimera = new Bellerophon(fastafile);			}
 		else if (method == "pintail")	{		chimera = new Pintail(fastafile, templatefile);	
+			//saves time to avoid generating it
 			if (consfile != "")			{		chimera->setCons(consfile);						}
 			else						{		chimera->setCons("");							}
+			
+			//saves time to avoid generating it
+			if (quanfile != "")			{		chimera->setQuantiles(quanfile);				}
+			else						{		chimera->setQuantiles("");						}
 		}else { mothurOut("Not a valid method."); mothurOutEndLine(); return 0;		}
 		
 		//set user options
