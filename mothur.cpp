@@ -18,14 +18,13 @@ GlobalData* GlobalData::_uniqueInstance = 0;
 int main(int argc, char *argv[]){
 	try {
 		
-		system("clear");
-		
 		//remove old logfile
 		string logFileName = "mothur.logFile";
 		remove(logFileName.c_str());
 		
 		//version
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			system("clear");
 			#if defined (__APPLE__) || (__MACH__)
 				mothurOutJustToLog("Mac version");
 				mothurOutEndLine(); mothurOutEndLine();
@@ -35,6 +34,7 @@ int main(int argc, char *argv[]){
 			#endif
 
 		#else
+			system("CLS");
 			mothurOutJustToLog("Windows version");
 			mothurOutEndLine(); mothurOutEndLine();
 		#endif		

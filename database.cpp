@@ -24,12 +24,12 @@ Database::Database(string fastaFileName){		//	This assumes that the template dat
 	mothurOut("Reading in the " + fastaFileName + " template sequences...\t");	cout.flush();
 
 	//all of this is elsewhere already!
-	numSeqs=count(istreambuf_iterator<char>(fastaFile),istreambuf_iterator<char>(), '>');	//	count the number of
-	fastaFile.seekg(0);																		//	sequences
+	//numSeqs=count(istreambuf_iterator<char>(fastaFile),istreambuf_iterator<char>(), '>');	//	count the number of
+	//fastaFile.seekg(0);																		//	sequences
 	
-	templateSequences.resize(numSeqs);
+	//templateSequences.resize(numSeqs);
 	
-	string seqName, sequence;
+	/*string seqName, sequence;
 	for(int i=0;i<numSeqs;i++){
 		fastaFile >> seqName;
 		seqName = seqName.substr(1);
@@ -52,7 +52,20 @@ Database::Database(string fastaFileName){		//	This assumes that the template dat
 		if (templateSequences[i].getUnaligned().length() > longest)  { longest = templateSequences[i].getUnaligned().length(); }
 		
 		fastaFile.putback(letter);
+	}*/
+	
+	while (!fastaFile.eof()) {
+		Sequence temp(fastaFile);
+		
+		templateSequences.push_back(temp);
+		
+		//save longest base
+		if (temp.getUnaligned().length() > longest)  { longest = temp.getUnaligned().length(); }
+		
+		gobble(fastaFile);
 	}
+	
+	numSeqs = templateSequences.size();
 	
 	fastaFile.close();
 	//all of this is elsewhere already!
