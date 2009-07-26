@@ -39,6 +39,9 @@ void Pintail::print(ostream& out) {
 			else								{	chimera = "No";		}
 			
 			out << querySeqs[i]->getName() << '\t' << "div: " << deviation[i] << "\tstDev: " << DE[i] << "\tchimera flag: " << chimera << endl;
+			if (chimera == "Yes") {
+				mothurOut(querySeqs[i]->getName() + "\tdiv: " + toString(deviation[i]) + "\tstDev: " + toString(DE[i]) + "\tchimera flag: " + chimera); mothurOutEndLine();
+			}
 			out << "Observed\t";
 			
 			for (int j = 0; j < obsDistance[i].size(); j++) {  out << obsDistance[i][j] << '\t';  }
@@ -80,10 +83,11 @@ void Pintail::getChimeras() {
 		windowSizes.resize(numSeqs, window);
 		windowSizesTemplate.resize(templateSeqs.size(), window);
 		windowsForeachQuery.resize(numSeqs);
+		h.resize(numSeqs);
 		quantiles.resize(100);  //one for every percent mismatch
 		
 		//break up file if needed
-		int linesPerProcess = processors / numSeqs;
+		int linesPerProcess = numSeqs / processors ;
 		
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			//find breakup of sequences for all times we will Parallelize
@@ -113,14 +117,28 @@ void Pintail::getChimeras() {
 		#endif
 		
 		distcalculator = new ignoreGaps();
-
+		decalc = new DeCalculator();
+		
+		decalc->setMask(seqMask);
+		
+		//mask querys
+		for (int i = 0; i < querySeqs.size(); i++) {
+			decalc->runMask(querySeqs[i]);
+		}
+		
+		//mask templates
+		for (int i = 0; i < templateSeqs.size(); i++) {
+			decalc->runMask(templateSeqs[i]);
+		}
+		
+for (int i = 0; i < lines.size(); i++) { cout << "line pair " << i << " = " << lines[i]->start << '\t' << lines[i]->end << endl;  }
 				
 		if (processors == 1) { 
 			mothurOut("Finding closest sequence in template to each sequence... "); cout.flush();
 			bestfit = findPairs(lines[0]->start, lines[0]->end);
 			
 			//ex.align matches from wigeon
-/*for (int m = 0; m < templateSeqs.size(); m++)  {
+for (int m = 0; m < templateSeqs.size(); m++)  {
 	if (templateSeqs[m]->getName() == "159481") {  bestfit[17] = *(templateSeqs[m]); }
 	if (templateSeqs[m]->getName() == "100137") {  bestfit[16] = *(templateSeqs[m]); }
 	if (templateSeqs[m]->getName() == "112956") {  bestfit[15] = *(templateSeqs[m]); }
@@ -141,19 +159,19 @@ void Pintail::getChimeras() {
 	if (templateSeqs[m]->getName() == "141312") {  bestfit[0] = *(templateSeqs[m]); }
 
 
-}*/
+}
 			
 			for (int j = 0; j < bestfit.size(); j++) { 
 				//chops off beginning and end of sequences so they both start and end with a base
-				trimSeqs(querySeqs[j], bestfit[j], trimmed[j]);  
+				decalc->trimSeqs(querySeqs[j], bestfit[j], trimmed[j]);  
 			}
 			mothurOut("Done."); mothurOutEndLine();
 			
 			mothurOut("Finding window breaks... "); cout.flush();
 			for (int i = lines[0]->start; i < lines[0]->end; i++) {
 				it = trimmed[i].begin();
-cout << "trimmed = " << it->first << '\t' << it->second << endl;
-				vector<int> win = findWindows(querySeqs[i], it->first, it->second, windowSizes[i]);
+//cout << "trimmed = " << it->first << '\t' << it->second << endl;
+				vector<int> win = decalc->findWindows(querySeqs[i], it->first, it->second, windowSizes[i], increment);
 				windowsForeachQuery[i] = win;
 			}
 			mothurOut("Done."); mothurOutEndLine();
@@ -164,7 +182,7 @@ cout << "trimmed = " << it->first << '\t' << it->second << endl;
 		mothurOut("Getting conservation... "); cout.flush();
 		if (consfile == "") { 
 			mothurOut("Calculating probability of conservation for your template sequences.  This can take a while...  I will output the quantiles to a .prob file so that you can input them using the conservation parameter next time you run this command.  Providing the .prob file will dramatically improve speed.    "); cout.flush();
-			probabilityProfile = calcFreq(templateSeqs); 
+			probabilityProfile = decalc->calcFreq(templateSeqs, templateFile); 
 			mothurOut("Done."); mothurOutEndLine();
 		}else				{   probabilityProfile = readFreq();			  }
 		
@@ -176,8 +194,8 @@ cout << "trimmed = " << it->first << '\t' << it->second << endl;
 						
 			mothurOut("Calculating observed distance... "); cout.flush();
 			for (int i = lines[0]->start; i < lines[0]->end; i++) {
-	cout << querySeqs[i]->getName() << '\t' << bestfit[i].getName() << " windows = " << windowsForeachQuery[i].size() << " size = " << windowSizes[i] << endl;
-				vector<float> obsi = calcObserved(querySeqs[i], bestfit[i], windowsForeachQuery[i], windowSizes[i]);
+	//cout << querySeqs[i]->getName() << '\t' << bestfit[i].getName() << " windows = " << windowsForeachQuery[i].size() << " size = " << windowSizes[i] << endl;
+				vector<float> obsi = decalc->calcObserved(querySeqs[i], bestfit[i], windowsForeachQuery[i], windowSizes[i]);
 				obsDistance[i] = obsi;
 			}
 			mothurOut("Done."); mothurOutEndLine();
@@ -185,23 +203,31 @@ cout << "trimmed = " << it->first << '\t' << it->second << endl;
 			
 			mothurOut("Finding variability... "); cout.flush();
 			for (int i = lines[0]->start; i < lines[0]->end; i++) {
-				vector<float> q = findQav(windowsForeachQuery[i], windowSizes[i]);
+				vector<float> q = decalc->findQav(windowsForeachQuery[i], windowSizes[i], probabilityProfile);
+
 				Qav[i] = q;
+//cout << i+1 << endl;
+//for (int j = 0; j < Qav[i].size(); j++) {
+	//cout << Qav[i][j] << '\t';
+//}
+//cout << endl << endl;
+
 			}
 			mothurOut("Done."); mothurOutEndLine();
 			
 			
 			mothurOut("Calculating alpha... "); cout.flush();
 			for (int i = lines[0]->start; i < lines[0]->end; i++) {
-				float alpha = getCoef(obsDistance[i], Qav[i]);
-				seqCoef.push_back(alpha);
+				float alpha = decalc->getCoef(obsDistance[i], Qav[i]);
+//cout << i+1 << "\tcoef = " << alpha << endl;
+				seqCoef[i] = alpha;
 			}
 			mothurOut("Done."); mothurOutEndLine();
 		
 		
 			mothurOut("Calculating expected distance... "); cout.flush();
 			for (int i = lines[0]->start; i < lines[0]->end; i++) {
-				vector<float> exp = calcExpected(Qav[i], seqCoef[i]);
+				vector<float> exp = decalc->calcExpected(Qav[i], seqCoef[i]);
 				expectedDistance[i] = exp;
 			}
 			mothurOut("Done."); mothurOutEndLine();
@@ -209,11 +235,11 @@ cout << "trimmed = " << it->first << '\t' << it->second << endl;
 			
 			mothurOut("Finding deviation... "); cout.flush();
 			for (int i = lines[0]->start; i < lines[0]->end; i++) {
-				float de = calcDE(obsDistance[i], expectedDistance[i]);
+				float de = decalc->calcDE(obsDistance[i], expectedDistance[i]);
 				DE[i] = de;
 				
 				it = trimmed[i].begin();
-				float dist = calcDist(querySeqs[i], bestfit[i], it->first, it->second); 
+				float dist = decalc->calcDist(querySeqs[i], bestfit[i], it->first, it->second); 
 				deviation[i] = dist;
 			}
 			mothurOut("Done."); mothurOutEndLine();
@@ -230,7 +256,7 @@ cout << "trimmed = " << it->first << '\t' << it->second << endl;
 			
 			mothurOut("Calculating quantiles for your template.  This can take a while...  I will output the quantiles to a .quan file that you can input them using the quantiles parameter next time you run this command.  Providing the .quan file will dramatically improve speed.    "); cout.flush();
 			if (processors == 1) { 
-				quantiles = getQuantiles(0, templateSeqs.size());
+				quantiles = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, 0, templateSeqs.size());
 			}else {		createProcessesQuan();		}
 			
 			ofstream out4;
@@ -281,35 +307,10 @@ cout << "trimmed = " << it->first << '\t' << it->second << endl;
 		for (int i = 0; i < templateLines.size(); i++)			{	delete templateLines[i];		}
 			
 		delete distcalculator;
+		delete decalc;
 	}
 	catch(exception& e) {
 		errorOut(e, "Pintail", "getChimeras");
-		exit(1);
-	}
-}
-//***************************************************************************************************************
-//num is query's spot in querySeqs
-void Pintail::trimSeqs(Sequence* query, Sequence subject, map<int, int>& trim) {
-	try {
-		
-		string q = query->getAligned();
-		string s = subject.getAligned();
-		
-		int front = 0;
-		for (int i = 0; i < q.length(); i++) {
-			if (isalpha(q[i]) && isalpha(s[i])) { front = i; break;  }
-		}
-		
-		int back = 0;		
-		for (int i = q.length(); i >= 0; i--) {
-			if (isalpha(q[i]) && isalpha(s[i])) { back = i; break;  }
-		}
-		
-		trim[front] = back;
-		
-	}
-	catch(exception& e) {
-		errorOut(e, "Pintail", "trimSeqs");
 		exit(1);
 	}
 }
@@ -391,13 +392,14 @@ vector< vector<float> > Pintail::readQuantiles() {
 vector<Sequence> Pintail::findPairs(int start, int end) {
 	try {
 		
-		vector<Sequence> seqsMatches;  seqsMatches.resize(end-start);
+		vector<Sequence> seqsMatches;  
 		
 		for(int i = start; i < end; i++){
 		
 			float smallest = 10000.0;
 			Sequence query = *(querySeqs[i]);
-		
+			Sequence match;
+			
 			for(int j = 0; j < templateSeqs.size(); j++){
 				
 				Sequence temp = *(templateSeqs[j]);
@@ -406,10 +408,12 @@ vector<Sequence> Pintail::findPairs(int start, int end) {
 				float dist = distcalculator->getDist();
 				
 				if (dist < smallest) { 
-					seqsMatches[i] = *(templateSeqs[j]);
+					match = *(templateSeqs[j]);
 					smallest = dist;
 				}
 			}
+			
+			seqsMatches.push_back(match);
 		}
 		
 		return seqsMatches;
@@ -421,329 +425,6 @@ vector<Sequence> Pintail::findPairs(int start, int end) {
 	}
 }
 
-//***************************************************************************************************************
-//find the window breaks for each sequence - this is so you can move ahead by bases.
-vector<int>  Pintail::findWindows(Sequence* query, int front, int back, int& size) {
-	try {
-		
-		vector<int> win; 
-		
-		int cutoff = back - front;  //back - front 
-			
-		//if window is set to default
-		if (size == 0) {  if (cutoff > 1200) {  size = 300; }
-							else{  size = (cutoff / 4); }  } 
-		else if (size > (cutoff / 4)) { 
-				mothurOut("You have selected to large a window size for sequence " + query->getName() + ".  I will choose an appropriate window size."); mothurOutEndLine();
-				size = (cutoff / 4); 
-		}
-	
-		string seq = query->getAligned().substr(front, cutoff);
-			
-		//count bases
-		int numBases = 0;
-		for (int l = 0; l < seq.length(); l++) {  if (isalpha(seq[l])) { numBases++; }  }
-			
-		//save start of seq
-		win.push_back(front);
-		
-		//move ahead increment bases at a time until all bases are in a window
-		int countBases = 0;
-		int totalBases = 0;  //used to eliminate window of blanks at end of sequence
-			
-		seq = query->getAligned();
-		for (int m = front; m < (back - size) ; m++) {
-				
-			//count number of bases you see
-			if (isalpha(seq[m])) { countBases++; totalBases++;  }
-				
-			//if you have seen enough bases to make a new window
-			if (countBases >= increment) {
-				win.push_back(m);  //save spot in alignment
-				countBases = 0;				//reset bases you've seen in this window
-			}
-				
-			//no need to continue if all your bases are in a window
-			if (totalBases == numBases) {   break;  }
-		}
-			
-		return win;
-	
-	}
-	catch(exception& e) {
-		errorOut(e, "Pintail", "findWindows");
-		exit(1);
-	}
-}
-
-//***************************************************************************************************************
-vector<float> Pintail::calcObserved(Sequence* query, Sequence subject, vector<int> window, int size) {
-	try {
-		
-		vector<float> temp;
-//cout << "query length = " << query->getAligned().length() << '\t' << " subject length = " << subject.getAligned().length() << endl;				
-		for (int m = 0; m < window.size(); m++) {
-						
-			string seqFrag = query->getAligned().substr(window[m], size);
-			string seqFragsub = subject.getAligned().substr(window[m], size);
-	//cout << "start point = " << window[m] << " end point = " << window[m]+size << endl;						
-			int diff = 0;
-			for (int b = 0; b < seqFrag.length(); b++) {
-				if (seqFrag[b] != seqFragsub[b]) { diff++; }
-			}
-               
-			//percentage of mismatched bases
-			float dist;
-			dist = diff / (float) seqFrag.length() * 100;       
-				
-			temp.push_back(dist);
-		}
-			
-		return temp;
-	}
-	catch(exception& e) {
-		errorOut(e, "Pintail", "calcObserved");
-		exit(1);
-	}
-}
-//***************************************************************************************************************
-float Pintail::calcDist(Sequence* query, Sequence subject, int front, int back) {
-	try {
-		
-		//so you only look at the trimmed part of the sequence
-		int cutoff = back - front;  
-			
-		//from first startpoint with length back-front
-		string seqFrag = query->getAligned().substr(front, cutoff);
-		string seqFragsub = subject.getAligned().substr(front, cutoff);
-														
-		int diff = 0;
-		for (int b = 0; b < seqFrag.length(); b++) {
-			if (seqFrag[b] != seqFragsub[b]) { diff++; }
-		}
-               
-		//percentage of mismatched bases
-		float dist = diff / (float) seqFrag.length() * 100;       
-				
-		return dist;
-	}
-	catch(exception& e) {
-		errorOut(e, "Pintail", "calcDist");
-		exit(1);
-	}
-}
-
-//***************************************************************************************************************
-vector<float> Pintail::calcExpected(vector<float> qav, float coef) {
-	try {
-		
-		//for each window
-		vector<float> queryExpected;
-			
-		for (int m = 0; m < qav.size(); m++) {		
-				
-			float expected = qav[m] * coef;
-				
-			queryExpected.push_back(expected);	
-		}
-			
-		return queryExpected;
-				
-	}
-	catch(exception& e) {
-		errorOut(e, "Pintail", "calcExpected");
-		exit(1);
-	}
-}
-//***************************************************************************************************************
-float Pintail::calcDE(vector<float> obs, vector<float> exp) {
-	try {
-		
-		//for each window
-		float sum = 0.0;  //sum = sum from 1 to m of (oi-ei)^2
-		for (int m = 0; m < obs.size(); m++) { 		sum += ((obs[m] - exp[m]) * (obs[m] - exp[m]));		}
-			
-		float de = sqrt((sum / (obs.size() - 1)));
-			
-		return de;
-	}
-	catch(exception& e) {
-		errorOut(e, "Pintail", "calcDE");
-		exit(1);
-	}
-}
-
-//***************************************************************************************************************
-
-vector<float> Pintail::calcFreq(vector<Sequence*> seqs) {
-	try {
-
-		vector<float> prob;
-		string freqfile = getRootName(templateFile) + "prob";
-		ofstream outFreq;
-		
-		openOutputFile(freqfile, outFreq);
-		
-		//at each position in the sequence
-		for (int i = 0; i < seqs[0]->getAligned().length(); i++) {
-			
-			vector<int> freq;   freq.resize(4,0);
-			int gaps = 0;
-			
-			//find the frequency of each nucleotide
-			for (int j = 0; j < seqs.size(); j++) {
-				
-				char value = seqs[j]->getAligned()[i];
-				
-				if(toupper(value) == 'A')									{	freq[0]++;	}
-				else if(toupper(value) == 'T' || toupper(value) == 'U')		{	freq[1]++;	}
-				else if(toupper(value) == 'G')								{	freq[2]++;	}
-				else if(toupper(value) == 'C')								{	freq[3]++;	}
-				else { gaps++; }
-			}
-			
-			//find base with highest frequency
-			int highest = 0;
-			for (int m = 0; m < freq.size(); m++) {   if (freq[m] > highest) {  highest = freq[m];  }		}
-			
-			float highFreq;
-			//subtract gaps to "ignore them"
-			if ( (seqs.size() - gaps) == 0 ) {  highFreq = 1.0;  }			
-			else { highFreq = highest / (float) (seqs.size() - gaps);	 }
-						
-			float Pi;
-			Pi =  (highFreq - 0.25) / 0.75; 
-			
-			//cannot have probability less than 0.
-			if (Pi < 0) { Pi = 0.0; }
-			
-			//saves this for later
-			outFreq << i+1 << '\t' << Pi << endl;
-			
-			prob.push_back(Pi); 
-		}
-		
-		outFreq.close();
-		
-		return prob;
-				
-	}
-	catch(exception& e) {
-		errorOut(e, "Pintail", "calcFreq");
-		exit(1);
-	}
-}
-//***************************************************************************************************************
-vector<float>  Pintail::findQav(vector<int> window, int size) {
-	try {
-		vector<float>  averages; 
-				
-		//for each window find average
-		for (int m = 0; m < window.size(); m++) {
-				
-			float average = 0.0;
-				
-			//while you are in the window for this sequence
-			for (int j = window[m]; j < (window[m]+size); j++) {   average += probabilityProfile[j];	}
-				
-			average = average / size;
-	
-			//save this windows average
-			averages.push_back(average);
-		}
-				
-		return averages;
-	}
-	catch(exception& e) {
-		errorOut(e, "Pintail", "findQav");
-		exit(1);
-	}
-}
-
-//***************************************************************************************************************
-vector< vector<float> > Pintail::getQuantiles(int start, int end) {
-	try {
-		vector< vector<float> > quan; 
-		
-		//percentage of mismatched pairs 1 to 100
-		quan.resize(100);
-		
-		
-		//for each sequence
-		for(int i = start; i < end; i++){
-		
-			mothurOut("Processing template sequence " + toString(i)); mothurOutEndLine();
-			Sequence* query = templateSeqs[i];
-			
-			//compare to every other sequence in template
-			for(int j = 0; j < i; j++){
-				
-				Sequence subject = *(templateSeqs[j]);
-				
-				map<int, int> trim;
-				trimSeqs(query, subject, trim);
-				
-				it = trim.begin();
-				int front = it->first; int back = it->second;
-				
-				//reset window for each new comparison
-				windowSizesTemplate[i] = window;
-				
-				vector<int> win = findWindows(query, front, back, windowSizesTemplate[i]);
-				
-				vector<float> obsi = calcObserved(query, subject, win, windowSizesTemplate[i]);
-				
-				vector<float> q = findQav(win, windowSizesTemplate[i]);
-									
-				float alpha = getCoef(obsi, q);
-						
-				vector<float> exp = calcExpected(q, alpha);
-				
-				float de = calcDE(obsi, exp);
-								
-				float dist = calcDist(query, subject, front, back); 
-				
-				dist = ceil(dist);
-				
-				//dist-1 because vector indexes start at 0.
-				quan[dist-1].push_back(de);
-				
-			}
-		}
-
-		return quan;
-						
-	}
-	catch(exception& e) {
-		errorOut(e, "Pintail", "findQav");
-		exit(1);
-	}
-}
-
-//***************************************************************************************************************
-float Pintail::getCoef(vector<float> obs, vector<float> qav) {
-	try {
-	
-		//find average prob for this seqs windows
-		float probAverage = 0.0;
-		for (int j = 0; j < qav.size(); j++) {   probAverage += qav[j];	}
-		probAverage = probAverage / (float) qav.size();
-		
-		//find observed average 
-		float obsAverage = 0.0;
-		for (int j = 0; j < obs.size(); j++) {   obsAverage += obs[j];	}
-		obsAverage = obsAverage / (float) obs.size();
-		
-
-		float coef = obsAverage / probAverage;
-						
-		return coef;
-	}
-	catch(exception& e) {
-		errorOut(e, "Pintail", "getCoef");
-		exit(1);
-	}
-}
 /**************************************************************************************************/
 
 void Pintail::createProcessesSpots() {
@@ -751,7 +432,6 @@ void Pintail::createProcessesSpots() {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 0;
 		vector<int> processIDS;
-		vector< vector<int> > win; win.resize(querySeqs.size());
 		
 		//loop through and create all the processes you want
 		while (process != processors) {
@@ -763,24 +443,55 @@ void Pintail::createProcessesSpots() {
 			}else if (pid == 0){
 				
 				mothurOut("Finding pairs for sequences " + toString(lines[process]->start) + " to " + toString(lines[process]->end)); mothurOutEndLine();
-				vector<Sequence> tempbest;
-				tempbest = findPairs(lines[process]->start, lines[process]->end);
-				int count = 0;
-				for (int i = lines[process]->start; i < lines[process]->end; i++) {
-					bestfit[i] = tempbest[count];
-					
-					//chops off beginning and end of sequences so they both start and end with a base
-					trimSeqs(querySeqs[i], bestfit[i], trimmed[i]);
-					count++;
-				}
+				bestfit = findPairs(lines[process]->start, lines[process]->end);
 				mothurOut("Done finding pairs for sequences " +  toString(lines[process]->start) + " to " + toString(lines[process]->end)); mothurOutEndLine();
 				
+				int count = lines[process]->start;
+				for (int j = 0; j < bestfit.size(); j++) {
+				
+					//chops off beginning and end of sequences so they both start and end with a base
+					map<int, int> trim;
+					decalc->trimSeqs(querySeqs[count], bestfit[j], trim); 
+					trimmed[count] = trim;
+					
+					count++;
+				}
+
 				mothurOut("Finding window breaks for sequences " + toString(lines[process]->start) + " to " + toString(lines[process]->end)); mothurOutEndLine();
 				for (int i = lines[process]->start; i < lines[process]->end; i++) {
-					vector<int> temp = findWindows(querySeqs[i], it->first, it->second, windowSizes[i]);
-					win[i] = temp;
+					it = trimmed[i].begin();
+					windowsForeachQuery[i] = decalc->findWindows(querySeqs[i], it->first, it->second, windowSizes[i], increment);
 				}
 				mothurOut("Done finding window breaks for sequences " + toString(lines[process]->start) + " to " + toString(lines[process]->end)); mothurOutEndLine();
+				
+				//write out data to file so parent can read it
+				ofstream out;
+				string s = toString(pid) + ".temp";
+				openOutputFile(s, out);
+				
+				//output range and size
+				out << bestfit.size() << endl;
+				
+				//output pairs
+				for (int i = 0; i < bestfit.size(); i++) {
+					out << ">" << bestfit[i].getName() << endl << bestfit[i].getAligned() << endl;
+				}
+				
+				//output windowsForeachQuery
+				for (int i = 0; i < windowsForeachQuery.size(); i++) {
+					out << windowsForeachQuery[i].size() << '\t';
+					for (int j = 0; j < windowsForeachQuery[i].size(); j++) {
+						out << windowsForeachQuery[i][j] << '\t';
+					}
+					out << endl;
+				}
+				
+				//output windowSizes
+				for (int i = 0; i < windowSizes.size(); i++) {
+					out << windowSizes[i] << '\t';
+				}
+				out << endl;			
+				out.close();
 				
 				exit(0);
 			}else { mothurOut("unable to spawn the necessary processes."); mothurOutEndLine(); exit(0); }
@@ -792,17 +503,67 @@ void Pintail::createProcessesSpots() {
 			wait(&temp);
 		}
 		
-		windowsForeachQuery = win;
+		//get data created by processes
+		for (int i=0;i<processors;i++) { 
+			ifstream in;
+			string s = toString(processIDS[i]) + ".temp";
+			openInputFile(s, in);
+			
+			int size;
+			in >> size;  gobble(in);
+			
+			//get pairs
+			int count = lines[i]->start;
+			for (int m = 0; m < size; m++) {
+				Sequence temp(in);
+				bestfit[count] = temp;
+				
+				count++;
+				gobble(in);
+			}
+				
+			gobble(in);
+			
+			count = lines[i]->start;
+			for (int m = 0; m < size; m++) {
+				int num;
+				in >> num;
+				
+				vector<int> win;  int w;
+				for (int j = 0; j < num; j++) {
+					in >> w;
+					win.push_back(w);
+				}
+				
+				windowsForeachQuery[count] = win;
+				count++;
+				gobble(in);
+			}
+			
+			gobble(in);
+			count = lines[i]->start;
+			for (int i = 0; i < size; i++) {
+				int num;
+				in >> num;
+				
+				windowSizes[count] = num;
+				count++;
+			}
+			
+			in.close();
+		}
+			
+		
 #else
 		bestfit = findPairs(lines[0]->start, lines[0]->end);
 		for (int j = 0; j < bestfit.size(); j++) {
 				//chops off beginning and end of sequences so they both start and end with a base
-				trimSeqs(querySeqs[j], bestfit[j], j);  
+				decalc->trimSeqs(querySeqs[j], bestfit[j], trimmed[j]);  
 		}
 
 		for (int i = lines[0]->start; i < lines[0]->end; i++) {
 				it = trimmed[i].begin();
-				map<int, int> win = findWindows(querySeqs[i], it->first, it->second, windowSizes[i]);
+				map<int, int> win = decalc->findWindows(querySeqs[i], it->first, it->second, windowSizes[i], increment);
 				windows[i] = win;
 		}
 
@@ -841,25 +602,25 @@ void Pintail::createProcesses() {
 				mothurOut("Calculating observed, expected and de values for sequences " + toString(lines[process]->start) + " to " + toString(lines[process]->end)); mothurOutEndLine();
 				for (int i = lines[process]->start; i < lines[process]->end; i++) {
 					
-					vector<float> obsi = calcObserved(querySeqs[i], bestfit[i], windowsForeachQuery[i], windowSizes[i]);
+					vector<float> obsi = decalc->calcObserved(querySeqs[i], bestfit[i], windowsForeachQuery[i], windowSizes[i]);
 					obs[i] = obsi;
 				
 					//calc Qav
-					vector<float> q = findQav(windowsForeachQuery[i], windowSizes[i]);
+					vector<float> q = decalc->findQav(windowsForeachQuery[i], windowSizes[i], probabilityProfile);
 					
 					//get alpha
-					float alpha = getCoef(obsDistance[i], q);
+					float alpha = decalc->getCoef(obsDistance[i], q);
 					
 					//find expected
-					vector<float> exp = calcExpected(q, alpha);
+					vector<float> exp = decalc->calcExpected(q, alpha);
 					expectedDistance[i] = exp;
 					
 					//get de and deviation
-					float dei = calcDE(obsi, exp);
+					float dei = decalc->calcDE(obsi, exp);
 					de[i] = dei;
 					
 					it = trimmed[i].begin();
-					float dist = calcDist(querySeqs[i], bestfit[i], it->first, it->second); 
+					float dist = decalc->calcDist(querySeqs[i], bestfit[i], it->first, it->second); 
 					dev[i] = dist;
 				}
 				mothurOut("Done calculating observed, expected and de values for sequences " + toString(lines[process]->start) + " to " + toString(lines[process]->end)); mothurOutEndLine();
@@ -882,7 +643,7 @@ void Pintail::createProcesses() {
 #else
 			mothurOut("Calculating observed distance... "); cout.flush();
 			for (int i = lines[0]->start; i < lines[0]->end; i++) {
-				vector<float> obsi = calcObserved(querySeqs[i], bestfit[i], windows[i], windowSizes[i]);
+				vector<float> obsi = decalc->calcObserved(querySeqs[i], bestfit[i], windows[i], windowSizes[i]);
 				obsDistance[i] = obsi;
 			}
 			mothurOut("Done."); mothurOutEndLine();
@@ -891,7 +652,7 @@ void Pintail::createProcesses() {
 			
 			mothurOut("Finding variability... "); cout.flush();
 			for (int i = lines[0]->start; i < lines[0]->end; i++) {
-				vector<float> q = findQav(windows[i], windowSizes[i]);
+				vector<float> q = decalc->findQav(windows[i], windowSizes[i], probabilityProfile, h[i]);
 				Qav[i] = q;
 			}
 			mothurOut("Done."); mothurOutEndLine();
@@ -900,7 +661,7 @@ void Pintail::createProcesses() {
 			
 			mothurOut("Calculating alpha... "); cout.flush();
 			for (int i = lines[0]->start; i < lines[0]->end; i++) {
-				float alpha = getCoef(obsDistance[i], Qav[i]);
+				float alpha = decalc->getCoef(obsDistance[i], Qav[i]);
 				seqCoef.push_back(alpha);
 			}
 			mothurOut("Done."); mothurOutEndLine();
@@ -909,7 +670,7 @@ void Pintail::createProcesses() {
 		
 			mothurOut("Calculating expected distance... "); cout.flush();
 			for (int i = lines[0]->start; i < lines[0]->end; i++) {
-				vector<float> exp = calcExpected(Qav[i], seqCoef[i]);
+				vector<float> exp = decalc->calcExpected(Qav[i], seqCoef[i]);
 				expectedDistance[i] = exp;
 			}
 			mothurOut("Done."); mothurOutEndLine();
@@ -918,11 +679,11 @@ void Pintail::createProcesses() {
 			
 			mothurOut("Finding deviation... "); cout.flush();
 			for (int i = lines[0]->start; i < lines[0]->end; i++) {
-				float de = calcDE(obsDistance[i], expectedDistance[i]);
+				float de = decalc->calcDE(obsDistance[i], expectedDistance[i]);
 				DE[i] = de;
 				
 				it = trimmed[i].begin();
-				float dist = calcDist(querySeqs[i], bestfit[i], it->first, it->second); 
+				float dist = decalc->calcDist(querySeqs[i], bestfit[i], it->first, it->second); 
 				deviation[i] = dist;
 			}
 			mothurOut("Done."); mothurOutEndLine();
@@ -954,7 +715,7 @@ void Pintail::createProcessesQuan() {
 				process++;
 			}else if (pid == 0){
 				
-				vector< vector<float> > q = getQuantiles(templateLines[process]->start, templateLines[process]->end);
+				vector< vector<float> > q = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, templateLines[process]->start, templateLines[process]->end);
 				
 				for (int i = 0; i < q.size(); i++) {
 					//put all values of q[i] into quan[i]
@@ -979,7 +740,7 @@ void Pintail::createProcessesQuan() {
 		
 		quantiles = quan;
 #else
-		quantiles = getQuantiles(0, templateSeqs.size());
+		quantiles = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, 0, templateSeqs.size());
 #endif		
 	}
 	catch(exception& e) {

@@ -12,6 +12,7 @@
 
 #include "chimera.h"
 #include "dist.h"
+#include "decalc.h"
 
 //This class was created using the algorythms described in the 
 // "At Least 1 in 20 16S rRNA Sequence Records Currently Held in the Public Repositories is Estimated To Contain Substantial Anomalies" paper 
@@ -42,8 +43,10 @@ class Pintail : public Chimera {
 		};
 
 		Dist* distcalculator;
+		DeCalculator* decalc;
 		int iters;
 		string fastafile, templateFile, consfile, quanfile;
+		
 		
 		vector<linePair*> lines;
 		vector<linePair*> templateLines;
@@ -69,22 +72,13 @@ class Pintail : public Chimera {
 		vector<float> DE;					//DE[0] is the deviaation for queryseqs[0]...
 		vector<float> probabilityProfile;
 		vector< vector<float> > quantiles;  //quantiles[0] is the vector of deviations with ceiling score of 1, quantiles[1] is the vector of deviations with ceiling score of 2...
+		vector< set<int> > h;
 		
-		void trimSeqs(Sequence*, Sequence, map<int, int>&);
+		
 		vector<float> readFreq();
 		vector< vector<float> > readQuantiles();
-		vector< vector<float> > getQuantiles(int, int);
-		vector<float> calcFreq(vector<Sequence*>);
-		
 		vector<Sequence> findPairs(int, int);
-		vector<int> findWindows(Sequence*, int, int, int&);
-		vector<float> calcObserved(Sequence*, Sequence, vector<int>, int);
-		vector<float>  calcExpected(vector<float>, float);
-		vector<float>  findQav(vector<int>, int);  
-		float calcDE(vector<float>, vector<float>);
-		float calcDist(Sequence*, Sequence, int, int);
-		float getCoef(vector<float>, vector<float>);
-	
+			
 		void createProcessesSpots();
 		void createProcesses();
 		void createProcessesQuan();

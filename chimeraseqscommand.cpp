@@ -22,7 +22,7 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile" };
+			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile", "mask" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -50,7 +50,12 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 			
 			quanfile = validParameter.validFile(parameters, "quantile", true);
 			if (quanfile == "not open") { abort = true; }
-			else if (quanfile == "not found") { quanfile = "";  }	
+			else if (quanfile == "not found") { quanfile = "";  }
+				
+			maskfile = validParameter.validFile(parameters, "mask", true);
+			if (maskfile == "not open") { abort = true; }
+			else if (maskfile == "not found") { maskfile = "";  }	
+
 			
 
 			string temp;
@@ -86,11 +91,12 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 void ChimeraSeqsCommand::help(){
 	try {
 		mothurOut("The chimera.seqs command reads a fastafile and creates a sorted priority score list of potentially chimeric sequences (ideally, the sequences should already be aligned).\n");
-		mothurOut("The chimera.seqs command parameters are fasta, filter, correction, processors and method.  fasta is required.\n");
+		mothurOut("The chimera.seqs command parameters are fasta, filter, correction, processors, mask and method.  fasta is required.\n");
 		mothurOut("The filter parameter allows you to specify if you would like to apply a 50% soft filter.  The default is false. \n");
 		mothurOut("The correction parameter allows you to put more emphasis on the distance between highly similar sequences and less emphasis on the differences between remote homologs.   The default is true. \n");
 		mothurOut("The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n");
 		mothurOut("The method parameter allows you to specify the method for finding chimeric sequences.  The default is pintail. \n");
+		mothurOut("The mask parameter allows you to specify a file containing one sequence you wish to use as a mask for the pintail and mallard method.  The default is 236627 EU009184.1 Shigella dysenteriae str. FBD013. \n");
 		mothurOut("The chimera.seqs command should be in the following format: \n");
 		mothurOut("chimera.seqs(fasta=yourFastaFile, filter=yourFilter, correction=yourCorrection, processors=yourProcessors, method=bellerophon) \n");
 		mothurOut("Example: chimera.seqs(fasta=AD.align, filter=True, correction=true, processors=2, method=yourMethod) \n");
@@ -122,6 +128,10 @@ int ChimeraSeqsCommand::execute(){
 			//saves time to avoid generating it
 			if (quanfile != "")			{		chimera->setQuantiles(quanfile);				}
 			else						{		chimera->setQuantiles("");						}
+			
+			if (maskfile == "") { mothurOut("You have not provided a mask, so I am using the default 236627 EU009184.1 Shigella dysenteriae str. FBD013."); mothurOutEndLine();  }
+			chimera->setMask(maskfile);
+						
 		}else { mothurOut("Not a valid method."); mothurOutEndLine(); return 0;		}
 		
 		//set user options
