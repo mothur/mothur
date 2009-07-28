@@ -51,11 +51,11 @@ void DeCalculator::runMask(Sequence* seq) {
 }
 //***************************************************************************************************************
 //num is query's spot in querySeqs
-void DeCalculator::trimSeqs(Sequence* query, Sequence subject, map<int, int>& trim) {
+void DeCalculator::trimSeqs(Sequence* query, Sequence* subject, map<int, int>& trim) {
 	try {
 		
 		string q = query->getAligned();
-		string s = subject.getAligned();
+		string s = subject->getAligned();
 		
 		int front = 0;
 		for (int i = 0; i < q.length(); i++) {
@@ -131,7 +131,7 @@ vector<int>  DeCalculator::findWindows(Sequence* query, int front, int back, int
 }
 
 //***************************************************************************************************************
-vector<float> DeCalculator::calcObserved(Sequence* query, Sequence subject, vector<int> window, int size) {
+vector<float> DeCalculator::calcObserved(Sequence* query, Sequence* subject, vector<int> window, int size) {
 	try {
 		
 		vector<float> temp;
@@ -139,7 +139,7 @@ vector<float> DeCalculator::calcObserved(Sequence* query, Sequence subject, vect
 		for (int m = 0; m < window.size(); m++) {
 						
 			string seqFrag = query->getAligned().substr(window[m], size);
-			string seqFragsub = subject.getAligned().substr(window[m], size);
+			string seqFragsub = subject->getAligned().substr(window[m], size);
 	//cout << "start point = " << window[m] << " end point = " << window[m]+size << endl;						
 			int diff = 0;
 			for (int b = 0; b < seqFrag.length(); b++) {
@@ -162,7 +162,7 @@ vector<float> DeCalculator::calcObserved(Sequence* query, Sequence subject, vect
 	}
 }
 //***************************************************************************************************************
-float DeCalculator::calcDist(Sequence* query, Sequence subject, int front, int back) {
+float DeCalculator::calcDist(Sequence* query, Sequence* subject, int front, int back) {
 	try {
 		
 		//so you only look at the trimmed part of the sequence
@@ -170,7 +170,7 @@ float DeCalculator::calcDist(Sequence* query, Sequence subject, int front, int b
 			
 		//from first startpoint with length back-front
 		string seqFrag = query->getAligned().substr(front, cutoff);
-		string seqFragsub = subject.getAligned().substr(front, cutoff);
+		string seqFragsub = subject->getAligned().substr(front, cutoff);
 														
 		int diff = 0;
 		for (int b = 0; b < seqFrag.length(); b++) {
@@ -234,7 +234,7 @@ vector<float> DeCalculator::calcFreq(vector<Sequence*> seqs, string filename) {
 	try {
 
 		vector<float> prob;
-		string freqfile = getRootName(filename) + "prob";
+		string freqfile = getRootName(filename) + "freq";
 		ofstream outFreq;
 		
 		openOutputFile(freqfile, outFreq);
@@ -273,9 +273,12 @@ vector<float> DeCalculator::calcFreq(vector<Sequence*> seqs, string filename) {
 			if (Pi < 0) { Pi = 0.0; }
 			
 			//saves this for later
-			outFreq << i+1 << '\t' << Pi << endl;
+			outFreq << i+1 << '\t' << highFreq << endl;
 			
-			prob.push_back(Pi); 
+			if (h.count(i) > 0) {
+	cout << i+1 << '\t' << highFreq << endl;
+				prob.push_back(Pi); 
+			}
 		}
 		
 		outFreq.close();
@@ -341,7 +344,7 @@ vector< vector<float> > DeCalculator::getQuantiles(vector<Sequence*> seqs, vecto
 			//compare to every other sequence in template
 			for(int j = 0; j < i; j++){
 				
-				Sequence subject = *(seqs[j]);
+				Sequence* subject = seqs[j];
 				
 				map<int, int> trim;
 				map<int, int>::iterator it;

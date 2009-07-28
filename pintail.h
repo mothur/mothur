@@ -53,7 +53,7 @@ class Pintail : public Chimera {
 		vector<Sequence*> querySeqs;
 		vector<Sequence*> templateSeqs;
 		
-		vector<Sequence> bestfit;  //bestfit[0] matches queryseqs[0]...
+		vector<Sequence*> bestfit;  //bestfit[0] matches queryseqs[0]...
 		
 		vector< vector<float> > obsDistance;  //obsDistance[0] is the vector of observed distances for queryseqs[0]... 
 		vector< vector<float> > expectedDistance;  //expectedDistance[0] is the vector of expected distances for queryseqs[0]... 
@@ -77,9 +77,10 @@ class Pintail : public Chimera {
 		
 		vector<float> readFreq();
 		vector< vector<float> > readQuantiles();
-		vector<Sequence> findPairs(int, int);
+		vector<Sequence*> findPairs(int, int);
 			
 		void createProcessesSpots();
+		void createProcessesPairs();
 		void createProcesses();
 		void createProcessesQuan();
 		
