@@ -27,16 +27,17 @@ class DeCalculator {
 		DeCalculator() {};
 		~DeCalculator() {};
 		
+		set<int> getPos() {  return h;  }
 		void setMask(string m); 
 		void runMask(Sequence*);
-		void trimSeqs(Sequence*, Sequence, map<int, int>&);
+		void trimSeqs(Sequence*, Sequence*, map<int, int>&);
 		vector<float> calcFreq(vector<Sequence*>, string);
 		vector<int> findWindows(Sequence*, int, int, int&, int);
-		vector<float> calcObserved(Sequence*, Sequence, vector<int>, int);
+		vector<float> calcObserved(Sequence*, Sequence*, vector<int>, int);
 		vector<float>  calcExpected(vector<float>, float);
 		vector<float>  findQav(vector<int>, int, vector<float>);  
 		float calcDE(vector<float>, vector<float>);
-		float calcDist(Sequence*, Sequence, int, int);
+		float calcDist(Sequence*, Sequence*, int, int);
 		float getCoef(vector<float>, vector<float>);
 		vector< vector<float> > getQuantiles(vector<Sequence*>, vector<int>, int, vector<float>, int, int, int);
 		
