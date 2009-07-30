@@ -285,7 +285,7 @@ void GetSeqsCommand::readGroup(){
 //alignreport file has a column header line then all other lines contain 16 columns.  we just want the first column since that contains the name
 void GetSeqsCommand::readAlign(){
 	try {
-		string outputFileName = getRootName(alignfile) + "pick" +  getExtension(alignfile);;
+		string outputFileName = getRootName(getRootName(alignfile)) + "pick.align.report";
 		ofstream out;
 		openOutputFile(outputFileName, out);
 

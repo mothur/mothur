@@ -42,8 +42,8 @@ cout << "my quantile = " << quantiles[index][4] << endl;
 			
 			//is your DE value higher than the 95%
 			string chimera;
-			if (DE[i] > quantiles[index][4])	{	chimera = "Yes";	}
-			else								{	chimera = "No";		}
+			if (DE[i] > quantiles[index][4])		{	chimera = "Yes";	}
+			else									{	chimera = "No";		}
 			
 			out << querySeqs[i]->getName() << '\t' << "div: " << deviation[i] << "\tstDev: " << DE[i] << "\tchimera flag: " << chimera << endl;
 			if (chimera == "Yes") {
@@ -126,6 +126,10 @@ void Pintail::getChimeras() {
 		distcalculator = new ignoreGaps();
 		decalc = new DeCalculator();
 		
+		//if the user does enter a mask then you want to keep all the spots in the alignment
+		if (seqMask.length() == 0)	{	decalc->setAlignmentLength(querySeqs[0]->getAligned().length());	}
+		else						{	decalc->setAlignmentLength(seqMask.length());						}
+		
 		decalc->setMask(seqMask);
 		
 		//find pairs
@@ -163,7 +167,7 @@ void Pintail::getChimeras() {
 		}else				{   probabilityProfile = readFreq();			  }
 
 		//make P into Q
-		for (int i = 0; i < probabilityProfile.size(); i++)  {	probabilityProfile[i] = 1 - probabilityProfile[i];   }  //cout << i << '\t' << probabilityProfile[i] << endl;
+		for (int i = 0; i < probabilityProfile.size(); i++)  {	probabilityProfile[i] = 1 - probabilityProfile[i];  }  //cout << i << '\t' << probabilityProfile[i] << endl;
 		mothurOut("Done."); mothurOutEndLine();
 		
 		//mask querys
@@ -183,15 +187,15 @@ void Pintail::getChimeras() {
 		if (processors == 1) { 
 	
 			for (int j = 0; j < bestfit.size(); j++) { 
-			cout << querySeqs[j]->getName() << " after mask = " << querySeqs[j]->getAligned() << endl << endl;
-			cout << bestfit[j]->getName() << " after mask = " << bestfit[j]->getAligned() << endl << endl;
+			//cout << querySeqs[j]->getName() << " after mask = " << querySeqs[j]->getAligned() << endl << endl;
+			///cout << bestfit[j]->getName() << " after mask = " << bestfit[j]->getAligned() << endl << endl;
 				decalc->trimSeqs(querySeqs[j], bestfit[j], trimmed[j]);  
 			}
 			
 			mothurOut("Finding window breaks... "); cout.flush();
 			for (int i = lines[0]->start; i < lines[0]->end; i++) {
 				it = trimmed[i].begin();
-cout << i << '\t' << "trimmed = " << it->first << '\t' << it->second << endl;
+//cout << querySeqs[i]->getName() << '\t' << "trimmed = " << it->first << '\t' << it->second << endl;
 				vector<int> win = decalc->findWindows(querySeqs[i], it->first, it->second, windowSizes[i], increment);
 				windowsForeachQuery[i] = win;
 			}
@@ -204,13 +208,13 @@ cout << i << '\t' << "trimmed = " << it->first << '\t' << it->second << endl;
 						
 			mothurOut("Calculating observed distance... "); cout.flush();
 			for (int i = lines[0]->start; i < lines[0]->end; i++) {
-	cout << querySeqs[i]->getName() << '\t' << bestfit[i]->getName() << " windows = " << windowsForeachQuery[i].size() << " size = " << windowSizes[i] << endl;
+	//cout << querySeqs[i]->getName() << '\t' << bestfit[i]->getName() << " windows = " << windowsForeachQuery[i].size() << " size = " << windowSizes[i] << endl;
 				vector<float> obsi = decalc->calcObserved(querySeqs[i], bestfit[i], windowsForeachQuery[i], windowSizes[i]);
 	
 	for (int j = 0; j < obsi.size(); j++) {
-		cout << obsi[j] << '\t';
+		//cout << obsi[j] << '\t';
 	}
-	cout << endl;
+	//cout << endl;
 				obsDistance[i] = obsi;
 			}
 			mothurOut("Done."); mothurOutEndLine();
@@ -221,11 +225,11 @@ cout << i << '\t' << "trimmed = " << it->first << '\t' << it->second << endl;
 				vector<float> q = decalc->findQav(windowsForeachQuery[i], windowSizes[i], probabilityProfile);
 
 				Qav[i] = q;
-cout << i+1 << endl;
+//cout << querySeqs[i]->getName() << endl;
 for (int j = 0; j < Qav[i].size(); j++) {
-	cout << Qav[i][j] << '\t';
+	//cout << Qav[i][j] << '\t';
 }
-cout << endl << endl;
+//cout << endl << endl;
 
 			}
 			mothurOut("Done."); mothurOutEndLine();
@@ -234,7 +238,7 @@ cout << endl << endl;
 			mothurOut("Calculating alpha... "); cout.flush();
 			for (int i = lines[0]->start; i < lines[0]->end; i++) {
 				float alpha = decalc->getCoef(obsDistance[i], Qav[i]);
-cout << i+1 << "\tcoef = " << alpha << endl;
+//cout << querySeqs[i]->getName() << "\tcoef = " << alpha << endl;
 				seqCoef[i] = alpha;
 			}
 			mothurOut("Done."); mothurOutEndLine();
@@ -252,10 +256,10 @@ cout << i+1 << "\tcoef = " << alpha << endl;
 			for (int i = lines[0]->start; i < lines[0]->end; i++) {
 				float de = decalc->calcDE(obsDistance[i], expectedDistance[i]);
 				DE[i] = de;
-cout << querySeqs[i]->getName() << '\t' << "de value = " << de << endl;				
+//cout << querySeqs[i]->getName() << '\t' << "de value = " << de << endl;				
 				it = trimmed[i].begin();
 				float dist = decalc->calcDist(querySeqs[i], bestfit[i], it->first, it->second); 
-cout << querySeqs[i]->getName() << '\t' << "dist value = " << dist << endl;
+//cout << querySeqs[i]->getName() << '\t' << "dist value = " << dist << endl;
 				deviation[i] = dist;
 			}
 			mothurOut("Done."); mothurOutEndLine();
