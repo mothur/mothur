@@ -21,7 +21,7 @@ ClusterCommand::ClusterCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"cutoff","precision","method"};
+			string Array[] =  {"cutoff","precision","method","showabund","timing"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -31,33 +31,43 @@ ClusterCommand::ClusterCommand(string option){
 		
 			//check to make sure all parameters are valid for command
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
-				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {
+					abort = true;
+				}
 			}
 			
 			//error checking to make sure they read a distance file
 			if ((globaldata->gSparseMatrix == NULL) || (globaldata->gListVector == NULL)) {
-				mothurOut("Before you use the cluster command, you first need to read in a distance matrix."); mothurOutEndLine(); abort = true;
+				mothurOut("Before you use the cluster command, you first need to read in a distance matrix."); mothurOutEndLine();
+				abort = true;
 			} 
 		
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			//get user cutoff and precision or use defaults
 			string temp;
-			temp = validParameter.validFile(parameters, "precision", false);		if (temp == "not found") { temp = "100"; }
+			temp = validParameter.validFile(parameters, "precision", false);
+			if (temp == "not found") { temp = "100"; }
 			//saves precision legnth for formatting below
 			length = temp.length();
 			convert(temp, precision); 
 			
-			temp = validParameter.validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "10"; }
+			temp = validParameter.validFile(parameters, "cutoff", false);
+			if (temp == "not found") { temp = "10"; }
 			convert(temp, cutoff); 
 			cutoff += (5 / (precision * 10.0));
 			
-			method = validParameter.validFile(parameters, "method", false);			if (method == "not found") { method = "furthest"; }
-
+			method = validParameter.validFile(parameters, "method", false);
+			if (method == "not found") { method = "furthest"; }
 			
 			if ((method == "furthest") || (method == "nearest") || (method == "average")) { }
 			else { mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average."); mothurOutEndLine(); abort = true; }
 
+			showabund = validParameter.validFile(parameters, "showabund", false);
+			if (showabund == "not found") { showabund = "T"; }
+
+			timing = validParameter.validFile(parameters, "timing", false);
+			if (timing == "not found") { timing = "F"; }
 			
 			if (abort == false) {
 			
@@ -70,25 +80,21 @@ ClusterCommand::ClusterCommand(string option){
 				}
 				
 				//create cluster
-				if(method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, matrix);	tag = "fn";	}
-				else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, matrix);		tag = "nn";	}
-				else if(method == "average"){	cluster = new AverageLinkage(rabund, list, matrix);		tag = "an";	}
-				else						{	mothurOut("error - not recognized method"); mothurOutEndLine();	abort = true;	}	
-				
+				if (method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, matrix); }
+				else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, matrix); }
+				else if(method == "average"){	cluster = new AverageLinkage(rabund, list, matrix);	}
+				tag = cluster->getTag();
+
 				fileroot = getRootName(globaldata->inputFileName);
 			
 				openOutputFile(fileroot+ tag + ".sabund",	sabundFile);
 				openOutputFile(fileroot+ tag + ".rabund",	rabundFile);
 				openOutputFile(fileroot+ tag + ".list",		listFile);
-				
-				
 			}
-
 		}
-		
 	}
 	catch(exception& e) {
-		errorOut(e, "ClusterCommand", "ClusterCommand");		
+		errorOut(e, "ClusterCommand", "ClusterCommand");
 		exit(1);
 	}
 }
@@ -97,11 +103,11 @@ ClusterCommand::ClusterCommand(string option){
 
 void ClusterCommand::help(){
 	try {
-		 mothurOut("The cluster command can only be executed after a successful read.dist command.\n");
-		 mothurOut("The cluster command parameter options are method, cuttoff and precision. No parameters are required.\n");
-		 mothurOut("The cluster command should be in the following format: \n");
-		 mothurOut("cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n");
-		 mothurOut("The acceptable cluster methods are furthest, nearest and average.  If no method is provided then furthest is assumed.\n\n");
+		mothurOut("The cluster command can only be executed after a successful read.dist command.\n");
+		mothurOut("The cluster command parameter options are method, cuttoff, precision, showabund and timing. No parameters are required.\n");
+		mothurOut("The cluster command should be in the following format: \n");
+		mothurOut("cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n");
+		mothurOut("The acceptable cluster methods are furthest, nearest and average.  If no method is provided then furthest is assumed.\n\n");	
 	}
 	catch(exception& e) {
 		errorOut(e, "ClusterCommand", "help");
@@ -125,16 +131,28 @@ int ClusterCommand::execute(){
 	
 		if (abort == true) {	return 0;	}
 		
+		time_t estart = time(NULL);
+		int ndist = matrix->getNNodes();
 		float previousDist = 0.00000;
 		float rndPreviousDist = 0.00000;
 		oldRAbund = *rabund;
 		oldList = *list;
+
+		print_start = true;
+		start = time(NULL);
+		loops = 0;
 		
-		float x;
-		x=0.1;
-		toString(x, 2);
-	
-		while(matrix->getSmallDist() < cutoff && matrix->getNNodes() > 0){
+		while (matrix->getSmallDist() < cutoff && matrix->getNNodes() > 0){
+			if (print_start && isTrue(timing)) {
+				mothurOut("Clustering (" + tag + ") dist " + toString(matrix->getSmallDist()) + "/" 
+					+ toString(roundDist(matrix->getSmallDist(), precision)) 
+					+ "\t(precision: " + toString(precision) + ", Nodes: " + toString(matrix->getNNodes()) + ")");
+				cout.flush();
+				print_start = false;
+			}
+
+			loops++;
+
 			cluster->update();
 			float dist = matrix->getSmallDist();
 			float rndDist = roundDist(dist, precision);
@@ -150,6 +168,13 @@ int ClusterCommand::execute(){
 			rndPreviousDist = rndDist;
 			oldRAbund = *rabund;
 			oldList = *list;
+		}
+
+		if (print_start && isTrue(timing)) {
+			mothurOut("Clustering (" + tag + ") for distance " + toString(previousDist) + "/" + toString(rndPreviousDist) 
+					 + "\t(precision: " + toString(precision) + ", Nodes: " + toString(matrix->getNNodes()) + ")");
+			cout.flush();
+	 		print_start = false;
 		}
 	
 		if(previousDist <= 0.0000){
@@ -174,7 +199,9 @@ int ClusterCommand::execute(){
 		sabundFile.close();
 		rabundFile.close();
 		listFile.close();
-		
+		if (isTrue(timing)) {
+			mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster " + toString(ndist) + " distances"); mothurOutEndLine();
+		}
 		return 0;
 	}
 	catch(exception& e) {
@@ -187,8 +214,18 @@ int ClusterCommand::execute(){
 
 void ClusterCommand::printData(string label){
 	try {
+		if (isTrue(timing)) {
+			mothurOut("\tTime: " + toString(time(NULL) - start) + "\tsecs for " + toString(oldRAbund.getNumBins()) 
+		     + "\tclusters. Updates: " + toString(loops)); mothurOutEndLine();
+		}
+		print_start = true;
+		loops = 0;
+		start = time(NULL);
+
 		oldRAbund.setLabel(label);
-		oldRAbund.getSAbundVector().print(cout);
+		if (isTrue(showabund)) {
+			oldRAbund.getSAbundVector().print(cout);
+		}
 		oldRAbund.print(rabundFile);
 		oldRAbund.getSAbundVector().print(sabundFile);
 	
@@ -199,5 +236,7 @@ void ClusterCommand::printData(string label){
 		errorOut(e, "ClusterCommand", "printData");
 		exit(1);
 	}
+
+
 }
 //**********************************************************************************************************************

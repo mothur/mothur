@@ -2,7 +2,6 @@
 #include "sparsematrix.hpp"
 #include "listvector.hpp"
 
-typedef list<PCell>::iterator MatData;
 
 /***********************************************************************/
 
@@ -22,15 +21,15 @@ float SparseMatrix::getSmallDist(){
 
 /***********************************************************************/
 
-void SparseMatrix::rmCell(MatData data){
+MatData SparseMatrix::rmCell(MatData data){
 	try {
 		if(data->vectorMap != NULL ){
 			*(data->vectorMap) = NULL;
 			data->vectorMap = NULL;
 		}
-		matrix.erase(data);		
+		data = matrix.erase(data);		
 		numNodes--;
-	
+		return(data);
 	//  seems like i should be updating smallDist here, but the only time we remove cells is when
 	//  clustering and the clustering algorithm updates smallDist
 	}
@@ -89,13 +88,11 @@ MatData SparseMatrix::end(){
 void SparseMatrix::print(){
 	try {
 		int index = 0;
-		
-		mothurOutEndLine();
-		mothurOut("Index\tRow\tColumn\tDistance");
-		mothurOutEndLine();
+	
+		cout << endl << "Index\tRow\tColumn\tDistance" << endl;
 	
 		for(MatData currentCell=matrix.begin();currentCell!=matrix.end();currentCell++){
-			mothurOut(toString(index) + "\t" + toString(currentCell->row)  + "\t" + toString(currentCell->column) + "\t" + toString(currentCell->dist)); mothurOutEndLine();
+			cout << index << '\t' << currentCell->row  << '\t' << currentCell->column << '\t' << currentCell->dist << endl;
 			index++;
 		}
 	}
@@ -111,10 +108,7 @@ void SparseMatrix::print(ListVector* list){
 	try {
 		int index = 0;
 	
-		mothurOutEndLine();
-		mothurOut("Index\tRow\tColumn\tDistance");
-		mothurOutEndLine();
-
+		mothurOutEndLine(); mothurOut("Index\tRow\tColumn\tDistance"); mothurOutEndLine();
 	
 		for(MatData currentCell=matrix.begin();currentCell!=matrix.end();currentCell++){
 			mothurOut(toString(index) + "\t" + toString(list->get(currentCell->row))  + "\t" + toString(list->get(currentCell->column)) + "\t" + toString(currentCell->dist)); mothurOutEndLine();
@@ -159,7 +153,7 @@ PCell* SparseMatrix::getSmallestCell(){
 				}
 
 			}
-			random_shuffle(mins.begin(), mins.end());  //randomize the order of the iterators in the mins vector
+//			random_shuffle(mins.begin(), mins.end());  //randomize the order of the iterators in the mins vector
 
 			for(int i=0;i<mins.size();i++){
 				mins[i]->vectorMap = &mins[i];  //assign vectorMap to the address for the container

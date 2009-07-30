@@ -59,11 +59,13 @@ void DeCalculator::trimSeqs(Sequence* query, Sequence* subject, map<int, int>& t
 		
 		int front = 0;
 		for (int i = 0; i < q.length(); i++) {
+//cout << "query = " << q[i] << " subject = " << s[i] << endl;
 			if (isalpha(q[i]) && isalpha(s[i])) { front = i; break;  }
 		}
-		
+//cout << endl << endl;		
 		int back = 0;		
 		for (int i = q.length(); i >= 0; i--) {
+//cout << "query = " << q[i] << " subject = " << s[i] << endl;
 			if (isalpha(q[i]) && isalpha(s[i])) { back = i; break;  }
 		}
 		
@@ -97,10 +99,10 @@ vector<int>  DeCalculator::findWindows(Sequence* query, int front, int back, int
 		//count bases
 		int numBases = 0;
 		for (int l = 0; l < seq.length(); l++) {  if (isalpha(seq[l])) { numBases++; }  }
-			
+//cout << "num Bases = " << numBases << endl;			
 		//save start of seq
 		win.push_back(front);
-		
+//cout << front << '\t';		
 		//move ahead increment bases at a time until all bases are in a window
 		int countBases = 0;
 		int totalBases = 0;  //used to eliminate window of blanks at end of sequence
@@ -109,18 +111,27 @@ vector<int>  DeCalculator::findWindows(Sequence* query, int front, int back, int
 		for (int m = front; m < (back - size) ; m++) {
 				
 			//count number of bases you see
-			if (isalpha(seq[m])) { countBases++; totalBases++;  }
+			if (isalpha(seq[m])) { countBases++;  }
 				
 			//if you have seen enough bases to make a new window
 			if (countBases >= increment) {
+				//total bases is the number of bases in a window already.
+				totalBases += countBases;
+//cout << "total bases = " << totalBases << endl;
 				win.push_back(m);  //save spot in alignment
+//cout << m << '\t';
 				countBases = 0;				//reset bases you've seen in this window
 			}
 				
 			//no need to continue if all your bases are in a window
 			if (totalBases == numBases) {   break;  }
 		}
-			
+	
+
+		//get last window if needed
+		if (totalBases < numBases) {   win.push_back(back-size);  cout << back-size << endl;}
+//cout << endl << endl;
+		
 		return win;
 	
 	}
@@ -239,6 +250,12 @@ vector<float> DeCalculator::calcFreq(vector<Sequence*> seqs, string filename) {
 		
 		openOutputFile(freqfile, outFreq);
 		
+		string length = toString(seqs.size());  //if there are 5000 seqs in the template then set precision to 3
+		int precision = length.length() - 1;
+		
+		//format output
+		outFreq.setf(ios::fixed, ios::floatfield); outFreq.setf(ios::showpoint);
+		
 		//at each position in the sequence
 		for (int i = 0; i < seqs[0]->getAligned().length(); i++) {
 			
@@ -261,11 +278,8 @@ vector<float> DeCalculator::calcFreq(vector<Sequence*> seqs, string filename) {
 			int highest = 0;
 			for (int m = 0; m < freq.size(); m++) {   if (freq[m] > highest) {  highest = freq[m];  }		}
 			
-			float highFreq;
-			//subtract gaps to "ignore them"
-			if ( (seqs.size() - gaps) == 0 ) {  highFreq = 1.0;  }			
-			else { highFreq = highest / (float) (seqs.size() - gaps);	 }
-						
+			float highFreq = highest / (float) (seqs.size());	
+			
 			float Pi;
 			Pi =  (highFreq - 0.25) / 0.75; 
 			
@@ -273,10 +287,9 @@ vector<float> DeCalculator::calcFreq(vector<Sequence*> seqs, string filename) {
 			if (Pi < 0) { Pi = 0.0; }
 			
 			//saves this for later
-			outFreq << i+1 << '\t' << highFreq << endl;
-			
+			outFreq << setprecision(precision) << i << '\t' << highFreq << endl;
+	
 			if (h.count(i) > 0) {
-	cout << i+1 << '\t' << highFreq << endl;
 				prob.push_back(Pi); 
 			}
 		}
@@ -387,6 +400,52 @@ vector< vector<float> > DeCalculator::getQuantiles(vector<Sequence*> seqs, vecto
 		exit(1);
 	}
 }
+//***************************************************************************************************************
+void DeCalculator::removeObviousOutliers(vector< vector<float> >& quantiles) {
+	try {
+		
+	
+		for (int i = 0; i < quantiles.size(); i++) {
+		
+			//find mean of this quantile score
+			float average = findAverage(quantiles[i]);
+			
+			vector<float> newQuanI;
+			//look at each value in quantiles to see if it is an outlier
+			for (int j = 0; j < quantiles[i].size(); j++) {
+				
+				float highCutoff, lowCutOff;
+				
+				
+			
+			}
+		
+		}
+
+	}
+	catch(exception& e) {
+		errorOut(e, "DeCalculator", "removeObviousOutliers");
+		exit(1);
+	}
+}
+
+//***************************************************************************************************************
+float DeCalculator::findAverage(vector<float> myVector) {
+	try{
+		
+		float total = 0.0;
+		for (int i = 0; i < myVector.size(); i++)  {  total += myVector[i];  }
+		
+		float average = total / (float) myVector.size();
+		
+		return average;
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "DeCalculator", "findAverage");
+		exit(1);
+	}
+}
 
 //***************************************************************************************************************
 float DeCalculator::getCoef(vector<float> obs, vector<float> qav) {
@@ -402,7 +461,8 @@ float DeCalculator::getCoef(vector<float> obs, vector<float> qav) {
 		for (int j = 0; j < obs.size(); j++) {   obsAverage += obs[j];	}
 		obsAverage = obsAverage / (float) obs.size();
 //cout << "sum ai / m = " << probAverage << endl;		
-//cout << "sum oi / m = " << obsAverage << endl;
+//cout << "sum oi / m = " << obsAverage << endl;	
+	
 		float coef = obsAverage / probAverage;
 						
 		return coef;
