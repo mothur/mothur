@@ -70,7 +70,7 @@ ReadDistCommand::ReadDistCommand(string option){
 			else if ((phylipfile != "") && (columnfile != "")) { mothurOut("When executing a read.dist command you must enter ONLY ONE of the following: phylip or column."); mothurOutEndLine(); abort = true; }
 		
 			if (columnfile != "") {
-				if (namefile == "") {  mothurOut("You need to provide a namefile if you are going to use the column format."); mothurOutEndLine(); abort = true; }
+				if (namefile == "") {  cout << "You need to provide a namefile if you are going to use the column format." << endl; abort = true; }
 			}
 		
 			//check for optional parameter and set defaults
@@ -129,7 +129,7 @@ void ReadDistCommand::help(){
 		mothurOut("If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n");
 		mothurOut("The second way to use the read.dist command is to read a phylip or column and a group, so you can use the libshuff command.\n");
 		mothurOut("For this use the read.dist command should be in the following format: \n");
-		mothurOut("read.dist(phylip=yourPhylipfile, group=yourGroupFile). The cutoff and precision parameters are not valid with this use. \n");
+		mothurOut("read.dist(phylip=yourPhylipfile, group=yourGroupFile). The cutoff and precision parameters are not valid with this use.  \n");
 		mothurOut("Note: No spaces between parameter labels (i.e. phylip), '=' and parameters (i.e.yourPhylipfile).\n\n");
 	}
 	catch(exception& e) {
@@ -141,6 +141,9 @@ void ReadDistCommand::help(){
 //**********************************************************************************************************************
 
 ReadDistCommand::~ReadDistCommand(){
+	if (abort == false) {
+		if (format != "matrix") { delete read; delete nameMap; }
+	}
 }
 
 //**********************************************************************************************************************
@@ -148,6 +151,9 @@ int ReadDistCommand::execute(){
 	try {
 		
 		if (abort == true) {	return 0;	}
+
+		time_t start = time(NULL);
+		size_t numDists = 0;
 		
 		if (format == "matrix") {
 			ifstream in;
@@ -157,7 +163,8 @@ int ReadDistCommand::execute(){
 			//memory leak prevention
 			if (globaldata->gMatrix != NULL) { delete globaldata->gMatrix;  }
 			globaldata->gMatrix = matrix; //save matrix for coverage commands
-		}else {
+			numDists = matrix->getSizes()[1];
+		} else {
 			read->read(nameMap);
 			//to prevent memory leak
 
@@ -166,10 +173,36 @@ int ReadDistCommand::execute(){
 
 			if (globaldata->gSparseMatrix != NULL) { delete globaldata->gSparseMatrix;  }
 			globaldata->gSparseMatrix = read->getMatrix();
-			delete read; delete nameMap;
+			numDists = globaldata->gSparseMatrix->getNNodes();
+ 
+      int lines = cutoff / (1.0/precision);
+      vector<float> dist_cutoff(lines+1,0);
+			for (int i = 0; i <= lines;i++) {	
+      	dist_cutoff[i] = (i + 0.5) / precision; 
+      } 
+      vector<int> dist_count(lines+1,0);
+      list<PCell>::iterator currentCell;
+      SparseMatrix* smatrix = globaldata->gSparseMatrix;
+  		for (currentCell = smatrix->begin(); currentCell != smatrix->end(); currentCell++) {
+				for (int i = 0; i <= lines;i++) {	
+					if (currentCell->dist < dist_cutoff[i]) {
+						dist_count[i]++;
+            break;
+          }
+        }
+			}
 
+      string dist_string = "Dist:";
+      string count_string = "Count: ";
+			for (int i = 0; i <= lines;i++) {	
+      	dist_string = dist_string.append("\t").append(toString(dist_cutoff[i]));
+      	count_string = count_string.append("\t").append(toString(dist_count[i]));
+			}
+      mothurOut(dist_string); mothurOutEndLine(); mothurOut(count_string); mothurOutEndLine();
 		}
+		mothurOut("It took " + toString(time(NULL) - start) + " secs to read " + toString(numDists) + " distances (cutoff: " + toString(cutoff) + ")"); mothurOutEndLine();
 		return 0;
+		
 	}
 	catch(exception& e) {
 		errorOut(e, "ReadDistCommand", "execute");

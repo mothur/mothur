@@ -20,21 +20,23 @@ class ListVector;
 
 /***********************************************************************/
 
+typedef list<PCell>::iterator MatData;
+
 class SparseMatrix {
 	
 public:
 	SparseMatrix();
 	int getNNodes();
 	void print();					//Print the contents of the matrix
-	void print(ListVector*);					//Print the contents of the matrix
+	void print(ListVector*);		//Print the contents of the matrix
 	PCell* getSmallestCell();		//Return the cell with the smallest distance
 	float getSmallDist();
 	
-	void rmCell(list<PCell>::iterator);
+	MatData rmCell(MatData);
 	void addCell(PCell);
 	void clear();
-	list<PCell>::iterator begin();
-	list<PCell>::iterator end();
+	MatData begin();
+	MatData end();
 
 private:
 	PCell* smallCell;				//The cell with the smallest distance

@@ -34,6 +34,11 @@ void Pintail::print(ostream& out) {
 		for (int i = 0; i < querySeqs.size(); i++) {
 			
 			int index = ceil(deviation[i]);
+float quan = 2.64 * log10(deviation[i]) + 1.46;
+cout << "dist = " << index << endl;
+cout << "de = "  << DE[i] << endl;
+cout << "mallard quantile = " << quan << endl;
+cout << "my quantile = " << quantiles[index][4] << endl;
 			
 			//is your DE value higher than the 95%
 			string chimera;
@@ -158,7 +163,7 @@ void Pintail::getChimeras() {
 		}else				{   probabilityProfile = readFreq();			  }
 
 		//make P into Q
-		for (int i = 0; i < probabilityProfile.size(); i++)  {	probabilityProfile[i] = 1 - probabilityProfile[i];	 cout << i << '\t' << probabilityProfile[i] << endl;  }
+		for (int i = 0; i < probabilityProfile.size(); i++)  {	probabilityProfile[i] = 1 - probabilityProfile[i];   }  //cout << i << '\t' << probabilityProfile[i] << endl;
 		mothurOut("Done."); mothurOutEndLine();
 		
 		//mask querys
@@ -270,6 +275,9 @@ cout << querySeqs[i]->getName() << '\t' << "dist value = " << dist << endl;
 				quantiles = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, 0, templateSeqs.size());
 			}else {		createProcessesQuan();		}
 			
+			
+			decalc->removeObviousOutliers(quantiles);
+			
 			ofstream out4;
 			string o = getRootName(templateFile) + "quan";
 			
@@ -344,7 +352,7 @@ vector<float> Pintail::readFreq() {
 			
 			in >> pos >> num;
 			
-			if (h.count(pos-1) > 0) {
+			if (h.count(pos) > 0) {
 				float Pi;
 				Pi =  (num - 0.25) / 0.75; 
 			

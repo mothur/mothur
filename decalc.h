@@ -31,6 +31,7 @@ class DeCalculator {
 		void setMask(string m); 
 		void runMask(Sequence*);
 		void trimSeqs(Sequence*, Sequence*, map<int, int>&);
+		void removeObviousOutliers(vector< vector<float> >&);
 		vector<float> calcFreq(vector<Sequence*>, string);
 		vector<int> findWindows(Sequence*, int, int, int&, int);
 		vector<float> calcObserved(Sequence*, Sequence*, vector<int>, int);
@@ -42,6 +43,7 @@ class DeCalculator {
 		vector< vector<float> > getQuantiles(vector<Sequence*>, vector<int>, int, vector<float>, int, int, int);
 		
 	private:
+		float findAverage(vector<float> myVector);
 		string seqMask;
 		set<int> h;
 

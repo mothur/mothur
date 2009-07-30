@@ -26,8 +26,6 @@
 	The cluster() command outputs three files *.list, *.rabund, and *.sabund.   */
 
 
-class GlobalData;
-
 class ClusterCommand : public Command {
 	
 public:
@@ -49,8 +47,13 @@ private:
 
 	string method, fileroot, tag;
 	double cutoff;
+	string showabund, timing;
 	int precision, length;
 	ofstream sabundFile, rabundFile, listFile;
+
+	bool print_start;
+	time_t start;
+	unsigned long loops;
 	
 	void printData(string label);
 };
