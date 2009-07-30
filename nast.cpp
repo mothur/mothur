@@ -53,7 +53,6 @@ void Nast::pairwiseAlignSeqs(){	//	Here we call one of the pairwise alignment me
 
 		}
 		else{
-
 			if(tempAln[0] == '-'){
 				int pairwiseAlignmentLength = tempAln.length();	//	we need to make sure that the candidate sequence alignment
 				for(int i=0;i<pairwiseAlignmentLength;i++){		//	starts where the template sequence alignment starts, if it
@@ -64,7 +63,6 @@ void Nast::pairwiseAlignSeqs(){	//	Here we call one of the pairwise alignment me
 					}
 				}
 			}
-			
 			int pairwiseAlignmentLength = tempAln.length();
 			if(tempAln[pairwiseAlignmentLength-1] == '-'){		//	we need to make sure that the candidate sequence alignment
 				for(int i=pairwiseAlignmentLength-1; i>=0; i--){//	ends where the template sequence alignment ends, if it runs
@@ -113,8 +111,7 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 						break;
 					}
 				}
-				
-				
+
 				for(rightIndex=i+1;rightIndex<longAlignmentLength-1;rightIndex++){
 					if(!isalpha(candAln[rightIndex])){
 						rightRoom = 1;	//count how far it is to the nearest gap on the RIGHT side of the anomaly
@@ -207,7 +204,6 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 		errorOut(e, "Nast", "removeExtraGaps");
 		exit(1);
 	}	
-	
 }
 
 /**************************************************************************************************/
@@ -239,7 +235,7 @@ void Nast::regapSequences(){	//This is essentially part B in Fig 2. of DeSantis 
 			newTemplateAlign += tempAln[fullAlignIndex];//	pairwise sequences
 			fullAlignIndex++;
 		}
-		
+
 		string lastLoop = "";
 		
 		while(pairwiseAlignIndex<pairwiseLength){

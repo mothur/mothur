@@ -171,6 +171,8 @@ int AlignCommand::execute(){
 			mothurOutEndLine();
 			alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);
 		}
+		mothurOut("Aligning sequences...");
+		mothurOutEndLine();
 		
 		string alignFileName = candidateFileName.substr(0,candidateFileName.find_last_of(".")+1) + "align";
 		string reportFileName = candidateFileName.substr(0,candidateFileName.find_last_of(".")+1) + "align.report";
@@ -283,7 +285,7 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName){
 			report.setAlignmentParameters(align, alignment);
 
 			report.setNastParameters(nast);
-			
+
 			alignmentFile << '>' << candidateSeq->getName() << '\n' << candidateSeq->getAligned() << endl;
 			
 			report.print();

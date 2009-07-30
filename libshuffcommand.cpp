@@ -208,7 +208,7 @@ void LibShuffCommand::printCoverageFile() {
 		vector<int> prevRow = it->second;
 		it++;
 		
-		for(it;it!=allDistances.end();it++){
+		for(;it!=allDistances.end();it++){
 			for(int i=0;i<it->second.size();i++){
 				it->second[i] += prevRow[i];
 			}

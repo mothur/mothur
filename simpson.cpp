@@ -19,8 +19,8 @@ EstOutput Simpson::getValues(SAbundVector* rank){
 		double ci = 0;
 	
 		double maxRank = (double)rank->getMaxRank();
-		int sampled = rank->getNumSeqs();
-		int sobs = rank->getNumBins();
+		double sampled = (double)rank->getNumSeqs();
+		double sobs = (double)rank->getNumBins();
 	
 		double firstTerm = 0;
 		double secondTerm = 0;
@@ -31,8 +31,8 @@ EstOutput Simpson::getValues(SAbundVector* rank){
 			for(int i=1;i<=maxRank;i++){
 				simnum += (double)(rank->get(i)*i*(i-1));
 			}
-		
-			simpson = simnum / (double)(sampled*(sampled-1));
+			
+			simpson = simnum / (sampled*(sampled-1));
 		
 			for(int i=1;i<=maxRank;i++){
 				double piI = (double) i / (double)sampled;
@@ -40,7 +40,7 @@ EstOutput Simpson::getValues(SAbundVector* rank){
 				secondTerm += rank->get(i) * pow(piI, 2);
 			}
 		
-			double var = (4.0 / (double)sampled) * (firstTerm - secondTerm*secondTerm);
+			double var = (4.0 / sampled) * (firstTerm - secondTerm*secondTerm);
 			ci = 1.95 * pow(var, 0.5);
 		}
 	

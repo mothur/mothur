@@ -288,8 +288,8 @@
 		375AA1360F9E433D008EF9B8 /* readotu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readotu.h; sourceTree = SOURCE_ROOT; };
 		375AA1370F9E433D008EF9B8 /* readphylip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readphylip.cpp; sourceTree = SOURCE_ROOT; };
 		375AA1380F9E433D008EF9B8 /* readphylip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readphylip.h; sourceTree = SOURCE_ROOT; };
-		377326630FAF16E0007ABB8B /* consensuscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = consensuscommand.cpp; sourceTree = "<group>"; };
-		377326640FAF16E0007ABB8B /* consensuscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = consensuscommand.h; sourceTree = "<group>"; };
+		377326630FAF16E0007ABB8B /* consensuscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = consensuscommand.cpp; sourceTree = SOURCE_ROOT; };
+		377326640FAF16E0007ABB8B /* consensuscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = consensuscommand.h; sourceTree = SOURCE_ROOT; };
 		378598640FDD497000EF9D03 /* heatmapsimcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = heatmapsimcommand.h; sourceTree = SOURCE_ROOT; };
 		378598650FDD497000EF9D03 /* heatmapsimcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = heatmapsimcommand.cpp; sourceTree = SOURCE_ROOT; };
 		378598720FDD4C1500EF9D03 /* heatmapsim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = heatmapsim.h; sourceTree = SOURCE_ROOT; };
