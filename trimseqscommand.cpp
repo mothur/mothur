@@ -171,7 +171,6 @@ int TrimSeqsCommand::execute(){
 				if(qThreshold != 0)		{	success = stripQualThreshold(currSeq, qFile);	}
 				else if(qAverage != 0)	{	success = cullQualAverage(currSeq, qFile);		}
 				if(!success)			{	trashCode += 'q';								}
-				qFile.close();
 			}
 			if(barcodes.size() != 0){
 				success = stripBarcode(currSeq, group);
@@ -221,6 +220,7 @@ int TrimSeqsCommand::execute(){
 		outFASTA.close();
 		scrapFASTA.close();
 		outGroups.close();
+		if(qFileName != "")	{	qFile.close();	}
 		
 		for(int i=0;i<fastaFileNames.size();i++){
 			fastaFileNames[i]->close();
@@ -548,7 +548,8 @@ bool TrimSeqsCommand::cullQualAverage(Sequence& seq, ifstream& qFile){
 		string name;
 		
 		qFile >> name;
-		if (name.length() != 0) {  if(name.substr(1) != seq.getName())	{	mothurOut("sequence name mismatch btwn fasta and qual file"); mothurOutEndLine();	} }
+		if (name[0] == '>') {  if(name.substr(1) != seq.getName())	{	mothurOut("sequence name mismatch btwn fasta: " + seq.getName() + " and qual file: " + name); mothurOutEndLine();	} }
+		
 		while (!qFile.eof())	{	char c = qFile.get(); if (c == 10 || c == 13){	break;	}	}
 		
 		float score;	
@@ -559,7 +560,7 @@ bool TrimSeqsCommand::cullQualAverage(Sequence& seq, ifstream& qFile){
 			average += score;
 		}
 		average /= seqLength;
-		
+
 		if(average >= qAverage)	{	success = 1;	}
 		else					{	success = 0;	}
 		
@@ -572,5 +573,3 @@ bool TrimSeqsCommand::cullQualAverage(Sequence& seq, ifstream& qFile){
 }
 
 //***************************************************************************************************************
-
-

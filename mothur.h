@@ -44,20 +44,17 @@
 #include <cerrno>
 #include <ctime>
 #include <limits>
+#include <sys/wait.h>
+#include <unistd.h>
 
 using namespace std;
 
-#ifdef _WIN32
-	#define exp(x) (exp((double) x))
-	#define sqrt(x) (sqrt((double) x))
-	#define log10(x) (log10((double) x))
-	#define log2(x) (log10(x)/log10(2))
-	#define isnan(x) ((x) != (x))
-	#define isinf(x) (fabs(x) == std::numeric_limits<double>::infinity())
-#else
-	#include <sys/wait.h>
-	#include <unistd.h>
-#endif
+#define exp(x) (exp((double) x))
+#define sqrt(x) (sqrt((double) x))
+#define log10(x) (log10((double) x))
+#define log2(x) (log10(x)/log10(2))
+#define isnan(x) ((x) != (x))
+#define isinf(x) (fabs(x) == std::numeric_limits<double>::infinity())
 
 
 typedef unsigned long ull;
@@ -96,6 +93,7 @@ inline void convert(const string& s, T& x, bool failIfLeftoverChars = true){
 	if (!(i >> x) || (failIfLeftoverChars && i.get(c)))
 		throw BadConversion(s);
 }
+
 //**********************************************************************************************************************
 
 template<typename T>

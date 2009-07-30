@@ -50,7 +50,7 @@ EstOutput SharedChao1::getValues(vector<SharedRAbundVector*> shared){
 		//calculate chao1, (numleaves-1) because numleaves contains the ++ values.
 		bool bias;
 		for(int i=0;i<numLeaves;i++){
-			if ((f2leaves[i]->lvalue == 0) || (f2leaves[i]->rvalue == 0))  { bias = true;  }// break;}
+			if (f2leaves[i]->lvalue == 0 || f2leaves[i]->rvalue == 0) { bias = true;}// break;}
 		}
 
 		if(bias){
