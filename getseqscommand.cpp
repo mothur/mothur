@@ -21,7 +21,7 @@ GetSeqsCommand::GetSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","name", "group", "align", "accnos" };
+			string Array[] =  {"fasta","name", "group", "alignreport", "accnos" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -51,13 +51,13 @@ GetSeqsCommand::GetSeqsCommand(string option){
 			if (groupfile == "not open") { abort = true; }
 			else if (groupfile == "not found") {  groupfile = "";  }	
 			
-			alignfile = validParameter.validFile(parameters, "align", true);
+			alignfile = validParameter.validFile(parameters, "alignreport", true);
 			if (alignfile == "not open") { abort = true; }
 			else if (alignfile == "not found") {  alignfile = "";  }
 			
-			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == ""))  { mothurOut("You must provide one of the following: fasta, name, group, align."); mothurOutEndLine(); abort = true; }
+			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == ""))  { mothurOut("You must provide one of the following: fasta, name, group, alignreport."); mothurOutEndLine(); abort = true; }
 			
-			if (parameters.size() > 2) { mothurOut("You may only enter one of the following: fasta, name, group, align."); mothurOutEndLine(); abort = true;  }
+			if (parameters.size() > 2) { mothurOut("You may only enter one of the following: fasta, name, group, alignreport."); mothurOutEndLine(); abort = true;  }
 		}
 
 	}
@@ -72,7 +72,7 @@ void GetSeqsCommand::help(){
 	try {
 		mothurOut("The get.seqs command reads an .accnos file and one of the following file types: fasta, name, group or alignreport file.\n");
 		mothurOut("It outputs a file containing only the sequences in the .accnos file.\n");
-		mothurOut("The get.seqs command parameters are accnos, fasta, name, group and align.  You must provide accnos and one of the other parameters.\n");
+		mothurOut("The get.seqs command parameters are accnos, fasta, name, group and alignreport.  You must provide accnos and one of the other parameters.\n");
 		mothurOut("The get.seqs command should be in the following format: get.seqs(accnos=yourAccnos, fasta=yourFasta).\n");
 		mothurOut("Example get.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n");
 		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
@@ -111,7 +111,7 @@ int GetSeqsCommand::execute(){
 //**********************************************************************************************************************
 void GetSeqsCommand::readFasta(){
 	try {
-		string outputFileName = getRootName(fastafile) + "pick";
+		string outputFileName = getRootName(fastafile) + "pick" +  getExtension(fastafile);
 		ofstream out;
 		openOutputFile(outputFileName, out);
 		
@@ -155,7 +155,7 @@ void GetSeqsCommand::readFasta(){
 void GetSeqsCommand::readName(){
 	try {
 	
-		string outputFileName = getRootName(namefile) + "pick";
+		string outputFileName = getRootName(namefile) + "pick" +  getExtension(namefile);;
 		ofstream out;
 		openOutputFile(outputFileName, out);
 
@@ -240,7 +240,7 @@ void GetSeqsCommand::readName(){
 void GetSeqsCommand::readGroup(){
 	try {
 	
-		string outputFileName = getRootName(groupfile) + "pick";
+		string outputFileName = getRootName(groupfile) + "pick" + getExtension(groupfile);
 		ofstream out;
 		openOutputFile(outputFileName, out);
 
@@ -285,7 +285,7 @@ void GetSeqsCommand::readGroup(){
 //alignreport file has a column header line then all other lines contain 16 columns.  we just want the first column since that contains the name
 void GetSeqsCommand::readAlign(){
 	try {
-		string outputFileName = getRootName(alignfile) + "pick";
+		string outputFileName = getRootName(alignfile) + "pick" +  getExtension(alignfile);;
 		ofstream out;
 		openOutputFile(outputFileName, out);
 
@@ -346,6 +346,7 @@ void GetSeqsCommand::readAlign(){
 	}
 }
 //**********************************************************************************************************************
+
 void GetSeqsCommand::readAccnos(){
 	try {
 		

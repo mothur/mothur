@@ -21,7 +21,7 @@ ListSeqsCommand::ListSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","name", "group", "align" };
+			string Array[] =  {"fasta","name", "group", "alignreport" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -47,7 +47,7 @@ ListSeqsCommand::ListSeqsCommand(string option){
 			if (groupfile == "not open") { abort = true; }
 			else if (groupfile == "not found") {  groupfile = "";  }	
 			
-			alignfile = validParameter.validFile(parameters, "align", true);
+			alignfile = validParameter.validFile(parameters, "alignreport", true);
 			if (alignfile == "not open") { abort = true; }
 			else if (alignfile == "not found") {  alignfile = "";  }
 			
@@ -67,7 +67,7 @@ ListSeqsCommand::ListSeqsCommand(string option){
 void ListSeqsCommand::help(){
 	try {
 		mothurOut("The list.seqs command reads a fasta, name, group or alignreport file and outputs a .accnos file containing sequence names.\n");
-		mothurOut("The list.seqs command parameters are fasta, name, group and align.  You must provide one of these parameters.\n");
+		mothurOut("The list.seqs command parameters are fasta, name, group and alignreport.  You must provide one of these parameters.\n");
 		mothurOut("The list.seqs command should be in the following format: list.seqs(fasta=yourFasta).\n");
 		mothurOut("Example list.seqs(fasta=amazon.fasta).\n");
 		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");

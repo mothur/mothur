@@ -21,7 +21,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","name", "group", "align", "accnos" };
+			string Array[] =  {"fasta","name", "group", "alignreport", "accnos" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -51,13 +51,13 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option){
 			if (groupfile == "not open") { abort = true; }
 			else if (groupfile == "not found") {  groupfile = "";  }	
 			
-			alignfile = validParameter.validFile(parameters, "align", true);
+			alignfile = validParameter.validFile(parameters, "alignreport", true);
 			if (alignfile == "not open") { abort = true; }
 			else if (alignfile == "not found") {  alignfile = "";  }
 			
-			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == ""))  { mothurOut("You must provide one of the following: fasta, name, group, align."); mothurOutEndLine(); abort = true; }
+			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == ""))  { mothurOut("You must provide one of the following: fasta, name, group, alignreport."); mothurOutEndLine(); abort = true; }
 			
-			if (parameters.size() > 2) { mothurOut("You may only enter one of the following: fasta, name, group, align."); mothurOutEndLine(); abort = true;  }
+			if (parameters.size() > 2) { mothurOut("You may only enter one of the following: fasta, name, group, alignreport."); mothurOutEndLine(); abort = true;  }
 		}
 
 	}
@@ -72,7 +72,7 @@ void RemoveSeqsCommand::help(){
 	try {
 		mothurOut("The remove.seqs command reads an .accnos file and one of the following file types: fasta, name, group or alignreport file.\n");
 		mothurOut("It outputs a file containing the sequences NOT in the .accnos file.\n");
-		mothurOut("The remove.seqs command parameters are accnos, fasta, name, group and align.  You must provide accnos and one of the other parameters.\n");
+		mothurOut("The remove.seqs command parameters are accnos, fasta, name, group and alignreport.  You must provide accnos and one of the other parameters.\n");
 		mothurOut("The remove.seqs command should be in the following format: remove.seqs(accnos=yourAccnos, fasta=yourFasta).\n");
 		mothurOut("Example remove.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n");
 		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
@@ -111,7 +111,7 @@ int RemoveSeqsCommand::execute(){
 //**********************************************************************************************************************
 void RemoveSeqsCommand::readFasta(){
 	try {
-		string outputFileName = getRootName(fastafile) + "pick";
+		string outputFileName = getRootName(fastafile) + "pick" + getExtension(fastafile);
 		ofstream out;
 		openOutputFile(outputFileName, out);
 		
@@ -153,7 +153,7 @@ void RemoveSeqsCommand::readFasta(){
 void RemoveSeqsCommand::readName(){
 	try {
 	
-		string outputFileName = getRootName(namefile) + "pick";
+		string outputFileName = getRootName(namefile) + "pick" + getExtension(namefile);
 		ofstream out;
 		openOutputFile(outputFileName, out);
 
@@ -236,7 +236,7 @@ void RemoveSeqsCommand::readName(){
 void RemoveSeqsCommand::readGroup(){
 	try {
 	
-		string outputFileName = getRootName(groupfile) + "pick";
+		string outputFileName = getRootName(groupfile) + "pick" + getExtension(groupfile);
 		ofstream out;
 		openOutputFile(outputFileName, out);
 
@@ -278,7 +278,7 @@ void RemoveSeqsCommand::readGroup(){
 //alignreport file has a column header line then all other lines contain 16 columns.  we just want the first column since that contains the name
 void RemoveSeqsCommand::readAlign(){
 	try {
-		string outputFileName = getRootName(alignfile) + "pick";
+		string outputFileName = getRootName(alignfile) + "pick" + getExtension(alignfile);
 		ofstream out;
 		openOutputFile(outputFileName, out);
 
