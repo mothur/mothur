@@ -14,13 +14,16 @@ void DeCalculator::setMask(string m) {
 	try {
 		seqMask = m; 
 		
-		//whereever there is a base in the mask, save that value is query and subject
-		for (int i = 0; i < seqMask.length(); i++) {
-			if (isalpha(seqMask[i])) {
-				h.insert(i);
+		if (seqMask.length() != 0) {
+			//whereever there is a base in the mask, save that value is query and subject
+			for (int i = 0; i < seqMask.length(); i++) {
+				if (isalpha(seqMask[i])) {
+					h.insert(i);
+				}
 			}
+		}else {
+			for (int i = 0; i < alignLength; i++) {   h.insert(i);  }
 		}
-
 	}
 	catch(exception& e) {
 		errorOut(e, "DeCalculator", "setMask");
@@ -94,7 +97,7 @@ vector<int>  DeCalculator::findWindows(Sequence* query, int front, int back, int
 				size = (cutoff / 4); 
 		}
 	
-		string seq = query->getAligned().substr(front, cutoff);
+	/*	string seq = query->getAligned().substr(front, cutoff);
 			
 		//count bases
 		int numBases = 0;
@@ -129,9 +132,15 @@ vector<int>  DeCalculator::findWindows(Sequence* query, int front, int back, int
 	
 
 		//get last window if needed
-		if (totalBases < numBases) {   win.push_back(back-size);  cout << back-size << endl;}
+		if (totalBases < numBases) {   win.push_back(back-size);  }
 //cout << endl << endl;
+*/	
 		
+		//this follows wigeon, but we may want to consider that it chops off the end values if the sequence cannot be evenly divided into steps
+		for (int m = front; m < (back - size) ; m+=increment) {  win.push_back(m);  }
+
+
+	
 		return win;
 	
 	}
@@ -154,7 +163,7 @@ vector<float> DeCalculator::calcObserved(Sequence* query, Sequence* subject, vec
 	//cout << "start point = " << window[m] << " end point = " << window[m]+size << endl;						
 			int diff = 0;
 			for (int b = 0; b < seqFrag.length(); b++) {
-		
+
 				if (seqFrag[b] != seqFragsub[b]) { diff++; }
 			}
                
@@ -178,6 +187,7 @@ float DeCalculator::calcDist(Sequence* query, Sequence* subject, int front, int 
 		
 		//so you only look at the trimmed part of the sequence
 		int cutoff = back - front;  
+		int gaps = 0;
 			
 		//from first startpoint with length back-front
 		string seqFrag = query->getAligned().substr(front, cutoff);
@@ -185,11 +195,13 @@ float DeCalculator::calcDist(Sequence* query, Sequence* subject, int front, int 
 														
 		int diff = 0;
 		for (int b = 0; b < seqFrag.length(); b++) {
+			//ignore gaps
+			if((!isalpha(seqFrag[b])) && (!isalpha(seqFragsub[b]))) { gaps++; }
 			if (seqFrag[b] != seqFragsub[b]) { diff++; }
 		}
                
 		//percentage of mismatched bases
-		float dist = diff / (float) seqFrag.length() * 100;       
+		float dist = diff / (float) (seqFrag.length()-gaps) * 100;       
 				
 		return dist;
 	}
@@ -317,12 +329,8 @@ vector<float>  DeCalculator::findQav(vector<int> window, int size, vector<float>
 			//while you are in the window for this sequence
 			int count = 0;
 			for (int j = window[m]; j < (window[m]+size); j++) {   
-				
-				//is this a spot that is included in the mask
-				if (h.count(j) > 0) {
-					average += probabilityProfile[j];
-					count++;
-				}
+				average += probabilityProfile[j];
+				count++;
 			}
 				
 			average = average / count;
@@ -408,17 +416,31 @@ void DeCalculator::removeObviousOutliers(vector< vector<float> >& quantiles) {
 		for (int i = 0; i < quantiles.size(); i++) {
 		
 			//find mean of this quantile score
-			float average = findAverage(quantiles[i]);
+			sort(quantiles[i].begin(), quantiles[i].end());
 			
+			float average = quantiles[i][int(quantiles[i].size() * 0.5)];
+cout << i << "\taverage = " << average << "\tquantiles[i].size = " << quantiles[i].size() << endl;			
 			vector<float> newQuanI;
 			//look at each value in quantiles to see if it is an outlier
 			for (int j = 0; j < quantiles[i].size(); j++) {
 				
-				float highCutoff, lowCutOff;
+				float highCutOff, lowCutOff;
 				
+				//99%
+				highCutOff = sqrt(((quantiles[i][j] - average + 3) * (quantiles[i][j] - average + 3)) / (float)(quantiles[i].size() - 1));
 				
-			
+				//1%
+				lowCutOff = sqrt(((quantiles[i][j] - average - 3) * (quantiles[i][j] - average + 3)) / (float)(quantiles[i].size() - 1));
+//cout << "high = " << highCutOff << " low = " << lowCutOff << " de = " << quantiles[i][j] << endl;				
+				//if this is below the highcutff and above the lowcutoff
+				if ((quantiles[i][j] < highCutOff) && (quantiles[i][j] > lowCutOff)) {
+					
+					newQuanI.push_back(quantiles[i][j]);
+					
+				}else { cout << "removed outlier:  high = " << highCutOff << " low = " << lowCutOff << " de = " << quantiles[i][j] << endl;	 }
 			}
+			
+			quantiles[i] = newQuanI;
 		
 		}
 
@@ -452,17 +474,11 @@ float DeCalculator::getCoef(vector<float> obs, vector<float> qav) {
 	try {
 	
 		//find average prob for this seqs windows
-		float probAverage = 0.0;
-		for (int j = 0; j < qav.size(); j++) {   probAverage += qav[j];	}
-		probAverage = probAverage / (float) qav.size();
-		
+		float probAverage = findAverage(qav);
+				
 		//find observed average 
-		float obsAverage = 0.0;
-		for (int j = 0; j < obs.size(); j++) {   obsAverage += obs[j];	}
-		obsAverage = obsAverage / (float) obs.size();
-//cout << "sum ai / m = " << probAverage << endl;		
-//cout << "sum oi / m = " << obsAverage << endl;	
-	
+		float obsAverage = findAverage(obs);
+			
 		float coef = obsAverage / probAverage;
 						
 		return coef;

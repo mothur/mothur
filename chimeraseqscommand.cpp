@@ -52,9 +52,15 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 			if (quanfile == "not open") { abort = true; }
 			else if (quanfile == "not found") { quanfile = "";  }
 				
-			maskfile = validParameter.validFile(parameters, "mask", true);
-			if (maskfile == "not open") { abort = true; }
-			else if (maskfile == "not found") { maskfile = "";  }	
+			maskfile = validParameter.validFile(parameters, "mask", false);
+			if (maskfile == "not found") { maskfile = "";  }	
+			else if (maskfile != "default")  { 
+				ifstream in;
+				int	ableToOpen = openInputFile(maskfile, in);
+				if (ableToOpen == 1) { abort = true; }
+				in.close();
+			}
+		
 
 			
 
@@ -129,7 +135,7 @@ int ChimeraSeqsCommand::execute(){
 			if (quanfile != "")			{		chimera->setQuantiles(quanfile);				}
 			else						{		chimera->setQuantiles("");						}
 			
-			if (maskfile == "") { mothurOut("You have not provided a mask, so I am using the default 236627 EU009184.1 Shigella dysenteriae str. FBD013."); mothurOutEndLine();  }
+			if (maskfile == "default") { mothurOut("I am using the default 236627 EU009184.1 Shigella dysenteriae str. FBD013."); mothurOutEndLine();  }
 			chimera->setMask(maskfile);
 						
 		}else { mothurOut("Not a valid method."); mothurOutEndLine(); return 0;		}

@@ -28,7 +28,8 @@ class DeCalculator {
 		~DeCalculator() {};
 		
 		set<int> getPos() {  return h;  }
-		void setMask(string m); 
+		void setMask(string); 
+		void setAlignmentLength(int l) {  alignLength = l;  }
 		void runMask(Sequence*);
 		void trimSeqs(Sequence*, Sequence*, map<int, int>&);
 		void removeObviousOutliers(vector< vector<float> >&);
@@ -46,6 +47,7 @@ class DeCalculator {
 		float findAverage(vector<float> myVector);
 		string seqMask;
 		set<int> h;
+		int alignLength;
 
 };
 
