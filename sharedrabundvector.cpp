@@ -379,12 +379,15 @@ vector<SharedRAbundVector*> SharedRAbundVector::getSharedRAbundVectors(){
 
 RAbundVector SharedRAbundVector::getRAbundVector() {
 	try {
-		RAbundVector rav(data.size());
+		RAbundVector rav;
 		
 		for (int i = 0; i < data.size(); i++) {
-			rav.set(i, data[i].abundance);
+			if(data[i].abundance != 0) {
+				rav.push_back(data[i].abundance);
+			}
 		}
-	
+		
+		rav.setLabel(label);
 		return rav;
 	}
 	catch(exception& e) {

@@ -156,9 +156,9 @@ void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup) {
 			out << thislookup[i]->getLabel() << '\t' << thislookup[i]->getGroup() << '\t';
 			thislookup[i]->print(out);
 			
+			RAbundVector rav = thislookup[i]->getRAbundVector();
 			openOutputFileAppend(fileroot + thislookup[i]->getGroup() + ".rabund", *(filehandles[thislookup[i]->getGroup()]));
-			(*filehandles[thislookup[i]->getGroup()]) << thislookup[i]->getLabel()  << '\t' << thislookup[i]->getGroup()  << '\t';
-			thislookup[i]->print(*(filehandles[thislookup[i]->getGroup()]));
+			rav.print(*(filehandles[thislookup[i]->getGroup()]));
 			(*(filehandles[thislookup[i]->getGroup()])).close();
 		}
  

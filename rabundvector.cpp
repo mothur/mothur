@@ -289,15 +289,16 @@ SAbundVector RAbundVector::getSAbundVector() {
 OrderVector RAbundVector::getOrderVector(map<string,int>* nameMap = NULL) {
 	try {
 		OrderVector ov;
-	
+
 		for(int i=0;i<data.size();i++){
 			for(int j=0;j<data[i];j++){
 				ov.push_back(i);
 			}
 		}
 		random_shuffle(ov.begin(), ov.end());
-
 		ov.setLabel(label);	
+		ov.getNumBins();
+
 		return ov;
 	}
 	catch(exception& e) {

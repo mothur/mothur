@@ -447,8 +447,8 @@ void BootSharedCommand::process(SharedOrderVector* order) {
 				
 				mothurOut("\tDone."); mothurOutEndLine();
 				//delete globaldata's tree
-				for (int m = 0; m < globaldata->gTree.size(); m++) {  delete globaldata->gTree[m];  }
-				globaldata->clear();
+				//for (int m = 0; m < globaldata->gTree.size(); m++) {  delete globaldata->gTree[m];  }
+				//globaldata->gTree.clear();
 				
 				
 				//create consensus trees for each bootstrapped tree set
@@ -465,8 +465,8 @@ void BootSharedCommand::process(SharedOrderVector* order) {
 					delete consensus;
 					
 					//delete globaldata's tree
-					for (int m = 0; m < globaldata->gTree.size(); m++) {  delete globaldata->gTree[m];  }
-					globaldata->clear();
+					//for (int m = 0; m < globaldata->gTree.size(); m++) {  delete globaldata->gTree[m];  }
+					//globaldata->gTree.clear();
 					
 				}
 				

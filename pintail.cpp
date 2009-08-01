@@ -593,8 +593,8 @@ void Pintail::createProcessesSpots() {
 
 		for (int i = lines[0]->start; i < lines[0]->end; i++) {
 				it = trimmed[i].begin();
-				map<int, int> win = decalc->findWindows(querySeqs[i], it->first, it->second, windowSizes[i], increment);
-				windows[i] = win;
+				vector<int> win = decalc->findWindows(querySeqs[i], it->first, it->second, windowSizes[i], increment);
+				windowsForeachQuery[i] = win;
 		}
 
 #endif		
@@ -852,7 +852,7 @@ void Pintail::createProcesses() {
 #else
 			mothurOut("Calculating observed distance... "); cout.flush();
 			for (int i = lines[0]->start; i < lines[0]->end; i++) {
-				vector<float> obsi = decalc->calcObserved(querySeqs[i], bestfit[i], windows[i], windowSizes[i]);
+				vector<float> obsi = decalc->calcObserved(querySeqs[i], bestfit[i], windowsForeachQuery[i], windowSizes[i]);
 				obsDistance[i] = obsi;
 			}
 			mothurOut("Done."); mothurOutEndLine();
@@ -861,7 +861,7 @@ void Pintail::createProcesses() {
 			
 			mothurOut("Finding variability... "); cout.flush();
 			for (int i = lines[0]->start; i < lines[0]->end; i++) {
-				vector<float> q = decalc->findQav(windows[i], windowSizes[i], probabilityProfile, h[i]);
+				vector<float> q = decalc->findQav(windowsForeachQuery[i], windowSizes[i], probabilityProfile);
 				Qav[i] = q;
 			}
 			mothurOut("Done."); mothurOutEndLine();

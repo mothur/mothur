@@ -93,17 +93,29 @@ void GlobalData::newRead() {
 			
 			//free memory
 			if (gGroupmap != NULL) { delete gGroupmap; gGroupmap = NULL; }
+
 			if (gListVector != NULL) { delete gListVector; gListVector = NULL;}
+
 			if (gSparseMatrix != NULL) { delete gSparseMatrix; gSparseMatrix = NULL; }
+
 			if (ginput != NULL) { delete ginput; ginput = NULL;}
+
 			if (gorder != NULL) { delete gorder; gorder = NULL; }
+
 			if (glist != NULL) { delete glist; glist = NULL;}
+
 			if (gSharedList != NULL) { delete gSharedList; gSharedList = NULL; }
+
 			if (sabund != NULL) { delete sabund; sabund = NULL;}
+
 			if (rabund != NULL) { delete rabund; rabund = NULL; }
+
 			if (gMatrix != NULL) { delete gMatrix; gMatrix = NULL;}
+
 			if (gTreemap != NULL) { delete gTreemap; gTreemap = NULL; }
+
 			if (gSequenceDB != NULL) { delete gSequenceDB; gSequenceDB = NULL;}
+
 
 			gTree.clear();
 			Treenames.clear();

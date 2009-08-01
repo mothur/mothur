@@ -39,8 +39,8 @@ HeatMapCommand::HeatMapCommand(string option){
 			}
 			
 			//make sure the user has already run the read.otu command
-			if ((globaldata->getListFile() == "") && (globaldata->getSharedFile() == "")) {
-				 mothurOut("You must read a list, or a list and a group, or a shared before you can use the heatmap.bin command."); mothurOutEndLine(); abort = true; 
+			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "") && (globaldata->getSharedFile() == "")) {
+				 mothurOut("You must read a list, rabund, sabund, or a list and a group, or a shared before you can use the heatmap.bin command."); mothurOutEndLine(); abort = true; 
 			}
 
 			//check for optional parameter and set defaults
@@ -132,7 +132,7 @@ int HeatMapCommand::execute(){
 	try {
 	
 		if (abort == true) { return 0; }
-	
+
 		int count = 1;	
 		string lastLabel;
 	
@@ -144,14 +144,16 @@ int HeatMapCommand::execute(){
 			input = globaldata->ginput;
 			lookup = input->getSharedRAbundVectors();
 			lastLabel = lookup[0]->getLabel();
-		}else if (format == "list") {
+	
+		}else if ((format == "list") || (format == "rabund") || (format == "sabund")) {
 			//you are using just a list file and have only one group
 			read = new ReadOTUFile(globaldata->inputFileName);	
 			read->read(&*globaldata); 
-			
+		
 			rabund = globaldata->rabund;
 			lastLabel = rabund->getLabel();
-			input = globaldata->ginput;		
+			input = globaldata->ginput;	
+
 		}
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -159,7 +161,7 @@ int HeatMapCommand::execute(){
 		set<string> userLabels = labels;
 		set<int> userLines = lines;
 
-		if (format != "list") {	
+		if ((format != "list") && (format != "rabund") && (format != "sabund")) {	
 		
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
@@ -223,7 +225,7 @@ int HeatMapCommand::execute(){
 			globaldata->Groups.clear();  
 			
 		}else{
-		
+	
 			while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 
 				if(allLines == 1 || lines.count(count) == 1 || labels.count(rabund->getLabel()) == 1){			
@@ -282,6 +284,7 @@ int HeatMapCommand::execute(){
 		
 		}
 		
+		globaldata->rabund = NULL;
 		delete input; globaldata->ginput = NULL;
 		return 0;
 	}

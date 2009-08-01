@@ -116,6 +116,7 @@ int ReadNewickTree::read() {
 
 				//make new tree
 				T = new Tree(); 
+
 				numNodes = T->getNumNodes();
 				numLeaves = T->getNumLeaves();
 				

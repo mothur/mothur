@@ -35,20 +35,25 @@ void ReadOTUFile::read(GlobalData* globaldata){
 		//memory leak prevention
 		//if (globaldata->ginput != NULL) { delete globaldata->ginput;  }
 		globaldata->ginput = input;	//saving to be used by collector and rarefact commands.
-		
+	
 		if ((globaldata->getFormat() == "list") || (globaldata->getFormat() == "rabund") || (globaldata->getFormat() == "sabund")) {//you are reading a list, rabund or sabund file for collect, rarefaction or summary.
+
+//cout << input << '\t' << globaldata << endl;
 			order = input->getOrderVector();
 			//memory leak prevention
+
 			//if (globaldata->gorder != NULL) { delete globaldata->gorder;  }
 			globaldata->gorder = order;	//saving to be used by collect and rarefact commands.
 			sabund = inputSabund->getSAbundVector(); 
 			//if (globaldata->sabund != NULL) { delete globaldata->sabund;  }
 			globaldata->sabund = sabund; //saving to be used by summary command.
 			delete inputSabund;
+
 			rabund = inputRabund->getRAbundVector(); 
 			//if (globaldata->rabund != NULL) { delete globaldata->rabund;  }
 			globaldata->rabund = rabund; //saving to be used by heatmap.bin command.
 			delete inputRabund;
+
 			list = inputList->getListVector();
 			//if (globaldata->gListVector != NULL) { delete globaldata->gListVector;  }
 			globaldata->gListVector = list;
