@@ -155,7 +155,7 @@ void GetSeqsCommand::readFasta(){
 void GetSeqsCommand::readName(){
 	try {
 	
-		string outputFileName = getRootName(namefile) + "pick" +  getExtension(namefile);;
+		string outputFileName = getRootName(namefile) + "pick" +  getExtension(namefile);
 		ofstream out;
 		openOutputFile(outputFileName, out);
 
@@ -186,7 +186,6 @@ void GetSeqsCommand::readName(){
 			for (int i = 0; i < parsedNames.size(); i++) {
 				if (names.count(parsedNames[i]) == 1) {
 					validSecond.push_back(parsedNames[i]);
-					names.erase(parsedNames[i]);
 				}
 			}
 
@@ -202,7 +201,6 @@ void GetSeqsCommand::readName(){
 				for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
 				out << validSecond[validSecond.size()-1] << endl;
 				
-				names.erase(firstCol);
 			
 			//make first name in set you come to first column and then add the remaining names to second column
 			}else {

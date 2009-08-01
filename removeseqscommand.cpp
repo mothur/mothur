@@ -154,6 +154,7 @@ void RemoveSeqsCommand::readName(){
 	try {
 	
 		string outputFileName = getRootName(namefile) + "pick" + getExtension(namefile);
+
 		ofstream out;
 		openOutputFile(outputFileName, out);
 
@@ -167,29 +168,29 @@ void RemoveSeqsCommand::readName(){
 
 			in >> firstCol;				
 			in >> secondCol;			
-			
+
 			vector<string> parsedNames;
 			//parse second column saving each name
 			while (secondCol.find_first_of(',') != -1) { 
 				name = secondCol.substr(0,secondCol.find_first_of(','));
 				secondCol = secondCol.substr(secondCol.find_first_of(',')+1, secondCol.length());
 				parsedNames.push_back(name);
+
 			}
 			
 			//get name after last ,
 			parsedNames.push_back(secondCol);
-			
-			vector<string> validSecond;
+
+			vector<string> validSecond;  validSecond.clear();
 			for (int i = 0; i < parsedNames.size(); i++) {
 				if (names.count(parsedNames[i]) == 0) {
 					validSecond.push_back(parsedNames[i]);
-				}else { names.erase(parsedNames[i]); }
+				}
 			}
-
 			
 			//if the name in the first column is in the set then print it and any other names in second column also in set
 			if (names.count(firstCol) == 0) {
-				
+			
 				wroteSomething = true;
 				
 				out << firstCol << '\t';
@@ -200,8 +201,7 @@ void RemoveSeqsCommand::readName(){
 			
 			//make first name in set you come to first column and then add the remaining names to second column
 			}else {
-				names.erase(firstCol);	
-					
+				
 				//you want part of this row
 				if (validSecond.size() != 0) {
 				
@@ -278,7 +278,7 @@ void RemoveSeqsCommand::readGroup(){
 //alignreport file has a column header line then all other lines contain 16 columns.  we just want the first column since that contains the name
 void RemoveSeqsCommand::readAlign(){
 	try {
-		string outputFileName = getRootName(alignfile) + "pick" + getExtension(alignfile);
+		string outputFileName = getRootName(getRootName(alignfile)) + "pick.align.report";
 		ofstream out;
 		openOutputFile(outputFileName, out);
 

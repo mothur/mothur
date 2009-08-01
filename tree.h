@@ -59,7 +59,7 @@ private:
 							//this is required in case user has sequences in the names file that are
 							//not included in the tree. 
 							//only takes names from the first tree in the tree file and assumes that all trees use the same names.
-	void readTreeString(ifstream&);
+	int readTreeString(ifstream&);
 };
 
 #endif

@@ -63,7 +63,7 @@ ListVector* InputData::getListVector(){
 		if(fileHandle){
 			if(format == "list") {
 				list = new ListVector(fileHandle);
-			}
+			}else{ list = NULL;  }
 					
 			gobble(fileHandle);
 			return list;
@@ -101,7 +101,7 @@ ListVector* InputData::getListVector(string label){
 					else {	delete list;	}
 					gobble(in);
 				}
-			}
+			}else{ list = NULL;  }
 			
 			in.close();
 			return list;
@@ -124,7 +124,7 @@ SharedListVector* InputData::getSharedListVector(){
 		if(fileHandle){
 			if (format == "shared")  {
 				SharedList = new SharedListVector(fileHandle);
-			}
+			}else{ SharedList = NULL;  }
 					
 			gobble(fileHandle);
 			return SharedList;
@@ -162,7 +162,7 @@ SharedListVector* InputData::getSharedListVector(string label){
 					gobble(in);
 				}
 
-			}
+			}else{ SharedList = NULL;  }
 				
 			in.close();
 			return SharedList;
@@ -186,7 +186,7 @@ SharedOrderVector* InputData::getSharedOrderVector(){
 		if(fileHandle){
 			if (format == "sharedfile")  {
 				SharedOrder = new SharedOrderVector(fileHandle);
-			}
+			}else{ SharedOrder = NULL;  }
 				
 			gobble(fileHandle);
 			return SharedOrder;
@@ -225,7 +225,7 @@ SharedOrderVector* InputData::getSharedOrderVector(string label){
 					gobble(in);
 				}
 
-			}
+			}else{ SharedOrder = NULL;  }
 				
 			in.close();
 			return SharedOrder;
@@ -262,11 +262,12 @@ OrderVector* InputData::getOrderVector(){
 			else if(format == "sabund"){
 				input = new SAbundVector(fileHandle);
 			}
-					
-			gobble(fileHandle);
-			output = new OrderVector();
-			*output = (input->getOrderVector());
 			
+			gobble(fileHandle);
+			
+			output = new OrderVector();	
+			*output = (input->getOrderVector());
+		
 			return output;
 		}
 		else{

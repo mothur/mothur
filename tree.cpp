@@ -16,7 +16,7 @@ Tree::Tree() {
 		globaldata = GlobalData::getInstance();
 		
 		if (globaldata->runParse == true) {  parseTreeFile();  globaldata->runParse = false;  }
-		
+//for(int i = 0; i < 	globaldata->Treenames.size(); i++) { cout << i << '\t' << globaldata->Treenames[i] << endl;  }	
 		numLeaves = globaldata->Treenames.size();
 		numNodes = 2*numLeaves - 1;
 		
@@ -529,7 +529,7 @@ void Tree::printTree() {
 }
 
 /*****************************************************************/
-
+//this code is a mess and should be rethought...-slw
 void Tree::parseTreeFile() {
 	
 	//only takes names from the first tree and assumes that all trees use the same names.
@@ -539,6 +539,7 @@ void Tree::parseTreeFile() {
 		openInputFile(filename, filehandle);
 		int c, comment;
 		comment = 0;
+		int done = 1;
 		
 		//ifyou are not a nexus file 
 		if((c = filehandle.peek()) != '#') {  
@@ -555,7 +556,8 @@ void Tree::parseTreeFile() {
 					filehandle.get();
 				}
 
-				readTreeString(filehandle); 
+				done = readTreeString(filehandle); 
+				if (done == 0) { break; }
 			}
 		//ifyou are a nexus file
 		}else if((c = filehandle.peek()) == '#') {
@@ -570,17 +572,20 @@ void Tree::parseTreeFile() {
 					comment = 0;
 				}
 				filehandle >> holder; 
-	
-				//ifthere is no translate then you must read tree string otherwise use translate to get names
-				if(holder == "tree" && comment != 1){	
+
+				//if there is no translate then you must read tree string otherwise use translate to get names
+				if((holder == "tree") && (comment != 1)){	
 					//pass over the "tree rep.6878900 = "
 					while (((c = filehandle.get()) != '(') && ((c = filehandle.peek()) != EOF)) {;}
 
 					if(c == EOF) { break; }
 					filehandle.putback(c);  //put back first ( of tree.
-					readTreeString(filehandle);	
+					done = readTreeString(filehandle);
+	
 					break;
 				}
+			
+				if (done == 0) { break;  }
 			}
 			
 			//use nexus translation rather than parsing tree to save time
@@ -610,10 +615,10 @@ void Tree::parseTreeFile() {
 /*******************************************************/
 
 /*******************************************************/
-void Tree::readTreeString(ifstream& filehandle)	{
+int Tree::readTreeString(ifstream& filehandle)	{
 	try {
 		int c;
-		string name;// k;
+		string name;  //, k
 		
 		while((c = filehandle.peek()) != ';') { 
 //k = c;
@@ -624,7 +629,8 @@ void Tree::readTreeString(ifstream& filehandle)	{
 				while((c!=',') && (c != -1) && (c!= ':') && (c!=';')){ c=filehandle.get(); }
 				filehandle.putback(c);
 			}
-			if(c == ';') { break; }
+			if(c == ';') { return 0; }
+			if(c == -1) { return 0; }
 			//if you are a name
 			if((c != '(') && (c != ')') && (c != ',') && (c != ':') && (c != '\n') && (c != '\t') && (c != 32)) { //32 is space
 				name = "";
@@ -648,19 +654,22 @@ void Tree::readTreeString(ifstream& filehandle)	{
 			if(c  == ':') { //read until you reach the end of the branch length
 				while ((c != '(') && (c != ')') && (c != ',') && (c != ';') && (c != '\n') && (c != '\t') && (c != 32)) {
 					c = filehandle.get();
-					//k = c;
+	//k = c;
 	//cout << " in branch while " << k << endl;
 				}
 				filehandle.putback(c);
 			}
-			
+		
 			c = filehandle.get();
-			if(c == ';') { break; }
+//k = c;
+	//cout << " here after get " << k << endl;
+			if(c == ';') { return 0; }
 			if(c == ')') { filehandle.putback(c); }
-	//		k = c;
+	//k = c;
 //cout << k << endl;
 
 		}
+		return 0;
 	}
 	catch(exception& e) {
 		errorOut(e, "Tree", "readTreeString");
