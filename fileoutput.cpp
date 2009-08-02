@@ -27,7 +27,7 @@ void ThreeColumnFile::initFile(string label){
 			openInputFile(inName, inFile);
 
 			string inputBuffer;
-			inputBuffer = getline(inFile);
+			getline(inFile, inputBuffer);
 		
 			outFile	<<  inputBuffer << '\t' << label << "\tlci\thci" << endl;
 		}
@@ -51,7 +51,7 @@ void ThreeColumnFile::output(int nSeqs, vector<double> data){
 	try {
 		if(counter != 0){		
 			string inputBuffer;
-			inputBuffer = getline(inFile);
+			getline(inFile, inputBuffer);
 		
 			outFile	<<  inputBuffer << setprecision(4) << '\t' << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
 		}
@@ -110,7 +110,7 @@ void ColumnFile::initFile(string label, vector<string> tags){
 			openInputFile(inName, inFile);
 
 			string inputBuffer;
-			inputBuffer = getline(inFile);
+			getline(inFile, inputBuffer);
 		
 			outFile	<<  inputBuffer << '\t'; 
 			for(int i = 0; i < tags.size(); i++) {
@@ -142,7 +142,7 @@ void ColumnFile::output(vector<double> data){
 	
 		if(counter != 0){		
 			string inputBuffer;
-			inputBuffer = getline(inFile);
+			getline(inFile, inputBuffer);
 
 			outFile << inputBuffer << '\t' << setprecision(6) << data[0] << setprecision(iters.length());
 			for (int i = 1; i< data.size(); i++) {
@@ -210,7 +210,7 @@ void SharedThreeColumnFile::initFile(string label){
 			openInputFile(inName, inFile);
 
 			string inputBuffer;
-			inputBuffer = getline(inFile);
+			getline(inFile, inputBuffer);
 		
 			outFile	<<  inputBuffer << '\t' << label << "\tlci\thci" << endl;
 		}
@@ -234,7 +234,7 @@ void SharedThreeColumnFile::output(int nSeqs, vector<double> data){
 	try {
 		if(counter != 0){		
 			string inputBuffer;
-			inputBuffer = getline(inFile);
+			getline(inFile, inputBuffer);
 		
 			outFile	<<  inputBuffer << setprecision(4) << '\t' << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
 		}
@@ -294,7 +294,7 @@ void OneColumnFile::initFile(string label){
 			openInputFile(inName, inFile);
 		
 			string inputBuffer;
-			inputBuffer = getline(inFile);
+			getline(inFile, inputBuffer);
 		
 			outFile	<<  inputBuffer << '\t' << label << endl;
 		}
@@ -318,7 +318,7 @@ void OneColumnFile::output(int nSeqs, vector<double> data){
 	try {	
 		if(counter != 0){		
 			string inputBuffer;
-			inputBuffer = getline(inFile);
+			getline(inFile, inputBuffer);
 		
 			outFile	<<  inputBuffer << setprecision(4) << '\t'  << data[0] << endl;
 		}
@@ -376,7 +376,7 @@ void SharedOneColumnFile::initFile(string label){
 			openInputFile(inName, inFile);
 		
 			string inputBuffer;
-			inputBuffer = getline(inFile);
+			getline(inFile, inputBuffer);
 		
 			outFile	<<  inputBuffer << '\t' << label  << endl;
 
