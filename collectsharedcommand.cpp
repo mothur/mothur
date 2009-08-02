@@ -255,10 +255,9 @@ int CollectSharedCommand::execute(){
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
 				userLines.erase(count);
-
-			//you have a label the user want that is smaller than this line and the last line has not already been processed 
 			}
 			
+			//you have a label the user want that is smaller than this line and the last line has not already been processed
 			if ((anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 				delete order;
 				order = input->getSharedOrderVector(lastLabel);
