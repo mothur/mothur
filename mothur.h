@@ -180,7 +180,7 @@ inline string getline(ifstream& fileHandle) {
 			char c = fileHandle.get(); 
 			
 			//are you at the end of the line
-			if (c == 10 || c == 13){   break;	}	
+			if ((c == '\n') || (c == '\r') || (c == '\f')){   break;	}	
 			else {		line += c;		}
 		}
 		
