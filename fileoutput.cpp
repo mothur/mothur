@@ -409,7 +409,7 @@ void SharedOneColumnFile::output(int nSeqs, vector<double> data){
 			}
 			if(counter != 0){		
 				string inputBuffer;
-				inputBuffer = getline(inFile);
+				getline(inFile, inputBuffer);
 
 				outFile	<<  inputBuffer << setprecision(2) << '\t' << dataOutput << endl;
 			}

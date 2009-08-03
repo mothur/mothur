@@ -119,10 +119,7 @@ bool BatchEngine::getInput(){
 		while(quitCommandCalled == 0){
 	
 			if (inputBatchFile.eof()) { input = "quit()"; }
-			else { getline(inputBatchFile, input); }
-	//cout << "input = ";		
-	//for (int i = 0; i < input.size();  i++) {  cout << input[i];  if ((input[i] == '\n') || (input[i] == '\r')) {  char c = input[i]; cout << "line feed = " << c << endl; } }
-	//cout << endl;		
+			else { input = getline(inputBatchFile); }
 			
 			if (input[0] != '#') {
 				
