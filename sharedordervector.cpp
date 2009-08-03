@@ -57,6 +57,8 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a
 			}
 		}
 		
+		gobble(f); 
+		
 		if (f.eof() != true) { f >> nextLabel; }
 		
 		//read the rest of the groups info in
@@ -79,6 +81,7 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a
 				}
 			}
 			
+			gobble(f);
 				
 			if (f.eof() != true) { f >> nextLabel; }
 

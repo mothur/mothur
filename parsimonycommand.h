@@ -23,7 +23,7 @@ class ParsimonyCommand : public Command {
 
 public:
 	ParsimonyCommand(string);	
-	~ParsimonyCommand() { delete pars; delete util; delete output; }
+	~ParsimonyCommand() { if (abort == false) { delete pars; delete util; delete output; }  }
 	int execute();	
 	void help();
 

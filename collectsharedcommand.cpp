@@ -251,7 +251,7 @@ int CollectSharedCommand::execute(){
 				cCurve->getSharedCurve(freq);
 				delete cCurve;
 			
-				mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+				mothurOut(order->getLabel()); mothurOutEndLine();
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
 				userLines.erase(count);
@@ -267,7 +267,7 @@ int CollectSharedCommand::execute(){
 				cCurve->getSharedCurve(freq);
 				delete cCurve;
 			
-				mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+				mothurOut(order->getLabel()); mothurOutEndLine();
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
 			}
@@ -303,7 +303,7 @@ int CollectSharedCommand::execute(){
 			cCurve->getCurve(freq);
 			delete cCurve;
 			
-			mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+			mothurOut(order->getLabel()); mothurOutEndLine();
 			delete order;
 		}
 		

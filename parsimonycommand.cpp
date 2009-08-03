@@ -45,7 +45,7 @@ ParsimonyCommand::ParsimonyCommand(string option) {
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			groups = validParameter.validFile(parameters, "groups", false);			
-			if (groups == "not found") { groups = ""; }
+			if (groups == "not found") { groups = ""; globaldata->Groups.clear(); }
 			else { 
 				splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
@@ -71,7 +71,7 @@ ParsimonyCommand::ParsimonyCommand(string option) {
 				
 				//set users groups to analyze
 				util = new SharedUtil();
-				util->setGroups(globaldata->Groups, tmap->namesOfGroups, allGroups, numGroups, "unweighted");	//sets the groups the user wants to analyze
+				util->setGroups(globaldata->Groups, tmap->namesOfGroups, allGroups, numGroups, "parsimony");	//sets the groups the user wants to analyze
 				util->getCombos(groupComb, globaldata->Groups, numComp);
 				
 				if (numGroups == 1) { numComp++; groupComb.push_back(allGroups); }
