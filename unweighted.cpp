@@ -57,8 +57,10 @@ EstOutput Unweighted::getValues(Tree* t) {
 					//This section adds in all lengths that are non leaf
 			
 					copyIpcount = t->tree[i].pcount;
-					for (it = copyIpcount.begin(); it != copyIpcount.end(); it++) {
-						if (inUsersGroups(it->first, groups) != true) {	copyIpcount.erase(it->first);	}
+					for (it = copyIpcount.begin(); it != copyIpcount.end();) {
+						if (inUsersGroups(it->first, groups) != true) {	
+							copyIpcount.erase(it++);	
+						}else { it++;  }
 					}
 			
 					//if i's children are from the same group then i's pcount size will be 1 
@@ -133,8 +135,10 @@ EstOutput Unweighted::getValues(Tree* t) {
 				//This section adds in all lengths that are non leaf
 			
 				copyIpcount = t->tree[i].pcount;
-				for (it = copyIpcount.begin(); it != copyIpcount.end(); it++) {
-					if (inUsersGroups(it->first, groups) != true) {	copyIpcount.erase(it->first);	}
+				for (it = copyIpcount.begin(); it != copyIpcount.end();) {
+					if (inUsersGroups(it->first, groups) != true) {	
+						copyIpcount.erase(it++);	
+					}else {  it++;  }
 				}
 			
 				//if i's children are from the same group then i's pcount size will be 1 
@@ -240,10 +244,11 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 			
 					/**********************************************************************/
 					//This section adds in all lengths that are non leaf
-			
 					copyIpcount = copyTree->tree[i].pcount;
-					for (it = copyIpcount.begin(); it != copyIpcount.end(); it++) {
-						if (inUsersGroups(it->first, groups) != true) {	copyIpcount.erase(it->first);	}
+					for (it = copyIpcount.begin(); it != copyIpcount.end();) {
+						if (inUsersGroups(it->first, groups) != true) {	
+							copyIpcount.erase(it++);	
+						}else { it++;  }
 					}
 			
 					//if i's children are from the same group then i's pcount size will be 1 
@@ -324,8 +329,10 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 				//This section adds in all lengths that are non leaf
 			
 				copyIpcount = copyTree->tree[i].pcount;
-				for (it = copyIpcount.begin(); it != copyIpcount.end(); it++) {
-					if (inUsersGroups(it->first, groups) != true) {	copyIpcount.erase(it->first);	}
+				for (it = copyIpcount.begin(); it != copyIpcount.end();) {
+						if (inUsersGroups(it->first, groups) != true) {	
+							copyIpcount.erase(it++);	
+						}else { it++;  }
 				}
 			
 				//if i's children are from the same group then i's pcount size will be 1 
