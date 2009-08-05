@@ -134,7 +134,7 @@ int GetRAbundCommand::execute(){
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 			
 			if(allLines == 1 || lines.count(count) == 1 || labels.count(list->getLabel()) == 1){
-					mothurOut(list->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+					mothurOut(list->getLabel()); mothurOutEndLine();
 					rabund = new RAbundVector();				
 					*rabund = (list->getRAbundVector());
 					
@@ -152,7 +152,7 @@ int GetRAbundCommand::execute(){
 					delete list;
 					list = input->getListVector(lastLabel);
 					
-					mothurOut(list->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+					mothurOut(list->getLabel()); mothurOutEndLine();
 					rabund = new RAbundVector();
 					*rabund = (list->getRAbundVector());
 					
@@ -190,7 +190,7 @@ int GetRAbundCommand::execute(){
 			delete list;
 			list = input->getListVector(lastLabel);
 			
-			mothurOut(list->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+			mothurOut(list->getLabel()); mothurOutEndLine();
 			rabund = new RAbundVector();
 			*rabund = (list->getRAbundVector());
 			

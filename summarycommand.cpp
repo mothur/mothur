@@ -236,7 +236,7 @@ int SummaryCommand::execute(){
 			
 			if(allLines == 1 || lines.count(count) == 1 || labels.count(sabund->getLabel()) == 1){			
 	
-				mothurOut(sabund->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+				mothurOut(sabund->getLabel()); mothurOutEndLine();
 				processedLabels.insert(sabund->getLabel());
 				userLabels.erase(sabund->getLabel());
 				userLines.erase(count);
@@ -255,7 +255,7 @@ int SummaryCommand::execute(){
 				delete sabund;
 				sabund = input->getSAbundVector(lastLabel);
 				
-				mothurOut(sabund->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+				mothurOut(sabund->getLabel()); mothurOutEndLine();
 				processedLabels.insert(sabund->getLabel());
 				userLabels.erase(sabund->getLabel());
 				
@@ -293,7 +293,7 @@ int SummaryCommand::execute(){
 			delete sabund;
 			sabund = input->getSAbundVector(lastLabel);
 			
-			mothurOut(sabund->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+			mothurOut(sabund->getLabel()); mothurOutEndLine();
 			outputFileHandle << sabund->getLabel();
 			for(int i=0;i<sumCalculators.size();i++){
 				vector<double> data = sumCalculators[i]->getValues(sabund);

@@ -44,10 +44,11 @@
 #include <cerrno>
 #include <ctime>
 #include <limits>
-#include <unistd.h>
+
 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 	#include <sys/wait.h>
+	#include <unistd.h>
 #endif
 
 using namespace std;

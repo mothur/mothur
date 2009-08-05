@@ -196,7 +196,7 @@ int RareFactSharedCommand::execute(){
 				rCurve->getSharedCurve(freq, nIters);
 				delete rCurve;
 			
-				mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+				mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 				processedLabels.insert(lookup[0]->getLabel());
 				userLabels.erase(lookup[0]->getLabel());
 				userLines.erase(count);
@@ -206,7 +206,7 @@ int RareFactSharedCommand::execute(){
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 					lookup = input->getSharedRAbundVectors(lastLabel);
 
-					mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 					rCurve = new Rarefact(lookup, rDisplays);
 					rCurve->getSharedCurve(freq, nIters);
 					delete rCurve;
@@ -242,7 +242,7 @@ int RareFactSharedCommand::execute(){
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 			lookup = input->getSharedRAbundVectors(lastLabel);
 
-			mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+			mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 			rCurve = new Rarefact(lookup, rDisplays);
 			rCurve->getSharedCurve(freq, nIters);
 			delete rCurve;

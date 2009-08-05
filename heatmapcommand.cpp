@@ -168,7 +168,7 @@ int HeatMapCommand::execute(){
 		
 				if(allLines == 1 || lines.count(count) == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 	
-					mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 					heatmap->getPic(lookup);
 					
 					processedLabels.insert(lookup[0]->getLabel());
@@ -179,7 +179,7 @@ int HeatMapCommand::execute(){
 				if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
 					lookup = input->getSharedRAbundVectors(lastLabel);
-					mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 					
 					heatmap->getPic(lookup);
 					
@@ -214,7 +214,7 @@ int HeatMapCommand::execute(){
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
 				lookup = input->getSharedRAbundVectors(lastLabel);
 				
-				mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+				mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 				heatmap->getPic(lookup);
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
 			}
@@ -230,7 +230,7 @@ int HeatMapCommand::execute(){
 
 				if(allLines == 1 || lines.count(count) == 1 || labels.count(rabund->getLabel()) == 1){			
 	
-					mothurOut(rabund->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+					mothurOut(rabund->getLabel()); mothurOutEndLine();
 					heatmap->getPic(rabund);
 					
 					processedLabels.insert(rabund->getLabel());
@@ -242,7 +242,7 @@ int HeatMapCommand::execute(){
 
 					delete rabund;
 					rabund = input->getRAbundVector(lastLabel);
-					mothurOut(rabund->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+					mothurOut(rabund->getLabel()); mothurOutEndLine();
 					
 					heatmap->getPic(rabund);
 					
@@ -276,7 +276,7 @@ int HeatMapCommand::execute(){
 		
 				delete rabund;
 				rabund = input->getRAbundVector(lastLabel);
-				mothurOut(rabund->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+				mothurOut(rabund->getLabel()); mothurOutEndLine();
 					
 				heatmap->getPic(rabund);
 				delete rabund; globaldata->rabund = NULL;

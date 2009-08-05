@@ -203,7 +203,7 @@ int RareFactCommand::execute(){
 				rCurve->getCurve(freq, nIters);
 				delete rCurve;
 			
-				mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+				mothurOut(order->getLabel()); mothurOutEndLine();
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
 				userLines.erase(count);
@@ -217,7 +217,7 @@ int RareFactCommand::execute(){
 				rCurve->getCurve(freq, nIters);
 				delete rCurve;
 			
-				mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+				mothurOut(order->getLabel()); mothurOutEndLine();
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
 			}
@@ -251,7 +251,7 @@ int RareFactCommand::execute(){
 			rCurve->getCurve(freq, nIters);
 			delete rCurve;
 			
-			mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+			mothurOut(order->getLabel()); mothurOutEndLine();
 			delete order;
 		}
 		

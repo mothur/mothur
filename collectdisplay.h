@@ -76,7 +76,10 @@ public:
 	void close()			{	output->resetFile();	};
 	bool isCalcMultiple() { return estimate->getMultiple(); }
 	
+	string getName()	{  return estimate->getName();  }
+
 private:
+	
 	Calculator* estimate;
 	FileOutput* output;
 	int nSeqs, timesCalled, numGroupComb;

@@ -227,7 +227,7 @@ int CollectCommand::execute(){
 				cCurve->getCurve(freq);
 				delete cCurve;
 			
-				mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+				mothurOut(order->getLabel()); mothurOutEndLine();
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
 				userLines.erase(count);
@@ -244,7 +244,7 @@ int CollectCommand::execute(){
 				cCurve->getCurve(freq);
 				delete cCurve;
 			
-				mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+				mothurOut(order->getLabel()); mothurOutEndLine();
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
 			}
@@ -274,7 +274,7 @@ int CollectCommand::execute(){
 			delete order;
 			order = (input->getOrderVector(lastLabel));
 			
-			mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+			mothurOut(order->getLabel()); mothurOutEndLine();
 			
 			cCurve = new Collect(order, cDisplays);
 			cCurve->getCurve(freq);

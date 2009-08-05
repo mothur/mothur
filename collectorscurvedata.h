@@ -47,6 +47,7 @@ public:
 	
 	void notifyDisplays(){	
 		for(set<Display*>::iterator pos=displays.begin();pos!=displays.end();pos++){
+//cout << (*pos)->getName() << endl;
 			if ( ((*pos)->isCalcMultiple() == true) || ( ((*pos)->isCalcMultiple() == false) && (shared.size() == 2) ) ) {
 				(*pos)->update(shared, NumSeqs, NumGroupComb);
 			}

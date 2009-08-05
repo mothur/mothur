@@ -75,7 +75,7 @@ int SharedCommand::execute(){
 			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(SharedList->getLabel()) == 1){
 					
 					lookup = SharedList->getSharedRAbundVector();
-					mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 					
 					printSharedData(lookup); //prints info to the .shared file
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
@@ -90,7 +90,7 @@ int SharedCommand::execute(){
 					SharedList = input->getSharedListVector(lastLabel); //get new list vector to process
 					
 					lookup = SharedList->getSharedRAbundVector();
-					mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 					
 					printSharedData(lookup); //prints info to the .shared file
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
@@ -123,7 +123,7 @@ int SharedCommand::execute(){
 			SharedList = input->getSharedListVector(lastLabel); //get new list vector to process
 					
 			lookup = SharedList->getSharedRAbundVector();
-			mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+			mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 			
 			printSharedData(lookup); //prints info to the .shared file
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
