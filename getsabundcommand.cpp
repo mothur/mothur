@@ -127,7 +127,7 @@ int GetSAbundCommand::execute(){
 		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 			
 			if(allLines == 1 || lines.count(count) == 1 || labels.count(order->getLabel()) == 1){
-					mothurOut(order->getLabel() + "\t" + toString(count));  mothurOutEndLine();
+					mothurOut(order->getLabel());  mothurOutEndLine();
 					sabund = new SAbundVector();
 					*sabund = (order->getSAbundVector());
 					sabund->print(out);
@@ -142,7 +142,7 @@ int GetSAbundCommand::execute(){
 					delete order;		
 					order = (input->getOrderVector(lastLabel));
 					
-					mothurOut(order->getLabel() + "\t" + toString(count));  mothurOutEndLine();
+					mothurOut(order->getLabel());  mothurOutEndLine();
 					sabund = new SAbundVector();
 					*sabund = (order->getSAbundVector());
 					sabund->print(out);
@@ -178,7 +178,7 @@ int GetSAbundCommand::execute(){
 			delete order;		
 			order = (input->getOrderVector(lastLabel));
 			
-			mothurOut(order->getLabel() + "\t" + toString(count));  mothurOutEndLine();
+			mothurOut(order->getLabel());  mothurOutEndLine();
 			sabund = new SAbundVector();
 			*sabund = (order->getSAbundVector());
 			sabund->print(out);

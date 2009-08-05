@@ -18,10 +18,11 @@ public:
 	virtual void reset() = 0;
 	virtual void close() = 0;
 	virtual bool isCalcMultiple() = 0;
+	virtual string getName() { return ""; };
 	virtual ~Display() {}
 	
 private:
-
+	
 };
 
 /***********************************************************************/

@@ -170,7 +170,7 @@ int BinSeqCommand::execute(){
 			
 			if(allLines == 1 || lines.count(count) == 1 || labels.count(list->getLabel()) == 1){
 				
-				error = process(list, count);	
+				error = process(list);	
 				if (error == 1) { return 0; }	
 							
 				processedLabels.insert(list->getLabel());
@@ -182,7 +182,7 @@ int BinSeqCommand::execute(){
 				delete list;
 				list = input->getListVector(lastLabel);
 				
-				error = process(list, count);	
+				error = process(list);	
 				if (error == 1) { return 0; }
 													
 				processedLabels.insert(list->getLabel());
@@ -216,7 +216,7 @@ int BinSeqCommand::execute(){
 			delete list;
 			list = input->getListVector(lastLabel);
 				
-			error = process(list, count);	
+			error = process(list);	
 			if (error == 1) { return 0; }
 			
 			delete list;  
@@ -265,13 +265,13 @@ void BinSeqCommand::readNamesFile() {
 }
 //**********************************************************************************************************************
 //return 1 if error, 0 otherwise
-int BinSeqCommand::process(ListVector* list, int count) {
+int BinSeqCommand::process(ListVector* list) {
 	try {
 				string binnames, name, sequence;
 				string outputFileName = getRootName(globaldata->getListFile()) + list->getLabel() + ".fasta";
 				openOutputFile(outputFileName, out);
 
-				mothurOut(list->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+				mothurOut(list->getLabel()); mothurOutEndLine();
 				
 				//for each bin in the list vector
 				for (int i = 0; i < list->size(); i++) {

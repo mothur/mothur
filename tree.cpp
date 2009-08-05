@@ -159,11 +159,10 @@ map<string, int> Tree::mergeGroups(int i) {
 		// this is true if right child had a greater parsimony for a certain group
 		if(maxPars > 1){
 			//erase all the groups that are only 1 because you found something with 2.
-			for(it=parsimony.begin();it!=parsimony.end();it++){
+			for(it=parsimony.begin();it!=parsimony.end();){
 				if(it->second == 1){
-					parsimony.erase(it->first);
-//					it--;
-				}
+					parsimony.erase(it++);
+				}else { it++; }
 			}
 			//set one remaining groups to 1
 			//so with our above example p[white] = 2 would be left and it would become p[white] = 1
@@ -193,13 +192,17 @@ map<string, int> Tree::mergeUserGroups(int i, vector<string> g) {
 		int rc = tree[i].getRChild();
 		
 		//loop through nodes groups removing the ones the user doesn't want
-		for (it = tree[lc].pGroups.begin(); it != tree[lc].pGroups.end(); it++) {
-			if (inUsersGroups(it->first, g) != true) { tree[lc].pGroups.erase(it->first); }
+		for(it=tree[lc].pGroups.begin();it!=tree[lc].pGroups.end();){
+				if (inUsersGroups(it->first, g) != true) {
+					tree[lc].pGroups.erase(it++);
+				}else { it++; }
 		}
-		
+
 		//loop through nodes groups removing the ones the user doesn't want
-		for (it = tree[rc].pGroups.begin(); it != tree[rc].pGroups.end(); it++) {
-			if (inUsersGroups(it->first, g) != true) { tree[rc].pGroups.erase(it->first); }
+		for(it=tree[rc].pGroups.begin();it!=tree[rc].pGroups.end();){
+				if (inUsersGroups(it->first, g) != true) {
+					tree[rc].pGroups.erase(it++);
+				}else { it++; }
 		}
 
 		//set parsimony groups to left child
@@ -224,11 +227,12 @@ map<string, int> Tree::mergeUserGroups(int i, vector<string> g) {
 		// this is true if right child had a greater parsimony for a certain group
 		if(maxPars > 1){
 			//erase all the groups that are only 1 because you found something with 2.
-			for(it=parsimony.begin();it!=parsimony.end();it++){
+			for(it=parsimony.begin();it!=parsimony.end();){
 				if(it->second == 1){
-					parsimony.erase(it->first);
-				}
+					parsimony.erase(it++);
+				}else { it++; }
 			}
+
 			for(it=parsimony.begin();it!=parsimony.end();it++){
 				parsimony[it->first] = 1;
 			}

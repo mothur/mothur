@@ -204,7 +204,7 @@ int GetOTURepCommand::execute(){
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 			
 			if (allLines == 1 || lines.count(count) == 1 || labels.count(list->getLabel()) == 1){
-					mothurOut(list->getLabel() + "\t" + toString(list->size()) + "\t" + toString(count)); mothurOutEndLine();
+					mothurOut(list->getLabel() + "\t" + toString(list->size())); mothurOutEndLine();
 					error = process(list);
 					if (error == 1) { return 0; } //there is an error in hte input files, abort command
 					
@@ -216,7 +216,7 @@ int GetOTURepCommand::execute(){
 			if ((anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 					delete list;
 					list = input->getListVector(lastLabel);
-					mothurOut(list->getLabel() + "\t" + toString(list->size()) + "\t" + toString(count)); mothurOutEndLine();
+					mothurOut(list->getLabel() + "\t" + toString(list->size())); mothurOutEndLine();
 					error = process(list);
 					if (error == 1) { return 0; } //there is an error in hte input files, abort command
 					
@@ -247,7 +247,7 @@ int GetOTURepCommand::execute(){
 		if (needToRun == true)  {
 			delete list;
 			list = input->getListVector(lastLabel);
-			mothurOut(list->getLabel() + "\t" + toString(list->size()) + "\t" + toString(count)); mothurOutEndLine();
+			mothurOut(list->getLabel() + "\t" + toString(list->size())); mothurOutEndLine();
 			error = process(list);
 			delete list;
 			if (error == 1) { return 0; } //there is an error in hte input files, abort command

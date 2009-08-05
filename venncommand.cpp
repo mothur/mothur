@@ -224,7 +224,7 @@ int VennCommand::execute(){
 			while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 
 				if(allLines == 1 || lines.count(count) == 1 || labels.count(lookup[0]->getLabel()) == 1){			
-					mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 					processedLabels.insert(lookup[0]->getLabel());
 					userLabels.erase(lookup[0]->getLabel());
 					userLines.erase(count);
@@ -240,7 +240,7 @@ int VennCommand::execute(){
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 					lookup = input->getSharedRAbundVectors(lastLabel);
 
-					mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 					processedLabels.insert(lookup[0]->getLabel());
 					userLabels.erase(lookup[0]->getLabel());
 
@@ -278,7 +278,7 @@ int VennCommand::execute(){
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 					lookup = input->getSharedRAbundVectors(lastLabel);
 
-					mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 					processedLabels.insert(lookup[0]->getLabel());
 					userLabels.erase(lookup[0]->getLabel());
 
@@ -300,7 +300,7 @@ int VennCommand::execute(){
 		
 				if(allLines == 1 || lines.count(count) == 1 || labels.count(sabund->getLabel()) == 1){			
 	
-					mothurOut(sabund->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+					mothurOut(sabund->getLabel()); mothurOutEndLine();
 					venn->getPic(sabund, vennCalculators);
 					
 					processedLabels.insert(sabund->getLabel());
@@ -312,7 +312,7 @@ int VennCommand::execute(){
 					delete sabund;
 					sabund = input->getSAbundVector(lastLabel);
 					
-					mothurOut(sabund->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+					mothurOut(sabund->getLabel()); mothurOutEndLine();
 					venn->getPic(sabund, vennCalculators);
 					
 					processedLabels.insert(sabund->getLabel());
@@ -344,7 +344,7 @@ int VennCommand::execute(){
 				delete sabund;
 				sabund = input->getSAbundVector(lastLabel);
 					
-				mothurOut(sabund->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+				mothurOut(sabund->getLabel()); mothurOutEndLine();
 				venn->getPic(sabund, vennCalculators);
 				delete sabund;
 					

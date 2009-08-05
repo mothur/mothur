@@ -228,7 +228,7 @@ int BootSharedCommand::execute(){
 		
 			if(allLines == 1 || lines.count(count) == 1 || labels.count(order->getLabel()) == 1){			
 				
-				mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+				mothurOut(order->getLabel()); mothurOutEndLine();
 				process(order);
 				
 				processedLabels.insert(order->getLabel());
@@ -241,7 +241,7 @@ int BootSharedCommand::execute(){
 				
 				delete order;
 				order = input->getSharedOrderVector(lastLabel);													
-				mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+				mothurOut(order->getLabel()); mothurOutEndLine();
 				process(order);
 
 				processedLabels.insert(order->getLabel());
@@ -274,7 +274,7 @@ int BootSharedCommand::execute(){
 		if (needToRun == true)  {
 				delete order;
 				order = input->getSharedOrderVector(lastLabel);													
-				mothurOut(order->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+				mothurOut(order->getLabel()); mothurOutEndLine();
 				process(order);
 				delete order;
 

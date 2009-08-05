@@ -204,7 +204,7 @@ int HeatMapSimCommand::execute(){
 		
 			if(allLines == 1 || lines.count(count) == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 	
-				mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+				mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 				heatmap->getPic(lookup, heatCalculators);
 					
 				processedLabels.insert(lookup[0]->getLabel());
@@ -217,7 +217,7 @@ int HeatMapSimCommand::execute(){
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 				lookup = input->getSharedRAbundVectors(lastLabel);				
 
-				mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+				mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 				heatmap->getPic(lookup, heatCalculators);
 					
 				processedLabels.insert(lookup[0]->getLabel());
@@ -252,7 +252,7 @@ int HeatMapSimCommand::execute(){
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 			lookup = input->getSharedRAbundVectors(lastLabel);				
 
-			mothurOut(lookup[0]->getLabel() + "\t" + toString(count)); mothurOutEndLine();
+			mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 			heatmap->getPic(lookup, heatCalculators);
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 		}

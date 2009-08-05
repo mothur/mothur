@@ -82,8 +82,10 @@ void ThreeColumnFile::resetFile(){
 		renameOk = rename(outName.c_str(), inName.c_str());
 		
 		//checks to make sure user was able to rename and remove successfully
-		if ((renameOk != 0)) {	mothurOut("Unable to rename necessary files."); mothurOutEndLine(); }
-
+		if ((renameOk != 0)) { 
+			mothurOut("Unable to rename " + outName); mothurOutEndLine();
+			perror(" : ");
+		}	
 	}
 	catch(exception& e) {
 		errorOut(e, "ThreeColumnFile", "resetFile");
@@ -182,8 +184,10 @@ void ColumnFile::resetFile(){
 		renameOk = rename(outName.c_str(), inName.c_str());
 		
 		//checks to make sure user was able to rename and remove successfully
-		if ((renameOk != 0)) { mothurOut("Unable to rename necessary files."); mothurOutEndLine(); }
-
+		if ((renameOk != 0)) { 
+			mothurOut("Unable to rename " + outName); mothurOutEndLine();
+			perror(" : ");
+		}	
 	}
 	catch(exception& e) {
 		errorOut(e, "ColumnFile", "resetFile");
@@ -265,8 +269,10 @@ void SharedThreeColumnFile::resetFile(){
 		renameOk = rename(outName.c_str(), inName.c_str());
 		
 		//checks to make sure user was able to rename and remove successfully
-		if ((renameOk != 0)) { mothurOut("Unable to rename necessary files."); mothurOutEndLine(); }
-
+		if ((renameOk != 0)) { 
+			mothurOut("Unable to rename " + outName); mothurOutEndLine();
+			perror(" : ");
+		}	
 	}
 	catch(exception& e) {
 		errorOut(e, "SharedThreeColumnFile", "resetFile");
@@ -348,8 +354,10 @@ void OneColumnFile::resetFile(){
 		renameOk = rename(outName.c_str(), inName.c_str());
 		
 		//checks to make sure user was able to rename and remove successfully
-		if ((renameOk != 0)) { mothurOut("Unable to rename necessary files."); mothurOutEndLine(); }
-
+		if ((renameOk != 0)) { 
+			mothurOut("Unable to rename " + outName); mothurOutEndLine();
+			perror(" : ");
+		}	
 	}
 	catch(exception& e) {
 		errorOut(e, "OneColumnFile", "resetFile");
@@ -435,14 +443,16 @@ void SharedOneColumnFile::resetFile(){
 			outFile.close();
 		}	
 		counter = 1;
-		
+
 		remove(inName.c_str());
+
 		renameOk = rename(outName.c_str(), inName.c_str());
 		
 		//checks to make sure user was able to rename and remove successfully
-		if ((renameOk != 0)) { mothurOut("Unable to rename necessary files."); mothurOutEndLine(); }
-
-		
+		if ((renameOk != 0)) { 
+			mothurOut("Unable to rename " + outName); mothurOutEndLine();
+			perror(" : ");
+		}	
 	}
 	catch(exception& e) {
 		errorOut(e, "SharedOneColumnFile", "resetFile");

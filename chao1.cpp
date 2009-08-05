@@ -15,9 +15,19 @@ EstOutput Chao1::getValues(SAbundVector* rank){
 		data.resize(3,0);
 	
 		double sobs = (double)rank->getNumBins();
-	
-		double singles = (double)rank->get(1);
-		double doubles = (double)rank->get(2);
+		
+		//this is a modification do to a vector fill error that occurs when an empty sharedRabund creates a sabund
+		//in that case there is no 1 0r 2.
+		double singles;
+		if (rank->size() > 1) {
+			singles = (double)rank->get(1);
+		}else{ singles = 0.0;  }
+
+		double doubles;
+		if (rank->size() > 2) {
+			 doubles = (double)rank->get(2);
+		}else{ doubles = 0.0;  }
+
 		double chaovar = 0.0000;
 //cout << "singles = " << singles << " doubles = " << doubles << " sobs = " << sobs << endl;	
 		double chao = sobs + singles*(singles-1)/(2*(doubles+1));
