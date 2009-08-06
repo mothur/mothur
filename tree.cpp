@@ -399,7 +399,7 @@ void Tree::randomTopology() {
 					escape = 1;
 				}		
 			}
-		
+	
 			tree[i].setChildren(rnd_index1,rnd_index2);
 			tree[i].setParent(-1);
 			tree[rnd_index1].setParent(i);
