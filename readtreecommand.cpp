@@ -119,6 +119,7 @@ int ReadTreeCommand::execute(){
 				//then you did not find it so report it 
 				if (count == globaldata->Treenames.size()) { 
 					mothurOut(treeMap->namesOfSeqs[i] + " is in your namefile and not in your tree. It will be disregarded."); mothurOutEndLine();
+					treeMap->removeSeq(treeMap->namesOfSeqs[i]);
 				}
 			}
 		}

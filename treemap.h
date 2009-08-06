@@ -34,6 +34,7 @@ public:
 	void setIndex(string, int);  //sequencename, index
 	int getIndex(string);		//returns vector index of sequence
 	bool isValidGroup(string);  //return true if string is a valid group
+	void removeSeq(string);  //removes a sequence, this is to accomadate trees that do not contain all the seqs in your groupfile
 	string getGroup(string);
 	vector<string> namesOfGroups;
 	vector<string> namesOfSeqs;
