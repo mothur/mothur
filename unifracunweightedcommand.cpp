@@ -134,7 +134,7 @@ int UnifracUnweightedCommand::execute() {
 			for (int j = 0; j < iters; j++) {
 				//we need a different getValues because when we swap the labels we only want to swap those in each parwise comparison
 				randomData = unweighted->getValues(T[i], "", "");
-				
+			
 				for(int k = 0; k < numComp; k++) {	
 					//add trees unweighted score to map of scores
 					map<float,float>::iterator it = rscoreFreq[k].find(randomData[k]);
