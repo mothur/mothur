@@ -20,6 +20,18 @@
 
 /***********************************************************************/
 
+//this structure is necessary to determine the sequence that contributed to the outliers when we remove them
+//this way we can remove all scores that are contributed by outlier sequences.
+struct quanMember {
+	float score;
+	int member1;
+	int member2;
+	quanMember (float s, int m, int n) : score(s), member1(m),  member2(n) {}
+	quanMember() {}
+	
+};
+		
+//********************************************************************************************************************
 class DeCalculator {
 
 	public:
@@ -32,7 +44,7 @@ class DeCalculator {
 		void setAlignmentLength(int l) {  alignLength = l;  }
 		void runMask(Sequence*);
 		void trimSeqs(Sequence*, Sequence*, map<int, int>&);
-		void removeObviousOutliers(vector< vector<float> >&);
+		vector< vector<float> > removeObviousOutliers(vector< vector<quanMember> >&, int);
 		vector<float> calcFreq(vector<Sequence*>, string);
 		vector<int> findWindows(Sequence*, int, int, int&, int);
 		vector<float> calcObserved(Sequence*, Sequence*, vector<int>, int);
@@ -41,10 +53,15 @@ class DeCalculator {
 		float calcDE(vector<float>, vector<float>);
 		float calcDist(Sequence*, Sequence*, int, int);
 		float getCoef(vector<float>, vector<float>);
-		vector< vector<float> > getQuantiles(vector<Sequence*>, vector<int>, int, vector<float>, int, int, int);
+		vector< vector<quanMember> > getQuantiles(vector<Sequence*>, vector<int>, int, vector<float>, int, int, int, vector<float>&);
+		
+		vector<int> returnObviousOutliers(vector< vector<quanMember> >, int);
 		
 	private:
-		float findAverage(vector<float> myVector);
+		vector<quanMember> sortContrib(map<quanMember*, float>);  //used by mallard
+		float findAverage(vector<float>);
+		int findLargestContrib(vector<int>);
+		void removeContrib(int, vector<quanMember>&);
 		string seqMask;
 		set<int> h;
 		int alignLength;

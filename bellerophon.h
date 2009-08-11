@@ -51,13 +51,8 @@ class Bellerophon : public Chimera {
 		string fastafile;
 		int iters;
 		
-		void readSeqs();
 		void generatePreferences(vector<SeqMap>, vector<SeqMap>, int);
 		int createSparseMatrix(int, int, SparseMatrix*, vector<Sequence>);
-	
-
-		
-
 };
 
 /***********************************************************/
