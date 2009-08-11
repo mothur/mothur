@@ -72,6 +72,7 @@ class Pintail : public Chimera {
 		vector<float> DE;					//DE[0] is the deviaation for queryseqs[0]...
 		vector<float> probabilityProfile;
 		vector< vector<float> > quantiles;  //quantiles[0] is the vector of deviations with ceiling score of 1, quantiles[1] is the vector of deviations with ceiling score of 2...
+		vector< vector<quanMember> > quantilesMembers;  //quantiles[0] is the vector of deviations with ceiling score of 1, quantiles[1] is the vector of deviations with ceiling score of 2...
 		vector< set<int> > h;
 		
 		
@@ -84,7 +85,7 @@ class Pintail : public Chimera {
 		void createProcesses();
 		void createProcessesQuan();
 		
-		
+		vector<float> makeCompliant;  //used by decalc->getQuantiles so pintail and mallard can use same function, it contains the highest de value for each seq in the template
 		
 };
 

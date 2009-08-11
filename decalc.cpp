@@ -81,7 +81,6 @@ void DeCalculator::trimSeqs(Sequence* query, Sequence* subject, map<int, int>& t
 	}
 }
 //***************************************************************************************************************
-//find the window breaks for each sequence - this is so you can move ahead by bases.
 vector<int>  DeCalculator::findWindows(Sequence* query, int front, int back, int& size, int increment) {
 	try {
 		
@@ -154,22 +153,25 @@ vector<int>  DeCalculator::findWindows(Sequence* query, int front, int back, int
 vector<float> DeCalculator::calcObserved(Sequence* query, Sequence* subject, vector<int> window, int size) {
 	try {
 		
-		vector<float> temp;
-//cout << "query length = " << query->getAligned().length() << '\t' << " subject length = " << subject.getAligned().length() << endl;				
+		vector<float> temp;	
+				
 		for (int m = 0; m < window.size(); m++) {
 						
 			string seqFrag = query->getAligned().substr(window[m], size);
 			string seqFragsub = subject->getAligned().substr(window[m], size);
-	//cout << "start point = " << window[m] << " end point = " << window[m]+size << endl;						
+				
 			int diff = 0;
 			for (int b = 0; b < seqFrag.length(); b++) {
-
-				if (seqFrag[b] != seqFragsub[b]) { diff++; }
+				//if at least one is a base and they are not equal
+				if( (isalpha(seqFrag[b]) || isalpha(seqFragsub[b])) && (seqFrag[b] != seqFragsub[b]) ) { diff++; }
 			}
                
 			//percentage of mismatched bases
 			float dist;
-			dist = diff / (float) seqFrag.length() * 100;       
+			
+			//if the whole fragment is 0 distance = 0
+			
+			dist = diff / (float) (seqFrag.length()) * 100;      
 				
 			temp.push_back(dist);
 		}
@@ -199,6 +201,9 @@ float DeCalculator::calcDist(Sequence* query, Sequence* subject, int front, int 
 			if((!isalpha(seqFrag[b])) && (!isalpha(seqFragsub[b]))) { gaps++; }
 			if (seqFrag[b] != seqFragsub[b]) { diff++; }
 		}
+		
+		//if the whole fragment is 0 distance = 0
+		if ((seqFrag.length()-gaps) == 0)  { return 0.0; }
                
 		//percentage of mismatched bases
 		float dist = diff / (float) (seqFrag.length()-gaps) * 100;       
@@ -346,26 +351,30 @@ vector<float>  DeCalculator::findQav(vector<int> window, int size, vector<float>
 		exit(1);
 	}
 }
-
+//********************************************************************************************************************
+//sorts lowest to highest
+inline bool compareQuanMembers(quanMember left, quanMember right){
+	return (left.score < right.score);	
+} 
 //***************************************************************************************************************
-vector< vector<float> > DeCalculator::getQuantiles(vector<Sequence*> seqs, vector<int> windowSizesTemplate, int window, vector<float> probProfile, int increment, int start, int end) {
+//seqs have already been masked
+vector< vector<quanMember> > DeCalculator::getQuantiles(vector<Sequence*> seqs, vector<int> windowSizesTemplate, int window, vector<float> probProfile, int increment, int start, int end, vector<float>& highestDE) {
 	try {
-		vector< vector<float> > quan; 
+		vector< vector<quanMember> > quan; 
 		
 		//percentage of mismatched pairs 1 to 100
 		quan.resize(100);
-		
 		
 		//for each sequence
 		for(int i = start; i < end; i++){
 		
 			mothurOut("Processing template sequence " + toString(i)); mothurOutEndLine();
-			Sequence* query = seqs[i];
+			Sequence* query = new Sequence(seqs[i]->getName(), seqs[i]->getAligned());
 			
 			//compare to every other sequence in template
 			for(int j = 0; j < i; j++){
 				
-				Sequence* subject = seqs[j];
+				Sequence* subject = new Sequence(seqs[j]->getName(), seqs[j]->getAligned());
 				
 				map<int, int> trim;
 				map<int, int>::iterator it;
@@ -394,12 +403,23 @@ vector< vector<float> > DeCalculator::getQuantiles(vector<Sequence*> seqs, vecto
 				
 				dist = ceil(dist);
 				
+				quanMember newScore(de, i, j);
+				
 				//dist-1 because vector indexes start at 0.
-				quan[dist-1].push_back(de);
+				quan[dist-1].push_back(newScore);
+				
+				//save highestDE
+				if(de > highestDE[i]) { highestDE[i] = de;  }
+				if(de > highestDE[j]) { highestDE[j] = de;  }
+				
+				delete subject;
 				
 			}
+			
+			delete query;
 		}
 
+		
 		return quan;
 						
 	}
@@ -408,45 +428,259 @@ vector< vector<float> > DeCalculator::getQuantiles(vector<Sequence*> seqs, vecto
 		exit(1);
 	}
 }
+
 //***************************************************************************************************************
-void DeCalculator::removeObviousOutliers(vector< vector<float> >& quantiles) {
+vector< vector<float> > DeCalculator::removeObviousOutliers(vector< vector<quanMember> >& quantiles, int num) {
 	try {
-		
+		vector< vector<float> > quan; 
+		quan.resize(100);
 	
+		/*vector<quanMember> contributions;  
+		vector<int> seen;  //seen[0] is the number of outliers that template seqs[0] was part of.
+		seen.resize(num,0);
+				
+		//find contributions
 		for (int i = 0; i < quantiles.size(); i++) {
 		
 			//find mean of this quantile score
-			sort(quantiles[i].begin(), quantiles[i].end());
+			sort(quantiles[i].begin(), quantiles[i].end(), compareQuanMembers);
 			
-			float average = quantiles[i][int(quantiles[i].size() * 0.5)];
-cout << i << "\taverage = " << average << "\tquantiles[i].size = " << quantiles[i].size() << endl;			
-			vector<float> newQuanI;
+			float high = quantiles[i][int(quantiles[i].size() * 0.99)].score;
+			float low =  quantiles[i][int(quantiles[i].size() * 0.01)].score;
+		
 			//look at each value in quantiles to see if it is an outlier
 			for (int j = 0; j < quantiles[i].size(); j++) {
 				
-				float highCutOff, lowCutOff;
-				
-				//99%
-				highCutOff = sqrt(((quantiles[i][j] - average + 3) * (quantiles[i][j] - average + 3)) / (float)(quantiles[i].size() - 1));
-				
-				//1%
-				lowCutOff = sqrt(((quantiles[i][j] - average - 3) * (quantiles[i][j] - average + 3)) / (float)(quantiles[i].size() - 1));
-//cout << "high = " << highCutOff << " low = " << lowCutOff << " de = " << quantiles[i][j] << endl;				
-				//if this is below the highcutff and above the lowcutoff
-				if ((quantiles[i][j] < highCutOff) && (quantiles[i][j] > lowCutOff)) {
+				//is this score between 1 and 99%
+				if ((quantiles[i][j].score > low) && (quantiles[i][j].score < high)) {
 					
-					newQuanI.push_back(quantiles[i][j]);
-					
-				}else { cout << "removed outlier:  high = " << highCutOff << " low = " << lowCutOff << " de = " << quantiles[i][j] << endl;	 }
+				}else {
+					//add to contributions
+					contributions.push_back(quantiles[i][j]);
+					seen[quantiles[i][j].member1]++;
+					seen[quantiles[i][j].member2]++;
+				}
 			}
-			
-			quantiles[i] = newQuanI;
-		
 		}
 
+		//find contributer with most offending score related to it
+		int largestContrib = findLargestContrib(seen);
+	
+		//while you still have guys to eliminate
+		while (contributions.size() > 0) {
+		
+			mothurOut("Removing scores contributed by sequence " + toString(largestContrib) + " in your template file."); mothurOutEndLine();
+			
+			//remove from quantiles all scores that were made using this largestContrib
+			for (int i = 0; i < quantiles.size(); i++) {
+//cout << "before remove " << quantiles[i].size() << '\t';
+				removeContrib(largestContrib, quantiles[i]);
+//cout << "after remove " << quantiles[i].size() << endl;
+			}
+//cout << count << " largest contrib = " << largestContrib << endl;  count++;
+			//remove from contributions all scores that were made using this largestContrib
+			removeContrib(largestContrib, contributions);
+			
+			//"erase" largestContrib
+			seen[largestContrib] = -1;
+			
+			//get next largestContrib
+			largestContrib = findLargestContrib(seen);
+		}
+		*/
+		
+		vector<int> marked = returnObviousOutliers(quantiles, num);
+		vector<int> copyMarked = marked;
+		
+		//find the 99% of marked
+		sort(copyMarked.begin(), copyMarked.end());
+		int high = copyMarked[int(copyMarked.size() * 0.99)];
+cout << "high = " << high << endl;		
+		
+		for(int i = 0; i < marked.size(); i++) {
+			if (marked[i] > high) { 
+				mothurOut("Removing scores contributed by sequence " + toString(marked[i]) + " in your template file."); mothurOutEndLine();
+				for (int i = 0; i < quantiles.size(); i++) {
+					removeContrib(marked[i], quantiles[i]);
+				}
+			}
+
+		}
+		
+		
+		//adjust quantiles
+		for (int i = 0; i < quantiles.size(); i++) {
+			vector<float> temp;
+			
+			if (quantiles[i].size() == 0) {
+				//in case this is not a distance found in your template files
+				for (int g = 0; g < 6; g++) {
+					temp.push_back(0.0);
+				}
+			}else{
+				
+				sort(quantiles[i].begin(), quantiles[i].end(), compareQuanMembers);
+				
+				//save 10%
+				temp.push_back(quantiles[i][int(quantiles[i].size() * 0.10)].score);
+				//save 25%
+				temp.push_back(quantiles[i][int(quantiles[i].size() * 0.25)].score);
+				//save 50%
+				temp.push_back(quantiles[i][int(quantiles[i].size() * 0.5)].score);
+				//save 75%
+				temp.push_back(quantiles[i][int(quantiles[i].size() * 0.75)].score);
+				//save 95%
+				temp.push_back(quantiles[i][int(quantiles[i].size() * 0.95)].score);
+				//save 99%
+				temp.push_back(quantiles[i][int(quantiles[i].size() * 0.99)].score);
+				
+			}
+			
+			quan[i] = temp;
+			
+		}
+
+		return quan;
 	}
 	catch(exception& e) {
 		errorOut(e, "DeCalculator", "removeObviousOutliers");
+		exit(1);
+	}
+}
+//***************************************************************************************************************
+//follows Mallard algorythn in paper referenced from mallard class
+vector<int> DeCalculator::returnObviousOutliers(vector< vector<quanMember> > quantiles, int num) {
+	try {
+		vector< vector<float> > quan; 
+		quan.resize(100);
+	
+		map<quanMember*, float> contributions;  //map of quanMember to distance from high or low - how bad is it.
+		vector<int> marked;  //marked[0] is the penalty of template seqs[0]. the higher the penalty the more likely the sequence is chimeric
+		marked.resize(num,0);
+				
+		//find contributions
+		for (int i = 0; i < quantiles.size(); i++) {
+		
+			//find mean of this quantile score
+			sort(quantiles[i].begin(), quantiles[i].end(), compareQuanMembers);
+			
+			float high = quantiles[i][int(quantiles[i].size() * 0.99)].score;
+			float low =  quantiles[i][int(quantiles[i].size() * 0.01)].score;
+		
+			//look at each value in quantiles to see if it is an outlier
+			for (int j = 0; j < quantiles[i].size(); j++) {
+				
+				//is this score between 1 and 99%
+				if ((quantiles[i][j].score > low) && (quantiles[i][j].score < high)) {
+					
+				}else {
+					float dist;
+					//add to contributions
+					if (quantiles[i][j].score < low) {
+						dist = low - quantiles[i][j].score;
+						contributions[&(quantiles[i][j])] = dist;
+					}else { //you are higher than high
+						dist = quantiles[i][j].score - high;
+						contributions[&(quantiles[i][j])] = dist;
+					}
+				}
+			}
+		}
+
+		//find contributer with most offending score related to it
+		vector<quanMember> outliers = sortContrib(contributions);
+		
+		//go through the outliers marking the potential chimeras
+		for (int i = 0; i < outliers.size(); i++) {
+			
+			//who is responsible for this outlying score?  
+			//if member1 has greater score mark him
+			//if member2 has greater score mark her
+			//if they are the same mark both
+			if (marked[outliers[i].member1] > marked[outliers[i].member2])			{	marked[outliers[i].member1]++;	}
+			else if (marked[outliers[i].member2] > marked[outliers[i].member1])		{	marked[outliers[i].member2]++;	}
+			else if (marked[outliers[i].member2] == marked[outliers[i].member1])	{	marked[outliers[i].member2]++;  marked[outliers[i].member1]++;	}
+		}
+		
+		return marked;
+	}
+	catch(exception& e) {
+		errorOut(e, "DeCalculator", "removeObviousOutliers");
+		exit(1);
+	}
+}
+//***************************************************************************************************************
+vector<quanMember> DeCalculator::sortContrib(map<quanMember*, float> quan) {
+	try{
+		
+		vector<quanMember> newQuan;
+		map<quanMember*, float>::iterator it;
+		
+		while (quan.size() > 0) {
+			
+			 map<quanMember*, float>::iterator largest = quan.begin(); 
+			  
+			//find biggest member
+			for (it = quan.begin(); it != quan.end(); it++) {
+				if (it->second > largest->second) {  largest = it;  }
+			}
+			
+			//save it 
+			newQuan.push_back(*(largest->first));
+		
+			//erase from quan
+			quan.erase(largest);
+		}
+		
+		return newQuan;
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "DeCalculator", "sortContrib");
+		exit(1);
+	}
+}
+
+//***************************************************************************************************************
+int DeCalculator::findLargestContrib(vector<int> seen) {
+	try{
+		
+		int largest = 0;
+		
+		int largestContribs;
+		
+		for (int i = 0; i < seen.size(); i++)  {  
+			
+			if (seen[i] > largest) {
+				largestContribs = i;
+				largest = seen[i];
+			}
+		}
+		
+		return largestContribs;
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "DeCalculator", "findLargestContribs");
+		exit(1);
+	}
+}
+//***************************************************************************************************************
+void DeCalculator::removeContrib(int bad, vector<quanMember>& quan) {
+	try{
+	
+		vector<quanMember> newQuan;
+		for (int i = 0; i < quan.size(); i++)  {  
+			if ((quan[i].member1 != bad) && (quan[i].member2 != bad) ) {  
+				newQuan.push_back(quan[i]);  
+			}
+		}
+		
+		quan = newQuan;
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "DeCalculator", "removeContrib");
 		exit(1);
 	}
 }

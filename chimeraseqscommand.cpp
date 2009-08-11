@@ -65,7 +65,7 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 			
 
 			string temp;
-			temp = validParameter.validFile(parameters, "filter", false);			if (temp == "not found") { temp = "T"; }
+			temp = validParameter.validFile(parameters, "filter", false);			if (temp == "not found") { temp = "F"; }
 			filter = isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "correction", false);		if (temp == "not found") { temp = "T"; }
@@ -96,13 +96,20 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 
 void ChimeraSeqsCommand::help(){
 	try {
+		mothurOut("chimera.seqs ASSUMES that your sequences are ALIGNED.\n");
 		mothurOut("The chimera.seqs command reads a fastafile and creates a sorted priority score list of potentially chimeric sequences (ideally, the sequences should already be aligned).\n");
-		mothurOut("The chimera.seqs command parameters are fasta, filter, correction, processors, mask and method.  fasta is required.\n");
-		mothurOut("The filter parameter allows you to specify if you would like to apply a 50% soft filter.  The default is false. \n");
-		mothurOut("The correction parameter allows you to put more emphasis on the distance between highly similar sequences and less emphasis on the differences between remote homologs.   The default is true. \n");
+		mothurOut("The chimera.seqs command parameters are fasta, filter, correction, processors, mask, method, window, increment, template, conservation and quantile.\n");
+		mothurOut("The filter parameter allows you to specify if you would like to apply a 50% soft filter this only applies when the method is bellerphon.  The default is false. \n");
+		mothurOut("The correction parameter allows you to put more emphasis on the distance between highly similar sequences and less emphasis on the differences between remote homologs.   The default is true. This only applies when the method is bellerphon.\n");
 		mothurOut("The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n");
-		mothurOut("The method parameter allows you to specify the method for finding chimeric sequences.  The default is pintail. \n");
-		mothurOut("The mask parameter allows you to specify a file containing one sequence you wish to use as a mask for the pintail and mallard method.  The default is 236627 EU009184.1 Shigella dysenteriae str. FBD013. \n");
+		mothurOut("The method parameter allows you to specify the method for finding chimeric sequences.  The default is pintail. Options include..... \n");
+		mothurOut("The mask parameter allows you to specify a file containing one sequence you wish to use as a mask for the pintail and mallard method.  The default is no mask.  If you enter mask=default, then the mask is 236627 EU009184.1 Shigella dysenteriae str. FBD013. \n");
+		mothurOut("The window parameter allows you to specify the window size for searching for chimeras.  The default is 300 is method is pintail unless the sequence length is less than 300, and 1/4 sequence length for bellerphon.\n");
+		mothurOut("The increment parameter allows you to specify how far you move each window while finding chimeric sequences.  The default is 25.\n");
+		mothurOut("The template parameter allows you to enter a template file containing known non-chimeric sequences for use by the pintail algorythm. It is a required parameter if using pintail.\n");
+		mothurOut("The conservation parameter allows you to enter a frequency file containing the highest bases frequency at each place in the alignment for use by the pintail algorythm. It is not required, but will speed up the pintail method.\n");
+		mothurOut("The quantile parameter allows you to enter a file containing quantiles for a template files sequences for use by the pintail algorythm. It is not required, but will speed up the pintail method.\n");
+		mothurOut("If you have run chimera.seqs using pintail a .quan and .freq file will be created if you have not provided them for use in future command executions.");
 		mothurOut("The chimera.seqs command should be in the following format: \n");
 		mothurOut("chimera.seqs(fasta=yourFastaFile, filter=yourFilter, correction=yourCorrection, processors=yourProcessors, method=bellerophon) \n");
 		mothurOut("Example: chimera.seqs(fasta=AD.align, filter=True, correction=true, processors=2, method=yourMethod) \n");
@@ -150,7 +157,7 @@ int ChimeraSeqsCommand::execute(){
 		//find chimeras
 		chimera->getChimeras();
 		
-		string outputFileName = getRootName(fastafile) + method + ".chimeras";
+		string outputFileName = getRootName(fastafile) + method + maskfile + ".chimeras";
 		ofstream out;
 		openOutputFile(outputFileName, out);
 		

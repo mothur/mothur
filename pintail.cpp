@@ -19,8 +19,7 @@ Pintail::~Pintail() {
 	try {
 		for (int i = 0; i < querySeqs.size(); i++)		{  delete querySeqs[i];		}
 		for (int i = 0; i < templateSeqs.size(); i++)	{  delete templateSeqs[i];	}
-		
-		if (processors != 1) {   for (int i = 0; i < bestfit.size(); i++)	{  delete bestfit[i];	}  }
+		for (int i = 0; i < bestfit.size(); i++)		{  delete bestfit[i];		}  
 	}
 	catch(exception& e) {
 		errorOut(e, "Pintail", "~Pintail");
@@ -31,14 +30,11 @@ Pintail::~Pintail() {
 void Pintail::print(ostream& out) {
 	try {
 		
+		mothurOutEndLine();
+		
 		for (int i = 0; i < querySeqs.size(); i++) {
 			
 			int index = ceil(deviation[i]);
-float quan = 2.64 * log10(deviation[i]) + 1.46;
-cout << "dist = " << index << endl;
-cout << "de = "  << DE[i] << endl;
-cout << "mallard quantile = " << quan << endl;
-cout << "my quantile = " << quantiles[index][4] << endl;
 			
 			//is your DE value higher than the 95%
 			string chimera;
@@ -92,6 +88,7 @@ void Pintail::getChimeras() {
 		windowsForeachQuery.resize(numSeqs);
 		h.resize(numSeqs);
 		quantiles.resize(100);  //one for every percent mismatch
+		quantilesMembers.resize(100);  //one for every percent mismatch
 		
 		//break up file if needed
 		int linesPerProcess = numSeqs / processors ;
@@ -141,10 +138,11 @@ void Pintail::getChimeras() {
 		
 		
 		for (int j = 0; j < bestfit.size(); j++) { 
+				
 				//chops off beginning and end of sequences so they both start and end with a base
 				ofstream out;
 				string s = querySeqs[j]->getName();
-				
+			
 				openOutputFile(s, out);
 				out << ">" << querySeqs[j]->getName() << endl;
 				out << querySeqs[j]->getAligned() << endl;
@@ -154,7 +152,7 @@ void Pintail::getChimeras() {
 				openOutputFile(t, out);
 				out << ">" << bestfit[j]->getName() << endl;
 				out << bestfit[j]->getAligned() << endl;
-				out.close();
+				out.close();	
 		}
 
 		
@@ -170,51 +168,46 @@ void Pintail::getChimeras() {
 		for (int i = 0; i < probabilityProfile.size(); i++)  {	probabilityProfile[i] = 1 - probabilityProfile[i];  }  //cout << i << '\t' << probabilityProfile[i] << endl;
 		mothurOut("Done."); mothurOutEndLine();
 		
-		//mask querys
-		for (int i = 0; i < querySeqs.size(); i++) {
-		//cout << querySeqs[i]->getName() << " before mask = " << querySeqs[i]->getAligned() << endl << endl;
-			decalc->runMask(querySeqs[i]);
-		//cout << querySeqs[i]->getName() << " after mask = " << querySeqs[i]->getAligned() << endl << endl;
-		}
+		//mask sequences if the user wants to 
+		if (seqMask != "") {
+			//mask querys
+			for (int i = 0; i < querySeqs.size(); i++) {
+				decalc->runMask(querySeqs[i]);
+			}
 		
-		//mask templates
-		for (int i = 0; i < templateSeqs.size(); i++) {
-			decalc->runMask(templateSeqs[i]);
+			//mask templates
+			for (int i = 0; i < templateSeqs.size(); i++) {
+				decalc->runMask(templateSeqs[i]);
+			}
+			
+			for (int i = 0; i < bestfit.size(); i++) { 
+				decalc->runMask(bestfit[i]);
+			}
+
 		}
-		
-//for (int i = 0; i < lines.size(); i++) { cout << "line pair " << i << " = " << lines[i]->start << '\t' << lines[i]->end << endl;  }
-				
+						
 		if (processors == 1) { 
 	
 			for (int j = 0; j < bestfit.size(); j++) { 
-			//cout << querySeqs[j]->getName() << " after mask = " << querySeqs[j]->getAligned() << endl << endl;
-			///cout << bestfit[j]->getName() << " after mask = " << bestfit[j]->getAligned() << endl << endl;
 				decalc->trimSeqs(querySeqs[j], bestfit[j], trimmed[j]);  
 			}
 			
 			mothurOut("Finding window breaks... "); cout.flush();
 			for (int i = lines[0]->start; i < lines[0]->end; i++) {
 				it = trimmed[i].begin();
-//cout << querySeqs[i]->getName() << '\t' << "trimmed = " << it->first << '\t' << it->second << endl;
 				vector<int> win = decalc->findWindows(querySeqs[i], it->first, it->second, windowSizes[i], increment);
 				windowsForeachQuery[i] = win;
 			}
 			mothurOut("Done."); mothurOutEndLine();
 		
 		}else {		createProcessesSpots();		}
-
 		
 		if (processors == 1) { 
 						
 			mothurOut("Calculating observed distance... "); cout.flush();
 			for (int i = lines[0]->start; i < lines[0]->end; i++) {
-	//cout << querySeqs[i]->getName() << '\t' << bestfit[i]->getName() << " windows = " << windowsForeachQuery[i].size() << " size = " << windowSizes[i] << endl;
 				vector<float> obsi = decalc->calcObserved(querySeqs[i], bestfit[i], windowsForeachQuery[i], windowSizes[i]);
 	
-	for (int j = 0; j < obsi.size(); j++) {
-		//cout << obsi[j] << '\t';
-	}
-	//cout << endl;
 				obsDistance[i] = obsi;
 			}
 			mothurOut("Done."); mothurOutEndLine();
@@ -225,12 +218,6 @@ void Pintail::getChimeras() {
 				vector<float> q = decalc->findQav(windowsForeachQuery[i], windowSizes[i], probabilityProfile);
 
 				Qav[i] = q;
-//cout << querySeqs[i]->getName() << endl;
-for (int j = 0; j < Qav[i].size(); j++) {
-	//cout << Qav[i][j] << '\t';
-}
-//cout << endl << endl;
-
 			}
 			mothurOut("Done."); mothurOutEndLine();
 			
@@ -238,7 +225,6 @@ for (int j = 0; j < Qav[i].size(); j++) {
 			mothurOut("Calculating alpha... "); cout.flush();
 			for (int i = lines[0]->start; i < lines[0]->end; i++) {
 				float alpha = decalc->getCoef(obsDistance[i], Qav[i]);
-//cout << querySeqs[i]->getName() << "\tcoef = " << alpha << endl;
 				seqCoef[i] = alpha;
 			}
 			mothurOut("Done."); mothurOutEndLine();
@@ -256,17 +242,15 @@ for (int j = 0; j < Qav[i].size(); j++) {
 			for (int i = lines[0]->start; i < lines[0]->end; i++) {
 				float de = decalc->calcDE(obsDistance[i], expectedDistance[i]);
 				DE[i] = de;
-//cout << querySeqs[i]->getName() << '\t' << "de value = " << de << endl;				
+			
 				it = trimmed[i].begin();
 				float dist = decalc->calcDist(querySeqs[i], bestfit[i], it->first, it->second); 
-//cout << querySeqs[i]->getName() << '\t' << "dist value = " << dist << endl;
 				deviation[i] = dist;
 			}
 			mothurOut("Done."); mothurOutEndLine();
 			
 		} 
 		else {		createProcesses();		}
-		
 		
 		//quantiles are used to determine whether the de values found indicate a chimera
 		//if you have to calculate them, its time intensive because you are finding the de and deviation values for each 
@@ -276,29 +260,33 @@ for (int j = 0; j < Qav[i].size(); j++) {
 			
 			mothurOut("Calculating quantiles for your template.  This can take a while...  I will output the quantiles to a .quan file that you can input them using the quantiles parameter next time you run this command.  Providing the .quan file will dramatically improve speed.    "); cout.flush();
 			if (processors == 1) { 
-				quantiles = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, 0, templateSeqs.size());
+				quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, 0, templateSeqs.size(), makeCompliant);
 			}else {		createProcessesQuan();		}
 			
-			
-			decalc->removeObviousOutliers(quantiles);
+						
+			//decided against this because we were having trouble setting the sensitivity... may want to revisit this...
+			//quantiles = decalc->removeObviousOutliers(quantilesMembers, templateSeqs.size());
 			
 			ofstream out4;
-			string o = getRootName(templateFile) + "quan";
+			string o;
+			
+			o = getRootName(templateFile) + "quan";
 			
 			openOutputFile(o, out4);
 			
 			//adjust quantiles
 			for (int i = 0; i < quantiles.size(); i++) {
+				vector<float> temp;
+				
 				if (quantiles[i].size() == 0) {
 					//in case this is not a distance found in your template files
 					for (int g = 0; g < 6; g++) {
-						quantiles[i].push_back(0.0);
+						temp.push_back(0.0);
 					}
 				}else{
 					
 					sort(quantiles[i].begin(), quantiles[i].end());
 					
-					vector<float> temp;
 					//save 10%
 					temp.push_back(quantiles[i][int(quantiles[i].size() * 0.10)]);
 					//save 25%
@@ -312,19 +300,23 @@ for (int j = 0; j < Qav[i].size(); j++) {
 					//save 99%
 					temp.push_back(quantiles[i][int(quantiles[i].size() * 0.99)]);
 					
-					quantiles[i] = temp;
 				}
 				
 				//output quan value
 				out4 << i+1 << '\t';				
-				for (int u = 0; u < quantiles[i].size(); u++) {   out4 << quantiles[i][u] << '\t'; }
+				for (int u = 0; u < temp.size(); u++) {   out4 << temp[u] << '\t'; }
 				out4 << endl;
-
+				
+				quantiles[i] = temp;
+				
 			}
 			
+			out4.close();
+			
 			mothurOut("Done."); mothurOutEndLine();
+			
 		}
-	
+			
 		//free memory
 		for (int i = 0; i < lines.size(); i++)					{	delete lines[i];				}
 		for (int i = 0; i < templateLines.size(); i++)			{	delete templateLines[i];		}
@@ -445,7 +437,10 @@ vector<Sequence*> Pintail::findPairs(int start, int end) {
 				}
 			}
 			
-			seqsMatches.push_back(match);
+			//make copy so trimSeqs doesn't overtrim
+			Sequence* copy = new Sequence(match->getName(), match->getAligned());
+			
+			seqsMatches.push_back(copy);
 		}
 		
 		return seqsMatches;
@@ -478,6 +473,7 @@ void Pintail::createProcessesSpots() {
 				
 					//chops off beginning and end of sequences so they both start and end with a base
 					map<int, int> trim;
+
 					decalc->trimSeqs(querySeqs[j], bestfit[j], trim); 
 					trimmed[j] = trim;
 					
@@ -512,8 +508,7 @@ void Pintail::createProcessesSpots() {
 				
 				//output trimmed values
 				for (int i = lines[process]->start; i < lines[process]->end; i++) {
-					it = trimmed[i].begin();
-					
+					it = trimmed[i].begin();					
 					out << it->first << '\t' << it->second << endl;
 				}
 				out.close();
@@ -568,7 +563,7 @@ void Pintail::createProcessesSpots() {
 			for (int m = 0; m < size; m++) {
 				int front, back;
 				in >> front >> back;
-				
+			
 				map<int, int> t;
 				
 				t[front] = back;
@@ -923,7 +918,7 @@ void Pintail::createProcessesQuan() {
 				process++;
 			}else if (pid == 0){
 				
-				quantiles = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, templateLines[process]->start, templateLines[process]->end);
+				quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, templateLines[process]->start, templateLines[process]->end, makeCompliant);
 				
 				//write out data to file so parent can read it
 				ofstream out;
@@ -932,10 +927,10 @@ void Pintail::createProcessesQuan() {
 				
 								
 				//output observed distances
-				for (int i = 0; i < quantiles.size(); i++) {
-					out << quantiles[i].size() << '\t';
-					for (int j = 0; j < quantiles[i].size(); j++) {
-						out << quantiles[i][j] << '\t';
+				for (int i = 0; i < quantilesMembers.size(); i++) {
+					out << quantilesMembers[i].size() << '\t';
+					for (int j = 0; j < quantilesMembers[i].size(); j++) {
+						out << quantilesMembers[i][j].score << '\t' << quantilesMembers[i][j].member1 << '\t' << quantilesMembers[i][j].member2 << '\t';
 					}
 					out << endl;
 				}
@@ -951,35 +946,42 @@ void Pintail::createProcessesQuan() {
 			int temp = processIDS[i];
 			wait(&temp);
 		}
-		
+
 		//get data created by processes
 		for (int i=0;i<processors;i++) { 
 			ifstream in;
 			string s = toString(processIDS[i]) + ".temp";
 			openInputFile(s, in);
 			
-			vector< vector<float> > quan; quan.resize(100);
+			vector< vector<quanMember> > quan; 
+			quan.resize(100);
 			
 			//get quantiles
 			for (int m = 0; m < quan.size(); m++) {
 				int num;
-				in >> num;
-			
-				vector<float> q;  float w;
+				in >> num; 
+				
+				gobble(in);
+
+				vector<quanMember> q;  float w; int b, n;
 				for (int j = 0; j < num; j++) {
-					in >> w;
-					q.push_back(w);
+					in >> w >> b >> n;
+	//cout << w << '\t' << b << '\t' n << endl;
+					quanMember newMember(w, b, n);
+					q.push_back(newMember);
 				}
-			
+//cout << "here" << endl;
 				quan[m] = q;
+//cout << "now here" << endl;
 				gobble(in);
 			}
 			
-			
+	
 			//save quan in quantiles
-			for (int i = 0; i < quan.size(); i++) {
+			for (int j = 0; j < quan.size(); j++) {
 				//put all values of q[i] into quan[i]
-				quantiles[i].insert(quantiles[i].begin(), quan[i].begin(), quan[i].end());
+				for (int l = 0; l < quan[j].size(); l++) {  quantilesMembers[j].push_back(quan[j][l]);   }
+				//quantilesMembers[j].insert(quantilesMembers[j].begin(), quan[j].begin(), quan[j].end());
 			}
 					
 			in.close();
@@ -987,7 +989,7 @@ void Pintail::createProcessesQuan() {
 		}
 		
 #else
-		quantiles = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, 0, templateSeqs.size());
+		quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, 0, templateSeqs.size(), makeCompliant);
 #endif		
 	}
 	catch(exception& e) {

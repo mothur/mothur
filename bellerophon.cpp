@@ -92,7 +92,7 @@ void Bellerophon::getChimeras() {
 		distCalculator = new eachGapDist();
 		
 		//read in sequences
-		readSeqs();
+		//seqs = readSeqs(fastafile);
 		
 		int numSeqs = seqs.size();
 		
@@ -173,6 +173,7 @@ cout << "increment = " << increment << endl;
 				vector<SeqMap> distMapLeft;
 				
 				// Create a data structure to quickly access the distance information.
+				//this is from thallingers reimplementation on get.oturep
 				// It consists of a vector of distance maps, where each map contains
 				// all distances of a certain sequence. Vector and maps are accessed
 				// via the index of a sequence in the distance matrix
@@ -231,31 +232,6 @@ cout << "increment = " << increment << endl;
 	}
 }
 
-//***************************************************************************************************************
-void Bellerophon::readSeqs(){
-	try {
-		ifstream inFASTA;
-		openInputFile(fastafile, inFASTA);
-		
-		//read in seqs and store in vector
-		while(!inFASTA.eof()){
-			Sequence current(inFASTA);
-			
-			if (current.getAligned() == "") { current.setAligned(current.getUnaligned()); }
-			
-			seqs.push_back(current);
-			
-			gobble(inFASTA);
-		}
-		inFASTA.close();
-
-	}
-	catch(exception& e) {
-		errorOut(e, "Bellerophon", "readSeqs");
-		exit(1);
-	}
-}
-
 /***************************************************************************************************************/
 int Bellerophon::createSparseMatrix(int startSeq, int endSeq, SparseMatrix* sparse, vector<Sequence> s){
 	try {
@@ -272,8 +248,7 @@ int Bellerophon::createSparseMatrix(int startSeq, int endSeq, SparseMatrix* spar
 				
 			}
 		}
-			
-	
+		
 		return 1;
 	}
 	catch(exception& e) {
