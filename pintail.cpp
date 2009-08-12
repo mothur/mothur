@@ -89,6 +89,7 @@ void Pintail::getChimeras() {
 		h.resize(numSeqs);
 		quantiles.resize(100);  //one for every percent mismatch
 		quantilesMembers.resize(100);  //one for every percent mismatch
+		makeCompliant.resize(templateSeqs.size(), 0.0);
 		
 		//break up file if needed
 		int linesPerProcess = numSeqs / processors ;
@@ -136,25 +137,6 @@ void Pintail::getChimeras() {
 			mothurOut("Done."); mothurOutEndLine();
 		}else {		createProcessesPairs();		}
 		
-		
-		for (int j = 0; j < bestfit.size(); j++) { 
-				
-				//chops off beginning and end of sequences so they both start and end with a base
-				ofstream out;
-				string s = querySeqs[j]->getName();
-			
-				openOutputFile(s, out);
-				out << ">" << querySeqs[j]->getName() << endl;
-				out << querySeqs[j]->getAligned() << endl;
-				out.close();
-				
-				string t =querySeqs[j]->getName() + ".ref";
-				openOutputFile(t, out);
-				out << ">" << bestfit[j]->getName() << endl;
-				out << bestfit[j]->getAligned() << endl;
-				out.close();	
-		}
-
 		
 		//find P
 		mothurOut("Getting conservation... "); cout.flush();

@@ -11,6 +11,7 @@
 #include "bellerophon.h"
 #include "pintail.h"
 
+
 //***************************************************************************************************************
 
 ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
@@ -96,14 +97,15 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 
 void ChimeraSeqsCommand::help(){
 	try {
-		mothurOut("chimera.seqs ASSUMES that your sequences are ALIGNED.\n");
-		mothurOut("The chimera.seqs command reads a fastafile and creates a sorted priority score list of potentially chimeric sequences (ideally, the sequences should already be aligned).\n");
+		mothurOut("chimera.seqs ASSUMES that your sequences are ALIGNED and if using a template that the template file sequences are the same length as the fasta file sequences.\n\n");
+		mothurOut("The chimera.seqs command reads a fastafile and creates list of potentially chimeric sequences.\n");
 		mothurOut("The chimera.seqs command parameters are fasta, filter, correction, processors, mask, method, window, increment, template, conservation and quantile.\n");
+		mothurOut("The fasta parameter is always required and template is required if using pintail.\n");
 		mothurOut("The filter parameter allows you to specify if you would like to apply a 50% soft filter this only applies when the method is bellerphon.  The default is false. \n");
 		mothurOut("The correction parameter allows you to put more emphasis on the distance between highly similar sequences and less emphasis on the differences between remote homologs.   The default is true. This only applies when the method is bellerphon.\n");
 		mothurOut("The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n");
 		mothurOut("The method parameter allows you to specify the method for finding chimeric sequences.  The default is pintail. Options include..... \n");
-		mothurOut("The mask parameter allows you to specify a file containing one sequence you wish to use as a mask for the pintail and mallard method.  The default is no mask.  If you enter mask=default, then the mask is 236627 EU009184.1 Shigella dysenteriae str. FBD013. \n");
+		mothurOut("The mask parameter allows you to specify a file containing one sequence you wish to use as a mask for the pintail.  The default is no mask.  If you enter mask=default, then the mask is 236627 EU009184.1 Shigella dysenteriae str. FBD013. \n");
 		mothurOut("The window parameter allows you to specify the window size for searching for chimeras.  The default is 300 is method is pintail unless the sequence length is less than 300, and 1/4 sequence length for bellerphon.\n");
 		mothurOut("The increment parameter allows you to specify how far you move each window while finding chimeric sequences.  The default is 25.\n");
 		mothurOut("The template parameter allows you to enter a template file containing known non-chimeric sequences for use by the pintail algorythm. It is a required parameter if using pintail.\n");
@@ -133,21 +135,21 @@ int ChimeraSeqsCommand::execute(){
 		if (abort == true) { return 0; }
 		
 		if (method == "bellerophon")	{		chimera = new Bellerophon(fastafile);			}
-		else if (method == "pintail")	{		chimera = new Pintail(fastafile, templatefile);	
-			//saves time to avoid generating it
-			if (consfile != "")			{		chimera->setCons(consfile);						}
-			else						{		chimera->setCons("");							}
-			
-			//saves time to avoid generating it
-			if (quanfile != "")			{		chimera->setQuantiles(quanfile);				}
-			else						{		chimera->setQuantiles("");						}
-			
-			if (maskfile == "default") { mothurOut("I am using the default 236627 EU009184.1 Shigella dysenteriae str. FBD013."); mothurOutEndLine();  }
-			chimera->setMask(maskfile);
-						
-		}else { mothurOut("Not a valid method."); mothurOutEndLine(); return 0;		}
+		else if (method == "pintail")	{		chimera = new Pintail(fastafile, templatefile);	}
+		else { mothurOut("Not a valid method."); mothurOutEndLine(); return 0;		}
 		
 		//set user options
+		if (maskfile == "default") { mothurOut("I am using the default 236627 EU009184.1 Shigella dysenteriae str. FBD013."); mothurOutEndLine();  }
+		
+		//saves time to avoid generating it
+		if (consfile != "")			{		chimera->setCons(consfile);						}
+		else						{		chimera->setCons("");							}
+		
+		//saves time to avoid generating it
+		if (quanfile != "")			{		chimera->setQuantiles(quanfile);				}
+		else						{		chimera->setQuantiles("");						}
+		
+		chimera->setMask(maskfile);
 		chimera->setFilter(filter);
 		chimera->setCorrection(correction);
 		chimera->setProcessors(processors);

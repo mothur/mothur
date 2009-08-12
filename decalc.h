@@ -60,8 +60,8 @@ class DeCalculator {
 	private:
 		vector<quanMember> sortContrib(map<quanMember*, float>);  //used by mallard
 		float findAverage(vector<float>);
-		int findLargestContrib(vector<int>);
-		void removeContrib(int, vector<quanMember>&);
+		//int findLargestContrib(vector<int>);
+		//void removeContrib(int, vector<quanMember>&);
 		string seqMask;
 		set<int> h;
 		int alignLength;

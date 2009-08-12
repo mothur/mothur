@@ -14,7 +14,6 @@
 		370B88070F8A4EE4005AB382 /* getoturepcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 370B88060F8A4EE4005AB382 /* getoturepcommand.cpp */; };
 		371B30B40FD7EE67000414CA /* screenseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 371B30B20FD7EE67000414CA /* screenseqscommand.cpp */; };
 		372095C2103196D70004D347 /* chimera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372095C1103196D70004D347 /* chimera.cpp */; };
-		372095CA1031A1D50004D347 /* mallard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372095C91031A1D50004D347 /* mallard.cpp */; };
 		372A55551017922B00C5194B /* decalc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372A55541017922B00C5194B /* decalc.cpp */; };
 		372E12700F26365B0095CF7E /* readotucommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E126F0F26365B0095CF7E /* readotucommand.cpp */; };
 		372E12960F263D5A0095CF7E /* readdistcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 372E12950F263D5A0095CF7E /* readdistcommand.cpp */; };
@@ -199,8 +198,6 @@
 		371B30B20FD7EE67000414CA /* screenseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = screenseqscommand.cpp; sourceTree = SOURCE_ROOT; };
 		371B30B30FD7EE67000414CA /* screenseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = screenseqscommand.h; sourceTree = SOURCE_ROOT; };
 		372095C1103196D70004D347 /* chimera.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimera.cpp; sourceTree = "<group>"; };
-		372095C81031A1D50004D347 /* mallard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mallard.h; sourceTree = "<group>"; };
-		372095C91031A1D50004D347 /* mallard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mallard.cpp; sourceTree = "<group>"; };
 		372A55531017922B00C5194B /* decalc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = decalc.h; sourceTree = "<group>"; };
 		372A55541017922B00C5194B /* decalc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = decalc.cpp; sourceTree = "<group>"; };
 		372E126E0F26365B0095CF7E /* readotucommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readotucommand.h; sourceTree = SOURCE_ROOT; };
@@ -650,8 +647,6 @@
 				374F2FEA100634B600E97C66 /* bellerophon.cpp */,
 				372A55531017922B00C5194B /* decalc.h */,
 				372A55541017922B00C5194B /* decalc.cpp */,
-				372095C81031A1D50004D347 /* mallard.h */,
-				372095C91031A1D50004D347 /* mallard.cpp */,
 				374F301110063B6F00E97C66 /* pintail.h */,
 				374F301210063B6F00E97C66 /* pintail.cpp */,
 			);
@@ -1172,7 +1167,6 @@
 				374F301310063B6F00E97C66 /* pintail.cpp in Sources */,
 				372A55551017922B00C5194B /* decalc.cpp in Sources */,
 				372095C2103196D70004D347 /* chimera.cpp in Sources */,
-				372095CA1031A1D50004D347 /* mallard.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
