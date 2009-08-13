@@ -32,7 +32,7 @@ void Bellerophon::print(ostream& out) {
 		out << "Name\tScore\tLeft\tRight\t" << endl;
 		//output prefenence structure to .chimeras file
 		for (int i = 0; i < pref.size(); i++) {
-			out << pref[i].name << '\t' << pref[i].score[0] << '\t' << pref[i].leftParent[0] << '\t' << pref[i].rightParent[0] << endl;
+			out << pref[i].name << '\t' << setprecision(3) << pref[i].score[0] << '\t' << pref[i].leftParent[0] << '\t' << pref[i].rightParent[0] << endl;
 			
 			//calc # of seqs with preference above 1.0
 			if (pref[i].score[0] > 1.0) { 
@@ -221,11 +221,8 @@ cout << "increment = " << increment << endl;
 			
 		}
 		
-		
 		//sort Preferences highest to lowest
 		sort(pref.begin(), pref.end(), comparePref);
-
-
 
 	}
 	catch(exception& e) {
