@@ -46,7 +46,7 @@ class Bellerophon : public Chimera {
 	private:
 		Dist* distCalculator;
 		FilterSeqsCommand* filterSeqs;
-		vector<Sequence> seqs;
+		vector<Sequence*> seqs;
 		vector<Preference> pref;
 		string fastafile;
 		int iters;

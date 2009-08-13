@@ -10,6 +10,11 @@
 #include "pintail.h"
 #include "ignoregaps.h"
 
+//********************************************************************************************************************
+//sorts lowest to highest
+inline bool compareQuanMembers(quanMember left, quanMember right){
+	return (left.score < right.score);	
+} 
 //***************************************************************************************************************
 
 Pintail::Pintail(string filename, string temp) {  fastafile = filename;  templateFile = temp;  }
@@ -89,7 +94,6 @@ void Pintail::getChimeras() {
 		h.resize(numSeqs);
 		quantiles.resize(100);  //one for every percent mismatch
 		quantilesMembers.resize(100);  //one for every percent mismatch
-		makeCompliant.resize(templateSeqs.size(), 0.0);
 		
 		//break up file if needed
 		int linesPerProcess = numSeqs / processors ;
@@ -242,10 +246,12 @@ void Pintail::getChimeras() {
 			
 			mothurOut("Calculating quantiles for your template.  This can take a while...  I will output the quantiles to a .quan file that you can input them using the quantiles parameter next time you run this command.  Providing the .quan file will dramatically improve speed.    "); cout.flush();
 			if (processors == 1) { 
-				quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, 0, templateSeqs.size(), makeCompliant);
+				quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, 0, templateSeqs.size());
 			}else {		createProcessesQuan();		}
 			
+			
 						
+			
 			//decided against this because we were having trouble setting the sensitivity... may want to revisit this...
 			//quantiles = decalc->removeObviousOutliers(quantilesMembers, templateSeqs.size());
 			
@@ -257,30 +263,30 @@ void Pintail::getChimeras() {
 			openOutputFile(o, out4);
 			
 			//adjust quantiles
-			for (int i = 0; i < quantiles.size(); i++) {
+			for (int i = 0; i < quantilesMembers.size(); i++) {
 				vector<float> temp;
 				
-				if (quantiles[i].size() == 0) {
+				if (quantilesMembers[i].size() == 0) {
 					//in case this is not a distance found in your template files
 					for (int g = 0; g < 6; g++) {
 						temp.push_back(0.0);
 					}
 				}else{
 					
-					sort(quantiles[i].begin(), quantiles[i].end());
+					sort(quantilesMembers[i].begin(), quantilesMembers[i].end(), compareQuanMembers);
 					
 					//save 10%
-					temp.push_back(quantiles[i][int(quantiles[i].size() * 0.10)]);
+					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.10)].score);
 					//save 25%
-					temp.push_back(quantiles[i][int(quantiles[i].size() * 0.25)]);
+					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.25)].score);
 					//save 50%
-					temp.push_back(quantiles[i][int(quantiles[i].size() * 0.5)]);
+					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.5)].score);
 					//save 75%
-					temp.push_back(quantiles[i][int(quantiles[i].size() * 0.75)]);
+					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.75)].score);
 					//save 95%
-					temp.push_back(quantiles[i][int(quantiles[i].size() * 0.95)]);
+					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.95)].score);
 					//save 99%
-					temp.push_back(quantiles[i][int(quantiles[i].size() * 0.99)]);
+					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.99)].score);
 					
 				}
 				
@@ -900,7 +906,7 @@ void Pintail::createProcessesQuan() {
 				process++;
 			}else if (pid == 0){
 				
-				quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, templateLines[process]->start, templateLines[process]->end, makeCompliant);
+				quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, templateLines[process]->start, templateLines[process]->end);
 				
 				//write out data to file so parent can read it
 				ofstream out;
@@ -971,7 +977,7 @@ void Pintail::createProcessesQuan() {
 		}
 		
 #else
-		quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, 0, templateSeqs.size(), makeCompliant);
+		quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, 0, templateSeqs.size());
 #endif		
 	}
 	catch(exception& e) {

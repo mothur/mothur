@@ -41,9 +41,9 @@ int main(int argc, char *argv[]){
 
 		
 		//header
-		mothurOut("mothur v.1.4.1");
+		mothurOut("mothur v.1.5.0");
 		mothurOutEndLine();		
-		mothurOut("Last updated: 6/23/2009");
+		mothurOut("Last updated: 8/03/2009");
 		mothurOutEndLine();	
 		mothurOutEndLine();		
 		mothurOut("by");

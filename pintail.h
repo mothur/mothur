@@ -85,8 +85,6 @@ class Pintail : public Chimera {
 		void createProcesses();
 		void createProcessesQuan();
 		
-		vector<float> makeCompliant;  //used by decalc->getQuantiles so pintail and mallard can use same function, it contains the highest de value for each seq in the template
-		
 };
 
 /***********************************************************/

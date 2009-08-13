@@ -80,7 +80,7 @@ void Bellerophon::getChimeras() {
 		
 		//do soft filter
 		if (filter)  {
-			string optionString = "fasta=" + fastafile + ", soft=50, vertical=F";
+			string optionString = "fasta=" + fastafile + ", soft=50";
 			filterSeqs = new FilterSeqsCommand(optionString);
 			filterSeqs->execute();
 			delete filterSeqs;
@@ -92,39 +92,39 @@ void Bellerophon::getChimeras() {
 		distCalculator = new eachGapDist();
 		
 		//read in sequences
-		//seqs = readSeqs(fastafile);
+		seqs = readSeqs(fastafile);
 		
 		int numSeqs = seqs.size();
 		
 		if (numSeqs == 0) { mothurOut("Error in reading you sequences."); mothurOutEndLine(); exit(1); }
 		
 		//set default window to 25% of sequence length
-		string seq0 = seqs[0].getAligned();
+		string seq0 = seqs[0]->getAligned();
 		if (window == 0) { window = seq0.length() / 4;  }
 		else if (window > (seq0.length() / 2)) {  
 			mothurOut("Your sequence length is = " + toString(seq0.length()) + ". You have selected a window size greater than the length of half your aligned sequence. I will run it with a window size of " + toString((seq0.length() / 2))); mothurOutEndLine();
 			window = (seq0.length() / 2);
 		}
 		
-		if (increment > (seqs[0].getAlignLength() - (2*window))) { 
+		if (increment > (seqs[0]->getAlignLength() - (2*window))) { 
 			if (increment != 10) {
 			
 				mothurOut("You have selected a increment that is too large. I will use the default."); mothurOutEndLine();
 				increment = 10;
-				if (increment > (seqs[0].getAlignLength() - (2*window))) {  increment = 0;  }
+				if (increment > (seqs[0]->getAlignLength() - (2*window))) {  increment = 0;  }
 				
 			}else{ increment = 0; }
 		}
 cout << "increment = " << increment << endl;		
 		if (increment == 0) { iters = 1; }
-		else { iters = ((seqs[0].getAlignLength() - (2*window)) / increment); }
+		else { iters = ((seqs[0]->getAlignLength() - (2*window)) / increment); }
 		
 		//initialize pref
 		pref.resize(numSeqs);  
 		
 		for (int i = 0; i < numSeqs; i++ ) { 
 			pref[i].leftParent.resize(2); pref[i].rightParent.resize(2); pref[i].score.resize(2);   pref[i].closestLeft.resize(2); pref[i].closestRight.resize(3);
-			pref[i].name = seqs[i].getName();
+			pref[i].name = seqs[i]->getName();
 			pref[i].score[0] = 0.0;  pref[i].score[1] = 0.0; 
 			pref[i].closestLeft[0] = 100000.0;  pref[i].closestLeft[1] = 100000.0;  
 			pref[i].closestRight[0] = 100000.0;  pref[i].closestRight[1] = 100000.0;  
@@ -140,16 +140,16 @@ cout << "increment = " << increment << endl;
 				for (int i = 0; i < seqs.size(); i++) {
 //cout << "whole = " << seqs[i].getAligned() << endl;
 					//save left side
-					string seqLeft = seqs[i].getAligned().substr(midpoint-window, window);
+					string seqLeft = seqs[i]->getAligned().substr(midpoint-window, window);
 					Sequence tempLeft;
-					tempLeft.setName(seqs[i].getName());
+					tempLeft.setName(seqs[i]->getName());
 					tempLeft.setAligned(seqLeft);
 					left.push_back(tempLeft);
 //cout << "left = " << tempLeft.getAligned() << endl;			
 					//save right side
-					string seqRight = seqs[i].getAligned().substr(midpoint, window);
+					string seqRight = seqs[i]->getAligned().substr(midpoint, window);
 					Sequence tempRight;
-					tempRight.setName(seqs[i].getName());
+					tempRight.setName(seqs[i]->getName());
 					tempRight.setAligned(seqRight);
 					right.push_back(tempRight);
 //cout << "right = " << seqRight << endl;	
@@ -216,6 +216,8 @@ cout << "increment = " << increment << endl;
 			
 			//how much higher or lower is this than expected
 			pref[i].score[0] = pref[i].score[0] / expectedPercent;
+			
+			
 			
 		}
 		
@@ -310,24 +312,24 @@ void Bellerophon::generatePreferences(vector<SeqMap> left, vector<SeqMap> right,
 					if (itL->second < pref[i].closestLeft[1]) {  
 
 						pref[i].closestLeft[1] = itL->second;
-						pref[i].leftParent[1] = seqs[j].getName();
+						pref[i].leftParent[1] = seqs[j]->getName();
 //cout << "updating closest left to " << pref[i].leftParent[1] << endl;
 					}
 //cout << "pref[" << j << "].closestLeft[1] = "	<< 	pref[j].closestLeft[1] << " parent = " << pref[j].leftParent[1] << endl;	
 					if (itL->second < pref[j].closestLeft[1]) { 
 						pref[j].closestLeft[1] = itL->second;
-						pref[j].leftParent[1] = seqs[i].getName();
+						pref[j].leftParent[1] = seqs[i]->getName();
 //cout << "updating closest left to " << pref[j].leftParent[1] << endl;
 					}
 					
 					//are you the closest right sequence
 					if (itR->second < pref[i].closestRight[1]) {   
 						pref[i].closestRight[1] = itR->second;
-						pref[i].rightParent[1] = seqs[j].getName();
+						pref[i].rightParent[1] = seqs[j]->getName();
 					}
 					if (itR->second < pref[j].closestRight[1]) {   
 						pref[j].closestRight[1] = itR->second;
-						pref[j].rightParent[1] = seqs[i].getName();
+						pref[j].rightParent[1] = seqs[i]->getName();
 					}
 					
 				}
