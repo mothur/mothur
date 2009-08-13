@@ -358,14 +358,9 @@ vector<float>  DeCalculator::findQav(vector<int> window, int size, vector<float>
 		exit(1);
 	}
 }
-//********************************************************************************************************************
-//sorts lowest to highest
-inline bool compareQuanMembers(quanMember left, quanMember right){
-	return (left.score < right.score);	
-} 
 //***************************************************************************************************************
 //seqs have already been masked
-vector< vector<quanMember> > DeCalculator::getQuantiles(vector<Sequence*> seqs, vector<int> windowSizesTemplate, int window, vector<float> probProfile, int increment, int start, int end, vector<float>& highestDE) {
+vector< vector<quanMember> > DeCalculator::getQuantiles(vector<Sequence*> seqs, vector<int> windowSizesTemplate, int window, vector<float> probProfile, int increment, int start, int end) {
 	try {
 		vector< vector<quanMember> > quan; 
 		
@@ -414,10 +409,6 @@ vector< vector<quanMember> > DeCalculator::getQuantiles(vector<Sequence*> seqs, 
 				
 				//dist-1 because vector indexes start at 0.
 				quan[dist-1].push_back(newScore);
-				
-				//save highestDE
-				if (de > highestDE[i])	{ highestDE[i] = de;  }
-				if(de > highestDE[j])	{ highestDE[j] = de;  }
 				
 				delete subject;
 			}
@@ -555,65 +546,8 @@ cout << "high = " << high << endl;
 	}
 }
 //***************************************************************************************************************
-//follows Mallard algorythn in paper referenced from mallard class
-vector<int> DeCalculator::returnObviousOutliers(vector< vector<quanMember> > quantiles, int num) {
-	try {
-		vector< vector<float> > quan; 
-		quan.resize(100);
-	
-		map<quanMember*, float> contributions;  //map of quanMember to distance from high or low - how bad is it.
-		vector<int> marked;  //marked[0] is the penalty of template seqs[0]. the higher the penalty the more likely the sequence is chimeric
-		marked.resize(num,0);
-				
-		//find contributions
-		for (int i = 0; i < quantiles.size(); i++) {
-		
-			//find mean of this quantile score
-			sort(quantiles[i].begin(), quantiles[i].end(), compareQuanMembers);
-			
-			float high = quantiles[i][int(quantiles[i].size() * 0.99)].score;
-		
-			//look at each value in quantiles to see if it is an outlier
-			for (int j = 0; j < quantiles[i].size(); j++) {
-				
-				//is this score between above 99%
-				if (quantiles[i][j].score > high) {
-					//find out how "bad" of an outlier you are - so you can rank the outliers
-					float dist = quantiles[i][j].score - high;
-					contributions[&(quantiles[i][j])] = dist;
-					
-					//penalizing sequences for being in multiple outliers
-					marked[quantiles[i][j].member1]++;
-					marked[quantiles[i][j].member2]++;
-				}
-			}
-		}
-
-		//find contributer with most offending score related to it
-		vector<quanMember> outliers = sortContrib(contributions);
-		
-		//go through the outliers marking the potential chimeras
-		for (int i = 0; i < outliers.size(); i++) {
-			
-			//who is responsible for this outlying score?  
-			//if member1 has greater score mark him
-			//if member2 has greater score mark her
-			//if they are the same mark both
-			if (marked[outliers[i].member1] > marked[outliers[i].member2])				{	marked[outliers[i].member1]++;	}
-			else if (marked[outliers[i].member2] > marked[outliers[i].member1])			{	marked[outliers[i].member2]++;	}
-			else if (marked[outliers[i].member2] == marked[outliers[i].member1])		{	marked[outliers[i].member2]++;  marked[outliers[i].member1]++;	}
-		}
-		
-		return marked;
-	}
-	catch(exception& e) {
-		errorOut(e, "DeCalculator", "removeObviousOutliers");
-		exit(1);
-	}
-}
-//***************************************************************************************************************
 //put quanMember in the vector based on how far they are from the 99% or 1%.  Biggest offenders in front.
-vector<quanMember> DeCalculator::sortContrib(map<quanMember*, float> quan) {
+/*vector<quanMember> DeCalculator::sortContrib(map<quanMember*, float> quan) {
 	try{
 		
 		vector<quanMember> newQuan;
@@ -646,7 +580,7 @@ cout << largest->second << '\t' << largest->first->score << '\t' << largest->fir
 
 //***************************************************************************************************************
 //used by removeObviousOutliers which was attempt to increase sensitivity of chimera detection...not currently used...
-/*int DeCalculator::findLargestContrib(vector<int> seen) {
+int DeCalculator::findLargestContrib(vector<int> seen) {
 	try{
 		
 		int largest = 0;

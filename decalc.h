@@ -53,12 +53,12 @@ class DeCalculator {
 		float calcDE(vector<float>, vector<float>);
 		float calcDist(Sequence*, Sequence*, int, int);
 		float getCoef(vector<float>, vector<float>);
-		vector< vector<quanMember> > getQuantiles(vector<Sequence*>, vector<int>, int, vector<float>, int, int, int, vector<float>&);
+		vector< vector<quanMember> > getQuantiles(vector<Sequence*>, vector<int>, int, vector<float>, int, int, int);
 		
 		vector<int> returnObviousOutliers(vector< vector<quanMember> >, int);
 		
 	private:
-		vector<quanMember> sortContrib(map<quanMember*, float>);  //used by mallard
+		//vector<quanMember> sortContrib(map<quanMember*, float>);  //used by mallard
 		float findAverage(vector<float>);
 		//int findLargestContrib(vector<int>);
 		//void removeContrib(int, vector<quanMember>&);
