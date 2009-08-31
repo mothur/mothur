@@ -44,7 +44,7 @@ class DeCalculator {
 		void setAlignmentLength(int l) {  alignLength = l;  }
 		void runMask(Sequence*);
 		void trimSeqs(Sequence*, Sequence*, map<int, int>&);
-		vector< vector<float> > removeObviousOutliers(vector< vector<quanMember> >&, int);
+		void removeObviousOutliers(vector< vector<quanMember> >&, int);
 		vector<float> calcFreq(vector<Sequence*>, string);
 		vector<int> findWindows(Sequence*, int, int, int&, int);
 		vector<float> calcObserved(Sequence*, Sequence*, vector<int>, int);

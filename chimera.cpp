@@ -10,6 +10,76 @@
 #include "chimera.h"
 
 //***************************************************************************************************************
+//this is a vertical filter
+void Chimera::createFilter(vector<Sequence*> seqs) {
+	try {
+		
+		int threshold = int (0.5 * seqs.size());
+//cout << "threshhold = " << threshold << endl;
+		
+		vector<int> gaps;	gaps.resize(seqs[0]->getAligned().length(), 0);
+		vector<int> a;		a.resize(seqs[0]->getAligned().length(), 0);
+		vector<int> t;		t.resize(seqs[0]->getAligned().length(), 0);
+		vector<int> g;		g.resize(seqs[0]->getAligned().length(), 0);
+		vector<int> c;		c.resize(seqs[0]->getAligned().length(), 0);
+		
+		filterString = (string(seqs[0]->getAligned().length(), '1'));
+		
+		//for each sequence
+		for (int i = 0; i < seqs.size(); i++) {
+		
+			string seqAligned = seqs[i]->getAligned();
+			
+			for (int j = 0; j < seqAligned.length(); j++) {
+				//if this spot is a gap
+				if ((seqAligned[j] == '-') || (seqAligned[j] == '.'))	{	gaps[j]++;	}
+				else if (toupper(seqAligned[j]) == 'A')					{	a[j]++;		}
+				else if (toupper(seqAligned[j]) == 'T')					{	t[j]++;		}
+				else if (toupper(seqAligned[j]) == 'G')					{	g[j]++;		}
+				else if (toupper(seqAligned[j]) == 'C')					{	c[j]++;		}
+			}
+		}
+		
+		//zero out spot where all sequences have blanks
+		for(int i = 0;i < seqs[0]->getAligned().length(); i++){
+			if(gaps[i] == seqs.size())	{	filterString[i] = '0'; 	}
+			
+			else if (((a[i] < threshold) && (t[i] < threshold) && (g[i] < threshold) && (c[i] < threshold))) {	filterString[i] = '0';	}
+			//cout << "a = " << a[i] <<  " t = " << t[i] <<  " g = " << g[i] <<  " c = " << c[i] << endl;
+		}
+//cout << "filter = " << filterString << endl;	
+	}
+	catch(exception& e) {
+		errorOut(e, "Chimera", "createFilter");
+		exit(1);
+	}
+}
+//***************************************************************************************************************
+void Chimera::runFilter(vector<Sequence*> seqs) {
+	try {
+		
+		//for each sequence
+		for (int i = 0; i < seqs.size(); i++) {
+		
+			string seqAligned = seqs[i]->getAligned();
+			string newAligned = "";
+			
+			for (int j = 0; j < seqAligned.length(); j++) {
+				//if this spot is a gap
+				if (filterString[j] == '1') { newAligned += seqAligned[j]; }
+			}
+			
+			seqs[i]->setAligned(newAligned);
+		}
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "Chimera", "runFilter");
+		exit(1);
+	}
+}
+
+//***************************************************************************************************************
 vector<Sequence*> Chimera::readSeqs(string file) {
 	try {
 		ifstream in;
@@ -61,3 +131,46 @@ void Chimera::setMask(string filename) {
 	}
 }
 //***************************************************************************************************************
+
+vector< vector<float> > Chimera::readQuantiles() {
+	try {
+	
+		ifstream in;
+		openInputFile(quanfile, in);
+		
+		vector< vector<float> > quan;
+	
+		int num; float ten, twentyfive, fifty, seventyfive, ninetyfive, ninetynine; 
+		
+		while(!in.eof()){
+			
+			in >> num >> ten >> twentyfive >> fifty >> seventyfive >> ninetyfive >> ninetynine; 
+			
+			vector <float> temp;
+			
+			temp.push_back(ten); 
+			temp.push_back(twentyfive);
+			temp.push_back(fifty);
+			temp.push_back(seventyfive);
+			temp.push_back(ninetyfive);
+			temp.push_back(ninetynine);
+			
+			quan.push_back(temp);  
+	
+			gobble(in);
+		}
+		
+		in.close();
+		return quan;
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "Chimera", "readQuantiles");
+		exit(1);
+	}
+}
+//***************************************************************************************************************
+
+
+
+

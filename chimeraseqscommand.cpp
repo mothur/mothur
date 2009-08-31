@@ -10,6 +10,8 @@
 #include "chimeraseqscommand.h"
 #include "bellerophon.h"
 #include "pintail.h"
+#include "alignedsimilarity.h"
+#include "ccode.h"
 
 
 //***************************************************************************************************************
@@ -23,7 +25,7 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile", "mask" };
+			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile", "mask", "numwanted" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -61,9 +63,6 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 				if (ableToOpen == 1) { abort = true; }
 				in.close();
 			}
-		
-
-			
 
 			string temp;
 			temp = validParameter.validFile(parameters, "filter", false);			if (temp == "not found") { temp = "F"; }
@@ -80,10 +79,13 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 					
 			temp = validParameter.validFile(parameters, "increment", false);			if (temp == "not found") { temp = "25"; }
 			convert(temp, increment);
-				
+			
+			temp = validParameter.validFile(parameters, "numwanted", false);			if (temp == "not found") { temp = "20"; }
+			convert(temp, numwanted);
+
 			method = validParameter.validFile(parameters, "method", false);		if (method == "not found") { method = "pintail"; }
 			
-			if ((method == "pintail") && (templatefile == "")) { mothurOut("You must provide a template file with the pintail method."); mothurOutEndLine(); abort = true;  }
+			if (((method == "pintail") || (method == "alignsim")) && (templatefile == "")) { mothurOut("You must provide a template file with the pintail and alignsim methods."); mothurOutEndLine(); abort = true;  }
 			
 
 		}
@@ -101,7 +103,7 @@ void ChimeraSeqsCommand::help(){
 		mothurOut("The chimera.seqs command reads a fastafile and creates list of potentially chimeric sequences.\n");
 		mothurOut("The chimera.seqs command parameters are fasta, filter, correction, processors, mask, method, window, increment, template, conservation and quantile.\n");
 		mothurOut("The fasta parameter is always required and template is required if using pintail.\n");
-		mothurOut("The filter parameter allows you to specify if you would like to apply a 50% soft filter this only applies when the method is bellerphon.  The default is false. \n");
+		mothurOut("The filter parameter allows you to specify if you would like to apply a vertical and 50% soft filter.  The default is false. \n");
 		mothurOut("The correction parameter allows you to put more emphasis on the distance between highly similar sequences and less emphasis on the differences between remote homologs.   The default is true. This only applies when the method is bellerphon.\n");
 		mothurOut("The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n");
 		mothurOut("The method parameter allows you to specify the method for finding chimeric sequences.  The default is pintail. Options include..... \n");
@@ -134,8 +136,10 @@ int ChimeraSeqsCommand::execute(){
 		
 		if (abort == true) { return 0; }
 		
-		if (method == "bellerophon")	{		chimera = new Bellerophon(fastafile);			}
-		else if (method == "pintail")	{		chimera = new Pintail(fastafile, templatefile);	}
+		if (method == "bellerophon")	{		chimera = new Bellerophon(fastafile);				}
+		else if (method == "pintail")	{		chimera = new Pintail(fastafile, templatefile);		}
+		//else if (method == "alignsim")	{		chimera = new AlignSim(fastafile, templatefile);	}
+		else if (method == "ccode")		{		chimera = new Ccode(fastafile, templatefile);		}
 		else { mothurOut("Not a valid method."); mothurOutEndLine(); return 0;		}
 		
 		//set user options
@@ -155,6 +159,7 @@ int ChimeraSeqsCommand::execute(){
 		chimera->setProcessors(processors);
 		chimera->setWindow(window);
 		chimera->setIncrement(increment);
+		chimera->setNumWanted(numwanted);
 				
 		//find chimeras
 		chimera->getChimeras();
