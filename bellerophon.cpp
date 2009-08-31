@@ -35,7 +35,7 @@ void Bellerophon::print(ostream& out) {
 			out << pref[i].name << '\t' << setprecision(3) << pref[i].score[0] << '\t' << pref[i].leftParent[0] << '\t' << pref[i].rightParent[0] << endl;
 			
 			//calc # of seqs with preference above 1.0
-			if (pref[i].score[0] > 1.0) { 
+			if (pref[i].score[0] > 1.1) { 
 				above1++; 
 				mothurOut(pref[i].name + " is a suspected chimera at breakpoint " + toString(pref[i].midpoint)); mothurOutEndLine();
 				mothurOut("It's score is " + toString(pref[i].score[0]) + " with suspected left parent " + pref[i].leftParent[0] + " and right parent " + pref[i].rightParent[0]); mothurOutEndLine();
@@ -44,7 +44,7 @@ void Bellerophon::print(ostream& out) {
 		
 		//output results to screen
 		mothurOutEndLine();
-		mothurOut("Sequence with preference score above 1.0: " + toString(above1)); mothurOutEndLine();
+		mothurOut("Sequence with preference score above 1.1: " + toString(above1)); mothurOutEndLine();
 		int spot;
 		spot = pref.size()-1;
 		mothurOut("Minimum:\t" + toString(pref[spot].score[0])); mothurOutEndLine();
@@ -115,7 +115,7 @@ void Bellerophon::getChimeras() {
 				
 			}else{ increment = 0; }
 		}
-cout << "increment = " << increment << endl;		
+		
 		if (increment == 0) { iters = 1; }
 		else { iters = ((seqs[0]->getAlignLength() - (2*window)) / increment); }
 		
@@ -193,7 +193,6 @@ cout << "increment = " << increment << endl;
 				delete SparseLeft;
 				delete SparseRight;
 				
-				
 				//fill preference structure
 				generatePreferences(distMapLeft, distMapRight, midpoint);
 				
@@ -204,7 +203,7 @@ cout << "increment = " << increment << endl;
 		delete distCalculator;
 		
 		//rank preference score to eachother
-		float dme = 0.0;
+		/*float dme = 0.0;
 		float expectedPercent = 1 / (float) (pref.size());
 		
 		for (int i = 0; i < pref.size(); i++) {	 dme += pref[i].score[0];  }
@@ -216,10 +215,8 @@ cout << "increment = " << increment << endl;
 			
 			//how much higher or lower is this than expected
 			pref[i].score[0] = pref[i].score[0] / expectedPercent;
-			
-			
-			
-		}
+		
+		}*/
 		
 		//sort Preferences highest to lowest
 		sort(pref.begin(), pref.end(), comparePref);
@@ -337,23 +334,25 @@ void Bellerophon::generatePreferences(vector<SeqMap> left, vector<SeqMap> right,
 		
 		  
 		//calculate the dme
-		
 		int count0 = 0;
-		for (int i = 0; i < pref.size(); i++) {	 dme += pref[i].score[1];  if (pref[i].score[1] == 0.0) { count0++; }  }
+		for (int i = 0; i < pref.size(); i++) {	 dme += pref[i].score[1];  if (pref[i].score[1] == 0.0) {  count0++; }  }
 		
-		float expectedPercent = 1 / (float) (pref.size() - count0);
+		//float expectedPercent = 1 / (float) (pref.size() - count0);
 //cout << endl << "dme = " << dme << endl;
 		//recalculate prefernences based on dme
 		for (int i = 0; i < pref.size(); i++) {
-//cout << "unadjusted pref " << i << " = " << pref[i].score[1] << endl;	
+//cout << "unadjusted col[i] " << i << " = " << pref[i].score[1] << endl;	
+//cout << i << '\t' <<  (dme / (dme - 2 * pref[i].score[1])) << endl;
+			
 			// gives the actual percentage of the dme this seq adds
-			pref[i].score[1] = pref[i].score[1] / dme;
+			//pref[i].score[1] = pref[i].score[1] / dme;
 			
 			//how much higher or lower is this than expected
-			pref[i].score[1] = pref[i].score[1] / expectedPercent;
+			//pref[i].score[1] = pref[i].score[1] / expectedPercent;
 			
-			//pref[i].score[1] = dme / (dme - 2 * pref[i].score[1]);
-			
+			//not 2 * pref[i].score[1] because i only calulate the pref scores once.
+			pref[i].score[1] = dme / (dme - pref[i].score[1]);
+//cout << i << '\t' << pref[i].score[1] << endl;
 			//so a non chimeric sequence would be around 1, and a chimeric would be signifigantly higher.
 //cout << "adjusted pref " << i << " = " << pref[i].score[1] << endl;					
 		}

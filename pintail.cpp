@@ -9,6 +9,7 @@
 
 #include "pintail.h"
 #include "ignoregaps.h"
+#include "eachgapdist.h"
 
 //********************************************************************************************************************
 //sorts lowest to highest
@@ -41,9 +42,11 @@ void Pintail::print(ostream& out) {
 			
 			int index = ceil(deviation[i]);
 			
+			if (index == 0) { index=1;  }
+						
 			//is your DE value higher than the 95%
 			string chimera;
-			if (DE[i] > quantiles[index][4])		{	chimera = "Yes";	}
+			if (DE[i] > quantiles[index-1][4])		{	chimera = "Yes";	}
 			else									{	chimera = "No";		}
 			
 			out << querySeqs[i]->getName() << '\t' << "div: " << deviation[i] << "\tstDev: " << DE[i] << "\tchimera flag: " << chimera << endl;
@@ -125,7 +128,7 @@ void Pintail::getChimeras() {
 			templateLines.push_back(new linePair(0, templateSeqs.size()));
 		#endif
 		
-		distcalculator = new ignoreGaps();
+		distcalculator = new eachGapDist();
 		decalc = new DeCalculator();
 		
 		//if the user does enter a mask then you want to keep all the spots in the alignment
@@ -141,7 +144,18 @@ void Pintail::getChimeras() {
 			mothurOut("Done."); mothurOutEndLine();
 		}else {		createProcessesPairs();		}
 		
-		
+/*string o = "foronlinepintailpairs-eachgap";
+ofstream out7;
+openOutputFile(o, out7);
+
+for (int i = 0; i < bestfit.size(); i++) {
+	out7 << querySeqs[i]->getName() << endl;
+	out7 << querySeqs[i]->getUnaligned() << endl << endl;
+	
+	out7 << bestfit[i]->getName() << endl;
+	out7 << bestfit[i]->getUnaligned() << endl << endl << endl;
+}		
+out7.close();/*/	
 		//find P
 		mothurOut("Getting conservation... "); cout.flush();
 		if (consfile == "") { 
@@ -171,7 +185,19 @@ void Pintail::getChimeras() {
 			}
 
 		}
-						
+		
+		if (filter) {
+			vector<Sequence*> temp = templateSeqs;
+			for (int i = 0; i < querySeqs.size(); i++) { temp.push_back(querySeqs[i]);  }
+			
+			createFilter(temp);
+			
+			runFilter(querySeqs);
+			runFilter(templateSeqs);
+			runFilter(bestfit);
+		}
+										
+																		
 		if (processors == 1) { 
 	
 			for (int j = 0; j < bestfit.size(); j++) { 
@@ -241,26 +267,22 @@ void Pintail::getChimeras() {
 		//quantiles are used to determine whether the de values found indicate a chimera
 		//if you have to calculate them, its time intensive because you are finding the de and deviation values for each 
 		//combination of sequences in the template
-		if (quanfile != "") {  quantiles =  readQuantiles();  }
+		if (quanfile != "") {  quantiles = readQuantiles();  }
 		else {
 			
 			mothurOut("Calculating quantiles for your template.  This can take a while...  I will output the quantiles to a .quan file that you can input them using the quantiles parameter next time you run this command.  Providing the .quan file will dramatically improve speed.    "); cout.flush();
 			if (processors == 1) { 
 				quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, 0, templateSeqs.size());
 			}else {		createProcessesQuan();		}
+		
 			
+			ofstream out4, out5;
+			string noOutliers, outliers;
 			
-						
+			noOutliers = getRootName(templateFile) + "pintail.quanNOOUTLIERS";
+			outliers = getRootName(templateFile) + "pintail.quanYESOUTLIERS";
 			
-			//decided against this because we were having trouble setting the sensitivity... may want to revisit this...
-			//quantiles = decalc->removeObviousOutliers(quantilesMembers, templateSeqs.size());
-			
-			ofstream out4;
-			string o;
-			
-			o = getRootName(templateFile) + "quan";
-			
-			openOutputFile(o, out4);
+			openOutputFile(outliers, out4);
 			
 			//adjust quantiles
 			for (int i = 0; i < quantilesMembers.size(); i++) {
@@ -301,6 +323,47 @@ void Pintail::getChimeras() {
 			
 			out4.close();
 			
+			decalc->removeObviousOutliers(quantilesMembers, templateSeqs.size());
+			
+			openOutputFile(noOutliers, out5);
+			
+			//adjust quantiles
+			for (int i = 0; i < quantilesMembers.size(); i++) {
+				vector<float> temp;
+				
+				if (quantilesMembers[i].size() == 0) {
+					//in case this is not a distance found in your template files
+					for (int g = 0; g < 6; g++) {
+						temp.push_back(0.0);
+					}
+				}else{
+					
+					sort(quantilesMembers[i].begin(), quantilesMembers[i].end(), compareQuanMembers);
+					
+					//save 10%
+					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.10)].score);
+					//save 25%
+					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.25)].score);
+					//save 50%
+					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.5)].score);
+					//save 75%
+					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.75)].score);
+					//save 95%
+					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.95)].score);
+					//save 99%
+					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.99)].score);
+					
+				}
+				
+				//output quan value
+				out5 << i+1 << '\t';				
+				for (int u = 0; u < temp.size(); u++) {   out5 << temp[u] << '\t'; }
+				out5 << endl;
+				
+				quantiles[i] = temp;
+				
+			}
+
 			mothurOut("Done."); mothurOutEndLine();
 			
 		}
@@ -360,45 +423,6 @@ vector<float> Pintail::readFreq() {
 	}
 }
 
-//***************************************************************************************************************
-
-vector< vector<float> > Pintail::readQuantiles() {
-	try {
-	
-		ifstream in;
-		openInputFile(quanfile, in);
-		
-		vector< vector<float> > quan;
-	
-		int num; float ten, twentyfive, fifty, seventyfive, ninetyfive, ninetynine; 
-		
-		while(!in.eof()){
-			
-			in >> num >> ten >> twentyfive >> fifty >> seventyfive >> ninetyfive >> ninetynine; 
-			
-			vector <float> temp;
-			
-			temp.push_back(ten); 
-			temp.push_back(twentyfive);
-			temp.push_back(fifty);
-			temp.push_back(seventyfive);
-			temp.push_back(ninetyfive);
-			temp.push_back(ninetynine);
-			
-			quan.push_back(temp);  
-			
-			gobble(in);
-		}
-		
-		in.close();
-		return quan;
-		
-	}
-	catch(exception& e) {
-		errorOut(e, "Pintail", "readQuantiles");
-		exit(1);
-	}
-}
 //***************************************************************************************************************
 //calculate the distances from each query sequence to all sequences in the template to find the closest sequence
 vector<Sequence*> Pintail::findPairs(int start, int end) {

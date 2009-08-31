@@ -30,7 +30,7 @@ private:
 	bool abort;
 	string method, fastafile, templatefile, consfile, quanfile, maskfile;
 	bool filter, correction;
-	int processors, midpoint, averageLeft, averageRight, window, iters, increment;
+	int processors, midpoint, averageLeft, averageRight, window, iters, increment, numwanted;
 	Chimera* chimera;
 	
 	

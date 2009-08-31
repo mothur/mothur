@@ -35,17 +35,10 @@ class Pintail : public Chimera {
 		
 	private:
 	
-		struct linePair {
-			int start;
-			int end;
-			linePair(int i, int j) : start(i), end(j) {}
-			linePair(){}
-		};
-
 		Dist* distcalculator;
 		DeCalculator* decalc;
 		int iters;
-		string fastafile, templateFile, consfile, quanfile;
+		string fastafile, templateFile, consfile;
 		
 		
 		vector<linePair*> lines;
@@ -77,7 +70,6 @@ class Pintail : public Chimera {
 		
 		
 		vector<float> readFreq();
-		vector< vector<float> > readQuantiles();
 		vector<Sequence*> findPairs(int, int);
 			
 		void createProcessesSpots();

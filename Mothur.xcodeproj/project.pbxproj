@@ -162,6 +162,8 @@
 		A70B53AA0F4CD7AD0064797E /* getgroupcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70B53A40F4CD7AD0064797E /* getgroupcommand.cpp */; };
 		A70B53AB0F4CD7AD0064797E /* getlabelcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70B53A60F4CD7AD0064797E /* getlabelcommand.cpp */; };
 		A70B53AC0F4CD7AD0064797E /* getlinecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70B53A80F4CD7AD0064797E /* getlinecommand.cpp */; };
+		A75B887D104C16860083C454 /* alignedsimilarity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A75B8879104C16860083C454 /* alignedsimilarity.cpp */; };
+		A75B887E104C16860083C454 /* ccode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A75B887B104C16860083C454 /* ccode.cpp */; };
 		EB1216880F619B83004A865F /* bergerparker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB1216870F619B83004A865F /* bergerparker.cpp */; };
 		EB1216E50F61ACFB004A865F /* bstick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB1216E40F61ACFB004A865F /* bstick.cpp */; };
 		EB1217230F61C9AC004A865F /* sharedkstest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB1217220F61C9AC004A865F /* sharedkstest.cpp */; };
@@ -513,6 +515,10 @@
 		A70B53A70F4CD7AD0064797E /* getlabelcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getlabelcommand.h; sourceTree = SOURCE_ROOT; };
 		A70B53A80F4CD7AD0064797E /* getlinecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getlinecommand.cpp; sourceTree = SOURCE_ROOT; };
 		A70B53A90F4CD7AD0064797E /* getlinecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getlinecommand.h; sourceTree = SOURCE_ROOT; };
+		A75B8879104C16860083C454 /* alignedsimilarity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alignedsimilarity.cpp; sourceTree = "<group>"; };
+		A75B887A104C16860083C454 /* alignedsimilarity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alignedsimilarity.h; sourceTree = "<group>"; };
+		A75B887B104C16860083C454 /* ccode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ccode.cpp; sourceTree = "<group>"; };
+		A75B887C104C16860083C454 /* ccode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ccode.h; sourceTree = "<group>"; };
 		C6859E8B029090EE04C91782 /* Mothur.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = Mothur.1; sourceTree = "<group>"; };
 		EB1216860F619B83004A865F /* bergerparker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bergerparker.h; sourceTree = SOURCE_ROOT; };
 		EB1216870F619B83004A865F /* bergerparker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bergerparker.cpp; sourceTree = SOURCE_ROOT; };
@@ -645,6 +651,10 @@
 				372095C1103196D70004D347 /* chimera.cpp */,
 				374F2FE9100634B600E97C66 /* bellerophon.h */,
 				374F2FEA100634B600E97C66 /* bellerophon.cpp */,
+				A75B8879104C16860083C454 /* alignedsimilarity.cpp */,
+				A75B887A104C16860083C454 /* alignedsimilarity.h */,
+				A75B887B104C16860083C454 /* ccode.cpp */,
+				A75B887C104C16860083C454 /* ccode.h */,
 				372A55531017922B00C5194B /* decalc.h */,
 				372A55541017922B00C5194B /* decalc.cpp */,
 				374F301110063B6F00E97C66 /* pintail.h */,
@@ -1167,6 +1177,8 @@
 				374F301310063B6F00E97C66 /* pintail.cpp in Sources */,
 				372A55551017922B00C5194B /* decalc.cpp in Sources */,
 				372095C2103196D70004D347 /* chimera.cpp in Sources */,
+				A75B887D104C16860083C454 /* alignedsimilarity.cpp in Sources */,
+				A75B887E104C16860083C454 /* ccode.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

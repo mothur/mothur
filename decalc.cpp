@@ -251,9 +251,16 @@ float DeCalculator::calcDE(vector<float> obs, vector<float> exp) {
 		
 		//for each window
 		float sum = 0.0;  //sum = sum from 1 to m of (oi-ei)^2
-		for (int m = 0; m < obs.size(); m++) { 		sum += ((obs[m] - exp[m]) * (obs[m] - exp[m]));		}
+		int numZeros = 0;
+		for (int m = 0; m < obs.size(); m++) { 		
 			
-		float de = sqrt((sum / (obs.size() - 1)));
+			//if (obs[m] != 0.0) {
+				sum += ((obs[m] - exp[m]) * (obs[m] - exp[m]));	
+			//}else {  numZeros++;   }
+			
+		}
+			
+		float de = sqrt((sum / (obs.size() - 1 - numZeros)));
 			
 		return de;
 	}
@@ -366,6 +373,9 @@ vector< vector<quanMember> > DeCalculator::getQuantiles(vector<Sequence*> seqs, 
 		
 		//percentage of mismatched pairs 1 to 100
 		quan.resize(100);
+//ofstream o;
+//string out = "getQuantiles.out";
+//openOutputFile(out, o);
 		
 		//for each sequence
 		for(int i = start; i < end; i++){
@@ -402,7 +412,7 @@ vector< vector<quanMember> > DeCalculator::getQuantiles(vector<Sequence*> seqs, 
 				float de = calcDE(obsi, exp);
 								
 				float dist = calcDist(query, subject, front, back); 
-				
+	//o << i << '\t' <<  j << '\t' << dist << '\t' << de << endl;			
 				dist = ceil(dist);
 				
 				quanMember newScore(de, i, j);
@@ -424,19 +434,16 @@ vector< vector<quanMember> > DeCalculator::getQuantiles(vector<Sequence*> seqs, 
 		exit(1);
 	}
 }
-
+//********************************************************************************************************************
+//sorts lowest to highest
+inline bool compareQuanMembers(quanMember left, quanMember right){
+	return (left.score < right.score);	
+} 
 //***************************************************************************************************************
 //this was going to be used by pintail to increase the sensitivity of the chimera detection, but it wasn't quite right.  may want to revisit in the future...
-vector< vector<float> > DeCalculator::removeObviousOutliers(vector< vector<quanMember> >& quantiles, int num) {
+void DeCalculator::removeObviousOutliers(vector< vector<quanMember> >& quantiles, int num) {
 	try {
-		vector< vector<float> > quan; 
-		quan.resize(100);
-	
-		/*vector<quanMember> contributions;  
-		vector<int> seen;  //seen[0] is the number of outliers that template seqs[0] was part of.
-		seen.resize(num,0);
-				
-		//find contributions
+						
 		for (int i = 0; i < quantiles.size(); i++) {
 		
 			//find mean of this quantile score
@@ -444,22 +451,21 @@ vector< vector<float> > DeCalculator::removeObviousOutliers(vector< vector<quanM
 			
 			float high = quantiles[i][int(quantiles[i].size() * 0.99)].score;
 			float low =  quantiles[i][int(quantiles[i].size() * 0.01)].score;
-		
+			
+			vector<quanMember> temp;
+			
 			//look at each value in quantiles to see if it is an outlier
 			for (int j = 0; j < quantiles[i].size(); j++) {
-				
 				//is this score between 1 and 99%
 				if ((quantiles[i][j].score > low) && (quantiles[i][j].score < high)) {
-					
-				}else {
-					//add to contributions
-					contributions.push_back(quantiles[i][j]);
-					seen[quantiles[i][j].member1]++;
-					seen[quantiles[i][j].member2]++;
+					temp.push_back(quantiles[i][j]);
 				}
 			}
+			
+			quantiles[i] = temp;
 		}
 
+/*
 		//find contributer with most offending score related to it
 		int largestContrib = findLargestContrib(seen);
 	
@@ -538,7 +544,7 @@ cout << "high = " << high << endl;
 			
 		}
 */
-		return quan;
+		
 	}
 	catch(exception& e) {
 		errorOut(e, "DeCalculator", "removeObviousOutliers");
