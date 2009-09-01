@@ -46,10 +46,20 @@ class Ccode : public Chimera {
 		vector<Sequence*> querySeqs;
 		vector<Sequence*> templateSeqs;
 		
-		vector< vector<Sequence*> > closest;  //bestfit[0] is a vector of sequence at are closest to queryseqs[0]...
+		vector<int> windows;
+		vector< vector<Sequence*> > closest;  //closest[0] is a vector of sequence at are closest to queryseqs[0]...
+		vector< vector<float> > averageRef;  //averageRef[0] is the average distance at each window for the references for querySeqs[0]
+		vector< vector<float> > averageQuery;  //averageQuery[0] is the average distance at each winow for the query for querySeqs[0]
 		
 		vector< vector<Sequence*> > findClosest(int, int, int); 
-		void removeSeqs(vector<Sequence*>);  //removes sequences from closest that are to different of too similar to eachother. 
+		void removeBadReferenceSeqs(vector<Sequence*>&, int);  //removes sequences from closest that are to different of too similar to eachother. 
+		void trimSequences();
+		vector<int> findWindows();
+		vector<float> getAverageRef(vector<Sequence*>);
+		vector<float> getAverageQuery (vector<Sequence*>, int);
+		
+		
+		int getDiff(string, string);  //return number of mismatched bases, a gap to base is not counted as a mismatch
 		
 		void createProcessesClosest();
 		
