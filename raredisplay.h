@@ -11,8 +11,7 @@
 class RareDisplay : public Display {
 	
 public:
-	RareDisplay(Calculator* calc, FileOutput* file) : estimate(calc), output(file), nIters(1),
-							tempInName(getPathName(output->getFileName()) + ".tempin"), tempOutName(getPathName(output->getFileName()) + ".tempout") {};
+	RareDisplay(Calculator* calc, FileOutput* file) : estimate(calc), output(file), nIters(1), index(0) {};
 	~RareDisplay()					{	delete estimate; delete output;		};
 	void init(string);
 	void reset();
@@ -25,12 +24,10 @@ private:
 	Calculator* estimate;
 	FileOutput* output;
 	string label;
-	int nIters;
-	string tempInName, tempOutName;
-	ifstream tempInFile;
-	ofstream tempOutFile;
-	int renameOk;
-
+	vector<int> seqs;  
+	vector<double> results;
+	vector<double> var;
+	int index, nIters;
 };
 
 #endif
