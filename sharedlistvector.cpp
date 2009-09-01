@@ -200,10 +200,14 @@ SharedOrderVector* SharedListVector::getSharedOrderVector(){
 				name = names.substr(0,names.find_first_of(','));
 				names = names.substr(names.find_first_of(',')+1, names.length());
 				groupName = groupmap->getGroup(name);
+				
+				if(groupName == "not found") {	mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); mothurOutEndLine();  exit(1); }
+				
 				order->push_back(i, binSize, groupName);  //i represents what bin you are in
 			}
 			//get last name
 			groupName = groupmap->getGroup(names);
+			if(groupName == "not found") {	mothurOut("Error: Sequence '" + names + "' was not found in the group file, please correct."); mothurOutEndLine();  exit(1); }
 			order->push_back(i, binSize, groupName);
 		}
 
@@ -229,6 +233,7 @@ SharedRAbundVector SharedListVector::getSharedRAbundVector(string groupName) {
 				name = names.substr(0,names.find_first_of(','));
 				names = names.substr(names.find_first_of(',')+1, names.length());
 				group = groupmap->getGroup(name);
+				if(group == "not found") {	mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); mothurOutEndLine();  exit(1); }
 				if (group == groupName) { //this name is in the group you want the vector for.
 					rav.set(i, rav.getAbundance(i) + 1, group);  //i represents what bin you are in
 				}
@@ -236,6 +241,7 @@ SharedRAbundVector SharedListVector::getSharedRAbundVector(string groupName) {
 			
 			//get last name
 			groupName = groupmap->getGroup(names);
+			if(groupName == "not found") {	mothurOut("Error: Sequence '" + names + "' was not found in the group file, please correct."); mothurOutEndLine();  exit(1); }
 			if (group == groupName) { //this name is in the group you want the vector for.
 					rav.set(i, rav.getAbundance(i) + 1, group);  //i represents what bin you are in
 			}
@@ -281,11 +287,13 @@ vector<SharedRAbundVector*> SharedListVector::getSharedRAbundVector() {
 				name = names.substr(0,names.find_first_of(','));
 				names = names.substr(names.find_first_of(',')+1, names.length());
 				group = groupmap->getGroup(name);
+				if(group == "not found") {	mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); mothurOutEndLine();  exit(1); }
 				finder[group]->set(i, finder[group]->getAbundance(i) + 1, group);  //i represents what bin you are in
 			}
 			
 			//get last name
 			group = groupmap->getGroup(names);
+			if(group == "not found") {	mothurOut("Error: Sequence '" + names + "' was not found in the group file, please correct."); mothurOutEndLine();  exit(1); }
 			finder[group]->set(i, finder[group]->getAbundance(i) + 1, group);  //i represents what bin you are in
 			
 		}

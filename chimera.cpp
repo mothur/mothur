@@ -41,13 +41,16 @@ void Chimera::createFilter(vector<Sequence*> seqs) {
 		}
 		
 		//zero out spot where all sequences have blanks
+		int numColRemoved = 0;
 		for(int i = 0;i < seqs[0]->getAligned().length(); i++){
-			if(gaps[i] == seqs.size())	{	filterString[i] = '0'; 	}
+			if(gaps[i] == seqs.size())	{	filterString[i] = '0'; 	numColRemoved++;  }
 			
-			else if (((a[i] < threshold) && (t[i] < threshold) && (g[i] < threshold) && (c[i] < threshold))) {	filterString[i] = '0';	}
+			else if (((a[i] < threshold) && (t[i] < threshold) && (g[i] < threshold) && (c[i] < threshold))) {	filterString[i] = '0';	numColRemoved++;  }
 			//cout << "a = " << a[i] <<  " t = " << t[i] <<  " g = " << g[i] <<  " c = " << c[i] << endl;
 		}
 //cout << "filter = " << filterString << endl;	
+
+		mothurOut("Filter removed " + toString(numColRemoved) + " columns.");  mothurOutEndLine();
 	}
 	catch(exception& e) {
 		errorOut(e, "Chimera", "createFilter");
