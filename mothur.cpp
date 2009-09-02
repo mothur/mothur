@@ -41,9 +41,9 @@ int main(int argc, char *argv[]){
 
 		
 		//header
-		mothurOut("mothur v.1.5.0");
+		mothurOut("mothur v.1.5.1");
 		mothurOutEndLine();		
-		mothurOut("Last updated: 8/03/2009");
+		mothurOut("Last updated: 9/02/2009");
 		mothurOutEndLine();	
 		mothurOutEndLine();		
 		mothurOut("by");
@@ -51,11 +51,13 @@ int main(int argc, char *argv[]){
 		mothurOut("Patrick D. Schloss");
 		mothurOutEndLine();
 		mothurOutEndLine();			
-		mothurOut("Department of Microbiology");
+		mothurOut("Department of Microbiology & Immunology");
+		mothurOutEndLine();	
+		mothurOut("University of Michigan");
+		mothurOutEndLine();			
+		mothurOut("pschloss@umich.edu");
 		mothurOutEndLine();		
-		mothurOut("pschloss@micro.umass.edu");
-		mothurOutEndLine();		
-		mothurOut("http://schloss.micro.umass.edu/mothur");
+		mothurOut("http://www.mothur.org");
 		mothurOutEndLine();	
 		mothurOutEndLine();	
 		mothurOutEndLine();		
