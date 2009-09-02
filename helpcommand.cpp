@@ -32,7 +32,7 @@ int HelpCommand::execute(){
 	
 	delete validCommands;
 	
-	mothurOutEndLine(); mothurOut("For further assistance please refer to the Mothur manual on our wiki at http://schloss.micro.umass.edu/mothur/, or contact Pat Schloss at pschloss@microbio.umass.edu.\n");
+	mothurOutEndLine(); mothurOut("For further assistance please refer to the Mothur manual on our wiki at http://www.mothur.org/wiki, or contact Pat Schloss at pschloss@umich.edu.\n");
 	return 0;
 }
 

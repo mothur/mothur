@@ -257,7 +257,7 @@ inline void errorOut(exception& e, string object, string function) {
 	
 		mothurOut("Error: ");
 		mothurOut(toString(e.what()));
-		mothurOut(" has occurred in the " + object + " class function " + function + ". Please contact Pat Schloss at pschloss@microbio.umass.edu, and be sure to include the mothur.logFile with your inquiry.");
+		mothurOut(" has occurred in the " + object + " class function " + function + ". Please contact Pat Schloss at pschloss@umich.edu, and be sure to include the mothur.logFile with your inquiry.");
 		mothurOutEndLine();
 	
 }
