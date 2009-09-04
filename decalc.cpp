@@ -13,13 +13,17 @@
 void DeCalculator::setMask(string m) { 
 	try {
 		seqMask = m; 
+		int count = 0;
+		maskMap.clear();
 		
 		if (seqMask.length() != 0) {
 			//whereever there is a base in the mask, save that value is query and subject
 			for (int i = 0; i < seqMask.length(); i++) {
 				if (isalpha(seqMask[i])) {
 					h.insert(i);
+					maskMap[i] = count;
 				}
+				count++;
 			}
 		}else {
 			for (int i = 0; i < alignLength; i++) {   h.insert(i);  }
