@@ -62,7 +62,7 @@ void Ccode::print(ostream& out) {
 		
 			//for each window
 			//window mapping info.
-			out << "Mapping information: " << endl;
+			out << "Mapping information: ";
 			//you mask and did not filter
 			if ((seqMask != "") && (!filter)) { out << "mask and trim."; }
 				
@@ -72,7 +72,7 @@ void Ccode::print(ostream& out) {
 			//you masked and filtered
 			if ((seqMask != "") && (filter)) { out << "mask, filter and trim."; }
 			
-			out << "Window\tStartPos\tEndPos" << endl;
+			out << endl << "Window\tStartPos\tEndPos" << endl;
 			it = trim[i].begin();
 			
 			for (int k = 0; k < windows[i].size()-1; k++) {
@@ -113,7 +113,7 @@ void Ccode::print(ostream& out) {
 			
 				out << k+1 << '\t' << temp << endl;
 				
-				if (temp != "\t\t\t") {  results = true;  }
+				if (temp == "*\t*\t*\t") {  results = true;  }
 			}
 			out << endl;	
 			
@@ -225,6 +225,8 @@ for (int i = 0; i < closest.size(); i++) {
 		
 		//mask sequences if the user wants to 
 		if (seqMask != "") {
+			decalc->setMask(seqMask);
+			
 			//mask querys
 			for (int i = 0; i < querySeqs.size(); i++) {
 				decalc->runMask(querySeqs[i]);
@@ -245,7 +247,7 @@ for (int i = 0; i < closest.size(); i++) {
 			for (int i = 0; i < querySeqs.size(); i++) { temp.push_back(querySeqs[i]);  }
 			
 			createFilter(temp);
-			
+		
 			runFilter(querySeqs);
 			runFilter(templateSeqs);
 			
@@ -255,7 +257,7 @@ for (int i = 0; i < closest.size(); i++) {
 			int j = 0;
 			
 			for (int i = 0; i < filterString.length(); i++) {
-				if (filterString[i] == 1) {
+				if (filterString[i] == '1') {
 					//add to newMap
 					newMap[spot] = spotMap[j][i];
 					spot++;  
