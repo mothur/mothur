@@ -57,6 +57,8 @@ class DeCalculator {
 		
 		vector<int> returnObviousOutliers(vector< vector<quanMember> >, int);
 		
+		map<int, int> getMaskMap() { return maskMap; }
+		
 	private:
 		//vector<quanMember> sortContrib(map<quanMember*, float>);  //used by mallard
 		float findAverage(vector<float>);
@@ -65,6 +67,7 @@ class DeCalculator {
 		string seqMask;
 		set<int> h;
 		int alignLength;
+		map<int, int> maskMap;
 
 };
 
