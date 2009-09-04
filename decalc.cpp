@@ -21,12 +21,17 @@ void DeCalculator::setMask(string m) {
 			for (int i = 0; i < seqMask.length(); i++) {
 				if (isalpha(seqMask[i])) {
 					h.insert(i);
-					maskMap[i] = count;
+					maskMap[count] = i;
+					count++;
+					
 				}
-				count++;
 			}
 		}else {
-			for (int i = 0; i < alignLength; i++) {   h.insert(i);  }
+			for (int i = 0; i < alignLength; i++) {   
+				h.insert(i); 
+				maskMap[count] = i;
+				count++;
+			}
 		}
 	}
 	catch(exception& e) {
