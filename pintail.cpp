@@ -41,13 +41,15 @@ void Pintail::print(ostream& out) {
 		for (int i = 0; i < querySeqs.size(); i++) {
 			
 			int index = ceil(deviation[i]);
-			
-			if (index == 0) { index=1;  }
 						
 			//is your DE value higher than the 95%
 			string chimera;
-			if (DE[i] > quantiles[index-1][4])		{	chimera = "Yes";	}
-			else									{	chimera = "No";		}
+			if (quantiles[index][4] == 0.0) {
+				chimera = "Your template does not include sequences that provide quantile values at distance " + toString(index);
+			}else {
+				if (DE[i] > quantiles[index][4])		{	chimera = "Yes";	}
+				else									{	chimera = "No";		}
+			}
 			
 			out << querySeqs[i]->getName() << '\t' << "div: " << deviation[i] << "\tstDev: " << DE[i] << "\tchimera flag: " << chimera << endl;
 			if (chimera == "Yes") {
@@ -279,10 +281,19 @@ out7.close();/*/
 			ofstream out4, out5;
 			string noOutliers, outliers;
 			
-			noOutliers = getRootName(templateFile) + "pintail.quanNOOUTLIERS";
-			outliers = getRootName(templateFile) + "pintail.quanYESOUTLIERS";
+			if ((!filter) && (seqMask == "")) {
+				noOutliers = getRootName(templateFile) + "pintail.quan";
+			}else if ((filter) && (seqMask == "")) { 
+				noOutliers = getRootName(templateFile) + "pintail.filtered.quan";
+			}else if ((!filter) && (seqMask != "")) { 
+				noOutliers = getRootName(templateFile) + "pintail.masked.quan";
+			}else if ((filter) && (seqMask != "")) { 
+				noOutliers = getRootName(templateFile) + "pintail.filtered.masked.quan";
+			}
+
+			//outliers = getRootName(templateFile) + "pintail.quanYESOUTLIERS";
 			
-			openOutputFile(outliers, out4);
+			/*openOutputFile(outliers, out4);
 			
 			//adjust quantiles
 			for (int i = 0; i < quantilesMembers.size(); i++) {
@@ -321,7 +332,7 @@ out7.close();/*/
 				
 			}
 			
-			out4.close();
+			out4.close();*/
 			
 			decalc->removeObviousOutliers(quantilesMembers, templateSeqs.size());
 			

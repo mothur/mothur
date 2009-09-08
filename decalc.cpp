@@ -426,8 +426,7 @@ vector< vector<quanMember> > DeCalculator::getQuantiles(vector<Sequence*> seqs, 
 				
 				quanMember newScore(de, i, j);
 				
-				//dist-1 because vector indexes start at 0.
-				quan[dist-1].push_back(newScore);
+				quan[dist].push_back(newScore);
 				
 				delete subject;
 			}

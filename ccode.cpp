@@ -20,7 +20,6 @@ Ccode::~Ccode() {
 	try {
 		for (int i = 0; i < querySeqs.size(); i++)		{  delete querySeqs[i];		}
 		for (int i = 0; i < templateSeqs.size(); i++)	{  delete templateSeqs[i];	}
-		delete distCalc;
 	}
 	catch(exception& e) {
 		errorOut(e, "Ccode", "~Ccode");
@@ -202,21 +201,7 @@ void Ccode::getChimeras() {
 			mothurOut("Done."); mothurOutEndLine();
 		}else {		createProcessesClosest();		}
 
-		
-for (int i = 0; i < closest.size(); i++) {
-	//cout << querySeqs[i]->getName() << ": ";
-	string file = querySeqs[i]->getName() + ".input";
-	ofstream o;
-	openOutputFile(file, o);
-	
-	querySeqs[i]->printSequence(o);
-	for (int j = 0; j < closest[i].size(); j++) {
-		//cout << closest[i][j].seq->getName() << '\t';
-		closest[i][j].seq->printSequence(o);
-	}
-	//cout << endl;
-	o.close();
-}	
+		//initialize spotMap
 		for (int j = 0; j < numSeqs; j++) {
 			for (int i = 0; i < querySeqs[0]->getAligned().length(); i++) {
 				spotMap[j][i] = i;
@@ -280,39 +265,49 @@ for (int i = 0; i < closest.size(); i++) {
 			windows[i] = findWindows(i);  
 		}
 
-		//remove sequences that are more than 20% different and less than 0.5% different - may want to allow user to specify this later - should be paralellized
-		for (int i = 0; i < closest.size(); i++) {
-			removeBadReferenceSeqs(closest[i], i);
-		}
-		
-	
-		//find the averages for each querys references - should be paralellized
-		for (int i = 0; i < numSeqs; i++) {
-			getAverageRef(closest[i], i);  //fills sumRef[i], averageRef[i], sumSquaredRef[i] and refCombo[i].
-		}
-	
-		//find the averages for the query - should be paralellized
-		for (int i = 0; i < numSeqs; i++) {
-			getAverageQuery(closest[i], i);  //fills sumQuery[i], averageQuery[i], sumSquaredQuery[i].
-		}
-		
-		//find the averages for each querys references - should be paralellized
-		for (int i = 0; i < numSeqs; i++) {
-			findVarianceRef(i);  //fills varRef[i] and sdRef[i] also sets minimum error rate to 0.001 to avoid divide by 0.
-		}
-		
-		//find the averages for the query - should be paralellized
-		for (int i = 0; i < numSeqs; i++) {
-			findVarianceQuery(i);  //fills varQuery[i] and sdQuery[i] also sets minimum error rate to 0.001 to avoid divide by 0.
-		}
+		//remove sequences that are more than 20% different and less than 0.5% different - may want to allow user to specify this later 
+		if (processors == 1) { 
+			for (int i = 0; i < closest.size(); i++) {
+				removeBadReferenceSeqs(closest[i], i);
+			}
+		}else {		createProcessesRemoveBad();		}
 
-		for (int i = 0; i < numSeqs; i++) {
-			determineChimeras(i);  //fills anova, isChimericConfidence[i], isChimericTStudent[i] and isChimericANOVA[i]. - should be paralellized
-		}
-
+		
+		if (processors == 1) { 
+			//find the averages for each querys references
+			for (int i = 0; i < numSeqs; i++) {
+				getAverageRef(closest[i], i);  //fills sumRef[i], averageRef[i], sumSquaredRef[i] and refCombo[i].
+			}
+			
+			//find the averages for the query 
+			for (int i = 0; i < numSeqs; i++) {
+				getAverageQuery(closest[i], i);  //fills sumQuery[i], averageQuery[i], sumSquaredQuery[i].
+			}
+		}else {		createProcessesAverages();		}
+		
+		if (processors == 1) { 
+			//find the averages for each querys references 
+			for (int i = 0; i < numSeqs; i++) {
+				findVarianceRef(i);  //fills varRef[i] and sdRef[i] also sets minimum error rate to 0.001 to avoid divide by 0.
+			}
+			
+			//find the averages for the query 
+			for (int i = 0; i < numSeqs; i++) {
+				findVarianceQuery(i);  //fills varQuery[i] and sdQuery[i] also sets minimum error rate to 0.001 to avoid divide by 0.
+			}
+		}else {		createProcessesVariances();		}
+		
+		if (processors == 1) { 
+			for (int i = 0; i < numSeqs; i++) {
+				determineChimeras(i);  //fills anova, isChimericConfidence[i], isChimericTStudent[i] and isChimericANOVA[i]. 
+			}
+		}else {		createProcessesDetermine();		}
+		
 		//free memory
 		for (int i = 0; i < lines.size(); i++)					{	delete lines[i];				}
 		for (int i = 0; i < templateLines.size(); i++)			{	delete templateLines[i];		}
+		delete distCalc;
+		delete decalc;
 			
 	}
 	catch(exception& e) {
@@ -908,6 +903,8 @@ void Ccode::determineChimeras (int query) {
 	               isChimericANOVA[query][i] = true;   /* significant P<0.05 */
 	        }
 			
+			if (isnan(anovaValue) || isinf(anovaValue)) { anovaValue = 0.0; }
+			
 			anova[query][i] = anovaValue;
 		}
 		
@@ -1045,7 +1042,7 @@ void Ccode::createProcessesClosest() {
 				ofstream out;
 				string s = toString(getpid()) + ".temp";
 				openOutputFile(s, out);
-				
+							
 				//output pairs
 				for (int i = lines[process]->start; i < lines[process]->end; i++) {
 					 for (int j = 0; j < closest[i].size(); j++) {
@@ -1060,9 +1057,7 @@ void Ccode::createProcessesClosest() {
 					 }
 					 out << endl;
 				}
-
 				out.close();
-				
 				exit(0);
 			}else { mothurOut("unable to spawn the necessary processes."); mothurOutEndLine(); exit(0); }
 		}
@@ -1083,7 +1078,7 @@ void Ccode::createProcessesClosest() {
 			//get pairs
 			for (int k = lines[i]->start; k < lines[i]->end; k++) {
 				vector<Sequence*> tempVector;
-				
+	
 				for (int j = 0; j < numWanted; j++) {
 				
 					Sequence* temp = new Sequence(in);
@@ -1097,21 +1092,23 @@ void Ccode::createProcessesClosest() {
 			
 			string junk;
 			in >> junk;  gobble(in);  // to get ">"
-			
+		
 			vector< vector<float> > dists; dists.resize(querySeqs.size());
 			
-			for (int i = lines[process]->start; i < lines[process]->end; i++) {
-				dists[i].resize(closest[i].size());
-				for (int j = 0; j < closest[i].size(); j++) {
-					in >> dists[i][j];
+			for (int k = lines[i]->start; k < lines[i]->end; k++) {
+				dists[k].resize(numWanted);
+				for (int j = 0; j < numWanted; j++) {
+					in >> dists[k][j];
 				}
 				gobble(in);
-			} 
 			
-			for (int i = lines[process]->start; i < lines[process]->end; i++) {
-				for (int j = 0; j < closest[i].size(); j++) {
-					closest[i][j].seq = tempClosest[i][j];
-					closest[i][j].dist = dists[i][j]; 
+			} 
+
+			for (int k = lines[i]->start; k < lines[i]->end; k++) {
+				closest[k].resize(numWanted);
+				for (int j = 0; j < closest[k].size(); j++) {
+					closest[k][j].seq = tempClosest[k][j];
+					closest[k][j].dist = dists[k][j]; 
 				}
 			} 
 
@@ -1132,4 +1129,486 @@ void Ccode::createProcessesClosest() {
 }
 
 //***************************************************************************************************************
+void Ccode::createProcessesRemoveBad() {
+	try {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		int process = 0;
+		vector<int> processIDS;
+		
+		//loop through and create all the processes you want
+		while (process != processors) {
+			int pid = fork();
+			
+			if (pid > 0) {
+				processIDS.push_back(pid);  
+				process++;
+			}else if (pid == 0){
+							
+				for (int i = lines[process]->start; i < lines[process]->end; i++) {
+					removeBadReferenceSeqs(closest[i], i);
+				}
+				
+				//write out data to file so parent can read it
+				ofstream out;
+				string s = toString(getpid()) + ".temp";
+				openOutputFile(s, out);
+				
+				//output pairs
+				for (int i = lines[process]->start; i < lines[process]->end; i++) {
+					out << closest[i].size() << endl;
+					 for (int j = 0; j < closest[i].size(); j++) {
+						closest[i][j].seq->printSequence(out);
+					 }
+					 out << ">" << endl; //to stop sequence read
+				}
+				
+				for (int i = lines[process]->start; i < lines[process]->end; i++) {
+					 for (int j = 0; j < closest[i].size(); j++) {
+						out << closest[i][j].dist << '\t';
+					 }
+					 out << endl;
+				}
+
+				out.close();
+				
+				exit(0);
+			}else { mothurOut("unable to spawn the necessary processes."); mothurOutEndLine(); exit(0); }
+		}
+		
+		//force parent to wait until all the processes are done
+		for (int i=0;i<processors;i++) { 
+			int temp = processIDS[i];
+			wait(&temp);
+		}
+	
+		//get data created by processes
+		for (int i=0;i<processors;i++) { 
+			ifstream in;
+			string s = toString(processIDS[i]) + ".temp";
+			openInputFile(s, in);
+		
+			vector< vector<Sequence*> > tempClosest;  tempClosest.resize(querySeqs.size());
+			vector<int> sizes; 
+			//get pairs
+			for (int k = lines[i]->start; k < lines[i]->end; k++) {
+		
+				int num;
+				in >> num; 
+				sizes.push_back(num);
+				gobble(in);
+				
+				vector<Sequence*> tempVector;
+				
+				for (int j = 0; j < num; j++) {
+				
+					Sequence* temp = new Sequence(in);
+					gobble(in);
+						
+					tempVector.push_back(temp);
+				}
+				string junk;
+				in >> junk;  gobble(in);  // to get ">"
+
+				tempClosest[k] = tempVector;
+			}
+			
+			vector< vector<float> > dists; dists.resize(querySeqs.size());
+			int count = 0;
+			for (int k = lines[i]->start; k < lines[i]->end; k++) {
+				dists[k].resize(sizes[count]);
+				for (int j = 0; j < sizes[count]; j++) {
+					in >> dists[k][j];
+				}
+				gobble(in);
+				count++;
+			} 
+			
+			count = 0;
+			for (int k = lines[i]->start; k < lines[i]->end; k++) {
+				for (int j = 0; j < sizes[count]; j++) {
+					closest[k][j].seq = tempClosest[k][j];
+					closest[k][j].dist = dists[k][j]; 
+				}
+				count++;
+			} 
+
+			in.close();
+			remove(s.c_str());
+		}
+#else
+		for (int i = 0; i < closest.size(); i++) {
+			removeBadReferenceSeqs(closest[i], i);
+		}
+#endif		
+	
+	}
+	catch(exception& e) {
+		errorOut(e, "Ccode", "createProcessesRemoveBad");
+		exit(1);
+	}
+}
+//***************************************************************************************************************
+void Ccode::createProcessesAverages() {
+	try {
+	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		int process = 0;
+		vector<int> processIDS;
+		
+		//loop through and create all the processes you want
+		while (process != processors) {
+			int pid = fork();
+			
+			if (pid > 0) {
+				processIDS.push_back(pid);  
+				process++;
+			}else if (pid == 0){
+							
+				//find the averages for each querys references 
+				for (int i = lines[process]->start; i < lines[process]->end; i++) {
+					getAverageRef(closest[i], i);  //fills sumRef[i], averageRef[i], sumSquaredRef[i] and refCombo[i].
+				}
+				
+				//find the averages for the query 
+				for (int i = lines[process]->start; i < lines[process]->end; i++) {
+					getAverageQuery(closest[i], i);  //fills sumQuery[i], averageQuery[i], sumSquaredQuery[i].
+				}
+				
+				
+				//write out data to file so parent can read it
+				ofstream out;
+				string s = toString(getpid()) + ".temp";
+				openOutputFile(s, out);
+				
+				//output pairs
+				for (int i = lines[process]->start; i < lines[process]->end; i++) {
+					for (int j = 0; j < windows[i].size(); j++) {
+						out << sumRef[i][j] << '\t';
+					}
+					out << endl;
+					for (int j = 0; j < windows[i].size(); j++) {
+						out << averageRef[i][j] << '\t';
+					}
+					out << endl;
+					for (int j = 0; j < windows[i].size(); j++) {
+						out << sumSquaredRef[i][j] << '\t';
+					}
+					out << endl;
+					for (int j = 0; j < windows[i].size(); j++) {
+						out << sumQuery[i][j] << '\t';
+					}
+					out << endl;
+					for (int j = 0; j < windows[i].size(); j++) {
+						out << averageQuery[i][j] << '\t';
+					}
+					out << endl;
+					for (int j = 0; j < windows[i].size(); j++) {
+						out << sumSquaredQuery[i][j] << '\t';
+					}
+					out << endl;
+					out << refCombo[i] << endl;
+				}
+
+				out.close();
+				
+				exit(0);
+			}else { mothurOut("unable to spawn the necessary processes."); mothurOutEndLine(); exit(0); }
+		}
+		
+		//force parent to wait until all the processes are done
+		for (int i=0;i<processors;i++) { 
+			int temp = processIDS[i];
+			wait(&temp);
+		}
+	
+		//get data created by processes
+		for (int i=0;i<processors;i++) { 
+			ifstream in;
+			string s = toString(processIDS[i]) + ".temp";
+			openInputFile(s, in);
+		
+			//get pairs
+			for (int k = lines[i]->start; k < lines[i]->end; k++) {
+				sumRef[k].resize(windows[k].size());
+				averageRef[k].resize(windows[k].size());
+				sumSquaredRef[k].resize(windows[k].size());
+				averageQuery[k].resize(windows[k].size());
+				sumQuery[k].resize(windows[k].size());
+				sumSquaredQuery[k].resize(windows[k].size());
+				
+				for (int j = 0; j < windows[k].size(); j++) {
+					in >> sumRef[k][j];
+				}
+				gobble(in);
+				for (int j = 0; j < windows[k].size(); j++) {
+					in >> averageRef[k][j];
+				}
+				gobble(in);
+				for (int j = 0; j < windows[k].size(); j++) {
+					in >> sumSquaredRef[k][j];
+				}
+				gobble(in);
+				for (int j = 0; j < windows[k].size(); j++) {
+					in >> sumQuery[k][j];
+				}
+				gobble(in);
+				for (int j = 0; j < windows[k].size(); j++) {
+					in >> averageQuery[k][j];
+				}
+				gobble(in);
+				for (int j = 0; j < windows[k].size(); j++) {
+					in >> sumSquaredQuery[k][j];
+				}
+				gobble(in);
+				in >> refCombo[k];
+				gobble(in);
+			}
+			
+			in.close();
+			remove(s.c_str());
+		}
+#else
+		//find the averages for each querys references 
+		for (int i = 0; i < querySeqs.size(); i++) {
+			getAverageRef(closest[i], i);  //fills sumRef[i], averageRef[i], sumSquaredRef[i] and refCombo[i].
+		}
+	
+		//find the averages for the query 
+		for (int i = 0; i < querySeqs.size(); i++) {
+			getAverageQuery(closest[i], i);  //fills sumQuery[i], averageQuery[i], sumSquaredQuery[i].
+		}
+
+#endif		
+	
+	}
+	catch(exception& e) {
+		errorOut(e, "Ccode", "createProcessesAverages");
+		exit(1);
+	}
+}
+//***************************************************************************************************************
+void Ccode::createProcessesVariances() {
+	try {
+	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		int process = 0;
+		vector<int> processIDS;
+		
+		//loop through and create all the processes you want
+		while (process != processors) {
+			int pid = fork();
+			
+			if (pid > 0) {
+				processIDS.push_back(pid);  
+				process++;
+			}else if (pid == 0){
+							
+				//find the averages for each querys references 
+				for (int i = lines[process]->start; i < lines[process]->end; i++) {
+					findVarianceRef(i);  //fills varRef[i] and sdRef[i] also sets minimum error rate to 0.001 to avoid divide by 0.
+				}
+				
+				//find the averages for the query 
+				for (int i = lines[process]->start; i < lines[process]->end; i++) {
+					findVarianceQuery(i);  //fills varQuery[i] and sdQuery[i] also sets minimum error rate to 0.001 to avoid divide by 0.
+				}
+				
+				
+				//write out data to file so parent can read it
+				ofstream out;
+				string s = toString(getpid()) + ".temp";
+				openOutputFile(s, out);
+				
+				//output pairs
+				for (int i = lines[process]->start; i < lines[process]->end; i++) {
+					for (int j = 0; j < windows[i].size(); j++) {
+						out << varRef[i][j] << '\t';
+					}
+					out << endl;
+					for (int j = 0; j < windows[i].size(); j++) {
+						out << sdRef[i][j] << '\t';
+					}
+					out << endl;
+					for (int j = 0; j < windows[i].size(); j++) {
+						out << varQuery[i][j] << '\t';
+					}
+					out << endl;
+					for (int j = 0; j < windows[i].size(); j++) {
+						out << sdQuery[i][j] << '\t';
+					}
+					out << endl;
+				}
+
+				out.close();
+				
+				exit(0);
+			}else { mothurOut("unable to spawn the necessary processes."); mothurOutEndLine(); exit(0); }
+		}
+		
+		//force parent to wait until all the processes are done
+		for (int i=0;i<processors;i++) { 
+			int temp = processIDS[i];
+			wait(&temp);
+		}
+	
+		//get data created by processes
+		for (int i=0;i<processors;i++) { 
+			ifstream in;
+			string s = toString(processIDS[i]) + ".temp";
+			openInputFile(s, in);
+		
+			//get pairs
+			for (int k = lines[i]->start; k < lines[i]->end; k++) {
+				varRef[k].resize(windows[k].size());
+				sdRef[k].resize(windows[k].size());
+				varQuery[k].resize(windows[k].size());
+				sdQuery[k].resize(windows[k].size());
+								
+				for (int j = 0; j < windows[k].size(); j++) {
+					in >> varRef[k][j];
+				}
+				gobble(in);
+				for (int j = 0; j < windows[k].size(); j++) {
+					in >> sdRef[k][j];
+				}
+				gobble(in);
+				for (int j = 0; j < windows[k].size(); j++) {
+					in >> varQuery[k][j];
+				}
+				gobble(in);
+				for (int j = 0; j < windows[k].size(); j++) {
+					in >> sdQuery[k][j];
+				}
+				gobble(in);
+			}
+			
+			in.close();
+			remove(s.c_str());
+		}
+#else
+			//find the averages for each querys references 
+			for (int i = 0; i < querySeqs.size(); i++) {
+				findVarianceRef(i);  //fills varRef[i] and sdRef[i] also sets minimum error rate to 0.001 to avoid divide by 0.
+			}
+			
+			//find the averages for the query 
+			for (int i = 0; i < querySeqs.size(); i++) {
+				findVarianceQuery(i);  //fills varQuery[i] and sdQuery[i] also sets minimum error rate to 0.001 to avoid divide by 0.
+			}
+#endif		
+	}
+	catch(exception& e) {
+		errorOut(e, "Ccode", "createProcessesVariances");
+		exit(1);
+	}
+}
+//***************************************************************************************************************
+void Ccode::createProcessesDetermine() {
+	try {
+	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		int process = 0;
+		vector<int> processIDS;
+		
+		//loop through and create all the processes you want
+		while (process != processors) {
+			int pid = fork();
+			
+			if (pid > 0) {
+				processIDS.push_back(pid);  
+				process++;
+			}else if (pid == 0){
+							
+				//find the averages for each querys references 
+				for (int i = lines[process]->start; i < lines[process]->end; i++) {
+					determineChimeras(i);  //fills anova, isChimericConfidence[i], isChimericTStudent[i] and isChimericANOVA[i]. 
+				}
+
+				//write out data to file so parent can read it
+				ofstream out;
+				string s = toString(getpid()) + ".temp";
+				openOutputFile(s, out);
+				
+				//output pairs
+				for (int i = lines[process]->start; i < lines[process]->end; i++) {
+					for (int j = 0; j < windows[i].size(); j++) {
+						out << anova[i][j] << '\t';
+					}
+					out << endl;
+					for (int j = 0; j < windows[i].size(); j++) {
+						out << isChimericConfidence[i][j] << '\t';
+					}
+					out << endl;
+					for (int j = 0; j < windows[i].size(); j++) {
+						out << isChimericTStudent[i][j] << '\t';
+					}
+					out << endl;
+					for (int j = 0; j < windows[i].size(); j++) {
+						out << isChimericANOVA[i][j] << '\t';
+					}
+					out << endl;
+				}
+
+				out.close();
+				
+				exit(0);
+			}else { mothurOut("unable to spawn the necessary processes."); mothurOutEndLine(); exit(0); }
+		}
+		
+		//force parent to wait until all the processes are done
+		for (int i=0;i<processors;i++) { 
+			int temp = processIDS[i];
+			wait(&temp);
+		}
+	
+		//get data created by processes
+		for (int i=0;i<processors;i++) { 
+			ifstream in;
+			string s = toString(processIDS[i]) + ".temp";
+			openInputFile(s, in);
+		
+			//get pairs
+			for (int k = lines[i]->start; k < lines[i]->end; k++) {
+				anova[k].resize(windows[k].size());
+				isChimericConfidence[k].resize(windows[k].size(), false);
+				isChimericTStudent[k].resize(windows[k].size(), false);
+				isChimericANOVA[k].resize(windows[k].size(), false);
+				int tempBool;
+								
+				for (int j = 0; j < windows[k].size(); j++) {
+					in >> anova[k][j];
+				}
+				gobble(in);
+				for (int j = 0; j < windows[k].size(); j++) {
+					in >> tempBool;
+					if (tempBool == 1) {  isChimericConfidence[k][j] = true;  }
+				}
+				gobble(in);
+				for (int j = 0; j < windows[k].size(); j++) {
+					in >> tempBool;
+					if (tempBool == 1) {  isChimericTStudent[k][j] = true;  }
+				}
+				gobble(in);
+				for (int j = 0; j < windows[k].size(); j++) {
+					in >> tempBool;
+					if (tempBool == 1) {  isChimericANOVA[k][j] = true;  }
+				}
+				gobble(in);
+			}
+			
+			in.close();
+			remove(s.c_str());
+		}
+	#else
+			for (int i = 0; i < querySeqs.size(); i++) {
+				determineChimeras(i);  //fills anova, isChimericConfidence[i], isChimericTStudent[i] and isChimericANOVA[i].
+			}
+	#endif		
+
+	}
+	catch(exception& e) {
+		errorOut(e, "Ccode", "createProcessesDetermine");
+		exit(1);
+	}
+}
+//***************************************************************************************************************
+
+
 
