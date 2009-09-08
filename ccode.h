@@ -83,7 +83,11 @@ class Ccode : public Chimera {
 		float getF(int); 
 		
 		void createProcessesClosest();
-		
+		void createProcessesRemoveBad();
+		void createProcessesAverages();
+		void createProcessesVariances();
+		void createProcessesDetermine();
+				
 };
 
 /***********************************************************/
