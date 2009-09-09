@@ -177,18 +177,8 @@ void Ccode::getChimeras() {
 				lines.push_back(new linePair((i*linesPerProcess), numSeqs));
 			}
 			
-			//find breakup of templatefile for quantiles
-			if (processors == 1) {   templateLines.push_back(new linePair(0, templateSeqs.size()));  }
-			else { 
-				for (int i = 0; i < processors; i++) {
-					templateLines.push_back(new linePair());
-					templateLines[i]->start = int (sqrt(float(i)/float(processors)) * templateSeqs.size());
-					templateLines[i]->end = int (sqrt(float(i+1)/float(processors)) * templateSeqs.size());
-				}
-			}
 		#else
 			lines.push_back(new linePair(0, numSeqs));
-			templateLines.push_back(new linePair(0, templateSeqs.size()));
 		#endif
 	
 		distCalc = new eachGapDist();
@@ -305,7 +295,6 @@ void Ccode::getChimeras() {
 		
 		//free memory
 		for (int i = 0; i < lines.size(); i++)					{	delete lines[i];				}
-		for (int i = 0; i < templateLines.size(); i++)			{	delete templateLines[i];		}
 		delete distCalc;
 		delete decalc;
 			

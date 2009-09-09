@@ -36,6 +36,8 @@ public:
 	int getTemplateEndPos();
 	
 	int getPairwiseLength();
+	void resize(int);
+	int getnRows() { return nRows; }
 //	int getLongestTemplateGap();
 
 protected:

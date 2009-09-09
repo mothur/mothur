@@ -291,6 +291,7 @@ void Sequence::reverseComplement(){
 		else						{	temp += 'N';	}
 	}
 	unaligned = temp;
+	aligned = temp;
 	
 }
 
