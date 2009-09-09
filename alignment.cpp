@@ -31,7 +31,22 @@ Alignment::Alignment(int A) : nCols(A), nRows(A) {
 		exit(1);
 	}
 }
+/**************************************************************************************************/
+void Alignment::resize(int A) {
+	try {
+		nCols = A;
+		nRows = A;
 
+		alignment.resize(nRows);			
+		for(int i=0;i<nRows;i++){			
+			alignment[i].resize(nCols);		
+		}	
+	}
+	catch(exception& e) {
+		errorOut(e, "Alignment", "resize");
+		exit(1);
+	}
+}
 /**************************************************************************************************/
 
 void Alignment::traceBack(){			//	This traceback routine is used by the dynamic programming algorithms

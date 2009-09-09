@@ -20,6 +20,7 @@
  */
 
 #include "mothur.h"
+#include "database.hpp"
 
 class KmerDB : public Database {
 	

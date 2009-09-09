@@ -39,8 +39,8 @@ inline bool compareSeqDist(SeqDist left, SeqDist right){
 //********************************************************************************************************************
 
 struct sim {
-		Sequence* leftParent;
-		Sequence* rightParent; 
+		string leftParent;
+		string rightParent; 
 		float score;  
 		int midpoint;
 };
@@ -68,6 +68,7 @@ class Chimera {
 		virtual void setWindow(int w)			{	window = w;			}
 		virtual void setIncrement(int i)		{	increment = i;		}
 		virtual void setNumWanted(int n)		{	numWanted = n;		}
+		virtual void setKmerSize(int k)			{	kmerSize = k;		}
 		
 		virtual void setCons(string){};
 		virtual void setQuantiles(string){};
@@ -85,7 +86,7 @@ class Chimera {
 	protected:
 		
 		bool filter, correction;
-		int processors, window, increment, numWanted;
+		int processors, window, increment, numWanted, kmerSize;
 		string seqMask, quanfile, filterString;
 			
 

@@ -10,8 +10,8 @@
 #include "chimeraseqscommand.h"
 #include "bellerophon.h"
 #include "pintail.h"
-#include "alignedsimilarity.h"
 #include "ccode.h"
+#include "chimeracheckrdp.h"
 
 
 //***************************************************************************************************************
@@ -25,7 +25,7 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile", "mask", "numwanted" };
+			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile", "mask", "numwanted", "ksize" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -63,7 +63,9 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 				if (ableToOpen == 1) { abort = true; }
 				in.close();
 			}
-
+			
+			method = validParameter.validFile(parameters, "method", false);			if (method == "not found") { method = "pintail"; }
+			
 			string temp;
 			temp = validParameter.validFile(parameters, "filter", false);			if (temp == "not found") { temp = "F"; }
 			filter = isTrue(temp);
@@ -74,16 +76,21 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 			temp = validParameter.validFile(parameters, "processors", false);		if (temp == "not found") { temp = "1"; }
 			convert(temp, processors);
 			
+			temp = validParameter.validFile(parameters, "ksize", false);			if (temp == "not found") { temp = "7"; }
+			convert(temp, ksize);
+			
 			temp = validParameter.validFile(parameters, "window", false);			if (temp == "not found") { temp = "0"; }
 			convert(temp, window);
 					
-			temp = validParameter.validFile(parameters, "increment", false);			if (temp == "not found") { temp = "25"; }
+			temp = validParameter.validFile(parameters, "increment", false);		
+			if ((temp == "not found") && (method == "chimeracheck")) { temp = "10"; }
+			else if (temp == "not found") { temp = "25"; }
 			convert(temp, increment);
 			
-			temp = validParameter.validFile(parameters, "numwanted", false);			if (temp == "not found") { temp = "20"; }
+			temp = validParameter.validFile(parameters, "numwanted", false);		if (temp == "not found") { temp = "20"; }
 			convert(temp, numwanted);
 
-			method = validParameter.validFile(parameters, "method", false);		if (method == "not found") { method = "pintail"; }
+			
 			
 			if (((method == "pintail") || (method == "alignsim")) && (templatefile == "")) { mothurOut("You must provide a template file with the pintail and alignsim methods."); mothurOutEndLine(); abort = true;  }
 			
@@ -136,10 +143,10 @@ int ChimeraSeqsCommand::execute(){
 		
 		if (abort == true) { return 0; }
 		
-		if (method == "bellerophon")	{		chimera = new Bellerophon(fastafile);				}
-		else if (method == "pintail")	{		chimera = new Pintail(fastafile, templatefile);		}
-		//else if (method == "alignsim")	{		chimera = new AlignSim(fastafile, templatefile);	}
-		else if (method == "ccode")		{		chimera = new Ccode(fastafile, templatefile);		}
+		if (method == "bellerophon")			{		chimera = new Bellerophon(fastafile);						}
+		else if (method == "pintail")			{		chimera = new Pintail(fastafile, templatefile);				}
+		else if (method == "ccode")				{		chimera = new Ccode(fastafile, templatefile);				}
+		else if (method == "chimeracheck")		{		chimera = new ChimeraCheckRDP(fastafile, templatefile);		}
 		else { mothurOut("Not a valid method."); mothurOutEndLine(); return 0;		}
 		
 		//set user options
@@ -160,6 +167,7 @@ int ChimeraSeqsCommand::execute(){
 		chimera->setWindow(window);
 		chimera->setIncrement(increment);
 		chimera->setNumWanted(numwanted);
+		chimera->setKmerSize(ksize);
 				
 		//find chimeras
 		chimera->getChimeras();

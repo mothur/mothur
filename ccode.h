@@ -42,7 +42,6 @@ class Ccode : public Chimera {
 		
 		
 		vector<linePair*> lines;
-		vector<linePair*> templateLines;
 		vector<Sequence*> querySeqs;
 		vector<Sequence*> templateSeqs;
 		vector< map<int, int> > spotMap;

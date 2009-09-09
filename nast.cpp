@@ -94,7 +94,7 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 	try {
 	
 		int longAlignmentLength = newTemplateAlign.length();	
-		
+	
 		for(int i=0; i<longAlignmentLength; i++){				//	use the long alignment as the standard
 			int rightIndex, rightRoom, leftIndex, leftRoom;
 			
@@ -123,7 +123,7 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 				int insertLength = 0;							//	figure out how long the anomaly is
 				while(!isalpha(newTemplateAlign[i + insertLength]))	{	insertLength++;	}
 				if(insertLength > maxInsertLength){	maxInsertLength = insertLength;	}
-					
+		
 				if((leftRoom + rightRoom) >= insertLength){
 	
 					//	Parts D & E from Fig. 2 of DeSantis et al.
@@ -168,6 +168,7 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 									
 						}
 						else{									//	not enough room to the right, have to steal some 
+			
 							//	space to the left lets move left and then right...
 							string leftTemplateString = newTemplateAlign.substr(0,i);
 							string rightTemplateString = newTemplateAlign.substr(i+insertLength);
@@ -183,7 +184,7 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 					}
 				}
 				else{
-													//	there could be a case where there isn't enough room in
+			//	there could be a case where there isn't enough room in
 					string leftTemplateString = newTemplateAlign.substr(0,i);			//	either direction to move stuff
 					string rightTemplateString = newTemplateAlign.substr(i+leftRoom+rightRoom);
 					newTemplateAlign = leftTemplateString + rightTemplateString;
@@ -193,9 +194,9 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 					string insertString = candAln.substr(leftIndex+1,rightIndex-leftIndex-1);
 					string rightCandidateString = candAln.substr(rightIndex+rightRoom);
 					candAln = leftCandidateString + insertString + rightCandidateString;
-	
+
 				}
-				
+			
 				i -= insertLength;
 			} 
 		}
@@ -337,12 +338,11 @@ void Nast::regapSequences(){	//This is essentially part B in Fig 2. of DeSantis 
 			candAln[i] = toupper(candAln[i]);			//	everything is upper case
 		}
 		
-		
+	
 		if(candAln.length() != tempAln.length()){		//	if the regapped candidate sequence is longer than the official
 			removeExtraGaps(candAln, tempAln, newTemplateAlign);//	template alignment then we need to do steps C-F in Fig.
 		}												//	2 of Desantis et al.
-		
-		
+			
 		candidateSeq->setAligned(candAln);
 	}
 	catch(exception& e) {

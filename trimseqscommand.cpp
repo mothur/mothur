@@ -160,7 +160,7 @@ int TrimSeqsCommand::execute(){
 		if(qFileName != "")	{	openInputFile(qFileName, qFile);	}
 		
 		bool success;
-		
+			
 		while(!inFASTA.eof()){
 			Sequence currSeq(inFASTA);
 			string origSeq = currSeq.getUnaligned();
@@ -173,6 +173,7 @@ int TrimSeqsCommand::execute(){
 				if(!success)			{	trashCode += 'q';								}
 			}
 			if(barcodes.size() != 0){
+	
 				success = stripBarcode(currSeq, group);
 				if(!success){	trashCode += 'b';	}
 			}
@@ -186,7 +187,8 @@ int TrimSeqsCommand::execute(){
 			}
 			if(minLength > 0 || maxLength > 0){
 				success = cullLength(currSeq);
-				if(!success){	trashCode += 'l';	}
+			if ((currSeq.getUnaligned().length() > 300) && (success)) {  cout << "too long " << currSeq.getUnaligned().length() << endl;  }
+				if(!success){	trashCode += 'l'; }
 			}
 			if(maxHomoP > 0){
 				success = cullHomoP(currSeq);
@@ -200,6 +202,7 @@ int TrimSeqsCommand::execute(){
 			if(flip){	currSeq.reverseComplement();	}		// should go last			
 			
 			if(trashCode.length() == 0){
+				currSeq.setAligned(currSeq.getUnaligned());  //this is because of a modification we made to the sequence class to fix a bug.  all seqs have an aligned version, which is the version that gets printed.
 				currSeq.printSequence(outFASTA);
 				if(barcodes.size() != 0){
 					outGroups << currSeq.getName() << '\t' << groupVector[group] << endl;

@@ -42,8 +42,6 @@ gap(gO), match(m), mismatch(mm), Alignment(r) {							//	the gap openning penalt
 		errorOut(e, "NeedlemanOverlap", "NeedlemanOverlap");
 		exit(1);
 	}
-																
-																		
 }
 /**************************************************************************************************/
 
@@ -56,7 +54,7 @@ void NeedlemanOverlap::align(string A, string B){
 		seqA = ' ' + A;	lA = seqA.length();		//	algorithm requires a dummy space at the beginning of each string
 		seqB = ' ' + B;	lB = seqB.length();		//	algorithm requires a dummy space at the beginning of each string
 
-		if (lA > nRows) { mothurOut("Your one of your candidate sequences is longer than you longest template sequence."); mothurOutEndLine();  }
+		if (lA > nRows) { mothurOut("One of your candidate sequences is longer than you longest template sequence. Your longest template sequence is " + toString(nRows) + ". Your candidate is " + toString(lA) + "."); mothurOutEndLine();  }
 		
 		for(int i=1;i<lB;i++){					//	This code was largely translated from Perl code provided in Ex 3.1 
 			for(int j=1;j<lA;j++){				//	of the O'Reilly BLAST book.  I found that the example output had a
@@ -90,10 +88,11 @@ void NeedlemanOverlap::align(string A, string B){
 				}
 			}
 		}
+
 		Overlap over;						
 		over.setOverlap(alignment, lA, lB, 0);		//	Fix gaps at the beginning and end of the sequences
 		traceBack();								//	Traceback the alignment to populate seqAaln and seqBaln
-		
+	
 	}
 	catch(exception& e) {
 		errorOut(e, "NeedlemanOverlap", "align");

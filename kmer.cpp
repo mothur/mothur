@@ -38,6 +38,32 @@ string Kmer::getKmerString(string sequence){	//	Calculate kmer for each position
 	
 	return kmerString;	
 }
+/**************************************************************************************************/
+
+vector< map<int, int> > Kmer::getKmerCounts(string sequence){	//	Calculate kmer for each position in the sequence, save info in a map
+	int length = sequence.length();				//	so you know at each spot in the sequence what kmers were found
+	int nKmers = length - kmerSize + 1;			//	
+	vector< map<int, int> > counts; counts.resize(nKmers);  // a map kmer counts for each spot
+	 map<int, int>::iterator it;
+	
+	for(int i=0;i<nKmers;i++){					//	Go though sequence and get the number between 0 and maxKmer for that
+		if (i == 0) {
+			int kmerNumber = getKmerNumber(sequence, i);//	kmer. 
+			counts[i][kmerNumber] = 1;			// add this kmer if not already there
+		}else { 
+			//your count is everything that came before and whatever you find now
+			counts[i] = counts[i-1];
+			int kmerNumber = getKmerNumber(sequence, i);//	kmer.  
+			
+			it = counts[i].find(kmerNumber);
+			if (it!= counts[i].end()) {   counts[i][kmerNumber]++;  }  //increment number of times you have seen this kmer
+			else {   counts[i][kmerNumber] = 1;   }  // add this kmer since not already there
+		}
+	}
+	
+	return counts;	
+}
+	
 	
 /**************************************************************************************************/
 

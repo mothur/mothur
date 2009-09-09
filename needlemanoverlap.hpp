@@ -32,6 +32,7 @@ public:
 	NeedlemanOverlap(float, float, float, int);
 	~NeedlemanOverlap();
 	void align(string, string);
+
 	
 private:	
 	float gap;

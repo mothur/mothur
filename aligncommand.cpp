@@ -272,6 +272,11 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName){
 		for(int i=0;i<line->numSeqs;i++){
 			
 			Sequence* candidateSeq = new Sequence(inFASTA);
+
+			if (candidateSeq->getUnaligned().length() > alignment->getnRows()) {
+				alignment->resize(candidateSeq->getUnaligned().length()+1);
+			}
+			
 			report.setCandidate(candidateSeq);
 	
 			Sequence temp = templateDB->findClosestSequence(candidateSeq);
