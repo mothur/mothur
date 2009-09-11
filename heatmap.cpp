@@ -61,7 +61,7 @@ void HeatMap::getPic(RAbundVector* rabund) {
 		openOutputFile(filenamesvg, outsvg);
 		
 		//svg image
-		outsvg << "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 " + toString(300) + " " + toString((rabund->getNumBins()*5 + 120))  + "\">\n";
+		outsvg << "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 " + toString(300) + " " + toString((rabund->getNumBins()*5 + 120))  + "\">\n";
 		outsvg << "<g>\n";
 		
 		//white backround
@@ -137,7 +137,7 @@ void HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 		openOutputFile(filenamesvg, outsvg);
 		
 		//svg image
-		outsvg << "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 " + toString(lookup.size() * 300) + " " + toString((lookup[0]->getNumBins()*5 + 120))  + "\">\n";
+		outsvg << "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 " + toString(lookup.size() * 300) + " " + toString((lookup[0]->getNumBins()*5 + 120))  + "\">\n";
 		outsvg << "<g>\n";
 		
 		//white backround

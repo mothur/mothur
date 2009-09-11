@@ -69,6 +69,8 @@ class Chimera {
 		virtual void setIncrement(int i)		{	increment = i;		}
 		virtual void setNumWanted(int n)		{	numWanted = n;		}
 		virtual void setKmerSize(int k)			{	kmerSize = k;		}
+		virtual void setSVG(int s)				{	svg = s;			}
+		virtual void setName(string n)			{	name = n;			}
 		
 		virtual void setCons(string){};
 		virtual void setQuantiles(string){};
@@ -85,9 +87,9 @@ class Chimera {
 		
 	protected:
 		
-		bool filter, correction;
+		bool filter, correction, svg;
 		int processors, window, increment, numWanted, kmerSize;
-		string seqMask, quanfile, filterString;
+		string seqMask, quanfile, filterString, name;
 			
 
 };

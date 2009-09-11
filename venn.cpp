@@ -37,7 +37,7 @@ void Venn::getPic(SAbundVector* sabund, vector<Calculator*> vCalcs) {
 			vector<double> data = vCalcs[i]->getValues(sabund);
 			
 			//svg image
-			outsvg << "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 700 700\" >\n";
+			outsvg << "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 700 700\" >\n";
 			outsvg << "<g>\n";
 				
 			outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"700\" height=\"700\"/>"; 
@@ -88,7 +88,7 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 				vector<double> data = singleCalc->getValues(sabund);
 			
 				//svg image
-				outsvg << "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 700 700\" >\n";
+				outsvg << "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 700 700\" >\n";
 				outsvg << "<g>\n";
 				
 				outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"700\" height=\"700\"/>"; 
@@ -144,7 +144,7 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 				vector<double> numB = singleCalc->getValues(sabundB);
 						
 				//image window
-				outsvg << "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 700 700\" >\n";
+				outsvg << "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 700 700\" >\n";
 				outsvg << "<g>\n";
 
 				//draw circles
@@ -284,7 +284,7 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 					}
 					
 					//image window
-					outsvg << "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 800 800\" >\n";
+					outsvg << "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 800 800\" >\n";
 					outsvg << "<g>\n";
 
 					//draw circles
@@ -367,7 +367,7 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 					vector<double> sharedabc =  vCalcs[i]->getValues(subset);
 					
 					//image window
-					outsvg << "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 800 800\" >\n";
+					outsvg << "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 800 800\" >\n";
 					outsvg << "<g>\n";
 
 					//draw circles
@@ -536,7 +536,7 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 				
 						
 					//image window
-					outsvg << "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 700 800\" >\n";
+					outsvg << "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 700 800\" >\n";
 					outsvg << "<g>\n";
 					outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"700\" height=\"800\"/>"; 
 					outsvg << "<text fill=\"black\" class=\"seri\" x=\"265\" y=\"30\">Venn Diagram at distance " + lookup[0]->getLabel() + "</text>\n";
