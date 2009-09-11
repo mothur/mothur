@@ -25,7 +25,7 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile", "mask", "numwanted", "ksize" };
+			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile", "mask", "numwanted", "ksize", "svg", "name" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -54,7 +54,11 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 			quanfile = validParameter.validFile(parameters, "quantile", true);
 			if (quanfile == "not open") { abort = true; }
 			else if (quanfile == "not found") { quanfile = "";  }
-				
+			
+			namefile = validParameter.validFile(parameters, "name", true);
+			if (namefile == "not open") { abort = true; }
+			else if (namefile == "not found") { namefile = "";  }
+
 			maskfile = validParameter.validFile(parameters, "mask", false);
 			if (maskfile == "not found") { maskfile = "";  }	
 			else if (maskfile != "default")  { 
@@ -78,6 +82,9 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 			
 			temp = validParameter.validFile(parameters, "ksize", false);			if (temp == "not found") { temp = "7"; }
 			convert(temp, ksize);
+			
+			temp = validParameter.validFile(parameters, "svg", false);				if (temp == "not found") { temp = "F"; }
+			svg = isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "window", false);			if (temp == "not found") { temp = "0"; }
 			convert(temp, window);
@@ -153,12 +160,10 @@ int ChimeraSeqsCommand::execute(){
 		if (maskfile == "default") { mothurOut("I am using the default 236627 EU009184.1 Shigella dysenteriae str. FBD013."); mothurOutEndLine();  }
 		
 		//saves time to avoid generating it
-		if (consfile != "")			{		chimera->setCons(consfile);						}
-		else						{		chimera->setCons("");							}
+		chimera->setCons(consfile);	
 		
 		//saves time to avoid generating it
-		if (quanfile != "")			{		chimera->setQuantiles(quanfile);				}
-		else						{		chimera->setQuantiles("");						}
+		chimera->setQuantiles(quanfile);				
 		
 		chimera->setMask(maskfile);
 		chimera->setFilter(filter);
@@ -168,6 +173,8 @@ int ChimeraSeqsCommand::execute(){
 		chimera->setIncrement(increment);
 		chimera->setNumWanted(numwanted);
 		chimera->setKmerSize(ksize);
+		chimera->setSVG(svg);
+		chimera->setName(namefile);
 				
 		//find chimeras
 		chimera->getChimeras();
