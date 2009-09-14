@@ -99,7 +99,7 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 
 			
 			
-			if (((method == "pintail") || (method == "alignsim")) && (templatefile == "")) { mothurOut("You must provide a template file with the pintail and alignsim methods."); mothurOutEndLine(); abort = true;  }
+			if (((method != "bellerophon")) && (templatefile == "")) { mothurOut("You must provide a template file with the pintail, ccode or chimeracheck methods."); mothurOutEndLine(); abort = true;  }
 			
 
 		}
@@ -113,24 +113,40 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 
 void ChimeraSeqsCommand::help(){
 	try {
-		mothurOut("chimera.seqs ASSUMES that your sequences are ALIGNED and if using a template that the template file sequences are the same length as the fasta file sequences.\n\n");
+	
+		//"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile", "mask", "numwanted", "ksize", "svg", "name"
+		//mothurOut("chimera.seqs ASSUMES that your sequences are ALIGNED and if using a template that the template file sequences are the same length as the fasta file sequences.\n\n");
 		mothurOut("The chimera.seqs command reads a fastafile and creates list of potentially chimeric sequences.\n");
-		mothurOut("The chimera.seqs command parameters are fasta, filter, correction, processors, mask, method, window, increment, template, conservation and quantile.\n");
-		mothurOut("The fasta parameter is always required and template is required if using pintail.\n");
-		mothurOut("The filter parameter allows you to specify if you would like to apply a vertical and 50% soft filter.  The default is false. \n");
-		mothurOut("The correction parameter allows you to put more emphasis on the distance between highly similar sequences and less emphasis on the differences between remote homologs.   The default is true. This only applies when the method is bellerphon.\n");
+		mothurOut("The chimera.seqs command parameters are fasta, filter, correction, processors, mask, method, window, increment, template, conservation, quantile, numwanted, ksize, svg, name.\n");
+		mothurOut("The fasta parameter is always required and template is required if using pintail, ccode or chimeracheck.\n");
+		mothurOut("The filter parameter allows you to specify if you would like to apply a vertical and 50% soft filter. \n");
+		mothurOut("The correction parameter allows you to put more emphasis on the distance between highly similar sequences and less emphasis on the differences between remote homologs.\n");
 		mothurOut("The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n");
-		mothurOut("The method parameter allows you to specify the method for finding chimeric sequences.  The default is pintail. Options include..... \n");
-		mothurOut("The mask parameter allows you to specify a file containing one sequence you wish to use as a mask for the pintail.  The default is no mask.  If you enter mask=default, then the mask is 236627 EU009184.1 Shigella dysenteriae str. FBD013. \n");
-		mothurOut("The window parameter allows you to specify the window size for searching for chimeras.  The default is 300 is method is pintail unless the sequence length is less than 300, and 1/4 sequence length for bellerphon.\n");
-		mothurOut("The increment parameter allows you to specify how far you move each window while finding chimeric sequences.  The default is 25.\n");
-		mothurOut("The template parameter allows you to enter a template file containing known non-chimeric sequences for use by the pintail algorythm. It is a required parameter if using pintail.\n");
-		mothurOut("The conservation parameter allows you to enter a frequency file containing the highest bases frequency at each place in the alignment for use by the pintail algorythm. It is not required, but will speed up the pintail method.\n");
-		mothurOut("The quantile parameter allows you to enter a file containing quantiles for a template files sequences for use by the pintail algorythm. It is not required, but will speed up the pintail method.\n");
-		mothurOut("If you have run chimera.seqs using pintail a .quan and .freq file will be created if you have not provided them for use in future command executions.");
+		mothurOut("The method parameter allows you to specify the method for finding chimeric sequences.  The default is pintail. Options include bellerophon, ccode and chimeracheck \n");
+		mothurOut("The mask parameter allows you to specify a file containing one sequence you wish to use as a mask for the your sequences. \n");
+		mothurOut("The window parameter allows you to specify the window size for searching for chimeras. \n");
+		mothurOut("The increment parameter allows you to specify how far you move each window while finding chimeric sequences.\n");
+		mothurOut("The template parameter allows you to enter a template file containing known non-chimeric sequences. \n");
+		mothurOut("The conservation parameter allows you to enter a frequency file containing the highest bases frequency at each place in the alignment.\n");
+		mothurOut("The quantile parameter allows you to enter a file containing quantiles for a template files sequences.\n");
+		mothurOut("The numwanted parameter allows you to specify how many sequences you would each query sequence compared with.\n");
+		mothurOut("The ksize parameter allows you to input kmersize. \n");
+		mothurOut("The svg parameter allows you to specify whether or not you would like a svg file outputted for each query sequence.\n");
+		mothurOut("The name parameter allows you to enter a file containing names of sequences you would like .svg files for.\n");
+		mothurOut("NOT ALL PARAMETERS ARE USED BY ALL METHODS. Please look below for method specifics.\n\n");
+		mothurOut("Details for each method: \n"); 
+		mothurOut("\tpintail: \n"); 
+		mothurOut("\t\tparameters: fasta=required, template=required, filter=F, mask=no mask, processors=1, window=300, increment=25, conservation=not required, but will improve speed, quantile=not required, but will greatly improve speed. \n"); 
+		mothurOut("\t\tIf you have run chimera.seqs using pintail a .quan and .freq file will be created for your template, if you have not provided them for use in future command executions.\n");
+		mothurOut("\tbellerophon: \n"); 
+		mothurOut("\t\tparameters: fasta=required, filter=F, processors=1, window=1/4 length of seq, increment=25, correction=T. \n"); 
+		mothurOut("\tccode: \n"); 
+		mothurOut("\t\tparameters: fasta=required, template=required, filter=F, mask=no mask, processors=1, window=10% of length, numwanted=20\n"); 
+		mothurOut("\tchimeracheck: \n"); 
+		mothurOut("\t\tparameters: fasta=required, template=required, processors=1, increment=10, ksize=7, svg=F, name=none\n\n"); 
 		mothurOut("The chimera.seqs command should be in the following format: \n");
 		mothurOut("chimera.seqs(fasta=yourFastaFile, filter=yourFilter, correction=yourCorrection, processors=yourProcessors, method=bellerophon) \n");
-		mothurOut("Example: chimera.seqs(fasta=AD.align, filter=True, correction=true, processors=2, method=yourMethod) \n");
+		mothurOut("Example: chimera.seqs(fasta=AD.align, filter=True, correction=true, method=bellerophon, window=200) \n");
 		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");	
 	}
 	catch(exception& e) {
