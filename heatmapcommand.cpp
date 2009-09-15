@@ -211,7 +211,7 @@ int HeatMapCommand::execute(){
 		
 			//run last line if you need to
 			if (needToRun == true)  {
-				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
+				for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }  
 				lookup = input->getSharedRAbundVectors(lastLabel);
 				
 				mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
@@ -274,7 +274,7 @@ int HeatMapCommand::execute(){
 			//run last line if you need to
 			if (needToRun == true)  {
 		
-				delete rabund;
+				if (rabund != NULL) {	delete rabund;	}
 				rabund = input->getRAbundVector(lastLabel);
 				mothurOut(rabund->getLabel()); mothurOutEndLine();
 					

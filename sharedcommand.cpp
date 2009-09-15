@@ -119,7 +119,7 @@ int SharedCommand::execute(){
 		
 		//run last line if you need to
 		if (needToRun == true)  {
-			delete SharedList;
+			if (SharedList != NULL) {	delete SharedList;	}
 			SharedList = input->getSharedListVector(lastLabel); //get new list vector to process
 					
 			lookup = SharedList->getSharedRAbundVector();

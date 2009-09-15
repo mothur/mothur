@@ -152,7 +152,7 @@ int ReadDistCommand::execute(){
 		
 		if (abort == true) {	return 0;	}
 
-		time_t start = time(NULL);
+		//time_t start = time(NULL);
 		size_t numDists = 0;
 		
 		if (format == "matrix") {
@@ -192,15 +192,15 @@ int ReadDistCommand::execute(){
         }
 			}
 
-      string dist_string = "Dist:";
-      string count_string = "Count: ";
-			for (int i = 0; i <= lines;i++) {	
-      	dist_string = dist_string.append("\t").append(toString(dist_cutoff[i]));
-      	count_string = count_string.append("\t").append(toString(dist_count[i]));
-			}
-      mothurOut(dist_string); mothurOutEndLine(); mothurOut(count_string); mothurOutEndLine();
+     // string dist_string = "Dist:";
+    //  string count_string = "Count: ";
+			//for (int i = 0; i <= lines;i++) {	
+      	//dist_string = dist_string.append("\t").append(toString(dist_cutoff[i]));
+      //	count_string = count_string.append("\t").append(toString(dist_count[i]));
+		//	}
+      //mothurOut(dist_string); mothurOutEndLine(); mothurOut(count_string); mothurOutEndLine();
 		}
-		mothurOut("It took " + toString(time(NULL) - start) + " secs to read " + toString(numDists) + " distances (cutoff: " + toString(cutoff) + ")"); mothurOutEndLine();
+		//mothurOut("It took " + toString(time(NULL) - start) + " secs to read " + toString(numDists) + " distances (cutoff: " + toString(cutoff) + ")"); mothurOutEndLine();
 		return 0;
 		
 	}

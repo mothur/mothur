@@ -290,7 +290,7 @@ int SummaryCommand::execute(){
 		
 		//run last line if you need to
 		if (needToRun == true)  {
-			delete sabund;
+			if (sabund != NULL) {	delete sabund;	}
 			sabund = input->getSAbundVector(lastLabel);
 			
 			mothurOut(sabund->getLabel()); mothurOutEndLine();

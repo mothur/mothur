@@ -515,8 +515,8 @@
 		A70B53A70F4CD7AD0064797E /* getlabelcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getlabelcommand.h; sourceTree = SOURCE_ROOT; };
 		A70B53A80F4CD7AD0064797E /* getlinecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getlinecommand.cpp; sourceTree = SOURCE_ROOT; };
 		A70B53A90F4CD7AD0064797E /* getlinecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getlinecommand.h; sourceTree = SOURCE_ROOT; };
-		A7283FF61056CAE100D0CC69 /* chimeracheckrdp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeracheckrdp.h; sourceTree = "<group>"; };
-		A7283FF71056CAE100D0CC69 /* chimeracheckrdp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeracheckrdp.cpp; sourceTree = "<group>"; };
+		A7283FF61056CAE100D0CC69 /* chimeracheckrdp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeracheckrdp.h; sourceTree = SOURCE_ROOT; };
+		A7283FF71056CAE100D0CC69 /* chimeracheckrdp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeracheckrdp.cpp; sourceTree = SOURCE_ROOT; };
 		A75B887B104C16860083C454 /* ccode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ccode.cpp; sourceTree = SOURCE_ROOT; };
 		A75B887C104C16860083C454 /* ccode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ccode.h; sourceTree = SOURCE_ROOT; };
 		C6859E8B029090EE04C91782 /* Mothur.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = Mothur.1; sourceTree = "<group>"; };

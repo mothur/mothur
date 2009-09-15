@@ -142,7 +142,7 @@ vector< vector<float> > Chimera::readQuantiles() {
 		openInputFile(quanfile, in);
 		
 		vector< vector<float> > quan;
-		vector <float> temp;
+		vector <float> temp; temp.resize(6, 0);
 		
 		//to fill 0
 		quan.push_back(temp); 

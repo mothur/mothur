@@ -24,7 +24,7 @@ class UnifracWeightedCommand : public Command {
 	
 	public:
 		UnifracWeightedCommand(string);	
-		~UnifracWeightedCommand() { delete weighted; delete util; }
+		~UnifracWeightedCommand() { if (abort == false) {  delete weighted; delete util; } }
 		int execute();	
 		void help();
 	
