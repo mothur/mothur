@@ -271,7 +271,7 @@ int CollectCommand::execute(){
 		
 		//run last line if you need to
 		if (needToRun == true)  {
-			delete order;
+			if (order != NULL) {	delete order;	}
 			order = (input->getOrderVector(lastLabel));
 			
 			mothurOut(order->getLabel()); mothurOutEndLine();

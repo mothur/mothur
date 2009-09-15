@@ -187,7 +187,7 @@ int GetRAbundCommand::execute(){
 		
 		//run last line if you need to
 		if (needToRun == true)  {
-			delete list;
+			if (list != NULL) {	delete list;	}
 			list = input->getListVector(lastLabel);
 			
 			mothurOut(list->getLabel()); mothurOutEndLine();

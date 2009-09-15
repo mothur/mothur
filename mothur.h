@@ -171,6 +171,16 @@ inline int openOutputFileAppend(string fileName, ofstream& fileHandle){
 }
 /***********************************************************************/
 
+inline void gobble(istream& f){
+	
+	char d;
+    while(isspace(d=f.get()))		{;}
+	f.putback(d);
+	
+}
+
+/***********************************************************************/
+
 inline string getline(ifstream& fileHandle) {
 	try {
 	
@@ -181,7 +191,7 @@ inline string getline(ifstream& fileHandle) {
 			char c = fileHandle.get(); 
 			
 			//are you at the end of the line
-			if ((c == '\n') || (c == '\r') || (c == '\f')){   break;	}	
+			if ((c == '\n') || (c == '\r') || (c == '\f')){  break;	}	
 			else {		line += c;		}
 		}
 		
@@ -265,15 +275,6 @@ inline void errorOut(exception& e, string object, string function) {
 
 
 
-/***********************************************************************/
-
-inline void gobble(istream& f){
-	
-	char d;
-    while(isspace(d=f.get()))		{;}
-	f.putback(d);
-	
-}
 /***********************************************************************/
 
 inline bool isTrue(string f){

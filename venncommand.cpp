@@ -275,7 +275,7 @@ int VennCommand::execute(){
 		
 			//run last line if you need to
 			if (needToRun == true)  {
-					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+					for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {	delete lookup[i]; }  } 
 					lookup = input->getSharedRAbundVectors(lastLabel);
 
 					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
@@ -341,7 +341,7 @@ int VennCommand::execute(){
 		
 			//run last line if you need to
 			if (needToRun == true)  {
-				delete sabund;
+				if (sabund != NULL) {	delete sabund;	}
 				sabund = input->getSAbundVector(lastLabel);
 					
 				mothurOut(sabund->getLabel()); mothurOutEndLine();

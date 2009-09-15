@@ -296,11 +296,11 @@ int CollectSharedCommand::execute(){
 		
 		//run last line if you need to
 		if (needToRun == true)  {
-			delete order;
+			if (order != NULL) {  delete order;  }
 			order = input->getSharedOrderVector(lastLabel);
 
 			cCurve = new Collect(order, cDisplays);
-			cCurve->getCurve(freq);
+			cCurve->getSharedCurve(freq);
 			delete cCurve;
 			
 			mothurOut(order->getLabel()); mothurOutEndLine();

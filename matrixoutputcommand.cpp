@@ -246,7 +246,7 @@ int MatrixOutputCommand::execute(){
 		
 		//run last line if you need to
 		if (needToRun == true)  {
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+			for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {  delete lookup[i]; }  } 
 			lookup = input->getSharedRAbundVectors(lastLabel);
 
 			mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
