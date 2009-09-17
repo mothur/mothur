@@ -425,6 +425,10 @@ inline int openInputFile(string fileName, ifstream& fileHandle){
 		return 1;
 	}
 	else {
+		//check for blank file
+		gobble(fileHandle);
+		if (fileHandle.eof()) { mothurOut(fileName + " is blank. Please correct."); mothurOutEndLine();  return 1;  }
+		
 		return 0;
 	}
 	

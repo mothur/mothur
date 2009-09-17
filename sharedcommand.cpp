@@ -57,12 +57,26 @@ int SharedCommand::execute(){
 		//read in listfile
 		read = new ReadOTUFile(globaldata->inputFileName);	
 		read->read(&*globaldata); 
+		delete read;
 
 		input = globaldata->ginput;
 		SharedList = globaldata->gSharedList;
 		string lastLabel = SharedList->getLabel();
 		vector<SharedRAbundVector*> lookup; 
-				
+		
+		if (SharedList->getNumSeqs() != groupMap->getNumSeqs()) {  
+			mothurOut("Your group file contains " + toString(groupMap->getNumSeqs()) + " sequences and list file contains " + toString(SharedList->getNumSeqs()) + " sequences. Please correct."); mothurOutEndLine(); 
+			
+			//delete memory
+			for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
+				delete it3->second;
+			}
+			delete SharedList;
+			globaldata->gSharedList = NULL;
+			
+			return(0); 
+		}
+		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = globaldata->labels;
@@ -131,7 +145,6 @@ int SharedCommand::execute(){
 		}
 		
 		globaldata->gSharedList = NULL;
-		delete read;
 		
 		out.close();
 		
