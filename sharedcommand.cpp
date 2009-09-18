@@ -67,6 +67,8 @@ int SharedCommand::execute(){
 		if (SharedList->getNumSeqs() != groupMap->getNumSeqs()) {  
 			mothurOut("Your group file contains " + toString(groupMap->getNumSeqs()) + " sequences and list file contains " + toString(SharedList->getNumSeqs()) + " sequences. Please correct."); mothurOutEndLine(); 
 			
+			createMisMatchFile();
+			
 			//delete memory
 			for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
 				delete it3->second;
@@ -74,7 +76,7 @@ int SharedCommand::execute(){
 			delete SharedList;
 			globaldata->gSharedList = NULL;
 			
-			return(0); 
+			return 1; 
 		}
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -178,6 +180,89 @@ void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup) {
 	}
 	catch(exception& e) {
 		errorOut(e, "SharedCommand", "printSharedData");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+void SharedCommand::createMisMatchFile() {
+	try {
+		ofstream outMisMatch;
+		string outputMisMatchName = getRootName(globaldata->inputFileName);
+		
+		//you have sequences in your list file that are not in your group file
+		if (SharedList->getNumSeqs() > groupMap->getNumSeqs()) { 
+			outputMisMatchName += "missing.group";
+			mothurOut("For a list of names that are in your list file and not in your group file, please refer to " + outputMisMatchName + "."); mothurOutEndLine();
+			
+			openOutputFile(outputMisMatchName, outMisMatch);
+			
+			//go through list and if group returns "not found" output it
+			for (int i = 0; i < SharedList->getNumBins(); i++) {
+			
+				string names = SharedList->get(i); 
+				
+				while (names.find_first_of(',') != -1) { 
+					string name = names.substr(0,names.find_first_of(','));
+					names = names.substr(names.find_first_of(',')+1, names.length());
+					string group = groupMap->getGroup(name);
+					
+					if(group == "not found") {	outMisMatch << name << endl;  }
+				}
+				
+				//get last name
+				string group = groupMap->getGroup(names);
+				if(group == "not found") {	outMisMatch << names << endl;  }				
+			}
+			
+			outMisMatch.close();
+			
+		
+		}else {//you have sequences in your group file that are not in you list file
+			
+			outputMisMatchName += "missing.name";
+			mothurOut("For a list of names that are in your group file and not in your list file, please refer to " + outputMisMatchName + "."); mothurOutEndLine();
+			
+			map<string, string> namesInList;
+			
+			//go through listfile and get names
+			for (int i = 0; i < SharedList->getNumSeqs(); i++) {
+				
+				string names = SharedList->get(i); 
+				
+				while (names.find_first_of(',') != -1) { 
+					string name = names.substr(0,names.find_first_of(','));
+					names = names.substr(names.find_first_of(',')+1, names.length());
+					
+					namesInList[name] = name;
+				}
+				
+				//get last name
+				namesInList[names] = names;				
+			}
+			
+			//get names of sequences in groupfile
+			vector<string> seqNames = groupMap->getNamesSeqs();
+		
+			map<string, string>::iterator itMatch;
+			
+			openOutputFile(outputMisMatchName, outMisMatch);
+			
+			//loop through names in seqNames and if they aren't in namesIn list output them
+			for (int i = 0; i < seqNames.size(); i++) {
+				
+				itMatch = namesInList.find(seqNames[i]);
+				
+				if (itMatch == namesInList.end()) {
+				
+					outMisMatch << seqNames[i] << endl; 
+				}
+			}		
+			outMisMatch.close();
+		}
+ 
+	}
+	catch(exception& e) {
+		errorOut(e, "SharedCommand", "createMisMatchFile");
 		exit(1);
 	}
 }

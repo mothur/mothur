@@ -159,14 +159,22 @@ int ReadOtuCommand::execute(){
 		if (globaldata->getFormat() == "shared") {
 			
 			shared = new SharedCommand();
-			shared->execute();
+			int okay = shared->execute();
 			delete shared;
+			
+			//problem with shared
+			if (okay == 1) {
+				globaldata->setListFile("");
+				globaldata->setGroupFile("");
+				globaldata->setSharedFile("");
+			}else{
 				
-			//change format to shared  to speed up commands
-			globaldata->setFormat("sharedfile");
-			globaldata->setListFile("");
-			globaldata->setGroupFile("");
-			globaldata->setSharedFile(getRootName(filename) + "shared");
+				//change format to shared  to speed up commands
+				globaldata->setFormat("sharedfile");
+				globaldata->setListFile("");
+				globaldata->setGroupFile("");
+				globaldata->setSharedFile(getRootName(filename) + "shared");
+			}
 		}
 		return 0;
 	}

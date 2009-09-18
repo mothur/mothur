@@ -33,6 +33,7 @@ public:
 	
 private:
 	void printSharedData(vector<SharedRAbundVector*>);
+	void createMisMatchFile();
 	GlobalData* globaldata;
 	ReadOTUFile* read;
 	SharedListVector* SharedList;
