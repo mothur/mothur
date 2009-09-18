@@ -146,15 +146,15 @@ void Pintail::getChimeras() {
 			mothurOut("Done."); mothurOutEndLine();
 		}else {		createProcessesPairs();		}
 		
-string o = "closestmatch.eachgap.fasta";
-ofstream out7;
-openOutputFile(o, out7);
+//string o = "closestmatch.eachgap.fasta";
+//ofstream out7;
+//openOutputFile(o, out7);
 
-for (int i = 0; i < bestfit.size(); i++) {
-	out7 << ">" << querySeqs[i]->getName() << "-"<< bestfit[i]->getName() << endl;
-	out7 << bestfit[i]->getAligned() << endl;
-}		
-out7.close();	
+//for (int i = 0; i < bestfit.size(); i++) {
+	//out7 << ">" << querySeqs[i]->getName() << "-"<< bestfit[i]->getName() << endl;
+	//out7 << bestfit[i]->getAligned() << endl;
+//}		
+//out7.close();	
 		//find P
 		mothurOut("Getting conservation... "); cout.flush();
 		if (consfile == "") { 
