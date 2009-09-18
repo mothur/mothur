@@ -27,6 +27,7 @@ public:
 	vector<string> namesOfGroups;
 	map<string, int> groupIndex;  //groupname, vectorIndex in namesOfGroups. - used by collectdisplays.
 	int getNumSeqs()  {  return groupmap.size();  }
+	vector<string> getNamesSeqs();
 			
 private:
 	ifstream fileHandle;

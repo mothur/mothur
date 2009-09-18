@@ -85,3 +85,23 @@ bool GroupMap::isValidGroup(string groupname) {
 		exit(1);
 	}
 }
+
+/************************************************************/
+vector<string> GroupMap::getNamesSeqs(){
+	try {
+	
+		vector<string> names;
+		
+		for (it = groupmap.begin(); it != groupmap.end(); it++) {
+			names.push_back(it->first);
+		}
+		
+		return names;
+	}
+	catch(exception& e) {
+		errorOut(e, "GroupMap", "getNamesSeqs");
+		exit(1);
+	}
+}
+/************************************************************/
+

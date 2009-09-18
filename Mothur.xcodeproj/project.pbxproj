@@ -162,6 +162,7 @@
 		A70B53AA0F4CD7AD0064797E /* getgroupcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70B53A40F4CD7AD0064797E /* getgroupcommand.cpp */; };
 		A70B53AB0F4CD7AD0064797E /* getlabelcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70B53A60F4CD7AD0064797E /* getlabelcommand.cpp */; };
 		A70B53AC0F4CD7AD0064797E /* getlinecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70B53A80F4CD7AD0064797E /* getlinecommand.cpp */; };
+		A70DECD91063D8B40057C03C /* secondarystructurecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70DECD81063D8B40057C03C /* secondarystructurecommand.cpp */; };
 		A7283FF81056CAE100D0CC69 /* chimeracheckrdp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7283FF71056CAE100D0CC69 /* chimeracheckrdp.cpp */; };
 		A75B887E104C16860083C454 /* ccode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A75B887B104C16860083C454 /* ccode.cpp */; };
 		EB1216880F619B83004A865F /* bergerparker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB1216870F619B83004A865F /* bergerparker.cpp */; };
@@ -515,6 +516,8 @@
 		A70B53A70F4CD7AD0064797E /* getlabelcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getlabelcommand.h; sourceTree = SOURCE_ROOT; };
 		A70B53A80F4CD7AD0064797E /* getlinecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getlinecommand.cpp; sourceTree = SOURCE_ROOT; };
 		A70B53A90F4CD7AD0064797E /* getlinecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getlinecommand.h; sourceTree = SOURCE_ROOT; };
+		A70DECD71063D8B40057C03C /* secondarystructurecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = secondarystructurecommand.h; sourceTree = "<group>"; };
+		A70DECD81063D8B40057C03C /* secondarystructurecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = secondarystructurecommand.cpp; sourceTree = "<group>"; };
 		A7283FF61056CAE100D0CC69 /* chimeracheckrdp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeracheckrdp.h; sourceTree = SOURCE_ROOT; };
 		A7283FF71056CAE100D0CC69 /* chimeracheckrdp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeracheckrdp.cpp; sourceTree = SOURCE_ROOT; };
 		A75B887B104C16860083C454 /* ccode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ccode.cpp; sourceTree = SOURCE_ROOT; };
@@ -866,6 +869,8 @@
 				37B73CBF1004EB38008C4B41 /* removeseqscommand.cpp */,
 				7E09C5120FDA79C5002ECAE5 /* reversecommand.h */,
 				7E09C5130FDA79C5002ECAE5 /* reversecommand.cpp */,
+				A70DECD71063D8B40057C03C /* secondarystructurecommand.h */,
+				A70DECD81063D8B40057C03C /* secondarystructurecommand.cpp */,
 				371B30B30FD7EE67000414CA /* screenseqscommand.h */,
 				371B30B20FD7EE67000414CA /* screenseqscommand.cpp */,
 				3799A94F0FD6A58C00E33EDE /* seqsummarycommand.h */,
@@ -1179,6 +1184,7 @@
 				372095C2103196D70004D347 /* chimera.cpp in Sources */,
 				A75B887E104C16860083C454 /* ccode.cpp in Sources */,
 				A7283FF81056CAE100D0CC69 /* chimeracheckrdp.cpp in Sources */,
+				A70DECD91063D8B40057C03C /* secondarystructurecommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
