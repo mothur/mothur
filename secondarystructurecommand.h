@@ -44,6 +44,7 @@ class AlignCheckCommand : public Command {
 		int seqLength;
 		
 		void readMap();
+		statData getStats(string sequence);
 };
 
 /**************************************************************************************************/

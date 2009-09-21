@@ -54,6 +54,7 @@
 #include "getseqscommand.h"
 #include "removeseqscommand.h"
 #include "systemcommand.h"
+#include "secondarystructurecommand.h"
 
 /***********************************************************/
 
@@ -106,6 +107,7 @@ CommandFactory::CommandFactory(){
 	commands["get.seqs"]			= "get.seqs";
 	commands["remove.seqs"]			= "get.seqs";
 	commands["system"]				= "system";
+	commands["align.check"]			= "align.check";
 	commands["quit"]				= "quit"; 
 
 }
@@ -168,6 +170,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "remove.seqs")			{	command = new RemoveSeqsCommand(optionString);			}
 		else if(commandName == "merge.files")			{	command = new MergeFileCommand(optionString);			}
 		else if(commandName == "system")				{	command = new SystemCommand(optionString);				}
+		else if(commandName == "align.check")			{	command = new AlignCheckCommand(optionString);			}
 		else											{	command = new NoCommand(optionString);					}
 
 		return command;
