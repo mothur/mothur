@@ -39,13 +39,12 @@ private:
 	InputData* input;
 	FastaMap* fasta;
 	GroupMap* groupMap;
-	string filename, fastafile, listfile, namesfile, groupfile, line, label;
+	string filename, fastafile, listfile, namesfile, groupfile, label;
 	ofstream out;
 	ifstream in, inNames;
 	bool groupError;
 
 	bool abort, allLines;
-	set<int> lines; //hold lines to be used
 	set<string> labels; //holds labels to be used
 	map<string, int> nameToIndex;  //maps sequence name to index in sparsematrix
 

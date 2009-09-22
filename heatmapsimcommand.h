@@ -38,9 +38,8 @@ private:
 	map<string, string> parameters;
 	map<string, string>::iterator it;
 	bool abort, allLines;
-	set<int> lines; //hold lines to be used
 	set<string> labels; //holds labels to be used
-	string format, groups, line, label, calc;
+	string format, groups, label, calc;
 	vector<string> Estimators, Groups;
 
 

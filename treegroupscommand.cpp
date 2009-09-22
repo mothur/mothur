@@ -27,7 +27,6 @@ TreeGroupCommand::TreeGroupCommand(string option){
 		globaldata = GlobalData::getInstance();
 		abort = false;
 		allLines = 1;
-		lines.clear();
 		labels.clear();
 		Groups.clear();
 		Estimators.clear();
@@ -37,7 +36,7 @@ TreeGroupCommand::TreeGroupCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"line","label","calc","groups", "phylip", "column", "name", "precision","cutoff"};
+			string Array[] =  {"label","calc","groups", "phylip", "column", "name", "precision","cutoff"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -78,13 +77,6 @@ TreeGroupCommand::TreeGroupCommand(string option){
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			line = validParameter.validFile(parameters, "line", false);				
-			if (line == "not found") { line = "";  }
-			else { 
-				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
-				else { allLines = 1;  }
-			}
-			
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
@@ -92,13 +84,10 @@ TreeGroupCommand::TreeGroupCommand(string option){
 				else { allLines = 1;  }
 			}
 			
-			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
-			//if the user has not specified any line or labels use the ones from read.otu
-			else if((line == "") && (label == "")) {  
+			//if the user has not specified any labels use the ones from read.otu
+			if(label == "") {  
 				allLines = globaldata->allLines; 
 				labels = globaldata->labels; 
-				lines = globaldata->lines;
 			}
 				
 			groups = validParameter.validFile(parameters, "groups", false);			
@@ -172,13 +161,13 @@ void TreeGroupCommand::help(){
 	try {
 		mothurOut("The tree.shared command creates a .tre to represent the similiarity between groups or sequences.\n");
 		mothurOut("The tree.shared command can only be executed after a successful read.otu command or by providing a distance file.\n");
-		mothurOut("The tree.shared command parameters are groups, calc, phylip, column, name, cutoff, precision, line and label.  You may not use line and label at the same time.\n");
+		mothurOut("The tree.shared command parameters are groups, calc, phylip, column, name, cutoff, precision and label.\n");
 		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included used.\n");
-		mothurOut("The group names are separated by dashes. The line and label allow you to select what distance levels you would like trees created for, and are also separated by dashes.\n");
+		mothurOut("The group names are separated by dashes. The label allow you to select what distance levels you would like trees created for, and are also separated by dashes.\n");
 		mothurOut("The phylip or column parameter are required if you do not run the read.otu command first, and only one may be used.  If you use a column file the name filename is required. \n");
 		mothurOut("If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n");
-		mothurOut("The tree.shared command should be in the following format: tree.shared(groups=yourGroups, calc=yourCalcs, line=yourLines, label=yourLabels).\n");
-		mothurOut("Example tree.shared(groups=A-B-C, line=1-3-5, calc=jabund-sorabund).\n");
+		mothurOut("The tree.shared command should be in the following format: tree.shared(groups=yourGroups, calc=yourCalcs, label=yourLabels).\n");
+		mothurOut("Example tree.shared(groups=A-B-C, calc=jabund-sorabund).\n");
 		mothurOut("The default value for groups is all the groups in your groupfile.\n");
 		mothurOut("The default value for calc is jclass-thetayc.\n");
 		mothurOut("The tree.shared command outputs a .tre file for each calculator you specify at each distance you choose.\n");
@@ -427,7 +416,6 @@ void TreeGroupCommand::makeSimsDist() {
 /***********************************************************/
 void TreeGroupCommand::makeSimsShared() {
 	try {
-		int count = 1;	
 	
 		//clear globaldatas old tree names if any
 		globaldata->Treenames.clear();
@@ -442,18 +430,16 @@ void TreeGroupCommand::makeSimsShared() {
 		
 		set<string> processedLabels;
 		set<string> userLabels = labels;
-		set<int> userLines = lines;
-
-		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 		
-			if(allLines == 1 || lines.count(count) == 1 || labels.count(lookup[0]->getLabel()) == 1){			
+		//as long as you are not at the end of the file or done wih the lines you want
+		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+		
+			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 				mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 				process(lookup);
 				
 				processedLabels.insert(lookup[0]->getLabel());
 				userLabels.erase(lookup[0]->getLabel());
-				userLines.erase(count);
 			}
 			
 			if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
@@ -472,7 +458,6 @@ void TreeGroupCommand::makeSimsShared() {
 			//get next line to process
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 			lookup = input->getSharedRAbundVectors();
-			count++;
 		}
 		
 		//output error messages about any remaining user labels
@@ -488,7 +473,7 @@ void TreeGroupCommand::makeSimsShared() {
 			}
 		}
 		
-		//run last line if you need to
+		//run last label if you need to
 		if (needToRun == true)  {
 			for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {		delete lookup[i]; }		} 
 			lookup = input->getSharedRAbundVectors(lastLabel);

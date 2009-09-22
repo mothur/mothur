@@ -27,7 +27,6 @@ RareFactCommand::RareFactCommand(string option){
 		globaldata = GlobalData::getInstance();
 		abort = false;
 		allLines = 1;
-		lines.clear();
 		labels.clear();
 		Estimators.clear();
 		
@@ -36,7 +35,7 @@ RareFactCommand::RareFactCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"iters","freq","line","label","calc","abund"};
+			string Array[] =  {"iters","freq","label","calc","abund"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -54,13 +53,6 @@ RareFactCommand::RareFactCommand(string option){
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			line = validParameter.validFile(parameters, "line", false);				
-			if (line == "not found") { line = "";  }
-			else { 
-				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
-				else { allLines = 1;  }
-			}
-			
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
@@ -68,13 +60,10 @@ RareFactCommand::RareFactCommand(string option){
 				else { allLines = 1;  }
 			}
 			
-			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
-			//if the user has not specified any line or labels use the ones from read.otu
-			else if((line == "") && (label == "")) {  
+			//if the user has not specified any labels use the ones from read.otu
+			if(label == "") {  
 				allLines = globaldata->allLines; 
 				labels = globaldata->labels; 
-				lines = globaldata->lines;
 			}
 				
 			calc = validParameter.validFile(parameters, "calc", false);			
@@ -144,13 +133,13 @@ void RareFactCommand::help(){
 	try {
 		mothurOut("The rarefaction.single command can only be executed after a successful read.otu WTIH ONE EXECEPTION.\n");
 		mothurOut("The rarefaction.single command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster.\n");
-		mothurOut("The rarefaction.single command parameters are label, line, iters, freq, calc and abund.  No parameters are required, but you may not use \n");
-		mothurOut("both the line and label parameters at the same time. The rarefaction.single command should be in the following format: \n");
-		mothurOut("rarefaction.single(label=yourLabel, line=yourLines, iters=yourIters, freq=yourFreq, calc=yourEstimators).\n");
-		mothurOut("Example rarefaction.single(label=unique-.01-.03, line=0-5-10, iters=10000, freq=10, calc=sobs-rchao-race-rjack-rbootstrap-rshannon-rnpshannon-rsimpson).\n");
+		mothurOut("The rarefaction.single command parameters are label, iters, freq, calc and abund.  No parameters are required. \n");
+		mothurOut("The rarefaction.single command should be in the following format: \n");
+		mothurOut("rarefaction.single(label=yourLabel, iters=yourIters, freq=yourFreq, calc=yourEstimators).\n");
+		mothurOut("Example rarefaction.single(label=unique-.01-.03, iters=10000, freq=10, calc=sobs-rchao-race-rjack-rbootstrap-rshannon-rnpshannon-rsimpson).\n");
 		mothurOut("The default values for iters is 1000, freq is 100, and calc is rarefaction which calculates the rarefaction curve for the observed richness.\n");
 		validCalculator->printCalc("rarefaction", cout);
-		mothurOut("The label and line parameters are used to analyze specific lines in your input.\n");
+		mothurOut("The label parameter is used to analyze specific labels in your input.\n");
 		mothurOut("Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n\n");
 	}
 	catch(exception& e) {
@@ -177,8 +166,6 @@ int RareFactCommand::execute(){
 	
 		if (abort == true) { return 0; }
 		
-		int count = 1;
-		
 		//if the users entered no valid calculators don't execute command
 		if (rDisplays.size() == 0) { return 0; }
 
@@ -192,12 +179,11 @@ int RareFactCommand::execute(){
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
-		set<int> userLines = lines;
 	
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
+		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if(allLines == 1 || lines.count(count) == 1 || labels.count(order->getLabel()) == 1){
+			if(allLines == 1 || labels.count(order->getLabel()) == 1){
 			
 				rCurve = new Rarefact(order, rDisplays);
 				rCurve->getCurve(freq, nIters);
@@ -206,7 +192,6 @@ int RareFactCommand::execute(){
 				mothurOut(order->getLabel()); mothurOutEndLine();
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
-				userLines.erase(count);
 			}
 			
 			if ((anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
@@ -226,7 +211,6 @@ int RareFactCommand::execute(){
 			
 			delete order;
 			order = (input->getOrderVector());
-			count++;
 		}
 		
 		//output error messages about any remaining user labels
@@ -242,7 +226,7 @@ int RareFactCommand::execute(){
 			}
 		}
 		
-		//run last line if you need to
+		//run last label if you need to
 		if (needToRun == true)  {
 			if (order != NULL) {	delete order;	}
 			order = (input->getOrderVector(lastLabel));

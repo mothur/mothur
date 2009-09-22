@@ -24,7 +24,6 @@ VennCommand::VennCommand(string option){
 		globaldata = GlobalData::getInstance();
 		abort = false;
 		allLines = 1;
-		lines.clear();
 		labels.clear();
 		
 		//allow user to run help
@@ -32,7 +31,7 @@ VennCommand::VennCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string AlignArray[] =  {"groups","line","label","calc", "abund"};
+			string AlignArray[] =  {"groups","label","calc", "abund"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -52,13 +51,6 @@ VennCommand::VennCommand(string option){
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			line = validParameter.validFile(parameters, "line", false);				
-			if (line == "not found") { line = "";  }
-			else { 
-				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
-				else { allLines = 1;  }
-			}
-			
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
@@ -66,13 +58,10 @@ VennCommand::VennCommand(string option){
 				else { allLines = 1;  }
 			}
 			
-			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
-			//if the user has not specified any line or labels use the ones from read.otu
-			else if ((line == "") && (label == "")) {  
+			//if the user has not specified any labels use the ones from read.otu
+			if (label == "") {  
 				allLines = globaldata->allLines; 
 				labels = globaldata->labels; 
-				lines = globaldata->lines;
 			}
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
@@ -151,12 +140,12 @@ VennCommand::VennCommand(string option){
 void VennCommand::help(){
 	try {
 		mothurOut("The venn command can only be executed after a successful read.otu command.\n");
-		mothurOut("The venn command parameters are groups, calc, abund, line and label.  No parameters are required, but you may not use line and label at the same time.\n");
+		mothurOut("The venn command parameters are groups, calc, abund and label.  No parameters are required.\n");
 		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included in your venn diagram, you may only use a maximum of 4 groups.\n");
-		mothurOut("The group names are separated by dashes. The line and label allow you to select what distance levels you would like a venn diagram created for, and are also separated by dashes.\n");
-		mothurOut("The venn command should be in the following format: venn(groups=yourGroups, calc=yourCalcs, line=yourLines, label=yourLabels, abund=yourAbund).\n");
-		mothurOut("Example venn(groups=A-B-C, line=1-3-5, calc=sharedsobs-sharedchao, abund=20).\n");
-		mothurOut("The default value for groups is all the groups in your groupfile up to 4, and all lines in your inputfile will be used.\n");
+		mothurOut("The group names are separated by dashes. The label allows you to select what distance levels you would like a venn diagram created for, and are also separated by dashes.\n");
+		mothurOut("The venn command should be in the following format: venn(groups=yourGroups, calc=yourCalcs, label=yourLabels, abund=yourAbund).\n");
+		mothurOut("Example venn(groups=A-B-C, calc=sharedsobs-sharedchao, abund=20).\n");
+		mothurOut("The default value for groups is all the groups in your groupfile up to 4, and all labels in your inputfile will be used.\n");
 		mothurOut("The default value for calc is sobs if you have only read a list file or if you have selected only one group, and sharedsobs if you have multiple groups.\n");
 		mothurOut("The default available estimators for calc are sobs, chao and ace if you have only read a list file, and sharedsobs, sharedchao and sharedace if you have read a list and group file or a shared file.\n");
 		mothurOut("The only estmiator available four 4 groups is sharedsobs.\n");
@@ -189,7 +178,6 @@ int VennCommand::execute(){
 	
 		if (abort == true) { return 0; }
 		
-		int count = 1;
 		string lastLabel;
 		
 		//if the users entered no valid calculators don't execute command
@@ -216,18 +204,16 @@ int VennCommand::execute(){
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
-		set<int> userLines = lines;
 		
 		if (format != "list") {	
 			
 			//as long as you are not at the end of the file or done wih the lines you want
-			while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
+			while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 
-				if(allLines == 1 || lines.count(count) == 1 || labels.count(lookup[0]->getLabel()) == 1){			
+				if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 					processedLabels.insert(lookup[0]->getLabel());
 					userLabels.erase(lookup[0]->getLabel());
-					userLines.erase(count);
 					
 					if (lookup.size() > 4) {
 						mothurOut("Error: Too many groups chosen.  You may use up to 4 groups with the venn command.  I will use the first four groups in your groupfile."); mothurOutEndLine();
@@ -257,7 +243,6 @@ int VennCommand::execute(){
 				//get next line to process
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 				lookup = input->getSharedRAbundVectors();
-				count++;
 			}
 			
 			//output error messages about any remaining user labels
@@ -273,7 +258,7 @@ int VennCommand::execute(){
 				}
 			}
 		
-			//run last line if you need to
+			//run last label if you need to
 			if (needToRun == true)  {
 					for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {	delete lookup[i]; }  } 
 					lookup = input->getSharedRAbundVectors(lastLabel);
@@ -296,16 +281,15 @@ int VennCommand::execute(){
 			
 		}else{
 		
-			while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
+			while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 		
-				if(allLines == 1 || lines.count(count) == 1 || labels.count(sabund->getLabel()) == 1){			
+				if(allLines == 1 || labels.count(sabund->getLabel()) == 1){			
 	
 					mothurOut(sabund->getLabel()); mothurOutEndLine();
 					venn->getPic(sabund, vennCalculators);
 					
 					processedLabels.insert(sabund->getLabel());
 					userLabels.erase(sabund->getLabel());
-					userLines.erase(count);
 				}
 				
 				if ((anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
@@ -323,7 +307,6 @@ int VennCommand::execute(){
 				
 				delete sabund;
 				sabund = input->getSAbundVector();
-				count++;
 			}
 			
 			//output error messages about any remaining user labels
@@ -339,7 +322,7 @@ int VennCommand::execute(){
 				}
 			}
 		
-			//run last line if you need to
+			//run last label if you need to
 			if (needToRun == true)  {
 				if (sabund != NULL) {	delete sabund;	}
 				sabund = input->getSAbundVector(lastLabel);

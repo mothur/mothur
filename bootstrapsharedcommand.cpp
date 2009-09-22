@@ -27,7 +27,6 @@ BootSharedCommand::BootSharedCommand(string option){
 		globaldata = GlobalData::getInstance();
 		abort = false;
 		allLines = 1;
-		lines.clear();
 		labels.clear();
 		Groups.clear();
 		Estimators.clear();
@@ -37,7 +36,7 @@ BootSharedCommand::BootSharedCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"line","label","calc","groups","iters"};
+			string Array[] =  {"label","calc","groups","iters"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -58,13 +57,6 @@ BootSharedCommand::BootSharedCommand(string option){
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			line = validParameter.validFile(parameters, "line", false);				
-			if (line == "not found") { line = "";  }
-			else { 
-				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
-				else { allLines = 1;  }
-			}
-			
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
@@ -72,13 +64,10 @@ BootSharedCommand::BootSharedCommand(string option){
 				else { allLines = 1;  }
 			}
 			
-			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
-			//if the user has not specified any line or labels use the ones from read.otu
-			else if((line == "") && (label == "")) {  
+			//if the user has not specified any labels use the ones from read.otu
+			if(label == "") {  
 				allLines = globaldata->allLines; 
 				labels = globaldata->labels; 
-				lines = globaldata->lines;
 			}
 				
 			groups = validParameter.validFile(parameters, "groups", false);			
@@ -158,11 +147,11 @@ BootSharedCommand::BootSharedCommand(string option){
 void BootSharedCommand::help(){
 	try {
 		mothurOut("The bootstrap.shared command can only be executed after a successful read.otu command.\n");
-		mothurOut("The bootstrap.shared command parameters are groups, calc, iters, line and label.  You may not use line and label at the same time.\n");
+		mothurOut("The bootstrap.shared command parameters are groups, calc, iters and label.\n");
 		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included used.\n");
-		mothurOut("The group names are separated by dashes. The line and label allow you to select what distance levels you would like trees created for, and are also separated by dashes.\n");
-		mothurOut("The bootstrap.shared command should be in the following format: bootstrap.shared(groups=yourGroups, calc=yourCalcs, line=yourLines, label=yourLabels, iters=yourIters).\n");
-		mothurOut("Example bootstrap.shared(groups=A-B-C, line=1-3-5, calc=jabund-sorabund, iters=100).\n");
+		mothurOut("The group names are separated by dashes. The label parameter allows you to select what distance levels you would like trees created for, and is also separated by dashes.\n");
+		mothurOut("The bootstrap.shared command should be in the following format: bootstrap.shared(groups=yourGroups, calc=yourCalcs, label=yourLabels, iters=yourIters).\n");
+		mothurOut("Example bootstrap.shared(groups=A-B-C, calc=jabund-sorabund, iters=100).\n");
 		mothurOut("The default value for groups is all the groups in your groupfile.\n");
 		mothurOut("The default value for calc is jclass-thetayc. The default for iters is 1000.\n");
 	}
@@ -191,7 +180,6 @@ int BootSharedCommand::execute(){
 	
 		if (abort == true) {	return 0;	}
 	
-		int count = 1;
 		util = new SharedUtil();	
 	
 		//read first line
@@ -207,7 +195,6 @@ int BootSharedCommand::execute(){
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
-		set<int> userLines = lines;
 				
 		//set users groups
 		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups, "treegroup");
@@ -224,19 +211,18 @@ int BootSharedCommand::execute(){
 		tmap->makeSim(globaldata->gGroupmap);
 		globaldata->gTreemap = tmap;
 			
-		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
+		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 		
-			if(allLines == 1 || lines.count(count) == 1 || labels.count(order->getLabel()) == 1){			
+			if(allLines == 1 || labels.count(order->getLabel()) == 1){			
 				
 				mothurOut(order->getLabel()); mothurOutEndLine();
 				process(order);
 				
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
-				userLines.erase(count);
 			}
 			
-			//you have a label the user want that is smaller than this line and the last line has not already been processed
+			//you have a label the user want that is smaller than this label and the last label has not already been processed
 			if ((anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 				
 				delete order;
@@ -254,7 +240,6 @@ int BootSharedCommand::execute(){
 			//get next line to process
 			delete order;
 			order = input->getSharedOrderVector();
-			count++;
 		}
 		
 		//output error messages about any remaining user labels
@@ -279,8 +264,6 @@ int BootSharedCommand::execute(){
 				delete order;
 
 		}
-		
-		
 		
 		//reset groups parameter
 		globaldata->Groups.clear();  

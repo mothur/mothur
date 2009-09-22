@@ -37,9 +37,8 @@ private:
 	FastaMap* fasta;
 	GroupMap* groupMap;
 	bool abort, allLines;
-	set<int> lines; //hold lines to be used
 	set<string> labels; //holds labels to be used
-	string filename, fastafile, namesfile, groupfile, line, label;
+	string filename, fastafile, namesfile, groupfile, label;
 	ofstream out;
 	ifstream in, inNames;
 	

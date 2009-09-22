@@ -41,9 +41,8 @@ private:
 	int abund;
 	
 	bool abort, allLines;
-	set<int> lines; //hold lines to be used
 	set<string> labels; //holds labels to be used
-	string format, groups, calc, line, label;
+	string format, groups, calc, label;
 	vector<string> Estimators, Groups;
 
 

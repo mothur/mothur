@@ -36,7 +36,6 @@ SummaryCommand::SummaryCommand(string option){
 		globaldata = GlobalData::getInstance();
 		abort = false;
 		allLines = 1;
-		lines.clear();
 		labels.clear();
 		Estimators.clear();
 		
@@ -45,7 +44,7 @@ SummaryCommand::SummaryCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"line","label","calc","abund","size"};
+			string Array[] =  {"label","calc","abund","size"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -63,13 +62,6 @@ SummaryCommand::SummaryCommand(string option){
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			line = validParameter.validFile(parameters, "line", false);				
-			if (line == "not found") { line = "";  }
-			else { 
-				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
-				else { allLines = 1;  }
-			}
-			
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
@@ -77,13 +69,10 @@ SummaryCommand::SummaryCommand(string option){
 				else { allLines = 1;  }
 			}
 			
-			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
-			//if the user has not specified any line or labels use the ones from read.otu
-			else if((line == "") && (label == "")) {  
+			//if the user has not specified any labels use the ones from read.otu
+			if(label == "") {  
 				allLines = globaldata->allLines; 
 				labels = globaldata->labels; 
-				lines = globaldata->lines;
 			}
 				
 			calc = validParameter.validFile(parameters, "calc", false);			
@@ -168,14 +157,14 @@ void SummaryCommand::help(){
 	try {
 		mothurOut("The summary.single command can only be executed after a successful read.otu WTIH ONE EXECEPTION.\n");
 		mothurOut("The summary.single command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster.\n");
-		mothurOut("The summary.single command parameters are label, line, calc, abund.  No parameters are required, but you may not use \n");
-		mothurOut("both the line and label parameters at the same time. The summary.single command should be in the following format: \n");
-		mothurOut("summary.single(label=yourLabel, line=yourLines, calc=yourEstimators).\n");
-		mothurOut("Example summary.single(label=unique-.01-.03, line=0,5,10, calc=sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson).\n");
+		mothurOut("The summary.single command parameters are label, calc, abund.  No parameters are required.\n");
+		mothurOut("The summary.single command should be in the following format: \n");
+		mothurOut("summary.single(label=yourLabel, calc=yourEstimators).\n");
+		mothurOut("Example summary.single(label=unique-.01-.03, calc=sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson).\n");
 		validCalculator->printCalc("summary", cout);
 		mothurOut("The default value calc is sobs-chao-ace-jack-shannon-npshannon-simpson\n");
-		mothurOut("The label and line parameters are used to analyze specific lines in your input.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. line), '=' and parameters (i.e.yourLines).\n\n");
+		mothurOut("The label parameter is used to analyze specific labels in your input.\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabels).\n\n");
 	}
 	catch(exception& e) {
 		errorOut(e, "SummaryCommand", "help");
@@ -200,8 +189,6 @@ int SummaryCommand::execute(){
 	try {
 	
 		if (abort == true) { return 0; }
-		
-		int count = 1;
 		
 		//if the users entered no valid calculators don't execute command
 		if (sumCalculators.size() == 0) { return 0; }
@@ -230,18 +217,15 @@ int SummaryCommand::execute(){
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
-		set<int> userLines = lines;
-		
-		while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
 			
-			if(allLines == 1 || lines.count(count) == 1 || labels.count(sabund->getLabel()) == 1){			
+		while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+			
+			if(allLines == 1 || labels.count(sabund->getLabel()) == 1){			
 	
 				mothurOut(sabund->getLabel()); mothurOutEndLine();
 				processedLabels.insert(sabund->getLabel());
 				userLabels.erase(sabund->getLabel());
-				userLines.erase(count);
-
-				
+								
 				outputFileHandle << sabund->getLabel();
 				for(int i=0;i<sumCalculators.size();i++){
 					vector<double> data = sumCalculators[i]->getValues(sabund);
@@ -272,7 +256,6 @@ int SummaryCommand::execute(){
 			
 			delete sabund;
 			sabund = input->getSAbundVector();
-			count++;
 		}
 		
 		//output error messages about any remaining user labels
@@ -288,7 +271,7 @@ int SummaryCommand::execute(){
 			}
 		}
 		
-		//run last line if you need to
+		//run last label if you need to
 		if (needToRun == true)  {
 			if (sabund != NULL) {	delete sabund;	}
 			sabund = input->getSAbundVector(lastLabel);

@@ -17,7 +17,6 @@ HeatMapCommand::HeatMapCommand(string option){
 		globaldata = GlobalData::getInstance();
 		abort = false;
 		allLines = 1;
-		lines.clear();
 		labels.clear();
 		
 		//allow user to run help
@@ -25,7 +24,7 @@ HeatMapCommand::HeatMapCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string AlignArray[] =  {"groups","line","label","sorted","scale"};
+			string AlignArray[] =  {"groups","label","sorted","scale"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -45,13 +44,6 @@ HeatMapCommand::HeatMapCommand(string option){
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			line = validParameter.validFile(parameters, "line", false);				
-			if (line == "not found") { line = "";  }
-			else { 
-				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
-				else { allLines = 1;  }
-			}
-			
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
@@ -59,13 +51,10 @@ HeatMapCommand::HeatMapCommand(string option){
 				else { allLines = 1;  }
 			}
 			
-			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
-			//if the user has not specified any line or labels use the ones from read.otu
-			else if ((line == "") && (label == "")) {  
+			//if the user has not specified any labels use the ones from read.otu
+			if (label == "") {  
 				allLines = globaldata->allLines; 
 				labels = globaldata->labels; 
-				lines = globaldata->lines;
 			}
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
@@ -97,17 +86,17 @@ HeatMapCommand::HeatMapCommand(string option){
 void HeatMapCommand::help(){
 	try {
 		mothurOut("The heatmap.bin command can only be executed after a successful read.otu command.\n");
-		mothurOut("The heatmap.bin command parameters are groups, sorted, scale, line and label.  No parameters are required, but you may not use line and label at the same time.\n");
+		mothurOut("The heatmap.bin command parameters are groups, sorted, scale label.  No parameters are required.\n");
 		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included in your heatmap.\n");
 		mothurOut("The sorted parameter allows you to choose to see the file with the shared otus at the top or the otus in the order they appear in your input file. \n");
 		mothurOut("The scale parameter allows you to choose the range of color your bin information will be displayed with.\n");
-		mothurOut("The group names are separated by dashes. The line and label allow you to select what distance levels you would like a heatmap created for, and are also separated by dashes.\n");
-		mothurOut("The heatmap.bin command should be in the following format: heatmap.bin(groups=yourGroups, sorted=yourSorted, line=yourLines, label=yourLabels).\n");
-		mothurOut("Example heatmap.bin(groups=A-B-C, line=1-3-5, sorted=F, scale=log10).\n");
-		mothurOut("The default value for groups is all the groups in your groupfile, and all lines in your inputfile will be used.\n");
+		mothurOut("The group names are separated by dashes. The label parameter allows you to select what distance levels you would like a heatmap created for, and are also separated by dashes.\n");
+		mothurOut("The heatmap.bin command should be in the following format: heatmap.bin(groups=yourGroups, sorted=yourSorted, label=yourLabels).\n");
+		mothurOut("Example heatmap.bin(groups=A-B-C, sorted=F, scale=log10).\n");
+		mothurOut("The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n");
 		mothurOut("The default value for sorted is T meaning you want the shared otus on top, you may change it to F meaning the exact representation of your input file.\n");
 		mothurOut("The default value for scale is log10; your other options are log2 and linear.\n");
-		mothurOut("The heatmap.bin command outputs a .svg file for each line or label you specify.\n");
+		mothurOut("The heatmap.bin command outputs a .svg file for each label you specify.\n");
 		mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
 
 	}
@@ -133,7 +122,6 @@ int HeatMapCommand::execute(){
 	
 		if (abort == true) { return 0; }
 
-		int count = 1;	
 		string lastLabel;
 	
 		if (format == "sharedfile") {
@@ -159,21 +147,19 @@ int HeatMapCommand::execute(){
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
-		set<int> userLines = lines;
 
 		if ((format != "list") && (format != "rabund") && (format != "sabund")) {	
 		
 			//as long as you are not at the end of the file or done wih the lines you want
-			while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
+			while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 		
-				if(allLines == 1 || lines.count(count) == 1 || labels.count(lookup[0]->getLabel()) == 1){			
+				if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 	
 					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 					heatmap->getPic(lookup);
 					
 					processedLabels.insert(lookup[0]->getLabel());
 					userLabels.erase(lookup[0]->getLabel());
-					userLines.erase(count);
 				}
 				
 				if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
@@ -193,7 +179,6 @@ int HeatMapCommand::execute(){
 							
 				//get next line to process
 				lookup = input->getSharedRAbundVectors();				
-				count++;
 			}
 			
 			//output error messages about any remaining user labels
@@ -209,7 +194,7 @@ int HeatMapCommand::execute(){
 				}
 			}
 		
-			//run last line if you need to
+			//run last label if you need to
 			if (needToRun == true)  {
 				for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }  
 				lookup = input->getSharedRAbundVectors(lastLabel);
@@ -226,16 +211,15 @@ int HeatMapCommand::execute(){
 			
 		}else{
 	
-			while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
+			while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 
-				if(allLines == 1 || lines.count(count) == 1 || labels.count(rabund->getLabel()) == 1){			
+				if(allLines == 1 || labels.count(rabund->getLabel()) == 1){			
 	
 					mothurOut(rabund->getLabel()); mothurOutEndLine();
 					heatmap->getPic(rabund);
 					
 					processedLabels.insert(rabund->getLabel());
 					userLabels.erase(rabund->getLabel());
-					userLines.erase(count);
 				}
 				
 				if ((anyLabelsToProcess(rabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
@@ -255,7 +239,6 @@ int HeatMapCommand::execute(){
 				lastLabel = rabund->getLabel();			
 				delete rabund;
 				rabund = input->getRAbundVector();
-				count++;
 			}
 			
 			//output error messages about any remaining user labels
@@ -271,7 +254,7 @@ int HeatMapCommand::execute(){
 				}
 			}
 		
-			//run last line if you need to
+			//run last label if you need to
 			if (needToRun == true)  {
 		
 				if (rabund != NULL) {	delete rabund;	}
