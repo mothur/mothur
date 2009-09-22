@@ -35,9 +35,8 @@ private:
 	SAbundVector* sabund;
 
 	bool abort, allLines;
-	set<int> lines; //hold lines to be used
 	set<string> labels; //holds labels to be used
-	string line, label;
+	string label;
 
 };
 

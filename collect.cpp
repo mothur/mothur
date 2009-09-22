@@ -129,7 +129,7 @@ try {
                         totalNumSeq = i+1;
                 }
                 
-                //calculate last line if you haven't already
+                //calculate last label if you haven't already
                 if(numSeqs % increment != 0){
                         //how many comparisons to make i.e. for group a, b, c = ab, ac, bc.
                         int n = 1;

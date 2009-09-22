@@ -21,7 +21,7 @@ ReadOtuCommand::ReadOtuCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"list","order","shared", "line", "label","group","sabund", "rabund"};
+			string Array[] =  {"list","order","shared", "label","group","sabund", "rabund"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -77,14 +77,6 @@ ReadOtuCommand::ReadOtuCommand(string option){
 		
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			line = validParameter.validFile(parameters, "line", false);				
-			if (line == "not found") { line = ""; }
-			else { 
-				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
-				else { allLines = 1;  }
-				globaldata->lines = lines;
-			}
-			
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
@@ -94,9 +86,6 @@ ReadOtuCommand::ReadOtuCommand(string option){
 			}
 			
 			globaldata->allLines = allLines;
-			
-			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
 			
 			orderfile = validParameter.validFile(parameters, "order", true);
 			if (orderfile == "not open") { abort = true; }	
@@ -123,16 +112,15 @@ void ReadOtuCommand::help(){
 	try {
 		mothurOut("The read.otu command must be run before you execute a collect.single, rarefaction.single, summary.single, \n");
 		mothurOut("collect.shared, rarefaction.shared or summary.shared command.   Mothur will generate a .list, .rabund and .sabund upon completion of the cluster command \n");
-		mothurOut("or you may use your own. The read.otu command parameter options are list, rabund, sabund, shared, group, order, line and label.\n");
+		mothurOut("or you may use your own. The read.otu command parameter options are list, rabund, sabund, shared, group, order and label.\n");
 		mothurOut("The read.otu command can be used in two ways.  The first is to read a list, rabund or sabund and run the collect.single, rarefaction.single or summary.single.\n");
 		mothurOut("For this use the read.otu command should be in the following format: read.otu(list=yourListFile, order=yourOrderFile, label=yourLabels).\n");
 		mothurOut("The list, rabund or sabund parameter is required, but you may only use one of them.\n");
-		mothurOut("The line and label parameters are optional but you may not use both the line and label parameters at the same time.\n");
-		mothurOut("The label and line parameters are used to read specific lines in your input.\n");
+		mothurOut("The label parameter is used to read specific labels in your input.\n");
 		mothurOut("The second way to use the read.otu command is to read a list and a group, or a shared so you can use the collect.shared, rarefaction.shared or summary.shared commands.\n");
-		mothurOut("In this case the read.otu command should be in the following format: read.otu(list=yourListFile, group=yourGroupFile, line=yourLines) or read.otu(shared=yourSharedFile).  \n");
+		mothurOut("In this case the read.otu command should be in the following format: read.otu(list=yourListFile, group=yourGroupFile) or read.otu(shared=yourSharedFile).  \n");
 		mothurOut("The list parameter and group paramaters or the shared paremeter is required. When using the command the second way with a list and group file read.otu command parses the .list file\n");
-		mothurOut("and separates it into groups.  It outputs a .shared file containing the OTU information for each group. The read.otu command also outputs a .list file for each group. \n");
+		mothurOut("and separates it into groups.  It outputs a .shared file containing the OTU information for each group. The read.otu command also outputs a .rabund file for each group. \n");
 		mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile).\n\n");
 
 	}

@@ -66,9 +66,8 @@ private:
 	float precision, cutoff;
 
 	bool abort, allLines;
-	set<int> lines; //hold lines to be used
 	set<string> labels; //holds labels to be used
-	string phylipfile, columnfile, namefile, calc, groups, line, label;
+	string phylipfile, columnfile, namefile, calc, groups, label;
 	vector<string>  Estimators, Groups; //holds estimators to be used
 	
 	//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.

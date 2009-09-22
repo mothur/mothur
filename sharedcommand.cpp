@@ -51,7 +51,6 @@ int SharedCommand::execute(){
 	try {
 		
 		//lookup.clear();
-		int count = 1;
 		string errorOff = "no error";
 			
 		//read in listfile
@@ -82,13 +81,12 @@ int SharedCommand::execute(){
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = globaldata->labels;
-		set<int> userLines = globaldata->lines;
 		
 		
-		while((SharedList != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
+		while((SharedList != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
 			
 
-			if(globaldata->allLines == 1 || globaldata->lines.count(count) == 1 || globaldata->labels.count(SharedList->getLabel()) == 1){
+			if(globaldata->allLines == 1 || globaldata->labels.count(SharedList->getLabel()) == 1){
 					
 					lookup = SharedList->getSharedRAbundVector();
 					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
@@ -98,7 +96,6 @@ int SharedCommand::execute(){
 				
 					processedLabels.insert(SharedList->getLabel());
 					userLabels.erase(SharedList->getLabel());
-					userLines.erase(count);
 			}
 			
 			if ((anyLabelsToProcess(SharedList->getLabel(), userLabels, errorOff) == true) && (processedLabels.count(lastLabel) != 1)) {
@@ -120,8 +117,6 @@ int SharedCommand::execute(){
 				
 			delete SharedList;
 			SharedList = input->getSharedListVector(); //get new list vector to process
-			
-			count++;		
 		}
 		
 		//output error messages about any remaining user labels
@@ -133,7 +128,7 @@ int SharedCommand::execute(){
 			}
 		}
 		
-		//run last line if you need to
+		//run last label if you need to
 		if (needToRun == true)  {
 			if (SharedList != NULL) {	delete SharedList;	}
 			SharedList = input->getSharedListVector(lastLabel); //get new list vector to process

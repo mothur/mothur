@@ -119,7 +119,7 @@ void GlobalData::newRead() {
 
 			gTree.clear();
 			Treenames.clear();
-			labels.clear(); lines.clear(); Groups.clear();
+			labels.clear(); Groups.clear();
 			allLines = 1;
 			runParse = true;
 	}

@@ -55,9 +55,8 @@ private:
 	vector<SharedRAbundVector*> lookup;
 
 	bool abort, allLines;
-	set<int> lines; //hold lines to be used
 	set<string> labels; //holds labels to be used
-	string outputFile, calc, groups, line, label;
+	string outputFile, calc, groups, label;
 	int numGroups, iters;
 	vector<string>  Estimators, Groups; //holds estimators to be used
 

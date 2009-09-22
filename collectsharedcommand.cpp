@@ -41,7 +41,6 @@ CollectSharedCommand::CollectSharedCommand(string option){
 		globaldata = GlobalData::getInstance();
 		abort = false;
 		allLines = 1;
-		lines.clear();
 		labels.clear();
 		Estimators.clear();
 		Groups.clear();
@@ -51,7 +50,7 @@ CollectSharedCommand::CollectSharedCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"freq","line","label","calc","groups"};
+			string Array[] =  {"freq","label","calc","groups"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -72,14 +71,7 @@ CollectSharedCommand::CollectSharedCommand(string option){
 
 			
 			//check for optional parameter and set defaults
-			// ...at some point should added some additional type checking...
-			line = validParameter.validFile(parameters, "line", false);				
-			if (line == "not found") { line = "";  }
-			else { 
-				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
-				else { allLines = 1;  }
-			}
-			
+			// ...at some point should added some additional type checking..
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
@@ -87,13 +79,10 @@ CollectSharedCommand::CollectSharedCommand(string option){
 				else { allLines = 1;  }
 			}
 			
-			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
-			//if the user has not specified any line or labels use the ones from read.otu
-			else if((line == "") && (label == "")) {  
+			//if the user has not specified any labels use the ones from read.otu
+			if(label == "") {  
 				allLines = globaldata->allLines; 
 				labels = globaldata->labels; 
-				lines = globaldata->lines;
 			}
 				
 			calc = validParameter.validFile(parameters, "calc", false);			
@@ -184,14 +173,14 @@ CollectSharedCommand::CollectSharedCommand(string option){
 void CollectSharedCommand::help(){
 	try {
 		mothurOut("The collect.shared command can only be executed after a successful read.otu command.\n");
-		mothurOut("The collect.shared command parameters are label, line, freq, calc and groups.  No parameters are required, but you may not use \n");
-		mothurOut("both the line and label parameters at the same time. The collect.shared command should be in the following format: \n");
-		mothurOut("collect.shared(label=yourLabel, line=yourLines, freq=yourFreq, calc=yourEstimators, groups=yourGroups).\n");
-		mothurOut("Example collect.shared(label=unique-.01-.03, line=0-5-10, freq=10, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan).\n");
+		mothurOut("The collect.shared command parameters are label, freq, calc and groups.  No parameters are required \n");
+		mothurOut("The collect.shared command should be in the following format: \n");
+		mothurOut("collect.shared(label=yourLabel, freq=yourFreq, calc=yourEstimators, groups=yourGroups).\n");
+		mothurOut("Example collect.shared(label=unique-.01-.03, freq=10, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan).\n");
 		mothurOut("The default values for freq is 100 and calc are sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan.\n");
 		mothurOut("The default value for groups is all the groups in your groupfile.\n");
 		validCalculator->printCalc("shared", cout);
-		mothurOut("The label and line parameters are used to analyze specific lines in your input.\n");
+		mothurOut("The label parameter is used to analyze specific labels in your input.\n");
 		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n");
 		mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile).\n\n");
 		
@@ -221,8 +210,6 @@ int CollectSharedCommand::execute(){
 		
 		if (abort == true) {	return 0;	}
 		
-		int count = 1;
-		
 		//if the users entered no valid calculators don't execute command
 		if (cDisplays.size() == 0) { return 0; }
 		
@@ -236,15 +223,14 @@ int CollectSharedCommand::execute(){
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
-		set<int> userLines = lines;
 				
 		//set users groups
 		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups, "collect");
 		util->updateGroupIndex(globaldata->Groups, globaldata->gGroupmap->groupIndex);
 
-		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
+		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 
-			if(allLines == 1 || lines.count(count) == 1 || labels.count(order->getLabel()) == 1){
+			if(allLines == 1 || labels.count(order->getLabel()) == 1){
 				
 				//create collectors curve
 				cCurve = new Collect(order, cDisplays);
@@ -254,10 +240,9 @@ int CollectSharedCommand::execute(){
 				mothurOut(order->getLabel()); mothurOutEndLine();
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
-				userLines.erase(count);
 			}
 			
-			//you have a label the user want that is smaller than this line and the last line has not already been processed
+			//you have a label the user want that is smaller than this label and the last label has not already been processed
 			if ((anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 				delete order;
 				order = input->getSharedOrderVector(lastLabel);
@@ -278,7 +263,6 @@ int CollectSharedCommand::execute(){
 			//get next line to process
 			delete order;
 			order = input->getSharedOrderVector();
-			count++;
 		}
 		
 		//output error messages about any remaining user labels
@@ -294,7 +278,7 @@ int CollectSharedCommand::execute(){
 			}
 		}
 		
-		//run last line if you need to
+		//run last label if you need to
 		if (needToRun == true)  {
 			if (order != NULL) {  delete order;  }
 			order = input->getSharedOrderVector(lastLabel);

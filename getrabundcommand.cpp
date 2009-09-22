@@ -16,7 +16,6 @@ GetRAbundCommand::GetRAbundCommand(string option){
 		globaldata = GlobalData::getInstance();
 		abort = false;
 		allLines = 1;
-		lines.clear();
 		labels.clear();
 		
 		//allow user to run help
@@ -24,7 +23,7 @@ GetRAbundCommand::GetRAbundCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"line","label","sorted"};
+			string Array[] =  {"label","sorted"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -47,13 +46,6 @@ GetRAbundCommand::GetRAbundCommand(string option){
 			temp = validParameter.validFile(parameters, "sorted", false);			if (temp == "not found") { temp = "T"; }
 			sorted = isTrue(temp);
 			
-			line = validParameter.validFile(parameters, "line", false);				
-			if (line == "not found") { line = "";  }
-			else { 
-				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
-				else { allLines = 1;  }
-			}
-			
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
@@ -61,13 +53,10 @@ GetRAbundCommand::GetRAbundCommand(string option){
 				else { allLines = 1;  }
 			}
 			
-			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
-			//if the user has not specified any line or labels use the ones from read.otu
-			else if((line == "") && (label == "")) {  
+			//if the user has not specified any labels use the ones from read.otu
+			if(label == "") {  
 				allLines = globaldata->allLines; 
 				labels = globaldata->labels; 
-				lines = globaldata->lines;
 			}
 				
 			if (abort == false) {
@@ -87,14 +76,14 @@ GetRAbundCommand::GetRAbundCommand(string option){
 void GetRAbundCommand::help(){
 	try {
 		mothurOut("The get.rabund command can only be executed after a successful read.otu of a listfile.\n");
-		mothurOut("The get.rabund command parameters are line, label and sorted.  No parameters are required, and you may not use line and label at the same time.\n");
-		mothurOut("The line and label allow you to select what distance levels you would like included in your .rabund file, and are separated by dashes.\n");
+		mothurOut("The get.rabund command parameters are label and sorted.  No parameters are required.\n");
+		mothurOut("The label parameter allows you to select what distance levels you would like included in your .rabund file, and are separated by dashes.\n");
 		mothurOut("The sorted parameters allows you to print the rabund results sorted by abundance or not.  The default is sorted.\n");
-		mothurOut("The get.rabund command should be in the following format: get.rabund(line=yourLines, label=yourLabels, sorted=yourSorted).\n");
-		mothurOut("Example get.rabund(line=1-3-5, sorted=F).\n");
-		mothurOut("The default value for line and label are all lines in your inputfile.\n");
+		mothurOut("The get.rabund command should be in the following format: get.rabund(label=yourLabels, sorted=yourSorted).\n");
+		mothurOut("Example get.rabund(sorted=F).\n");
+		mothurOut("The default value for label is all labels in your inputfile.\n");
 		mothurOut("The get.rabund command outputs a .rabund file containing the lines you selected.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. line), '=' and parameters (i.e.yourLines).\n\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabels).\n\n");
 	}
 	catch(exception& e) {
 		errorOut(e, "GetRAbundCommand", "help");
@@ -115,8 +104,6 @@ int GetRAbundCommand::execute(){
 	
 		if (abort == true) { return 0; }
 		
-		int count = 1;
-		
 		//read first line
 		read = new ReadOTUFile(globaldata->inputFileName);	
 		read->read(&*globaldata); 
@@ -128,12 +115,10 @@ int GetRAbundCommand::execute(){
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
-		set<int> userLines = lines;
-
 		
-		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
+		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if(allLines == 1 || lines.count(count) == 1 || labels.count(list->getLabel()) == 1){
+			if(allLines == 1 || labels.count(list->getLabel()) == 1){
 					mothurOut(list->getLabel()); mothurOutEndLine();
 					rabund = new RAbundVector();				
 					*rabund = (list->getRAbundVector());
@@ -145,7 +130,6 @@ int GetRAbundCommand::execute(){
 															
 					processedLabels.insert(list->getLabel());
 					userLabels.erase(list->getLabel());
-					userLines.erase(count);
 			}
 			
 			if ((anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
@@ -169,7 +153,6 @@ int GetRAbundCommand::execute(){
 			
 			delete list;
 			list = input->getListVector();
-			count++;
 		}
 		
 		//output error messages about any remaining user labels
@@ -185,7 +168,7 @@ int GetRAbundCommand::execute(){
 			}
 		}
 		
-		//run last line if you need to
+		//run last label if you need to
 		if (needToRun == true)  {
 			if (list != NULL) {	delete list;	}
 			list = input->getListVector(lastLabel);

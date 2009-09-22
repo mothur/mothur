@@ -44,7 +44,6 @@ public:
 	string inputFileName, argv;
 	bool allLines, runParse, jumble;
 	vector<string>  Estimators, Groups; //holds estimators to be used
-	set<int> lines; //hold lines to be used
 	set<string> labels; //holds labels to be used
 	vector<string> Treenames;
 	

@@ -16,7 +16,6 @@ GetSAbundCommand::GetSAbundCommand(string option){
 		globaldata = GlobalData::getInstance();
 		abort = false;
 		allLines = 1;
-		lines.clear();
 		labels.clear();
 		
 		//allow user to run help
@@ -24,7 +23,7 @@ GetSAbundCommand::GetSAbundCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"line","label"};
+			string Array[] =  {"label"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -42,13 +41,6 @@ GetSAbundCommand::GetSAbundCommand(string option){
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			line = validParameter.validFile(parameters, "line", false);				
-			if (line == "not found") { line = "";  }
-			else { 
-				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
-				else { allLines = 1;  }
-			}
-			
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
@@ -56,13 +48,10 @@ GetSAbundCommand::GetSAbundCommand(string option){
 				else { allLines = 1;  }
 			}
 			
-			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
-			//if the user has not specified any line or labels use the ones from read.otu
-			else if((line == "") && (label == "")) {  
+			//if the user has not specified any labels use the ones from read.otu
+			if(label == "") {  
 				allLines = globaldata->allLines; 
 				labels = globaldata->labels; 
-				lines = globaldata->lines;
 			}
 				
 			if (abort == false) {
@@ -82,13 +71,13 @@ GetSAbundCommand::GetSAbundCommand(string option){
 void GetSAbundCommand::help(){
 	try {
 		mothurOut("The get.sabund command can only be executed after a successful read.otu of a listfile or rabundfile.\n");
-		mothurOut("The get.sabund command parameters are line and label.  No parameters are required, and you may not use line and label at the same time.\n");
-		mothurOut("The line and label allow you to select what distance levels you would like included in your .sabund file, and are separated by dashes.\n");
-		mothurOut("The get.sabund command should be in the following format: get.sabund(line=yourLines, label=yourLabels).\n");
-		mothurOut("Example get.sabund(line=1-3-5).\n");
-		mothurOut("The default value for line and label are all lines in your inputfile.\n");
-		mothurOut("The get.sabund command outputs a .sabund file containing the lines you selected.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. line), '=' and parameters (i.e.yourLines).\n\n");
+		mothurOut("The get.sabund command parameters is label.  No parameters are required.\n");
+		mothurOut("The label parameter allows you to select what distance levels you would like included in your .sabund file, and are separated by dashes.\n");
+		mothurOut("The get.sabund command should be in the following format: get.sabund(label=yourLabels).\n");
+		mothurOut("Example get.sabund().\n");
+		mothurOut("The default value for label is all labels in your inputfile.\n");
+		mothurOut("The get.sabund command outputs a .sabund file containing the labels you selected.\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabel).\n\n");
 	}
 	catch(exception& e) {
 		errorOut(e, "GetSAbundCommand", "help");
@@ -108,8 +97,6 @@ int GetSAbundCommand::execute(){
 		
 		if (abort == true) { return 0; }
 	
-		int count = 1;
-		
 		//using order vector so you don't have to distinguish between the list and rabund files
 		read = new ReadOTUFile(globaldata->inputFileName);	
 		read->read(&*globaldata); 
@@ -121,12 +108,10 @@ int GetSAbundCommand::execute(){
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
-		set<int> userLines = lines;
-
 		
-		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
+		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if(allLines == 1 || lines.count(count) == 1 || labels.count(order->getLabel()) == 1){
+			if(allLines == 1 || labels.count(order->getLabel()) == 1){
 					mothurOut(order->getLabel());  mothurOutEndLine();
 					sabund = new SAbundVector();
 					*sabund = (order->getSAbundVector());
@@ -135,7 +120,6 @@ int GetSAbundCommand::execute(){
 
 					processedLabels.insert(order->getLabel());
 					userLabels.erase(order->getLabel());
-					userLines.erase(count);
 			}
 			
 			if ((anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
@@ -157,7 +141,6 @@ int GetSAbundCommand::execute(){
 			
 			delete order;		
 			order = (input->getOrderVector());
-			count++;
 		}
 		
 		//output error messages about any remaining user labels
@@ -173,7 +156,7 @@ int GetSAbundCommand::execute(){
 			}
 		}
 		
-		//run last line if you need to
+		//run last label if you need to
 		if (needToRun == true)  {
 			if (order != NULL) {	delete order;	}
 			order = (input->getOrderVector(lastLabel));

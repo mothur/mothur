@@ -40,7 +40,6 @@ SummarySharedCommand::SummarySharedCommand(string option){
 		globaldata = GlobalData::getInstance();
 		abort = false;
 		allLines = 1;
-		lines.clear();
 		labels.clear();
 		Estimators.clear();
 		
@@ -49,7 +48,7 @@ SummarySharedCommand::SummarySharedCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"line","label","calc","groups"};
+			string Array[] =  {"label","calc","groups"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -69,13 +68,6 @@ SummarySharedCommand::SummarySharedCommand(string option){
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			line = validParameter.validFile(parameters, "line", false);				
-			if (line == "not found") { line = "";  }
-			else { 
-				if(line != "all") {  splitAtDash(line, lines);  allLines = 0;  }
-				else { allLines = 1;  }
-			}
-			
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
@@ -83,13 +75,10 @@ SummarySharedCommand::SummarySharedCommand(string option){
 				else { allLines = 1;  }
 			}
 			
-			//make sure user did not use both the line and label parameters
-			if ((line != "") && (label != "")) { mothurOut("You cannot use both the line and label parameters at the same time. "); mothurOutEndLine(); abort = true; }
-			//if the user has not specified any line or labels use the ones from read.otu
-			else if((line == "") && (label == "")) {  
+			//if the user has not specified any labels use the ones from read.otu
+			if(label == "") {  
 				allLines = globaldata->allLines; 
 				labels = globaldata->labels; 
-				lines = globaldata->lines;
 			}
 				
 			calc = validParameter.validFile(parameters, "calc", false);			
@@ -176,16 +165,16 @@ SummarySharedCommand::SummarySharedCommand(string option){
 void SummarySharedCommand::help(){
 	try {
 		mothurOut("The summary.shared command can only be executed after a successful read.otu command.\n");
-		mothurOut("The summary.shared command parameters are label, line and calc.  No parameters are required, but you may not use \n");
-		mothurOut("both the line and label parameters at the same time. The summary.shared command should be in the following format: \n");
-		mothurOut("summary.shared(label=yourLabel, line=yourLines, calc=yourEstimators, groups=yourGroups).\n");
-		mothurOut("Example summary.shared(label=unique-.01-.03, line=0,5,10, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan).\n");
+		mothurOut("The summary.shared command parameters are label and calc.  No parameters are required.\n");
+		mothurOut("The summary.shared command should be in the following format: \n");
+		mothurOut("summary.shared(label=yourLabel, calc=yourEstimators, groups=yourGroups).\n");
+		mothurOut("Example summary.shared(label=unique-.01-.03, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan).\n");
 		validCalculator->printCalc("sharedsummary", cout);
 		mothurOut("The default value for calc is sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan\n");
 		mothurOut("The default value for groups is all the groups in your groupfile.\n");
-		mothurOut("The label and line parameters are used to analyze specific lines in your input.\n");
+		mothurOut("The label parameter is used to analyze specific labels in your input.\n");
 		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. line), '=' and parameters (i.e.yourLines).\n\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabel).\n\n");
 	}
 	catch(exception& e) {
 		errorOut(e, "SummarySharedCommand", "help");
@@ -208,8 +197,6 @@ int SummarySharedCommand::execute(){
 	try {
 	
 		if (abort == true) { return 0; }
-		
-		int count = 1;	
 	
 		//if the users entered no valid calculators don't execute command
 		if (sumCalculators.size() == 0) { return 0; }
@@ -267,18 +254,16 @@ int SummarySharedCommand::execute(){
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
-		set<int> userLines = lines;
-		
+			
 		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0) || (userLines.size() != 0))) {
+		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 		
-			if(allLines == 1 || lines.count(count) == 1 || labels.count(lookup[0]->getLabel()) == 1){			
+			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 				mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 				process(lookup);
 				
 				processedLabels.insert(lookup[0]->getLabel());
 				userLabels.erase(lookup[0]->getLabel());
-				userLines.erase(count);
 			}
 			
 			if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
@@ -300,7 +285,6 @@ int SummarySharedCommand::execute(){
 			//prevent memory leak
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 			lookup = input->getSharedRAbundVectors();
-			count++;
 		}
 		
 		//output error messages about any remaining user labels
@@ -316,7 +300,7 @@ int SummarySharedCommand::execute(){
 			}
 		}
 		
-		//run last line if you need to
+		//run last label if you need to
 		if (needToRun == true)  {
 				for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {	delete lookup[i];	} } 
 				lookup = input->getSharedRAbundVectors(lastLabel);
