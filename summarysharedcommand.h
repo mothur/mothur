@@ -33,10 +33,7 @@ private:
 	vector<Calculator*> sumCalculators;	
 	InputData* input;
 	ValidCalculators* validCalculator;
-	SharedListVector* SharedList;
-	OptionParser* parser;
-	map<string, string> parameters;
-	map<string, string>::iterator it;
+	
 	bool abort, allLines, mult;
 	set<string> labels; //holds labels to be used
 	string label, calc, groups;

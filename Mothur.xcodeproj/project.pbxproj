@@ -165,6 +165,7 @@
 		A70DECD91063D8B40057C03C /* secondarystructurecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70DECD81063D8B40057C03C /* secondarystructurecommand.cpp */; };
 		A7283FF81056CAE100D0CC69 /* chimeracheckrdp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7283FF71056CAE100D0CC69 /* chimeracheckrdp.cpp */; };
 		A75B887E104C16860083C454 /* ccode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A75B887B104C16860083C454 /* ccode.cpp */; };
+		A7E4A783106913F900688F62 /* getsharedotucommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E4A782106913F900688F62 /* getsharedotucommand.cpp */; };
 		EB1216880F619B83004A865F /* bergerparker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB1216870F619B83004A865F /* bergerparker.cpp */; };
 		EB1216E50F61ACFB004A865F /* bstick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB1216E40F61ACFB004A865F /* bstick.cpp */; };
 		EB1217230F61C9AC004A865F /* sharedkstest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB1217220F61C9AC004A865F /* sharedkstest.cpp */; };
@@ -522,6 +523,8 @@
 		A7283FF71056CAE100D0CC69 /* chimeracheckrdp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeracheckrdp.cpp; sourceTree = SOURCE_ROOT; };
 		A75B887B104C16860083C454 /* ccode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ccode.cpp; sourceTree = SOURCE_ROOT; };
 		A75B887C104C16860083C454 /* ccode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ccode.h; sourceTree = SOURCE_ROOT; };
+		A7E4A781106913F900688F62 /* getsharedotucommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getsharedotucommand.h; sourceTree = "<group>"; };
+		A7E4A782106913F900688F62 /* getsharedotucommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getsharedotucommand.cpp; sourceTree = "<group>"; };
 		C6859E8B029090EE04C91782 /* Mothur.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = Mothur.1; sourceTree = "<group>"; };
 		EB1216860F619B83004A865F /* bergerparker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bergerparker.h; sourceTree = SOURCE_ROOT; };
 		EB1216870F619B83004A865F /* bergerparker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bergerparker.cpp; sourceTree = SOURCE_ROOT; };
@@ -835,6 +838,8 @@
 				3749271C0FD58C840031C06B /* getsabundcommand.cpp */,
 				37B73CA41004D89A008C4B41 /* getseqscommand.h */,
 				37B73CA51004D89A008C4B41 /* getseqscommand.cpp */,
+				A7E4A781106913F900688F62 /* getsharedotucommand.h */,
+				A7E4A782106913F900688F62 /* getsharedotucommand.cpp */,
 				375873F10F7D64800040F377 /* heatmapcommand.h */,
 				375873F00F7D64800040F377 /* heatmapcommand.cpp */,
 				378598640FDD497000EF9D03 /* heatmapsimcommand.h */,
@@ -1185,6 +1190,7 @@
 				A75B887E104C16860083C454 /* ccode.cpp in Sources */,
 				A7283FF81056CAE100D0CC69 /* chimeracheckrdp.cpp in Sources */,
 				A70DECD91063D8B40057C03C /* secondarystructurecommand.cpp in Sources */,
+				A7E4A783106913F900688F62 /* getsharedotucommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
