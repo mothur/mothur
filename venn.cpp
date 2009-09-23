@@ -306,12 +306,12 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(408 - ((int)toString(sharedBC[0] - sharedABC).length() / 2)) + "\" y=\"305\">" + toString(sharedBC[0] - sharedABC) + "</text>\n";  
 					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(343 - ((int)toString(sharedABC).length() / 2)) + "\"  y=\"280\">" + toString(sharedABC) + "</text>\n"; 
 				
-					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"660\">The number of sepecies shared between groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString(sharedAB[0]) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"680\">The number of sepecies shared between groups " + lookup[0]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedAC[0]) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"700\">The number of sepecies shared between groups " + lookup[1]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedBC[0]) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"720\">The number of sepecies shared between groups " + lookup[0]->getGroup() + " and combined groups " + lookup[1]->getGroup() + lookup[2]->getGroup() + " is " + toString(sharedAwithBC[0]) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"740\">The number of sepecies shared between groups " + lookup[1]->getGroup() + " and combined groups " + lookup[0]->getGroup() + lookup[2]->getGroup() + " is " + toString(sharedBwithAC[0]) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"760\">The number of sepecies shared between groups " + lookup[2]->getGroup() + " and combined groups " + lookup[0]->getGroup() + lookup[1]->getGroup() + " is " + toString(sharedCwithAB[0]) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"660\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString(sharedAB[0]) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"680\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedAC[0]) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"700\">The number of species shared between groups " + lookup[1]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedBC[0]) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"720\">The number of species shared between groups " + lookup[0]->getGroup() + " and combined groups " + lookup[1]->getGroup() + lookup[2]->getGroup() + " is " + toString(sharedAwithBC[0]) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"740\">The number of species shared between groups " + lookup[1]->getGroup() + " and combined groups " + lookup[0]->getGroup() + lookup[2]->getGroup() + " is " + toString(sharedBwithAC[0]) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"760\">The number of species shared between groups " + lookup[2]->getGroup() + " and combined groups " + lookup[0]->getGroup() + lookup[1]->getGroup() + " is " + toString(sharedCwithAB[0]) + "</text>\n";
 					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"580\">The number of species in group " + lookup[0]->getGroup() + " is " + toString(numA[0]);
 					if (numA.size() == 3) { 
 						outsvg << " the lci is " + toString(numA[1]) + " and the hci is " + toString(numA[2]) + "</text>\n";
@@ -389,9 +389,9 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(408 - ((int)toString(sharedbc[0] - sharedabc[0]).length() / 2)) + "\" y=\"305\">" + toString(sharedbc[0] - sharedabc[0]) + "</text>\n";  
 					outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(343 - ((int)toString(sharedabc[0]).length() / 2)) + "\"  y=\"280\">" + toString(sharedabc[0]) + "</text>\n"; 
 				
-					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"660\">The number of sepecies shared between groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString(sharedab[0]) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"680\">The number of sepecies shared between groups " + lookup[0]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedac[0]) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"700\">The number of sepecies shared between groups " + lookup[1]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedbc[0]) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"660\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString(sharedab[0]) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"680\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedac[0]) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"700\">The number of species shared between groups " + lookup[1]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedbc[0]) + "</text>\n";
 					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"580\">The number of species in group " + lookup[0]->getGroup() + " is " + toString(numA[0]);
 					if (numA.size() == 3) { 
 						outsvg << " the lci is " + toString(numA[1]) + " and the hci is " + toString(numA[2]) + "</text>\n";
@@ -546,17 +546,17 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"530\">The number of species in group " + lookup[2]->getGroup() + " is " + toString(numC) + "</text>\n";
 					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"550\">The number of species in group " + lookup[3]->getGroup() + " is " + toString(numD) + "</text>\n";
 					
-					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"570\">The number of sepecies shared between groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString(sharedAB) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"590\">The number of sepecies shared between groups " + lookup[0]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedAC) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"610\">The number of sepecies shared between groups " + lookup[0]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedAD) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"630\">The number of sepecies shared between groups " + lookup[1]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedBC) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"650\">The number of sepecies shared between groups " + lookup[1]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedBD) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"670\">The number of sepecies shared between groups " + lookup[2]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedCD) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"570\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString(sharedAB) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"590\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedAC) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"610\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedAD) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"630\">The number of species shared between groups " + lookup[1]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedBC) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"650\">The number of species shared between groups " + lookup[1]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedBD) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"670\">The number of species shared between groups " + lookup[2]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedCD) + "</text>\n";
 					
-					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"690\">The number of sepecies shared between groups " + lookup[0]->getGroup() + ", " + lookup[1]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedABC) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"710\">The number of sepecies shared between groups " + lookup[0]->getGroup() + ", " + lookup[1]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedABD) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"730\">The number of sepecies shared between groups " + lookup[0]->getGroup() + ", " + lookup[2]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedACD) + "</text>\n";
-					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"750\">The number of sepecies shared between groups " + lookup[1]->getGroup() + ", " + lookup[2]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedBCD) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"690\">The number of species shared between groups " + lookup[0]->getGroup() + ", " + lookup[1]->getGroup() + " and " + lookup[2]->getGroup() + " is " + toString(sharedABC) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"710\">The number of species shared between groups " + lookup[0]->getGroup() + ", " + lookup[1]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedABD) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"730\">The number of species shared between groups " + lookup[0]->getGroup() + ", " + lookup[2]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedACD) + "</text>\n";
+					outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"750\">The number of species shared between groups " + lookup[1]->getGroup() + ", " + lookup[2]->getGroup() + " and " + lookup[3]->getGroup() + " is " + toString(sharedBCD) + "</text>\n";
 									
 					//make adjustments
 					sharedABC = sharedABC - sharedABCD;

@@ -55,6 +55,7 @@
 #include "removeseqscommand.h"
 #include "systemcommand.h"
 #include "secondarystructurecommand.h"
+#include "getsharedotucommand.h"
 
 /***********************************************************/
 
@@ -108,6 +109,7 @@ CommandFactory::CommandFactory(){
 	commands["remove.seqs"]			= "get.seqs";
 	commands["system"]				= "system";
 	commands["align.check"]			= "align.check";
+	commands["get.sharedotu"]		= "get.sharedotu";
 	commands["quit"]				= "quit"; 
 
 }
@@ -171,6 +173,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "merge.files")			{	command = new MergeFileCommand(optionString);			}
 		else if(commandName == "system")				{	command = new SystemCommand(optionString);				}
 		else if(commandName == "align.check")			{	command = new AlignCheckCommand(optionString);			}
+		else if(commandName == "get.sharedotu")			{	command = new GetSharedOTUCommand(optionString);		}
 		else											{	command = new NoCommand(optionString);					}
 
 		return command;
