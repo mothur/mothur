@@ -12,6 +12,7 @@
 #include "pintail.h"
 #include "ccode.h"
 #include "chimeracheckrdp.h"
+#include "chimeraslayer.h"
 
 
 //***************************************************************************************************************
@@ -25,7 +26,7 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile", "mask", "numwanted", "ksize", "svg", "name" };
+			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile", "mask", "numwanted", "ksize", "svg", "name", "match","mismatch", "divergence", "minsim", "parents" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -86,15 +87,34 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 			temp = validParameter.validFile(parameters, "svg", false);				if (temp == "not found") { temp = "F"; }
 			svg = isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "window", false);			if (temp == "not found") { temp = "0"; }
+			temp = validParameter.validFile(parameters, "window", false);	
+			if ((temp == "not found") && (method == "chimeraslayer")) { temp = "100"; }			
+			else if (temp == "not found") { temp = "0"; }
 			convert(temp, window);
-					
+			
+			temp = validParameter.validFile(parameters, "match", false);			if (temp == "not found") { temp = "5"; }
+			convert(temp, match);
+			
+			temp = validParameter.validFile(parameters, "mismatch", false);			if (temp == "not found") { temp = "-4"; }
+			convert(temp, mismatch);
+			
+			temp = validParameter.validFile(parameters, "divergence", false);		if (temp == "not found") { temp = "1.0"; }
+			convert(temp, divR);
+			
+			temp = validParameter.validFile(parameters, "minsim", false);			if (temp == "not found") { temp = "90"; }
+			convert(temp, minSimilarity);
+			
+			temp = validParameter.validFile(parameters, "parents", false);			if (temp == "not found") { temp = "5"; }
+			convert(temp, parents); 
+			 
 			temp = validParameter.validFile(parameters, "increment", false);		
-			if ((temp == "not found") && (method == "chimeracheck")) { temp = "10"; }
+			if ((temp == "not found") && ((method == "chimeracheck") || (method == "chimeraslayer"))) { temp = "10"; }
 			else if (temp == "not found") { temp = "25"; }
 			convert(temp, increment);
 			
-			temp = validParameter.validFile(parameters, "numwanted", false);		if (temp == "not found") { temp = "20"; }
+			temp = validParameter.validFile(parameters, "numwanted", false);
+			if ((temp == "not found") && (method == "chimeraslayer")) { temp = "10"; }		
+			else if (temp == "not found") { temp = "20"; }
 			convert(temp, numwanted);
 
 			
@@ -170,6 +190,7 @@ int ChimeraSeqsCommand::execute(){
 		else if (method == "pintail")			{		chimera = new Pintail(fastafile, templatefile);				}
 		else if (method == "ccode")				{		chimera = new Ccode(fastafile, templatefile);				}
 		else if (method == "chimeracheck")		{		chimera = new ChimeraCheckRDP(fastafile, templatefile);		}
+		else if (method == "chimeraslayer")		{		chimera = new ChimeraSlayer(fastafile, templatefile);		}
 		else { mothurOut("Not a valid method."); mothurOutEndLine(); return 0;		}
 		
 		//set user options
@@ -191,6 +212,12 @@ int ChimeraSeqsCommand::execute(){
 		chimera->setKmerSize(ksize);
 		chimera->setSVG(svg);
 		chimera->setName(namefile);
+		chimera->setMatch(match);
+		chimera->setMisMatch(mismatch);
+		chimera->setDivR(divR);
+		chimera->setParents(parents);
+		chimera->setMinSim(minSimilarity);
+		
 				
 		//find chimeras
 		chimera->getChimeras();

@@ -188,9 +188,9 @@ void TreeGroupCommand::help(){
 TreeGroupCommand::~TreeGroupCommand(){
 	if (abort == false) {
 		
-		if (format == "sharedfile") { delete read;  delete input; globaldata->ginput = NULL;}
+		if (format == "sharedfile") { delete read;  delete input; globaldata->ginput = NULL; }
 		else { delete readMatrix;  delete matrix; delete list; }
-		delete tmap;
+		delete tmap;  globaldata->gTreemap = NULL;
 		delete validCalculator;
 	}
 	
