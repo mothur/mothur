@@ -66,6 +66,9 @@ int SharedCommand::execute(){
 		if (SharedList->getNumSeqs() != groupMap->getNumSeqs()) {  
 			mothurOut("Your group file contains " + toString(groupMap->getNumSeqs()) + " sequences and list file contains " + toString(SharedList->getNumSeqs()) + " sequences. Please correct."); mothurOutEndLine(); 
 			
+			out.close();
+			remove(filename.c_str()); //remove blank shared file you made
+			
 			createMisMatchFile();
 			
 			//delete memory

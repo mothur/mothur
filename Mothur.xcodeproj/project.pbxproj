@@ -165,7 +165,10 @@
 		A70DECD91063D8B40057C03C /* secondarystructurecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70DECD81063D8B40057C03C /* secondarystructurecommand.cpp */; };
 		A7283FF81056CAE100D0CC69 /* chimeracheckrdp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7283FF71056CAE100D0CC69 /* chimeracheckrdp.cpp */; };
 		A75B887E104C16860083C454 /* ccode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A75B887B104C16860083C454 /* ccode.cpp */; };
+		A7B04493106CC3E60046FC83 /* chimeraslayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7B04492106CC3E60046FC83 /* chimeraslayer.cpp */; };
+		A7B0450E106CEEC90046FC83 /* slayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7B0450D106CEEC90046FC83 /* slayer.cpp */; };
 		A7E4A783106913F900688F62 /* getsharedotucommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E4A782106913F900688F62 /* getsharedotucommand.cpp */; };
+		A7E4A824106A9AD700688F62 /* maligner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E4A823106A9AD700688F62 /* maligner.cpp */; };
 		EB1216880F619B83004A865F /* bergerparker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB1216870F619B83004A865F /* bergerparker.cpp */; };
 		EB1216E50F61ACFB004A865F /* bstick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB1216E40F61ACFB004A865F /* bstick.cpp */; };
 		EB1217230F61C9AC004A865F /* sharedkstest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB1217220F61C9AC004A865F /* sharedkstest.cpp */; };
@@ -517,14 +520,20 @@
 		A70B53A70F4CD7AD0064797E /* getlabelcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getlabelcommand.h; sourceTree = SOURCE_ROOT; };
 		A70B53A80F4CD7AD0064797E /* getlinecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getlinecommand.cpp; sourceTree = SOURCE_ROOT; };
 		A70B53A90F4CD7AD0064797E /* getlinecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getlinecommand.h; sourceTree = SOURCE_ROOT; };
-		A70DECD71063D8B40057C03C /* secondarystructurecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = secondarystructurecommand.h; sourceTree = "<group>"; };
-		A70DECD81063D8B40057C03C /* secondarystructurecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = secondarystructurecommand.cpp; sourceTree = "<group>"; };
+		A70DECD71063D8B40057C03C /* secondarystructurecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = secondarystructurecommand.h; sourceTree = SOURCE_ROOT; };
+		A70DECD81063D8B40057C03C /* secondarystructurecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = secondarystructurecommand.cpp; sourceTree = SOURCE_ROOT; };
 		A7283FF61056CAE100D0CC69 /* chimeracheckrdp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeracheckrdp.h; sourceTree = SOURCE_ROOT; };
 		A7283FF71056CAE100D0CC69 /* chimeracheckrdp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeracheckrdp.cpp; sourceTree = SOURCE_ROOT; };
 		A75B887B104C16860083C454 /* ccode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ccode.cpp; sourceTree = SOURCE_ROOT; };
 		A75B887C104C16860083C454 /* ccode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ccode.h; sourceTree = SOURCE_ROOT; };
-		A7E4A781106913F900688F62 /* getsharedotucommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getsharedotucommand.h; sourceTree = "<group>"; };
-		A7E4A782106913F900688F62 /* getsharedotucommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getsharedotucommand.cpp; sourceTree = "<group>"; };
+		A7B04491106CC3E60046FC83 /* chimeraslayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraslayer.h; sourceTree = SOURCE_ROOT; };
+		A7B04492106CC3E60046FC83 /* chimeraslayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeraslayer.cpp; sourceTree = SOURCE_ROOT; };
+		A7B0450C106CEEC90046FC83 /* slayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = slayer.h; sourceTree = SOURCE_ROOT; };
+		A7B0450D106CEEC90046FC83 /* slayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = slayer.cpp; sourceTree = SOURCE_ROOT; };
+		A7E4A781106913F900688F62 /* getsharedotucommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getsharedotucommand.h; sourceTree = SOURCE_ROOT; };
+		A7E4A782106913F900688F62 /* getsharedotucommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getsharedotucommand.cpp; sourceTree = SOURCE_ROOT; };
+		A7E4A822106A9AD700688F62 /* maligner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = maligner.h; sourceTree = SOURCE_ROOT; };
+		A7E4A823106A9AD700688F62 /* maligner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = maligner.cpp; sourceTree = SOURCE_ROOT; };
 		C6859E8B029090EE04C91782 /* Mothur.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = Mothur.1; sourceTree = "<group>"; };
 		EB1216860F619B83004A865F /* bergerparker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bergerparker.h; sourceTree = SOURCE_ROOT; };
 		EB1216870F619B83004A865F /* bergerparker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bergerparker.cpp; sourceTree = SOURCE_ROOT; };
@@ -661,10 +670,16 @@
 				A75B887B104C16860083C454 /* ccode.cpp */,
 				A7283FF61056CAE100D0CC69 /* chimeracheckrdp.h */,
 				A7283FF71056CAE100D0CC69 /* chimeracheckrdp.cpp */,
+				A7B04491106CC3E60046FC83 /* chimeraslayer.h */,
+				A7B04492106CC3E60046FC83 /* chimeraslayer.cpp */,
 				372A55531017922B00C5194B /* decalc.h */,
 				372A55541017922B00C5194B /* decalc.cpp */,
+				A7E4A822106A9AD700688F62 /* maligner.h */,
+				A7E4A823106A9AD700688F62 /* maligner.cpp */,
 				374F301110063B6F00E97C66 /* pintail.h */,
 				374F301210063B6F00E97C66 /* pintail.cpp */,
+				A7B0450C106CEEC90046FC83 /* slayer.h */,
+				A7B0450D106CEEC90046FC83 /* slayer.cpp */,
 			);
 			name = chimera;
 			sourceTree = "<group>";
@@ -1191,6 +1206,9 @@
 				A7283FF81056CAE100D0CC69 /* chimeracheckrdp.cpp in Sources */,
 				A70DECD91063D8B40057C03C /* secondarystructurecommand.cpp in Sources */,
 				A7E4A783106913F900688F62 /* getsharedotucommand.cpp in Sources */,
+				A7E4A824106A9AD700688F62 /* maligner.cpp in Sources */,
+				A7B04493106CC3E60046FC83 /* chimeraslayer.cpp in Sources */,
+				A7B0450E106CEEC90046FC83 /* slayer.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

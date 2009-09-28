@@ -1480,7 +1480,7 @@ void Ccode::createProcessesVariances() {
 			
 			//find the averages for the query 
 			for (int i = 0; i < querySeqs.size(); i++) {
-				findVarianceQuery(i);  //fills varQuery[i] and sdQuery[i] also sets minimum error rate to 0.001 to avoid divide by 0.
+				findVarianceQuery(i);  //fills v arQuery[i] and sdQuery[i] also sets minimum error rate to 0.001 to avoid divide by 0.
 			}
 #endif		
 	}

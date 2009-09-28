@@ -39,11 +39,13 @@ class DeCalculator {
 		DeCalculator() {};
 		~DeCalculator() {};
 		
+		vector<Sequence*> findClosest(Sequence*, vector<Sequence*>, int);  //takes querySeq, a reference db and numWanted - returns indexes to closest seqs in db
 		set<int> getPos() {  return h;  }
 		void setMask(string); 
 		void setAlignmentLength(int l) {  alignLength = l;  }
 		void runMask(Sequence*);
 		void trimSeqs(Sequence*, Sequence*, map<int, int>&);
+		void trimSeqs(Sequence*, vector<Sequence*>);
 		void removeObviousOutliers(vector< vector<quanMember> >&, int);
 		vector<float> calcFreq(vector<Sequence*>, string);
 		vector<int> findWindows(Sequence*, int, int, int&, int);

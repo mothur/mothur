@@ -439,28 +439,9 @@ vector<Sequence*> Pintail::findPairs(int start, int end) {
 		vector<Sequence*> seqsMatches;  
 		
 		for(int i = start; i < end; i++){
-		
-			float smallest = 10000.0;
-			Sequence query = *(querySeqs[i]);
-			Sequence* match;
 			
-			for(int j = 0; j < templateSeqs.size(); j++){
-				
-				Sequence temp = *(templateSeqs[j]);
-				
-				distcalculator->calcDist(query, temp);
-				float dist = distcalculator->getDist();
-				
-				if (dist < smallest) { 
-					match = templateSeqs[j];
-					smallest = dist;
-				}
-			}
-			
-			//make copy so trimSeqs doesn't overtrim
-			Sequence* copy = new Sequence(match->getName(), match->getAligned());
-			
-			seqsMatches.push_back(copy);
+			vector<Sequence*> copy = decalc->findClosest(querySeqs[i], templateSeqs, 1);
+			seqsMatches.push_back(copy[0]);
 		}
 		
 		return seqsMatches;

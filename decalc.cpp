@@ -8,6 +8,10 @@
  */
 
 #include "decalc.h"
+#include "chimera.h"
+#include "dist.h"
+#include "eachgapdist.h"
+
 
 //***************************************************************************************************************
 void DeCalculator::setMask(string m) { 
@@ -675,5 +679,144 @@ float DeCalculator::getCoef(vector<float> obs, vector<float> qav) {
 	}
 }
 //***************************************************************************************************************
+vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*> db, int numWanted) {
+	try {
+		
+		vector<Sequence*> seqsMatches;  
+		vector<SeqDist> dists;
+		
+		Dist* distcalculator = new eachGapDist();
+		
+		Sequence query = *(querySeq);
+		
+		for(int j = 0; j < db.size(); j++){
+			
+			Sequence temp = *(db[j]);
+			
+			distcalculator->calcDist(query, temp);
+			float dist = distcalculator->getDist();
+			
+			SeqDist subject;
+			subject.seq = db[j];
+			subject.dist = dist;
+			
+			dists.push_back(subject);
+		}
+		
+		delete distcalculator;
+		
+		sort(dists.begin(), dists.end(), compareSeqDist);
+		
+		for (int i = 0; i < numWanted; i++) {
+			Sequence* temp = new Sequence(dists[i].seq->getName(), dists[i].seq->getAligned()); //have to make a copy so you can trim and filter without stepping on eachother.
+			seqsMatches.push_back(temp);
+		}
+		
+		return seqsMatches;
+	}
+	catch(exception& e) {
+		errorOut(e, "DeCalculator", "findClosest");
+		exit(1);
+	}
+}
+/***************************************************************************************************************/
+void DeCalculator::trimSeqs(Sequence* query, vector<Sequence*> topMatches) {
+	try {
+		
+		int frontPos = 0;  //should contain first position in all seqs that is not a gap character
+		int rearPos = query->getAligned().length();
+		
+		//********find first position in topMatches that is a non gap character***********//
+		//find first position all query seqs that is a non gap character
+		for (int i = 0; i < topMatches.size(); i++) {
+			
+			string aligned = topMatches[i]->getAligned();
+			int pos = 0;
+			
+			//find first spot in this seq
+			for (int j = 0; j < aligned.length(); j++) {
+				if (isalpha(aligned[j])) {
+					pos = j;
+					break;
+				}
+			}
+			
+			//save this spot if it is the farthest
+			if (pos > frontPos) { frontPos = pos; }
+		}
+		
+		
+		string aligned = query->getAligned();
+		int pos = 0;
+			
+		//find first position in query that is a non gap character
+		for (int j = 0; j < aligned.length(); j++) {
+			if (isalpha(aligned[j])) {
+				pos = j;
+				break;
+			}
+		}
+		
+		//save this spot if it is the farthest
+		if (pos > frontPos) { frontPos = pos; }
+		
+		
+		//********find last position in topMatches that is a non gap character***********//
+		for (int i = 0; i < topMatches.size(); i++) {
+			
+			string aligned = topMatches[i]->getAligned();
+			int pos = aligned.length();
+			
+			//find first spot in this seq
+			for (int j = aligned.length()-1; j >= 0; j--) {
+				if (isalpha(aligned[j])) {
+					pos = j;
+					break;
+				}
+			}
+			
+			//save this spot if it is the farthest
+			if (pos < rearPos) { rearPos = pos; }
+		}
+		
+		
+		aligned = query->getAligned();
+		pos = aligned.length();
+		
+		//find last position in query that is a non gap character
+		for (int j = aligned.length()-1; j >= 0; j--) {
+			if (isalpha(aligned[j])) {
+				pos = j;
+				break;
+			}
+		}
+		
+		//save this spot if it is the farthest
+		if (pos < rearPos) { rearPos = pos; }
+
+		//check to make sure that is not whole seq
+		if ((rearPos - frontPos - 1) <= 0) {  mothurOut("Error, when I trim your sequences, the entire sequence is trimmed."); mothurOutEndLine(); exit(1);  }
+//cout << "front = " << frontPos << " rear = " << rearPos << endl;		
+		//trim query
+		string newAligned = query->getAligned();
+		newAligned = newAligned.substr(frontPos, (rearPos-frontPos));
+		query->setAligned(newAligned);
+		
+		//trim topMatches
+		for (int i = 0; i < topMatches.size(); i++) {
+			newAligned = topMatches[i]->getAligned();
+			newAligned = newAligned.substr(frontPos, (rearPos-frontPos+1));
+			topMatches[i]->setAligned(newAligned);
+		}
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "DeCalculator", "trimSequences");
+		exit(1);
+	}
+
+}
+//***************************************************************************************************************
+
 
 

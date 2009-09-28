@@ -10,7 +10,7 @@
 #include "chimera.h"
 
 //***************************************************************************************************************
-//this is a vertical filter
+//this is a vertical soft filter
 void Chimera::createFilter(vector<Sequence*> seqs) {
 	try {
 		
@@ -41,6 +41,7 @@ void Chimera::createFilter(vector<Sequence*> seqs) {
 		}
 		
 		//zero out spot where all sequences have blanks
+		//zero out spot where all sequences have blanks
 		int numColRemoved = 0;
 		for(int i = 0;i < seqs[0]->getAligned().length(); i++){
 			if(gaps[i] == seqs.size())	{	filterString[i] = '0'; 	numColRemoved++;  }
@@ -48,6 +49,7 @@ void Chimera::createFilter(vector<Sequence*> seqs) {
 			else if (((a[i] < threshold) && (t[i] < threshold) && (g[i] < threshold) && (c[i] < threshold))) {	filterString[i] = '0';	numColRemoved++;  }
 			//cout << "a = " << a[i] <<  " t = " << t[i] <<  " g = " << g[i] <<  " c = " << c[i] << endl;
 		}
+	
 //cout << "filter = " << filterString << endl;	
 
 		mothurOut("Filter removed " + toString(numColRemoved) + " columns.");  mothurOutEndLine();

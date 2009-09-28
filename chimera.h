@@ -71,6 +71,12 @@ class Chimera {
 		virtual void setKmerSize(int k)			{	kmerSize = k;		}
 		virtual void setSVG(int s)				{	svg = s;			}
 		virtual void setName(string n)			{	name = n;			}
+		virtual void setMatch(int m)			{	match = m;			}
+		virtual void setMisMatch(int m)			{	misMatch = m;		}
+		virtual void setDivR(float d)			{	divR = d;			}
+		virtual void setParents(int p)			{	parents = p;		}
+		virtual void setMinSim(int s)			{	minSim = s;			}
+
 		
 		virtual void setCons(string){};
 		virtual void setQuantiles(string){};
@@ -88,7 +94,8 @@ class Chimera {
 	protected:
 		
 		bool filter, correction, svg;
-		int processors, window, increment, numWanted, kmerSize;
+		int processors, window, increment, numWanted, kmerSize, match, misMatch, minSim, parents;
+		float divR;
 		string seqMask, quanfile, filterString, name;
 			
 
