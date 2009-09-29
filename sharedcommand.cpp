@@ -223,10 +223,10 @@ void SharedCommand::createMisMatchFile() {
 			map<string, string> namesInList;
 			
 			//go through listfile and get names
-			for (int i = 0; i < SharedList->getNumSeqs(); i++) {
+			for (int i = 0; i < SharedList->getNumBins(); i++) {
 				
 				string names = SharedList->get(i); 
-				
+		
 				while (names.find_first_of(',') != -1) { 
 					string name = names.substr(0,names.find_first_of(','));
 					names = names.substr(names.find_first_of(',')+1, names.length());

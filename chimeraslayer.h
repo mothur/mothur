@@ -40,6 +40,9 @@ class ChimeraSlayer : public Chimera {
 		vector<linePair*> lines;
 		vector<Sequence*> querySeqs;
 		vector<Sequence*> templateSeqs;
+		
+		vector< vector<data_struct> > chimeraResults;
+		vector<string> chimeraFlags;
 				
 		string fastafile, templateFile;
 		
