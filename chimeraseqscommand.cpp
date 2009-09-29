@@ -26,7 +26,7 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile", "mask", "numwanted", "ksize", "svg", "name", "match","mismatch", "divergence", "minsim", "parents" };
+			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile", "mask", "numwanted", "ksize", "svg", "name", "match","mismatch", "divergence", "minsim", "parents", "printall" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -77,6 +77,9 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 			
 			temp = validParameter.validFile(parameters, "correction", false);		if (temp == "not found") { temp = "T"; }
 			correction = isTrue(temp);
+			
+			temp = validParameter.validFile(parameters, "printall", false);			if (temp == "not found") { temp = "F"; }
+			printAll = isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "processors", false);		if (temp == "not found") { temp = "1"; }
 			convert(temp, processors);
@@ -217,6 +220,7 @@ int ChimeraSeqsCommand::execute(){
 		chimera->setDivR(divR);
 		chimera->setParents(parents);
 		chimera->setMinSim(minSimilarity);
+		chimera->setPrint(printAll);
 		
 				
 		//find chimeras

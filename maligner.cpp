@@ -26,12 +26,6 @@ string Maligner::getResults(Sequence* q) {
 		//find closest seqs to query in template - returns copies of seqs so trim does not destroy - remember to deallocate
 		refSeqs = decalc->findClosest(query, db, numWanted);
 		
-		ofstream out;
-		string outFile = "parentsOf" + query->getName();
-		openOutputFile(outFile, out);
-		for (int i = 0; i < refSeqs.size(); i++) {   refSeqs[i]->printSequence(out);	}
-		out.close();
-		
 		refSeqs = minCoverageFilter(refSeqs);
 		
 		if (refSeqs.size() < 2)  { 

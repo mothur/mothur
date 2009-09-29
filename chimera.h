@@ -76,6 +76,7 @@ class Chimera {
 		virtual void setDivR(float d)			{	divR = d;			}
 		virtual void setParents(int p)			{	parents = p;		}
 		virtual void setMinSim(int s)			{	minSim = s;			}
+		virtual void setPrint(int p)			{	printAll = p;		}
 
 		
 		virtual void setCons(string){};
@@ -93,7 +94,7 @@ class Chimera {
 		
 	protected:
 		
-		bool filter, correction, svg;
+		bool filter, correction, svg, printAll;
 		int processors, window, increment, numWanted, kmerSize, match, misMatch, minSim, parents;
 		float divR;
 		string seqMask, quanfile, filterString, name;
