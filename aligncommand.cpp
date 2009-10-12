@@ -276,26 +276,27 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName){
 			if (candidateSeq->getUnaligned().length() > alignment->getnRows()) {
 				alignment->resize(candidateSeq->getUnaligned().length()+1);
 			}
-			
+	
 			report.setCandidate(candidateSeq);
 	
 			Sequence temp = templateDB->findClosestSequence(candidateSeq);
 			Sequence* templateSeq = &temp;
-			
+	
 			report.setTemplate(templateSeq);
 			report.setSearchParameters(search, templateDB->getSearchScore());
-			
+				
 			Nast nast(alignment, candidateSeq, templateSeq);
 
 			report.setAlignmentParameters(align, alignment);
-
+	
 			report.setNastParameters(nast);
 
 			alignmentFile << '>' << candidateSeq->getName() << '\n' << candidateSeq->getAligned() << endl;
-			
+				
 			report.print();
 			
-			delete candidateSeq;		
+			delete candidateSeq;
+	
 		}
 		
 		alignmentFile.close();

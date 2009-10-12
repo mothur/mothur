@@ -16,6 +16,8 @@ Maligner::Maligner(vector<Sequence*> temp, int num, int match, int misMatch, flo
 string Maligner::getResults(Sequence* q) {
 	try {
 		
+		outputResults.clear();
+		
 		//make copy so trimming doesn't destroy query from calling class - remember to deallocate
 		query = new Sequence(q->getName(), q->getAligned());
 		
@@ -25,7 +27,7 @@ string Maligner::getResults(Sequence* q) {
 		
 		//find closest seqs to query in template - returns copies of seqs so trim does not destroy - remember to deallocate
 		refSeqs = decalc->findClosest(query, db, numWanted);
-		
+	
 		refSeqs = minCoverageFilter(refSeqs);
 		
 		if (refSeqs.size() < 2)  { 

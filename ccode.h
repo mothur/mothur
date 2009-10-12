@@ -14,6 +14,7 @@
 #include "dist.h"
 #include "decalc.h"
 
+/***********************************************************/
 //This class was created using the algorythms described in the 
 // "Evaluating putative chimeric sequences from PCR-amplified products" paper 
 //by Juan M. Gonzalez, Johannes Zimmerman and Cesareo Saiz-Jimenez.

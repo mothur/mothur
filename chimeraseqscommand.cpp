@@ -26,7 +26,7 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile", "mask", "numwanted", "ksize", "svg", "name", "match","mismatch", "divergence", "minsim", "parents", "printall" };
+			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile", "mask", "numwanted", "ksize", "svg", "name", "match","mismatch", "divergence", "minsim", "parents", "iters" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -78,9 +78,6 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 			temp = validParameter.validFile(parameters, "correction", false);		if (temp == "not found") { temp = "T"; }
 			correction = isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "printall", false);			if (temp == "not found") { temp = "F"; }
-			printAll = isTrue(temp);
-			
 			temp = validParameter.validFile(parameters, "processors", false);		if (temp == "not found") { temp = "1"; }
 			convert(temp, processors);
 			
@@ -109,6 +106,9 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 			
 			temp = validParameter.validFile(parameters, "parents", false);			if (temp == "not found") { temp = "5"; }
 			convert(temp, parents); 
+			
+			temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
+			convert(temp, iters); 
 			 
 			temp = validParameter.validFile(parameters, "increment", false);		
 			if ((temp == "not found") && ((method == "chimeracheck") || (method == "chimeraslayer"))) { temp = "10"; }
@@ -140,7 +140,7 @@ void ChimeraSeqsCommand::help(){
 		//"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile", "mask", "numwanted", "ksize", "svg", "name"
 		//mothurOut("chimera.seqs ASSUMES that your sequences are ALIGNED and if using a template that the template file sequences are the same length as the fasta file sequences.\n\n");
 		mothurOut("The chimera.seqs command reads a fastafile and creates list of potentially chimeric sequences.\n");
-		mothurOut("The chimera.seqs command parameters are fasta, filter, correction, processors, mask, method, window, increment, template, conservation, quantile, numwanted, ksize, svg, name.\n");
+		mothurOut("The chimera.seqs command parameters are fasta, filter, correction, processors, mask, method, window, increment, template, conservation, quantile, numwanted, ksize, svg, name, iters.\n");
 		mothurOut("The fasta parameter is always required and template is required if using pintail, ccode or chimeracheck.\n");
 		mothurOut("The filter parameter allows you to specify if you would like to apply a vertical and 50% soft filter. \n");
 		mothurOut("The correction parameter allows you to put more emphasis on the distance between highly similar sequences and less emphasis on the differences between remote homologs.\n");
@@ -156,6 +156,7 @@ void ChimeraSeqsCommand::help(){
 		mothurOut("The ksize parameter allows you to input kmersize. \n");
 		mothurOut("The svg parameter allows you to specify whether or not you would like a svg file outputted for each query sequence.\n");
 		mothurOut("The name parameter allows you to enter a file containing names of sequences you would like .svg files for.\n");
+		mothurOut("The iters parameter allows you to specify the number of bootstrap iters to do with the chimeraslayer method.\n");
 		mothurOut("NOT ALL PARAMETERS ARE USED BY ALL METHODS. Please look below for method specifics.\n\n");
 		mothurOut("Details for each method: \n"); 
 		mothurOut("\tpintail: \n"); 
@@ -220,7 +221,7 @@ int ChimeraSeqsCommand::execute(){
 		chimera->setDivR(divR);
 		chimera->setParents(parents);
 		chimera->setMinSim(minSimilarity);
-		chimera->setPrint(printAll);
+		chimera->setIters(iters);
 		
 				
 		//find chimeras

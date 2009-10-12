@@ -56,6 +56,7 @@
 #include "systemcommand.h"
 #include "secondarystructurecommand.h"
 #include "getsharedotucommand.h"
+#include "getlistcountcommand.h"
 
 /***********************************************************/
 
@@ -110,6 +111,7 @@ CommandFactory::CommandFactory(){
 	commands["system"]				= "system";
 	commands["align.check"]			= "align.check";
 	commands["get.sharedotu"]		= "get.sharedotu";
+	commands["get.listcount"]		= "get.listcount";
 	commands["quit"]				= "quit"; 
 
 }
@@ -174,6 +176,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "system")				{	command = new SystemCommand(optionString);				}
 		else if(commandName == "align.check")			{	command = new AlignCheckCommand(optionString);			}
 		else if(commandName == "get.sharedotu")			{	command = new GetSharedOTUCommand(optionString);		}
+		else if(commandName == "get.listcount")			{	command = new GetListCountCommand(optionString);		}
 		else											{	command = new NoCommand(optionString);					}
 
 		return command;

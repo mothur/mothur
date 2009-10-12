@@ -16,6 +16,7 @@
 #include "kmerdb.hpp"
 #include "database.hpp"
 
+/***********************************************************/
 //This class was created using the algorythms described in 
 //CHIMERA_CHECK version 2.7 written by Niels Larsen. 
 
