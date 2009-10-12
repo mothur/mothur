@@ -226,7 +226,7 @@ void Nast::regapSequences(){	//This is essentially part B in Fig 2. of DeSantis 
 			candidateSeq->setAligned(candAln);
 			return;
 		}
-		
+	
 		int fullAlignIndex = 0;
 		int pairwiseAlignIndex = 0;
 		string newTemplateAlign = "";					//	this is going to be messy so we want a temporary template
@@ -323,7 +323,9 @@ void Nast::regapSequences(){	//This is essentially part B in Fig 2. of DeSantis 
 			newTemplateAlign += tempAln[i];//
 		}
 		
-		int start, end;
+		int start = 0;
+		int end = candAln.length()-1;
+
 		for(int i=0;i<candAln.length();i++){
 			if(candAln[i] == 'Z' || !isalnum(candAln[i]))	{	candAln[i] = '.';	}	//	if we padded the alignemnt from
 			else{			start = i;			break;		}							//	blast with Z's, change them to
@@ -338,11 +340,11 @@ void Nast::regapSequences(){	//This is essentially part B in Fig 2. of DeSantis 
 			candAln[i] = toupper(candAln[i]);			//	everything is upper case
 		}
 		
-	
+
 		if(candAln.length() != tempAln.length()){		//	if the regapped candidate sequence is longer than the official
 			removeExtraGaps(candAln, tempAln, newTemplateAlign);//	template alignment then we need to do steps C-F in Fig.
 		}												//	2 of Desantis et al.
-			
+
 		candidateSeq->setAligned(candAln);
 	}
 	catch(exception& e) {

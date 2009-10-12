@@ -10,12 +10,11 @@
 #include "slayer.h"
 
 /***********************************************************************/
-Slayer::Slayer(int win, int increment, int parentThreshold, float div) :
-		windowSize(win), windowStep(increment), parentFragmentThreshold(parentThreshold), divRThreshold(div) {}
+Slayer::Slayer(int win, int increment, int parentThreshold, float div, int i) :
+		windowSize(win), windowStep(increment), parentFragmentThreshold(parentThreshold), divRThreshold(div), iters(i){}
 /***********************************************************************/
 string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 	try {
-cout << "refSeqs = " << refSeqs.size() << endl;		
 		vector<data_struct> all; all.clear();
 		
 		for (int i = 0; i < refSeqs.size(); i++) {
@@ -46,7 +45,6 @@ cout << "refSeqs = " << refSeqs.size() << endl;
 						
 						float snpRateLeft = numSNPSLeft / (float) winSizeLeft;
 						float snpRateRight = numSNPSRight / (float) winSizeRight;
-						
 						float logR = log(snpRateLeft / snpRateRight) / log(2);
 						
 						// do not accept excess snp ratio on either side of the break
@@ -54,7 +52,7 @@ cout << "refSeqs = " << refSeqs.size() << endl;
 							
 							float BS_A, BS_B;
 							bootstrapSNPS(snpsLeft, snpsRight, BS_A, BS_B);
-						
+
 							divs[k].bsa = BS_A;
 							divs[k].bsb = BS_B;
 						
@@ -101,18 +99,17 @@ vector<data_struct> Slayer::runBellerophon(Sequence* q, Sequence* pA, Sequence* 
 	try{
 		
 		vector<data_struct> data;
-cout << q->getName() << '\t' << q->getAligned().length() << endl;		
+				
 		//vertical filter
 		vector<Sequence*> temp;
 		temp.push_back(q); temp.push_back(pA); temp.push_back(pB);
-		verticalFilter(temp);
+		map<int, int> spots = verticalFilter(temp);
 		
 		//get these to avoid numerous function calls
 		string query = q->getAligned();
 		string parentA = pA->getAligned();
 		string parentB = pB->getAligned();
 		int length = query.length();
-cout << q->getName() << '\t' << length << endl;
 		
 		//check window size
 		if (length < (2*windowSize+windowStep)) { 
@@ -170,10 +167,10 @@ cout << q->getName() << '\t' << length << endl;
 					member.rab = RAB; 
 					member.qra = QRA; 
 					member.qlb = QLB; 
-					member.winLStart = 0;
-					member.winLEnd = breakpoint; 
-					member.winRStart = breakpoint+1; 
-					member.winREnd = length-1; 
+					member.winLStart = spots[0];
+					member.winLEnd = spots[breakpoint];  //so breakpoint reflects spot in alignment before filter
+					member.winRStart = spots[breakpoint+1]; 
+					member.winREnd = spots[length-1]; 
 					member.querySeq = *(q); 
 					member.parentA = *(pA);
 					member.parentB = *(pB);
@@ -238,15 +235,16 @@ void Slayer::bootstrapSNPS(vector<snps> left, vector<snps> right, float& BSA, fl
 		int numLeft = max(1, int(left.size()/10 +0.5));
 		int numRight = max(1, int(right.size()/10 + 0.5));
 		
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < iters; i++) {
 			//random sampling with replacement.
 		
 			vector<snps> selectedLeft;
+
 			for (int j = 0; j < numLeft; j++) {
 				int index = int(rand() % left.size());
 				selectedLeft.push_back(left[index]);
 			}
-		
+
 			vector<snps> selectedRight;
 			for (int j = 0; j < numRight; j++) {
 				int index = int(rand() % right.size());
@@ -268,7 +266,7 @@ void Slayer::bootstrapSNPS(vector<snps> left, vector<snps> right, float& BSA, fl
 		
 			float QLB = snpQB(selectedLeft);
 			float QRB = snpQB(selectedRight);
-			
+	
 			//in original - not used - not sure why?
 			//float ALB = snpAB(selectedLeft);
 			//float ARB = snpAB(selectedRight);
@@ -283,8 +281,8 @@ void Slayer::bootstrapSNPS(vector<snps> left, vector<snps> right, float& BSA, fl
 		
 		}
 
-		BSA = (float) count_A;
-		BSB = (float) count_B;
+		BSA = ((float) count_A / (float) iters) * 100;
+		BSB = ((float) count_B / (float) iters) * 100;
 	
 	}
 	catch(exception& e) {
@@ -304,7 +302,7 @@ float Slayer::snpQA(vector<snps> data) {
 			}
 		}
 
-		float percentID = (numIdentical / data.size()) * 100;
+		float percentID = (numIdentical / (float) data.size()) * 100;
 		
 		return percentID;
 	}
@@ -325,7 +323,7 @@ float Slayer::snpQB(vector<snps> data) {
 			}
 		}
 
-		float percentID = (numIdentical / data.size()) * 100;
+		float percentID = (numIdentical / (float) data.size()) * 100;
 		
 		return percentID;
 
@@ -346,7 +344,7 @@ float Slayer::snpAB(vector<snps> data) {
 			}
 		}
 
-		float percentID = (numIdentical / data.size()) * 100;
+		float percentID = (numIdentical / (float) data.size()) * 100;
 		
 		return percentID;
 
@@ -380,7 +378,7 @@ float Slayer::computePercentID(string queryFrag, string parent, int left, int ri
 }
 /***********************************************************************/
 //remove columns that contain any gaps
-void Slayer::verticalFilter(vector<Sequence*> seqs) {
+map<int, int> Slayer::verticalFilter(vector<Sequence*> seqs) {
 	try {
 		vector<int> gaps;	gaps.resize(seqs[0]->getAligned().length(), 0);
 		
@@ -399,11 +397,17 @@ void Slayer::verticalFilter(vector<Sequence*> seqs) {
 		
 		//zero out spot where all sequences have blanks
 		int numColRemoved = 0;
+		int count = 0;
+		map<int, int> maskMap; maskMap.clear();
 
 		for(int i = 0; i < seqs[0]->getAligned().length(); i++){
 			if(gaps[i] != 0)	{	filterString[i] = '0'; 	numColRemoved++;  }
+			else {
+				maskMap[count] = i;
+				count++;
+			}
 		}
-
+		
 		//for each sequence
 		for (int i = 0; i < seqs.size(); i++) {
 		
@@ -417,6 +421,8 @@ void Slayer::verticalFilter(vector<Sequence*> seqs) {
 			
 			seqs[i]->setAligned(newAligned);
 		}
+		
+		return maskMap;
 	}
 	catch(exception& e) {
 		errorOut(e, "Slayer", "verticalFilter");

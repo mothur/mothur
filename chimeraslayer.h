@@ -40,6 +40,7 @@ class ChimeraSlayer : public Chimera {
 		vector<linePair*> lines;
 		vector<Sequence*> querySeqs;
 		vector<Sequence*> templateSeqs;
+		vector< map<int, int> > spotMap;
 		
 		vector< vector<data_struct> > chimeraResults;
 		vector<string> chimeraFlags;
@@ -47,8 +48,7 @@ class ChimeraSlayer : public Chimera {
 		string fastafile, templateFile;
 		
 		Sequence* getSequence(string);  //find sequence from name
-			
-				
+		void printBlock(data_struct, ostream&, int i);
 };
 
 /************************************************************************/

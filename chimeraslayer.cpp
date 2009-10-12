@@ -27,118 +27,28 @@ ChimeraSlayer::~ChimeraSlayer() {
 void ChimeraSlayer::print(ostream& out) {
 	try {
 		mothurOutEndLine();
+		mothurOut("Only reporting sequence supported by 90% of bootstrapped results.");
+		mothurOutEndLine();
 		
 		for (int i = 0; i < querySeqs.size(); i++) {
 		
 			if (chimeraFlags[i] == "yes") {	
-				mothurOut(querySeqs[i]->getName() + "\tyes"); mothurOutEndLine();
-			
+				if ((chimeraResults[i][0].bsa >= 90.0) || (chimeraResults[i][0].bsb >= 90.0)) {
+					mothurOut(querySeqs[i]->getName() + "\tyes"); mothurOutEndLine();
+					out << querySeqs[i]->getName() << "\tyes" << endl;
+				}else {
+					out << querySeqs[i]->getName() << "\tno" << endl;
+					mothurOut(querySeqs[i]->getName() + "\tno"); mothurOutEndLine();
+				}
+
+				printBlock(chimeraResults[i][0], out, i);
+				
+				out << endl;
 			}else{
 				out << querySeqs[i]->getName() << "\tno" << endl;
-				mothurOut("no");
+				mothurOut(querySeqs[i]->getName() + "\tno"); mothurOutEndLine();
 			}
 		}
-/*		
-	
-	my $div_ratio_QLA_QRB = $data_struct->{div_ratio_QLA_QRB};
-	my $div_ratio_QRA_QLB = $data_struct->{div_ratio_QLB_QRA};
-	
-	my $per_id_QLA = $data_struct->{per_id_QLA};
-	my $per_id_QRB = $data_struct->{per_id_QRB};
-	my $per_id_AB = $data_struct->{per_id_AB};
-	my $per_id_QA = $data_struct->{per_id_QA};
-	my $per_id_QB = $data_struct->{per_id_QB}; 
-	my $per_id_LAB = $data_struct->{per_id_LAB};
-	my $per_id_RAB = $data_struct->{per_id_RAB};
-	my $per_id_QRA = $data_struct->{per_id_QRA};
-	my $per_id_QLB = $data_struct->{per_id_QLB};
-	my $per_id_QLB_QRA = $data_struct->{per_id_QLB_QRA};
-	my $per_id_QLA_QRB = $data_struct->{per_id_QLA_QRB};
-	
-	my $win_left_end5 = $data_struct->{win_left_end5};
-	my $win_left_end3 = $data_struct->{win_left_end3};
-	my $win_right_end5 = $data_struct->{win_right_end5};
-	my $win_right_end3 = $data_struct->{win_right_end3};
-	my $Q = $data_struct->{query_alignment};
-	my $A = $data_struct->{parent_A_alignment};
-	my $B = $data_struct->{parent_B_alignment}; 
-	my $BS_A = $data_struct->{BS_A};
-	my $BS_B = $data_struct->{BS_B};
-	
-	my @Q_chars = @{$Q->{align}};
-	my @A_chars = @{$A->{align}};
-	my @B_chars = @{$B->{align}};
-	
-	my $query_acc = $Q->{acc};
-	my $A_acc = $A->{acc};
-	my $B_acc = $B->{acc};
-	
-	my $break_left = $Q->{seqPos}->[$win_left_end3];
-	my $break_right = $Q->{seqPos}->[$win_right_end5];
-	
-	
-	cout << "//\n## CHIMERA\t" << querySeqs[i]->getName() << "\t" << $break_left-$break_right" << endl  
-		<< "\tDIV_QLARB: ". sprintf("%.3f", $div_ratio_QLA_QRB)
-		<< "\tBS_QLARB: " . sprintf("%.2f", $BS_A)
-		<< "\tDIV_QRALB: " . sprintf("%.3f", $div_ratio_QRA_QLB)
-		<< "\tBS_QRALB: " . sprintf("%.2f", $BS_B)
-		<< "\t$A_acc\t$B_acc" 
-		<< "\tbreakpoint: $break_left-$break_right\n\n";
-	
-	## draw illustration:
-
-	print "            Per_id parents: " . sprintf("%.2f", $per_id_AB) . "\n\n";
-	print "           Per_id(Q,A): " . sprintf("%.2f", $per_id_QA) . "\n";
-	print "--------------------------------------------------- A: $A_acc\n"
-		. " " . sprintf("%.2f", $per_id_QLA) . "                                " . sprintf("%.2f", $per_id_QRA) . "\n"
-		. "~~~~~~~~~~~~~~~~~~~~~~~~\\ /~~~~~~~~~~~~~~~~~~~~~~~~ Q: $query_acc\n"
-		. "DivR: " . sprintf("%.3f", $div_ratio_QLA_QRB) . " BS: " . sprintf("%.2f", $BS_A) . "     |\n"
-		. "Per_id(QLA,QRB): " . sprintf("%.2f", $per_id_QLA_QRB) . "   |\n"
-		. "                         |\n"
-		. "   (L-AB: " . sprintf("%.2f", $per_id_LAB) . ")         |      (R-AB: " . sprintf("%.2f", $per_id_RAB) . ")\n"
-		. "   WinL:$win_left_end5-$win_left_end3            |      WinR:$win_right_end5-$win_right_end3\n"
-		. "                         |\n"
-		. "Per_id(QLB,QRA): " . sprintf("%.2f", $per_id_QLB_QRA) . "   |\n"
-		. "DivR: " . sprintf("%.3f", $div_ratio_QRA_QLB) . " BS: " . sprintf("%.2f", $BS_B) . "    |\n"
-		. "~~~~~~~~~~~~~~~~~~~~~~~~/ \\~~~~~~~~~~~~~~~~~~~~~~~~~ Q: $query_acc\n"
-		. " " . sprintf("%.2f", $per_id_QLB) . "                                " . sprintf("%.2f", $per_id_QRB) . "\n"
-		. "---------------------------------------------------- B: $B_acc\n";
-	print "            Per_id(Q,B): ". sprintf("%.2f", $per_id_QB) . "\n\n";
-	
-	my $deltaL = $per_id_QLA - $per_id_QLB;
-	my $deltaR = $per_id_QRA - $per_id_QRB;
-
-	print "DeltaL: " . sprintf("%.2f", $deltaL) . "                   DeltaR: " . sprintf("%.2f", $deltaR) . "\n\n";
-	
-	unless ($printAlignmentsFlag) { return; }
-	
-	
-	## build the left windows:
-	my @Q_left_win = @Q_chars[$win_left_end5..$win_left_end3];
-	my @A_left_win = @A_chars[$win_left_end5..$win_left_end3];
-	my @B_left_win = @B_chars[$win_left_end5..$win_left_end3];
-	
-	&print_alignment($A_acc, \@A_left_win, 
-					 $query_acc, \@Q_left_win, 
-					 $B_acc, \@B_left_win);
-	
-	print "\t\t** Breakpoint **\n\n";
-	
-	my @Q_right_win = @Q_chars[$win_right_end5..$win_right_end3];
-	my @A_right_win = @A_chars[$win_right_end5..$win_right_end3];
-	my @B_right_win = @B_chars[$win_right_end5..$win_right_end3];
-	
-	&print_alignment($A_acc, \@A_right_win, 
-					 $query_acc, \@Q_right_win, 
-					 $B_acc, \@B_right_win);
-	
-	return;
-}
-
-
-####
-		
-	*/	
 				
 	}
 	catch(exception& e) {
@@ -161,6 +71,7 @@ void ChimeraSlayer::getChimeras() {
 		
 		chimeraResults.resize(numSeqs);
 		chimeraFlags.resize(numSeqs, "no");
+		spotMap.resize(numSeqs);
 		
 		//break up file if needed
 		int linesPerProcess = numSeqs / processors ;
@@ -183,39 +94,56 @@ void ChimeraSlayer::getChimeras() {
 		
 		if (seqMask != "") {	decalc = new DeCalculator();	} //to use below
 		
+		//initialize spotMap
+		for (int j = 0; j < numSeqs; j++) {
+			for (int i = 0; i < querySeqs[0]->getAligned().length(); i++) {
+				spotMap[j][i] = i;
+			}
+		}
+		
 		//referenceSeqs, numWanted, matchScore, misMatchPenalty, divR, minSimilarity
 		maligner = new Maligner(templateSeqs, numWanted, match, misMatch, 1.01, minSim);
-		slayer = new Slayer(window, increment, minSim, divR);
+		slayer = new Slayer(window, increment, minSim, divR, iters);
 		
 		for (int i = 0; i < querySeqs.size(); i++) {
 		
 			string chimeraFlag = maligner->getResults(querySeqs[i]);
-			float percentIdentical = maligner->getPercentID();
+			//float percentIdentical = maligner->getPercentID();
 			vector<results> Results = maligner->getOutput();
 			
-			//cout << querySeqs[i]->getName() << '\t' << chimeraFlag << '\t' << percentIdentical << endl;
+			cout << "Processing sequence: " << i+1 << endl;
 			
-			for (int j = 0; j < Results.size(); j++) {
+			//for (int j = 0; j < Results.size(); j++) {
 				//cout << "regionStart = " << Results[j].regionStart << "\tRegionEnd = " << Results[j].regionEnd << "\tName = " << Results[j].parent << "\tPerQP = " << Results[j].queryToParent << "\tLocalPerQP = " << Results[j].queryToParentLocal << "\tdivR = " << Results[j].divR << endl;
-			}
+			//}
 			
-			if (chimeraFlag == "yes") {
+			//if (chimeraFlag == "yes") {
 			
 				//get sequence that were given from maligner results
 				vector<SeqDist> seqs;
+				map<string, float> removeDups;
+				map<string, float>::iterator itDup;
 				for (int j = 0; j < Results.size(); j++) {
-					Sequence* seq = getSequence(Results[j].parent); //makes copy so you can filter and mask and not effect template
-					
-					//seq = NULL if error occurred in getSequence
-					if (seq == NULL) {  break;	}
-					else {	
-						SeqDist member;
-						member.seq = seq;
-						member.dist = (Results[j].regionEnd - Results[j].regionStart + 1) * Results[j].queryToParentLocal;
-						seqs.push_back(member);	
+					float dist = (Results[j].regionEnd - Results[j].regionStart + 1) * Results[j].queryToParentLocal;
+					//only add if you are not a duplicate
+					itDup = removeDups.find(Results[j].parent);
+					if (itDup == removeDups.end()) { //this is not duplicate
+						removeDups[Results[j].parent] = dist;
+					}else if (dist > itDup->second) { //is this a stronger number for this parent
+						removeDups[Results[j].parent] = dist;
 					}
 				}
-			
+				
+				for (itDup = removeDups.begin(); itDup != removeDups.end(); itDup++) {
+					Sequence* seq = getSequence(itDup->first); //makes copy so you can filter and mask and not effect template
+					
+					SeqDist member;
+					member.seq = seq;
+					member.dist = itDup->second;
+					
+					seqs.push_back(member);
+				}
+				
 				//limit number of parents to explore - default 5
 				if (Results.size() > parents) {
 					//sort by distance
@@ -232,6 +160,24 @@ void ChimeraSlayer::getChimeras() {
 				//put seqs into vector to send to slayer
 				vector<Sequence*> seqsForSlayer;
 				for (int k = 0; k < seqs.size(); k++) {  seqsForSlayer.push_back(seqs[k].seq);	}
+//ofstream out;
+//string name = querySeqs[i]->getName();
+//cout << name << endl;
+//name = name.substr(name.find_first_of("|")+1);
+//cout << name << endl;
+//name = name.substr(name.find_first_of("|")+1);
+//cout << name << endl;
+//name = name.substr(0, name.find_last_of("|"));
+//cout << name << endl;
+//string filename = name + ".seqsforslayer";
+//openOutputFile(filename, out);	
+//for (int u = 0; u < seqsForSlayer.size(); u++) { seqsForSlayer[u]->printSequence(out);	}
+//out.close();
+//filename = name + ".fasta";
+//openOutputFile(filename, out);	
+//q->printSequence(out);
+//out.close();
+
 			
 				//mask then send to slayer...
 				if (seqMask != "") {
@@ -245,6 +191,10 @@ void ChimeraSlayer::getChimeras() {
 						decalc->runMask(seqsForSlayer[k]);
 					}
 					
+					for (int i = 0; i < numSeqs; i++) {
+						spotMap[i] = decalc->getMaskMap();
+					}
+
 				}
 				
 				//send to slayer
@@ -253,7 +203,7 @@ void ChimeraSlayer::getChimeras() {
 			
 				//free memory
 				for (int k = 0; k < seqs.size(); k++) {  delete seqs[k].seq;   }
-			}
+			//}
 			
 		}	
 		//free memory
@@ -296,6 +246,34 @@ Sequence* ChimeraSlayer::getSequence(string name) {
 	}
 }
 //***************************************************************************************************************
+void ChimeraSlayer::printBlock(data_struct data, ostream& out, int i){
+	try {
+		
+		out << "parentA: " << data.parentA.getName() << "  parentB: " << data.parentB.getName()  << endl;
+		out << "Left Window: " << spotMap[i][data.winLStart] << " " << spotMap[i][data.winLEnd] << endl;
+		out << "Right Window: " << spotMap[i][data.winRStart] << " " << spotMap[i][data.winREnd] << endl;
+		
+		out << "Divergence of Query to Leftside ParentA and Rightside ParentB: " << data.divr_qla_qrb << '\t' << "Bootstrap: " << data.bsa << endl;
+		out << "Divergence of Query to Rightside ParentA and Leftside ParentB: " << data.divr_qlb_qra << '\t' << "Bootstrap: " << data.bsb << endl;
+		
+		out << "Similarity of parents: " << data.ab << endl;
+		out << "Similarity of query to parentA: " << data.qa << endl;
+		out << "Similarity of query to parentB: " << data.qb << endl;
+		
+		//out << "Per_id(QL,A): " << data.qla << endl;
+		//out << "Per_id(QL,B): " << data.qlb << endl;
+		//out << "Per_id(QR,A): " << data.qra << endl;
+		//out << "Per_id(QR,B): " << data.qrb << endl;
 
+		
+		out << "DeltaL: " << (data.qla - data.qlb) << endl;
+		out << "DeltaR: " << (data.qra - data.qrb) << endl;
 
+	}
+	catch(exception& e) {
+		errorOut(e, "ChimeraSlayer", "printBlock");
+		exit(1);
+	}
+}
+//***************************************************************************************************************
 

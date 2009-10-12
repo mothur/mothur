@@ -64,7 +64,7 @@ class Slayer {
 
 	public:
 		
-		Slayer(int, int, int, float);
+		Slayer(int, int, int, float, int);
 		~Slayer() {};
 		
 		string getResults(Sequence*, vector<Sequence*>);
@@ -73,11 +73,11 @@ class Slayer {
 				
 	private:
 		
-		int windowSize, windowStep, parentFragmentThreshold;
+		int windowSize, windowStep, parentFragmentThreshold, iters;
 		float divRThreshold; 
 		vector<data_struct>  outputResults;
 		
-		void verticalFilter(vector<Sequence*>);
+		map<int, int> verticalFilter(vector<Sequence*>);
 		float computePercentID(string, string, int, int);
 		
 		vector<data_struct> runBellerophon(Sequence*, Sequence*, Sequence*);
