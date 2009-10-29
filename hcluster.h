@@ -19,7 +19,7 @@ class ListVector;
 struct clusterNode {
 	int numSeq;
 	int parent;
-	int smallChild; //used to make linkTable work with list and rabund
+	int smallChild; //used to make linkTable work with list and rabund. represents bin number of this cluster node
 	clusterNode(int num, int par, int kid) : numSeq(num), parent(par), smallChild(kid) {};
 };
 

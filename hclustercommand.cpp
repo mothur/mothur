@@ -144,6 +144,8 @@ int HClusterCommand::execute(){
 			globaldata->nameMap = NULL;
 		}
 		
+		time_t estart = time(NULL);
+		
 		if (!sorted) {
 			read = new ReadCluster(distfile, cutoff); 	
 			read->setFormat(format);
@@ -156,6 +158,9 @@ int HClusterCommand::execute(){
 			list = new ListVector(globaldata->nameMap->getListVector());
 		}
 	
+		mothurOut("It took " + toString(time(NULL) - estart) + " seconds to sort. "); mothurOutEndLine();
+		estart = time(NULL);
+		
 		//list vector made by read contains all sequence names
 		if(list != NULL){
 			rabund = new RAbundVector(list->getRAbundVector());
@@ -254,9 +259,10 @@ int HClusterCommand::execute(){
 		sabundFile.close();
 		rabundFile.close();
 		listFile.close();
-		if (isTrue(timing)) {
-			//mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster " + toString(ndist) + " distances"); mothurOutEndLine();
-		}
+		
+		//if (isTrue(timing)) {
+			mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster. "); mothurOutEndLine();
+		//}
 		return 0;
 	}
 	catch(exception& e) {

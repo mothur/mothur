@@ -21,7 +21,7 @@ ReadOtuCommand::ReadOtuCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"list","order","shared", "label","group","sabund", "rabund"};
+			string Array[] =  {"list","order","shared", "label","group","sabund", "rabund","groups"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -65,6 +65,13 @@ ReadOtuCommand::ReadOtuCommand(string option){
 				groupMap = new GroupMap(groupfile);
 				groupMap->readMap();
 				globaldata->gGroupmap = groupMap;
+			}
+			
+			groups = validParameter.validFile(parameters, "groups", false);			
+			if (groups == "not found") { groups = ""; }
+			else { 
+				splitAtDash(groups, Groups);
+				globaldata->Groups = Groups;
 			}
 
 			//you are doing a list and group shared
