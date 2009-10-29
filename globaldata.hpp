@@ -10,6 +10,7 @@
 #include "tree.h"
 #include "sparsematrix.hpp"
 #include "sequencedb.h"
+#include "nameassignment.hpp"
 
 
 class ListVector;
@@ -73,6 +74,8 @@ public:
 	void setOrderFile(string file);
 	void setFormat(string);	//do we need this?
 	
+	NameAssignment* nameMap;
+	
 	void clear(); 
 	void clearLabels();
 	void clearAbund();
@@ -81,7 +84,7 @@ public:
 	
 private:
 
-	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, treefile, sharedfile, format;
+	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, treefile, sharedfile, format, distfile;
 
 	static GlobalData* _uniqueInstance;
 	GlobalData( const GlobalData& ); // Disable copy constructor

@@ -236,6 +236,8 @@ int SummaryCommand::execute(){
 			}
 			
 			if ((anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = sabund->getLabel();
+				
 				delete sabund;
 				sabund = input->getSAbundVector(lastLabel);
 				
@@ -250,6 +252,9 @@ int SummaryCommand::execute(){
 					sumCalculators[i]->print(outputFileHandle);
 				}
 				outputFileHandle << endl;
+				
+				//restore real lastlabel to save below
+				sabund->setLabel(saveLabel);
 			}		
 
 			lastLabel = sabund->getLabel();			

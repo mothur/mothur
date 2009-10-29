@@ -142,7 +142,10 @@ void ReadDistCommand::help(){
 
 ReadDistCommand::~ReadDistCommand(){
 	if (abort == false) {
-		if (format != "matrix") { delete read; delete nameMap; }
+		if (format != "matrix") { 
+			delete read; 
+			delete nameMap; 
+		}
 	}
 }
 
@@ -174,7 +177,7 @@ int ReadDistCommand::execute(){
 			if (globaldata->gSparseMatrix != NULL) { delete globaldata->gSparseMatrix;  }
 			globaldata->gSparseMatrix = read->getMatrix();
 			numDists = globaldata->gSparseMatrix->getNNodes();
- 
+			
       int lines = cutoff / (1.0/precision);
       vector<float> dist_cutoff(lines+1,0);
 			for (int i = 0; i <= lines;i++) {	

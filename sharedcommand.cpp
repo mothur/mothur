@@ -52,6 +52,7 @@ int SharedCommand::execute(){
 		
 		//lookup.clear();
 		string errorOff = "no error";
+		//errorOff = "";
 			
 		//read in listfile
 		read = new ReadOTUFile(globaldata->inputFileName);	
@@ -83,8 +84,7 @@ int SharedCommand::execute(){
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
-		set<string> userLabels = globaldata->labels;
-		
+		set<string> userLabels = globaldata->labels;	
 		
 		while((SharedList != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
 			
@@ -102,6 +102,8 @@ int SharedCommand::execute(){
 			}
 			
 			if ((anyLabelsToProcess(SharedList->getLabel(), userLabels, errorOff) == true) && (processedLabels.count(lastLabel) != 1)) {
+					string saveLabel = SharedList->getLabel();
+					
 					delete SharedList;
 					SharedList = input->getSharedListVector(lastLabel); //get new list vector to process
 					
@@ -113,6 +115,9 @@ int SharedCommand::execute(){
 					
 					processedLabels.insert(SharedList->getLabel());
 					userLabels.erase(SharedList->getLabel());
+					
+					//restore real lastlabel to save below
+					SharedList->setLabel(saveLabel);
 			}
 			
 		
@@ -166,6 +171,7 @@ void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup) {
 		
 		//initialize bin values
 		for (int i = 0; i < thislookup.size(); i++) {
+//cout << "in printData " << thislookup[i]->getLabel() << '\t' << thislookup[i]->getGroup() <<  endl;
 			out << thislookup[i]->getLabel() << '\t' << thislookup[i]->getGroup() << '\t';
 			thislookup[i]->print(out);
 			

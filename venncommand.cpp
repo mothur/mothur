@@ -223,6 +223,8 @@ int VennCommand::execute(){
 				}
 				
 				if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+					string saveLabel = lookup[0]->getLabel();
+					
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 					lookup = input->getSharedRAbundVectors(lastLabel);
 
@@ -235,6 +237,9 @@ int VennCommand::execute(){
 						for (int i = lookup.size(); i > 4; i--) { lookup.pop_back(); } //no memmory leak because pop_back calls destructor
 					}				
 					venn->getPic(lookup, vennCalculators);
+					
+					//restore real lastlabel to save below
+					lookup[0]->setLabel(saveLabel);
 				}
 				
 				
@@ -293,6 +298,8 @@ int VennCommand::execute(){
 				}
 				
 				if ((anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+					string saveLabel = sabund->getLabel();
+				
 					delete sabund;
 					sabund = input->getSAbundVector(lastLabel);
 					
@@ -301,6 +308,9 @@ int VennCommand::execute(){
 					
 					processedLabels.insert(sabund->getLabel());
 					userLabels.erase(sabund->getLabel());
+					
+					//restore real lastlabel to save below
+					sabund->setLabel(saveLabel);
 				}		
 				
 				lastLabel = sabund->getLabel();		

@@ -206,6 +206,14 @@ void ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 	goodNameOut.close();
 	badNameOut.close();
 	
+	//we were unable to remove some of the bad sequences
+	if (badSeqNames.size() != 0) {
+		for (it = badSeqNames.begin(); it != badSeqNames.end(); it++) {  
+			mothurOut("Your namefile does not include the sequence " + *it + " please correct."); 
+			mothurOutEndLine();
+		}
+	}
+
 	if(groupfile != ""){
 		
 		ifstream inputGroups;
@@ -234,6 +242,14 @@ void ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 		inputGroups.close();
 		goodGroupOut.close();
 		badGroupOut.close();
+		
+		//we were unable to remove some of the bad sequences
+		if (badSeqGroups.size() != 0) {
+			for (it = badSeqGroups.begin(); it != badSeqGroups.end(); it++) {  
+				mothurOut("Your namefile does not include the sequence " + *it + " please correct."); 
+				mothurOutEndLine();
+			}
+		}
 	}
 }
 
@@ -265,6 +281,15 @@ void ScreenSeqsCommand::screenGroupFile(set<string> badSeqNames){
 		}
 		gobble(inputGroups);
 	}
+	
+	//we were unable to remove some of the bad sequences
+	if (badSeqNames.size() != 0) {
+		for (it = badSeqNames.begin(); it != badSeqNames.end(); it++) {  
+			mothurOut("Your groupfile does not include the sequence " + *it + " please correct."); 
+			mothurOutEndLine();
+		}
+	}
+	
 	inputGroups.close();
 	goodGroupOut.close();
 	badGroupOut.close();
@@ -312,6 +337,15 @@ void ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){
 		}
 		gobble(inputAlignReport);
 	}
+	
+	//we were unable to remove some of the bad sequences
+	if (badSeqNames.size() != 0) {
+		for (it = badSeqNames.begin(); it != badSeqNames.end(); it++) {  
+			mothurOut("Your file does not include the sequence " + *it + " please correct."); 
+			mothurOutEndLine();
+		}
+	}
+
 	inputAlignReport.close();
 	goodAlignReportOut.close();
 	badAlignReportOut.close();
