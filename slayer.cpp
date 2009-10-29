@@ -45,7 +45,7 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 						
 						float snpRateLeft = numSNPSLeft / (float) winSizeLeft;
 						float snpRateRight = numSNPSRight / (float) winSizeRight;
-						float logR = log(snpRateLeft / snpRateRight) / log(2);
+						float logR = log(snpRateLeft / snpRateRight) / log(2.0);
 						
 						// do not accept excess snp ratio on either side of the break
 						if (abs(logR) < 1 ) {  

@@ -27,12 +27,10 @@ string GlobalData::getNameFile()		{	return namefile;		}
 string GlobalData::getGroupFile()		{	return groupfile;		}
 string GlobalData::getOrderFile()		{	return orderfile;		}
 string GlobalData::getTreeFile()		{	return treefile;		}
-string GlobalData::getSharedFile()		{	return sharedfile;		}
-//string GlobalData::getFastaFile()		{	return fastafile;		}	
+string GlobalData::getSharedFile()		{	return sharedfile;		}	
 string GlobalData::getFormat()			{	return format;			}
 
 void GlobalData::setListFile(string file)		{	listfile = file;	inputFileName = file;					}
-//void GlobalData::setFastaFile(string file)		{	fastafile = file;	inputFileName = file;					}
 void GlobalData::setTreeFile(string file)		{	treefile = file;	inputFileName = file;					}
 void GlobalData::setRabundFile(string file)		{	rabundfile = file;	inputFileName = file;					}
 void GlobalData::setSabundFile(string file)		{	sabundfile = file;	inputFileName = file;					}
@@ -63,6 +61,7 @@ GlobalData::GlobalData() {
 	gMatrix = NULL;
 	gTreemap = NULL;
 	gSequenceDB = NULL;
+	nameMap = NULL;
 }
 /*******************************************************/
 
@@ -115,6 +114,8 @@ void GlobalData::newRead() {
 			if (gTreemap != NULL) { delete gTreemap; gTreemap = NULL; }
 
 			if (gSequenceDB != NULL) { delete gSequenceDB; gSequenceDB = NULL;}
+			
+			if (nameMap != NULL) { delete nameMap; nameMap = NULL; }
 
 
 			gTree.clear();
@@ -147,6 +148,7 @@ GlobalData::~GlobalData() {
 		if (gMatrix != NULL) { delete gMatrix; gMatrix = NULL;}
 		if (gTreemap != NULL) { delete gTreemap; gTreemap = NULL; }
 		if (gSequenceDB != NULL) { delete gSequenceDB; gSequenceDB = NULL;}
+		if (nameMap != NULL) { delete nameMap; nameMap = NULL; }
 	}
 	catch(exception& e) {
 		errorOut(e, "GlobalData", "~GlobalData");

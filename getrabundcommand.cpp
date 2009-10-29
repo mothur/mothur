@@ -133,6 +133,8 @@ int GetRAbundCommand::execute(){
 			}
 			
 			if ((anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+					string saveLabel = list->getLabel();
+					
 					delete list;
 					list = input->getListVector(lastLabel);
 					
@@ -147,6 +149,9 @@ int GetRAbundCommand::execute(){
 
 					processedLabels.insert(list->getLabel());
 					userLabels.erase(list->getLabel());
+					
+					//restore real lastlabel to save below
+					list->setLabel(saveLabel);
 			}
 			
 			lastLabel = list->getLabel();		

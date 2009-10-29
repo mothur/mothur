@@ -244,6 +244,8 @@ int CollectSharedCommand::execute(){
 			
 			//you have a label the user want that is smaller than this label and the last label has not already been processed
 			if ((anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = order->getLabel();
+				
 				delete order;
 				order = input->getSharedOrderVector(lastLabel);
 				
@@ -255,6 +257,9 @@ int CollectSharedCommand::execute(){
 				mothurOut(order->getLabel()); mothurOutEndLine();
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
+				
+				//restore real lastlabel to save below
+				order->setLabel(saveLabel);
 			}
 			
 			

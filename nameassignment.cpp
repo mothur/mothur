@@ -39,6 +39,20 @@ void NameAssignment::readMap(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+void NameAssignment::push_back(string name) {
+	try{
+	
+		int num = (*this).size();
+		(*this)[name] = num;
+		
+		list.push_back(name);
+	}
+	catch(exception& e) {
+		errorOut(e, "NameAssignment", "push_back");
+		exit(1);
+	}
+}
 
 //**********************************************************************************************************************
 

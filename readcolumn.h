@@ -22,6 +22,7 @@ public:
 private:
 	ifstream fileHandle;
 	string distFile;
+	
 };
 
 /******************************************************/

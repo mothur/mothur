@@ -163,6 +163,8 @@ int HeatMapCommand::execute(){
 				}
 				
 				if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+					string saveLabel = lookup[0]->getLabel();
+				
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
 					lookup = input->getSharedRAbundVectors(lastLabel);
 					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
@@ -171,6 +173,9 @@ int HeatMapCommand::execute(){
 					
 					processedLabels.insert(lookup[0]->getLabel());
 					userLabels.erase(lookup[0]->getLabel());
+					
+					//restore real lastlabel to save below
+					lookup[0]->setLabel(saveLabel);
 				}
 				
 				lastLabel = lookup[0]->getLabel();
@@ -223,7 +228,8 @@ int HeatMapCommand::execute(){
 				}
 				
 				if ((anyLabelsToProcess(rabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-
+					string saveLabel = rabund->getLabel();
+					
 					delete rabund;
 					rabund = input->getRAbundVector(lastLabel);
 					mothurOut(rabund->getLabel()); mothurOutEndLine();
@@ -232,6 +238,9 @@ int HeatMapCommand::execute(){
 					
 					processedLabels.insert(rabund->getLabel());
 					userLabels.erase(rabund->getLabel());
+					
+					//restore real lastlabel to save below
+					rabund->setLabel(saveLabel);
 				}		
 				
 								

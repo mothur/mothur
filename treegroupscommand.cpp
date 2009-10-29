@@ -443,6 +443,8 @@ void TreeGroupCommand::makeSimsShared() {
 			}
 			
 			if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = lookup[0]->getLabel();
+			
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 				lookup = input->getSharedRAbundVectors(lastLabel);
 
@@ -451,6 +453,9 @@ void TreeGroupCommand::makeSimsShared() {
 					
 				processedLabels.insert(lookup[0]->getLabel());
 				userLabels.erase(lookup[0]->getLabel());
+				
+				//restore real lastlabel to save below
+				lookup[0]->setLabel(saveLabel);
 			}
 
 			lastLabel = lookup[0]->getLabel();			

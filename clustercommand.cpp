@@ -71,7 +71,8 @@ ClusterCommand::ClusterCommand(string option){
 			
 			if (abort == false) {
 			
-				//get matrix, list and rabund for execute
+	
+							//get matrix, list and rabund for execute
 				if(globaldata->gSparseMatrix != NULL)	{	matrix = globaldata->gSparseMatrix;		}
 			
 				if(globaldata->gListVector != NULL){

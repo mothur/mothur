@@ -11,6 +11,7 @@ public:
 	ListVector getListVector();
 	int get(string);
 	void print();
+	void push_back(string);
 private:
 	ifstream fileHandle;
 	ListVector list;

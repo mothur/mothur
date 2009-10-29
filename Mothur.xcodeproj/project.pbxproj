@@ -164,7 +164,10 @@
 		A70B53AC0F4CD7AD0064797E /* getlinecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70B53A80F4CD7AD0064797E /* getlinecommand.cpp */; };
 		A70DECD91063D8B40057C03C /* secondarystructurecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70DECD81063D8B40057C03C /* secondarystructurecommand.cpp */; };
 		A7283FF81056CAE100D0CC69 /* chimeracheckrdp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7283FF71056CAE100D0CC69 /* chimeracheckrdp.cpp */; };
+		A729ACD010848E6100139801 /* hclustercommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A729ACCF10848E6100139801 /* hclustercommand.cpp */; };
+		A729ACE410849BBE00139801 /* hcluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A729ACE310849BBE00139801 /* hcluster.cpp */; };
 		A73329CF1083B3B3003B10C5 /* getlistcountcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73329CE1083B3B3003B10C5 /* getlistcountcommand.cpp */; };
+		A751ACEA1098B283003D0911 /* readcluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A751ACE91098B283003D0911 /* readcluster.cpp */; };
 		A75B887E104C16860083C454 /* ccode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A75B887B104C16860083C454 /* ccode.cpp */; };
 		A7B04493106CC3E60046FC83 /* chimeraslayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7B04492106CC3E60046FC83 /* chimeraslayer.cpp */; };
 		A7B0450E106CEEC90046FC83 /* slayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7B0450D106CEEC90046FC83 /* slayer.cpp */; };
@@ -525,8 +528,14 @@
 		A70DECD81063D8B40057C03C /* secondarystructurecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = secondarystructurecommand.cpp; sourceTree = SOURCE_ROOT; };
 		A7283FF61056CAE100D0CC69 /* chimeracheckrdp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeracheckrdp.h; sourceTree = SOURCE_ROOT; };
 		A7283FF71056CAE100D0CC69 /* chimeracheckrdp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeracheckrdp.cpp; sourceTree = SOURCE_ROOT; };
-		A73329CD1083B3B3003B10C5 /* getlistcountcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getlistcountcommand.h; sourceTree = "<group>"; };
-		A73329CE1083B3B3003B10C5 /* getlistcountcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getlistcountcommand.cpp; sourceTree = "<group>"; };
+		A729ACCE10848E6100139801 /* hclustercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hclustercommand.h; sourceTree = SOURCE_ROOT; };
+		A729ACCF10848E6100139801 /* hclustercommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = hclustercommand.cpp; sourceTree = SOURCE_ROOT; };
+		A729ACE210849BBE00139801 /* hcluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hcluster.h; sourceTree = SOURCE_ROOT; };
+		A729ACE310849BBE00139801 /* hcluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = hcluster.cpp; sourceTree = SOURCE_ROOT; };
+		A73329CD1083B3B3003B10C5 /* getlistcountcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getlistcountcommand.h; sourceTree = SOURCE_ROOT; };
+		A73329CE1083B3B3003B10C5 /* getlistcountcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getlistcountcommand.cpp; sourceTree = SOURCE_ROOT; };
+		A751ACE81098B283003D0911 /* readcluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readcluster.h; sourceTree = SOURCE_ROOT; };
+		A751ACE91098B283003D0911 /* readcluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readcluster.cpp; sourceTree = SOURCE_ROOT; };
 		A75B887B104C16860083C454 /* ccode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ccode.cpp; sourceTree = SOURCE_ROOT; };
 		A75B887C104C16860083C454 /* ccode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ccode.h; sourceTree = SOURCE_ROOT; };
 		A7B04491106CC3E60046FC83 /* chimeraslayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraslayer.h; sourceTree = SOURCE_ROOT; };
@@ -585,6 +594,8 @@
 				374F2FE81006346600E97C66 /* chimera */,
 				37D927C20F21331F001D4494 /* cluster.hpp */,
 				37D927C10F21331F001D4494 /* cluster.cpp */,
+				A729ACE210849BBE00139801 /* hcluster.h */,
+				A729ACE310849BBE00139801 /* hcluster.cpp */,
 				37D928A90F2133E5001D4494 /* commands */,
 				37D927C60F21331F001D4494 /* collect.h */,
 				37D927C50F21331F001D4494 /* collect.cpp */,
@@ -618,8 +629,6 @@
 				7E412FE90F8D3E2C00381DD0 /* libshuff.cpp */,
 				37E3ED800F4D9D0D00B5DF02 /* mothur.h */,
 				37D927EF0F21331F001D4494 /* mothur.cpp */,
-				37D927F10F21331F001D4494 /* nameassignment.hpp */,
-				37D927F00F21331F001D4494 /* nameassignment.cpp */,
 				373C691E0FC1C98600137ACD /* nast.hpp */,
 				373C691D0FC1C98600137ACD /* nast.cpp */,
 				373C692A0FC1C9EB00137ACD /* nastreport.hpp */,
@@ -690,6 +699,8 @@
 		3796441D0FB9B9650081FDB6 /* read */ = {
 			isa = PBXGroup;
 			children = (
+				A751ACE81098B283003D0911 /* readcluster.h */,
+				A751ACE91098B283003D0911 /* readcluster.cpp */,
 				375AA1340F9E433D008EF9B8 /* readcolumn.h */,
 				375AA1330F9E433D008EF9B8 /* readcolumn.cpp */,
 				37D928130F21331F001D4494 /* readmatrix.hpp */,
@@ -860,6 +871,8 @@
 				37B73CA51004D89A008C4B41 /* getseqscommand.cpp */,
 				A7E4A781106913F900688F62 /* getsharedotucommand.h */,
 				A7E4A782106913F900688F62 /* getsharedotucommand.cpp */,
+				A729ACCE10848E6100139801 /* hclustercommand.h */,
+				A729ACCF10848E6100139801 /* hclustercommand.cpp */,
 				375873F10F7D64800040F377 /* heatmapcommand.h */,
 				375873F00F7D64800040F377 /* heatmapcommand.cpp */,
 				378598640FDD497000EF9D03 /* heatmapsimcommand.h */,
@@ -948,6 +961,8 @@
 				37D927EB0F21331F001D4494 /* kmerdb.cpp */,
 				37D927EE0F21331F001D4494 /* listvector.hpp */,
 				37D927ED0F21331F001D4494 /* listvector.cpp */,
+				37D927F10F21331F001D4494 /* nameassignment.hpp */,
+				37D927F00F21331F001D4494 /* nameassignment.cpp */,
 				37D927F80F21331F001D4494 /* ordervector.hpp */,
 				37D927F70F21331F001D4494 /* ordervector.cpp */,
 				37D928000F21331F001D4494 /* rabundvector.hpp */,
@@ -1215,6 +1230,9 @@
 				A7B04493106CC3E60046FC83 /* chimeraslayer.cpp in Sources */,
 				A7B0450E106CEEC90046FC83 /* slayer.cpp in Sources */,
 				A73329CF1083B3B3003B10C5 /* getlistcountcommand.cpp in Sources */,
+				A729ACD010848E6100139801 /* hclustercommand.cpp in Sources */,
+				A729ACE410849BBE00139801 /* hcluster.cpp in Sources */,
+				A751ACEA1098B283003D0911 /* readcluster.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
