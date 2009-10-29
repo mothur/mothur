@@ -133,7 +133,7 @@ int ClusterCommand::execute(){
 		if (abort == true) {	return 0;	}
 		
 		time_t estart = time(NULL);
-		int ndist = matrix->getNNodes();
+		//int ndist = matrix->getNNodes();
 		float previousDist = 0.00000;
 		float rndPreviousDist = 0.00000;
 		oldRAbund = *rabund;
@@ -200,9 +200,9 @@ int ClusterCommand::execute(){
 		sabundFile.close();
 		rabundFile.close();
 		listFile.close();
-		if (isTrue(timing)) {
-			mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster " + toString(ndist) + " distances"); mothurOutEndLine();
-		}
+		//if (isTrue(timing)) {
+			mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster"); mothurOutEndLine();
+		//}
 		return 0;
 	}
 	catch(exception& e) {

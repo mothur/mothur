@@ -95,8 +95,9 @@ void HCluster::printInfo(){
 		}
 		cout << endl;
 		for (int i = 0; i < linkTable.size(); i++) {
+			cout << i << '\t';
 			for (it = linkTable[i].begin(); it != linkTable[i].end(); it++) {
-				cout << it->first << '\t' << it->second << '\t' << '\t';
+				cout << it->first << '-' << it->second << '\t';
 			}
 			cout << endl;
 		}
@@ -241,13 +242,12 @@ void HCluster::updateArrayandLinkTable() {
 			activeLinks.erase(smallCol);
 			
 			if(rowSpot>colSpot) {	activeLinks[size] = colSpot;	}
-			else{	activeLinks[size] = colSpot-1;  }
+			else{	activeLinks[size] = colSpot;  }
 			
 			//adjust everybody elses spot since you deleted - time vs. space
 			for (it = activeLinks.begin(); it != activeLinks.end(); it++) {
 				if (it->second > rowSpot) {  activeLinks[it->first]--;	}
 			}
-			
 			
 //cout << "here4" << endl;
 	
@@ -269,7 +269,7 @@ bool HCluster::update(int row, int col, float distance){
 		//find upmost parent of row and col
 		smallRow = getUpmostParent(smallRow);
 		smallCol = getUpmostParent(smallCol);
-	//cout << "smallRow = " << smallRow << " smallCol = " << smallCol << endl;
+	//cout << "row = " << row << " smallRow = " << smallRow <<  " col = " << col << " smallCol = " << smallCol << " dist = " << distance << endl;
 		
 		//are they active in the link table
 		int linkValue = makeActive(); //after this point this nodes info is active in linkTable
@@ -277,6 +277,7 @@ bool HCluster::update(int row, int col, float distance){
 //cout << "linkValue = " << linkValue << " times = " << (clusterArray[smallRow].numSeq * clusterArray[smallCol].numSeq) << endl;
 		//can we cluster???
 		if (linkValue == (clusterArray[smallRow].numSeq * clusterArray[smallCol].numSeq)) {
+			//printInfo();
 			updateArrayandLinkTable();
 			clusterBins();
 			clusterNames();
@@ -284,7 +285,7 @@ bool HCluster::update(int row, int col, float distance){
 			//printInfo();
 		}
 		
-		
+		//printInfo();
 		return clustered;
 	}
 	catch(exception& e) {

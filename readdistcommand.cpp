@@ -155,7 +155,7 @@ int ReadDistCommand::execute(){
 		
 		if (abort == true) {	return 0;	}
 
-		//time_t start = time(NULL);
+		time_t start = time(NULL);
 		size_t numDists = 0;
 		
 		if (format == "matrix") {
@@ -203,7 +203,7 @@ int ReadDistCommand::execute(){
 		//	}
       //mothurOut(dist_string); mothurOutEndLine(); mothurOut(count_string); mothurOutEndLine();
 		}
-		//mothurOut("It took " + toString(time(NULL) - start) + " secs to read " + toString(numDists) + " distances (cutoff: " + toString(cutoff) + ")"); mothurOutEndLine();
+		mothurOut("It took " + toString(time(NULL) - start) + " secs to read "); mothurOutEndLine();
 		return 0;
 		
 	}

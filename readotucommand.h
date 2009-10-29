@@ -29,7 +29,8 @@ private:
 	InputData* input;
 	Command* shared;
 	GroupMap* groupMap;
-	string filename, listfile, orderfile, sharedfile, label, groupfile, sabundfile, rabundfile, format;
+	string filename, listfile, orderfile, sharedfile, label, groupfile, sabundfile, rabundfile, format, groups;
+	vector<string> Groups;
 
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
