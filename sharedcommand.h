@@ -34,11 +34,14 @@ public:
 private:
 	void printSharedData(vector<SharedRAbundVector*>);
 	void createMisMatchFile();
+	bool isValidGroup(string, vector<string>);
+	
 	GlobalData* globaldata;
 	ReadOTUFile* read;
 	SharedListVector* SharedList;
 	InputData* input;
 	GroupMap* groupMap;
+	vector<string> groups;
 	ofstream out;
 	string filename, fileroot;
 	bool firsttime;

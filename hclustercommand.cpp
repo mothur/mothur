@@ -168,8 +168,6 @@ int HClusterCommand::execute(){
 			mothurOut("Error: no list vector!"); mothurOutEndLine(); return 0;
 		}
 		
-		
-		
 		float previousDist = 0.00000;
 		float rndPreviousDist = 0.00000;
 		oldRAbund = *rabund;
@@ -260,6 +258,7 @@ int HClusterCommand::execute(){
 		rabundFile.close();
 		listFile.close();
 		
+		delete cluster;
 		//if (isTrue(timing)) {
 			mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster. "); mothurOutEndLine();
 		//}

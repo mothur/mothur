@@ -78,6 +78,14 @@ struct ThreadNode {
 	IntNode* right;
 };
 
+/************************************************************/
+struct clusterNode {
+	int numSeq;
+	int parent;
+	int smallChild; //used to make linkTable work with list and rabund. represents bin number of this cluster node
+	clusterNode(int num, int par, int kid) : numSeq(num), parent(par), smallChild(kid) {};
+};
+
 /***********************************************************************/
 
 // snagged from http://www.parashift.com/c++-faq-lite/misc-technical-issues.html#faq-39.2

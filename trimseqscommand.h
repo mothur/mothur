@@ -36,7 +36,7 @@ private:
 	bool abort;
 	string fastaFile, oligoFile, qFileName;
 	
-	bool flip, allFiles;
+	bool flip, allFiles, qtrim;
 	int numFPrimers, numRPrimers, maxAmbig, maxHomoP, minLength, maxLength, qThreshold, qAverage;
 	vector<string> forPrimer, revPrimer;
 	map<string, int> barcodes;

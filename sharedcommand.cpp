@@ -23,20 +23,27 @@ SharedCommand::SharedCommand(){
 		
 		groupMap = globaldata->gGroupmap;
 		
+		//if hte user has not specified any groups then use them all
+		if (globaldata->Groups.size() == 0) {
+			groups = groupMap->namesOfGroups;
+		}else{ //they have specified groups
+			groups = globaldata->Groups;
+		}
+		
 		//fill filehandles with neccessary ofstreams
 		int i;
 		ofstream* temp;
-		for (i=0; i<groupMap->getNumGroups(); i++) {
+		for (i=0; i<groups.size(); i++) {
 			temp = new ofstream;
-			filehandles[groupMap->namesOfGroups[i]] = temp;
+			filehandles[groups[i]] = temp;
 		}
 		
 		//set fileroot
 		fileroot = getRootName(globaldata->getListFile());
 		
 		//clears file before we start to write to it below
-		for (int i=0; i<groupMap->getNumGroups(); i++) {
-			remove((fileroot + groupMap->namesOfGroups[i] + ".rabund").c_str());
+		for (int i=0; i<groups.size(); i++) {
+			remove((fileroot + groups[i] + ".rabund").c_str());
 		}
 
 	}
@@ -64,7 +71,7 @@ int SharedCommand::execute(){
 		string lastLabel = SharedList->getLabel();
 		vector<SharedRAbundVector*> lookup; 
 		
-		if (SharedList->getNumSeqs() != groupMap->getNumSeqs()) {  
+		if ((globaldata->Groups.size() == 0) && (SharedList->getNumSeqs() != groupMap->getNumSeqs())) {  //if the user has not specified any groups and their files don't match exit with error
 			mothurOut("Your group file contains " + toString(groupMap->getNumSeqs()) + " sequences and list file contains " + toString(SharedList->getNumSeqs()) + " sequences. Please correct."); mothurOutEndLine(); 
 			
 			out.close();
@@ -82,15 +89,36 @@ int SharedCommand::execute(){
 			return 1; 
 		}
 		
+		//if user has specified groups make new groupfile for them
+		if (globaldata->Groups.size() != 0) { //make new group file
+			string groups = "";
+			for (int i = 0; i < globaldata->Groups.size(); i++) {
+				groups += globaldata->Groups[i] + ".";
+			}
+		
+			string newGroupFile = getRootName(globaldata->inputFileName) + groups + "groups";
+			ofstream outGroups;
+			openOutputFile(newGroupFile, outGroups);
+		
+			vector<string> names = groupMap->getNamesSeqs();
+			string groupName;
+			for (int i = 0; i < names.size(); i++) {
+				groupName = groupMap->getGroup(names[i]);
+				if (isValidGroup(groupName, globaldata->Groups)) {
+					outGroups << names[i] << '\t' << groupName << endl;
+				}
+			}
+			outGroups.close();
+		}
+		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = globaldata->labels;	
 		
 		while((SharedList != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
 			
-
 			if(globaldata->allLines == 1 || globaldata->labels.count(SharedList->getLabel()) == 1){
-					
+			
 					lookup = SharedList->getSharedRAbundVector();
 					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 					
@@ -280,3 +308,20 @@ SharedCommand::~SharedCommand(){
 }
 
 //**********************************************************************************************************************
+
+bool SharedCommand::isValidGroup(string groupname, vector<string> groups) {
+	try {
+		for (int i = 0; i < groups.size(); i++) {
+			if (groupname == groups[i]) { return true; }
+		}
+		
+		return false;
+	}
+	catch(exception& e) {
+		errorOut(e, "SharedCommand", "isValidGroup");
+		exit(1);
+	}
+}
+/************************************************************/
+
+
