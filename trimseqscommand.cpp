@@ -21,7 +21,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string AlignArray[] =  {"fasta", "flip", "oligos", "maxambig", "maxhomop", "minlength", "maxlength", "qfile", "qthreshold", "qaverage", "allfiles"};
+			string AlignArray[] =  {"fasta", "flip", "oligos", "maxambig", "maxhomop", "minlength", "maxlength", "qfile", "qthreshold", "qaverage", "allfiles", "qtrim"};
 			
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
@@ -72,6 +72,9 @@ TrimSeqsCommand::TrimSeqsCommand(string option){
 			
 			temp = validParameter.validFile(parameters, "qthreshold", false);	if (temp == "not found") { temp = "0"; }
 			convert(temp, qThreshold);
+			
+			temp = validParameter.validFile(parameters, "qtrim", false);	if (temp == "not found") { temp = "F"; }
+			qtrim = isTrue(temp);
 
 			temp = validParameter.validFile(parameters, "qaverage", false);		if (temp == "not found") { temp = "0"; }
 			convert(temp, qAverage);
@@ -104,7 +107,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option){
 void TrimSeqsCommand::help(){
 	try {
 		mothurOut("The trim.seqs command reads a fastaFile and creates .....\n");
-		mothurOut("The trim.seqs command parameters are fasta, flip, oligos, maxambig, maxhomop, minlength and maxlength.\n");
+		mothurOut("The trim.seqs command parameters are fasta, flip, oligos, maxambig, maxhomop, minlength, maxlength, qfile, qthreshold, qaverage, qtrim and allfiles.\n");
 		mothurOut("The fasta parameter is required.\n");
 		mothurOut("The flip parameter .... The default is 0.\n");
 		mothurOut("The oligos parameter .... The default is "".\n");
@@ -112,11 +115,17 @@ void TrimSeqsCommand::help(){
 		mothurOut("The maxhomop parameter .... The default is 0.\n");
 		mothurOut("The minlength parameter .... The default is 0.\n");
 		mothurOut("The maxlength parameter .... The default is 0.\n");
+		mothurOut("The qfile parameter .....\n");
+		mothurOut("The qthreshold parameter .... The default is 0.\n");
+		mothurOut("The qaverage parameter .... The default is 0.\n");
+		mothurOut("The allfiles parameter .... The default is F.\n");
+		mothurOut("The qtrim parameter .... The default is F.\n");
 		mothurOut("The trim.seqs command should be in the following format: \n");
 		mothurOut("trim.seqs(fasta=yourFastaFile, flip=yourFlip, oligos=yourOligos, maxambig=yourMaxambig,  \n");
 		mothurOut("maxhomop=yourMaxhomop, minlength=youMinlength, maxlength=yourMaxlength)  \n");	
 		mothurOut("Example trim.seqs(fasta=abrecovery.fasta, flip=..., oligos=..., maxambig=..., maxhomop=..., minlength=..., maxlength=...).\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
+		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n");
+		mothurOut("For more details please check out the wiki http://www.mothur.org/wiki/Trim.seqs .\n\n");
 
 	}
 	catch(exception& e) {
@@ -170,6 +179,9 @@ int TrimSeqsCommand::execute(){
 			if(qFileName != ""){
 				if(qThreshold != 0)		{	success = stripQualThreshold(currSeq, qFile);	}
 				else if(qAverage != 0)	{	success = cullQualAverage(currSeq, qFile);		}
+				if ((!qtrim) && (origSeq.length() != currSeq.getUnaligned().length())) { 
+					success = 0; //if you don't want to trim and the sequence does not meet quality requirements, move to scrap
+				}
 				if(!success)			{	trashCode += 'q';								}
 			}
 			if(barcodes.size() != 0){

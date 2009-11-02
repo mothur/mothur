@@ -93,6 +93,7 @@ void GetSharedOTUCommand::help(){
 		mothurOut("The get.sharedotu command outputs a .names file for each distance level containing a list of sequences in the OTUs shared by the groups specified.\n");
 		mothurOut("The get.sharedotu command should be in the following format: get.sabund(label=yourLabels, groups=yourGroups, fasta=yourFastafile, output=yourOutput).\n");
 		mothurOut("Example get.sharedotu(list=amazon.fn.list, label=unique-0.01, group=forest-pasture, fasta=amazon.fasta, output=accnos).\n");
+		mothurOut("The output to the screen is the distance and the number of otus at that distance for the groups you specified.\n");
 		mothurOut("The default value for label is all labels in your inputfile. The default for groups is all groups in your file.\n");
 		mothurOut("Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabel).\n\n");
 	}
@@ -227,6 +228,7 @@ void GetSharedOTUCommand::process(ListVector* shared) {
 		openOutputFile(outputFileNames, outNames);
 		
 		bool wroteSomething = false;
+		int num = 0;
 				
 		//go through each bin, find out if shared
 		for (int i = 0; i < shared->getNumBins(); i++) {
@@ -248,7 +250,7 @@ void GetSharedOTUCommand::process(ListVector* shared) {
 				//find group
 				string seqGroup = groupMap->getGroup(name);
 				if (output != "accnos") {
-					namesOfSeqsInThisBin.push_back((name + "|" + seqGroup + "|" + toString(i)));
+					namesOfSeqsInThisBin.push_back((name + "|" + seqGroup + "|" + toString(i+1)));
 				}else {  namesOfSeqsInThisBin.push_back(name);	}
 
 				if (seqGroup == "not found") { mothurOut(name + " is not in your groupfile. Please correct."); mothurOutEndLine(); exit(1);  }
@@ -264,7 +266,7 @@ void GetSharedOTUCommand::process(ListVector* shared) {
 			if (sharedByAll) {
 				string seqGroup = groupMap->getGroup(names);
 				if (output != "accnos") {
-					namesOfSeqsInThisBin.push_back((names + "|" + seqGroup + "|" + toString(i)));
+					namesOfSeqsInThisBin.push_back((names + "|" + seqGroup + "|" + toString(i+1)));
 				}else {  namesOfSeqsInThisBin.push_back(names);	}
 				
 				if (seqGroup == "not found") { mothurOut(names + " is not in your groupfile. Please correct."); mothurOutEndLine(); exit(1);  }
@@ -285,6 +287,7 @@ void GetSharedOTUCommand::process(ListVector* shared) {
 			if (sharedByAll) {
 				
 				wroteSomething = true;
+				num++;
 				
 				//output list of names 
 				for (int j = 0; j < namesOfSeqsInThisBin.size(); j++) {
@@ -310,7 +313,7 @@ void GetSharedOTUCommand::process(ListVector* shared) {
 		
 		if (!wroteSomething) {
 			remove(outputFileNames.c_str());
-			string outputString = " - No otus shared by groups";
+			string outputString = "\t" + toString(num) + " - No otus shared by groups";
 			
 			string groupString = "";
 			for (int h = 0; h < Groups.size(); h++) {
@@ -319,7 +322,7 @@ void GetSharedOTUCommand::process(ListVector* shared) {
 			
 			outputString += groupString + ".";
 			mothurOut(outputString); mothurOutEndLine();
-		}else { mothurOutEndLine(); }
+		}else { mothurOut("\t" + toString(num)); mothurOutEndLine(); }
 		
 		//if fasta file provided output new fasta file
 		if ((fastafile != "") && wroteSomething) {	
