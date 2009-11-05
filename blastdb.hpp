@@ -15,10 +15,14 @@
 #include "globaldata.hpp"
 
 class BlastDB : public Database {
+
 public:
-	BlastDB(string, float, float, float, float);
+	BlastDB(float, float, float, float);
 	~BlastDB();
-	Sequence findClosestSequence(Sequence*);
+	
+	void generateDB();
+	void addSequence(Sequence);
+	vector<int> findClosestSequences(Sequence*, int);
 
 private:
 	string dbFileName;
@@ -26,11 +30,11 @@ private:
 	string blastFileName;
 	string path;
 	
+	int count;
 	float gapOpen;
 	float gapExtend;
 	float match;
 	float misMatch;
-	Sequence emptySequence;
 	GlobalData* globaldata;
 };
 

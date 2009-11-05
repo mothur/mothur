@@ -40,12 +40,12 @@ Nast::Nast(Alignment* method, Sequence* cand, Sequence* temp) : alignment(method
 void Nast::pairwiseAlignSeqs(){	//	Here we call one of the pairwise alignment methods to align our unaligned candidate
 								//	and template sequences
 	try {
-		
+
 		alignment->align(candidateSeq->getUnaligned(), templateSeq->getUnaligned());
-	
+		
 		string candAln = alignment->getSeqAAln();
 		string tempAln = alignment->getSeqBAln();
-
+		
 		if(candAln == ""){
 
 			candidateSeq->setPairwise("");

@@ -235,7 +235,7 @@ void HCluster::updateArrayandLinkTable() {
 			}
 //cout << "here3" << endl;			
 			linkTable[colSpot].erase(size);
-			//linkTable.erase(linkTable.begin()+rowSpot);  //delete row
+			linkTable.erase(linkTable.begin()+rowSpot);  //delete row
 	//printInfo();		
 			//update activerows
 			activeLinks.erase(smallRow);
@@ -243,9 +243,9 @@ void HCluster::updateArrayandLinkTable() {
 			activeLinks[size] = colSpot;
 			
 			//adjust everybody elses spot since you deleted - time vs. space
-			//for (it = activeLinks.begin(); it != activeLinks.end(); it++) {
-				//if (it->second > rowSpot) {  activeLinks[it->first]--;	}
-			//}
+			for (it = activeLinks.begin(); it != activeLinks.end(); it++) {
+				if (it->second > rowSpot) {  activeLinks[it->first]--;	}
+			}
 			
 //cout << "here4" << endl;
 	

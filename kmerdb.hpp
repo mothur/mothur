@@ -27,13 +27,17 @@ class KmerDB : public Database {
 public:
 	KmerDB(string, int);
 	~KmerDB();
-	Sequence findClosestSequence(Sequence*);
-
+	
+	void generateDB();
+	void addSequence(Sequence);
+	vector<int> findClosestSequences(Sequence*, int);
+	void readKmerDB(ifstream&);
+	
 private:
-	void generateKmerDB(string);
-	void readKmerDB(string, ifstream&);
+	
 	int kmerSize;
-	int maxKmer;
+	int maxKmer, count;
+	string kmerDBName;
 	vector<vector<int> > kmerLocations;
 };
 

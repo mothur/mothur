@@ -22,10 +22,6 @@
 #include "blastalign.hpp"
 #include "noalign.hpp"
 
-#include "kmerdb.hpp"
-#include "suffixdb.hpp"
-#include "blastdb.hpp"
-
 #include "nast.hpp"
 #include "nastreport.hpp"
 
@@ -126,7 +122,7 @@ void AlignCommand::help(){
 		mothurOut("The template and candidate parameters are required.\n");
 		mothurOut("The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer and blast. The default is kmer.\n");
 		mothurOut("The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.\n");
-		mothurOut("The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 7.\n");
+		mothurOut("The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 8.\n");
 		mothurOut("The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n");
 		mothurOut("The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n");
 		mothurOut("The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -1.0.\n");
@@ -149,19 +145,9 @@ int AlignCommand::execute(){
 	try {
 		if (abort == true) {	return 0;	}
 		
-		if(search == "kmer")			{	templateDB = new KmerDB(templateFileName, kmerSize);	}
-		else if(search == "suffix")		{	templateDB = new SuffixDB(templateFileName);			}
-		else if(search == "blast")		{	templateDB = new BlastDB(templateFileName, gapOpen, gapExtend, match, misMatch);	}
-		else {
-			mothurOut(search + " is not a valid search option. I will run the command using kmer, ksize=8.");
-			mothurOutEndLine();
-			kmerSize = 8;
-			
-			templateDB = new KmerDB(templateFileName, kmerSize);
-		}
-		
+		templateDB = new AlignmentDB(templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch);
 		int longestBase = templateDB->getLongestBase();
-		
+	
 		if(align == "gotoh")			{	alignment = new GotohOverlap(gapOpen, gapExtend, match, misMatch, longestBase);			}
 		else if(align == "needleman")	{	alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);				}
 		else if(align == "blast")		{	alignment = new BlastAlignment(gapOpen, gapExtend, match, misMatch);		}
@@ -281,7 +267,7 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName){
 	
 			Sequence temp = templateDB->findClosestSequence(candidateSeq);
 			Sequence* templateSeq = &temp;
-	
+
 			report.setTemplate(templateSeq);
 			report.setSearchParameters(search, templateDB->getSearchScore());
 				
@@ -290,13 +276,13 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName){
 			report.setAlignmentParameters(align, alignment);
 	
 			report.setNastParameters(nast);
-
+	
 			alignmentFile << '>' << candidateSeq->getName() << '\n' << candidateSeq->getAligned() << endl;
 				
 			report.print();
 			
 			delete candidateSeq;
-	
+		
 		}
 		
 		alignmentFile.close();
