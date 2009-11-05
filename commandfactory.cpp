@@ -58,6 +58,7 @@
 #include "getsharedotucommand.h"
 #include "getlistcountcommand.h"
 #include "hclustercommand.h"
+#include "classifyseqscommand.h"
 
 /***********************************************************/
 
@@ -114,8 +115,8 @@ CommandFactory::CommandFactory(){
 	commands["get.sharedotu"]		= "get.sharedotu";
 	commands["get.listcount"]		= "get.listcount";
 	commands["quit"]				= "quit"; 
-	
 	commands["hcluster"]			= "hcluster"; 
+	commands["classify.seqs"]		= "classify.seqs"; 
 
 }
 /***********************************************************/
@@ -180,8 +181,8 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "align.check")			{	command = new AlignCheckCommand(optionString);			}
 		else if(commandName == "get.sharedotu")			{	command = new GetSharedOTUCommand(optionString);		}
 		else if(commandName == "get.listcount")			{	command = new GetListCountCommand(optionString);		}
-		
 		else if(commandName == "hcluster")				{	command = new HClusterCommand(optionString);			}
+		else if(commandName == "classify.seqs")			{	command = new ClassifySeqsCommand(optionString);		}
 		else											{	command = new NoCommand(optionString);					}
 
 		return command;

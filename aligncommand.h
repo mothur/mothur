@@ -14,6 +14,7 @@
 #include "command.hpp"
 #include "database.hpp"
 #include "alignment.hpp"
+#include "alignmentdb.h"
 
 class AlignCommand : public Command {
 	
@@ -32,7 +33,7 @@ private:
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;
 	
-	Database* templateDB;
+	AlignmentDB* templateDB;
 	Alignment* alignment;
 	
 	int driver(linePair*, string, string);

@@ -16,8 +16,9 @@
 class DistanceDB : public Database {
 	
 public:
+
 	DistanceDB(string, string);
-	Sequence findClosestSequence(Sequence*);
+	vector<int> findClosestSequences(Sequence*, int);
 	
 private:
 
@@ -26,8 +27,8 @@ private:
 		int indexNumber;
 		float simScore;
 	};
+	
 	vector<hit> mostSimSequenceVector;
-//	ifstream inputData;
 	int searchIndex;
 };
 

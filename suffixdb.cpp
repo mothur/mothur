@@ -22,41 +22,58 @@
 
 /**************************************************************************************************/
 
-SuffixDB::SuffixDB(string fastaFileName) : Database(fastaFileName) {
-
+SuffixDB::SuffixDB(int numSeqs) : Database() {
 	suffixForest.resize(numSeqs);
-	mothurOut("Generating the suffix tree database...\t");	cout.flush();
-	for(int i=0;i<numSeqs;i++){								//	The parent class' constructor generates the vector of
-		suffixForest[i].loadSequence(templateSequences[i]);	//	template Sequence objects.  Here each of these objects
-	}														//	is used to generate a suffix tree, aka the suffix forest
-	mothurOut("DONE."); mothurOutEndLine();	mothurOutEndLine(); cout.flush();
-
+	count = 0;
 }
-
 /**************************************************************************************************/
-
-Sequence SuffixDB::findClosestSequence(Sequence* candidateSeq){
-
-	int minValue = 2000;
-	int closestSequenceNo = 0;
-	string processedSeq = candidateSeq->convert2ints();		//	the candidate sequence needs to be a string of ints
-	for(int i=0;i<suffixForest.size();i++){					//	scan through the forest and see what the minimum
-		int count = suffixForest[i].countSuffixes(processedSeq, minValue);	//	return score is and keep track of the
-		if(count == minValue){								//	template sequence index that corresponds to that score
-			closestSequenceNo = i;
+//assumes sequences have been added using addSequence
+vector<int> SuffixDB::findClosestSequences(Sequence* candidateSeq, int num){
+	try {
+		vector<int> topMatches;
+		string processedSeq = candidateSeq->convert2ints();		//	the candidate sequence needs to be a string of ints
+		
+		vector<seqMatch> seqMatches;
+		for(int i=0;i<suffixForest.size();i++){					//	scan through the forest and see what the minimum
+			int count = suffixForest[i].countSuffixes(processedSeq);	//	return score is and keep track of the
+			seqMatch temp(i, count);
+			seqMatches.push_back(temp);
 		}
-	}
-	searchScore = 100 * (1. - minValue / (float)processedSeq.length());
-	return templateSequences[closestSequenceNo];			//	return the Sequence object that has the minimum score
-	
-}
+		
+		//sorts putting smallest matches first
+		sort(seqMatches.begin(), seqMatches.end(), compareSeqMatchesReverse);
+		
+		searchScore = seqMatches[0].match;
+		searchScore = 100 * (1. - searchScore / (float)processedSeq.length());
+		
+		//save top matches
+		for (int i = 0; i < num; i++) {
+			topMatches.push_back(seqMatches[i].seq);
+		}
 
+		//	return the Sequence object that has the minimum score
+		return topMatches;
+	}
+	catch(exception& e) {
+		errorOut(e, "SuffixDB", "findClosestSequences");
+		exit(1);
+	}	
+}
+/**************************************************************************************************/
+//adding the sequences generates the db
+void SuffixDB::addSequence(Sequence seq) {
+	try {
+		suffixForest[count].loadSequence(seq);		
+		count++;
+	}
+	catch(exception& e) {
+		errorOut(e, "SuffixDB", "addSequence");
+		exit(1);
+	}
+}
 /**************************************************************************************************/
 
 SuffixDB::~SuffixDB(){														
-	
 	for (int i = (suffixForest.size()-1); i >= 0; i--) {  suffixForest.pop_back();  }
-	// templateSequences.clear();
-
 }
 /**************************************************************************************************/

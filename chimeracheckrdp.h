@@ -14,7 +14,7 @@
 #include "chimera.h"
 #include "kmer.hpp"
 #include "kmerdb.hpp"
-#include "database.hpp"
+#include "alignmentdb.h"
 
 /***********************************************************/
 //This class was created using the algorythms described in 
@@ -39,7 +39,7 @@ class ChimeraCheckRDP : public Chimera {
 		
 		vector<linePair*> lines;
 		vector<Sequence*> querySeqs;
-		Database* templateDB;
+		AlignmentDB* templateDB;
 		Kmer* kmer;
 		
 		vector< vector<sim> > IS;  //IS[0] is the vector of IS values for each window for querySeqs[0]

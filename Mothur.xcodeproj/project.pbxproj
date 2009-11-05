@@ -72,7 +72,6 @@
 		379293C30F2DE73400B9034A /* treemap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 379293C20F2DE73400B9034A /* treemap.cpp */; };
 		379294700F2E191800B9034A /* parsimonycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3792946F0F2E191800B9034A /* parsimonycommand.cpp */; };
 		3792948A0F2E258500B9034A /* parsimony.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 379294890F2E258500B9034A /* parsimony.cpp */; };
-		3799A9500FD6A58C00E33EDE /* distancedb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3799A94C0FD6A58C00E33EDE /* distancedb.cpp */; };
 		3799A9510FD6A58C00E33EDE /* seqsummarycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3799A94E0FD6A58C00E33EDE /* seqsummarycommand.cpp */; };
 		379D3D510FF90E090068C1C0 /* chimeraseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 379D3D500FF90E090068C1C0 /* chimeraseqscommand.cpp */; };
 		37AD4CE40F28AEA300AA2D49 /* sharedlistvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37AD4CE30F28AEA300AA2D49 /* sharedlistvector.cpp */; };
@@ -169,6 +168,13 @@
 		A73329CF1083B3B3003B10C5 /* getlistcountcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A73329CE1083B3B3003B10C5 /* getlistcountcommand.cpp */; };
 		A751ACEA1098B283003D0911 /* readcluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A751ACE91098B283003D0911 /* readcluster.cpp */; };
 		A75B887E104C16860083C454 /* ccode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A75B887B104C16860083C454 /* ccode.cpp */; };
+		A7861478109F5FA00010AAAF /* classifyseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7861477109F5FA00010AAAF /* classifyseqscommand.cpp */; };
+		A787810310A06D5D0086103D /* classify.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A787810210A06D5D0086103D /* classify.cpp */; };
+		A787811510A074330086103D /* phylotype.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A787811410A074330086103D /* phylotype.cpp */; };
+		A78781BA10A0813E0086103D /* doTaxonomy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A78781B810A0813D0086103D /* doTaxonomy.cpp */; };
+		A787821110A0AAE70086103D /* bayesian.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A787821010A0AAE70086103D /* bayesian.cpp */; };
+		A78782AB10A1B1CB0086103D /* alignmentdb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A78782AA10A1B1CB0086103D /* alignmentdb.cpp */; };
+		A787844510A1EBDD0086103D /* knn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A787844410A1EBDD0086103D /* knn.cpp */; };
 		A7B04493106CC3E60046FC83 /* chimeraslayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7B04492106CC3E60046FC83 /* chimeraslayer.cpp */; };
 		A7B0450E106CEEC90046FC83 /* slayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7B0450D106CEEC90046FC83 /* slayer.cpp */; };
 		A7E4A783106913F900688F62 /* getsharedotucommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E4A782106913F900688F62 /* getsharedotucommand.cpp */; };
@@ -328,8 +334,6 @@
 		379294880F2E258500B9034A /* parsimony.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parsimony.h; sourceTree = SOURCE_ROOT; };
 		379294890F2E258500B9034A /* parsimony.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parsimony.cpp; sourceTree = SOURCE_ROOT; };
 		3792948D0F2E271100B9034A /* treecalculator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = treecalculator.h; sourceTree = SOURCE_ROOT; };
-		3799A94C0FD6A58C00E33EDE /* distancedb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = distancedb.cpp; sourceTree = SOURCE_ROOT; };
-		3799A94D0FD6A58C00E33EDE /* distancedb.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = distancedb.hpp; sourceTree = SOURCE_ROOT; };
 		3799A94E0FD6A58C00E33EDE /* seqsummarycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = seqsummarycommand.cpp; sourceTree = SOURCE_ROOT; };
 		3799A94F0FD6A58C00E33EDE /* seqsummarycommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = seqsummarycommand.h; sourceTree = SOURCE_ROOT; };
 		379D3D4F0FF90E090068C1C0 /* chimeraseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraseqscommand.h; sourceTree = SOURCE_ROOT; };
@@ -538,6 +542,20 @@
 		A751ACE91098B283003D0911 /* readcluster.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readcluster.cpp; sourceTree = SOURCE_ROOT; };
 		A75B887B104C16860083C454 /* ccode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ccode.cpp; sourceTree = SOURCE_ROOT; };
 		A75B887C104C16860083C454 /* ccode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ccode.h; sourceTree = SOURCE_ROOT; };
+		A7861476109F5FA00010AAAF /* classifyseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = classifyseqscommand.h; sourceTree = "<group>"; };
+		A7861477109F5FA00010AAAF /* classifyseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = classifyseqscommand.cpp; sourceTree = "<group>"; };
+		A78780FE10A06B8B0086103D /* classify.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = classify.h; sourceTree = SOURCE_ROOT; };
+		A787810210A06D5D0086103D /* classify.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = classify.cpp; sourceTree = SOURCE_ROOT; };
+		A787811310A074330086103D /* phylotype.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = phylotype.h; sourceTree = SOURCE_ROOT; };
+		A787811410A074330086103D /* phylotype.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = phylotype.cpp; sourceTree = SOURCE_ROOT; };
+		A78781B810A0813D0086103D /* doTaxonomy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = doTaxonomy.cpp; sourceTree = "<group>"; };
+		A78781B910A0813D0086103D /* doTaxonomy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = doTaxonomy.h; sourceTree = "<group>"; };
+		A787820F10A0AAE70086103D /* bayesian.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bayesian.h; sourceTree = "<group>"; };
+		A787821010A0AAE70086103D /* bayesian.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bayesian.cpp; sourceTree = "<group>"; };
+		A78782A910A1B1CB0086103D /* alignmentdb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alignmentdb.h; sourceTree = "<group>"; };
+		A78782AA10A1B1CB0086103D /* alignmentdb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alignmentdb.cpp; sourceTree = "<group>"; };
+		A787844310A1EBDD0086103D /* knn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = knn.h; sourceTree = "<group>"; };
+		A787844410A1EBDD0086103D /* knn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = knn.cpp; sourceTree = "<group>"; };
 		A7B04491106CC3E60046FC83 /* chimeraslayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraslayer.h; sourceTree = SOURCE_ROOT; };
 		A7B04492106CC3E60046FC83 /* chimeraslayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeraslayer.cpp; sourceTree = SOURCE_ROOT; };
 		A7B0450C106CEEC90046FC83 /* slayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = slayer.h; sourceTree = SOURCE_ROOT; };
@@ -592,10 +610,9 @@
 				373C68DB0FC1C38D00137ACD /* blastalign.cpp */,
 				37D928A60F2133C0001D4494 /* calculators */,
 				374F2FE81006346600E97C66 /* chimera */,
+				A787811210A073F40086103D /* classifiers */,
 				37D927C20F21331F001D4494 /* cluster.hpp */,
 				37D927C10F21331F001D4494 /* cluster.cpp */,
-				A729ACE210849BBE00139801 /* hcluster.h */,
-				A729ACE310849BBE00139801 /* hcluster.cpp */,
 				37D928A90F2133E5001D4494 /* commands */,
 				37D927C60F21331F001D4494 /* collect.h */,
 				37D927C50F21331F001D4494 /* collect.cpp */,
@@ -619,6 +636,8 @@
 				37D927DF0F21331F001D4494 /* globaldata.cpp */,
 				373C68BB0FC1C1A600137ACD /* gotohoverlap.hpp */,
 				373C68BA0FC1C1A600137ACD /* gotohoverlap.cpp */,
+				A729ACE210849BBE00139801 /* hcluster.h */,
+				A729ACE310849BBE00139801 /* hcluster.cpp */,
 				375873ED0F7D646F0040F377 /* heatmap.h */,
 				375873EE0F7D646F0040F377 /* heatmap.cpp */,
 				378598720FDD4C1500EF9D03 /* heatmapsim.h */,
@@ -847,6 +866,8 @@
 				377326630FAF16E0007ABB8B /* consensuscommand.cpp */,
 				379D3D4F0FF90E090068C1C0 /* chimeraseqscommand.h */,
 				379D3D500FF90E090068C1C0 /* chimeraseqscommand.cpp */,
+				A7861476109F5FA00010AAAF /* classifyseqscommand.h */,
+				A7861477109F5FA00010AAAF /* classifyseqscommand.cpp */,
 				37B28F660F27590100808A62 /* deconvolutecommand.h */,
 				37B28F670F27590100808A62 /* deconvolutecommand.cpp */,
 				37C753CC0FB3415200DBD02E /* distancecommand.h */,
@@ -942,13 +963,13 @@
 				373C68A00FC1C07D00137ACD /* alignment.cpp */,
 				373C68A30FC1C07D00137ACD /* alignmentcell.hpp */,
 				373C68A20FC1C07D00137ACD /* alignmentcell.cpp */,
+				A78782A910A1B1CB0086103D /* alignmentdb.h */,
+				A78782AA10A1B1CB0086103D /* alignmentdb.cpp */,
 				373C69170FC1C8AF00137ACD /* blastdb.hpp */,
 				373C69160FC1C8AF00137ACD /* blastdb.cpp */,
 				37D927D40F21331F001D4494 /* database.hpp */,
 				37D927D30F21331F001D4494 /* database.cpp */,
 				37D927D50F21331F001D4494 /* datavector.hpp */,
-				3799A94D0FD6A58C00E33EDE /* distancedb.hpp */,
-				3799A94C0FD6A58C00E33EDE /* distancedb.cpp */,
 				37D927DC0F21331F001D4494 /* fastamap.h */,
 				37D927DB0F21331F001D4494 /* fastamap.cpp */,
 				375873EA0F7D64520040F377 /* fullmatrix.h */,
@@ -1008,6 +1029,23 @@
 				37D928530F21331F001D4494 /* validparameter.cpp */,
 			);
 			name = errorcheckor;
+			sourceTree = "<group>";
+		};
+		A787811210A073F40086103D /* classifiers */ = {
+			isa = PBXGroup;
+			children = (
+				A78780FE10A06B8B0086103D /* classify.h */,
+				A787810210A06D5D0086103D /* classify.cpp */,
+				A787820F10A0AAE70086103D /* bayesian.h */,
+				A787821010A0AAE70086103D /* bayesian.cpp */,
+				A78781B910A0813D0086103D /* doTaxonomy.h */,
+				A78781B810A0813D0086103D /* doTaxonomy.cpp */,
+				A787844310A1EBDD0086103D /* knn.h */,
+				A787844410A1EBDD0086103D /* knn.cpp */,
+				A787811310A074330086103D /* phylotype.h */,
+				A787811410A074330086103D /* phylotype.cpp */,
+			);
+			name = classifiers;
 			sourceTree = "<group>";
 		};
 		C6859E8C029090F304C91782 /* Documentation */ = {
@@ -1204,7 +1242,6 @@
 				21E859D80FC4632E005E1A48 /* matrixoutputcommand.cpp in Sources */,
 				3749271D0FD58C840031C06B /* getsabundcommand.cpp in Sources */,
 				3749273F0FD5956B0031C06B /* getrabundcommand.cpp in Sources */,
-				3799A9500FD6A58C00E33EDE /* distancedb.cpp in Sources */,
 				3799A9510FD6A58C00E33EDE /* seqsummarycommand.cpp in Sources */,
 				371B30B40FD7EE67000414CA /* screenseqscommand.cpp in Sources */,
 				7E09C5140FDA79C5002ECAE5 /* reversecommand.cpp in Sources */,
@@ -1233,6 +1270,13 @@
 				A729ACD010848E6100139801 /* hclustercommand.cpp in Sources */,
 				A729ACE410849BBE00139801 /* hcluster.cpp in Sources */,
 				A751ACEA1098B283003D0911 /* readcluster.cpp in Sources */,
+				A7861478109F5FA00010AAAF /* classifyseqscommand.cpp in Sources */,
+				A787810310A06D5D0086103D /* classify.cpp in Sources */,
+				A787811510A074330086103D /* phylotype.cpp in Sources */,
+				A78781BA10A0813E0086103D /* doTaxonomy.cpp in Sources */,
+				A787821110A0AAE70086103D /* bayesian.cpp in Sources */,
+				A78782AB10A1B1CB0086103D /* alignmentdb.cpp in Sources */,
+				A787844510A1EBDD0086103D /* knn.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -54,7 +54,8 @@ Sequence DistanceDB::findClosestSequence(Sequence* candidateSeq){
 	searchScore = 100. * simAccession.simScore;
 	searchIndex++;
 //	return templateSequences[closestMatchIndexNumber];
-	return templateSequences[simAccession.indexNumber];
+	if (templateValid) {  return templateSequences[simAccession.indexNumber];	}
+	else {	return emptySequence;	}
 	
 }
 

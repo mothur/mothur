@@ -125,7 +125,46 @@ int SuffixTree::countSuffixes(string compareSequence, int& minValue){	//	here we
 	return numSuffixes;											//	change the value and return the number of suffixes
 	
 }
+//********************************************************************************************************************
 
+int SuffixTree::countSuffixes(string compareSequence){	//	here we count the number of suffix parts 
+															//	we need to rewrite a user supplied sequence.  if the 
+	int numSuffixes = 0;									//	count exceeds the supplied minValue, bail out.  The
+	int seqLength = compareSequence.length();				//	time complexity should be O(L)
+	int position = 0;
+	
+	int presentNode = 0;
+	
+	while(position < seqLength){		//	while the position in the query sequence isn't at the end...
+		
+		int newNode = nodeVector[presentNode]->getChild(compareSequence[position]);	//	see if the current node has a
+																//	child that matches the next character in the query
+		if(newNode == -1){										
+			if(presentNode == 0){	position++;		}			//	if not, go back to the root and increase the count
+			numSuffixes++;										//	by one.
+			presentNode = 0;
+		}
+		else{													//	if there is, move to that node and see how far down
+			presentNode = newNode;								//	it we can get
+			
+			for(int i=nodeVector[newNode]->getStartCharPos(); i<=nodeVector[newNode]->getEndCharPos(); i++){
+				if(compareSequence[position] == sequence[i]){
+					position++;									//	as long as the query and branch agree, keep going
+				}
+				else{
+					numSuffixes++;								//	if there is a mismatch, increase the number of 
+					presentNode = 0;							//	suffixes and go back to the root
+					break;
+				}
+			}
+		}
+		//	if we get all the way through the node we'll go to the top of the while loop and find the child node
+		//	that corresponds to what we are interested in		
+	}
+	numSuffixes--;												//	the method puts an extra count on numSuffixes
+	
+	return numSuffixes;											//	change the value and return the number of suffixes
+}
 //********************************************************************************************************************
 
 void SuffixTree::canonize(){	//	if you have to ask how this works, you don't really want to know and this really

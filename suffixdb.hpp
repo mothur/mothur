@@ -26,12 +26,16 @@ class SuffixTree;
 class SuffixDB : public Database {
 	
 public:
-	SuffixDB(string);
+	SuffixDB(int);
 	~SuffixDB();
-	Sequence findClosestSequence(Sequence*);
+	
+	void generateDB() {}; //adding sequences generates the db
+	void addSequence(Sequence);
+	vector<int> findClosestSequences(Sequence*, int);
 
 private:
 	vector<SuffixTree> suffixForest;
+	int count;
 };
 
 #endif

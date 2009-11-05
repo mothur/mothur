@@ -11,24 +11,51 @@
  */
 
 
-/* This class is a parent to blastdb, distancedb, kmerdb, suffixdb.  Which are used to convert a squencedb object into that form. */
+/* This class is a parent to blastdb, kmerdb, suffixdb.  */
 
 #include "mothur.h"
+#include "sequence.hpp"
 
-class Sequence;
+/**************************************************************************************************/
+struct seqMatch {  //used to select top n matches
+		int seq;
+		int match;
+		seqMatch(int s, int m) : seq(s), match(m) {}
+};
+/**************************************************************************************************/
+inline bool compareSeqMatches (seqMatch member, seqMatch member2){ //sorts largest to smallest
+	if(member.match > member2.match){
+		return true;   }   
+	else{
+		return false; 
+	}
+}
+/**************************************************************************************************/
+inline bool compareSeqMatchesReverse (seqMatch member, seqMatch member2){ //sorts largest to smallest
+	if(member.match < member2.match){
+		return true;   }   
+	else{
+		return false; 
+	}
+}
 
+/**************************************************************************************************/
 class Database {
+
 public:
-	Database(string);
+	Database();
 	virtual ~Database();
-	virtual Sequence findClosestSequence(Sequence*) = 0;
+	virtual void generateDB() = 0; 
+	virtual void addSequence(Sequence) = 0;  //add sequence to search engine
+	virtual vector<int> findClosestSequences(Sequence*, int) = 0;  // returns indexes of n closest sequences to query
 	virtual float getSearchScore();
 	virtual int getLongestBase(); 
+	virtual void readKmerDB(ifstream&){};
+	virtual void setNumSeqs(int i) {	numSeqs = i; 	}
 	
 protected:
 	int numSeqs, longest;
 	float searchScore;
-	vector<Sequence> templateSequences;
 };
-
+/**************************************************************************************************/
 #endif

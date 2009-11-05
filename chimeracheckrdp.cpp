@@ -77,11 +77,13 @@ void ChimeraCheckRDP::getChimeras() {
 	try {
 		
 		//read in query sequences and subject sequences
-		mothurOut("Reading sequences and template file... "); cout.flush();
+		mothurOutEndLine();
+		mothurOut("Reading query sequences... "); cout.flush();
 		querySeqs = readSeqs(fastafile);
+		mothurOut("Done."); 
 		//templateSeqs = readSeqs(templateFile);
-		templateDB = new KmerDB(templateFile, kmerSize);
-		mothurOut("Done."); mothurOutEndLine();
+		templateDB = new AlignmentDB(templateFile, "kmer", kmerSize, 0,0,0,0);
+		mothurOutEndLine();
 		
 		int numSeqs = querySeqs.size();
 		
