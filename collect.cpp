@@ -88,7 +88,7 @@ try {
 				
                 for(int i=0;i<displays.size();i++){
                         ccd->registerDisplay(displays[i]); //adds a display[i] to cdd
-						if (displays[i]->isCalcMultiple() == true)  {   displays[i]->init(groupLabelAll); }
+						if ((displays[i]->isCalcMultiple() == true) && (displays[i]->getAll() == true)) {   displays[i]->init(groupLabelAll); }
 						else {  displays[i]->init(groupLabel);  }           
                 }
                 

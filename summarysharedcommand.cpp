@@ -48,7 +48,7 @@ SummarySharedCommand::SummarySharedCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"label","calc","groups"};
+			string Array[] =  {"label","calc","groups","all"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -94,6 +94,9 @@ SummarySharedCommand::SummarySharedCommand(string option){
 				splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 			}
+			
+			string temp = validParameter.validFile(parameters, "all", false);				if (temp == "not found") { temp = "true"; }
+			all = isTrue(temp);
 			
 			if (abort == false) {
 			
@@ -165,7 +168,7 @@ SummarySharedCommand::SummarySharedCommand(string option){
 void SummarySharedCommand::help(){
 	try {
 		mothurOut("The summary.shared command can only be executed after a successful read.otu command.\n");
-		mothurOut("The summary.shared command parameters are label and calc.  No parameters are required.\n");
+		mothurOut("The summary.shared command parameters are label, calc and all.  No parameters are required.\n");
 		mothurOut("The summary.shared command should be in the following format: \n");
 		mothurOut("summary.shared(label=yourLabel, calc=yourEstimators, groups=yourGroups).\n");
 		mothurOut("Example summary.shared(label=unique-.01-.03, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan).\n");
@@ -173,6 +176,8 @@ void SummarySharedCommand::help(){
 		mothurOut("The default value for calc is sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan\n");
 		mothurOut("The default value for groups is all the groups in your groupfile.\n");
 		mothurOut("The label parameter is used to analyze specific labels in your input.\n");
+		mothurOut("The all parameter is used to specify if you want the estimate of all your groups together.  This estimate can only be made for sharedsobs and sharedchao calculators. The default is true.\n");
+		mothurOut("If you use sharedchao and run into memory issues, set all to false. \n");
 		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n");
 		mothurOut("Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabel).\n\n");
 	}
@@ -202,8 +207,10 @@ int SummarySharedCommand::execute(){
 		if (sumCalculators.size() == 0) { return 0; }
 		//check if any calcs can do multiples
 		else{
-			for (int i = 0; i < sumCalculators.size(); i++) {
-				if (sumCalculators[i]->getMultiple() == true) { mult = true; }
+			if (all){ 
+				for (int i = 0; i < sumCalculators.size(); i++) {
+					if (sumCalculators[i]->getMultiple() == true) { mult = true; }
+				}
 			}
 		}
 		

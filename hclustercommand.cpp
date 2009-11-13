@@ -53,8 +53,8 @@ HClusterCommand::HClusterCommand(string option){
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
 			
-			if ((phylipfile == "") && (columnfile == "")) { mothurOut("When executing a cluster command you must enter a phylip or a column."); mothurOutEndLine(); abort = true; }
-			else if ((phylipfile != "") && (columnfile != "")) { mothurOut("When executing a cluster command you must enter ONLY ONE of the following: phylip or column."); mothurOutEndLine(); abort = true; }
+			if ((phylipfile == "") && (columnfile == "")) { mothurOut("When executing a hcluster command you must enter a phylip or a column."); mothurOutEndLine(); abort = true; }
+			else if ((phylipfile != "") && (columnfile != "")) { mothurOut("When executing a hcluster command you must enter ONLY ONE of the following: phylip or column."); mothurOutEndLine(); abort = true; }
 		
 			if (columnfile != "") {
 				if (namefile == "") {  cout << "You need to provide a namefile if you are going to use the column format." << endl; abort = true; }
@@ -114,11 +114,12 @@ HClusterCommand::HClusterCommand(string option){
 
 void HClusterCommand::help(){
 	try {
-		mothurOut("The cluster command can only be executed after a successful read.dist command.\n");
-		mothurOut("The cluster command parameter options are method, cuttoff, precision, showabund and timing. No parameters are required.\n");
-		mothurOut("The cluster command should be in the following format: \n");
-		mothurOut("cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n");
-		mothurOut("The acceptable cluster methods are furthest, nearest and average.  If no method is provided then furthest is assumed.\n\n");	
+		mothurOut("The hcluster command parameter options are cutoff, precision, method, showabund, timing, phylip, column, name and sorted. Phylip or column and name are required.\n");
+		mothurOut("The phylip and column parameter allow you to enter your distance file, and sorted indicates whether your column distance file is already sorted. \n");
+		mothurOut("The name parameter allows you to enter your name file and is required if your distance file is in column format. \n");
+		mothurOut("The hcluster command should be in the following format: \n");
+		mothurOut("hcluster(column=youDistanceFile, name=yourNameFile, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n");
+		mothurOut("The acceptable hcluster methods is furthest, but we hope to add nearest and average in the future.\n\n");	
 	}
 	catch(exception& e) {
 		errorOut(e, "HClusterCommand", "help");

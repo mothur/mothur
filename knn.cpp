@@ -60,18 +60,7 @@ string Knn::findCommonTaxonomy(vector<string> closest)  {
 		
 			string tax = taxonomy[closest[i]];  //we know its there since we checked in getTaxonomy
 		
-			tax = tax.substr(0, tax.length()-1);  //get rid of last ';'
-	
-			//parse taxonomy
-			string individual;
-			while (tax.find_first_of(';') != -1) {
-				individual = tax.substr(0,tax.find_first_of(';'));
-				tax = tax.substr(tax.find_first_of(';')+1, tax.length());
-				taxons[i].push_back(individual);
-			
-			}
-			//get last one
-			taxons[i].push_back(tax);
+			taxons[i] = parseTax(tax);
 		
 			//figure out who has the shortest taxonomy info. so you can start comparing there
 			if (taxons[i].size() < smallest) {

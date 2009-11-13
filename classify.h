@@ -15,10 +15,11 @@
 
 #include "mothur.h"
 #include "database.hpp"
-
+#include "doTaxonomy.h"
 
 
 class Sequence;
+
 
 /**************************************************************************************************/
 
@@ -26,22 +27,29 @@ class Classify {
 
 public:
 	Classify(string, string, string, int, int, int, int, int);
-	Classify(){};
+	Classify(){	delete phyloTree;  }
 	
 	virtual ~Classify(){};
 	virtual string getTaxonomy(Sequence*) = 0;
+	//virtual map<string, int> getConfidenceScores() { return taxConfidenceScore; }
+	//virtual vector<string> parseTax(string);
+	virtual string getSimpleTax()  { return simpleTax;	}
 	
 protected:
 
 	map<string, string> taxonomy;  //name maps to taxonomy
+	//map<string, int> genusCount;  //maps genus to count - in essence a list of how many seqs are in each taxonomy
+	map<string, int>::iterator itTax;
 	map<string, string>::iterator it;
 	Database* database;
+	PhyloTree* phyloTree;
 	
-	string taxFile, templateFile;
+	string taxFile, templateFile, simpleTax;
 	vector<string> names;
+	//map<string, int> taxConfidenceScore;
 	
 	void readTaxonomy(string);
-		
+	vector<string> parseTax(string);
 };
 
 /**************************************************************************************************/

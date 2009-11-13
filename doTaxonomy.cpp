@@ -59,11 +59,13 @@ void PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 		if(childPointer != tree[currentNode].children.end()){	//if the node already exists, move on
 			currentNode = childPointer->second;
 			tree[currentNode].accessions.push_back(seqName);
+			name2Taxonomy[seqName] = currentNode;
 		}
 		else{											//otherwise, create it
 			tree.push_back(TaxNode(taxon));
 			numNodes++;
 			tree[currentNode].children[taxon] = numNodes-1;
+			tree[numNodes-1].parent = currentNode;
 
 //			int numChildren = tree[currentNode].children.size();
 //			string heirarchyID = tree[currentNode].heirarchyID;
@@ -71,15 +73,30 @@ void PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 			
 			currentNode = tree[currentNode].children[taxon];
 			tree[currentNode].accessions.push_back(seqName);
-
+			name2Taxonomy[seqName] = currentNode;
 //			tree[currentNode].level = level;
 //			tree[currentNode].childNumber = numChildren;
 //			tree[currentNode].heirarchyID = heirarchyID + '.' + toString(tree[currentNode].childNumber);
 		}
-
+		
+		if (seqTaxonomy == "") {   uniqueTaxonomies[currentNode] = currentNode;	}
 	}
 }
-
+/**************************************************************************************************/
+vector<int> PhyloTree::getGenusNodes()	{
+	try {
+		genusIndex.clear();
+		//generate genusIndexes
+		map<int, int>::iterator it2;
+		for (it2=uniqueTaxonomies.begin(); it2!=uniqueTaxonomies.end(); it2++) {  genusIndex.push_back(it2->first);	}
+		
+		return genusIndex;
+	}
+	catch(exception& e) {
+		errorOut(e, "PhyloTree", "getGenusNodes");
+		exit(1);
+	}
+}
 /**************************************************************************************************/
 
 void PhyloTree::assignHeirarchyIDs(int index){
@@ -92,9 +109,7 @@ void PhyloTree::assignHeirarchyIDs(int index){
 		counter++;
 		tree[it->second].level = tree[index].level + 1;
 		assignHeirarchyIDs(it->second);
-
 	}
-	
 }
 
 /**************************************************************************************************/

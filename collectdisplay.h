@@ -15,6 +15,8 @@ class CollectDisplay : public Display {
 public:
 	CollectDisplay(Calculator* calc, FileOutput* file) : estimate(calc), output(file) {timesCalled = 0;};
 	~CollectDisplay()	{	delete estimate; delete output;		}
+	
+	
 	void update(SAbundVector* rank){
 		nSeqs=rank->getNumSeqs();
 		data = estimate->getValues(rank);
@@ -45,7 +47,7 @@ public:
 			n++;
 		}
 		
-		if (estimate->getMultiple() == true) { 
+		if ((estimate->getMultiple() == true) && all) { 
 			numGroupComb++; 
 			groupData.resize((numGroupComb*data.size()), 0);
 			//is this the time its called with all values
@@ -74,10 +76,14 @@ public:
 	void init(string s)		{	output->initFile(s);	};
 	void reset()			{	output->resetFile();	};
 	void close()			{	output->resetFile();	};
+	void setAll(bool a)		{	all = a;				}
+	bool getAll()			{	return all;				}
+	
 	bool isCalcMultiple() { return estimate->getMultiple(); }
 	
 	string getName()	{  return estimate->getName();  }
-
+	
+	
 private:
 	
 	Calculator* estimate;
@@ -85,6 +91,8 @@ private:
 	int nSeqs, timesCalled, numGroupComb;
 	vector<double> data;
 	vector<double> groupData;
+	bool all;
+	
 };
 
 /***********************************************************************/

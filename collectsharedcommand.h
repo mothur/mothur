@@ -45,7 +45,7 @@ private:
 	int freq;
 	string format;
 
-	bool abort, allLines;
+	bool abort, allLines, all;
 	set<string> labels; //holds labels to be used
 	string label, calc, groups;
 	vector<string>  Estimators, Groups;
