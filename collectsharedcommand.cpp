@@ -50,7 +50,7 @@ CollectSharedCommand::CollectSharedCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"freq","label","calc","groups"};
+			string Array[] =  {"freq","label","calc","groups","all"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -102,6 +102,9 @@ CollectSharedCommand::CollectSharedCommand(string option){
 			string temp;
 			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
 			convert(temp, freq); 
+			
+			temp = validParameter.validFile(parameters, "all", false);				if (temp == "not found") { temp = "true"; }
+			all = isTrue(temp);
 						
 			if (abort == false) {
 			
@@ -181,6 +184,8 @@ void CollectSharedCommand::help(){
 		mothurOut("The default value for groups is all the groups in your groupfile.\n");
 		validCalculator->printCalc("shared", cout);
 		mothurOut("The label parameter is used to analyze specific labels in your input.\n");
+		mothurOut("The all parameter is used to specify if you want the estimate of all your groups together.  This estimate can only be made for sharedsobs and sharedchao calculators. The default is true.\n");
+		mothurOut("If you use sharedchao and run into memory issues, set all to false. \n");
 		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n");
 		mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile).\n\n");
 		
@@ -212,6 +217,7 @@ int CollectSharedCommand::execute(){
 		
 		//if the users entered no valid calculators don't execute command
 		if (cDisplays.size() == 0) { return 0; }
+		for(int i=0;i<cDisplays.size();i++){	cDisplays[i]->setAll(all);	}	
 		
 		read = new ReadOTUFile(globaldata->inputFileName);	
 		read->read(&*globaldata); 

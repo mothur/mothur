@@ -34,7 +34,7 @@ private:
 	InputData* input;
 	ValidCalculators* validCalculator;
 	
-	bool abort, allLines, mult;
+	bool abort, allLines, mult, all;
 	set<string> labels; //holds labels to be used
 	string label, calc, groups;
 	vector<string>  Estimators, Groups;

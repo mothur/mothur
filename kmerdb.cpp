@@ -176,3 +176,36 @@ void KmerDB::readKmerDB(ifstream& kmerDBFile){
 }
 
 /**************************************************************************************************/
+int KmerDB::getCount(int kmer) {
+	try {
+		if (kmer < 0) { return 0; }  //if user gives negative number
+		else if (kmer > maxKmer) {	return 0;	}  //or a kmer that is bigger than maxkmer
+		else {	return kmerLocations[kmer].size();	}  // kmer is in vector range
+	}
+	catch(exception& e) {
+		errorOut(e, "KmerDB", "getCount");
+		exit(1);
+	}	
+}
+/**************************************************************************************************/
+vector<int> KmerDB::getSequencesWithKmer(int kmer) {
+	try {
+		
+		vector<int> seqs;
+	
+		if (kmer < 0) { }  //if user gives negative number
+		else if (kmer > maxKmer) {	}  //or a kmer that is bigger than maxkmer
+		else {	seqs = kmerLocations[kmer];	}
+		
+		return seqs;
+	}
+	catch(exception& e) {
+		errorOut(e, "KmerDB", "getSequencesWithKmer");
+		exit(1);
+	}	
+}
+
+
+/**************************************************************************************************/
+
+

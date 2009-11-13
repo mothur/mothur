@@ -70,6 +70,9 @@ struct IntNode {
 	int rcoef;
 	IntNode* left;
 	IntNode* right;
+	
+	IntNode(int lv, int rv, IntNode* l, IntNode* r) : lvalue(lv), rvalue(rv), left(l), right(r) {};
+	IntNode() {};
 };
 
 struct ThreadNode {

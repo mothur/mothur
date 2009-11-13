@@ -52,6 +52,9 @@ public:
 	virtual int getLongestBase(); 
 	virtual void readKmerDB(ifstream&){};
 	virtual void setNumSeqs(int i) {	numSeqs = i; 	}
+	virtual vector<int> getSequencesWithKmer(int){ vector<int> filler; return filler; };  
+	virtual int getMaxKmer(){	return 1;	};
+
 	
 protected:
 	int numSeqs, longest;

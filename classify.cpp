@@ -17,9 +17,9 @@
 
 Classify::Classify(string tfile, string tempFile, string method, int kmerSize, int gapOpen, int gapExtend, int match, int misMatch) : taxFile(tfile), templateFile(tempFile) {		
 	try {											
+		readTaxonomy(taxFile);	
 		
-		readTaxonomy(taxFile);
-		
+		int start = time(NULL);
 		int numSeqs = 0;
 		//need to know number of template seqs for suffixdb
 		if (method == "suffix") {
@@ -51,12 +51,13 @@ Classify::Classify(string tfile, string tempFile, string method, int kmerSize, i
 		if (needToGenerate) {
 			ifstream fastaFile;
 			openInputFile(tempFile, fastaFile);
-		
+			
 			while (!fastaFile.eof()) {
 				Sequence temp(fastaFile);
 				gobble(fastaFile);
 			
 				names.push_back(temp.getName());
+								
 				database->addSequence(temp);	
 			}
 			fastaFile.close();
@@ -69,7 +70,7 @@ Classify::Classify(string tfile, string tempFile, string method, int kmerSize, i
 			
 			ifstream fastaFile;
 			openInputFile(tempFile, fastaFile);
-		
+			
 			while (!fastaFile.eof()) {
 				Sequence temp(fastaFile);
 				gobble(fastaFile);
@@ -82,6 +83,7 @@ Classify::Classify(string tfile, string tempFile, string method, int kmerSize, i
 		database->setNumSeqs(names.size());
 		
 		mothurOut("DONE."); mothurOutEndLine();
+		mothurOut("It took " + toString(time(NULL) - start) + " seconds generate search database. "); mothurOutEndLine();
 
 	}
 	catch(exception& e) {
@@ -93,7 +95,9 @@ Classify::Classify(string tfile, string tempFile, string method, int kmerSize, i
 
 void Classify::readTaxonomy(string file) {
 	try {
-	
+		
+		phyloTree = new PhyloTree();
+		
 		ifstream inTax;
 		openInputFile(file, inTax);
 	
@@ -106,9 +110,17 @@ void Classify::readTaxonomy(string file) {
 			inTax >> name >> taxInfo;
 			
 			taxonomy[name] = taxInfo;
+			
+			//itTax = taxList.find(taxInfo);
+			//if (itTax == taxList.end()) { //this is new taxonomy
+				//taxList[taxInfo] = 1;
+			//}else { taxList[taxInfo]++;	}
+			phyloTree->addSeqToTree(name, taxInfo);
 		
 			gobble(inTax);
 		}
+		
+		phyloTree->assignHeirarchyIDs(0);
 		inTax.close();
 	
 		mothurOut("DONE.");
@@ -117,6 +129,32 @@ void Classify::readTaxonomy(string file) {
 	}
 	catch(exception& e) {
 		errorOut(e, "Classify", "readTaxonomy");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+
+vector<string> Classify::parseTax(string tax) {
+	try {
+		vector<string> taxons;
+		
+		tax = tax.substr(0, tax.length()-1);  //get rid of last ';'
+	
+		//parse taxonomy
+		string individual;
+		while (tax.find_first_of(';') != -1) {
+			individual = tax.substr(0,tax.find_first_of(';'));
+			tax = tax.substr(tax.find_first_of(';')+1, tax.length());
+			taxons.push_back(individual);
+			
+		}
+		//get last one
+		taxons.push_back(tax);
+		
+		return taxons;
+	}
+	catch(exception& e) {
+		errorOut(e, "Classify", "parseTax");
 		exit(1);
 	}
 }

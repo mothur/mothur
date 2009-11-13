@@ -120,6 +120,10 @@ int SeqSummaryCommand::execute(){
 		int ptile97_5	= int(numSeqs * 0.975);
 		int ptile100	= numSeqs - 1;
 		
+		//to compensate for blank sequences that would result in startPosition and endPostion equalling -1
+		if (startPosition[0] == -1) {  startPosition[0] = 0;	}
+		if (endPosition[0] == -1)	{  endPosition[0] = 0;		}
+		
 		mothurOutEndLine();
 		mothurOut("\t\tStart\tEnd\tNBases\tAmbigs\tPolymer"); mothurOutEndLine();
 		mothurOut("Minimum:\t" + toString(startPosition[0]) + "\t" + toString(endPosition[0]) + "\t" + toString(seqLength[0]) + "\t" + toString(ambigBases[0]) + "\t" + toString(longHomoPolymer[0])); mothurOutEndLine();

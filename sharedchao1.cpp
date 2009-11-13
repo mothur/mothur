@@ -27,8 +27,7 @@ EstOutput SharedChao1::getValues(vector<SharedRAbundVector*> shared){
 		// the coeffient is 2.  Note: we only set the coeffient in f2 values.
 		
 		//create and initialize trees to 0.
-		initialTree(numGroups);	
-		
+		initialTree(numGroups);
 		
 		for (int i = 0; i < shared[0]->size(); i++) {
 			//get bin values and calc shared 
@@ -46,7 +45,7 @@ EstOutput SharedChao1::getValues(vector<SharedRAbundVector*> shared){
 			}
 		}
 
-			
+		
 		//calculate chao1, (numleaves-1) because numleaves contains the ++ values.
 		bool bias = false;
 		for(int i=0;i<numLeaves;i++){
@@ -108,39 +107,30 @@ void SharedChao1::initialTree(int n) {
 		
 		f1leaves.resize(numNodes);
 		f2leaves.resize(numNodes);
-		
+	
 		//initialize leaf values
 		for (int i = 0; i < numLeaves; i++) {
-			f1leaves[i] = new IntNode;
-			f1leaves[i]->lvalue = 0;
-			f1leaves[i]->rvalue = 0;
-			f1leaves[i]->left = NULL;
-			f1leaves[i]->right = NULL;
-			
-			f2leaves[i] = new IntNode;
-			f2leaves[i]->lvalue = 0;
-			f2leaves[i]->rvalue = 0;
-			f2leaves[i]->left = NULL;
-			f2leaves[i]->right = NULL;
+			f1leaves[i] = new IntNode(0, 0, NULL, NULL);
+			f2leaves[i] = new IntNode(0, 0, NULL, NULL);
 		}
 		
 		//set pointers to children
 		for (int j = numLeaves; j < numNodes; j++) {
-			f1leaves[j] = new IntNode;
+			f1leaves[j] = new IntNode();
 			f1leaves[j]->left = f1leaves[countleft];
 			f1leaves[j]->right = f1leaves[countright];
 						
-			f2leaves[j] = new IntNode;
+			f2leaves[j] = new IntNode();
 			f2leaves[j]->left = f2leaves[countleft];
 			f2leaves[j]->right =f2leaves[countright];
-						
+			
 			countleft = countleft + 2;
 			countright = countright + 2;
 		}
 		
 		//point to root
 		f1root = f1leaves[numNodes-1];
-		
+	
 		//point to root
 		f2root = f2leaves[numNodes-1];
 		
@@ -148,6 +138,7 @@ void SharedChao1::initialTree(int n) {
 		setCoef(f2root, 0);
 	}
 	catch(exception& e) {
+		if ((toString(e.what()) == "vector::_M_fill_insert") || (toString(e.what()) == "St9bad_alloc")) { mothurOut("You are using " + toString(n) + " groups which creates 2^" + toString(n+1) + " nodes. Try reducing the number of groups you selected. "); mothurOutEndLine(); exit(1); }
 		errorOut(e, "SharedChao1", "initialTree");
 		exit(1);
 	}

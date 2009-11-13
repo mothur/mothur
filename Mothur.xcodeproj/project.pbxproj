@@ -170,7 +170,6 @@
 		A75B887E104C16860083C454 /* ccode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A75B887B104C16860083C454 /* ccode.cpp */; };
 		A7861478109F5FA00010AAAF /* classifyseqscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7861477109F5FA00010AAAF /* classifyseqscommand.cpp */; };
 		A787810310A06D5D0086103D /* classify.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A787810210A06D5D0086103D /* classify.cpp */; };
-		A787811510A074330086103D /* phylotype.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A787811410A074330086103D /* phylotype.cpp */; };
 		A78781BA10A0813E0086103D /* doTaxonomy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A78781B810A0813D0086103D /* doTaxonomy.cpp */; };
 		A787821110A0AAE70086103D /* bayesian.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A787821010A0AAE70086103D /* bayesian.cpp */; };
 		A78782AB10A1B1CB0086103D /* alignmentdb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A78782AA10A1B1CB0086103D /* alignmentdb.cpp */; };
@@ -546,8 +545,6 @@
 		A7861477109F5FA00010AAAF /* classifyseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = classifyseqscommand.cpp; sourceTree = "<group>"; };
 		A78780FE10A06B8B0086103D /* classify.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = classify.h; sourceTree = SOURCE_ROOT; };
 		A787810210A06D5D0086103D /* classify.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = classify.cpp; sourceTree = SOURCE_ROOT; };
-		A787811310A074330086103D /* phylotype.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = phylotype.h; sourceTree = SOURCE_ROOT; };
-		A787811410A074330086103D /* phylotype.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = phylotype.cpp; sourceTree = SOURCE_ROOT; };
 		A78781B810A0813D0086103D /* doTaxonomy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = doTaxonomy.cpp; sourceTree = "<group>"; };
 		A78781B910A0813D0086103D /* doTaxonomy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = doTaxonomy.h; sourceTree = "<group>"; };
 		A787820F10A0AAE70086103D /* bayesian.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bayesian.h; sourceTree = "<group>"; };
@@ -1042,8 +1039,6 @@
 				A78781B810A0813D0086103D /* doTaxonomy.cpp */,
 				A787844310A1EBDD0086103D /* knn.h */,
 				A787844410A1EBDD0086103D /* knn.cpp */,
-				A787811310A074330086103D /* phylotype.h */,
-				A787811410A074330086103D /* phylotype.cpp */,
 			);
 			name = classifiers;
 			sourceTree = "<group>";
@@ -1272,7 +1267,6 @@
 				A751ACEA1098B283003D0911 /* readcluster.cpp in Sources */,
 				A7861478109F5FA00010AAAF /* classifyseqscommand.cpp in Sources */,
 				A787810310A06D5D0086103D /* classify.cpp in Sources */,
-				A787811510A074330086103D /* phylotype.cpp in Sources */,
 				A78781BA10A0813E0086103D /* doTaxonomy.cpp in Sources */,
 				A787821110A0AAE70086103D /* bayesian.cpp in Sources */,
 				A78782AB10A1B1CB0086103D /* alignmentdb.cpp in Sources */,

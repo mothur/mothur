@@ -35,13 +35,13 @@ private:
 	Classify* classify;
 	
 	string fastaFileName, templateFileName, distanceFileName, search, method, taxonomyFileName;
-	int processors, kmerSize, numWanted;
+	int processors, kmerSize, numWanted, cutoff;
 	float match, misMatch, gapOpen, gapExtend;
 	bool abort;
 	
-	int driver(linePair*, string);
+	int driver(linePair*, string, string);
 	void appendTaxFiles(string, string);
-	void createProcesses(string); 
+	void createProcesses(string, string); 
 };
 
 #endif

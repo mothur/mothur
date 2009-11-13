@@ -1,3 +1,6 @@
+#ifndef DOTAXONOMY_H
+#define DOTAXONOMY_H
+
 /*
  *  doTaxonomy.h
  *  
@@ -12,8 +15,8 @@
 /**************************************************************************************************/
 
 struct TaxNode {
-	vector<string> accessions;
-	map<string, int> children;
+	vector<string> accessions;	//names of seqs in this branch of tree
+	map<string, int> children;  //childs name to index in tree
 	int parent, childNumber, level;
 	string name, heirarchyID;
 	
@@ -30,13 +33,24 @@ public:
 	void addSeqToTree(string, string);
 	void assignHeirarchyIDs(int);
 	void print(ofstream&);
+	vector<int> getGenusNodes();	
+	TaxNode get(int i)				{	return tree[i];	}
+	TaxNode get(string seqName)		{	return tree[name2Taxonomy[seqName]];	}
+	int getIndex(string seqName)	{	return name2Taxonomy[seqName];	}
+	string getName(int i)			{	return tree[i].name;	}
 private:
 	string getNextTaxon(string&);
 	vector<TaxNode> tree;
+	vector<int> genusIndex; //holds the indexes in tree where the genus level taxonomies are stored
+	map<string, int> name2Taxonomy;  //maps name to index in tree
+	map<int, int> uniqueTaxonomies;  //map of unique taxonomies
 	void print(int, ofstream&);
 	int numNodes;
 	int numSeqs;
 };
 
 /**************************************************************************************************/
+
+#endif
+
 

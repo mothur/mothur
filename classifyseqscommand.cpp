@@ -9,7 +9,6 @@
 
 #include "classifyseqscommand.h"
 #include "sequence.hpp"
-#include "phylotype.h"
 #include "bayesian.h"
 #include "doTaxonomy.h"
 #include "knn.h"
@@ -27,7 +26,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option){
 		else {
 			
 			//valid paramters for this command
-			string AlignArray[] =  {"template","fasta","search","ksize","method","processors","taxonomy","match","mismatch","gapopen","gapextend","numwanted"};
+			string AlignArray[] =  {"template","fasta","search","ksize","method","processors","taxonomy","match","mismatch","gapopen","gapextend","numwanted","cutoff"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -77,7 +76,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option){
 			
 			search = validParameter.validFile(parameters, "search", false);		if (search == "not found"){	search = "kmer";		}
 			
-			method = validParameter.validFile(parameters, "method", false);		if (method == "not found"){	method = "phylotype";	}
+			method = validParameter.validFile(parameters, "method", false);		if (method == "not found"){	method = "bayesian";	}
 			
 			temp = validParameter.validFile(parameters, "match", false);		if (temp == "not found"){	temp = "1.0";			}
 			convert(temp, match);  
@@ -93,7 +92,15 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option){
 			
 			temp = validParameter.validFile(parameters, "numwanted", false);	if (temp == "not found"){	temp = "10";			}
 			convert(temp, numWanted);
+			
+			temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found"){	temp = "0";				}
+			convert(temp, cutoff);
 
+			
+			if ((method == "bayesian") && (search != "kmer"))  { 
+				mothurOut("The bayesian method requires the kmer search." + search + "will be disregarded." ); mothurOutEndLine();
+				search = "kmer";
+			}
 		}
 		
 	}
@@ -120,7 +127,7 @@ void ClassifySeqsCommand::help(){
 		mothurOut("The classify.seqs command parameters are template, fasta, search, ksize, method, taxonomy, processors, match, mismatch, gapopen, gapextend and numwanted.\n");
 		mothurOut("The template, fasta and taxonomy parameters are required.\n");
 		mothurOut("The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer and blast. The default is kmer.\n");
-		mothurOut("The method parameter allows you to specify classification method to use.  Your options are: phylotype, bayesian and knn. The default is phylotype.\n");
+		mothurOut("The method parameter allows you to specify classification method to use.  Your options are: bayesian and knn. The default is bayesian.\n");
 		mothurOut("The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 8.\n");
 		mothurOut("The processors parameter allows you to specify the number of processors to use. The default is 1.\n");
 		mothurOut("The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n");
@@ -128,9 +135,10 @@ void ClassifySeqsCommand::help(){
 		mothurOut("The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -1.0.\n");
 		mothurOut("The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -2.0.\n");
 		mothurOut("The numwanted parameter allows you to specify the number of sequence matches you want with the knn method.  The default is 10.\n");
+		mothurOut("The cutoff parameter allows you to specify a bootstrap confidence threshold for your taxonomy.  The default is 0.\n");
 		mothurOut("The classify.seqs command should be in the following format: \n");
 		mothurOut("classify.seqs(template=yourTemplateFile, fasta=yourFastaFile, method=yourClassificationMethod, search=yourSearchmethod, ksize=yourKmerSize, taxonomy=yourTaxonomyFile, processors=yourProcessors) \n");
-		mothurOut("Example classify.seqs(fasta=amazon.fasta, template=core.filtered, method=phylotype, search=gotoh, ksize=8, processors=2)\n");
+		mothurOut("Example classify.seqs(fasta=amazon.fasta, template=core.filtered, method=knn, search=gotoh, ksize=8, processors=2)\n");
 		mothurOut("The .taxonomy file consists of 2 columns: 1 = your sequence name, 2 = the taxonomy for your sequence. \n");
 		mothurOut("The .tax.summary is a summary of the different taxonomies represented in your fasta file. \n");
 		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");
@@ -148,22 +156,23 @@ int ClassifySeqsCommand::execute(){
 	try {
 		if (abort == true) {	return 0;	}
 		
-		int start = time(NULL);
 		
-		if(method == "phylotype"){	classify = new PhyloType(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch);					}
-		//else if(method == "bayesian")		{	classify = new Bayesian(taxonomyFileName, templateFileName, search);		}
+		
+		if(method == "bayesian")			{	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff);		}
 		else if(method == "knn")			{	classify = new Knn(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, numWanted);				}
 		else {
-			mothurOut(search + " is not a valid method option. I will run the command using phylotype.");
+			mothurOut(search + " is not a valid method option. I will run the command using bayesian.");
 			mothurOutEndLine();
-			classify = new PhyloType(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch);
+			classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff);	
 		}
 
 		int numFastaSeqs = 0;
 		
 		string newTaxonomyFile = getRootName(fastaFileName) + "taxonomy";
+		string tempTaxonomyFile = getRootName(fastaFileName) + "taxonomy.temp";
 		string taxSummary = getRootName(fastaFileName) + "tax.summary";
 		
+		int start = time(NULL);
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		if(processors == 1){
 			ifstream inFASTA;
@@ -173,7 +182,7 @@ int ClassifySeqsCommand::execute(){
 			
 			lines.push_back(new linePair(0, numFastaSeqs));
 			
-			driver(lines[0], newTaxonomyFile);
+			driver(lines[0], newTaxonomyFile, tempTaxonomyFile);
 			
 		}
 		else{
@@ -203,13 +212,16 @@ int ClassifySeqsCommand::execute(){
 				}
 				lines.push_back(new linePair(startPos, numSeqsPerProcessor));
 			}
-			createProcesses(newTaxonomyFile); 
+			createProcesses(newTaxonomyFile, tempTaxonomyFile); 
 			
 			rename((newTaxonomyFile + toString(processIDS[0]) + ".temp").c_str(), newTaxonomyFile.c_str());
+			rename((tempTaxonomyFile + toString(processIDS[0]) + ".temp").c_str(), tempTaxonomyFile.c_str());
 			
 			for(int i=1;i<processors;i++){
 				appendTaxFiles((newTaxonomyFile + toString(processIDS[i]) + ".temp"), newTaxonomyFile);
+				appendTaxFiles((tempTaxonomyFile + toString(processIDS[i]) + ".temp"), tempTaxonomyFile);
 				remove((newTaxonomyFile + toString(processIDS[i]) + ".temp").c_str());
+				remove((tempTaxonomyFile + toString(processIDS[i]) + ".temp").c_str());
 			}
 			
 		}
@@ -221,14 +233,14 @@ int ClassifySeqsCommand::execute(){
 		
 		lines.push_back(new linePair(0, numFastaSeqs));
 		
-		driver(lines[0], newTaxonomyFile);
+		driver(lines[0], newTaxonomyFile, tempTaxonomyFile);
 #endif
 		
 		delete classify;
 		
 		//make taxonomy tree from new taxonomy file 
 		ifstream inTaxonomy;
-		openInputFile(newTaxonomyFile, inTaxonomy);
+		openInputFile(tempTaxonomyFile, inTaxonomy);
 		
 		string accession, taxaList;
 		PhyloTree taxaBrowser;
@@ -242,6 +254,7 @@ int ClassifySeqsCommand::execute(){
 			gobble(inTaxonomy);
 		}
 		inTaxonomy.close();
+		remove(tempTaxonomyFile.c_str());
 		
 		taxaBrowser.assignHeirarchyIDs(0);
 		
@@ -264,7 +277,7 @@ int ClassifySeqsCommand::execute(){
 }
 /**************************************************************************************************/
 
-void ClassifySeqsCommand::createProcesses(string taxFileName) {
+void ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 0;
@@ -278,7 +291,7 @@ void ClassifySeqsCommand::createProcesses(string taxFileName) {
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				driver(lines[process], taxFileName + toString(getpid()) + ".temp");
+				driver(lines[process], taxFileName + toString(getpid()) + ".temp", tempTaxFile + toString(getpid()) + ".temp");
 				exit(0);
 			}else { mothurOut("unable to spawn the necessary processes."); mothurOutEndLine(); exit(0); }
 		}
@@ -321,10 +334,13 @@ void ClassifySeqsCommand::appendTaxFiles(string temp, string filename) {
 
 //**********************************************************************************************************************
 
-int ClassifySeqsCommand::driver(linePair* line, string taxFName){
+int ClassifySeqsCommand::driver(linePair* line, string taxFName, string tempTFName){
 	try {
 		ofstream outTax;
 		openOutputFile(taxFName, outTax);
+		
+		ofstream outTaxSimple;
+		openOutputFile(tempTFName, outTaxSimple);
 	
 		ifstream inFASTA;
 		openInputFile(fastaFileName, inFASTA);
@@ -340,14 +356,33 @@ int ClassifySeqsCommand::driver(linePair* line, string taxFName){
 			taxonomy = classify->getTaxonomy(candidateSeq);
 			
 			if (taxonomy != "bad seq") {
-				outTax << candidateSeq->getName() << '\t' << taxonomy << endl;
+				//if (method != "bayesian") {
+					outTax << candidateSeq->getName() << '\t' << taxonomy << endl;
+					outTaxSimple << candidateSeq->getName() << '\t' << classify->getSimpleTax() << endl;
+				//}else{
+					//vector<string> pTax = classify->parseTax(taxonomy);
+					//map<string, int> confidence = classify->getConfidenceScores();
+					
+					//outTax << candidateSeq->getName() << '\t';
+					//for (int j = 0; j < pTax.size(); j++) {
+						//if (confidence[pTax[j]] > cutoff) {
+						//	outTax << pTax[j] << "(" << confidence[pTax[j]] << ");";
+						//}else{ break; }
+					//}
+					//outTax << endl;
+				//}
 			}
 							
 			delete candidateSeq;
+			
+			if(i % 100 == 0){
+				mothurOut("Classifying sequence " + toString(i)); mothurOutEndLine();
+			}
 		}
 		
 		inFASTA.close();
 		outTax.close();
+		outTaxSimple.close();
 		
 		return 1;
 	}
