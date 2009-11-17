@@ -10,7 +10,7 @@
 #include "knn.h"
 
 /**************************************************************************************************/
-Knn::Knn(string tfile, string tempFile, string method, int kmerSize, int gapOpen, int gapExtend, int match, int misMatch, int n) 
+Knn::Knn(string tfile, string tempFile, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch, int n) 
 : Classify(tfile, tempFile, method, kmerSize, gapOpen, gapExtend, match, misMatch), num(n)  {}
 /**************************************************************************************************/
 string Knn::getTaxonomy(Sequence* seq) {
@@ -18,8 +18,9 @@ string Knn::getTaxonomy(Sequence* seq) {
 		string tax;
 		
 		//use database to find closest seq
+
 		vector<int> closest = database->findClosestSequences(seq, num);
-		
+
 		vector<string> closestNames;
 		for (int i = 0; i < closest.size(); i++) {
 			//find that sequences taxonomy in map
@@ -39,6 +40,7 @@ string Knn::getTaxonomy(Sequence* seq) {
 			if (tax == "") { mothurOut("There are no common levels for sequence " + seq->getName() + ". " + seq->getName() + " will be disregarded."); mothurOutEndLine(); tax = "bad seq"; }
 		}
 		
+		simpleTax = tax;
 		return tax;	
 	}
 	catch(exception& e) {

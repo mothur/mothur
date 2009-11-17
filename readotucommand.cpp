@@ -119,7 +119,7 @@ void ReadOtuCommand::help(){
 	try {
 		mothurOut("The read.otu command must be run before you execute a collect.single, rarefaction.single, summary.single, \n");
 		mothurOut("collect.shared, rarefaction.shared or summary.shared command.   Mothur will generate a .list, .rabund and .sabund upon completion of the cluster command \n");
-		mothurOut("or you may use your own. The read.otu command parameter options are list, rabund, sabund, shared, group, order and label.\n");
+		mothurOut("or you may use your own. The read.otu command parameter options are list, rabund, sabund, shared, group, order, label and groups.\n");
 		mothurOut("The read.otu command can be used in two ways.  The first is to read a list, rabund or sabund and run the collect.single, rarefaction.single or summary.single.\n");
 		mothurOut("For this use the read.otu command should be in the following format: read.otu(list=yourListFile, order=yourOrderFile, label=yourLabels).\n");
 		mothurOut("The list, rabund or sabund parameter is required, but you may only use one of them.\n");
@@ -128,6 +128,7 @@ void ReadOtuCommand::help(){
 		mothurOut("In this case the read.otu command should be in the following format: read.otu(list=yourListFile, group=yourGroupFile) or read.otu(shared=yourSharedFile).  \n");
 		mothurOut("The list parameter and group paramaters or the shared paremeter is required. When using the command the second way with a list and group file read.otu command parses the .list file\n");
 		mothurOut("and separates it into groups.  It outputs a .shared file containing the OTU information for each group. The read.otu command also outputs a .rabund file for each group. \n");
+		mothurOut("You can use the groups parameter to choose only specific groups to be used in the .shared and .rabund files. \n");
 		mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile).\n\n");
 
 	}

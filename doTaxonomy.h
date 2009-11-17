@@ -30,6 +30,7 @@ class PhyloTree {
 
 public:
 	PhyloTree();
+	~PhyloTree() {};
 	void addSeqToTree(string, string);
 	void assignHeirarchyIDs(int);
 	void print(ofstream&);

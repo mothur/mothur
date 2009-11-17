@@ -18,7 +18,7 @@
 class Knn : public Classify {
 	
 public:
-	Knn(string, string, string, int, int, int, int, int, int);
+	Knn(string, string, string, int, float, float, float, float, int);
 	~Knn() {};
 	
 	string getTaxonomy(Sequence*);

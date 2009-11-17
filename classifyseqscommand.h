@@ -15,6 +15,16 @@
 #include "alignment.hpp"
 #include "classify.h"
 
+//KNN and Bayesian methods modeled from algorithms in
+//Naı¨ve Bayesian Classiﬁer for Rapid Assignment of rRNA Sequences 
+//into the New Bacterial Taxonomy􏰎† 
+//Qiong Wang,1 George M. Garrity,1,2 James M. Tiedje,1,2 and James R. Cole1* 
+//Center for Microbial Ecology1 and Department of Microbiology and Molecular Genetics,2 Michigan State University, 
+//East Lansing, Michigan 48824 
+//Received 10 January 2007/Accepted 18 June 2007 
+
+
+
 class ClassifySeqsCommand : public Command {
 	
 public:

@@ -43,7 +43,7 @@ int main(int argc, char *argv[]){
 		//header
 		mothurOut("mothur v.1.6.0");
 		mothurOutEndLine();		
-		mothurOut("Last updated: 10/6/2009");
+		mothurOut("Last updated: 11/20/2009");
 		mothurOutEndLine();	
 		mothurOutEndLine();		
 		mothurOut("by");
