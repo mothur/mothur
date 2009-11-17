@@ -82,7 +82,7 @@ void ChimeraCheckRDP::getChimeras() {
 		querySeqs = readSeqs(fastafile);
 		mothurOut("Done."); 
 		//templateSeqs = readSeqs(templateFile);
-		templateDB = new AlignmentDB(templateFile, "kmer", kmerSize, 0,0,0,0);
+		templateDB = new AlignmentDB(templateFile, "kmer", kmerSize, 0.0,0.0,0.0,0.0);
 		mothurOutEndLine();
 		
 		int numSeqs = querySeqs.size();

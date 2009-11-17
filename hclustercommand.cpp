@@ -330,10 +330,10 @@ vector<seqDist> HClusterCommand::getSeqs(ifstream& filehandle){
 			map<string,int>::iterator itB = globaldata->nameMap->find(secondName);
 			
 			if(itA == globaldata->nameMap->end()){
-				cerr << "AAError: Sequence '" << firstName << "' was not found in the names file, please correct\n";
+				cerr << "AAError: Sequence '" << firstName << "' was not found in the names file, please correct\n"; exit(1);
 			}
 			if(itB == globaldata->nameMap->end()){
-				cerr << "ABError: Sequence '" << secondName << "' was not found in the names file, please correct\n";
+				cerr << "ABError: Sequence '" << secondName << "' was not found in the names file, please correct\n"; exit(1);
 			}
 			
 			//using cutoff

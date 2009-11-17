@@ -266,6 +266,7 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName){
 			report.setCandidate(candidateSeq);
 	
 			Sequence temp = templateDB->findClosestSequence(candidateSeq);
+
 			Sequence* templateSeq = &temp;
 
 			report.setTemplate(templateSeq);

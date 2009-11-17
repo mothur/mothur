@@ -15,7 +15,7 @@
 
 /**************************************************************************************************/
 
-Classify::Classify(string tfile, string tempFile, string method, int kmerSize, int gapOpen, int gapExtend, int match, int misMatch) : taxFile(tfile), templateFile(tempFile) {		
+Classify::Classify(string tfile, string tempFile, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch) : taxFile(tfile), templateFile(tempFile) {		
 	try {											
 		readTaxonomy(taxFile);	
 		

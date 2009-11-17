@@ -12,7 +12,7 @@
 
 /**************************************************************************************************/
 Bayesian::Bayesian(string tfile, string tempFile, string method, int ksize, int cutoff) : 
-Classify(tfile, tempFile, method, ksize, 0, 0, 0, 0), kmerSize(ksize), confidenceThreshold(cutoff)  {
+Classify(tfile, tempFile, method, ksize, 0.0, 0.0, 0.0, 0.0), kmerSize(ksize), confidenceThreshold(cutoff)  {
 	try {
 					
 		numKmers = database->getMaxKmer() + 1;

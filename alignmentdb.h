@@ -20,7 +20,7 @@ class AlignmentDB {
 
 public:
 
-	AlignmentDB(string, string, int, int, int, int, int);  //reads fastafile passed in and stores sequences
+	AlignmentDB(string, string, int, float, float, float, float);  //reads fastafile passed in and stores sequences
 	~AlignmentDB();
 	
 	Sequence findClosestSequence(Sequence*);

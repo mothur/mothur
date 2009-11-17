@@ -181,9 +181,8 @@ int ClassifySeqsCommand::execute(){
 			inFASTA.close();
 			
 			lines.push_back(new linePair(0, numFastaSeqs));
-			
+		
 			driver(lines[0], newTaxonomyFile, tempTaxonomyFile);
-			
 		}
 		else{
 			vector<int> positions;
@@ -227,15 +226,14 @@ int ClassifySeqsCommand::execute(){
 		}
 #else
 		ifstream inFASTA;
-		openInputFile(candidateFileName, inFASTA);
+		openInputFile(fastaFileName, inFASTA);
 		numFastaSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
 		inFASTA.close();
 		
 		lines.push_back(new linePair(0, numFastaSeqs));
 		
 		driver(lines[0], newTaxonomyFile, tempTaxonomyFile);
-#endif
-		
+#endif	
 		delete classify;
 		
 		//make taxonomy tree from new taxonomy file 
@@ -356,27 +354,14 @@ int ClassifySeqsCommand::driver(linePair* line, string taxFName, string tempTFNa
 			taxonomy = classify->getTaxonomy(candidateSeq);
 			
 			if (taxonomy != "bad seq") {
-				//if (method != "bayesian") {
-					outTax << candidateSeq->getName() << '\t' << taxonomy << endl;
-					outTaxSimple << candidateSeq->getName() << '\t' << classify->getSimpleTax() << endl;
-				//}else{
-					//vector<string> pTax = classify->parseTax(taxonomy);
-					//map<string, int> confidence = classify->getConfidenceScores();
-					
-					//outTax << candidateSeq->getName() << '\t';
-					//for (int j = 0; j < pTax.size(); j++) {
-						//if (confidence[pTax[j]] > cutoff) {
-						//	outTax << pTax[j] << "(" << confidence[pTax[j]] << ");";
-						//}else{ break; }
-					//}
-					//outTax << endl;
-				//}
+				outTax << candidateSeq->getName() << '\t' << taxonomy << endl;
+				outTaxSimple << candidateSeq->getName() << '\t' << classify->getSimpleTax() << endl;
 			}
 							
 			delete candidateSeq;
 			
-			if(i % 100 == 0){
-				mothurOut("Classifying sequence " + toString(i)); mothurOutEndLine();
+			if((i+1) % 100 == 0){
+				mothurOut("Classifying sequence " + toString(i+1)); mothurOutEndLine();
 			}
 		}
 		

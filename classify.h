@@ -11,7 +11,7 @@
  */
 
 
-/* This class is a parent to phylotyp, bayesian, knn.  */
+/* This class is a parent to bayesian, knn.  */
 
 #include "mothur.h"
 #include "database.hpp"
@@ -26,10 +26,9 @@ class Sequence;
 class Classify {
 
 public:
-	Classify(string, string, string, int, int, int, int, int);
-	Classify(){	delete phyloTree;  }
+	Classify(string, string, string, int, float, float, float, float);
 	
-	virtual ~Classify(){};
+	virtual ~Classify(){  delete phyloTree; delete database;  };
 	virtual string getTaxonomy(Sequence*) = 0;
 	//virtual map<string, int> getConfidenceScores() { return taxConfidenceScore; }
 	//virtual vector<string> parseTax(string);

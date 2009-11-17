@@ -14,7 +14,7 @@
 
 
 /**************************************************************************************************/
-AlignmentDB::AlignmentDB(string fastaFileName, string method, int kmerSize, int gapOpen, int gapExtend, int match, int misMatch){		//	This assumes that the template database is in fasta format, may 
+AlignmentDB::AlignmentDB(string fastaFileName, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch){		//	This assumes that the template database is in fasta format, may 
 	try {											//	need to alter this in the future?
 		longest = 0;
 		
