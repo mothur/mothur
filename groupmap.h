@@ -25,9 +25,10 @@ public:
 	string getGroup(string);
 	void setGroup(string, string);
 	vector<string> namesOfGroups;
-	map<string, int> groupIndex;  //groupname, vectorIndex in namesOfGroups. - used by collectdisplays.
+	map<string, int> groupIndex;  //groupname, vectorIndex in namesOfGroups. - used by collectdisplays and libshuff commands.
 	int getNumSeqs()  {  return groupmap.size();  }
 	vector<string> getNamesSeqs();
+	int getNumSeqs(string); //return the number of seqs in a given group
 			
 private:
 	ifstream fileHandle;
@@ -36,6 +37,7 @@ private:
 	map<string, string>::iterator it;
 	void setNamesOfGroups(string); 
 	map<string, string> groupmap; //sequence name and groupname
+	map<string, int> seqsPerGroup;  //maps groupname to number of seqs in that group
 };
 
 #endif

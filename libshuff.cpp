@@ -20,7 +20,6 @@ Libshuff::Libshuff(FullMatrix* D, int it, float step, float co) : matrix(D), ite
 		groupNames = matrix->getGroups();
 		groupSizes = matrix->getSizes();
 		numGroups = matrix->getNumGroups();
-
 		initializeGroups(matrix);
 	}
 	catch(exception& e) {
@@ -43,6 +42,7 @@ void Libshuff::initializeGroups(FullMatrix* matrix){
 		}
 		int index=0;
 		for(int i=0;i<numGroups;i++){
+
 			for(int j=0;j<groupSizes[i];j++){
 				savedGroups[i][j] = groups[i][j] = index++;
 			}
@@ -64,9 +64,11 @@ vector<vector<vector<double> > > Libshuff::getSavedMins(){
 
 vector<double> Libshuff::getMinX(int x){
 	try{
+
 		vector<double> minX(groupSizes[x], 0);
 		for(int i=0;i<groupSizes[x];i++){
-			minX[i] = (groupSizes[x] > 1 ? (i==0 ? matrix->get(groups[x][0], groups[x][1]) : matrix->get(groups[x][i], groups[x][0])) : 0.0);
+			minX[i] = (groupSizes[x] > 1 ? (i==0 ? matrix->get(groups[x][0], groups[x][1]) : matrix->get(groups[x][i], groups[x][0])) : 0.0); //get the first value in row i of this block
+			//minX[i] = matrix->get(groups[x][i], groups[x][0]);
 			for(int j=0;j<groupSizes[x];j++){
 				if(i != j)	{
 					double dx = matrix->get(groups[x][i], groups[x][j]);

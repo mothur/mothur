@@ -30,6 +30,8 @@ public:
 	int getNumSeqs();
 	vector<int> getSizes();
 	vector<string> getGroups();
+	void setGroups(vector<string> names) { groups = names;  }
+	void setSizes(vector<int> s)		 { sizes = s;		}
 	int getNumGroups();
 	void printMatrix(ostream&);
 	float get(int, int);
@@ -41,8 +43,9 @@ private:
 	vector<Names> index; // row in vector, sequence group.  need to know this so when we sort it can be updated.
 	vector<int> sizes;
 	vector<string> groups;
-	void sortGroups(int, int);  //this function sorts the sequences within the matrix.
 	
+	void sortGroups(int, int);  //this function sorts the sequences within the matrix.
+	void swapRows(int, int);
 	
 	GroupMap* groupmap;  //maps sequences to groups they belong to.
 	int numSeqs;

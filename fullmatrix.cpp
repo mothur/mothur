@@ -10,7 +10,6 @@
 #include "fullmatrix.h"
 
 /**************************************************************************/
-
 //This constructor reads a distance matrix file and stores the data in the matrix.
 FullMatrix::FullMatrix(ifstream& filehandle) {
 	try{
@@ -23,14 +22,13 @@ FullMatrix::FullMatrix(ifstream& filehandle) {
 		//make the matrix filled with zeros
 		matrix.resize(numSeqs); 
 		for(int i = 0; i < numSeqs; i++) {
-			matrix[i].resize(numSeqs, 0);
+			matrix[i].resize(numSeqs, 0.0);
 		}
-		
 		group = groupmap->getGroup(name);
 		if(group == "not found") {	mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); mothurOutEndLine(); exit(1); }
 		index.resize(numSeqs);
-		index[0].groupName = group; 
 		index[0].seqName = name;
+		index[0].groupName = group;
 		
 		//determine if matrix is square or lower triangle
 		//if it is square read the distances for the first sequence
@@ -60,22 +58,8 @@ FullMatrix::FullMatrix(ifstream& filehandle) {
 		if (square == true) { readSquareMatrix(filehandle); }
 		else { readLTMatrix(filehandle); }
 		
-		//sort sequences so they are gathered in groups for processing
-		sortGroups(0, numSeqs-1);
-		
-		groups.push_back(index[0].groupName);
-		sizes.push_back(1);
-		int groupCount = 0;
-		
-		for(int i=1;i<numSeqs;i++){
-			if(index[i].groupName == index[i-1].groupName){	sizes[groupCount]++;	}
-			else{
-				sizes.push_back(1);
-				groups.push_back(index[i].groupName);
-				groupCount++;
-			}				
-		}
-		
+		sortGroups(0, numSeqs-1);	
+				
 	}
 	catch(exception& e) {
 		errorOut(e, "FullMatrix", "FullMatrix");
@@ -97,8 +81,8 @@ void FullMatrix::readSquareMatrix(ifstream& filehandle) {
 			filehandle >> name;		
 			
 			group = groupmap->getGroup(name);
-			index[i].groupName = group;
 			index[i].seqName = name;
+			index[i].groupName = group;
 			
 			if(group == "not found") {	mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); mothurOutEndLine(); exit(1); }
 				
@@ -127,25 +111,24 @@ void FullMatrix::readLTMatrix(ifstream& filehandle) {
 		float distance;
 
 		string group, name;
-		
+	
 		for(int i=1;i<numSeqs;i++){
 			filehandle >> name;		
-						
+					
 			group = groupmap->getGroup(name);
-			index[i].groupName = group;
 			index[i].seqName = name;
+			index[i].groupName = group;
 	
 			if(group == "not found") {	mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); mothurOutEndLine();  exit(1); }
 				
 			for(int j=0;j<i;j++){
 				filehandle >> distance;
-					
 				matrix[i][j] = distance;  matrix[j][i] = distance;
 				count++;
 				reading->update(count);
 			}
-			
 		}
+
 		reading->finish();
 		delete reading;
 	}
@@ -159,61 +142,37 @@ void FullMatrix::readLTMatrix(ifstream& filehandle) {
 
 void FullMatrix::sortGroups(int low, int high){
 	try{
-	
-		int i = low;
-		int j = high;
-		float y = 0;
-		string name;
 		
-		/* compare value */
-		//what group does this row belong to
-		string z = index[(low + high) / 2].groupName;
-
-		/* partition */
-		do {
-			/* find member above ... */
-			while(index[i].groupName < z) i++;
-
-			/* find element below ... */
-			while(index[j].groupName > z) j--;
+		if (low < high) {
+			int i = low+1;
+			int j = high;
+			int pivot = (low+high) / 2;
 			
-			if(i <= j) {
-				/* swap rows*/
-				for (int h = 0; h < numSeqs; h++) {
-					y = matrix[i][h];
-					matrix[i][h] = matrix[j][h]; 
-					matrix[j][h] = y;
+			swapRows(low, pivot);  //puts pivot in final spot
+			
+			/* compare value */
+			//what group does this row belong to
+			string key = index[low].groupName;
+			
+			/* partition */
+			while(i <= j) {
+				/* find member above ... */
+				while((i <= high) && (index[i].groupName <= key))	{  i++;  }  
+				
+				/* find element below ... */
+				while((j >= low) && (index[j].groupName > key))		{  j--;  } 
+								
+				if(i < j) {
+					swapRows(i, j);
 				}
-				
-				/* swap columns*/
-				for (int b = 0; b < numSeqs; b++) {
-					y = matrix[b][i];
-					matrix[b][i] = matrix[b][j]; 
-					matrix[b][j] = y;
-				}
-				
-				//swap map elements
-				z = index[i].groupName;
-				index[i].groupName = index[j].groupName;
-				index[j].groupName = z;
-				
-				name = index[i].seqName;
-				index[i].seqName = index[j].seqName;
-				index[j].seqName = name;
-
-				
-				i++; 
-				j--;
-			}
-		} while(i <= j);
-
-		/* recurse */
-		if(low < j) 
-		sortGroups(low, j);
-
-		if(i < high) 
-		sortGroups(i, high); 
-
+			} 
+			
+			swapRows(low, j);
+			
+			/* recurse */
+			sortGroups(low, j-1);
+			sortGroups(j+1, high); 
+		}
 	
 	}
 	catch(exception& e) {
@@ -222,6 +181,43 @@ void FullMatrix::sortGroups(int low, int high){
 	}
 }
 
+/**************************************************************************/	
+void FullMatrix::swapRows(int i, int j) {
+	try {
+	
+		float y;
+		string z, name;
+		
+		/* swap rows*/
+		for (int h = 0; h < numSeqs; h++) {
+			y = matrix[i][h];
+			matrix[i][h] = matrix[j][h]; 
+			matrix[j][h] = y;
+		}
+		
+		/* swap columns*/
+		for (int b = 0; b < numSeqs; b++) {
+			y = matrix[b][i];
+			matrix[b][i] = matrix[b][j]; 
+			matrix[b][j] = y;
+		}
+		
+		//swap map elements
+		z = index[i].groupName;
+		index[i].groupName = index[j].groupName;
+		index[j].groupName = z;
+		
+		name = index[i].seqName;
+		index[i].seqName = index[j].seqName;
+		index[j].seqName = name;
+		
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "FullMatrix", "swapRows");
+		exit(1);
+	}
+}
 /**************************************************************************/	
 
 float FullMatrix::get(int i, int j){	return matrix[i][j];		}
@@ -249,10 +245,12 @@ void FullMatrix::printMatrix(ostream& out) {
 		for (int i = 0; i < numSeqs; i++) {
 			out << "row " << i << " group = " << index[i].groupName << " name = " << index[i].seqName << endl;
 			for (int j = 0; j < numSeqs; j++) {
-				out << matrix[i][j] << " ";
+				out << i << '\t' << j << '\t' << matrix[i][j] << endl;
 			}
 			out << endl;
 		}
+		
+		for (int i = 0; i < numSeqs; i++) {  out << i << '\t' <<  index[i].seqName << endl;  }
 	}
 	catch(exception& e) {
 		errorOut(e, "FullMatrix", "printMatrix");

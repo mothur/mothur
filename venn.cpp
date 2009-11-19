@@ -168,7 +168,7 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 				}else { outsvg << "</text>\n"; }
 
 				outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"500\">The number of sepecies shared between groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString(shared[0]) + "</text>\n";
-				outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"520\">Percentage of species that are shared in groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString((shared[0] / (float)(numA[0] + numB[0] - shared[0]))) + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"520\">Percentage of species that are shared in groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString((shared[0] / (float)(numA[0] + numB[0] - shared[0]))*100) + "</text>\n";
 				outsvg << "<text fill=\"black\" class=\"seri\" x=\"175\" y=\"540\">The total richness for all groups is " + toString((float)(numA[0] + numB[0] - shared[0])) + "</text>\n";
 				
 				//close file
