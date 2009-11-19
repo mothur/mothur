@@ -29,8 +29,9 @@ void GroupMap::readMap() {
 			fileHandle >> seqGroup;			//read from second column
 			
 			setNamesOfGroups(seqGroup);
-						
+			
 			groupmap[seqName] = seqGroup;	//store data in map
+			seqsPerGroup[seqGroup]++;  //increment number of seqs in that group
 		
 			gobble(fileHandle);
 		}
@@ -67,6 +68,7 @@ void GroupMap::setNamesOfGroups(string seqGroup) {
 			}
 			if (count == namesOfGroups.size()) {
 				namesOfGroups.push_back(seqGroup); //new group
+				seqsPerGroup[seqGroup] = 0;
 				groupIndex[seqGroup] = index;
 				index++;
 			}
@@ -82,6 +84,24 @@ bool GroupMap::isValidGroup(string groupname) {
 	}
 	catch(exception& e) {
 		errorOut(e, "GroupMap", "isValidGroup");
+		exit(1);
+	}
+}
+/************************************************************/
+int GroupMap::getNumSeqs(string group) {
+	try {
+		
+		map<string, int>::iterator itNum;
+		
+		itNum = seqsPerGroup.find(group);
+		
+		if (itNum == seqsPerGroup.end()) { return 0; }
+		
+		return seqsPerGroup[group];
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "GroupMap", "getNumSeqs");
 		exit(1);
 	}
 }

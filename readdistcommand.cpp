@@ -72,7 +72,7 @@ ReadDistCommand::ReadDistCommand(string option){
 			if (columnfile != "") {
 				if (namefile == "") {  cout << "You need to provide a namefile if you are going to use the column format." << endl; abort = true; }
 			}
-		
+			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			//get user cutoff and precision or use defaults
@@ -93,6 +93,7 @@ ReadDistCommand::ReadDistCommand(string option){
 				else if (format == "matrix") { 
 					groupMap = new GroupMap(groupfile);
 					groupMap->readMap();
+	
 					if (globaldata->gGroupmap != NULL) { delete globaldata->gGroupmap;  }
 					globaldata->gGroupmap = groupMap;
 				}

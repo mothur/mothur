@@ -76,7 +76,17 @@ LibShuffCommand::LibShuffCommand(string option){
 			if (abort == false) {
 			
 				matrix = globaldata->gMatrix;				//get the distance matrix
-				setGroups();								//set the groups to be analyzed
+				setGroups();								//set the groups to be analyzed and sorts them
+				
+				/********************************************************************************************/
+				//this is needed because when we read the matrix we sort it into groups in alphabetical order
+				//the rest of the command and the classes used in this command assume specific order
+				/********************************************************************************************/
+				matrix->setGroups(globaldata->gGroupmap->namesOfGroups);
+				vector<int> sizes;
+				for (int i = 0; i < globaldata->gGroupmap->namesOfGroups.size(); i++) {  sizes.push_back(globaldata->gGroupmap->getNumSeqs(globaldata->gGroupmap->namesOfGroups[i]));  }
+				matrix->setSizes(sizes);
+				
 
 				if(userform == "discrete"){
 					form = new DLibshuff(matrix, iters, step, cutOff);
@@ -136,14 +146,17 @@ int LibShuffCommand::execute(){
 		for(int i=0;i<numGroups-1;i++) {
 			for(int j=i+1;j<numGroups;j++) {
 				reading->newLine(groupNames[i]+'-'+groupNames[j], iters);
+				int spoti = globaldata->gGroupmap->groupIndex[groupNames[i]]; //neccessary in case user selects groups so you know where they are in the matrix
+				int spotj = globaldata->gGroupmap->groupIndex[groupNames[j]];
+	
 				for(int p=0;p<iters;p++) {		
-					form->randomizeGroups(i,j);
-					if(form->evaluatePair(i,j) >= savedDXYValues[i][j])	{	pValueCounts[i][j]++;	}
-					if(form->evaluatePair(j,i) >= savedDXYValues[j][i])	{	pValueCounts[j][i]++;	}
+					form->randomizeGroups(spoti,spotj); 
+					if(form->evaluatePair(spoti,spotj) >= savedDXYValues[spoti][spotj])	{	pValueCounts[i][j]++;	}
+					if(form->evaluatePair(spotj,spoti) >= savedDXYValues[spotj][spoti])	{	pValueCounts[j][i]++;	}
 					reading->update(p);			
 				}
-				form->resetGroup(i);
-				form->resetGroup(j);
+				form->resetGroup(spoti);
+				form->resetGroup(spotj);
 			}
 		}
 		reading->finish();
@@ -190,13 +203,17 @@ void LibShuffCommand::printCoverageFile() {
 			indices[i].assign(numGroups,0);
 			for(int j=0;j<numGroups;j++){
 				indices[i][j] = index++;
-				for(int k=0;k<savedMinValues[i][j].size();k++){
-					if(allDistances[savedMinValues[i][j][k]].size() != 0){
-						allDistances[savedMinValues[i][j][k]][indices[i][j]]++;
+				
+				int spoti = globaldata->gGroupmap->groupIndex[groupNames[i]]; //neccessary in case user selects groups so you know where they are in the matrix
+				int spotj = globaldata->gGroupmap->groupIndex[groupNames[j]];
+				
+				for(int k=0;k<savedMinValues[spoti][spotj].size();k++){
+					if(allDistances[savedMinValues[spoti][spotj][k]].size() != 0){
+						allDistances[savedMinValues[spoti][spotj][k]][indices[i][j]]++;
 					}
 					else{
-						allDistances[savedMinValues[i][j][k]].assign(numIndices, 0);
-						allDistances[savedMinValues[i][j][k]][indices[i][j]] = 1;
+						allDistances[savedMinValues[spoti][spotj][k]].assign(numIndices, 0);
+						allDistances[savedMinValues[spoti][spotj][k]][indices[i][j]] = 1;
 					}
 				}
 			}
@@ -270,25 +287,28 @@ void LibShuffCommand::printSummaryFile() {
 		int precision = (int)log10(iters);
 		for(int i=0;i<numGroups;i++){
 			for(int j=i+1;j<numGroups;j++){
+				int spoti = globaldata->gGroupmap->groupIndex[groupNames[i]]; //neccessary in case user selects groups so you know where they are in the matrix
+				int spotj = globaldata->gGroupmap->groupIndex[groupNames[j]];
+				
 				if(pValueCounts[i][j]){
-					cout << setw(20) << left << groupNames[i]+'-'+groupNames[j] << '\t' << setprecision(8) << savedDXYValues[i][j] << '\t' << setprecision(precision) << pValueCounts[i][j]/(float)iters << endl;
-					mothurOutJustToLog(groupNames[i]+"-"+groupNames[j] + "\t" + toString(savedDXYValues[i][j]) + "\t" + toString((pValueCounts[i][j]/(float)iters))); mothurOutEndLine();
-					outSum << setw(20) << left << groupNames[i]+'-'+groupNames[j] << '\t' << setprecision(8) << savedDXYValues[i][j] << '\t' << setprecision(precision) << pValueCounts[i][j]/(float)iters << endl;
+					cout << setw(20) << left << groupNames[i]+'-'+groupNames[j] << '\t' << setprecision(8) << savedDXYValues[spoti][spotj] << '\t' << setprecision(precision) << pValueCounts[i][j]/(float)iters << endl;
+					mothurOutJustToLog(groupNames[i]+"-"+groupNames[j] + "\t" + toString(savedDXYValues[spoti][spotj]) + "\t" + toString((pValueCounts[i][j]/(float)iters))); mothurOutEndLine();
+					outSum << setw(20) << left << groupNames[i]+'-'+groupNames[j] << '\t' << setprecision(8) << savedDXYValues[spoti][spotj] << '\t' << setprecision(precision) << pValueCounts[i][j]/(float)iters << endl;
 				}
 				else{
-					cout << setw(20) << left << groupNames[i]+'-'+groupNames[j] << '\t' << setprecision(8) << savedDXYValues[i][j] << '\t' << '<' <<setprecision(precision) << 1/(float)iters << endl;
-					mothurOutJustToLog(groupNames[i]+"-"+groupNames[j] + "\t" + toString(savedDXYValues[i][j]) + "\t" + toString((1/(float)iters))); mothurOutEndLine();
-					outSum << setw(20) << left << groupNames[i]+'-'+groupNames[j] << '\t' << setprecision(8) << savedDXYValues[i][j] << '\t' << '<' <<setprecision(precision) << 1/(float)iters << endl;
+					cout << setw(20) << left << groupNames[i]+'-'+groupNames[j] << '\t' << setprecision(8) << savedDXYValues[spoti][spotj] << '\t' << '<' <<setprecision(precision) << 1/(float)iters << endl;
+					mothurOutJustToLog(groupNames[i]+"-"+groupNames[j] + "\t" + toString(savedDXYValues[spoti][spotj]) + "\t" + toString((1/(float)iters))); mothurOutEndLine();
+					outSum << setw(20) << left << groupNames[i]+'-'+groupNames[j] << '\t' << setprecision(8) << savedDXYValues[spoti][spotj] << '\t' << '<' <<setprecision(precision) << 1/(float)iters << endl;
 				}
 				if(pValueCounts[j][i]){
-					cout << setw(20) << left << groupNames[j]+'-'+groupNames[i] << '\t' << setprecision(8) << savedDXYValues[j][i] << '\t' << setprecision (precision) << pValueCounts[j][i]/(float)iters << endl;
-					mothurOutJustToLog(groupNames[j]+"-"+groupNames[i] + "\t" + toString(savedDXYValues[j][i]) + "\t" + toString((pValueCounts[j][i]/(float)iters))); mothurOutEndLine();
-					outSum << setw(20) << left << groupNames[j]+'-'+groupNames[i] << '\t' << setprecision(8) << savedDXYValues[j][i] << '\t' << setprecision (precision) << pValueCounts[j][i]/(float)iters << endl;
+					cout << setw(20) << left << groupNames[j]+'-'+groupNames[i] << '\t' << setprecision(8) << savedDXYValues[spotj][spoti] << '\t' << setprecision (precision) << pValueCounts[j][i]/(float)iters << endl;
+					mothurOutJustToLog(groupNames[j]+"-"+groupNames[i] + "\t" + toString(savedDXYValues[spotj][spoti]) + "\t" + toString((pValueCounts[j][i]/(float)iters))); mothurOutEndLine();
+					outSum << setw(20) << left << groupNames[j]+'-'+groupNames[i] << '\t' << setprecision(8) << savedDXYValues[spotj][spoti] << '\t' << setprecision (precision) << pValueCounts[j][i]/(float)iters << endl;
 				}
 				else{
-					cout << setw(20) << left << groupNames[j]+'-'+groupNames[i] << '\t' << setprecision(8) << savedDXYValues[j][i] << '\t' << '<' <<setprecision (precision) << 1/(float)iters << endl;
-					mothurOutJustToLog(groupNames[j]+"-"+groupNames[i] + "\t" + toString(savedDXYValues[j][i]) + "\t" + toString((1/(float)iters))); mothurOutEndLine();
-					outSum << setw(20) << left << groupNames[j]+'-'+groupNames[i] << '\t' << setprecision(8) << savedDXYValues[j][i] << '\t' << '<' <<setprecision (precision) << 1/(float)iters << endl;
+					cout << setw(20) << left << groupNames[j]+'-'+groupNames[i] << '\t' << setprecision(8) << savedDXYValues[spotj][spoti] << '\t' << '<' <<setprecision (precision) << 1/(float)iters << endl;
+					mothurOutJustToLog(groupNames[j]+"-"+groupNames[i] + "\t" + toString(savedDXYValues[spotj][spoti]) + "\t" + toString((1/(float)iters))); mothurOutEndLine();
+					outSum << setw(20) << left << groupNames[j]+'-'+groupNames[i] << '\t' << setprecision(8) << savedDXYValues[spotj][spoti] << '\t' << '<' <<setprecision (precision) << 1/(float)iters << endl;
 				}
 			}
 		}
@@ -344,6 +364,8 @@ void LibShuffCommand::setGroups() {
 		
 		//sort
 		sort(globaldata->gGroupmap->namesOfGroups.begin(), globaldata->gGroupmap->namesOfGroups.end());
+		
+		for (int i = 0; i < globaldata->gGroupmap->namesOfGroups.size(); i++) {  globaldata->gGroupmap->groupIndex[globaldata->gGroupmap->namesOfGroups[i]] = i;  }
 
 		groupNames = globaldata->Groups;
 
