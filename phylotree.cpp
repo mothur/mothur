@@ -7,7 +7,7 @@
  *
  */
 
-#include "doTaxonomy.h"
+#include "phylotree.h"
 
 /**************************************************************************************************/
 
@@ -17,6 +17,34 @@ PhyloTree::PhyloTree(){
 		numSeqs = 0;
 		tree.push_back(TaxNode("Root"));
 		tree[0].heirarchyID = "0";
+	}
+	catch(exception& e) {
+		errorOut(e, "PhyloTree", "PhyloTree");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+
+PhyloTree::PhyloTree(string tfile){
+	try {
+		numNodes = 1;
+		numSeqs = 0;
+		tree.push_back(TaxNode("Root"));
+		tree[0].heirarchyID = "0";
+		
+		ifstream in;
+		openInputFile(tfile, in);
+		
+		//read in users taxonomy file and add sequences to tree
+		string name, tax;
+		while(!in.eof()){
+			in >> name >> tax; gobble(in);
+			
+			addSeqToTree(name, tax);
+		}
+		in.close();
+	
+		assignHeirarchyIDs(0);
 	}
 	catch(exception& e) {
 		errorOut(e, "PhyloTree", "PhyloTree");

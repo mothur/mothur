@@ -10,14 +10,13 @@
 #include "classifyseqscommand.h"
 #include "sequence.hpp"
 #include "bayesian.h"
-#include "doTaxonomy.h"
+#include "phylotree.h"
 #include "knn.h"
 
 //**********************************************************************************************************************
 
 ClassifySeqsCommand::ClassifySeqsCommand(string option){
 	try {
-		//		globaldata = GlobalData::getInstance();
 		abort = false;
 		
 		//allow user to run help
