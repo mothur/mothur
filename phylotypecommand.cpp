@@ -113,13 +113,13 @@ int PhylotypeCommand::execute(){
 		if (tree->get(leaves[0]).parent == -1) {  mothurOut("Empty Tree"); mothurOutEndLine();	done = true;	}
 		
 		ofstream outList;
-		string outputListFile = getRootName(taxonomyFileName) + "tax.list";
+		string outputListFile = getRootName(taxonomyFileName) + "tx.list";
 		openOutputFile(outputListFile, outList);
 		ofstream outSabund;
-		string outputSabundFile = getRootName(taxonomyFileName) + "tax.sabund";
+		string outputSabundFile = getRootName(taxonomyFileName) + "tx.sabund";
 		openOutputFile(outputSabundFile, outSabund);
 		ofstream outRabund;
-		string outputRabundFile = getRootName(taxonomyFileName) + "tax.rabund";
+		string outputRabundFile = getRootName(taxonomyFileName) + "tx.rabund";
 		openOutputFile(outputRabundFile, outRabund);
 		
 		int count = 1;		
