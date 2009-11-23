@@ -17,7 +17,7 @@ TaxEqualizer::TaxEqualizer(string tfile, int c) : cutoff(c) {
 		ifstream inTax;
 		openInputFile(tfile, inTax);
 	
-		int highestLevel = getHighestLevel(inTax);
+		highestLevel = getHighestLevel(inTax);
 	
 		//if the user has specified a cutoff and it's smaller than the highest level
 		if ((cutoff != -1) && (cutoff < highestLevel)) { 
@@ -43,7 +43,7 @@ TaxEqualizer::TaxEqualizer(string tfile, int c) : cutoff(c) {
 			//is this a taxonomy that needs to be extended?
 			if (seqLevels[name] < highestLevel) {
 				extendTaxonomy(name, tax, highestLevel);
-			}else if (seqLevels[name] > highestLevel) { //this can happen if hte user enters a cutoff
+			}else if (seqLevels[name] > highestLevel) { //this can happen if the user enters a cutoff
 				truncateTaxonomy(name, tax, highestLevel);
 			}
 			
