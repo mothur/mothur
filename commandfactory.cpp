@@ -59,6 +59,7 @@
 #include "getlistcountcommand.h"
 #include "hclustercommand.h"
 #include "classifyseqscommand.h"
+#include "phylotypecommand.h"
 
 /***********************************************************/
 
@@ -117,6 +118,7 @@ CommandFactory::CommandFactory(){
 	commands["quit"]				= "quit"; 
 	commands["hcluster"]			= "hcluster"; 
 	commands["classify.seqs"]		= "classify.seqs"; 
+	commands["phylotype"]			= "phylotype";
 
 }
 /***********************************************************/
@@ -183,6 +185,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "get.listcount")			{	command = new GetListCountCommand(optionString);		}
 		else if(commandName == "hcluster")				{	command = new HClusterCommand(optionString);			}
 		else if(commandName == "classify.seqs")			{	command = new ClassifySeqsCommand(optionString);		}
+		else if(commandName == "phylotype")				{	command = new PhylotypeCommand(optionString);			}
 		else											{	command = new NoCommand(optionString);					}
 
 		return command;

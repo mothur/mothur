@@ -15,7 +15,7 @@
 
 #include "mothur.h"
 #include "database.hpp"
-#include "doTaxonomy.h"
+#include "phylotree.h"
 
 
 class Sequence;

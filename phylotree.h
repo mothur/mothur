@@ -2,7 +2,7 @@
 #define DOTAXONOMY_H
 
 /*
- *  doTaxonomy.h
+ * phylotree.h
  *  
  *
  *  Created by Pat Schloss on 6/17/09.
@@ -30,6 +30,7 @@ class PhyloTree {
 
 public:
 	PhyloTree();
+	PhyloTree(string);  //pass it a taxonomy file and it makes the tree
 	~PhyloTree() {};
 	void addSeqToTree(string, string);
 	void assignHeirarchyIDs(int);
