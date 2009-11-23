@@ -27,16 +27,17 @@ TaxEqualizer::TaxEqualizer(string tfile, int c) : cutoff(c) {
 			mothurOutEndLine();
 		}
 		
-		inTax.close();  
-		openInputFile(tfile, inTax);
+		inTax.close(); 
+		ifstream in; 
+		openInputFile(tfile, in);
 		
 		ofstream out;
 		equalizedFile = getRootName(tfile) + "equalized.taxonomy";
 		openOutputFile(equalizedFile, out);
 		
 		string name, tax;
-		while (inTax) {
-			inTax >> name >> tax;   gobble(inTax);
+		while (in) {
+			in >> name >> tax;   gobble(in);
 			
 			if (containsConfidence) {  removeConfidences(tax);	}
 			
@@ -50,7 +51,7 @@ TaxEqualizer::TaxEqualizer(string tfile, int c) : cutoff(c) {
 			out << name << '\t' << tax << endl;
 		}
 		
-		inTax.close();
+		in.close();
 		out.close();
 					
 	}
