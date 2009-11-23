@@ -69,7 +69,10 @@ void PhylotypeCommand::help(){
 		mothurOut("The phylotype command reads a taxonomy file and outputs a .list, .rabund and .sabund file. \n");
 		mothurOut("The phylotype command parameter options are taxonomy, cutoff and label. The taxonomy parameter is required.\n");
 		mothurOut("The cutoff parameter allows you to specify the level you want to stop at.  The default is the highest level in your taxonomy file. \n");
+		mothurOut("For example: taxonomy = Bacteria;Bacteroidetes-Chlorobi;Bacteroidetes; - cutoff=2, would truncate the taxonomy to Bacteria;Bacteroidetes-Chlorobi; \n");
+		mothurOut("For the cutoff parameter levels count up from the root of the phylotree. This enables you to look at the grouping down to a specific resolution, say the genus level.\n");
 		mothurOut("The label parameter allows you to specify which level you would like, and are separated by dashes.  The default all levels in your taxonomy file. \n");
+		mothurOut("For the label parameter, levels count down from the root to keep the output similiar to mothur's other commands which report information from finer resolution to coarser resolutions.\n");
 		mothurOut("The phylotype command should be in the following format: \n");
 		mothurOut("phylotype(taxonomy=yourTaxonomyFile, cutoff=yourCutoff, label=yourLabels) \n");
 		mothurOut("Eaxample: phylotype(taxonomy=amazon.taxonomy, cutoff=5, label=1-3-5).\n\n");
@@ -119,11 +122,12 @@ int PhylotypeCommand::execute(){
 		string outputRabundFile = getRootName(taxonomyFileName) + "tax.rabund";
 		openOutputFile(outputRabundFile, outRabund);
 		
-				
+		int count = 1;		
 		//start at leaves of tree and work towards root, processing the labels the user wants
 		while((!done) && ((allLines == 1) || (labels.size() != 0))) {
 		
-			string level = toString(tree->get(currentNodes.begin()->first).level); 
+			string level = toString(count); 
+			count++;
 			
 			//is this a level the user want output for
 			if(allLines == 1 || labels.count(level) == 1){	

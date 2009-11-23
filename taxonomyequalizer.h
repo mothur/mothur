@@ -25,13 +25,14 @@ public:
 	TaxEqualizer(string, int);
 	~TaxEqualizer() {};
 	
-	string getEqualizedTaxFile()	{  return equalizedFile;	}
+	string getEqualizedTaxFile()	{	return equalizedFile;	}
+	int getHighestLevel()			{	return highestLevel;	}
 	
 	
 private:
 	string equalizedFile, testTax;
 	bool containsConfidence;
-	int cutoff;
+	int cutoff, highestLevel;
 	map<string, int> seqLevels;  //maps name to level of taxonomy
 	
 	int getHighestLevel(ifstream&);  //scans taxonomy file to find taxonomy with highest level
