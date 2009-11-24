@@ -7,6 +7,7 @@
 class NameAssignment : public map<string,int> {
 public:
 	NameAssignment(string);
+	NameAssignment(){};
 	void readMap();
 	ListVector getListVector();
 	int get(string);

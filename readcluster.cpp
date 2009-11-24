@@ -12,6 +12,7 @@
 /***********************************************************************/
 
 ReadCluster::ReadCluster(string distfile, float c){
+		globaldata = GlobalData::getInstance();
         distFile = distfile;
 		cutoff = c;
 }
@@ -185,24 +186,22 @@ void ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
 			}
 		}
 		else{
-			
 			for(int i=1;i<nseqs;i++){
 				in >> name;                
 				rowToName[i] = name;
 				matrixNames.push_back(name);
-				
+		
 				if(nameMap == NULL){
 					list->set(i, name);
 					for(int j=0;j<nseqs;j++){
 						in >> distance;
-						
+					
 						if (distance == -1) { distance = 1000000; }
 						
 						if(distance < cutoff && j < i){
 							out << i << '\t' << j << '\t' << distance << endl;
 						}
 					}
-					
 				}
 				else{
 					if(nameMap->count(name)==0){        mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); mothurOutEndLine(); }
@@ -226,11 +225,14 @@ void ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
 		out.close();
 		
 		if(nameMap == NULL){
+			nameMap = new NameAssignment();
 			for(int i=0;i<matrixNames.size();i++){
 				nameMap->push_back(matrixNames[i]);
 			}
+			globaldata->nameMap = nameMap;
 		}
 		
+	
 		ifstream in2;
 		ofstream out2;
 		

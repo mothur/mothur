@@ -21,7 +21,7 @@ HClusterCommand::HClusterCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"cutoff","precision","method","showabund","timing","phylip","column","name","sorted"};
+			string Array[] =  {"cutoff","precision","method","phylip","column","name","sorted","showabund","timing"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -114,7 +114,7 @@ HClusterCommand::HClusterCommand(string option){
 
 void HClusterCommand::help(){
 	try {
-		mothurOut("The hcluster command parameter options are cutoff, precision, method, showabund, timing, phylip, column, name and sorted. Phylip or column and name are required.\n");
+		mothurOut("The hcluster command parameter options are cutoff, precision, method, phylip, column, name, showabund, timing and sorted. Phylip or column and name are required.\n");
 		mothurOut("The phylip and column parameter allow you to enter your distance file, and sorted indicates whether your column distance file is already sorted. \n");
 		mothurOut("The name parameter allows you to enter your name file and is required if your distance file is in column format. \n");
 		mothurOut("The hcluster command should be in the following format: \n");
@@ -161,7 +161,7 @@ int HClusterCommand::execute(){
 	
 		mothurOut("It took " + toString(time(NULL) - estart) + " seconds to sort. "); mothurOutEndLine();
 		estart = time(NULL);
-		
+	
 		//list vector made by read contains all sequence names
 		if(list != NULL){
 			rabund = new RAbundVector(list->getRAbundVector());
@@ -177,7 +177,7 @@ int HClusterCommand::execute(){
 		print_start = true;
 		start = time(NULL);
 		
-//cout << "here" << endl;	
+	
 		ifstream in;
 		openInputFile(distfile, in);
 		string firstName, secondName;
@@ -187,7 +187,7 @@ int HClusterCommand::execute(){
 		bool clusteredSomething;
 		vector<seqDist> seqs; seqs.resize(1); // to start loop
 		exitedBreak = false;  //lets you know if there is a distance stored in next
-		
+	
 		while (seqs.size() != 0){
 		
 			seqs = getSeqs(in);
@@ -205,12 +205,12 @@ int HClusterCommand::execute(){
 					print_start = false;
 				}
 				
-	///cout << "before cluster update" << endl;
+	//cout << "before cluster update" << endl;
 				if (seqs[i].seq1 != seqs[i].seq2) {
 					clusteredSomething = cluster->update(seqs[i].seq1, seqs[i].seq2, seqs[i].dist);
 					
 					float rndDist = roundDist(seqs[i].dist, precision);
-					//cout << "after cluster update clusterSomething = " << clusteredSomething << " rndDist = " << rndDist << " rndPreviousDist = " << rndPreviousDist << endl;			
+		//cout << "after cluster update clusterSomething = " << clusteredSomething << " rndDist = " << rndDist << " rndPreviousDist = " << rndPreviousDist << endl;			
 					
 					
 					if((previousDist <= 0.0000) && (seqs[i].dist != previousDist)){
@@ -325,7 +325,8 @@ vector<seqDist> HClusterCommand::getSeqs(ifstream& filehandle){
 			
 			//save first one
 			if (prevDistance == -1) { prevDistance = distance; }
-			
+	//cout << prevDistance << endl;	
+//if (globaldata->nameMap == NULL) { cout << "null" << endl; }
 			map<string,int>::iterator itA = globaldata->nameMap->find(firstName);
 			map<string,int>::iterator itB = globaldata->nameMap->find(secondName);
 			
@@ -335,7 +336,7 @@ vector<seqDist> HClusterCommand::getSeqs(ifstream& filehandle){
 			if(itB == globaldata->nameMap->end()){
 				cerr << "ABError: Sequence '" << secondName << "' was not found in the names file, please correct\n"; exit(1);
 			}
-			
+	//cout << "here" << endl;		
 			//using cutoff
 			if (distance > cutoff) { break; }
 			

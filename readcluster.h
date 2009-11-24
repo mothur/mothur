@@ -13,6 +13,7 @@
 #include "mothur.h"
 #include "nameassignment.hpp"
 #include "listvector.hpp"
+#include "globaldata.hpp"
 
 
 /******************************************************/
@@ -26,12 +27,15 @@ public:
 	string getOutputFile() { return OutPutFile; }
 	void setFormat(string f) { format = f;	}
 	ListVector* getListVector()		{	return list;	}
+	//NameAssignment* getNameMap()	{	return nameMap;	}
 	
 private:
+	GlobalData* globaldata;
 	string distFile;
 	string OutPutFile, format;
 	ListVector* list;
 	float cutoff;
+	//NameAssignment* nameMap;
 	
 	void createHClusterFile();
 	void convertPhylip2Column(NameAssignment*);
