@@ -113,7 +113,7 @@ CommandFactory::CommandFactory(){
 	commands["remove.seqs"]			= "get.seqs";
 	commands["system"]				= "system";
 	commands["align.check"]			= "align.check";
-	commands["get.sharedotu"]		= "get.sharedotu";
+	commands["get.sharedseqs"]		= "get.sharedseqs";
 	commands["get.listcount"]		= "get.listcount";
 	commands["quit"]				= "quit"; 
 	commands["hcluster"]			= "hcluster"; 
@@ -181,7 +181,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "merge.files")			{	command = new MergeFileCommand(optionString);			}
 		else if(commandName == "system")				{	command = new SystemCommand(optionString);				}
 		else if(commandName == "align.check")			{	command = new AlignCheckCommand(optionString);			}
-		else if(commandName == "get.sharedotu")			{	command = new GetSharedOTUCommand(optionString);		}
+		else if(commandName == "get.sharedseqs")			{	command = new GetSharedOTUCommand(optionString);		}
 		else if(commandName == "get.listcount")			{	command = new GetListCountCommand(optionString);		}
 		else if(commandName == "hcluster")				{	command = new HClusterCommand(optionString);			}
 		else if(commandName == "classify.seqs")			{	command = new ClassifySeqsCommand(optionString);		}
