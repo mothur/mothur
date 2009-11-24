@@ -114,7 +114,7 @@ CommandFactory::CommandFactory(){
 	commands["system"]				= "system";
 	commands["align.check"]			= "align.check";
 	commands["get.sharedseqs"]		= "get.sharedseqs";
-	commands["get.listcount"]		= "get.listcount";
+	commands["get.otulist"]			= "get.otulist";
 	commands["quit"]				= "quit"; 
 	commands["hcluster"]			= "hcluster"; 
 	commands["classify.seqs"]		= "classify.seqs"; 
@@ -182,7 +182,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "system")				{	command = new SystemCommand(optionString);				}
 		else if(commandName == "align.check")			{	command = new AlignCheckCommand(optionString);			}
 		else if(commandName == "get.sharedseqs")			{	command = new GetSharedOTUCommand(optionString);		}
-		else if(commandName == "get.listcount")			{	command = new GetListCountCommand(optionString);		}
+		else if(commandName == "get.otulist")			{	command = new GetListCountCommand(optionString);		}
 		else if(commandName == "hcluster")				{	command = new HClusterCommand(optionString);			}
 		else if(commandName == "classify.seqs")			{	command = new ClassifySeqsCommand(optionString);		}
 		else if(commandName == "phylotype")				{	command = new PhylotypeCommand(optionString);			}
