@@ -58,7 +58,11 @@ int main(int argc, char *argv[]){
 		mothurOut("pschloss@umich.edu");
 		mothurOutEndLine();		
 		mothurOut("http://www.mothur.org");
-		mothurOutEndLine();	
+		mothurOutEndLine();
+		mothurOutEndLine();
+		mothurOut("When using, please cite:");
+		mothurOutEndLine();
+		mothurOut("Schloss, P.D., et al., Introducing mothur: Open-source, platform-independent, community-supported software for describing and comparing microbial communities. Appl Environ Microbiol, 2009. 75(23):7537-41.");
 		mothurOutEndLine();	
 		mothurOutEndLine();		
 		mothurOut("Distributed under the GNU General Public License");
