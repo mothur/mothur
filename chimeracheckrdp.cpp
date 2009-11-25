@@ -43,7 +43,7 @@ void ChimeraCheckRDP::print(ostream& out) {
 					out << IS[i][k].score << '\t'; 
 					//if (IS[i][k].score > chimeraCutoff) {  isChimeric[i] = true;   lastChimericWindowFound = k;		}			
 				}
-				
+				out << endl;
 				//if (isChimeric[i]) { 
 					//mothurOut(querySeqs[i]->getName() + "\tIS: " + toString(IS[i][lastChimericWindowFound].score) + "\tbreakpoint: " + toString(IS[i][lastChimericWindowFound].midpoint) + "\tleft parent: " + IS[i][lastChimericWindowFound].leftParent + "\tright parent: " + IS[i][lastChimericWindowFound].rightParent); mothurOutEndLine();
 					//out << endl << "chimera: YES" << endl;
@@ -65,6 +65,7 @@ void ChimeraCheckRDP::print(ostream& out) {
 				}
 		}
 		
+		mothurOut("This method does not determine if a sequence is chimeric, but allows you to make that determination based on the IS values."); mothurOutEndLine();
 	}
 	catch(exception& e) {
 		errorOut(e, "ChimeraCheckRDP", "print");

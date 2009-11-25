@@ -423,15 +423,15 @@ vector<int> Ccode::findWindows(int query) {
 		it = trim[query].begin();
 		
 		int length = it->second - it->first;
-		
+	
 		//default is wanted = 10% of total length
 		if (windowSizes[query] > length) { 
 			mothurOut("You have slected a window larger than your sequence length after all filters, masks and trims have been done. I will use the default 10% of sequence length.");
 			windowSizes[query] = length / 10;
 		}else if (windowSizes[query] == 0) { windowSizes[query] = length / 10;  }
-		else if (windowSizes[query] > (length / 20)) {
+		else if (windowSizes[query] > (length * 0.20)) {
 			mothurOut("You have selected a window that is larger than 20% of your sequence length.  This is not recommended, but I will continue anyway."); mothurOutEndLine();
-		}else if (windowSizes[query] < (length / 5)) {
+		}else if (windowSizes[query] < (length * 0.05)) {
 			mothurOut("You have selected a window that is smaller than 5% of your sequence length.  This is not recommended, but I will continue anyway."); mothurOutEndLine();
 		}
 		
