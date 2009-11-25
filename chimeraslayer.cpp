@@ -38,7 +38,7 @@ void ChimeraSlayer::print(ostream& out) {
 					out << querySeqs[i]->getName() << "\tyes" << endl;
 				}else {
 					out << querySeqs[i]->getName() << "\tno" << endl;
-					mothurOut(querySeqs[i]->getName() + "\tno"); mothurOutEndLine();
+					//mothurOut(querySeqs[i]->getName() + "\tno"); mothurOutEndLine();
 				}
 
 				printBlock(chimeraResults[i][0], out, i);
@@ -46,7 +46,7 @@ void ChimeraSlayer::print(ostream& out) {
 				out << endl;
 			}else{
 				out << querySeqs[i]->getName() << "\tno" << endl;
-				mothurOut(querySeqs[i]->getName() + "\tno"); mothurOutEndLine();
+				//mothurOut(querySeqs[i]->getName() + "\tno"); mothurOutEndLine();
 			}
 		}
 				
@@ -212,8 +212,6 @@ void ChimeraSlayer::getChimeras() {
 		if (seqMask != "") {
 			delete decalc; 
 		}
-
-			
 	}
 	catch(exception& e) {
 		errorOut(e, "ChimeraSlayer", "getChimeras");
