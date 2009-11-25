@@ -1328,7 +1328,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OTHER_CPLUSPLUSFLAGS = "";
 				PREBINDING = NO;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 				WARNING_CFLAGS = "";
 			};
 			name = Debug;
@@ -1357,7 +1357,7 @@
 					"-wall",
 				);
 				PREBINDING = NO;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 				SYMROOT = /Users/johnwestcott/Desktop;
 				WARNING_CFLAGS = "";
 			};
