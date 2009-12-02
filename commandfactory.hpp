@@ -19,6 +19,7 @@ public:
 	CommandFactory();
 	~CommandFactory();
 	Command* getCommand(string, string);
+	Command* getCommand();
 	bool isValidCommand(string);
 	void printCommands(ostream&);
 

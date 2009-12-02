@@ -131,20 +131,22 @@ int ScreenSeqsCommand::execute(){
 		
 		while(!inFASTA.eof()){
 			Sequence currSeq(inFASTA);
-			bool goodSeq = 1;		//	innocent until proven guilty
-			if(goodSeq == 1 && startPos != -1 && startPos < currSeq.getStartPos())			{	goodSeq = 0;	}
-			if(goodSeq == 1 && endPos != -1 && endPos > currSeq.getEndPos())				{	goodSeq = 0;	}
-			if(goodSeq == 1 && maxAmbig != -1 && maxAmbig <	currSeq.getAmbigBases())		{	goodSeq = 0;	}
-			if(goodSeq == 1 && maxHomoP != -1 && maxHomoP < currSeq.getLongHomoPolymer())	{	goodSeq = 0;	}
-			if(goodSeq == 1 && minLength != -1 && minLength > currSeq.getNumBases())		{	goodSeq = 0;	}
-			if(goodSeq == 1 && maxLength != -1 && maxLength < currSeq.getNumBases())		{	goodSeq = 0;	}
-			
-			if(goodSeq == 1){
-				currSeq.printSequence(goodSeqOut);	
-			}
-			else{
-				currSeq.printSequence(badSeqOut);	
-				badSeqNames.insert(currSeq.getName());
+			if (currSeq.getName() != "") {
+				bool goodSeq = 1;		//	innocent until proven guilty
+				if(goodSeq == 1 && startPos != -1 && startPos < currSeq.getStartPos())			{	goodSeq = 0;	}
+				if(goodSeq == 1 && endPos != -1 && endPos > currSeq.getEndPos())				{	goodSeq = 0;	}
+				if(goodSeq == 1 && maxAmbig != -1 && maxAmbig <	currSeq.getAmbigBases())		{	goodSeq = 0;	}
+				if(goodSeq == 1 && maxHomoP != -1 && maxHomoP < currSeq.getLongHomoPolymer())	{	goodSeq = 0;	}
+				if(goodSeq == 1 && minLength != -1 && minLength > currSeq.getNumBases())		{	goodSeq = 0;	}
+				if(goodSeq == 1 && maxLength != -1 && maxLength < currSeq.getNumBases())		{	goodSeq = 0;	}
+				
+				if(goodSeq == 1){
+					currSeq.printSequence(goodSeqOut);	
+				}
+				else{
+					currSeq.printSequence(badSeqOut);	
+					badSeqNames.insert(currSeq.getName());
+				}
 			}
 			gobble(inFASTA);
 		}	

@@ -29,6 +29,7 @@ class Nast {
 	
 public:
 	Nast(Alignment*, Sequence*, Sequence*);
+	~Nast(){};
 	float getSimilarityScore();
 	int getMaxInsertLength();
 	

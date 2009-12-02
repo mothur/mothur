@@ -181,7 +181,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "merge.files")			{	command = new MergeFileCommand(optionString);			}
 		else if(commandName == "system")				{	command = new SystemCommand(optionString);				}
 		else if(commandName == "align.check")			{	command = new AlignCheckCommand(optionString);			}
-		else if(commandName == "get.sharedseqs")			{	command = new GetSharedOTUCommand(optionString);		}
+		else if(commandName == "get.sharedseqs")		{	command = new GetSharedOTUCommand(optionString);		}
 		else if(commandName == "get.otulist")			{	command = new GetListCountCommand(optionString);		}
 		else if(commandName == "hcluster")				{	command = new HClusterCommand(optionString);			}
 		else if(commandName == "classify.seqs")			{	command = new ClassifySeqsCommand(optionString);		}
@@ -195,7 +195,22 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		exit(1);
 	}
 }
+/***********************************************************/
+//This function is used to interrupt a command
+Command* CommandFactory::getCommand(){
+	try {
+		delete command;   //delete the old command
 
+		string s = "";
+	    command = new NoCommand(s);
+	
+		return command;
+	}
+	catch(exception& e) {
+		errorOut(e, "CommandFactory", "getCommand");
+		exit(1);
+	}
+}
 /***********************************************************************/
 bool CommandFactory::isValidCommand(string command) {
 	try {	

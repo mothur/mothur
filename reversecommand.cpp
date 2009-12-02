@@ -82,9 +82,11 @@ int ReverseSeqsCommand::execute(){
 		openOutputFile(reverseFile, outFASTA);
 		
 		while(!inFASTA.eof()){
-			Sequence currSeq(inFASTA);
-			currSeq.reverseComplement();
-			currSeq.printSequence(outFASTA);
+			Sequence currSeq(inFASTA);  gobble(inFASTA);
+			if (currSeq.getName() != "") {
+				currSeq.reverseComplement();
+				currSeq.printSequence(outFASTA);
+			}
 		}
 		inFASTA.close();
 		outFASTA.close();

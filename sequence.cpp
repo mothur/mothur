@@ -28,34 +28,84 @@ Sequence::Sequence(string newName, string sequence) {
 	
 }
 //********************************************************************************************************************
-
+//this function will jump over commented out sequences, but if the last sequence in a file is commented out it makes a blank seq
 Sequence::Sequence(ifstream& fastaFile){
 
 	initialize();
 	fastaFile >> name;
 	name = name.substr(1);
-	
-	while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-
-	char letter;
 	string sequence;
 	
-	while(fastaFile){
-		letter= fastaFile.get();
-		if(letter == '>'){
-			fastaFile.putback(letter);
+	//read comments
+	while ((name[0] == '#') && fastaFile) { 
+	    while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+		sequence = getCommentString(fastaFile);
+		
+		if (fastaFile) {  
+			fastaFile >> name;  
+			name = name.substr(1);	
+		}else { 
+			name = "";
 			break;
 		}
-		else if(isprint(letter)){
-			letter = toupper(letter);
-			if(letter == 'U'){letter = 'T';}
-			sequence += letter;
-		}
 	}
-
+	
+	//read real sequence
+	while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+		
+	sequence = getSequenceString(fastaFile);		
+   	
 	setAligned(sequence);	
 	//setUnaligned removes any gap characters for us						
 	setUnaligned(sequence);								
+}
+//********************************************************************************************************************
+string Sequence::getSequenceString(ifstream& fastaFile) {
+	try {
+		char letter;
+		string sequence = "";	
+		
+		while(fastaFile){
+			letter= fastaFile.get();
+			if(letter == '>'){
+				fastaFile.putback(letter);
+				break;
+			}
+			else if(isprint(letter)){
+				letter = toupper(letter);
+				if(letter == 'U'){letter = 'T';}
+				sequence += letter;
+			}
+		}
+		
+		return sequence;
+	}
+	catch(exception& e) {
+		errorOut(e, "Sequence", "getSequenceString");
+		exit(1);
+	}
+}
+//********************************************************************************************************************
+//comment can contain '>' so we need to account for that
+string Sequence::getCommentString(ifstream& fastaFile) {
+	try {
+		char letter;
+		string sequence = "";
+		
+		while(fastaFile){
+			letter=fastaFile.get();
+			if((letter == '\r') || (letter == '\n')){  
+				gobble(fastaFile);  //in case its a \r\n situation
+				break;
+			}
+		}
+		
+		return sequence;
+	}
+	catch(exception& e) {
+		errorOut(e, "Sequence", "getCommentString");
+		exit(1);
+	}
 }
 
 //********************************************************************************************************************
@@ -109,6 +159,7 @@ void Sequence::setAligned(string sequence){
 	//if the alignment starts or ends with a gap, replace it with a period to indicate missing data
 	aligned = sequence;
 	alignmentLength = aligned.length();
+	setUnaligned(sequence);	
 
 	if(aligned[0] == '-'){
 		for(int i=0;i<alignmentLength;i++){

@@ -94,9 +94,9 @@ vector<Sequence*> Chimera::readSeqs(string file) {
 		//read in seqs and store in vector
 		while(!in.eof()){
 			
-			Sequence* current = new Sequence(in);
-			container.push_back(current);
-			gobble(in);
+			Sequence* current = new Sequence(in);  gobble(in);
+			
+			if (current->getName() != "") {  container.push_back(current);  }
 		}
 		
 		in.close();

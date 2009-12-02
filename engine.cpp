@@ -20,14 +20,11 @@ InteractEngine::InteractEngine(string path){
 
 	globaldata = GlobalData::getInstance();
 	globaldata->argv = path;
-	
-	
 }
 
 /***********************************************************************/
 
-InteractEngine::~InteractEngine(){
-	}
+InteractEngine::~InteractEngine(){}
 
 /***********************************************************************/
 //This function allows the user to input commands one line at a time until they quit.
@@ -44,8 +41,46 @@ bool InteractEngine::getInput(){
 			
 			mothurOutEndLine();
 			mothurOut("mothur > ");
+			
+			//get input char by char so you can check for use of arrow keys
+			//if (_kbhit()){
+			//	_getch(); // edit : if you want to check the arrow-keys you must call getch twice because special-keys have two values
+			//	return _getch();
+			//}
+			//return 0; // if no key is pressed
+			//setbuf(stdin, NULL); //no buffering
+/*if(ch==0)
+{
+ch=getch();
+if(ch==72) cout<<"up";
+else if(ch==75) cout<<"left";
+else if(ch==77) cout<<"right";
+else if(ch==80) cout<<"down";
+cout<<endl;
+}
+else break;
+}
+delay(2000);
+return 0;
+}*/
+			
+			//int letter = 0;
+			//while ((letter != 10) && (letter != 13)) {
+			//	letter = getch();
+				
+			//	cout << "char code = " << letter << endl;
+				
+			//	input += char(letter);
+			//}
+		//	input = input.substr(0, input.length()-1); //cut off newline char
+		
+	//cout << input << endl;		
+			
 			getline(cin, input);
 			if (cin.eof()) { input = "quit()"; }
+			
+			//save command
+			//previousInputs.push_back(input);
 			
 			mothurOutJustToLog(input);
 			mothurOutEndLine();
@@ -55,13 +90,13 @@ bool InteractEngine::getInput(){
 			
 			CommandOptionParser parser(input);
 			commandName = parser.getCommandString();
+	//cout << " command = " << commandName << endl;
 			options = parser.getOptionString();
 			
 			if (commandName != "") {
 			
 				//executes valid command
-				CommandFactory cFactory;
-				Command* command = cFactory.getCommand(commandName, options);
+				Command* command = cFactory->getCommand(commandName, options);
 				quitCommandCalled = command->execute();
 				
 			}else {
@@ -76,7 +111,17 @@ bool InteractEngine::getInput(){
 		exit(1);
 	}
 }
-
+/***********************************************************************/
+void Engine::terminateCommand(int dummy)  {
+	try {
+		mothurOut("Stopping command."); mothurOutEndLine();
+		cFactory->getCommand();  //terminates command
+	}
+	catch(exception& e) {
+		errorOut(e, "InteractEngine", "terminateCommand");
+		exit(1);
+	}
+}
 /***********************************************************************/
 //This function opens the batchfile to be used by BatchEngine::getInput.
 BatchEngine::BatchEngine(string path, string batchFileName){
@@ -95,8 +140,7 @@ BatchEngine::BatchEngine(string path, string batchFileName){
 
 /***********************************************************************/
 
-BatchEngine::~BatchEngine(){
-	}
+BatchEngine::~BatchEngine(){	}
 
 /***********************************************************************/
 //This Function allows the user to run a batchfile containing several commands on Dotur
@@ -138,8 +182,7 @@ bool BatchEngine::getInput(){
 				if (commandName != "") {
 
 					//executes valid command
-					CommandFactory cFactory;
-					Command* command = cFactory.getCommand(commandName, options);
+					Command* command = cFactory->getCommand(commandName, options);
 					quitCommandCalled = command->execute();
 				}else {		
 					mothurOut("Invalid."); 
@@ -172,8 +215,6 @@ ScriptEngine::ScriptEngine(string path, string commandString){
 
 		globaldata->argv = path;
 		
-		
-	
 	}
 	catch(exception& e) {
 		errorOut(e, "ScriptEngine", "ScriptEngine");
@@ -183,8 +224,7 @@ ScriptEngine::ScriptEngine(string path, string commandString){
 
 /***********************************************************************/
 
-ScriptEngine::~ScriptEngine(){
-	}
+ScriptEngine::~ScriptEngine(){ 	}
 
 /***********************************************************************/
 //This Function allows the user to run a batchfile containing several commands on mothur
@@ -221,8 +261,7 @@ bool ScriptEngine::getInput(){
 			if (commandName != "") {
 
 				//executes valid command
-				CommandFactory cFactory;
-				Command* command = cFactory.getCommand(commandName, options);
+				Command* command = cFactory->getCommand(commandName, options);
 				quitCommandCalled = command->execute();
 			}else {		
 				mothurOut("Invalid."); 

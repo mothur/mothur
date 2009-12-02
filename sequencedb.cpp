@@ -35,7 +35,8 @@ SequenceDB::SequenceDB(ifstream& filehandle) {
 		while (!filehandle.eof()) {
 			//input sequence info into sequencedb
 			Sequence newSequence(filehandle);
-			data.push_back(newSequence);
+			
+			if (newSequence.getName() != "") {   data.push_back(newSequence);  }
 			
 			//takes care of white space
 			gobble(filehandle);

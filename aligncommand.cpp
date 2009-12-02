@@ -39,7 +39,7 @@ AlignCommand::AlignCommand(string option){
 		else {
 			
 			//valid paramters for this command
-			string AlignArray[] =  {"template","candidate","search","ksize","align","match","mismatch","gapopen","gapextend", "processors"};
+			string AlignArray[] =  {"template","candidate","search","ksize","align","match","mismatch","gapopen","gapextend", "processors","flip","threshold"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -90,6 +90,12 @@ AlignCommand::AlignCommand(string option){
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = "1";				}
 			convert(temp, processors); 
 			
+			temp = validParameter.validFile(parameters, "flip", false);			if (temp == "not found"){	temp = "f";				}
+			flip = isTrue(temp); 
+			
+			temp = validParameter.validFile(parameters, "threshold", false);	if (temp == "not found"){	temp = "0.80";			}
+			convert(temp, threshold); 
+			
 			search = validParameter.validFile(parameters, "search", false);		if (search == "not found"){	search = "kmer";		}
 			
 			align = validParameter.validFile(parameters, "align", false);		if (align == "not found"){	align = "needleman";	}
@@ -127,6 +133,10 @@ void AlignCommand::help(){
 		mothurOut("The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n");
 		mothurOut("The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -1.0.\n");
 		mothurOut("The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -2.0.\n");
+		mothurOut("The flip parameter is used to specify whether or not you want mothur to try the reverse compement if a sequence falls below the threshold.  The default is false.\n");
+		mothurOut("The threshold is used to specify a cutoff at which an alignment is deemed 'bad' and the reverse complement may be tried. \n");
+		mothurOut("If the flip parameter is set to true the reverse complement of the sequence is aligned and the better alignment is reported.\n");
+		mothurOut("The default for the threshold parameter is 0.80, meaning at least 80% of the bases must remain or the sequence is reported as potentially reversed.\n");
 		mothurOut("The align.seqs command should be in the following format: \n");
 		mothurOut("align.seqs(template=yourTemplateFile, candidate=yourCandidateFile, align=yourAlignmentMethod, search=yourSearchmethod, ksize=yourKmerSize, match=yourMatchBonus, mismatch=yourMismatchpenalty, gapopen=yourGapopenPenalty, gapextend=yourGapExtendPenalty) \n");
 		mothurOut("Example align.seqs(candidate=candidate.fasta, template=core.filtered, align=kmer, search=gotoh, ksize=8, match=2.0, mismatch=3.0, gapopen=-2.0, gapextend=-1.0)\n");
@@ -162,6 +172,7 @@ int AlignCommand::execute(){
 		
 		string alignFileName = candidateFileName.substr(0,candidateFileName.find_last_of(".")+1) + "align";
 		string reportFileName = candidateFileName.substr(0,candidateFileName.find_last_of(".")+1) + "align.report";
+		string accnosFileName = candidateFileName.substr(0,candidateFileName.find_last_of(".")+1) + "flip.accnos";
 		
 		int numFastaSeqs = 0;
 		int start = time(NULL);
@@ -175,8 +186,17 @@ int AlignCommand::execute(){
 			
 			lines.push_back(new linePair(0, numFastaSeqs));
 		
-			driver(lines[0], alignFileName, reportFileName);
+			driver(lines[0], alignFileName, reportFileName, accnosFileName);
 			
+			//delete accnos file if its blank else report to user
+			if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  }
+			else { 
+				mothurOut("Some of you sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
+				if (!flip) {
+					mothurOut(" If you set the flip parameter to true mothur will try aligning the reverse compliment as well."); 
+				}else{  mothurOut(" If the reverse compliment proved to be better it was reported.");  }
+				mothurOutEndLine();
+			}
 		}
 		else{
 			vector<int> positions;
@@ -205,11 +225,35 @@ int AlignCommand::execute(){
 				}
 				lines.push_back(new linePair(startPos, numSeqsPerProcessor));
 			}
-			createProcesses(alignFileName, reportFileName); 
+			createProcesses(alignFileName, reportFileName, accnosFileName); 
 			
 			rename((alignFileName + toString(processIDS[0]) + ".temp").c_str(), alignFileName.c_str());
 			rename((reportFileName + toString(processIDS[0]) + ".temp").c_str(), reportFileName.c_str());
 			
+			vector<string> nonBlankAccnosFiles;
+			//delete blank accnos files generated with multiple processes
+			for(int i=0;i<processors;i++){  
+				if (!(isBlank(accnosFileName + toString(processIDS[i]) + ".temp"))) {
+					nonBlankAccnosFiles.push_back(accnosFileName + toString(processIDS[i]) + ".temp");
+				}else { remove((accnosFileName + toString(processIDS[i]) + ".temp").c_str());  }
+			}
+			
+			//append accnos files
+			if (nonBlankAccnosFiles.size() != 0) { 
+				rename(nonBlankAccnosFiles[0].c_str(), accnosFileName.c_str());
+				
+				for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
+					appendAlignFiles(nonBlankAccnosFiles[h], accnosFileName);
+					remove(nonBlankAccnosFiles[h].c_str());
+				}
+				mothurOut("Some of you sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
+				if (!flip) {
+					mothurOut(" If you set the flip parameter to true mothur will try aligning the reverse compliment as well."); 
+				}else{  mothurOut(" If the reverse compliment proved to be better it was reported.");  }
+				mothurOutEndLine();
+			}
+			
+			//append other files
 			for(int i=1;i<processors;i++){
 				appendAlignFiles((alignFileName + toString(processIDS[i]) + ".temp"), alignFileName);
 				remove((alignFileName + toString(processIDS[i]) + ".temp").c_str());
@@ -227,8 +271,21 @@ int AlignCommand::execute(){
 		
 		lines.push_back(new linePair(0, numFastaSeqs));
 		
-		driver(lines[0], alignFileName, reportFileName);
+		driver(lines[0], alignFileName, reportFileName, accnosFileName);
+		
+		//delete accnos file if its blank else report to user
+		if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  }
+		else { 
+			mothurOut("Some of you sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
+			if (!flip) {
+				 mothurOut(" If you set the flip parameter to true mothur will try aligning the reverse compliment as well."); 
+			}else{  mothurOut(" If the reverse compliment proved to be better it was reported.");  }
+			mothurOutEndLine();
+		}
+		
 #endif
+		
+		
 		
 		mothurOut("It took " + toString(time(NULL) - start) + " secs to align " + toString(numFastaSeqs) + " sequences.");
 		mothurOutEndLine();
@@ -244,10 +301,14 @@ int AlignCommand::execute(){
 
 //**********************************************************************************************************************
 
-int AlignCommand::driver(linePair* line, string alignFName, string reportFName){
+int AlignCommand::driver(linePair* line, string alignFName, string reportFName, string accnosFName){
 	try {
 		ofstream alignmentFile;
 		openOutputFile(alignFName, alignmentFile);
+		
+		ofstream accnosFile;
+		openOutputFile(accnosFName, accnosFile);
+		
 		NastReport report(reportFName);
 		
 		ifstream inFASTA;
@@ -258,36 +319,83 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName){
 		for(int i=0;i<line->numSeqs;i++){
 			
 			Sequence* candidateSeq = new Sequence(inFASTA);
-
-			if (candidateSeq->getUnaligned().length() > alignment->getnRows()) {
-				alignment->resize(candidateSeq->getUnaligned().length()+1);
-			}
-	
-			report.setCandidate(candidateSeq);
-	
-			Sequence temp = templateDB->findClosestSequence(candidateSeq);
-
-			Sequence* templateSeq = &temp;
-
-			report.setTemplate(templateSeq);
-			report.setSearchParameters(search, templateDB->getSearchScore());
-				
-			Nast nast(alignment, candidateSeq, templateSeq);
-
-			report.setAlignmentParameters(align, alignment);
-	
-			report.setNastParameters(nast);
-	
-			alignmentFile << '>' << candidateSeq->getName() << '\n' << candidateSeq->getAligned() << endl;
-				
-			report.print();
+			int origNumBases = candidateSeq->getNumBases();
+			string originalUnaligned = candidateSeq->getUnaligned();
+			int numBasesNeeded = origNumBases * threshold;
 			
+			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
+				if (candidateSeq->getUnaligned().length() > alignment->getnRows()) {
+					alignment->resize(candidateSeq->getUnaligned().length()+1);
+				}
+								
+				Sequence temp = templateDB->findClosestSequence(candidateSeq);
+				Sequence* templateSeq = &temp;
+				
+				float searchScore = templateDB->getSearchScore();
+								
+				Nast* nast = new Nast(alignment, candidateSeq, templateSeq);
+				Sequence* copy;
+				
+				Nast* nast2;
+				bool needToDeleteCopy = false;  //this is needed in case you have you enter the ifs below
+												//since nast does not make a copy of hte sequence passed, and it is used by the reporter below
+												//you can't delete the copy sequence til after you report, but you may choose not to create it in the first place
+												//so this bool tells you if you need to delete it
+												
+				//if there is a possibility that this sequence should be reversed
+				if (candidateSeq->getNumBases() < numBasesNeeded) {
+					
+					string wasBetter = "";
+					//if the user wants you to try the reverse
+					if (flip) {
+						//get reverse compliment
+						copy = new Sequence(candidateSeq->getName(), originalUnaligned);
+						copy->reverseComplement();
+						
+						//rerun alignment
+						Sequence temp2 = templateDB->findClosestSequence(copy);
+						Sequence* templateSeq2 = &temp2;
+						
+						searchScore = templateDB->getSearchScore();
+						
+						nast2 = new Nast(alignment, copy, templateSeq2);
+			
+						//check if any better
+						if (copy->getNumBases() > candidateSeq->getNumBases()) {
+							candidateSeq->setAligned(copy->getAligned());  //use reverse compliments alignment since its better
+							templateSeq = templateSeq2; 
+							delete nast;
+							nast = nast2;
+							needToDeleteCopy = true;
+						}else{  
+							wasBetter = "\treverse complement did NOT produce a better alignment, please check sequence.";
+							delete nast2;
+							delete copy;	
+						}
+					}
+					
+					//create accnos file with names
+					accnosFile << candidateSeq->getName() << wasBetter << endl;
+				}
+				
+				report.setCandidate(candidateSeq);
+				report.setTemplate(templateSeq);
+				report.setSearchParameters(search, searchScore);
+				report.setAlignmentParameters(align, alignment);
+				report.setNastParameters(*nast);
+	
+				alignmentFile << '>' << candidateSeq->getName() << '\n' << candidateSeq->getAligned() << endl;
+				
+				report.print();
+				delete nast;
+				if (needToDeleteCopy) {   delete copy;   }
+			}
 			delete candidateSeq;
-		
 		}
 		
 		alignmentFile.close();
 		inFASTA.close();
+		accnosFile.close();
 		
 		return 1;
 	}
@@ -299,7 +407,7 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName){
 
 /**************************************************************************************************/
 
-void AlignCommand::createProcesses(string alignFileName, string reportFileName) {
+void AlignCommand::createProcesses(string alignFileName, string reportFileName, string accnosFName) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 0;
@@ -313,7 +421,7 @@ void AlignCommand::createProcesses(string alignFileName, string reportFileName) 
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				driver(lines[process], alignFileName + toString(getpid()) + ".temp", reportFileName + toString(getpid()) + ".temp");
+				driver(lines[process], alignFileName + toString(getpid()) + ".temp", reportFileName + toString(getpid()) + ".temp", accnosFName + toString(getpid()) + ".temp");
 				exit(0);
 			}else { mothurOut("unable to spawn the necessary processes."); mothurOutEndLine(); exit(0); }
 		}
@@ -354,8 +462,7 @@ void AlignCommand::appendAlignFiles(string temp, string filename) {
 		exit(1);
 	}
 }
-
-/**************************************************************************************************/
+//**********************************************************************************************************************
 
 void AlignCommand::appendReportFiles(string temp, string filename) {
 	try{

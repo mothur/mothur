@@ -349,14 +349,15 @@ int ClassifySeqsCommand::driver(linePair* line, string taxFName, string tempTFNa
 		for(int i=0;i<line->numSeqs;i++){
 			
 			Sequence* candidateSeq = new Sequence(inFASTA);
-
-			taxonomy = classify->getTaxonomy(candidateSeq);
 			
-			if (taxonomy != "bad seq") {
-				outTax << candidateSeq->getName() << '\t' << taxonomy << endl;
-				outTaxSimple << candidateSeq->getName() << '\t' << classify->getSimpleTax() << endl;
-			}
-							
+			if (candidateSeq->getName() != "") {
+				taxonomy = classify->getTaxonomy(candidateSeq);
+				
+				if (taxonomy != "bad seq") {
+					outTax << candidateSeq->getName() << '\t' << taxonomy << endl;
+					outTaxSimple << candidateSeq->getName() << '\t' << classify->getSimpleTax() << endl;
+				}
+			}				
 			delete candidateSeq;
 			
 			if((i+1) % 100 == 0){

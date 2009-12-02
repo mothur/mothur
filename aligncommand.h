@@ -36,16 +36,16 @@ private:
 	AlignmentDB* templateDB;
 	Alignment* alignment;
 	
-	int driver(linePair*, string, string);
-	void createProcesses(string, string);
+	int driver(linePair*, string, string, string);
+	void createProcesses(string, string, string);
 	void appendAlignFiles(string, string); 
 	void appendReportFiles(string, string);
 	
 	string candidateFileName, templateFileName, distanceFileName, search, align;
-	float match, misMatch, gapOpen, gapExtend;
+	float match, misMatch, gapOpen, gapExtend, threshold;
 	int processors, kmerSize;
 	
-	bool abort;
+	bool abort, flip;
 };
 
 #endif

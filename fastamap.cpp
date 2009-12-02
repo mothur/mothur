@@ -24,20 +24,21 @@ void FastaMap::readFastaFile(string inFileName) {
 			Sequence currSeq(in);
 			name = currSeq.getName();
 			
-			if(currSeq.getIsAligned())	{	sequence = currSeq.getAligned();	}
-			else						{	sequence = currSeq.getUnaligned();	}
-			
-			seqmap[name] = sequence;  
-			map<string,group>::iterator it = data.find(sequence);
-			if (it == data.end()) { 	//it's unique.
-				data[sequence].groupname = name;  //group name will be the name of the first duplicate sequence found.
-//				data[sequence].groupnumber = 1;
-				data[sequence].names = name;
-			}else { // its a duplicate.
-				data[sequence].names += "," + name;
-//				data[sequence].groupnumber++;
-			}	
-			
+			if (name != "") {
+				if(currSeq.getIsAligned())	{	sequence = currSeq.getAligned();	}
+				else						{	sequence = currSeq.getUnaligned();	}
+				
+				seqmap[name] = sequence;  
+				map<string,group>::iterator it = data.find(sequence);
+				if (it == data.end()) { 	//it's unique.
+					data[sequence].groupname = name;  //group name will be the name of the first duplicate sequence found.
+					//				data[sequence].groupnumber = 1;
+					data[sequence].names = name;
+				}else { // its a duplicate.
+					data[sequence].names += "," + name;
+					//				data[sequence].groupnumber++;
+				}	
+			}
 			gobble(in);
 		}
 		in.close();		
@@ -71,20 +72,21 @@ void FastaMap::readFastaFile(string inFastaFile, string oldNameFileName){ //prin
 		Sequence currSeq(inFASTA);
 		name = currSeq.getName();
 		
-		if(currSeq.getIsAligned())	{	sequence = currSeq.getAligned();	}
-		else						{	sequence = currSeq.getUnaligned();	}
-		
-		seqmap[name] = sequence;  
-		map<string,group>::iterator it = data.find(sequence);
-		if (it == data.end()) { 	//it's unique.
-			data[sequence].groupname = name;  //group name will be the name of the first duplicate sequence found.
-//			data[sequence].groupnumber = 1;
-			data[sequence].names = oldNameMap[name];
-		}else { // its a duplicate.
-			data[sequence].names += "," + oldNameMap[name];
-//			data[sequence].groupnumber++;
-		}	
-		
+		if (name != "") {
+			if(currSeq.getIsAligned())	{	sequence = currSeq.getAligned();	}
+			else						{	sequence = currSeq.getUnaligned();	}
+			
+			seqmap[name] = sequence;  
+			map<string,group>::iterator it = data.find(sequence);
+			if (it == data.end()) { 	//it's unique.
+				data[sequence].groupname = name;  //group name will be the name of the first duplicate sequence found.
+				//			data[sequence].groupnumber = 1;
+				data[sequence].names = oldNameMap[name];
+			}else { // its a duplicate.
+				data[sequence].names += "," + oldNameMap[name];
+				//			data[sequence].groupnumber++;
+			}	
+		}
 		gobble(inFASTA);
 	}
 	

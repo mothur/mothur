@@ -48,6 +48,8 @@ public:
 	
 private:
 	void initialize();
+	string getSequenceString(ifstream&);
+	string getCommentString(ifstream&);
 	string name;
 	string unaligned;
 	string aligned;

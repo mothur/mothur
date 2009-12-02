@@ -25,14 +25,13 @@ AlignmentDB::AlignmentDB(string fastaFileName, string method, int kmerSize, floa
 		mothurOut("Reading in the " + fastaFileName + " template sequences...\t");	cout.flush();
 		
 		while (!fastaFile.eof()) {
-			Sequence temp(fastaFile);
+			Sequence temp(fastaFile);  gobble(fastaFile);
 			
-			templateSequences.push_back(temp);
-			
-			//save longest base
-			if (temp.getUnaligned().length() > longest)  { longest = temp.getUnaligned().length(); }
-			
-			gobble(fastaFile);
+			if (temp.getName() != "") {
+				templateSequences.push_back(temp);
+				//save longest base
+				if (temp.getUnaligned().length() > longest)  { longest = temp.getUnaligned().length(); }
+			}
 		}
 		
 		numSeqs = templateSequences.size();
