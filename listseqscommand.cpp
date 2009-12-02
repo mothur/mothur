@@ -125,7 +125,7 @@ void ListSeqsCommand::readFasta(){
 			Sequence currSeq(in);
 			name = currSeq.getName();
 			
-			names.push_back(name);
+			if (name != "") {  names.push_back(name);  }
 			
 			gobble(in);
 		}

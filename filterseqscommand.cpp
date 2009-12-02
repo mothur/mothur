@@ -121,10 +121,12 @@ int FilterSeqsCommand::execute() {
 		if(trump != '*' || isTrue(vertical) || soft != 0){
 			while(!inFASTA.eof()){	//read through and create the filter...
 				Sequence seq(inFASTA);
-				if(trump != '*'){	F.doTrump(seq);	}
-				if(isTrue(vertical) || soft != 0){	F.getFreqs(seq);	}
-				numSeqs++;
-				cout.flush();
+				if (seq.getName() != "") {
+					if(trump != '*'){	F.doTrump(seq);	}
+					if(isTrue(vertical) || soft != 0){	F.getFreqs(seq);	}
+					numSeqs++;
+					cout.flush();
+				}
 			}
 		
 		}
@@ -152,17 +154,19 @@ int FilterSeqsCommand::execute() {
 		numSeqs = 0;
 		while(!inFasta2.eof()){
 			Sequence seq(inFasta2);
-			string align = seq.getAligned();
-			string filterSeq = "";
-	
-			for(int j=0;j<alignmentLength;j++){
-				if(filter[j] == '1'){
-					filterSeq += align[j];
+			if (seq.getName() != "") {
+				string align = seq.getAligned();
+				string filterSeq = "";
+				
+				for(int j=0;j<alignmentLength;j++){
+					if(filter[j] == '1'){
+						filterSeq += align[j];
+					}
 				}
+				
+				outFASTA << '>' << seq.getName() << endl << filterSeq << endl;
+				numSeqs++;
 			}
-
-			outFASTA << '>' << seq.getName() << endl << filterSeq << endl;
-			numSeqs++;
 			gobble(inFasta2);
 		}
 		outFASTA.close();

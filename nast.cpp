@@ -32,7 +32,6 @@ Nast::Nast(Alignment* method, Sequence* cand, Sequence* temp) : alignment(method
 		errorOut(e, "Nast", "Nast");
 		exit(1);
 	}
-
 }
 
 /**************************************************************************************************/
@@ -42,10 +41,10 @@ void Nast::pairwiseAlignSeqs(){	//	Here we call one of the pairwise alignment me
 	try {
 
 		alignment->align(candidateSeq->getUnaligned(), templateSeq->getUnaligned());
-		
+	
 		string candAln = alignment->getSeqAAln();
 		string tempAln = alignment->getSeqBAln();
-		
+	
 		if(candAln == ""){
 
 			candidateSeq->setPairwise("");
@@ -78,7 +77,6 @@ void Nast::pairwiseAlignSeqs(){	//	Here we call one of the pairwise alignment me
 
 		candidateSeq->setPairwise(candAln);					//	set the pairwise sequences in the Sequence objects for
 		templateSeq->setPairwise(tempAln);					//	the candidate and template sequences
-
 	}
 	catch(exception& e) {
 		errorOut(e, "Nast", "pairwiseAlignSeqs");

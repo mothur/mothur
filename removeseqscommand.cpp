@@ -125,13 +125,14 @@ void RemoveSeqsCommand::readFasta(){
 			Sequence currSeq(in);
 			name = currSeq.getName();
 			
-			//if this name is in the accnos file
-			if (names.count(name) == 0) {
-				wroteSomething = true;
-				
-				currSeq.printSequence(out);
-			}else {		names.erase(name);		}
-			
+			if (name != "") {
+				//if this name is in the accnos file
+				if (names.count(name) == 0) {
+					wroteSomething = true;
+					
+					currSeq.printSequence(out);
+				}else {		names.erase(name);		}
+			}
 			gobble(in);
 		}
 		in.close();	

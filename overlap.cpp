@@ -60,7 +60,7 @@ void Overlap::setOverlap(vector<vector<AlignmentCell> >& alignment, const int nA
 	
 	int rowIndex = maxRow(alignment, band);		//	get the index for the row with the highest right hand side score
 	int colIndex = maxColumn(alignment, band);	//	get the index for the column with the highest bottom row score
-	
+		
 	int row = lB-1;
 	int column = lA-1;
 	

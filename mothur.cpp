@@ -77,7 +77,7 @@ int main(int argc, char *argv[]){
 				
 		//srand(54321);
 		srand( (unsigned)time( NULL ) );
-
+		
 		Engine* mothur;
 		bool bail = 0;
 		string input;
@@ -92,9 +92,16 @@ int main(int argc, char *argv[]){
 			}
 		}
 		else{
-			mothur = new InteractEngine(argv[0]);		
+			mothur = new InteractEngine(argv[0]);	
 		}
+		
+		//used to intercept the terminate signal, so instead of terminating mothur it will end a command
+		//void (*prev_fn)(int);
+		//prev_fn = signal(SIGTERM, mothur->terminateCommand(0));
+		
+		//if (prev_fn==SIG_IGN) signal (SIGTERM,SIG_IGN);
 
+		
 		while(bail == 0)		{	bail = mothur->getInput();			}
 	
 		delete mothur;

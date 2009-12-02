@@ -21,6 +21,7 @@
 #include <iomanip>
 #include <fstream>
 #include <sstream>
+#include <signal.h>
 
 //exception
 #include <stdexcept>
@@ -283,9 +284,6 @@ inline void errorOut(exception& e, string object, string function) {
 	
 }
 
-
-
-
 /***********************************************************************/
 
 inline bool isTrue(string f){
@@ -425,7 +423,21 @@ inline string getExtension(string longName){
 	
 	return extension;
 }
-
+/***********************************************************************/
+inline bool isBlank(string fileName){
+	
+	ifstream fileHandle;
+	fileHandle.open(fileName.c_str());
+	if(!fileHandle) {
+		mothurOut("Error: Could not open " + fileName);  mothurOutEndLine();
+		return false;
+	}else {
+		//check for blank file
+		gobble(fileHandle);
+		if (fileHandle.eof()) { fileHandle.close(); return true;  }
+	}
+	return false;
+}
 /***********************************************************************/
 
 inline int openInputFile(string fileName, ifstream& fileHandle){

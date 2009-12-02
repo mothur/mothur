@@ -133,7 +133,7 @@ int GetSharedOTUCommand::execute(){
 			
 			while(!inFasta.eof()) {
 				Sequence seq(inFasta);
-				seqs.push_back(seq);
+				if (seq.getName() != "") {  seqs.push_back(seq);   }
 			}
 			inFasta.close();
 		}

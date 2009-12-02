@@ -91,18 +91,20 @@ int SeqSummaryCommand::execute(){
 
 		while(!inFASTA.eof()){
 			Sequence current(inFASTA);
-			startPosition.push_back(current.getStartPos());
-			endPosition.push_back(current.getEndPos());
-			seqLength.push_back(current.getNumBases());
-			ambigBases.push_back(current.getAmbigBases());
-			longHomoPolymer.push_back(current.getLongHomoPolymer());
-
-			outSummary << current.getName() << '\t';
-			outSummary << current.getStartPos() << '\t' << current.getEndPos() << '\t';
-			outSummary << current.getNumBases() << '\t' << current.getAmbigBases() << '\t';
-			outSummary << current.getLongHomoPolymer() << endl;
-			
-			numSeqs++;
+			if (current.getName() != "") {
+				startPosition.push_back(current.getStartPos());
+				endPosition.push_back(current.getEndPos());
+				seqLength.push_back(current.getNumBases());
+				ambigBases.push_back(current.getAmbigBases());
+				longHomoPolymer.push_back(current.getLongHomoPolymer());
+				
+				outSummary << current.getName() << '\t';
+				outSummary << current.getStartPos() << '\t' << current.getEndPos() << '\t';
+				outSummary << current.getNumBases() << '\t' << current.getAmbigBases() << '\t';
+				outSummary << current.getLongHomoPolymer() << endl;
+				
+				numSeqs++;
+			}
 			gobble(inFASTA);
 		}
 		inFASTA.close();

@@ -91,11 +91,13 @@ int AlignCheckCommand::execute(){
 		
 		while(!in.eof()){
 			
-			Sequence seq(in);
-			statData data = getStats(seq.getAligned());
-			
-			out << seq.getName() << '\t' << data.pound << '\t' << data.dash << '\t' << data.plus << '\t' << data.equal << '\t';
-			out << data.loop << '\t' << data.tilde << '\t' << data.total << endl;
+			Sequence seq(in);  gobble(in);
+			if (seq.getName() != "") {
+				statData data = getStats(seq.getAligned());
+				
+				out << seq.getName() << '\t' << data.pound << '\t' << data.dash << '\t' << data.plus << '\t' << data.equal << '\t';
+				out << data.loop << '\t' << data.tilde << '\t' << data.total << endl;
+			}
 		}
 
 		in.close();

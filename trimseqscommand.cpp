@@ -173,61 +173,63 @@ int TrimSeqsCommand::execute(){
 		while(!inFASTA.eof()){
 			Sequence currSeq(inFASTA);
 			string origSeq = currSeq.getUnaligned();
-			int group;
-			string trashCode = "";
-			
-			if(qFileName != ""){
-				if(qThreshold != 0)		{	success = stripQualThreshold(currSeq, qFile);	}
-				else if(qAverage != 0)	{	success = cullQualAverage(currSeq, qFile);		}
-				if ((!qtrim) && (origSeq.length() != currSeq.getUnaligned().length())) { 
-					success = 0; //if you don't want to trim and the sequence does not meet quality requirements, move to scrap
+			if (origSeq != "") {
+				int group;
+				string trashCode = "";
+				
+				if(qFileName != ""){
+					if(qThreshold != 0)		{	success = stripQualThreshold(currSeq, qFile);	}
+					else if(qAverage != 0)	{	success = cullQualAverage(currSeq, qFile);		}
+					if ((!qtrim) && (origSeq.length() != currSeq.getUnaligned().length())) { 
+						success = 0; //if you don't want to trim and the sequence does not meet quality requirements, move to scrap
+					}
+					if(!success)			{	trashCode += 'q';								}
 				}
-				if(!success)			{	trashCode += 'q';								}
-			}
-			if(barcodes.size() != 0){
-	
-				success = stripBarcode(currSeq, group);
-				if(!success){	trashCode += 'b';	}
-			}
-			if(numFPrimers != 0){
-				success = stripForward(currSeq);
-				if(!success){	trashCode += 'f';	}
-			}
-			if(numRPrimers != 0){
-				success = stripReverse(currSeq);
-				if(!success){	trashCode += 'r';	}
-			}
-			if(minLength > 0 || maxLength > 0){
-				success = cullLength(currSeq);
-			if ((currSeq.getUnaligned().length() > 300) && (success)) {  cout << "too long " << currSeq.getUnaligned().length() << endl;  }
-				if(!success){	trashCode += 'l'; }
-			}
-			if(maxHomoP > 0){
-				success = cullHomoP(currSeq);
-				if(!success){	trashCode += 'h';	}
-			}
-			if(maxAmbig != -1){
-				success = cullAmbigs(currSeq);
-				if(!success){	trashCode += 'n';	}
-			}
-			
-			if(flip){	currSeq.reverseComplement();	}		// should go last			
-			
-			if(trashCode.length() == 0){
-				currSeq.setAligned(currSeq.getUnaligned());  //this is because of a modification we made to the sequence class to fix a bug.  all seqs have an aligned version, which is the version that gets printed.
-				currSeq.printSequence(outFASTA);
 				if(barcodes.size() != 0){
-					outGroups << currSeq.getName() << '\t' << groupVector[group] << endl;
 					
-					if(allFiles){
-						currSeq.printSequence(*fastaFileNames[group]);					
+					success = stripBarcode(currSeq, group);
+					if(!success){	trashCode += 'b';	}
+				}
+				if(numFPrimers != 0){
+					success = stripForward(currSeq);
+					if(!success){	trashCode += 'f';	}
+				}
+				if(numRPrimers != 0){
+					success = stripReverse(currSeq);
+					if(!success){	trashCode += 'r';	}
+				}
+				if(minLength > 0 || maxLength > 0){
+					success = cullLength(currSeq);
+					if ((currSeq.getUnaligned().length() > 300) && (success)) {  cout << "too long " << currSeq.getUnaligned().length() << endl;  }
+					if(!success){	trashCode += 'l'; }
+				}
+				if(maxHomoP > 0){
+					success = cullHomoP(currSeq);
+					if(!success){	trashCode += 'h';	}
+				}
+				if(maxAmbig != -1){
+					success = cullAmbigs(currSeq);
+					if(!success){	trashCode += 'n';	}
+				}
+				
+				if(flip){	currSeq.reverseComplement();	}		// should go last			
+				
+				if(trashCode.length() == 0){
+					currSeq.setAligned(currSeq.getUnaligned());  //this is because of a modification we made to the sequence class to fix a bug.  all seqs have an aligned version, which is the version that gets printed.
+					currSeq.printSequence(outFASTA);
+					if(barcodes.size() != 0){
+						outGroups << currSeq.getName() << '\t' << groupVector[group] << endl;
+						
+						if(allFiles){
+							currSeq.printSequence(*fastaFileNames[group]);					
+						}
 					}
 				}
-			}
-			else{
-				currSeq.setName(currSeq.getName() + '|' + trashCode);
-				currSeq.setUnaligned(origSeq);
-				currSeq.printSequence(scrapFASTA);
+				else{
+					currSeq.setName(currSeq.getName() + '|' + trashCode);
+					currSeq.setUnaligned(origSeq);
+					currSeq.printSequence(scrapFASTA);
+				}
 			}
 			gobble(inFASTA);
 		}

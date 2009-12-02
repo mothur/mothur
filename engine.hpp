@@ -22,13 +22,16 @@ class GlobalData;
 
 class Engine {
 public:
-	virtual ~Engine(){};
+	Engine() {  cFactory = new CommandFactory();	}
+	virtual ~Engine(){  delete cFactory;  }
 	virtual bool getInput() = 0;
 //	string getCommand()			{	return command;		}
 	vector<string> getOptions() {	return options;		}
+	virtual void terminateCommand(int);
 protected:
 //	string command;
 	vector<string> options;
+	CommandFactory* cFactory;
 };
 
 
@@ -54,6 +57,8 @@ public:
 	virtual bool getInput();
 private:
 	GlobalData* globaldata;
+	vector<string> previousInputs; //this is used to make the arrow keys work
+	
 };
 
 
