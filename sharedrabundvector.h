@@ -51,7 +51,7 @@ public:
 	void sortD();  //Sorts the data in descending order.
 	void push_front(int, int, string); //abundance, otu, groupname
 	void insert(int, int, string); //abundance, otu, groupname
-	void push_back(int, int, string);  //abundance, otu, groupname
+	void push_back(int, string);  //abundance, groupname
 	void pop_back();
 	void resize(int);
 	int size();

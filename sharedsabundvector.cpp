@@ -191,11 +191,9 @@ SharedRAbundVector SharedSAbundVector::getSharedRAbundVector(){
 	try {
 		SharedRAbundVector rav;
 		
-		int binNumber = 0;
 		for(int i=1;i<=data.size();i++){		
 			for(int j=0;j<data[i].abundance;j++){
-				rav.push_back(i, binNumber, data[i].group);
-				binNumber++;
+				rav.push_back(i, data[i].group);
 			}
 		}
 		sort(rav.rbegin(), rav.rend(), compareMembers);

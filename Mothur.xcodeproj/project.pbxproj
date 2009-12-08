@@ -180,6 +180,7 @@
 		A7B0450E106CEEC90046FC83 /* slayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7B0450D106CEEC90046FC83 /* slayer.cpp */; };
 		A7E4A783106913F900688F62 /* getsharedotucommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E4A782106913F900688F62 /* getsharedotucommand.cpp */; };
 		A7E4A824106A9AD700688F62 /* maligner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E4A823106A9AD700688F62 /* maligner.cpp */; };
+		A7F5759710CEBC0600E20E47 /* libreadline.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A7F5759610CEBC0600E20E47 /* libreadline.a */; };
 		EB1216880F619B83004A865F /* bergerparker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB1216870F619B83004A865F /* bergerparker.cpp */; };
 		EB1216E50F61ACFB004A865F /* bstick.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB1216E40F61ACFB004A865F /* bstick.cpp */; };
 		EB1217230F61C9AC004A865F /* sharedkstest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB1217220F61C9AC004A865F /* sharedkstest.cpp */; };
@@ -567,6 +568,7 @@
 		A7E4A782106913F900688F62 /* getsharedotucommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getsharedotucommand.cpp; sourceTree = SOURCE_ROOT; };
 		A7E4A822106A9AD700688F62 /* maligner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = maligner.h; sourceTree = SOURCE_ROOT; };
 		A7E4A823106A9AD700688F62 /* maligner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = maligner.cpp; sourceTree = SOURCE_ROOT; };
+		A7F5759610CEBC0600E20E47 /* libreadline.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libreadline.a; path = "../readline-6.0/libreadline.a"; sourceTree = SOURCE_ROOT; };
 		C6859E8B029090EE04C91782 /* Mothur.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = Mothur.1; sourceTree = "<group>"; };
 		EB1216860F619B83004A865F /* bergerparker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bergerparker.h; sourceTree = SOURCE_ROOT; };
 		EB1216870F619B83004A865F /* bergerparker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bergerparker.cpp; sourceTree = SOURCE_ROOT; };
@@ -589,6 +591,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A7F5759710CEBC0600E20E47 /* libreadline.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -681,6 +684,7 @@
 				37D928490F21331F001D4494 /* summarydisplay.h */,
 				37519AB30F810FAE00FED5E8 /* venn.h */,
 				37519AB40F810FAE00FED5E8 /* venn.cpp */,
+				A7F5759610CEBC0600E20E47 /* libreadline.a */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -1302,6 +1306,10 @@
 					"_GLIBCXX_DEBUG_PEDANTIC=1",
 				);
 				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../readline-6.0\"",
+				);
 				PRODUCT_NAME = mothur;
 				ZERO_LINK = YES;
 			};
@@ -1313,6 +1321,10 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../readline-6.0\"",
+				);
 				PRODUCT_NAME = mothur;
 			};
 			name = Release;
@@ -1355,6 +1367,7 @@
 					"-ansi",
 					"-pedantic",
 					"-wall",
+					"-lreadline",
 				);
 				PREBINDING = NO;
 				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";

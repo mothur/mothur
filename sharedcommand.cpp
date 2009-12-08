@@ -20,6 +20,7 @@ SharedCommand::SharedCommand(){
 		filename = getRootName(filename);
 		filename = filename + "shared";
 		openOutputFile(filename, out);
+		pickedGroups = false;
 		
 		groupMap = globaldata->gGroupmap;
 		
@@ -28,6 +29,7 @@ SharedCommand::SharedCommand(){
 			groups = groupMap->namesOfGroups;
 		}else{ //they have specified groups
 			groups = globaldata->Groups;
+			pickedGroups = true;
 		}
 		
 		//fill filehandles with neccessary ofstreams
@@ -114,12 +116,15 @@ int SharedCommand::execute(){
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = globaldata->labels;	
-		
+	
 		while((SharedList != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
-			
+		
 			if(globaldata->allLines == 1 || globaldata->labels.count(SharedList->getLabel()) == 1){
 			
 					lookup = SharedList->getSharedRAbundVector();
+					if (pickedGroups) { //check for otus with no seqs in them
+						eliminateZeroOTUS(lookup);
+					}
 					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 					
 					printSharedData(lookup); //prints info to the .shared file
@@ -136,6 +141,9 @@ int SharedCommand::execute(){
 					SharedList = input->getSharedListVector(lastLabel); //get new list vector to process
 					
 					lookup = SharedList->getSharedRAbundVector();
+					if (pickedGroups) { //check for otus with no seqs in them
+						eliminateZeroOTUS(lookup);
+					}
 					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 					
 					printSharedData(lookup); //prints info to the .shared file
@@ -170,6 +178,9 @@ int SharedCommand::execute(){
 			SharedList = input->getSharedListVector(lastLabel); //get new list vector to process
 					
 			lookup = SharedList->getSharedRAbundVector();
+			if (pickedGroups) { //check for otus with no seqs in them
+				eliminateZeroOTUS(lookup);
+			}
 			mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
 			
 			printSharedData(lookup); //prints info to the .shared file
@@ -212,6 +223,46 @@ void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup) {
 	}
 	catch(exception& e) {
 		errorOut(e, "SharedCommand", "printSharedData");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+void SharedCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
+	try {
+		
+		vector<SharedRAbundVector*> newLookup;
+		for (int i = 0; i < thislookup.size(); i++) {
+			SharedRAbundVector* temp = new SharedRAbundVector();
+			temp->setLabel(thislookup[i]->getLabel());
+			temp->setGroup(thislookup[i]->getGroup());
+			newLookup.push_back(temp);
+		}
+		
+		//for each bin
+		for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
+		
+			//look at each sharedRabund and make sure they are not all zero
+			bool allZero = true;
+			for (int j = 0; j < thislookup.size(); j++) {
+				if (thislookup[j]->getAbundance(i) != 0) { allZero = false;  break;  }
+			}
+			
+			//if they are not all zero add this bin
+			if (!allZero) {
+				for (int j = 0; j < thislookup.size(); j++) {
+					newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
+				}
+			}
+			//else{  cout << "bin # " << i << " is all zeros" << endl;  }
+		}
+	
+		for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
+		thislookup = newLookup;
+	
+ 
+	}
+	catch(exception& e) {
+		errorOut(e, "SharedCommand", "eliminateZeroOTUS");
 		exit(1);
 	}
 }

@@ -263,10 +263,8 @@ vector<SharedRAbundVector*> SharedListVector::getSharedRAbundVector() {
 	try {
 		SharedUtil* util;
 		util = new SharedUtil();
-		vector<SharedRAbundVector*> lookup;
-		vector<SharedRAbundVector*> lookup2;
-		map<string, SharedRAbundVector*> finder;
-		map<string, SharedRAbundVector*>::iterator it;
+		vector<SharedRAbundVector*> lookup;  //contains just the groups the user selected
+		map<string, SharedRAbundVector*> finder;  //contains all groups in groupmap
 		string group, names, name;
 	
 		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups);
@@ -277,10 +275,11 @@ vector<SharedRAbundVector*> SharedListVector::getSharedRAbundVector() {
 			finder[globaldata->gGroupmap->namesOfGroups[i]] = temp;
 			finder[globaldata->gGroupmap->namesOfGroups[i]]->setLabel(label);
 			finder[globaldata->gGroupmap->namesOfGroups[i]]->setGroup(globaldata->gGroupmap->namesOfGroups[i]);
-			//*temp = getSharedRAbundVector(globaldata->Groups[i]);
-			lookup.push_back(finder[globaldata->gGroupmap->namesOfGroups[i]]);
+			if (inVector(globaldata->gGroupmap->namesOfGroups[i], globaldata->Groups)) {  //if this group is in user groups
+				lookup.push_back(finder[globaldata->gGroupmap->namesOfGroups[i]]);
+			}
 		}
-//cout << "after blanks" << endl;		
+	
 		//fill vectors
 		for(int i=0;i<numBins;i++){
 			names = get(i);  
@@ -288,30 +287,18 @@ vector<SharedRAbundVector*> SharedListVector::getSharedRAbundVector() {
 				name = names.substr(0,names.find_first_of(','));
 				names = names.substr(names.find_first_of(',')+1, names.length());
 				group = groupmap->getGroup(name);
-//cout << i << '\t' << name << '\t' << group << endl;
 				if(group == "not found") {	mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); mothurOutEndLine();  exit(1); }
 				finder[group]->set(i, finder[group]->getAbundance(i) + 1, group);  //i represents what bin you are in
 			}
 			
 			//get last name
 			group = groupmap->getGroup(names);
-//cout << i << '\t' << names << '\t' << group << endl;
 			if(group == "not found") {	mothurOut("Error: Sequence '" + names + "' was not found in the group file, please correct."); mothurOutEndLine();  exit(1); }
 			finder[group]->set(i, finder[group]->getAbundance(i) + 1, group);  //i represents what bin you are in
 			
 		}
 		
-		if (globaldata->Groups.size() == globaldata->gGroupmap->namesOfGroups.size()) { //no groups specified
-			lookup2 = lookup;
-		}else{ //delete unwanted groups
-			for (int i = 0; i < globaldata->Groups.size(); i++) {
-				SharedRAbundVector* temp = new SharedRAbundVector(*finder[globaldata->Groups[i]]);
-				lookup2.push_back(temp);
-				delete finder[globaldata->Groups[i]];  //so we don't get dup memory
-			}
-		}
-		
-		return lookup2;
+		return lookup;
 	}
 	catch(exception& e) {
 		errorOut(e, "SharedListVector", "getSharedRAbundVector");

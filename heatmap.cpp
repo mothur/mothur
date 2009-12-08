@@ -231,7 +231,7 @@ void HeatMap::sortSharedVectors(vector<SharedRAbundVector*>& lookup){
 			//fill lookup
 			for (int j = 0; j < looktemp.size(); j++) {
 				//if they are not shared then push to back, if they are not insert in front
-				if (count < 2)  { lookup[j]->push_back(looktemp[j]->getAbundance(i), i, looktemp[j]->getGroup()); }
+				if (count < 2)  { lookup[j]->push_back(looktemp[j]->getAbundance(i), looktemp[j]->getGroup()); }
 				//they are shared by some
 				else {  lookup[j]->insert(looktemp[j]->getAbundance(i), place[count], looktemp[j]->getGroup());   updatePlace = true; }
 			}
