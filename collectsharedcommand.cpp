@@ -229,7 +229,7 @@ int CollectSharedCommand::execute(){
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
-				
+			
 		//set users groups
 		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups, "collect");
 		util->updateGroupIndex(globaldata->Groups, globaldata->gGroupmap->groupIndex);

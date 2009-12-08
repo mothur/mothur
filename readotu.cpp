@@ -64,6 +64,9 @@ void ReadOTUFile::read(GlobalData* globaldata){
 			//memory leak prevention
 			//if (globaldata->gSharedList != NULL) { delete globaldata->gSharedList;  }
 			globaldata->gSharedList = SharedList;
+			delete inputSabund;
+			delete inputRabund;
+			delete inputList;
 		}
 	}
 	catch(exception& e) {

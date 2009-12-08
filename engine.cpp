@@ -14,6 +14,7 @@
 
 #include "engine.hpp"
 
+
 /***********************************************************************/
 
 InteractEngine::InteractEngine(string path){
@@ -36,53 +37,13 @@ bool InteractEngine::getInput(){
 		string options = "";
 		int quitCommandCalled = 0;
 		
-				
 		while(quitCommandCalled != 1){
 			
 			mothurOutEndLine();
-			mothurOut("mothur > ");
 			
-			//get input char by char so you can check for use of arrow keys
-			//if (_kbhit()){
-			//	_getch(); // edit : if you want to check the arrow-keys you must call getch twice because special-keys have two values
-			//	return _getch();
-			//}
-			//return 0; // if no key is pressed
-			//setbuf(stdin, NULL); //no buffering
-/*if(ch==0)
-{
-ch=getch();
-if(ch==72) cout<<"up";
-else if(ch==75) cout<<"left";
-else if(ch==77) cout<<"right";
-else if(ch==80) cout<<"down";
-cout<<endl;
-}
-else break;
-}
-delay(2000);
-return 0;
-}*/
+			input = getCommand();			
 			
-			//int letter = 0;
-			//while ((letter != 10) && (letter != 13)) {
-			//	letter = getch();
-				
-			//	cout << "char code = " << letter << endl;
-				
-			//	input += char(letter);
-			//}
-		//	input = input.substr(0, input.length()-1); //cut off newline char
-		
-	//cout << input << endl;		
-			
-			getline(cin, input);
-			if (cin.eof()) { input = "quit()"; }
-			
-			//save command
-			//previousInputs.push_back(input);
-			
-			mothurOutJustToLog(input);
+			mothurOutJustToLog("mothur > " + input);
 			mothurOutEndLine();
 			
 			//allow user to omit the () on the quit command
@@ -90,7 +51,7 @@ return 0;
 			
 			CommandOptionParser parser(input);
 			commandName = parser.getCommandString();
-	//cout << " command = " << commandName << endl;
+	
 			options = parser.getOptionString();
 			
 			if (commandName != "") {
@@ -112,13 +73,28 @@ return 0;
 	}
 }
 /***********************************************************************/
+string Engine::getCommand()  {
+	try {
+		char* nextCommand = NULL;
+		
+		nextCommand = readline("mothur > ");
+		if(nextCommand != NULL) {  add_history(nextCommand);  }
+						
+		return nextCommand;
+	}
+	catch(exception& e) {
+		errorOut(e, "Engine", "getCommand");
+		exit(1);
+	}
+}
+/***********************************************************************/
 void Engine::terminateCommand(int dummy)  {
 	try {
 		mothurOut("Stopping command."); mothurOutEndLine();
 		cFactory->getCommand();  //terminates command
 	}
 	catch(exception& e) {
-		errorOut(e, "InteractEngine", "terminateCommand");
+		errorOut(e, "Engine", "terminateCommand");
 		exit(1);
 	}
 }

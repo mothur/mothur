@@ -23,7 +23,7 @@ class GetSeqsCommand : public Command {
 		
 	private:
 		set<string> names;
-		string accnosfile, fastafile, namefile, groupfile, alignfile;
+		string accnosfile, fastafile, namefile, groupfile, alignfile, listfile;
 		bool abort;
 		
 		void readFasta();
@@ -31,6 +31,7 @@ class GetSeqsCommand : public Command {
 		void readGroup();
 		void readAlign();
 		void readAccnos();
+		void readList();
 		
 };
 

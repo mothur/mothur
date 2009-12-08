@@ -9,6 +9,7 @@
 
 #include "removeseqscommand.h"
 #include "sequence.hpp"
+#include "listvector.hpp"
 
 //**********************************************************************************************************************
 
@@ -21,7 +22,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","name", "group", "alignreport", "accnos" };
+			string Array[] =  {"fasta","name", "group", "alignreport", "accnos", "list" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -55,9 +56,13 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option){
 			if (alignfile == "not open") { abort = true; }
 			else if (alignfile == "not found") {  alignfile = "";  }
 			
-			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == ""))  { mothurOut("You must provide one of the following: fasta, name, group, alignreport."); mothurOutEndLine(); abort = true; }
+			listfile = validParameter.validFile(parameters, "list", true);
+			if (listfile == "not open") { abort = true; }
+			else if (listfile == "not found") {  listfile = "";  }
 			
-			if (parameters.size() > 2) { mothurOut("You may only enter one of the following: fasta, name, group, alignreport."); mothurOutEndLine(); abort = true;  }
+			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == ""))  { mothurOut("You must provide one of the following: fasta, name, group, alignreport or list."); mothurOutEndLine(); abort = true; }
+			
+			if (parameters.size() > 2) { mothurOut("You may only enter one of the following: fasta, name, group, alignreport, or list."); mothurOutEndLine(); abort = true;  }
 		}
 
 	}
@@ -70,9 +75,9 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option){
 
 void RemoveSeqsCommand::help(){
 	try {
-		mothurOut("The remove.seqs command reads an .accnos file and one of the following file types: fasta, name, group or alignreport file.\n");
+		mothurOut("The remove.seqs command reads an .accnos file and one of the following file types: fasta, name, group, list or alignreport file.\n");
 		mothurOut("It outputs a file containing the sequences NOT in the .accnos file.\n");
-		mothurOut("The remove.seqs command parameters are accnos, fasta, name, group and alignreport.  You must provide accnos and one of the other parameters.\n");
+		mothurOut("The remove.seqs command parameters are accnos, fasta, name, group, list and alignreport.  You must provide accnos and one of the other parameters.\n");
 		mothurOut("The remove.seqs command should be in the following format: remove.seqs(accnos=yourAccnos, fasta=yourFasta).\n");
 		mothurOut("Example remove.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n");
 		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
@@ -98,6 +103,7 @@ int RemoveSeqsCommand::execute(){
 		else if (namefile != "")	{		readName();		}
 		else if (groupfile != "")	{		readGroup();	}
 		else if (alignfile != "")	{		readAlign();	}
+		else if (listfile != "")	{		readList();		}
 		
 		return 0;		
 	}
@@ -149,7 +155,70 @@ void RemoveSeqsCommand::readFasta(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+void RemoveSeqsCommand::readList(){
+	try {
+		string outputFileName = getRootName(listfile) + "pick" +  getExtension(listfile);
+		ofstream out;
+		openOutputFile(outputFileName, out);
+		
+		ifstream in;
+		openInputFile(listfile, in);
+		
+		bool wroteSomething = false;
+		
+		while(!in.eof()){
+			//read in list vector
+			ListVector list(in);
+			
+			//make a new list vector
+			ListVector newList;
+			newList.setLabel(list.getLabel());
+			
+			//for each bin
+			for (int i = 0; i < list.getNumBins(); i++) {
+			
+				//parse out names that are in accnos file
+				string binnames = list.get(i);
+				
+				string newNames = "";
+				while (binnames.find_first_of(',') != -1) { 
+					string name = binnames.substr(0,binnames.find_first_of(','));
+					binnames = binnames.substr(binnames.find_first_of(',')+1, binnames.length());
+					
+					//if that name is in the .accnos file, add it
+					if (names.count(name) == 0) {  newNames += name + ",";  }
+				}
+			
+				//get last name
+				if (names.count(binnames) == 0) {  newNames += binnames;  }
 
+				//if there are names in this bin add to new list
+				if (newNames != "") {  newList.push_back(newNames);	}
+			}
+				
+			//print new listvector
+			if (newList.getNumBins() != 0) {
+				wroteSomething = true;
+				newList.print(out);
+			}
+			
+			gobble(in);
+		}
+		in.close();	
+		out.close();
+		
+		if (wroteSomething == false) {
+			mothurOut("Your file contains only sequences from the .accnos file."); mothurOutEndLine();
+			remove(outputFileName.c_str()); 
+		}
+
+	}
+	catch(exception& e) {
+		errorOut(e, "RemoveSeqsCommand", "readList");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 void RemoveSeqsCommand::readName(){
 	try {

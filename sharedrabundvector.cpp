@@ -93,8 +93,8 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 		for(int i=0;i<num;i++){
 			f >> inputData;
 			
-			lookup[0]->push_back(inputData, i, groupN); //abundance, bin, group
-			push_back(inputData, i, groupN);
+			lookup[0]->push_back(inputData, groupN); //abundance, bin, group
+			push_back(inputData, groupN);
 			numSeqs += inputData;
 			numBins++;
 			if (inputData > maxRank) { maxRank = inputData; }
@@ -125,7 +125,7 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 			//fill vector.  
 			for(int i=0;i<num;i++){
 				f >> inputData;
-				lookup[count]->push_back(inputData, i, groupN); //abundance, bin, group
+				lookup[count]->push_back(inputData, groupN); //abundance, bin, group
 			}
 			
 			gobble(f);
@@ -202,12 +202,12 @@ vector <individual> SharedRAbundVector::getData(){
 }
 /***********************************************************************/
 
-void SharedRAbundVector::push_back(int binSize, int otu, string groupName){
+void SharedRAbundVector::push_back(int binSize, string groupName){
 	try {
 		individual newGuy;
 		newGuy.abundance = binSize;
 		newGuy.group = groupName;
-		newGuy.bin = otu;
+		newGuy.bin = data.size();
 		
 		data.push_back(newGuy);
 		numBins++;

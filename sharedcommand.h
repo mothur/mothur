@@ -35,6 +35,7 @@ private:
 	void printSharedData(vector<SharedRAbundVector*>);
 	void createMisMatchFile();
 	bool isValidGroup(string, vector<string>);
+	void eliminateZeroOTUS(vector<SharedRAbundVector*>&);
 	
 	GlobalData* globaldata;
 	ReadOTUFile* read;
@@ -44,7 +45,7 @@ private:
 	vector<string> groups;
 	ofstream out;
 	string filename, fileroot;
-	bool firsttime;
+	bool firsttime, pickedGroups;
 	map<string, ofstream*> filehandles;
 	map<string, ofstream*>::iterator it3;
 

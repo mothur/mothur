@@ -106,7 +106,6 @@ try {
 								break;
 							}
                         }
-                        
 	
                         //calculate at 0 and the given increment
                         if((i == 0) || (i+1) % increment == 0){

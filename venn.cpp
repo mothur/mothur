@@ -232,7 +232,7 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 						//merge BC and estimate with shared with A
 						SharedRAbundVector* merge = new SharedRAbundVector();
 						for (int j = 0; j < lookup[1]->size(); j++) {
-							merge->push_back((lookup[1]->getAbundance(j) + lookup[2]->getAbundance(j)), j, "");
+							merge->push_back((lookup[1]->getAbundance(j) + lookup[2]->getAbundance(j)), "");
 						}
 					
 						subset.clear();
@@ -243,7 +243,7 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 						//merge AC and estimate with shared with B
 						merge = new SharedRAbundVector();
 						for (int j = 0; j < lookup[0]->size(); j++) {
-							merge->push_back((lookup[0]->getAbundance(j) + lookup[2]->getAbundance(j)), j, "");
+							merge->push_back((lookup[0]->getAbundance(j) + lookup[2]->getAbundance(j)), "");
 						}
 					
 						subset.clear();
@@ -254,7 +254,7 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 						//merge AB and estimate with shared with C
 						merge = new SharedRAbundVector();
 						for (int j = 0; j < lookup[0]->size(); j++) {
-							merge->push_back((lookup[0]->getAbundance(j) + lookup[1]->getAbundance(j)), j, "");
+							merge->push_back((lookup[0]->getAbundance(j) + lookup[1]->getAbundance(j)), "");
 						}
 					
 						subset.clear();

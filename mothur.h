@@ -45,11 +45,16 @@
 #include <cerrno>
 #include <ctime>
 #include <limits>
+#include <readline/readline.h>
+#include <readline/history.h>
 
+/***********************************************************************/
 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 	#include <sys/wait.h>
 	#include <unistd.h>
+#else
+	#include <conio.h> //allows unbuffered screen capture from stdin
 #endif
 
 using namespace std;
@@ -480,6 +485,16 @@ inline int getNumSeqs(ifstream& file){
 	file.seekg(0);
 	return numSeqs;
 
+}
+/***********************************************************************/
+
+inline bool inVector(string member, vector<string> group){
+	
+	for (int i = 0; i < group.size(); i++) {
+		if (group[i] == member) {  return true; 	}
+	}
+	
+	return false;
 }
 
 /***********************************************************************/
