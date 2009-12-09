@@ -74,7 +74,7 @@ void ChimeraCheckRDP::print(ostream& out) {
 }
 
 //***************************************************************************************************************
-void ChimeraCheckRDP::getChimeras() {
+int ChimeraCheckRDP::getChimeras() {
 	try {
 		
 		//read in query sequences and subject sequences
@@ -135,7 +135,7 @@ void ChimeraCheckRDP::getChimeras() {
 		//free memory
 		for (int i = 0; i < lines.size(); i++)					{	delete lines[i];	}
 	
-			
+		return 0;
 	}
 	catch(exception& e) {
 		errorOut(e, "ChimeraCheckRDP", "getChimeras");

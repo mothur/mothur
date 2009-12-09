@@ -14,6 +14,26 @@
 
 #include "engine.hpp"
 
+/***********************************************************************/
+inline void terminateCommand(int dummy)  {
+	
+		//mothurOut("Stopping command...."); 
+		//CommandFactory* cFactory = CommandFactory::getInstance();
+		//cFactory->getCommand();  //deletes old command and makes new no command.  
+								//this may cause memory leak if old commands execute function allocated memory 
+								//that is freed in the execute function and not the deconstructor 
+		//mothurOut("DONE."); mothurOutEndLine();
+}
+/***********************************************************************/
+Engine::Engine(){
+	try {
+		cFactory = CommandFactory::getInstance();
+	}
+	catch(exception& e) {
+		errorOut(e, "Engine", "Engine");
+		exit(1);
+	}
+}
 
 /***********************************************************************/
 
@@ -38,13 +58,10 @@ bool InteractEngine::getInput(){
 		int quitCommandCalled = 0;
 		
 		while(quitCommandCalled != 1){
-			
+
 			mothurOutEndLine();
 			
 			input = getCommand();			
-			
-			mothurOutJustToLog("mothur > " + input);
-			mothurOutEndLine();
 			
 			//allow user to omit the () on the quit command
 			if (input == "quit") { input = "quit()"; }
@@ -75,26 +92,31 @@ bool InteractEngine::getInput(){
 /***********************************************************************/
 string Engine::getCommand()  {
 	try {
-		char* nextCommand = NULL;
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			#ifdef USE_READLINE
+				char* nextCommand = NULL;
+				nextCommand = readline("mothur > ");
+				if(nextCommand != NULL) {  add_history(nextCommand);  }		
+				mothurOutJustToLog("mothur > " + toString(nextCommand));
+				return nextCommand;
+			#else
+				string nextCommand = "";
+				mothurOut("mothur > ");
+				getline(cin, nextCommand);
+				return nextCommand;
+			#endif
+		#else
+			string nextCommand = "";
+			mothurOut("mothur > ");
+			getline(cin, nextCommand);
+			return nextCommand;
+		#endif
 		
-		nextCommand = readline("mothur > ");
-		if(nextCommand != NULL) {  add_history(nextCommand);  }
+		mothurOutEndLine();
 						
-		return nextCommand;
 	}
 	catch(exception& e) {
 		errorOut(e, "Engine", "getCommand");
-		exit(1);
-	}
-}
-/***********************************************************************/
-void Engine::terminateCommand(int dummy)  {
-	try {
-		mothurOut("Stopping command."); mothurOutEndLine();
-		cFactory->getCommand();  //terminates command
-	}
-	catch(exception& e) {
-		errorOut(e, "Engine", "terminateCommand");
 		exit(1);
 	}
 }

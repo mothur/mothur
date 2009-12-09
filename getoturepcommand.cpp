@@ -9,6 +9,26 @@
 
 #include "getoturepcommand.h"
 
+//********************************************************************************************************************
+//sorts lowest to highest
+inline bool compareName(repStruct left, repStruct right){
+	return (left.name < right.name);	
+}
+//********************************************************************************************************************
+//sorts lowest to highest
+inline bool compareBin(repStruct left, repStruct right){
+	return (left.bin < right.bin);	
+}
+//********************************************************************************************************************
+//sorts lowest to highest
+inline bool compareSize(repStruct left, repStruct right){
+	return (left.size < right.size);	
+}
+//********************************************************************************************************************
+//sorts lowest to highest
+inline bool compareGroup(repStruct left, repStruct right){
+	return (left.group < right.group);	
+}
 //**********************************************************************************************************************
 GetOTURepCommand::GetOTURepCommand(string option){
 	try{
@@ -22,7 +42,7 @@ GetOTURepCommand::GetOTURepCommand(string option){
 			help(); abort = true;
 		} else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","list","label","name", "group"};
+			string Array[] =  {"fasta","list","label","name", "group", "sorted"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -70,14 +90,25 @@ GetOTURepCommand::GetOTURepCommand(string option){
 			else if (namesfile == "not found") { namesfile = ""; }
 
 			groupfile = validParameter.validFile(parameters, "group", true);
-			if (groupfile == "not open") { abort = true; }
+			if (groupfile == "not open") { groupfile = ""; abort = true; }
 			else if (groupfile == "not found") { groupfile = ""; }
 			else {
 				//read in group map info.
 				groupMap = new GroupMap(groupfile);
 				groupMap->readMap();
 			}
-		
+			
+			sorted = validParameter.validFile(parameters, "sorted", false);		if (sorted == "not found"){	sorted = "";	}
+			if ((sorted != "") && (sorted != "name") && (sorted != "bin") && (sorted != "size") && (sorted != "group")) {
+				mothurOut(sorted + " is not a valid option for the sorted parameter. The only options are: name, bin, size and group. I will not sort."); mothurOutEndLine();
+				sorted = "";
+			}
+			
+			if ((sorted == "group") && (groupfile == "")) {
+				mothurOut("You must provide a groupfile to sort by group. I will not sort."); mothurOutEndLine();
+				sorted = "";
+			}
+			
 			if (abort == false) {
 			
 				if(globaldata->gSparseMatrix != NULL)	{
@@ -125,11 +156,12 @@ GetOTURepCommand::GetOTURepCommand(string option){
 void GetOTURepCommand::help(){
 	try {
 		mothurOut("The get.oturep command can only be executed after a successful read.dist command.\n");
-		mothurOut("The get.oturep command parameters are list, fasta, name, group and label.  The fasta and list parameters are required.\n");
+		mothurOut("The get.oturep command parameters are list, fasta, name, group, sorted and label.  The fasta and list parameters are required.\n");
 		mothurOut("The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n");
 		mothurOut("The get.oturep command should be in the following format: get.oturep(fasta=yourFastaFile, list=yourListFile, name=yourNamesFile, group=yourGroupFile, label=yourLabels).\n");
 		mothurOut("Example get.oturep(fasta=amazon.fasta, list=amazon.fn.list, group=amazon.groups, name=amazon.names).\n");
 		mothurOut("The default value for label is all labels in your inputfile.\n");
+		mothurOut("The sorted parameter allows you to indicate you want the output sorted. You can sort by sequence name, bin number, bin size or group. The default is no sorting, but your options are name, number, size, or group.\n");
 		mothurOut("The get.oturep command outputs a .fastarep file for each distance you specify, selecting one OTU representative for each bin.\n");
 		mothurOut("If you provide a groupfile, then it also appends the names of the groups present in that bin.\n");
 		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");
@@ -319,7 +351,7 @@ string GetOTURepCommand::findRep(int bin, string& group, ListVector* thisList, i
 			}
 			//rip off last dash
 			group = group.substr(0, group.length()-1);
-		}
+		}else{ group = ""; }
 
 		// if only 1 sequence in bin or processing the "unique" label, then 
 		// the first sequence of the OTU is the representative one
@@ -376,6 +408,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 		//create output file
 		string outputFileName = getRootName(listfile) + processList->getLabel() + ".rep.fasta";
 		openOutputFile(outputFileName, out);
+		vector<repStruct> reps;
 
 		//for each bin in the list vector
 		for (int i = 0; i < processList->size(); i++) {
@@ -387,17 +420,41 @@ int GetOTURepCommand::process(ListVector* processList) {
 			sequence = fasta->getSequence(nameRep);
 
 			if (sequence != "not found") {
-				nameRep = nameRep + "|" + toString(i+1);
-				nameRep = nameRep + "|" + toString(binsize);
-				if (groupfile != "") {
-					nameRep = nameRep + "|" + groups;
+				if (sorted == "") { //print them out
+					nameRep = nameRep + "|" + toString(i+1);
+					nameRep = nameRep + "|" + toString(binsize);
+					if (groupfile != "") {
+						nameRep = nameRep + "|" + groups;
+					}
+					out << ">" << nameRep << endl;
+					out << sequence << endl;
+				}else { //save them
+					repStruct newRep(nameRep, i+1, binsize, groups);
+					reps.push_back(newRep);
 				}
-				out << ">" << nameRep << endl;
-				out << sequence << endl;
-			} else { 
+			}else { 
 				mothurOut(nameRep + " is missing from your fasta or name file. Please correct. "); mothurOutEndLine(); 
 				remove(outputFileName.c_str());
 				return 1;
+			}
+		}
+		
+		if (sorted != "") { //then sort them and print them
+			if (sorted == "name")		{  sort(reps.begin(), reps.end(), compareName);		}
+			else if (sorted == "bin")	{  sort(reps.begin(), reps.end(), compareBin);		}
+			else if (sorted == "size")	{  sort(reps.begin(), reps.end(), compareSize);		}
+			else if (sorted == "group")	{  sort(reps.begin(), reps.end(), compareGroup);	}
+			
+			//print them
+			for (int i = 0; i < reps.size(); i++) {
+				string sequence = fasta->getSequence(reps[i].name);
+				string outputName = reps[i].name + "|" + toString(reps[i].bin);
+				outputName = outputName + "|" + toString(reps[i].size);
+				if (groupfile != "") {
+					outputName = outputName + "|" + reps[i].group;
+				}
+				out << ">" << outputName << endl;
+				out << sequence << endl;
 			}
 		}
 

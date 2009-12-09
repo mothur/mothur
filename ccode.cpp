@@ -128,7 +128,7 @@ void Ccode::print(ostream& out) {
 }
 
 //***************************************************************************************************************
-void Ccode::getChimeras() {
+int Ccode::getChimeras() {
 	try {
 		
 		//read in query sequences and subject sequences
@@ -138,6 +138,8 @@ void Ccode::getChimeras() {
 		mothurOut("Done."); mothurOutEndLine();
 		
 		int numSeqs = querySeqs.size();
+		
+		if (unaligned) { mothurOut("Your sequences need to be aligned when you use the bellerophon ccode."); mothurOutEndLine(); return 1;  }
 		
 		closest.resize(numSeqs);
 		
@@ -297,7 +299,8 @@ void Ccode::getChimeras() {
 		for (int i = 0; i < lines.size(); i++)					{	delete lines[i];				}
 		delete distCalc;
 		delete decalc;
-			
+		
+		return 0;
 	}
 	catch(exception& e) {
 		errorOut(e, "Ccode", "getChimeras");

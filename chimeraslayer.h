@@ -26,7 +26,7 @@ class ChimeraSlayer : public Chimera {
 		ChimeraSlayer(string, string);	
 		~ChimeraSlayer();
 		
-		void getChimeras();
+		int getChimeras();
 		void print(ostream&);
 		
 		void setCons(string){};

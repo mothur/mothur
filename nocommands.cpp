@@ -23,9 +23,8 @@ int NoCommand::execute(){
 	//Could choose to give more help here?fdsah
 	mothurOut("Invalid command.\n");
 	
-	CommandFactory* valid = new CommandFactory();
+	CommandFactory* valid =  CommandFactory::getInstance();
 	valid->printCommands(cout);
-	delete valid;
 	
 	return 0;
 }

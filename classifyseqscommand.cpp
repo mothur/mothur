@@ -25,7 +25,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option){
 		else {
 			
 			//valid paramters for this command
-			string AlignArray[] =  {"template","fasta","search","ksize","method","processors","taxonomy","match","mismatch","gapopen","gapextend","numwanted","cutoff"};
+			string AlignArray[] =  {"template","fasta","search","ksize","method","processors","taxonomy","match","mismatch","gapopen","gapextend","numwanted","cutoff","probs"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -94,6 +94,9 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option){
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found"){	temp = "0";				}
 			convert(temp, cutoff);
+			
+			temp = validParameter.validFile(parameters, "probs", false);		if (temp == "not found"){	temp = "true";			}
+			probs = isTrue(temp);
 
 			
 			if ((method == "bayesian") && (search != "kmer"))  { 
@@ -123,7 +126,7 @@ ClassifySeqsCommand::~ClassifySeqsCommand(){
 void ClassifySeqsCommand::help(){
 	try {
 		mothurOut("The classify.seqs command reads a fasta file containing sequences and creates a .taxonomy file and a .tax.summary file.\n");
-		mothurOut("The classify.seqs command parameters are template, fasta, search, ksize, method, taxonomy, processors, match, mismatch, gapopen, gapextend and numwanted.\n");
+		mothurOut("The classify.seqs command parameters are template, fasta, search, ksize, method, taxonomy, processors, match, mismatch, gapopen, gapextend, numwanted and probs.\n");
 		mothurOut("The template, fasta and taxonomy parameters are required.\n");
 		mothurOut("The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer and blast. The default is kmer.\n");
 		mothurOut("The method parameter allows you to specify classification method to use.  Your options are: bayesian and knn. The default is bayesian.\n");
@@ -135,6 +138,7 @@ void ClassifySeqsCommand::help(){
 		mothurOut("The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -2.0.\n");
 		mothurOut("The numwanted parameter allows you to specify the number of sequence matches you want with the knn method.  The default is 10.\n");
 		mothurOut("The cutoff parameter allows you to specify a bootstrap confidence threshold for your taxonomy.  The default is 0.\n");
+		mothurOut("The probs parameter shut off the bootstrapping results for the bayesian method. The default is true, meaning you want the bootstrapping to be run.\n");
 		mothurOut("The classify.seqs command should be in the following format: \n");
 		mothurOut("classify.seqs(template=yourTemplateFile, fasta=yourFastaFile, method=yourClassificationMethod, search=yourSearchmethod, ksize=yourKmerSize, taxonomy=yourTaxonomyFile, processors=yourProcessors) \n");
 		mothurOut("Example classify.seqs(fasta=amazon.fasta, template=core.filtered, method=knn, search=gotoh, ksize=8, processors=2)\n");
@@ -155,14 +159,12 @@ int ClassifySeqsCommand::execute(){
 	try {
 		if (abort == true) {	return 0;	}
 		
-		
-		
-		if(method == "bayesian")			{	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff);		}
+		if(method == "bayesian")			{	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, probs);		}
 		else if(method == "knn")			{	classify = new Knn(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, numWanted);				}
 		else {
 			mothurOut(search + " is not a valid method option. I will run the command using bayesian.");
 			mothurOutEndLine();
-			classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff);	
+			classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, probs);	
 		}
 
 		int numFastaSeqs = 0;

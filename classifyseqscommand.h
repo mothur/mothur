@@ -47,7 +47,7 @@ private:
 	string fastaFileName, templateFileName, distanceFileName, search, method, taxonomyFileName;
 	int processors, kmerSize, numWanted, cutoff;
 	float match, misMatch, gapOpen, gapExtend;
-	bool abort;
+	bool abort, probs;
 	
 	int driver(linePair*, string, string);
 	void appendTaxFiles(string, string);

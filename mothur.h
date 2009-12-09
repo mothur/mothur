@@ -45,14 +45,20 @@
 #include <cerrno>
 #include <ctime>
 #include <limits>
-#include <readline/readline.h>
-#include <readline/history.h>
 
 /***********************************************************************/
 
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 	#include <sys/wait.h>
 	#include <unistd.h>
+	
+	#ifdef USE_READLINE
+		#include <readline/readline.h>
+		#include <readline/history.h>
+	#endif
+
+	//#include <readline/readline.h>
+	//#include <readline/history.h>
 #else
 	#include <conio.h> //allows unbuffered screen capture from stdin
 #endif
@@ -195,7 +201,6 @@ inline void gobble(istream& f){
 	f.putback(d);
 	
 }
-
 /***********************************************************************/
 
 inline string getline(ifstream& fileHandle) {
@@ -496,7 +501,6 @@ inline bool inVector(string member, vector<string> group){
 	
 	return false;
 }
-
 /***********************************************************************/
 
 //This function parses the estimator options and puts them in a vector
