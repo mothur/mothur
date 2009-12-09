@@ -27,7 +27,7 @@ class Pintail : public Chimera {
 		Pintail(string, string);	
 		~Pintail();
 		
-		void getChimeras();
+		int getChimeras();
 		void print(ostream&);
 		
 		void setCons(string c)		{ consfile = c;  }

@@ -16,7 +16,7 @@ HelpCommand::HelpCommand(string option){
 	
 	if (option != "") { mothurOut("There are no valid parameters for the help() command."); mothurOutEndLine();  }
 	
-	validCommands = new CommandFactory();
+	validCommands = CommandFactory::getInstance();
 }
 
 //**********************************************************************************************************************
@@ -29,8 +29,6 @@ int HelpCommand::execute(){
 
 	validCommands->printCommands(cout);
 	mothurOut("For more information about a specific command type 'commandName(help)' i.e. 'read.dist(help)'"); mothurOutEndLine();
-	
-	delete validCommands;
 	
 	mothurOutEndLine(); mothurOut("For further assistance please refer to the Mothur manual on our wiki at http://www.mothur.org/wiki, or contact Pat Schloss at mothur.bugs@gmail.com.\n");
 	return 0;

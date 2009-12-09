@@ -27,7 +27,7 @@ class Ccode : public Chimera {
 		Ccode(string, string);	
 		~Ccode();
 		
-		void getChimeras();
+		int getChimeras();
 		void print(ostream&);
 		
 		void setCons(string c)		{}

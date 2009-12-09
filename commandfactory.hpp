@@ -16,8 +16,7 @@ class Command;
 
 class CommandFactory {
 public:
-	CommandFactory();
-	~CommandFactory();
+	static CommandFactory* getInstance();
 	Command* getCommand(string, string);
 	Command* getCommand();
 	bool isValidCommand(string);
@@ -27,8 +26,12 @@ private:
 	Command* command;
 	map<string, string> commands;
 	map<string, string>::iterator it;
-
 	
+	static CommandFactory* _uniqueInstance;
+	CommandFactory( const CommandFactory& ); // Disable copy constructor
+	void operator=( const CommandFactory& ); // Disable assignment operator
+	CommandFactory();
+	~CommandFactory();
 
 };
 

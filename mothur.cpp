@@ -14,6 +14,7 @@
 /**************************************************************************************************/
 
 GlobalData* GlobalData::_uniqueInstance = 0;
+CommandFactory* CommandFactory::_uniqueInstance = 0;
 
 int main(int argc, char *argv[]){
 	try {

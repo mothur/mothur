@@ -89,12 +89,12 @@ class Chimera {
 		
 		
 		//pure functions
-		virtual void getChimeras() = 0;	
+		virtual int getChimeras() = 0;	
 		virtual void print(ostream&) = 0;	
 		
 	protected:
 		
-		bool filter, correction, svg;
+		bool filter, correction, svg, unaligned;
 		int processors, window, increment, numWanted, kmerSize, match, misMatch, minSim, parents, iters;
 		float divR;
 		string seqMask, quanfile, filterString, name;

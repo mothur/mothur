@@ -22,12 +22,12 @@ class GlobalData;
 
 class Engine {
 public:
-	Engine() {  cFactory = new CommandFactory();	}
-	virtual ~Engine(){  delete cFactory;  }
+	Engine(); 
+	virtual ~Engine(){}
 	virtual bool getInput() = 0;
 	virtual string getCommand();
 	vector<string> getOptions() {	return options;		}
-	virtual void terminateCommand(int);
+	//virtual void terminateCommand(int);
 protected:
 	vector<string> options;
 	CommandFactory* cFactory;

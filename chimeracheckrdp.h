@@ -28,7 +28,7 @@ class ChimeraCheckRDP : public Chimera {
 		ChimeraCheckRDP(string, string);	
 		~ChimeraCheckRDP();
 		
-		void getChimeras();
+		int getChimeras();
 		void print(ostream&);
 		
 		void setCons(string){};

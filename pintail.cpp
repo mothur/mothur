@@ -74,7 +74,7 @@ void Pintail::print(ostream& out) {
 }
 
 //***************************************************************************************************************
-void Pintail::getChimeras() {
+int Pintail::getChimeras() {
 	try {
 		
 		//read in query sequences and subject sequences
@@ -84,6 +84,8 @@ void Pintail::getChimeras() {
 		mothurOut("Done."); mothurOutEndLine();
 		
 		int numSeqs = querySeqs.size();
+		
+		if (unaligned) { mothurOut("Your sequences need to be aligned when you use the pintail method."); mothurOutEndLine(); return 1;  }
 		
 		obsDistance.resize(numSeqs);
 		expectedDistance.resize(numSeqs);
@@ -382,6 +384,8 @@ void Pintail::getChimeras() {
 			
 		delete distcalculator;
 		delete decalc;
+		
+		return 0;
 	}
 	catch(exception& e) {
 		errorOut(e, "Pintail", "getChimeras");

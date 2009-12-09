@@ -23,6 +23,17 @@
 typedef list<PCell>::iterator MatData;
 typedef map<int, float> SeqMap;
 
+struct repStruct {
+		string name;
+		int	bin;
+		int size;
+		string group;
+		
+		repStruct(){}
+		repStruct(string n, int b, int s, string g) : name(n), bin(b), size(s), group(g) {}
+		~repStruct() {}
+};
+
 class GetOTURepCommand : public Command {
 
 public:
@@ -39,7 +50,7 @@ private:
 	InputData* input;
 	FastaMap* fasta;
 	GroupMap* groupMap;
-	string filename, fastafile, listfile, namesfile, groupfile, label;
+	string filename, fastafile, listfile, namesfile, groupfile, label, sorted;
 	ofstream out;
 	ifstream in, inNames;
 	bool groupError;

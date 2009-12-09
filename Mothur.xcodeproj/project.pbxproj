@@ -1368,6 +1368,7 @@
 					"-pedantic",
 					"-wall",
 					"-lreadline",
+					"-DUSE_READLINE",
 				);
 				PREBINDING = NO;
 				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";

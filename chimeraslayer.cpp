@@ -58,7 +58,7 @@ void ChimeraSlayer::print(ostream& out) {
 }
 
 //***************************************************************************************************************
-void ChimeraSlayer::getChimeras() {
+int ChimeraSlayer::getChimeras() {
 	try {
 		
 		//read in query sequences and subject sequences
@@ -68,6 +68,8 @@ void ChimeraSlayer::getChimeras() {
 		mothurOut("Done."); mothurOutEndLine();
 		
 		int numSeqs = querySeqs.size();
+		
+		if (unaligned) { mothurOut("Your sequences need to be aligned when you use the chimeraslayer method."); mothurOutEndLine(); return 1;  }
 		
 		chimeraResults.resize(numSeqs);
 		chimeraFlags.resize(numSeqs, "no");
@@ -212,6 +214,8 @@ void ChimeraSlayer::getChimeras() {
 		if (seqMask != "") {
 			delete decalc; 
 		}
+		
+		return 0;
 	}
 	catch(exception& e) {
 		errorOut(e, "ChimeraSlayer", "getChimeras");

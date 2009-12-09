@@ -61,10 +61,20 @@
 #include "classifyseqscommand.h"
 #include "phylotypecommand.h"
 
+/*******************************************************/
+
+/******************************************************/
+CommandFactory* CommandFactory::getInstance() {
+	if( _uniqueInstance == 0) {
+		_uniqueInstance = new CommandFactory();
+	}
+	return _uniqueInstance;
+}
 /***********************************************************/
 
 /***********************************************************/
 CommandFactory::CommandFactory(){
+	_uniqueInstance = 0;
 	string s = "";
 	command = new NoCommand(s);
 	

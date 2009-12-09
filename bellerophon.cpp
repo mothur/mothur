@@ -75,7 +75,7 @@ inline bool comparePref(Preference left, Preference right){
 }
 
 //***************************************************************************************************************
-void Bellerophon::getChimeras() {
+int Bellerophon::getChimeras() {
 	try {
 		
 		//do soft filter
@@ -93,6 +93,8 @@ void Bellerophon::getChimeras() {
 		
 		//read in sequences
 		seqs = readSeqs(fastafile);
+		
+		if (unaligned) { mothurOut("Your sequences need to be aligned when you use the bellerophon method."); mothurOutEndLine(); return 1;  }
 		
 		int numSeqs = seqs.size();
 		
@@ -138,21 +140,22 @@ void Bellerophon::getChimeras() {
 				vector<Sequence> left;  vector<Sequence> right;
 				
 				for (int i = 0; i < seqs.size(); i++) {
-//cout << "whole = " << seqs[i].getAligned() << endl;
+//cout << "midpoint = " << midpoint << "\twindow = " << window << endl;
+//cout << "whole = " << seqs[i]->getAligned().length() << endl;
 					//save left side
 					string seqLeft = seqs[i]->getAligned().substr(midpoint-window, window);
 					Sequence tempLeft;
 					tempLeft.setName(seqs[i]->getName());
 					tempLeft.setAligned(seqLeft);
 					left.push_back(tempLeft);
-//cout << "left = " << tempLeft.getAligned() << endl;			
+//cout << "left = " << tempLeft.getAligned().length() << endl;			
 					//save right side
 					string seqRight = seqs[i]->getAligned().substr(midpoint, window);
 					Sequence tempRight;
 					tempRight.setName(seqs[i]->getName());
 					tempRight.setAligned(seqRight);
 					right.push_back(tempRight);
-//cout << "right = " << seqRight << endl;	
+//cout << "right = " << seqRight.length() << endl;	
 				}
 				
 				//adjust midpoint by increment
@@ -220,6 +223,8 @@ void Bellerophon::getChimeras() {
 		
 		//sort Preferences highest to lowest
 		sort(pref.begin(), pref.end(), comparePref);
+		
+		return 0;
 
 	}
 	catch(exception& e) {

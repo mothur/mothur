@@ -90,11 +90,19 @@ vector<Sequence*> Chimera::readSeqs(string file) {
 		ifstream in;
 		openInputFile(file, in);
 		vector<Sequence*> container;
+		int count = 0;
+		int length = 0;
+		unaligned = false;
 		
 		//read in seqs and store in vector
 		while(!in.eof()){
 			
 			Sequence* current = new Sequence(in);  gobble(in);
+			
+			if (count == 0) {  length = current->getAligned().length();  count++;  } //gets first seqs length
+			else if (length != current->getAligned().length()) { //seqs are unaligned
+				unaligned = true;
+			}
 			
 			if (current->getName() != "") {  container.push_back(current);  }
 		}
