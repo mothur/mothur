@@ -16,6 +16,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option){
 	
 		globaldata = GlobalData::getInstance();
 		abort = false;
+		unique = true;
 		allLines = 1;
 		labels.clear();
 		
@@ -24,7 +25,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"label","groups","fasta","list","group","output"};
+			string Array[] =  {"label","unique","shared","fasta","list","group","output"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -61,11 +62,20 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option){
 			output = validParameter.validFile(parameters, "output", false);			
 			if (output == "not found") { output = ""; }
 			
-			groups = validParameter.validFile(parameters, "groups", false);			
+			groups = validParameter.validFile(parameters, "unique", false);			
 			if (groups == "not found") { groups = ""; }
 			else { 
 				splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
+				
+			}
+			
+			groups = validParameter.validFile(parameters, "shared", false);			
+			if (groups == "not found") { groups = "";  }
+			else { 
+				splitAtDash(groups, Groups);
+				globaldata->Groups = Groups;
+				unique = false;
 			}
 			
 			fastafile = validParameter.validFile(parameters, "fasta", true);
@@ -84,9 +94,12 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option){
 
 void GetSharedOTUCommand::help(){
 	try {
-		mothurOut("The get.sharedseqs command parameters are list, group, label, groups, output and fasta.  The list and group parameters are required.\n");
+		mothurOut("The get.sharedseqs command parameters are list, group, label, unique, shared, output and fasta.  The list and group parameters are required.\n");
 		mothurOut("The label parameter allows you to select what distance levels you would like output files for, and are separated by dashes.\n");
-		mothurOut("The groups parameter allows you to select groups you would like to know the shared info for, and are separated by dashes.\n");
+		mothurOut("The unique and shared parameters allow you to select groups you would like to know the shared info for, and are separated by dashes.\n");
+		mothurOut("If you enter your groups under the unique parameter mothur will return the otus that contain ONLY sequences from those groups.\n");
+		mothurOut("If you enter your groups under the shared parameter mothur will return the otus that contain sequences from those groups and may also contain sequences from other groups.\n");
+		mothurOut("If you do not enter any groups then the get.sharedseqs command will return sequences that are unique to all groups in your group file.\n");
 		mothurOut("The fasta parameter allows you to input a fasta file and outputs a fasta file for each distance level containing only the sequences that are in OTUs shared by the groups specified.\n");
 		mothurOut("The output parameter allows you to output the list of names without the group and bin number added. \n");
 		mothurOut("With this option you can use the names file as an input in get.seqs and remove.seqs commands. To do this enter output=accnos. \n");
@@ -121,7 +134,7 @@ int GetSharedOTUCommand::execute(){
 		if (Groups.size() == 0) {
 			Groups = groupMap->namesOfGroups;
 		}
-		
+	
 		//put groups in map to find easier
 		for(int i = 0; i < Groups.size(); i++) {
 			groupFinder[Groups[i]] = Groups[i];
@@ -238,7 +251,7 @@ void GetSharedOTUCommand::process(ListVector* shared) {
 		//go through each bin, find out if shared
 		for (int i = 0; i < shared->getNumBins(); i++) {
 			
-			bool sharedByAll = true;
+			bool uniqueOTU = true;
 			
 			map<string, int> atLeastOne;
 			for (int m = 0; m < Groups.size(); m++) {
@@ -248,48 +261,48 @@ void GetSharedOTUCommand::process(ListVector* shared) {
 			vector<string> namesOfSeqsInThisBin;
 			
 			string names = shared->get(i);  
-			while ((names.find_first_of(',') != -1) && sharedByAll) { 
+			while ((names.find_first_of(',') != -1)) { 
 				string name = names.substr(0,names.find_first_of(','));
 				names = names.substr(names.find_first_of(',')+1, names.length());
-								
+				
 				//find group
 				string seqGroup = groupMap->getGroup(name);
 				if (output != "accnos") {
 					namesOfSeqsInThisBin.push_back((name + "\t" + seqGroup + "\t" + toString(i+1)));
 				}else {  namesOfSeqsInThisBin.push_back(name);	}
-
+				
 				if (seqGroup == "not found") { mothurOut(name + " is not in your groupfile. Please correct."); mothurOutEndLine(); exit(1);  }
 				
 				//is this seq in one of hte groups we care about
 				it = groupFinder.find(seqGroup);
-				if (it == groupFinder.end()) {  sharedByAll = false;  } //you have a sequence from a group you don't want
+				if (it == groupFinder.end()) {  uniqueOTU = false;  } //you have a sequence from a group you don't want
 				else {  atLeastOne[seqGroup]++;  }
 			}
 			
 			//get last name
-			//find group
-			if (sharedByAll) {
-				string seqGroup = groupMap->getGroup(names);
-				if (output != "accnos") {
-					namesOfSeqsInThisBin.push_back((names + "\t" + seqGroup + "\t" + toString(i+1)));
-				}else {  namesOfSeqsInThisBin.push_back(names);	}
-				
-				if (seqGroup == "not found") { mothurOut(names + " is not in your groupfile. Please correct."); mothurOutEndLine(); exit(1);  }
+			string seqGroup = groupMap->getGroup(names);
+			if (output != "accnos") {
+				namesOfSeqsInThisBin.push_back((names + "\t" + seqGroup + "\t" + toString(i+1)));
+			}else {  namesOfSeqsInThisBin.push_back(names);	}
 			
-				//is this seq in one of hte groups we care about
-				it = groupFinder.find(seqGroup);
-				if (it == groupFinder.end()) {  sharedByAll = false;  } //you have a sequence from a group you don't want
-				else {  atLeastOne[seqGroup]++;  }
-			}
+			if (seqGroup == "not found") { mothurOut(names + " is not in your groupfile. Please correct."); mothurOutEndLine(); exit(1);  }
+			
+			//is this seq in one of hte groups we care about
+			it = groupFinder.find(seqGroup);
+			if (it == groupFinder.end()) {  uniqueOTU = false;  } //you have a sequence from a group you don't want
+			else {  atLeastOne[seqGroup]++;  }
+			
 			
 			//make sure you have at least one seq from each group you want
+			bool sharedByAll = true;
 			map<string, int>::iterator it2;
 			for (it2 = atLeastOne.begin(); it2 != atLeastOne.end(); it2++) {
 				if (it2->second == 0) {  sharedByAll = false;	}
 			}
 			
-			//if shared, save names of seqs in that bin
-			if (sharedByAll) {
+			//if the user wants unique bins and this is unique then print
+			//or this the user wants shared bins and this bin is shared then print
+			if ((unique && uniqueOTU && sharedByAll) || (!unique && sharedByAll)) {
 				
 				wroteSomething = true;
 				num++;
@@ -309,9 +322,6 @@ void GetSharedOTUCommand::process(ListVector* shared) {
 					}
 				}
 			}
-			
-			
-				
 		}
 		
 		outNames.close();

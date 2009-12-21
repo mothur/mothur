@@ -24,7 +24,6 @@ float SLibshuff::evaluatePair(int i, int j){
 vector<vector<double> > SLibshuff::evaluateAll(){
 	try{
 		savedMins.resize(numGroups);
-		
 		vector<vector<double> > dCXYValues(numGroups);
 
 		for(int i=0;i<numGroups;i++){

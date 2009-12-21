@@ -34,7 +34,7 @@ class GetSharedOTUCommand : public Command {
 		
 		set<string> labels;
 		string fastafile, label, groups, listfile, groupfile, output;
-		bool abort, allLines;
+		bool abort, allLines, unique;
 		vector<string> Groups;
 		map<string, string> groupFinder;
 		map<string, string>::iterator it;

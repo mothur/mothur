@@ -35,6 +35,7 @@ public:
 	int getNumGroups();
 	void printMatrix(ostream&);
 	float get(int, int);
+	Names getRowInfo(int row)  {  return index[row];  }
 	
 private:
 	vector< vector<float> > matrix;  //a 2D distance matrix of all the sequences and their distances to eachother.

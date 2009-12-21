@@ -28,10 +28,6 @@
 //University of Florida, Gainesville, FL 32610-3622 and 3Materials Technology Directorate, Air Force Technical 
 //Applications Center, 1030 S. Highway A1A, Patrick AFB, FL 32925-3002, USA 
 //Received January 28, 2009; Revised April 14, 2009; Accepted April 15, 2009 
-
-/******************************************************************/
-
-
 /************************************************************/
 struct seqDist {
 	int seq1;

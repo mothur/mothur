@@ -30,7 +30,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string method, int kmerSize, floa
 			if (temp.getName() != "") {
 				templateSequences.push_back(temp);
 				//save longest base
-				if (temp.getUnaligned().length() > longest)  { longest = temp.getUnaligned().length(); }
+				if (temp.getUnaligned().length() > longest)  { longest = temp.getUnaligned().length()+1; }
 			}
 		}
 		

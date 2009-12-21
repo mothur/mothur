@@ -162,6 +162,7 @@
 		A70B53AB0F4CD7AD0064797E /* getlabelcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70B53A60F4CD7AD0064797E /* getlabelcommand.cpp */; };
 		A70B53AC0F4CD7AD0064797E /* getlinecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70B53A80F4CD7AD0064797E /* getlinecommand.cpp */; };
 		A70DECD91063D8B40057C03C /* secondarystructurecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70DECD81063D8B40057C03C /* secondarystructurecommand.cpp */; };
+		A727E84A10D14568001A8432 /* readblast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A727E84910D14568001A8432 /* readblast.cpp */; };
 		A7283FF81056CAE100D0CC69 /* chimeracheckrdp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7283FF71056CAE100D0CC69 /* chimeracheckrdp.cpp */; };
 		A729ACD010848E6100139801 /* hclustercommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A729ACCF10848E6100139801 /* hclustercommand.cpp */; };
 		A729ACE410849BBE00139801 /* hcluster.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A729ACE310849BBE00139801 /* hcluster.cpp */; };
@@ -178,6 +179,7 @@
 		A787844510A1EBDD0086103D /* knn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A787844410A1EBDD0086103D /* knn.cpp */; };
 		A7B04493106CC3E60046FC83 /* chimeraslayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7B04492106CC3E60046FC83 /* chimeraslayer.cpp */; };
 		A7B0450E106CEEC90046FC83 /* slayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7B0450D106CEEC90046FC83 /* slayer.cpp */; };
+		A7E0AAB610D2886D00CF407B /* mgclustercommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E0AAB510D2886D00CF407B /* mgclustercommand.cpp */; };
 		A7E4A783106913F900688F62 /* getsharedotucommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E4A782106913F900688F62 /* getsharedotucommand.cpp */; };
 		A7E4A824106A9AD700688F62 /* maligner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E4A823106A9AD700688F62 /* maligner.cpp */; };
 		A7F5759710CEBC0600E20E47 /* libreadline.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A7F5759610CEBC0600E20E47 /* libreadline.a */; };
@@ -532,6 +534,8 @@
 		A70B53A90F4CD7AD0064797E /* getlinecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getlinecommand.h; sourceTree = SOURCE_ROOT; };
 		A70DECD71063D8B40057C03C /* secondarystructurecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = secondarystructurecommand.h; sourceTree = SOURCE_ROOT; };
 		A70DECD81063D8B40057C03C /* secondarystructurecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = secondarystructurecommand.cpp; sourceTree = SOURCE_ROOT; };
+		A727E84810D14568001A8432 /* readblast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readblast.h; sourceTree = SOURCE_ROOT; };
+		A727E84910D14568001A8432 /* readblast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readblast.cpp; sourceTree = SOURCE_ROOT; };
 		A7283FF61056CAE100D0CC69 /* chimeracheckrdp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeracheckrdp.h; sourceTree = SOURCE_ROOT; };
 		A7283FF71056CAE100D0CC69 /* chimeracheckrdp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeracheckrdp.cpp; sourceTree = SOURCE_ROOT; };
 		A729ACCE10848E6100139801 /* hclustercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hclustercommand.h; sourceTree = SOURCE_ROOT; };
@@ -564,6 +568,8 @@
 		A7B04492106CC3E60046FC83 /* chimeraslayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeraslayer.cpp; sourceTree = SOURCE_ROOT; };
 		A7B0450C106CEEC90046FC83 /* slayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = slayer.h; sourceTree = SOURCE_ROOT; };
 		A7B0450D106CEEC90046FC83 /* slayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = slayer.cpp; sourceTree = SOURCE_ROOT; };
+		A7E0AAB410D2886D00CF407B /* mgclustercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mgclustercommand.h; sourceTree = "<group>"; };
+		A7E0AAB510D2886D00CF407B /* mgclustercommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mgclustercommand.cpp; sourceTree = "<group>"; };
 		A7E4A781106913F900688F62 /* getsharedotucommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getsharedotucommand.h; sourceTree = SOURCE_ROOT; };
 		A7E4A782106913F900688F62 /* getsharedotucommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getsharedotucommand.cpp; sourceTree = SOURCE_ROOT; };
 		A7E4A822106A9AD700688F62 /* maligner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = maligner.h; sourceTree = SOURCE_ROOT; };
@@ -725,6 +731,8 @@
 		3796441D0FB9B9650081FDB6 /* read */ = {
 			isa = PBXGroup;
 			children = (
+				A727E84810D14568001A8432 /* readblast.h */,
+				A727E84910D14568001A8432 /* readblast.cpp */,
 				A751ACE81098B283003D0911 /* readcluster.h */,
 				A751ACE91098B283003D0911 /* readcluster.cpp */,
 				375AA1340F9E433D008EF9B8 /* readcolumn.h */,
@@ -915,6 +923,8 @@
 				21E859D70FC4632E005E1A48 /* matrixoutputcommand.cpp */,
 				7E5A17AD0FE57292003C6A03 /* mergefilecommand.h */,
 				7E5A17AE0FE57292003C6A03 /* mergefilecommand.cpp */,
+				A7E0AAB410D2886D00CF407B /* mgclustercommand.h */,
+				A7E0AAB510D2886D00CF407B /* mgclustercommand.cpp */,
 				375873F70F7D649C0040F377 /* nocommands.h */,
 				375873F60F7D649C0040F377 /* nocommands.cpp */,
 				3792946E0F2E191800B9034A /* parsimonycommand.h */,
@@ -1287,6 +1297,8 @@
 				A787844510A1EBDD0086103D /* knn.cpp in Sources */,
 				A773805F10B6D6FC002A6A61 /* taxonomyequalizer.cpp in Sources */,
 				A773809010B6EFD1002A6A61 /* phylotypecommand.cpp in Sources */,
+				A727E84A10D14568001A8432 /* readblast.cpp in Sources */,
+				A7E0AAB610D2886D00CF407B /* mgclustercommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

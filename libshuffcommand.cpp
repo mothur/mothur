@@ -22,7 +22,6 @@
 
 LibShuffCommand::LibShuffCommand(string option){
 	try {
-		
 		globaldata = GlobalData::getInstance();
 		abort = false;
 		Groups.clear();
@@ -74,19 +73,19 @@ LibShuffCommand::LibShuffCommand(string option){
 			userform = validParameter.validFile(parameters, "form", false);			if (userform == "not found") { userform = "integral"; }
 			
 			if (abort == false) {
-			
+		
 				matrix = globaldata->gMatrix;				//get the distance matrix
 				setGroups();								//set the groups to be analyzed and sorts them
-				
+	
 				/********************************************************************************************/
 				//this is needed because when we read the matrix we sort it into groups in alphabetical order
 				//the rest of the command and the classes used in this command assume specific order
 				/********************************************************************************************/
 				matrix->setGroups(globaldata->gGroupmap->namesOfGroups);
 				vector<int> sizes;
-				for (int i = 0; i < globaldata->gGroupmap->namesOfGroups.size(); i++) {  sizes.push_back(globaldata->gGroupmap->getNumSeqs(globaldata->gGroupmap->namesOfGroups[i]));  }
+				for (int i = 0; i < globaldata->gGroupmap->namesOfGroups.size(); i++) {   sizes.push_back(globaldata->gGroupmap->getNumSeqs(globaldata->gGroupmap->namesOfGroups[i]));  }
 				matrix->setSizes(sizes);
-				
+			
 
 				if(userform == "discrete"){
 					form = new DLibshuff(matrix, iters, step, cutOff);
@@ -132,10 +131,10 @@ int LibShuffCommand::execute(){
 	try {
 		
 		if (abort == true) {	return 0;	}
-		
+	
 		savedDXYValues = form->evaluateAll();
 		savedMinValues = form->getSavedMins();
-		
+	
 		pValueCounts.resize(numGroups);
 		for(int i=0;i<numGroups;i++){
 			pValueCounts[i].assign(numGroups, 0);

@@ -11,11 +11,13 @@ public:
 	void readMap();
 	ListVector getListVector();
 	int get(string);
-	void print();
+	string get(int);
+	void print(ostream&);
 	void push_back(string);
 private:
 	ifstream fileHandle;
 	ListVector list;
+	map<int, string> reverse;
 };
 
 

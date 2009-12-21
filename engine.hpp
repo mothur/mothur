@@ -27,7 +27,6 @@ public:
 	virtual bool getInput() = 0;
 	virtual string getCommand();
 	vector<string> getOptions() {	return options;		}
-	//virtual void terminateCommand(int);
 protected:
 	vector<string> options;
 	CommandFactory* cFactory;

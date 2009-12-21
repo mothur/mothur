@@ -16,7 +16,7 @@
 
 HCluster::HCluster(RAbundVector* rav, ListVector* lv) :  rabund(rav), list(lv){
 	try {
-	
+		mapWanted = false;
 		numSeqs = list->getNumSeqs();
 		
 		//initialize cluster array
@@ -56,7 +56,8 @@ void HCluster::clusterBins(){
 void HCluster::clusterNames(){
 	try {
 		///cout << smallCol << '\t' << smallRow << '\t' << smallDist << '\t' << list->get(clusterArray[smallRow].smallChild) << '\t' << list->get(clusterArray[smallCol].smallChild);
-
+		if (mapWanted) {  updateMap();  }
+		
 		list->set(clusterArray[smallCol].smallChild, list->get(clusterArray[smallRow].smallChild)+','+list->get(clusterArray[smallCol].smallChild));
 		list->set(clusterArray[smallRow].smallChild, "");	
 		list->setLabel(toString(smallDist));
@@ -256,7 +257,7 @@ void HCluster::updateArrayandLinkTable() {
 	}
 }
 /***********************************************************************/
-bool HCluster::update(int row, int col, float distance){
+void HCluster::update(int row, int col, float distance){
 	try {
 		
 		smallRow = row;
@@ -284,15 +285,62 @@ bool HCluster::update(int row, int col, float distance){
 		}
 		
 		//printInfo();
-		return clustered;
 	}
 	catch(exception& e) {
 		errorOut(e, "HCluster", "update");
 		exit(1);
 	}
 }
-
-
 /***********************************************************************/
+void HCluster::setMapWanted(bool m)  {  
+	try {
+		mapWanted = m;
+		
+		//initialize map
+		for (int i = 0; i < list->getNumBins(); i++) {
+			
+			//parse bin 
+			string names = list->get(i);
+			while (names.find_first_of(',') != -1) { 
+				//get name from bin
+				string name = names.substr(0,names.find_first_of(','));
+				//save name and bin number
+				seq2Bin[name] = i;
+				names = names.substr(names.find_first_of(',')+1, names.length());
+			}
+			
+			//get last name
+			seq2Bin[names] = i;
+		}
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "HCluster", "setMapWanted");
+		exit(1);
+	}
+}
+/***********************************************************************/
+void HCluster::updateMap() {
+try {
+		//update location of seqs in smallRow since they move to smallCol now
+		string names = list->get(clusterArray[smallRow].smallChild);
+		while (names.find_first_of(',') != -1) { 
+			//get name from bin
+			string name = names.substr(0,names.find_first_of(','));
+			//save name and bin number
+			seq2Bin[name] = clusterArray[smallCol].smallChild;
+			names = names.substr(names.find_first_of(',')+1, names.length());
+		}
+			
+		//get last name
+		seq2Bin[names] = clusterArray[smallCol].smallChild;
+	}
+	catch(exception& e) {
+		errorOut(e, "HCluster", "updateMap");
+		exit(1);
+	}
+}
+/***********************************************************************/
+
 
 

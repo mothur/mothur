@@ -14,8 +14,10 @@ class Cluster {
 	
 public:
 	Cluster(RAbundVector*, ListVector*, SparseMatrix*);
-    virtual void update();
+    virtual void update();				
 	virtual string getTag() = 0;
+	virtual void setMapWanted(bool m);  
+	virtual map<string, int> getSeqtoBin()  {  return seq2Bin;	}
 
 protected:	
 	void getRowColCells();
@@ -25,6 +27,7 @@ protected:
 
 	virtual void clusterBins();
 	virtual void clusterNames();
+	virtual void updateMap();
 	
 	RAbundVector* rabund;
 	ListVector* list;
@@ -33,6 +36,8 @@ protected:
 	int smallRow;
 	int smallCol;
 	float smallDist;
+	bool mapWanted;
+	map<string, int> seq2Bin;
 	
 	vector<MatVec> seqVec;		// contains vectors of cells related to a certain sequence
 	MatVec rowCells;

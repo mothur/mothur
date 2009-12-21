@@ -64,7 +64,6 @@ vector<vector<vector<double> > > Libshuff::getSavedMins(){
 
 vector<double> Libshuff::getMinX(int x){
 	try{
-
 		vector<double> minX(groupSizes[x], 0);
 		for(int i=0;i<groupSizes[x];i++){
 			minX[i] = (groupSizes[x] > 1 ? (i==0 ? matrix->get(groups[x][0], groups[x][1]) : matrix->get(groups[x][i], groups[x][0])) : 0.0); //get the first value in row i of this block

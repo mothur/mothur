@@ -45,10 +45,10 @@ void ReadColumnMatrix::read(NameAssignment* nameMap){
 			map<string,int>::iterator itB = nameMap->find(secondName);
 			
 			if(itA == nameMap->end()){
-				cerr << "AAError: Sequence '" << firstName << "' was not found in the names file, please correct\n";
+				cerr << "AAError: Sequence '" << firstName << "' was not found in the names file, please correct\n"; exit(1);
 			}
 			if(itB == nameMap->end()){
-				cerr << "ABError: Sequence '" << secondName << "' was not found in the names file, please correct\n";
+				cerr << "ABError: Sequence '" << secondName << "' was not found in the names file, please correct\n"; exit(1);
 			}
 
 			if (distance == -1) { distance = 1000000; }

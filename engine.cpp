@@ -15,16 +15,6 @@
 #include "engine.hpp"
 
 /***********************************************************************/
-inline void terminateCommand(int dummy)  {
-	
-		//mothurOut("Stopping command...."); 
-		//CommandFactory* cFactory = CommandFactory::getInstance();
-		//cFactory->getCommand();  //deletes old command and makes new no command.  
-								//this may cause memory leak if old commands execute function allocated memory 
-								//that is freed in the execute function and not the deconstructor 
-		//mothurOut("DONE."); mothurOutEndLine();
-}
-/***********************************************************************/
 Engine::Engine(){
 	try {
 		cFactory = CommandFactory::getInstance();
