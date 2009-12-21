@@ -55,6 +55,7 @@ rabund(rav), list(lv), dMatrix(dm)
 		seqVec[currentCell->row].push_back(currentCell);
 		seqVec[currentCell->column].push_back(currentCell);
 	}
+	mapWanted = false;  //set to true by mgcluster to speed up overlap merge
 }
 
 /***********************************************************************/
@@ -78,7 +79,7 @@ void Cluster::getRowColCells() {
 	}
 
 }
-
+/***********************************************************************/
 // Remove the specified cell from the seqVec and from the sparse
 // matrix
 void Cluster::removeCell(const MatData& cell, int vrow, int vcol, bool rmMatrix)
@@ -150,7 +151,8 @@ void Cluster::clusterBins(){
 void Cluster::clusterNames(){
 	try {
 	//	cout << smallCol << '\t' << smallRow << '\t' << smallDist << '\t' << list->get(smallRow) << '\t' << list->get(smallCol);
-
+		if (mapWanted) {  updateMap();  }
+		
 		list->set(smallCol, list->get(smallRow)+','+list->get(smallCol));
 		list->set(smallRow, "");	
 		list->setLabel(toString(smallDist));
@@ -222,7 +224,57 @@ void Cluster::update(){
 		exit(1);
 	}
 }
-
-
 /***********************************************************************/
+void Cluster::setMapWanted(bool m)  {  
+	try {
+		mapWanted = m;
+		
+		//initialize map
+		for (int i = 0; i < list->getNumBins(); i++) {
+			
+			//parse bin 
+			string names = list->get(i);
+			while (names.find_first_of(',') != -1) { 
+				//get name from bin
+				string name = names.substr(0,names.find_first_of(','));
+				//save name and bin number
+				seq2Bin[name] = i;
+				names = names.substr(names.find_first_of(',')+1, names.length());
+			}
+			
+			//get last name
+			seq2Bin[names] = i;
+		}
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "Cluster", "setMapWanted");
+		exit(1);
+	}
+}
+/***********************************************************************/
+void Cluster::updateMap() {
+try {
+		//update location of seqs in smallRow since they move to smallCol now
+		string names = list->get(smallRow);
+		while (names.find_first_of(',') != -1) { 
+			//get name from bin
+			string name = names.substr(0,names.find_first_of(','));
+			//save name and bin number
+			seq2Bin[name] = smallCol;
+			names = names.substr(names.find_first_of(',')+1, names.length());
+		}
+			
+		//get last name
+		seq2Bin[names] = smallCol;
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "Cluster", "updateMap");
+		exit(1);
+	}
+}
+/***********************************************************************/
+
+
 

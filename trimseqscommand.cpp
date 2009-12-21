@@ -200,7 +200,6 @@ int TrimSeqsCommand::execute(){
 				}
 				if(minLength > 0 || maxLength > 0){
 					success = cullLength(currSeq);
-					if ((currSeq.getUnaligned().length() > 300) && (success)) {  cout << "too long " << currSeq.getUnaligned().length() << endl;  }
 					if(!success){	trashCode += 'l'; }
 				}
 				if(maxHomoP > 0){

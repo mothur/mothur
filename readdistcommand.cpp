@@ -164,6 +164,34 @@ int ReadDistCommand::execute(){
 			openInputFile(distFileName, in);
 			matrix = new FullMatrix(in); //reads the matrix file
 			in.close();
+			
+			//if files don't match...
+			if (matrix->getNumSeqs() < groupMap->getNumSeqs()) {  
+				mothurOut("Your distance file contains " + toString(matrix->getNumSeqs()) + " sequences, and your group file contains " + toString(groupMap->getNumSeqs()) + " sequences.");  mothurOutEndLine();				
+				//create new group file
+				string newGroupFile = getRootName(groupfile) + "editted.groups";
+				ofstream outGroups;
+				openOutputFile(newGroupFile, outGroups);
+				
+				for (int i = 0; i < matrix->getNumSeqs(); i++) {
+					Names temp = matrix->getRowInfo(i);
+					outGroups << temp.seqName << '\t' << temp.groupName << endl;
+				}
+				outGroups.close();
+				
+				mothurOut(newGroupFile + " is a new group file containing only the sequence that are in your distance file. I will read this file instead."); mothurOutEndLine();
+				
+				//read new groupfile
+				delete groupMap; groupMap = NULL;
+				groupfile = newGroupFile;
+				globaldata->setGroupFile(groupfile); 
+				
+				groupMap = new GroupMap(groupfile);
+				groupMap->readMap();
+				
+				globaldata->gGroupmap = groupMap;
+			}
+			
 			//memory leak prevention
 			if (globaldata->gMatrix != NULL) { delete globaldata->gMatrix;  }
 			globaldata->gMatrix = matrix; //save matrix for coverage commands

@@ -22,8 +22,9 @@ class HCluster {
 public:
 	HCluster(RAbundVector*, ListVector*);
 	~HCluster(){};
-    bool update(int, int, float);
-	//string getTag();
+    void update(int, int, float);
+	void setMapWanted(bool m); 
+	map<string, int> getSeqtoBin()  {  return seq2Bin;	}
 
 protected:	
 	void clusterBins();
@@ -32,6 +33,7 @@ protected:
 	int makeActive();
 	void printInfo();
 	void updateArrayandLinkTable();
+	void updateMap();
 		
 	RAbundVector* rabund;
 	ListVector* list;
@@ -43,10 +45,11 @@ protected:
 	map<int, int>::iterator it2;
 	
 	int numSeqs;
-	
 	int smallRow;
 	int smallCol;
 	float smallDist;
+	map<string, int> seq2Bin;
+	bool mapWanted;
 	
 };
 

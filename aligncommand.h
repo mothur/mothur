@@ -28,7 +28,7 @@ private:
 	struct linePair {
 		int start;
 		int numSeqs;
-		linePair(int i, int j) : start(i), numSeqs(j) {}
+		linePair(long int i, int j) : start(i), numSeqs(j) {}
 	};
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;

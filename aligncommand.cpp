@@ -209,22 +209,23 @@ int AlignCommand::execute(){
 			while(!inFASTA.eof()){
 				input = getline(inFASTA);
 				if (input.length() != 0) {
-					if(input[0] == '>'){	int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
+					if(input[0] == '>'){	long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
 				}
 			}
 			inFASTA.close();
 			
 			numFastaSeqs = positions.size();
-			
+		
 			int numSeqsPerProcessor = numFastaSeqs / processors;
 			
 			for (int i = 0; i < processors; i++) {
-				int startPos = positions[ i * numSeqsPerProcessor ];
+				long int startPos = positions[ i * numSeqsPerProcessor ];
 				if(i == processors - 1){
 					numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor;
 				}
 				lines.push_back(new linePair(startPos, numSeqsPerProcessor));
 			}
+			
 			createProcesses(alignFileName, reportFileName, accnosFileName); 
 			
 			rename((alignFileName + toString(processIDS[0]) + ".temp").c_str(), alignFileName.c_str());
@@ -318,11 +319,11 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName, 
 
 		for(int i=0;i<line->numSeqs;i++){
 			
-			Sequence* candidateSeq = new Sequence(inFASTA);
+			Sequence* candidateSeq = new Sequence(inFASTA);  gobble(inFASTA);
 			int origNumBases = candidateSeq->getNumBases();
 			string originalUnaligned = candidateSeq->getUnaligned();
 			int numBasesNeeded = origNumBases * threshold;
-			
+	
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
 				if (candidateSeq->getUnaligned().length() > alignment->getnRows()) {
 					alignment->resize(candidateSeq->getUnaligned().length()+1);

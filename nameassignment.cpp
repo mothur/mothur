@@ -28,6 +28,7 @@ void NameAssignment::readMap(){
 //			data[firstCol] = secondCol;			//store data in map
 
 			list.push_back(secondCol);		//adds data's value to list
+			reverse[rowIndex] = firstCol;
 			(*this)[firstCol] = rowIndex++;
 			gobble(fileHandle);
 		}
@@ -45,6 +46,7 @@ void NameAssignment::push_back(string name) {
 	
 		int num = (*this).size();
 		(*this)[name] = num;
+		reverse[num] = name;
 		
 		list.push_back(name);
 	}
@@ -64,11 +66,12 @@ ListVector NameAssignment::getListVector(void){
 
 //**********************************************************************************************************************
 
-void NameAssignment::print(void){
+void NameAssignment::print(ostream& out){
 	try {
 		map<string,int>::iterator it;
+cout << (*this).size() << endl;
 		for(it = (*this).begin(); it!=(*this).end(); it++){
-			mothurOut(it->first + "\t" + toString(it->second)); mothurOutEndLine();  //prints out keys and values of the map this.
+			out << it->first << '\t' <<  it->second << endl;  //prints out keys and values of the map this.
 		}
 	}
 	catch(exception& e) {
@@ -84,6 +87,12 @@ int NameAssignment::get(string key){
 	return	(*this)[key];	
 
 }
+//**********************************************************************************************************************
 
+string NameAssignment::get(int key){
+	
+	return	reverse[key];	
+
+}
 //**********************************************************************************************************************
 

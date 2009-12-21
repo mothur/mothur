@@ -176,7 +176,6 @@ int HClusterCommand::execute(){
 		
 		print_start = true;
 		start = time(NULL);
-		
 	
 		ifstream in;
 		openInputFile(distfile, in);
@@ -184,7 +183,6 @@ int HClusterCommand::execute(){
 		float distance;
 		
 		cluster = new HCluster(rabund, list);
-		bool clusteredSomething;
 		vector<seqDist> seqs; seqs.resize(1); // to start loop
 		exitedBreak = false;  //lets you know if there is a distance stored in next
 	
@@ -207,7 +205,7 @@ int HClusterCommand::execute(){
 				
 	//cout << "before cluster update" << endl;
 				if (seqs[i].seq1 != seqs[i].seq2) {
-					clusteredSomething = cluster->update(seqs[i].seq1, seqs[i].seq2, seqs[i].dist);
+					cluster->update(seqs[i].seq1, seqs[i].seq2, seqs[i].dist);
 					
 					float rndDist = roundDist(seqs[i].dist, precision);
 		//cout << "after cluster update clusterSomething = " << clusteredSomething << " rndDist = " << rndDist << " rndPreviousDist = " << rndPreviousDist << endl;			
@@ -301,7 +299,6 @@ void HClusterCommand::printData(string label){
 
 }
 //**********************************************************************************************************************
-
 vector<seqDist> HClusterCommand::getSeqs(ifstream& filehandle){
 	try {
 		string firstName, secondName;
