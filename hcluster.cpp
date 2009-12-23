@@ -280,7 +280,8 @@ void HCluster::update(int row, int col, float distance){
 			bool cluster = false;
 			
 			if (method == "nearest") { cluster = true;  }
-			else if (method == "average") { cout << "still working on this... " << endl; //got to figure this out 
+			else if (method == "average") { 
+				if (linkValue == (ceil(((clusterArray[smallRow].numSeq * clusterArray[smallCol].numSeq)) / (float) 2.0))) { cluster = true; }
 			}else{ //assume furthest
 				if (linkValue == (clusterArray[smallRow].numSeq * clusterArray[smallCol].numSeq)) { cluster = true; }
 			}
