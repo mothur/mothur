@@ -61,6 +61,7 @@
 #include "classifyseqscommand.h"
 #include "phylotypecommand.h"
 #include "mgclustercommand.h"
+#include "preclustercommand.h"
 
 /*******************************************************/
 
@@ -131,6 +132,7 @@ CommandFactory::CommandFactory(){
 	commands["classify.seqs"]		= "classify.seqs"; 
 	commands["phylotype"]			= "phylotype";
 	commands["mgcluster"]			= "mgcluster";
+	commands["pre.cluster"]			= "pre.cluster";
 
 }
 /***********************************************************/
@@ -199,6 +201,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "classify.seqs")			{	command = new ClassifySeqsCommand(optionString);		}
 		else if(commandName == "phylotype")				{	command = new PhylotypeCommand(optionString);			}
 		else if(commandName == "mgcluster")				{	command = new MGClusterCommand(optionString);			}
+		else if(commandName == "pre.cluster")			{	command = new PreClusterCommand(optionString);			}
 		else											{	command = new NoCommand(optionString);					}
 
 		return command;

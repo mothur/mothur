@@ -8,7 +8,6 @@
  */
 
 #include "mgclustercommand.h"
-#include "readcluster.h"
 
 //**********************************************************************************************************************
 MGClusterCommand::MGClusterCommand(string option){
@@ -138,6 +137,15 @@ int MGClusterCommand::execute(){
 		start = time(NULL);
 		oldList = *list;
 		
+		if (method == "furthest")		{ tag = "fn";  }
+		else if (method == "nearest")	{ tag = "nn";  }
+		else							{ tag = "an";  }
+		
+		//open output files
+		openOutputFile(fileroot+ tag + ".list",  listFile);
+		openOutputFile(fileroot+ tag + ".rabund",  rabundFile);
+		openOutputFile(fileroot+ tag + ".sabund",  sabundFile);
+		
 		if (!hclusterWanted) {
 			//get distmatrix and overlap
 			SparseMatrix* distMatrix = read->getDistMatrix();
@@ -148,13 +156,7 @@ int MGClusterCommand::execute(){
 			if (method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, distMatrix); }
 			else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, distMatrix); }
 			else if(method == "average"){	cluster = new AverageLinkage(rabund, list, distMatrix);	}
-			tag = cluster->getTag();
 			cluster->setMapWanted(true);
-			
-			//open output files
-			openOutputFile(fileroot+ tag + ".list",  listFile);
-			openOutputFile(fileroot+ tag + ".rabund",  rabundFile);
-			openOutputFile(fileroot+ tag + ".sabund",  sabundFile);
 			
 			//cluster using cluster classes
 			while (distMatrix->getSmallDist() < cutoff && distMatrix->getNNodes() > 0){
@@ -218,24 +220,16 @@ int MGClusterCommand::execute(){
 			sortHclusterFiles(distFile, overlapFile);
 		
 			//create cluster
-			hcluster = new HCluster(rabund, list);
+			hcluster = new HCluster(rabund, list, method);
 			hcluster->setMapWanted(true);
 			
-			//open output files
-			openOutputFile(fileroot+ tag + ".list",  listFile);
-			openOutputFile(fileroot+ tag + ".rabund",  rabundFile);
-			openOutputFile(fileroot+ tag + ".sabund",  sabundFile);
-			
-			vector<DistNode> seqs; seqs.resize(1); // to start loop
-			exitedBreak = false;  //lets you know if there is a distance stored in next
-			
+			vector<seqDist> seqs; seqs.resize(1); // to start loop
 			ifstream inHcluster;
 			openInputFile(distFile, inHcluster);
 
 			while (seqs.size() != 0){
 		
-				seqs = getSeqs(inHcluster);
-				random_shuffle(seqs.begin(), seqs.end());
+				seqs = hcluster->getSeqs(inHcluster, nameMap, cutoff);
 				
 				for (int i = 0; i < seqs.size(); i++) {  //-1 means skip me
 					
@@ -345,7 +339,7 @@ ListVector* MGClusterCommand::mergeOPFs(map<string, int> binInfo, float dist){
 		while (!done) {
 			
 			//get next overlap
-			DistNode overlapNode;
+			seqDist overlapNode;
 			if (!hclusterWanted) {  
 				if (count < overlapMatrix.size()) { //do we have another node in the matrix
 					overlapNode = overlapMatrix[count];
@@ -415,89 +409,21 @@ ListVector* MGClusterCommand::mergeOPFs(map<string, int> binInfo, float dist){
 void MGClusterCommand::sortHclusterFiles(string unsortedDist, string unsortedOverlap) {
 	try {
 		//sort distFile
-		ReadCluster* readCluster = new ReadCluster(unsortedDist, cutoff); 	
-		readCluster->setFormat("column");
-		readCluster->read(nameMap);
-		string sortedDistFile = readCluster->getOutputFile();
-		ListVector* extralist = readCluster->getListVector();  //we get this so we can delete it and not have a memory leak
-		
+		string sortedDistFile = sortFile(unsortedDist);
 		remove(unsortedDist.c_str());  //delete unsorted file
 		distFile = sortedDistFile;
-		delete extralist;
-		delete readCluster;
 		
 		//sort overlap file
-		readCluster = new ReadCluster(unsortedOverlap, cutoff); 	
-		readCluster->setFormat("column");
-		readCluster->read(nameMap);
-		string sortedOverlapFile = readCluster->getOutputFile();
-		extralist = readCluster->getListVector();  //we get this so we can delete it and not have a memory leak
-		
+		string sortedOverlapFile = sortFile(unsortedOverlap);
 		remove(unsortedOverlap.c_str());  //delete unsorted file
 		overlapFile = sortedOverlapFile;
-		delete extralist;
-		delete readCluster;
 	}
 	catch(exception& e) {
 		errorOut(e, "MGClusterCommand", "sortHclusterFiles");
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-vector<DistNode> MGClusterCommand::getSeqs(ifstream& filehandle){
-	try {
-		string firstName, secondName;
-		float distance, prevDistance;
-		vector<DistNode> sameSeqs;
-		prevDistance = -1;
-	
-		//if you are not at the beginning of the file
-		if (exitedBreak) { 
-			sameSeqs.push_back(next);
-			prevDistance = next.dist;
-			exitedBreak = false;
-		}
-	
-		//get entry
-		while (!filehandle.eof()) {
-			
-			filehandle >> firstName >> secondName >> distance;    gobble(filehandle); 
-	
-			//save first one
-			if (prevDistance == -1) { prevDistance = distance; }
-			
-			map<string,int>::iterator itA = nameMap->find(firstName);
-			map<string,int>::iterator itB = nameMap->find(secondName);
-			if(itA == nameMap->end()){  cerr << "AAError: Sequence '" << firstName << "' was not found in the names file, please correct\n"; exit(1);  }
-			if(itB == nameMap->end()){  cerr << "ABError: Sequence '" << secondName << "' was not found in the names file, please correct\n"; exit(1);  }
-		
-			//using cutoff
-			if (distance > cutoff) { break; }
-		
-			if (distance != -1) { //-1 means skip me
-			
-				//are the distances the same
-				if (distance == prevDistance) { //save in vector
-					DistNode temp(itA->second, itB->second, distance);
-					sameSeqs.push_back(temp);
-					exitedBreak = false;
-				}else{ 
-					next.seq1 = itA->second;
-					next.seq2 = itB->second;
-					next.dist = distance;
-					exitedBreak = true;
-					break;
-				}
-			}
-		}
-		
-		return sameSeqs;
-	}
-	catch(exception& e) {
-		errorOut(e, "MGClusterCommand", "getSeqs");
-		exit(1);
-	}
-}
+
 //**********************************************************************************************************************
 
 

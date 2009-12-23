@@ -36,20 +36,18 @@ private:
 	HCluster* hcluster;
 	ListVector* list;
 	ListVector oldList;
-	vector<DistNode> overlapMatrix;
-	DistNode next;
-
+	vector<seqDist> overlapMatrix;
 	
 	string blastfile, method, namefile, overlapFile, distFile;
 	ofstream sabundFile, rabundFile, listFile;
 	float cutoff, penalty;
 	int precision, length, precisionLength;
-	bool abort, minWanted, hclusterWanted, exitedBreak, merge;
+	bool abort, minWanted, hclusterWanted, merge;
 	
 	void printData(ListVector*);
 	ListVector* mergeOPFs(map<string, int>, float);
 	void sortHclusterFiles(string, string);
-	vector<DistNode> getSeqs(ifstream&);
+	vector<seqDist> getSeqs(ifstream&);
 
 };
 

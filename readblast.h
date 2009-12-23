@@ -14,15 +14,6 @@
 #include "nameassignment.hpp"
 
 /****************************************************************************************/
-struct DistNode {
-	int seq1;
-	int seq2;
-	float dist;
-	DistNode(int s1, int s2, float d) : seq1(s1), seq2(s2), dist(d) {}
-	DistNode() {}
-	~DistNode() {}
-};
-/****************************************************************************************/
 
 //Note: this class creates a sparsematrix and list if the read is executed, but does not delete them on deconstruction.
 //the user of this object is responsible for deleting the matrix and list if they call the read or there will be a memory leak
@@ -36,7 +27,7 @@ public:
 	
 	void read(NameAssignment*);
 	SparseMatrix* getDistMatrix()		{	return matrix;		}
-	vector<DistNode> getOverlapMatrix()	{	return overlap;		}
+	vector<seqDist> getOverlapMatrix()	{	return overlap;		}
 	string getOverlapFile()				{	return overlapFile;	}
 	string getDistFile()				{	return distFile;	}
 	
@@ -48,7 +39,7 @@ private:
 	bool hclusterWanted;
 	
 	SparseMatrix* matrix;
-	vector<DistNode> overlap;
+	vector<seqDist> overlap;
 	
 	void readNames(NameAssignment*);
 };

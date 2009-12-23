@@ -12,6 +12,7 @@
 
 
 #include "mothur.h"
+#include "nameassignment.hpp"
 
 class RAbundVector;
 class ListVector;
@@ -20,11 +21,12 @@ class ListVector;
 class HCluster {
 	
 public:
-	HCluster(RAbundVector*, ListVector*);
+	HCluster(RAbundVector*, ListVector*, string);
 	~HCluster(){};
     void update(int, int, float);
 	void setMapWanted(bool m); 
 	map<string, int> getSeqtoBin()  {  return seq2Bin;	}
+	vector<seqDist> getSeqs(ifstream&, NameAssignment*, float);
 
 protected:	
 	void clusterBins();
@@ -49,7 +51,9 @@ protected:
 	int smallCol;
 	float smallDist;
 	map<string, int> seq2Bin;
-	bool mapWanted;
+	bool mapWanted, exitedBreak;
+	seqDist next;
+	string method;
 	
 };
 

@@ -278,7 +278,7 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 	}
 }
 
-/**************************************************************************************************/
+/**************************************************************************************************
 void DistanceCommand::appendFiles(string temp, string filename) {
 	try{
 		ofstream output;
