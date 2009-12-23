@@ -29,12 +29,6 @@
 //Applications Center, 1030 S. Highway A1A, Patrick AFB, FL 32925-3002, USA 
 //Received January 28, 2009; Revised April 14, 2009; Accepted April 15, 2009 
 /************************************************************/
-struct seqDist {
-	int seq1;
-	int seq2;
-	float dist;
-};
-/************************************************************/
 class HClusterCommand : public Command {
 	
 public:
@@ -52,23 +46,15 @@ private:
 	ListVector oldList;
 	ReadCluster* read;
 	
-	bool abort;
-
-	string method, fileroot, tag, distfile, format, phylipfile, columnfile, namefile, sort;
+	bool abort, sorted, print_start;
+	string method, fileroot, tag, distfile, format, phylipfile, columnfile, namefile, sort, showabund, timing;
 	double cutoff;
-	string showabund, timing;
 	int precision, length;
 	ofstream sabundFile, rabundFile, listFile;
-	//ifstream in;
-	seqDist next;
-	bool exitedBreak, sorted;
-
-	bool print_start;
 	time_t start;
 	unsigned long loops;
 	
 	void printData(string label);
-	vector<seqDist> getSeqs(ifstream&);
 };
 
 /************************************************************/

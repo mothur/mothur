@@ -12,11 +12,13 @@
 #include "listvector.hpp"
 #include "sparsematrix.hpp"
 
+
 /***********************************************************************/
 
-HCluster::HCluster(RAbundVector* rav, ListVector* lv) :  rabund(rav), list(lv){
+HCluster::HCluster(RAbundVector* rav, ListVector* lv, string m) :  rabund(rav), list(lv), method(m){
 	try {
 		mapWanted = false;
+		exitedBreak = false; 
 		numSeqs = list->getNumSeqs();
 		
 		//initialize cluster array
@@ -263,27 +265,32 @@ void HCluster::update(int row, int col, float distance){
 		smallRow = row;
 		smallCol = col;
 		smallDist = distance;
-		bool clustered = false;
 		
 		//find upmost parent of row and col
 		smallRow = getUpmostParent(smallRow);
 		smallCol = getUpmostParent(smallCol);
 	//cout << "row = " << row << " smallRow = " << smallRow <<  " col = " << col << " smallCol = " << smallCol << " dist = " << distance << endl;
-		
-		//are they active in the link table
-		int linkValue = makeActive(); //after this point this nodes info is active in linkTable
-	//printInfo();			
-//cout << "linkValue = " << linkValue << " times = " << (clusterArray[smallRow].numSeq * clusterArray[smallCol].numSeq) << endl;
-		//can we cluster???
-		if (linkValue == (clusterArray[smallRow].numSeq * clusterArray[smallCol].numSeq)) {
-			//printInfo();
-			updateArrayandLinkTable();
-			clusterBins();
-			clusterNames();
-			clustered = true;
-			//printInfo();
+		//you don't want to cluster with yourself
+		if (smallRow != smallCol) {
+			//are they active in the link table
+			int linkValue = makeActive(); //after this point this nodes info is active in linkTable
+			//printInfo();			
+			//cout << "linkValue = " << linkValue << " times = " << (clusterArray[smallRow].numSeq * clusterArray[smallCol].numSeq) << endl;
+			//can we cluster???
+			bool cluster = false;
+			
+			if (method == "nearest") { cluster = true;  }
+			else if (method == "average") { cout << "still working on this... " << endl; //got to figure this out 
+			}else{ //assume furthest
+				if (linkValue == (clusterArray[smallRow].numSeq * clusterArray[smallCol].numSeq)) { cluster = true; }
+			}
+			
+			if (cluster) { 
+				updateArrayandLinkTable();
+				clusterBins();
+				clusterNames();
+			}
 		}
-		
 		//printInfo();
 	}
 	catch(exception& e) {
@@ -337,6 +344,64 @@ try {
 	}
 	catch(exception& e) {
 		errorOut(e, "HCluster", "updateMap");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<seqDist> HCluster::getSeqs(ifstream& filehandle, NameAssignment* nameMap, float cutoff){
+	try {
+		string firstName, secondName;
+		float distance, prevDistance;
+		vector<seqDist> sameSeqs;
+		prevDistance = -1;
+	
+		//if you are not at the beginning of the file
+		if (exitedBreak) { 
+			sameSeqs.push_back(next);
+			prevDistance = next.dist;
+			exitedBreak = false;
+		}
+	
+		//get entry
+		while (!filehandle.eof()) {
+			
+			filehandle >> firstName >> secondName >> distance;    gobble(filehandle); 
+	
+			//save first one
+			if (prevDistance == -1) { prevDistance = distance; }
+			
+			map<string,int>::iterator itA = nameMap->find(firstName);
+			map<string,int>::iterator itB = nameMap->find(secondName);
+			if(itA == nameMap->end()){  cerr << "AAError: Sequence '" << firstName << "' was not found in the names file, please correct\n"; exit(1);  }
+			if(itB == nameMap->end()){  cerr << "ABError: Sequence '" << secondName << "' was not found in the names file, please correct\n"; exit(1);  }
+		
+			//using cutoff
+			if (distance > cutoff) { break; }
+		
+			if (distance != -1) { //-1 means skip me
+			
+				//are the distances the same
+				if (distance == prevDistance) { //save in vector
+					seqDist temp(itA->second, itB->second, distance);
+					sameSeqs.push_back(temp);
+					exitedBreak = false;
+				}else{ 
+					next.seq1 = itA->second;
+					next.seq2 = itB->second;
+					next.dist = distance;
+					exitedBreak = true;
+					break;
+				}
+			}
+		}
+		
+		//rndomize matching dists
+		random_shuffle(sameSeqs.begin(), sameSeqs.end());
+		
+		return sameSeqs;
+	}
+	catch(exception& e) {
+		errorOut(e, "HCluster", "getSeqs");
 		exit(1);
 	}
 }

@@ -100,7 +100,15 @@ struct clusterNode {
 	int smallChild; //used to make linkTable work with list and rabund. represents bin number of this cluster node
 	clusterNode(int num, int par, int kid) : numSeq(num), parent(par), smallChild(kid) {};
 };
-
+/************************************************************/
+struct seqDist {
+	int seq1;
+	int seq2;
+	float dist;
+	seqDist() {}
+	seqDist(int s1, int s2, float d) : seq1(s1), seq2(s2), dist(d) {}
+	~seqDist() {}
+};
 /***********************************************************************/
 
 // snagged from http://www.parashift.com/c++-faq-lite/misc-technical-issues.html#faq-39.2
@@ -775,6 +783,92 @@ inline bool anyLabelsToProcess(string label, set<string>& userLabels, string err
 	}
 }
 
+/**************************************************************************************************/
+inline void appendFiles(string temp, string filename) {
+	try{
+		ofstream output;
+		ifstream input;
+	
+		//open output file in append mode
+		openOutputFileAppend(filename, output);
+		openInputFile(temp, input);
+		
+		while(char c = input.get()){
+			if(input.eof())		{	break;			}
+			else				{	output << c;	}
+		}
+		
+		input.close();
+		output.close();
+	}
+	catch(exception& e) {
+		errorOut(e, "mothur", "appendFiles");
+		exit(1);
+	}
+}
+
+/**************************************************************************************************/
+inline string sortFile(string distFile){
+	try {	
+		string outfile = getRootName(distFile) + "sorted.dist";
+		
+		//if you can, use the unix sort since its been optimized for years
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			string command = "sort -n -k +3 " + distFile + " -o " + outfile;
+			system(command.c_str());
+		#else //you are stuck with my best attempt...
+			//windows sort does not have a way to specify a column, only a character in the line
+			//since we cannot assume that the distance will always be at the the same character location on each line
+			//due to variable sequence name lengths, I chose to force the distance into first position, then sort and then put it back.
+		
+			//read in file line by file and put distance first
+			string tempDistFile = distFile + ".temp";
+			ifstream input;
+			ofstream output;
+			openInputFile(distFile, input);
+			openOutputFile(tempDistFile, output);
+
+			string firstName, secondName;
+			float dist;
+			while (input) {
+				input >> firstName >> secondName >> dist;
+				output << dist << '\t' << firstName << '\t' << secondName << endl;
+				gobble(input);
+			}
+			input.close();
+			output.close();
+		
+	
+			//sort using windows sort
+			string tempOutfile = outfile + ".temp";
+			string command = "sort " + tempDistFile + " /O " + tempOutfile;
+			system(command.c_str());
+		
+			//read in sorted file and put distance at end again
+			ifstream input2;
+			openInputFile(tempOutfile, input2);
+			openOutputFile(outfile, output);
+		
+			while (input2) {
+				input2 >> dist >> firstName >> secondName;
+				output << firstName << '\t' << secondName << '\t' << dist << endl;
+				gobble(input2);
+			}
+			input2.close();
+			output.close();
+		
+			//remove temp files
+			remove(tempDistFile.c_str());
+			remove(tempOutfile.c_str());
+		#endif
+		
+		return outfile;
+	}
+	catch(exception& e) {
+		errorOut(e, "mothur", "sortFile");
+		exit(1);
+	}
+}
 /**************************************************************************************************/
 #endif
 

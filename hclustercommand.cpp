@@ -76,7 +76,7 @@ HClusterCommand::HClusterCommand(string option){
 			cutoff += (5 / (precision * 10.0));
 			
 			method = validParameter.validFile(parameters, "method", false);
-			if (method == "not found") { method = "nearest"; }
+			if (method == "not found") { method = "furthest"; }
 			
 			if ((method == "furthest") || (method == "nearest") || (method == "average")) { }
 			else { mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average."); mothurOutEndLine(); abort = true; }
@@ -96,7 +96,9 @@ HClusterCommand::HClusterCommand(string option){
 											
 				fileroot = getRootName(distfile);
 				
-				tag = "fn";  //until we figure out average and nearest methods
+				if (method == "furthest")		{ tag = "fn";  }
+				else if (method == "nearest")	{ tag = "nn";  }
+				else							{ tag = "an";  }
 			
 				openOutputFile(fileroot+ tag + ".sabund",	sabundFile);
 				openOutputFile(fileroot+ tag + ".rabund",	rabundFile);
@@ -119,7 +121,7 @@ void HClusterCommand::help(){
 		mothurOut("The name parameter allows you to enter your name file and is required if your distance file is in column format. \n");
 		mothurOut("The hcluster command should be in the following format: \n");
 		mothurOut("hcluster(column=youDistanceFile, name=yourNameFile, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n");
-		mothurOut("The acceptable hcluster methods is furthest, but we hope to add nearest and average in the future.\n\n");	
+		mothurOut("The acceptable hcluster methods are furthest and nearest, but we hope to add average in the future.\n\n");	
 	}
 	catch(exception& e) {
 		errorOut(e, "HClusterCommand", "help");
@@ -182,17 +184,13 @@ int HClusterCommand::execute(){
 		string firstName, secondName;
 		float distance;
 		
-		cluster = new HCluster(rabund, list);
+		cluster = new HCluster(rabund, list, method);
 		vector<seqDist> seqs; seqs.resize(1); // to start loop
-		exitedBreak = false;  //lets you know if there is a distance stored in next
-	
+		
 		while (seqs.size() != 0){
 		
-			seqs = getSeqs(in);
-			random_shuffle(seqs.begin(), seqs.end());
-			
-			if (seqs.size() == 0) { break; } //there are no more distances
-		
+			seqs = cluster->getSeqs(in, globaldata->nameMap, cutoff);
+				
 			for (int i = 0; i < seqs.size(); i++) {  //-1 means skip me
 
 				if (print_start && isTrue(timing)) {
@@ -203,14 +201,12 @@ int HClusterCommand::execute(){
 					print_start = false;
 				}
 				
-	//cout << "before cluster update" << endl;
+	
 				if (seqs[i].seq1 != seqs[i].seq2) {
 					cluster->update(seqs[i].seq1, seqs[i].seq2, seqs[i].dist);
 					
 					float rndDist = roundDist(seqs[i].dist, precision);
-		//cout << "after cluster update clusterSomething = " << clusteredSomething << " rndDist = " << rndDist << " rndPreviousDist = " << rndPreviousDist << endl;			
-					
-					
+							
 					if((previousDist <= 0.0000) && (seqs[i].dist != previousDist)){
 						printData("unique");
 					}
@@ -256,11 +252,10 @@ int HClusterCommand::execute(){
 		sabundFile.close();
 		rabundFile.close();
 		listFile.close();
-		
 		delete cluster;
-		//if (isTrue(timing)) {
-			mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster. "); mothurOutEndLine();
-		//}
+	
+		mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster. "); mothurOutEndLine();
+		
 		return 0;
 	}
 	catch(exception& e) {
@@ -298,77 +293,5 @@ void HClusterCommand::printData(string label){
 
 
 }
-//**********************************************************************************************************************
-vector<seqDist> HClusterCommand::getSeqs(ifstream& filehandle){
-	try {
-		string firstName, secondName;
-		float distance, prevDistance;
-		vector<seqDist> sameSeqs;
-		prevDistance = -1;
-		
-		//if you are not at the beginning of the file
-		if (exitedBreak) { 
-			sameSeqs.push_back(next);
-			prevDistance = next.dist;
-			exitedBreak = false;
-		}
-	
-		//get entry
-		while (filehandle) {
-			
-			filehandle >> firstName >> secondName >> distance;  
-//cout << firstName << '\t' << secondName << '\t' << distance << endl;
-			gobble(filehandle);
-			
-			//save first one
-			if (prevDistance == -1) { prevDistance = distance; }
-	//cout << prevDistance << endl;	
-//if (globaldata->nameMap == NULL) { cout << "null" << endl; }
-			map<string,int>::iterator itA = globaldata->nameMap->find(firstName);
-			map<string,int>::iterator itB = globaldata->nameMap->find(secondName);
-			
-			if(itA == globaldata->nameMap->end()){
-				cerr << "AAError: Sequence '" << firstName << "' was not found in the names file, please correct\n"; exit(1);
-			}
-			if(itB == globaldata->nameMap->end()){
-				cerr << "ABError: Sequence '" << secondName << "' was not found in the names file, please correct\n"; exit(1);
-			}
-	//cout << "here" << endl;		
-			//using cutoff
-			if (distance > cutoff) { break; }
-			
-			if (distance != -1) { //-1 means skip me
-				
-				//are the distances the same
-				if (distance == prevDistance) { //save in vector
-					seqDist temp;
-					temp.seq1 = itA->second;
-					temp.seq2 = itB->second;
-					temp.dist = distance;
-					sameSeqs.push_back(temp);
-					exitedBreak = false;
-					//what about precision??
-					
-				}else{ 
-					next.seq1 = itA->second;
-					next.seq2 = itB->second;
-					next.dist = distance;
-					exitedBreak = true;
-					break;
-				}
-				
-			}
-		}
-
-		return sameSeqs;
-	}
-	catch(exception& e) {
-		errorOut(e, "HClusterCommand", "getSeqs");
-		exit(1);
-	}
-
-
-}
-
 //**********************************************************************************************************************
 

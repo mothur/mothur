@@ -27,7 +27,6 @@ public:
 	string getOutputFile() { return OutPutFile; }
 	void setFormat(string f) { format = f;	}
 	ListVector* getListVector()		{	return list;	}
-	//NameAssignment* getNameMap()	{	return nameMap;	}
 	
 private:
 	GlobalData* globaldata;
@@ -35,9 +34,7 @@ private:
 	string OutPutFile, format;
 	ListVector* list;
 	float cutoff;
-	//NameAssignment* nameMap;
 	
-	void createHClusterFile();
 	void convertPhylip2Column(NameAssignment*);
 };
 

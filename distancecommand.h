@@ -43,7 +43,7 @@ private:
 	bool abort;
 	vector<string>  Estimators; //holds estimators to be used
 	
-	void appendFiles(string, string);
+	//void appendFiles(string, string);
 	void createProcesses(string);
 	int driver(/*Dist*, SequenceDB, */int, int, string, float);
 

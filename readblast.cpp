@@ -12,7 +12,7 @@
 
 //********************************************************************************************************************
 //sorts lowest to highest
-inline bool compareOverlap(DistNode left, DistNode right){
+inline bool compareOverlap(seqDist left, seqDist right){
 	return (left.dist < right.dist);	
 } 
 /*********************************************************************************************/
@@ -91,7 +91,7 @@ void ReadBlast::read(NameAssignment* nameMap) {
 				//if there is a valid overlap, add it
 				if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap < cutoff)) {
 					if (!hclusterWanted) {
-						DistNode overlapValue(itA->second, itB->second, thisoverlap);
+						seqDist overlapValue(itA->second, itB->second, thisoverlap);
 						overlap.push_back(overlapValue);
 					}else {
 						outOverlap << itA->first << '\t' << itB->first << '\t' << thisoverlap << endl;
@@ -137,7 +137,7 @@ void ReadBlast::read(NameAssignment* nameMap) {
 						//if there is a valid overlap, add it
 						if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap < cutoff)) {
 							if (!hclusterWanted) {
-								DistNode overlapValue(itA->second, itB->second, thisoverlap);
+								seqDist overlapValue(itA->second, itB->second, thisoverlap);
 								//cout << "overlap = " << itA->second << '\t' << itB->second << '\t' << thisoverlap << endl;
 								overlap.push_back(overlapValue);
 							}else {
@@ -201,7 +201,7 @@ void ReadBlast::read(NameAssignment* nameMap) {
 						//if there is a valid overlap, add it
 						if ((startRef <= length) && ((endQuery+length) >= lengthThisSeq) && (thisoverlap < cutoff)) {
 							if (!hclusterWanted) {
-								DistNode overlapValue(itA->second, itB->second, thisoverlap);
+								seqDist overlapValue(itA->second, itB->second, thisoverlap);
 								overlap.push_back(overlapValue);
 							}else {
 								outOverlap << itA->first << '\t' << itB->first << '\t' << thisoverlap << endl;
