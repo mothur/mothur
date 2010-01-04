@@ -180,6 +180,7 @@
 		A787844510A1EBDD0086103D /* knn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A787844410A1EBDD0086103D /* knn.cpp */; };
 		A7B04493106CC3E60046FC83 /* chimeraslayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7B04492106CC3E60046FC83 /* chimeraslayer.cpp */; };
 		A7B0450E106CEEC90046FC83 /* slayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7B0450D106CEEC90046FC83 /* slayer.cpp */; };
+		A7D176CF10F2558500159497 /* pcacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7D176CE10F2558500159497 /* pcacommand.cpp */; };
 		A7E0AAB610D2886D00CF407B /* mgclustercommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E0AAB510D2886D00CF407B /* mgclustercommand.cpp */; };
 		A7E4A783106913F900688F62 /* getsharedotucommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E4A782106913F900688F62 /* getsharedotucommand.cpp */; };
 		A7E4A824106A9AD700688F62 /* maligner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E4A823106A9AD700688F62 /* maligner.cpp */; };
@@ -571,6 +572,8 @@
 		A7B04492106CC3E60046FC83 /* chimeraslayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeraslayer.cpp; sourceTree = SOURCE_ROOT; };
 		A7B0450C106CEEC90046FC83 /* slayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = slayer.h; sourceTree = SOURCE_ROOT; };
 		A7B0450D106CEEC90046FC83 /* slayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = slayer.cpp; sourceTree = SOURCE_ROOT; };
+		A7D176CD10F2558500159497 /* pcacommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pcacommand.h; sourceTree = SOURCE_ROOT; };
+		A7D176CE10F2558500159497 /* pcacommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pcacommand.cpp; sourceTree = SOURCE_ROOT; };
 		A7E0AAB410D2886D00CF407B /* mgclustercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mgclustercommand.h; sourceTree = "<group>"; };
 		A7E0AAB510D2886D00CF407B /* mgclustercommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mgclustercommand.cpp; sourceTree = "<group>"; };
 		A7E4A781106913F900688F62 /* getsharedotucommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getsharedotucommand.h; sourceTree = SOURCE_ROOT; };
@@ -932,6 +935,8 @@
 				375873F60F7D649C0040F377 /* nocommands.cpp */,
 				3792946E0F2E191800B9034A /* parsimonycommand.h */,
 				3792946F0F2E191800B9034A /* parsimonycommand.cpp */,
+				A7D176CD10F2558500159497 /* pcacommand.h */,
+				A7D176CE10F2558500159497 /* pcacommand.cpp */,
 				A773808E10B6EFD1002A6A61 /* phylotypecommand.h */,
 				A773808F10B6EFD1002A6A61 /* phylotypecommand.cpp */,
 				A7027F2610DFF86D00BF45FE /* preclustercommand.h */,
@@ -1305,6 +1310,7 @@
 				A727E84A10D14568001A8432 /* readblast.cpp in Sources */,
 				A7E0AAB610D2886D00CF407B /* mgclustercommand.cpp in Sources */,
 				A7027F2810DFF86D00BF45FE /* preclustercommand.cpp in Sources */,
+				A7D176CF10F2558500159497 /* pcacommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

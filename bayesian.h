@@ -18,7 +18,7 @@
 class Bayesian : public Classify {
 	
 public:
-	Bayesian(string, string, string, int, int, bool);
+	Bayesian(string, string, string, int, int, int);
 	~Bayesian() {};
 	
 	string getTaxonomy(Sequence*);
@@ -35,8 +35,7 @@ private:
 	vector<int> genusTotals;
 	vector<int> genusNodes;  //indexes in phyloTree where genus' are located
 	
-	int kmerSize, numKmers, confidenceThreshold;
-	bool probs;
+	int kmerSize, numKmers, confidenceThreshold, iters;
 	
 	string bootstrapResults(vector<int>, int, int);
 	int getMostProbableTaxonomy(vector<int>);

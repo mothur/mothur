@@ -206,6 +206,7 @@ int ReadDistCommand::execute(){
 			if (globaldata->gSparseMatrix != NULL) { delete globaldata->gSparseMatrix;  }
 			globaldata->gSparseMatrix = read->getMatrix();
 			numDists = globaldata->gSparseMatrix->getNNodes();
+	cout << "matrix contains " << numDists << " distances." << endl;
 			
       int lines = cutoff / (1.0/precision);
       vector<float> dist_cutoff(lines+1,0);

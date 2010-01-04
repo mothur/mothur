@@ -42,7 +42,7 @@ GetOTURepCommand::GetOTURepCommand(string option){
 			help(); abort = true;
 		} else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","list","label","name", "group", "sorted"};
+			string Array[] =  {"fasta","list","label","name", "group", "sorted", "phylip","column"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -69,6 +69,19 @@ GetOTURepCommand::GetOTURepCommand(string option){
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not found") { mothurOut("list is a required parameter for the get.oturep command."); mothurOutEndLine(); abort = true; }
 			else if (listfile == "not open") { abort = true; }	
+			
+			phylipfile = validParameter.validFile(parameters, "phylip", true);
+			if (phylipfile == "not found") { phylipfile = "";  }
+			else if (phylipfile == "not open") { abort = true; }	
+			
+			columnfile = validParameter.validFile(parameters, "column", true);
+			if (columnfile == "not found") { columnfile = ""; }
+			else if (columnfile == "not open") { abort = true; }	
+			
+			if ((phylipfile == "") && (columnfile == "")) { mothurOut("When executing a get.oturep command you must enter a phylip or a column."); mothurOutEndLine(); abort = true; }
+			else if ((phylipfile != "") && (columnfile != "")) { mothurOut("When executing a get.oturep command you must enter ONLY ONE of the following: phylip or column."); mothurOutEndLine(); abort = true; }
+		
+			if (columnfile != "") {  if (namefile == "") {  cout << "You need to provide a namefile if you are going to use the column format." << endl; abort = true; }  }
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -110,10 +123,6 @@ GetOTURepCommand::GetOTURepCommand(string option){
 			}
 			
 			if (abort == false) {
-			
-				if(globaldata->gSparseMatrix != NULL)	{
-					matrix = globaldata->gSparseMatrix;
-				}
 
 				//globaldata->gListVector bin 0 = first name read in distance matrix, globaldata->gListVector bin 1 = second name read in distance matrix
 				if (globaldata->gListVector != NULL) {
@@ -131,15 +140,6 @@ GetOTURepCommand::GetOTURepCommand(string option){
 						}
 					}
 				} else { mothurOut("error, no listvector."); mothurOutEndLine(); }
-
-				// Create a data structure to quickly access the distance information.
-				// It consists of a vector of distance maps, where each map contains
-				// all distances of a certain sequence. Vector and maps are accessed
-				// via the index of a sequence in the distance matrix
-				seqVec = vector<SeqMap>(globaldata->gListVector->size()); 
-				for (MatData currentCell = matrix->begin(); currentCell != matrix->end(); currentCell++) {
-					seqVec[currentCell->row][currentCell->column] = currentCell->dist;
-				}
 
 				fasta = new FastaMap();
 			}
@@ -191,22 +191,21 @@ int GetOTURepCommand::execute(){
 	try {
 	
 		if (abort == true) { return 0; }
-
 		int error;
 		
 		//read fastafile
 		fasta->readFastaFile(fastafile);
 		
-		in.close();
+		//in.close();
+		//read distance file and generate indexed distance file that can be used by findrep function
+//....new reading class....//
+		
+		//if user gave a namesfile then use it
+		if (namesfile != "") {	readNamesFile();	}
 		
 		//set format to list so input can get listvector
 		globaldata->setFormat("list");
-		
-		//if user gave a namesfile then use it
-		if (namesfile != "") {
-			readNamesFile();
-		}
-		
+
 		//read list file
 		read = new ReadOTUFile(listfile);
 		read->read(&*globaldata); 
@@ -274,8 +273,6 @@ int GetOTURepCommand::execute(){
 			if (error == 1) { return 0; } //there is an error in hte input files, abort command
 		}
 		
-		delete matrix;
-		globaldata->gSparseMatrix = NULL;
 		delete list;
 		globaldata->gListVector = NULL;
 
@@ -371,7 +368,7 @@ string GetOTURepCommand::findRep(int bin, string& group, ListVector* thisList, i
 			SeqMap::iterator it;
 			SeqMap currMap;
 			for (size_t i=0; i < seqIndex.size(); i++) {
-				currMap = seqVec[seqIndex[i]];
+	//currMap = seqVec[seqIndex[i]];
 				for (size_t j=0; j < seqIndex.size(); j++) {
 					it = currMap.find(seqIndex[j]);		
 					if (it != currMap.end()) {
