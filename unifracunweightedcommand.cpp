@@ -132,7 +132,7 @@ int UnifracUnweightedCommand::execute() {
 			
 			//get unweighted scores for random trees
 			for (int j = 0; j < iters; j++) {
-				//we need a different getValues because when we swap the labels we only want to swap those in each parwise comparison
+				//we need a different getValues because when we swap the labels we only want to swap those in each pairwise comparison
 				randomData = unweighted->getValues(T[i], "", "");
 			
 				for(int k = 0; k < numComp; k++) {	
@@ -147,7 +147,6 @@ int UnifracUnweightedCommand::execute() {
 					//add randoms score to validscores
 					validScores[randomData[k]] = randomData[k];
 				}
-				
 			}
 		
 			for(int a = 0; a < numComp; a++) {

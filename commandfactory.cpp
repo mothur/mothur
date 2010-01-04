@@ -62,6 +62,7 @@
 #include "phylotypecommand.h"
 #include "mgclustercommand.h"
 #include "preclustercommand.h"
+#include "pcacommand.h"
 
 /*******************************************************/
 
@@ -133,6 +134,7 @@ CommandFactory::CommandFactory(){
 	commands["phylotype"]			= "phylotype";
 	commands["mgcluster"]			= "mgcluster";
 	commands["pre.cluster"]			= "pre.cluster";
+	commands["pca"]					= "pca";
 
 }
 /***********************************************************/
@@ -202,6 +204,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "phylotype")				{	command = new PhylotypeCommand(optionString);			}
 		else if(commandName == "mgcluster")				{	command = new MGClusterCommand(optionString);			}
 		else if(commandName == "pre.cluster")			{	command = new PreClusterCommand(optionString);			}
+		else if(commandName == "pca")					{	command = new PCACommand(optionString);					}
 		else											{	command = new NoCommand(optionString);					}
 
 		return command;

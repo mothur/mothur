@@ -25,7 +25,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option){
 		else {
 			
 			//valid paramters for this command
-			string AlignArray[] =  {"template","fasta","search","ksize","method","processors","taxonomy","match","mismatch","gapopen","gapextend","numwanted","cutoff","probs"};
+			string AlignArray[] =  {"template","fasta","search","ksize","method","processors","taxonomy","match","mismatch","gapopen","gapextend","numwanted","cutoff","probs","iters"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -97,6 +97,10 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option){
 			
 			temp = validParameter.validFile(parameters, "probs", false);		if (temp == "not found"){	temp = "true";			}
 			probs = isTrue(temp);
+			
+			temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found") { temp = "100";			}
+			convert(temp, iters); 
+
 
 			
 			if ((method == "bayesian") && (search != "kmer"))  { 
@@ -134,11 +138,12 @@ void ClassifySeqsCommand::help(){
 		mothurOut("The processors parameter allows you to specify the number of processors to use. The default is 1.\n");
 		mothurOut("The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n");
 		mothurOut("The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n");
-		mothurOut("The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -1.0.\n");
-		mothurOut("The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -2.0.\n");
+		mothurOut("The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n");
+		mothurOut("The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n");
 		mothurOut("The numwanted parameter allows you to specify the number of sequence matches you want with the knn method.  The default is 10.\n");
 		mothurOut("The cutoff parameter allows you to specify a bootstrap confidence threshold for your taxonomy.  The default is 0.\n");
 		mothurOut("The probs parameter shut off the bootstrapping results for the bayesian method. The default is true, meaning you want the bootstrapping to be run.\n");
+		mothurOut("The iters parameter allows you to specify how many iterations to do when calculating the bootstrap confidence score for your taxonomy with the bayesian method.  The default is 100.\n");
 		mothurOut("The classify.seqs command should be in the following format: \n");
 		mothurOut("classify.seqs(template=yourTemplateFile, fasta=yourFastaFile, method=yourClassificationMethod, search=yourSearchmethod, ksize=yourKmerSize, taxonomy=yourTaxonomyFile, processors=yourProcessors) \n");
 		mothurOut("Example classify.seqs(fasta=amazon.fasta, template=core.filtered, method=knn, search=gotoh, ksize=8, processors=2)\n");
@@ -159,19 +164,19 @@ int ClassifySeqsCommand::execute(){
 	try {
 		if (abort == true) {	return 0;	}
 		
-		if(method == "bayesian")			{	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, probs);		}
+		if(method == "bayesian")			{	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters);		}
 		else if(method == "knn")			{	classify = new Knn(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, numWanted);				}
 		else {
 			mothurOut(search + " is not a valid method option. I will run the command using bayesian.");
 			mothurOutEndLine();
-			classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, probs);	
+			classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters);	
 		}
 
 		int numFastaSeqs = 0;
 		
-		string newTaxonomyFile = getRootName(fastaFileName) + "taxonomy";
+		string newTaxonomyFile = getRootName(fastaFileName) + getRootName(taxonomyFileName) + "taxonomy";
 		string tempTaxonomyFile = getRootName(fastaFileName) + "taxonomy.temp";
-		string taxSummary = getRootName(fastaFileName) + "tax.summary";
+		string taxSummary = getRootName(fastaFileName) + getRootName(taxonomyFileName) + "tax.summary";
 		
 		int start = time(NULL);
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -356,7 +361,13 @@ int ClassifySeqsCommand::driver(linePair* line, string taxFName, string tempTFNa
 				taxonomy = classify->getTaxonomy(candidateSeq);
 				
 				if (taxonomy != "bad seq") {
-					outTax << candidateSeq->getName() << '\t' << taxonomy << endl;
+					//output confidence scores or not
+					if (probs) {
+						outTax << candidateSeq->getName() << '\t' << taxonomy << endl;
+					}else{
+						outTax << candidateSeq->getName() << '\t' << classify->getSimpleTax() << endl;
+					}
+					
 					outTaxSimple << candidateSeq->getName() << '\t' << classify->getSimpleTax() << endl;
 				}
 			}				

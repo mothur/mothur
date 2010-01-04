@@ -13,7 +13,6 @@
 
 #include "command.hpp"
 #include "globaldata.hpp"
-#include "sparsematrix.hpp"
 #include "listvector.hpp"
 #include "inputdata.h"
 #include "readotu.h"
@@ -44,24 +43,17 @@ public:
 
 private:
 	GlobalData* globaldata;
-	SparseMatrix* matrix;
 	ListVector* list;
 	ReadOTUFile* read;
 	InputData* input;
 	FastaMap* fasta;
 	GroupMap* groupMap;
-	string filename, fastafile, listfile, namesfile, groupfile, label, sorted;
+	string filename, fastafile, listfile, namesfile, groupfile, label, sorted, phylipfile, columnfile, namefile;
 	ofstream out;
 	ifstream in, inNames;
-	bool groupError;
-
-	bool abort, allLines;
+	bool abort, allLines, groupError;
 	set<string> labels; //holds labels to be used
 	map<string, int> nameToIndex;  //maps sequence name to index in sparsematrix
-
-	vector<SeqMap> seqVec;			// contains maps with sequence index and distance
-									// for all distances related to a certain sequence
-
 
 	void readNamesFile();
 	int process(ListVector*);

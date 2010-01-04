@@ -11,8 +11,8 @@
 #include "kmer.hpp"
 
 /**************************************************************************************************/
-Bayesian::Bayesian(string tfile, string tempFile, string method, int ksize, int cutoff, bool p) : 
-Classify(tfile, tempFile, method, ksize, 0.0, 0.0, 0.0, 0.0), kmerSize(ksize), confidenceThreshold(cutoff), probs(p)  {
+Bayesian::Bayesian(string tfile, string tempFile, string method, int ksize, int cutoff, int i) : 
+Classify(tfile, tempFile, method, ksize, 0.0, 0.0, 0.0, 0.0), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 	try {
 					
 		numKmers = database->getMaxKmer() + 1;
@@ -116,18 +116,9 @@ string Bayesian::getTaxonomy(Sequence* seq) {
 		int index = getMostProbableTaxonomy(queryKmers);
 					
 		//bootstrap - to set confidenceScore
-		if (probs) {
-			int numToSelect = queryKmers.size() / 8;
-			tax = bootstrapResults(queryKmers, index, numToSelect);
-		}else{
-			TaxNode seqTax = phyloTree->get(index);
-			while (seqTax.level != 0) { //while you are not at the root
-				tax = seqTax.name + ";" + tax;
-				seqTax = phyloTree->get(seqTax.parent);
-			}
-			simpleTax = tax;
-		}
-				
+		int numToSelect = queryKmers.size() / 8;
+		tax = bootstrapResults(queryKmers, index, numToSelect);
+						
 		return tax;	
 	}
 	catch(exception& e) {
@@ -151,7 +142,7 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 		map<string, int>::iterator itBoot2;
 		map<int, int>::iterator itConvert;
 		
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < iters; i++) {
 			vector<int> temp;
 						
 			for (int j = 0; j < numToSelect; j++) {

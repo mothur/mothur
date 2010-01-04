@@ -93,7 +93,7 @@ AlignCommand::AlignCommand(string option){
 			temp = validParameter.validFile(parameters, "flip", false);			if (temp == "not found"){	temp = "f";				}
 			flip = isTrue(temp); 
 			
-			temp = validParameter.validFile(parameters, "threshold", false);	if (temp == "not found"){	temp = "0.80";			}
+			temp = validParameter.validFile(parameters, "threshold", false);	if (temp == "not found"){	temp = "0.50";			}
 			convert(temp, threshold); 
 			
 			search = validParameter.validFile(parameters, "search", false);		if (search == "not found"){	search = "kmer";		}
@@ -131,12 +131,12 @@ void AlignCommand::help(){
 		mothurOut("The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 8.\n");
 		mothurOut("The match parameter allows you to specify the bonus for having the same base. The default is 1.0.\n");
 		mothurOut("The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n");
-		mothurOut("The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -1.0.\n");
-		mothurOut("The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -2.0.\n");
+		mothurOut("The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n");
+		mothurOut("The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n");
 		mothurOut("The flip parameter is used to specify whether or not you want mothur to try the reverse compement if a sequence falls below the threshold.  The default is false.\n");
 		mothurOut("The threshold is used to specify a cutoff at which an alignment is deemed 'bad' and the reverse complement may be tried. \n");
 		mothurOut("If the flip parameter is set to true the reverse complement of the sequence is aligned and the better alignment is reported.\n");
-		mothurOut("The default for the threshold parameter is 0.80, meaning at least 80% of the bases must remain or the sequence is reported as potentially reversed.\n");
+		mothurOut("The default for the threshold parameter is 0.50, meaning at least 50% of the bases must remain or the sequence is reported as potentially reversed.\n");
 		mothurOut("The align.seqs command should be in the following format: \n");
 		mothurOut("align.seqs(template=yourTemplateFile, candidate=yourCandidateFile, align=yourAlignmentMethod, search=yourSearchmethod, ksize=yourKmerSize, match=yourMatchBonus, mismatch=yourMismatchpenalty, gapopen=yourGapopenPenalty, gapextend=yourGapExtendPenalty) \n");
 		mothurOut("Example align.seqs(candidate=candidate.fasta, template=core.filtered, align=kmer, search=gotoh, ksize=8, match=2.0, mismatch=3.0, gapopen=-2.0, gapextend=-1.0)\n");
@@ -231,6 +231,15 @@ int AlignCommand::execute(){
 			rename((alignFileName + toString(processIDS[0]) + ".temp").c_str(), alignFileName.c_str());
 			rename((reportFileName + toString(processIDS[0]) + ".temp").c_str(), reportFileName.c_str());
 			
+			//append alignment and report files
+			for(int i=1;i<processors;i++){
+				appendAlignFiles((alignFileName + toString(processIDS[i]) + ".temp"), alignFileName);
+				remove((alignFileName + toString(processIDS[i]) + ".temp").c_str());
+				
+				appendReportFiles((reportFileName + toString(processIDS[i]) + ".temp"), reportFileName);
+				remove((reportFileName + toString(processIDS[i]) + ".temp").c_str());
+			}
+			
 			vector<string> nonBlankAccnosFiles;
 			//delete blank accnos files generated with multiple processes
 			for(int i=0;i<processors;i++){  
@@ -253,16 +262,6 @@ int AlignCommand::execute(){
 				}else{  mothurOut(" If the reverse compliment proved to be better it was reported.");  }
 				mothurOutEndLine();
 			}
-			
-			//append other files
-			for(int i=1;i<processors;i++){
-				appendAlignFiles((alignFileName + toString(processIDS[i]) + ".temp"), alignFileName);
-				remove((alignFileName + toString(processIDS[i]) + ".temp").c_str());
-				
-				appendReportFiles((reportFileName + toString(processIDS[i]) + ".temp"), reportFileName);
-				remove((reportFileName + toString(processIDS[i]) + ".temp").c_str());
-			}
-			
 		}
 #else
 		ifstream inFASTA;
@@ -316,7 +315,7 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName, 
 		openInputFile(candidateFileName, inFASTA);
 
 		inFASTA.seekg(line->start);
-
+		
 		for(int i=0;i<line->numSeqs;i++){
 			
 			Sequence* candidateSeq = new Sequence(inFASTA);  gobble(inFASTA);
@@ -392,7 +391,13 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName, 
 				if (needToDeleteCopy) {   delete copy;   }
 			}
 			delete candidateSeq;
+			
+			//report progress
+			if((i+1) % 100 == 0){	mothurOut(toString(i+1)); mothurOutEndLine();		}
+			
 		}
+		//report progress
+		if((line->numSeqs) % 100 != 0){	mothurOut(toString(line->numSeqs)); mothurOutEndLine();		}
 		
 		alignmentFile.close();
 		inFASTA.close();
