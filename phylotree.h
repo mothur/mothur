@@ -35,7 +35,9 @@ public:
 	void addSeqToTree(string, string);
 	void assignHeirarchyIDs(int);
 	void print(ofstream&);
-	vector<int> getGenusNodes();	
+	vector<int> getGenusNodes();
+	void binUnclassified();
+		
 	TaxNode get(int i)				{	return tree[i];	}
 	TaxNode get(string seqName)		{	return tree[name2Taxonomy[seqName]];	}
 	int getIndex(string seqName)	{	return name2Taxonomy[seqName];	}
@@ -49,6 +51,7 @@ private:
 	void print(int, ofstream&);
 	int numNodes;
 	int numSeqs;
+	int maxLevel;
 };
 
 /**************************************************************************************************/

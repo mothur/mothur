@@ -21,7 +21,7 @@ PCACommand::PCACommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"phylip","lt"};
+			string Array[] =  {"phylip"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -59,11 +59,11 @@ PCACommand::PCACommand(string option){
 			//	if (namefile == "") {  mothurOut("You need to provide a namefile if you are going to use the column format."); mothurOutEndLine(); abort = true; }
 			//}
 			
-			string temp = validParameter.validFile(parameters, "lt", false);				if (temp == "not found") { temp = "false"; }
-			bool lt = isTrue(temp);
+			//string temp = validParameter.validFile(parameters, "lt", false);				if (temp == "not found") { temp = "false"; }
+			//bool lt = isTrue(temp);
 			
-			if (lt)		{  matrix = 2;	}
-			else		{  matrix = 1;  }
+			//if (lt)		{  matrix = 2;	}
+			//else		{  matrix = 1;  }
 
 
 		}
@@ -108,14 +108,14 @@ int PCACommand::execute(){
 		else{
 			fbase += ".";
 		}
-		read(filename, matrix, names, D);
+		read(filename, names, D);
    	
 		double offset = 0.0000;
 		vector<double> d;
 		vector<double> e;
 		vector<vector<double> > G = D;
 		vector<vector<double> > copy_G;
-		int rank = D.size();
+		//int rank = D.size();
 		
 		cout << "\nProcessing...\n";
 		
@@ -160,7 +160,7 @@ void PCACommand::get_comment(istream& f, char begin, char end){
 
 /*********************************************************************************************************************************/
 
-void PCACommand::read_mega(istream& f, int square_m, vector<string>& name_list, vector<vector<double> >& d){
+void PCACommand::read_mega(istream& f, vector<string>& name_list, vector<vector<double> >& d){
 	try {
 		get_comment(f, '#', '\n');
 		
@@ -262,23 +262,47 @@ void PCACommand::read_phylip(istream& f, int square_m, vector<string>& name_list
 
 /*********************************************************************************************************************************/
 
-void PCACommand::read(string fname, int m, vector<string>& names, vector<vector<double> >& D){
+void PCACommand::read(string fname, vector<string>& names, vector<vector<double> >& D){
 	try {
-		ifstream f(fname.c_str());
-		if(!f) {
-			cerr << "Error: Could not open " << fname << endl;
-			exit(1);
-		}
+		ifstream f;
+		openInputFile(fname, f);
+		
 		char test = f.peek();
 		
 		if(test == '#'){
-			read_mega(f, m, names, D);
+			read_mega(f, names, D);
 		}
 		else{
+			//check whether matrix is square
+			char d;
+			int m = 1;
+			int numSeqs;
+			string name;
+			
+			f >> numSeqs >> name; 
+			
+			while((d=f.get()) != EOF){
+				
+				//is d a number meaning its square
+				if(isalnum(d)){ 
+					m = 1; 
+					break; 
+				}
+				
+				//is d a line return meaning its lower triangle
+				if(d == '\n'){
+					m = 2;
+					break;
+				}
+			}
+			f.close();
+			
+			//reopen to get back to beginning
+			openInputFile(fname, f);			
 			read_phylip(f, m, names, D);
 		}
 		
-		int rank = D.size();
+		//int rank = D.size();
 	}
 	catch(exception& e) {
 		errorOut(e, "PCACommand", "read");

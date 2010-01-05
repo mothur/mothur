@@ -45,7 +45,7 @@ class UnifracUnweightedCommand : public Command {
 		vector< map<float, float> > rscoreFreq;  //map <unweighted score, number of random trees with that score.> -vector entry for each combination.
 		vector< map<float, float> > rCumul;  //map <unweighted score, cumulative percentage of number of random trees with that score or higher.> -vector entry for each combination.
 		
-		bool abort;
+		bool abort, phylip, random;
 		string groups, itersString;
 		vector<string> Groups; //holds groups to be used
 
@@ -54,6 +54,7 @@ class UnifracUnweightedCommand : public Command {
 		
 		void printUWSummaryFile(int);
 		void printUnweightedFile();
+		void createPhylipFile(int);
 		 
 		
 };

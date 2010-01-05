@@ -49,7 +49,7 @@ class UnifracWeightedCommand : public Command {
 		vector< map<float, float> > rCumul;  //map <weighted score, cumulative percentage of number of random trees with that score or higher.> -vector entry for each c								
 		map<float, float>  validScores;  //map contains scores from random
 		
-		bool abort;
+		bool abort, phylip, random;
 		string groups, itersString;
 		vector<string> Groups; //holds groups to be used
 
@@ -58,6 +58,7 @@ class UnifracWeightedCommand : public Command {
 		
 		void printWSummaryFile();
 		void printWeightedFile();  
+		void createPhylipFile();
 		//void removeValidScoresDuplicates();
 		int findIndex(float, int);
 		void calculateFreqsCumuls();
