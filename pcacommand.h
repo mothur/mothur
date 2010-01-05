@@ -27,12 +27,11 @@ private:
 	bool abort;
 	string phylipfile, columnfile, namefile, format, filename, fbase;
 	float cutoff, precision;
-	int matrix;
 	
 	void get_comment(istream&, char, char);
-	void read_mega(istream&, int, vector<string>&, vector<vector<double> >&);
+	void read_mega(istream&, vector<string>&, vector<vector<double> >&);
 	void read_phylip(istream&, int, vector<string>&, vector<vector<double> >&);
-	void read(string, int, vector<string>&, vector<vector<double> >&);
+	void read(string, vector<string>&, vector<vector<double> >&);
 	double pythag(double, double);
 	void matrix_mult(vector<vector<double> >, vector<vector<double> >, vector<vector<double> >&);
 	void recenter(double, vector<vector<double> >, vector<vector<double> >&);

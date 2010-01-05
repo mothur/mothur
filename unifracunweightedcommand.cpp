@@ -21,7 +21,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option) {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"groups","iters"};
+			string Array[] =  {"groups","iters","distance","random"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -46,10 +46,24 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option) {
 				globaldata->Groups = Groups;
 			}
 				
-			itersString = validParameter.validFile(parameters, "iters", false);			if (itersString == "not found") { itersString = "1000"; }
+			itersString = validParameter.validFile(parameters, "iters", false);				if (itersString == "not found") { itersString = "1000"; }
 			convert(itersString, iters); 
 			
+			string temp = validParameter.validFile(parameters, "distance", false);			if (temp == "not found") { temp = "false"; }
+			phylip = isTrue(temp);
 			
+			temp = validParameter.validFile(parameters, "random", false);					if (temp == "not found") { temp = "true"; }
+			random = isTrue(temp);
+			
+			if (!random) {  iters = 0;  } //turn off random calcs
+			
+			//if user selects distance = true and no groups it won't calc the pairwise
+			if ((phylip) && (Groups.size() == 0)) {
+				groups = "all";
+				splitAtDash(groups, Groups);
+				globaldata->Groups = Groups;
+			}
+		
 			if (abort == false) {
 				T = globaldata->gTree;
 				tmap = globaldata->gTreemap;
@@ -80,9 +94,11 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option) {
 void UnifracUnweightedCommand::help(){
 	try {
 		mothurOut("The unifrac.unweighted command can only be executed after a successful read.tree command.\n");
-		mothurOut("The unifrac.unweighted command parameters are groups and iters.  No parameters are required.\n");
+		mothurOut("The unifrac.unweighted command parameters are groups, iters, distance and random.  No parameters are required.\n");
 		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 1 valid group.\n");
 		mothurOut("The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree.\n");
+		mothurOut("The distance parameter allows you to create a distance file from the results. The default is false.\n");
+		mothurOut("The random parameter allows you to shut off the comparison to random trees. The default is true, meaning compare your trees with randomly generated trees.\n");
 		mothurOut("The unifrac.unweighted command should be in the following format: unifrac.unweighted(groups=yourGroups, iters=yourIters).\n");
 		mothurOut("Example unifrac.unweighted(groups=A-B-C, iters=500).\n");
 		mothurOut("The default value for groups is all the groups in your groupfile, and iters is 1000.\n");
@@ -113,7 +129,7 @@ int UnifracUnweightedCommand::execute() {
 		for (int i = 0; i < T.size(); i++) {
 			counter = 0;
 			
-			output = new ColumnFile(globaldata->getTreeFile()  + toString(i+1) + ".unweighted", itersString);
+			if (random)  {  output = new ColumnFile(globaldata->getTreeFile()  + toString(i+1) + ".unweighted", itersString);  }
 			
 			//get unweighted for users tree
 			rscoreFreq.resize(numComp);  
@@ -127,7 +143,9 @@ int UnifracUnweightedCommand::execute() {
 			for(int k = 0; k < numComp; k++) {
 				//saves users score
 				utreeScores[k].push_back(userData[k]);
-
+				
+				//add users score to validscores
+				validScores[userData[k]] = userData[k];
 			}
 			
 			//get unweighted scores for random trees
@@ -160,15 +178,16 @@ int UnifracUnweightedCommand::execute() {
 					if (it2 != rscoreFreq[a].end()) {  rscoreFreq[a][it->first] /= iters; rcumul-= it2->second;  }
 					else { rscoreFreq[a][it->first] = 0.0000; } //no random trees with that score
 				}
-				UWScoreSig[a].push_back(rCumul[a][userData[a]]);
+				
+				if (random) {   UWScoreSig[a].push_back(rCumul[a][userData[a]]);	}
+				else		{	UWScoreSig[a].push_back(0.0);						}
 			}
 		
-		
-		
-			printUnweightedFile();
+			//print output files
 			printUWSummaryFile(i);
+			if (random)  {	printUnweightedFile();	delete output;	}
+			if (phylip) {	createPhylipFile(i);		}
 			
-			delete output;
 			rscoreFreq.clear(); 
 			rCumul.clear();  
 			validScores.clear(); 
@@ -193,13 +212,15 @@ void UnifracUnweightedCommand::printUnweightedFile() {
 	try {
 		vector<double> data;
 		vector<string> tags;
-		tags.push_back("Score"); tags.push_back("RandFreq"); tags.push_back("RandCumul");
 		
+		tags.push_back("Score");
+		tags.push_back("RandFreq"); tags.push_back("RandCumul");
+			
 		for(int a = 0; a < numComp; a++) {
 			output->initFile(groupComb[a], tags);
 			//print each line
 			for (map<float,float>::iterator it = validScores.begin(); it != validScores.end(); it++) { 
-				data.push_back(it->first);  data.push_back(rscoreFreq[a][it->first]); data.push_back(rCumul[a][it->first]); 
+				data.push_back(it->first);  data.push_back(rscoreFreq[a][it->first]); data.push_back(rCumul[a][it->first]);						
 				output->output(data);
 				data.clear();
 			} 
@@ -225,14 +246,20 @@ void UnifracUnweightedCommand::printUWSummaryFile(int i) {
 			outSum << i+1 << '\t';
 			mothurOut(toString(i+1) + "\t");
 			
-			if (UWScoreSig[a][0] > (1/(float)iters)) {
-				outSum << setprecision(6) << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(itersString.length()) << UWScoreSig[a][0] << endl;
-				cout << setprecision(6)  << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(itersString.length()) << UWScoreSig[a][0] << endl; 
-				mothurOutJustToLog(groupComb[a]  + "\t" + toString(utreeScores[a][0])  + "\t" + toString(UWScoreSig[a][0])); mothurOutEndLine(); 
-			}else {
-				outSum << setprecision(6) << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(itersString.length()) << "<" << (1/float(iters)) << endl;
-				cout << setprecision(6)  << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(itersString.length()) << "<" << (1/float(iters)) << endl; 
-				mothurOutJustToLog(groupComb[a]  + "\t" + toString(utreeScores[a][0])  + "\t<" + toString((1/float(iters)))); mothurOutEndLine();
+			if (random) {
+				if (UWScoreSig[a][0] > (1/(float)iters)) {
+					outSum << setprecision(6) << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(itersString.length()) << UWScoreSig[a][0] << endl;
+					cout << setprecision(6)  << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(itersString.length()) << UWScoreSig[a][0] << endl; 
+					mothurOutJustToLog(groupComb[a]  + "\t" + toString(utreeScores[a][0])  + "\t" + toString(UWScoreSig[a][0])); mothurOutEndLine(); 
+				}else {
+					outSum << setprecision(6) << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(itersString.length()) << "<" << (1/float(iters)) << endl;
+					cout << setprecision(6)  << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(itersString.length()) << "<" << (1/float(iters)) << endl; 
+					mothurOutJustToLog(groupComb[a]  + "\t" + toString(utreeScores[a][0])  + "\t<" + toString((1/float(iters)))); mothurOutEndLine();
+				}
+			}else{
+				outSum << setprecision(6) << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << "0.00" << endl;
+				cout << setprecision(6)  << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << "0.00" << endl; 
+				mothurOutJustToLog(groupComb[a]  + "\t" + toString(utreeScores[a][0])  + "\t0.00"); mothurOutEndLine();
 			}
 		}
 		
@@ -242,7 +269,49 @@ void UnifracUnweightedCommand::printUWSummaryFile(int i) {
 		exit(1);
 	}
 }
-
 /***********************************************************/
+void UnifracUnweightedCommand::createPhylipFile(int i) {
+	try {
+		string phylipFileName = globaldata->getTreeFile()  + toString(i+1) + ".unweighted.dist";
+		ofstream out;
+		openOutputFile(phylipFileName, out);
+			
+		//output numSeqs
+		out << globaldata->Groups.size() << endl;
+			
+		//make matrix with scores in it
+		vector< vector<float> > dists;	dists.resize(globaldata->Groups.size());
+		for (int i = 0; i < globaldata->Groups.size(); i++) {
+			dists[i].resize(globaldata->Groups.size(), 0.0);
+		}
+		
+		//flip it so you can print it
+		int count = 0;
+		for (int r=0; r<globaldata->Groups.size(); r++) { 
+			for (int l = r+1; l < globaldata->Groups.size(); l++) {
+				dists[r][l] = (1.0 - utreeScores[count][0]);
+				dists[l][r] = (1.0 - utreeScores[count][0]);
+				count++;
+			}
+		}
+		
+		//output to file
+		for (int r=0; r<globaldata->Groups.size(); r++) { 
+			//output name
+			out << globaldata->Groups[r] << '\t';
+			
+			//output distances
+			for (int l = 0; l < r; l++) {	out  << dists[r][l] << '\t';  }
+			out << endl;
+		}
+		out.close();
+	}
+	catch(exception& e) {
+		errorOut(e, "UnifracUnweightedCommand", "createPhylipFile");
+		exit(1);
+	}
+}
+/***********************************************************/
+
 
 

@@ -24,7 +24,6 @@ HeatMapSim::HeatMapSim(){
 		globaldata = GlobalData::getInstance();
 }
 //**********************************************************************************************************************
-
 void HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> calcs) {
 	try {
 		EstOutput data;
@@ -101,6 +100,73 @@ void HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> 
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+void HeatMapSim::getPic(vector< vector<double> > dists, vector<string> groups) {
+	try {
+		
+		vector<double> sims;
+		
+		string filenamesvg = getRootName(globaldata->inputFileName) + "heatmap.sim.svg";
+		openOutputFile(filenamesvg, outsvg);
+			
+		//svg image
+		outsvg << "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 " + toString((dists.size() * 150) + 160) + " " + toString((dists.size() * 150) + 160)  + "\">\n";
+		outsvg << "<g>\n";
+		
+		//white backround
+		outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"" + toString((dists.size() * 150) + 160) + "\" height=\"" + toString((dists.size() * 150) + 160)  + "\"/>"; 
+		outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString((dists.size() * 75) - 40) + "\" y=\"25\">Heatmap for " + globaldata->inputFileName + "</text>\n";
+		
+		//column labels
+		for (int h = 0; h < groups.size(); h++) {
+			outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString(((150 * (h+1)) ) - ((int)groups[h].length() / 2)) + "\" y=\"50\">" + groups[h] + "</text>\n"; 
+			outsvg << "<text fill=\"black\" class=\"seri\" y=\"" + toString(((150 * (h+1)) ) - ((int)groups[h].length() / 2)) + "\" x=\"50\">" + groups[h] + "</text>\n";
+		}
+			
+		double biggest = -1;
+		float scaler;
+
+		//get sim for each comparison and save them so you can find the relative similairity
+		for(int i = 0; i < (dists.size()-1); i++){
+			for(int j = (i+1); j < dists.size(); j++){
+				
+				float sim = 1.0 - dists[i][j];
+				sims.push_back(sim);
+					
+				//save biggest similairity to set relative sim
+				if (sim > biggest) { biggest = sim; }
+			}
+		}
+			
+		//map biggest similairity found to red
+		scaler = 255.0 / biggest;
+			
+		int count = 0;
+		//output similairites to file
+		for(int i = 0; i < (dists.size()-1); i++){
+			for(int j = (i+1); j < dists.size(); j++){
+				
+					//find relative color
+					int color = scaler * sims[count];					
+					//draw box
+					outsvg << "<rect fill=\"rgb(" + toString(color) + ",0,0)\" stroke=\"rgb(" + toString(color) + ",0,0)\" x=\"" + toString((i*150)+80) + "\" y=\"" + toString((j*150)+75) + "\" width=\"150\" height=\"150\"/>\n";
+					count++;
+			}
+		}
+			
+		int y = ((dists.size() * 150) + 120);
+		printLegend(y, biggest);
+		
+		outsvg << "</g>\n</svg>\n";
+		outsvg.close();
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "HeatMapSim", "getPic");
+		exit(1);
+	}
+}
+
 //**********************************************************************************************************************
 
 void HeatMapSim::printLegend(int y, float maxSim) {

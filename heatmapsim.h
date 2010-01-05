@@ -24,6 +24,7 @@ class HeatMapSim {
 		~HeatMapSim(){};
 	
 		void getPic(vector<SharedRAbundVector*>, vector<Calculator*>);
+		void getPic(vector< vector<double> >, vector<string>);
 
 	private:
 		void printLegend(int, float);

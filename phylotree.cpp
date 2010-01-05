@@ -31,6 +31,7 @@ PhyloTree::PhyloTree(string tfile){
 		numSeqs = 0;
 		tree.push_back(TaxNode("Root"));
 		tree[0].heirarchyID = "0";
+		maxLevel = 0;
 		
 		ifstream in;
 		openInputFile(tfile, in);
@@ -151,6 +152,10 @@ void PhyloTree::assignHeirarchyIDs(int index){
 			tree[it->second].heirarchyID = tree[index].heirarchyID + '.' + toString(counter);
 			counter++;
 			tree[it->second].level = tree[index].level + 1;
+			
+			//save maxLevel for binning the unclassified seqs
+			if (tree[it->second].level > maxLevel) { maxLevel = tree[it->second].level; } 
+			
 			assignHeirarchyIDs(it->second);
 		}
 	}
@@ -159,7 +164,60 @@ void PhyloTree::assignHeirarchyIDs(int index){
 		exit(1);
 	}
 }
-
+/**************************************************************************************************/
+void PhyloTree::binUnclassified(){
+	try {
+		map<string, int>::iterator itBin;
+		map<string, int>::iterator childPointer;
+		
+		//go through the seqs and if a sequence finest taxon is not the same level as the most finely defined taxon then classify it as unclassified where necessary
+		for (itBin = name2Taxonomy.begin(); itBin != name2Taxonomy.end(); itBin++) {
+		
+			int level = tree[itBin->second].level;
+			int currentNode = itBin->second;
+			
+			//this sequence is unclassified at some levels
+			while(level != maxLevel){
+			
+				level++;
+			
+				string taxon = "unclassified";	
+				
+				//does the parent have a child names 'unclassified'?
+				childPointer = tree[currentNode].children.find(taxon);
+				
+				if(childPointer != tree[currentNode].children.end()){	//if the node already exists, move on
+					currentNode = childPointer->second; //currentNode becomes 'unclassified'
+					tree[currentNode].accessions.push_back(itBin->first);  //add this seq
+					name2Taxonomy[itBin->first] = currentNode;
+				}
+				else{											//otherwise, create it
+					tree.push_back(TaxNode(taxon));
+					numNodes++;
+					tree[currentNode].children[taxon] = numNodes-1;
+					tree[numNodes-1].parent = currentNode;
+									
+					currentNode = tree[currentNode].children[taxon];
+					tree[currentNode].accessions.push_back(itBin->first);
+					name2Taxonomy[itBin->first] = currentNode;
+				}
+				
+				if (level == maxLevel) {   uniqueTaxonomies[currentNode] = currentNode;	}
+			}
+		}
+		
+		//clear HeirarchyIDs and reset them
+		for (int i = 1; i < tree.size(); i++) {
+			tree[i].heirarchyID = "";
+		}
+		assignHeirarchyIDs(0);
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "PhyloTree", "binUnclassified");
+		exit(1);
+	}
+}
 /**************************************************************************************************/
 
 void PhyloTree::print(ofstream& out){
@@ -182,6 +240,8 @@ void PhyloTree::print(int i, ofstream& out){
 			out <<tree[it->second].level << '\t' << tree[it->second].heirarchyID << '\t' << tree[it->second].name << '\t' << tree[it->second].children.size() << '\t' << tree[it->second].accessions.size() << endl;
 			print(it->second, out);
 		}
+		
+		
 	}
 	catch(exception& e) {
 		errorOut(e, "PhyloTree", "print");

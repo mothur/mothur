@@ -36,7 +36,7 @@ HeatMapSimCommand::HeatMapSimCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string AlignArray[] =  {"groups","label", "calc"};
+			string AlignArray[] =  {"groups","label", "calc","phylip","column","name"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -49,43 +49,67 @@ HeatMapSimCommand::HeatMapSimCommand(string option){
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
-			//make sure the user has already run the read.otu command
-			if (globaldata->getSharedFile() == "") {
-				 mothurOut("You must read a list and a group, or a shared before you can use the heatmap.sim command."); mothurOutEndLine(); abort = true; 
+			format = "";
+			
+			//required parameters
+			phylipfile = validParameter.validFile(parameters, "phylip", true);
+			if (phylipfile == "not open") { abort = true; }
+			else if (phylipfile == "not found") { phylipfile = ""; }	
+			else {  format = "phylip"; 	}
+			
+			columnfile = validParameter.validFile(parameters, "column", true);
+			if (columnfile == "not open") { abort = true; }	
+			else if (columnfile == "not found") { columnfile = ""; }
+			else {  format = "column";	}
+			
+			namefile = validParameter.validFile(parameters, "name", true);
+			if (namefile == "not open") { abort = true; }	
+			else if (namefile == "not found") { namefile = ""; }
+			
+			
+			//error checking on files			
+			if ((globaldata->getSharedFile() == "") && ((phylipfile == "") && (columnfile == "")))	{ mothurOut("You must run the read.otu command or provide a distance file before running the heatmap.sim command."); mothurOutEndLine(); abort = true; }
+			else if ((phylipfile != "") && (columnfile != "")) { mothurOut("When running the heatmap.sim command with a distance file you may not use both the column and the phylip parameters."); mothurOutEndLine(); abort = true; }
+			
+			if (columnfile != "") {
+				if (namefile == "") {  mothurOut("You need to provide a namefile if you are going to use the column format."); mothurOutEndLine(); abort = true; }
 			}
-
+			
+			if (format == "") { format = "shared"; }
+			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
-			label = validParameter.validFile(parameters, "label", false);			
-			if (label == "not found") { label = ""; }
-			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
-				else { allLines = 1;  }
-			}
-			
-			//if the user has not specified any labels use the ones from read.otu
-			if (label == "") {  
-				allLines = globaldata->allLines; 
-				labels = globaldata->labels; 
-			}
-			
-			calc = validParameter.validFile(parameters, "calc", false);			
-			if (calc == "not found") { calc = "jest-thetayc";  }
-			else { 
-				 if (calc == "default")  {  calc = "jest-thetayc";  }
-			}
-			splitAtDash(calc, Estimators);
-			
-			groups = validParameter.validFile(parameters, "groups", false);			
-			if (groups == "not found") { groups = ""; }
-			else { 
-				splitAtDash(groups, Groups);
-				globaldata->Groups = Groups;
+			if (format == "shared") {
+				label = validParameter.validFile(parameters, "label", false);			
+				if (label == "not found") { label = ""; }
+				else { 
+					if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+					else { allLines = 1;  }
+				}
+				
+				//if the user has not specified any labels use the ones from read.otu
+				if (label == "") {  
+					allLines = globaldata->allLines; 
+					labels = globaldata->labels; 
+				}
+				
+				calc = validParameter.validFile(parameters, "calc", false);			
+				if (calc == "not found") { calc = "jest-thetayc";  }
+				else { 
+					if (calc == "default")  {  calc = "jest-thetayc";  }
+				}
+				splitAtDash(calc, Estimators);
+				
+				groups = validParameter.validFile(parameters, "groups", false);			
+				if (groups == "not found") { groups = ""; }
+				else { 
+					splitAtDash(groups, Groups);
+					globaldata->Groups = Groups;
+				}
 			}
 			
 			if (abort == false) {
 				validCalculator = new ValidCalculators();
-				heatmap = new HeatMapSim();
 			
 				int i;
 				for (i=0; i<Estimators.size(); i++) {
@@ -130,8 +154,10 @@ HeatMapSimCommand::HeatMapSimCommand(string option){
 
 void HeatMapSimCommand::help(){
 	try {
-		mothurOut("The heatmap.sim command can only be executed after a successful read.otu command.\n");
-		mothurOut("The heatmap.sim command parameters are groups, calc and label.  No parameters are required.\n");
+		mothurOut("The heatmap.sim command can only be executed after a successful read.otu command, or by providing a distance file.\n");
+		mothurOut("The heatmap.sim command parameters are phylip, column, name, groups, calc and label.  No parameters are required.\n");
+		mothurOut("There are two ways to use the heatmap.sim command. The first is with the read.otu command. \n");
+		mothurOut("With the read.otu command you may use the groups, label and calc parameters. \n");
 		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included in your heatmap.\n");
 		mothurOut("The group names are separated by dashes. The label parameter allows you to select what distance levels you would like a heatmap created for, and is also separated by dashes.\n");
 		mothurOut("The heatmap.sim command should be in the following format: heatmap.sim(groups=yourGroups, calc=yourCalc, label=yourLabels).\n");
@@ -140,6 +166,10 @@ void HeatMapSimCommand::help(){
 		validCalculator->printCalc("heat", cout);
 		mothurOut("The default value for calc is jclass-thetayc.\n");
 		mothurOut("The heatmap.sim command outputs a .svg file for each calculator you choose at each label you specify.\n");
+		mothurOut("The second way to use the heatmap.sim command is with a distance file representing the distance bewteen your groups. \n");
+		mothurOut("Using the command this way, the phylip or column parameter are required, and only one may be used.  If you use a column file the name filename is required. \n");
+		mothurOut("The heatmap.sim command should be in the following format: heatmap.sim(phylip=yourDistanceFile).\n");
+		mothurOut("Example heatmap.sim(phylip=amazonGroups.dist).\n");
 		mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
 
 	}
@@ -151,14 +181,7 @@ void HeatMapSimCommand::help(){
 
 //**********************************************************************************************************************
 
-HeatMapSimCommand::~HeatMapSimCommand(){
-	if (abort == false) {
-		delete input;  globaldata->ginput = NULL;
-		delete read;
-		delete heatmap;
-		delete validCalculator;
-	}
-}
+HeatMapSimCommand::~HeatMapSimCommand(){}
 
 //**********************************************************************************************************************
 
@@ -167,6 +190,32 @@ int HeatMapSimCommand::execute(){
 	
 		if (abort == true)  { return 0; }
 		
+		heatmap = new HeatMapSim();
+		
+		if (format == "shared") {
+			runCommandShared();
+		}else if (format == "phylip") {
+			globaldata->inputFileName = phylipfile;
+			runCommandDist();
+		}else if (format == "column") {
+			globaldata->inputFileName = columnfile;
+			runCommandDist();
+		}
+		
+		delete heatmap;
+		delete validCalculator;
+
+		return 0;
+	}
+	catch(exception& e) {
+		errorOut(e, "HeatMapSimCommand", "execute");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
+int HeatMapSimCommand::runCommandShared() {
+	try {
 		//if the users entered no valid calculators don't execute command
 		if (heatCalculators.size() == 0) { mothurOut("No valid calculators."); mothurOutEndLine(); return 0; }
 		
@@ -248,12 +297,142 @@ int HeatMapSimCommand::execute(){
 		//reset groups parameter
 		globaldata->Groups.clear();  
 		
+		delete input;  globaldata->ginput = NULL;
+		delete read;
+
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "HeatMapSimCommand", "execute");
+		errorOut(e, "HeatMapSimCommand", "runCommandShared");
 		exit(1);
 	}
 }
-
 //**********************************************************************************************************************
+int HeatMapSimCommand::runCommandDist() {
+	try {
+	
+		vector< vector<double> > matrix;
+		vector<string> names;
+		ifstream in;
+		
+		//read distance file and create distance vector and names vector
+		if (format == "phylip") {
+			//read phylip file
+			openInputFile(phylipfile, in);
+			
+			string name;
+			int numSeqs;
+			in >> numSeqs >> name; 
+			
+			//save name
+			names.push_back(name);
+		
+			//resize the matrix and fill with zeros
+			matrix.resize(numSeqs); 
+			for(int i = 0; i < numSeqs; i++) {
+				matrix[i].resize(numSeqs, 0.0);
+			}
+					
+			//determine if matrix is square or lower triangle
+			//if it is square read the distances for the first sequence
+			char d;
+			bool square;
+			while((d=in.get()) != EOF){
+				
+				//is d a number meaning its square
+				if(isalnum(d)){ 
+					square = true;
+					in.putback(d);
+					
+					for(int i=0;i<numSeqs;i++){
+						in >> matrix[0][i];
+					}
+					break;
+				}
+				
+				//is d a line return meaning its lower triangle
+				if(d == '\n'){
+					square = false;
+					break;
+				}
+			}
+			
+			//read rest of matrix
+			if (square == true) { 
+				for(int i=1;i<numSeqs;i++){
+					in >> name;		
+					names.push_back(name);
+					
+					for(int j=0;j<numSeqs;j++) {  in >> matrix[i][j];  }
+					gobble(in);
+				}
+			}else { 
+				double dist;
+				for(int i=1;i<numSeqs;i++){
+					in >> name;	
+					names.push_back(name);	
+					
+					for(int j=0;j<i;j++){
+						in >> dist;
+						matrix[i][j] = dist;  matrix[j][i] = dist;
+					}
+					gobble(in);
+				}
+			}
+			in.close();
+		}else {
+			//read names file
+			NameAssignment* nameMap = new NameAssignment(namefile);
+			nameMap->readMap();
+			
+			//put names in order in vector
+			for (int i = 0; i < nameMap->size(); i++) {
+				names.push_back(nameMap->get(i));
+			}
+			
+			//resize matrix
+			matrix.resize(nameMap->size());
+			for (int i = 0; i < nameMap->size(); i++) {
+				matrix[i].resize(nameMap->size(), 0.0);
+			}
+			
+			//read column file
+			string first, second;
+			double dist;
+			openInputFile(columnfile, in);
+			
+			while (!in.eof()) {
+				in >> first >> second >> dist; gobble(in);
+				
+				map<string, int>::iterator itA = nameMap->find(first);
+				map<string, int>::iterator itB = nameMap->find(second);
+				
+				if(itA == nameMap->end()){  cerr << "AAError: Sequence '" << first << "' was not found in the names file, please correct\n"; exit(1);  }
+				if(itB == nameMap->end()){  cerr << "ABError: Sequence '" << second << "' was not found in the names file, please correct\n"; exit(1);  }
+				
+				//save distance
+				matrix[itA->second][itB->second] = dist;
+				matrix[itB->second][itA->second] = dist;
+			}
+			in.close();
+			
+			delete nameMap;
+		}
+		
+
+		heatmap->getPic(matrix, names); //vector<vector<double>>, vector<string>
+		
+		return 0;
+	}
+	catch(exception& e) {
+		errorOut(e, "HeatMapSimCommand", "runCommandDist");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+
+
+
+
+
+

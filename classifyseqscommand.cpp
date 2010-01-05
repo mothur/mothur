@@ -261,6 +261,7 @@ int ClassifySeqsCommand::execute(){
 		remove(tempTaxonomyFile.c_str());
 		
 		taxaBrowser.assignHeirarchyIDs(0);
+		taxaBrowser.binUnclassified();
 		
 		ofstream outTaxTree;
 		openOutputFile(taxSummary, outTaxTree);
