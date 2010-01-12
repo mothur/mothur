@@ -41,17 +41,22 @@ private:
 	};
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;
+	vector<string> fastaFileNames;
+	vector<string> namefileNames;
+	map<string, int> nameMap;
+	map<string, int>::iterator itNames;
 	
 	Classify* classify;
 	
-	string fastaFileName, templateFileName, distanceFileName, search, method, taxonomyFileName;
+	string fastaFileName, templateFileName, distanceFileName, namefile, search, method, taxonomyFileName;
 	int processors, kmerSize, numWanted, cutoff, iters;
 	float match, misMatch, gapOpen, gapExtend;
 	bool abort, probs;
 	
-	int driver(linePair*, string, string);
+	int driver(linePair*, string, string, string);
 	void appendTaxFiles(string, string);
-	void createProcesses(string, string); 
+	void createProcesses(string, string, string); 
+	string addUnclassifieds(string, int);
 };
 
 #endif

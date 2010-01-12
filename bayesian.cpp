@@ -92,7 +92,7 @@ Classify(tfile, tempFile, method, ksize, 0.0, 0.0, 0.0, 0.0), kmerSize(ksize), c
 		mothurOut("It took " + toString(time(NULL) - start) + " seconds get probabilities. "); mothurOutEndLine();
 	}
 	catch(exception& e) {
-		errorOut(e, "Bayesian", "getTaxonomy");
+		errorOut(e, "Bayesian", "Bayesian");
 		exit(1);
 	}
 }

@@ -38,10 +38,13 @@ public:
 	vector<int> getGenusNodes();
 	void binUnclassified();
 		
-	TaxNode get(int i)				{	return tree[i];	}
+	TaxNode get(int i)				{	return tree[i];							}
 	TaxNode get(string seqName)		{	return tree[name2Taxonomy[seqName]];	}
-	int getIndex(string seqName)	{	return name2Taxonomy[seqName];	}
-	string getName(int i)			{	return tree[i].name;	}
+	int getIndex(string seqName)	{	return name2Taxonomy[seqName];			}
+	string getName(int i)			{	return tree[i].name;					}
+	string getFullTaxonomy(string);	 //pass a sequence name return taxonomy
+	int getMaxLevel()				{	return maxLevel;						}
+	
 private:
 	string getNextTaxon(string&);
 	vector<TaxNode> tree;

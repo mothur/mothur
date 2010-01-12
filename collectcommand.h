@@ -56,6 +56,10 @@ private:
 	set<string> labels; //holds labels to be used
 	string label, calc;
 	vector<string>  Estimators;
+	vector<string> inputFileNames;
+	vector<string> groups;
+	
+	vector<string> parseSharedFile(string);
 
 
 };

@@ -220,16 +220,16 @@ int MGClusterCommand::execute(){
 			sortHclusterFiles(distFile, overlapFile);
 		
 			//create cluster
-			hcluster = new HCluster(rabund, list, method);
+			hcluster = new HCluster(rabund, list, method, distFile, nameMap, cutoff);
 			hcluster->setMapWanted(true);
 			
 			vector<seqDist> seqs; seqs.resize(1); // to start loop
-			ifstream inHcluster;
-			openInputFile(distFile, inHcluster);
+			//ifstream inHcluster;
+			//openInputFile(distFile, inHcluster);
 
 			while (seqs.size() != 0){
 		
-				seqs = hcluster->getSeqs(inHcluster, nameMap, cutoff);
+				seqs = hcluster->getSeqs();
 				
 				for (int i = 0; i < seqs.size(); i++) {  //-1 means skip me
 					
@@ -262,7 +262,7 @@ int MGClusterCommand::execute(){
 					}
 				}
 			}
-			inHcluster.close();
+			//inHcluster.close();
 			
 			if(previousDist <= 0.0000){
 				oldList.setLabel("unique");

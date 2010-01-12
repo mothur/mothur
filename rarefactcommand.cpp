@@ -31,7 +31,7 @@ RareFactCommand::RareFactCommand(string option){
 		Estimators.clear();
 		
 		//allow user to run help
-		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; }
+		if(option == "help") { validCalculator = new ValidCalculators(); help(); delete validCalculator; abort = true; }
 		
 		else {
 			//valid paramters for this command
@@ -49,7 +49,7 @@ RareFactCommand::RareFactCommand(string option){
 			}
 			
 			//make sure the user has already run the read.otu command
-			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { mothurOut("You must read a list, sabund or rabund before you can use the rarefaction.single command."); mothurOutEndLine(); abort = true; }
+			if ((globaldata->getSharedFile() == "") && (globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { mothurOut("You must read a list, sabund, rabund or shared file before you can use the rarefact.single command."); mothurOutEndLine(); abort = true; }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -82,43 +82,6 @@ RareFactCommand::RareFactCommand(string option){
 			
 			temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
 			convert(temp, nIters); 
-			
-			if (abort == false) {
-			
-				string fileNameRoot = getRootName(globaldata->inputFileName);
-				int i;
-				validCalculator = new ValidCalculators();
-				
-				
-				for (i=0; i<Estimators.size(); i++) {
-					if (validCalculator->isValidCalculator("rarefaction", Estimators[i]) == true) { 
-						if (Estimators[i] == "sobs") { 
-							rDisplays.push_back(new RareDisplay(new Sobs(), new ThreeColumnFile(fileNameRoot+"rarefaction")));
-						}else if (Estimators[i] == "chao") { 
-							rDisplays.push_back(new RareDisplay(new Chao1(), new ThreeColumnFile(fileNameRoot+"r_chao")));
-						}else if (Estimators[i] == "ace") { 
-							if(abund < 5)
-								abund = 10;
-							rDisplays.push_back(new RareDisplay(new Ace(abund), new ThreeColumnFile(fileNameRoot+"r_ace")));
-						}else if (Estimators[i] == "jack") { 
-							rDisplays.push_back(new RareDisplay(new Jackknife(), new ThreeColumnFile(fileNameRoot+"r_jack")));
-						}else if (Estimators[i] == "shannon") { 
-							rDisplays.push_back(new RareDisplay(new Shannon(), new ThreeColumnFile(fileNameRoot+"r_shannon")));
-						}else if (Estimators[i] == "npshannon") { 
-							rDisplays.push_back(new RareDisplay(new NPShannon(), new ThreeColumnFile(fileNameRoot+"r_npshannon")));
-						}else if (Estimators[i] == "simpson") { 
-							rDisplays.push_back(new RareDisplay(new Simpson(), new ThreeColumnFile(fileNameRoot+"r_simpson")));
-						}else if (Estimators[i] == "bootstrap") { 
-							rDisplays.push_back(new RareDisplay(new Bootstrap(), new ThreeColumnFile(fileNameRoot+"r_bootstrap")));
-						}else if (Estimators[i] == "coverage") { 
-							rDisplays.push_back(new RareDisplay(new Coverage(), new ThreeColumnFile(fileNameRoot+"r_coverage")));
-						}else if (Estimators[i] == "nseqs") { 
-							rDisplays.push_back(new RareDisplay(new NSeqs(), new ThreeColumnFile(fileNameRoot+"r_nseqs")));
-						}
-					}
-				}
-			}
-				
 		}
 		
 	}
@@ -150,14 +113,7 @@ void RareFactCommand::help(){
 
 //**********************************************************************************************************************
 
-RareFactCommand::~RareFactCommand(){
-	if (abort == false) {
-		globaldata->gorder = NULL;
-		delete input;  globaldata->ginput = NULL;
-		delete read;
-		delete validCalculator;
-	}
-}
+RareFactCommand::~RareFactCommand(){}
 
 //**********************************************************************************************************************
 
@@ -166,86 +122,138 @@ int RareFactCommand::execute(){
 	
 		if (abort == true) { return 0; }
 		
-		//if the users entered no valid calculators don't execute command
-		if (rDisplays.size() == 0) { return 0; }
-
-		read = new ReadOTUFile(globaldata->inputFileName);	
-		read->read(&*globaldata); 
-
-		order = globaldata->gorder;
-		string lastLabel = order->getLabel();
-		input = globaldata->ginput;
+		if ((globaldata->getFormat() != "sharedfile")) { inputFileNames.push_back(globaldata->inputFileName);  }
+		else {  inputFileNames = parseSharedFile(globaldata->getSharedFile());  globaldata->setFormat("rabund");  }
 		
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> processedLabels;
-		set<string> userLabels = labels;
-	
-		//as long as you are not at the end of the file or done wih the lines you want
-		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+		for (int p = 0; p < inputFileNames.size(); p++) {
 			
-			if(allLines == 1 || labels.count(order->getLabel()) == 1){
+			string fileNameRoot = getRootName(inputFileNames[p]);
+			globaldata->inputFileName = inputFileNames[p];
 			
-				rCurve = new Rarefact(order, rDisplays);
-				rCurve->getCurve(freq, nIters);
-				delete rCurve;
+			if (inputFileNames.size() > 1) {
+				mothurOutEndLine(); mothurOut("Processing group " + groups[p]); mothurOutEndLine(); mothurOutEndLine();
+			}
+			int i;
+			validCalculator = new ValidCalculators();
 			
-				mothurOut(order->getLabel()); mothurOutEndLine();
-				processedLabels.insert(order->getLabel());
-				userLabels.erase(order->getLabel());
+			
+			for (i=0; i<Estimators.size(); i++) {
+				if (validCalculator->isValidCalculator("rarefaction", Estimators[i]) == true) { 
+					if (Estimators[i] == "sobs") { 
+						rDisplays.push_back(new RareDisplay(new Sobs(), new ThreeColumnFile(fileNameRoot+"rarefaction")));
+					}else if (Estimators[i] == "chao") { 
+						rDisplays.push_back(new RareDisplay(new Chao1(), new ThreeColumnFile(fileNameRoot+"r_chao")));
+					}else if (Estimators[i] == "ace") { 
+						if(abund < 5)
+							abund = 10;
+						rDisplays.push_back(new RareDisplay(new Ace(abund), new ThreeColumnFile(fileNameRoot+"r_ace")));
+					}else if (Estimators[i] == "jack") { 
+						rDisplays.push_back(new RareDisplay(new Jackknife(), new ThreeColumnFile(fileNameRoot+"r_jack")));
+					}else if (Estimators[i] == "shannon") { 
+						rDisplays.push_back(new RareDisplay(new Shannon(), new ThreeColumnFile(fileNameRoot+"r_shannon")));
+					}else if (Estimators[i] == "npshannon") { 
+						rDisplays.push_back(new RareDisplay(new NPShannon(), new ThreeColumnFile(fileNameRoot+"r_npshannon")));
+					}else if (Estimators[i] == "simpson") { 
+						rDisplays.push_back(new RareDisplay(new Simpson(), new ThreeColumnFile(fileNameRoot+"r_simpson")));
+					}else if (Estimators[i] == "bootstrap") { 
+						rDisplays.push_back(new RareDisplay(new Bootstrap(), new ThreeColumnFile(fileNameRoot+"r_bootstrap")));
+					}else if (Estimators[i] == "coverage") { 
+						rDisplays.push_back(new RareDisplay(new Coverage(), new ThreeColumnFile(fileNameRoot+"r_coverage")));
+					}else if (Estimators[i] == "nseqs") { 
+						rDisplays.push_back(new RareDisplay(new NSeqs(), new ThreeColumnFile(fileNameRoot+"r_nseqs")));
+					}
+				}
 			}
 			
-			if ((anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = order->getLabel();
+			
+			//if the users entered no valid calculators don't execute command
+			if (rDisplays.size() == 0) { return 0; }
+			
+			read = new ReadOTUFile(globaldata->inputFileName);	
+			read->read(&*globaldata); 
+			
+			order = globaldata->gorder;
+			string lastLabel = order->getLabel();
+			input = globaldata->ginput;
+			
+			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+			set<string> processedLabels;
+			set<string> userLabels = labels;
+			
+			//as long as you are not at the end of the file or done wih the lines you want
+			while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+				
+				if(allLines == 1 || labels.count(order->getLabel()) == 1){
+					
+					rCurve = new Rarefact(order, rDisplays);
+					rCurve->getCurve(freq, nIters);
+					delete rCurve;
+					
+					mothurOut(order->getLabel()); mothurOutEndLine();
+					processedLabels.insert(order->getLabel());
+					userLabels.erase(order->getLabel());
+				}
+				
+				if ((anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+					string saveLabel = order->getLabel();
+					
+					delete order;
+					order = (input->getOrderVector(lastLabel));
+					
+					rCurve = new Rarefact(order, rDisplays);
+					rCurve->getCurve(freq, nIters);
+					delete rCurve;
+					
+					mothurOut(order->getLabel()); mothurOutEndLine();
+					processedLabels.insert(order->getLabel());
+					userLabels.erase(order->getLabel());
+					
+					//restore real lastlabel to save below
+					order->setLabel(saveLabel);
+				}
+				
+				lastLabel = order->getLabel();		
 				
 				delete order;
+				order = (input->getOrderVector());
+			}
+			
+			//output error messages about any remaining user labels
+			set<string>::iterator it;
+			bool needToRun = false;
+			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+				mothurOut("Your file does not include the label " + *it);
+				if (processedLabels.count(lastLabel) != 1) {
+					mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
+					needToRun = true;
+				}else {
+					mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
+				}
+			}
+			
+			//run last label if you need to
+			if (needToRun == true)  {
+				if (order != NULL) {	delete order;	}
 				order = (input->getOrderVector(lastLabel));
 				
 				rCurve = new Rarefact(order, rDisplays);
 				rCurve->getCurve(freq, nIters);
 				delete rCurve;
-			
+				
 				mothurOut(order->getLabel()); mothurOutEndLine();
-				processedLabels.insert(order->getLabel());
-				userLabels.erase(order->getLabel());
-				
-				//restore real lastlabel to save below
-				order->setLabel(saveLabel);
+				delete order;
 			}
 			
-			lastLabel = order->getLabel();		
 			
-			delete order;
-			order = (input->getOrderVector());
-		}
-		
-		//output error messages about any remaining user labels
-		set<string>::iterator it;
-		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			mothurOut("Your file does not include the label " + *it);
-			if (processedLabels.count(lastLabel) != 1) {
-				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
-				needToRun = true;
-			}else {
-				mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
-			}
-		}
-		
-		//run last label if you need to
-		if (needToRun == true)  {
-			if (order != NULL) {	delete order;	}
-			order = (input->getOrderVector(lastLabel));
-				
-			rCurve = new Rarefact(order, rDisplays);
-			rCurve->getCurve(freq, nIters);
-			delete rCurve;
+			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}	
+			rDisplays.clear();
+			globaldata->gorder = NULL;
+			delete input;  globaldata->ginput = NULL;
+			delete read;
+			delete validCalculator;
 			
-			mothurOut(order->getLabel()); mothurOutEndLine();
-			delete order;
 		}
 		
-
-		for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}	
 		return 0;
 	}
 	catch(exception& e) {
@@ -253,5 +261,66 @@ int RareFactCommand::execute(){
 		exit(1);
 	}
 }
-
 //**********************************************************************************************************************
+vector<string> RareFactCommand::parseSharedFile(string filename) {
+	try {
+		vector<string> filenames;
+		
+		map<string, ofstream*> filehandles;
+		map<string, ofstream*>::iterator it3;
+		
+				
+		//read first line
+		read = new ReadOTUFile(filename);	
+		read->read(&*globaldata); 
+			
+		input = globaldata->ginput;
+		vector<SharedRAbundVector*> lookup = input->getSharedRAbundVectors();
+		
+		string sharedFileRoot = getRootName(filename);
+		
+		//clears file before we start to write to it below
+		for (int i=0; i<lookup.size(); i++) {
+			remove((sharedFileRoot + lookup[i]->getGroup() + ".rabund").c_str());
+			filenames.push_back((sharedFileRoot + lookup[i]->getGroup() + ".rabund"));
+		}
+		
+		ofstream* temp;
+		for (int i=0; i<lookup.size(); i++) {
+			temp = new ofstream;
+			filehandles[lookup[i]->getGroup()] = temp;
+			groups.push_back(lookup[i]->getGroup());
+		}
+
+		while(lookup[0] != NULL) {
+		
+			for (int i = 0; i < lookup.size(); i++) {
+				RAbundVector rav = lookup[i]->getRAbundVector();
+				openOutputFileAppend(sharedFileRoot + lookup[i]->getGroup() + ".rabund", *(filehandles[lookup[i]->getGroup()]));
+				rav.print(*(filehandles[lookup[i]->getGroup()]));
+				(*(filehandles[lookup[i]->getGroup()])).close();
+			}
+		
+			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+			lookup = input->getSharedRAbundVectors();
+		}
+		
+		//free memory
+		for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
+			delete it3->second;
+		}
+		delete read;
+		delete input;
+		globaldata->ginput = NULL;
+
+		return filenames;
+	}
+	catch(exception& e) {
+		errorOut(e, "RareFactCommand", "parseSharedFile");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+
+
+

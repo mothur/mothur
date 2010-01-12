@@ -308,7 +308,11 @@ void UnifracWeightedCommand::createPhylipFile() {
 			//output to file
 			for (int r=0; r<globaldata->Groups.size(); r++) { 
 				//output name
-				out << globaldata->Groups[r] << '\t';
+				string name = globaldata->Groups[r];
+				if (name.length() < 10) { //pad with spaces to make compatible
+					while (name.length() < 10) {  name += " ";  }
+				}
+				out << name << '\t';
 				
 				//output distances
 				for (int l = 0; l < r; l++) {	out  << dists[r][l] << '\t';  }

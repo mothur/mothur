@@ -61,13 +61,29 @@ AlignCommand::AlignCommand(string option){
 			}
 			else if (templateFileName == "not open") { abort = true; }	
 			
-			candidateFileName = validParameter.validFile(parameters, "candidate", true);
-			if (candidateFileName == "not found") { 
-				mothurOut("candidate is a required parameter for the align.seqs command."); 
-				mothurOutEndLine();
-				abort = true; 
+			candidateFileName = validParameter.validFile(parameters, "candidate", false);
+			if (candidateFileName == "not found") { mothurOut("candidate is a required parameter for the align.seqs command."); mothurOutEndLine(); abort = true;  }
+			else { 
+				splitAtDash(candidateFileName, candidateFileNames);
+				
+				//go through files and make sure they are good, if not, then disregard them
+				for (int i = 0; i < candidateFileNames.size(); i++) {
+					int ableToOpen;
+					ifstream in;
+					ableToOpen = openInputFile(candidateFileNames[i], in);
+					if (ableToOpen == 1) { 
+						mothurOut(candidateFileNames[i] + " will be disregarded."); mothurOutEndLine(); 
+						//erase from file list
+						candidateFileNames.erase(candidateFileNames.begin()+i);
+						i--;
+					}
+					in.close();
+				}
+				
+				//make sure there is at least one valid file left
+				if (candidateFileNames.size() == 0) { mothurOut("no valid files."); mothurOutEndLine(); abort = true; }
 			}
-			else if (candidateFileName == "not open") { abort = true; }	
+				
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -125,7 +141,7 @@ void AlignCommand::help(){
 	try {
 		mothurOut("The align.seqs command reads a file containing sequences and creates an alignment file and a report file.\n");
 		mothurOut("The align.seqs command parameters are template, candidate, search, ksize, align, match, mismatch, gapopen and gapextend.\n");
-		mothurOut("The template and candidate parameters are required.\n");
+		mothurOut("The template and candidate parameters are required. You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n");
 		mothurOut("The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer and blast. The default is kmer.\n");
 		mothurOut("The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.\n");
 		mothurOut("The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 8.\n");
@@ -167,25 +183,112 @@ int AlignCommand::execute(){
 			mothurOutEndLine();
 			alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);
 		}
-		mothurOut("Aligning sequences...");
-		mothurOutEndLine();
 		
-		string alignFileName = candidateFileName.substr(0,candidateFileName.find_last_of(".")+1) + "align";
-		string reportFileName = candidateFileName.substr(0,candidateFileName.find_last_of(".")+1) + "align.report";
-		string accnosFileName = candidateFileName.substr(0,candidateFileName.find_last_of(".")+1) + "flip.accnos";
-		
-		int numFastaSeqs = 0;
-		int start = time(NULL);
-		
+		for (int s = 0; s < candidateFileNames.size(); s++) {
+			mothurOut("Aligning sequences from " + candidateFileNames[s] + " ..." ); mothurOutEndLine();
+			
+			string alignFileName = candidateFileNames[s].substr(0,candidateFileNames[s].find_last_of(".")+1) + "align";
+			string reportFileName = candidateFileNames[s].substr(0,candidateFileNames[s].find_last_of(".")+1) + "align.report";
+			string accnosFileName = candidateFileNames[s].substr(0,candidateFileNames[s].find_last_of(".")+1) + "flip.accnos";
+			
+			int numFastaSeqs = 0;
+			for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
+			int start = time(NULL);
+			
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		if(processors == 1){
+			if(processors == 1){
+				ifstream inFASTA;
+				openInputFile(candidateFileNames[s], inFASTA);
+				numFastaSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+				inFASTA.close();
+				
+				lines.push_back(new linePair(0, numFastaSeqs));
+				
+				driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s]);
+				
+				//delete accnos file if its blank else report to user
+				if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  }
+				else { 
+					mothurOut("Some of you sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
+					if (!flip) {
+						mothurOut(" If you set the flip parameter to true mothur will try aligning the reverse compliment as well."); 
+					}else{  mothurOut(" If the reverse compliment proved to be better it was reported.");  }
+					mothurOutEndLine();
+				}
+			}
+			else{
+				vector<int> positions;
+				processIDS.resize(0);
+				
+				ifstream inFASTA;
+				openInputFile(candidateFileNames[s], inFASTA);
+				
+				string input;
+				while(!inFASTA.eof()){
+					input = getline(inFASTA);
+					if (input.length() != 0) {
+						if(input[0] == '>'){	long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
+					}
+				}
+				inFASTA.close();
+				
+				numFastaSeqs = positions.size();
+				
+				int numSeqsPerProcessor = numFastaSeqs / processors;
+				
+				for (int i = 0; i < processors; i++) {
+					long int startPos = positions[ i * numSeqsPerProcessor ];
+					if(i == processors - 1){
+						numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor;
+					}
+					lines.push_back(new linePair(startPos, numSeqsPerProcessor));
+				}
+				
+				createProcesses(alignFileName, reportFileName, accnosFileName, candidateFileNames[s]); 
+				
+				rename((alignFileName + toString(processIDS[0]) + ".temp").c_str(), alignFileName.c_str());
+				rename((reportFileName + toString(processIDS[0]) + ".temp").c_str(), reportFileName.c_str());
+				
+				//append alignment and report files
+				for(int i=1;i<processors;i++){
+					appendAlignFiles((alignFileName + toString(processIDS[i]) + ".temp"), alignFileName);
+					remove((alignFileName + toString(processIDS[i]) + ".temp").c_str());
+					
+					appendReportFiles((reportFileName + toString(processIDS[i]) + ".temp"), reportFileName);
+					remove((reportFileName + toString(processIDS[i]) + ".temp").c_str());
+				}
+				
+				vector<string> nonBlankAccnosFiles;
+				//delete blank accnos files generated with multiple processes
+				for(int i=0;i<processors;i++){  
+					if (!(isBlank(accnosFileName + toString(processIDS[i]) + ".temp"))) {
+						nonBlankAccnosFiles.push_back(accnosFileName + toString(processIDS[i]) + ".temp");
+					}else { remove((accnosFileName + toString(processIDS[i]) + ".temp").c_str());  }
+				}
+				
+				//append accnos files
+				if (nonBlankAccnosFiles.size() != 0) { 
+					rename(nonBlankAccnosFiles[0].c_str(), accnosFileName.c_str());
+					
+					for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
+						appendAlignFiles(nonBlankAccnosFiles[h], accnosFileName);
+						remove(nonBlankAccnosFiles[h].c_str());
+					}
+					mothurOut("Some of you sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
+					if (!flip) {
+						mothurOut(" If you set the flip parameter to true mothur will try aligning the reverse compliment as well."); 
+					}else{  mothurOut(" If the reverse compliment proved to be better it was reported.");  }
+					mothurOutEndLine();
+				}
+			}
+#else
 			ifstream inFASTA;
-			openInputFile(candidateFileName, inFASTA);
+			openInputFile(candidateFileName[s], inFASTA);
 			numFastaSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
 			inFASTA.close();
 			
 			lines.push_back(new linePair(0, numFastaSeqs));
-		
+			
 			driver(lines[0], alignFileName, reportFileName, accnosFileName);
 			
 			//delete accnos file if its blank else report to user
@@ -197,99 +300,15 @@ int AlignCommand::execute(){
 				}else{  mothurOut(" If the reverse compliment proved to be better it was reported.");  }
 				mothurOutEndLine();
 			}
-		}
-		else{
-			vector<int> positions;
-			processIDS.resize(0);
 			
-			ifstream inFASTA;
-			openInputFile(candidateFileName, inFASTA);
+#endif
 			
-			string input;
-			while(!inFASTA.eof()){
-				input = getline(inFASTA);
-				if (input.length() != 0) {
-					if(input[0] == '>'){	long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
-				}
-			}
-			inFASTA.close();
 			
-			numFastaSeqs = positions.size();
-		
-			int numSeqsPerProcessor = numFastaSeqs / processors;
 			
-			for (int i = 0; i < processors; i++) {
-				long int startPos = positions[ i * numSeqsPerProcessor ];
-				if(i == processors - 1){
-					numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor;
-				}
-				lines.push_back(new linePair(startPos, numSeqsPerProcessor));
-			}
-			
-			createProcesses(alignFileName, reportFileName, accnosFileName); 
-			
-			rename((alignFileName + toString(processIDS[0]) + ".temp").c_str(), alignFileName.c_str());
-			rename((reportFileName + toString(processIDS[0]) + ".temp").c_str(), reportFileName.c_str());
-			
-			//append alignment and report files
-			for(int i=1;i<processors;i++){
-				appendAlignFiles((alignFileName + toString(processIDS[i]) + ".temp"), alignFileName);
-				remove((alignFileName + toString(processIDS[i]) + ".temp").c_str());
-				
-				appendReportFiles((reportFileName + toString(processIDS[i]) + ".temp"), reportFileName);
-				remove((reportFileName + toString(processIDS[i]) + ".temp").c_str());
-			}
-			
-			vector<string> nonBlankAccnosFiles;
-			//delete blank accnos files generated with multiple processes
-			for(int i=0;i<processors;i++){  
-				if (!(isBlank(accnosFileName + toString(processIDS[i]) + ".temp"))) {
-					nonBlankAccnosFiles.push_back(accnosFileName + toString(processIDS[i]) + ".temp");
-				}else { remove((accnosFileName + toString(processIDS[i]) + ".temp").c_str());  }
-			}
-			
-			//append accnos files
-			if (nonBlankAccnosFiles.size() != 0) { 
-				rename(nonBlankAccnosFiles[0].c_str(), accnosFileName.c_str());
-				
-				for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
-					appendAlignFiles(nonBlankAccnosFiles[h], accnosFileName);
-					remove(nonBlankAccnosFiles[h].c_str());
-				}
-				mothurOut("Some of you sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
-				if (!flip) {
-					mothurOut(" If you set the flip parameter to true mothur will try aligning the reverse compliment as well."); 
-				}else{  mothurOut(" If the reverse compliment proved to be better it was reported.");  }
-				mothurOutEndLine();
-			}
-		}
-#else
-		ifstream inFASTA;
-		openInputFile(candidateFileName, inFASTA);
-		numFastaSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
-		inFASTA.close();
-		
-		lines.push_back(new linePair(0, numFastaSeqs));
-		
-		driver(lines[0], alignFileName, reportFileName, accnosFileName);
-		
-		//delete accnos file if its blank else report to user
-		if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  }
-		else { 
-			mothurOut("Some of you sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
-			if (!flip) {
-				 mothurOut(" If you set the flip parameter to true mothur will try aligning the reverse compliment as well."); 
-			}else{  mothurOut(" If the reverse compliment proved to be better it was reported.");  }
+			mothurOut("It took " + toString(time(NULL) - start) + " secs to align " + toString(numFastaSeqs) + " sequences.");
+			mothurOutEndLine();
 			mothurOutEndLine();
 		}
-		
-#endif
-		
-		
-		
-		mothurOut("It took " + toString(time(NULL) - start) + " secs to align " + toString(numFastaSeqs) + " sequences.");
-		mothurOutEndLine();
-		mothurOutEndLine();
 		
 		return 0;
 	}
@@ -301,7 +320,7 @@ int AlignCommand::execute(){
 
 //**********************************************************************************************************************
 
-int AlignCommand::driver(linePair* line, string alignFName, string reportFName, string accnosFName){
+int AlignCommand::driver(linePair* line, string alignFName, string reportFName, string accnosFName, string filename){
 	try {
 		ofstream alignmentFile;
 		openOutputFile(alignFName, alignmentFile);
@@ -312,12 +331,12 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName, 
 		NastReport report(reportFName);
 		
 		ifstream inFASTA;
-		openInputFile(candidateFileName, inFASTA);
+		openInputFile(filename, inFASTA);
 
 		inFASTA.seekg(line->start);
 		
 		for(int i=0;i<line->numSeqs;i++){
-			
+		
 			Sequence* candidateSeq = new Sequence(inFASTA);  gobble(inFASTA);
 			int origNumBases = candidateSeq->getNumBases();
 			string originalUnaligned = candidateSeq->getUnaligned();
@@ -394,7 +413,6 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName, 
 			
 			//report progress
 			if((i+1) % 100 == 0){	mothurOut(toString(i+1)); mothurOutEndLine();		}
-			
 		}
 		//report progress
 		if((line->numSeqs) % 100 != 0){	mothurOut(toString(line->numSeqs)); mothurOutEndLine();		}
@@ -413,7 +431,7 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName, 
 
 /**************************************************************************************************/
 
-void AlignCommand::createProcesses(string alignFileName, string reportFileName, string accnosFName) {
+void AlignCommand::createProcesses(string alignFileName, string reportFileName, string accnosFName, string filename) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 0;
@@ -427,7 +445,7 @@ void AlignCommand::createProcesses(string alignFileName, string reportFileName, 
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				driver(lines[process], alignFileName + toString(getpid()) + ".temp", reportFileName + toString(getpid()) + ".temp", accnosFName + toString(getpid()) + ".temp");
+				driver(lines[process], alignFileName + toString(getpid()) + ".temp", reportFileName + toString(getpid()) + ".temp", accnosFName + toString(getpid()) + ".temp", filename);
 				exit(0);
 			}else { mothurOut("unable to spawn the necessary processes."); mothurOutEndLine(); exit(0); }
 		}

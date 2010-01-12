@@ -75,9 +75,10 @@ int MergeFileCommand::execute(){
 		ofstream outputFile;
 		openOutputFile(outputFileName, outputFile);
 		
-		ifstream inputFile;
 		char c;
 		for(int i=0;i<numInputFiles;i++){
+			ifstream inputFile; //declaration must be inside for loop of windows throws an error
+			
 			openInputFile(fileNames[i], inputFile);
 			
 			while(!inputFile.eof()){	c = inputFile.get(); outputFile << c;	}

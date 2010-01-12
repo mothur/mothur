@@ -17,6 +17,7 @@ PhyloTree::PhyloTree(){
 		numSeqs = 0;
 		tree.push_back(TaxNode("Root"));
 		tree[0].heirarchyID = "0";
+		maxLevel = 0;
 	}
 	catch(exception& e) {
 		errorOut(e, "PhyloTree", "PhyloTree");
@@ -215,6 +216,25 @@ void PhyloTree::binUnclassified(){
 	}
 	catch(exception& e) {
 		errorOut(e, "PhyloTree", "binUnclassified");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+string PhyloTree::getFullTaxonomy(string seqName) {
+	try {
+		string tax = "";
+		
+		int currentNode = name2Taxonomy[seqName];
+		
+		while (tree[currentNode].parent != -1) {
+			tax = tree[currentNode].name + ";" + tax;
+			currentNode = tree[currentNode].parent;
+		}
+		
+		return tax;
+	}
+	catch(exception& e) {
+		errorOut(e, "PhyloTree", "getFullTaxonomy");
 		exit(1);
 	}
 }
