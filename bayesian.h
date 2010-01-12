@@ -22,13 +22,8 @@ public:
 	~Bayesian() {};
 	
 	string getTaxonomy(Sequence*);
-	//map<string, int> getConfidenceScores() { return taxConfidenceScore; }
 	
 private:
-	//map<string, vector<double> > taxonomyProbability;	//probability of a word being in a given taxonomy. 
-													//taxonomyProbability[bacteria;][0] = probabtility that a sequence within bacteria; would contain kmer 0;
-													//taxonomyProbability[bacteria;][1] = probabtility that a sequence within bacteria; would contain kmer 1...
-	
 	vector< vector<float> > wordGenusProb;	//vector of maps from genus to probability
 												//wordGenusProb[0][392] = probability that a sequence within genus that's index in the tree is 392 would contain kmer 0;
 	
@@ -40,7 +35,6 @@ private:
 	string bootstrapResults(vector<int>, int, int);
 	int getMostProbableTaxonomy(vector<int>);
 	void readProbFile(ifstream&, ifstream&);
-	//map<string, int> parseTaxMap(string);
 	
 };
 

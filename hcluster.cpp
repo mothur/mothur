@@ -12,10 +12,8 @@
 #include "listvector.hpp"
 #include "sparsematrix.hpp"
 
-
 /***********************************************************************/
-
-HCluster::HCluster(RAbundVector* rav, ListVector* lv, string m) :  rabund(rav), list(lv), method(m){
+HCluster::HCluster(RAbundVector* rav, ListVector* lv, string m, string d, NameAssignment* n, float c) :  rabund(rav), list(lv), method(m), distfile(d), nameMap(n), cutoff(c) {
 	try {
 		mapWanted = false;
 		exitedBreak = false; 
@@ -27,6 +25,9 @@ HCluster::HCluster(RAbundVector* rav, ListVector* lv, string m) :  rabund(rav), 
 			clusterArray.push_back(temp);
 		}
 		
+		if (method != "average") {
+			openInputFile(distfile, filehandle);
+		}else{ firstRead = true; }
 	}
 	catch(exception& e) {
 		errorOut(e, "HCluster", "HCluster");
@@ -76,7 +77,6 @@ void HCluster::clusterNames(){
 /***********************************************************************/
 int HCluster::getUpmostParent(int node){
 	try {
-		
 		while (clusterArray[node].parent != -1) {
 			node = clusterArray[node].parent;
 		}
@@ -93,14 +93,14 @@ void HCluster::printInfo(){
 	try {
 		
 		cout << "link table" << endl;
-		for (it = activeLinks.begin(); it!= activeLinks.end(); it++) {
-			cout << it->first << " = " << it->second << endl;
+		for (itActive = activeLinks.begin(); itActive!= activeLinks.end(); itActive++) {
+			cout << itActive->first << " = " << itActive->second << endl;
 		}
 		cout << endl;
 		for (int i = 0; i < linkTable.size(); i++) {
 			cout << i << '\t';
 			for (it = linkTable[i].begin(); it != linkTable[i].end(); it++) {
-				cout << it->first << '-' << it->second << '\t';
+				cout << it->first << '-' << it->second << '\t' ;
 			}
 			cout << endl;
 		}
@@ -121,64 +121,62 @@ void HCluster::printInfo(){
 /***********************************************************************/
 int HCluster::makeActive() {
 	try {
-	
 		int linkValue = 1; 
-//cout << "active - here" << endl;		
-		it = activeLinks.find(smallRow);
-		it2 = activeLinks.find(smallCol);
+
+		itActive = activeLinks.find(smallRow);
+		it2Active = activeLinks.find(smallCol);
 		
-		if ((it == activeLinks.end()) && (it2 == activeLinks.end())) { //both are not active so add them
+		if ((itActive == activeLinks.end()) && (it2Active == activeLinks.end())) { //both are not active so add them
 			int size = linkTable.size();
 			map<int, int> temp; map<int, int> temp2;
 			
 			//add link to eachother
-			temp[smallRow] = 1;							//	   1	2
-			temp2[smallCol] = 1;						// 1   0	1
-														// 2   1	0
+			temp[smallRow] = 1;							//	   1	2  								
+			temp2[smallCol] = 1;						// 1   0	1 
+														// 2   1	0				
 			linkTable.push_back(temp);
 			linkTable.push_back(temp2);
 			
 			//add to activeLinks
 			activeLinks[smallRow] = size;
 			activeLinks[smallCol] = size+1;
-//cout << "active - here1" << endl;
-		}else if ((it != activeLinks.end()) && (it2 == activeLinks.end())) {  //smallRow is active, smallCol is not
+
+		}else if ((itActive != activeLinks.end()) && (it2Active == activeLinks.end())) {  //smallRow is active, smallCol is not
 			 int size = linkTable.size();
-			 int alreadyActiveRow = it->second;
+			 int alreadyActiveRow = itActive->second;
 			 map<int, int> temp; 
 			
 			//add link to eachother
-			temp[smallRow] = 1;							//	   6	2	3	5
-			linkTable.push_back(temp);					// 6   0	1	2	0
-			linkTable[alreadyActiveRow][smallCol] = 1;	// 2   1	0	1	1
-														// 3   2	1	0	0
-														// 5   0    1   0   0	
+			temp[smallRow] = 1;									//	   6	2	3	5
+			linkTable.push_back(temp);							// 6   0	1	2	0
+			linkTable[alreadyActiveRow][smallCol] = 1;			// 2   1	0	1	1
+																// 3   2	1	0	0
+																// 5   0    1   0   0	
 			//add to activeLinks
 			activeLinks[smallCol] = size;
-//cout << "active - here2" << endl;			
-		}else if ((it == activeLinks.end()) && (it2 != activeLinks.end())) {  //smallCol is active, smallRow is not
+	
+		}else if ((itActive == activeLinks.end()) && (it2Active != activeLinks.end())) {  //smallCol is active, smallRow is not
 			 int size = linkTable.size();
-			 int alreadyActiveCol = it2->second;
+			 int alreadyActiveCol = it2Active->second;
 			 map<int, int> temp; 
 			
 			//add link to eachother
-			temp[smallCol] = 1;							//	   6	2	3	5
-			linkTable.push_back(temp);					// 6   0	1	2	0
-			linkTable[alreadyActiveCol][smallRow] = 1;	// 2   1	0	1	1
-														// 3   2	1	0	0
-														// 5   0    1   0   0	
+			temp[smallCol] = 1;									//	   6	2	3	5
+			linkTable.push_back(temp);							// 6   0	1	2	0
+			linkTable[alreadyActiveCol][smallRow] = 1;			// 2   1	0	1	1
+																// 3   2	1	0	0
+																// 5   0    1   0   0	
 			//add to activeLinks
 			activeLinks[smallRow] = size;
-//cout << "active - here3" << endl;
+
 		}else { //both are active so add one
-			int row = it->second;
-			int col = it2->second;
-//cout << row << '\t' << col << endl;			
+			int row = itActive->second;
+			int col = it2Active->second;
+			
 			
 			linkTable[row][smallCol]++;
 			linkTable[col][smallRow]++;
 			linkValue = linkTable[row][smallCol];
-//cout << "active - here4" << endl;
 		}
 		
 		return linkValue;
@@ -191,21 +189,23 @@ int HCluster::makeActive() {
 /***********************************************************************/
 void HCluster::updateArrayandLinkTable() {
 	try {
-	        //if cluster was made update clusterArray and linkTable
-			int size = clusterArray.size();
-			
-			//add new node
-			clusterNode temp(clusterArray[smallRow].numSeq + clusterArray[smallCol].numSeq, -1, clusterArray[smallCol].smallChild);
-			clusterArray.push_back(temp);
-			
-			//update child nodes
-			clusterArray[smallRow].parent = size;
-			clusterArray[smallCol].parent = size;
+		//if cluster was made update clusterArray and linkTable
+		int size = clusterArray.size();
+		
+		//add new node
+		clusterNode temp(clusterArray[smallRow].numSeq + clusterArray[smallCol].numSeq, -1, clusterArray[smallCol].smallChild);
+		clusterArray.push_back(temp);
+		
+		//update child nodes
+		clusterArray[smallRow].parent = size;
+		clusterArray[smallCol].parent = size;
+		
+		if (method == "furthest") {
 			
 			//update linkTable by merging clustered rows and columns
 			int rowSpot = activeLinks[smallRow];
 			int colSpot = activeLinks[smallCol];
-	//cout << "here" << endl;		
+			
 			//fix old rows
 			for (int i = 0; i < linkTable.size(); i++) {
 				//check if they are in map
@@ -224,8 +224,7 @@ void HCluster::updateArrayandLinkTable() {
 					linkTable[i].erase(smallRow); //delete col 
 				}
 			}
-	//printInfo();
-//cout << "here2" << endl;
+			
 			//merge their values
 			for (it = linkTable[rowSpot].begin(); it != linkTable[rowSpot].end(); it++) {
 				it2 = linkTable[colSpot].find(it->first);  //does the col also have this
@@ -233,25 +232,23 @@ void HCluster::updateArrayandLinkTable() {
 				if (it2 == linkTable[colSpot].end()) { //not there so add it
 					linkTable[colSpot][it->first] = it->second;
 				}else { //merge them
-					linkTable[colSpot][it->first] = it->second+it2->second;
+					linkTable[colSpot][it->first] = it->second + it2->second;
 				}
 			}
-//cout << "here3" << endl;			
+			
 			linkTable[colSpot].erase(size);
 			linkTable.erase(linkTable.begin()+rowSpot);  //delete row
-	//printInfo();		
+			
 			//update activerows
 			activeLinks.erase(smallRow);
 			activeLinks.erase(smallCol);
 			activeLinks[size] = colSpot;
 			
 			//adjust everybody elses spot since you deleted - time vs. space
-			for (it = activeLinks.begin(); it != activeLinks.end(); it++) {
-				if (it->second > rowSpot) {  activeLinks[it->first]--;	}
+			for (itActive = activeLinks.begin(); itActive != activeLinks.end(); itActive++) {
+				if (itActive->second > rowSpot) {  activeLinks[itActive->first]--;	}
 			}
-			
-//cout << "here4" << endl;
-	
+		}
 	}
 	catch(exception& e) {
 		errorOut(e, "HCluster", "updateArrayandLinkTable");
@@ -259,9 +256,9 @@ void HCluster::updateArrayandLinkTable() {
 	}
 }
 /***********************************************************************/
-void HCluster::update(int row, int col, float distance){
+bool HCluster::update(int row, int col, float distance){
 	try {
-		
+		bool cluster = false;
 		smallRow = row;
 		smallCol = col;
 		smallDist = distance;
@@ -269,29 +266,34 @@ void HCluster::update(int row, int col, float distance){
 		//find upmost parent of row and col
 		smallRow = getUpmostParent(smallRow);
 		smallCol = getUpmostParent(smallCol);
-	//cout << "row = " << row << " smallRow = " << smallRow <<  " col = " << col << " smallCol = " << smallCol << " dist = " << distance << endl;
+
 		//you don't want to cluster with yourself
 		if (smallRow != smallCol) {
-			//are they active in the link table
-			int linkValue = makeActive(); //after this point this nodes info is active in linkTable
-			//printInfo();			
-			//cout << "linkValue = " << linkValue << " times = " << (clusterArray[smallRow].numSeq * clusterArray[smallCol].numSeq) << endl;
-			//can we cluster???
-			bool cluster = false;
 			
-			if (method == "nearest") { cluster = true;  }
-			else if (method == "average") { 
-				if (linkValue == (ceil(((clusterArray[smallRow].numSeq * clusterArray[smallCol].numSeq)) / (float) 2.0))) { cluster = true; }
-			}else{ //assume furthest
-				if (linkValue == (clusterArray[smallRow].numSeq * clusterArray[smallCol].numSeq)) { cluster = true; }
-			}
-			
-			if (cluster) { 
+			if (method != "average") {
+				//can we cluster???
+				if (method == "nearest") { cluster = true;  }
+				else{ //assume furthest
+					//are they active in the link table
+					int linkValue = makeActive(); //after this point this nodes info is active in linkTable
+					if (linkValue == (clusterArray[smallRow].numSeq * clusterArray[smallCol].numSeq)) {		cluster = true;		}
+				}
+				
+				if (cluster) { 
+					updateArrayandLinkTable();
+					clusterBins();
+					clusterNames();
+				}
+			}else {
+				cluster = true;
 				updateArrayandLinkTable();
 				clusterBins();
 				clusterNames();
+				combineFile();
 			}
 		}
+		
+		return cluster;
 		//printInfo();
 	}
 	catch(exception& e) {
@@ -349,7 +351,26 @@ try {
 	}
 }
 //**********************************************************************************************************************
-vector<seqDist> HCluster::getSeqs(ifstream& filehandle, NameAssignment* nameMap, float cutoff){
+vector<seqDist> HCluster::getSeqs(){
+	try {
+		vector<seqDist> sameSeqs;
+		
+		if(method != "average") {
+			sameSeqs = getSeqsFNNN();
+		}else{
+			if (firstRead) {	processFile();   }
+			sameSeqs = getSeqsAN();	
+		}
+				
+		return sameSeqs;
+	}
+	catch(exception& e) {
+		errorOut(e, "HCluster", "getSeqs");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<seqDist> HCluster::getSeqsFNNN(){
 	try {
 		string firstName, secondName;
 		float distance, prevDistance;
@@ -402,11 +423,352 @@ vector<seqDist> HCluster::getSeqs(ifstream& filehandle, NameAssignment* nameMap,
 		return sameSeqs;
 	}
 	catch(exception& e) {
-		errorOut(e, "HCluster", "getSeqs");
+		errorOut(e, "HCluster", "getSeqsFNNN");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+//don't need cutoff since processFile removes all distance above cutoff and changes names to indexes
+vector<seqDist> HCluster::getSeqsAN(){
+	try {
+		int firstName, secondName;
+		float prevDistance;
+		vector<seqDist> sameSeqs;
+		prevDistance = -1;
+		
+		openInputFile(distfile, filehandle, "no error"); 
+		
+		//is the smallest value in mergedMin or the distfile?
+		float mergedMinDist = 10000;
+		float distance = 10000;
+		if (mergedMin.size() > 0) { mergedMinDist = mergedMin[0].dist;  }
+			
+		if (!filehandle.eof()) {  
+			filehandle >> firstName >> secondName >> distance;    gobble(filehandle);
+			//save first one
+			if (prevDistance == -1) { prevDistance = distance; } 
+			if (distance != -1) { //-1 means skip me
+				seqDist temp(firstName, secondName, distance);
+				sameSeqs.push_back(temp);
+			}
+		}
+		
+		if (mergedMinDist < distance) { //get minimum distance from mergedMin
+			//remove distance we saved from file
+			sameSeqs.clear();
+			prevDistance = mergedMinDist;
+			
+			for (int i = 0; i < mergedMin.size(); i++) {
+				if (mergedMin[i].dist == prevDistance) {
+					sameSeqs.push_back(mergedMin[i]);
+				}else { break; }
+			}
+		}else{ //get minimum from file
+			//get entry
+			while (!filehandle.eof()) {
+				
+				filehandle >> firstName >> secondName >> distance;    gobble(filehandle); 
+				
+				if (prevDistance == -1) { prevDistance = distance; }
+				
+				if (distance != -1) { //-1 means skip me
+					//are the distances the same
+					if (distance == prevDistance) { //save in vector
+						seqDist temp(firstName, secondName, distance);
+						sameSeqs.push_back(temp);
+					}else{	
+						break;
+					}
+				}
+			}
+		}
+		filehandle.close();
+		
+		//randomize matching dists
+		random_shuffle(sameSeqs.begin(), sameSeqs.end());
+		
+		//can only return one value since once these are merged the other distances in sameSeqs may have changed
+		vector<seqDist> temp;
+		if (sameSeqs.size() > 0) {  temp.push_back(sameSeqs[0]);  }
+		
+		return temp;
+	}
+	catch(exception& e) {
+		errorOut(e, "HCluster", "getSeqsAN");
+		exit(1);
+	}
+}
+
+/***********************************************************************/
+void HCluster::combineFile() {
+	try {
+		int bufferSize = 64000;  //512k - this should be a variable that the user can set to optimize code to their hardware
+		char* inputBuffer;
+		inputBuffer = new char[bufferSize];
+		size_t numRead;
+		
+		string tempDistFile = distfile + ".temp";
+		ofstream out;
+		openOutputFile(tempDistFile, out);
+		
+		FILE* in;
+		in = fopen(distfile.c_str(), "rb");
+	
+		int first, second;
+		float dist;
+		
+		vector< map<int, float> > smallRowColValues;
+		smallRowColValues.resize(2);  //0 = row, 1 = col
+		int count = 0;
+				
+		//go through file pulling out distances related to rows merging
+		//if mergedMin contains distances add those back into file
+		bool done = false;
+		partialDist = "";
+		while ((numRead = fread(inputBuffer, 1, bufferSize, in)) != 0) {
+//cout << "number of char read = " << numRead << endl;
+//cout << inputBuffer << endl;
+			if (numRead < bufferSize) { done = true; }
+			
+			//parse input into individual distances
+			int spot = 0;
+			string outputString = "";
+			while(spot < numRead) {
+	//cout << "spot = " << spot << endl;
+			   seqDist nextDist = getNextDist(inputBuffer, spot, bufferSize);
+			   
+			   //you read a partial distance
+			   if (nextDist.seq1 == -1) { break;  }
+			   
+			   first = nextDist.seq1; second = nextDist.seq2; dist = nextDist.dist;
+	//cout << "next distance = " << first << '\t' << second << '\t' << dist << endl;		   
+			   //since file is sorted and mergedMin is sorted 
+			   //you can put the smallest distance from each through the code below and keep the file sorted
+			   
+			   //while there are still values in mergedMin that are smaller than the distance read from file
+			   while (count < mergedMin.size())  {
+			   
+					//is the distance in mergedMin smaller than from the file
+					if (mergedMin[count].dist < dist) {
+					//is this a distance related to the columns merging?
+					//if yes, save in memory
+						if ((mergedMin[count].seq1 == smallRow) && (mergedMin[count].seq2 == smallCol)) { //do nothing this is the smallest distance from last time
+						}else if (mergedMin[count].seq1 == smallCol) {
+							smallRowColValues[1][mergedMin[count].seq2] = mergedMin[count].dist;
+						}else if (mergedMin[count].seq2 == smallCol) {
+							smallRowColValues[1][mergedMin[count].seq1] = mergedMin[count].dist;
+						}else if (mergedMin[count].seq1 == smallRow) {
+							smallRowColValues[0][mergedMin[count].seq2] = mergedMin[count].dist;
+						}else if (mergedMin[count].seq2 == smallRow) {
+							smallRowColValues[0][mergedMin[count].seq1] = mergedMin[count].dist;
+						}else { //if no, write to temp file
+							outputString += toString(mergedMin[count].seq1) + '\t' + toString(mergedMin[count].seq2) + '\t' + toString(mergedMin[count].dist) + '\n';
+						}
+						count++;
+					}else{   break;	}
+			   }
+			   
+			   //is this a distance related to the columns merging?
+			   //if yes, save in memory
+			   if ((first == smallRow) && (second == smallCol)) { //do nothing this is the smallest distance from last time
+			   }else if (first == smallCol) {
+					smallRowColValues[1][second] = dist;
+			   }else if (second == smallCol) {
+					smallRowColValues[1][first] = dist;
+			   }else if (first == smallRow) {
+					smallRowColValues[0][second] = dist;
+			   }else if (second == smallRow) {
+					smallRowColValues[0][first] = dist;
+			   
+			   }else { //if no, write to temp file
+					outputString += toString(first) + '\t' + toString(second) + '\t' + toString(dist) + '\n';
+			   }
+			}
+			
+			out << outputString;
+			if(done) { break; }
+		}
+		fclose(in);
+		
+		//if values in mergedMin are larger than the the largest in file then
+		while (count < mergedMin.size())  {  
+			//is this a distance related to the columns merging?
+			//if yes, save in memory
+			if ((mergedMin[count].seq1 == smallRow) && (mergedMin[count].seq2 == smallCol)) { //do nothing this is the smallest distance from last time
+			}else if (mergedMin[count].seq1 == smallCol) {
+				smallRowColValues[1][mergedMin[count].seq2] = mergedMin[count].dist;
+			}else if (mergedMin[count].seq2 == smallCol) {
+				smallRowColValues[1][mergedMin[count].seq1] = mergedMin[count].dist;
+			}else if (mergedMin[count].seq1 == smallRow) {
+				smallRowColValues[0][mergedMin[count].seq2] = mergedMin[count].dist;
+			}else if (mergedMin[count].seq2 == smallRow) {
+				smallRowColValues[0][mergedMin[count].seq1] = mergedMin[count].dist;
+				
+			}else { //if no, write to temp file
+				out << mergedMin[count].seq1 << '\t' << mergedMin[count].seq2 << '\t' << mergedMin[count].dist << endl;
+			}
+			count++;
+		}
+		out.close();
+		mergedMin.clear();
+			
+		//rename tempfile to distfile
+		remove(distfile.c_str());
+		rename(tempDistFile.c_str(), distfile.c_str());
+		
+		//merge clustered rows averaging the distances
+		map<int, float>::iterator itMerge;
+		map<int, float>::iterator it2Merge;
+		for(itMerge = smallRowColValues[0].begin(); itMerge != smallRowColValues[0].end(); itMerge++) {			
+			//does smallRowColValues[1] have a distance to this seq too?
+			it2Merge = smallRowColValues[1].find(itMerge->first);
+			
+			float average;
+			if (it2Merge != smallRowColValues[1].end()) { //if yes, then average
+				//weighted average
+				int total = clusterArray[smallRow].numSeq + clusterArray[smallCol].numSeq;
+				average = ((clusterArray[smallRow].numSeq * itMerge->second) + (clusterArray[smallCol].numSeq * it2Merge->second)) / (float) total;
+				smallRowColValues[1].erase(it2Merge);
+				
+				seqDist temp(clusterArray[smallRow].parent, itMerge->first, average);
+				mergedMin.push_back(temp);
+			}
+		}
+
+		//sort merged values
+		sort(mergedMin.begin(), mergedMin.end(), compareSequenceDistance);	
+	}
+	catch(exception& e) {
+		errorOut(e, "HCluster", "combineFile");
 		exit(1);
 	}
 }
 /***********************************************************************/
+seqDist HCluster::getNextDist(char* buffer, int& index, int size){
+	try {
+		seqDist next;
+		int indexBefore = index;
+		string first, second, distance;
+		first = ""; second = ""; distance = "";
+		int tabCount = 0;
+//cout << "partial = " << partialDist << endl;		
+		if (partialDist != "") { //read what you can, you know it is less than a whole distance.
+			for (int i = 0; i < partialDist.size(); i++) {
+				if (tabCount == 0) {
+					if (partialDist[i] == '\t') { tabCount++; }
+					else {  first += partialDist[i];	}
+				}else if (tabCount == 1) {
+					if (partialDist[i] == '\t') { tabCount++; }
+					else {  second += partialDist[i];	}
+				}else if (tabCount == 2) {
+					distance +=  partialDist[i];
+				}
+			}
+			partialDist = "";
+		}
+	
+		//try to get another distance
+		bool gotDist = false;
+		while (index < size) {
+			if ((buffer[index] == 10) || (buffer[index] == 13)) { //newline in unix or windows
+				gotDist = true;
+				
+				//gobble space
+				while (index < size) {		
+					if (isspace(buffer[index])) { index++; }
+					else { break; }		
+				}
+				break;
+			}else{
+				if (tabCount == 0) {
+					if (buffer[index] == '\t') { tabCount++; }
+					else {  first += buffer[index];	}
+				}else if (tabCount == 1) {
+					if (buffer[index] == '\t') { tabCount++; }
+					else {  second += buffer[index];	}
+				}else if (tabCount == 2) {
+					distance +=  buffer[index];
+				}
+				index++;
+			}
+		}
+		
+		//there was not a whole distance in the buffer, ie. buffer = "1	2	0.01	2	3	0."
+		//then you want to save the partial distance.
+		if (!gotDist) {
+			for (int i = indexBefore; i < size; i++) {
+				partialDist += buffer[i];
+			}
+			index = size + 1;
+			next.seq1 = -1; next.seq2 = -1; next.dist = 0.0;
+		}else{
+			int firstname, secondname;
+			float dist;
+			
+			convert(first, firstname);
+			convert(second, secondname);
+			convert(distance, dist);
+			
+			next.seq1 = firstname; next.seq2 = secondname; next.dist = dist;
+		}
+						
+		return next;
+	}
+	catch(exception& e) {
+		errorOut(e, "HCluster", "getNextDist");
+		exit(1);
+	}
+}
+/***********************************************************************/
+void HCluster::processFile() {
+	try {
+		string firstName, secondName;
+		float distance;
+		
+		ifstream in;
+		openInputFile(distfile, in);
+		
+		ofstream out;
+		string outTemp = distfile + ".temp";
+		openOutputFile(outTemp, out);
+	
+		//get entry
+		while (!in.eof()) {
+			
+			in >> firstName >> secondName >> distance;    gobble(in);		
+			
+			map<string,int>::iterator itA = nameMap->find(firstName);
+			map<string,int>::iterator itB = nameMap->find(secondName);
+			if(itA == nameMap->end()){  cerr << "AAError: Sequence '" << firstName << "' was not found in the names file, please correct\n"; exit(1);  }
+			if(itB == nameMap->end()){  cerr << "ABError: Sequence '" << secondName << "' was not found in the names file, please correct\n"; exit(1);  }
+		
+			//using cutoff
+			if (distance > cutoff) { break; }
+		
+			if (distance != -1) { //-1 means skip me
+				out << itA->second << '\t' << itB->second << '\t' << distance << endl;
+			}
+		}
+		
+		in.close();
+		out.close();
+		
+		remove(distfile.c_str());
+		rename(outTemp.c_str(), distfile.c_str());
+		
+		firstRead = false;
+	}
+	catch(exception& e) {
+		errorOut(e, "HCluster", "processFile");
+		exit(1);
+	}
+}
+/***********************************************************************/
+
+
+
+
+
 
 
 

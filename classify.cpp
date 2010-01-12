@@ -14,9 +14,9 @@
 #include "blastdb.hpp"
 
 /**************************************************************************************************/
-
 Classify::Classify(string tfile, string tempFile, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch) : taxFile(tfile), templateFile(tempFile) {		
-	try {											
+	try {	
+											
 		readTaxonomy(taxFile);	
 		
 		int start = time(NULL);
@@ -111,10 +111,6 @@ void Classify::readTaxonomy(string file) {
 			
 			taxonomy[name] = taxInfo;
 			
-			//itTax = taxList.find(taxInfo);
-			//if (itTax == taxList.end()) { //this is new taxonomy
-				//taxList[taxInfo] = 1;
-			//}else { taxList[taxInfo]++;	}
 			phyloTree->addSeqToTree(name, taxInfo);
 		
 			gobble(inTax);

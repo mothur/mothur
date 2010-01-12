@@ -45,7 +45,6 @@ protected:
 	
 	string taxFile, templateFile, simpleTax;
 	vector<string> names;
-	//map<string, int> taxConfidenceScore;
 	
 	void readTaxonomy(string);
 	vector<string> parseTax(string);

@@ -246,8 +246,15 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 		outFile << setprecision(4);
 		
 		if(isTrue(phylip) && startLine == 0){	outFile << alignDB.getNumSeqs() << endl;	}
+		
 		for(int i=startLine;i<endLine;i++){
-			if(isTrue(phylip))	{	outFile << alignDB.get(i).getName() << '\t';	}
+			if(isTrue(phylip))	{	
+				string name = alignDB.get(i).getName();
+				if (name.length() < 10) { //pad with spaces to make compatible
+					while (name.length() < 10) {  name += " ";  }
+				}
+				outFile << name << '\t';	
+			}
 			for(int j=0;j<i;j++){
 				distCalculator->calcDist(alignDB.get(i), alignDB.get(j));
 				double dist = distCalculator->getDist();

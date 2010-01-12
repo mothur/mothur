@@ -109,6 +109,11 @@ struct seqDist {
 	seqDist(int s1, int s2, float d) : seq1(s1), seq2(s2), dist(d) {}
 	~seqDist() {}
 };
+//********************************************************************************************************************
+//sorts lowest to highest
+inline bool compareSequenceDistance(seqDist left, seqDist right){
+	return (left.dist < right.dist);	
+} 
 /***********************************************************************/
 
 // snagged from http://www.parashift.com/c++-faq-lite/misc-technical-issues.html#faq-39.2
@@ -455,6 +460,22 @@ inline bool isBlank(string fileName){
 		if (fileHandle.eof()) { fileHandle.close(); return true;  }
 	}
 	return false;
+}
+/***********************************************************************/
+
+inline int openInputFile(string fileName, ifstream& fileHandle, string m){
+
+	fileHandle.open(fileName.c_str());
+	if(!fileHandle) {
+		mothurOut("Error: Could not open " + fileName);  mothurOutEndLine();
+		return 1;
+	}
+	else {
+		//check for blank file
+		gobble(fileHandle);
+		return 0;
+	}
+	
 }
 /***********************************************************************/
 

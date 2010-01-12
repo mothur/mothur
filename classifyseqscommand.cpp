@@ -25,7 +25,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option){
 		else {
 			
 			//valid paramters for this command
-			string AlignArray[] =  {"template","fasta","search","ksize","method","processors","taxonomy","match","mismatch","gapopen","gapextend","numwanted","cutoff","probs","iters"};
+			string AlignArray[] =  {"template","fasta","name","search","ksize","method","processors","taxonomy","match","mismatch","gapopen","gapextend","numwanted","cutoff","probs","iters"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -47,13 +47,29 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option){
 			}
 			else if (templateFileName == "not open") { abort = true; }	
 			
-			fastaFileName = validParameter.validFile(parameters, "fasta", true);
-			if (fastaFileName == "not found") { 
-				mothurOut("fasta is a required parameter for the classify.seqs command."); 
-				mothurOutEndLine();
-				abort = true; 
+			fastaFileName = validParameter.validFile(parameters, "fasta", false);
+			if (fastaFileName == "not found") { mothurOut("fasta is a required parameter for the classify.seqs command."); mothurOutEndLine(); abort = true;  }
+			else { 
+				splitAtDash(fastaFileName, fastaFileNames);
+				
+				//go through files and make sure they are good, if not, then disregard them
+				for (int i = 0; i < fastaFileNames.size(); i++) {
+					int ableToOpen;
+					ifstream in;
+					ableToOpen = openInputFile(fastaFileNames[i], in);
+					if (ableToOpen == 1) { 
+						mothurOut(fastaFileNames[i] + " will be disregarded."); mothurOutEndLine(); 
+						//erase from file list
+						fastaFileNames.erase(fastaFileNames.begin()+i);
+						i--;
+					}
+					in.close();
+				}
+				
+				//make sure there is at least one valid file left
+				if (fastaFileNames.size() == 0) { mothurOut("no valid files."); mothurOutEndLine(); abort = true; }
 			}
-			else if (fastaFileName == "not open") { abort = true; }	
+
 			
 			taxonomyFileName = validParameter.validFile(parameters, "taxonomy", true);
 			if (taxonomyFileName == "not found") { 
@@ -62,7 +78,26 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option){
 				abort = true; 
 			}
 			else if (taxonomyFileName == "not open") { abort = true; }	
+			
+			
+			namefile = validParameter.validFile(parameters, "name", false);
+			if (fastaFileName == "not found") { namefile = "";  }
+			else { 
+				splitAtDash(namefile, namefileNames);
+				
+				//go through files and make sure they are good, if not, then disregard them
+				for (int i = 0; i < namefileNames.size(); i++) {
+					int ableToOpen;
+					ifstream in;
+					ableToOpen = openInputFile(namefileNames[i], in);
+					if (ableToOpen == 1) {  mothurOut("Unable to match name file with fasta file."); mothurOutEndLine(); abort = true;	}
+					in.close();
+				}
+			}
 
+			if (namefile != "") {
+				if (namefileNames.size() != fastaFileNames.size()) { abort = true; mothurOut("If you provide a name file, you must have one for each fasta file."); mothurOutEndLine(); }
+			}
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -131,7 +166,7 @@ void ClassifySeqsCommand::help(){
 	try {
 		mothurOut("The classify.seqs command reads a fasta file containing sequences and creates a .taxonomy file and a .tax.summary file.\n");
 		mothurOut("The classify.seqs command parameters are template, fasta, search, ksize, method, taxonomy, processors, match, mismatch, gapopen, gapextend, numwanted and probs.\n");
-		mothurOut("The template, fasta and taxonomy parameters are required.\n");
+		mothurOut("The template, fasta and taxonomy parameters are required. You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n");
 		mothurOut("The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer and blast. The default is kmer.\n");
 		mothurOut("The method parameter allows you to specify classification method to use.  Your options are: bayesian and knn. The default is bayesian.\n");
 		mothurOut("The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 8.\n");
@@ -172,107 +207,161 @@ int ClassifySeqsCommand::execute(){
 			classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters);	
 		}
 
-		int numFastaSeqs = 0;
+				
+		for (int s = 0; s < fastaFileNames.size(); s++) {
 		
-		string newTaxonomyFile = getRootName(fastaFileName) + getRootName(taxonomyFileName) + "taxonomy";
-		string tempTaxonomyFile = getRootName(fastaFileName) + "taxonomy.temp";
-		string taxSummary = getRootName(fastaFileName) + getRootName(taxonomyFileName) + "tax.summary";
+			//read namefile
+			if(namefile != "") {
+				nameMap.clear(); //remove old names
+				
+				ifstream inNames;
+				openInputFile(namefileNames[s], inNames);
+				
+				string firstCol, secondCol;
+				while(!inNames.eof()) {
+					inNames >> firstCol >> secondCol; gobble(inNames);
+					nameMap[firstCol] = getNumNames(secondCol);  //ex. seq1	seq1,seq3,seq5 -> seq1 = 3.
+				}
+				inNames.close();
+			}
 		
-		int start = time(NULL);
+			mothurOut("Classifying sequences from " + fastaFileNames[s] + " ..." ); mothurOutEndLine();
+			string newTaxonomyFile = getRootName(fastaFileNames[s]) + getRootName(taxonomyFileName) + "taxonomy";
+			string tempTaxonomyFile = getRootName(fastaFileNames[s]) + "taxonomy.temp";
+			string taxSummary = getRootName(fastaFileNames[s]) + getRootName(taxonomyFileName) + "tax.summary";
+			
+			int start = time(NULL);
+			int numFastaSeqs = 0;
+			for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
+			
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		if(processors == 1){
+			if(processors == 1){
+				ifstream inFASTA;
+				openInputFile(fastaFileNames[s], inFASTA);
+				numFastaSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+				inFASTA.close();
+				
+				lines.push_back(new linePair(0, numFastaSeqs));
+				
+				driver(lines[0], newTaxonomyFile, tempTaxonomyFile, fastaFileNames[s]);
+			}
+			else{
+				vector<int> positions;
+				processIDS.resize(0);
+				
+				ifstream inFASTA;
+				openInputFile(fastaFileNames[s], inFASTA);
+				
+				string input;
+				while(!inFASTA.eof()){
+					input = getline(inFASTA);
+					if (input.length() != 0) {
+						if(input[0] == '>'){	int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
+					}
+				}
+				inFASTA.close();
+				
+				numFastaSeqs = positions.size();
+				
+				int numSeqsPerProcessor = numFastaSeqs / processors;
+				
+				for (int i = 0; i < processors; i++) {
+					int startPos = positions[ i * numSeqsPerProcessor ];
+					if(i == processors - 1){
+						numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor;
+					}
+					lines.push_back(new linePair(startPos, numSeqsPerProcessor));
+				}
+				createProcesses(newTaxonomyFile, tempTaxonomyFile, fastaFileNames[s]); 
+				
+				rename((newTaxonomyFile + toString(processIDS[0]) + ".temp").c_str(), newTaxonomyFile.c_str());
+				rename((tempTaxonomyFile + toString(processIDS[0]) + ".temp").c_str(), tempTaxonomyFile.c_str());
+				
+				for(int i=1;i<processors;i++){
+					appendTaxFiles((newTaxonomyFile + toString(processIDS[i]) + ".temp"), newTaxonomyFile);
+					appendTaxFiles((tempTaxonomyFile + toString(processIDS[i]) + ".temp"), tempTaxonomyFile);
+					remove((newTaxonomyFile + toString(processIDS[i]) + ".temp").c_str());
+					remove((tempTaxonomyFile + toString(processIDS[i]) + ".temp").c_str());
+				}
+				
+			}
+#else
 			ifstream inFASTA;
-			openInputFile(fastaFileName, inFASTA);
+			openInputFile(fastaFileNames[s], inFASTA);
 			numFastaSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
 			inFASTA.close();
 			
 			lines.push_back(new linePair(0, numFastaSeqs));
-		
-			driver(lines[0], newTaxonomyFile, tempTaxonomyFile);
-		}
-		else{
-			vector<int> positions;
-			processIDS.resize(0);
 			
-			ifstream inFASTA;
-			openInputFile(fastaFileName, inFASTA);
-			
-			string input;
-			while(!inFASTA.eof()){
-				input = getline(inFASTA);
-				if (input.length() != 0) {
-					if(input[0] == '>'){	int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
-				}
-			}
-			inFASTA.close();
-			
-			numFastaSeqs = positions.size();
-			
-			int numSeqsPerProcessor = numFastaSeqs / processors;
-			
-			for (int i = 0; i < processors; i++) {
-				int startPos = positions[ i * numSeqsPerProcessor ];
-				if(i == processors - 1){
-					numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor;
-				}
-				lines.push_back(new linePair(startPos, numSeqsPerProcessor));
-			}
-			createProcesses(newTaxonomyFile, tempTaxonomyFile); 
-			
-			rename((newTaxonomyFile + toString(processIDS[0]) + ".temp").c_str(), newTaxonomyFile.c_str());
-			rename((tempTaxonomyFile + toString(processIDS[0]) + ".temp").c_str(), tempTaxonomyFile.c_str());
-			
-			for(int i=1;i<processors;i++){
-				appendTaxFiles((newTaxonomyFile + toString(processIDS[i]) + ".temp"), newTaxonomyFile);
-				appendTaxFiles((tempTaxonomyFile + toString(processIDS[i]) + ".temp"), tempTaxonomyFile);
-				remove((newTaxonomyFile + toString(processIDS[i]) + ".temp").c_str());
-				remove((tempTaxonomyFile + toString(processIDS[i]) + ".temp").c_str());
-			}
-			
-		}
-#else
-		ifstream inFASTA;
-		openInputFile(fastaFileName, inFASTA);
-		numFastaSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
-		inFASTA.close();
-		
-		lines.push_back(new linePair(0, numFastaSeqs));
-		
-		driver(lines[0], newTaxonomyFile, tempTaxonomyFile);
+			driver(lines[0], newTaxonomyFile, tempTaxonomyFile, fastaFileNames[s]);
 #endif	
-		delete classify;
-		
-		//make taxonomy tree from new taxonomy file 
-		ifstream inTaxonomy;
-		openInputFile(tempTaxonomyFile, inTaxonomy);
-		
-		string accession, taxaList;
-		PhyloTree taxaBrowser;
-		
-		//read in users taxonomy file and add sequences to tree
-		while(!inTaxonomy.eof()){
-			inTaxonomy >> accession >> taxaList;
+			//make taxonomy tree from new taxonomy file 
+			PhyloTree taxaBrowser;
 			
-			taxaBrowser.addSeqToTree(accession, taxaList);
+			ifstream in;
+			openInputFile(tempTaxonomyFile, in);
+		
+			//read in users taxonomy file and add sequences to tree
+			string name, taxon;
+			while(!in.eof()){
+				in >> name >> taxon; gobble(in);
+				
+				if (namefile != "") {
+					itNames = nameMap.find(name);
+		
+					if (itNames == nameMap.end()) { 
+						mothurOut(name + " is not in your name file please correct."); mothurOutEndLine(); exit(1);
+					}else{
+						for (int i = 0; i < itNames->second; i++) { 
+							taxaBrowser.addSeqToTree(name+toString(i), taxon);  //add it as many times as there are identical seqs
+						}
+					}
+				}else {  taxaBrowser.addSeqToTree(name, taxon);  } //add it once
+			}
+			in.close();
+	
+			taxaBrowser.assignHeirarchyIDs(0);
+
+			taxaBrowser.binUnclassified();
 			
-			gobble(inTaxonomy);
+			remove(tempTaxonomyFile.c_str());
+			
+			//print summary file
+			ofstream outTaxTree;
+			openOutputFile(taxSummary, outTaxTree);
+			taxaBrowser.print(outTaxTree);
+			outTaxTree.close();
+			
+			//output taxonomy with the unclassified bins added
+			ifstream inTax;
+			openInputFile(newTaxonomyFile, inTax);
+			
+			ofstream outTax;
+			string unclass = newTaxonomyFile + ".unclass.temp";
+			openOutputFile(unclass, outTax);
+			
+			//get maxLevel from phylotree so you know how many 'unclassified's to add
+			int maxLevel = taxaBrowser.getMaxLevel();
+			
+			//read taxfile - this reading and rewriting is done to preserve the confidence sscores.
+			while (!inTax.eof()) {
+				inTax >> name >> taxon; gobble(inTax);
+				
+				string newTax = addUnclassifieds(taxon, maxLevel);
+				
+				outTax << name << '\t' << newTax << endl;
+			}
+			inTax.close();	
+			outTax.close();
+			
+			remove(newTaxonomyFile.c_str());
+			rename(unclass.c_str(), newTaxonomyFile.c_str());
+			
+			mothurOutEndLine();
+			mothurOut("It took " + toString(time(NULL) - start) + " secs to classify " + toString(numFastaSeqs) + " sequences."); mothurOutEndLine(); mothurOutEndLine();
 		}
-		inTaxonomy.close();
-		remove(tempTaxonomyFile.c_str());
 		
-		taxaBrowser.assignHeirarchyIDs(0);
-		taxaBrowser.binUnclassified();
-		
-		ofstream outTaxTree;
-		openOutputFile(taxSummary, outTaxTree);
-		
-		taxaBrowser.print(outTaxTree);
-		
-		mothurOutEndLine();
-		mothurOut("It took " + toString(time(NULL) - start) + " secs to classify " + toString(numFastaSeqs) + " sequences.");
-		mothurOutEndLine();
-		mothurOutEndLine();
-		
+		delete classify;
 		return 0;
 	}
 	catch(exception& e) {
@@ -280,9 +369,39 @@ int ClassifySeqsCommand::execute(){
 		exit(1);
 	}
 }
+
+/**************************************************************************************************/
+string ClassifySeqsCommand::addUnclassifieds(string tax, int maxlevel) {
+	try{
+		string newTax, taxon;
+		int level = 0;
+		
+		//keep what you have counting the levels
+		while (tax.find_first_of(';') != -1) {
+			//get taxon
+			taxon = tax.substr(0,tax.find_first_of(';'));
+			tax = tax.substr(tax.find_first_of(';')+1, tax.length());
+			newTax += taxon;
+			level++;
+		}
+		
+		//add "unclassified" until you reach maxLevel
+		while (level < maxlevel) {
+			newTax += "unclassified;";
+			level++;
+		}
+		
+		return newTax;
+	}
+	catch(exception& e) {
+		errorOut(e, "ClassifySeqsCommand", "addUnclassifieds");
+		exit(1);
+	}
+}
+
 /**************************************************************************************************/
 
-void ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile) {
+void ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile, string filename) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 0;
@@ -296,7 +415,7 @@ void ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				driver(lines[process], taxFileName + toString(getpid()) + ".temp", tempTaxFile + toString(getpid()) + ".temp");
+				driver(lines[process], taxFileName + toString(getpid()) + ".temp", tempTaxFile + toString(getpid()) + ".temp", filename);
 				exit(0);
 			}else { mothurOut("unable to spawn the necessary processes."); mothurOutEndLine(); exit(0); }
 		}
@@ -339,7 +458,7 @@ void ClassifySeqsCommand::appendTaxFiles(string temp, string filename) {
 
 //**********************************************************************************************************************
 
-int ClassifySeqsCommand::driver(linePair* line, string taxFName, string tempTFName){
+int ClassifySeqsCommand::driver(linePair* line, string taxFName, string tempTFName, string filename){
 	try {
 		ofstream outTax;
 		openOutputFile(taxFName, outTax);
@@ -348,7 +467,7 @@ int ClassifySeqsCommand::driver(linePair* line, string taxFName, string tempTFNa
 		openOutputFile(tempTFName, outTaxSimple);
 	
 		ifstream inFASTA;
-		openInputFile(fastaFileName, inFASTA);
+		openInputFile(filename, inFASTA);
 
 		inFASTA.seekg(line->start);
 		

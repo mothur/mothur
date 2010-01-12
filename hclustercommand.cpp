@@ -179,39 +179,30 @@ int HClusterCommand::execute(){
 		print_start = true;
 		start = time(NULL);
 	
-		ifstream in;
-		openInputFile(distfile, in);
-		string firstName, secondName;
-		float distance;
-		
-		cluster = new HCluster(rabund, list, method);
+		//ifstream in;
+		//openInputFile(distfile, in);
+				
+		cluster = new HCluster(rabund, list, method, distfile, globaldata->nameMap, cutoff);
 		vector<seqDist> seqs; seqs.resize(1); // to start loop
 		
 		while (seqs.size() != 0){
 		
-			seqs = cluster->getSeqs(in, globaldata->nameMap, cutoff);
+			seqs = cluster->getSeqs();
 				
 			for (int i = 0; i < seqs.size(); i++) {  //-1 means skip me
 
-				if (print_start && isTrue(timing)) {
-					mothurOut("Clustering (" + tag + ") dist " + toString(distance) + "/" 
-							  + toString(roundDist(distance, precision)) 
-							  + "\t(precision: " + toString(precision) + ")");
-					cout.flush();
-					print_start = false;
-				}
-				
-	
 				if (seqs[i].seq1 != seqs[i].seq2) {
-					cluster->update(seqs[i].seq1, seqs[i].seq2, seqs[i].dist);
+					bool clustered = cluster->update(seqs[i].seq1, seqs[i].seq2, seqs[i].dist);
 					
 					float rndDist = roundDist(seqs[i].dist, precision);
-							
-					if((previousDist <= 0.0000) && (seqs[i].dist != previousDist)){
-						printData("unique");
-					}
-					else if((rndDist != rndPreviousDist)){
-						printData(toString(rndPreviousDist,  length-1));
+					
+					if (clustered) {
+						if((previousDist <= 0.0000) && (seqs[i].dist != previousDist)){
+							printData("unique");
+						}
+						else if((rndDist != rndPreviousDist)){
+							printData(toString(rndPreviousDist,  length-1));
+						}
 					}
 					
 					previousDist = seqs[i].dist;
@@ -222,15 +213,8 @@ int HClusterCommand::execute(){
 			}
 		}
 		
-		in.close();
+		//in.close();
 
-		if (print_start && isTrue(timing)) {
-			//mothurOut("Clustering (" + tag + ") for distance " + toString(previousDist) + "/" + toString(rndPreviousDist) 
-					 //+ "\t(precision: " + toString(precision) + ", Nodes: " + toString(matrix->getNNodes()) + ")");
-			cout.flush();
-	 		print_start = false;
-		}
-	
 		if(previousDist <= 0.0000){
 			printData("unique");
 		}
