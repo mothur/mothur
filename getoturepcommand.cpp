@@ -8,6 +8,12 @@
  */
 
 #include "getoturepcommand.h"
+#include "readphylip.h"
+#include "readcolumn.h"
+#include "formatphylip.h"
+#include "formatcolumn.h"
+
+
 
 //********************************************************************************************************************
 //sorts lowest to highest
@@ -42,7 +48,7 @@ GetOTURepCommand::GetOTURepCommand(string option){
 			help(); abort = true;
 		} else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","list","label","name", "group", "sorted", "phylip","column"};
+			string Array[] =  {"fasta","list","label","name", "group", "sorted", "phylip","column","large","cutoff"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -53,12 +59,6 @@ GetOTURepCommand::GetOTURepCommand(string option){
 			//check to make sure all parameters are valid for command
 			for (map<string, string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
-			}
-			
-			//make sure the user has already run the read.otu command
-			if ((globaldata->gSparseMatrix == NULL) || (globaldata->gListVector == NULL)) {
-				mothurOut("Before you use the get.oturep command, you first need to read in a distance matrix."); mothurOutEndLine(); 
-				abort = true;
 			}
 			
 			//check for required parameters
@@ -73,10 +73,16 @@ GetOTURepCommand::GetOTURepCommand(string option){
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
 			if (phylipfile == "not found") { phylipfile = "";  }
 			else if (phylipfile == "not open") { abort = true; }	
+			else { distFile = phylipfile; format = "phylip";   }
 			
 			columnfile = validParameter.validFile(parameters, "column", true);
 			if (columnfile == "not found") { columnfile = ""; }
 			else if (columnfile == "not open") { abort = true; }	
+			else { distFile = columnfile; format = "column";   }
+			
+			namefile = validParameter.validFile(parameters, "name", true);
+			if (namefile == "not open") { abort = true; }	
+			else if (namefile == "not found") { namefile = ""; }
 			
 			if ((phylipfile == "") && (columnfile == "")) { mothurOut("When executing a get.oturep command you must enter a phylip or a column."); mothurOutEndLine(); abort = true; }
 			else if ((phylipfile != "") && (columnfile != "")) { mothurOut("When executing a get.oturep command you must enter ONLY ONE of the following: phylip or column."); mothurOutEndLine(); abort = true; }
@@ -86,22 +92,12 @@ GetOTURepCommand::GetOTURepCommand(string option){
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			label = validParameter.validFile(parameters, "label", false);			
-			if (label == "not found") { label = ""; }
+			if (label == "not found") { label = ""; allLines = 1;  }
 			else { 
 				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
-			//if the user has not specified any labels use the ones from read.otu
-			if (label == "") {  
-				allLines = globaldata->allLines; 
-				labels = globaldata->labels; 
-			}
-			
-			namesfile = validParameter.validFile(parameters, "name", true);
-			if (namesfile == "not open") { abort = true; }	
-			else if (namesfile == "not found") { namesfile = ""; }
-
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { groupfile = ""; abort = true; }
 			else if (groupfile == "not found") { groupfile = ""; }
@@ -122,27 +118,15 @@ GetOTURepCommand::GetOTURepCommand(string option){
 				sorted = "";
 			}
 			
-			if (abort == false) {
-
-				//globaldata->gListVector bin 0 = first name read in distance matrix, globaldata->gListVector bin 1 = second name read in distance matrix
-				if (globaldata->gListVector != NULL) {
-					vector<string> names;
-					string binnames;
-					//map names to rows in sparsematrix
-					for (int i = 0; i < globaldata->gListVector->size(); i++) {
-						names.clear();
-						binnames = globaldata->gListVector->get(i);
-	
-						splitAtComma(binnames, names);
-				
-						for (int j = 0; j < names.size(); j++) {
-							nameToIndex[names[j]] = i;
-						}
-					}
-				} else { mothurOut("error, no listvector."); mothurOutEndLine(); }
-
-				fasta = new FastaMap();
-			}
+			string temp = validParameter.validFile(parameters, "large", false);		if (temp == "not found") {	temp = "F";	}
+			large = isTrue(temp);
+			
+			temp = validParameter.validFile(parameters, "precision", false);			if (temp == "not found") { temp = "100"; }
+			convert(temp, precision); 
+			
+			temp = validParameter.validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "10.0"; }
+			convert(temp, cutoff); 
+			cutoff += (5 / (precision * 10.0));
 		}
 	}
 	catch(exception& e) {
@@ -156,13 +140,14 @@ GetOTURepCommand::GetOTURepCommand(string option){
 void GetOTURepCommand::help(){
 	try {
 		mothurOut("The get.oturep command can only be executed after a successful read.dist command.\n");
-		mothurOut("The get.oturep command parameters are list, fasta, name, group, sorted and label.  The fasta and list parameters are required.\n");
+		mothurOut("The get.oturep command parameters are list, fasta, name, group, large, sorted and label.  The fasta and list parameters are required.\n");
 		mothurOut("The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n");
 		mothurOut("The get.oturep command should be in the following format: get.oturep(fasta=yourFastaFile, list=yourListFile, name=yourNamesFile, group=yourGroupFile, label=yourLabels).\n");
 		mothurOut("Example get.oturep(fasta=amazon.fasta, list=amazon.fn.list, group=amazon.groups, name=amazon.names).\n");
 		mothurOut("The default value for label is all labels in your inputfile.\n");
 		mothurOut("The sorted parameter allows you to indicate you want the output sorted. You can sort by sequence name, bin number, bin size or group. The default is no sorting, but your options are name, number, size, or group.\n");
-		mothurOut("The get.oturep command outputs a .fastarep file for each distance you specify, selecting one OTU representative for each bin.\n");
+		mothurOut("The large parameter allows you to indicate that your distance matrix is too large to fit in RAM.  The default value is false.\n");
+		mothurOut("The get.oturep command outputs a .fastarep and .rep.names file for each distance you specify, selecting one OTU representative for each bin.\n");
 		mothurOut("If you provide a groupfile, then it also appends the names of the groups present in that bin.\n");
 		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");
 	}
@@ -174,16 +159,7 @@ void GetOTURepCommand::help(){
 
 //**********************************************************************************************************************
 
-GetOTURepCommand::~GetOTURepCommand(){
-	if (abort == false) {
-		delete input;  globaldata->ginput = NULL;
-		delete read;
-		delete fasta;
-		if (groupfile != "") {
-			delete groupMap;  globaldata->gGroupmap = NULL;
-		}
-	}
-}
+GetOTURepCommand::~GetOTURepCommand(){}
 
 //**********************************************************************************************************************
 
@@ -193,15 +169,93 @@ int GetOTURepCommand::execute(){
 		if (abort == true) { return 0; }
 		int error;
 		
+		if (!large) {
+			//read distance files
+			if (format == "column") { readMatrix = new ReadColumnMatrix(distFile); }	
+			else if (format == "phylip") { readMatrix = new ReadPhylipMatrix(distFile); }
+			else { mothurOut("File format error."); mothurOutEndLine(); return 0;  }
+			
+			readMatrix->setCutoff(cutoff);
+	
+			if(namefile != ""){	
+				nameMap = new NameAssignment(namefile);
+				nameMap->readMap();
+			}else{	nameMap = NULL;		}
+			
+			readMatrix->read(nameMap);
+
+			//get matrix
+			if (globaldata->gListVector != NULL) {  delete globaldata->gListVector;  }
+			globaldata->gListVector = readMatrix->getListVector();
+
+			SparseMatrix* matrix = readMatrix->getMatrix();
+			
+			// Create a data structure to quickly access the distance information.
+			// It consists of a vector of distance maps, where each map contains
+			// all distances of a certain sequence. Vector and maps are accessed
+			// via the index of a sequence in the distance matrix
+			seqVec = vector<SeqMap>(globaldata->gListVector->size()); 
+			for (MatData currentCell = matrix->begin(); currentCell != matrix->end(); currentCell++) {
+				seqVec[currentCell->row][currentCell->column] = currentCell->dist;
+			}
+			
+			delete matrix;
+			delete readMatrix;
+		}else {
+			//process file and set up indexes
+			if (format == "column") { formatMatrix = new FormatColumnMatrix(distFile); }	
+			else if (format == "phylip") { formatMatrix = new FormatPhylipMatrix(distFile); }
+			else { mothurOut("File format error."); mothurOutEndLine(); return 0;  }
+			
+			formatMatrix->setCutoff(cutoff);
+	
+			if(namefile != ""){	
+				nameMap = new NameAssignment(namefile);
+				nameMap->readMap();
+			}else{	nameMap = NULL;		}
+			
+			formatMatrix->read(nameMap);
+
+			//get matrix
+			if (globaldata->gListVector != NULL) {  delete globaldata->gListVector;  }
+			globaldata->gListVector = formatMatrix->getListVector();
+			
+			distFile = formatMatrix->getFormattedFileName();
+			
+			//positions in file where the distances for each sequence begin
+			//rowPositions[1] = position in file where distance related to sequence 1 start.
+			rowPositions = formatMatrix->getRowPositions();
+			
+			delete formatMatrix;
+			
+			//openfile for getMap to use
+			openInputFile(distFile, inRow);
+		}
+		
+		//globaldata->gListVector bin 0 = first name read in distance matrix, globaldata->gListVector bin 1 = second name read in distance matrix
+		if (globaldata->gListVector != NULL) {
+			vector<string> names;
+			string binnames;
+			//map names to rows in sparsematrix
+			for (int i = 0; i < globaldata->gListVector->size(); i++) {
+				names.clear();
+				binnames = globaldata->gListVector->get(i);
+				
+				splitAtComma(binnames, names);
+				
+				for (int j = 0; j < names.size(); j++) {
+					nameToIndex[names[j]] = i;
+				}
+			}
+		} else { mothurOut("error, no listvector."); mothurOutEndLine(); }
+		
+		fasta = new FastaMap();
+		
 		//read fastafile
 		fasta->readFastaFile(fastafile);
-		
-		//in.close();
-		//read distance file and generate indexed distance file that can be used by findrep function
-//....new reading class....//
-		
+				
 		//if user gave a namesfile then use it
-		if (namesfile != "") {	readNamesFile();	}
+		if (namefile != "") {	readNamesFile();	}
 		
 		//set format to list so input can get listvector
 		globaldata->setFormat("list");
@@ -217,7 +271,7 @@ int GetOTURepCommand::execute(){
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
-		
+	
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
 			if (allLines == 1 || labels.count(list->getLabel()) == 1){
@@ -273,9 +327,18 @@ int GetOTURepCommand::execute(){
 			if (error == 1) { return 0; } //there is an error in hte input files, abort command
 		}
 		
-		delete list;
+		//close and remove formatted matrix file
+		inRow.close();
+		remove(distFile.c_str());
+		
 		globaldata->gListVector = NULL;
-
+		delete input;  globaldata->ginput = NULL;
+		delete read;
+		delete fasta;
+		if (groupfile != "") {
+			delete groupMap;  globaldata->gGroupmap = NULL;
+		}
+		
 		return 0;
 	}
 	catch(exception& e) {
@@ -288,7 +351,7 @@ int GetOTURepCommand::execute(){
 void GetOTURepCommand::readNamesFile() {
 	try {
 		vector<string> dupNames;
-		openInputFile(namesfile, inNames);
+		openInputFile(namefile, inNames);
 		
 		string name, names, sequence;
 	
@@ -354,37 +417,58 @@ string GetOTURepCommand::findRep(int bin, string& group, ListVector* thisList, i
 		// the first sequence of the OTU is the representative one
 		if ((names.size() == 1) || (list->getLabel() == "unique")) {
 			return names[0];
-		} else {
+		}else{
 			vector<int> seqIndex(names.size());
 			vector<float> max_dist(names.size());
+			vector<float> total_dist(names.size());
 
 			//fill seqIndex and initialize sums
 			for (size_t i = 0; i < names.size(); i++) {
 				seqIndex[i] = nameToIndex[names[i]];
 				max_dist[i] = 0.0;
+				total_dist[i] = 0.0;
 			}
 			
 			// loop through all entries in seqIndex
 			SeqMap::iterator it;
 			SeqMap currMap;
 			for (size_t i=0; i < seqIndex.size(); i++) {
-	//currMap = seqVec[seqIndex[i]];
+			
+				if (!large) {	currMap = seqVec[seqIndex[i]];  }
+				else		{	currMap = getMap(seqIndex[i]);	}
+				
 				for (size_t j=0; j < seqIndex.size(); j++) {
 					it = currMap.find(seqIndex[j]);		
 					if (it != currMap.end()) {
 						max_dist[i] = max(max_dist[i], it->second);
 						max_dist[j] = max(max_dist[j], it->second);
+						total_dist[i] += it->second;
+						total_dist[j] += it->second;
+					}else{ //if you can't find the distance make it the cutoff
+						max_dist[i] = max(max_dist[i], cutoff);
+						max_dist[j] = max(max_dist[j], cutoff);
+						total_dist[i] += cutoff;
+						total_dist[j] += cutoff;
 					}
 				}
 			}
 			
 			// sequence with the smallest maximum distance is the representative
+			//if tie occurs pick sequence with smallest average distance
 			float min = 10000;
 			int minIndex;
 			for (size_t i=0; i < max_dist.size(); i++) {
 				if (max_dist[i] < min) {
 					min = max_dist[i];
 					minIndex = i;
+				}else if (max_dist[i] == min) {
+					float currentAverage = total_dist[minIndex] / (float) total_dist.size();
+					float newAverage = total_dist[i] / (float) total_dist.size();
+					
+					if (newAverage < currentAverage) {
+						min = max_dist[i];
+						minIndex = i;
+					}
 				}
 			}
 
@@ -406,12 +490,19 @@ int GetOTURepCommand::process(ListVector* processList) {
 		string outputFileName = getRootName(listfile) + processList->getLabel() + ".rep.fasta";
 		openOutputFile(outputFileName, out);
 		vector<repStruct> reps;
-
+		
+		ofstream newNamesOutput;
+		string outputNamesFile = getRootName(listfile) + processList->getLabel() + ".rep.names";
+		openOutputFile(outputNamesFile, newNamesOutput);
+		
 		//for each bin in the list vector
 		for (int i = 0; i < processList->size(); i++) {
 			string groups;
 			int binsize;
 			nameRep = findRep(i, groups, processList, binsize);
+			
+			//output to new names file
+			newNamesOutput << nameRep << '\t' << processList->get(i) << endl;
 
 			//print out name and sequence for that bin
 			sequence = fasta->getSequence(nameRep);
@@ -432,6 +523,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 			}else { 
 				mothurOut(nameRep + " is missing from your fasta or name file. Please correct. "); mothurOutEndLine(); 
 				remove(outputFileName.c_str());
+				remove(outputNamesFile.c_str());
 				return 1;
 			}
 		}
@@ -456,6 +548,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 		}
 
 		out.close();
+		newNamesOutput.close();
 		return 0;
 
 	}
@@ -466,3 +559,33 @@ int GetOTURepCommand::process(ListVector* processList) {
 }
 
 //**********************************************************************************************************************
+SeqMap GetOTURepCommand::getMap(int row) {
+	try {
+		SeqMap rowMap;
+		
+		//make sure this row exists in the file, it may not if the seq did not have any distances below the cutoff
+		if (rowPositions[row] != -1){
+			//go to row in file
+			inRow.seekg(rowPositions[row]);
+			
+			int rowNum, numDists, colNum;
+			float dist;
+			
+			inRow >> rowNum >> numDists;
+			
+			for(int i = 0; i < numDists; i++) {
+				inRow >> colNum >> dist;
+				rowMap[colNum] = dist;
+				
+			}
+		}
+		
+		return rowMap;
+	}
+	catch(exception& e) {
+		errorOut(e, "GetOTURepCommand", "getMap");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+
