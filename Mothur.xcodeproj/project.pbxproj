@@ -181,6 +181,8 @@
 		A7B04493106CC3E60046FC83 /* chimeraslayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7B04492106CC3E60046FC83 /* chimeraslayer.cpp */; };
 		A7B0450E106CEEC90046FC83 /* slayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7B0450D106CEEC90046FC83 /* slayer.cpp */; };
 		A7D176CF10F2558500159497 /* pcacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7D176CE10F2558500159497 /* pcacommand.cpp */; };
+		A7D86C7D10FE09AB00865661 /* formatcolumn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7D86C7C10FE09AB00865661 /* formatcolumn.cpp */; };
+		A7D86C8C10FE09FE00865661 /* formatphylip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7D86C8B10FE09FE00865661 /* formatphylip.cpp */; };
 		A7E0AAB610D2886D00CF407B /* mgclustercommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E0AAB510D2886D00CF407B /* mgclustercommand.cpp */; };
 		A7E4A783106913F900688F62 /* getsharedotucommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E4A782106913F900688F62 /* getsharedotucommand.cpp */; };
 		A7E4A824106A9AD700688F62 /* maligner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E4A823106A9AD700688F62 /* maligner.cpp */; };
@@ -574,6 +576,11 @@
 		A7B0450D106CEEC90046FC83 /* slayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = slayer.cpp; sourceTree = SOURCE_ROOT; };
 		A7D176CD10F2558500159497 /* pcacommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pcacommand.h; sourceTree = SOURCE_ROOT; };
 		A7D176CE10F2558500159497 /* pcacommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pcacommand.cpp; sourceTree = SOURCE_ROOT; };
+		A7D86C6A10FE084300865661 /* formatmatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = formatmatrix.h; sourceTree = SOURCE_ROOT; };
+		A7D86C7B10FE09AB00865661 /* formatcolumn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = formatcolumn.h; sourceTree = SOURCE_ROOT; };
+		A7D86C7C10FE09AB00865661 /* formatcolumn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = formatcolumn.cpp; sourceTree = SOURCE_ROOT; };
+		A7D86C8A10FE09FE00865661 /* formatphylip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = formatphylip.h; sourceTree = SOURCE_ROOT; };
+		A7D86C8B10FE09FE00865661 /* formatphylip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = formatphylip.cpp; sourceTree = SOURCE_ROOT; };
 		A7E0AAB410D2886D00CF407B /* mgclustercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mgclustercommand.h; sourceTree = "<group>"; };
 		A7E0AAB510D2886D00CF407B /* mgclustercommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mgclustercommand.cpp; sourceTree = "<group>"; };
 		A7E4A781106913F900688F62 /* getsharedotucommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getsharedotucommand.h; sourceTree = SOURCE_ROOT; };
@@ -737,6 +744,11 @@
 		3796441D0FB9B9650081FDB6 /* read */ = {
 			isa = PBXGroup;
 			children = (
+				A7D86C6A10FE084300865661 /* formatmatrix.h */,
+				A7D86C7B10FE09AB00865661 /* formatcolumn.h */,
+				A7D86C7C10FE09AB00865661 /* formatcolumn.cpp */,
+				A7D86C8A10FE09FE00865661 /* formatphylip.h */,
+				A7D86C8B10FE09FE00865661 /* formatphylip.cpp */,
 				A727E84810D14568001A8432 /* readblast.h */,
 				A727E84910D14568001A8432 /* readblast.cpp */,
 				A751ACE81098B283003D0911 /* readcluster.h */,
@@ -1311,6 +1323,8 @@
 				A7E0AAB610D2886D00CF407B /* mgclustercommand.cpp in Sources */,
 				A7027F2810DFF86D00BF45FE /* preclustercommand.cpp in Sources */,
 				A7D176CF10F2558500159497 /* pcacommand.cpp in Sources */,
+				A7D86C7D10FE09AB00865661 /* formatcolumn.cpp in Sources */,
+				A7D86C8C10FE09FE00865661 /* formatphylip.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

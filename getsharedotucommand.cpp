@@ -357,7 +357,7 @@ void GetSharedOTUCommand::process(ListVector* shared) {
 					}
 					
 					outFasta << seqs[k].getAligned() << endl;
-				}
+				}else {		mothurOut(seqs[k].getName() + " is not in your fasta file. Please correct."); mothurOutEndLine();	}
 			}
 			
 			outFasta.close();

@@ -18,6 +18,8 @@
 #include "readotu.h"
 #include "fastamap.h"
 #include "groupmap.h"
+#include "readmatrix.hpp"
+#include "formatmatrix.h"
 
 typedef list<PCell>::iterator MatData;
 typedef map<int, float> SeqMap;
@@ -48,15 +50,24 @@ private:
 	InputData* input;
 	FastaMap* fasta;
 	GroupMap* groupMap;
-	string filename, fastafile, listfile, namesfile, groupfile, label, sorted, phylipfile, columnfile, namefile;
+	ReadMatrix* readMatrix;
+	FormatMatrix* formatMatrix;
+	NameAssignment* nameMap;
+	string filename, fastafile, listfile, namefile, groupfile, label, sorted, phylipfile, columnfile, distFile, format;
 	ofstream out;
-	ifstream in, inNames;
-	bool abort, allLines, groupError;
+	ifstream in, inNames, inRow;
+	bool abort, allLines, groupError, large;
 	set<string> labels; //holds labels to be used
 	map<string, int> nameToIndex;  //maps sequence name to index in sparsematrix
+	float cutoff;
+	int precision;
+	vector<SeqMap> seqVec;			// contains maps with sequence index and distance
+									// for all distances related to a certain sequence
+	vector<int> rowPositions;
 
 	void readNamesFile();
 	int process(ListVector*);
+	SeqMap getMap(int);
 	string findRep(int, string&, ListVector*, int&); 	// returns the name of the "representative" sequence of given bin, 
 									// fills a string containing the groups in that bin if a groupfile is given,
 									// and returns the number of sequences in the given bin
