@@ -50,7 +50,7 @@ protected:
 	vector<seqDist> getSeqsAN();
 	void combineFile();
 	void processFile();
-	seqDist getNextDist(char*, int&, int);
+	//seqDist getNextDist(char*, int&, int);
 		
 	RAbundVector* rabund;
 	ListVector* list;

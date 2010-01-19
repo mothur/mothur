@@ -95,7 +95,7 @@ SummarySharedCommand::SummarySharedCommand(string option){
 				globaldata->Groups = Groups;
 			}
 			
-			string temp = validParameter.validFile(parameters, "all", false);				if (temp == "not found") { temp = "true"; }
+			string temp = validParameter.validFile(parameters, "all", false);				if (temp == "not found") { temp = "false"; }
 			all = isTrue(temp);
 			
 			if (abort == false) {
@@ -176,7 +176,7 @@ void SummarySharedCommand::help(){
 		mothurOut("The default value for calc is sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan\n");
 		mothurOut("The default value for groups is all the groups in your groupfile.\n");
 		mothurOut("The label parameter is used to analyze specific labels in your input.\n");
-		mothurOut("The all parameter is used to specify if you want the estimate of all your groups together.  This estimate can only be made for sharedsobs and sharedchao calculators. The default is true.\n");
+		mothurOut("The all parameter is used to specify if you want the estimate of all your groups together.  This estimate can only be made for sharedsobs and sharedchao calculators. The default is false.\n");
 		mothurOut("If you use sharedchao and run into memory issues, set all to false. \n");
 		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n");
 		mothurOut("Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabel).\n\n");

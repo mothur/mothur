@@ -503,18 +503,21 @@ vector<seqDist> HCluster::getSeqsAN(){
 /***********************************************************************/
 void HCluster::combineFile() {
 	try {
-		int bufferSize = 64000;  //512k - this should be a variable that the user can set to optimize code to their hardware
-		char* inputBuffer;
-		inputBuffer = new char[bufferSize];
-		size_t numRead;
+		//int bufferSize = 64000;  //512k - this should be a variable that the user can set to optimize code to their hardware
+		//char* inputBuffer;
+		//inputBuffer = new char[bufferSize];
+		//size_t numRead;
 		
 		string tempDistFile = distfile + ".temp";
 		ofstream out;
 		openOutputFile(tempDistFile, out);
 		
-		FILE* in;
-		in = fopen(distfile.c_str(), "rb");
+		//FILE* in;
+		//in = fopen(distfile.c_str(), "rb");
 	
+		ifstream in;
+		openInputFile(distfile, in);
+		
 		int first, second;
 		float dist;
 		
@@ -524,27 +527,29 @@ void HCluster::combineFile() {
 				
 		//go through file pulling out distances related to rows merging
 		//if mergedMin contains distances add those back into file
-		bool done = false;
-		partialDist = "";
-		while ((numRead = fread(inputBuffer, 1, bufferSize, in)) != 0) {
+		//bool done = false;
+		//partialDist = "";
+		//while ((numRead = fread(inputBuffer, 1, bufferSize, in)) != 0) {
 //cout << "number of char read = " << numRead << endl;
 //cout << inputBuffer << endl;
-			if (numRead < bufferSize) { done = true; }
+			//if (numRead < bufferSize) { done = true; }
 			
 			//parse input into individual distances
-			int spot = 0;
-			string outputString = "";
-			while(spot < numRead) {
+			//int spot = 0;
+			//string outputString = "";
+			//while(spot < numRead) {
 	//cout << "spot = " << spot << endl;
-			   seqDist nextDist = getNextDist(inputBuffer, spot, bufferSize);
+			 //  seqDist nextDist = getNextDist(inputBuffer, spot, bufferSize);
 			   
 			   //you read a partial distance
-			   if (nextDist.seq1 == -1) { break;  }
-			   
-			   first = nextDist.seq1; second = nextDist.seq2; dist = nextDist.dist;
+			  // if (nextDist.seq1 == -1) { break;  }
+			while (!in.eof()) {
+				//first = nextDist.seq1; second = nextDist.seq2; dist = nextDist.dist;
 	//cout << "next distance = " << first << '\t' << second << '\t' << dist << endl;		   
 			   //since file is sorted and mergedMin is sorted 
 			   //you can put the smallest distance from each through the code below and keep the file sorted
+			   
+			   in >> first >> second >> dist; gobble(in);
 			   
 			   //while there are still values in mergedMin that are smaller than the distance read from file
 			   while (count < mergedMin.size())  {
@@ -563,7 +568,8 @@ void HCluster::combineFile() {
 						}else if (mergedMin[count].seq2 == smallRow) {
 							smallRowColValues[0][mergedMin[count].seq1] = mergedMin[count].dist;
 						}else { //if no, write to temp file
-							outputString += toString(mergedMin[count].seq1) + '\t' + toString(mergedMin[count].seq2) + '\t' + toString(mergedMin[count].dist) + '\n';
+							//outputString += toString(mergedMin[count].seq1) + '\t' + toString(mergedMin[count].seq2) + '\t' + toString(mergedMin[count].dist) + '\n';
+							out << mergedMin[count].seq1 << '\t' << mergedMin[count].seq2 << '\t' << mergedMin[count].dist << endl;
 						}
 						count++;
 					}else{   break;	}
@@ -582,14 +588,16 @@ void HCluster::combineFile() {
 					smallRowColValues[0][first] = dist;
 			   
 			   }else { //if no, write to temp file
-					outputString += toString(first) + '\t' + toString(second) + '\t' + toString(dist) + '\n';
+					//outputString += toString(first) + '\t' + toString(second) + '\t' + toString(dist) + '\n';
+					out << first << '\t' << second << '\t' << dist << endl;
 			   }
 			}
 			
-			out << outputString;
-			if(done) { break; }
-		}
-		fclose(in);
+			//out << outputString;
+			//if(done) { break; }
+		//}
+		//fclose(in);
+		in.close();
 		
 		//if values in mergedMin are larger than the the largest in file then
 		while (count < mergedMin.size())  {  
@@ -644,7 +652,7 @@ void HCluster::combineFile() {
 		exit(1);
 	}
 }
-/***********************************************************************/
+/***********************************************************************
 seqDist HCluster::getNextDist(char* buffer, int& index, int size){
 	try {
 		seqDist next;
