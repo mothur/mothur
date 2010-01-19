@@ -72,7 +72,6 @@ using namespace std;
 #define isnan(x) ((x) != (x))
 #define isinf(x) (fabs(x) == std::numeric_limits<double>::infinity())
 
-
 typedef unsigned long ull;
 
 struct IntNode {

@@ -20,8 +20,11 @@ int main(int argc, char *argv[]){
 	try {
 		
 		//remove old logfile
-		string logFileName = "mothur.logFile";
-		remove(logFileName.c_str());
+		string log = "mothur.logFile";
+		remove(log.c_str());
+		
+		time_t ltime = time(NULL); /* calendar time */  
+		string logFileName = "mothur." + toString(asctime( localtime(&ltime) )) + ".logfile";
 		
 		//version
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -106,7 +109,9 @@ int main(int argc, char *argv[]){
 		while(bail == 0)		{	bail = mothur->getInput();			}
 	
 		delete mothur;
-	
+		
+		rename(log.c_str(), logFileName.c_str()); //logfile with timestamp
+		
 		return 0;
 	}
 	catch(exception& e) {

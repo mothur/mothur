@@ -71,7 +71,7 @@ protected:
 	int smallCol;
 	float smallDist, cutoff;
 	map<string, int> seq2Bin;
-	bool mapWanted, exitedBreak, firstRead;
+	bool mapWanted, exitedBreak;
 	seqDist next;
 	string method, distfile;
 	ifstream filehandle;

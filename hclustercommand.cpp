@@ -178,9 +178,6 @@ int HClusterCommand::execute(){
 		
 		print_start = true;
 		start = time(NULL);
-	
-		//ifstream in;
-		//openInputFile(distfile, in);
 				
 		cluster = new HCluster(rabund, list, method, distfile, globaldata->nameMap, cutoff);
 		vector<seqDist> seqs; seqs.resize(1); // to start loop
@@ -192,19 +189,17 @@ int HClusterCommand::execute(){
 			for (int i = 0; i < seqs.size(); i++) {  //-1 means skip me
 
 				if (seqs[i].seq1 != seqs[i].seq2) {
-					bool clustered = cluster->update(seqs[i].seq1, seqs[i].seq2, seqs[i].dist);
+					cluster->update(seqs[i].seq1, seqs[i].seq2, seqs[i].dist);
 					
 					float rndDist = roundDist(seqs[i].dist, precision);
 					
-					if (clustered) {
-						if((previousDist <= 0.0000) && (seqs[i].dist != previousDist)){
-							printData("unique");
-						}
-						else if((rndDist != rndPreviousDist)){
-							printData(toString(rndPreviousDist,  length-1));
-						}
+					if((previousDist <= 0.0000) && (seqs[i].dist != previousDist)){
+						printData("unique");
 					}
-					
+					else if((rndDist != rndPreviousDist)){
+						printData(toString(rndPreviousDist,  length-1));
+					}
+				
 					previousDist = seqs[i].dist;
 					rndPreviousDist = rndDist;
 					oldRAbund = *rabund;
@@ -212,8 +207,6 @@ int HClusterCommand::execute(){
 				}
 			}
 		}
-		
-		//in.close();
 
 		if(previousDist <= 0.0000){
 			printData("unique");

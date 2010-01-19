@@ -48,7 +48,7 @@ GetOTURepCommand::GetOTURepCommand(string option){
 			help(); abort = true;
 		} else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","list","label","name", "group", "sorted", "phylip","column","large","cutoff"};
+			string Array[] =  {"fasta","list","label","name", "group", "sorted", "phylip","column","large","cutoff","precision"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -139,11 +139,12 @@ GetOTURepCommand::GetOTURepCommand(string option){
 
 void GetOTURepCommand::help(){
 	try {
-		mothurOut("The get.oturep command can only be executed after a successful read.dist command.\n");
-		mothurOut("The get.oturep command parameters are list, fasta, name, group, large, sorted and label.  The fasta and list parameters are required.\n");
+		mothurOut("The get.oturep command parameters are phylip, column, list, fasta, name, group, large, cutoff, precision, sorted and label.  The fasta and list parameters are required, as well as phylip or column and name.\n");
 		mothurOut("The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n");
-		mothurOut("The get.oturep command should be in the following format: get.oturep(fasta=yourFastaFile, list=yourListFile, name=yourNamesFile, group=yourGroupFile, label=yourLabels).\n");
-		mothurOut("Example get.oturep(fasta=amazon.fasta, list=amazon.fn.list, group=amazon.groups, name=amazon.names).\n");
+		mothurOut("The phylip or column parameter is required, but only one may be used.  If you use a column file the name filename is required. \n");
+		mothurOut("If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n");
+		mothurOut("The get.oturep command should be in the following format: get.oturep(phylip=yourDistanceMatrix, fasta=yourFastaFile, list=yourListFile, name=yourNamesFile, group=yourGroupFile, label=yourLabels).\n");
+		mothurOut("Example get.oturep(phylip=amazon.dist, fasta=amazon.fasta, list=amazon.fn.list, group=amazon.groups).\n");
 		mothurOut("The default value for label is all labels in your inputfile.\n");
 		mothurOut("The sorted parameter allows you to indicate you want the output sorted. You can sort by sequence name, bin number, bin size or group. The default is no sorting, but your options are name, number, size, or group.\n");
 		mothurOut("The large parameter allows you to indicate that your distance matrix is too large to fit in RAM.  The default value is false.\n");
@@ -328,8 +329,10 @@ int GetOTURepCommand::execute(){
 		}
 		
 		//close and remove formatted matrix file
-		inRow.close();
-		remove(distFile.c_str());
+		if (large) {
+			inRow.close();
+			//remove(distFile.c_str());
+		}
 		
 		globaldata->gListVector = NULL;
 		delete input;  globaldata->ginput = NULL;

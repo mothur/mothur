@@ -47,9 +47,8 @@ void FormatColumnMatrix::read(NameAssignment* nameMap){
 			if(itB == nameMap->end()){	cerr << "ABError: Sequence '" << secondName << "' was not found in the names file, please correct\n"; exit(1);	}
 
 			if (distance == -1) { distance = 1000000; }
-			
-			if(distance < cutoff && itA != itB){
-							
+		
+			if((distance < cutoff) && (itA != itB)){
 				if(refRow == refCol){		// in other words, if we haven't loaded refRow and refCol...
 					refRow = itA->second;
 					refCol = itB->second;
@@ -71,7 +70,7 @@ void FormatColumnMatrix::read(NameAssignment* nameMap){
 		}
 		out.close();
 		fileHandle.close();
-		
+	
 		string squareFile;
 		if(lt == 0){  // oops, it was square
 			squareFile = filename;
@@ -129,10 +128,13 @@ void FormatColumnMatrix::read(NameAssignment* nameMap){
 				rowMap.clear();
 				
 				//save row you just read
-				rowMap[second] = dist;
-
+				if (dist < cutoff) {
+					rowMap[second] = dist;
+				}
 			}else{
-				rowMap[second] = dist;
+				if (dist < cutoff) {
+					rowMap[second] = dist;
+				}
 			}
 		}
 		
