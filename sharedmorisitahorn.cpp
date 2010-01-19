@@ -14,7 +14,7 @@ EstOutput MorHorn::getValues(vector<SharedRAbundVector*> shared) {
 	try {	
 		data.resize(1,0);
 		
-		int Atotal, Btotal, tempA, tempB;
+		float Atotal, Btotal, tempA, tempB;
 		Atotal = 0; Btotal = 0; 
 		float  morhorn, sumSharedA, sumSharedB, a, b, d;
 		morhorn = 0.0; sumSharedA = 0.0; sumSharedB = 0.0; a = 0.0; b = 0.0; d = 0.0;
@@ -26,23 +26,21 @@ EstOutput MorHorn::getValues(vector<SharedRAbundVector*> shared) {
 			Btotal += shared[1]->getAbundance(i);
 		}
 		
-		//calculate the theta denominator sums
+		//calculate the denominator sums
 		for (int j = 0; j < shared[0]->size(); j++) {
 			//store in temps to avoid multiple repetitive function calls
 			tempA = shared[0]->getAbundance(j);
 			tempB = shared[1]->getAbundance(j);
+			float relA = tempA / Atotal;
+			float relB = tempB / Btotal;
 			
-			a += tempA * tempA;
-			b += tempB * tempB;
-			d += tempA * tempB;
+			a += relA * relA;
+			b += relB * relB;
+			d += relA * relB;
 		}
 
-		a /= double(Atotal * Atotal);
-		b /= double(Btotal * Btotal);
-		d /= double(Atotal * Btotal);
-		
 		morhorn = (2 * d) / (a + b);
-		
+
 		if (isnan(morhorn) || isinf(morhorn)) { morhorn = 0; }
 		
 		data[0] = morhorn;

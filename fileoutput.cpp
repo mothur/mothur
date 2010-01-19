@@ -306,7 +306,7 @@ void OneColumnFile::initFile(string label){
 		}
 		else{
 			openOutputFile(outName, outFile);
-			outFile << "numsequences\t" << label << endl;
+			outFile << "numsampled\t" << label << endl;
 		}
 	
 		outFile.setf(ios::fixed, ios::floatfield);
