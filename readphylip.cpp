@@ -59,13 +59,13 @@ void ReadPhylipMatrix::read(NameAssignment* nameMap){
                         }
         
                         Progress* reading;
-        
+      
                         if(square == 0){
 
                                 reading = new Progress("Reading matrix:     ", nseqs * (nseqs - 1) / 2);
                 
                                 int        index = 0;
-                
+               
                                 for(int i=1;i<nseqs;i++){
                                         fileHandle >> name;
                                         matrixNames.push_back(name);
@@ -156,7 +156,7 @@ void ReadPhylipMatrix::read(NameAssignment* nameMap){
                         list->setLabel("0");
                         fileHandle.close();
 
-                        if(nameMap != NULL){
+                     /*   if(nameMap != NULL){
                                 for(int i=0;i<matrixNames.size();i++){
                                         nameMap->erase(matrixNames[i]);
                                 }
@@ -164,7 +164,7 @@ void ReadPhylipMatrix::read(NameAssignment* nameMap){
                                         //should probably tell them what is missing if we missed something
                                         mothurOut("missed something\t" + toString(nameMap->size())); mothurOutEndLine();
                                 }
-                        }
+                        } */
 
                 }
         catch(exception& e) {

@@ -81,7 +81,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option){
 			
 			
 			namefile = validParameter.validFile(parameters, "name", false);
-			if (fastaFileName == "not found") { namefile = "";  }
+			if (namefile == "not found") { namefile = "";  }
 			else { 
 				splitAtDash(namefile, namefileNames);
 				
@@ -297,7 +297,7 @@ int ClassifySeqsCommand::execute(){
 #endif	
 			//make taxonomy tree from new taxonomy file 
 			PhyloTree taxaBrowser;
-			
+		
 			ifstream in;
 			openInputFile(tempTaxonomyFile, in);
 		

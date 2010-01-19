@@ -153,9 +153,9 @@ int MGClusterCommand::execute(){
 			delete read;
 		
 			//create cluster
-			if (method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, distMatrix); }
-			else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, distMatrix); }
-			else if(method == "average"){	cluster = new AverageLinkage(rabund, list, distMatrix);	}
+			if (method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, distMatrix, cutoff); }
+			else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, distMatrix, cutoff); }
+			else if(method == "average"){	cluster = new AverageLinkage(rabund, list, distMatrix, cutoff);	}
 			cluster->setMapWanted(true);
 			
 			//cluster using cluster classes

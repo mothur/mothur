@@ -14,8 +14,8 @@
 
 /***********************************************************************/
 
-Cluster::Cluster(RAbundVector* rav, ListVector* lv, SparseMatrix* dm) :
-rabund(rav), list(lv), dMatrix(dm)
+Cluster::Cluster(RAbundVector* rav, ListVector* lv, SparseMatrix* dm, float c) :
+rabund(rav), list(lv), dMatrix(dm), cutoff(c)
 {
 /*
 	cout << "sizeof(MatData): " << sizeof(MatData) << endl;

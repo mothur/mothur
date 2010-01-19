@@ -81,9 +81,9 @@ ClusterCommand::ClusterCommand(string option){
 				}
 				
 				//create cluster
-				if (method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, matrix); }
-				else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, matrix); }
-				else if(method == "average"){	cluster = new AverageLinkage(rabund, list, matrix);	}
+				if (method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, matrix, cutoff); }
+				else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, matrix, cutoff); }
+				else if(method == "average"){	cluster = new AverageLinkage(rabund, list, matrix, cutoff);	}
 				tag = cluster->getTag();
 
 				fileroot = getRootName(globaldata->inputFileName);

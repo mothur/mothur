@@ -27,7 +27,9 @@ HCluster::HCluster(RAbundVector* rav, ListVector* lv, string m, string d, NameAs
 		
 		if (method != "average") {
 			openInputFile(distfile, filehandle);
-		}else{ firstRead = true; }
+		}else{  
+			processFile();  
+		}
 	}
 	catch(exception& e) {
 		errorOut(e, "HCluster", "HCluster");
@@ -358,7 +360,6 @@ vector<seqDist> HCluster::getSeqs(){
 		if(method != "average") {
 			sameSeqs = getSeqsFNNN();
 		}else{
-			if (firstRead) {	processFile();   }
 			sameSeqs = getSeqsAN();	
 		}
 				
@@ -755,8 +756,6 @@ void HCluster::processFile() {
 		
 		remove(distfile.c_str());
 		rename(outTemp.c_str(), distfile.c_str());
-		
-		firstRead = false;
 	}
 	catch(exception& e) {
 		errorOut(e, "HCluster", "processFile");

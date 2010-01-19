@@ -288,10 +288,10 @@ void SharedCommand::createMisMatchFile() {
 					string name = names.substr(0,names.find_first_of(','));
 					names = names.substr(names.find_first_of(',')+1, names.length());
 					string group = groupMap->getGroup(name);
-					
+	cout << name << endl;				
 					if(group == "not found") {	outMisMatch << name << endl;  }
 				}
-				
+	cout << names << endl;			
 				//get last name
 				string group = groupMap->getGroup(names);
 				if(group == "not found") {	outMisMatch << names << endl;  }				

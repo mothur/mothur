@@ -208,7 +208,7 @@ int ReadDistCommand::execute(){
 			numDists = globaldata->gSparseMatrix->getNNodes();
 	//cout << "matrix contains " << numDists << " distances." << endl;
 			
-      int lines = cutoff / (1.0/precision);
+    /*  int lines = cutoff / (1.0/precision);
       vector<float> dist_cutoff(lines+1,0);
 			for (int i = 0; i <= lines;i++) {	
       	dist_cutoff[i] = (i + 0.5) / precision; 
@@ -224,7 +224,7 @@ int ReadDistCommand::execute(){
           }
         }
 			}
-
+*/
      // string dist_string = "Dist:";
     //  string count_string = "Count: ";
 			//for (int i = 0; i <= lines;i++) {	
