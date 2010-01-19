@@ -63,6 +63,7 @@
 #include "mgclustercommand.h"
 #include "preclustercommand.h"
 #include "pcacommand.h"
+#include "otuhierarchycommand.h"
 
 /*******************************************************/
 
@@ -135,6 +136,7 @@ CommandFactory::CommandFactory(){
 	commands["mgcluster"]			= "mgcluster";
 	commands["pre.cluster"]			= "pre.cluster";
 	commands["pca"]					= "pca";
+	commands["otu.hierarchy"]		= "otu.hierarchy";
 
 }
 /***********************************************************/
@@ -205,6 +207,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "mgcluster")				{	command = new MGClusterCommand(optionString);			}
 		else if(commandName == "pre.cluster")			{	command = new PreClusterCommand(optionString);			}
 		else if(commandName == "pca")					{	command = new PCACommand(optionString);					}
+		else if(commandName == "otu.hierarchy")			{	command = new OtuHierarchyCommand(optionString);		}
 		else											{	command = new NoCommand(optionString);					}
 
 		return command;
