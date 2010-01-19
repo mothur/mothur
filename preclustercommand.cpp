@@ -43,9 +43,10 @@ PreClusterCommand::PreClusterCommand(string option){
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			namefile = validParameter.validFile(parameters, "name", true);
+
 			if (namefile == "not found") { namefile =  "";  }
 			else if (namefile == "not open") { abort = true; }	
-			else {  readNameFile();  }
+//			else {  readNameFile();  }
 			
 			string temp	= validParameter.validFile(parameters, "diffs", false);				if(temp == "not found"){	temp = "1"; }
 			convert(temp, diffs); 
@@ -87,68 +88,62 @@ int PreClusterCommand::execute(){
 		if (abort == true) { return 0; }
 		
 		//reads fasta file and return number of seqs
-		int numSeqs = readSeqs(); //fills alignSeqs and makes all seqs active
+		int numSeqs = readNamesFASTA(); //fills alignSeqs and makes all seqs active
 	
 		if (numSeqs == 0) { mothurOut("Error reading fasta file...please correct."); mothurOutEndLine(); return 0;  }
 		if (diffs > length) { mothurOut("Error: diffs is greater than your sequence length."); mothurOutEndLine(); return 0;  }
 		
 		//clear sizes since you only needed this info to build the alignSeqs seqPNode structs
-		sizes.clear();
+//		sizes.clear();
 	
 		//sort seqs by number of identical seqs
 		sort(alignSeqs.begin(), alignSeqs.end(), comparePriority);
 	
 		//go through active list and cluster everthing you can, until all nodes are inactive
 		//taking advantage of the fact that maps are already sorted
-		map<string, bool>::iterator itActive;
-		map<string, bool>::iterator it2Active;
+//		map<string, bool>::iterator itActive;
+//		map<string, bool>::iterator it2Active;
 		int count = 0;
 		
-		for (int i = 0; i < alignSeqs.size(); i++) {
-		
+		for (int i = 0; i < numSeqs; i++) {
+			
 			//are you active
-			itActive = active.find(alignSeqs[i].seq.getName());
+			//			itActive = active.find(alignSeqs[i].seq.getName());
 			
-			if (itActive != active.end()) {  //this sequence has not been merged yet
-			
-				//try to merge it with all smaller seqs
-				for (int j = i; j < alignSeqs.size(); j++) {
-					
-					if (i != j) {
-						//are you active
-						it2Active = active.find(alignSeqs[j].seq.getName());
-						if (it2Active != active.end()) {  //this sequence has not been merged yet
-							//are you within "diff" bases
-							int mismatch = calcMisMatches(alignSeqs[i].seq.getAligned(), alignSeqs[j].seq.getAligned());
-							
-							if (mismatch <= diffs) {
-								//merge
-								names[alignSeqs[i].seq.getName()] += "," + names[alignSeqs[j].seq.getName()];
-							
-								//remove from active list
-								active.erase(it2Active);
-								
-								//set numIdentical to 0, so you only print the representative seqs in the fasta file
-								alignSeqs[j].numIdentical = 0;
-								count++;
-							}
-						}//end if j active
-					}//end if i != j
-				}//end for loop
+			if (alignSeqs[i].active) {  //this sequence has not been merged yet
 				
-				//remove from active list 
-				active.erase(itActive);
+				//try to merge it with all smaller seqs
+				for (int j = i+1; j < numSeqs; j++) {
+					if (alignSeqs[j].active) {  //this sequence has not been merged yet
+						//are you within "diff" bases
+						int mismatch = calcMisMatches(alignSeqs[i].seq.getAligned(), alignSeqs[j].seq.getAligned());
+						
+						if (mismatch <= diffs) {
+							//merge
+							alignSeqs[i].names += ',' + alignSeqs[j].names;
+							alignSeqs[i].numIdentical += alignSeqs[j].numIdentical;
+
+							alignSeqs[j].active = 0;
+							alignSeqs[j].numIdentical = 0;
+							count++;
+						}
+					}//end if j active
+				}//end if i != j
+			
+			//remove from active list 
+				alignSeqs[i].active = 0;
 			}//end if active i
+			if(i % 100 == 0)	{ cout << i << '\t' << numSeqs - count << '\t' << count << endl;	}
 		}
 	
 		string newFastaFile = getRootName(fastafile) + "precluster" + getExtension(fastafile);
 		string newNamesFile = getRootName(fastafile) + "precluster.names";
 		
-		printData(newFastaFile, newNamesFile);
 		
 		mothurOut("Total number of sequences before precluster was " + toString(alignSeqs.size()) + "."); mothurOutEndLine();
 		mothurOut("pre.cluster removed " + toString(count) + " sequences."); mothurOutEndLine(); 
-		
+		printData(newFastaFile, newNamesFile);
+
 		return 0;
 		
 	}
@@ -158,65 +153,85 @@ int PreClusterCommand::execute(){
 	}
 }
 /**************************************************************************************************/
-int PreClusterCommand::readSeqs(){
+int PreClusterCommand::readFASTA(){
 	try {
-		ifstream inFasta;
-		openInputFile(fastafile, inFasta);
-		length = 0;
-		map<string, string>::iterator it;
-				
-		while (!inFasta.eof()) {
-			Sequence temp(inFasta);  //read seq
-			
-			if (temp.getName() != "") {  
-				if (namefile != "") {
-					//make sure fasta and name files match
-					it = names.find(temp.getName());
-					if (it == names.end()) { mothurOut(temp.getName() + " is not in your names file, please correct."); mothurOutEndLine(); exit(1); }
-				}else { sizes[temp.getName()] = 1; }
-				
-				seqPNode tempNode(sizes[temp.getName()], temp);
-				alignSeqs.push_back(tempNode); 
-				active[temp.getName()] = true;
-			}
-			gobble(inFasta);
-		}
-		inFasta.close();
-		
-		if (alignSeqs.size() != 0) {  length = alignSeqs[0].seq.getAligned().length();  }
-		
+//		ifstream inFasta;
+//		openInputFile(fastafile, inFasta);
+//		length = 0;
+////		map<string, string>::iterator it;
+//
+//		while (!inFasta.eof()) {
+//			Sequence temp(inFasta);  //read seq
+//			
+//			if (temp.getName() != "") {  
+//				if (namefile != "") {
+//					//make sure fasta and name files match
+//					it = names.find(temp.getName());
+//					if (it == names.end()) { mothurOut(temp.getName() + " is not in your names file, please correct."); mothurOutEndLine(); exit(1); }
+//				}else { sizes[temp.getName()] = 1; }
+//				
+//				seqPNode tempNode(sizes[temp.getName()], temp);
+//				alignSeqs.push_back(tempNode); 
+//				active[temp.getName()] = true;
+//			}
+//			gobble(inFasta);
+//		}
+//		inFasta.close();
+//		
+//		if (alignSeqs.size() != 0) {  length = alignSeqs[0].seq.getAligned().length();  }
+//		
 		return alignSeqs.size();
 	}
 	catch(exception& e) {
-		errorOut(e, "PreClusterCommand", "readSeqs");
+		errorOut(e, "PreClusterCommand", "readFASTA");
 		exit(1);
 	}
 }
 /**************************************************************************************************/
-void PreClusterCommand::readNameFile(){
+
+int PreClusterCommand::readNamesFASTA(){
 	try {
-		ifstream in;
-		openInputFile(namefile, in);
-		string firstCol, secondCol;
-				
-		while (!in.eof()) {
-			in >> firstCol >> secondCol; gobble(in);
-			names[firstCol] = secondCol;
+		ifstream inNames;
+		ifstream inFasta;
+		
+		openInputFile(namefile, inNames);
+		openInputFile(fastafile, inFasta);
+		
+		string firstCol, secondCol, nameString;
+		length = 0;
+		
+		while (inFasta && inNames) {
+	
+			inNames >> firstCol >> secondCol;
+			nameString = secondCol;
+			
+			gobble(inNames);
 			int size = 1;
 			while (secondCol.find_first_of(',') != -1) { 
 				size++;
 				secondCol = secondCol.substr(secondCol.find_first_of(',')+1, secondCol.length());
 			}
-			sizes[firstCol] = size;
+			Sequence seq(inFasta);
+			if (seq.getName() != firstCol) { mothurOut(seq.getName() + " is not in your names file, please correct."); mothurOutEndLine(); exit(1); }
+			else{
+				seqPNode tempNode(size, seq, nameString);
+				alignSeqs.push_back(tempNode);
+				if (seq.getAligned().length() > length) {  length = alignSeqs[0].seq.getAligned().length();  }
+			}			
 		}
-		in.close();
+		inFasta.close();
+		inNames.close();
+		return alignSeqs.size();
 	}
+	
 	catch(exception& e) {
-		errorOut(e, "PreClusterCommand", "readNameFile");
+		errorOut(e, "PreClusterCommand", "readNamesFASTA");
 		exit(1);
 	}
 }
+
 /**************************************************************************************************/
+
 int PreClusterCommand::calcMisMatches(string seq1, string seq2){
 	try {
 		int numBad = 0;
@@ -234,23 +249,22 @@ int PreClusterCommand::calcMisMatches(string seq1, string seq2){
 		exit(1);
 	}
 }
+
 /**************************************************************************************************/
+
 void PreClusterCommand::printData(string newfasta, string newname){
 	try {
 		ofstream outFasta;
 		ofstream outNames;
+		
 		openOutputFile(newfasta, outFasta);
 		openOutputFile(newname, outNames);
 				
-		map<string, string>::iterator itNames;
 		
 		for (int i = 0; i < alignSeqs.size(); i++) {
 			if (alignSeqs[i].numIdentical != 0) {
 				alignSeqs[i].seq.printSequence(outFasta); 
-				
-				itNames = names.find(alignSeqs[i].seq.getName());
-				
-				outNames << itNames->first << '\t' << itNames->second << endl;
+				outNames << alignSeqs[i].seq.getName() << '\t' << alignSeqs[i].names << endl;
 			}
 		}
 		

@@ -185,15 +185,17 @@ int TrimSeqsCommand::execute(){
 					}
 					if(!success)			{	trashCode += 'q';								}
 				}
+				
 				if(barcodes.size() != 0){
-					
 					success = stripBarcode(currSeq, group);
 					if(!success){	trashCode += 'b';	}
 				}
+				
 				if(numFPrimers != 0){
 					success = stripForward(currSeq);
 					if(!success){	trashCode += 'f';	}
 				}
+				
 				if(numRPrimers != 0){
 					success = stripReverse(currSeq);
 					if(!success){	trashCode += 'r';	}

@@ -581,8 +581,8 @@
 		A7D86C7C10FE09AB00865661 /* formatcolumn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = formatcolumn.cpp; sourceTree = SOURCE_ROOT; };
 		A7D86C8A10FE09FE00865661 /* formatphylip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = formatphylip.h; sourceTree = SOURCE_ROOT; };
 		A7D86C8B10FE09FE00865661 /* formatphylip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = formatphylip.cpp; sourceTree = SOURCE_ROOT; };
-		A7E0AAB410D2886D00CF407B /* mgclustercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mgclustercommand.h; sourceTree = "<group>"; };
-		A7E0AAB510D2886D00CF407B /* mgclustercommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mgclustercommand.cpp; sourceTree = "<group>"; };
+		A7E0AAB410D2886D00CF407B /* mgclustercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mgclustercommand.h; sourceTree = SOURCE_ROOT; };
+		A7E0AAB510D2886D00CF407B /* mgclustercommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mgclustercommand.cpp; sourceTree = SOURCE_ROOT; };
 		A7E4A781106913F900688F62 /* getsharedotucommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getsharedotucommand.h; sourceTree = SOURCE_ROOT; };
 		A7E4A782106913F900688F62 /* getsharedotucommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getsharedotucommand.cpp; sourceTree = SOURCE_ROOT; };
 		A7E4A822106A9AD700688F62 /* maligner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = maligner.h; sourceTree = SOURCE_ROOT; };
@@ -1370,6 +1370,8 @@
 		1DEB923608733DC60010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_64_BIT_PRE_XCODE_3_1 = x86_64;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -1386,10 +1388,8 @@
 		1DEB923708733DC60010E9CD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
+				ARCHS = "$(ARCHS_STANDARD_64_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_64_BIT_PRE_XCODE_3_1 = x86_64;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
