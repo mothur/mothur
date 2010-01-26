@@ -26,7 +26,7 @@ class GlobalData;
 class SharedCommand : public Command {
 	
 public:
-	SharedCommand();	
+	SharedCommand(string);	
 	~SharedCommand();
 	int execute();	
 	void help() {}
@@ -44,7 +44,7 @@ private:
 	GroupMap* groupMap;
 	vector<string> groups;
 	ofstream out;
-	string filename, fileroot;
+	string filename, fileroot, outputDir;
 	bool firsttime, pickedGroups;
 	map<string, ofstream*> filehandles;
 	map<string, ofstream*>::iterator it3;

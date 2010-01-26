@@ -44,6 +44,7 @@ private:
 	vector<string>  Estimators;
 	vector<string> inputFileNames;
 	vector<string> groups;
+	string outputDir;
 	
 	vector<string> parseSharedFile(string);
 

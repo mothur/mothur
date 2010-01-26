@@ -21,51 +21,47 @@ PCACommand::PCACommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"phylip"};
+			string Array[] =  {"phylip","outputdir", "inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser. getParameters();
 			
 			ValidParameters validParameter;
+			map<string, string>::iterator it;
 		
 			//check to make sure all parameters are valid for command
-			for (map<string, string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
-			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("phylip");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
+				}
+			}
+
 			//required parameters
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
 			if (phylipfile == "not open") { abort = true; }
 			else if (phylipfile == "not found") { phylipfile = ""; abort = true; }	
 			else {	filename = phylipfile;  }
 			
-			//columnfile = validParameter.validFile(parameters, "column", true);
-			//if (columnfile == "not open") { abort = true; }	
-			//else if (columnfile == "not found") { columnfile = ""; }
-			//else {  format = "column";	}
-			
-			//namefile = validParameter.validFile(parameters, "name", true);
-			//if (namefile == "not open") { abort = true; }	
-			//else if (namefile == "not found") { namefile = ""; }
-			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(phylipfile); //if user entered a file with a path then preserve it	
+			}
 			
 			//error checking on files	
 			if (phylipfile == "")	{ mothurOut("You must provide a distance file before running the pca command."); mothurOutEndLine(); abort = true; }		
-			//if ((phylipfile == "") && (columnfile == ""))	{ mothurOut("You must provide a distance file before running the pca command."); mothurOutEndLine(); abort = true; }
-			//else if ((phylipfile != "") && (columnfile != "")) { mothurOut("You may not use both the column and the phylip parameters."); mothurOutEndLine(); abort = true; }
-			
-			//if (columnfile != "") {
-			//	if (namefile == "") {  mothurOut("You need to provide a namefile if you are going to use the column format."); mothurOutEndLine(); abort = true; }
-			//}
-			
-			//string temp = validParameter.validFile(parameters, "lt", false);				if (temp == "not found") { temp = "false"; }
-			//bool lt = isTrue(temp);
-			
-			//if (lt)		{  matrix = 2;	}
-			//else		{  matrix = 1;  }
-
-
 		}
 
 	}
@@ -101,13 +97,16 @@ int PCACommand::execute(){
 		vector<string> names;
 		vector<vector<double> > D;
 	
-		fbase = filename;
-		if(fbase.find_last_of(".")!=string::npos){
-			fbase.erase(fbase.find_last_of(".")+1); 
-		}
-		else{
-			fbase += ".";
-		}
+		//fbase = filename;
+		//if(fbase.find_last_of(".")!=string::npos){
+		//	fbase.erase(fbase.find_last_of(".")+1); 
+		//}
+		//else{
+		//	fbase += ".";
+		//}
+		
+		fbase = outputDir + getRootName(getSimpleName(filename));
+		
 		read(filename, names, D);
    	
 		double offset = 0.0000;

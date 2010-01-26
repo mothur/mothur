@@ -22,7 +22,7 @@ public:
 	
 private:
 	bool abort;
-	string fastafile;
+	string fastafile, outputDir;
 
 };
 

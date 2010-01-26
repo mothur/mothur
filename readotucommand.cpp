@@ -21,21 +21,81 @@ ReadOtuCommand::ReadOtuCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"list","order","shared", "label","group","sabund", "rabund","groups"};
+			string Array[] =  {"list","order","shared", "label","group","sabund", "rabund","groups","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
+			map<string, string>::iterator it;
 		
 			//check to make sure all parameters are valid for command
-			for (map<string, string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
 			globaldata->newRead();
 			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("list");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["list"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("order");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["order"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("shared");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["shared"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("group");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["group"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("sabund");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["sabund"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("rabund");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["rabund"] = inputDir + it->second;		}
+				}
+
+			}
+
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
+
 			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not open") { abort = true; }
@@ -63,7 +123,10 @@ ReadOtuCommand::ReadOtuCommand(string option){
 			else {  
 				globaldata->setGroupFile(groupfile); 
 				groupMap = new GroupMap(groupfile);
-				groupMap->readMap();
+				
+				int error = groupMap->readMap();
+				if (error == 1) { abort = true; }
+				
 				globaldata->gGroupmap = groupMap;
 			}
 			
@@ -154,9 +217,8 @@ int ReadOtuCommand::execute(){
 		
 		if (globaldata->getFormat() == "shared") {
 			
-			shared = new SharedCommand();
+			shared = new SharedCommand(outputDir);
 			int okay = shared->execute();
-			delete shared;
 			
 			//problem with shared
 			if (okay == 1) {
@@ -169,8 +231,8 @@ int ReadOtuCommand::execute(){
 				globaldata->setFormat("sharedfile");
 				globaldata->setListFile("");
 				globaldata->setGroupFile("");
-				globaldata->setSharedFile(getRootName(filename) + "shared");
 			}
+			delete shared;
 		}
 		return 0;
 	}

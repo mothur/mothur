@@ -39,7 +39,7 @@ class UnifracWeightedCommand : public Command {
 		Tree* randT;  //random tree
 		TreeMap* tmap;
 		Weighted* weighted;
-		string sumFile;
+		string sumFile, outputDir;
 		int iters, numGroups, numComp, counter;
 		EstOutput userData;			//weighted score info for user tree
 		EstOutput randomData;		//weighted score info for random trees

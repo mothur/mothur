@@ -35,7 +35,7 @@ RareFactCommand::RareFactCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"iters","freq","label","calc","abund"};
+			string Array[] =  {"iters","freq","label","calc","abund","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -48,6 +48,12 @@ RareFactCommand::RareFactCommand(string option){
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
+			}
+
 			//make sure the user has already run the read.otu command
 			if ((globaldata->getSharedFile() == "") && (globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { mothurOut("You must read a list, sabund, rabund or shared file before you can use the rarefact.single command."); mothurOutEndLine(); abort = true; }
 			
@@ -127,7 +133,7 @@ int RareFactCommand::execute(){
 		
 		for (int p = 0; p < inputFileNames.size(); p++) {
 			
-			string fileNameRoot = getRootName(inputFileNames[p]);
+			string fileNameRoot = outputDir + getRootName(getSimpleName(inputFileNames[p]));
 			globaldata->inputFileName = inputFileNames[p];
 			
 			if (inputFileNames.size() > 1) {

@@ -20,7 +20,17 @@ SystemCommand::SystemCommand(string option){
 		
 		else {
 			if (option == "") { mothurOut("You must enter a command to run."); mothurOutEndLine(); abort = true; }
-			else { command = option; }
+			else { 
+				//check for outputdir and inputdir parameters
+				int commaPos = option.find_first_of(',');
+				
+				//if there is a comma then grab string up to that pos
+				if (commaPos != option.npos) {
+					option = option.substr(0, commaPos);
+				}
+			
+				command = option;
+			}
 		}	
 
 	}

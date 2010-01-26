@@ -19,7 +19,7 @@ public:
 	GroupMap() {};
 	GroupMap(string);
 	~GroupMap();
-	void readMap();
+	int readMap();
 	int getNumGroups();
 	bool isValidGroup(string);  //return true if string is a valid group
 	string getGroup(string);

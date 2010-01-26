@@ -22,19 +22,58 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option){
 		else {
 			//valid paramters for this command
 			string AlignArray[] =  {"fasta", "start", "end", "maxambig", "maxhomop", "minlength", "maxlength",
-									"name", "group", "alignreport"};
+									"name", "group", "alignreport","outputdir","inputdir"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
+			map<string,string>::iterator it;
 			
 			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("fasta");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("group");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["group"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("name");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["name"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("alignreport");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["alignreport"] = inputDir + it->second;		}
+				}
+			}
+
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not found") { mothurOut("fasta is a required parameter for the screen.seqs command."); mothurOutEndLine(); abort = true; }
@@ -52,6 +91,12 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option){
 			if (alignreport == "not open") { abort = true; }
 			else if (alignreport == "not found") { alignreport = ""; }	
 			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(fastafile); //if user entered a file with a path then preserve it	
+			}
+
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			string temp;
@@ -123,8 +168,8 @@ int ScreenSeqsCommand::execute(){
 		
 		set<string> badSeqNames;
 		
-		string goodSeqFile = getRootName(fastafile) + "good" + getExtension(fastafile);
-		string badSeqFile = getRootName(fastafile) + "bad" + getExtension(fastafile);
+		string goodSeqFile = outputDir + getRootName(getSimpleName(fastafile)) + "good" + getExtension(fastafile);
+		string badSeqFile =  outputDir + getRootName(getSimpleName(fastafile)) + "bad" + getExtension(fastafile);
 		
 		ofstream goodSeqOut;	openOutputFile(goodSeqFile, goodSeqOut);
 		ofstream badSeqOut;		openOutputFile(badSeqFile, badSeqOut);		
@@ -176,8 +221,8 @@ void ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 	string seqName, seqList, group;
 	set<string>::iterator it;
 
-	string goodNameFile = getRootName(namefile) + "good" + getExtension(namefile);
-	string badNameFile = getRootName(namefile) + "bad" + getExtension(namefile);
+	string goodNameFile = outputDir + getRootName(getSimpleName(namefile)) + "good" + getExtension(namefile);
+	string badNameFile = outputDir + getRootName(getSimpleName(namefile)) + "bad" + getExtension(namefile);
 	
 	ofstream goodNameOut;	openOutputFile(goodNameFile, goodNameOut);
 	ofstream badNameOut;	openOutputFile(badNameFile, badNameOut);		
@@ -222,8 +267,8 @@ void ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 		ifstream inputGroups;
 		openInputFile(groupfile, inputGroups);
 
-		string goodGroupFile = getRootName(groupfile) + "good" + getExtension(groupfile);
-		string badGroupFile = getRootName(groupfile) + "bad" + getExtension(groupfile);
+		string goodGroupFile = outputDir + getRootName(getSimpleName(groupfile)) + "good" + getExtension(groupfile);
+		string badGroupFile = outputDir + getRootName(getSimpleName(groupfile)) + "bad" + getExtension(groupfile);
 		
 		ofstream goodGroupOut;	openOutputFile(goodGroupFile, goodGroupOut);
 		ofstream badGroupOut;	openOutputFile(badGroupFile, badGroupOut);		
@@ -265,8 +310,8 @@ void ScreenSeqsCommand::screenGroupFile(set<string> badSeqNames){
 	string seqName, group;
 	set<string>::iterator it;
 	
-	string goodGroupFile = getRootName(groupfile) + "good" + getExtension(groupfile);
-	string badGroupFile = getRootName(groupfile) + "bad" + getExtension(groupfile);
+	string goodGroupFile = outputDir + getRootName(getSimpleName(groupfile)) + "good" + getExtension(groupfile);
+	string badGroupFile = outputDir + getRootName(getSimpleName(groupfile)) + "bad" + getExtension(groupfile);
 	
 	ofstream goodGroupOut;	openOutputFile(goodGroupFile, goodGroupOut);
 	ofstream badGroupOut;	openOutputFile(badGroupFile, badGroupOut);		
@@ -308,8 +353,8 @@ void ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){
 	string seqName, group;
 	set<string>::iterator it;
 	
-	string goodAlignReportFile = getRootName(alignreport) + "good" + getExtension(alignreport);
-	string badAlignReportFile = getRootName(alignreport) + "bad" + getExtension(alignreport);
+	string goodAlignReportFile = outputDir + getRootName(getSimpleName(alignreport)) + "good" + getExtension(alignreport);
+	string badAlignReportFile = outputDir + getRootName(getSimpleName(alignreport)) + "bad" + getExtension(alignreport);
 	
 	ofstream goodAlignReportOut;	openOutputFile(goodAlignReportFile, goodAlignReportOut);
 	ofstream badAlignReportOut;		openOutputFile(badAlignReportFile, badAlignReportOut);		

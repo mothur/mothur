@@ -48,7 +48,7 @@ private:
 
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
-	string outputFile, calc, groups, label;
+	string outputFile, calc, groups, label, outputDir;
 	vector<string>  Estimators, Groups; //holds estimators to be used
 	
 

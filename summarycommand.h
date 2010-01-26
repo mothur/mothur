@@ -37,7 +37,7 @@ private:
 
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
-	string label, calc;
+	string label, calc, outputDir;
 	vector<string>  Estimators;
 	vector<string> inputFileNames;
 	vector<string> groups;

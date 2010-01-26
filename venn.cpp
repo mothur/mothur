@@ -16,7 +16,7 @@
 
 
 //**********************************************************************************************************************
-Venn::Venn(){
+Venn::Venn(string o) : outputDir(o) {
 	try {
 		globaldata = GlobalData::getInstance();
 
@@ -31,7 +31,7 @@ void Venn::getPic(SAbundVector* sabund, vector<Calculator*> vCalcs) {
 	try {
 				
 		for(int i=0;i<vCalcs.size();i++){
-			string filenamesvg = globaldata->inputFileName + ".venn." + sabund->getLabel() + vCalcs[i]->getName() + ".svg";
+			string filenamesvg = outputDir + getSimpleName(globaldata->inputFileName) + ".venn." + sabund->getLabel() + vCalcs[i]->getName() + ".svg";
 			openOutputFile(filenamesvg, outsvg);
 
 			vector<double> data = vCalcs[i]->getValues(sabund);
@@ -73,7 +73,7 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 			
 			//make a file for each calculator
 			for(int i=0;i<vCalcs.size();i++){
-				string filenamesvg = getRootName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
+				string filenamesvg = outputDir + getSimpleName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
 				openOutputFile(filenamesvg, outsvg);
 			
 				//in essence you want to run it like a single 
@@ -122,7 +122,7 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 			
 			//make a file for each calculator
 			for(int i=0;i<vCalcs.size();i++){
-				string filenamesvg = getRootName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
+				string filenamesvg = outputDir + getSimpleName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
 				openOutputFile(filenamesvg, outsvg);
 				
 				//get estimates for sharedAB
@@ -191,7 +191,7 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 			for(int i=0;i<vCalcs.size();i++){
 			
 												
-				string filenamesvg = getRootName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
+				string filenamesvg = outputDir + getSimpleName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
 				openOutputFile(filenamesvg, outsvg);
 				
 				if (vCalcs[i]->getName() == "sharedace") {
@@ -446,7 +446,7 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 				
 				if ((vCalcs[i]->getName() != "sharedsobs") && (vCalcs[i]->getName() != "sharedchao")) { mothurOut(vCalcs[i]->getName() + " is not a valid calculator with four groups.  It will be disregarded. "); mothurOutEndLine(); }
 				else{
-					string filenamesvg = getRootName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
+					string filenamesvg = outputDir + getSimpleName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
 					openOutputFile(filenamesvg, outsvg);
 
 				

@@ -160,9 +160,9 @@
 		8DD76F6A0486A84900D96B5E /* Mothur.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6859E8B029090EE04C91782 /* Mothur.1 */; };
 		A7027F2810DFF86D00BF45FE /* preclustercommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7027F2710DFF86D00BF45FE /* preclustercommand.cpp */; };
 		A704E8A31106045D00870157 /* otuhierarchycommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A704E8A21106045D00870157 /* otuhierarchycommand.cpp */; };
+		A70B00C8110885EB002F453A /* setdircommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70B00C7110885EB002F453A /* setdircommand.cpp */; };
 		A70B53AA0F4CD7AD0064797E /* getgroupcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70B53A40F4CD7AD0064797E /* getgroupcommand.cpp */; };
 		A70B53AB0F4CD7AD0064797E /* getlabelcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70B53A60F4CD7AD0064797E /* getlabelcommand.cpp */; };
-		A70B53AC0F4CD7AD0064797E /* getlinecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70B53A80F4CD7AD0064797E /* getlinecommand.cpp */; };
 		A70DECD91063D8B40057C03C /* secondarystructurecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70DECD81063D8B40057C03C /* secondarystructurecommand.cpp */; };
 		A727E84A10D14568001A8432 /* readblast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A727E84910D14568001A8432 /* readblast.cpp */; };
 		A7283FF81056CAE100D0CC69 /* chimeracheckrdp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7283FF71056CAE100D0CC69 /* chimeracheckrdp.cpp */; };
@@ -535,12 +535,12 @@
 		A7027F2710DFF86D00BF45FE /* preclustercommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = preclustercommand.cpp; sourceTree = SOURCE_ROOT; };
 		A704E8A11106045D00870157 /* otuhierarchycommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = otuhierarchycommand.h; sourceTree = SOURCE_ROOT; };
 		A704E8A21106045D00870157 /* otuhierarchycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = otuhierarchycommand.cpp; sourceTree = SOURCE_ROOT; };
+		A70B00C6110885EB002F453A /* setdircommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = setdircommand.h; sourceTree = SOURCE_ROOT; };
+		A70B00C7110885EB002F453A /* setdircommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = setdircommand.cpp; sourceTree = SOURCE_ROOT; };
 		A70B53A40F4CD7AD0064797E /* getgroupcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getgroupcommand.cpp; sourceTree = SOURCE_ROOT; };
 		A70B53A50F4CD7AD0064797E /* getgroupcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getgroupcommand.h; sourceTree = SOURCE_ROOT; };
 		A70B53A60F4CD7AD0064797E /* getlabelcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getlabelcommand.cpp; sourceTree = SOURCE_ROOT; };
 		A70B53A70F4CD7AD0064797E /* getlabelcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getlabelcommand.h; sourceTree = SOURCE_ROOT; };
-		A70B53A80F4CD7AD0064797E /* getlinecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getlinecommand.cpp; sourceTree = SOURCE_ROOT; };
-		A70B53A90F4CD7AD0064797E /* getlinecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getlinecommand.h; sourceTree = SOURCE_ROOT; };
 		A70DECD71063D8B40057C03C /* secondarystructurecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = secondarystructurecommand.h; sourceTree = SOURCE_ROOT; };
 		A70DECD81063D8B40057C03C /* secondarystructurecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = secondarystructurecommand.cpp; sourceTree = SOURCE_ROOT; };
 		A727E84810D14568001A8432 /* readblast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readblast.h; sourceTree = SOURCE_ROOT; };
@@ -914,8 +914,6 @@
 				A70B53A40F4CD7AD0064797E /* getgroupcommand.cpp */,
 				A70B53A70F4CD7AD0064797E /* getlabelcommand.h */,
 				A70B53A60F4CD7AD0064797E /* getlabelcommand.cpp */,
-				A70B53A90F4CD7AD0064797E /* getlinecommand.h */,
-				A70B53A80F4CD7AD0064797E /* getlinecommand.cpp */,
 				A73329CD1083B3B3003B10C5 /* getlistcountcommand.h */,
 				A73329CE1083B3B3003B10C5 /* getlistcountcommand.cpp */,
 				370B88050F8A4EE4005AB382 /* getoturepcommand.h */,
@@ -980,6 +978,8 @@
 				371B30B20FD7EE67000414CA /* screenseqscommand.cpp */,
 				3799A94F0FD6A58C00E33EDE /* seqsummarycommand.h */,
 				3799A94E0FD6A58C00E33EDE /* seqsummarycommand.cpp */,
+				A70B00C6110885EB002F453A /* setdircommand.h */,
+				A70B00C7110885EB002F453A /* setdircommand.cpp */,
 				37D928270F21331F001D4494 /* sharedcommand.h */,
 				37D928260F21331F001D4494 /* sharedcommand.cpp */,
 				37D928470F21331F001D4494 /* summarycommand.h */,
@@ -1226,7 +1226,6 @@
 				37AFC71F0F445386005F492D /* sharedsobscollectsummary.cpp in Sources */,
 				A70B53AA0F4CD7AD0064797E /* getgroupcommand.cpp in Sources */,
 				A70B53AB0F4CD7AD0064797E /* getlabelcommand.cpp in Sources */,
-				A70B53AC0F4CD7AD0064797E /* getlinecommand.cpp in Sources */,
 				EB9303EB0F534D9400E8EF26 /* logsd.cpp in Sources */,
 				EB9303F90F53517300E8EF26 /* geom.cpp in Sources */,
 				EB6E68190F5F1C780044E17B /* qstat.cpp in Sources */,
@@ -1331,6 +1330,7 @@
 				A7D86C7D10FE09AB00865661 /* formatcolumn.cpp in Sources */,
 				A7D86C8C10FE09FE00865661 /* formatphylip.cpp in Sources */,
 				A704E8A31106045D00870157 /* otuhierarchycommand.cpp in Sources */,
+				A70B00C8110885EB002F453A /* setdircommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -38,7 +38,7 @@ private:
 	GroupMap* groupMap;
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
-	string filename, fastafile, namesfile, groupfile, label;
+	string filename, fastafile, namesfile, groupfile, label, outputDir;
 	ofstream out;
 	ifstream in, inNames;
 	

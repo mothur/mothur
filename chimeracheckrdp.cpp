@@ -10,7 +10,7 @@
 #include "chimeracheckrdp.h"
 		
 //***************************************************************************************************************
-ChimeraCheckRDP::ChimeraCheckRDP(string filename, string temp) {  fastafile = filename;  templateFile = temp;  }
+ChimeraCheckRDP::ChimeraCheckRDP(string filename, string temp, string o) {  fastafile = filename;  templateFile = temp; outputDir = o;  }
 //***************************************************************************************************************
 
 ChimeraCheckRDP::~ChimeraCheckRDP() {
@@ -338,7 +338,7 @@ void ChimeraCheckRDP::getCutoff() {
 void ChimeraCheckRDP::makeSVGpic(vector<sim> info, int query) {
 	try{
 		
-		string file = querySeqs[query]->getName() + ".chimeracheck.svg";
+		string file = outputDir + querySeqs[query]->getName() + ".chimeracheck.svg";
 		ofstream outsvg;
 		openOutputFile(file, outsvg);
 		

@@ -21,7 +21,7 @@ ClusterCommand::ClusterCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"cutoff","precision","method","showabund","timing"};
+			string Array[] =  {"cutoff","precision","method","showabund","timing","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -35,6 +35,9 @@ ClusterCommand::ClusterCommand(string option){
 					abort = true;
 				}
 			}
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//error checking to make sure they read a distance file
 			if ((globaldata->gSparseMatrix == NULL) || (globaldata->gListVector == NULL)) {
@@ -85,8 +88,9 @@ ClusterCommand::ClusterCommand(string option){
 				else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, matrix, cutoff); }
 				else if(method == "average"){	cluster = new AverageLinkage(rabund, list, matrix, cutoff);	}
 				tag = cluster->getTag();
-
-				fileroot = getRootName(globaldata->inputFileName);
+				
+				if (outputDir == "") { outputDir += hasPath(globaldata->inputFileName); }
+				fileroot = outputDir + getRootName(getSimpleName(globaldata->inputFileName));
 			
 				openOutputFile(fileroot+ tag + ".sabund",	sabundFile);
 				openOutputFile(fileroot+ tag + ".rabund",	rabundFile);

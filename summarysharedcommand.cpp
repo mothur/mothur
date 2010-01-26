@@ -48,7 +48,7 @@ SummarySharedCommand::SummarySharedCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"label","calc","groups","all"};
+			string Array[] =  {"label","calc","groups","all","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -66,6 +66,12 @@ SummarySharedCommand::SummarySharedCommand(string option){
 				 mothurOut("You must read a list and a group, or a shared before you can use the summary.shared command."); mothurOutEndLine(); abort = true; 
 			}
 			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(globaldata->getSharedFile()); //if user entered a file with a path then preserve it	
+			}
+
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			label = validParameter.validFile(parameters, "label", false);			
@@ -151,7 +157,7 @@ SummarySharedCommand::SummarySharedCommand(string option){
 					}
 				}
 				
-				outputFileName = ((getRootName(globaldata->inputFileName)) + "shared.summary");
+				outputFileName = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + "shared.summary";
 				openOutputFile(outputFileName, outputFileHandle);
 				mult = false;
 			}

@@ -43,7 +43,7 @@ private:
 	vector<vector<vector<double> > > savedMinValues;
 
 	bool abort;
-	string outputFile, groups, userform, savegroups;
+	string outputFile, groups, userform, savegroups, outputDir;
 	vector<string> Groups; //holds groups to be used
 };
 

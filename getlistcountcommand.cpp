@@ -22,20 +22,38 @@ GetListCountCommand::GetListCountCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string AlignArray[] =  {"list","label"};
+			string AlignArray[] =  {"list","label","outputdir","inputdir"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
-		
+			map<string, string>::iterator it;
+			
 			//check to make sure all parameters are valid for command
-			for (map<string, string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
 			string ranRead = globaldata->getListFile();
+			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("list");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["list"] = inputDir + it->second;		}
+				}
+			}
+
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list", true);
@@ -179,7 +197,8 @@ int GetListCountCommand::execute(){
 void GetListCountCommand::process(ListVector* list) {
 	try {
 		string binnames, name, sequence;
-		string outputFileName = getRootName(listfile) + list->getLabel() + ".otu";
+		if (outputDir == "") { outputDir += hasPath(listfile); }
+		string outputFileName = outputDir + getRootName(getSimpleName(listfile)) + list->getLabel() + ".otu";
 		openOutputFile(outputFileName, out);
 		
 		mothurOut(list->getLabel()); mothurOutEndLine();

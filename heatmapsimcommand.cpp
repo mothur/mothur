@@ -36,31 +36,64 @@ HeatMapSimCommand::HeatMapSimCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string AlignArray[] =  {"groups","label", "calc","phylip","column","name"};
+			string AlignArray[] =  {"groups","label", "calc","phylip","column","name","outputdir","inputdir"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
+			map<string,string>::iterator it;
 			
 			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
 			format = "";
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
 			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("phylip");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("column");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["column"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("name");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["name"] = inputDir + it->second;		}
+				}
+			}
+
 			//required parameters
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
 			if (phylipfile == "not open") { abort = true; }
 			else if (phylipfile == "not found") { phylipfile = ""; }	
-			else {  format = "phylip"; 	}
+			else {  format = "phylip"; 	if (outputDir == "") { outputDir += hasPath(phylipfile); }  }
 			
 			columnfile = validParameter.validFile(parameters, "column", true);
 			if (columnfile == "not open") { abort = true; }	
 			else if (columnfile == "not found") { columnfile = ""; }
-			else {  format = "column";	}
+			else {  format = "column";	if (outputDir == "") { outputDir += hasPath(columnfile); } }
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }	
@@ -80,6 +113,8 @@ HeatMapSimCommand::HeatMapSimCommand(string option){
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			if (format == "shared") {
+				if (outputDir == "") { outputDir += hasPath(globaldata->getSharedFile()); }
+				
 				label = validParameter.validFile(parameters, "label", false);			
 				if (label == "not found") { label = ""; }
 				else { 
@@ -190,7 +225,7 @@ int HeatMapSimCommand::execute(){
 	
 		if (abort == true)  { return 0; }
 		
-		heatmap = new HeatMapSim();
+		heatmap = new HeatMapSim(outputDir);
 		
 		if (format == "shared") {
 			runCommandShared();

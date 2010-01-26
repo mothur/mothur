@@ -28,7 +28,7 @@ RareFactSharedCommand::RareFactSharedCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"iters","label","calc","groups", "jumble"};
+			string Array[] =  {"iters","label","calc","groups", "jumble","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -45,6 +45,12 @@ RareFactSharedCommand::RareFactSharedCommand(string option){
 			if (globaldata->getSharedFile() == "") {
 				if (globaldata->getListFile() == "") { mothurOut("You must read a list and a group, or a shared before you can use the collect.shared command."); mothurOutEndLine(); abort = true; }
 				else if (globaldata->getGroupFile() == "") { mothurOut("You must read a list and a group, or a shared before you can use the collect.shared command."); mothurOutEndLine(); abort = true; }
+			}
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
 			}
 
 			
@@ -88,7 +94,7 @@ RareFactSharedCommand::RareFactSharedCommand(string option){
 			
 			if (abort == false) {
 			
-				string fileNameRoot = getRootName(globaldata->inputFileName);
+				string fileNameRoot = outputDir + getRootName(getSimpleName(globaldata->inputFileName));
 //				format = globaldata->getFormat();
 
 				

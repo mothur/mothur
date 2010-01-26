@@ -25,7 +25,7 @@ public:
 private:
 
 	bool abort;
-	string phylipfile, columnfile, namefile, format, filename, fbase;
+	string phylipfile, columnfile, namefile, format, filename, fbase, outputDir;
 	float cutoff, precision;
 	
 	void get_comment(istream&, char, char);

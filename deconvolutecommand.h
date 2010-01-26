@@ -25,7 +25,7 @@ public:
 	void help();	
 	
 private:
-	string inFastaName, oldNameMapFName;
+	string inFastaName, oldNameMapFName, outputDir;
 
 	bool abort;
 };

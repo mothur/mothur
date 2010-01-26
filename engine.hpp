@@ -26,7 +26,8 @@ public:
 	virtual ~Engine(){}
 	virtual bool getInput() = 0;
 	virtual string getCommand();
-	vector<string> getOptions() {	return options;		}
+	virtual string getOutputDir()	{	return cFactory->getOutputDir();  }
+	vector<string> getOptions()		{	return options;		}
 protected:
 	vector<string> options;
 	CommandFactory* cFactory;

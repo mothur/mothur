@@ -21,11 +21,15 @@ public:
 	Command* getCommand();
 	bool isValidCommand(string);
 	void printCommands(ostream&);
+	void setOutputDirectory(string o)	{	outputDir = o;		}
+	void setInputDirectory(string i)	{	inputDir = i;		}
+	string getOutputDir()				{	return outputDir;	}
 
 private:
 	Command* command;
 	map<string, string> commands;
 	map<string, string>::iterator it;
+	string outputDir, inputDir;
 	
 	static CommandFactory* _uniqueInstance;
 	CommandFactory( const CommandFactory& ); // Disable copy constructor

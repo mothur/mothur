@@ -20,7 +20,7 @@
 
 class Venn {
 public:
-	Venn();
+	Venn(string);
 	~Venn(){};
 
 	void getPic(SAbundVector*, vector<Calculator*>);
@@ -29,7 +29,7 @@ public:
 private:
 	GlobalData* globaldata;
 	Calculator* singleCalc;
-	string groupComb;
+	string groupComb, outputDir;
 	ofstream outsvg;
 };
 

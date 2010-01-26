@@ -23,7 +23,7 @@ GetRAbundCommand::GetRAbundCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"label","sorted"};
+			string Array[] =  {"label","sorted","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -34,6 +34,12 @@ GetRAbundCommand::GetRAbundCommand(string option){
 			//check to make sure all parameters are valid for command
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			}
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			string outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
 			}
 			
 			//make sure the user has already run the read.otu command
@@ -60,7 +66,7 @@ GetRAbundCommand::GetRAbundCommand(string option){
 			}
 				
 			if (abort == false) {
-				filename = getRootName(globaldata->inputFileName) + "rabund";
+				filename = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + "rabund";
 				openOutputFile(filename, out);
 			}
 		}

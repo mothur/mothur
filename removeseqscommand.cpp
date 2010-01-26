@@ -22,18 +22,77 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","name", "group", "alignreport", "accnos", "list" };
+			string Array[] =  {"fasta","name", "group", "alignreport", "accnos", "list","outputdir","inputdir" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
+			map<string,string>::iterator it;
 			
 			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("alignreport");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["alignreport"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("fasta");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("accnos");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["accnos"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("list");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["list"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("name");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["name"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("group");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["group"] = inputDir + it->second;		}
+				}
+			}
+
 			
 			//check for required parameters
 			accnosfile = validParameter.validFile(parameters, "accnos", true);
@@ -62,7 +121,10 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option){
 			
 			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == ""))  { mothurOut("You must provide one of the following: fasta, name, group, alignreport or list."); mothurOutEndLine(); abort = true; }
 			
-			if (parameters.size() > 2) { mothurOut("You may only enter one of the following: fasta, name, group, alignreport, or list."); mothurOutEndLine(); abort = true;  }
+			int okay = 2;
+			if (outputDir != "") { okay++; }
+			
+			if (parameters.size() > okay) { mothurOut("You may only enter one of the following: fasta, name, group, alignreport, or list."); mothurOutEndLine(); abort = true;  }
 		}
 
 	}
@@ -117,6 +179,7 @@ int RemoveSeqsCommand::execute(){
 //**********************************************************************************************************************
 void RemoveSeqsCommand::readFasta(){
 	try {
+		if (outputDir == "") {  outputDir += hasPath(fastafile);  }
 		string outputFileName = getRootName(fastafile) + "pick" + getExtension(fastafile);
 		ofstream out;
 		openOutputFile(outputFileName, out);
@@ -158,6 +221,7 @@ void RemoveSeqsCommand::readFasta(){
 //**********************************************************************************************************************
 void RemoveSeqsCommand::readList(){
 	try {
+		if (outputDir == "") {  outputDir += hasPath(listfile);  }
 		string outputFileName = getRootName(listfile) + "pick" +  getExtension(listfile);
 		ofstream out;
 		openOutputFile(outputFileName, out);
@@ -222,7 +286,7 @@ void RemoveSeqsCommand::readList(){
 //**********************************************************************************************************************
 void RemoveSeqsCommand::readName(){
 	try {
-	
+		if (outputDir == "") {  outputDir += hasPath(namefile);  }
 		string outputFileName = getRootName(namefile) + "pick" + getExtension(namefile);
 
 		ofstream out;
@@ -305,7 +369,7 @@ void RemoveSeqsCommand::readName(){
 //**********************************************************************************************************************
 void RemoveSeqsCommand::readGroup(){
 	try {
-	
+		if (outputDir == "") {  outputDir += hasPath(groupfile);  }
 		string outputFileName = getRootName(groupfile) + "pick" + getExtension(groupfile);
 		ofstream out;
 		openOutputFile(outputFileName, out);
@@ -348,6 +412,7 @@ void RemoveSeqsCommand::readGroup(){
 //alignreport file has a column header line then all other lines contain 16 columns.  we just want the first column since that contains the name
 void RemoveSeqsCommand::readAlign(){
 	try {
+		if (outputDir == "") {  outputDir += hasPath(alignfile);  }
 		string outputFileName = getRootName(getRootName(alignfile)) + "pick.align.report";
 		ofstream out;
 		openOutputFile(outputFileName, out);

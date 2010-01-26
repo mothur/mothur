@@ -39,7 +39,7 @@ private:
 	map<string, string>::iterator it;
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
-	string format, groups, label, calc, phylipfile, columnfile, namefile;
+	string format, groups, label, calc, phylipfile, columnfile, namefile, outputDir;
 	vector<string> Estimators, Groups;
 	
 	int runCommandShared();

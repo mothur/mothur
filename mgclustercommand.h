@@ -38,7 +38,7 @@ private:
 	ListVector oldList;
 	vector<seqDist> overlapMatrix;
 	
-	string blastfile, method, namefile, overlapFile, distFile;
+	string blastfile, method, namefile, overlapFile, distFile, outputDir;
 	ofstream sabundFile, rabundFile, listFile;
 	float cutoff, penalty;
 	int precision, length, precisionLength;

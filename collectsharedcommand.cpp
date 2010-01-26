@@ -50,7 +50,7 @@ CollectSharedCommand::CollectSharedCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"freq","label","calc","groups","all"};
+			string Array[] =  {"freq","label","calc","groups","all","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -63,6 +63,10 @@ CollectSharedCommand::CollectSharedCommand(string option){
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			
+						
 			//make sure the user has already run the read.otu command
 			if (globaldata->getSharedFile() == "") {
 				if (globaldata->getListFile() == "") { mothurOut("You must read a list and a group, or a shared before you can use the collect.shared command."); mothurOutEndLine(); abort = true; }
@@ -107,8 +111,9 @@ CollectSharedCommand::CollectSharedCommand(string option){
 			all = isTrue(temp);
 						
 			if (abort == false) {
-			
-				string fileNameRoot = getRootName(globaldata->inputFileName);
+				
+				if (outputDir == "") { outputDir += hasPath(globaldata->inputFileName); }
+				string fileNameRoot = outputDir + getRootName(getSimpleName(globaldata->inputFileName));
 				format = globaldata->getFormat();
 				int i;
 				

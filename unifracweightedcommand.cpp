@@ -21,7 +21,7 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"groups","iters","distance","random"};
+			string Array[] =  {"groups","iters","distance","random","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -36,7 +36,13 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 			
 			if (globaldata->gTree.size() == 0) {//no trees were read
 				mothurOut("You must execute the read.tree command, before you may execute the unifrac.weighted command."); mothurOutEndLine(); abort = true;  }
-										
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
+			}
+																	
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			groups = validParameter.validFile(parameters, "groups", false);			
@@ -61,7 +67,7 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 			if (abort == false) {
 				T = globaldata->gTree;
 				tmap = globaldata->gTreemap;
-				sumFile = globaldata->getTreeFile() + ".wsummary";
+				sumFile = outputDir + getSimpleName(globaldata->getTreeFile()) + ".wsummary";
 				openOutputFile(sumFile, outSum);
 				
 				util = new SharedUtil();
@@ -125,7 +131,7 @@ int UnifracWeightedCommand::execute() {
 			rScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
 			uScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
 			
-			if (random) {  output = new ColumnFile(globaldata->getTreeFile()  + toString(i+1) + ".weighted", itersString);  } 
+			if (random) {  output = new ColumnFile(outputDir + getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".weighted", itersString);  } 
 
 			userData = weighted->getValues(T[i]);  //userData[0] = weightedscore
 			
@@ -283,7 +289,7 @@ void UnifracWeightedCommand::createPhylipFile() {
 		//for each tree
 		for (int i = 0; i < T.size(); i++) { 
 		
-			string phylipFileName = globaldata->getTreeFile()  + toString(i+1) + ".weighted.dist";
+			string phylipFileName = outputDir + getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".weighted.dist";
 			ofstream out;
 			openOutputFile(phylipFileName, out);
 			

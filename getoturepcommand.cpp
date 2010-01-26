@@ -48,18 +48,77 @@ GetOTURepCommand::GetOTURepCommand(string option){
 			help(); abort = true;
 		} else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","list","label","name", "group", "sorted", "phylip","column","large","cutoff","precision"};
+			string Array[] =  {"fasta","list","label","name", "group", "sorted", "phylip","column","large","cutoff","precision","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
+			map<string, string>::iterator it;
 		
 			//check to make sure all parameters are valid for command
-			for (map<string, string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("list");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["list"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("fasta");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("phylip");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("column");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["column"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("name");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["name"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("group");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["group"] = inputDir + it->second;		}
+				}
+			}
+
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
@@ -104,7 +163,8 @@ GetOTURepCommand::GetOTURepCommand(string option){
 			else {
 				//read in group map info.
 				groupMap = new GroupMap(groupfile);
-				groupMap->readMap();
+				int error = groupMap->readMap();
+				if (error == 1) { delete groupMap; abort = true; }
 			}
 			
 			sorted = validParameter.validFile(parameters, "sorted", false);		if (sorted == "not found"){	sorted = "";	}
@@ -490,12 +550,13 @@ int GetOTURepCommand::process(ListVector* processList) {
 		string nameRep, name, sequence;
 
 		//create output file
-		string outputFileName = getRootName(listfile) + processList->getLabel() + ".rep.fasta";
+		if (outputDir == "") { outputDir += hasPath(listfile); }
+		string outputFileName = outputDir + getRootName(getSimpleName(listfile)) + processList->getLabel() + ".rep.fasta";
 		openOutputFile(outputFileName, out);
 		vector<repStruct> reps;
 		
 		ofstream newNamesOutput;
-		string outputNamesFile = getRootName(listfile) + processList->getLabel() + ".rep.names";
+		string outputNamesFile = outputDir + getRootName(getSimpleName(listfile)) + processList->getLabel() + ".rep.names";
 		openOutputFile(outputNamesFile, newNamesOutput);
 		
 		//for each bin in the list vector

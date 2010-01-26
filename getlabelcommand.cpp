@@ -20,8 +20,6 @@ GetlabelCommand::GetlabelCommand(string option){
 		if(option == "help") { help(); abort = true; }
 		
 		else {
-			if (option != "") { mothurOut("There are no valid parameters for the get.label command."); mothurOutEndLine(); abort = true; }
-			
 			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { mothurOut("You must read a list, sabund or rabund before you can use the get.label command."); mothurOutEndLine(); abort = true; }				
 		}
 

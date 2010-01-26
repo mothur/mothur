@@ -38,7 +38,7 @@ private:
 	TreeMap* savetmap;
 	Parsimony* pars;
 	vector<string> groupComb; // AB. AC, BC...
-	string sumFile, randomtree, allGroups;
+	string sumFile, randomtree, allGroups, outputDir;
 	int iters, numGroups, numComp, counter;
 	vector<int> numEachGroup; //vector containing the number of sequences in each group the users wants for random distrib.
 	vector< vector<float> > userTreeScores; //scores for users trees for each comb.

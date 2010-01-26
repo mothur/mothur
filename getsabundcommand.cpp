@@ -23,7 +23,7 @@ GetSAbundCommand::GetSAbundCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"label"};
+			string Array[] =  {"label","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -36,6 +36,12 @@ GetSAbundCommand::GetSAbundCommand(string option){
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			string outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
+			}
+
 			//make sure the user has already run the read.otu command
 			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "")) { mothurOut("You must read a list or rabund before you can use the get.sabund command."); mothurOutEndLine(); abort = true; }
 			
@@ -55,7 +61,7 @@ GetSAbundCommand::GetSAbundCommand(string option){
 			}
 				
 			if (abort == false) {
-				filename = getRootName(globaldata->inputFileName) + "sabund";
+				filename = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + "sabund";
 				openOutputFile(filename, out);
 			}
 		}

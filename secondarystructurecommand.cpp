@@ -21,19 +21,42 @@ AlignCheckCommand::AlignCheckCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","map"};
+			string Array[] =  {"fasta","map", "outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
+			map<string,string>::iterator it;
 			
 			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("fasta");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("map");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["map"] = inputDir + it->second;		}
+				}
+			}
+
 			//check for required parameters
 			mapfile = validParameter.validFile(parameters, "map", true);
 			if (mapfile == "not open") { abort = true; }
@@ -43,6 +66,12 @@ AlignCheckCommand::AlignCheckCommand(string option){
 			if (fastafile == "not open") { abort = true; }
 			else if (fastafile == "not found") {  fastafile = "";  mothurOut("You must provide an fasta file."); mothurOutEndLine(); abort = true;  }	
 			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(fastafile); //if user entered a file with a path then preserve it	
+			}
+
 		}
 
 	}
@@ -82,7 +111,7 @@ int AlignCheckCommand::execute(){
 		openInputFile(fastafile, in);
 		
 		ofstream out;
-		string outfile = getRootName(fastafile) + "align.check";
+		string outfile = outputDir + getRootName(getSimpleName(fastafile)) + "align.check";
 		openOutputFile(outfile, out);
 		
 		out << "name" << '\t' << "pound" << '\t' << "dash" << '\t' << "plus" << '\t' << "equal" << '\t';

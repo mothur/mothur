@@ -47,7 +47,7 @@ private:
 	ReadCluster* read;
 	
 	bool abort, sorted, print_start;
-	string method, fileroot, tag, distfile, format, phylipfile, columnfile, namefile, sort, showabund, timing;
+	string method, fileroot, tag, distfile, format, phylipfile, columnfile, namefile, sort, showabund, timing, outputDir;
 	double cutoff;
 	int precision, length;
 	ofstream sabundFile, rabundFile, listFile;

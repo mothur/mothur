@@ -99,14 +99,10 @@ int main(int argc, char *argv[]){
 			mothur = new InteractEngine(argv[0]);	
 		}
 		
-		//used to intercept the terminate signal, so instead of terminating mothur it will end a command
-		//void (*prev_fn)(int);
-		//prev_fn = signal(SIGTERM, mothur->terminateCommand(0));
-		
-		//if (prev_fn==SIG_IGN) signal (SIGTERM,SIG_IGN);
-
-		
 		while(bail == 0)		{	bail = mothur->getInput();			}
+		
+		string outputDir = mothur->getOutputDir();
+		logFileName = outputDir + logFileName;
 	
 		delete mothur;
 		

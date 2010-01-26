@@ -26,19 +26,34 @@ DistanceCommand::DistanceCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "phylip", "calc", "countends", "cutoff", "processors"};
+			string Array[] =  {"fasta", "phylip", "calc", "countends", "cutoff", "processors", "outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
+			map<string, string>::iterator it2;
 		
 			//check to make sure all parameters are valid for command
-			for (map<string, string>::iterator it2 = parameters.begin(); it2 != parameters.end(); it2++) { 
+			for (it2 = parameters.begin(); it2 != parameters.end(); it2++) { 
 				if (validParameter.isValidParameter(it2->first, myArray, it2->second) != true) {  abort = true;  }
 			}
 			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it2 = parameters.find("fasta");
+				//user has given a template file
+				if(it2 != parameters.end()){ 
+					path = hasPath(it2->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["fasta"] = inputDir + it2->second;		}
+				}
+			}
+
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not found") { mothurOut("fasta is a required parameter for the dist.seqs command."); mothurOutEndLine(); abort = true; }
@@ -48,6 +63,12 @@ DistanceCommand::DistanceCommand(string option){
 				openInputFile(fastafile, inFASTA);
 				alignDB = SequenceDB(inFASTA); 
 				inFASTA.close();
+			}
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(fastafile); //if user entered a file with a path then preserve it	
 			}
 
 			//check for optional parameter and set defaults
@@ -146,20 +167,14 @@ int DistanceCommand::execute(){
 		
 		//doses the user want the phylip formatted file as well
 		if (isTrue(phylip) == true) {
-			outputFile = getRootName(fastafile) + "phylip.dist";
+			outputFile = outputDir + getRootName(getSimpleName(fastafile)) + "phylip.dist";
 			remove(outputFile.c_str());
 			
 			//output numSeqs to phylip formatted dist file
 		}else { //user wants column format
-			outputFile = getRootName(fastafile) + "dist";
+			outputFile = outputDir + getRootName(getSimpleName(fastafile)) + "dist";
 			remove(outputFile.c_str());
 		}
-				
-		//#	if defined (_WIN32)
-		//figure out how to implement the fork and wait commands in windows
-		//	driver(distCalculator, seqDB, 0, numSeqs, distFile, phylipFile, cutoff);
-		//#	endif
-		
 				
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		//if you don't need to fork anything

@@ -39,7 +39,7 @@ private:
 	FullMatrix* matrix;
 	GroupMap* groupMap;
 	string distFileName, format, method;
-	string phylipfile, columnfile, namefile, groupfile;
+	string phylipfile, columnfile, namefile, groupfile, outputDir;
 	NameAssignment* nameMap;
 
 	bool abort;

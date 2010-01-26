@@ -10,12 +10,13 @@
 #include "heatmap.h"
 
 //**********************************************************************************************************************
-HeatMap::HeatMap(string sort, string scale){
+HeatMap::HeatMap(string sort, string scale, string dir){
 	try {
 		globaldata = GlobalData::getInstance();
 //		format = globaldata->getFormat();
 		sorted = sort;
 		scaler = scale;
+		outputDir = dir;
 	}
 	catch(exception& e) {
 		errorOut(e, "HeatMap", "HeatMap");
@@ -57,7 +58,7 @@ void HeatMap::getPic(RAbundVector* rabund) {
 		}
 		
 		
-		string filenamesvg = getRootName(globaldata->inputFileName) + rabund->getLabel() + ".heatmap.bin.svg";
+		string filenamesvg = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + rabund->getLabel() + ".heatmap.bin.svg";
 		openOutputFile(filenamesvg, outsvg);
 		
 		//svg image
@@ -133,7 +134,7 @@ void HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 			}
 		}
 
-		string filenamesvg = getRootName(globaldata->inputFileName) + lookup[0]->getLabel() + ".heatmap.bin.svg";
+		string filenamesvg = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + lookup[0]->getLabel() + ".heatmap.bin.svg";
 		openOutputFile(filenamesvg, outsvg);
 		
 		//svg image

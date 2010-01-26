@@ -53,7 +53,7 @@ private:
 	ReadMatrix* readMatrix;
 	FormatMatrix* formatMatrix;
 	NameAssignment* nameMap;
-	string filename, fastafile, listfile, namefile, groupfile, label, sorted, phylipfile, columnfile, distFile, format;
+	string filename, fastafile, listfile, namefile, groupfile, label, sorted, phylipfile, columnfile, distFile, format, outputDir;
 	ofstream out;
 	ifstream in, inNames, inRow;
 	bool abort, allLines, groupError, large;

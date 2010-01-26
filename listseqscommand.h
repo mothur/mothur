@@ -23,13 +23,14 @@ class ListSeqsCommand : public Command {
 		
 	private:
 		vector<string> names;
-		string fastafile, namefile, groupfile, alignfile, inputFileName;
+		string fastafile, namefile, groupfile, alignfile, inputFileName, outputDir, listfile;
 		bool abort;
 		
 		void readFasta();
 		void readName();
 		void readGroup();
 		void readAlign();
+		void readList();
 		
 };
 

@@ -20,7 +20,7 @@
 #include "sharedbraycurtis.h"
 
 //**********************************************************************************************************************
-HeatMapSim::HeatMapSim(){
+HeatMapSim::HeatMapSim(string dir) : outputDir(dir) {
 		globaldata = GlobalData::getInstance();
 }
 //**********************************************************************************************************************
@@ -32,7 +32,7 @@ void HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> 
 		//make file for each calculator selected
 		for (int m = 0; m < calcs.size(); m++) {
 			
-			string filenamesvg = getRootName(globaldata->inputFileName) + lookup[0]->getLabel() + calcs[m]->getName() + ".heatmap.sim.svg";
+			string filenamesvg = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + lookup[0]->getLabel() + calcs[m]->getName() + ".heatmap.sim.svg";
 			openOutputFile(filenamesvg, outsvg);
 			
 			//svg image
@@ -107,7 +107,7 @@ void HeatMapSim::getPic(vector< vector<double> > dists, vector<string> groups) {
 		
 		vector<double> sims;
 		
-		string filenamesvg = getRootName(globaldata->inputFileName) + "heatmap.sim.svg";
+		string filenamesvg = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + "heatmap.sim.svg";
 		openOutputFile(filenamesvg, outsvg);
 			
 		//svg image

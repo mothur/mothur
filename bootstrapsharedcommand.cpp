@@ -36,7 +36,7 @@ BootSharedCommand::BootSharedCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"label","calc","groups","iters"};
+			string Array[] =  {"label","calc","groups","iters","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -48,6 +48,13 @@ BootSharedCommand::BootSharedCommand(string option){
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
+			}
+
 			
 			//make sure the user has already run the read.otu command
 			if (globaldata->getSharedFile() == "") {
@@ -373,12 +380,11 @@ void BootSharedCommand::process(SharedOrderVector* order) {
 	try{
 				EstOutput data;
 				vector<SharedRAbundVector*> subset;
-				
-				
+								
 				//open an ostream for each calc to print to
 				for (int z = 0; z < treeCalculators.size(); z++) {
 					//create a new filename
-					outputFile = getRootName(globaldata->inputFileName) + treeCalculators[z]->getName() + ".boot" + order->getLabel() + ".tre";
+					outputFile = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + treeCalculators[z]->getName() + ".boot" + order->getLabel() + ".tre";
 					openOutputFile(outputFile, *(out[z]));
 				}
 				
@@ -446,7 +452,7 @@ void BootSharedCommand::process(SharedOrderVector* order) {
 					//set global data to calc trees
 					globaldata->gTree = trees[k];
 					
-					string filename = getRootName(globaldata->inputFileName) + treeCalculators[k]->getName() + ".boot" + order->getLabel();
+					string filename = getRootName(getSimpleName(globaldata->inputFileName)) + treeCalculators[k]->getName() + ".boot" + order->getLabel();
 					consensus = new ConcensusCommand(filename);
 					consensus->execute();
 					delete consensus;

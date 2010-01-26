@@ -25,7 +25,7 @@ public:
 private:
 	bool abort;
 	set<string> labels; //holds labels to be used
-	string label, listFile;
+	string label, listFile, outputDir;
 	
 	vector<ListVector> getListVectors();
 		

@@ -25,7 +25,7 @@ typedef map<int, float> SeqMap;  //maps sequence to all distance for that seqeun
 class Bellerophon : public Chimera {
 	
 	public:
-		Bellerophon(string);	
+		Bellerophon(string, string);	
 		~Bellerophon() {};
 		
 		int getChimeras();

@@ -46,7 +46,7 @@ class UnifracUnweightedCommand : public Command {
 		vector< map<float, float> > rCumul;  //map <unweighted score, cumulative percentage of number of random trees with that score or higher.> -vector entry for each combination.
 		
 		bool abort, phylip, random;
-		string groups, itersString;
+		string groups, itersString, outputDir;
 		vector<string> Groups; //holds groups to be used
 
 		ofstream outSum, out;
