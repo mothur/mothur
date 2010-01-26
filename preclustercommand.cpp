@@ -99,12 +99,9 @@ int PreClusterCommand::execute(){
 		//sort seqs by number of identical seqs
 		sort(alignSeqs.begin(), alignSeqs.end(), comparePriority);
 	
-		//go through active list and cluster everthing you can, until all nodes are inactive
-		//taking advantage of the fact that maps are already sorted
-//		map<string, bool>::iterator itActive;
-//		map<string, bool>::iterator it2Active;
 		int count = 0;
-		
+
+		//think about running through twice...
 		for (int i = 0; i < numSeqs; i++) {
 			
 			//are you active
