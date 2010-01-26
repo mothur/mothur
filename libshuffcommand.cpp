@@ -32,7 +32,7 @@ LibShuffCommand::LibShuffCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"iters","groups","step","form","cutoff"};
+			string Array[] =  {"iters","groups","step","form","cutoff","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -43,6 +43,12 @@ LibShuffCommand::LibShuffCommand(string option){
 			//check to make sure all parameters are valid for command
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			}
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(globaldata->getPhylipFile()); //if user entered a file with a path then preserve it	
 			}
 			
 			//make sure the user has already run the read.dist command
@@ -186,7 +192,7 @@ void LibShuffCommand::printCoverageFile() {
 	try {
 
 		ofstream outCov;
-		summaryFile = getRootName(globaldata->getPhylipFile()) + "libshuff.coverage";
+		summaryFile = outputDir + getRootName(getSimpleName(globaldata->getPhylipFile())) + "libshuff.coverage";
 		openOutputFile(summaryFile, outCov);
 		outCov.setf(ios::fixed, ios::floatfield); outCov.setf(ios::showpoint);
 		//cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
@@ -273,7 +279,7 @@ void LibShuffCommand::printSummaryFile() {
 	try {
 
 		ofstream outSum;
-		summaryFile = getRootName(globaldata->getPhylipFile()) + "libshuff.summary";
+		summaryFile = outputDir + getRootName(getSimpleName(globaldata->getPhylipFile())) + "libshuff.summary";
 		openOutputFile(summaryFile, outSum);
 
 		outSum.setf(ios::fixed, ios::floatfield); outSum.setf(ios::showpoint);

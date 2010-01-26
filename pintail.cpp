@@ -18,7 +18,7 @@ inline bool compareQuanMembers(quanMember left, quanMember right){
 } 
 //***************************************************************************************************************
 
-Pintail::Pintail(string filename, string temp) {  fastafile = filename;  templateFile = temp;  }
+Pintail::Pintail(string filename, string temp, string o) {  fastafile = filename;  templateFile = temp; outputDir = o; }
 //***************************************************************************************************************
 
 Pintail::~Pintail() {
@@ -161,7 +161,7 @@ int Pintail::getChimeras() {
 		mothurOut("Getting conservation... "); cout.flush();
 		if (consfile == "") { 
 			mothurOut("Calculating probability of conservation for your template sequences.  This can take a while...  I will output the frequency of the highest base in each position to a .freq file so that you can input them using the conservation parameter next time you run this command.  Providing the .freq file will improve speed.    "); cout.flush();
-			probabilityProfile = decalc->calcFreq(templateSeqs, templateFile); 
+			probabilityProfile = decalc->calcFreq(templateSeqs, outputDir + getSimpleName(templateFile)); 
 			mothurOut("Done."); mothurOutEndLine();
 		}else				{   probabilityProfile = readFreq();			  }
 
@@ -281,13 +281,13 @@ int Pintail::getChimeras() {
 			string noOutliers, outliers;
 			
 			if ((!filter) && (seqMask == "")) {
-				noOutliers = getRootName(templateFile) + "pintail.quan";
+				noOutliers = outputDir + getRootName(getSimpleName(templateFile)) + "pintail.quan";
 			}else if ((filter) && (seqMask == "")) { 
-				noOutliers = getRootName(templateFile) + "pintail.filtered.quan";
+				noOutliers = outputDir + getRootName(getSimpleName(templateFile)) + "pintail.filtered.quan";
 			}else if ((!filter) && (seqMask != "")) { 
-				noOutliers = getRootName(templateFile) + "pintail.masked.quan";
+				noOutliers = outputDir + getRootName(getSimpleName(templateFile)) + "pintail.masked.quan";
 			}else if ((filter) && (seqMask != "")) { 
-				noOutliers = getRootName(templateFile) + "pintail.filtered.masked.quan";
+				noOutliers = outputDir + getRootName(getSimpleName(templateFile)) + "pintail.filtered.masked.quan";
 			}
 
 			//outliers = getRootName(templateFile) + "pintail.quanYESOUTLIERS";

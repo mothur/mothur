@@ -23,6 +23,7 @@
 #include <sstream>
 #include <signal.h>
 
+
 //exception
 #include <stdexcept>
 #include <exception>
@@ -61,6 +62,7 @@
 	//#include <readline/history.h>
 #else
 	#include <conio.h> //allows unbuffered screen capture from stdin
+	#include <direct.h> //get cwd
 #endif
 
 using namespace std;
@@ -391,11 +393,18 @@ inline string getSimpleName(string longName){
  
 	string simpleName = longName;
 	
-	if(longName.find_last_of("/") != longName.npos){
-		int pos = longName.find_last_of('/')+1;
-		simpleName = longName.substr(pos, longName.length());
-	}
+	size_t found;
+	found=longName.find_last_of("/\\");
 
+	if(found != longName.npos){
+		simpleName = longName.substr(found+1);
+	}
+	
+		//if(longName.find_last_of("/") != longName.npos){
+		//	int pos = longName.find_last_of('/')+1;
+		//	simpleName = longName.substr(pos, longName.length());
+		//}
+	
 	return simpleName;
 }
 
@@ -428,8 +437,23 @@ inline string getPathName(string longName){
 		int pos = longName.find_last_of('/')+1;
 		rootPathName = longName.substr(0, pos);
 	}
-
+	
 	return rootPathName;
+}
+/***********************************************************************/
+
+inline string hasPath(string longName){
+	
+	string path = "";
+	
+	size_t found;
+	found=longName.find_last_of("/\\");
+
+	if(found != longName.npos){
+		path = longName.substr(0, found+1);
+	}
+	
+	return path;
 }
 
 /***********************************************************************/
@@ -462,11 +486,114 @@ inline bool isBlank(string fileName){
 }
 /***********************************************************************/
 
-inline int openInputFile(string fileName, ifstream& fileHandle, string m){
+inline string getFullPathName(string fileName){
+	
+	string path = hasPath(fileName);
+	string newFileName = getSimpleName(fileName);
+	int pos;
+	
+	if (path == "") { return fileName; } //its a simple name
+	else { //we need to complete the pathname
+		// ex. ../../../filename 
+		// cwd = /user/work/desktop
+				
+		string cwd;
+		//get current working directory 
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)	
+			if (path.rfind("./") == -1) { return fileName; } //already complete name
+			
+			char* cwdpath;
+			size_t size;
+			cwdpath=getcwd(cwdpath,size);
+			cwd = cwdpath;
+		
+			//rip off first '/'
+			string simpleCWD;
+			if (cwd.length() > 0) { simpleCWD = cwd.substr(1); }
+			
+			//break apart the current working directory
+			vector<string> dirs;
+			while (simpleCWD.find_first_of('/') != -1) {
+				string dir = simpleCWD.substr(0,simpleCWD.find_first_of('/'));
+				simpleCWD = simpleCWD.substr(simpleCWD.find_first_of('/')+1, simpleCWD.length());
+				dirs.push_back(dir);
+			}
+			//get last one              // ex. ../../../filename = /user/work/desktop/filename
+			dirs.push_back(simpleCWD);  //ex. dirs[0] = user, dirs[1] = work, dirs[2] = desktop
+				
+			int index = dirs.size()-1;
+				
+			while((pos = path.rfind("./")) != -1) { //while you don't have a complete path
+				if (path[(pos-1)] == '.') { //you want your parent directory ../
+					path = path.substr(0, pos-1);
+					index--;
+					if (index == 0) {  break; }
+				}else if (path[(pos-1)] == '/') { //you want the current working dir ./
+					path = path.substr(0, pos);
+				}else if (pos == 1) { break; 
+				}else {  mothurOut("cannot resolve path for " + fileName); mothurOutEndLine(); return fileName; }
+			}
+		
+			for (int i = index; i >= 0; i--) {
+				newFileName = dirs[i] +  "/" + newFileName;		
+			}
+			
+			newFileName =  "/" +  newFileName;
+			return newFileName;
+				
+		#else
+			if (path.rfind(".\\") == -1) { return fileName; } //already complete name
+						
+			char *cwdpath = NULL;
+			cwdpath = getcwd(NULL, 0); // or _getcwd
+			if ( cwdpath != NULL) { cwd = cwdpath; }
+			else { cwd = "";  }
+			
+			//break apart the current working directory
+			vector<string> dirs;
+			while (cwd.find_first_of('\\') != -1) {
+				string dir = cwd.substr(0,cwd.find_first_of('\\'));
+				cwd = cwd.substr(cwd.find_first_of('\\')+1, cwd.length());
+				dirs.push_back(dir);
+	
+			}
+			//get last one
+			dirs.push_back(cwd);  //ex. dirs[0] = user, dirs[1] = work, dirs[2] = desktop
+				
+			int index = dirs.size()-1;
+				
+			while((pos = path.rfind(".\\")) != -1) { //while you don't have a complete path
+				if (path[(pos-1)] == '.') { //you want your parent directory ../
+					path = path.substr(0, pos-1);
+					index--;
+					if (index == 0) {  break; }
+				}else if (path[(pos-1)] == '\\') { //you want the current working dir ./
+					path = path.substr(0, pos);
+				}else if (pos == 1) { break; 
+				}else {  mothurOut("cannot resolve path for " + fileName); mothurOutEndLine(); return fileName; }
+			}
+		
+			for (int i = index; i >= 0; i--) {
+				newFileName = dirs[i] +  "\\" + newFileName;		
+			}
+			
+			return newFileName;
+			
+		#endif
+	}
+	
+}
+/***********************************************************************/
 
-	fileHandle.open(fileName.c_str());
+inline int openInputFile(string fileName, ifstream& fileHandle, string m){
+	
+	//get full path name
+	string completeFileName = getFullPathName(fileName);
+	//string completeFileName = fileName;
+
+	fileHandle.open(completeFileName.c_str());
 	if(!fileHandle) {
-		mothurOut("Error: Could not open " + fileName);  mothurOutEndLine();
+		mothurOut("Error: Could not open " + completeFileName);  mothurOutEndLine();
 		return 1;
 	}
 	else {
@@ -479,16 +606,18 @@ inline int openInputFile(string fileName, ifstream& fileHandle, string m){
 /***********************************************************************/
 
 inline int openInputFile(string fileName, ifstream& fileHandle){
-
-	fileHandle.open(fileName.c_str());
+	//get full path name
+	string completeFileName = getFullPathName(fileName);
+	
+	fileHandle.open(completeFileName.c_str());
 	if(!fileHandle) {
-		mothurOut("Error: Could not open " + fileName);  mothurOutEndLine();
+		mothurOut("Error: Could not open " + completeFileName);  mothurOutEndLine();
 		return 1;
 	}
 	else {
 		//check for blank file
 		gobble(fileHandle);
-		if (fileHandle.eof()) { mothurOut(fileName + " is blank. Please correct."); mothurOutEndLine();  return 1;  }
+		if (fileHandle.eof()) { mothurOut(completeFileName + " is blank. Please correct."); mothurOutEndLine();  return 1;  }
 		
 		return 0;
 	}
@@ -498,10 +627,12 @@ inline int openInputFile(string fileName, ifstream& fileHandle){
 /***********************************************************************/
 
 inline int openOutputFile(string fileName, ofstream& fileHandle){
+
+	string completeFileName = getFullPathName(fileName);
 	
-	fileHandle.open(fileName.c_str(), ios::trunc);
+	fileHandle.open(completeFileName.c_str(), ios::trunc);
 	if(!fileHandle) {
-		mothurOut("Error: Could not open " + fileName);  mothurOutEndLine();
+		mothurOut("Error: Could not open " + completeFileName);  mothurOutEndLine();
 		return 1;
 	}
 	else {

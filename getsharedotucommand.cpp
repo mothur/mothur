@@ -25,18 +25,53 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"label","unique","shared","fasta","list","group","output"};
+			string Array[] =  {"label","unique","shared","fasta","list","group","output","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
+			map<string,string>::iterator it;
 			
 			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("fasta");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("list");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["list"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("group");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["group"] = inputDir + it->second;		}
+				}
+			}
+
 			
 			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list", true);
@@ -65,6 +100,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option){
 			groups = validParameter.validFile(parameters, "unique", false);			
 			if (groups == "not found") { groups = ""; }
 			else { 
+				userGroups = "unique." + groups;
 				splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 				
@@ -73,6 +109,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option){
 			groups = validParameter.validFile(parameters, "shared", false);			
 			if (groups == "not found") { groups = "";  }
 			else { 
+				userGroups = groups;
 				splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 				unique = false;
@@ -128,11 +165,18 @@ int GetSharedOTUCommand::execute(){
 		if (abort == true) { return 0; }
 		
 		groupMap = new GroupMap(groupfile);
-		groupMap->readMap();
+		int error = groupMap->readMap();
+		if (error == 1) { delete groupMap; return 0; }
+		
 		globaldata->gGroupmap = groupMap;
 		
 		if (Groups.size() == 0) {
 			Groups = groupMap->namesOfGroups;
+			
+			//make string for outputfile name
+			userGroups = "unique.";
+			for(int i = 0; i < Groups.size(); i++) {  userGroups += Groups[i] + "-";  }
+			userGroups = userGroups.substr(0, userGroups.length()-1);
 		}
 	
 		//put groups in map to find easier
@@ -238,10 +282,12 @@ void GetSharedOTUCommand::process(ListVector* shared) {
 		
 		ofstream outNames;
 		string outputFileNames;
+		
+		if (outputDir == "") { outputDir += hasPath(listfile); }
 		if (output != "accnos") {
-			outputFileNames = getRootName(listfile) + shared->getLabel() + ".shared.seqs";
+			outputFileNames = outputDir + getRootName(getSimpleName(listfile)) + shared->getLabel() + userGroups + ".shared.seqs";
 		}else {
-			outputFileNames = getRootName(listfile) + shared->getLabel() + ".accnos";
+			outputFileNames = outputDir + getRootName(getSimpleName(listfile)) + shared->getLabel() + userGroups + ".accnos";
 		}
 		openOutputFile(outputFileNames, outNames);
 		
@@ -340,8 +386,9 @@ void GetSharedOTUCommand::process(ListVector* shared) {
 		}else { mothurOut("\t" + toString(num)); mothurOutEndLine(); }
 		
 		//if fasta file provided output new fasta file
-		if ((fastafile != "") && wroteSomething) {	
-			string outputFileFasta = getRootName(fastafile) + shared->getLabel() + ".shared.fasta";
+		if ((fastafile != "") && wroteSomething) {
+			if (outputDir == "") { outputDir += hasPath(fastafile); }
+			string outputFileFasta = outputDir + getRootName(getSimpleName(fastafile)) + shared->getLabel() + userGroups + ".shared.fasta";
 			ofstream outFasta;
 			openOutputFile(outputFileFasta, outFasta);
 			

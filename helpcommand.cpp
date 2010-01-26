@@ -12,9 +12,6 @@
 //**********************************************************************************************************************
 
 HelpCommand::HelpCommand(string option){
-
-	
-	if (option != "") { mothurOut("There are no valid parameters for the help() command."); mothurOutEndLine();  }
 	
 	validCommands = CommandFactory::getInstance();
 }

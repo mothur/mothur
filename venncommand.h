@@ -42,7 +42,7 @@ private:
 	
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
-	string format, groups, calc, label;
+	string format, groups, calc, label, outputDir;
 	vector<string> Estimators, Groups;
 
 

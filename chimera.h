@@ -59,8 +59,8 @@ class Chimera {
 	public:
 	
 		Chimera(){};
-		Chimera(string);
 		Chimera(string, string);
+		Chimera(string, string, string);
 		virtual ~Chimera(){};
 		virtual void setFilter(bool f)			{	filter = f;	 		}
 		virtual void setCorrection(bool c)		{	correction = c;		}
@@ -97,7 +97,7 @@ class Chimera {
 		bool filter, correction, svg, unaligned;
 		int processors, window, increment, numWanted, kmerSize, match, misMatch, minSim, parents, iters;
 		float divR;
-		string seqMask, quanfile, filterString, name;
+		string seqMask, quanfile, filterString, name, outputDir;
 			
 
 };

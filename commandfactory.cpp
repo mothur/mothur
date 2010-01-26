@@ -16,7 +16,6 @@
 #include "collectsharedcommand.h"
 #include "getgroupcommand.h"
 #include "getlabelcommand.h"
-#include "getlinecommand.h"
 #include "rarefactcommand.h"
 #include "summarycommand.h"
 #include "summarysharedcommand.h"
@@ -64,6 +63,7 @@
 #include "preclustercommand.h"
 #include "pcacommand.h"
 #include "otuhierarchycommand.h"
+#include "setdircommand.h"
 
 /*******************************************************/
 
@@ -78,10 +78,10 @@ CommandFactory* CommandFactory::getInstance() {
 
 /***********************************************************/
 CommandFactory::CommandFactory(){
-	_uniqueInstance = 0;
 	string s = "";
 	command = new NoCommand(s);
 	
+	outputDir = ""; inputDir = "";
 	
 	//initialize list of valid commands
 	commands["read.dist"]			= "read.dist"; 
@@ -109,7 +109,6 @@ CommandFactory::CommandFactory(){
 	commands["venn"]				= "venn";
 	commands["get.group"]           = "get.group";
 	commands["get.label"]           = "get.label";
-	commands["get.line"]            = "get.line";
 	commands["get.sabund"]          = "get.sabund";
 	commands["get.rabund"]          = "get.rabund";
 	commands["bootstrap.shared"]	= "bootstrap.shared";
@@ -137,12 +136,13 @@ CommandFactory::CommandFactory(){
 	commands["pre.cluster"]			= "pre.cluster";
 	commands["pca"]					= "pca";
 	commands["otu.hierarchy"]		= "otu.hierarchy";
-
+	commands["set.dir"]				= "set.dir";
 }
 /***********************************************************/
 
 /***********************************************************/
 CommandFactory::~CommandFactory(){
+	_uniqueInstance = 0;
 	delete command;
 }
 
@@ -153,7 +153,14 @@ CommandFactory::~CommandFactory(){
 Command* CommandFactory::getCommand(string commandName, string optionString){
 	try {
 		delete command;   //delete the old command
+		
+		//user has opted to redirect output from dir where input files are located to some other place
+		if (outputDir != "") { optionString += ", outputdir=" + outputDir; }
+		
+		//user has opted to redirect input from dir where mothur.exe is located to some other place
+		if (inputDir != "") { optionString += ", inputdir=" + inputDir; }
 
+		
 		if(commandName == "read.dist")					{	command = new ReadDistCommand(optionString);			}
 		else if(commandName == "read.otu")				{	command = new ReadOtuCommand(optionString);				}
 		else if(commandName == "read.tree")				{	command = new ReadTreeCommand(optionString);			}
@@ -172,7 +179,6 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "unifrac.unweighted")	{	command = new UnifracUnweightedCommand(optionString);	}
 		else if(commandName == "get.group")             {   command = new GetgroupCommand(optionString);			}
 		else if(commandName == "get.label")             {   command = new GetlabelCommand(optionString);			}
-		else if(commandName == "get.line")              {   command = new GetlineCommand(optionString);				}
 		else if(commandName == "get.sabund")            {   command = new GetSAbundCommand(optionString);			}
 		else if(commandName == "get.rabund")            {   command = new GetRAbundCommand(optionString);			}
 		else if(commandName == "libshuff")              {   command = new LibShuffCommand(optionString);			}
@@ -208,6 +214,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "pre.cluster")			{	command = new PreClusterCommand(optionString);			}
 		else if(commandName == "pca")					{	command = new PCACommand(optionString);					}
 		else if(commandName == "otu.hierarchy")			{	command = new OtuHierarchyCommand(optionString);		}
+		else if(commandName == "set.dir")				{	command = new SetDirectoryCommand(optionString);	}
 		else											{	command = new NoCommand(optionString);					}
 
 		return command;

@@ -16,8 +16,6 @@ QuitCommand::QuitCommand(string option){
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; }
-		
-		else if (option != "") { mothurOut("There are no valid parameters for the quit command."); mothurOutEndLine();  abort = true;  }
 
 }
 //**********************************************************************************************************************

@@ -21,23 +21,52 @@ FilterSeqsCommand::FilterSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "trump", "soft", "hard", "vertical"};
+			string Array[] =  {"fasta", "trump", "soft", "hard", "vertical", "outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
+			map<string,string>::iterator it;
 			
 			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			}
+			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("fasta");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("hard");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["hard"] = inputDir + it->second;		}
+				}
 			}
 			
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not found") { mothurOut("fasta is a required parameter for the filter.seqs command."); mothurOutEndLine(); abort = true; }
 			else if (fastafile == "not open") { abort = true; }	
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(fastafile); //if user entered a file with a path then preserve it	
+			}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -140,14 +169,14 @@ int FilterSeqsCommand::execute() {
 		filter = F.getFilter();
 
 		ofstream outFilter;
-		string filterFile = getRootName(fastafile) + "filter";
+		string filterFile = outputDir + getRootName(getSimpleName(fastafile)) + "filter";
 		openOutputFile(filterFile, outFilter);
 		outFilter << filter << endl;
 		outFilter.close();
 		
 		ifstream inFasta2;
 		openInputFile(fastafile, inFasta2);
-		string filteredFasta = getRootName(fastafile) + "filter.fasta";
+		string filteredFasta = outputDir + getRootName(getSimpleName(fastafile)) + "filter.fasta";
 		ofstream outFASTA;
 		openOutputFile(filteredFasta, outFASTA);
 

@@ -36,36 +36,67 @@ TreeGroupCommand::TreeGroupCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"label","calc","groups", "phylip", "column", "name", "precision","cutoff"};
+			string Array[] =  {"label","calc","groups", "phylip", "column", "name", "precision","cutoff","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser. getParameters();
 			
 			ValidParameters validParameter;
+			map<string, string>::iterator it;
 		
 			//check to make sure all parameters are valid for command
-			for (map<string, string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("phylip");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("column");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["column"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("name");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["name"] = inputDir + it->second;		}
+				}
+			}
+			
+			format = globaldata->getFormat();
 			
 			//required parameters
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
 			if (phylipfile == "not open") { abort = true; }
 			else if (phylipfile == "not found") { phylipfile = ""; }	
-			else {  format = "phylip"; 	}
+			else {  format = "phylip";  globaldata->setPhylipFile(phylipfile);	}
 			
 			columnfile = validParameter.validFile(parameters, "column", true);
 			if (columnfile == "not open") { abort = true; }	
 			else if (columnfile == "not found") { columnfile = ""; }
-			else {  format = "column";	}
+			else {  format = "column"; globaldata->setColumnFile(columnfile);	}
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
 			else {  globaldata->setNameFile(namefile);	}
-			
-			format = globaldata->getFormat();
 			
 			//error checking on files			
 			if ((globaldata->getSharedFile() == "") && ((phylipfile == "") && (columnfile == "")))	{ mothurOut("You must run the read.otu command or provide a distance file before running the tree.shared command."); mothurOutEndLine(); abort = true; }
@@ -111,6 +142,12 @@ TreeGroupCommand::TreeGroupCommand(string option){
 			temp = validParameter.validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "10"; }
 			convert(temp, cutoff); 
 			cutoff += (5 / (precision * 10.0));
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
+			}
 
 				
 			if (abort == false) {
@@ -262,7 +299,7 @@ int TreeGroupCommand::execute(){
 			makeSimsDist();
 
 			//create a new filename
-			outputFile = getRootName(globaldata->inputFileName) + "tre";	
+			outputFile = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + "tre";	
 				
 			createTree();
 			mothurOut("Tree complete. "); mothurOutEndLine();
@@ -519,7 +556,7 @@ void TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
 					for (int g = 0; g < numGroups; g++) {	index[g] = g;	}
 		
 					//create a new filename
-					outputFile = getRootName(globaldata->inputFileName) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".tre";				
+					outputFile = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".tre";				
 												
 					for (int k = 0; k < thisLookup.size(); k++) { 
 						for (int l = k; l < thisLookup.size(); l++) {

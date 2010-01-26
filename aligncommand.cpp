@@ -39,17 +39,35 @@ AlignCommand::AlignCommand(string option){
 		else {
 			
 			//valid paramters for this command
-			string AlignArray[] =  {"template","candidate","search","ksize","align","match","mismatch","gapopen","gapextend", "processors","flip","threshold"};
+			string AlignArray[] =  {"template","candidate","search","ksize","align","match","mismatch","gapopen","gapextend", "processors","flip","threshold","outputdir","inputdir"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters(); 
 			
 			ValidParameters validParameter;
+			map<string, string>::iterator it;
 			
 			//check to make sure all parameters are valid for command
-			for (map<string, string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			}
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("template");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["template"] = inputDir + it->second;		}
+				}
 			}
 			
 			//check for required parameters
@@ -58,8 +76,7 @@ AlignCommand::AlignCommand(string option){
 				mothurOut("template is a required parameter for the align.seqs command."); 
 				mothurOutEndLine();
 				abort = true; 
-			}
-			else if (templateFileName == "not open") { abort = true; }	
+			}else if (templateFileName == "not open") { abort = true; }	
 			
 			candidateFileName = validParameter.validFile(parameters, "candidate", false);
 			if (candidateFileName == "not found") { mothurOut("candidate is a required parameter for the align.seqs command."); mothurOutEndLine(); abort = true;  }
@@ -68,6 +85,12 @@ AlignCommand::AlignCommand(string option){
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < candidateFileNames.size(); i++) {
+					if (inputDir != "") {
+						string path = hasPath(candidateFileNames[i]);
+						//if the user has not given a path then, add inputdir. else leave path alone.
+						if (path == "") {	candidateFileNames[i] = inputDir + candidateFileNames[i];		}
+					}
+
 					int ableToOpen;
 					ifstream in;
 					ableToOpen = openInputFile(candidateFileNames[i], in);
@@ -149,8 +172,8 @@ void AlignCommand::help(){
 		mothurOut("The mistmatch parameter allows you to specify the penalty for having different bases.  The default is -1.0.\n");
 		mothurOut("The gapopen parameter allows you to specify the penalty for opening a gap in an alignment. The default is -2.0.\n");
 		mothurOut("The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n");
-		mothurOut("The flip parameter is used to specify whether or not you want mothur to try the reverse compement if a sequence falls below the threshold.  The default is false.\n");
-		mothurOut("The threshold is used to specify a cutoff at which an alignment is deemed 'bad' and the reverse complement may be tried. \n");
+		mothurOut("The flip parameter is used to specify whether or not you want mothur to try the reverse complement if a sequence falls below the threshold.  The default is false.\n");
+		mothurOut("The threshold is used to specify a cutoff at which an alignment is deemed 'bad' and the reverse complement may be tried. The default threshold is 0.50, meaning 50% of the bases are removed in the alignment.\n");
 		mothurOut("If the flip parameter is set to true the reverse complement of the sequence is aligned and the better alignment is reported.\n");
 		mothurOut("The default for the threshold parameter is 0.50, meaning at least 50% of the bases must remain or the sequence is reported as potentially reversed.\n");
 		mothurOut("The align.seqs command should be in the following format: \n");
@@ -187,9 +210,10 @@ int AlignCommand::execute(){
 		for (int s = 0; s < candidateFileNames.size(); s++) {
 			mothurOut("Aligning sequences from " + candidateFileNames[s] + " ..." ); mothurOutEndLine();
 			
-			string alignFileName = candidateFileNames[s].substr(0,candidateFileNames[s].find_last_of(".")+1) + "align";
-			string reportFileName = candidateFileNames[s].substr(0,candidateFileNames[s].find_last_of(".")+1) + "align.report";
-			string accnosFileName = candidateFileNames[s].substr(0,candidateFileNames[s].find_last_of(".")+1) + "flip.accnos";
+			if (outputDir == "") {  outputDir += hasPath(candidateFileNames[s]); }
+			string alignFileName = outputDir + getRootName(getSimpleName(candidateFileNames[s])) + "align";
+			string reportFileName = outputDir + getRootName(getSimpleName(candidateFileNames[s])) + "align.report";
+			string accnosFileName = outputDir + getRootName(getSimpleName(candidateFileNames[s])) + "flip.accnos";
 			
 			int numFastaSeqs = 0;
 			for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
@@ -283,13 +307,13 @@ int AlignCommand::execute(){
 			}
 #else
 			ifstream inFASTA;
-			openInputFile(candidateFileName[s], inFASTA);
+			openInputFile(candidateFileNames[s], inFASTA);
 			numFastaSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
 			inFASTA.close();
 			
 			lines.push_back(new linePair(0, numFastaSeqs));
 			
-			driver(lines[0], alignFileName, reportFileName, accnosFileName);
+			driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s]);
 			
 			//delete accnos file if its blank else report to user
 			if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  }

@@ -22,18 +22,26 @@ BinSeqCommand::BinSeqCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string AlignArray[] =  {"fasta","label","name", "group"};
+			string AlignArray[] =  {"fasta","label","name", "group","outputdir","inputdir"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
+			map<string, string>::iterator it;
 		
 			//check to make sure all parameters are valid for command
-			for (map<string, string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(globaldata->getListFile()); //if user entered a file with a path then preserve it	
+			}
+
 			
 			//make sure the user has already run the read.otu command
 			if (globaldata->getListFile() == "") { 
@@ -42,6 +50,36 @@ BinSeqCommand::BinSeqCommand(string option){
 				abort = true; 
 			}
 			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("fasta");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("name");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["name"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("group");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["group"] = inputDir + it->second;		}
+				}
+			}
+
 			
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
@@ -77,7 +115,9 @@ BinSeqCommand::BinSeqCommand(string option){
 				fasta = new FastaMap();
 				if (groupfile != "") {
 					groupMap = new GroupMap(groupfile);
-					groupMap->readMap();
+					
+					int error = groupMap->readMap();
+					if (error == 1) { delete groupMap; abort = true; }
 				}
 			}
 	
@@ -258,7 +298,8 @@ void BinSeqCommand::readNamesFile() {
 int BinSeqCommand::process(ListVector* list) {
 	try {
 				string binnames, name, sequence;
-				string outputFileName = getRootName(globaldata->getListFile()) + list->getLabel() + ".fasta";
+				
+				string outputFileName = outputDir + getRootName(getSimpleName(globaldata->getListFile())) + list->getLabel() + ".fasta";
 				openOutputFile(outputFileName, out);
 
 				mothurOut(list->getLabel()); mothurOutEndLine();

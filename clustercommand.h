@@ -45,7 +45,7 @@ private:
 
 	bool abort;
 
-	string method, fileroot, tag;
+	string method, fileroot, tag, outputDir;
 	double cutoff;
 	string showabund, timing;
 	int precision, length;

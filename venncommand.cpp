@@ -31,7 +31,7 @@ VennCommand::VennCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string AlignArray[] =  {"groups","label","calc", "abund"};
+			string AlignArray[] =  {"groups","label","calc", "abund","outputdir","inputdir"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -47,6 +47,12 @@ VennCommand::VennCommand(string option){
 			//make sure the user has already run the read.otu command
 			if ((globaldata->getListFile() == "") && (globaldata->getSharedFile() == "")) {
 				mothurOut("You must read a list, or a list and a group, or a shared before you can use the venn command."); mothurOutEndLine(); abort = true; 
+			}
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
 			}
 
 			//check for optional parameter and set defaults
@@ -122,7 +128,7 @@ VennCommand::VennCommand(string option){
 					}
 				}
 				
-				venn = new Venn();
+				venn = new Venn(outputDir);
 			}
 		}
 

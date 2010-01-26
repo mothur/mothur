@@ -9,6 +9,7 @@
 
 #include "listseqscommand.h"
 #include "sequence.hpp"
+#include "listvector.hpp"
 
 //**********************************************************************************************************************
 
@@ -21,19 +22,69 @@ ListSeqsCommand::ListSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","name", "group", "alignreport" };
+			string Array[] =  {"fasta","name", "group", "alignreport","list","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
+			map<string,string>::iterator it;
 			
 			//check to make sure all parameters are valid for command
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("alignreport");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["alignreport"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("fasta");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("list");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["list"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("name");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["name"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("group");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["group"] = inputDir + it->second;		}
+				}
+			}
+
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
@@ -51,9 +102,17 @@ ListSeqsCommand::ListSeqsCommand(string option){
 			if (alignfile == "not open") { abort = true; }
 			else if (alignfile == "not found") {  alignfile = "";  }
 			
-			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == ""))  { mothurOut("You must provide a file."); mothurOutEndLine(); abort = true; }
+			listfile = validParameter.validFile(parameters, "list", true);
+			if (listfile == "not open") { abort = true; }
+			else if (listfile == "not found") {  listfile = "";  }
+
 			
-			if (parameters.size() > 1) { mothurOut("You may only enter one file."); mothurOutEndLine(); abort = true;  }
+			if ((fastafile == "") && (namefile == "") && (listfile == "") && (groupfile == "") && (alignfile == ""))  { mothurOut("You must provide a file."); mothurOutEndLine(); abort = true; }
+			
+			int okay = 1;
+			if (outputDir != "") { okay++; }
+			
+			if (parameters.size() > okay) { mothurOut("You may only enter one file."); mothurOutEndLine(); abort = true;  }
 		}
 
 	}
@@ -66,7 +125,7 @@ ListSeqsCommand::ListSeqsCommand(string option){
 
 void ListSeqsCommand::help(){
 	try {
-		mothurOut("The list.seqs command reads a fasta, name, group or alignreport file and outputs a .accnos file containing sequence names.\n");
+		mothurOut("The list.seqs command reads a fasta, name, group, list or alignreport file and outputs a .accnos file containing sequence names.\n");
 		mothurOut("The list.seqs command parameters are fasta, name, group and alignreport.  You must provide one of these parameters.\n");
 		mothurOut("The list.seqs command should be in the following format: list.seqs(fasta=yourFasta).\n");
 		mothurOut("Example list.seqs(fasta=amazon.fasta).\n");
@@ -90,11 +149,15 @@ int ListSeqsCommand::execute(){
 		else if (namefile != "")	{	inputFileName = namefile;	readName();		}
 		else if (groupfile != "")	{	inputFileName = groupfile;	readGroup();	}
 		else if (alignfile != "")	{	inputFileName = alignfile;	readAlign();	}
+		else if (listfile != "")	{	inputFileName = listfile;	readList();		}
 		
 		//sort in alphabetical order
 		sort(names.begin(), names.end());
 		
-		string outputFileName = getRootName(inputFileName) + "accnos";
+		if (outputDir == "") {  outputDir += hasPath(inputFileName);  }
+		
+		string outputFileName = outputDir + getRootName(getSimpleName(inputFileName)) + "accnos";
+
 		ofstream out;
 		openOutputFile(outputFileName, out);
 		
@@ -134,6 +197,37 @@ void ListSeqsCommand::readFasta(){
 	}
 	catch(exception& e) {
 		errorOut(e, "ListSeqsCommand", "readFasta");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+void ListSeqsCommand::readList(){
+	try {
+		ifstream in;
+		openInputFile(listfile, in);
+		
+		if(!in.eof()){
+			//read in list vector
+			ListVector list(in);
+			
+			//for each bin
+			for (int i = 0; i < list.getNumBins(); i++) {
+				string binnames = list.get(i);
+				
+				while (binnames.find_first_of(',') != -1) { 
+					string name = binnames.substr(0,binnames.find_first_of(','));
+					binnames = binnames.substr(binnames.find_first_of(',')+1, binnames.length());
+					names.push_back(name);
+				}
+			
+				names.push_back(binnames);
+			}
+		}
+		in.close();	
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "ListSeqsCommand", "readList");
 		exit(1);
 	}
 }

@@ -21,7 +21,7 @@ ParsimonyCommand::ParsimonyCommand(string option) {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"random","groups","iters"};
+			string Array[] =  {"random","groups","iters","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -41,7 +41,10 @@ ParsimonyCommand::ParsimonyCommand(string option) {
 				if (globaldata->gTree.size() == 0) {
 					mothurOut("You must read a treefile and a groupfile or set the randomtree parameter to the output filename you wish, before you may execute the parsimony command."); mothurOutEndLine(); abort = true;  }
 			}
-						
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			string outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
+			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			groups = validParameter.validFile(parameters, "groups", false);			
@@ -60,13 +63,18 @@ ParsimonyCommand::ParsimonyCommand(string option) {
 				if (randomtree == "") { 
 					T = globaldata->gTree;
 					tmap = globaldata->gTreemap;
-					output = new ColumnFile(globaldata->getTreeFile()  +  ".parsimony", itersString);
-					sumFile = globaldata->getTreeFile() + ".psummary";
+					
+					if(outputDir == "") { outputDir += hasPath(globaldata->getTreeFile()); }
+					output = new ColumnFile(outputDir + getSimpleName(globaldata->getTreeFile())  +  ".parsimony", itersString);
+					
+					sumFile = outputDir + getSimpleName(globaldata->getTreeFile()) + ".psummary";
 					openOutputFile(sumFile, outSum);
 				}else { //user wants random distribution
 					savetmap = globaldata->gTreemap;
 					getUserInput();
-					output = new ColumnFile(randomtree, itersString);
+					
+					if(outputDir == "") { outputDir += hasPath(randomtree); }
+					output = new ColumnFile(outputDir+ getSimpleName(randomtree), itersString);
 				}
 				
 				//set users groups to analyze

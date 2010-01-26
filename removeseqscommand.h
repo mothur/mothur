@@ -23,7 +23,7 @@ class RemoveSeqsCommand : public Command {
 		
 	private:
 		set<string> names;
-		string accnosfile, fastafile, namefile, groupfile, alignfile, listfile;
+		string accnosfile, fastafile, namefile, groupfile, alignfile, listfile, outputDir;
 		bool abort;
 		
 		void readFasta();

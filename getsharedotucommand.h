@@ -33,7 +33,7 @@ class GetSharedOTUCommand : public Command {
 		GroupMap* groupMap;
 		
 		set<string> labels;
-		string fastafile, label, groups, listfile, groupfile, output;
+		string fastafile, label, groups, listfile, groupfile, output, userGroups, outputDir;
 		bool abort, allLines, unique;
 		vector<string> Groups;
 		map<string, string> groupFinder;

@@ -26,24 +26,78 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile", "mask", "numwanted", "ksize", "svg", "name", "match","mismatch", "divergence", "minsim", "parents", "iters" };
+			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile", "mask", "numwanted", "ksize", "svg", "name", "match","mismatch", "divergence", "minsim", "parents", "iters","outputdir","inputdir" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
+			map<string,string>::iterator it;
 			
 			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("fasta");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("template");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["template"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("conservation");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["conservation"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("quantile");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["quantile"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("name");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["name"] = inputDir + it->second;		}
+				}
+			}
+
 			
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
 			else if (fastafile == "not found") { fastafile = ""; mothurOut("fasta is a required parameter for the chimera.seqs command."); mothurOutEndLine(); abort = true;  }	
 			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(fastafile); //if user entered a file with a path then preserve it	
+			}
+
 			templatefile = validParameter.validFile(parameters, "template", true);
 			if (templatefile == "not open") { abort = true; }
 			else if (templatefile == "not found") { templatefile = "";  }	
@@ -63,6 +117,12 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 			maskfile = validParameter.validFile(parameters, "mask", false);
 			if (maskfile == "not found") { maskfile = "";  }	
 			else if (maskfile != "default")  { 
+				if (inputDir != "") {
+					string path = hasPath(maskfile);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	maskfile = inputDir + maskfile;		}
+				}
+
 				ifstream in;
 				int	ableToOpen = openInputFile(maskfile, in);
 				if (ableToOpen == 1) { abort = true; }
@@ -192,10 +252,10 @@ int ChimeraSeqsCommand::execute(){
 		
 		if (abort == true) { return 0; }
 		
-		if (method == "bellerophon")			{		chimera = new Bellerophon(fastafile);						}
-		else if (method == "pintail")			{		chimera = new Pintail(fastafile, templatefile);				}
+		if (method == "bellerophon")			{		chimera = new Bellerophon(fastafile, outputDir);			}
+		else if (method == "pintail")			{		chimera = new Pintail(fastafile, templatefile, outputDir);	}
 		else if (method == "ccode")				{		chimera = new Ccode(fastafile, templatefile);				}
-		else if (method == "chimeracheck")		{		chimera = new ChimeraCheckRDP(fastafile, templatefile);		}
+		else if (method == "chimeracheck")		{		chimera = new ChimeraCheckRDP(fastafile, templatefile, outputDir);	}
 		else if (method == "chimeraslayer")		{		chimera = new ChimeraSlayer(fastafile, templatefile);		}
 		else { mothurOut("Not a valid method."); mothurOutEndLine(); return 0;		}
 		
@@ -231,8 +291,8 @@ int ChimeraSeqsCommand::execute(){
 		
 		//there was a problem
 		if (error == 1) {  return 0;  }
-		
-		string outputFileName = getRootName(fastafile) + method + maskfile + ".chimeras";
+
+		string outputFileName = outputDir + getRootName(getSimpleName(fastafile)) + method + maskfile + ".chimeras";
 		ofstream out;
 		openOutputFile(outputFileName, out);
 		

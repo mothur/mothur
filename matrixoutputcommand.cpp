@@ -36,7 +36,7 @@ MatrixOutputCommand::MatrixOutputCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"label","calc","groups"};
+			string Array[] =  {"label","calc","groups","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -47,6 +47,12 @@ MatrixOutputCommand::MatrixOutputCommand(string option){
 			//check to make sure all parameters are valid for command
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			}
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
 			}
 			
 			//make sure the user has already run the read.otu command
@@ -309,7 +315,7 @@ void MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 						}
 					}
 					
-					exportFileName = getRootName(globaldata->inputFileName) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".dist";
+					exportFileName = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".dist";
 					openOutputFile(exportFileName, out);
 					printSims(out);
 					out.close();

@@ -22,21 +22,63 @@ ReadDistCommand::ReadDistCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"phylip", "column", "name", "cutoff", "precision", "group"};
+			string Array[] =  {"phylip", "column", "name", "cutoff", "precision", "group","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
+			map<string,string>::iterator it;
 		
 			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
 			globaldata->newRead();
 			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("phylip");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("column");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["column"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("name");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["name"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("group");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["group"] = inputDir + it->second;		}
+				}
+			}
+
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
+
 			//check for required parameters
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
 			if (phylipfile == "not open") { abort = true; }
@@ -92,10 +134,12 @@ ReadDistCommand::ReadDistCommand(string option){
 				else if (format == "phylip") { read = new ReadPhylipMatrix(distFileName); }
 				else if (format == "matrix") { 
 					groupMap = new GroupMap(groupfile);
-					groupMap->readMap();
-	
-					if (globaldata->gGroupmap != NULL) { delete globaldata->gGroupmap;  }
-					globaldata->gGroupmap = groupMap;
+					int error = groupMap->readMap();
+					if (error == 1) { delete groupMap; abort = true; }
+					else {
+						if (globaldata->gGroupmap != NULL) { delete globaldata->gGroupmap;  }
+						globaldata->gGroupmap = groupMap;
+					}
 				}
 		
 				if (format != "matrix" ) {
@@ -169,7 +213,9 @@ int ReadDistCommand::execute(){
 			if (matrix->getNumSeqs() < groupMap->getNumSeqs()) {  
 				mothurOut("Your distance file contains " + toString(matrix->getNumSeqs()) + " sequences, and your group file contains " + toString(groupMap->getNumSeqs()) + " sequences.");  mothurOutEndLine();				
 				//create new group file
-				string newGroupFile = getRootName(groupfile) + "editted.groups";
+				if(outputDir == "") { outputDir += hasPath(groupfile); }
+				
+				string newGroupFile = outputDir + getRootName(getSimpleName(groupfile)) + "editted.groups";
 				ofstream outGroups;
 				openOutputFile(newGroupFile, outGroups);
 				

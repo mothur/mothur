@@ -34,7 +34,7 @@ private:
 	bool compareDNASeq(string, string);
 
 	bool abort;
-	string fastaFile, oligoFile, qFileName;
+	string fastaFile, oligoFile, qFileName, outputDir;
 	
 	bool flip, allFiles, qtrim;
 	int numFPrimers, numRPrimers, maxAmbig, maxHomoP, minLength, maxLength, qThreshold, qAverage;

@@ -67,7 +67,7 @@ private:
 
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
-	string phylipfile, columnfile, namefile, calc, groups, label;
+	string phylipfile, columnfile, namefile, calc, groups, label, outputDir;
 	vector<string>  Estimators, Groups; //holds estimators to be used
 	
 	//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.

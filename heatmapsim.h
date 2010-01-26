@@ -20,7 +20,7 @@
 class HeatMapSim {
 	
 	public:
-		HeatMapSim();
+		HeatMapSim(string);
 		~HeatMapSim(){};
 	
 		void getPic(vector<SharedRAbundVector*>, vector<Calculator*>);
@@ -30,7 +30,7 @@ class HeatMapSim {
 		void printLegend(int, float);
 
 		GlobalData* globaldata;
-		string format, groupComb;
+		string format, groupComb, outputDir;
 		ofstream outsvg;
 			
 };

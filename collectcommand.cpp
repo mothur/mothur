@@ -44,7 +44,7 @@ CollectCommand::CollectCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"freq","label","calc","abund","size"};
+			string Array[] =  {"freq","label","calc","abund","size","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -56,6 +56,9 @@ CollectCommand::CollectCommand(string option){
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//make sure the user has already run the read.otu command
 			if ((globaldata->getSharedFile() == "") && (globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { mothurOut("You must read a list, sabund, rabund or shared file before you can use the collect.single command."); mothurOutEndLine(); abort = true; }
@@ -136,7 +139,8 @@ int CollectCommand::execute(){
 		
 		for (int p = 0; p < inputFileNames.size(); p++) {
 			
-			string fileNameRoot = getRootName(inputFileNames[p]);
+			if (outputDir == "") { outputDir += hasPath(inputFileNames[p]); }
+			string fileNameRoot = outputDir + getRootName(getSimpleName(inputFileNames[p]));
 			globaldata->inputFileName = inputFileNames[p];
 			
 			if (inputFileNames.size() > 1) {

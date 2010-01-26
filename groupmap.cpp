@@ -21,8 +21,9 @@
  GroupMap::~GroupMap(){}
 
 /************************************************************/
-void GroupMap::readMap() {
+int GroupMap::readMap() {
 		string seqName, seqGroup;
+		int error = 0;
 	
 		while(fileHandle){
 			fileHandle >> seqName;			//read from first column
@@ -30,12 +31,17 @@ void GroupMap::readMap() {
 			
 			setNamesOfGroups(seqGroup);
 			
-			groupmap[seqName] = seqGroup;	//store data in map
-			seqsPerGroup[seqGroup]++;  //increment number of seqs in that group
-		
+			it = groupmap.find(seqName);
+			
+			if (it != groupmap.end()) { error = 1; mothurOut("Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); mothurOutEndLine();  }
+			else {
+				groupmap[seqName] = seqGroup;	//store data in map
+				seqsPerGroup[seqGroup]++;  //increment number of seqs in that group
+			}
 			gobble(fileHandle);
 		}
 		fileHandle.close();
+		return error;
 }
 /************************************************************/
 int GroupMap::getNumGroups() { return namesOfGroups.size();	}

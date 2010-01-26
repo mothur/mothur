@@ -39,7 +39,7 @@ private:
 	string label, calc, groups;
 	vector<string>  Estimators, Groups;
 	vector<SharedRAbundVector*> lookup;
-	string outputFileName, format, outAllFileName;
+	string outputFileName, format, outAllFileName, outputDir;
 	ofstream outputFileHandle, outAll;
 	void process(vector<SharedRAbundVector*>);
 

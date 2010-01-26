@@ -20,23 +20,53 @@ MGClusterCommand::MGClusterCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"blast", "method", "name", "cutoff", "precision", "length", "min", "penalty", "hcluster","merge"};
+			string Array[] =  {"blast", "method", "name", "cutoff", "precision", "length", "min", "penalty", "hcluster","merge","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
+			map<string,string>::iterator it;
 		
 			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("blast");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["blast"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("name");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["name"] = inputDir + it->second;		}
+				}
+			}
+
 			
 			//check for required parameters
 			blastfile = validParameter.validFile(parameters, "blast", true);
 			if (blastfile == "not open") { abort = true; }	
 			else if (blastfile == "not found") { blastfile = ""; }
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(blastfile); //if user entered a file with a path then preserve it	
+			}
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }	
@@ -120,7 +150,7 @@ int MGClusterCommand::execute(){
 			nameMap->readMap();
 		}else{ nameMap= new NameAssignment(); }
 		
-		string fileroot = getRootName(blastfile);
+		string fileroot = outputDir + getRootName(getSimpleName(blastfile));
 		string tag = "";
 		time_t start;
 		float previousDist = 0.00000;
@@ -210,7 +240,6 @@ int MGClusterCommand::execute(){
 			delete cluster;
 			
 		}else { //use hcluster to cluster
-			tag = "fn";
 			//get distmatrix and overlap
 			overlapFile = read->getOverlapFile();
 			distFile = read->getDistFile(); 

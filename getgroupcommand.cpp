@@ -19,7 +19,21 @@ GetgroupCommand::GetgroupCommand(string option){
 		if(option == "help") { help(); abort = true; }
 		
 		else {
-			if (option != "") { mothurOut("There are no valid parameters for the get.group command."); mothurOutEndLine(); abort = true; }
+			//valid paramters for this command
+			string Array[] =  {"outputdir","inputdir"};
+			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			
+			OptionParser parser(option);
+			map<string,string> parameters = parser.getParameters();
+			
+			ValidParameters validParameter;
+			//check to make sure all parameters are valid for command
+			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			}
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			string outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
 			
 			if ((globaldata->getSharedFile() == "")) { mothurOut("You must use the read.otu command to read a groupfile or a sharedfile before you can use the get.group command."); mothurOutEndLine(); abort = true; }
 				
@@ -29,7 +43,8 @@ GetgroupCommand::GetgroupCommand(string option){
 				openInputFile(sharedfile, in);
 		
 				//open output file
-				outputFile = getRootName(sharedfile) + "bootGroups";
+				if (outputDir == "") { outputDir += hasPath(sharedfile); }
+				outputFile = outputDir + getRootName(getSimpleName(sharedfile)) + "bootGroups";
 				openOutputFile(outputFile, out);
 
 			}

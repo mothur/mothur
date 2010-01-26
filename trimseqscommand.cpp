@@ -21,7 +21,8 @@ TrimSeqsCommand::TrimSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string AlignArray[] =  {"fasta", "flip", "oligos", "maxambig", "maxhomop", "minlength", "maxlength", "qfile", "qthreshold", "qaverage", "allfiles", "qtrim"};
+			string AlignArray[] =  {"fasta", "flip", "oligos", "maxambig", "maxhomop", "minlength", "maxlength", "qfile", 
+									"qthreshold", "qaverage", "allfiles", "qtrim", "outputdir","inputdir"};
 			
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
@@ -29,17 +30,54 @@ TrimSeqsCommand::TrimSeqsCommand(string option){
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
+			map<string,string>::iterator it;
 			
 			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("fasta");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("oligos");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["oligos"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("qfile");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
+				}
+			}
+
 			
 			//check for required parameters
 			fastaFile = validParameter.validFile(parameters, "fasta", true);
 			if (fastaFile == "not found") { mothurOut("fasta is a required parameter for the screen.seqs command."); mothurOutEndLine(); abort = true; }
 			else if (fastaFile == "not open") { abort = true; }	
-		
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(fastaFile); //if user entered a file with a path then preserve it	
+			}
 		
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -150,19 +188,19 @@ int TrimSeqsCommand::execute(){
 		openInputFile(fastaFile, inFASTA);
 		
 		ofstream outFASTA;
-		string trimSeqFile = getRootName(fastaFile) + "trim.fasta";
+		string trimSeqFile = outputDir + getRootName(getSimpleName(fastaFile)) + "trim.fasta";
 		openOutputFile(trimSeqFile, outFASTA);
 		
 		ofstream outGroups;
 		vector<ofstream*> fastaFileNames;
 		if(oligoFile != ""){
-			string groupFile = getRootName(fastaFile) + "groups"; 
+			string groupFile = outputDir + getRootName(getSimpleName(fastaFile)) + "groups"; 
 			openOutputFile(groupFile, outGroups);
 			getOligos(fastaFileNames);
 		}
 		
 		ofstream scrapFASTA;
-		string scrapSeqFile = getRootName(fastaFile) + "scrap.fasta";
+		string scrapSeqFile = outputDir + getRootName(getSimpleName(fastaFile)) + "scrap.fasta";
 		openOutputFile(scrapSeqFile, scrapFASTA);
 		
 		ifstream qFile;
@@ -249,7 +287,7 @@ int TrimSeqsCommand::execute(){
 			string seqName;
 			openInputFile(getRootName(fastaFile) + groupVector[i] + ".fasta", inFASTA);
 			ofstream outGroups;
-			openOutputFile(getRootName(fastaFile) + groupVector[i] + ".groups", outGroups);
+			openOutputFile(outputDir + getRootName(getSimpleName(fastaFile)) + groupVector[i] + ".groups", outGroups);
 			
 			while(!inFASTA.eof()){
 				if(inFASTA.get() == '>'){
@@ -311,7 +349,7 @@ void TrimSeqsCommand::getOligos(vector<ofstream*>& outFASTAVec){
 					groupVector.push_back(group);
 					
 					if(allFiles){
-						outFASTAVec.push_back(new ofstream((getRootName(fastaFile) + group + ".fasta").c_str(), ios::ate));
+						outFASTAVec.push_back(new ofstream((outputDir + getRootName(getSimpleName(fastaFile)) + group + ".fasta").c_str(), ios::ate));
 					}
 				}
 			}

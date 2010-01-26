@@ -28,7 +28,7 @@ public:
 private:
 	
 	bool abort;
-	string method, fastafile, templatefile, consfile, quanfile, maskfile, namefile;
+	string method, fastafile, templatefile, consfile, quanfile, maskfile, namefile, outputDir;
 	bool filter, correction, svg, printAll;
 	int processors, midpoint, averageLeft, averageRight, window, iters, increment, numwanted, ksize, match, mismatch, parents, minSimilarity;
 	float divR;

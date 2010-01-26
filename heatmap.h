@@ -19,7 +19,7 @@
 class HeatMap {
 	
 	public:
-		HeatMap(string, string);
+		HeatMap(string, string, string);
 		~HeatMap(){};
 	
 		void getPic(RAbundVector*);
@@ -30,7 +30,7 @@ class HeatMap {
 		void printLegend(int, float);
 
 		GlobalData* globaldata;
-		string format, sorted, groupComb, scaler;
+		string format, sorted, groupComb, scaler, outputDir;
 		ofstream outsvg;
 			
 };

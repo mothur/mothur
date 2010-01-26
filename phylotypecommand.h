@@ -26,7 +26,7 @@ public:
 	
 private:
 	bool abort, allLines;
-	string taxonomyFileName, label;
+	string taxonomyFileName, label, outputDir;
 	set<string> labels; //holds labels to be used
 	int cutoff;
 	

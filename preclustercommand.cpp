@@ -22,28 +22,56 @@ PreClusterCommand::PreClusterCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "name", "diffs"};
+			string Array[] =  {"fasta", "name", "diffs", "outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
+			map<string, string>::iterator it;
 		
 			//check to make sure all parameters are valid for command
 			for (map<string, string>::iterator it2 = parameters.begin(); it2 != parameters.end(); it2++) { 
 				if (validParameter.isValidParameter(it2->first, myArray, it2->second) != true) {  abort = true;  }
 			}
 			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("fasta");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("name");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["name"] = inputDir + it->second;		}
+				}
+			}
+
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not found") { mothurOut("fasta is a required parameter for the pre.cluster command."); mothurOutEndLine(); abort = true; }
 			else if (fastafile == "not open") { abort = true; }	
 			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(fastafile); //if user entered a file with a path then preserve it	
+			}
+
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			namefile = validParameter.validFile(parameters, "name", true);
-
 			if (namefile == "not found") { namefile =  "";  }
 			else if (namefile == "not open") { abort = true; }	
 //			else {  readNameFile();  }
@@ -132,9 +160,11 @@ int PreClusterCommand::execute(){
 			}//end if active i
 			if(i % 100 == 0)	{ cout << i << '\t' << numSeqs - count << '\t' << count << endl;	}
 		}
-	
-		string newFastaFile = getRootName(fastafile) + "precluster" + getExtension(fastafile);
-		string newNamesFile = getRootName(fastafile) + "precluster.names";
+		
+		string fileroot = outputDir + getRootName(getSimpleName(fastafile));
+		
+		string newFastaFile = fileroot + "precluster" + getExtension(fastafile);
+		string newNamesFile = fileroot + "precluster.names";
 		
 		
 		mothurOut("Total number of sequences before precluster was " + toString(alignSeqs.size()) + "."); mothurOutEndLine();

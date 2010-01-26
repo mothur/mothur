@@ -15,9 +15,10 @@
 
 //***************************************************************************************************************
 
-Bellerophon::Bellerophon(string name) {
+Bellerophon::Bellerophon(string name, string o)  {
 	try {
 		fastafile = name;
+		outputDir = o;
 	}
 	catch(exception& e) {
 		errorOut(e, "Bellerophon", "Bellerophon");
@@ -81,12 +82,16 @@ int Bellerophon::getChimeras() {
 		//do soft filter
 		if (filter)  {
 			string optionString = "fasta=" + fastafile + ", soft=50";
+			if (outputDir != "") { optionString += ", outputdir=" + outputDir; }
+			
 			filterSeqs = new FilterSeqsCommand(optionString);
 			filterSeqs->execute();
 			delete filterSeqs;
 			
 			//reset fastafile to filtered file
-			fastafile = getRootName(fastafile) + "filter.fasta";
+			if (outputDir == "") { fastafile = getRootName(fastafile) + "filter.fasta"; }
+			else				 { fastafile = outputDir + getRootName(getSimpleName(fastafile)) + "filter.fasta"; }
+			
 		}
 		
 		distCalculator = new eachGapDist();

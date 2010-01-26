@@ -23,7 +23,7 @@ public:
 	void help();
 	
 private:
-	string vertical, filter, fastafile, hard;	
+	string vertical, filter, fastafile, hard, outputDir;	
 	int alignmentLength;
 
 	char trump;

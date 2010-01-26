@@ -41,7 +41,7 @@ private:
 	void appendAlignFiles(string, string); 
 	void appendReportFiles(string, string);
 	
-	string candidateFileName, templateFileName, distanceFileName, search, align;
+	string candidateFileName, templateFileName, distanceFileName, search, align, outputDir;
 	float match, misMatch, gapOpen, gapExtend, threshold;
 	int processors, kmerSize;
 	vector<string> candidateFileNames;

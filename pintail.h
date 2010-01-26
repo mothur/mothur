@@ -24,7 +24,7 @@
 class Pintail : public Chimera {
 	
 	public:
-		Pintail(string, string);	
+		Pintail(string, string, string);	
 		~Pintail();
 		
 		int getChimeras();

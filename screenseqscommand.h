@@ -26,7 +26,7 @@ private:
 	void screenAlignReport(set<string>);
 	
 	bool abort;
-	string fastafile, namefile, groupfile, alignreport;
+	string fastafile, namefile, groupfile, alignreport, outputDir;
 	int startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength;
 };
 

@@ -11,14 +11,17 @@
 
 //**********************************************************************************************************************
 
-SharedCommand::SharedCommand(){
+SharedCommand::SharedCommand(string o) : outputDir(o) {
 	try {
 		globaldata = GlobalData::getInstance();
 		
 		//getting output filename
 		filename = globaldata->inputFileName;
-		filename = getRootName(filename);
+		if (outputDir == "") { outputDir += hasPath(filename); }
+		
+		filename = outputDir + getRootName(getSimpleName(filename));
 		filename = filename + "shared";
+		
 		openOutputFile(filename, out);
 		pickedGroups = false;
 		
@@ -41,7 +44,7 @@ SharedCommand::SharedCommand(){
 		}
 		
 		//set fileroot
-		fileroot = getRootName(globaldata->getListFile());
+		fileroot = outputDir + getRootName(getSimpleName(globaldata->getListFile()));
 		
 		//clears file before we start to write to it below
 		for (int i=0; i<groups.size(); i++) {
@@ -62,7 +65,7 @@ int SharedCommand::execute(){
 		//lookup.clear();
 		string errorOff = "no error";
 		//errorOff = "";
-			
+cout << globaldata->inputFileName << endl;			
 		//read in listfile
 		read = new ReadOTUFile(globaldata->inputFileName);	
 		read->read(&*globaldata); 
@@ -196,6 +199,7 @@ int SharedCommand::execute(){
 			delete it3->second;
 		}
 
+		globaldata->setSharedFile(filename);
 		
 		return 0;
 	}
@@ -288,10 +292,10 @@ void SharedCommand::createMisMatchFile() {
 					string name = names.substr(0,names.find_first_of(','));
 					names = names.substr(names.find_first_of(',')+1, names.length());
 					string group = groupMap->getGroup(name);
-	cout << name << endl;				
+				
 					if(group == "not found") {	outMisMatch << name << endl;  }
 				}
-	cout << names << endl;			
+			
 				//get last name
 				string group = groupMap->getGroup(names);
 				if(group == "not found") {	outMisMatch << names << endl;  }				

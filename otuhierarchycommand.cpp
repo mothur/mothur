@@ -18,23 +18,43 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"list","label"};
+			string Array[] =  {"list","label","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
+			map<string,string>::iterator it;
 		
 			//check to make sure all parameters are valid for command
-			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("list");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["list"] = inputDir + it->second;		}
+				}
+			}
+
 			listFile = validParameter.validFile(parameters, "list", true);
 			if (listFile == "not found") { mothurOut("list is a required parameter for the otu.hierarchy command."); mothurOutEndLine(); abort = true; }
 			else if (listFile == "not open") { abort = true; }	
-
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(listFile); //if user entered a file with a path then preserve it	
+			}
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -111,7 +131,7 @@ int OtuHierarchyCommand::execute(){
 		}
 		
 		ofstream out;
-		string outputFileName = getRootName(listFile) + lists[0].getLabel() + "-" + lists[1].getLabel() + ".otu.hierarchy";
+		string outputFileName = outputDir + getRootName(getSimpleName(listFile)) + lists[0].getLabel() + "-" + lists[1].getLabel() + ".otu.hierarchy";
 		openOutputFile(outputFileName, out);
 		
 		//go through each bin in "big" otu and output the bins in "little" otu which created it

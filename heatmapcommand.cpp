@@ -24,7 +24,7 @@ HeatMapCommand::HeatMapCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string AlignArray[] =  {"groups","label","sorted","scale"};
+			string AlignArray[] =  {"groups","label","sorted","scale","outputdir","inputdir"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -35,6 +35,12 @@ HeatMapCommand::HeatMapCommand(string option){
 			//check to make sure all parameters are valid for command
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
+			}
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
 			}
 			
 			//make sure the user has already run the read.otu command
@@ -69,7 +75,7 @@ HeatMapCommand::HeatMapCommand(string option){
 			scale = validParameter.validFile(parameters, "scale", false);				if (scale == "not found") { scale = "log10"; }
 			
 			if (abort == false) {
-				heatmap = new HeatMap(sorted, scale);
+				heatmap = new HeatMap(sorted, scale, outputDir);
 				format = globaldata->getFormat();
 			}
 		}

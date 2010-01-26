@@ -19,23 +19,53 @@ DeconvoluteCommand::DeconvoluteCommand(string option) {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "name"};
+			string Array[] =  {"fasta", "name","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
 			
 			ValidParameters validParameter;
+			map<string, string>::iterator it;
 		
 			//check to make sure all parameters are valid for command
-			for (map<string, string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("fasta");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("name");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["name"] = inputDir + it->second;		}
+				}
+			}
+
 			
 			//check for required parameters
 			inFastaName = validParameter.validFile(parameters, "fasta", true);
 			if (inFastaName == "not open") { abort = true; }
 			else if (inFastaName == "not found") { inFastaName = ""; mothurOut("fasta is a required parameter for the unique.seqs command."); mothurOutEndLine(); abort = true;  }	
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(inFastaName); //if user entered a file with a path then preserve it	
+			}
 			
 			oldNameMapFName = validParameter.validFile(parameters, "name", true);
 			if (oldNameMapFName == "not open") { abort = true; }
@@ -72,8 +102,8 @@ int DeconvoluteCommand::execute() {
 		if (abort == true) { return 0; }
 
 		//prepare filenames and open files
-		string outNameFile = (getRootName(inFastaName) + "names");
-		string outFastaFile = (getRootName(inFastaName) + "unique" + getExtension(inFastaName));
+		string outNameFile = outputDir + getRootName(getSimpleName(inFastaName)) + "names";
+		string outFastaFile = outputDir + getRootName(getSimpleName(inFastaName)) + "unique" + getExtension(inFastaName);
 		
 		FastaMap fastamap;
 	

@@ -25,19 +25,45 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option){
 		else {
 			
 			//valid paramters for this command
-			string AlignArray[] =  {"template","fasta","name","search","ksize","method","processors","taxonomy","match","mismatch","gapopen","gapextend","numwanted","cutoff","probs","iters"};
+			string AlignArray[] =  {"template","fasta","name","search","ksize","method","processors","taxonomy","match","mismatch","gapopen","gapextend","numwanted","cutoff","probs","iters", "outputdir","inputdir"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters(); 
 			
 			ValidParameters validParameter;
+			map<string, string>::iterator it;
 			
 			//check to make sure all parameters are valid for command
-			for (map<string, string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("template");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["template"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("taxonomy");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
+				}
+			}
+
 			//check for required parameters
 			templateFileName = validParameter.validFile(parameters, "template", true);
 			if (templateFileName == "not found") { 
@@ -54,6 +80,12 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option){
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < fastaFileNames.size(); i++) {
+					if (inputDir != "") {
+						string path = hasPath(fastaFileNames[i]);
+						//if the user has not given a path then, add inputdir. else leave path alone.
+						if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
+					}
+					
 					int ableToOpen;
 					ifstream in;
 					ableToOpen = openInputFile(fastaFileNames[i], in);
@@ -88,6 +120,12 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option){
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < namefileNames.size(); i++) {
+					if (inputDir != "") {
+						string path = hasPath(namefileNames[i]);
+						//if the user has not given a path then, add inputdir. else leave path alone.
+						if (path == "") {	namefileNames[i] = inputDir + namefileNames[i];		}
+					}
+
 					int ableToOpen;
 					ifstream in;
 					ableToOpen = openInputFile(namefileNames[i], in);
@@ -227,9 +265,11 @@ int ClassifySeqsCommand::execute(){
 			}
 		
 			mothurOut("Classifying sequences from " + fastaFileNames[s] + " ..." ); mothurOutEndLine();
-			string newTaxonomyFile = getRootName(fastaFileNames[s]) + getRootName(taxonomyFileName) + "taxonomy";
-			string tempTaxonomyFile = getRootName(fastaFileNames[s]) + "taxonomy.temp";
-			string taxSummary = getRootName(fastaFileNames[s]) + getRootName(taxonomyFileName) + "tax.summary";
+			
+			if (outputDir == "") { outputDir += hasPath(fastaFileNames[s]); }
+			string newTaxonomyFile = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + getRootName(getSimpleName(taxonomyFileName)) + "taxonomy";
+			string tempTaxonomyFile = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + "taxonomy.temp";
+			string taxSummary = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + getRootName(getSimpleName(taxonomyFileName)) + "tax.summary";
 			
 			int start = time(NULL);
 			int numFastaSeqs = 0;

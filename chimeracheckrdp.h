@@ -25,7 +25,7 @@
 class ChimeraCheckRDP : public Chimera {
 	
 	public:
-		ChimeraCheckRDP(string, string);	
+		ChimeraCheckRDP(string, string, string);	
 		~ChimeraCheckRDP();
 		
 		int getChimeras();

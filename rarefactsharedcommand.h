@@ -39,7 +39,7 @@ private:
 
 	bool abort, allLines, jumble;
 	set<string> labels; //holds labels to be used
-	string label, calc, groups;
+	string label, calc, groups, outputDir;
 	vector<string>  Estimators, Groups;
 
 

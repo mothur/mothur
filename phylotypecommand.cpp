@@ -24,25 +24,46 @@ PhylotypeCommand::PhylotypeCommand(string option){
 		else {
 			
 			//valid paramters for this command
-			string AlignArray[] =  {"taxonomy","cutoff","label"};
+			string AlignArray[] =  {"taxonomy","cutoff","label","outputdir","inputdir"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters(); 
 			
 			ValidParameters validParameter;
+			map<string, string>::iterator it;
 			
 			//check to make sure all parameters are valid for command
-			for (map<string, string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
+			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			//if the user changes the input directory command factory will send this info to us in the output parameter 
+			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			if (inputDir == "not found"){	inputDir = "";		}
+			else {
+				string path;
+				it = parameters.find("taxonomy");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
+				}
+			}
+
 			taxonomyFileName = validParameter.validFile(parameters, "taxonomy", true);
 			if (taxonomyFileName == "not found") { 
 				mothurOut("taxonomy is a required parameter for the phylotype command."); 
 				mothurOutEndLine();
 				abort = true; 
 			}else if (taxonomyFileName == "not open") { abort = true; }	
+			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+				outputDir = "";	
+				outputDir += hasPath(taxonomyFileName); //if user entered a file with a path then preserve it	
+			}
 			
 			string temp = validParameter.validFile(parameters, "cutoff", false);
 			if (temp == "not found") { temp = "-1"; }
@@ -112,14 +133,16 @@ int PhylotypeCommand::execute(){
 		bool done = false;
 		if (tree->get(leaves[0]).parent == -1) {  mothurOut("Empty Tree"); mothurOutEndLine();	done = true;	}
 		
+		string fileroot = outputDir + getRootName(getSimpleName(taxonomyFileName));
+		
 		ofstream outList;
-		string outputListFile = getRootName(taxonomyFileName) + "tx.list";
+		string outputListFile = fileroot + "tx.list";
 		openOutputFile(outputListFile, outList);
 		ofstream outSabund;
-		string outputSabundFile = getRootName(taxonomyFileName) + "tx.sabund";
+		string outputSabundFile = fileroot + "tx.sabund";
 		openOutputFile(outputSabundFile, outSabund);
 		ofstream outRabund;
-		string outputRabundFile = getRootName(taxonomyFileName) + "tx.rabund";
+		string outputRabundFile = fileroot + "tx.rabund";
 		openOutputFile(outputRabundFile, outRabund);
 		
 		int count = 1;		
