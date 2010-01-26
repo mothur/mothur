@@ -196,7 +196,7 @@ int ChimeraSeqsCommand::execute(){
 		else if (method == "pintail")			{		chimera = new Pintail(fastafile, templatefile);				}
 		else if (method == "ccode")				{		chimera = new Ccode(fastafile, templatefile);				}
 		else if (method == "chimeracheck")		{		chimera = new ChimeraCheckRDP(fastafile, templatefile);		}
-		//else if (method == "chimeraslayer")		{		chimera = new ChimeraSlayer(fastafile, templatefile);		}
+		else if (method == "chimeraslayer")		{		chimera = new ChimeraSlayer(fastafile, templatefile);		}
 		else { mothurOut("Not a valid method."); mothurOutEndLine(); return 0;		}
 		
 		//set user options

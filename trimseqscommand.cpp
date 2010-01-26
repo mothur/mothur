@@ -301,7 +301,9 @@ void TrimSeqsCommand::getOligos(vector<ofstream*>& outFASTAVec){
 					forPrimer.push_back(oligo);
 				}
 				else if(type == "reverse"){
-					revPrimer.push_back(oligo);
+					Sequence oligoRC("reverse", oligo);
+					oligoRC.reverseComplement();
+					revPrimer.push_back(oligoRC.getUnaligned());
 				}
 				else if(type == "barcode"){
 					inOligos >> group;
@@ -406,7 +408,7 @@ bool TrimSeqsCommand::stripReverse(Sequence& seq){
 			}
 			
 			if(compareDNASeq(oligo, rawSequence.substr(rawSequence.length()-oligo.length(),oligo.length()))){
-				seq.setUnaligned(rawSequence.substr(rawSequence.length()-oligo.length()));
+				seq.setUnaligned(rawSequence.substr(0,rawSequence.length()-oligo.length()));
 				success = 1;
 				break;
 			}

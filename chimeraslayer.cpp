@@ -33,11 +33,12 @@ void ChimeraSlayer::print(ostream& out) {
 		for (int i = 0; i < querySeqs.size(); i++) {
 		
 			if (chimeraFlags[i] == "yes") {	
+				cout << i << endl;
 				if ((chimeraResults[i][0].bsa >= 90.0) || (chimeraResults[i][0].bsb >= 90.0)) {
 					mothurOut(querySeqs[i]->getName() + "\tyes"); mothurOutEndLine();
 					out << querySeqs[i]->getName() << "\tyes" << endl;
 				}else {
-					out << querySeqs[i]->getName() << "\tno" << endl;
+					out << querySeqs[i]->getName() << "\tyes" << endl;
 					//mothurOut(querySeqs[i]->getName() + "\tno"); mothurOutEndLine();
 				}
 

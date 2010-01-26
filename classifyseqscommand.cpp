@@ -200,8 +200,8 @@ int ClassifySeqsCommand::execute(){
 	try {
 		if (abort == true) {	return 0;	}
 		
-		if(method == "bayesian")			{	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters);		}
-		else if(method == "knn")			{	classify = new Knn(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, numWanted);				}
+		if(method == "bayesian"){	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters);		}
+		else if(method == "knn"){	classify = new Knn(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, numWanted);				}
 		else {
 			mothurOut(search + " is not a valid method option. I will run the command using bayesian.");
 			mothurOutEndLine();
@@ -380,7 +380,7 @@ string ClassifySeqsCommand::addUnclassifieds(string tax, int maxlevel) {
 		//keep what you have counting the levels
 		while (tax.find_first_of(';') != -1) {
 			//get taxon
-			taxon = tax.substr(0,tax.find_first_of(';'));
+			taxon = tax.substr(0,tax.find_first_of(';'))+';';
 			tax = tax.substr(tax.find_first_of(';')+1, tax.length());
 			newTax += taxon;
 			level++;
@@ -480,13 +480,14 @@ int ClassifySeqsCommand::driver(linePair* line, string taxFName, string tempTFNa
 			
 			if (candidateSeq->getName() != "") {
 				taxonomy = classify->getTaxonomy(candidateSeq);
-				
+
 				if (taxonomy != "bad seq") {
 					//output confidence scores or not
 					if (probs) {
 						outTax << candidateSeq->getName() << '\t' << taxonomy << endl;
 					}else{
 						outTax << candidateSeq->getName() << '\t' << classify->getSimpleTax() << endl;
+						cout << classify->getSimpleTax() << endl;
 					}
 					
 					outTaxSimple << candidateSeq->getName() << '\t' << classify->getSimpleTax() << endl;
