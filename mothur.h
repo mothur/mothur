@@ -489,7 +489,7 @@ inline bool isBlank(string fileName){
 inline string getFullPathName(string fileName){
 	
 	string path = hasPath(fileName);
-	string newFileName = getSimpleName(fileName);
+	string newFileName;
 	int pos;
 	
 	if (path == "") { return fileName; } //its a simple name
@@ -501,6 +501,7 @@ inline string getFullPathName(string fileName){
 		//get current working directory 
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)	
 			if (path.rfind("./") == -1) { return fileName; } //already complete name
+			else { newFileName = fileName.substr(fileName.rfind("./")+2); } //save the complete part of the name
 			
 			char* cwdpath;
 			size_t size;
@@ -543,6 +544,7 @@ inline string getFullPathName(string fileName){
 				
 		#else
 			if (path.rfind(".\\") == -1) { return fileName; } //already complete name
+			else { newFileName = fileName.substr(fileName.rfind(".\\")+2); } //save the complete part of the name
 						
 			char *cwdpath = NULL;
 			cwdpath = getcwd(NULL, 0); // or _getcwd

@@ -12,7 +12,7 @@
 
 #include "mothur.h"
 #include "command.hpp"
-#include "alignment.hpp"
+//#include "alignment.hpp"
 #include "classify.h"
 
 //KNN and Bayesian methods modeled from algorithms in
