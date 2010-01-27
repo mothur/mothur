@@ -12,6 +12,7 @@
 #include "kmerdb.hpp"
 #include "suffixdb.hpp"
 #include "blastdb.hpp"
+#include "distancedb.hpp"
 
 /**************************************************************************************************/
 Classify::Classify(string tfile, string tempFile, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch) : taxFile(tfile), templateFile(tempFile) {		
@@ -42,6 +43,7 @@ Classify::Classify(string tfile, string tempFile, string method, int kmerSize, f
 		}
 		else if(method == "suffix")		{	database = new SuffixDB(numSeqs);								}
 		else if(method == "blast")		{	database = new BlastDB(gapOpen, gapExtend, match, misMatch);	}
+		else if(method == "distance")	{	database = new DistanceDB();	}
 		else {
 			mothurOut(method + " is not a valid search option. I will run the command using kmer, ksize=8.");
 			mothurOutEndLine();

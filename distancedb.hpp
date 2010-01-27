@@ -5,31 +5,35 @@
  *  distancedb.hpp
  *  
  *
- *  Created by Pat Schloss on 12/29/08.
- *  Copyright 2008 Patrick D. Schloss. All rights reserved.
+ *  Created by westcott on 1/27/10.
+ *  Copyright 2010 Schloss Lab. All rights reserved.
  *
  */
 
 
 #include "mothur.h"
+#include "dist.h"
 
 class DistanceDB : public Database {
 	
 public:
-
-	DistanceDB(string, string);
-	vector<int> findClosestSequences(Sequence*, int);
+	
+	DistanceDB();
+	~DistanceDB() {}
+	
+	void generateDB() {} //doesn't generate a search db 
+	void addSequence(Sequence);  
+	vector<int> findClosestSequences(Sequence*, int);  // returns indexes of n closest sequences to query
 	
 private:
-
-	struct hit{
-		string seqName;
-		int indexNumber;
-		float simScore;
-	};
+	vector<Sequence> data;
+	Dist* distCalculator;
 	
-	vector<hit> mostSimSequenceVector;
-	int searchIndex;
+	int templateSeqsLength;
+	bool templateAligned;
+	
+	bool isAligned(string);
+	
 };
 
 #endif

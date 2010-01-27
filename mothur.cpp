@@ -19,9 +19,8 @@ CommandFactory* CommandFactory::_uniqueInstance = 0;
 int main(int argc, char *argv[]){
 	try {
 		
-		//remove old logfile
-//		string log = "mothur.logFile";
-//		remove(log.c_str());
+		string log = "mothur.logFile";
+		remove(log.c_str());
 		
 		time_t ltime = time(NULL); /* calendar time */  
 		string logFileName = "mothur." + toString(ltime) + ".logfile";
@@ -104,10 +103,11 @@ int main(int argc, char *argv[]){
 		string outputDir = mothur->getOutputDir();
 		logFileName = outputDir + logFileName;
 	
+		//need this because mothur.h makes the logfile, but doesn't know where to put it
+		rename(log.c_str(), logFileName.c_str()); //logfile with timestamp
+		
 		delete mothur;
-		
-//		rename(log.c_str(), logFileName.c_str()); //logfile with timestamp
-		
+
 		return 0;
 	}
 	catch(exception& e) {

@@ -204,9 +204,10 @@ ClassifySeqsCommand::~ClassifySeqsCommand(){
 void ClassifySeqsCommand::help(){
 	try {
 		mothurOut("The classify.seqs command reads a fasta file containing sequences and creates a .taxonomy file and a .tax.summary file.\n");
-		mothurOut("The classify.seqs command parameters are template, fasta, search, ksize, method, taxonomy, processors, match, mismatch, gapopen, gapextend, numwanted and probs.\n");
+		mothurOut("The classify.seqs command parameters are template, fasta, name, search, ksize, method, taxonomy, processors, match, mismatch, gapopen, gapextend, numwanted and probs.\n");
 		mothurOut("The template, fasta and taxonomy parameters are required. You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n");
-		mothurOut("The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer and blast. The default is kmer.\n");
+		mothurOut("The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer, blast and distance. The default is kmer.\n");
+		mothurOut("The name parameter allows you add a names file with your fasta file, if you enter multiple fasta files, you must enter matching names files for them.\n");
 		mothurOut("The method parameter allows you to specify classification method to use.  Your options are: bayesian and knn. The default is bayesian.\n");
 		mothurOut("The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 8.\n");
 		mothurOut("The processors parameter allows you to specify the number of processors to use. The default is 1.\n");
