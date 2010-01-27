@@ -13,7 +13,7 @@
 
 
 //***************************************************************************************************************
-Ccode::Ccode(string filename, string temp) {  fastafile = filename;  templateFile = temp;  }
+Ccode::Ccode(string filename, string temp, string o) {  fastafile = filename;  templateFile = temp;  outputDir = o; }
 //***************************************************************************************************************
 
 Ccode::~Ccode() {
@@ -32,7 +32,7 @@ void Ccode::print(ostream& out) {
 		
 		mothurOutEndLine();
 		
-		string mapInfo = getRootName(fastafile) + "mapinfo";
+		string mapInfo = outputDir + getRootName(getSimpleName(fastafile)) + "mapinfo";
 		ofstream out2;
 		openOutputFile(mapInfo, out2);
 		

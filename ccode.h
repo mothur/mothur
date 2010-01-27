@@ -24,7 +24,7 @@
 class Ccode : public Chimera {
 	
 	public:
-		Ccode(string, string);	
+		Ccode(string, string, string);	
 		~Ccode();
 		
 		int getChimeras();

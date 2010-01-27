@@ -155,11 +155,16 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		delete command;   //delete the old command
 		
 		//user has opted to redirect output from dir where input files are located to some other place
-		if (outputDir != "") { optionString += ", outputdir=" + outputDir; }
+		if (outputDir != "") { 
+			if (optionString != "") { optionString += ", outputdir=" + outputDir; }
+			else { optionString += "outputdir=" + outputDir; }
+		}
 		
 		//user has opted to redirect input from dir where mothur.exe is located to some other place
-		if (inputDir != "") { optionString += ", inputdir=" + inputDir; }
-
+		if (inputDir != "") { 
+			if (optionString != "") { optionString += ", inputdir=" + inputDir; }
+			else { optionString += "inputdir=" + inputDir; }
+		}
 		
 		if(commandName == "read.dist")					{	command = new ReadDistCommand(optionString);			}
 		else if(commandName == "read.otu")				{	command = new ReadOtuCommand(optionString);				}
