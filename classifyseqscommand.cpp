@@ -528,7 +528,6 @@ int ClassifySeqsCommand::driver(linePair* line, string taxFName, string tempTFNa
 						outTax << candidateSeq->getName() << '\t' << taxonomy << endl;
 					}else{
 						outTax << candidateSeq->getName() << '\t' << classify->getSimpleTax() << endl;
-						cout << classify->getSimpleTax() << endl;
 					}
 					
 					outTaxSimple << candidateSeq->getName() << '\t' << classify->getSimpleTax() << endl;
