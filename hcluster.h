@@ -18,16 +18,6 @@ class RAbundVector;
 class ListVector;
 
 /***********************************************************************/
-struct linkNode {
-	int	links;
-	float dist;
-	
-	linkNode() {};
-	linkNode(int l, float a) : links(l), dist(a) {};
-	~linkNode() {};
-};
-
-/***********************************************************************/
 class HCluster {
 	
 public:

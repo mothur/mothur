@@ -215,7 +215,7 @@ int PreClusterCommand::readFASTA(){
 	}
 }
 /**************************************************************************************************/
-
+//this seems to require the names and fasta file to be in the same order???
 int PreClusterCommand::readNamesFASTA(){
 	try {
 		ifstream inNames;
@@ -238,7 +238,8 @@ int PreClusterCommand::readNamesFASTA(){
 				size++;
 				secondCol = secondCol.substr(secondCol.find_first_of(',')+1, secondCol.length());
 			}
-			Sequence seq(inFasta);
+			
+			Sequence seq(inFasta);  gobble(inFasta);
 			if (seq.getName() != firstCol) { mothurOut(seq.getName() + " is not in your names file, please correct."); mothurOutEndLine(); exit(1); }
 			else{
 				seqPNode tempNode(size, seq, nameString);

@@ -105,7 +105,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option){
 			
 			temp = validParameter.validFile(parameters, "qfile", true);	
 			if (temp == "not found")	{	qFileName = "";		}
-			else if(temp == "not open")	{	abort = 0;		}
+			else if(temp == "not open")	{	abort = true;		}
 			else						{	qFileName = temp;	}
 			
 			temp = validParameter.validFile(parameters, "qthreshold", false);	if (temp == "not found") { temp = "0"; }
@@ -183,7 +183,10 @@ int TrimSeqsCommand::execute(){
 	try{
 	
 		if (abort == true) { return 0; }
-
+		
+		numFPrimers = 0;  //this needs to be initialized
+		numRPrimers = 0;
+		
 		ifstream inFASTA;
 		openInputFile(fastaFile, inFASTA);
 		
@@ -207,9 +210,10 @@ int TrimSeqsCommand::execute(){
 		if(qFileName != "")	{	openInputFile(qFileName, qFile);	}
 		
 		bool success;
-			
+
 		while(!inFASTA.eof()){
 			Sequence currSeq(inFASTA);
+
 			string origSeq = currSeq.getUnaligned();
 			if (origSeq != "") {
 				int group;
@@ -223,21 +227,22 @@ int TrimSeqsCommand::execute(){
 					}
 					if(!success)			{	trashCode += 'q';								}
 				}
-				
+			
 				if(barcodes.size() != 0){
 					success = stripBarcode(currSeq, group);
 					if(!success){	trashCode += 'b';	}
 				}
-				
+			
 				if(numFPrimers != 0){
 					success = stripForward(currSeq);
 					if(!success){	trashCode += 'f';	}
 				}
-				
+					
 				if(numRPrimers != 0){
 					success = stripReverse(currSeq);
 					if(!success){	trashCode += 'r';	}
 				}
+		
 				if(minLength > 0 || maxLength > 0){
 					success = cullLength(currSeq);
 					if(!success){	trashCode += 'l'; }
@@ -299,8 +304,7 @@ int TrimSeqsCommand::execute(){
 			outGroups.close();
 			inFASTA.close();
 		}
-		
-		
+			
 		return 0;		
 	}
 	catch(exception& e) {

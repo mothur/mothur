@@ -225,13 +225,8 @@ int ReadOtuCommand::execute(){
 				globaldata->setListFile("");
 				globaldata->setGroupFile("");
 				globaldata->setSharedFile("");
-			}else{
-				
-				//change format to shared  to speed up commands
-				globaldata->setFormat("sharedfile");
-				globaldata->setListFile("");
-				globaldata->setGroupFile("");
 			}
+			
 			delete shared;
 		}
 		return 0;

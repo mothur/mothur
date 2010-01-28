@@ -134,7 +134,7 @@ CommandFactory::CommandFactory(){
 	commands["phylotype"]			= "phylotype";
 	commands["mgcluster"]			= "mgcluster";
 	commands["pre.cluster"]			= "pre.cluster";
-	commands["pca"]					= "pca";
+	commands["pcoa"]				= "pcoa";
 	commands["otu.hierarchy"]		= "otu.hierarchy";
 	commands["set.dir"]				= "set.dir";
 }
@@ -217,7 +217,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "phylotype")				{	command = new PhylotypeCommand(optionString);			}
 		else if(commandName == "mgcluster")				{	command = new MGClusterCommand(optionString);			}
 		else if(commandName == "pre.cluster")			{	command = new PreClusterCommand(optionString);			}
-		else if(commandName == "pca")					{	command = new PCACommand(optionString);					}
+		else if(commandName == "pcoa")					{	command = new PCACommand(optionString);					}
 		else if(commandName == "otu.hierarchy")			{	command = new OtuHierarchyCommand(optionString);		}
 		else if(commandName == "set.dir")				{	command = new SetDirectoryCommand(optionString);	}
 		else											{	command = new NoCommand(optionString);					}

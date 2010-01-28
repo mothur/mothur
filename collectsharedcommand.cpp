@@ -223,10 +223,10 @@ int CollectSharedCommand::execute(){
 		//if the users entered no valid calculators don't execute command
 		if (cDisplays.size() == 0) { return 0; }
 		for(int i=0;i<cDisplays.size();i++){	cDisplays[i]->setAll(all);	}	
-		
+	
 		read = new ReadOTUFile(globaldata->inputFileName);	
 		read->read(&*globaldata); 
-			
+		
 		input = globaldata->ginput;
 		order = input->getSharedOrderVector();
 		string lastLabel = order->getLabel();
