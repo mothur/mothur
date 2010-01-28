@@ -136,17 +136,17 @@ int CollectCommand::execute(){
 		
 		if ((globaldata->getFormat() != "sharedfile")) { inputFileNames.push_back(globaldata->inputFileName);  }
 		else {  inputFileNames = parseSharedFile(globaldata->getSharedFile());  globaldata->setFormat("rabund");  }
-		
+	
 		for (int p = 0; p < inputFileNames.size(); p++) {
-			
+		
 			if (outputDir == "") { outputDir += hasPath(inputFileNames[p]); }
 			string fileNameRoot = outputDir + getRootName(getSimpleName(inputFileNames[p]));
 			globaldata->inputFileName = inputFileNames[p];
-			
+		
 			if (inputFileNames.size() > 1) {
 				mothurOutEndLine(); mothurOut("Processing group " + groups[p]); mothurOutEndLine(); mothurOutEndLine();
 			}
-			
+		
 			validCalculator = new ValidCalculators();
 			
 			for (int i=0; i<Estimators.size(); i++) {
@@ -195,13 +195,12 @@ int CollectCommand::execute(){
 				}
 			}
 		
-			
 			//if the users entered no valid calculators don't execute command
 			if (cDisplays.size() == 0) { return 0; }
 			
 			read = new ReadOTUFile(inputFileNames[p]);	
 			read->read(&*globaldata); 
-				
+		
 			order = globaldata->gorder;
 			string lastLabel = order->getLabel();
 			input = globaldata->ginput;

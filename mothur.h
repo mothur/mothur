@@ -433,8 +433,8 @@ inline string getPathName(string longName){
  
 	string rootPathName = longName;
 	
-	if(longName.find_last_of('/') != longName.npos){
-		int pos = longName.find_last_of('/')+1;
+	if(longName.find_last_of("/\\") != longName.npos){
+		int pos = longName.find_last_of("/\\")+1;
 		rootPathName = longName.substr(0, pos);
 	}
 	
@@ -591,19 +591,15 @@ inline int openInputFile(string fileName, ifstream& fileHandle, string m){
 	
 	//get full path name
 	string completeFileName = getFullPathName(fileName);
-	//string completeFileName = fileName;
 
 	fileHandle.open(completeFileName.c_str());
 	if(!fileHandle) {
-		mothurOut("Error: Could not open " + completeFileName);  mothurOutEndLine();
 		return 1;
-	}
-	else {
+	}else {
 		//check for blank file
 		gobble(fileHandle);
 		return 0;
-	}
-	
+	}	
 }
 /***********************************************************************/
 
@@ -624,6 +620,28 @@ inline int openInputFile(string fileName, ifstream& fileHandle){
 		return 0;
 	}
 	
+}
+/***********************************************************************/
+
+inline int renameFile(string oldName, string newName){
+	
+	ifstream inTest;
+	int exist = openInputFile(newName, inTest, "");
+	
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)		
+	if (exist == 0) { //you could open it so you want to delete it
+		inTest.close();
+		string command = "rm " + newName;
+		system(command.c_str());
+	}
+			
+	string command = "mv " + oldName + " " + newName;
+	system(command.c_str());
+#else
+	remove(newName.c_str());
+	renameOk = rename(oldName.c_str(), newName.c_str());
+#endif
+	return 0;
 }
 
 /***********************************************************************/

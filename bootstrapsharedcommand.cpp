@@ -452,7 +452,7 @@ void BootSharedCommand::process(SharedOrderVector* order) {
 					//set global data to calc trees
 					globaldata->gTree = trees[k];
 					
-					string filename = getRootName(getSimpleName(globaldata->inputFileName)) + treeCalculators[k]->getName() + ".boot" + order->getLabel();
+					string filename = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + treeCalculators[k]->getName() + ".boot" + order->getLabel();
 					consensus = new ConcensusCommand(filename);
 					consensus->execute();
 					delete consensus;

@@ -391,7 +391,7 @@ int GetOTURepCommand::execute(){
 		//close and remove formatted matrix file
 		if (large) {
 			inRow.close();
-			//remove(distFile.c_str());
+			remove(distFile.c_str());
 		}
 		
 		globaldata->gListVector = NULL;

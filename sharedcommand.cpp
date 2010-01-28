@@ -65,7 +65,7 @@ int SharedCommand::execute(){
 		//lookup.clear();
 		string errorOff = "no error";
 		//errorOff = "";
-cout << globaldata->inputFileName << endl;			
+		
 		//read in listfile
 		read = new ReadOTUFile(globaldata->inputFileName);	
 		read->read(&*globaldata); 
@@ -101,7 +101,7 @@ cout << globaldata->inputFileName << endl;
 				groups += globaldata->Groups[i] + ".";
 			}
 		
-			string newGroupFile = getRootName(globaldata->inputFileName) + groups + "groups";
+			string newGroupFile = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + groups + "groups";
 			ofstream outGroups;
 			openOutputFile(newGroupFile, outGroups);
 		
@@ -199,7 +199,13 @@ cout << globaldata->inputFileName << endl;
 			delete it3->second;
 		}
 
+		
+		//change format to shared  to speed up commands
+		globaldata->setFormat("sharedfile");
+		globaldata->setListFile("");
+		globaldata->setGroupFile("");
 		globaldata->setSharedFile(filename);
+
 		
 		return 0;
 	}
@@ -274,7 +280,7 @@ void SharedCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
 void SharedCommand::createMisMatchFile() {
 	try {
 		ofstream outMisMatch;
-		string outputMisMatchName = getRootName(globaldata->inputFileName);
+		string outputMisMatchName = outputDir + getRootName(getSimpleName(globaldata->inputFileName));
 		
 		//you have sequences in your list file that are not in your group file
 		if (SharedList->getNumSeqs() > groupMap->getNumSeqs()) { 
