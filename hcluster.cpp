@@ -622,9 +622,10 @@ void HCluster::combineFile() {
 		mergedMin.clear();
 			
 		//rename tempfile to distfile
-		remove(distfile.c_str());
-		rename(tempDistFile.c_str(), distfile.c_str());
-		
+		int renameOK = remove(distfile.c_str());
+		int ok = rename(tempDistFile.c_str(), distfile.c_str());
+//cout << "remove = "<< renameOK << " rename = " << ok << endl;	
+
 		//merge clustered rows averaging the distances
 		map<int, float>::iterator itMerge;
 		map<int, float>::iterator it2Merge;

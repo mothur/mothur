@@ -41,7 +41,7 @@ class AlignCheckCommand : public Command {
 		vector<int> structMap;
 		string mapfile, fastafile, outputDir;
 		bool abort;
-		int seqLength;
+		int seqLength, haderror;
 		
 		void readMap();
 		statData getStats(string sequence);

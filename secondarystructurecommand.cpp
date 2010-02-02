@@ -15,6 +15,7 @@
 AlignCheckCommand::AlignCheckCommand(string option){
 	try {
 		abort = false;
+		haderror = 0;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; }
@@ -124,6 +125,8 @@ int AlignCheckCommand::execute(){
 			if (seq.getName() != "") {
 				statData data = getStats(seq.getAligned());
 				
+				if (haderror == 1) { break; }
+				
 				out << seq.getName() << '\t' << data.pound << '\t' << data.dash << '\t' << data.plus << '\t' << data.equal << '\t';
 				out << data.loop << '\t' << data.tilde << '\t' << data.total << endl;
 			}
@@ -184,8 +187,11 @@ statData AlignCheckCommand::getStats(string sequence){
 		statData data;
 		sequence = "*" + sequence; // need to pad the sequence so we can index it by 1
 		
-		int seqLength = sequence.length();
-		for(int i=1;i<seqLength;i++){
+		int length = sequence.length();
+		
+		if (length != seqLength) { mothurOut("your sequences are " + toString(length) + " long, but your map file only contains " + toString(seqLength) + " entries. please correct."); mothurOutEndLine(); haderror = 1; return data;  }
+		
+		for(int i=1;i<length;i++){
 			if(structMap[i] != 0){
 				if(sequence[i] == 'A'){
 					if(sequence[structMap[i]] == 'T')		{	data.tilde++;	}

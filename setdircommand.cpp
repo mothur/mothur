@@ -99,6 +99,7 @@ int SetDirectoryCommand::execute(){
 			if(!out) {
 				mothurOut(output + " directory does not exist or is not writable."); mothurOutEndLine(); 
 			}else{
+				out.close();
 				remove(outTemp.c_str());
 				mothurOut("Changing output directory to " + output); mothurOutEndLine();  
 				commandFactory->setOutputDirectory(output);
@@ -124,6 +125,7 @@ int SetDirectoryCommand::execute(){
 			if(!in) {
 				mothurOut(input + " directory does not exist or is not writable."); mothurOutEndLine(); 
 			}else{
+				in.close();
 				remove(inTemp.c_str());
 				mothurOut("Changing input directory to " + input); mothurOutEndLine();  
 				commandFactory->setInputDirectory(input); 

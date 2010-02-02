@@ -74,7 +74,7 @@ PreClusterCommand::PreClusterCommand(string option){
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not found") { namefile =  "";  }
 			else if (namefile == "not open") { abort = true; }	
-//			else {  readNameFile();  }
+			else {  readNameFile();  }
 			
 			string temp	= validParameter.validFile(parameters, "diffs", false);				if(temp == "not found"){	temp = "1"; }
 			convert(temp, diffs); 
@@ -116,7 +116,7 @@ int PreClusterCommand::execute(){
 		if (abort == true) { return 0; }
 		
 		//reads fasta file and return number of seqs
-		int numSeqs = readNamesFASTA(); //fills alignSeqs and makes all seqs active
+		int numSeqs = readFASTA(); //fills alignSeqs and makes all seqs active
 	
 		if (numSeqs == 0) { mothurOut("Error reading fasta file...please correct."); mothurOutEndLine(); return 0;  }
 		if (diffs > length) { mothurOut("Error: diffs is greater than your sequence length."); mothurOutEndLine(); return 0;  }
@@ -179,7 +179,7 @@ int PreClusterCommand::execute(){
 		exit(1);
 	}
 }
-/**************************************************************************************************/
+/**************************************************************************************************
 int PreClusterCommand::readFASTA(){
 	try {
 //		ifstream inFasta;
@@ -216,44 +216,55 @@ int PreClusterCommand::readFASTA(){
 }
 /**************************************************************************************************/
 //this seems to require the names and fasta file to be in the same order???
-int PreClusterCommand::readNamesFASTA(){
+int PreClusterCommand::readFASTA(){
 	try {
-		ifstream inNames;
+		//ifstream inNames;
 		ifstream inFasta;
 		
-		openInputFile(namefile, inNames);
+		//openInputFile(namefile, inNames);
 		openInputFile(fastafile, inFasta);
 		
-		string firstCol, secondCol, nameString;
+		//string firstCol, secondCol, nameString;
 		length = 0;
 		
-		while (inFasta && inNames) {
+		while (!inFasta.eof()) {
 	
-			inNames >> firstCol >> secondCol;
-			nameString = secondCol;
+			//inNames >> firstCol >> secondCol;
+			//nameString = secondCol;
 			
-			gobble(inNames);
-			int size = 1;
-			while (secondCol.find_first_of(',') != -1) { 
-				size++;
-				secondCol = secondCol.substr(secondCol.find_first_of(',')+1, secondCol.length());
-			}
+			//gobble(inNames);
+			//int size = 1;
+			//while (secondCol.find_first_of(',') != -1) { 
+			//	size++;
+			//	secondCol = secondCol.substr(secondCol.find_first_of(',')+1, secondCol.length());
+			//}
 			
 			Sequence seq(inFasta);  gobble(inFasta);
-			if (seq.getName() != firstCol) { mothurOut(seq.getName() + " is not in your names file, please correct."); mothurOutEndLine(); exit(1); }
-			else{
-				seqPNode tempNode(size, seq, nameString);
-				alignSeqs.push_back(tempNode);
-				if (seq.getAligned().length() > length) {  length = alignSeqs[0].seq.getAligned().length();  }
-			}			
+			
+			if (seq.getName() != "") {  //can get "" if commented line is at end of fasta file
+				if (namefile != "") {
+					itSize = sizes.find(seq.getName());
+					
+					if (itSize == sizes.end()) { mothurOut(seq.getName() + " is not in your names file, please correct."); mothurOutEndLine(); exit(1); }
+					else{
+						seqPNode tempNode(itSize->second, seq, names[seq.getName()]);
+						alignSeqs.push_back(tempNode);
+						if (seq.getAligned().length() > length) {  length = alignSeqs[0].seq.getAligned().length();  }
+					}	
+				}else { //no names file, you are identical to yourself 
+					seqPNode tempNode(1, seq, seq.getName());
+					alignSeqs.push_back(tempNode);
+					if (seq.getAligned().length() > length) {  length = alignSeqs[0].seq.getAligned().length();  }
+				}
+			}
 		}
 		inFasta.close();
-		inNames.close();
+		//inNames.close();
 		return alignSeqs.size();
 	}
 	
 	catch(exception& e) {
-		errorOut(e, "PreClusterCommand", "readNamesFASTA");
+		errorOut(e, "PreClusterCommand", "readFASTA");
 		exit(1);
 	}
 }
@@ -302,6 +313,30 @@ void PreClusterCommand::printData(string newfasta, string newname){
 	}
 	catch(exception& e) {
 		errorOut(e, "PreClusterCommand", "printData");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+void PreClusterCommand::readNameFile(){
+	try {
+		ifstream in;
+		openInputFile(namefile, in);
+		string firstCol, secondCol;
+				
+		while (!in.eof()) {
+			in >> firstCol >> secondCol; gobble(in);
+			names[firstCol] = secondCol;
+			int size = 1;
+			while (secondCol.find_first_of(',') != -1) { 
+				size++;
+				secondCol = secondCol.substr(secondCol.find_first_of(',')+1, secondCol.length());
+			}
+			sizes[firstCol] = size;
+		}
+		in.close();
+	}
+	catch(exception& e) {
+		errorOut(e, "PreClusterCommand", "readNameFile");
 		exit(1);
 	}
 }
