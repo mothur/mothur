@@ -159,58 +159,6 @@ void PCACommand::get_comment(istream& f, char begin, char end){
 
 /*********************************************************************************************************************************/
 
-void PCACommand::read_mega(istream& f, vector<string>& name_list, vector<vector<double> >& d){
-	try {
-		get_comment(f, '#', '\n');
-		
-		char test = f.peek();
-		
-		while(test == '!'){								//get header comments
-			get_comment(f, '!', ';');
-			while(isspace(test=f.get()))		{;}
-			f.putback(test);
-			test = f.peek();
-		}
-		while(test != '\n'){							//get sequence names
-			get_comment(f, '[', ']');
-			char d = f.get();
-			d = f.get();
-			if(d == '#'){
-				string name;
-				f >> name;
-				name_list.push_back(name);
-				while(isspace(test=f.get()))		{;}
-				f.putback(test);
-			}
-			else{
-				break;
-			}
-		}
-		int rank = name_list.size();
-		d.resize(rank);
-		for(int i=0;i<rank;i++){		d[i].resize(rank);		}
-		
-		d[0][0] = 0.0000;
-		get_comment(f, '[', ']');
-		for(int i=1;i<rank;i++){
-			get_comment(f, '[', ']');
-			d[i][i]=0.0000;
-			for(int j=0;j<i;j++){
-				f >> d[i][j];
-				if (d[i][j] == -0.0000)
-					d[i][j] = 0.0000;
-				d[j][i]=d[i][j];
-			}
-		}
-	}
-	catch(exception& e) {
-		errorOut(e, "PCACommand", "read_mega");
-		exit(1);
-	}
-}
-
-/*********************************************************************************************************************************/
-
 void PCACommand::read_phylip(istream& f, int square_m, vector<string>& name_list, vector<vector<double> >& d){
 	try {
 		//     int count1=0;
@@ -265,54 +213,45 @@ void PCACommand::read(string fname, vector<string>& names, vector<vector<double>
 	try {
 		ifstream f;
 		openInputFile(fname, f);
-		
-		char test = f.peek();
-		
-		if(test == '#'){
-			read_mega(f, names, D);
-		}
-		else{
-			//check whether matrix is square
-			char d;
-			int m = 1;
-			int numSeqs;
-			string name;
 			
-			f >> numSeqs >> name; 
+		//check whether matrix is square
+		char d;
+		int m = 1;
+		int numSeqs;
+		string name;
+		
+		f >> numSeqs >> name; 
+		
+		while((d=f.get()) != EOF){
 			
-			while((d=f.get()) != EOF){
-				
-				//is d a number meaning its square
-				if(isalnum(d)){ 
-					m = 1; 
-					break; 
-				}
-				
-				//is d a line return meaning its lower triangle
-				if(d == '\n'){
-					m = 2;
-					break;
-				}
+			//is d a number meaning its square
+			if(isalnum(d)){ 
+				m = 1; 
+				break; 
 			}
-			f.close();
 			
-			//reopen to get back to beginning
-			openInputFile(fname, f);			
-			read_phylip(f, m, names, D);
+			//is d a line return meaning its lower triangle
+			if(d == '\n'){
+				m = 2;
+				break;
+			}
 		}
+		f.close();
 		
-		//int rank = D.size();
+		//reopen to get back to beginning
+		openInputFile(fname, f);			
+		read_phylip(f, m, names, D);
 	}
-	catch(exception& e) {
+		catch(exception& e) {
 		errorOut(e, "PCACommand", "read");
 		exit(1);
 	}
 }
 
 /*********************************************************************************************************************************/
-double PCACommand::pythag(double a, double b){
-    return(pow(a*a+b*b,0.5));
-}
+
+double PCACommand::pythag(double a, double b)	{	return(pow(a*a+b*b,0.5));	}
+
 /*********************************************************************************************************************************/
 
 void PCACommand::matrix_mult(vector<vector<double> > first, vector<vector<double> > second, vector<vector<double> >& product){
@@ -579,7 +518,7 @@ void PCACommand::output(string fnameRoot, vector<string> name_list, vector<vecto
 			pcaLoadings << i+1 << '\t' << d[i] * 100.0 / dsum << endl;
 		}
 		
-		pcaData << "SeqName";
+		pcaData << "group";
 		for(int i=0;i<rank;i++){
 			pcaData << '\t' << "axis" << i+1;
 		}
@@ -599,22 +538,5 @@ void PCACommand::output(string fnameRoot, vector<string> name_list, vector<vecto
 	}
 }
 
-/*********************************************************************************************************************************/
-
-void PCACommand::print_matrix(vector<vector<double> > A) {
-	try {
-		int rank = A.size();
-		for(int i=0;i<rank;i++){
-			for(int j=0;j<rank;j++){
-				cout << A[i][j] << "  ";
-			}
-			cout << endl;
-		}
-	}
-	catch(exception& e) {
-		errorOut(e, "PCACommand", "print_matrix");
-		exit(1);
-	}
-}
 /*********************************************************************************************************************************/
 

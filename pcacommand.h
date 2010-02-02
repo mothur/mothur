@@ -29,7 +29,6 @@ private:
 	float cutoff, precision;
 	
 	void get_comment(istream&, char, char);
-	void read_mega(istream&, vector<string>&, vector<vector<double> >&);
 	void read_phylip(istream&, int, vector<string>&, vector<vector<double> >&);
 	void read(string, vector<string>&, vector<vector<double> >&);
 	double pythag(double, double);
@@ -38,7 +37,6 @@ private:
 	void tred2(vector<vector<double> >&, vector<double>&, vector<double>&);
 	void qtli(vector<double>&, vector<double>&, vector<vector<double> >&);
 	void output(string, vector<string>, vector<vector<double> >, vector<double>);
-	void print_matrix(vector<vector<double> >);
 	
 };
 	
