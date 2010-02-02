@@ -574,8 +574,8 @@
 		A78782AA10A1B1CB0086103D /* alignmentdb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alignmentdb.cpp; sourceTree = SOURCE_ROOT; };
 		A787844310A1EBDD0086103D /* knn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = knn.h; sourceTree = SOURCE_ROOT; };
 		A787844410A1EBDD0086103D /* knn.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = knn.cpp; sourceTree = SOURCE_ROOT; };
-		A794200F11107897003AECCD /* distancedb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = distancedb.cpp; sourceTree = "<group>"; };
-		A794201011107897003AECCD /* distancedb.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = distancedb.hpp; sourceTree = "<group>"; };
+		A794200F11107897003AECCD /* distancedb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = distancedb.cpp; sourceTree = SOURCE_ROOT; };
+		A794201011107897003AECCD /* distancedb.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = distancedb.hpp; sourceTree = SOURCE_ROOT; };
 		A7B04491106CC3E60046FC83 /* chimeraslayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraslayer.h; sourceTree = SOURCE_ROOT; };
 		A7B04492106CC3E60046FC83 /* chimeraslayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeraslayer.cpp; sourceTree = SOURCE_ROOT; };
 		A7B0450C106CEEC90046FC83 /* slayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = slayer.h; sourceTree = SOURCE_ROOT; };

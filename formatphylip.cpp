@@ -165,16 +165,16 @@ void FormatPhylipMatrix::read(NameAssignment* nameMap){
 				int index = nseqs;
 				map<int, float> rowMap;
 				map<int, float>::iterator itRow;
-
+				rowPos.resize(nseqs, -1);
                 
 				for(int i=0;i<nseqs;i++){
 					fileHandle >> name;                
-										
+									
 					list->set(i, name);
 					
 					for(int j=0;j<nseqs;j++){
 						fileHandle >> distance;
-						
+					
 						if (distance == -1) { distance = 1000000; }
 						
 						if((distance < cutoff) && (j != i)){
@@ -184,6 +184,8 @@ void FormatPhylipMatrix::read(NameAssignment* nameMap){
 						reading->update(index);
 					}
 					
+					gobble(fileHandle);
+			
 					//save position in file of each new row
 					rowPos[i] = out.tellp();
 

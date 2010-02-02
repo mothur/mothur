@@ -40,12 +40,14 @@ private:
 	bool abort;
 	string fastafile, namefile, outputDir;
 	vector<seqPNode> alignSeqs; //maps the number of identical seqs to a sequence
-//	map<string, string> names; //represents the names file first column maps to second column
-//	map<string, int> sizes;  //this map a seq name to the number of identical seqs in the names file
+	map<string, string> names; //represents the names file first column maps to second column
+	map<string, int> sizes;  //this map a seq name to the number of identical seqs in the names file
+	map<string, int>::iterator itSize; 
 //	map<string, bool> active; //maps sequence name to whether it has already been merged or not.
 	
 	int readFASTA();
-	int readNamesFASTA();
+	void readNameFile();
+	//int readNamesFASTA();
 	int calcMisMatches(string, string);
 	void printData(string, string); //fasta filename, names file name
 };

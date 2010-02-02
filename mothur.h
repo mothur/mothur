@@ -639,7 +639,7 @@ inline int renameFile(string oldName, string newName){
 	system(command.c_str());
 #else
 	remove(newName.c_str());
-	renameOk = rename(oldName.c_str(), newName.c_str());
+	int renameOk = rename(oldName.c_str(), newName.c_str());
 #endif
 	return 0;
 }
