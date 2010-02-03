@@ -69,7 +69,7 @@ ListVector NameAssignment::getListVector(void){
 void NameAssignment::print(ostream& out){
 	try {
 		map<string,int>::iterator it;
-cout << (*this).size() << endl;
+//cout << (*this).size() << endl;
 		for(it = (*this).begin(); it!=(*this).end(); it++){
 			out << it->first << '\t' <<  it->second << endl;  //prints out keys and values of the map this.
 		}

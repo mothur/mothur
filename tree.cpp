@@ -50,6 +50,85 @@ Tree::Tree() {
 /*****************************************************************/
 Tree::~Tree() {}
 /*****************************************************************/
+void Tree::addNamesToCounts() {
+	try {
+		//ex. seq1	seq2,seq3,se4
+		//		seq1 = pasture
+		//		seq2 = forest
+		//		seq4 = pasture
+		//		seq3 = ocean
+		
+		//before this function seq1.pcount = pasture -> 1
+		//after				   seq1.pcount = pasture -> 2, forest -> 1, ocean -> 1
+		
+		//before this function seq1.pgroups = pasture -> 1
+		//after				   seq1.pgroups = pasture -> 1 since that is the dominant group
+
+				
+		//go through each leaf and update its pcounts and pgroups
+		for (int i = 0; i < numLeaves; i++) {
+			string name = tree[i].getName();
+			
+			map<string, string>::iterator itNames = globaldata->names.find(name);
+			
+			if (itNames == globaldata->names.end()) { mothurOut(name + " is not in your name file, please correct."); mothurOutEndLine(); exit(1);  }
+			else {
+				vector<string> dupNames;
+				splitAtComma(globaldata->names[name], dupNames);
+				
+				map<string, int>::iterator itCounts;
+				int maxPars = 1;
+				for (int j = 0; j < dupNames.size(); j++) {
+				
+					if (dupNames[j] != name) {//you already added yourself in the constructor
+						string group = globaldata->gTreemap->getGroup(dupNames[j]);
+						
+						//update pcounts
+						itCounts = tree[i].pcount.find(group);
+						if (itCounts == tree[i].pcount.end()) { //new group, add it
+							tree[i].pcount[group] = 1;
+						}else {
+							tree[i].pcount[group]++;
+						}
+							
+						//update pgroups
+						itCounts = tree[i].pGroups.find(group);
+						if (itCounts == tree[i].pGroups.end()) { //new group, add it
+							tree[i].pGroups[group] = 1;
+						}else {
+							tree[i].pGroups[group]++;
+						}
+						
+						//keep highest group
+						if(tree[i].pGroups[group] > maxPars){
+							maxPars = tree[i].pGroups[group];
+						}
+					}//end if
+				}//end for
+				
+				if (maxPars > 1) { //then we have some more dominant groups
+					//erase all the groups that are less than maxPars because you found a more dominant group.
+					for(it=tree[i].pGroups.begin();it!=tree[i].pGroups.end();){
+						if(it->second < maxPars){
+							tree[i].pGroups.erase(it++);
+						}else { it++; }
+					}
+					//set one remaining groups to 1
+					for(it=tree[i].pGroups.begin();it!=tree[i].pGroups.end();it++){
+						tree[i].pGroups[it->first] = 1;
+					}
+				}//end if
+				
+			}//end else
+		}//end for
+				
+	}
+	catch(exception& e) {
+		errorOut(e, "Tree", "addNamesToCounts");
+		exit(1);
+	}
+}
+/*****************************************************************/
 int Tree::getIndex(string searchName) {
 	try {
 		//Treemap knows name, group and index to speed up search
@@ -78,6 +157,10 @@ void Tree::setIndex(string searchName, int index) {
 /*****************************************************************/
 void Tree::assembleTree() {
 	try {
+	
+		//if user has given a names file we want to include that info in the pgroups and pcount info.
+		if(globaldata->names.size() != 0) {  addNamesToCounts();  }
+		
 		//build the pGroups in non leaf nodes to be used in the parsimony calcs.
 		for (int i = numLeaves; i < numNodes; i++) {
 			tree[i].pGroups = (mergeGroups(i));
@@ -120,6 +203,7 @@ void Tree::getCopy(Tree* copy) {
 			//copy pcount
 			tree[i].pcount = copy->tree[i].pcount;
 		}
+		
 	}
 	catch(exception& e) {
 		errorOut(e, "Tree", "getCopy");
