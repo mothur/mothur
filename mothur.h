@@ -503,7 +503,7 @@ inline string getFullPathName(string fileName){
 			if (path.rfind("./") == -1) { return fileName; } //already complete name
 			else { newFileName = fileName.substr(fileName.rfind("./")+2); } //save the complete part of the name
 			
-			char* cwdpath;
+			char* cwdpath = new char[1024];
 			size_t size;
 			cwdpath=getcwd(cwdpath,size);
 			cwd = cwdpath;

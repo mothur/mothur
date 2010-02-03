@@ -37,9 +37,10 @@ public:
 	int findRoot();  //return index of root node
 	
 	//this function takes the leaf info and populates the non leaf nodes
-	void assembleTree();		
+	void assembleTree();	
 	
 	vector<Node> tree;		//the first n nodes are the leaves, where n is the number of sequences.
+		
 private:
 	GlobalData* globaldata;
 	int numNodes, numLeaves;
@@ -48,8 +49,9 @@ private:
 	
 	map<string, int>::iterator it, it2;
 	map<string, int> mergeGroups(int);  //returns a map with a groupname and the number of times that group was seen in the children
-	
 	map<string,int> mergeGcounts(int);
+	
+	void addNamesToCounts();
 	void randomTopology();
 	void randomBlengths();
 	void randomLabels(vector<string>);
@@ -60,6 +62,7 @@ private:
 							//not included in the tree. 
 							//only takes names from the first tree in the tree file and assumes that all trees use the same names.
 	int readTreeString(ifstream&);
+	
 };
 
 #endif

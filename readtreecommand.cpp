@@ -20,7 +20,7 @@ ReadTreeCommand::ReadTreeCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"tree","group","outputdir","inputdir"};
+			string Array[] =  {"tree","group","name","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -56,6 +56,15 @@ ReadTreeCommand::ReadTreeCommand(string option){
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
+				
+				it = parameters.find("name");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["name"] = inputDir + it->second;		}
+				}
+
 			}
 
 			
@@ -75,6 +84,11 @@ ReadTreeCommand::ReadTreeCommand(string option){
 				treeMap->readMap();
 				globaldata->gTreemap = treeMap;
 			}
+			
+			namefile = validParameter.validFile(parameters, "name", true);
+			if (namefile == "not open") { abort = true; }
+			else if (namefile == "not found") { treefile = ""; }
+			else { readNamesFile(); }	
 			
 			if (abort == false) {
 				filename = treefile;
@@ -130,7 +144,7 @@ int ReadTreeCommand::execute(){
 			T[i]->assembleTree();
 		}
 
-		//output any names that are in names file but not in tree
+		//output any names that are in group file but not in tree
 		if (globaldata->Treenames.size() < treeMap->getNumSeqs()) {
 			for (int i = 0; i < treeMap->namesOfSeqs.size(); i++) {
 				//is that name in the tree?
@@ -142,8 +156,13 @@ int ReadTreeCommand::execute(){
 				
 				//then you did not find it so report it 
 				if (count == globaldata->Treenames.size()) { 
-					mothurOut(treeMap->namesOfSeqs[i] + " is in your namefile and not in your tree. It will be disregarded."); mothurOutEndLine();
-					treeMap->removeSeq(treeMap->namesOfSeqs[i]);
+					//if it is in your namefile then don't remove
+					map<string, string>::iterator it = nameMap.find(treeMap->namesOfSeqs[i]);
+					
+					if (it == nameMap.end()) {
+						mothurOut(treeMap->namesOfSeqs[i] + " is in your groupfile and not in your tree. It will be disregarded."); mothurOutEndLine();
+						treeMap->removeSeq(treeMap->namesOfSeqs[i]);
+					}
 				}
 			}
 		}
@@ -152,6 +171,40 @@ int ReadTreeCommand::execute(){
 	}
 	catch(exception& e) {
 		errorOut(e, "ReadTreeCommand", "execute");	
+		exit(1);
+	}
+}
+/*****************************************************************/
+int ReadTreeCommand::readNamesFile() {
+	try {
+		globaldata->names.clear();
+		
+		ifstream in;
+		openInputFile(namefile, in);
+		
+		string first, second;
+		map<string, string>::iterator itNames;
+		
+		while(!in.eof()) {
+			in >> first >> second; gobble(in);
+			
+			itNames = globaldata->names.find(first);
+			if (itNames == globaldata->names.end()) {  
+				globaldata->names[first] = second; 
+				
+				//we need a list of names in your namefile to use above when removing extra seqs above so we don't remove them
+				vector<string> dupNames;
+				splitAtComma(second, dupNames);
+				
+				for (int i = 0; i < dupNames.size(); i++) {	nameMap[dupNames[i]] = dupNames[i];  }
+			}else {  mothurOut(first + " has already been seen in namefile, disregarding names file."); mothurOutEndLine(); in.close(); globaldata->names.clear(); return 1; }			
+		}
+		in.close();
+		
+		return 0;
+	}
+	catch(exception& e) {
+		errorOut(e, "ReadTreeCommand", "readNamesFile");
 		exit(1);
 	}
 }

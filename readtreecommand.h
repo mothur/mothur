@@ -27,8 +27,11 @@ private:
 	GlobalData* globaldata;
 	ReadTree* read;
 	TreeMap* treeMap;
-	string filename, treefile, groupfile;
+	string filename, treefile, groupfile, namefile;
 	bool abort;
+	map<string, string> nameMap;
+	
+	int readNamesFile();
 
 };
 

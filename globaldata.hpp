@@ -47,6 +47,7 @@ public:
 	vector<string>  Estimators, Groups; //holds estimators to be used
 	set<string> labels; //holds labels to be used
 	vector<string> Treenames;
+	map<string, string> names;
 	
 	
 	string getPhylipFile();
