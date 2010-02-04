@@ -52,16 +52,20 @@ AlignCommand::AlignCommand(string option){
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
-			
+
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
 			
+
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
+			
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
+
 				it = parameters.find("template");
+
 				//user has given a template file
 				if(it != parameters.end()){ 
 					path = hasPath(it->second);
@@ -69,9 +73,10 @@ AlignCommand::AlignCommand(string option){
 					if (path == "") {	parameters["template"] = inputDir + it->second;		}
 				}
 			}
-			
+
 			//check for required parameters
 			templateFileName = validParameter.validFile(parameters, "template", true);
+			
 			if (templateFileName == "not found") { 
 				mothurOut("template is a required parameter for the align.seqs command."); 
 				mothurOutEndLine();
@@ -106,7 +111,6 @@ AlignCommand::AlignCommand(string option){
 				//make sure there is at least one valid file left
 				if (candidateFileNames.size() == 0) { mothurOut("no valid files."); mothurOutEndLine(); abort = true; }
 			}
-				
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...

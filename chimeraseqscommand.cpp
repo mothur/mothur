@@ -228,8 +228,8 @@ void ChimeraSeqsCommand::help(){
 		mothurOut("\t\tparameters: fasta=required, template=required, filter=F, mask=no mask, processors=1, window=10% of length, numwanted=20\n"); 
 		mothurOut("\tchimeracheck: \n"); 
 		mothurOut("\t\tparameters: fasta=required, template=required, processors=1, increment=10, ksize=7, svg=F, name=none\n\n"); 
-		//mothurOut("\tchimeraslayer: \n"); 
-		//mothurOut("\t\tparameters: fasta=required, template=required, processors=1, increment=10, mask=no mask, numwanted=10, match=5, mismatch=-4, divergence=1.0, minsim=90, parents=5, iters=1000, window=100. \n\n"); 
+		mothurOut("\tchimeraslayer: \n"); 
+		mothurOut("\t\tparameters: fasta=required, template=required, processors=1, increment=10, mask=no mask, numwanted=10, match=5, mismatch=-4, divergence=1.0, minsim=90, parents=5, iters=1000, window=100. \n\n"); 
 		mothurOut("The chimera.seqs command should be in the following format: \n");
 		mothurOut("chimera.seqs(fasta=yourFastaFile, filter=yourFilter, correction=yourCorrection, processors=yourProcessors, method=bellerophon) \n");
 		mothurOut("Example: chimera.seqs(fasta=AD.align, filter=True, correction=true, method=bellerophon, window=200) \n");

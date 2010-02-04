@@ -204,8 +204,11 @@ string ValidParameters::validFile(map<string, string> container, string paramete
 		
 		it = container.find(parameter);
 		if(it != container.end()){ //no parameter given
+
 			if(isFile == true) {
+
 				ableToOpen = openInputFile(it->second, in);
+
 				if (ableToOpen == 1) { return "not open"; }
 				in.close();
 			}
