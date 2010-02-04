@@ -17,7 +17,7 @@
 AlignmentDB::AlignmentDB(string fastaFileName, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch){		//	This assumes that the template database is in fasta format, may 
 	try {											//	need to alter this in the future?
 		longest = 0;
-		cout << longest;
+
 		ifstream fastaFile;
 		openInputFile(fastaFileName, fastaFile);
 		
