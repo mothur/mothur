@@ -179,43 +179,11 @@ int PreClusterCommand::execute(){
 		exit(1);
 	}
 }
-/**************************************************************************************************
-int PreClusterCommand::readFASTA(){
-	try {
-//		ifstream inFasta;
-//		openInputFile(fastafile, inFasta);
-//		length = 0;
-////		map<string, string>::iterator it;
-//
-//		while (!inFasta.eof()) {
-//			Sequence temp(inFasta);  //read seq
-//			
-//			if (temp.getName() != "") {  
-//				if (namefile != "") {
-//					//make sure fasta and name files match
-//					it = names.find(temp.getName());
-//					if (it == names.end()) { mothurOut(temp.getName() + " is not in your names file, please correct."); mothurOutEndLine(); exit(1); }
-//				}else { sizes[temp.getName()] = 1; }
-//				
-//				seqPNode tempNode(sizes[temp.getName()], temp);
-//				alignSeqs.push_back(tempNode); 
-//				active[temp.getName()] = true;
-//			}
-//			gobble(inFasta);
-//		}
-//		inFasta.close();
-//		
-//		if (alignSeqs.size() != 0) {  length = alignSeqs[0].seq.getAligned().length();  }
-//		
-		return alignSeqs.size();
-	}
-	catch(exception& e) {
-		errorOut(e, "PreClusterCommand", "readFASTA");
-		exit(1);
-	}
-}
+
 /**************************************************************************************************/
-//this seems to require the names and fasta file to be in the same order???
+
+//this requires the names and fasta file to be in the same order
+
 int PreClusterCommand::readFASTA(){
 	try {
 		//ifstream inNames;
@@ -316,7 +284,9 @@ void PreClusterCommand::printData(string newfasta, string newname){
 		exit(1);
 	}
 }
+
 /**************************************************************************************************/
+
 void PreClusterCommand::readNameFile(){
 	try {
 		ifstream in;

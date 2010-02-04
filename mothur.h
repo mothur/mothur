@@ -487,7 +487,7 @@ inline bool isBlank(string fileName){
 /***********************************************************************/
 
 inline string getFullPathName(string fileName){
-	
+	try{
 	string path = hasPath(fileName);
 	string newFileName;
 	int pos;
@@ -504,10 +504,12 @@ inline string getFullPathName(string fileName){
 			else { newFileName = fileName.substr(fileName.rfind("./")+2); } //save the complete part of the name
 			
 			char* cwdpath = new char[1024];
+
 			size_t size;
 			cwdpath=getcwd(cwdpath,size);
-			cwd = cwdpath;
 		
+			cwd = cwdpath;
+			
 			//rip off first '/'
 			string simpleCWD;
 			if (cwd.length() > 0) { simpleCWD = cwd.substr(1); }
@@ -521,9 +523,10 @@ inline string getFullPathName(string fileName){
 			}
 			//get last one              // ex. ../../../filename = /user/work/desktop/filename
 			dirs.push_back(simpleCWD);  //ex. dirs[0] = user, dirs[1] = work, dirs[2] = desktop
-				
+			
+		
 			int index = dirs.size()-1;
-				
+		
 			while((pos = path.rfind("./")) != -1) { //while you don't have a complete path
 				if (path[(pos-1)] == '.') { //you want your parent directory ../
 					path = path.substr(0, pos-1);
@@ -583,6 +586,12 @@ inline string getFullPathName(string fileName){
 			
 		#endif
 	}
+	}
+	catch(exception& e) {
+		errorOut(e, "getFullPathName", "getFullPathName");
+		exit(1);
+	}
+	
 	
 }
 /***********************************************************************/
@@ -606,7 +615,7 @@ inline int openInputFile(string fileName, ifstream& fileHandle, string m){
 inline int openInputFile(string fileName, ifstream& fileHandle){
 	//get full path name
 	string completeFileName = getFullPathName(fileName);
-	
+
 	fileHandle.open(completeFileName.c_str());
 	if(!fileHandle) {
 		mothurOut("Error: Could not open " + completeFileName);  mothurOutEndLine();
