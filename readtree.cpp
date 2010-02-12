@@ -354,7 +354,9 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 				group = "xxx";
 			}
 			
-			T->tree[n1].setGroup(group);
+			vector<string> tempGroup; tempGroup.push_back(group);
+			
+			T->tree[n1].setGroup(tempGroup);
 			T->tree[n1].setChildren(-1,-1);
 		
 			if(blen == 1){	

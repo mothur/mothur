@@ -105,7 +105,7 @@ vector<int>  DeCalculator::findWindows(Sequence* query, int front, int back, int
 		if (size == 0) {  if (cutoff > 1200) {  size = 300; }
 							else{  size = (cutoff / 4); }  } 
 		else if (size > (cutoff / 4)) { 
-				mothurOut("You have selected to large a window size for sequence " + query->getName() + ".  I will choose an appropriate window size."); mothurOutEndLine();
+				mothurOut("You have selected too large a window size for sequence " + query->getName() + ".  I will choose an appropriate window size."); mothurOutEndLine();
 				size = (cutoff / 4); 
 		}
 	
@@ -679,6 +679,7 @@ float DeCalculator::getCoef(vector<float> obs, vector<float> qav) {
 	}
 }
 //***************************************************************************************************************
+//gets closest matches to each end, since chimeras will most likely have different parents on each end
 vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*> db, int numWanted) {
 	try {
 		
@@ -687,14 +688,29 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 		
 		Dist* distcalculator = new eachGapDist();
 		
-		Sequence query = *(querySeq);
+		string queryAligned = querySeq->getAligned();
+		string leftQuery = queryAligned.substr(0, (queryAligned.length() / 3)); //first 1/3 of the sequence
+		string rightQuery = queryAligned.substr(((queryAligned.length() / 3)*2)); //last 1/3 of the sequence
 		
+		Sequence queryLeft(querySeq->getName(), leftQuery);
+		Sequence queryRight(querySeq->getName(), rightQuery);
+				
 		for(int j = 0; j < db.size(); j++){
 			
-			Sequence temp = *(db[j]);
+			string dbAligned = db[j]->getAligned();
+			string leftDB = dbAligned.substr(0, (dbAligned.length() / 3)); //first 1/3 of the sequence
+			string rightDB = dbAligned.substr(((dbAligned.length() / 3)*2)); //last 1/3 of the sequence
 			
-			distcalculator->calcDist(query, temp);
-			float dist = distcalculator->getDist();
+			Sequence dbLeft(db[j]->getName(), leftDB);
+			Sequence dbRight(db[j]->getName(), rightDB);
+			
+			distcalculator->calcDist(queryLeft, dbLeft);
+			float distLeft = distcalculator->getDist();
+			
+			distcalculator->calcDist(queryRight, dbRight);
+			float distRight = distcalculator->getDist();
+			
+			float dist = min(distLeft, distRight); //keep smallest distance
 			
 			SeqDist subject;
 			subject.seq = db[j];
@@ -720,7 +736,7 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 	}
 }
 /***************************************************************************************************************/
-void DeCalculator::trimSeqs(Sequence* query, vector<Sequence*> topMatches) {
+map<int, int> DeCalculator::trimSeqs(Sequence* query, vector<Sequence*> topMatches) {
 	try {
 		
 		int frontPos = 0;  //should contain first position in all seqs that is not a gap character
@@ -809,6 +825,13 @@ void DeCalculator::trimSeqs(Sequence* query, vector<Sequence*> topMatches) {
 			topMatches[i]->setAligned(newAligned);
 		}
 		
+		map<int, int> trimmedPos;
+		
+		for (int i = 0; i < newAligned.length(); i++) {
+			trimmedPos[i] = i+frontPos;
+		}
+		
+		return trimmedPos;
 	}
 	catch(exception& e) {
 		errorOut(e, "DeCalculator", "trimSequences");

@@ -49,7 +49,7 @@ void TreeMap::removeSeq(string seqName) {
 	//erase name from namesOfSeqs
 	for (int i = 0; i < namesOfSeqs.size(); i++) {
 		if (namesOfSeqs[i] == seqName)  {
-			namesOfSeqs.erase (namesOfSeqs.begin()+i);
+			namesOfSeqs.erase(namesOfSeqs.begin()+i);
 			break;
 		}
 	}
@@ -61,8 +61,6 @@ void TreeMap::removeSeq(string seqName) {
 	//remove seq from treemap
 	it = treemap.find(seqName);
 	treemap.erase(it);
-	
-
 }
 /************************************************************/
 

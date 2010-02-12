@@ -48,6 +48,7 @@ public:
 	virtual void generateDB() = 0; 
 	virtual void addSequence(Sequence) = 0;  //add sequence to search engine
 	virtual vector<int> findClosestSequences(Sequence*, int) = 0;  // returns indexes of n closest sequences to query
+	virtual map<int, float> findClosest(Sequence*, int){ return results; }  // returns of n closest sequences to query and their search scores
 	virtual float getSearchScore();
 	virtual int getLongestBase(); 
 	virtual void readKmerDB(ifstream&){};
@@ -59,6 +60,7 @@ public:
 protected:
 	int numSeqs, longest;
 	float searchScore;
+	map<int, float> results;
 };
 /**************************************************************************************************/
 #endif

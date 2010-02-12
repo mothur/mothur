@@ -26,7 +26,6 @@ Nast::Nast(Alignment* method, Sequence* cand, Sequence* temp) : alignment(method
 		maxInsertLength = 0;
 		pairwiseAlignSeqs();	//	This is part A in Fig. 2 of DeSantis et al.
 		regapSequences();		//	This is parts B-F in Fig. 2 of DeSantis et al.
-
 	}
 	catch(exception& e) {
 		errorOut(e, "Nast", "Nast");
@@ -41,7 +40,7 @@ void Nast::pairwiseAlignSeqs(){	//	Here we call one of the pairwise alignment me
 	try {
 
 		alignment->align(candidateSeq->getUnaligned(), templateSeq->getUnaligned());
-	
+
 		string candAln = alignment->getSeqAAln();
 		string tempAln = alignment->getSeqBAln();
 	

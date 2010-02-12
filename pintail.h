@@ -24,10 +24,10 @@
 class Pintail : public Chimera {
 	
 	public:
-		Pintail(string, string, string);	
+		Pintail(string, string);	
 		~Pintail();
 		
-		int getChimeras();
+		int getChimeras(Sequence*);
 		void print(ostream&);
 		
 		void setCons(string c)		{ consfile = c;  }
@@ -39,44 +39,39 @@ class Pintail : public Chimera {
 		Dist* distcalculator;
 		DeCalculator* decalc;
 		int iters;
-		string fastafile, templateFile, consfile;
+		string fastafile, consfile;
 		
-		
-		vector<linePair*> lines;
 		vector<linePair*> templateLines;
-		vector<Sequence*> querySeqs;
-		vector<Sequence*> templateSeqs;
+		Sequence*querySeq;
+				
+		Sequence* bestfit;  //closest match to query in template
 		
-		vector<Sequence*> bestfit;  //bestfit[0] matches queryseqs[0]...
-		
-		vector< vector<float> > obsDistance;  //obsDistance[0] is the vector of observed distances for queryseqs[0]... 
-		vector< vector<float> > expectedDistance;  //expectedDistance[0] is the vector of expected distances for queryseqs[0]... 
-		vector<float> deviation;  //deviation[0] is the percentage of mismatched pairs over the whole seq between querySeqs[0] and its best match.
-		vector< vector<int> > windowsForeachQuery;  // windowsForeachQuery[0] is a vector containing the starting spot in queryseqs[0] aligned sequence for each window.
+		vector<float>  obsDistance;  //obsDistance is the vector of observed distances for query 
+		vector<float>  expectedDistance;  //expectedDistance is the vector of expected distances for query
+		float deviation;  //deviation is the percentage of mismatched pairs over the whole seq between query and its best match.
+		vector<int>  windowsForeachQuery;  // windowsForeachQuery is a vector containing the starting spot in query aligned sequence for each window.
 										//this is needed so you can move by bases and not just spots in the alignment
 										
-		vector<int> windowSizes;			//windowSizes[0] = window size of querySeqs[0]
+		int windowSizes;			//windowSizes = window size of query
 		vector<int> windowSizesTemplate;    //windowSizesTemplate[0] = window size of templateSeqs[0]
 		
-		vector< map<int, int> > trimmed;    //trimmed[0] = start and stop of trimmed sequences for querySeqs[0]
+		map<int, int> trimmed;    //trimmed = start and stop of trimmed sequences for query
 		map<int, int>::iterator it;
 		
-		vector< vector<float> > Qav;	//Qav[0] is the vector of average variablility for queryseqs[0]... 
-		vector<float>  seqCoef;				//seqCoef[0] is the coeff for queryseqs[0]...
-		vector<float> DE;					//DE[0] is the deviaation for queryseqs[0]...
+		vector<float>  Qav;	//Qav is the vector of average variablility for query
+		float  seqCoef;		//seqCoef is the coeff for query
+		float DE;			//DE is the deviaation for query
 		vector<float> probabilityProfile;
 		vector< vector<float> > quantiles;  //quantiles[0] is the vector of deviations with ceiling score of 1, quantiles[1] is the vector of deviations with ceiling score of 2...
 		vector< vector<quanMember> > quantilesMembers;  //quantiles[0] is the vector of deviations with ceiling score of 1, quantiles[1] is the vector of deviations with ceiling score of 2...
-		vector< set<int> > h;
+		set<int>  h;
 		
 		
 		vector<float> readFreq();
-		vector<Sequence*> findPairs(int, int);
+		Sequence* findPairs(Sequence*);
 			
-		void createProcessesSpots();
-		void createProcessesPairs();
-		void createProcesses();
 		void createProcessesQuan();
+		void doPrep();
 		
 };
 

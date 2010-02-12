@@ -64,7 +64,7 @@ class Slayer {
 
 	public:
 		
-		Slayer(int, int, int, float, int);
+		Slayer(int, int, int, float, int, int);
 		~Slayer() {};
 		
 		string getResults(Sequence*, vector<Sequence*>);
@@ -73,14 +73,15 @@ class Slayer {
 				
 	private:
 		
-		int windowSize, windowStep, parentFragmentThreshold, iters;
+		int windowSize, windowStep, parentFragmentThreshold, iters, percentSNPSample;
 		float divRThreshold; 
 		vector<data_struct>  outputResults;
+		vector< map<int, int> > baseSpots;
 		
 		map<int, int> verticalFilter(vector<Sequence*>);
 		float computePercentID(string, string, int, int);
 		
-		vector<data_struct> runBellerophon(Sequence*, Sequence*, Sequence*);
+		vector<data_struct> runBellerophon(Sequence*, Sequence*, Sequence*, map<int, int>&);
 		vector<snps> getSNPS(string, string, string, int, int);
 		void bootstrapSNPS(vector<snps>, vector<snps>, float&, float&);
 		float snpQA(vector<snps>);

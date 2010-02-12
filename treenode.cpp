@@ -25,7 +25,7 @@ Node::Node() {
 /****************************************************************/
 void Node::setName(string Name) {  name = Name; }
 /****************************************************************/
-void Node::setGroup(string groups)  { group =groups; }
+void Node::setGroup(vector<string> groups)  { group =groups; }
 /****************************************************************/
 void Node::setBranchLength(float l) { branchLength = l; }
 /****************************************************************/
@@ -41,7 +41,7 @@ void Node::setChildren(int lc, int rc) { lchild = lc; rchild = rc; }	//leftchild
 /****************************************************************/
 string Node::getName() { return name; }
 /****************************************************************/
-string Node::getGroup() { return group; }
+vector<string> Node::getGroup() { return group; }
 /****************************************************************/
 float Node::getBranchLength() { return branchLength; }
 /****************************************************************/
@@ -60,12 +60,16 @@ int Node::getIndex() { return vectorIndex; }
 //to be used by printTree in the Tree class to print the leaf info			
 void Node::printNode() {
 	try{
-		mothurOut(toString(parent) + " " + toString(lchild) + " " + toString(rchild) + " " + group);
+		mothurOut(toString(parent) + " " + toString(lchild) + " " + toString(rchild) + " ");
+		
+		for (int i = 0; i < group.size(); i++) {  mothurOut( group[i] + " "); }
+		
 		//there is a branch length
 		if (branchLength != -1) { 
 			mothurOut(" " + toString(branchLength)); 
 		}
 		mothurOut(" |");
+		
 		map<string, int>::iterator it;
 		for(it=pGroups.begin();it!=pGroups.end();it++){
 			mothurOut(" " + it->first + ":" + toString(it->second));

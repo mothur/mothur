@@ -8,12 +8,14 @@
  */
 
 #include "maligner.h"
+#include "database.hpp"
+#include "blastdb.hpp"
 
 /***********************************************************************/
-Maligner::Maligner(vector<Sequence*> temp, int num, int match, int misMatch, float div, int minCov) :
-		db(temp), numWanted(num), matchScore(match), misMatchPenalty(misMatch), minDivR(div), minCoverage(minCov) {}
+Maligner::Maligner(vector<Sequence*> temp, int num, int match, int misMatch, float div, int ms, int minCov, string mode) :
+		db(temp), numWanted(num), matchScore(match), misMatchPenalty(misMatch), minDivR(div), minSimilarity(ms), minCoverage(minCov), searchMethod(mode) {}
 /***********************************************************************/
-string Maligner::getResults(Sequence* q) {
+string Maligner::getResults(Sequence* q, DeCalculator* decalc) {
 	try {
 		
 		outputResults.clear();
@@ -22,14 +24,36 @@ string Maligner::getResults(Sequence* q) {
 		query = new Sequence(q->getName(), q->getAligned());
 		
 		string chimera;
-	
-		decalc = new DeCalculator();
 		
-		//find closest seqs to query in template - returns copies of seqs so trim does not destroy - remember to deallocate
-		refSeqs = decalc->findClosest(query, db, numWanted);
-	
+		if (searchMethod != "blast") {
+			//find closest seqs to query in template - returns copies of seqs so trim does not destroy - remember to deallocate
+			refSeqs = decalc->findClosest(query, db, numWanted);
+		}else{
+			refSeqs = getBlastSeqs(query, numWanted);
+		}
+		
+//ofstream out;
+//string name = toString(numi+1); 
+//cout << name << endl;
+//name = name.substr(name.find_first_of("|")+1);
+//cout << name << endl;
+//name = name.substr(name.find_first_of("|")+1);
+//cout << name << endl;
+//name = name.substr(0, name.find_last_of("|"));
+//cout << name << endl;
+//string filename = name + ".seqsformaligner";
+//openOutputFile(filename, out);	
+//for (int u = 0; u < refSeqs.size(); u++) {  refSeqs[u]->printSequence(out);	}
+//out.close();
+//filename = name + ".fasta";
+//openOutputFile(filename, out);	
+//query->printSequence(out);
+//out.close();
+
+//for (int i = 0; i < refSeqs.size(); i++)  { cout << refSeqs[i]->getName() << endl;  }	
+//cout << "before = " << refSeqs.size() << endl;
 		refSeqs = minCoverageFilter(refSeqs);
-		
+//cout << "after = " << refSeqs.size() << endl;		
 		if (refSeqs.size() < 2)  { 
 			for (int i = 0; i < refSeqs.size(); i++) {  delete refSeqs[i];	}
 			percentIdenticalQueryChimera = 0.0;
@@ -37,9 +61,30 @@ string Maligner::getResults(Sequence* q) {
 		}
 		
 		int chimeraPenalty = computeChimeraPenalty();
-	
+//cout << chimeraPenalty << endl;		
+		//fills outputResults
+		chimera = chimeraMaligner(chimeraPenalty, decalc);
+		
+				
+		//free memory
+		delete query;
+		for (int i = 0; i < refSeqs.size(); i++) {  delete refSeqs[i];	}
+		
+		return chimera;
+	}
+	catch(exception& e) {
+		errorOut(e, "Maligner", "getResults");
+		exit(1);
+	}
+}
+/***********************************************************************/
+string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
+	try {
+		
+		string chimera;
+		
 		//trims seqs to first non gap char in all seqs and last non gap char in all seqs
-		decalc->trimSeqs(query, refSeqs);
+		spotMap = decalc->trimSeqs(query, refSeqs);
 		
 		vector<Sequence*> temp = refSeqs;
 		temp.push_back(query);
@@ -67,8 +112,6 @@ string Maligner::getResults(Sequence* q) {
 		
 		percentIdenticalQueryChimera = computePercentID(queryInRange, chimeraSeq);
 		
-		delete decalc;
-		
 		//save output results
 		for (int i = 0; i < trace.size(); i++) {
 			int regionStart = trace[i].col;
@@ -78,6 +121,8 @@ string Maligner::getResults(Sequence* q) {
 			results temp;
 			
 			temp.parent = refSeqs[seqIndex]->getName();
+			temp.nastRegionStart = spotMap[regionStart];
+			temp.nastRegionEnd = spotMap[regionEnd];
 			temp.regionStart = regionStart;
 			temp.regionEnd = regionEnd;
 			
@@ -97,15 +142,11 @@ string Maligner::getResults(Sequence* q) {
 		
 			outputResults.push_back(temp);
 		}
-		
-		//free memory
-		delete query;
-		for (int i = 0; i < refSeqs.size(); i++) {  delete refSeqs[i];	}
-		
+
 		return chimera;
 	}
 	catch(exception& e) {
-		errorOut(e, "Maligner", "getResults");
+		errorOut(e, "Maligner", "chimeraMaligner");
 		exit(1);
 	}
 }
@@ -193,21 +234,27 @@ void Maligner::verticalFilter(vector<Sequence*> seqs) {
 			if(gaps[i] == seqs.size())	{	filterString[i] = '0'; 	numColRemoved++;  }
 		}
 		
+		map<int, int> newMap;
 		//for each sequence
 		for (int i = 0; i < seqs.size(); i++) {
 		
 			string seqAligned = seqs[i]->getAligned();
 			string newAligned = "";
+			int count = 0;
 			
 			for (int j = 0; j < seqAligned.length(); j++) {
 				//if this spot is not a gap
-				if (filterString[j] == '1') { newAligned += seqAligned[j]; }
+				if (filterString[j] == '1') { 
+					newAligned += seqAligned[j]; 
+					newMap[count] = spotMap[j];
+					count++;
+				}
 			}
 			
 			seqs[i]->setAligned(newAligned);
 		}
 
-	
+		spotMap = newMap;
 	}
 	catch(exception& e) {
 		errorOut(e, "Maligner", "verticalFilter");
@@ -451,5 +498,79 @@ float Maligner::computePercentID(string queryAlign, string chimera) {
 		exit(1);
 	}
 }
+//***************************************************************************************************************
+vector<Sequence*> Maligner::getBlastSeqs(Sequence* q, int num) {
+	try {
+cout << q->getName() << endl;	
+		//generate blastdb
+		Database* database = new BlastDB(-2.0, -1.0, matchScore, misMatchPenalty);
+		for (int i = 0; i < db.size(); i++) { 	database->addSequence(*db[i]);	}
+		database->generateDB();
+		database->setNumSeqs(db.size());
+		
+		//get parts of query
+		string queryAligned = q->getAligned();
+		string leftQuery = queryAligned.substr(0, (queryAligned.length() / 3)); //first 1/3 of the sequence
+		string rightQuery = queryAligned.substr(((queryAligned.length() / 3)*2)); //last 1/3 of the sequence
+		
+		Sequence* queryLeft = new Sequence(q->getName(), leftQuery);
+		Sequence* queryRight = new Sequence(q->getName(), rightQuery);
+		
+		map<int, float> tempIndexesRight = database->findClosest(queryRight, num);
+		map<int, float> tempIndexesLeft = database->findClosest(queryLeft, num);
+		
+		//merge results
+		vector<rank> mergedResults;
+		
+		map<int, float>::iterator it;
+		map<int, float>::iterator it2;
+		
+		//add in right guys merging common finds
+		for (it = tempIndexesRight.begin(); it != tempIndexesRight.end(); it++) {
+			it2 = tempIndexesLeft.find(it->first);
+			
+			if (it2 == tempIndexesLeft.end()) {  //result only present in right
+				rank temp(it->first, it->second);
+				mergedResults.push_back(temp); 
+
+			}else { //result present in both save best score
+				float bestscore;
+				if (it->second > it2->second)	{  bestscore = it->second;  }
+				else							{  bestscore = it2->second; }
+				
+				rank temp(it->first, bestscore);
+				mergedResults.push_back(temp);
+				
+				tempIndexesLeft.erase(it2);
+			}
+		}
+		
+		//add in unique left guys
+		for (it = tempIndexesLeft.begin(); it != tempIndexesLeft.end(); it++) {
+			rank temp(it->first, it->second);
+			mergedResults.push_back(temp); 
+		}
+		
+		sort(mergedResults.begin(), mergedResults.end(), compareMembers);
+		
+		vector<Sequence*> refResults;
+		for (int i = 0; i < numWanted; i++) {
+			Sequence* temp = new Sequence(db[mergedResults[i].num]->getName(), db[mergedResults[i].num]->getAligned());
+			refResults.push_back(temp);
+cout << db[mergedResults[i].num]->getName() << endl;
+		}
+		
+		delete queryRight;
+		delete queryLeft;
+		delete database;
+		
+		return refResults;
+	}
+	catch(exception& e) {
+		errorOut(e, "Maligner", "getBlastSeqs");
+		exit(1);
+	}
+}
+
 //***************************************************************************************************************
 

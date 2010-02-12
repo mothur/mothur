@@ -27,7 +27,8 @@ Tree::Tree() {
 			//initialize leaf nodes
 			if (i <= (numLeaves-1)) {
 				tree[i].setName(globaldata->Treenames[i]);
-				tree[i].setGroup(globaldata->gTreemap->getGroup(globaldata->Treenames[i]));
+				vector<string> tempGroups; tempGroups.push_back(globaldata->gTreemap->getGroup(globaldata->Treenames[i]));
+				tree[i].setGroup(tempGroups);
 				//set pcount and pGroup for groupname to 1.
 				tree[i].pcount[globaldata->gTreemap->getGroup(globaldata->Treenames[i])] = 1;
 				tree[i].pGroups[globaldata->gTreemap->getGroup(globaldata->Treenames[i])] = 1;
@@ -37,7 +38,8 @@ Tree::Tree() {
 			//intialize non leaf nodes
 			}else if (i > (numLeaves-1)) {
 				tree[i].setName("");
-				tree[i].setGroup("");
+				vector<string> tempGroups;
+				tree[i].setGroup(tempGroups);
 			}
 		}
 	}
@@ -118,6 +120,14 @@ void Tree::addNamesToCounts() {
 						tree[i].pGroups[it->first] = 1;
 					}
 				}//end if
+				
+				//update groups to reflect all the groups this node represents
+				vector<string> nodeGroups;
+				map<string, int>::iterator itGroups;
+				for (itGroups = tree[i].pcount.begin(); itGroups != tree[i].pcount.end(); itGroups++) {
+					nodeGroups.push_back(itGroups->first);
+				}
+				tree[i].setGroup(nodeGroups);
 				
 			}//end else
 		}//end for
@@ -375,7 +385,7 @@ void Tree::randomLabels(vector<string> g) {
 				tree[z].pGroups = (tree[i].pGroups);
 				tree[i].pGroups = (lib_hold);
 				
-				string zgroup = tree[z].getGroup();
+				vector<string> zgroup = tree[z].getGroup();
 				tree[z].setGroup(tree[i].getGroup());
 				tree[i].setGroup(zgroup);
 				
@@ -394,7 +404,7 @@ void Tree::randomLabels(vector<string> g) {
 		exit(1);
 	}
 }
-/**************************************************************************************************/
+/**************************************************************************************************
 
 void Tree::randomLabels(string groupA, string groupB) {
 	try {
@@ -447,7 +457,9 @@ void Tree::assembleRandomUnifracTree(vector<string> g) {
 }
 /*************************************************************************************************/
 void Tree::assembleRandomUnifracTree(string groupA, string groupB) {
-	randomLabels(groupA, groupB);
+
+	vector<string> temp; temp.push_back(groupA); temp.push_back(groupB);
+	randomLabels(temp);
 	assembleTree();
 }
 
@@ -584,7 +596,9 @@ void Tree::printBranch(int node, ostream& out, string mode) {
 				}
 			}
 		}else { //you are a leaf
-			out << tree[node].getGroup(); 
+			string leafGroup = globaldata->gTreemap->getGroup(tree[node].getName());
+			
+			out << leafGroup; 
 			if (mode == "branch") {
 				//if there is a branch length then print it
 				if (tree[node].getBranchLength() != -1) {

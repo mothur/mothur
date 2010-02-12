@@ -55,7 +55,7 @@ private:
 	void randomTopology();
 	void randomBlengths();
 	void randomLabels(vector<string>);
-	void randomLabels(string, string);
+	//void randomLabels(string, string);
 	void printBranch(int, ostream&, string);  //recursively print out tree
 	void parseTreeFile();	//parses through tree file to find names of nodes and number of them
 							//this is required in case user has sequences in the names file that are

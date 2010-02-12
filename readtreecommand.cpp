@@ -87,7 +87,7 @@ ReadTreeCommand::ReadTreeCommand(string option){
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }
-			else if (namefile == "not found") { treefile = ""; }
+			else if (namefile == "not found") { namefile = ""; }
 			else { readNamesFile(); }	
 			
 			if (abort == false) {
@@ -162,6 +162,7 @@ int ReadTreeCommand::execute(){
 					if (it == nameMap.end()) {
 						mothurOut(treeMap->namesOfSeqs[i] + " is in your groupfile and not in your tree. It will be disregarded."); mothurOutEndLine();
 						treeMap->removeSeq(treeMap->namesOfSeqs[i]);
+						i--; //need this because removeSeq removes name from namesOfSeqs
 					}
 				}
 			}

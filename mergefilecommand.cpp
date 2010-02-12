@@ -96,7 +96,11 @@ int MergeFileCommand::execute(){
 			
 			openInputFile(fileNames[i], inputFile);
 			
-			while(!inputFile.eof()){	c = inputFile.get(); outputFile << c;	}
+			while(!inputFile.eof()){	
+				c = inputFile.get(); 
+				//-1 is eof char
+				if (int(c) != -1) { outputFile << c; }   
+			}
 			
 			inputFile.close();
 		}

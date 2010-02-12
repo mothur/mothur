@@ -10,8 +10,8 @@
 #include "slayer.h"
 
 /***********************************************************************/
-Slayer::Slayer(int win, int increment, int parentThreshold, float div, int i) :
-		windowSize(win), windowStep(increment), parentFragmentThreshold(parentThreshold), divRThreshold(div), iters(i){}
+Slayer::Slayer(int win, int increment, int parentThreshold, float div, int i, int snp) :
+		windowSize(win), windowStep(increment), parentFragmentThreshold(parentThreshold), divRThreshold(div), iters(i), percentSNPSample(snp){}
 /***********************************************************************/
 string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 	try {
@@ -20,13 +20,14 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 		for (int i = 0; i < refSeqs.size(); i++) {
 		
 			for (int j = i+1; j < refSeqs.size(); j++) {
-			
+	
 				//make copies of query and each parent because runBellerophon removes gaps and messes them up
 				Sequence* q = new Sequence(query->getName(), query->getAligned());
 				Sequence* leftParent = new Sequence(refSeqs[i]->getName(), refSeqs[i]->getAligned());
 				Sequence* rightParent = new Sequence(refSeqs[j]->getName(), refSeqs[j]->getAligned());
 				
-				vector<data_struct> divs = runBellerophon(q, leftParent, rightParent);
+				map<int, int> spots;  //map from spot in original sequence to spot in filtered sequence for query and both parents
+				vector<data_struct> divs = runBellerophon(q, leftParent, rightParent, spots);
 				
 				vector<data_struct> selectedDivs;
 				for (int k = 0; k < divs.size(); k++) {
@@ -39,16 +40,17 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 					
 					//require at least 3 SNPs on each side of the break
 					if ((numSNPSLeft >= 3) && (numSNPSRight >= 3)) {
+					
+						//removed in 12/09 version of chimeraSlayer
+						//int winSizeLeft = divs[k].winLEnd - divs[k].winLStart + 1;
+						//int winSizeRight = divs[k].winREnd - divs[k].winRStart + 1;
 						
-						int winSizeLeft = divs[k].winLEnd - divs[k].winLStart + 1;
-						int winSizeRight = divs[k].winREnd - divs[k].winRStart + 1;
-						
-						float snpRateLeft = numSNPSLeft / (float) winSizeLeft;
-						float snpRateRight = numSNPSRight / (float) winSizeRight;
-						float logR = log(snpRateLeft / snpRateRight) / log(2.0);
+						//float snpRateLeft = numSNPSLeft / (float) winSizeLeft;
+						//float snpRateRight = numSNPSRight / (float) winSizeRight;
+						//float logR = log(snpRateLeft / snpRateRight) / log(2.0); 
 						
 						// do not accept excess snp ratio on either side of the break
-						if (abs(logR) < 1 ) {  
+						//if (abs(logR) < 1 ) {  
 							
 							float BS_A, BS_B;
 							bootstrapSNPS(snpsLeft, snpsRight, BS_A, BS_B);
@@ -59,9 +61,15 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 							divs[k].bsMax = max(BS_A, BS_B);
 						
 							divs[k].chimeraMax = max(divs[k].qla_qrb, divs[k].qlb_qra);
+							
+							//so results reflect orignal alignment
+							divs[k].winLStart = spots[divs[k].winLStart];
+							divs[k].winLEnd = spots[divs[k].winLEnd];  
+							divs[k].winRStart = spots[divs[k].winRStart]; 
+							divs[k].winREnd = spots[divs[k].winREnd]; 
 						
 							selectedDivs.push_back(divs[k]);
-						}
+						//}
 					}
 				}
 				
@@ -74,7 +82,7 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 			}
 		}
 		
-		
+
 		// compute bootstrap support
 		if (all.size() > 0) {
 			//sort them
@@ -95,22 +103,31 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 	}
 }
 /***********************************************************************/
-vector<data_struct> Slayer::runBellerophon(Sequence* q, Sequence* pA, Sequence* pB) {
+vector<data_struct> Slayer::runBellerophon(Sequence* q, Sequence* pA, Sequence* pB, map<int, int>& spots) {
 	try{
 		
 		vector<data_struct> data;
-				
+		
 		//vertical filter
 		vector<Sequence*> temp;
 		temp.push_back(q); temp.push_back(pA); temp.push_back(pB);
-		map<int, int> spots = verticalFilter(temp);
+		
+		//maps spot in new alignment to spot in alignment before filter
+		spots = verticalFilter(temp);  //fills baseSpots
 		
 		//get these to avoid numerous function calls
 		string query = q->getAligned();
 		string parentA = pA->getAligned();
 		string parentB = pB->getAligned();
 		int length = query.length();
-		
+//cout << q->getName() << endl << q->getAligned() << endl << endl;	
+//cout << pA->getName() << endl << pA->getAligned() << endl << endl;		
+//cout << pB->getName() << endl << pB->getAligned() << endl << endl;	
+//cout << " length = " << length << endl;
+//cout << q->getName() << endl;
+//cout << pA->getName() << '\t';
+//cout << pB->getName() << endl;
+	
 		//check window size
 		if (length < (2*windowSize+windowStep)) { 
 			mothurOut("Your window size is too large for " + q->getName() + ". I will make the window size " + toString(length/4) + " which is 1/4 the filtered length."); mothurOutEndLine();	
@@ -143,9 +160,11 @@ vector<data_struct> Slayer::runBellerophon(Sequence* q, Sequence* pA, Sequence* 
 			//float avgQA_QB = ((QA*leftLength) + (QB*rightLength)) / (float) length;
 		
 			float divR_QLA_QRB = min((QLA_QRB/QA), (QLA_QRB/QB));
-		
 			float divR_QLB_QRA = min((QLB_QRA/QA), (QLB_QRA/QB));
+//cout << leftLength << '\t' << rightLength << '\t' << QLA << '\t' << QRB << '\t' << QLB << '\t' << QRA  << '\t' << LAB << '\t' << RAB << '\t' << AB << '\t' << QA << '\t' << QB << '\t' << QLA_QRB << '\t' <<  QLB_QRA <<    endl;    		
 
+//cout << divRThreshold << endl;
+//cout << breakpoint << '\t' << divR_QLA_QRB << '\t' << divR_QLB_QRA << endl;
 			//is one of them above the 
 			if (divR_QLA_QRB >= divRThreshold || divR_QLB_QRA >= divRThreshold) {
 				
@@ -167,10 +186,10 @@ vector<data_struct> Slayer::runBellerophon(Sequence* q, Sequence* pA, Sequence* 
 					member.rab = RAB; 
 					member.qra = QRA; 
 					member.qlb = QLB; 
-					member.winLStart = spots[0];
-					member.winLEnd = spots[breakpoint];  //so breakpoint reflects spot in alignment before filter
-					member.winRStart = spots[breakpoint+1]; 
-					member.winREnd = spots[length-1]; 
+					member.winLStart = 0;
+					member.winLEnd = breakpoint;  
+					member.winRStart = breakpoint+1; 
+					member.winREnd = length-1; 
 					member.querySeq = *(q); 
 					member.parentA = *(pA);
 					member.parentB = *(pB);
@@ -198,7 +217,7 @@ vector<snps> Slayer::getSNPS(string parentA, string query, string parentB, int l
 	try {
 	
 		vector<snps> data;
-
+//cout << left << '\t' << right << endl;
 		for (int i = left; i <= right; i++) {
 			
 			char A = parentA[i];
@@ -206,12 +225,31 @@ vector<snps> Slayer::getSNPS(string parentA, string query, string parentB, int l
 			char B = parentB[i];
 			
 			if ((A != Q) || (B != Q)) {
-				snps member;
-				member.queryChar = Q;
-				member.parentAChar = A;
-				member.parentBChar = B;
+//cout << "not equal " << Q << '\t' << A << '\t' << B << endl;
+			
+				//ensure not neighboring a gap. change to 12/09 release of chimeraSlayer - not sure what this adds, but it eliminates alot of SNPS
+				if (
+					//did query loose a base here during filter??
+					( i == 0 || abs (baseSpots[0][i] - baseSpots[0][i-1]) == 1) &&
+					( i == query.length() || abs (baseSpots[0][i] - baseSpots[0][i+1]) == 1)
+					&&
+					//did parentA loose a base here during filter??
+					( i == 0 || abs (baseSpots[1][i] - baseSpots[1][i-1]) == 1) &&
+					( i == parentA.length() || abs (baseSpots[1][i] - baseSpots[1][i+1]) == 1) 
+					&&
+					//did parentB loose a base here during filter??
+					( i == 0 || abs (baseSpots[2][i] - baseSpots[2][i-1]) == 1) &&
+					( i == parentB.length() || abs (baseSpots[2][i] - baseSpots[2][i+1]) == 1)
+					) 
+				{ 
 				
-				data.push_back(member);
+					snps member;
+					member.queryChar = Q;
+					member.parentAChar = A;
+					member.parentBChar = B;
+//cout << "not neighboring a gap " << Q << '\t' << A << '\t' << B << '\t' << baseSpots[0][i] << '\t' << baseSpots[0][i+1] << '\t' << baseSpots[0][i-1] << '\t' << baseSpots[1][i] << '\t' << baseSpots[1][i+1] << '\t' << baseSpots[1][i-1] << '\t' << baseSpots[2][i] << '\t' << baseSpots[2][i+1] << '\t' << baseSpots[2][i-1] << endl;				
+					data.push_back(member);
+				}
 			}
 		}
 		
@@ -232,9 +270,9 @@ void Slayer::bootstrapSNPS(vector<snps> left, vector<snps> right, float& BSA, fl
 		int count_A = 0; // sceneario QLA,QRB supported
 		int count_B = 0; // sceneario QLB,QRA supported
 	
-		int numLeft = max(1, int(left.size()/10 +0.5));
-		int numRight = max(1, int(right.size()/10 + 0.5));
-		
+		int numLeft = max(1, int(left.size() * (percentSNPSample/(float)100) + 0.5));
+		int numRight = max(1, int(right.size() * (percentSNPSample/(float)100) + 0.5));
+
 		for (int i = 0; i < iters; i++) {
 			//random sampling with replacement.
 		
@@ -278,11 +316,29 @@ void Slayer::bootstrapSNPS(vector<snps> left, vector<snps> right, float& BSA, fl
 			if ((QLB > QLA) && (QRA > QRB)) {
 				count_B++;
 			}
-		
+			
+//cout << "selected left snp: \n";
+//for (int j = 0; j < selectedLeft.size(); j++) {  cout << selectedLeft[j].parentAChar;  } 
+//cout << endl;
+//for (int j = 0; j < selectedLeft.size(); j++) {  cout << selectedLeft[j].queryChar;  }
+//cout << endl;
+//for (int j = 0; j < selectedLeft.size(); j++) {  cout << selectedLeft[j].parentBChar;  }
+//cout << endl;
+//cout << "selected right snp: \n";
+//for (int j = 0; j < selectedRight.size(); j++) {  cout << selectedRight[j].parentAChar;  } 
+//cout << endl;
+//for (int i = 0; i < selectedRight.size(); i++) {  cout << selectedRight[i].queryChar;  }
+//cout << endl;
+//for (int i = 0; i < selectedRight.size(); i++) {  cout << selectedRight[i].parentBChar;  }
+//cout << endl;		
 		}
+
+
+
 
 		BSA = ((float) count_A / (float) iters) * 100;
 		BSB = ((float) count_B / (float) iters) * 100;
+//cout << "bsa = " << BSA << " bsb = " << BSB << endl;
 	
 	}
 	catch(exception& e) {
@@ -359,7 +415,7 @@ float Slayer::computePercentID(string queryFrag, string parent, int left, int ri
 	try {
 		int total = 0;
 		int matches = 0;
-	
+
 		for (int i = left; i <= right; i++) {
 			total++;
 			if (queryFrag[i] == parent[i]) {
@@ -380,6 +436,10 @@ float Slayer::computePercentID(string queryFrag, string parent, int left, int ri
 //remove columns that contain any gaps
 map<int, int> Slayer::verticalFilter(vector<Sequence*> seqs) {
 	try {
+		//find baseSpots
+		baseSpots.clear(); 
+		baseSpots.resize(3);  //query, parentA, parentB
+	
 		vector<int> gaps;	gaps.resize(seqs[0]->getAligned().length(), 0);
 		
 		string filterString = (string(seqs[0]->getAligned().length(), '1'));
@@ -391,11 +451,11 @@ map<int, int> Slayer::verticalFilter(vector<Sequence*> seqs) {
 			
 			for (int j = 0; j < seqAligned.length(); j++) {
 				//if this spot is a gap
-				if ((seqAligned[j] == '-') || (seqAligned[j] == '.') || (toupper(seqAligned[j]) == 'N'))	{	gaps[j]++;	}
+				if ((seqAligned[j] == '-') || (seqAligned[j] == '.') || (toupper(seqAligned[j]) == 'N'))	{   gaps[j]++;	}
 			}
 		}
 		
-		//zero out spot where all sequences have blanks
+		//zero out spot where any sequences have blanks
 		int numColRemoved = 0;
 		int count = 0;
 		map<int, int> maskMap; maskMap.clear();
@@ -407,16 +467,25 @@ map<int, int> Slayer::verticalFilter(vector<Sequence*> seqs) {
 				count++;
 			}
 		}
-		
+
 		//for each sequence
 		for (int i = 0; i < seqs.size(); i++) {
 		
 			string seqAligned = seqs[i]->getAligned();
 			string newAligned = "";
 			
+			int baseCount = 0;
+			int count = 0;
 			for (int j = 0; j < seqAligned.length(); j++) {
+				//are you a base
+				if ((seqAligned[j] != '-') && (seqAligned[j] != '.') && (toupper(seqAligned[j]) != 'N'))	{ baseCount++; }
+			
 				//if this spot is not a gap
-				if (filterString[j] == '1') { newAligned += seqAligned[j]; }
+				if (filterString[j] == '1') { 
+					newAligned += seqAligned[j]; 
+					baseSpots[i][count] = baseCount;
+					count++;
+				}
 			}
 			
 			seqs[i]->setAligned(newAligned);

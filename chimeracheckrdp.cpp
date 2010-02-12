@@ -10,12 +10,11 @@
 #include "chimeracheckrdp.h"
 		
 //***************************************************************************************************************
-ChimeraCheckRDP::ChimeraCheckRDP(string filename, string temp, string o) {  fastafile = filename;  templateFile = temp; outputDir = o;  }
+ChimeraCheckRDP::ChimeraCheckRDP(string filename,  string o) {  fastafile = filename;  outputDir = o;  }
 //***************************************************************************************************************
 
 ChimeraCheckRDP::~ChimeraCheckRDP() {
 	try {
-		for (int i = 0; i < querySeqs.size(); i++)		{  delete querySeqs[i];		}
 		delete templateDB;
 		delete kmer;
 	}
@@ -28,113 +27,65 @@ ChimeraCheckRDP::~ChimeraCheckRDP() {
 void ChimeraCheckRDP::print(ostream& out) {
 	try {
 		
-		mothurOutEndLine();
+		mothurOut("Processing: " + querySeq->getName()); mothurOutEndLine();
 		
-		//vector<bool> isChimeric;  isChimeric.resize(querySeqs.size(), false);
-		
-		for (int i = 0; i < querySeqs.size(); i++) {
+		out << querySeq->getName() << endl;
+		out << "IS scores: " << '\t';
 			
-				out << querySeqs[i]->getName() << endl;
-				out << "IS scores: " << '\t';
-				
-				//int lastChimericWindowFound = 0;
-				
-				for (int k = 0; k < IS[i].size(); k++) {
-					out << IS[i][k].score << '\t'; 
-					//if (IS[i][k].score > chimeraCutoff) {  isChimeric[i] = true;   lastChimericWindowFound = k;		}			
-				}
-				out << endl;
-				//if (isChimeric[i]) { 
-					//mothurOut(querySeqs[i]->getName() + "\tIS: " + toString(IS[i][lastChimericWindowFound].score) + "\tbreakpoint: " + toString(IS[i][lastChimericWindowFound].midpoint) + "\tleft parent: " + IS[i][lastChimericWindowFound].leftParent + "\tright parent: " + IS[i][lastChimericWindowFound].rightParent); mothurOutEndLine();
-					//out << endl << "chimera: YES" << endl;
-				//}else{
-					//out << endl << "chimera: NO" << endl;
-				//}
-				
-				if (svg) {
-					
-					if (name != "") { //if user has specific names
-						map<string, string>::iterator it = names.find(querySeqs[i]->getName());
-					
-						if (it != names.end()) { //user wants pic of this
-							makeSVGpic(IS[i], i);  //zeros out negative results
-						}
-					}else{//output them all
-						makeSVGpic(IS[i], i);  //zeros out negative results
-					}
-				}
+		for (int k = 0; k < IS.size(); k++) {
+			out << IS[k].score << '\t'; 
 		}
+		out << endl;
 		
-		mothurOut("This method does not determine if a sequence is chimeric, but allows you to make that determination based on the IS values."); mothurOutEndLine();
+		if (svg) {
+			if (name != "") { //if user has specific names
+				map<string, string>::iterator it = names.find(querySeq->getName());
+				
+				if (it != names.end()) { //user wants pic of this
+					makeSVGpic(IS);  //zeros out negative results
+				}
+			}else{//output them all
+				makeSVGpic(IS);  //zeros out negative results
+			}
+		}
 	}
 	catch(exception& e) {
 		errorOut(e, "ChimeraCheckRDP", "print");
 		exit(1);
 	}
 }
-
 //***************************************************************************************************************
-int ChimeraCheckRDP::getChimeras() {
+void ChimeraCheckRDP::doPrep() {
 	try {
-		
-		//read in query sequences and subject sequences
+		templateDB = new AlignmentDB(templateFileName, "kmer", kmerSize, 0.0,0.0,0.0,0.0);
 		mothurOutEndLine();
-		mothurOut("Reading query sequences... "); cout.flush();
-		querySeqs = readSeqs(fastafile);
-		mothurOut("Done."); 
-		//templateSeqs = readSeqs(templateFile);
-		templateDB = new AlignmentDB(templateFile, "kmer", kmerSize, 0.0,0.0,0.0,0.0);
-		mothurOutEndLine();
-		
-		int numSeqs = querySeqs.size();
-		
-		IS.resize(numSeqs);
-		closest.resize(numSeqs);
-		
-		//break up file if needed
-		int linesPerProcess = numSeqs / processors ;
-		
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-			//find breakup of sequences for all times we will Parallelize
-			if (processors == 1) {   lines.push_back(new linePair(0, numSeqs));  }
-			else {
-				//fill line pairs
-				for (int i = 0; i < (processors-1); i++) {			
-					lines.push_back(new linePair((i*linesPerProcess), ((i*linesPerProcess) + linesPerProcess)));
-				}
-				//this is necessary to get remainder of processors / numSeqs so you don't miss any lines at the end
-				int i = processors - 1;
-				lines.push_back(new linePair((i*linesPerProcess), numSeqs));
-			}
-			
-		#else
-			lines.push_back(new linePair(0, numSeqs));
-		#endif
 		
 		kmer = new Kmer(kmerSize);
 		
 		if (name != "") { 
 			readName(name);  //fills name map with names of seqs the user wants to have .svg for.  
 		}
+	}
+	catch(exception& e) {
+		errorOut(e, "ChimeraCheckRDP", "doPrep");
+		exit(1);
+	}
+}
+//***************************************************************************************************************
+int ChimeraCheckRDP::getChimeras(Sequence* query) {
+	try {
 		
-		//find closest seq to each querySeq
-		for (int i = 0; i < querySeqs.size(); i++) {
-			closest[i] = templateDB->findClosestSequence(querySeqs[i]);  
-		}
-
-		//for each query find IS value  
-		if (processors == 1) {
-			for (int i = 0; i < querySeqs.size(); i++) {
-				IS[i] = findIS(i); 
-			}
-		}else {		createProcessesIS();	}
-		
+		IS.clear();
+				
+		querySeq = query;
+			
+		closest = templateDB->findClosestSequence(query);  
+	
+		IS = findIS(); 
+					
 		//determine chimera report cutoff - window score above 95%
 		//getCutoff();  - not very acurate predictor
 		
-		//free memory
-		for (int i = 0; i < lines.size(); i++)					{	delete lines[i];	}
-	
 		return 0;
 	}
 	catch(exception& e) {
@@ -143,7 +94,7 @@ int ChimeraCheckRDP::getChimeras() {
 	}
 }
 //***************************************************************************************************************
-vector<sim> ChimeraCheckRDP::findIS(int query) {
+vector<sim> ChimeraCheckRDP::findIS() {
 	try {
 		
 		
@@ -154,13 +105,11 @@ vector<sim> ChimeraCheckRDP::findIS(int query) {
 		vector< map<int, int> > subjectKmerInfo;
 		
 		vector<sim>  isValues;
-		string queryName = querySeqs[query]->getName();
-		string seq = querySeqs[query]->getUnaligned();
-		
-		mothurOut("Finding IS values for sequence " + toString(query+1)); mothurOutEndLine();
+		string queryName = querySeq->getName();
+		string seq = querySeq->getUnaligned();
 		
 		queryKmerInfo = kmer->getKmerCounts(seq);
-		subjectKmerInfo = kmer->getKmerCounts(closest[query].getUnaligned());
+		subjectKmerInfo = kmer->getKmerCounts(closest.getUnaligned());
 		
 		//find total kmers you have in common with closest[query] by looking at the last entry in the vector of maps for each
 		int nTotal = calcKmers(queryKmerInfo[(queryKmerInfo.size()-1)], subjectKmerInfo[(subjectKmerInfo.size()-1)]);
@@ -238,7 +187,7 @@ vector<sim> ChimeraCheckRDP::findIS(int query) {
 			
 			delete left;
 			delete right;
-		}	
+		}
 		
 		return isValues;
 	
@@ -309,36 +258,10 @@ int ChimeraCheckRDP::calcKmers(map<int, int> query, map<int, int> subject) {
 }
 
 //***************************************************************************************************************
-void ChimeraCheckRDP::getCutoff() {
+void ChimeraCheckRDP::makeSVGpic(vector<sim> info) {
 	try{
 		
-		vector<float> temp;
-		
-		//store all is scores for all windows
-		for (int i = 0; i < IS.size(); i++) {
-			for (int j = 0; j < IS[i].size(); j++) {
-				temp.push_back(IS[i][j].score);
-			}
-		}
-		
-		//sort them
-		sort(temp.begin(), temp.end());
-		
-		//get 95%
-		chimeraCutoff = temp[int(temp.size() * 0.95)];
-
-	}
-	catch(exception& e) {
-		errorOut(e, "ChimeraCheckRDP", "getCutoff");
-		exit(1);
-	}
-}
-
-//***************************************************************************************************************
-void ChimeraCheckRDP::makeSVGpic(vector<sim> info, int query) {
-	try{
-		
-		string file = outputDir + querySeqs[query]->getName() + ".chimeracheck.svg";
+		string file = outputDir + querySeq->getName() + ".chimeracheck.svg";
 		ofstream outsvg;
 		openOutputFile(file, outsvg);
 		
@@ -346,7 +269,7 @@ void ChimeraCheckRDP::makeSVGpic(vector<sim> info, int query) {
 		
 		outsvg << "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 700 " + toString(width) + "\">\n";
 		outsvg << "<g>\n";
-		outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString((width / 2) - 150) + "\" y=\"25\">Plotted IS values for " + querySeqs[query]->getName() + "</text>\n";
+		outsvg << "<text fill=\"black\" class=\"seri\" x=\"" + toString((width / 2) - 150) + "\" y=\"25\">Plotted IS values for " + querySeq->getName() + "</text>\n";
 		
 		outsvg <<  "<line x1=\"75\" y1=\"600\" x2=\"" + toString((info.size()*5) + 75) + "\" y2=\"600\" stroke=\"black\" stroke-width=\"2\"/>\n";  
 		outsvg <<  "<line x1=\"75\" y1=\"600\" x2=\"75\" y2=\"125\" stroke=\"black\" stroke-width=\"2\"/>\n";
@@ -391,97 +314,6 @@ void ChimeraCheckRDP::makeSVGpic(vector<sim> info, int query) {
 		exit(1);
 	}
 }
-//***************************************************************************************************************
-void ChimeraCheckRDP::createProcessesIS() {
-	try {
-	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		int process = 0;
-		vector<int> processIDS;
-		
-		//loop through and create all the processes you want
-		while (process != processors) {
-			int pid = fork();
-			
-			if (pid > 0) {
-				processIDS.push_back(pid);  
-				process++;
-			}else if (pid == 0){
-							
-				for (int i = lines[process]->start; i < lines[process]->end; i++) {
-					IS[i] = findIS(i);  
-				}				
-				
-				//write out data to file so parent can read it
-				ofstream out;
-				string s = toString(getpid()) + ".temp";
-				openOutputFile(s, out);
-				
-				//output pairs
-				for (int i = lines[process]->start; i < lines[process]->end; i++) {
-					out << IS[i].size() << endl;
-					for (int j = 0; j < IS[i].size(); j++) {
-						out << IS[i][j].leftParent << '\t'<< IS[i][j].rightParent << '\t' << IS[i][j].midpoint << '\t' << IS[i][j].score << endl;
-					}
-				}
-
-				out.close();
-				
-				exit(0);
-			}else { mothurOut("unable to spawn the necessary processes."); mothurOutEndLine(); exit(0); }
-		}
-		
-		//force parent to wait until all the processes are done
-		for (int i=0;i<processors;i++) { 
-			int temp = processIDS[i];
-			wait(&temp);
-		}
-	
-		//get data created by processes
-		for (int i=0;i<processors;i++) { 
-			ifstream in;
-			string s = toString(processIDS[i]) + ".temp";
-			openInputFile(s, in);
-		
-			//get pairs
-			for (int k = lines[i]->start; k < lines[i]->end; k++) {
-			
-				int size;
-				in >> size; gobble(in);
-				
-				string left, right;
-				int mid;
-				float score;
-				
-				IS[k].clear();
-				
-				for (int j = 0; j < size; j++) {
-					in >> left >> right >> mid >> score;  gobble(in);
-					
-					sim temp;
-					temp.leftParent = left;
-					temp.rightParent = right;
-					temp.midpoint = mid;
-					temp.score = score;
-					
-					IS[k].push_back(temp);
-				}
-			}
-			
-			in.close();
-			remove(s.c_str());
-		}
-#else
-			for (int i = 0; i < querySeqs.size(); i++) {
-				IS[i] = findIS(i);
-			}
-#endif		
-	}
-	catch(exception& e) {
-		errorOut(e, "ChimeraCheckRDP", "createProcessesIS");
-		exit(1);
-	}
-}
-
 //***************************************************************************************************************
 
 

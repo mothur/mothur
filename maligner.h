@@ -10,53 +10,32 @@
  */
  
 #include "decalc.h"
+#include "chimera.h"
 
 /***********************************************************************/
 //This class was modeled after the chimeraMaligner written by the Broad Institute
-/***********************************************************************/
-struct score_struct {
-	int prev;
-	int score;
-	int row;
-	int col;
-};
-/***********************************************************************/
-struct trace_struct {
-	int col;
-	int oldCol;
-	int row;
-};
-/***********************************************************************/
-struct results {
-	int regionStart;
-	int regionEnd;
-	string parent;
-	float queryToParent;
-	float queryToParentLocal;
-	float divR;
-};
-
 /**********************************************************************/
 class Maligner {
 
 	public:
 		
-		Maligner(vector<Sequence*>, int, int, int, float, int);
+		Maligner(vector<Sequence*>, int, int, int, float, int, int, string);
 		~Maligner() {};
 		
-		string getResults(Sequence*);
+		string getResults(Sequence*, DeCalculator*);
 		float getPercentID() {	return percentIdenticalQueryChimera;	}
 		vector<results> getOutput()  {	return outputResults;			}
 		
 				
 	private:
-		DeCalculator* decalc;
 		Sequence* query;
 		vector<Sequence*> refSeqs;
 		vector<Sequence*> db;
-		int numWanted, matchScore, misMatchPenalty, minCoverage;
+		int numWanted, matchScore, misMatchPenalty, minCoverage, minSimilarity;
+		string searchMethod;
 		float minDivR, percentIdenticalQueryChimera;
 		vector<results> outputResults;
+		map<int, int> spotMap;
 		
 		vector<Sequence*> minCoverageFilter(vector<Sequence*>);  //removes top matches that do not have minimum coverage with query.
 		int computeChimeraPenalty();
@@ -68,6 +47,8 @@ class Maligner {
 		vector<trace_struct> mapTraceRegionsToAlignment(vector<score_struct>, vector<Sequence*>);
 		string constructChimericSeq(vector<trace_struct>, vector<Sequence*>);
 		float computePercentID(string, string);
+		string chimeraMaligner(int, DeCalculator*);
+		vector<Sequence*> getBlastSeqs(Sequence*, int);
 		
 };
 

@@ -41,7 +41,11 @@ int main(int argc, char *argv[]){
 			mothurOutJustToLog("Windows version");
 			mothurOutEndLine(); mothurOutEndLine();
 		#endif		
-
+		
+		#ifdef USE_READLINE
+			mothurOutJustToLog("Using ReadLine");
+			mothurOutEndLine(); mothurOutEndLine();
+		#endif
 		
 		//header
 		mothurOut("mothur v.1.8");

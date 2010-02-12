@@ -23,32 +23,25 @@
 class ChimeraSlayer : public Chimera {
 	
 	public:
-		ChimeraSlayer(string, string);	
+		ChimeraSlayer(string);	
 		~ChimeraSlayer();
 		
-		int getChimeras();
+		int getChimeras(Sequence*);
 		void print(ostream&);
-		
-		void setCons(string){};
-		void setQuantiles(string q) {};
-		
+		void printHeader(ostream&);
 		
 	private:
+		Sequence* querySeq;
 		DeCalculator* decalc;
 		Maligner* maligner;
 		Slayer* slayer;
-		vector<linePair*> lines;
-		vector<Sequence*> querySeqs;
-		vector<Sequence*> templateSeqs;
-		vector< map<int, int> > spotMap;
+		map<int, int>  spotMap;
 		
-		vector< vector<data_struct> > chimeraResults;
-		vector<string> chimeraFlags;
-				
-		string fastafile, templateFile;
-		
-		Sequence* getSequence(string);  //find sequence from name
-		void printBlock(data_struct, ostream&, int i);
+		vector<data_struct>  chimeraResults;
+		string chimeraFlags, searchMethod;
+		string fastafile;
+	
+		void printBlock(data_struct, ostream&);
 };
 
 /************************************************************************/

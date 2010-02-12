@@ -25,45 +25,30 @@
 class ChimeraCheckRDP : public Chimera {
 	
 	public:
-		ChimeraCheckRDP(string, string, string);	
+		ChimeraCheckRDP(string, string);	
 		~ChimeraCheckRDP();
 		
-		int getChimeras();
+		int getChimeras(Sequence*);
 		void print(ostream&);
-		
-		void setCons(string){};
-		void setQuantiles(string q) {};
-		
+		void doPrep();
 		
 	private:
 		
-		vector<linePair*> lines;
-		vector<Sequence*> querySeqs;
+		
+		Sequence* querySeq;
 		AlignmentDB* templateDB;
 		Kmer* kmer;
-		
-		vector< vector<sim> > IS;  //IS[0] is the vector of IS values for each window for querySeqs[0]
-		float chimeraCutoff;
-		
-		
-		//map<string, vector< map<int, int> > >:: iterator it;
-		//map<int, int>::iterator it2;
-		
-		vector<Sequence> closest;		//closest[0] is the closest overall seq to querySeqs[0].
-		
-		string fastafile, templateFile;
+		Sequence closest;		//closest is the closest overall seq to query
+
+		vector<sim>  IS;  //IS is the vector of IS values for each window for query
+		string fastafile;
 		map<string, string> names;
 		
-		vector<sim> findIS(int);
+		vector<sim> findIS();
 		int calcKmers(map<int, int>, map<int, int>);
-		void getCutoff();
-		void makeSVGpic(vector<sim>, int);
+		void makeSVGpic(vector<sim>);
 		void readName(string);
-				
-		void createProcessesIS();
-		
 };
-
 /***********************************************************/
 
 #endif

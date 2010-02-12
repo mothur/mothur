@@ -81,6 +81,55 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 
 }
 /**************************************************************************************************/
+//assumes you have added all the template sequences using the addSequence function and run generateDB.
+map<int, float> BlastDB::findClosest(Sequence* seq, int n) {
+	try{
+		map<int, float> topMatches;
+		
+		ofstream queryFile;
+		openOutputFile(queryFileName, queryFile);
+		queryFile << '>' << seq->getName() << endl;
+		queryFile << seq->getUnaligned() << endl;
+		queryFile.close();
+				
+		//	the goal here is to quickly survey the database to find the closest match.  To do this we are using the default
+		//	wordsize used in megablast.  I'm sure we're sacrificing accuracy for speed, but anyother way would take way too
+		//	long.  With this setting, it seems comparable in speed to the suffix tree approach.
+	
+		string blastCommand = path + "blast/bin/blastall -p blastn -d " + dbFileName + " -m 8 -W 28 -b " + toString(n) + " -v " + toString(n);
+		blastCommand += (" -i " + queryFileName + " -o " + blastFileName);
+		system(blastCommand.c_str());
+		
+		ifstream m8FileHandle;
+		openInputFile(blastFileName, m8FileHandle);
+	
+		string dummy;
+		int templateAccession;
+		gobble(m8FileHandle);
+//string name = seq->getName();
+//ofstream out;
+//openOutputFileAppend(name, out);	
+		while(!m8FileHandle.eof()){
+			m8FileHandle >> dummy >> templateAccession >> searchScore;
+//out << dummy << '\t' <<  templateAccession	<< '\t' << searchScore << endl;
+			//get rest of junk in line
+			while (!m8FileHandle.eof())	{	char c = m8FileHandle.get(); 
+			//out << c; 
+			if (c == 10 || c == 13){	break;	}	} 
+			
+			gobble(m8FileHandle);
+			topMatches[templateAccession] = searchScore;
+		}
+		m8FileHandle.close();
+//out.close();		
+		return topMatches;
+	}
+	catch(exception& e) {
+		errorOut(e, "BlastDB", "findClosest");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
 void BlastDB::addSequence(Sequence seq) {
 	try {
 	
@@ -103,7 +152,7 @@ void BlastDB::addSequence(Sequence seq) {
 void BlastDB::generateDB() {
 	try {
 	
-		mothurOut("Generating the temporary BLAST database...\t");	cout.flush();
+		//mothurOut("Generating the temporary BLAST database...\t");	cout.flush();
 		
 		path = globaldata->argv;
 		path = path.substr(0, (path.find_last_of('m')));
@@ -111,7 +160,7 @@ void BlastDB::generateDB() {
 		string formatdbCommand = path + "blast/bin/formatdb -p F -o T -i " + dbFileName;	//	format the database, -o option gives us the ability
 		system(formatdbCommand.c_str());								//	to get the right sequence names, i think. -p F
 																	//	option tells formatdb that seqs are DNA, not prot
-		mothurOut("DONE."); mothurOutEndLine();	mothurOutEndLine(); cout.flush();
+		//mothurOut("DONE."); mothurOutEndLine();	mothurOutEndLine(); cout.flush();
 	}
 	catch(exception& e) {
 		errorOut(e, "BlastDB", "generateDB");

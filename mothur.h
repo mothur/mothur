@@ -831,6 +831,21 @@ inline bool inUsersGroups(string groupname, vector<string> Groups) {
 		exit(1);
 	}
 }
+/**************************************************************************************************/
+//returns true if any of the strings in first vector are in second vector
+inline bool inUsersGroups(vector<string> groupnames, vector<string> Groups) {
+	try {
+		
+		for (int i = 0; i < groupnames.size(); i++) {
+			if (inUsersGroups(groupnames[i], Groups)) { return true; }
+		}
+		return false;
+	}
+	catch(exception& e) {
+		errorOut(e, "mothur", "inUsersGroups");
+		exit(1);
+	}
+}
 
 /**************************************************************************************************/
 

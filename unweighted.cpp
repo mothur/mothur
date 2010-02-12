@@ -48,14 +48,8 @@ EstOutput Unweighted::getValues(Tree* t) {
 				//groups in this combo
 				groups.push_back(globaldata->Groups[a]); groups.push_back(globaldata->Groups[l]);
 		
-				for(int i=t->getNumLeaves();i<t->getNumNodes();i++){
-		
-					int lc = t->tree[i].getLChild();  //lc = vector index of left child
-					int rc = t->tree[i].getRChild();  //rc = vector index of right child
-			
-					/**********************************************************************/
-					//This section adds in all lengths that are non leaf
-			
+				for(int i=0;i<t->getNumNodes();i++){
+	
 					copyIpcount = t->tree[i].pcount;
 					for (it = copyIpcount.begin(); it != copyIpcount.end();) {
 						if (inUsersGroups(it->first, groups) != true) {	
@@ -73,30 +67,10 @@ EstOutput Unweighted::getValues(Tree* t) {
 						totalBL += abs(t->tree[i].getBranchLength()); 
 					}
 			
-					/**********************************************************************/
-					//This section adds in all lengths that are leaf
-			
-					//if i's chidren are leaves
-					if (t->tree[rc].getRChild() == -1) {
-						//if rc is a valid group and rc has a BL
-						if ((inUsersGroups(t->tree[rc].getGroup(), groups) == true) && (t->tree[rc].getBranchLength() != -1)) {
-							UniqueBL += abs(t->tree[rc].getBranchLength());
-							totalBL += abs(t->tree[rc].getBranchLength()); 
-						}
-					}
-			
-					if (t->tree[lc].getLChild() == -1) {
-						//if lc is a valid group and lc has a BL
-						if ((inUsersGroups(t->tree[lc].getGroup(), groups) == true) && (t->tree[lc].getBranchLength() != -1)) {
-							UniqueBL += abs(t->tree[lc].getBranchLength());
-							totalBL += abs(t->tree[lc].getBranchLength()); 
-						}
-					}
-			
-					/**********************************************************************/
 				}
 		
 				UW = (UniqueBL / totalBL);  
+		//cout << globaldata->Groups[a] << globaldata->Groups[l] << '\t' << UniqueBL << '\t' << totalBL << endl;
 	
 				if (isnan(UW) || isinf(UW)) { UW = 0; }
 	
@@ -126,14 +100,8 @@ EstOutput Unweighted::getValues(Tree* t) {
 			UW = 0.00;		//Unweighted Value = UniqueBL / totalBL;
 			copyIpcount.clear();
 				
-			for(int i=t->getNumLeaves();i<t->getNumNodes();i++){
-		
-				int lc = t->tree[i].getLChild();  //lc = vector index of left child
-				int rc = t->tree[i].getRChild();  //rc = vector index of right child
-			
-				/**********************************************************************/
-				//This section adds in all lengths that are non leaf
-			
+			for(int i=0;i<t->getNumNodes();i++){
+				
 				copyIpcount = t->tree[i].pcount;
 				for (it = copyIpcount.begin(); it != copyIpcount.end();) {
 					if (inUsersGroups(it->first, groups) != true) {	
@@ -151,27 +119,6 @@ EstOutput Unweighted::getValues(Tree* t) {
 					totalBL += abs(t->tree[i].getBranchLength()); 
 				}
 			
-				/**********************************************************************/
-				//This section adds in all lengths that are leaf
-			
-				//if i's chidren are leaves
-				if (t->tree[rc].getRChild() == -1) {
-					//if rc is a valid group and rc has a BL
-					if ((inUsersGroups(t->tree[rc].getGroup(), groups) == true) && (t->tree[rc].getBranchLength() != -1)) {
-						UniqueBL += abs(t->tree[rc].getBranchLength());
-						totalBL += abs(t->tree[rc].getBranchLength()); 
-					}
-				}
-			
-				if (t->tree[lc].getLChild() == -1) {
-					//if lc is a valid group and lc has a BL
-					if ((inUsersGroups(t->tree[lc].getGroup(), groups) == true) && (t->tree[lc].getBranchLength() != -1)) {
-						UniqueBL += abs(t->tree[lc].getBranchLength());
-						totalBL += abs(t->tree[lc].getBranchLength()); 
-					}
-				}
-			
-				/**********************************************************************/
 			}
 		
 			UW = (UniqueBL / totalBL);  
@@ -236,12 +183,9 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 				copyTree->assembleRandomUnifracTree(groups[0], groups[1]);
 				
 				//copyTree->createNewickFile("random"+groupA+toString(count));
-		
-				for(int i=copyTree->getNumLeaves();i<copyTree->getNumNodes();i++){
-		
-					int lc = copyTree->tree[i].getLChild();  //lc = vector index of left child
-					int rc = copyTree->tree[i].getRChild();  //rc = vector index of right child
-			
+				
+				for(int i=0;i<copyTree->getNumNodes();i++){
+						
 					/**********************************************************************/
 					//This section adds in all lengths that are non leaf
 					copyIpcount = copyTree->tree[i].pcount;
@@ -261,27 +205,6 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 						totalBL += abs(copyTree->tree[i].getBranchLength()); 
 					}
 			
-					/**********************************************************************/
-					//This section adds in all lengths that are leaf
-			
-					//if i's chidren are leaves
-					if (copyTree->tree[rc].getRChild() == -1) {
-						//if rc is a valid group and rc has a BL
-						if ((inUsersGroups(copyTree->tree[rc].getGroup(), groups) == true) && (copyTree->tree[rc].getBranchLength() != -1)) {
-							UniqueBL += abs(copyTree->tree[rc].getBranchLength());
-							totalBL += abs(copyTree->tree[rc].getBranchLength()); 
-						}
-					}
-			
-					if (copyTree->tree[lc].getLChild() == -1) {
-						//if lc is a valid group and lc has a BL
-						if ((inUsersGroups(copyTree->tree[lc].getGroup(), groups) == true) && (copyTree->tree[lc].getBranchLength() != -1)) {
-							UniqueBL += abs(copyTree->tree[lc].getBranchLength());
-							totalBL += abs(copyTree->tree[lc].getBranchLength()); 
-						}
-					}
-			
-					/**********************************************************************/
 				}
 		
 				UW = (UniqueBL / totalBL);  
@@ -320,13 +243,7 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 			//swap labels in all the groups you want to compare
 			copyTree->assembleRandomUnifracTree(groups);
 
-			for(int i=copyTree->getNumLeaves();i<copyTree->getNumNodes();i++){
-		
-				int lc = copyTree->tree[i].getLChild();  //lc = vector index of left child
-				int rc = copyTree->tree[i].getRChild();  //rc = vector index of right child
-			
-				/**********************************************************************/
-				//This section adds in all lengths that are non leaf
+			for(int i=0;i<copyTree->getNumNodes();i++){
 			
 				copyIpcount = copyTree->tree[i].pcount;
 				for (it = copyIpcount.begin(); it != copyIpcount.end();) {
@@ -345,27 +262,6 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 					totalBL += abs(copyTree->tree[i].getBranchLength()); 
 				}
 			
-				/**********************************************************************/
-				//This section adds in all lengths that are leaf
-			
-				//if i's chidren are leaves
-				if (copyTree->tree[rc].getRChild() == -1) {
-					//if rc is a valid group and rc has a BL
-					if ((inUsersGroups(copyTree->tree[rc].getGroup(), groups) == true) && (copyTree->tree[rc].getBranchLength() != -1)) {
-						UniqueBL += abs(copyTree->tree[rc].getBranchLength());
-						totalBL += abs(copyTree->tree[rc].getBranchLength()); 
-					}
-				}
-			
-				if (copyTree->tree[lc].getLChild() == -1) {
-					//if lc is a valid group and lc has a BL
-					if ((inUsersGroups(copyTree->tree[lc].getGroup(), groups) == true) && (copyTree->tree[lc].getBranchLength() != -1)) {
-						UniqueBL += abs(copyTree->tree[lc].getBranchLength());
-						totalBL += abs(copyTree->tree[lc].getBranchLength()); 
-					}
-				}
-			
-				/**********************************************************************/
 			}
 		
 			UW = (UniqueBL / totalBL);  

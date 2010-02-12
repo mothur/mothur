@@ -123,6 +123,7 @@ void GlobalData::newRead() {
 			labels.clear(); Groups.clear();
 			allLines = 1;
 			runParse = true;
+			names.clear();
 	}
 	catch(exception& e) {
 		errorOut(e, "GlobalData", "newRead");

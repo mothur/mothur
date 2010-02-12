@@ -14,7 +14,7 @@
 #include "mothur.h"
 #include "sequence.hpp"
 
-
+/***********************************************************************/
 struct Preference {
 		string name;
 		vector<string> leftParent; //keep the name of closest left associated with the two scores
@@ -25,12 +25,52 @@ struct Preference {
 		int midpoint;
 
 };
+/***********************************************************************/
+struct score_struct {
+	int prev;
+	int score;
+	int row;
+	int col;
+};
+/***********************************************************************/
+struct trace_struct {
+	int col;
+	int oldCol;
+	int row;
+};
+/***********************************************************************/
+struct results {
+	int regionStart;
+	int regionEnd;
+	int nastRegionStart;
+	int nastRegionEnd;
+	string parent;
+	float queryToParent;
+	float queryToParentLocal;
+	float divR;
+};
+/***********************************************************************/
+struct rank {
+		int num;
+		float score;
+		rank(int n, float s) : num(n), score(s) {}
+};
+/***********************************************************************/
 
 struct SeqDist {
 	Sequence* seq;
 	float dist;
 };
-
+//********************************************************************************************************************
+//sorts highest to lowest
+inline bool compareMembers(rank left, rank right){
+	return (left.score > right.score);	
+} 
+//********************************************************************************************************************
+//sorts lowest to highest
+inline bool compareRegionStart(results left, results right){
+	return (left.nastRegionStart < right.nastRegionStart);	
+} 
 //********************************************************************************************************************
 //sorts lowest to highest
 inline bool compareSeqDist(SeqDist left, SeqDist right){
@@ -59,8 +99,8 @@ class Chimera {
 	public:
 	
 		Chimera(){};
+		Chimera(string);
 		Chimera(string, string);
-		Chimera(string, string, string);
 		virtual ~Chimera(){};
 		virtual void setFilter(bool f)			{	filter = f;	 		}
 		virtual void setCorrection(bool c)		{	correction = c;		}
@@ -76,30 +116,37 @@ class Chimera {
 		virtual void setDivR(float d)			{	divR = d;			}
 		virtual void setParents(int p)			{	parents = p;		}
 		virtual void setMinSim(int s)			{	minSim = s;			}
+		virtual void setMinCoverage(int c)		{	minCov = c;			}
+		virtual void setMinBS(int b)			{	minBS = b;			}
+		virtual void setMinSNP(int s)			{	minSNP = s;			}
 		virtual void setIters(int i)			{	iters = i;			}
-
+		virtual void setTemplateSeqs(vector<Sequence*> t)	{	templateSeqs = t;	}
+		virtual bool getUnaligned()				{	return unaligned;			}
+		virtual void setTemplateFile(string t)	{   templateFileName = t;	}
 		
 		virtual void setCons(string){};
 		virtual void setQuantiles(string){};
+		virtual void doPrep(){};
 		virtual vector<Sequence*> readSeqs(string);
 		virtual vector< vector<float> > readQuantiles();
 		virtual void setMask(string);
-		virtual void runFilter(vector<Sequence*>);
+		virtual void runFilter(Sequence*);
 		virtual void createFilter(vector<Sequence*>);
 		
+		virtual void printHeader(ostream&){};
+		virtual int getChimeras(Sequence*){ return 0; }
+		virtual int getChimeras(){ return 0; }
+		virtual void print(ostream&){};	
 		
-		//pure functions
-		virtual int getChimeras() = 0;	
-		virtual void print(ostream&) = 0;	
 		
 	protected:
 		
+		vector<Sequence*> templateSeqs;
 		bool filter, correction, svg, unaligned;
-		int processors, window, increment, numWanted, kmerSize, match, misMatch, minSim, parents, iters;
+		int processors, window, increment, numWanted, kmerSize, match, misMatch, minSim, minCov, minBS, minSNP, parents, iters;
 		float divR;
-		string seqMask, quanfile, filterString, name, outputDir;
-			
-
+		string seqMask, quanfile, filterString, name, outputDir, templateFileName;
+		Sequence* getSequence(string);  //find sequence from name	
 };
 
 /***********************************************************************/
