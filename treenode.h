@@ -21,7 +21,7 @@ class Node  {
 		~Node() { pGroups.clear(); pcount.clear(); };
 		
 		void setName(string);
-		void setGroup(string);  
+		void setGroup(vector<string>);  
 		void setBranchLength(float);
 		void setLabel(float);
 		void setParent(int);
@@ -30,7 +30,7 @@ class Node  {
 		void setLengthToLeaves(float);
 		
 		string getName();
-		string getGroup();  
+		vector<string> getGroup();  
 		float getBranchLength();
 		float getLengthToLeaves();
 		float getLabel();
@@ -52,7 +52,7 @@ class Node  {
 			
 	private:
 		string			name;
-		string			group;
+		vector<string>	group; 
 		float			branchLength, length2leaf, label;
 		int				parent;
 		int				lchild;

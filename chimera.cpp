@@ -13,7 +13,7 @@
 //this is a vertical soft filter
 void Chimera::createFilter(vector<Sequence*> seqs) {
 	try {
-		
+		filterString = "";
 		int threshold = int (0.5 * seqs.size());
 //cout << "threshhold = " << threshold << endl;
 		
@@ -60,33 +60,29 @@ void Chimera::createFilter(vector<Sequence*> seqs) {
 	}
 }
 //***************************************************************************************************************
-void Chimera::runFilter(vector<Sequence*> seqs) {
+void Chimera::runFilter(Sequence* seq) {
 	try {
 		
-		//for each sequence
-		for (int i = 0; i < seqs.size(); i++) {
-		
-			string seqAligned = seqs[i]->getAligned();
-			string newAligned = "";
+		string seqAligned = seq->getAligned();
+		string newAligned = "";
 			
-			for (int j = 0; j < seqAligned.length(); j++) {
-				//if this spot is a gap
-				if (filterString[j] == '1') { newAligned += seqAligned[j]; }
-			}
-			
-			seqs[i]->setAligned(newAligned);
+		for (int j = 0; j < seqAligned.length(); j++) {
+			//if this spot is a gap
+			if (filterString[j] == '1') { newAligned += seqAligned[j]; }
 		}
-		
+			
+		seq->setAligned(newAligned);
 	}
 	catch(exception& e) {
 		errorOut(e, "Chimera", "runFilter");
 		exit(1);
 	}
 }
-
 //***************************************************************************************************************
 vector<Sequence*> Chimera::readSeqs(string file) {
 	try {
+	
+		mothurOut("Reading sequences... "); cout.flush();
 		ifstream in;
 		openInputFile(file, in);
 		vector<Sequence*> container;
@@ -108,6 +104,8 @@ vector<Sequence*> Chimera::readSeqs(string file) {
 		}
 		
 		in.close();
+		mothurOut("Done."); mothurOutEndLine();
+		
 		return container;
 	}
 	catch(exception& e) {
@@ -183,6 +181,31 @@ vector< vector<float> > Chimera::readQuantiles() {
 	}
 	catch(exception& e) {
 		errorOut(e, "Chimera", "readQuantiles");
+		exit(1);
+	}
+}
+//***************************************************************************************************************
+Sequence* Chimera::getSequence(string name) {
+	try{
+		Sequence* temp;
+		
+		//look through templateSeqs til you find it
+		int spot = -1;
+		for (int i = 0; i < templateSeqs.size(); i++) {
+			if (name == templateSeqs[i]->getName()) {  
+				spot = i;
+				break;
+			}
+		}
+		
+		if(spot == -1) { mothurOut("Error: Could not find sequence."); mothurOutEndLine(); return NULL; }
+		
+		temp = new Sequence(templateSeqs[spot]->getName(), templateSeqs[spot]->getAligned());
+		
+		return temp;
+	}
+	catch(exception& e) {
+		errorOut(e, "Chimera", "getSequence");
 		exit(1);
 	}
 }

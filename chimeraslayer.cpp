@@ -8,161 +8,109 @@
  */
 
 #include "chimeraslayer.h"
+#include "chimerarealigner.h"
 
 //***************************************************************************************************************
-ChimeraSlayer::ChimeraSlayer(string filename, string temp) {  fastafile = filename;  templateFile = temp;  }
+ChimeraSlayer::ChimeraSlayer(string mode) : searchMethod(mode) {  	decalc = new DeCalculator();	  }
 //***************************************************************************************************************
-
-ChimeraSlayer::~ChimeraSlayer() {
-	try {
-		for (int i = 0; i < querySeqs.size(); i++)			{  delete querySeqs[i];			}
-		for (int i = 0; i < templateSeqs.size(); i++)		{  delete templateSeqs[i];		}
-	}
-	catch(exception& e) {
-		errorOut(e, "ChimeraSlayer", "~ChimeraSlayer");
-		exit(1);
-	}
-}	
+ChimeraSlayer::~ChimeraSlayer() { 	delete decalc;	 }
+//***************************************************************************************************************
+void ChimeraSlayer::printHeader(ostream& out) {
+	mothurOutEndLine();
+	mothurOut("Only reporting sequence supported by 90% of bootstrapped results.");
+	mothurOutEndLine();
+}
 //***************************************************************************************************************
 void ChimeraSlayer::print(ostream& out) {
 	try {
-		mothurOutEndLine();
-		mothurOut("Only reporting sequence supported by 90% of bootstrapped results.");
-		mothurOutEndLine();
-		
-		for (int i = 0; i < querySeqs.size(); i++) {
-		
-			if (chimeraFlags[i] == "yes") {	
-//				cout << i << endl;
-				if ((chimeraResults[i][0].bsa >= 90.0) || (chimeraResults[i][0].bsb >= 90.0)) {
-					mothurOut(querySeqs[i]->getName() + "\tyes"); mothurOutEndLine();
-					out << querySeqs[i]->getName() << "\tyes" << endl;
-				}else {
-					out << querySeqs[i]->getName() << "\tyes" << endl;
-					//mothurOut(querySeqs[i]->getName() + "\tno"); mothurOutEndLine();
+		if (chimeraFlags == "yes") {
+			string chimeraFlag = "no";
+			if(  (chimeraResults[0].bsa >= minBS && chimeraResults[0].divr_qla_qrb >= divR)
+			   ||
+			   (chimeraResults[0].bsb >= minBS && chimeraResults[0].divr_qlb_qra >= divR) ) { chimeraFlag = "yes"; }
+			
+			
+			if (chimeraFlag == "yes") {	
+				if ((chimeraResults[0].bsa >= minBS) || (chimeraResults[0].bsb >= minBS)) {
+					mothurOut(querySeq->getName() + "\tyes"); mothurOutEndLine();
 				}
-
-				printBlock(chimeraResults[i][0], out, i);
-				
-				out << endl;
-			}else{
-				out << querySeqs[i]->getName() << "\tno" << endl;
-				//mothurOut(querySeqs[i]->getName() + "\tno"); mothurOutEndLine();
 			}
-		}
-				
+			out << querySeq->getName() << "\tyes" << endl;
+			printBlock(chimeraResults[0], out);
+			out << endl;
+		}else {  out << querySeq->getName() << "\tno" << endl;  }
+		
 	}
 	catch(exception& e) {
 		errorOut(e, "ChimeraSlayer", "print");
 		exit(1);
 	}
 }
-
 //***************************************************************************************************************
-int ChimeraSlayer::getChimeras() {
+int ChimeraSlayer::getChimeras(Sequence* query) {
 	try {
+		chimeraFlags = "no";
+		querySeq = query;
 		
-		//read in query sequences and subject sequences
-		mothurOut("Reading sequences and template file... "); cout.flush();
-		querySeqs = readSeqs(fastafile);
-		templateSeqs = readSeqs(templateFile);
-		mothurOut("Done."); mothurOutEndLine();
-		
-		int numSeqs = querySeqs.size();
-		
-		if (unaligned) { mothurOut("Your sequences need to be aligned when you use the chimeraslayer method."); mothurOutEndLine(); return 1;  }
-		
-		chimeraResults.resize(numSeqs);
-		chimeraFlags.resize(numSeqs, "no");
-		spotMap.resize(numSeqs);
-		
-		//break up file if needed
-		int linesPerProcess = numSeqs / processors ;
-		
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-			//find breakup of sequences for all times we will Parallelize
-			if (processors == 1) {   lines.push_back(new linePair(0, numSeqs));  }
-			else {
-				//fill line pairs
-				for (int i = 0; i < (processors-1); i++) {			
-					lines.push_back(new linePair((i*linesPerProcess), ((i*linesPerProcess) + linesPerProcess)));
-				}
-				//this is necessary to get remainder of processors / numSeqs so you don't miss any lines at the end
-				int i = processors - 1;
-				lines.push_back(new linePair((i*linesPerProcess), numSeqs));
-			}
-		#else
-			lines.push_back(new linePair(0, numSeqs));
-		#endif
-		
-		if (seqMask != "") {	decalc = new DeCalculator();	} //to use below
-		
-		//initialize spotMap
-		for (int j = 0; j < numSeqs; j++) {
-			for (int i = 0; i < querySeqs[0]->getAligned().length(); i++) {
-				spotMap[j][i] = i;
-			}
+		for (int i = 0; i < query->getAligned().length(); i++) {
+			spotMap[i] = i;
 		}
 		
 		//referenceSeqs, numWanted, matchScore, misMatchPenalty, divR, minSimilarity
-		maligner = new Maligner(templateSeqs, numWanted, match, misMatch, 1.01, minSim);
-		slayer = new Slayer(window, increment, minSim, divR, iters);
+		maligner = new Maligner(templateSeqs, numWanted, match, misMatch, divR, minSim, minCov, searchMethod);
+		slayer = new Slayer(window, increment, minSim, divR, iters, minSNP);
 		
-		for (int i = 0; i < querySeqs.size(); i++) {
-		
-			string chimeraFlag = maligner->getResults(querySeqs[i]);
-			//float percentIdentical = maligner->getPercentID();
-			vector<results> Results = maligner->getOutput();
-			
-			cout << "Processing sequence: " << i+1 << endl;
-			
-			//for (int j = 0; j < Results.size(); j++) {
-				//cout << "regionStart = " << Results[j].regionStart << "\tRegionEnd = " << Results[j].regionEnd << "\tName = " << Results[j].parent << "\tPerQP = " << Results[j].queryToParent << "\tLocalPerQP = " << Results[j].queryToParentLocal << "\tdivR = " << Results[j].divR << endl;
-			//}
+		string chimeraFlag = maligner->getResults(query, decalc);
+		vector<results> Results = maligner->getOutput();
+
+		//realign query to parents to improve slayers detection rate
+		//ChimeraReAligner realigner(templateSeqs, match, misMatch);
+		//realigner.reAlign(query, Results);
 			
 			//if (chimeraFlag == "yes") {
 			
-				//get sequence that were given from maligner results
-				vector<SeqDist> seqs;
-				map<string, float> removeDups;
-				map<string, float>::iterator itDup;
-				for (int j = 0; j < Results.size(); j++) {
-					float dist = (Results[j].regionEnd - Results[j].regionStart + 1) * Results[j].queryToParentLocal;
-					//only add if you are not a duplicate
-					itDup = removeDups.find(Results[j].parent);
-					if (itDup == removeDups.end()) { //this is not duplicate
-						removeDups[Results[j].parent] = dist;
-					}else if (dist > itDup->second) { //is this a stronger number for this parent
-						removeDups[Results[j].parent] = dist;
-					}
-				}
-				
-				for (itDup = removeDups.begin(); itDup != removeDups.end(); itDup++) {
-					Sequence* seq = getSequence(itDup->first); //makes copy so you can filter and mask and not effect template
-					
-					SeqDist member;
-					member.seq = seq;
-					member.dist = itDup->second;
-					
-					seqs.push_back(member);
-				}
-				
-				//limit number of parents to explore - default 5
-				if (Results.size() > parents) {
-					//sort by distance
-					sort(seqs.begin(), seqs.end(), compareSeqDist);
-					//prioritize larger more similiar sequence fragments
-					reverse(seqs.begin(), seqs.end());
-					
-					for (int k = seqs.size()-1; k > (parents-1); k--)  {  
-						delete seqs[k].seq;
-						seqs.pop_back();	
-					}
-				}
+		//get sequence that were given from maligner results
+		vector<SeqDist> seqs;
+		map<string, float> removeDups;
+		map<string, float>::iterator itDup;
+		for (int j = 0; j < Results.size(); j++) {
+			float dist = (Results[j].regionEnd - Results[j].regionStart + 1) * Results[j].queryToParentLocal;
+			//only add if you are not a duplicate
+			itDup = removeDups.find(Results[j].parent);
+			if (itDup == removeDups.end()) { //this is not duplicate
+				removeDups[Results[j].parent] = dist;
+			}else if (dist > itDup->second) { //is this a stronger number for this parent
+				removeDups[Results[j].parent] = dist;
+			}
+		}
 		
-				//put seqs into vector to send to slayer
-				vector<Sequence*> seqsForSlayer;
-				for (int k = 0; k < seqs.size(); k++) {  seqsForSlayer.push_back(seqs[k].seq);	}
+		for (itDup = removeDups.begin(); itDup != removeDups.end(); itDup++) {
+			Sequence* seq = getSequence(itDup->first); //makes copy so you can filter and mask and not effect template
+			
+			SeqDist member;
+			member.seq = seq;
+			member.dist = itDup->second;
+			
+			seqs.push_back(member);
+		}
+		
+		//limit number of parents to explore - default 3
+		if (Results.size() > parents) {
+			//sort by distance
+			sort(seqs.begin(), seqs.end(), compareSeqDist);
+			//prioritize larger more similiar sequence fragments
+			reverse(seqs.begin(), seqs.end());
+			
+			for (int k = seqs.size()-1; k > (parents-1); k--)  {  
+				delete seqs[k].seq;
+				seqs.pop_back();	
+			}
+		}
+		
+		//put seqs into vector to send to slayer
+		vector<Sequence*> seqsForSlayer;
+		for (int k = 0; k < seqs.size(); k++) {  seqsForSlayer.push_back(seqs[k].seq);	}
+		//cout << i+1 << "num parents = " << seqsForSlayer.size() << '\t' << chimeraFlag << endl;
 //ofstream out;
 //string name = querySeqs[i]->getName();
 //cout << name << endl;
@@ -172,50 +120,42 @@ int ChimeraSlayer::getChimeras() {
 //cout << name << endl;
 //name = name.substr(0, name.find_last_of("|"));
 //cout << name << endl;
-//string filename = name + ".seqsforslayer";
+//string filename = toString(i+1) + ".seqsforslayer";
 //openOutputFile(filename, out);	
-//for (int u = 0; u < seqsForSlayer.size(); u++) { seqsForSlayer[u]->printSequence(out);	}
+//cout << querySeqs[i]->getName() << endl;
+//for (int u = 0; u < seqsForSlayer.size(); u++) { cout << seqsForSlayer[u]->getName() << '\t'; seqsForSlayer[u]->printSequence(out);	}
+//cout << endl;
 //out.close();
-//filename = name + ".fasta";
+//filename = toString(i+1) + ".fasta";
 //openOutputFile(filename, out);	
-//q->printSequence(out);
+//querySeqs[i]->printSequence(out);
 //out.close();
 
-			
-				//mask then send to slayer...
-				if (seqMask != "") {
-					decalc->setMask(seqMask);
 
-					//mask querys
-					decalc->runMask(querySeqs[i]);
-					
-					//mask parents
-					for (int k = 0; k < seqsForSlayer.size(); k++) {
-						decalc->runMask(seqsForSlayer[k]);
-					}
-					
-					for (int i = 0; i < numSeqs; i++) {
-						spotMap[i] = decalc->getMaskMap();
-					}
-
-				}
-				
-				//send to slayer
-				chimeraFlags[i] = slayer->getResults(querySeqs[i], seqsForSlayer);
-				chimeraResults[i] = slayer->getOutput();
 			
-				//free memory
-				for (int k = 0; k < seqs.size(); k++) {  delete seqs[k].seq;   }
-			//}
-			
-		}	
-		//free memory
-		for (int i = 0; i < lines.size(); i++)					{	delete lines[i];	}
-		
+		//mask then send to slayer...
 		if (seqMask != "") {
-			delete decalc; 
+			decalc->setMask(seqMask);
+			
+			//mask querys
+			decalc->runMask(query);
+			
+			//mask parents
+			for (int k = 0; k < seqsForSlayer.size(); k++) {
+				decalc->runMask(seqsForSlayer[k]);
+			}
+			
+			spotMap = decalc->getMaskMap();
 		}
 		
+		//send to slayer
+		chimeraFlags = slayer->getResults(query, seqsForSlayer);
+		chimeraResults = slayer->getOutput();
+	
+		//free memory
+		for (int k = 0; k < seqs.size(); k++) {  delete seqs[k].seq;   }
+		//}
+			
 		return 0;
 	}
 	catch(exception& e) {
@@ -224,37 +164,12 @@ int ChimeraSlayer::getChimeras() {
 	}
 }
 //***************************************************************************************************************
-Sequence* ChimeraSlayer::getSequence(string name) {
-	try{
-		Sequence* temp;
-		
-		//look through templateSeqs til you find it
-		int spot = -1;
-		for (int i = 0; i < templateSeqs.size(); i++) {
-			if (name == templateSeqs[i]->getName()) {  
-				spot = i;
-				break;
-			}
-		}
-		
-		if(spot == -1) { mothurOut("Error: Could not find sequence in chimeraSlayer."); mothurOutEndLine(); return NULL; }
-		
-		temp = new Sequence(templateSeqs[spot]->getName(), templateSeqs[spot]->getAligned());
-		
-		return temp;
-	}
-	catch(exception& e) {
-		errorOut(e, "ChimeraSlayer", "getSequence");
-		exit(1);
-	}
-}
-//***************************************************************************************************************
-void ChimeraSlayer::printBlock(data_struct data, ostream& out, int i){
+void ChimeraSlayer::printBlock(data_struct data, ostream& out){
 	try {
 		
 		out << "parentA: " << data.parentA.getName() << "  parentB: " << data.parentB.getName()  << endl;
-		out << "Left Window: " << spotMap[i][data.winLStart] << " " << spotMap[i][data.winLEnd] << endl;
-		out << "Right Window: " << spotMap[i][data.winRStart] << " " << spotMap[i][data.winREnd] << endl;
+		out << "Left Window: " << spotMap[data.winLStart] << " " << spotMap[data.winLEnd] << endl;
+		out << "Right Window: " << spotMap[data.winRStart] << " " << spotMap[data.winREnd] << endl;
 		
 		out << "Divergence of Query to Leftside ParentA and Rightside ParentB: " << data.divr_qla_qrb << '\t' << "Bootstrap: " << data.bsa << endl;
 		out << "Divergence of Query to Rightside ParentA and Leftside ParentB: " << data.divr_qlb_qra << '\t' << "Bootstrap: " << data.bsb << endl;
@@ -263,6 +178,8 @@ void ChimeraSlayer::printBlock(data_struct data, ostream& out, int i){
 		out << "Similarity of query to parentA: " << data.qa << endl;
 		out << "Similarity of query to parentB: " << data.qb << endl;
 		
+		out << "Percent_ID QLA_QRB: " << data.qla_qrb << endl;
+		out << "Percent_ID QLB_QRA: " << data.qlb_qra << endl;
 		//out << "Per_id(QL,A): " << data.qla << endl;
 		//out << "Per_id(QL,B): " << data.qlb << endl;
 		//out << "Per_id(QR,A): " << data.qra << endl;

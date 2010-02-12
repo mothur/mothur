@@ -86,19 +86,27 @@ string Engine::getCommand()  {
 			#ifdef USE_READLINE
 				char* nextCommand = NULL;
 				nextCommand = readline("mothur > ");
-				if(nextCommand != NULL) {  add_history(nextCommand);  }		
+				
+				if(nextCommand != NULL) {  add_history(nextCommand);  }	
+				else{ //^D causes null string and we want it to quit mothur
+					nextCommand = "quit"; 
+					cout << nextCommand << endl;
+				}	
+				
 				mothurOutJustToLog("mothur > " + toString(nextCommand));
 				return nextCommand;
 			#else
 				string nextCommand = "";
 				mothurOut("mothur > ");
 				getline(cin, nextCommand);
+				mothurOutJustToLog("mothur > " + toString(nextCommand));
 				return nextCommand;
 			#endif
 		#else
 			string nextCommand = "";
 			mothurOut("mothur > ");
 			getline(cin, nextCommand);
+			mothurOutJustToLog("mothur > " + toString(nextCommand));
 			return nextCommand;
 		#endif
 		

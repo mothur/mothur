@@ -230,7 +230,7 @@ int Bellerophon::getChimeras() {
 		sort(pref.begin(), pref.end(), comparePref);
 		
 		return 0;
-
+		
 	}
 	catch(exception& e) {
 		errorOut(e, "Bellerophon", "getChimeras");

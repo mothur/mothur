@@ -26,7 +26,8 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile", "mask", "numwanted", "ksize", "svg", "name", "match","mismatch", "divergence", "minsim", "parents", "iters","outputdir","inputdir" };
+			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile", "mask", 
+			"numwanted", "ksize", "svg", "name", "match","mismatch", "divergence", "minsim","mincov","minbs", "minsnp","parents", "iters","outputdir","inputdir" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -148,7 +149,7 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 			svg = isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "window", false);	
-			if ((temp == "not found") && (method == "chimeraslayer")) { temp = "100"; }			
+			if ((temp == "not found") && (method == "chimeraslayer")) { temp = "50"; }			
 			else if (temp == "not found") { temp = "0"; }
 			convert(temp, window);
 			
@@ -158,25 +159,37 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 			temp = validParameter.validFile(parameters, "mismatch", false);			if (temp == "not found") { temp = "-4"; }
 			convert(temp, mismatch);
 			
-			temp = validParameter.validFile(parameters, "divergence", false);		if (temp == "not found") { temp = "1.0"; }
+			temp = validParameter.validFile(parameters, "divergence", false);		if (temp == "not found") { temp = "1.007"; }
 			convert(temp, divR);
 			
 			temp = validParameter.validFile(parameters, "minsim", false);			if (temp == "not found") { temp = "90"; }
 			convert(temp, minSimilarity);
 			
-			temp = validParameter.validFile(parameters, "parents", false);			if (temp == "not found") { temp = "5"; }
+			temp = validParameter.validFile(parameters, "mincov", false);			if (temp == "not found") { temp = "70"; }
+			convert(temp, minCoverage);
+			
+			temp = validParameter.validFile(parameters, "minbs", false);			if (temp == "not found") { temp = "90"; }
+			convert(temp, minBS);
+			
+			temp = validParameter.validFile(parameters, "minsnp", false);			if (temp == "not found") { temp = "10"; }
+			convert(temp, minSNP);
+
+			temp = validParameter.validFile(parameters, "parents", false);			if (temp == "not found") { temp = "3"; }
 			convert(temp, parents); 
 			
-			temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
+			temp = validParameter.validFile(parameters, "iters", false);	
+			if ((temp == "not found") && (method == "chimeraslayer")) { temp = "100"; }		
+			else if (temp == "not found") { temp = "1000"; }
 			convert(temp, iters); 
 			 
 			temp = validParameter.validFile(parameters, "increment", false);		
-			if ((temp == "not found") && ((method == "chimeracheck") || (method == "chimeraslayer"))) { temp = "10"; }
+			if ((temp == "not found") && (method == "chimeracheck")) { temp = "10"; }
+			else if ((temp == "not found") && (method == "chimeraslayer")) { temp = "5"; }
 			else if (temp == "not found") { temp = "25"; }
 			convert(temp, increment);
 			
 			temp = validParameter.validFile(parameters, "numwanted", false);
-			if ((temp == "not found") && (method == "chimeraslayer")) { temp = "10"; }		
+			if ((temp == "not found") && (method == "chimeraslayer")) { temp = "15"; }		
 			else if (temp == "not found") { temp = "20"; }
 			convert(temp, numwanted);
 
@@ -216,7 +229,11 @@ void ChimeraSeqsCommand::help(){
 		mothurOut("The ksize parameter allows you to input kmersize. \n");
 		mothurOut("The svg parameter allows you to specify whether or not you would like a svg file outputted for each query sequence.\n");
 		mothurOut("The name parameter allows you to enter a file containing names of sequences you would like .svg files for.\n");
-		//mothurOut("The iters parameter allows you to specify the number of bootstrap iters to do with the chimeraslayer method.\n");
+		mothurOut("The iters parameter allows you to specify the number of bootstrap iters to do with the chimeraslayer method.\n");
+		mothurOut("The minsim parameter allows you .... \n");
+		mothurOut("The mincov parameter allows you to specify minimum coverage by closest matches found in template. Default is 70, meaning 70%. \n");
+		mothurOut("The minbs parameter allows you to specify minimum bootstrap support for calling a sequence chimeric. Default is 90, meaning 90%. \n");
+		mothurOut("The minsnp parameter allows you to specify percent of SNPs to sample on each side of breakpoint for computing bootstrap support (default: 10) \n");
 		mothurOut("NOT ALL PARAMETERS ARE USED BY ALL METHODS. Please look below for method specifics.\n\n");
 		mothurOut("Details for each method: \n"); 
 		mothurOut("\tpintail: \n"); 
@@ -252,22 +269,20 @@ int ChimeraSeqsCommand::execute(){
 		
 		if (abort == true) { return 0; }
 		
+		int start = time(NULL);	
+		
 		if (method == "bellerophon")			{		chimera = new Bellerophon(fastafile, outputDir);			}
-		else if (method == "pintail")			{		chimera = new Pintail(fastafile, templatefile, outputDir);	}
-		else if (method == "ccode")				{		chimera = new Ccode(fastafile, templatefile, outputDir);			}
-		else if (method == "chimeracheck")		{		chimera = new ChimeraCheckRDP(fastafile, templatefile, outputDir);	}
-		else if (method == "chimeraslayer")		{		chimera = new ChimeraSlayer(fastafile, templatefile);		}
+		else if (method == "pintail")			{		chimera = new Pintail(fastafile, outputDir);				}
+		else if (method == "ccode")				{		chimera = new Ccode(fastafile, outputDir);					}
+		else if (method == "chimeracheck")		{		chimera = new ChimeraCheckRDP(fastafile, outputDir);		}
+		else if (method == "chimeraslayer")		{		chimera = new ChimeraSlayer("blast");						}
 		else { mothurOut("Not a valid method."); mothurOutEndLine(); return 0;		}
 		
 		//set user options
 		if (maskfile == "default") { mothurOut("I am using the default 236627 EU009184.1 Shigella dysenteriae str. FBD013."); mothurOutEndLine();  }
 		
-		//saves time to avoid generating it
 		chimera->setCons(consfile);	
-		
-		//saves time to avoid generating it
 		chimera->setQuantiles(quanfile);				
-		
 		chimera->setMask(maskfile);
 		chimera->setFilter(filter);
 		chimera->setCorrection(correction);
@@ -283,25 +298,126 @@ int ChimeraSeqsCommand::execute(){
 		chimera->setDivR(divR);
 		chimera->setParents(parents);
 		chimera->setMinSim(minSimilarity);
+		chimera->setMinCoverage(minCoverage);
+		chimera->setMinBS(minBS);
+		chimera->setMinSNP(minSNP);
 		chimera->setIters(iters);
-		
-				
-		//find chimeras
-		int error = chimera->getChimeras();
-		
-		//there was a problem
-		if (error == 1) {  return 0;  }
+		chimera->setTemplateFile(templatefile);
 
+		
+		
+		vector<Sequence*> templateSeqs;
+		if ((method != "bellerophon") && (method != "chimeracheck")) {   
+			templateSeqs = chimera->readSeqs(templatefile);   
+			if (chimera->getUnaligned()) { 
+				mothurOut("Your sequences need to be aligned when you use the chimeraslayer method."); mothurOutEndLine(); 
+				//free memory
+				for (int i = 0; i < templateSeqs.size(); i++)		{  delete templateSeqs[i];		}
+				return 0; 
+			}
+			
+			//set options
+			chimera->setTemplateSeqs(templateSeqs);
+
+		}else if (method == "bellerophon") {//run bellerophon separately since you need to read entire fastafile to run it
+			chimera->getChimeras();
+			
+			string outputFName = outputDir + getRootName(getSimpleName(fastafile)) + method + maskfile + ".chimeras";
+			ofstream out;
+			openOutputFile(outputFName, out);
+			
+			chimera->print(out);
+			out.close();
+			return 0;
+		}
+		
+		//some methods need to do prep work before processing the chimeras
+		chimera->doPrep(); 
+		
+		ofstream outHeader;
+		string tempHeader = outputDir + getRootName(getSimpleName(fastafile)) + method + maskfile + ".chimeras.tempHeader";
+		openOutputFile(tempHeader, outHeader);
+		
+		chimera->printHeader(outHeader);
+		outHeader.close();
+		
 		string outputFileName = outputDir + getRootName(getSimpleName(fastafile)) + method + maskfile + ".chimeras";
-		ofstream out;
-		openOutputFile(outputFileName, out);
+
+		//break up file
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			if(processors == 1){
+				ifstream inFASTA;
+				openInputFile(fastafile, inFASTA);
+				numSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+				inFASTA.close();
+				
+				lines.push_back(new linePair(0, numSeqs));
+				
+				driver(lines[0], outputFileName, fastafile);
+				
+			}else{
+				vector<int> positions;
+				processIDS.resize(0);
+				
+				ifstream inFASTA;
+				openInputFile(fastafile, inFASTA);
+				
+				string input;
+				while(!inFASTA.eof()){
+					input = getline(inFASTA);
+					if (input.length() != 0) {
+						if(input[0] == '>'){	long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
+					}
+				}
+				inFASTA.close();
+				
+				numSeqs = positions.size();
+				
+				int numSeqsPerProcessor = numSeqs / processors;
+				
+				for (int i = 0; i < processors; i++) {
+					long int startPos = positions[ i * numSeqsPerProcessor ];
+					if(i == processors - 1){
+						numSeqsPerProcessor = numSeqs - i * numSeqsPerProcessor;
+					}
+					lines.push_back(new linePair(startPos, numSeqsPerProcessor));
+				}
+				
+				
+				createProcesses(outputFileName, fastafile); 
+				
+				rename((outputFileName + toString(processIDS[0]) + ".temp").c_str(), outputFileName.c_str());
+								
+				//append alignment and report files
+				for(int i=1;i<processors;i++){
+					appendOutputFiles((outputFileName + toString(processIDS[i]) + ".temp"), outputFileName);
+					remove((outputFileName + toString(processIDS[i]) + ".temp").c_str());
+				}
+			}
+
+		#else
+			ifstream inFASTA;
+			openInputFile(candidateFileNames[s], inFASTA);
+			numSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+			inFASTA.close();
+			lines.push_back(new linePair(0, numSeqs));
+			
+			driver(lines[0], outputFileName, fastafile);
+		#endif
 		
-		//print results
-		chimera->print(out);
+		//mothurOut("Output File Names: ");
+		//if ((filter) && (method == "bellerophon")) { mothurOut(
+		//if (outputDir == "") { fastafile = getRootName(fastafile) + "filter.fasta"; }
+		//	else				 { fastafile = outputDir + getRootName(getSimpleName(fastafile)) + "filter.fasta"; }
 		
-		out.close();
+		appendOutputFiles(tempHeader, outputFileName);
+		remove(tempHeader.c_str());
+
+		for (int i = 0; i < templateSeqs.size(); i++)		{   delete templateSeqs[i];	}
 		
-		delete chimera;
+		if (method == "chimeracheck") { mothurOutEndLine(); mothurOut("This method does not determine if a sequence is chimeric, but allows you to make that determination based on the IS values."); mothurOutEndLine();  }
+		
+		mothurOutEndLine(); mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	mothurOutEndLine();
 		
 		return 0;
 		
@@ -310,6 +426,107 @@ int ChimeraSeqsCommand::execute(){
 		errorOut(e, "ChimeraSeqsCommand", "execute");
 		exit(1);
 	}
+}//**********************************************************************************************************************
+
+int ChimeraSeqsCommand::driver(linePair* line, string outputFName, string filename){
+	try {
+		ofstream out;
+		openOutputFile(outputFName, out);
+		
+		ifstream inFASTA;
+		openInputFile(filename, inFASTA);
+
+		inFASTA.seekg(line->start);
+		
+		for(int i=0;i<line->numSeqs;i++){
+		
+			Sequence* candidateSeq = new Sequence(inFASTA);  gobble(inFASTA);
+				
+			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
+					
+				//find chimeras
+				chimera->getChimeras(candidateSeq);
+		
+				//print results
+				chimera->print(out);
+			}
+			delete candidateSeq;
+			
+			//report progress
+			if((i+1) % 100 == 0){	mothurOut("Processing sequence: " + toString(i+1)); mothurOutEndLine();		}
+		}
+		//report progress
+		if((line->numSeqs) % 100 != 0){	mothurOut("Processing sequence: " + toString(line->numSeqs)); mothurOutEndLine();		}
+		
+		out.close();
+		inFASTA.close();
+				
+		return 1;
+	}
+	catch(exception& e) {
+		errorOut(e, "ChimeraSeqsCommand", "driver");
+		exit(1);
+	}
 }
+
 /**************************************************************************************************/
+
+void ChimeraSeqsCommand::createProcesses(string outputFileName, string filename) {
+	try {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		int process = 0;
+		//		processIDS.resize(0);
+		
+		//loop through and create all the processes you want
+		while (process != processors) {
+			int pid = fork();
+			
+			if (pid > 0) {
+				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+				process++;
+			}else if (pid == 0){
+				driver(lines[process], outputFileName + toString(getpid()) + ".temp", filename);
+				exit(0);
+			}else { mothurOut("unable to spawn the necessary processes."); mothurOutEndLine(); exit(0); }
+		}
+		
+		//force parent to wait until all the processes are done
+		for (int i=0;i<processors;i++) { 
+			int temp = processIDS[i];
+			wait(&temp);
+		}
+#endif		
+	}
+	catch(exception& e) {
+		errorOut(e, "ChimeraSeqsCommand", "createProcesses");
+		exit(1);
+	}
+}
+
+/**************************************************************************************************/
+
+void ChimeraSeqsCommand::appendOutputFiles(string temp, string filename) {
+	try{
+		
+		ofstream output;
+		ifstream input;
+		
+		openOutputFileAppend(temp, output);
+		openInputFile(filename, input);
+		
+		while(char c = input.get()){
+			if(input.eof())		{	break;			}
+			else				{	output << c;	}
+		}
+		
+		input.close();
+		output.close();
+	}
+	catch(exception& e) {
+		errorOut(e, "ChimeraSeqsCommand", "appendOuputFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+
 

@@ -26,11 +26,23 @@ public:
 	
 		
 private:
+
+	struct linePair {
+		int start;
+		int numSeqs;
+		linePair(long int i, int j) : start(i), numSeqs(j) {}
+	};
+	vector<int> processIDS;   //processid
+	vector<linePair*> lines;
 	
+	int driver(linePair*, string, string);
+	void createProcesses(string, string);
+	void appendOutputFiles(string, string); 
+
 	bool abort;
 	string method, fastafile, templatefile, consfile, quanfile, maskfile, namefile, outputDir;
 	bool filter, correction, svg, printAll;
-	int processors, midpoint, averageLeft, averageRight, window, iters, increment, numwanted, ksize, match, mismatch, parents, minSimilarity;
+	int processors, midpoint, averageLeft, averageRight, window, iters, increment, numwanted, ksize, match, mismatch, parents, minSimilarity, minCoverage, minBS, minSNP, numSeqs;
 	float divR;
 	Chimera* chimera;
 	

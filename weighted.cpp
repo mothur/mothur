@@ -26,6 +26,8 @@ EstOutput Weighted::getValues(Tree* t) {
 				//initialize weighted scores
 				WScore[globaldata->Groups[i]+globaldata->Groups[l]] = 0.0;
 				
+				vector<string> groups; groups.push_back(globaldata->Groups[i]); groups.push_back(globaldata->Groups[l]);
+				
 				D.push_back(0.0000); //initialize a spot in D for each combination
 				
 				/********************************************************/
@@ -52,9 +54,25 @@ EstOutput Weighted::getValues(Tree* t) {
 					//is this sum from a sequence which is in one of the users groups
 					if (inUsersGroups(t->tree[v].getGroup(), globaldata->Groups) == true) {
 						//is this sum from a sequence which is in this groupCombo
-						if ((t->tree[v].getGroup() == globaldata->Groups[i]) || (t->tree[v].getGroup() == globaldata->Groups[l])) {
-							sum /= (double)tmap->seqsPerGroup[t->tree[v].getGroup()];
-							D[count] += sum; 
+						if (inUsersGroups(t->tree[v].getGroup(), groups)) {
+							int numSeqsInGroupI, numSeqsInGroupL;
+							
+							map<string, int>::iterator it;
+							it = t->tree[v].pcount.find(groups[0]);
+							if (it != t->tree[v].pcount.end()) { //this leaf node contains seqs from group i
+								numSeqsInGroupI = it->second;
+							}else{ numSeqsInGroupI = 0; }
+							
+							it = t->tree[v].pcount.find(groups[1]);
+							if (it != t->tree[v].pcount.end()) { //this leaf node contains seqs from group l
+								numSeqsInGroupL = it->second;
+							}else{ numSeqsInGroupL = 0; }
+							
+							double weightedSum = ((numSeqsInGroupI * sum) / (double)tmap->seqsPerGroup[groups[0]]) + ((numSeqsInGroupL * sum) / (double)tmap->seqsPerGroup[groups[1]]);
+
+							//sum /= (double)tmap->seqsPerGroup[t->tree[v].getGroup()];
+							
+							D[count] += weightedSum; 
 						}
 					}
 				}
@@ -125,6 +143,7 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 		WScore[(groupA+groupB)] = 0.0;
 		float D = 0.0;
 		
+		vector<string> groups; groups.push_back(groupA); groups.push_back(groupB);
 						
 		/********************************************************/
 		//calculate a D value for the group combo
@@ -147,9 +166,25 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 				sum += abs(t->tree[index].getBranchLength());
 			}
 						
-			if ((t->tree[v].getGroup() == groupA) || (t->tree[v].getGroup() == groupB)) {
-				sum /= (double)tmap->seqsPerGroup[t->tree[v].getGroup()];
-				D += sum; 
+			if (inUsersGroups(t->tree[v].getGroup(), groups)) {
+				int numSeqsInGroupI, numSeqsInGroupL;
+							
+				map<string, int>::iterator it;
+				it = t->tree[v].pcount.find(groups[0]);
+				if (it != t->tree[v].pcount.end()) { //this leaf node contains seqs from group i
+					numSeqsInGroupI = it->second;
+				}else{ numSeqsInGroupI = 0; }
+				
+				it = t->tree[v].pcount.find(groups[1]);
+				if (it != t->tree[v].pcount.end()) { //this leaf node contains seqs from group l
+					numSeqsInGroupL = it->second;
+				}else{ numSeqsInGroupL = 0; }
+				
+				double weightedSum = ((numSeqsInGroupI * sum) / (double)tmap->seqsPerGroup[groups[0]]) + ((numSeqsInGroupL * sum) / (double)tmap->seqsPerGroup[groups[1]]);
+				
+				//sum /= (double)tmap->seqsPerGroup[t->tree[v].getGroup()];
+				
+				D += weightedSum; 
 			}
 		}
 		/********************************************************/				

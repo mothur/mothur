@@ -218,6 +218,7 @@ int AlignCommand::execute(){
 			string alignFileName = outputDir + getRootName(getSimpleName(candidateFileNames[s])) + "align";
 			string reportFileName = outputDir + getRootName(getSimpleName(candidateFileNames[s])) + "align.report";
 			string accnosFileName = outputDir + getRootName(getSimpleName(candidateFileNames[s])) + "flip.accnos";
+			bool hasAccnos = true;
 			
 			int numFastaSeqs = 0;
 			for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
@@ -307,7 +308,7 @@ int AlignCommand::execute(){
 						mothurOut(" If you set the flip parameter to true mothur will try aligning the reverse compliment as well."); 
 					}else{  mothurOut(" If the reverse compliment proved to be better it was reported.");  }
 					mothurOutEndLine();
-				}
+				}else{ hasAccnos = false;  }
 			}
 #else
 			ifstream inFASTA;
@@ -320,7 +321,7 @@ int AlignCommand::execute(){
 			driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s]);
 			
 			//delete accnos file if its blank else report to user
-			if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  }
+			if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
 			else { 
 				mothurOut("Some of you sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
 				if (!flip) {
@@ -331,7 +332,10 @@ int AlignCommand::execute(){
 			
 #endif
 			
-			
+			mothurOut("Output File Names: " + alignFileName + ", " + reportFileName);
+			if (hasAccnos)	{	mothurOut(", " + accnosFileName + ".");		}
+			else			{	mothurOut(".");								}
+			mothurOutEndLine();
 			
 			mothurOut("It took " + toString(time(NULL) - start) + " secs to align " + toString(numFastaSeqs) + " sequences.");
 			mothurOutEndLine();

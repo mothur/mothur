@@ -137,6 +137,7 @@ CommandFactory::CommandFactory(){
 	commands["pcoa"]				= "pcoa";
 	commands["otu.hierarchy"]		= "otu.hierarchy";
 	commands["set.dir"]				= "set.dir";
+	commands["merge.files"]			= "merge.files";
 }
 /***********************************************************/
 

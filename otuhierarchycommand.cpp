@@ -18,7 +18,7 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"list","label","outputdir","inputdir"};
+			string Array[] =  {"list","label","output","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -63,7 +63,11 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option){
 			else { 
 				splitAtDash(label, labels);
 				if (labels.size() != 2) { mothurOut("You must provide 2 labels."); mothurOutEndLine(); abort = true; }
-			}				
+			}	
+			
+			output = validParameter.validFile(parameters, "output", false);			if (output == "not found") { output = "name"; }
+			
+			if ((output != "name") && (output != "number")) { mothurOut("output options are name and number. I will use name."); mothurOutEndLine(); output = "name"; }
 		}
 		
 	}
@@ -77,7 +81,8 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option){
 void OtuHierarchyCommand::help(){
 	try {
 		mothurOut("The otu.hierarchy command is used to see how otus relate at two distances. \n");
-		mothurOut("The otu.hierarchy command parameters are list and label.  Both parameters are required. \n");
+		mothurOut("The otu.hierarchy command parameters are list, label and output.  list and label parameters are required. \n");
+		mothurOut("The output parameter allows you to output the names of the sequence in the OTUs or the OTU numbers. Options are name and number, default is name. \n");
 		mothurOut("The otu.hierarchy command should be in the following format: \n");
 		mothurOut("otu.hierarchy(list=yourListFile, label=yourLabels).\n");
 		mothurOut("Example otu.hierarchy(list=amazon.fn.list, label=0.01-0.03).\n");
@@ -140,7 +145,8 @@ int OtuHierarchyCommand::execute(){
 			string names = lists[1].get(i);
 			
 			//output column 1
-			out << names << '\t';
+			if (output == "name")	{   out << names << '\t';	}
+			else					{	out << i << '\t';		}
 			
 			map<int, int> bins; //bin numbers in little that are in this bin in big
 			map<int, int>::iterator it;
@@ -157,7 +163,8 @@ int OtuHierarchyCommand::execute(){
 			
 			string col2 = "";
 			for (it = bins.begin(); it != bins.end(); it++) {
-				col2 += lists[0].get(it->first) + "\t";
+				if (output == "name")	{   col2 += lists[0].get(it->first) + "\t";	}
+				else					{	col2 += toString(it->first) + "\t";		}
 			}
 			
 			//output column 2
