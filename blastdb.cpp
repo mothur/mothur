@@ -50,7 +50,7 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 		//	wordsize used in megablast.  I'm sure we're sacrificing accuracy for speed, but anyother way would take way too
 		//	long.  With this setting, it seems comparable in speed to the suffix tree approach.
 		
-		string blastCommand = path + "blast/bin/blastall -p blastn -d " + dbFileName + " -b 1 -m 8 -W 28 -v " + toString(n);
+		string blastCommand = path + "blast/bin/blastall -p blastn -d " + dbFileName + " -m 8 -W 28 -v " + toString(n) + " -b " + toString(n);;
 		blastCommand += (" -i " + queryFileName + " -o " + blastFileName);
 		system(blastCommand.c_str());
 		
@@ -82,9 +82,9 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 }
 /**************************************************************************************************/
 //assumes you have added all the template sequences using the addSequence function and run generateDB.
-map<int, float> BlastDB::findClosest(Sequence* seq, int n) {
+vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n) {
 	try{
-		map<int, float> topMatches;
+		vector<int> topMatches;
 		
 		ofstream queryFile;
 		openOutputFile(queryFileName, queryFile);
@@ -96,7 +96,7 @@ map<int, float> BlastDB::findClosest(Sequence* seq, int n) {
 		//	wordsize used in megablast.  I'm sure we're sacrificing accuracy for speed, but anyother way would take way too
 		//	long.  With this setting, it seems comparable in speed to the suffix tree approach.
 	
-		string blastCommand = path + "blast/bin/blastall -p blastn -d " + dbFileName + " -m 8 -W 28 -b " + toString(n) + " -v " + toString(n);
+		string blastCommand = path + "blast/bin/megablast -e 1e-10 -d " + dbFileName + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
 		blastCommand += (" -i " + queryFileName + " -o " + blastFileName);
 		system(blastCommand.c_str());
 		
@@ -106,22 +106,18 @@ map<int, float> BlastDB::findClosest(Sequence* seq, int n) {
 		string dummy;
 		int templateAccession;
 		gobble(m8FileHandle);
-//string name = seq->getName();
-//ofstream out;
-//openOutputFileAppend(name, out);	
+		
 		while(!m8FileHandle.eof()){
 			m8FileHandle >> dummy >> templateAccession >> searchScore;
-//out << dummy << '\t' <<  templateAccession	<< '\t' << searchScore << endl;
+			
 			//get rest of junk in line
-			while (!m8FileHandle.eof())	{	char c = m8FileHandle.get(); 
-			//out << c; 
-			if (c == 10 || c == 13){	break;	}	} 
+			while (!m8FileHandle.eof())	{	char c = m8FileHandle.get(); if (c == 10 || c == 13){	break;	}	} 
 			
 			gobble(m8FileHandle);
-			topMatches[templateAccession] = searchScore;
+			topMatches.push_back(templateAccession);
 		}
 		m8FileHandle.close();
-//out.close();		
+		
 		return topMatches;
 	}
 	catch(exception& e) {
