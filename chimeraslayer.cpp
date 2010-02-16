@@ -64,9 +64,9 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 		vector<results> Results = maligner->getOutput();
 
 		//realign query to parents to improve slayers detection rate
-		//ChimeraReAligner realigner(templateSeqs, match, misMatch);
-		//realigner.reAlign(query, Results);
-			
+		ChimeraReAligner realigner(templateSeqs, match, misMatch);
+		realigner.reAlign(query, Results);
+cout << query->getName() << '\n' << query->getAligned() << endl;
 			//if (chimeraFlag == "yes") {
 			
 		//get sequence that were given from maligner results

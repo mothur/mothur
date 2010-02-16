@@ -23,7 +23,7 @@ public:
 	void generateDB();
 	void addSequence(Sequence);
 	vector<int> findClosestSequences(Sequence*, int);
-	map<int, float> findClosest(Sequence*, int); //template index -> searchscore
+	vector<int> findClosestMegaBlast(Sequence*, int);
 
 private:
 	string dbFileName;

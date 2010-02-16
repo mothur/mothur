@@ -29,19 +29,23 @@ void ChimeraReAligner::reAlign(Sequence* query, vector<results> parents) {
 			sort(parents.begin(), parents.end(), compareRegionStart);
 
 			//make sure you don't cutoff beginning of query 
-			if (parents[0].nastRegionStart > 0) {  newQuery += qAligned.substr(0, parents[0].nastRegionStart+1);  }
+			if (parents[0].nastRegionStart > 0) {  newQuery += qAligned.substr(0, parents[0].nastRegionStart);  }
 			int longest = 0;
 			//take query and break apart into pieces using breakpoints given by results of parents
 			for (int i = 0; i < parents.size(); i++) {
-				int length = parents[i].nastRegionEnd - parents[i].nastRegionStart+1;
+	cout << parents[i].parent << '\t' << parents[i].nastRegionStart <<  '\t' << parents[i].nastRegionEnd	<< endl;	
+				int length = parents[i].nastRegionEnd - parents[i].nastRegionStart;
 				string q = qAligned.substr(parents[i].nastRegionStart, length);
+	cout << "query = " << q << endl;
 				Sequence* queryFrag = new Sequence(query->getName(), q);
 				
 				queryParts.push_back(queryFrag);
 				
 				Sequence* parent = getSequence(parents[i].parent);
 				string p = parent->getAligned();
+		
 				p = p.substr(parents[i].nastRegionStart, length);
+	cout << "parent = " << p << endl;		
 				parent->setAligned(p);
 				
 				parentParts.push_back(parent);
@@ -62,8 +66,9 @@ void ChimeraReAligner::reAlign(Sequence* query, vector<results> parents) {
 				newQuery += queryParts[i]->getAligned();
 			}
 			
+			
 			//make sure you don't cutoff end of query 
-			if (parents[parents.size()-1].nastRegionEnd < qAligned.length()) {  newQuery += qAligned.substr(parents[parents.size()-1].nastRegionEnd-1);  }
+			if (parents[parents.size()-1].nastRegionEnd < qAligned.length()) {  newQuery += qAligned.substr(parents[parents.size()-1].nastRegionEnd);  }
 			
 			//set query to new aligned string
 			query->setAligned(newQuery);

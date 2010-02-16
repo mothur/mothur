@@ -50,22 +50,10 @@ struct results {
 	float divR;
 };
 /***********************************************************************/
-struct rank {
-		int num;
-		float score;
-		rank(int n, float s) : num(n), score(s) {}
-};
-/***********************************************************************/
-
 struct SeqDist {
 	Sequence* seq;
 	float dist;
 };
-//********************************************************************************************************************
-//sorts highest to lowest
-inline bool compareMembers(rank left, rank right){
-	return (left.score > right.score);	
-} 
 //********************************************************************************************************************
 //sorts lowest to highest
 inline bool compareRegionStart(results left, results right){
