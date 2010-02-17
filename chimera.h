@@ -88,6 +88,7 @@ class Chimera {
 	
 		Chimera(){};
 		Chimera(string);
+		Chimera(string, bool);
 		Chimera(string, string);
 		virtual ~Chimera(){};
 		virtual void setFilter(bool f)			{	filter = f;	 		}

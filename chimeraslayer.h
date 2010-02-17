@@ -23,7 +23,7 @@
 class ChimeraSlayer : public Chimera {
 	
 	public:
-		ChimeraSlayer(string);	
+		ChimeraSlayer(string, bool);	
 		~ChimeraSlayer();
 		
 		int getChimeras(Sequence*);
@@ -40,6 +40,7 @@ class ChimeraSlayer : public Chimera {
 		vector<data_struct>  chimeraResults;
 		string chimeraFlags, searchMethod;
 		string fastafile;
+		bool realign;
 	
 		void printBlock(data_struct, ostream&);
 };

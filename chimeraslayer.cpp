@@ -11,7 +11,7 @@
 #include "chimerarealigner.h"
 
 //***************************************************************************************************************
-ChimeraSlayer::ChimeraSlayer(string mode) : searchMethod(mode) {  	decalc = new DeCalculator();	  }
+ChimeraSlayer::ChimeraSlayer(string mode, bool r) : searchMethod(mode), realign(r) {  	decalc = new DeCalculator();	  }
 //***************************************************************************************************************
 ChimeraSlayer::~ChimeraSlayer() { 	delete decalc;	 }
 //***************************************************************************************************************
@@ -63,10 +63,12 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 		string chimeraFlag = maligner->getResults(query, decalc);
 		vector<results> Results = maligner->getOutput();
 
-		//realign query to parents to improve slayers detection rate
-		ChimeraReAligner realigner(templateSeqs, match, misMatch);
-		realigner.reAlign(query, Results);
-cout << query->getName() << '\n' << query->getAligned() << endl;
+		//realign query to parents to improve slayers detection rate???
+		if (realign) {
+			ChimeraReAligner realigner(templateSeqs, match, misMatch);
+			realigner.reAlign(query, Results);
+		}
+
 			//if (chimeraFlag == "yes") {
 			
 		//get sequence that were given from maligner results

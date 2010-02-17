@@ -688,22 +688,48 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 		
 		Dist* distcalculator = new eachGapDist();
 		
+		string queryUnAligned = querySeq->getUnaligned();
+		int numBases = int(queryUnAligned.length() * 0.33);
+		
+		string leftQuery = ""; //first 1/3 of the sequence
+		string rightQuery = ""; //last 1/3 of the sequence
 		string queryAligned = querySeq->getAligned();
-		string leftQuery = queryAligned.substr(0, (queryAligned.length() / 3)); //first 1/3 of the sequence
-		string rightQuery = queryAligned.substr(((queryAligned.length() / 3)*2)); //last 1/3 of the sequence
+		
+		//left side
+		int baseCount = 0;
+		int leftSpot = 0;
+		for (int i = 0; i < queryAligned.length(); i++) {
+			leftQuery += queryAligned[i];
+			//if you are a base
+			if ((queryAligned[i] != '.') && (queryAligned[i] != '-')) {		baseCount++;	}
+			//if you have 1/3
+			if (baseCount >= numBases) {  leftSpot = i; break; } //first 1/3
+		}
+		
+		//right side - count through another 1/3, so you are at last third
+		baseCount = 0;
+		int rightSpot = 0;
+		for (int i = leftSpot; i < queryAligned.length(); i++) {
+			//if you are a base
+			if ((queryAligned[i] != '.') && (queryAligned[i] != '-')) {		baseCount++;	}
+			//if you have 1/3
+			if (baseCount >= numBases) { rightSpot = i;  break; } //last 1/3
+		}
+		rightQuery = queryAligned.substr(rightSpot); //sequence from pos spot to end
 		
 		Sequence queryLeft(querySeq->getName(), leftQuery);
 		Sequence queryRight(querySeq->getName(), rightQuery);
-				
+//cout << querySeq->getName() << '\t' << leftSpot << '\t' << rightSpot << endl;
+//cout << queryUnAligned.length() << '\t' << queryLeft.getUnaligned().length() << '\t' << queryRight.getUnaligned().length() << endl;
 		for(int j = 0; j < db.size(); j++){
 			
 			string dbAligned = db[j]->getAligned();
-			string leftDB = dbAligned.substr(0, (dbAligned.length() / 3)); //first 1/3 of the sequence
-			string rightDB = dbAligned.substr(((dbAligned.length() / 3)*2)); //last 1/3 of the sequence
+			string leftDB = dbAligned.substr(0, leftSpot+1); //first 1/3 of the sequence
+			string rightDB = dbAligned.substr(rightSpot); //last 1/3 of the sequence
 			
 			Sequence dbLeft(db[j]->getName(), leftDB);
 			Sequence dbRight(db[j]->getName(), rightDB);
-			
+
 			distcalculator->calcDist(queryLeft, dbLeft);
 			float distLeft = distcalculator->getDist();
 			
