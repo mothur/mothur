@@ -27,7 +27,7 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 		else {
 			//valid paramters for this command
 			string Array[] =  {"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile", "mask", 
-			"numwanted", "ksize", "svg", "name", "match","mismatch", "divergence", "minsim","mincov","minbs", "minsnp","parents", "iters","outputdir","inputdir" };
+			"numwanted", "ksize", "svg", "name", "match","mismatch", "divergence", "minsim","mincov","minbs", "minsnp","parents", "iters","outputdir","inputdir", "search","realign" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -177,6 +177,11 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 			temp = validParameter.validFile(parameters, "parents", false);			if (temp == "not found") { temp = "3"; }
 			convert(temp, parents); 
 			
+			temp = validParameter.validFile(parameters, "realign", false);			if (temp == "not found") { temp = "f"; }
+			realign = isTrue(temp); 
+			
+			search = validParameter.validFile(parameters, "search", false);			if (search == "not found") { temp = "distance"; }
+			
 			temp = validParameter.validFile(parameters, "iters", false);	
 			if ((temp == "not found") && (method == "chimeraslayer")) { temp = "100"; }		
 			else if (temp == "not found") { temp = "1000"; }
@@ -213,7 +218,7 @@ void ChimeraSeqsCommand::help(){
 		//"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile", "mask", "numwanted", "ksize", "svg", "name"
 		//mothurOut("chimera.seqs ASSUMES that your sequences are ALIGNED and if using a template that the template file sequences are the same length as the fasta file sequences.\n\n");
 		mothurOut("The chimera.seqs command reads a fastafile and creates list of potentially chimeric sequences.\n");
-		mothurOut("The chimera.seqs command parameters are fasta, filter, correction, processors, mask, method, window, increment, template, conservation, quantile, numwanted, ksize, svg, name, iters.\n");
+		mothurOut("The chimera.seqs command parameters are fasta, filter, correction, processors, mask, method, window, increment, template, conservation, quantile, numwanted, ksize, svg, name, iters, search, realign.\n");
 		mothurOut("The fasta parameter is always required and template is required if using pintail, ccode or chimeracheck.\n");
 		mothurOut("The filter parameter allows you to specify if you would like to apply a vertical and 50% soft filter. \n");
 		mothurOut("The correction parameter allows you to put more emphasis on the distance between highly similar sequences and less emphasis on the differences between remote homologs.\n");
@@ -234,6 +239,8 @@ void ChimeraSeqsCommand::help(){
 		mothurOut("The mincov parameter allows you to specify minimum coverage by closest matches found in template. Default is 70, meaning 70%. \n");
 		mothurOut("The minbs parameter allows you to specify minimum bootstrap support for calling a sequence chimeric. Default is 90, meaning 90%. \n");
 		mothurOut("The minsnp parameter allows you to specify percent of SNPs to sample on each side of breakpoint for computing bootstrap support (default: 10) \n");
+		mothurOut("The search parameter allows you to specify search method for finding the closest parent. Choices are distance and blast, default distance.  -used only by chimeraslayer. \n");
+		mothurOut("The realign parameter allows you to realign the query to the potential paretns. Choices are true or false, default false.  -used only by chimeraslayer. \n");
 		mothurOut("NOT ALL PARAMETERS ARE USED BY ALL METHODS. Please look below for method specifics.\n\n");
 		mothurOut("Details for each method: \n"); 
 		mothurOut("\tpintail: \n"); 
@@ -275,7 +282,7 @@ int ChimeraSeqsCommand::execute(){
 		else if (method == "pintail")			{		chimera = new Pintail(fastafile, outputDir);				}
 		else if (method == "ccode")				{		chimera = new Ccode(fastafile, outputDir);					}
 		else if (method == "chimeracheck")		{		chimera = new ChimeraCheckRDP(fastafile, outputDir);		}
-		else if (method == "chimeraslayer")		{		chimera = new ChimeraSlayer("blast");						}
+		else if (method == "chimeraslayer")		{		chimera = new ChimeraSlayer(search, realign);				}
 		else { mothurOut("Not a valid method."); mothurOutEndLine(); return 0;		}
 		
 		//set user options

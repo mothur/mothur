@@ -40,8 +40,8 @@ private:
 	void appendOutputFiles(string, string); 
 
 	bool abort;
-	string method, fastafile, templatefile, consfile, quanfile, maskfile, namefile, outputDir;
-	bool filter, correction, svg, printAll;
+	string method, fastafile, templatefile, consfile, quanfile, maskfile, namefile, outputDir, search;
+	bool filter, correction, svg, printAll, realign;
 	int processors, midpoint, averageLeft, averageRight, window, iters, increment, numwanted, ksize, match, mismatch, parents, minSimilarity, minCoverage, minBS, minSNP, numSeqs;
 	float divR;
 	Chimera* chimera;
