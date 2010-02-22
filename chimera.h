@@ -45,6 +45,7 @@ struct results {
 	int nastRegionStart;
 	int nastRegionEnd;
 	string parent;
+	string parentAligned;
 	float queryToParent;
 	float queryToParentLocal;
 	float divR;
@@ -53,6 +54,7 @@ struct results {
 struct SeqDist {
 	Sequence* seq;
 	float dist;
+	int index;
 };
 //********************************************************************************************************************
 //sorts lowest to highest
@@ -88,7 +90,7 @@ class Chimera {
 	
 		Chimera(){};
 		Chimera(string);
-		Chimera(string, bool);
+		Chimera(string, bool, string);
 		Chimera(string, string);
 		virtual ~Chimera(){};
 		virtual void setFilter(bool f)			{	filter = f;	 		}
@@ -119,8 +121,8 @@ class Chimera {
 		virtual vector<Sequence*> readSeqs(string);
 		virtual vector< vector<float> > readQuantiles();
 		virtual void setMask(string);
-		virtual void runFilter(Sequence*);
-		virtual void createFilter(vector<Sequence*>);
+		virtual map<int, int> runFilter(Sequence*);
+		virtual string createFilter(vector<Sequence*>, float);
 		
 		virtual void printHeader(ostream&){};
 		virtual int getChimeras(Sequence*){ return 0; }

@@ -65,6 +65,7 @@ class Pintail : public Chimera {
 		vector< vector<float> > quantiles;  //quantiles[0] is the vector of deviations with ceiling score of 1, quantiles[1] is the vector of deviations with ceiling score of 2...
 		vector< vector<quanMember> > quantilesMembers;  //quantiles[0] is the vector of deviations with ceiling score of 1, quantiles[1] is the vector of deviations with ceiling score of 2...
 		set<int>  h;
+		string mergedFilterString;
 		
 		
 		vector<float> readFreq();

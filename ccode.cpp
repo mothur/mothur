@@ -48,13 +48,10 @@ void Ccode::print(ostream& out) {
 			out2 << it->first << '\t' << it->second << endl;
 		}
 		out2.close();
-		
-		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
-		
 		out << querySeq->getName() << endl << endl << "Reference sequences used and distance to query:" << endl;
 			
 		for (int j = 0; j < closest.size(); j++) {
-			out << setprecision(3) << closest[j].seq->getName() << '\t' << closest[j].dist << endl;
+			out << closest[j].seq->getName() << '\t' << closest[j].dist << endl;
 		}
 		out << endl << endl;
 		
@@ -72,14 +69,12 @@ void Ccode::print(ostream& out) {
 			
 		out << endl << "Window\tStartPos\tEndPos" << endl;
 		it = trim.begin();
-			
 		for (int k = 0; k < windows.size()-1; k++) {
 			out << k+1 << '\t' << spotMap[windows[k]-it->first] << '\t' << spotMap[windows[k]-it->first+windowSizes] << endl;
 		}
 			
 		out << windows.size() << '\t' << spotMap[windows[windows.size()-1]-it->first] << '\t' << spotMap[it->second-it->first-1] << endl;
 		out << endl;
-			
 		out << "Window\tAvgQ\t(sdQ)\tAvgR\t(sdR)\tRatio\tAnova" << endl;
 		for (int k = 0; k < windows.size(); k++) {
 			float ds = averageQuery[k] / averageRef[k]; 
@@ -94,7 +89,7 @@ void Ccode::print(ostream& out) {
 		//float fs = varQuery[query] / varRef[query];	/* F-Snedecor, test for differences of variances */
 			
 		bool results = false;	
-						
+					
 		//confidence limit, t - Student, anova
 		out << "Window\tConfidenceLimit\tt-Student\tAnova" << endl;
 			
@@ -118,6 +113,10 @@ void Ccode::print(ostream& out) {
 		if (results) {
 			mothurOut(querySeq->getName() + " was found have at least one chimeric window."); mothurOutEndLine();
 		}
+
+		//free memory
+		for (int i = 0; i < closest.size(); i++) {  delete closest[i].seq;  }
+
 		
 	}
 	catch(exception& e) {
@@ -176,7 +175,7 @@ int Ccode::getChimeras(Sequence* query) {
 			for (int i = 0; i < closest.size(); i++) { temp.push_back(closest[i].seq);  }
 			temp.push_back(query);  
 			
-			createFilter(temp);
+			createFilter(temp, 0.5);
 		
 			for (int i = 0; i < temp.size(); i++) { runFilter(temp[i]);  }
 			
@@ -220,9 +219,6 @@ int Ccode::getChimeras(Sequence* query) {
 		findVarianceQuery();  //fills varQuery and sdQuery also sets minimum error rate to 0.001 to avoid divide by 0.
 					
 		determineChimeras();  //fills anova, isChimericConfidence, isChimericTStudent and isChimericANOVA. 
-		
-		//free memory
-		for (int i = 0; i < closest.size(); i++) {  delete closest[i].seq;  }
 		
 		return 0;
 	}
@@ -525,6 +521,10 @@ vector<SeqDist>  Ccode::findClosest(Sequence* q, int numWanted) {
 		}
 			
 		sort(topMatches.begin(), topMatches.end(), compareSeqDist);
+		
+		for (int i = numWanted; i < topMatches.size(); i++) {  delete topMatches[i].seq;  }
+		
+		topMatches.resize(numWanted);
 			
 		return topMatches;
 

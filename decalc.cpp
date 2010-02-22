@@ -11,6 +11,7 @@
 #include "chimera.h"
 #include "dist.h"
 #include "eachgapdist.h"
+#include "ignoregaps.h"
 
 
 //***************************************************************************************************************
@@ -680,11 +681,13 @@ float DeCalculator::getCoef(vector<float> obs, vector<float> qav) {
 }
 //***************************************************************************************************************
 //gets closest matches to each end, since chimeras will most likely have different parents on each end
-vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*> db, int numWanted) {
+vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*> db, int& numWanted, vector<int>& indexes) {
 	try {
+		indexes.clear();
 		
 		vector<Sequence*> seqsMatches;  
-		vector<SeqDist> dists;
+		vector<SeqDist> distsLeft;
+		vector<SeqDist> distsRight;
 		
 		Dist* distcalculator = new eachGapDist();
 		
@@ -696,12 +699,19 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 		string queryAligned = querySeq->getAligned();
 		
 		//left side
+		bool foundFirstBase = false;
 		int baseCount = 0;
 		int leftSpot = 0;
+		int firstBaseSpot = 0;
 		for (int i = 0; i < queryAligned.length(); i++) {
-			leftQuery += queryAligned[i];
 			//if you are a base
-			if ((queryAligned[i] != '.') && (queryAligned[i] != '-')) {		baseCount++;	}
+			if (isalpha(queryAligned[i])) {		
+				baseCount++; 
+				if (!foundFirstBase) {   foundFirstBase = true;  firstBaseSpot = i;  }
+			}
+			
+			//eliminate opening .'s
+			if (foundFirstBase) {   leftQuery += queryAligned[i];  }
 			//if you have 1/3
 			if (baseCount >= numBases) {  leftSpot = i; break; } //first 1/3
 		}
@@ -711,21 +721,31 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 		int rightSpot = 0;
 		for (int i = leftSpot; i < queryAligned.length(); i++) {
 			//if you are a base
-			if ((queryAligned[i] != '.') && (queryAligned[i] != '-')) {		baseCount++;	}
+			if (isalpha(queryAligned[i])) {		baseCount++;	}
 			//if you have 1/3
 			if (baseCount >= numBases) { rightSpot = i;  break; } //last 1/3
 		}
-		rightQuery = queryAligned.substr(rightSpot); //sequence from pos spot to end
+		
+		//trim end
+		//find last position in query that is a non gap character
+		int lastBaseSpot = queryAligned.length()-1;
+		for (int j = queryAligned.length()-1; j >= 0; j--) {
+			if (isalpha(queryAligned[j])) {
+				lastBaseSpot = j;
+				break;
+			}
+		}
+		rightQuery = queryAligned.substr(rightSpot, (lastBaseSpot-rightSpot)); //sequence from pos spot to end
 		
 		Sequence queryLeft(querySeq->getName(), leftQuery);
 		Sequence queryRight(querySeq->getName(), rightQuery);
-//cout << querySeq->getName() << '\t' << leftSpot << '\t' << rightSpot << endl;
+//cout << querySeq->getName() << '\t' << leftSpot << '\t' << rightSpot << '\t' << firstBaseSpot << '\t' << lastBaseSpot << endl;
 //cout << queryUnAligned.length() << '\t' << queryLeft.getUnaligned().length() << '\t' << queryRight.getUnaligned().length() << endl;
 		for(int j = 0; j < db.size(); j++){
 			
 			string dbAligned = db[j]->getAligned();
-			string leftDB = dbAligned.substr(0, leftSpot+1); //first 1/3 of the sequence
-			string rightDB = dbAligned.substr(rightSpot); //last 1/3 of the sequence
+			string leftDB = dbAligned.substr(firstBaseSpot, (leftSpot-firstBaseSpot+1)); //first 1/3 of the sequence
+			string rightDB = dbAligned.substr(rightSpot, (lastBaseSpot-rightSpot)); //last 1/3 of the sequence
 			
 			Sequence dbLeft(db[j]->getName(), leftDB);
 			Sequence dbRight(db[j]->getName(), rightDB);
@@ -736,25 +756,113 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 			distcalculator->calcDist(queryRight, dbRight);
 			float distRight = distcalculator->getDist();
 			
-			float dist = min(distLeft, distRight); //keep smallest distance
+			SeqDist subjectLeft;
+			subjectLeft.seq = db[j];
+			subjectLeft.dist = distLeft;
+			subjectLeft.index = j;
 			
-			SeqDist subject;
-			subject.seq = db[j];
-			subject.dist = dist;
+			distsLeft.push_back(subjectLeft);
 			
-			dists.push_back(subject);
+			SeqDist subjectRight;
+			subjectRight.seq = db[j];
+			subjectRight.dist = distRight;
+			subjectRight.index = j;
+			
+			distsRight.push_back(subjectRight);
+
 		}
 		
 		delete distcalculator;
 		
-		sort(dists.begin(), dists.end(), compareSeqDist);
+		//sort by smallest distance
+		sort(distsRight.begin(), distsRight.end(), compareSeqDist);
+		sort(distsLeft.begin(), distsLeft.end(), compareSeqDist);
 		
+		//merge results		
+		map<string, string> seen;
+		map<string, string>::iterator it;
+		
+		vector<SeqDist> dists;
+		float lastRight = distsRight[0].dist;
+		float lastLeft = distsLeft[0].dist;
+		int lasti = 0;
+		for (int i = 0; i < distsLeft.size(); i++) {
+			//add left if you havent already
+			it = seen.find(distsLeft[i].seq->getName());
+			if (it == seen.end()) {  
+				dists.push_back(distsLeft[i]);
+				seen[distsLeft[i].seq->getName()] = distsLeft[i].seq->getName();
+				lastLeft =  distsLeft[i].dist;
+			}
+
+			//add right if you havent already
+			it = seen.find(distsRight[i].seq->getName());
+			if (it == seen.end()) {  
+				dists.push_back(distsRight[i]);
+				seen[distsRight[i].seq->getName()] = distsRight[i].seq->getName();
+				lastRight =  distsRight[i].dist;
+			}
+			
+			if (dists.size() > numWanted) { lasti = i; break; } //you have enough results
+		}
+		
+		//add in dups
+		lasti++;
+		int i = lasti;
+		while (i < distsLeft.size()) {  
+			if (distsLeft[i].dist == lastLeft) {  dists.push_back(distsLeft[i]);  numWanted++; }
+			else { break; }
+			i++;
+		}
+		
+		i = lasti;
+		while (i < distsRight.size()) {  
+			if (distsRight[i].dist == lastRight) {  dists.push_back(distsRight[i]);  numWanted++; }
+			else { break; }
+			i++;
+		}
+
+//cout << numWanted << endl;
 		for (int i = 0; i < numWanted; i++) {
+//cout << dists[i].seq->getName() << '\t' << dists[i].dist << endl;
 			Sequence* temp = new Sequence(dists[i].seq->getName(), dists[i].seq->getAligned()); //have to make a copy so you can trim and filter without stepping on eachother.
 			seqsMatches.push_back(temp);
+			indexes.push_back(dists[i].index);
 		}
 		
 		return seqsMatches;
+	}
+	catch(exception& e) {
+		errorOut(e, "DeCalculator", "findClosest");
+		exit(1);
+	}
+}
+//***************************************************************************************************************
+Sequence* DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*> db) {
+	try {
+		
+		Sequence* seqsMatch;  
+		
+		Dist* distcalculator = new eachGapDist();
+		int index = 0;
+		int smallest = 1000000;
+		
+		for(int j = 0; j < db.size(); j++){
+			
+			distcalculator->calcDist(*querySeq, *db[j]);
+			float dist = distcalculator->getDist();
+			
+			if (dist < smallest) { 
+				smallest = dist;
+				index = j;
+			}
+		}
+		
+		delete distcalculator;
+		
+		seqsMatch = new Sequence(db[index]->getName(), db[index]->getAligned()); //have to make a copy so you can trim and filter without stepping on eachother.
+			
+		return seqsMatch;
 	}
 	catch(exception& e) {
 		errorOut(e, "DeCalculator", "findClosest");
@@ -838,10 +946,10 @@ map<int, int> DeCalculator::trimSeqs(Sequence* query, vector<Sequence*> topMatch
 
 		//check to make sure that is not whole seq
 		if ((rearPos - frontPos - 1) <= 0) {  mothurOut("Error, when I trim your sequences, the entire sequence is trimmed."); mothurOutEndLine(); exit(1);  }
-//cout << "front = " << frontPos << " rear = " << rearPos << endl;		
+//cout << query->getName() << " front = " << frontPos << " rear = " << rearPos << endl;		
 		//trim query
 		string newAligned = query->getAligned();
-		newAligned = newAligned.substr(frontPos, (rearPos-frontPos));
+		newAligned = newAligned.substr(frontPos, (rearPos-frontPos+1));
 		query->setAligned(newAligned);
 		
 		//trim topMatches

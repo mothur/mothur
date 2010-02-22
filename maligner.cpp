@@ -8,12 +8,12 @@
  */
 
 #include "maligner.h"
-#include "database.hpp"
+#include "kmerdb.hpp"
 #include "blastdb.hpp"
 
 /***********************************************************************/
-Maligner::Maligner(vector<Sequence*> temp, int num, int match, int misMatch, float div, int ms, int minCov, string mode) :
-		db(temp), numWanted(num), matchScore(match), misMatchPenalty(misMatch), minDivR(div), minSimilarity(ms), minCoverage(minCov), searchMethod(mode) {}
+Maligner::Maligner(vector<Sequence*> temp, int num, int match, int misMatch, float div, int ms, int minCov, string mode, Database* dataLeft, Database* dataRight) :
+		db(temp), numWanted(num), matchScore(match), misMatchPenalty(misMatch), minDivR(div), minSimilarity(ms), minCoverage(minCov), searchMethod(mode), databaseLeft(dataLeft), databaseRight(dataRight) {}
 /***********************************************************************/
 string Maligner::getResults(Sequence* q, DeCalculator* decalc) {
 	try {
@@ -25,15 +25,17 @@ string Maligner::getResults(Sequence* q, DeCalculator* decalc) {
 		
 		string chimera;
 		
-		if (searchMethod != "blast") {
+		if (searchMethod == "distance") {
 			//find closest seqs to query in template - returns copies of seqs so trim does not destroy - remember to deallocate
-			refSeqs = decalc->findClosest(query, db, numWanted);
-		}else{
-			refSeqs = getBlastSeqs(query, numWanted);
-		}
+			refSeqs = decalc->findClosest(query, db, numWanted, indexes);
+		}else if (searchMethod == "blast")  {
+			refSeqs = getBlastSeqs(query, numWanted); //fills indexes
+		}else if (searchMethod == "kmer") {
+			refSeqs = getKmerSeqs(query, numWanted); //fills indexes
+		}else { mothurOut("not valid search."); exit(1);  } //should never get here
 		
 		refSeqs = minCoverageFilter(refSeqs);
-		
+
 		if (refSeqs.size() < 2)  { 
 			for (int i = 0; i < refSeqs.size(); i++) {  delete refSeqs[i];	}
 			percentIdenticalQueryChimera = 0.0;
@@ -41,13 +43,14 @@ string Maligner::getResults(Sequence* q, DeCalculator* decalc) {
 		}
 		
 		int chimeraPenalty = computeChimeraPenalty();
-	
+
 		//fills outputResults
 		chimera = chimeraMaligner(chimeraPenalty, decalc);
-		
+	
 				
 		//free memory
 		delete query;
+
 		for (int i = 0; i < refSeqs.size(); i++) {  delete refSeqs[i];	}
 		
 		return chimera;
@@ -65,31 +68,31 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 		
 		//trims seqs to first non gap char in all seqs and last non gap char in all seqs
 		spotMap = decalc->trimSeqs(query, refSeqs);
-		
+
 		vector<Sequence*> temp = refSeqs;
 		temp.push_back(query);
 		
 		verticalFilter(temp);
+//for (int i = 0; i < temp.size(); i++) { cout << temp[i]->getName() << '\n' << temp[i]->getAligned() << endl; } return "no";
 
 		vector< vector<score_struct> > matrix = buildScoreMatrix(query->getAligned().length(), refSeqs.size()); //builds and initializes
 		
 		fillScoreMatrix(matrix, refSeqs, chimeraPenalty);
-		
+	
 		vector<score_struct> path = extractHighestPath(matrix);
 		
 		vector<trace_struct> trace = mapTraceRegionsToAlignment(path, refSeqs);
-		
+	
 		if (trace.size() > 1) {		chimera = "yes";	}
 		else { chimera = "no";	}
 		
 		int traceStart = path[0].col;
-		int traceEnd = path[path.size()-1].col;
-		
+		int traceEnd = path[path.size()-1].col;	
 		string queryInRange = query->getAligned();
 		queryInRange = queryInRange.substr(traceStart, (traceEnd-traceStart+1));
 	
 		string chimeraSeq = constructChimericSeq(trace, refSeqs);
-		
+	
 		percentIdenticalQueryChimera = computePercentID(queryInRange, chimeraSeq);
 		
 		//save output results
@@ -101,6 +104,7 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 			results temp;
 			
 			temp.parent = refSeqs[seqIndex]->getName();
+			temp.parentAligned = db[indexes[seqIndex]]->getAligned();
 			temp.nastRegionStart = spotMap[regionStart];
 			temp.nastRegionEnd = spotMap[regionEnd];
 			temp.regionStart = regionStart;
@@ -481,6 +485,8 @@ float Maligner::computePercentID(string queryAlign, string chimera) {
 //***************************************************************************************************************
 vector<Sequence*> Maligner::getBlastSeqs(Sequence* q, int num) {
 	try {	
+		indexes.clear();
+		vector<Sequence*> refResults;
 		//generate blastdb
 		Database* database = new BlastDB(-2.0, -1.0, matchScore, misMatchPenalty);
 		for (int i = 0; i < db.size(); i++) { 	database->addSequence(*db[i]);	}
@@ -497,6 +503,82 @@ vector<Sequence*> Maligner::getBlastSeqs(Sequence* q, int num) {
 		
 		vector<int> tempIndexesRight = database->findClosestMegaBlast(queryRight, num+1);
 		vector<int> tempIndexesLeft = database->findClosestMegaBlast(queryLeft, num+1);
+		
+		//if ((tempIndexesRight.size() != (num+1)) || (tempIndexesLeft.size() != (num+1)))  {  mothurOut("megablast returned " + toString(tempIndexesRight.size()) + " results for the right end, and " + toString(tempIndexesLeft.size()) + " for the left end. Needed " + toString(num+1) + ". Unable to porcess sequence " + q->getName()); mothurOutEndLine(); return refResults; }
+		
+		vector<int> smaller;
+		vector<int> larger;
+		
+		if (tempIndexesRight.size() < tempIndexesLeft.size()) { smaller = tempIndexesRight;  larger = tempIndexesLeft; }
+		else { smaller = tempIndexesLeft; larger = tempIndexesRight; } 
+		
+		//merge results		
+		map<int, int> seen;
+		map<int, int>::iterator it;
+		
+		vector<int> mergedResults;
+		for (int i = 0; i < smaller.size(); i++) {
+			//add left if you havent already
+			it = seen.find(smaller[i]);
+			if (it == seen.end()) {  
+				mergedResults.push_back(smaller[i]);
+				seen[smaller[i]] = smaller[i];
+			}
+
+			//add right if you havent already
+			it = seen.find(larger[i]);
+			if (it == seen.end()) {  
+				mergedResults.push_back(larger[i]);
+				seen[larger[i]] = larger[i];
+			}
+		}
+		
+		for (int i = smaller.size(); i < larger.size(); i++) {
+			it = seen.find(larger[i]);
+			if (it == seen.end()) {  
+				mergedResults.push_back(larger[i]);
+				seen[larger[i]] = larger[i];
+			}
+		}
+		
+		if (mergedResults.size() < numWanted) { numWanted = mergedResults.size(); }
+//cout << q->getName() <<  endl;		
+		for (int i = 0; i < numWanted; i++) {
+//cout << db[mergedResults[i]]->getName() << endl;	
+			if (db[mergedResults[i]]->getName() != q->getName()) { 
+				Sequence* temp = new Sequence(db[mergedResults[i]]->getName(), db[mergedResults[i]]->getAligned());
+				refResults.push_back(temp);
+				indexes.push_back(mergedResults[i]);
+			}
+//cout << mergedResults[i] << endl;
+		}
+//cout << endl;		
+		delete queryRight;
+		delete queryLeft;
+		delete database;
+		
+		return refResults;
+	}
+	catch(exception& e) {
+		errorOut(e, "Maligner", "getBlastSeqs");
+		exit(1);
+	}
+}
+//***************************************************************************************************************
+vector<Sequence*> Maligner::getKmerSeqs(Sequence* q, int num) {
+	try {	
+		indexes.clear();
+		
+		//get parts of query
+		string queryUnAligned = q->getUnaligned();
+		string leftQuery = queryUnAligned.substr(0, int(queryUnAligned.length() * 0.33)); //first 1/3 of the sequence
+		string rightQuery = queryUnAligned.substr(int(queryUnAligned.length() * 0.66)); //last 1/3 of the sequence
+
+		Sequence* queryLeft = new Sequence(q->getName(), leftQuery);
+		Sequence* queryRight = new Sequence(q->getName(), rightQuery);
+		
+		vector<int> tempIndexesLeft = databaseLeft->findClosestSequences(queryLeft, numWanted);
+		vector<int> tempIndexesRight = databaseRight->findClosestSequences(queryRight, numWanted);
 		
 		//merge results		
 		map<int, int> seen;
@@ -519,16 +601,17 @@ vector<Sequence*> Maligner::getBlastSeqs(Sequence* q, int num) {
 			}
 		}
 		
-		
+//cout << q->getName() << endl;		
 		vector<Sequence*> refResults;
 		for (int i = 0; i < numWanted; i++) {
+//cout << db[mergedResults[i]]->getName() << endl;	
 			Sequence* temp = new Sequence(db[mergedResults[i]]->getName(), db[mergedResults[i]]->getAligned());
 			refResults.push_back(temp);
+			indexes.push_back(mergedResults[i]);
 		}
-		
+//cout << endl;		
 		delete queryRight;
 		delete queryLeft;
-		delete database;
 		
 		return refResults;
 	}
@@ -537,6 +620,5 @@ vector<Sequence*> Maligner::getBlastSeqs(Sequence* q, int num) {
 		exit(1);
 	}
 }
-
 //***************************************************************************************************************
 

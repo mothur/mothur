@@ -60,8 +60,10 @@ SAbundVector::SAbundVector(ifstream& f): DataVector(), maxRank(0), numBins(0), n
 	
 		for(int i=1;i<=hold;i++){
 			f >> inputData;
+
 			set(i, inputData);
 		}
+
 	}
 	catch(exception& e) {
 		errorOut(e, "SAbundVector", "SAbundVector");
@@ -192,13 +194,13 @@ RAbundVector SAbundVector::getRAbundVector(){
 	try {
 		RAbundVector rav;
 	
-		for(int i=1;i<=data.size();i++){		
+		for(int i=1;i < data.size();i++){
 			for(int j=0;j<data[i];j++){
 				rav.push_back(i);
 			}
 		}
 		sort(rav.rbegin(), rav.rend());
-	
+
 		rav.setLabel(label);
 		return rav;
 	}

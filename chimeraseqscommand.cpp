@@ -180,7 +180,7 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 			temp = validParameter.validFile(parameters, "realign", false);			if (temp == "not found") { temp = "f"; }
 			realign = isTrue(temp); 
 			
-			search = validParameter.validFile(parameters, "search", false);			if (search == "not found") { temp = "distance"; }
+			search = validParameter.validFile(parameters, "search", false);			if (search == "not found") { search = "distance"; }
 			
 			temp = validParameter.validFile(parameters, "iters", false);	
 			if ((temp == "not found") && (method == "chimeraslayer")) { temp = "100"; }		
@@ -198,7 +198,7 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 			else if (temp == "not found") { temp = "20"; }
 			convert(temp, numwanted);
 
-			
+			if ((search != "distance") && (search != "blast") && (search != "kmer")) { mothurOut(search + " is not a valid search."); mothurOutEndLine(); abort = true;  }
 			
 			if (((method != "bellerophon")) && (templatefile == "")) { mothurOut("You must provide a template file with the pintail, ccode, chimeraslayer or chimeracheck methods."); mothurOutEndLine(); abort = true;  }
 			
@@ -239,7 +239,7 @@ void ChimeraSeqsCommand::help(){
 		mothurOut("The mincov parameter allows you to specify minimum coverage by closest matches found in template. Default is 70, meaning 70%. \n");
 		mothurOut("The minbs parameter allows you to specify minimum bootstrap support for calling a sequence chimeric. Default is 90, meaning 90%. \n");
 		mothurOut("The minsnp parameter allows you to specify percent of SNPs to sample on each side of breakpoint for computing bootstrap support (default: 10) \n");
-		mothurOut("The search parameter allows you to specify search method for finding the closest parent. Choices are distance and blast, default distance.  -used only by chimeraslayer. \n");
+		mothurOut("The search parameter allows you to specify search method for finding the closest parent. Choices are distance, blast, and kmer, default distance.  -used only by chimeraslayer. \n");
 		mothurOut("The realign parameter allows you to realign the query to the potential paretns. Choices are true or false, default false.  -used only by chimeraslayer. \n");
 		mothurOut("NOT ALL PARAMETERS ARE USED BY ALL METHODS. Please look below for method specifics.\n\n");
 		mothurOut("Details for each method: \n"); 
@@ -282,7 +282,7 @@ int ChimeraSeqsCommand::execute(){
 		else if (method == "pintail")			{		chimera = new Pintail(fastafile, outputDir);				}
 		else if (method == "ccode")				{		chimera = new Ccode(fastafile, outputDir);					}
 		else if (method == "chimeracheck")		{		chimera = new ChimeraCheckRDP(fastafile, outputDir);		}
-		else if (method == "chimeraslayer")		{		chimera = new ChimeraSlayer(search, realign);				}
+		else if (method == "chimeraslayer")		{		chimera = new ChimeraSlayer(search, realign, fastafile);	}
 		else { mothurOut("Not a valid method."); mothurOutEndLine(); return 0;		}
 		
 		//set user options
@@ -418,7 +418,8 @@ int ChimeraSeqsCommand::execute(){
 		//	else				 { fastafile = outputDir + getRootName(getSimpleName(fastafile)) + "filter.fasta"; }
 		
 		appendOutputFiles(tempHeader, outputFileName);
-		remove(tempHeader.c_str());
+		remove(outputFileName.c_str());
+		rename(tempHeader.c_str(), outputFileName.c_str());
 
 		for (int i = 0; i < templateSeqs.size(); i++)		{   delete templateSeqs[i];	}
 		

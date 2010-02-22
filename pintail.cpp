@@ -39,7 +39,8 @@ Pintail::~Pintail() {
 //***************************************************************************************************************
 void Pintail::doPrep() {
 	try {
-	
+		
+		mergedFilterString = "";
 		windowSizesTemplate.resize(templateSeqs.size(), window);
 		quantiles.resize(100);  //one for every percent mismatch
 		quantilesMembers.resize(100);  //one for every percent mismatch
@@ -72,14 +73,15 @@ void Pintail::doPrep() {
 			mothurOut("Done."); mothurOutEndLine();
 		}else				{   probabilityProfile = readFreq();	mothurOut("Done.");		  }
 		mothurOutEndLine();
-	
-		//quantiles are used to determine whether the de values found indicate a chimera
-		//if you have to calculate them, its time intensive because you are finding the de and deviation values for each 
-		//combination of sequences in the template
-		if (quanfile != "") {  quantiles = readQuantiles();  }
-		else {
+		
+		//make P into Q
+		for (int i = 0; i < probabilityProfile.size(); i++)  {	probabilityProfile[i] = 1 - probabilityProfile[i];  }  //cout << i << '\t' << probabilityProfile[i] << endl;
+		
+		bool reRead = false;
+		//create filter if needed for later
+		if (filter) {
+			reRead = true;
 			
-			//if user has not provided the quantiles and wants the mask we need to mask, but then delete and reread or we will mess up the best match process in getChimeras
 			if (seqMask != "") {
 				//mask templates
 				for (int i = 0; i < templateSeqs.size(); i++) {
@@ -87,11 +89,44 @@ void Pintail::doPrep() {
 				}
 			}
 			
-			if (filter) {
-				createFilter(templateSeqs);
-				for (int i = 0; i < templateSeqs.size(); i++) {  runFilter(templateSeqs[i]);  }
+			//read in all query seqs
+			ifstream in; 
+			openInputFile(fastafile, in);
+			
+			vector<Sequence*> tempQuerySeqs;
+			while(!in.eof()){
+				Sequence* s = new Sequence(in);
+				gobble(in);
+				
+				if (s->getName() != "") { tempQuerySeqs.push_back(s); }
 			}
-
+			in.close();
+			
+			vector<Sequence*> temp;
+			//merge query seqs and template seqs
+			temp = templateSeqs;
+			for (int i = 0; i < tempQuerySeqs.size(); i++) {  temp.push_back(tempQuerySeqs[i]);  }
+			
+			mergedFilterString = createFilter(temp, 0.5);
+			
+			//reread template seqs
+			for (int i = 0; i < tempQuerySeqs.size(); i++) { delete tempQuerySeqs[i];  }
+		}
+		
+		
+		//quantiles are used to determine whether the de values found indicate a chimera
+		//if you have to calculate them, its time intensive because you are finding the de and deviation values for each 
+		//combination of sequences in the template
+		if (quanfile != "") {  
+			quantiles = readQuantiles(); 
+		}else {
+			if ((!filter) && (seqMask != "")) { //if you didn't filter but you want to mask. if you filtered then you did mask first above.
+				reRead = true;
+				//mask templates
+				for (int i = 0; i < templateSeqs.size(); i++) {
+					decalc->runMask(templateSeqs[i]);
+				}
+			}
 			
 			mothurOut("Calculating quantiles for your template.  This can take a while...  I will output the quantiles to a .quan file that you can input them using the quantiles parameter next time you run this command.  Providing the .quan file will dramatically improve speed.    "); cout.flush();
 			if (processors == 1) { 
@@ -155,14 +190,14 @@ void Pintail::doPrep() {
 			}
 
 			mothurOut("Done."); mothurOutEndLine();
-			
-			//if mask reread template
-			if ((seqMask != "") || (filter)) {
-				for (int i = 0; i < templateSeqs.size(); i++)		{  delete templateSeqs[i];		}
-				templateSeqs = readSeqs(templateFileName);
-			}
-			
 		}
+		
+		if (reRead) {
+			for (int i = 0; i < templateSeqs.size(); i++) { delete templateSeqs[i];  }
+			templateSeqs.clear();
+			templateSeqs = readSeqs(templateFileName);
+		}
+
 		
 		//free memory
 		for (int i = 0; i < templateLines.size(); i++) { delete templateLines[i];  }
@@ -217,24 +252,22 @@ int Pintail::getChimeras(Sequence* query) {
 		querySeq = query;
 		trimmed.clear();
 		windowSizes = window;
-				
-		//find pairs
-		bestfit = findPairs(query);
 							
-		//make P into Q
-		for (int i = 0; i < probabilityProfile.size(); i++)  {	probabilityProfile[i] = 1 - probabilityProfile[i];  }  //cout << i << '\t' << probabilityProfile[i] << endl;
-	
-		//mask sequences if the user wants to 
+		//find pairs has to be done before a mask
+		bestfit = findPairs(query);
+		
+		//if they mask  
 		if (seqMask != "") {
 			decalc->runMask(query);
 			decalc->runMask(bestfit);
 		}
-		
-		if (filter) {
+
+		if (filter) { //must be done after a mask
 			runFilter(query);
 			runFilter(bestfit);
 		}
 		
+				
 		//trim seq
 		decalc->trimSeqs(query, bestfit, trimmed);  
 		
@@ -319,9 +352,7 @@ Sequence* Pintail::findPairs(Sequence* q) {
 		
 		Sequence* seqsMatches;  
 		
-		vector<Sequence*> copy = decalc->findClosest(q, templateSeqs, 1);
-		seqsMatches = copy[0];
-		
+		seqsMatches = decalc->findClosest(q, templateSeqs);
 		return seqsMatches;
 	
 	}

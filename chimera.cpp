@@ -11,10 +11,10 @@
 
 //***************************************************************************************************************
 //this is a vertical soft filter
-void Chimera::createFilter(vector<Sequence*> seqs) {
+string Chimera::createFilter(vector<Sequence*> seqs, float t) {
 	try {
 		filterString = "";
-		int threshold = int (0.5 * seqs.size());
+		int threshold = int (t * seqs.size());
 //cout << "threshhold = " << threshold << endl;
 		
 		vector<int> gaps;	gaps.resize(seqs[0]->getAligned().length(), 0);
@@ -53,6 +53,7 @@ void Chimera::createFilter(vector<Sequence*> seqs) {
 //cout << "filter = " << filterString << endl;	
 
 		mothurOut("Filter removed " + toString(numColRemoved) + " columns.");  mothurOutEndLine();
+		return filterString;
 	}
 	catch(exception& e) {
 		errorOut(e, "Chimera", "createFilter");
@@ -60,18 +61,25 @@ void Chimera::createFilter(vector<Sequence*> seqs) {
 	}
 }
 //***************************************************************************************************************
-void Chimera::runFilter(Sequence* seq) {
+map<int, int> Chimera::runFilter(Sequence* seq) {
 	try {
-		
+		map<int, int> maskMap;
 		string seqAligned = seq->getAligned();
 		string newAligned = "";
+		int count = 0;
 			
 		for (int j = 0; j < seqAligned.length(); j++) {
 			//if this spot is a gap
-			if (filterString[j] == '1') { newAligned += seqAligned[j]; }
+			if (filterString[j] == '1') { 
+				newAligned += seqAligned[j]; 
+				maskMap[count] = j;
+				count++;
+			}
 		}
 			
 		seq->setAligned(newAligned);
+		
+		return maskMap;
 	}
 	catch(exception& e) {
 		errorOut(e, "Chimera", "runFilter");

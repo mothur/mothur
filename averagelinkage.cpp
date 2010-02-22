@@ -38,15 +38,8 @@ bool AverageLinkage::updateDistance(MatData& colCell, MatData& rowCell) {
 			saveCol = smallCol;
 		}
 		
-		float oldColCell = colCell->dist;
-		
 		colCell->dist = (colBin * colCell->dist + rowBin * rowCell->dist) / totalBin;
 		
-		//warn user if merge with value above cutoff produces a value below cutoff
-		if ((colCell->dist < cutoff) && ((oldColCell > cutoff) || (rowCell->dist > cutoff)) ) {
-			mothurOut("Warning: merging " + toString(oldColCell) + " with " + toString(rowCell->dist) + ", new value = " + toString(colCell->dist) + ". Results will differ from those if cutoff was used in the read.dist command."); mothurOutEndLine();
-		}
-
 		return(true);
 	}
 	catch(exception& e) {
