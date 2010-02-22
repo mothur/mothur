@@ -23,12 +23,13 @@
 class ChimeraSlayer : public Chimera {
 	
 	public:
-		ChimeraSlayer(string, bool);	
+		ChimeraSlayer(string, bool, string);	
 		~ChimeraSlayer();
 		
 		int getChimeras(Sequence*);
 		void print(ostream&);
 		void printHeader(ostream&);
+		void doPrep();
 		
 	private:
 		Sequence* querySeq;
@@ -36,13 +37,15 @@ class ChimeraSlayer : public Chimera {
 		Maligner* maligner;
 		Slayer* slayer;
 		map<int, int>  spotMap;
+		Database* databaseRight;
+		Database* databaseLeft;
 		
 		vector<data_struct>  chimeraResults;
-		string chimeraFlags, searchMethod;
-		string fastafile;
+		string chimeraFlags, searchMethod, fastafile;
 		bool realign;
 	
 		void printBlock(data_struct, ostream&);
+		
 };
 
 /************************************************************************/

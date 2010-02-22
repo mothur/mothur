@@ -11,6 +11,7 @@
  
 #include "decalc.h"
 #include "chimera.h"
+#include "database.hpp"
 
 /***********************************************************************/
 //This class was modeled after the chimeraMaligner written by the Broad Institute
@@ -19,7 +20,7 @@ class Maligner {
 
 	public:
 		
-		Maligner(vector<Sequence*>, int, int, int, float, int, int, string);
+		Maligner(vector<Sequence*>, int, int, int, float, int, int, string, Database*, Database*);
 		~Maligner() {};
 		
 		string getResults(Sequence*, DeCalculator*);
@@ -35,7 +36,10 @@ class Maligner {
 		string searchMethod;
 		float minDivR, percentIdenticalQueryChimera;
 		vector<results> outputResults;
+		vector<int> indexes;  //stores index into template seqs of the refSeqs, so we can return the whole sequence rather than the trimmed and filtered one
 		map<int, int> spotMap;
+		Database* databaseLeft;
+		Database* databaseRight;
 		
 		vector<Sequence*> minCoverageFilter(vector<Sequence*>);  //removes top matches that do not have minimum coverage with query.
 		int computeChimeraPenalty();
@@ -49,6 +53,7 @@ class Maligner {
 		float computePercentID(string, string);
 		string chimeraMaligner(int, DeCalculator*);
 		vector<Sequence*> getBlastSeqs(Sequence*, int);
+		vector<Sequence*> getKmerSeqs(Sequence*, int);
 		
 };
 

@@ -143,7 +143,7 @@ RAbundVector SharedSAbundVector::getRAbundVector(){
 	try {
 		RAbundVector rav;
 	
-		for(int i=1;i<=data.size();i++){		
+		for(int i=1;i<data.size();i++){		
 			for(int j=0;j<data[i].abundance;j++){
 				rav.push_back(i);
 			}
@@ -191,7 +191,7 @@ SharedRAbundVector SharedSAbundVector::getSharedRAbundVector(){
 	try {
 		SharedRAbundVector rav;
 		
-		for(int i=1;i<=data.size();i++){		
+		for(int i=1;i<data.size();i++){		
 			for(int j=0;j<data[i].abundance;j++){
 				rav.push_back(i, data[i].group);
 			}

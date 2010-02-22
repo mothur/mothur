@@ -93,12 +93,21 @@ int main(int argc, char *argv[]){
 			input = argv[1];
 
 			if (input[0] == '#') {
+				mothurOutJustToLog("Script Mode");
+				mothurOutEndLine(); mothurOutEndLine();
+
 				mothur = new ScriptEngine(argv[0], argv[1]);
 			}else{
+				mothurOutJustToLog("Batch Mode");
+				mothurOutEndLine(); mothurOutEndLine();
+				
 				mothur = new BatchEngine(argv[0], argv[1]);
 			}
 		}
 		else{
+			mothurOutJustToLog("Interactive Mode");
+			mothurOutEndLine(); mothurOutEndLine();
+			
 			mothur = new InteractEngine(argv[0]);	
 		}
 		

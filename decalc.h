@@ -39,7 +39,8 @@ class DeCalculator {
 		DeCalculator() {};
 		~DeCalculator() {};
 		
-		vector<Sequence*> findClosest(Sequence*, vector<Sequence*>, int);  //takes querySeq, a reference db and numWanted - returns indexes to closest seqs in db
+		vector<Sequence*> findClosest(Sequence*, vector<Sequence*>, int&, vector<int>&);  //takes querySeq, a reference db, numWanted and indexes 
+		Sequence* findClosest(Sequence*, vector<Sequence*>);
 		set<int> getPos() {  return h;  }
 		void setMask(string); 
 		void setAlignmentLength(int l) {  alignLength = l;  }

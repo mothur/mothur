@@ -118,7 +118,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n) {
 		system(blastCommand.c_str());
 		
 		ifstream m8FileHandle;
-		openInputFile(blastFileName, m8FileHandle);
+		openInputFile(blastFileName, m8FileHandle, "no error");
 	
 		string dummy;
 		int templateAccession;
@@ -132,9 +132,10 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n) {
 			
 			gobble(m8FileHandle);
 			topMatches.push_back(templateAccession);
+//cout << templateAccession << endl;
 		}
 		m8FileHandle.close();
-		
+//cout << "\n\n" ;		
 		return topMatches;
 	}
 	catch(exception& e) {

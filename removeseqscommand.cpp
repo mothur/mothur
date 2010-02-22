@@ -22,7 +22,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","name", "group", "alignreport", "accnos", "list","outputdir","inputdir" };
+			string Array[] =  {"fasta","name", "group", "alignreport", "accnos", "list","outputdir","inputdir", "dups" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -119,10 +119,17 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option){
 			if (listfile == "not open") { abort = true; }
 			else if (listfile == "not found") {  listfile = "";  }
 			
+			string usedDups = "true";
+			string temp = validParameter.validFile(parameters, "dups", false);	if (temp == "not found") { temp = "false"; usedDups = ""; }
+			dups = isTrue(temp);
+			
 			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == ""))  { mothurOut("You must provide one of the following: fasta, name, group, alignreport or list."); mothurOutEndLine(); abort = true; }
 			
 			int okay = 2;
 			if (outputDir != "") { okay++; }
+			if (usedDups != "") { okay++;  }
+			
+			if ((usedDups != "") && (namefile == "")) {  mothurOut("You may only use dups with the name option."); mothurOutEndLine();  abort = true; }
 			
 			if (parameters.size() > okay) { mothurOut("You may only enter one of the following: fasta, name, group, alignreport, or list."); mothurOutEndLine(); abort = true;  }
 		}
@@ -139,7 +146,8 @@ void RemoveSeqsCommand::help(){
 	try {
 		mothurOut("The remove.seqs command reads an .accnos file and one of the following file types: fasta, name, group, list or alignreport file.\n");
 		mothurOut("It outputs a file containing the sequences NOT in the .accnos file.\n");
-		mothurOut("The remove.seqs command parameters are accnos, fasta, name, group, list and alignreport.  You must provide accnos and one of the other parameters.\n");
+		mothurOut("The remove.seqs command parameters are accnos, fasta, name, group, list, alignreport and dups.  You must provide accnos and one of the file parameters.\n");
+		mothurOut("The dups parameter allows you to remove the entire line from a name file if you remove any name from the line. default=false. If dups=true, then remove.seqs outputs a new .accnos file containing all the sequences removed. \n");
 		mothurOut("The remove.seqs command should be in the following format: remove.seqs(accnos=yourAccnos, fasta=yourFasta).\n");
 		mothurOut("Example remove.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n");
 		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
@@ -288,7 +296,12 @@ void RemoveSeqsCommand::readName(){
 	try {
 		if (outputDir == "") {  outputDir += hasPath(namefile);  }
 		string outputFileName = getRootName(namefile) + "pick" + getExtension(namefile);
+		string outputFileName2 = getRootName(namefile) + "dups.accnos";
 
+		ofstream out2;
+		if (dups) {	 openOutputFile(outputFileName2, out2);	}
+		bool wroteDups = false;
+		
 		ofstream out;
 		openOutputFile(outputFileName, out);
 
@@ -322,37 +335,46 @@ void RemoveSeqsCommand::readName(){
 				}
 			}
 			
-			//if the name in the first column is in the set then print it and any other names in second column also in set
-			if (names.count(firstCol) == 0) {
-			
-				wroteSomething = true;
-				
-				out << firstCol << '\t';
-				
-				//you know you have at least one valid second since first column is valid
-				for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
-				out << validSecond[validSecond.size()-1] << endl;
-			
-			//make first name in set you come to first column and then add the remaining names to second column
+			if ((dups) && (validSecond.size() != parsedNames.size())) { 
+				wroteDups = true;
+				for (int i = 0; i < parsedNames.size(); i++) {  out2 << parsedNames[i] << endl;  }
 			}else {
-				
-				//you want part of this row
-				if (validSecond.size() != 0) {
-				
+					//if the name in the first column is in the set then print it and any other names in second column also in set
+				if (names.count(firstCol) == 0) {
+					
 					wroteSomething = true;
 					
-					out << validSecond[0] << '\t';
-				
+					out << firstCol << '\t';
+					
 					//you know you have at least one valid second since first column is valid
 					for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
 					out << validSecond[validSecond.size()-1] << endl;
+					
+					//make first name in set you come to first column and then add the remaining names to second column
+				}else {
+					
+					//you want part of this row
+					if (validSecond.size() != 0) {
+						
+						wroteSomething = true;
+						
+						out << validSecond[0] << '\t';
+						
+						//you know you have at least one valid second since first column is valid
+						for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
+						out << validSecond[validSecond.size()-1] << endl;
+					}
 				}
 			}
-			
 			gobble(in);
 		}
 		in.close();
 		out.close();
+		
+		if (dups) { out2.close();  }
+		if (wroteDups == false) {
+			remove(outputFileName2.c_str()); 
+		}
 		
 		if (wroteSomething == false) {
 			mothurOut("Your file contains only sequences from the .accnos file."); mothurOutEndLine();

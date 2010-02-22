@@ -216,6 +216,10 @@ void Cluster::update(){
 		for (int i=nColCells-1;i>=0;i--) {
 			if (found[i] == 0) {
 				removeCell(colCells[i], -1, i);
+cout << "smallRow = " << smallRow+1 << " smallCol = " << smallCol+1 << endl;
+				if (!((colCells[i]->row == smallRow) && (colCells[i]->column == smallCol))) {
+					mothurOut("Warning: merging " + toString(colCells[i]->row+1)  + " " + toString(colCells[i]->column+1) + " distance " + toString(colCells[i]->dist) + " value above cutoff. Results will differ from those if cutoff was used in the read.dist command."); mothurOutEndLine();
+				}
 			}
 		}
 	}
