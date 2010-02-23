@@ -40,7 +40,8 @@ private:
 	
 	string blastfile, method, namefile, overlapFile, distFile, outputDir;
 	ofstream sabundFile, rabundFile, listFile;
-	float cutoff, penalty;
+	double cutoff;
+	float penalty;
 	int precision, length, precisionLength;
 	bool abort, minWanted, hclusterWanted, merge;
 	

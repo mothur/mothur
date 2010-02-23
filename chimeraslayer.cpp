@@ -118,7 +118,7 @@ void ChimeraSlayer::printHeader(ostream& out) {
 	out << "Name\tLeftParent\tRightParent\tDivQLAQRB\tPerIDQLAQRB\tBootStrapA\tDivQLBQRA\tPerIDQLBQRA\tBootStrapB\tFlag\tLeftWindow\tRightWindow\n";
 }
 //***************************************************************************************************************
-void ChimeraSlayer::print(ostream& out) {
+void ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 	try {
 		if (chimeraFlags == "yes") {
 			string chimeraFlag = "no";
@@ -130,6 +130,7 @@ void ChimeraSlayer::print(ostream& out) {
 			if (chimeraFlag == "yes") {	
 				if ((chimeraResults[0].bsa >= minBS) || (chimeraResults[0].bsb >= minBS)) {
 					mothurOut(querySeq->getName() + "\tyes"); mothurOutEndLine();
+					outAcc << querySeq->getName() << endl;
 				}
 			}
 			

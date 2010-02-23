@@ -35,14 +35,14 @@ private:
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;
 	
-	int driver(linePair*, string, string);
-	void createProcesses(string, string);
+	int driver(linePair*, string, string, string);
+	void createProcesses(string, string, string);
 	void appendOutputFiles(string, string); 
 
 	bool abort;
 	string method, fastafile, templatefile, consfile, quanfile, maskfile, namefile, outputDir, search;
 	bool filter, correction, svg, printAll, realign;
-	int processors, midpoint, averageLeft, averageRight, window, iters, increment, numwanted, ksize, match, mismatch, parents, minSimilarity, minCoverage, minBS, minSNP, numSeqs;
+	int processors, midpoint, averageLeft, averageRight, window, iters, increment, numwanted, ksize, match, mismatch, parents, minSimilarity, minCoverage, minBS, minSNP, numSeqs, templateSeqsLength;
 	float divR;
 	Chimera* chimera;
 	

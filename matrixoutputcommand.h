@@ -42,7 +42,7 @@ private:
 	InputData* input;
 	ValidCalculators* validCalculator;
 	vector<SharedRAbundVector*> lookup;
-	string exportFileName;
+	string exportFileName, output;
 	int numGroups;
 	ofstream out;
 

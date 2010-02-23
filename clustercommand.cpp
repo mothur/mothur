@@ -158,7 +158,7 @@ int ClusterCommand::execute(){
 
 			loops++;
 
-			cluster->update();
+			cluster->update(cutoff);
 			float dist = matrix->getSmallDist();
 			float rndDist = roundDist(dist, precision);
 

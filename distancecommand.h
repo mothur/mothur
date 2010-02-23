@@ -34,7 +34,7 @@ private:
 	Dist* distCalculator;
 	SequenceDB alignDB;
 
-	string countends, phylip, fastafile, calc, outputDir;
+	string countends, output, fastafile, calc, outputDir;
 	int processors;
 	float cutoff;
 	map<int, int> processIDS;   //end line, processid
@@ -46,6 +46,7 @@ private:
 	//void appendFiles(string, string);
 	void createProcesses(string);
 	int driver(/*Dist*, SequenceDB, */int, int, string, float);
+	void convertMatrix(string);
 
 };
 

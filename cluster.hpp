@@ -14,7 +14,7 @@ class Cluster {
 	
 public:
 	Cluster(RAbundVector*, ListVector*, SparseMatrix*, float);
-    virtual void update();				
+    virtual void update(double&);				
 	virtual string getTag() = 0;
 	virtual void setMapWanted(bool m);  
 	virtual map<string, int> getSeqtoBin()  {  return seq2Bin;	}

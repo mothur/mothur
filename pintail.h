@@ -28,7 +28,7 @@ class Pintail : public Chimera {
 		~Pintail();
 		
 		int getChimeras(Sequence*);
-		void print(ostream&);
+		void print(ostream&, ostream&);
 		
 		void setCons(string c)		{ consfile = c;  }
 		void setQuantiles(string q) { quanfile = q;  }
@@ -42,7 +42,7 @@ class Pintail : public Chimera {
 		string fastafile, consfile;
 		
 		vector<linePair*> templateLines;
-		Sequence*querySeq;
+		Sequence* querySeq;
 				
 		Sequence* bestfit;  //closest match to query in template
 		

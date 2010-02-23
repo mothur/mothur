@@ -191,7 +191,7 @@ int MGClusterCommand::execute(){
 			//cluster using cluster classes
 			while (distMatrix->getSmallDist() < cutoff && distMatrix->getNNodes() > 0){
 				
-				cluster->update();
+				cluster->update(cutoff);
 				float dist = distMatrix->getSmallDist();
 				float rndDist = roundDist(dist, precision);
 				

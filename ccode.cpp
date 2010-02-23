@@ -35,7 +35,7 @@ void Ccode::printHeader(ostream& out) {
 	out << "For full window mapping info refer to " << mapInfo << endl << endl;
 }
 //***************************************************************************************************************
-void Ccode::print(ostream& out) {
+void Ccode::print(ostream& out, ostream& outAcc) {
 	try {
 		
 		mothurOutEndLine();
@@ -112,6 +112,7 @@ void Ccode::print(ostream& out) {
 			
 		if (results) {
 			mothurOut(querySeq->getName() + " was found have at least one chimeric window."); mothurOutEndLine();
+			outAcc << querySeq->getName() << endl;
 		}
 
 		//free memory

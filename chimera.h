@@ -114,6 +114,7 @@ class Chimera {
 		virtual void setTemplateSeqs(vector<Sequence*> t)	{	templateSeqs = t;	}
 		virtual bool getUnaligned()				{	return unaligned;			}
 		virtual void setTemplateFile(string t)	{   templateFileName = t;	}
+		virtual int getLength()					{   return length;	}
 		
 		virtual void setCons(string){};
 		virtual void setQuantiles(string){};
@@ -127,14 +128,14 @@ class Chimera {
 		virtual void printHeader(ostream&){};
 		virtual int getChimeras(Sequence*){ return 0; }
 		virtual int getChimeras(){ return 0; }
-		virtual void print(ostream&){};	
+		virtual void print(ostream&, ostream&){};	
 		
 		
 	protected:
 		
 		vector<Sequence*> templateSeqs;
 		bool filter, correction, svg, unaligned;
-		int processors, window, increment, numWanted, kmerSize, match, misMatch, minSim, minCov, minBS, minSNP, parents, iters;
+		int processors, window, increment, numWanted, kmerSize, match, misMatch, minSim, minCov, minBS, minSNP, parents, iters, length;
 		float divR;
 		string seqMask, quanfile, filterString, name, outputDir, templateFileName;
 		Sequence* getSequence(string);  //find sequence from name	

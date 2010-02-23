@@ -15,7 +15,7 @@
 /***********************************************************************/
 
 Cluster::Cluster(RAbundVector* rav, ListVector* lv, SparseMatrix* dm, float c) :
-rabund(rav), list(lv), dMatrix(dm), cutoff(c)
+rabund(rav), list(lv), dMatrix(dm)
 {
 /*
 	cout << "sizeof(MatData): " << sizeof(MatData) << endl;
@@ -56,6 +56,9 @@ rabund(rav), list(lv), dMatrix(dm), cutoff(c)
 		seqVec[currentCell->column].push_back(currentCell);
 	}
 	mapWanted = false;  //set to true by mgcluster to speed up overlap merge
+	
+	//save so you can modify as it changes in average neighbor
+	cutoff = c;
 }
 
 /***********************************************************************/
@@ -170,11 +173,12 @@ void Cluster::clusterNames(){
 //This function clusters based on the method of the derived class
 //At the moment only average and complete linkage are covered, because
 //single linkage uses a different approach.
-void Cluster::update(){
+void Cluster::update(double& cutOFF){
 	try {
 		getRowColCells();	
 	
-		vector<int> found(nColCells, 0);
+		vector<int> foundCol(nColCells, 0);
+
 		int search;
 		bool changed;
 
@@ -187,11 +191,13 @@ void Cluster::update(){
 				} else {
 					search = rowCells[i]->row;
 				}
-		
+				
+				bool merged = false;
 				for (int j=0;j<nColCells;j++) {
-					if (!((colCells[j]->row == smallRow) && (colCells[j]->column == smallCol))) {
+					if (!((colCells[j]->row == smallRow) && (colCells[j]->column == smallCol))) { //if you are not hte smallest distance
 						if (colCells[j]->row == search || colCells[j]->column == search) {
-							found[j] = 1;
+							foundCol[j] = 1;
+							merged = true;
 							changed = updateDistance(colCells[j], rowCells[i]);
 							// If the cell's distance changed and it had the same distance as 
 							// the smallest distance, invalidate the mins vector in SparseMatrix
@@ -203,9 +209,16 @@ void Cluster::update(){
 							}
 							break;
 						}
-					}
+					}		
 				}
-				removeCell(rowCells[i], i , -1);
+				//if not merged it you need it for warning 
+				if (!merged) {  
+					mothurOut("Warning: trying to merge cell " + toString(rowCells[i]->row+1) + " " + toString(rowCells[i]->column+1) + " distance " + toString(rowCells[i]->dist) + " with value above cutoff. Results may vary from using cutoff at cluster command instead of read.dist."); mothurOutEndLine(); 
+					if (cutOFF > rowCells[i]->dist) {  cutOFF = rowCells[i]->dist;  mothurOut("changing cutoff to " + toString(cutOFF));  mothurOutEndLine(); }
+
+				}
+				removeCell(rowCells[i], i , -1);  
+				
 			}
 		}
 		clusterBins();
@@ -214,12 +227,12 @@ void Cluster::update(){
 		// Special handling for singlelinkage case, not sure whether this
 		// could be avoided
 		for (int i=nColCells-1;i>=0;i--) {
-			if (found[i] == 0) {
-				removeCell(colCells[i], -1, i);
-cout << "smallRow = " << smallRow+1 << " smallCol = " << smallCol+1 << endl;
+			if (foundCol[i] == 0) {
 				if (!((colCells[i]->row == smallRow) && (colCells[i]->column == smallCol))) {
-					mothurOut("Warning: merging " + toString(colCells[i]->row+1)  + " " + toString(colCells[i]->column+1) + " distance " + toString(colCells[i]->dist) + " value above cutoff. Results will differ from those if cutoff was used in the read.dist command."); mothurOutEndLine();
+					mothurOut("Warning: merging cell " + toString(colCells[i]->row+1) + " " + toString(colCells[i]->column+1) + " distance " + toString(colCells[i]->dist) + " value above cutoff. Results may vary from using cutoff at cluster command instead of read.dist."); mothurOutEndLine();
+					if (cutOFF > colCells[i]->dist) {  cutOFF = colCells[i]->dist;  mothurOut("changing cutoff to " + toString(cutOFF));  mothurOutEndLine(); }
 				}
+				removeCell(colCells[i], -1, i);
 			}
 		}
 	}

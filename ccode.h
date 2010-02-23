@@ -28,7 +28,7 @@ class Ccode : public Chimera {
 		~Ccode();
 		
 		int getChimeras(Sequence* query);
-		void print(ostream&);
+		void print(ostream&, ostream&);
 		void printHeader(ostream&);		
 	private:
 	
