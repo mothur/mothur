@@ -14,8 +14,8 @@
 
 /***********************************************************************/
 
-Cluster::Cluster(RAbundVector* rav, ListVector* lv, SparseMatrix* dm, float c) :
-rabund(rav), list(lv), dMatrix(dm)
+Cluster::Cluster(RAbundVector* rav, ListVector* lv, SparseMatrix* dm, float c, string m) :
+rabund(rav), list(lv), dMatrix(dm), method(m)
 {
 /*
 	cout << "sizeof(MatData): " << sizeof(MatData) << endl;
@@ -212,7 +212,7 @@ void Cluster::update(double& cutOFF){
 					}		
 				}
 				//if not merged it you need it for warning 
-				if (!merged) {  
+				if ((!merged) && (method == "average")) {  
 					mothurOut("Warning: trying to merge cell " + toString(rowCells[i]->row+1) + " " + toString(rowCells[i]->column+1) + " distance " + toString(rowCells[i]->dist) + " with value above cutoff. Results may vary from using cutoff at cluster command instead of read.dist."); mothurOutEndLine(); 
 					if (cutOFF > rowCells[i]->dist) {  cutOFF = rowCells[i]->dist;  mothurOut("changing cutoff to " + toString(cutOFF));  mothurOutEndLine(); }
 
@@ -228,9 +228,11 @@ void Cluster::update(double& cutOFF){
 		// could be avoided
 		for (int i=nColCells-1;i>=0;i--) {
 			if (foundCol[i] == 0) {
-				if (!((colCells[i]->row == smallRow) && (colCells[i]->column == smallCol))) {
-					mothurOut("Warning: merging cell " + toString(colCells[i]->row+1) + " " + toString(colCells[i]->column+1) + " distance " + toString(colCells[i]->dist) + " value above cutoff. Results may vary from using cutoff at cluster command instead of read.dist."); mothurOutEndLine();
-					if (cutOFF > colCells[i]->dist) {  cutOFF = colCells[i]->dist;  mothurOut("changing cutoff to " + toString(cutOFF));  mothurOutEndLine(); }
+				if (method == "average") {
+					if (!((colCells[i]->row == smallRow) && (colCells[i]->column == smallCol))) {
+						mothurOut("Warning: merging cell " + toString(colCells[i]->row+1) + " " + toString(colCells[i]->column+1) + " distance " + toString(colCells[i]->dist) + " value above cutoff. Results may vary from using cutoff at cluster command instead of read.dist."); mothurOutEndLine();
+						if (cutOFF > colCells[i]->dist) {  cutOFF = colCells[i]->dist;  mothurOut("changing cutoff to " + toString(cutOFF));  mothurOutEndLine(); }
+					}
 				}
 				removeCell(colCells[i], -1, i);
 			}
