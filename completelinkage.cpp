@@ -3,8 +3,8 @@
 
 /***********************************************************************/
 
-CompleteLinkage::CompleteLinkage(RAbundVector* rav, ListVector* lv, SparseMatrix* dm, float c) :
-	Cluster(rav, lv, dm, c)
+CompleteLinkage::CompleteLinkage(RAbundVector* rav, ListVector* lv, SparseMatrix* dm, float c, string s) :
+	Cluster(rav, lv, dm, c, s)
 {}
 
 /***********************************************************************/

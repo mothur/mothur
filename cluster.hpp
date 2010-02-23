@@ -13,7 +13,7 @@ typedef vector<MatData> MatVec;
 class Cluster {
 	
 public:
-	Cluster(RAbundVector*, ListVector*, SparseMatrix*, float);
+	Cluster(RAbundVector*, ListVector*, SparseMatrix*, float, string);
     virtual void update(double&);				
 	virtual string getTag() = 0;
 	virtual void setMapWanted(bool m);  
@@ -39,6 +39,7 @@ protected:
 	bool mapWanted;
 	float cutoff;
 	map<string, int> seq2Bin;
+	string method;
 	
 	vector<MatVec> seqVec;		// contains vectors of cells related to a certain sequence
 	MatVec rowCells;
@@ -51,7 +52,7 @@ protected:
 
 class CompleteLinkage : public Cluster {
 public:
-	CompleteLinkage(RAbundVector*, ListVector*, SparseMatrix*, float);
+	CompleteLinkage(RAbundVector*, ListVector*, SparseMatrix*, float, string);
 	bool updateDistance(MatData& colCell, MatData& rowCell);
 	string getTag();
 	
@@ -63,7 +64,7 @@ private:
 
 class SingleLinkage : public Cluster {
 public:
-	SingleLinkage(RAbundVector*, ListVector*, SparseMatrix*, float);
+	SingleLinkage(RAbundVector*, ListVector*, SparseMatrix*, float, string);
     void update();
 	bool updateDistance(MatData& colCell, MatData& rowCell);
 	string getTag();
@@ -76,7 +77,7 @@ private:
 
 class AverageLinkage : public Cluster {
 public:
-	AverageLinkage(RAbundVector*, ListVector*, SparseMatrix*, float);
+	AverageLinkage(RAbundVector*, ListVector*, SparseMatrix*, float, string);
 	bool updateDistance(MatData& colCell, MatData& rowCell);
 	string getTag();
 	
