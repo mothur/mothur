@@ -27,7 +27,7 @@ Bellerophon::Bellerophon(string name, string o)  {
 }
 
 //***************************************************************************************************************
-void Bellerophon::print(ostream& out) {
+void Bellerophon::print(ostream& out, ostream& outAcc) {
 	try {
 		int above1 = 0;
 		out << "Name\tScore\tLeft\tRight\t" << endl;
@@ -38,6 +38,7 @@ void Bellerophon::print(ostream& out) {
 			//calc # of seqs with preference above 1.0
 			if (pref[i].score[0] > 1.0) { 
 				above1++; 
+				outAcc << pref[i].name << endl;
 				mothurOut(pref[i].name + " is a suspected chimera at breakpoint " + toString(pref[i].midpoint)); mothurOutEndLine();
 				mothurOut("It's score is " + toString(pref[i].score[0]) + " with suspected left parent " + pref[i].leftParent[0] + " and right parent " + pref[i].rightParent[0]); mothurOutEndLine();
 			}

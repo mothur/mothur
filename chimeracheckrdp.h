@@ -29,7 +29,7 @@ class ChimeraCheckRDP : public Chimera {
 		~ChimeraCheckRDP();
 		
 		int getChimeras(Sequence*);
-		void print(ostream&);
+		void print(ostream&, ostream&);
 		void doPrep();
 		
 	private:

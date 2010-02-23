@@ -29,7 +29,7 @@ class Bellerophon : public Chimera {
 		~Bellerophon() {};
 		
 		int getChimeras();
-		void print(ostream&);
+		void print(ostream&, ostream&);
 		
 		void setCons(string){};
 		void setQuantiles(string) {};

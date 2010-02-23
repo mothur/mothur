@@ -24,7 +24,7 @@ ChimeraCheckRDP::~ChimeraCheckRDP() {
 	}
 }	
 //***************************************************************************************************************
-void ChimeraCheckRDP::print(ostream& out) {
+void ChimeraCheckRDP::print(ostream& out, ostream& outAcc) {
 	try {
 		
 		mothurOut("Processing: " + querySeq->getName()); mothurOutEndLine();

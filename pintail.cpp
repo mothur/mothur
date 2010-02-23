@@ -80,15 +80,9 @@ void Pintail::doPrep() {
 		bool reRead = false;
 		//create filter if needed for later
 		if (filter) {
-			reRead = true;
 			
-			if (seqMask != "") {
-				//mask templates
-				for (int i = 0; i < templateSeqs.size(); i++) {
-					decalc->runMask(templateSeqs[i]);
-				}
-			}
-			
+cout << "filter" << endl;			
+						
 			//read in all query seqs
 			ifstream in; 
 			openInputFile(fastafile, in);
@@ -106,11 +100,20 @@ void Pintail::doPrep() {
 			//merge query seqs and template seqs
 			temp = templateSeqs;
 			for (int i = 0; i < tempQuerySeqs.size(); i++) {  temp.push_back(tempQuerySeqs[i]);  }
-			
+cout << temp.size() << endl;	
+			if (seqMask != "") {
+			    reRead = true;
+	cout << "masked "  << seqMask << endl;
+				//mask templates
+				for (int i = 0; i < temp.size(); i++) {
+					decalc->runMask(temp[i]);
+				}
+			}
+
 			mergedFilterString = createFilter(temp, 0.5);
-			
+	cout << "here" << endl;		
 			//reread template seqs
-			for (int i = 0; i < tempQuerySeqs.size(); i++) { delete tempQuerySeqs[i];  }
+			//for (int i = 0; i < tempQuerySeqs.size(); i++) { delete tempQuerySeqs[i];  }
 		}
 		
 		
@@ -128,6 +131,13 @@ void Pintail::doPrep() {
 				}
 			}
 			
+			if (filter) { 
+				reRead = true;
+				for (int i = 0; i < templateSeqs.size(); i++) {
+					runFilter(templateSeqs[i]);
+				}
+			}
+			
 			mothurOut("Calculating quantiles for your template.  This can take a while...  I will output the quantiles to a .quan file that you can input them using the quantiles parameter next time you run this command.  Providing the .quan file will dramatically improve speed.    "); cout.flush();
 			if (processors == 1) { 
 				quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, 0, templateSeqs.size());
@@ -139,19 +149,20 @@ void Pintail::doPrep() {
 			
 			if ((!filter) && (seqMask == "")) {
 				noOutliers = outputDir + getRootName(getSimpleName(templateFileName)) + "pintail.quan";
-			}else if ((filter) && (seqMask == "")) { 
-				noOutliers = outputDir + getRootName(getSimpleName(templateFileName)) + "pintail.filtered.quan";
 			}else if ((!filter) && (seqMask != "")) { 
 				noOutliers = outputDir + getRootName(getSimpleName(templateFileName)) + "pintail.masked.quan";
 			}else if ((filter) && (seqMask != "")) { 
-				noOutliers = outputDir + getRootName(getSimpleName(templateFileName)) + "pintail.filtered.masked.quan";
+				noOutliers = outputDir + getRootName(getSimpleName(templateFileName)) + "pintail.filtered." + getSimpleName(getRootName(fastafile)) + "masked.quan";
+			}else if ((filter) && (seqMask == "")) { 
+				noOutliers = outputDir + getRootName(getSimpleName(templateFileName)) + "pintail.filtered." + getSimpleName(getRootName(fastafile)) + "quan";
 			}
+
+
 
 						
 			decalc->removeObviousOutliers(quantilesMembers, templateSeqs.size());
 			
-			openOutputFile(noOutliers, out5);
-			
+			openOutputFile(noOutliers, out5); 			
 			//adjust quantiles
 			for (int i = 0; i < quantilesMembers.size(); i++) {
 				vector<float> temp;
@@ -209,7 +220,7 @@ void Pintail::doPrep() {
 	}
 }
 //***************************************************************************************************************
-void Pintail::print(ostream& out) {
+void Pintail::print(ostream& out, ostream& outAcc) {
 	try {
 		int index = ceil(deviation);
 		
@@ -227,6 +238,7 @@ void Pintail::print(ostream& out) {
 		out << querySeq->getName() << '\t' << "div: " << deviation << "\tstDev: " << DE << "\tchimera flag: " << chimera << endl;
 		if (chimera == "Yes") {
 			mothurOut(querySeq->getName() + "\tdiv: " + toString(deviation) + "\tstDev: " + toString(DE) + "\tchimera flag: " + chimera); mothurOutEndLine();
+			outAcc << querySeq->getName() << endl;
 		}
 		out << "Observed\t";
 		

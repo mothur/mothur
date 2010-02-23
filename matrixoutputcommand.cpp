@@ -36,7 +36,7 @@ MatrixOutputCommand::MatrixOutputCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"label","calc","groups","outputdir","inputdir"};
+			string Array[] =  {"label","calc","groups","outputdir","inputdir", "output"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -69,6 +69,9 @@ MatrixOutputCommand::MatrixOutputCommand(string option){
 				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
+			
+			output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "lt"; }
+			if ((output != "lt") && (output != "square")) { mothurOut(output + " is not a valid output form. Options are lt and square. I will use lt."); mothurOutEndLine(); output = "lt"; }
 			
 			//if the user has not specified any labels use the ones from read.otu
 			if (label == "") {  
@@ -136,10 +139,11 @@ MatrixOutputCommand::MatrixOutputCommand(string option){
 void MatrixOutputCommand::help(){
 	try {
 		mothurOut("The dist.shared command can only be executed after a successful read.otu command.\n");
-		mothurOut("The dist.shared command parameters are groups, calc and label.  No parameters are required.\n");
+		mothurOut("The dist.shared command parameters are groups, calc, output and label.  No parameters are required.\n");
 		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included used.\n");
 		mothurOut("The group names are separated by dashes. The label parameter allows you to select what distance levels you would like distance matrices created for, and is also separated by dashes.\n");
 		mothurOut("The dist.shared command should be in the following format: dist.shared(groups=yourGroups, calc=yourCalcs, label=yourLabels).\n");
+		mothurOut("The output parameter allows you to specify format of your distance matrix. Options are lt, and square. The default is lt.\n");
 		mothurOut("Example dist.shared(groups=A-B-C, calc=jabund-sorabund).\n");
 		mothurOut("The default value for groups is all the groups in your groupfile.\n");
 		mothurOut("The default value for calc is jclass and thetayc.\n");
@@ -262,17 +266,28 @@ int MatrixOutputCommand::execute(){
 void MatrixOutputCommand::printSims(ostream& out) {
 	try {
 		
-		//output column headers
+		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+		
+		//output num seqs
 		out << simMatrix.size() << endl;
 		
-		for (int m = 0; m < simMatrix.size(); m++)	{
-			out << lookup[m]->getGroup() << '\t';
-			for (int n = 0; n < m; n++)	{
-				out << simMatrix[m][n] << '\t'; 
+		if (output == "lt") {
+			for (int m = 0; m < simMatrix.size(); m++)	{
+				out << lookup[m]->getGroup() << '\t';
+				for (int n = 0; n < m; n++)	{
+					out << simMatrix[m][n] << '\t'; 
+				}
+				out << endl;
 			}
-			out << endl;
+		}else{
+			for (int m = 0; m < simMatrix.size(); m++)	{
+				out << lookup[m]->getGroup() << '\t';
+				for (int n = 0; n < simMatrix[m].size(); n++)	{
+					out << simMatrix[m][n] << '\t'; 
+				}
+				out << endl;
+			}
 		}
-
 	}
 	catch(exception& e) {
 		errorOut(e, "MatrixOutputCommand", "printSims");
@@ -315,7 +330,7 @@ void MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 						}
 					}
 					
-					exportFileName = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".dist";
+					exportFileName = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + "." + output + ".dist";
 					openOutputFile(exportFileName, out);
 					printSims(out);
 					out.close();

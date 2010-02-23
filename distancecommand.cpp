@@ -26,7 +26,7 @@ DistanceCommand::DistanceCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "phylip", "calc", "countends", "cutoff", "processors", "outputdir","inputdir"};
+			string Array[] =  {"fasta", "output", "calc", "countends", "cutoff", "processors", "outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -90,8 +90,9 @@ DistanceCommand::DistanceCommand(string option){
 			temp = validParameter.validFile(parameters, "processors", false);	if(temp == "not found"){	temp = "1"; }
 			convert(temp, processors); 
 			
-			phylip = validParameter.validFile(parameters, "phylip", false);		if(phylip == "not found"){	phylip = "F"; }
-	
+			output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "column"; }
+			
+			if ((output != "column") && (output != "lt") && (output != "square")) { mothurOut(output + " is not a valid output form. Options are column, lt and square. I will use column."); mothurOutEndLine(); output = "column"; }
 			
 			ValidCalculators validCalculator;
 			
@@ -137,11 +138,12 @@ DistanceCommand::~DistanceCommand(){
 void DistanceCommand::help(){
 	try {
 		mothurOut("The dist.seqs command reads a file containing sequences and creates a distance file.\n");
-		mothurOut("The dist.seqs command parameters are fasta, calc, countends, cutoff and processors.  \n");
+		mothurOut("The dist.seqs command parameters are fasta, calc, countends, output, cutoff and processors.  \n");
 		mothurOut("The fasta parameter is required.\n");
 		mothurOut("The calc parameter allows you to specify the method of calculating the distances.  Your options are: nogaps, onegap or eachgap. The default is onegap.\n");
 		mothurOut("The countends parameter allows you to specify whether to include terminal gaps in distance.  Your options are: T or F. The default is T.\n");
 		mothurOut("The cutoff parameter allows you to specify maximum distance to keep. The default is 1.0.\n");
+		mothurOut("The output parameter allows you to specify format of your distance matrix. Options are column, lt, and square. The default is column.\n");
 		mothurOut("The processors parameter allows you to specify number of processors to use.  The default is 1.\n");
 		mothurOut("The dist.seqs command should be in the following format: \n");
 		mothurOut("dist.seqs(fasta=yourFastaFile, calc=yourCalc, countends=yourEnds, cutoff= yourCutOff, processors=yourProcessors) \n");
@@ -165,14 +167,16 @@ int DistanceCommand::execute(){
 		
 		string outputFile;
 		
-		//doses the user want the phylip formatted file as well
-		if (isTrue(phylip) == true) {
+		if (output == "lt") { //does the user want lower triangle phylip formatted file 
 			outputFile = outputDir + getRootName(getSimpleName(fastafile)) + "phylip.dist";
 			remove(outputFile.c_str());
 			
 			//output numSeqs to phylip formatted dist file
-		}else { //user wants column format
+		}else if (output == "column") { //user wants column format
 			outputFile = outputDir + getRootName(getSimpleName(fastafile)) + "dist";
+			remove(outputFile.c_str());
+		}else { //assume square
+			outputFile = outputDir + getRootName(getSimpleName(fastafile)) + "square.dist";
 			remove(outputFile.c_str());
 		}
 				
@@ -204,6 +208,8 @@ int DistanceCommand::execute(){
 		ifstream inFASTA;
 		driver(0, numSeqs, outputFile, cutoff);
 #endif
+		
+		if (output == "square") {  convertMatrix(outputFile); }
 		
 		delete distCalculator;
 		
@@ -260,10 +266,10 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 		outFile.setf(ios::fixed, ios::showpoint);
 		outFile << setprecision(4);
 		
-		if(isTrue(phylip) && startLine == 0){	outFile << alignDB.getNumSeqs() << endl;	}
+		if((output == "lt") && startLine == 0){	outFile << alignDB.getNumSeqs() << endl;	}
 		
 		for(int i=startLine;i<endLine;i++){
-			if(isTrue(phylip))	{	
+			if(output == "lt")	{	
 				string name = alignDB.get(i).getName();
 				if (name.length() < 10) { //pad with spaces to make compatible
 					while (name.length() < 10) {  name += " ";  }
@@ -275,13 +281,18 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 				double dist = distCalculator->getDist();
 				
 				if(dist <= cutoff){
-					if (!isTrue(phylip)) { outFile << alignDB.get(i).getName() << ' ' << alignDB.get(j).getName() << ' ' << dist << endl; }
+					if (output == "column") { outFile << alignDB.get(i).getName() << ' ' << alignDB.get(j).getName() << ' ' << dist << endl; }
 				}
-				if (isTrue(phylip)) {  outFile << dist << '\t'; }
+				if (output == "lt") {  outFile << dist << '\t'; }
 				
+				if (output == "square") { //make a square column you can convert to square phylip
+					outFile << alignDB.get(i).getName() << '\t' << alignDB.get(j).getName() << '\t' << dist << endl;
+					outFile << alignDB.get(j).getName() << '\t' << alignDB.get(i).getName() << '\t' << dist << endl;
+				}
+
 			}
 			
-			if (isTrue(phylip) == true) { outFile << endl; }
+			if (output == "lt") { outFile << endl; }
 			
 			if(i % 100 == 0){
 				mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); mothurOutEndLine();
@@ -299,7 +310,90 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 		exit(1);
 	}
 }
+/**************************************************************************************************/
+void DistanceCommand::convertMatrix(string outputFile) {
+	try{
 
+		//sort file by first column so the distances for each row are together
+		string outfile = getRootName(outputFile) + "sorted.dist.temp";
+		
+		//use the unix sort 
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			string command = "sort -n " + outputFile + " -o " + outfile;
+			system(command.c_str());
+		#else //sort using windows sort
+			string command = "sort " + outputFile + " /O " + outfile;
+			system(command.c_str());
+		#endif
+		
+
+		//output to new file distance for each row and save positions in file where new row begins
+		ifstream in;
+		openInputFile(outfile, in);
+		
+		ofstream out;
+		openOutputFile(outputFile, out);
+		
+		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+
+		out << alignDB.getNumSeqs() << endl;
+		
+		//get first currentRow
+		string first, currentRow, second;
+		float dist;
+		map<string, float> rowDists; //take advantage of the fact that maps are already sorted by key 
+		map<string, float>::iterator it;
+		
+		in >> first;
+		currentRow = first;
+		
+		rowDists[first] = 0.00; //distance to yourself is 0.0
+		
+		in.seekg(0);
+		//openInputFile(outfile, in);
+		
+		while(!in.eof()) {
+			in >> first >> second >> dist; gobble(in);
+				
+			if (first != currentRow) {
+				//print out last row
+				out << currentRow << '\t'; //print name
+
+				//print dists
+				for (it = rowDists.begin(); it != rowDists.end(); it++) {
+					out << it->second << '\t';
+				}
+				out << endl;
+				
+				//start new row
+				currentRow = first;
+				rowDists.clear();
+				rowDists[first] = 0.00;
+				rowDists[second] = dist;
+			}else{
+				rowDists[second] = dist;
+			}
+		}
+		//print out last row
+		out << currentRow << '\t'; //print name
+				
+		//print dists
+		for (it = rowDists.begin(); it != rowDists.end(); it++) {
+			out << it->second << '\t';
+		}
+		out << endl;
+		
+		in.close();
+		out.close();
+		
+		remove(outfile.c_str());
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "DistanceCommand", "convertMatrix");
+		exit(1);
+	}
+}
 /**************************************************************************************************
 void DistanceCommand::appendFiles(string temp, string filename) {
 	try{
@@ -324,3 +418,5 @@ void DistanceCommand::appendFiles(string temp, string filename) {
 	}
 }
 /**************************************************************************************************/
+
+

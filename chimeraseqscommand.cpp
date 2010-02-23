@@ -311,15 +311,18 @@ int ChimeraSeqsCommand::execute(){
 		chimera->setIters(iters);
 		chimera->setTemplateFile(templatefile);
 
-		
+		string outputFileName = outputDir + getRootName(getSimpleName(fastafile)) + method + maskfile + ".chimeras";
+		string accnosFileName = outputDir + getRootName(getSimpleName(fastafile)) + method + maskfile + ".accnos";
+
 		
 		vector<Sequence*> templateSeqs;
 		if ((method != "bellerophon") && (method != "chimeracheck")) {   
 			templateSeqs = chimera->readSeqs(templatefile);   
 			if (chimera->getUnaligned()) { 
-				mothurOut("Your sequences need to be aligned when you use the chimeraslayer method."); mothurOutEndLine(); 
+				mothurOut("Your template sequences are different lengths, please correct."); mothurOutEndLine(); 
 				//free memory
 				for (int i = 0; i < templateSeqs.size(); i++)		{  delete templateSeqs[i];		}
+				delete chimera;
 				return 0; 
 			}
 			
@@ -329,17 +332,23 @@ int ChimeraSeqsCommand::execute(){
 		}else if (method == "bellerophon") {//run bellerophon separately since you need to read entire fastafile to run it
 			chimera->getChimeras();
 			
-			string outputFName = outputDir + getRootName(getSimpleName(fastafile)) + method + maskfile + ".chimeras";
 			ofstream out;
-			openOutputFile(outputFName, out);
+			openOutputFile(outputFileName, out);
 			
-			chimera->print(out);
+			ofstream out2;
+			openOutputFile(accnosFileName, out2);
+			
+			chimera->print(out, out2);
 			out.close();
+			out2.close(); 
+			
 			return 0;
 		}
 		
 		//some methods need to do prep work before processing the chimeras
 		chimera->doPrep(); 
+		
+		templateSeqsLength = chimera->getLength();
 		
 		ofstream outHeader;
 		string tempHeader = outputDir + getRootName(getSimpleName(fastafile)) + method + maskfile + ".chimeras.tempHeader";
@@ -348,7 +357,6 @@ int ChimeraSeqsCommand::execute(){
 		chimera->printHeader(outHeader);
 		outHeader.close();
 		
-		string outputFileName = outputDir + getRootName(getSimpleName(fastafile)) + method + maskfile + ".chimeras";
 
 		//break up file
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -360,7 +368,7 @@ int ChimeraSeqsCommand::execute(){
 				
 				lines.push_back(new linePair(0, numSeqs));
 				
-				driver(lines[0], outputFileName, fastafile);
+				driver(lines[0], outputFileName, fastafile, accnosFileName);
 				
 			}else{
 				vector<int> positions;
@@ -391,14 +399,19 @@ int ChimeraSeqsCommand::execute(){
 				}
 				
 				
-				createProcesses(outputFileName, fastafile); 
-				
+				createProcesses(outputFileName, fastafile, accnosFileName); 
+			
 				rename((outputFileName + toString(processIDS[0]) + ".temp").c_str(), outputFileName.c_str());
-								
+				rename((accnosFileName + toString(processIDS[0]) + ".temp").c_str(), accnosFileName.c_str());
+					
 				//append alignment and report files
 				for(int i=1;i<processors;i++){
 					appendOutputFiles((outputFileName + toString(processIDS[i]) + ".temp"), outputFileName);
 					remove((outputFileName + toString(processIDS[i]) + ".temp").c_str());
+					
+					appendOutputFiles((accnosFileName + toString(processIDS[i]) + ".temp"), accnosFileName);
+					remove((accnosFileName + toString(processIDS[i]) + ".temp").c_str());
+
 				}
 			}
 
@@ -409,21 +422,23 @@ int ChimeraSeqsCommand::execute(){
 			inFASTA.close();
 			lines.push_back(new linePair(0, numSeqs));
 			
-			driver(lines[0], outputFileName, fastafile);
+			driver(lines[0], outputFileName, fastafile, accnosFileName);
 		#endif
 		
 		//mothurOut("Output File Names: ");
 		//if ((filter) && (method == "bellerophon")) { mothurOut(
 		//if (outputDir == "") { fastafile = getRootName(fastafile) + "filter.fasta"; }
 		//	else				 { fastafile = outputDir + getRootName(getSimpleName(fastafile)) + "filter.fasta"; }
-		
+	
 		appendOutputFiles(tempHeader, outputFileName);
+	
 		remove(outputFileName.c_str());
 		rename(tempHeader.c_str(), outputFileName.c_str());
-
-		for (int i = 0; i < templateSeqs.size(); i++)		{   delete templateSeqs[i];	}
+	
+		for (int i = 0; i < templateSeqs.size(); i++)		{  delete templateSeqs[i];	} 
+		delete chimera;
 		
-		if (method == "chimeracheck") { mothurOutEndLine(); mothurOut("This method does not determine if a sequence is chimeric, but allows you to make that determination based on the IS values."); mothurOutEndLine();  }
+		if (method == "chimeracheck") { remove(accnosFileName.c_str());  mothurOutEndLine(); mothurOut("This method does not determine if a sequence is chimeric, but allows you to make that determination based on the IS values."); mothurOutEndLine();  }
 		
 		mothurOutEndLine(); mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	mothurOutEndLine();
 		
@@ -436,10 +451,13 @@ int ChimeraSeqsCommand::execute(){
 	}
 }//**********************************************************************************************************************
 
-int ChimeraSeqsCommand::driver(linePair* line, string outputFName, string filename){
+int ChimeraSeqsCommand::driver(linePair* line, string outputFName, string filename, string accnos){
 	try {
 		ofstream out;
 		openOutputFile(outputFName, out);
+		
+		ofstream out2;
+		openOutputFile(accnos, out2);
 		
 		ifstream inFASTA;
 		openInputFile(filename, inFASTA);
@@ -451,12 +469,16 @@ int ChimeraSeqsCommand::driver(linePair* line, string outputFName, string filena
 			Sequence* candidateSeq = new Sequence(inFASTA);  gobble(inFASTA);
 				
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
-					
-				//find chimeras
-				chimera->getChimeras(candidateSeq);
+				
+				if ((candidateSeq->getAligned().length() != templateSeqsLength) && (method != "chimeracheck")) {  //chimeracheck does not require seqs to be aligned
+					mothurOut(candidateSeq->getName() + " is not the same length as the template sequences. Skipping."); mothurOutEndLine();
+				}else{
+					//find chimeras
+					chimera->getChimeras(candidateSeq);
 		
-				//print results
-				chimera->print(out);
+					//print results
+					chimera->print(out, out2);
+				}
 			}
 			delete candidateSeq;
 			
@@ -467,6 +489,7 @@ int ChimeraSeqsCommand::driver(linePair* line, string outputFName, string filena
 		if((line->numSeqs) % 100 != 0){	mothurOut("Processing sequence: " + toString(line->numSeqs)); mothurOutEndLine();		}
 		
 		out.close();
+		out2.close();
 		inFASTA.close();
 				
 		return 1;
@@ -479,7 +502,7 @@ int ChimeraSeqsCommand::driver(linePair* line, string outputFName, string filena
 
 /**************************************************************************************************/
 
-void ChimeraSeqsCommand::createProcesses(string outputFileName, string filename) {
+void ChimeraSeqsCommand::createProcesses(string outputFileName, string filename, string accnos) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 0;
@@ -493,7 +516,7 @@ void ChimeraSeqsCommand::createProcesses(string outputFileName, string filename)
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				driver(lines[process], outputFileName + toString(getpid()) + ".temp", filename);
+				driver(lines[process], outputFileName + toString(getpid()) + ".temp", filename, accnos + toString(getpid()) + ".temp");
 				exit(0);
 			}else { mothurOut("unable to spawn the necessary processes."); mothurOutEndLine(); exit(0); }
 		}
@@ -520,7 +543,7 @@ void ChimeraSeqsCommand::appendOutputFiles(string temp, string filename) {
 		ifstream input;
 		
 		openOutputFileAppend(temp, output);
-		openInputFile(filename, input);
+		openInputFile(filename, input, "noerror");
 		
 		while(char c = input.get()){
 			if(input.eof())		{	break;			}

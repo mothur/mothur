@@ -22,14 +22,14 @@ string Chimera::createFilter(vector<Sequence*> seqs, float t) {
 		vector<int> t;		t.resize(seqs[0]->getAligned().length(), 0);
 		vector<int> g;		g.resize(seqs[0]->getAligned().length(), 0);
 		vector<int> c;		c.resize(seqs[0]->getAligned().length(), 0);
-		
+	
 		filterString = (string(seqs[0]->getAligned().length(), '1'));
 		
 		//for each sequence
 		for (int i = 0; i < seqs.size(); i++) {
 		
 			string seqAligned = seqs[i]->getAligned();
-			
+		
 			for (int j = 0; j < seqAligned.length(); j++) {
 				//if this spot is a gap
 				if ((seqAligned[j] == '-') || (seqAligned[j] == '.'))	{	gaps[j]++;	}
@@ -47,10 +47,8 @@ string Chimera::createFilter(vector<Sequence*> seqs, float t) {
 			if(gaps[i] == seqs.size())	{	filterString[i] = '0'; 	numColRemoved++;  }
 			
 			else if (((a[i] < threshold) && (t[i] < threshold) && (g[i] < threshold) && (c[i] < threshold))) {	filterString[i] = '0';	numColRemoved++;  }
-			//cout << "a = " << a[i] <<  " t = " << t[i] <<  " g = " << g[i] <<  " c = " << c[i] << endl;
+			cout << "a = " << a[i] <<  " t = " << t[i] <<  " g = " << g[i] <<  " c = " << c[i] << endl;
 		}
-	
-//cout << "filter = " << filterString << endl;	
 
 		mothurOut("Filter removed " + toString(numColRemoved) + " columns.");  mothurOutEndLine();
 		return filterString;
@@ -95,7 +93,7 @@ vector<Sequence*> Chimera::readSeqs(string file) {
 		openInputFile(file, in);
 		vector<Sequence*> container;
 		int count = 0;
-		int length = 0;
+		length = 0;
 		unaligned = false;
 		
 		//read in seqs and store in vector
