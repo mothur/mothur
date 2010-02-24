@@ -80,8 +80,6 @@ void Pintail::doPrep() {
 		bool reRead = false;
 		//create filter if needed for later
 		if (filter) {
-			
-cout << "filter" << endl;			
 						
 			//read in all query seqs
 			ifstream in; 
@@ -100,10 +98,9 @@ cout << "filter" << endl;
 			//merge query seqs and template seqs
 			temp = templateSeqs;
 			for (int i = 0; i < tempQuerySeqs.size(); i++) {  temp.push_back(tempQuerySeqs[i]);  }
-cout << temp.size() << endl;	
+	
 			if (seqMask != "") {
 			    reRead = true;
-	cout << "masked "  << seqMask << endl;
 				//mask templates
 				for (int i = 0; i < temp.size(); i++) {
 					decalc->runMask(temp[i]);
@@ -111,9 +108,9 @@ cout << temp.size() << endl;
 			}
 
 			mergedFilterString = createFilter(temp, 0.5);
-	cout << "here" << endl;		
+			
 			//reread template seqs
-			//for (int i = 0; i < tempQuerySeqs.size(); i++) { delete tempQuerySeqs[i];  }
+			for (int i = 0; i < tempQuerySeqs.size(); i++) { delete tempQuerySeqs[i];  }
 		}
 		
 		
