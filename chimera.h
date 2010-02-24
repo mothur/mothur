@@ -92,7 +92,7 @@ class Chimera {
 		Chimera(string);
 		Chimera(string, bool, string);
 		Chimera(string, string);
-		virtual ~Chimera(){};
+		virtual ~Chimera(){	for (int i = 0; i < templateSeqs.size(); i++) { delete templateSeqs[i];  } };
 		virtual void setFilter(bool f)			{	filter = f;	 		}
 		virtual void setCorrection(bool c)		{	correction = c;		}
 		virtual void setProcessors(int p)		{	processors = p;		}
@@ -111,9 +111,8 @@ class Chimera {
 		virtual void setMinBS(int b)			{	minBS = b;			}
 		virtual void setMinSNP(int s)			{	minSNP = s;			}
 		virtual void setIters(int i)			{	iters = i;			}
-		virtual void setTemplateSeqs(vector<Sequence*> t)	{	templateSeqs = t;	}
 		virtual bool getUnaligned()				{	return unaligned;			}
-		virtual void setTemplateFile(string t)	{   templateFileName = t;	}
+		virtual void setTemplateFile(string t)	{   templateFileName = t;	templateSeqs = readSeqs(t);  }
 		virtual int getLength()					{   return length;	}
 		
 		virtual void setCons(string){};

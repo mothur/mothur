@@ -289,6 +289,9 @@ void SharedCommand::createMisMatchFile() {
 			
 			openOutputFile(outputMisMatchName, outMisMatch);
 			
+			map<string, string> listNames;
+			map<string, string>::iterator itList;
+			
 			//go through list and if group returns "not found" output it
 			for (int i = 0; i < SharedList->getNumBins(); i++) {
 			
@@ -298,13 +301,22 @@ void SharedCommand::createMisMatchFile() {
 					string name = names.substr(0,names.find_first_of(','));
 					names = names.substr(names.find_first_of(',')+1, names.length());
 					string group = groupMap->getGroup(name);
-				
+					
 					if(group == "not found") {	outMisMatch << name << endl;  }
+					
+					itList = listNames.find(name);
+					if (itList != listNames.end()) {  mothurOut(name + " is in your list file more than once.  Sequence names must be unique. please correct."); mothurOutEndLine(); }
+					else { listNames[name] = name; }
 				}
 			
 				//get last name
 				string group = groupMap->getGroup(names);
-				if(group == "not found") {	outMisMatch << names << endl;  }				
+				if(group == "not found") {	outMisMatch << names << endl;  }	
+				
+				itList = listNames.find(names);
+				if (itList != listNames.end()) {  mothurOut(names + " is in your list file more than once.  Sequence names must be unique. please correct."); mothurOutEndLine(); }
+				else { listNames[names] = names; }
+
 			}
 			
 			outMisMatch.close();
@@ -316,6 +328,7 @@ void SharedCommand::createMisMatchFile() {
 			mothurOut("For a list of names that are in your group file and not in your list file, please refer to " + outputMisMatchName + "."); mothurOutEndLine();
 			
 			map<string, string> namesInList;
+			map<string, string>::iterator itList;
 			
 			//go through listfile and get names
 			for (int i = 0; i < SharedList->getNumBins(); i++) {
@@ -326,9 +339,16 @@ void SharedCommand::createMisMatchFile() {
 					string name = names.substr(0,names.find_first_of(','));
 					names = names.substr(names.find_first_of(',')+1, names.length());
 					
+					itList = namesInList.find(name);
+					if (itList != namesInList.end()) {  mothurOut(name + " is in your list file more than once.  Sequence names must be unique. please correct."); mothurOutEndLine(); }
+
 					namesInList[name] = name;
+					
 				}
 				
+				itList = namesInList.find(names);
+				if (itList != namesInList.end()) {  mothurOut(names + " is in your list file more than once.  Sequence names must be unique. please correct."); mothurOutEndLine(); }
+
 				//get last name
 				namesInList[names] = names;				
 			}

@@ -47,7 +47,7 @@ string Chimera::createFilter(vector<Sequence*> seqs, float t) {
 			if(gaps[i] == seqs.size())	{	filterString[i] = '0'; 	numColRemoved++;  }
 			
 			else if (((a[i] < threshold) && (t[i] < threshold) && (g[i] < threshold) && (c[i] < threshold))) {	filterString[i] = '0';	numColRemoved++;  }
-			cout << "a = " << a[i] <<  " t = " << t[i] <<  " g = " << g[i] <<  " c = " << c[i] << endl;
+			//cout << "a = " << a[i] <<  " t = " << t[i] <<  " g = " << g[i] <<  " c = " << c[i] << endl;
 		}
 
 		mothurOut("Filter removed " + toString(numColRemoved) + " columns.");  mothurOutEndLine();

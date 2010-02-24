@@ -315,20 +315,12 @@ int ChimeraSeqsCommand::execute(){
 		string accnosFileName = outputDir + getRootName(getSimpleName(fastafile)) + method + maskfile + ".accnos";
 
 		
-		vector<Sequence*> templateSeqs;
 		if ((method != "bellerophon") && (method != "chimeracheck")) {   
-			templateSeqs = chimera->readSeqs(templatefile);   
 			if (chimera->getUnaligned()) { 
 				mothurOut("Your template sequences are different lengths, please correct."); mothurOutEndLine(); 
-				//free memory
-				for (int i = 0; i < templateSeqs.size(); i++)		{  delete templateSeqs[i];		}
 				delete chimera;
 				return 0; 
 			}
-			
-			//set options
-			chimera->setTemplateSeqs(templateSeqs);
-
 		}else if (method == "bellerophon") {//run bellerophon separately since you need to read entire fastafile to run it
 			chimera->getChimeras();
 			
@@ -435,7 +427,6 @@ int ChimeraSeqsCommand::execute(){
 		remove(outputFileName.c_str());
 		rename(tempHeader.c_str(), outputFileName.c_str());
 	
-		for (int i = 0; i < templateSeqs.size(); i++)		{  delete templateSeqs[i];	} 
 		delete chimera;
 		
 		if (method == "chimeracheck") { remove(accnosFileName.c_str());  mothurOutEndLine(); mothurOut("This method does not determine if a sequence is chimeric, but allows you to make that determination based on the IS values."); mothurOutEndLine();  }
