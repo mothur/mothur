@@ -164,6 +164,7 @@
 		A70B53AA0F4CD7AD0064797E /* getgroupcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70B53A40F4CD7AD0064797E /* getgroupcommand.cpp */; };
 		A70B53AB0F4CD7AD0064797E /* getlabelcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70B53A60F4CD7AD0064797E /* getlabelcommand.cpp */; };
 		A70DECD91063D8B40057C03C /* secondarystructurecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A70DECD81063D8B40057C03C /* secondarystructurecommand.cpp */; };
+		A71CB8A311354B9F00848EF7 /* parselistscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A71CB8A211354B9F00848EF7 /* parselistscommand.cpp */; };
 		A727E84A10D14568001A8432 /* readblast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A727E84910D14568001A8432 /* readblast.cpp */; };
 		A7283FF81056CAE100D0CC69 /* chimeracheckrdp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7283FF71056CAE100D0CC69 /* chimeracheckrdp.cpp */; };
 		A729ACD010848E6100139801 /* hclustercommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A729ACCF10848E6100139801 /* hclustercommand.cpp */; };
@@ -545,6 +546,8 @@
 		A70B53A70F4CD7AD0064797E /* getlabelcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getlabelcommand.h; sourceTree = SOURCE_ROOT; };
 		A70DECD71063D8B40057C03C /* secondarystructurecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = secondarystructurecommand.h; sourceTree = SOURCE_ROOT; };
 		A70DECD81063D8B40057C03C /* secondarystructurecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = secondarystructurecommand.cpp; sourceTree = SOURCE_ROOT; };
+		A71CB8A111354B9F00848EF7 /* parselistscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parselistscommand.h; sourceTree = SOURCE_ROOT; };
+		A71CB8A211354B9F00848EF7 /* parselistscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parselistscommand.cpp; sourceTree = SOURCE_ROOT; };
 		A727E84810D14568001A8432 /* readblast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readblast.h; sourceTree = SOURCE_ROOT; };
 		A727E84910D14568001A8432 /* readblast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readblast.cpp; sourceTree = SOURCE_ROOT; };
 		A7283FF61056CAE100D0CC69 /* chimeracheckrdp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeracheckrdp.h; sourceTree = SOURCE_ROOT; };
@@ -956,6 +959,8 @@
 				375873F60F7D649C0040F377 /* nocommands.cpp */,
 				A704E8A11106045D00870157 /* otuhierarchycommand.h */,
 				A704E8A21106045D00870157 /* otuhierarchycommand.cpp */,
+				A71CB8A111354B9F00848EF7 /* parselistscommand.h */,
+				A71CB8A211354B9F00848EF7 /* parselistscommand.cpp */,
 				3792946E0F2E191800B9034A /* parsimonycommand.h */,
 				3792946F0F2E191800B9034A /* parsimonycommand.cpp */,
 				A7D176CD10F2558500159497 /* pcacommand.h */,
@@ -1343,6 +1348,7 @@
 				A70B00C8110885EB002F453A /* setdircommand.cpp in Sources */,
 				A794201111107897003AECCD /* distancedb.cpp in Sources */,
 				A7E8A22F1125939F0011D39C /* chimerarealigner.cpp in Sources */,
+				A71CB8A311354B9F00848EF7 /* parselistscommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

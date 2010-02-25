@@ -146,6 +146,7 @@ int ClusterCommand::execute(){
 		print_start = true;
 		start = time(NULL);
 		loops = 0;
+		double saveCutoff = cutoff;
 		
 		while (matrix->getSmallDist() < cutoff && matrix->getNNodes() > 0){
 			if (print_start && isTrue(timing)) {
@@ -204,9 +205,14 @@ int ClusterCommand::execute(){
 		sabundFile.close();
 		rabundFile.close();
 		listFile.close();
+		
+		if (saveCutoff != cutoff) { mothurOut("changed cutoff to " + toString(cutoff)); mothurOutEndLine();  }
+		
 		//if (isTrue(timing)) {
 			mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster"); mothurOutEndLine();
 		//}
+		
+		
 		return 0;
 	}
 	catch(exception& e) {

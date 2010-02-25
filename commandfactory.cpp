@@ -64,6 +64,7 @@
 #include "pcacommand.h"
 #include "otuhierarchycommand.h"
 #include "setdircommand.h"
+#include "parselistscommand.h"
 
 /*******************************************************/
 
@@ -138,6 +139,7 @@ CommandFactory::CommandFactory(){
 	commands["otu.hierarchy"]		= "otu.hierarchy";
 	commands["set.dir"]				= "set.dir";
 	commands["merge.files"]			= "merge.files";
+	commands["parse.list"]			= "parse.list";
 }
 /***********************************************************/
 
@@ -220,7 +222,8 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "pre.cluster")			{	command = new PreClusterCommand(optionString);			}
 		else if(commandName == "pcoa")					{	command = new PCACommand(optionString);					}
 		else if(commandName == "otu.hierarchy")			{	command = new OtuHierarchyCommand(optionString);		}
-		else if(commandName == "set.dir")				{	command = new SetDirectoryCommand(optionString);	}
+		else if(commandName == "set.dir")				{	command = new SetDirectoryCommand(optionString);		}
+		else if(commandName == "parse.list")			{	command = new ParseListCommand(optionString);			}
 		else											{	command = new NoCommand(optionString);					}
 
 		return command;
