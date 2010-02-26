@@ -52,7 +52,7 @@ EstOutput Shannon::getValues(SAbundVector* rank){
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "Shannon", "getValues");
+		m->errorOut(e, "Shannon", "getValues");
 		exit(1);
 	}
 }

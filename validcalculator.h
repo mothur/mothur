@@ -11,6 +11,7 @@
  */
 
 #include "mothur.h"
+#include "mothurout.h"
 
 //This class contains a list of all valid calculators in Mothur.  
 //It has a function which will tell you if your calculator is valid for the given parameter.
@@ -53,6 +54,8 @@ class ValidCalculators {
 		void initialBoot();
 		void initialDistance();
 		void initialHeat();
+		
+		MothurOut* m;
 };
 
 #endif

@@ -14,6 +14,7 @@
 Tree::Tree() {
 	try {
 		globaldata = GlobalData::getInstance();
+		m = MothurOut::getInstance();
 		
 		if (globaldata->runParse == true) {  parseTreeFile();  globaldata->runParse = false;  }
 //for(int i = 0; i < 	globaldata->Treenames.size(); i++) { cout << i << '\t' << globaldata->Treenames[i] << endl;  }	
@@ -44,7 +45,7 @@ Tree::Tree() {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "Tree", "Tree");
+		m->errorOut(e, "Tree", "Tree");
 		exit(1);
 	}
 }
@@ -73,7 +74,7 @@ void Tree::addNamesToCounts() {
 			
 			map<string, string>::iterator itNames = globaldata->names.find(name);
 			
-			if (itNames == globaldata->names.end()) { mothurOut(name + " is not in your name file, please correct."); mothurOutEndLine(); exit(1);  }
+			if (itNames == globaldata->names.end()) { m->mothurOut(name + " is not in your name file, please correct."); m->mothurOutEndLine(); exit(1);  }
 			else {
 				vector<string> dupNames;
 				splitAtComma(globaldata->names[name], dupNames);
@@ -134,7 +135,7 @@ void Tree::addNamesToCounts() {
 				
 	}
 	catch(exception& e) {
-		errorOut(e, "Tree", "addNamesToCounts");
+		m->errorOut(e, "Tree", "addNamesToCounts");
 		exit(1);
 	}
 }
@@ -148,7 +149,7 @@ int Tree::getIndex(string searchName) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Tree", "getIndex");
+		m->errorOut(e, "Tree", "getIndex");
 		exit(1);
 	}
 }
@@ -160,7 +161,7 @@ void Tree::setIndex(string searchName, int index) {
 		globaldata->gTreemap->setIndex(searchName, index);
 	}
 	catch(exception& e) {
-		errorOut(e, "Tree", "setIndex");
+		m->errorOut(e, "Tree", "setIndex");
 		exit(1);
 	}
 }
@@ -178,7 +179,7 @@ void Tree::assembleTree() {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "Tree", "assembleTree");
+		m->errorOut(e, "Tree", "assembleTree");
 		exit(1);
 	}
 }
@@ -216,7 +217,7 @@ void Tree::getCopy(Tree* copy) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Tree", "getCopy");
+		m->errorOut(e, "Tree", "getCopy");
 		exit(1);
 	}
 }
@@ -269,7 +270,7 @@ map<string, int> Tree::mergeGroups(int i) {
 		return parsimony;
 	}
 	catch(exception& e) {
-		errorOut(e, "Tree", "mergeGroups");
+		m->errorOut(e, "Tree", "mergeGroups");
 		exit(1);
 	}
 }
@@ -335,7 +336,7 @@ map<string, int> Tree::mergeUserGroups(int i, vector<string> g) {
 		return parsimony;
 	}
 	catch(exception& e) {
-		errorOut(e, "Tree", "mergeUserGroups");
+		m->errorOut(e, "Tree", "mergeUserGroups");
 		exit(1);
 	}
 }
@@ -358,7 +359,7 @@ map<string,int> Tree::mergeGcounts(int position) {
 		return sum;
 	}
 	catch(exception& e) {
-		errorOut(e, "Tree", "mergeGcounts");
+		m->errorOut(e, "Tree", "mergeGcounts");
 		exit(1);
 	}
 }
@@ -400,7 +401,7 @@ void Tree::randomLabels(vector<string> g) {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "Tree", "randomLabels");
+		m->errorOut(e, "Tree", "randomLabels");
 		exit(1);
 	}
 }
@@ -430,7 +431,7 @@ void Tree::randomLabels(string groupA, string groupB) {
 		}
 	}		
 	catch(exception& e) {
-		errorOut(e, "Tree", "randomLabels");
+		m->errorOut(e, "Tree", "randomLabels");
 		exit(1);
 	}
 }
@@ -446,7 +447,7 @@ void Tree::randomBlengths()  {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "Tree", "randomBlengths");
+		m->errorOut(e, "Tree", "randomBlengths");
 		exit(1);
 	}
 }
@@ -503,7 +504,7 @@ void Tree::randomTopology() {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "Tree", "randomTopology");
+		m->errorOut(e, "Tree", "randomTopology");
 		exit(1);
 	}
 }
@@ -515,7 +516,7 @@ void Tree::print(ostream& out) {
 		out << ";" << endl;
 	}
 	catch(exception& e) {
-		errorOut(e, "Tree", "print");
+		m->errorOut(e, "Tree", "print");
 		exit(1);
 	}
 }
@@ -527,7 +528,7 @@ void Tree::printForBoot(ostream& out) {
 		out << ";" << endl;
 	}
 	catch(exception& e) {
-		errorOut(e, "Tree", "printForBoot");
+		m->errorOut(e, "Tree", "printForBoot");
 		exit(1);
 	}
 }
@@ -549,7 +550,7 @@ void Tree::createNewickFile(string f) {
 		out.close();
 	}
 	catch(exception& e) {
-		errorOut(e, "Tree", "createNewickFile");
+		m->errorOut(e, "Tree", "createNewickFile");
 		exit(1);
 	}
 }
@@ -568,7 +569,7 @@ int Tree::findRoot() {
 		return -1;
 	}
 	catch(exception& e) {
-		errorOut(e, "Tree", "findRoot");
+		m->errorOut(e, "Tree", "findRoot");
 		exit(1);
 	}
 }
@@ -614,7 +615,7 @@ void Tree::printBranch(int node, ostream& out, string mode) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Tree", "printBranch");
+		m->errorOut(e, "Tree", "printBranch");
 		exit(1);
 	}
 }
@@ -710,7 +711,7 @@ void Tree::parseTreeFile() {
 		filehandle.close();
 	}
 	catch(exception& e) {
-		errorOut(e, "Tree", "parseTreeFile");
+		m->errorOut(e, "Tree", "parseTreeFile");
 		exit(1);
 	}
 }
@@ -774,7 +775,7 @@ int Tree::readTreeString(ifstream& filehandle)	{
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "Tree", "readTreeString");
+		m->errorOut(e, "Tree", "readTreeString");
 		exit(1);
 	}
 }	

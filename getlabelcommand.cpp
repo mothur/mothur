@@ -11,7 +11,7 @@
 
 //**********************************************************************************************************************
 
-GetlabelCommand::GetlabelCommand(string option){
+GetlabelCommand::GetlabelCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
@@ -20,12 +20,12 @@ GetlabelCommand::GetlabelCommand(string option){
 		if(option == "help") { help(); abort = true; }
 		
 		else {
-			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { mothurOut("You must read a list, sabund or rabund before you can use the get.label command."); mothurOutEndLine(); abort = true; }				
+			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { m->mothurOut("You must read a list, sabund or rabund before you can use the get.label command."); m->mothurOutEndLine(); abort = true; }				
 		}
 
 	}
 	catch(exception& e) {
-		errorOut(e, "GetlabelCommand", "GetlabelCommand");
+		m->errorOut(e, "GetlabelCommand", "GetlabelCommand");
 		exit(1);
 	}
 }
@@ -33,14 +33,14 @@ GetlabelCommand::GetlabelCommand(string option){
 
 void GetlabelCommand::help(){
 	try {
-		mothurOut("The get.label command can only be executed after a successful read.otu command.\n");
-		mothurOut("You may not use any parameters with the get.label command.\n");
-		mothurOut("The get.label command should be in the following format: \n");
-		mothurOut("get.label()\n");
-		mothurOut("Example get.label().\n");
+		m->mothurOut("The get.label command can only be executed after a successful read.otu command.\n");
+		m->mothurOut("You may not use any parameters with the get.label command.\n");
+		m->mothurOut("The get.label command should be in the following format: \n");
+		m->mothurOut("get.label()\n");
+		m->mothurOut("Example get.label().\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "GetlabelCommand", "help");
+		m->errorOut(e, "GetlabelCommand", "help");
 		exit(1);
 	}
 }
@@ -67,7 +67,7 @@ int GetlabelCommand::execute(){
 			if(count > numBins)
 				count = 0;
 			if(count == 0) {
-				mothurOut(label); mothurOutEndLine();
+				m->mothurOut(label); m->mothurOutEndLine();
 				in >> numBins;
 			}
 			in >> label;
@@ -79,7 +79,7 @@ int GetlabelCommand::execute(){
 	}
 
 	catch(exception& e) {
-		errorOut(e, "GetlabelCommand", "execute");
+		m->errorOut(e, "GetlabelCommand", "execute");
 		exit(1);
 	}
 }

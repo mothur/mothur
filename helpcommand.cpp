@@ -11,7 +11,7 @@
 
 //**********************************************************************************************************************
 
-HelpCommand::HelpCommand(string option){
+HelpCommand::HelpCommand(string option)  {
 	
 	validCommands = CommandFactory::getInstance();
 }
@@ -25,9 +25,9 @@ HelpCommand::~HelpCommand(){}
 int HelpCommand::execute(){
 
 	validCommands->printCommands(cout);
-	mothurOut("For more information about a specific command type 'commandName(help)' i.e. 'read.dist(help)'"); mothurOutEndLine();
+	m->mothurOut("For more information about a specific command type 'commandName(help)' i.e. 'read.dist(help)'"); m->mothurOutEndLine();
 	
-	mothurOutEndLine(); mothurOut("For further assistance please refer to the Mothur manual on our wiki at http://www.mothur.org/wiki, or contact Pat Schloss at mothur.bugs@gmail.com.\n");
+	m->mothurOutEndLine(); m->mothurOut("For further assistance please refer to the Mothur manual on our wiki at http://www.mothur.org/wiki, or contact Pat Schloss at mothur.bugs@gmail.com.\n");
 	return 0;
 }
 

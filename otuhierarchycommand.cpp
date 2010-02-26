@@ -10,9 +10,10 @@
 #include "otuhierarchycommand.h"
 
 //**********************************************************************************************************************
-OtuHierarchyCommand::OtuHierarchyCommand(string option){
+OtuHierarchyCommand::OtuHierarchyCommand(string option) {
 	try {
 		abort = false;
+		
 		//allow user to run help
 		if(option == "help") {  help(); abort = true; }
 		
@@ -47,7 +48,7 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option){
 			}
 
 			listFile = validParameter.validFile(parameters, "list", true);
-			if (listFile == "not found") { mothurOut("list is a required parameter for the otu.hierarchy command."); mothurOutEndLine(); abort = true; }
+			if (listFile == "not found") { m->mothurOut("list is a required parameter for the otu.hierarchy command."); m->mothurOutEndLine(); abort = true; }
 			else if (listFile == "not open") { abort = true; }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -59,20 +60,20 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option){
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			label = validParameter.validFile(parameters, "label", false);			
-			if (label == "not found") { mothurOut("label is a required parameter for the otu.hierarchy command."); mothurOutEndLine(); abort = true; }
+			if (label == "not found") { m->mothurOut("label is a required parameter for the otu.hierarchy command."); m->mothurOutEndLine(); abort = true; }
 			else { 
 				splitAtDash(label, labels);
-				if (labels.size() != 2) { mothurOut("You must provide 2 labels."); mothurOutEndLine(); abort = true; }
+				if (labels.size() != 2) { m->mothurOut("You must provide 2 labels."); m->mothurOutEndLine(); abort = true; }
 			}	
 			
 			output = validParameter.validFile(parameters, "output", false);			if (output == "not found") { output = "name"; }
 			
-			if ((output != "name") && (output != "number")) { mothurOut("output options are name and number. I will use name."); mothurOutEndLine(); output = "name"; }
+			if ((output != "name") && (output != "number")) { m->mothurOut("output options are name and number. I will use name."); m->mothurOutEndLine(); output = "name"; }
 		}
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "OtuHierarchyCommand", "OtuHierarchyCommand");
+		m->errorOut(e, "OtuHierarchyCommand", "OtuHierarchyCommand");
 		exit(1);
 	}			
 }
@@ -80,17 +81,17 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option){
 
 void OtuHierarchyCommand::help(){
 	try {
-		mothurOut("The otu.hierarchy command is used to see how otus relate at two distances. \n");
-		mothurOut("The otu.hierarchy command parameters are list, label and output.  list and label parameters are required. \n");
-		mothurOut("The output parameter allows you to output the names of the sequence in the OTUs or the OTU numbers. Options are name and number, default is name. \n");
-		mothurOut("The otu.hierarchy command should be in the following format: \n");
-		mothurOut("otu.hierarchy(list=yourListFile, label=yourLabels).\n");
-		mothurOut("Example otu.hierarchy(list=amazon.fn.list, label=0.01-0.03).\n");
-		mothurOut("The otu.hierarchy command outputs a .otu.hierarchy file which is described on the wiki.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n\n");
+		m->mothurOut("The otu.hierarchy command is used to see how otus relate at two distances. \n");
+		m->mothurOut("The otu.hierarchy command parameters are list, label and output.  list and label parameters are required. \n");
+		m->mothurOut("The output parameter allows you to output the names of the sequence in the OTUs or the OTU numbers. Options are name and number, default is name. \n");
+		m->mothurOut("The otu.hierarchy command should be in the following format: \n");
+		m->mothurOut("otu.hierarchy(list=yourListFile, label=yourLabels).\n");
+		m->mothurOut("Example otu.hierarchy(list=amazon.fn.list, label=0.01-0.03).\n");
+		m->mothurOut("The otu.hierarchy command outputs a .otu.hierarchy file which is described on the wiki.\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "OtuHierarchyCommand", "help");
+		m->errorOut(e, "OtuHierarchyCommand", "help");
 		exit(1);
 	}
 }
@@ -116,7 +117,7 @@ int OtuHierarchyCommand::execute(){
 				reverse(lists.begin(), lists.end());
 			}
 		}else{
-			mothurOut("error getting listvectors, unable to read 2 different vectors, check your label inputs."); mothurOutEndLine(); return 0;
+			m->mothurOut("error getting listvectors, unable to read 2 different vectors, check your label inputs."); m->mothurOutEndLine(); return 0;
 		}
 		
 		//map sequences to bin number in the "little" otu
@@ -173,10 +174,15 @@ int OtuHierarchyCommand::execute(){
 		
 		out.close();
 		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+		m->mothurOut(outputFileName); m->mothurOutEndLine();	
+		m->mothurOutEndLine();
+		
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "OtuHierarchyCommand", "execute");
+		m->errorOut(e, "OtuHierarchyCommand", "execute");
 		exit(1);
 	}
 }
@@ -264,12 +270,12 @@ vector<ListVector> OtuHierarchyCommand::getListVectors() {
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			mothurOut("Your file does not include the label " + *it); 
+			m->mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(lastLabel) != 1) {
-				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
 				needToRun = true;
 			}else {
-				mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
 			}
 		}
 		
@@ -293,7 +299,7 @@ vector<ListVector> OtuHierarchyCommand::getListVectors() {
 		return lists;
 	}
 	catch(exception& e) {
-		errorOut(e, "OtuHierarchyCommand", "getListVectors");
+		m->errorOut(e, "OtuHierarchyCommand", "getListVectors");
 		exit(1);
 	}
 }

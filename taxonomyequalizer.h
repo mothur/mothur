@@ -12,6 +12,7 @@
  */
 
 #include "mothur.h"
+#include "mothurout.h"
 
 //reads in taxonomy file and makes all the taxonomies the same length 
 //by appending the last taxon to a given taxonomy as many times as needed to 
@@ -39,7 +40,7 @@ private:
 	void extendTaxonomy(string, string&, int);  //name, taxonomy, desired level
 	void truncateTaxonomy(string, string&, int);  //name, taxonomy, desired level
 	void removeConfidences(string&);  //removes the confidence limits on the taxon 
-
+	MothurOut* m;
 	
 };
 

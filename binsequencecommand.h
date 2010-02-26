@@ -41,6 +41,7 @@ private:
 	string filename, fastafile, namesfile, groupfile, label, outputDir;
 	ofstream out;
 	ifstream in, inNames;
+	vector<string> outputNames;
 	
 	void readNamesFile();
 	int process(ListVector*);

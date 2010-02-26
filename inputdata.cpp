@@ -15,7 +15,7 @@
 /***********************************************************************/
 
 InputData::InputData(string fName, string f) : format(f){
-	
+	m = MothurOut::getInstance();
 	openInputFile(fName, fileHandle);
 	filename = fName;
 	
@@ -34,7 +34,7 @@ InputData::~InputData(){
 
 InputData::InputData(string fName, string orderFileName, string f) : format(f){
 	try {
-		
+		m = MothurOut::getInstance();
 		ifstream ofHandle;
 		openInputFile(orderFileName, ofHandle);
 		string name;
@@ -52,7 +52,7 @@ InputData::InputData(string fName, string orderFileName, string f) : format(f){
 		openInputFile(fName, fileHandle);
 	}
 	catch(exception& e) {
-		errorOut(e, "InputData", "InputData");
+		m->errorOut(e, "InputData", "InputData");
 		exit(1);
 	}
 }
@@ -73,7 +73,7 @@ ListVector* InputData::getListVector(){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "InputData", "getListVector");
+		m->errorOut(e, "InputData", "getListVector");
 		exit(1);
 	}
 }
@@ -111,7 +111,7 @@ ListVector* InputData::getListVector(string label){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "InputData", "getListVector");
+		m->errorOut(e, "InputData", "getListVector");
 		exit(1);
 	}
 }
@@ -134,7 +134,7 @@ SharedListVector* InputData::getSharedListVector(){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "InputData", "getSharedListVector");
+		m->errorOut(e, "InputData", "getSharedListVector");
 		exit(1);
 	}
 }
@@ -172,7 +172,7 @@ SharedListVector* InputData::getSharedListVector(string label){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "InputData", "getSharedListVector");
+		m->errorOut(e, "InputData", "getSharedListVector");
 		exit(1);
 	}
 }
@@ -196,7 +196,7 @@ SharedOrderVector* InputData::getSharedOrderVector(){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "InputData", "getSharedOrderVector");
+		m->errorOut(e, "InputData", "getSharedOrderVector");
 		exit(1);
 	}
 }
@@ -235,7 +235,7 @@ SharedOrderVector* InputData::getSharedOrderVector(string label){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "InputData", "getSharedOrderVector");
+		m->errorOut(e, "InputData", "getSharedOrderVector");
 		exit(1);
 	}
 }
@@ -275,7 +275,7 @@ OrderVector* InputData::getOrderVector(){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "InputData", "getOrderVector");
+		m->errorOut(e, "InputData", "getOrderVector");
 		exit(1);
 	}
 }
@@ -378,7 +378,7 @@ OrderVector* InputData::getOrderVector(string label){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "InputData", "getOrderVector");
+		m->errorOut(e, "InputData", "getOrderVector");
 		exit(1);
 	}
 }
@@ -408,7 +408,7 @@ vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "InputData", "getSharedRAbundVectors");
+		m->errorOut(e, "InputData", "getSharedRAbundVectors");
 		exit(1);
 	}
 }
@@ -466,7 +466,7 @@ vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(string label){
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "InputData", "getSharedRAbundVectors");
+		m->errorOut(e, "InputData", "getSharedRAbundVectors");
 		exit(1);
 	}
 }
@@ -505,7 +505,7 @@ SAbundVector* InputData::getSAbundVector(){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "InputData", "getSAbundVector");
+		m->errorOut(e, "InputData", "getSAbundVector");
 		exit(1);
 	}
 }
@@ -607,7 +607,7 @@ SAbundVector* InputData::getSAbundVector(string label){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "InputData", "getSAbundVector");
+		m->errorOut(e, "InputData", "getSAbundVector");
 		exit(1);
 	}
 }
@@ -644,7 +644,7 @@ RAbundVector* InputData::getRAbundVector(){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "InputData", "getRAbundVector");
+		m->errorOut(e, "InputData", "getRAbundVector");
 		exit(1);
 	}
 }
@@ -745,7 +745,7 @@ RAbundVector* InputData::getRAbundVector(string label){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "InputData", "getRAbundVector");
+		m->errorOut(e, "InputData", "getRAbundVector");
 		exit(1);
 	}
 }

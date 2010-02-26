@@ -17,13 +17,14 @@ void swap(int& i,int& j){	int t = i;  i = j;  j = t;	}
 
 Libshuff::Libshuff(FullMatrix* D, int it, float step, float co) : matrix(D), iters(it), stepSize(step), cutOff(co){
 	try{
+		m = MothurOut::getInstance();
 		groupNames = matrix->getGroups();
 		groupSizes = matrix->getSizes();
 		numGroups = matrix->getNumGroups();
 		initializeGroups(matrix);
 	}
 	catch(exception& e) {
-		errorOut(e, "Libshuff", "Libshuff");
+		m->errorOut(e, "Libshuff", "Libshuff");
 		exit(1);
 	}
 }
@@ -49,7 +50,7 @@ void Libshuff::initializeGroups(FullMatrix* matrix){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "Libshuff", "initializeGroups");
+		m->errorOut(e, "Libshuff", "initializeGroups");
 		exit(1);
 	}
 }
@@ -78,7 +79,7 @@ vector<double> Libshuff::getMinX(int x){
 		return minX;
 	}
 	catch(exception& e) {
-		errorOut(e, "Libshuff", "getMinX");
+		m->errorOut(e, "Libshuff", "getMinX");
 		exit(1);
 	}
 }
@@ -99,7 +100,7 @@ vector<double> Libshuff::getMinXY(int x, int y){
 		return minXY;
 	}
 	catch(exception& e) {
-		errorOut(e, "Libshuff", "getMinXY");
+		m->errorOut(e, "Libshuff", "getMinXY");
 		exit(1);
 	}
 }
@@ -125,7 +126,7 @@ void Libshuff::randomizeGroups(int x, int y){
 		for(int k=0;k<groupSizes[y];k++)	{	groups[y][k]=v[index++];	}
 	}
 	catch(exception& e) {
-		errorOut(e, "Libshuff", "randomizeGroups");
+		m->errorOut(e, "Libshuff", "randomizeGroups");
 		exit(1);
 	}
 }

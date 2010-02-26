@@ -20,11 +20,11 @@
 class Shen : public Calculator  {
 	
 public: 
-	Shen(int size, int n) : m(size), abund(n), Calculator("shen", 1, false) {};
+	Shen(int size, int n) : f(size), abund(n), Calculator("shen", 1, false) {};
 	EstOutput getValues(SAbundVector*);	
 	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
 private:
-	int m;
+	int f;
 	int abund;
 };
 

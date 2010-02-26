@@ -34,7 +34,7 @@ EstOutput SharedSobsCS::getValues(vector<SharedRAbundVector*> shared){
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedSobsCS", "getValues");
+		m->errorOut(e, "SharedSobsCS", "getValues");
 		exit(1);
 	}
 }

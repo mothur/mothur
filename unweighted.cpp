@@ -132,7 +132,7 @@ EstOutput Unweighted::getValues(Tree* t) {
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "Unweighted", "getValues");
+		m->errorOut(e, "Unweighted", "getValues");
 		exit(1);
 	}
 }
@@ -277,7 +277,7 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "Unweighted", "getValues");
+		m->errorOut(e, "Unweighted", "getValues");
 		exit(1);
 	}
 }

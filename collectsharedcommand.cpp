@@ -36,7 +36,7 @@
 
 //**********************************************************************************************************************
 
-CollectSharedCommand::CollectSharedCommand(string option){
+CollectSharedCommand::CollectSharedCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
@@ -69,8 +69,8 @@ CollectSharedCommand::CollectSharedCommand(string option){
 						
 			//make sure the user has already run the read.otu command
 			if (globaldata->getSharedFile() == "") {
-				if (globaldata->getListFile() == "") { mothurOut("You must read a list and a group, or a shared before you can use the collect.shared command."); mothurOutEndLine(); abort = true; }
-				else if (globaldata->getGroupFile() == "") { mothurOut("You must read a list and a group, or a shared before you can use the collect.shared command."); mothurOutEndLine(); abort = true; }
+				if (globaldata->getListFile() == "") { m->mothurOut("You must read a list and a group, or a shared before you can use the collect.shared command."); m->mothurOutEndLine(); abort = true; }
+				else if (globaldata->getGroupFile() == "") { m->mothurOut("You must read a list and a group, or a shared before you can use the collect.shared command."); m->mothurOutEndLine(); abort = true; }
 			}
 
 			
@@ -124,46 +124,67 @@ CollectSharedCommand::CollectSharedCommand(string option){
 					if (validCalculator->isValidCalculator("shared", Estimators[i]) == true) { 
 						if (Estimators[i] == "sharedchao") { 
 							cDisplays.push_back(new CollectDisplay(new SharedChao1(), new SharedOneColumnFile(fileNameRoot+"shared.chao")));
+							outputNames.push_back(fileNameRoot+"shared.chao");
 						}else if (Estimators[i] == "sharedsobs") { 
 							cDisplays.push_back(new CollectDisplay(new SharedSobsCS(), new SharedOneColumnFile(fileNameRoot+"shared.sobs")));
+							outputNames.push_back(fileNameRoot+"shared.sobs");
 						}else if (Estimators[i] == "sharedace") { 
 							cDisplays.push_back(new CollectDisplay(new SharedAce(), new SharedOneColumnFile(fileNameRoot+"shared.ace")));
+							outputNames.push_back(fileNameRoot+"shared.ace");
 						}else if (Estimators[i] == "jabund") { 	
 							cDisplays.push_back(new CollectDisplay(new JAbund(), new SharedOneColumnFile(fileNameRoot+"jabund")));
+							outputNames.push_back(fileNameRoot+"jabund");
 						}else if (Estimators[i] == "sorabund") { 
 							cDisplays.push_back(new CollectDisplay(new SorAbund(), new SharedOneColumnFile(fileNameRoot+"sorabund")));
+							outputNames.push_back(fileNameRoot+"sorabund");
 						}else if (Estimators[i] == "jclass") { 
 							cDisplays.push_back(new CollectDisplay(new Jclass(), new SharedOneColumnFile(fileNameRoot+"jclass")));
+							outputNames.push_back(fileNameRoot+"jclass");
 						}else if (Estimators[i] == "sorclass") { 
 							cDisplays.push_back(new CollectDisplay(new SorClass(), new SharedOneColumnFile(fileNameRoot+"sorclass")));
+							outputNames.push_back(fileNameRoot+"sorclass");
 						}else if (Estimators[i] == "jest") { 
 							cDisplays.push_back(new CollectDisplay(new Jest(), new SharedOneColumnFile(fileNameRoot+"jest")));
+							outputNames.push_back(fileNameRoot+"jest");
 						}else if (Estimators[i] == "sorest") { 
 							cDisplays.push_back(new CollectDisplay(new SorEst(), new SharedOneColumnFile(fileNameRoot+"sorest")));
+							outputNames.push_back(fileNameRoot+"sorest");
 						}else if (Estimators[i] == "thetayc") { 
 							cDisplays.push_back(new CollectDisplay(new ThetaYC(), new SharedOneColumnFile(fileNameRoot+"thetayc")));
+							outputNames.push_back(fileNameRoot+"thetayc");
 						}else if (Estimators[i] == "thetan") { 
 							cDisplays.push_back(new CollectDisplay(new ThetaN(), new SharedOneColumnFile(fileNameRoot+"thetan")));
+							outputNames.push_back(fileNameRoot+"thetan");
 						}else if (Estimators[i] == "kstest") { 
 							cDisplays.push_back(new CollectDisplay(new KSTest(), new SharedOneColumnFile(fileNameRoot+"kstest")));
+							outputNames.push_back(fileNameRoot+"kstest");
 						}else if (Estimators[i] == "whittaker") { 
 							cDisplays.push_back(new CollectDisplay(new Whittaker(), new SharedOneColumnFile(fileNameRoot+"whittaker")));
+							outputNames.push_back(fileNameRoot+"whittaker");
 						}else if (Estimators[i] == "sharednseqs") { 
 							cDisplays.push_back(new CollectDisplay(new SharedNSeqs(), new SharedOneColumnFile(fileNameRoot+"shared.nseqs")));
+							outputNames.push_back(fileNameRoot+"shared.nseqs");
 						}else if (Estimators[i] == "ochiai") { 
 							cDisplays.push_back(new CollectDisplay(new Ochiai(), new SharedOneColumnFile(fileNameRoot+"ochiai")));
+							outputNames.push_back(fileNameRoot+"ochiai");
 						}else if (Estimators[i] == "anderberg") { 
 							cDisplays.push_back(new CollectDisplay(new Anderberg(), new SharedOneColumnFile(fileNameRoot+"anderberg")));
+							outputNames.push_back(fileNameRoot+"anderberg");
 						}else if (Estimators[i] == "skulczynski") { 
 							cDisplays.push_back(new CollectDisplay(new Kulczynski(), new SharedOneColumnFile(fileNameRoot+"kulczynski")));
+							outputNames.push_back(fileNameRoot+"kulczynski");
 						}else if (Estimators[i] == "kulczynskicody") { 
 							cDisplays.push_back(new CollectDisplay(new KulczynskiCody(), new SharedOneColumnFile(fileNameRoot+"kulczynskicody")));
+							outputNames.push_back(fileNameRoot+"kulczynskicody");
 						}else if (Estimators[i] == "lennon") { 
 							cDisplays.push_back(new CollectDisplay(new Lennon(), new SharedOneColumnFile(fileNameRoot+"lennon")));
+							outputNames.push_back(fileNameRoot+"lennon");
 						}else if (Estimators[i] == "morisitahorn") { 
 							cDisplays.push_back(new CollectDisplay(new MorHorn(), new SharedOneColumnFile(fileNameRoot+"morisitahorn")));
+							outputNames.push_back(fileNameRoot+"morisitahorn");
 						}else if (Estimators[i] == "braycurtis") { 
 							cDisplays.push_back(new CollectDisplay(new BrayCurtis(), new SharedOneColumnFile(fileNameRoot+"braycurtis")));
+							outputNames.push_back(fileNameRoot+"braycurtis");
 						}
 					}
 				}	
@@ -172,7 +193,7 @@ CollectSharedCommand::CollectSharedCommand(string option){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "CollectSharedCommand", "CollectSharedCommand");
+		m->errorOut(e, "CollectSharedCommand", "CollectSharedCommand");
 		exit(1);
 	}
 }
@@ -180,23 +201,23 @@ CollectSharedCommand::CollectSharedCommand(string option){
 
 void CollectSharedCommand::help(){
 	try {
-		mothurOut("The collect.shared command can only be executed after a successful read.otu command.\n");
-		mothurOut("The collect.shared command parameters are label, freq, calc and groups.  No parameters are required \n");
-		mothurOut("The collect.shared command should be in the following format: \n");
-		mothurOut("collect.shared(label=yourLabel, freq=yourFreq, calc=yourEstimators, groups=yourGroups).\n");
-		mothurOut("Example collect.shared(label=unique-.01-.03, freq=10, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan).\n");
-		mothurOut("The default values for freq is 100 and calc are sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan.\n");
-		mothurOut("The default value for groups is all the groups in your groupfile.\n");
+		m->mothurOut("The collect.shared command can only be executed after a successful read.otu command.\n");
+		m->mothurOut("The collect.shared command parameters are label, freq, calc and groups.  No parameters are required \n");
+		m->mothurOut("The collect.shared command should be in the following format: \n");
+		m->mothurOut("collect.shared(label=yourLabel, freq=yourFreq, calc=yourEstimators, groups=yourGroups).\n");
+		m->mothurOut("Example collect.shared(label=unique-.01-.03, freq=10, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan).\n");
+		m->mothurOut("The default values for freq is 100 and calc are sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan.\n");
+		m->mothurOut("The default value for groups is all the groups in your groupfile.\n");
 		validCalculator->printCalc("shared", cout);
-		mothurOut("The label parameter is used to analyze specific labels in your input.\n");
-		mothurOut("The all parameter is used to specify if you want the estimate of all your groups together.  This estimate can only be made for sharedsobs and sharedchao calculators. The default is false.\n");
-		mothurOut("If you use sharedchao and run into memory issues, set all to false. \n");
-		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile).\n\n");
+		m->mothurOut("The label parameter is used to analyze specific labels in your input.\n");
+		m->mothurOut("The all parameter is used to specify if you want the estimate of all your groups together.  This estimate can only be made for sharedsobs and sharedchao calculators. The default is false.\n");
+		m->mothurOut("If you use sharedchao and run into memory issues, set all to false. \n");
+		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile).\n\n");
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "CollectSharedCommand", "help");
+		m->errorOut(e, "CollectSharedCommand", "help");
 		exit(1);
 	}
 }
@@ -248,7 +269,7 @@ int CollectSharedCommand::execute(){
 				cCurve->getSharedCurve(freq);
 				delete cCurve;
 			
-				mothurOut(order->getLabel()); mothurOutEndLine();
+				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
 			}
@@ -265,7 +286,7 @@ int CollectSharedCommand::execute(){
 				cCurve->getSharedCurve(freq);
 				delete cCurve;
 			
-				mothurOut(order->getLabel()); mothurOutEndLine();
+				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
 				
@@ -285,12 +306,12 @@ int CollectSharedCommand::execute(){
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			mothurOut("Your file does not include the label " + *it); 
+			m->mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(lastLabel) != 1) {
-				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
 				needToRun = true;
 			}else {
-				mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
 			}
 		}
 		
@@ -303,7 +324,7 @@ int CollectSharedCommand::execute(){
 			cCurve->getSharedCurve(freq);
 			delete cCurve;
 			
-			mothurOut(order->getLabel()); mothurOutEndLine();
+			m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 			delete order;
 		}
 		
@@ -312,10 +333,16 @@ int CollectSharedCommand::execute(){
 		//reset groups parameter
 		globaldata->Groups.clear(); 
 		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+
+		
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "CollectSharedCommand", "execute");
+		m->errorOut(e, "CollectSharedCommand", "execute");
 		exit(1);
 	}
 }

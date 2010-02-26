@@ -23,12 +23,13 @@
 
 Nast::Nast(Alignment* method, Sequence* cand, Sequence* temp) : alignment(method), candidateSeq(cand), templateSeq(temp) {
 	try {
+		m = MothurOut::getInstance();
 		maxInsertLength = 0;
 		pairwiseAlignSeqs();	//	This is part A in Fig. 2 of DeSantis et al.
 		regapSequences();		//	This is parts B-F in Fig. 2 of DeSantis et al.
 	}
 	catch(exception& e) {
-		errorOut(e, "Nast", "Nast");
+		m->errorOut(e, "Nast", "Nast");
 		exit(1);
 	}
 }
@@ -78,7 +79,7 @@ void Nast::pairwiseAlignSeqs(){	//	Here we call one of the pairwise alignment me
 		templateSeq->setPairwise(tempAln);					//	the candidate and template sequences
 	}
 	catch(exception& e) {
-		errorOut(e, "Nast", "pairwiseAlignSeqs");
+		m->errorOut(e, "Nast", "pairwiseAlignSeqs");
 		exit(1);
 	}	
 }
@@ -199,7 +200,7 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "Nast", "removeExtraGaps");
+		m->errorOut(e, "Nast", "removeExtraGaps");
 		exit(1);
 	}	
 }
@@ -302,14 +303,14 @@ void Nast::regapSequences(){	//This is essentially part B in Fig 2. of DeSantis 
 				//	would skip the gaps and not progress through full alignment sequence
 				//	not tested yet
 				
-				mothurOut("We're into D " + toString(fullAlignIndex) + " " +  toString(pairwiseAlignIndex)); mothurOutEndLine();
+				m->mothurOut("We're into D " + toString(fullAlignIndex) + " " +  toString(pairwiseAlignIndex)); m->mothurOutEndLine();
 				pairwiseAlignIndex++;
 			}
 			else{
 				//	everything has a gap - not possible
 				//	not tested yet
 				
-				mothurOut("We're into F " +  toString(fullAlignIndex) + " " +  toString(pairwiseAlignIndex)); mothurOutEndLine();
+				m->mothurOut("We're into F " +  toString(fullAlignIndex) + " " +  toString(pairwiseAlignIndex)); m->mothurOutEndLine();
 				pairwiseAlignIndex++;
 				fullAlignIndex++;			
 			}		
@@ -345,7 +346,7 @@ void Nast::regapSequences(){	//This is essentially part B in Fig 2. of DeSantis 
 		candidateSeq->setAligned(candAln);
 	}
 	catch(exception& e) {
-		errorOut(e, "Nast", "regapSequences");
+		m->errorOut(e, "Nast", "regapSequences");
 		exit(1);
 	}	
 }
@@ -380,7 +381,7 @@ float Nast::getSimilarityScore(){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Nast", "getSimilarityScore");
+		m->errorOut(e, "Nast", "getSimilarityScore");
 		exit(1);
 	}	
 }

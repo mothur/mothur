@@ -25,8 +25,8 @@
 
 /**************************************************************************************************/
 
-GotohOverlap::GotohOverlap(float gO, float gE, float m, float mm, int r) :
-	gapOpen(gO), gapExtend(gE), match(m), mismatch(mm), Alignment(r) {
+GotohOverlap::GotohOverlap(float gO, float gE, float f, float mm, int r) :
+	gapOpen(gO), gapExtend(gE), match(f), mismatch(mm), Alignment(r) {
 	
 	try {
 		for(int i=1;i<nCols;i++){				//	we initialize the dynamic programming matrix by setting the pointers in
@@ -43,7 +43,7 @@ GotohOverlap::GotohOverlap(float gO, float gE, float m, float mm, int r) :
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "GotohOverlap", "GotohOverlap");
+		m->errorOut(e, "GotohOverlap", "GotohOverlap");
 		exit(1);
 	}
 }
@@ -94,7 +94,7 @@ void GotohOverlap::align(string A, string B){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "GotohOverlap", "align");
+		m->errorOut(e, "GotohOverlap", "align");
 		exit(1);
 	}
 }

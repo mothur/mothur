@@ -15,9 +15,9 @@
 
 
 //***************************************************************************************************************
-void DeCalculator::setMask(string m) { 
+void DeCalculator::setMask(string ms) { 
 	try {
-		seqMask = m; 
+		seqMask = ms; 
 		int count = 0;
 		maskMap.clear();
 		
@@ -40,7 +40,7 @@ void DeCalculator::setMask(string m) {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "DeCalculator", "setMask");
+		m->errorOut(e, "DeCalculator", "setMask");
 		exit(1);
 	} 
 }
@@ -62,7 +62,7 @@ void DeCalculator::runMask(Sequence* seq) {
 		seq->setUnaligned(tempQuery);
 	}
 	catch(exception& e) {
-		errorOut(e, "DeCalculator", "runMask");
+		m->errorOut(e, "DeCalculator", "runMask");
 		exit(1);
 	}
 }
@@ -90,7 +90,7 @@ void DeCalculator::trimSeqs(Sequence* query, Sequence* subject, map<int, int>& t
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "DeCalculator", "trimSeqs");
+		m->errorOut(e, "DeCalculator", "trimSeqs");
 		exit(1);
 	}
 }
@@ -106,7 +106,7 @@ vector<int>  DeCalculator::findWindows(Sequence* query, int front, int back, int
 		if (size == 0) {  if (cutoff > 1200) {  size = 300; }
 							else{  size = (cutoff / 4); }  } 
 		else if (size > (cutoff / 4)) { 
-				mothurOut("You have selected too large a window size for sequence " + query->getName() + ".  I will choose an appropriate window size."); mothurOutEndLine();
+				m->mothurOut("You have selected too large a window size for sequence " + query->getName() + ".  I will choose an appropriate window size."); m->mothurOutEndLine();
 				size = (cutoff / 4); 
 		}
 	
@@ -158,7 +158,7 @@ vector<int>  DeCalculator::findWindows(Sequence* query, int front, int back, int
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "DeCalculator", "findWindows");
+		m->errorOut(e, "DeCalculator", "findWindows");
 		exit(1);
 	}
 }
@@ -200,7 +200,7 @@ vector<float> DeCalculator::calcObserved(Sequence* query, Sequence* subject, vec
 		return temp;
 	}
 	catch(exception& e) {
-		errorOut(e, "DeCalculator", "calcObserved");
+		m->errorOut(e, "DeCalculator", "calcObserved");
 		exit(1);
 	}
 }
@@ -232,7 +232,7 @@ float DeCalculator::calcDist(Sequence* query, Sequence* subject, int front, int 
 		return dist;
 	}
 	catch(exception& e) {
-		errorOut(e, "DeCalculator", "calcDist");
+		m->errorOut(e, "DeCalculator", "calcDist");
 		exit(1);
 	}
 }
@@ -255,7 +255,7 @@ vector<float> DeCalculator::calcExpected(vector<float> qav, float coef) {
 				
 	}
 	catch(exception& e) {
-		errorOut(e, "DeCalculator", "calcExpected");
+		m->errorOut(e, "DeCalculator", "calcExpected");
 		exit(1);
 	}
 }
@@ -279,7 +279,7 @@ float DeCalculator::calcDE(vector<float> obs, vector<float> exp) {
 		return de;
 	}
 	catch(exception& e) {
-		errorOut(e, "DeCalculator", "calcDE");
+		m->errorOut(e, "DeCalculator", "calcDE");
 		exit(1);
 	}
 }
@@ -345,7 +345,7 @@ vector<float> DeCalculator::calcFreq(vector<Sequence*> seqs, string filename) {
 				
 	}
 	catch(exception& e) {
-		errorOut(e, "DeCalculator", "calcFreq");
+		m->errorOut(e, "DeCalculator", "calcFreq");
 		exit(1);
 	}
 }
@@ -375,7 +375,7 @@ vector<float>  DeCalculator::findQav(vector<int> window, int size, vector<float>
 		return averages;
 	}
 	catch(exception& e) {
-		errorOut(e, "DeCalculator", "findQav");
+		m->errorOut(e, "DeCalculator", "findQav");
 		exit(1);
 	}
 }
@@ -394,7 +394,7 @@ vector< vector<quanMember> > DeCalculator::getQuantiles(vector<Sequence*> seqs, 
 		//for each sequence
 		for(int i = start; i < end; i++){
 		
-			mothurOut("Processing sequence " + toString(i)); mothurOutEndLine();
+			m->mothurOut("Processing sequence " + toString(i)); m->mothurOutEndLine();
 			Sequence* query = new Sequence(seqs[i]->getName(), seqs[i]->getAligned());
 			
 			//compare to every other sequence in template
@@ -443,7 +443,7 @@ vector< vector<quanMember> > DeCalculator::getQuantiles(vector<Sequence*> seqs, 
 						
 	}
 	catch(exception& e) {
-		errorOut(e, "DeCalculator", "getQuantiles");
+		m->errorOut(e, "DeCalculator", "getQuantiles");
 		exit(1);
 	}
 }
@@ -485,7 +485,7 @@ void DeCalculator::removeObviousOutliers(vector< vector<quanMember> >& quantiles
 		//while you still have guys to eliminate
 		while (contributions.size() > 0) {
 		
-			mothurOut("Removing scores contributed by sequence " + toString(largestContrib) + " in your template file."); mothurOutEndLine();
+			m->mothurOut("Removing scores contributed by sequence " + toString(largestContrib) + " in your template file."); m->mothurOutEndLine();
 			
 			//remove from quantiles all scores that were made using this largestContrib
 			for (int i = 0; i < quantiles.size(); i++) {
@@ -516,7 +516,7 @@ cout << "high = " << high << endl;
 		
 		for(int i = 0; i < marked.size(); i++) {
 			if (marked[i] > high) { 
-				mothurOut("Removing scores contributed by sequence " + toString(marked[i]) + " in your template file."); mothurOutEndLine();
+				m->mothurOut("Removing scores contributed by sequence " + toString(marked[i]) + " in your template file."); m->mothurOutEndLine();
 				for (int i = 0; i < quantiles.size(); i++) {
 					removeContrib(marked[i], quantiles[i]);
 				}
@@ -560,7 +560,7 @@ cout << "high = " << high << endl;
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "DeCalculator", "removeObviousOutliers");
+		m->errorOut(e, "DeCalculator", "removeObviousOutliers");
 		exit(1);
 	}
 }
@@ -592,7 +592,7 @@ cout << largest->second << '\t' << largest->first->score << '\t' << largest->fir
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "DeCalculator", "sortContrib");
+		m->errorOut(e, "DeCalculator", "sortContrib");
 		exit(1);
 	}
 }
@@ -618,7 +618,7 @@ int DeCalculator::findLargestContrib(vector<int> seen) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "DeCalculator", "findLargestContribs");
+		m->errorOut(e, "DeCalculator", "findLargestContribs");
 		exit(1);
 	}
 }
@@ -637,7 +637,7 @@ void DeCalculator::removeContrib(int bad, vector<quanMember>& quan) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "DeCalculator", "removeContrib");
+		m->errorOut(e, "DeCalculator", "removeContrib");
 		exit(1);
 	}
 }
@@ -655,7 +655,7 @@ float DeCalculator::findAverage(vector<float> myVector) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "DeCalculator", "findAverage");
+		m->errorOut(e, "DeCalculator", "findAverage");
 		exit(1);
 	}
 }
@@ -675,7 +675,7 @@ float DeCalculator::getCoef(vector<float> obs, vector<float> qav) {
 		return coef;
 	}
 	catch(exception& e) {
-		errorOut(e, "DeCalculator", "getCoef");
+		m->errorOut(e, "DeCalculator", "getCoef");
 		exit(1);
 	}
 }
@@ -833,7 +833,7 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 		return seqsMatches;
 	}
 	catch(exception& e) {
-		errorOut(e, "DeCalculator", "findClosest");
+		m->errorOut(e, "DeCalculator", "findClosest");
 		exit(1);
 	}
 }
@@ -865,7 +865,7 @@ Sequence* DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*> db) {
 		return seqsMatch;
 	}
 	catch(exception& e) {
-		errorOut(e, "DeCalculator", "findClosest");
+		m->errorOut(e, "DeCalculator", "findClosest");
 		exit(1);
 	}
 }
@@ -945,7 +945,7 @@ map<int, int> DeCalculator::trimSeqs(Sequence* query, vector<Sequence*> topMatch
 		if (pos < rearPos) { rearPos = pos; }
 
 		//check to make sure that is not whole seq
-		if ((rearPos - frontPos - 1) <= 0) {  mothurOut("Error, when I trim your sequences, the entire sequence is trimmed."); mothurOutEndLine(); exit(1);  }
+		if ((rearPos - frontPos - 1) <= 0) {  m->mothurOut("Error, when I trim your sequences, the entire sequence is trimmed."); m->mothurOutEndLine(); exit(1);  }
 //cout << query->getName() << " front = " << frontPos << " rear = " << rearPos << endl;		
 		//trim query
 		string newAligned = query->getAligned();
@@ -968,7 +968,7 @@ map<int, int> DeCalculator::trimSeqs(Sequence* query, vector<Sequence*> topMatch
 		return trimmedPos;
 	}
 	catch(exception& e) {
-		errorOut(e, "DeCalculator", "trimSequences");
+		m->errorOut(e, "DeCalculator", "trimSequences");
 		exit(1);
 	}
 

@@ -11,6 +11,7 @@
  */
 
 #include "mothur.h"
+#include "mothurout.h"
 
 //This class contains a list of all valid parameters in Mothur.  
 //It has a function which will tell you if your parameter is valid.
@@ -31,6 +32,7 @@ class ValidParameters {
 	private:
 		map<string, string>::iterator it;
 		map<string, vector<string> > parameterRanges;
+		MothurOut* m;
 
 };
 

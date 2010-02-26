@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 Slayer::Slayer(int win, int increment, int parentThreshold, float div, int i, int snp) :
-		windowSize(win), windowStep(increment), parentFragmentThreshold(parentThreshold), divRThreshold(div), iters(i), percentSNPSample(snp){}
+		windowSize(win), windowStep(increment), parentFragmentThreshold(parentThreshold), divRThreshold(div), iters(i), percentSNPSample(snp){ m = MothurOut::getInstance(); }
 /***********************************************************************/
 string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 	try {
@@ -98,7 +98,7 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "Slayer", "getResults");
+		m->errorOut(e, "Slayer", "getResults");
 		exit(1);
 	}
 }
@@ -130,7 +130,7 @@ vector<data_struct> Slayer::runBellerophon(Sequence* q, Sequence* pA, Sequence* 
 	
 		//check window size
 		if (length < (2*windowSize+windowStep)) { 
-			mothurOut("Your window size is too large for " + q->getName() + ". I will make the window size " + toString(length/4) + " which is 1/4 the filtered length."); mothurOutEndLine();	
+			m->mothurOut("Your window size is too large for " + q->getName() + ". I will make the window size " + toString(length/4) + " which is 1/4 the filtered length."); m->mothurOutEndLine();	
 			windowSize = length / 4;
 		}
 		
@@ -208,7 +208,7 @@ vector<data_struct> Slayer::runBellerophon(Sequence* q, Sequence* pA, Sequence* 
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Slayer", "runBellerophon");
+		m->errorOut(e, "Slayer", "runBellerophon");
 		exit(1);
 	}
 }
@@ -257,7 +257,7 @@ vector<snps> Slayer::getSNPS(string parentA, string query, string parentB, int l
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Slayer", "getSNPS");
+		m->errorOut(e, "Slayer", "getSNPS");
 		exit(1);
 	}
 }
@@ -342,7 +342,7 @@ void Slayer::bootstrapSNPS(vector<snps> left, vector<snps> right, float& BSA, fl
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "Slayer", "bootstrapSNPS");
+		m->errorOut(e, "Slayer", "bootstrapSNPS");
 		exit(1);
 	}
 }
@@ -363,7 +363,7 @@ float Slayer::snpQA(vector<snps> data) {
 		return percentID;
 	}
 	catch(exception& e) {
-		errorOut(e, "Slayer", "snpQA");
+		m->errorOut(e, "Slayer", "snpQA");
 		exit(1);
 	}
 }
@@ -385,7 +385,7 @@ float Slayer::snpQB(vector<snps> data) {
 
 	}
 	catch(exception& e) {
-		errorOut(e, "Slayer", "snpQB");
+		m->errorOut(e, "Slayer", "snpQB");
 		exit(1);
 	}
 }
@@ -406,7 +406,7 @@ float Slayer::snpAB(vector<snps> data) {
 
 	}
 	catch(exception& e) {
-		errorOut(e, "Slayer", "snpAB");
+		m->errorOut(e, "Slayer", "snpAB");
 		exit(1);
 	}
 }
@@ -428,7 +428,7 @@ float Slayer::computePercentID(string queryFrag, string parent, int left, int ri
 		return percentID;
 	}
 	catch(exception& e) {
-		errorOut(e, "Slayer", "computePercentID");
+		m->errorOut(e, "Slayer", "computePercentID");
 		exit(1);
 	}
 }
@@ -494,7 +494,7 @@ map<int, int> Slayer::verticalFilter(vector<Sequence*> seqs) {
 		return maskMap;
 	}
 	catch(exception& e) {
-		errorOut(e, "Slayer", "verticalFilter");
+		m->errorOut(e, "Slayer", "verticalFilter");
 		exit(1);
 	}
 }

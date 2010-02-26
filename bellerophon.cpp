@@ -21,7 +21,7 @@ Bellerophon::Bellerophon(string name, string o)  {
 		outputDir = o;
 	}
 	catch(exception& e) {
-		errorOut(e, "Bellerophon", "Bellerophon");
+		m->errorOut(e, "Bellerophon", "Bellerophon");
 		exit(1);
 	}
 }
@@ -39,33 +39,33 @@ void Bellerophon::print(ostream& out, ostream& outAcc) {
 			if (pref[i].score[0] > 1.0) { 
 				above1++; 
 				outAcc << pref[i].name << endl;
-				mothurOut(pref[i].name + " is a suspected chimera at breakpoint " + toString(pref[i].midpoint)); mothurOutEndLine();
-				mothurOut("It's score is " + toString(pref[i].score[0]) + " with suspected left parent " + pref[i].leftParent[0] + " and right parent " + pref[i].rightParent[0]); mothurOutEndLine();
+				m->mothurOut(pref[i].name + " is a suspected chimera at breakpoint " + toString(pref[i].midpoint)); m->mothurOutEndLine();
+				m->mothurOut("It's score is " + toString(pref[i].score[0]) + " with suspected left parent " + pref[i].leftParent[0] + " and right parent " + pref[i].rightParent[0]); m->mothurOutEndLine();
 			}
 		}
 		
 		//output results to screen
-		mothurOutEndLine();
-		mothurOut("Sequence with preference score above 1.0: " + toString(above1)); mothurOutEndLine();
+		m->mothurOutEndLine();
+		m->mothurOut("Sequence with preference score above 1.0: " + toString(above1)); m->mothurOutEndLine();
 		int spot;
 		spot = pref.size()-1;
-		mothurOut("Minimum:\t" + toString(pref[spot].score[0])); mothurOutEndLine();
+		m->mothurOut("Minimum:\t" + toString(pref[spot].score[0])); m->mothurOutEndLine();
 		spot = pref.size() * 0.975;
-		mothurOut("2.5%-tile:\t" + toString(pref[spot].score[0])); mothurOutEndLine();
+		m->mothurOut("2.5%-tile:\t" + toString(pref[spot].score[0])); m->mothurOutEndLine();
 		spot = pref.size() * 0.75;
-		mothurOut("25%-tile:\t" + toString(pref[spot].score[0])); mothurOutEndLine();
+		m->mothurOut("25%-tile:\t" + toString(pref[spot].score[0])); m->mothurOutEndLine();
 		spot = pref.size() * 0.50;
-		mothurOut("Median: \t" + toString(pref[spot].score[0])); mothurOutEndLine();
+		m->mothurOut("Median: \t" + toString(pref[spot].score[0])); m->mothurOutEndLine();
 		spot = pref.size() * 0.25;
-		mothurOut("75%-tile:\t" + toString(pref[spot].score[0])); mothurOutEndLine();
+		m->mothurOut("75%-tile:\t" + toString(pref[spot].score[0])); m->mothurOutEndLine();
 		spot = pref.size() * 0.025;
-		mothurOut("97.5%-tile:\t" + toString(pref[spot].score[0])); mothurOutEndLine();
+		m->mothurOut("97.5%-tile:\t" + toString(pref[spot].score[0])); m->mothurOutEndLine();
 		spot = 0;
-		mothurOut("Maximum:\t" + toString(pref[spot].score[0])); mothurOutEndLine();
+		m->mothurOut("Maximum:\t" + toString(pref[spot].score[0])); m->mothurOutEndLine();
 
 	}
 	catch(exception& e) {
-		errorOut(e, "Bellerophon", "print");
+		m->errorOut(e, "Bellerophon", "print");
 		exit(1);
 	}
 }
@@ -96,28 +96,28 @@ int Bellerophon::getChimeras() {
 		}
 		
 		distCalculator = new eachGapDist();
-		
+cout << "fastafile = " << fastafile << endl;		
 		//read in sequences
 		seqs = readSeqs(fastafile);
-		
-		if (unaligned) { mothurOut("Your sequences need to be aligned when you use the bellerophon method."); mothurOutEndLine(); return 1;  }
+	cout << "here:"<< endl;	
+		if (unaligned) { m->mothurOut("Your sequences need to be aligned when you use the bellerophon method."); m->mothurOutEndLine(); return 1;  }
 		
 		int numSeqs = seqs.size();
 		
-		if (numSeqs == 0) { mothurOut("Error in reading you sequences."); mothurOutEndLine(); exit(1); }
+		if (numSeqs == 0) { m->mothurOut("Error in reading you sequences."); m->mothurOutEndLine(); exit(1); }
 		
 		//set default window to 25% of sequence length
 		string seq0 = seqs[0]->getAligned();
 		if (window == 0) { window = seq0.length() / 4;  }
 		else if (window > (seq0.length() / 2)) {  
-			mothurOut("Your sequence length is = " + toString(seq0.length()) + ". You have selected a window size greater than the length of half your aligned sequence. I will run it with a window size of " + toString((seq0.length() / 2))); mothurOutEndLine();
+			m->mothurOut("Your sequence length is = " + toString(seq0.length()) + ". You have selected a window size greater than the length of half your aligned sequence. I will run it with a window size of " + toString((seq0.length() / 2))); m->mothurOutEndLine();
 			window = (seq0.length() / 2);
 		}
 		
 		if (increment > (seqs[0]->getAlignLength() - (2*window))) { 
 			if (increment != 10) {
 			
-				mothurOut("You have selected a increment that is too large. I will use the default."); mothurOutEndLine();
+				m->mothurOut("You have selected a increment that is too large. I will use the default."); m->mothurOutEndLine();
 				increment = 10;
 				if (increment > (seqs[0]->getAlignLength() - (2*window))) {  increment = 0;  }
 				
@@ -234,7 +234,7 @@ int Bellerophon::getChimeras() {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Bellerophon", "getChimeras");
+		m->errorOut(e, "Bellerophon", "getChimeras");
 		exit(1);
 	}
 }
@@ -259,7 +259,7 @@ int Bellerophon::createSparseMatrix(int startSeq, int endSeq, SparseMatrix* spar
 		return 1;
 	}
 	catch(exception& e) {
-		errorOut(e, "Bellerophon", "createSparseMatrix");
+		m->errorOut(e, "Bellerophon", "createSparseMatrix");
 		exit(1);
 	}
 }
@@ -382,7 +382,7 @@ void Bellerophon::generatePreferences(vector<SeqMap> left, vector<SeqMap> right,
 
 	}
 	catch(exception& e) {
-		errorOut(e, "Bellerophon", "generatePreferences");
+		m->errorOut(e, "Bellerophon", "generatePreferences");
 		exit(1);
 	}
 }

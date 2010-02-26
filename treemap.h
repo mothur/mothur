@@ -25,7 +25,7 @@ class ListVector;
 
 class TreeMap {
 public:
-	TreeMap() {};
+	TreeMap() { m = MothurOut::getInstance(); }
 	TreeMap(string);
 	~TreeMap();
 	void readMap();
@@ -51,6 +51,7 @@ private:
 	map<string, GroupIndex>::iterator it;
 	map<string, int>::iterator it2;
 	void setNamesOfGroups(string); 
+	MothurOut* m;
 	
 	
 };

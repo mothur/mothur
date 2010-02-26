@@ -29,7 +29,7 @@ SAbundVector::SAbundVector(string id, vector<int> sav) : DataVector(id), data(sa
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "SAbundVector", "SAbundVector");
+		m->errorOut(e, "SAbundVector", "SAbundVector");
 		exit(1);
 	}
 }
@@ -44,7 +44,7 @@ SAbundVector::SAbundVector(vector <int> dataVec, int mr, int nb, int ns) {
 		numSeqs = ns;
 	}
 	catch(exception& e) {
-		errorOut(e, "SAbundVector", "SAbundVector");
+		m->errorOut(e, "SAbundVector", "SAbundVector");
 		exit(1);
 	}
 }
@@ -66,7 +66,7 @@ SAbundVector::SAbundVector(ifstream& f): DataVector(), maxRank(0), numBins(0), n
 
 	}
 	catch(exception& e) {
-		errorOut(e, "SAbundVector", "SAbundVector");
+		m->errorOut(e, "SAbundVector", "SAbundVector");
 		exit(1);
 	}
 }
@@ -89,7 +89,7 @@ void SAbundVector::set(int sabund, int abundance){
 		if(sabund > maxRank)	{	maxRank = sabund;		}
 	}
 	catch(exception& e) {
-		errorOut(e, "SAbundVector", "set");
+		m->errorOut(e, "SAbundVector", "set");
 		exit(1);
 	}
 }
@@ -114,7 +114,7 @@ void SAbundVector::push_back(int abundance){
 		numSeqs += (maxRank * abundance);
 	}
 	catch(exception& e) {
-		errorOut(e, "SAbundVector", "push_back");
+		m->errorOut(e, "SAbundVector", "push_back");
 		exit(1);
 	}
 }
@@ -165,7 +165,7 @@ void SAbundVector::print(ostream& output){
 		output << endl;
 	}
 	catch(exception& e) {
-		errorOut(e, "SAbundVector", "print");
+		m->errorOut(e, "SAbundVector", "print");
 		exit(1);
 	}
 }
@@ -205,7 +205,7 @@ RAbundVector SAbundVector::getRAbundVector(){
 		return rav;
 	}
 	catch(exception& e) {
-		errorOut(e, "SAbundVector", "getRAbundVector");
+		m->errorOut(e, "SAbundVector", "getRAbundVector");
 		exit(1);
 	}
 }
@@ -240,7 +240,7 @@ OrderVector SAbundVector::getOrderVector(map<string,int>* hold = NULL){
 		return ov;
 	}
 	catch(exception& e) {
-		errorOut(e, "SAbundVector", "getOrderVector");
+		m->errorOut(e, "SAbundVector", "getOrderVector");
 		exit(1);
 	}
 }

@@ -100,7 +100,7 @@ EstOutput SharedAce::getValues(vector<SharedRAbundVector*> shared) {
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedAce", "getValues");
+		m->errorOut(e, "SharedAce", "getValues");
 		exit(1);
 	}
 }

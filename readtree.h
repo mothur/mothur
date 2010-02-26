@@ -33,6 +33,7 @@ class ReadTree {
 	protected:
 		GlobalData* globaldata;
 		int numNodes, numLeaves;
+		MothurOut* m;
 		
 		
 };

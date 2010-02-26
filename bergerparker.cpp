@@ -23,7 +23,7 @@ EstOutput BergerParker::getValues(SAbundVector* rank){
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "BergerParker", "getValues");
+		m->errorOut(e, "BergerParker", "getValues");
 		exit(1);
 	}
 }

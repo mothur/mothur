@@ -25,6 +25,7 @@ class RemoveSeqsCommand : public Command {
 		set<string> names;
 		string accnosfile, fastafile, namefile, groupfile, alignfile, listfile, outputDir;
 		bool abort, dups;
+		vector<string> outputNames;
 		
 		void readFasta();
 		void readName();

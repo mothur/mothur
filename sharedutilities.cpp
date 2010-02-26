@@ -49,7 +49,7 @@ void SharedUtil::getSharedVectors(vector<string> Groups, vector<SharedRAbundVect
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedUtil", "getSharedVectors");
+		m->errorOut(e, "SharedUtil", "getSharedVectors");
 		exit(1);
 	}
 }
@@ -93,7 +93,7 @@ void SharedUtil::getSharedVectorswithReplacement(vector<string> Groups, vector<S
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedUtil", "getSharedVectorswithReplacement");
+		m->errorOut(e, "SharedUtil", "getSharedVectorswithReplacement");
 		exit(1);
 	}
 }
@@ -107,7 +107,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 				//check that groups are valid
 				for (int i = 0; i < userGroups.size(); i++) {
 					if (isValidGroup(userGroups[i], allGroups) != true) {
-						mothurOut(userGroups[i] + " is not a valid group, and will be disregarded."); mothurOutEndLine();
+						m->mothurOut(userGroups[i] + " is not a valid group, and will be disregarded."); m->mothurOutEndLine();
 						// erase the invalid group from userGroups
 						userGroups.erase(userGroups.begin()+i);
 						i--;
@@ -116,7 +116,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 				
 				//if the user only entered invalid groups
 				if (userGroups.size() == 0) { 
-					mothurOut("You provided no valid groups. I will run the command using all the groups in your groupfile."); mothurOutEndLine();
+					m->mothurOut("You provided no valid groups. I will run the command using all the groups in your groupfile."); m->mothurOutEndLine();
 					for (int i = 0; i < allGroups.size(); i++) {
 						userGroups.push_back(allGroups[i]);
 					}
@@ -136,7 +136,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 			
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedUtil", "setGroups");
+		m->errorOut(e, "SharedUtil", "setGroups");
 		exit(1);
 	}
 }
@@ -149,7 +149,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 				//check that groups are valid
 				for (int i = 0; i < userGroups.size(); i++) {
 					if (isValidGroup(userGroups[i], allGroups) != true) {
-						mothurOut(userGroups[i] + " is not a valid group, and will be disregarded."); mothurOutEndLine();
+						m->mothurOut(userGroups[i] + " is not a valid group, and will be disregarded."); m->mothurOutEndLine();
 						// erase the invalid group from userGroups
 						userGroups.erase(userGroups.begin()+i);
 						i--;
@@ -171,7 +171,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 		if ((mode == "collect") || (mode == "rarefact") || (mode == "summary") || (mode == "treegroup")) {
 				//if the user only entered invalid groups
 				if ((userGroups.size() == 0) || (userGroups.size() == 1)) { 
-					mothurOut("When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile."); mothurOutEndLine();
+					m->mothurOut("When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile."); m->mothurOutEndLine();
 					for (int i = 0; i < allGroups.size(); i++) {
 						userGroups.push_back(allGroups[i]);
 					}
@@ -180,7 +180,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedUtil", "setGroups");
+		m->errorOut(e, "SharedUtil", "setGroups");
 		exit(1);
 	}
 }
@@ -199,7 +199,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 				//check that groups are valid
 				for (int i = 0; i < userGroups.size(); i++) {
 					if (isValidGroup(userGroups[i], allGroups) != true) {
-						mothurOut(userGroups[i] + " is not a valid group, and will be disregarded."); mothurOutEndLine();
+						m->mothurOut(userGroups[i] + " is not a valid group, and will be disregarded."); m->mothurOutEndLine();
 						// erase the invalid group from globaldata->Groups
 						userGroups.erase(userGroups.begin()+i);
 						i--;
@@ -236,9 +236,9 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 						userGroups.push_back(allGroups[i]);
 					}
 				}
-				mothurOut("When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile."); mothurOutEndLine();
+				m->mothurOut("When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile."); m->mothurOutEndLine();
 			}else if (userGroups.size() == 1) { 
-				mothurOut("When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile."); mothurOutEndLine();
+				m->mothurOut("When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile."); m->mothurOutEndLine();
 				userGroups.clear();
 				for (int i=0; i < allGroups.size(); i++) { 
 					if (allGroups[i] != "xxx") {
@@ -251,7 +251,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 		}else if ((mode == "unweighted") || (mode == "parsimony")) {
 				//if the user only entered invalid groups
 				if ((userGroups.size() == 0) && (numGroups == 0)) { 
-					mothurOut("When using the groups parameter you must have at least 1 valid group. I will run the command using all the groups in your groupfile."); mothurOutEndLine();
+					m->mothurOut("When using the groups parameter you must have at least 1 valid group. I will run the command using all the groups in your groupfile."); m->mothurOutEndLine();
 					for (int i = 0; i < allGroups.size(); i++) {
 						if (allGroups[i] != "xxx") {
 							userGroups.push_back(allGroups[i]);
@@ -263,7 +263,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedUtil", "setGroups");
+		m->errorOut(e, "SharedUtil", "setGroups");
 		exit(1);
 	}
 }
@@ -281,7 +281,7 @@ void SharedUtil::getCombos(vector<string>& groupComb, vector<string> userGroups,
 		} 
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedUtil", "getCombos");
+		m->errorOut(e, "SharedUtil", "getCombos");
 		exit(1);
 	}
 }
@@ -295,7 +295,7 @@ bool SharedUtil::isValidGroup(string groupname, vector<string> groups) {
 		return false;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedUtil", "isValidGroup");
+		m->errorOut(e, "SharedUtil", "isValidGroup");
 		exit(1);
 	}
 }
@@ -309,7 +309,7 @@ void SharedUtil::updateGroupIndex(vector<string>& userGroups, map<string, int>& 
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedUtil", "updateGroupIndex");
+		m->errorOut(e, "SharedUtil", "updateGroupIndex");
 		exit(1);
 	}
 }

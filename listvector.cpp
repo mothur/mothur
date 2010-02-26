@@ -36,7 +36,7 @@ ListVector::ListVector(string id, vector<string> lv) : DataVector(id), data(lv){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "ListVector", "ListVector");
+		m->errorOut(e, "ListVector", "ListVector");
 		exit(1);
 	}
 }
@@ -59,7 +59,7 @@ ListVector::ListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numS
 		gobble(f);
 	}
 	catch(exception& e) {
-		errorOut(e, "ListVector", "ListVector");
+		m->errorOut(e, "ListVector", "ListVector");
 		exit(1);
 	}
 }
@@ -79,7 +79,7 @@ void ListVector::set(int binNumber, string seqNames){
 		numSeqs += (nNames_new - nNames_old);
 	}
 	catch(exception& e) {
-		errorOut(e, "ListVector", "set");
+		m->errorOut(e, "ListVector", "set");
 		exit(1);
 	}
 }
@@ -104,7 +104,7 @@ void ListVector::push_back(string seqNames){
 		numSeqs += nNames;
 	}
 	catch(exception& e) {
-		errorOut(e, "ListVector", "push_back");
+		m->errorOut(e, "ListVector", "push_back");
 		exit(1);
 	}
 }
@@ -144,7 +144,7 @@ void ListVector::print(ostream& output){
 		output << endl;
 	}
 	catch(exception& e) {
-		errorOut(e, "ListVector", "print");
+		m->errorOut(e, "ListVector", "print");
 		exit(1);
 	}
 }
@@ -175,7 +175,7 @@ RAbundVector ListVector::getRAbundVector(){
 		return rav;
 	}
 	catch(exception& e) {
-		errorOut(e, "ListVector", "getRAbundVector");
+		m->errorOut(e, "ListVector", "getRAbundVector");
 		exit(1);
 	}
 }
@@ -196,7 +196,7 @@ SAbundVector ListVector::getSAbundVector(){
 		return sav;
 	}
 	catch(exception& e) {
-		errorOut(e, "ListVector", "getSAbundVector");
+		m->errorOut(e, "ListVector", "getSAbundVector");
 		exit(1);
 	}
 }
@@ -238,7 +238,7 @@ OrderVector ListVector::getOrderVector(map<string,int>* orderMap = NULL){
 					}
 					else{
 						if(orderMap->count(seqName) == 0){
-							mothurOut(seqName + " not found, check *.names file\n");
+							m->mothurOut(seqName + " not found, check *.names file\n");
 							exit(1);
 						}
 					
@@ -248,7 +248,7 @@ OrderVector ListVector::getOrderVector(map<string,int>* orderMap = NULL){
 				}
 			
 				if(orderMap->count(seqName) == 0){
-					mothurOut(seqName + " not found, check *.names file\n");
+					m->mothurOut(seqName + " not found, check *.names file\n");
 					exit(1);
 				}
 				ov.set((*orderMap)[seqName], i);	
@@ -261,7 +261,7 @@ OrderVector ListVector::getOrderVector(map<string,int>* orderMap = NULL){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "ListVector", "getOrderVector");
+		m->errorOut(e, "ListVector", "getOrderVector");
 		exit(1);
 	}
 }

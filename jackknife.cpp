@@ -25,7 +25,7 @@ void Jackknife::getAMatrix(void){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "Jackknife", "getAMatrix");
+		m->errorOut(e, "Jackknife", "getAMatrix");
 		exit(1);
 	}
 }
@@ -53,7 +53,7 @@ double Jackknife::CN(double z){
 		return n;
 	}
 	catch(exception& e) {
-		errorOut(e, "Jackknife", "CN");
+		m->errorOut(e, "Jackknife", "CN");
 		exit(1);
 	}
 }
@@ -144,7 +144,7 @@ EstOutput Jackknife::getValues(SAbundVector* rank){
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "Jackknife", "getValues");
+		m->errorOut(e, "Jackknife", "getValues");
 		exit(1);
 	}
 }

@@ -90,7 +90,7 @@ EstOutput SharedChao1::getValues(vector<SharedRAbundVector*> shared){
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedChao1", "getValues");
+		m->errorOut(e, "SharedChao1", "getValues");
 		exit(1);
 	}
 }
@@ -138,8 +138,8 @@ void SharedChao1::initialTree(int n) {
 		setCoef(f2root, 0);
 	}
 	catch(exception& e) {
-		if ((toString(e.what()) == "vector::_M_fill_insert") || (toString(e.what()) == "St9bad_alloc")) { mothurOut("You are using " + toString(n) + " groups which creates 2^" + toString(n+1) + " nodes. Try reducing the number of groups you selected. "); mothurOutEndLine(); exit(1); }
-		errorOut(e, "SharedChao1", "initialTree");
+		if ((toString(e.what()) == "vector::_M_fill_insert") || (toString(e.what()) == "St9bad_alloc")) { m->mothurOut("You are using " + toString(n) + " groups which creates 2^" + toString(n+1) + " nodes. Try reducing the number of groups you selected. "); m->mothurOutEndLine(); exit(1); }
+		m->errorOut(e, "SharedChao1", "initialTree");
 		exit(1);
 	}
 }
@@ -152,7 +152,7 @@ void SharedChao1::updateTree(vector<int> bin) {
 		updateBranchf2(f2root, bin, 0); 
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedChao1", "updateTree");
+		m->errorOut(e, "SharedChao1", "updateTree");
 		exit(1);
 	}
 }
@@ -174,7 +174,7 @@ void SharedChao1::updateBranchf1(IntNode* node, vector<int> bin, int index) {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedChao1", "updateBranchf1");		
+		m->errorOut(e, "SharedChao1", "updateBranchf1");		
 		exit(1);
 	}
 }
@@ -196,7 +196,7 @@ void SharedChao1::updateBranchf2(IntNode* node, vector<int> bin, int index) {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedChao1", "updateBranchf2");	
+		m->errorOut(e, "SharedChao1", "updateBranchf2");	
 		exit(1);
 	}
 }
@@ -213,7 +213,7 @@ void SharedChao1::setCoef(IntNode* node, int coef) {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedChao1", "setCoef");	
+		m->errorOut(e, "SharedChao1", "setCoef");	
 		exit(1);
 	}
 }
@@ -222,10 +222,10 @@ void SharedChao1::setCoef(IntNode* node, int coef) {
 //for debugging purposes
 void SharedChao1::printTree() {
 	
-	mothurOut("F1 leaves"); mothurOutEndLine();
+	m->mothurOut("F1 leaves"); m->mothurOutEndLine();
 	printBranch(f1root);
 	
-	mothurOut("F2 leaves"); mothurOutEndLine();
+	m->mothurOut("F2 leaves"); m->mothurOutEndLine();
 	printBranch(f2root);
 
 
@@ -239,13 +239,13 @@ void SharedChao1::printBranch(IntNode* node) {
 			printBranch(node->left);
 			printBranch(node->right);
 		}else { //you are a leaf
-			mothurOut(toString(node->lvalue)); mothurOutEndLine();
-			mothurOut(toString(node->rvalue)); mothurOutEndLine();
+			m->mothurOut(toString(node->lvalue)); m->mothurOutEndLine();
+			m->mothurOut(toString(node->rvalue)); m->mothurOutEndLine();
 		}
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedChao1", "printBranch");	
+		m->errorOut(e, "SharedChao1", "printBranch");	
 		exit(1);
 	}
 }

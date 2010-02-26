@@ -127,7 +127,7 @@ void ReadColumnMatrix::read(NameAssignment* nameMap){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "ReadColumnMatrix", "read");
+		m->errorOut(e, "ReadColumnMatrix", "read");
 		exit(1);
 	}
 }

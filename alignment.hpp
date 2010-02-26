@@ -49,6 +49,7 @@ protected:
 	int pairwiseLength;
 	int nRows, nCols, lA, lB;
 	vector<vector<AlignmentCell> > alignment;
+	MothurOut* m;
 };
 
 /**************************************************************************************************/

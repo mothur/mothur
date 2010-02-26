@@ -209,7 +209,7 @@ void FormatPhylipMatrix::read(NameAssignment* nameMap){
 			
 	}
 	catch(exception& e) {
-               errorOut(e, "FormatPhylipMatrix", "read");
+               m->errorOut(e, "FormatPhylipMatrix", "read");
                 exit(1);
 	}
 }

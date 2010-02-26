@@ -57,7 +57,7 @@
 class FormatMatrix {
 
 public:
-	FormatMatrix(){	}
+	FormatMatrix(){	m = MothurOut::getInstance(); }
 	virtual ~FormatMatrix() {}
 	
 	virtual void read(NameAssignment*){};
@@ -72,6 +72,7 @@ protected:
 	float cutoff;
 	string distFile;
 	vector<int> rowPos;
+	MothurOut* m;
 };
 
 //**********************************************************************************************************************

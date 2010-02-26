@@ -23,7 +23,7 @@ class GlobalData;
 class UnifracWeightedCommand : public Command {
 	
 	public:
-		UnifracWeightedCommand(string);	
+		UnifracWeightedCommand(string);
 		~UnifracWeightedCommand() { if (abort == false) {  delete weighted; delete util; } }
 		int execute();	
 		void help();
@@ -51,7 +51,7 @@ class UnifracWeightedCommand : public Command {
 		
 		bool abort, phylip, random;
 		string groups, itersString;
-		vector<string> Groups; //holds groups to be used
+		vector<string> Groups, outputNames; //holds groups to be used
 
 		
 		ofstream outSum;

@@ -17,7 +17,7 @@
 
 //***************************************************************************************************************
 
-ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
+ChimeraSeqsCommand::ChimeraSeqsCommand(string option)  {
 	try {
 		abort = false;
 		
@@ -91,7 +91,7 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
-			else if (fastafile == "not found") { fastafile = ""; mothurOut("fasta is a required parameter for the chimera.seqs command."); mothurOutEndLine(); abort = true;  }	
+			else if (fastafile == "not found") { fastafile = ""; m->mothurOut("fasta is a required parameter for the chimera.seqs command."); m->mothurOutEndLine(); abort = true;  }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -198,15 +198,15 @@ ChimeraSeqsCommand::ChimeraSeqsCommand(string option){
 			else if (temp == "not found") { temp = "20"; }
 			convert(temp, numwanted);
 
-			if ((search != "distance") && (search != "blast") && (search != "kmer")) { mothurOut(search + " is not a valid search."); mothurOutEndLine(); abort = true;  }
+			if ((search != "distance") && (search != "blast") && (search != "kmer")) { m->mothurOut(search + " is not a valid search."); m->mothurOutEndLine(); abort = true;  }
 			
-			if (((method != "bellerophon")) && (templatefile == "")) { mothurOut("You must provide a template file with the pintail, ccode, chimeraslayer or chimeracheck methods."); mothurOutEndLine(); abort = true;  }
+			if (((method != "bellerophon")) && (templatefile == "")) { m->mothurOut("You must provide a template file with the pintail, ccode, chimeraslayer or chimeracheck methods."); m->mothurOutEndLine(); abort = true;  }
 			
 
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "ChimeraSeqsCommand", "ChimeraSeqsCommand");
+		m->errorOut(e, "ChimeraSeqsCommand", "ChimeraSeqsCommand");
 		exit(1);
 	}
 }
@@ -216,51 +216,51 @@ void ChimeraSeqsCommand::help(){
 	try {
 	
 		//"fasta", "filter", "correction", "processors", "method", "window", "increment", "template", "conservation", "quantile", "mask", "numwanted", "ksize", "svg", "name"
-		//mothurOut("chimera.seqs ASSUMES that your sequences are ALIGNED and if using a template that the template file sequences are the same length as the fasta file sequences.\n\n");
-		mothurOut("The chimera.seqs command reads a fastafile and creates list of potentially chimeric sequences.\n");
-		mothurOut("The chimera.seqs command parameters are fasta, filter, correction, processors, mask, method, window, increment, template, conservation, quantile, numwanted, ksize, svg, name, iters, search, realign.\n");
-		mothurOut("The fasta parameter is always required and template is required if using pintail, ccode or chimeracheck.\n");
-		mothurOut("The filter parameter allows you to specify if you would like to apply a vertical and 50% soft filter. \n");
-		mothurOut("The correction parameter allows you to put more emphasis on the distance between highly similar sequences and less emphasis on the differences between remote homologs.\n");
-		mothurOut("The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n");
-		mothurOut("The method parameter allows you to specify the method for finding chimeric sequences.  The default is pintail. Options include bellerophon, ccode and chimeracheck \n");
-		mothurOut("The mask parameter allows you to specify a file containing one sequence you wish to use as a mask for the your sequences. \n");
-		mothurOut("The window parameter allows you to specify the window size for searching for chimeras. \n");
-		mothurOut("The increment parameter allows you to specify how far you move each window while finding chimeric sequences.\n");
-		mothurOut("The template parameter allows you to enter a template file containing known non-chimeric sequences. \n");
-		mothurOut("The conservation parameter allows you to enter a frequency file containing the highest bases frequency at each place in the alignment.\n");
-		mothurOut("The quantile parameter allows you to enter a file containing quantiles for a template files sequences.\n");
-		mothurOut("The numwanted parameter allows you to specify how many sequences you would each query sequence compared with.\n");
-		mothurOut("The ksize parameter allows you to input kmersize. \n");
-		mothurOut("The svg parameter allows you to specify whether or not you would like a svg file outputted for each query sequence.\n");
-		mothurOut("The name parameter allows you to enter a file containing names of sequences you would like .svg files for.\n");
-		mothurOut("The iters parameter allows you to specify the number of bootstrap iters to do with the chimeraslayer method.\n");
-		mothurOut("The minsim parameter allows you .... \n");
-		mothurOut("The mincov parameter allows you to specify minimum coverage by closest matches found in template. Default is 70, meaning 70%. \n");
-		mothurOut("The minbs parameter allows you to specify minimum bootstrap support for calling a sequence chimeric. Default is 90, meaning 90%. \n");
-		mothurOut("The minsnp parameter allows you to specify percent of SNPs to sample on each side of breakpoint for computing bootstrap support (default: 10) \n");
-		mothurOut("The search parameter allows you to specify search method for finding the closest parent. Choices are distance, blast, and kmer, default distance.  -used only by chimeraslayer. \n");
-		mothurOut("The realign parameter allows you to realign the query to the potential paretns. Choices are true or false, default false.  -used only by chimeraslayer. \n");
-		mothurOut("NOT ALL PARAMETERS ARE USED BY ALL METHODS. Please look below for method specifics.\n\n");
-		mothurOut("Details for each method: \n"); 
-		mothurOut("\tpintail: \n"); 
-		mothurOut("\t\tparameters: fasta=required, template=required, filter=F, mask=no mask, processors=1, window=300, increment=25, conservation=not required, but will improve speed, quantile=not required, but will greatly improve speed. \n"); 
-		mothurOut("\t\tIf you have run chimera.seqs using pintail a .quan and .freq file will be created for your template, if you have not provided them for use in future command executions.\n");
-		mothurOut("\tbellerophon: \n"); 
-		mothurOut("\t\tparameters: fasta=required, filter=F, processors=1, window=1/4 length of seq, increment=25, correction=T. \n"); 
-		mothurOut("\tccode: \n"); 
-		mothurOut("\t\tparameters: fasta=required, template=required, filter=F, mask=no mask, processors=1, window=10% of length, numwanted=20\n"); 
-		mothurOut("\tchimeracheck: \n"); 
-		mothurOut("\t\tparameters: fasta=required, template=required, processors=1, increment=10, ksize=7, svg=F, name=none\n\n"); 
-		mothurOut("\tchimeraslayer: \n"); 
-		mothurOut("\t\tparameters: fasta=required, template=required, processors=1, increment=10, mask=no mask, numwanted=10, match=5, mismatch=-4, divergence=1.0, minsim=90, parents=5, iters=1000, window=100. \n\n"); 
-		mothurOut("The chimera.seqs command should be in the following format: \n");
-		mothurOut("chimera.seqs(fasta=yourFastaFile, filter=yourFilter, correction=yourCorrection, processors=yourProcessors, method=bellerophon) \n");
-		mothurOut("Example: chimera.seqs(fasta=AD.align, filter=True, correction=true, method=bellerophon, window=200) \n");
-		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");	
+		//m->mothurOut("chimera.seqs ASSUMES that your sequences are ALIGNED and if using a template that the template file sequences are the same length as the fasta file sequences.\n\n");
+		m->mothurOut("The chimera.seqs command reads a fastafile and creates list of potentially chimeric sequences.\n");
+		m->mothurOut("The chimera.seqs command parameters are fasta, filter, correction, processors, mask, method, window, increment, template, conservation, quantile, numwanted, ksize, svg, name, iters, search, realign.\n");
+		m->mothurOut("The fasta parameter is always required and template is required if using pintail, ccode or chimeracheck.\n");
+		m->mothurOut("The filter parameter allows you to specify if you would like to apply a vertical and 50% soft filter. \n");
+		m->mothurOut("The correction parameter allows you to put more emphasis on the distance between highly similar sequences and less emphasis on the differences between remote homologs.\n");
+		m->mothurOut("The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n");
+		m->mothurOut("The method parameter allows you to specify the method for finding chimeric sequences.  The default is pintail. Options include bellerophon, ccode and chimeracheck \n");
+		m->mothurOut("The mask parameter allows you to specify a file containing one sequence you wish to use as a mask for the your sequences. \n");
+		m->mothurOut("The window parameter allows you to specify the window size for searching for chimeras. \n");
+		m->mothurOut("The increment parameter allows you to specify how far you move each window while finding chimeric sequences.\n");
+		m->mothurOut("The template parameter allows you to enter a template file containing known non-chimeric sequences. \n");
+		m->mothurOut("The conservation parameter allows you to enter a frequency file containing the highest bases frequency at each place in the alignment.\n");
+		m->mothurOut("The quantile parameter allows you to enter a file containing quantiles for a template files sequences.\n");
+		m->mothurOut("The numwanted parameter allows you to specify how many sequences you would each query sequence compared with.\n");
+		m->mothurOut("The ksize parameter allows you to input kmersize. \n");
+		m->mothurOut("The svg parameter allows you to specify whether or not you would like a svg file outputted for each query sequence.\n");
+		m->mothurOut("The name parameter allows you to enter a file containing names of sequences you would like .svg files for.\n");
+		m->mothurOut("The iters parameter allows you to specify the number of bootstrap iters to do with the chimeraslayer method.\n");
+		m->mothurOut("The minsim parameter allows you .... \n");
+		m->mothurOut("The mincov parameter allows you to specify minimum coverage by closest matches found in template. Default is 70, meaning 70%. \n");
+		m->mothurOut("The minbs parameter allows you to specify minimum bootstrap support for calling a sequence chimeric. Default is 90, meaning 90%. \n");
+		m->mothurOut("The minsnp parameter allows you to specify percent of SNPs to sample on each side of breakpoint for computing bootstrap support (default: 10) \n");
+		m->mothurOut("The search parameter allows you to specify search method for finding the closest parent. Choices are distance, blast, and kmer, default distance.  -used only by chimeraslayer. \n");
+		m->mothurOut("The realign parameter allows you to realign the query to the potential paretns. Choices are true or false, default false.  -used only by chimeraslayer. \n");
+		m->mothurOut("NOT ALL PARAMETERS ARE USED BY ALL METHODS. Please look below for method specifics.\n\n");
+		m->mothurOut("Details for each method: \n"); 
+		m->mothurOut("\tpintail: \n"); 
+		m->mothurOut("\t\tparameters: fasta=required, template=required, filter=F, mask=no mask, processors=1, window=300, increment=25, conservation=not required, but will improve speed, quantile=not required, but will greatly improve speed. \n"); 
+		m->mothurOut("\t\tIf you have run chimera.seqs using pintail a .quan and .freq file will be created for your template, if you have not provided them for use in future command executions.\n");
+		m->mothurOut("\tbellerophon: \n"); 
+		m->mothurOut("\t\tparameters: fasta=required, filter=F, processors=1, window=1/4 length of seq, increment=25, correction=T. \n"); 
+		m->mothurOut("\tccode: \n"); 
+		m->mothurOut("\t\tparameters: fasta=required, template=required, filter=F, mask=no mask, processors=1, window=10% of length, numwanted=20\n"); 
+		m->mothurOut("\tchimeracheck: \n"); 
+		m->mothurOut("\t\tparameters: fasta=required, template=required, processors=1, increment=10, ksize=7, svg=F, name=none\n\n"); 
+		m->mothurOut("\tchimeraslayer: \n"); 
+		m->mothurOut("\t\tparameters: fasta=required, template=required, processors=1, increment=10, mask=no mask, numwanted=10, match=5, mismatch=-4, divergence=1.0, minsim=90, parents=5, iters=1000, window=100. \n\n"); 
+		m->mothurOut("The chimera.seqs command should be in the following format: \n");
+		m->mothurOut("chimera.seqs(fasta=yourFastaFile, filter=yourFilter, correction=yourCorrection, processors=yourProcessors, method=bellerophon) \n");
+		m->mothurOut("Example: chimera.seqs(fasta=AD.align, filter=True, correction=true, method=bellerophon, window=200) \n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");	
 	}
 	catch(exception& e) {
-		errorOut(e, "ChimeraSeqsCommand", "help");
+		m->errorOut(e, "ChimeraSeqsCommand", "help");
 		exit(1);
 	}
 }
@@ -283,10 +283,10 @@ int ChimeraSeqsCommand::execute(){
 		else if (method == "ccode")				{		chimera = new Ccode(fastafile, outputDir);					}
 		else if (method == "chimeracheck")		{		chimera = new ChimeraCheckRDP(fastafile, outputDir);		}
 		else if (method == "chimeraslayer")		{		chimera = new ChimeraSlayer(search, realign, fastafile);	}
-		else { mothurOut("Not a valid method."); mothurOutEndLine(); return 0;		}
+		else { m->mothurOut("Not a valid method."); m->mothurOutEndLine(); return 0;		}
 		
 		//set user options
-		if (maskfile == "default") { mothurOut("I am using the default 236627 EU009184.1 Shigella dysenteriae str. FBD013."); mothurOutEndLine();  }
+		if (maskfile == "default") { m->mothurOut("I am using the default 236627 EU009184.1 Shigella dysenteriae str. FBD013."); m->mothurOutEndLine();  }
 		
 		chimera->setCons(consfile);	
 		chimera->setQuantiles(quanfile);				
@@ -309,19 +309,13 @@ int ChimeraSeqsCommand::execute(){
 		chimera->setMinBS(minBS);
 		chimera->setMinSNP(minSNP);
 		chimera->setIters(iters);
-		chimera->setTemplateFile(templatefile);
+		
 
 		string outputFileName = outputDir + getRootName(getSimpleName(fastafile)) + method + maskfile + ".chimeras";
 		string accnosFileName = outputDir + getRootName(getSimpleName(fastafile)) + method + maskfile + ".accnos";
-
+		bool hasAccnos = true;
 		
-		if ((method != "bellerophon") && (method != "chimeracheck")) {   
-			if (chimera->getUnaligned()) { 
-				mothurOut("Your template sequences are different lengths, please correct."); mothurOutEndLine(); 
-				delete chimera;
-				return 0; 
-			}
-		}else if (method == "bellerophon") {//run bellerophon separately since you need to read entire fastafile to run it
+		if (method == "bellerophon") {//run bellerophon separately since you need to read entire fastafile to run it
 			chimera->getChimeras();
 			
 			ofstream out;
@@ -334,7 +328,27 @@ int ChimeraSeqsCommand::execute(){
 			out.close();
 			out2.close(); 
 			
+			//delete accnos file if its blank 
+			if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
+			
+			m->mothurOutEndLine();
+			m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+			m->mothurOut(outputFileName); m->mothurOutEndLine();	
+			if (hasAccnos) {  m->mothurOut(accnosFileName); m->mothurOutEndLine();  }
+			m->mothurOutEndLine();
+
 			return 0;
+		}
+		
+		//reads template
+		chimera->setTemplateFile(templatefile);
+		
+		if  (method != "chimeracheck") {   
+			if (chimera->getUnaligned()) { 
+				m->mothurOut("Your template sequences are different lengths, please correct."); m->mothurOutEndLine(); 
+				delete chimera;
+				return 0; 
+			}
 		}
 		
 		//some methods need to do prep work before processing the chimeras
@@ -349,7 +363,7 @@ int ChimeraSeqsCommand::execute(){
 		chimera->printHeader(outHeader);
 		outHeader.close();
 		
-
+		
 		//break up file
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			if(processors == 1){
@@ -362,6 +376,9 @@ int ChimeraSeqsCommand::execute(){
 				
 				driver(lines[0], outputFileName, fastafile, accnosFileName);
 				
+				//delete accnos file if its blank 
+				if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
+								
 			}else{
 				vector<int> positions;
 				processIDS.resize(0);
@@ -394,17 +411,31 @@ int ChimeraSeqsCommand::execute(){
 				createProcesses(outputFileName, fastafile, accnosFileName); 
 			
 				rename((outputFileName + toString(processIDS[0]) + ".temp").c_str(), outputFileName.c_str());
-				rename((accnosFileName + toString(processIDS[0]) + ".temp").c_str(), accnosFileName.c_str());
 					
-				//append alignment and report files
+				//append output files
 				for(int i=1;i<processors;i++){
 					appendOutputFiles((outputFileName + toString(processIDS[i]) + ".temp"), outputFileName);
 					remove((outputFileName + toString(processIDS[i]) + ".temp").c_str());
-					
-					appendOutputFiles((accnosFileName + toString(processIDS[i]) + ".temp"), accnosFileName);
-					remove((accnosFileName + toString(processIDS[i]) + ".temp").c_str());
-
 				}
+				
+				vector<string> nonBlankAccnosFiles;
+				//delete blank accnos files generated with multiple processes
+				for(int i=0;i<processors;i++){  
+					if (!(isBlank(accnosFileName + toString(processIDS[i]) + ".temp"))) {
+						nonBlankAccnosFiles.push_back(accnosFileName + toString(processIDS[i]) + ".temp");
+					}else { remove((accnosFileName + toString(processIDS[i]) + ".temp").c_str());  }
+				}
+				
+				//append accnos files
+				if (nonBlankAccnosFiles.size() != 0) { 
+					rename(nonBlankAccnosFiles[0].c_str(), accnosFileName.c_str());
+					
+					for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
+						appendOutputFiles(nonBlankAccnosFiles[h], accnosFileName);
+						remove(nonBlankAccnosFiles[h].c_str());
+					}
+				}else{ hasAccnos = false;  }
+
 			}
 
 		#else
@@ -415,10 +446,13 @@ int ChimeraSeqsCommand::execute(){
 			lines.push_back(new linePair(0, numSeqs));
 			
 			driver(lines[0], outputFileName, fastafile, accnosFileName);
+			
+			//delete accnos file if its blank 
+			if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
 		#endif
 		
-		//mothurOut("Output File Names: ");
-		//if ((filter) && (method == "bellerophon")) { mothurOut(
+		//m->mothurOut("Output File Names: ");
+		//if ((filter) && (method == "bellerophon")) { m->mothurOut(
 		//if (outputDir == "") { fastafile = getRootName(fastafile) + "filter.fasta"; }
 		//	else				 { fastafile = outputDir + getRootName(getSimpleName(fastafile)) + "filter.fasta"; }
 	
@@ -429,15 +463,23 @@ int ChimeraSeqsCommand::execute(){
 	
 		delete chimera;
 		
-		if (method == "chimeracheck") { remove(accnosFileName.c_str());  mothurOutEndLine(); mothurOut("This method does not determine if a sequence is chimeric, but allows you to make that determination based on the IS values."); mothurOutEndLine();  }
+		if (method == "chimeracheck") { remove(accnosFileName.c_str());  m->mothurOutEndLine(); m->mothurOut("This method does not determine if a sequence is chimeric, but allows you to make that determination based on the IS values."); m->mothurOutEndLine();  }
 		
-		mothurOutEndLine(); mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	mothurOutEndLine();
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		m->mothurOut(outputFileName); m->mothurOutEndLine();	
+		if (hasAccnos) {  m->mothurOut(accnosFileName); m->mothurOutEndLine();  }
+		m->mothurOutEndLine();
+
+
+		
+		m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine();
 		
 		return 0;
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "ChimeraSeqsCommand", "execute");
+		m->errorOut(e, "ChimeraSeqsCommand", "execute");
 		exit(1);
 	}
 }//**********************************************************************************************************************
@@ -462,7 +504,7 @@ int ChimeraSeqsCommand::driver(linePair* line, string outputFName, string filena
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
 				
 				if ((candidateSeq->getAligned().length() != templateSeqsLength) && (method != "chimeracheck")) {  //chimeracheck does not require seqs to be aligned
-					mothurOut(candidateSeq->getName() + " is not the same length as the template sequences. Skipping."); mothurOutEndLine();
+					m->mothurOut(candidateSeq->getName() + " is not the same length as the template sequences. Skipping."); m->mothurOutEndLine();
 				}else{
 					//find chimeras
 					chimera->getChimeras(candidateSeq);
@@ -474,10 +516,10 @@ int ChimeraSeqsCommand::driver(linePair* line, string outputFName, string filena
 			delete candidateSeq;
 			
 			//report progress
-			if((i+1) % 100 == 0){	mothurOut("Processing sequence: " + toString(i+1)); mothurOutEndLine();		}
+			if((i+1) % 100 == 0){	m->mothurOut("Processing sequence: " + toString(i+1)); m->mothurOutEndLine();		}
 		}
 		//report progress
-		if((line->numSeqs) % 100 != 0){	mothurOut("Processing sequence: " + toString(line->numSeqs)); mothurOutEndLine();		}
+		if((line->numSeqs) % 100 != 0){	m->mothurOut("Processing sequence: " + toString(line->numSeqs)); m->mothurOutEndLine();		}
 		
 		out.close();
 		out2.close();
@@ -486,7 +528,7 @@ int ChimeraSeqsCommand::driver(linePair* line, string outputFName, string filena
 		return 1;
 	}
 	catch(exception& e) {
-		errorOut(e, "ChimeraSeqsCommand", "driver");
+		m->errorOut(e, "ChimeraSeqsCommand", "driver");
 		exit(1);
 	}
 }
@@ -509,7 +551,7 @@ void ChimeraSeqsCommand::createProcesses(string outputFileName, string filename,
 			}else if (pid == 0){
 				driver(lines[process], outputFileName + toString(getpid()) + ".temp", filename, accnos + toString(getpid()) + ".temp");
 				exit(0);
-			}else { mothurOut("unable to spawn the necessary processes."); mothurOutEndLine(); exit(0); }
+			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
 		}
 		
 		//force parent to wait until all the processes are done
@@ -520,7 +562,7 @@ void ChimeraSeqsCommand::createProcesses(string outputFileName, string filename,
 #endif		
 	}
 	catch(exception& e) {
-		errorOut(e, "ChimeraSeqsCommand", "createProcesses");
+		m->errorOut(e, "ChimeraSeqsCommand", "createProcesses");
 		exit(1);
 	}
 }
@@ -545,7 +587,7 @@ void ChimeraSeqsCommand::appendOutputFiles(string temp, string filename) {
 		output.close();
 	}
 	catch(exception& e) {
-		errorOut(e, "ChimeraSeqsCommand", "appendOuputFiles");
+		m->errorOut(e, "ChimeraSeqsCommand", "appendOuputFiles");
 		exit(1);
 	}
 }

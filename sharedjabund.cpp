@@ -27,7 +27,7 @@ EstOutput JAbund::getValues(vector<SharedRAbundVector*> shared) {
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "JAbund", "getValues");
+		m->errorOut(e, "JAbund", "getValues");
 		exit(1);
 	}
 }

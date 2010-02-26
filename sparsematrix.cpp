@@ -5,7 +5,7 @@
 
 /***********************************************************************/
 
-SparseMatrix::SparseMatrix() : numNodes(0), minsIndex(0), smallDist(1e6){}
+SparseMatrix::SparseMatrix() : numNodes(0), minsIndex(0), smallDist(1e6){  m = MothurOut::getInstance();  }
 
 /***********************************************************************/
 
@@ -34,7 +34,7 @@ MatData SparseMatrix::rmCell(MatData data){
 	//  clustering and the clustering algorithm updates smallDist
 	}
 	catch(exception& e) {
-		errorOut(e, "SparseMatrix", "rmCell");
+		m->errorOut(e, "SparseMatrix", "rmCell");
 		exit(1);
 	}
 }
@@ -50,7 +50,7 @@ void SparseMatrix::addCell(PCell value){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "SparseMatrix", "addCell");
+		m->errorOut(e, "SparseMatrix", "addCell");
 		exit(1);
 	}
 }
@@ -66,7 +66,7 @@ void SparseMatrix::clear(){
 		smallDist = 1e6;
 	}
 	catch(exception& e) {
-		errorOut(e, "SparseMatrix", "clear");
+		m->errorOut(e, "SparseMatrix", "clear");
 		exit(1);
 	}
 }
@@ -97,7 +97,7 @@ void SparseMatrix::print(){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "SparseMatrix", "print");
+		m->errorOut(e, "SparseMatrix", "print");
 		exit(1);
 	}
 }
@@ -108,15 +108,15 @@ void SparseMatrix::print(ListVector* list){
 	try {
 		int index = 0;
 	
-		mothurOutEndLine(); mothurOut("Index\tRow\tColumn\tDistance"); mothurOutEndLine();
+		m->mothurOutEndLine(); m->mothurOut("Index\tRow\tColumn\tDistance"); m->mothurOutEndLine();
 	
 		for(MatData currentCell=matrix.begin();currentCell!=matrix.end();currentCell++){
-			mothurOut(toString(index) + "\t" + toString(list->get(currentCell->row))  + "\t" + toString(list->get(currentCell->column)) + "\t" + toString(currentCell->dist)); mothurOutEndLine();
+			m->mothurOut(toString(index) + "\t" + toString(list->get(currentCell->row))  + "\t" + toString(list->get(currentCell->column)) + "\t" + toString(currentCell->dist)); m->mothurOutEndLine();
 			index++;
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "SparseMatrix", "print");
+		m->errorOut(e, "SparseMatrix", "print");
 		exit(1);
 	}
 }
@@ -168,7 +168,7 @@ PCell* SparseMatrix::getSmallestCell(){
 		return smallCell;
 	}
 	catch(exception& e) {
-		errorOut(e, "SparseMatrix", "getSmallestCell");
+		m->errorOut(e, "SparseMatrix", "getSmallestCell");
 		exit(1);
 	}
 }

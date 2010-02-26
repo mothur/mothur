@@ -15,7 +15,7 @@
  */
 
 #include "mothur.h"
-
+#include "mothurout.h"
 
 /**************************************************************************************************/
 
@@ -47,6 +47,7 @@ public:
 	void printSequence(ostream&);
 	
 private:
+	MothurOut* m;
 	void initialize();
 	string getSequenceString(ifstream&);
 	string getCommentString(ifstream&);

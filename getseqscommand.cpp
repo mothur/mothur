@@ -13,10 +13,10 @@
 
 //**********************************************************************************************************************
 
-GetSeqsCommand::GetSeqsCommand(string option){
+GetSeqsCommand::GetSeqsCommand(string option)  {
 	try {
 		abort = false;
-		
+				
 		//allow user to run help
 		if(option == "help") { help(); abort = true; }
 		
@@ -97,7 +97,7 @@ GetSeqsCommand::GetSeqsCommand(string option){
 			//check for required parameters
 			accnosfile = validParameter.validFile(parameters, "accnos", true);
 			if (accnosfile == "not open") { abort = true; }
-			else if (accnosfile == "not found") {  accnosfile = "";  mothurOut("You must provide an accnos file."); mothurOutEndLine(); abort = true; }	
+			else if (accnosfile == "not found") {  accnosfile = "";  m->mothurOut("You must provide an accnos file."); m->mothurOutEndLine(); abort = true; }	
 			
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
@@ -119,17 +119,17 @@ GetSeqsCommand::GetSeqsCommand(string option){
 			if (listfile == "not open") { abort = true; }
 			else if (listfile == "not found") {  listfile = "";  }
 			
-			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == ""))  { mothurOut("You must provide one of the following: fasta, name, group, alignreport or listfile."); mothurOutEndLine(); abort = true; }
+			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, alignreport or listfile."); m->mothurOutEndLine(); abort = true; }
 			
 			int okay = 2;
 			if (outputDir != "") { okay++; }
 			
-			if (parameters.size() > okay) { mothurOut("You may only enter one of the following: fasta, name, group, alignreport or listfile."); mothurOutEndLine(); abort = true;  }
+			if (parameters.size() > okay) { m->mothurOut("You may only enter one of the following: fasta, name, group, alignreport or listfile."); m->mothurOutEndLine(); abort = true;  }
 		}
 
 	}
 	catch(exception& e) {
-		errorOut(e, "GetSeqsCommand", "GetSeqsCommand");
+		m->errorOut(e, "GetSeqsCommand", "GetSeqsCommand");
 		exit(1);
 	}
 }
@@ -137,15 +137,15 @@ GetSeqsCommand::GetSeqsCommand(string option){
 
 void GetSeqsCommand::help(){
 	try {
-		mothurOut("The get.seqs command reads an .accnos file and one of the following file types: fasta, name, group, list or alignreport file.\n");
-		mothurOut("It outputs a file containing only the sequences in the .accnos file.\n");
-		mothurOut("The get.seqs command parameters are accnos, fasta, name, group, list and alignreport.  You must provide accnos and one of the other parameters.\n");
-		mothurOut("The get.seqs command should be in the following format: get.seqs(accnos=yourAccnos, fasta=yourFasta).\n");
-		mothurOut("Example get.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
+		m->mothurOut("The get.seqs command reads an .accnos file and one of the following file types: fasta, name, group, list or alignreport file.\n");
+		m->mothurOut("It outputs a file containing only the sequences in the .accnos file.\n");
+		m->mothurOut("The get.seqs command parameters are accnos, fasta, name, group, list and alignreport.  You must provide accnos and one of the other parameters.\n");
+		m->mothurOut("The get.seqs command should be in the following format: get.seqs(accnos=yourAccnos, fasta=yourFasta).\n");
+		m->mothurOut("Example get.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "GetSeqsCommand", "help");
+		m->errorOut(e, "GetSeqsCommand", "help");
 		exit(1);
 	}
 }
@@ -167,11 +167,18 @@ int GetSeqsCommand::execute(){
 		else if (alignfile != "")	{		readAlign();	}
 		else if (listfile != "")	{		readList();		}
 		
+		if (outputNames.size() != 0) {
+			m->mothurOutEndLine();
+			m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+			m->mothurOutEndLine();
+		}
+		
 		return 0;		
 	}
 
 	catch(exception& e) {
-		errorOut(e, "GetSeqsCommand", "execute");
+		m->errorOut(e, "GetSeqsCommand", "execute");
 		exit(1);
 	}
 }
@@ -183,6 +190,7 @@ void GetSeqsCommand::readFasta(){
 		string outputFileName = outputDir + getRootName(getSimpleName(fastafile)) + "pick" +  getExtension(fastafile);
 		ofstream out;
 		openOutputFile(outputFileName, out);
+		
 		
 		ifstream in;
 		openInputFile(fastafile, in);
@@ -210,13 +218,13 @@ void GetSeqsCommand::readFasta(){
 		out.close();
 		
 		if (wroteSomething == false) {
-			mothurOut("Your file does not contain any sequence from the .accnos file."); mothurOutEndLine();
+			m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();
 			remove(outputFileName.c_str()); 
-		}
+		}else {  outputNames.push_back(outputFileName); }
 
 	}
 	catch(exception& e) {
-		errorOut(e, "GetSeqsCommand", "readFasta");
+		m->errorOut(e, "GetSeqsCommand", "readFasta");
 		exit(1);
 	}
 }
@@ -275,13 +283,13 @@ void GetSeqsCommand::readList(){
 		out.close();
 		
 		if (wroteSomething == false) {
-			mothurOut("Your file does not contain any sequence from the .accnos file."); mothurOutEndLine();
+			m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();
 			remove(outputFileName.c_str()); 
-		}
+		}else {  outputNames.push_back(outputFileName); }
 
 	}
 	catch(exception& e) {
-		errorOut(e, "GetSeqsCommand", "readList");
+		m->errorOut(e, "GetSeqsCommand", "readList");
 		exit(1);
 	}
 }
@@ -292,6 +300,7 @@ void GetSeqsCommand::readName(){
 		string outputFileName = outputDir + getRootName(getSimpleName(namefile)) + "pick" +  getExtension(namefile);
 		ofstream out;
 		openOutputFile(outputFileName, out);
+		
 
 		ifstream in;
 		openInputFile(namefile, in);
@@ -357,13 +366,13 @@ void GetSeqsCommand::readName(){
 		out.close();
 		
 		if (wroteSomething == false) {
-			mothurOut("Your file does not contain any sequence from the .accnos file."); mothurOutEndLine();
+			m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();
 			remove(outputFileName.c_str()); 
-		}
+		}else {  outputNames.push_back(outputFileName); }
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "GetSeqsCommand", "readName");
+		m->errorOut(e, "GetSeqsCommand", "readName");
 		exit(1);
 	}
 }
@@ -375,6 +384,7 @@ void GetSeqsCommand::readGroup(){
 		string outputFileName = outputDir + getRootName(getSimpleName(groupfile)) + "pick" + getExtension(groupfile);
 		ofstream out;
 		openOutputFile(outputFileName, out);
+		
 
 		ifstream in;
 		openInputFile(groupfile, in);
@@ -402,13 +412,13 @@ void GetSeqsCommand::readGroup(){
 		out.close();
 		
 		if (wroteSomething == false) {
-			mothurOut("Your file does not contain any sequence from the .accnos file."); mothurOutEndLine();
+			m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();
 			remove(outputFileName.c_str()); 
-		}
+		}else {  outputNames.push_back(outputFileName); }
 
 	}
 	catch(exception& e) {
-		errorOut(e, "GetSeqsCommand", "readGroup");
+		m->errorOut(e, "GetSeqsCommand", "readGroup");
 		exit(1);
 	}
 }
@@ -421,6 +431,7 @@ void GetSeqsCommand::readAlign(){
 		string outputFileName = outputDir + getRootName(getSimpleName(alignfile)) + "pick.align.report";
 		ofstream out;
 		openOutputFile(outputFileName, out);
+		
 
 		ifstream in;
 		openInputFile(alignfile, in);
@@ -468,13 +479,13 @@ void GetSeqsCommand::readAlign(){
 		out.close();
 		
 		if (wroteSomething == false) {
-			mothurOut("Your file does not contain any sequence from the .accnos file."); mothurOutEndLine();
+			m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();
 			remove(outputFileName.c_str()); 
-		}
+		}else {  outputNames.push_back(outputFileName); }
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "GetSeqsCommand", "readAlign");
+		m->errorOut(e, "GetSeqsCommand", "readAlign");
 		exit(1);
 	}
 }
@@ -498,7 +509,7 @@ void GetSeqsCommand::readAccnos(){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "GetSeqsCommand", "readAccnos");
+		m->errorOut(e, "GetSeqsCommand", "readAccnos");
 		exit(1);
 	}
 }

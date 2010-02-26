@@ -19,6 +19,7 @@
  */
 
 #include "mothur.h"
+#include "mothurout.h"
 
 class Alignment;
 class Sequence;
@@ -43,6 +44,7 @@ private:
 	Sequence* templateSeq;
 	
 	int maxInsertLength;
+	MothurOut* m;
 };
 
 /**************************************************************************************************/

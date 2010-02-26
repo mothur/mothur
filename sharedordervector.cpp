@@ -96,7 +96,7 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedOrderVector", "SharedOrderVector");
+		m->errorOut(e, "SharedOrderVector", "SharedOrderVector");
 		exit(1);
 	}
 }
@@ -166,7 +166,7 @@ void SharedOrderVector::print(ostream& output){
 		output << endl;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedOrderVector", "print");
+		m->errorOut(e, "SharedOrderVector", "print");
 		exit(1);
 	}
 }
@@ -175,7 +175,7 @@ void SharedOrderVector::print(ostream& output){
 /***********************************************************************/
 
 void SharedOrderVector::resize(int){
-	mothurOut("resize() did nothing in class SharedOrderVector");
+	m->mothurOut("resize() did nothing in class SharedOrderVector");
 }
 
 /***********************************************************************/
@@ -218,7 +218,7 @@ RAbundVector SharedOrderVector::getRAbundVector(){
 		return rav;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedOrderVector", "getRAbundVector");
+		m->errorOut(e, "SharedOrderVector", "getRAbundVector");
 		exit(1);
 	}
 }
@@ -238,7 +238,7 @@ OrderVector SharedOrderVector::getOrderVector(map<string,int>* nameMap = NULL) {
 		return ov;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedOrderVector", "getOrderVector");
+		m->errorOut(e, "SharedOrderVector", "getOrderVector");
 		exit(1);
 	}
 }
@@ -268,7 +268,7 @@ SharedRAbundVector SharedOrderVector::getSharedRAbundVector(string group) {
 		return sharedRav;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedOrderVector", "getSharedRAbundVector");
+		m->errorOut(e, "SharedOrderVector", "getSharedRAbundVector");
 		exit(1);
 	}
 }
@@ -285,7 +285,7 @@ vector<SharedRAbundVector*> SharedOrderVector::getSharedRAbundVector() {
 		return lookup;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedOrderVector", "getSharedRAbundVector");
+		m->errorOut(e, "SharedOrderVector", "getSharedRAbundVector");
 		exit(1);
 	}
 }
@@ -298,7 +298,7 @@ SharedSAbundVector SharedOrderVector::getSharedSAbundVector(string group) {
 				
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedOrderVector", "getSharedSAbundVector");
+		m->errorOut(e, "SharedOrderVector", "getSharedSAbundVector");
 		exit(1);
 	}
 }
@@ -333,7 +333,7 @@ void SharedOrderVector::updateStats(){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedOrderVector", "updateStats");
+		m->errorOut(e, "SharedOrderVector", "updateStats");
 		exit(1);
 	}
 }

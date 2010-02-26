@@ -46,7 +46,7 @@ EstOutput Lennon::getValues(vector<SharedRAbundVector*> shared) {
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "Lennon", "getValues");
+		m->errorOut(e, "Lennon", "getValues");
 		exit(1);
 	}
 }

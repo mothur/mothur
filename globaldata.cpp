@@ -47,6 +47,7 @@ void GlobalData::setFormat(string Format)		{	format = Format;		}
 
 /******************************************************/
 GlobalData::GlobalData() {
+	m = MothurOut::getInstance();
 	//option definitions should go here...
 	clear();
 	gListVector = NULL;		
@@ -126,7 +127,7 @@ void GlobalData::newRead() {
 			names.clear();
 	}
 	catch(exception& e) {
-		errorOut(e, "GlobalData", "newRead");
+		m->errorOut(e, "GlobalData", "newRead");
 		exit(1);
 	}
 }
@@ -152,7 +153,7 @@ GlobalData::~GlobalData() {
 		if (nameMap != NULL) { delete nameMap; nameMap = NULL; }
 	}
 	catch(exception& e) {
-		errorOut(e, "GlobalData", "~GlobalData");
+		m->errorOut(e, "GlobalData", "~GlobalData");
 		exit(1);
 	}
 }

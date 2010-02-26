@@ -54,6 +54,7 @@ class Maligner {
 		string chimeraMaligner(int, DeCalculator*);
 		vector<Sequence*> getBlastSeqs(Sequence*, int);
 		vector<Sequence*> getKmerSeqs(Sequence*, int);
+		MothurOut* m;
 		
 };
 

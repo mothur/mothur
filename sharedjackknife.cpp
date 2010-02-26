@@ -136,7 +136,7 @@ EstOutput SharedJackknife::getValues(vector<SharedRAbundVector*> vectorShared){ 
 	}
 		
 	catch(exception& e) {
-		errorOut(e, "SharedJackknife", "getValues");
+		m->errorOut(e, "SharedJackknife", "getValues");
 		exit(1);
 	}
 }

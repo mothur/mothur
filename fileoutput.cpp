@@ -40,7 +40,7 @@ void ThreeColumnFile::initFile(string label){
 		outFile.setf(ios::showpoint);
 	}
 	catch(exception& e) {
-		errorOut(e, "ThreeColumnFile", "initFile");
+		m->errorOut(e, "ThreeColumnFile", "initFile");
 		exit(1);
 	}
 }
@@ -60,7 +60,7 @@ void ThreeColumnFile::output(int nSeqs, vector<double> data){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "ThreeColumnFile", "output");
+		m->errorOut(e, "ThreeColumnFile", "output");
 		exit(1);
 	}
 }
@@ -85,12 +85,12 @@ void ThreeColumnFile::resetFile(){
 		
 		//checks to make sure user was able to rename and remove successfully
 		if ((renameOk != 0)) { 
-			mothurOut("Unable to rename " + outName); mothurOutEndLine();
+			m->mothurOut("Unable to rename " + outName); m->mothurOutEndLine();
 			perror(" : ");
 		}	
 	}
 	catch(exception& e) {
-		errorOut(e, "ThreeColumnFile", "resetFile");
+		m->errorOut(e, "ThreeColumnFile", "resetFile");
 		exit(1);
 	}
 }
@@ -134,7 +134,7 @@ void ColumnFile::initFile(string label, vector<string> tags){
 		outFile.setf(ios::showpoint);
 	}
 	catch(exception& e) {
-		errorOut(e, "ColumnFile", "initFile");
+		m->errorOut(e, "ColumnFile", "initFile");
 		exit(1);
 	}
 }
@@ -164,7 +164,7 @@ void ColumnFile::output(vector<double> data){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "ColumnFile", "output");
+		m->errorOut(e, "ColumnFile", "output");
 		exit(1);
 	}
 }
@@ -189,12 +189,12 @@ void ColumnFile::resetFile(){
 		
 		//checks to make sure user was able to rename and remove successfully
 		if ((renameOk != 0)) { 
-			mothurOut("Unable to rename " + outName); mothurOutEndLine();
+			m->mothurOut("Unable to rename " + outName); m->mothurOutEndLine();
 			perror(" : ");
 		}	
 	}
 	catch(exception& e) {
-		errorOut(e, "ColumnFile", "resetFile");
+		m->errorOut(e, "ColumnFile", "resetFile");
 		exit(1);
 	}
 }
@@ -231,7 +231,7 @@ void SharedThreeColumnFile::initFile(string label){
 		outFile.setf(ios::showpoint);
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedThreeColumnFile", "initFile");
+		m->errorOut(e, "SharedThreeColumnFile", "initFile");
 		exit(1);
 	}
 }
@@ -252,7 +252,7 @@ void SharedThreeColumnFile::output(int nSeqs, vector<double> data){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedThreeColumnFile", "output");
+		m->errorOut(e, "SharedThreeColumnFile", "output");
 		exit(1);
 	}
 }
@@ -277,12 +277,12 @@ void SharedThreeColumnFile::resetFile(){
 		
 		//checks to make sure user was able to rename and remove successfully
 		if ((renameOk != 0)) { 
-			mothurOut("Unable to rename " + outName); mothurOutEndLine();
+			m->mothurOut("Unable to rename " + outName); m->mothurOutEndLine();
 			perror(" : ");
 		}	
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedThreeColumnFile", "resetFile");
+		m->errorOut(e, "SharedThreeColumnFile", "resetFile");
 		exit(1);
 	}
 }
@@ -320,7 +320,7 @@ void OneColumnFile::initFile(string label){
 		outFile.setf(ios::showpoint);
 	}
 	catch(exception& e) {
-		errorOut(e, "OneColumnFile", "initFile");
+		m->errorOut(e, "OneColumnFile", "initFile");
 		exit(1);
 	}
 }
@@ -340,7 +340,7 @@ void OneColumnFile::output(int nSeqs, vector<double> data){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "OneColumnFile", "output");
+		m->errorOut(e, "OneColumnFile", "output");
 		exit(1);
 	}
 }
@@ -364,13 +364,13 @@ void OneColumnFile::resetFile(){
 		
 		//checks to make sure user was able to rename and remove successfully
 		if ((renameOk != 0)) { 
-			mothurOut("Unable to rename " + outName); mothurOutEndLine();
+			m->mothurOut("Unable to rename " + outName); m->mothurOutEndLine();
 			perror(" : ");
 		}	
 
 	}
 	catch(exception& e) {
-		errorOut(e, "OneColumnFile", "resetFile");
+		m->errorOut(e, "OneColumnFile", "resetFile");
 		exit(1);
 	}
 }
@@ -409,7 +409,7 @@ void SharedOneColumnFile::initFile(string label){
 		outFile.setf(ios::showpoint);
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedOneColumnFile", "initFile");
+		m->errorOut(e, "SharedOneColumnFile", "initFile");
 		exit(1);
 	}
 }
@@ -436,7 +436,7 @@ void SharedOneColumnFile::output(int nSeqs, vector<double> data){
 			}
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedOneColumnFile", "output");
+		m->errorOut(e, "SharedOneColumnFile", "output");
 		exit(1);
 	}
 }
@@ -461,12 +461,12 @@ void SharedOneColumnFile::resetFile(){
 		
 		//checks to make sure user was able to rename and remove successfully
 		if ((renameOk != 0)) { 
-			mothurOut("Unable to rename " + outName); mothurOutEndLine();
+			m->mothurOut("Unable to rename " + outName); m->mothurOutEndLine();
 			perror(" : ");
 		}	
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedOneColumnFile", "resetFile");
+		m->errorOut(e, "SharedOneColumnFile", "resetFile");
 		exit(1);
 	}
 }

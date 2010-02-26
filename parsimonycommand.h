@@ -56,7 +56,7 @@ private:
 
 	bool abort;
 	string groups, itersString;
-	vector<string> Groups; //holds groups to be used
+	vector<string> Groups, outputNames; //holds groups to be used
 
 	void printParsimonyFile();  
 	void printUSummaryFile();

@@ -26,7 +26,7 @@ bool CompleteLinkage::updateDistance(MatData& colCell, MatData& rowCell) {
 		return(changed);
 	}
 	catch(exception& e) {
-		errorOut(e, "CompleteLinkage", "updateDistance");
+		m->errorOut(e, "CompleteLinkage", "updateDistance");
 		exit(1);
 	}
 }

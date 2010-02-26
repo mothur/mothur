@@ -127,7 +127,7 @@ EstOutput Weighted::getValues(Tree* t) {
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "Weighted", "getValues");
+		m->errorOut(e, "Weighted", "getValues");
 		exit(1);
 	}
 }
@@ -225,7 +225,7 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 		return data; 
 	}
 	catch(exception& e) {
-		errorOut(e, "Weighted", "getValues");
+		m->errorOut(e, "Weighted", "getValues");
 		exit(1);
 	}
 }

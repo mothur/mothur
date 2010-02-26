@@ -58,7 +58,7 @@ private:
 	set<string> labels; //holds labels to be used
 	string outputFile, calc, groups, label, outputDir;
 	int numGroups, iters;
-	vector<string>  Estimators, Groups; //holds estimators to be used
+	vector<string>  Estimators, Groups, outputNames; //holds estimators to be used
 
 };
 	

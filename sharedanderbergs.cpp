@@ -40,7 +40,7 @@ EstOutput Anderberg::getValues(vector<SharedRAbundVector*> shared) {
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "Anderberg", "getValues");
+		m->errorOut(e, "Anderberg", "getValues");
 		exit(1);
 	}
 }

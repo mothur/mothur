@@ -39,6 +39,7 @@ class GetSharedOTUCommand : public Command {
 		map<string, string> groupFinder;
 		map<string, string>::iterator it;
 		vector<Sequence> seqs;
+		vector<string> outputNames;
 		
 		void process(ListVector*);
 		

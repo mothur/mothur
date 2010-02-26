@@ -48,6 +48,7 @@ protected:
 	
 	void readTaxonomy(string);
 	vector<string> parseTax(string);
+	MothurOut* m;
 };
 
 /**************************************************************************************************/

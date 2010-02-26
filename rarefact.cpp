@@ -63,7 +63,7 @@ void Rarefact::getCurve(int increment = 1, int nIters = 1000){
 		delete rcd;
 	}
 	catch(exception& e) {
-		errorOut(e, "Rarefact", "getCurve");
+		m->errorOut(e, "Rarefact", "getCurve");
 		exit(1);
 	}
 }
@@ -129,7 +129,7 @@ try {
 		delete rcd;
 	}
 	catch(exception& e) {
-		errorOut(e, "Rarefact", "getSharedCurve");
+		m->errorOut(e, "Rarefact", "getSharedCurve");
 		exit(1);
 	}
 }
@@ -143,7 +143,7 @@ void Rarefact::mergeVectors(SharedRAbundVector* shared1, SharedRAbundVector* sha
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "Rarefact", "mergeVectors");
+		m->errorOut(e, "Rarefact", "mergeVectors");
 		exit(1);
 	}
 }

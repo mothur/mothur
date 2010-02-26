@@ -22,7 +22,7 @@
 
 //**********************************************************************************************************************
 
-BootSharedCommand::BootSharedCommand(string option){
+BootSharedCommand::BootSharedCommand(string option) {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
@@ -58,8 +58,8 @@ BootSharedCommand::BootSharedCommand(string option){
 			
 			//make sure the user has already run the read.otu command
 			if (globaldata->getSharedFile() == "") {
-				if (globaldata->getListFile() == "") { mothurOut("You must read a list and a group, or a shared before you can use the bootstrap.shared command."); mothurOutEndLine(); abort = true; }
-				else if (globaldata->getGroupFile() == "") { mothurOut("You must read a list and a group, or a shared before you can use the bootstrap.shared command."); mothurOutEndLine(); abort = true; }
+				if (globaldata->getListFile() == "") { m->mothurOut("You must read a list and a group, or a shared before you can use the bootstrap.shared command."); m->mothurOutEndLine(); abort = true; }
+				else if (globaldata->getGroupFile() == "") { m->mothurOut("You must read a list and a group, or a shared before you can use the bootstrap.shared command."); m->mothurOutEndLine(); abort = true; }
 			}
 			
 			//check for optional parameter and set defaults
@@ -144,7 +144,7 @@ BootSharedCommand::BootSharedCommand(string option){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "BootSharedCommand", "BootSharedCommand");
+		m->errorOut(e, "BootSharedCommand", "BootSharedCommand");
 		exit(1);
 	}
 }
@@ -153,17 +153,17 @@ BootSharedCommand::BootSharedCommand(string option){
 
 void BootSharedCommand::help(){
 	try {
-		mothurOut("The bootstrap.shared command can only be executed after a successful read.otu command.\n");
-		mothurOut("The bootstrap.shared command parameters are groups, calc, iters and label.\n");
-		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included used.\n");
-		mothurOut("The group names are separated by dashes. The label parameter allows you to select what distance levels you would like trees created for, and is also separated by dashes.\n");
-		mothurOut("The bootstrap.shared command should be in the following format: bootstrap.shared(groups=yourGroups, calc=yourCalcs, label=yourLabels, iters=yourIters).\n");
-		mothurOut("Example bootstrap.shared(groups=A-B-C, calc=jabund-sorabund, iters=100).\n");
-		mothurOut("The default value for groups is all the groups in your groupfile.\n");
-		mothurOut("The default value for calc is jclass-thetayc. The default for iters is 1000.\n");
+		m->mothurOut("The bootstrap.shared command can only be executed after a successful read.otu command.\n");
+		m->mothurOut("The bootstrap.shared command parameters are groups, calc, iters and label.\n");
+		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included used.\n");
+		m->mothurOut("The group names are separated by dashes. The label parameter allows you to select what distance levels you would like trees created for, and is also separated by dashes.\n");
+		m->mothurOut("The bootstrap.shared command should be in the following format: bootstrap.shared(groups=yourGroups, calc=yourCalcs, label=yourLabels, iters=yourIters).\n");
+		m->mothurOut("Example bootstrap.shared(groups=A-B-C, calc=jabund-sorabund, iters=100).\n");
+		m->mothurOut("The default value for groups is all the groups in your groupfile.\n");
+		m->mothurOut("The default value for calc is jclass-thetayc. The default for iters is 1000.\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "BootSharedCommand", "help");
+		m->errorOut(e, "BootSharedCommand", "help");
 		exit(1);
 	}
 }
@@ -222,7 +222,7 @@ int BootSharedCommand::execute(){
 		
 			if(allLines == 1 || labels.count(order->getLabel()) == 1){			
 				
-				mothurOut(order->getLabel()); mothurOutEndLine();
+				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 				process(order);
 				
 				processedLabels.insert(order->getLabel());
@@ -235,7 +235,7 @@ int BootSharedCommand::execute(){
 				
 				delete order;
 				order = input->getSharedOrderVector(lastLabel);													
-				mothurOut(order->getLabel()); mothurOutEndLine();
+				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 				process(order);
 
 				processedLabels.insert(order->getLabel());
@@ -257,12 +257,12 @@ int BootSharedCommand::execute(){
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			mothurOut("Your file does not include the label " + *it); 
+			m->mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(lastLabel) != 1) {
-				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
 				needToRun = true;
 			}else {
-				mothurOut(". Please refer to " + lastLabel + ".");  mothurOutEndLine();
+				m->mothurOut(". Please refer to " + lastLabel + ".");  m->mothurOutEndLine();
 			}
 		}
 		
@@ -270,7 +270,7 @@ int BootSharedCommand::execute(){
 		if (needToRun == true)  {
 				if (order != NULL) {	delete order;	}
 				order = input->getSharedOrderVector(lastLabel);													
-				mothurOut(order->getLabel()); mothurOutEndLine();
+				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 				process(order);
 				delete order;
 
@@ -278,11 +278,17 @@ int BootSharedCommand::execute(){
 		
 		//reset groups parameter
 		globaldata->Groups.clear();  
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+
 
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "BootSharedCommand", "execute");
+		m->errorOut(e, "BootSharedCommand", "execute");
 		exit(1);
 	}
 }
@@ -354,24 +360,24 @@ void BootSharedCommand::createTree(ostream* out, Tree* t){
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "BootSharedCommand", "createTree");
+		m->errorOut(e, "BootSharedCommand", "createTree");
 		exit(1);
 	}
 }
 /***********************************************************/
 void BootSharedCommand::printSims() {
 	try {
-		mothurOut("simsMatrix"); mothurOutEndLine(); 
-		for (int m = 0; m < simMatrix.size(); m++)	{
+		m->mothurOut("simsMatrix"); m->mothurOutEndLine(); 
+		for (int k = 0; k < simMatrix.size(); k++)	{
 			for (int n = 0; n < simMatrix.size(); n++)	{
-				mothurOut(simMatrix[m][n]);  mothurOut("\t"); 
+				m->mothurOut(toString(simMatrix[k][n]));  m->mothurOut("\t"); 
 			}
-			mothurOutEndLine(); 
+			m->mothurOutEndLine(); 
 		}
 
 	}
 	catch(exception& e) {
-		errorOut(e, "BootSharedCommand", "printSims");
+		m->errorOut(e, "BootSharedCommand", "printSims");
 		exit(1);
 	}
 }
@@ -386,9 +392,10 @@ void BootSharedCommand::process(SharedOrderVector* order) {
 					//create a new filename
 					outputFile = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + treeCalculators[z]->getName() + ".boot" + order->getLabel() + ".tre";
 					openOutputFile(outputFile, *(out[z]));
+					outputNames.push_back(outputFile);
 				}
 				
-				mothurOut("Generating bootstrap trees..."); cout.flush();
+				m->mothurOut("Generating bootstrap trees..."); cout.flush();
 				
 				//create a file for each calculator with the 1000 trees in it.
 				for (int p = 0; p < iters; p++) {
@@ -438,7 +445,7 @@ void BootSharedCommand::process(SharedOrderVector* order) {
 					}
 				}
 				
-				mothurOut("\tDone."); mothurOutEndLine();
+				m->mothurOut("\tDone."); m->mothurOutEndLine();
 				//delete globaldata's tree
 				//for (int m = 0; m < globaldata->gTree.size(); m++) {  delete globaldata->gTree[m];  }
 				//globaldata->gTree.clear();
@@ -447,7 +454,7 @@ void BootSharedCommand::process(SharedOrderVector* order) {
 				//create consensus trees for each bootstrapped tree set
 				for (int k = 0; k < trees.size(); k++) {
 					
-					mothurOut("Generating consensus tree for " + treeCalculators[k]->getName()); mothurOutEndLine();
+					m->mothurOut("Generating consensus tree for " + treeCalculators[k]->getName()); m->mothurOutEndLine();
 					
 					//set global data to calc trees
 					globaldata->gTree = trees[k];
@@ -456,6 +463,9 @@ void BootSharedCommand::process(SharedOrderVector* order) {
 					consensus = new ConcensusCommand(filename);
 					consensus->execute();
 					delete consensus;
+					
+					outputNames.push_back(filename + ".cons.pairs");
+					outputNames.push_back(filename + ".cons.tre");
 					
 					//delete globaldata's tree
 					//for (int m = 0; m < globaldata->gTree.size(); m++) {  delete globaldata->gTree[m];  }
@@ -470,7 +480,7 @@ void BootSharedCommand::process(SharedOrderVector* order) {
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "BootSharedCommand", "process");
+		m->errorOut(e, "BootSharedCommand", "process");
 		exit(1);
 	}
 }

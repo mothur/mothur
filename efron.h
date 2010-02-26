@@ -20,11 +20,11 @@
 class Efron : public Calculator  {
 	
 public: 
-	Efron(int size) : m(size), Calculator("efron", 1, false) {};
+	Efron(int size) : f(size), Calculator("efron", 1, false) {};
 	EstOutput getValues(SAbundVector*);	
 	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
 private:
-	int m;
+	int f;
 };
 
 

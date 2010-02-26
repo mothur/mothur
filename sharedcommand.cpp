@@ -53,7 +53,7 @@ SharedCommand::SharedCommand(string o) : outputDir(o) {
 
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedCommand", "SharedCommand");
+		m->errorOut(e, "SharedCommand", "SharedCommand");
 		exit(1);
 	}
 }
@@ -77,7 +77,7 @@ int SharedCommand::execute(){
 		vector<SharedRAbundVector*> lookup; 
 		
 		if ((globaldata->Groups.size() == 0) && (SharedList->getNumSeqs() != groupMap->getNumSeqs())) {  //if the user has not specified any groups and their files don't match exit with error
-			mothurOut("Your group file contains " + toString(groupMap->getNumSeqs()) + " sequences and list file contains " + toString(SharedList->getNumSeqs()) + " sequences. Please correct."); mothurOutEndLine(); 
+			m->mothurOut("Your group file contains " + toString(groupMap->getNumSeqs()) + " sequences and list file contains " + toString(SharedList->getNumSeqs()) + " sequences. Please correct."); m->mothurOutEndLine(); 
 			
 			out.close();
 			remove(filename.c_str()); //remove blank shared file you made
@@ -128,7 +128,7 @@ int SharedCommand::execute(){
 					if (pickedGroups) { //check for otus with no seqs in them
 						eliminateZeroOTUS(lookup);
 					}
-					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
+					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 					
 					printSharedData(lookup); //prints info to the .shared file
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
@@ -147,7 +147,7 @@ int SharedCommand::execute(){
 					if (pickedGroups) { //check for otus with no seqs in them
 						eliminateZeroOTUS(lookup);
 					}
-					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
+					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 					
 					printSharedData(lookup); //prints info to the .shared file
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
@@ -184,7 +184,7 @@ int SharedCommand::execute(){
 			if (pickedGroups) { //check for otus with no seqs in them
 				eliminateZeroOTUS(lookup);
 			}
-			mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
+			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 			
 			printSharedData(lookup); //prints info to the .shared file
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
@@ -210,7 +210,7 @@ int SharedCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedCommand", "execute");
+		m->errorOut(e, "SharedCommand", "execute");
 		exit(1);
 	}
 }
@@ -232,7 +232,7 @@ void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup) {
  
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedCommand", "printSharedData");
+		m->errorOut(e, "SharedCommand", "printSharedData");
 		exit(1);
 	}
 }
@@ -272,7 +272,7 @@ void SharedCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
  
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedCommand", "eliminateZeroOTUS");
+		m->errorOut(e, "SharedCommand", "eliminateZeroOTUS");
 		exit(1);
 	}
 }
@@ -285,7 +285,7 @@ void SharedCommand::createMisMatchFile() {
 		//you have sequences in your list file that are not in your group file
 		if (SharedList->getNumSeqs() > groupMap->getNumSeqs()) { 
 			outputMisMatchName += "missing.group";
-			mothurOut("For a list of names that are in your list file and not in your group file, please refer to " + outputMisMatchName + "."); mothurOutEndLine();
+			m->mothurOut("For a list of names that are in your list file and not in your group file, please refer to " + outputMisMatchName + "."); m->mothurOutEndLine();
 			
 			openOutputFile(outputMisMatchName, outMisMatch);
 			
@@ -305,7 +305,7 @@ void SharedCommand::createMisMatchFile() {
 					if(group == "not found") {	outMisMatch << name << endl;  }
 					
 					itList = listNames.find(name);
-					if (itList != listNames.end()) {  mothurOut(name + " is in your list file more than once.  Sequence names must be unique. please correct."); mothurOutEndLine(); }
+					if (itList != listNames.end()) {  m->mothurOut(name + " is in your list file more than once.  Sequence names must be unique. please correct."); m->mothurOutEndLine(); }
 					else { listNames[name] = name; }
 				}
 			
@@ -314,7 +314,7 @@ void SharedCommand::createMisMatchFile() {
 				if(group == "not found") {	outMisMatch << names << endl;  }	
 				
 				itList = listNames.find(names);
-				if (itList != listNames.end()) {  mothurOut(names + " is in your list file more than once.  Sequence names must be unique. please correct."); mothurOutEndLine(); }
+				if (itList != listNames.end()) {  m->mothurOut(names + " is in your list file more than once.  Sequence names must be unique. please correct."); m->mothurOutEndLine(); }
 				else { listNames[names] = names; }
 
 			}
@@ -325,7 +325,7 @@ void SharedCommand::createMisMatchFile() {
 		}else {//you have sequences in your group file that are not in you list file
 			
 			outputMisMatchName += "missing.name";
-			mothurOut("For a list of names that are in your group file and not in your list file, please refer to " + outputMisMatchName + "."); mothurOutEndLine();
+			m->mothurOut("For a list of names that are in your group file and not in your list file, please refer to " + outputMisMatchName + "."); m->mothurOutEndLine();
 			
 			map<string, string> namesInList;
 			map<string, string>::iterator itList;
@@ -340,14 +340,14 @@ void SharedCommand::createMisMatchFile() {
 					names = names.substr(names.find_first_of(',')+1, names.length());
 					
 					itList = namesInList.find(name);
-					if (itList != namesInList.end()) {  mothurOut(name + " is in your list file more than once.  Sequence names must be unique. please correct."); mothurOutEndLine(); }
+					if (itList != namesInList.end()) {  m->mothurOut(name + " is in your list file more than once.  Sequence names must be unique. please correct."); m->mothurOutEndLine(); }
 
 					namesInList[name] = name;
 					
 				}
 				
 				itList = namesInList.find(names);
-				if (itList != namesInList.end()) {  mothurOut(names + " is in your list file more than once.  Sequence names must be unique. please correct."); mothurOutEndLine(); }
+				if (itList != namesInList.end()) {  m->mothurOut(names + " is in your list file more than once.  Sequence names must be unique. please correct."); m->mothurOutEndLine(); }
 
 				//get last name
 				namesInList[names] = names;				
@@ -375,7 +375,7 @@ void SharedCommand::createMisMatchFile() {
  
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedCommand", "createMisMatchFile");
+		m->errorOut(e, "SharedCommand", "createMisMatchFile");
 		exit(1);
 	}
 }
@@ -399,7 +399,7 @@ bool SharedCommand::isValidGroup(string groupname, vector<string> groups) {
 		return false;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedCommand", "isValidGroup");
+		m->errorOut(e, "SharedCommand", "isValidGroup");
 		exit(1);
 	}
 }

@@ -24,8 +24,8 @@
 
 /**************************************************************************************************/
 
-NeedlemanOverlap::NeedlemanOverlap(float gO, float m, float mm, int r) ://	note that we don't have a gap extend
-gap(gO), match(m), mismatch(mm), Alignment(r) {							//	the gap openning penalty is assessed for
+NeedlemanOverlap::NeedlemanOverlap(float gO, float f, float mm, int r) ://	note that we don't have a gap extend
+gap(gO), match(f), mismatch(mm), Alignment(r) {							//	the gap openning penalty is assessed for
 	try {																	//	every gapped position
 		for(int i=1;i<nCols;i++){
 			alignment[0][i].prevCell = 'l';					//	initialize first row by pointing all poiters to the left
@@ -39,7 +39,7 @@ gap(gO), match(m), mismatch(mm), Alignment(r) {							//	the gap openning penalt
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "NeedlemanOverlap", "NeedlemanOverlap");
+		m->errorOut(e, "NeedlemanOverlap", "NeedlemanOverlap");
 		exit(1);
 	}
 }
@@ -54,7 +54,7 @@ void NeedlemanOverlap::align(string A, string B){
 		seqA = ' ' + A;	lA = seqA.length();		//	algorithm requires a dummy space at the beginning of each string
 		seqB = ' ' + B;	lB = seqB.length();		//	algorithm requires a dummy space at the beginning of each string
 
-		if (lA > nRows) { mothurOut("One of your candidate sequences is longer than you longest template sequence. Your longest template sequence is " + toString(nRows) + ". Your candidate is " + toString(lA) + "."); mothurOutEndLine();  }
+		if (lA > nRows) { m->mothurOut("One of your candidate sequences is longer than you longest template sequence. Your longest template sequence is " + toString(nRows) + ". Your candidate is " + toString(lA) + "."); m->mothurOutEndLine();  }
 		
 		for(int i=1;i<lB;i++){					//	This code was largely translated from Perl code provided in Ex 3.1 
 			for(int j=1;j<lA;j++){				//	of the O'Reilly BLAST book.  I found that the example output had a
@@ -95,7 +95,7 @@ void NeedlemanOverlap::align(string A, string B){
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "NeedlemanOverlap", "align");
+		m->errorOut(e, "NeedlemanOverlap", "align");
 		exit(1);
 	}
 

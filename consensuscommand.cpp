@@ -11,7 +11,7 @@
 
 //**********************************************************************************************************************
 
-ConcensusCommand::ConcensusCommand(string fileroot){
+ConcensusCommand::ConcensusCommand(string fileroot)  {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
@@ -22,7 +22,7 @@ ConcensusCommand::ConcensusCommand(string fileroot){
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "ConcensusCommand", "ConcensusCommand");
+		m->errorOut(e, "ConcensusCommand", "ConcensusCommand");
 		exit(1);
 	}
 }
@@ -31,17 +31,17 @@ ConcensusCommand::ConcensusCommand(string fileroot){
 
 void ConcensusCommand::help(){
 	try {
-		mothurOut("The consensus command can only be executed after a successful read.tree command.\n");
-		mothurOut("The consensus command has no parameters.\n");
-		mothurOut("The consensus command should be in the following format: consensus().\n");
-		mothurOut("The consensus command output two files: .consensus.tre and .consensuspairs.\n");
-		mothurOut("The .consensus.tre file contains the consensus tree of the trees in your input file.\n");
-		mothurOut("The branch lengths are the percentage of trees in your input file that had the given pair.\n");
-		mothurOut("The .consensuspairs file contains a list of the internal nodes in your tree.  For each node, the pair that was used in the consensus tree \n");
-		mothurOut("is reported with its percentage, as well as the other pairs that were seen for that node but not used and their percentages.\n\n");		
+		m->mothurOut("The consensus command can only be executed after a successful read.tree command.\n");
+		m->mothurOut("The consensus command has no parameters.\n");
+		m->mothurOut("The consensus command should be in the following format: consensus().\n");
+		m->mothurOut("The consensus command output two files: .consensus.tre and .consensuspairs.\n");
+		m->mothurOut("The .consensus.tre file contains the consensus tree of the trees in your input file.\n");
+		m->mothurOut("The branch lengths are the percentage of trees in your input file that had the given pair.\n");
+		m->mothurOut("The .consensuspairs file contains a list of the internal nodes in your tree.  For each node, the pair that was used in the consensus tree \n");
+		m->mothurOut("is reported with its percentage, as well as the other pairs that were seen for that node but not used and their percentages.\n\n");		
 	}
 	catch(exception& e) {
-		errorOut(e, "ConcensusCommand", "help");
+		m->errorOut(e, "ConcensusCommand", "help");
 		exit(1);
 	}
 }
@@ -148,7 +148,7 @@ int ConcensusCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "ConcensusCommand", "execute");
+		m->errorOut(e, "ConcensusCommand", "execute");
 		exit(1);
 	}
 }
@@ -180,7 +180,7 @@ int ConcensusCommand::buildConcensusTree(vector<string> nodeSet) {
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "ConcensusCommand", "buildConcensusTree");
+		m->errorOut(e, "ConcensusCommand", "buildConcensusTree");
 		exit(1);
 	}
 }
@@ -251,7 +251,7 @@ void ConcensusCommand::getSets() {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "ConcensusCommand", "getSets");
+		m->errorOut(e, "ConcensusCommand", "getSets");
 		exit(1);
 	}
 }
@@ -268,7 +268,7 @@ vector<string> ConcensusCommand::getSmallest(map< vector<string>, int> nodes) {
 		return smallest;
 	}
 	catch(exception& e) {
-		errorOut(e, "ConcensusCommand", "getSmallest");
+		m->errorOut(e, "ConcensusCommand", "getSmallest");
 		exit(1);
 	}
 }
@@ -306,7 +306,7 @@ vector<string> ConcensusCommand::getNextAvailableSet(vector<string> bigset, vect
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "ConcensusCommand", "getNextAvailableSet");
+		m->errorOut(e, "ConcensusCommand", "getNextAvailableSet");
 		exit(1);
 	}
 }
@@ -373,7 +373,7 @@ int ConcensusCommand::getSubgroupRating(vector<string> group) {
 		return rate;
 	}
 	catch(exception& e) {
-		errorOut(e, "ConcensusCommand", "getSubgroupRating");
+		m->errorOut(e, "ConcensusCommand", "getSubgroupRating");
 		exit(1);
 	}
 }
@@ -397,7 +397,7 @@ vector<string> ConcensusCommand::getRestSet(vector<string> bigset, vector<string
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "ConcensusCommand", "getRestSet");
+		m->errorOut(e, "ConcensusCommand", "getRestSet");
 		exit(1);
 	}
 }
@@ -424,7 +424,7 @@ bool ConcensusCommand::isSubset(vector<string> bigset, vector<string> subset) {
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "ConcensusCommand", "isSubset");
+		m->errorOut(e, "ConcensusCommand", "isSubset");
 		exit(1);
 	}
 }
@@ -442,7 +442,7 @@ int ConcensusCommand::findSpot(string node) {
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "ConcensusCommand", "findSpot");
+		m->errorOut(e, "ConcensusCommand", "findSpot");
 		exit(1);
 	}
 }

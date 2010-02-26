@@ -11,7 +11,7 @@
 
 //**********************************************************************************************************************
 
-GetSharedOTUCommand::GetSharedOTUCommand(string option){
+GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 	try {
 	
 		globaldata = GlobalData::getInstance();
@@ -83,7 +83,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option){
 			if (groupfile == "not open") { abort = true; }	
 			else if (groupfile == "not found") { groupfile = ""; }
 						
-			if ((listfile == "") || (groupfile == "")) { mothurOut("The list and group parameters are required."); mothurOutEndLine(); abort = true; }
+			if ((listfile == "") || (groupfile == "")) { m->mothurOut("The list and group parameters are required."); m->mothurOutEndLine(); abort = true; }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -123,7 +123,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "GetSharedOTUCommand", "GetSharedOTUCommand");
+		m->errorOut(e, "GetSharedOTUCommand", "GetSharedOTUCommand");
 		exit(1);
 	}
 }
@@ -131,24 +131,24 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option){
 
 void GetSharedOTUCommand::help(){
 	try {
-		mothurOut("The get.sharedseqs command parameters are list, group, label, unique, shared, output and fasta.  The list and group parameters are required.\n");
-		mothurOut("The label parameter allows you to select what distance levels you would like output files for, and are separated by dashes.\n");
-		mothurOut("The unique and shared parameters allow you to select groups you would like to know the shared info for, and are separated by dashes.\n");
-		mothurOut("If you enter your groups under the unique parameter mothur will return the otus that contain ONLY sequences from those groups.\n");
-		mothurOut("If you enter your groups under the shared parameter mothur will return the otus that contain sequences from those groups and may also contain sequences from other groups.\n");
-		mothurOut("If you do not enter any groups then the get.sharedseqs command will return sequences that are unique to all groups in your group file.\n");
-		mothurOut("The fasta parameter allows you to input a fasta file and outputs a fasta file for each distance level containing only the sequences that are in OTUs shared by the groups specified.\n");
-		mothurOut("The output parameter allows you to output the list of names without the group and bin number added. \n");
-		mothurOut("With this option you can use the names file as an input in get.seqs and remove.seqs commands. To do this enter output=accnos. \n");
-		mothurOut("The get.sharedseqs command outputs a .names file for each distance level containing a list of sequences in the OTUs shared by the groups specified.\n");
-		mothurOut("The get.sharedseqs command should be in the following format: get.sabund(label=yourLabels, groups=yourGroups, fasta=yourFastafile, output=yourOutput).\n");
-		mothurOut("Example get.sharedseqs(list=amazon.fn.list, label=unique-0.01, group=forest-pasture, fasta=amazon.fasta, output=accnos).\n");
-		mothurOut("The output to the screen is the distance and the number of otus at that distance for the groups you specified.\n");
-		mothurOut("The default value for label is all labels in your inputfile. The default for groups is all groups in your file.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabel).\n\n");
+		m->mothurOut("The get.sharedseqs command parameters are list, group, label, unique, shared, output and fasta.  The list and group parameters are required.\n");
+		m->mothurOut("The label parameter allows you to select what distance levels you would like output files for, and are separated by dashes.\n");
+		m->mothurOut("The unique and shared parameters allow you to select groups you would like to know the shared info for, and are separated by dashes.\n");
+		m->mothurOut("If you enter your groups under the unique parameter mothur will return the otus that contain ONLY sequences from those groups.\n");
+		m->mothurOut("If you enter your groups under the shared parameter mothur will return the otus that contain sequences from those groups and may also contain sequences from other groups.\n");
+		m->mothurOut("If you do not enter any groups then the get.sharedseqs command will return sequences that are unique to all groups in your group file.\n");
+		m->mothurOut("The fasta parameter allows you to input a fasta file and outputs a fasta file for each distance level containing only the sequences that are in OTUs shared by the groups specified.\n");
+		m->mothurOut("The output parameter allows you to output the list of names without the group and bin number added. \n");
+		m->mothurOut("With this option you can use the names file as an input in get.seqs and remove.seqs commands. To do this enter output=accnos. \n");
+		m->mothurOut("The get.sharedseqs command outputs a .names file for each distance level containing a list of sequences in the OTUs shared by the groups specified.\n");
+		m->mothurOut("The get.sharedseqs command should be in the following format: get.sabund(label=yourLabels, groups=yourGroups, fasta=yourFastafile, output=yourOutput).\n");
+		m->mothurOut("Example get.sharedseqs(list=amazon.fn.list, label=unique-0.01, group=forest-pasture, fasta=amazon.fasta, output=accnos).\n");
+		m->mothurOut("The output to the screen is the distance and the number of otus at that distance for the groups you specified.\n");
+		m->mothurOut("The default value for label is all labels in your inputfile. The default for groups is all groups in your file.\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabel).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "GetSharedOTUCommand", "help");
+		m->errorOut(e, "GetSharedOTUCommand", "help");
 		exit(1);
 	}
 }
@@ -211,7 +211,7 @@ int GetSharedOTUCommand::execute(){
 			list = new ListVector(in);
 			
 			if(allLines == 1 || labels.count(list->getLabel()) == 1){			
-				mothurOut(list->getLabel()); 
+				m->mothurOut(list->getLabel()); 
 				process(list);
 				
 				processedLabels.insert(list->getLabel());
@@ -221,7 +221,7 @@ int GetSharedOTUCommand::execute(){
 			if ((anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = list->getLabel();
 					
-					mothurOut(lastlist->getLabel()); 
+					m->mothurOut(lastlist->getLabel()); 
 					process(lastlist);
 					
 					processedLabels.insert(lastlist->getLabel());
@@ -243,18 +243,18 @@ int GetSharedOTUCommand::execute(){
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			mothurOut("Your file does not include the label " + *it); 
+			m->mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(lastLabel) != 1) {
-				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
 				needToRun = true;
 			}else {
-				mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
 			}
 		}
 		
 		//run last label if you need to
 		if (needToRun == true)  {
-				mothurOut(lastlist->getLabel()); 
+				m->mothurOut(lastlist->getLabel()); 
 				process(lastlist);
 					
 				processedLabels.insert(lastlist->getLabel());
@@ -266,11 +266,19 @@ int GetSharedOTUCommand::execute(){
 		globaldata->Groups.clear();  
 		
 		if (lastlist != NULL) {		delete lastlist;	}
+		
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+
+
 		return 0;
 	}
 
 	catch(exception& e) {
-		errorOut(e, "GetSharedOTUCommand", "execute");
+		m->errorOut(e, "GetSharedOTUCommand", "execute");
 		exit(1);
 	}
 }
@@ -300,8 +308,8 @@ void GetSharedOTUCommand::process(ListVector* shared) {
 			bool uniqueOTU = true;
 			
 			map<string, int> atLeastOne;
-			for (int m = 0; m < Groups.size(); m++) {
-				atLeastOne[Groups[m]] = 0;
+			for (int f = 0; f < Groups.size(); f++) {
+				atLeastOne[Groups[f]] = 0;
 			}
 			
 			vector<string> namesOfSeqsInThisBin;
@@ -317,7 +325,7 @@ void GetSharedOTUCommand::process(ListVector* shared) {
 					namesOfSeqsInThisBin.push_back((name + "\t" + seqGroup + "\t" + toString(i+1)));
 				}else {  namesOfSeqsInThisBin.push_back(name);	}
 				
-				if (seqGroup == "not found") { mothurOut(name + " is not in your groupfile. Please correct."); mothurOutEndLine(); exit(1);  }
+				if (seqGroup == "not found") { m->mothurOut(name + " is not in your groupfile. Please correct."); m->mothurOutEndLine(); exit(1);  }
 				
 				//is this seq in one of hte groups we care about
 				it = groupFinder.find(seqGroup);
@@ -331,7 +339,7 @@ void GetSharedOTUCommand::process(ListVector* shared) {
 				namesOfSeqsInThisBin.push_back((names + "\t" + seqGroup + "\t" + toString(i+1)));
 			}else {  namesOfSeqsInThisBin.push_back(names);	}
 			
-			if (seqGroup == "not found") { mothurOut(names + " is not in your groupfile. Please correct."); mothurOutEndLine(); exit(1);  }
+			if (seqGroup == "not found") { m->mothurOut(names + " is not in your groupfile. Please correct."); m->mothurOutEndLine(); exit(1);  }
 			
 			//is this seq in one of hte groups we care about
 			it = groupFinder.find(seqGroup);
@@ -382,8 +390,11 @@ void GetSharedOTUCommand::process(ListVector* shared) {
 			}
 			
 			outputString += groupString + ".";
-			mothurOut(outputString); mothurOutEndLine();
-		}else { mothurOut("\t" + toString(num)); mothurOutEndLine(); }
+			m->mothurOut(outputString); m->mothurOutEndLine();
+		}else { 
+			m->mothurOut("\t" + toString(num)); m->mothurOutEndLine(); 
+			outputNames.push_back(outputFileNames);
+		}
 		
 		//if fasta file provided output new fasta file
 		if ((fastafile != "") && wroteSomething) {
@@ -391,6 +402,7 @@ void GetSharedOTUCommand::process(ListVector* shared) {
 			string outputFileFasta = outputDir + getRootName(getSimpleName(fastafile)) + shared->getLabel() + userGroups + ".shared.fasta";
 			ofstream outFasta;
 			openOutputFile(outputFileFasta, outFasta);
+			outputNames.push_back(outputFileFasta);
 			
 			for (int k = 0; k < seqs.size(); k++) {
 				//if this is a sequence we want, output it
@@ -413,7 +425,7 @@ void GetSharedOTUCommand::process(ListVector* shared) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "GetSharedOTUCommand", "process");
+		m->errorOut(e, "GetSharedOTUCommand", "process");
 		exit(1);
 	}
 }

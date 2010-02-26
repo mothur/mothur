@@ -58,6 +58,7 @@ public:
 
 	
 protected:
+	MothurOut* m;
 	int numSeqs, longest;
 	float searchScore;
 	vector<int> results;

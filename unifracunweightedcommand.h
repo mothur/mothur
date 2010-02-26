@@ -47,7 +47,7 @@ class UnifracUnweightedCommand : public Command {
 		
 		bool abort, phylip, random;
 		string groups, itersString, outputDir;
-		vector<string> Groups; //holds groups to be used
+		vector<string> Groups, outputNames; //holds groups to be used
 
 		ofstream outSum, out;
 		ifstream inFile;

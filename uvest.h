@@ -21,7 +21,10 @@ typedef vector<double> EstOutput;
 /***********************************************************************/
 class UVEst {
 	public:
-		EstOutput getUVest(vector<SharedRAbundVector*>);		
+		UVEst() { m = MothurOut::getInstance(); }
+		EstOutput getUVest(vector<SharedRAbundVector*>);	
+	private:
+		MothurOut* m;
 };
 /***********************************************************************/
 

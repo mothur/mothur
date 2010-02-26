@@ -23,7 +23,7 @@ struct Names {
 class FullMatrix {
 	
 public:
-	FullMatrix(){};
+	FullMatrix(){ m = MothurOut::getInstance(); }
 	FullMatrix(ifstream&);
 	~FullMatrix(){};
 	
@@ -53,6 +53,7 @@ private:
 	int numGroups;
 	int numUserGroups;
 	GlobalData* globaldata;
+	MothurOut* m;
 };
 
 #endif

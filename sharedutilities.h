@@ -10,6 +10,7 @@
  */
 
 #include "mothur.h"
+#include "mothurout.h"
 
 class SharedRAbundVector;
 class SharedOrderVector;
@@ -18,7 +19,7 @@ class SharedOrderVector;
 
 class SharedUtil {
 	public:
-		SharedUtil() {};
+		SharedUtil() { m = MothurOut::getInstance(); }
 		~SharedUtil() {};
 		
 		void getSharedVectors(vector<string>, vector<SharedRAbundVector*>&, SharedOrderVector*);
@@ -31,7 +32,7 @@ class SharedUtil {
 		bool isValidGroup(string, vector<string>);
 		
 	private:
-	
+		MothurOut* m;
 		
 };
 

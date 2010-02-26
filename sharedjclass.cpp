@@ -41,7 +41,7 @@ EstOutput Jclass::getValues(vector<SharedRAbundVector*> shared) {
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "Jclass", "getValues");
+		m->errorOut(e, "Jclass", "getValues");
 		exit(1);
 	}
 }

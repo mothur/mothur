@@ -13,7 +13,7 @@
 
 //**********************************************************************************************************************
 
-RareFactSharedCommand::RareFactSharedCommand(string option){
+RareFactSharedCommand::RareFactSharedCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
 		
@@ -43,8 +43,8 @@ RareFactSharedCommand::RareFactSharedCommand(string option){
 			
 			//make sure the user has already run the read.otu command
 			if (globaldata->getSharedFile() == "") {
-				if (globaldata->getListFile() == "") { mothurOut("You must read a list and a group, or a shared before you can use the collect.shared command."); mothurOutEndLine(); abort = true; }
-				else if (globaldata->getGroupFile() == "") { mothurOut("You must read a list and a group, or a shared before you can use the collect.shared command."); mothurOutEndLine(); abort = true; }
+				if (globaldata->getListFile() == "") { m->mothurOut("You must read a list and a group, or a shared before you can use the collect.shared command."); m->mothurOutEndLine(); abort = true; }
+				else if (globaldata->getGroupFile() == "") { m->mothurOut("You must read a list and a group, or a shared before you can use the collect.shared command."); m->mothurOutEndLine(); abort = true; }
 			}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -104,8 +104,10 @@ RareFactSharedCommand::RareFactSharedCommand(string option){
 					if (validCalculator->isValidCalculator("sharedrarefaction", Estimators[i]) == true) { 
 						if (Estimators[i] == "sharedobserved") { 
 							rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(fileNameRoot+"shared.rarefaction", "")));
+							outputNames.push_back(fileNameRoot+"shared.rarefaction");
 						}else if (Estimators[i] == "sharednseqs") { 
 							rDisplays.push_back(new RareDisplay(new SharedNSeqs(), new SharedThreeColumnFile(fileNameRoot+"shared.r_nseqs", "")));
+							outputNames.push_back(fileNameRoot+"shared.r_nseqs");
 						}
 					}
 				}
@@ -115,7 +117,7 @@ RareFactSharedCommand::RareFactSharedCommand(string option){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "RareFactSharedCommand", "RareFactSharedCommand");
+		m->errorOut(e, "RareFactSharedCommand", "RareFactSharedCommand");
 		exit(1);
 	}
 }
@@ -124,20 +126,20 @@ RareFactSharedCommand::RareFactSharedCommand(string option){
 
 void RareFactSharedCommand::help(){
 	try {
-		mothurOut("The rarefaction.shared command can only be executed after a successful read.otu command.\n");
-		mothurOut("The rarefaction.shared command parameters are label, iters, groups, jumble and calc.  No parameters are required.\n");
-		mothurOut("The rarefaction command should be in the following format: \n");
-		mothurOut("rarefaction.shared(label=yourLabel, iters=yourIters, calc=yourEstimators, jumble=yourJumble, groups=yourGroups).\n");
-		mothurOut("Example rarefaction.shared(label=unique-0.01-0.03,  iters=10000, groups=B-C, jumble=T, calc=sharedobserved).\n");
-		mothurOut("The default values for iters is 1000, freq is 100, and calc is sharedobserved which calculates the shared rarefaction curve for the observed richness.\n");
-		mothurOut("The default value for groups is all the groups in your groupfile, and jumble is true.\n");
+		m->mothurOut("The rarefaction.shared command can only be executed after a successful read.otu command.\n");
+		m->mothurOut("The rarefaction.shared command parameters are label, iters, groups, jumble and calc.  No parameters are required.\n");
+		m->mothurOut("The rarefaction command should be in the following format: \n");
+		m->mothurOut("rarefaction.shared(label=yourLabel, iters=yourIters, calc=yourEstimators, jumble=yourJumble, groups=yourGroups).\n");
+		m->mothurOut("Example rarefaction.shared(label=unique-0.01-0.03,  iters=10000, groups=B-C, jumble=T, calc=sharedobserved).\n");
+		m->mothurOut("The default values for iters is 1000, freq is 100, and calc is sharedobserved which calculates the shared rarefaction curve for the observed richness.\n");
+		m->mothurOut("The default value for groups is all the groups in your groupfile, and jumble is true.\n");
 		validCalculator->printCalc("sharedrarefaction", cout);
-		mothurOut("The label parameter is used to analyze specific labels in your input.\n");
-		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n\n");
+		m->mothurOut("The label parameter is used to analyze specific labels in your input.\n");
+		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "RareFactSharedCommand", "help");
+		m->errorOut(e, "RareFactSharedCommand", "help");
 		exit(1);
 	}
 }
@@ -170,7 +172,7 @@ int RareFactSharedCommand::execute(){
 		string lastLabel = lookup[0]->getLabel();
 
 		if (lookup.size() < 2) { 
-			mothurOut("I cannot run the command without at least 2 valid groups."); 
+			m->mothurOut("I cannot run the command without at least 2 valid groups."); 
 			for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; }
 			return 0;
 		}
@@ -188,7 +190,7 @@ int RareFactSharedCommand::execute(){
 				rCurve->getSharedCurve(freq, nIters);
 				delete rCurve;
 			
-				mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
+				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 				processedLabels.insert(lookup[0]->getLabel());
 				userLabels.erase(lookup[0]->getLabel());
 			}
@@ -199,7 +201,7 @@ int RareFactSharedCommand::execute(){
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 					lookup = input->getSharedRAbundVectors(lastLabel);
 
-					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
+					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 					rCurve = new Rarefact(lookup, rDisplays);
 					rCurve->getSharedCurve(freq, nIters);
 					delete rCurve;
@@ -223,12 +225,12 @@ int RareFactSharedCommand::execute(){
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			mothurOut("Your file does not include the label " + *it); 
+			m->mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(lastLabel) != 1) {
-				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
 				needToRun = true;
 			}else {
-				mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
 			}
 		}
 		
@@ -237,7 +239,7 @@ int RareFactSharedCommand::execute(){
 			for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {	delete lookup[i]; }  } 
 			lookup = input->getSharedRAbundVectors(lastLabel);
 
-			mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
+			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 			rCurve = new Rarefact(lookup, rDisplays);
 			rCurve->getSharedCurve(freq, nIters);
 			delete rCurve;
@@ -248,11 +250,16 @@ int RareFactSharedCommand::execute(){
 		
 		//reset groups parameter
 		globaldata->Groups.clear();  
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
 
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "RareFactSharedCommand", "execute");
+		m->errorOut(e, "RareFactSharedCommand", "execute");
 		exit(1);
 	}
 }

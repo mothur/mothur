@@ -13,6 +13,7 @@
 
 ReadCluster::ReadCluster(string distfile, float c){
 		globaldata = GlobalData::getInstance();
+		m = MothurOut::getInstance();
         distFile = distfile;
 		cutoff = c;
 }
@@ -29,7 +30,7 @@ void ReadCluster::read(NameAssignment* nameMap){
 			
 	}
 	catch(exception& e) {
-		errorOut(e, "ReadCluster", "read");
+		m->errorOut(e, "ReadCluster", "read");
 		exit(1);
 	}
 }
@@ -63,7 +64,7 @@ void ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
 		}
 		else{
 			list = new ListVector(nameMap->getListVector());
-			if(nameMap->count(name)==0){        mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); mothurOutEndLine(); }
+			if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); m->mothurOutEndLine(); }
 		}
         
 		char d;
@@ -106,7 +107,7 @@ void ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
 					
 				}
 				else{
-					if(nameMap->count(name)==0){        mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); mothurOutEndLine(); }
+					if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); m->mothurOutEndLine(); }
 					
 					for(int j=0;j<i;j++){
 						in >> distance;
@@ -139,7 +140,7 @@ void ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
 					}
 				}
 				else{
-					if(nameMap->count(name)==0){        mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); mothurOutEndLine(); }
+					if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); m->mothurOutEndLine(); }
 					
 					for(int j=0;j<nseqs;j++){
 						in >> distance;
@@ -190,7 +191,7 @@ void ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
 		distFile = outputFile;
 	}
 	catch(exception& e) {
-		errorOut(e, "ReadCluster", "convertPhylip2Column");
+		m->errorOut(e, "ReadCluster", "convertPhylip2Column");
 		exit(1);
 	}
 }

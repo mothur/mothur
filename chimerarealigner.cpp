@@ -12,7 +12,7 @@
 #include "nast.hpp"
 
 //***************************************************************************************************************
-ChimeraReAligner::ChimeraReAligner(vector<Sequence*> t, int m, int mm) : match(m), misMatch(mm) {  templateSeqs = t;  }
+ChimeraReAligner::ChimeraReAligner(vector<Sequence*> t, int ms, int mm) : match(ms), misMatch(mm) {  templateSeqs = t;   m = MothurOut::getInstance(); }
 //***************************************************************************************************************
 ChimeraReAligner::~ChimeraReAligner() {}	
 //***************************************************************************************************************
@@ -78,7 +78,7 @@ void ChimeraReAligner::reAlign(Sequence* query, vector<results> parents) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "ChimeraReAligner", "reAlign");
+		m->errorOut(e, "ChimeraReAligner", "reAlign");
 		exit(1);
 	}
 }
@@ -96,14 +96,14 @@ Sequence* ChimeraReAligner::getSequence(string name) {
 			}
 		}
 		
-		if(spot == -1) { mothurOut("Error: Could not find sequence."); mothurOutEndLine(); return NULL; }
+		if(spot == -1) { m->mothurOut("Error: Could not find sequence."); m->mothurOutEndLine(); return NULL; }
 		
 		temp = new Sequence(templateSeqs[spot]->getName(), templateSeqs[spot]->getAligned());
 		
 		return temp;
 	}
 	catch(exception& e) {
-		errorOut(e, "ChimeraReAligner", "getSequence");
+		m->errorOut(e, "ChimeraReAligner", "getSequence");
 		exit(1);
 	}
 }

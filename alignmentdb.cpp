@@ -16,13 +16,14 @@
 /**************************************************************************************************/
 AlignmentDB::AlignmentDB(string fastaFileName, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch){		//	This assumes that the template database is in fasta format, may 
 	try {											//	need to alter this in the future?
+		m = MothurOut::getInstance();
 		longest = 0;
 
 		ifstream fastaFile;
 		openInputFile(fastaFileName, fastaFile);
 		
-		mothurOutEndLine();
-		mothurOut("Reading in the " + fastaFileName + " template sequences...\t");	cout.flush();
+		m->mothurOutEndLine();
+		m->mothurOut("Reading in the " + fastaFileName + " template sequences...\t");	cout.flush();
 		
 		while (!fastaFile.eof()) {
 			Sequence temp(fastaFile);  gobble(fastaFile);
@@ -39,8 +40,8 @@ AlignmentDB::AlignmentDB(string fastaFileName, string method, int kmerSize, floa
 		fastaFile.close();
 		//all of this is elsewhere already!
 		
-		mothurOut("DONE.");
-		mothurOutEndLine();	cout.flush();
+		m->mothurOut("DONE.");
+		m->mothurOutEndLine();	cout.flush();
 		
 		//in case you delete the seqs and then ask for them
 		emptySequence = Sequence();
@@ -61,8 +62,8 @@ AlignmentDB::AlignmentDB(string fastaFileName, string method, int kmerSize, floa
 		else if(method == "suffix")		{	search = new SuffixDB(numSeqs);								}
 		else if(method == "blast")		{	search = new BlastDB(gapOpen, gapExtend, match, misMatch);	}
 		else {
-			mothurOut(method + " is not a valid search option. I will run the command using kmer, ksize=8.");
-			mothurOutEndLine();
+			m->mothurOut(method + " is not a valid search option. I will run the command using kmer, ksize=8.");
+			m->mothurOutEndLine();
 			search = new KmerDB(fastaFileName, 8);
 		}
 		
@@ -82,7 +83,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string method, int kmerSize, floa
 		search->setNumSeqs(numSeqs);
 	}
 	catch(exception& e) {
-		errorOut(e, "AlignmentDB", "AlignmentDB");
+		m->errorOut(e, "AlignmentDB", "AlignmentDB");
 		exit(1);
 	}
 }
@@ -99,7 +100,7 @@ Sequence AlignmentDB::findClosestSequence(Sequence* seq) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "AlignmentDB", "findClosestSequence");
+		m->errorOut(e, "AlignmentDB", "findClosestSequence");
 		exit(1);
 	}
 }

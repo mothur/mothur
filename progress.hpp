@@ -2,6 +2,7 @@
 #define PROGRESS_H
 
 #include "mothur.h"
+#include "mothurout.h"
 
 class Progress {
 	
@@ -14,7 +15,8 @@ public:
 	
 private:
 	int nTicks;
-	int finalPos;	
+	int finalPos;
+	MothurOut* m;	
 };
 
 #endif

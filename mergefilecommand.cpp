@@ -11,7 +11,7 @@
 
 //**********************************************************************************************************************
 
-MergeFileCommand::MergeFileCommand(string option){
+MergeFileCommand::MergeFileCommand(string option)  {
 	try {
 		abort = false;
 		
@@ -39,7 +39,7 @@ MergeFileCommand::MergeFileCommand(string option){
 			if (inputDir == "not found"){	inputDir = "";		}
 			
 			string fileList = validParameter.validFile(parameters, "input", false);			
-			if(fileList == "not found") { mothurOut("you must enter two or more file names"); mothurOutEndLine();  abort=true;  }
+			if(fileList == "not found") { m->mothurOut("you must enter two or more file names"); m->mothurOutEndLine();  abort=true;  }
 			else{ 	splitAtDash(fileList, fileNames);	}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -49,7 +49,7 @@ MergeFileCommand::MergeFileCommand(string option){
 			numInputFiles = fileNames.size();
 			ifstream testFile;
 			if(numInputFiles == 0){
-				mothurOut("you must enter two or more file names and you entered " + toString(fileNames.size()) +  " file names"); mothurOutEndLine();
+				m->mothurOut("you must enter two or more file names and you entered " + toString(fileNames.size()) +  " file names"); m->mothurOutEndLine();
 				abort=true;  
 			}
 			else{
@@ -66,13 +66,13 @@ MergeFileCommand::MergeFileCommand(string option){
 			}   
 			
 			outputFileName = validParameter.validFile(parameters, "output", false);			
-			if (outputFileName == "not found") { mothurOut("you must enter an output file name"); mothurOutEndLine();  abort=true;  }
+			if (outputFileName == "not found") { m->mothurOut("you must enter an output file name"); m->mothurOutEndLine();  abort=true;  }
 			else if (outputDir != "") { outputFileName = outputDir + getSimpleName(outputFileName); }
 		}
 			
 	}
 	catch(exception& e) {
-		errorOut(e, "MergeFileCommand", "MergeFileCommand");
+		m->errorOut(e, "MergeFileCommand", "MergeFileCommand");
 		exit(1);
 	}
 }
@@ -106,10 +106,16 @@ int MergeFileCommand::execute(){
 		}
 		
 		outputFile.close();
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+		m->mothurOut(outputFileName); m->mothurOutEndLine();	
+		m->mothurOutEndLine();
+
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "MergeFileCommand", "execute");
+		m->errorOut(e, "MergeFileCommand", "execute");
 		exit(1);
 	}
 }
@@ -118,10 +124,10 @@ int MergeFileCommand::execute(){
 
 void MergeFileCommand::help(){
 	try {
-		mothurOut("The merge.file command..."); mothurOutEndLine();
+		m->mothurOut("The merge.file command..."); m->mothurOutEndLine();
 	}
 	catch(exception& e) {
-		errorOut(e, "MergeFileCommand", "help");
+		m->errorOut(e, "MergeFileCommand", "help");
 		exit(1);
 	}
 }

@@ -56,7 +56,7 @@ EstOutput KSTest::getValues(vector<SharedRAbundVector*> shared){
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "KSTest", "getValues");
+		m->errorOut(e, "KSTest", "getValues");
 		exit(1);
 	}
 }

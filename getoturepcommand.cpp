@@ -36,13 +36,13 @@ inline bool compareGroup(repStruct left, repStruct right){
 	return (left.group < right.group);	
 }
 //**********************************************************************************************************************
-GetOTURepCommand::GetOTURepCommand(string option){
+GetOTURepCommand::GetOTURepCommand(string option)  {
 	try{
 		globaldata = GlobalData::getInstance();
 		abort = false;
 		allLines = 1;
 		labels.clear();
-		
+				
 		//allow user to run help
 		if (option == "help") { 
 			help(); abort = true;
@@ -122,11 +122,11 @@ GetOTURepCommand::GetOTURepCommand(string option){
 			
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not found") { mothurOut("fasta is a required parameter for the get.oturep command."); mothurOutEndLine(); abort = true; }
+			if (fastafile == "not found") { m->mothurOut("fasta is a required parameter for the get.oturep command."); m->mothurOutEndLine(); abort = true; }
 			else if (fastafile == "not open") { abort = true; }	
 		
 			listfile = validParameter.validFile(parameters, "list", true);
-			if (listfile == "not found") { mothurOut("list is a required parameter for the get.oturep command."); mothurOutEndLine(); abort = true; }
+			if (listfile == "not found") { m->mothurOut("list is a required parameter for the get.oturep command."); m->mothurOutEndLine(); abort = true; }
 			else if (listfile == "not open") { abort = true; }	
 			
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
@@ -143,8 +143,8 @@ GetOTURepCommand::GetOTURepCommand(string option){
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
 			
-			if ((phylipfile == "") && (columnfile == "")) { mothurOut("When executing a get.oturep command you must enter a phylip or a column."); mothurOutEndLine(); abort = true; }
-			else if ((phylipfile != "") && (columnfile != "")) { mothurOut("When executing a get.oturep command you must enter ONLY ONE of the following: phylip or column."); mothurOutEndLine(); abort = true; }
+			if ((phylipfile == "") && (columnfile == "")) { m->mothurOut("When executing a get.oturep command you must enter a phylip or a column."); m->mothurOutEndLine(); abort = true; }
+			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When executing a get.oturep command you must enter ONLY ONE of the following: phylip or column."); m->mothurOutEndLine(); abort = true; }
 		
 			if (columnfile != "") {  if (namefile == "") {  cout << "You need to provide a namefile if you are going to use the column format." << endl; abort = true; }  }
 
@@ -169,12 +169,12 @@ GetOTURepCommand::GetOTURepCommand(string option){
 			
 			sorted = validParameter.validFile(parameters, "sorted", false);		if (sorted == "not found"){	sorted = "";	}
 			if ((sorted != "") && (sorted != "name") && (sorted != "bin") && (sorted != "size") && (sorted != "group")) {
-				mothurOut(sorted + " is not a valid option for the sorted parameter. The only options are: name, bin, size and group. I will not sort."); mothurOutEndLine();
+				m->mothurOut(sorted + " is not a valid option for the sorted parameter. The only options are: name, bin, size and group. I will not sort."); m->mothurOutEndLine();
 				sorted = "";
 			}
 			
 			if ((sorted == "group") && (groupfile == "")) {
-				mothurOut("You must provide a groupfile to sort by group. I will not sort."); mothurOutEndLine();
+				m->mothurOut("You must provide a groupfile to sort by group. I will not sort."); m->mothurOutEndLine();
 				sorted = "";
 			}
 			
@@ -190,7 +190,7 @@ GetOTURepCommand::GetOTURepCommand(string option){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "GetOTURepCommand", "GetOTURepCommand");
+		m->errorOut(e, "GetOTURepCommand", "GetOTURepCommand");
 		exit(1);
 	}
 }
@@ -199,21 +199,21 @@ GetOTURepCommand::GetOTURepCommand(string option){
 
 void GetOTURepCommand::help(){
 	try {
-		mothurOut("The get.oturep command parameters are phylip, column, list, fasta, name, group, large, cutoff, precision, sorted and label.  The fasta and list parameters are required, as well as phylip or column and name.\n");
-		mothurOut("The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n");
-		mothurOut("The phylip or column parameter is required, but only one may be used.  If you use a column file the name filename is required. \n");
-		mothurOut("If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n");
-		mothurOut("The get.oturep command should be in the following format: get.oturep(phylip=yourDistanceMatrix, fasta=yourFastaFile, list=yourListFile, name=yourNamesFile, group=yourGroupFile, label=yourLabels).\n");
-		mothurOut("Example get.oturep(phylip=amazon.dist, fasta=amazon.fasta, list=amazon.fn.list, group=amazon.groups).\n");
-		mothurOut("The default value for label is all labels in your inputfile.\n");
-		mothurOut("The sorted parameter allows you to indicate you want the output sorted. You can sort by sequence name, bin number, bin size or group. The default is no sorting, but your options are name, number, size, or group.\n");
-		mothurOut("The large parameter allows you to indicate that your distance matrix is too large to fit in RAM.  The default value is false.\n");
-		mothurOut("The get.oturep command outputs a .fastarep and .rep.names file for each distance you specify, selecting one OTU representative for each bin.\n");
-		mothurOut("If you provide a groupfile, then it also appends the names of the groups present in that bin.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");
+		m->mothurOut("The get.oturep command parameters are phylip, column, list, fasta, name, group, large, cutoff, precision, sorted and label.  The fasta and list parameters are required, as well as phylip or column and name.\n");
+		m->mothurOut("The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n");
+		m->mothurOut("The phylip or column parameter is required, but only one may be used.  If you use a column file the name filename is required. \n");
+		m->mothurOut("If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n");
+		m->mothurOut("The get.oturep command should be in the following format: get.oturep(phylip=yourDistanceMatrix, fasta=yourFastaFile, list=yourListFile, name=yourNamesFile, group=yourGroupFile, label=yourLabels).\n");
+		m->mothurOut("Example get.oturep(phylip=amazon.dist, fasta=amazon.fasta, list=amazon.fn.list, group=amazon.groups).\n");
+		m->mothurOut("The default value for label is all labels in your inputfile.\n");
+		m->mothurOut("The sorted parameter allows you to indicate you want the output sorted. You can sort by sequence name, bin number, bin size or group. The default is no sorting, but your options are name, number, size, or group.\n");
+		m->mothurOut("The large parameter allows you to indicate that your distance matrix is too large to fit in RAM.  The default value is false.\n");
+		m->mothurOut("The get.oturep command outputs a .fastarep and .rep.names file for each distance you specify, selecting one OTU representative for each bin.\n");
+		m->mothurOut("If you provide a groupfile, then it also appends the names of the groups present in that bin.\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "GetOTURepCommand", "help");
+		m->errorOut(e, "GetOTURepCommand", "help");
 		exit(1);
 	}
 }
@@ -234,7 +234,7 @@ int GetOTURepCommand::execute(){
 			//read distance files
 			if (format == "column") { readMatrix = new ReadColumnMatrix(distFile); }	
 			else if (format == "phylip") { readMatrix = new ReadPhylipMatrix(distFile); }
-			else { mothurOut("File format error."); mothurOutEndLine(); return 0;  }
+			else { m->mothurOut("File format error."); m->mothurOutEndLine(); return 0;  }
 			
 			readMatrix->setCutoff(cutoff);
 	
@@ -266,7 +266,7 @@ int GetOTURepCommand::execute(){
 			//process file and set up indexes
 			if (format == "column") { formatMatrix = new FormatColumnMatrix(distFile); }	
 			else if (format == "phylip") { formatMatrix = new FormatPhylipMatrix(distFile); }
-			else { mothurOut("File format error."); mothurOutEndLine(); return 0;  }
+			else { m->mothurOut("File format error."); m->mothurOutEndLine(); return 0;  }
 			
 			formatMatrix->setCutoff(cutoff);
 	
@@ -308,7 +308,7 @@ int GetOTURepCommand::execute(){
 					nameToIndex[names[j]] = i;
 				}
 			}
-		} else { mothurOut("error, no listvector."); mothurOutEndLine(); }
+		} else { m->mothurOut("error, no listvector."); m->mothurOutEndLine(); }
 		
 		fasta = new FastaMap();
 		
@@ -336,7 +336,7 @@ int GetOTURepCommand::execute(){
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
 			if (allLines == 1 || labels.count(list->getLabel()) == 1){
-					mothurOut(list->getLabel() + "\t" + toString(list->size())); mothurOutEndLine();
+					m->mothurOut(list->getLabel() + "\t" + toString(list->size())); m->mothurOutEndLine();
 					error = process(list);
 					if (error == 1) { return 0; } //there is an error in hte input files, abort command
 					
@@ -349,7 +349,7 @@ int GetOTURepCommand::execute(){
 					
 					delete list;
 					list = input->getListVector(lastLabel);
-					mothurOut(list->getLabel() + "\t" + toString(list->size())); mothurOutEndLine();
+					m->mothurOut(list->getLabel() + "\t" + toString(list->size())); m->mothurOutEndLine();
 					error = process(list);
 					if (error == 1) { return 0; } //there is an error in hte input files, abort command
 					
@@ -369,12 +369,12 @@ int GetOTURepCommand::execute(){
 		//output error messages about any remaining user labels
 		bool needToRun = false;
 		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {  
-			mothurOut("Your file does not include the label " + *it); 
+			m->mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(list->getLabel()) != 1) {
-				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
 				needToRun = true;
 			}else {
-				mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
 			}
 		}
 		
@@ -382,7 +382,7 @@ int GetOTURepCommand::execute(){
 		if (needToRun == true)  {
 			if (list != NULL) {	delete list;	}
 			list = input->getListVector(lastLabel);
-			mothurOut(list->getLabel() + "\t" + toString(list->size())); mothurOutEndLine();
+			m->mothurOut(list->getLabel() + "\t" + toString(list->size())); m->mothurOutEndLine();
 			error = process(list);
 			delete list;
 			if (error == 1) { return 0; } //there is an error in hte input files, abort command
@@ -402,10 +402,15 @@ int GetOTURepCommand::execute(){
 			delete groupMap;  globaldata->gGroupmap = NULL;
 		}
 		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+		
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "GetOTURepCommand", "execute");
+		m->errorOut(e, "GetOTURepCommand", "execute");
 		exit(1);
 	}
 }
@@ -439,7 +444,7 @@ void GetOTURepCommand::readNamesFile() {
 
 	}
 	catch(exception& e) {
-		errorOut(e, "GetOTURepCommand", "readNamesFile");
+		m->errorOut(e, "GetOTURepCommand", "readNamesFile");
 		exit(1);
 	}
 }
@@ -461,7 +466,7 @@ string GetOTURepCommand::findRep(int bin, string& group, ListVector* thisList, i
 			for (size_t i = 0; i < names.size(); i++) {
 				string groupName = groupMap->getGroup(names[i]);
 				if (groupName == "not found") {  
-					mothurOut(names[i] + " is missing from your group file. Please correct. "); mothurOutEndLine();
+					m->mothurOut(names[i] + " is missing from your group file. Please correct. "); m->mothurOutEndLine();
 					groupError = true;
 				} else {
 					groups[groupName] = groupName;
@@ -539,7 +544,7 @@ string GetOTURepCommand::findRep(int bin, string& group, ListVector* thisList, i
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "GetOTURepCommand", "FindRep");
+		m->errorOut(e, "GetOTURepCommand", "FindRep");
 		exit(1);
 	}
 }
@@ -554,10 +559,12 @@ int GetOTURepCommand::process(ListVector* processList) {
 		string outputFileName = outputDir + getRootName(getSimpleName(listfile)) + processList->getLabel() + ".rep.fasta";
 		openOutputFile(outputFileName, out);
 		vector<repStruct> reps;
+		outputNames.push_back(outputFileName);
 		
 		ofstream newNamesOutput;
 		string outputNamesFile = outputDir + getRootName(getSimpleName(listfile)) + processList->getLabel() + ".rep.names";
 		openOutputFile(outputNamesFile, newNamesOutput);
+		outputNames.push_back(outputNamesFile);
 		
 		//for each bin in the list vector
 		for (int i = 0; i < processList->size(); i++) {
@@ -585,7 +592,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 					reps.push_back(newRep);
 				}
 			}else { 
-				mothurOut(nameRep + " is missing from your fasta or name file. Please correct. "); mothurOutEndLine(); 
+				m->mothurOut(nameRep + " is missing from your fasta or name file. Please correct. "); m->mothurOutEndLine(); 
 				remove(outputFileName.c_str());
 				remove(outputNamesFile.c_str());
 				return 1;
@@ -617,7 +624,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 
 	}
 	catch(exception& e) {
-		errorOut(e, "GetOTURepCommand", "process");
+		m->errorOut(e, "GetOTURepCommand", "process");
 		exit(1);
 	}
 }
@@ -647,7 +654,7 @@ SeqMap GetOTURepCommand::getMap(int row) {
 		return rowMap;
 	}
 	catch(exception& e) {
-		errorOut(e, "GetOTURepCommand", "getMap");
+		m->errorOut(e, "GetOTURepCommand", "getMap");
 		exit(1);
 	}
 }

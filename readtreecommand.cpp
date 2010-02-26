@@ -10,11 +10,11 @@
 #include "readtreecommand.h"
 
 //**********************************************************************************************************************
-ReadTreeCommand::ReadTreeCommand(string option){
+ReadTreeCommand::ReadTreeCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
-		
+				
 		//allow user to run help
 		if(option == "help") { help(); abort = true; }
 		
@@ -71,12 +71,12 @@ ReadTreeCommand::ReadTreeCommand(string option){
 			//check for required parameters
 			treefile = validParameter.validFile(parameters, "tree", true);
 			if (treefile == "not open") { abort = true; }
-			else if (treefile == "not found") { treefile = ""; mothurOut("tree is a required parameter for the read.tree command."); mothurOutEndLine(); abort = true;  }	
+			else if (treefile == "not found") { treefile = ""; m->mothurOut("tree is a required parameter for the read.tree command."); m->mothurOutEndLine(); abort = true;  }	
 			else {  globaldata->setTreeFile(treefile);  globaldata->setFormat("tree"); 	}
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }	
-			else if (groupfile == "not found") { groupfile = ""; mothurOut("group is a required parameter for the read.tree command."); mothurOutEndLine(); abort = true;	}
+			else if (groupfile == "not found") { groupfile = ""; m->mothurOut("group is a required parameter for the read.tree command."); m->mothurOutEndLine(); abort = true;	}
 			else {  
 				globaldata->setGroupFile(groupfile); 
 				//read in group map info.
@@ -98,7 +98,7 @@ ReadTreeCommand::ReadTreeCommand(string option){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "ReadTreeCommand", "ReadTreeCommand");		
+		m->errorOut(e, "ReadTreeCommand", "ReadTreeCommand");		
 		exit(1);
 	}
 }
@@ -106,14 +106,14 @@ ReadTreeCommand::ReadTreeCommand(string option){
 
 void ReadTreeCommand::help(){
 	try {
-		mothurOut("The read.tree command must be run before you execute a unifrac.weighted, unifrac.unweighted. \n");
-		mothurOut("It also must be run before using the parsimony command, unless you are using the randomtree parameter.\n");
-		mothurOut("The read.tree command should be in the following format: read.tree(tree=yourTreeFile, group=yourGroupFile).\n");
-		mothurOut("The tree and group parameters are both required.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. tree), '=' and parameters (i.e.yourTreefile).\n\n");
+		m->mothurOut("The read.tree command must be run before you execute a unifrac.weighted, unifrac.unweighted. \n");
+		m->mothurOut("It also must be run before using the parsimony command, unless you are using the randomtree parameter.\n");
+		m->mothurOut("The read.tree command should be in the following format: read.tree(tree=yourTreeFile, group=yourGroupFile).\n");
+		m->mothurOut("The tree and group parameters are both required.\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. tree), '=' and parameters (i.e.yourTreefile).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "ReadTreeCommand", "help");	
+		m->errorOut(e, "ReadTreeCommand", "help");	
 		exit(1);
 	}
 }
@@ -135,7 +135,7 @@ int ReadTreeCommand::execute(){
 		
 		readOk = read->read(); 
 		
-		if (readOk != 0) { mothurOut("Read Terminated."); mothurOutEndLine(); globaldata->gTree.clear(); delete globaldata->gTreemap; return 0; }
+		if (readOk != 0) { m->mothurOut("Read Terminated."); m->mothurOutEndLine(); globaldata->gTree.clear(); delete globaldata->gTreemap; return 0; }
 		
 		vector<Tree*> T = globaldata->gTree;
 
@@ -160,7 +160,7 @@ int ReadTreeCommand::execute(){
 					map<string, string>::iterator it = nameMap.find(treeMap->namesOfSeqs[i]);
 					
 					if (it == nameMap.end()) {
-						mothurOut(treeMap->namesOfSeqs[i] + " is in your groupfile and not in your tree. It will be disregarded."); mothurOutEndLine();
+						m->mothurOut(treeMap->namesOfSeqs[i] + " is in your groupfile and not in your tree. It will be disregarded."); m->mothurOutEndLine();
 						treeMap->removeSeq(treeMap->namesOfSeqs[i]);
 						i--; //need this because removeSeq removes name from namesOfSeqs
 					}
@@ -171,7 +171,7 @@ int ReadTreeCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "ReadTreeCommand", "execute");	
+		m->errorOut(e, "ReadTreeCommand", "execute");	
 		exit(1);
 	}
 }
@@ -198,14 +198,14 @@ int ReadTreeCommand::readNamesFile() {
 				splitAtComma(second, dupNames);
 				
 				for (int i = 0; i < dupNames.size(); i++) {	nameMap[dupNames[i]] = dupNames[i];  }
-			}else {  mothurOut(first + " has already been seen in namefile, disregarding names file."); mothurOutEndLine(); in.close(); globaldata->names.clear(); return 1; }			
+			}else {  m->mothurOut(first + " has already been seen in namefile, disregarding names file."); m->mothurOutEndLine(); in.close(); globaldata->names.clear(); return 1; }			
 		}
 		in.close();
 		
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "ReadTreeCommand", "readNamesFile");
+		m->errorOut(e, "ReadTreeCommand", "readNamesFile");
 		exit(1);
 	}
 }

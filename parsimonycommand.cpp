@@ -10,12 +10,12 @@
 #include "parsimonycommand.h"
 
 /***********************************************************/
-ParsimonyCommand::ParsimonyCommand(string option) {
+ParsimonyCommand::ParsimonyCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
 		Groups.clear();
-		
+			
 		//allow user to run help
 		if(option == "help") { help(); abort = true; }
 		
@@ -39,7 +39,7 @@ ParsimonyCommand::ParsimonyCommand(string option) {
 			//are you trying to use parsimony without reading a tree or saying you want random distribution
 			if (randomtree == "")  {
 				if (globaldata->gTree.size() == 0) {
-					mothurOut("You must read a treefile and a groupfile or set the randomtree parameter to the output filename you wish, before you may execute the parsimony command."); mothurOutEndLine(); abort = true;  }
+					m->mothurOut("You must read a treefile and a groupfile or set the randomtree parameter to the output filename you wish, before you may execute the parsimony command."); m->mothurOutEndLine(); abort = true;  }
 			}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -66,15 +66,18 @@ ParsimonyCommand::ParsimonyCommand(string option) {
 					
 					if(outputDir == "") { outputDir += hasPath(globaldata->getTreeFile()); }
 					output = new ColumnFile(outputDir + getSimpleName(globaldata->getTreeFile())  +  ".parsimony", itersString);
+					outputNames.push_back(outputDir + getSimpleName(globaldata->getTreeFile())  +  ".parsimony");
 					
 					sumFile = outputDir + getSimpleName(globaldata->getTreeFile()) + ".psummary";
 					openOutputFile(sumFile, outSum);
+					outputNames.push_back(sumFile);
 				}else { //user wants random distribution
 					savetmap = globaldata->gTreemap;
 					getUserInput();
 					
 					if(outputDir == "") { outputDir += hasPath(randomtree); }
 					output = new ColumnFile(outputDir+ getSimpleName(randomtree), itersString);
+					outputNames.push_back(outputDir+ getSimpleName(randomtree));
 				}
 				
 				//set users groups to analyze
@@ -93,7 +96,7 @@ ParsimonyCommand::ParsimonyCommand(string option) {
 
 	}
 	catch(exception& e) {
-		errorOut(e, "ParsimonyCommand", "ParsimonyCommand");
+		m->errorOut(e, "ParsimonyCommand", "ParsimonyCommand");
 		exit(1);
 	}
 }
@@ -102,18 +105,18 @@ ParsimonyCommand::ParsimonyCommand(string option) {
 
 void ParsimonyCommand::help(){
 	try {
-		mothurOut("The parsimony command can only be executed after a successful read.tree command, unless you use the random parameter.\n");
-		mothurOut("The parsimony command parameters are random, groups and iters.  No parameters are required.\n");
-		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 1 valid group.\n");
-		mothurOut("The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree.\n");
-		mothurOut("The parsimony command should be in the following format: parsimony(random=yourOutputFilename, groups=yourGroups, iters=yourIters).\n");
-		mothurOut("Example parsimony(random=out, iters=500).\n");
-		mothurOut("The default value for random is "" (meaning you want to use the trees in your inputfile, randomtree=out means you just want the random distribution of trees outputted to out.rd_parsimony),\n");
-		mothurOut("and iters is 1000.  The parsimony command output two files: .parsimony and .psummary their descriptions are in the manual.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. random), '=' and parameters (i.e.yourOutputFilename).\n\n");
+		m->mothurOut("The parsimony command can only be executed after a successful read.tree command, unless you use the random parameter.\n");
+		m->mothurOut("The parsimony command parameters are random, groups and iters.  No parameters are required.\n");
+		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 1 valid group.\n");
+		m->mothurOut("The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree.\n");
+		m->mothurOut("The parsimony command should be in the following format: parsimony(random=yourOutputFilename, groups=yourGroups, iters=yourIters).\n");
+		m->mothurOut("Example parsimony(random=out, iters=500).\n");
+		m->mothurOut("The default value for random is "" (meaning you want to use the trees in your inputfile, randomtree=out means you just want the random distribution of trees outputted to out.rd_parsimony),\n");
+		m->mothurOut("and iters is 1000.  The parsimony command output two files: .parsimony and .psummary their descriptions are in the manual.\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. random), '=' and parameters (i.e.yourOutputFilename).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "ParsimonyCommand", "help");
+		m->errorOut(e, "ParsimonyCommand", "help");
 		exit(1);
 	}
 }
@@ -268,11 +271,17 @@ int ParsimonyCommand::execute() {
 		//reset groups parameter
 		globaldata->Groups.clear(); 
 		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+
+		
 		return 0;
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "ParsimonyCommand", "execute");
+		m->errorOut(e, "ParsimonyCommand", "execute");
 		exit(1);
 	}
 }
@@ -305,7 +314,7 @@ void ParsimonyCommand::printParsimonyFile() {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "ParsimonyCommand", "printParsimonyFile");
+		m->errorOut(e, "ParsimonyCommand", "printParsimonyFile");
 		exit(1);
 	}
 }
@@ -314,7 +323,7 @@ void ParsimonyCommand::printUSummaryFile() {
 	try {
 		//column headers
 		outSum << "Tree#" << '\t' << "Groups" << '\t'  <<  "ParsScore" << '\t' << "ParsSig" <<  endl;
-		mothurOut("Tree#\tGroups\tParsScore\tParsSig"); mothurOutEndLine();
+		m->mothurOut("Tree#\tGroups\tParsScore\tParsSig"); m->mothurOutEndLine();
 		
 		//format output
 		outSum.setf(ios::fixed, ios::floatfield); outSum.setf(ios::showpoint);
@@ -326,11 +335,11 @@ void ParsimonyCommand::printUSummaryFile() {
 				if (UScoreSig[a][i] > (1/(float)iters)) {
 					outSum << setprecision(6) << i+1 << '\t' << groupComb[a]  << '\t' << userTreeScores[a][i] << setprecision(itersString.length()) << '\t' << UScoreSig[a][i] << endl;
 					cout << setprecision(6) << i+1 << '\t' << groupComb[a]  << '\t' << userTreeScores[a][i] << setprecision(itersString.length()) << '\t' << UScoreSig[a][i] << endl;
-					mothurOutJustToLog(toString(i+1) + "\t" + groupComb[a] + "\t" + toString(userTreeScores[a][i]) + "\t" + toString(UScoreSig[a][i])); mothurOutEndLine();
+					m->mothurOutJustToLog(toString(i+1) + "\t" + groupComb[a] + "\t" + toString(userTreeScores[a][i]) + "\t" + toString(UScoreSig[a][i])); m->mothurOutEndLine();
 				}else {
 					outSum << setprecision(6) << i+1 << '\t' << groupComb[a] << '\t' << userTreeScores[a][i] << setprecision(itersString.length())  << '\t' << "<" << (1/float(iters)) << endl;
 					cout << setprecision(6) << i+1 << '\t' << groupComb[a] << '\t' << userTreeScores[a][i] << setprecision(itersString.length()) << '\t' << "<" << (1/float(iters)) << endl;
-					mothurOutJustToLog(toString(i+1) + "\t" + groupComb[a] + "\t" + toString(userTreeScores[a][i]) + "\t" + toString((1/float(iters)))); mothurOutEndLine();
+					m->mothurOutJustToLog(toString(i+1) + "\t" + groupComb[a] + "\t" + toString(userTreeScores[a][i]) + "\t" + toString((1/float(iters)))); m->mothurOutEndLine();
 				}
 			}
 		}
@@ -338,7 +347,7 @@ void ParsimonyCommand::printUSummaryFile() {
 		outSum.close();
 	}
 	catch(exception& e) {
-		errorOut(e, "ParsimonyCommand", "printUSummaryFile");
+		m->errorOut(e, "ParsimonyCommand", "printUSummaryFile");
 		exit(1);
 	}
 }
@@ -350,18 +359,18 @@ void ParsimonyCommand::getUserInput() {
 		//create treemap
 		tmap = new TreeMap();
 
-		mothurOut("Please enter the number of groups you would like to analyze: ");
+		m->mothurOut("Please enter the number of groups you would like to analyze: ");
 		cin >> numGroups;
-		mothurOutJustToLog(toString(numGroups)); mothurOutEndLine();
+		m->mothurOutJustToLog(toString(numGroups)); m->mothurOutEndLine();
 				
 		int num, count;
 		count = 1;
 		numEachGroup.resize(numGroups, 0);  
 		
 		for (int i = 1; i <= numGroups; i++) {
-			mothurOut("Please enter the number of sequences in group " + toString(i) +  ": ");
+			m->mothurOut("Please enter the number of sequences in group " + toString(i) +  ": ");
 			cin >> num;
-			mothurOutJustToLog(toString(num)); mothurOutEndLine();
+			m->mothurOutJustToLog(toString(num)); m->mothurOutEndLine();
 				
 			//set tmaps seqsPerGroup
 			tmap->seqsPerGroup[toString(i)] = num;
@@ -387,7 +396,7 @@ void ParsimonyCommand::getUserInput() {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "ParsimonyCommand", "getUserInput");
+		m->errorOut(e, "ParsimonyCommand", "getUserInput");
 		exit(1);
 	}
 }

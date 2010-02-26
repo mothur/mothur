@@ -19,19 +19,23 @@
 Venn::Venn(string o) : outputDir(o) {
 	try {
 		globaldata = GlobalData::getInstance();
+		m = MothurOut::getInstance();
 
 	}
 	catch(exception& e) {
-		errorOut(e, "Venn", "Venn");
+		m->errorOut(e, "Venn", "Venn");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-void Venn::getPic(SAbundVector* sabund, vector<Calculator*> vCalcs) {
+vector<string> Venn::getPic(SAbundVector* sabund, vector<Calculator*> vCalcs) {
 	try {
-				
+		
+		vector<string> outputNames;
+		
 		for(int i=0;i<vCalcs.size();i++){
 			string filenamesvg = outputDir + getSimpleName(globaldata->inputFileName) + ".venn." + sabund->getLabel() + vCalcs[i]->getName() + ".svg";
+			outputNames.push_back(filenamesvg);
 			openOutputFile(filenamesvg, outsvg);
 
 			vector<double> data = vCalcs[i]->getValues(sabund);
@@ -53,17 +57,20 @@ void Venn::getPic(SAbundVector* sabund, vector<Calculator*> vCalcs) {
 			outsvg << "</g>\n</svg>\n";
 			outsvg.close();
 		}
+		
+		return outputNames;
 	}
 	catch(exception& e) {
-		errorOut(e, "Venn", "getPic");
+		m->errorOut(e, "Venn", "getPic");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs) {
+vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs) {
 	try {
 		
 		vector<SharedRAbundVector*> subset;
+		vector<string> outputNames;
 		
 		/******************* 1 Group **************************/
 		if (lookup.size() == 1) {
@@ -74,6 +81,7 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 			//make a file for each calculator
 			for(int i=0;i<vCalcs.size();i++){
 				string filenamesvg = outputDir + getSimpleName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
+				outputNames.push_back(filenamesvg);
 				openOutputFile(filenamesvg, outsvg);
 			
 				//in essence you want to run it like a single 
@@ -123,6 +131,7 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 			//make a file for each calculator
 			for(int i=0;i<vCalcs.size();i++){
 				string filenamesvg = outputDir + getSimpleName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
+				outputNames.push_back(filenamesvg);
 				openOutputFile(filenamesvg, outsvg);
 				
 				//get estimates for sharedAB
@@ -190,8 +199,8 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 			//make a file for each calculator
 			for(int i=0;i<vCalcs.size();i++){
 			
-												
 				string filenamesvg = outputDir + getSimpleName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
+				outputNames.push_back(filenamesvg);
 				openOutputFile(filenamesvg, outsvg);
 				
 				if (vCalcs[i]->getName() == "sharedace") {
@@ -444,9 +453,10 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 			//make a file for each calculator
 			for(int i=0;i<vCalcs.size();i++){
 				
-				if ((vCalcs[i]->getName() != "sharedsobs") && (vCalcs[i]->getName() != "sharedchao")) { mothurOut(vCalcs[i]->getName() + " is not a valid calculator with four groups.  It will be disregarded. "); mothurOutEndLine(); }
+				if ((vCalcs[i]->getName() != "sharedsobs") && (vCalcs[i]->getName() != "sharedchao")) { m->mothurOut(vCalcs[i]->getName() + " is not a valid calculator with four groups.  It will be disregarded. "); m->mothurOutEndLine(); }
 				else{
 					string filenamesvg = outputDir + getSimpleName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
+					outputNames.push_back(filenamesvg);
 					openOutputFile(filenamesvg, outsvg);
 
 				
@@ -625,9 +635,11 @@ void Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs
 			}
 		}
 		
+		return outputNames;
+		
 	}
 	catch(exception& e) {
-		errorOut(e, "Venn", "getPic");
+		m->errorOut(e, "Venn", "getPic");
 		exit(1);
 	}
 }

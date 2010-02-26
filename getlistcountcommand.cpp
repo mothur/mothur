@@ -10,13 +10,13 @@
 #include "getlistcountcommand.h"
 
 //**********************************************************************************************************************
-GetListCountCommand::GetListCountCommand(string option){
+GetListCountCommand::GetListCountCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
 		allLines = 1;
 		labels.clear();
-		
+				
 		//allow user to run help
 		if(option == "help") { help(); abort = true; }
 		
@@ -57,7 +57,7 @@ GetListCountCommand::GetListCountCommand(string option){
 			
 			//check for required parameters
 			listfile = validParameter.validFile(parameters, "list", true);
-			if ((listfile == "not found") && (globaldata->getListFile() == ""))  { mothurOut("You must read a listfile before running the get.listcount command.");  mothurOutEndLine(); abort = true; }
+			if ((listfile == "not found") && (globaldata->getListFile() == ""))  { m->mothurOut("You must read a listfile before running the get.listcount command.");  m->mothurOutEndLine(); abort = true; }
 			else if ((listfile == "not found") && (globaldata->getListFile() != "")) { listfile = globaldata->getListFile(); }
 			else if (listfile == "not open") { abort = true; }	
 			else { globaldata->setListFile(listfile); }
@@ -80,7 +80,7 @@ GetListCountCommand::GetListCountCommand(string option){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "GetListCountCommand", "GetListCountCommand");
+		m->errorOut(e, "GetListCountCommand", "GetListCountCommand");
 		exit(1);
 	}
 }
@@ -88,17 +88,17 @@ GetListCountCommand::GetListCountCommand(string option){
 
 void GetListCountCommand::help(){
 	try {
-		mothurOut("The get.listcount command can only be executed after a successful read.otu command of a listfile or providing a list file using the list parameter.\n");
-		mothurOut("The get.listcount command parameters are list and label.  No parameters are required.\n");
-		mothurOut("The label parameter allows you to select what distance levels you would like a output files created for, and are separated by dashes.\n");
-		mothurOut("The get.listcount command should be in the following format: get.listcount(list=yourlistFile, label=yourLabels).\n");
-		mothurOut("Example get.listcount(list=amazon.fn.list, label=0.10).\n");
-		mothurOut("The default value for label is all lines in your inputfile.\n");
-		mothurOut("The get.listcount command outputs a .otu file for each distance you specify listing the bin number and the names of the sequences in that bin.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n\n");
+		m->mothurOut("The get.listcount command can only be executed after a successful read.otu command of a listfile or providing a list file using the list parameter.\n");
+		m->mothurOut("The get.listcount command parameters are list and label.  No parameters are required.\n");
+		m->mothurOut("The label parameter allows you to select what distance levels you would like a output files created for, and are separated by dashes.\n");
+		m->mothurOut("The get.listcount command should be in the following format: get.listcount(list=yourlistFile, label=yourLabels).\n");
+		m->mothurOut("Example get.listcount(list=amazon.fn.list, label=0.10).\n");
+		m->mothurOut("The default value for label is all lines in your inputfile.\n");
+		m->mothurOut("The get.listcount command outputs a .otu file for each distance you specify listing the bin number and the names of the sequences in that bin.\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "GetListCountCommand", "help");
+		m->errorOut(e, "GetListCountCommand", "help");
 		exit(1);
 	}
 }
@@ -163,12 +163,12 @@ int GetListCountCommand::execute(){
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			mothurOut("Your file does not include the label " + *it); 
+			m->mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(lastLabel) != 1) {
-				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
 				needToRun = true;
 			}else {
-				mothurOut(". Please refer to " + lastLabel + ".");  mothurOutEndLine();
+				m->mothurOut(". Please refer to " + lastLabel + ".");  m->mothurOutEndLine();
 			}
 		}
 		
@@ -184,10 +184,15 @@ int GetListCountCommand::execute(){
 		delete read;
 		globaldata->gListVector = NULL;
 		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+		
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "GetListCountCommand", "execute");
+		m->errorOut(e, "GetListCountCommand", "execute");
 		exit(1);
 	}
 }
@@ -200,8 +205,9 @@ void GetListCountCommand::process(ListVector* list) {
 		if (outputDir == "") { outputDir += hasPath(listfile); }
 		string outputFileName = outputDir + getRootName(getSimpleName(listfile)) + list->getLabel() + ".otu";
 		openOutputFile(outputFileName, out);
+		outputNames.push_back(outputFileName);
 		
-		mothurOut(list->getLabel()); mothurOutEndLine();
+		m->mothurOut(list->getLabel()); m->mothurOutEndLine();
 		
 		//for each bin in the list vector
 		for (int i = 0; i < list->getNumBins(); i++) {
@@ -212,7 +218,7 @@ void GetListCountCommand::process(ListVector* list) {
 		out.close();
 	}
 	catch(exception& e) {
-		errorOut(e, "GetListCountCommand", "process");
+		m->errorOut(e, "GetListCountCommand", "process");
 		exit(1);
 	}
 }

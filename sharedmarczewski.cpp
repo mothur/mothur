@@ -38,7 +38,7 @@ EstOutput SharedMarczewski::getValues(vector<SharedRAbundVector*> vectorShared){
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedMarczewski", "getValues");
+		m->errorOut(e, "SharedMarczewski", "getValues");
 		exit(1);
 	}
 }

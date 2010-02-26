@@ -19,7 +19,7 @@ ChimeraCheckRDP::~ChimeraCheckRDP() {
 		delete kmer;
 	}
 	catch(exception& e) {
-		errorOut(e, "ChimeraCheckRDP", "~AlignSim");
+		m->errorOut(e, "ChimeraCheckRDP", "~AlignSim");
 		exit(1);
 	}
 }	
@@ -27,7 +27,7 @@ ChimeraCheckRDP::~ChimeraCheckRDP() {
 void ChimeraCheckRDP::print(ostream& out, ostream& outAcc) {
 	try {
 		
-		mothurOut("Processing: " + querySeq->getName()); mothurOutEndLine();
+		m->mothurOut("Processing: " + querySeq->getName()); m->mothurOutEndLine();
 		
 		out << querySeq->getName() << endl;
 		out << "IS scores: " << '\t';
@@ -50,7 +50,7 @@ void ChimeraCheckRDP::print(ostream& out, ostream& outAcc) {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "ChimeraCheckRDP", "print");
+		m->errorOut(e, "ChimeraCheckRDP", "print");
 		exit(1);
 	}
 }
@@ -58,7 +58,7 @@ void ChimeraCheckRDP::print(ostream& out, ostream& outAcc) {
 void ChimeraCheckRDP::doPrep() {
 	try {
 		templateDB = new AlignmentDB(templateFileName, "kmer", kmerSize, 0.0,0.0,0.0,0.0);
-		mothurOutEndLine();
+		m->mothurOutEndLine();
 		
 		kmer = new Kmer(kmerSize);
 		
@@ -67,7 +67,7 @@ void ChimeraCheckRDP::doPrep() {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "ChimeraCheckRDP", "doPrep");
+		m->errorOut(e, "ChimeraCheckRDP", "doPrep");
 		exit(1);
 	}
 }
@@ -89,7 +89,7 @@ int ChimeraCheckRDP::getChimeras(Sequence* query) {
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "ChimeraCheckRDP", "getChimeras");
+		m->errorOut(e, "ChimeraCheckRDP", "getChimeras");
 		exit(1);
 	}
 }
@@ -118,14 +118,14 @@ vector<sim> ChimeraCheckRDP::findIS() {
 		int start = seq.length() / 10;
 			
 		//for each window
-		for (int m = start; m < (seq.length() - start); m+=increment) {
+		for (int f = start; f < (seq.length() - start); f+=increment) {
 			
-			if ((m - kmerSize) < 0)  { mothurOut("Your sequence is too short for your kmerSize."); mothurOutEndLine(); exit(1); }
+			if ((f - kmerSize) < 0)  { m->mothurOut("Your sequence is too short for your kmerSize."); m->mothurOutEndLine(); exit(1); }
 			
 			sim temp;
 			
-			string fragLeft = seq.substr(0, m);  //left side of breakpoint
-			string fragRight = seq.substr(m);  //right side of breakpoint
+			string fragLeft = seq.substr(0, f);  //left side of breakpoint
+			string fragRight = seq.substr(f);  //right side of breakpoint
 			
 			//make a sequence of the left side and right side
 			Sequence* left = new Sequence(queryName, fragLeft);
@@ -145,7 +145,7 @@ vector<sim> ChimeraCheckRDP::findIS() {
 			//right side is tricky - since the counts grow on eachother to find the correct counts of only the right side you must subtract the counts of the left side
 			//iterate through left sides map to subtract the number of times you saw things before you got the the right side
 			map<int, int> rightside = queryKmerInfo[queryKmerInfo.size()-1];
-			for (map<int, int>::iterator itleft = queryKmerInfo[m-kmerSize].begin(); itleft != queryKmerInfo[m-kmerSize].end(); itleft++) {
+			for (map<int, int>::iterator itleft = queryKmerInfo[f-kmerSize].begin(); itleft != queryKmerInfo[f-kmerSize].end(); itleft++) {
 				int howManyTotal = queryKmerInfo[queryKmerInfo.size()-1][itleft->first];   //times that kmer was seen in total
 
 				//itleft->second is times it was seen in left side, so howmanytotal - leftside should give you right side
@@ -158,7 +158,7 @@ vector<sim> ChimeraCheckRDP::findIS() {
 			}
 			
 			map<int, int> closerightside = closeRightKmerInfo[closeRightKmerInfo.size()-1];
-			for (map<int, int>::iterator itright = closeRightKmerInfo[m-kmerSize].begin(); itright != closeRightKmerInfo[m-kmerSize].end(); itright++) {
+			for (map<int, int>::iterator itright = closeRightKmerInfo[f-kmerSize].begin(); itright != closeRightKmerInfo[f-kmerSize].end(); itright++) {
 				int howManyTotal = closeRightKmerInfo[(closeRightKmerInfo.size()-1)][itright->first];   //times that kmer was seen in total
 
 				//itleft->second is times it was seen in left side, so howmanytotal - leftside should give you right side
@@ -171,7 +171,7 @@ vector<sim> ChimeraCheckRDP::findIS() {
 			}
 
 			
-			int nLeft = calcKmers(closeLeftKmerInfo[m-kmerSize], queryKmerInfo[m-kmerSize]);
+			int nLeft = calcKmers(closeLeftKmerInfo[f-kmerSize], queryKmerInfo[f-kmerSize]);
 
 			int nRight = calcKmers(closerightside, rightside);
 
@@ -181,7 +181,7 @@ vector<sim> ChimeraCheckRDP::findIS() {
 			temp.leftParent = closestLeft.getName();
 			temp.rightParent = closestRight.getName();
 			temp.score = is;
-			temp.midpoint = m;
+			temp.midpoint = f;
 			
 			isValues.push_back(temp);
 			
@@ -193,7 +193,7 @@ vector<sim> ChimeraCheckRDP::findIS() {
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "ChimeraCheckRDP", "findIS");
+		m->errorOut(e, "ChimeraCheckRDP", "findIS");
 		exit(1);
 	}
 }
@@ -215,7 +215,7 @@ void ChimeraCheckRDP::readName(string namefile) {
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "ChimeraCheckRDP", "readName");
+		m->errorOut(e, "ChimeraCheckRDP", "readName");
 		exit(1);
 	}
 }
@@ -252,7 +252,7 @@ int ChimeraCheckRDP::calcKmers(map<int, int> query, map<int, int> subject) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "ChimeraCheckRDP", "calcKmers");
+		m->errorOut(e, "ChimeraCheckRDP", "calcKmers");
 		exit(1);
 	}
 }
@@ -310,7 +310,7 @@ void ChimeraCheckRDP::makeSVGpic(vector<sim> info) {
 
 	}
 	catch(exception& e) {
-		errorOut(e, "ChimeraCheckRDP", "makeSVGpic");
+		m->errorOut(e, "ChimeraCheckRDP", "makeSVGpic");
 		exit(1);
 	}
 }

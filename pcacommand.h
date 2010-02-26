@@ -27,6 +27,7 @@ private:
 	bool abort;
 	string phylipfile, columnfile, namefile, format, filename, fbase, outputDir;
 	float cutoff, precision;
+	vector<string> outputNames;
 	
 	void get_comment(istream&, char, char);
 	void read_phylip(istream&, int, vector<string>&, vector<vector<double> >&);

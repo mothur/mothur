@@ -12,7 +12,7 @@
 /***********************************************************************/
 
 ReadOTUFile::ReadOTUFile(string pf): philFile(pf){
-	
+	m = MothurOut::getInstance();
 	//openInputFile(philFile, fileHandle);
 }
 
@@ -70,7 +70,7 @@ void ReadOTUFile::read(GlobalData* globaldata){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "ReadOTUFile", "read");
+		m->errorOut(e, "ReadOTUFile", "read");
 		exit(1);
 	}
 }

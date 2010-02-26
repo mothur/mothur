@@ -22,7 +22,7 @@
 
 //**********************************************************************************************************************
 
-HeatMapSimCommand::HeatMapSimCommand(string option){
+HeatMapSimCommand::HeatMapSimCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
@@ -30,7 +30,7 @@ HeatMapSimCommand::HeatMapSimCommand(string option){
 		labels.clear();
 		Groups.clear();
 		Estimators.clear();
-		
+			
 		//allow user to run help
 		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; }
 		
@@ -101,11 +101,11 @@ HeatMapSimCommand::HeatMapSimCommand(string option){
 			
 			
 			//error checking on files			
-			if ((globaldata->getSharedFile() == "") && ((phylipfile == "") && (columnfile == "")))	{ mothurOut("You must run the read.otu command or provide a distance file before running the heatmap.sim command."); mothurOutEndLine(); abort = true; }
-			else if ((phylipfile != "") && (columnfile != "")) { mothurOut("When running the heatmap.sim command with a distance file you may not use both the column and the phylip parameters."); mothurOutEndLine(); abort = true; }
+			if ((globaldata->getSharedFile() == "") && ((phylipfile == "") && (columnfile == "")))	{ m->mothurOut("You must run the read.otu command or provide a distance file before running the heatmap.sim command."); m->mothurOutEndLine(); abort = true; }
+			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When running the heatmap.sim command with a distance file you may not use both the column and the phylip parameters."); m->mothurOutEndLine(); abort = true; }
 			
 			if (columnfile != "") {
-				if (namefile == "") {  mothurOut("You need to provide a namefile if you are going to use the column format."); mothurOutEndLine(); abort = true; }
+				if (namefile == "") {  m->mothurOut("You need to provide a namefile if you are going to use the column format."); m->mothurOutEndLine(); abort = true; }
 			}
 			
 			if (format == "") { format = "shared"; }
@@ -180,7 +180,7 @@ HeatMapSimCommand::HeatMapSimCommand(string option){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "HeatMapSimCommand", "HeatMapSimCommand");
+		m->errorOut(e, "HeatMapSimCommand", "HeatMapSimCommand");
 		exit(1);
 	}
 }
@@ -189,27 +189,27 @@ HeatMapSimCommand::HeatMapSimCommand(string option){
 
 void HeatMapSimCommand::help(){
 	try {
-		mothurOut("The heatmap.sim command can only be executed after a successful read.otu command, or by providing a distance file.\n");
-		mothurOut("The heatmap.sim command parameters are phylip, column, name, groups, calc and label.  No parameters are required.\n");
-		mothurOut("There are two ways to use the heatmap.sim command. The first is with the read.otu command. \n");
-		mothurOut("With the read.otu command you may use the groups, label and calc parameters. \n");
-		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included in your heatmap.\n");
-		mothurOut("The group names are separated by dashes. The label parameter allows you to select what distance levels you would like a heatmap created for, and is also separated by dashes.\n");
-		mothurOut("The heatmap.sim command should be in the following format: heatmap.sim(groups=yourGroups, calc=yourCalc, label=yourLabels).\n");
-		mothurOut("Example heatmap.sim(groups=A-B-C, calc=jabund).\n");
-		mothurOut("The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n");
+		m->mothurOut("The heatmap.sim command can only be executed after a successful read.otu command, or by providing a distance file.\n");
+		m->mothurOut("The heatmap.sim command parameters are phylip, column, name, groups, calc and label.  No parameters are required.\n");
+		m->mothurOut("There are two ways to use the heatmap.sim command. The first is with the read.otu command. \n");
+		m->mothurOut("With the read.otu command you may use the groups, label and calc parameters. \n");
+		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included in your heatmap.\n");
+		m->mothurOut("The group names are separated by dashes. The label parameter allows you to select what distance levels you would like a heatmap created for, and is also separated by dashes.\n");
+		m->mothurOut("The heatmap.sim command should be in the following format: heatmap.sim(groups=yourGroups, calc=yourCalc, label=yourLabels).\n");
+		m->mothurOut("Example heatmap.sim(groups=A-B-C, calc=jabund).\n");
+		m->mothurOut("The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n");
 		validCalculator->printCalc("heat", cout);
-		mothurOut("The default value for calc is jclass-thetayc.\n");
-		mothurOut("The heatmap.sim command outputs a .svg file for each calculator you choose at each label you specify.\n");
-		mothurOut("The second way to use the heatmap.sim command is with a distance file representing the distance bewteen your groups. \n");
-		mothurOut("Using the command this way, the phylip or column parameter are required, and only one may be used.  If you use a column file the name filename is required. \n");
-		mothurOut("The heatmap.sim command should be in the following format: heatmap.sim(phylip=yourDistanceFile).\n");
-		mothurOut("Example heatmap.sim(phylip=amazonGroups.dist).\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
+		m->mothurOut("The default value for calc is jclass-thetayc.\n");
+		m->mothurOut("The heatmap.sim command outputs a .svg file for each calculator you choose at each label you specify.\n");
+		m->mothurOut("The second way to use the heatmap.sim command is with a distance file representing the distance bewteen your groups. \n");
+		m->mothurOut("Using the command this way, the phylip or column parameter are required, and only one may be used.  If you use a column file the name filename is required. \n");
+		m->mothurOut("The heatmap.sim command should be in the following format: heatmap.sim(phylip=yourDistanceFile).\n");
+		m->mothurOut("Example heatmap.sim(phylip=amazonGroups.dist).\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
 
 	}
 	catch(exception& e) {
-		errorOut(e, "HeatMapSimCommand", "help");
+		m->errorOut(e, "HeatMapSimCommand", "help");
 		exit(1);
 	}
 }
@@ -239,11 +239,16 @@ int HeatMapSimCommand::execute(){
 		
 		delete heatmap;
 		delete validCalculator;
-
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+		
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "HeatMapSimCommand", "execute");
+		m->errorOut(e, "HeatMapSimCommand", "execute");
 		exit(1);
 	}
 }
@@ -252,7 +257,7 @@ int HeatMapSimCommand::execute(){
 int HeatMapSimCommand::runCommandShared() {
 	try {
 		//if the users entered no valid calculators don't execute command
-		if (heatCalculators.size() == 0) { mothurOut("No valid calculators."); mothurOutEndLine(); return 0; }
+		if (heatCalculators.size() == 0) { m->mothurOut("No valid calculators."); m->mothurOutEndLine(); return 0; }
 		
 		//you have groups
 		read = new ReadOTUFile(globaldata->inputFileName);	
@@ -262,7 +267,7 @@ int HeatMapSimCommand::runCommandShared() {
 		lookup = input->getSharedRAbundVectors();
 		string lastLabel = lookup[0]->getLabel();
 		
-		if (lookup.size() < 2) { mothurOut("You have not provided enough valid groups.  I cannot run the command."); mothurOutEndLine(); return 0;}
+		if (lookup.size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); return 0;}
 				
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
@@ -273,8 +278,9 @@ int HeatMapSimCommand::runCommandShared() {
 		
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 	
-				mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
-				heatmap->getPic(lookup, heatCalculators);
+				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+				vector<string> outfilenames = heatmap->getPic(lookup, heatCalculators);
+				for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); }
 					
 				processedLabels.insert(lookup[0]->getLabel());
 				userLabels.erase(lookup[0]->getLabel());
@@ -286,8 +292,9 @@ int HeatMapSimCommand::runCommandShared() {
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 				lookup = input->getSharedRAbundVectors(lastLabel);				
 
-				mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
-				heatmap->getPic(lookup, heatCalculators);
+				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+				vector<string> outfilenames = heatmap->getPic(lookup, heatCalculators);
+				for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); }
 					
 				processedLabels.insert(lookup[0]->getLabel());
 				userLabels.erase(lookup[0]->getLabel());
@@ -309,12 +316,12 @@ int HeatMapSimCommand::runCommandShared() {
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			mothurOut("Your file does not include the label " + *it); 
+			m->mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(lastLabel) != 1) {
-				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
 				needToRun = true;
 			}else {
-				mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
 			}
 		}
 		
@@ -323,8 +330,10 @@ int HeatMapSimCommand::runCommandShared() {
 			for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i]; } } 
 			lookup = input->getSharedRAbundVectors(lastLabel);				
 
-			mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
-			heatmap->getPic(lookup, heatCalculators);
+			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+			vector<string> outfilenames = heatmap->getPic(lookup, heatCalculators);
+			for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); }
+			
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 		}
 		
@@ -338,7 +347,7 @@ int HeatMapSimCommand::runCommandShared() {
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "HeatMapSimCommand", "runCommandShared");
+		m->errorOut(e, "HeatMapSimCommand", "runCommandShared");
 		exit(1);
 	}
 }
@@ -455,12 +464,12 @@ int HeatMapSimCommand::runCommandDist() {
 		}
 		
 
-		heatmap->getPic(matrix, names); //vector<vector<double>>, vector<string>
+		outputNames.push_back(heatmap->getPic(matrix, names)); //vector<vector<double>>, vector<string>
 		
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "HeatMapSimCommand", "runCommandDist");
+		m->errorOut(e, "HeatMapSimCommand", "runCommandDist");
 		exit(1);
 	}
 }

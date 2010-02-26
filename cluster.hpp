@@ -4,6 +4,7 @@
 
 #include "mothur.h"
 #include "sparsematrix.hpp"
+#include "mothurout.h"
 
 class RAbundVector;
 class ListVector;
@@ -46,6 +47,7 @@ protected:
 	MatVec colCells;
 	ull nRowCells;
 	ull nColCells;
+	MothurOut* m;
 };
 
 /***********************************************************************/

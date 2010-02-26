@@ -41,6 +41,7 @@ private:
 	RAbundVector* rabund;
 	map<string,int> orderMap;
 	string filename;
+	MothurOut* m;
 };
 
 

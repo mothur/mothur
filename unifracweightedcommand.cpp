@@ -15,7 +15,7 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 		globaldata = GlobalData::getInstance();
 		abort = false;
 		Groups.clear();
-		
+			
 		//allow user to run help
 		if(option == "help") { help(); abort = true; }
 		
@@ -35,7 +35,7 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 			}
 			
 			if (globaldata->gTree.size() == 0) {//no trees were read
-				mothurOut("You must execute the read.tree command, before you may execute the unifrac.weighted command."); mothurOutEndLine(); abort = true;  }
+				m->mothurOut("You must execute the read.tree command, before you may execute the unifrac.weighted command."); m->mothurOutEndLine(); abort = true;  }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -69,6 +69,7 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 				tmap = globaldata->gTreemap;
 				sumFile = outputDir + getSimpleName(globaldata->getTreeFile()) + ".wsummary";
 				openOutputFile(sumFile, outSum);
+				outputNames.push_back(sumFile);
 				
 				util = new SharedUtil();
 				string s; //to make work with setgroups
@@ -83,7 +84,7 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "UnifracWeightedCommand", "UnifracWeightedCommand");
+		m->errorOut(e, "UnifracWeightedCommand", "UnifracWeightedCommand");
 		exit(1);
 	}
 }
@@ -91,20 +92,20 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 
 void UnifracWeightedCommand::help(){
 	try {
-		mothurOut("The unifrac.weighted command can only be executed after a successful read.tree command.\n");
-		mothurOut("The unifrac.weighted command parameters are groups, iters, distance and random.  No parameters are required.\n");
-		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n");
-		mothurOut("The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree.\n");
-		mothurOut("The distance parameter allows you to create a distance file from the results. The default is false.\n");
-		mothurOut("The random parameter allows you to shut off the comparison to random trees. The default is true, meaning compare your trees with randomly generated trees.\n");
-		mothurOut("The unifrac.weighted command should be in the following format: unifrac.weighted(groups=yourGroups, iters=yourIters).\n");
-		mothurOut("Example unifrac.weighted(groups=A-B-C, iters=500).\n");
-		mothurOut("The default value for groups is all the groups in your groupfile, and iters is 1000.\n");
-		mothurOut("The unifrac.weighted command output two files: .weighted and .wsummary their descriptions are in the manual.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
+		m->mothurOut("The unifrac.weighted command can only be executed after a successful read.tree command.\n");
+		m->mothurOut("The unifrac.weighted command parameters are groups, iters, distance and random.  No parameters are required.\n");
+		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n");
+		m->mothurOut("The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree.\n");
+		m->mothurOut("The distance parameter allows you to create a distance file from the results. The default is false.\n");
+		m->mothurOut("The random parameter allows you to shut off the comparison to random trees. The default is true, meaning compare your trees with randomly generated trees.\n");
+		m->mothurOut("The unifrac.weighted command should be in the following format: unifrac.weighted(groups=yourGroups, iters=yourIters).\n");
+		m->mothurOut("Example unifrac.weighted(groups=A-B-C, iters=500).\n");
+		m->mothurOut("The default value for groups is all the groups in your groupfile, and iters is 1000.\n");
+		m->mothurOut("The unifrac.weighted command output two files: .weighted and .wsummary their descriptions are in the manual.\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "UnifracWeightedCommand", "help");
+		m->errorOut(e, "UnifracWeightedCommand", "help");
 		exit(1);
 	}
 }
@@ -131,7 +132,10 @@ int UnifracWeightedCommand::execute() {
 			rScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
 			uScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
 			
-			if (random) {  output = new ColumnFile(outputDir + getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".weighted", itersString);  } 
+			if (random) {  
+				output = new ColumnFile(outputDir + getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".weighted", itersString);  
+				outputNames.push_back(outputDir + getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".weighted");
+			} 
 
 			userData = weighted->getValues(T[i]);  //userData[0] = weightedscore
 			
@@ -179,7 +183,7 @@ int UnifracWeightedCommand::execute() {
 					//so if you have 1000 random trees the index returned is 100 
 					//then there are 900 trees with a score greater then you. 
 					//giving you a signifigance of 0.900
-					int index = findIndex(userData[f], f);    if (index == -1) { mothurOut("error in UnifracWeightedCommand"); mothurOutEndLine(); exit(1); } //error code
+					int index = findIndex(userData[f], f);    if (index == -1) { m->mothurOut("error in UnifracWeightedCommand"); m->mothurOutEndLine(); exit(1); } //error code
 					
 					//the signifigance is the number of trees with the users score or higher 
 					WScoreSig.push_back((iters-index)/(float)iters);
@@ -210,11 +214,16 @@ int UnifracWeightedCommand::execute() {
 		
 		delete randT;
 		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+		
 		return 0;
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "UnifracWeightedCommand", "execute");
+		m->errorOut(e, "UnifracWeightedCommand", "execute");
 		exit(1);
 	}
 }
@@ -237,7 +246,7 @@ void UnifracWeightedCommand::printWeightedFile() {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "UnifracWeightedCommand", "printWeightedFile");
+		m->errorOut(e, "UnifracWeightedCommand", "printWeightedFile");
 		exit(1);
 	}
 }
@@ -248,7 +257,7 @@ void UnifracWeightedCommand::printWSummaryFile() {
 	try {
 		//column headers
 		outSum << "Tree#" << '\t' << "Groups" << '\t' << "WScore" << '\t' << "WSig" <<  endl;
-		mothurOut("Tree#\tGroups\tWScore\tWSig"); mothurOutEndLine(); 
+		m->mothurOut("Tree#\tGroups\tWScore\tWSig"); m->mothurOutEndLine(); 
 		
 		//format output
 		outSum.setf(ios::fixed, ios::floatfield); outSum.setf(ios::showpoint);
@@ -261,16 +270,16 @@ void UnifracWeightedCommand::printWSummaryFile() {
 					if (WScoreSig[count] > (1/(float)iters)) {
 						outSum << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << setprecision(itersString.length()) << WScoreSig[count] << endl; 
 						cout << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << setprecision(itersString.length()) << WScoreSig[count] << endl; 
-						mothurOutJustToLog(toString(i+1) +"\t" + groupComb[j] +"\t" + toString(utreeScores[count]) +"\t" +  toString(WScoreSig[count])); mothurOutEndLine();  
+						m->mothurOutJustToLog(toString(i+1) +"\t" + groupComb[j] +"\t" + toString(utreeScores[count]) +"\t" +  toString(WScoreSig[count])); m->mothurOutEndLine();  
 					}else{
 						outSum << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << setprecision(itersString.length()) << "<" << (1/float(iters)) << endl; 
 						cout << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << setprecision(itersString.length()) << "<" << (1/float(iters)) << endl; 
-						mothurOutJustToLog(toString(i+1) +"\t" + groupComb[j] +"\t" + toString(utreeScores[count]) +"\t<" +  toString((1/float(iters)))); mothurOutEndLine();  
+						m->mothurOutJustToLog(toString(i+1) +"\t" + groupComb[j] +"\t" + toString(utreeScores[count]) +"\t<" +  toString((1/float(iters)))); m->mothurOutEndLine();  
 					}
 				}else{
 					outSum << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << "0.00" << endl; 
 					cout << setprecision(6) << i+1 << '\t' << groupComb[j] << '\t' << utreeScores[count] << '\t' << "0.00" << endl; 
-					mothurOutJustToLog(toString(i+1) +"\t" + groupComb[j] +"\t" + toString(utreeScores[count]) +"\t0.00"); mothurOutEndLine(); 
+					m->mothurOutJustToLog(toString(i+1) +"\t" + groupComb[j] +"\t" + toString(utreeScores[count]) +"\t0.00"); m->mothurOutEndLine(); 
 				}
 				count++;
 			}
@@ -278,7 +287,7 @@ void UnifracWeightedCommand::printWSummaryFile() {
 		outSum.close();
 	}
 	catch(exception& e) {
-		errorOut(e, "UnifracWeightedCommand", "printWSummaryFile");
+		m->errorOut(e, "UnifracWeightedCommand", "printWSummaryFile");
 		exit(1);
 	}
 }
@@ -290,6 +299,7 @@ void UnifracWeightedCommand::createPhylipFile() {
 		for (int i = 0; i < T.size(); i++) { 
 		
 			string phylipFileName = outputDir + getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".weighted.dist";
+			outputNames.push_back(phylipFileName);
 			ofstream out;
 			openOutputFile(phylipFileName, out);
 			
@@ -328,7 +338,7 @@ void UnifracWeightedCommand::createPhylipFile() {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "UnifracWeightedCommand", "createPhylipFile");
+		m->errorOut(e, "UnifracWeightedCommand", "createPhylipFile");
 		exit(1);
 	}
 }
@@ -341,7 +351,7 @@ int UnifracWeightedCommand::findIndex(float score, int index) {
 		return rScores[index].size();
 	}
 	catch(exception& e) {
-		errorOut(e, "UnifracWeightedCommand", "findIndex");
+		m->errorOut(e, "UnifracWeightedCommand", "findIndex");
 		exit(1);
 	}
 }
@@ -386,7 +396,7 @@ void UnifracWeightedCommand::calculateFreqsCumuls() {
 
 	}
 	catch(exception& e) {
-		errorOut(e, "UnifracWeightedCommand", "calculateFreqsCums");
+		m->errorOut(e, "UnifracWeightedCommand", "calculateFreqsCums");
 		exit(1);
 	}
 }

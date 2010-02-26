@@ -44,7 +44,7 @@ EstOutput BrayCurtis::getValues(vector<SharedRAbundVector*> shared) {
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "BrayCurtis", "getValues");
+		m->errorOut(e, "BrayCurtis", "getValues");
 		exit(1);
 	}
 }

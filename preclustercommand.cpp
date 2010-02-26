@@ -13,7 +13,7 @@
 inline bool comparePriority(seqPNode first, seqPNode second) {  return (first.numIdentical > second.numIdentical); }
 //**********************************************************************************************************************
 
-PreClusterCommand::PreClusterCommand(string option){
+PreClusterCommand::PreClusterCommand(string option) {
 	try {
 		abort = false;
 		
@@ -60,7 +60,7 @@ PreClusterCommand::PreClusterCommand(string option){
 
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not found") { mothurOut("fasta is a required parameter for the pre.cluster command."); mothurOutEndLine(); abort = true; }
+			if (fastafile == "not found") { m->mothurOut("fasta is a required parameter for the pre.cluster command."); m->mothurOutEndLine(); abort = true; }
 			else if (fastafile == "not open") { abort = true; }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -82,7 +82,7 @@ PreClusterCommand::PreClusterCommand(string option){
 				
 	}
 	catch(exception& e) {
-		errorOut(e, "PreClusterCommand", "PreClusterCommand");
+		m->errorOut(e, "PreClusterCommand", "PreClusterCommand");
 		exit(1);
 	}
 }
@@ -93,18 +93,18 @@ PreClusterCommand::~PreClusterCommand(){}
 
 void PreClusterCommand::help(){
 	try {
-		mothurOut("The pre.cluster command groups sequences that are within a given number of base mismatches.\n");
-		mothurOut("The pre.cluster command outputs a new fasta and name file.\n");
-		mothurOut("The pre.cluster command parameters are fasta, names and diffs. The fasta parameter is required. \n");
-		mothurOut("The names parameter allows you to give a list of seqs that are identical. This file is 2 columns, first column is name or representative sequence, second column is a list of its identical sequences separated by commas.\n");
-		mothurOut("The diffs parameter allows you to specify maximum number of mismatched bases allowed between sequences in a grouping. The default is 1.\n");
-		mothurOut("The pre.cluster command should be in the following format: \n");
-		mothurOut("pre.cluster(fasta=yourFastaFile, names=yourNamesFile, diffs=yourMaxDiffs) \n");
-		mothurOut("Example pre.cluster(fasta=amazon.fasta, diffs=2).\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
+		m->mothurOut("The pre.cluster command groups sequences that are within a given number of base mismatches.\n");
+		m->mothurOut("The pre.cluster command outputs a new fasta and name file.\n");
+		m->mothurOut("The pre.cluster command parameters are fasta, names and diffs. The fasta parameter is required. \n");
+		m->mothurOut("The names parameter allows you to give a list of seqs that are identical. This file is 2 columns, first column is name or representative sequence, second column is a list of its identical sequences separated by commas.\n");
+		m->mothurOut("The diffs parameter allows you to specify maximum number of mismatched bases allowed between sequences in a grouping. The default is 1.\n");
+		m->mothurOut("The pre.cluster command should be in the following format: \n");
+		m->mothurOut("pre.cluster(fasta=yourFastaFile, names=yourNamesFile, diffs=yourMaxDiffs) \n");
+		m->mothurOut("Example pre.cluster(fasta=amazon.fasta, diffs=2).\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "PreClusterCommand", "help");
+		m->errorOut(e, "PreClusterCommand", "help");
 		exit(1);
 	}
 }
@@ -118,8 +118,8 @@ int PreClusterCommand::execute(){
 		//reads fasta file and return number of seqs
 		int numSeqs = readFASTA(); //fills alignSeqs and makes all seqs active
 	
-		if (numSeqs == 0) { mothurOut("Error reading fasta file...please correct."); mothurOutEndLine(); return 0;  }
-		if (diffs > length) { mothurOut("Error: diffs is greater than your sequence length."); mothurOutEndLine(); return 0;  }
+		if (numSeqs == 0) { m->mothurOut("Error reading fasta file...please correct."); m->mothurOutEndLine(); return 0;  }
+		if (diffs > length) { m->mothurOut("Error: diffs is greater than your sequence length."); m->mothurOutEndLine(); return 0;  }
 		
 		//clear sizes since you only needed this info to build the alignSeqs seqPNode structs
 //		sizes.clear();
@@ -167,15 +167,21 @@ int PreClusterCommand::execute(){
 		string newNamesFile = fileroot + "precluster.names";
 		
 		
-		mothurOut("Total number of sequences before precluster was " + toString(alignSeqs.size()) + "."); mothurOutEndLine();
-		mothurOut("pre.cluster removed " + toString(count) + " sequences."); mothurOutEndLine(); 
+		m->mothurOut("Total number of sequences before precluster was " + toString(alignSeqs.size()) + "."); m->mothurOutEndLine();
+		m->mothurOut("pre.cluster removed " + toString(count) + " sequences."); m->mothurOutEndLine(); 
 		printData(newFastaFile, newNamesFile);
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		m->mothurOut(newFastaFile); m->mothurOutEndLine();	
+		m->mothurOut(newNamesFile); m->mothurOutEndLine();	
+		m->mothurOutEndLine();
 
 		return 0;
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "PreClusterCommand", "execute");
+		m->errorOut(e, "PreClusterCommand", "execute");
 		exit(1);
 	}
 }
@@ -213,7 +219,7 @@ int PreClusterCommand::readFASTA(){
 				if (namefile != "") {
 					itSize = sizes.find(seq.getName());
 					
-					if (itSize == sizes.end()) { mothurOut(seq.getName() + " is not in your names file, please correct."); mothurOutEndLine(); exit(1); }
+					if (itSize == sizes.end()) { m->mothurOut(seq.getName() + " is not in your names file, please correct."); m->mothurOutEndLine(); exit(1); }
 					else{
 						seqPNode tempNode(itSize->second, seq, names[seq.getName()]);
 						alignSeqs.push_back(tempNode);
@@ -232,7 +238,7 @@ int PreClusterCommand::readFASTA(){
 	}
 	
 	catch(exception& e) {
-		errorOut(e, "PreClusterCommand", "readFASTA");
+		m->errorOut(e, "PreClusterCommand", "readFASTA");
 		exit(1);
 	}
 }
@@ -252,7 +258,7 @@ int PreClusterCommand::calcMisMatches(string seq1, string seq2){
 		return numBad;
 	}
 	catch(exception& e) {
-		errorOut(e, "PreClusterCommand", "calcMisMatches");
+		m->errorOut(e, "PreClusterCommand", "calcMisMatches");
 		exit(1);
 	}
 }
@@ -280,7 +286,7 @@ void PreClusterCommand::printData(string newfasta, string newname){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "PreClusterCommand", "printData");
+		m->errorOut(e, "PreClusterCommand", "printData");
 		exit(1);
 	}
 }
@@ -306,7 +312,7 @@ void PreClusterCommand::readNameFile(){
 		in.close();
 	}
 	catch(exception& e) {
-		errorOut(e, "PreClusterCommand", "readNameFile");
+		m->errorOut(e, "PreClusterCommand", "readNameFile");
 		exit(1);
 	}
 }

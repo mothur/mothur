@@ -11,7 +11,7 @@
 
 //**********************************************************************************************************************
 
-QuitCommand::QuitCommand(string option){
+QuitCommand::QuitCommand(string option) {
 		abort = false;
 		
 		//allow user to run help
@@ -22,11 +22,11 @@ QuitCommand::QuitCommand(string option){
 
 void QuitCommand::help(){
 	try {
-		 mothurOut("The quit command will terminate mothur and should be in the following format: \n"); 
-		 mothurOut("quit() or quit\n\n");
+		 m->mothurOut("The quit command will terminate mothur and should be in the following format: \n"); 
+		 m->mothurOut("quit() or quit\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "QuitCommand", "help");
+		m->errorOut(e, "QuitCommand", "help");
 		exit(1);
 	}
 }

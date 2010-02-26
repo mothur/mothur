@@ -32,7 +32,7 @@ EstOutput Bootstrap::getValues(SAbundVector* rank){
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "Bootstrap", "getValues");
+		m->errorOut(e, "Bootstrap", "getValues");
 		exit(1);
 	}
 }

@@ -88,10 +88,10 @@ class Chimera {
 
 	public:
 	
-		Chimera(){};
-		Chimera(string);
-		Chimera(string, bool, string);
-		Chimera(string, string);
+		Chimera(){ m = MothurOut::getInstance(); }
+		Chimera(string) { m = MothurOut::getInstance(); }
+		Chimera(string, bool, string) { m = MothurOut::getInstance(); }
+		Chimera(string, string) { m = MothurOut::getInstance(); }
 		virtual ~Chimera(){	for (int i = 0; i < templateSeqs.size(); i++) { delete templateSeqs[i];  } };
 		virtual void setFilter(bool f)			{	filter = f;	 		}
 		virtual void setCorrection(bool c)		{	correction = c;		}
@@ -138,6 +138,7 @@ class Chimera {
 		float divR;
 		string seqMask, quanfile, filterString, name, outputDir, templateFileName;
 		Sequence* getSequence(string);  //find sequence from name	
+		MothurOut* m;
 };
 
 /***********************************************************************/

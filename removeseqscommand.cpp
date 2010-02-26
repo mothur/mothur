@@ -13,7 +13,7 @@
 
 //**********************************************************************************************************************
 
-RemoveSeqsCommand::RemoveSeqsCommand(string option){
+RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 	try {
 		abort = false;
 		
@@ -97,7 +97,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option){
 			//check for required parameters
 			accnosfile = validParameter.validFile(parameters, "accnos", true);
 			if (accnosfile == "not open") { abort = true; }
-			else if (accnosfile == "not found") {  accnosfile = "";  mothurOut("You must provide an accnos file."); mothurOutEndLine(); abort = true; }	
+			else if (accnosfile == "not found") {  accnosfile = "";  m->mothurOut("You must provide an accnos file."); m->mothurOutEndLine(); abort = true; }	
 			
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
@@ -123,20 +123,20 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option){
 			string temp = validParameter.validFile(parameters, "dups", false);	if (temp == "not found") { temp = "false"; usedDups = ""; }
 			dups = isTrue(temp);
 			
-			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == ""))  { mothurOut("You must provide one of the following: fasta, name, group, alignreport or list."); mothurOutEndLine(); abort = true; }
+			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, alignreport or list."); m->mothurOutEndLine(); abort = true; }
 			
 			int okay = 2;
 			if (outputDir != "") { okay++; }
 			if (usedDups != "") { okay++;  }
 			
-			if ((usedDups != "") && (namefile == "")) {  mothurOut("You may only use dups with the name option."); mothurOutEndLine();  abort = true; }
+			if ((usedDups != "") && (namefile == "")) {  m->mothurOut("You may only use dups with the name option."); m->mothurOutEndLine();  abort = true; }
 			
-			if (parameters.size() > okay) { mothurOut("You may only enter one of the following: fasta, name, group, alignreport, or list."); mothurOutEndLine(); abort = true;  }
+			if (parameters.size() > okay) { m->mothurOut("You may only enter one of the following: fasta, name, group, alignreport, or list."); m->mothurOutEndLine(); abort = true;  }
 		}
 
 	}
 	catch(exception& e) {
-		errorOut(e, "RemoveSeqsCommand", "RemoveSeqsCommand");
+		m->errorOut(e, "RemoveSeqsCommand", "RemoveSeqsCommand");
 		exit(1);
 	}
 }
@@ -144,16 +144,16 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option){
 
 void RemoveSeqsCommand::help(){
 	try {
-		mothurOut("The remove.seqs command reads an .accnos file and one of the following file types: fasta, name, group, list or alignreport file.\n");
-		mothurOut("It outputs a file containing the sequences NOT in the .accnos file.\n");
-		mothurOut("The remove.seqs command parameters are accnos, fasta, name, group, list, alignreport and dups.  You must provide accnos and one of the file parameters.\n");
-		mothurOut("The dups parameter allows you to remove the entire line from a name file if you remove any name from the line. default=false. If dups=true, then remove.seqs outputs a new .accnos file containing all the sequences removed. \n");
-		mothurOut("The remove.seqs command should be in the following format: remove.seqs(accnos=yourAccnos, fasta=yourFasta).\n");
-		mothurOut("Example remove.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
+		m->mothurOut("The remove.seqs command reads an .accnos file and one of the following file types: fasta, name, group, list or alignreport file.\n");
+		m->mothurOut("It outputs a file containing the sequences NOT in the .accnos file.\n");
+		m->mothurOut("The remove.seqs command parameters are accnos, fasta, name, group, list, alignreport and dups.  You must provide accnos and one of the file parameters.\n");
+		m->mothurOut("The dups parameter allows you to remove the entire line from a name file if you remove any name from the line. default=false. If dups=true, then remove.seqs outputs a new .accnos file containing all the sequences removed. \n");
+		m->mothurOut("The remove.seqs command should be in the following format: remove.seqs(accnos=yourAccnos, fasta=yourFasta).\n");
+		m->mothurOut("Example remove.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "RemoveSeqsCommand", "help");
+		m->errorOut(e, "RemoveSeqsCommand", "help");
 		exit(1);
 	}
 }
@@ -175,11 +175,18 @@ int RemoveSeqsCommand::execute(){
 		else if (alignfile != "")	{		readAlign();	}
 		else if (listfile != "")	{		readList();		}
 		
+		if (outputNames.size() != 0) {
+			m->mothurOutEndLine();
+			m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+			m->mothurOutEndLine();
+		}
+		
 		return 0;		
 	}
 
 	catch(exception& e) {
-		errorOut(e, "RemoveSeqsCommand", "execute");
+		m->errorOut(e, "RemoveSeqsCommand", "execute");
 		exit(1);
 	}
 }
@@ -216,13 +223,13 @@ void RemoveSeqsCommand::readFasta(){
 		out.close();
 		
 		if (wroteSomething == false) {
-			mothurOut("Your file contains only sequences from the .accnos file."); mothurOutEndLine();
+			m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();
 			remove(outputFileName.c_str()); 
-		}
+		}else { outputNames.push_back(outputFileName); }
 
 	}
 	catch(exception& e) {
-		errorOut(e, "RemoveSeqsCommand", "readFasta");
+		m->errorOut(e, "RemoveSeqsCommand", "readFasta");
 		exit(1);
 	}
 }
@@ -281,13 +288,13 @@ void RemoveSeqsCommand::readList(){
 		out.close();
 		
 		if (wroteSomething == false) {
-			mothurOut("Your file contains only sequences from the .accnos file."); mothurOutEndLine();
+			m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();
 			remove(outputFileName.c_str()); 
-		}
+		}else { outputNames.push_back(outputFileName); }
 
 	}
 	catch(exception& e) {
-		errorOut(e, "RemoveSeqsCommand", "readList");
+		m->errorOut(e, "RemoveSeqsCommand", "readList");
 		exit(1);
 	}
 }
@@ -374,16 +381,16 @@ void RemoveSeqsCommand::readName(){
 		if (dups) { out2.close();  }
 		if (wroteDups == false) {
 			remove(outputFileName2.c_str()); 
-		}
+		}else { outputNames.push_back(outputFileName2); }
 		
 		if (wroteSomething == false) {
-			mothurOut("Your file contains only sequences from the .accnos file."); mothurOutEndLine();
+			m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();
 			remove(outputFileName.c_str()); 
-		}
+		}else { outputNames.push_back(outputFileName); }
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "RemoveSeqsCommand", "readName");
+		m->errorOut(e, "RemoveSeqsCommand", "readName");
 		exit(1);
 	}
 }
@@ -419,13 +426,13 @@ void RemoveSeqsCommand::readGroup(){
 		out.close();
 		
 		if (wroteSomething == false) {
-			mothurOut("Your file contains only sequences from the .accnos file."); mothurOutEndLine();
+			m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();
 			remove(outputFileName.c_str()); 
-		}
+		}else { outputNames.push_back(outputFileName); }
 
 	}
 	catch(exception& e) {
-		errorOut(e, "RemoveSeqsCommand", "readGroup");
+		m->errorOut(e, "RemoveSeqsCommand", "readGroup");
 		exit(1);
 	}
 }
@@ -485,13 +492,13 @@ void RemoveSeqsCommand::readAlign(){
 		out.close();
 		
 		if (wroteSomething == false) {
-			mothurOut("Your file contains only sequences from the .accnos file."); mothurOutEndLine();
+			m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();
 			remove(outputFileName.c_str()); 
-		}
+		}else { outputNames.push_back(outputFileName); }
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "RemoveSeqsCommand", "readAlign");
+		m->errorOut(e, "RemoveSeqsCommand", "readAlign");
 		exit(1);
 	}
 }
@@ -514,7 +521,7 @@ void RemoveSeqsCommand::readAccnos(){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "RemoveSeqsCommand", "readAccnos");
+		m->errorOut(e, "RemoveSeqsCommand", "readAccnos");
 		exit(1);
 	}
 }

@@ -35,7 +35,7 @@ inline bool compareParents(SuffixNode* left, SuffixNode* right){//	this is neces
 
 //********************************************************************************************************************
 
-SuffixTree::SuffixTree(){}
+SuffixTree::SuffixTree(){ m = MothurOut::getInstance(); }
 
 //********************************************************************************************************************
 
@@ -75,7 +75,7 @@ string SuffixTree::getSeqName()	{
 void SuffixTree::print(){
 	vector<SuffixNode*> hold = nodeVector;
 	sort(hold.begin(), hold.end(), compareParents);
-	mothurOut("Address\t\tParent\tNode\tSuffix\tStartC\tEndC\tSuffix"); mothurOutEndLine();
+	m->mothurOut("Address\t\tParent\tNode\tSuffix\tStartC\tEndC\tSuffix"); m->mothurOutEndLine();
 	for(int i=1;i<=nodeCounter;i++){
 		hold[i]->print(sequence, i);
 	}

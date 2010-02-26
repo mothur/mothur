@@ -40,7 +40,7 @@ EstOutput KulczynskiCody::getValues(vector<SharedRAbundVector*> shared) {
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "KulczynskiCody", "getValues");
+		m->errorOut(e, "KulczynskiCody", "getValues");
 		exit(1);
 	}
 }

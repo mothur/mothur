@@ -13,7 +13,7 @@
 
 //**********************************************************************************************************************
 
-ListSeqsCommand::ListSeqsCommand(string option){
+ListSeqsCommand::ListSeqsCommand(string option)  {
 	try {
 		abort = false;
 		
@@ -107,17 +107,17 @@ ListSeqsCommand::ListSeqsCommand(string option){
 			else if (listfile == "not found") {  listfile = "";  }
 
 			
-			if ((fastafile == "") && (namefile == "") && (listfile == "") && (groupfile == "") && (alignfile == ""))  { mothurOut("You must provide a file."); mothurOutEndLine(); abort = true; }
+			if ((fastafile == "") && (namefile == "") && (listfile == "") && (groupfile == "") && (alignfile == ""))  { m->mothurOut("You must provide a file."); m->mothurOutEndLine(); abort = true; }
 			
 			int okay = 1;
 			if (outputDir != "") { okay++; }
 			
-			if (parameters.size() > okay) { mothurOut("You may only enter one file."); mothurOutEndLine(); abort = true;  }
+			if (parameters.size() > okay) { m->mothurOut("You may only enter one file."); m->mothurOutEndLine(); abort = true;  }
 		}
 
 	}
 	catch(exception& e) {
-		errorOut(e, "ListSeqsCommand", "ListSeqsCommand");
+		m->errorOut(e, "ListSeqsCommand", "ListSeqsCommand");
 		exit(1);
 	}
 }
@@ -125,14 +125,14 @@ ListSeqsCommand::ListSeqsCommand(string option){
 
 void ListSeqsCommand::help(){
 	try {
-		mothurOut("The list.seqs command reads a fasta, name, group, list or alignreport file and outputs a .accnos file containing sequence names.\n");
-		mothurOut("The list.seqs command parameters are fasta, name, group and alignreport.  You must provide one of these parameters.\n");
-		mothurOut("The list.seqs command should be in the following format: list.seqs(fasta=yourFasta).\n");
-		mothurOut("Example list.seqs(fasta=amazon.fasta).\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
+		m->mothurOut("The list.seqs command reads a fasta, name, group, list or alignreport file and outputs a .accnos file containing sequence names.\n");
+		m->mothurOut("The list.seqs command parameters are fasta, name, group and alignreport.  You must provide one of these parameters.\n");
+		m->mothurOut("The list.seqs command should be in the following format: list.seqs(fasta=yourFasta).\n");
+		m->mothurOut("Example list.seqs(fasta=amazon.fasta).\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "ListSeqsCommand", "help");
+		m->errorOut(e, "ListSeqsCommand", "help");
 		exit(1);
 	}
 }
@@ -167,11 +167,16 @@ int ListSeqsCommand::execute(){
 		}
 		out.close();
 		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+		m->mothurOut(outputFileName); m->mothurOutEndLine();	
+		m->mothurOutEndLine();
+		
 		return 0;		
 	}
 
 	catch(exception& e) {
-		errorOut(e, "ListSeqsCommand", "execute");
+		m->errorOut(e, "ListSeqsCommand", "execute");
 		exit(1);
 	}
 }
@@ -196,7 +201,7 @@ void ListSeqsCommand::readFasta(){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "ListSeqsCommand", "readFasta");
+		m->errorOut(e, "ListSeqsCommand", "readFasta");
 		exit(1);
 	}
 }
@@ -227,7 +232,7 @@ void ListSeqsCommand::readList(){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "ListSeqsCommand", "readList");
+		m->errorOut(e, "ListSeqsCommand", "readList");
 		exit(1);
 	}
 }
@@ -261,7 +266,7 @@ void ListSeqsCommand::readName(){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "ListSeqsCommand", "readName");
+		m->errorOut(e, "ListSeqsCommand", "readName");
 		exit(1);
 	}
 }
@@ -287,7 +292,7 @@ void ListSeqsCommand::readGroup(){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "ListSeqsCommand", "readGroup");
+		m->errorOut(e, "ListSeqsCommand", "readGroup");
 		exit(1);
 	}
 }
@@ -327,7 +332,7 @@ void ListSeqsCommand::readAlign(){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "ListSeqsCommand", "readAlign");
+		m->errorOut(e, "ListSeqsCommand", "readAlign");
 		exit(1);
 	}
 }

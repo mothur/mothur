@@ -12,7 +12,7 @@
  *	used to calcualte the alignment.  Initially everything is set to zero and all pointers are set to 'x'
  *  
  */
-
+#include "mothurout.h"
 //********************************************************************************************************************
 
 class AlignmentCell {

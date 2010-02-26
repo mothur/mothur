@@ -84,7 +84,7 @@ public:
 	void newRead();
 	
 private:
-
+	MothurOut* m;
 	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, treefile, sharedfile, format, distfile;
 
 	static GlobalData* _uniqueInstance;

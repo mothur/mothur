@@ -19,7 +19,7 @@
 class DeconvoluteCommand : public Command {
 
 public:
-	DeconvoluteCommand(string);	
+	DeconvoluteCommand(string);
 	~DeconvoluteCommand() { };
 	int execute();
 	void help();	

@@ -30,6 +30,7 @@ class ChimeraReAligner  {
 		int match, misMatch;
 		
 		Sequence* getSequence(string);  //find sequence from name
+		MothurOut* m;
 };
 /***********************************************************/
 

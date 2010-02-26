@@ -16,12 +16,13 @@ inline bool compareOverlap(seqDist left, seqDist right){
 	return (left.dist < right.dist);	
 } 
 /*********************************************************************************************/
-ReadBlast::ReadBlast(string file, float c, float p, int l, bool m, bool h) : blastfile(file), cutoff(c), penalty(p), length(l), minWanted(m), hclusterWanted(h) {
+ReadBlast::ReadBlast(string file, float c, float p, int l, bool ms, bool h) : blastfile(file), cutoff(c), penalty(p), length(l), minWanted(ms), hclusterWanted(h) {
 	try {
+		m = MothurOut::getInstance();
 		matrix = NULL;
 	}
 	catch(exception& e) {
-		errorOut(e, "ReadBlast", "ReadBlast");
+		m->errorOut(e, "ReadBlast", "ReadBlast");
 		exit(1);
 	}
 } 
@@ -98,7 +99,7 @@ void ReadBlast::read(NameAssignment* nameMap) {
 					}
 				}
 			}
-		}else { mothurOut("Error in your blast file, cannot read."); mothurOutEndLine(); exit(1); }
+		}else { m->mothurOut("Error in your blast file, cannot read."); m->mothurOutEndLine(); exit(1); }
 
 				
 		//read file
@@ -260,14 +261,14 @@ void ReadBlast::read(NameAssignment* nameMap) {
 		fileHandle.close();
 	}
 	catch(exception& e) {
-		errorOut(e, "ReadBlast", "read");
+		m->errorOut(e, "ReadBlast", "read");
 		exit(1);
 	}
 } 
 /*********************************************************************************************/
 void ReadBlast::readNames(NameAssignment* nameMap) {
 	try {
-		mothurOut("Reading names... "); cout.flush();
+		m->mothurOut("Reading names... "); cout.flush();
 		
 		string name, hold, prevName;
 		int num = 1;
@@ -307,11 +308,11 @@ void ReadBlast::readNames(NameAssignment* nameMap) {
 		//nameMap->print(out);
 		//out.close();
 		
-		mothurOut(toString(num) + " names read."); mothurOutEndLine();
+		m->mothurOut(toString(num) + " names read."); m->mothurOutEndLine();
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "ReadBlast", "readNames");
+		m->errorOut(e, "ReadBlast", "readNames");
 		exit(1);
 	}
 } 

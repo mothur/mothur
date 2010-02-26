@@ -34,6 +34,7 @@ private:
 	Database* search;
 	vector<Sequence> templateSequences;
 	Sequence emptySequence;
+	MothurOut* m;
 };
 
 /**************************************************************************************************/

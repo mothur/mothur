@@ -20,7 +20,7 @@
 class DistanceCommand : public Command {
 
 public:
-	DistanceCommand(string);	
+	DistanceCommand(string);
 	~DistanceCommand();
 	int execute();	
 	void help();

@@ -5,7 +5,7 @@
 //**********************************************************************************************************************
 
 NameAssignment::NameAssignment(string nameMapFile){
-	
+	m = MothurOut::getInstance();
 	openInputFile(nameMapFile, fileHandle);
 	
 }
@@ -36,7 +36,7 @@ void NameAssignment::readMap(){
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "NameAssignment", "readMap");
+		m->errorOut(e, "NameAssignment", "readMap");
 		exit(1);
 	}
 }
@@ -51,7 +51,7 @@ void NameAssignment::push_back(string name) {
 		list.push_back(name);
 	}
 	catch(exception& e) {
-		errorOut(e, "NameAssignment", "push_back");
+		m->errorOut(e, "NameAssignment", "push_back");
 		exit(1);
 	}
 }
@@ -75,7 +75,7 @@ void NameAssignment::print(ostream& out){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "NameAssignment", "print");
+		m->errorOut(e, "NameAssignment", "print");
 		exit(1);
 	}
 }

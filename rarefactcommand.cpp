@@ -22,14 +22,14 @@
 //**********************************************************************************************************************
 
 
-RareFactCommand::RareFactCommand(string option){
+RareFactCommand::RareFactCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
 		allLines = 1;
 		labels.clear();
 		Estimators.clear();
-		
+				
 		//allow user to run help
 		if(option == "help") { validCalculator = new ValidCalculators(); help(); delete validCalculator; abort = true; }
 		
@@ -55,7 +55,7 @@ RareFactCommand::RareFactCommand(string option){
 			}
 
 			//make sure the user has already run the read.otu command
-			if ((globaldata->getSharedFile() == "") && (globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { mothurOut("You must read a list, sabund, rabund or shared file before you can use the rarefact.single command."); mothurOutEndLine(); abort = true; }
+			if ((globaldata->getSharedFile() == "") && (globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { m->mothurOut("You must read a list, sabund, rabund or shared file before you can use the rarefact.single command."); m->mothurOutEndLine(); abort = true; }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -92,7 +92,7 @@ RareFactCommand::RareFactCommand(string option){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "RareFactCommand", "RareFactCommand");
+		m->errorOut(e, "RareFactCommand", "RareFactCommand");
 		exit(1);
 	}
 }
@@ -100,19 +100,19 @@ RareFactCommand::RareFactCommand(string option){
 
 void RareFactCommand::help(){
 	try {
-		mothurOut("The rarefaction.single command can only be executed after a successful read.otu WTIH ONE EXECEPTION.\n");
-		mothurOut("The rarefaction.single command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster.\n");
-		mothurOut("The rarefaction.single command parameters are label, iters, freq, calc and abund.  No parameters are required. \n");
-		mothurOut("The rarefaction.single command should be in the following format: \n");
-		mothurOut("rarefaction.single(label=yourLabel, iters=yourIters, freq=yourFreq, calc=yourEstimators).\n");
-		mothurOut("Example rarefaction.single(label=unique-.01-.03, iters=10000, freq=10, calc=sobs-rchao-race-rjack-rbootstrap-rshannon-rnpshannon-rsimpson).\n");
-		mothurOut("The default values for iters is 1000, freq is 100, and calc is rarefaction which calculates the rarefaction curve for the observed richness.\n");
+		m->mothurOut("The rarefaction.single command can only be executed after a successful read.otu WTIH ONE EXECEPTION.\n");
+		m->mothurOut("The rarefaction.single command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster.\n");
+		m->mothurOut("The rarefaction.single command parameters are label, iters, freq, calc and abund.  No parameters are required. \n");
+		m->mothurOut("The rarefaction.single command should be in the following format: \n");
+		m->mothurOut("rarefaction.single(label=yourLabel, iters=yourIters, freq=yourFreq, calc=yourEstimators).\n");
+		m->mothurOut("Example rarefaction.single(label=unique-.01-.03, iters=10000, freq=10, calc=sobs-rchao-race-rjack-rbootstrap-rshannon-rnpshannon-rsimpson).\n");
+		m->mothurOut("The default values for iters is 1000, freq is 100, and calc is rarefaction which calculates the rarefaction curve for the observed richness.\n");
 		validCalculator->printCalc("rarefaction", cout);
-		mothurOut("The label parameter is used to analyze specific labels in your input.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n\n");
+		m->mothurOut("The label parameter is used to analyze specific labels in your input.\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "RareFactCommand", "help");
+		m->errorOut(e, "RareFactCommand", "help");
 		exit(1);
 	}
 }
@@ -128,6 +128,8 @@ int RareFactCommand::execute(){
 	
 		if (abort == true) { return 0; }
 		
+		vector<string> outputNames;
+		
 		if ((globaldata->getFormat() != "sharedfile")) { inputFileNames.push_back(globaldata->inputFileName);  }
 		else {  inputFileNames = parseSharedFile(globaldata->getSharedFile());  globaldata->setFormat("rabund");  }
 		
@@ -137,7 +139,7 @@ int RareFactCommand::execute(){
 			globaldata->inputFileName = inputFileNames[p];
 			
 			if (inputFileNames.size() > 1) {
-				mothurOutEndLine(); mothurOut("Processing group " + groups[p]); mothurOutEndLine(); mothurOutEndLine();
+				m->mothurOutEndLine(); m->mothurOut("Processing group " + groups[p]); m->mothurOutEndLine(); m->mothurOutEndLine();
 			}
 			int i;
 			validCalculator = new ValidCalculators();
@@ -147,26 +149,36 @@ int RareFactCommand::execute(){
 				if (validCalculator->isValidCalculator("rarefaction", Estimators[i]) == true) { 
 					if (Estimators[i] == "sobs") { 
 						rDisplays.push_back(new RareDisplay(new Sobs(), new ThreeColumnFile(fileNameRoot+"rarefaction")));
+						outputNames.push_back(fileNameRoot+"rarefaction");
 					}else if (Estimators[i] == "chao") { 
 						rDisplays.push_back(new RareDisplay(new Chao1(), new ThreeColumnFile(fileNameRoot+"r_chao")));
+						outputNames.push_back(fileNameRoot+"r_chao");
 					}else if (Estimators[i] == "ace") { 
 						if(abund < 5)
 							abund = 10;
 						rDisplays.push_back(new RareDisplay(new Ace(abund), new ThreeColumnFile(fileNameRoot+"r_ace")));
+						outputNames.push_back(fileNameRoot+"r_ace");
 					}else if (Estimators[i] == "jack") { 
 						rDisplays.push_back(new RareDisplay(new Jackknife(), new ThreeColumnFile(fileNameRoot+"r_jack")));
+						outputNames.push_back(fileNameRoot+"r_jack");
 					}else if (Estimators[i] == "shannon") { 
 						rDisplays.push_back(new RareDisplay(new Shannon(), new ThreeColumnFile(fileNameRoot+"r_shannon")));
+						outputNames.push_back(fileNameRoot+"r_shannon");
 					}else if (Estimators[i] == "npshannon") { 
 						rDisplays.push_back(new RareDisplay(new NPShannon(), new ThreeColumnFile(fileNameRoot+"r_npshannon")));
+						outputNames.push_back(fileNameRoot+"r_npshannon");
 					}else if (Estimators[i] == "simpson") { 
 						rDisplays.push_back(new RareDisplay(new Simpson(), new ThreeColumnFile(fileNameRoot+"r_simpson")));
+						outputNames.push_back(fileNameRoot+"r_simpson");
 					}else if (Estimators[i] == "bootstrap") { 
 						rDisplays.push_back(new RareDisplay(new Bootstrap(), new ThreeColumnFile(fileNameRoot+"r_bootstrap")));
+						outputNames.push_back(fileNameRoot+"r_bootstrap");
 					}else if (Estimators[i] == "coverage") { 
 						rDisplays.push_back(new RareDisplay(new Coverage(), new ThreeColumnFile(fileNameRoot+"r_coverage")));
+						outputNames.push_back(fileNameRoot+"r_coverage");
 					}else if (Estimators[i] == "nseqs") { 
 						rDisplays.push_back(new RareDisplay(new NSeqs(), new ThreeColumnFile(fileNameRoot+"r_nseqs")));
+						outputNames.push_back(fileNameRoot+"r_nseqs");
 					}
 				}
 			}
@@ -195,7 +207,7 @@ int RareFactCommand::execute(){
 					rCurve->getCurve(freq, nIters);
 					delete rCurve;
 					
-					mothurOut(order->getLabel()); mothurOutEndLine();
+					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 					processedLabels.insert(order->getLabel());
 					userLabels.erase(order->getLabel());
 				}
@@ -210,7 +222,7 @@ int RareFactCommand::execute(){
 					rCurve->getCurve(freq, nIters);
 					delete rCurve;
 					
-					mothurOut(order->getLabel()); mothurOutEndLine();
+					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 					processedLabels.insert(order->getLabel());
 					userLabels.erase(order->getLabel());
 					
@@ -228,12 +240,12 @@ int RareFactCommand::execute(){
 			set<string>::iterator it;
 			bool needToRun = false;
 			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-				mothurOut("Your file does not include the label " + *it);
+				m->mothurOut("Your file does not include the label " + *it);
 				if (processedLabels.count(lastLabel) != 1) {
-					mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
+					m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
 					needToRun = true;
 				}else {
-					mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
+					m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
 				}
 			}
 			
@@ -246,7 +258,7 @@ int RareFactCommand::execute(){
 				rCurve->getCurve(freq, nIters);
 				delete rCurve;
 				
-				mothurOut(order->getLabel()); mothurOutEndLine();
+				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 				delete order;
 			}
 			
@@ -260,10 +272,16 @@ int RareFactCommand::execute(){
 			
 		}
 		
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "RareFactCommand", "execute");
+		m->errorOut(e, "RareFactCommand", "execute");
 		exit(1);
 	}
 }
@@ -322,7 +340,7 @@ vector<string> RareFactCommand::parseSharedFile(string filename) {
 		return filenames;
 	}
 	catch(exception& e) {
-		errorOut(e, "RareFactCommand", "parseSharedFile");
+		m->errorOut(e, "RareFactCommand", "parseSharedFile");
 		exit(1);
 	}
 }

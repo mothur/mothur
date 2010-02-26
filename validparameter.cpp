@@ -13,10 +13,11 @@
 
 ValidParameters::ValidParameters() {
 	try {
+		m = MothurOut::getInstance();
 		initParameterRanges();
 	}
 	catch(exception& e) {
-		errorOut(e, "ValidParameters", "ValidParameters");
+		m->errorOut(e, "ValidParameters", "ValidParameters");
 		exit(1);
 	}
 }
@@ -38,11 +39,11 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 			}
 		}
 		if(!valid) {
-			mothurOut(parameter + " is not a valid parameter."); mothurOutEndLine();
-			mothurOut("The valid parameters are: ");
+			m->mothurOut(parameter + " is not a valid parameter."); m->mothurOutEndLine();
+			m->mothurOut("The valid parameters are: ");
 			for(int i = 0; i < numParams-1; i++)
-				mothurOut(cParams.at(i) + ", ");
-			mothurOut("and " + cParams.at(numParams-1) + ".\n");
+				m->mothurOut(cParams.at(i) + ", ");
+			m->mothurOut("and " + cParams.at(numParams-1) + ".\n");
 			return false;
 		}
 		
@@ -73,7 +74,7 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 				double logNum = log10((double)pVal);
 				double diff = (double)((int)logNum - logNum);
 				if(diff != 0) {
-					mothurOut("The precision parameter can only take powers of 10 as a value (e.g. 10,1000,1000, etc.)\n");
+					m->mothurOut("The precision parameter can only take powers of 10 as a value (e.g. 10,1000,1000, etc.)\n");
 					return false;
 				}
 			}
@@ -99,7 +100,7 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 			else if(range.at(4).compare("only") == 0)
 				c = 1;
 			else {
-				mothurOut("The range can only be 'between' or 'only' the bounding numbers.\n");
+				m->mothurOut("The range can only be 'between' or 'only' the bounding numbers.\n");
 				return false;
 			}
 			
@@ -108,7 +109,7 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 			else if(range.at(0).compare(">=") == 0 || range[3].compare("=>") == 0)
 				d = 1;
 			else {
-				mothurOut("The parameter value can only be '>', '>=', or '=>' the lower bounding number.\n");
+				m->mothurOut("The parameter value can only be '>', '>=', or '=>' the lower bounding number.\n");
 				return false;
 			}
 			
@@ -117,7 +118,7 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 			else if(range.at(2).compare("<=") == 0 || range[4].compare("=<") == 0)
 				e = 1;
 			else {
-				mothurOut("The parameter value can only be '<', '<=', or '=<' the upper bounding number.\n");
+				m->mothurOut("The parameter value can only be '<', '<=', or '=<' the upper bounding number.\n");
 				return false;
 			}
 			
@@ -161,25 +162,25 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 			
 			
 			if(!valid) {
-				mothurOut("The '" + parameter + "' parameter needs to be ");
+				m->mothurOut("The '" + parameter + "' parameter needs to be ");
 				if(c == 1)
-					mothurOut("either '" + toString(a) + "' or '" + toString(b) + "'.\n");
+					m->mothurOut("either '" + toString(a) + "' or '" + toString(b) + "'.\n");
 				else {
 					if(a != piSentinel) {
-						mothurOut(">");
+						m->mothurOut(">");
 						if(d != 0)
-							mothurOut("=");
-						mothurOut(" '" + toString(a) + "'");
+							m->mothurOut("=");
+						m->mothurOut(" '" + toString(a) + "'");
 					}
 					if(b == piSentinel)
-						mothurOut( "'.\n");
+						m->mothurOut( "'.\n");
 					else if(a != piSentinel)
-						mothurOut(" and ");
+						m->mothurOut(" and ");
 					if(b != piSentinel) {
-						mothurOut("<");
+						m->mothurOut("<");
 						if(e != 0)
-							mothurOut("=");
-						mothurOut(" '" + toString(b) + "'.\n");
+							m->mothurOut("=");
+						m->mothurOut(" '" + toString(b) + "'.\n");
 					}
 				}
 				return false;
@@ -188,7 +189,7 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 		return true;
 	}
 	catch(exception& e) {
-		errorOut(e, "ValidParameters", "isValidParameters");
+		m->errorOut(e, "ValidParameters", "isValidParameters");
 		exit(1);
 	}
 }
@@ -218,7 +219,7 @@ string ValidParameters::validFile(map<string, string> container, string paramete
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "ValidParameters", "validFile");
+		m->errorOut(e, "ValidParameters", "validFile");
 		exit(1);
 	}
 }
@@ -263,7 +264,7 @@ void ValidParameters::initParameterRanges() {
 		parameterRanges["size"] = addParameters(sizeArray, rangeSize);
 	}
 	catch(exception& e) {
-		errorOut(e, "ValidParameters", "initParameterRanges");
+		m->errorOut(e, "ValidParameters", "initParameterRanges");
 		exit(1);
 	}
 }
@@ -277,7 +278,7 @@ vector<string> ValidParameters::addParameters(string parameters[], int size) {
 		return pVector;
 	}
 	catch(exception& e) {
-		errorOut(e, "ValidParameters", "addParameters");
+		m->errorOut(e, "ValidParameters", "addParameters");
 		exit(1);
 	}
 }

@@ -20,12 +20,11 @@
 
 //**********************************************************************************************************************
 
-LibShuffCommand::LibShuffCommand(string option){
+LibShuffCommand::LibShuffCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
 		Groups.clear();
-		
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; }
@@ -53,7 +52,7 @@ LibShuffCommand::LibShuffCommand(string option){
 			
 			//make sure the user has already run the read.dist command
 			if ((globaldata->gMatrix == NULL) || (globaldata->gGroupmap == NULL)) {
-				mothurOut("You must read in a matrix and groupfile using the read.dist command, before you use the libshuff command. "); mothurOutEndLine(); abort = true;; 
+				m->mothurOut("You must read in a matrix and groupfile using the read.dist command, before you use the libshuff command. "); m->mothurOutEndLine(); abort = true;; 
 			}
 						
 			//check for optional parameter and set defaults
@@ -105,7 +104,7 @@ LibShuffCommand::LibShuffCommand(string option){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "LibShuffCommand", "LibShuffCommand");
+		m->errorOut(e, "LibShuffCommand", "LibShuffCommand");
 		exit(1);
 	}
 }
@@ -113,20 +112,20 @@ LibShuffCommand::LibShuffCommand(string option){
 
 void LibShuffCommand::help(){
 	try {
-		mothurOut("The libshuff command can only be executed after a successful read.dist command including a groupfile.\n");
-		mothurOut("The libshuff command parameters are groups, iters, step, form and cutoff.  No parameters are required.\n");
-		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n");
-		mothurOut("The group names are separated by dashes.  The iters parameter allows you to specify how many random matrices you would like compared to your matrix.\n");
-		mothurOut("The step parameter allows you to specify change in distance you would like between each output if you are using the discrete form.\n");
-		mothurOut("The form parameter allows you to specify if you would like to analyze your matrix using the discrete or integral form. Your options are integral or discrete.\n");
-		mothurOut("The libshuff command should be in the following format: libshuff(groups=yourGroups, iters=yourIters, cutOff=yourCutOff, form=yourForm, step=yourStep).\n");
-		mothurOut("Example libshuff(groups=A-B-C, iters=500, form=discrete, step=0.01, cutOff=2.0).\n");
-		mothurOut("The default value for groups is all the groups in your groupfile, iters is 10000, cutoff is 1.0, form is integral and step is 0.01.\n");
-		mothurOut("The libshuff command output two files: .coverage and .slsummary their descriptions are in the manual.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. iters), '=' and parameters (i.e.yourIters).\n\n");
+		m->mothurOut("The libshuff command can only be executed after a successful read.dist command including a groupfile.\n");
+		m->mothurOut("The libshuff command parameters are groups, iters, step, form and cutoff.  No parameters are required.\n");
+		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n");
+		m->mothurOut("The group names are separated by dashes.  The iters parameter allows you to specify how many random matrices you would like compared to your matrix.\n");
+		m->mothurOut("The step parameter allows you to specify change in distance you would like between each output if you are using the discrete form.\n");
+		m->mothurOut("The form parameter allows you to specify if you would like to analyze your matrix using the discrete or integral form. Your options are integral or discrete.\n");
+		m->mothurOut("The libshuff command should be in the following format: libshuff(groups=yourGroups, iters=yourIters, cutOff=yourCutOff, form=yourForm, step=yourStep).\n");
+		m->mothurOut("Example libshuff(groups=A-B-C, iters=500, form=discrete, step=0.01, cutOff=2.0).\n");
+		m->mothurOut("The default value for groups is all the groups in your groupfile, iters is 10000, cutoff is 1.0, form is integral and step is 0.01.\n");
+		m->mothurOut("The libshuff command output two files: .coverage and .slsummary their descriptions are in the manual.\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. iters), '=' and parameters (i.e.yourIters).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "LibShuffCommand", "help");
+		m->errorOut(e, "LibShuffCommand", "help");
 		exit(1);
 	}
 }
@@ -167,7 +166,7 @@ int LibShuffCommand::execute(){
 		reading->finish();
 		delete reading;
 
-		mothurOutEndLine();
+		m->mothurOutEndLine();
 		printSummaryFile();
 		printCoverageFile();
 		
@@ -178,10 +177,15 @@ int LibShuffCommand::execute(){
 		//delete globaldata's copy of the gmatrix to free up memory
 		delete globaldata->gMatrix;  globaldata->gMatrix = NULL;
 		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+		
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "LibShuffCommand", "execute");
+		m->errorOut(e, "LibShuffCommand", "execute");
 		exit(1);
 	}
 }
@@ -194,6 +198,7 @@ void LibShuffCommand::printCoverageFile() {
 		ofstream outCov;
 		summaryFile = outputDir + getRootName(getSimpleName(globaldata->getPhylipFile())) + "libshuff.coverage";
 		openOutputFile(summaryFile, outCov);
+		outputNames.push_back(summaryFile);
 		outCov.setf(ios::fixed, ios::floatfield); outCov.setf(ios::showpoint);
 		//cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
 		
@@ -268,7 +273,7 @@ void LibShuffCommand::printCoverageFile() {
 		outCov.close();
 	}
 	catch(exception& e) {
-		errorOut(e, "LibShuffCommand", "printCoverageFile");
+		m->errorOut(e, "LibShuffCommand", "printCoverageFile");
 		exit(1);
 	}
 } 
@@ -281,12 +286,13 @@ void LibShuffCommand::printSummaryFile() {
 		ofstream outSum;
 		summaryFile = outputDir + getRootName(getSimpleName(globaldata->getPhylipFile())) + "libshuff.summary";
 		openOutputFile(summaryFile, outSum);
+		outputNames.push_back(summaryFile);
 
 		outSum.setf(ios::fixed, ios::floatfield); outSum.setf(ios::showpoint);
 		cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
 		
 		cout << setw(20) << left << "Comparison" << '\t' << setprecision(8) << "dCXYScore" << '\t' << "Significance" << endl;
-		mothurOutJustToLog("Comparison\tdCXYScore\tSignificance"); mothurOutEndLine();
+		m->mothurOutJustToLog("Comparison\tdCXYScore\tSignificance"); m->mothurOutEndLine();
 		outSum << setw(20) << left << "Comparison" << '\t' << setprecision(8) << "dCXYScore" << '\t' << "Significance" << endl;
 	
 		int precision = (int)log10(iters);
@@ -297,22 +303,22 @@ void LibShuffCommand::printSummaryFile() {
 				
 				if(pValueCounts[i][j]){
 					cout << setw(20) << left << groupNames[i]+'-'+groupNames[j] << '\t' << setprecision(8) << savedDXYValues[spoti][spotj] << '\t' << setprecision(precision) << pValueCounts[i][j]/(float)iters << endl;
-					mothurOutJustToLog(groupNames[i]+"-"+groupNames[j] + "\t" + toString(savedDXYValues[spoti][spotj]) + "\t" + toString((pValueCounts[i][j]/(float)iters))); mothurOutEndLine();
+					m->mothurOutJustToLog(groupNames[i]+"-"+groupNames[j] + "\t" + toString(savedDXYValues[spoti][spotj]) + "\t" + toString((pValueCounts[i][j]/(float)iters))); m->mothurOutEndLine();
 					outSum << setw(20) << left << groupNames[i]+'-'+groupNames[j] << '\t' << setprecision(8) << savedDXYValues[spoti][spotj] << '\t' << setprecision(precision) << pValueCounts[i][j]/(float)iters << endl;
 				}
 				else{
 					cout << setw(20) << left << groupNames[i]+'-'+groupNames[j] << '\t' << setprecision(8) << savedDXYValues[spoti][spotj] << '\t' << '<' <<setprecision(precision) << 1/(float)iters << endl;
-					mothurOutJustToLog(groupNames[i]+"-"+groupNames[j] + "\t" + toString(savedDXYValues[spoti][spotj]) + "\t" + toString((1/(float)iters))); mothurOutEndLine();
+					m->mothurOutJustToLog(groupNames[i]+"-"+groupNames[j] + "\t" + toString(savedDXYValues[spoti][spotj]) + "\t" + toString((1/(float)iters))); m->mothurOutEndLine();
 					outSum << setw(20) << left << groupNames[i]+'-'+groupNames[j] << '\t' << setprecision(8) << savedDXYValues[spoti][spotj] << '\t' << '<' <<setprecision(precision) << 1/(float)iters << endl;
 				}
 				if(pValueCounts[j][i]){
 					cout << setw(20) << left << groupNames[j]+'-'+groupNames[i] << '\t' << setprecision(8) << savedDXYValues[spotj][spoti] << '\t' << setprecision (precision) << pValueCounts[j][i]/(float)iters << endl;
-					mothurOutJustToLog(groupNames[j]+"-"+groupNames[i] + "\t" + toString(savedDXYValues[spotj][spoti]) + "\t" + toString((pValueCounts[j][i]/(float)iters))); mothurOutEndLine();
+					m->mothurOutJustToLog(groupNames[j]+"-"+groupNames[i] + "\t" + toString(savedDXYValues[spotj][spoti]) + "\t" + toString((pValueCounts[j][i]/(float)iters))); m->mothurOutEndLine();
 					outSum << setw(20) << left << groupNames[j]+'-'+groupNames[i] << '\t' << setprecision(8) << savedDXYValues[spotj][spoti] << '\t' << setprecision (precision) << pValueCounts[j][i]/(float)iters << endl;
 				}
 				else{
 					cout << setw(20) << left << groupNames[j]+'-'+groupNames[i] << '\t' << setprecision(8) << savedDXYValues[spotj][spoti] << '\t' << '<' <<setprecision (precision) << 1/(float)iters << endl;
-					mothurOutJustToLog(groupNames[j]+"-"+groupNames[i] + "\t" + toString(savedDXYValues[spotj][spoti]) + "\t" + toString((1/(float)iters))); mothurOutEndLine();
+					m->mothurOutJustToLog(groupNames[j]+"-"+groupNames[i] + "\t" + toString(savedDXYValues[spotj][spoti]) + "\t" + toString((1/(float)iters))); m->mothurOutEndLine();
 					outSum << setw(20) << left << groupNames[j]+'-'+groupNames[i] << '\t' << setprecision(8) << savedDXYValues[spotj][spoti] << '\t' << '<' <<setprecision (precision) << 1/(float)iters << endl;
 				}
 			}
@@ -321,7 +327,7 @@ void LibShuffCommand::printSummaryFile() {
 		outSum.close();
 	}
 	catch(exception& e) {
-		errorOut(e, "LibShuffCommand", "printSummaryFile");
+		m->errorOut(e, "LibShuffCommand", "printSummaryFile");
 		exit(1);
 	}
 } 
@@ -341,7 +347,7 @@ void LibShuffCommand::setGroups() {
 				//check that groups are valid
 				for (int i = 0; i < globaldata->Groups.size(); i++) {
 					if (globaldata->gGroupmap->isValidGroup(globaldata->Groups[i]) != true) {
-						mothurOut(globaldata->Groups[i] + " is not a valid group, and will be disregarded."); mothurOutEndLine();
+						m->mothurOut(globaldata->Groups[i] + " is not a valid group, and will be disregarded."); m->mothurOutEndLine();
 						// erase the invalid group from globaldata->Groups
 						globaldata->Groups.erase(globaldata->Groups.begin()+i);
 					}
@@ -353,7 +359,7 @@ void LibShuffCommand::setGroups() {
 					for (int i=0; i < numGroups; i++) { 
 						globaldata->Groups.push_back(globaldata->gGroupmap->namesOfGroups[i]);
 					}
-					mothurOut("When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile."); mothurOutEndLine();
+					m->mothurOut("When using the groups parameter you must have at least 2 valid groups. I will run the command using all the groups in your groupfile."); m->mothurOutEndLine();
 				} else { numGroups = globaldata->Groups.size(); }
 			} else { //users wants all groups
 				numGroups = globaldata->gGroupmap->getNumGroups();
@@ -376,7 +382,7 @@ void LibShuffCommand::setGroups() {
 
 	}
 	catch(exception& e) {
-		errorOut(e, "LibShuffCommand", "setGroups");
+		m->errorOut(e, "LibShuffCommand", "setGroups");
 		exit(1);
 	}
 }

@@ -12,7 +12,7 @@
 
 //***************************************************************************************************************
 
-SeqSummaryCommand::SeqSummaryCommand(string option){
+SeqSummaryCommand::SeqSummaryCommand(string option)  {
 	try {
 		abort = false;
 		
@@ -52,7 +52,7 @@ SeqSummaryCommand::SeqSummaryCommand(string option){
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
-			else if (fastafile == "not found") { fastafile = ""; mothurOut("fasta is a required parameter for the summary.seqs command."); mothurOutEndLine(); abort = true;  }	
+			else if (fastafile == "not found") { fastafile = ""; m->mothurOut("fasta is a required parameter for the summary.seqs command."); m->mothurOutEndLine(); abort = true;  }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -63,7 +63,7 @@ SeqSummaryCommand::SeqSummaryCommand(string option){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "SeqSummaryCommand", "SeqSummaryCommand");
+		m->errorOut(e, "SeqSummaryCommand", "SeqSummaryCommand");
 		exit(1);
 	}
 }
@@ -71,14 +71,14 @@ SeqSummaryCommand::SeqSummaryCommand(string option){
 
 void SeqSummaryCommand::help(){
 	try {
-		mothurOut("The summary.seqs command reads a fastafile and ....\n");
-		mothurOut("The summary.seqs command parameter is fasta and it is required.\n");
-		mothurOut("The summary.seqs command should be in the following format: \n");
-		mothurOut("summary.seqs(fasta=yourFastaFile) \n");
-		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");	
+		m->mothurOut("The summary.seqs command reads a fastafile and ....\n");
+		m->mothurOut("The summary.seqs command parameter is fasta and it is required.\n");
+		m->mothurOut("The summary.seqs command should be in the following format: \n");
+		m->mothurOut("summary.seqs(fasta=yourFastaFile) \n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");	
 	}
 	catch(exception& e) {
-		errorOut(e, "SeqSummaryCommand", "help");
+		m->errorOut(e, "SeqSummaryCommand", "help");
 		exit(1);
 	}
 }
@@ -147,22 +147,28 @@ int SeqSummaryCommand::execute(){
 		if (startPosition[0] == -1) {  startPosition[0] = 0;	}
 		if (endPosition[0] == -1)	{  endPosition[0] = 0;		}
 		
-		mothurOutEndLine();
-		mothurOut("\t\tStart\tEnd\tNBases\tAmbigs\tPolymer"); mothurOutEndLine();
-		mothurOut("Minimum:\t" + toString(startPosition[0]) + "\t" + toString(endPosition[0]) + "\t" + toString(seqLength[0]) + "\t" + toString(ambigBases[0]) + "\t" + toString(longHomoPolymer[0])); mothurOutEndLine();
-		mothurOut("2.5%-tile:\t" + toString(startPosition[ptile0_25]) + "\t" + toString(endPosition[ptile0_25]) + "\t" + toString(seqLength[ptile0_25]) + "\t" + toString(ambigBases[ptile0_25]) + "\t"+ toString(longHomoPolymer[ptile0_25])); mothurOutEndLine();
-		mothurOut("25%-tile:\t" + toString(startPosition[ptile25]) + "\t" + toString(endPosition[ptile25]) + "\t" + toString(seqLength[ptile25]) + "\t" + toString(ambigBases[ptile25]) + "\t" + toString(longHomoPolymer[ptile25])); mothurOutEndLine();
-		mothurOut("Median: \t" + toString(startPosition[ptile50]) + "\t" + toString(endPosition[ptile50]) + "\t" + toString(seqLength[ptile50]) + "\t" + toString(ambigBases[ptile50]) + "\t" + toString(longHomoPolymer[ptile50])); mothurOutEndLine();
-		mothurOut("75%-tile:\t" + toString(startPosition[ptile75]) + "\t" + toString(endPosition[ptile75]) + "\t" + toString(seqLength[ptile75]) + "\t" + toString(ambigBases[ptile75]) + "\t" + toString(longHomoPolymer[ptile75])); mothurOutEndLine();
-		mothurOut("97.5%-tile:\t" + toString(startPosition[ptile97_5]) + "\t" + toString(endPosition[ptile97_5]) + "\t" + toString(seqLength[ptile97_5]) + "\t" + toString(ambigBases[ptile97_5]) + "\t" + toString(longHomoPolymer[ptile97_5])); mothurOutEndLine();
-		mothurOut("Maximum:\t" + toString(startPosition[ptile100]) + "\t" + toString(endPosition[ptile100]) + "\t" + toString(seqLength[ptile100]) + "\t" + toString(ambigBases[ptile100]) + "\t" + toString(longHomoPolymer[ptile100])); mothurOutEndLine();
-		mothurOut("# of Seqs:\t" + toString(numSeqs)); mothurOutEndLine();
+		m->mothurOutEndLine();
+		m->mothurOut("\t\tStart\tEnd\tNBases\tAmbigs\tPolymer"); m->mothurOutEndLine();
+		m->mothurOut("Minimum:\t" + toString(startPosition[0]) + "\t" + toString(endPosition[0]) + "\t" + toString(seqLength[0]) + "\t" + toString(ambigBases[0]) + "\t" + toString(longHomoPolymer[0])); m->mothurOutEndLine();
+		m->mothurOut("2.5%-tile:\t" + toString(startPosition[ptile0_25]) + "\t" + toString(endPosition[ptile0_25]) + "\t" + toString(seqLength[ptile0_25]) + "\t" + toString(ambigBases[ptile0_25]) + "\t"+ toString(longHomoPolymer[ptile0_25])); m->mothurOutEndLine();
+		m->mothurOut("25%-tile:\t" + toString(startPosition[ptile25]) + "\t" + toString(endPosition[ptile25]) + "\t" + toString(seqLength[ptile25]) + "\t" + toString(ambigBases[ptile25]) + "\t" + toString(longHomoPolymer[ptile25])); m->mothurOutEndLine();
+		m->mothurOut("Median: \t" + toString(startPosition[ptile50]) + "\t" + toString(endPosition[ptile50]) + "\t" + toString(seqLength[ptile50]) + "\t" + toString(ambigBases[ptile50]) + "\t" + toString(longHomoPolymer[ptile50])); m->mothurOutEndLine();
+		m->mothurOut("75%-tile:\t" + toString(startPosition[ptile75]) + "\t" + toString(endPosition[ptile75]) + "\t" + toString(seqLength[ptile75]) + "\t" + toString(ambigBases[ptile75]) + "\t" + toString(longHomoPolymer[ptile75])); m->mothurOutEndLine();
+		m->mothurOut("97.5%-tile:\t" + toString(startPosition[ptile97_5]) + "\t" + toString(endPosition[ptile97_5]) + "\t" + toString(seqLength[ptile97_5]) + "\t" + toString(ambigBases[ptile97_5]) + "\t" + toString(longHomoPolymer[ptile97_5])); m->mothurOutEndLine();
+		m->mothurOut("Maximum:\t" + toString(startPosition[ptile100]) + "\t" + toString(endPosition[ptile100]) + "\t" + toString(seqLength[ptile100]) + "\t" + toString(ambigBases[ptile100]) + "\t" + toString(longHomoPolymer[ptile100])); m->mothurOutEndLine();
+		m->mothurOut("# of Seqs:\t" + toString(numSeqs)); m->mothurOutEndLine();
 		
 		outSummary.close();
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+		m->mothurOut(summaryFile); m->mothurOutEndLine();	
+		m->mothurOutEndLine();
+
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "SeqSummaryCommand", "execute");
+		m->errorOut(e, "SeqSummaryCommand", "execute");
 		exit(1);
 	}
 }

@@ -23,8 +23,8 @@ class HeatMapSim {
 		HeatMapSim(string);
 		~HeatMapSim(){};
 	
-		void getPic(vector<SharedRAbundVector*>, vector<Calculator*>);
-		void getPic(vector< vector<double> >, vector<string>);
+		vector<string> getPic(vector<SharedRAbundVector*>, vector<Calculator*>);
+		string getPic(vector< vector<double> >, vector<string>);
 
 	private:
 		void printLegend(int, float);
@@ -32,6 +32,7 @@ class HeatMapSim {
 		GlobalData* globaldata;
 		string format, groupComb, outputDir;
 		ofstream outsvg;
+		MothurOut* m;
 			
 };
 

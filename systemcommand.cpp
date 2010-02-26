@@ -11,7 +11,7 @@
 
 //**********************************************************************************************************************
 
-SystemCommand::SystemCommand(string option){
+SystemCommand::SystemCommand(string option)  {
 	try {
 		abort = false;
 		
@@ -19,7 +19,7 @@ SystemCommand::SystemCommand(string option){
 		if(option == "help") { help(); abort = true; }
 		
 		else {
-			if (option == "") { mothurOut("You must enter a command to run."); mothurOutEndLine(); abort = true; }
+			if (option == "") { m->mothurOut("You must enter a command to run."); m->mothurOutEndLine(); abort = true; }
 			else { 
 				//check for outputdir and inputdir parameters
 				int commaPos = option.find_first_of(',');
@@ -35,7 +35,7 @@ SystemCommand::SystemCommand(string option){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "SystemCommand", "SystemCommand");
+		m->errorOut(e, "SystemCommand", "SystemCommand");
 		exit(1);
 	}
 }
@@ -43,13 +43,13 @@ SystemCommand::SystemCommand(string option){
 
 void SystemCommand::help(){
 	try {
-		mothurOut("The system command allows you to execute a system command from within mothur.\n");
-		mothurOut("The system has no parameters.\n");
-		mothurOut("The system command should be in the following format: system(yourCommand).\n");
-		mothurOut("Example system(clear).\n");
+		m->mothurOut("The system command allows you to execute a system command from within mothur.\n");
+		m->mothurOut("The system has no parameters.\n");
+		m->mothurOut("The system command should be in the following format: system(yourCommand).\n");
+		m->mothurOut("Example system(clear).\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "SystemCommand", "help");
+		m->errorOut(e, "SystemCommand", "help");
 		exit(1);
 	}
 }
@@ -67,7 +67,7 @@ int SystemCommand::execute(){
 	}
 
 	catch(exception& e) {
-		errorOut(e, "SystemCommand", "execute");
+		m->errorOut(e, "SystemCommand", "execute");
 		exit(1);
 	}
 }

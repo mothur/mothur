@@ -22,7 +22,7 @@
 
 //**********************************************************************************************************************
 
-MatrixOutputCommand::MatrixOutputCommand(string option){
+MatrixOutputCommand::MatrixOutputCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
@@ -57,8 +57,8 @@ MatrixOutputCommand::MatrixOutputCommand(string option){
 			
 			//make sure the user has already run the read.otu command
 			if (globaldata->getSharedFile() == "") {
-				if (globaldata->getListFile() == "") { mothurOut("You must read a list and a group, or a shared before you can use the dist.shared command."); mothurOutEndLine(); abort = true; }
-				else if (globaldata->getGroupFile() == "") { mothurOut("You must read a list and a group, or a shared before you can use the dist.shared command."); mothurOutEndLine(); abort = true; }
+				if (globaldata->getListFile() == "") { m->mothurOut("You must read a list and a group, or a shared before you can use the dist.shared command."); m->mothurOutEndLine(); abort = true; }
+				else if (globaldata->getGroupFile() == "") { m->mothurOut("You must read a list and a group, or a shared before you can use the dist.shared command."); m->mothurOutEndLine(); abort = true; }
 			}
 			
 			//check for optional parameter and set defaults
@@ -71,7 +71,7 @@ MatrixOutputCommand::MatrixOutputCommand(string option){
 			}
 			
 			output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "lt"; }
-			if ((output != "lt") && (output != "square")) { mothurOut(output + " is not a valid output form. Options are lt and square. I will use lt."); mothurOutEndLine(); output = "lt"; }
+			if ((output != "lt") && (output != "square")) { m->mothurOut(output + " is not a valid output form. Options are lt and square. I will use lt."); m->mothurOutEndLine(); output = "lt"; }
 			
 			//if the user has not specified any labels use the ones from read.otu
 			if (label == "") {  
@@ -129,7 +129,7 @@ MatrixOutputCommand::MatrixOutputCommand(string option){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "MatrixOutputCommand", "MatrixOutputCommand");
+		m->errorOut(e, "MatrixOutputCommand", "MatrixOutputCommand");
 		exit(1);
 	}
 }
@@ -138,21 +138,21 @@ MatrixOutputCommand::MatrixOutputCommand(string option){
 
 void MatrixOutputCommand::help(){
 	try {
-		mothurOut("The dist.shared command can only be executed after a successful read.otu command.\n");
-		mothurOut("The dist.shared command parameters are groups, calc, output and label.  No parameters are required.\n");
-		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included used.\n");
-		mothurOut("The group names are separated by dashes. The label parameter allows you to select what distance levels you would like distance matrices created for, and is also separated by dashes.\n");
-		mothurOut("The dist.shared command should be in the following format: dist.shared(groups=yourGroups, calc=yourCalcs, label=yourLabels).\n");
-		mothurOut("The output parameter allows you to specify format of your distance matrix. Options are lt, and square. The default is lt.\n");
-		mothurOut("Example dist.shared(groups=A-B-C, calc=jabund-sorabund).\n");
-		mothurOut("The default value for groups is all the groups in your groupfile.\n");
-		mothurOut("The default value for calc is jclass and thetayc.\n");
+		m->mothurOut("The dist.shared command can only be executed after a successful read.otu command.\n");
+		m->mothurOut("The dist.shared command parameters are groups, calc, output and label.  No parameters are required.\n");
+		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included used.\n");
+		m->mothurOut("The group names are separated by dashes. The label parameter allows you to select what distance levels you would like distance matrices created for, and is also separated by dashes.\n");
+		m->mothurOut("The dist.shared command should be in the following format: dist.shared(groups=yourGroups, calc=yourCalcs, label=yourLabels).\n");
+		m->mothurOut("The output parameter allows you to specify format of your distance matrix. Options are lt, and square. The default is lt.\n");
+		m->mothurOut("Example dist.shared(groups=A-B-C, calc=jabund-sorabund).\n");
+		m->mothurOut("The default value for groups is all the groups in your groupfile.\n");
+		m->mothurOut("The default value for calc is jclass and thetayc.\n");
 		validCalculator->printCalc("matrix", cout);
-		mothurOut("The dist.shared command outputs a .dist file for each calculator you specify at each distance you choose.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
+		m->mothurOut("The dist.shared command outputs a .dist file for each calculator you specify at each distance you choose.\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "MatrixOutputCommand", "help");
+		m->errorOut(e, "MatrixOutputCommand", "help");
 		exit(1);
 	}
 }
@@ -176,7 +176,7 @@ int MatrixOutputCommand::execute(){
 		if (abort == true) {	return 0;	}
 			
 		//if the users entered no valid calculators don't execute command
-		if (matrixCalculators.size() == 0) { mothurOut("No valid calculators."); mothurOutEndLine();  return 0; }
+		if (matrixCalculators.size() == 0) { m->mothurOut("No valid calculators."); m->mothurOutEndLine();  return 0; }
 
 		//you have groups
 		read = new ReadOTUFile(globaldata->inputFileName);	
@@ -190,7 +190,7 @@ int MatrixOutputCommand::execute(){
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 					
-		if (lookup.size() < 2) { mothurOut("You have not provided enough valid groups.  I cannot run the command."); mothurOutEndLine(); return 0;}
+		if (lookup.size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); return 0;}
 		
 		numGroups = lookup.size();
 				
@@ -198,7 +198,7 @@ int MatrixOutputCommand::execute(){
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 		
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
-				mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
+				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 				process(lookup);
 				
 				processedLabels.insert(lookup[0]->getLabel());
@@ -211,7 +211,7 @@ int MatrixOutputCommand::execute(){
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 				lookup = input->getSharedRAbundVectors(lastLabel);
 
-				mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
+				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 				process(lookup);
 				
 				processedLabels.insert(lookup[0]->getLabel());
@@ -232,12 +232,12 @@ int MatrixOutputCommand::execute(){
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			mothurOut("Your file does not include the label " + *it);  
+			m->mothurOut("Your file does not include the label " + *it);  
 			if (processedLabels.count(lastLabel) != 1) {
-				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
 				needToRun = true;
 			}else {
-				mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
 			}
 		}
 		
@@ -246,7 +246,7 @@ int MatrixOutputCommand::execute(){
 			for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {  delete lookup[i]; }  } 
 			lookup = input->getSharedRAbundVectors(lastLabel);
 
-			mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
+			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 			process(lookup);
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 		}
@@ -254,11 +254,17 @@ int MatrixOutputCommand::execute(){
 				
 		//reset groups parameter
 		globaldata->Groups.clear();  
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+
 
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "MatrixOutputCommand", "execute");
+		m->errorOut(e, "MatrixOutputCommand", "execute");
 		exit(1);
 	}
 }
@@ -290,7 +296,7 @@ void MatrixOutputCommand::printSims(ostream& out) {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "MatrixOutputCommand", "printSims");
+		m->errorOut(e, "MatrixOutputCommand", "printSims");
 		exit(1);
 	}
 }
@@ -332,6 +338,8 @@ void MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 					
 					exportFileName = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + "." + output + ".dist";
 					openOutputFile(exportFileName, out);
+					outputNames.push_back(exportFileName);
+					
 					printSims(out);
 					out.close();
 					
@@ -341,7 +349,7 @@ void MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "MatrixOutputCommand", "process");
+		m->errorOut(e, "MatrixOutputCommand", "process");
 		exit(1);
 	}
 }

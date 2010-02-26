@@ -44,7 +44,7 @@ vector<vector<double> > SLibshuff::evaluateAll(){
 		return dCXYValues;
 	}
 	catch(exception& e) {
-		errorOut(e, "SLibshuff", "evaluateAll");
+		m->errorOut(e, "SLibshuff", "evaluateAll");
 		exit(1);
 	}
 }
@@ -97,7 +97,7 @@ double SLibshuff::sCalculate(int x, int y){
 		return sum;
 	}
 	catch(exception& e) {
-		errorOut(e, "SLibshuff", "sCalculate");
+		m->errorOut(e, "SLibshuff", "sCalculate");
 		exit(1);
 	}
 }

@@ -3,6 +3,7 @@
 
 
 #include "mothur.h"
+#include "mothurout.h"
 
 /* This class is parent to listvector, ordervector, rabundvector, sabundvector, sharedordervector, sharedrabundvector, sharedsabundvector. 
 	The child classes all contain OTU information in different forms. */
@@ -19,7 +20,7 @@ class SharedRAbundVector;
 class DataVector {
 	
 public:
-	DataVector(){};// : maxRank(0), numBins(0), numSeqs(0){};
+	DataVector(){ m = MothurOut::getInstance(); }// : maxRank(0), numBins(0), numSeqs(0){};
 	DataVector(string l) : label(l) {};
 	DataVector(const DataVector& dv) : label(dv.label){};//, maxRank(dv.maxRank), numBins(dv.numBins), numSeqs(dv.numSeqs) {};
 	DataVector(ifstream&);
@@ -42,6 +43,7 @@ public:
 	
 protected:
 	string label;
+	MothurOut* m;
 //	int maxRank;
 //	int numBins;
 //	int numSeqs;	

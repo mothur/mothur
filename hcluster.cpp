@@ -13,8 +13,9 @@
 #include "sparsematrix.hpp"
 
 /***********************************************************************/
-HCluster::HCluster(RAbundVector* rav, ListVector* lv, string m, string d, NameAssignment* n, float c) :  rabund(rav), list(lv), method(m), distfile(d), nameMap(n), cutoff(c) {
+HCluster::HCluster(RAbundVector* rav, ListVector* lv, string ms, string d, NameAssignment* n, float c) :  rabund(rav), list(lv), method(ms), distfile(d), nameMap(n), cutoff(c) {
 	try {
+		m = MothurOut::getInstance();
 		mapWanted = false;
 		exitedBreak = false; 
 		numSeqs = list->getNumSeqs();
@@ -32,7 +33,7 @@ HCluster::HCluster(RAbundVector* rav, ListVector* lv, string m, string d, NameAs
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "HCluster", "HCluster");
+		m->errorOut(e, "HCluster", "HCluster");
 		exit(1);
 	}
 }
@@ -49,7 +50,7 @@ void HCluster::clusterBins(){
 		//cout << '\t' << rabund->get(clusterArray[smallRow].smallChild) << '\t' << rabund->get(clusterArray[smallCol].smallChild) << endl;
 	}
 	catch(exception& e) {
-		errorOut(e, "HCluster", "clusterBins");
+		m->errorOut(e, "HCluster", "clusterBins");
 		exit(1);
 	}
 
@@ -71,7 +72,7 @@ void HCluster::clusterNames(){
 
     }
 	catch(exception& e) {
-		errorOut(e, "HCluster", "clusterNames");
+		m->errorOut(e, "HCluster", "clusterNames");
 		exit(1);
 	}
 
@@ -86,7 +87,7 @@ int HCluster::getUpmostParent(int node){
 		return node;
 	}
 	catch(exception& e) {
-		errorOut(e, "HCluster", "getUpmostParent");
+		m->errorOut(e, "HCluster", "getUpmostParent");
 		exit(1);
 	}
 }
@@ -116,7 +117,7 @@ void HCluster::printInfo(){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "HCluster", "getUpmostParent");
+		m->errorOut(e, "HCluster", "getUpmostParent");
 		exit(1);
 	}
 }
@@ -184,7 +185,7 @@ int HCluster::makeActive() {
 		return linkValue;
 	}
 	catch(exception& e) {
-		errorOut(e, "HCluster", "makeActive");
+		m->errorOut(e, "HCluster", "makeActive");
 		exit(1);
 	}
 }
@@ -253,7 +254,7 @@ void HCluster::updateArrayandLinkTable() {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "HCluster", "updateArrayandLinkTable");
+		m->errorOut(e, "HCluster", "updateArrayandLinkTable");
 		exit(1);
 	}
 }
@@ -299,14 +300,14 @@ bool HCluster::update(int row, int col, float distance){
 		//printInfo();
 	}
 	catch(exception& e) {
-		errorOut(e, "HCluster", "update");
+		m->errorOut(e, "HCluster", "update");
 		exit(1);
 	}
 }
 /***********************************************************************/
-void HCluster::setMapWanted(bool m)  {  
+void HCluster::setMapWanted(bool ms)  {  
 	try {
-		mapWanted = m;
+		mapWanted = ms;
 		
 		//initialize map
 		for (int i = 0; i < list->getNumBins(); i++) {
@@ -327,7 +328,7 @@ void HCluster::setMapWanted(bool m)  {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "HCluster", "setMapWanted");
+		m->errorOut(e, "HCluster", "setMapWanted");
 		exit(1);
 	}
 }
@@ -348,7 +349,7 @@ try {
 		seq2Bin[names] = clusterArray[smallCol].smallChild;
 	}
 	catch(exception& e) {
-		errorOut(e, "HCluster", "updateMap");
+		m->errorOut(e, "HCluster", "updateMap");
 		exit(1);
 	}
 }
@@ -366,7 +367,7 @@ vector<seqDist> HCluster::getSeqs(){
 		return sameSeqs;
 	}
 	catch(exception& e) {
-		errorOut(e, "HCluster", "getSeqs");
+		m->errorOut(e, "HCluster", "getSeqs");
 		exit(1);
 	}
 }
@@ -424,7 +425,7 @@ vector<seqDist> HCluster::getSeqsFNNN(){
 		return sameSeqs;
 	}
 	catch(exception& e) {
-		errorOut(e, "HCluster", "getSeqsFNNN");
+		m->errorOut(e, "HCluster", "getSeqsFNNN");
 		exit(1);
 	}
 }
@@ -495,7 +496,7 @@ vector<seqDist> HCluster::getSeqsAN(){
 		return temp;
 	}
 	catch(exception& e) {
-		errorOut(e, "HCluster", "getSeqsAN");
+		m->errorOut(e, "HCluster", "getSeqsAN");
 		exit(1);
 	}
 }
@@ -649,7 +650,7 @@ void HCluster::combineFile() {
 		sort(mergedMin.begin(), mergedMin.end(), compareSequenceDistance);	
 	}
 	catch(exception& e) {
-		errorOut(e, "HCluster", "combineFile");
+		m->errorOut(e, "HCluster", "combineFile");
 		exit(1);
 	}
 }
@@ -725,7 +726,7 @@ seqDist HCluster::getNextDist(char* buffer, int& index, int size){
 		return next;
 	}
 	catch(exception& e) {
-		errorOut(e, "HCluster", "getNextDist");
+		m->errorOut(e, "HCluster", "getNextDist");
 		exit(1);
 	}
 }
@@ -767,7 +768,7 @@ void HCluster::processFile() {
 		rename(outTemp.c_str(), distfile.c_str());
 	}
 	catch(exception& e) {
-		errorOut(e, "HCluster", "processFile");
+		m->errorOut(e, "HCluster", "processFile");
 		exit(1);
 	}
 }

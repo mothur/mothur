@@ -40,7 +40,7 @@ private:
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
 	string format, groups, label, calc, phylipfile, columnfile, namefile, outputDir;
-	vector<string> Estimators, Groups;
+	vector<string> Estimators, Groups, outputNames;
 	
 	int runCommandShared();
 	int runCommandDist();

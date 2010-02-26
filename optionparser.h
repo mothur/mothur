@@ -13,6 +13,7 @@
 
 
 #include "mothur.h"
+#include "mothurout.h"
 
 
 /***********************************************************************/
@@ -24,6 +25,7 @@ public:
 	map<string, string> getParameters();
 private:
 	map<string, string> parameters;
+	MothurOut* m;
 };
 
 /***********************************************************************/

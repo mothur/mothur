@@ -47,7 +47,7 @@ OrderVector::OrderVector(ifstream& f) : DataVector() {
 		updateStats();
 	}
 	catch(exception& e) {
-		errorOut(e, "OrderVector", "OrderVector");
+		m->errorOut(e, "OrderVector", "OrderVector");
 		exit(1);
 	}
 }
@@ -112,7 +112,7 @@ void OrderVector::print(ostream& output){
 		output << endl;
 	}
 	catch(exception& e) {
-		errorOut(e, "OrderVector", "print");
+		m->errorOut(e, "OrderVector", "print");
 		exit(1);
 	}
 }
@@ -129,7 +129,7 @@ void OrderVector::print(string prefix, ostream& output){
 		output << endl;
 	}
 	catch(exception& e) {
-		errorOut(e, "OrderVector", "print");
+		m->errorOut(e, "OrderVector", "print");
 		exit(1);
 	}
 }
@@ -137,7 +137,7 @@ void OrderVector::print(string prefix, ostream& output){
 /***********************************************************************/
 
 void OrderVector::resize(int){
-	mothurOut("resize() did nothing in class OrderVector");
+	m->mothurOut("resize() did nothing in class OrderVector");
 }
 
 /***********************************************************************/
@@ -179,7 +179,7 @@ RAbundVector OrderVector::getRAbundVector(){
 		return rav;
 	}
 	catch(exception& e) {
-		errorOut(e, "OrderVector", "getRAbundVector");
+		m->errorOut(e, "OrderVector", "getRAbundVector");
 		exit(1);
 	}
 }
@@ -228,7 +228,7 @@ void OrderVector::updateStats(){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "OrderVector", "updateStats");
+		m->errorOut(e, "OrderVector", "updateStats");
 		exit(1);
 	}
 }

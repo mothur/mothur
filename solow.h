@@ -20,11 +20,11 @@
 class Solow : public Calculator  {
 	
 public: 
-	Solow(int size) : m(size), Calculator("solow", 1, false) {};
+	Solow(int size) : f(size), Calculator("solow", 1, false) {};
 	EstOutput getValues(SAbundVector*);	
 	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
 private:
-	int m;
+	int f;
 };
 
 

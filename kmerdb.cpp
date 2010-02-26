@@ -42,7 +42,7 @@ KmerDB::KmerDB(string fastaFileName, int kSize) : Database(), kmerSize(kSize) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "KmerDB", "KmerDB");
+		m->errorOut(e, "KmerDB", "KmerDB");
 		exit(1);
 	}	
 
@@ -94,7 +94,7 @@ vector<int> KmerDB::findClosestSequences(Sequence* candidateSeq, int num){
 		return topMatches;		
 	}
 	catch(exception& e) {
-		errorOut(e, "KmerDB", "findClosestSequences");
+		m->errorOut(e, "KmerDB", "findClosestSequences");
 		exit(1);
 	}	
 }
@@ -118,7 +118,7 @@ void KmerDB::generateDB(){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "KmerDB", "generateDB");
+		m->errorOut(e, "KmerDB", "generateDB");
 		exit(1);
 	}	
 	
@@ -143,7 +143,7 @@ void KmerDB::addSequence(Sequence seq) {
 		count++;
 	}
 	catch(exception& e) {
-		errorOut(e, "KmerDB", "addSequence");
+		m->errorOut(e, "KmerDB", "addSequence");
 		exit(1);
 	}	
 }
@@ -170,7 +170,7 @@ void KmerDB::readKmerDB(ifstream& kmerDBFile){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "KmerDB", "readKmerDB");
+		m->errorOut(e, "KmerDB", "readKmerDB");
 		exit(1);
 	}	
 }
@@ -183,7 +183,7 @@ int KmerDB::getCount(int kmer) {
 		else {	return kmerLocations[kmer].size();	}  // kmer is in vector range
 	}
 	catch(exception& e) {
-		errorOut(e, "KmerDB", "getCount");
+		m->errorOut(e, "KmerDB", "getCount");
 		exit(1);
 	}	
 }
@@ -200,7 +200,7 @@ vector<int> KmerDB::getSequencesWithKmer(int kmer) {
 		return seqs;
 	}
 	catch(exception& e) {
-		errorOut(e, "KmerDB", "getSequencesWithKmer");
+		m->errorOut(e, "KmerDB", "getSequencesWithKmer");
 		exit(1);
 	}	
 }

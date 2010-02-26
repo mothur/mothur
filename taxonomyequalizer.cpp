@@ -12,6 +12,7 @@
 /**************************************************************************************************/
 TaxEqualizer::TaxEqualizer(string tfile, int c) : cutoff(c) {
 	try {
+		m = MothurOut::getInstance();
 		containsConfidence = false;
 		
 		ifstream inTax;
@@ -23,8 +24,8 @@ TaxEqualizer::TaxEqualizer(string tfile, int c) : cutoff(c) {
 		if ((cutoff != -1) && (cutoff < highestLevel)) { 
 			highestLevel = cutoff;
 		}else if (cutoff > highestLevel) {
-			mothurOut("The highest level taxonomy you have is " + toString(highestLevel) + " and your cutoff is " + toString(cutoff) + ". I will set the cutoff to " + toString(highestLevel));
-			mothurOutEndLine();
+			m->mothurOut("The highest level taxonomy you have is " + toString(highestLevel) + " and your cutoff is " + toString(cutoff) + ". I will set the cutoff to " + toString(highestLevel));
+			m->mothurOutEndLine();
 		}
 		
 		inTax.close(); 
@@ -56,7 +57,7 @@ TaxEqualizer::TaxEqualizer(string tfile, int c) : cutoff(c) {
 					
 	}
 	catch(exception& e) {
-		errorOut(e, "TaxEqualizer", "TaxEqualizer");
+		m->errorOut(e, "TaxEqualizer", "TaxEqualizer");
 		exit(1);
 	}
 }
@@ -95,7 +96,7 @@ int TaxEqualizer::getHighestLevel(ifstream& in) {
 					
 	}
 	catch(exception& e) {
-		errorOut(e, "TaxEqualizer", "getHighestLevel");
+		m->errorOut(e, "TaxEqualizer", "getHighestLevel");
 		exit(1);
 	}
 }
@@ -118,7 +119,7 @@ void TaxEqualizer::extendTaxonomy(string name, string& tax, int desiredLevel) {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "TaxEqualizer", "extendTaxonomy");
+		m->errorOut(e, "TaxEqualizer", "extendTaxonomy");
 		exit(1);
 	}
 }
@@ -137,7 +138,7 @@ void TaxEqualizer::truncateTaxonomy(string name, string& tax, int desiredLevel) 
 		tax += ";";
 	}
 	catch(exception& e) {
-		errorOut(e, "TaxEqualizer", "truncateTaxonomy");
+		m->errorOut(e, "TaxEqualizer", "truncateTaxonomy");
 		exit(1);
 	}
 }
@@ -161,7 +162,7 @@ void TaxEqualizer::removeConfidences(string& tax) {
 		tax = newTax;
 	}
 	catch(exception& e) {
-		errorOut(e, "TaxEqualizer", "removeConfidences");
+		m->errorOut(e, "TaxEqualizer", "removeConfidences");
 		exit(1);
 	}
 }

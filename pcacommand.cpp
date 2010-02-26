@@ -12,7 +12,7 @@
 
 //**********************************************************************************************************************
 
-PCACommand::PCACommand(string option){
+PCACommand::PCACommand(string option)  {
 	try {
 		abort = false;
 		
@@ -61,12 +61,12 @@ PCACommand::PCACommand(string option){
 			}
 			
 			//error checking on files	
-			if (phylipfile == "")	{ mothurOut("You must provide a distance file before running the pca command."); mothurOutEndLine(); abort = true; }		
+			if (phylipfile == "")	{ m->mothurOut("You must provide a distance file before running the pca command."); m->mothurOutEndLine(); abort = true; }		
 		}
 
 	}
 	catch(exception& e) {
-		errorOut(e, "PCACommand", "PCACommand");
+		m->errorOut(e, "PCACommand", "PCACommand");
 		exit(1);
 	}
 }
@@ -74,10 +74,10 @@ PCACommand::PCACommand(string option){
 void PCACommand::help(){
 	try {
 	
-		mothurOut("The pca command..."); mothurOutEndLine();
+		m->mothurOut("The pca command..."); m->mothurOutEndLine();
 	}
 	catch(exception& e) {
-		errorOut(e, "PCACommand", "help");
+		m->errorOut(e, "PCACommand", "help");
 		exit(1);
 	}
 }
@@ -129,10 +129,15 @@ int PCACommand::execute(){
 		
 		output(fbase, names, G, d);
 		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+		
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "PCACommand", "execute");
+		m->errorOut(e, "PCACommand", "execute");
 		exit(1);
 	}
 }
@@ -152,7 +157,7 @@ void PCACommand::get_comment(istream& f, char begin, char end){
 		d = f.peek();
 	}
 	catch(exception& e) {
-		errorOut(e, "PCACommand", "get_comment");
+		m->errorOut(e, "PCACommand", "get_comment");
 		exit(1);
 	}
 }	
@@ -201,7 +206,7 @@ void PCACommand::read_phylip(istream& f, int square_m, vector<string>& name_list
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "PCACommand", "read_phylip");
+		m->errorOut(e, "PCACommand", "read_phylip");
 		exit(1);
 	}
 
@@ -243,7 +248,7 @@ void PCACommand::read(string fname, vector<string>& names, vector<vector<double>
 		read_phylip(f, m, names, D);
 	}
 		catch(exception& e) {
-		errorOut(e, "PCACommand", "read");
+		m->errorOut(e, "PCACommand", "read");
 		exit(1);
 	}
 }
@@ -275,7 +280,7 @@ void PCACommand::matrix_mult(vector<vector<double> > first, vector<vector<double
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "PCACommand", "matrix_mult");
+		m->errorOut(e, "PCACommand", "matrix_mult");
 		exit(1);
 	}
 
@@ -309,7 +314,7 @@ void PCACommand::recenter(double offset, vector<vector<double> > D, vector<vecto
 		matrix_mult(A,C,G);
 	}
 	catch(exception& e) {
-		errorOut(e, "PCACommand", "recenter");
+		m->errorOut(e, "PCACommand", "recenter");
 		exit(1);
 	}
 
@@ -402,7 +407,7 @@ void PCACommand::tred2(vector<vector<double> >& a, vector<double>& d, vector<dou
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "PCACommand", "tred2");
+		m->errorOut(e, "PCACommand", "tred2");
 		exit(1);
 	}
 
@@ -486,7 +491,7 @@ void PCACommand::qtli(vector<double>& d, vector<double>& e, vector<vector<double
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "PCACommand", "qtli");
+		m->errorOut(e, "PCACommand", "qtli");
 		exit(1);
 	}
 }
@@ -508,10 +513,12 @@ void PCACommand::output(string fnameRoot, vector<string> name_list, vector<vecto
 		ofstream pcaData((fnameRoot+"pca").c_str(), ios::trunc);
 		pcaData.setf(ios::fixed, ios::floatfield);
 		pcaData.setf(ios::showpoint);	
+		outputNames.push_back(fnameRoot+"pca");
 		
 		ofstream pcaLoadings((fnameRoot+"pca.loadings").c_str(), ios::trunc);
 		pcaLoadings.setf(ios::fixed, ios::floatfield);
-		pcaLoadings.setf(ios::showpoint);	
+		pcaLoadings.setf(ios::showpoint);
+		outputNames.push_back(fnameRoot+"pca.loadings");	
 		
 		pcaLoadings << "axis\tloading\n";
 		for(int i=0;i<rank;i++){
@@ -533,7 +540,7 @@ void PCACommand::output(string fnameRoot, vector<string> name_list, vector<vecto
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "PCACommand", "output");
+		m->errorOut(e, "PCACommand", "output");
 		exit(1);
 	}
 }

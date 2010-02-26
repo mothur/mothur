@@ -21,7 +21,7 @@ class GlobalData;
 class RareFactSharedCommand : public Command {
 	
 public:
-	RareFactSharedCommand(string);	
+	RareFactSharedCommand(string);
 	~RareFactSharedCommand();
 	int execute();	
 	void help();
@@ -40,7 +40,7 @@ private:
 	bool abort, allLines, jumble;
 	set<string> labels; //holds labels to be used
 	string label, calc, groups, outputDir;
-	vector<string>  Estimators, Groups;
+	vector<string>  Estimators, Groups, outputNames;
 
 
 };

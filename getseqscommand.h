@@ -16,13 +16,14 @@ class GetSeqsCommand : public Command {
 	
 	public:
 	
-		GetSeqsCommand(string);	
+		GetSeqsCommand(string);
 		~GetSeqsCommand(){};
 		int execute();
 		void help();	
 		
 	private:
 		set<string> names;
+		vector<string> outputNames;
 		string accnosfile, fastafile, namefile, groupfile, alignfile, listfile, outputDir;
 		bool abort;
 		

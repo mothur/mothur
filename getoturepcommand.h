@@ -59,6 +59,7 @@ private:
 	bool abort, allLines, groupError, large;
 	set<string> labels; //holds labels to be used
 	map<string, int> nameToIndex;  //maps sequence name to index in sparsematrix
+	vector<string> outputNames;
 	float cutoff;
 	int precision;
 	vector<SeqMap> seqVec;			// contains maps with sequence index and distance

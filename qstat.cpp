@@ -59,7 +59,7 @@ EstOutput QStat::getValues(SAbundVector* rank){
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "QStat", "getValues");
+		m->errorOut(e, "QStat", "getValues");
 		exit(1);
 	}
 }

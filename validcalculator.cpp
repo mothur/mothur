@@ -12,6 +12,8 @@
 /********************************************************************/
 ValidCalculators::ValidCalculators() {
 	try {
+		 m = MothurOut::getInstance();
+		
 		 initialSingle();
 		 initialShared();
 		 initialRarefaction();
@@ -27,7 +29,7 @@ ValidCalculators::ValidCalculators() {
 		 initialHeat();
 	}
 	catch(exception& e) {
-		errorOut(e, "ValidCalculator", "ValidCalculator");
+		m->errorOut(e, "ValidCalculator", "ValidCalculator");
 		exit(1);
 	}
 }
@@ -46,11 +48,11 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 			if ((single.find(calculator)) != (single.end())) {
 				return true;
 			}else { 
-				mothurOut(calculator + " is not a valid estimator for the collect.single command and will be disregarded. Valid estimators are ");
+				m->mothurOut(calculator + " is not a valid estimator for the collect.single command and will be disregarded. Valid estimators are ");
 				for (it = single.begin(); it != single.end(); it++) {
-					mothurOut(it->first + ", ");
+					m->mothurOut(it->first + ", ");
 				}
-				mothurOutEndLine();
+				m->mothurOutEndLine();
 				return false; }
 		//are you looking for a calculator for a shared parameter
 		}else if (parameter == "shared") {
@@ -58,11 +60,11 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 			if ((shared.find(calculator)) != (shared.end())) {
 				return true;
 			}else { 
-				mothurOut(calculator +  " is not a valid estimator for the collect.shared command and will be disregarded.  Valid estimators are ");
+				m->mothurOut(calculator +  " is not a valid estimator for the collect.shared command and will be disregarded.  Valid estimators are ");
 				for (it = shared.begin(); it != shared.end(); it++) {
-					mothurOut(it->first + ", ");
+					m->mothurOut(it->first + ", ");
 				}
-				mothurOutEndLine();
+				m->mothurOutEndLine();
 				return false; }
 		//are you looking for a calculator for a rarefaction parameter
 		}else if (parameter == "rarefaction") {
@@ -70,11 +72,11 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 			if ((rarefaction.find(calculator)) != (rarefaction.end())) {
 				return true;
 			}else { 
-				mothurOut(calculator + " is not a valid estimator for the rarefaction.single command and will be disregarded. Valid estimators are ");
+				m->mothurOut(calculator + " is not a valid estimator for the rarefaction.single command and will be disregarded. Valid estimators are ");
 				for (it = rarefaction.begin(); it != rarefaction.end(); it++) {
-					mothurOut(it->first + ", ");
+					m->mothurOut(it->first + ", ");
 				}
-				mothurOutEndLine();
+				m->mothurOutEndLine();
 				return false; }
 		//are you looking for a calculator for a summary parameter
 		}else if (parameter == "summary") {
@@ -82,11 +84,11 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 			if ((summary.find(calculator)) != (summary.end())) {
 				return true;
 			}else { 
-				mothurOut(calculator + " is not a valid estimator for the summary.shared command and will be disregarded. Valid estimators are ");
+				m->mothurOut(calculator + " is not a valid estimator for the summary.shared command and will be disregarded. Valid estimators are ");
 				for (it = summary.begin(); it != summary.end(); it++) {
-					mothurOut(it->first + ", ");
+					m->mothurOut(it->first + ", ");
 				}
-				mothurOutEndLine();
+				m->mothurOutEndLine();
 				return false; }
 		//are you looking for a calculator for a sharedsummary parameter
 		}else if (parameter == "sharedsummary") {
@@ -94,106 +96,106 @@ bool ValidCalculators::isValidCalculator(string parameter, string calculator) {
 			if ((sharedsummary.find(calculator)) != (sharedsummary.end())) {
 				return true;
 			}else { 
-				mothurOut(calculator +  " is not a valid estimator for the summary.shared command and will be disregarded. Valid estimators are ");
+				m->mothurOut(calculator +  " is not a valid estimator for the summary.shared command and will be disregarded. Valid estimators are ");
 				for (it = sharedsummary.begin(); it != sharedsummary.end(); it++) {
-					mothurOut(it->first + ", ");
+					m->mothurOut(it->first + ", ");
 				}
-				mothurOutEndLine();
+				m->mothurOutEndLine();
 				return false; }
 		}else if (parameter == "sharedrarefaction") {
 			//is it valid
 			if ((sharedrarefaction.find(calculator)) != (sharedrarefaction.end())) {
 				return true;
 			}else { 
-				mothurOut(calculator + " is not a valid estimator for the rarefaction.shared command and will be disregarded. Valid estimator is ");
+				m->mothurOut(calculator + " is not a valid estimator for the rarefaction.shared command and will be disregarded. Valid estimator is ");
 				for (it = sharedrarefaction.begin(); it != sharedrarefaction.end(); it++) {
-					mothurOut(it->first + ", ");
+					m->mothurOut(it->first + ", ");
 				}
-				mothurOutEndLine();
+				m->mothurOutEndLine();
 				return false; }
 		}else if (parameter == "vennsingle") {
 			//is it valid
 			if ((vennsingle.find(calculator)) != (vennsingle.end())) {
 				return true;
 			}else { 
-				mothurOut(calculator + " is not a valid estimator for the venn command in single mode and will be disregarded. Valid estimators are ");
+				m->mothurOut(calculator + " is not a valid estimator for the venn command in single mode and will be disregarded. Valid estimators are ");
 				for (it = vennsingle.begin(); it != vennsingle.end(); it++) {
-					mothurOut(it->first + ", ");
+					m->mothurOut(it->first + ", ");
 				}
-				mothurOutEndLine();
+				m->mothurOutEndLine();
 				return false; }
 		}else if (parameter == "vennshared") {
 			//is it valid
 			if ((vennshared.find(calculator)) != (vennshared.end())) {
 				return true;
 			}else { 
-				mothurOut(calculator + " is not a valid estimator for the venn command in shared mode and will be disregarded. Valid estimators are ");
+				m->mothurOut(calculator + " is not a valid estimator for the venn command in shared mode and will be disregarded. Valid estimators are ");
 				for (it = vennshared.begin(); it != vennshared.end(); it++) {
-					mothurOut(it->first + ", ");
+					m->mothurOut(it->first + ", ");
 				}
-				mothurOutEndLine();
+				m->mothurOutEndLine();
 				return false; }
 		}else if (parameter == "treegroup") {
 			//is it valid
 			if ((treegroup.find(calculator)) != (treegroup.end())) {
 				return true;
 			}else { 
-				mothurOut(calculator + " is not a valid estimator for the tree.shared command and will be disregarded. Valid estimators are ");
+				m->mothurOut(calculator + " is not a valid estimator for the tree.shared command and will be disregarded. Valid estimators are ");
 				for (it = treegroup.begin(); it != treegroup.end(); it++) {
-					mothurOut(it->first + ", ");
+					m->mothurOut(it->first + ", ");
 				}
-				mothurOutEndLine();
+				m->mothurOutEndLine();
 				return false; }
 		}else if (parameter == "matrix") {
 			//is it valid
 			if ((matrix.find(calculator)) != (matrix.end())) {
 				return true;
 			}else { 
-				mothurOut(calculator +  " is not a valid estimator for the matrix.output command and will be disregarded. Valid estimators are ");
+				m->mothurOut(calculator +  " is not a valid estimator for the matrix.output command and will be disregarded. Valid estimators are ");
 				for (it = matrix.begin(); it != matrix.end(); it++) {
-					mothurOut(it->first + ", ");
+					m->mothurOut(it->first + ", ");
 				}
-				mothurOutEndLine();
+				m->mothurOutEndLine();
 				return false; }
 		}else if (parameter == "heat") {
 			//is it valid
 			if ((heat.find(calculator)) != (heat.end())) {
 				return true;
 			}else { 
-				mothurOut(calculator + " is not a valid estimator for the heatmap.sim command and will be disregarded. Valid estimators are ");
+				m->mothurOut(calculator + " is not a valid estimator for the heatmap.sim command and will be disregarded. Valid estimators are ");
 				for (it = heat.begin(); it != heat.end(); it++) {
-					mothurOut(it->first + ", ");
+					m->mothurOut(it->first + ", ");
 				}
-				mothurOutEndLine();
+				m->mothurOutEndLine();
 				return false; }
 		}else if (parameter == "boot") {
 			//is it valid
 			if ((boot.find(calculator)) != (boot.end())) {
 				return true;
 			}else { 
-				mothurOut(calculator + " is not a valid estimator for the bootstrap.shared command and will be disregarded. Valid estimators are ");
+				m->mothurOut(calculator + " is not a valid estimator for the bootstrap.shared command and will be disregarded. Valid estimators are ");
 				for (it = boot.begin(); it != boot.end(); it++) {
-					mothurOut(it->first + ", ");
+					m->mothurOut(it->first + ", ");
 				}
-				mothurOutEndLine();
+				m->mothurOutEndLine();
 				return false; }
 		}else if (parameter == "distance") {
 			//is it valid
 			if ((distance.find(calculator)) != (distance.end())) {
 				return true;
 			}else { 
-				mothurOut(calculator +  " is not a valid estimator for the distance command and will be disregarded. Valid calculators are ");
+				m->mothurOut(calculator +  " is not a valid estimator for the distance command and will be disregarded. Valid calculators are ");
 				for (it = distance.begin(); it != distance.end(); it++) {
-					mothurOut(it->first + ", ");
+					m->mothurOut(it->first + ", ");
 				}
-				mothurOutEndLine();
+				m->mothurOutEndLine();
 				return false; }
 		//not a valid parameter
 		}else { return false; }
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "ValidCalculator", "isValidCalculator");
+		m->errorOut(e, "ValidCalculator", "isValidCalculator");
 		exit(1);
 	}
 }
@@ -224,7 +226,7 @@ void ValidCalculators::initialSingle() {
 		single["default"]	    = "default";
 	}
 	catch(exception& e) {
-		errorOut(e, "ValidCalculator", "initialSingle");
+		m->errorOut(e, "ValidCalculator", "initialSingle");
 		exit(1);
 	}
 }
@@ -256,7 +258,7 @@ void ValidCalculators::initialShared() {
 		shared["default"]	            = "default";
 	}
 	catch(exception& e) {
-		errorOut(e, "ValidCalculator", "initialShared");
+		m->errorOut(e, "ValidCalculator", "initialShared");
 		exit(1);
 	}
 }
@@ -277,7 +279,7 @@ void ValidCalculators::initialRarefaction() {
 		rarefaction["default"]	    = "default";
 	}
 	catch(exception& e) {
-		errorOut(e, "ValidCalculator", "initialRarefaction");
+		m->errorOut(e, "ValidCalculator", "initialRarefaction");
 		exit(1);
 	}
 }
@@ -309,7 +311,7 @@ void ValidCalculators::initialSummary() {
 		summary["default"]	    = "default";
 	}
 	catch(exception& e) {
-		errorOut(e, "ValidCalculator", "initialSummary");
+		m->errorOut(e, "ValidCalculator", "initialSummary");
 		exit(1);
 	}
 }
@@ -341,7 +343,7 @@ void ValidCalculators::initialSharedSummary() {
 		sharedsummary["default"]				= "default";
 	}
 	catch(exception& e) {
-		errorOut(e, "ValidCalculator", "initialSharedSummary");
+		m->errorOut(e, "ValidCalculator", "initialSharedSummary");
 		exit(1);
 	}
 }
@@ -356,7 +358,7 @@ void ValidCalculators::initialSharedRarefact() {
 		sharedrarefaction["default"]	    = "default";
 	}
 	catch(exception& e) {
-		errorOut(e, "ValidCalculator", "initialSharedRarefact");
+		m->errorOut(e, "ValidCalculator", "initialSharedRarefact");
 		exit(1);
 	}
 }
@@ -372,7 +374,7 @@ void ValidCalculators::initialVennSingle() {
 		vennsingle["default"]		= "default";
 	}
 	catch(exception& e) {
-		errorOut(e, "ValidCalculator", "initialVennSingle");
+		m->errorOut(e, "ValidCalculator", "initialVennSingle");
 		exit(1);
 	}
 }
@@ -386,7 +388,7 @@ void ValidCalculators::initialVennShared() {
 		vennshared["default"]		= "default";
 	}
 	catch(exception& e) {
-		errorOut(e, "ValidCalculator", "initialVennShared");
+		m->errorOut(e, "ValidCalculator", "initialVennShared");
 		exit(1);
 	}
 }
@@ -406,7 +408,7 @@ void ValidCalculators::initialTreeGroups() {
 		treegroup["braycurtis"]				= "braycurtis";
 	}
 	catch(exception& e) {
-		errorOut(e, "ValidCalculator", "initialTreeGroups");
+		m->errorOut(e, "ValidCalculator", "initialTreeGroups");
 		exit(1);
 	}
 }
@@ -425,7 +427,7 @@ void ValidCalculators::initialHeat() {
 		heat["braycurtis"]			= "braycurtis";
 	}
 	catch(exception& e) {
-		errorOut(e, "ValidCalculator", "initialHeat");
+		m->errorOut(e, "ValidCalculator", "initialHeat");
 		exit(1);
 	}
 }
@@ -445,7 +447,7 @@ void ValidCalculators::initialMatrix() {
 		matrix["braycurtis"]			= "braycurtis";
 	}
 	catch(exception& e) {
-		errorOut(e, "ValidCalculator", "initialMatrix");
+		m->errorOut(e, "ValidCalculator", "initialMatrix");
 		exit(1);
 	}
 }
@@ -465,7 +467,7 @@ void ValidCalculators::initialBoot() {
 		boot["braycurtis"]			= "braycurtis";
 	}
 	catch(exception& e) {
-		errorOut(e, "ValidCalculator", "initialBoot");
+		m->errorOut(e, "ValidCalculator", "initialBoot");
 		exit(1);
 	}
 }
@@ -477,7 +479,7 @@ void ValidCalculators::initialDistance() {
 		distance["onegap"]		= "onegap";
 	}
 	catch(exception& e) {
-		errorOut(e, "ValidCalculator", "initialDistance");
+		m->errorOut(e, "ValidCalculator", "initialDistance");
 		exit(1);
 	}
 }
@@ -548,7 +550,7 @@ void ValidCalculators::printCalc(string parameter, ostream& out) {
 		out << endl;
 	}
 	catch(exception& e) {
-		errorOut(e, "ValidCalculator", "printCalc");
+		m->errorOut(e, "ValidCalculator", "printCalc");
 		exit(1);
 	}
 }

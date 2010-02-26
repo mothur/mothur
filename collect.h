@@ -9,6 +9,7 @@
 #include "sharedordervector.h"
 #include "datavector.hpp"
 #include "globaldata.hpp"
+#include "mothurout.h"
 
 /***********************************************************************/
 
@@ -16,9 +17,9 @@ class Collect {
 	
 public:
 	Collect(OrderVector* order, vector<Display*> disp) :
-					numSeqs(order->getNumSeqs()), order(order), displays(disp), label(order->getLabel())  {};
+					numSeqs(order->getNumSeqs()), order(order), displays(disp), label(order->getLabel())  { m = MothurOut::getInstance(); };
 	Collect(SharedOrderVector* sharedorder, vector<Display*> disp) :
-					numSeqs(sharedorder->getNumSeqs()), sharedorder(sharedorder), displays(disp), label(sharedorder->getLabel())  {};
+					numSeqs(sharedorder->getNumSeqs()), sharedorder(sharedorder), displays(disp), label(sharedorder->getLabel())  { m = MothurOut::getInstance(); }
 
 	~Collect(){		};
 	void getCurve(int);
@@ -34,6 +35,7 @@ private:
 	void getGroupComb();
 	vector<string> groupComb;
 	bool validGroup(vector<string>, string);
+	MothurOut* m;
 };
 
 

@@ -18,6 +18,7 @@ private:
 	ifstream fileHandle;
 	ListVector list;
 	map<int, string> reverse;
+	MothurOut* m;
 };
 
 

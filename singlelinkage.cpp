@@ -80,7 +80,7 @@ void  SingleLinkage::update(){
 		removeCell(rowCells[rowInd], -1 , -1);
 	}
 	catch(exception& e) {
-		errorOut(e, "SingleLinkage", "update");
+		m->errorOut(e, "SingleLinkage", "update");
 		exit(1);
 	}
 }
@@ -97,7 +97,7 @@ bool SingleLinkage::updateDistance(MatData& colCell, MatData& rowCell) {
 		return(changed);
 	}
 	catch(exception& e) {
-		errorOut(e, "SingleLinkage", "updateDistance");
+		m->errorOut(e, "SingleLinkage", "updateDistance");
 		exit(1);
 	}
 }

@@ -135,7 +135,7 @@ bool TreeMap::isValidGroup(string groupname) {
 		return false;
 	}
 	catch(exception& e) {
-		errorOut(e, "TreeMap", "isValidGroup");
+		m->errorOut(e, "TreeMap", "isValidGroup");
 		exit(1);
 	}
 }
@@ -149,7 +149,7 @@ void TreeMap::print(ostream& output){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "TreeMap", "print");
+		m->errorOut(e, "TreeMap", "print");
 		exit(1);
 	}
 }
@@ -173,7 +173,7 @@ void TreeMap::makeSim(GroupMap* groupmap) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "TreeMap", "makeSim");
+		m->errorOut(e, "TreeMap", "makeSim");
 		exit(1);
 	}
 }
@@ -199,7 +199,7 @@ void TreeMap::makeSim(ListVector* list) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "TreeMap", "makeSim");
+		m->errorOut(e, "TreeMap", "makeSim");
 		exit(1);
 	}
 }

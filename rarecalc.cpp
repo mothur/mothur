@@ -45,7 +45,7 @@ EstOutput RareCalc::getValues(int n){
 		return output;
 	}
 	catch(exception& e) {
-		errorOut(e, "RareCalc", "getValues");
+		m->errorOut(e, "RareCalc", "getValues");
 		exit(1);
 	}
 }

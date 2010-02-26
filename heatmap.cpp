@@ -13,20 +13,21 @@
 HeatMap::HeatMap(string sort, string scale, string dir){
 	try {
 		globaldata = GlobalData::getInstance();
+		m = MothurOut::getInstance();
 //		format = globaldata->getFormat();
 		sorted = sort;
 		scaler = scale;
 		outputDir = dir;
 	}
 	catch(exception& e) {
-		errorOut(e, "HeatMap", "HeatMap");
+		m->errorOut(e, "HeatMap", "HeatMap");
 		exit(1);
 	}
 }
 
 //**********************************************************************************************************************
 
-void HeatMap::getPic(RAbundVector* rabund) {
+string HeatMap::getPic(RAbundVector* rabund) {
 	try {
 		
 		
@@ -85,17 +86,17 @@ void HeatMap::getPic(RAbundVector* rabund) {
 		outsvg << "</g>\n</svg>\n";
 		outsvg.close();
 		
-		
+		return filenamesvg;
 	}
 	catch(exception& e) {
-		errorOut(e, "HeatMap", "getPic");
+		m->errorOut(e, "HeatMap", "getPic");
 		exit(1);
 	}
 }
 
 //**********************************************************************************************************************
 
-void HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
+string HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 	try {
 		//sort lookup so shared bins are on top
 		if (isTrue(sorted) == true) {  sortSharedVectors(lookup);  }
@@ -169,10 +170,12 @@ void HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 		
 		outsvg << "</g>\n</svg>\n";
 		outsvg.close();
+		
+		return filenamesvg;
 
 	}
 	catch(exception& e) {
-		errorOut(e, "HeatMap", "getPic");
+		m->errorOut(e, "HeatMap", "getPic");
 		exit(1);
 	}
 }
@@ -252,7 +255,7 @@ void HeatMap::sortSharedVectors(vector<SharedRAbundVector*>& lookup){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "HeatMap", "sortSharedVectors");
+		m->errorOut(e, "HeatMap", "sortSharedVectors");
 		exit(1);
 	}
 }
@@ -292,7 +295,7 @@ void HeatMap::printLegend(int y, float maxbin) {
 	}
 	
 	catch(exception& e) {
-		errorOut(e, "HeatMap", "printLegend");
+		m->errorOut(e, "HeatMap", "printLegend");
 		exit(1);
 	}
 }

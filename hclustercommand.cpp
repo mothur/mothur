@@ -11,7 +11,7 @@
 
 //**********************************************************************************************************************
 //This function checks to make sure the cluster command has no errors and then clusters based on the method chosen.
-HClusterCommand::HClusterCommand(string option){
+HClusterCommand::HClusterCommand(string option)  {
 	try{
 		globaldata = GlobalData::getInstance();
 		abort = false;
@@ -87,8 +87,8 @@ HClusterCommand::HClusterCommand(string option){
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
 			
-			if ((phylipfile == "") && (columnfile == "")) { mothurOut("When executing a hcluster command you must enter a phylip or a column."); mothurOutEndLine(); abort = true; }
-			else if ((phylipfile != "") && (columnfile != "")) { mothurOut("When executing a hcluster command you must enter ONLY ONE of the following: phylip or column."); mothurOutEndLine(); abort = true; }
+			if ((phylipfile == "") && (columnfile == "")) { m->mothurOut("When executing a hcluster command you must enter a phylip or a column."); m->mothurOutEndLine(); abort = true; }
+			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When executing a hcluster command you must enter ONLY ONE of the following: phylip or column."); m->mothurOutEndLine(); abort = true; }
 		
 			if (columnfile != "") {
 				if (namefile == "") {  cout << "You need to provide a namefile if you are going to use the column format." << endl; abort = true; }
@@ -113,7 +113,7 @@ HClusterCommand::HClusterCommand(string option){
 			if (method == "not found") { method = "furthest"; }
 			
 			if ((method == "furthest") || (method == "nearest") || (method == "average")) { }
-			else { mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average."); mothurOutEndLine(); abort = true; }
+			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average."); m->mothurOutEndLine(); abort = true; }
 
 			showabund = validParameter.validFile(parameters, "showabund", false);
 			if (showabund == "not found") { showabund = "T"; }
@@ -138,11 +138,15 @@ HClusterCommand::HClusterCommand(string option){
 				openOutputFile(fileroot+ tag + ".sabund",	sabundFile);
 				openOutputFile(fileroot+ tag + ".rabund",	rabundFile);
 				openOutputFile(fileroot+ tag + ".list",		listFile);
+				
+				outputNames.push_back(fileroot+ tag + ".sabund");
+				outputNames.push_back(fileroot+ tag + ".rabund");
+				outputNames.push_back(fileroot+ tag + ".list");
 			}
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "HClusterCommand", "HClusterCommand");
+		m->errorOut(e, "HClusterCommand", "HClusterCommand");
 		exit(1);
 	}
 }
@@ -151,15 +155,15 @@ HClusterCommand::HClusterCommand(string option){
 
 void HClusterCommand::help(){
 	try {
-		mothurOut("The hcluster command parameter options are cutoff, precision, method, phylip, column, name, showabund, timing and sorted. Phylip or column and name are required.\n");
-		mothurOut("The phylip and column parameter allow you to enter your distance file, and sorted indicates whether your column distance file is already sorted. \n");
-		mothurOut("The name parameter allows you to enter your name file and is required if your distance file is in column format. \n");
-		mothurOut("The hcluster command should be in the following format: \n");
-		mothurOut("hcluster(column=youDistanceFile, name=yourNameFile, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n");
-		mothurOut("The acceptable hcluster methods are furthest and nearest, but we hope to add average in the future.\n\n");	
+		m->mothurOut("The hcluster command parameter options are cutoff, precision, method, phylip, column, name, showabund, timing and sorted. Phylip or column and name are required.\n");
+		m->mothurOut("The phylip and column parameter allow you to enter your distance file, and sorted indicates whether your column distance file is already sorted. \n");
+		m->mothurOut("The name parameter allows you to enter your name file and is required if your distance file is in column format. \n");
+		m->mothurOut("The hcluster command should be in the following format: \n");
+		m->mothurOut("hcluster(column=youDistanceFile, name=yourNameFile, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n");
+		m->mothurOut("The acceptable hcluster methods are furthest and nearest, but we hope to add average in the future.\n\n");	
 	}
 	catch(exception& e) {
-		errorOut(e, "HClusterCommand", "help");
+		m->errorOut(e, "HClusterCommand", "help");
 		exit(1);
 	}
 }
@@ -196,14 +200,14 @@ int HClusterCommand::execute(){
 			list = new ListVector(globaldata->nameMap->getListVector());
 		}
 	
-		mothurOut("It took " + toString(time(NULL) - estart) + " seconds to sort. "); mothurOutEndLine();
+		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to sort. "); m->mothurOutEndLine();
 		estart = time(NULL);
 	
 		//list vector made by read contains all sequence names
 		if(list != NULL){
 			rabund = new RAbundVector(list->getRAbundVector());
 		}else{
-			mothurOut("Error: no list vector!"); mothurOutEndLine(); return 0;
+			m->mothurOut("Error: no list vector!"); m->mothurOutEndLine(); return 0;
 		}
 		
 		float previousDist = 0.00000;
@@ -265,13 +269,18 @@ int HClusterCommand::execute(){
 		rabundFile.close();
 		listFile.close();
 		delete cluster;
-	
-		mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster. "); mothurOutEndLine();
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+		
+		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster. "); m->mothurOutEndLine();
 		
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "HClusterCommand", "execute");
+		m->errorOut(e, "HClusterCommand", "execute");
 		exit(1);
 	}
 }
@@ -281,8 +290,8 @@ int HClusterCommand::execute(){
 void HClusterCommand::printData(string label){
 	try {
 		if (isTrue(timing)) {
-			mothurOut("\tTime: " + toString(time(NULL) - start) + "\tsecs for " + toString(oldRAbund.getNumBins()) 
-		     + "\tclusters. Updates: " + toString(loops)); mothurOutEndLine();
+			m->mothurOut("\tTime: " + toString(time(NULL) - start) + "\tsecs for " + toString(oldRAbund.getNumBins()) 
+		     + "\tclusters. Updates: " + toString(loops)); m->mothurOutEndLine();
 		}
 		print_start = true;
 		loops = 0;
@@ -299,7 +308,7 @@ void HClusterCommand::printData(string label){
 		oldList.print(listFile);
 	}
 	catch(exception& e) {
-		errorOut(e, "HClusterCommand", "printData");
+		m->errorOut(e, "HClusterCommand", "printData");
 		exit(1);
 	}
 

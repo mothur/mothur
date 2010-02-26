@@ -31,7 +31,7 @@
 
 
 //**********************************************************************************************************************
-CollectCommand::CollectCommand(string option){
+CollectCommand::CollectCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
@@ -61,7 +61,7 @@ CollectCommand::CollectCommand(string option){
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
 			
 			//make sure the user has already run the read.otu command
-			if ((globaldata->getSharedFile() == "") && (globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { mothurOut("You must read a list, sabund, rabund or shared file before you can use the collect.single command."); mothurOutEndLine(); abort = true; }
+			if ((globaldata->getSharedFile() == "") && (globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { m->mothurOut("You must read a list, sabund, rabund or shared file before you can use the collect.single command."); m->mothurOutEndLine(); abort = true; }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -98,7 +98,7 @@ CollectCommand::CollectCommand(string option){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "CollectCommand", "CollectCommand");
+		m->errorOut(e, "CollectCommand", "CollectCommand");
 		exit(1);
 	}			
 }
@@ -106,19 +106,19 @@ CollectCommand::CollectCommand(string option){
 
 void CollectCommand::help(){
 	try {
-		mothurOut("The collect.single command can only be executed after a successful read.otu command. WITH ONE EXECEPTION. \n");
-		mothurOut("The collect.single command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster.\n");
-		mothurOut("The collect.single command parameters are label, freq, calc and abund.  No parameters are required. \n");
-		mothurOut("The collect.single command should be in the following format: \n");
-		mothurOut("collect.single(label=yourLabel, iters=yourIters, freq=yourFreq, calc=yourEstimators).\n");
-		mothurOut("Example collect(label=unique-.01-.03, iters=10000, freq=10, calc=sobs-chao-ace-jack).\n");
-		mothurOut("The default values for freq is 100, and calc are sobs-chao-ace-jack-shannon-npshannon-simpson.\n");
+		m->mothurOut("The collect.single command can only be executed after a successful read.otu command. WITH ONE EXECEPTION. \n");
+		m->mothurOut("The collect.single command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster.\n");
+		m->mothurOut("The collect.single command parameters are label, freq, calc and abund.  No parameters are required. \n");
+		m->mothurOut("The collect.single command should be in the following format: \n");
+		m->mothurOut("collect.single(label=yourLabel, iters=yourIters, freq=yourFreq, calc=yourEstimators).\n");
+		m->mothurOut("Example collect(label=unique-.01-.03, iters=10000, freq=10, calc=sobs-chao-ace-jack).\n");
+		m->mothurOut("The default values for freq is 100, and calc are sobs-chao-ace-jack-shannon-npshannon-simpson.\n");
 		validCalculator->printCalc("single", cout);
-		mothurOut("The label parameter is used to analyze specific labels in your input.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n\n");
+		m->mothurOut("The label parameter is used to analyze specific labels in your input.\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. freq), '=' and parameters (i.e.yourFreq).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "CollectCommand", "help");
+		m->errorOut(e, "CollectCommand", "help");
 		exit(1);
 	}
 }
@@ -134,6 +134,8 @@ int CollectCommand::execute(){
 		
 		if (abort == true) { return 0; }
 		
+		vector<string> outputNames;
+		
 		if ((globaldata->getFormat() != "sharedfile")) { inputFileNames.push_back(globaldata->inputFileName);  }
 		else {  inputFileNames = parseSharedFile(globaldata->getSharedFile());  globaldata->setFormat("rabund");  }
 	
@@ -144,7 +146,7 @@ int CollectCommand::execute(){
 			globaldata->inputFileName = inputFileNames[p];
 		
 			if (inputFileNames.size() > 1) {
-				mothurOutEndLine(); mothurOut("Processing group " + groups[p]); mothurOutEndLine(); mothurOutEndLine();
+				m->mothurOutEndLine(); m->mothurOut("Processing group " + groups[p]); m->mothurOutEndLine(); m->mothurOutEndLine();
 			}
 		
 			validCalculator = new ValidCalculators();
@@ -153,44 +155,64 @@ int CollectCommand::execute(){
 				if (validCalculator->isValidCalculator("single", Estimators[i]) == true) { 
 					if (Estimators[i] == "sobs") { 
 						cDisplays.push_back(new CollectDisplay(new Sobs(), new OneColumnFile(fileNameRoot+"sobs")));
+						outputNames.push_back(fileNameRoot+"sobs");
 					}else if (Estimators[i] == "chao") { 
 						cDisplays.push_back(new CollectDisplay(new Chao1(), new ThreeColumnFile(fileNameRoot+"chao")));
+						outputNames.push_back(fileNameRoot+"chao");
 					}else if (Estimators[i] == "nseqs") { 
 						cDisplays.push_back(new CollectDisplay(new NSeqs(), new OneColumnFile(fileNameRoot+"nseqs")));
+						outputNames.push_back(fileNameRoot+"nseqs");
 					}else if (Estimators[i] == "coverage") { 
 						cDisplays.push_back(new CollectDisplay(new Coverage(), new OneColumnFile(fileNameRoot+"coverage")));
+						outputNames.push_back(fileNameRoot+"coverage");
 					}else if (Estimators[i] == "ace") { 
 						cDisplays.push_back(new CollectDisplay(new Ace(abund), new ThreeColumnFile(fileNameRoot+"ace")));
+						outputNames.push_back(fileNameRoot+"ace");
 					}else if (Estimators[i] == "jack") { 
 						cDisplays.push_back(new CollectDisplay(new Jackknife(), new ThreeColumnFile(fileNameRoot+"jack")));
+						outputNames.push_back(fileNameRoot+"jack");
 					}else if (Estimators[i] == "shannon") { 
 						cDisplays.push_back(new CollectDisplay(new Shannon(), new ThreeColumnFile(fileNameRoot+"shannon")));
+						outputNames.push_back(fileNameRoot+"shannon");
 					}else if (Estimators[i] == "npshannon") { 
 						cDisplays.push_back(new CollectDisplay(new NPShannon(), new OneColumnFile(fileNameRoot+"np_shannon")));
+						outputNames.push_back(fileNameRoot+"np_shannon");
 					}else if (Estimators[i] == "simpson") { 
 						cDisplays.push_back(new CollectDisplay(new Simpson(), new ThreeColumnFile(fileNameRoot+"simpson")));
+						outputNames.push_back(fileNameRoot+"simpson");
 					}else if (Estimators[i] == "bootstrap") { 
 						cDisplays.push_back(new CollectDisplay(new Bootstrap(), new OneColumnFile(fileNameRoot+"bootstrap")));
+						outputNames.push_back(fileNameRoot+"bootstrap");
 					}else if (Estimators[i] == "geometric") { 
 						cDisplays.push_back(new CollectDisplay(new Geom(), new OneColumnFile(fileNameRoot+"geometric")));
+						outputNames.push_back(fileNameRoot+"geometric");
 					}else if (Estimators[i] == "qstat") { 
 						cDisplays.push_back(new CollectDisplay(new QStat(), new OneColumnFile(fileNameRoot+"qstat")));
+						outputNames.push_back(fileNameRoot+"qstat");
 					}else if (Estimators[i] == "logseries") { 
 						cDisplays.push_back(new CollectDisplay(new LogSD(), new OneColumnFile(fileNameRoot+"logseries")));
+						outputNames.push_back(fileNameRoot+"logseries");
 					}else if (Estimators[i] == "bergerparker") { 
 						cDisplays.push_back(new CollectDisplay(new BergerParker(), new OneColumnFile(fileNameRoot+"bergerparker")));
+						outputNames.push_back(fileNameRoot+"bergerparker");
 					}else if (Estimators[i] == "bstick") { 
 						cDisplays.push_back(new CollectDisplay(new BStick(), new ThreeColumnFile(fileNameRoot+"bstick")));
+						outputNames.push_back(fileNameRoot+"bstick");
 					}else if (Estimators[i] == "goodscoverage") { 
 						cDisplays.push_back(new CollectDisplay(new GoodsCoverage(), new OneColumnFile(fileNameRoot+"goodscoverage")));
+						outputNames.push_back(fileNameRoot+"goodscoverage");
 					}else if (Estimators[i] == "efron") {
 						cDisplays.push_back(new CollectDisplay(new Efron(size), new OneColumnFile(fileNameRoot+"efron")));
+						outputNames.push_back(fileNameRoot+"efron");
 					}else if (Estimators[i] == "boneh") {
 						cDisplays.push_back(new CollectDisplay(new Boneh(size), new OneColumnFile(fileNameRoot+"boneh")));
+						outputNames.push_back(fileNameRoot+"boneh");
 					}else if (Estimators[i] == "solow") {
 						cDisplays.push_back(new CollectDisplay(new Solow(size), new OneColumnFile(fileNameRoot+"solow")));
+						outputNames.push_back(fileNameRoot+"solow");
 					}else if (Estimators[i] == "shen") {
 						cDisplays.push_back(new CollectDisplay(new Shen(size, abund), new OneColumnFile(fileNameRoot+"shen")));
+						outputNames.push_back(fileNameRoot+"shen");
 					}
 				}
 			}
@@ -217,7 +239,7 @@ int CollectCommand::execute(){
 					cCurve->getCurve(freq);
 					delete cCurve;
 					
-					mothurOut(order->getLabel()); mothurOutEndLine();
+					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 					processedLabels.insert(order->getLabel());
 					userLabels.erase(order->getLabel());
 					
@@ -234,7 +256,7 @@ int CollectCommand::execute(){
 					cCurve->getCurve(freq);
 					delete cCurve;
 					
-					mothurOut(order->getLabel()); mothurOutEndLine();
+					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 					processedLabels.insert(order->getLabel());
 					userLabels.erase(order->getLabel());
 					
@@ -252,12 +274,12 @@ int CollectCommand::execute(){
 			set<string>::iterator it;
 			bool needToRun = false;
 			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-				mothurOut("Your file does not include the label " + *it); 
+				m->mothurOut("Your file does not include the label " + *it); 
 				if (processedLabels.count(lastLabel) != 1) {
-					mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
+					m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
 					needToRun = true;
 				}else {
-					mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
+					m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
 				}
 			}
 			
@@ -266,7 +288,7 @@ int CollectCommand::execute(){
 				if (order != NULL) {	delete order;	}
 				order = (input->getOrderVector(lastLabel));
 				
-				mothurOut(order->getLabel()); mothurOutEndLine();
+				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 				
 				cCurve = new Collect(order, cDisplays);
 				cCurve->getCurve(freq);
@@ -282,12 +304,16 @@ int CollectCommand::execute(){
 			delete validCalculator;
 		}
 		
-		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+
 		
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "CollectCommand", "execute");
+		m->errorOut(e, "CollectCommand", "execute");
 		exit(1);
 	}
 }
@@ -347,7 +373,7 @@ vector<string> CollectCommand::parseSharedFile(string filename) {
 		return filenames;
 	}
 	catch(exception& e) {
-		errorOut(e, "CollectCommand", "parseSharedFile");
+		m->errorOut(e, "CollectCommand", "parseSharedFile");
 		exit(1);
 	}
 }
