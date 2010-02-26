@@ -31,7 +31,7 @@
 
 //**********************************************************************************************************************
 
-SummaryCommand::SummaryCommand(string option){
+SummaryCommand::SummaryCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
@@ -58,7 +58,7 @@ SummaryCommand::SummaryCommand(string option){
 			}
 			
 			//make sure the user has already run the read.otu command
-			if ((globaldata->getSharedFile() == "") && (globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { mothurOut("You must read a list, sabund, rabund or shared file before you can use the summary.single command."); mothurOutEndLine(); abort = true; }
+			if ((globaldata->getSharedFile() == "") && (globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { m->mothurOut("You must read a list, sabund, rabund or shared file before you can use the summary.single command."); m->mothurOutEndLine(); abort = true; }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -98,7 +98,7 @@ SummaryCommand::SummaryCommand(string option){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "SummaryCommand", "SummaryCommand");
+		m->errorOut(e, "SummaryCommand", "SummaryCommand");
 		exit(1);
 	}
 }
@@ -106,19 +106,19 @@ SummaryCommand::SummaryCommand(string option){
 
 void SummaryCommand::help(){
 	try {
-		mothurOut("The summary.single command can only be executed after a successful read.otu WTIH ONE EXECEPTION.\n");
-		mothurOut("The summary.single command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster.\n");
-		mothurOut("The summary.single command parameters are label, calc, abund.  No parameters are required.\n");
-		mothurOut("The summary.single command should be in the following format: \n");
-		mothurOut("summary.single(label=yourLabel, calc=yourEstimators).\n");
-		mothurOut("Example summary.single(label=unique-.01-.03, calc=sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson).\n");
+		m->mothurOut("The summary.single command can only be executed after a successful read.otu WTIH ONE EXECEPTION.\n");
+		m->mothurOut("The summary.single command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster.\n");
+		m->mothurOut("The summary.single command parameters are label, calc, abund.  No parameters are required.\n");
+		m->mothurOut("The summary.single command should be in the following format: \n");
+		m->mothurOut("summary.single(label=yourLabel, calc=yourEstimators).\n");
+		m->mothurOut("Example summary.single(label=unique-.01-.03, calc=sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson).\n");
 		validCalculator->printCalc("summary", cout);
-		mothurOut("The default value calc is sobs-chao-ace-jack-shannon-npshannon-simpson\n");
-		mothurOut("The label parameter is used to analyze specific labels in your input.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabels).\n\n");
+		m->mothurOut("The default value calc is sobs-chao-ace-jack-shannon-npshannon-simpson\n");
+		m->mothurOut("The label parameter is used to analyze specific labels in your input.\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabels).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "SummaryCommand", "help");
+		m->errorOut(e, "SummaryCommand", "help");
 		exit(1);
 	}
 }
@@ -134,6 +134,8 @@ int SummaryCommand::execute(){
 	
 		if (abort == true) { return 0; }
 		
+		vector<string> outputNames;
+		
 		if ((globaldata->getFormat() != "sharedfile")) { inputFileNames.push_back(globaldata->inputFileName);  }
 		else {  inputFileNames = parseSharedFile(globaldata->getSharedFile());  globaldata->setFormat("rabund");  }
 		
@@ -141,9 +143,10 @@ int SummaryCommand::execute(){
 			
 			string fileNameRoot = outputDir + getRootName(getSimpleName(inputFileNames[p])) + "summary";
 			globaldata->inputFileName = inputFileNames[p];
+			outputNames.push_back(fileNameRoot);
 			
 			if (inputFileNames.size() > 1) {
-				mothurOutEndLine(); mothurOut("Processing group " + groups[p]); mothurOutEndLine(); mothurOutEndLine();
+				m->mothurOutEndLine(); m->mothurOut("Processing group " + groups[p]); m->mothurOutEndLine(); m->mothurOutEndLine();
 			}
 			
 			sumCalculators.clear();
@@ -230,7 +233,7 @@ int SummaryCommand::execute(){
 				
 				if(allLines == 1 || labels.count(sabund->getLabel()) == 1){			
 					
-					mothurOut(sabund->getLabel()); mothurOutEndLine();
+					m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
 					processedLabels.insert(sabund->getLabel());
 					userLabels.erase(sabund->getLabel());
 					
@@ -249,7 +252,7 @@ int SummaryCommand::execute(){
 					delete sabund;
 					sabund = input->getSAbundVector(lastLabel);
 					
-					mothurOut(sabund->getLabel()); mothurOutEndLine();
+					m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
 					processedLabels.insert(sabund->getLabel());
 					userLabels.erase(sabund->getLabel());
 					
@@ -275,12 +278,12 @@ int SummaryCommand::execute(){
 			set<string>::iterator it;
 			bool needToRun = false;
 			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-				mothurOut("Your file does not include the label " + *it); 
+				m->mothurOut("Your file does not include the label " + *it); 
 				if (processedLabels.count(lastLabel) != 1) {
-					mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
+					m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
 					needToRun = true;
 				}else {
-					mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
+					m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
 				}
 			}
 			
@@ -289,7 +292,7 @@ int SummaryCommand::execute(){
 				if (sabund != NULL) {	delete sabund;	}
 				sabund = input->getSAbundVector(lastLabel);
 				
-				mothurOut(sabund->getLabel()); mothurOutEndLine();
+				m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
 				outputFileHandle << sabund->getLabel();
 				for(int i=0;i<sumCalculators.size();i++){
 					vector<double> data = sumCalculators[i]->getValues(sabund);
@@ -308,10 +311,15 @@ int SummaryCommand::execute(){
 			globaldata->sabund = NULL;
 		}
 		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+		
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "SummaryCommand", "execute");
+		m->errorOut(e, "SummaryCommand", "execute");
 		exit(1);
 	}
 }
@@ -370,7 +378,7 @@ vector<string> SummaryCommand::parseSharedFile(string filename) {
 		return filenames;
 	}
 	catch(exception& e) {
-		errorOut(e, "SummaryCommand", "parseSharedFile");
+		m->errorOut(e, "SummaryCommand", "parseSharedFile");
 		exit(1);
 	}
 }

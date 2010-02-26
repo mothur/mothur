@@ -16,7 +16,7 @@ void RareDisplay::init(string label){
 		this->label = label;
 	}
 	catch(exception& e) {
-		errorOut(e, "RareDisplay", "init");
+		m->errorOut(e, "RareDisplay", "init");
 		exit(1);
 	}
 }
@@ -49,7 +49,7 @@ void RareDisplay::update(SAbundVector* rank){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "RareDisplay", "update");
+		m->errorOut(e, "RareDisplay", "update");
 		exit(1);
 	}
 }
@@ -82,7 +82,7 @@ void RareDisplay::update(vector<SharedRAbundVector*> shared, int numSeqs, int nu
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "RareDisplay", "update");
+		m->errorOut(e, "RareDisplay", "update");
 		exit(1);
 	}
 }
@@ -95,7 +95,7 @@ void RareDisplay::reset(){
 		index = 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "RareDisplay", "reset");
+		m->errorOut(e, "RareDisplay", "reset");
 		exit(1);
 	}
 }
@@ -131,7 +131,7 @@ void RareDisplay::close(){
 		output->resetFile();
 	}
 	catch(exception& e) {
-		errorOut(e, "RareDisplay", "close");
+		m->errorOut(e, "RareDisplay", "close");
 		exit(1);
 	}
 }

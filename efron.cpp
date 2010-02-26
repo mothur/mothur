@@ -16,18 +16,18 @@ EstOutput Efron::getValues(SAbundVector* rank){
 		data.resize(1,0);
 		
 		double n = (double)rank->getNumSeqs();
-		if(m > n || m == 0) {	m = n;	}
+		if(f > n || f == 0) {	f = n;	}
 		
 		double sum = 0;
 		for(int i = 1; i < rank->size(); i++){
-			sum += pow(-1., i+1) * pow(((double)m / n), i) * (double)(rank->get(i));
+			sum += pow(-1., i+1) * pow(((double)f / n), i) * (double)(rank->get(i));
 		}
 		data[0] = sum;
 		
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "Efron", "getValues");
+		m->errorOut(e, "Efron", "getValues");
 		exit(1);
 	}
 }

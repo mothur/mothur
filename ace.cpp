@@ -140,7 +140,7 @@ EstOutput Ace::getValues(SAbundVector* rank) {
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "Ace", "getValues");
+		m->errorOut(e, "Ace", "getValues");
 		exit(1);
 	}
 }

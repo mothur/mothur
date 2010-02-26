@@ -36,6 +36,7 @@ private:
 	set<string> labels; //holds labels to be used
 	string label, listfile, outputDir;
 	ofstream out;
+	vector<string> outputNames;
 	
 	void process(ListVector*);
 };

@@ -55,7 +55,7 @@ vector<int> SuffixDB::findClosestSequences(Sequence* candidateSeq, int num){
 		return topMatches;
 	}
 	catch(exception& e) {
-		errorOut(e, "SuffixDB", "findClosestSequences");
+		m->errorOut(e, "SuffixDB", "findClosestSequences");
 		exit(1);
 	}	
 }
@@ -67,7 +67,7 @@ void SuffixDB::addSequence(Sequence seq) {
 		count++;
 	}
 	catch(exception& e) {
-		errorOut(e, "SuffixDB", "addSequence");
+		m->errorOut(e, "SuffixDB", "addSequence");
 		exit(1);
 	}
 }

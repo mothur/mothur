@@ -11,7 +11,7 @@
 
 //**********************************************************************************************************************
 
-GetSAbundCommand::GetSAbundCommand(string option){
+GetSAbundCommand::GetSAbundCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
@@ -43,7 +43,7 @@ GetSAbundCommand::GetSAbundCommand(string option){
 			}
 
 			//make sure the user has already run the read.otu command
-			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "")) { mothurOut("You must read a list or rabund before you can use the get.sabund command."); mothurOutEndLine(); abort = true; }
+			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "")) { m->mothurOut("You must read a list or rabund before you can use the get.sabund command."); m->mothurOutEndLine(); abort = true; }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -68,7 +68,7 @@ GetSAbundCommand::GetSAbundCommand(string option){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "GetSAbundCommand", "GetSAbundCommand");
+		m->errorOut(e, "GetSAbundCommand", "GetSAbundCommand");
 		exit(1);
 	}
 }
@@ -76,17 +76,17 @@ GetSAbundCommand::GetSAbundCommand(string option){
 
 void GetSAbundCommand::help(){
 	try {
-		mothurOut("The get.sabund command can only be executed after a successful read.otu of a listfile or rabundfile.\n");
-		mothurOut("The get.sabund command parameters is label.  No parameters are required.\n");
-		mothurOut("The label parameter allows you to select what distance levels you would like included in your .sabund file, and are separated by dashes.\n");
-		mothurOut("The get.sabund command should be in the following format: get.sabund(label=yourLabels).\n");
-		mothurOut("Example get.sabund().\n");
-		mothurOut("The default value for label is all labels in your inputfile.\n");
-		mothurOut("The get.sabund command outputs a .sabund file containing the labels you selected.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabel).\n\n");
+		m->mothurOut("The get.sabund command can only be executed after a successful read.otu of a listfile or rabundfile.\n");
+		m->mothurOut("The get.sabund command parameters is label.  No parameters are required.\n");
+		m->mothurOut("The label parameter allows you to select what distance levels you would like included in your .sabund file, and are separated by dashes.\n");
+		m->mothurOut("The get.sabund command should be in the following format: get.sabund(label=yourLabels).\n");
+		m->mothurOut("Example get.sabund().\n");
+		m->mothurOut("The default value for label is all labels in your inputfile.\n");
+		m->mothurOut("The get.sabund command outputs a .sabund file containing the labels you selected.\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabel).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "GetSAbundCommand", "help");
+		m->errorOut(e, "GetSAbundCommand", "help");
 		exit(1);
 	}
 }
@@ -118,7 +118,7 @@ int GetSAbundCommand::execute(){
 		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
 			if(allLines == 1 || labels.count(order->getLabel()) == 1){
-					mothurOut(order->getLabel());  mothurOutEndLine();
+					m->mothurOut(order->getLabel());  m->mothurOutEndLine();
 					sabund = new SAbundVector();
 					*sabund = (order->getSAbundVector());
 					sabund->print(out);
@@ -134,7 +134,7 @@ int GetSAbundCommand::execute(){
 					delete order;		
 					order = (input->getOrderVector(lastLabel));
 					
-					mothurOut(order->getLabel());  mothurOutEndLine();
+					m->mothurOut(order->getLabel());  m->mothurOutEndLine();
 					sabund = new SAbundVector();
 					*sabund = (order->getSAbundVector());
 					sabund->print(out);
@@ -158,12 +158,12 @@ int GetSAbundCommand::execute(){
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			mothurOut("Your file does not include the label " + *it); 
+			m->mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(lastLabel) != 1) {
-				mothurOut(". I will use " + lastLabel + ".");  mothurOutEndLine();
+				m->mothurOut(". I will use " + lastLabel + ".");  m->mothurOutEndLine();
 				needToRun = true;
 			}else {
-				mothurOut(". Please refer to " + lastLabel + ".");  mothurOutEndLine();
+				m->mothurOut(". Please refer to " + lastLabel + ".");  m->mothurOutEndLine();
 			}
 		}
 		
@@ -172,7 +172,7 @@ int GetSAbundCommand::execute(){
 			if (order != NULL) {	delete order;	}
 			order = (input->getOrderVector(lastLabel));
 			
-			mothurOut(order->getLabel());  mothurOutEndLine();
+			m->mothurOut(order->getLabel());  m->mothurOutEndLine();
 			sabund = new SAbundVector();
 			*sabund = (order->getSAbundVector());
 			sabund->print(out);
@@ -182,11 +182,17 @@ int GetSAbundCommand::execute(){
 		globaldata->gorder = NULL;
 
 		out.close();
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+		m->mothurOut(filename); m->mothurOutEndLine();	
+		m->mothurOutEndLine();
+		
 		return 0;		
 	}
 
 	catch(exception& e) {
-		errorOut(e, "GetSAbundCommand", "execute");
+		m->errorOut(e, "GetSAbundCommand", "execute");
 		exit(1);
 	}
 }

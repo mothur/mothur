@@ -13,6 +13,7 @@
 //This constructor reads a distance matrix file and stores the data in the matrix.
 FullMatrix::FullMatrix(ifstream& filehandle) {
 	try{
+		m = MothurOut::getInstance();
 		globaldata = GlobalData::getInstance();
 		groupmap = globaldata->gGroupmap;
 		
@@ -25,7 +26,7 @@ FullMatrix::FullMatrix(ifstream& filehandle) {
 			matrix[i].resize(numSeqs, 0.0);
 		}
 		group = groupmap->getGroup(name);
-		if(group == "not found") {	mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); mothurOutEndLine(); exit(1); }
+		if(group == "not found") {	m->mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); m->mothurOutEndLine(); exit(1); }
 		index.resize(numSeqs);
 		index[0].seqName = name;
 		index[0].groupName = group;
@@ -62,7 +63,7 @@ FullMatrix::FullMatrix(ifstream& filehandle) {
 				
 	}
 	catch(exception& e) {
-		errorOut(e, "FullMatrix", "FullMatrix");
+		m->errorOut(e, "FullMatrix", "FullMatrix");
 		exit(1);
 	}
 }
@@ -84,7 +85,7 @@ void FullMatrix::readSquareMatrix(ifstream& filehandle) {
 			index[i].seqName = name;
 			index[i].groupName = group;
 			
-			if(group == "not found") {	mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); mothurOutEndLine(); exit(1); }
+			if(group == "not found") {	m->mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); m->mothurOutEndLine(); exit(1); }
 				
 			for(int j=0;j<numSeqs;j++){
 				filehandle >> matrix[i][j];
@@ -97,7 +98,7 @@ void FullMatrix::readSquareMatrix(ifstream& filehandle) {
 		delete reading;
 	}
 	catch(exception& e) {
-		errorOut(e, "FullMatrix", "readSquareMatrix");
+		m->errorOut(e, "FullMatrix", "readSquareMatrix");
 		exit(1);
 	}
 } 
@@ -119,7 +120,7 @@ void FullMatrix::readLTMatrix(ifstream& filehandle) {
 			index[i].seqName = name;
 			index[i].groupName = group;
 	
-			if(group == "not found") {	mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); mothurOutEndLine();  exit(1); }
+			if(group == "not found") {	m->mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
 				
 			for(int j=0;j<i;j++){
 				filehandle >> distance;
@@ -133,7 +134,7 @@ void FullMatrix::readLTMatrix(ifstream& filehandle) {
 		delete reading;
 	}
 	catch(exception& e) {
-		errorOut(e, "FullMatrix", "readLTMatrix");
+		m->errorOut(e, "FullMatrix", "readLTMatrix");
 		exit(1);
 	}
 }
@@ -176,7 +177,7 @@ void FullMatrix::sortGroups(int low, int high){
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "FullMatrix", "sortGroups");
+		m->errorOut(e, "FullMatrix", "sortGroups");
 		exit(1);
 	}
 }
@@ -214,7 +215,7 @@ void FullMatrix::swapRows(int i, int j) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "FullMatrix", "swapRows");
+		m->errorOut(e, "FullMatrix", "swapRows");
 		exit(1);
 	}
 }
@@ -253,7 +254,7 @@ void FullMatrix::printMatrix(ostream& out) {
 		for (int i = 0; i < numSeqs; i++) {  out << i << '\t' <<  index[i].seqName << endl;  }
 	}
 	catch(exception& e) {
-		errorOut(e, "FullMatrix", "printMatrix");
+		m->errorOut(e, "FullMatrix", "printMatrix");
 		exit(1);
 	}
 }

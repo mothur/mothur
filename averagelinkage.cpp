@@ -43,7 +43,7 @@ bool AverageLinkage::updateDistance(MatData& colCell, MatData& rowCell) {
 		return(true);
 	}
 	catch(exception& e) {
-		errorOut(e, "AverageLinkage", "updateDistance");
+		m->errorOut(e, "AverageLinkage", "updateDistance");
 		exit(1);
 	}
 }

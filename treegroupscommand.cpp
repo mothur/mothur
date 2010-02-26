@@ -22,7 +22,7 @@
 
 //**********************************************************************************************************************
 
-TreeGroupCommand::TreeGroupCommand(string option){
+TreeGroupCommand::TreeGroupCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
@@ -99,11 +99,11 @@ TreeGroupCommand::TreeGroupCommand(string option){
 			else {  globaldata->setNameFile(namefile);	}
 			
 			//error checking on files			
-			if ((globaldata->getSharedFile() == "") && ((phylipfile == "") && (columnfile == "")))	{ mothurOut("You must run the read.otu command or provide a distance file before running the tree.shared command."); mothurOutEndLine(); abort = true; }
-			else if ((phylipfile != "") && (columnfile != "")) { mothurOut("When running the tree.shared command with a distance file you may not use both the column and the phylip parameters."); mothurOutEndLine(); abort = true; }
+			if ((globaldata->getSharedFile() == "") && ((phylipfile == "") && (columnfile == "")))	{ m->mothurOut("You must run the read.otu command or provide a distance file before running the tree.shared command."); m->mothurOutEndLine(); abort = true; }
+			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When running the tree.shared command with a distance file you may not use both the column and the phylip parameters."); m->mothurOutEndLine(); abort = true; }
 			
 			if (columnfile != "") {
-				if (namefile == "") {  mothurOut("You need to provide a namefile if you are going to use the column format."); mothurOutEndLine(); abort = true; }
+				if (namefile == "") {  m->mothurOut("You need to provide a namefile if you are going to use the column format."); m->mothurOutEndLine(); abort = true; }
 			}
 
 			//check for optional parameter and set defaults
@@ -187,7 +187,7 @@ TreeGroupCommand::TreeGroupCommand(string option){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "TreeGroupCommand", "TreeGroupCommand");
+		m->errorOut(e, "TreeGroupCommand", "TreeGroupCommand");
 		exit(1);
 	}
 }
@@ -196,25 +196,25 @@ TreeGroupCommand::TreeGroupCommand(string option){
 
 void TreeGroupCommand::help(){
 	try {
-		mothurOut("The tree.shared command creates a .tre to represent the similiarity between groups or sequences.\n");
-		mothurOut("The tree.shared command can only be executed after a successful read.otu command or by providing a distance file.\n");
-		mothurOut("The tree.shared command parameters are groups, calc, phylip, column, name, cutoff, precision and label.\n");
-		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included used.\n");
-		mothurOut("The group names are separated by dashes. The label allow you to select what distance levels you would like trees created for, and are also separated by dashes.\n");
-		mothurOut("The phylip or column parameter are required if you do not run the read.otu command first, and only one may be used.  If you use a column file the name filename is required. \n");
-		mothurOut("If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n");
-		mothurOut("The tree.shared command should be in the following format: tree.shared(groups=yourGroups, calc=yourCalcs, label=yourLabels).\n");
-		mothurOut("Example tree.shared(groups=A-B-C, calc=jabund-sorabund).\n");
-		mothurOut("The default value for groups is all the groups in your groupfile.\n");
-		mothurOut("The default value for calc is jclass-thetayc.\n");
-		mothurOut("The tree.shared command outputs a .tre file for each calculator you specify at each distance you choose.\n");
+		m->mothurOut("The tree.shared command creates a .tre to represent the similiarity between groups or sequences.\n");
+		m->mothurOut("The tree.shared command can only be executed after a successful read.otu command or by providing a distance file.\n");
+		m->mothurOut("The tree.shared command parameters are groups, calc, phylip, column, name, cutoff, precision and label.\n");
+		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included used.\n");
+		m->mothurOut("The group names are separated by dashes. The label allow you to select what distance levels you would like trees created for, and are also separated by dashes.\n");
+		m->mothurOut("The phylip or column parameter are required if you do not run the read.otu command first, and only one may be used.  If you use a column file the name filename is required. \n");
+		m->mothurOut("If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n");
+		m->mothurOut("The tree.shared command should be in the following format: tree.shared(groups=yourGroups, calc=yourCalcs, label=yourLabels).\n");
+		m->mothurOut("Example tree.shared(groups=A-B-C, calc=jabund-sorabund).\n");
+		m->mothurOut("The default value for groups is all the groups in your groupfile.\n");
+		m->mothurOut("The default value for calc is jclass-thetayc.\n");
+		m->mothurOut("The tree.shared command outputs a .tre file for each calculator you specify at each distance you choose.\n");
 		validCalculator->printCalc("treegroup", cout);
-		mothurOut("Or the tree.shared command can be in the following format: tree.shared(phylip=yourPhylipFile).\n");
-		mothurOut("Example tree.shared(phylip=abrecovery.dist).\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
+		m->mothurOut("Or the tree.shared command can be in the following format: tree.shared(phylip=yourPhylipFile).\n");
+		m->mothurOut("Example tree.shared(phylip=abrecovery.dist).\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "TreeGroupCommand", "help");
+		m->errorOut(e, "TreeGroupCommand", "help");
 		exit(1);
 	}
 }
@@ -242,7 +242,7 @@ int TreeGroupCommand::execute(){
 		
 		if (format == "sharedfile") {
 			//if the users entered no valid calculators don't execute command
-			if (treeCalculators.size() == 0) { mothurOut("You have given no valid calculators."); mothurOutEndLine(); return 0; }
+			if (treeCalculators.size() == 0) { m->mothurOut("You have given no valid calculators."); m->mothurOutEndLine(); return 0; }
 
 			//you have groups
 			read = new ReadOTUFile(globaldata->inputFileName);	
@@ -252,7 +252,7 @@ int TreeGroupCommand::execute(){
 			lookup = input->getSharedRAbundVectors();
 			lastLabel = lookup[0]->getLabel();
 			
-			if (lookup.size() < 2) { mothurOut("You have not provided enough valid groups.  I cannot run the command."); mothurOutEndLine(); return 0; }
+			if (lookup.size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); return 0; }
 			
 			//used in tree constructor 
 			globaldata->runParse = false;
@@ -300,18 +300,24 @@ int TreeGroupCommand::execute(){
 
 			//create a new filename
 			outputFile = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + "tre";	
+			outputNames.push_back(outputFile);
 				
 			createTree();
-			mothurOut("Tree complete. "); mothurOutEndLine();
+			m->mothurOut("Tree complete. "); m->mothurOutEndLine();
 		}
 				
 		//reset groups parameter
 		globaldata->Groups.clear();  
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
 
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "TreeGroupCommand", "execute");
+		m->errorOut(e, "TreeGroupCommand", "execute");
 		exit(1);
 	}
 }
@@ -388,7 +394,7 @@ void TreeGroupCommand::createTree(){
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "TreeGroupCommand", "createTree");
+		m->errorOut(e, "TreeGroupCommand", "createTree");
 		exit(1);
 	}
 }
@@ -412,7 +418,7 @@ void TreeGroupCommand::printSims(ostream& out) {
 
 	}
 	catch(exception& e) {
-		errorOut(e, "TreeGroupCommand", "printSims");
+		m->errorOut(e, "TreeGroupCommand", "printSims");
 		exit(1);
 	}
 }
@@ -445,7 +451,7 @@ void TreeGroupCommand::makeSimsDist() {
 
 	}
 	catch(exception& e) {
-		errorOut(e, "TreeGroupCommand", "makeSimsDist");
+		m->errorOut(e, "TreeGroupCommand", "makeSimsDist");
 		exit(1);
 	}
 }
@@ -472,7 +478,7 @@ void TreeGroupCommand::makeSimsShared() {
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 		
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
-				mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
+				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 				process(lookup);
 				
 				processedLabels.insert(lookup[0]->getLabel());
@@ -485,7 +491,7 @@ void TreeGroupCommand::makeSimsShared() {
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 				lookup = input->getSharedRAbundVectors(lastLabel);
 
-				mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
+				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 				process(lookup);
 					
 				processedLabels.insert(lookup[0]->getLabel());
@@ -506,12 +512,12 @@ void TreeGroupCommand::makeSimsShared() {
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			mothurOut("Your file does not include the label " + *it); 
+			m->mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(lastLabel) != 1) {
-				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
 				needToRun = true;
 			}else {
-				mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
 			}
 		}
 		
@@ -520,7 +526,7 @@ void TreeGroupCommand::makeSimsShared() {
 			for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {		delete lookup[i]; }		} 
 			lookup = input->getSharedRAbundVectors(lastLabel);
 
-			mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
+			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 			process(lookup);
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 	
 		}
@@ -528,7 +534,7 @@ void TreeGroupCommand::makeSimsShared() {
 		for(int i = 0 ; i < treeCalculators.size(); i++) {  delete treeCalculators[i]; }
 	}
 	catch(exception& e) {
-		errorOut(e, "TreeGroupCommand", "makeSimsShared");
+		m->errorOut(e, "TreeGroupCommand", "makeSimsShared");
 		exit(1);
 	}
 }
@@ -557,6 +563,7 @@ void TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
 		
 					//create a new filename
 					outputFile = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".tre";				
+					outputNames.push_back(outputFile);
 												
 					for (int k = 0; k < thisLookup.size(); k++) { 
 						for (int l = k; l < thisLookup.size(); l++) {
@@ -581,7 +588,7 @@ void TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
 
 	}
 	catch(exception& e) {
-		errorOut(e, "TreeGroupCommand", "process");
+		m->errorOut(e, "TreeGroupCommand", "process");
 		exit(1);
 	}
 }

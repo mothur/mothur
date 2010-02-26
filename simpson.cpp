@@ -58,7 +58,7 @@ EstOutput Simpson::getValues(SAbundVector* rank){
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "Simpson", "getValues");
+		m->errorOut(e, "Simpson", "getValues");
 		exit(1);
 	}
 }

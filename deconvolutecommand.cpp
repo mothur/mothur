@@ -10,7 +10,7 @@
 #include "deconvolutecommand.h"
 
 /**************************************************************************************/
-DeconvoluteCommand::DeconvoluteCommand(string option) {	
+DeconvoluteCommand::DeconvoluteCommand(string option)  {	
 	try {
 		abort = false;
 		
@@ -59,7 +59,7 @@ DeconvoluteCommand::DeconvoluteCommand(string option) {
 			//check for required parameters
 			inFastaName = validParameter.validFile(parameters, "fasta", true);
 			if (inFastaName == "not open") { abort = true; }
-			else if (inFastaName == "not found") { inFastaName = ""; mothurOut("fasta is a required parameter for the unique.seqs command."); mothurOutEndLine(); abort = true;  }	
+			else if (inFastaName == "not found") { inFastaName = ""; m->mothurOut("fasta is a required parameter for the unique.seqs command."); m->mothurOutEndLine(); abort = true;  }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -74,7 +74,7 @@ DeconvoluteCommand::DeconvoluteCommand(string option) {
 
 	}
 	catch(exception& e) {
-		errorOut(e, "DeconvoluteCommand", "DeconvoluteCommand");
+		m->errorOut(e, "DeconvoluteCommand", "DeconvoluteCommand");
 		exit(1);
 	}
 }
@@ -82,15 +82,15 @@ DeconvoluteCommand::DeconvoluteCommand(string option) {
 
 void DeconvoluteCommand::help(){
 	try {
-		mothurOut("The unique.seqs command reads a fastafile and creates a namesfile.\n");
-		mothurOut("It creates a file where the first column is the groupname and the second column is a list of sequence names who have the same sequence. \n");
-		mothurOut("If the sequence is unique the second column will just contain its name. \n");
-		mothurOut("The unique.seqs command parameter is fasta and it is required.\n");
-		mothurOut("The unique.seqs command should be in the following format: \n");
-		mothurOut("unique.seqs(fasta=yourFastaFile) \n");	
+		m->mothurOut("The unique.seqs command reads a fastafile and creates a namesfile.\n");
+		m->mothurOut("It creates a file where the first column is the groupname and the second column is a list of sequence names who have the same sequence. \n");
+		m->mothurOut("If the sequence is unique the second column will just contain its name. \n");
+		m->mothurOut("The unique.seqs command parameter is fasta and it is required.\n");
+		m->mothurOut("The unique.seqs command should be in the following format: \n");
+		m->mothurOut("unique.seqs(fasta=yourFastaFile) \n");	
 	}
 	catch(exception& e) {
-		errorOut(e, "DeconvoluteCommand", "help");
+		m->errorOut(e, "DeconvoluteCommand", "help");
 		exit(1);
 	}
 }
@@ -113,10 +113,18 @@ int DeconvoluteCommand::execute() {
 		fastamap.printCondensedFasta(outFastaFile);
 		fastamap.printNamesFile(outNameFile);
 		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		m->mothurOut(outFastaFile); m->mothurOutEndLine();	
+		m->mothurOut(outNameFile); m->mothurOutEndLine();
+		m->mothurOutEndLine();
+
+
+		
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "DeconvoluteCommand", "execute");
+		m->errorOut(e, "DeconvoluteCommand", "execute");
 		exit(1);
 	}
 }

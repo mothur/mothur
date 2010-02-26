@@ -39,6 +39,7 @@ private:
 	SAbundVector* sabund;
 	RAbundVector* rabund;
 	GlobalData* globaldata;
+	MothurOut* m;
 	// InputData* getInput()			{	return input;	}
 };
 

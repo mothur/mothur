@@ -15,7 +15,7 @@
 
 /***********************************************************************/
 
-SequenceDB::SequenceDB() {}
+SequenceDB::SequenceDB() {  m = MothurOut::getInstance();  }
 /***********************************************************************/
 //the clear function free's the memory
 SequenceDB::~SequenceDB() { clear(); }
@@ -46,7 +46,7 @@ SequenceDB::SequenceDB(ifstream& filehandle) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "SequenceDB", "SequenceDB");
+		m->errorOut(e, "SequenceDB", "SequenceDB");
 		exit(1);
 	}
 }
@@ -67,7 +67,7 @@ string SequenceDB::readName(ifstream& in) {
 		return name;
 	}
 	catch(exception& e) {
-		errorOut(e, "SequenceDB", "readName");
+		m->errorOut(e, "SequenceDB", "readName");
 		exit(1);
 	}
 }
@@ -96,7 +96,7 @@ string SequenceDB::readSequence(ifstream& in) {
 		return sequence;
 	}
 	catch(exception& e) {
-		errorOut(e, "SequenceDB", "readSequence");
+		m->errorOut(e, "SequenceDB", "readSequence");
 		exit(1);
 	}
 }
@@ -114,7 +114,7 @@ void SequenceDB::set(int index, string newUnaligned) {
 		data[index] = Sequence(data[index].getName(), newUnaligned);
 	}
 	catch(exception& e) {
-		errorOut(e, "SequenceDB", "set");
+		m->errorOut(e, "SequenceDB", "set");
 		exit(1);
 	}
 }
@@ -126,7 +126,7 @@ void SequenceDB::set(int index, Sequence newSeq) {
 		data[index] = newSeq;
 	}
 	catch(exception& e) {
-		errorOut(e, "SequenceDB", "set");
+		m->errorOut(e, "SequenceDB", "set");
 		exit(1);
 	}
 }
@@ -144,7 +144,7 @@ void SequenceDB::resize(int newSize) {
 		data.resize(newSize);
 	}
 	catch(exception& e) {
-		errorOut(e, "SequenceDB", "resize");
+		m->errorOut(e, "SequenceDB", "resize");
 		exit(1);
 	}
 }
@@ -156,7 +156,7 @@ void SequenceDB::clear() {
 		data.clear();
 	}
 	catch(exception& e) {
-		errorOut(e, "SequenceDB", "clear");
+		m->errorOut(e, "SequenceDB", "clear");
 		exit(1);
 	}
 }
@@ -176,7 +176,7 @@ void SequenceDB::print(ostream& out) {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "SequenceDB", "print");
+		m->errorOut(e, "SequenceDB", "print");
 		exit(1);
 	}
 }
@@ -188,7 +188,7 @@ void SequenceDB::push_back(Sequence newSequence) {
 		data.push_back(newSequence);
 	}
 	catch(exception& e) {
-		errorOut(e, "SequenceDB", "push_back");
+		m->errorOut(e, "SequenceDB", "push_back");
 		exit(1);
 	}
 }

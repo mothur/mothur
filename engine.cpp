@@ -18,9 +18,10 @@
 Engine::Engine(){
 	try {
 		cFactory = CommandFactory::getInstance();
+		mout = MothurOut::getInstance();
 	}
 	catch(exception& e) {
-		errorOut(e, "Engine", "Engine");
+		mout->errorOut(e, "Engine", "Engine");
 		exit(1);
 	}
 }
@@ -31,6 +32,7 @@ InteractEngine::InteractEngine(string path){
 
 	globaldata = GlobalData::getInstance();
 	globaldata->argv = path;
+	
 }
 
 /***********************************************************************/
@@ -49,9 +51,10 @@ bool InteractEngine::getInput(){
 		
 		while(quitCommandCalled != 1){
 
-			mothurOutEndLine();
+			mout->mothurOutEndLine();
 			
-			input = getCommand();			
+			input = getCommand();	
+			mout->mothurOutEndLine();		
 			
 			//allow user to omit the () on the quit command
 			if (input == "quit") { input = "quit()"; }
@@ -68,14 +71,14 @@ bool InteractEngine::getInput(){
 				quitCommandCalled = command->execute();
 				
 			}else {
-				mothurOut("Your input contains errors. Please try again."); 
-				mothurOutEndLine();
+				mout->mothurOut("Your input contains errors. Please try again."); 
+				mout->mothurOutEndLine();
 			}
 		}	
 		return 1;
 	}
 	catch(exception& e) {
-		errorOut(e, "InteractEngine", "getInput");
+		mout->errorOut(e, "InteractEngine", "getInput");
 		exit(1);
 	}
 }
@@ -93,28 +96,28 @@ string Engine::getCommand()  {
 					cout << nextCommand << endl;
 				}	
 				
-				mothurOutJustToLog("mothur > " + toString(nextCommand));
+				mout->mothurOutJustToLog("mothur > " + toString(nextCommand));
 				return nextCommand;
 			#else
 				string nextCommand = "";
-				mothurOut("mothur > ");
+				mout->mothurOut("mothur > ");
 				getline(cin, nextCommand);
-				mothurOutJustToLog("mothur > " + toString(nextCommand));
+				mout->mothurOutJustToLog("mothur > " + toString(nextCommand));
 				return nextCommand;
 			#endif
 		#else
 			string nextCommand = "";
-			mothurOut("mothur > ");
+			mout->mothurOut("mothur > ");
 			getline(cin, nextCommand);
-			mothurOutJustToLog("mothur > " + toString(nextCommand));
+			mout->mothurOutJustToLog("mothur > " + toString(nextCommand));
 			return nextCommand;
 		#endif
 		
-		mothurOutEndLine();
+		mout->mothurOutEndLine();
 						
 	}
 	catch(exception& e) {
-		errorOut(e, "Engine", "getCommand");
+		mout->errorOut(e, "Engine", "getCommand");
 		exit(1);
 	}
 }
@@ -129,7 +132,7 @@ BatchEngine::BatchEngine(string path, string batchFileName){
 				
 	}
 	catch(exception& e) {
-		errorOut(e, "BatchEngine", "BatchEngine");
+		mout->errorOut(e, "BatchEngine", "BatchEngine");
 		exit(1);
 	}
 }
@@ -144,8 +147,8 @@ bool BatchEngine::getInput(){
 	try {
 		//check if this is a valid batchfile
 		if (openedBatch == 1) {  
-			mothurOut("unable to open batchfile");  
-			mothurOutEndLine();
+			mout->mothurOut("unable to open batchfile");  
+			mout->mothurOutEndLine();
 			return 1; 
 		}
 	
@@ -163,9 +166,9 @@ bool BatchEngine::getInput(){
 			
 			if (input[0] != '#') {
 				
-				mothurOutEndLine();
-				mothurOut("mothur > " + input);
-				mothurOutEndLine();
+				mout->mothurOutEndLine();
+				mout->mothurOut("mothur > " + input);
+				mout->mothurOutEndLine();
 				
 				
 				//allow user to omit the () on the quit command
@@ -181,8 +184,8 @@ bool BatchEngine::getInput(){
 					Command* command = cFactory->getCommand(commandName, options);
 					quitCommandCalled = command->execute();
 				}else {		
-					mothurOut("Invalid."); 
-					mothurOutEndLine();
+					mout->mothurOut("Invalid."); 
+					mout->mothurOutEndLine();
 				}
 				
 			}
@@ -193,7 +196,7 @@ bool BatchEngine::getInput(){
 		return 1;
 	}
 	catch(exception& e) {
-		errorOut(e, "BatchEngine", "getInput");
+		mout->errorOut(e, "BatchEngine", "getInput");
 		exit(1);
 	}
 }
@@ -210,10 +213,10 @@ ScriptEngine::ScriptEngine(string path, string commandString){
 		listOfCommands = commandString.substr(1, (commandString.length()-1));
 
 		globaldata->argv = path;
-		
+				
 	}
 	catch(exception& e) {
-		errorOut(e, "ScriptEngine", "ScriptEngine");
+		mout->errorOut(e, "ScriptEngine", "ScriptEngine");
 		exit(1);
 	}
 }
@@ -242,9 +245,9 @@ bool ScriptEngine::getInput(){
 			if (input == "") { input = "quit()"; }
 			
 			
-			mothurOutEndLine();
-			mothurOut("mothur > " + input);
-			mothurOutEndLine();
+			mout->mothurOutEndLine();
+			mout->mothurOut("mothur > " + input);
+			mout->mothurOutEndLine();
 
 				
 			//allow user to omit the () on the quit command
@@ -260,8 +263,8 @@ bool ScriptEngine::getInput(){
 				Command* command = cFactory->getCommand(commandName, options);
 				quitCommandCalled = command->execute();
 			}else {		
-				mothurOut("Invalid."); 
-				mothurOutEndLine();
+				mout->mothurOut("Invalid."); 
+				mout->mothurOutEndLine();
 			}
 			
 		}
@@ -269,7 +272,7 @@ bool ScriptEngine::getInput(){
 		return 1;
 	}
 	catch(exception& e) {
-		errorOut(e, "ScriptEngine", "getInput");
+		mout->errorOut(e, "ScriptEngine", "getInput");
 		exit(1);
 	}
 }
@@ -304,7 +307,7 @@ string ScriptEngine::getNextCommand(string& commandString) {
 		return nextcommand;
 	}
 	catch(exception& e) {
-		errorOut(e, "ScriptEngine", "getNextCommand");
+		mout->errorOut(e, "ScriptEngine", "getNextCommand");
 		exit(1);
 	}
 }

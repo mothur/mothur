@@ -13,7 +13,7 @@
 
 /***********************************************************************/
 Maligner::Maligner(vector<Sequence*> temp, int num, int match, int misMatch, float div, int ms, int minCov, string mode, Database* dataLeft, Database* dataRight) :
-		db(temp), numWanted(num), matchScore(match), misMatchPenalty(misMatch), minDivR(div), minSimilarity(ms), minCoverage(minCov), searchMethod(mode), databaseLeft(dataLeft), databaseRight(dataRight) {}
+		db(temp), numWanted(num), matchScore(match), misMatchPenalty(misMatch), minDivR(div), minSimilarity(ms), minCoverage(minCov), searchMethod(mode), databaseLeft(dataLeft), databaseRight(dataRight) { m = MothurOut::getInstance(); }
 /***********************************************************************/
 string Maligner::getResults(Sequence* q, DeCalculator* decalc) {
 	try {
@@ -32,7 +32,7 @@ string Maligner::getResults(Sequence* q, DeCalculator* decalc) {
 			refSeqs = getBlastSeqs(query, numWanted); //fills indexes
 		}else if (searchMethod == "kmer") {
 			refSeqs = getKmerSeqs(query, numWanted); //fills indexes
-		}else { mothurOut("not valid search."); exit(1);  } //should never get here
+		}else { m->mothurOut("not valid search."); exit(1);  } //should never get here
 		
 		refSeqs = minCoverageFilter(refSeqs);
 
@@ -56,7 +56,7 @@ string Maligner::getResults(Sequence* q, DeCalculator* decalc) {
 		return chimera;
 	}
 	catch(exception& e) {
-		errorOut(e, "Maligner", "getResults");
+		m->errorOut(e, "Maligner", "getResults");
 		exit(1);
 	}
 }
@@ -130,7 +130,7 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 		return chimera;
 	}
 	catch(exception& e) {
-		errorOut(e, "Maligner", "chimeraMaligner");
+		m->errorOut(e, "Maligner", "chimeraMaligner");
 		exit(1);
 	}
 }
@@ -172,7 +172,7 @@ vector<Sequence*> Maligner::minCoverageFilter(vector<Sequence*> ref){
 		return newRefs;
 	}
 	catch(exception& e) {
-		errorOut(e, "Maligner", "minCoverageFilter");
+		m->errorOut(e, "Maligner", "minCoverageFilter");
 		exit(1);
 	}
 }
@@ -189,7 +189,7 @@ int Maligner::computeChimeraPenalty() {
 
 	}
 	catch(exception& e) {
-		errorOut(e, "Maligner", "computeChimeraPenalty");
+		m->errorOut(e, "Maligner", "computeChimeraPenalty");
 		exit(1);
 	}
 }
@@ -241,7 +241,7 @@ void Maligner::verticalFilter(vector<Sequence*> seqs) {
 		spotMap = newMap;
 	}
 	catch(exception& e) {
-		errorOut(e, "Maligner", "verticalFilter");
+		m->errorOut(e, "Maligner", "verticalFilter");
 		exit(1);
 	}
 }
@@ -268,12 +268,12 @@ vector< vector<score_struct> > Maligner::buildScoreMatrix(int cols, int rows) {
 		return m;
 	}
 	catch(exception& e) {
-		errorOut(e, "Maligner", "buildScoreMatrix");
+		m->errorOut(e, "Maligner", "buildScoreMatrix");
 		exit(1);
 	}
 }
 //***************************************************************************************************************
-void Maligner::fillScoreMatrix(vector<vector<score_struct> >& m, vector<Sequence*> seqs, int penalty) {
+void Maligner::fillScoreMatrix(vector<vector<score_struct> >& ms, vector<Sequence*> seqs, int penalty) {
 	try{
 		
 		//get matrix dimensions
@@ -287,11 +287,11 @@ void Maligner::fillScoreMatrix(vector<vector<score_struct> >& m, vector<Sequence
 			
 			//are you both gaps?
 			if ((!isalpha(queryAligned[0])) && (!isalpha(subjectAligned[0]))) {
-				m[i][0].score = 0;
+				ms[i][0].score = 0;
 			}else if (queryAligned[0] == subjectAligned[0]) {
-				m[i][0].score = matchScore;
+				ms[i][0].score = matchScore;
 			}else{
-				m[i][0].score = 0;
+				ms[i][0].score = 0;
 			}
 		}
 		
@@ -317,15 +317,15 @@ void Maligner::fillScoreMatrix(vector<vector<score_struct> >& m, vector<Sequence
 				//compute score based on previous columns scores
 				for (int prevIndex = 0; prevIndex < numRows; prevIndex++) { //iterate through rows
 					
-					int sumScore = matchMisMatchScore + m[prevIndex][j-1].score;
+					int sumScore = matchMisMatchScore + ms[prevIndex][j-1].score;
 					
 					//you are not at yourself
 					if (prevIndex != i) {   sumScore += penalty;	}
 					if (sumScore < 0)	{	sumScore = 0;			}
 					
-					if (sumScore > m[i][j].score) {
-						m[i][j].score = sumScore;
-						m[i][j].prev = prevIndex;
+					if (sumScore > ms[i][j].score) {
+						ms[i][j].score = sumScore;
+						ms[i][j].prev = prevIndex;
 					}
 				}
 			}
@@ -333,17 +333,17 @@ void Maligner::fillScoreMatrix(vector<vector<score_struct> >& m, vector<Sequence
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Maligner", "fillScoreMatrix");
+		m->errorOut(e, "Maligner", "fillScoreMatrix");
 		exit(1);
 	}
 }
 //***************************************************************************************************************
-vector<score_struct> Maligner::extractHighestPath(vector<vector<score_struct> > m) {
+vector<score_struct> Maligner::extractHighestPath(vector<vector<score_struct> > ms) {
 	try {
 	
 		//get matrix dimensions
 		int numCols = query->getAligned().length();
-		int numRows = m.size();
+		int numRows = ms.size();
 	
 	
 		//find highest score scoring matrix
@@ -352,9 +352,9 @@ vector<score_struct> Maligner::extractHighestPath(vector<vector<score_struct> > 
 		
 		for (int i = 0; i < numRows; i++) {
 			for (int j = 0; j < numCols; j++) {
-				if (m[i][j].score > highestScore) {
-					highestScore = m[i][j].score;
-					highestStruct = m[i][j];
+				if (ms[i][j].score > highestScore) {
+					highestScore = ms[i][j].score;
+					highestStruct = ms[i][j];
 				}
 			}
 		}
@@ -366,7 +366,7 @@ vector<score_struct> Maligner::extractHighestPath(vector<vector<score_struct> > 
 		int score = highestStruct.score;
 		
 		while (pos >= 0 && score > 0) {
-			score_struct temp = m[rowIndex][pos];
+			score_struct temp = ms[rowIndex][pos];
 			score = temp.score;
 			
 			if (score > 0) {	path.push_back(temp);	}
@@ -381,7 +381,7 @@ vector<score_struct> Maligner::extractHighestPath(vector<vector<score_struct> > 
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Maligner", "extractHighestPath");
+		m->errorOut(e, "Maligner", "extractHighestPath");
 		exit(1);
 	}
 }
@@ -424,7 +424,7 @@ vector<trace_struct> Maligner::mapTraceRegionsToAlignment(vector<score_struct> p
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Maligner", "mapTraceRegionsToAlignment");
+		m->errorOut(e, "Maligner", "mapTraceRegionsToAlignment");
 		exit(1);
 	}
 }
@@ -442,7 +442,7 @@ string Maligner::constructChimericSeq(vector<trace_struct> trace, vector<Sequenc
 		return chimera;
 	}
 	catch(exception& e) {
-		errorOut(e, "Maligner", "constructChimericSeq");
+		m->errorOut(e, "Maligner", "constructChimericSeq");
 		exit(1);
 	}
 }
@@ -451,9 +451,9 @@ float Maligner::computePercentID(string queryAlign, string chimera) {
 	try {
 	
 		if (queryAlign.length() != chimera.length()) {
-			mothurOut("Error, alignment strings are of different lengths: "); mothurOutEndLine();
-			mothurOut(toString(queryAlign.length())); mothurOutEndLine(); mothurOutEndLine(); mothurOutEndLine(); mothurOutEndLine();
-			mothurOut(toString(chimera.length())); mothurOutEndLine();
+			m->mothurOut("Error, alignment strings are of different lengths: "); m->mothurOutEndLine();
+			m->mothurOut(toString(queryAlign.length())); m->mothurOutEndLine(); m->mothurOutEndLine(); m->mothurOutEndLine(); m->mothurOutEndLine();
+			m->mothurOut(toString(chimera.length())); m->mothurOutEndLine();
 			return -1.0;
 		}
 
@@ -478,7 +478,7 @@ float Maligner::computePercentID(string queryAlign, string chimera) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Maligner", "computePercentID");
+		m->errorOut(e, "Maligner", "computePercentID");
 		exit(1);
 	}
 }
@@ -504,7 +504,7 @@ vector<Sequence*> Maligner::getBlastSeqs(Sequence* q, int num) {
 		vector<int> tempIndexesRight = database->findClosestMegaBlast(queryRight, num+1);
 		vector<int> tempIndexesLeft = database->findClosestMegaBlast(queryLeft, num+1);
 		
-		//if ((tempIndexesRight.size() != (num+1)) || (tempIndexesLeft.size() != (num+1)))  {  mothurOut("megablast returned " + toString(tempIndexesRight.size()) + " results for the right end, and " + toString(tempIndexesLeft.size()) + " for the left end. Needed " + toString(num+1) + ". Unable to porcess sequence " + q->getName()); mothurOutEndLine(); return refResults; }
+		//if ((tempIndexesRight.size() != (num+1)) || (tempIndexesLeft.size() != (num+1)))  {  m->mothurOut("megablast returned " + toString(tempIndexesRight.size()) + " results for the right end, and " + toString(tempIndexesLeft.size()) + " for the left end. Needed " + toString(num+1) + ". Unable to porcess sequence " + q->getName()); m->mothurOutEndLine(); return refResults; }
 		
 		vector<int> smaller;
 		vector<int> larger;
@@ -560,7 +560,7 @@ vector<Sequence*> Maligner::getBlastSeqs(Sequence* q, int num) {
 		return refResults;
 	}
 	catch(exception& e) {
-		errorOut(e, "Maligner", "getBlastSeqs");
+		m->errorOut(e, "Maligner", "getBlastSeqs");
 		exit(1);
 	}
 }
@@ -616,7 +616,7 @@ vector<Sequence*> Maligner::getKmerSeqs(Sequence* q, int num) {
 		return refResults;
 	}
 	catch(exception& e) {
-		errorOut(e, "Maligner", "getBlastSeqs");
+		m->errorOut(e, "Maligner", "getBlastSeqs");
 		exit(1);
 	}
 }

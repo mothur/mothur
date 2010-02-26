@@ -44,7 +44,7 @@ EstOutput Boneh::getValues(SAbundVector* sabund){
 		bool valid = false;
 		double sum = 0;
 		double n = (double)sabund->getNumSeqs();
-		if(m==0){	m=n;	}
+		if(f==0){	f=n;	}
 		
 		double f1 = (double)sabund->get(1);
 		
@@ -66,10 +66,10 @@ EstOutput Boneh::getValues(SAbundVector* sabund){
 			sum = 0;
 			for(int j = 1; j < sabund->size(); j++) {
 				for (int i = 0; i < sabund->get(j); i++) {
-					sum += pow(1 - j / n, n) * (1 - pow(1 - j / n, m));
+					sum += pow(1 - j / n, n) * (1 - pow(1 - j / n, f));
 				}
 			}
-			sum +=  v * pow(1 - f1/(n*v), n) * (1 - pow(1 - f1/(n*v), m));
+			sum +=  v * pow(1 - f1/(n*v), n) * (1 - pow(1 - f1/(n*v), f));
 		}
 
 		data[0] = sum;
@@ -77,7 +77,7 @@ EstOutput Boneh::getValues(SAbundVector* sabund){
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "Boneh", "getValues");
+		m->errorOut(e, "Boneh", "getValues");
 		exit(1);
 	}
 }

@@ -50,11 +50,11 @@ string Chimera::createFilter(vector<Sequence*> seqs, float t) {
 			//cout << "a = " << a[i] <<  " t = " << t[i] <<  " g = " << g[i] <<  " c = " << c[i] << endl;
 		}
 
-		mothurOut("Filter removed " + toString(numColRemoved) + " columns.");  mothurOutEndLine();
+		m->mothurOut("Filter removed " + toString(numColRemoved) + " columns.");  m->mothurOutEndLine();
 		return filterString;
 	}
 	catch(exception& e) {
-		errorOut(e, "Chimera", "createFilter");
+		m->errorOut(e, "Chimera", "createFilter");
 		exit(1);
 	}
 }
@@ -80,7 +80,7 @@ map<int, int> Chimera::runFilter(Sequence* seq) {
 		return maskMap;
 	}
 	catch(exception& e) {
-		errorOut(e, "Chimera", "runFilter");
+		m->errorOut(e, "Chimera", "runFilter");
 		exit(1);
 	}
 }
@@ -88,9 +88,10 @@ map<int, int> Chimera::runFilter(Sequence* seq) {
 vector<Sequence*> Chimera::readSeqs(string file) {
 	try {
 	
-		mothurOut("Reading sequences... "); cout.flush();
+		m->mothurOut("Reading sequences... "); cout.flush();
 		ifstream in;
 		openInputFile(file, in);
+		
 		vector<Sequence*> container;
 		int count = 0;
 		length = 0;
@@ -110,12 +111,12 @@ vector<Sequence*> Chimera::readSeqs(string file) {
 		}
 		
 		in.close();
-		mothurOut("Done."); mothurOutEndLine();
+		m->mothurOut("Done."); m->mothurOutEndLine();
 		
 		return container;
 	}
 	catch(exception& e) {
-		errorOut(e, "Chimera", "readSeqs");
+		m->errorOut(e, "Chimera", "readSeqs");
 		exit(1);
 	}
 }
@@ -143,7 +144,7 @@ void Chimera::setMask(string filename) {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "Chimera", "setMask");
+		m->errorOut(e, "Chimera", "setMask");
 		exit(1);
 	}
 }
@@ -186,7 +187,7 @@ vector< vector<float> > Chimera::readQuantiles() {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Chimera", "readQuantiles");
+		m->errorOut(e, "Chimera", "readQuantiles");
 		exit(1);
 	}
 }
@@ -204,14 +205,14 @@ Sequence* Chimera::getSequence(string name) {
 			}
 		}
 		
-		if(spot == -1) { mothurOut("Error: Could not find sequence."); mothurOutEndLine(); return NULL; }
+		if(spot == -1) { m->mothurOut("Error: Could not find sequence."); m->mothurOutEndLine(); return NULL; }
 		
 		temp = new Sequence(templateSeqs[spot]->getName(), templateSeqs[spot]->getAligned());
 		
 		return temp;
 	}
 	catch(exception& e) {
-		errorOut(e, "Chimera", "getSequence");
+		m->errorOut(e, "Chimera", "getSequence");
 		exit(1);
 	}
 }

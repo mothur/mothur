@@ -44,7 +44,7 @@ SharedListVector::SharedListVector(ifstream& f) : DataVector(), maxRank(0), numB
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedListVector", "SharedListVector");
+		m->errorOut(e, "SharedListVector", "SharedListVector");
 		exit(1);
 	}
 }
@@ -63,7 +63,7 @@ void SharedListVector::set(int binNumber, string seqNames){
 		numSeqs += (nNames_new - nNames_old);
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedListVector", "set");
+		m->errorOut(e, "SharedListVector", "set");
 		exit(1);
 	}
 }
@@ -88,7 +88,7 @@ void SharedListVector::push_back(string seqNames){
 		numSeqs += nNames;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedListVector", "push_back");
+		m->errorOut(e, "SharedListVector", "push_back");
 		exit(1);
 	}
 }
@@ -128,7 +128,7 @@ void SharedListVector::print(ostream& output){
 		output << endl;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedListVector", "print");
+		m->errorOut(e, "SharedListVector", "print");
 		exit(1);
 	}
 }
@@ -159,7 +159,7 @@ RAbundVector SharedListVector::getRAbundVector(){
 		return rav;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedListVector", "getRAbundVector");
+		m->errorOut(e, "SharedListVector", "getRAbundVector");
 		exit(1);
 	}
 }
@@ -180,7 +180,7 @@ SAbundVector SharedListVector::getSAbundVector(){
 		return sav;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedListVector", "getSAbundVector");
+		m->errorOut(e, "SharedListVector", "getSAbundVector");
 		exit(1);
 	}
 }
@@ -201,13 +201,13 @@ SharedOrderVector* SharedListVector::getSharedOrderVector(){
 				names = names.substr(names.find_first_of(',')+1, names.length());
 				groupName = groupmap->getGroup(name);
 				
-				if(groupName == "not found") {	mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); mothurOutEndLine();  exit(1); }
+				if(groupName == "not found") {	m->mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
 				
 				order->push_back(i, binSize, groupName);  //i represents what bin you are in
 			}
 			//get last name
 			groupName = groupmap->getGroup(names);
-			if(groupName == "not found") {	mothurOut("Error: Sequence '" + names + "' was not found in the group file, please correct."); mothurOutEndLine();  exit(1); }
+			if(groupName == "not found") {	m->mothurOut("Error: Sequence '" + names + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
 			order->push_back(i, binSize, groupName);
 		}
 
@@ -217,7 +217,7 @@ SharedOrderVector* SharedListVector::getSharedOrderVector(){
 		return order;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedListVector", "getSharedOrderVector");
+		m->errorOut(e, "SharedListVector", "getSharedOrderVector");
 		exit(1);
 	}
 }
@@ -233,7 +233,7 @@ SharedRAbundVector SharedListVector::getSharedRAbundVector(string groupName) {
 				name = names.substr(0,names.find_first_of(','));
 				names = names.substr(names.find_first_of(',')+1, names.length());
 				group = groupmap->getGroup(name);
-				if(group == "not found") {	mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); mothurOutEndLine();  exit(1); }
+				if(group == "not found") {	m->mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
 				if (group == groupName) { //this name is in the group you want the vector for.
 					rav.set(i, rav.getAbundance(i) + 1, group);  //i represents what bin you are in
 				}
@@ -241,7 +241,7 @@ SharedRAbundVector SharedListVector::getSharedRAbundVector(string groupName) {
 			
 			//get last name
 			groupName = groupmap->getGroup(names);
-			if(groupName == "not found") {	mothurOut("Error: Sequence '" + names + "' was not found in the group file, please correct."); mothurOutEndLine();  exit(1); }
+			if(groupName == "not found") {	m->mothurOut("Error: Sequence '" + names + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
 			if (group == groupName) { //this name is in the group you want the vector for.
 					rav.set(i, rav.getAbundance(i) + 1, group);  //i represents what bin you are in
 			}
@@ -254,7 +254,7 @@ SharedRAbundVector SharedListVector::getSharedRAbundVector(string groupName) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedListVector", "getSharedRAbundVector");
+		m->errorOut(e, "SharedListVector", "getSharedRAbundVector");
 		exit(1);
 	}
 }
@@ -287,13 +287,13 @@ vector<SharedRAbundVector*> SharedListVector::getSharedRAbundVector() {
 				name = names.substr(0,names.find_first_of(','));
 				names = names.substr(names.find_first_of(',')+1, names.length());
 				group = groupmap->getGroup(name);
-				if(group == "not found") {	mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); mothurOutEndLine();  exit(1); }
+				if(group == "not found") {	m->mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
 				finder[group]->set(i, finder[group]->getAbundance(i) + 1, group);  //i represents what bin you are in
 			}
 			
 			//get last name
 			group = groupmap->getGroup(names);
-			if(group == "not found") {	mothurOut("Error: Sequence '" + names + "' was not found in the group file, please correct."); mothurOutEndLine();  exit(1); }
+			if(group == "not found") {	m->mothurOut("Error: Sequence '" + names + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
 			finder[group]->set(i, finder[group]->getAbundance(i) + 1, group);  //i represents what bin you are in
 			
 		}
@@ -301,7 +301,7 @@ vector<SharedRAbundVector*> SharedListVector::getSharedRAbundVector() {
 		return lookup;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedListVector", "getSharedRAbundVector");
+		m->errorOut(e, "SharedListVector", "getSharedRAbundVector");
 		exit(1);
 	}
 }
@@ -318,7 +318,7 @@ SharedSAbundVector SharedListVector::getSharedSAbundVector(string groupName) {
 		return sav;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedListVector", "getSharedSAbundVector");
+		m->errorOut(e, "SharedListVector", "getSharedSAbundVector");
 		exit(1);
 	}
 }
@@ -359,7 +359,7 @@ OrderVector SharedListVector::getOrderVector(map<string,int>* orderMap = NULL){
 					}
 					else{
 						if(orderMap->count(seqName) == 0){
-							mothurOut(seqName + " not found, check *.names file\n");
+							m->mothurOut(seqName + " not found, check *.names file\n");
 							exit(1);
 						}
 					
@@ -369,7 +369,7 @@ OrderVector SharedListVector::getOrderVector(map<string,int>* orderMap = NULL){
 				}
 			
 				if(orderMap->count(seqName) == 0){
-					mothurOut(seqName + " not found, check *.names file\n");
+					m->mothurOut(seqName + " not found, check *.names file\n");
 					exit(1);
 				}
 				ov.set((*orderMap)[seqName], i);	
@@ -382,7 +382,7 @@ OrderVector SharedListVector::getOrderVector(map<string,int>* orderMap = NULL){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedListVector", "getOrderVector");
+		m->errorOut(e, "SharedListVector", "getOrderVector");
 		exit(1);
 	}
 }

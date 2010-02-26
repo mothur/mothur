@@ -35,7 +35,7 @@ SuffixNode::SuffixNode(int parent, int start, int end) :
 		parentNode(parent),			//	we store the parent node as an int
 		startCharPosition(start),	//	the suffix tree class will hold the sequence that the startCharPosition and 
 		endCharPosition(end)		//	endCharPosition indices correspond to
-		{	/*	do nothing	*/			}
+		{	/*	do nothing	*/		m = MothurOut::getInstance();	}
 
 
 void SuffixNode::setChildren(char, int)			{	/*	do nothing	*/			}	//	there's no children in a leaf
@@ -57,14 +57,14 @@ SuffixLeaf::SuffixLeaf(int parent, int start, int end) : SuffixNode(parent, star
 
 void SuffixLeaf::print(string sequence, int nodeNumber){
 	
-	mothurOut(toString(this) + "\t" + toString(parentNode) + "\t" + toString(nodeNumber) + "\t" +
+	m->mothurOut(toString(this) + "\t" + toString(parentNode) + "\t" + toString(nodeNumber) + "\t" +
 	toString(-1) + "\t" + toString(startCharPosition) + "\t" + toString(endCharPosition) + "\t");
 	
-	mothurOut("/");
+	m->mothurOut("/");
 	for(int i=startCharPosition;i<=endCharPosition;i++){
-		mothurOut(toString(deCodeSequence(sequence[i])));
+		m->mothurOut(toString(deCodeSequence(sequence[i])));
 	}
-	mothurOut("/");  mothurOutEndLine();
+	m->mothurOut("/");  m->mothurOutEndLine();
 }
 
 //********************************************************************************************************************
@@ -74,14 +74,14 @@ SuffixBranch::SuffixBranch(int parent, int start, int end) : SuffixNode(parent, 
 }
 	
 void SuffixBranch::print(string sequence, int nodeNumber){						//	this method is different that than
-	mothurOut(toString(this) + "\t" + toString(parentNode) + "\t" + toString(nodeNumber) + "\t" +		//	of a leaf because it prints out a
+	m->mothurOut(toString(this) + "\t" + toString(parentNode) + "\t" + toString(nodeNumber) + "\t" +		//	of a leaf because it prints out a
 	toString(suffixNode) + "\t" + toString(startCharPosition) + "\t" + toString(endCharPosition) + "\t");  //	value for the suffix node
 	
-	mothurOut("/");
+	m->mothurOut("/");
 	for(int i=startCharPosition;i<=endCharPosition;i++){
-		mothurOut(toString(deCodeSequence(sequence[i])));
+		m->mothurOut(toString(deCodeSequence(sequence[i])));
 	}
-	mothurOut("/");  mothurOutEndLine();
+	m->mothurOut("/");  m->mothurOutEndLine();
 }
 
 //	we can access the children by subtracting '0' from the the char value from the string, the difference is an int

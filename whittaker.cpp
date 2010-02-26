@@ -27,7 +27,7 @@ EstOutput Whittaker::getValues(vector<SharedRAbundVector*> shared){
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "Whittaker", "getValues");
+		m->errorOut(e, "Whittaker", "getValues");
 		exit(1);
 	}
 }

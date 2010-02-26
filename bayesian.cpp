@@ -43,10 +43,10 @@ Classify(tfile, tempFile, method, ksize, 0.0, 0.0, 0.0, 0.0), kmerSize(ksize), c
 		int start = time(NULL);
 		
 		if(probFileTest && probFileTest2){	
-			mothurOut("Reading template probabilities...     "); cout.flush();
+			m->mothurOut("Reading template probabilities...     "); cout.flush();
 			readProbFile(probFileTest, probFileTest2);	
 		}else{
-			mothurOut("Calculating template probabilities...     "); cout.flush();
+			m->mothurOut("Calculating template probabilities...     "); cout.flush();
 
 			ofstream out;
 			openOutputFile(probFileName, out);
@@ -88,11 +88,11 @@ Classify(tfile, tempFile, method, ksize, 0.0, 0.0, 0.0, 0.0), kmerSize(ksize), c
 		}
 		
 		
-		mothurOut("DONE."); mothurOutEndLine();
-		mothurOut("It took " + toString(time(NULL) - start) + " seconds get probabilities. "); mothurOutEndLine();
+		m->mothurOut("DONE."); m->mothurOutEndLine();
+		m->mothurOut("It took " + toString(time(NULL) - start) + " seconds get probabilities. "); m->mothurOutEndLine();
 	}
 	catch(exception& e) {
-		errorOut(e, "Bayesian", "Bayesian");
+		m->errorOut(e, "Bayesian", "Bayesian");
 		exit(1);
 	}
 }
@@ -122,7 +122,7 @@ string Bayesian::getTaxonomy(Sequence* seq) {
 		return tax;	
 	}
 	catch(exception& e) {
-		errorOut(e, "Bayesian", "getTaxonomy");
+		m->errorOut(e, "Bayesian", "getTaxonomy");
 		exit(1);
 	}
 }
@@ -196,7 +196,7 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Bayesian", "bootstrapResults");
+		m->errorOut(e, "Bayesian", "bootstrapResults");
 		exit(1);
 	}
 }
@@ -225,7 +225,7 @@ int Bayesian::getMostProbableTaxonomy(vector<int> queryKmer) {
 		return indexofGenus;
 	}
 	catch(exception& e) {
-		errorOut(e, "Bayesian", "getMostProbableTaxonomy");
+		m->errorOut(e, "Bayesian", "getMostProbableTaxonomy");
 		exit(1);
 	}
 }
@@ -252,7 +252,7 @@ map<string, int> Bayesian::parseTaxMap(string newTax) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Bayesian", "parseTax");
+		m->errorOut(e, "Bayesian", "parseTax");
 		exit(1);
 	}
 }
@@ -291,7 +291,7 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum) {
 		in.close();
 	}
 	catch(exception& e) {
-		errorOut(e, "Bayesian", "readProbFile");
+		m->errorOut(e, "Bayesian", "readProbFile");
 		exit(1);
 	}
 }

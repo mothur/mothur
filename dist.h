@@ -17,12 +17,13 @@
 class Dist {
 	
 public:
-	Dist(){dist = 0;}
+	Dist(){dist = 0; m = MothurOut::getInstance(); }
 	virtual ~Dist() {}
 	virtual void calcDist(Sequence, Sequence) = 0;
 	double getDist()	{	return dist;	}
 protected:
 	double dist;
+	MothurOut* m;
 };
 
 /**************************************************************************************************/

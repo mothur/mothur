@@ -16,11 +16,11 @@
 
 //**********************************************************************************************************************
 
-DistanceCommand::DistanceCommand(string option){
+DistanceCommand::DistanceCommand(string option) {
 	try {
 		abort = false;
 		Estimators.clear();
-		
+				
 		//allow user to run help
 		if(option == "help") { help(); abort = true; }
 		
@@ -56,7 +56,7 @@ DistanceCommand::DistanceCommand(string option){
 
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not found") { mothurOut("fasta is a required parameter for the dist.seqs command."); mothurOutEndLine(); abort = true; }
+			if (fastafile == "not found") { m->mothurOut("fasta is a required parameter for the dist.seqs command."); m->mothurOutEndLine(); abort = true; }
 			else if (fastafile == "not open") { abort = true; }	
 			else{
 				ifstream inFASTA;
@@ -92,7 +92,7 @@ DistanceCommand::DistanceCommand(string option){
 			
 			output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "column"; }
 			
-			if ((output != "column") && (output != "lt") && (output != "square")) { mothurOut(output + " is not a valid output form. Options are column, lt and square. I will use column."); mothurOutEndLine(); output = "column"; }
+			if ((output != "column") && (output != "lt") && (output != "square")) { m->mothurOut(output + " is not a valid output form. Options are column, lt and square. I will use column."); m->mothurOutEndLine(); output = "column"; }
 			
 			ValidCalculators validCalculator;
 			
@@ -118,7 +118,7 @@ DistanceCommand::DistanceCommand(string option){
 				
 	}
 	catch(exception& e) {
-		errorOut(e, "DistanceCommand", "DistanceCommand");
+		m->errorOut(e, "DistanceCommand", "DistanceCommand");
 		exit(1);
 	}
 }
@@ -137,21 +137,21 @@ DistanceCommand::~DistanceCommand(){
 
 void DistanceCommand::help(){
 	try {
-		mothurOut("The dist.seqs command reads a file containing sequences and creates a distance file.\n");
-		mothurOut("The dist.seqs command parameters are fasta, calc, countends, output, cutoff and processors.  \n");
-		mothurOut("The fasta parameter is required.\n");
-		mothurOut("The calc parameter allows you to specify the method of calculating the distances.  Your options are: nogaps, onegap or eachgap. The default is onegap.\n");
-		mothurOut("The countends parameter allows you to specify whether to include terminal gaps in distance.  Your options are: T or F. The default is T.\n");
-		mothurOut("The cutoff parameter allows you to specify maximum distance to keep. The default is 1.0.\n");
-		mothurOut("The output parameter allows you to specify format of your distance matrix. Options are column, lt, and square. The default is column.\n");
-		mothurOut("The processors parameter allows you to specify number of processors to use.  The default is 1.\n");
-		mothurOut("The dist.seqs command should be in the following format: \n");
-		mothurOut("dist.seqs(fasta=yourFastaFile, calc=yourCalc, countends=yourEnds, cutoff= yourCutOff, processors=yourProcessors) \n");
-		mothurOut("Example dist.seqs(fasta=amazon.fasta, calc=eachgap, countends=F, cutoff= 2.0, processors=3).\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. calc), '=' and parameters (i.e.yourCalc).\n\n");
+		m->mothurOut("The dist.seqs command reads a file containing sequences and creates a distance file.\n");
+		m->mothurOut("The dist.seqs command parameters are fasta, calc, countends, output, cutoff and processors.  \n");
+		m->mothurOut("The fasta parameter is required.\n");
+		m->mothurOut("The calc parameter allows you to specify the method of calculating the distances.  Your options are: nogaps, onegap or eachgap. The default is onegap.\n");
+		m->mothurOut("The countends parameter allows you to specify whether to include terminal gaps in distance.  Your options are: T or F. The default is T.\n");
+		m->mothurOut("The cutoff parameter allows you to specify maximum distance to keep. The default is 1.0.\n");
+		m->mothurOut("The output parameter allows you to specify format of your distance matrix. Options are column, lt, and square. The default is column.\n");
+		m->mothurOut("The processors parameter allows you to specify number of processors to use.  The default is 1.\n");
+		m->mothurOut("The dist.seqs command should be in the following format: \n");
+		m->mothurOut("dist.seqs(fasta=yourFastaFile, calc=yourCalc, countends=yourEnds, cutoff= yourCutOff, processors=yourProcessors) \n");
+		m->mothurOut("Example dist.seqs(fasta=amazon.fasta, calc=eachgap, countends=F, cutoff= 2.0, processors=3).\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. calc), '=' and parameters (i.e.yourCalc).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "DistanceCommand", "help");
+		m->errorOut(e, "DistanceCommand", "help");
 		exit(1);
 	}
 }
@@ -213,11 +213,16 @@ int DistanceCommand::execute(){
 		
 		delete distCalculator;
 		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+		m->mothurOut(outputFile); m->mothurOutEndLine();
+		m->mothurOutEndLine();
+
 		return 0;
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "DistanceCommand", "execute");
+		m->errorOut(e, "DistanceCommand", "execute");
 		exit(1);
 	}
 }
@@ -238,7 +243,7 @@ void DistanceCommand::createProcesses(string filename) {
 			}else if (pid == 0){
 				driver(lines[process]->start, lines[process]->end, filename + toString(getpid()) + ".temp", cutoff);
 				exit(0);
-			}else { mothurOut("unable to spawn the necessary processes."); mothurOutEndLine(); exit(0); }
+			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
 		}
 	
 		//force parent to wait until all the processes are done
@@ -249,7 +254,7 @@ void DistanceCommand::createProcesses(string filename) {
 #endif
 	}
 	catch(exception& e) {
-		errorOut(e, "DistanceCommand", "createProcesses");
+		m->errorOut(e, "DistanceCommand", "createProcesses");
 		exit(1);
 	}
 }
@@ -295,18 +300,18 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 			if (output == "lt") { outFile << endl; }
 			
 			if(i % 100 == 0){
-				mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); mothurOutEndLine();
+				m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
 			}
 			
 		}
-		mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); mothurOutEndLine();
+		m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
 		
 		outFile.close();
 		
 		return 1;
 	}
 	catch(exception& e) {
-		errorOut(e, "DistanceCommand", "driver");
+		m->errorOut(e, "DistanceCommand", "driver");
 		exit(1);
 	}
 }
@@ -390,7 +395,7 @@ void DistanceCommand::convertMatrix(string outputFile) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "DistanceCommand", "convertMatrix");
+		m->errorOut(e, "DistanceCommand", "convertMatrix");
 		exit(1);
 	}
 }
@@ -413,7 +418,7 @@ void DistanceCommand::appendFiles(string temp, string filename) {
 		output.close();
 	}
 	catch(exception& e) {
-		errorOut(e, "DistanceCommand", "appendFiles");
+		m->errorOut(e, "DistanceCommand", "appendFiles");
 		exit(1);
 	}
 }

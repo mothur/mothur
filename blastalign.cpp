@@ -102,9 +102,9 @@ void BlastAlignment::setPairwiseSeqs(){	//	This method call assigns the blast ge
 			pairwiseLength = 0;
 			
 //			string dummy;
-//			while(dummy != "query:"){	mothurOut(dummy, ""); mothurOutEndLine(); blastFile >> dummy;	}
+//			while(dummy != "query:"){	m->mothurOut(dummy, ""); m->mothurOutEndLine(); blastFile >> dummy;	}
 //			blastFile >> seqBend;
-//			mothurOut(toString(seqBend), ""); mothurOutEndLine();
+//			m->mothurOut(toString(seqBend), ""); m->mothurOutEndLine();
 //			for(int i=0;i<seqBend;i++){
 //				seqAaln += 'Z';
 //				seqBaln += 'X';

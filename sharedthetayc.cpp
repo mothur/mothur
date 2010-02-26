@@ -48,7 +48,7 @@ EstOutput ThetaYC::getValues(vector<SharedRAbundVector*> shared) {
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "ThetaYC", "getValues");
+		m->errorOut(e, "ThetaYC", "getValues");
 		exit(1);
 	}
 }

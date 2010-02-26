@@ -92,7 +92,7 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 		return topMatches;
 	}
 	catch(exception& e) {
-		errorOut(e, "BlastDB", "findClosestSequences");
+		m->errorOut(e, "BlastDB", "findClosestSequences");
 		exit(1);
 	}
 
@@ -139,7 +139,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n) {
 		return topMatches;
 	}
 	catch(exception& e) {
-		errorOut(e, "BlastDB", "findClosest");
+		m->errorOut(e, "BlastDB", "findClosest");
 		exit(1);
 	}
 }
@@ -158,7 +158,7 @@ void BlastDB::addSequence(Sequence seq) {
 		count++;
 	}
 	catch(exception& e) {
-		errorOut(e, "BlastDB", "addSequence");
+		m->errorOut(e, "BlastDB", "addSequence");
 		exit(1);
 	}
 }
@@ -166,7 +166,7 @@ void BlastDB::addSequence(Sequence seq) {
 void BlastDB::generateDB() {
 	try {
 	
-		//mothurOut("Generating the temporary BLAST database...\t");	cout.flush();
+		//m->mothurOut("Generating the temporary BLAST database...\t");	cout.flush();
 		
 		path = globaldata->argv;
 		path = path.substr(0, (path.find_last_of('m')));
@@ -174,10 +174,10 @@ void BlastDB::generateDB() {
 		string formatdbCommand = path + "blast/bin/formatdb -p F -o T -i " + dbFileName;	//	format the database, -o option gives us the ability
 		system(formatdbCommand.c_str());								//	to get the right sequence names, i think. -p F
 																	//	option tells formatdb that seqs are DNA, not prot
-		//mothurOut("DONE."); mothurOutEndLine();	mothurOutEndLine(); cout.flush();
+		//m->mothurOut("DONE."); m->mothurOutEndLine();	m->mothurOutEndLine(); cout.flush();
 	}
 	catch(exception& e) {
-		errorOut(e, "BlastDB", "generateDB");
+		m->errorOut(e, "BlastDB", "generateDB");
 		exit(1);
 	}
 }

@@ -12,6 +12,7 @@
 
 /****************************************************************/	
 Node::Node() {
+	m = MothurOut::getInstance();
 	//initialize node
 	name = "";
 	branchLength = -1;
@@ -60,30 +61,30 @@ int Node::getIndex() { return vectorIndex; }
 //to be used by printTree in the Tree class to print the leaf info			
 void Node::printNode() {
 	try{
-		mothurOut(toString(parent) + " " + toString(lchild) + " " + toString(rchild) + " ");
+		m->mothurOut(toString(parent) + " " + toString(lchild) + " " + toString(rchild) + " ");
 		
-		for (int i = 0; i < group.size(); i++) {  mothurOut( group[i] + " "); }
+		for (int i = 0; i < group.size(); i++) {  m->mothurOut( group[i] + " "); }
 		
 		//there is a branch length
 		if (branchLength != -1) { 
-			mothurOut(" " + toString(branchLength)); 
+			m->mothurOut(" " + toString(branchLength)); 
 		}
-		mothurOut(" |");
+		m->mothurOut(" |");
 		
 		map<string, int>::iterator it;
 		for(it=pGroups.begin();it!=pGroups.end();it++){
-			mothurOut(" " + it->first + ":" + toString(it->second));
+			m->mothurOut(" " + it->first + ":" + toString(it->second));
 		}
-		mothurOut(" |");
+		m->mothurOut(" |");
 		for(it=pcount.begin();it!=pcount.end();it++){
-			mothurOut(" " + it->first + ":" + toString(it->second));
+			m->mothurOut(" " + it->first + ":" + toString(it->second));
 		}
-		mothurOutEndLine();
+		m->mothurOutEndLine();
 		
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Node", "printNode");
+		m->errorOut(e, "Node", "printNode");
 		exit(1);
 	}
 }

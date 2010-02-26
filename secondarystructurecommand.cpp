@@ -12,11 +12,11 @@
 
 //**********************************************************************************************************************
 
-AlignCheckCommand::AlignCheckCommand(string option){
+AlignCheckCommand::AlignCheckCommand(string option)  {
 	try {
 		abort = false;
 		haderror = 0;
-		
+			
 		//allow user to run help
 		if(option == "help") { help(); abort = true; }
 		
@@ -61,11 +61,11 @@ AlignCheckCommand::AlignCheckCommand(string option){
 			//check for required parameters
 			mapfile = validParameter.validFile(parameters, "map", true);
 			if (mapfile == "not open") { abort = true; }
-			else if (mapfile == "not found") {  mapfile = "";  mothurOut("You must provide an map file."); mothurOutEndLine(); abort = true; }	
+			else if (mapfile == "not found") {  mapfile = "";  m->mothurOut("You must provide an map file."); m->mothurOutEndLine(); abort = true; }	
 			
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
-			else if (fastafile == "not found") {  fastafile = "";  mothurOut("You must provide an fasta file."); mothurOutEndLine(); abort = true;  }	
+			else if (fastafile == "not found") {  fastafile = "";  m->mothurOut("You must provide an fasta file."); m->mothurOutEndLine(); abort = true;  }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -77,7 +77,7 @@ AlignCheckCommand::AlignCheckCommand(string option){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "AlignCheckCommand", "RemoveSeqsCommand");
+		m->errorOut(e, "AlignCheckCommand", "RemoveSeqsCommand");
 		exit(1);
 	}
 }
@@ -85,15 +85,15 @@ AlignCheckCommand::AlignCheckCommand(string option){
 
 void AlignCheckCommand::help(){
 	try {
-		mothurOut("The align.check command reads a fasta file and map file.\n");
-		mothurOut("It outputs a file containing the secondary structure matches in the .align.check file.\n");
-		mothurOut("The align.check command parameters are fasta and map, both are required.\n");
-		mothurOut("The align.check command should be in the following format: align.check(fasta=yourFasta, map=yourMap).\n");
-		mothurOut("Example align.check(map=silva.ss.map, fasta=amazon.fasta).\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
+		m->mothurOut("The align.check command reads a fasta file and map file.\n");
+		m->mothurOut("It outputs a file containing the secondary structure matches in the .align.check file.\n");
+		m->mothurOut("The align.check command parameters are fasta and map, both are required.\n");
+		m->mothurOut("The align.check command should be in the following format: align.check(fasta=yourFasta, map=yourMap).\n");
+		m->mothurOut("Example align.check(map=silva.ss.map, fasta=amazon.fasta).\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "AlignCheckCommand", "help");
+		m->errorOut(e, "AlignCheckCommand", "help");
 		exit(1);
 	}
 }
@@ -135,11 +135,16 @@ int AlignCheckCommand::execute(){
 		in.close();
 		out.close();
 		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+		m->mothurOut(outfile); m->mothurOutEndLine();	
+		m->mothurOutEndLine();
+		
 		return 0;		
 	}
 
 	catch(exception& e) {
-		errorOut(e, "AlignCheckCommand", "execute");
+		m->errorOut(e, "AlignCheckCommand", "execute");
 		exit(1);
 	}
 }
@@ -167,7 +172,7 @@ void AlignCheckCommand::readMap(){
 		for(int i=0;i<seqLength;i++){
 			if(structMap[i] != 0){
 				if(structMap[structMap[i]] != i){
-					mothurOut("Your map file contains an error:  line " + toString(i) + " does not match line " + toString(structMap[i]) + "."); mothurOutEndLine();
+					m->mothurOut("Your map file contains an error:  line " + toString(i) + " does not match line " + toString(structMap[i]) + "."); m->mothurOutEndLine();
 				}
 			}
 		}
@@ -175,7 +180,7 @@ void AlignCheckCommand::readMap(){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "AlignCheckCommand", "readMap");
+		m->errorOut(e, "AlignCheckCommand", "readMap");
 		exit(1);
 	}
 }
@@ -189,7 +194,7 @@ statData AlignCheckCommand::getStats(string sequence){
 		
 		int length = sequence.length();
 		
-		if (length != seqLength) { mothurOut("your sequences are " + toString(length) + " long, but your map file only contains " + toString(seqLength) + " entries. please correct."); mothurOutEndLine(); haderror = 1; return data;  }
+		if (length != seqLength) { m->mothurOut("your sequences are " + toString(length) + " long, but your map file only contains " + toString(seqLength) + " entries. please correct."); m->mothurOutEndLine(); haderror = 1; return data;  }
 		
 		for(int i=1;i<length;i++){
 			if(structMap[i] != 0){
@@ -242,7 +247,7 @@ statData AlignCheckCommand::getStats(string sequence){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "AlignCheckCommand", "getStats");
+		m->errorOut(e, "AlignCheckCommand", "getStats");
 		exit(1);
 	}
 }

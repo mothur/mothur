@@ -11,9 +11,10 @@
 
 //**********************************************************************************************************************
 //This function checks to make sure the cluster command has no errors and then clusters based on the method chosen.
-ClusterCommand::ClusterCommand(string option){
+ClusterCommand::ClusterCommand(string option)  {
 	try{
 		globaldata = GlobalData::getInstance();
+		
 		abort = false;
 		
 		//allow user to run help
@@ -41,7 +42,7 @@ ClusterCommand::ClusterCommand(string option){
 			
 			//error checking to make sure they read a distance file
 			if ((globaldata->gSparseMatrix == NULL) || (globaldata->gListVector == NULL)) {
-				mothurOut("Before you use the cluster command, you first need to read in a distance matrix."); mothurOutEndLine();
+				m->mothurOut("Before you use the cluster command, you first need to read in a distance matrix."); m->mothurOutEndLine();
 				abort = true;
 			} 
 		
@@ -64,7 +65,7 @@ ClusterCommand::ClusterCommand(string option){
 			if (method == "not found") { method = "furthest"; }
 			
 			if ((method == "furthest") || (method == "nearest") || (method == "average")) { }
-			else { mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average."); mothurOutEndLine(); abort = true; }
+			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average."); m->mothurOutEndLine(); abort = true; }
 
 			showabund = validParameter.validFile(parameters, "showabund", false);
 			if (showabund == "not found") { showabund = "T"; }
@@ -95,11 +96,15 @@ ClusterCommand::ClusterCommand(string option){
 				openOutputFile(fileroot+ tag + ".sabund",	sabundFile);
 				openOutputFile(fileroot+ tag + ".rabund",	rabundFile);
 				openOutputFile(fileroot+ tag + ".list",		listFile);
+				
+				outputNames.push_back(fileroot+ tag + ".sabund");
+				outputNames.push_back(fileroot+ tag + ".rabund");
+				outputNames.push_back(fileroot+ tag + ".list");
 			}
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "ClusterCommand", "ClusterCommand");
+		m->errorOut(e, "ClusterCommand", "ClusterCommand");
 		exit(1);
 	}
 }
@@ -108,14 +113,14 @@ ClusterCommand::ClusterCommand(string option){
 
 void ClusterCommand::help(){
 	try {
-		mothurOut("The cluster command can only be executed after a successful read.dist command.\n");
-		mothurOut("The cluster command parameter options are method, cuttoff, precision, showabund and timing. No parameters are required.\n");
-		mothurOut("The cluster command should be in the following format: \n");
-		mothurOut("cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n");
-		mothurOut("The acceptable cluster methods are furthest, nearest and average.  If no method is provided then furthest is assumed.\n\n");	
+		m->mothurOut("The cluster command can only be executed after a successful read.dist command.\n");
+		m->mothurOut("The cluster command parameter options are method, cuttoff, precision, showabund and timing. No parameters are required.\n");
+		m->mothurOut("The cluster command should be in the following format: \n");
+		m->mothurOut("cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n");
+		m->mothurOut("The acceptable cluster methods are furthest, nearest and average.  If no method is provided then furthest is assumed.\n\n");	
 	}
 	catch(exception& e) {
-		errorOut(e, "ClusterCommand", "help");
+		m->errorOut(e, "ClusterCommand", "help");
 		exit(1);
 	}
 }
@@ -150,7 +155,7 @@ int ClusterCommand::execute(){
 		
 		while (matrix->getSmallDist() < cutoff && matrix->getNNodes() > 0){
 			if (print_start && isTrue(timing)) {
-				mothurOut("Clustering (" + tag + ") dist " + toString(matrix->getSmallDist()) + "/" 
+				m->mothurOut("Clustering (" + tag + ") dist " + toString(matrix->getSmallDist()) + "/" 
 					+ toString(roundDist(matrix->getSmallDist(), precision)) 
 					+ "\t(precision: " + toString(precision) + ", Nodes: " + toString(matrix->getNNodes()) + ")");
 				cout.flush();
@@ -177,7 +182,7 @@ int ClusterCommand::execute(){
 		}
 
 		if (print_start && isTrue(timing)) {
-			mothurOut("Clustering (" + tag + ") for distance " + toString(previousDist) + "/" + toString(rndPreviousDist) 
+			m->mothurOut("Clustering (" + tag + ") for distance " + toString(previousDist) + "/" + toString(rndPreviousDist) 
 					 + "\t(precision: " + toString(precision) + ", Nodes: " + toString(matrix->getNNodes()) + ")");
 			cout.flush();
 	 		print_start = false;
@@ -206,17 +211,23 @@ int ClusterCommand::execute(){
 		rabundFile.close();
 		listFile.close();
 		
-		if (saveCutoff != cutoff) { mothurOut("changed cutoff to " + toString(cutoff)); mothurOutEndLine();  }
+		if (saveCutoff != cutoff) { m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine();  }
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+
 		
 		//if (isTrue(timing)) {
-			mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster"); mothurOutEndLine();
+			m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster"); m->mothurOutEndLine();
 		//}
 		
 		
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "ClusterCommand", "execute");
+		m->errorOut(e, "ClusterCommand", "execute");
 		exit(1);
 	}
 }
@@ -226,8 +237,8 @@ int ClusterCommand::execute(){
 void ClusterCommand::printData(string label){
 	try {
 		if (isTrue(timing)) {
-			mothurOut("\tTime: " + toString(time(NULL) - start) + "\tsecs for " + toString(oldRAbund.getNumBins()) 
-		     + "\tclusters. Updates: " + toString(loops)); mothurOutEndLine();
+			m->mothurOut("\tTime: " + toString(time(NULL) - start) + "\tsecs for " + toString(oldRAbund.getNumBins()) 
+		     + "\tclusters. Updates: " + toString(loops)); m->mothurOutEndLine();
 		}
 		print_start = true;
 		loops = 0;
@@ -244,7 +255,7 @@ void ClusterCommand::printData(string label){
 		oldList.print(listFile);
 	}
 	catch(exception& e) {
-		errorOut(e, "ClusterCommand", "printData");
+		m->errorOut(e, "ClusterCommand", "printData");
 		exit(1);
 	}
 

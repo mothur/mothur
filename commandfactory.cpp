@@ -80,6 +80,8 @@ CommandFactory* CommandFactory::getInstance() {
 /***********************************************************/
 CommandFactory::CommandFactory(){
 	string s = "";
+	m = MothurOut::getInstance();
+	
 	command = new NoCommand(s);
 	
 	outputDir = ""; inputDir = "";
@@ -169,67 +171,67 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 			else { optionString += "inputdir=" + inputDir; }
 		}
 		
-		if(commandName == "read.dist")					{	command = new ReadDistCommand(optionString);			}
-		else if(commandName == "read.otu")				{	command = new ReadOtuCommand(optionString);				}
-		else if(commandName == "read.tree")				{	command = new ReadTreeCommand(optionString);			}
-		else if(commandName == "cluster")				{	command = new ClusterCommand(optionString);				}
-		else if(commandName == "unique.seqs")			{	command = new DeconvoluteCommand(optionString);			}
-		else if(commandName == "parsimony")				{	command = new ParsimonyCommand(optionString);			}
-		else if(commandName == "help")					{	command = new HelpCommand(optionString);				}
-		else if(commandName == "quit")					{	command = new QuitCommand(optionString);				}
-		else if(commandName == "collect.single")		{	command = new CollectCommand(optionString);				}
-		else if(commandName == "collect.shared")		{	command = new CollectSharedCommand(optionString);		}
-		else if(commandName == "rarefaction.single")	{	command = new RareFactCommand(optionString);			}
-		else if(commandName == "rarefaction.shared")	{	command = new RareFactSharedCommand(optionString);		}
-		else if(commandName == "summary.single")		{	command = new SummaryCommand(optionString);				}
-		else if(commandName == "summary.shared")		{	command = new SummarySharedCommand(optionString);		}
-		else if(commandName == "unifrac.weighted")		{	command = new UnifracWeightedCommand(optionString);		}
-		else if(commandName == "unifrac.unweighted")	{	command = new UnifracUnweightedCommand(optionString);	}
-		else if(commandName == "get.group")             {   command = new GetgroupCommand(optionString);			}
-		else if(commandName == "get.label")             {   command = new GetlabelCommand(optionString);			}
-		else if(commandName == "get.sabund")            {   command = new GetSAbundCommand(optionString);			}
-		else if(commandName == "get.rabund")            {   command = new GetRAbundCommand(optionString);			}
-		else if(commandName == "libshuff")              {   command = new LibShuffCommand(optionString);			}
-		else if(commandName == "heatmap.bin")			{   command = new HeatMapCommand(optionString);				}
-		else if(commandName == "heatmap.sim")			{   command = new HeatMapSimCommand(optionString);			}
-		else if(commandName == "filter.seqs")			{   command = new FilterSeqsCommand(optionString);			}
-		else if(commandName == "venn")					{   command = new VennCommand(optionString);				}
-		else if(commandName == "bin.seqs")				{   command = new BinSeqCommand(optionString);				}
-		else if(commandName == "get.oturep")			{   command = new GetOTURepCommand(optionString);			}
-		else if(commandName == "tree.shared")			{   command = new TreeGroupCommand(optionString);			}
-		else if(commandName == "dist.shared")			{   command = new MatrixOutputCommand(optionString);		}
-		else if(commandName == "bootstrap.shared")		{   command = new BootSharedCommand(optionString);			}
-		//else if(commandName == "consensus")			{   command = new ConcensusCommand(optionString);			}
-		else if(commandName == "dist.seqs")				{   command = new DistanceCommand(optionString);			}
-		else if(commandName == "align.seqs")			{   command = new AlignCommand(optionString);				}
-		else if(commandName == "summary.seqs")			{	command = new SeqSummaryCommand(optionString);			}
-		else if(commandName == "screen.seqs")			{	command = new ScreenSeqsCommand(optionString);			}
-		else if(commandName == "reverse.seqs")			{	command = new ReverseSeqsCommand(optionString);			}
-		else if(commandName == "trim.seqs")				{	command = new TrimSeqsCommand(optionString);			}
-		else if(commandName == "chimera.seqs")			{	command = new ChimeraSeqsCommand(optionString);			}
-		else if(commandName == "list.seqs")				{	command = new ListSeqsCommand(optionString);			}
-		else if(commandName == "get.seqs")				{	command = new GetSeqsCommand(optionString);				}
-		else if(commandName == "remove.seqs")			{	command = new RemoveSeqsCommand(optionString);			}
-		else if(commandName == "merge.files")			{	command = new MergeFileCommand(optionString);			}
-		else if(commandName == "system")				{	command = new SystemCommand(optionString);				}
-		else if(commandName == "align.check")			{	command = new AlignCheckCommand(optionString);			}
-		else if(commandName == "get.sharedseqs")		{	command = new GetSharedOTUCommand(optionString);		}
-		else if(commandName == "get.otulist")			{	command = new GetListCountCommand(optionString);		}
-		else if(commandName == "hcluster")				{	command = new HClusterCommand(optionString);			}
-		else if(commandName == "classify.seqs")			{	command = new ClassifySeqsCommand(optionString);		}
-		else if(commandName == "phylotype")				{	command = new PhylotypeCommand(optionString);			}
-		else if(commandName == "mgcluster")				{	command = new MGClusterCommand(optionString);			}
-		else if(commandName == "pre.cluster")			{	command = new PreClusterCommand(optionString);			}
-		else if(commandName == "pcoa")					{	command = new PCACommand(optionString);					}
-		else if(commandName == "otu.hierarchy")			{	command = new OtuHierarchyCommand(optionString);		}
-		else if(commandName == "set.dir")				{	command = new SetDirectoryCommand(optionString);		}
-		else if(commandName == "parse.list")			{	command = new ParseListCommand(optionString);			}
-		else											{	command = new NoCommand(optionString);					}
+		if(commandName == "read.dist")					{	command = new ReadDistCommand(optionString);				}
+		else if(commandName == "read.otu")				{	command = new ReadOtuCommand(optionString);					}
+		else if(commandName == "read.tree")				{	command = new ReadTreeCommand(optionString);				}
+		else if(commandName == "cluster")				{	command = new ClusterCommand(optionString);					}
+		else if(commandName == "unique.seqs")			{	command = new DeconvoluteCommand(optionString);				}
+		else if(commandName == "parsimony")				{	command = new ParsimonyCommand(optionString);				}
+		else if(commandName == "help")					{	command = new HelpCommand(optionString);					}
+		else if(commandName == "quit")					{	command = new QuitCommand(optionString);					}
+		else if(commandName == "collect.single")		{	command = new CollectCommand(optionString);					}
+		else if(commandName == "collect.shared")		{	command = new CollectSharedCommand(optionString);			}
+		else if(commandName == "rarefaction.single")	{	command = new RareFactCommand(optionString);				}
+		else if(commandName == "rarefaction.shared")	{	command = new RareFactSharedCommand(optionString);			}
+		else if(commandName == "summary.single")		{	command = new SummaryCommand(optionString);					}
+		else if(commandName == "summary.shared")		{	command = new SummarySharedCommand(optionString);			}
+		else if(commandName == "unifrac.weighted")		{	command = new UnifracWeightedCommand(optionString);			}
+		else if(commandName == "unifrac.unweighted")	{	command = new UnifracUnweightedCommand(optionString);		}
+		else if(commandName == "get.group")             {   command = new GetgroupCommand(optionString);				}
+		else if(commandName == "get.label")             {   command = new GetlabelCommand(optionString);				}
+		else if(commandName == "get.sabund")            {   command = new GetSAbundCommand(optionString);				}
+		else if(commandName == "get.rabund")            {   command = new GetRAbundCommand(optionString);				}
+		else if(commandName == "libshuff")              {   command = new LibShuffCommand(optionString);				}
+		else if(commandName == "heatmap.bin")			{   command = new HeatMapCommand(optionString);					}
+		else if(commandName == "heatmap.sim")			{   command = new HeatMapSimCommand(optionString);				}
+		else if(commandName == "filter.seqs")			{   command = new FilterSeqsCommand(optionString);				}
+		else if(commandName == "venn")					{   command = new VennCommand(optionString);					}
+		else if(commandName == "bin.seqs")				{   command = new BinSeqCommand(optionString);					}
+		else if(commandName == "get.oturep")			{   command = new GetOTURepCommand(optionString);				}
+		else if(commandName == "tree.shared")			{   command = new TreeGroupCommand(optionString);				}
+		else if(commandName == "dist.shared")			{   command = new MatrixOutputCommand(optionString);			}
+		else if(commandName == "bootstrap.shared")		{   command = new BootSharedCommand(optionString);				}
+		//else if(commandName == "consensus")			{   command = new ConcensusCommand(optionString);				}
+		else if(commandName == "dist.seqs")				{   command = new DistanceCommand(optionString);				}
+		else if(commandName == "align.seqs")			{   command = new AlignCommand(optionString);					}
+		else if(commandName == "summary.seqs")			{	command = new SeqSummaryCommand(optionString);				}
+		else if(commandName == "screen.seqs")			{	command = new ScreenSeqsCommand(optionString);				}
+		else if(commandName == "reverse.seqs")			{	command = new ReverseSeqsCommand(optionString);				}
+		else if(commandName == "trim.seqs")				{	command = new TrimSeqsCommand(optionString);				}
+		else if(commandName == "chimera.seqs")			{	command = new ChimeraSeqsCommand(optionString);				}
+		else if(commandName == "list.seqs")				{	command = new ListSeqsCommand(optionString);				}
+		else if(commandName == "get.seqs")				{	command = new GetSeqsCommand(optionString);					}
+		else if(commandName == "remove.seqs")			{	command = new RemoveSeqsCommand(optionString);				}
+		else if(commandName == "merge.files")			{	command = new MergeFileCommand(optionString);				}
+		else if(commandName == "system")				{	command = new SystemCommand(optionString);					}
+		else if(commandName == "align.check")			{	command = new AlignCheckCommand(optionString);				}
+		else if(commandName == "get.sharedseqs")		{	command = new GetSharedOTUCommand(optionString);			}
+		else if(commandName == "get.otulist")			{	command = new GetListCountCommand(optionString);			}
+		else if(commandName == "hcluster")				{	command = new HClusterCommand(optionString);				}
+		else if(commandName == "classify.seqs")			{	command = new ClassifySeqsCommand(optionString);			}
+		else if(commandName == "phylotype")				{	command = new PhylotypeCommand(optionString);				}
+		else if(commandName == "mgcluster")				{	command = new MGClusterCommand(optionString);				}
+		else if(commandName == "pre.cluster")			{	command = new PreClusterCommand(optionString);				}
+		else if(commandName == "pcoa")					{	command = new PCACommand(optionString);						}
+		else if(commandName == "otu.hierarchy")			{	command = new OtuHierarchyCommand(optionString);			}
+		else if(commandName == "set.dir")				{	command = new SetDirectoryCommand(optionString);			}
+		else if(commandName == "parse.list")			{	command = new ParseListCommand(optionString);				}
+		else											{	command = new NoCommand(optionString);						}
 
 		return command;
 	}
 	catch(exception& e) {
-		errorOut(e, "CommandFactory", "getCommand");
+		m->errorOut(e, "CommandFactory", "getCommand");
 		exit(1);
 	}
 }
@@ -245,7 +247,7 @@ Command* CommandFactory::getCommand(){
 		return command;
 	}
 	catch(exception& e) {
-		errorOut(e, "CommandFactory", "getCommand");
+		m->errorOut(e, "CommandFactory", "getCommand");
 		exit(1);
 	}
 }
@@ -257,17 +259,17 @@ bool CommandFactory::isValidCommand(string command) {
 		if ((commands.find(command)) != (commands.end())) {
 			return true;
 		}else{
-			mothurOut(command + " is not a valid command in Mothur.  Valid commands are ");
+			m->mothurOut(command + " is not a valid command in Mothur.  Valid commands are ");
 			for (it = commands.begin(); it != commands.end(); it++) {
-				mothurOut(it->first + ", ");
+				m->mothurOut(it->first + ", ");
 			}
-			mothurOutEndLine();
+			m->mothurOutEndLine();
 			return false;
 		}
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "CommandFactory", "isValidCommand");
+		m->errorOut(e, "CommandFactory", "isValidCommand");
 		exit(1);
 	}
 }
@@ -282,7 +284,7 @@ void CommandFactory::printCommands(ostream& out) {
 		out << endl;
 	}
 	catch(exception& e) {
-		errorOut(e, "CommandFactory", "printCommands");
+		m->errorOut(e, "CommandFactory", "printCommands");
 		exit(1);
 	}
 }

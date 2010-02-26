@@ -11,6 +11,7 @@
  */
  
 #include "mothur.h"
+#include "mothurout.h"
 
 
 /* This class represents the fasta file.  It reads a fasta file a populates the internal data structure "data".
@@ -21,7 +22,7 @@ a list of the sequences names who have the same sequence and a number of how man
 class FastaMap  {
 
 public:
-	FastaMap() {};
+	FastaMap() { m = MothurOut::getInstance(); }
 	~FastaMap() {};
 	
 	string getGroupName(string);  //pass a sequence name get its group
@@ -42,6 +43,7 @@ private:
 
 	map<string, group>  data;  //sequence, groupinfo	- condensed representation of file
 	map<string, string>  seqmap;  //name, sequence  -  uncondensed representation of file
+	MothurOut* m;
 };
 
 #endif

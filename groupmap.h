@@ -10,6 +10,7 @@
  */
 
 #include "mothur.h"
+#include "mothurout.h"
 
 /* This class is a representation of the groupfile.  It is used by all the shared commands to determine what group a 
 	certain sequence belongs to. */
@@ -31,6 +32,7 @@ public:
 	int getNumSeqs(string); //return the number of seqs in a given group
 			
 private:
+	MothurOut* m;
 	ifstream fileHandle;
 	string groupFileName;
 	int index;

@@ -21,12 +21,12 @@ EstOutput Solow::getValues(SAbundVector* rank){
 		double f1 = (double)rank->get(1);
 		double f2 = (double)rank->get(2);
 
-		data[0] = f1*f1/2/f2 * (1 - pow(1 - 2*f2/n/f1, m));
+		data[0] = f1*f1/2/f2 * (1 - pow(1 - 2*f2/n/f1, f));
 		
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "Solow", "getValues");
+		m->errorOut(e, "Solow", "getValues");
 		exit(1);
 	}
 }

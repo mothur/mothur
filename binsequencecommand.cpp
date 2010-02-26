@@ -10,7 +10,7 @@
 #include "binsequencecommand.h"
 
 //**********************************************************************************************************************
-BinSeqCommand::BinSeqCommand(string option){
+BinSeqCommand::BinSeqCommand(string option) {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
@@ -45,8 +45,8 @@ BinSeqCommand::BinSeqCommand(string option){
 			
 			//make sure the user has already run the read.otu command
 			if (globaldata->getListFile() == "") { 
-				mothurOut("You must read a listfile before running the bin.seqs command."); 
-				mothurOutEndLine(); 
+				m->mothurOut("You must read a listfile before running the bin.seqs command."); 
+				m->mothurOutEndLine(); 
 				abort = true; 
 			}
 			
@@ -83,7 +83,7 @@ BinSeqCommand::BinSeqCommand(string option){
 			
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not found") { mothurOut("fasta is a required parameter for the bin.seqs command.");  mothurOutEndLine(); abort = true; }
+			if (fastafile == "not found") { m->mothurOut("fasta is a required parameter for the bin.seqs command.");  m->mothurOutEndLine(); abort = true; }
 			else if (fastafile == "not open") { abort = true; }	
 		
 			//check for optional parameter and set defaults
@@ -124,7 +124,7 @@ BinSeqCommand::BinSeqCommand(string option){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "BinSeqCommand", "BinSeqCommand");
+		m->errorOut(e, "BinSeqCommand", "BinSeqCommand");
 		exit(1);
 	}
 }
@@ -132,18 +132,18 @@ BinSeqCommand::BinSeqCommand(string option){
 
 void BinSeqCommand::help(){
 	try {
-		mothurOut("The bin.seqs command can only be executed after a successful read.otu command of a listfile.\n");
-		mothurOut("The bin.seqs command parameters are fasta, name, label and group.  The fasta parameter is required.\n");
-		mothurOut("The label parameter allows you to select what distance levels you would like a output files created for, and are separated by dashes.\n");
-		mothurOut("The bin.seqs command should be in the following format: bin.seqs(fasta=yourFastaFile, name=yourNamesFile, group=yourGroupFile, label=yourLabels).\n");
-		mothurOut("Example bin.seqs(fasta=amazon.fasta, group=amazon.groups, name=amazon.names).\n");
-		mothurOut("The default value for label is all lines in your inputfile.\n");
-		mothurOut("The bin.seqs command outputs a .fasta file for each distance you specify appending the OTU number to each name.\n");
-		mothurOut("If you provide a groupfile, then it also appends the sequences group to the name.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");
+		m->mothurOut("The bin.seqs command can only be executed after a successful read.otu command of a listfile.\n");
+		m->mothurOut("The bin.seqs command parameters are fasta, name, label and group.  The fasta parameter is required.\n");
+		m->mothurOut("The label parameter allows you to select what distance levels you would like a output files created for, and are separated by dashes.\n");
+		m->mothurOut("The bin.seqs command should be in the following format: bin.seqs(fasta=yourFastaFile, name=yourNamesFile, group=yourGroupFile, label=yourLabels).\n");
+		m->mothurOut("Example bin.seqs(fasta=amazon.fasta, group=amazon.groups, name=amazon.names).\n");
+		m->mothurOut("The default value for label is all lines in your inputfile.\n");
+		m->mothurOut("The bin.seqs command outputs a .fasta file for each distance you specify appending the OTU number to each name.\n");
+		m->mothurOut("If you provide a groupfile, then it also appends the sequences group to the name.\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "BinSeqCommand", "help");
+		m->errorOut(e, "BinSeqCommand", "help");
 		exit(1);
 	}
 }
@@ -232,12 +232,12 @@ int BinSeqCommand::execute(){
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			mothurOut("Your file does not include the label " + *it); 
+			m->mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(lastLabel) != 1) {
-				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
 				needToRun = true;
 			}else {
-				mothurOut(". Please refer to " + lastLabel + ".");  mothurOutEndLine();
+				m->mothurOut(". Please refer to " + lastLabel + ".");  m->mothurOutEndLine();
 			}
 		}
 		
@@ -252,10 +252,16 @@ int BinSeqCommand::execute(){
 			delete list;  
 		}
 		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+
+		
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "BinSeqCommand", "execute");
+		m->errorOut(e, "BinSeqCommand", "execute");
 		exit(1);
 	}
 }
@@ -289,7 +295,7 @@ void BinSeqCommand::readNamesFile() {
 
 	}
 	catch(exception& e) {
-		errorOut(e, "BinSeqCommand", "readNamesFile");
+		m->errorOut(e, "BinSeqCommand", "readNamesFile");
 		exit(1);
 	}
 }
@@ -301,8 +307,11 @@ int BinSeqCommand::process(ListVector* list) {
 				
 				string outputFileName = outputDir + getRootName(getSimpleName(globaldata->getListFile())) + list->getLabel() + ".fasta";
 				openOutputFile(outputFileName, out);
+				
+				//save to output list of output file names
+				outputNames.push_back(outputFileName);
 
-				mothurOut(list->getLabel()); mothurOutEndLine();
+				m->mothurOut(list->getLabel()); m->mothurOutEndLine();
 				
 				//for each bin in the list vector
 				for (int i = 0; i < list->size(); i++) {
@@ -323,7 +332,7 @@ int BinSeqCommand::process(ListVector* list) {
 							}else {//if you do have groups
 								string group = groupMap->getGroup(name);
 								if (group == "not found") {  
-									mothurOut(name + " is missing from your group file. Please correct. ");  mothurOutEndLine();
+									m->mothurOut(name + " is missing from your group file. Please correct. ");  m->mothurOutEndLine();
 									remove(outputFileName.c_str());
 									return 1;
 								}else{
@@ -333,7 +342,7 @@ int BinSeqCommand::process(ListVector* list) {
 								}
 							}
 						}else { 
-							mothurOut(name + " is missing from your fasta or name file. Please correct. "); mothurOutEndLine();
+							m->mothurOut(name + " is missing from your fasta or name file. Please correct. "); m->mothurOutEndLine();
 							remove(outputFileName.c_str());
 							return 1;
 						}
@@ -351,7 +360,7 @@ int BinSeqCommand::process(ListVector* list) {
 						}else {//if you do have groups
 							string group = groupMap->getGroup(binnames);
 							if (group == "not found") {  
-								mothurOut(binnames + " is missing from your group file. Please correct. "); mothurOutEndLine();
+								m->mothurOut(binnames + " is missing from your group file. Please correct. "); m->mothurOutEndLine();
 								remove(outputFileName.c_str());
 								return 1;
 							}else{
@@ -361,7 +370,7 @@ int BinSeqCommand::process(ListVector* list) {
 							}
 						}
 					}else { 
-						mothurOut(binnames + " is missing from your fasta or name file. Please correct. "); mothurOutEndLine();
+						m->mothurOut(binnames + " is missing from your fasta or name file. Please correct. "); m->mothurOutEndLine();
 						remove(outputFileName.c_str());
 						return 1;
 					}
@@ -372,7 +381,7 @@ int BinSeqCommand::process(ListVector* list) {
 
 	}
 	catch(exception& e) {
-		errorOut(e, "BinSeqCommand", "process");
+		m->errorOut(e, "BinSeqCommand", "process");
 		exit(1);
 	}
 }

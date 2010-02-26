@@ -12,7 +12,7 @@
 #include "readcolumn.h"
 #include "readmatrix.hpp"
 
-ReadDistCommand::ReadDistCommand(string option){
+ReadDistCommand::ReadDistCommand(string option) {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
@@ -108,8 +108,8 @@ ReadDistCommand::ReadDistCommand(string option){
 			if ((phylipfile != "") && (groupfile != "")) { 
 			globaldata->setFormat("matrix"); }
 			
-			if ((phylipfile == "") && (columnfile == "")) { mothurOut("When executing a read.dist command you must enter a phylip or a column."); mothurOutEndLine(); abort = true; }
-			else if ((phylipfile != "") && (columnfile != "")) { mothurOut("When executing a read.dist command you must enter ONLY ONE of the following: phylip or column."); mothurOutEndLine(); abort = true; }
+			if ((phylipfile == "") && (columnfile == "")) { m->mothurOut("When executing a read.dist command you must enter a phylip or a column."); m->mothurOutEndLine(); abort = true; }
+			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When executing a read.dist command you must enter ONLY ONE of the following: phylip or column."); m->mothurOutEndLine(); abort = true; }
 		
 			if (columnfile != "") {
 				if (namefile == "") {  cout << "You need to provide a namefile if you are going to use the column format." << endl; abort = true; }
@@ -158,7 +158,7 @@ ReadDistCommand::ReadDistCommand(string option){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "ReadDistCommand", "ReadDistCommand");
+		m->errorOut(e, "ReadDistCommand", "ReadDistCommand");
 		exit(1);
 	}
 }
@@ -166,19 +166,19 @@ ReadDistCommand::ReadDistCommand(string option){
 
 void ReadDistCommand::help(){
 	try {
-		mothurOut("The read.dist command parameter options are phylip or column, group, name, cutoff and precision\n");
-		mothurOut("The read.dist command can be used in two ways.  The first is to read a phylip or column and run the cluster command\n");
-		mothurOut("For this use the read.dist command should be in the following format: \n");
-		mothurOut("read.dist(phylip=yourDistFile, name=yourNameFile, cutoff=yourCutoff, precision=yourPrecision) \n");
-		mothurOut("The phylip or column parameter is required, but only one may be used.  If you use a column file the name filename is required. \n");
-		mothurOut("If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n");
-		mothurOut("The second way to use the read.dist command is to read a phylip or column and a group, so you can use the libshuff command.\n");
-		mothurOut("For this use the read.dist command should be in the following format: \n");
-		mothurOut("read.dist(phylip=yourPhylipfile, group=yourGroupFile). The cutoff and precision parameters are not valid with this use.  \n");
-		mothurOut("Note: No spaces between parameter labels (i.e. phylip), '=' and parameters (i.e.yourPhylipfile).\n\n");
+		m->mothurOut("The read.dist command parameter options are phylip or column, group, name, cutoff and precision\n");
+		m->mothurOut("The read.dist command can be used in two ways.  The first is to read a phylip or column and run the cluster command\n");
+		m->mothurOut("For this use the read.dist command should be in the following format: \n");
+		m->mothurOut("read.dist(phylip=yourDistFile, name=yourNameFile, cutoff=yourCutoff, precision=yourPrecision) \n");
+		m->mothurOut("The phylip or column parameter is required, but only one may be used.  If you use a column file the name filename is required. \n");
+		m->mothurOut("If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n");
+		m->mothurOut("The second way to use the read.dist command is to read a phylip or column and a group, so you can use the libshuff command.\n");
+		m->mothurOut("For this use the read.dist command should be in the following format: \n");
+		m->mothurOut("read.dist(phylip=yourPhylipfile, group=yourGroupFile). The cutoff and precision parameters are not valid with this use.  \n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. phylip), '=' and parameters (i.e.yourPhylipfile).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "ReadDistCommand", "help");
+		m->errorOut(e, "ReadDistCommand", "help");
 		exit(1);
 	}
 }
@@ -203,6 +203,8 @@ int ReadDistCommand::execute(){
 		time_t start = time(NULL);
 		size_t numDists = 0;
 		
+		vector<string> outputNames;
+		
 		if (format == "matrix") {
 			ifstream in;
 			openInputFile(distFileName, in);
@@ -211,11 +213,12 @@ int ReadDistCommand::execute(){
 			
 			//if files don't match...
 			if (matrix->getNumSeqs() < groupMap->getNumSeqs()) {  
-				mothurOut("Your distance file contains " + toString(matrix->getNumSeqs()) + " sequences, and your group file contains " + toString(groupMap->getNumSeqs()) + " sequences.");  mothurOutEndLine();				
+				m->mothurOut("Your distance file contains " + toString(matrix->getNumSeqs()) + " sequences, and your group file contains " + toString(groupMap->getNumSeqs()) + " sequences.");  m->mothurOutEndLine();				
 				//create new group file
 				if(outputDir == "") { outputDir += hasPath(groupfile); }
 				
 				string newGroupFile = outputDir + getRootName(getSimpleName(groupfile)) + "editted.groups";
+				outputNames.push_back(newGroupFile);
 				ofstream outGroups;
 				openOutputFile(newGroupFile, outGroups);
 				
@@ -225,7 +228,7 @@ int ReadDistCommand::execute(){
 				}
 				outGroups.close();
 				
-				mothurOut(newGroupFile + " is a new group file containing only the sequence that are in your distance file. I will read this file instead."); mothurOutEndLine();
+				m->mothurOut(newGroupFile + " is a new group file containing only the sequence that are in your distance file. I will read this file instead."); m->mothurOutEndLine();
 				
 				//read new groupfile
 				delete groupMap; groupMap = NULL;
@@ -277,14 +280,22 @@ int ReadDistCommand::execute(){
       	//dist_string = dist_string.append("\t").append(toString(dist_cutoff[i]));
       //	count_string = count_string.append("\t").append(toString(dist_count[i]));
 		//	}
-      //mothurOut(dist_string); mothurOutEndLine(); mothurOut(count_string); mothurOutEndLine();
+      //m->mothurOut(dist_string); m->mothurOutEndLine(); m->mothurOut(count_string); m->mothurOutEndLine();
 		}
-		mothurOut("It took " + toString(time(NULL) - start) + " secs to read "); mothurOutEndLine();
+		
+		if (outputNames.size() != 0) {
+			m->mothurOutEndLine();
+			m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+			m->mothurOutEndLine();
+		}
+		
+		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to read "); m->mothurOutEndLine();
 		return 0;
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "ReadDistCommand", "execute");
+		m->errorOut(e, "ReadDistCommand", "execute");
 		exit(1);
 	}
 }

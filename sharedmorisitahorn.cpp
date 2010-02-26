@@ -48,7 +48,7 @@ EstOutput MorHorn::getValues(vector<SharedRAbundVector*> shared) {
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "MorHorn", "getValues");
+		m->errorOut(e, "MorHorn", "getValues");
 		exit(1);
 	}
 }

@@ -17,6 +17,7 @@
 #include "commandoptionparser.hpp"
 #include "command.hpp"
 #include "commandfactory.hpp"
+#include "mothurout.h"
 
 class GlobalData;
 
@@ -31,6 +32,7 @@ public:
 protected:
 	vector<string> options;
 	CommandFactory* cFactory;
+	MothurOut* mout;
 };
 
 

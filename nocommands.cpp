@@ -11,7 +11,7 @@
 
 //**********************************************************************************************************************
 
-NoCommand::NoCommand(string option){}
+NoCommand::NoCommand(string option)  {}
 
 //**********************************************************************************************************************
 
@@ -21,7 +21,7 @@ NoCommand::~NoCommand(){}
 
 int NoCommand::execute(){
 	//Could choose to give more help here?fdsah
-	mothurOut("Invalid command.\n");
+	cout << "Invalid command.\n";
 	
 	CommandFactory* valid =  CommandFactory::getInstance();
 	valid->printCommands(cout);

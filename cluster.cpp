@@ -14,8 +14,8 @@
 
 /***********************************************************************/
 
-Cluster::Cluster(RAbundVector* rav, ListVector* lv, SparseMatrix* dm, float c, string m) :
-rabund(rav), list(lv), dMatrix(dm), method(m)
+Cluster::Cluster(RAbundVector* rav, ListVector* lv, SparseMatrix* dm, float c, string f) :
+rabund(rav), list(lv), dMatrix(dm), method(f)
 {
 /*
 	cout << "sizeof(MatData): " << sizeof(MatData) << endl;
@@ -59,6 +59,7 @@ rabund(rav), list(lv), dMatrix(dm), method(m)
 	
 	//save so you can modify as it changes in average neighbor
 	cutoff = c;
+	m = MothurOut::getInstance();
 }
 
 /***********************************************************************/
@@ -77,7 +78,7 @@ void Cluster::getRowColCells() {
 		nColCells = colCells.size();
 	}
 	catch(exception& e) {
-		errorOut(e, "Cluster", "getRowColCells");
+		m->errorOut(e, "Cluster", "getRowColCells");
 		exit(1);
 	}
 
@@ -142,7 +143,7 @@ void Cluster::clusterBins(){
 	//	cout << '\t' << rabund->get(smallRow) << '\t' << rabund->get(smallCol) << endl;
 	}
 	catch(exception& e) {
-		errorOut(e, "Cluster", "clusterBins");
+		m->errorOut(e, "Cluster", "clusterBins");
 		exit(1);
 	}
 
@@ -163,7 +164,7 @@ void Cluster::clusterNames(){
 	//	cout << '\t' << list->get(smallRow) << '\t' << list->get(smallCol) << endl;
     }
 	catch(exception& e) {
-		errorOut(e, "Cluster", "clusterNames");
+		m->errorOut(e, "Cluster", "clusterNames");
 		exit(1);
 	}
 
@@ -213,10 +214,10 @@ void Cluster::update(double& cutOFF){
 				}
 				//if not merged it you need it for warning 
 				if ((!merged) && (method == "average")) {  
-					//mothurOut("Warning: trying to merge cell " + toString(rowCells[i]->row+1) + " " + toString(rowCells[i]->column+1) + " distance " + toString(rowCells[i]->dist) + " with value above cutoff. Results may vary from using cutoff at cluster command instead of read.dist."); mothurOutEndLine(); 
+					//m->mothurOut("Warning: trying to merge cell " + toString(rowCells[i]->row+1) + " " + toString(rowCells[i]->column+1) + " distance " + toString(rowCells[i]->dist) + " with value above cutoff. Results may vary from using cutoff at cluster command instead of read.dist."); m->mothurOutEndLine(); 
 					if (cutOFF > rowCells[i]->dist) {  
 						cutOFF = rowCells[i]->dist;  
-						//mothurOut("changing cutoff to " + toString(cutOFF));  mothurOutEndLine(); 
+						//m->mothurOut("changing cutoff to " + toString(cutOFF));  m->mothurOutEndLine(); 
 					}
 
 				}
@@ -233,10 +234,10 @@ void Cluster::update(double& cutOFF){
 			if (foundCol[i] == 0) {
 				if (method == "average") {
 					if (!((colCells[i]->row == smallRow) && (colCells[i]->column == smallCol))) {
-						//mothurOut("Warning: merging cell " + toString(colCells[i]->row+1) + " " + toString(colCells[i]->column+1) + " distance " + toString(colCells[i]->dist) + " value above cutoff. Results may vary from using cutoff at cluster command instead of read.dist."); mothurOutEndLine();
+						//m->mothurOut("Warning: merging cell " + toString(colCells[i]->row+1) + " " + toString(colCells[i]->column+1) + " distance " + toString(colCells[i]->dist) + " value above cutoff. Results may vary from using cutoff at cluster command instead of read.dist."); m->mothurOutEndLine();
 						if (cutOFF > colCells[i]->dist) {  
 							cutOFF = colCells[i]->dist;  
-							//mothurOut("changing cutoff to " + toString(cutOFF));  mothurOutEndLine(); 
+							//m->mothurOut("changing cutoff to " + toString(cutOFF));  m->mothurOutEndLine(); 
 						}
 					}
 				}
@@ -245,14 +246,14 @@ void Cluster::update(double& cutOFF){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "Cluster", "update");
+		m->errorOut(e, "Cluster", "update");
 		exit(1);
 	}
 }
 /***********************************************************************/
-void Cluster::setMapWanted(bool m)  {  
+void Cluster::setMapWanted(bool f)  {  
 	try {
-		mapWanted = m;
+		mapWanted = f;
 		
 		//initialize map
 		for (int i = 0; i < list->getNumBins(); i++) {
@@ -273,7 +274,7 @@ void Cluster::setMapWanted(bool m)  {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Cluster", "setMapWanted");
+		m->errorOut(e, "Cluster", "setMapWanted");
 		exit(1);
 	}
 }
@@ -295,7 +296,7 @@ try {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Cluster", "updateMap");
+		m->errorOut(e, "Cluster", "updateMap");
 		exit(1);
 	}
 }

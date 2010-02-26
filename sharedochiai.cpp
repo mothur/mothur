@@ -40,7 +40,7 @@ EstOutput Ochiai::getValues(vector<SharedRAbundVector*> shared) {
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "Ochiai", "getValues");
+		m->errorOut(e, "Ochiai", "getValues");
 		exit(1);
 	}
 }

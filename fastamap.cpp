@@ -44,7 +44,7 @@ void FastaMap::readFastaFile(string inFileName) {
 		in.close();		
 	}
 	catch(exception& e) {
-		errorOut(e, "FastaMap", "readFastaFile");
+		m->errorOut(e, "FastaMap", "readFastaFile");
 		exit(1);
 	}
 }
@@ -150,7 +150,7 @@ void FastaMap::printNamesFile(string outFileName){ //prints data
 		outFile.close();
 	}
 	catch(exception& e) {
-		errorOut(e, "FastaMap", "printNamesFile");
+		m->errorOut(e, "FastaMap", "printNamesFile");
 		exit(1);
 	}
 }
@@ -169,7 +169,7 @@ void FastaMap::printCondensedFasta(string outFileName){ //prints data
 		out.close();
 	}
 	catch(exception& e) {
-		errorOut(e, "FastaMap", "printCondensedFasta");
+		m->errorOut(e, "FastaMap", "printCondensedFasta");
 		exit(1);
 	}
 }

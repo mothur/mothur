@@ -62,6 +62,7 @@ private:
 							//not included in the tree. 
 							//only takes names from the first tree in the tree file and assumes that all trees use the same names.
 	int readTreeString(ifstream&);
+	MothurOut* m;
 	
 };
 

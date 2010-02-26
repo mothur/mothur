@@ -22,8 +22,10 @@ public:
 	virtual bool getAll()	{	bool a; return a;	}
 	virtual string getName() { return ""; };
 	virtual ~Display() {}
+	Display() {  m = MothurOut::getInstance();  }
 	
-private:
+protected:
+	MothurOut* m;
 	
 };
 

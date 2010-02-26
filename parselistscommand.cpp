@@ -14,7 +14,7 @@ ParseListCommand::ParseListCommand(string option)  {
 	try {
 		abort = false;
 		allLines = 1;
-		
+			
 		//allow user to run help
 		if(option == "help") { help(); abort = true; }
 		
@@ -76,7 +76,7 @@ ParseListCommand::ParseListCommand(string option)  {
 			}
 			
 			//do you have all files needed
-			if ((listfile == "") || (groupfile == "")) { mothurOut("You must enter both a listfile and groupfile for the parse.list command. "); mothurOutEndLine(); abort = true;  }
+			if ((listfile == "") || (groupfile == "")) { m->mothurOut("You must enter both a listfile and groupfile for the parse.list command. "); m->mothurOutEndLine(); abort = true;  }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -90,24 +90,24 @@ ParseListCommand::ParseListCommand(string option)  {
 
 	}
 	catch(exception& e) {
-		errorOut(e, "ParseListCommand", "ParseListCommand");
+		m->errorOut(e, "ParseListCommand", "ParseListCommand");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 void ParseListCommand::help(){
 	try {
-		mothurOut("The parse.list command reads a list and group file and generates a list file for each group in the groupfile \n");
-		mothurOut("The parse.list command parameters are list, group and label.\n");
-		mothurOut("The list and group parameters are required.\n");
-		mothurOut("The label parameter is used to read specific labels in your input you want to use.\n");
-		mothurOut("The parse.list command should be used in the following format: parse.list(list=yourListFile, group=yourGroupFile, label=yourLabels).\n");
-		mothurOut("Example: parse.list(list=abrecovery.fn.list, group=abrecovery.groups, label=0.03).\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile).\n\n");
+		m->mothurOut("The parse.list command reads a list and group file and generates a list file for each group in the groupfile \n");
+		m->mothurOut("The parse.list command parameters are list, group and label.\n");
+		m->mothurOut("The list and group parameters are required.\n");
+		m->mothurOut("The label parameter is used to read specific labels in your input you want to use.\n");
+		m->mothurOut("The parse.list command should be used in the following format: parse.list(list=yourListFile, group=yourGroupFile, label=yourLabels).\n");
+		m->mothurOut("Example: parse.list(list=abrecovery.fn.list, group=abrecovery.groups, label=0.03).\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile).\n\n");
 
 	}
 	catch(exception& e) {
-		errorOut(e, "ParseListCommand", "help");
+		m->errorOut(e, "ParseListCommand", "help");
 		exit(1);
 	}
 }
@@ -121,6 +121,7 @@ int ParseListCommand::execute(){
 		
 		//set fileroot
 		string fileroot = outputDir + getRootName(getSimpleName(listfile));
+		vector<string> outputNames;
 		
 		//fill filehandles with neccessary ofstreams
 		int i;
@@ -130,6 +131,7 @@ int ParseListCommand::execute(){
 			filehandles[groupMap->namesOfGroups[i]] = temp;
 			
 			string filename = fileroot +  groupMap->namesOfGroups[i] + ".list";
+			outputNames.push_back(filename);
 			openOutputFile(filename, *temp);
 		}
 		
@@ -146,7 +148,7 @@ int ParseListCommand::execute(){
 			if(allLines == 1 || labels.count(list->getLabel()) == 1){
 					
 					parse(list);
-					mothurOut(list->getLabel()); mothurOutEndLine();
+					m->mothurOut(list->getLabel()); m->mothurOutEndLine();
 					
 					processedLabels.insert(list->getLabel());
 					userLabels.erase(list->getLabel());
@@ -159,7 +161,7 @@ int ParseListCommand::execute(){
 					list = input->getListVector(lastLabel); //get new list vector to process
 					
 					parse(list);
-					mothurOut(list->getLabel()); mothurOutEndLine();
+					m->mothurOut(list->getLabel()); m->mothurOutEndLine();
 					
 					processedLabels.insert(list->getLabel());
 					userLabels.erase(list->getLabel());
@@ -179,12 +181,12 @@ int ParseListCommand::execute(){
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			mothurOut("Your file does not include the label " + *it); 
+			m->mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(lastLabel) != 1) {
-				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
 				needToRun = true;
 			}else {
-				mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
 			}
 
 		}
@@ -195,7 +197,7 @@ int ParseListCommand::execute(){
 			list = input->getListVector(lastLabel); //get new list vector to process
 			
 			parse(list);		
-			mothurOut(list->getLabel()); mothurOutEndLine();
+			m->mothurOut(list->getLabel()); m->mothurOutEndLine();
 			
 			delete list;
 		}
@@ -207,10 +209,15 @@ int ParseListCommand::execute(){
 		
 		delete groupMap;
 		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+		
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "ParseListCommand", "execute");
+		m->errorOut(e, "ParseListCommand", "execute");
 		exit(1);
 	}
 }
@@ -241,7 +248,7 @@ void ParseListCommand::parse(ListVector* thisList) {
 			for (int j = 0; j < names.size(); j++) {
 				string group = groupMap->getGroup(names[j]);
 				
-				if (group == "not found") { mothurOut(names[j] + " is not in your groupfile. please correct."); mothurOutEndLine(); exit(1); }
+				if (group == "not found") { m->mothurOut(names[j] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); exit(1); }
 				
 				itGroup = groupBins.find(group);
 				if(itGroup == groupBins.end()) {
@@ -267,7 +274,7 @@ void ParseListCommand::parse(ListVector* thisList) {
 
 	}
 	catch(exception& e) {
-		errorOut(e, "ParseListCommand", "parse");
+		m->errorOut(e, "ParseListCommand", "parse");
 		exit(1);
 	}
 }

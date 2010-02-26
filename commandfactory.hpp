@@ -11,6 +11,7 @@
  */
 
 #include "mothur.h"
+#include "mothurout.h";
 
 class Command;
 
@@ -27,6 +28,7 @@ public:
 
 private:
 	Command* command;
+	MothurOut* m;
 	map<string, string> commands;
 	map<string, string>::iterator it;
 	string outputDir, inputDir;

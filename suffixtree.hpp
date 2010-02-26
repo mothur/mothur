@@ -60,6 +60,7 @@ private:
 	int nodeCounter;
 	string seqName;
 	string sequence;
+	MothurOut* m;
 	
 };
 

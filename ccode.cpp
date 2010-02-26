@@ -38,8 +38,6 @@ void Ccode::printHeader(ostream& out) {
 void Ccode::print(ostream& out, ostream& outAcc) {
 	try {
 		
-		mothurOutEndLine();
-		
 		ofstream out2;
 		openOutputFileAppend(mapInfo, out2);
 		
@@ -111,7 +109,7 @@ void Ccode::print(ostream& out, ostream& outAcc) {
 		out << endl;	
 			
 		if (results) {
-			mothurOut(querySeq->getName() + " was found have at least one chimeric window."); mothurOutEndLine();
+			m->mothurOut(querySeq->getName() + " was found have at least one chimeric window."); m->mothurOutEndLine();
 			outAcc << querySeq->getName() << endl;
 		}
 
@@ -121,7 +119,7 @@ void Ccode::print(ostream& out, ostream& outAcc) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Ccode", "print");
+		m->errorOut(e, "Ccode", "print");
 		exit(1);
 	}
 }
@@ -224,7 +222,7 @@ int Ccode::getChimeras(Sequence* query) {
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "Ccode", "getChimeras");
+		m->errorOut(e, "Ccode", "getChimeras");
 		exit(1);
 	}
 }
@@ -306,7 +304,7 @@ void Ccode::trimSequences(Sequence* query) {
 
 		
 		//check to make sure that is not whole seq
-		if ((rearPos - frontPos - 1) <= 0) {  mothurOut("Error, when I trim your sequences, the entire sequence is trimmed."); mothurOutEndLine(); exit(1);  }
+		if ((rearPos - frontPos - 1) <= 0) {  m->mothurOut("Error, when I trim your sequences, the entire sequence is trimmed."); m->mothurOutEndLine(); exit(1);  }
 		
 		map<int, int> tempTrim;
 		tempTrim[frontPos] = rearPos;
@@ -326,7 +324,7 @@ void Ccode::trimSequences(Sequence* query) {
 		spotMap = newMap;
 	}
 	catch(exception& e) {
-		errorOut(e, "Ccode", "trimSequences");
+		m->errorOut(e, "Ccode", "trimSequences");
 		exit(1);
 	}
 }
@@ -341,13 +339,13 @@ vector<int> Ccode::findWindows() {
 	
 		//default is wanted = 10% of total length
 		if (windowSizes > length) { 
-			mothurOut("You have slected a window larger than your sequence length after all filters, masks and trims have been done. I will use the default 10% of sequence length.");
+			m->mothurOut("You have slected a window larger than your sequence length after all filters, masks and trims have been done. I will use the default 10% of sequence length.");
 			windowSizes = length / 10;
 		}else if (windowSizes == 0) { windowSizes = length / 10;  }
 		else if (windowSizes > (length * 0.20)) {
-			mothurOut("You have selected a window that is larger than 20% of your sequence length.  This is not recommended, but I will continue anyway."); mothurOutEndLine();
+			m->mothurOut("You have selected a window that is larger than 20% of your sequence length.  This is not recommended, but I will continue anyway."); m->mothurOutEndLine();
 		}else if (windowSizes < (length * 0.05)) {
-			mothurOut("You have selected a window that is smaller than 5% of your sequence length.  This is not recommended, but I will continue anyway."); mothurOutEndLine();
+			m->mothurOut("You have selected a window that is smaller than 5% of your sequence length.  This is not recommended, but I will continue anyway."); m->mothurOutEndLine();
 		}
 		
 		//save starting points of each window
@@ -361,7 +359,7 @@ vector<int> Ccode::findWindows() {
 		return win;
 	}
 	catch(exception& e) {
-		errorOut(e, "Ccode", "findWindows");
+		m->errorOut(e, "Ccode", "findWindows");
 		exit(1);
 	}
 }
@@ -416,7 +414,7 @@ int Ccode::getDiff(string seqA, string seqB) {
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "Ccode", "getDiff");
+		m->errorOut(e, "Ccode", "getDiff");
 		exit(1);
 	}
 }
@@ -486,12 +484,12 @@ void Ccode::removeBadReferenceSeqs(vector<SeqDist>& seqs) {
 			seqs = goodSeqs;
 			
 		}else { //warn, but dont remove any
-			mothurOut(querySeq->getName() + " does not have an adaquate number of reference sequences that are within 20% and 0.5% similarity.  I will continue, but please check."); mothurOutEndLine();  
+			m->mothurOut(querySeq->getName() + " does not have an adaquate number of reference sequences that are within 20% and 0.5% similarity.  I will continue, but please check."); m->mothurOutEndLine();  
 		}
 
 	}
 	catch(exception& e) {
-		errorOut(e, "Ccode", "removeBadReferenceSeqs");
+		m->errorOut(e, "Ccode", "removeBadReferenceSeqs");
 		exit(1);
 	}
 }
@@ -531,7 +529,7 @@ vector<SeqDist>  Ccode::findClosest(Sequence* q, int numWanted) {
 
 	}
 	catch(exception& e) {
-		errorOut(e, "Ccode", "findClosestSides");
+		m->errorOut(e, "Ccode", "findClosestSides");
 		exit(1);
 	}
 }
@@ -618,7 +616,7 @@ void Ccode::getAverageRef(vector<SeqDist> ref) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Ccode", "getAverageRef");
+		m->errorOut(e, "Ccode", "getAverageRef");
 		exit(1);
 	}
 }
@@ -687,7 +685,7 @@ void Ccode::getAverageQuery (vector<SeqDist> ref, Sequence* query) {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "Ccode", "getAverageQuery");
+		m->errorOut(e, "Ccode", "getAverageQuery");
 		exit(1);
 	}
 }
@@ -713,7 +711,7 @@ void Ccode::findVarianceRef() {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "Ccode", "findVarianceRef");
+		m->errorOut(e, "Ccode", "findVarianceRef");
 		exit(1);
 	}
 }
@@ -738,7 +736,7 @@ void Ccode::findVarianceQuery() {
 
 	}
 	catch(exception& e) {
-		errorOut(e, "Ccode", "findVarianceQuery");
+		m->errorOut(e, "Ccode", "findVarianceQuery");
 		exit(1);
 	}
 }
@@ -800,7 +798,7 @@ void Ccode::determineChimeras() {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Ccode", "determineChimeras");
+		m->errorOut(e, "Ccode", "determineChimeras");
 		exit(1);
 	}
 }
@@ -845,13 +843,13 @@ float Ccode::getT(int numseq) {
         else if (numseq > 2) tvalue = 2.353;
         else if (numseq > 1) tvalue = 2.920;
 		else if (numseq <= 1) {
-			mothurOut("Two or more reference sequences are required, your data will be flawed.\n"); mothurOutEndLine();
+			m->mothurOut("Two or more reference sequences are required, your data will be flawed.\n"); m->mothurOutEndLine();
 		}
 		
 		return tvalue;
 	}
 	catch(exception& e) {
-		errorOut(e, "Ccode", "getT");
+		m->errorOut(e, "Ccode", "getT");
 		exit(1);
 	}
 }
@@ -897,13 +895,13 @@ float Ccode::getF(int numseq) {
         else if (numseq > 1) fvalue = 18.5;
         else if (numseq > 0) fvalue = 161;
 		else if (numseq <= 0) {
-			mothurOut("Two or more reference sequences are required, your data will be flawed.\n"); mothurOutEndLine();
+			m->mothurOut("Two or more reference sequences are required, your data will be flawed.\n"); m->mothurOutEndLine();
         }
 		
 		return fvalue;
 	}
 	catch(exception& e) {
-		errorOut(e, "Ccode", "getF");
+		m->errorOut(e, "Ccode", "getF");
 		exit(1);
 	}
 }

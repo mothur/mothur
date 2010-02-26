@@ -36,7 +36,7 @@ class DeCalculator {
 
 	public:
 		
-		DeCalculator() {};
+		DeCalculator() { m = MothurOut::getInstance(); }
 		~DeCalculator() {};
 		
 		vector<Sequence*> findClosest(Sequence*, vector<Sequence*>, int&, vector<int>&);  //takes querySeq, a reference db, numWanted and indexes 
@@ -71,6 +71,7 @@ class DeCalculator {
 		set<int> h;
 		int alignLength;
 		map<int, int> maskMap;
+		MothurOut* m;
 
 };
 

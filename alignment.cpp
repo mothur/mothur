@@ -21,13 +21,14 @@ Alignment::Alignment() {	/*	do nothing	*/	}
 
 Alignment::Alignment(int A) : nCols(A), nRows(A) {
 	try {
+		m = MothurOut::getInstance();
 		alignment.resize(nRows);			//	For the Gotoh and Needleman-Wunsch we initialize the dynamic programming
 		for(int i=0;i<nRows;i++){			//	matrix by initializing a matrix that is A x A.  By default we will set A
 			alignment[i].resize(nCols);		//	at 2000 for 16S rRNA gene sequences
 		}	
 	}
 	catch(exception& e) {
-		errorOut(e, "Alignment", "Alignment");
+		m->errorOut(e, "Alignment", "Alignment");
 		exit(1);
 	}
 }
@@ -43,7 +44,7 @@ void Alignment::resize(int A) {
 		}	
 	}
 	catch(exception& e) {
-		errorOut(e, "Alignment", "resize");
+		m->errorOut(e, "Alignment", "resize");
 		exit(1);
 	}
 }
@@ -107,7 +108,7 @@ void Alignment::traceBack(){			//	This traceback routine is used by the dynamic 
 		seqBend = seqB.length() - seqBend - 1;
 	}
 	catch(exception& e) {
-		errorOut(e, "Alignment", "traceBack");
+		m->errorOut(e, "Alignment", "traceBack");
 		exit(1);
 	}
 }
@@ -120,7 +121,7 @@ Alignment::~Alignment(){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "Alignment", "~Alignment");
+		m->errorOut(e, "Alignment", "~Alignment");
 		exit(1);
 	}
 }

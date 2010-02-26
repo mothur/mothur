@@ -86,7 +86,7 @@ EstOutput Geom::getValues(SAbundVector* rank){
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "Geom", "getValues");
+		m->errorOut(e, "Geom", "getValues");
 		exit(1);
 	}
 }

@@ -12,7 +12,7 @@
 
 /**************************************************************************************/
 
-FilterSeqsCommand::FilterSeqsCommand(string option){
+FilterSeqsCommand::FilterSeqsCommand(string option)  {
 	try {
 		abort = false;
 		
@@ -59,7 +59,7 @@ FilterSeqsCommand::FilterSeqsCommand(string option){
 			
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not found") { mothurOut("fasta is a required parameter for the filter.seqs command."); mothurOutEndLine(); abort = true; }
+			if (fastafile == "not found") { m->mothurOut("fasta is a required parameter for the filter.seqs command."); m->mothurOutEndLine(); abort = true; }
 			else if (fastafile == "not open") { abort = true; }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -96,7 +96,7 @@ FilterSeqsCommand::FilterSeqsCommand(string option){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "FilterSeqsCommand", "FilterSeqsCommand");
+		m->errorOut(e, "FilterSeqsCommand", "FilterSeqsCommand");
 		exit(1);
 	}
 }
@@ -105,21 +105,21 @@ FilterSeqsCommand::FilterSeqsCommand(string option){
 
 void FilterSeqsCommand::help(){
 	try {
-		mothurOut("The filter.seqs command reads a file containing sequences and creates a .filter and .filter.fasta file.\n");
-		mothurOut("The filter.seqs command parameters are fasta, trump, soft, hard and vertical. \n");
-		mothurOut("The fasta parameter is required.\n");
-		mothurOut("The trump parameter .... The default is ...\n");
-		mothurOut("The soft parameter .... The default is ....\n");
-		mothurOut("The hard parameter .... The default is ....\n");
-		mothurOut("The vertical parameter .... The default is T.\n");
-		mothurOut("The filter.seqs command should be in the following format: \n");
-		mothurOut("filter.seqs(fasta=yourFastaFile, trump=yourTrump, soft=yourSoft, hard=yourHard, vertical=yourVertical) \n");
-		mothurOut("Example filter.seqs(fasta=abrecovery.fasta, trump=..., soft=..., hard=..., vertical=T).\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
+		m->mothurOut("The filter.seqs command reads a file containing sequences and creates a .filter and .filter.fasta file.\n");
+		m->mothurOut("The filter.seqs command parameters are fasta, trump, soft, hard and vertical. \n");
+		m->mothurOut("The fasta parameter is required.\n");
+		m->mothurOut("The trump parameter .... The default is ...\n");
+		m->mothurOut("The soft parameter .... The default is ....\n");
+		m->mothurOut("The hard parameter .... The default is ....\n");
+		m->mothurOut("The vertical parameter .... The default is T.\n");
+		m->mothurOut("The filter.seqs command should be in the following format: \n");
+		m->mothurOut("filter.seqs(fasta=yourFastaFile, trump=yourTrump, soft=yourSoft, hard=yourHard, vertical=yourVertical) \n");
+		m->mothurOut("Example filter.seqs(fasta=abrecovery.fasta, trump=..., soft=..., hard=..., vertical=T).\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "FilterSeqsCommand", "help");
+		m->errorOut(e, "FilterSeqsCommand", "help");
 		exit(1);
 	}
 }
@@ -207,17 +207,24 @@ int FilterSeqsCommand::execute() {
 			if(filter[i] == '1'){	filteredLength++;	}
 		}
 		
-		mothurOutEndLine();
-		mothurOut("Length of filtered alignment: " + toString(filteredLength)); mothurOutEndLine();
-		mothurOut("Number of columns removed: " + toString((alignmentLength-filteredLength))); mothurOutEndLine();
-		mothurOut("Length of the original alignment: " + toString(alignmentLength)); mothurOutEndLine();
-		mothurOut("Number of sequences used to construct filter: " + toString(numSeqs)); mothurOutEndLine();
+		m->mothurOutEndLine();
+		m->mothurOut("Length of filtered alignment: " + toString(filteredLength)); m->mothurOutEndLine();
+		m->mothurOut("Number of columns removed: " + toString((alignmentLength-filteredLength))); m->mothurOutEndLine();
+		m->mothurOut("Length of the original alignment: " + toString(alignmentLength)); m->mothurOutEndLine();
+		m->mothurOut("Number of sequences used to construct filter: " + toString(numSeqs)); m->mothurOutEndLine();
 		
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		m->mothurOut(filterFile); m->mothurOutEndLine();	
+		m->mothurOut(filteredFasta); m->mothurOutEndLine();
+		m->mothurOutEndLine();
+
 		return 0;
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "FilterSeqsCommand", "execute");
+		m->errorOut(e, "FilterSeqsCommand", "execute");
 		exit(1);
 	}
 }

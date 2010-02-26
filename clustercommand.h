@@ -29,7 +29,7 @@
 class ClusterCommand : public Command {
 	
 public:
-	ClusterCommand(string);	
+	ClusterCommand(string);
 	~ClusterCommand();
 	int execute();	
 	void help();
@@ -56,6 +56,7 @@ private:
 	unsigned long loops;
 	
 	void printData(string label);
+	vector<string> outputNames;
 };
 
 #endif

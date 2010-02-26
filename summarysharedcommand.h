@@ -37,7 +37,7 @@ private:
 	bool abort, allLines, mult, all;
 	set<string> labels; //holds labels to be used
 	string label, calc, groups;
-	vector<string>  Estimators, Groups;
+	vector<string>  Estimators, Groups, outputNames;
 	vector<SharedRAbundVector*> lookup;
 	string outputFileName, format, outAllFileName, outputDir;
 	ofstream outputFileHandle, outAll;

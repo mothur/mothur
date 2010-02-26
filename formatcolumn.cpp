@@ -162,7 +162,7 @@ void FormatColumnMatrix::read(NameAssignment* nameMap){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "FormatColumnMatrix", "read");
+		m->errorOut(e, "FormatColumnMatrix", "read");
 		exit(1);
 	}
 }

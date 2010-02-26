@@ -28,7 +28,7 @@
 class ClassifySeqsCommand : public Command {
 	
 public:
-	ClassifySeqsCommand(string);	
+	ClassifySeqsCommand(string);
 	~ClassifySeqsCommand();
 	int execute(); 
 	void help();	

@@ -87,6 +87,7 @@ class Slayer {
 		float snpQA(vector<snps>);
 		float snpQB(vector<snps>);
 		float snpAB(vector<snps>);
+		MothurOut* m;
 				
 };
 

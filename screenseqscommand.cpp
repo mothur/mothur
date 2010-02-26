@@ -12,7 +12,7 @@
 
 //***************************************************************************************************************
 
-ScreenSeqsCommand::ScreenSeqsCommand(string option){
+ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 	try {
 		abort = false;
 		
@@ -76,7 +76,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option){
 
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not found") { mothurOut("fasta is a required parameter for the screen.seqs command."); mothurOutEndLine(); abort = true; }
+			if (fastafile == "not found") { m->mothurOut("fasta is a required parameter for the screen.seqs command."); m->mothurOutEndLine(); abort = true; }
 			else if (fastafile == "not open") { abort = true; }	
 	
 			groupfile = validParameter.validFile(parameters, "group", true);
@@ -121,7 +121,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "ScreenSeqsCommand", "ScreenSeqsCommand");
+		m->errorOut(e, "ScreenSeqsCommand", "ScreenSeqsCommand");
 		exit(1);
 	}
 }
@@ -129,25 +129,25 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option){
 
 void ScreenSeqsCommand::help(){
 	try {
-		mothurOut("The screen.seqs command reads a fastafile and creates .....\n");
-		mothurOut("The screen.seqs command parameters are fasta, start, end, maxambig, maxhomop, minlength, maxlength, name, and group.\n");
-		mothurOut("The fasta parameter is required.\n");
-		mothurOut("The start parameter .... The default is -1.\n");
-		mothurOut("The end parameter .... The default is -1.\n");
-		mothurOut("The maxambig parameter .... The default is -1.\n");
-		mothurOut("The maxhomop parameter .... The default is -1.\n");
-		mothurOut("The minlength parameter .... The default is -1.\n");
-		mothurOut("The maxlength parameter .... The default is -1.\n");
-		mothurOut("The name parameter allows you to provide a namesfile, and the group parameter allows you to provide a groupfile.\n");
-		mothurOut("The screen.seqs command should be in the following format: \n");
-		mothurOut("screen.seqs(fasta=yourFastaFile, name=youNameFile, group=yourGroupFIle, start=yourStart, end=yourEnd, maxambig=yourMaxambig,  \n");
-		mothurOut("maxhomop=yourMaxhomop, minlength=youMinlength, maxlength=yourMaxlength)  \n");	
-		mothurOut("Example screen.seqs(fasta=abrecovery.fasta, name=abrecovery.names, group=abrecovery.groups, start=..., end=..., maxambig=..., maxhomop=..., minlength=..., maxlength=...).\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
+		m->mothurOut("The screen.seqs command reads a fastafile and creates .....\n");
+		m->mothurOut("The screen.seqs command parameters are fasta, start, end, maxambig, maxhomop, minlength, maxlength, name, and group.\n");
+		m->mothurOut("The fasta parameter is required.\n");
+		m->mothurOut("The start parameter .... The default is -1.\n");
+		m->mothurOut("The end parameter .... The default is -1.\n");
+		m->mothurOut("The maxambig parameter .... The default is -1.\n");
+		m->mothurOut("The maxhomop parameter .... The default is -1.\n");
+		m->mothurOut("The minlength parameter .... The default is -1.\n");
+		m->mothurOut("The maxlength parameter .... The default is -1.\n");
+		m->mothurOut("The name parameter allows you to provide a namesfile, and the group parameter allows you to provide a groupfile.\n");
+		m->mothurOut("The screen.seqs command should be in the following format: \n");
+		m->mothurOut("screen.seqs(fasta=yourFastaFile, name=youNameFile, group=yourGroupFIle, start=yourStart, end=yourEnd, maxambig=yourMaxambig,  \n");
+		m->mothurOut("maxhomop=yourMaxhomop, minlength=youMinlength, maxlength=yourMaxlength)  \n");	
+		m->mothurOut("Example screen.seqs(fasta=abrecovery.fasta, name=abrecovery.names, group=abrecovery.groups, start=..., end=..., maxambig=..., maxhomop=..., minlength=..., maxlength=...).\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
 
 	}
 	catch(exception& e) {
-		errorOut(e, "ScreenSeqsCommand", "help");
+		m->errorOut(e, "ScreenSeqsCommand", "help");
 		exit(1);
 	}
 }
@@ -203,10 +203,18 @@ int ScreenSeqsCommand::execute(){
 		goodSeqOut.close();
 		badSeqOut.close();
 		inFASTA.close();
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		m->mothurOut(goodSeqFile); m->mothurOutEndLine();	
+		m->mothurOut(badSeqFile); m->mothurOutEndLine();	
+		m->mothurOutEndLine();
+
+		
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "ScreenSeqsCommand", "execute");
+		m->errorOut(e, "ScreenSeqsCommand", "execute");
 		exit(1);
 	}
 }
@@ -257,8 +265,8 @@ void ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 	//we were unable to remove some of the bad sequences
 	if (badSeqNames.size() != 0) {
 		for (it = badSeqNames.begin(); it != badSeqNames.end(); it++) {  
-			mothurOut("Your namefile does not include the sequence " + *it + " please correct."); 
-			mothurOutEndLine();
+			m->mothurOut("Your namefile does not include the sequence " + *it + " please correct."); 
+			m->mothurOutEndLine();
 		}
 	}
 
@@ -294,8 +302,8 @@ void ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 		//we were unable to remove some of the bad sequences
 		if (badSeqGroups.size() != 0) {
 			for (it = badSeqGroups.begin(); it != badSeqGroups.end(); it++) {  
-				mothurOut("Your namefile does not include the sequence " + *it + " please correct."); 
-				mothurOutEndLine();
+				m->mothurOut("Your namefile does not include the sequence " + *it + " please correct."); 
+				m->mothurOutEndLine();
 			}
 		}
 	}
@@ -333,8 +341,8 @@ void ScreenSeqsCommand::screenGroupFile(set<string> badSeqNames){
 	//we were unable to remove some of the bad sequences
 	if (badSeqNames.size() != 0) {
 		for (it = badSeqNames.begin(); it != badSeqNames.end(); it++) {  
-			mothurOut("Your groupfile does not include the sequence " + *it + " please correct."); 
-			mothurOutEndLine();
+			m->mothurOut("Your groupfile does not include the sequence " + *it + " please correct."); 
+			m->mothurOutEndLine();
 		}
 	}
 	
@@ -389,8 +397,8 @@ void ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){
 	//we were unable to remove some of the bad sequences
 	if (badSeqNames.size() != 0) {
 		for (it = badSeqNames.begin(); it != badSeqNames.end(); it++) {  
-			mothurOut("Your file does not include the sequence " + *it + " please correct."); 
-			mothurOutEndLine();
+			m->mothurOut("Your file does not include the sequence " + *it + " please correct."); 
+			m->mothurOutEndLine();
 		}
 	}
 

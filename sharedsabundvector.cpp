@@ -45,7 +45,7 @@ void SharedSAbundVector::set(int bin, int abundance, string groupName){
 		if(bin > maxRank)	{	maxRank = bin;		}
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedSAbundVector", "set");
+		m->errorOut(e, "SharedSAbundVector", "set");
 		exit(1);
 	}
 }
@@ -79,7 +79,7 @@ void SharedSAbundVector::push_back(int abundance, int bin, string groupName){
 		numSeqs += (maxRank * abundance);
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedSAbundVector", "push_back");
+		m->errorOut(e, "SharedSAbundVector", "push_back");
 		exit(1);
 	}
 }
@@ -107,7 +107,7 @@ void SharedSAbundVector::print(ostream& output){
 		output << endl;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedSAbundVector", "print");
+		m->errorOut(e, "SharedSAbundVector", "print");
 		exit(1);
 	}
 }
@@ -154,7 +154,7 @@ RAbundVector SharedSAbundVector::getRAbundVector(){
 		return rav;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedSAbundVector", "getRAbundVector");
+		m->errorOut(e, "SharedSAbundVector", "getRAbundVector");
 		exit(1);
 	}
 }
@@ -170,7 +170,7 @@ SAbundVector SharedSAbundVector::getSAbundVector(){
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedSAbundVector", "getSAbundVector");
+		m->errorOut(e, "SharedSAbundVector", "getSAbundVector");
 		exit(1);
 	}
 }
@@ -204,7 +204,7 @@ SharedRAbundVector SharedSAbundVector::getSharedRAbundVector(){
 		return rav;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedSAbundVector", "getSharedRAbundVector");
+		m->errorOut(e, "SharedSAbundVector", "getSharedRAbundVector");
 		exit(1);
 	}
 }
@@ -230,7 +230,7 @@ SharedOrderVector SharedSAbundVector::getSharedOrderVector() {
 		return ov;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedSAbundVector", "getSharedOrderVector");
+		m->errorOut(e, "SharedSAbundVector", "getSharedOrderVector");
 		exit(1);
 	}
 }
@@ -257,7 +257,7 @@ OrderVector SharedSAbundVector::getOrderVector(map<string,int>* hold = NULL){
 		return ov;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedSAbundVector", "getOrderVector");
+		m->errorOut(e, "SharedSAbundVector", "getOrderVector");
 		exit(1);
 	}
 }

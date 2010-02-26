@@ -22,18 +22,21 @@
 //**********************************************************************************************************************
 HeatMapSim::HeatMapSim(string dir) : outputDir(dir) {
 		globaldata = GlobalData::getInstance();
+		m = MothurOut::getInstance();
 }
 //**********************************************************************************************************************
-void HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> calcs) {
+vector<string> HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> calcs) {
 	try {
 		EstOutput data;
 		vector<double> sims;
+		vector<string> outputNames;
 				
 		//make file for each calculator selected
 		for (int m = 0; m < calcs.size(); m++) {
 			
 			string filenamesvg = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + lookup[0]->getLabel() + calcs[m]->getName() + ".heatmap.sim.svg";
 			openOutputFile(filenamesvg, outsvg);
+			outputNames.push_back(filenamesvg);
 			
 			//svg image
 			outsvg << "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 " + toString((lookup.size() * 150) + 160) + " " + toString((lookup.size() * 150) + 160)  + "\">\n";
@@ -94,15 +97,15 @@ void HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> 
 
 		}
 		
-		
+		return outputNames;
 	}
 	catch(exception& e) {
-		errorOut(e, "HeatMapSim", "getPic");
+		m->errorOut(e, "HeatMapSim", "getPic");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-void HeatMapSim::getPic(vector< vector<double> > dists, vector<string> groups) {
+string HeatMapSim::getPic(vector< vector<double> > dists, vector<string> groups) {
 	try {
 		
 		vector<double> sims;
@@ -161,9 +164,11 @@ void HeatMapSim::getPic(vector< vector<double> > dists, vector<string> groups) {
 		outsvg << "</g>\n</svg>\n";
 		outsvg.close();
 		
+		return filenamesvg;
+		
 	}
 	catch(exception& e) {
-		errorOut(e, "HeatMapSim", "getPic");
+		m->errorOut(e, "HeatMapSim", "getPic");
 		exit(1);
 	}
 }
@@ -202,7 +207,7 @@ void HeatMapSim::printLegend(int y, float maxSim) {
 	}
 	
 	catch(exception& e) {
-		errorOut(e, "HeatMapSim", "printLegend");
+		m->errorOut(e, "HeatMapSim", "printLegend");
 		exit(1);
 	}
 }

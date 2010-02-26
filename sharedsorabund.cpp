@@ -27,7 +27,7 @@ EstOutput SorAbund::getValues(vector<SharedRAbundVector*> shared) {
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "SorAbund", "getValues");
+		m->errorOut(e, "SorAbund", "getValues");
 		exit(1);
 	}
 }

@@ -30,7 +30,7 @@ struct seqPNode {
 class PreClusterCommand : public Command {
 	
 public:
-	PreClusterCommand(string);	
+	PreClusterCommand(string);
 	~PreClusterCommand();
 	int execute();	
 	void help();

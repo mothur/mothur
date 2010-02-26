@@ -7,6 +7,7 @@
 #include "sharedsabundvector.h"
 #include "rabundvector.hpp"
 #include "uvest.h"
+#include "mothurout.h"
 
 /* The calculator class is the parent class for all the different estimators implemented in mothur except the tree calculators.
 It has 2 pure functions EstOutput getValues(SAbundVector*), which works on a single group, and 
@@ -20,9 +21,9 @@ typedef vector<double> EstOutput;
 class Calculator {
 
 public:
-	Calculator(){};
+	Calculator(){ m = MothurOut::getInstance();  }
 	virtual ~Calculator(){};
-	Calculator(string n, int c, bool m) : name(n), cols(c), multiple(m) {};
+	Calculator(string n, int c, bool f) : name(n), cols(c), multiple(f) {};
 	virtual EstOutput getValues(SAbundVector*) = 0;	
 	virtual EstOutput getValues(vector<SharedRAbundVector*>) = 0;
 	virtual void print(ostream& f)	{ f.setf(ios::fixed, ios::floatfield); f.setf(ios::showpoint);
@@ -31,6 +32,7 @@ public:
 	virtual int getCols()		{	return cols;	}
 	virtual bool getMultiple()  {   return multiple;   }
 protected:
+	MothurOut* m;
 	EstOutput data;
 	string name;
 	int cols;

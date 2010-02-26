@@ -123,7 +123,7 @@ EstOutput Parsimony::getValues(Tree* t) {
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "Parsimony", "getValues");
+		m->errorOut(e, "Parsimony", "getValues");
 		exit(1);
 	}
 }

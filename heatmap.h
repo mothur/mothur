@@ -22,8 +22,8 @@ class HeatMap {
 		HeatMap(string, string, string);
 		~HeatMap(){};
 	
-		void getPic(RAbundVector*);
-		void getPic(vector<SharedRAbundVector*>);
+		string getPic(RAbundVector*);
+		string getPic(vector<SharedRAbundVector*>);
 
 	private:
 		void sortSharedVectors(vector<SharedRAbundVector*>& );
@@ -32,6 +32,7 @@ class HeatMap {
 		GlobalData* globaldata;
 		string format, sorted, groupComb, scaler, outputDir;
 		ofstream outsvg;
+		MothurOut* m;
 			
 };
 

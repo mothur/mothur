@@ -34,6 +34,7 @@ private:
 	string OutPutFile, format;
 	ListVector* list;
 	float cutoff;
+	MothurOut* m;
 	
 	void convertPhylip2Column(NameAssignment*);
 };

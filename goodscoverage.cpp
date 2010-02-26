@@ -26,7 +26,7 @@ EstOutput GoodsCoverage::getValues(SAbundVector* rank){
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "GoodsCoverage", "getValues");
+		m->errorOut(e, "GoodsCoverage", "getValues");
 		exit(1);
 	}
 }

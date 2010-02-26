@@ -16,13 +16,17 @@
 #include "mothur.h"
 #include "optionparser.h"
 #include "validparameter.h"
+#include "mothurout.h"
 
 class Command {
 	
 	public:
+		Command() {  m = MothurOut::getInstance();  }
 		virtual int execute() = 0;
 		virtual void help() = 0;
 		virtual ~Command() { }
+	protected:
+		MothurOut* m;
 };
 
 #endif

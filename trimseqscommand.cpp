@@ -11,7 +11,7 @@
 
 //***************************************************************************************************************
 
-TrimSeqsCommand::TrimSeqsCommand(string option){
+TrimSeqsCommand::TrimSeqsCommand(string option)  {
 	try {
 		
 		abort = false;
@@ -70,7 +70,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option){
 			
 			//check for required parameters
 			fastaFile = validParameter.validFile(parameters, "fasta", true);
-			if (fastaFile == "not found") { mothurOut("fasta is a required parameter for the screen.seqs command."); mothurOutEndLine(); abort = true; }
+			if (fastaFile == "not found") { m->mothurOut("fasta is a required parameter for the screen.seqs command."); m->mothurOutEndLine(); abort = true; }
 			else if (fastaFile == "not open") { abort = true; }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -121,22 +121,22 @@ TrimSeqsCommand::TrimSeqsCommand(string option){
 			allFiles = isTrue(temp);
 			
 			if(allFiles && oligoFile == ""){
-				mothurOut("You selected allfiles, but didn't enter an oligos file.  Ignoring the allfiles request."); mothurOutEndLine();
+				m->mothurOut("You selected allfiles, but didn't enter an oligos file.  Ignoring the allfiles request."); m->mothurOutEndLine();
 			}
 			if((qAverage != 0 && qThreshold != 0) && qFileName == ""){
-				mothurOut("You didn't provide a quality file name, quality criteria will be ignored."); mothurOutEndLine();
+				m->mothurOut("You didn't provide a quality file name, quality criteria will be ignored."); m->mothurOutEndLine();
 				qAverage=0;
 				qThreshold=0;
 			}
 			if(!flip && oligoFile=="" && !maxLength && !minLength && (maxAmbig==-1) && !maxHomoP && qFileName == ""){		
-				mothurOut("You didn't set any options... quiting command."); mothurOutEndLine();
+				m->mothurOut("You didn't set any options... quiting command."); m->mothurOutEndLine();
 				abort = true;
 			}
 		}
 
 	}
 	catch(exception& e) {
-		errorOut(e, "TrimSeqsCommand", "TrimSeqsCommand");
+		m->errorOut(e, "TrimSeqsCommand", "TrimSeqsCommand");
 		exit(1);
 	}
 }
@@ -144,30 +144,30 @@ TrimSeqsCommand::TrimSeqsCommand(string option){
 
 void TrimSeqsCommand::help(){
 	try {
-		mothurOut("The trim.seqs command reads a fastaFile and creates .....\n");
-		mothurOut("The trim.seqs command parameters are fasta, flip, oligos, maxambig, maxhomop, minlength, maxlength, qfile, qthreshold, qaverage, qtrim and allfiles.\n");
-		mothurOut("The fasta parameter is required.\n");
-		mothurOut("The flip parameter .... The default is 0.\n");
-		mothurOut("The oligos parameter .... The default is "".\n");
-		mothurOut("The maxambig parameter .... The default is -1.\n");
-		mothurOut("The maxhomop parameter .... The default is 0.\n");
-		mothurOut("The minlength parameter .... The default is 0.\n");
-		mothurOut("The maxlength parameter .... The default is 0.\n");
-		mothurOut("The qfile parameter .....\n");
-		mothurOut("The qthreshold parameter .... The default is 0.\n");
-		mothurOut("The qaverage parameter .... The default is 0.\n");
-		mothurOut("The allfiles parameter .... The default is F.\n");
-		mothurOut("The qtrim parameter .... The default is F.\n");
-		mothurOut("The trim.seqs command should be in the following format: \n");
-		mothurOut("trim.seqs(fasta=yourFastaFile, flip=yourFlip, oligos=yourOligos, maxambig=yourMaxambig,  \n");
-		mothurOut("maxhomop=yourMaxhomop, minlength=youMinlength, maxlength=yourMaxlength)  \n");	
-		mothurOut("Example trim.seqs(fasta=abrecovery.fasta, flip=..., oligos=..., maxambig=..., maxhomop=..., minlength=..., maxlength=...).\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n");
-		mothurOut("For more details please check out the wiki http://www.mothur.org/wiki/Trim.seqs .\n\n");
+		m->mothurOut("The trim.seqs command reads a fastaFile and creates .....\n");
+		m->mothurOut("The trim.seqs command parameters are fasta, flip, oligos, maxambig, maxhomop, minlength, maxlength, qfile, qthreshold, qaverage, qtrim and allfiles.\n");
+		m->mothurOut("The fasta parameter is required.\n");
+		m->mothurOut("The flip parameter .... The default is 0.\n");
+		m->mothurOut("The oligos parameter .... The default is "".\n");
+		m->mothurOut("The maxambig parameter .... The default is -1.\n");
+		m->mothurOut("The maxhomop parameter .... The default is 0.\n");
+		m->mothurOut("The minlength parameter .... The default is 0.\n");
+		m->mothurOut("The maxlength parameter .... The default is 0.\n");
+		m->mothurOut("The qfile parameter .....\n");
+		m->mothurOut("The qthreshold parameter .... The default is 0.\n");
+		m->mothurOut("The qaverage parameter .... The default is 0.\n");
+		m->mothurOut("The allfiles parameter .... The default is F.\n");
+		m->mothurOut("The qtrim parameter .... The default is F.\n");
+		m->mothurOut("The trim.seqs command should be in the following format: \n");
+		m->mothurOut("trim.seqs(fasta=yourFastaFile, flip=yourFlip, oligos=yourOligos, maxambig=yourMaxambig,  \n");
+		m->mothurOut("maxhomop=yourMaxhomop, minlength=youMinlength, maxlength=yourMaxlength)  \n");	
+		m->mothurOut("Example trim.seqs(fasta=abrecovery.fasta, flip=..., oligos=..., maxambig=..., maxhomop=..., minlength=..., maxlength=...).\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n");
+		m->mothurOut("For more details please check out the wiki http://www.mothur.org/wiki/Trim.seqs .\n\n");
 
 	}
 	catch(exception& e) {
-		errorOut(e, "TrimSeqsCommand", "help");
+		m->errorOut(e, "TrimSeqsCommand", "help");
 		exit(1);
 	}
 }
@@ -184,6 +184,8 @@ int TrimSeqsCommand::execute(){
 	
 		if (abort == true) { return 0; }
 		
+		vector<string> outputNames;
+		
 		numFPrimers = 0;  //this needs to be initialized
 		numRPrimers = 0;
 		
@@ -193,18 +195,21 @@ int TrimSeqsCommand::execute(){
 		ofstream outFASTA;
 		string trimSeqFile = outputDir + getRootName(getSimpleName(fastaFile)) + "trim.fasta";
 		openOutputFile(trimSeqFile, outFASTA);
+		outputNames.push_back(trimSeqFile);
 		
 		ofstream outGroups;
 		vector<ofstream*> fastaFileNames;
 		if(oligoFile != ""){
 			string groupFile = outputDir + getRootName(getSimpleName(fastaFile)) + "groups"; 
 			openOutputFile(groupFile, outGroups);
+			outputNames.push_back(groupFile);
 			getOligos(fastaFileNames);
 		}
 		
 		ofstream scrapFASTA;
 		string scrapSeqFile = outputDir + getRootName(getSimpleName(fastaFile)) + "scrap.fasta";
 		openOutputFile(scrapSeqFile, scrapFASTA);
+		outputNames.push_back(scrapSeqFile);
 		
 		ifstream qFile;
 		if(qFileName != "")	{	openInputFile(qFileName, qFile);	}
@@ -293,6 +298,7 @@ int TrimSeqsCommand::execute(){
 			openInputFile(getRootName(fastaFile) + groupVector[i] + ".fasta", inFASTA);
 			ofstream outGroups;
 			openOutputFile(outputDir + getRootName(getSimpleName(fastaFile)) + groupVector[i] + ".groups", outGroups);
+			outputNames.push_back(outputDir + getRootName(getSimpleName(fastaFile)) + groupVector[i] + ".groups");
 			
 			while(!inFASTA.eof()){
 				if(inFASTA.get() == '>'){
@@ -304,11 +310,16 @@ int TrimSeqsCommand::execute(){
 			outGroups.close();
 			inFASTA.close();
 		}
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
 			
 		return 0;		
 	}
 	catch(exception& e) {
-		errorOut(e, "TrimSeqsCommand", "execute");
+		m->errorOut(e, "TrimSeqsCommand", "execute");
 		exit(1);
 	}
 }
@@ -366,7 +377,7 @@ void TrimSeqsCommand::getOligos(vector<ofstream*>& outFASTAVec){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "TrimSeqsCommand", "getOligos");
+		m->errorOut(e, "TrimSeqsCommand", "getOligos");
 		exit(1);
 	}
 
@@ -397,7 +408,7 @@ bool TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "TrimSeqsCommand", "stripBarcode");
+		m->errorOut(e, "TrimSeqsCommand", "stripBarcode");
 		exit(1);
 	}
 
@@ -429,7 +440,7 @@ bool TrimSeqsCommand::stripForward(Sequence& seq){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "TrimSeqsCommand", "stripForward");
+		m->errorOut(e, "TrimSeqsCommand", "stripForward");
 		exit(1);
 	}
 }
@@ -459,7 +470,7 @@ bool TrimSeqsCommand::stripReverse(Sequence& seq){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "TrimSeqsCommand", "stripReverse");
+		m->errorOut(e, "TrimSeqsCommand", "stripReverse");
 		exit(1);
 	}
 }
@@ -480,7 +491,7 @@ bool TrimSeqsCommand::cullLength(Sequence& seq){
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "TrimSeqsCommand", "cullLength");
+		m->errorOut(e, "TrimSeqsCommand", "cullLength");
 		exit(1);
 	}
 	
@@ -499,7 +510,7 @@ bool TrimSeqsCommand::cullHomoP(Sequence& seq){
 		return success;
 	}
 	catch(exception& e) {
-		errorOut(e, "TrimSeqsCommand", "cullHomoP");
+		m->errorOut(e, "TrimSeqsCommand", "cullHomoP");
 		exit(1);
 	}
 	
@@ -518,7 +529,7 @@ bool TrimSeqsCommand::cullAmbigs(Sequence& seq){
 		return success;
 	}
 	catch(exception& e) {
-		errorOut(e, "TrimSeqsCommand", "cullAmbigs");
+		m->errorOut(e, "TrimSeqsCommand", "cullAmbigs");
 		exit(1);
 	}
 	
@@ -557,7 +568,7 @@ bool TrimSeqsCommand::compareDNASeq(string oligo, string seq){
 		return success;
 	}
 	catch(exception& e) {
-		errorOut(e, "TrimSeqsCommand", "compareDNASeq");
+		m->errorOut(e, "TrimSeqsCommand", "compareDNASeq");
 		exit(1);
 	}
 
@@ -572,7 +583,7 @@ bool TrimSeqsCommand::stripQualThreshold(Sequence& seq, ifstream& qFile){
 		string name;
 		
 		qFile >> name;
-		if (name.length() != 0) {  if(name.substr(1) != seq.getName())	{	mothurOut("sequence name mismatch btwn fasta and qual file"); mothurOutEndLine();	}  } 
+		if (name.length() != 0) {  if(name.substr(1) != seq.getName())	{	m->mothurOut("sequence name mismatch btwn fasta and qual file"); m->mothurOutEndLine();	}  } 
 		while (!qFile.eof())	{	char c = qFile.get(); if (c == 10 || c == 13){	break;	}	}
 		
 		int score;
@@ -595,7 +606,7 @@ bool TrimSeqsCommand::stripQualThreshold(Sequence& seq, ifstream& qFile){
 		return 1;
 	}
 	catch(exception& e) {
-		errorOut(e, "TrimSeqsCommand", "stripQualThreshold");
+		m->errorOut(e, "TrimSeqsCommand", "stripQualThreshold");
 		exit(1);
 	}
 }
@@ -610,7 +621,7 @@ bool TrimSeqsCommand::cullQualAverage(Sequence& seq, ifstream& qFile){
 		string name;
 		
 		qFile >> name;
-		if (name[0] == '>') {  if(name.substr(1) != seq.getName())	{	mothurOut("sequence name mismatch btwn fasta: " + seq.getName() + " and qual file: " + name); mothurOutEndLine();	} }
+		if (name[0] == '>') {  if(name.substr(1) != seq.getName())	{	m->mothurOut("sequence name mismatch btwn fasta: " + seq.getName() + " and qual file: " + name); m->mothurOutEndLine();	} }
 		
 		while (!qFile.eof())	{	char c = qFile.get(); if (c == 10 || c == 13){	break;	}	}
 		
@@ -629,7 +640,7 @@ bool TrimSeqsCommand::cullQualAverage(Sequence& seq, ifstream& qFile){
 		return success;
 	}
 	catch(exception& e) {
-		errorOut(e, "TrimSeqsCommand", "cullQualAverage");
+		m->errorOut(e, "TrimSeqsCommand", "cullQualAverage");
 		exit(1);
 	}
 }

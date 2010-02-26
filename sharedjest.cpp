@@ -52,7 +52,7 @@ EstOutput Jest::getValues(vector<SharedRAbundVector*> shared) {
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "Jest", "getValues");
+		m->errorOut(e, "Jest", "getValues");
 		exit(1);
 	}
 }

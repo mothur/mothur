@@ -13,6 +13,7 @@
 
 PhyloTree::PhyloTree(){
 	try {
+		m = MothurOut::getInstance();
 		numNodes = 1;
 		numSeqs = 0;
 		tree.push_back(TaxNode("Root"));
@@ -20,7 +21,7 @@ PhyloTree::PhyloTree(){
 		maxLevel = 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "PhyloTree", "PhyloTree");
+		m->errorOut(e, "PhyloTree", "PhyloTree");
 		exit(1);
 	}
 }
@@ -49,7 +50,7 @@ PhyloTree::PhyloTree(string tfile){
 		assignHeirarchyIDs(0);
 	}
 	catch(exception& e) {
-		errorOut(e, "PhyloTree", "PhyloTree");
+		m->errorOut(e, "PhyloTree", "PhyloTree");
 		exit(1);
 	}
 }
@@ -66,7 +67,7 @@ string PhyloTree::getNextTaxon(string& heirarchy){
 		return currentLevel;
 	}
 	catch(exception& e) {
-		errorOut(e, "PhyloTree", "getNextTaxon");
+		m->errorOut(e, "PhyloTree", "getNextTaxon");
 		exit(1);
 	}
 }
@@ -123,7 +124,7 @@ void PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "PhyloTree", "addSeqToTree");
+		m->errorOut(e, "PhyloTree", "addSeqToTree");
 		exit(1);
 	}
 }
@@ -138,7 +139,7 @@ vector<int> PhyloTree::getGenusNodes()	{
 		return genusIndex;
 	}
 	catch(exception& e) {
-		errorOut(e, "PhyloTree", "getGenusNodes");
+		m->errorOut(e, "PhyloTree", "getGenusNodes");
 		exit(1);
 	}
 }
@@ -161,7 +162,7 @@ void PhyloTree::assignHeirarchyIDs(int index){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "PhyloTree", "assignHeirarchyIDs");
+		m->errorOut(e, "PhyloTree", "assignHeirarchyIDs");
 		exit(1);
 	}
 }
@@ -215,7 +216,7 @@ void PhyloTree::binUnclassified(){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "PhyloTree", "binUnclassified");
+		m->errorOut(e, "PhyloTree", "binUnclassified");
 		exit(1);
 	}
 }
@@ -234,7 +235,7 @@ string PhyloTree::getFullTaxonomy(string seqName) {
 		return tax;
 	}
 	catch(exception& e) {
-		errorOut(e, "PhyloTree", "getFullTaxonomy");
+		m->errorOut(e, "PhyloTree", "getFullTaxonomy");
 		exit(1);
 	}
 }
@@ -246,7 +247,7 @@ void PhyloTree::print(ofstream& out){
 		print(0, out);
 	}
 	catch(exception& e) {
-		errorOut(e, "PhyloTree", "print");
+		m->errorOut(e, "PhyloTree", "print");
 		exit(1);
 	}
 }
@@ -264,7 +265,7 @@ void PhyloTree::print(int i, ofstream& out){
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "PhyloTree", "print");
+		m->errorOut(e, "PhyloTree", "print");
 		exit(1);
 	}
 }

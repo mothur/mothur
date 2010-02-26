@@ -13,7 +13,7 @@
 
 OptionParser::OptionParser(string option) {
 	try {
-		
+		m = MothurOut::getInstance();
 		if (option != "") {
 			
 			string key, value;		
@@ -30,7 +30,7 @@ OptionParser::OptionParser(string option) {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "OptionParser", "parse");
+		m->errorOut(e, "OptionParser", "parse");
 		exit(1);
 	}
 }

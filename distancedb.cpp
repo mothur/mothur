@@ -21,7 +21,7 @@ DistanceDB::DistanceDB() {
 		distCalculator = new eachGapDist();
 	}
 	catch(exception& e) {
-		errorOut(e, "DistanceDB", "DistanceDB");
+		m->errorOut(e, "DistanceDB", "DistanceDB");
 		exit(1);
 	}	
 }
@@ -29,14 +29,14 @@ DistanceDB::DistanceDB() {
 void DistanceDB::addSequence(Sequence seq) {
 	try {
 		//are the template sequences aligned
-		if (!isAligned(seq.getAligned())) { templateAligned = false; mothurOut(seq.getName() + " is not aligned. Sequences must be aligned to use the distance method."); mothurOutEndLine(); }
+		if (!isAligned(seq.getAligned())) { templateAligned = false; m->mothurOut(seq.getName() + " is not aligned. Sequences must be aligned to use the distance method."); m->mothurOutEndLine(); }
 		
 		if (templateSeqsLength == 0) { templateSeqsLength = seq.getAligned().length(); }
 				
 		data.push_back(seq);
 	}
 	catch(exception& e) {
-		errorOut(e, "DistanceDB", "addSequence");
+		m->errorOut(e, "DistanceDB", "addSequence");
 		exit(1);
 	}	
 }
@@ -49,7 +49,7 @@ vector<int> DistanceDB::findClosestSequences(Sequence* query, int numWanted){
 		string sequence = query->getAligned();
 		vector<seqDist> dists;
 		
-		if (numWanted > data.size()) { mothurOut("numwanted is larger than the number of template sequences, using 10."); mothurOutEndLine(); numWanted = 10; }
+		if (numWanted > data.size()) { m->mothurOut("numwanted is larger than the number of template sequences, using 10."); m->mothurOutEndLine(); numWanted = 10; }
 		
 		if (sequence.length() != templateSeqsLength) { templateSameLength = false; }
 		
@@ -72,14 +72,14 @@ vector<int> DistanceDB::findClosestSequences(Sequence* query, int numWanted){
 			}
 		
 		}else{
-			mothurOut("cannot find closest matches using distance method for " + query->getName() + " without aligned template sequences of the same length."); mothurOutEndLine();
+			m->mothurOut("cannot find closest matches using distance method for " + query->getName() + " without aligned template sequences of the same length."); m->mothurOutEndLine();
 			exit(1);
 		}
 		
 		return topMatches;
 	}
 	catch(exception& e) {
-		errorOut(e, "DistanceDB", "findClosestSequence");
+		m->errorOut(e, "DistanceDB", "findClosestSequence");
 		exit(1);
 	}	
 }
@@ -98,7 +98,7 @@ bool DistanceDB::isAligned(string seq){
 		return aligned;
 	}
 	catch(exception& e) {
-		errorOut(e, "DistanceDB", "isAligned");
+		m->errorOut(e, "DistanceDB", "isAligned");
 		exit(1);
 	}	
 }

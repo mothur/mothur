@@ -13,7 +13,7 @@
 
 //***************************************************************************************************************
 
-ReverseSeqsCommand::ReverseSeqsCommand(string option){
+ReverseSeqsCommand::ReverseSeqsCommand(string option)  {
 	try {
 		abort = false;
 		
@@ -53,7 +53,7 @@ ReverseSeqsCommand::ReverseSeqsCommand(string option){
 			//check for required parameters
 			fasta = validParameter.validFile(parameters, "fasta", true);
 			if (fasta == "not open") { abort = true; }
-			else if (fasta == "not found") { fasta = ""; mothurOut("fasta is a required parameter for the reverse.seqs command."); mothurOutEndLine(); abort = true;  }	
+			else if (fasta == "not found") { fasta = ""; m->mothurOut("fasta is a required parameter for the reverse.seqs command."); m->mothurOutEndLine(); abort = true;  }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -64,7 +64,7 @@ ReverseSeqsCommand::ReverseSeqsCommand(string option){
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "ReverseSeqsCommand", "ReverseSeqsCommand");
+		m->errorOut(e, "ReverseSeqsCommand", "ReverseSeqsCommand");
 		exit(1);
 	}
 }
@@ -72,13 +72,13 @@ ReverseSeqsCommand::ReverseSeqsCommand(string option){
 
 void ReverseSeqsCommand::help(){
 	try {
-		mothurOut("The reverse.seqs command reads a fastafile and ....\n");
-		mothurOut("The reverse.seqs command parameter is fasta and it is required.\n");
-		mothurOut("The reverse.seqs command should be in the following format: \n");
-		mothurOut("reverse.seqs(fasta=yourFastaFile) \n");	
+		m->mothurOut("The reverse.seqs command reads a fastafile and ....\n");
+		m->mothurOut("The reverse.seqs command parameter is fasta and it is required.\n");
+		m->mothurOut("The reverse.seqs command should be in the following format: \n");
+		m->mothurOut("reverse.seqs(fasta=yourFastaFile) \n");	
 	}
 	catch(exception& e) {
-		errorOut(e, "ReverseSeqsCommand", "help");
+		m->errorOut(e, "ReverseSeqsCommand", "help");
 		exit(1);
 	}
 }
@@ -112,11 +112,17 @@ int ReverseSeqsCommand::execute(){
 		inFASTA.close();
 		outFASTA.close();
 		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+		m->mothurOut(reverseFile); m->mothurOutEndLine();	
+		m->mothurOutEndLine();
+
+		
 		return 0;
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "ReverseSeqsCommand", "execute");
+		m->errorOut(e, "ReverseSeqsCommand", "execute");
 		exit(1);
 	}
 }

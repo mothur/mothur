@@ -41,7 +41,7 @@ RAbundVector::RAbundVector(string id, vector<int> rav) : DataVector(id), data(ra
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "RAbundVector", "RAbundVector");
+		m->errorOut(e, "RAbundVector", "RAbundVector");
 		exit(1);
 	}
 }
@@ -56,7 +56,7 @@ RAbundVector::RAbundVector(vector<int> rav, int mr, int nb, int ns) {
 		data = rav;
 	}
 	catch(exception& e) {
-		errorOut(e, "RAbundVector", "RAbundVector");
+		m->errorOut(e, "RAbundVector", "RAbundVector");
 		exit(1);
 	}
 }
@@ -78,7 +78,7 @@ RAbundVector::RAbundVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), 
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "RAbundVector", "RAbundVector");
+		m->errorOut(e, "RAbundVector", "RAbundVector");
 		exit(1);
 	}
 }
@@ -103,7 +103,7 @@ void RAbundVector::set(int binNumber, int newBinSize){
 		numSeqs += (newBinSize - oldBinSize);
 	}
 	catch(exception& e) {
-		errorOut(e, "RAbundVector", "set");
+		m->errorOut(e, "RAbundVector", "set");
 		exit(1);
 	}
 }
@@ -129,7 +129,7 @@ void RAbundVector::push_back(int binSize){
 		numSeqs += binSize;
 	}
 	catch(exception& e) {
-		errorOut(e, "RAbundVector", "push_back");
+		m->errorOut(e, "RAbundVector", "push_back");
 		exit(1);
 	}
 }
@@ -202,7 +202,7 @@ void RAbundVector::nonSortedPrint(ostream& output){
 		output << endl;
 	}
 	catch(exception& e) {
-		errorOut(e, "RAbundVector", "nonSortedPrint");
+		m->errorOut(e, "RAbundVector", "nonSortedPrint");
 		exit(1);
 	}
 }
@@ -218,7 +218,7 @@ void RAbundVector::print(string prefix, ostream& output){
 		output << endl;
 	}
 	catch(exception& e) {
-		errorOut(e, "RAbundVector", "print");
+		m->errorOut(e, "RAbundVector", "print");
 		exit(1);
 	}
 }
@@ -236,7 +236,7 @@ void RAbundVector::print(ostream& output){
 		output << endl;
 	}
 	catch(exception& e) {
-		errorOut(e, "RAbundVector", "print");
+		m->errorOut(e, "RAbundVector", "print");
 		exit(1);
 	}
 }
@@ -279,7 +279,7 @@ SAbundVector RAbundVector::getSAbundVector() {
 		return sav;
 	}
 	catch(exception& e) {
-		errorOut(e, "RAbundVector", "getSAbundVector");
+		m->errorOut(e, "RAbundVector", "getSAbundVector");
 		exit(1);
 	}
 }
@@ -302,7 +302,7 @@ OrderVector RAbundVector::getOrderVector(map<string,int>* nameMap = NULL) {
 		return ov;
 	}
 	catch(exception& e) {
-		errorOut(e, "RAbundVector", "getOrderVector");
+		m->errorOut(e, "RAbundVector", "getOrderVector");
 		exit(1);
 	}
 }

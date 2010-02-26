@@ -52,7 +52,7 @@ void Collect::getCurve(int increment = 1){
 				delete ccd;
         }
         catch(exception& e) {
-			errorOut(e, "Collect", "getCurve");
+			m->errorOut(e, "Collect", "getCurve");
 			exit(1);
         }
 }
@@ -158,7 +158,7 @@ try {
 
         }
         catch(exception& e) {
-                errorOut(e, "Collect", "getSharedCurve");
+                m->errorOut(e, "Collect", "getSharedCurve");
 				exit(1);
         }
 }

@@ -68,6 +68,7 @@ protected:
 	
 	vector<seqDist> mergedMin;
 	string partialDist;
+	MothurOut* m;
 	
 	
 };

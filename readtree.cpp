@@ -13,10 +13,11 @@
 ReadTree::ReadTree() {
 	try {
 		globaldata = GlobalData::getInstance();
+		m = MothurOut::getInstance();
 		globaldata->gTree.clear();
 	}
 	catch(exception& e) {
-		errorOut(e, "ReadTree", "ReadTree");
+		m->errorOut(e, "ReadTree", "ReadTree");
 		exit(1);
 	}
 }
@@ -28,11 +29,11 @@ int ReadTree::readSpecialChar(istream& f, char c, string name) {
 		char d = f.get();
 	
 		if(d == EOF){
-			mothurOut("Error: Input file ends prematurely, expecting a " + name + "\n");
+			m->mothurOut("Error: Input file ends prematurely, expecting a " + name + "\n");
 			exit(1);
 		}
 		if(d != c){
-			mothurOut("Error: Expected " + name + " in input file.  Found " + toString(d) + ".\n");
+			m->mothurOut("Error: Expected " + name + " in input file.  Found " + toString(d) + ".\n");
 			exit(1);
 		}
 		if(d == ')' && f.peek() == '\n'){
@@ -41,7 +42,7 @@ int ReadTree::readSpecialChar(istream& f, char c, string name) {
 		return d;
 	}
 	catch(exception& e) {
-		errorOut(e, "ReadTree", "readSpecialChar");
+		m->errorOut(e, "ReadTree", "readSpecialChar");
 		exit(1);
 	}
 }
@@ -54,13 +55,13 @@ int ReadTree::readNodeChar(istream& f) {
 		char d = f.get();
 
 		if(d == EOF){
-			mothurOut("Error: Input file ends prematurely, expecting a left parenthesis\n");
+			m->mothurOut("Error: Input file ends prematurely, expecting a left parenthesis\n");
 			exit(1);
 		}
 		return d;
 	}
 	catch(exception& e) {
-		errorOut(e, "ReadTree", "readNodeChar");
+		m->errorOut(e, "ReadTree", "readNodeChar");
 		exit(1);
 	}
 }
@@ -72,14 +73,14 @@ float ReadTree::readBranchLength(istream& f) {
 		float b;
 	
 		if(!(f >> b)){
-			mothurOut("Error: Missing branch length in input tree.\n");
+			m->mothurOut("Error: Missing branch length in input tree.\n");
 			exit(1);
 		}
 		gobble(f);
 		return b;
 	}
 	catch(exception& e) {
-		errorOut(e, "ReadTree", "readBranchLength");
+		m->errorOut(e, "ReadTree", "readBranchLength");
 		exit(1);
 	}
 }
@@ -167,7 +168,7 @@ int ReadNewickTree::read() {
 		return readOk;
 	}
 	catch(exception& e) {
-		errorOut(e, "ReadNewickTree", "read");
+		m->errorOut(e, "ReadNewickTree", "read");
 		exit(1);
 	}
 }
@@ -208,7 +209,7 @@ void ReadNewickTree::nexusTranslation() {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "ReadNewickTree", "nexusTranslation");
+		m->errorOut(e, "ReadNewickTree", "nexusTranslation");
 		exit(1);
 	}
 }
@@ -228,7 +229,7 @@ int ReadNewickTree::readTreeString() {
 			n = numLeaves;  //number of leaves / sequences, we want node 1 to start where the leaves left off
 
 			lc = readNewickInt(filehandle, n, T);
-			if (lc == -1) { mothurOut("error with lc"); mothurOutEndLine(); return -1; } //reports an error in reading
+			if (lc == -1) { m->mothurOut("error with lc"); m->mothurOutEndLine(); return -1; } //reports an error in reading
 		
 			if(filehandle.peek()==','){							
 				readSpecialChar(filehandle,',',"comma");
@@ -239,7 +240,7 @@ int ReadNewickTree::readTreeString() {
 			}												
 			if(rooted != 1){								
 				rc = readNewickInt(filehandle, n, T);
-				if (rc == -1) { mothurOut("error with rc"); mothurOutEndLine(); return -1; } //reports an error in reading
+				if (rc == -1) { m->mothurOut("error with rc"); m->mothurOutEndLine(); return -1; } //reports an error in reading
 				if(filehandle.peek() == ')'){					
 					readSpecialChar(filehandle,')',"right parenthesis");
 				}											
@@ -255,7 +256,7 @@ int ReadNewickTree::readTreeString() {
 			n = T->getIndex(name);
 
 			if(n!=0){
-				mothurOut("Internal error: The only taxon is not taxon 0.\n");
+				m->mothurOut("Internal error: The only taxon is not taxon 0.\n");
 				//exit(1);
 				readOk = -1; return -1;
 			}
@@ -274,7 +275,7 @@ int ReadNewickTree::readTreeString() {
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "ReadNewickTree", "readTreeString");
+		m->errorOut(e, "ReadNewickTree", "readTreeString");
 		exit(1);
 	}
 }
@@ -303,7 +304,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 			if(f.peek() == ':'){									      
 				readSpecialChar(f,':',"colon");	
 										
-				if(n >= numNodes){	mothurOut("Error: Too many nodes in input tree\n");  readOk = -1; return -1; }
+				if(n >= numNodes){	m->mothurOut("Error: Too many nodes in input tree\n");  readOk = -1; return -1; }
 				
 				T->tree[n].setBranchLength(readBranchLength(f));
 			}else{
@@ -337,7 +338,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 			
 			//adds sequence names that are not in group file to the "xxx" group
 			if(group == "not found") {
-				mothurOut("Name: " + name + " is not in your groupfile, and will be disregarded. \n");  //readOk = -1; return n1;
+				m->mothurOut("Name: " + name + " is not in your groupfile, and will be disregarded. \n");  //readOk = -1; return n1;
 				
 				globaldata->gTreemap->namesOfSeqs.push_back(name);
 				globaldata->gTreemap->treemap[name].groupname = "xxx";
@@ -373,7 +374,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "ReadNewickTree", "readNewickInt");
+		m->errorOut(e, "ReadNewickTree", "readNewickInt");
 		exit(1);
 	}
 }

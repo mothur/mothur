@@ -99,11 +99,11 @@ void ChimeraSlayer::doPrep() {
 		//run filter on template
 		for (int i = 0; i < templateSeqs.size(); i++) {  runFilter(templateSeqs[i]);  }
 		
-		mothurOutEndLine(); mothurOut("It took " + toString(time(NULL) - start) + " secs to filter.");	mothurOutEndLine();
+		m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to filter.");	m->mothurOutEndLine();
 
 	}
 	catch(exception& e) {
-		errorOut(e, "ChimeraSlayer", "doprep");
+		m->errorOut(e, "ChimeraSlayer", "doprep");
 		exit(1);
 	}
 }
@@ -111,9 +111,9 @@ void ChimeraSlayer::doPrep() {
 ChimeraSlayer::~ChimeraSlayer() { 	delete decalc;  if (searchMethod == "kmer") {  delete databaseRight;  delete databaseLeft;  }	 }
 //***************************************************************************************************************
 void ChimeraSlayer::printHeader(ostream& out) {
-	mothurOutEndLine();
-	mothurOut("Only reporting sequence supported by " + toString(minBS) + "% of bootstrapped results.");
-	mothurOutEndLine();
+	m->mothurOutEndLine();
+	m->mothurOut("Only reporting sequence supported by " + toString(minBS) + "% of bootstrapped results.");
+	m->mothurOutEndLine();
 	
 	out << "Name\tLeftParent\tRightParent\tDivQLAQRB\tPerIDQLAQRB\tBootStrapA\tDivQLBQRA\tPerIDQLBQRA\tBootStrapB\tFlag\tLeftWindow\tRightWindow\n";
 }
@@ -129,7 +129,7 @@ void ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 			
 			if (chimeraFlag == "yes") {	
 				if ((chimeraResults[0].bsa >= minBS) || (chimeraResults[0].bsb >= minBS)) {
-					mothurOut(querySeq->getName() + "\tyes"); mothurOutEndLine();
+					m->mothurOut(querySeq->getName() + "\tyes"); m->mothurOutEndLine();
 					outAcc << querySeq->getName() << endl;
 				}
 			}
@@ -140,7 +140,7 @@ void ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "ChimeraSlayer", "print");
+		m->errorOut(e, "ChimeraSlayer", "print");
 		exit(1);
 	}
 }
@@ -247,7 +247,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "ChimeraSlayer", "getChimeras");
+		m->errorOut(e, "ChimeraSlayer", "getChimeras");
 		exit(1);
 	}
 }
@@ -282,7 +282,7 @@ void ChimeraSlayer::printBlock(data_struct data, ostream& out){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "ChimeraSlayer", "printBlock");
+		m->errorOut(e, "ChimeraSlayer", "printBlock");
 		exit(1);
 	}
 }

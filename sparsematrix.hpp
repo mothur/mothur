@@ -2,6 +2,7 @@
 #define SPARSEMATRIX_H
 
 #include "mothur.h"
+#include "mothurout.h"
 
 
 class ListVector;
@@ -47,6 +48,7 @@ private:
 	vector<PCell*> mins;
 	float smallDist;
 	int minsIndex;
+	MothurOut* m;
 };
 
 /***********************************************************************/

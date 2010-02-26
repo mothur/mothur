@@ -70,7 +70,7 @@ EstOutput Chao1::getValues(SAbundVector* rank){
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "Chao1", "getValues");
+		m->errorOut(e, "Chao1", "getValues");
 		exit(1);
 	}
 }

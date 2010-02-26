@@ -51,7 +51,7 @@ SharedRAbundVector::SharedRAbundVector(string id, vector<individual> rav) : Data
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedRAbundVector", "SharedRAbundVector");
+		m->errorOut(e, "SharedRAbundVector", "SharedRAbundVector");
 		exit(1);
 	}
 }
@@ -140,7 +140,7 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedRAbundVector", "SharedRAbundVector");
+		m->errorOut(e, "SharedRAbundVector", "SharedRAbundVector");
 		exit(1);
 	}
 }
@@ -158,7 +158,7 @@ void SharedRAbundVector::set(int binNumber, int newBinSize, string groupname){
 		numSeqs += (newBinSize - oldBinSize);
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedRAbundVector", "set");
+		m->errorOut(e, "SharedRAbundVector", "set");
 		exit(1);
 	}
 }
@@ -219,7 +219,7 @@ void SharedRAbundVector::push_back(int binSize, string groupName){
 		numSeqs += binSize;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedRAbundVector", "push_back");
+		m->errorOut(e, "SharedRAbundVector", "push_back");
 		exit(1);
 	}
 }
@@ -243,7 +243,7 @@ void SharedRAbundVector::insert(int binSize, int otu, string groupName){
 		numSeqs += binSize;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedRAbundVector", "insert");
+		m->errorOut(e, "SharedRAbundVector", "insert");
 		exit(1);
 	}
 }
@@ -267,7 +267,7 @@ void SharedRAbundVector::push_front(int binSize, int otu, string groupName){
 		numSeqs += binSize;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedRAbundVector", "push_front");
+		m->errorOut(e, "SharedRAbundVector", "push_front");
 		exit(1);
 	}
 }
@@ -313,7 +313,7 @@ void SharedRAbundVector::print(ostream& output){
 		output << endl;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedRAbundVector", "print");
+		m->errorOut(e, "SharedRAbundVector", "print");
 		exit(1);
 	}
 }
@@ -374,7 +374,7 @@ vector<SharedRAbundVector*> SharedRAbundVector::getSharedRAbundVectors(){
 		return lookup;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedRAbundVector", "getSharedRAbundVectors");
+		m->errorOut(e, "SharedRAbundVector", "getSharedRAbundVectors");
 		exit(1);
 	}
 }
@@ -394,7 +394,7 @@ RAbundVector SharedRAbundVector::getRAbundVector() {
 		return rav;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedRAbundVector", "getRAbundVector");
+		m->errorOut(e, "SharedRAbundVector", "getRAbundVector");
 		exit(1);
 	}
 }
@@ -409,7 +409,7 @@ RAbundVector SharedRAbundVector::getRAbundVector2() {
 		return rav;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedRAbundVector", "getRAbundVector2");
+		m->errorOut(e, "SharedRAbundVector", "getRAbundVector2");
 		exit(1);
 	}
 }
@@ -431,7 +431,7 @@ SharedSAbundVector SharedRAbundVector::getSharedSAbundVector(){
 		return sav;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedRAbundVector", "getSharedSAbundVector");
+		m->errorOut(e, "SharedRAbundVector", "getSharedSAbundVector");
 		exit(1);
 	}
 }
@@ -450,7 +450,7 @@ SAbundVector SharedRAbundVector::getSAbundVector() {
 		return sav;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedRAbundVector", "getSAbundVector");		
+		m->errorOut(e, "SharedRAbundVector", "getSAbundVector");		
 		exit(1);
 	}
 }
@@ -474,7 +474,7 @@ SharedOrderVector SharedRAbundVector::getSharedOrderVector() {
 		return ov;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedRAbundVector", "getSharedOrderVector");
+		m->errorOut(e, "SharedRAbundVector", "getSharedOrderVector");
 		exit(1);
 	}
 }
@@ -495,7 +495,7 @@ OrderVector SharedRAbundVector::getOrderVector(map<string,int>* nameMap = NULL) 
 		return ov;
 	}
 	catch(exception& e) {
-		errorOut(e, "SharedRAbundVector", "getOrderVector");
+		m->errorOut(e, "SharedRAbundVector", "getOrderVector");
 		exit(1);
 	}
 }

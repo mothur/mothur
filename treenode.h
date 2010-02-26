@@ -11,6 +11,7 @@
  */
 
 #include "mothur.h"
+#include "mothurout.h"
 
 /* This class represents a node on a tree. */
 
@@ -58,6 +59,7 @@ class Node  {
 		int				lchild;
 		int				rchild;
 		int				vectorIndex;
+		MothurOut* m;
 };		
 
 #endif

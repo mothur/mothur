@@ -40,7 +40,7 @@ private:
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
 	string format, groups, sorted, scale, label, outputDir;
-	vector<string> Groups;
+	vector<string> Groups, outputNames;
 
 
 };

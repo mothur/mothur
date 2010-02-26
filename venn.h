@@ -23,14 +23,15 @@ public:
 	Venn(string);
 	~Venn(){};
 
-	void getPic(SAbundVector*, vector<Calculator*>);
-	void getPic(vector<SharedRAbundVector*>, vector<Calculator*>);
+	vector<string> getPic(SAbundVector*, vector<Calculator*>);
+	vector<string> getPic(vector<SharedRAbundVector*>, vector<Calculator*>);
 
 private:
 	GlobalData* globaldata;
 	Calculator* singleCalc;
 	string groupComb, outputDir;
 	ofstream outsvg;
+	MothurOut* m;
 };
 
 /***********************************************************************/

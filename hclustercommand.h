@@ -53,6 +53,7 @@ private:
 	ofstream sabundFile, rabundFile, listFile;
 	time_t start;
 	unsigned long loops;
+	vector<string> outputNames;
 	
 	void printData(string label);
 };

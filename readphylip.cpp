@@ -38,7 +38,7 @@ void ReadPhylipMatrix::read(NameAssignment* nameMap){
                         }
                         else{
                                 list = new ListVector(nameMap->getListVector());
-                                if(nameMap->count(name)==0){        mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); mothurOutEndLine(); }
+                                if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); m->mothurOutEndLine(); }
                         }
         
                         char d;
@@ -89,7 +89,7 @@ void ReadPhylipMatrix::read(NameAssignment* nameMap){
                                 
                                         }
                                         else{
-                                                if(nameMap->count(name)==0){        mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); mothurOutEndLine(); }
+                                                if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); m->mothurOutEndLine(); }
                                 
                                                 for(int j=0;j<i;j++){
                                                         fileHandle >> distance;
@@ -133,7 +133,7 @@ void ReadPhylipMatrix::read(NameAssignment* nameMap){
                                         
                                         }
                                         else{
-                                                if(nameMap->count(name)==0){        mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); mothurOutEndLine(); }
+                                                if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); m->mothurOutEndLine(); }
                                 
                                                 for(int j=0;j<nseqs;j++){
                                                         fileHandle >> distance;
@@ -162,13 +162,13 @@ void ReadPhylipMatrix::read(NameAssignment* nameMap){
                                 }
                                 if(nameMap->size() > 0){
                                         //should probably tell them what is missing if we missed something
-                                        mothurOut("missed something\t" + toString(nameMap->size())); mothurOutEndLine();
+                                        m->mothurOut("missed something\t" + toString(nameMap->size())); m->mothurOutEndLine();
                                 }
                         } */
 
                 }
         catch(exception& e) {
-               errorOut(e, "ReadPhylipMatrix", "read");
+               m->errorOut(e, "ReadPhylipMatrix", "read");
                 exit(1);
         }
 	}

@@ -10,12 +10,12 @@
 #include "unifracunweightedcommand.h"
 
 /***********************************************************/
-UnifracUnweightedCommand::UnifracUnweightedCommand(string option) {
+UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
 		Groups.clear();
-		
+			
 		//allow user to run help
 		if(option == "help") { help(); abort = true; }
 		
@@ -35,7 +35,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option) {
 			}
 			
 			if (globaldata->gTree.size() == 0) {//no trees were read
-				mothurOut("You must execute the read.tree command, before you may execute the unifrac.unweighted command."); mothurOutEndLine(); abort = true;  }
+				m->mothurOut("You must execute the read.tree command, before you may execute the unifrac.unweighted command."); m->mothurOutEndLine(); abort = true;  }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -74,6 +74,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option) {
 				T = globaldata->gTree;
 				tmap = globaldata->gTreemap;
 				sumFile = outputDir + getSimpleName(globaldata->getTreeFile()) + ".uwsummary";
+				outputNames.push_back(sumFile);
 				openOutputFile(sumFile, outSum);
 				
 				util = new SharedUtil();
@@ -90,7 +91,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "UnifracUnweightedCommand", "UnifracUnweightedCommand");
+		m->errorOut(e, "UnifracUnweightedCommand", "UnifracUnweightedCommand");
 		exit(1);
 	}
 }
@@ -99,20 +100,20 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option) {
 
 void UnifracUnweightedCommand::help(){
 	try {
-		mothurOut("The unifrac.unweighted command can only be executed after a successful read.tree command.\n");
-		mothurOut("The unifrac.unweighted command parameters are groups, iters, distance and random.  No parameters are required.\n");
-		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 1 valid group.\n");
-		mothurOut("The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree.\n");
-		mothurOut("The distance parameter allows you to create a distance file from the results. The default is false.\n");
-		mothurOut("The random parameter allows you to shut off the comparison to random trees. The default is true, meaning compare your trees with randomly generated trees.\n");
-		mothurOut("The unifrac.unweighted command should be in the following format: unifrac.unweighted(groups=yourGroups, iters=yourIters).\n");
-		mothurOut("Example unifrac.unweighted(groups=A-B-C, iters=500).\n");
-		mothurOut("The default value for groups is all the groups in your groupfile, and iters is 1000.\n");
-		mothurOut("The unifrac.unweighted command output two files: .unweighted and .uwsummary their descriptions are in the manual.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
+		m->mothurOut("The unifrac.unweighted command can only be executed after a successful read.tree command.\n");
+		m->mothurOut("The unifrac.unweighted command parameters are groups, iters, distance and random.  No parameters are required.\n");
+		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 1 valid group.\n");
+		m->mothurOut("The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree.\n");
+		m->mothurOut("The distance parameter allows you to create a distance file from the results. The default is false.\n");
+		m->mothurOut("The random parameter allows you to shut off the comparison to random trees. The default is true, meaning compare your trees with randomly generated trees.\n");
+		m->mothurOut("The unifrac.unweighted command should be in the following format: unifrac.unweighted(groups=yourGroups, iters=yourIters).\n");
+		m->mothurOut("Example unifrac.unweighted(groups=A-B-C, iters=500).\n");
+		m->mothurOut("The default value for groups is all the groups in your groupfile, and iters is 1000.\n");
+		m->mothurOut("The unifrac.unweighted command output two files: .unweighted and .uwsummary their descriptions are in the manual.\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "UnifracUnweightedCommand", "help");
+		m->errorOut(e, "UnifracUnweightedCommand", "help");
 		exit(1);
 	}
 }
@@ -129,13 +130,16 @@ int UnifracUnweightedCommand::execute() {
 		//create new tree with same num nodes and leaves as users
 		
 		outSum << "Tree#" << '\t' << "Groups" << '\t'  <<  "UWScore" <<'\t' << "UWSig" <<  endl;
-		mothurOut("Tree#\tGroups\tUWScore\tUWSig"); mothurOutEndLine();
+		m->mothurOut("Tree#\tGroups\tUWScore\tUWSig"); m->mothurOutEndLine();
 		
 		//get pscores for users trees
 		for (int i = 0; i < T.size(); i++) {
 			counter = 0;
 			
-			if (random)  {  output = new ColumnFile(outputDir + getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".unweighted", itersString);  }
+			if (random)  {  
+				output = new ColumnFile(outputDir + getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".unweighted", itersString);
+				outputNames.push_back(outputDir + getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".unweighted");
+			}
 			
 			//get unweighted for users tree
 			rscoreFreq.resize(numComp);  
@@ -205,11 +209,16 @@ int UnifracUnweightedCommand::execute() {
 		globaldata->Groups.clear(); 
 		outSum.close();
 		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+		
 		return 0;
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "UnifracUnweightedCommand", "execute");
+		m->errorOut(e, "UnifracUnweightedCommand", "execute");
 		exit(1);
 	}
 }
@@ -234,7 +243,7 @@ void UnifracUnweightedCommand::printUnweightedFile() {
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "UnifracUnweightedCommand", "printUnweightedFile");
+		m->errorOut(e, "UnifracUnweightedCommand", "printUnweightedFile");
 		exit(1);
 	}
 }
@@ -250,28 +259,28 @@ void UnifracUnweightedCommand::printUWSummaryFile(int i) {
 
 		for(int a = 0; a < numComp; a++) {
 			outSum << i+1 << '\t';
-			mothurOut(toString(i+1) + "\t");
+			m->mothurOut(toString(i+1) + "\t");
 			
 			if (random) {
 				if (UWScoreSig[a][0] > (1/(float)iters)) {
 					outSum << setprecision(6) << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(itersString.length()) << UWScoreSig[a][0] << endl;
 					cout << setprecision(6)  << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(itersString.length()) << UWScoreSig[a][0] << endl; 
-					mothurOutJustToLog(groupComb[a]  + "\t" + toString(utreeScores[a][0])  + "\t" + toString(UWScoreSig[a][0])); mothurOutEndLine(); 
+					m->mothurOutJustToLog(groupComb[a]  + "\t" + toString(utreeScores[a][0])  + "\t" + toString(UWScoreSig[a][0])); m->mothurOutEndLine(); 
 				}else {
 					outSum << setprecision(6) << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(itersString.length()) << "<" << (1/float(iters)) << endl;
 					cout << setprecision(6)  << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(itersString.length()) << "<" << (1/float(iters)) << endl; 
-					mothurOutJustToLog(groupComb[a]  + "\t" + toString(utreeScores[a][0])  + "\t<" + toString((1/float(iters)))); mothurOutEndLine();
+					m->mothurOutJustToLog(groupComb[a]  + "\t" + toString(utreeScores[a][0])  + "\t<" + toString((1/float(iters)))); m->mothurOutEndLine();
 				}
 			}else{
 				outSum << setprecision(6) << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << "0.00" << endl;
 				cout << setprecision(6)  << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << "0.00" << endl; 
-				mothurOutJustToLog(groupComb[a]  + "\t" + toString(utreeScores[a][0])  + "\t0.00"); mothurOutEndLine();
+				m->mothurOutJustToLog(groupComb[a]  + "\t" + toString(utreeScores[a][0])  + "\t0.00"); m->mothurOutEndLine();
 			}
 		}
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "UnifracUnweightedCommand", "printUWSummaryFile");
+		m->errorOut(e, "UnifracUnweightedCommand", "printUWSummaryFile");
 		exit(1);
 	}
 }
@@ -279,6 +288,8 @@ void UnifracUnweightedCommand::printUWSummaryFile(int i) {
 void UnifracUnweightedCommand::createPhylipFile(int i) {
 	try {
 		string phylipFileName = outputDir + getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".unweighted.dist";
+		outputNames.push_back(phylipFileName);
+		
 		ofstream out;
 		openOutputFile(phylipFileName, out);
 			
@@ -317,7 +328,7 @@ void UnifracUnweightedCommand::createPhylipFile(int i) {
 		out.close();
 	}
 	catch(exception& e) {
-		errorOut(e, "UnifracUnweightedCommand", "createPhylipFile");
+		m->errorOut(e, "UnifracUnweightedCommand", "createPhylipFile");
 		exit(1);
 	}
 }

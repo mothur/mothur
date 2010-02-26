@@ -85,7 +85,7 @@ EstOutput LogSD::getValues(SAbundVector* rank){
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "LogSD", "getValues");
+		m->errorOut(e, "LogSD", "getValues");
 		exit(1);
 	}
 }

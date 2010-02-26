@@ -2,13 +2,14 @@
 #define FILEOUTPUT_H
 
 #include "mothur.h"
+#include "mothurout.h"
 
 /***********************************************************************/
 
 class FileOutput {
 	
 public:
-	FileOutput(){};
+	FileOutput(){ m = MothurOut::getInstance(); }
 	virtual ~FileOutput(){};
 	
 	virtual void initFile(string) = 0;
@@ -20,6 +21,7 @@ public:
 
 protected:
 	int renameOk;
+	MothurOut* m;
 
 };	
 	

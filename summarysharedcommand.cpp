@@ -35,7 +35,7 @@
 
 //**********************************************************************************************************************
 
-SummarySharedCommand::SummarySharedCommand(string option){
+SummarySharedCommand::SummarySharedCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
@@ -63,7 +63,7 @@ SummarySharedCommand::SummarySharedCommand(string option){
 			
 			//make sure the user has already run the read.otu command
 			if (globaldata->getSharedFile() == "") {
-				 mothurOut("You must read a list and a group, or a shared before you can use the summary.shared command."); mothurOutEndLine(); abort = true; 
+				 m->mothurOut("You must read a list and a group, or a shared before you can use the summary.shared command."); m->mothurOutEndLine(); abort = true; 
 			}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -159,12 +159,14 @@ SummarySharedCommand::SummarySharedCommand(string option){
 				
 				outputFileName = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + "shared.summary";
 				openOutputFile(outputFileName, outputFileHandle);
+				outputNames.push_back(outputFileName);
+				
 				mult = false;
 			}
 		}
 	}
 	catch(exception& e) {
-		errorOut(e, "SummarySharedCommand", "SummarySharedCommand");
+		m->errorOut(e, "SummarySharedCommand", "SummarySharedCommand");
 		exit(1);
 	}
 }
@@ -173,22 +175,22 @@ SummarySharedCommand::SummarySharedCommand(string option){
 
 void SummarySharedCommand::help(){
 	try {
-		mothurOut("The summary.shared command can only be executed after a successful read.otu command.\n");
-		mothurOut("The summary.shared command parameters are label, calc and all.  No parameters are required.\n");
-		mothurOut("The summary.shared command should be in the following format: \n");
-		mothurOut("summary.shared(label=yourLabel, calc=yourEstimators, groups=yourGroups).\n");
-		mothurOut("Example summary.shared(label=unique-.01-.03, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan).\n");
+		m->mothurOut("The summary.shared command can only be executed after a successful read.otu command.\n");
+		m->mothurOut("The summary.shared command parameters are label, calc and all.  No parameters are required.\n");
+		m->mothurOut("The summary.shared command should be in the following format: \n");
+		m->mothurOut("summary.shared(label=yourLabel, calc=yourEstimators, groups=yourGroups).\n");
+		m->mothurOut("Example summary.shared(label=unique-.01-.03, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan).\n");
 		validCalculator->printCalc("sharedsummary", cout);
-		mothurOut("The default value for calc is sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan\n");
-		mothurOut("The default value for groups is all the groups in your groupfile.\n");
-		mothurOut("The label parameter is used to analyze specific labels in your input.\n");
-		mothurOut("The all parameter is used to specify if you want the estimate of all your groups together.  This estimate can only be made for sharedsobs and sharedchao calculators. The default is false.\n");
-		mothurOut("If you use sharedchao and run into memory issues, set all to false. \n");
-		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabel).\n\n");
+		m->mothurOut("The default value for calc is sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan\n");
+		m->mothurOut("The default value for groups is all the groups in your groupfile.\n");
+		m->mothurOut("The label parameter is used to analyze specific labels in your input.\n");
+		m->mothurOut("The all parameter is used to specify if you want the estimate of all your groups together.  This estimate can only be made for sharedsobs and sharedchao calculators. The default is false.\n");
+		m->mothurOut("If you use sharedchao and run into memory issues, set all to false. \n");
+		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 2 valid groups.\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabel).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "SummarySharedCommand", "help");
+		m->errorOut(e, "SummarySharedCommand", "help");
 		exit(1);
 	}
 }
@@ -208,7 +210,7 @@ int SummarySharedCommand::execute(){
 	try {
 	
 		if (abort == true) { return 0; }
-	
+		
 		//if the users entered no valid calculators don't execute command
 		if (sumCalculators.size() == 0) { return 0; }
 		//check if any calcs can do multiples
@@ -239,6 +241,7 @@ int SummarySharedCommand::execute(){
 		if (mult == true) {
 			outAllFileName = ((getRootName(globaldata->inputFileName)) + "sharedmultiple.summary");
 			openOutputFile(outAllFileName, outAll);
+			outputNames.push_back(outAllFileName);
 			
 			outAll << "label" <<'\t' << "comparison" << '\t'; 
 			for(int i=0;i<sumCalculators.size();i++){
@@ -250,7 +253,7 @@ int SummarySharedCommand::execute(){
 		}
 		
 		if (lookup.size() < 2) { 
-			mothurOut("I cannot run the command without at least 2 valid groups."); 
+			m->mothurOut("I cannot run the command without at least 2 valid groups."); 
 			for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; }
 			
 			//close files and clean up
@@ -262,6 +265,7 @@ int SummarySharedCommand::execute(){
 			mult = false;
 			outAll.close();  
 			remove(outAllFileName.c_str());
+			outputNames.pop_back();
 		}
 					
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -272,7 +276,7 @@ int SummarySharedCommand::execute(){
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 		
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
-				mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
+				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 				process(lookup);
 				
 				processedLabels.insert(lookup[0]->getLabel());
@@ -285,7 +289,7 @@ int SummarySharedCommand::execute(){
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 					lookup = input->getSharedRAbundVectors(lastLabel);
 
-					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
+					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 					process(lookup);
 					
 					processedLabels.insert(lookup[0]->getLabel());
@@ -307,12 +311,12 @@ int SummarySharedCommand::execute(){
 		set<string>::iterator it;
 		bool needToRun = false;
 		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			mothurOut("Your file does not include the label " + *it); 
+			m->mothurOut("Your file does not include the label " + *it); 
 			if (processedLabels.count(lastLabel) != 1) {
-				mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
 				needToRun = true;
 			}else {
-				mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
+				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
 			}
 		}
 		
@@ -321,7 +325,7 @@ int SummarySharedCommand::execute(){
 				for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {	delete lookup[i];	} } 
 				lookup = input->getSharedRAbundVectors(lastLabel);
 
-				mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
+				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 				process(lookup);
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 		}
@@ -337,11 +341,16 @@ int SummarySharedCommand::execute(){
 		for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
 		
 		delete input;  globaldata->ginput = NULL;
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
 
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "SummarySharedCommand", "execute");
+		m->errorOut(e, "SummarySharedCommand", "execute");
 		exit(1);
 	}
 }
@@ -403,7 +412,7 @@ void SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup) {
 
 	}
 	catch(exception& e) {
-		errorOut(e, "SummarySharedCommand", "process");
+		m->errorOut(e, "SummarySharedCommand", "process");
 		exit(1);
 	}
 }

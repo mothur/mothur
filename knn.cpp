@@ -28,23 +28,23 @@ string Knn::getTaxonomy(Sequence* seq) {
 		
 			//is this sequence in the taxonomy file
 			if (it == taxonomy.end()) { //error not in file
-				mothurOut("Error: sequence " + names[closest[i]] + " is not in the taxonomy file.  It will be eliminated as a match to sequence " + seq->getName() + "."); mothurOutEndLine();
+				m->mothurOut("Error: sequence " + names[closest[i]] + " is not in the taxonomy file.  It will be eliminated as a match to sequence " + seq->getName() + "."); m->mothurOutEndLine();
 			}else{   closestNames.push_back(it->first);	}
 		}
 		
 		if (closestNames.size() == 0) {
-			mothurOut("Error: All the matches for sequence " + seq->getName() + " have been eliminated. " + seq->getName() + " will be disregarded."); mothurOutEndLine();
+			m->mothurOut("Error: All the matches for sequence " + seq->getName() + " have been eliminated. " + seq->getName() + " will be disregarded."); m->mothurOutEndLine();
 			tax = "bad seq";
 		}else{
 			tax = findCommonTaxonomy(closestNames);
-			if (tax == "") { mothurOut("There are no common levels for sequence " + seq->getName() + ". " + seq->getName() + " will be disregarded."); mothurOutEndLine(); tax = "bad seq"; }
+			if (tax == "") { m->mothurOut("There are no common levels for sequence " + seq->getName() + ". " + seq->getName() + " will be disregarded."); m->mothurOutEndLine(); tax = "bad seq"; }
 		}
 		
 		simpleTax = tax;
 		return tax;	
 	}
 	catch(exception& e) {
-		errorOut(e, "Knn", "getTaxonomy");
+		m->errorOut(e, "Knn", "getTaxonomy");
 		exit(1);
 	}
 }
@@ -92,7 +92,7 @@ string Knn::findCommonTaxonomy(vector<string> closest)  {
 		return common;
 	}
 	catch(exception& e) {
-		errorOut(e, "Knn", "findCommonTaxonomy");
+		m->errorOut(e, "Knn", "findCommonTaxonomy");
 		exit(1);
 	}
 }

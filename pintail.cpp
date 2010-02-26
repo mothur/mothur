@@ -32,7 +32,7 @@ Pintail::~Pintail() {
 		delete decalc; 
 	}
 	catch(exception& e) {
-		errorOut(e, "Pintail", "~Pintail");
+		m->errorOut(e, "Pintail", "~Pintail");
 		exit(1);
 	}
 }
@@ -66,13 +66,13 @@ void Pintail::doPrep() {
 		#endif
 
 		
-		mothurOut("Getting conservation... "); cout.flush();
+		m->mothurOut("Getting conservation... "); cout.flush();
 		if (consfile == "") { 
-			mothurOut("Calculating probability of conservation for your template sequences.  This can take a while...  I will output the frequency of the highest base in each position to a .freq file so that you can input them using the conservation parameter next time you run this command.  Providing the .freq file will improve speed.    "); cout.flush();
+			m->mothurOut("Calculating probability of conservation for your template sequences.  This can take a while...  I will output the frequency of the highest base in each position to a .freq file so that you can input them using the conservation parameter next time you run this command.  Providing the .freq file will improve speed.    "); cout.flush();
 			probabilityProfile = decalc->calcFreq(templateSeqs, outputDir + getSimpleName(templateFileName)); 
-			mothurOut("Done."); mothurOutEndLine();
-		}else				{   probabilityProfile = readFreq();	mothurOut("Done.");		  }
-		mothurOutEndLine();
+			m->mothurOut("Done."); m->mothurOutEndLine();
+		}else				{   probabilityProfile = readFreq();	m->mothurOut("Done.");		  }
+		m->mothurOutEndLine();
 		
 		//make P into Q
 		for (int i = 0; i < probabilityProfile.size(); i++)  {	probabilityProfile[i] = 1 - probabilityProfile[i];  }  //cout << i << '\t' << probabilityProfile[i] << endl;
@@ -135,7 +135,7 @@ void Pintail::doPrep() {
 				}
 			}
 			
-			mothurOut("Calculating quantiles for your template.  This can take a while...  I will output the quantiles to a .quan file that you can input them using the quantiles parameter next time you run this command.  Providing the .quan file will dramatically improve speed.    "); cout.flush();
+			m->mothurOut("Calculating quantiles for your template.  This can take a while...  I will output the quantiles to a .quan file that you can input them using the quantiles parameter next time you run this command.  Providing the .quan file will dramatically improve speed.    "); cout.flush();
 			if (processors == 1) { 
 				quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, 0, templateSeqs.size());
 			}else {		createProcessesQuan();		}
@@ -197,7 +197,7 @@ void Pintail::doPrep() {
 				
 			}
 
-			mothurOut("Done."); mothurOutEndLine();
+			m->mothurOut("Done."); m->mothurOutEndLine();
 		}
 		
 		if (reRead) {
@@ -212,7 +212,7 @@ void Pintail::doPrep() {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Pintail", "doPrep");
+		m->errorOut(e, "Pintail", "doPrep");
 		exit(1);
 	}
 }
@@ -234,7 +234,7 @@ void Pintail::print(ostream& out, ostream& outAcc) {
 		
 		out << querySeq->getName() << '\t' << "div: " << deviation << "\tstDev: " << DE << "\tchimera flag: " << chimera << endl;
 		if (chimera == "Yes") {
-			mothurOut(querySeq->getName() + "\tdiv: " + toString(deviation) + "\tstDev: " + toString(DE) + "\tchimera flag: " + chimera); mothurOutEndLine();
+			m->mothurOut(querySeq->getName() + "\tdiv: " + toString(deviation) + "\tstDev: " + toString(DE) + "\tchimera flag: " + chimera); m->mothurOutEndLine();
 			outAcc << querySeq->getName() << endl;
 		}
 		out << "Observed\t";
@@ -250,7 +250,7 @@ void Pintail::print(ostream& out, ostream& outAcc) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Pintail", "print");
+		m->errorOut(e, "Pintail", "print");
 		exit(1);
 	}
 }
@@ -307,7 +307,7 @@ int Pintail::getChimeras(Sequence* query) {
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "Pintail", "getChimeras");
+		m->errorOut(e, "Pintail", "getChimeras");
 		exit(1);
 	}
 }
@@ -349,7 +349,7 @@ vector<float> Pintail::readFreq() {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "Pintail", "readFreq");
+		m->errorOut(e, "Pintail", "readFreq");
 		exit(1);
 	}
 }
@@ -366,7 +366,7 @@ Sequence* Pintail::findPairs(Sequence* q) {
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "Pintail", "findPairs");
+		m->errorOut(e, "Pintail", "findPairs");
 		exit(1);
 	}
 }
@@ -406,7 +406,7 @@ void Pintail::createProcessesQuan() {
 				out.close();
 				
 				exit(0);
-			}else { mothurOut("unable to spawn the necessary processes."); mothurOutEndLine(); exit(0); }
+			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
 		}
 		
 		//force parent to wait until all the processes are done
@@ -461,7 +461,7 @@ void Pintail::createProcessesQuan() {
 #endif		
 	}
 	catch(exception& e) {
-		errorOut(e, "Pintail", "createProcessesQuan");
+		m->errorOut(e, "Pintail", "createProcessesQuan");
 		exit(1);
 	}
 }

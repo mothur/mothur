@@ -12,6 +12,7 @@
 /************************************************************/
 
  GroupMap::GroupMap(string filename) {
+	m = MothurOut::getInstance();
 	groupFileName = filename;
 	openInputFile(filename, fileHandle);
 	index = 0;
@@ -33,7 +34,7 @@ int GroupMap::readMap() {
 			
 			it = groupmap.find(seqName);
 			
-			if (it != groupmap.end()) { error = 1; mothurOut("Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); mothurOutEndLine();  }
+			if (it != groupmap.end()) { error = 1; m->mothurOut("Your groupfile contains more than 1 sequence named " + seqName + ", sequence names must be unique. Please correct."); m->mothurOutEndLine();  }
 			else {
 				groupmap[seqName] = seqGroup;	//store data in map
 				seqsPerGroup[seqGroup]++;  //increment number of seqs in that group
@@ -89,7 +90,7 @@ bool GroupMap::isValidGroup(string groupname) {
 		return false;
 	}
 	catch(exception& e) {
-		errorOut(e, "GroupMap", "isValidGroup");
+		m->errorOut(e, "GroupMap", "isValidGroup");
 		exit(1);
 	}
 }
@@ -107,7 +108,7 @@ int GroupMap::getNumSeqs(string group) {
 		
 	}
 	catch(exception& e) {
-		errorOut(e, "GroupMap", "getNumSeqs");
+		m->errorOut(e, "GroupMap", "getNumSeqs");
 		exit(1);
 	}
 }
@@ -125,7 +126,7 @@ vector<string> GroupMap::getNamesSeqs(){
 		return names;
 	}
 	catch(exception& e) {
-		errorOut(e, "GroupMap", "getNamesSeqs");
+		m->errorOut(e, "GroupMap", "getNamesSeqs");
 		exit(1);
 	}
 }

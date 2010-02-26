@@ -19,13 +19,13 @@
 
 //**********************************************************************************************************************
 
-VennCommand::VennCommand(string option){
+VennCommand::VennCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
 		allLines = 1;
 		labels.clear();
-		
+			
 		//allow user to run help
 		if(option == "help") { help(); abort = true; }
 		
@@ -46,7 +46,7 @@ VennCommand::VennCommand(string option){
 			
 			//make sure the user has already run the read.otu command
 			if ((globaldata->getListFile() == "") && (globaldata->getSharedFile() == "")) {
-				mothurOut("You must read a list, or a list and a group, or a shared before you can use the venn command."); mothurOutEndLine(); abort = true; 
+				m->mothurOut("You must read a list, or a list and a group, or a shared before you can use the venn command."); m->mothurOutEndLine(); abort = true; 
 			}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -136,7 +136,7 @@ VennCommand::VennCommand(string option){
 				
 	}
 	catch(exception& e) {
-		errorOut(e, "VennCommand", "VennCommand");
+		m->errorOut(e, "VennCommand", "VennCommand");
 		exit(1);
 	}
 }
@@ -145,21 +145,21 @@ VennCommand::VennCommand(string option){
 
 void VennCommand::help(){
 	try {
-		mothurOut("The venn command can only be executed after a successful read.otu command.\n");
-		mothurOut("The venn command parameters are groups, calc, abund and label.  No parameters are required.\n");
-		mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included in your venn diagram, you may only use a maximum of 4 groups.\n");
-		mothurOut("The group names are separated by dashes. The label allows you to select what distance levels you would like a venn diagram created for, and are also separated by dashes.\n");
-		mothurOut("The venn command should be in the following format: venn(groups=yourGroups, calc=yourCalcs, label=yourLabels, abund=yourAbund).\n");
-		mothurOut("Example venn(groups=A-B-C, calc=sharedsobs-sharedchao, abund=20).\n");
-		mothurOut("The default value for groups is all the groups in your groupfile up to 4, and all labels in your inputfile will be used.\n");
-		mothurOut("The default value for calc is sobs if you have only read a list file or if you have selected only one group, and sharedsobs if you have multiple groups.\n");
-		mothurOut("The default available estimators for calc are sobs, chao and ace if you have only read a list file, and sharedsobs, sharedchao and sharedace if you have read a list and group file or a shared file.\n");
-		mothurOut("The only estmiator available four 4 groups is sharedsobs.\n");
-		mothurOut("The venn command outputs a .svg file for each calculator you specify at each distance you choose.\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
+		m->mothurOut("The venn command can only be executed after a successful read.otu command.\n");
+		m->mothurOut("The venn command parameters are groups, calc, abund and label.  No parameters are required.\n");
+		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included in your venn diagram, you may only use a maximum of 4 groups.\n");
+		m->mothurOut("The group names are separated by dashes. The label allows you to select what distance levels you would like a venn diagram created for, and are also separated by dashes.\n");
+		m->mothurOut("The venn command should be in the following format: venn(groups=yourGroups, calc=yourCalcs, label=yourLabels, abund=yourAbund).\n");
+		m->mothurOut("Example venn(groups=A-B-C, calc=sharedsobs-sharedchao, abund=20).\n");
+		m->mothurOut("The default value for groups is all the groups in your groupfile up to 4, and all labels in your inputfile will be used.\n");
+		m->mothurOut("The default value for calc is sobs if you have only read a list file or if you have selected only one group, and sharedsobs if you have multiple groups.\n");
+		m->mothurOut("The default available estimators for calc are sobs, chao and ace if you have only read a list file, and sharedsobs, sharedchao and sharedace if you have read a list and group file or a shared file.\n");
+		m->mothurOut("The only estmiator available four 4 groups is sharedsobs.\n");
+		m->mothurOut("The venn command outputs a .svg file for each calculator you specify at each distance you choose.\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "VennCommand", "help");
+		m->errorOut(e, "VennCommand", "help");
 		exit(1);
 	}
 }
@@ -185,6 +185,7 @@ int VennCommand::execute(){
 		if (abort == true) { return 0; }
 		
 		string lastLabel;
+		vector<string> outputNames;
 		
 		//if the users entered no valid calculators don't execute command
 		if (vennCalculators.size() == 0) { return 0; }
@@ -217,15 +218,17 @@ int VennCommand::execute(){
 			while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 
 				if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
-					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
+					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 					processedLabels.insert(lookup[0]->getLabel());
 					userLabels.erase(lookup[0]->getLabel());
 					
 					if (lookup.size() > 4) {
-						mothurOut("Error: Too many groups chosen.  You may use up to 4 groups with the venn command.  I will use the first four groups in your groupfile."); mothurOutEndLine();
+						m->mothurOut("Error: Too many groups chosen.  You may use up to 4 groups with the venn command.  I will use the first four groups in your groupfile."); m->mothurOutEndLine();
 						for (int i = lookup.size(); i > 4; i--) { lookup.pop_back(); } //no memmory leak because pop_back calls destructor
 					}
-					venn->getPic(lookup, vennCalculators);
+					
+					vector<string> outfilenames = venn->getPic(lookup, vennCalculators);
+					for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); } 
 				}
 				
 				if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
@@ -234,15 +237,16 @@ int VennCommand::execute(){
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 					lookup = input->getSharedRAbundVectors(lastLabel);
 
-					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
+					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 					processedLabels.insert(lookup[0]->getLabel());
 					userLabels.erase(lookup[0]->getLabel());
 
 					if (lookup.size() > 4) {
-						mothurOut("Error: Too many groups chosen.  You may use up to 4 groups with the venn command.  I will use the first four groups in your groupfile."); mothurOutEndLine();
+						m->mothurOut("Error: Too many groups chosen.  You may use up to 4 groups with the venn command.  I will use the first four groups in your groupfile."); m->mothurOutEndLine();
 						for (int i = lookup.size(); i > 4; i--) { lookup.pop_back(); } //no memmory leak because pop_back calls destructor
 					}				
-					venn->getPic(lookup, vennCalculators);
+					vector<string> outfilenames = venn->getPic(lookup, vennCalculators);
+					for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); } 
 					
 					//restore real lastlabel to save below
 					lookup[0]->setLabel(saveLabel);
@@ -260,12 +264,12 @@ int VennCommand::execute(){
 			set<string>::iterator it;
 			bool needToRun = false;
 			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-				mothurOut("Your file does not include the label " + *it); 
+				m->mothurOut("Your file does not include the label " + *it); 
 				if (processedLabels.count(lastLabel) != 1) {
-					mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
+					m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
 					needToRun = true;
 				}else {
-					mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
+					m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
 				}
 			}
 		
@@ -274,15 +278,17 @@ int VennCommand::execute(){
 					for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {	delete lookup[i]; }  } 
 					lookup = input->getSharedRAbundVectors(lastLabel);
 
-					mothurOut(lookup[0]->getLabel()); mothurOutEndLine();
+					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 					processedLabels.insert(lookup[0]->getLabel());
 					userLabels.erase(lookup[0]->getLabel());
 
 					if (lookup.size() > 4) {
-						mothurOut("Error: Too many groups chosen.  You may use up to 4 groups with the venn command.  I will use the first four groups in your groupfile."); mothurOutEndLine();
+						m->mothurOut("Error: Too many groups chosen.  You may use up to 4 groups with the venn command.  I will use the first four groups in your groupfile."); m->mothurOutEndLine();
 						for (int i = lookup.size(); i > 4; i--) { lookup.pop_back(); } //no memmory leak because pop_back calls destructor
 					}				
-					venn->getPic(lookup, vennCalculators);
+					vector<string> outfilenames = venn->getPic(lookup, vennCalculators);
+					for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); } 
+
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 			}
 		
@@ -296,8 +302,10 @@ int VennCommand::execute(){
 		
 				if(allLines == 1 || labels.count(sabund->getLabel()) == 1){			
 	
-					mothurOut(sabund->getLabel()); mothurOutEndLine();
-					venn->getPic(sabund, vennCalculators);
+					m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
+					vector<string> outfilenames = venn->getPic(sabund, vennCalculators);
+					for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); } 
+
 					
 					processedLabels.insert(sabund->getLabel());
 					userLabels.erase(sabund->getLabel());
@@ -309,8 +317,10 @@ int VennCommand::execute(){
 					delete sabund;
 					sabund = input->getSAbundVector(lastLabel);
 					
-					mothurOut(sabund->getLabel()); mothurOutEndLine();
-					venn->getPic(sabund, vennCalculators);
+					m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
+					vector<string> outfilenames = venn->getPic(sabund, vennCalculators);
+					for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); } 
+
 					
 					processedLabels.insert(sabund->getLabel());
 					userLabels.erase(sabund->getLabel());
@@ -329,12 +339,12 @@ int VennCommand::execute(){
 			set<string>::iterator it;
 			bool needToRun = false;
 			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-				mothurOut("Your file does not include the label " + *it); 
+				m->mothurOut("Your file does not include the label " + *it); 
 				if (processedLabels.count(lastLabel) != 1) {
-					mothurOut(". I will use " + lastLabel + "."); mothurOutEndLine();
+					m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
 					needToRun = true;
 				}else {
-					mothurOut(". Please refer to " + lastLabel + "."); mothurOutEndLine();
+					m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
 				}
 			}
 		
@@ -343,8 +353,10 @@ int VennCommand::execute(){
 				if (sabund != NULL) {	delete sabund;	}
 				sabund = input->getSAbundVector(lastLabel);
 					
-				mothurOut(sabund->getLabel()); mothurOutEndLine();
-				venn->getPic(sabund, vennCalculators);
+				m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
+				vector<string> outfilenames = venn->getPic(sabund, vennCalculators);
+				for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); } 
+
 				delete sabund;
 					
 			}
@@ -352,10 +364,17 @@ int VennCommand::execute(){
 		}
 		
 		for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+
+		
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "VennCommand", "execute");
+		m->errorOut(e, "VennCommand", "execute");
 		exit(1);
 	}
 }

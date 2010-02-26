@@ -12,6 +12,7 @@
 /***********************************************************************/
 
 Sequence::Sequence(){
+	m = MothurOut::getInstance();
 	initialize();
 }
 
@@ -81,7 +82,7 @@ string Sequence::getSequenceString(ifstream& fastaFile) {
 		return sequence;
 	}
 	catch(exception& e) {
-		errorOut(e, "Sequence", "getSequenceString");
+		m->errorOut(e, "Sequence", "getSequenceString");
 		exit(1);
 	}
 }
@@ -103,7 +104,7 @@ string Sequence::getCommentString(ifstream& fastaFile) {
 		return sequence;
 	}
 	catch(exception& e) {
-		errorOut(e, "Sequence", "getCommentString");
+		m->errorOut(e, "Sequence", "getCommentString");
 		exit(1);
 	}
 }

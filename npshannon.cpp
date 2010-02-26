@@ -43,7 +43,7 @@ EstOutput NPShannon::getValues(SAbundVector* rank){
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "NPShannon", "getValues");
+		m->errorOut(e, "NPShannon", "getValues");
 		exit(1);
 	}
 }

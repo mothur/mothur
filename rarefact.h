@@ -12,9 +12,9 @@ class Rarefact {
 	
 public:
 	Rarefact(OrderVector* o, vector<Display*> disp) :
-			numSeqs(o->getNumSeqs()), order(o), displays(disp), label(o->getLabel())  {};
+			numSeqs(o->getNumSeqs()), order(o), displays(disp), label(o->getLabel())  { m = MothurOut::getInstance(); }
 	Rarefact(vector<SharedRAbundVector*> shared, vector<Display*> disp) :
-					 lookup(shared), displays(disp) {  globaldata = GlobalData::getInstance();  };
+					 lookup(shared), displays(disp) {  globaldata = GlobalData::getInstance(); m = MothurOut::getInstance(); }
 
 	~Rarefact(){};
 	void getCurve(int, int);
@@ -28,6 +28,7 @@ private:
 	string label;
 	void mergeVectors(SharedRAbundVector*, SharedRAbundVector*);
 	vector<SharedRAbundVector*> lookup; 
+	MothurOut* m;
 
 };
 

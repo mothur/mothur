@@ -42,6 +42,7 @@ protected:
 	float stepSize;
 	
 	int numGroups;
+	MothurOut* m;
 };
 
 #endif

@@ -67,8 +67,8 @@ EstOutput BStick::getValues(SAbundVector* rank){
 		data[1] = 0.886/sqrt(rdata.size());
 		data[2] = 1.031/sqrt(rdata.size());
 
-		/*mothurOut(critVal); mothurOutEndLine();
-		mothurOut("If D-Statistic is less than the critical value then the data fits the Broken Stick model w/ 95% confidence.\n\n");*/
+		/*m->mothurOut(critVal); m->mothurOutEndLine();
+		m->mothurOut("If D-Statistic is less than the critical value then the data fits the Broken Stick model w/ 95% confidence.\n\n");*/
 		
 
 		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
@@ -78,7 +78,7 @@ EstOutput BStick::getValues(SAbundVector* rank){
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "BStick", "getValues");
+		m->errorOut(e, "BStick", "getValues");
 		exit(1);
 	}
 }

@@ -41,7 +41,7 @@ EstOutput SorClass::getValues(vector<SharedRAbundVector*> shared) {
 		return data;
 	}
 	catch(exception& e) {
-		errorOut(e, "SorClass", "getValues");
+		m->errorOut(e, "SorClass", "getValues");
 		exit(1);
 	}
 }

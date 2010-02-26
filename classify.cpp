@@ -17,7 +17,7 @@
 /**************************************************************************************************/
 Classify::Classify(string tfile, string tempFile, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch) : taxFile(tfile), templateFile(tempFile) {		
 	try {	
-											
+		m = MothurOut::getInstance();									
 		readTaxonomy(taxFile);	
 		
 		int start = time(NULL);
@@ -30,7 +30,7 @@ Classify::Classify(string tfile, string tempFile, string method, int kmerSize, f
 			inFASTA.close();
 		}
 
-		mothurOut("Generating search database...    "); cout.flush();
+		m->mothurOut("Generating search database...    "); cout.flush();
 				
 		bool needToGenerate = true;
 		string kmerDBName;
@@ -45,8 +45,8 @@ Classify::Classify(string tfile, string tempFile, string method, int kmerSize, f
 		else if(method == "blast")		{	database = new BlastDB(gapOpen, gapExtend, match, misMatch);	}
 		else if(method == "distance")	{	database = new DistanceDB();	}
 		else {
-			mothurOut(method + " is not a valid search option. I will run the command using kmer, ksize=8.");
-			mothurOutEndLine();
+			m->mothurOut(method + " is not a valid search option. I will run the command using kmer, ksize=8.");
+			m->mothurOutEndLine();
 			database = new KmerDB(tempFile, 8);
 		}
 		
@@ -84,12 +84,12 @@ Classify::Classify(string tfile, string tempFile, string method, int kmerSize, f
 		
 		database->setNumSeqs(names.size());
 		
-		mothurOut("DONE."); mothurOutEndLine();
-		mothurOut("It took " + toString(time(NULL) - start) + " seconds generate search database. "); mothurOutEndLine();
+		m->mothurOut("DONE."); m->mothurOutEndLine();
+		m->mothurOut("It took " + toString(time(NULL) - start) + " seconds generate search database. "); m->mothurOutEndLine();
 
 	}
 	catch(exception& e) {
-		errorOut(e, "Classify", "Classify");
+		m->errorOut(e, "Classify", "Classify");
 		exit(1);
 	}
 }
@@ -103,8 +103,8 @@ void Classify::readTaxonomy(string file) {
 		ifstream inTax;
 		openInputFile(file, inTax);
 	
-		mothurOutEndLine();
-		mothurOut("Reading in the " + file + " taxonomy...\t");	cout.flush();
+		m->mothurOutEndLine();
+		m->mothurOut("Reading in the " + file + " taxonomy...\t");	cout.flush();
 		
 		string name, taxInfo;
 		//read template seqs and save
@@ -121,12 +121,12 @@ void Classify::readTaxonomy(string file) {
 		phyloTree->assignHeirarchyIDs(0);
 		inTax.close();
 	
-		mothurOut("DONE.");
-		mothurOutEndLine();	cout.flush();
+		m->mothurOut("DONE.");
+		m->mothurOutEndLine();	cout.flush();
 	
 	}
 	catch(exception& e) {
-		errorOut(e, "Classify", "readTaxonomy");
+		m->errorOut(e, "Classify", "readTaxonomy");
 		exit(1);
 	}
 }
@@ -152,7 +152,7 @@ vector<string> Classify::parseTax(string tax) {
 		return taxons;
 	}
 	catch(exception& e) {
-		errorOut(e, "Classify", "parseTax");
+		m->errorOut(e, "Classify", "parseTax");
 		exit(1);
 	}
 }

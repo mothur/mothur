@@ -10,7 +10,7 @@
 #include "mgclustercommand.h"
 
 //**********************************************************************************************************************
-MGClusterCommand::MGClusterCommand(string option){
+MGClusterCommand::MGClusterCommand(string option) {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
@@ -72,7 +72,7 @@ MGClusterCommand::MGClusterCommand(string option){
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
 			
-			if ((blastfile == "")) { mothurOut("When executing a mgcluster command you must provide a blastfile."); mothurOutEndLine(); abort = true; }
+			if ((blastfile == "")) { m->mothurOut("When executing a mgcluster command you must provide a blastfile."); m->mothurOutEndLine(); abort = true; }
 			
 			//check for optional parameter and set defaults
 			string temp;
@@ -88,7 +88,7 @@ MGClusterCommand::MGClusterCommand(string option){
 			if (method == "not found") { method = "furthest"; }
 			
 			if ((method == "furthest") || (method == "nearest") || (method == "average")) { }
-			else { mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average."); mothurOutEndLine(); abort = true; }
+			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average."); m->mothurOutEndLine(); abort = true; }
 
 			temp = validParameter.validFile(parameters, "length", false);			if (temp == "not found") { temp = "5"; }
 			convert(temp, length); 
@@ -108,7 +108,7 @@ MGClusterCommand::MGClusterCommand(string option){
 
 	}
 	catch(exception& e) {
-		errorOut(e, "MGClusterCommand", "MGClusterCommand");
+		m->errorOut(e, "MGClusterCommand", "MGClusterCommand");
 		exit(1);
 	}
 }
@@ -116,23 +116,23 @@ MGClusterCommand::MGClusterCommand(string option){
 
 void MGClusterCommand::help(){
 	try {
-		mothurOut("The mgcluster command parameter options are blast, name, cutoff, precision, method, merge, min, length, penalty and hcluster. The blast parameter is required.\n");
-		mothurOut("The mgcluster command reads a blast and name file and clusters the sequences into OPF units similiar to the OTUs.\n");
-		mothurOut("This command outputs a .list, .rabund and .sabund file that can be used with mothur other commands to estimate richness.\n");
-		mothurOut("The cutoff parameter is used to specify the maximum distance you would like to cluster to. The default is 0.70.\n");
-		mothurOut("The precision parameter's default value is 100. \n");
-		mothurOut("The acceptable mgcluster methods are furthest, nearest and average.  If no method is provided then furthest is assumed.\n\n");	
-		mothurOut("The min parameter allows you to specify is you want the minimum or maximum blast score ratio used in calculating the distance. The default is true, meaning you want the minimum.\n");
-		mothurOut("The length parameter is used to specify the minimum overlap required.  The default is 5.\n");
-		mothurOut("The penalty parameter is used to adjust the error rate.  The default is 0.10.\n");
-		mothurOut("The merge parameter allows you to shut off merging based on overlaps and just cluster.  By default merge is true, meaning you want to merge.\n");
-		mothurOut("The hcluster parameter allows you to use the hcluster algorithm when clustering.  This may be neccessary if your file is too large to fit into RAM. The default is false.\n");
-		mothurOut("The mgcluster command should be in the following format: \n");
-		mothurOut("mgcluster(blast=yourBlastfile, name=yourNameFile, cutoff=yourCutOff).\n");
-		mothurOut("Note: No spaces between parameter labels (i.e. balst), '=' and parameters (i.e.yourBlastfile).\n\n");
+		m->mothurOut("The mgcluster command parameter options are blast, name, cutoff, precision, method, merge, min, length, penalty and hcluster. The blast parameter is required.\n");
+		m->mothurOut("The mgcluster command reads a blast and name file and clusters the sequences into OPF units similiar to the OTUs.\n");
+		m->mothurOut("This command outputs a .list, .rabund and .sabund file that can be used with mothur other commands to estimate richness.\n");
+		m->mothurOut("The cutoff parameter is used to specify the maximum distance you would like to cluster to. The default is 0.70.\n");
+		m->mothurOut("The precision parameter's default value is 100. \n");
+		m->mothurOut("The acceptable mgcluster methods are furthest, nearest and average.  If no method is provided then furthest is assumed.\n\n");	
+		m->mothurOut("The min parameter allows you to specify is you want the minimum or maximum blast score ratio used in calculating the distance. The default is true, meaning you want the minimum.\n");
+		m->mothurOut("The length parameter is used to specify the minimum overlap required.  The default is 5.\n");
+		m->mothurOut("The penalty parameter is used to adjust the error rate.  The default is 0.10.\n");
+		m->mothurOut("The merge parameter allows you to shut off merging based on overlaps and just cluster.  By default merge is true, meaning you want to merge.\n");
+		m->mothurOut("The hcluster parameter allows you to use the hcluster algorithm when clustering.  This may be neccessary if your file is too large to fit into RAM. The default is false.\n");
+		m->mothurOut("The mgcluster command should be in the following format: \n");
+		m->mothurOut("mgcluster(blast=yourBlastfile, name=yourNameFile, cutoff=yourCutOff).\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. balst), '=' and parameters (i.e.yourBlastfile).\n\n");
 	}
 	catch(exception& e) {
-		errorOut(e, "MGClusterCommand", "help");
+		m->errorOut(e, "MGClusterCommand", "help");
 		exit(1);
 	}
 }
@@ -323,13 +323,20 @@ int MGClusterCommand::execute(){
 	
 		globaldata->setListFile(fileroot+ tag + ".list");
 		globaldata->setFormat("list");
-			
-		mothurOut("It took " + toString(time(NULL) - start) + " seconds to cluster."); mothurOutEndLine();
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		m->mothurOut(fileroot+ tag + ".list"); m->mothurOutEndLine();	
+		m->mothurOut(fileroot+ tag + ".rabund"); m->mothurOutEndLine();	
+		m->mothurOut(fileroot+ tag + ".sabund"); m->mothurOutEndLine();	
+		m->mothurOutEndLine();
+		
+		m->mothurOut("It took " + toString(time(NULL) - start) + " seconds to cluster."); m->mothurOutEndLine();
 			
 		return 0;
 	}
 	catch(exception& e) {
-		errorOut(e, "MGClusterCommand", "execute");
+		m->errorOut(e, "MGClusterCommand", "execute");
 		exit(1);
 	}
 }
@@ -345,7 +352,7 @@ void MGClusterCommand::printData(ListVector* mergedList){
 		sabund.print(sabundFile);
 	}
 	catch(exception& e) {
-		errorOut(e, "MGClusterCommand", "printData");
+		m->errorOut(e, "MGClusterCommand", "printData");
 		exit(1);
 	}
 }
@@ -430,7 +437,7 @@ ListVector* MGClusterCommand::mergeOPFs(map<string, int> binInfo, float dist){
 				
 	}
 	catch(exception& e) {
-		errorOut(e, "MGClusterCommand", "mergeOPFs");
+		m->errorOut(e, "MGClusterCommand", "mergeOPFs");
 		exit(1);
 	}
 }
@@ -448,7 +455,7 @@ void MGClusterCommand::sortHclusterFiles(string unsortedDist, string unsortedOve
 		overlapFile = sortedOverlapFile;
 	}
 	catch(exception& e) {
-		errorOut(e, "MGClusterCommand", "sortHclusterFiles");
+		m->errorOut(e, "MGClusterCommand", "sortHclusterFiles");
 		exit(1);
 	}
 }

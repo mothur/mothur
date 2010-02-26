@@ -44,7 +44,7 @@ private:
 
 	bool abort;
 	string outputFile, groups, userform, savegroups, outputDir;
-	vector<string> Groups; //holds groups to be used
+	vector<string> Groups, outputNames; //holds groups to be used
 };
 
 #endif
