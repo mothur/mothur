@@ -15,6 +15,7 @@
 FilterSeqsCommand::FilterSeqsCommand(string option)  {
 	try {
 		abort = false;
+		filterFileName = "";
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; }
@@ -58,16 +59,45 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 			}
 			
 			//check for required parameters
-			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not found") { m->mothurOut("fasta is a required parameter for the filter.seqs command."); m->mothurOutEndLine(); abort = true; }
-			else if (fastafile == "not open") { abort = true; }	
-			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += hasPath(fastafile); //if user entered a file with a path then preserve it	
-			}
+			fasta = validParameter.validFile(parameters, "fasta", false);
+			if (fasta == "not found") { m->mothurOut("fasta is a required parameter for the filter.seqs command."); m->mothurOutEndLine(); abort = true;  }
+			else { 
+				splitAtDash(fasta, fastafileNames);
+				
+				//go through files and make sure they are good, if not, then disregard them
+				for (int i = 0; i < fastafileNames.size(); i++) {
+					if (inputDir != "") {
+						string path = hasPath(fastafileNames[i]);
+						//if the user has not given a path then, add inputdir. else leave path alone.
+						if (path == "") {	fastafileNames[i] = inputDir + fastafileNames[i];		}
+					}
 
+					int ableToOpen;
+					ifstream in;
+					ableToOpen = openInputFile(fastafileNames[i], in);
+					if (ableToOpen == 1) { 
+						m->mothurOut(fastafileNames[i] + " will be disregarded."); m->mothurOutEndLine(); 
+						//erase from file list
+						fastafileNames.erase(fastafileNames.begin()+i);
+						i--;
+					}else{  
+						string simpleName = getSimpleName(fastafileNames[i]);
+						filterFileName += simpleName.substr(0, simpleName.find_first_of('.'));
+					}
+					in.close();
+				}
+				
+				//make sure there is at least one valid file left
+				if (fastafileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
+			}
+			
+			if (!abort) {
+				//if the user changes the output directory command factory will send this info to us in the output parameter 
+				outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
+					outputDir = "";	
+					outputDir += hasPath(fastafileNames[0]); //if user entered a file with a path then preserve it	
+				}
+			}
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			
@@ -107,7 +137,8 @@ void FilterSeqsCommand::help(){
 	try {
 		m->mothurOut("The filter.seqs command reads a file containing sequences and creates a .filter and .filter.fasta file.\n");
 		m->mothurOut("The filter.seqs command parameters are fasta, trump, soft, hard and vertical. \n");
-		m->mothurOut("The fasta parameter is required.\n");
+		m->mothurOut("The fasta parameter is required. You may enter several fasta files to build the filter from and filter, by separating their names with -'s.\n");
+		m->mothurOut("For example: fasta=abrecovery.fasta-amazon.fasta \n");
 		m->mothurOut("The trump parameter .... The default is ...\n");
 		m->mothurOut("The soft parameter .... The default is ....\n");
 		m->mothurOut("The hard parameter .... The default is ....\n");
@@ -130,13 +161,14 @@ int FilterSeqsCommand::execute() {
 	try {
 	
 		if (abort == true) { return 0; }
+		vector<string> outputNames;
 		
 		ifstream inFASTA;
-		openInputFile(fastafile, inFASTA);
+		openInputFile(fastafileNames[0], inFASTA);
 		
 		Sequence testSeq(inFASTA);
 		alignmentLength = testSeq.getAlignLength();
-		inFASTA.seekg(0);
+		inFASTA.close();
 		
 		F.setLength(alignmentLength);
 		
@@ -148,18 +180,23 @@ int FilterSeqsCommand::execute() {
 		else						{	F.setFilter(string(alignmentLength, '1'));	}
 
 		if(trump != '*' || isTrue(vertical) || soft != 0){
-			while(!inFASTA.eof()){	//read through and create the filter...
-				Sequence seq(inFASTA);
-				if (seq.getName() != "") {
-					if(trump != '*'){	F.doTrump(seq);	}
-					if(isTrue(vertical) || soft != 0){	F.getFreqs(seq);	}
-					numSeqs++;
-					cout.flush();
+			for (int i = 0; i < fastafileNames.size(); i++) {
+				ifstream in;
+				openInputFile(fastafileNames[i], in);
+				
+				while(!in.eof()){	//read through and create the filter...
+					Sequence seq(in);
+					if (seq.getName() != "") {
+						if(trump != '*'){	F.doTrump(seq);	}
+						if(isTrue(vertical) || soft != 0){	F.getFreqs(seq);	}
+						numSeqs++;
+						cout.flush();
+					}
 				}
+				in.close();
 			}
 		
 		}
-		inFASTA.close();
 		F.setNumSeqs(numSeqs);
 		
 		
@@ -169,38 +206,43 @@ int FilterSeqsCommand::execute() {
 		filter = F.getFilter();
 
 		ofstream outFilter;
-		string filterFile = outputDir + getRootName(getSimpleName(fastafile)) + "filter";
+		
+		string filterFile = outputDir + filterFileName + ".filter";
 		openOutputFile(filterFile, outFilter);
 		outFilter << filter << endl;
 		outFilter.close();
+		outputNames.push_back(filterFile);
 		
-		ifstream inFasta2;
-		openInputFile(fastafile, inFasta2);
-		string filteredFasta = outputDir + getRootName(getSimpleName(fastafile)) + "filter.fasta";
-		ofstream outFASTA;
-		openOutputFile(filteredFasta, outFASTA);
-
 		numSeqs = 0;
-		while(!inFasta2.eof()){
-			Sequence seq(inFasta2);
-			if (seq.getName() != "") {
-				string align = seq.getAligned();
-				string filterSeq = "";
-				
-				for(int j=0;j<alignmentLength;j++){
-					if(filter[j] == '1'){
-						filterSeq += align[j];
+		for (int i = 0; i < fastafileNames.size(); i++) {
+			ifstream in;
+			openInputFile(fastafileNames[i], in);
+			string filteredFasta = outputDir + getRootName(getSimpleName(fastafileNames[i])) + "filter.fasta";
+			ofstream outFASTA;
+			openOutputFile(filteredFasta, outFASTA);
+			outputNames.push_back(filteredFasta);
+			
+			
+			while(!in.eof()){
+				Sequence seq(in);
+				if (seq.getName() != "") {
+					string align = seq.getAligned();
+					string filterSeq = "";
+					
+					for(int j=0;j<alignmentLength;j++){
+						if(filter[j] == '1'){
+							filterSeq += align[j];
+						}
 					}
+					
+					outFASTA << '>' << seq.getName() << endl << filterSeq << endl;
+					numSeqs++;
 				}
-				
-				outFASTA << '>' << seq.getName() << endl << filterSeq << endl;
-				numSeqs++;
+				gobble(in);
 			}
-			gobble(inFasta2);
+			outFASTA.close();
+			in.close();
 		}
-		outFASTA.close();
-		inFasta2.close();
-		
 		
 		int filteredLength = 0;
 		for(int i=0;i<alignmentLength;i++){
@@ -216,8 +258,7 @@ int FilterSeqsCommand::execute() {
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		m->mothurOut(filterFile); m->mothurOutEndLine();	
-		m->mothurOut(filteredFasta); m->mothurOutEndLine();
+		for(int i = 0; i < outputNames.size(); i++) {  m->mothurOut(outputNames[i]); m->mothurOutEndLine();	 }
 		m->mothurOutEndLine();
 
 		return 0;

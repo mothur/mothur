@@ -23,7 +23,8 @@ public:
 	void help();
 	
 private:
-	string vertical, filter, fastafile, hard, outputDir;	
+	string vertical, filter, fasta, hard, outputDir, filterFileName;
+	vector<string> fastafileNames;	
 	int alignmentLength;
 
 	char trump;
