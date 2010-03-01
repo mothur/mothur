@@ -32,9 +32,9 @@ public:
 	void help();
 	
 private:
-	void createTree(ostream*, Tree*);
+	int createTree(ostream*, Tree*);
 	void printSims();
-	void process(SharedOrderVector*);
+	int process(SharedOrderVector*);
 	
 	
 	GlobalData* globaldata;

@@ -18,13 +18,20 @@ GlobalData* GlobalData::_uniqueInstance = 0;
 CommandFactory* CommandFactory::_uniqueInstance = 0;
 MothurOut* MothurOut::_uniqueInstance = 0;
 
+/***********************************************************************/
+volatile int ctrlc_pressed = 0;
+void ctrlc_handler ( int sig ) {
+	MothurOut* m = MothurOut::getInstance();
+    ctrlc_pressed = 1;
+	m->control_pressed = ctrlc_pressed;
+}
+/***********************************************************************/
 int main(int argc, char *argv[]){
 	MothurOut* m = MothurOut::getInstance();
 	try {
 		
-		//string log = "mothur.logFile";
-		//remove(log.c_str());
-		
+		signal(SIGINT, ctrlc_handler );
+				
 		time_t ltime = time(NULL); /* calendar time */  
 		string logFileName = "mothur." + toString(ltime) + ".logfile";
 		

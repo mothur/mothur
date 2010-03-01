@@ -193,7 +193,6 @@ string toString(const T&x, int i){
     return output.str();
 }
 /***********************************************************************/
-
 inline int openOutputFileAppend(string fileName, ofstream& fileHandle){
 	
 	fileHandle.open(fileName.c_str(), ios::app);

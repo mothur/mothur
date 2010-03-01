@@ -154,6 +154,17 @@ int ClusterCommand::execute(){
 		double saveCutoff = cutoff;
 		
 		while (matrix->getSmallDist() < cutoff && matrix->getNNodes() > 0){
+		
+			if (m->control_pressed) { //clean up
+				delete globaldata->gSparseMatrix;  globaldata->gSparseMatrix = NULL;
+				delete globaldata->gListVector;	 globaldata->gListVector = NULL;
+				if (globaldata->getFormat() == "phylip") { globaldata->setPhylipFile(""); }
+				else if (globaldata->getFormat() == "column") { globaldata->setColumnFile(""); }
+				sabundFile.close();rabundFile.close();listFile.close();
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
+				return 0;
+			}
+		
 			if (print_start && isTrue(timing)) {
 				m->mothurOut("Clustering (" + tag + ") dist " + toString(matrix->getSmallDist()) + "/" 
 					+ toString(roundDist(matrix->getSmallDist(), precision)) 

@@ -266,8 +266,19 @@ int CollectSharedCommand::execute(){
 				
 				//create collectors curve
 				cCurve = new Collect(order, cDisplays);
-				cCurve->getSharedCurve(freq);
+				int error = cCurve->getSharedCurve(freq);
 				delete cCurve;
+				
+				if (error == 1) {
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  
+					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
+					delete input;  globaldata->ginput = NULL;
+					delete read;
+					delete order; globaldata->gorder = NULL;
+					delete validCalculator;
+					globaldata->Groups.clear();
+					return 0;
+				}
 			
 				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 				processedLabels.insert(order->getLabel());
@@ -283,8 +294,20 @@ int CollectSharedCommand::execute(){
 				
 				//create collectors curve
 				cCurve = new Collect(order, cDisplays);
-				cCurve->getSharedCurve(freq);
+				int error = cCurve->getSharedCurve(freq);
 				delete cCurve;
+				
+				if (error == 1) {
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  
+					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
+					delete input;  globaldata->ginput = NULL;
+					delete read;
+					delete order; globaldata->gorder = NULL;
+					delete validCalculator;
+					globaldata->Groups.clear();
+					return 0;
+				}
+
 			
 				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 				processedLabels.insert(order->getLabel());
@@ -321,8 +344,20 @@ int CollectSharedCommand::execute(){
 			order = input->getSharedOrderVector(lastLabel);
 
 			cCurve = new Collect(order, cDisplays);
-			cCurve->getSharedCurve(freq);
+			int error = cCurve->getSharedCurve(freq);
 			delete cCurve;
+			
+			if (error == 1) {
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  
+				for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
+				delete input;  globaldata->ginput = NULL;
+				delete read;
+				delete order; globaldata->gorder = NULL;
+				delete validCalculator;
+				globaldata->Groups.clear();
+				return 0;
+			}
+
 			
 			m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 			delete order;

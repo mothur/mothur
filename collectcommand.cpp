@@ -140,7 +140,9 @@ int CollectCommand::execute(){
 		else {  inputFileNames = parseSharedFile(globaldata->getSharedFile());  globaldata->setFormat("rabund");  }
 	
 		for (int p = 0; p < inputFileNames.size(); p++) {
-		
+			
+			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  globaldata->Groups.clear(); return 0; }
+			
 			if (outputDir == "") { outputDir += hasPath(inputFileNames[p]); }
 			string fileNameRoot = outputDir + getRootName(getSimpleName(inputFileNames[p]));
 			globaldata->inputFileName = inputFileNames[p];
@@ -230,14 +232,37 @@ int CollectCommand::execute(){
 			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 			set<string> processedLabels;
 			set<string> userLabels = labels;
+			
+			if (m->control_pressed) {  
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  
+				for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
+				delete input;  globaldata->ginput = NULL;
+				delete read;
+				delete order; globaldata->gorder = NULL;
+				delete validCalculator;
+				globaldata->Groups.clear();
+				return 0;
+			}
+
 
 			while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
 				if(allLines == 1 || labels.count(order->getLabel()) == 1){
 					
 					cCurve = new Collect(order, cDisplays);
-					cCurve->getCurve(freq);
+					int error = cCurve->getCurve(freq);
 					delete cCurve;
+					
+					if (error == 1) {
+						for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  
+						for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
+						delete input;  globaldata->ginput = NULL;
+						delete read;
+						delete order; globaldata->gorder = NULL;
+						delete validCalculator;
+						globaldata->Groups.clear();
+						return 0;
+					}
 					
 					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 					processedLabels.insert(order->getLabel());
@@ -253,8 +278,19 @@ int CollectCommand::execute(){
 					order = (input->getOrderVector(lastLabel));
 					
 					cCurve = new Collect(order, cDisplays);
-					cCurve->getCurve(freq);
+					int error = cCurve->getCurve(freq);
 					delete cCurve;
+					
+					if (error == 1) {
+						for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  
+						for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
+						delete input;  globaldata->ginput = NULL;
+						delete read;
+						delete order; globaldata->gorder = NULL;
+						delete validCalculator;
+						globaldata->Groups.clear();
+						return 0;
+					}
 					
 					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 					processedLabels.insert(order->getLabel());
@@ -291,8 +327,19 @@ int CollectCommand::execute(){
 				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 				
 				cCurve = new Collect(order, cDisplays);
-				cCurve->getCurve(freq);
+				int error = cCurve->getCurve(freq);
 				delete cCurve;
+				
+				if (error == 1) {
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  
+					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
+					delete input;  globaldata->ginput = NULL;
+					delete read;
+					delete order; globaldata->gorder = NULL;
+					delete validCalculator;
+					globaldata->Groups.clear();
+					return 0;
+				}
 				delete order;
 			}
 			
