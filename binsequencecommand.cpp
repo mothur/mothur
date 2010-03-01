@@ -181,6 +181,7 @@ int BinSeqCommand::execute(){
 			readNamesFile();
 		}
 		
+		
 		//read list file
 		read = new ReadOTUFile(globaldata->getListFile());	
 		read->read(&*globaldata); 
@@ -188,6 +189,8 @@ int BinSeqCommand::execute(){
 		input = globaldata->ginput;
 		list = globaldata->gListVector;
 		string lastLabel = list->getLabel();
+		
+		if (m->control_pressed) {  return 0; }
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
@@ -199,7 +202,7 @@ int BinSeqCommand::execute(){
 			if(allLines == 1 || labels.count(list->getLabel()) == 1){
 				
 				error = process(list);	
-				if (error == 1) { return 0; }	
+				if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());		} return 0; }	
 							
 				processedLabels.insert(list->getLabel());
 				userLabels.erase(list->getLabel());
@@ -212,7 +215,7 @@ int BinSeqCommand::execute(){
 				list = input->getListVector(lastLabel);
 				
 				error = process(list);	
-				if (error == 1) { return 0; }
+				if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());		} return 0; }
 													
 				processedLabels.insert(list->getLabel());
 				userLabels.erase(list->getLabel());
@@ -247,7 +250,7 @@ int BinSeqCommand::execute(){
 			list = input->getListVector(lastLabel);
 				
 			error = process(list);	
-			if (error == 1) { return 0; }
+			if (error == 1) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());		} return 0; }
 			
 			delete list;  
 		}
@@ -315,7 +318,9 @@ int BinSeqCommand::process(ListVector* list) {
 				
 				//for each bin in the list vector
 				for (int i = 0; i < list->size(); i++) {
-
+					
+					if (m->control_pressed) {  return 1; }
+					
 					binnames = list->get(i);
 					while (binnames.find_first_of(',') != -1) { 
 						name = binnames.substr(0,binnames.find_first_of(','));
@@ -333,7 +338,6 @@ int BinSeqCommand::process(ListVector* list) {
 								string group = groupMap->getGroup(name);
 								if (group == "not found") {  
 									m->mothurOut(name + " is missing from your group file. Please correct. ");  m->mothurOutEndLine();
-									remove(outputFileName.c_str());
 									return 1;
 								}else{
 									name = name + "|" + group + "|" + toString(i+1);
@@ -343,7 +347,6 @@ int BinSeqCommand::process(ListVector* list) {
 							}
 						}else { 
 							m->mothurOut(name + " is missing from your fasta or name file. Please correct. "); m->mothurOutEndLine();
-							remove(outputFileName.c_str());
 							return 1;
 						}
 						
@@ -361,7 +364,6 @@ int BinSeqCommand::process(ListVector* list) {
 							string group = groupMap->getGroup(binnames);
 							if (group == "not found") {  
 								m->mothurOut(binnames + " is missing from your group file. Please correct. "); m->mothurOutEndLine();
-								remove(outputFileName.c_str());
 								return 1;
 							}else{
 								binnames = binnames + "|" + group + "|" + toString(i+1);
@@ -371,7 +373,6 @@ int BinSeqCommand::process(ListVector* list) {
 						}
 					}else { 
 						m->mothurOut(binnames + " is missing from your fasta or name file. Please correct. "); m->mothurOutEndLine();
-						remove(outputFileName.c_str());
 						return 1;
 					}
 				}

@@ -223,7 +223,8 @@ int BootSharedCommand::execute(){
 			if(allLines == 1 || labels.count(order->getLabel()) == 1){			
 				
 				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-				process(order);
+				int error = process(order);
+				if (error == 1) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } globaldata->Groups.clear(); return 0;	} 
 				
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
@@ -236,7 +237,8 @@ int BootSharedCommand::execute(){
 				delete order;
 				order = input->getSharedOrderVector(lastLabel);													
 				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-				process(order);
+				int error = process(order);
+				if (error == 1) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } globaldata->Groups.clear(); return 0;	} 
 
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
@@ -271,7 +273,9 @@ int BootSharedCommand::execute(){
 				if (order != NULL) {	delete order;	}
 				order = input->getSharedOrderVector(lastLabel);													
 				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-				process(order);
+				int error = process(order);
+				if (error == 1) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } globaldata->Groups.clear(); return 0;	} 
+				
 				delete order;
 
 		}
@@ -294,12 +298,14 @@ int BootSharedCommand::execute(){
 }
 //**********************************************************************************************************************
 
-void BootSharedCommand::createTree(ostream* out, Tree* t){
+int BootSharedCommand::createTree(ostream* out, Tree* t){
 	try {
 		
 		//do merges and create tree structure by setting parents and children
 		//there are numGroups - 1 merges to do
 		for (int i = 0; i < (numGroups - 1); i++) {
+		
+			if (m->control_pressed) {  return 1; }
 		
 			float largest = -1000.0;
 			int row, column;
@@ -357,6 +363,8 @@ void BootSharedCommand::createTree(ostream* out, Tree* t){
 	
 		//print newick file
 		t->print(*out);
+		
+		return 0;
 	
 	}
 	catch(exception& e) {
@@ -382,7 +390,7 @@ void BootSharedCommand::printSims() {
 	}
 }
 /***********************************************************/
-void BootSharedCommand::process(SharedOrderVector* order) {
+int BootSharedCommand::process(SharedOrderVector* order) {
 	try{
 				EstOutput data;
 				vector<SharedRAbundVector*> subset;
@@ -400,18 +408,22 @@ void BootSharedCommand::process(SharedOrderVector* order) {
 				//create a file for each calculator with the 1000 trees in it.
 				for (int p = 0; p < iters; p++) {
 					
+					if (m->control_pressed) {  return 1; }
+					
 					util->getSharedVectorswithReplacement(globaldata->Groups, lookup, order);  //fills group vectors from order vector.
 
 				
 					//for each calculator												
 					for(int i = 0 ; i < treeCalculators.size(); i++) {
-					
+						
+						if (m->control_pressed) {  return 1; }
+						
 						//initialize simMatrix
 						simMatrix.clear();
 						simMatrix.resize(numGroups);
-						for (int m = 0; m < simMatrix.size(); m++)	{
+						for (int o = 0; o < simMatrix.size(); o++)	{
 							for (int j = 0; j < simMatrix.size(); j++)	{
-								simMatrix[m].push_back(0.0);
+								simMatrix[o].push_back(0.0);
 							}
 						}
 				
@@ -437,6 +449,8 @@ void BootSharedCommand::process(SharedOrderVector* order) {
 						
 						tempTree = new Tree();
 						
+						if (m->control_pressed) {   delete tempTree; return 1; }
+						
 						//creates tree from similarity matrix and write out file
 						createTree(out[i], tempTree);
 						
@@ -455,6 +469,8 @@ void BootSharedCommand::process(SharedOrderVector* order) {
 				for (int k = 0; k < trees.size(); k++) {
 					
 					m->mothurOut("Generating consensus tree for " + treeCalculators[k]->getName()); m->mothurOutEndLine();
+					
+					if (m->control_pressed) {  return 1; }
 					
 					//set global data to calc trees
 					globaldata->gTree = trees[k];
@@ -477,6 +493,8 @@ void BootSharedCommand::process(SharedOrderVector* order) {
 					
 				//close ostream for each calc
 				for (int z = 0; z < treeCalculators.size(); z++) { out[z]->close(); }
+				
+				return 0;
 	
 	}
 	catch(exception& e) {

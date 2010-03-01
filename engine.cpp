@@ -69,6 +69,7 @@ bool InteractEngine::getInput(){
 				//executes valid command
 				Command* command = cFactory->getCommand(commandName, options);
 				quitCommandCalled = command->execute();
+				mout->control_pressed = 0;
 				
 			}else {
 				mout->mothurOut("Your input contains errors. Please try again."); 
@@ -183,6 +184,7 @@ bool BatchEngine::getInput(){
 					//executes valid command
 					Command* command = cFactory->getCommand(commandName, options);
 					quitCommandCalled = command->execute();
+					mout->control_pressed = 0;
 				}else {		
 					mout->mothurOut("Invalid."); 
 					mout->mothurOutEndLine();
@@ -262,6 +264,7 @@ bool ScriptEngine::getInput(){
 				//executes valid command
 				Command* command = cFactory->getCommand(commandName, options);
 				quitCommandCalled = command->execute();
+				mout->control_pressed = 0;
 			}else {		
 				mout->mothurOut("Invalid."); 
 				mout->mothurOutEndLine();

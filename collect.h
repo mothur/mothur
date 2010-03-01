@@ -22,8 +22,8 @@ public:
 					numSeqs(sharedorder->getNumSeqs()), sharedorder(sharedorder), displays(disp), label(sharedorder->getLabel())  { m = MothurOut::getInstance(); }
 
 	~Collect(){		};
-	void getCurve(int);
-	void getSharedCurve(int);
+	int getCurve(int);
+	int getSharedCurve(int);
 	
 private:
 	SharedOrderVector* sharedorder;

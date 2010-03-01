@@ -234,7 +234,13 @@ int AlignCommand::execute(){
 				
 				lines.push_back(new linePair(0, numFastaSeqs));
 				
-				driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s]);
+				int exitCommand = driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s]);
+				if (exitCommand == 0) { 
+					remove(accnosFileName.c_str()); 
+					remove(alignFileName.c_str()); 
+					remove(reportFileName.c_str()); 
+					return 0; 
+				}
 				
 				//delete accnos file if its blank else report to user
 				if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
@@ -274,7 +280,7 @@ int AlignCommand::execute(){
 					lines.push_back(new linePair(startPos, numSeqsPerProcessor));
 				}
 				
-				createProcesses(alignFileName, reportFileName, accnosFileName, candidateFileNames[s]); 
+				int exitCommand = createProcesses(alignFileName, reportFileName, accnosFileName, candidateFileNames[s]); 
 				
 				rename((alignFileName + toString(processIDS[0]) + ".temp").c_str(), alignFileName.c_str());
 				rename((reportFileName + toString(processIDS[0]) + ".temp").c_str(), reportFileName.c_str());
@@ -310,6 +316,13 @@ int AlignCommand::execute(){
 					}else{  m->mothurOut(" If the reverse compliment proved to be better it was reported.");  }
 					m->mothurOutEndLine();
 				}else{ hasAccnos = false;  }
+				
+				if (exitCommand == 0) { 
+					remove(accnosFileName.c_str()); 
+					remove(alignFileName.c_str()); 
+					remove(reportFileName.c_str()); 
+					return 0; 
+				}
 			}
 #else
 			ifstream inFASTA;
@@ -319,7 +332,13 @@ int AlignCommand::execute(){
 			
 			lines.push_back(new linePair(0, numFastaSeqs));
 			
-			driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s]);
+			int exitCommand = driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s]);
+			if (exitCommand == 0) { 
+				remove(accnosFileName.c_str()); 
+				remove(alignFileName.c_str()); 
+				remove(reportFileName.c_str()); 
+				return 0; 
+			}
 			
 			//delete accnos file if its blank else report to user
 			if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
@@ -374,7 +393,9 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName, 
 		inFASTA.seekg(line->start);
 		
 		for(int i=0;i<line->numSeqs;i++){
-		
+			
+			if (m->control_pressed) {  return 0; }
+			
 			Sequence* candidateSeq = new Sequence(inFASTA);  gobble(inFASTA);
 			int origNumBases = candidateSeq->getNumBases();
 			string originalUnaligned = candidateSeq->getUnaligned();
@@ -469,10 +490,11 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName, 
 
 /**************************************************************************************************/
 
-void AlignCommand::createProcesses(string alignFileName, string reportFileName, string accnosFName, string filename) {
+int AlignCommand::createProcesses(string alignFileName, string reportFileName, string accnosFName, string filename) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 0;
+		int exitCommand;
 		//		processIDS.resize(0);
 		
 		//loop through and create all the processes you want
@@ -483,7 +505,7 @@ void AlignCommand::createProcesses(string alignFileName, string reportFileName, 
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				driver(lines[process], alignFileName + toString(getpid()) + ".temp", reportFileName + toString(getpid()) + ".temp", accnosFName + toString(getpid()) + ".temp", filename);
+				exitCommand = driver(lines[process], alignFileName + toString(getpid()) + ".temp", reportFileName + toString(getpid()) + ".temp", accnosFName + toString(getpid()) + ".temp", filename);
 				exit(0);
 			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
 		}
@@ -493,6 +515,8 @@ void AlignCommand::createProcesses(string alignFileName, string reportFileName, 
 			int temp = processIDS[i];
 			wait(&temp);
 		}
+		
+		return exitCommand;
 #endif		
 	}
 	catch(exception& e) {

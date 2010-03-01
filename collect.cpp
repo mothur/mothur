@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 
-void Collect::getCurve(int increment = 1){
+int Collect::getCurve(int increment = 1){
         try {
                 RAbundVector* lookup = new RAbundVector(order->getNumBins());
                 SAbundVector* rank        = new SAbundVector(order->getMaxRank()+1);
@@ -23,7 +23,9 @@ void Collect::getCurve(int increment = 1){
                         displays[i]->init(label);                   //sets displays label
                 }                                                                           
                 for(int i=0;i<numSeqs;i++){
-
+						
+						if (m->control_pressed) { delete lookup; delete rank; delete ccd;  return 1;  }
+						
                         int binNumber = order->get(i);
                         int abundance = lookup->get(binNumber);
                 
@@ -50,6 +52,8 @@ void Collect::getCurve(int increment = 1){
 				delete lookup;
 				delete rank;
 				delete ccd;
+				
+				return 0;
         }
         catch(exception& e) {
 			m->errorOut(e, "Collect", "getCurve");
@@ -58,7 +62,7 @@ void Collect::getCurve(int increment = 1){
 }
 
 /***********************************************************************/
-void Collect::getSharedCurve(int increment = 1){
+int Collect::getSharedCurve(int increment = 1){
 try {
                 globaldata = GlobalData::getInstance();
                 vector<SharedRAbundVector*> lookup; 
@@ -94,6 +98,9 @@ try {
                 
                 //sample all the members
                 for(int i=0;i<numSeqs;i++){
+				
+						if (m->control_pressed) { for (int j = 0; j < lookup.size(); j++) {  delete lookup[j]; } delete ccd;  return 1;  }
+						
                         //get first sample
                         individual chosen = sharedorder->get(i);
                         int abundance; 
@@ -155,6 +162,8 @@ try {
 				for (int i = 0; i < lookup.size(); i++) {
 					delete lookup[i];
 				}
+				
+				return 0;
 
         }
         catch(exception& e) {
