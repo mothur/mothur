@@ -49,6 +49,7 @@ SharedCommand::SharedCommand(string o) : outputDir(o) {
 		//clears file before we start to write to it below
 		for (int i=0; i<groups.size(); i++) {
 			remove((fileroot + groups[i] + ".rabund").c_str());
+			outputNames.push_back((fileroot + groups[i] + ".rabund"));
 		}
 
 	}
@@ -76,6 +77,14 @@ int SharedCommand::execute(){
 		string lastLabel = SharedList->getLabel();
 		vector<SharedRAbundVector*> lookup; 
 		
+		if (m->control_pressed) { 
+			delete input; delete SharedList; globaldata->ginput = NULL; globaldata->gSharedList = NULL; 
+			for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
+			out.close(); remove(filename.c_str()); 
+			for (int i=0; i<groups.size(); i++) {  remove((fileroot + groups[i] + ".rabund").c_str());		}
+			return 1; 
+		}
+				
 		if ((globaldata->Groups.size() == 0) && (SharedList->getNumSeqs() != groupMap->getNumSeqs())) {  //if the user has not specified any groups and their files don't match exit with error
 			m->mothurOut("Your group file contains " + toString(groupMap->getNumSeqs()) + " sequences and list file contains " + toString(SharedList->getNumSeqs()) + " sequences. Please correct."); m->mothurOutEndLine(); 
 			
@@ -88,6 +97,8 @@ int SharedCommand::execute(){
 			for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
 				delete it3->second;
 			}
+			delete input;
+			globaldata->ginput = NULL;
 			delete SharedList;
 			globaldata->gSharedList = NULL;
 			
@@ -121,14 +132,30 @@ int SharedCommand::execute(){
 		set<string> userLabels = globaldata->labels;	
 	
 		while((SharedList != NULL) && ((globaldata->allLines == 1) || (userLabels.size() != 0))) {
+			if (m->control_pressed) { 
+				delete input; delete SharedList; globaldata->ginput = NULL; globaldata->gSharedList = NULL; 
+				for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
+				out.close(); remove(filename.c_str()); 
+				for (int i=0; i<groups.size(); i++) {  remove((fileroot + groups[i] + ".rabund").c_str());		}
+				return 1; 
+			}
 		
 			if(globaldata->allLines == 1 || globaldata->labels.count(SharedList->getLabel()) == 1){
-			
+					
 					lookup = SharedList->getSharedRAbundVector();
+					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 					if (pickedGroups) { //check for otus with no seqs in them
 						eliminateZeroOTUS(lookup);
 					}
-					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+					
+					if (m->control_pressed) { 
+						delete input; delete SharedList; globaldata->ginput = NULL; globaldata->gSharedList = NULL; 
+						for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+						for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
+						out.close(); remove(filename.c_str()); 
+						for (int i=0; i<groups.size(); i++) {  remove((fileroot + groups[i] + ".rabund").c_str());		}
+						return 1; 
+					}
 					
 					printSharedData(lookup); //prints info to the .shared file
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
@@ -144,10 +171,20 @@ int SharedCommand::execute(){
 					SharedList = input->getSharedListVector(lastLabel); //get new list vector to process
 					
 					lookup = SharedList->getSharedRAbundVector();
+					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 					if (pickedGroups) { //check for otus with no seqs in them
 						eliminateZeroOTUS(lookup);
 					}
-					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+					
+					
+					if (m->control_pressed) { 
+						delete input; delete SharedList; globaldata->ginput = NULL; globaldata->gSharedList = NULL; 
+						for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+						for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;  }
+						out.close(); remove(filename.c_str()); 
+						for (int i=0; i<groups.size(); i++) {  remove((fileroot + groups[i] + ".rabund").c_str());		}
+						return 1; 
+					}
 					
 					printSharedData(lookup); //prints info to the .shared file
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
@@ -181,10 +218,18 @@ int SharedCommand::execute(){
 			SharedList = input->getSharedListVector(lastLabel); //get new list vector to process
 					
 			lookup = SharedList->getSharedRAbundVector();
+			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 			if (pickedGroups) { //check for otus with no seqs in them
 				eliminateZeroOTUS(lookup);
 			}
-			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+			
+			if (m->control_pressed) { 
+					delete input;  globaldata->ginput = NULL; 
+					for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {  delete it3->second;   }
+					out.close(); remove(filename.c_str()); 
+					for (int i=0; i<groups.size(); i++) {  remove((fileroot + groups[i] + ".rabund").c_str());		}
+					return 1; 
+			}
 			
 			printSharedData(lookup); //prints info to the .shared file
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
@@ -205,7 +250,19 @@ int SharedCommand::execute(){
 		globaldata->setListFile("");
 		globaldata->setGroupFile("");
 		globaldata->setSharedFile(filename);
-
+		
+		if (m->control_pressed) { 
+				delete input;  globaldata->ginput = NULL; 
+				remove(filename.c_str()); 
+				for (int i=0; i<groups.size(); i++) {  remove((fileroot + groups[i] + ".rabund").c_str());		}
+				return 1; 
+		}
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOut(filename); m->mothurOutEndLine();
+		m->mothurOutEndLine();
 		
 		return 0;
 	}
@@ -237,7 +294,7 @@ void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup) {
 	}
 }
 //**********************************************************************************************************************
-void SharedCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
+int SharedCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
 	try {
 		
 		vector<SharedRAbundVector*> newLookup;
@@ -250,6 +307,7 @@ void SharedCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
 		
 		//for each bin
 		for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
+			if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
 		
 			//look at each sharedRabund and make sure they are not all zero
 			bool allZero = true;
@@ -268,7 +326,8 @@ void SharedCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
 	
 		for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
 		thislookup = newLookup;
-	
+		
+		return 0;
  
 	}
 	catch(exception& e) {
@@ -277,7 +336,7 @@ void SharedCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
 	}
 }
 //**********************************************************************************************************************
-void SharedCommand::createMisMatchFile() {
+int SharedCommand::createMisMatchFile() {
 	try {
 		ofstream outMisMatch;
 		string outputMisMatchName = outputDir + getRootName(getSimpleName(globaldata->inputFileName));
@@ -294,6 +353,7 @@ void SharedCommand::createMisMatchFile() {
 			
 			//go through list and if group returns "not found" output it
 			for (int i = 0; i < SharedList->getNumBins(); i++) {
+				if (m->control_pressed) { outMisMatch.close(); remove(outputMisMatchName.c_str()); return 0; } 
 			
 				string names = SharedList->get(i); 
 				
@@ -332,6 +392,8 @@ void SharedCommand::createMisMatchFile() {
 			
 			//go through listfile and get names
 			for (int i = 0; i < SharedList->getNumBins(); i++) {
+				if (m->control_pressed) {  return 0; } 
+
 				
 				string names = SharedList->get(i); 
 		
@@ -362,6 +424,7 @@ void SharedCommand::createMisMatchFile() {
 			
 			//loop through names in seqNames and if they aren't in namesIn list output them
 			for (int i = 0; i < seqNames.size(); i++) {
+				if (m->control_pressed) { outMisMatch.close(); remove(outputMisMatchName.c_str()); return 0; } 
 				
 				itMatch = namesInList.find(seqNames[i]);
 				
@@ -372,7 +435,8 @@ void SharedCommand::createMisMatchFile() {
 			}		
 			outMisMatch.close();
 		}
- 
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SharedCommand", "createMisMatchFile");

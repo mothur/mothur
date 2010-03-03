@@ -185,6 +185,9 @@ int FilterSeqsCommand::execute() {
 				openInputFile(fastafileNames[i], in);
 				
 				while(!in.eof()){	//read through and create the filter...
+				
+					if (m->control_pressed) { in.close(); return 0; }
+					
 					Sequence seq(in);
 					if (seq.getName() != "") {
 						if(trump != '*'){	F.doTrump(seq);	}
@@ -224,6 +227,8 @@ int FilterSeqsCommand::execute() {
 			
 			
 			while(!in.eof()){
+				if (m->control_pressed) { in.close(); outFASTA.close(); for(int i = 0; i < outputNames.size(); i++) { remove(outputNames[i].c_str()); }  return 0; }
+				
 				Sequence seq(in);
 				if (seq.getName() != "") {
 					string align = seq.getAligned();
@@ -248,6 +253,9 @@ int FilterSeqsCommand::execute() {
 		for(int i=0;i<alignmentLength;i++){
 			if(filter[i] == '1'){	filteredLength++;	}
 		}
+		
+		if (m->control_pressed) {  for(int i = 0; i < outputNames.size(); i++) { remove(outputNames[i].c_str()); }  return 0; }
+
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Length of filtered alignment: " + toString(filteredLength)); m->mothurOutEndLine();

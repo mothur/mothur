@@ -133,10 +133,14 @@ int RareFactCommand::execute(){
 		if ((globaldata->getFormat() != "sharedfile")) { inputFileNames.push_back(globaldata->inputFileName);  }
 		else {  inputFileNames = parseSharedFile(globaldata->getSharedFile());  globaldata->setFormat("rabund");  }
 		
+		if (m->control_pressed) { return 0; }
+		
 		for (int p = 0; p < inputFileNames.size(); p++) {
 			
 			string fileNameRoot = outputDir + getRootName(getSimpleName(inputFileNames[p]));
 			globaldata->inputFileName = inputFileNames[p];
+			
+			if (m->control_pressed) { return 0; }
 			
 			if (inputFileNames.size() > 1) {
 				m->mothurOutEndLine(); m->mothurOut("Processing group " + groups[p]); m->mothurOutEndLine(); m->mothurOutEndLine();
@@ -185,7 +189,7 @@ int RareFactCommand::execute(){
 			
 			
 			//if the users entered no valid calculators don't execute command
-			if (rDisplays.size() == 0) { return 0; }
+			if (rDisplays.size() == 0) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	} delete validCalculator; return 0; }
 			
 			read = new ReadOTUFile(globaldata->inputFileName);	
 			read->read(&*globaldata); 
@@ -198,16 +202,21 @@ int RareFactCommand::execute(){
 			set<string> processedLabels;
 			set<string> userLabels = labels;
 			
+			if (m->control_pressed) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	} delete validCalculator; delete read; delete input; globaldata->ginput = NULL; delete order; globaldata->gorder = NULL; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+			
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
+				if (m->control_pressed) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	} delete validCalculator; delete read; delete input; globaldata->ginput = NULL; delete order; globaldata->gorder = NULL; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+
+				
 				if(allLines == 1 || labels.count(order->getLabel()) == 1){
 					
+					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 					rCurve = new Rarefact(order, rDisplays);
 					rCurve->getCurve(freq, nIters);
 					delete rCurve;
 					
-					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 					processedLabels.insert(order->getLabel());
 					userLabels.erase(order->getLabel());
 				}
@@ -218,11 +227,11 @@ int RareFactCommand::execute(){
 					delete order;
 					order = (input->getOrderVector(lastLabel));
 					
+					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 					rCurve = new Rarefact(order, rDisplays);
 					rCurve->getCurve(freq, nIters);
 					delete rCurve;
 					
-					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 					processedLabels.insert(order->getLabel());
 					userLabels.erase(order->getLabel());
 					
@@ -236,6 +245,8 @@ int RareFactCommand::execute(){
 				order = (input->getOrderVector());
 			}
 			
+			if (m->control_pressed) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	} delete validCalculator; delete read; delete input; globaldata->ginput = NULL; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }  return 0; }
+
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
 			bool needToRun = false;
@@ -249,16 +260,18 @@ int RareFactCommand::execute(){
 				}
 			}
 			
+			if (m->control_pressed) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	} delete validCalculator; delete read; delete input; globaldata->ginput = NULL;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+
 			//run last label if you need to
 			if (needToRun == true)  {
 				if (order != NULL) {	delete order;	}
 				order = (input->getOrderVector(lastLabel));
 				
+				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 				rCurve = new Rarefact(order, rDisplays);
 				rCurve->getCurve(freq, nIters);
 				delete rCurve;
 				
-				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 				delete order;
 			}
 			
@@ -272,7 +285,8 @@ int RareFactCommand::execute(){
 			
 		}
 		
-		
+		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}

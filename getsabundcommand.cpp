@@ -115,6 +115,9 @@ int GetSAbundCommand::execute(){
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
+		if (m->control_pressed) {  out.close(); remove(filename.c_str()); delete read; delete input; delete order; globaldata->gorder = NULL;  return 0; }
+
+		
 		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
 			if(allLines == 1 || labels.count(order->getLabel()) == 1){
@@ -123,6 +126,8 @@ int GetSAbundCommand::execute(){
 					*sabund = (order->getSAbundVector());
 					sabund->print(out);
 					delete sabund;
+					
+					if (m->control_pressed) {  out.close(); remove(filename.c_str()); delete read; delete input; delete order; globaldata->gorder = NULL;  return 0; }
 
 					processedLabels.insert(order->getLabel());
 					userLabels.erase(order->getLabel());
@@ -139,6 +144,8 @@ int GetSAbundCommand::execute(){
 					*sabund = (order->getSAbundVector());
 					sabund->print(out);
 					delete sabund;
+					
+					if (m->control_pressed) {  out.close(); remove(filename.c_str()); delete read; delete input; delete order; globaldata->gorder = NULL;  return 0; }
 
 					processedLabels.insert(order->getLabel());
 					userLabels.erase(order->getLabel());
@@ -177,9 +184,13 @@ int GetSAbundCommand::execute(){
 			*sabund = (order->getSAbundVector());
 			sabund->print(out);
 			delete sabund;
+			
+			if (m->control_pressed) {  out.close(); remove(filename.c_str()); delete read; delete input; delete order; globaldata->gorder = NULL;  return 0; }
+			
 			delete order;
 		}
 		globaldata->gorder = NULL;
+		delete read; delete input;
 
 		out.close();
 		

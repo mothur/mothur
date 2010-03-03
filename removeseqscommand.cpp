@@ -168,12 +168,16 @@ int RemoveSeqsCommand::execute(){
 		//get names you want to keep
 		readAccnos();
 		
+		if (m->control_pressed) { return 0; }
+		
 		//read through the correct file and output lines you want to keep
 		if (fastafile != "")		{		readFasta();	}
 		else if (namefile != "")	{		readName();		}
 		else if (groupfile != "")	{		readGroup();	}
 		else if (alignfile != "")	{		readAlign();	}
 		else if (listfile != "")	{		readList();		}
+		
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
 		
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
@@ -192,7 +196,7 @@ int RemoveSeqsCommand::execute(){
 }
 
 //**********************************************************************************************************************
-void RemoveSeqsCommand::readFasta(){
+int RemoveSeqsCommand::readFasta(){
 	try {
 		if (outputDir == "") {  outputDir += hasPath(fastafile);  }
 		string outputFileName = getRootName(fastafile) + "pick" + getExtension(fastafile);
@@ -206,6 +210,8 @@ void RemoveSeqsCommand::readFasta(){
 		bool wroteSomething = false;
 		
 		while(!in.eof()){
+			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
+			
 			Sequence currSeq(in);
 			name = currSeq.getName();
 			
@@ -226,7 +232,9 @@ void RemoveSeqsCommand::readFasta(){
 			m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();
 			remove(outputFileName.c_str()); 
 		}else { outputNames.push_back(outputFileName); }
-
+		
+		return 0;
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveSeqsCommand", "readFasta");
@@ -234,7 +242,7 @@ void RemoveSeqsCommand::readFasta(){
 	}
 }
 //**********************************************************************************************************************
-void RemoveSeqsCommand::readList(){
+int RemoveSeqsCommand::readList(){
 	try {
 		if (outputDir == "") {  outputDir += hasPath(listfile);  }
 		string outputFileName = getRootName(listfile) + "pick" +  getExtension(listfile);
@@ -256,6 +264,7 @@ void RemoveSeqsCommand::readList(){
 			
 			//for each bin
 			for (int i = 0; i < list.getNumBins(); i++) {
+				if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
 			
 				//parse out names that are in accnos file
 				string binnames = list.get(i);
@@ -291,6 +300,8 @@ void RemoveSeqsCommand::readList(){
 			m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();
 			remove(outputFileName.c_str()); 
 		}else { outputNames.push_back(outputFileName); }
+		
+		return 0;
 
 	}
 	catch(exception& e) {
@@ -299,7 +310,7 @@ void RemoveSeqsCommand::readList(){
 	}
 }
 //**********************************************************************************************************************
-void RemoveSeqsCommand::readName(){
+int RemoveSeqsCommand::readName(){
 	try {
 		if (outputDir == "") {  outputDir += hasPath(namefile);  }
 		string outputFileName = getRootName(namefile) + "pick" + getExtension(namefile);
@@ -319,6 +330,7 @@ void RemoveSeqsCommand::readName(){
 		bool wroteSomething = false;
 		
 		while(!in.eof()){
+			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str()); if (dups) { out2.close(); remove(outputFileName2.c_str()); } return 0; }
 
 			in >> firstCol;				
 			in >> secondCol;			
@@ -388,6 +400,7 @@ void RemoveSeqsCommand::readName(){
 			remove(outputFileName.c_str()); 
 		}else { outputNames.push_back(outputFileName); }
 		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveSeqsCommand", "readName");
@@ -396,7 +409,7 @@ void RemoveSeqsCommand::readName(){
 }
 
 //**********************************************************************************************************************
-void RemoveSeqsCommand::readGroup(){
+int RemoveSeqsCommand::readGroup(){
 	try {
 		if (outputDir == "") {  outputDir += hasPath(groupfile);  }
 		string outputFileName = getRootName(groupfile) + "pick" + getExtension(groupfile);
@@ -410,7 +423,8 @@ void RemoveSeqsCommand::readGroup(){
 		bool wroteSomething = false;
 		
 		while(!in.eof()){
-
+			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
+			
 			in >> name;				//read from first column
 			in >> group;			//read from second column
 			
@@ -429,7 +443,8 @@ void RemoveSeqsCommand::readGroup(){
 			m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();
 			remove(outputFileName.c_str()); 
 		}else { outputNames.push_back(outputFileName); }
-
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveSeqsCommand", "readGroup");
@@ -439,7 +454,7 @@ void RemoveSeqsCommand::readGroup(){
 
 //**********************************************************************************************************************
 //alignreport file has a column header line then all other lines contain 16 columns.  we just want the first column since that contains the name
-void RemoveSeqsCommand::readAlign(){
+int RemoveSeqsCommand::readAlign(){
 	try {
 		if (outputDir == "") {  outputDir += hasPath(alignfile);  }
 		string outputFileName = getRootName(getRootName(alignfile)) + "pick.align.report";
@@ -460,7 +475,8 @@ void RemoveSeqsCommand::readAlign(){
 		out << endl;
 		
 		while(!in.eof()){
-
+			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
+			
 			in >> name;				//read from first column
 			
 			//if this name is in the accnos file
@@ -495,6 +511,8 @@ void RemoveSeqsCommand::readAlign(){
 			m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();
 			remove(outputFileName.c_str()); 
 		}else { outputNames.push_back(outputFileName); }
+		
+		return 0;
 		
 	}
 	catch(exception& e) {

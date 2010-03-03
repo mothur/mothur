@@ -199,6 +199,8 @@ int BinSeqCommand::execute(){
 				
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
+			if(m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());		} return 0; }	
+			
 			if(allLines == 1 || labels.count(list->getLabel()) == 1){
 				
 				error = process(list);	
@@ -230,7 +232,8 @@ int BinSeqCommand::execute(){
 			list = input->getListVector();
 		}
 		
-		
+		if(m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());		} return 0; }	
+
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
 		bool needToRun = false;
@@ -255,6 +258,8 @@ int BinSeqCommand::execute(){
 			delete list;  
 		}
 		
+		if(m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());		} return 0; }	
+
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}

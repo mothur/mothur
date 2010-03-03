@@ -110,6 +110,8 @@ int OtuHierarchyCommand::execute(){
 		//get listvectors that correspond to labels requested, (or use smart distancing to get closest listvector)
 		vector<ListVector> lists = getListVectors();
 		
+		if (m->control_pressed) { return 0; }
+		
 		//determine which is little and which is big, putting little first
 		if (lists.size() == 2) {
 			//if big is first swap them
@@ -123,6 +125,9 @@ int OtuHierarchyCommand::execute(){
 		//map sequences to bin number in the "little" otu
 		map<string, int> littleBins; 
 		for (int i = 0; i < lists[0].getNumBins(); i++) {
+		
+			if (m->control_pressed) {  return 0; }
+			
 			string names = lists[0].get(i); 
 			
 			//parse bin
@@ -143,6 +148,8 @@ int OtuHierarchyCommand::execute(){
 		//go through each bin in "big" otu and output the bins in "little" otu which created it
 		for (int i = 0; i < lists[1].getNumBins(); i++) {
 		
+			if (m->control_pressed) { out.close(); remove(outputFileName.c_str()); return 0; }
+			
 			string names = lists[1].get(i);
 			
 			//output column 1
@@ -173,6 +180,8 @@ int OtuHierarchyCommand::execute(){
 		}
 		
 		out.close();
+		
+		if (m->control_pressed) { remove(outputFileName.c_str()); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
@@ -216,6 +225,8 @@ vector<ListVector> OtuHierarchyCommand::getListVectors() {
 		}
 		
 		while ((list != NULL) && (userLabels.size() != 0)) {
+		
+			if (m->control_pressed) {  in.close(); delete list;  return lists; }
 			
 			//is this a listvector that we want?
 			if(labels.count(list->getLabel()) == 1){
@@ -264,7 +275,7 @@ vector<ListVector> OtuHierarchyCommand::getListVectors() {
 			}else { list = NULL; }
 		}
 		
-						
+		if (m->control_pressed) { in.close();  return lists; }				
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -278,6 +289,8 @@ vector<ListVector> OtuHierarchyCommand::getListVectors() {
 				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
 			}
 		}
+		
+		if (m->control_pressed) {  in.close(); return lists; }
 		
 		//run last label if you need to
 		if (needToRun == true)  {
@@ -295,7 +308,7 @@ vector<ListVector> OtuHierarchyCommand::getListVectors() {
 			}
 		}
 		
-		
+		in.close();
 		return lists;
 	}
 	catch(exception& e) {

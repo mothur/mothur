@@ -25,7 +25,7 @@ public:
 	void help();
 	
 private:
-	void parse(ListVector*);
+	int parse(ListVector*);
 		
 	ListVector* list;
 	GroupMap* groupMap;

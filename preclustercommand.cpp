@@ -117,6 +117,8 @@ int PreClusterCommand::execute(){
 		
 		//reads fasta file and return number of seqs
 		int numSeqs = readFASTA(); //fills alignSeqs and makes all seqs active
+		
+		if (m->control_pressed) { return 0; }
 	
 		if (numSeqs == 0) { m->mothurOut("Error reading fasta file...please correct."); m->mothurOutEndLine(); return 0;  }
 		if (diffs > length) { m->mothurOut("Error: diffs is greater than your sequence length."); m->mothurOutEndLine(); return 0;  }
@@ -139,6 +141,9 @@ int PreClusterCommand::execute(){
 				
 				//try to merge it with all smaller seqs
 				for (int j = i+1; j < numSeqs; j++) {
+					
+					if (m->control_pressed) { return 0; }
+					
 					if (alignSeqs[j].active) {  //this sequence has not been merged yet
 						//are you within "diff" bases
 						int mismatch = calcMisMatches(alignSeqs[i].seq.getAligned(), alignSeqs[j].seq.getAligned());
@@ -166,10 +171,13 @@ int PreClusterCommand::execute(){
 		string newFastaFile = fileroot + "precluster" + getExtension(fastafile);
 		string newNamesFile = fileroot + "precluster.names";
 		
+		if (m->control_pressed) { return 0; }
 		
 		m->mothurOut("Total number of sequences before precluster was " + toString(alignSeqs.size()) + "."); m->mothurOutEndLine();
 		m->mothurOut("pre.cluster removed " + toString(count) + " sequences."); m->mothurOutEndLine(); 
 		printData(newFastaFile, newNamesFile);
+		
+		if (m->control_pressed) { remove(newFastaFile.c_str()); remove(newNamesFile.c_str()); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -202,7 +210,9 @@ int PreClusterCommand::readFASTA(){
 		length = 0;
 		
 		while (!inFasta.eof()) {
-	
+			
+			if (m->control_pressed) { inFasta.close(); return 0; }
+			
 			//inNames >> firstCol >> secondCol;
 			//nameString = secondCol;
 			

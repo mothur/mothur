@@ -139,6 +139,8 @@ int SummaryCommand::execute(){
 		if ((globaldata->getFormat() != "sharedfile")) { inputFileNames.push_back(globaldata->inputFileName);  }
 		else {  inputFileNames = parseSharedFile(globaldata->getSharedFile());  globaldata->setFormat("rabund");  }
 		
+		if (m->control_pressed) { return 0; }
+		
 		for (int p = 0; p < inputFileNames.size(); p++) {
 			
 			string fileNameRoot = outputDir + getRootName(getSimpleName(inputFileNames[p])) + "summary";
@@ -229,7 +231,11 @@ int SummaryCommand::execute(){
 			set<string> processedLabels;
 			set<string> userLabels = labels;
 			
+			if (m->control_pressed) { outputFileHandle.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; } delete validCalculator; delete read; delete sabund; globaldata->sabund = NULL; delete input; globaldata->ginput = NULL; return 0;  }
+			
 			while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+				
+				if (m->control_pressed) { outputFileHandle.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; } delete validCalculator; delete read; delete sabund; globaldata->sabund = NULL; delete input; globaldata->ginput = NULL; return 0;  }
 				
 				if(allLines == 1 || labels.count(sabund->getLabel()) == 1){			
 					
@@ -240,6 +246,9 @@ int SummaryCommand::execute(){
 					outputFileHandle << sabund->getLabel();
 					for(int i=0;i<sumCalculators.size();i++){
 						vector<double> data = sumCalculators[i]->getValues(sabund);
+						
+						if (m->control_pressed) { outputFileHandle.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; } delete validCalculator; delete read; delete sabund; globaldata->sabund = NULL; delete input; globaldata->ginput = NULL; return 0;  }
+
 						outputFileHandle << '\t';
 						sumCalculators[i]->print(outputFileHandle);
 					}
@@ -259,6 +268,9 @@ int SummaryCommand::execute(){
 					outputFileHandle << sabund->getLabel();
 					for(int i=0;i<sumCalculators.size();i++){
 						vector<double> data = sumCalculators[i]->getValues(sabund);
+						
+						if (m->control_pressed) { outputFileHandle.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; } delete validCalculator; delete read; delete sabund; globaldata->sabund = NULL; delete input; globaldata->ginput = NULL; return 0;  }
+						
 						outputFileHandle << '\t';
 						sumCalculators[i]->print(outputFileHandle);
 					}
@@ -274,6 +286,8 @@ int SummaryCommand::execute(){
 				sabund = input->getSAbundVector();
 			}
 			
+			if (m->control_pressed) { outputFileHandle.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; } delete validCalculator; delete read;  delete input; globaldata->ginput = NULL; return 0;  }
+
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
 			bool needToRun = false;
@@ -296,6 +310,9 @@ int SummaryCommand::execute(){
 				outputFileHandle << sabund->getLabel();
 				for(int i=0;i<sumCalculators.size();i++){
 					vector<double> data = sumCalculators[i]->getValues(sabund);
+					
+					if (m->control_pressed) { outputFileHandle.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; } delete validCalculator; delete read; delete sabund; globaldata->sabund = NULL; delete input; globaldata->ginput = NULL; return 0;  }
+
 					outputFileHandle << '\t';
 					sumCalculators[i]->print(outputFileHandle);
 				}
@@ -305,11 +322,17 @@ int SummaryCommand::execute(){
 			
 			outputFileHandle.close();
 			
+			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; } delete validCalculator; delete read;  delete input; globaldata->ginput = NULL; return 0;  }
+
+			
 			delete input;  globaldata->ginput = NULL;
 			delete read;
 			delete validCalculator;
 			globaldata->sabund = NULL;
+			for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
 		}
+		
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }  return 0;  }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

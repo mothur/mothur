@@ -27,12 +27,12 @@ class RemoveSeqsCommand : public Command {
 		bool abort, dups;
 		vector<string> outputNames;
 		
-		void readFasta();
-		void readName();
-		void readGroup();
-		void readAlign();
+		int readFasta();
+		int readName();
+		int readGroup();
+		int readAlign();
 		void readAccnos();
-		void readList();
+		int readList();
 		
 };
 

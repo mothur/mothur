@@ -20,7 +20,7 @@ ReadColumnMatrix::ReadColumnMatrix(string df) : distFile(df){
 
 /***********************************************************************/
 
-void ReadColumnMatrix::read(NameAssignment* nameMap){
+int ReadColumnMatrix::read(NameAssignment* nameMap){
 	try {		
 
 		string firstName, secondName;
@@ -38,8 +38,11 @@ void ReadColumnMatrix::read(NameAssignment* nameMap){
 		//need to see if this is a square or a triangular matrix...
 	
 		while(fileHandle && lt == 1){  //let's assume it's a triangular matrix...
+
 		
 			fileHandle >> firstName >> secondName >> distance;	// get the row and column names and distance
+			
+			if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
 	
 			map<string,int>::iterator itA = nameMap->find(firstName);
 			map<string,int>::iterator itB = nameMap->find(secondName);
@@ -97,6 +100,8 @@ void ReadColumnMatrix::read(NameAssignment* nameMap){
 
 			while(fileHandle){
 				fileHandle >> firstName >> secondName >> distance;
+				
+				if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
 		
 				map<string,int>::iterator itA = nameMap->find(firstName);
 				map<string,int>::iterator itB = nameMap->find(secondName);
@@ -119,11 +124,15 @@ void ReadColumnMatrix::read(NameAssignment* nameMap){
 				gobble(fileHandle);
 			}
 		}
-
+		
+		if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+		
 		reading->finish();
 		fileHandle.close();
 
 		list->setLabel("0");
+		
+		return 1;
 
 	}
 	catch(exception& e) {

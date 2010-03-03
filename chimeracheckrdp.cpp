@@ -24,7 +24,7 @@ ChimeraCheckRDP::~ChimeraCheckRDP() {
 	}
 }	
 //***************************************************************************************************************
-void ChimeraCheckRDP::print(ostream& out, ostream& outAcc) {
+int ChimeraCheckRDP::print(ostream& out, ostream& outAcc) {
 	try {
 		
 		m->mothurOut("Processing: " + querySeq->getName()); m->mothurOutEndLine();
@@ -48,6 +48,8 @@ void ChimeraCheckRDP::print(ostream& out, ostream& outAcc) {
 				makeSVGpic(IS);  //zeros out negative results
 			}
 		}
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraCheckRDP", "print");
@@ -55,7 +57,7 @@ void ChimeraCheckRDP::print(ostream& out, ostream& outAcc) {
 	}
 }
 //***************************************************************************************************************
-void ChimeraCheckRDP::doPrep() {
+int ChimeraCheckRDP::doPrep() {
 	try {
 		templateDB = new AlignmentDB(templateFileName, "kmer", kmerSize, 0.0,0.0,0.0,0.0);
 		m->mothurOutEndLine();
@@ -65,6 +67,8 @@ void ChimeraCheckRDP::doPrep() {
 		if (name != "") { 
 			readName(name);  //fills name map with names of seqs the user wants to have .svg for.  
 		}
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraCheckRDP", "doPrep");

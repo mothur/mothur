@@ -267,13 +267,34 @@ int SummarySharedCommand::execute(){
 			remove(outAllFileName.c_str());
 			outputNames.pop_back();
 		}
-					
+		
+		if (m->control_pressed) {
+			if (mult) { outAll.close();  remove(outAllFileName.c_str());  }
+			outputFileHandle.close(); remove(outputFileName.c_str()); 
+			delete input; globaldata->ginput = NULL;
+			for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; }
+			for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
+			globaldata->Groups.clear(); 
+			return 0;
+		}
+								
+														
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 			
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+			if (m->control_pressed) {
+				if (mult) { outAll.close();  remove(outAllFileName.c_str());  }
+				outputFileHandle.close(); remove(outputFileName.c_str()); 
+				delete input; globaldata->ginput = NULL;
+				for (int i = 0; i < lookup.size(); i++) { delete lookup[i]; }
+				for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
+				globaldata->Groups.clear(); 
+				return 0;
+			}
+
 		
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
@@ -307,6 +328,15 @@ int SummarySharedCommand::execute(){
 			lookup = input->getSharedRAbundVectors();
 		}
 		
+		if (m->control_pressed) {
+			if (mult) { outAll.close();  remove(outAllFileName.c_str());  }
+			outputFileHandle.close(); remove(outputFileName.c_str()); 
+			delete input; globaldata->ginput = NULL;
+			for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
+			globaldata->Groups.clear(); 
+			return 0;
+		}
+
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
 		bool needToRun = false;
@@ -330,7 +360,7 @@ int SummarySharedCommand::execute(){
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 		}
 		
-
+				
 		//reset groups parameter
 		globaldata->Groups.clear();  
 		
@@ -339,8 +369,13 @@ int SummarySharedCommand::execute(){
 		if (mult == true) {  outAll.close();  }
 		
 		for(int i=0;i<sumCalculators.size();i++){  delete sumCalculators[i]; }
-		
 		delete input;  globaldata->ginput = NULL;
+		
+		if (m->control_pressed) {
+			remove(outAllFileName.c_str());  
+			remove(outputFileName.c_str()); 
+			return 0;
+		}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -356,7 +391,7 @@ int SummarySharedCommand::execute(){
 }
 
 /***********************************************************/
-void SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup) {
+int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup) {
 	try {
 				//loop through calculators and add to file all for all calcs that can do mutiple groups
 				if (mult == true) {
@@ -374,6 +409,9 @@ void SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup) {
 					for(int i=0;i<sumCalculators.size();i++){
 						if (sumCalculators[i]->getMultiple() == true) { 
 							sumCalculators[i]->getValues(thisLookup);
+							
+							if (m->control_pressed) { return 1; }
+							
 							outAll << '\t';
 							sumCalculators[i]->print(outAll);
 						}
@@ -402,6 +440,9 @@ void SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup) {
 						for(int i=0;i<sumCalculators.size();i++) {
 
 							sumCalculators[i]->getValues(subset); //saves the calculator outputs
+							
+							if (m->control_pressed) { return 1; }
+							
 							outputFileHandle << '\t';
 							sumCalculators[i]->print(outputFileHandle);
 						}
@@ -409,7 +450,7 @@ void SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup) {
 					}
 					n++;
 				}
-
+			return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SummarySharedCommand", "process");

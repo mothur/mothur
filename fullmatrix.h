@@ -39,8 +39,8 @@ public:
 	
 private:
 	vector< vector<float> > matrix;  //a 2D distance matrix of all the sequences and their distances to eachother.
-	void readSquareMatrix(ifstream&);  
-	void readLTMatrix(ifstream&);
+	int readSquareMatrix(ifstream&);  
+	int readLTMatrix(ifstream&);
 	vector<Names> index; // row in vector, sequence group.  need to know this so when we sort it can be updated.
 	vector<int> sizes;
 	vector<string> groups;

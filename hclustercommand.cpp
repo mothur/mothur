@@ -192,6 +192,16 @@ int HClusterCommand::execute(){
 			read = new ReadCluster(distfile, cutoff); 	
 			read->setFormat(format);
 			read->read(globaldata->nameMap);
+			
+			if (m->control_pressed) {  
+				delete read; 
+				sabundFile.close();
+				rabundFile.close();
+				listFile.close();
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+				return 0;  
+			}
+			
 			distfile = read->getOutputFile();
 		
 			list = read->getListVector();
@@ -199,7 +209,15 @@ int HClusterCommand::execute(){
 		}else {
 			list = new ListVector(globaldata->nameMap->getListVector());
 		}
-	
+		
+		if (m->control_pressed) {  
+			sabundFile.close();
+			rabundFile.close();
+			listFile.close();
+			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+			return 0;  
+		}
+
 		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to sort. "); m->mothurOutEndLine();
 		estart = time(NULL);
 	
@@ -221,14 +239,43 @@ int HClusterCommand::execute(){
 		cluster = new HCluster(rabund, list, method, distfile, globaldata->nameMap, cutoff);
 		vector<seqDist> seqs; seqs.resize(1); // to start loop
 		
+		if (m->control_pressed) {  
+				delete cluster;
+				sabundFile.close();
+				rabundFile.close();
+				listFile.close();
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+				return 0;  
+		}
+
+		
 		while (seqs.size() != 0){
 		
 			seqs = cluster->getSeqs();
-				
-			for (int i = 0; i < seqs.size(); i++) {  //-1 means skip me
+			
+			if (m->control_pressed) {  
+				delete cluster;
+				sabundFile.close();
+				rabundFile.close();
+				listFile.close();
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+				return 0;  
+			}
 
+			for (int i = 0; i < seqs.size(); i++) {  //-1 means skip me
+				
 				if (seqs[i].seq1 != seqs[i].seq2) {
 					cluster->update(seqs[i].seq1, seqs[i].seq2, seqs[i].dist);
+					
+					if (m->control_pressed) {  
+						delete cluster;
+						sabundFile.close();
+						rabundFile.close();
+						listFile.close();
+						for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+						return 0;  
+					}
+
 					
 					float rndDist = roundDist(seqs[i].dist, precision);
 					
@@ -247,6 +294,15 @@ int HClusterCommand::execute(){
 			}
 		}
 
+		if (m->control_pressed) {  
+			delete cluster;
+			sabundFile.close();
+			rabundFile.close();
+			listFile.close();
+			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+			return 0;  
+		}
+					
 		if(previousDist <= 0.0000){
 			printData("unique");
 		}
@@ -269,6 +325,12 @@ int HClusterCommand::execute(){
 		rabundFile.close();
 		listFile.close();
 		delete cluster;
+		
+		if (m->control_pressed) {  
+			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+			return 0;  
+		}
+
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

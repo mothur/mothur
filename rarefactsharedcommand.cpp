@@ -170,6 +170,15 @@ int RareFactSharedCommand::execute(){
 		input = globaldata->ginput;
 		lookup = input->getSharedRAbundVectors();
 		string lastLabel = lookup[0]->getLabel();
+		
+		if (m->control_pressed) { 
+			globaldata->Groups.clear(); 
+			for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
+			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
+			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+			return 0;
+		}
+
 
 		if (lookup.size() < 2) { 
 			m->mothurOut("I cannot run the command without at least 2 valid groups."); 
@@ -183,14 +192,20 @@ int RareFactSharedCommand::execute(){
 	
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+			if (m->control_pressed) { 
+				globaldata->Groups.clear(); 
+				for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
+				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+				return 0;
+			}
 			
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){
-				
+				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 				rCurve = new Rarefact(lookup, rDisplays);
 				rCurve->getSharedCurve(freq, nIters);
 				delete rCurve;
 			
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 				processedLabels.insert(lookup[0]->getLabel());
 				userLabels.erase(lookup[0]->getLabel());
 			}
@@ -221,6 +236,13 @@ int RareFactSharedCommand::execute(){
 			lookup = input->getSharedRAbundVectors();
 		}
 		
+		if (m->control_pressed) { 
+				globaldata->Groups.clear(); 
+				for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
+				return 0;
+		}
+		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
 		bool needToRun = false;
@@ -232,6 +254,13 @@ int RareFactSharedCommand::execute(){
 			}else {
 				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
 			}
+		}
+		
+		if (m->control_pressed) { 
+				globaldata->Groups.clear(); 
+				for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	}
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
+				return 0;
 		}
 		
 		//run last label if you need to
@@ -250,6 +279,11 @@ int RareFactSharedCommand::execute(){
 		
 		//reset groups parameter
 		globaldata->Groups.clear();  
+		
+		if (m->control_pressed) { 
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
+				return 0;
+		}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

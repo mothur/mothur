@@ -18,7 +18,7 @@ class FormatColumnMatrix : public FormatMatrix {
 public:
 	FormatColumnMatrix(string);
 	~FormatColumnMatrix();
-	void read(NameAssignment*);
+	int read(NameAssignment*);
 	
 private:
 	ifstream fileHandle;

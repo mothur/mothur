@@ -38,7 +38,7 @@ private:
 	
 	bool flip, allFiles, qtrim;
 	int numFPrimers, numRPrimers, maxAmbig, maxHomoP, minLength, maxLength, qThreshold, qAverage;
-	vector<string> forPrimer, revPrimer;
+	vector<string> forPrimer, revPrimer, outputNames;
 	map<string, int> barcodes;
 	vector<string> groupVector;
 };

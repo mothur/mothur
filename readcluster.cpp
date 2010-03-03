@@ -20,13 +20,17 @@ ReadCluster::ReadCluster(string distfile, float c){
 
 /***********************************************************************/
 
-void ReadCluster::read(NameAssignment* nameMap){
+int ReadCluster::read(NameAssignment* nameMap){
 	try {
         
 		if (format == "phylip") { convertPhylip2Column(nameMap); }
 		else { list = new ListVector(nameMap->getListVector());  }
 		
+		if (m->control_pressed) { return 0; }
+		
 		OutPutFile = sortFile(distFile);
+		
+		return 0;
 			
 	}
 	catch(exception& e) {
@@ -36,7 +40,7 @@ void ReadCluster::read(NameAssignment* nameMap){
 }
 /***********************************************************************/
 
-void ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
+int ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
 	try {	
 		//convert phylip file to column file
 		map<int, string> rowToName;
@@ -96,6 +100,9 @@ void ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
 					list->set(i, name);
 					
 					for(int j=0;j<i;j++){
+					
+						if (m->control_pressed) { in.close(); out.close(); remove(tempFile.c_str()); return 0; }
+						
 						in >> distance;
 						
 						if (distance == -1) { distance = 1000000; }
@@ -110,6 +117,9 @@ void ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
 					if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); m->mothurOutEndLine(); }
 					
 					for(int j=0;j<i;j++){
+						
+						if (m->control_pressed) { in.close(); out.close(); remove(tempFile.c_str()); return 0; }
+						
 						in >> distance;
 						
 						if (distance == -1) { distance = 1000000; }
@@ -130,6 +140,8 @@ void ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
 				if(nameMap == NULL){
 					list->set(i, name);
 					for(int j=0;j<nseqs;j++){
+						if (m->control_pressed) { in.close(); out.close(); remove(tempFile.c_str()); return 0; }
+						
 						in >> distance;
 					
 						if (distance == -1) { distance = 1000000; }
@@ -143,6 +155,8 @@ void ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
 					if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); m->mothurOutEndLine(); }
 					
 					for(int j=0;j<nseqs;j++){
+						if (m->control_pressed) { in.close(); out.close(); remove(tempFile.c_str()); return 0; }
+						
 						in >> distance;
                         
 						if (distance == -1) { distance = 1000000; }
@@ -180,6 +194,8 @@ void ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
 		float dist;
 		
 		while (in2) {
+			if (m->control_pressed) { in2.close(); out2.close(); remove(tempFile.c_str()); remove(outputFile.c_str()); return 0; }
+			
 			in2 >> first >> second >> dist;
 			out2 << rowToName[first] << '\t' << rowToName[second] << '\t' << dist << endl;
 			gobble(in2);
@@ -189,6 +205,10 @@ void ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
 		
 		remove(tempFile.c_str());
 		distFile = outputFile;
+		
+		if (m->control_pressed) {  remove(outputFile.c_str());  }
+
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ReadCluster", "convertPhylip2Column");

@@ -41,7 +41,7 @@ private:
 	vector<SharedRAbundVector*> lookup;
 	string outputFileName, format, outAllFileName, outputDir;
 	ofstream outputFileHandle, outAll;
-	void process(vector<SharedRAbundVector*>);
+	int process(vector<SharedRAbundVector*>);
 
 };
 

@@ -141,6 +141,13 @@ int ReadTreeCommand::execute(){
 
 		//assemble users trees
 		for (int i = 0; i < T.size(); i++) {
+			if (m->control_pressed) {  
+				for (int i = 0; i < T.size(); i++) {  delete T[i];  }
+				globaldata->gTree.clear();
+				delete globaldata->gTreemap;
+				return 0;
+			}
+			
 			T[i]->assembleTree();
 		}
 
@@ -152,6 +159,13 @@ int ReadTreeCommand::execute(){
 				for (int j = 0; j < globaldata->Treenames.size(); j++) {
 					if (treeMap->namesOfSeqs[i] == globaldata->Treenames[j]) { break; } //found it
 					count++;
+				}
+				
+				if (m->control_pressed) {  
+					for (int i = 0; i < T.size(); i++) {  delete T[i];  }
+					globaldata->gTree.clear();
+					delete globaldata->gTreemap;
+					return 0;
 				}
 				
 				//then you did not find it so report it 

@@ -41,7 +41,7 @@ class GetSharedOTUCommand : public Command {
 		vector<Sequence> seqs;
 		vector<string> outputNames;
 		
-		void process(ListVector*);
+		int process(ListVector*);
 		
 };
 //**********************************************************************************************************************

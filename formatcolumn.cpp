@@ -16,7 +16,7 @@ FormatColumnMatrix::FormatColumnMatrix(string df) : filename(df){
 }
 /***********************************************************************/
 
-void FormatColumnMatrix::read(NameAssignment* nameMap){
+int FormatColumnMatrix::read(NameAssignment* nameMap){
 	try {		
 
 		string firstName, secondName;
@@ -38,6 +38,8 @@ void FormatColumnMatrix::read(NameAssignment* nameMap){
 		openOutputFile(tempOutFile, out);
 	
 		while(fileHandle && lt == 1){  //let's assume it's a triangular matrix...
+		
+			if (m->control_pressed) { out.close(); remove(tempOutFile.c_str()); fileHandle.close();  delete reading; return 0; }
 		
 			fileHandle >> firstName >> secondName >> distance;	// get the row and column names and distance
 	
@@ -88,6 +90,7 @@ void FormatColumnMatrix::read(NameAssignment* nameMap){
 			system(command.c_str());
 		#endif
 		
+		if (m->control_pressed) { remove(tempOutFile.c_str()); remove(outfile.c_str()); delete reading; return 0; }
 
 		//output to new file distance for each row and save positions in file where new row begins
 		ifstream in;
@@ -111,6 +114,9 @@ void FormatColumnMatrix::read(NameAssignment* nameMap){
 		for(int k = 0; k < firstString.length(); k++)  {   in.putback(firstString[k]);  }
 		
 		while(!in.eof()) {
+			
+			if (m->control_pressed) { in.close(); out.close(); remove(distFile.c_str()); remove(tempOutFile.c_str()); remove(outfile.c_str()); delete reading; return 0; }
+			
 			in >> first >> second >> dist; gobble(in);
 			
 			if (first != currentRow) {
@@ -153,12 +159,19 @@ void FormatColumnMatrix::read(NameAssignment* nameMap){
 		in.close();
 		out.close();
 		
+		if (m->control_pressed) {  remove(distFile.c_str()); remove(tempOutFile.c_str()); remove(outfile.c_str());  delete reading; return 0; }
 		
 		remove(tempOutFile.c_str());
 		remove(outfile.c_str());
 		
 		reading->finish();
+		
+		delete reading;
 		list->setLabel("0");
+		
+		if (m->control_pressed) {  remove(distFile.c_str());  return 0; }
+
+		return 1;
 
 	}
 	catch(exception& e) {

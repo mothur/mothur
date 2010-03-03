@@ -204,12 +204,14 @@ int ReadDistCommand::execute(){
 		size_t numDists = 0;
 		
 		vector<string> outputNames;
-		
+cout << format << endl;		
 		if (format == "matrix") {
 			ifstream in;
 			openInputFile(distFileName, in);
 			matrix = new FullMatrix(in); //reads the matrix file
 			in.close();
+			
+			if (m->control_pressed) { delete groupMap; delete matrix; return 0; }
 			
 			//if files don't match...
 			if (matrix->getNumSeqs() < groupMap->getNumSeqs()) {  
@@ -223,6 +225,8 @@ int ReadDistCommand::execute(){
 				openOutputFile(newGroupFile, outGroups);
 				
 				for (int i = 0; i < matrix->getNumSeqs(); i++) {
+					if (m->control_pressed) { delete groupMap; delete matrix; outGroups.close(); remove(newGroupFile.c_str()); return 0; }
+					
 					Names temp = matrix->getRowInfo(i);
 					outGroups << temp.seqName << '\t' << temp.groupName << endl;
 				}
@@ -238,6 +242,8 @@ int ReadDistCommand::execute(){
 				groupMap = new GroupMap(groupfile);
 				groupMap->readMap();
 				
+				if (m->control_pressed) { delete groupMap; delete matrix; remove(newGroupFile.c_str()); return 0; }
+	
 				globaldata->gGroupmap = groupMap;
 			}
 			
@@ -248,41 +254,19 @@ int ReadDistCommand::execute(){
 		} else {
 			read->read(nameMap);
 			//to prevent memory leak
-
+			
+			if (m->control_pressed) {  return 0; }
+		
 			if (globaldata->gListVector != NULL) {  delete globaldata->gListVector;  }
 			globaldata->gListVector = read->getListVector();
 
 			if (globaldata->gSparseMatrix != NULL) { delete globaldata->gSparseMatrix;  }
 			globaldata->gSparseMatrix = read->getMatrix();
 			numDists = globaldata->gSparseMatrix->getNNodes();
-	//cout << "matrix contains " << numDists << " distances." << endl;
-			
-    /*  int lines = cutoff / (1.0/precision);
-      vector<float> dist_cutoff(lines+1,0);
-			for (int i = 0; i <= lines;i++) {	
-      	dist_cutoff[i] = (i + 0.5) / precision; 
-      } 
-      vector<int> dist_count(lines+1,0);
-      list<PCell>::iterator currentCell;
-      SparseMatrix* smatrix = globaldata->gSparseMatrix;
-  		for (currentCell = smatrix->begin(); currentCell != smatrix->end(); currentCell++) {
-				for (int i = 0; i <= lines;i++) {	
-					if (currentCell->dist < dist_cutoff[i]) {
-						dist_count[i]++;
-            break;
-          }
-        }
-			}
-*/
-     // string dist_string = "Dist:";
-    //  string count_string = "Count: ";
-			//for (int i = 0; i <= lines;i++) {	
-      	//dist_string = dist_string.append("\t").append(toString(dist_cutoff[i]));
-      //	count_string = count_string.append("\t").append(toString(dist_count[i]));
-		//	}
-      //m->mothurOut(dist_string); m->mothurOutEndLine(); m->mothurOut(count_string); m->mothurOutEndLine();
 		}
 		
+		if (m->control_pressed) {  return 0; }
+
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
 			m->mothurOut("Output File Name: "); m->mothurOutEndLine();

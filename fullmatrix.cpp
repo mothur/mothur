@@ -56,10 +56,12 @@ FullMatrix::FullMatrix(ifstream& filehandle) {
 		}
 		
 		//read rest of matrix
-		if (square == true) { readSquareMatrix(filehandle); }
-		else { readLTMatrix(filehandle); }
+		if (square == true) {  readSquareMatrix(filehandle); }
+		else {  readLTMatrix(filehandle); }
 		
-		sortGroups(0, numSeqs-1);	
+		filehandle.close();
+		
+		if (!m->control_pressed) { sortGroups(0, numSeqs-1); }	
 				
 	}
 	catch(exception& e) {
@@ -68,7 +70,7 @@ FullMatrix::FullMatrix(ifstream& filehandle) {
 	}
 }
 /**************************************************************************/
-void FullMatrix::readSquareMatrix(ifstream& filehandle) {
+int FullMatrix::readSquareMatrix(ifstream& filehandle) {
 	try {
 	
 		Progress* reading;
@@ -77,7 +79,7 @@ void FullMatrix::readSquareMatrix(ifstream& filehandle) {
 		int count = 0;
 		
 		string group, name;
-		
+	
 		for(int i=1;i<numSeqs;i++){
 			filehandle >> name;		
 			
@@ -88,14 +90,21 @@ void FullMatrix::readSquareMatrix(ifstream& filehandle) {
 			if(group == "not found") {	m->mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); m->mothurOutEndLine(); exit(1); }
 				
 			for(int j=0;j<numSeqs;j++){
+				if (m->control_pressed) { delete reading;  return 0; }
+				
 				filehandle >> matrix[i][j];
 				
 				count++;
 				reading->update(count);
 			}
 		}
+		
+		if (m->control_pressed) { delete reading;  return 0; }
+		
 		reading->finish();
 		delete reading;
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "FullMatrix", "readSquareMatrix");
@@ -103,7 +112,7 @@ void FullMatrix::readSquareMatrix(ifstream& filehandle) {
 	}
 } 
 /**************************************************************************/
-void FullMatrix::readLTMatrix(ifstream& filehandle) {
+int FullMatrix::readLTMatrix(ifstream& filehandle) {
 	try {
 		Progress* reading;
 		reading = new Progress("Reading matrix:     ", numSeqs * (numSeqs - 1) / 2);
@@ -123,15 +132,22 @@ void FullMatrix::readLTMatrix(ifstream& filehandle) {
 			if(group == "not found") {	m->mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
 				
 			for(int j=0;j<i;j++){
+				if (m->control_pressed) { delete reading;  return 0; }
+				
 				filehandle >> distance;
+		
 				matrix[i][j] = distance;  matrix[j][i] = distance;
 				count++;
 				reading->update(count);
 			}
 		}
-
+		
+		if (m->control_pressed) { delete reading;  return 0; }
+		
 		reading->finish();
 		delete reading;
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "FullMatrix", "readLTMatrix");

@@ -24,6 +24,13 @@ void ctrlc_handler ( int sig ) {
 	MothurOut* m = MothurOut::getInstance();
     ctrlc_pressed = 1;
 	m->control_pressed = ctrlc_pressed;
+	
+	if (m->executing) { //if mid command quit execution, else quit mothur
+		m->mothurOutEndLine(); m->mothurOut("quitting command...");  m->mothurOutEndLine();
+	}else{
+		m->mothurOut("quitting mothur");  m->mothurOutEndLine();
+		exit(1);
+	}
 }
 /***********************************************************************/
 int main(int argc, char *argv[]){

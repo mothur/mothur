@@ -240,6 +240,8 @@ int HeatMapSimCommand::execute(){
 		delete heatmap;
 		delete validCalculator;
 		
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
+		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
@@ -273,9 +275,13 @@ int HeatMapSimCommand::runCommandShared() {
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
+		if (m->control_pressed) { delete read; delete input; globaldata->ginput = NULL; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  globaldata->Groups.clear(); return 0; }
+		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-		
+			
+			if (m->control_pressed) { delete read; delete input; globaldata->ginput = NULL; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } globaldata->Groups.clear(); return 0; }
+
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 	
 				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
@@ -311,7 +317,10 @@ int HeatMapSimCommand::runCommandShared() {
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 			lookup = input->getSharedRAbundVectors();				
 		}
+		
 			
+		if (m->control_pressed) { delete read; delete input; globaldata->ginput = NULL; globaldata->Groups.clear();  return 0; }
+
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
 		bool needToRun = false;
@@ -325,6 +334,8 @@ int HeatMapSimCommand::runCommandShared() {
 			}
 		}
 		
+		if (m->control_pressed) { delete read; delete input; globaldata->ginput = NULL;  globaldata->Groups.clear(); return 0; }
+		
 		//run last label if you need to
 		if (needToRun == true)  {
 			for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) { delete lookup[i]; } } 
@@ -337,6 +348,7 @@ int HeatMapSimCommand::runCommandShared() {
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 		}
 		
+		if (m->control_pressed) { delete read; delete input; globaldata->ginput = NULL;  globaldata->Groups.clear(); return 0; }
 			
 		//reset groups parameter
 		globaldata->Groups.clear();  
@@ -407,7 +419,9 @@ int HeatMapSimCommand::runCommandDist() {
 					in >> name;		
 					names.push_back(name);
 					
-					for(int j=0;j<numSeqs;j++) {  in >> matrix[i][j];  }
+					if (m->control_pressed) { return 0; }
+					
+					for(int j=0;j<numSeqs;j++) { in >> matrix[i][j];  }
 					gobble(in);
 				}
 			}else { 
@@ -415,6 +429,8 @@ int HeatMapSimCommand::runCommandDist() {
 				for(int i=1;i<numSeqs;i++){
 					in >> name;	
 					names.push_back(name);	
+					
+					if (m->control_pressed) { return 0; }
 					
 					for(int j=0;j<i;j++){
 						in >> dist;
@@ -447,6 +463,8 @@ int HeatMapSimCommand::runCommandDist() {
 			
 			while (!in.eof()) {
 				in >> first >> second >> dist; gobble(in);
+				
+				if (m->control_pressed) { return 0; }
 				
 				map<string, int>::iterator itA = nameMap->find(first);
 				map<string, int>::iterator itB = nameMap->find(second);

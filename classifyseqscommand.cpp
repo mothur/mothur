@@ -246,7 +246,9 @@ int ClassifySeqsCommand::execute(){
 			m->mothurOutEndLine();
 			classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters);	
 		}
-
+		
+		if (m->control_pressed) { delete classify; return 0; }
+		
 		vector<string> outputNames;
 				
 		for (int s = 0; s < fastaFileNames.size(); s++) {
@@ -343,7 +345,9 @@ int ClassifySeqsCommand::execute(){
 #endif	
 			//make taxonomy tree from new taxonomy file 
 			PhyloTree taxaBrowser;
-		
+			
+			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} delete classify; return 0; }
+			
 			ifstream in;
 			openInputFile(tempTaxonomyFile, in);
 		
@@ -351,6 +355,8 @@ int ClassifySeqsCommand::execute(){
 			string name, taxon;
 			while(!in.eof()){
 				in >> name >> taxon; gobble(in);
+				
+				if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} remove(tempTaxonomyFile.c_str()); delete classify; return 0; }
 				
 				if (namefile != "") {
 					itNames = nameMap.find(name);
@@ -367,10 +373,15 @@ int ClassifySeqsCommand::execute(){
 			in.close();
 	
 			taxaBrowser.assignHeirarchyIDs(0);
+			
+			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} remove(tempTaxonomyFile.c_str()); delete classify; return 0; }
 
 			taxaBrowser.binUnclassified();
 			
 			remove(tempTaxonomyFile.c_str());
+			
+			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} delete classify; return 0; }
+
 			
 			//print summary file
 			ofstream outTaxTree;
@@ -389,8 +400,10 @@ int ClassifySeqsCommand::execute(){
 			//get maxLevel from phylotree so you know how many 'unclassified's to add
 			int maxLevel = taxaBrowser.getMaxLevel();
 			
-			//read taxfile - this reading and rewriting is done to preserve the confidence sscores.
+			//read taxfile - this reading and rewriting is done to preserve the confidence scores.
 			while (!inTax.eof()) {
+				if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} remove(unclass.c_str()); delete classify; return 0; }
+
 				inTax >> name >> taxon; gobble(inTax);
 				
 				string newTax = addUnclassifieds(taxon, maxLevel);
@@ -526,11 +539,14 @@ int ClassifySeqsCommand::driver(linePair* line, string taxFName, string tempTFNa
 		string taxonomy;
 
 		for(int i=0;i<line->numSeqs;i++){
+			if (m->control_pressed) { return 0; }
 			
 			Sequence* candidateSeq = new Sequence(inFASTA);
 			
 			if (candidateSeq->getName() != "") {
 				taxonomy = classify->getTaxonomy(candidateSeq);
+				
+				if (m->control_pressed) { delete candidateSeq; return 0; }
 
 				if (taxonomy != "bad seq") {
 					//output confidence scores or not

@@ -19,7 +19,7 @@ class FormatPhylipMatrix : public FormatMatrix {
 public:
 	FormatPhylipMatrix(string);
 	~FormatPhylipMatrix();
-	void read(NameAssignment*);
+	int read(NameAssignment*);
 private:
 	ifstream fileHandle;
 	string filename;

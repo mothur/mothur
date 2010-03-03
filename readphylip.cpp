@@ -20,7 +20,7 @@ ReadPhylipMatrix::ReadPhylipMatrix(string distFile){
 
 /***********************************************************************/
 
-void ReadPhylipMatrix::read(NameAssignment* nameMap){
+int ReadPhylipMatrix::read(NameAssignment* nameMap){
         try {
         
                         float distance;
@@ -67,15 +67,22 @@ void ReadPhylipMatrix::read(NameAssignment* nameMap){
                                 int        index = 0;
                
                                 for(int i=1;i<nseqs;i++){
+										if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+										
                                         fileHandle >> name;
                                         matrixNames.push_back(name);
+						
         
                                         //there's A LOT of repeated code throughout this method...
                                         if(nameMap == NULL){
                                                 list->set(i, name);
                                         
                                                 for(int j=0;j<i;j++){
+												
+														if (m->control_pressed) { delete reading; fileHandle.close(); return 0;  }
+														
                                                         fileHandle >> distance;
+											
                                                 
                                                         if (distance == -1) { distance = 1000000; }
                                                 
@@ -93,6 +100,8 @@ void ReadPhylipMatrix::read(NameAssignment* nameMap){
                                 
                                                 for(int j=0;j<i;j++){
                                                         fileHandle >> distance;
+														
+														if (m->control_pressed) { delete reading; fileHandle.close(); return 0;  }
                                 
                                                         if (distance == -1) { distance = 1000000; }
                                                         
@@ -115,12 +124,16 @@ void ReadPhylipMatrix::read(NameAssignment* nameMap){
                                 for(int i=1;i<nseqs;i++){
                                         fileHandle >> name;                
                                         matrixNames.push_back(name);
+										
+										
         
                                         if(nameMap == NULL){
                                                 list->set(i, name);
                                                 for(int j=0;j<nseqs;j++){
                                                         fileHandle >> distance;
-                                        
+														
+														if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+														
                                                         if (distance == -1) { distance = 1000000; }
                                                         
                                                         if(distance < cutoff && j < i){
@@ -137,7 +150,9 @@ void ReadPhylipMatrix::read(NameAssignment* nameMap){
                                 
                                                 for(int j=0;j<nseqs;j++){
                                                         fileHandle >> distance;
-                        
+														
+														if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+														
                                                         if (distance == -1) { distance = 1000000; }
                                                         
                                                         if(distance < cutoff && j < i){
@@ -150,6 +165,9 @@ void ReadPhylipMatrix::read(NameAssignment* nameMap){
                                         }
                                 }
                         }
+						
+						if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+						
                         reading->finish();
                         delete reading;
 
@@ -165,6 +183,8 @@ void ReadPhylipMatrix::read(NameAssignment* nameMap){
                                         m->mothurOut("missed something\t" + toString(nameMap->size())); m->mothurOutEndLine();
                                 }
                         } */
+						
+						return 1;
 
                 }
         catch(exception& e) {

@@ -62,7 +62,9 @@ int ConcensusCommand::execute(){
 		}
 		
 		//get the possible pairings
-		getSets();		
+		getSets();	
+		
+		if (m->control_pressed) { return 0; }
 		
 		//open file for pairing not included in the tree
 		notIncluded = filename + ".cons.pairs";
@@ -82,7 +84,11 @@ int ConcensusCommand::execute(){
 		
 		buildConcensusTree(treeSet);
 		
+		if (m->control_pressed) { delete consensusTree; return 0; }
+		
 		consensusTree->assembleTree();
+		
+		if (m->control_pressed) { delete consensusTree; return 0; }
 		
 		//output species in order
 		out2 << "Species in Order: " << endl << endl;
@@ -91,8 +97,13 @@ int ConcensusCommand::execute(){
 		//output sets included
 		out2 << endl << "Sets included in the consensus tree:" << endl << endl;
 		
+		if (m->control_pressed) { delete consensusTree; return 0; }
+		
 		vector<string> temp;
 		for (it2 = nodePairsInTree.begin(); it2 != nodePairsInTree.end(); it2++) {
+		
+			if (m->control_pressed) { delete consensusTree; return 0; }
+			
 			//only output pairs not leaves
 			if (it2->first.size() > 1) { 
 				temp.clear();
@@ -118,6 +129,9 @@ int ConcensusCommand::execute(){
 		//output sets not included
 		out2 << endl << "Sets NOT included in the consensus tree:" << endl << endl;
 		for (it2 = nodePairs.begin(); it2 != nodePairs.end(); it2++) {
+		
+			if (m->control_pressed) { delete consensusTree; return 0; }
+			
 			temp.clear();
 			//initialize temp to all "."
 			temp.resize(treeSet.size(), ".");
@@ -159,6 +173,8 @@ int ConcensusCommand::buildConcensusTree(vector<string> nodeSet) {
 		vector<string> leftChildSet;
 		vector<string> rightChildSet;
 		
+		if (m->control_pressed) { return 1; }
+		
 		//if you are at a leaf
 		if (nodeSet.size() == 1) {
 			//return the vector index of the leaf you are at
@@ -186,7 +202,7 @@ int ConcensusCommand::buildConcensusTree(vector<string> nodeSet) {
 }
 
 //**********************************************************************************************************************
-void ConcensusCommand::getSets() {
+int ConcensusCommand::getSets() {
 	try {
 		vector<string> temp;
 		treeSet.clear();
@@ -196,6 +212,9 @@ void ConcensusCommand::getSets() {
 			
 			//for each non-leaf node get descendant info.
 			for (int j = numLeaves; j < numNodes; j++) {
+				
+				if (m->control_pressed) { return 1; }
+				
 				temp.clear();
 				//go through pcounts and pull out descendants
 				for (it = t[i]->tree[j].pcount.begin(); it != t[i]->tree[j].pcount.end(); it++) {
@@ -219,6 +238,8 @@ void ConcensusCommand::getSets() {
 		//you want the leaves in there but with insignifigant sightings value so it is added last
 		//for each leaf node get descendant info.
 		for (int j = 0; j < numLeaves; j++) {
+		
+			if (m->control_pressed) { return 1; }
 			
 			//only need the first one since leaves have no descendants but themselves
 			it = t[0]->tree[j].pcount.begin(); 
@@ -239,6 +260,7 @@ void ConcensusCommand::getSets() {
 		
 		//set initial rating on pairs to sightings + subgroup sightings
 		while (nodePairsCopy.size() != 0) {
+			if (m->control_pressed) { return 1; }
 		
 			vector<string> small = getSmallest(nodePairsCopy);
 			
@@ -249,6 +271,7 @@ void ConcensusCommand::getSets() {
 			nodePairsCopy.erase(small);
 		}
 		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ConcensusCommand", "getSets");

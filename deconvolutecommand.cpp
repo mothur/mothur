@@ -110,8 +110,12 @@ int DeconvoluteCommand::execute() {
 		if(oldNameMapFName == "")	{	fastamap.readFastaFile(inFastaName);					}
 		else						{	fastamap.readFastaFile(inFastaName, oldNameMapFName);	}
 		
+		if (m->control_pressed) { return 0; }
+		
 		fastamap.printCondensedFasta(outFastaFile);
 		fastamap.printNamesFile(outNameFile);
+		
+		if (m->control_pressed) { remove(outFastaFile.c_str()); remove(outNameFile.c_str()); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

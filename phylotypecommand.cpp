@@ -121,6 +121,8 @@ int PhylotypeCommand::execute(){
 		//make it as long as the longest taxonomy in the file 
 		TaxEqualizer* taxEqual = new TaxEqualizer(taxonomyFileName, cutoff);
 		
+		if (m->control_pressed) { delete taxEqual; return 0; }
+		
 		string equalizedTaxFile = taxEqual->getEqualizedTaxFile();
 		
 		delete taxEqual;
@@ -134,6 +136,8 @@ int PhylotypeCommand::execute(){
 		
 		bool done = false;
 		if (tree->get(leaves[0]).parent == -1) {  m->mothurOut("Empty Tree"); m->mothurOutEndLine();	done = true;	}
+		
+		if (m->control_pressed) { delete tree; return 0; }
 		
 		string fileroot = outputDir + getRootName(getSimpleName(taxonomyFileName));
 		
@@ -157,6 +161,12 @@ int PhylotypeCommand::execute(){
 		
 			string level = toString(count); 
 			count++;
+			
+			if (m->control_pressed) { 
+				outRabund.close(); outSabund.close(); outList.close();
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+				delete tree; return 0; 
+			}
 			
 			//is this a level the user want output for
 			if(allLines == 1 || labels.count(level) == 1){	
@@ -215,6 +225,11 @@ int PhylotypeCommand::execute(){
 		outRabund.close();	
 		
 		delete tree;
+		
+		if (m->control_pressed) { 
+			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+			return 0; 
+		}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

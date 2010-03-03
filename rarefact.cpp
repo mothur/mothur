@@ -12,7 +12,7 @@
 
 /***********************************************************************/
 
-void Rarefact::getCurve(int increment = 1, int nIters = 1000){
+int Rarefact::getCurve(int increment = 1, int nIters = 1000){
 	try {
 		RarefactionCurveData* rcd = new RarefactionCurveData();
 		for(int i=0;i<displays.size();i++){
@@ -30,6 +30,8 @@ void Rarefact::getCurve(int increment = 1, int nIters = 1000){
 			random_shuffle(order->begin(), order->end());
 		
 			for(int i=0;i<numSeqs;i++){
+			
+				if (m->control_pressed) { delete lookup; delete rank; delete rcd; return 0;  }
 			
 				int binNumber = order->get(i);
 				int abundance = lookup->get(binNumber);
@@ -61,6 +63,7 @@ void Rarefact::getCurve(int increment = 1, int nIters = 1000){
 			displays[i]->close();
 		}
 		delete rcd;
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Rarefact", "getCurve");
@@ -70,7 +73,7 @@ void Rarefact::getCurve(int increment = 1, int nIters = 1000){
 
 /***********************************************************************/
 
-void Rarefact::getSharedCurve(int increment = 1, int nIters = 1000){
+int Rarefact::getSharedCurve(int increment = 1, int nIters = 1000){
 try {
 		SharedRarefactionCurveData* rcd = new SharedRarefactionCurveData();
 		
@@ -106,6 +109,8 @@ try {
 			vector<SharedRAbundVector*> subset;
 			//send each group one at a time
 			for (int k = 0; k < lookup.size(); k++) { 
+				if (m->control_pressed) {  delete merge; delete rcd; return 0;  }
+				
 				subset.clear(); //clears out old pair of sharedrabunds
 				//add in new pair of sharedrabunds
 				subset.push_back(merge); subset.push_back(lookup[k]);
@@ -127,6 +132,7 @@ try {
 		}
 		
 		delete rcd;
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Rarefact", "getSharedCurve");

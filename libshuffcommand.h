@@ -29,8 +29,8 @@ private:
 	vector<string> groupNames;
 	
 	void setGroups();
-	void printCoverageFile();
-	void printSummaryFile();
+	int printCoverageFile();
+	int printSummaryFile();
 
 	GlobalData* globaldata;
 	FullMatrix* matrix;

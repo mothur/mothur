@@ -27,12 +27,15 @@ Bellerophon::Bellerophon(string name, string o)  {
 }
 
 //***************************************************************************************************************
-void Bellerophon::print(ostream& out, ostream& outAcc) {
+int Bellerophon::print(ostream& out, ostream& outAcc) {
 	try {
 		int above1 = 0;
 		out << "Name\tScore\tLeft\tRight\t" << endl;
 		//output prefenence structure to .chimeras file
 		for (int i = 0; i < pref.size(); i++) {
+			
+			if (m->control_pressed) {  return 0; }
+			
 			out << pref[i].name << '\t' << setprecision(3) << pref[i].score[0] << '\t' << pref[i].leftParent[0] << '\t' << pref[i].rightParent[0] << endl;
 			
 			//calc # of seqs with preference above 1.0
@@ -62,6 +65,8 @@ void Bellerophon::print(ostream& out, ostream& outAcc) {
 		m->mothurOut("97.5%-tile:\t" + toString(pref[spot].score[0])); m->mothurOutEndLine();
 		spot = 0;
 		m->mothurOut("Maximum:\t" + toString(pref[spot].score[0])); m->mothurOutEndLine();
+		
+		return 1;
 
 	}
 	catch(exception& e) {
@@ -89,6 +94,8 @@ int Bellerophon::getChimeras() {
 			filterSeqs->execute();
 			delete filterSeqs;
 			
+			if (m->control_pressed) { return 0; }
+			
 			//reset fastafile to filtered file
 			if (outputDir == "") { fastafile = getRootName(fastafile) + "filter.fasta"; }
 			else				 { fastafile = outputDir + getRootName(getSimpleName(fastafile)) + "filter.fasta"; }
@@ -96,10 +103,12 @@ int Bellerophon::getChimeras() {
 		}
 		
 		distCalculator = new eachGapDist();
-cout << "fastafile = " << fastafile << endl;		
+		
 		//read in sequences
 		seqs = readSeqs(fastafile);
-	cout << "here:"<< endl;	
+		
+		if (m->control_pressed) { return 0; }
+	
 		if (unaligned) { m->mothurOut("Your sequences need to be aligned when you use the bellerophon method."); m->mothurOutEndLine(); return 1;  }
 		
 		int numSeqs = seqs.size();
@@ -142,10 +151,15 @@ cout << "fastafile = " << fastafile << endl;
 		int count = 0;
 		while (count < iters) {
 				
+				if (m->control_pressed) { return 0; }
+				
 				//create 2 vectors of sequences, 1 for left side and one for right side
 				vector<Sequence> left;  vector<Sequence> right;
 				
 				for (int i = 0; i < seqs.size(); i++) {
+				
+					if (m->control_pressed) { return 0; }
+					
 //cout << "midpoint = " << midpoint << "\twindow = " << window << endl;
 //cout << "whole = " << seqs[i]->getAligned().length() << endl;
 					//save left side
@@ -176,7 +190,12 @@ cout << "fastafile = " << fastafile << endl;
 				SparseMatrix* SparseRight = new SparseMatrix();
 				
 				createSparseMatrix(0, left.size(), SparseLeft, left);
+				
+				if (m->control_pressed) { delete SparseLeft; delete SparseRight; return 0; }
+				
 				createSparseMatrix(0, right.size(), SparseRight, right);
+				
+				if (m->control_pressed) { delete SparseLeft; delete SparseRight; return 0; }
 				
 				vector<SeqMap> distMapRight;
 				vector<SeqMap> distMapLeft;
@@ -191,11 +210,13 @@ cout << "fastafile = " << fastafile << endl;
 				//cout << "left" << endl << endl;
 				for (MatData currentCell = SparseLeft->begin(); currentCell != SparseLeft->end(); currentCell++) {
 					distMapLeft[currentCell->row][currentCell->column] = currentCell->dist;
+					if (m->control_pressed) { delete SparseLeft; delete SparseRight; return 0; }
 					//cout << " i = " << currentCell->row << " j = " << currentCell->column << " dist = " << currentCell->dist << endl;
 				}
 				//cout << "right" << endl << endl;
 				for (MatData currentCell = SparseRight->begin(); currentCell != SparseRight->end(); currentCell++) {
 					distMapRight[currentCell->row][currentCell->column] = currentCell->dist;
+					if (m->control_pressed) { delete SparseLeft; delete SparseRight; return 0; }
 					//cout << " i = " << currentCell->row << " j = " << currentCell->column << " dist = " << currentCell->dist << endl;
 				}
 				
@@ -246,6 +267,8 @@ int Bellerophon::createSparseMatrix(int startSeq, int endSeq, SparseMatrix* spar
 		for(int i=startSeq; i<endSeq; i++){
 			
 			for(int j=0;j<i;j++){
+				
+				if (m->control_pressed) { return 0; }
 			
 				distCalculator->calcDist(s[i], s[j]);
 				float dist = distCalculator->getDist();
@@ -264,7 +287,7 @@ int Bellerophon::createSparseMatrix(int startSeq, int endSeq, SparseMatrix* spar
 	}
 }
 /***************************************************************************************************************/
-void Bellerophon::generatePreferences(vector<SeqMap> left, vector<SeqMap> right, int mid){
+int Bellerophon::generatePreferences(vector<SeqMap> left, vector<SeqMap> right, int mid){
 	try {
 		
 		float dme = 0.0;
@@ -288,6 +311,8 @@ void Bellerophon::generatePreferences(vector<SeqMap> left, vector<SeqMap> right,
 			SeqMap currentRight = right[i];		// same as left but with distances on the right side.
 			
 			for (int j = 0; j < i; j++) {
+			
+				if (m->control_pressed) {  return 0; }
 				
 				itL = currentLeft.find(j);
 				itR = currentRight.find(j);
@@ -352,6 +377,8 @@ void Bellerophon::generatePreferences(vector<SeqMap> left, vector<SeqMap> right,
 //cout << endl << "dme = " << dme << endl;
 		//recalculate prefernences based on dme
 		for (int i = 0; i < pref.size(); i++) {
+		
+			if (m->control_pressed) {  return 0; }
 //cout << "unadjusted pref " << i << " = " << pref[i].score[1] << endl;	
 			// gives the actual percentage of the dme this seq adds
 			pref[i].score[1] = pref[i].score[1] / dme;
@@ -368,6 +395,8 @@ void Bellerophon::generatePreferences(vector<SeqMap> left, vector<SeqMap> right,
 		//is this score bigger then the last score
 		for (int i = 0; i < pref.size(); i++) {	 
 			
+			if (m->control_pressed) {  return 0; }
+			
 			//update biggest score
 			if (pref[i].score[1] > pref[i].score[0]) {
 				pref[i].score[0] = pref[i].score[1];
@@ -379,6 +408,8 @@ void Bellerophon::generatePreferences(vector<SeqMap> left, vector<SeqMap> right,
 			}
 			
 		}
+		
+		return 1;
 
 	}
 	catch(exception& e) {

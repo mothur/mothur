@@ -30,12 +30,14 @@ ReadBlast::ReadBlast(string file, float c, float p, int l, bool ms, bool h) : bl
 //assumptions about the blast file: 
 //1. if duplicate lines occur the first line is always best and is chosen
 //2. blast scores are grouped together, ie. a a .... score, a b .... score, a c ....score...
-void ReadBlast::read(NameAssignment* nameMap) {
+int ReadBlast::read(NameAssignment* nameMap) {
 	try {
 	
 		//if the user has not given a names file read names from blastfile
 		if (nameMap->size() == 0) { readNames(nameMap);  }
 		int nseqs = nameMap->size();
+		
+		if (m->control_pressed) { return 0; }
 
 		ifstream fileHandle;
 		openInputFile(blastfile, fileHandle);
@@ -60,7 +62,14 @@ void ReadBlast::read(NameAssignment* nameMap) {
 			openOutputFile(overlapFile, outOverlap);
 			openOutputFile(distFile, outDist);
 		}
-	
+		
+		if (m->control_pressed) { 
+			fileHandle.close();
+			if (!hclusterWanted) {  delete matrix; }
+			else { outOverlap.close(); remove(overlapFile.c_str()); outDist.close(); remove(distFile.c_str());  }
+			return 0;
+		}
+		
 		Progress* reading = new Progress("Reading blast:     ", nseqs * nseqs);
 		
 		//this is used to quickly find if we already have a distance for this combo
@@ -104,6 +113,14 @@ void ReadBlast::read(NameAssignment* nameMap) {
 				
 		//read file
 		while(!fileHandle.eof()){  
+		
+			if (m->control_pressed) { 
+				fileHandle.close();
+				if (!hclusterWanted) {  delete matrix; }
+				else { outOverlap.close(); remove(overlapFile.c_str()); outDist.close(); remove(distFile.c_str());  }
+				delete reading;
+				return 0;
+			}
 			
 			//read in line from file
 			fileHandle >> firstName >> secondName >> percentId >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
@@ -249,6 +266,14 @@ void ReadBlast::read(NameAssignment* nameMap) {
 		thisRowsBlastScores.clear();
 		dists.clear();
 		
+		if (m->control_pressed) { 
+				fileHandle.close();
+				if (!hclusterWanted) {  delete matrix; }
+				else { outOverlap.close(); remove(overlapFile.c_str()); outDist.close(); remove(distFile.c_str());  }
+				delete reading;
+				return 0;
+		}
+		
 		if (!hclusterWanted) {
 			sort(overlap.begin(), overlap.end(), compareOverlap);
 		}else {
@@ -256,9 +281,19 @@ void ReadBlast::read(NameAssignment* nameMap) {
 			outOverlap.close();
 		}
 		
+		if (m->control_pressed) { 
+				fileHandle.close();
+				if (!hclusterWanted) {  delete matrix; }
+				else {  remove(overlapFile.c_str());  remove(distFile.c_str());  }
+				delete reading;
+				return 0;
+		}
+		
 		reading->finish();
 		delete reading;
 		fileHandle.close();
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ReadBlast", "read");
@@ -266,7 +301,7 @@ void ReadBlast::read(NameAssignment* nameMap) {
 	}
 } 
 /*********************************************************************************************/
-void ReadBlast::readNames(NameAssignment* nameMap) {
+int ReadBlast::readNames(NameAssignment* nameMap) {
 	try {
 		m->mothurOut("Reading names... "); cout.flush();
 		
@@ -285,6 +320,7 @@ void ReadBlast::readNames(NameAssignment* nameMap) {
 		nameMap->push_back(prevName);
 		
 		while (!in.eof()) {
+			if (m->control_pressed) { in.close(); return 0; }
 			
 			//read line
 			in >> name;
@@ -307,8 +343,11 @@ void ReadBlast::readNames(NameAssignment* nameMap) {
 		//openOutputFile(outNames, out);
 		//nameMap->print(out);
 		//out.close();
+		if (m->control_pressed) { return 0; }
 		
 		m->mothurOut(toString(num) + " names read."); m->mothurOutEndLine();
+		
+		return 0;
 		
 	}
 	catch(exception& e) {

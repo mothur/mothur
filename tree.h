@@ -37,7 +37,7 @@ public:
 	int findRoot();  //return index of root node
 	
 	//this function takes the leaf info and populates the non leaf nodes
-	void assembleTree();	
+	int assembleTree();	
 	
 	vector<Node> tree;		//the first n nodes are the leaves, where n is the number of sequences.
 		

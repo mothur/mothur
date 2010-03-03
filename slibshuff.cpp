@@ -53,13 +53,24 @@ vector<vector<double> > SLibshuff::evaluateAll(){
 
 double SLibshuff::sCalculate(int x, int y){
 	try{
+		double sum = 0.0,t=0.0;
+		
 		minX = getMinX(x);
+		
+		if (m->control_pressed) { return sum; }
+		
 		minXY = getMinXY(x,y);
+		
+		if (m->control_pressed) { return sum; }
 
 		sort(minX.begin(), minX.end());
+		
+		if (m->control_pressed) { return sum; }
+		
 		sort(minXY.begin(), minXY.end());
+		
+		if (m->control_pressed) { return sum; }
 
-		double sum = 0.0,t=0.0;
 		int ix=0,iy=0;
 		while( (ix < groupSizes[x]) && (iy < groupSizes[x]) ) {
 			double h = (ix-iy)/double(groupSizes[x]);

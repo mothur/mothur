@@ -19,42 +19,51 @@ TaxEqualizer::TaxEqualizer(string tfile, int c) : cutoff(c) {
 		openInputFile(tfile, inTax);
 	
 		highestLevel = getHighestLevel(inTax);
-	
-		//if the user has specified a cutoff and it's smaller than the highest level
-		if ((cutoff != -1) && (cutoff < highestLevel)) { 
-			highestLevel = cutoff;
-		}else if (cutoff > highestLevel) {
-			m->mothurOut("The highest level taxonomy you have is " + toString(highestLevel) + " and your cutoff is " + toString(cutoff) + ". I will set the cutoff to " + toString(highestLevel));
-			m->mothurOutEndLine();
-		}
 		
-		inTax.close(); 
-		ifstream in; 
-		openInputFile(tfile, in);
-		
-		ofstream out;
-		equalizedFile = getRootName(tfile) + "equalized.taxonomy";
-		openOutputFile(equalizedFile, out);
-		
-		string name, tax;
-		while (in) {
-			in >> name >> tax;   gobble(in);
+		if (!m->control_pressed) { 
 			
-			if (containsConfidence) {  removeConfidences(tax);	}
-			
-			//is this a taxonomy that needs to be extended?
-			if (seqLevels[name] < highestLevel) {
-				extendTaxonomy(name, tax, highestLevel);
-			}else if (seqLevels[name] > highestLevel) { //this can happen if the user enters a cutoff
-				truncateTaxonomy(name, tax, highestLevel);
+			//if the user has specified a cutoff and it's smaller than the highest level
+			if ((cutoff != -1) && (cutoff < highestLevel)) { 
+				highestLevel = cutoff;
+			}else if (cutoff > highestLevel) {
+				m->mothurOut("The highest level taxonomy you have is " + toString(highestLevel) + " and your cutoff is " + toString(cutoff) + ". I will set the cutoff to " + toString(highestLevel));
+				m->mothurOutEndLine();
 			}
 			
-			out << name << '\t' << tax << endl;
-		}
+			inTax.close(); 
+			ifstream in; 
+			openInputFile(tfile, in);
+			
+			ofstream out;
+			equalizedFile = getRootName(tfile) + "equalized.taxonomy";
+			openOutputFile(equalizedFile, out);
+			
+	
+			string name, tax;
+			while (in) {
+			
+				if (m->control_pressed) {  break; }
+				
+				in >> name >> tax;   gobble(in);
+				
+				if (containsConfidence) {  removeConfidences(tax);	}
+				
+				//is this a taxonomy that needs to be extended?
+				if (seqLevels[name] < highestLevel) {
+					extendTaxonomy(name, tax, highestLevel);
+				}else if (seqLevels[name] > highestLevel) { //this can happen if the user enters a cutoff
+					truncateTaxonomy(name, tax, highestLevel);
+				}
+				
+				out << name << '\t' << tax << endl;
+			}
+			
+			in.close();
+			out.close();
+			
+			if (m->control_pressed) { remove(equalizedFile.c_str());  }
+		}else { inTax.close(); }
 		
-		in.close();
-		out.close();
-					
 	}
 	catch(exception& e) {
 		m->errorOut(e, "TaxEqualizer", "TaxEqualizer");

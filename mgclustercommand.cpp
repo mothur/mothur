@@ -164,6 +164,8 @@ int MGClusterCommand::execute(){
 		list = new ListVector(nameMap->getListVector());
 		RAbundVector* rabund = new RAbundVector(list->getRAbundVector());
 		
+		if (m->control_pressed) { delete nameMap; delete read; delete list; delete rabund; return 0; }
+		
 		start = time(NULL);
 		oldList = *list;
 		
@@ -175,6 +177,12 @@ int MGClusterCommand::execute(){
 		openOutputFile(fileroot+ tag + ".list",  listFile);
 		openOutputFile(fileroot+ tag + ".rabund",  rabundFile);
 		openOutputFile(fileroot+ tag + ".sabund",  sabundFile);
+		
+		if (m->control_pressed) { 
+			delete nameMap; delete read; delete list; delete rabund; 
+			listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
+			return 0; 
+		}
 		
 		if (!hclusterWanted) {
 			//get distmatrix and overlap
@@ -188,10 +196,23 @@ int MGClusterCommand::execute(){
 			else if(method == "average"){	cluster = new AverageLinkage(rabund, list, distMatrix, cutoff, method);	}
 			cluster->setMapWanted(true);
 			
+			if (m->control_pressed) { 
+				delete nameMap; delete distMatrix; delete list; delete rabund; delete cluster;
+				listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
+				return 0; 
+			}
+			
 			//cluster using cluster classes
 			while (distMatrix->getSmallDist() < cutoff && distMatrix->getNNodes() > 0){
 				
 				cluster->update(cutoff);
+				
+				if (m->control_pressed) { 
+					delete nameMap; delete distMatrix; delete list; delete rabund; delete cluster;
+					listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
+					return 0; 
+				}
+				
 				float dist = distMatrix->getSmallDist();
 				float rndDist = roundDist(dist, precision);
 				
@@ -203,6 +224,13 @@ int MGClusterCommand::execute(){
 					if (merge) {
 						map<string, int> seq2Bin = cluster->getSeqtoBin();
 						ListVector* temp = mergeOPFs(seq2Bin, rndPreviousDist);
+						
+						if (m->control_pressed) { 
+							delete nameMap; delete distMatrix; delete list; delete rabund; delete cluster; delete temp;
+							listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
+							return 0; 
+						}
+						
 						temp->setLabel(toString(rndPreviousDist,  precisionLength-1));
 						printData(temp);
 						delete temp;
@@ -225,6 +253,13 @@ int MGClusterCommand::execute(){
 				if (merge) {
 					map<string, int> seq2Bin = cluster->getSeqtoBin();
 					ListVector* temp = mergeOPFs(seq2Bin, rndPreviousDist);
+					
+					if (m->control_pressed) { 
+							delete nameMap; delete distMatrix; delete list; delete rabund; delete cluster; delete temp;
+							listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
+							return 0; 
+					}
+					
 					temp->setLabel(toString(rndPreviousDist,  precisionLength-1));
 					printData(temp);
 					delete temp;
@@ -247,6 +282,12 @@ int MGClusterCommand::execute(){
 		
 			//sort the distance and overlap files
 			sortHclusterFiles(distFile, overlapFile);
+			
+			if (m->control_pressed) { 
+				delete nameMap;  delete list; delete rabund; 
+				listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
+				return 0; 
+			}
 		
 			//create cluster
 			hcluster = new HCluster(rabund, list, method, distFile, nameMap, cutoff);
@@ -255,16 +296,38 @@ int MGClusterCommand::execute(){
 			vector<seqDist> seqs; seqs.resize(1); // to start loop
 			//ifstream inHcluster;
 			//openInputFile(distFile, inHcluster);
+			
+			if (m->control_pressed) { 
+				delete nameMap;  delete list; delete rabund; delete hcluster;
+				listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
+				return 0; 
+			}
 
 			while (seqs.size() != 0){
 		
 				seqs = hcluster->getSeqs();
+				
+				if (m->control_pressed) { 
+					delete nameMap;  delete list; delete rabund; delete hcluster;
+					listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
+					remove(distFile.c_str());
+					remove(overlapFile.c_str());
+					return 0; 
+				}
 				
 				for (int i = 0; i < seqs.size(); i++) {  //-1 means skip me
 					
 					if (seqs[i].seq1 != seqs[i].seq2) {
 		
 						hcluster->update(seqs[i].seq1, seqs[i].seq2, seqs[i].dist);
+						
+						if (m->control_pressed) { 
+							delete nameMap;  delete list; delete rabund; delete hcluster;
+							listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
+							remove(distFile.c_str());
+							remove(overlapFile.c_str());
+							return 0; 
+						}
 	
 						float rndDist = roundDist(seqs[i].dist, precision);
 												
@@ -276,6 +339,15 @@ int MGClusterCommand::execute(){
 							if (merge) {
 								map<string, int> seq2Bin = hcluster->getSeqtoBin();
 								ListVector* temp = mergeOPFs(seq2Bin, rndPreviousDist);
+								
+								if (m->control_pressed) { 
+									delete nameMap;  delete list; delete rabund; delete hcluster; delete temp;
+									listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
+									remove(distFile.c_str());
+									remove(overlapFile.c_str());
+									return 0; 
+								}
+
 								temp->setLabel(toString(rndPreviousDist,  precisionLength-1));
 								printData(temp);
 								delete temp;
@@ -301,6 +373,15 @@ int MGClusterCommand::execute(){
 				if (merge) {
 					map<string, int> seq2Bin = hcluster->getSeqtoBin();
 					ListVector* temp = mergeOPFs(seq2Bin, rndPreviousDist);
+					
+					if (m->control_pressed) { 
+							delete nameMap; delete list; delete rabund; delete hcluster; delete temp;
+							listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
+							remove(distFile.c_str());
+							remove(overlapFile.c_str());
+							return 0; 
+					}
+					
 					temp->setLabel(toString(rndPreviousDist,  precisionLength-1));
 					printData(temp);
 					delete temp;
@@ -323,6 +404,14 @@ int MGClusterCommand::execute(){
 	
 		globaldata->setListFile(fileroot+ tag + ".list");
 		globaldata->setFormat("list");
+		
+		if (m->control_pressed) { 
+			delete nameMap; 
+			listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
+			globaldata->setListFile("");
+			globaldata->setFormat("");
+			return 0; 
+		}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -373,6 +462,10 @@ ListVector* MGClusterCommand::mergeOPFs(map<string, int> binInfo, float dist){
 		}else { if (overlapMatrix.size() == 0)  {  done = true;  } } 
 		
 		while (!done) {
+			if (m->control_pressed) { 
+				if (hclusterWanted) { 	inOverlap.close();  }		
+				return newList;
+			}
 			
 			//get next overlap
 			seqDist overlapNode;

@@ -261,26 +261,22 @@ int CollectSharedCommand::execute(){
 		util->updateGroupIndex(globaldata->Groups, globaldata->gGroupmap->groupIndex);
 
 		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-
-			if(allLines == 1 || labels.count(order->getLabel()) == 1){
-				
-				//create collectors curve
-				cCurve = new Collect(order, cDisplays);
-				int error = cCurve->getSharedCurve(freq);
-				delete cCurve;
-				
-				if (error == 1) {
+			if (m->control_pressed) { 
 					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					delete input;  globaldata->ginput = NULL;
-					delete read;
-					delete order; globaldata->gorder = NULL;
-					delete validCalculator;
+					delete order; 
 					globaldata->Groups.clear();
 					return 0;
-				}
+			}
+
+			if(allLines == 1 || labels.count(order->getLabel()) == 1){
 			
 				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
+				//create collectors curve
+				cCurve = new Collect(order, cDisplays);
+				cCurve->getSharedCurve(freq);
+				delete cCurve;
+			
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
 			}
@@ -292,24 +288,12 @@ int CollectSharedCommand::execute(){
 				delete order;
 				order = input->getSharedOrderVector(lastLabel);
 				
+				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 				//create collectors curve
 				cCurve = new Collect(order, cDisplays);
-				int error = cCurve->getSharedCurve(freq);
+				cCurve->getSharedCurve(freq);
 				delete cCurve;
 				
-				if (error == 1) {
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  
-					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					delete input;  globaldata->ginput = NULL;
-					delete read;
-					delete order; globaldata->gorder = NULL;
-					delete validCalculator;
-					globaldata->Groups.clear();
-					return 0;
-				}
-
-			
-				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 				processedLabels.insert(order->getLabel());
 				userLabels.erase(order->getLabel());
 				
@@ -323,6 +307,13 @@ int CollectSharedCommand::execute(){
 			//get next line to process
 			delete order;
 			order = input->getSharedOrderVector();
+		}
+		
+		if (m->control_pressed) { 
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  
+					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
+					globaldata->Groups.clear();
+					return 0;
 		}
 		
 		//output error messages about any remaining user labels
@@ -342,24 +333,20 @@ int CollectSharedCommand::execute(){
 		if (needToRun == true)  {
 			if (order != NULL) {  delete order;  }
 			order = input->getSharedOrderVector(lastLabel);
-
+			
+			m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 			cCurve = new Collect(order, cDisplays);
-			int error = cCurve->getSharedCurve(freq);
+			cCurve->getSharedCurve(freq);
 			delete cCurve;
 			
-			if (error == 1) {
+			if (m->control_pressed) { 
 				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  
 				for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-				delete input;  globaldata->ginput = NULL;
-				delete read;
-				delete order; globaldata->gorder = NULL;
-				delete validCalculator;
+				delete order; 
 				globaldata->Groups.clear();
 				return 0;
 			}
 
-			
-			m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 			delete order;
 		}
 		

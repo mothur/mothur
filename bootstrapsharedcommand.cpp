@@ -219,7 +219,8 @@ int BootSharedCommand::execute(){
 		globaldata->gTreemap = tmap;
 			
 		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-		
+			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } globaldata->Groups.clear(); return 0;	} 
+	
 			if(allLines == 1 || labels.count(order->getLabel()) == 1){			
 				
 				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
@@ -255,6 +256,9 @@ int BootSharedCommand::execute(){
 			order = input->getSharedOrderVector();
 		}
 		
+		
+		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } globaldata->Groups.clear(); return 0;	} 
+
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
 		bool needToRun = false;
@@ -268,6 +272,8 @@ int BootSharedCommand::execute(){
 			}
 		}
 		
+		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } globaldata->Groups.clear(); return 0;	} 
+
 		//run last line if you need to
 		if (needToRun == true)  {
 				if (order != NULL) {	delete order;	}
@@ -280,6 +286,8 @@ int BootSharedCommand::execute(){
 
 		}
 		
+		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } globaldata->Groups.clear(); return 0;	} 
+
 		//reset groups parameter
 		globaldata->Groups.clear();  
 		
@@ -360,6 +368,8 @@ int BootSharedCommand::createTree(ostream* out, Tree* t){
 
 		//assemble tree
 		t->assembleTree();
+		
+		if (m->control_pressed) { return 1; }
 	
 		//print newick file
 		t->print(*out);
@@ -453,6 +463,8 @@ int BootSharedCommand::process(SharedOrderVector* order) {
 						
 						//creates tree from similarity matrix and write out file
 						createTree(out[i], tempTree);
+						
+						if (m->control_pressed) {   delete tempTree; return 1; }
 						
 						//save trees for consensus command.
 						trees[i].push_back(tempTree);

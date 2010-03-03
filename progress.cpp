@@ -34,6 +34,8 @@ Progress::Progress(){
 
 Progress::Progress(string job, int end){
 	try {
+		m = MothurOut::getInstance();
+		
 		m->mothurOut("********************#****#****#****#****#****#****#****#****#****#****#\n");
 		cout << setw(20) << left << job << setw(1) << marker;
 		m->mothurOutJustToLog(job);
@@ -42,6 +44,7 @@ Progress::Progress(string job, int end){
 
 		nTicks = 0;
 		finalPos = end;
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Progress", "Progress");

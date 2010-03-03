@@ -54,7 +54,9 @@ bool InteractEngine::getInput(){
 			mout->mothurOutEndLine();
 			
 			input = getCommand();	
-			mout->mothurOutEndLine();		
+			mout->mothurOutEndLine();	
+			
+			if (mout->control_pressed) { input = "quit()"; }
 			
 			//allow user to omit the () on the quit command
 			if (input == "quit") { input = "quit()"; }
@@ -65,12 +67,12 @@ bool InteractEngine::getInput(){
 			options = parser.getOptionString();
 			
 			if (commandName != "") {
-			
+				mout->executing = true;
 				//executes valid command
 				Command* command = cFactory->getCommand(commandName, options);
 				quitCommandCalled = command->execute();
 				mout->control_pressed = 0;
-				
+				mout->executing = false;
 			}else {
 				mout->mothurOut("Your input contains errors. Please try again."); 
 				mout->mothurOutEndLine();
@@ -171,6 +173,7 @@ bool BatchEngine::getInput(){
 				mout->mothurOut("mothur > " + input);
 				mout->mothurOutEndLine();
 				
+				if (mout->control_pressed) { input = "quit()"; }
 				
 				//allow user to omit the () on the quit command
 				if (input == "quit") { input = "quit()"; }
@@ -180,11 +183,12 @@ bool BatchEngine::getInput(){
 				options = parser.getOptionString();
 										
 				if (commandName != "") {
-
+					mout->executing = true;
 					//executes valid command
 					Command* command = cFactory->getCommand(commandName, options);
 					quitCommandCalled = command->execute();
 					mout->control_pressed = 0;
+					mout->executing = false;
 				}else {		
 					mout->mothurOut("Invalid."); 
 					mout->mothurOutEndLine();
@@ -251,6 +255,7 @@ bool ScriptEngine::getInput(){
 			mout->mothurOut("mothur > " + input);
 			mout->mothurOutEndLine();
 
+			if (mout->control_pressed) { input = "quit()"; }
 				
 			//allow user to omit the () on the quit command
 			if (input == "quit") { input = "quit()"; }
@@ -260,11 +265,12 @@ bool ScriptEngine::getInput(){
 			options = parser.getOptionString();
 										
 			if (commandName != "") {
-
+				mout->executing = true;
 				//executes valid command
 				Command* command = cFactory->getCommand(commandName, options);
 				quitCommandCalled = command->execute();
 				mout->control_pressed = 0;
+				mout->executing = false;
 			}else {		
 				mout->mothurOut("Invalid."); 
 				mout->mothurOutEndLine();

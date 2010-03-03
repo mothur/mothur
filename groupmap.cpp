@@ -30,6 +30,8 @@ int GroupMap::readMap() {
 			fileHandle >> seqName;			//read from first column
 			fileHandle >> seqGroup;			//read from second column
 			
+			if (m->control_pressed) {  fileHandle.close();  return 1; }
+			
 			setNamesOfGroups(seqGroup);
 			
 			it = groupmap.find(seqName);

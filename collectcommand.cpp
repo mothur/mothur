@@ -234,8 +234,8 @@ int CollectCommand::execute(){
 			set<string> userLabels = labels;
 			
 			if (m->control_pressed) {  
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  
 				for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
 				delete input;  globaldata->ginput = NULL;
 				delete read;
 				delete order; globaldata->gorder = NULL;
@@ -246,25 +246,26 @@ int CollectCommand::execute(){
 
 
 			while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+			
+				if (m->control_pressed) { 
+					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
+					delete input;  globaldata->ginput = NULL;
+					delete read;
+					delete order; globaldata->gorder = NULL;
+					delete validCalculator;
+					globaldata->Groups.clear();
+					return 0;
+				}
+
 				
 				if(allLines == 1 || labels.count(order->getLabel()) == 1){
-					
+				
+					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 					cCurve = new Collect(order, cDisplays);
-					int error = cCurve->getCurve(freq);
+					cCurve->getCurve(freq);
 					delete cCurve;
 					
-					if (error == 1) {
-						for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  
-						for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-						delete input;  globaldata->ginput = NULL;
-						delete read;
-						delete order; globaldata->gorder = NULL;
-						delete validCalculator;
-						globaldata->Groups.clear();
-						return 0;
-					}
-					
-					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 					processedLabels.insert(order->getLabel());
 					userLabels.erase(order->getLabel());
 					
@@ -277,22 +278,12 @@ int CollectCommand::execute(){
 					delete order;
 					order = (input->getOrderVector(lastLabel));
 					
+					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 					cCurve = new Collect(order, cDisplays);
-					int error = cCurve->getCurve(freq);
+					cCurve->getCurve(freq);
 					delete cCurve;
 					
-					if (error == 1) {
-						for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  
-						for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-						delete input;  globaldata->ginput = NULL;
-						delete read;
-						delete order; globaldata->gorder = NULL;
-						delete validCalculator;
-						globaldata->Groups.clear();
-						return 0;
-					}
 					
-					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 					processedLabels.insert(order->getLabel());
 					userLabels.erase(order->getLabel());
 					
@@ -306,6 +297,17 @@ int CollectCommand::execute(){
 				order = (input->getOrderVector());
 			}
 			
+			
+			if (m->control_pressed) { 
+					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
+					delete input;  globaldata->ginput = NULL;
+					delete read;
+					delete validCalculator;
+					globaldata->Groups.clear();
+					return 0;
+			}
+				
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
 			bool needToRun = false;
@@ -327,12 +329,12 @@ int CollectCommand::execute(){
 				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
 				
 				cCurve = new Collect(order, cDisplays);
-				int error = cCurve->getCurve(freq);
+				cCurve->getCurve(freq);
 				delete cCurve;
 				
-				if (error == 1) {
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  
+				if (m->control_pressed) { 
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
 					delete input;  globaldata->ginput = NULL;
 					delete read;
 					delete order; globaldata->gorder = NULL;
@@ -351,6 +353,8 @@ int CollectCommand::execute(){
 			delete validCalculator;
 		}
 		
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} return 0; }
+
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}

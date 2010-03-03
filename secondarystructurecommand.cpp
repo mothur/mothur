@@ -120,6 +120,7 @@ int AlignCheckCommand::execute(){
 
 		
 		while(!in.eof()){
+			if (m->control_pressed) { in.close(); out.close(); remove(outfile.c_str()); return 0; }
 			
 			Sequence seq(in);  gobble(in);
 			if (seq.getName() != "") {
@@ -134,6 +135,8 @@ int AlignCheckCommand::execute(){
 
 		in.close();
 		out.close();
+		
+		if (m->control_pressed) {  remove(outfile.c_str()); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();

@@ -102,10 +102,14 @@ int GetgroupCommand::execute(){
 			in >> inputData;
 		}
 		
+		if (m->control_pressed) { in.close();  out.close(); remove(outputFile.c_str());   return 0; }
+
 		if (in.eof() != true) { in >> nextLabel; }
 		
 		//read the rest of the groups info in
 		while ((nextLabel == holdLabel) && (in.eof() != true)) {
+			if (m->control_pressed) { in.close();  out.close(); remove(outputFile.c_str());   return 0; }
+			
 			in >> groupN >> num;
 			count++;
 			
@@ -123,6 +127,8 @@ int GetgroupCommand::execute(){
 		
 		in.close();
 		out.close();
+		
+		if (m->control_pressed) {  remove(outputFile.c_str());   return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();

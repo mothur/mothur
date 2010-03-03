@@ -402,6 +402,8 @@ vector< vector<quanMember> > DeCalculator::getQuantiles(vector<Sequence*> seqs, 
 				
 				Sequence* subject = new Sequence(seqs[j]->getName(), seqs[j]->getAligned());
 				
+				if (m->control_pressed) { delete query; delete subject; return quan; }
+				
 				map<int, int> trim;
 				map<int, int>::iterator it;
 				

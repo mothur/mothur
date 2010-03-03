@@ -36,7 +36,7 @@ private:
 	vector<linePair*> lines;
 	
 	int driver(linePair*, string, string, string);
-	void createProcesses(string, string, string);
+	int createProcesses(string, string, string);
 	void appendOutputFiles(string, string); 
 
 	bool abort;

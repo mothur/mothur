@@ -40,10 +40,10 @@ public:
 	void help();
 	
 private:
-	void createTree();
+	int createTree();
 	void printSims(ostream&);
-	void makeSimsShared();
-	void makeSimsDist();
+	int makeSimsShared();
+	int makeSimsDist();
 	
 	GlobalData* globaldata;
 	ReadOTUFile* read;
@@ -71,7 +71,7 @@ private:
 	vector<string>  Estimators, Groups, outputNames; //holds estimators to be used
 	
 	//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-	void process(vector<SharedRAbundVector*>);
+	int process(vector<SharedRAbundVector*>);
 	
 	
 

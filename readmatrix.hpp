@@ -23,8 +23,8 @@ class ReadMatrix {
 public:
 	ReadMatrix(){	D = new SparseMatrix();	 m = MothurOut::getInstance();  }
 	virtual ~ReadMatrix() {}
-	virtual void read(NameAssignment*){};
-	virtual void read(GlobalData* globaldata){};
+	virtual int read(NameAssignment*){ return 1; }
+	
 	void setCutoff(float c)			{	cutoff = c;		}
 	SparseMatrix* getMatrix()		{	return D;		}
 	ListVector* getListVector()		{	return list;	}

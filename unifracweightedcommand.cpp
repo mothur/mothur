@@ -128,6 +128,15 @@ int UnifracWeightedCommand::execute() {
 		
 		//get weighted scores for users trees
 		for (int i = 0; i < T.size(); i++) {
+			
+			if (m->control_pressed) { 
+				delete randT;
+				if (random) { delete reading; }
+				outSum.close();
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+				return 0; 
+			}
+
 			counter = 0;
 			rScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
 			uScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
@@ -138,6 +147,15 @@ int UnifracWeightedCommand::execute() {
 			} 
 
 			userData = weighted->getValues(T[i]);  //userData[0] = weightedscore
+			
+			if (m->control_pressed) { 
+				delete randT;
+				if (random) { delete reading; delete output; }
+				outSum.close();
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+				return 0; 
+			}
+
 			
 			//save users score
 			for (int s=0; s<numComp; s++) {
@@ -158,8 +176,26 @@ int UnifracWeightedCommand::execute() {
 						 
 						//create a random tree with same topology as T[i], but different labels
 						randT->assembleRandomUnifracTree(globaldata->Groups[r], globaldata->Groups[l]);
+						
+						if (m->control_pressed) { 
+							delete randT;
+							if (random) { delete reading; delete output; }
+							outSum.close();
+							for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+							return 0; 
+						}
+
+
 						//get wscore of random tree
 						randomData = weighted->getValues(randT, globaldata->Groups[r], globaldata->Groups[l]);
+						
+						if (m->control_pressed) { 
+							delete randT;
+							if (random) { delete reading; delete output; }
+							outSum.close();
+							for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+							return 0; 
+						}
 						
 						//save scores
 						rScores[count].push_back(randomData[0]);
@@ -202,6 +238,15 @@ int UnifracWeightedCommand::execute() {
 			validScores.clear();
 		}
 		
+		
+		if (m->control_pressed) { 
+				delete randT;
+				if (random) { delete reading;  }
+				outSum.close();
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+				return 0; 
+		}
+		
 		//finish progress bar
 		if (random) {	reading->finish();	delete reading;		}
 		
@@ -213,6 +258,11 @@ int UnifracWeightedCommand::execute() {
 		globaldata->Groups.clear();
 		
 		delete randT;
+		
+		if (m->control_pressed) { 
+			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+			return 0; 
+		}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

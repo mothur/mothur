@@ -44,7 +44,7 @@ private:
 	ofstream out, out2;
 	int numNodes, numLeaves, count;  //count is the next available spot in the tree vector
 									 	
-	void getSets();
+	int getSets();
 	int getSubgroupRating(vector<string>);
 	vector<string> getSmallest(map< vector<string>, int>);
 	vector<string> getNextAvailableSet(vector<string>, vector<string>&);  
