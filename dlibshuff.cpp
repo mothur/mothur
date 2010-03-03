@@ -46,13 +46,23 @@ vector<vector<double> > DLibshuff::evaluateAll(){
 
 double DLibshuff::dCalculate(int x, int y){
 	
+	double sum = 0;
+	
 	minX = getMinX(x);
+	
+	if (m->control_pressed) { return sum; }
+	
 	minXY = getMinXY(x, y);
 	
+	if (m->control_pressed) { return sum; }
+	
 	vector<int> nx = calcN(minX);
+	
+	if (m->control_pressed) { return sum; }
+	
 	vector<int> nxy = calcN(minXY);
-
-	double sum = 0;
+	
+	if (m->control_pressed) { return sum; }
 
 	for(int i=0;i<numDXs;i++){
 		float h = (nx[i] - nxy[i]) / (float) groupSizes[x];

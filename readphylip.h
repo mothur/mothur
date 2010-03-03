@@ -18,7 +18,7 @@ class ReadPhylipMatrix : public ReadMatrix {
 public:
 	ReadPhylipMatrix(string);
 	~ReadPhylipMatrix();
-	void read(NameAssignment*);
+	int read(NameAssignment*);
 private:
 	ifstream fileHandle;
 	string distFile;

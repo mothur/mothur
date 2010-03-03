@@ -27,9 +27,9 @@ class ChimeraSlayer : public Chimera {
 		~ChimeraSlayer();
 		
 		int getChimeras(Sequence*);
-		void print(ostream&, ostream&);
+		int print(ostream&, ostream&);
 		void printHeader(ostream&);
-		void doPrep();
+		int doPrep();
 		
 	private:
 		Sequence* querySeq;

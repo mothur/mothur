@@ -97,6 +97,8 @@ int MergeFileCommand::execute(){
 			openInputFile(fileNames[i], inputFile);
 			
 			while(!inputFile.eof()){	
+				if (m->control_pressed) { inputFile.close(); outputFile.close(); remove(outputFileName.c_str()); return 0;  }
+			
 				c = inputFile.get(); 
 				//-1 is eof char
 				if (int(c) != -1) { outputFile << c; }   
@@ -106,6 +108,8 @@ int MergeFileCommand::execute(){
 		}
 		
 		outputFile.close();
+		
+		if (m->control_pressed) { remove(outputFileName.c_str()); return 0;  }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();

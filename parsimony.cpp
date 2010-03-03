@@ -49,6 +49,9 @@ EstOutput Parsimony::getValues(Tree* t) {
 				}
 		
 				for(int i=copyTree->getNumLeaves();i<copyTree->getNumNodes();i++){
+				
+					if (m->control_pressed) { return data; }
+					
 					int lc = copyTree->tree[i].getLChild();
 					int rc = copyTree->tree[i].getRChild();
 			
@@ -97,6 +100,9 @@ EstOutput Parsimony::getValues(Tree* t) {
 //			map<string,int>::iterator it;
 			
 			for(int i=copyTree->getNumLeaves();i<copyTree->getNumNodes();i++){
+			
+				if (m->control_pressed) { return data; }
+				
 				int lc = copyTree->tree[i].getLChild();
 				int rc = copyTree->tree[i].getRChild();
 			

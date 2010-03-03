@@ -283,6 +283,9 @@ int ReadNewickTree::readTreeString() {
 
 int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 	try {
+		
+		if (m->control_pressed) { return -1; } 
+		
 		int c = readNodeChar(f);
     
 		if(c == '('){

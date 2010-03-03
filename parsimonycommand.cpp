@@ -131,6 +131,15 @@ int ParsimonyCommand::execute() {
 		Progress* reading;
 		reading = new Progress("Comparing to random:", iters);
 		
+		if (m->control_pressed) { 
+			delete reading; delete pars; delete util; delete output;
+			if (randomtree == "") {  outSum.close();  }
+			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+			globaldata->Groups.clear();
+			return 0;
+		}
+			
+		
 		//get pscore for users tree
 		userData.resize(numComp,0);  //data = AB, AC, BC, ABC.
 		randomData.resize(numComp,0);  //data = AB, AC, BC, ABC.
@@ -145,6 +154,15 @@ int ParsimonyCommand::execute() {
 			//get pscores for users trees
 			for (int i = 0; i < T.size(); i++) {
 				userData = pars->getValues(T[i]);  //data = AB, AC, BC, ABC.
+				
+				if (m->control_pressed) { 
+					delete reading; delete pars; delete util; delete output;
+					if (randomtree == "") {  outSum.close();  }
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+					globaldata->Groups.clear();
+					return 0;
+				}
+
 
 				//output scores for each combination
 				for(int k = 0; k < numComp; k++) {
@@ -165,6 +183,7 @@ int ParsimonyCommand::execute() {
 			
 			//get pscores for random trees
 			for (int j = 0; j < iters; j++) {
+								
 				//create new tree with same num nodes and leaves as users
 				randT = new Tree();
 
@@ -173,6 +192,14 @@ int ParsimonyCommand::execute() {
 
 				//get pscore of random tree
 				randomData = pars->getValues(randT);
+				
+				if (m->control_pressed) { 
+					delete reading; delete pars; delete util; delete output; delete randT;
+					if (randomtree == "") {  outSum.close();  }
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+					globaldata->Groups.clear();
+					return 0;
+				}
 					
 				for(int r = 0; r < numComp; r++) {
 					//add trees pscore to map of scores
@@ -196,14 +223,32 @@ int ParsimonyCommand::execute() {
 		}else {
 			//get pscores for random trees
 			for (int j = 0; j < iters; j++) {
+								
 				//create new tree with same num nodes and leaves as users
 				randT = new Tree();
 				//create random relationships between nodes
 
 				randT->assembleRandomTree();
+				
+				if (m->control_pressed) { 
+					delete reading; delete pars; delete util; delete output; delete randT;
+					globaldata->gTreemap = savetmap; 
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+					globaldata->Groups.clear();
+					return 0;
+				}
+
 
 				//get pscore of random tree
 				randomData = pars->getValues(randT);
+				
+				if (m->control_pressed) { 
+					delete reading; delete pars; delete util; delete output; delete randT;
+					globaldata->gTreemap = savetmap; 
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+					globaldata->Groups.clear();
+					return 0;
+				}
 			
 				for(int r = 0; r < numComp; r++) {
 					//add trees pscore to map of scores
@@ -253,6 +298,15 @@ int ParsimonyCommand::execute() {
 			}
 		}
 		
+		if (m->control_pressed) { 
+				delete reading; delete pars; delete util; delete output;
+				if (randomtree == "") {  outSum.close();  }
+				else { globaldata->gTreemap = savetmap; }
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+				globaldata->Groups.clear();
+				return 0;
+		}
+		
 		//finish progress bar
 		reading->finish();
 		delete reading;
@@ -270,6 +324,12 @@ int ParsimonyCommand::execute() {
 		
 		//reset groups parameter
 		globaldata->Groups.clear(); 
+		
+		if (m->control_pressed) { 
+			delete pars; delete util; delete output;
+			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+			return 0;
+		}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -319,7 +379,7 @@ void ParsimonyCommand::printParsimonyFile() {
 	}
 }
 /***********************************************************/
-void ParsimonyCommand::printUSummaryFile() {
+int ParsimonyCommand::printUSummaryFile() {
 	try {
 		//column headers
 		outSum << "Tree#" << '\t' << "Groups" << '\t'  <<  "ParsScore" << '\t' << "ParsSig" <<  endl;
@@ -332,6 +392,7 @@ void ParsimonyCommand::printUSummaryFile() {
 		//print each line
 		for (int i = 0; i< T.size(); i++) {
 			for(int a = 0; a < numComp; a++) {
+				if (m->control_pressed) {  outSum.close(); return 0; }
 				if (UScoreSig[a][i] > (1/(float)iters)) {
 					outSum << setprecision(6) << i+1 << '\t' << groupComb[a]  << '\t' << userTreeScores[a][i] << setprecision(itersString.length()) << '\t' << UScoreSig[a][i] << endl;
 					cout << setprecision(6) << i+1 << '\t' << groupComb[a]  << '\t' << userTreeScores[a][i] << setprecision(itersString.length()) << '\t' << UScoreSig[a][i] << endl;
@@ -345,6 +406,7 @@ void ParsimonyCommand::printUSummaryFile() {
 		}
 		
 		outSum.close();
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ParsimonyCommand", "printUSummaryFile");

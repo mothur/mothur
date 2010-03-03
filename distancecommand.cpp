@@ -208,8 +208,11 @@ int DistanceCommand::execute(){
 		ifstream inFASTA;
 		driver(0, numSeqs, outputFile, cutoff);
 #endif
+		if (m->control_pressed) { delete distCalculator; remove(outputFile.c_str()); return 0; }
 		
 		if (output == "square") {  convertMatrix(outputFile); }
+		
+		if (m->control_pressed) { delete distCalculator; remove(outputFile.c_str()); return 0; }
 		
 		delete distCalculator;
 		
@@ -282,6 +285,9 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 				outFile << name << '\t';	
 			}
 			for(int j=0;j<i;j++){
+				
+				if (m->control_pressed) { outFile.close(); return 0;  }
+				
 				distCalculator->calcDist(alignDB.get(i), alignDB.get(j));
 				double dist = distCalculator->getDist();
 				
@@ -316,7 +322,7 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 	}
 }
 /**************************************************************************************************/
-void DistanceCommand::convertMatrix(string outputFile) {
+int DistanceCommand::convertMatrix(string outputFile) {
 	try{
 
 		//sort file by first column so the distances for each row are together
@@ -358,6 +364,8 @@ void DistanceCommand::convertMatrix(string outputFile) {
 		//openInputFile(outfile, in);
 		
 		while(!in.eof()) {
+			if (m->control_pressed) { in.close(); remove(outfile.c_str()); out.close(); return 0; }
+			
 			in >> first >> second >> dist; gobble(in);
 				
 			if (first != currentRow) {
@@ -392,6 +400,8 @@ void DistanceCommand::convertMatrix(string outputFile) {
 		out.close();
 		
 		remove(outfile.c_str());
+		
+		return 1;
 		
 	}
 	catch(exception& e) {

@@ -16,7 +16,7 @@ ChimeraSlayer::ChimeraSlayer(string mode, bool r, string f) : searchMethod(mode)
 	decalc = new DeCalculator();	
 }
 //***************************************************************************************************************
-void ChimeraSlayer::doPrep() {
+int ChimeraSlayer::doPrep() {
 	try {
 	
 		string 	kmerDBNameLeft;
@@ -33,6 +33,9 @@ void ChimeraSlayer::doPrep() {
 			if(!kmerFileTestLeft){	
 			
 				for (int i = 0; i < templateSeqs.size(); i++) {
+					
+					if (m->control_pressed) { return 0; } 
+					
 					string leftFrag = templateSeqs[i]->getUnaligned();
 					leftFrag = leftFrag.substr(0, int(leftFrag.length() * 0.33));
 					
@@ -57,6 +60,8 @@ void ChimeraSlayer::doPrep() {
 			if(!kmerFileTestRight){	
 			
 				for (int i = 0; i < templateSeqs.size(); i++) {
+					if (m->control_pressed) { return 0; } 
+					
 					string rightFrag = templateSeqs[i]->getUnaligned();
 					rightFrag = rightFrag.substr(int(rightFrag.length() * 0.66));
 					
@@ -82,6 +87,8 @@ void ChimeraSlayer::doPrep() {
 		
 		vector<Sequence*> tempQuerySeqs;
 		while(!in.eof()){
+			if (m->control_pressed) { for (int i = 0; i < tempQuerySeqs.size(); i++) { delete tempQuerySeqs[i];  } return 0; } 
+		
 			Sequence* s = new Sequence(in);
 			gobble(in);
 			
@@ -96,10 +103,15 @@ void ChimeraSlayer::doPrep() {
 				
 		for (int i = 0; i < tempQuerySeqs.size(); i++) { delete tempQuerySeqs[i];  }
 		
+		if (m->control_pressed) {  return 0; } 
+
+		
 		//run filter on template
-		for (int i = 0; i < templateSeqs.size(); i++) {  runFilter(templateSeqs[i]);  }
+		for (int i = 0; i < templateSeqs.size(); i++) {  if (m->control_pressed) {  return 0; }  runFilter(templateSeqs[i]);  }
 		
 		m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to filter.");	m->mothurOutEndLine();
+		
+		return 0;
 
 	}
 	catch(exception& e) {
@@ -118,7 +130,7 @@ void ChimeraSlayer::printHeader(ostream& out) {
 	out << "Name\tLeftParent\tRightParent\tDivQLAQRB\tPerIDQLAQRB\tBootStrapA\tDivQLBQRA\tPerIDQLBQRA\tBootStrapB\tFlag\tLeftWindow\tRightWindow\n";
 }
 //***************************************************************************************************************
-void ChimeraSlayer::print(ostream& out, ostream& outAcc) {
+int ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 	try {
 		if (chimeraFlags == "yes") {
 			string chimeraFlag = "no";
@@ -137,6 +149,8 @@ void ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 			printBlock(chimeraResults[0], out);
 			out << endl;
 		}else {  out << querySeq->getName() << "\tno" << endl;  }
+		
+		return 0;
 		
 	}
 	catch(exception& e) {
@@ -158,7 +172,10 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 		maligner = new Maligner(templateSeqs, numWanted, match, misMatch, divR, minSim, minCov, searchMethod, databaseLeft, databaseRight);
 		slayer = new Slayer(window, increment, minSim, divR, iters, minSNP);
 		
+		if (m->control_pressed) {  return 0;  }
+		
 		string chimeraFlag = maligner->getResults(query, decalc);
+		if (m->control_pressed) {  return 0;  }
 		vector<results> Results = maligner->getOutput();
 				
 		//found in testing realigning only made things worse
@@ -233,8 +250,11 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 				spotMap = decalc->getMaskMap();
 			}
 			
+			if (m->control_pressed) {  for (int k = 0; k < seqs.size(); k++) {  delete seqs[k].seq;   }  return 0;  }
+			
 			//send to slayer
 			chimeraFlags = slayer->getResults(query, seqsForSlayer);
+			if (m->control_pressed) {  return 0;  }
 			chimeraResults = slayer->getOutput();
 			
 			//free memory

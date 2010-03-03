@@ -21,6 +21,8 @@ void FastaMap::readFastaFile(string inFileName) {
 		string temp;
 
 		while(!in.eof()){
+			if (m->control_pressed) { break; }
+			
 			Sequence currSeq(in);
 			name = currSeq.getName();
 			
@@ -59,6 +61,8 @@ void FastaMap::readFastaFile(string inFastaFile, string oldNameFileName){ //prin
 	map<string,string> oldNameMap;
 	string name, list;
 	while(!oldNameFile.eof()){
+		if (m->control_pressed) { break; }
+		
 		oldNameFile >> name >> list;
 		oldNameMap[name] = list;
 		gobble(oldNameFile);
@@ -69,6 +73,8 @@ void FastaMap::readFastaFile(string inFastaFile, string oldNameFileName){ //prin
 	openInputFile(inFastaFile, inFASTA);
 	string sequence;
 	while(!inFASTA.eof()){
+		if (m->control_pressed) { break; }
+		
 		Sequence currSeq(inFASTA);
 		name = currSeq.getName();
 		
@@ -145,6 +151,7 @@ void FastaMap::printNamesFile(string outFileName){ //prints data
 		
 		// two column file created with groupname and them list of identical sequence names
 		for (map<string,group>::iterator it = data.begin(); it != data.end(); it++) {
+			if (m->control_pressed) { break; }
 			outFile << it->second.groupname << '\t' << it->second.names << endl;
 		}
 		outFile.close();
@@ -163,6 +170,7 @@ void FastaMap::printCondensedFasta(string outFileName){ //prints data
 		openOutputFile(outFileName, out);
 		//creates a fasta file
 		for (map<string,group>::iterator it = data.begin(); it != data.end(); it++) {
+			if (m->control_pressed) { break; }
 			out << ">" << it->second.groupname << endl;
 			out << it->first << endl;
 		}

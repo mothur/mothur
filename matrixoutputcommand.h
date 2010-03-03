@@ -33,7 +33,7 @@ public:
 	
 private:
 	void printSims(ostream&);
-	void process(vector<SharedRAbundVector*>);
+	int process(vector<SharedRAbundVector*>);
 	
 	GlobalData* globaldata;
 	ReadOTUFile* read;

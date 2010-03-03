@@ -151,6 +151,8 @@ int ListSeqsCommand::execute(){
 		else if (alignfile != "")	{	inputFileName = alignfile;	readAlign();	}
 		else if (listfile != "")	{	inputFileName = listfile;	readList();		}
 		
+		if (m->control_pressed) { return 0; }
+		
 		//sort in alphabetical order
 		sort(names.begin(), names.end());
 		
@@ -163,10 +165,15 @@ int ListSeqsCommand::execute(){
 		
 		//output to .accnos file
 		for (int i = 0; i < names.size(); i++) {
+			
+			if (m->control_pressed) { out.close(); remove(outputFileName.c_str()); return 0; }
+			
 			out << names[i] << endl;
 		}
 		out.close();
 		
+		if (m->control_pressed) { remove(outputFileName.c_str()); return 0; }
+
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
 		m->mothurOut(outputFileName); m->mothurOutEndLine();	
@@ -182,7 +189,7 @@ int ListSeqsCommand::execute(){
 }
 
 //**********************************************************************************************************************
-void ListSeqsCommand::readFasta(){
+int ListSeqsCommand::readFasta(){
 	try {
 		
 		ifstream in;
@@ -190,6 +197,9 @@ void ListSeqsCommand::readFasta(){
 		string name;
 		
 		while(!in.eof()){
+			
+			if (m->control_pressed) { in.close(); return 0; }
+			
 			Sequence currSeq(in);
 			name = currSeq.getName();
 			
@@ -197,7 +207,9 @@ void ListSeqsCommand::readFasta(){
 			
 			gobble(in);
 		}
-		in.close();		
+		in.close();	
+		
+		return 0;
 
 	}
 	catch(exception& e) {
@@ -206,7 +218,7 @@ void ListSeqsCommand::readFasta(){
 	}
 }
 //**********************************************************************************************************************
-void ListSeqsCommand::readList(){
+int ListSeqsCommand::readList(){
 	try {
 		ifstream in;
 		openInputFile(listfile, in);
@@ -219,6 +231,8 @@ void ListSeqsCommand::readList(){
 			for (int i = 0; i < list.getNumBins(); i++) {
 				string binnames = list.get(i);
 				
+				if (m->control_pressed) { in.close(); return 0; }
+				
 				while (binnames.find_first_of(',') != -1) { 
 					string name = binnames.substr(0,binnames.find_first_of(','));
 					binnames = binnames.substr(binnames.find_first_of(',')+1, binnames.length());
@@ -230,6 +244,8 @@ void ListSeqsCommand::readList(){
 		}
 		in.close();	
 		
+		return 0;
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ListSeqsCommand", "readList");
@@ -238,7 +254,7 @@ void ListSeqsCommand::readList(){
 }
 
 //**********************************************************************************************************************
-void ListSeqsCommand::readName(){
+int ListSeqsCommand::readName(){
 	try {
 		
 		ifstream in;
@@ -246,6 +262,8 @@ void ListSeqsCommand::readName(){
 		string name, firstCol, secondCol;
 		
 		while(!in.eof()){
+		
+			if (m->control_pressed) { in.close(); return 0; }
 
 			in >> firstCol;				
 			in >> secondCol;			
@@ -263,6 +281,7 @@ void ListSeqsCommand::readName(){
 			gobble(in);
 		}
 		in.close();
+		return 0;
 		
 	}
 	catch(exception& e) {
@@ -272,7 +291,7 @@ void ListSeqsCommand::readName(){
 }
 
 //**********************************************************************************************************************
-void ListSeqsCommand::readGroup(){
+int ListSeqsCommand::readGroup(){
 	try {
 	
 		ifstream in;
@@ -280,7 +299,9 @@ void ListSeqsCommand::readGroup(){
 		string name, group;
 		
 		while(!in.eof()){
-
+			
+			if (m->control_pressed) { in.close(); return 0; }
+			
 			in >> name;				//read from first column
 			in >> group;			//read from second column
 			
@@ -289,6 +310,7 @@ void ListSeqsCommand::readGroup(){
 			gobble(in);
 		}
 		in.close();
+		return 0;
 
 	}
 	catch(exception& e) {
@@ -299,7 +321,7 @@ void ListSeqsCommand::readGroup(){
 
 //**********************************************************************************************************************
 //alignreport file has a column header line then all other lines contain 16 columns.  we just want the first column since that contains the name
-void ListSeqsCommand::readAlign(){
+int ListSeqsCommand::readAlign(){
 	try {
 	
 		ifstream in;
@@ -314,6 +336,8 @@ void ListSeqsCommand::readAlign(){
 		
 		
 		while(!in.eof()){
+		
+			if (m->control_pressed) { in.close(); return 0; }
 
 			in >> name;				//read from first column
 			
@@ -328,6 +352,8 @@ void ListSeqsCommand::readAlign(){
 			gobble(in);
 		}
 		in.close();
+		
+		return 0;
 
 		
 	}

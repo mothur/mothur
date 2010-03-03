@@ -56,6 +56,7 @@ Classify(tfile, tempFile, method, ksize, 0.0, 0.0, 0.0, 0.0), kmerSize(ksize), c
 			
 			//for each word
 			for (int i = 0; i < numKmers; i++) {
+				if (m->control_pressed) { break; }
 				
 				out << i << '\t';
 				
@@ -114,6 +115,8 @@ string Bayesian::getTaxonomy(Sequence* seq) {
 		}
 	
 		int index = getMostProbableTaxonomy(queryKmers);
+		
+		if (m->control_pressed) { return tax; }
 					
 		//bootstrap - to set confidenceScore
 		int numToSelect = queryKmers.size() / 8;
@@ -143,6 +146,8 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 		map<int, int>::iterator itConvert;
 		
 		for (int i = 0; i < iters; i++) {
+			if (m->control_pressed) { return "control"; }
+			
 			vector<int> temp;
 						
 			for (int j = 0; j < numToSelect; j++) {

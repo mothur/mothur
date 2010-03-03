@@ -33,6 +33,9 @@ EstOutput Weighted::getValues(Tree* t) {
 				/********************************************************/
 				//calculate a D value for each group combo
 				for(int v=0;v<t->getNumLeaves();v++){
+				
+					if (m->control_pressed) { return data; }
+					
 					int index = v;
 					double sum = 0.0000;
 		
@@ -87,6 +90,9 @@ EstOutput Weighted::getValues(Tree* t) {
 			//calculate weighted score for each of the group comb i.e. with groups A,B,C = AB, AC, BC.
 			for (int b=0; b<numGroups; b++) { 
 				for (int l = b+1; l < numGroups; l++) {
+				
+					if (m->control_pressed) { return data; }
+					
 					//calculate a u value for each combo
 					double u;
 					//does this node have descendants from group b-1
@@ -148,6 +154,8 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 		/********************************************************/
 		//calculate a D value for the group combo
 		for(int v=0;v<t->getNumLeaves();v++){
+			if (m->control_pressed) { return data; }
+			
 			int index = v;
 			double sum = 0.0000;
 		
@@ -191,6 +199,9 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 		
 		//calculate u for the group comb 
 		for(int i=0;i<t->getNumNodes();i++){
+		
+			if (m->control_pressed) { return data; }
+			
 			double u;
 			//does this node have descendants from groupA
 			it = t->tree[i].pcount.find(groupA);

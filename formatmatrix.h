@@ -60,7 +60,7 @@ public:
 	FormatMatrix(){	m = MothurOut::getInstance(); }
 	virtual ~FormatMatrix() {}
 	
-	virtual void read(NameAssignment*){};
+	virtual int read(NameAssignment*){ return 1; }
 	
 	void setCutoff(float c)			{	cutoff = c;			}
 	ListVector* getListVector()		{	return list;		}

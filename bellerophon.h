@@ -29,11 +29,7 @@ class Bellerophon : public Chimera {
 		~Bellerophon() {};
 		
 		int getChimeras();
-		void print(ostream&, ostream&);
-		
-		void setCons(string){};
-		void setQuantiles(string) {};
-		
+		int print(ostream&, ostream&);
 		
 	private:
 		Dist* distCalculator;
@@ -43,7 +39,7 @@ class Bellerophon : public Chimera {
 		string fastafile;
 		int iters;
 		
-		void generatePreferences(vector<SeqMap>, vector<SeqMap>, int);
+		int generatePreferences(vector<SeqMap>, vector<SeqMap>, int);
 		int createSparseMatrix(int, int, SparseMatrix*, vector<Sequence>);
 };
 

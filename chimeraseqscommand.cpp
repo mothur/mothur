@@ -318,6 +318,8 @@ int ChimeraSeqsCommand::execute(){
 		if (method == "bellerophon") {//run bellerophon separately since you need to read entire fastafile to run it
 			chimera->getChimeras();
 			
+			if (m->control_pressed) { delete chimera;	return 0;	}
+			
 			ofstream out;
 			openOutputFile(outputFileName, out);
 			
@@ -327,6 +329,8 @@ int ChimeraSeqsCommand::execute(){
 			chimera->print(out, out2);
 			out.close();
 			out2.close(); 
+			
+			if (m->control_pressed) { remove(accnosFileName.c_str()); remove(outputFileName.c_str()); delete chimera;	return 0;	}
 			
 			//delete accnos file if its blank 
 			if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
@@ -343,6 +347,8 @@ int ChimeraSeqsCommand::execute(){
 		//reads template
 		chimera->setTemplateFile(templatefile);
 		
+		if (m->control_pressed) { delete chimera;	return 0;	}
+		
 		if  (method != "chimeracheck") {   
 			if (chimera->getUnaligned()) { 
 				m->mothurOut("Your template sequences are different lengths, please correct."); m->mothurOutEndLine(); 
@@ -353,6 +359,8 @@ int ChimeraSeqsCommand::execute(){
 		
 		//some methods need to do prep work before processing the chimeras
 		chimera->doPrep(); 
+		
+		if (m->control_pressed) { delete chimera;	return 0;	}
 		
 		templateSeqsLength = chimera->getLength();
 		
@@ -375,6 +383,15 @@ int ChimeraSeqsCommand::execute(){
 				lines.push_back(new linePair(0, numSeqs));
 				
 				driver(lines[0], outputFileName, fastafile, accnosFileName);
+				
+				if (m->control_pressed) { 
+					remove(outputFileName.c_str()); 
+					remove(tempHeader.c_str()); 
+					remove(accnosFileName.c_str());
+					for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
+					delete chimera;
+					return 0;
+				}
 				
 				//delete accnos file if its blank 
 				if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
@@ -435,6 +452,14 @@ int ChimeraSeqsCommand::execute(){
 						remove(nonBlankAccnosFiles[h].c_str());
 					}
 				}else{ hasAccnos = false;  }
+				
+				if (m->control_pressed) { 
+					remove(outputFileName.c_str()); 
+					remove(accnosFileName.c_str());
+					for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
+					delete chimera;
+					return 0;
+				}
 
 			}
 
@@ -446,6 +471,15 @@ int ChimeraSeqsCommand::execute(){
 			lines.push_back(new linePair(0, numSeqs));
 			
 			driver(lines[0], outputFileName, fastafile, accnosFileName);
+			
+			if (m->control_pressed) { 
+					remove(outputFileName.c_str()); 
+					remove(tempHeader.c_str()); 
+					remove(accnosFileName.c_str());
+					for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
+					delete chimera;
+					return 0;
+			}
 			
 			//delete accnos file if its blank 
 			if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
@@ -471,7 +505,7 @@ int ChimeraSeqsCommand::execute(){
 		if (hasAccnos) {  m->mothurOut(accnosFileName); m->mothurOutEndLine();  }
 		m->mothurOutEndLine();
 
-
+		for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 		
 		m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine();
 		
@@ -499,6 +533,8 @@ int ChimeraSeqsCommand::driver(linePair* line, string outputFName, string filena
 		
 		for(int i=0;i<line->numSeqs;i++){
 		
+			if (m->control_pressed) {	return 1;	}
+		
 			Sequence* candidateSeq = new Sequence(inFASTA);  gobble(inFASTA);
 				
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
@@ -508,6 +544,8 @@ int ChimeraSeqsCommand::driver(linePair* line, string outputFName, string filena
 				}else{
 					//find chimeras
 					chimera->getChimeras(candidateSeq);
+					
+					if (m->control_pressed) {	delete candidateSeq; return 1;	}
 		
 					//print results
 					chimera->print(out, out2);
@@ -525,7 +563,7 @@ int ChimeraSeqsCommand::driver(linePair* line, string outputFName, string filena
 		out2.close();
 		inFASTA.close();
 				
-		return 1;
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraSeqsCommand", "driver");
@@ -535,7 +573,7 @@ int ChimeraSeqsCommand::driver(linePair* line, string outputFName, string filena
 
 /**************************************************************************************************/
 
-void ChimeraSeqsCommand::createProcesses(string outputFileName, string filename, string accnos) {
+int ChimeraSeqsCommand::createProcesses(string outputFileName, string filename, string accnos) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 0;
@@ -559,6 +597,8 @@ void ChimeraSeqsCommand::createProcesses(string outputFileName, string filename,
 			int temp = processIDS[i];
 			wait(&temp);
 		}
+		
+		return 0;
 #endif		
 	}
 	catch(exception& e) {

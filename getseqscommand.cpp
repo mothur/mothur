@@ -160,12 +160,16 @@ int GetSeqsCommand::execute(){
 		//get names you want to keep
 		readAccnos();
 		
+		if (m->control_pressed) { return 0; }
+		
 		//read through the correct file and output lines you want to keep
 		if (fastafile != "")		{		readFasta();	}
 		else if (namefile != "")	{		readName();		}
 		else if (groupfile != "")	{		readGroup();	}
 		else if (alignfile != "")	{		readAlign();	}
 		else if (listfile != "")	{		readList();		}
+		
+		if (m->control_pressed) { return 0; }
 		
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
@@ -184,7 +188,7 @@ int GetSeqsCommand::execute(){
 }
 
 //**********************************************************************************************************************
-void GetSeqsCommand::readFasta(){
+int GetSeqsCommand::readFasta(){
 	try {
 		if (outputDir == "") { outputDir += hasPath(fastafile); }
 		string outputFileName = outputDir + getRootName(getSimpleName(fastafile)) + "pick" +  getExtension(fastafile);
@@ -199,6 +203,9 @@ void GetSeqsCommand::readFasta(){
 		bool wroteSomething = false;
 		
 		while(!in.eof()){
+		
+			if (m->control_pressed) { in.close(); out.close(); remove(outputFileName.c_str());  return 0; }
+			
 			Sequence currSeq(in);
 			name = currSeq.getName();
 			
@@ -221,6 +228,8 @@ void GetSeqsCommand::readFasta(){
 			m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();
 			remove(outputFileName.c_str()); 
 		}else {  outputNames.push_back(outputFileName); }
+		
+		return 0;
 
 	}
 	catch(exception& e) {
@@ -229,7 +238,7 @@ void GetSeqsCommand::readFasta(){
 	}
 }
 //**********************************************************************************************************************
-void GetSeqsCommand::readList(){
+int GetSeqsCommand::readList(){
 	try {
 		if (outputDir == "") { outputDir += hasPath(listfile); }
 		string outputFileName = outputDir + getRootName(getSimpleName(listfile)) + "pick" +  getExtension(listfile);
@@ -242,6 +251,9 @@ void GetSeqsCommand::readList(){
 		bool wroteSomething = false;
 		
 		while(!in.eof()){
+			
+			if (m->control_pressed) { in.close(); out.close(); remove(outputFileName.c_str());  return 0; }
+
 			//read in list vector
 			ListVector list(in);
 			
@@ -286,6 +298,8 @@ void GetSeqsCommand::readList(){
 			m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();
 			remove(outputFileName.c_str()); 
 		}else {  outputNames.push_back(outputFileName); }
+		
+		return 0;
 
 	}
 	catch(exception& e) {
@@ -294,7 +308,7 @@ void GetSeqsCommand::readList(){
 	}
 }
 //**********************************************************************************************************************
-void GetSeqsCommand::readName(){
+int GetSeqsCommand::readName(){
 	try {
 		if (outputDir == "") { outputDir += hasPath(namefile); }
 		string outputFileName = outputDir + getRootName(getSimpleName(namefile)) + "pick" +  getExtension(namefile);
@@ -310,6 +324,8 @@ void GetSeqsCommand::readName(){
 		
 		
 		while(!in.eof()){
+		
+			if (m->control_pressed) { in.close(); out.close(); remove(outputFileName.c_str());  return 0; }
 
 			in >> firstCol;				
 			in >> secondCol;			
@@ -370,6 +386,8 @@ void GetSeqsCommand::readName(){
 			remove(outputFileName.c_str()); 
 		}else {  outputNames.push_back(outputFileName); }
 		
+		return 0;
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetSeqsCommand", "readName");
@@ -378,7 +396,7 @@ void GetSeqsCommand::readName(){
 }
 
 //**********************************************************************************************************************
-void GetSeqsCommand::readGroup(){
+int GetSeqsCommand::readGroup(){
 	try {
 		if (outputDir == "") { outputDir += hasPath(groupfile); }
 		string outputFileName = outputDir + getRootName(getSimpleName(groupfile)) + "pick" + getExtension(groupfile);
@@ -393,6 +411,9 @@ void GetSeqsCommand::readGroup(){
 		bool wroteSomething = false;
 		
 		while(!in.eof()){
+
+			if (m->control_pressed) { in.close(); out.close(); remove(outputFileName.c_str());  return 0; }
+
 
 			in >> name;				//read from first column
 			in >> group;			//read from second column
@@ -415,6 +436,8 @@ void GetSeqsCommand::readGroup(){
 			m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();
 			remove(outputFileName.c_str()); 
 		}else {  outputNames.push_back(outputFileName); }
+		
+		return 0;
 
 	}
 	catch(exception& e) {
@@ -425,7 +448,7 @@ void GetSeqsCommand::readGroup(){
 
 //**********************************************************************************************************************
 //alignreport file has a column header line then all other lines contain 16 columns.  we just want the first column since that contains the name
-void GetSeqsCommand::readAlign(){
+int GetSeqsCommand::readAlign(){
 	try {
 		if (outputDir == "") { outputDir += hasPath(alignfile); }
 		string outputFileName = outputDir + getRootName(getSimpleName(alignfile)) + "pick.align.report";
@@ -447,6 +470,9 @@ void GetSeqsCommand::readAlign(){
 		out << endl;
 		
 		while(!in.eof()){
+		
+			if (m->control_pressed) { in.close(); out.close(); remove(outputFileName.c_str());  return 0; }
+
 
 			in >> name;				//read from first column
 			
@@ -483,6 +509,8 @@ void GetSeqsCommand::readAlign(){
 			remove(outputFileName.c_str()); 
 		}else {  outputNames.push_back(outputFileName); }
 		
+		return 0;
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetSeqsCommand", "readAlign");
@@ -491,7 +519,7 @@ void GetSeqsCommand::readAlign(){
 }
 //**********************************************************************************************************************
 
-void GetSeqsCommand::readAccnos(){
+int GetSeqsCommand::readAccnos(){
 	try {
 		
 		ifstream in;
@@ -505,7 +533,9 @@ void GetSeqsCommand::readAccnos(){
 			
 			gobble(in);
 		}
-		in.close();		
+		in.close();	
+		
+		return 0;
 
 	}
 	catch(exception& e) {

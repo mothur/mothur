@@ -143,13 +143,27 @@ int ParseListCommand::execute(){
 		list = input->getListVector();
 		string lastLabel = list->getLabel();
 		
+		if (m->control_pressed) { 
+			delete input; delete list; delete groupMap;
+			for (i=0; i<groupMap->namesOfGroups.size(); i++) {  (*(filehandles[groupMap->namesOfGroups[i]])).close();  delete filehandles[groupMap->namesOfGroups[i]]; } 
+			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+			return 0;
+		}
+		
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+		
+			if (m->control_pressed) { 
+				delete input; delete list; delete groupMap;
+				for (i=0; i<groupMap->namesOfGroups.size(); i++) {  (*(filehandles[groupMap->namesOfGroups[i]])).close();  delete filehandles[groupMap->namesOfGroups[i]]; } 
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+				return 0;
+			}
 			
 			if(allLines == 1 || labels.count(list->getLabel()) == 1){
 					
-					parse(list);
 					m->mothurOut(list->getLabel()); m->mothurOutEndLine();
-					
+					parse(list);
+										
 					processedLabels.insert(list->getLabel());
 					userLabels.erase(list->getLabel());
 			}
@@ -160,8 +174,8 @@ int ParseListCommand::execute(){
 					delete list;
 					list = input->getListVector(lastLabel); //get new list vector to process
 					
-					parse(list);
 					m->mothurOut(list->getLabel()); m->mothurOutEndLine();
+					parse(list);
 					
 					processedLabels.insert(list->getLabel());
 					userLabels.erase(list->getLabel());
@@ -175,6 +189,13 @@ int ParseListCommand::execute(){
 				
 			delete list;
 			list = input->getListVector(); //get new list vector to process
+		}
+		
+		if (m->control_pressed) { 
+				delete input; delete groupMap;
+				for (i=0; i<groupMap->namesOfGroups.size(); i++) { (*(filehandles[groupMap->namesOfGroups[i]])).close();  delete filehandles[groupMap->namesOfGroups[i]]; } 
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+				return 0;
 		}
 		
 		//output error messages about any remaining user labels
@@ -191,13 +212,20 @@ int ParseListCommand::execute(){
 
 		}
 		
+		if (m->control_pressed) { 
+				delete input; delete groupMap;
+				for (i=0; i<groupMap->namesOfGroups.size(); i++) {  (*(filehandles[groupMap->namesOfGroups[i]])).close();  delete filehandles[groupMap->namesOfGroups[i]]; } 
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+				return 0;
+		}
+		
 		//run last label if you need to
 		if (needToRun == true)  {
 			if (list != NULL) {	delete list;	}
 			list = input->getListVector(lastLabel); //get new list vector to process
 			
-			parse(list);		
 			m->mothurOut(list->getLabel()); m->mothurOutEndLine();
+			parse(list);		
 			
 			delete list;
 		}
@@ -207,7 +235,14 @@ int ParseListCommand::execute(){
 			delete it3->second;
 		}
 		
+		
 		delete groupMap;
+		delete input;
+		
+		if (m->control_pressed) { 
+			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+			return 0;
+		}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -222,7 +257,7 @@ int ParseListCommand::execute(){
 	}
 }
 /**********************************************************************************************************************/
-void ParseListCommand::parse(ListVector* thisList) {
+int ParseListCommand::parse(ListVector* thisList) {
 	try {
 	
 		map<string, string> groupVector;
@@ -237,6 +272,7 @@ void ParseListCommand::parse(ListVector* thisList) {
 
 		
 		for (int i = 0; i < thisList->getNumBins(); i++) {
+			if (m->control_pressed) { return 0; }
 			
 			map<string, string> groupBins;
 			string bin = list->get(i); 
@@ -270,7 +306,8 @@ void ParseListCommand::parse(ListVector* thisList) {
 		for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) {
 			(*(filehandles[it3->first])) << thisList->getLabel() << '\t' << groupNumBins[it3->first] << '\t' << groupVector[it3->first] << endl;  // label numBins  listvector for that group
 		}
-
+		
+		return 0;
 
 	}
 	catch(exception& e) {

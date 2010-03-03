@@ -26,11 +26,11 @@ class ListSeqsCommand : public Command {
 		string fastafile, namefile, groupfile, alignfile, inputFileName, outputDir, listfile;
 		bool abort;
 		
-		void readFasta();
-		void readName();
-		void readGroup();
-		void readAlign();
-		void readList();
+		int readFasta();
+		int readName();
+		int readGroup();
+		int readAlign();
+		int readList();
 		
 };
 

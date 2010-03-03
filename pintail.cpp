@@ -37,7 +37,7 @@ Pintail::~Pintail() {
 	}
 }
 //***************************************************************************************************************
-void Pintail::doPrep() {
+int Pintail::doPrep() {
 	try {
 		
 		mergedFilterString = "";
@@ -70,6 +70,7 @@ void Pintail::doPrep() {
 		if (consfile == "") { 
 			m->mothurOut("Calculating probability of conservation for your template sequences.  This can take a while...  I will output the frequency of the highest base in each position to a .freq file so that you can input them using the conservation parameter next time you run this command.  Providing the .freq file will improve speed.    "); cout.flush();
 			probabilityProfile = decalc->calcFreq(templateSeqs, outputDir + getSimpleName(templateFileName)); 
+			if (m->control_pressed) {  return 0;  }
 			m->mothurOut("Done."); m->mothurOutEndLine();
 		}else				{   probabilityProfile = readFreq();	m->mothurOut("Done.");		  }
 		m->mothurOutEndLine();
@@ -87,6 +88,11 @@ void Pintail::doPrep() {
 			
 			vector<Sequence*> tempQuerySeqs;
 			while(!in.eof()){
+				if (m->control_pressed) {  
+					for (int i = 0; i < tempQuerySeqs.size(); i++) { delete tempQuerySeqs[i];  }
+					return 0; 
+				}
+				
 				Sequence* s = new Sequence(in);
 				gobble(in);
 				
@@ -103,11 +109,20 @@ void Pintail::doPrep() {
 			    reRead = true;
 				//mask templates
 				for (int i = 0; i < temp.size(); i++) {
+					if (m->control_pressed) {  
+						for (int i = 0; i < tempQuerySeqs.size(); i++) { delete tempQuerySeqs[i];  }
+						return 0; 
+					}
 					decalc->runMask(temp[i]);
 				}
 			}
 
 			mergedFilterString = createFilter(temp, 0.5);
+			
+			if (m->control_pressed) {  
+				for (int i = 0; i < tempQuerySeqs.size(); i++) { delete tempQuerySeqs[i];  }
+				return 0; 
+			}
 			
 			//reread template seqs
 			for (int i = 0; i < tempQuerySeqs.size(); i++) { delete tempQuerySeqs[i];  }
@@ -124,6 +139,7 @@ void Pintail::doPrep() {
 				reRead = true;
 				//mask templates
 				for (int i = 0; i < templateSeqs.size(); i++) {
+					if (m->control_pressed) {  return 0;  }
 					decalc->runMask(templateSeqs[i]);
 				}
 			}
@@ -131,6 +147,7 @@ void Pintail::doPrep() {
 			if (filter) { 
 				reRead = true;
 				for (int i = 0; i < templateSeqs.size(); i++) {
+					if (m->control_pressed) {  return 0;  }
 					runFilter(templateSeqs[i]);
 				}
 			}
@@ -140,6 +157,7 @@ void Pintail::doPrep() {
 				quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, 0, templateSeqs.size());
 			}else {		createProcessesQuan();		}
 		
+			if (m->control_pressed) {  return 0;  }
 			
 			ofstream out4, out5;
 			string noOutliers, outliers;
@@ -154,10 +172,9 @@ void Pintail::doPrep() {
 				noOutliers = outputDir + getRootName(getSimpleName(templateFileName)) + "pintail.filtered." + getSimpleName(getRootName(fastafile)) + "quan";
 			}
 
-
-
-						
 			decalc->removeObviousOutliers(quantilesMembers, templateSeqs.size());
+			
+			if (m->control_pressed) {  return 0;  }
 			
 			openOutputFile(noOutliers, out5); 			
 			//adjust quantiles
@@ -210,6 +227,8 @@ void Pintail::doPrep() {
 		//free memory
 		for (int i = 0; i < templateLines.size(); i++) { delete templateLines[i];  }
 		
+		return 0;
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Pintail", "doPrep");
@@ -217,7 +236,7 @@ void Pintail::doPrep() {
 	}
 }
 //***************************************************************************************************************
-void Pintail::print(ostream& out, ostream& outAcc) {
+int Pintail::print(ostream& out, ostream& outAcc) {
 	try {
 		int index = ceil(deviation);
 		
@@ -247,6 +266,7 @@ void Pintail::print(ostream& out, ostream& outAcc) {
 		for (int m = 0; m < expectedDistance.size(); m++) {  out << expectedDistance[m] << '\t';  }
 		out << endl;
 		
+		return 0;
 		
 	}
 	catch(exception& e) {
@@ -264,6 +284,8 @@ int Pintail::getChimeras(Sequence* query) {
 							
 		//find pairs has to be done before a mask
 		bestfit = findPairs(query);
+		
+		if (m->control_pressed) {  return 0; } 
 		
 		//if they mask  
 		if (seqMask != "") {
@@ -286,8 +308,12 @@ int Pintail::getChimeras(Sequence* query) {
 
 		//find observed distance
 		obsDistance = decalc->calcObserved(query, bestfit, windowsForeachQuery, windowSizes);
+		
+		if (m->control_pressed) {  return 0; } 
 				
 		Qav = decalc->findQav(windowsForeachQuery, windowSizes, probabilityProfile);
+		
+		if (m->control_pressed) {  return 0; } 
 
 		//find alpha			
 		seqCoef	= decalc->getCoef(obsDistance, Qav);
@@ -295,8 +321,12 @@ int Pintail::getChimeras(Sequence* query) {
 		//calculating expected distance
 		expectedDistance = decalc->calcExpected(Qav, seqCoef);
 		
+		if (m->control_pressed) {  return 0; } 
+		
 		//finding de
 		DE = decalc->calcDE(obsDistance, expectedDistance);
+		
+		if (m->control_pressed) {  return 0; } 
 		
 		//find distance between query and closest match
 		it = trimmed.begin();

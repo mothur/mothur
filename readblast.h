@@ -25,7 +25,7 @@ public:
 	ReadBlast(string, float, float, int, bool, bool); //blastfile, cutoff, penalty, length of overlap, min or max bsr, hclusterWanted
 	~ReadBlast() {}
 	
-	void read(NameAssignment*);
+	int read(NameAssignment*);
 	SparseMatrix* getDistMatrix()		{	return matrix;		}
 	vector<seqDist> getOverlapMatrix()	{	return overlap;		}
 	string getOverlapFile()				{	return overlapFile;	}
@@ -42,7 +42,7 @@ private:
 	vector<seqDist> overlap;
 	MothurOut* m;
 	
-	void readNames(NameAssignment*);
+	int readNames(NameAssignment*);
 };
 
 /*******************************************************************************************/

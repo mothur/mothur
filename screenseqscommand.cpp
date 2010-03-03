@@ -175,6 +175,8 @@ int ScreenSeqsCommand::execute(){
 		ofstream badSeqOut;		openOutputFile(badSeqFile, badSeqOut);		
 		
 		while(!inFASTA.eof()){
+			if (m->control_pressed) { goodSeqOut.close(); badSeqOut.close(); inFASTA.close(); remove(goodSeqFile.c_str()); remove(badSeqFile.c_str()); return 0; }
+			
 			Sequence currSeq(inFASTA);
 			if (currSeq.getName() != "") {
 				bool goodSeq = 1;		//	innocent until proven guilty
@@ -194,20 +196,32 @@ int ScreenSeqsCommand::execute(){
 				}
 			}
 			gobble(inFASTA);
-		}	
-		if(namefile != "" && groupfile != "")	{	screenNameGroupFile(badSeqNames);	}	// this screens both names and groups
-		else if(namefile != "")					{	screenNameGroupFile(badSeqNames);	}
-		else if(groupfile != "")				{	screenGroupFile(badSeqNames);		}	// this screens just the groups
+		}
+			
+		if(namefile != "" && groupfile != "")	{	
+			screenNameGroupFile(badSeqNames);	
+			if (m->control_pressed) { goodSeqOut.close(); badSeqOut.close(); inFASTA.close(); remove(goodSeqFile.c_str()); remove(badSeqFile.c_str()); return 0; }
+		}else if(namefile != "")	{	
+			screenNameGroupFile(badSeqNames);
+			if (m->control_pressed) { goodSeqOut.close(); badSeqOut.close(); inFASTA.close(); remove(goodSeqFile.c_str()); remove(badSeqFile.c_str()); return 0; }	
+		}else if(groupfile != "")				{	screenGroupFile(badSeqNames);		}	// this screens just the group
+		
+		if (m->control_pressed) { goodSeqOut.close(); badSeqOut.close(); inFASTA.close(); remove(goodSeqFile.c_str()); remove(badSeqFile.c_str()); return 0; }
+
 		if(alignreport != "")					{	screenAlignReport(badSeqNames);		}
 		
 		goodSeqOut.close();
 		badSeqOut.close();
 		inFASTA.close();
 		
+		
+		if (m->control_pressed) { remove(goodSeqFile.c_str()); remove(badSeqFile.c_str()); return 0; }
+
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		m->mothurOut(goodSeqFile); m->mothurOutEndLine();	
 		m->mothurOut(badSeqFile); m->mothurOutEndLine();	
+		for (int i = 0; i < outputNames.size(); i++) { m->mothurOut(outputNames[i]); m->mothurOutEndLine(); }
 		m->mothurOutEndLine();
 
 		
@@ -221,7 +235,7 @@ int ScreenSeqsCommand::execute(){
 
 //***************************************************************************************************************
 
-void ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
+int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 
 	ifstream inputNames;
 	openInputFile(namefile, inputNames);
@@ -232,10 +246,14 @@ void ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 	string goodNameFile = outputDir + getRootName(getSimpleName(namefile)) + "good" + getExtension(namefile);
 	string badNameFile = outputDir + getRootName(getSimpleName(namefile)) + "bad" + getExtension(namefile);
 	
+	outputNames.push_back(goodNameFile);  outputNames.push_back(badNameFile);
+	
 	ofstream goodNameOut;	openOutputFile(goodNameFile, goodNameOut);
 	ofstream badNameOut;	openOutputFile(badNameFile, badNameOut);		
 	
 	while(!inputNames.eof()){
+		if (m->control_pressed) { goodNameOut.close(); badNameOut.close(); inputNames.close(); remove(goodNameFile.c_str()); remove(badNameFile.c_str()); return 0; }
+
 		inputNames >> seqName >> seqList;
 		it = badSeqNames.find(seqName);
 		
@@ -278,10 +296,14 @@ void ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 		string goodGroupFile = outputDir + getRootName(getSimpleName(groupfile)) + "good" + getExtension(groupfile);
 		string badGroupFile = outputDir + getRootName(getSimpleName(groupfile)) + "bad" + getExtension(groupfile);
 		
+		outputNames.push_back(goodGroupFile);  outputNames.push_back(badGroupFile);
+		
 		ofstream goodGroupOut;	openOutputFile(goodGroupFile, goodGroupOut);
 		ofstream badGroupOut;	openOutputFile(badGroupFile, badGroupOut);		
 		
 		while(!inputGroups.eof()){
+			if (m->control_pressed) { goodGroupOut.close(); badGroupOut.close(); inputGroups.close(); remove(goodNameFile.c_str()); remove(badNameFile.c_str()); remove(goodGroupFile.c_str()); remove(badGroupFile.c_str()); return 0; }
+
 			inputGroups >> seqName >> group;
 
 			it = badSeqGroups.find(seqName);
@@ -307,11 +329,14 @@ void ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 			}
 		}
 	}
+		
+	return 0;
+
 }
 
 //***************************************************************************************************************
 
-void ScreenSeqsCommand::screenGroupFile(set<string> badSeqNames){
+int ScreenSeqsCommand::screenGroupFile(set<string> badSeqNames){
 
 	ifstream inputGroups;
 	openInputFile(groupfile, inputGroups);
@@ -321,10 +346,14 @@ void ScreenSeqsCommand::screenGroupFile(set<string> badSeqNames){
 	string goodGroupFile = outputDir + getRootName(getSimpleName(groupfile)) + "good" + getExtension(groupfile);
 	string badGroupFile = outputDir + getRootName(getSimpleName(groupfile)) + "bad" + getExtension(groupfile);
 	
+	outputNames.push_back(goodGroupFile);  outputNames.push_back(badGroupFile);
+	
 	ofstream goodGroupOut;	openOutputFile(goodGroupFile, goodGroupOut);
 	ofstream badGroupOut;	openOutputFile(badGroupFile, badGroupOut);		
 	
 	while(!inputGroups.eof()){
+		if (m->control_pressed) { goodGroupOut.close(); badGroupOut.close(); inputGroups.close(); remove(goodGroupFile.c_str()); remove(badGroupFile.c_str()); return 0; }
+
 		inputGroups >> seqName >> group;
 		it = badSeqNames.find(seqName);
 		
@@ -338,6 +367,8 @@ void ScreenSeqsCommand::screenGroupFile(set<string> badSeqNames){
 		gobble(inputGroups);
 	}
 	
+	if (m->control_pressed) { goodGroupOut.close(); badGroupOut.close(); inputGroups.close(); remove(goodGroupFile.c_str()); remove(badGroupFile.c_str()); return 0; }
+
 	//we were unable to remove some of the bad sequences
 	if (badSeqNames.size() != 0) {
 		for (it = badSeqNames.begin(); it != badSeqNames.end(); it++) {  
@@ -350,11 +381,16 @@ void ScreenSeqsCommand::screenGroupFile(set<string> badSeqNames){
 	goodGroupOut.close();
 	badGroupOut.close();
 	
+	if (m->control_pressed) { remove(goodGroupFile.c_str()); remove(badGroupFile.c_str());  }
+
+	
+	return 0;
+	
 }
 
 //***************************************************************************************************************
 
-void ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){
+int ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){
 	
 	ifstream inputAlignReport;
 	openInputFile(alignreport, inputAlignReport);
@@ -363,6 +399,8 @@ void ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){
 	
 	string goodAlignReportFile = outputDir + getRootName(getSimpleName(alignreport)) + "good" + getExtension(alignreport);
 	string badAlignReportFile = outputDir + getRootName(getSimpleName(alignreport)) + "bad" + getExtension(alignreport);
+	
+	outputNames.push_back(goodAlignReportFile);  outputNames.push_back(badAlignReportFile);
 	
 	ofstream goodAlignReportOut;	openOutputFile(goodAlignReportFile, goodAlignReportOut);
 	ofstream badAlignReportOut;		openOutputFile(badAlignReportFile, badAlignReportOut);		
@@ -375,6 +413,8 @@ void ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){
 	}
 
 	while(!inputAlignReport.eof()){
+		if (m->control_pressed) { goodAlignReportOut.close(); badAlignReportOut.close(); inputAlignReport.close(); remove(goodAlignReportFile.c_str()); remove(badAlignReportFile.c_str()); return 0; }
+
 		inputAlignReport >> seqName;
 		it = badSeqNames.find(seqName);
 		string line;		
@@ -394,6 +434,8 @@ void ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){
 		gobble(inputAlignReport);
 	}
 	
+	if (m->control_pressed) { goodAlignReportOut.close(); badAlignReportOut.close(); inputAlignReport.close(); remove(goodAlignReportFile.c_str()); remove(badAlignReportFile.c_str()); return 0; }
+
 	//we were unable to remove some of the bad sequences
 	if (badSeqNames.size() != 0) {
 		for (it = badSeqNames.begin(); it != badSeqNames.end(); it++) {  
@@ -405,6 +447,11 @@ void ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){
 	inputAlignReport.close();
 	goodAlignReportOut.close();
 	badAlignReportOut.close();
+			
+	if (m->control_pressed) {  remove(goodAlignReportFile.c_str()); remove(badAlignReportFile.c_str()); return 0; }
+	
+	return 0;
+
 	
 }
 

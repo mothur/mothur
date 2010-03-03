@@ -168,6 +168,8 @@ int GetSharedOTUCommand::execute(){
 		int error = groupMap->readMap();
 		if (error == 1) { delete groupMap; return 0; }
 		
+		if (m->control_pressed) { delete groupMap; return 0; }
+		
 		globaldata->gGroupmap = groupMap;
 		
 		if (Groups.size() == 0) {
@@ -189,6 +191,8 @@ int GetSharedOTUCommand::execute(){
 			openInputFile(fastafile, inFasta);
 			
 			while(!inFasta.eof()) {
+				if (m->control_pressed) { inFasta.close(); delete groupMap; return 0; }
+				
 				Sequence seq(inFasta); gobble(inFasta);
 				if (seq.getName() != "") {  seqs.push_back(seq);   }
 			}
@@ -207,6 +211,12 @@ int GetSharedOTUCommand::execute(){
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((!in.eof()) && ((allLines == 1) || (userLabels.size() != 0))) {
+			
+			if (m->control_pressed) { 
+				if (lastlist != NULL) {		delete lastlist;	}
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }  
+				delete groupMap; return 0;
+			}
 			
 			list = new ListVector(in);
 			
@@ -267,6 +277,7 @@ int GetSharedOTUCommand::execute(){
 		
 		if (lastlist != NULL) {		delete lastlist;	}
 		
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }  delete groupMap; return 0; } 
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -283,7 +294,7 @@ int GetSharedOTUCommand::execute(){
 	}
 }
 /***********************************************************/
-void GetSharedOTUCommand::process(ListVector* shared) {
+int GetSharedOTUCommand::process(ListVector* shared) {
 	try {
 		
 		map<string, string> fastaMap;
@@ -304,6 +315,7 @@ void GetSharedOTUCommand::process(ListVector* shared) {
 				
 		//go through each bin, find out if shared
 		for (int i = 0; i < shared->getNumBins(); i++) {
+			if (m->control_pressed) { outNames.close(); remove(outputFileNames.c_str()); return 0; }
 			
 			bool uniqueOTU = true;
 			
@@ -405,6 +417,8 @@ void GetSharedOTUCommand::process(ListVector* shared) {
 			outputNames.push_back(outputFileFasta);
 			
 			for (int k = 0; k < seqs.size(); k++) {
+				if (m->control_pressed) { outFasta.close(); return 0; }
+			
 				//if this is a sequence we want, output it
 				it = fastaMap.find(seqs[k].getName());
 				if (it != fastaMap.end()) {
@@ -421,7 +435,8 @@ void GetSharedOTUCommand::process(ListVector* shared) {
 			
 			outFasta.close();
 		}
-
+		
+		return 0;
 		
 	}
 	catch(exception& e) {

@@ -139,43 +139,62 @@ int LibShuffCommand::execute(){
 	
 		savedDXYValues = form->evaluateAll();
 		savedMinValues = form->getSavedMins();
+		
+		if (m->control_pressed) {  delete form; globaldata->Groups.clear(); delete globaldata->gMatrix;  globaldata->gMatrix = NULL; return 0; }
 	
 		pValueCounts.resize(numGroups);
 		for(int i=0;i<numGroups;i++){
 			pValueCounts[i].assign(numGroups, 0);
 		}
-		
+	
+		if (m->control_pressed) {  delete form; globaldata->Groups.clear(); delete globaldata->gMatrix;  globaldata->gMatrix = NULL; return 0; }
+				
 		Progress* reading = new Progress();
 		
 		for(int i=0;i<numGroups-1;i++) {
 			for(int j=i+1;j<numGroups;j++) {
+				
+				if (m->control_pressed) {  delete form; globaldata->Groups.clear(); delete globaldata->gMatrix;  globaldata->gMatrix = NULL; delete reading; return 0; }
+
 				reading->newLine(groupNames[i]+'-'+groupNames[j], iters);
 				int spoti = globaldata->gGroupmap->groupIndex[groupNames[i]]; //neccessary in case user selects groups so you know where they are in the matrix
 				int spotj = globaldata->gGroupmap->groupIndex[groupNames[j]];
 	
-				for(int p=0;p<iters;p++) {		
+				for(int p=0;p<iters;p++) {	
+					
+					if (m->control_pressed) {  delete form; globaldata->Groups.clear(); delete globaldata->gMatrix;  globaldata->gMatrix = NULL; delete reading; return 0; }
+					
 					form->randomizeGroups(spoti,spotj); 
 					if(form->evaluatePair(spoti,spotj) >= savedDXYValues[spoti][spotj])	{	pValueCounts[i][j]++;	}
 					if(form->evaluatePair(spotj,spoti) >= savedDXYValues[spotj][spoti])	{	pValueCounts[j][i]++;	}
+					
+					if (m->control_pressed) {  delete form; globaldata->Groups.clear(); delete globaldata->gMatrix;  globaldata->gMatrix = NULL; delete reading; return 0; }
+					
 					reading->update(p);			
 				}
 				form->resetGroup(spoti);
 				form->resetGroup(spotj);
 			}
 		}
+		
+		if (m->control_pressed) {  delete form; globaldata->Groups.clear(); delete globaldata->gMatrix;  globaldata->gMatrix = NULL; delete reading; return 0; }
+	
 		reading->finish();
 		delete reading;
 
 		m->mothurOutEndLine();
 		printSummaryFile();
 		printCoverageFile();
-		
+				
 		//clear out users groups
 		globaldata->Groups.clear();
 		delete form;
 		
 		//delete globaldata's copy of the gmatrix to free up memory
 		delete globaldata->gMatrix;  globaldata->gMatrix = NULL;
+		
+		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -192,7 +211,7 @@ int LibShuffCommand::execute(){
 
 //**********************************************************************************************************************
 
-void LibShuffCommand::printCoverageFile() {
+int LibShuffCommand::printCoverageFile() {
 	try {
 
 		ofstream outCov;
@@ -218,6 +237,9 @@ void LibShuffCommand::printCoverageFile() {
 				int spotj = globaldata->gGroupmap->groupIndex[groupNames[j]];
 				
 				for(int k=0;k<savedMinValues[spoti][spotj].size();k++){
+					
+					if(m->control_pressed)  { outCov.close(); return 0; }
+					
 					if(allDistances[savedMinValues[spoti][spotj][k]].size() != 0){
 						allDistances[savedMinValues[spoti][spotj][k]][indices[i][j]]++;
 					}
@@ -251,6 +273,7 @@ void LibShuffCommand::printCoverageFile() {
 		}
 		for (int i=0;i<numGroups;i++){
 			for(int j=i+1;j<numGroups;j++){
+				if(m->control_pressed)  { outCov.close(); return 0; }
 				outCov << '\t' << groupNames[i] << '-' << groupNames[j] << '\t';
 				outCov << groupNames[j] << '-' << groupNames[i];
 			}
@@ -264,6 +287,8 @@ void LibShuffCommand::printCoverageFile() {
 			}
 			for(int i=0;i<numGroups;i++){
 				for(int j=i+1;j<numGroups;j++){
+					if(m->control_pressed)  { outCov.close(); return 0; }
+					
 					outCov << it->second[indices[i][j]]/(float)lastRow[indices[i][j]] << '\t';
 					outCov << it->second[indices[j][i]]/(float)lastRow[indices[j][i]] << '\t';
 				}
@@ -271,6 +296,8 @@ void LibShuffCommand::printCoverageFile() {
 			outCov << endl;
 		}
 		outCov.close();
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "LibShuffCommand", "printCoverageFile");
@@ -280,7 +307,7 @@ void LibShuffCommand::printCoverageFile() {
 
 //**********************************************************************************************************************
 
-void LibShuffCommand::printSummaryFile() {
+int LibShuffCommand::printSummaryFile() {
 	try {
 
 		ofstream outSum;
@@ -298,6 +325,8 @@ void LibShuffCommand::printSummaryFile() {
 		int precision = (int)log10(iters);
 		for(int i=0;i<numGroups;i++){
 			for(int j=i+1;j<numGroups;j++){
+				if(m->control_pressed)  { outSum.close(); return 0; }
+				
 				int spoti = globaldata->gGroupmap->groupIndex[groupNames[i]]; //neccessary in case user selects groups so you know where they are in the matrix
 				int spotj = globaldata->gGroupmap->groupIndex[groupNames[j]];
 				
@@ -325,6 +354,7 @@ void LibShuffCommand::printSummaryFile() {
 		}
 		
 		outSum.close();
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "LibShuffCommand", "printSummaryFile");

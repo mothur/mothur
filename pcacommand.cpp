@@ -97,17 +97,11 @@ int PCACommand::execute(){
 		vector<string> names;
 		vector<vector<double> > D;
 	
-		//fbase = filename;
-		//if(fbase.find_last_of(".")!=string::npos){
-		//	fbase.erase(fbase.find_last_of(".")+1); 
-		//}
-		//else{
-		//	fbase += ".";
-		//}
-		
 		fbase = outputDir + getRootName(getSimpleName(filename));
 		
 		read(filename, names, D);
+		
+		if (m->control_pressed) { return 0; }
    	
 		double offset = 0.0000;
 		vector<double> d;
@@ -116,18 +110,21 @@ int PCACommand::execute(){
 		vector<vector<double> > copy_G;
 		//int rank = D.size();
 		
-		cout << "\nProcessing...\n";
+		m->mothurOut("\nProcessing...\n");
 		
 		for(int count=0;count<2;count++){
-			recenter(offset, D, G);   
-			tred2(G, d, e);
-			qtli(d, e, G);
+			recenter(offset, D, G);		if (m->control_pressed) { return 0; }
+			tred2(G, d, e);				if (m->control_pressed) { return 0; }
+			qtli(d, e, G);				if (m->control_pressed) { return 0; }
 			offset = d[d.size()-1];
 			if(offset > 0.0) break;
 		} 
 		
+		if (m->control_pressed) { return 0; }
 		
 		output(fbase, names, G, d);
+		
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -164,7 +161,7 @@ void PCACommand::get_comment(istream& f, char begin, char end){
 
 /*********************************************************************************************************************************/
 
-void PCACommand::read_phylip(istream& f, int square_m, vector<string>& name_list, vector<vector<double> >& d){
+int PCACommand::read_phylip(istream& f, int square_m, vector<string>& name_list, vector<vector<double> >& d){
 	try {
 		//     int count1=0;
 		//     int count2=0;
@@ -181,6 +178,8 @@ void PCACommand::read_phylip(istream& f, int square_m, vector<string>& name_list
 				f >> name_list[i];
 				//			cout << i << "\t" << name_list[i] << endl;
 				for(int j=0;j<rank;j++) {
+					if (m->control_pressed) { return 0; }
+					
 					f >> d[i][j];
 					if (d[i][j] == -0.0000)
 						d[i][j] = 0.0000;
@@ -197,6 +196,7 @@ void PCACommand::read_phylip(istream& f, int square_m, vector<string>& name_list
 				f >> name_list[i];
 				d[i][i]=0.0000;
 				for(int j=0;j<i;j++){
+					if (m->control_pressed) { return 0; }
 					f >> d[i][j];
 					if (d[i][j] == -0.0000)
 						d[i][j] = 0.0000;
@@ -204,6 +204,8 @@ void PCACommand::read_phylip(istream& f, int square_m, vector<string>& name_list
 				}
 			}
 		}
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PCACommand", "read_phylip");

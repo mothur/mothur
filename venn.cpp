@@ -37,6 +37,8 @@ vector<string> Venn::getPic(SAbundVector* sabund, vector<Calculator*> vCalcs) {
 			string filenamesvg = outputDir + getSimpleName(globaldata->inputFileName) + ".venn." + sabund->getLabel() + vCalcs[i]->getName() + ".svg";
 			outputNames.push_back(filenamesvg);
 			openOutputFile(filenamesvg, outsvg);
+			
+			if (m->control_pressed) { outsvg.close(); return outputNames; }
 
 			vector<double> data = vCalcs[i]->getValues(sabund);
 			
@@ -83,7 +85,9 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 				string filenamesvg = outputDir + getSimpleName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
 				outputNames.push_back(filenamesvg);
 				openOutputFile(filenamesvg, outsvg);
-			
+				
+				if (m->control_pressed) { outsvg.close(); return outputNames; }
+				
 				//in essence you want to run it like a single 
 				if (vCalcs[i]->getName() == "sharedsobs") {
 					singleCalc = new Sobs();
@@ -133,6 +137,8 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 				string filenamesvg = outputDir + getSimpleName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
 				outputNames.push_back(filenamesvg);
 				openOutputFile(filenamesvg, outsvg);
+				
+				if (m->control_pressed) { outsvg.close(); return outputNames; }
 				
 				//get estimates for sharedAB
 				vector<double> shared = vCalcs[i]->getValues(subset);
@@ -202,6 +208,8 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 				string filenamesvg = outputDir + getSimpleName(globaldata->inputFileName) + lookup[0]->getLabel() + ".venn." + vCalcs[i]->getName() + ".svg";
 				outputNames.push_back(filenamesvg);
 				openOutputFile(filenamesvg, outsvg);
+				
+				if (m->control_pressed) { outsvg.close(); return outputNames; }
 				
 				if (vCalcs[i]->getName() == "sharedace") {
 				
@@ -459,7 +467,8 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					outputNames.push_back(filenamesvg);
 					openOutputFile(filenamesvg, outsvg);
 
-				
+					if (m->control_pressed) { outsvg.close(); return outputNames; }
+					
 					//in essence you want to run it like a single 
 					if (vCalcs[i]->getName() == "sharedsobs") {
 						singleCalc = new Sobs();

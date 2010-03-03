@@ -117,7 +117,7 @@ class Chimera {
 		
 		virtual void setCons(string){};
 		virtual void setQuantiles(string){};
-		virtual void doPrep(){};
+		virtual int doPrep(){ return 0; }
 		virtual vector<Sequence*> readSeqs(string);
 		virtual vector< vector<float> > readQuantiles();
 		virtual void setMask(string);
@@ -127,7 +127,7 @@ class Chimera {
 		virtual void printHeader(ostream&){};
 		virtual int getChimeras(Sequence*){ return 0; }
 		virtual int getChimeras(){ return 0; }
-		virtual void print(ostream&, ostream&){};	
+		virtual int print(ostream&, ostream&){ return 0; }
 		
 		
 	protected:

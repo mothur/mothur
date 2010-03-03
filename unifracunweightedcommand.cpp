@@ -134,12 +134,19 @@ int UnifracUnweightedCommand::execute() {
 		
 		//get pscores for users trees
 		for (int i = 0; i < T.size(); i++) {
+			if (m->control_pressed) { 
+				outSum.close();
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+				return 0; 
+			}
+			
 			counter = 0;
 			
 			if (random)  {  
 				output = new ColumnFile(outputDir + getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".unweighted", itersString);
 				outputNames.push_back(outputDir + getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".unweighted");
 			}
+			
 			
 			//get unweighted for users tree
 			rscoreFreq.resize(numComp);  
@@ -148,6 +155,13 @@ int UnifracUnweightedCommand::execute() {
 			UWScoreSig.resize(numComp); 
 
 			userData = unweighted->getValues(T[i]);  //userData[0] = unweightedscore
+			
+			if (m->control_pressed) { 
+				if (random) { delete output;  }
+				outSum.close();
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+				return 0; 
+			}
 			
 			//output scores for each combination
 			for(int k = 0; k < numComp; k++) {
@@ -158,10 +172,17 @@ int UnifracUnweightedCommand::execute() {
 				validScores[userData[k]] = userData[k];
 			}
 			
-			//get unweighted scores for random trees
+			//get unweighted scores for random trees - if random is false iters = 0
 			for (int j = 0; j < iters; j++) {
 				//we need a different getValues because when we swap the labels we only want to swap those in each pairwise comparison
 				randomData = unweighted->getValues(T[i], "", "");
+				
+				if (m->control_pressed) { 
+					if (random) { delete output;  }
+					outSum.close();
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+					return 0; 
+				}
 			
 				for(int k = 0; k < numComp; k++) {	
 					//add trees unweighted score to map of scores
@@ -192,7 +213,15 @@ int UnifracUnweightedCommand::execute() {
 				if (random) {   UWScoreSig[a].push_back(rCumul[a][userData[a]]);	}
 				else		{	UWScoreSig[a].push_back(0.0);						}
 			}
-		
+			
+			
+			if (m->control_pressed) { 
+				if (random) { delete output;  }
+				outSum.close();
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+				return 0; 
+			}
+			
 			//print output files
 			printUWSummaryFile(i);
 			if (random)  {	printUnweightedFile();	delete output;	}
@@ -205,9 +234,10 @@ int UnifracUnweightedCommand::execute() {
 			UWScoreSig.clear(); 
 		}
 		
-		//reset groups parameter
-		globaldata->Groups.clear(); 
+
 		outSum.close();
+		
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }	return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

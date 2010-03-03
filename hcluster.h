@@ -38,8 +38,8 @@ protected:
 	void updateMap();
 	vector<seqDist> getSeqsFNNN();
 	vector<seqDist> getSeqsAN();
-	void combineFile();
-	void processFile();
+	int combineFile();
+	int processFile();
 	//seqDist getNextDist(char*, int&, int);
 		
 	RAbundVector* rabund;

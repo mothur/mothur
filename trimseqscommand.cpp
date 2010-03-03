@@ -184,8 +184,6 @@ int TrimSeqsCommand::execute(){
 	
 		if (abort == true) { return 0; }
 		
-		vector<string> outputNames;
-		
 		numFPrimers = 0;  //this needs to be initialized
 		numRPrimers = 0;
 		
@@ -217,6 +215,22 @@ int TrimSeqsCommand::execute(){
 		bool success;
 
 		while(!inFASTA.eof()){
+		
+			if (m->control_pressed) { 
+				inFASTA.close(); 
+				outFASTA.close();
+				scrapFASTA.close();
+				outGroups.close();
+				if(qFileName != "")	{	qFile.close();	}
+				for(int i=0;i<fastaFileNames.size();i++){
+					fastaFileNames[i]->close();
+					delete fastaFileNames[i];
+				}	
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+				return 0;
+			}
+
+			
 			Sequence currSeq(inFASTA);
 
 			string origSeq = currSeq.getUnaligned();
@@ -311,6 +325,11 @@ int TrimSeqsCommand::execute(){
 			inFASTA.close();
 		}
 		
+		if (m->control_pressed) { 
+			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+			return 0;
+		}
+
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
@@ -365,6 +384,7 @@ void TrimSeqsCommand::getOligos(vector<ofstream*>& outFASTAVec){
 					
 					if(allFiles){
 						outFASTAVec.push_back(new ofstream((outputDir + getRootName(getSimpleName(fastaFile)) + group + ".fasta").c_str(), ios::ate));
+						outputNames.push_back((outputDir + getRootName(getSimpleName(fastaFile)) + group + ".fasta"));
 					}
 				}
 			}

@@ -173,6 +173,7 @@ VennCommand::~VennCommand(){
 		delete read;
 		delete venn;
 		globaldata->sabund = NULL;
+		delete validCalculator;
 	}
 	
 }
@@ -216,6 +217,14 @@ int VennCommand::execute(){
 			
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+			
+				if (m->control_pressed) {
+					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
+					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+					globaldata->Groups.clear(); 
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+					return 0;
+				}
 
 				if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
@@ -228,7 +237,7 @@ int VennCommand::execute(){
 					}
 					
 					vector<string> outfilenames = venn->getPic(lookup, vennCalculators);
-					for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); } 
+					for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]); }  }
 				}
 				
 				if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
@@ -246,7 +255,7 @@ int VennCommand::execute(){
 						for (int i = lookup.size(); i > 4; i--) { lookup.pop_back(); } //no memmory leak because pop_back calls destructor
 					}				
 					vector<string> outfilenames = venn->getPic(lookup, vennCalculators);
-					for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); } 
+					for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]); }  }
 					
 					//restore real lastlabel to save below
 					lookup[0]->setLabel(saveLabel);
@@ -259,6 +268,14 @@ int VennCommand::execute(){
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 				lookup = input->getSharedRAbundVectors();
 			}
+			
+			if (m->control_pressed) {
+					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
+					globaldata->Groups.clear(); 
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+					return 0;
+			}
+
 			
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -287,7 +304,7 @@ int VennCommand::execute(){
 						for (int i = lookup.size(); i > 4; i--) { lookup.pop_back(); } //no memmory leak because pop_back calls destructor
 					}				
 					vector<string> outfilenames = venn->getPic(lookup, vennCalculators);
-					for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); } 
+					for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]); }  }
 
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 			}
@@ -296,15 +313,29 @@ int VennCommand::execute(){
 			//reset groups parameter
 			globaldata->Groups.clear();  
 			
+			if (m->control_pressed) {
+					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+					return 0;
+			}
+
+			
 		}else{
 		
 			while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+			
+				if (m->control_pressed) {
+					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
+					delete sabund;
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+					return 0;
+				}
 		
 				if(allLines == 1 || labels.count(sabund->getLabel()) == 1){			
 	
 					m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
 					vector<string> outfilenames = venn->getPic(sabund, vennCalculators);
-					for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); } 
+					for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]); }  }
 
 					
 					processedLabels.insert(sabund->getLabel());
@@ -319,7 +350,7 @@ int VennCommand::execute(){
 					
 					m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
 					vector<string> outfilenames = venn->getPic(sabund, vennCalculators);
-					for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); } 
+					for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]); }  }
 
 					
 					processedLabels.insert(sabund->getLabel());
@@ -333,6 +364,12 @@ int VennCommand::execute(){
 				
 				delete sabund;
 				sabund = input->getSAbundVector();
+			}
+			
+			if (m->control_pressed) {
+					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+					return 0;
 			}
 			
 			//output error messages about any remaining user labels
@@ -355,12 +392,17 @@ int VennCommand::execute(){
 					
 				m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
 				vector<string> outfilenames = venn->getPic(sabund, vennCalculators);
-				for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); } 
+				for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]); }  }
 
 				delete sabund;
 					
 			}
 			
+			if (m->control_pressed) {
+					for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+					return 0;
+			}
 		}
 		
 		for (int i = 0; i < vennCalculators.size(); i++) {	delete vennCalculators[i];	}

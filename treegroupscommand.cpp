@@ -223,6 +223,7 @@ void TreeGroupCommand::help(){
 //**********************************************************************************************************************
 
 TreeGroupCommand::~TreeGroupCommand(){
+	globaldata->Groups.clear();  
 	if (abort == false) {
 		
 		if (format == "sharedfile") { delete read;  delete input; globaldata->ginput = NULL; }
@@ -257,8 +258,23 @@ int TreeGroupCommand::execute(){
 			//used in tree constructor 
 			globaldata->runParse = false;
 			
+			//clear globaldatas old tree names if any
+			globaldata->Treenames.clear();
+		
+			//fills globaldatas tree names
+			globaldata->Treenames = globaldata->Groups;
+		
+			//create treemap class from groupmap for tree class to use
+			tmap = new TreeMap();
+			tmap->makeSim(globaldata->gGroupmap);
+			globaldata->gTreemap = tmap;
+			
+			if (m->control_pressed) { return 0; }
+			
 			//create tree file
 			makeSimsShared();
+			
+			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
 		}else{
 			//read in dist file
 			filename = globaldata->inputFileName;
@@ -282,6 +298,9 @@ int TreeGroupCommand::execute(){
 
 			//make treemap
 			tmap = new TreeMap();
+			
+			if (m->control_pressed) { return 0; }
+			
 			tmap->makeSim(list);
 			globaldata->gTreemap = tmap;
 			
@@ -296,14 +315,22 @@ int TreeGroupCommand::execute(){
 			//used in tree constructor 
 			globaldata->runParse = false;
 			
+			if (m->control_pressed) { return 0; }
+			
 			makeSimsDist();
+			
+			if (m->control_pressed) { return 0; }
 
 			//create a new filename
 			outputFile = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + "tre";	
 			outputNames.push_back(outputFile);
 				
 			createTree();
+			
+			if (m->control_pressed) { return 0; }
+
 			m->mothurOut("Tree complete. "); m->mothurOutEndLine();
+			
 		}
 				
 		//reset groups parameter
@@ -323,7 +350,7 @@ int TreeGroupCommand::execute(){
 }
 //**********************************************************************************************************************
 
-void TreeGroupCommand::createTree(){
+int TreeGroupCommand::createTree(){
 	try {
 		//create tree
 		t = new Tree();
@@ -332,7 +359,9 @@ void TreeGroupCommand::createTree(){
 		//there are numGroups - 1 merges to do
 		for (int i = 0; i < (numGroups - 1); i++) {
 			float largest = -1000.0;
-
+			
+			if (m->control_pressed) { delete t; return 1; }
+			
 			int row, column;
 			//find largest value in sims matrix by searching lower triangle
 			for (int j = 1; j < simMatrix.size(); j++) {
@@ -386,11 +415,17 @@ void TreeGroupCommand::createTree(){
 		//assemble tree
 		t->assembleTree();
 		
+		if (m->control_pressed) { delete t; return 1; }
+		
 		//print newick file
 		t->createNewickFile(outputFile);
 		
 		//delete tree
 		delete t;
+		
+		if (m->control_pressed) { remove(outputFile.c_str()); outputNames.pop_back(); return 1; }
+		
+		return 0;
 	
 	}
 	catch(exception& e) {
@@ -423,7 +458,7 @@ void TreeGroupCommand::printSims(ostream& out) {
 	}
 }
 /***********************************************************/
-void TreeGroupCommand::makeSimsDist() {
+int TreeGroupCommand::makeSimsDist() {
 	try {
 		numGroups = list->size();
 		
@@ -434,9 +469,9 @@ void TreeGroupCommand::makeSimsDist() {
 		//initialize simMatrix
 		simMatrix.clear();
 		simMatrix.resize(numGroups);
-		for (int m = 0; m < simMatrix.size(); m++)	{
+		for (int k = 0; k < simMatrix.size(); k++)	{
 			for (int j = 0; j < simMatrix.size(); j++)	{
-				simMatrix[m].push_back(0.0);
+				simMatrix[k].push_back(0.0);
 			}
 		}
 		
@@ -445,10 +480,13 @@ void TreeGroupCommand::makeSimsDist() {
 		for(MatData currentCell = matrix->begin(); currentCell != matrix->end(); currentCell++){
 			//similairity = -(distance-1)
 			simMatrix[currentCell->row][currentCell->column] = -(currentCell->dist -1.0);	
-			simMatrix[currentCell->column][currentCell->row] = -(currentCell->dist -1.0);				
+			simMatrix[currentCell->column][currentCell->row] = -(currentCell->dist -1.0);	
+			
+			if (m->control_pressed) { return 1; }
+			
 		}
 
-
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "TreeGroupCommand", "makeSimsDist");
@@ -457,25 +495,14 @@ void TreeGroupCommand::makeSimsDist() {
 }
 
 /***********************************************************/
-void TreeGroupCommand::makeSimsShared() {
+int TreeGroupCommand::makeSimsShared() {
 	try {
-	
-		//clear globaldatas old tree names if any
-		globaldata->Treenames.clear();
-		
-		//fills globaldatas tree names
-		globaldata->Treenames = globaldata->Groups;
-		
-		//create treemap class from groupmap for tree class to use
-		tmap = new TreeMap();
-		tmap->makeSim(globaldata->gGroupmap);
-		globaldata->gTreemap = tmap;
-		
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+			if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } for(int i = 0 ; i < treeCalculators.size(); i++) {  delete treeCalculators[i]; } return 1; }
 		
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
@@ -508,6 +535,8 @@ void TreeGroupCommand::makeSimsShared() {
 			lookup = input->getSharedRAbundVectors();
 		}
 		
+		if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } for(int i = 0 ; i < treeCalculators.size(); i++) {  delete treeCalculators[i]; } return 1; }
+
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
 		bool needToRun = false;
@@ -532,6 +561,8 @@ void TreeGroupCommand::makeSimsShared() {
 		}
 		
 		for(int i = 0 ; i < treeCalculators.size(); i++) {  delete treeCalculators[i]; }
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "TreeGroupCommand", "makeSimsShared");
@@ -540,7 +571,7 @@ void TreeGroupCommand::makeSimsShared() {
 }
 
 /***********************************************************/
-void TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
+int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
 	try{
 				EstOutput data;
 				vector<SharedRAbundVector*> subset;
@@ -551,9 +582,9 @@ void TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
 					//initialize simMatrix
 					simMatrix.clear();
 					simMatrix.resize(numGroups);
-					for (int m = 0; m < simMatrix.size(); m++)	{
+					for (int k = 0; k < simMatrix.size(); k++)	{
 						for (int j = 0; j < simMatrix.size(); j++)	{
-							simMatrix[m].push_back(0.0);
+							simMatrix[k].push_back(0.0);
 						}
 					}
 		
@@ -575,16 +606,24 @@ void TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
 								subset.push_back(thisLookup[k]); subset.push_back(thisLookup[l]); 
 								
 								data = treeCalculators[i]->getValues(subset); //saves the calculator outputs
+								
+								if (m->control_pressed) { return 1; }
+								
 								//save values in similarity matrix
 								simMatrix[k][l] = data[0];
 								simMatrix[l][k] = data[0];
 							}
 						}
 					}
-				
+					
+					if (m->control_pressed) { return 1; }
 					//creates tree from similarity matrix and write out file
 					createTree();
+					
+					if (m->control_pressed) { return 1; }
 				}
+				
+				return 0;
 
 	}
 	catch(exception& e) {

@@ -502,7 +502,7 @@ vector<seqDist> HCluster::getSeqsAN(){
 }
 
 /***********************************************************************/
-void HCluster::combineFile() {
+int HCluster::combineFile() {
 	try {
 		//int bufferSize = 64000;  //512k - this should be a variable that the user can set to optimize code to their hardware
 		//char* inputBuffer;
@@ -551,6 +551,8 @@ void HCluster::combineFile() {
 			   //you can put the smallest distance from each through the code below and keep the file sorted
 			   
 			   in >> first >> second >> dist; gobble(in);
+			   
+			   if (m->control_pressed) { in.close(); out.close(); remove(tempDistFile.c_str()); return 0; }
 			   
 			   //while there are still values in mergedMin that are smaller than the distance read from file
 			   while (count < mergedMin.size())  {
@@ -623,8 +625,8 @@ void HCluster::combineFile() {
 		mergedMin.clear();
 			
 		//rename tempfile to distfile
-		int renameOK = remove(distfile.c_str());
-		int ok = rename(tempDistFile.c_str(), distfile.c_str());
+		remove(distfile.c_str());
+		rename(tempDistFile.c_str(), distfile.c_str());
 //cout << "remove = "<< renameOK << " rename = " << ok << endl;	
 
 		//merge clustered rows averaging the distances
@@ -648,6 +650,8 @@ void HCluster::combineFile() {
 
 		//sort merged values
 		sort(mergedMin.begin(), mergedMin.end(), compareSequenceDistance);	
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "HCluster", "combineFile");
@@ -731,7 +735,7 @@ seqDist HCluster::getNextDist(char* buffer, int& index, int size){
 	}
 }
 /***********************************************************************/
-void HCluster::processFile() {
+int HCluster::processFile() {
 	try {
 		string firstName, secondName;
 		float distance;
@@ -745,6 +749,7 @@ void HCluster::processFile() {
 	
 		//get entry
 		while (!in.eof()) {
+			if (m->control_pressed) { in.close(); out.close(); remove(outTemp.c_str()); return 0; }
 			
 			in >> firstName >> secondName >> distance;    gobble(in);		
 			
@@ -766,6 +771,8 @@ void HCluster::processFile() {
 		
 		remove(distfile.c_str());
 		rename(outTemp.c_str(), distfile.c_str());
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "HCluster", "processFile");

@@ -83,7 +83,7 @@ class Slayer {
 		
 		vector<data_struct> runBellerophon(Sequence*, Sequence*, Sequence*, map<int, int>&);
 		vector<snps> getSNPS(string, string, string, int, int);
-		void bootstrapSNPS(vector<snps>, vector<snps>, float&, float&);
+		int bootstrapSNPS(vector<snps>, vector<snps>, float&, float&);
 		float snpQA(vector<snps>);
 		float snpQB(vector<snps>);
 		float snpAB(vector<snps>);

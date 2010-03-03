@@ -27,12 +27,12 @@ class GetSeqsCommand : public Command {
 		string accnosfile, fastafile, namefile, groupfile, alignfile, listfile, outputDir;
 		bool abort;
 		
-		void readFasta();
-		void readName();
-		void readGroup();
-		void readAlign();
-		void readAccnos();
-		void readList();
+		int readFasta();
+		int readName();
+		int readGroup();
+		int readAlign();
+		int readAccnos();
+		int readList();
 		
 };
 

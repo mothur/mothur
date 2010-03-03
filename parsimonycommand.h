@@ -59,7 +59,7 @@ private:
 	vector<string> Groups, outputNames; //holds groups to be used
 
 	void printParsimonyFile();  
-	void printUSummaryFile();
+	int printUSummaryFile();
 	void getUserInput();
 	
 };

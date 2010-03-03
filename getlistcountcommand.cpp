@@ -126,12 +126,30 @@ int GetListCountCommand::execute(){
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
-
+		
+		if (m->control_pressed) { 
+			delete read;
+			delete input;
+			delete list;
+			globaldata->gListVector = NULL;  
+			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	}
+			return 0; 
+		}
+		
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
 			if(allLines == 1 || labels.count(list->getLabel()) == 1){
 			
 				process(list);
+				
+				if (m->control_pressed) { 
+					delete read;
+					delete input;
+					delete list;
+					globaldata->gListVector = NULL;  
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	}
+					return 0; 
+				}
 							
 				processedLabels.insert(list->getLabel());
 				userLabels.erase(list->getLabel());
@@ -144,6 +162,15 @@ int GetListCountCommand::execute(){
 				list = input->getListVector(lastLabel);
 				
 				process(list);
+				
+				if (m->control_pressed) { 
+					delete read;
+					delete input;
+					delete list;
+					globaldata->gListVector = NULL;  
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	}
+					return 0; 
+				}
 													
 				processedLabels.insert(list->getLabel());
 				userLabels.erase(list->getLabel());
@@ -177,11 +204,22 @@ int GetListCountCommand::execute(){
 			if (list != NULL) {		delete list;	}
 			list = input->getListVector(lastLabel);
 				
-			process(list);			
+			process(list);	
+			
+			if (m->control_pressed) { 
+					delete read;
+					delete input;
+					delete list;
+					globaldata->gListVector = NULL;  
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	}
+					return 0; 
+			}
+			
 			delete list;  
 		}
 		
 		delete read;
+		delete input;
 		globaldata->gListVector = NULL;
 		
 		m->mothurOutEndLine();
@@ -211,6 +249,8 @@ void GetListCountCommand::process(ListVector* list) {
 		
 		//for each bin in the list vector
 		for (int i = 0; i < list->getNumBins(); i++) {
+			if (m->control_pressed) { break; }
+			
 			binnames = list->get(i);
 			out << i+1 << '\t' << binnames << endl;
 		}

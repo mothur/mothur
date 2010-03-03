@@ -17,8 +17,8 @@ public:
 					 lookup(shared), displays(disp) {  globaldata = GlobalData::getInstance(); m = MothurOut::getInstance(); }
 
 	~Rarefact(){};
-	void getCurve(int, int);
-	void getSharedCurve(int, int);
+	int getCurve(int, int);
+	int getSharedCurve(int, int);
 	
 private:
 	GlobalData* globaldata;

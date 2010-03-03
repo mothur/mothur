@@ -46,7 +46,7 @@ private:
 	//void appendFiles(string, string);
 	void createProcesses(string);
 	int driver(/*Dist*, SequenceDB, */int, int, string, float);
-	void convertMatrix(string);
+	int convertMatrix(string);
 
 };
 

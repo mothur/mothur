@@ -28,6 +28,8 @@ AlignmentDB::AlignmentDB(string fastaFileName, string method, int kmerSize, floa
 		while (!fastaFile.eof()) {
 			Sequence temp(fastaFile);  gobble(fastaFile);
 			
+			if (m->control_pressed) {  templateSequences.clear(); break;  }
+			
 			if (temp.getName() != "") {
 				templateSequences.push_back(temp);
 				//save longest base
@@ -67,20 +69,21 @@ AlignmentDB::AlignmentDB(string fastaFileName, string method, int kmerSize, floa
 			search = new KmerDB(fastaFileName, 8);
 		}
 		
-		if (needToGenerate) {
-		
-			//add sequences to search 
-			for (int i = 0; i < templateSequences.size(); i++) {
-				search->addSequence(templateSequences[i]);
+		if (!(m->control_pressed)) {
+			if (needToGenerate) {
+				//add sequences to search 
+				for (int i = 0; i < templateSequences.size(); i++) {
+					search->addSequence(templateSequences[i]);
+				}
+				search->generateDB();
+				
+			}else if ((method == "kmer") && (!needToGenerate)) {
+				ifstream kmerFileTest(kmerDBName.c_str());
+				search->readKmerDB(kmerFileTest);	
 			}
-			search->generateDB();
 			
-		}else if ((method == "kmer") && (!needToGenerate)) {
-			ifstream kmerFileTest(kmerDBName.c_str());
-			search->readKmerDB(kmerFileTest);	
+			search->setNumSeqs(numSeqs);
 		}
-		
-		search->setNumSeqs(numSeqs);
 	}
 	catch(exception& e) {
 		m->errorOut(e, "AlignmentDB", "AlignmentDB");

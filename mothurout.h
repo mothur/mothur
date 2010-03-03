@@ -25,6 +25,7 @@ class MothurOut {
 		void mothurOutJustToLog(string);
 		void errorOut(exception&, string, string);
 		int control_pressed;
+		bool executing;
 		
 
 	private:

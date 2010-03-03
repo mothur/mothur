@@ -213,6 +213,8 @@ int AlignCommand::execute(){
 		vector<string> outputNames;
 		
 		for (int s = 0; s < candidateFileNames.size(); s++) {
+			if (m->control_pressed) { return 0; }
+			
 			m->mothurOut("Aligning sequences from " + candidateFileNames[s] + " ..." ); m->mothurOutEndLine();
 			
 			if (outputDir == "") {  outputDir += hasPath(candidateFileNames[s]); }
@@ -234,8 +236,9 @@ int AlignCommand::execute(){
 				
 				lines.push_back(new linePair(0, numFastaSeqs));
 				
-				int exitCommand = driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s]);
-				if (exitCommand == 0) { 
+				driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s]);
+				
+				if (m->control_pressed) { 
 					remove(accnosFileName.c_str()); 
 					remove(alignFileName.c_str()); 
 					remove(reportFileName.c_str()); 
@@ -280,7 +283,7 @@ int AlignCommand::execute(){
 					lines.push_back(new linePair(startPos, numSeqsPerProcessor));
 				}
 				
-				int exitCommand = createProcesses(alignFileName, reportFileName, accnosFileName, candidateFileNames[s]); 
+				createProcesses(alignFileName, reportFileName, accnosFileName, candidateFileNames[s]); 
 				
 				rename((alignFileName + toString(processIDS[0]) + ".temp").c_str(), alignFileName.c_str());
 				rename((reportFileName + toString(processIDS[0]) + ".temp").c_str(), reportFileName.c_str());
@@ -317,7 +320,7 @@ int AlignCommand::execute(){
 					m->mothurOutEndLine();
 				}else{ hasAccnos = false;  }
 				
-				if (exitCommand == 0) { 
+				if (m->control_pressed) { 
 					remove(accnosFileName.c_str()); 
 					remove(alignFileName.c_str()); 
 					remove(reportFileName.c_str()); 
@@ -332,8 +335,9 @@ int AlignCommand::execute(){
 			
 			lines.push_back(new linePair(0, numFastaSeqs));
 			
-			int exitCommand = driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s]);
-			if (exitCommand == 0) { 
+			driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s]);
+			
+			if (m->control_pressed) { 
 				remove(accnosFileName.c_str()); 
 				remove(alignFileName.c_str()); 
 				remove(reportFileName.c_str()); 
@@ -494,7 +498,7 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 0;
-		int exitCommand;
+		int exitCommand = 1;
 		//		processIDS.resize(0);
 		
 		//loop through and create all the processes you want

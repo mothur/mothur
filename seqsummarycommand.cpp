@@ -111,6 +111,8 @@ int SeqSummaryCommand::execute(){
 		outSummary << "seqname\tstart\tend\tnbases\tambigs\tpolymer" << endl;			
 
 		while(!inFASTA.eof()){
+			if (m->control_pressed) { inFASTA.close(); outSummary.close(); remove(summaryFile.c_str()); return 0; }
+			
 			Sequence current(inFASTA);
 			if (current.getName() != "") {
 				startPosition.push_back(current.getStartPos());
@@ -147,6 +149,8 @@ int SeqSummaryCommand::execute(){
 		if (startPosition[0] == -1) {  startPosition[0] = 0;	}
 		if (endPosition[0] == -1)	{  endPosition[0] = 0;		}
 		
+		if (m->control_pressed) {  outSummary.close(); remove(summaryFile.c_str()); return 0; }
+		
 		m->mothurOutEndLine();
 		m->mothurOut("\t\tStart\tEnd\tNBases\tAmbigs\tPolymer"); m->mothurOutEndLine();
 		m->mothurOut("Minimum:\t" + toString(startPosition[0]) + "\t" + toString(endPosition[0]) + "\t" + toString(seqLength[0]) + "\t" + toString(ambigBases[0]) + "\t" + toString(longHomoPolymer[0])); m->mothurOutEndLine();
@@ -159,6 +163,8 @@ int SeqSummaryCommand::execute(){
 		m->mothurOut("# of Seqs:\t" + toString(numSeqs)); m->mothurOutEndLine();
 		
 		outSummary.close();
+		
+		if (m->control_pressed) {  remove(summaryFile.c_str()); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();

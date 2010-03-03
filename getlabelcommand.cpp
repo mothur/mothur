@@ -64,6 +64,9 @@ int GetlabelCommand::execute(){
 		int numBins = 0;
 		int count = -1;
 		while(in.good()) {
+			
+			if (m->control_pressed) { in.close();  return 0; }
+			
 			if(count > numBins)
 				count = 0;
 			if(count == 0) {

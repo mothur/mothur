@@ -21,13 +21,14 @@ public:
 	void help();
 	
 private:
-	void screenNameGroupFile(set<string>);
-	void screenGroupFile(set<string>);
-	void screenAlignReport(set<string>);
+	int screenNameGroupFile(set<string>);
+	int screenGroupFile(set<string>);
+	int screenAlignReport(set<string>);
 	
 	bool abort;
 	string fastafile, namefile, groupfile, alignreport, outputDir;
 	int startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength;
+	vector<string> outputNames;
 };
 
 #endif

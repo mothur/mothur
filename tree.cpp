@@ -166,7 +166,7 @@ void Tree::setIndex(string searchName, int index) {
 	}
 }
 /*****************************************************************/
-void Tree::assembleTree() {
+int Tree::assembleTree() {
 	try {
 	
 		//if user has given a names file we want to include that info in the pgroups and pcount info.
@@ -174,9 +174,13 @@ void Tree::assembleTree() {
 		
 		//build the pGroups in non leaf nodes to be used in the parsimony calcs.
 		for (int i = numLeaves; i < numNodes; i++) {
+			if (m->control_pressed) { return 1; }
+
 			tree[i].pGroups = (mergeGroups(i));
 			tree[i].pcount = (mergeGcounts(i));
 		}
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Tree", "assembleTree");

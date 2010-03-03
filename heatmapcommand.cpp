@@ -74,10 +74,6 @@ HeatMapCommand::HeatMapCommand(string option) {
 		 
 			scale = validParameter.validFile(parameters, "scale", false);				if (scale == "not found") { scale = "log10"; }
 			
-			if (abort == false) {
-				heatmap = new HeatMap(sorted, scale, outputDir);
-				format = globaldata->getFormat();
-			}
 		}
 
 	}
@@ -115,10 +111,6 @@ void HeatMapCommand::help(){
 //**********************************************************************************************************************
 
 HeatMapCommand::~HeatMapCommand(){
-	if (abort == false) {
-		delete read;
-		delete heatmap;
-	}
 }
 
 //**********************************************************************************************************************
@@ -127,27 +119,25 @@ int HeatMapCommand::execute(){
 	try {
 	
 		if (abort == true) { return 0; }
+		
+		heatmap = new HeatMap(sorted, scale, outputDir);
+		format = globaldata->getFormat();
 
 		string lastLabel;
-	
+		
+		read = new ReadOTUFile(globaldata->inputFileName);	
+		read->read(&*globaldata); 
+		input = globaldata->ginput;
+		
 		if (format == "sharedfile") {
 			//you have groups
-			read = new ReadOTUFile(globaldata->inputFileName);	
-			read->read(&*globaldata); 
-			
-			input = globaldata->ginput;
 			lookup = input->getSharedRAbundVectors();
 			lastLabel = lookup[0]->getLabel();
 	
 		}else if ((format == "list") || (format == "rabund") || (format == "sabund")) {
 			//you are using just a list file and have only one group
-			read = new ReadOTUFile(globaldata->inputFileName);	
-			read->read(&*globaldata); 
-		
 			rabund = globaldata->rabund;
 			lastLabel = rabund->getLabel();
-			input = globaldata->ginput;	
-
 		}
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -158,6 +148,12 @@ int HeatMapCommand::execute(){
 		
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+				if (m->control_pressed) {
+					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } }
+					globaldata->Groups.clear(); 
+					delete read; delete heatmap; return 0;
+				}
 		
 				if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 	
@@ -192,6 +188,13 @@ int HeatMapCommand::execute(){
 				lookup = input->getSharedRAbundVectors();				
 			}
 			
+			
+			if (m->control_pressed) {
+				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } }
+				globaldata->Groups.clear(); 
+				delete read; delete heatmap; return 0;
+			}
+
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
 			bool needToRun = false;
@@ -215,14 +218,16 @@ int HeatMapCommand::execute(){
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
 			}
 		
-			
-			
 			//reset groups parameter
 			globaldata->Groups.clear();  
 			
 		}else{
 	
 			while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+				if (m->control_pressed) {   
+					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } }
+					delete rabund;  delete read; delete heatmap; return 0;	
+				}
 
 				if(allLines == 1 || labels.count(rabund->getLabel()) == 1){			
 	
@@ -256,6 +261,11 @@ int HeatMapCommand::execute(){
 				rabund = input->getRAbundVector();
 			}
 			
+			if (m->control_pressed) {
+				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } }
+				delete read; delete heatmap; return 0;
+			}
+
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
 			bool needToRun = false;
@@ -285,10 +295,18 @@ int HeatMapCommand::execute(){
 		globaldata->rabund = NULL;
 		delete input; globaldata->ginput = NULL;
 		
+		if (m->control_pressed) {
+			for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } }
+			delete read; delete heatmap; return 0;
+		}
+		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 		m->mothurOutEndLine();
+		
+		delete read;
+		delete heatmap;
 
 		return 0;
 	}

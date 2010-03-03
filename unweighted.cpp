@@ -49,6 +49,7 @@ EstOutput Unweighted::getValues(Tree* t) {
 				groups.push_back(globaldata->Groups[a]); groups.push_back(globaldata->Groups[l]);
 		
 				for(int i=0;i<t->getNumNodes();i++){
+					if (m->control_pressed) {  return data; }
 	
 					copyIpcount = t->tree[i].pcount;
 					for (it = copyIpcount.begin(); it != copyIpcount.end();) {
@@ -101,6 +102,8 @@ EstOutput Unweighted::getValues(Tree* t) {
 			copyIpcount.clear();
 				
 			for(int i=0;i<t->getNumNodes();i++){
+			
+				if (m->control_pressed) {  return data; }
 				
 				copyIpcount = t->tree[i].pcount;
 				for (it = copyIpcount.begin(); it != copyIpcount.end();) {
@@ -182,10 +185,14 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 				//swap labels in the groups you want to compare
 				copyTree->assembleRandomUnifracTree(groups[0], groups[1]);
 				
+				if (m->control_pressed) { delete copyTree; return data; }
+				
 				//copyTree->createNewickFile("random"+groupA+toString(count));
 				
 				for(int i=0;i<copyTree->getNumNodes();i++){
-						
+					
+					if (m->control_pressed) { delete copyTree; return data; }
+					
 					/**********************************************************************/
 					//This section adds in all lengths that are non leaf
 					copyIpcount = copyTree->tree[i].pcount;
@@ -242,8 +249,11 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 				
 			//swap labels in all the groups you want to compare
 			copyTree->assembleRandomUnifracTree(groups);
+			
+			if (m->control_pressed) { delete copyTree; return data; }
 
 			for(int i=0;i<copyTree->getNumNodes();i++){
+				if (m->control_pressed) { delete copyTree; return data; }
 			
 				copyIpcount = copyTree->tree[i].pcount;
 				for (it = copyIpcount.begin(); it != copyIpcount.end();) {

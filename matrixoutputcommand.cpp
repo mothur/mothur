@@ -193,9 +193,13 @@ int MatrixOutputCommand::execute(){
 		if (lookup.size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); return 0;}
 		
 		numGroups = lookup.size();
+		
+		if (m->control_pressed) { delete read; delete input; globaldata->ginput = NULL; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } globaldata->Groups.clear(); return 0;  }
 				
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+		
+			if (m->control_pressed) { delete read; delete input; globaldata->ginput = NULL; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } globaldata->Groups.clear(); return 0;  }
 		
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
@@ -228,6 +232,8 @@ int MatrixOutputCommand::execute(){
 			lookup = input->getSharedRAbundVectors();
 		}
 		
+		if (m->control_pressed) { delete read; delete input; globaldata->ginput = NULL; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } globaldata->Groups.clear(); return 0;  }
+
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
 		bool needToRun = false;
@@ -241,6 +247,8 @@ int MatrixOutputCommand::execute(){
 			}
 		}
 		
+		if (m->control_pressed) { delete read; delete input; globaldata->ginput = NULL;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } globaldata->Groups.clear(); return 0;  }
+
 		//run last label if you need to
 		if (needToRun == true)  {
 			for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {  delete lookup[i]; }  } 
@@ -251,7 +259,8 @@ int MatrixOutputCommand::execute(){
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 		}
 		
-				
+		if (m->control_pressed) { delete read; delete input; globaldata->ginput = NULL;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } globaldata->Groups.clear(); return 0;  }
+		
 		//reset groups parameter
 		globaldata->Groups.clear();  
 		
@@ -301,7 +310,7 @@ void MatrixOutputCommand::printSims(ostream& out) {
 	}
 }
 /***********************************************************/
-void MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
+int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 	try {
 	
 				EstOutput data;
@@ -313,9 +322,9 @@ void MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 					//initialize simMatrix
 					simMatrix.clear();
 					simMatrix.resize(numGroups);
-					for (int m = 0; m < simMatrix.size(); m++)	{
+					for (int p = 0; p < simMatrix.size(); p++)	{
 						for (int j = 0; j < simMatrix.size(); j++)	{
-							simMatrix[m].push_back(0.0);
+							simMatrix[p].push_back(0.0);
 						}
 					}
 				
@@ -323,6 +332,8 @@ void MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 						for (int l = k; l < thisLookup.size(); l++) {
 							if (k != l) { //we dont need to similiarity of a groups to itself
 								//get estimated similarity between 2 groups
+								
+								if (m->control_pressed) { return 0; }
 								
 								subset.clear(); //clear out old pair of sharedrabunds
 								//add new pair of sharedrabunds
@@ -345,7 +356,7 @@ void MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 					
 				}
 
-	
+				return 0;
 		
 	}
 	catch(exception& e) {

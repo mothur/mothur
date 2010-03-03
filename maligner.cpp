@@ -34,6 +34,8 @@ string Maligner::getResults(Sequence* q, DeCalculator* decalc) {
 			refSeqs = getKmerSeqs(query, numWanted); //fills indexes
 		}else { m->mothurOut("not valid search."); exit(1);  } //should never get here
 		
+		if (m->control_pressed) { return chimera;  }
+		
 		refSeqs = minCoverageFilter(refSeqs);
 
 		if (refSeqs.size() < 2)  { 
@@ -46,7 +48,8 @@ string Maligner::getResults(Sequence* q, DeCalculator* decalc) {
 
 		//fills outputResults
 		chimera = chimeraMaligner(chimeraPenalty, decalc);
-	
+		
+		if (m->control_pressed) { return chimera;  }
 				
 		//free memory
 		delete query;
@@ -77,9 +80,13 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 
 		vector< vector<score_struct> > matrix = buildScoreMatrix(query->getAligned().length(), refSeqs.size()); //builds and initializes
 		
+		if (m->control_pressed) { return chimera;  }
+		
 		fillScoreMatrix(matrix, refSeqs, chimeraPenalty);
 	
 		vector<score_struct> path = extractHighestPath(matrix);
+		
+		if (m->control_pressed) { return chimera;  }
 		
 		vector<trace_struct> trace = mapTraceRegionsToAlignment(path, refSeqs);
 	
@@ -94,6 +101,8 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 		string chimeraSeq = constructChimericSeq(trace, refSeqs);
 	
 		percentIdenticalQueryChimera = computePercentID(queryInRange, chimeraSeq);
+		
+		if (m->control_pressed) { return chimera;  }
 		
 		//save output results
 		for (int i = 0; i < trace.size(); i++) {

@@ -30,7 +30,7 @@ private:
 	vector<string> outputNames;
 	
 	void get_comment(istream&, char, char);
-	void read_phylip(istream&, int, vector<string>&, vector<vector<double> >&);
+	int read_phylip(istream&, int, vector<string>&, vector<vector<double> >&);
 	void read(string, vector<string>&, vector<vector<double> >&);
 	double pythag(double, double);
 	void matrix_mult(vector<vector<double> >, vector<vector<double> >, vector<vector<double> >&);

@@ -23,7 +23,7 @@ class UnifracUnweightedCommand : public Command {
 	
 	public:
 		UnifracUnweightedCommand(string);	
-		~UnifracUnweightedCommand() { delete unweighted; delete util; }
+		~UnifracUnweightedCommand() { globaldata->Groups.clear();  if (abort == false) { delete unweighted; delete util; } }
 		int execute();
 		void help();	
 	

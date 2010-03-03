@@ -28,7 +28,7 @@ class Pintail : public Chimera {
 		~Pintail();
 		
 		int getChimeras(Sequence*);
-		void print(ostream&, ostream&);
+		int print(ostream&, ostream&);
 		
 		void setCons(string c)		{ consfile = c;  }
 		void setQuantiles(string q) { quanfile = q;  }
@@ -72,7 +72,7 @@ class Pintail : public Chimera {
 		Sequence* findPairs(Sequence*);
 			
 		void createProcessesQuan();
-		void doPrep();
+		int doPrep();
 		
 };
 

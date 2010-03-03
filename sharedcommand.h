@@ -33,16 +33,16 @@ public:
 	
 private:
 	void printSharedData(vector<SharedRAbundVector*>);
-	void createMisMatchFile();
+	int createMisMatchFile();
 	bool isValidGroup(string, vector<string>);
-	void eliminateZeroOTUS(vector<SharedRAbundVector*>&);
+	int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
 	
 	GlobalData* globaldata;
 	ReadOTUFile* read;
 	SharedListVector* SharedList;
 	InputData* input;
 	GroupMap* groupMap;
-	vector<string> groups;
+	vector<string> groups, outputNames;
 	ofstream out;
 	string filename, fileroot, outputDir;
 	bool firsttime, pickedGroups;

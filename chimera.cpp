@@ -28,6 +28,8 @@ string Chimera::createFilter(vector<Sequence*> seqs, float t) {
 		//for each sequence
 		for (int i = 0; i < seqs.size(); i++) {
 		
+			if (m->control_pressed) { return filterString; }
+		
 			string seqAligned = seqs[i]->getAligned();
 		
 			for (int j = 0; j < seqAligned.length(); j++) {
@@ -44,6 +46,9 @@ string Chimera::createFilter(vector<Sequence*> seqs, float t) {
 		//zero out spot where all sequences have blanks
 		int numColRemoved = 0;
 		for(int i = 0;i < seqs[0]->getAligned().length(); i++){
+		
+			if (m->control_pressed) { return filterString; }
+			
 			if(gaps[i] == seqs.size())	{	filterString[i] = '0'; 	numColRemoved++;  }
 			
 			else if (((a[i] < threshold) && (t[i] < threshold) && (g[i] < threshold) && (c[i] < threshold))) {	filterString[i] = '0';	numColRemoved++;  }
@@ -99,6 +104,8 @@ vector<Sequence*> Chimera::readSeqs(string file) {
 		
 		//read in seqs and store in vector
 		while(!in.eof()){
+			
+			if (m->control_pressed) { return container; }
 			
 			Sequence* current = new Sequence(in);  gobble(in);
 			

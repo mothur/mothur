@@ -103,6 +103,8 @@ int ReverseSeqsCommand::execute(){
 		openOutputFile(reverseFile, outFASTA);
 		
 		while(!inFASTA.eof()){
+			if (m->control_pressed) {  inFASTA.close();  outFASTA.close(); remove(reverseFile.c_str()); return 0; }
+			 
 			Sequence currSeq(inFASTA);  gobble(inFASTA);
 			if (currSeq.getName() != "") {
 				currSeq.reverseComplement();
@@ -111,6 +113,8 @@ int ReverseSeqsCommand::execute(){
 		}
 		inFASTA.close();
 		outFASTA.close();
+		
+		if (m->control_pressed) {  remove(reverseFile.c_str()); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();

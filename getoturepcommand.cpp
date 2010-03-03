@@ -244,6 +244,8 @@ int GetOTURepCommand::execute(){
 			}else{	nameMap = NULL;		}
 			
 			readMatrix->read(nameMap);
+			
+			if (m->control_pressed) { delete readMatrix; delete groupMap; return 0; }
 
 			//get matrix
 			if (globaldata->gListVector != NULL) {  delete globaldata->gListVector;  }
@@ -257,11 +259,14 @@ int GetOTURepCommand::execute(){
 			// via the index of a sequence in the distance matrix
 			seqVec = vector<SeqMap>(globaldata->gListVector->size()); 
 			for (MatData currentCell = matrix->begin(); currentCell != matrix->end(); currentCell++) {
+				if (m->control_pressed) { delete readMatrix; delete groupMap; return 0; }
 				seqVec[currentCell->row][currentCell->column] = currentCell->dist;
 			}
 			
 			delete matrix;
 			delete readMatrix;
+			
+			if (m->control_pressed) {  delete groupMap; return 0; }
 		}else {
 			//process file and set up indexes
 			if (format == "column") { formatMatrix = new FormatColumnMatrix(distFile); }	
@@ -276,6 +281,8 @@ int GetOTURepCommand::execute(){
 			}else{	nameMap = NULL;		}
 			
 			formatMatrix->read(nameMap);
+			
+			if (m->control_pressed) { delete formatMatrix; delete groupMap; return 0; }
 
 			//get matrix
 			if (globaldata->gListVector != NULL) {  delete globaldata->gListVector;  }
@@ -291,7 +298,10 @@ int GetOTURepCommand::execute(){
 			
 			//openfile for getMap to use
 			openInputFile(distFile, inRow);
+			
+			if (m->control_pressed) { inRow.close(); remove(distFile.c_str()); delete groupMap; return 0; }
 		}
+		
 		
 		//globaldata->gListVector bin 0 = first name read in distance matrix, globaldata->gListVector bin 1 = second name read in distance matrix
 		if (globaldata->gListVector != NULL) {
@@ -314,6 +324,11 @@ int GetOTURepCommand::execute(){
 		
 		//read fastafile
 		fasta->readFastaFile(fastafile);
+		
+		if (m->control_pressed) { 
+			if (large) {  inRow.close(); remove(distFile.c_str());  }
+			delete groupMap; delete fasta; return 0; 
+		}
 				
 		//if user gave a namesfile then use it
 		if (namefile != "") {	readNamesFile();	}
@@ -332,6 +347,11 @@ int GetOTURepCommand::execute(){
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
+		
+		if (m->control_pressed) { 
+			if (large) {  inRow.close(); remove(distFile.c_str());  }
+			delete groupMap; delete fasta; delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
+		}
 	
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
@@ -339,6 +359,13 @@ int GetOTURepCommand::execute(){
 					m->mothurOut(list->getLabel() + "\t" + toString(list->size())); m->mothurOutEndLine();
 					error = process(list);
 					if (error == 1) { return 0; } //there is an error in hte input files, abort command
+					
+					if (m->control_pressed) { 
+						if (large) {  inRow.close(); remove(distFile.c_str());  }
+						if (groupfile != "") {	delete groupMap;  globaldata->gGroupmap = NULL;	}
+						for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+						delete fasta; delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
+					}
 					
 					processedLabels.insert(list->getLabel());
 					userLabels.erase(list->getLabel());
@@ -352,6 +379,13 @@ int GetOTURepCommand::execute(){
 					m->mothurOut(list->getLabel() + "\t" + toString(list->size())); m->mothurOutEndLine();
 					error = process(list);
 					if (error == 1) { return 0; } //there is an error in hte input files, abort command
+					
+					if (m->control_pressed) { 
+						if (large) {  inRow.close(); remove(distFile.c_str());  }
+						if (groupfile != "") {	delete groupMap;  globaldata->gGroupmap = NULL;	}
+						for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+						delete fasta; delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
+					}
 					
 					processedLabels.insert(list->getLabel());
 					userLabels.erase(list->getLabel());
@@ -386,6 +420,13 @@ int GetOTURepCommand::execute(){
 			error = process(list);
 			delete list;
 			if (error == 1) { return 0; } //there is an error in hte input files, abort command
+			
+			if (m->control_pressed) { 
+					if (large) {  inRow.close(); remove(distFile.c_str());  }
+					if (groupfile != "") {	delete groupMap;  globaldata->gGroupmap = NULL;	}
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+					delete fasta; delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
+			}
 		}
 		
 		//close and remove formatted matrix file
@@ -401,6 +442,8 @@ int GetOTURepCommand::execute(){
 		if (groupfile != "") {
 			delete groupMap;  globaldata->gGroupmap = NULL;
 		}
+		
+		if (m->control_pressed) {  return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -501,6 +544,7 @@ string GetOTURepCommand::findRep(int bin, string& group, ListVector* thisList, i
 			SeqMap::iterator it;
 			SeqMap currMap;
 			for (size_t i=0; i < seqIndex.size(); i++) {
+				if (m->control_pressed) {  return  "control"; }
 			
 				if (!large) {	currMap = seqVec[seqIndex[i]];  }
 				else		{	currMap = getMap(seqIndex[i]);	}
@@ -526,6 +570,7 @@ string GetOTURepCommand::findRep(int bin, string& group, ListVector* thisList, i
 			float min = 10000;
 			int minIndex;
 			for (size_t i=0; i < max_dist.size(); i++) {
+				if (m->control_pressed) {  return  "control"; }
 				if (max_dist[i] < min) {
 					min = max_dist[i];
 					minIndex = i;
@@ -570,7 +615,12 @@ int GetOTURepCommand::process(ListVector* processList) {
 		for (int i = 0; i < processList->size(); i++) {
 			string groups;
 			int binsize;
+			
+			if (m->control_pressed) { out.close();  newNamesOutput.close(); return 0; }
+			
 			nameRep = findRep(i, groups, processList, binsize);
+			
+			if (m->control_pressed) { out.close();  newNamesOutput.close(); return 0; }
 			
 			//output to new names file
 			newNamesOutput << nameRep << '\t' << processList->get(i) << endl;

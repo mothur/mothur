@@ -32,9 +32,11 @@ vector<string> HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Cal
 		vector<string> outputNames;
 				
 		//make file for each calculator selected
-		for (int m = 0; m < calcs.size(); m++) {
-			
-			string filenamesvg = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + lookup[0]->getLabel() + calcs[m]->getName() + ".heatmap.sim.svg";
+		for (int k = 0; k < calcs.size(); k++) {
+		
+			if (m->control_pressed) { return outputNames; }
+		
+			string filenamesvg = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + lookup[0]->getLabel() + calcs[k]->getName() + ".heatmap.sim.svg";
 			openOutputFile(filenamesvg, outsvg);
 			outputNames.push_back(filenamesvg);
 			
@@ -60,12 +62,14 @@ vector<string> HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Cal
 			//get sim for each comparison and save them so you can find the relative similairity
 			for(int i = 0; i < (lookup.size()-1); i++){
 				for(int j = (i+1); j < lookup.size(); j++){
-					
+						
+						if (m->control_pressed) { outsvg.close(); return outputNames; }
+						
 						vector<SharedRAbundVector*> subset;
 						subset.push_back(lookup[i]);  subset.push_back(lookup[j]); 
 					
 						//get similairity between groups
-						data = calcs[m]->getValues(subset);
+						data = calcs[k]->getValues(subset);
 						sims.push_back(data[0]);
 					
 						//save biggest similairity to set relative sim
@@ -133,6 +137,8 @@ string HeatMapSim::getPic(vector< vector<double> > dists, vector<string> groups)
 		//get sim for each comparison and save them so you can find the relative similairity
 		for(int i = 0; i < (dists.size()-1); i++){
 			for(int j = (i+1); j < dists.size(); j++){
+			
+				if (m->control_pressed) { outsvg.close(); return filenamesvg; }
 				
 				float sim = 1.0 - dists[i][j];
 				sims.push_back(sim);

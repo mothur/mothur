@@ -18,7 +18,7 @@ class ReadColumnMatrix : public ReadMatrix {
 public:
 	ReadColumnMatrix(string);
 	~ReadColumnMatrix();
-	void read(NameAssignment*);
+	int read(NameAssignment*);
 private:
 	ifstream fileHandle;
 	string distFile;

@@ -44,6 +44,8 @@ string HeatMap::getPic(RAbundVector* rabund) {
 		for(int i=0;i<rabund->size();i++){
 			float relAbund = rabund->get(i) / (float)rabund->getNumSeqs();
 			
+			if (m->control_pressed) { return "control"; }
+			
 			if (rabund->get(i) != 0) { //don't want log value of 0.
 				if (scaler == "log10") {
 					scaleRelAbund[i] = toHex(int(255 * log10(relAbund) / log10(maxRelAbund))) + "0000";  
@@ -78,6 +80,7 @@ string HeatMap::getPic(RAbundVector* rabund) {
 		
 		y = 70;
 		for (int i = 0; i < scaleRelAbund.size(); i++) {
+			if (m->control_pressed) { outsvg.close(); return "control"; }
 			
 			outsvg << "<rect fill=\"#" + scaleRelAbund[i] + "\" stroke=\"#" + scaleRelAbund[i] + "\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\" width=\"300\" height=\"5\"/>\n";
 			y += 5;
@@ -118,6 +121,7 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 		for(int i=0;i<lookup.size();i++){
 			scaleRelAbund[i].assign(lookup[i]->size(), "");
 			for(int j=0;j<lookup[i]->size();j++){
+				if (m->control_pressed) {  return "control"; }
 				float relAbund = lookup[i]->getAbundance(j) / (float)lookup[i]->getNumSeqs();
 				
 				if (lookup[i]->getAbundance(j) != 0) { //don't want log value of 0.
@@ -160,6 +164,7 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 		y = 70;
 		for (int i = 0; i < scaleRelAbund[0].size(); i++) {
 			for (int j = 0; j < scaleRelAbund.size(); j++) {
+				if (m->control_pressed) { outsvg.close(); return "control"; }
 				
 				outsvg << "<rect fill=\"#" + scaleRelAbund[j][i] + "\" stroke=\"#" + scaleRelAbund[j][i] + "\" x=\"" + toString(x) + "\" y=\"" + toString(y) + "\" width=\"300\" height=\"5\"/>\n";
 				x += 300;
