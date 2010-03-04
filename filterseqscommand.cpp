@@ -22,7 +22,7 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "trump", "soft", "hard", "vertical", "outputdir","inputdir"};
+			string Array[] =  {"fasta", "trump", "soft", "hard", "vertical", "outputdir","inputdir", "processors"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -108,6 +108,9 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "soft", false);				if (temp == "not found") { soft = 0; }
 			else {  soft = (float)atoi(temp.c_str()) / 100.0;  }
 			
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = "1";				}
+			convert(temp, processors); 
+			
 			hard = validParameter.validFile(parameters, "hard", true);				if (hard == "not found") { hard = ""; }
 			else if (hard == "not open") { abort = true; }	
 			
@@ -115,13 +118,6 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 			
 			numSeqs = 0;
 			
-			if (abort == false) {
-			
-				if (soft != 0)			{  F.setSoft(soft);		}
-				if (trump != '*')		{  F.setTrump(trump);	}
-			
-			}
-						
 		}
 		
 	}
@@ -170,44 +166,10 @@ int FilterSeqsCommand::execute() {
 		alignmentLength = testSeq.getAlignLength();
 		inFASTA.close();
 		
-		F.setLength(alignmentLength);
+		////////////create filter/////////////////
 		
-		if(soft != 0 || isTrue(vertical)){
-			F.initialize();
-		}
+		filter = createFilter();
 		
-		if(hard.compare("") != 0)	{	F.doHard(hard);		}
-		else						{	F.setFilter(string(alignmentLength, '1'));	}
-
-		if(trump != '*' || isTrue(vertical) || soft != 0){
-			for (int i = 0; i < fastafileNames.size(); i++) {
-				ifstream in;
-				openInputFile(fastafileNames[i], in);
-				
-				while(!in.eof()){	//read through and create the filter...
-				
-					if (m->control_pressed) { in.close(); return 0; }
-					
-					Sequence seq(in);
-					if (seq.getName() != "") {
-						if(trump != '*'){	F.doTrump(seq);	}
-						if(isTrue(vertical) || soft != 0){	F.getFreqs(seq);	}
-						numSeqs++;
-						cout.flush();
-					}
-				}
-				in.close();
-			}
-		
-		}
-		F.setNumSeqs(numSeqs);
-		
-		
-		if(isTrue(vertical) == 1)	{	F.doVertical();	}
-		if(soft != 0)				{	F.doSoft();		}
-		
-		filter = F.getFilter();
-
 		ofstream outFilter;
 		
 		string filterFile = outputDir + filterFileName + ".filter";
@@ -215,6 +177,9 @@ int FilterSeqsCommand::execute() {
 		outFilter << filter << endl;
 		outFilter.close();
 		outputNames.push_back(filterFile);
+		
+		
+		////////////run filter/////////////////
 		
 		numSeqs = 0;
 		for (int i = 0; i < fastafileNames.size(); i++) {
@@ -277,5 +242,170 @@ int FilterSeqsCommand::execute() {
 		exit(1);
 	}
 }
+/**************************************************************************************/
+string FilterSeqsCommand::createFilter() {	
+	try {
+		string filterString = "";
+		
+		Filters F;
+		
+		if (soft != 0)			{  F.setSoft(soft);		}
+		if (trump != '*')		{  F.setTrump(trump);	}
+		
+		F.setLength(alignmentLength);
+		
+		if(soft != 0 || isTrue(vertical)){
+			F.initialize();
+		}
+		
+		if(hard.compare("") != 0)	{	F.doHard(hard);		}
+		else						{	F.setFilter(string(alignmentLength, '1'));	}
+		
+		numSeqs = 0;
+		
+		if(trump != '*' || isTrue(vertical) || soft != 0){
+			for (int s = 0; s < fastafileNames.size(); s++) {
+			
+				for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
+				
+				#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+					if(processors == 1){
+						ifstream inFASTA;
+						openInputFile(fastafileNames[s], inFASTA);
+						int numFastaSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+						inFASTA.close();
+						
+						numSeqs += numFastaSeqs;
+				
+						lines.push_back(new linePair(0, numFastaSeqs));
+				
+						driverCreateFilter(F, fastafileNames[s], lines[0]);
+					}else{
+						vector<int> positions;
+				
+						ifstream inFASTA;
+						openInputFile(fastafileNames[s], inFASTA);
+				
+						string input;
+						while(!inFASTA.eof()){
+							input = getline(inFASTA);
+							if (input.length() != 0) {
+								if(input[0] == '>'){	long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
+							}
+						}
+						inFASTA.close();
+				
+						int numFastaSeqs = positions.size();
+						
+						numSeqs += numFastaSeqs;
+				
+						int numSeqsPerProcessor = numFastaSeqs / processors;
+				
+						for (int i = 0; i < processors; i++) {
+							long int startPos = positions[ i * numSeqsPerProcessor ];
+							if(i == processors - 1){
+								numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor;
+							}
+							lines.push_back(new linePair(startPos, numSeqsPerProcessor));
+						}
+				
+						createProcessesCreateFilter(F, fastafileNames[s]); 
+					}
+				#else
+					ifstream inFASTA;
+					openInputFile(fastafileNames[s], inFASTA);
+					int numFastaSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+					inFASTA.close();
+						
+					numSeqs += numFastaSeqs;
+				
+					lines.push_back(new linePair(0, numFastaSeqs));
+				
+					driverCreateFilter(F, lines[0], fastafileNames[s]);
+				#endif
+			
+			
+			}
+		}
+		
+		F.setNumSeqs(numSeqs);
+				
+		if(isTrue(vertical) == 1)	{	F.doVertical();	}
+		if(soft != 0)				{	F.doSoft();		}
+		
+		filterString = F.getFilter();
 
+		return filterString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "FilterSeqsCommand", "createFilter");
+		exit(1);
+	}
+}
+/**************************************************************************************/
+int FilterSeqsCommand::driverCreateFilter(Filters& F, string filename, linePair* line) {	
+	try {
+		
+		ifstream in;
+		openInputFile(filename, in);
+				
+		in.seekg(line->start);
+		
+		for(int i=0;i<line->numSeqs;i++){
+				
+			if (m->control_pressed) { in.close(); return 1; }
+					
+			Sequence seq(in);
+			if (seq.getName() != "") {
+					if(trump != '*'){	F.doTrump(seq);	}
+					if(isTrue(vertical) || soft != 0){	F.getFreqs(seq);	}
+					cout.flush();
+			}
+		}
+				
+		in.close();
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "FilterSeqsCommand", "driverCreateFilter");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+
+int FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string filename) {
+	try {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		int process = 0;
+		int exitCommand = 1;
+		vector<int> processIDS;
+		
+		//loop through and create all the processes you want
+		while (process != processors) {
+			int pid = vfork();
+			
+			if (pid > 0) {
+				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+				process++;
+			}else if (pid == 0){
+				driverCreateFilter(F, filename, lines[process]);
+				exit(0);
+			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
+		}
+		
+		//force parent to wait until all the processes are done
+		for (int i=0;i<processors;i++) { 
+			int temp = processIDS[i];
+			wait(&temp);
+		}
+		
+		return exitCommand;
+#endif		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "FilterSeqsCommand", "createProcessesCreateFilter");
+		exit(1);
+	}
+}
 /**************************************************************************************/

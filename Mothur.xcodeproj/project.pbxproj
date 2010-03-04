@@ -1431,6 +1431,8 @@
 				GCC_WARN_UNUSED_PARAMETER = NO;
 				GCC_WARN_UNUSED_VALUE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				LD_MAP_FILE_PATH = "$(TARGET_TEMP_DIR)/$(PRODUCT_NAME)-LinkMap-$(CURRENT_VARIANT)-$(CURRENT_ARCH).txt";
+				LINK_WITH_STANDARD_LIBRARIES = YES;
 				OTHER_CPLUSPLUSFLAGS = (
 					"-ansi",
 					"-pedantic",
@@ -1438,6 +1440,7 @@
 					"-lreadline",
 					"-DUSE_READLINE",
 				);
+				OTHER_LDFLAGS = "";
 				PREBINDING = NO;
 				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
 				SYMROOT = /Users/johnwestcott/Desktop;
