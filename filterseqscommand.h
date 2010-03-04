@@ -12,6 +12,7 @@
 
 #include "command.hpp"
 #include "filters.h"
+#include "mpi.h"
 
 class Sequence;
 class FilterSeqsCommand : public Command {
@@ -23,19 +24,26 @@ public:
 	void help();
 	
 private:
+	struct linePair {
+		int start;
+		int numSeqs;
+		linePair(long int i, int j) : start(i), numSeqs(j) {}
+	};
+	vector<linePair*> lines;
+
+
 	string vertical, filter, fasta, hard, outputDir, filterFileName;
 	vector<string> fastafileNames;	
-	int alignmentLength;
+	int alignmentLength, processors;
 
 	char trump;
 	bool abort;
 	float soft;
 	int numSeqs;
 	
-	Filters F;
-		
-	vector<int> a, t, g, c, gap;
-
+	string createFilter();
+	int createProcessesCreateFilter(Filters&, string);
+	int driverCreateFilter(Filters&, string, linePair*);
 };
 
 #endif

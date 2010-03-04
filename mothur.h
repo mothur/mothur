@@ -58,8 +58,6 @@
 		#include <readline/history.h>
 	#endif
 
-	//#include <readline/readline.h>
-	//#include <readline/history.h>
 #else
 	#include <conio.h> //allows unbuffered screen capture from stdin
 	#include <direct.h> //get cwd
