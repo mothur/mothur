@@ -24,6 +24,7 @@ public:
 	Sequence();
 	Sequence(string, string);
 	Sequence(ifstream&);
+	Sequence(istringstream&);
 	
 	void setName(string);
 	void setUnaligned(string);
@@ -51,6 +52,8 @@ private:
 	void initialize();
 	string getSequenceString(ifstream&);
 	string getCommentString(ifstream&);
+	string getSequenceString(istringstream&);
+	string getCommentString(istringstream&);
 	string name;
 	string unaligned;
 	string aligned;

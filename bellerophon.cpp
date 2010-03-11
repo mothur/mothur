@@ -197,6 +197,7 @@ int Bellerophon::getChimeras() {
 				
 				if (m->control_pressed) { delete SparseLeft; delete SparseRight; return 0; }
 				
+				left.clear(); right.clear();
 				vector<SeqMap> distMapRight;
 				vector<SeqMap> distMapLeft;
 				
@@ -250,6 +251,8 @@ int Bellerophon::getChimeras() {
 		
 		//sort Preferences highest to lowest
 		sort(pref.begin(), pref.end(), comparePref);
+		
+		for (int i = 0; i < seqs.size(); i++) { delete seqs[i];  }  seqs.clear();
 		
 		return 0;
 		

@@ -35,6 +35,7 @@ private:
 	string vertical, filter, fasta, hard, outputDir, filterFileName;
 	vector<string> fastafileNames;	
 	int alignmentLength, processors;
+	vector<int> bufferSizes;
 
 	char trump;
 	bool abort;
@@ -44,6 +45,10 @@ private:
 	string createFilter();
 	int createProcessesCreateFilter(Filters&, string);
 	int driverCreateFilter(Filters&, string, linePair*);
+	int MPICreateFilter(Filters&, string);	
+	int setLines(string);
+	int parseBuffer(string, vector<string>&);
+	
 };
 
 #endif

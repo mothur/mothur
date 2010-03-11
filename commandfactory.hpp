@@ -25,6 +25,7 @@ public:
 	void setOutputDirectory(string o)	{	outputDir = o;		}
 	void setInputDirectory(string i)	{	inputDir = i;		}
 	string getOutputDir()				{	return outputDir;	}
+	bool MPIEnabled(string);
 
 private:
 	Command* command;

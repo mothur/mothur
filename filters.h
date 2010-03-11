@@ -28,6 +28,8 @@ public:
 	void setSoft(float s)		{		soft = s;		}
 	void setTrump(float t)		{		trump = t;		}
 	void setNumSeqs(int num)	{	numSeqs = num;		}
+	vector<int> a, t, g, c, gap;
+	
 	
 	void initialize() {
 		a.assign(alignmentLength, 0);
@@ -89,7 +91,6 @@ public:
 		
 protected:
 	string filter;
-	vector<int> a, t, g, c, gap;
 	int alignmentLength, numSeqs;
 	float soft;
 	char trump;

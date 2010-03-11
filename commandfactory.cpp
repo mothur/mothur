@@ -117,7 +117,7 @@ CommandFactory::CommandFactory(){
 	commands["bootstrap.shared"]	= "bootstrap.shared";
 	//commands["consensus"]			= "consensus";
 	commands["help"]				= "help"; 
-	commands["filter.seqs"]			= "filter.seqs";
+	commands["filter.seqs"]			= "MPIEnabled";
 	commands["align.seqs"]			= "align.seqs";
 	commands["summary.seqs"]		= "summary.seqs";
 	commands["screen.seqs"]			= "screen.seqs";
@@ -131,7 +131,7 @@ CommandFactory::CommandFactory(){
 	commands["align.check"]			= "align.check";
 	commands["get.sharedseqs"]		= "get.sharedseqs";
 	commands["get.otulist"]			= "get.otulist";
-	commands["quit"]				= "quit"; 
+	commands["quit"]				= "MPIEnabled"; 
 	commands["hcluster"]			= "hcluster"; 
 	commands["classify.seqs"]		= "classify.seqs"; 
 	commands["phylotype"]			= "phylotype";
@@ -142,6 +142,17 @@ CommandFactory::CommandFactory(){
 	commands["set.dir"]				= "set.dir";
 	commands["merge.files"]			= "merge.files";
 	commands["parse.list"]			= "parse.list";
+}
+/***********************************************************/
+
+/***********************************************************/
+bool CommandFactory::MPIEnabled(string commandName) {
+	bool mpi = false;
+	it = commands.find(commandName);
+	if (it != commands.end()) { 
+		if (it->second == "MPIEnabled") { return true; }
+	}
+	return mpi;
 }
 /***********************************************************/
 
