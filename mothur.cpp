@@ -12,6 +12,7 @@
 #include "globaldata.hpp"
 #include "mothurout.h"
 
+
 /**************************************************************************************************/
 
 GlobalData* GlobalData::_uniqueInstance = 0;
@@ -99,7 +100,11 @@ int main(int argc, char *argv[]){
 		m->mothurOutEndLine();			
 		m->mothurOut("Type 'quit()' to exit program");
 		m->mothurOutEndLine();	
-
+		
+		#ifdef USE_MPI
+			m->mothurOutJustToLog("Using MPI\n");
+			MPI_Init(&argc, &argv); 
+		#endif
 				
 		//srand(54321);
 		srand( (unsigned)time( NULL ) );
@@ -130,7 +135,7 @@ int main(int argc, char *argv[]){
 			mothur = new InteractEngine(argv[0]);	
 		}
 		
-		while(bail == 0)		{	bail = mothur->getInput();			}
+		while(bail == 0)	{	bail = mothur->getInput();	}
 		
 		string outputDir = mothur->getOutputDir();
 		string newlogFileName = outputDir + logFileName;
@@ -139,7 +144,11 @@ int main(int argc, char *argv[]){
 		rename(logFileName.c_str(), newlogFileName.c_str()); //logfile with timestamp
 		
 		delete mothur;
-
+		
+		#ifdef USE_MPI
+			MPI_Finalize();
+		#endif
+		
 		return 0;
 	}
 	catch(exception& e) {

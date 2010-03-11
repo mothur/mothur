@@ -19,46 +19,101 @@ Sequence::Sequence(){
 /***********************************************************************/
 
 Sequence::Sequence(string newName, string sequence) {
-
-	initialize();	
-	name = newName;
-	
-	//setUnaligned removes any gap characters for us
-	setUnaligned(sequence);
-	setAligned(sequence);
-	
+	try {
+		m = MothurOut::getInstance();
+		initialize();	
+		name = newName;
+		
+		//setUnaligned removes any gap characters for us
+		setUnaligned(sequence);
+		setAligned(sequence);
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Sequence", "Sequence");
+		exit(1);
+	}			
 }
 //********************************************************************************************************************
 //this function will jump over commented out sequences, but if the last sequence in a file is commented out it makes a blank seq
-Sequence::Sequence(ifstream& fastaFile){
-
-	initialize();
-	fastaFile >> name;
-	name = name.substr(1);
-	string sequence;
-	
-	//read comments
-	while ((name[0] == '#') && fastaFile) { 
-	    while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-		sequence = getCommentString(fastaFile);
+Sequence::Sequence(istringstream& fastaString){
+	try {
+		m = MothurOut::getInstance();
+	int pid;
+	MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+	cout << pid << " after mothur instance " << &name << endl;
+		initialize();
+	cout << "after mothur initialize" << endl;
+		fastaString >> name;
+	cout << "after name "  << endl;
+		name = name.substr(1);
+		string sequence;
 		
-		if (fastaFile) {  
-			fastaFile >> name;  
-			name = name.substr(1);	
-		}else { 
-			name = "";
-			break;
+		//read comments
+		while ((name[0] == '#') && fastaString) { 
+			while (fastaString)	{	char c = fastaString.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+			sequence = getCommentString(fastaString);
+			
+			if (fastaString) {  
+				fastaString >> name;  
+				name = name.substr(1);	
+			}else { 
+				name = "";
+				break;
+			}
 		}
+	cout << "after mothur comment" << endl;	
+		//read real sequence
+		while (fastaString)	{	char c = fastaString.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+	cout << "after mothur name" << endl;	
+		sequence = getSequenceString(fastaString);		
+	cout << "after mothur sequence" << endl;	
+		setAligned(sequence);	
+		//setUnaligned removes any gap characters for us						
+		setUnaligned(sequence);		
 	}
-	
-	//read real sequence
-	while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+	catch(exception& e) {
+		m->errorOut(e, "Sequence", "Sequence");
+		exit(1);
+	}								
+}
+
+//********************************************************************************************************************
+//this function will jump over commented out sequences, but if the last sequence in a file is commented out it makes a blank seq
+Sequence::Sequence(ifstream& fastaFile){
+	try {
+		m = MothurOut::getInstance();
+		initialize();
+		fastaFile >> name;
+		name = name.substr(1);
+		string sequence;
 		
-	sequence = getSequenceString(fastaFile);		
-   	
-	setAligned(sequence);	
-	//setUnaligned removes any gap characters for us						
-	setUnaligned(sequence);								
+		//read comments
+		while ((name[0] == '#') && fastaFile) { 
+			while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+			sequence = getCommentString(fastaFile);
+			
+			if (fastaFile) {  
+				fastaFile >> name;  
+				name = name.substr(1);	
+			}else { 
+				name = "";
+				break;
+			}
+		}
+		
+		//read real sequence
+		while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+		
+		sequence = getSequenceString(fastaFile);		
+		
+		setAligned(sequence);	
+		//setUnaligned removes any gap characters for us						
+		setUnaligned(sequence);	
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Sequence", "Sequence");
+		exit(1);
+	}							
 }
 //********************************************************************************************************************
 string Sequence::getSequenceString(ifstream& fastaFile) {
@@ -108,7 +163,54 @@ string Sequence::getCommentString(ifstream& fastaFile) {
 		exit(1);
 	}
 }
-
+//********************************************************************************************************************
+string Sequence::getSequenceString(istringstream& fastaFile) {
+	try {
+		char letter;
+		string sequence = "";	
+		
+		while(fastaFile){
+			letter= fastaFile.get();
+			if(letter == '>'){
+				fastaFile.putback(letter);
+				break;
+			}
+			else if(isprint(letter)){
+				letter = toupper(letter);
+				if(letter == 'U'){letter = 'T';}
+				sequence += letter;
+			}
+		}
+		
+		return sequence;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Sequence", "getSequenceString");
+		exit(1);
+	}
+}
+//********************************************************************************************************************
+//comment can contain '>' so we need to account for that
+string Sequence::getCommentString(istringstream& fastaFile) {
+	try {
+		char letter;
+		string sequence = "";
+		
+		while(fastaFile){
+			letter=fastaFile.get();
+			if((letter == '\r') || (letter == '\n')){  
+				gobble(fastaFile);  //in case its a \r\n situation
+				break;
+			}
+		}
+		
+		return sequence;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Sequence", "getCommentString");
+		exit(1);
+	}
+}
 //********************************************************************************************************************
 
 void Sequence::initialize(){

@@ -26,7 +26,6 @@ class MothurOut {
 		void errorOut(exception&, string, string);
 		int control_pressed;
 		bool executing;
-		
 
 	private:
 		static MothurOut* _uniqueInstance;

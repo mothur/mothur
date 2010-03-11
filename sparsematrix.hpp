@@ -27,6 +27,7 @@ class SparseMatrix {
 	
 public:
 	SparseMatrix();
+	~SparseMatrix(){  while(!mins.empty() && mins.back() == NULL){  mins.pop_back();	}  }
 	int getNNodes();
 	void print();					//Print the contents of the matrix
 	void print(ListVector*);		//Print the contents of the matrix

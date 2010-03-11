@@ -54,7 +54,17 @@ bool InteractEngine::getInput(){
 			mout->mothurOutEndLine();
 			
 			input = getCommand();	
+			#ifdef USE_MPI
+					int pid;
+					MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+					
+					if (pid == 0) {
+			#endif
 			mout->mothurOutEndLine();	
+			
+			#ifdef USE_MPI
+				}
+			#endif
 			
 			if (mout->control_pressed) { input = "quit()"; }
 			
@@ -68,11 +78,22 @@ bool InteractEngine::getInput(){
 			
 			if (commandName != "") {
 				mout->executing = true;
+				
+				#ifdef USE_MPI
+					int pid;
+					MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+					
+					if ((cFactory->MPIEnabled(commandName)) || (pid == 0)) {
+				#endif
 				//executes valid command
 				Command* command = cFactory->getCommand(commandName, options);
 				quitCommandCalled = command->execute();
 				mout->control_pressed = 0;
 				mout->executing = false;
+				
+				#ifdef USE_MPI
+					}
+				#endif
 			}else {
 				mout->mothurOut("Your input contains errors. Please try again."); 
 				mout->mothurOutEndLine();
@@ -99,21 +120,83 @@ string Engine::getCommand()  {
 					cout << nextCommand << endl;
 				}	
 				
+				#ifdef USE_MPI
+					int pid;
+					MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+					
+					if (pid == 0) { //only one process should output to screen
+				#endif
+
 				mout->mothurOutJustToLog("mothur > " + toString(nextCommand));
+				
+				#ifdef USE_MPI
+					}
+				#endif
+				
 				return nextCommand;
 			#else
 				string nextCommand = "";
+				#ifdef USE_MPI
+					int pid;
+					MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+					
+					if (pid == 0) { //only one process should output to screen
+				#endif
+
 				mout->mothurOut("mothur > ");
+				
+				#ifdef USE_MPI
+					}
+				#endif
+				
 				getline(cin, nextCommand);
+				
+				#ifdef USE_MPI
+					int pid;
+					MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+					
+					if (pid == 0) { //only one process should output to screen
+				#endif
+				
 				mout->mothurOutJustToLog("mothur > " + toString(nextCommand));
+				
+				#ifdef USE_MPI
+					}
+				#endif
+
 				return nextCommand;
 			#endif
 		#else
 			string nextCommand = "";
-			mout->mothurOut("mothur > ");
-			getline(cin, nextCommand);
-			mout->mothurOutJustToLog("mothur > " + toString(nextCommand));
-			return nextCommand;
+				#ifdef USE_MPI
+					int pid;
+					MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+					
+					if (pid == 0) { //only one process should output to screen
+				#endif
+
+				mout->mothurOut("mothur > ");
+				
+				#ifdef USE_MPI
+					}
+				#endif
+				
+				getline(cin, nextCommand);
+				
+				#ifdef USE_MPI
+					int pid;
+					MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+					
+					if (pid == 0) { //only one process should output to screen
+				#endif
+				
+				mout->mothurOutJustToLog(toString(nextCommand));
+				
+				#ifdef USE_MPI
+					}
+				#endif
+
+				return nextCommand;
 		#endif
 		
 		mout->mothurOutEndLine();
@@ -169,9 +252,20 @@ bool BatchEngine::getInput(){
 			
 			if (input[0] != '#') {
 				
+				#ifdef USE_MPI
+					int pid;
+					MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+					
+					if (pid == 0) { //only one process should output to screen
+				#endif
+
 				mout->mothurOutEndLine();
 				mout->mothurOut("mothur > " + input);
 				mout->mothurOutEndLine();
+				
+				#ifdef USE_MPI
+					}
+				#endif
 				
 				if (mout->control_pressed) { input = "quit()"; }
 				
@@ -184,11 +278,21 @@ bool BatchEngine::getInput(){
 										
 				if (commandName != "") {
 					mout->executing = true;
+					#ifdef USE_MPI
+						int pid;
+						MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+					
+						if ((cFactory->MPIEnabled(commandName)) || (pid == 0)) {
+					#endif
 					//executes valid command
 					Command* command = cFactory->getCommand(commandName, options);
 					quitCommandCalled = command->execute();
 					mout->control_pressed = 0;
 					mout->executing = false;
+				
+					#ifdef USE_MPI
+						}
+					#endif
 				}else {		
 					mout->mothurOut("Invalid."); 
 					mout->mothurOutEndLine();
@@ -250,11 +354,21 @@ bool ScriptEngine::getInput(){
 			
 			if (input == "") { input = "quit()"; }
 			
-			
+			#ifdef USE_MPI
+					int pid;
+					MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+					
+					if (pid == 0) {
+			#endif
+
 			mout->mothurOutEndLine();
 			mout->mothurOut("mothur > " + input);
 			mout->mothurOutEndLine();
-
+			
+			#ifdef USE_MPI
+					}
+			#endif
+			
 			if (mout->control_pressed) { input = "quit()"; }
 				
 			//allow user to omit the () on the quit command
@@ -266,11 +380,21 @@ bool ScriptEngine::getInput(){
 										
 			if (commandName != "") {
 				mout->executing = true;
+				#ifdef USE_MPI
+					int pid;
+					MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+					
+					if ((cFactory->MPIEnabled(commandName)) || (pid == 0)) {
+				#endif
 				//executes valid command
 				Command* command = cFactory->getCommand(commandName, options);
 				quitCommandCalled = command->execute();
 				mout->control_pressed = 0;
 				mout->executing = false;
+				
+				#ifdef USE_MPI
+					}
+				#endif
 			}else {		
 				mout->mothurOut("Invalid."); 
 				mout->mothurOutEndLine();

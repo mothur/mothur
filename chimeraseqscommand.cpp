@@ -340,7 +340,8 @@ int ChimeraSeqsCommand::execute(){
 			m->mothurOut(outputFileName); m->mothurOutEndLine();	
 			if (hasAccnos) {  m->mothurOut(accnosFileName); m->mothurOutEndLine();  }
 			m->mothurOutEndLine();
-
+			
+			delete chimera;
 			return 0;
 		}
 		

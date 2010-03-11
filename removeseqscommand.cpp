@@ -279,10 +279,13 @@ int RemoveSeqsCommand::readList(){
 				}
 			
 				//get last name
-				if (names.count(binnames) == 0) {  newNames += binnames;  }
+				if (names.count(binnames) == 0) {  newNames += binnames + ",";  }
 
 				//if there are names in this bin add to new list
-				if (newNames != "") {  newList.push_back(newNames);	}
+				if (newNames != "") {  
+					newNames = newNames.substr(0, newNames.length()-1); //rip off extra comma
+					newList.push_back(newNames);	
+				}
 			}
 				
 			//print new listvector
