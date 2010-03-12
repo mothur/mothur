@@ -166,7 +166,7 @@ int DistanceCommand::execute(){
 		cutoff += 0.005;
 		
 		string outputFile;
-		
+				
 		if (output == "lt") { //does the user want lower triangle phylip formatted file 
 			outputFile = outputDir + getRootName(getSimpleName(fastafile)) + "phylip.dist";
 			remove(outputFile.c_str());
@@ -179,8 +179,64 @@ int DistanceCommand::execute(){
 			outputFile = outputDir + getRootName(getSimpleName(fastafile)) + "square.dist";
 			remove(outputFile.c_str());
 		}
+		
+
+#ifdef USE_MPI
+		
+		int pid, start, end; 
+		int tag = 2001;
 				
-#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		MPI_Status status; 
+		MPI_Comm_size(MPI_COMM_WORLD, &processors); //set processors to the number of mpi processes running
+		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+		
+		//each process gets where it should start and stop in the file
+		start = int (sqrt(float(pid)/float(processors)) * numSeqs);
+		end = int (sqrt(float(pid+1)/float(processors)) * numSeqs);
+		
+		if (pid == 0) { //you are the root process 
+			//do your part
+			string outputMyPart;
+			driverMPI(start, end, outputMyPart, cutoff);
+			
+			ofstream out;
+			openOutputFile(outputFile, out);
+			
+			out << outputMyPart;
+			
+			//get the childrens parts
+			for(int i = 1; i < processors; i++) { 
+				int length;
+				MPI_Recv(&length, 1, MPI_INT, i, tag, MPI_COMM_WORLD, &status); 
+				
+				char buf[length];
+					
+				MPI_Recv(buf, length, MPI_CHAR, i, tag, MPI_COMM_WORLD, &status); 
+				
+				outputMyPart = buf;
+				out << outputMyPart;
+			}
+			
+			out.close();
+			
+		}else { //you are a child process
+			//do your part
+			string outputMyPart;
+			driverMPI(start, end, outputMyPart, cutoff);
+		
+			//send results to parent
+			int length = outputMyPart.length();
+			char buf[length];
+			strcpy(buf, outputMyPart.c_str()); 
+			
+			MPI_Send( &length, 1, MPI_INT, 0, tag, MPI_COMM_WORLD);
+			MPI_Send(buf, length, MPI_CHAR, 0, tag, MPI_COMM_WORLD);
+		}
+		
+
+#else		
+				
+	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		//if you don't need to fork anything
 		if(processors == 1){
 			driver(0, numSeqs, outputFile, cutoff);
@@ -204,13 +260,25 @@ int DistanceCommand::execute(){
 				remove((outputFile + toString(it->second) + ".temp").c_str());
 			}
 		}
-#else
+	#else
 		ifstream inFASTA;
 		driver(0, numSeqs, outputFile, cutoff);
+	#endif
+	
 #endif
 		if (m->control_pressed) { delete distCalculator; remove(outputFile.c_str()); return 0; }
 		
+		#ifdef USE_MPI
+			MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+					
+			if (pid == 0) { //only one process should output to screen
+		#endif
+		
 		if (output == "square") {  convertMatrix(outputFile); }
+		
+		#ifdef USE_MPI
+			}
+		#endif
 		
 		if (m->control_pressed) { delete distCalculator; remove(outputFile.c_str()); return 0; }
 		
@@ -321,6 +389,62 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 		exit(1);
 	}
 }
+/**************************************************************************************************/
+/////// need to fix to work with calcs and sequencedb
+int DistanceCommand::driverMPI(int startLine, int endLine, string& outputString, float cutoff){
+	try {
+
+		int startTime = time(NULL);
+		
+		outputString = "";
+				
+		if((output == "lt") && startLine == 0){	outputString += (toString(alignDB.getNumSeqs()) + '\n');	}
+		
+		for(int i=startLine;i<endLine;i++){
+	
+			if(output == "lt")	{	
+				string name = alignDB.get(i).getName();
+				if (name.length() < 10) { //pad with spaces to make compatible
+					while (name.length() < 10) {  name += " ";  }
+				}
+				outputString += (name + '\t');	
+			}
+			for(int j=0;j<i;j++){
+				
+				if (m->control_pressed) {  return 0;  }
+				
+				distCalculator->calcDist(alignDB.get(i), alignDB.get(j));
+				double dist = distCalculator->getDist();
+				
+				if(dist <= cutoff){
+					if (output == "column") { outputString += (alignDB.get(i).getName() + ' ' + alignDB.get(j).getName() + ' ' + toString(dist) + '\n'); }
+				}
+				if (output == "lt") {   outputString += (toString(dist) + '\t'); }
+				
+				if (output == "square") { //make a square column you can convert to square phylip
+					outputString += (alignDB.get(i).getName() + ' ' + alignDB.get(j).getName() + ' ' + toString(dist) + '\n');
+					outputString += (alignDB.get(j).getName() + ' ' + alignDB.get(i).getName() + ' ' + toString(dist) + '\n');
+				}
+
+			}
+			
+			if (output == "lt") { outputString += '\n'; }
+			
+			if(i % 100 == 0){
+				m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+			}
+			
+		}
+		m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+		
+		return 1;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DistanceCommand", "driver");
+		exit(1);
+	}
+}
+
 /**************************************************************************************************/
 int DistanceCommand::convertMatrix(string outputFile) {
 	try{

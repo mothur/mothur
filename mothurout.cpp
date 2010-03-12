@@ -20,7 +20,19 @@ MothurOut* MothurOut::getInstance() {
 void MothurOut::setFileName(string filename)  {
 	try {
 		logFileName = filename;
+		
+		#ifdef USE_MPI
+			int pid;
+			MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+					
+			if (pid == 0) { //only one process should output to screen
+		#endif
+		
 		openOutputFile(filename, out);
+		
+		#ifdef USE_MPI
+			}
+		#endif
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "setFileName");
@@ -31,7 +43,19 @@ void MothurOut::setFileName(string filename)  {
 MothurOut::~MothurOut() {
 	try {
 		_uniqueInstance = 0;
+		
+		#ifdef USE_MPI
+			int pid;
+			MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+					
+			if (pid == 0) { //only one process should output to screen
+		#endif
+		
 		out.close();
+		
+		#ifdef USE_MPI
+			}
+		#endif
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOut");
@@ -42,10 +66,20 @@ MothurOut::~MothurOut() {
 /*********************************************************************************************/
 void MothurOut::mothurOut(string output) {
 	try {
-	
+		
+		#ifdef USE_MPI
+			int pid;
+			MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+					
+			if (pid == 0) { //only one process should output to screen
+		#endif
+		
 		cout << output;
 		out << output;
 		
+		#ifdef USE_MPI
+			}
+		#endif
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOut");
@@ -55,8 +89,19 @@ void MothurOut::mothurOut(string output) {
 /*********************************************************************************************/
 void MothurOut::mothurOutEndLine() {
 	try {
+		#ifdef USE_MPI
+			int pid;
+			MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+					
+			if (pid == 0) { //only one process should output to screen
+		#endif
+		
 		cout << endl;
 		out << endl;
+		
+		#ifdef USE_MPI
+			}
+		#endif
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOutEndLine");
@@ -66,7 +111,18 @@ void MothurOut::mothurOutEndLine() {
 /*********************************************************************************************/
 void MothurOut::mothurOutJustToLog(string output) {
 	try {
+		#ifdef USE_MPI
+			int pid;
+			MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+					
+			if (pid == 0) { //only one process should output to screen
+		#endif
+		
 		out << output;
+		
+		#ifdef USE_MPI
+			}
+		#endif
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "MothurOutJustToLog");

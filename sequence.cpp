@@ -44,13 +44,14 @@ Sequence::Sequence(istringstream& fastaString){
 		initialize();
 	cout << "after mothur initialize" << endl;
 		fastaString >> name;
-	cout << "after name "  << endl;
+	cout << pid << " after name "  << name << endl;
 		name = name.substr(1);
+
 		string sequence;
-		
+cout << pid << " name = "  << name << endl;		
 		//read comments
 		while ((name[0] == '#') && fastaString) { 
-			while (fastaString)	{	char c = fastaString.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+			while (!fastaString.eof())	{	char c = fastaString.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
 			sequence = getCommentString(fastaString);
 			
 			if (fastaString) {  
@@ -60,13 +61,13 @@ Sequence::Sequence(istringstream& fastaString){
 				name = "";
 				break;
 			}
+			cout << pid << "in while comment" << endl;	
 		}
-	cout << "after mothur comment" << endl;	
-		//read real sequence
-		while (fastaString)	{	char c = fastaString.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-	cout << "after mothur name" << endl;	
+	cout << pid << "after mothur comment" << endl;	
+		while (!fastaString.eof())	{	char c = fastaString.get(); cout << pid << " char = " << int(c) << endl; if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+	cout << pid << " after mothur name" << endl;	
 		sequence = getSequenceString(fastaString);		
-	cout << "after mothur sequence" << endl;	
+	cout << pid << " after mothur sequence" << endl;	
 		setAligned(sequence);	
 		//setUnaligned removes any gap characters for us						
 		setUnaligned(sequence);		
@@ -168,9 +169,11 @@ string Sequence::getSequenceString(istringstream& fastaFile) {
 	try {
 		char letter;
 		string sequence = "";	
-		
-		while(fastaFile){
+int pid;
+MPI_Comm_rank(MPI_COMM_WORLD, &pid); 		
+		while(!fastaFile.eof()){
 			letter= fastaFile.get();
+	cout << pid << '\t' << letter << endl;
 			if(letter == '>'){
 				fastaFile.putback(letter);
 				break;

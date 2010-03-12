@@ -54,17 +54,7 @@ bool InteractEngine::getInput(){
 			mout->mothurOutEndLine();
 			
 			input = getCommand();	
-			#ifdef USE_MPI
-					int pid;
-					MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-					
-					if (pid == 0) {
-			#endif
 			mout->mothurOutEndLine();	
-			
-			#ifdef USE_MPI
-				}
-			#endif
 			
 			if (mout->control_pressed) { input = "quit()"; }
 			
@@ -117,85 +107,26 @@ string Engine::getCommand()  {
 				if(nextCommand != NULL) {  add_history(nextCommand);  }	
 				else{ //^D causes null string and we want it to quit mothur
 					nextCommand = "quit"; 
-					cout << nextCommand << endl;
+					mout->mothurOut(nextCommand);
 				}	
 				
-				#ifdef USE_MPI
-					int pid;
-					MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-					
-					if (pid == 0) { //only one process should output to screen
-				#endif
-
 				mout->mothurOutJustToLog("mothur > " + toString(nextCommand));
-				
-				#ifdef USE_MPI
-					}
-				#endif
-				
 				return nextCommand;
 			#else
 				string nextCommand = "";
-				#ifdef USE_MPI
-					int pid;
-					MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-					
-					if (pid == 0) { //only one process should output to screen
-				#endif
-
 				mout->mothurOut("mothur > ");
-				
-				#ifdef USE_MPI
-					}
-				#endif
-				
 				getline(cin, nextCommand);
-				
-				#ifdef USE_MPI
-					int pid;
-					MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-					
-					if (pid == 0) { //only one process should output to screen
-				#endif
-				
 				mout->mothurOutJustToLog("mothur > " + toString(nextCommand));
 				
-				#ifdef USE_MPI
-					}
-				#endif
-
 				return nextCommand;
 			#endif
 		#else
-			string nextCommand = "";
-				#ifdef USE_MPI
-					int pid;
-					MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-					
-					if (pid == 0) { //only one process should output to screen
-				#endif
-
+				string nextCommand = "";
+				
 				mout->mothurOut("mothur > ");
-				
-				#ifdef USE_MPI
-					}
-				#endif
-				
 				getline(cin, nextCommand);
-				
-				#ifdef USE_MPI
-					int pid;
-					MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-					
-					if (pid == 0) { //only one process should output to screen
-				#endif
-				
 				mout->mothurOutJustToLog(toString(nextCommand));
 				
-				#ifdef USE_MPI
-					}
-				#endif
-
 				return nextCommand;
 		#endif
 		
@@ -252,21 +183,10 @@ bool BatchEngine::getInput(){
 			
 			if (input[0] != '#') {
 				
-				#ifdef USE_MPI
-					int pid;
-					MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-					
-					if (pid == 0) { //only one process should output to screen
-				#endif
-
 				mout->mothurOutEndLine();
 				mout->mothurOut("mothur > " + input);
 				mout->mothurOutEndLine();
-				
-				#ifdef USE_MPI
-					}
-				#endif
-				
+							
 				if (mout->control_pressed) { input = "quit()"; }
 				
 				//allow user to omit the () on the quit command
@@ -354,20 +274,9 @@ bool ScriptEngine::getInput(){
 			
 			if (input == "") { input = "quit()"; }
 			
-			#ifdef USE_MPI
-					int pid;
-					MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-					
-					if (pid == 0) {
-			#endif
-
 			mout->mothurOutEndLine();
 			mout->mothurOut("mothur > " + input);
 			mout->mothurOutEndLine();
-			
-			#ifdef USE_MPI
-					}
-			#endif
 			
 			if (mout->control_pressed) { input = "quit()"; }
 				
