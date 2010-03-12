@@ -43,8 +43,13 @@ int main(int argc, char *argv[]){
 		time_t ltime = time(NULL); /* calendar time */  
 		string logFileName = "mothur." + toString(ltime) + ".logfile";
 		
+		#ifdef USE_MPI
+			MPI_Init(&argc, &argv); 
+		#endif
+
 		m->setFileName(logFileName);
 		
+				
 		//version
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			system("clear");
@@ -103,9 +108,8 @@ int main(int argc, char *argv[]){
 		
 		#ifdef USE_MPI
 			m->mothurOutJustToLog("Using MPI\n");
-			MPI_Init(&argc, &argv); 
 		#endif
-				
+		
 		//srand(54321);
 		srand( (unsigned)time( NULL ) );
 		

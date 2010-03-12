@@ -94,7 +94,7 @@ CommandFactory::CommandFactory(){
 	commands["get.oturep"]			= "get.oturep";
 	commands["cluster"]				= "cluster"; 
 	commands["unique.seqs"]			= "unique.seqs"; 
-	commands["dist.seqs"]			= "dist.seqs";
+	commands["dist.seqs"]			= "MPIEnabled";
 	commands["dist.shared"]			= "dist.shared";
 	commands["collect.single"]		= "collect.single"; 
 	commands["collect.shared"]		= "collect.shared"; 
