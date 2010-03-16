@@ -45,7 +45,7 @@ private:
 	string createFilter();
 	int createProcessesCreateFilter(Filters&, string);
 	int driverCreateFilter(Filters&, string, linePair*);
-	int MPICreateFilter(Filters&, vector<string>&);	
+	int MPICreateFilter(Filters&, string);	
 	int setLines(string);
 	int parseBuffer(string, vector<string>&);
 	

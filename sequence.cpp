@@ -38,17 +38,12 @@ Sequence::Sequence(string newName, string sequence) {
 Sequence::Sequence(istringstream& fastaString){
 	try {
 		m = MothurOut::getInstance();
-	int pid;
-	MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-	cout << pid << " after mothur instance " << &name << endl;
+	
 		initialize();
-	cout << "after mothur initialize" << endl;
 		fastaString >> name;
-	cout << pid << " after name "  << name << endl;
 		name = name.substr(1);
-
 		string sequence;
-cout << pid << " name = "  << name << endl;		
+	
 		//read comments
 		while ((name[0] == '#') && fastaString) { 
 			while (!fastaString.eof())	{	char c = fastaString.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
@@ -61,13 +56,11 @@ cout << pid << " name = "  << name << endl;
 				name = "";
 				break;
 			}
-			cout << pid << "in while comment" << endl;	
 		}
-	cout << pid << "after mothur comment" << endl;	
-		while (!fastaString.eof())	{	char c = fastaString.get(); cout << pid << " char = " << int(c) << endl; if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-	cout << pid << " after mothur name" << endl;	
+		
+		while (!fastaString.eof())	{	char c = fastaString.get();  if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+		
 		sequence = getSequenceString(fastaString);		
-	cout << pid << " after mothur sequence" << endl;	
 		setAligned(sequence);	
 		//setUnaligned removes any gap characters for us						
 		setUnaligned(sequence);		
@@ -169,11 +162,10 @@ string Sequence::getSequenceString(istringstream& fastaFile) {
 	try {
 		char letter;
 		string sequence = "";	
-int pid;
-MPI_Comm_rank(MPI_COMM_WORLD, &pid); 		
+		
 		while(!fastaFile.eof()){
 			letter= fastaFile.get();
-	cout << pid << '\t' << letter << endl;
+	
 			if(letter == '>'){
 				fastaFile.putback(letter);
 				break;

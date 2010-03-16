@@ -194,46 +194,42 @@ int DistanceCommand::execute(){
 		start = int (sqrt(float(pid)/float(processors)) * numSeqs);
 		end = int (sqrt(float(pid+1)/float(processors)) * numSeqs);
 		
+		MPI_File outMPI;
+		int amode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
+		
+		char filename[outputFile.length()];
+		strcpy(filename, outputFile.c_str());
+		
+		MPI_File_open(MPI_COMM_WORLD, filename, amode, MPI_INFO_NULL, &outMPI);
+		
 		if (pid == 0) { //you are the root process 
+		
 			//do your part
 			string outputMyPart;
-			driverMPI(start, end, outputMyPart, cutoff);
+			driverMPI(start, end, outMPI, cutoff);
 			
-			ofstream out;
-			openOutputFile(outputFile, out);
-			
-			out << outputMyPart;
-			
-			//get the childrens parts
+			//wait on chidren
 			for(int i = 1; i < processors; i++) { 
-				int length;
-				MPI_Recv(&length, 1, MPI_INT, i, tag, MPI_COMM_WORLD, &status); 
-				
-				char buf[length];
-					
-				MPI_Recv(buf, length, MPI_CHAR, i, tag, MPI_COMM_WORLD, &status); 
-				
-				outputMyPart = buf;
-				out << outputMyPart;
+				char buf[4];
+				MPI_Recv(buf, 4, MPI_CHAR, i, tag, MPI_COMM_WORLD, &status); 
 			}
 			
-			out.close();
+			if (output == "lt") {
+				convertToLowerTriangle(outputFile);
+			}
 			
 		}else { //you are a child process
 			//do your part
-			string outputMyPart;
-			driverMPI(start, end, outputMyPart, cutoff);
+			driverMPI(start, end, outMPI, cutoff);
 		
-			//send results to parent
-			int length = outputMyPart.length();
-			char buf[length];
-			strcpy(buf, outputMyPart.c_str()); 
+			char buf[4];
+			strcpy(buf, "done"); 
 			
-			MPI_Send( &length, 1, MPI_INT, 0, tag, MPI_COMM_WORLD);
-			MPI_Send(buf, length, MPI_CHAR, 0, tag, MPI_COMM_WORLD);
+			//tell parent you are done.
+			MPI_Send(buf, 4, MPI_CHAR, 0, tag, MPI_COMM_WORLD);
 		}
 		
-
+		MPI_File_close(&outMPI);
 #else		
 				
 	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -391,24 +387,15 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 }
 /**************************************************************************************************/
 /////// need to fix to work with calcs and sequencedb
-int DistanceCommand::driverMPI(int startLine, int endLine, string& outputString, float cutoff){
+int DistanceCommand::driverMPI(int startLine, int endLine, MPI_File& outMPI, float cutoff){
 	try {
-
+		MPI_Status status;
 		int startTime = time(NULL);
 		
-		outputString = "";
-				
-		if((output == "lt") && startLine == 0){	outputString += (toString(alignDB.getNumSeqs()) + '\n');	}
+		string outputString = "";
 		
 		for(int i=startLine;i<endLine;i++){
 	
-			if(output == "lt")	{	
-				string name = alignDB.get(i).getName();
-				if (name.length() < 10) { //pad with spaces to make compatible
-					while (name.length() < 10) {  name += " ";  }
-				}
-				outputString += (name + '\t');	
-			}
 			for(int j=0;j<i;j++){
 				
 				if (m->control_pressed) {  return 0;  }
@@ -419,23 +406,40 @@ int DistanceCommand::driverMPI(int startLine, int endLine, string& outputString,
 				if(dist <= cutoff){
 					if (output == "column") { outputString += (alignDB.get(i).getName() + ' ' + alignDB.get(j).getName() + ' ' + toString(dist) + '\n'); }
 				}
-				if (output == "lt") {   outputString += (toString(dist) + '\t'); }
 				
-				if (output == "square") { //make a square column you can convert to square phylip
+				if ((output == "square") || (output == "lt")){ //make a square column you can convert to square phylip
 					outputString += (alignDB.get(i).getName() + ' ' + alignDB.get(j).getName() + ' ' + toString(dist) + '\n');
 					outputString += (alignDB.get(j).getName() + ' ' + alignDB.get(i).getName() + ' ' + toString(dist) + '\n');
 				}
 
 			}
 			
-			if (output == "lt") { outputString += '\n'; }
-			
 			if(i % 100 == 0){
 				m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
 			}
 			
+			if(i % 10 == 0){ //output to file 
+				//send results to parent
+				int length = outputString.length();
+				char buf[length];
+				strcpy(buf, outputString.c_str()); 
+				
+				MPI_File_write_shared(outMPI, buf, length, MPI_CHAR, &status);
+				outputString = "";
+			}
+			
 		}
+		
 		m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+		if(outputString != ""){ //output to file 
+				//send results to parent
+				int length = outputString.length();
+				char buf[length];
+				strcpy(buf, outputString.c_str()); 
+				
+				MPI_File_write_shared(outMPI, buf, length, MPI_CHAR, &status);
+				outputString = "";
+		}
 		
 		return 1;
 	}
@@ -530,6 +534,100 @@ int DistanceCommand::convertMatrix(string outputFile) {
 	}
 	catch(exception& e) {
 		m->errorOut(e, "DistanceCommand", "convertMatrix");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+int DistanceCommand::convertToLowerTriangle(string outputFile) {
+	try{
+
+		//sort file by first column so the distances for each row are together
+		string outfile = getRootName(outputFile) + "sorted.dist.temp";
+		
+		//use the unix sort 
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			string command = "sort -n " + outputFile + " -o " + outfile;
+			system(command.c_str());
+		#else //sort using windows sort
+			string command = "sort " + outputFile + " /O " + outfile;
+			system(command.c_str());
+		#endif
+		
+
+		//output to new file distance for each row and save positions in file where new row begins
+		ifstream in;
+		openInputFile(outfile, in);
+		
+		ofstream out;
+		openOutputFile(outputFile, out);
+		
+		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+
+		out << alignDB.getNumSeqs() << endl;
+		
+		//get first currentRow
+		string first, currentRow, second;
+		float dist;
+		int i, j;
+		i = 0; j = 0;
+		map<string, float> rowDists; //take advantage of the fact that maps are already sorted by key 
+		map<string, float>::iterator it;
+		
+		in >> first;
+		currentRow = first;
+		
+		rowDists[first] = 0.00; //distance to yourself is 0.0
+		
+		in.seekg(0);
+		//openInputFile(outfile, in);
+		
+		while(!in.eof()) {
+			if (m->control_pressed) { in.close(); remove(outfile.c_str()); out.close(); return 0; }
+			
+			in >> first >> second >> dist; gobble(in);
+				
+			if (first != currentRow) {
+				//print out last row
+				out << currentRow << '\t'; //print name
+
+				//print dists
+				for (it = rowDists.begin(); it != rowDists.end(); it++) {
+					if (j >= i) { break; }
+					out << it->second << '\t';
+					j++;
+				}
+				out << endl;
+				
+				//start new row
+				currentRow = first;
+				rowDists.clear();
+				rowDists[first] = 0.00;
+				rowDists[second] = dist;
+				j = 0;
+				i++;
+			}else{
+				rowDists[second] = dist;
+			}
+		}
+		//print out last row
+		out << currentRow << '\t'; //print name
+				
+		//print dists
+		for (it = rowDists.begin(); it != rowDists.end(); it++) {
+			out << it->second << '\t';
+		}
+		out << endl;
+		
+		in.close();
+		out.close();
+		
+		remove(outfile.c_str());
+		
+		return 1;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DistanceCommand", "convertToLowerTriangle");
 		exit(1);
 	}
 }
