@@ -46,9 +46,10 @@ private:
 	//void appendFiles(string, string);
 	void createProcesses(string);
 	int driver(/*Dist*, SequenceDB, */int, int, string, float);
-	int driverMPI(int, int, string&, float);
+	int driverMPI(int, int, MPI_File&, float);
 	
 	int convertMatrix(string);
+	int convertToLowerTriangle(string);
 
 };
 

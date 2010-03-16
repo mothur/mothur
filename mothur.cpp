@@ -107,7 +107,10 @@ int main(int argc, char *argv[]){
 		m->mothurOutEndLine();	
 		
 		#ifdef USE_MPI
-			m->mothurOutJustToLog("Using MPI\n");
+			m->mothurOutJustToLog("Using MPI\tversion ");
+			int version, subversion;
+			MPI_Get_version(&version, &subversion);
+			m->mothurOutJustToLog(toString(version) + "." + toString(subversion) + "\n");
 		#endif
 		
 		//srand(54321);
