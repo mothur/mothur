@@ -385,6 +385,7 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 		exit(1);
 	}
 }
+#ifdef USE_MPI
 /**************************************************************************************************/
 /////// need to fix to work with calcs and sequencedb
 int DistanceCommand::driverMPI(int startLine, int endLine, MPI_File& outMPI, float cutoff){
@@ -444,11 +445,11 @@ int DistanceCommand::driverMPI(int startLine, int endLine, MPI_File& outMPI, flo
 		return 1;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "DistanceCommand", "driver");
+		m->errorOut(e, "DistanceCommand", "driverMPI");
 		exit(1);
 	}
 }
-
+#endif
 /**************************************************************************************************/
 int DistanceCommand::convertMatrix(string outputFile) {
 	try{
