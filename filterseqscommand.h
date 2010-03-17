@@ -30,12 +30,13 @@ private:
 		linePair(long int i, int j) : start(i), numSeqs(j) {}
 	};
 	vector<linePair*> lines;
-
+	vector<int> processIDS;
 
 	string vertical, filter, fasta, hard, outputDir, filterFileName;
 	vector<string> fastafileNames;	
 	int alignmentLength, processors;
 	vector<int> bufferSizes;
+	vector<string> outputNames;
 
 	char trump;
 	bool abort;
@@ -43,8 +44,12 @@ private:
 	int numSeqs;
 	
 	string createFilter();
+	int filterSequences();
 	int createProcessesCreateFilter(Filters&, string);
+	int createProcessesRunFilter(string, string);
 	int driverCreateFilter(Filters&, string, linePair*);
+	int driverRunFilter(string, string, string, linePair*);	
+	int driverMPIRun(istringstream&, MPI_File&);
 	int MPICreateFilter(Filters&, string);	
 	int setLines(string);
 	int parseBuffer(string, vector<string>&);

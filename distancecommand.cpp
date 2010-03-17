@@ -193,7 +193,7 @@ int DistanceCommand::execute(){
 		//each process gets where it should start and stop in the file
 		start = int (sqrt(float(pid)/float(processors)) * numSeqs);
 		end = int (sqrt(float(pid+1)/float(processors)) * numSeqs);
-		
+	
 		MPI_File outMPI;
 		int amode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
 		
