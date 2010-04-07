@@ -942,5 +942,77 @@ inline string sortFile(string distFile){
 	}	
 }
 /**************************************************************************************************/
+inline vector<long> setFilePosFasta(string filename, int& num) {
+
+			vector<long> positions;
+			ifstream inFASTA;
+			openInputFile(filename, inFASTA);
+				
+			string input;
+			while(!inFASTA.eof()){
+				input = getline(inFASTA); gobble(inFASTA);
+				if (input.length() != 0) {
+					if(input[0] == '>'){	long pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
+				}
+			}
+			inFASTA.close();
+		
+			num = positions.size();
+		
+			FILE * pFile;
+			long size;
+		
+			//get num bytes in file
+			pFile = fopen (filename.c_str(),"rb");
+			if (pFile==NULL) perror ("Error opening file");
+			else{
+				fseek (pFile, 0, SEEK_END);
+				size=ftell (pFile);
+				fclose (pFile);
+			}
+		
+			positions.push_back(size);
+		
+			return positions;
+}
+/**************************************************************************************************/
+inline vector<long> setFilePosEachLine(string filename, int& num) {
+
+			vector<long> positions;
+			ifstream in;
+			openInputFile(filename, in);
+				
+			string input;
+			while(!in.eof()){
+				long lastpos = in.tellg();
+				input = getline(in); gobble(in);
+				if (input.length() != 0) {
+					long pos = in.tellg(); 
+					if (pos != -1) { positions.push_back(pos - input.length() - 1);	}
+					else {  positions.push_back(lastpos);  }
+				}
+			}
+			in.close();
+		
+			num = positions.size();
+		
+			FILE * pFile;
+			long size;
+		
+			//get num bytes in file
+			pFile = fopen (filename.c_str(),"rb");
+			if (pFile==NULL) perror ("Error opening file");
+			else{
+				fseek (pFile, 0, SEEK_END);
+				size=ftell (pFile);
+				fclose (pFile);
+			}
+		
+			positions.push_back(size);
+		
+			return positions;
+}
+
+/**************************************************************************************************/
 #endif
 

@@ -162,6 +162,8 @@ int DistanceCommand::execute(){
 		
 		if (abort == true) { return 0; }
 		
+		int startTime = time(NULL);
+		
 		int numSeqs = alignDB.getNumSeqs();
 		cutoff += 0.005;
 		
@@ -193,43 +195,104 @@ int DistanceCommand::execute(){
 		//each process gets where it should start and stop in the file
 		start = int (sqrt(float(pid)/float(processors)) * numSeqs);
 		end = int (sqrt(float(pid+1)/float(processors)) * numSeqs);
-	
-		MPI_File outMPI;
-		int amode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
 		
-		char filename[outputFile.length()];
-		strcpy(filename, outputFile.c_str());
-		
-		MPI_File_open(MPI_COMM_WORLD, filename, amode, MPI_INFO_NULL, &outMPI);
-		
-		if (pid == 0) { //you are the root process 
-		
-			//do your part
-			string outputMyPart;
-			driverMPI(start, end, outMPI, cutoff);
+		if (output != "lt") {
+			MPI_File outMPI;
+			int amode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
 			
-			//wait on chidren
-			for(int i = 1; i < processors; i++) { 
+			char filename[outputFile.length()];
+			strcpy(filename, outputFile.c_str());
+			
+			MPI_File_open(MPI_COMM_WORLD, filename, amode, MPI_INFO_NULL, &outMPI);
+			
+			if (m->control_pressed) {   MPI_File_close(&outMPI);  delete distCalculator;  return 0;  }
+
+			if (pid == 0) { //you are the root process 
+			
+				//do your part
+				string outputMyPart;
+				driverMPI(start, end, outMPI, cutoff);
+				
+				if (m->control_pressed) { MPI_File_close(&outMPI);  delete distCalculator;  return 0; }
+			
+				//wait on chidren
+				for(int i = 1; i < processors; i++) { 
+					if (m->control_pressed) { MPI_File_close(&outMPI);  delete distCalculator;  return 0; }
+					
+					char buf[4];
+					MPI_Recv(buf, 4, MPI_CHAR, i, tag, MPI_COMM_WORLD, &status); 
+				}
+			}else { //you are a child process
+				//do your part
+				driverMPI(start, end, outMPI, cutoff);
+				
+				if (m->control_pressed) { MPI_File_close(&outMPI);  delete distCalculator;  return 0; }
+			
 				char buf[4];
-				MPI_Recv(buf, 4, MPI_CHAR, i, tag, MPI_COMM_WORLD, &status); 
+				strcpy(buf, "done"); 
+				//tell parent you are done.
+				MPI_Send(buf, 4, MPI_CHAR, 0, tag, MPI_COMM_WORLD);
 			}
 			
-			if (output == "lt") {
-				convertToLowerTriangle(outputFile);
+			MPI_File_close(&outMPI);
+			
+		}else { //lower triangle format
+			if (pid == 0) { //you are the root process 
+			
+				//do your part
+				string outputMyPart;
+				long mySize;
+				driverMPI(start, end, outputFile, mySize);
+	
+				if (m->control_pressed) {  delete distCalculator;  return 0; }
+				
+				int amode=MPI_MODE_APPEND|MPI_MODE_WRONLY|MPI_MODE_CREATE; //
+				MPI_File outMPI;
+				MPI_File inMPI;
+			
+				char filename[outputFile.length()];
+				strcpy(filename, outputFile.c_str());
+			
+				MPI_File_open(MPI_COMM_SELF, filename, amode, MPI_INFO_NULL, &outMPI);
+
+				//wait on chidren
+				for(int b = 1; b < processors; b++) { 
+					long fileSize;
+					
+					if (m->control_pressed) { MPI_File_close(&outMPI);  delete distCalculator;  return 0; }
+					
+					MPI_Recv(&fileSize, 1, MPI_LONG, b, tag, MPI_COMM_WORLD, &status); 
+					
+					string outTemp = outputFile + toString(b) + ".temp";
+					char buf[outTemp.length()];
+					strcpy(buf, outTemp.c_str());
+					
+					MPI_File_open(MPI_COMM_SELF, buf, MPI_MODE_DELETE_ON_CLOSE|MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);
+					
+					int count = 0;
+					while (count < fileSize) { //read 1000 characters at a time
+						//send freqs
+						char buf2[1];
+						MPI_File_read(inMPI, buf2, 1, MPI_CHAR, &status);
+						MPI_File_write(outMPI, buf2, 1, MPI_CHAR, &status);
+						count += 1;
+					}
+					
+					MPI_File_close(&inMPI); //deleted on close
+				}
+				
+				MPI_File_close(&outMPI);
+			}else { //you are a child process
+				//do your part
+				long size;
+				driverMPI(start, end, (outputFile + toString(pid) + ".temp"), size);
+				
+				if (m->control_pressed) { delete distCalculator;  return 0; }
+			
+				//tell parent you are done.
+				MPI_Send(&size, 1, MPI_LONG, 0, tag, MPI_COMM_WORLD);
 			}
-			
-		}else { //you are a child process
-			//do your part
-			driverMPI(start, end, outMPI, cutoff);
-		
-			char buf[4];
-			strcpy(buf, "done"); 
-			
-			//tell parent you are done.
-			MPI_Send(buf, 4, MPI_CHAR, 0, tag, MPI_COMM_WORLD);
 		}
-		
-		MPI_File_close(&outMPI);
 #else		
 				
 	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -284,7 +347,7 @@ int DistanceCommand::execute(){
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
 		m->mothurOut(outputFile); m->mothurOutEndLine();
 		m->mothurOutEndLine();
-
+		m->mothurOut("It took " + toString(time(NULL) - startTime) + " to calculate the distances for " + toString(numSeqs) + " sequences."); m->mothurOutEndLine();
 		return 0;
 		
 	}
@@ -408,39 +471,100 @@ int DistanceCommand::driverMPI(int startLine, int endLine, MPI_File& outMPI, flo
 					if (output == "column") { outputString += (alignDB.get(i).getName() + ' ' + alignDB.get(j).getName() + ' ' + toString(dist) + '\n'); }
 				}
 				
-				if ((output == "square") || (output == "lt")){ //make a square column you can convert to square phylip
+				if (output == "square") { //make a square column you can convert to square phylip
 					outputString += (alignDB.get(i).getName() + ' ' + alignDB.get(j).getName() + ' ' + toString(dist) + '\n');
 					outputString += (alignDB.get(j).getName() + ' ' + alignDB.get(i).getName() + ' ' + toString(dist) + '\n');
 				}
-
 			}
 			
 			if(i % 100 == 0){
-				m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+				//m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+				cout << i << '\t' << (time(NULL) - startTime) << endl;
 			}
 			
-			if(i % 10 == 0){ //output to file 
-				//send results to parent
-				int length = outputString.length();
-				char buf[length];
-				strcpy(buf, outputString.c_str()); 
-				
-				MPI_File_write_shared(outMPI, buf, length, MPI_CHAR, &status);
-				outputString = "";
-			}
+			 
+			//send results to parent
+			int length = outputString.length();
+			char buf[length];
+			strcpy(buf, outputString.c_str()); 
+			
+			MPI_File_write_shared(outMPI, buf, length, MPI_CHAR, &status);
+			outputString = "";
 			
 		}
 		
-		m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
-		if(outputString != ""){ //output to file 
-				//send results to parent
-				int length = outputString.length();
-				char buf[length];
-				strcpy(buf, outputString.c_str()); 
+		//m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+		cout << (endLine-1) << '\t' << (time(NULL) - startTime) << endl;		
+		return 1;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DistanceCommand", "driverMPI");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+/////// need to fix to work with calcs and sequencedb
+int DistanceCommand::driverMPI(int startLine, int endLine, string file, long& size){
+	try {
+		MPI_Status status;
+		
+		MPI_File outMPI;
+		int amode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
+		
+		char filename[file.length()];
+		strcpy(filename, file.c_str());
+		
+		MPI_File_open(MPI_COMM_SELF, filename, amode, MPI_INFO_NULL, &outMPI);
+
+		int startTime = time(NULL);
+		
+		string outputString = "";
+		size = 0;
+		
+		if((output == "lt") && startLine == 0){	outputString += toString(alignDB.getNumSeqs()) + "\n";	}
+		
+		for(int i=startLine;i<endLine;i++){
+			if(output == "lt")	{	
+				string name = alignDB.get(i).getName();
+				if (name.length() < 10) { //pad with spaces to make compatible
+					while (name.length() < 10) {  name += " ";  }
+				}
+				outputString += name + "\t";	
+			}
+			for(int j=0;j<i;j++){
 				
-				MPI_File_write_shared(outMPI, buf, length, MPI_CHAR, &status);
-				outputString = "";
+				if (m->control_pressed) {  return 0;  }
+				
+				distCalculator->calcDist(alignDB.get(i), alignDB.get(j));
+				double dist = distCalculator->getDist();
+				
+				if (output == "lt") {  outputString += toString(dist) + "\t"; }
+			}
+			
+			if (output == "lt") { outputString += "\n"; }
+
+		
+			if(i % 100 == 0){
+				//m->mothurOut(toString(i) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+				cout << i << '\t' << (time(NULL) - startTime) << endl;
+			}
+			
+			
+			//send results to parent
+			int length = outputString.length();
+			char buf[length];
+			strcpy(buf, outputString.c_str()); 
+			
+			MPI_File_write(outMPI, buf, length, MPI_CHAR, &status);
+			size += outputString.length();
+			outputString = "";
+			
+			
 		}
+		
+		//m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();
+		cout << (endLine-1) << '\t' << (time(NULL) - startTime) << endl;
+		MPI_File_close(&outMPI);
 		
 		return 1;
 	}

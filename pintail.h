@@ -24,7 +24,7 @@
 class Pintail : public Chimera {
 	
 	public:
-		Pintail(string, string);	
+		Pintail(string, string, bool, int, string, string, string, int, int, string); //fastafile, templatefile, filter, processors, mask, conservation, quantile, window, increment, outputDir)	
 		~Pintail();
 		
 		int getChimeras(Sequence*);
@@ -33,13 +33,16 @@ class Pintail : public Chimera {
 		void setCons(string c)		{ consfile = c;  }
 		void setQuantiles(string q) { quanfile = q;  }
 		
+		#ifdef USE_MPI
+		int print(MPI_File&, MPI_File&);
+		#endif
 		
 	private:
 	
 		Dist* distcalculator;
 		DeCalculator* decalc;
-		int iters;
-		string fastafile, consfile;
+		int iters, window, increment, processors;
+		string fastafile, quanfile, consfile;
 		
 		vector<linePair*> templateLines;
 		Sequence* querySeq;
@@ -52,7 +55,7 @@ class Pintail : public Chimera {
 		vector<int>  windowsForeachQuery;  // windowsForeachQuery is a vector containing the starting spot in query aligned sequence for each window.
 										//this is needed so you can move by bases and not just spots in the alignment
 										
-		int windowSizes;			//windowSizes = window size of query
+		int  windowSizes;			//windowSizes = window size of query
 		vector<int> windowSizesTemplate;    //windowSizesTemplate[0] = window size of templateSeqs[0]
 		
 		map<int, int> trimmed;    //trimmed = start and stop of trimmed sequences for query
@@ -67,12 +70,13 @@ class Pintail : public Chimera {
 		set<int>  h;
 		string mergedFilterString;
 		
-		
+		vector< vector<float> > readQuantiles();
 		vector<float> readFreq();
 		Sequence* findPairs(Sequence*);
 			
 		void createProcessesQuan();
 		int doPrep();
+		void printQuanFile(string, string);
 		
 };
 

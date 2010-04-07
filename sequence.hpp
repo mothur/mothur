@@ -47,6 +47,9 @@ public:
 	bool getIsAligned();
 	void printSequence(ostream&);
 	
+	int MPISend(int); //not working at the moment...
+	int MPIRecv(int); //not working at the moment...
+	
 private:
 	MothurOut* m;
 	void initialize();

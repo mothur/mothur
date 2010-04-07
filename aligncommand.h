@@ -32,6 +32,7 @@ private:
 	};
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;
+	bool MPIWroteAccnos;
 	
 	AlignmentDB* templateDB;
 	Alignment* alignment;
@@ -40,6 +41,10 @@ private:
 	int createProcesses(string, string, string, string);
 	void appendAlignFiles(string, string); 
 	void appendReportFiles(string, string);
+	
+	#ifdef USE_MPI
+	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, vector<long>&);
+	#endif
 	
 	string candidateFileName, templateFileName, distanceFileName, search, align, outputDir;
 	float match, misMatch, gapOpen, gapExtend, threshold;

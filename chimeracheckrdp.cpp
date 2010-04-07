@@ -10,7 +10,30 @@
 #include "chimeracheckrdp.h"
 		
 //***************************************************************************************************************
-ChimeraCheckRDP::ChimeraCheckRDP(string filename,  string o) {  fastafile = filename;  outputDir = o;  }
+ChimeraCheckRDP::ChimeraCheckRDP(string filename, string temp, string n, bool s, int inc, int k, string o) : Chimera() { 
+	try {
+		fastafile = filename; 
+		templateFileName = temp;  
+		name = n;
+		svg = s;
+		increment = inc;
+		kmerSize = k;
+		outputDir = o; 
+		
+		templateDB = new AlignmentDB(templateFileName, "kmer", kmerSize, 0.0,0.0,0.0,0.0);
+		m->mothurOutEndLine();
+		
+		kmer = new Kmer(kmerSize);
+		
+		if (name != "") { 
+			readName(name);  //fills name map with names of seqs the user wants to have .svg for.  
+		}
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraCheckRDP", "ChimeraCheckRDP");
+		exit(1);
+	}
+}
 //***************************************************************************************************************
 
 ChimeraCheckRDP::~ChimeraCheckRDP() {
@@ -19,7 +42,7 @@ ChimeraCheckRDP::~ChimeraCheckRDP() {
 		delete kmer;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ChimeraCheckRDP", "~AlignSim");
+		m->errorOut(e, "ChimeraCheckRDP", "~ChimeraCheckRDP");
 		exit(1);
 	}
 }	
@@ -56,25 +79,49 @@ int ChimeraCheckRDP::print(ostream& out, ostream& outAcc) {
 		exit(1);
 	}
 }
+#ifdef USE_MPI
 //***************************************************************************************************************
-int ChimeraCheckRDP::doPrep() {
+int ChimeraCheckRDP::print(MPI_File& out, MPI_File& outAcc) {
 	try {
-		templateDB = new AlignmentDB(templateFileName, "kmer", kmerSize, 0.0,0.0,0.0,0.0);
-		m->mothurOutEndLine();
 		
-		kmer = new Kmer(kmerSize);
+		cout << "Processing: " << querySeq->getName() << endl; 
 		
-		if (name != "") { 
-			readName(name);  //fills name map with names of seqs the user wants to have .svg for.  
+		string outString = "";
+		
+		outString += querySeq->getName() + "\nIS scores: \t";
+			
+		for (int k = 0; k < IS.size(); k++) {
+			outString += toString(IS[k].score)  + "\t"; 
+		}
+		outString += "\n";
+		
+		MPI_Status status;
+		int length = outString.length();
+		char buf[length];
+		strcpy(buf, outString.c_str()); 
+				
+		MPI_File_write_shared(out, buf, length, MPI_CHAR, &status);
+		
+		if (svg) {
+			if (name != "") { //if user has specific names
+				map<string, string>::iterator it = names.find(querySeq->getName());
+				
+				if (it != names.end()) { //user wants pic of this
+					makeSVGpic(IS);  //zeros out negative results
+				}
+			}else{//output them all
+				makeSVGpic(IS);  //zeros out negative results
+			}
 		}
 		
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ChimeraCheckRDP", "doPrep");
+		m->errorOut(e, "ChimeraCheckRDP", "print");
 		exit(1);
 	}
 }
+#endif
 //***************************************************************************************************************
 int ChimeraCheckRDP::getChimeras(Sequence* query) {
 	try {
@@ -123,6 +170,8 @@ vector<sim> ChimeraCheckRDP::findIS() {
 			
 		//for each window
 		for (int f = start; f < (seq.length() - start); f+=increment) {
+		
+			if (m->control_pressed) { return isValues; }
 			
 			if ((f - kmerSize) < 0)  { m->mothurOut("Your sequence is too short for your kmerSize."); m->mothurOutEndLine(); exit(1); }
 			
@@ -204,18 +253,47 @@ vector<sim> ChimeraCheckRDP::findIS() {
 //***************************************************************************************************************
 void ChimeraCheckRDP::readName(string namefile) {
 	try{
+	
+		string name;
+
+	#ifdef USE_MPI
+		
+		MPI_File inMPI;
+		MPI_Offset size;
+		MPI_Status status;
+		
+		char inFileName[namefile.length()];
+		strcpy(inFileName, namefile.c_str());
+
+		MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  
+		MPI_File_get_size(inMPI, &size);
+
+		char buffer[size];
+		MPI_File_read(inMPI, buffer, size, MPI_CHAR, &status);
+
+		string tempBuf = buffer;
+		if (tempBuf.length() > size) { tempBuf = tempBuf.substr(0, size);  }
+		istringstream iss (tempBuf,istringstream::in);
+		
+		while(!iss.eof()) {
+			iss >> name; gobble(iss);
+			names[name] = name;
+		}
+	
+		MPI_File_close(&inMPI);
+		
+	#else	
+	
 		ifstream in;
 		openInputFile(namefile, in);
-		string name;
-		
+				
 		while (!in.eof()) {
-			
-			in >> name;
-			
+			in >> name; gobble(in);
 			names[name] = name;
-			
-			gobble(in);
 		}
+		in.close();
+	
+	#endif
 	
 	}
 	catch(exception& e) {
@@ -260,7 +338,80 @@ int ChimeraCheckRDP::calcKmers(map<int, int> query, map<int, int> subject) {
 		exit(1);
 	}
 }
+#ifdef USE_MPI
+//***************************************************************************************************************
+void ChimeraCheckRDP::makeSVGpic(vector<sim> info) {
+	try{
+		
+		string file = outputDir + querySeq->getName() + ".chimeracheck.svg";
+		
+		MPI_File outSVG;
+		int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY;
+		
+		char FileName[file.length()];
+		strcpy(FileName, file.c_str());
+		
+		MPI_File_open(MPI_COMM_SELF, FileName, outMode, MPI_INFO_NULL, &outSVG);  //comm, filename, mode, info, filepointer
+		
+		int width = (info.size()*5) + 150;
+		
+		string outString = "";
+		
+		outString += "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 700 " + toString(width) + "\">\n";
+		outString += "<g>\n";
+		outString += "<text fill=\"black\" class=\"seri\" x=\"" + toString((width / 2) - 150) + "\" y=\"25\">Plotted IS values for " + querySeq->getName() + "</text>\n";
+		
+		outString +=  "<line x1=\"75\" y1=\"600\" x2=\"" + toString((info.size()*5) + 75) + "\" y2=\"600\" stroke=\"black\" stroke-width=\"2\"/>\n";  
+		outString +=  "<line x1=\"75\" y1=\"600\" x2=\"75\" y2=\"125\" stroke=\"black\" stroke-width=\"2\"/>\n";
+		
+		outString += "<text fill=\"black\" class=\"seri\" x=\"80\" y=\"620\">" + toString(info[0].midpoint) + "</text>\n";
+		outString += "<text fill=\"black\" class=\"seri\" x=\"" + toString((info.size()*5) + 75) + "\" y=\"620\">" + toString(info[info.size()-1].midpoint) + "</text>\n";
+		outString += "<text fill=\"black\" class=\"seri\" x=\"" + toString((width / 2) - 150) + "\" y=\"650\">Base Positions</text>\n";
+		
+		outString += "<text fill=\"black\" class=\"seri\" x=\"50\" y=\"580\">0</text>\n";
+		
+		outString += "<text fill=\"black\" class=\"seri\" x=\"50\" y=\"350\">IS</text>\n";
+		
+		
+		//find max is score
+		float biggest = 0.0;
+		for (int i = 0; i < info.size(); i++) {
+			if (info[i].score > biggest)  {
+				biggest = info[i].score;
+			}
+		}
+		
+		outString += "<text fill=\"black\" class=\"seri\" x=\"50\" y=\"135\">" + toString(biggest) + "</text>\n";
+		
+		int scaler2 = 500 / biggest;
+		
+		
+		outString += "<polyline fill=\"none\" stroke=\"red\" stroke-width=\"2\" points=\"";
+		//160,200 180,230 200,210 234,220\"/> "; 
+		for (int i = 0; i < info.size(); i++) {
+			if(info[i].score < 0) { info[i].score = 0; }
+			outString += toString(((i*5) + 75)) + "," + toString((600 - (info[i].score * scaler2))) + " ";
+		}
+		
+		outString += "\"/> ";
+		outString += "</g>\n</svg>\n";
+		
+		MPI_Status status;
+		int length = outString.length();
+		char buf2[length];
+		strcpy(buf2, outString.c_str()); 
+				
+		MPI_File_write(outSVG, buf2, length, MPI_CHAR, &status);
+		
+		MPI_File_close(&outSVG);
 
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraCheckRDP", "makeSVGpic");
+		exit(1);
+	}
+}
+#else
 //***************************************************************************************************************
 void ChimeraCheckRDP::makeSVGpic(vector<sim> info) {
 	try{
@@ -318,6 +469,7 @@ void ChimeraCheckRDP::makeSVGpic(vector<sim> info) {
 		exit(1);
 	}
 }
-//***************************************************************************************************************
+#endif
+//***************************************************************************************************************/
 
 

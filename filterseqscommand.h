@@ -47,12 +47,14 @@ private:
 	int filterSequences();
 	int createProcessesCreateFilter(Filters&, string);
 	int createProcessesRunFilter(string, string);
-	int driverCreateFilter(Filters&, string, linePair*);
-	int driverRunFilter(string, string, string, linePair*);	
-	int driverMPIRun(istringstream&, MPI_File&);
-	int MPICreateFilter(Filters&, string);	
+	int driverRunFilter(string, string, string, linePair*);
+	int driverCreateFilter(Filters& F, string filename, linePair* line);
+	#ifdef USE_MPI
+	int driverMPIRun(int, int, MPI_File&, MPI_File&, vector<long>&);
+	int MPICreateFilter(int, int, Filters&, MPI_File&, vector<long>&);	
+	#endif
 	int setLines(string);
-	int parseBuffer(string, vector<string>&);
+	
 	
 };
 

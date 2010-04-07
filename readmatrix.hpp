@@ -21,7 +21,7 @@ class SparseMatrix;
 class ReadMatrix {
 
 public:
-	ReadMatrix(){	D = new SparseMatrix();	 m = MothurOut::getInstance();  }
+	ReadMatrix(){	D = new SparseMatrix();	 m = MothurOut::getInstance();   globaldata = GlobalData::getInstance(); }
 	virtual ~ReadMatrix() {}
 	virtual int read(NameAssignment*){ return 1; }
 	
@@ -38,6 +38,7 @@ protected:
 	GlobalData* globaldata;
 	float cutoff;
 	MothurOut* m;
+	bool sim;
 };
 
 

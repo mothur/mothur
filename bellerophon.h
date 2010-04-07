@@ -12,7 +12,6 @@
 
 
 #include "chimera.h"
-#include "filterseqscommand.h"
 #include "sparsematrix.hpp"
 #include "sequence.hpp"
 #include "dist.h"
@@ -25,22 +24,41 @@ typedef map<int, float> SeqMap;  //maps sequence to all distance for that seqeun
 class Bellerophon : public Chimera {
 	
 	public:
-		Bellerophon(string, string);	
-		~Bellerophon() {};
+		Bellerophon(string, bool, bool, int, int, int, string);	//fastafile, filter, correction, window, increment, processors, outputDir);	
+		~Bellerophon() { delete distCalculator; for (int i = 0; i < seqs.size(); i++) { delete seqs[i];  }  seqs.clear(); }
 		
 		int getChimeras();
 		int print(ostream&, ostream&);
 		
+		#ifdef USE_MPI
+		int print(MPI_File&, MPI_File&);
+		#endif
+		
 	private:
+		struct linePair {
+			int start;
+			int num;
+			linePair(long int i, int j) : start(i), num(j) {}
+		};
+		
+		vector<linePair> lines;
+	
 		Dist* distCalculator;
-		FilterSeqsCommand* filterSeqs;
 		vector<Sequence*> seqs;
-		vector<Preference> pref;
+		vector< vector<Preference> > pref; //pref[0] = preference scores for all seqs in window 0.
 		string fastafile;
-		int iters;
+		int iters, count, window, increment, numSeqs, processors; //iters = number of windows
+		bool correction;
 		
 		int generatePreferences(vector<SeqMap>, vector<SeqMap>, int);
 		int createSparseMatrix(int, int, SparseMatrix*, vector<Sequence>);
+		vector<Preference> getBestPref();
+		int driverChimeras(vector<int>, linePair);
+		int createProcesses(vector<int>);
+		int writePrefs(string, linePair);
+		int readPrefs(string);
+		vector<string> getBestWindow(linePair line);
+		int fillPref(int, vector<string>&);
 };
 
 /***********************************************************/

@@ -65,6 +65,12 @@
 #include "otuhierarchycommand.h"
 #include "setdircommand.h"
 #include "parselistscommand.h"
+#include "parsesffcommand.h"
+#include "chimeraccodecommand.h"
+#include "chimeracheckcommand.h"
+#include "chimeraslayercommand.h"
+#include "chimerapintailcommand.h"
+#include "chimerabellerophoncommand.h"
 
 /*******************************************************/
 
@@ -78,6 +84,12 @@ CommandFactory* CommandFactory::getInstance() {
 /***********************************************************/
 
 /***********************************************************/
+//note: This class is resposible for knowing which commands are mpiEnabled,
+//If a command is not enabled only process 0 will execute the command. 
+//This avoids redundant outputs on pieces of code we have not paralellized. 
+//If you add mpi code to a existing command you need to modify the list below or the code will hang on MPI blocking commands like FIle_open. 
+//example:  commands["dist.seqs"] = "MPIEnabled";
+
 CommandFactory::CommandFactory(){
 	string s = "";
 	m = MothurOut::getInstance();
@@ -94,7 +106,6 @@ CommandFactory::CommandFactory(){
 	commands["get.oturep"]			= "get.oturep";
 	commands["cluster"]				= "cluster"; 
 	commands["unique.seqs"]			= "unique.seqs"; 
-	commands["dist.seqs"]			= "MPIEnabled";
 	commands["dist.shared"]			= "dist.shared";
 	commands["collect.single"]		= "collect.single"; 
 	commands["collect.shared"]		= "collect.shared"; 
@@ -117,13 +128,10 @@ CommandFactory::CommandFactory(){
 	commands["bootstrap.shared"]	= "bootstrap.shared";
 	//commands["consensus"]			= "consensus";
 	commands["help"]				= "help"; 
-	commands["filter.seqs"]			= "MPIEnabled";
-	commands["align.seqs"]			= "align.seqs";
 	commands["summary.seqs"]		= "summary.seqs";
 	commands["screen.seqs"]			= "screen.seqs";
 	commands["reverse.seqs"]		= "reverse.seqs";
 	commands["trim.seqs"]			= "trim.seqs";
-	commands["chimera.seqs"]		= "chimera.seqs";
 	commands["list.seqs"]			= "list.seqs";
 	commands["get.seqs"]			= "get.seqs";
 	commands["remove.seqs"]			= "get.seqs";
@@ -131,9 +139,7 @@ CommandFactory::CommandFactory(){
 	commands["align.check"]			= "align.check";
 	commands["get.sharedseqs"]		= "get.sharedseqs";
 	commands["get.otulist"]			= "get.otulist";
-	commands["quit"]				= "MPIEnabled"; 
 	commands["hcluster"]			= "hcluster"; 
-	commands["classify.seqs"]		= "classify.seqs"; 
 	commands["phylotype"]			= "phylotype";
 	commands["mgcluster"]			= "mgcluster";
 	commands["pre.cluster"]			= "pre.cluster";
@@ -142,6 +148,19 @@ CommandFactory::CommandFactory(){
 	commands["set.dir"]				= "set.dir";
 	commands["merge.files"]			= "merge.files";
 	commands["parse.list"]			= "parse.list";
+	commands["parse.sff"]			= "parse.sff";
+	commands["classify.seqs"]		= "MPIEnabled"; 
+	commands["dist.seqs"]			= "MPIEnabled";
+	commands["filter.seqs"]			= "MPIEnabled";
+	commands["align.seqs"]			= "MPIEnabled";
+	commands["chimera.seqs"]		= "chimera.seqs";
+	commands["chimera.ccode"]		= "MPIEnabled";
+	commands["chimera.check"]		= "MPIEnabled";
+	commands["chimera.slayer"]		= "MPIEnabled";
+	commands["chimera.pintail"]		= "MPIEnabled";
+	commands["chimera.bellerophon"]	= "MPIEnabled";
+	commands["quit"]				= "MPIEnabled"; 
+
 }
 /***********************************************************/
 
@@ -230,6 +249,11 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "get.otulist")			{	command = new GetListCountCommand(optionString);			}
 		else if(commandName == "hcluster")				{	command = new HClusterCommand(optionString);				}
 		else if(commandName == "classify.seqs")			{	command = new ClassifySeqsCommand(optionString);			}
+		else if(commandName == "chimera.ccode")			{	command = new ChimeraCcodeCommand(optionString);			}
+		else if(commandName == "chimera.check")			{	command = new ChimeraCheckCommand(optionString);			}
+		else if(commandName == "chimera.slayer")		{	command = new ChimeraSlayerCommand(optionString);			}
+		else if(commandName == "chimera.pintail")		{	command = new ChimeraPintailCommand(optionString);			}
+		else if(commandName == "chimera.bellerophon")	{	command = new ChimeraBellerophonCommand(optionString);		}
 		else if(commandName == "phylotype")				{	command = new PhylotypeCommand(optionString);				}
 		else if(commandName == "mgcluster")				{	command = new MGClusterCommand(optionString);				}
 		else if(commandName == "pre.cluster")			{	command = new PreClusterCommand(optionString);				}
@@ -237,6 +261,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "otu.hierarchy")			{	command = new OtuHierarchyCommand(optionString);			}
 		else if(commandName == "set.dir")				{	command = new SetDirectoryCommand(optionString);			}
 		else if(commandName == "parse.list")			{	command = new ParseListCommand(optionString);				}
+		else if(commandName == "parse.sff")				{	command = new ParseSFFCommand(optionString);				}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;

@@ -21,15 +21,18 @@ class AlignmentDB {
 public:
 
 	AlignmentDB(string, string, int, float, float, float, float);  //reads fastafile passed in and stores sequences
+	AlignmentDB(string);
 	~AlignmentDB();
 	
 	Sequence findClosestSequence(Sequence*);
 	float getSearchScore()  {  return search->getSearchScore();  }
 	int getLongestBase()	{  return longest;  }
+	int MPISend(int);
+	int MPIRecv(int);
 	
 private:
 	int numSeqs, longest;
-	float searchScore;
+	string method;
 	
 	Database* search;
 	vector<Sequence> templateSequences;

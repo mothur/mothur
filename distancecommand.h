@@ -49,6 +49,7 @@ private:
 	
 	#ifdef USE_MPI 
 	int driverMPI(int, int, MPI_File&, float);
+	int driverMPI(int, int, string, long&);
 	#endif
 	
 	int convertMatrix(string);

@@ -57,6 +57,11 @@ private:
 	void appendTaxFiles(string, string);
 	void createProcesses(string, string, string); 
 	string addUnclassifieds(string, int);
+	
+	int MPIReadNamesFile(string);
+	#ifdef USE_MPI
+	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, vector<long>&);
+	#endif
 };
 
 #endif

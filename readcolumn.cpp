@@ -46,7 +46,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 	
 			map<string,int>::iterator itA = nameMap->find(firstName);
 			map<string,int>::iterator itB = nameMap->find(secondName);
-			
+				
 			if(itA == nameMap->end()){
 				cerr << "AAError: Sequence '" << firstName << "' was not found in the names file, please correct\n"; exit(1);
 			}
@@ -55,6 +55,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 			}
 
 			if (distance == -1) { distance = 1000000; }
+			else if (globaldata->sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
 			
 			if(distance < cutoff && itA != itB){
 				if(itA->second > itB->second){
@@ -93,6 +94,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 		}
 
 		if(lt == 0){  // oops, it was square
+	
 			fileHandle.close();  //let's start over
 			D->clear();  //let's start over
 		   
@@ -114,6 +116,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 				}
 				
 				if (distance == -1) { distance = 1000000; }
+				else if (globaldata->sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
 				
 				if(distance < cutoff && itA->second > itB->second){
 					PCell value(itA->second, itB->second, distance);

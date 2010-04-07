@@ -27,11 +27,17 @@ class SuffixDB : public Database {
 	
 public:
 	SuffixDB(int);
+	SuffixDB();
 	~SuffixDB();
 	
 	void generateDB() {}; //adding sequences generates the db
 	void addSequence(Sequence);
 	vector<int> findClosestSequences(Sequence*, int);
+	
+	#ifdef USE_MPI	
+	int MPISend(int); //just sends numSeqs
+	int MPIRecv(int);
+	#endif
 
 private:
 	vector<SuffixTree> suffixForest;

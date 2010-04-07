@@ -12,21 +12,94 @@
 #include "kmerdb.hpp"
 
 //***************************************************************************************************************
-ChimeraSlayer::ChimeraSlayer(string mode, bool r, string f) : searchMethod(mode), realign(r), fastafile(f) {  	
-	decalc = new DeCalculator();	
+ChimeraSlayer::ChimeraSlayer(string file, string temp, string mode, int k, int ms, int mms, int win, float div, 
+int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r) : Chimera()  {  	
+	try {
+		fastafile = file;
+		templateFileName = temp; templateSeqs = readSeqs(temp);
+		searchMethod = mode;
+		kmerSize = k;
+		match = ms;
+		misMatch = mms;
+		window = win;
+		divR = div;
+		minSim = minsim;
+		minCov = mincov;
+		minBS = minbs;
+		minSNP = minsnp;
+		parents = par;
+		iters = it;
+		increment = inc;
+		numWanted = numw;
+		realign = r; 
+	
+		decalc = new DeCalculator();	
+		
+		doPrep();
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraSlayer", "ChimeraSlayer");
+		exit(1);
+	}
 }
 //***************************************************************************************************************
 int ChimeraSlayer::doPrep() {
 	try {
-	
+		
+		
+		//read in all query seqs
+		vector<Sequence*> tempQuerySeqs = readSeqs(fastafile);
+		
+		vector<Sequence*> temp = templateSeqs;
+		for (int i = 0; i < tempQuerySeqs.size(); i++) {  temp.push_back(tempQuerySeqs[i]);  }
+		
+		createFilter(temp, 0.0); //just removed columns where all seqs have a gap
+		
+		for (int i = 0; i < tempQuerySeqs.size(); i++) { delete tempQuerySeqs[i];  }
+		
+		if (m->control_pressed) {  return 0; } 
+		
+		//run filter on template
+		for (int i = 0; i < templateSeqs.size(); i++) {  if (m->control_pressed) {  return 0; }  runFilter(templateSeqs[i]);  }
+		
 		string 	kmerDBNameLeft;
 		string 	kmerDBNameRight;
-		
+	
 		//generate the kmerdb to pass to maligner
 		if (searchMethod == "kmer") { 
-			//leftside
+			string rightTemplateFileName = "right." + templateFileName;
+			databaseRight = new KmerDB(rightTemplateFileName, kmerSize);
+				
 			string leftTemplateFileName = "left." + templateFileName;
-			databaseLeft = new KmerDB(leftTemplateFileName, kmerSize);			
+			databaseLeft = new KmerDB(leftTemplateFileName, kmerSize);	
+		#ifdef USE_MPI
+			for (int i = 0; i < templateSeqs.size(); i++) {
+					
+				if (m->control_pressed) { return 0; } 
+					
+				string leftFrag = templateSeqs[i]->getUnaligned();
+				leftFrag = leftFrag.substr(0, int(leftFrag.length() * 0.33));
+					
+				Sequence leftTemp(templateSeqs[i]->getName(), leftFrag);
+				databaseLeft->addSequence(leftTemp);	
+			}
+			databaseLeft->generateDB();
+			databaseLeft->setNumSeqs(templateSeqs.size());
+			
+			for (int i = 0; i < templateSeqs.size(); i++) {
+				if (m->control_pressed) { return 0; } 
+					
+				string rightFrag = templateSeqs[i]->getUnaligned();
+				rightFrag = rightFrag.substr(int(rightFrag.length() * 0.66));
+					
+				Sequence rightTemp(templateSeqs[i]->getName(), rightFrag);
+				databaseRight->addSequence(rightTemp);	
+			}
+			databaseRight->generateDB();
+			databaseRight->setNumSeqs(templateSeqs.size());
+
+		#else	
+			//leftside
 			kmerDBNameLeft = leftTemplateFileName.substr(0,leftTemplateFileName.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
 			ifstream kmerFileTestLeft(kmerDBNameLeft.c_str());
 			
@@ -52,8 +125,6 @@ int ChimeraSlayer::doPrep() {
 			databaseLeft->setNumSeqs(templateSeqs.size());
 			
 			//rightside
-			string rightTemplateFileName = "right." + templateFileName;
-			databaseRight = new KmerDB(rightTemplateFileName, kmerSize);			
 			kmerDBNameRight = rightTemplateFileName.substr(0,rightTemplateFileName.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
 			ifstream kmerFileTestRight(kmerDBNameRight.c_str());
 			
@@ -76,40 +147,8 @@ int ChimeraSlayer::doPrep() {
 			kmerFileTestRight.close();
 			
 			databaseRight->setNumSeqs(templateSeqs.size());
-
+		#endif	
 		}
-		
-		int start = time(NULL);	
-		//filter the sequences
-		//read in all query seqs
-		ifstream in; 
-		openInputFile(fastafile, in);
-		
-		vector<Sequence*> tempQuerySeqs;
-		while(!in.eof()){
-			if (m->control_pressed) { for (int i = 0; i < tempQuerySeqs.size(); i++) { delete tempQuerySeqs[i];  } return 0; } 
-		
-			Sequence* s = new Sequence(in);
-			gobble(in);
-			
-			if (s->getName() != "") { tempQuerySeqs.push_back(s); }
-		}
-		in.close();
-		
-		vector<Sequence*> temp = templateSeqs;
-		for (int i = 0; i < tempQuerySeqs.size(); i++) {  temp.push_back(tempQuerySeqs[i]);  }
-				
-		createFilter(temp, 0.0); //just removed columns where all seqs have a gap
-				
-		for (int i = 0; i < tempQuerySeqs.size(); i++) { delete tempQuerySeqs[i];  }
-		
-		if (m->control_pressed) {  return 0; } 
-
-		
-		//run filter on template
-		for (int i = 0; i < templateSeqs.size(); i++) {  if (m->control_pressed) {  return 0; }  runFilter(templateSeqs[i]);  }
-		
-		m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to filter.");	m->mothurOutEndLine();
 		
 		return 0;
 
@@ -158,13 +197,65 @@ int ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 		exit(1);
 	}
 }
+#ifdef USE_MPI
+//***************************************************************************************************************
+int ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
+	try {
+		MPI_Status status;
+		bool results = false;
+		string outAccString = "";
+		string outputString = "";
+		
+		if (chimeraFlags == "yes") {
+			string chimeraFlag = "no";
+			if(  (chimeraResults[0].bsa >= minBS && chimeraResults[0].divr_qla_qrb >= divR)
+			   ||
+			   (chimeraResults[0].bsb >= minBS && chimeraResults[0].divr_qlb_qra >= divR) ) { chimeraFlag = "yes"; }
+			
+			
+			if (chimeraFlag == "yes") {	
+				if ((chimeraResults[0].bsa >= minBS) || (chimeraResults[0].bsb >= minBS)) {
+					cout << querySeq->getName() <<  "\tyes" << endl;
+					outAccString += querySeq->getName() + "\n";
+					results = true;
+					
+					//write to accnos file
+					int length = outAccString.length();
+					char buf2[length];
+					strcpy(buf2, outAccString.c_str()); 
+				
+					MPI_File_write_shared(outAcc, buf2, length, MPI_CHAR, &status);
+				}
+			}
+			
+			outputString = getBlock(chimeraResults[0]);
+			outputString += "\n";
+			
+		}else {  outputString += querySeq->getName() + "\tno\n";  }
+		
+		//write to output file
+		int length = outputString.length();
+		char buf[length];
+		strcpy(buf, outputString.c_str()); 
+		
+		MPI_File_write_shared(out, buf, length, MPI_CHAR, &status);
+
+		return results;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraSlayer", "print");
+		exit(1);
+	}
+}
+#endif
+
 //***************************************************************************************************************
 int ChimeraSlayer::getChimeras(Sequence* query) {
 	try {
 		chimeraFlags = "no";
 		
 		//filter query
-		spotMap = runFilter(query);
+		spotMap = runFilter(query);	
 		
 		querySeq = query;
 		
@@ -274,7 +365,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 //***************************************************************************************************************
 void ChimeraSlayer::printBlock(data_struct data, ostream& out){
 	try {
-	//out << "Name\tParentA\tParentB\tDivQLAQRB\tPerIDQLAQRB\tBootStrapA\tDivQLBQRA\tPerIDQLBQRA\tBootStrapB\tFlag\tLeftWindow\tRightWindow\n";
+	//out << ":)\n";
 		
 		out << querySeq->getName() << '\t';
 		out << data.parentA.getName() << "\t" << data.parentB.getName()  << '\t';
@@ -307,4 +398,25 @@ void ChimeraSlayer::printBlock(data_struct data, ostream& out){
 	}
 }
 //***************************************************************************************************************
+string ChimeraSlayer::getBlock(data_struct data){
+	try {
+		
+		string outputString = "";
+		
+		outputString += querySeq->getName() + "\t";
+		outputString += data.parentA.getName() + "\t" + data.parentB.getName()  + "\t";
+			
+		outputString += toString(data.divr_qla_qrb) + "\t" + toString(data.qla_qrb) + "\t" + toString(data.bsa) + "\t";
+		outputString += toString(data.divr_qlb_qra) + "\t" + toString(data.qlb_qra) + "\t" + toString(data.bsb) + "\t";
+		
+		outputString += "yes\t" + toString(spotMap[data.winLStart]) + "-" + toString(spotMap[data.winLEnd]) + "\t" + toString(spotMap[data.winRStart]) + "-" + toString(spotMap[data.winREnd]) + "\t";
+		
+		return outputString;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraSlayer", "getBlock");
+		exit(1);
+	}
+}
+//***************************************************************************************************************/
 

@@ -12,6 +12,25 @@
 #include "alignment.hpp"
 #include "nastreport.hpp"
 
+
+/******************************************************************************************************************/
+
+NastReport::NastReport() {
+	output = "";
+}
+/******************************************************************************************************************/
+string NastReport::getHeaders() {
+	output = "";
+	
+	output += "QueryName\tQueryLength\tTemplateName\tTemplateLength\t";
+	output += "SearchMethod\tSearchScore\t";
+	output += "AlignmentMethod\tQueryStart\tQueryEnd\tTemplateStart\tTemplateEnd\t";
+	output += "PairwiseAlignmentLength\tGapsInQuery\tGapsInTemplate\t";
+	output += "LongestInsert\t";
+	output += "SimBtwnQuery&Template\n";
+	
+	return output;
+}
 /******************************************************************************************************************/
 
 NastReport::NastReport(string candidateReportFName) {
@@ -46,6 +65,38 @@ void NastReport::print(){
 	
 	candidateReportFile << endl;
 	candidateReportFile.flush();
+}
+/******************************************************************************************************************/
+
+string NastReport::getReport(){
+	
+	output = "";
+	
+	output += queryName + '\t' + toString(queryLength) + '\t' + templateName + '\t' + toString(templateLength) + '\t';
+	
+	string temp = toString(searchScore);
+	int pos = temp.find_last_of('.');  //find deicmal point if their is one
+	
+	//if there is a decimal
+	if (pos != -1) { temp = temp.substr(0, pos+3); } //set precision to 2 places
+	else{	temp += ".00";	}
+	
+	output += searchMethod + '\t' + temp + '\t';
+	output += alignmentMethod + '\t' + toString(candidateStartPosition) + "\t" + toString(candidateEndPosition) + '\t';
+	output += toString(templateStartPosition) + "\t" + toString(templateEndPosition) + '\t';
+	output += toString(pairwiseAlignmentLength) + '\t' + toString(totalGapsInQuery) + '\t' + toString(totalGapsInTemplate) + '\t';
+	output += toString(longestInsert) + '\t';
+	
+	temp = toString(similarityToTemplate);
+	pos = temp.find_last_of('.');  //find deicmal point if their is one
+	
+	//if there is a decimal
+	if (pos != -1) { temp = temp.substr(0, pos+3); } //set precision to 2 places
+	else{	temp += ".00";	}
+	
+	output += temp + '\n';
+	
+	return output;
 }
 
 /******************************************************************************************************************/
