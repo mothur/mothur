@@ -24,17 +24,20 @@
 class Ccode : public Chimera {
 	
 	public:
-		Ccode(string, string);	
+		Ccode(string, string, bool, string, int, int, string);	//fasta, template, filter, mask, window, numWanted, outputDir
 		~Ccode();
 		
 		int getChimeras(Sequence* query);
 		int print(ostream&, ostream&);
-		void printHeader(ostream&);		
+		
+		#ifdef USE_MPI
+		int print(MPI_File&, MPI_File&);
+		#endif
 	private:
 	
 		Dist* distCalc;
 		DeCalculator* decalc;
-		int iters;
+		int iters, window, numWanted;
 		string fastafile, mapInfo;
 		
 		Sequence* querySeq;
@@ -75,6 +78,12 @@ class Ccode : public Chimera {
 		int getDiff(string, string);  //return number of mismatched bases, a gap to base is not counted as a mismatch
 		float getT(int); 
 		float getF(int); 
+		
+		#ifdef USE_MPI
+		int printMapping(string&);
+		MPI_File outMap;
+		#endif
+
 };
 
 /***********************************************************/

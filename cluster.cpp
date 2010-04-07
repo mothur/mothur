@@ -50,11 +50,14 @@ rabund(rav), list(lv), dMatrix(dm), method(f)
 	// a list contains pointers (iterators) to the all distances related
 	// to a certain sequence. The Vector is accessed via the index of a 
 	// sequence in the distance matrix.
+	
+
 	seqVec = vector<MatVec>(lv->size());
 	for (MatData currentCell = dMatrix->begin(); currentCell != dMatrix->end(); currentCell++) {
 		seqVec[currentCell->row].push_back(currentCell);
 		seqVec[currentCell->column].push_back(currentCell);
 	}
+
 	mapWanted = false;  //set to true by mgcluster to speed up overlap merge
 	
 	//save so you can modify as it changes in average neighbor
@@ -86,50 +89,58 @@ void Cluster::getRowColCells() {
 /***********************************************************************/
 // Remove the specified cell from the seqVec and from the sparse
 // matrix
-void Cluster::removeCell(const MatData& cell, int vrow, int vcol, bool rmMatrix)
-{
-	ull drow = cell->row;
-	ull dcol = cell->column;
-	if (((vrow >=0) && (drow != smallRow)) ||
-		((vcol >=0) && (dcol != smallCol))) {
-		ull dtemp = drow;
-		drow = dcol;
-		dcol = dtemp;
-	}
+void Cluster::removeCell(const MatData& cell, int vrow, int vcol, bool rmMatrix){
+	try {
+	
+		ull drow = cell->row;
+			ull dcol = cell->column;
+			if (((vrow >=0) && (drow != smallRow)) ||
+				((vcol >=0) && (dcol != smallCol))) {
+				ull dtemp = drow;
+				drow = dcol;
+				dcol = dtemp;
+			}
 
-	ull crow;
-	ull ccol;
-	int nCells;
-	if (vrow < 0) {
-		nCells = seqVec[drow].size();
-		for (vrow=0; vrow<nCells;vrow++) {
-			crow = seqVec[drow][vrow]->row;
-			ccol = seqVec[drow][vrow]->column;
-			if (((crow == drow) && (ccol == dcol)) ||
-				((ccol == drow) && (crow == dcol))) {
-				break;
+			ull crow;
+			ull ccol;
+			int nCells;
+			if (vrow < 0) {
+				nCells = seqVec[drow].size();
+				for (vrow=0; vrow<nCells;vrow++) {
+					crow = seqVec[drow][vrow]->row;
+					ccol = seqVec[drow][vrow]->column;
+					if (((crow == drow) && (ccol == dcol)) ||
+						((ccol == drow) && (crow == dcol))) {
+						break;
+					}
+				}
 			}
-		}
-	}
-	seqVec[drow].erase(seqVec[drow].begin()+vrow);
-	if (vcol < 0) {
-		nCells = seqVec[dcol].size();
-		for (vcol=0; vcol<nCells;vcol++) {
-			crow = seqVec[dcol][vcol]->row;
-			ccol = seqVec[dcol][vcol]->column;
-			if (((crow == drow) && (ccol == dcol)) ||
-				((ccol == drow) && (crow == dcol))) {
-				break;
+
+			seqVec[drow].erase(seqVec[drow].begin()+vrow);
+			if (vcol < 0) {
+				nCells = seqVec[dcol].size();
+				for (vcol=0; vcol<nCells;vcol++) {
+					crow = seqVec[dcol][vcol]->row;
+					ccol = seqVec[dcol][vcol]->column;
+					if (((crow == drow) && (ccol == dcol)) ||
+						((ccol == drow) && (crow == dcol))) {
+						break;
+					}
+				}
 			}
-		}
+		
+			seqVec[dcol].erase(seqVec[dcol].begin()+vcol);
+		
+			if (rmMatrix) {
+				dMatrix->rmCell(cell);
+			}
+		
 	}
-	seqVec[dcol].erase(seqVec[dcol].begin()+vcol);
-	if (rmMatrix) {
-		dMatrix->rmCell(cell);
+	catch(exception& e) {
+		m->errorOut(e, "Cluster", "removeCell");
+		exit(1);
 	}
 }
-
-
 /***********************************************************************/
 
 void Cluster::clusterBins(){
@@ -177,7 +188,7 @@ void Cluster::clusterNames(){
 void Cluster::update(double& cutOFF){
 	try {
 		getRowColCells();	
-	
+
 		vector<int> foundCol(nColCells, 0);
 
 		int search;

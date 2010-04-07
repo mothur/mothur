@@ -43,7 +43,7 @@ public:
 	TreeMap* gTreemap;
 	SequenceDB* gSequenceDB;
 	string inputFileName, argv;
-	bool allLines, runParse, jumble;
+	bool allLines, runParse, jumble, sim;
 	vector<string>  Estimators, Groups; //holds estimators to be used
 	set<string> labels; //holds labels to be used
 	vector<string> Treenames;

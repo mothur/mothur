@@ -443,5 +443,65 @@ void Sequence::reverseComplement(){
 	aligned = temp;
 	
 }
-
+#ifdef USE_MPI	
 //********************************************************************************************************************
+int Sequence::MPISend(int receiver) {
+	try {
+		//send name - string
+		int length = name.length();
+		char buf[name.length()];
+		strcpy(buf, name.c_str()); 
+		
+		MPI_Send(&length, 1, MPI_INT, receiver, 2001, MPI_COMM_WORLD); 
+
+		MPI_Send(&buf, length, MPI_CHAR, receiver, 2001, MPI_COMM_WORLD);
+	
+		//send aligned - string
+		length = aligned.length();
+		char buf2[aligned.length()];
+		strcpy(buf2, aligned.c_str()); 
+	
+		MPI_Send(&length, 1, MPI_INT, receiver, 2001, MPI_COMM_WORLD); 
+	
+		MPI_Send(&buf2, length, MPI_CHAR, receiver, 2001, MPI_COMM_WORLD);
+	
+		return 0;
+
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Sequence", "MPISend");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+int Sequence::MPIRecv(int sender) {
+	try {
+		MPI_Status status;
+	
+		//receive name - string
+		int length;
+		MPI_Recv(&length, 1, MPI_INT, sender, 2001, MPI_COMM_WORLD, &status);
+	
+		char buf[length];
+		MPI_Recv(&buf, length, MPI_CHAR, sender, 2001, MPI_COMM_WORLD, &status);
+		name = buf;
+		
+		//receive aligned - string
+		MPI_Recv(&length, 1, MPI_INT, sender, 2001, MPI_COMM_WORLD, &status);
+	
+		char buf2[length];
+		MPI_Recv(&buf2, length, MPI_CHAR, sender, 2001, MPI_COMM_WORLD, &status);
+		aligned = buf2;
+		
+		setAligned(aligned);
+		
+		return 0;
+
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Sequence", "MPIRecv");
+		exit(1);
+	}
+}
+#endif
+/**************************************************************************************************/

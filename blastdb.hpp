@@ -18,13 +18,19 @@ class BlastDB : public Database {
 
 public:
 	BlastDB(float, float, float, float);
+	BlastDB();
 	~BlastDB();
 	
 	void generateDB();
 	void addSequence(Sequence);
 	vector<int> findClosestSequences(Sequence*, int);
 	vector<int> findClosestMegaBlast(Sequence*, int);
-
+	
+	#ifdef USE_MPI	
+	int MPISend(int); //just sends gapOpen, gapExtend, match and mismatch
+	int MPIRecv(int);
+	#endif
+	
 private:
 	string dbFileName;
 	string queryFileName;

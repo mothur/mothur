@@ -22,7 +22,7 @@ ReadDistCommand::ReadDistCommand(string option) {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"phylip", "column", "name", "cutoff", "precision", "group","outputdir","inputdir"};
+			string Array[] =  {"phylip", "column", "name", "cutoff", "precision", "group","outputdir","inputdir","sim"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -119,8 +119,12 @@ ReadDistCommand::ReadDistCommand(string option) {
 			// ...at some point should added some additional type checking...
 			//get user cutoff and precision or use defaults
 			string temp;
-			temp = validParameter.validFile(parameters, "precision", false);			if (temp == "not found") { temp = "100"; }
+			temp = validParameter.validFile(parameters, "precision", false);		if (temp == "not found") { temp = "100"; }
 			convert(temp, precision); 
+			
+			temp = validParameter.validFile(parameters, "sim", false);				if (temp == "not found") { temp = "F"; }
+			sim = isTrue(temp); 
+			globaldata->sim = sim;
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "10"; }
 			convert(temp, cutoff); 
@@ -166,11 +170,12 @@ ReadDistCommand::ReadDistCommand(string option) {
 
 void ReadDistCommand::help(){
 	try {
-		m->mothurOut("The read.dist command parameter options are phylip or column, group, name, cutoff and precision\n");
+		m->mothurOut("The read.dist command parameter options are phylip or column, group, name, sim, cutoff and precision\n");
 		m->mothurOut("The read.dist command can be used in two ways.  The first is to read a phylip or column and run the cluster command\n");
 		m->mothurOut("For this use the read.dist command should be in the following format: \n");
 		m->mothurOut("read.dist(phylip=yourDistFile, name=yourNameFile, cutoff=yourCutoff, precision=yourPrecision) \n");
 		m->mothurOut("The phylip or column parameter is required, but only one may be used.  If you use a column file the name filename is required. \n");
+		m->mothurOut("The sim parameter is used to indicate that your distance file contains similiarity values instead of distance values. The default is false, if sim=true then mothur will convert the similairity values to distances. \n");
 		m->mothurOut("If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n");
 		m->mothurOut("The second way to use the read.dist command is to read a phylip or column and a group, so you can use the libshuff command.\n");
 		m->mothurOut("For this use the read.dist command should be in the following format: \n");
@@ -204,7 +209,7 @@ int ReadDistCommand::execute(){
 		size_t numDists = 0;
 		
 		vector<string> outputNames;
-cout << format << endl;		
+		
 		if (format == "matrix") {
 			ifstream in;
 			openInputFile(distFileName, in);

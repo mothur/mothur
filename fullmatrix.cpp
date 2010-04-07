@@ -44,6 +44,7 @@ FullMatrix::FullMatrix(ifstream& filehandle) {
 				
 				for(int i=0;i<numSeqs;i++){
 					filehandle >> matrix[0][i];
+					if (globaldata->sim) {  matrix[0][i] = 1.0 - matrix[0][i];  }
 				}
 				break;
 			}
@@ -93,6 +94,7 @@ int FullMatrix::readSquareMatrix(ifstream& filehandle) {
 				if (m->control_pressed) { delete reading;  return 0; }
 				
 				filehandle >> matrix[i][j];
+				if (globaldata->sim) {  matrix[i][j] = 1.0 - matrix[i][j];  }
 				
 				count++;
 				reading->update(count);
@@ -135,8 +137,10 @@ int FullMatrix::readLTMatrix(ifstream& filehandle) {
 				if (m->control_pressed) { delete reading;  return 0; }
 				
 				filehandle >> distance;
-		
+				if (globaldata->sim) {  distance = 1.0 - distance;  }
+				
 				matrix[i][j] = distance;  matrix[j][i] = distance;
+				
 				count++;
 				reading->update(count);
 			}

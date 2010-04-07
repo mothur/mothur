@@ -7,6 +7,16 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		A747E79B1163442A00FB9042 /* chimeracheckcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeracheckcommand.h; sourceTree = "<group>"; };
+		A747E79C1163442A00FB9042 /* chimeracheckcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeracheckcommand.cpp; sourceTree = "<group>"; };
+		A747E81C116365E000FB9042 /* chimeraslayercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraslayercommand.h; sourceTree = "<group>"; };
+		A747E81D116365E000FB9042 /* chimeraslayercommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeraslayercommand.cpp; sourceTree = "<group>"; };
+		A78254461164D7790002E2DD /* chimerapintailcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimerapintailcommand.h; sourceTree = "<group>"; };
+		A78254471164D7790002E2DD /* chimerapintailcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimerapintailcommand.cpp; sourceTree = "<group>"; };
+		A7825502116519F70002E2DD /* chimerabellerophoncommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimerabellerophoncommand.h; sourceTree = "<group>"; };
+		A7825503116519F70002E2DD /* chimerabellerophoncommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimerabellerophoncommand.cpp; sourceTree = "<group>"; };
+		A78434881162224F00100BE0 /* chimeraccodecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraccodecommand.h; sourceTree = "<group>"; };
+		A78434891162224F00100BE0 /* chimeraccodecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeraccodecommand.cpp; sourceTree = "<group>"; };
 		A7DA1FEC113FECD400BF472F /* ace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ace.cpp; sourceTree = "<group>"; };
 		A7DA1FED113FECD400BF472F /* ace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ace.h; sourceTree = "<group>"; };
 		A7DA1FEE113FECD400BF472F /* aligncommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = aligncommand.cpp; sourceTree = "<group>"; };
@@ -405,6 +415,8 @@
 		A7DA217A113FECD400BF472F /* weighted.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = weighted.h; sourceTree = "<group>"; };
 		A7DA217B113FECD400BF472F /* whittaker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = whittaker.cpp; sourceTree = "<group>"; };
 		A7DA217C113FECD400BF472F /* whittaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = whittaker.h; sourceTree = "<group>"; };
+		A7E8338B115BBDAA00739EC4 /* parsesffcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parsesffcommand.cpp; sourceTree = "<group>"; };
+		A7E8338C115BBDAA00739EC4 /* parsesffcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parsesffcommand.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -618,6 +630,16 @@
 				A7DA2008113FECD400BF472F /* bootstrapsharedcommand.h */,
 				A7DA2017113FECD400BF472F /* chimeraseqscommand.cpp */,
 				A7DA2018113FECD400BF472F /* chimeraseqscommand.h */,
+				A7825502116519F70002E2DD /* chimerabellerophoncommand.h */,
+				A7825503116519F70002E2DD /* chimerabellerophoncommand.cpp */,
+				A747E79B1163442A00FB9042 /* chimeracheckcommand.h */,
+				A747E79C1163442A00FB9042 /* chimeracheckcommand.cpp */,
+				A78434881162224F00100BE0 /* chimeraccodecommand.h */,
+				A78434891162224F00100BE0 /* chimeraccodecommand.cpp */,
+				A78254461164D7790002E2DD /* chimerapintailcommand.h */,
+				A78254471164D7790002E2DD /* chimerapintailcommand.cpp */,
+				A747E81C116365E000FB9042 /* chimeraslayercommand.h */,
+				A747E81D116365E000FB9042 /* chimeraslayercommand.cpp */,
 				A7DA201D113FECD400BF472F /* classifyseqscommand.cpp */,
 				A7DA201E113FECD400BF472F /* classifyseqscommand.h */,
 				A7DA2021113FECD400BF472F /* clustercommand.cpp */,
@@ -674,6 +696,8 @@
 				A7DA20B9113FECD400BF472F /* otuhierarchycommand.h */,
 				A7DA20BC113FECD400BF472F /* parselistscommand.cpp */,
 				A7DA20BD113FECD400BF472F /* parselistscommand.h */,
+				A7E8338B115BBDAA00739EC4 /* parsesffcommand.cpp */,
+				A7E8338C115BBDAA00739EC4 /* parsesffcommand.h */,
 				A7DA20C0113FECD400BF472F /* parsimonycommand.cpp */,
 				A7DA20C1113FECD400BF472F /* parsimonycommand.h */,
 				A7DA20C2113FECD400BF472F /* pcacommand.cpp */,

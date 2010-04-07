@@ -26,6 +26,7 @@ class KmerDB : public Database {
 	
 public:
 	KmerDB(string, int);
+	KmerDB();
 	~KmerDB();
 	
 	void generateDB();
@@ -35,6 +36,11 @@ public:
 	int getCount(int);  //returns number of sequences with that kmer number
 	vector<int> getSequencesWithKmer(int);  //returns vector of sequences that contain kmer passed in
 	int getMaxKmer() { return maxKmer; }
+	
+	#ifdef USE_MPI	
+	int MPISend(int); //just sends kmersize
+	int MPIRecv(int);
+	#endif
 	
 private:
 	

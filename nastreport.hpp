@@ -19,6 +19,7 @@ class NastReport {
 
 public:
 	NastReport(string);
+	NastReport();
 	~NastReport();
 	void setCandidate(Sequence*);
 	void setTemplate(Sequence*);
@@ -26,9 +27,12 @@ public:
 	void setAlignmentParameters(string, Alignment*);
 	void setNastParameters(Nast);
 	void print();
+	string getReport();
+	string getHeaders();
 	
 private:
 	string queryName;
+	string output;
 	int queryLength;
 	string templateName;
 	int templateLength;

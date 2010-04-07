@@ -12,8 +12,6 @@
 
 #include "mothur.h"
 #include "command.hpp"
-#include "chimera.h"
-
 
 /***********************************************************/
 
@@ -27,26 +25,6 @@ public:
 		
 private:
 
-	struct linePair {
-		int start;
-		int numSeqs;
-		linePair(long int i, int j) : start(i), numSeqs(j) {}
-	};
-	vector<int> processIDS;   //processid
-	vector<linePair*> lines;
-	
-	int driver(linePair*, string, string, string);
-	int createProcesses(string, string, string);
-	void appendOutputFiles(string, string); 
-
-	bool abort;
-	string method, fastafile, templatefile, consfile, quanfile, maskfile, namefile, outputDir, search;
-	bool filter, correction, svg, printAll, realign;
-	int processors, midpoint, averageLeft, averageRight, window, iters, increment, numwanted, ksize, match, mismatch, parents, minSimilarity, minCoverage, minBS, minSNP, numSeqs, templateSeqsLength;
-	float divR;
-	Chimera* chimera;
-	
-	
 };
 
 /***********************************************************/

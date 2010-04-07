@@ -207,11 +207,23 @@ string ValidParameters::validFile(map<string, string> container, string paramete
 		if(it != container.end()){ //no parameter given
 
 			if(isFile == true) {
+			
+			#ifdef USE_MPI	
+				int pid;
+				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+				
+				if (pid == 0) {
+			#endif
 
 				ableToOpen = openInputFile(it->second, in);
 
 				if (ableToOpen == 1) { return "not open"; }
 				in.close();
+				
+			#ifdef USE_MPI	
+				}
+			#endif
+
 			}
 		}else { return "not found"; }
 		

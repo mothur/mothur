@@ -22,6 +22,66 @@ Classify::Classify(string tfile, string tempFile, string method, int kmerSize, f
 		
 		int start = time(NULL);
 		int numSeqs = 0;
+		
+		m->mothurOut("Generating search database...    "); cout.flush();
+#ifdef USE_MPI	
+			int pid;
+			vector<long> positions;
+		
+			MPI_Status status; 
+			MPI_File inMPI;
+			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+	
+			char inFileName[tempFile.length()];
+			strcpy(inFileName, tempFile.c_str());
+	
+			MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
+	
+			if (pid == 0) { //only one process needs to scan file
+				positions = setFilePosFasta(tempFile, numSeqs); //fills MPIPos, returns numSeqs
+
+				//send file positions to all processes
+				MPI_Bcast(&numSeqs, 1, MPI_INT, 0, MPI_COMM_WORLD);  //send numSeqs
+				MPI_Bcast(&positions[0], (numSeqs+1), MPI_LONG, 0, MPI_COMM_WORLD); //send file pos	
+			}else{
+				MPI_Bcast(&numSeqs, 1, MPI_INT, 0, MPI_COMM_WORLD); //get numSeqs
+				positions.resize(numSeqs);
+				MPI_Bcast(&positions[0], (numSeqs+1), MPI_LONG, 0, MPI_COMM_WORLD); //get file positions
+			}
+			
+			//create database
+			if(method == "kmer")			{	database = new KmerDB(tempFile, kmerSize);			}
+			else if(method == "suffix")		{	database = new SuffixDB(numSeqs);								}
+			else if(method == "blast")		{	database = new BlastDB(gapOpen, gapExtend, match, misMatch);	}
+			else if(method == "distance")	{	database = new DistanceDB();	}
+			else {
+				m->mothurOut(method + " is not a valid search option. I will run the command using kmer, ksize=8."); m->mothurOutEndLine();
+				database = new KmerDB(tempFile, 8);
+			}
+
+			//read file 
+			for(int i=0;i<numSeqs;i++){
+				//read next sequence
+				int length = positions[i+1] - positions[i];
+				char buf4[length];
+				MPI_File_read_at(inMPI, positions[i], buf4, length, MPI_CHAR, &status);
+				
+				string tempBuf = buf4;
+				if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length); }
+				
+				istringstream iss (tempBuf,istringstream::in);
+				
+				Sequence temp(iss);  
+				if (temp.getName() != "") {
+					names.push_back(temp.getName());
+					database->addSequence(temp);	
+				}
+			}
+			
+			database->generateDB();
+			MPI_File_close(&inMPI);
+	#else
+		
 		//need to know number of template seqs for suffixdb
 		if (method == "suffix") {
 			ifstream inFASTA;
@@ -30,8 +90,6 @@ Classify::Classify(string tfile, string tempFile, string method, int kmerSize, f
 			inFASTA.close();
 		}
 
-		m->mothurOut("Generating search database...    "); cout.flush();
-				
 		bool needToGenerate = true;
 		string kmerDBName;
 		if(method == "kmer")			{	
@@ -81,7 +139,7 @@ Classify::Classify(string tfile, string tempFile, string method, int kmerSize, f
 			}
 			fastaFile.close();
 		}
-		
+#endif		
 		database->setNumSeqs(names.size());
 		
 		m->mothurOut("DONE."); m->mothurOutEndLine();
@@ -99,14 +157,58 @@ void Classify::readTaxonomy(string file) {
 	try {
 		
 		phyloTree = new PhyloTree();
+		string name, taxInfo;
 		
+		m->mothurOutEndLine();
+		m->mothurOut("Reading in the " + file + " taxonomy...\t");	cout.flush();
+
+#ifdef USE_MPI	
+		int pid, num;
+		vector<long> positions;
+		
+		MPI_Status status; 
+		MPI_File inMPI;
+		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+		
+		char inFileName[file.length()];
+		strcpy(inFileName, file.c_str());
+		
+		MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
+		
+		if (pid == 0) {
+			positions = setFilePosEachLine(file, num);
+			
+			//send file positions to all processes
+			MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);  //send numSeqs
+			MPI_Bcast(&positions[0], (num+1), MPI_LONG, 0, MPI_COMM_WORLD); //send file pos	
+		}else{
+			MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD); //get numSeqs
+			positions.resize(num);
+			MPI_Bcast(&positions[0], (num+1), MPI_LONG, 0, MPI_COMM_WORLD); //get file positions
+		}
+	
+		//read file 
+		for(int i=0;i<num;i++){
+			//read next sequence
+			int length = positions[i+1] - positions[i];
+			char buf4[length];
+
+			MPI_File_read_at(inMPI, positions[i], buf4, length, MPI_CHAR, &status);
+
+			string tempBuf = buf4;
+			if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length); }
+			
+			istringstream iss (tempBuf,istringstream::in);
+			iss >> name >> taxInfo;
+			taxonomy[name] = taxInfo;
+			phyloTree->addSeqToTree(name, taxInfo);
+		}
+		
+		MPI_File_close(&inMPI);
+#else				
 		ifstream inTax;
 		openInputFile(file, inTax);
 	
-		m->mothurOutEndLine();
-		m->mothurOut("Reading in the " + file + " taxonomy...\t");	cout.flush();
-		
-		string name, taxInfo;
 		//read template seqs and save
 		while (!inTax.eof()) {
 			inTax >> name >> taxInfo;
@@ -117,10 +219,11 @@ void Classify::readTaxonomy(string file) {
 		
 			gobble(inTax);
 		}
-		
-		phyloTree->assignHeirarchyIDs(0);
 		inTax.close();
+#endif	
 	
+		phyloTree->assignHeirarchyIDs(0);
+		
 		m->mothurOut("DONE.");
 		m->mothurOutEndLine();	cout.flush();
 	

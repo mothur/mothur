@@ -154,7 +154,7 @@ int ClusterCommand::execute(){
 		double saveCutoff = cutoff;
 		
 		while (matrix->getSmallDist() < cutoff && matrix->getNNodes() > 0){
-		
+	
 			if (m->control_pressed) { //clean up
 				delete globaldata->gSparseMatrix;  globaldata->gSparseMatrix = NULL;
 				delete globaldata->gListVector;	 globaldata->gListVector = NULL;
@@ -176,6 +176,7 @@ int ClusterCommand::execute(){
 			loops++;
 
 			cluster->update(cutoff);
+	
 			float dist = matrix->getSmallDist();
 			float rndDist = roundDist(dist, precision);
 
@@ -209,7 +210,7 @@ int ClusterCommand::execute(){
 		//delete globaldata's copy of the sparsematrix and listvector to free up memory
 		delete globaldata->gSparseMatrix;  globaldata->gSparseMatrix = NULL;
 		delete globaldata->gListVector;	 globaldata->gListVector = NULL;
-		
+	
 		//saves .list file so you can do the collect, rarefaction and summary commands without doing a read.list
 		if (globaldata->getFormat() == "phylip") { globaldata->setPhylipFile(""); }
 		else if (globaldata->getFormat() == "column") { globaldata->setColumnFile(""); }
@@ -221,7 +222,7 @@ int ClusterCommand::execute(){
 		sabundFile.close();
 		rabundFile.close();
 		listFile.close();
-		
+	
 		if (saveCutoff != cutoff) { m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine();  }
 		
 		m->mothurOutEndLine();

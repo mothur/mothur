@@ -25,15 +25,17 @@
 class ChimeraCheckRDP : public Chimera {
 	
 	public:
-		ChimeraCheckRDP(string, string);	
+		ChimeraCheckRDP(string, string, string, bool, int, int, string); //fasta, template, name, svg, increment, ksize, outputDir	
 		~ChimeraCheckRDP();
 		
 		int getChimeras(Sequence*);
 		int print(ostream&, ostream&);
-		int doPrep();
+		
+		#ifdef USE_MPI
+		int print(MPI_File&, MPI_File&);
+		#endif
 		
 	private:
-		
 		
 		Sequence* querySeq;
 		AlignmentDB* templateDB;
@@ -43,6 +45,9 @@ class ChimeraCheckRDP : public Chimera {
 		vector<sim>  IS;  //IS is the vector of IS values for each window for query
 		string fastafile;
 		map<string, string> names;
+		string name;
+		bool svg;
+		int kmerSize, increment;
 		
 		vector<sim> findIS();
 		int calcKmers(map<int, int>, map<int, int>);
