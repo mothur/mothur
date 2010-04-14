@@ -97,7 +97,7 @@ ParseListCommand::ParseListCommand(string option)  {
 //**********************************************************************************************************************
 void ParseListCommand::help(){
 	try {
-		m->mothurOut("The parse.list command reads a list and group file and generates a list file for each group in the groupfile \n");
+		m->mothurOut("The parse.list command reads a list and group file and generates a list file for each group in the groupfile. \n");
 		m->mothurOut("The parse.list command parameters are list, group and label.\n");
 		m->mothurOut("The list and group parameters are required.\n");
 		m->mothurOut("The label parameter is used to read specific labels in your input you want to use.\n");

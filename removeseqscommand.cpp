@@ -199,7 +199,7 @@ int RemoveSeqsCommand::execute(){
 int RemoveSeqsCommand::readFasta(){
 	try {
 		if (outputDir == "") {  outputDir += hasPath(fastafile);  }
-		string outputFileName = getRootName(fastafile) + "pick" + getExtension(fastafile);
+		string outputFileName = outputDir + getRootName(getSimpleName(fastafile)) + "pick" + getExtension(fastafile);
 		ofstream out;
 		openOutputFile(outputFileName, out);
 		
@@ -245,7 +245,7 @@ int RemoveSeqsCommand::readFasta(){
 int RemoveSeqsCommand::readList(){
 	try {
 		if (outputDir == "") {  outputDir += hasPath(listfile);  }
-		string outputFileName = getRootName(listfile) + "pick" +  getExtension(listfile);
+		string outputFileName = outputDir + getRootName(getSimpleName(listfile)) + "pick" +  getExtension(listfile);
 		ofstream out;
 		openOutputFile(outputFileName, out);
 		
@@ -316,8 +316,8 @@ int RemoveSeqsCommand::readList(){
 int RemoveSeqsCommand::readName(){
 	try {
 		if (outputDir == "") {  outputDir += hasPath(namefile);  }
-		string outputFileName = getRootName(namefile) + "pick" + getExtension(namefile);
-		string outputFileName2 = getRootName(namefile) + "dups.accnos";
+		string outputFileName = outputDir + getRootName(getSimpleName(namefile)) + "pick" + getExtension(namefile);
+		string outputFileName2 = outputDir + getRootName(getSimpleName(namefile)) + "dups.accnos";
 
 		ofstream out2;
 		if (dups) {	 openOutputFile(outputFileName2, out2);	}
@@ -415,7 +415,7 @@ int RemoveSeqsCommand::readName(){
 int RemoveSeqsCommand::readGroup(){
 	try {
 		if (outputDir == "") {  outputDir += hasPath(groupfile);  }
-		string outputFileName = getRootName(groupfile) + "pick" + getExtension(groupfile);
+		string outputFileName = outputDir + getRootName(getSimpleName(groupfile)) + "pick" + getExtension(groupfile);
 		ofstream out;
 		openOutputFile(outputFileName, out);
 
@@ -460,7 +460,7 @@ int RemoveSeqsCommand::readGroup(){
 int RemoveSeqsCommand::readAlign(){
 	try {
 		if (outputDir == "") {  outputDir += hasPath(alignfile);  }
-		string outputFileName = getRootName(getRootName(alignfile)) + "pick.align.report";
+		string outputFileName = outputDir + getRootName(getSimpleName(alignfile)) + "pick.align.report";
 		ofstream out;
 		openOutputFile(outputFileName, out);
 

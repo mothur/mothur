@@ -70,7 +70,7 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 		string holdLabel, nextLabel, groupN;
 		individual newguy;
 		
-		for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+		for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
 		lookup.clear();
 		
 		//read in first row since you know there is at least 1 group.
@@ -95,8 +95,8 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 			
 			lookup[0]->push_back(inputData, groupN); //abundance, bin, group
 			push_back(inputData, groupN);
-			numSeqs += inputData;
-			numBins++;
+			//numSeqs += inputData;
+			//numBins++;
 			if (inputData > maxRank) { maxRank = inputData; }
 			
 		}
@@ -363,7 +363,7 @@ vector<SharedRAbundVector*> SharedRAbundVector::getSharedRAbundVectors(){
 		for (int i = 0; i < lookup.size(); i++) {
 			//if this sharedrabund is not from a group the user wants then delete it.
 			if (util->isValidGroup(lookup[i]->getGroup(), globaldata->Groups) == false) { 
-				delete lookup[i]; 
+				delete lookup[i]; lookup[i] = NULL;
 				lookup.erase(lookup.begin()+i); 
 				i--; 
 			}

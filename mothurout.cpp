@@ -40,9 +40,8 @@ void MothurOut::setFileName(string filename)  {
 	}
 }
 /*********************************************************************************************/
-MothurOut::~MothurOut() {
+void MothurOut::closeLog()  {
 	try {
-		_uniqueInstance = 0;
 		
 		#ifdef USE_MPI
 			int pid;
@@ -58,11 +57,22 @@ MothurOut::~MothurOut() {
 		#endif
 	}
 	catch(exception& e) {
-		errorOut(e, "MothurOut", "MothurOut");
+		errorOut(e, "MothurOut", "closeLog");
 		exit(1);
 	}
 }
 
+/*********************************************************************************************/
+MothurOut::~MothurOut() {
+	try {
+		_uniqueInstance = 0;
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "MothurOut");
+		exit(1);
+	}
+}
 /*********************************************************************************************/
 void MothurOut::mothurOut(string output) {
 	try {

@@ -371,7 +371,7 @@ int ChimeraCcodeCommand::execute(){
 
 		#else
 			ifstream inFASTA;
-			openInputFile(candidateFileNames[s], inFASTA);
+			openInputFile(fastafile, inFASTA);
 			numSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
 			inFASTA.close();
 			lines.push_back(new linePair(0, numSeqs));

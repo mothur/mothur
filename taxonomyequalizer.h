@@ -23,7 +23,7 @@
 class TaxEqualizer  {
 	
 public:
-	TaxEqualizer(string, int);
+	TaxEqualizer(string, int, string);
 	~TaxEqualizer() {};
 	
 	string getEqualizedTaxFile()	{	return equalizedFile;	}
@@ -31,7 +31,7 @@ public:
 	
 	
 private:
-	string equalizedFile, testTax;
+	string equalizedFile, testTax, outputDir;
 	bool containsConfidence;
 	int cutoff, highestLevel;
 	map<string, int> seqLevels;  //maps name to level of taxonomy

@@ -17,19 +17,23 @@ void NameAssignment::readMap(){
 		string firstCol, secondCol, skip;
 	//	int index = 0;
 	
-	
-//		map<string, string> data;
+		
+		map<string, int>::iterator itData;
 		int rowIndex = 0;
-
+		
 		while(fileHandle){
 			fileHandle >> firstCol;				//read from first column
 			fileHandle >> secondCol;			//read from second column
+						
+			itData = (*this).find(firstCol);
+			if (itData == (*this).end()) {
 			
-//			data[firstCol] = secondCol;			//store data in map
-
-			list.push_back(secondCol);		//adds data's value to list
-			reverse[rowIndex] = firstCol;
-			(*this)[firstCol] = rowIndex++;
+				(*this)[firstCol] = rowIndex++;
+				list.push_back(secondCol);		//adds data's value to list
+				reverse[rowIndex] = firstCol;
+				
+			}else{	m->mothurOut(firstCol + " is already in namesfile. I will use first definition."); m->mothurOutEndLine();  }
+			
 			gobble(fileHandle);
 		}
 		fileHandle.close();

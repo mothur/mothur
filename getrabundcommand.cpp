@@ -120,7 +120,7 @@ int GetRAbundCommand::execute(){
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
-		if (m->control_pressed) {  out.close(); remove(filename.c_str()); delete read; delete input; delete list; globaldata->gListVector = NULL;  return 0; }
+		if (m->control_pressed) {  out.close(); remove(filename.c_str());  delete list; globaldata->gListVector = NULL;  return 0; }
 		
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
@@ -129,7 +129,7 @@ int GetRAbundCommand::execute(){
 					rabund = new RAbundVector();				
 					*rabund = (list->getRAbundVector());
 					
-					if (m->control_pressed) {  out.close(); remove(filename.c_str()); delete read; delete input; delete list; delete rabund; globaldata->gListVector = NULL;  return 0; }
+					if (m->control_pressed) {  out.close(); remove(filename.c_str());  delete list; delete rabund; globaldata->gListVector = NULL;  return 0; }
 
 					
 					if(sorted)	{   rabund->print(out);				}
@@ -151,7 +151,7 @@ int GetRAbundCommand::execute(){
 					rabund = new RAbundVector();
 					*rabund = (list->getRAbundVector());
 					
-					if (m->control_pressed) {  out.close(); remove(filename.c_str()); delete read; delete input; delete list; delete rabund; globaldata->gListVector = NULL;  return 0; }
+					if (m->control_pressed) {  out.close(); remove(filename.c_str());  delete list; delete rabund; globaldata->gListVector = NULL;  return 0; }
 					
 					if(sorted)	{   rabund->print(out);				}
 					else		{	rabund->nonSortedPrint(out);	}
@@ -193,7 +193,7 @@ int GetRAbundCommand::execute(){
 			rabund = new RAbundVector();
 			*rabund = (list->getRAbundVector());
 			
-			if (m->control_pressed) {  out.close(); remove(filename.c_str()); delete read; delete input; delete list; delete rabund; globaldata->gListVector = NULL;  return 0; }
+			if (m->control_pressed) {  out.close(); remove(filename.c_str());  delete list; delete rabund; globaldata->gListVector = NULL;  return 0; }
 			
 			if(sorted)	{   rabund->print(out);				}
 			else		{	rabund->nonSortedPrint(out);	}
@@ -206,11 +206,10 @@ int GetRAbundCommand::execute(){
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
 		m->mothurOut(filename); m->mothurOutEndLine();	
 		m->mothurOutEndLine();
-
 		
 		out.close(); 
-		delete read; delete input;
-		globaldata->gListVector = NULL; 
+		
+		globaldata->gListVector = NULL;
 		
 		return 0;		
 	}

@@ -313,6 +313,7 @@ int ClassifySeqsCommand::execute(){
 			for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 			
 #ifdef USE_MPI	
+
 				int pid, end, numSeqsPerProcessor; 
 				int tag = 2001;
 				vector<long> MPIPos;
@@ -392,6 +393,7 @@ int ClassifySeqsCommand::execute(){
 				MPI_File_close(&outMPITempTax);
 				
 #else
+
 			//read namefile
 			if(namefile != "") {
 				nameMap.clear(); //remove old names
@@ -469,7 +471,9 @@ int ClassifySeqsCommand::execute(){
 			driver(lines[0], newTaxonomyFile, tempTaxonomyFile, fastaFileNames[s]);
 	#endif	
 #endif
-
+		
+		delete classify;
+		
 		#ifdef USE_MPI	
 			if (pid == 0) {  //this part does not need to be paralellized
 		#endif
@@ -484,6 +488,7 @@ int ClassifySeqsCommand::execute(){
 		
 			//read in users taxonomy file and add sequences to tree
 			string name, taxon;
+
 			while(!in.eof()){
 				in >> name >> taxon; gobble(in);
 				
@@ -561,7 +566,6 @@ int ClassifySeqsCommand::execute(){
 			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to classify " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
 		}
 		
-		delete classify;
 		return 0;
 	}
 	catch(exception& e) {
@@ -677,13 +681,13 @@ int ClassifySeqsCommand::driver(linePair* line, string taxFName, string tempTFNa
 			if (m->control_pressed) { return 0; }
 			
 			Sequence* candidateSeq = new Sequence(inFASTA);
-			
+	
 			if (candidateSeq->getName() != "") {
 				taxonomy = classify->getTaxonomy(candidateSeq);
 				
 				if (m->control_pressed) { delete candidateSeq; return 0; }
 
-				if (taxonomy != "bad seq") {
+				if ((taxonomy != "bad seq") && (taxonomy != "")) {
 					//output confidence scores or not
 					if (probs) {
 						outTax << candidateSeq->getName() << '\t' << taxonomy << endl;
@@ -692,7 +696,7 @@ int ClassifySeqsCommand::driver(linePair* line, string taxFName, string tempTFNa
 					}
 					
 					outTaxSimple << candidateSeq->getName() << '\t' << classify->getSimpleTax() << endl;
-				}
+				}else{  m->mothurOut("Sequence: " + candidateSeq->getName() + " is bad."); m->mothurOutEndLine();  }
 			}				
 			delete candidateSeq;
 			
@@ -744,7 +748,7 @@ int ClassifySeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File
 			if (candidateSeq->getName() != "") {
 				taxonomy = classify->getTaxonomy(candidateSeq);
 				
-				if (taxonomy != "bad seq") {
+				if ((taxonomy != "bad seq") && (taxonomy != ""))  {
 					//output confidence scores or not
 					if (probs) {
 						outputString =  candidateSeq->getName() + "\t" + taxonomy + "\n";
@@ -764,7 +768,7 @@ int ClassifySeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File
 					strcpy(buf, outputString.c_str()); 
 				
 					MPI_File_write_shared(tempFile, buf, length, MPI_CHAR, &statusTemp);
-				}
+				}else{  cout << "Sequence: " << candidateSeq->getName() << " is bad." << endl;  }
 			}				
 			delete candidateSeq;
 			

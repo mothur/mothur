@@ -11,11 +11,12 @@
 
 /***********************************************************************/
 
-ReadCluster::ReadCluster(string distfile, float c){
+ReadCluster::ReadCluster(string distfile, float c, string o){
 		globaldata = GlobalData::getInstance();
 		m = MothurOut::getInstance();
         distFile = distfile;
 		cutoff = c;
+		outputDir = o;
 }
 
 /***********************************************************************/
@@ -28,7 +29,7 @@ int ReadCluster::read(NameAssignment* nameMap){
 		
 		if (m->control_pressed) { return 0; }
 		
-		OutPutFile = sortFile(distFile);
+		OutPutFile = sortFile(distFile, outputDir);
 		
 		return 0;
 			

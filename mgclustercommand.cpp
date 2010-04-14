@@ -538,12 +538,12 @@ ListVector* MGClusterCommand::mergeOPFs(map<string, int> binInfo, float dist){
 void MGClusterCommand::sortHclusterFiles(string unsortedDist, string unsortedOverlap) {
 	try {
 		//sort distFile
-		string sortedDistFile = sortFile(unsortedDist);
+		string sortedDistFile = sortFile(unsortedDist, outputDir);
 		remove(unsortedDist.c_str());  //delete unsorted file
 		distFile = sortedDistFile;
 		
 		//sort overlap file
-		string sortedOverlapFile = sortFile(unsortedOverlap);
+		string sortedOverlapFile = sortFile(unsortedOverlap, outputDir);
 		remove(unsortedOverlap.c_str());  //delete unsorted file
 		overlapFile = sortedOverlapFile;
 	}

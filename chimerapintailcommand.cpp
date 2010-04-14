@@ -21,7 +21,7 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","filter","processors","window" "increment","template","conservation","quantile","mask","outputdir","inputdir"};
+			string Array[] =  {"fasta","filter","processors","window" ,"increment","template","conservation","quantile","mask","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -381,7 +381,7 @@ int ChimeraPintailCommand::execute(){
 
 		#else
 			ifstream inFASTA;
-			openInputFile(candidateFileNames[s], inFASTA);
+			openInputFile(fastafile, inFASTA);
 			numSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
 			inFASTA.close();
 			lines.push_back(new linePair(0, numSeqs));

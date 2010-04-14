@@ -637,40 +637,45 @@ string FilterSeqsCommand::createFilter() {
 		MPI_Status status;
 		
 		MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-		if (pid == 0) { //only one process should output the filter
 		
-			vector<int> temp; temp.resize(alignmentLength+1);
-							
-			//get the frequencies from the child processes
-			for(int i = 0; i < ((processors-1)*5); i++) { 
-				MPI_Recv(&temp[0], (alignmentLength+1), MPI_INT, MPI_ANY_SOURCE, 2001, MPI_COMM_WORLD, &status); 
-				int receiveTag = temp[temp.size()-1];  //child process added a int to the end to indicate what letter count this is for
-				
-				if (receiveTag == Atag) { //you are recieveing the A frequencies
-					for (int k = 0; k < alignmentLength; k++) {		F.a[k] += temp[k];	}
-				}else if (receiveTag == Ttag) { //you are recieveing the T frequencies
-					for (int k = 0; k < alignmentLength; k++) {		F.t[k] += temp[k];	}
-				}else if (receiveTag == Ctag) { //you are recieveing the C frequencies
-					for (int k = 0; k < alignmentLength; k++) {		F.c[k] += temp[k];	}
-				}else if (receiveTag == Gtag) { //you are recieveing the G frequencies
-					for (int k = 0; k < alignmentLength; k++) {		F.g[k] += temp[k];	}
-				}else if (receiveTag == Gaptag) { //you are recieveing the gap frequencies
-					for (int k = 0; k < alignmentLength; k++) {		F.gap[k] += temp[k];	}
-				}
-			} 
-		}else{
-		
-			//send my fequency counts
-			F.a.push_back(Atag);
-			int ierr = MPI_Send(&(F.a[0]), (alignmentLength+1), MPI_INT, 0, 2001, MPI_COMM_WORLD);
-			F.t.push_back(Ttag);
-			ierr = MPI_Send (&(F.t[0]), (alignmentLength+1), MPI_INT, 0, 2001, MPI_COMM_WORLD);
-			F.c.push_back(Ctag);
-			ierr = MPI_Send(&(F.c[0]), (alignmentLength+1), MPI_INT, 0, 2001, MPI_COMM_WORLD);
-			F.g.push_back(Gtag);
-			ierr = MPI_Send(&(F.g[0]), (alignmentLength+1), MPI_INT, 0, 2001, MPI_COMM_WORLD);
-			F.gap.push_back(Gaptag);
-			ierr = MPI_Send(&(F.gap[0]), (alignmentLength+1), MPI_INT, 0, 2001, MPI_COMM_WORLD);
+		if(trump != '*' || isTrue(vertical) || soft != 0){
+			
+			if (pid == 0) { //only one process should output the filter
+			
+				vector<int> temp; temp.resize(alignmentLength+1);
+								
+				//get the frequencies from the child processes
+				for(int i = 0; i < ((processors-1)*5); i++) { 
+					MPI_Recv(&temp[0], (alignmentLength+1), MPI_INT, MPI_ANY_SOURCE, 2001, MPI_COMM_WORLD, &status); 
+					int receiveTag = temp[temp.size()-1];  //child process added a int to the end to indicate what letter count this is for
+					
+					if (receiveTag == Atag) { //you are recieveing the A frequencies
+						for (int k = 0; k < alignmentLength; k++) {		F.a[k] += temp[k];	}
+					}else if (receiveTag == Ttag) { //you are recieveing the T frequencies
+						for (int k = 0; k < alignmentLength; k++) {		F.t[k] += temp[k];	}
+					}else if (receiveTag == Ctag) { //you are recieveing the C frequencies
+						for (int k = 0; k < alignmentLength; k++) {		F.c[k] += temp[k];	}
+					}else if (receiveTag == Gtag) { //you are recieveing the G frequencies
+						for (int k = 0; k < alignmentLength; k++) {		F.g[k] += temp[k];	}
+					}else if (receiveTag == Gaptag) { //you are recieveing the gap frequencies
+						for (int k = 0; k < alignmentLength; k++) {		F.gap[k] += temp[k];	}
+					}
+				} 
+			}else{
+			
+				//send my fequency counts
+				F.a.push_back(Atag);
+				int ierr = MPI_Send(&(F.a[0]), (alignmentLength+1), MPI_INT, 0, 2001, MPI_COMM_WORLD);
+				F.t.push_back(Ttag);
+				ierr = MPI_Send (&(F.t[0]), (alignmentLength+1), MPI_INT, 0, 2001, MPI_COMM_WORLD);
+				F.c.push_back(Ctag);
+				ierr = MPI_Send(&(F.c[0]), (alignmentLength+1), MPI_INT, 0, 2001, MPI_COMM_WORLD);
+				F.g.push_back(Gtag);
+				ierr = MPI_Send(&(F.g[0]), (alignmentLength+1), MPI_INT, 0, 2001, MPI_COMM_WORLD);
+				F.gap.push_back(Gaptag);
+				ierr = MPI_Send(&(F.gap[0]), (alignmentLength+1), MPI_INT, 0, 2001, MPI_COMM_WORLD);
+			}
+			
 		}
 		
 		if (pid == 0) { //only one process should output the filter

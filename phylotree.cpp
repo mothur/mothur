@@ -29,6 +29,7 @@ PhyloTree::PhyloTree(){
 
 PhyloTree::PhyloTree(string tfile){
 	try {
+		m = MothurOut::getInstance();
 		numNodes = 1;
 		numSeqs = 0;
 		tree.push_back(TaxNode("Root"));
@@ -61,8 +62,10 @@ string PhyloTree::getNextTaxon(string& heirarchy){
 	try {
 		string currentLevel = "";
 		if(heirarchy != ""){
-			currentLevel=heirarchy.substr(0,heirarchy.find_first_of(';'));
-			heirarchy=heirarchy.substr(heirarchy.find_first_of(';')+1);
+			int pos = heirarchy.find_first_of(';');
+			currentLevel=heirarchy.substr(0,pos);
+			if (pos != (heirarchy.length()-1)) {  heirarchy=heirarchy.substr(pos+1);  }
+			else { heirarchy = ""; }
 		}
 		return currentLevel;
 	}
@@ -74,7 +77,7 @@ string PhyloTree::getNextTaxon(string& heirarchy){
 
 /**************************************************************************************************/
 
-void PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
+int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 	try {
 		numSeqs++;
 		
@@ -89,6 +92,8 @@ void PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 		while(seqTaxonomy != ""){
 			
 			level++;
+			
+			if (m->control_pressed) { return 0; }
 			
 			//somehow the parent is getting one too many accnos
 			//use print to reassign the taxa id
@@ -154,7 +159,7 @@ void PhyloTree::assignHeirarchyIDs(int index){
 			tree[it->second].heirarchyID = tree[index].heirarchyID + '.' + toString(counter);
 			counter++;
 			tree[it->second].level = tree[index].level + 1;
-			
+						
 			//save maxLevel for binning the unclassified seqs
 			if (tree[it->second].level > maxLevel) { maxLevel = tree[it->second].level; } 
 			

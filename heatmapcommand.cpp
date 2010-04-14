@@ -182,7 +182,7 @@ int HeatMapCommand::execute(){
 				
 				lastLabel = lookup[0]->getLabel();
 				//prevent memory leak
-				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
 							
 				//get next line to process
 				lookup = input->getSharedRAbundVectors();				
