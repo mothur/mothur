@@ -11,6 +11,7 @@
 		A747E79C1163442A00FB9042 /* chimeracheckcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeracheckcommand.cpp; sourceTree = "<group>"; };
 		A747E81C116365E000FB9042 /* chimeraslayercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraslayercommand.h; sourceTree = "<group>"; };
 		A747E81D116365E000FB9042 /* chimeraslayercommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeraslayercommand.cpp; sourceTree = "<group>"; };
+		A7639F8D1175DF35008F5578 /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
 		A78254461164D7790002E2DD /* chimerapintailcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimerapintailcommand.h; sourceTree = "<group>"; };
 		A78254471164D7790002E2DD /* chimerapintailcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimerapintailcommand.cpp; sourceTree = "<group>"; };
 		A7825502116519F70002E2DD /* chimerabellerophoncommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimerabellerophoncommand.h; sourceTree = "<group>"; };
@@ -423,6 +424,7 @@
 		08FB7794FE84155DC02AAC07 /* mothur */ = {
 			isa = PBXGroup;
 			children = (
+				A7639F8D1175DF35008F5578 /* makefile */,
 				A7DA1FF0113FECD400BF472F /* alignment.cpp */,
 				A7DA1FF1113FECD400BF472F /* alignment.hpp */,
 				A7DA1FF6113FECD400BF472F /* averagelinkage.cpp */,

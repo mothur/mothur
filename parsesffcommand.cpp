@@ -453,7 +453,6 @@ bool ParseSFFCommand::screenSeq(string& sequence, int& group){
 		}
 	}
 	
-	
 	int fPrimer = 1;
 	for(int i=0;i<numFPrimers;i++){
 		if(compareDNASeq(forPrimer[i], sequence.substr(barcodeLength,forPrimer[i].length()))){
@@ -464,7 +463,7 @@ bool ParseSFFCommand::screenSeq(string& sequence, int& group){
 			fPrimer = 0;
 		}
 	}
-	
+
 	int rPrimer = 1;
 	for(int i=0;i<numRPrimers;i++){
 		if(compareDNASeq(revPrimer[i], sequence.substr(sequence.length()-revPrimer[i].length(),revPrimer[i].length()))){

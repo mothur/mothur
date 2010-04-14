@@ -33,7 +33,7 @@ public:
 	PhyloTree();
 	PhyloTree(string);  //pass it a taxonomy file and it makes the tree
 	~PhyloTree() {};
-	void addSeqToTree(string, string);
+	int addSeqToTree(string, string);
 	void assignHeirarchyIDs(int);
 	void print(ofstream&);
 	vector<int> getGenusNodes();

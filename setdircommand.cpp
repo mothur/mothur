@@ -79,7 +79,6 @@ int SetDirectoryCommand::execute(){
 		
 		commandFactory = CommandFactory::getInstance();
 		
-		
 		//redirect output
 		if ((output == "clear") || (output == "")) {  output = "";  commandFactory->setOutputDirectory(output);  }
 		else {

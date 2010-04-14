@@ -80,6 +80,7 @@ void GlobalData::clear() {
 //	fastafile		=   ""; //do we need this?
 	treefile		=	"";
 	sharedfile		=	"";
+	format = "";
 }
 
 

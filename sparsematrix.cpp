@@ -136,7 +136,7 @@ PCell* SparseMatrix::getSmallestCell(){
 	//	if the mins vector is empty go here...
 		if(mins.empty()){		
 			mins.clear();
-		
+	
 			smallDist = begin()->dist;  //set the first candidate small distance
 		
 			for(MatData currentCell=begin();currentCell!=end();currentCell++){

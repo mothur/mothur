@@ -53,6 +53,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 			if(itB == nameMap->end()){
 				cerr << "ABError: Sequence '" << secondName << "' was not found in the names file, please correct\n"; exit(1);
 			}
+//if (((itA->second == 8) && (itB->second == 1588)) || ((itA->second == 1588) && (itB->second == 8))) { cout << "found it" << endl; }
 
 			if (distance == -1) { distance = 1000000; }
 			else if (globaldata->sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.

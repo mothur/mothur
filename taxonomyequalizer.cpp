@@ -10,7 +10,7 @@
 #include "taxonomyequalizer.h"
 
 /**************************************************************************************************/
-TaxEqualizer::TaxEqualizer(string tfile, int c) : cutoff(c) {
+TaxEqualizer::TaxEqualizer(string tfile, int c, string o) : cutoff(c), outputDir(o) {
 	try {
 		m = MothurOut::getInstance();
 		containsConfidence = false;
@@ -35,7 +35,7 @@ TaxEqualizer::TaxEqualizer(string tfile, int c) : cutoff(c) {
 			openInputFile(tfile, in);
 			
 			ofstream out;
-			equalizedFile = getRootName(tfile) + "equalized.taxonomy";
+			equalizedFile = outputDir + getRootName(getSimpleName(tfile)) + "equalized.taxonomy";
 			openOutputFile(equalizedFile, out);
 			
 	

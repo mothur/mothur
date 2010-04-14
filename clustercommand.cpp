@@ -154,7 +154,7 @@ int ClusterCommand::execute(){
 		double saveCutoff = cutoff;
 		
 		while (matrix->getSmallDist() < cutoff && matrix->getNNodes() > 0){
-	
+		
 			if (m->control_pressed) { //clean up
 				delete globaldata->gSparseMatrix;  globaldata->gSparseMatrix = NULL;
 				delete globaldata->gListVector;	 globaldata->gListVector = NULL;

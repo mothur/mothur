@@ -34,7 +34,7 @@ ReadOtuCommand::ReadOtuCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
-			
+	
 			globaldata->newRead();
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
@@ -156,18 +156,17 @@ ReadOtuCommand::ReadOtuCommand(string option)  {
 			}
 			
 			globaldata->allLines = allLines;
-			
+		
 			orderfile = validParameter.validFile(parameters, "order", true);
 			if (orderfile == "not open") { abort = true; }	
 			else if (orderfile == "not found") { orderfile = ""; }
 			else {  globaldata->setOrderFile(orderfile);	}
 			
-			
+				
 			if (abort == false) {
 				//gets whichever one of the above is set
 				filename = globaldata->inputFileName;
 			}
-
 		}
 
 	}
@@ -204,17 +203,14 @@ void ReadOtuCommand::help(){
 
 
 //**********************************************************************************************************************
-
-ReadOtuCommand::~ReadOtuCommand(){
-	}
-
+ReadOtuCommand::~ReadOtuCommand(){}
 //**********************************************************************************************************************
 
 int ReadOtuCommand::execute(){
 	try {
 	
 		if (abort == true) {	return 0;	}
-		
+	
 		if (globaldata->getFormat() == "shared") {
 			
 			shared = new SharedCommand(outputDir);
@@ -225,11 +221,11 @@ int ReadOtuCommand::execute(){
 				globaldata->setListFile("");
 				globaldata->setGroupFile("");
 				globaldata->setSharedFile("");
-			}else {
-				m->mothurOutEndLine();
-				m->mothurOut("Output File Name: "); m->mothurOutEndLine();
-				m->mothurOut(globaldata->getSharedFile()); m->mothurOutEndLine();	
-				m->mothurOutEndLine();
+			}else { //shared command outputs the filenames
+				//m->mothurOutEndLine();
+				//m->mothurOut("Output File Name: "); m->mothurOutEndLine();
+				//m->mothurOut(globaldata->getSharedFile()); m->mothurOutEndLine();	
+				//m->mothurOutEndLine();
 			}
 			
 			delete shared;

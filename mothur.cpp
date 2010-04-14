@@ -73,9 +73,9 @@ int main(int argc, char *argv[]){
 		#endif
 		
 		//header
-		m->mothurOut("mothur v.1.8");
+		m->mothurOut("mothur v.1.9");
 		m->mothurOutEndLine();		
-		m->mothurOut("Last updated: 2/02/2010");
+		m->mothurOut("Last updated: 4/09/2010");
 		m->mothurOutEndLine();	
 		m->mothurOutEndLine();		
 		m->mothurOut("by");
@@ -146,6 +146,9 @@ int main(int argc, char *argv[]){
 		
 		string outputDir = mothur->getOutputDir();
 		string newlogFileName = outputDir + logFileName;
+		
+		//closes logfile so we can rename
+		m->closeLog();
 	
 		//need this because m->mothurOut makes the logfile, but doesn't know where to put it
 		rename(logFileName.c_str(), newlogFileName.c_str()); //logfile with timestamp

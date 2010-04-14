@@ -33,11 +33,11 @@ Classify(tfile, tempFile, method, ksize, 0.0, 0.0, 0.0, 0.0), kmerSize(ksize), c
 		
 		/************calculate the probablity that each word will be in a specific taxonomy*************/
 		ofstream out;
-		string probFileName = tempFile.substr(0,tempFile.find_last_of(".")+1) + char('0'+ kmerSize) + "mer.prob";
+		string probFileName = tfile.substr(0,tfile.find_last_of(".")+1) + tempFile.substr(0,tempFile.find_last_of(".")+1) + char('0'+ kmerSize) + "mer.prob";
 		ifstream probFileTest(probFileName.c_str());
 		
 		ofstream out2;
-		string probFileName2 = tempFile.substr(0,tempFile.find_last_of(".")+1) + char('0'+ kmerSize) + "mer.numNonZero";
+		string probFileName2 = tfile.substr(0,tfile.find_last_of(".")+1) + tempFile.substr(0,tempFile.find_last_of(".")+1) + char('0'+ kmerSize) + "mer.numNonZero";
 		ifstream probFileTest2(probFileName2.c_str());
 		
 		int start = time(NULL);
@@ -106,15 +106,21 @@ string Bayesian::getTaxonomy(Sequence* seq) {
 		//get words contained in query
 		//getKmerString returns a string where the index in the string is hte kmer number 
 		//and the character at that index can be converted to be the number of times that kmer was seen
+
 		string queryKmerString = kmer.getKmerString(seq->getUnaligned()); 
+
 		vector<int> queryKmers;
 		for (int i = 0; i < queryKmerString.length(); i++) {
 			if (queryKmerString[i] != '!') { //this kmer is in the query
 				queryKmers.push_back(i);
+ 
 			}
 		}
-	
+		
+		if (queryKmers.size() == 0) {  m->mothurOut(seq->getName() + "is bad."); m->mothurOutEndLine(); return "bad seq"; }
+		
 		int index = getMostProbableTaxonomy(queryKmers);
+
 		
 		if (m->control_pressed) { return tax; }
 					
@@ -171,9 +177,10 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 				}else{
 					confidenceScores[taxonomy.level][taxonomy.name]++;
 				}
-			
+		
 				taxonomy = phyloTree->get(taxonomy.parent);
 			}
+	
 		}
 		
 		string confidenceTax = "";
@@ -181,7 +188,7 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 		TaxNode seqTax = phyloTree->get(tax);
 		
 		while (seqTax.level != 0) { //while you are not at the root
-				
+					
 				itBoot2 = confidenceScores[seqTax.level].find(seqTax.name); //is this a classification we already have a count on
 				
 				int confidence = 0;
@@ -197,6 +204,7 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 				seqTax = phyloTree->get(seqTax.parent);
 		}
 		
+		if (confidenceTax == "") { confidenceTax = "unclassified;"; simpleTax = "unclassified;"; }
 		return confidenceTax;
 		
 	}
@@ -208,12 +216,11 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 /**************************************************************************************************/
 int Bayesian::getMostProbableTaxonomy(vector<int> queryKmer) {
 	try {
-		int indexofGenus;
+		int indexofGenus = 0;
 		
 		double maxProbability = -1000000.0;
 		//find taxonomy with highest probability that this sequence is from it
 		for (int k = 0; k < genusNodes.size(); k++) {
-		
 			//for each taxonomy calc its probability
 			double prob = 1.0;
 			for (int i = 0; i < queryKmer.size(); i++) {

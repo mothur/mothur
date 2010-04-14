@@ -459,15 +459,16 @@ inline string getFullPathName(string fileName){
 			
 		
 			int index = dirs.size()-1;
-		
+	
 			while((pos = path.rfind("./")) != -1) { //while you don't have a complete path
-				if (path[(pos-1)] == '.') { //you want your parent directory ../
+				if (pos == 0) { break;  //you are at the end
+				}else if (path[(pos-1)] == '.') { //you want your parent directory ../
 					path = path.substr(0, pos-1);
 					index--;
 					if (index == 0) {  break; }
 				}else if (path[(pos-1)] == '/') { //you want the current working dir ./
 					path = path.substr(0, pos);
-				}else if (pos == 1) { break; 
+				}else if (pos == 1) { break;  //you are at the end
 				}else { cout << "cannot resolve path for " <<  fileName << endl; return fileName; }
 			}
 		
@@ -501,14 +502,15 @@ inline string getFullPathName(string fileName){
 			int index = dirs.size()-1;
 				
 			while((pos = path.rfind(".\\")) != -1) { //while you don't have a complete path
-				if (path[(pos-1)] == '.') { //you want your parent directory ../
+				if (pos == 0) { break;  //you are at the end
+				}else if (path[(pos-1)] == '.') { //you want your parent directory ../
 					path = path.substr(0, pos-1);
 					index--;
 					if (index == 0) {  break; }
 				}else if (path[(pos-1)] == '\\') { //you want the current working dir ./
 					path = path.substr(0, pos);
-				}else if (pos == 1) { break; 
-				}else {  cout << "cannot resolve path for " <<  fileName << endl;  return fileName; }
+				}else if (pos == 1) { break;  //you are at the end
+				}else { cout << "cannot resolve path for " <<  fileName << endl; return fileName; }
 			}
 		
 			for (int i = index; i >= 0; i--) {
@@ -880,9 +882,12 @@ inline void appendFiles(string temp, string filename) {
 }
 
 /**************************************************************************************************/
-inline string sortFile(string distFile){
+inline string sortFile(string distFile, string outputDir){
 	try {	
+	
+		//if (outputDir == "") {  outputDir += hasPath(distFile);  }
 		string outfile = getRootName(distFile) + "sorted.dist";
+
 		
 		//if you can, use the unix sort since its been optimized for years
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)

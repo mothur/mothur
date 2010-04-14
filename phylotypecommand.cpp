@@ -119,7 +119,7 @@ int PhylotypeCommand::execute(){
 		//reads in taxonomy file and makes all the taxonomies the same length 
 		//by appending the last taxon to a given taxonomy as many times as needed to 
 		//make it as long as the longest taxonomy in the file 
-		TaxEqualizer* taxEqual = new TaxEqualizer(taxonomyFileName, cutoff);
+		TaxEqualizer* taxEqual = new TaxEqualizer(taxonomyFileName, cutoff, outputDir);
 		
 		if (m->control_pressed) { delete taxEqual; return 0; }
 		

@@ -12,7 +12,6 @@
 
 #include "command.hpp"
 #include "filters.h"
-#include "mpi.h"
 
 class Sequence;
 class FilterSeqsCommand : public Command {

@@ -2,7 +2,7 @@
 #define MOTHUROUT_H
 
 /*
- *  m->mothurOut.h
+ *  mothurOut.h
  *  Mothur
  *
  *  Created by westcott on 2/25/10.
@@ -24,6 +24,8 @@ class MothurOut {
 		void mothurOutEndLine();
 		void mothurOutJustToLog(string);
 		void errorOut(exception&, string, string);
+		void closeLog();
+
 		int control_pressed;
 		bool executing;
 
@@ -31,7 +33,7 @@ class MothurOut {
 		static MothurOut* _uniqueInstance;
 		MothurOut( const MothurOut& ); // Disable copy constructor
 		void operator=( const MothurOut& ); // Disable assignment operator
-		MothurOut() {};
+		MothurOut() { control_pressed = false; };
 		~MothurOut();
 
 		string logFileName;

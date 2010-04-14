@@ -216,14 +216,16 @@ string ValidParameters::validFile(map<string, string> container, string paramete
 			#endif
 
 				ableToOpen = openInputFile(it->second, in);
-
-				if (ableToOpen == 1) { return "not open"; }
 				in.close();
-				
+
 			#ifdef USE_MPI	
+					MPI_Bcast(&ableToOpen, 1, MPI_INT, 0, MPI_COMM_WORLD);  //send ableToOPen
+				}else {
+					MPI_Bcast(&ableToOpen, 1, MPI_INT, 0, MPI_COMM_WORLD); //get ableToOPen
 				}
 			#endif
-
+			
+				if (ableToOpen == 1) { return "not open"; }
 			}
 		}else { return "not found"; }
 		

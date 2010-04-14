@@ -21,7 +21,7 @@
 class ReadCluster {
 	
 public:
-	ReadCluster(string, float);
+	ReadCluster(string, float, string);
 	~ReadCluster();
 	int read(NameAssignment*);
 	string getOutputFile() { return OutPutFile; }
@@ -30,7 +30,7 @@ public:
 	
 private:
 	GlobalData* globaldata;
-	string distFile;
+	string distFile, outputDir;
 	string OutPutFile, format;
 	ListVector* list;
 	float cutoff;

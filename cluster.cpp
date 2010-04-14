@@ -50,14 +50,17 @@ rabund(rav), list(lv), dMatrix(dm), method(f)
 	// a list contains pointers (iterators) to the all distances related
 	// to a certain sequence. The Vector is accessed via the index of a 
 	// sequence in the distance matrix.
-	
-
+//ofstream outtemp;
+//string temp = "temp";
+//openOutputFile(temp, outtemp);	
+//cout << lv->size() << endl;
 	seqVec = vector<MatVec>(lv->size());
 	for (MatData currentCell = dMatrix->begin(); currentCell != dMatrix->end(); currentCell++) {
+//outtemp << currentCell->row << '\t' << currentCell->column  << '\t' << currentCell->dist << endl;
 		seqVec[currentCell->row].push_back(currentCell);
 		seqVec[currentCell->column].push_back(currentCell);
 	}
-
+//outtemp.close();
 	mapWanted = false;  //set to true by mgcluster to speed up overlap merge
 	
 	//save so you can modify as it changes in average neighbor
@@ -74,11 +77,16 @@ void Cluster::getRowColCells() {
 		smallRow = smallCell->row;		// get its row
 		smallCol = smallCell->column;	// get its column
 		smallDist = smallCell->dist;	// get the smallest distance
-	
+	//cout << "small row = " << smallRow << "small col = " << smallCol << "small dist = " << smallDist << endl;
+	 
 		rowCells = seqVec[smallRow];    // all distances related to the row index
 		colCells = seqVec[smallCol];    // all distances related to the column index
 		nRowCells = rowCells.size();
 		nColCells = colCells.size();
+//cout << "num rows = " << nRowCells << "num col = " << nColCells << endl;
+		
+		//for (int i = 0; i < nColCells; i++) { cout << colCells[i]->row << '\t' << colCells[i]->column << endl;  }
+		//for (int i = 0; i < nRowCells; i++) { cout << rowCells[i]->row << '\t' << rowCells[i]->column << endl;  }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Cluster", "getRowColCells");
@@ -132,7 +140,9 @@ void Cluster::removeCell(const MatData& cell, int vrow, int vcol, bool rmMatrix)
 			seqVec[dcol].erase(seqVec[dcol].begin()+vcol);
 		
 			if (rmMatrix) {
+			//cout << " removing = " << cell->row << '\t' << cell->column  << '\t' << cell->dist << endl;
 				dMatrix->rmCell(cell);
+		//	cout << "done" << endl;
 			}
 		
 	}
@@ -188,6 +198,7 @@ void Cluster::clusterNames(){
 void Cluster::update(double& cutOFF){
 	try {
 		getRowColCells();	
+//cout << "got rowcells" << endl;
 
 		vector<int> foundCol(nColCells, 0);
 
