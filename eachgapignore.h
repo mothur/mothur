@@ -22,19 +22,28 @@ public:
 		int diff = 0;
 		int length = 0;
 		int start = 0;
+		int end = 0;
 		
 		string seqA = A.getAligned();
 		string seqB = B.getAligned();
 		int alignLength = seqA.length();
 		
-		for(int i=0; i<alignLength; i++){
-			if(seqA[i] != '.' && seqB[i] != '.'){
+		for(int i=0;i<alignLength;i++){
+			if(seqA[i] != '.' && seqB[i] != '.' && seqA[i] != '-' && seqB[i] != '-' ){
 				start = i;
+				cout << "start: " << start << endl;
+				break;
+			}
+		}
+		for(int i=alignLength-1;i>=0;i--){
+			if(seqA[i] != '.' && seqB[i] != '.' && seqA[i] != '-' && seqB[i] != '-' ){
+				end = i;
+				cout << "end: " << end << endl;
 				break;
 			}
 		}
 		
-		for(int i=start;i<alignLength;i++){
+		for(int i=start;i<=end;i++){
 			if(seqA[i] == '.' || seqB[i] == '.'){
 				break;	
 			}
