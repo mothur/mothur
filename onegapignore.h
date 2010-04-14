@@ -9,6 +9,7 @@
  *
  */
 
+
 #include "dist.h"
 
 /**************************************************************************************************/
@@ -28,17 +29,19 @@ public:
 		string seqA = A.getAligned();
 		string seqB = B.getAligned();
 		int alignLength = seqA.length();
-		
+
 		// this assumes that sequences start and end with '.'s instead of'-'s.
 		for(int i=0;i<alignLength;i++){
-			if(seqA[i] != '.' && seqB[i] != '.'){
+			if(seqA[i] != '.' && seqB[i] != '.' && seqA[i] != '-' && seqB[i] != '-' ){
 				start = i;
+				cout << "start: " << start << endl;
 				break;
 			}
 		}
 		for(int i=alignLength-1;i>=0;i--){
-			if(seqA[i] != '.' && seqB[i] != '.'){
+			if(seqA[i] != '.' && seqB[i] != '.' && seqA[i] != '-' && seqB[i] != '-' ){
 				end = i;
+				cout << "end: " << end << endl;
 				break;
 			}
 		}

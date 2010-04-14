@@ -205,8 +205,6 @@ int DistanceCommand::execute(){
 			
 			MPI_File_open(MPI_COMM_WORLD, filename, amode, MPI_INFO_NULL, &outMPI);
 			
-			if (m->control_pressed) {   MPI_File_close(&outMPI);  delete distCalculator;  return 0;  }
-
 			if (pid == 0) { //you are the root process 
 			
 				//do your part
