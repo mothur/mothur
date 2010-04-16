@@ -75,7 +75,7 @@ int main(int argc, char *argv[]){
 		//header
 		m->mothurOut("mothur v.1.9");
 		m->mothurOutEndLine();		
-		m->mothurOut("Last updated: 4/09/2010");
+		m->mothurOut("Last updated: 4/16/2010");
 		m->mothurOutEndLine();	
 		m->mothurOutEndLine();		
 		m->mothurOut("by");
