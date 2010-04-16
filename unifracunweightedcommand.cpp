@@ -336,8 +336,8 @@ void UnifracUnweightedCommand::createPhylipFile(int i) {
 		int count = 0;
 		for (int r=0; r<globaldata->Groups.size(); r++) { 
 			for (int l = r+1; l < globaldata->Groups.size(); l++) {
-				dists[r][l] = (1.0 - utreeScores[count][0]);
-				dists[l][r] = (1.0 - utreeScores[count][0]);
+				dists[r][l] = utreeScores[count][0];
+				dists[l][r] = utreeScores[count][0];
 				count++;
 			}
 		}

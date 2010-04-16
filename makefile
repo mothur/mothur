@@ -2,7 +2,7 @@
 #
 # Makefile for mothur
 # Creator [Xcode -> Makefile Ver: Feb 14 2007 09:18:41]
-# Created: [Thu Mar  4 08:31:03 2010]
+# Created: April 16, 2010
 #
 ###################################################
 
@@ -27,7 +27,7 @@ ifeq  ($(strip $(USEREADLINE)),yes)
       -L../readline-6.0
 endif
 
-USEMPI ?= no
+USEMPI ?= yes
 
 ifeq  ($(strip $(USEMPI)),yes)
     CC_OPTIONS += -DUSE_MPI
