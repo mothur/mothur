@@ -266,24 +266,29 @@ int AlignCommand::execute(){
 				
 				int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
 				int inMode=MPI_MODE_RDONLY; 
-								
-				char outAlignFilename[alignFileName.length()];
-				strcpy(outAlignFilename, alignFileName.c_str());
 				
-				char outReportFilename[reportFileName.length()];
-				strcpy(outReportFilename, reportFileName.c_str());
-				
-				char outAccnosFilename[accnosFileName.length()];
-				strcpy(outAccnosFilename, accnosFileName.c_str());
-				
-				char inFileName[candidateFileNames[s].length()];
-				strcpy(inFileName, candidateFileNames[s].c_str());
+				char* outAlignFilename = new char[alignFileName.length()];
+				memcpy(outAlignFilename, alignFileName.c_str(), alignFileName.length());
+
+				char* outReportFilename = new char[reportFileName.length()];
+				memcpy(outReportFilename, reportFileName.c_str(), reportFileName.length());
+
+				char* outAccnosFilename = new char[accnosFileName.length()];
+				memcpy(outAccnosFilename, accnosFileName.c_str(), accnosFileName.length());
+
+				char* inFileName = new char[candidateFileNames[s].length()];
+				memcpy(inFileName, candidateFileNames[s].c_str(), candidateFileNames[s].length());
 
 				MPI_File_open(MPI_COMM_WORLD, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
 				MPI_File_open(MPI_COMM_WORLD, outAlignFilename, outMode, MPI_INFO_NULL, &outMPIAlign);
 				MPI_File_open(MPI_COMM_WORLD, outReportFilename, outMode, MPI_INFO_NULL, &outMPIReport);
 				MPI_File_open(MPI_COMM_WORLD, outAccnosFilename, outMode, MPI_INFO_NULL, &outMPIAccnos);
 				
+				delete outAlignFilename;
+				delete inFileName;
+				delete outReportFilename;
+				delete outAccnosFilename;
+
 				if (m->control_pressed) { MPI_File_close(&inMPI);  MPI_File_close(&outMPIAlign);  MPI_File_close(&outMPIReport);  MPI_File_close(&outMPIAccnos); return 0; }
 				
 				if (pid == 0) { //you are the root process 
@@ -647,10 +652,13 @@ int AlignCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& align
 		if (pid == 0) {
 			outputString = report.getHeaders();
 			int length = outputString.length();
-			char buf[length];
-			strcpy(buf, outputString.c_str()); 
+            
+			char* buf = new char[length];
+			memcpy(buf, outputString.c_str(), length);
 		
 			MPI_File_write_shared(reportFile, buf, length, MPI_CHAR, &statusReport);
+
+            delete buf;
 		}
 		
 		for(int i=0;i<num;i++){
@@ -659,10 +667,16 @@ int AlignCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& align
 
 			//read next sequence
 			int length = MPIPos[start+i+1] - MPIPos[start+i];
-			char buf4[length];
+
+			char* buf4 = new char[length];
+			memcpy(buf4, outputString.c_str(), length);
+
 			MPI_File_read_at(inMPI, MPIPos[start+i], buf4, length, MPI_CHAR, &status);
 			
 			string tempBuf = buf4;
+
+			delete buf4;
+
 			if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length);  }
 			istringstream iss (tempBuf,istringstream::in);
 	
@@ -727,10 +741,12 @@ int AlignCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& align
 					
 					//send results to parent
 					int length = outputString.length();
-					char buf[length];
-					strcpy(buf, outputString.c_str()); 
+
+					char* buf = new char[length];
+					memcpy(buf, outputString.c_str(), length);
 				
 					MPI_File_write_shared(accnosFile, buf, length, MPI_CHAR, &statusAccnos);
+					delete buf;
 					MPIWroteAccnos = true;
 				}
 				
@@ -744,20 +760,23 @@ int AlignCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& align
 				
 				//send results to parent
 				int length = outputString.length();
-				char buf2[length];
-				strcpy(buf2, outputString.c_str()); 
+				char* buf2 = new char[length];
+				memcpy(buf2, outputString.c_str(), length);
 				
 				MPI_File_write_shared(alignFile, buf2, length, MPI_CHAR, &statusAlign);
 				
+				delete buf2;
+
 				outputString = report.getReport();
 				
 				//send results to parent
 				length = outputString.length();
-				char buf3[length];
-				strcpy(buf3, outputString.c_str()); 
+				char* buf3 = new char[length];
+				memcpy(buf3, outputString.c_str(), length);
 				
 				MPI_File_write_shared(reportFile, buf3, length, MPI_CHAR, &statusReport);
-
+				
+				delete buf3;
 				delete nast;
 				if (needToDeleteCopy) {   delete copy;   }
 			}

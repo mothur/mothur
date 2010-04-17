@@ -256,15 +256,18 @@ int FilterSeqsCommand::filterSequences() {
 				int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
 				int inMode=MPI_MODE_RDONLY; 
 				
-				char outFilename[filteredFasta.length()];
-				strcpy(outFilename, filteredFasta.c_str());
-				
-				char inFileName[fastafileNames[s].length()];
-				strcpy(inFileName, fastafileNames[s].c_str());
+				char* outFilename = new char[filteredFasta.length()];
+				memcpy(outFilename, filteredFasta.c_str(), filteredFasta.length());
+
+				char* inFileName = new char[fastafileNames[s].length()];
+				memcpy(inFileName, fastafileNames[s].c_str(), fastafileNames[s].length());
 				
 				MPI_File_open(MPI_COMM_WORLD, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
 				MPI_File_open(MPI_COMM_WORLD, outFilename, outMode, MPI_INFO_NULL, &outMPI);
 				
+				delete inFileName;
+				delete outFilename;
+
 				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);  return 0;  }
 
 				if (pid == 0) { //you are the root process 
@@ -380,12 +383,13 @@ int FilterSeqsCommand::driverMPIRun(int start, int num, MPI_File& inMPI, MPI_Fil
 		
 			//read next sequence
 			int length = MPIPos[start+i+1] - MPIPos[start+i];
-			char buf4[length];
+			char* buf4 = new char[length];
 			MPI_File_read_at(inMPI, MPIPos[start+i], buf4, length, MPI_CHAR, &status);
 			
 			string tempBuf = buf4;
 			if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length);  }
 			istringstream iss (tempBuf,istringstream::in);
+			delete buf4;
 	
 			Sequence seq(iss);  gobble(iss);
 			
@@ -405,11 +409,12 @@ int FilterSeqsCommand::driverMPIRun(int start, int num, MPI_File& inMPI, MPI_Fil
 				if(count % 10 == 0){ //output to file 
 					//send results to parent
 					int length = outputString.length();
-					char buf[length];
-					strcpy(buf, outputString.c_str()); 
+					char* buf = new char[length];
+					memcpy(buf, outputString.c_str(), length);
 				
 					MPI_File_write_shared(outMPI, buf, length, MPI_CHAR, &status);
 					outputString = "";
+					delete buf;
 				}
 
 			}
@@ -420,11 +425,12 @@ int FilterSeqsCommand::driverMPIRun(int start, int num, MPI_File& inMPI, MPI_Fil
 		if(outputString != ""){ //output to file 
 			//send results to parent
 			int length = outputString.length();
-			char buf[length];
-			strcpy(buf, outputString.c_str()); 
+			char* buf = new char[length];
+			memcpy(buf, outputString.c_str(), length);
 			
 			MPI_File_write_shared(outMPI, buf, length, MPI_CHAR, &status);
 			outputString = "";
+			delete buf;
 		}
 		
 		if((num) % 100 != 0){	cout << (num) << endl;	 m->mothurOutJustToLog(toString(num) + "\n");	}
@@ -692,11 +698,12 @@ string FilterSeqsCommand::createFilter() {
 		MPI_Bcast(&filterString[0], alignmentLength, MPI_CHAR, 0, MPI_COMM_WORLD); 
 	}else{
 		//recieve filterString
-		char tempBuf[alignmentLength];
+		char* tempBuf = new char[alignmentLength];
 		MPI_Bcast(tempBuf, alignmentLength, MPI_CHAR, 0, MPI_COMM_WORLD);
 		
 		filterString = tempBuf;
 		if (filterString.length() > alignmentLength) { filterString = filterString.substr(0, alignmentLength);  }
+		delete tempBuf;	
 	}
 	
 	MPI_Barrier(MPI_COMM_WORLD);
@@ -764,13 +771,14 @@ int FilterSeqsCommand::MPICreateFilter(int start, int num, Filters& F, MPI_File&
 			//read next sequence
 			int length = MPIPos[start+i+1] - MPIPos[start+i];
 	
-			char buf4[length];
+			char* buf4 = new char[length];
 			MPI_File_read_at(inMPI, MPIPos[start+i], buf4, length, MPI_CHAR, &status);
 			
 			string tempBuf = buf4;
 			if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length);  }
 			istringstream iss (tempBuf,istringstream::in);
-	
+			delete buf4;
+
 			Sequence seq(iss);  
 
 			if (seq.getAligned().length() != alignmentLength) {  cout << "Alignment length is " << alignmentLength << " and sequence " << seq.getName() << " has length " << seq.getAligned().length() << ", please correct." << endl; exit(1);  }

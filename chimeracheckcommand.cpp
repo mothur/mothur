@@ -166,16 +166,19 @@ int ChimeraCheckCommand::execute(){
 						
 			int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
 			int inMode=MPI_MODE_RDONLY; 
-							
-			char outFilename[outputFileName.length()];
-			strcpy(outFilename, outputFileName.c_str());
 			
-			char inFileName[fastafile.length()];
-			strcpy(inFileName, fastafile.c_str());
+			char* outFilename = new char[outputFileName.length()];
+			memcpy(outFilename, outputFileName.c_str(), outputFileName.length());
+
+			char* inFileName = new char[fastafile.length()];
+			memcpy(inFileName, fastafile.c_str(), fastafile.length());
 
 			MPI_File_open(MPI_COMM_WORLD, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
 			MPI_File_open(MPI_COMM_WORLD, outFilename, outMode, MPI_INFO_NULL, &outMPI);
 			
+			delete outFilename;
+			delete inFileName;
+
 			if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);  delete chimera; return 0;  }
 			
 			if (pid == 0) { //you are the root process 
@@ -391,12 +394,13 @@ int ChimeraCheckCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File
 			//read next sequence
 			int length = MPIPos[start+i+1] - MPIPos[start+i];
 	
-			char buf4[length];
+			char* buf4 = new char[length];
 			MPI_File_read_at(inMPI, MPIPos[start+i], buf4, length, MPI_CHAR, &status);
 			
 			string tempBuf = buf4;
 			if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length);  }
 			istringstream iss (tempBuf,istringstream::in);
+			delete buf4;
 
 			Sequence* candidateSeq = new Sequence(iss);  gobble(iss);
 				

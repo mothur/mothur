@@ -158,11 +158,12 @@ int Bellerophon::print(MPI_File& out, MPI_File& outAcc) {
 				
 				MPI_Status status;
 				int length = outString.length();
-				char buf2[length];
-				strcpy(buf2, outString.c_str()); 
+				char* buf2 = new char[length];
+				memcpy(buf2, outString.c_str(), length);
 					
 				MPI_File_write_shared(out, buf2, length, MPI_CHAR, &status);
-
+				
+				delete buf2;
 				
 				//calc # of seqs with preference above 95%tile
 				if (best[i].score >= cutoffScore) { 
@@ -172,11 +173,13 @@ int Bellerophon::print(MPI_File& out, MPI_File& outAcc) {
 					
 					MPI_Status statusAcc;
 					length = outAccString.length();
-					char buf[length];
-					strcpy(buf, outAccString.c_str()); 
+					char* buf = new char[length];
+					memcpy(buf, outAccString.c_str(), length);
 					
 					MPI_File_write_shared(outAcc, buf, length, MPI_CHAR, &statusAcc);
 					
+					delete buf;
+
 					cout << best[i].name << " is a suspected chimera at breakpoint " << toString(best[i].midpoint) << endl;
 					cout << "It's score is " << toString(best[i].score) << " with suspected left parent " << best[i].leftParent << " and right parent " << best[i].rightParent << endl;
 				}
@@ -261,12 +264,13 @@ int Bellerophon::getChimeras() {
 					int length;
 					MPI_Recv(&length, 1, MPI_INT, j, 2001, MPI_COMM_WORLD, &status);
 					
-					char buf[length];
+					char* buf = new char[length];
 					MPI_Recv(&buf, length, MPI_CHAR, j, 2001, MPI_COMM_WORLD, &status);
 					
 					string temp = buf;
 					if (temp.length() > length) { temp = temp.substr(0, length); }
-					
+					delete buf;
+
 					MPIBestSend.push_back(temp);
 				}
 				
@@ -287,11 +291,12 @@ int Bellerophon::getChimeras() {
 				if (m->control_pressed) { return 0; }
 				
 				int bestLength = MPIBestSend[i].length();
-				char buf[bestLength];
-				strcpy(buf, MPIBestSend[i].c_str()); 
+				char* buf = new char[bestLength];
+				memcpy(buf, MPIBestSend[i].c_str(), bestLength);
 				
 				MPI_Send(&bestLength, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD);
 				MPI_Send(buf, bestLength, MPI_CHAR, 0, 2001, MPI_COMM_WORLD);
+				delete buf;
 			}
 			
 			MPIBestSend.clear();

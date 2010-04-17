@@ -310,11 +310,12 @@ int Pintail::print(MPI_File& out, MPI_File& outAcc) {
 			
 			MPI_Status statusAcc;
 			int length = outAccString.length();
-			char buf[length];
-			strcpy(buf, outAccString.c_str()); 
+			char* buf = new char[length];
+			memcpy(buf, outAccString.c_str(), length);
 				
 			MPI_File_write_shared(outAcc, buf, length, MPI_CHAR, &statusAcc);
-			
+			delete buf;
+
 			results = true;
 		}
 		outputString += "Observed\t";
@@ -329,10 +330,11 @@ int Pintail::print(MPI_File& out, MPI_File& outAcc) {
 		
 		MPI_Status status;
 		int length = outputString.length();
-		char buf2[length];
-		strcpy(buf2, outputString.c_str()); 
+		char* buf2 = new char[length];
+		memcpy(buf2, outputString.c_str(), length);
 				
 		MPI_File_write_shared(out, buf2, length, MPI_CHAR, &status);
+		delete buf2;
 		
 		return results;
 	}
@@ -424,17 +426,19 @@ vector<float> Pintail::readFreq() {
 		MPI_File inMPI;
 		MPI_Offset size;
 		MPI_Status status;
-		
-		char inFileName[consfile.length()];
-		strcpy(inFileName, consfile.c_str());
+
+		char* inFileName = new char[consfile.length()];
+		memcpy(inFileName, consfile.c_str(), consfile.length());
 
 		MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  
 		MPI_File_get_size(inMPI, &size);
+		delete inFileName;
 
-		char buffer[size];
+		char* buffer = new char[size];
 		MPI_File_read(inMPI, buffer, size, MPI_CHAR, &status);
 
 		string tempBuf = buffer;
+		delete buffer;
 
 		if (tempBuf.length() > size) { tempBuf = tempBuf.substr(0, size);  }
 		istringstream iss (tempBuf,istringstream::in);
@@ -621,18 +625,21 @@ vector< vector<float> > Pintail::readQuantiles() {
 		MPI_Offset size;
 		MPI_Status status;
 		
-		char inFileName[quanfile.length()];
-		strcpy(inFileName, quanfile.c_str());
+		char* inFileName = new char[quanfile.length()];
+		memcpy(inFileName, quanfile.c_str(), quanfile.length());
 
 		MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  
 		MPI_File_get_size(inMPI, &size);
+		delete inFileName;
 
-		char buffer[size];
+
+		char* buffer = new char[size];
 		MPI_File_read(inMPI, buffer, size, MPI_CHAR, &status);
 
 		string tempBuf = buffer;
 		if (tempBuf.length() > size) { tempBuf = tempBuf.substr(0, size);  }
 		istringstream iss (tempBuf,istringstream::in);
+		delete buffer;
 		
 		while(!iss.eof()) {
 			iss >> num >> ten >> twentyfive >> fifty >> seventyfive >> ninetyfive >> ninetynine; 
@@ -700,21 +707,24 @@ void Pintail::printQuanFile(string file, string outputString) {
 			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
 
 			int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY;
-			
-			char FileName[file.length()];
-			strcpy(FileName, file.c_str());
+
+			char* FileName = new char[file.length()];
+			memcpy(FileName, file.c_str(), file.length());
 			
 			if (pid == 0) {
 				MPI_File_open(MPI_COMM_SELF, FileName, outMode, MPI_INFO_NULL, &outQuan);  //comm, filename, mode, info, filepointer
 				
 				int length = outputString.length();
-				char buf[length];
-				strcpy(buf, outputString.c_str()); 
+				char* buf = new char[length];
+				memcpy(buf, outputString.c_str(), length);
 					
 				MPI_File_write(outQuan, buf, length, MPI_CHAR, &status);
-			
+				delete buf;
+
 				MPI_File_close(&outQuan);
 			}
+
+			delete FileName;
 		#else
 			ofstream outQuan;
 			openOutputFile(file, outQuan);

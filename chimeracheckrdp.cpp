@@ -97,11 +97,12 @@ int ChimeraCheckRDP::print(MPI_File& out, MPI_File& outAcc) {
 		
 		MPI_Status status;
 		int length = outString.length();
-		char buf[length];
-		strcpy(buf, outString.c_str()); 
+		char* buf = new char[length];
+		memcpy(buf, outString.c_str(), length);
 				
 		MPI_File_write_shared(out, buf, length, MPI_CHAR, &status);
-		
+		delete buf;
+
 		if (svg) {
 			if (name != "") { //if user has specific names
 				map<string, string>::iterator it = names.find(querySeq->getName());
@@ -261,19 +262,22 @@ void ChimeraCheckRDP::readName(string namefile) {
 		MPI_File inMPI;
 		MPI_Offset size;
 		MPI_Status status;
-		
-		char inFileName[namefile.length()];
-		strcpy(inFileName, namefile.c_str());
+
+		char* inFileName = new char[namefile.length()];
+		memcpy(inFileName, namefile.c_str(), namefile.length());
 
 		MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  
 		MPI_File_get_size(inMPI, &size);
 
-		char buffer[size];
+		delete inFileName;
+
+		char* buffer = new char[size];
 		MPI_File_read(inMPI, buffer, size, MPI_CHAR, &status);
 
 		string tempBuf = buffer;
 		if (tempBuf.length() > size) { tempBuf = tempBuf.substr(0, size);  }
 		istringstream iss (tempBuf,istringstream::in);
+		delete buffer;
 		
 		while(!iss.eof()) {
 			iss >> name; gobble(iss);
@@ -347,12 +351,14 @@ void ChimeraCheckRDP::makeSVGpic(vector<sim> info) {
 		
 		MPI_File outSVG;
 		int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY;
-		
-		char FileName[file.length()];
-		strcpy(FileName, file.c_str());
+
+		char* FileName = new char[file.length()];
+		memcpy(FileName, file.c_str(), file.length());
 		
 		MPI_File_open(MPI_COMM_SELF, FileName, outMode, MPI_INFO_NULL, &outSVG);  //comm, filename, mode, info, filepointer
 		
+		delete FileName;
+
 		int width = (info.size()*5) + 150;
 		
 		string outString = "";
@@ -398,10 +404,11 @@ void ChimeraCheckRDP::makeSVGpic(vector<sim> info) {
 		
 		MPI_Status status;
 		int length = outString.length();
-		char buf2[length];
-		strcpy(buf2, outString.c_str()); 
+		char* buf2 = new char[length];
+		memcpy(buf2, outString.c_str(), length);
 				
 		MPI_File_write(outSVG, buf2, length, MPI_CHAR, &status);
+		delete buf2;
 		
 		MPI_File_close(&outSVG);
 

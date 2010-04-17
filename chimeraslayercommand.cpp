@@ -8,10 +8,6 @@
  */
 
 #include "chimeraslayercommand.h"
-#include "bellerophon.h"
-#include "pintail.h"
-#include "ccode.h"
-#include "chimeracheckrdp.h"
 #include "chimeraslayer.h"
 
 
@@ -220,20 +216,24 @@ int ChimeraSlayerCommand::execute(){
 			
 			int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
 			int inMode=MPI_MODE_RDONLY; 
-							
-			char outFilename[outputFileName.length()];
-			strcpy(outFilename, outputFileName.c_str());
 			
-			char outAccnosFilename[accnosFileName.length()];
-			strcpy(outAccnosFilename, accnosFileName.c_str());
+			char* outFilename = new char[outputFileName.length()];
+			memcpy(outFilename, outputFileName.c_str(), outputFileName.length());
 			
-			char inFileName[fastafile.length()];
-			strcpy(inFileName, fastafile.c_str());
+			char* outAccnosFilename = new char[accnosFileName.length()];
+			memcpy(outAccnosFilename, accnosFileName.c_str(), accnosFileName.length());
+
+			char* inFileName = new char[fastafile.length()];
+			memcpy(inFileName, fastafile.c_str(), fastafile.length());
 
 			MPI_File_open(MPI_COMM_WORLD, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
 			MPI_File_open(MPI_COMM_WORLD, outFilename, outMode, MPI_INFO_NULL, &outMPI);
 			MPI_File_open(MPI_COMM_WORLD, outAccnosFilename, outMode, MPI_INFO_NULL, &outMPIAccnos);
 			
+			delete inFileName;
+			delete outFilename;
+			delete outAccnosFilename;
+
 			if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  delete chimera; return 0;  }
 
 		
@@ -246,10 +246,12 @@ int ChimeraSlayerCommand::execute(){
 				
 				//print header
 				int length = outTemp.length();
-				char buf2[length];
-				strcpy(buf2, outTemp.c_str()); 
+				char* buf2 = new char[length];
+				memcpy(buf2, outTemp.c_str(), length);
+
 				MPI_File_write_shared(outMPI, buf2, length, MPI_CHAR, &status);
-				
+				delete buf2;
+
 				MPIPos = setFilePosFasta(fastafile, numSeqs); //fills MPIPos, returns numSeqs
 				
 				//send file positions to all processes
@@ -521,12 +523,13 @@ int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_Fil
 			//read next sequence
 			int length = MPIPos[start+i+1] - MPIPos[start+i];
 	
-			char buf4[length];
+			char* buf4 = new char[length];
 			MPI_File_read_at(inMPI, MPIPos[start+i], buf4, length, MPI_CHAR, &status);
 			
 			string tempBuf = buf4;
 			if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length);  }
 			istringstream iss (tempBuf,istringstream::in);
+			delete buf4;
 
 			Sequence* candidateSeq = new Sequence(iss);  gobble(iss);
 				

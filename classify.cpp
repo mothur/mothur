@@ -31,12 +31,13 @@ Classify::Classify(string tfile, string tempFile, string method, int kmerSize, f
 			MPI_Status status; 
 			MPI_File inMPI;
 			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-	
-			char inFileName[tempFile.length()];
-			strcpy(inFileName, tempFile.c_str());
+
+			char* inFileName = new char[tempFile.length()];
+			memcpy(inFileName, tempFile.c_str(), tempFile.length());
 	
 			MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-	
+			delete inFileName;
+
 			if (pid == 0) { //only one process needs to scan file
 				positions = setFilePosFasta(tempFile, numSeqs); //fills MPIPos, returns numSeqs
 
@@ -63,12 +64,12 @@ Classify::Classify(string tfile, string tempFile, string method, int kmerSize, f
 			for(int i=0;i<numSeqs;i++){
 				//read next sequence
 				int length = positions[i+1] - positions[i];
-				char buf4[length];
+				char* buf4 = new char[length];
 				MPI_File_read_at(inMPI, positions[i], buf4, length, MPI_CHAR, &status);
 				
 				string tempBuf = buf4;
 				if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length); }
-				
+				delete buf4;
 				istringstream iss (tempBuf,istringstream::in);
 				
 				Sequence temp(iss);  
@@ -169,12 +170,13 @@ void Classify::readTaxonomy(string file) {
 		MPI_Status status; 
 		MPI_File inMPI;
 		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-		
-		char inFileName[file.length()];
-		strcpy(inFileName, file.c_str());
+
+		char* inFileName = new char[file.length()];
+		memcpy(inFileName, file.c_str(), file.length());
 		
 		MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-		
+		delete inFileName;
+
 		if (pid == 0) {
 			positions = setFilePosEachLine(file, num);
 			
@@ -191,13 +193,14 @@ void Classify::readTaxonomy(string file) {
 		for(int i=0;i<num;i++){
 			//read next sequence
 			int length = positions[i+1] - positions[i];
-			char buf4[length];
+			char* buf4 = new char[length];
 
 			MPI_File_read_at(inMPI, positions[i], buf4, length, MPI_CHAR, &status);
 
 			string tempBuf = buf4;
 			if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length); }
-			
+			delete buf4;
+
 			istringstream iss (tempBuf,istringstream::in);
 			iss >> name >> taxInfo;
 			taxonomy[name] = taxInfo;
