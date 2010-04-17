@@ -29,13 +29,15 @@ Ccode::Ccode(string filename, string temp, bool f, string mask, int win, int num
 	
 	#ifdef USE_MPI
 		
-		char inFileName[mapInfo.length()];
-		strcpy(inFileName, mapInfo.c_str());
+		char* inFileName = new char[mapInfo.length()];
+		memcpy(inFileName, mapInfo.c_str(), mapInfo.length());
 		
 		int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY;
 
 		MPI_File_open(MPI_COMM_WORLD, inFileName, outMode, MPI_INFO_NULL, &outMap);  //comm, filename, mode, info, filepointer
 		
+		delete inFileName;
+
 		int pid;
 		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
 		
@@ -44,10 +46,11 @@ Ccode::Ccode(string filename, string temp, bool f, string mask, int win, int num
 			
 			MPI_Status status;
 			int length = outString.length();
-			char buf2[length];
-			strcpy(buf2, outString.c_str()); 
+			char* buf2 = new char[length];
+			memcpy(buf2, outString.c_str(), length);
 				
 			MPI_File_write_shared(outMap, buf2, length, MPI_CHAR, &status);
+			delete buf2;
 		}
 	#else
 
@@ -235,21 +238,23 @@ int Ccode::print(MPI_File& out, MPI_File& outAcc) {
 		
 		MPI_Status status;
 		int length = outString.length();
-		char buf2[length];
-		strcpy(buf2, outString.c_str()); 
+		char* buf2 = new char[length];
+		memcpy(buf2, outString.c_str(), length);
 				
 		MPI_File_write_shared(out, buf2, length, MPI_CHAR, &status);
-			
+		delete buf2;
+
 		if (results) {
 			m->mothurOut(querySeq->getName() + " was found have at least one chimeric window."); m->mothurOutEndLine();
 			outAccString += querySeq->getName() + "\n";
 			
 			MPI_Status statusAcc;
 			length = outAccString.length();
-			char buf[length];
-			strcpy(buf, outAccString.c_str()); 
+			char* buf = new char[length];
+			memcpy(buf, outAccString.c_str(), length);
 				
 			MPI_File_write_shared(outAcc, buf, length, MPI_CHAR, &statusAcc);
+			delete buf;
 		}
 
 		//free memory
@@ -267,10 +272,11 @@ int Ccode::printMapping(string& output) {
 	try {
 			MPI_Status status;
 			int length = output.length();
-			char buf[length];
-			strcpy(buf, output.c_str()); 
+			char* buf = new char[length];
+			memcpy(buf, output.c_str(), length);
 				
 			MPI_File_write_shared(outMap, buf, length, MPI_CHAR, &status);
+			delete buf;
 
 	}
 	catch(exception& e) {

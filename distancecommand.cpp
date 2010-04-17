@@ -199,12 +199,13 @@ int DistanceCommand::execute(){
 		if (output != "lt") {
 			MPI_File outMPI;
 			int amode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
-			
-			char filename[outputFile.length()];
-			strcpy(filename, outputFile.c_str());
+
+			char* filename = new char[outputFile.length()];
+			memcpy(filename, outputFile.c_str(), outputFile.length());
 			
 			MPI_File_open(MPI_COMM_WORLD, filename, amode, MPI_INFO_NULL, &outMPI);
-			
+			delete filename;
+
 			if (pid == 0) { //you are the root process 
 			
 				//do your part
@@ -247,11 +248,12 @@ int DistanceCommand::execute(){
 				int amode=MPI_MODE_APPEND|MPI_MODE_WRONLY|MPI_MODE_CREATE; //
 				MPI_File outMPI;
 				MPI_File inMPI;
-			
-				char filename[outputFile.length()];
-				strcpy(filename, outputFile.c_str());
+
+				char* filename = new char[outputFile.length()];
+				memcpy(filename, outputFile.c_str(), outputFile.length());
 			
 				MPI_File_open(MPI_COMM_SELF, filename, amode, MPI_INFO_NULL, &outMPI);
+				delete filename;
 
 				//wait on chidren
 				for(int b = 1; b < processors; b++) { 
@@ -262,11 +264,13 @@ int DistanceCommand::execute(){
 					MPI_Recv(&fileSize, 1, MPI_LONG, b, tag, MPI_COMM_WORLD, &status); 
 					
 					string outTemp = outputFile + toString(b) + ".temp";
-					char buf[outTemp.length()];
-					strcpy(buf, outTemp.c_str());
+
+					char* buf = new char[outTemp.length()];
+					memcpy(buf, outTemp.c_str(), outTemp.length());
 					
 					MPI_File_open(MPI_COMM_SELF, buf, MPI_MODE_DELETE_ON_CLOSE|MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);
-					
+					delete buf;
+
 					int count = 0;
 					while (count < fileSize) { //read 1000 characters at a time
 						//send freqs
@@ -483,11 +487,13 @@ int DistanceCommand::driverMPI(int startLine, int endLine, MPI_File& outMPI, flo
 			 
 			//send results to parent
 			int length = outputString.length();
-			char buf[length];
-			strcpy(buf, outputString.c_str()); 
+
+			char* buf = new char[length];
+			memcpy(buf, outputString.c_str(), length);
 			
 			MPI_File_write_shared(outMPI, buf, length, MPI_CHAR, &status);
 			outputString = "";
+			delete buf;
 			
 		}
 		
@@ -508,11 +514,12 @@ int DistanceCommand::driverMPI(int startLine, int endLine, string file, long& si
 		
 		MPI_File outMPI;
 		int amode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
-		
-		char filename[file.length()];
-		strcpy(filename, file.c_str());
+
+		char* filename = new char[file.length()];
+		memcpy(filename, file.c_str(), file.length());
 		
 		MPI_File_open(MPI_COMM_SELF, filename, amode, MPI_INFO_NULL, &outMPI);
+		delete filename;
 
 		int startTime = time(NULL);
 		
@@ -550,14 +557,13 @@ int DistanceCommand::driverMPI(int startLine, int endLine, string file, long& si
 			
 			//send results to parent
 			int length = outputString.length();
-			char buf[length];
-			strcpy(buf, outputString.c_str()); 
+			char* buf = new char[length];
+			memcpy(buf, outputString.c_str(), length);
 			
 			MPI_File_write(outMPI, buf, length, MPI_CHAR, &status);
 			size += outputString.length();
 			outputString = "";
-			
-			
+			delete buf;
 		}
 		
 		//m->mothurOut(toString(endLine-1) + "\t" + toString(time(NULL) - startTime)); m->mothurOutEndLine();

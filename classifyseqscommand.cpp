@@ -313,7 +313,6 @@ int ClassifySeqsCommand::execute(){
 			for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 			
 #ifdef USE_MPI	
-
 				int pid, end, numSeqsPerProcessor; 
 				int tag = 2001;
 				vector<long> MPIPos;
@@ -328,20 +327,24 @@ int ClassifySeqsCommand::execute(){
 							
 				int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
 				int inMode=MPI_MODE_RDONLY; 
-								
-				char outNewTax[newTaxonomyFile.length()];
-				strcpy(outNewTax, newTaxonomyFile.c_str());
 				
-				char outTempTax[tempTaxonomyFile.length()];
-				strcpy(outTempTax, tempTaxonomyFile.c_str());
-				
-				char inFileName[fastaFileNames[s].length()];
-				strcpy(inFileName, fastaFileNames[s].c_str());
+				char* outNewTax = new char[newTaxonomyFile.length()];
+				memcpy(outNewTax, newTaxonomyFile.c_str(), newTaxonomyFile.length());
+			
+				char* outTempTax = new char[tempTaxonomyFile.length()];
+				memcpy(outTempTax, tempTaxonomyFile.c_str(), tempTaxonomyFile.length());
+
+				char* inFileName = new char[fastaFileNames[s].length()];
+				memcpy(inFileName, fastaFileNames[s].c_str(), fastaFileNames[s].length());
 
 				MPI_File_open(MPI_COMM_WORLD, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
 				MPI_File_open(MPI_COMM_WORLD, outNewTax, outMode, MPI_INFO_NULL, &outMPINewTax);
 				MPI_File_open(MPI_COMM_WORLD, outTempTax, outMode, MPI_INFO_NULL, &outMPITempTax);
 				
+				delete outNewTax;
+				delete outTempTax;
+				delete inFileName;
+
 				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPINewTax);   MPI_File_close(&outMPITempTax);  delete classify; return 0;  }
 
 				if(namefile != "") {  MPIReadNamesFile(namefileNames[s]);  }
@@ -393,7 +396,6 @@ int ClassifySeqsCommand::execute(){
 				MPI_File_close(&outMPITempTax);
 				
 #else
-
 			//read namefile
 			if(namefile != "") {
 				nameMap.clear(); //remove old names
@@ -471,9 +473,7 @@ int ClassifySeqsCommand::execute(){
 			driver(lines[0], newTaxonomyFile, tempTaxonomyFile, fastaFileNames[s]);
 	#endif	
 #endif
-		
-		delete classify;
-		
+
 		#ifdef USE_MPI	
 			if (pid == 0) {  //this part does not need to be paralellized
 		#endif
@@ -488,7 +488,6 @@ int ClassifySeqsCommand::execute(){
 		
 			//read in users taxonomy file and add sequences to tree
 			string name, taxon;
-
 			while(!in.eof()){
 				in >> name >> taxon; gobble(in);
 				
@@ -566,6 +565,7 @@ int ClassifySeqsCommand::execute(){
 			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to classify " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
 		}
 		
+		delete classify;
 		return 0;
 	}
 	catch(exception& e) {
@@ -681,13 +681,13 @@ int ClassifySeqsCommand::driver(linePair* line, string taxFName, string tempTFNa
 			if (m->control_pressed) { return 0; }
 			
 			Sequence* candidateSeq = new Sequence(inFASTA);
-	
+			
 			if (candidateSeq->getName() != "") {
 				taxonomy = classify->getTaxonomy(candidateSeq);
 				
 				if (m->control_pressed) { delete candidateSeq; return 0; }
 
-				if ((taxonomy != "bad seq") && (taxonomy != "")) {
+				if (taxonomy != "bad seq") {
 					//output confidence scores or not
 					if (probs) {
 						outTax << candidateSeq->getName() << '\t' << taxonomy << endl;
@@ -696,7 +696,7 @@ int ClassifySeqsCommand::driver(linePair* line, string taxFName, string tempTFNa
 					}
 					
 					outTaxSimple << candidateSeq->getName() << '\t' << classify->getSimpleTax() << endl;
-				}else{  m->mothurOut("Sequence: " + candidateSeq->getName() + " is bad."); m->mothurOutEndLine();  }
+				}
 			}				
 			delete candidateSeq;
 			
@@ -736,19 +736,20 @@ int ClassifySeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File
 		
 			//read next sequence
 			int length = MPIPos[start+i+1] - MPIPos[start+i];
-			char buf4[length];
+			char* buf4 = new char[length];
 			MPI_File_read_at(inMPI, MPIPos[start+i], buf4, length, MPI_CHAR, &status);
 			
 			string tempBuf = buf4;
 			if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length);  }
 			istringstream iss (tempBuf,istringstream::in);
+			delete buf4;
 
 			Sequence* candidateSeq = new Sequence(iss);
 			
 			if (candidateSeq->getName() != "") {
 				taxonomy = classify->getTaxonomy(candidateSeq);
 				
-				if ((taxonomy != "bad seq") && (taxonomy != ""))  {
+				if (taxonomy != "bad seq") {
 					//output confidence scores or not
 					if (probs) {
 						outputString =  candidateSeq->getName() + "\t" + taxonomy + "\n";
@@ -757,18 +758,20 @@ int ClassifySeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File
 					}
 					
 					int length = outputString.length();
-					char buf2[length];
-					strcpy(buf2, outputString.c_str()); 
+					char* buf2 = new char[length];
+					memcpy(buf2, outputString.c_str(), length);
 				
 					MPI_File_write_shared(newFile, buf2, length, MPI_CHAR, &statusNew);
-					
+					delete buf2;
+
 					outputString =  candidateSeq->getName() + "\t" + classify->getSimpleTax() + "\n";
 					length = outputString.length();
-					char buf[length];
-					strcpy(buf, outputString.c_str()); 
+					char* buf = new char[length];
+					memcpy(buf, outputString.c_str(), length);
 				
 					MPI_File_write_shared(tempFile, buf, length, MPI_CHAR, &statusTemp);
-				}else{  cout << "Sequence: " << candidateSeq->getName() << " is bad." << endl;  }
+					delete buf;
+				}
 			}				
 			delete candidateSeq;
 			
@@ -795,19 +798,21 @@ int ClassifySeqsCommand::MPIReadNamesFile(string nameFilename){
 		MPI_File inMPI;
 		MPI_Offset size;
 		MPI_Status status;
-		
-		char inFileName[nameFilename.length()];
-		strcpy(inFileName, nameFilename.c_str());
+
+		char* inFileName = new char[nameFilename.length()];
+		memcpy(inFileName, nameFilename.c_str(), nameFilename.length());
 
 		MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  
 		MPI_File_get_size(inMPI, &size);
+		delete inFileName;
 
-		char buffer[size];
+		char* buffer = new char[size];
 		MPI_File_read(inMPI, buffer, size, MPI_CHAR, &status);
 
 		string tempBuf = buffer;
 		if (tempBuf.length() > size) { tempBuf = tempBuf.substr(0, size);  }
 		istringstream iss (tempBuf,istringstream::in);
+		delete buffer;
 		
 		string firstCol, secondCol;
 		while(!iss.eof()) {

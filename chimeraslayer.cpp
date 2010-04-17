@@ -221,10 +221,11 @@ int ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 					
 					//write to accnos file
 					int length = outAccString.length();
-					char buf2[length];
-					strcpy(buf2, outAccString.c_str()); 
+					char* buf2 = new char[length];
+					memcpy(buf2, outAccString.c_str(), length);
 				
 					MPI_File_write_shared(outAcc, buf2, length, MPI_CHAR, &status);
+					delete buf2;
 				}
 			}
 			
@@ -235,10 +236,11 @@ int ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 		
 		//write to output file
 		int length = outputString.length();
-		char buf[length];
-		strcpy(buf, outputString.c_str()); 
-		
+		char* buf = new char[length];
+		memcpy(buf, outputString.c_str(), length);
+				
 		MPI_File_write_shared(out, buf, length, MPI_CHAR, &status);
+		delete buf;
 
 		return results;
 	}

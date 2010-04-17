@@ -11,7 +11,7 @@
  */
 
 #include "mothur.h"
-#include "mothurout.h";
+#include "mothurout.h"
 
 class Command;
 
@@ -24,7 +24,7 @@ public:
 	void printCommands(ostream&);
 	void setOutputDirectory(string o)	{	outputDir = o;		}
 	void setInputDirectory(string i)	{	inputDir = i;		}
-	string getOutputDir()				{	return outputDir;	}
+	string getOutputDir()			{	return outputDir;		}
 	bool MPIEnabled(string);
 
 private:

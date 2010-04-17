@@ -32,7 +32,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 			MPI_File inMPI;
 			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
 	
-			char inFileName[fastaFileName.length()];
+			char inFileName[1024];
 			strcpy(inFileName, fastaFileName.c_str());
 	
 			MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
@@ -48,7 +48,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 				positions.resize(numSeqs+1);
 				MPI_Bcast(&positions[0], (numSeqs+1), MPI_LONG, 0, MPI_COMM_WORLD); //get file positions
 			}
-			
+		
 			//read file 
 			for(int i=0;i<numSeqs;i++){
 				
@@ -56,12 +56,14 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 				
 				//read next sequence
 				int length = positions[i+1] - positions[i];
-				char buf4[length];
+				char* buf4 = new char[length];
+			
 				MPI_File_read_at(inMPI, positions[i], buf4, length, MPI_CHAR, &status);
-				
+		
 				string tempBuf = buf4;
 				if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length); }
-				
+				delete buf4;
+
 				istringstream iss (tempBuf,istringstream::in);
 		
 				Sequence temp(iss);  
@@ -71,8 +73,9 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 					if (temp.getUnaligned().length() > longest)  { longest = temp.getUnaligned().length()+1; }
 				}
 			}
-			
+		
 			MPI_File_close(&inMPI);
+		
 	#else
 		ifstream fastaFile;
 		openInputFile(fastaFileName, fastaFile);

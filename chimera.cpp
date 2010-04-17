@@ -108,12 +108,13 @@ vector<Sequence*> Chimera::readSeqs(string file) {
 			MPI_Status status; 
 			MPI_File inMPI;
 			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-	
-			char inFileName[file.length()];
-			strcpy(inFileName, file.c_str());
+
+			char* inFileName = new char[file.length()];
+			memcpy(inFileName, file.c_str(), file.length());
 	
 			MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-	
+			delete inFileName;
+
 			if (pid == 0) {
 				positions = setFilePosFasta(file, numSeqs); //fills MPIPos, returns numSeqs
 
@@ -133,12 +134,14 @@ vector<Sequence*> Chimera::readSeqs(string file) {
 	
 				//read next sequence
 				int seqlength = positions[i+1] - positions[i];
-				char buf4[seqlength];
+				char* buf4 = new char[seqlength];
+
 				MPI_File_read_at(inMPI, positions[i], buf4, seqlength, MPI_CHAR, &status);
 				
 				string tempBuf = buf4;
 				if (tempBuf.length() > seqlength) { tempBuf = tempBuf.substr(0, seqlength); }
-				
+				delete buf4;
+
 				istringstream iss (tempBuf,istringstream::in);
 		
 				Sequence* current = new Sequence(iss);   
@@ -196,18 +199,22 @@ void Chimera::setMask(string filename) {
 			MPI_Offset size;
 			MPI_Status status;
 			
-			char inFileName[filename.length()];
-			strcpy(inFileName, filename.c_str());
+			char* inFileName = new char[filename.length()];
+			memcpy(inFileName, filename.c_str(), filename.length());
 	
 			MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
 			MPI_File_get_size(inMPI, &size);
+
+			delete inFileName;
 			
-			char buffer[size];
+			char* buffer = new char[size];
 			MPI_File_read(inMPI, buffer, size, MPI_CHAR, &status);
 			
 			string tempBuf = buffer;
 			if (tempBuf.length() > size) { tempBuf = tempBuf.substr(0, size);  }
 			istringstream iss (tempBuf,istringstream::in);
+
+			delete buffer;
 			
 			if (!iss.eof()) {
 				Sequence temp(iss);
