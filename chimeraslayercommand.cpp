@@ -235,7 +235,6 @@ int ChimeraSlayerCommand::execute(){
 			delete outAccnosFilename;
 
 			if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  delete chimera; return 0;  }
-
 		
 			if (pid == 0) { //you are the root process 
 				m->mothurOutEndLine();
@@ -427,7 +426,7 @@ int ChimeraSlayerCommand::execute(){
 			if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
 		#endif
 		
-		appendFiles(tempHeader, outputFileName);
+		appendFiles(outputFileName, tempHeader);
 	
 		remove(outputFileName.c_str());
 		rename(tempHeader.c_str(), outputFileName.c_str());
@@ -510,8 +509,7 @@ int ChimeraSlayerCommand::driver(linePair* line, string outputFName, string file
 //**********************************************************************************************************************
 #ifdef USE_MPI
 int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& outMPI, MPI_File& outAccMPI, vector<long>& MPIPos){
-	try {
-				
+	try {				
 		MPI_Status status; 
 		int pid;
 		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
@@ -522,30 +520,33 @@ int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_Fil
 			
 			//read next sequence
 			int length = MPIPos[start+i+1] - MPIPos[start+i];
-	
+
 			char* buf4 = new char[length];
 			MPI_File_read_at(inMPI, MPIPos[start+i], buf4, length, MPI_CHAR, &status);
-			
+	
 			string tempBuf = buf4;
 			if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length);  }
 			istringstream iss (tempBuf,istringstream::in);
+
 			delete buf4;
 
 			Sequence* candidateSeq = new Sequence(iss);  gobble(iss);
-				
+		
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
 				
 				if (candidateSeq->getAligned().length() != templateSeqsLength) {  
 					m->mothurOut(candidateSeq->getName() + " is not the same length as the template sequences. Skipping."); m->mothurOutEndLine();
 				}else{
+		
 					//find chimeras
 					chimera->getChimeras(candidateSeq);
-					
+			
 					if (m->control_pressed) {	delete candidateSeq; return 1;	}
-		
+		//cout << "about to print" << endl;
 					//print results
 					bool isChimeric = chimera->print(outMPI, outAccMPI);
 					if (isChimeric) { MPIWroteAccnos = true;  }
+	
 				}
 			}
 			delete candidateSeq;
