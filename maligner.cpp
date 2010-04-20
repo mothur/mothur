@@ -496,12 +496,7 @@ vector<Sequence*> Maligner::getBlastSeqs(Sequence* q, int num) {
 	try {	
 		indexes.clear();
 		vector<Sequence*> refResults;
-		//generate blastdb
-		Database* database = new BlastDB(-2.0, -1.0, matchScore, misMatchPenalty);
-		for (int i = 0; i < db.size(); i++) { 	database->addSequence(*db[i]);	}
-		database->generateDB();
-		database->setNumSeqs(db.size());
-		
+				
 		//get parts of query
 		string queryUnAligned = q->getUnaligned();
 		string leftQuery = queryUnAligned.substr(0, int(queryUnAligned.length() * 0.33)); //first 1/3 of the sequence
@@ -510,8 +505,8 @@ vector<Sequence*> Maligner::getBlastSeqs(Sequence* q, int num) {
 		Sequence* queryLeft = new Sequence(q->getName(), leftQuery);
 		Sequence* queryRight = new Sequence(q->getName(), rightQuery);
 		
-		vector<int> tempIndexesRight = database->findClosestMegaBlast(queryRight, num+1);
-		vector<int> tempIndexesLeft = database->findClosestMegaBlast(queryLeft, num+1);
+		vector<int> tempIndexesRight = databaseLeft->findClosestMegaBlast(queryRight, num+1);
+		vector<int> tempIndexesLeft = databaseLeft->findClosestMegaBlast(queryLeft, num+1);
 		
 		//if ((tempIndexesRight.size() != (num+1)) || (tempIndexesLeft.size() != (num+1)))  {  m->mothurOut("megablast returned " + toString(tempIndexesRight.size()) + " results for the right end, and " + toString(tempIndexesLeft.size()) + " for the left end. Needed " + toString(num+1) + ". Unable to porcess sequence " + q->getName()); m->mothurOutEndLine(); return refResults; }
 		
@@ -564,8 +559,7 @@ vector<Sequence*> Maligner::getBlastSeqs(Sequence* q, int num) {
 //cout << endl;		
 		delete queryRight;
 		delete queryLeft;
-		delete database;
-		
+			
 		return refResults;
 	}
 	catch(exception& e) {

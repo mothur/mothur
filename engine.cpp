@@ -99,6 +99,15 @@ bool InteractEngine::getInput(){
 /***********************************************************************/
 string Engine::getCommand()  {
 	try {
+	#ifdef USE_MPI //mpirun doesn't work with readline
+				string nextCommand = "";
+				
+				mout->mothurOut("mothur > ");
+				getline(cin, nextCommand);
+				mout->mothurOutJustToLog(toString(nextCommand));
+				
+				return nextCommand;
+	#else
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			#ifdef USE_READLINE
 				char* nextCommand = NULL;
@@ -129,8 +138,7 @@ string Engine::getCommand()  {
 				
 				return nextCommand;
 		#endif
-		
-		mout->mothurOutEndLine();
+	#endif
 						
 	}
 	catch(exception& e) {

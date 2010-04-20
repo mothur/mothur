@@ -10,6 +10,7 @@
 #include "chimeraslayer.h"
 #include "chimerarealigner.h"
 #include "kmerdb.hpp"
+#include "blastdb.hpp"
 
 //***************************************************************************************************************
 ChimeraSlayer::ChimeraSlayer(string file, string temp, string mode, int k, int ms, int mms, int win, float div, 
@@ -45,7 +46,6 @@ int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int num
 //***************************************************************************************************************
 int ChimeraSlayer::doPrep() {
 	try {
-		
 		
 		//read in all query seqs
 		vector<Sequence*> tempQuerySeqs = readSeqs(fastafile);
@@ -148,6 +148,13 @@ int ChimeraSlayer::doPrep() {
 			
 			databaseRight->setNumSeqs(templateSeqs.size());
 		#endif	
+		}else if (searchMethod == "blast") {
+		
+			//generate blastdb
+			databaseLeft = new BlastDB(-2.0, -1.0, match, misMatch);
+			for (int i = 0; i < templateSeqs.size(); i++) { 	databaseLeft->addSequence(*templateSeqs[i]);	}
+			databaseLeft->generateDB();
+			databaseLeft->setNumSeqs(templateSeqs.size());
 		}
 		
 		return 0;
@@ -159,7 +166,11 @@ int ChimeraSlayer::doPrep() {
 	}
 }
 //***************************************************************************************************************
-ChimeraSlayer::~ChimeraSlayer() { 	delete decalc;  if (searchMethod == "kmer") {  delete databaseRight;  delete databaseLeft;  }	 }
+ChimeraSlayer::~ChimeraSlayer() { 	
+	delete decalc;  
+	if (searchMethod == "kmer") {  delete databaseRight;  delete databaseLeft;  }	
+	else if (searchMethod == "blast") {  delete databaseLeft; }
+}
 //***************************************************************************************************************
 void ChimeraSlayer::printHeader(ostream& out) {
 	m->mothurOutEndLine();
@@ -231,17 +242,28 @@ int ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 			
 			outputString = getBlock(chimeraResults[0]);
 			outputString += "\n";
-			
-		}else {  outputString += querySeq->getName() + "\tno\n";  }
-		
-		//write to output file
-		int length = outputString.length();
-		char* buf = new char[length];
-		memcpy(buf, outputString.c_str(), length);
+	//cout << outputString << endl;		
+			//write to output file
+			int length = outputString.length();
+			char* buf = new char[length];
+			memcpy(buf, outputString.c_str(), length);
 				
-		MPI_File_write_shared(out, buf, length, MPI_CHAR, &status);
-		delete buf;
+			MPI_File_write_shared(out, buf, length, MPI_CHAR, &status);
+			delete buf;
 
+		}else {  
+			outputString += querySeq->getName() + "\tno\n";  
+	//cout << outputString << endl;
+			//write to output file
+			int length = outputString.length();
+			char* buf = new char[length];
+			memcpy(buf, outputString.c_str(), length);
+				
+			MPI_File_write_shared(out, buf, length, MPI_CHAR, &status);
+			delete buf;
+		}
+		
+		
 		return results;
 	}
 	catch(exception& e) {
@@ -255,7 +277,7 @@ int ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 int ChimeraSlayer::getChimeras(Sequence* query) {
 	try {
 		chimeraFlags = "no";
-		
+
 		//filter query
 		spotMap = runFilter(query);	
 		
