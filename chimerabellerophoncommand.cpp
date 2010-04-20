@@ -136,18 +136,23 @@ int ChimeraBellerophonCommand::execute(){
 		
 		int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
 						
-		char* outFilename = new char[accnosFileName.length()];
-		memcpy(outFilename, accnosFileName.c_str(), accnosFileName.length());
+		//char* outFilename = new char[accnosFileName.length()];
+		//memcpy(outFilename, accnosFileName.c_str(), accnosFileName.length());
+		
+		char outFilename[1024];
+		strcpy(outFilename, accnosFileName.c_str());
 
-		char* FileName = new char[outputFileName.length()];
-		memcpy(FileName, outputFileName.c_str(), outputFileName.length());
-
+		//char* FileName = new char[outputFileName.length()];
+		//memcpy(FileName, outputFileName.c_str(), outputFileName.length());
+		
+		char FileName[1024];
+		strcpy(FileName, outputFileName.c_str());
 
 		MPI_File_open(MPI_COMM_WORLD, FileName, outMode, MPI_INFO_NULL, &outMPI);  //comm, filename, mode, info, filepointer
 		MPI_File_open(MPI_COMM_WORLD, outFilename, outMode, MPI_INFO_NULL, &outMPIAccnos);
 		
-		delete FileName;
-		delete outFilename;
+		//delete FileName;
+		//delete outFilename;
 
 		numSeqs = chimera->print(outMPI, outMPIAccnos);
 		

@@ -200,11 +200,14 @@ int DistanceCommand::execute(){
 			MPI_File outMPI;
 			int amode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
 
-			char* filename = new char[outputFile.length()];
-			memcpy(filename, outputFile.c_str(), outputFile.length());
+			//char* filename = new char[outputFile.length()];
+			//memcpy(filename, outputFile.c_str(), outputFile.length());
+			
+			char filename[1024];
+			strcpy(filename, outputFile.c_str());
 			
 			MPI_File_open(MPI_COMM_WORLD, filename, amode, MPI_INFO_NULL, &outMPI);
-			delete filename;
+			//delete filename;
 
 			if (pid == 0) { //you are the root process 
 			
@@ -249,11 +252,14 @@ int DistanceCommand::execute(){
 				MPI_File outMPI;
 				MPI_File inMPI;
 
-				char* filename = new char[outputFile.length()];
-				memcpy(filename, outputFile.c_str(), outputFile.length());
-			
+				//char* filename = new char[outputFile.length()];
+				//memcpy(filename, outputFile.c_str(), outputFile.length());
+				
+				char filename[1024];
+				strcpy(filename, outputFile.c_str());
+
 				MPI_File_open(MPI_COMM_SELF, filename, amode, MPI_INFO_NULL, &outMPI);
-				delete filename;
+				//delete filename;
 
 				//wait on chidren
 				for(int b = 1; b < processors; b++) { 
@@ -515,11 +521,14 @@ int DistanceCommand::driverMPI(int startLine, int endLine, string file, long& si
 		MPI_File outMPI;
 		int amode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
 
-		char* filename = new char[file.length()];
-		memcpy(filename, file.c_str(), file.length());
+		//char* filename = new char[file.length()];
+		//memcpy(filename, file.c_str(), file.length());
 		
+		char filename[1024];
+		strcpy(filename, file.c_str());
+
 		MPI_File_open(MPI_COMM_SELF, filename, amode, MPI_INFO_NULL, &outMPI);
-		delete filename;
+		//delete filename;
 
 		int startTime = time(NULL);
 		

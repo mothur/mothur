@@ -32,11 +32,14 @@ Classify::Classify(string tfile, string tempFile, string method, int kmerSize, f
 			MPI_File inMPI;
 			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
 
-			char* inFileName = new char[tempFile.length()];
-			memcpy(inFileName, tempFile.c_str(), tempFile.length());
-	
+			//char* inFileName = new char[tempFile.length()];
+			//memcpy(inFileName, tempFile.c_str(), tempFile.length());
+			
+			char inFileName[1024];
+			strcpy(inFileName, tempFile.c_str());
+
 			MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-			delete inFileName;
+			//delete inFileName;
 
 			if (pid == 0) { //only one process needs to scan file
 				positions = setFilePosFasta(tempFile, numSeqs); //fills MPIPos, returns numSeqs
@@ -171,11 +174,14 @@ void Classify::readTaxonomy(string file) {
 		MPI_File inMPI;
 		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
 
-		char* inFileName = new char[file.length()];
-		memcpy(inFileName, file.c_str(), file.length());
+		//char* inFileName = new char[file.length()];
+		//memcpy(inFileName, file.c_str(), file.length());
 		
+		char inFileName[1024];
+		strcpy(inFileName, file.c_str());
+
 		MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-		delete inFileName;
+		//delete inFileName;
 
 		if (pid == 0) {
 			positions = setFilePosEachLine(file, num);

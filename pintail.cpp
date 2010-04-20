@@ -427,12 +427,15 @@ vector<float> Pintail::readFreq() {
 		MPI_Offset size;
 		MPI_Status status;
 
-		char* inFileName = new char[consfile.length()];
-		memcpy(inFileName, consfile.c_str(), consfile.length());
+		//char* inFileName = new char[consfile.length()];
+		//memcpy(inFileName, consfile.c_str(), consfile.length());
+		
+		char inFileName[1024];
+		strcpy(inFileName, consfile.c_str());
 
 		MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  
 		MPI_File_get_size(inMPI, &size);
-		delete inFileName;
+		//delete inFileName;
 
 		char* buffer = new char[size];
 		MPI_File_read(inMPI, buffer, size, MPI_CHAR, &status);
@@ -625,12 +628,15 @@ vector< vector<float> > Pintail::readQuantiles() {
 		MPI_Offset size;
 		MPI_Status status;
 		
-		char* inFileName = new char[quanfile.length()];
-		memcpy(inFileName, quanfile.c_str(), quanfile.length());
+		//char* inFileName = new char[quanfile.length()];
+		//memcpy(inFileName, quanfile.c_str(), quanfile.length());
+		
+		char inFileName[1024];
+		strcpy(inFileName, quanfile.c_str());
 
 		MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  
 		MPI_File_get_size(inMPI, &size);
-		delete inFileName;
+		//delete inFileName;
 
 
 		char* buffer = new char[size];
@@ -708,8 +714,11 @@ void Pintail::printQuanFile(string file, string outputString) {
 
 			int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY;
 
-			char* FileName = new char[file.length()];
-			memcpy(FileName, file.c_str(), file.length());
+			//char* FileName = new char[file.length()];
+			//memcpy(FileName, file.c_str(), file.length());
+			
+			char FileName[1024];
+			strcpy(FileName, file.c_str());
 			
 			if (pid == 0) {
 				MPI_File_open(MPI_COMM_SELF, FileName, outMode, MPI_INFO_NULL, &outQuan);  //comm, filename, mode, info, filepointer
@@ -724,7 +733,7 @@ void Pintail::printQuanFile(string file, string outputString) {
 				MPI_File_close(&outQuan);
 			}
 
-			delete FileName;
+			//delete FileName;
 		#else
 			ofstream outQuan;
 			openOutputFile(file, outQuan);

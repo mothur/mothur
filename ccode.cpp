@@ -29,14 +29,17 @@ Ccode::Ccode(string filename, string temp, bool f, string mask, int win, int num
 	
 	#ifdef USE_MPI
 		
-		char* inFileName = new char[mapInfo.length()];
-		memcpy(inFileName, mapInfo.c_str(), mapInfo.length());
+		//char* inFileName = new char[mapInfo.length()];
+		//memcpy(inFileName, mapInfo.c_str(), mapInfo.length());
+		
+		char inFileName[1024];
+		strcpy(inFileName, mapInfo.c_str());
 		
 		int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY;
 
 		MPI_File_open(MPI_COMM_WORLD, inFileName, outMode, MPI_INFO_NULL, &outMap);  //comm, filename, mode, info, filepointer
 		
-		delete inFileName;
+		//delete inFileName;
 
 		int pid;
 		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are

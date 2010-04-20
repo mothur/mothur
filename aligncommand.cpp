@@ -267,28 +267,35 @@ int AlignCommand::execute(){
 				int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
 				int inMode=MPI_MODE_RDONLY; 
 				
-				char* outAlignFilename = new char[alignFileName.length()];
-				memcpy(outAlignFilename, alignFileName.c_str(), alignFileName.length());
+				//char* outAlignFilename = new char[alignFileName.length()];
+				//memcpy(outAlignFilename, alignFileName.c_str(), alignFileName.length());
+				
+				char outAlignFilename[1024];
+				strcpy(outAlignFilename, alignFileName.c_str());
 
-				char* outReportFilename = new char[reportFileName.length()];
-				memcpy(outReportFilename, reportFileName.c_str(), reportFileName.length());
+				//char* outReportFilename = new char[reportFileName.length()];
+				//memcpy(outReportFilename, reportFileName.c_str(), reportFileName.length());
+				
+				char outReportFilename[1024];
+				strcpy(outReportFilename, reportFileName.c_str());
 
-				char* outAccnosFilename = new char[accnosFileName.length()];
-				memcpy(outAccnosFilename, accnosFileName.c_str(), accnosFileName.length());
+				//char* outAccnosFilename = new char[accnosFileName.length()];
+				//memcpy(outAccnosFilename, accnosFileName.c_str(), accnosFileName.length());
+				
+				char outAccnosFilename[1024];
+				strcpy(outAccnosFilename, accnosFileName.c_str());
 
-				char* inFileName = new char[candidateFileNames[s].length()];
-				memcpy(inFileName, candidateFileNames[s].c_str(), candidateFileNames[s].length());
-
+				//char* inFileName = new char[candidateFileNames[s].length()];
+				//memcpy(inFileName, candidateFileNames[s].c_str(), candidateFileNames[s].length());
+				
+				char inFileName[1024];
+				strcpy(inFileName, candidateFileNames[s].c_str());
+				
 				MPI_File_open(MPI_COMM_WORLD, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
 				MPI_File_open(MPI_COMM_WORLD, outAlignFilename, outMode, MPI_INFO_NULL, &outMPIAlign);
 				MPI_File_open(MPI_COMM_WORLD, outReportFilename, outMode, MPI_INFO_NULL, &outMPIReport);
 				MPI_File_open(MPI_COMM_WORLD, outAccnosFilename, outMode, MPI_INFO_NULL, &outMPIAccnos);
 				
-				delete outAlignFilename;
-				delete inFileName;
-				delete outReportFilename;
-				delete outAccnosFilename;
-
 				if (m->control_pressed) { MPI_File_close(&inMPI);  MPI_File_close(&outMPIAlign);  MPI_File_close(&outMPIReport);  MPI_File_close(&outMPIAccnos); return 0; }
 				
 				if (pid == 0) { //you are the root process 

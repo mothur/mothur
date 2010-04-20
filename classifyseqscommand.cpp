@@ -328,22 +328,31 @@ int ClassifySeqsCommand::execute(){
 				int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
 				int inMode=MPI_MODE_RDONLY; 
 				
-				char* outNewTax = new char[newTaxonomyFile.length()];
-				memcpy(outNewTax, newTaxonomyFile.c_str(), newTaxonomyFile.length());
-			
-				char* outTempTax = new char[tempTaxonomyFile.length()];
-				memcpy(outTempTax, tempTaxonomyFile.c_str(), tempTaxonomyFile.length());
+				//char* outNewTax = new char[newTaxonomyFile.length()];
+				//memcpy(outNewTax, newTaxonomyFile.c_str(), newTaxonomyFile.length());
+				
+				char outNewTax[1024];
+				strcpy(outNewTax, newTaxonomyFile.c_str());
 
-				char* inFileName = new char[fastaFileNames[s].length()];
-				memcpy(inFileName, fastaFileNames[s].c_str(), fastaFileNames[s].length());
+				//char* outTempTax = new char[tempTaxonomyFile.length()];
+				//memcpy(outTempTax, tempTaxonomyFile.c_str(), tempTaxonomyFile.length());
+				
+				char outTempTax[1024];
+				strcpy(outTempTax, tempTaxonomyFile.c_str());
+
+				//char* inFileName = new char[fastaFileNames[s].length()];
+				//memcpy(inFileName, fastaFileNames[s].c_str(), fastaFileNames[s].length());
+				
+				char inFileName[1024];
+				strcpy(inFileName, fastaFileNames[s].c_str());
 
 				MPI_File_open(MPI_COMM_WORLD, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
 				MPI_File_open(MPI_COMM_WORLD, outNewTax, outMode, MPI_INFO_NULL, &outMPINewTax);
 				MPI_File_open(MPI_COMM_WORLD, outTempTax, outMode, MPI_INFO_NULL, &outMPITempTax);
 				
-				delete outNewTax;
-				delete outTempTax;
-				delete inFileName;
+				//delete outNewTax;
+				//delete outTempTax;
+				//delete inFileName;
 
 				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPINewTax);   MPI_File_close(&outMPITempTax);  delete classify; return 0;  }
 
@@ -799,12 +808,15 @@ int ClassifySeqsCommand::MPIReadNamesFile(string nameFilename){
 		MPI_Offset size;
 		MPI_Status status;
 
-		char* inFileName = new char[nameFilename.length()];
-		memcpy(inFileName, nameFilename.c_str(), nameFilename.length());
+		//char* inFileName = new char[nameFilename.length()];
+		//memcpy(inFileName, nameFilename.c_str(), nameFilename.length());
+		
+		char inFileName[1024];
+		strcpy(inFileName, nameFilename.c_str());
 
 		MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  
 		MPI_File_get_size(inMPI, &size);
-		delete inFileName;
+		//delete inFileName;
 
 		char* buffer = new char[size];
 		MPI_File_read(inMPI, buffer, size, MPI_CHAR, &status);

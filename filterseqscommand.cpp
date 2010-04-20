@@ -256,17 +256,23 @@ int FilterSeqsCommand::filterSequences() {
 				int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
 				int inMode=MPI_MODE_RDONLY; 
 				
-				char* outFilename = new char[filteredFasta.length()];
-				memcpy(outFilename, filteredFasta.c_str(), filteredFasta.length());
+				//char* outFilename = new char[filteredFasta.length()];
+				//memcpy(outFilename, filteredFasta.c_str(), filteredFasta.length());
+				
+				char outFilename[1024];
+				strcpy(outFilename, filteredFasta.c_str());
 
-				char* inFileName = new char[fastafileNames[s].length()];
-				memcpy(inFileName, fastafileNames[s].c_str(), fastafileNames[s].length());
+				//char* inFileName = new char[fastafileNames[s].length()];
+				//memcpy(inFileName, fastafileNames[s].c_str(), fastafileNames[s].length());
+				
+				char inFileName[1024];
+				strcpy(inFileName, fastafileNames[s].c_str());
 				
 				MPI_File_open(MPI_COMM_WORLD, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
 				MPI_File_open(MPI_COMM_WORLD, outFilename, outMode, MPI_INFO_NULL, &outMPI);
 				
-				delete inFileName;
-				delete outFilename;
+				//delete inFileName;
+				//delete outFilename;
 
 				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);  return 0;  }
 
@@ -554,8 +560,11 @@ string FilterSeqsCommand::createFilter() {
 				MPI_Comm_size(MPI_COMM_WORLD, &processors);
 				MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
 							
-				char* tempFileName = new char(fastafileNames[s].length());
-				tempFileName = &(fastafileNames[s][0]);
+				//char* tempFileName = new char(fastafileNames[s].length());
+				//tempFileName = &(fastafileNames[s][0]);
+				
+				char tempFileName[1024];
+				strcpy(tempFileName, fastafileNames[s].c_str());
 		
 				MPI_File_open(MPI_COMM_WORLD, tempFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
 				

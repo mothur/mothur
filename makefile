@@ -10,7 +10,7 @@
 # Macros
 #
 
-CC = g++
+CC = mpic++
 CC_OPTIONS = -O3
 
 # if you do not want to use the readline library set to no, default yes.
@@ -26,7 +26,7 @@ ifeq  ($(strip $(USEREADLINE)),yes)
       -L../readline-6.0
 endif
 
-USEMPI ?= no
+USEMPI ?= yes
 
 ifeq  ($(strip $(USEMPI)),yes)
     CC_OPTIONS += -DUSE_MPI

@@ -167,17 +167,23 @@ int ChimeraCheckCommand::execute(){
 			int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
 			int inMode=MPI_MODE_RDONLY; 
 			
-			char* outFilename = new char[outputFileName.length()];
-			memcpy(outFilename, outputFileName.c_str(), outputFileName.length());
+			//char* outFilename = new char[outputFileName.length()];
+			//memcpy(outFilename, outputFileName.c_str(), outputFileName.length());
+			
+			char outFilename[1024];
+			strcpy(outFilename, outputFileName.c_str());
 
-			char* inFileName = new char[fastafile.length()];
-			memcpy(inFileName, fastafile.c_str(), fastafile.length());
+			//char* inFileName = new char[fastafile.length()];
+			//memcpy(inFileName, fastafile.c_str(), fastafile.length());
+			
+			char inFileName[1024];
+			strcpy(inFileName, fastafile.c_str());
 
 			MPI_File_open(MPI_COMM_WORLD, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
 			MPI_File_open(MPI_COMM_WORLD, outFilename, outMode, MPI_INFO_NULL, &outMPI);
 			
-			delete outFilename;
-			delete inFileName;
+			//delete outFilename;
+			//delete inFileName;
 
 			if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);  delete chimera; return 0;  }
 			

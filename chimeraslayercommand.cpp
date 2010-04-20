@@ -217,22 +217,31 @@ int ChimeraSlayerCommand::execute(){
 			int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
 			int inMode=MPI_MODE_RDONLY; 
 			
-			char* outFilename = new char[outputFileName.length()];
-			memcpy(outFilename, outputFileName.c_str(), outputFileName.length());
+			//char* outFilename = new char[outputFileName.length()];
+			//memcpy(outFilename, outputFileName.c_str(), outputFileName.length());
 			
-			char* outAccnosFilename = new char[accnosFileName.length()];
-			memcpy(outAccnosFilename, accnosFileName.c_str(), accnosFileName.length());
+			char outFilename[1024];
+			strcpy(outFilename, outputFileName.c_str());
+			
+			//char* outAccnosFilename = new char[accnosFileName.length()];
+			//memcpy(outAccnosFilename, accnosFileName.c_str(), accnosFileName.length());
+			
+			char outAccnosFilename[1024];
+			strcpy(outAccnosFilename, accnosFileName.c_str());
 
-			char* inFileName = new char[fastafile.length()];
-			memcpy(inFileName, fastafile.c_str(), fastafile.length());
+			//char* inFileName = new char[fastafile.length()];
+			//memcpy(inFileName, fastafile.c_str(), fastafile.length());
+			
+			char inFileName[1024];
+			strcpy(inFileName, fastafile.c_str());
 
 			MPI_File_open(MPI_COMM_WORLD, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
 			MPI_File_open(MPI_COMM_WORLD, outFilename, outMode, MPI_INFO_NULL, &outMPI);
 			MPI_File_open(MPI_COMM_WORLD, outAccnosFilename, outMode, MPI_INFO_NULL, &outMPIAccnos);
 			
-			delete inFileName;
-			delete outFilename;
-			delete outAccnosFilename;
+			//delete inFileName;
+			//delete outFilename;
+			//delete outAccnosFilename;
 
 			if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  delete chimera; return 0;  }
 		
