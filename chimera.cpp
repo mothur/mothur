@@ -109,11 +109,14 @@ vector<Sequence*> Chimera::readSeqs(string file) {
 			MPI_File inMPI;
 			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
 
-			char* inFileName = new char[file.length()];
-			memcpy(inFileName, file.c_str(), file.length());
+			//char* inFileName = new char[file.length()];
+			//memcpy(inFileName, file.c_str(), file.length());
+			
+			char inFileName[1024];
+			strcpy(inFileName, file.c_str());
 	
 			MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-			delete inFileName;
+			//delete inFileName;
 
 			if (pid == 0) {
 				positions = setFilePosFasta(file, numSeqs); //fills MPIPos, returns numSeqs
@@ -199,13 +202,16 @@ void Chimera::setMask(string filename) {
 			MPI_Offset size;
 			MPI_Status status;
 			
-			char* inFileName = new char[filename.length()];
-			memcpy(inFileName, filename.c_str(), filename.length());
+			//char* inFileName = new char[filename.length()];
+			//memcpy(inFileName, filename.c_str(), filename.length());
+			
+			char inFileName[1024];
+			strcpy(inFileName, filename.c_str());
 	
 			MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
 			MPI_File_get_size(inMPI, &size);
 
-			delete inFileName;
+			//delete inFileName;
 			
 			char* buffer = new char[size];
 			MPI_File_read(inMPI, buffer, size, MPI_CHAR, &status);
