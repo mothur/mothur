@@ -132,7 +132,7 @@ int Bellerophon::print(ostream& out, ostream& outAcc) {
 //***************************************************************************************************************
 int Bellerophon::print(MPI_File& out, MPI_File& outAcc) {
 	try {
-		
+	
 		int pid;
 		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
 		
@@ -148,14 +148,23 @@ int Bellerophon::print(MPI_File& out, MPI_File& outAcc) {
 
 			if (m->control_pressed) { return numSeqs; }
 			
-			outString += "Name\tScore\tLeft\tRight\n";
+			outString = "Name\tScore\tLeft\tRight\n";
+			MPI_Status status;
+			int olength = outString.length();
+			char* buf5 = new char[olength];
+			memcpy(buf5, outString.c_str(), olength);
+					
+			MPI_File_write_shared(out, buf5, olength, MPI_CHAR, &status);
+			
+			delete buf5;
+
 			//output prefenence structure to .chimeras file
 			for (int i = 0; i < best.size(); i++) {
 				
 				if (m->control_pressed) {  return numSeqs; }
 				
-				outString += best[i].name + "\t" +  toString(best[i].score) + "\t" + best[i].leftParent + "\t" + best[i].rightParent + "\n";
-				
+				outString = best[i].name + "\t" +  toString(best[i].score) + "\t" + best[i].leftParent + "\t" + best[i].rightParent + "\n";
+			
 				MPI_Status status;
 				int length = outString.length();
 				char* buf2 = new char[length];
@@ -168,7 +177,7 @@ int Bellerophon::print(MPI_File& out, MPI_File& outAcc) {
 				//calc # of seqs with preference above 95%tile
 				if (best[i].score >= cutoffScore) { 
 					above1++; 
-					string outAccString;
+					string outAccString = "";
 					 outAccString += best[i].name + "\n";
 					
 					MPI_Status statusAcc;

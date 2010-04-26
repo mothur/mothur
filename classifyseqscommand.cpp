@@ -487,6 +487,10 @@ int ClassifySeqsCommand::execute(){
 			if (pid == 0) {  //this part does not need to be paralellized
 		#endif
 
+			m->mothurOutEndLine();
+			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to classify " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
+			start = time(NULL);
+			
 			//make taxonomy tree from new taxonomy file 
 			PhyloTree taxaBrowser;
 			
@@ -570,8 +574,8 @@ int ClassifySeqsCommand::execute(){
 			m->mothurOutEndLine();
 
 			
-			m->mothurOutEndLine();
-			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to classify " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
+			//m->mothurOutEndLine();
+			//m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create the summary file for  " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
 		}
 		
 		delete classify;

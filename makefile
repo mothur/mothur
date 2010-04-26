@@ -26,7 +26,7 @@ ifeq  ($(strip $(USEREADLINE)),yes)
       -L../readline-6.0
 endif
 
-USEMPI ?= yes
+USEMPI ?= no
 
 ifeq  ($(strip $(USEMPI)),yes)
     CC_OPTIONS += -DUSE_MPI
@@ -220,6 +220,7 @@ mothur : \
 		./classify.o\
 		./phylotree.o\
 		./bayesian.o\
+		./rawtrainingdatamaker.o\
 		./alignmentdb.o\
 		./knn.o\
 		./distancedb.o\
@@ -417,6 +418,7 @@ mothur : \
 		./classify.o\
 		./phylotree.o\
 		./bayesian.o\
+		./rawtrainingdatamaker.o\
 		./alignmentdb.o\
 		./knn.o\
 		./distancedb.o\
@@ -617,6 +619,7 @@ clean :
 		./classify.o\
 		./phylotree.o\
 		./bayesian.o\
+		./rawtrainingdatamaker.o\
 		./alignmentdb.o\
 		./knn.o\
 		./distancedb.o\
@@ -1619,6 +1622,11 @@ install : mothur
 # Item # 196 -- chimerabellerophoncommand --
 ./chimerabellerophoncommand.o : chimerabellerophoncommand.cpp
 	$(CC) $(CC_OPTIONS) chimerabellerophoncommand.cpp -c $(INCLUDE) -o ./chimerabellerophoncommand.o
+
+# Item # 171 -- rawtrainingdatamaker --
+./rawtrainingdatamaker.o : rawtrainingdatamaker.cpp
+	$(CC) $(CC_OPTIONS) rawtrainingdatamaker.cpp -c $(INCLUDE) -o ./rawtrainingdatamaker.o
+
 
 
 ##### END RUN ####

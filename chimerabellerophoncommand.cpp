@@ -90,7 +90,7 @@ void ChimeraBellerophonCommand::help(){
 		m->mothurOut("The chimera.bellerophon command reads a fastafile and creates list of potentially chimeric sequences.\n");
 		m->mothurOut("The chimera.bellerophon command parameters are fasta, filter, correction, processors, window, increment. The fasta parameter is required.\n");
 		m->mothurOut("The filter parameter allows you to specify if you would like to apply a vertical and 50% soft filter, default=false. \n");
-		m->mothurOut("The correction parameter allows you to put more emphasis on the distance between highly similar sequences and less emphasis on the differences between remote homologs.\n");
+		m->mothurOut("The correction parameter allows you to put more emphasis on the distance between highly similar sequences and less emphasis on the differences between remote homologs, default=true.\n");
 		m->mothurOut("The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n");
 		#ifdef USE_MPI
 		m->mothurOut("When using MPI, the processors parameter is set to the number of MPI processes running. \n");

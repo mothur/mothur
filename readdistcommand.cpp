@@ -175,7 +175,7 @@ void ReadDistCommand::help(){
 		m->mothurOut("For this use the read.dist command should be in the following format: \n");
 		m->mothurOut("read.dist(phylip=yourDistFile, name=yourNameFile, cutoff=yourCutoff, precision=yourPrecision) \n");
 		m->mothurOut("The phylip or column parameter is required, but only one may be used.  If you use a column file the name filename is required. \n");
-		m->mothurOut("The sim parameter is used to indicate that your distance file contains similiarity values instead of distance values. The default is false, if sim=true then mothur will convert the similairity values to distances. \n");
+		m->mothurOut("The sim parameter is used to indicate that your distance file contains similarity values instead of distance values. The default is false, if sim=true then mothur will convert the similarity values to distances. \n");
 		m->mothurOut("If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n");
 		m->mothurOut("The second way to use the read.dist command is to read a phylip or column and a group, so you can use the libshuff command.\n");
 		m->mothurOut("For this use the read.dist command should be in the following format: \n");
