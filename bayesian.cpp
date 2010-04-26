@@ -9,29 +9,17 @@
 
 #include "bayesian.h"
 #include "kmer.hpp"
+#include "rawtrainingdatamaker.h"
 
 /**************************************************************************************************/
 Bayesian::Bayesian(string tfile, string tempFile, string method, int ksize, int cutoff, int i) : 
-Classify(tfile, tempFile, method, ksize, 0.0, 0.0, 0.0, 0.0), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
+Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 	try {
 					
-		numKmers = database->getMaxKmer() + 1;
-		
-		//initialze probabilities
-		wordGenusProb.resize(numKmers);
-		
-		genusNodes = phyloTree->getGenusNodes(); 
-		
-		for (int j = 0; j < wordGenusProb.size(); j++) {	wordGenusProb[j].resize(genusNodes.size());		}
-			
-		//reset counts because we are on a new word
-		for (int j = 0; j < genusNodes.size(); j++) {
-			TaxNode temp = phyloTree->get(genusNodes[j]);
-			genusTotals.push_back(temp.accessions.size());
-		}
-
-		
 		/************calculate the probablity that each word will be in a specific taxonomy*************/
+		string phyloTreeName = tfile.substr(0,tfile.find_last_of(".")+1) + "tree.train";
+		ifstream phyloTreeTest(phyloTreeName.c_str());
+		
 		ofstream out;
 		string probFileName = tfile.substr(0,tfile.find_last_of(".")+1) + tempFile.substr(0,tempFile.find_last_of(".")+1) + char('0'+ kmerSize) + "mer.prob";
 		ifstream probFileTest(probFileName.c_str());
@@ -42,14 +30,46 @@ Classify(tfile, tempFile, method, ksize, 0.0, 0.0, 0.0, 0.0), kmerSize(ksize), c
 		
 		int start = time(NULL);
 		
-		if(probFileTest && probFileTest2){	
+		if(probFileTest && probFileTest2 && phyloTreeTest){	
+			m->mothurOut("Reading template taxonomy...     "); cout.flush();
+			
+			phyloTree = new PhyloTree(phyloTreeTest);
+	
+			m->mothurOut("DONE."); m->mothurOutEndLine();
+			
+			genusNodes = phyloTree->getGenusNodes(); 
+			genusTotals = phyloTree->getGenusTotals();
+		
 			m->mothurOut("Reading template probabilities...     "); cout.flush();
 			readProbFile(probFileTest, probFileTest2);	
+			
 		}else{
+		
+			//create search database and names vector
+			generateDatabaseAndNames(tfile, tempFile, method, ksize, 0.0, 0.0, 0.0, 0.0);
+			
+			genusNodes = phyloTree->getGenusNodes(); 
+			genusTotals = phyloTree->getGenusTotals();
+			
+			m->mothurOut("Calculating template taxonomy tree...     "); cout.flush();
+			
+			phyloTree->printTreeNodes(phyloTreeName);
+						
+			m->mothurOut("DONE."); m->mothurOutEndLine();
+			
 			m->mothurOut("Calculating template probabilities...     "); cout.flush();
+			
+			numKmers = database->getMaxKmer() + 1;
+		
+			//initialze probabilities
+			wordGenusProb.resize(numKmers);
+		
+			for (int j = 0; j < wordGenusProb.size(); j++) {	wordGenusProb[j].resize(genusNodes.size());		}
 
 			ofstream out;
 			openOutputFile(probFileName, out);
+			
+			out << numKmers << endl;
 			
 			ofstream out2;
 			openOutputFile(probFileName2, out2);
@@ -86,9 +106,14 @@ Classify(tfile, tempFile, method, ksize, 0.0, 0.0, 0.0, 0.0), kmerSize(ksize), c
 			
 			out.close();
 			out2.close();
+			
+			//read in new phylotree with less info. - its faster
+			ifstream phyloTreeTest(phyloTreeName.c_str());
+			delete phyloTree;
+			
+			phyloTree = new PhyloTree(phyloTreeTest);
 		}
-		
-		
+	
 		m->mothurOut("DONE."); m->mothurOutEndLine();
 		m->mothurOut("It took " + toString(time(NULL) - start) + " seconds get probabilities. "); m->mothurOutEndLine();
 	}
@@ -113,14 +138,12 @@ string Bayesian::getTaxonomy(Sequence* seq) {
 		for (int i = 0; i < queryKmerString.length(); i++) {
 			if (queryKmerString[i] != '!') { //this kmer is in the query
 				queryKmers.push_back(i);
- 
 			}
 		}
 		
 		if (queryKmers.size() == 0) {  m->mothurOut(seq->getName() + "is bad."); m->mothurOutEndLine(); return "bad seq"; }
 		
 		int index = getMostProbableTaxonomy(queryKmers);
-
 		
 		if (m->control_pressed) { return tax; }
 					
@@ -272,18 +295,25 @@ map<string, int> Bayesian::parseTaxMap(string newTax) {
 void Bayesian::readProbFile(ifstream& in, ifstream& inNum) {
 	try{
 		
+		in >> numKmers; gobble(in);
+		
+		//initialze probabilities
+		wordGenusProb.resize(numKmers);
+		
+		for (int j = 0; j < wordGenusProb.size(); j++) {	wordGenusProb[j].resize(genusNodes.size());		}
+		
 		int kmer, name, count;  count = 0;
 		vector<int> num; num.resize(numKmers);
 		float prob;
 		vector<float> zeroCountProb; zeroCountProb.resize(numKmers);		
-		
+	
 		while (inNum) {
 			inNum >> zeroCountProb[count] >> num[count];  
 			count++;
 			gobble(inNum);
 		}
 		inNum.close();
-		
+	
 		while(in) {
 			in >> kmer;
 			

@@ -147,7 +147,7 @@ void ChimeraPintailCommand::help(){
 		#ifdef USE_MPI
 		m->mothurOut("When using MPI, the processors parameter is set to the number of MPI processes running. \n");
 		#endif
-		m->mothurOut("The window parameter allows you to specify the window size for searching for chimeras, default=1/4 sequence length. \n");
+		m->mothurOut("The window parameter allows you to specify the window size for searching for chimeras, default=300. \n");
 		m->mothurOut("The increment parameter allows you to specify how far you move each window while finding chimeric sequences, default=25.\n");
 		m->mothurOut("The conservation parameter allows you to enter a frequency file containing the highest bases frequency at each place in the alignment.\n");
 		m->mothurOut("The quantile parameter allows you to enter a file containing quantiles for a template files sequences, if you use the filter the quantile file generated becomes unique to the fasta file you used.\n");
@@ -175,12 +175,11 @@ int ChimeraPintailCommand::execute(){
 		
 		int start = time(NULL);	
 		
-		chimera = new Pintail(fastafile, templatefile, filter, processors, maskfile, consfile, quanfile, window, increment, outputDir);
-		
 		//set user options
 		if (maskfile == "default") { m->mothurOut("I am using the default 236627 EU009184.1 Shigella dysenteriae str. FBD013."); m->mothurOutEndLine();  }
 		
-
+		chimera = new Pintail(fastafile, templatefile, filter, processors, maskfile, consfile, quanfile, window, increment, outputDir);
+		
 		string outputFileName, accnosFileName;
 		if (maskfile != "") {
 			outputFileName = outputDir + getRootName(getSimpleName(fastafile)) + maskfile + ".pintail.chimeras";

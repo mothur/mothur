@@ -32,11 +32,14 @@ class PhyloTree {
 public:
 	PhyloTree();
 	PhyloTree(string);  //pass it a taxonomy file and it makes the tree
+	PhyloTree(ifstream&);  //pass it a taxonomy file and it makes the train.tree
 	~PhyloTree() {};
 	int addSeqToTree(string, string);
 	void assignHeirarchyIDs(int);
 	void print(ofstream&);
+	void printTreeNodes(string); //used by bayesian to save time
 	vector<int> getGenusNodes();
+	vector<int> getGenusTotals();	
 	void binUnclassified();
 		
 	TaxNode get(int i)				{	return tree[i];							}
@@ -45,17 +48,20 @@ public:
 	string getName(int i)			{	return tree[i].name;					}
 	string getFullTaxonomy(string);	 //pass a sequence name return taxonomy
 	int getMaxLevel()				{	return maxLevel;						}
+	int getNumSeqs()  {  return numSeqs;  }
 	
 private:
 	string getNextTaxon(string&);
 	vector<TaxNode> tree;
 	vector<int> genusIndex; //holds the indexes in tree where the genus level taxonomies are stored
+	vector<int> totals; //holds the numSeqs at each genus level taxonomy
 	map<string, int> name2Taxonomy;  //maps name to index in tree
 	map<int, int> uniqueTaxonomies;  //map of unique taxonomies
 	void print(int, ofstream&);
 	int numNodes;
 	int numSeqs;
 	int maxLevel;
+	bool calcTotals;
 	MothurOut* m;
 };
 

@@ -327,7 +327,7 @@ int GetOTURepCommand::execute(){
 		
 		if (m->control_pressed) { 
 			if (large) {  inRow.close(); remove(distFile.c_str());  }
-			delete groupMap; delete fasta; return 0; 
+			delete fasta; return 0; 
 		}
 				
 		//if user gave a namesfile then use it
@@ -350,7 +350,7 @@ int GetOTURepCommand::execute(){
 		
 		if (m->control_pressed) { 
 			if (large) {  inRow.close(); remove(distFile.c_str());  }
-			delete groupMap; delete fasta; delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
+			delete fasta; delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
 		}
 	
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {

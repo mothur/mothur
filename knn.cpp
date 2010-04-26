@@ -11,14 +11,22 @@
 
 /**************************************************************************************************/
 Knn::Knn(string tfile, string tempFile, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch, int n) 
-: Classify(tfile, tempFile, method, kmerSize, gapOpen, gapExtend, match, misMatch), num(n)  {}
+: Classify(), num(n)  {
+	try {
+		//create search database and names vector
+		generateDatabaseAndNames(tfile, tempFile, method, kmerSize, gapOpen, gapExtend, match, misMatch);
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Knn", "Knn");
+		exit(1);
+	}
+}
 /**************************************************************************************************/
 string Knn::getTaxonomy(Sequence* seq) {
 	try {
 		string tax;
 		
 		//use database to find closest seq
-
 		vector<int> closest = database->findClosestSequences(seq, num);
 		
 		if (m->control_pressed) { return tax; }

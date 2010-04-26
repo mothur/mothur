@@ -19,6 +19,44 @@ PhyloTree::PhyloTree(){
 		tree.push_back(TaxNode("Root"));
 		tree[0].heirarchyID = "0";
 		maxLevel = 0;
+		calcTotals = true;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhyloTree", "PhyloTree");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+
+PhyloTree::PhyloTree(ifstream& in){
+	try {
+		m = MothurOut::getInstance();
+		calcTotals = false;
+		
+		in >> numNodes; gobble(in);
+		
+		tree.resize(numNodes);
+		
+		for (int i = 0; i < tree.size(); i++) {
+			in >> tree[i].name >> tree[i].level >> tree[i].parent; gobble(in);
+ 
+		}
+		
+		//read genus nodes
+		int numGenus = 0;
+		in >> numGenus; gobble(in);
+	
+		int gnode, gsize;
+		totals.clear();
+		for (int i = 0; i < numGenus; i++) {
+			in >> gnode >> gsize; gobble(in);
+			
+			uniqueTaxonomies[gnode] = gnode;
+			totals.push_back(gsize);
+		}
+			
+		in.close();
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloTree", "PhyloTree");
@@ -35,6 +73,7 @@ PhyloTree::PhyloTree(string tfile){
 		tree.push_back(TaxNode("Root"));
 		tree[0].heirarchyID = "0";
 		maxLevel = 0;
+		calcTotals = true;
 		
 		ifstream in;
 		openInputFile(tfile, in);
@@ -142,6 +181,27 @@ vector<int> PhyloTree::getGenusNodes()	{
 		for (it2=uniqueTaxonomies.begin(); it2!=uniqueTaxonomies.end(); it2++) {  genusIndex.push_back(it2->first);	}
 		
 		return genusIndex;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhyloTree", "getGenusNodes");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+vector<int> PhyloTree::getGenusTotals()	{
+	try {
+	
+		if (calcTotals) {
+			totals.clear();
+			//reset counts because we are on a new word
+			for (int j = 0; j < genusIndex.size(); j++) {
+				totals.push_back(tree[genusIndex[j]].accessions.size());
+			}
+			return totals;
+		}else{
+			return totals;
+		}
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloTree", "getGenusNodes");
@@ -266,15 +326,39 @@ void PhyloTree::print(int i, ofstream& out){
 			out <<tree[it->second].level << '\t' << tree[it->second].heirarchyID << '\t' << tree[it->second].name << '\t' << tree[it->second].children.size() << '\t' << tree[it->second].accessions.size() << endl;
 			print(it->second, out);
 		}
-		
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloTree", "print");
 		exit(1);
 	}
 }
-
+/**************************************************************************************************/
+void PhyloTree::printTreeNodes(string treefilename) {
+	try {
+		ofstream outTree;
+		openOutputFile(treefilename, outTree);
+		
+		//print treenodes
+		outTree << tree.size() << endl;
+		for (int i = 0; i < tree.size(); i++) {
+			outTree << tree[i].name << '\t' << tree[i].level << '\t' << tree[i].parent << endl;
+		}
+		
+		//print genus nodes
+		outTree << endl << uniqueTaxonomies.size() << endl;
+		map<int, int>::iterator it2;
+		for (it2=uniqueTaxonomies.begin(); it2!=uniqueTaxonomies.end(); it2++) {  outTree << it2->first << '\t' << tree[it2->first].accessions.size() << endl;	}
+		outTree << endl;
+		
+		
+		outTree.close();
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhyloTree", "printTreeNodes");
+		exit(1);
+	}
+}
 /**************************************************************************************************/
 
 

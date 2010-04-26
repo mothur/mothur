@@ -137,14 +137,13 @@ void ChimeraSlayerCommand::help(){
 	
 		m->mothurOut("The chimera.slayer command reads a fastafile and templatefile and outputs potentially chimeric sequences.\n");
 		m->mothurOut("This command was modeled after the chimeraSlayer written by the Broad Institute.\n");
-		m->mothurOut("The chimera.slayer command parameters are fasta, template, filter, mask, processors, ksize, window, match, mismatch, divergence. minsim, mincov, minbs, minsnp, parents, search, iters, increment and numwanted.\n"); //realign,
+		m->mothurOut("The chimera.slayer command parameters are fasta, template, processors, ksize, window, match, mismatch, divergence. minsim, mincov, minbs, minsnp, parents, search, iters, increment and numwanted.\n"); //realign,
 		m->mothurOut("The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required. \n");
 		m->mothurOut("The template parameter allows you to enter a template file containing known non-chimeric sequences, and is required. \n");
 		m->mothurOut("The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n");
 		#ifdef USE_MPI
 		m->mothurOut("When using MPI, the processors parameter is set to the number of MPI processes running. \n");
 		#endif
-		m->mothurOut("The mask parameter allows you to specify a file containing one sequence you wish to use as a mask for the your sequences. \n");
 		m->mothurOut("The window parameter allows you to specify the window size for searching for chimeras, default=50. \n");
 		m->mothurOut("The increment parameter allows you to specify how far you move each window while finding chimeric sequences, default=5.\n");
 		m->mothurOut("The numwanted parameter allows you to specify how many sequences you would each query sequence compared with, default=15.\n");
@@ -160,7 +159,6 @@ void ChimeraSlayerCommand::help(){
 		m->mothurOut("The minsnp parameter allows you to specify percent of SNPs to sample on each side of breakpoint for computing bootstrap support (default: 10) \n");
 		m->mothurOut("The search parameter allows you to specify search method for finding the closest parent. Choices are distance, blast, and kmer, default distance. \n");
 		//m->mothurOut("The realign parameter allows you to realign the query to the potential parents. Choices are true or false, default false. Found to make results worse. \n");
-		m->mothurOut("NOT ALL PARAMETERS ARE USED BY ALL METHODS. Please look below for method specifics.\n\n");
 		m->mothurOut("The chimera.slayer command should be in the following format: \n");
 		m->mothurOut("chimera.slayer(fasta=yourFastaFile, template=yourTemplate, search=yourSearch) \n");
 		m->mothurOut("Example: chimera.slayer(fasta=AD.align, template=core_set_aligned.imputed.fasta, search=kmer) \n");

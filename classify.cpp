@@ -15,10 +15,12 @@
 #include "distancedb.hpp"
 
 /**************************************************************************************************/
-Classify::Classify(string tfile, string tempFile, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch) : taxFile(tfile), templateFile(tempFile) {		
+void Classify::generateDatabaseAndNames(string tfile, string tempFile, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch)  {		
 	try {	
-		m = MothurOut::getInstance();									
+		taxFile = tfile;
 		readTaxonomy(taxFile);	
+		
+		templateFile = tempFile;	
 		
 		int start = time(NULL);
 		int numSeqs = 0;
@@ -138,7 +140,7 @@ Classify::Classify(string tfile, string tempFile, string method, int kmerSize, f
 			while (!fastaFile.eof()) {
 				Sequence temp(fastaFile);
 				gobble(fastaFile);
-			
+
 				names.push_back(temp.getName());
 			}
 			fastaFile.close();
@@ -151,13 +153,15 @@ Classify::Classify(string tfile, string tempFile, string method, int kmerSize, f
 
 	}
 	catch(exception& e) {
-		m->errorOut(e, "Classify", "Classify");
+		m->errorOut(e, "Classify", "generateDatabaseAndNames");
 		exit(1);
 	}
 }
 /**************************************************************************************************/
+Classify::Classify() {		m = MothurOut::getInstance();	database = NULL;	}
+/**************************************************************************************************/
 
-void Classify::readTaxonomy(string file) {
+int Classify::readTaxonomy(string file) {
 	try {
 		
 		phyloTree = new PhyloTree();
@@ -235,6 +239,8 @@ void Classify::readTaxonomy(string file) {
 		
 		m->mothurOut("DONE.");
 		m->mothurOutEndLine();	cout.flush();
+		
+		return phyloTree->getNumSeqs();
 	
 	}
 	catch(exception& e) {
