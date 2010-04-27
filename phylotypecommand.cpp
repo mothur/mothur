@@ -24,7 +24,7 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 		else {
 			
 			//valid paramters for this command
-			string AlignArray[] =  {"taxonomy","cutoff","label","outputdir","inputdir"};
+			string AlignArray[] =  {"taxonomy","cutoff","label","name","outputdir","inputdir"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -50,6 +50,14 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
+				
+				it = parameters.find("name");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["name"] = inputDir + it->second;		}
+				}
 			}
 
 			taxonomyFileName = validParameter.validFile(parameters, "taxonomy", true);
@@ -58,6 +66,11 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 				m->mothurOutEndLine();
 				abort = true; 
 			}else if (taxonomyFileName == "not open") { abort = true; }	
+			
+			namefile = validParameter.validFile(parameters, "name", true);
+			if (namefile == "not open") { abort = true; }
+			else if (namefile == "not found") { namefile = ""; }
+			else { readNamesFile(); }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -187,7 +200,15 @@ int PhylotypeCommand::execute(){
 					
 					//make the names compatable with listvector
 					string name = "";
-					for (int i = 0; i < names.size(); i++) {  name += names[i] + ",";	}
+					for (int i = 0; i < names.size(); i++) {  
+						if (namefile != "") {	
+							map<string, string>::iterator itNames = namemap.find(names[i]);  //make sure this name is in namefile
+		
+							if (itNames != namemap.end()) {  name += namemap[names[i]] + ",";   } //you found it in namefile
+							else { m->mothurOut(names[i] + " is not in your namefile, please correct."); m->mothurOutEndLine(); exit(1);  }
+							
+						}else{   name += names[i] + ",";	}
+					}
 					name = name.substr(0, name.length()-1);  //rip off extra ','
 					
 					//add bin to list vector
@@ -244,4 +265,32 @@ int PhylotypeCommand::execute(){
 		exit(1);
 	}
 }
+/*****************************************************************/
+int PhylotypeCommand::readNamesFile() {
+	try {
+				
+		ifstream in;
+		openInputFile(namefile, in);
+		
+		string first, second;
+		map<string, string>::iterator itNames;
+		
+		while(!in.eof()) {
+			in >> first >> second; gobble(in);
+			
+			itNames = namemap.find(first);
+			if (itNames == namemap.end()) {  
+				namemap[first] = second; 
+			}else {  m->mothurOut(first + " has already been seen in namefile, disregarding names file."); m->mothurOutEndLine(); in.close(); namemap.clear(); namefile = ""; return 1; }			
+		}
+		in.close();
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhylotypeCommand", "readNamesFile");
+		exit(1);
+	}
+}
+
 /**********************************************************************************************************************/
