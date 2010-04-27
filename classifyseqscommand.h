@@ -48,7 +48,7 @@ private:
 	
 	Classify* classify;
 	
-	string fastaFileName, templateFileName, distanceFileName, namefile, search, method, taxonomyFileName, outputDir;
+	string fastaFileName, templateFileName, distanceFileName, namefile, search, method, taxonomyFileName, outputDir, groupfile;
 	int processors, kmerSize, numWanted, cutoff, iters;
 	float match, misMatch, gapOpen, gapExtend;
 	bool abort, probs;

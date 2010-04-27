@@ -12,6 +12,7 @@
 
 #include "mothur.h"
 #include "mothurout.h"
+#include "groupmap.h"
 
 /**************************************************************************************************/
 
@@ -19,31 +20,37 @@ struct rawTaxNode {
 	map<string, int> children;  //childs name to index in tree
 	int parent, level;
 	string name, rank;
+	map<string, int> groupCount;
+	int total;
 	
-	rawTaxNode(string n) : name(n), level(0), parent(-1) {		}
+	rawTaxNode(string n) : name(n), level(0), parent(-1), total(0) {}
 	rawTaxNode(){}
 };
 
 /**************************************************************************************************/
-
-class RawTrainingDataMaker {
+//doesn't use MPI ifdefs since only pid 0 uses this class
+class PhyloSummary {
 
 public:
-	RawTrainingDataMaker();
-	RawTrainingDataMaker(string);  //pass it a taxonomy file and it makes the tree
-	~RawTrainingDataMaker() {};
+	PhyloSummary(string, string);
+	~PhyloSummary() { if (groupmap != NULL)  {  delete groupmap;  }  }
+	
+	void summarize(string);  //pass it a taxonomy file and a group file and it makes the tree
 	int addSeqToTree(string, string);
-	void assignRank(int);
 	void print(ofstream&);
+	int getMaxLevel() { return maxLevel; }
 	
 private:
 	string getNextTaxon(string&);
 	vector<rawTaxNode> tree;
 	void print(int, ofstream&);
+	void assignRank(int);
+	void readTreeStruct(ifstream&);
+	GroupMap* groupmap;
+	
 	int numNodes;
 	int numSeqs;
 	int maxLevel;
-	//map<string, string> sanityCheck;
 	MothurOut* m;
 };
 

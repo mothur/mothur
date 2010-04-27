@@ -278,8 +278,7 @@ int DistanceCommand::execute(){
 					delete buf;
 
 					int count = 0;
-					while (count < fileSize) { //read 1000 characters at a time
-						//send freqs
+					while (count < fileSize) { 
 						char buf2[1];
 						MPI_File_read(inMPI, buf2, 1, MPI_CHAR, &status);
 						MPI_File_write(outMPI, buf2, 1, MPI_CHAR, &status);

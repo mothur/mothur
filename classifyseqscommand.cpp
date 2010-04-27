@@ -11,6 +11,7 @@
 #include "sequence.hpp"
 #include "bayesian.h"
 #include "phylotree.h"
+#include "phylosummary.h"
 #include "knn.h"
 
 //**********************************************************************************************************************
@@ -25,7 +26,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 		else {
 			
 			//valid paramters for this command
-			string AlignArray[] =  {"template","fasta","name","search","ksize","method","processors","taxonomy","match","mismatch","gapopen","gapextend","numwanted","cutoff","probs","iters", "outputdir","inputdir"};
+			string AlignArray[] =  {"template","fasta","name","group","search","ksize","method","processors","taxonomy","match","mismatch","gapopen","gapextend","numwanted","cutoff","probs","iters", "outputdir","inputdir"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -62,6 +63,14 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
+				
+				it = parameters.find("group");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["group"] = inputDir + it->second;		}
+				}
 			}
 
 			//check for required parameters
@@ -72,6 +81,10 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 				abort = true; 
 			}
 			else if (templateFileName == "not open") { abort = true; }	
+			
+			groupfile = validParameter.validFile(parameters, "group", true);
+			if (groupfile == "not open") { abort = true; }	
+			else if (groupfile == "not found") { groupfile = ""; }
 			
 			fastaFileName = validParameter.validFile(parameters, "fasta", false);
 			if (fastaFileName == "not found") { m->mothurOut("fasta is a required parameter for the classify.seqs command."); m->mothurOutEndLine(); abort = true;  }
@@ -250,6 +263,7 @@ void ClassifySeqsCommand::help(){
 		m->mothurOut("The template, fasta and taxonomy parameters are required. You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n");
 		m->mothurOut("The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer, blast and distance. The default is kmer.\n");
 		m->mothurOut("The name parameter allows you add a names file with your fasta file, if you enter multiple fasta files, you must enter matching names files for them.\n");
+		m->mothurOut("The group parameter allows you add a group file so you can have the summary totals broken up by group.\n");
 		m->mothurOut("The method parameter allows you to specify classification method to use.  Your options are: bayesian and knn. The default is bayesian.\n");
 		m->mothurOut("The ksize parameter allows you to specify the kmer size for finding most similar template to candidate.  The default is 8.\n");
 		m->mothurOut("The processors parameter allows you to specify the number of processors to use. The default is 1.\n");
@@ -491,50 +505,40 @@ int ClassifySeqsCommand::execute(){
 			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to classify " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
 			start = time(NULL);
 			
-			//make taxonomy tree from new taxonomy file 
-			PhyloTree taxaBrowser;
+			PhyloSummary taxaSum(taxonomyFileName, groupfile);
 			
 			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} delete classify; return 0; }
 			
-			ifstream in;
-			openInputFile(tempTaxonomyFile, in);
-		
-			//read in users taxonomy file and add sequences to tree
-			string name, taxon;
-			while(!in.eof()){
-				in >> name >> taxon; gobble(in);
+			if (namefile == "") {  taxaSum.summarize(tempTaxonomyFile);  }
+			else {
+				ifstream in;
+				openInputFile(tempTaxonomyFile, in);
 				
-				if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} remove(tempTaxonomyFile.c_str()); delete classify; return 0; }
-				
-				if (namefile != "") {
+				//read in users taxonomy file and add sequences to tree
+				string name, taxon;
+				while(!in.eof()){
+					in >> name >> taxon; gobble(in);
+					
 					itNames = nameMap.find(name);
 		
 					if (itNames == nameMap.end()) { 
 						m->mothurOut(name + " is not in your name file please correct."); m->mothurOutEndLine(); exit(1);
 					}else{
 						for (int i = 0; i < itNames->second; i++) { 
-							taxaBrowser.addSeqToTree(name+toString(i), taxon);  //add it as many times as there are identical seqs
+							taxaSum.addSeqToTree(name+toString(i), taxon);  //add it as many times as there are identical seqs
 						}
 					}
-				}else {  taxaBrowser.addSeqToTree(name, taxon);  } //add it once
+				}
+				in.close();
 			}
-			in.close();
-	
-			taxaBrowser.assignHeirarchyIDs(0);
-			
-			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} remove(tempTaxonomyFile.c_str()); delete classify; return 0; }
-
-			taxaBrowser.binUnclassified();
-			
 			remove(tempTaxonomyFile.c_str());
 			
 			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} delete classify; return 0; }
-
 			
 			//print summary file
 			ofstream outTaxTree;
 			openOutputFile(taxSummary, outTaxTree);
-			taxaBrowser.print(outTaxTree);
+			taxaSum.print(outTaxTree);
 			outTaxTree.close();
 			
 			//output taxonomy with the unclassified bins added
@@ -546,9 +550,10 @@ int ClassifySeqsCommand::execute(){
 			openOutputFile(unclass, outTax);
 			
 			//get maxLevel from phylotree so you know how many 'unclassified's to add
-			int maxLevel = taxaBrowser.getMaxLevel();
+			int maxLevel = taxaSum.getMaxLevel();
 			
 			//read taxfile - this reading and rewriting is done to preserve the confidence scores.
+			string name, taxon;
 			while (!inTax.eof()) {
 				if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} remove(unclass.c_str()); delete classify; return 0; }
 
@@ -564,6 +569,9 @@ int ClassifySeqsCommand::execute(){
 			remove(newTaxonomyFile.c_str());
 			rename(unclass.c_str(), newTaxonomyFile.c_str());
 			
+			m->mothurOutEndLine();
+			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create the summary file for  " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
+			
 			#ifdef USE_MPI	
 				}
 			#endif
@@ -572,10 +580,7 @@ int ClassifySeqsCommand::execute(){
 			m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 			m->mothurOutEndLine();
-
 			
-			//m->mothurOutEndLine();
-			//m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create the summary file for  " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
 		}
 		
 		delete classify;

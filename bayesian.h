@@ -34,7 +34,7 @@ private:
 	
 	string bootstrapResults(vector<int>, int, int);
 	int getMostProbableTaxonomy(vector<int>);
-	void readProbFile(ifstream&, ifstream&);
+	void readProbFile(ifstream&, ifstream&, string, string);
 	
 };
 
