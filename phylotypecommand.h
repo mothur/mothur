@@ -26,13 +26,16 @@ public:
 	
 private:
 	bool abort, allLines;
-	string taxonomyFileName, label, outputDir;
+	string taxonomyFileName, label, outputDir, namefile;
 	set<string> labels; //holds labels to be used
 	int cutoff;
+	map<string, string> namemap;
 	
 	map<int, int> currentNodes;
 	map<int, int> parentNodes;
 	map<int, int>::iterator itCurrent;
+	
+	int readNamesFile();
 
 };
 

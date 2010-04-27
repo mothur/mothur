@@ -126,8 +126,8 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 				tree[currentNode].total++;
 
 				currentNode = childPointer->second;
-			}else{											//otherwise, create it
-				m->mothurOut("Error: cannot find taxonomy in tree for " + seqName + "."); m->mothurOutEndLine();
+			}else{	//otherwise, error
+				m->mothurOut("Warning: cannot find taxon " + taxon + " in reference taxonomy tree at level " + toString(tree[currentNode].level) + " for " + seqName + ". This may cause totals of daughter levels not to add up in summary file."); m->mothurOutEndLine();
 				seqTaxonomy = "";
 			}
 			
