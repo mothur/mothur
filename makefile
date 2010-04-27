@@ -220,7 +220,7 @@ mothur : \
 		./classify.o\
 		./phylotree.o\
 		./bayesian.o\
-		./rawtrainingdatamaker.o\
+		./phylosummary.o\
 		./alignmentdb.o\
 		./knn.o\
 		./distancedb.o\
@@ -418,7 +418,7 @@ mothur : \
 		./classify.o\
 		./phylotree.o\
 		./bayesian.o\
-		./rawtrainingdatamaker.o\
+		./phylosummary.o\
 		./alignmentdb.o\
 		./knn.o\
 		./distancedb.o\
@@ -619,7 +619,7 @@ clean :
 		./classify.o\
 		./phylotree.o\
 		./bayesian.o\
-		./rawtrainingdatamaker.o\
+		./phylosummary.o\
 		./alignmentdb.o\
 		./knn.o\
 		./distancedb.o\
@@ -1623,9 +1623,9 @@ install : mothur
 ./chimerabellerophoncommand.o : chimerabellerophoncommand.cpp
 	$(CC) $(CC_OPTIONS) chimerabellerophoncommand.cpp -c $(INCLUDE) -o ./chimerabellerophoncommand.o
 
-# Item # 171 -- rawtrainingdatamaker --
-./rawtrainingdatamaker.o : rawtrainingdatamaker.cpp
-	$(CC) $(CC_OPTIONS) rawtrainingdatamaker.cpp -c $(INCLUDE) -o ./rawtrainingdatamaker.o
+# Item # 171 -- phylosummary --
+./phylosummary.o : phylosummary.cpp
+	$(CC) $(CC_OPTIONS) phylosummary.cpp -c $(INCLUDE) -o ./phylosummary.o
 
 
 

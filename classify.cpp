@@ -237,6 +237,8 @@ int Classify::readTaxonomy(string file) {
 	
 		phyloTree->assignHeirarchyIDs(0);
 		
+		phyloTree->setUp(file);
+		
 		m->mothurOut("DONE.");
 		m->mothurOutEndLine();	cout.flush();
 		

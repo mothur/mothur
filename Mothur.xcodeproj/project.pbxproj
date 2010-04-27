@@ -12,8 +12,8 @@
 		A747E81C116365E000FB9042 /* chimeraslayercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraslayercommand.h; sourceTree = "<group>"; };
 		A747E81D116365E000FB9042 /* chimeraslayercommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeraslayercommand.cpp; sourceTree = "<group>"; };
 		A7639F8D1175DF35008F5578 /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
-		A76AAD02117F322B003D8DA1 /* rawtrainingdatamaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rawtrainingdatamaker.h; sourceTree = SOURCE_ROOT; };
-		A76AAD03117F322B003D8DA1 /* rawtrainingdatamaker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rawtrainingdatamaker.cpp; sourceTree = SOURCE_ROOT; };
+		A76AAD02117F322B003D8DA1 /* phylosummary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = phylosummary.h; sourceTree = "<group>"; };
+		A76AAD03117F322B003D8DA1 /* phylosummary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = phylosummary.cpp; sourceTree = "<group>"; };
 		A78254461164D7790002E2DD /* chimerapintailcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimerapintailcommand.h; sourceTree = "<group>"; };
 		A78254471164D7790002E2DD /* chimerapintailcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimerapintailcommand.cpp; sourceTree = "<group>"; };
 		A7825502116519F70002E2DD /* chimerabellerophoncommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimerabellerophoncommand.h; sourceTree = "<group>"; };
@@ -831,8 +831,8 @@
 				A7DA208A113FECD400BF472F /* knn.h */,
 				A7DA20C4113FECD400BF472F /* phylotree.cpp */,
 				A7DA20C5113FECD400BF472F /* phylotree.h */,
-				A76AAD02117F322B003D8DA1 /* rawtrainingdatamaker.h */,
-				A76AAD03117F322B003D8DA1 /* rawtrainingdatamaker.cpp */,
+				A76AAD02117F322B003D8DA1 /* phylosummary.h */,
+				A76AAD03117F322B003D8DA1 /* phylosummary.cpp */,
 				A7DA215C113FECD400BF472F /* taxonomyequalizer.cpp */,
 				A7DA215D113FECD400BF472F /* taxonomyequalizer.h */,
 			);
