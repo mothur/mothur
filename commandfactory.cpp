@@ -71,6 +71,7 @@
 #include "chimeraslayercommand.h"
 #include "chimerapintailcommand.h"
 #include "chimerabellerophoncommand.h"
+#include "setlogfilecommand.h"
 
 /*******************************************************/
 
@@ -97,6 +98,8 @@ CommandFactory::CommandFactory(){
 	command = new NoCommand(s);
 	
 	outputDir = ""; inputDir = "";
+	logFileName = "";
+	append = false;
 	
 	//initialize list of valid commands
 	commands["read.dist"]			= "read.dist"; 
@@ -149,6 +152,7 @@ CommandFactory::CommandFactory(){
 	commands["merge.files"]			= "merge.files";
 	commands["parse.list"]			= "parse.list";
 	commands["parse.sff"]			= "parse.sff";
+	commands["set.logfile"]			= "set.logfile";
 	commands["classify.seqs"]		= "MPIEnabled"; 
 	commands["dist.seqs"]			= "MPIEnabled";
 	commands["filter.seqs"]			= "MPIEnabled";
@@ -260,6 +264,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "pcoa")					{	command = new PCACommand(optionString);						}
 		else if(commandName == "otu.hierarchy")			{	command = new OtuHierarchyCommand(optionString);			}
 		else if(commandName == "set.dir")				{	command = new SetDirectoryCommand(optionString);			}
+		else if(commandName == "set.logfile")			{	command = new SetLogFileCommand(optionString);				}
 		else if(commandName == "parse.list")			{	command = new ParseListCommand(optionString);				}
 		else if(commandName == "parse.sff")				{	command = new ParseSFFCommand(optionString);				}
 		else											{	command = new NoCommand(optionString);						}

@@ -239,7 +239,8 @@ mothur : \
 		./qstat.o\
 		./shen.o\
 		./logsd.o\
-		./geom.o
+		./geom.o\
+		./setlogfilecommand.o
 	$(CC) $(LNK_OPTIONS) \
 		./sharedutilities.o\
 		./treegroupscommand.o\
@@ -438,6 +439,7 @@ mothur : \
 		./shen.o\
 		./logsd.o\
 		./geom.o\
+		./setlogfilecommand.o\
 		-o ../Release/mothur
 
 clean : 
@@ -639,6 +641,7 @@ clean :
 		./shen.o\
 		./logsd.o\
 		./geom.o\
+		./setlogfilecommand.o\
 		mothur
 
 install : mothur
@@ -1623,9 +1626,13 @@ install : mothur
 ./chimerabellerophoncommand.o : chimerabellerophoncommand.cpp
 	$(CC) $(CC_OPTIONS) chimerabellerophoncommand.cpp -c $(INCLUDE) -o ./chimerabellerophoncommand.o
 
-# Item # 171 -- phylosummary --
+# Item # 197 -- phylosummary --
 ./phylosummary.o : phylosummary.cpp
 	$(CC) $(CC_OPTIONS) phylosummary.cpp -c $(INCLUDE) -o ./phylosummary.o
+
+# Item # 198 -- setlogfilecommand --
+./setlogfilecommand.o : setlogfilecommand.cpp
+	$(CC) $(CC_OPTIONS) setlogfilecommand.cpp -c $(INCLUDE) -o ./setlogfilecommand.o
 
 
 

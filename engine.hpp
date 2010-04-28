@@ -27,7 +27,10 @@ public:
 	virtual ~Engine(){}
 	virtual bool getInput() = 0;
 	virtual string getCommand();
-	virtual string getOutputDir()	{	return cFactory->getOutputDir();  }
+	virtual string getOutputDir()			{	return cFactory->getOutputDir();	}
+	virtual string getLogFileName()			{	return cFactory->getLogfileName(); 	}
+	virtual bool getAppend()				{	return cFactory->getAppend();		}
+
 	vector<string> getOptions()		{	return options;		}
 protected:
 	vector<string> options;

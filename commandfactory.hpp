@@ -22,9 +22,12 @@ public:
 	Command* getCommand();
 	bool isValidCommand(string);
 	void printCommands(ostream&);
-	void setOutputDirectory(string o)	{	outputDir = o;		}
-	void setInputDirectory(string i)	{	inputDir = i;		}
-	string getOutputDir()			{	return outputDir;		}
+	void setOutputDirectory(string o)		{	outputDir = o;		}
+	void setInputDirectory(string i)		{	inputDir = i;		}
+	void setLogfileName(string n, bool a)	{	logFileName = n;  append = a;		}
+	string getLogfileName()					{	return logFileName; 	}
+	bool getAppend()						{	return append;			}
+	string getOutputDir()					{	return outputDir;		}
 	bool MPIEnabled(string);
 
 private:
@@ -32,7 +35,8 @@ private:
 	MothurOut* m;
 	map<string, string> commands;
 	map<string, string>::iterator it;
-	string outputDir, inputDir;
+	string outputDir, inputDir, logFileName;
+	bool append;
 	
 	static CommandFactory* _uniqueInstance;
 	CommandFactory( const CommandFactory& ); // Disable copy constructor
