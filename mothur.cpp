@@ -144,15 +144,37 @@ int main(int argc, char *argv[]){
 		
 		while(bail == 0)	{	bail = mothur->getInput();	}
 		
-		string outputDir = mothur->getOutputDir();
-		string newlogFileName = outputDir + logFileName;
-		
 		//closes logfile so we can rename
 		m->closeLog();
-	
-		//need this because m->mothurOut makes the logfile, but doesn't know where to put it
-		rename(logFileName.c_str(), newlogFileName.c_str()); //logfile with timestamp
 		
+		string outputDir = mothur->getOutputDir();
+		string tempLog = mothur->getLogFileName();
+		bool append = mothur->getAppend();
+		
+		string newlogFileName;
+		if (tempLog != "") {
+			newlogFileName = outputDir + tempLog;
+			
+			if (!append) {	
+				//need this because m->mothurOut makes the logfile, but doesn't know where to put it
+				rename(logFileName.c_str(), newlogFileName.c_str()); //logfile with timestamp
+
+			}else {
+				ofstream outNewLog;
+				openOutputFileAppend(newlogFileName, outNewLog);
+				outNewLog << endl << endl << "*********************************************************************************" << endl << endl;
+				outNewLog.close();
+				
+				appendFiles(logFileName, newlogFileName);
+				remove(logFileName.c_str());
+			}
+		}else{  
+			newlogFileName = outputDir + logFileName;
+			//need this because m->mothurOut makes the logfile, but doesn't know where to put it
+			rename(logFileName.c_str(), newlogFileName.c_str()); //logfile with timestamp
+		}
+		
+				
 		delete mothur;
 		
 		#ifdef USE_MPI
