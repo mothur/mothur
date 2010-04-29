@@ -21,13 +21,29 @@ public:
 	void help();
 	
 private:
+
+	struct linePair {
+		int start;
+		int numSeqs;
+		linePair(long int i, int j) : start(i), numSeqs(j) {}
+	};
+	vector<int> processIDS;   //processid
+	vector<linePair*> lines;
+
 	int screenNameGroupFile(set<string>);
 	int screenGroupFile(set<string>);
 	int screenAlignReport(set<string>);
 	
+	int driver(linePair*, string, string, string, string, set<string>&);
+	int createProcesses(string, string, string, string, set<string>&);
+	
+	#ifdef USE_MPI
+	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, vector<long>&, set<string>&);
+	#endif
+
 	bool abort;
 	string fastafile, namefile, groupfile, alignreport, outputDir;
-	int startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength;
+	int startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, processors;
 	vector<string> outputNames;
 };
 

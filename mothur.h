@@ -865,14 +865,16 @@ inline void appendFiles(string temp, string filename) {
 	
 		//open output file in append mode
 		openOutputFileAppend(filename, output);
-		openInputFile(temp, input);
+		int ableToOpen = openInputFile(temp, input, "no error");
 		
-		while(char c = input.get()){
-			if(input.eof())		{	break;			}
-			else				{	output << c;	}
+		if (ableToOpen == 0) { //you opened it
+			while(char c = input.get()){
+				if(input.eof())		{	break;			}
+				else				{	output << c;	}
+			}
+			input.close();
 		}
 		
-		input.close();
 		output.close();
 	}
 	catch(exception& e) {
@@ -964,7 +966,7 @@ inline vector<long> setFilePosFasta(string filename, int& num) {
 		
 			num = positions.size();
 		
-			FILE * pFile;
+			/*FILE * pFile;
 			long size;
 		
 			//get num bytes in file
@@ -974,7 +976,19 @@ inline vector<long> setFilePosFasta(string filename, int& num) {
 				fseek (pFile, 0, SEEK_END);
 				size=ftell (pFile);
 				fclose (pFile);
+			}*/
+			
+			long size = positions[(positions.size()-1)];
+			ifstream in;
+			openInputFile(filename, in);
+			
+			in.seekg(size);
+		
+			while(char c = in.get()){
+				if(in.eof())		{	break;	}
+				else				{	size++;	}
 			}
+			in.close();
 		
 			positions.push_back(size);
 		

@@ -373,7 +373,7 @@ void PhyloTree::binUnclassified(string file){
 			
 			//this sequence is unclassified at some levels
 			while(level != maxLevel){
-			
+		
 				level++;
 			
 				string taxon = "unclassified";	

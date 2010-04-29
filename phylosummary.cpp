@@ -128,7 +128,7 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 				currentNode = childPointer->second;
 			}else{	//otherwise, error
 				m->mothurOut("Warning: cannot find taxon " + taxon + " in reference taxonomy tree at level " + toString(tree[currentNode].level) + " for " + seqName + ". This may cause totals of daughter levels not to add up in summary file."); m->mothurOutEndLine();
-				seqTaxonomy = "";
+				break;
 			}
 			
 			level++;
@@ -168,7 +168,7 @@ void PhyloSummary::assignRank(int index){
 void PhyloSummary::print(ofstream& out){
 	try {
 		//print labels
-		out << "taxlevel\t rank ID\t label\t daughterlevels\t total\t";
+		out << "taxlevel\t rankID\t taxon\t daughterlevels\t total\t";
 		if (groupmap != NULL) {
 			for (int i = 0; i < groupmap->namesOfGroups.size(); i++) {
 				out << groupmap->namesOfGroups[i] << '\t';
