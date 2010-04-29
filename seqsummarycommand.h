@@ -23,6 +23,24 @@ public:
 private:
 	bool abort;
 	string fastafile, outputDir;
+	int processors;
+	
+	struct linePair {
+		int start;
+		int num;
+		linePair(long int i, long int j) : start(i), num(j) {}
+	};
+	vector<linePair*> lines;
+	vector<int> processIDS;
+	
+	int createProcessesCreateSummary(vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, string, string);
+	int driverCreateSummary(vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, string, string, linePair*);	
+	int setLines(string);
+
+	#ifdef USE_MPI
+	int MPICreateSummary(int, int, vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, MPI_File&, MPI_File&, vector<long>&);	
+	#endif
+
 
 };
 
