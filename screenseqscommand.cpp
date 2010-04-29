@@ -134,7 +134,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 void ScreenSeqsCommand::help(){
 	try {
 		m->mothurOut("The screen.seqs command reads a fastafile and creates .....\n");
-		m->mothurOut("The screen.seqs command parameters are fasta, start, end, maxambig, maxhomop, minlength, maxlength, name, and group.\n");
+		m->mothurOut("The screen.seqs command parameters are fasta, start, end, maxambig, maxhomop, minlength, maxlength, name, group and processors.\n");
 		m->mothurOut("The fasta parameter is required.\n");
 		m->mothurOut("The start parameter .... The default is -1.\n");
 		m->mothurOut("The end parameter .... The default is -1.\n");
@@ -142,6 +142,7 @@ void ScreenSeqsCommand::help(){
 		m->mothurOut("The maxhomop parameter .... The default is -1.\n");
 		m->mothurOut("The minlength parameter .... The default is -1.\n");
 		m->mothurOut("The maxlength parameter .... The default is -1.\n");
+		m->mothurOut("The processors parameter allows you to specify the number of processors to use while running the command. The default is 1.\n");
 		m->mothurOut("The name parameter allows you to provide a namesfile, and the group parameter allows you to provide a groupfile.\n");
 		m->mothurOut("The screen.seqs command should be in the following format: \n");
 		m->mothurOut("screen.seqs(fasta=yourFastaFile, name=youNameFile, group=yourGroupFIle, start=yourStart, end=yourEnd, maxambig=yourMaxambig,  \n");

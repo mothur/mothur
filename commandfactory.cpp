@@ -130,8 +130,7 @@ CommandFactory::CommandFactory(){
 	commands["get.rabund"]          = "get.rabund";
 	commands["bootstrap.shared"]	= "bootstrap.shared";
 	//commands["consensus"]			= "consensus";
-	commands["help"]				= "help"; 
-	commands["summary.seqs"]		= "summary.seqs";
+	commands["help"]				= "help";
 	commands["reverse.seqs"]		= "reverse.seqs";
 	commands["trim.seqs"]			= "trim.seqs";
 	commands["list.seqs"]			= "list.seqs";
@@ -163,6 +162,7 @@ CommandFactory::CommandFactory(){
 	commands["chimera.pintail"]		= "MPIEnabled";
 	commands["chimera.bellerophon"]	= "MPIEnabled";
 	commands["screen.seqs"]			= "MPIEnabled";
+	commands["summary.seqs"]		= "MPIEnabled";
 	commands["quit"]				= "MPIEnabled"; 
 
 }
