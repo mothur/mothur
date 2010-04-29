@@ -287,8 +287,9 @@ int FilterSeqsCommand::filterSequences() {
 					
 					//figure out how many sequences you have to do
 					numSeqsPerProcessor = num / processors;
-					if(pid == (processors - 1)){	numSeqsPerProcessor = num - pid * numSeqsPerProcessor; 	}
 					int startIndex =  pid * numSeqsPerProcessor;
+					if(pid == (processors - 1)){	numSeqsPerProcessor = num - pid * numSeqsPerProcessor; 	}
+					
 				
 					//do your part
 					driverMPIRun(startIndex, numSeqsPerProcessor, inMPI, outMPI, MPIPos);
@@ -309,8 +310,9 @@ int FilterSeqsCommand::filterSequences() {
 					
 					//figure out how many sequences you have to align
 					numSeqsPerProcessor = num / processors;
-					if(pid == (processors - 1)){	numSeqsPerProcessor = num - pid * numSeqsPerProcessor; 	}
 					int startIndex =  pid * numSeqsPerProcessor;
+					if(pid == (processors - 1)){	numSeqsPerProcessor = num - pid * numSeqsPerProcessor; 	}
+					
 					
 					//align your part
 					driverMPIRun(startIndex, numSeqsPerProcessor, inMPI, outMPI, MPIPos);		
@@ -580,8 +582,9 @@ string FilterSeqsCommand::createFilter() {
 								
 						//figure out how many sequences you have to do
 						numSeqsPerProcessor = num / processors;
-						if(pid == (processors - 1)){	numSeqsPerProcessor = num - pid * numSeqsPerProcessor; 	}
 						int startIndex =  pid * numSeqsPerProcessor;
+						if(pid == (processors - 1)){	numSeqsPerProcessor = num - pid * numSeqsPerProcessor; 	}
+						
 				
 						//do your part
 						MPICreateFilter(startIndex, numSeqsPerProcessor, F, inMPI, MPIPos);
@@ -597,8 +600,9 @@ string FilterSeqsCommand::createFilter() {
 					
 					//figure out how many sequences you have to align
 					numSeqsPerProcessor = num / processors;
-					if(pid == (processors - 1)){	numSeqsPerProcessor = num - pid * numSeqsPerProcessor; 	}
 					int startIndex =  pid * numSeqsPerProcessor;
+					if(pid == (processors - 1)){	numSeqsPerProcessor = num - pid * numSeqsPerProcessor; 	}
+					
 					
 					//do your part
 					MPICreateFilter(startIndex, numSeqsPerProcessor, F, inMPI,  MPIPos);

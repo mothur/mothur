@@ -342,6 +342,14 @@ int DistanceCommand::execute(){
 		
 		if (output == "square") {  convertMatrix(outputFile); }
 		
+		ifstream fileHandle;
+		fileHandle.open(outputFile.c_str());
+		if(fileHandle) {
+			gobble(fileHandle);
+			if (fileHandle.eof()) { m->mothurOut(outputFile + " is blank. This can result if there are no distances below your cutoff.");  m->mothurOutEndLine(); }
+		}
+
+		
 		#ifdef USE_MPI
 			}
 		#endif

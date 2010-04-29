@@ -132,7 +132,6 @@ CommandFactory::CommandFactory(){
 	//commands["consensus"]			= "consensus";
 	commands["help"]				= "help"; 
 	commands["summary.seqs"]		= "summary.seqs";
-	commands["screen.seqs"]			= "screen.seqs";
 	commands["reverse.seqs"]		= "reverse.seqs";
 	commands["trim.seqs"]			= "trim.seqs";
 	commands["list.seqs"]			= "list.seqs";
@@ -163,6 +162,7 @@ CommandFactory::CommandFactory(){
 	commands["chimera.slayer"]		= "MPIEnabled";
 	commands["chimera.pintail"]		= "MPIEnabled";
 	commands["chimera.bellerophon"]	= "MPIEnabled";
+	commands["screen.seqs"]			= "MPIEnabled";
 	commands["quit"]				= "MPIEnabled"; 
 
 }

@@ -308,8 +308,9 @@ int AlignCommand::execute(){
 					
 					//figure out how many sequences you have to align
 					numSeqsPerProcessor = numFastaSeqs / processors;
-					if(pid == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - pid * numSeqsPerProcessor; 	}
 					int startIndex =  pid * numSeqsPerProcessor;
+					if(pid == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - pid * numSeqsPerProcessor; 	}
+					
 				
 					//align your part
 					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPIAlign, outMPIReport, outMPIAccnos, MPIPos);
@@ -328,8 +329,9 @@ int AlignCommand::execute(){
 					
 					//figure out how many sequences you have to align
 					numSeqsPerProcessor = numFastaSeqs / processors;
-					if(pid == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - pid * numSeqsPerProcessor; 	}
 					int startIndex =  pid * numSeqsPerProcessor;
+					if(pid == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - pid * numSeqsPerProcessor; 	}
+					
 					
 					//align your part
 					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPIAlign, outMPIReport, outMPIAccnos, MPIPos);

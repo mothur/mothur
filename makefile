@@ -26,7 +26,8 @@ ifeq  ($(strip $(USEREADLINE)),yes)
       -L../readline-6.0
 endif
 
-USEMPI ?= no
+USEMPI ?= yes
+
 
 ifeq  ($(strip $(USEMPI)),yes)
     CC_OPTIONS += -DUSE_MPI

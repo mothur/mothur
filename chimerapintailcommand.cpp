@@ -254,8 +254,9 @@ int ChimeraPintailCommand::execute(){
 				
 				//figure out how many sequences you have to align
 				numSeqsPerProcessor = numSeqs / processors;
-				if(pid == (processors - 1)){	numSeqsPerProcessor = numSeqs - pid * numSeqsPerProcessor; 	}
 				int startIndex =  pid * numSeqsPerProcessor;
+				if(pid == (processors - 1)){	numSeqsPerProcessor = numSeqs - pid * numSeqsPerProcessor; 	}
+				
 			
 				//align your part
 				driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, MPIPos);
@@ -274,8 +275,9 @@ int ChimeraPintailCommand::execute(){
 				
 				//figure out how many sequences you have to align
 				numSeqsPerProcessor = numSeqs / processors;
-				if(pid == (processors - 1)){	numSeqsPerProcessor = numSeqs - pid * numSeqsPerProcessor; 	}
 				int startIndex =  pid * numSeqsPerProcessor;
+				if(pid == (processors - 1)){	numSeqsPerProcessor = numSeqs - pid * numSeqsPerProcessor; 	}
+				
 				
 				//align your part
 				driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, MPIPos);
