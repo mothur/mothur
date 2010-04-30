@@ -160,13 +160,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { groupfile = ""; abort = true; }
 			else if (groupfile == "not found") { groupfile = ""; }
-			else {
-				//read in group map info.
-				groupMap = new GroupMap(groupfile);
-				int error = groupMap->readMap();
-				if (error == 1) { delete groupMap; abort = true; }
-			}
-			
+						
 			sorted = validParameter.validFile(parameters, "sorted", false);		if (sorted == "not found"){	sorted = "";	}
 			if ((sorted != "") && (sorted != "name") && (sorted != "bin") && (sorted != "size") && (sorted != "group")) {
 				m->mothurOut(sorted + " is not a valid option for the sorted parameter. The only options are: name, bin, size and group. I will not sort."); m->mothurOutEndLine();
@@ -245,7 +239,7 @@ int GetOTURepCommand::execute(){
 			
 			readMatrix->read(nameMap);
 			
-			if (m->control_pressed) { delete readMatrix; delete groupMap; return 0; }
+			if (m->control_pressed) { delete readMatrix; return 0; }
 
 			//get matrix
 			if (globaldata->gListVector != NULL) {  delete globaldata->gListVector;  }
@@ -259,14 +253,15 @@ int GetOTURepCommand::execute(){
 			// via the index of a sequence in the distance matrix
 			seqVec = vector<SeqMap>(globaldata->gListVector->size()); 
 			for (MatData currentCell = matrix->begin(); currentCell != matrix->end(); currentCell++) {
-				if (m->control_pressed) { delete readMatrix; delete groupMap; return 0; }
+				if (m->control_pressed) { delete readMatrix; return 0; }
 				seqVec[currentCell->row][currentCell->column] = currentCell->dist;
 			}
 			
 			delete matrix;
 			delete readMatrix;
+			delete nameMap;
 			
-			if (m->control_pressed) {  delete groupMap; return 0; }
+			if (m->control_pressed) { return 0; }
 		}else {
 			//process file and set up indexes
 			if (format == "column") { formatMatrix = new FormatColumnMatrix(distFile); }	
@@ -282,7 +277,7 @@ int GetOTURepCommand::execute(){
 			
 			formatMatrix->read(nameMap);
 			
-			if (m->control_pressed) { delete formatMatrix; delete groupMap; return 0; }
+			if (m->control_pressed) { delete formatMatrix;  return 0; }
 
 			//get matrix
 			if (globaldata->gListVector != NULL) {  delete globaldata->gListVector;  }
@@ -295,11 +290,12 @@ int GetOTURepCommand::execute(){
 			rowPositions = formatMatrix->getRowPositions();
 			
 			delete formatMatrix;
+			delete nameMap;
 			
 			//openfile for getMap to use
 			openInputFile(distFile, inRow);
 			
-			if (m->control_pressed) { inRow.close(); remove(distFile.c_str()); delete groupMap; return 0; }
+			if (m->control_pressed) { inRow.close(); remove(distFile.c_str()); return 0; }
 		}
 		
 		
@@ -320,19 +316,12 @@ int GetOTURepCommand::execute(){
 			}
 		} else { m->mothurOut("error, no listvector."); m->mothurOutEndLine(); }
 		
-		fasta = new FastaMap();
-		
-		//read fastafile
-		fasta->readFastaFile(fastafile);
-		
+				
 		if (m->control_pressed) { 
 			if (large) {  inRow.close(); remove(distFile.c_str());  }
-			delete fasta; return 0; 
+			return 0; 
 		}
 				
-		//if user gave a namesfile then use it
-		if (namefile != "") {	readNamesFile();	}
-		
 		//set format to list so input can get listvector
 		globaldata->setFormat("list");
 
@@ -350,7 +339,7 @@ int GetOTURepCommand::execute(){
 		
 		if (m->control_pressed) { 
 			if (large) {  inRow.close(); remove(distFile.c_str());  }
-			delete fasta; delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
+			delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
 		}
 	
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
@@ -362,9 +351,8 @@ int GetOTURepCommand::execute(){
 					
 					if (m->control_pressed) { 
 						if (large) {  inRow.close(); remove(distFile.c_str());  }
-						if (groupfile != "") {	delete groupMap;  globaldata->gGroupmap = NULL;	}
 						for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
-						delete fasta; delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
+						delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
 					}
 					
 					processedLabels.insert(list->getLabel());
@@ -382,9 +370,8 @@ int GetOTURepCommand::execute(){
 					
 					if (m->control_pressed) { 
 						if (large) {  inRow.close(); remove(distFile.c_str());  }
-						if (groupfile != "") {	delete groupMap;  globaldata->gGroupmap = NULL;	}
 						for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
-						delete fasta; delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
+						delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
 					}
 					
 					processedLabels.insert(list->getLabel());
@@ -423,9 +410,8 @@ int GetOTURepCommand::execute(){
 			
 			if (m->control_pressed) { 
 					if (large) {  inRow.close(); remove(distFile.c_str());  }
-					if (groupfile != "") {	delete groupMap;  globaldata->gGroupmap = NULL;	}
 					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
-					delete fasta; delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
+					delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
 			}
 		}
 		
@@ -438,6 +424,27 @@ int GetOTURepCommand::execute(){
 		globaldata->gListVector = NULL;
 		delete input;  globaldata->ginput = NULL;
 		delete read;
+		
+		if (groupfile != "") {
+			//read in group map info.
+			groupMap = new GroupMap(groupfile);
+			int error = groupMap->readMap();
+			if (error == 1) { delete groupMap; m->mothurOut("Error reading your groupfile. Proceeding without groupfile."); m->mothurOutEndLine(); groupfile = "";  }
+		}
+
+		//read fastafile
+		fasta = new FastaMap();
+		fasta->readFastaFile(fastafile);
+		
+		//if user gave a namesfile then use it
+		if (namefile != "") {	readNamesFile();	}
+		
+		//output create and output the .rep.fasta files
+		map<string, string>::iterator itNameFile;
+		for (itNameFile = outputNameFiles.begin(); itNameFile != outputNameFiles.end(); itNameFile++) {
+			processNames(itNameFile->first, itNameFile->second);
+		}
+		
 		delete fasta;
 		if (groupfile != "") {
 			delete groupMap;  globaldata->gGroupmap = NULL;
@@ -492,7 +499,7 @@ void GetOTURepCommand::readNamesFile() {
 	}
 }
 //**********************************************************************************************************************
-string GetOTURepCommand::findRep(int bin, string& group, ListVector* thisList, int& binsize) {
+string GetOTURepCommand::findRep(int bin, ListVector* thisList) {
 	try{
 		vector<string> names;
 		map<string, string> groups;
@@ -501,28 +508,6 @@ string GetOTURepCommand::findRep(int bin, string& group, ListVector* thisList, i
 		//parse names into vector
 		string binnames = thisList->get(bin);
 		splitAtComma(binnames, names);
-		binsize = names.size();
-
-		//if you have a groupfile
-		if (groupfile != "") {
-			//find the groups that are in this bin
-			for (size_t i = 0; i < names.size(); i++) {
-				string groupName = groupMap->getGroup(names[i]);
-				if (groupName == "not found") {  
-					m->mothurOut(names[i] + " is missing from your group file. Please correct. "); m->mothurOutEndLine();
-					groupError = true;
-				} else {
-					groups[groupName] = groupName;
-				}
-			}
-			
-			//turn the groups into a string
-			for (groupIt = groups.begin(); groupIt != groups.end(); groupIt++) {
-				group += groupIt->first + "-";
-			}
-			//rip off last dash
-			group = group.substr(0, group.length()-1);
-		}else{ group = ""; }
 
 		// if only 1 sequence in bin or processing the "unique" label, then 
 		// the first sequence of the OTU is the representative one
@@ -601,54 +586,104 @@ int GetOTURepCommand::process(ListVector* processList) {
 
 		//create output file
 		if (outputDir == "") { outputDir += hasPath(listfile); }
-		string outputFileName = outputDir + getRootName(getSimpleName(listfile)) + processList->getLabel() + ".rep.fasta";
-		openOutputFile(outputFileName, out);
-		vector<repStruct> reps;
-		outputNames.push_back(outputFileName);
-		
+				
 		ofstream newNamesOutput;
 		string outputNamesFile = outputDir + getRootName(getSimpleName(listfile)) + processList->getLabel() + ".rep.names";
 		openOutputFile(outputNamesFile, newNamesOutput);
 		outputNames.push_back(outputNamesFile);
+		outputNameFiles[outputNamesFile] = processList->getLabel();
 		
 		//for each bin in the list vector
 		for (int i = 0; i < processList->size(); i++) {
-			string groups;
-			int binsize;
-			
-			if (m->control_pressed) { out.close();  newNamesOutput.close(); return 0; }
-			
-			nameRep = findRep(i, groups, processList, binsize);
+			nameRep = findRep(i, processList);
 			
 			if (m->control_pressed) { out.close();  newNamesOutput.close(); return 0; }
 			
 			//output to new names file
 			newNamesOutput << nameRep << '\t' << processList->get(i) << endl;
+		}
 
+		newNamesOutput.close();
+		return 0;
+
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetOTURepCommand", "process");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int GetOTURepCommand::processNames(string filename, string label) {
+	try{
+
+		//create output file
+		if (outputDir == "") { outputDir += hasPath(listfile); }
+		string outputFileName = outputDir + getRootName(getSimpleName(listfile)) + label + ".rep.fasta";
+		openOutputFile(outputFileName, out);
+		vector<repStruct> reps;
+		outputNames.push_back(outputFileName);
+		
+		ifstream in;
+		openInputFile(filename, in);
+		
+		int i = 0;
+		while (!in.eof()) {
+			string rep, binnames;
+			in >> rep >> binnames; gobble(in);
+			
+			vector<string> names;
+			splitAtComma(binnames, names);
+			int binsize = names.size();
+			
+			//if you have a groupfile
+			string group = "";
+			if (groupfile != "") {
+				map<string, string> groups;
+				map<string, string>::iterator groupIt;
+				
+				//find the groups that are in this bin
+				for (size_t i = 0; i < names.size(); i++) {
+					string groupName = groupMap->getGroup(names[i]);
+					if (groupName == "not found") {  
+						m->mothurOut(names[i] + " is missing from your group file. Please correct. "); m->mothurOutEndLine();
+						groupError = true;
+					} else {
+						groups[groupName] = groupName;
+					}
+				}
+				
+				//turn the groups into a string
+				for (groupIt = groups.begin(); groupIt != groups.end(); groupIt++) {
+					group += groupIt->first + "-";
+				}
+				//rip off last dash
+				group = group.substr(0, group.length()-1);
+			}else{ group = ""; }
+
+			
 			//print out name and sequence for that bin
-			sequence = fasta->getSequence(nameRep);
+			string sequence = fasta->getSequence(rep);
 
 			if (sequence != "not found") {
 				if (sorted == "") { //print them out
-					nameRep = nameRep + "|" + toString(i+1);
-					nameRep = nameRep + "|" + toString(binsize);
+					rep = rep + "|" + toString(i+1);
+					rep = rep + "|" + toString(binsize);
 					if (groupfile != "") {
-						nameRep = nameRep + "|" + groups;
+						rep = rep + "|" + group;
 					}
-					out << ">" << nameRep << endl;
+					out << ">" << rep << endl;
 					out << sequence << endl;
 				}else { //save them
-					repStruct newRep(nameRep, i+1, binsize, groups);
+					repStruct newRep(rep, i+1, binsize, group);
 					reps.push_back(newRep);
 				}
 			}else { 
-				m->mothurOut(nameRep + " is missing from your fasta or name file. Please correct. "); m->mothurOutEndLine(); 
-				remove(outputFileName.c_str());
-				remove(outputNamesFile.c_str());
-				return 1;
+				m->mothurOut(rep + " is missing from your fasta or name file, ignoring. Please correct."); m->mothurOutEndLine(); 
 			}
+			i++;
 		}
 		
+			
 		if (sorted != "") { //then sort them and print them
 			if (sorted == "name")		{  sort(reps.begin(), reps.end(), compareName);		}
 			else if (sorted == "bin")	{  sort(reps.begin(), reps.end(), compareBin);		}
@@ -667,18 +702,17 @@ int GetOTURepCommand::process(ListVector* processList) {
 				out << sequence << endl;
 			}
 		}
-
+			
 		out.close();
-		newNamesOutput.close();
+		
 		return 0;
 
 	}
 	catch(exception& e) {
-		m->errorOut(e, "GetOTURepCommand", "process");
+		m->errorOut(e, "GetOTURepCommand", "processNames");
 		exit(1);
 	}
 }
-
 //**********************************************************************************************************************
 SeqMap GetOTURepCommand::getMap(int row) {
 	try {
