@@ -22,7 +22,14 @@ public:
 	void help();
 	
 private:
-	void getOligos(vector<ofstream*>&);
+
+	struct linePair {
+		int start;
+		int num;
+		linePair(long int i, int j) : start(i), num(j) {}
+	};
+
+	void getOligos(vector<string>&);
 	bool stripQualThreshold(Sequence&, ifstream&);
 	bool cullQualAverage(Sequence&, ifstream&);
 	bool stripBarcode(Sequence&, int&);
@@ -37,10 +44,19 @@ private:
 	string fastaFile, oligoFile, qFileName, outputDir;
 	
 	bool flip, allFiles, qtrim;
-	int numFPrimers, numRPrimers, maxAmbig, maxHomoP, minLength, maxLength, qThreshold, qAverage;
+	int numFPrimers, numRPrimers, maxAmbig, maxHomoP, minLength, maxLength, qThreshold, qAverage, processors;
 	vector<string> forPrimer, revPrimer, outputNames;
 	map<string, int> barcodes;
 	vector<string> groupVector;
+	
+	vector<int> processIDS;   //processid
+	vector<linePair*> lines;
+	vector<linePair*> qLines;
+	
+	int driverCreateTrim(string, string, string, string, string, vector<string>, linePair*, linePair*);	
+	int createProcessesCreateTrim(string, string, string, string, string, vector<string>);
+	int setLines(string, vector<linePair*>&);
+	
 };
 
 #endif
