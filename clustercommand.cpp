@@ -22,7 +22,7 @@ ClusterCommand::ClusterCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"cutoff","precision","method","showabund","timing","outputdir","inputdir"};
+			string Array[] =  {"cutoff","precision","method","showabund","timing","hard","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -56,10 +56,13 @@ ClusterCommand::ClusterCommand(string option)  {
 			length = temp.length();
 			convert(temp, precision); 
 			
+			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "F"; }
+			hard = isTrue(temp);
+			
 			temp = validParameter.validFile(parameters, "cutoff", false);
 			if (temp == "not found") { temp = "10"; }
 			convert(temp, cutoff); 
-			cutoff += (5 / (precision * 10.0));
+			if (!hard) {	cutoff += (5 / (precision * 10.0));  }
 			
 			method = validParameter.validFile(parameters, "method", false);
 			if (method == "not found") { method = "furthest"; }
@@ -114,7 +117,7 @@ ClusterCommand::ClusterCommand(string option)  {
 void ClusterCommand::help(){
 	try {
 		m->mothurOut("The cluster command can only be executed after a successful read.dist command.\n");
-		m->mothurOut("The cluster command parameter options are method, cuttoff, precision, showabund and timing. No parameters are required.\n");
+		m->mothurOut("The cluster command parameter options are method, cuttoff, hard, precision, showabund and timing. No parameters are required.\n");
 		m->mothurOut("The cluster command should be in the following format: \n");
 		m->mothurOut("cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n");
 		m->mothurOut("The acceptable cluster methods are furthest, nearest and average.  If no method is provided then furthest is assumed.\n\n");	

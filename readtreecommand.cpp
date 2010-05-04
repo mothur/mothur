@@ -180,6 +180,8 @@ int ReadTreeCommand::execute(){
 					}
 				}
 			}
+			
+			globaldata->gTreemap = treeMap;
 		}
 		
 		return 0;

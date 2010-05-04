@@ -70,10 +70,11 @@ void Tree::addNamesToCounts() {
 				
 		//go through each leaf and update its pcounts and pgroups
 		for (int i = 0; i < numLeaves; i++) {
+
 			string name = tree[i].getName();
-			
+		
 			map<string, string>::iterator itNames = globaldata->names.find(name);
-			
+		
 			if (itNames == globaldata->names.end()) { m->mothurOut(name + " is not in your name file, please correct."); m->mothurOutEndLine(); exit(1);  }
 			else {
 				vector<string> dupNames;
@@ -131,8 +132,7 @@ void Tree::addNamesToCounts() {
 				tree[i].setGroup(nodeGroups);
 				
 			}//end else
-		}//end for
-				
+		}//end for					
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Tree", "addNamesToCounts");

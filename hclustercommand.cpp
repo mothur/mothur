@@ -21,7 +21,7 @@ HClusterCommand::HClusterCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"cutoff","precision","method","phylip","column","name","sorted","showabund","timing","outputdir","inputdir"};
+			string Array[] =  {"cutoff","hard","precision","method","phylip","column","name","sorted","showabund","timing","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -104,10 +104,13 @@ HClusterCommand::HClusterCommand(string option)  {
 			length = temp.length();
 			convert(temp, precision); 
 			
+			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "F"; }
+			hard = isTrue(temp);
+			
 			temp = validParameter.validFile(parameters, "cutoff", false);
 			if (temp == "not found") { temp = "10"; }
 			convert(temp, cutoff); 
-			cutoff += (5 / (precision * 10.0));
+			if (!hard) {  cutoff += (5 / (precision * 10.0));  }
 			
 			method = validParameter.validFile(parameters, "method", false);
 			if (method == "not found") { method = "furthest"; }

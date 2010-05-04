@@ -125,13 +125,13 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 			
 			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, alignreport or list."); m->mothurOutEndLine(); abort = true; }
 			
-			int okay = 2;
-			if (outputDir != "") { okay++; }
-			if (usedDups != "") { okay++;  }
+			//int okay = 2;
+			//if (outputDir != "") { okay++; }
+			//if (usedDups != "") { okay++;  }
 			
 			if ((usedDups != "") && (namefile == "")) {  m->mothurOut("You may only use dups with the name option."); m->mothurOutEndLine();  abort = true; }
 			
-			if (parameters.size() > okay) { m->mothurOut("You may only enter one of the following: fasta, name, group, alignreport, or list."); m->mothurOutEndLine(); abort = true;  }
+			//if (parameters.size() > okay) { m->mothurOut("You may only enter one of the following: fasta, name, group, alignreport, or list."); m->mothurOutEndLine(); abort = true;  }
 		}
 
 	}
@@ -172,10 +172,10 @@ int RemoveSeqsCommand::execute(){
 		
 		//read through the correct file and output lines you want to keep
 		if (fastafile != "")		{		readFasta();	}
-		else if (namefile != "")	{		readName();		}
-		else if (groupfile != "")	{		readGroup();	}
-		else if (alignfile != "")	{		readAlign();	}
-		else if (listfile != "")	{		readList();		}
+		if (namefile != "")			{		readName();		}
+		if (groupfile != "")		{		readGroup();	}
+		if (alignfile != "")		{		readAlign();	}
+		if (listfile != "")			{		readList();		}
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
 		
@@ -221,7 +221,7 @@ int RemoveSeqsCommand::readFasta(){
 					wroteSomething = true;
 					
 					currSeq.printSequence(out);
-				}else {		names.erase(name);		}
+				}//else {		names.erase(name);		}
 			}
 			gobble(in);
 		}
@@ -435,7 +435,7 @@ int RemoveSeqsCommand::readGroup(){
 			if (names.count(name) == 0) {
 				wroteSomething = true;
 				out << name << '\t' << group << endl;
-			}else {		names.erase(name);		}
+			}//else {		names.erase(name);		}
 					
 			gobble(in);
 		}
@@ -496,7 +496,7 @@ int RemoveSeqsCommand::readAlign(){
 				out << endl;
 				
 			}else {//still read just don't do anything with it
-				names.erase(name);	
+				//names.erase(name);	
 				
 				//read rest
 				for (int i = 0; i < 15; i++) {  

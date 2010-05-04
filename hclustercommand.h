@@ -46,7 +46,7 @@ private:
 	ListVector oldList;
 	ReadCluster* read;
 	
-	bool abort, sorted, print_start;
+	bool abort, sorted, print_start, hard;
 	string method, fileroot, tag, distfile, format, phylipfile, columnfile, namefile, sort, showabund, timing, outputDir;
 	double cutoff;
 	int precision, length;

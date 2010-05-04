@@ -220,6 +220,8 @@ mothur : \
 		./parsesffcommand.o\
 		./classify.o\
 		./phylotree.o\
+		./phylodiversity.o\
+		./phylodiversitycommand.o\
 		./bayesian.o\
 		./phylosummary.o\
 		./alignmentdb.o\
@@ -419,6 +421,8 @@ mothur : \
 		./parsesffcommand.o\
 		./classify.o\
 		./phylotree.o\
+		./phylodiversity.o\
+		./phylodiversitycommand.o\
 		./bayesian.o\
 		./phylosummary.o\
 		./alignmentdb.o\
@@ -621,6 +625,8 @@ clean :
 		./parsesffcommand.o\
 		./classify.o\
 		./phylotree.o\
+		./phylodiversity.o\
+		./phylodiversitycommand.o\
 		./bayesian.o\
 		./phylosummary.o\
 		./alignmentdb.o\
@@ -1634,6 +1640,14 @@ install : mothur
 # Item # 198 -- setlogfilecommand --
 ./setlogfilecommand.o : setlogfilecommand.cpp
 	$(CC) $(CC_OPTIONS) setlogfilecommand.cpp -c $(INCLUDE) -o ./setlogfilecommand.o
+
+# Item # 199 -- phylodiversity --
+./phylodiversity.o : phylodiversity.cpp
+	$(CC) $(CC_OPTIONS) phylodiversity.cpp -c $(INCLUDE) -o ./phylodiversity.o
+
+# Item # 200 -- phylodiversitycommand --
+./phylodiversitycommand.o : phylodiversitycommand.cpp
+	$(CC) $(CC_OPTIONS) phylodiversitycommand.cpp -c $(INCLUDE) -o ./phylodiversitycommand.o
 
 
 
