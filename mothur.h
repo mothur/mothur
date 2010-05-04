@@ -379,7 +379,7 @@ inline string hasPath(string longName){
 	string path = "";
 	
 	size_t found;
-	found=longName.find_last_of("/\\");
+	found=longName.find_last_of("~/\\");
 
 	if(found != longName.npos){
 		path = longName.substr(0, found+1);
@@ -433,91 +433,103 @@ inline string getFullPathName(string fileName){
 		string cwd;
 		//get current working directory 
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)	
-			if (path.rfind("./") == -1) { return fileName; } //already complete name
-			else { newFileName = fileName.substr(fileName.rfind("./")+2); } //save the complete part of the name
 			
-			char* cwdpath = new char[1024];
+			if (path.find("~") != -1) { //go to home directory
+				string homeDir = getenv ("HOME");
+				newFileName = homeDir + fileName.substr(fileName.find("~")+1);
+				return newFileName;
+			}else { //find path
+				if (path.rfind("./") == -1) { return fileName; } //already complete name
+				else { newFileName = fileName.substr(fileName.rfind("./")+2); } //save the complete part of the name
+				
+				char* cwdpath = new char[1024];
 
-			size_t size;
-			cwdpath=getcwd(cwdpath,size);
-		
-			cwd = cwdpath;
+				size_t size;
+				cwdpath=getcwd(cwdpath,size);
 			
-			//rip off first '/'
-			string simpleCWD;
-			if (cwd.length() > 0) { simpleCWD = cwd.substr(1); }
-			
-			//break apart the current working directory
-			vector<string> dirs;
-			while (simpleCWD.find_first_of('/') != -1) {
-				string dir = simpleCWD.substr(0,simpleCWD.find_first_of('/'));
-				simpleCWD = simpleCWD.substr(simpleCWD.find_first_of('/')+1, simpleCWD.length());
-				dirs.push_back(dir);
-			}
-			//get last one              // ex. ../../../filename = /user/work/desktop/filename
-			dirs.push_back(simpleCWD);  //ex. dirs[0] = user, dirs[1] = work, dirs[2] = desktop
-			
-		
-			int index = dirs.size()-1;
-	
-			while((pos = path.rfind("./")) != -1) { //while you don't have a complete path
-				if (pos == 0) { break;  //you are at the end
-				}else if (path[(pos-1)] == '.') { //you want your parent directory ../
-					path = path.substr(0, pos-1);
-					index--;
-					if (index == 0) {  break; }
-				}else if (path[(pos-1)] == '/') { //you want the current working dir ./
-					path = path.substr(0, pos);
-				}else if (pos == 1) { break;  //you are at the end
-				}else { cout << "cannot resolve path for " <<  fileName << endl; return fileName; }
-			}
-		
-			for (int i = index; i >= 0; i--) {
-				newFileName = dirs[i] +  "/" + newFileName;		
-			}
-			
-			newFileName =  "/" +  newFileName;
-			return newFileName;
+				cwd = cwdpath;
 				
+				//rip off first '/'
+				string simpleCWD;
+				if (cwd.length() > 0) { simpleCWD = cwd.substr(1); }
+				
+				//break apart the current working directory
+				vector<string> dirs;
+				while (simpleCWD.find_first_of('/') != -1) {
+					string dir = simpleCWD.substr(0,simpleCWD.find_first_of('/'));
+					simpleCWD = simpleCWD.substr(simpleCWD.find_first_of('/')+1, simpleCWD.length());
+					dirs.push_back(dir);
+				}
+				//get last one              // ex. ../../../filename = /user/work/desktop/filename
+				dirs.push_back(simpleCWD);  //ex. dirs[0] = user, dirs[1] = work, dirs[2] = desktop
+				
+			
+				int index = dirs.size()-1;
+		
+				while((pos = path.rfind("./")) != -1) { //while you don't have a complete path
+					if (pos == 0) { break;  //you are at the end
+					}else if (path[(pos-1)] == '.') { //you want your parent directory ../
+						path = path.substr(0, pos-1);
+						index--;
+						if (index == 0) {  break; }
+					}else if (path[(pos-1)] == '/') { //you want the current working dir ./
+						path = path.substr(0, pos);
+					}else if (pos == 1) { break;  //you are at the end
+					}else { cout << "cannot resolve path for " <<  fileName << endl; return fileName; }
+				}
+			
+				for (int i = index; i >= 0; i--) {
+					newFileName = dirs[i] +  "/" + newFileName;		
+				}
+				
+				newFileName =  "/" +  newFileName;
+				return newFileName;
+			}	
 		#else
-			if (path.rfind(".\\") == -1) { return fileName; } //already complete name
-			else { newFileName = fileName.substr(fileName.rfind(".\\")+2); } //save the complete part of the name
-						
-			char *cwdpath = NULL;
-			cwdpath = getcwd(NULL, 0); // or _getcwd
-			if ( cwdpath != NULL) { cwd = cwdpath; }
-			else { cwd = "";  }
-			
-			//break apart the current working directory
-			vector<string> dirs;
-			while (cwd.find_first_of('\\') != -1) {
-				string dir = cwd.substr(0,cwd.find_first_of('\\'));
-				cwd = cwd.substr(cwd.find_first_of('\\')+1, cwd.length());
-				dirs.push_back(dir);
-	
-			}
-			//get last one
-			dirs.push_back(cwd);  //ex. dirs[0] = user, dirs[1] = work, dirs[2] = desktop
+			if (path.find("~") != -1) { //go to home directory
+				string homeDir = getenv ("HOME");
+				newFileName = homeDir + fileName.substr(fileName.find("~")+1);
+				return newFileName;
+			}else { //find path
+				if (path.rfind(".\\") == -1) { return fileName; } //already complete name
+				else { newFileName = fileName.substr(fileName.rfind(".\\")+2); } //save the complete part of the name
+							
+				char *cwdpath = NULL;
+				cwdpath = getcwd(NULL, 0); // or _getcwd
+				if ( cwdpath != NULL) { cwd = cwdpath; }
+				else { cwd = "";  }
 				
-			int index = dirs.size()-1;
-				
-			while((pos = path.rfind(".\\")) != -1) { //while you don't have a complete path
-				if (pos == 0) { break;  //you are at the end
-				}else if (path[(pos-1)] == '.') { //you want your parent directory ../
-					path = path.substr(0, pos-1);
-					index--;
-					if (index == 0) {  break; }
-				}else if (path[(pos-1)] == '\\') { //you want the current working dir ./
-					path = path.substr(0, pos);
-				}else if (pos == 1) { break;  //you are at the end
-				}else { cout << "cannot resolve path for " <<  fileName << endl; return fileName; }
-			}
+				//break apart the current working directory
+				vector<string> dirs;
+				while (cwd.find_first_of('\\') != -1) {
+					string dir = cwd.substr(0,cwd.find_first_of('\\'));
+					cwd = cwd.substr(cwd.find_first_of('\\')+1, cwd.length());
+					dirs.push_back(dir);
 		
-			for (int i = index; i >= 0; i--) {
-				newFileName = dirs[i] +  "\\" + newFileName;		
-			}
+				}
+				//get last one
+				dirs.push_back(cwd);  //ex. dirs[0] = user, dirs[1] = work, dirs[2] = desktop
+					
+				int index = dirs.size()-1;
+					
+				while((pos = path.rfind(".\\")) != -1) { //while you don't have a complete path
+					if (pos == 0) { break;  //you are at the end
+					}else if (path[(pos-1)] == '.') { //you want your parent directory ../
+						path = path.substr(0, pos-1);
+						index--;
+						if (index == 0) {  break; }
+					}else if (path[(pos-1)] == '\\') { //you want the current working dir ./
+						path = path.substr(0, pos);
+					}else if (pos == 1) { break;  //you are at the end
+					}else { cout << "cannot resolve path for " <<  fileName << endl; return fileName; }
+				}
 			
-			return newFileName;
+				for (int i = index; i >= 0; i--) {
+					newFileName = dirs[i] +  "\\" + newFileName;		
+				}
+				
+				return newFileName;
+			}
 			
 		#endif
 	}
