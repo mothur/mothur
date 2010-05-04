@@ -274,7 +274,7 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 					confidence = confidenceScores[seqTax.level][seqTax.name];
 				}
 				
-				if (confidence >= confidenceThreshold) {
+				if (((confidence/(float)iters) * 100) >= confidenceThreshold) {
 					confidenceTax = seqTax.name + "(" + toString(((confidence/(float)iters) * 100)) + ");" + confidenceTax;
 					simpleTax = seqTax.name + ";" + simpleTax;
 				}

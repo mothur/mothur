@@ -778,10 +778,14 @@ bool TrimSeqsCommand::compareDNASeq(string oligo, string seq){
 bool TrimSeqsCommand::stripQualThreshold(Sequence& seq, ifstream& qFile){
 	try {
 		string rawSequence = seq.getUnaligned();
-		int seqLength = rawSequence.length();
-		string name;
+		int seqLength;  // = rawSequence.length();
+		string name, temp, temp2;
 		
-		qFile >> name;
+		qFile >> name >> temp;
+	
+		splitAtEquals(temp2, temp); //separates length=242, temp=length, temp2=242
+		convert(temp, seqLength); //converts string to int
+	
 		if (name.length() != 0) {  if(name.substr(1) != seq.getName())	{	m->mothurOut("sequence name mismatch btwn fasta and qual file"); m->mothurOutEndLine();	}  } 
 		while (!qFile.eof())	{	char c = qFile.get(); if (c == 10 || c == 13){	break;	}	}
 		
