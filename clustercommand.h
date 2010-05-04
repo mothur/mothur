@@ -43,7 +43,7 @@ private:
 	RAbundVector oldRAbund;
 	ListVector oldList;
 
-	bool abort;
+	bool abort, hard;
 
 	string method, fileroot, tag, outputDir;
 	double cutoff;

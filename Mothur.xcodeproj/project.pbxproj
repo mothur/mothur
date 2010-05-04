@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		A72B3A62118B37FD004B9F8D /* phylodiversitycommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = phylodiversitycommand.h; sourceTree = "<group>"; };
+		A72B3A63118B37FD004B9F8D /* phylodiversitycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = phylodiversitycommand.cpp; sourceTree = "<group>"; };
+		A72B3A7B118B4D1B004B9F8D /* phylodiversity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = phylodiversity.h; sourceTree = "<group>"; };
+		A72B3A7C118B4D1B004B9F8D /* phylodiversity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = phylodiversity.cpp; sourceTree = "<group>"; };
 		A747E79B1163442A00FB9042 /* chimeracheckcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeracheckcommand.h; sourceTree = "<group>"; };
 		A747E79C1163442A00FB9042 /* chimeracheckcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeracheckcommand.cpp; sourceTree = "<group>"; };
 		A747E81C116365E000FB9042 /* chimeraslayercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraslayercommand.h; sourceTree = "<group>"; };
@@ -552,6 +556,8 @@
 				A7DA20B0113FECD400BF472F /* nseqs.h */,
 				A7DA20B2113FECD400BF472F /* onegapdist.h */,
 				A7DA20B3113FECD400BF472F /* onegapignore.h */,
+				A72B3A7B118B4D1B004B9F8D /* phylodiversity.h */,
+				A72B3A7C118B4D1B004B9F8D /* phylodiversity.cpp */,
 				A7DA20BE113FECD400BF472F /* parsimony.cpp */,
 				A7DA20BF113FECD400BF472F /* parsimony.h */,
 				A7DA20CE113FECD400BF472F /* qstat.cpp */,
@@ -706,26 +712,28 @@
 				A7E8338C115BBDAA00739EC4 /* parsesffcommand.h */,
 				A7DA20C0113FECD400BF472F /* parsimonycommand.cpp */,
 				A7DA20C1113FECD400BF472F /* parsimonycommand.h */,
-				A7DA20C2113FECD400BF472F /* pcacommand.cpp */,
 				A7DA20C3113FECD400BF472F /* pcacommand.h */,
-				A7DA20C6113FECD400BF472F /* phylotypecommand.cpp */,
+				A7DA20C2113FECD400BF472F /* pcacommand.cpp */,
+				A72B3A62118B37FD004B9F8D /* phylodiversitycommand.h */,
+				A72B3A63118B37FD004B9F8D /* phylodiversitycommand.cpp */,
 				A7DA20C7113FECD400BF472F /* phylotypecommand.h */,
-				A7DA20CA113FECD400BF472F /* preclustercommand.cpp */,
+				A7DA20C6113FECD400BF472F /* phylotypecommand.cpp */,
 				A7DA20CB113FECD400BF472F /* preclustercommand.h */,
-				A7DA20D0113FECD400BF472F /* quitcommand.cpp */,
+				A7DA20CA113FECD400BF472F /* preclustercommand.cpp */,
 				A7DA20D1113FECD400BF472F /* quitcommand.h */,
-				A7DA20DA113FECD400BF472F /* rarefactcommand.cpp */,
+				A7DA20D0113FECD400BF472F /* quitcommand.cpp */,
 				A7DA20DB113FECD400BF472F /* rarefactcommand.h */,
-				A7DA20DD113FECD400BF472F /* rarefactsharedcommand.cpp */,
+				A7DA20DA113FECD400BF472F /* rarefactcommand.cpp */,
 				A7DA20DE113FECD400BF472F /* rarefactsharedcommand.h */,
-				A7DA20E5113FECD400BF472F /* readdistcommand.cpp */,
+				A7DA20DD113FECD400BF472F /* rarefactsharedcommand.cpp */,
 				A7DA20E6113FECD400BF472F /* readdistcommand.h */,
-				A7DA20EA113FECD400BF472F /* readotucommand.cpp */,
+				A7DA20E5113FECD400BF472F /* readdistcommand.cpp */,
 				A7DA20EB113FECD400BF472F /* readotucommand.h */,
-				A7DA20F0113FECD400BF472F /* readtreecommand.cpp */,
+				A7DA20EA113FECD400BF472F /* readotucommand.cpp */,
 				A7DA20F1113FECD400BF472F /* readtreecommand.h */,
-				A7DA20F2113FECD400BF472F /* removeseqscommand.cpp */,
+				A7DA20F0113FECD400BF472F /* readtreecommand.cpp */,
 				A7DA20F3113FECD400BF472F /* removeseqscommand.h */,
+				A7DA20F2113FECD400BF472F /* removeseqscommand.cpp */,
 				A7DA20F5113FECD400BF472F /* reversecommand.h */,
 				A7DA20F4113FECD400BF472F /* reversecommand.cpp */,
 				A7DA20F9113FECD400BF472F /* screenseqscommand.h */,

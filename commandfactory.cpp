@@ -72,6 +72,7 @@
 #include "chimerapintailcommand.h"
 #include "chimerabellerophoncommand.h"
 #include "setlogfilecommand.h"
+#include "phylodiversitycommand.h"
 
 /*******************************************************/
 
@@ -151,6 +152,7 @@ CommandFactory::CommandFactory(){
 	commands["parse.list"]			= "parse.list";
 	commands["parse.sff"]			= "parse.sff";
 	commands["set.logfile"]			= "set.logfile";
+	commands["phylo.diversity"]		= "phylo.diversity";
 	commands["classify.seqs"]		= "MPIEnabled"; 
 	commands["dist.seqs"]			= "MPIEnabled";
 	commands["filter.seqs"]			= "MPIEnabled";
@@ -267,6 +269,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "set.logfile")			{	command = new SetLogFileCommand(optionString);				}
 		else if(commandName == "parse.list")			{	command = new ParseListCommand(optionString);				}
 		else if(commandName == "parse.sff")				{	command = new ParseSFFCommand(optionString);				}
+		else if(commandName == "phylo.diversity")		{	command = new PhyloDiversityCommand(optionString);			}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
