@@ -361,18 +361,31 @@ void PhyloTree::binUnclassified(string file){
 		map<string, int>::iterator childPointer;
 		
 		vector<TaxNode> copy = tree;
-		int copyNodes = numNodes;
+				
+		//fill out tree
+		fillOutTree(0, copy);
+		
+		//get leaf nodes that may need externsion
+		for (int i = 0; i < copy.size(); i++) {  
+
+			if (copy[i].children.size() == 0) {
+				leafNodes[i] = i;
+			}
+		}
+		
+		int copyNodes = copy.size();
 		
 		//go through the seqs and if a sequence finest taxon is not the same level as the most finely defined taxon then classify it as unclassified where necessary
-		for (itBin = name2Taxonomy.begin(); itBin != name2Taxonomy.end(); itBin++) {
+		map<int, int>::iterator itLeaf;
+		for (itLeaf = leafNodes.begin(); itLeaf != leafNodes.end(); itLeaf++) {
 			
 			if (m->control_pressed) {  out.close(); break;  }
 			
-			int level = copy[itBin->second].level;
-			int currentNode = itBin->second;
+			int level = copy[itLeaf->second].level;
+			int currentNode = itLeaf->second;
 			
 			//this sequence is unclassified at some levels
-			while(level != maxLevel){
+			while(level <= maxLevel){
 		
 				level++;
 			
@@ -383,7 +396,6 @@ void PhyloTree::binUnclassified(string file){
 				
 				if(childPointer != copy[currentNode].children.end()){	//if the node already exists, move on
 					currentNode = childPointer->second; //currentNode becomes 'unclassified'
-					copy[currentNode].accessions.push_back(itBin->first);  //add this seq
 				}
 				else{											//otherwise, create it
 					copy.push_back(TaxNode(taxon));
@@ -393,7 +405,6 @@ void PhyloTree::binUnclassified(string file){
 					copy[copyNodes-1].level = copy[currentNode].level + 1;
 									
 					currentNode = copy[currentNode].children[taxon];
-					copy[currentNode].accessions.push_back(itBin->first);
 				}
 			}
 		}
@@ -406,6 +417,32 @@ void PhyloTree::binUnclassified(string file){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloTree", "binUnclassified");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+void PhyloTree::fillOutTree(int index, vector<TaxNode>& copy) {
+	try {
+		map<string,int>::iterator it;
+		
+		it = copy[index].children.find("unclassified");
+		if (it == copy[index].children.end()) { //no unclassified at this level
+			string taxon = "unclassified";
+			copy.push_back(TaxNode(taxon));
+			copy[index].children[taxon] = copy.size()-1;
+			copy[copy.size()-1].parent = index;
+			copy[copy.size()-1].level = copy[index].level + 1;
+		}
+		
+		if (tree[index].level <= maxLevel) {
+			for(it=tree[index].children.begin();it!=tree[index].children.end();it++){ //check your children
+				fillOutTree(it->second, copy);
+			}
+		}
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhyloTree", "fillOutTree");
 		exit(1);
 	}
 }
