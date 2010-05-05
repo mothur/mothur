@@ -51,7 +51,8 @@ public:
 	
 private:
 	string getNextTaxon(string&);
-	void print(ofstream&, vector<TaxNode>&);
+	void print(ofstream&, vector<TaxNode>&); //used to create static reference taxonomy file
+	void fillOutTree(int, vector<TaxNode>&); //used to create static reference taxonomy file
 	void binUnclassified(string);
 	
 	vector<TaxNode> tree;
@@ -59,6 +60,7 @@ private:
 	vector<int> totals; //holds the numSeqs at each genus level taxonomy
 	map<string, int> name2Taxonomy;  //maps name to index in tree
 	map<int, int> uniqueTaxonomies;  //map of unique taxonomies
+	map<int, int> leafNodes; //used to create static reference taxonomy file
 	//void print(int, ofstream&);
 	int numNodes;
 	int numSeqs;
