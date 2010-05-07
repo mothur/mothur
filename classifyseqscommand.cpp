@@ -82,47 +82,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			}
 			else if (templateFileName == "not open") { abort = true; }	
 			
-			groupfile = validParameter.validFile(parameters, "group", false);
-			if (groupfile == "not found") { groupfile = "";  }
-			else { 
-				splitAtDash(groupfile, groupfileNames);
-				
-				//go through files and make sure they are good, if not, then disregard them
-				for (int i = 0; i < groupfileNames.size(); i++) {
-					if (inputDir != "") {
-						string path = hasPath(groupfileNames[i]);
-						//if the user has not given a path then, add inputdir. else leave path alone.
-						if (path == "") {	groupfileNames[i] = inputDir + groupfileNames[i];		}
-					}
-					int ableToOpen;
-					
-					#ifdef USE_MPI	
-						int pid;
-						MPI_Comm_size(MPI_COMM_WORLD, &processors); //set processors to the number of mpi processes running
-						MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-				
-						if (pid == 0) {
-					#endif
-
-					ifstream in;
-					ableToOpen = openInputFile(groupfileNames[i], in);
-					in.close();
-					
-					#ifdef USE_MPI	
-							for (int j = 1; j < processors; j++) {
-								MPI_Send(&ableToOpen, 1, MPI_INT, j, 2001, MPI_COMM_WORLD); 
-							}
-						}else{
-							MPI_Status status;
-							MPI_Recv(&ableToOpen, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-						}
 						
-					#endif
-					if (ableToOpen == 1) {  m->mothurOut("Unable to match group file with fasta file."); m->mothurOutEndLine(); abort = true;	}
-					
-				}
-			}
-			
 			fastaFileName = validParameter.validFile(parameters, "fasta", false);
 			if (fastaFileName == "not found") { m->mothurOut("fasta is a required parameter for the classify.seqs command."); m->mothurOutEndLine(); abort = true;  }
 			else { 
@@ -230,8 +190,51 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 				if (namefileNames.size() != fastaFileNames.size()) { abort = true; m->mothurOut("If you provide a name file, you must have one for each fasta file."); m->mothurOutEndLine(); }
 			}
 			
+			groupfile = validParameter.validFile(parameters, "group", false);
+			if (groupfile == "not found") { groupfile = "";  }
+			else { 
+				splitAtDash(groupfile, groupfileNames);
+				
+				//go through files and make sure they are good, if not, then disregard them
+				for (int i = 0; i < groupfileNames.size(); i++) {
+					if (inputDir != "") {
+						string path = hasPath(groupfileNames[i]);
+						//if the user has not given a path then, add inputdir. else leave path alone.
+						if (path == "") {	groupfileNames[i] = inputDir + groupfileNames[i];		}
+					}
+					int ableToOpen;
+					
+					#ifdef USE_MPI	
+						int pid;
+						MPI_Comm_size(MPI_COMM_WORLD, &processors); //set processors to the number of mpi processes running
+						MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+				
+						if (pid == 0) {
+					#endif
+
+					ifstream in;
+					ableToOpen = openInputFile(groupfileNames[i], in);
+					in.close();
+					
+					#ifdef USE_MPI	
+							for (int j = 1; j < processors; j++) {
+								MPI_Send(&ableToOpen, 1, MPI_INT, j, 2001, MPI_COMM_WORLD); 
+							}
+						}else{
+							MPI_Status status;
+							MPI_Recv(&ableToOpen, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
+						}
+						
+					#endif
+					if (ableToOpen == 1) {  m->mothurOut("Unable to match group file with fasta file."); m->mothurOutEndLine(); abort = true;	}
+					
+				}
+			}
+
 			if (groupfile != "") {
 				if (groupfileNames.size() != fastaFileNames.size()) { abort = true; m->mothurOut("If you provide a group file, you must have one for each fasta file."); m->mothurOutEndLine(); }
+			}else {
+				for (int i = 0; i < fastaFileNames.size(); i++) {  groupfileNames.push_back("");  }
 			}
 			
 			//check for optional parameter and set defaults
