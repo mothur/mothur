@@ -39,6 +39,7 @@ private:
 	bool cullHomoP(Sequence&);
 	bool cullAmbigs(Sequence&);
 	bool compareDNASeq(string, string);
+	bool compareDNASeq(string, string, int, int&);
 
 	bool abort;
 	string fastaFile, oligoFile, qFileName, outputDir;

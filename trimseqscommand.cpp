@@ -9,7 +9,6 @@
 
 #include "trimseqscommand.h"
 #include "needlemanoverlap.hpp"
-#include "nast.hpp"
 
 //***************************************************************************************************************
 
@@ -613,33 +612,43 @@ bool TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
 		if ((diffs == 0) || (success == 1)) { return success;  }
 		
 		else { //try aligning and see if you can find it
+			
+			Alignment* alignment;
+			if (barcodes.size() > 0) { //assumes barcodes are all the same length
+				map<string,int>::iterator it=barcodes.begin();
+				string temp = it->first;
+				
+				alignment = new NeedlemanOverlap(-2.0, 1.0, -1.0, (temp.length()+diffs+1));  
+			}else{ alignment = NULL; } 
+			
+
 			//can you find the barcode
 			for(map<string,int>::iterator it=barcodes.begin();it!=barcodes.end();it++){
 				string oligo = it->first;
+				int length = oligo.length();
+				
 				if(rawSequence.length() < oligo.length()){	//let's just assume that the barcodes are the same length
 					success = 0;
 					break;
 				}
 				
 				//use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-				Alignment* alignment = new NeedlemanOverlap(-2.0, 1.0, -1.0, (oligo.length()+diffs+1));
-				Sequence* templateSeq = new Sequence("temp", rawSequence.substr(0,(oligo.length()+diffs)));
-				Sequence* candidateSeq = new Sequence("temp2", oligo);
-				Nast nast(alignment, candidateSeq, templateSeq);
+				alignment->align(oligo, rawSequence.substr(0,length+diffs));
+				oligo = alignment->getSeqAAln();
+				string temp = alignment->getSeqBAln();
+		cout << "barcode = " << oligo << " raw = " << rawSequence.substr(0,oligo.length()) << " raw aligned = " << temp << endl;			
 				
-				oligo = candidateSeq->getAligned();
-	cout << "barcode = " << oligo << " raw = " << rawSequence.substr(0,(oligo.length())) << endl;			
-				delete alignment;
-				delete templateSeq;
-				delete candidateSeq;
-				
-				if(compareDNASeq(oligo, rawSequence.substr(0,oligo.length()))){
+				int newStart=0;
+				if(compareDNASeq(oligo, rawSequence.substr(0,oligo.length()), length, newStart)){
+		cout << "found match" << endl;
 					group = it->second;
-					seq.setUnaligned(rawSequence.substr(0,oligo.length()));
+					seq.setUnaligned(rawSequence.substr(newStart));
 					success = 1;
 					break;
 				}
 			}
+			
+			if (alignment != NULL) {  delete alignment;  }
 		}
 		return success;
 		
@@ -677,32 +686,35 @@ bool TrimSeqsCommand::stripForward(Sequence& seq){
 		if ((diffs == 0) || (success == 1)) { return success;  }
 		
 		else { //try aligning and see if you can find it
+			
+			
+			Alignment* alignment;
+			if (numFPrimers > 0) { alignment = new NeedlemanOverlap(-2.0, 1.0, -1.0, (forPrimer[0].length()+diffs+1));  } //assumes primers are all the same length
+			else{ alignment = NULL; } 
+			
 			//can you find the primer
 			for(int i=0;i<numFPrimers;i++){
 				string oligo = forPrimer[i];
+				int length = oligo.length();
+				
 				if(rawSequence.length() < oligo.length()){	
 					success = 0;
 					break;
 				}
 				
 				//use needleman to align first primer.length()+numdiffs of sequence to each primer
-				Alignment* alignment = new NeedlemanOverlap(-2.0, 1.0, -1.0, (oligo.length()+diffs+1));
-				Sequence* templateSeq = new Sequence("temp", rawSequence.substr(0,(oligo.length()+diffs)));
-				Sequence* candidateSeq = new Sequence("temp2", oligo);
-				Nast nast(alignment, candidateSeq, templateSeq);
+				alignment->align(oligo, rawSequence.substr(0,length+diffs));
+				oligo = alignment->getSeqAAln();
 				
-				oligo = candidateSeq->getAligned();
-				
-				delete alignment;
-				delete templateSeq;
-				delete candidateSeq;
-				
-				if(compareDNASeq(oligo, rawSequence.substr(0,oligo.length()))){
-					seq.setUnaligned(rawSequence.substr(0,oligo.length()));
+				int newStart = 0;
+				if(compareDNASeq(oligo, rawSequence.substr(0,oligo.length()), length, newStart)){
+					seq.setUnaligned(rawSequence.substr(newStart));
 					success = 1;
 					break;
 				}
 			}
+			
+			if (alignment != NULL) {  delete alignment;  }
 		}
 		
 		return success;
@@ -842,7 +854,57 @@ bool TrimSeqsCommand::compareDNASeq(string oligo, string seq){
 	}
 
 }
+//***************************************************************************************************************
 
+bool TrimSeqsCommand::compareDNASeq(string oligo, string seq, int numBases, int& end){
+	try {
+		bool success = 1;
+		int length = oligo.length();
+		end = length;
+		int countBases = 0;
+		int countDiffs = 0;
+		
+		if (length != 0) {
+			if ((oligo[0] == '-') || (oligo[0] == '.')) {  success = 0; return success;  } //no gaps allowed at beginning
+		}
+		
+		for(int i=0;i<length;i++){
+			
+			if ((oligo[i] != '-') && (oligo[i] != '.'))  { countBases++; } 
+			
+	//cout << oligo[i] << " " << seq[i] << " diffs = " << countDiffs << " countBases = " << countBases << endl; 	
+		
+			if(oligo[i] != seq[i]){
+				if(oligo[i] == 'A' || oligo[i] == 'T' || oligo[i] == 'G' || oligo[i] == 'C' || oligo[i] == '-' || oligo[i] == '.')	{	countDiffs++; 	}
+				else if((oligo[i] == 'N' || oligo[i] == 'I') && (seq[i] == 'N'))				{	countDiffs++;	}
+				else if(oligo[i] == 'R' && (seq[i] != 'A' && seq[i] != 'G'))					{	countDiffs++;	}
+				else if(oligo[i] == 'Y' && (seq[i] != 'C' && seq[i] != 'T'))					{	countDiffs++;	}
+				else if(oligo[i] == 'M' && (seq[i] != 'C' && seq[i] != 'A'))					{	countDiffs++;	}
+				else if(oligo[i] == 'K' && (seq[i] != 'T' && seq[i] != 'G'))					{	countDiffs++;	}
+				else if(oligo[i] == 'W' && (seq[i] != 'T' && seq[i] != 'A'))					{	countDiffs++;	}
+				else if(oligo[i] == 'S' && (seq[i] != 'C' && seq[i] != 'G'))					{	countDiffs++;	}
+				else if(oligo[i] == 'B' && (seq[i] != 'C' && seq[i] != 'T' && seq[i] != 'G'))	{	countDiffs++;	}
+				else if(oligo[i] == 'D' && (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'G'))	{	countDiffs++;	}
+				else if(oligo[i] == 'H' && (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'C'))	{	countDiffs++;	}
+				else if(oligo[i] == 'V' && (seq[i] != 'A' && seq[i] != 'C' && seq[i] != 'G'))	{	countDiffs++;	}			
+				
+				if(countDiffs > diffs)	{	success = 0; break;	 }
+			}
+			else{
+				success = 1;
+			}
+			
+			if (countBases >= numBases) { end = i; break; } //stop checking after end of barcode or primer
+		}
+	
+		return success;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TrimSeqsCommand", "compareDNASeq");
+		exit(1);
+	}
+
+}
 //***************************************************************************************************************
 
 bool TrimSeqsCommand::stripQualThreshold(Sequence& seq, ifstream& qFile){
