@@ -123,6 +123,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 			
 			int okay = 2;
 			if (outputDir != "") { okay++; }
+			if (inputDir != "")	{ okay++; }
 			
 			if (parameters.size() > okay) { m->mothurOut("You may only enter one of the following: fasta, name, group, alignreport or listfile."); m->mothurOutEndLine(); abort = true;  }
 		}

@@ -43,6 +43,7 @@ private:
 	vector<linePair*> lines;
 	vector<string> fastaFileNames;
 	vector<string> namefileNames;
+	vector<string> groupfileNames;
 	map<string, int> nameMap;
 	map<string, int>::iterator itNames;
 	

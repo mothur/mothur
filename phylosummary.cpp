@@ -114,6 +114,8 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 					//find out the sequences group
 					string group = groupmap->getGroup(seqName);
 					
+					if (group == "not found") {  m->mothurOut(seqName + " is not in your groupfile, and will be included in the overall total, but not any group total."); m->mothurOutEndLine();  }
+					
 					//do you have a count for this group?
 					map<string, int>::iterator itGroup = tree[currentNode].groupCount.find(group);
 					

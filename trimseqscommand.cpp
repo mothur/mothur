@@ -8,6 +8,8 @@
  */
 
 #include "trimseqscommand.h"
+#include "needlemanoverlap.hpp"
+#include "nast.hpp"
 
 //***************************************************************************************************************
 
@@ -22,7 +24,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 		else {
 			//valid paramters for this command
 			string AlignArray[] =  {"fasta", "flip", "oligos", "maxambig", "maxhomop", "minlength", "maxlength", "qfile", 
-									"qthreshold", "qaverage", "allfiles", "qtrim", "processors", "outputdir","inputdir"};
+									"qthreshold", "qaverage", "allfiles", "qtrim","diffs", "processors", "outputdir","inputdir"};
 			
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
@@ -103,6 +105,9 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "maxlength", false);	if (temp == "not found") { temp = "0"; }
 			convert(temp, maxLength);
 			
+			temp = validParameter.validFile(parameters, "diffs", false);		if (temp == "not found") { temp = "0"; }
+			convert(temp, diffs);
+			
 			temp = validParameter.validFile(parameters, "qfile", true);	
 			if (temp == "not found")	{	qFileName = "";		}
 			else if(temp == "not open")	{	abort = true;		}
@@ -148,7 +153,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 void TrimSeqsCommand::help(){
 	try {
 		m->mothurOut("The trim.seqs command reads a fastaFile and creates .....\n");
-		m->mothurOut("The trim.seqs command parameters are fasta, flip, oligos, maxambig, maxhomop, minlength, maxlength, qfile, qthreshold, qaverage, qtrim and allfiles.\n");
+		m->mothurOut("The trim.seqs command parameters are fasta, flip, oligos, maxambig, maxhomop, minlength, maxlength, qfile, qthreshold, qaverage, diffs, qtrim and allfiles.\n");
 		m->mothurOut("The fasta parameter is required.\n");
 		m->mothurOut("The flip parameter .... The default is 0.\n");
 		m->mothurOut("The oligos parameter .... The default is "".\n");
@@ -156,6 +161,7 @@ void TrimSeqsCommand::help(){
 		m->mothurOut("The maxhomop parameter .... The default is 0.\n");
 		m->mothurOut("The minlength parameter .... The default is 0.\n");
 		m->mothurOut("The maxlength parameter .... The default is 0.\n");
+		m->mothurOut("The diffs parameter .... The default is 0.\n");
 		m->mothurOut("The qfile parameter .....\n");
 		m->mothurOut("The qthreshold parameter .... The default is 0.\n");
 		m->mothurOut("The qaverage parameter .... The default is 0.\n");
@@ -579,9 +585,7 @@ void TrimSeqsCommand::getOligos(vector<string>& outFASTAVec){ //vector<ofstream*
 		m->errorOut(e, "TrimSeqsCommand", "getOligos");
 		exit(1);
 	}
-
 }
-
 //***************************************************************************************************************
 
 bool TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
@@ -589,6 +593,7 @@ bool TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
 		string rawSequence = seq.getUnaligned();
 		bool success = 0;	//guilty until proven innocent
 		
+		//can you find the barcode
 		for(map<string,int>::iterator it=barcodes.begin();it!=barcodes.end();it++){
 			string oligo = it->first;
 			if(rawSequence.length() < oligo.length()){	//let's just assume that the barcodes are the same length
@@ -601,6 +606,39 @@ bool TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
 				seq.setUnaligned(rawSequence.substr(oligo.length()));
 				success = 1;
 				break;
+			}
+		}
+		
+		//if you found the barcode or if you don't want to allow for diffs
+		if ((diffs == 0) || (success == 1)) { return success;  }
+		
+		else { //try aligning and see if you can find it
+			//can you find the barcode
+			for(map<string,int>::iterator it=barcodes.begin();it!=barcodes.end();it++){
+				string oligo = it->first;
+				if(rawSequence.length() < oligo.length()){	//let's just assume that the barcodes are the same length
+					success = 0;
+					break;
+				}
+				
+				//use needleman to align first barcode.length()+numdiffs of sequence to each barcode
+				Alignment* alignment = new NeedlemanOverlap(-2.0, 1.0, -1.0, (oligo.length()+diffs+1));
+				Sequence* templateSeq = new Sequence("temp", rawSequence.substr(0,(oligo.length()+diffs)));
+				Sequence* candidateSeq = new Sequence("temp2", oligo);
+				Nast nast(alignment, candidateSeq, templateSeq);
+				
+				oligo = candidateSeq->getAligned();
+	cout << "barcode = " << oligo << " raw = " << rawSequence.substr(0,(oligo.length())) << endl;			
+				delete alignment;
+				delete templateSeq;
+				delete candidateSeq;
+				
+				if(compareDNASeq(oligo, rawSequence.substr(0,oligo.length()))){
+					group = it->second;
+					seq.setUnaligned(rawSequence.substr(0,oligo.length()));
+					success = 1;
+					break;
+				}
 			}
 		}
 		return success;
@@ -632,6 +670,38 @@ bool TrimSeqsCommand::stripForward(Sequence& seq){
 				seq.setUnaligned(rawSequence.substr(oligo.length()));
 				success = 1;
 				break;
+			}
+		}
+		
+		//if you found the primer or if you don't want to allow for diffs
+		if ((diffs == 0) || (success == 1)) { return success;  }
+		
+		else { //try aligning and see if you can find it
+			//can you find the primer
+			for(int i=0;i<numFPrimers;i++){
+				string oligo = forPrimer[i];
+				if(rawSequence.length() < oligo.length()){	
+					success = 0;
+					break;
+				}
+				
+				//use needleman to align first primer.length()+numdiffs of sequence to each primer
+				Alignment* alignment = new NeedlemanOverlap(-2.0, 1.0, -1.0, (oligo.length()+diffs+1));
+				Sequence* templateSeq = new Sequence("temp", rawSequence.substr(0,(oligo.length()+diffs)));
+				Sequence* candidateSeq = new Sequence("temp2", oligo);
+				Nast nast(alignment, candidateSeq, templateSeq);
+				
+				oligo = candidateSeq->getAligned();
+				
+				delete alignment;
+				delete templateSeq;
+				delete candidateSeq;
+				
+				if(compareDNASeq(oligo, rawSequence.substr(0,oligo.length()))){
+					seq.setUnaligned(rawSequence.substr(0,oligo.length()));
+					success = 1;
+					break;
+				}
 			}
 		}
 		
@@ -744,7 +814,7 @@ bool TrimSeqsCommand::compareDNASeq(string oligo, string seq){
 		for(int i=0;i<length;i++){
 			
 			if(oligo[i] != seq[i]){
-				if(oligo[i] == 'A' || oligo[i] == 'T' || oligo[i] == 'G' || oligo[i] == 'C')	{	success = 0;	}
+				if(oligo[i] == 'A' || oligo[i] == 'T' || oligo[i] == 'G' || oligo[i] == 'C')	{	success = 0; 	}
 				else if((oligo[i] == 'N' || oligo[i] == 'I') && (seq[i] == 'N'))				{	success = 0;	}
 				else if(oligo[i] == 'R' && (seq[i] != 'A' && seq[i] != 'G'))					{	success = 0;	}
 				else if(oligo[i] == 'Y' && (seq[i] != 'C' && seq[i] != 'T'))					{	success = 0;	}
@@ -757,7 +827,7 @@ bool TrimSeqsCommand::compareDNASeq(string oligo, string seq){
 				else if(oligo[i] == 'H' && (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'C'))	{	success = 0;	}
 				else if(oligo[i] == 'V' && (seq[i] != 'A' && seq[i] != 'C' && seq[i] != 'G'))	{	success = 0;	}			
 				
-				if(success == 0)	{	break;	}
+				if(success == 0)	{	break;	 }
 			}
 			else{
 				success = 1;
