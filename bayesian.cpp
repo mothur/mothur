@@ -216,17 +216,11 @@ string Bayesian::getTaxonomy(Sequence* seq) {
 /**************************************************************************************************/
 string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 	try {
-		
-		//taxConfidenceScore.clear(); //clear out previous seqs scores
 				
-		vector< map<string, int> > confidenceScores; //you need the added vector level of confusion to account for the level that name is seen since they can be the same
-										//map of classification to confidence for all areas seen
-									   //ie. Bacteria;Alphaproteobacteria;Rhizobiales;Azorhizobium_et_rel.;Methylobacterium_et_rel.;Bosea;
-									   //ie. Bacteria -> 100, Alphaproteobacteria -> 100, Rhizobiales -> 87, Azorhizobium_et_rel. -> 78, Methylobacterium_et_rel. -> 70, Bosea -> 50
-		confidenceScores.resize(100);  //if you have more than 100 levels of classification...
-		
-		map<string, int>::iterator itBoot;
-		map<string, int>::iterator itBoot2;
+		map<int, int> confidenceScores; 
+				
+		map<int, int>::iterator itBoot;
+		map<int, int>::iterator itBoot2;
 		map<int, int>::iterator itConvert;
 		
 		for (int i = 0; i < iters; i++) {
@@ -248,14 +242,15 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 			//add to confidence results
 			while (taxonomy.level != 0) { //while you are not at the root
 				
-				itBoot2 = confidenceScores[taxonomy.level].find(taxonomy.name); //is this a classification we already have a count on
+				itBoot2 = confidenceScores.find(newTax); //is this a classification we already have a count on
 				
-				if (itBoot2 == confidenceScores[taxonomy.level].end()) { //not already in confidence scores
-					confidenceScores[taxonomy.level][taxonomy.name] = 1;
+				if (itBoot2 == confidenceScores.end()) { //not already in confidence scores
+					confidenceScores[newTax] = 1;
 				}else{
-					confidenceScores[taxonomy.level][taxonomy.name]++;
+					confidenceScores[newTax]++;
 				}
-		
+				
+				newTax = taxonomy.parent;
 				taxonomy = phyloTree->get(taxonomy.parent);
 			}
 	
@@ -263,15 +258,17 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 		
 		string confidenceTax = "";
 		simpleTax = "";
+		
+		int seqTaxIndex = tax;
 		TaxNode seqTax = phyloTree->get(tax);
 		
 		while (seqTax.level != 0) { //while you are not at the root
 					
-				itBoot2 = confidenceScores[seqTax.level].find(seqTax.name); //is this a classification we already have a count on
+				itBoot2 = confidenceScores.find(seqTaxIndex); //is this a classification we already have a count on
 				
 				int confidence = 0;
-				if (itBoot2 != confidenceScores[seqTax.level].end()) { //not already in confidence scores
-					confidence = confidenceScores[seqTax.level][seqTax.name];
+				if (itBoot2 != confidenceScores.end()) { //already in confidence scores
+					confidence = confidenceScores[seqTaxIndex];
 				}
 				
 				if (((confidence/(float)iters) * 100) >= confidenceThreshold) {
@@ -279,6 +276,7 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 					simpleTax = seqTax.name + ";" + simpleTax;
 				}
 				
+				seqTaxIndex = seqTax.parent;
 				seqTax = phyloTree->get(seqTax.parent);
 		}
 		
