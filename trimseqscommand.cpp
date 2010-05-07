@@ -636,11 +636,10 @@ bool TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
 				alignment->align(oligo, rawSequence.substr(0,length+diffs));
 				oligo = alignment->getSeqAAln();
 				string temp = alignment->getSeqBAln();
-		cout << "barcode = " << oligo << " raw = " << rawSequence.substr(0,oligo.length()) << " raw aligned = " << temp << endl;			
+		//cout << "barcode = " << oligo << " raw = " << rawSequence.substr(0,oligo.length()) << " raw aligned = " << temp << endl;			
 				
 				int newStart=0;
-				if(compareDNASeq(oligo, rawSequence.substr(0,oligo.length()), length, newStart)){
-		cout << "found match" << endl;
+				if(compareDNASeq(oligo, temp, length, newStart)){
 					group = it->second;
 					seq.setUnaligned(rawSequence.substr(newStart));
 					success = 1;
@@ -705,9 +704,10 @@ bool TrimSeqsCommand::stripForward(Sequence& seq){
 				//use needleman to align first primer.length()+numdiffs of sequence to each primer
 				alignment->align(oligo, rawSequence.substr(0,length+diffs));
 				oligo = alignment->getSeqAAln();
+				string temp = alignment->getSeqBAln();
 				
 				int newStart = 0;
-				if(compareDNASeq(oligo, rawSequence.substr(0,oligo.length()), length, newStart)){
+				if(compareDNASeq(oligo, temp, length, newStart)){
 					seq.setUnaligned(rawSequence.substr(newStart));
 					success = 1;
 					break;
