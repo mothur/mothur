@@ -452,7 +452,7 @@ vector<seqDist> HCluster::getSeqsAN(){
 			if (distance != -1) { //-1 means skip me
 				seqDist temp(firstName, secondName, distance);
 				sameSeqs.push_back(temp);
-			}
+			}else{ distance = 10000; }
 		}
 		
 		if (mergedMinDist < distance) { //get minimum distance from mergedMin

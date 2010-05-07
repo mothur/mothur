@@ -339,6 +339,8 @@ int FilterSeqsCommand::filterSequences() {
 					
 					lines.push_back(new linePair(0, numFastaSeqs));
 					
+					numSeqs += numFastaSeqs;
+					
 					driverRunFilter(filter, filteredFasta, fastafileNames[s], lines[0]);
 				}else{
 					setLines(fastafileNames[s]);
@@ -361,6 +363,8 @@ int FilterSeqsCommand::filterSequences() {
 				inFASTA.close();
 					
 				lines.push_back(new linePair(0, numFastaSeqs));
+				
+				numSeqs += numFastaSeqs;
 				
 				driverRunFilter(filter, filteredFasta, fastafileNames[s], lines[0]);
 

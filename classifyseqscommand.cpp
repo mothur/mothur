@@ -82,9 +82,46 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			}
 			else if (templateFileName == "not open") { abort = true; }	
 			
-			groupfile = validParameter.validFile(parameters, "group", true);
-			if (groupfile == "not open") { abort = true; }	
-			else if (groupfile == "not found") { groupfile = ""; }
+			groupfile = validParameter.validFile(parameters, "group", false);
+			if (groupfile == "not found") { groupfile = "";  }
+			else { 
+				splitAtDash(groupfile, groupfileNames);
+				
+				//go through files and make sure they are good, if not, then disregard them
+				for (int i = 0; i < groupfileNames.size(); i++) {
+					if (inputDir != "") {
+						string path = hasPath(groupfileNames[i]);
+						//if the user has not given a path then, add inputdir. else leave path alone.
+						if (path == "") {	groupfileNames[i] = inputDir + groupfileNames[i];		}
+					}
+					int ableToOpen;
+					
+					#ifdef USE_MPI	
+						int pid;
+						MPI_Comm_size(MPI_COMM_WORLD, &processors); //set processors to the number of mpi processes running
+						MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+				
+						if (pid == 0) {
+					#endif
+
+					ifstream in;
+					ableToOpen = openInputFile(groupfileNames[i], in);
+					in.close();
+					
+					#ifdef USE_MPI	
+							for (int j = 1; j < processors; j++) {
+								MPI_Send(&ableToOpen, 1, MPI_INT, j, 2001, MPI_COMM_WORLD); 
+							}
+						}else{
+							MPI_Status status;
+							MPI_Recv(&ableToOpen, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
+						}
+						
+					#endif
+					if (ableToOpen == 1) {  m->mothurOut("Unable to match group file with fasta file."); m->mothurOutEndLine(); abort = true;	}
+					
+				}
+			}
 			
 			fastaFileName = validParameter.validFile(parameters, "fasta", false);
 			if (fastaFileName == "not found") { m->mothurOut("fasta is a required parameter for the classify.seqs command."); m->mothurOutEndLine(); abort = true;  }
@@ -191,6 +228,10 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 
 			if (namefile != "") {
 				if (namefileNames.size() != fastaFileNames.size()) { abort = true; m->mothurOut("If you provide a name file, you must have one for each fasta file."); m->mothurOutEndLine(); }
+			}
+			
+			if (groupfile != "") {
+				if (groupfileNames.size() != fastaFileNames.size()) { abort = true; m->mothurOut("If you provide a group file, you must have one for each fasta file."); m->mothurOutEndLine(); }
 			}
 			
 			//check for optional parameter and set defaults
@@ -507,7 +548,7 @@ int ClassifySeqsCommand::execute(){
 			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to classify " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
 			start = time(NULL);
 			
-			PhyloSummary taxaSum(taxonomyFileName, groupfile);
+			PhyloSummary taxaSum(taxonomyFileName, groupfileNames[s]);
 			
 			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} delete classify; return 0; }
 			
@@ -527,7 +568,7 @@ int ClassifySeqsCommand::execute(){
 						m->mothurOut(name + " is not in your name file please correct."); m->mothurOutEndLine(); exit(1);
 					}else{
 						for (int i = 0; i < itNames->second; i++) { 
-							taxaSum.addSeqToTree(name+toString(i), taxon);  //add it as many times as there are identical seqs
+							taxaSum.addSeqToTree(name, taxon);  //add it as many times as there are identical seqs
 						}
 					}
 				}
@@ -582,7 +623,6 @@ int ClassifySeqsCommand::execute(){
 			m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 			m->mothurOutEndLine();
-			
 		}
 		
 		delete classify;

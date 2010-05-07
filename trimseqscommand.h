@@ -44,7 +44,7 @@ private:
 	string fastaFile, oligoFile, qFileName, outputDir;
 	
 	bool flip, allFiles, qtrim;
-	int numFPrimers, numRPrimers, maxAmbig, maxHomoP, minLength, maxLength, qThreshold, qAverage, processors;
+	int numFPrimers, numRPrimers, maxAmbig, maxHomoP, minLength, maxLength, qThreshold, qAverage, processors, diffs;
 	vector<string> forPrimer, revPrimer, outputNames;
 	map<string, int> barcodes;
 	vector<string> groupVector;
