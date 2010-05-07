@@ -23,7 +23,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 		else {
 			//valid paramters for this command
 			string AlignArray[] =  {"fasta", "flip", "oligos", "maxambig", "maxhomop", "minlength", "maxlength", "qfile", 
-									"qthreshold", "qaverage", "allfiles", "qtrim","diffs", "processors", "outputdir","inputdir"};
+									"qthreshold", "qaverage", "allfiles", "qtrim","tdiffs", "pdiffs", "bdiffs", "processors", "outputdir","inputdir"};
 			
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
@@ -104,8 +104,14 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "maxlength", false);	if (temp == "not found") { temp = "0"; }
 			convert(temp, maxLength);
 			
-			temp = validParameter.validFile(parameters, "diffs", false);		if (temp == "not found") { temp = "0"; }
-			convert(temp, diffs);
+			temp = validParameter.validFile(parameters, "tdiffs", false);		if (temp == "not found") { temp = "0"; }
+			convert(temp, tdiffs);
+			
+			temp = validParameter.validFile(parameters, "bdiffs", false);		if (temp == "not found") { temp = "0"; }
+			convert(temp, bdiffs);
+			
+			temp = validParameter.validFile(parameters, "pdiffs", false);		if (temp == "not found") { temp = "0"; }
+			convert(temp, pdiffs);
 			
 			temp = validParameter.validFile(parameters, "qfile", true);	
 			if (temp == "not found")	{	qFileName = "";		}
@@ -160,7 +166,9 @@ void TrimSeqsCommand::help(){
 		m->mothurOut("The maxhomop parameter .... The default is 0.\n");
 		m->mothurOut("The minlength parameter .... The default is 0.\n");
 		m->mothurOut("The maxlength parameter .... The default is 0.\n");
-		m->mothurOut("The diffs parameter .... The default is 0.\n");
+		m->mothurOut("The tdiffs parameter is used to specify the total number of differences allowed in the sequence. The default is 0.\n");
+		m->mothurOut("The bdiffs parameter is used to specify the number of differences allowed in the barcode. The default is 0.\n");
+		m->mothurOut("The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n");
 		m->mothurOut("The qfile parameter .....\n");
 		m->mothurOut("The qthreshold parameter .... The default is 0.\n");
 		m->mothurOut("The qaverage parameter .... The default is 0.\n");
@@ -357,6 +365,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			if (origSeq != "") {
 				int group;
 				string trashCode = "";
+				int currentSeqsDiffs = 0;
 				
 				if(qFileName != ""){
 					if(qThreshold != 0)		{	success = stripQualThreshold(currSeq, qFile);	}
@@ -370,13 +379,17 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 				if(barcodes.size() != 0){
 					success = stripBarcode(currSeq, group);
 					if(!success){	trashCode += 'b';	}
+					else{ currentSeqsDiffs += currentSeqsTdiffs;  }
 				}
 			
 				if(numFPrimers != 0){
 					success = stripForward(currSeq);
 					if(!success){	trashCode += 'f';	}
+					else{ currentSeqsDiffs += currentSeqsTdiffs;  }
 				}
-					
+				
+				if (currentSeqsDiffs > tdiffs) { trashCode += 't';   }
+
 				if(numRPrimers != 0){
 					success = stripReverse(currSeq);
 					if(!success){	trashCode += 'r';	}
@@ -609,7 +622,7 @@ bool TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
 		}
 		
 		//if you found the barcode or if you don't want to allow for diffs
-		if ((diffs == 0) || (success == 1)) { return success;  }
+		if ((bdiffs == 0) || (success == 1)) { return success;  }
 		
 		else { //try aligning and see if you can find it
 			
@@ -618,7 +631,7 @@ bool TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
 				map<string,int>::iterator it=barcodes.begin();
 				string temp = it->first;
 				
-				alignment = new NeedlemanOverlap(-2.0, 1.0, -1.0, (temp.length()+diffs+1));  
+				alignment = new NeedlemanOverlap(-2.0, 1.0, -1.0, (temp.length()+bdiffs+1));  
 			}else{ alignment = NULL; } 
 			
 
@@ -633,13 +646,13 @@ bool TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
 				}
 				
 				//use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-				alignment->align(oligo, rawSequence.substr(0,length+diffs));
+				alignment->align(oligo, rawSequence.substr(0,length+bdiffs));
 				oligo = alignment->getSeqAAln();
 				string temp = alignment->getSeqBAln();
 		//cout << "barcode = " << oligo << " raw = " << rawSequence.substr(0,oligo.length()) << " raw aligned = " << temp << endl;			
 				
 				int newStart=0;
-				if(compareDNASeq(oligo, temp, length, newStart)){
+				if(compareDNASeq(oligo, temp, length, newStart, bdiffs)){
 					group = it->second;
 					seq.setUnaligned(rawSequence.substr(newStart));
 					success = 1;
@@ -682,32 +695,33 @@ bool TrimSeqsCommand::stripForward(Sequence& seq){
 		}
 		
 		//if you found the primer or if you don't want to allow for diffs
-		if ((diffs == 0) || (success == 1)) { return success;  }
+		if ((pdiffs == 0) || (success == 1)) { return success;  }
 		
 		else { //try aligning and see if you can find it
 			
-			
 			Alignment* alignment;
-			if (numFPrimers > 0) { alignment = new NeedlemanOverlap(-2.0, 1.0, -1.0, (forPrimer[0].length()+diffs+1));  } //assumes primers are all the same length
+			if (numFPrimers > 0) {  alignment = new NeedlemanOverlap(-2.0, 1.0, -1.0, (forPrimer[0].length()+pdiffs+1));  } 
 			else{ alignment = NULL; } 
-			
 			//can you find the primer
 			for(int i=0;i<numFPrimers;i++){
 				string oligo = forPrimer[i];
 				int length = oligo.length();
-				
+			
 				if(rawSequence.length() < oligo.length()){	
 					success = 0;
 					break;
 				}
+			
+				//resize if neccessary
+				if ((length+pdiffs+1) > alignment->getnRows()) { alignment->resize(length+pdiffs+1);	}
 				
 				//use needleman to align first primer.length()+numdiffs of sequence to each primer
-				alignment->align(oligo, rawSequence.substr(0,length+diffs));
+				alignment->align(oligo, rawSequence.substr(0,length+pdiffs));
 				oligo = alignment->getSeqAAln();
 				string temp = alignment->getSeqBAln();
-				
+			
 				int newStart = 0;
-				if(compareDNASeq(oligo, temp, length, newStart)){
+				if(compareDNASeq(oligo, temp, length, newStart, pdiffs)){
 					seq.setUnaligned(rawSequence.substr(newStart));
 					success = 1;
 					break;
@@ -856,24 +870,22 @@ bool TrimSeqsCommand::compareDNASeq(string oligo, string seq){
 }
 //***************************************************************************************************************
 
-bool TrimSeqsCommand::compareDNASeq(string oligo, string seq, int numBases, int& end){
+bool TrimSeqsCommand::compareDNASeq(string oligo, string seq, int numBases, int& end, int diffs){
 	try {
 		bool success = 1;
 		int length = oligo.length();
-		end = length;
+		end = numBases;
 		int countBases = 0;
 		int countDiffs = 0;
 		
 		if (length != 0) {
-			if ((oligo[0] == '-') || (oligo[0] == '.')) {  success = 0; return success;  } //no gaps allowed at beginning
+			if ((oligo[0] == '-') || (oligo[0] == '.')) {  success = 0;  return success;  } //no gaps allowed at beginning
 		}
 		
 		for(int i=0;i<length;i++){
 			
 			if ((oligo[i] != '-') && (oligo[i] != '.'))  { countBases++; } 
-			
-	//cout << oligo[i] << " " << seq[i] << " diffs = " << countDiffs << " countBases = " << countBases << endl; 	
-		
+					
 			if(oligo[i] != seq[i]){
 				if(oligo[i] == 'A' || oligo[i] == 'T' || oligo[i] == 'G' || oligo[i] == 'C' || oligo[i] == '-' || oligo[i] == '.')	{	countDiffs++; 	}
 				else if((oligo[i] == 'N' || oligo[i] == 'I') && (seq[i] == 'N'))				{	countDiffs++;	}
@@ -894,9 +906,12 @@ bool TrimSeqsCommand::compareDNASeq(string oligo, string seq, int numBases, int&
 				success = 1;
 			}
 			
-			if (countBases >= numBases) { end = i; break; } //stop checking after end of barcode or primer
+			if (countBases >= numBases) { end = countBases; break; } //stop checking after end of barcode or primer
 		}
-	
+		
+		//if it's a success we want to check for total diffs in driver, so save it.
+		if (success == 1) {  currentSeqsTdiffs = countDiffs; }
+		
 		return success;
 	}
 	catch(exception& e) {

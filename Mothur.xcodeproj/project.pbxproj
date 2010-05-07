@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		A703FE931194645F002C397E /* makegroupcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = makegroupcommand.h; sourceTree = SOURCE_ROOT; };
+		A703FE941194645F002C397E /* makegroupcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = makegroupcommand.cpp; sourceTree = SOURCE_ROOT; };
 		A72B3A62118B37FD004B9F8D /* phylodiversitycommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = phylodiversitycommand.h; sourceTree = "<group>"; };
 		A72B3A63118B37FD004B9F8D /* phylodiversitycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = phylodiversitycommand.cpp; sourceTree = "<group>"; };
 		A72B3A7B118B4D1B004B9F8D /* phylodiversity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = phylodiversity.h; sourceTree = "<group>"; };
@@ -694,8 +696,10 @@
 				A7DA207F113FECD400BF472F /* helpcommand.h */,
 				A7DA208D113FECD400BF472F /* libshuffcommand.cpp */,
 				A7DA208E113FECD400BF472F /* libshuffcommand.h */,
-				A7DA208F113FECD400BF472F /* listseqscommand.cpp */,
 				A7DA2090113FECD400BF472F /* listseqscommand.h */,
+				A7DA208F113FECD400BF472F /* listseqscommand.cpp */,
+				A703FE931194645F002C397E /* makegroupcommand.h */,
+				A703FE941194645F002C397E /* makegroupcommand.cpp */,
 				A7DA2098113FECD400BF472F /* matrixoutputcommand.cpp */,
 				A7DA2099113FECD400BF472F /* matrixoutputcommand.h */,
 				A7DA209A113FECD400BF472F /* mergefilecommand.cpp */,

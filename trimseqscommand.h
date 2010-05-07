@@ -39,13 +39,13 @@ private:
 	bool cullHomoP(Sequence&);
 	bool cullAmbigs(Sequence&);
 	bool compareDNASeq(string, string);
-	bool compareDNASeq(string, string, int, int&);
+	bool compareDNASeq(string, string, int, int&, int);
 
 	bool abort;
 	string fastaFile, oligoFile, qFileName, outputDir;
 	
 	bool flip, allFiles, qtrim;
-	int numFPrimers, numRPrimers, maxAmbig, maxHomoP, minLength, maxLength, qThreshold, qAverage, processors, diffs;
+	int numFPrimers, numRPrimers, maxAmbig, maxHomoP, minLength, maxLength, qThreshold, qAverage, processors, tdiffs, bdiffs, pdiffs, currentSeqsTdiffs;
 	vector<string> forPrimer, revPrimer, outputNames;
 	map<string, int> barcodes;
 	vector<string> groupVector;
