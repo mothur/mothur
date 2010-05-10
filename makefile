@@ -146,6 +146,7 @@ mothur : \
 		./globaldata.o\
 		./groupmap.o\
 		./helpcommand.o\
+		./makegroupcommand.o\
 		./inputdata.o\
 		./jackknife.o\
 		./kmer.o\
@@ -347,6 +348,7 @@ mothur : \
 		./globaldata.o\
 		./groupmap.o\
 		./helpcommand.o\
+		./makegroupcommand.o\
 		./inputdata.o\
 		./jackknife.o\
 		./kmer.o\
@@ -445,7 +447,7 @@ mothur : \
 		./logsd.o\
 		./geom.o\
 		./setlogfilecommand.o\
-		-o mothur
+		-o ../Release/mothur
 
 clean : 
 		rm \
@@ -551,6 +553,7 @@ clean :
 		./globaldata.o\
 		./groupmap.o\
 		./helpcommand.o\
+		./makegroupcommand.o\
 		./inputdata.o\
 		./jackknife.o\
 		./kmer.o\
@@ -1649,6 +1652,9 @@ install : mothur
 ./phylodiversitycommand.o : phylodiversitycommand.cpp
 	$(CC) $(CC_OPTIONS) phylodiversitycommand.cpp -c $(INCLUDE) -o ./phylodiversitycommand.o
 
+# Item # 201 -- makegroupcommand --
+./makegroupcommand.o : makegroupcommand.cpp
+	$(CC) $(CC_OPTIONS) makegroupcommand.cpp -c $(INCLUDE) -o ./makegroupcommand.o
 
 
 ##### END RUN ####
