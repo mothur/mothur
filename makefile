@@ -147,6 +147,7 @@ mothur : \
 		./groupmap.o\
 		./helpcommand.o\
 		./makegroupcommand.o\
+		./chopseqscommand.o\
 		./inputdata.o\
 		./jackknife.o\
 		./kmer.o\
@@ -349,6 +350,7 @@ mothur : \
 		./groupmap.o\
 		./helpcommand.o\
 		./makegroupcommand.o\
+		./chopseqscommand.o\
 		./inputdata.o\
 		./jackknife.o\
 		./kmer.o\
@@ -554,6 +556,7 @@ clean :
 		./groupmap.o\
 		./helpcommand.o\
 		./makegroupcommand.o\
+		./chopseqscommand.o\
 		./inputdata.o\
 		./jackknife.o\
 		./kmer.o\
@@ -1656,5 +1659,8 @@ install : mothur
 ./makegroupcommand.o : makegroupcommand.cpp
 	$(CC) $(CC_OPTIONS) makegroupcommand.cpp -c $(INCLUDE) -o ./makegroupcommand.o
 
+# Item # 202 -- chopseqscommand --
+./chopseqscommand.o : chopseqscommand.cpp
+	$(CC) $(CC_OPTIONS) chopseqscommand.cpp -c $(INCLUDE) -o ./chopseqscommand.o
 
 ##### END RUN ####
