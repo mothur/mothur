@@ -226,7 +226,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 						}
 						
 					#endif
-					if (ableToOpen == 1) {  m->mothurOut("Unable to match group file with fasta file."); m->mothurOutEndLine(); abort = true;	}
+					if (ableToOpen == 1) {  m->mothurOut("Unable to match group file with fasta file, not using " + groupfileNames[i] + "."); m->mothurOutEndLine(); groupfileNames[i] = "";	}
 					
 				}
 			}
@@ -551,7 +551,10 @@ int ClassifySeqsCommand::execute(){
 			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to classify " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
 			start = time(NULL);
 			
-			PhyloSummary taxaSum(taxonomyFileName, groupfileNames[s]);
+			string group = "";
+			if (groupfile != "") {  group = groupfileNames[s]; }
+			
+			PhyloSummary taxaSum(taxonomyFileName, group);
 			
 			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} delete classify; return 0; }
 			
