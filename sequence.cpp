@@ -10,14 +10,11 @@
 #include "sequence.hpp"
 
 /***********************************************************************/
-
 Sequence::Sequence(){
 	m = MothurOut::getInstance();
 	initialize();
 }
-
 /***********************************************************************/
-
 Sequence::Sequence(string newName, string sequence) {
 	try {
 		m = MothurOut::getInstance();
@@ -33,6 +30,22 @@ Sequence::Sequence(string newName, string sequence) {
 		exit(1);
 	}			
 }
+/***********************************************************************/
+Sequence::Sequence(string newName, string sequence, string justUnAligned) {
+	try {
+		m = MothurOut::getInstance();
+		initialize();	
+		name = newName;
+		
+		//setUnaligned removes any gap characters for us
+		setUnaligned(sequence);
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Sequence", "Sequence");
+		exit(1);
+	}			
+}
+
 //********************************************************************************************************************
 //this function will jump over commented out sequences, but if the last sequence in a file is commented out it makes a blank seq
 Sequence::Sequence(istringstream& fastaString){
@@ -70,6 +83,44 @@ Sequence::Sequence(istringstream& fastaString){
 		exit(1);
 	}								
 }
+//********************************************************************************************************************
+//this function will jump over commented out sequences, but if the last sequence in a file is commented out it makes a blank seq
+Sequence::Sequence(istringstream& fastaString, string JustUnaligned){
+	try {
+		m = MothurOut::getInstance();
+	
+		initialize();
+		fastaString >> name;
+		name = name.substr(1);
+		string sequence;
+	
+		//read comments
+		while ((name[0] == '#') && fastaString) { 
+			while (!fastaString.eof())	{	char c = fastaString.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+			sequence = getCommentString(fastaString);
+			
+			if (fastaString) {  
+				fastaString >> name;  
+				name = name.substr(1);	
+			}else { 
+				name = "";
+				break;
+			}
+		}
+		
+		while (!fastaString.eof())	{	char c = fastaString.get();  if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+		
+		sequence = getSequenceString(fastaString);		
+		
+		//setUnaligned removes any gap characters for us						
+		setUnaligned(sequence);		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Sequence", "Sequence");
+		exit(1);
+	}								
+}
+
 
 //********************************************************************************************************************
 //this function will jump over commented out sequences, but if the last sequence in a file is commented out it makes a blank seq
@@ -109,6 +160,44 @@ Sequence::Sequence(ifstream& fastaFile){
 		exit(1);
 	}							
 }
+//********************************************************************************************************************
+//this function will jump over commented out sequences, but if the last sequence in a file is commented out it makes a blank seq
+Sequence::Sequence(ifstream& fastaFile, string JustUnaligned){
+	try {
+		m = MothurOut::getInstance();
+		initialize();
+		fastaFile >> name;
+		name = name.substr(1);
+		string sequence;
+		
+		//read comments
+		while ((name[0] == '#') && fastaFile) { 
+			while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+			sequence = getCommentString(fastaFile);
+			
+			if (fastaFile) {  
+				fastaFile >> name;  
+				name = name.substr(1);	
+			}else { 
+				name = "";
+				break;
+			}
+		}
+		
+		//read real sequence
+		while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+		
+		sequence = getSequenceString(fastaFile);		
+		
+		//setUnaligned removes any gap characters for us						
+		setUnaligned(sequence);	
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Sequence", "Sequence");
+		exit(1);
+	}							
+}
+
 //********************************************************************************************************************
 string Sequence::getSequenceString(ifstream& fastaFile) {
 	try {
@@ -314,7 +403,8 @@ string Sequence::getName(){
 //********************************************************************************************************************
 
 string Sequence::getAligned(){
-	return aligned;
+	if(isAligned == 0)	{ return unaligned; }
+	else				{  return aligned;  }
 }
 
 //********************************************************************************************************************
@@ -443,31 +533,4 @@ void Sequence::reverseComplement(){
 	aligned = temp;
 	
 }
-#ifdef USE_MPI	
-//********************************************************************************************************************
-int Sequence::MPISend(int receiver) {
-	try {
-		
-	
-		return 0;
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Sequence", "MPISend");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-int Sequence::MPIRecv(int sender) {
-	try {
-		
-		return 0;
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Sequence", "MPIRecv");
-		exit(1);
-	}
-}
-#endif
 /**************************************************************************************************/

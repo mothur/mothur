@@ -26,6 +26,11 @@ public:
 	Sequence(ifstream&);
 	Sequence(istringstream&);
 	
+	//these constructors just set the unaligned string to save space
+	Sequence(string, string, string);  
+	Sequence(ifstream&, string);
+	Sequence(istringstream&, string);
+	
 	void setName(string);
 	void setUnaligned(string);
 	void setPairwise(string);
@@ -46,9 +51,6 @@ public:
 	int getLongHomoPolymer();
 	bool getIsAligned();
 	void printSequence(ostream&);
-	
-	int MPISend(int); //not working at the moment...
-	int MPIRecv(int); //not working at the moment...
 	
 private:
 	MothurOut* m;
