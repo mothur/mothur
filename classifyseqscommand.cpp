@@ -526,6 +526,11 @@ int ClassifySeqsCommand::execute(){
 	#endif	
 #endif
 
+		m->mothurOutEndLine();
+		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to classify " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
+		start = time(NULL);
+
+
 		#ifdef USE_MPI	
 			if (pid == 0) {  //this part does not need to be paralellized
 			
@@ -556,10 +561,6 @@ int ClassifySeqsCommand::execute(){
 			}
 		#endif
 
-			m->mothurOutEndLine();
-			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to classify " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
-			start = time(NULL);
-			
 			string group = "";
 			if (groupfile != "") {  group = groupfileNames[s]; }
 			
