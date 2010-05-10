@@ -58,7 +58,7 @@ int main(int argc, char *argv[]){
 				m->mothurOutEndLine(); m->mothurOutEndLine();
 			#else
 				m->mothurOutJustToLog("Linux version");
-				>m->mothurOutEndLine(); m->mothurOutEndLine();
+				m->mothurOutEndLine(); m->mothurOutEndLine();
 			#endif
 
 		#else

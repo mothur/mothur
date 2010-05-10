@@ -10,7 +10,7 @@
 # Macros
 #
 
-CC = mpic++
+CC = g++
 CC_OPTIONS = -O3
 
 # if you do not want to use the readline library set to no, default yes.
@@ -445,7 +445,7 @@ mothur : \
 		./logsd.o\
 		./geom.o\
 		./setlogfilecommand.o\
-		-o ../Release/mothur
+		-o mothur
 
 clean : 
 		rm \
