@@ -113,6 +113,8 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "pdiffs", false);		if (temp == "not found") { temp = "0"; }
 			convert(temp, pdiffs);
 			
+			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs;	}
+			
 			temp = validParameter.validFile(parameters, "qfile", true);	
 			if (temp == "not found")	{	qFileName = "";		}
 			else if(temp == "not open")	{	abort = true;		}
@@ -366,6 +368,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 				int group;
 				string trashCode = "";
 				int currentSeqsDiffs = 0;
+				currentSeqsTdiffs = 0;
 				
 				if(qFileName != ""){
 					if(qThreshold != 0)		{	success = stripQualThreshold(currSeq, qFile);	}
@@ -378,10 +381,11 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			
 				if(barcodes.size() != 0){
 					success = stripBarcode(currSeq, group);
+//					cout << "here: " << success << endl;
 					if(!success){	trashCode += 'b';	}
 					else{ currentSeqsDiffs += currentSeqsTdiffs;  }
 				}
-			
+
 				if(numFPrimers != 0){
 					success = stripForward(currSeq);
 					if(!success){	trashCode += 'f';	}
@@ -622,42 +626,85 @@ bool TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
 		}
 		
 		//if you found the barcode or if you don't want to allow for diffs
+//		cout << success;
 		if ((bdiffs == 0) || (success == 1)) { return success;  }
 		
 		else { //try aligning and see if you can find it
-			
+//			cout << endl;
+
+			int maxLength = 0;
+
 			Alignment* alignment;
-			if (barcodes.size() > 0) { //assumes barcodes are all the same length
+			if (barcodes.size() > 0) {
 				map<string,int>::iterator it=barcodes.begin();
-				string temp = it->first;
-				
-				alignment = new NeedlemanOverlap(-2.0, 1.0, -1.0, (temp.length()+bdiffs+1));  
+
+				for(it;it!=barcodes.end();it++){
+					if(it->first.length() > maxLength){
+						maxLength = it->first.length();
+					}
+				}
+				alignment = new NeedlemanOverlap(-2.0, 1.0, -1.0, (maxLength+bdiffs+1));  
+
 			}else{ alignment = NULL; } 
 			
-
 			//can you find the barcode
+			int minDiff = 1e6;
+			int minCount = 1;
+			int minGroup = -1;
+			int minPos = 0;
+			
 			for(map<string,int>::iterator it=barcodes.begin();it!=barcodes.end();it++){
 				string oligo = it->first;
-				int length = oligo.length();
+//				int length = oligo.length();
 				
-				if(rawSequence.length() < oligo.length()){	//let's just assume that the barcodes are the same length
+				if(rawSequence.length() < maxLength){	//let's just assume that the barcodes are the same length
 					success = 0;
 					break;
 				}
 				
 				//use needleman to align first barcode.length()+numdiffs of sequence to each barcode
-				alignment->align(oligo, rawSequence.substr(0,length+bdiffs));
+				alignment->align(oligo, rawSequence.substr(0,oligo.length()+bdiffs));
 				oligo = alignment->getSeqAAln();
 				string temp = alignment->getSeqBAln();
-		//cout << "barcode = " << oligo << " raw = " << rawSequence.substr(0,oligo.length()) << " raw aligned = " << temp << endl;			
+		
+				int alnLength = oligo.length();
+				
+				for(int i=oligo.length()-1;i>=0;i--){
+					if(oligo[i] != '-'){	alnLength = i+1;	break;	}
+				}
+				oligo = oligo.substr(0,alnLength);
+				temp = temp.substr(0,alnLength);
+//				cout << "barcode = " << oligo << " raw = " << rawSequence.substr(0,alnLength) << " raw aligned = " << temp << endl;			
+				cout << seq.getName() << endl;
+				cout << temp << endl;
+				cout << oligo << endl;
+				cout << alnLength << endl;
+				cout << endl;
 				
 				int newStart=0;
-				if(compareDNASeq(oligo, temp, length, newStart, bdiffs)){
-					group = it->second;
-					seq.setUnaligned(rawSequence.substr(newStart));
-					success = 1;
-					break;
+				int numDiff = countDiffs(oligo, temp);//, alnLength, newStart, bdiffs);
+				if(numDiff < minDiff){
+					minDiff = numDiff;
+					minCount = 1;
+					minGroup = it->second;
+					minPos = 0;
+					for(int i=0;i<alnLength;i++){
+						if(temp[i] != '-'){
+							minPos++;
+						}
+					}
 				}
+				else if(numDiff == minDiff){
+					minCount++;
+				}
+
+			}
+			if(minDiff > bdiffs){	success = 0;	}
+			else if(minCount > 1)	{	success = 0;	}
+			else{
+				group = minGroup;
+				seq.setUnaligned("*" + rawSequence.substr(minPos));
+				success = 1;
 			}
 			
 			if (alignment != NULL) {  delete alignment;  }
@@ -721,11 +768,11 @@ bool TrimSeqsCommand::stripForward(Sequence& seq){
 				string temp = alignment->getSeqBAln();
 			
 				int newStart = 0;
-				if(compareDNASeq(oligo, temp, length, newStart, pdiffs)){
-					seq.setUnaligned(rawSequence.substr(newStart));
-					success = 1;
-					break;
-				}
+//				if(compareDNASeq(oligo, temp, length, newStart, pdiffs)){
+//					seq.setUnaligned(rawSequence.substr(newStart));
+//					success = 1;
+//					break;
+//				}
 			}
 			
 			if (alignment != NULL) {  delete alignment;  }
@@ -870,21 +917,22 @@ bool TrimSeqsCommand::compareDNASeq(string oligo, string seq){
 }
 //***************************************************************************************************************
 
-bool TrimSeqsCommand::compareDNASeq(string oligo, string seq, int numBases, int& end, int diffs){
+int TrimSeqsCommand::countDiffs(string oligo, string seq){//, int numBases, int& end, int diffs){
 	try {
-		bool success = 1;
+//		bool success = 1;
 		int length = oligo.length();
-		end = numBases;
-		int countBases = 0;
+//		end = numBases;
+//		int countBases = 0;
 		int countDiffs = 0;
 		
-		if (length != 0) {
-			if ((oligo[0] == '-') || (oligo[0] == '.')) {  success = 0;  return success;  } //no gaps allowed at beginning
-		}
+	
+//		if (length != 0) {
+//			if ((oligo[0] == '-') || (oligo[0] == '.')) {  return 1e6;  } //no gaps allowed at beginning
+//		}
 		
 		for(int i=0;i<length;i++){
 			
-			if ((oligo[i] != '-') && (oligo[i] != '.'))  { countBases++; } 
+//			if ((oligo[i] != '-') && (oligo[i] != '.'))  { countBases++; } 
 					
 			if(oligo[i] != seq[i]){
 				if(oligo[i] == 'A' || oligo[i] == 'T' || oligo[i] == 'G' || oligo[i] == 'C' || oligo[i] == '-' || oligo[i] == '.')	{	countDiffs++; 	}
@@ -900,22 +948,21 @@ bool TrimSeqsCommand::compareDNASeq(string oligo, string seq, int numBases, int&
 				else if(oligo[i] == 'H' && (seq[i] != 'A' && seq[i] != 'T' && seq[i] != 'C'))	{	countDiffs++;	}
 				else if(oligo[i] == 'V' && (seq[i] != 'A' && seq[i] != 'C' && seq[i] != 'G'))	{	countDiffs++;	}			
 				
-				if(countDiffs > diffs)	{	success = 0; break;	 }
+//				if(countDiffs > diffs)	{	break;	 }
 			}
-			else{
-				success = 1;
-			}
+//			else{
+//				success = 1;
+//			}
 			
-			if (countBases >= numBases) { end = countBases; break; } //stop checking after end of barcode or primer
+//			if (countBases >= numBases) { end = countBases; break; } //stop checking after end of barcode or primer
 		}
-		
 		//if it's a success we want to check for total diffs in driver, so save it.
-		if (success == 1) {  currentSeqsTdiffs = countDiffs; }
+//		if (success == 1) {  currentSeqsTdiffs = countDiffs; }
 		
-		return success;
+		return countDiffs;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "TrimSeqsCommand", "compareDNASeq");
+		m->errorOut(e, "TrimSeqsCommand", "countDiffs");
 		exit(1);
 	}
 
