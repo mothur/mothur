@@ -32,8 +32,8 @@ private:
 	void getOligos(vector<string>&);
 	bool stripQualThreshold(Sequence&, ifstream&);
 	bool cullQualAverage(Sequence&, ifstream&);
-	bool stripBarcode(Sequence&, int&);
-	bool stripForward(Sequence&);
+	int stripBarcode(Sequence&, int&);
+	int stripForward(Sequence&);
 	bool stripReverse(Sequence&);
 	bool cullLength(Sequence&);
 	bool cullHomoP(Sequence&);

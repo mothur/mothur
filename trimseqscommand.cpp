@@ -604,7 +604,7 @@ void TrimSeqsCommand::getOligos(vector<string>& outFASTAVec){ //vector<ofstream*
 }
 //***************************************************************************************************************
 
-bool TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
+int TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
 	try {
 		string rawSequence = seq.getUnaligned();
 		bool success = bdiffs + 1;	//guilty until proven innocent
@@ -722,7 +722,7 @@ bool TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
 
 //***************************************************************************************************************
 
-bool TrimSeqsCommand::stripForward(Sequence& seq){
+int TrimSeqsCommand::stripForward(Sequence& seq){
 	try {
 		string rawSequence = seq.getUnaligned();
 		bool success = pdiffs + 1;	//guilty until proven innocent
