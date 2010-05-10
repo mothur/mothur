@@ -13,6 +13,8 @@
 		A72B3A63118B37FD004B9F8D /* phylodiversitycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = phylodiversitycommand.cpp; sourceTree = "<group>"; };
 		A72B3A7B118B4D1B004B9F8D /* phylodiversity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = phylodiversity.h; sourceTree = "<group>"; };
 		A72B3A7C118B4D1B004B9F8D /* phylodiversity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = phylodiversity.cpp; sourceTree = "<group>"; };
+		A73953DA11987ED100B0B160 /* chopseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chopseqscommand.h; sourceTree = "<group>"; };
+		A73953DB11987ED100B0B160 /* chopseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chopseqscommand.cpp; sourceTree = "<group>"; };
 		A747E79B1163442A00FB9042 /* chimeracheckcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeracheckcommand.h; sourceTree = "<group>"; };
 		A747E79C1163442A00FB9042 /* chimeracheckcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeracheckcommand.cpp; sourceTree = "<group>"; };
 		A747E81C116365E000FB9042 /* chimeraslayercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraslayercommand.h; sourceTree = "<group>"; };
@@ -643,17 +645,19 @@
 				A7DA2007113FECD400BF472F /* bootstrapsharedcommand.cpp */,
 				A7DA2008113FECD400BF472F /* bootstrapsharedcommand.h */,
 				A7DA2017113FECD400BF472F /* chimeraseqscommand.cpp */,
+				A78434881162224F00100BE0 /* chimeraccodecommand.h */,
 				A7DA2018113FECD400BF472F /* chimeraseqscommand.h */,
 				A7825502116519F70002E2DD /* chimerabellerophoncommand.h */,
 				A7825503116519F70002E2DD /* chimerabellerophoncommand.cpp */,
 				A747E79B1163442A00FB9042 /* chimeracheckcommand.h */,
 				A747E79C1163442A00FB9042 /* chimeracheckcommand.cpp */,
-				A78434881162224F00100BE0 /* chimeraccodecommand.h */,
 				A78434891162224F00100BE0 /* chimeraccodecommand.cpp */,
 				A78254461164D7790002E2DD /* chimerapintailcommand.h */,
 				A78254471164D7790002E2DD /* chimerapintailcommand.cpp */,
 				A747E81C116365E000FB9042 /* chimeraslayercommand.h */,
 				A747E81D116365E000FB9042 /* chimeraslayercommand.cpp */,
+				A73953DA11987ED100B0B160 /* chopseqscommand.h */,
+				A73953DB11987ED100B0B160 /* chopseqscommand.cpp */,
 				A7DA201E113FECD400BF472F /* classifyseqscommand.h */,
 				A7DA201D113FECD400BF472F /* classifyseqscommand.cpp */,
 				A7DA2021113FECD400BF472F /* clustercommand.cpp */,

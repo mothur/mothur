@@ -127,12 +127,16 @@ int MakeGroupCommand::execute(){
 		
 		for (int i = 0; i < fastaFileNames.size(); i++) {
 		
+			if (m->control_pressed) {  out.close(); remove(filename.c_str()); return 0; }
+			
 			ifstream in;
 			openInputFile(fastaFileNames[i], in);
 			
 			while (!in.eof()) {
 				
-				Sequence seq(in); gobble(in);
+				Sequence seq(in, "no align"); gobble(in);
+				
+				if (m->control_pressed) {  in.close(); out.close(); remove(filename.c_str()); return 0; }
 				
 				if (seq.getName() != "") {	out << seq.getName() << '\t' << groupsNames[i] << endl;		}
 			}
