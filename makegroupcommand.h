@@ -22,7 +22,7 @@ public:
 	
 private:
 		
-	string fastaFileName, groups, outputDir;
+	string fastaFileName, groups, outputDir, filename;
 	vector<string> fastaFileNames;
 	vector<string> groupsNames;
 	

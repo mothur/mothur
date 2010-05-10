@@ -73,6 +73,7 @@
 #include "chimerabellerophoncommand.h"
 #include "setlogfilecommand.h"
 #include "phylodiversitycommand.h"
+#include "makegroupcommand.h"
 
 /*******************************************************/
 
@@ -153,6 +154,7 @@ CommandFactory::CommandFactory(){
 	commands["parse.sff"]			= "parse.sff";
 	commands["set.logfile"]			= "set.logfile";
 	commands["phylo.diversity"]		= "phylo.diversity";
+	commands["make.group"]			= "make.group";
 	commands["classify.seqs"]		= "MPIEnabled"; 
 	commands["dist.seqs"]			= "MPIEnabled";
 	commands["filter.seqs"]			= "MPIEnabled";
@@ -270,6 +272,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "parse.list")			{	command = new ParseListCommand(optionString);				}
 		else if(commandName == "parse.sff")				{	command = new ParseSFFCommand(optionString);				}
 		else if(commandName == "phylo.diversity")		{	command = new PhyloDiversityCommand(optionString);			}
+		else if(commandName == "make.group")			{	command = new MakeGroupCommand(optionString);				}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;

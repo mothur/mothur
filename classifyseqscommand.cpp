@@ -413,8 +413,6 @@ int ClassifySeqsCommand::execute(){
 				//delete inFileName;
 
 				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPINewTax);   MPI_File_close(&outMPITempTax);  delete classify; return 0;  }
-
-				if(namefile != "") {  MPIReadNamesFile(namefileNames[s]);  }
 				
 				if (pid == 0) { //you are the root process 
 					
@@ -465,22 +463,7 @@ int ClassifySeqsCommand::execute(){
 				MPI_File_close(&outMPITempTax);
 				
 #else
-			//read namefile
-			if(namefile != "") {
-				nameMap.clear(); //remove old names
-				
-				ifstream inNames;
-				openInputFile(namefileNames[s], inNames);
-				
-				string firstCol, secondCol;
-				while(!inNames.eof()) {
-					inNames >> firstCol >> secondCol; gobble(inNames);
-					nameMap[firstCol] = getNumNames(secondCol);  //ex. seq1	seq1,seq3,seq5 -> seq1 = 3.
-				}
-				inNames.close();
-			}
-
-	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			if(processors == 1){
 				ifstream inFASTA;
 				openInputFile(fastaFileNames[s], inFASTA);
@@ -545,6 +528,32 @@ int ClassifySeqsCommand::execute(){
 
 		#ifdef USE_MPI	
 			if (pid == 0) {  //this part does not need to be paralellized
+			
+				if(namefile != "") { m->mothurOut("Reading " + namefileNames[s] + "..."); cout.flush();  MPIReadNamesFile(namefileNames[s]);  m->mothurOut("  Done."); m->mothurOutEndLine(); }
+		#else
+			//read namefile
+			if(namefile != "") {
+			
+			    m->mothurOut("Reading " + namefileNames[s] + "..."); cout.flush();
+				
+				nameMap.clear(); //remove old names
+				
+				ifstream inNames;
+				openInputFile(namefileNames[s], inNames);
+				
+				string firstCol, secondCol;
+				while(!inNames.eof()) {
+					inNames >> firstCol >> secondCol; gobble(inNames);
+					
+					vector<string> temp;
+					splitAtComma(secondCol, temp);
+			
+					nameMap[firstCol] = temp;  
+				}
+				inNames.close();
+				
+				m->mothurOut("  Done."); m->mothurOutEndLine();
+			}
 		#endif
 
 			m->mothurOutEndLine();
@@ -557,7 +566,7 @@ int ClassifySeqsCommand::execute(){
 			PhyloSummary taxaSum(taxonomyFileName, group);
 			
 			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} delete classify; return 0; }
-			
+		
 			if (namefile == "") {  taxaSum.summarize(tempTaxonomyFile);  }
 			else {
 				ifstream in;
@@ -565,6 +574,7 @@ int ClassifySeqsCommand::execute(){
 				
 				//read in users taxonomy file and add sequences to tree
 				string name, taxon;
+				
 				while(!in.eof()){
 					in >> name >> taxon; gobble(in);
 					
@@ -573,9 +583,11 @@ int ClassifySeqsCommand::execute(){
 					if (itNames == nameMap.end()) { 
 						m->mothurOut(name + " is not in your name file please correct."); m->mothurOutEndLine(); exit(1);
 					}else{
-						for (int i = 0; i < itNames->second; i++) { 
-							taxaSum.addSeqToTree(name, taxon);  //add it as many times as there are identical seqs
+						for (int i = 0; i < itNames->second.size(); i++) { 
+							taxaSum.addSeqToTree(itNames->second[i], taxon);  //add it as many times as there are identical seqs
 						}
+						itNames->second.clear();
+						nameMap.erase(itNames->first);
 					}
 				}
 				in.close();
@@ -886,7 +898,11 @@ int ClassifySeqsCommand::MPIReadNamesFile(string nameFilename){
 		string firstCol, secondCol;
 		while(!iss.eof()) {
 			iss >> firstCol >> secondCol; gobble(iss);
-			nameMap[firstCol] = getNumNames(secondCol);  //ex. seq1	seq1,seq3,seq5 -> seq1 = 3.
+			
+			vector<string> temp;
+			splitAtComma(secondCol, temp);
+			
+			nameMap[firstCol] = temp;  
 		}
 	
 		MPI_File_close(&inMPI);

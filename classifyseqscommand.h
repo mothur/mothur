@@ -44,8 +44,8 @@ private:
 	vector<string> fastaFileNames;
 	vector<string> namefileNames;
 	vector<string> groupfileNames;
-	map<string, int> nameMap;
-	map<string, int>::iterator itNames;
+	map<string, vector<string> > nameMap;
+	map<string,  vector<string> >::iterator itNames;
 	
 	Classify* classify;
 	
