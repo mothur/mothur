@@ -75,6 +75,7 @@
 #include "phylodiversitycommand.h"
 #include "makegroupcommand.h"
 #include "chopseqscommand.h"
+#include "clearcutcommand.h"
 
 /*******************************************************/
 
@@ -157,6 +158,7 @@ CommandFactory::CommandFactory(){
 	commands["phylo.diversity"]		= "phylo.diversity";
 	commands["make.group"]			= "make.group";
 	commands["chop.seqs"]			= "chop.seqs";
+	commands["clearcut"]			= "clearcut";
 	commands["classify.seqs"]		= "MPIEnabled"; 
 	commands["dist.seqs"]			= "MPIEnabled";
 	commands["filter.seqs"]			= "MPIEnabled";
@@ -276,6 +278,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "phylo.diversity")		{	command = new PhyloDiversityCommand(optionString);			}
 		else if(commandName == "make.group")			{	command = new MakeGroupCommand(optionString);				}
 		else if(commandName == "chop.seqs")				{	command = new ChopSeqsCommand(optionString);				}
+		else if(commandName == "clearcut")				{	command = new ClearcutCommand(optionString);				}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;

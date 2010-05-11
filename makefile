@@ -148,6 +148,7 @@ mothur : \
 		./helpcommand.o\
 		./makegroupcommand.o\
 		./chopseqscommand.o\
+		./clearcutcommand.o\
 		./inputdata.o\
 		./jackknife.o\
 		./kmer.o\
@@ -351,6 +352,7 @@ mothur : \
 		./helpcommand.o\
 		./makegroupcommand.o\
 		./chopseqscommand.o\
+		./clearcutcommand.o\
 		./inputdata.o\
 		./jackknife.o\
 		./kmer.o\
@@ -557,6 +559,7 @@ clean :
 		./helpcommand.o\
 		./makegroupcommand.o\
 		./chopseqscommand.o\
+		./clearcutcommand.o\
 		./inputdata.o\
 		./jackknife.o\
 		./kmer.o\
@@ -1662,5 +1665,9 @@ install : mothur
 # Item # 202 -- chopseqscommand --
 ./chopseqscommand.o : chopseqscommand.cpp
 	$(CC) $(CC_OPTIONS) chopseqscommand.cpp -c $(INCLUDE) -o ./chopseqscommand.o
+
+# Item # 203 -- clearcutcommand --
+./clearcutcommand.o : clearcutcommand.cpp
+	$(CC) $(CC_OPTIONS) clearcutcommand.cpp -c $(INCLUDE) -o ./clearcutcommand.o
 
 ##### END RUN ####
