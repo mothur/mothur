@@ -139,6 +139,7 @@ void ClearcutCommand::help(){
 	try {
 		m->mothurOut("The clearcut command interfaces mothur with the clearcut program written by Initiative for Bioinformatics and Evolutionary Studies (IBEST) at the University of Idaho.\n");
 		m->mothurOut("For more information about clearcut refer to http://bioinformatics.hungry.com/clearcut/ \n");
+		m->mothurOut("The clearcut executable must be in a folder called clearcut in the same folder as your mothur executable, similar to mothur's requirements for using blast. \n");
 		m->mothurOut("The clearcut command parameters are phylip, fasta, version, verbose, quiet, seed, norandom, shuffle, neighbor, expblen, expdist, ntrees, matrixout, stdout, kimura, jukes, protein, DNA, stdin. \n");
 		m->mothurOut("The phylip parameter allows you to enter your phylip formatted distance matrix. \n");
 		m->mothurOut("The fasta parameter allows you to enter your aligned fasta file, if you enter a fastafile you specify if the sequences are DNA or protein using the DNA or protein parameters. \n");
@@ -233,3 +234,7 @@ int ClearcutCommand::execute() {
 	}
 }
 /**************************************************************************************/
+
+
+
+

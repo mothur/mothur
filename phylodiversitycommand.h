@@ -24,8 +24,9 @@ class PhyloDiversityCommand : public Command {
 	
 	private:
 		GlobalData* globaldata;
-	
-		int iters, freq;  
+		
+		float freq;
+		int iters;  
 		bool abort, rarefy;
 		string groups, outputDir;
 		vector<string> Groups, outputNames; //holds groups to be used, and outputFile names

@@ -12,13 +12,16 @@
 
 /***********************************************************************/
 
-int Rarefact::getCurve(int increment = 1, int nIters = 1000){
+int Rarefact::getCurve(float percentFreq = 0.01, int nIters = 1000){
 	try {
 		RarefactionCurveData* rcd = new RarefactionCurveData();
 		for(int i=0;i<displays.size();i++){
 			rcd->registerDisplay(displays[i]);
 		}
-	
+		
+		//convert freq percentage to number
+		int increment = numSeqs * percentFreq;
+		
 		for(int iter=0;iter<nIters;iter++){
 		
 			for(int i=0;i<displays.size();i++){
@@ -73,7 +76,7 @@ int Rarefact::getCurve(int increment = 1, int nIters = 1000){
 
 /***********************************************************************/
 
-int Rarefact::getSharedCurve(int increment = 1, int nIters = 1000){
+int Rarefact::getSharedCurve(float percentFreq = 0.01, int nIters = 1000){
 try {
 		SharedRarefactionCurveData* rcd = new SharedRarefactionCurveData();
 		
@@ -86,6 +89,9 @@ try {
 		
 		//if jumble is false all iters will be the same
 		if (globaldata->jumble == false)  {  nIters = 1;  }
+		
+		//convert freq percentage to number
+		int increment = numSeqs * percentFreq;
 		
 		for(int iter=0;iter<nIters;iter++){
 		

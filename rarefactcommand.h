@@ -36,8 +36,9 @@ private:
 	InputData* input;
 	ValidCalculators* validCalculator;
 	Rarefact* rCurve;
-	int freq, nIters, abund;
-
+	int nIters, abund;
+	float freq;
+	
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
 	string label, calc;

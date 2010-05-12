@@ -42,7 +42,7 @@ private:
 	ValidCalculators* validCalculator;
 	Collect* cCurve;
 	vector<Display*> cDisplays;
-	int freq;
+	float freq;
 	string format;
 
 	bool abort, allLines, all;

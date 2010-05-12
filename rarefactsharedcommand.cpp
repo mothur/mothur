@@ -28,7 +28,7 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"iters","label","calc","groups", "jumble","outputdir","inputdir"};
+			string Array[] =  {"iters","freq","label","calc","groups", "jumble","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -84,6 +84,9 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 			globaldata->Groups = Groups;
 			
 			string temp;
+			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "0.10"; }
+			convert(temp, freq); 
+			
 			temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
 			convert(temp, nIters); 
 			
@@ -130,6 +133,7 @@ void RareFactSharedCommand::help(){
 		m->mothurOut("The rarefaction.shared command parameters are label, iters, groups, jumble and calc.  No parameters are required.\n");
 		m->mothurOut("The rarefaction command should be in the following format: \n");
 		m->mothurOut("rarefaction.shared(label=yourLabel, iters=yourIters, calc=yourEstimators, jumble=yourJumble, groups=yourGroups).\n");
+		m->mothurOut("The freq parameter is used indicate when to output your data.  It is a percentage of the number of sequences.  By default it is set to 0.10, meaning 10%. \n");
 		m->mothurOut("Example rarefaction.shared(label=unique-0.01-0.03,  iters=10000, groups=B-C, jumble=T, calc=sharedobserved).\n");
 		m->mothurOut("The default values for iters is 1000, freq is 100, and calc is sharedobserved which calculates the shared rarefaction curve for the observed richness.\n");
 		m->mothurOut("The default value for groups is all the groups in your groupfile, and jumble is true.\n");

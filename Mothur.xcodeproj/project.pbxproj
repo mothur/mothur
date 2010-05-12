@@ -32,6 +32,8 @@
 		A78434891162224F00100BE0 /* chimeraccodecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeraccodecommand.cpp; sourceTree = "<group>"; };
 		A7D215C811996C6E00F13F13 /* clearcutcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clearcutcommand.h; sourceTree = "<group>"; };
 		A7D215C911996C6E00F13F13 /* clearcutcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clearcutcommand.cpp; sourceTree = "<group>"; };
+		A7D216061199C47F00F13F13 /* catchallcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = catchallcommand.h; sourceTree = "<group>"; };
+		A7D216071199C47F00F13F13 /* catchallcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = catchallcommand.cpp; sourceTree = "<group>"; };
 		A7DA1FEC113FECD400BF472F /* ace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ace.cpp; sourceTree = "<group>"; };
 		A7DA1FED113FECD400BF472F /* ace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ace.h; sourceTree = "<group>"; };
 		A7DA1FEE113FECD400BF472F /* aligncommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = aligncommand.cpp; sourceTree = "<group>"; };
@@ -646,6 +648,8 @@
 				A7DA1FFE113FECD400BF472F /* binsequencecommand.h */,
 				A7DA2007113FECD400BF472F /* bootstrapsharedcommand.cpp */,
 				A7DA2008113FECD400BF472F /* bootstrapsharedcommand.h */,
+				A7D216061199C47F00F13F13 /* catchallcommand.h */,
+				A7D216071199C47F00F13F13 /* catchallcommand.cpp */,
 				A7DA2017113FECD400BF472F /* chimeraseqscommand.cpp */,
 				A78434881162224F00100BE0 /* chimeraccodecommand.h */,
 				A7DA2018113FECD400BF472F /* chimeraseqscommand.h */,
