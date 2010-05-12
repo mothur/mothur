@@ -104,7 +104,7 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 			globaldata->Groups = Groups;
 			
 			string temp;
-			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
+			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "0.10"; }
 			convert(temp, freq); 
 			
 			temp = validParameter.validFile(parameters, "all", false);				if (temp == "not found") { temp = "false"; }
@@ -208,6 +208,7 @@ void CollectSharedCommand::help(){
 		m->mothurOut("Example collect.shared(label=unique-.01-.03, freq=10, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan).\n");
 		m->mothurOut("The default values for freq is 100 and calc are sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan.\n");
 		m->mothurOut("The default value for groups is all the groups in your groupfile.\n");
+		m->mothurOut("The freq parameter is used indicate when to output your data.  It is a percentage of the number of sequences.  By default it is set to 0.10, meaning 10%. \n");
 		validCalculator->printCalc("shared", cout);
 		m->mothurOut("The label parameter is used to analyze specific labels in your input.\n");
 		m->mothurOut("The all parameter is used to specify if you want the estimate of all your groups together.  This estimate can only be made for sharedsobs and sharedchao calculators. The default is false.\n");

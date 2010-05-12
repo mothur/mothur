@@ -80,7 +80,7 @@ RareFactCommand::RareFactCommand(string option)  {
 			splitAtDash(calc, Estimators);
 
 			string temp;
-			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
+			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "0.10"; }
 			convert(temp, freq); 
 			
 			temp = validParameter.validFile(parameters, "abund", false);			if (temp == "not found") { temp = "10"; }
@@ -103,6 +103,7 @@ void RareFactCommand::help(){
 		m->mothurOut("The rarefaction.single command can only be executed after a successful read.otu WTIH ONE EXECEPTION.\n");
 		m->mothurOut("The rarefaction.single command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster.\n");
 		m->mothurOut("The rarefaction.single command parameters are label, iters, freq, calc and abund.  No parameters are required. \n");
+		m->mothurOut("The freq parameter is used indicate when to output your data.  It is a percentage of the number of sequences.  By default it is set to 0.10, meaning 10%. \n");
 		m->mothurOut("The rarefaction.single command should be in the following format: \n");
 		m->mothurOut("rarefaction.single(label=yourLabel, iters=yourIters, freq=yourFreq, calc=yourEstimators).\n");
 		m->mothurOut("Example rarefaction.single(label=unique-.01-.03, iters=10000, freq=10, calc=sobs-rchao-race-rjack-rbootstrap-rshannon-rnpshannon-rsimpson).\n");

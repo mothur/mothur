@@ -34,9 +34,10 @@ private:
 	ValidCalculators* validCalculator;
 	Rarefact* rCurve;
 	vector<Display*> rDisplays;
-	int freq, nIters;
+	int nIters;
 	string format;
-
+	float freq;
+	
 	bool abort, allLines, jumble;
 	set<string> labels; //holds labels to be used
 	string label, calc, groups, outputDir;

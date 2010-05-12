@@ -50,7 +50,8 @@ private:
 	Collect* cCurve;
 	ValidCalculators* validCalculator;
 	vector<Display*> cDisplays;
-	int freq, abund, size;
+	int abund, size;
+	float freq;
 
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used

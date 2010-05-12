@@ -41,7 +41,7 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 				m->mothurOut("You must execute the read.tree command, before you may execute the phylo.diversity command."); m->mothurOutEndLine(); abort = true;  }
 
 			string temp;
-			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
+			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "0.10"; }
 			convert(temp, freq); 
 			
 			temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
@@ -69,7 +69,16 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 
 void PhyloDiversityCommand::help(){
 	try {
-
+		m->mothurOut("The phylo.diversity command can only be executed after a successful read.tree command.\n");
+		m->mothurOut("The phylo.diversity command parameters are groups, iters, freq and rarefy.  No parameters are required.\n");
+		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed. The group names are separated by dashes. By default all groups are used.\n");
+		m->mothurOut("The iters parameter allows you to specify the number of randomizations to preform, by default iters=1000, if you set rarefy to true.\n");
+		m->mothurOut("The freq parameter is used indicate when to output your data.  It is a percentage of the number of sequences.  By default it is set to 0.10, meaning 10%. \n");
+		m->mothurOut("The rarefy parameter allows you to create a rarefaction curve. The default is false.\n");
+		m->mothurOut("The phylo.diversity command should be in the following format: phylo.diversity(groups=yourGroups, rarefy=yourRarefy, iters=yourIters).\n");
+		m->mothurOut("Example phylo.diversity(groups=A-B-C, rarefy=T, iters=500).\n");
+		m->mothurOut("The phylo.diversity command output two files: .phylo.diversity and if rarefy=T, .rarefaction.\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
 
 	}
 	catch(exception& e) {
@@ -122,14 +131,17 @@ int PhyloDiversityCommand::execute(){
 			
 			numLeafNodes = randomLeaf.size();  //reset the number of leaf nodes you are using 
 			
+			//convert freq percentage to number
+			int increment = numLeafNodes * freq;
+			
 			//each group, each sampling, if no rarefy iters = 1;
 			vector< vector<float> > diversity;
 			diversity.resize(globaldata->Groups.size());
 			
 			//initialize sampling spots
 			vector<int> numSampledList;
-			for(int k = 0; k < numLeafNodes; k++){  if((k == 0) || (k+1) % freq == 0){  numSampledList.push_back(k); }   }
-			if(numLeafNodes % freq != 0){	numSampledList.push_back(numLeafNodes);   }
+			for(int k = 0; k < numLeafNodes; k++){  if((k == 0) || (k+1) % increment == 0){  numSampledList.push_back(k); }   }
+			if(numLeafNodes % increment != 0){	numSampledList.push_back(numLeafNodes);   }
 			
 			//initialize diversity
 			for (int j = 0; j < diversity.size(); j++) {   diversity[j].resize(numSampledList.size(), 0.0);  }  //			10sampled	20 sampled ...
@@ -147,7 +159,7 @@ int PhyloDiversityCommand::execute(){
 					
 					leavesSampled.push_back(randomLeaf[k]);
 						
-					if((k == 0) || (k+1) % freq == 0){ //ready to calc?
+					if((k == 0) || (k+1) % increment == 0){ //ready to calc?
 						
 						data = phylo.getValues(trees[i], leavesSampled);
 						
@@ -158,7 +170,7 @@ int PhyloDiversityCommand::execute(){
 					}
 				}
 		
-				if(numLeafNodes % freq != 0){	
+				if(numLeafNodes % increment != 0){	
 					
 					data = phylo.getValues(trees[i], leavesSampled);
 					

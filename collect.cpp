@@ -11,7 +11,7 @@
 
 /***********************************************************************/
 
-int Collect::getCurve(int increment = 1){
+int Collect::getCurve(float percentFreq = 0.01){
         try {
                 RAbundVector* lookup = new RAbundVector(order->getNumBins());
                 SAbundVector* rank        = new SAbundVector(order->getMaxRank()+1);
@@ -21,7 +21,11 @@ int Collect::getCurve(int increment = 1){
                 for(int i=0;i<displays.size();i++){
                         ccd->registerDisplay(displays[i]); //adds a display[i] to cdd
                         displays[i]->init(label);                   //sets displays label
-                }                                                                           
+                }   
+				
+				//convert freq percentage to number
+				int increment = numSeqs * percentFreq;
+																						                                                                        
                 for(int i=0;i<numSeqs;i++){
 						
 						if (m->control_pressed) { delete lookup; delete rank; delete ccd;  return 1;  }
@@ -62,9 +66,9 @@ int Collect::getCurve(int increment = 1){
 }
 
 /***********************************************************************/
-int Collect::getSharedCurve(int increment = 1){
+int Collect::getSharedCurve(float percentFreq = 0.01){
 try {
-                globaldata = GlobalData::getInstance();
+				globaldata = GlobalData::getInstance();
                 vector<SharedRAbundVector*> lookup; 
 				vector<SharedRAbundVector*> subset;
 
@@ -96,6 +100,9 @@ try {
 						else {  displays[i]->init(groupLabel);  }           
                 }
                 
+				//convert freq percentage to number
+				int increment = numSeqs * percentFreq;
+				
                 //sample all the members
                 for(int i=0;i<numSeqs;i++){
 				
