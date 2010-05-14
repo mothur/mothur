@@ -487,7 +487,7 @@ inline string getFullPathName(string fileName){
 			}	
 		#else
 			if (path.find("~") != -1) { //go to home directory
-				string homeDir = getenv ("HOME");
+				string homeDir = getenv ("HOMEPATH");
 				newFileName = homeDir + fileName.substr(fileName.find("~")+1);
 				return newFileName;
 			}else { //find path

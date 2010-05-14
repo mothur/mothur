@@ -86,7 +86,7 @@ CollectCommand::CollectCommand(string option)  {
 			splitAtDash(calc, Estimators);
 
 			string temp;
-			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "0.10"; }
+			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
 			convert(temp, freq); 
 			
 			temp = validParameter.validFile(parameters, "abund", false);		if (temp == "not found") { temp = "10"; }
@@ -110,7 +110,7 @@ void CollectCommand::help(){
 		m->mothurOut("The collect.single command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster.\n");
 		m->mothurOut("The collect.single command parameters are label, freq, calc and abund.  No parameters are required. \n");
 		m->mothurOut("The collect.single command should be in the following format: \n");
-		m->mothurOut("The freq parameter is used indicate when to output your data.  It is a percentage of the number of sequences.  By default it is set to 0.10, meaning 10%. \n");
+		m->mothurOut("The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n");
 		m->mothurOut("collect.single(label=yourLabel, iters=yourIters, freq=yourFreq, calc=yourEstimators).\n");
 		m->mothurOut("Example collect(label=unique-.01-.03, iters=10000, freq=10, calc=sobs-chao-ace-jack).\n");
 		m->mothurOut("The default values for freq is 100, and calc are sobs-chao-ace-jack-shannon-npshannon-simpson.\n");

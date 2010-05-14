@@ -27,11 +27,8 @@ class Classify {
 
 public:
 	Classify();
-	
-	virtual ~Classify(){  delete phyloTree; if (database != NULL) {  delete database; } };
+	virtual ~Classify(){};
 	virtual string getTaxonomy(Sequence*) = 0;
-	//virtual map<string, int> getConfidenceScores() { return taxConfidenceScore; }
-	//virtual vector<string> parseTax(string);
 	virtual string getSimpleTax()  { return simpleTax;	}
 	virtual void generateDatabaseAndNames(string, string, string, int, float, float, float, float);
 	

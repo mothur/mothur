@@ -19,7 +19,7 @@ class Bayesian : public Classify {
 	
 public:
 	Bayesian(string, string, string, int, int, int);
-	~Bayesian() {};
+	~Bayesian();
 	
 	string getTaxonomy(Sequence*);
 	

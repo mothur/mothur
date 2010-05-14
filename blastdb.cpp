@@ -85,23 +85,6 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 		}
 		m8FileHandle.close();
 		
-		string root = dbFileName;
-		string temp = dbFileName + ".nsq";
-		remove(temp.c_str());	
-		temp = dbFileName + ".nsi";
-		remove(temp.c_str());
-		
-		temp = dbFileName + ".nsd";
-		remove(temp.c_str());	
-
-		temp = dbFileName + ".nin";
-		remove(temp.c_str());	
-
-		temp = dbFileName + ".nhr";
-		remove(temp.c_str());	
-	
-
-		
 		return topMatches;
 	}
 	catch(exception& e) {
@@ -167,7 +150,7 @@ void BlastDB::addSequence(Sequence seq) {
 		unalignedFastaFile << '>' << count << endl;					//	sequences, which will be input to formatdb
 		unalignedFastaFile << seq.getUnaligned() << endl;
 		unalignedFastaFile.close();
-		
+	
 		count++;
 	}
 	catch(exception& e) {

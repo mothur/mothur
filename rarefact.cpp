@@ -20,8 +20,10 @@ int Rarefact::getCurve(float percentFreq = 0.01, int nIters = 1000){
 		}
 		
 		//convert freq percentage to number
-		int increment = numSeqs * percentFreq;
-		
+		int increment = 1;
+		if (percentFreq < 1.0) {  increment = numSeqs * percentFreq;  }
+		else { increment = percentFreq;  }	
+			
 		for(int iter=0;iter<nIters;iter++){
 		
 			for(int i=0;i<displays.size();i++){
@@ -91,7 +93,9 @@ try {
 		if (globaldata->jumble == false)  {  nIters = 1;  }
 		
 		//convert freq percentage to number
-		int increment = numSeqs * percentFreq;
+		int increment = 1;
+		if (percentFreq < 1.0) {  increment = numSeqs * percentFreq;  }
+		else { increment = percentFreq;  }
 		
 		for(int iter=0;iter<nIters;iter++){
 		

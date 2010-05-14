@@ -8,7 +8,6 @@
  */
 
 #include "clearcutcommand.h"
-#include "globaldata.hpp"
 
 /**************************************************************************************/
 ClearcutCommand::ClearcutCommand(string option)  {	
@@ -97,7 +96,7 @@ ClearcutCommand::ClearcutCommand(string option)  {
 			neighbor = isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "stdin", false);		if (temp == "not found"){	temp = "F";			}
-			stdin = isTrue(temp); 
+			stdinWanted = isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "DNA", false);			if (temp == "not found"){	temp = "F";			}
 			DNA = isTrue(temp);
@@ -112,7 +111,7 @@ ClearcutCommand::ClearcutCommand(string option)  {
 			kimura = isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "stdout", false);		if (temp == "not found"){	temp = "F";			}
-			stdout = isTrue(temp); 
+			stdoutWanted = isTrue(temp); 
 			
 			matrixout = validParameter.validFile(parameters, "matrixout", false);	if (matrixout == "not found"){	matrixout = "";		}
 			
@@ -140,7 +139,7 @@ void ClearcutCommand::help(){
 		m->mothurOut("The clearcut command interfaces mothur with the clearcut program written by Initiative for Bioinformatics and Evolutionary Studies (IBEST) at the University of Idaho.\n");
 		m->mothurOut("For more information about clearcut refer to http://bioinformatics.hungry.com/clearcut/ \n");
 		m->mothurOut("The clearcut executable must be in a folder called clearcut in the same folder as your mothur executable, similar to mothur's requirements for using blast. \n");
-		m->mothurOut("The clearcut command parameters are phylip, fasta, version, verbose, quiet, seed, norandom, shuffle, neighbor, expblen, expdist, ntrees, matrixout, stdout, kimura, jukes, protein, DNA, stdin. \n");
+		m->mothurOut("The clearcut command parameters are phylip, fasta, version, verbose, quiet, seed, norandom, shuffle, neighbor, expblen, expdist, ntrees, matrixout, stdoutWanted, kimura, jukes, protein, DNA, stdinWanted. \n");
 		m->mothurOut("The phylip parameter allows you to enter your phylip formatted distance matrix. \n");
 		m->mothurOut("The fasta parameter allows you to enter your aligned fasta file, if you enter a fastafile you specify if the sequences are DNA or protein using the DNA or protein parameters. \n");
 		
@@ -152,11 +151,11 @@ void ClearcutCommand::help(){
 		m->mothurOut("The shuffle parameter allows you to randomly shuffle the distance matrix, default=F. \n");
 		m->mothurOut("The neighbor parameter allows you to use traditional Neighbor-Joining algorithm, default=F. \n");
 		
-		m->mothurOut("The stdin parameter reads input from STDIN, default=F. \n");
+		m->mothurOut("The stdinWanted parameter reads input from STDIN, default=F. \n");
 		m->mothurOut("The DNA parameter allows you to indicate your fasta file contains DNA sequences, default=F. \n");
 		m->mothurOut("The protein parameter allows you to indicate your fasta file contains protein sequences, default=F. \n");
 		
-		m->mothurOut("The stdout parameter outputs your tree to STDOUT, default=F. \n");
+		m->mothurOut("The stdoutWanted parameter outputs your tree to STDOUT, default=F. \n");
 		m->mothurOut("The matrixout parameter allows you to specify a filename to output a distance matrix to. \n");
 		m->mothurOut("The ntrees parameter allows you to specify the number of output trees, default=1. \n");
 		m->mothurOut("The expblen parameter allows you to use exponential notation for branch lengths, default=F. \n");
@@ -165,6 +164,7 @@ void ClearcutCommand::help(){
 		m->mothurOut("The clearcut command should be in the following format: \n");
 		m->mothurOut("clearcut(phylip=yourDistanceFile) \n");
 		m->mothurOut("Example: clearcut(phylip=abrecovery.phylip.dist) \n");	
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClearcutCommand", "help");
@@ -185,8 +185,13 @@ int ClearcutCommand::execute() {
 		GlobalData* globaldata = GlobalData::getInstance();
 		string path = globaldata->argv;
 		path = path.substr(0, (path.find_last_of('m')));
-
-		string clearcutCommand = path + "clearcut/clearcut ";
+		
+		string clearcutCommand = "";
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			clearcutCommand = path + "clearcut/clearcut ";
+		#else
+			clearcutCommand = path + "clearcut\\clearcut ";
+		#endif
 		
 		//you gave us a distance matrix
 		if (phylipfile != "") { clearcutCommand += "--distance "; 	}
@@ -202,10 +207,20 @@ int ClearcutCommand::execute() {
 		if (shuffle)			{  clearcutCommand += "--shuffle ";		}
 		if (neighbor)			{  clearcutCommand += "--neighbor ";	}
 		
-		if (stdin)				{  clearcutCommand += "--stdin ";		}
-		else					{  clearcutCommand += "--in=" + inputFile + " "; }
-		if (stdout)				{  clearcutCommand += "--stdout ";		}
-		else					{  clearcutCommand += "--out=" + outputName + " "; }
+		if (stdinWanted)		{  clearcutCommand += "--stdin ";		}
+		else{  
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				clearcutCommand += "--in=" + inputFile + " "; }
+			#else
+				clearcutCommand += "--in=\"" + inputFile + "\" "; }
+			#endif
+		if (stdoutWanted)		{  clearcutCommand += "--stdout ";		}
+		else{  
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				clearcutCommand += "--out=" + outputName + " "; }
+			#else
+				clearcutCommand += "--out=\"" + outputName + "\" "; }
+			#endif
 		
 		if (DNA)				{  clearcutCommand += "--DNA ";			}
 		if (protein)			{  clearcutCommand += "--protein ";		}
@@ -215,11 +230,11 @@ int ClearcutCommand::execute() {
 		if (ntrees != "1")		{  clearcutCommand += "--ntrees=" + ntrees + " "; }
 		if (expblen)			{  clearcutCommand += "--expblen ";		}
 		if (expdist)			{  clearcutCommand += "--expdist ";		}
-		
+	
 		//run clearcut
 		system(clearcutCommand.c_str());
 		
-		if (!stdout) {	
+		if (!stdoutWanted) {	
 			m->mothurOutEndLine();
 			m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 			m->mothurOut(outputName); m->mothurOutEndLine();	
