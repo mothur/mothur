@@ -194,65 +194,6 @@ Sequence AlignmentDB::findClosestSequence(Sequence* seq) {
 		exit(1);
 	}
 }
-#ifdef USE_MPI	
-/**************************************************************************************************/
-int AlignmentDB::MPISend(int receiver) {
-	try {
-		
-		//send numSeqs - int
-		MPI_Send(&numSeqs, 1, MPI_INT, receiver, 2001, MPI_COMM_WORLD); 
-									
-		//send longest - int
-		MPI_Send(&longest, 1, MPI_INT, receiver, 2001, MPI_COMM_WORLD); 
-	
-		//send templateSequences
-		for (int i = 0; i < templateSequences.size(); i++) {
-			templateSequences[i].MPISend(receiver);
-		}
-		
-		//send Database
-		search->MPISend(receiver);
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "AlignmentDB", "MPISend");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-int AlignmentDB::MPIRecv(int sender) {
-	try {
-		MPI_Status status;
-		//receive numSeqs - int
-		MPI_Recv(&numSeqs, 1, MPI_INT, sender, 2001, MPI_COMM_WORLD, &status);
-		
-		//receive longest - int
-		MPI_Recv(&longest, 1, MPI_INT, sender, 2001, MPI_COMM_WORLD, &status);
-
-		//receive templateSequences
-		templateSequences.resize(numSeqs);
-		for (int i = 0; i < templateSequences.size(); i++) {
-			templateSequences[i].MPIRecv(sender);
-		}
-
-		//receive Database
-		search->MPIRecv(sender);
-	
-		for (int i = 0; i < templateSequences.size(); i++) {
-			search->addSequence(templateSequences[i]);
-		}
-		search->generateDB();
-		search->setNumSeqs(numSeqs);
-
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "AlignmentDB", "MPIRecv");
-		exit(1);
-	}
-}
-#endif
 /**************************************************************************************************/
 
 

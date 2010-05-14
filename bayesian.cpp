@@ -178,6 +178,18 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 	}
 }
 /**************************************************************************************************/
+Bayesian::~Bayesian() {
+	try {
+		 delete phyloTree; 
+		 if (database != NULL) {  delete database; }
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Bayesian", "~Bayesian");
+		exit(1);
+	}
+}
+
+/**************************************************************************************************/
 string Bayesian::getTaxonomy(Sequence* seq) {
 	try {
 		string tax = "";

@@ -24,7 +24,9 @@ int Collect::getCurve(float percentFreq = 0.01){
                 }   
 				
 				//convert freq percentage to number
-				int increment = numSeqs * percentFreq;
+				int increment = 1;
+				if (percentFreq < 1.0) {  increment = numSeqs * percentFreq;  }
+				else { increment = percentFreq;  }
 																						                                                                        
                 for(int i=0;i<numSeqs;i++){
 						
@@ -101,7 +103,9 @@ try {
                 }
                 
 				//convert freq percentage to number
-				int increment = numSeqs * percentFreq;
+				int increment = 1;
+				if (percentFreq < 1.0) {  increment = numSeqs * percentFreq;  }
+				else { increment = percentFreq;  }
 				
                 //sample all the members
                 for(int i=0;i<numSeqs;i++){

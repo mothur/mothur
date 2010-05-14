@@ -19,7 +19,7 @@ class Knn : public Classify {
 	
 public:
 	Knn(string, string, string, int, float, float, float, float, int);
-	~Knn() {};
+	~Knn();
 	
 	string getTaxonomy(Sequence*);
 	

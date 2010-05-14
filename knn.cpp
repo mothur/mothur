@@ -22,6 +22,17 @@ Knn::Knn(string tfile, string tempFile, string method, int kmerSize, float gapOp
 	}
 }
 /**************************************************************************************************/
+Knn::~Knn() {
+	try {
+		 delete phyloTree; 
+		 if (database != NULL) {  delete database; }
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Knn", "~Knn");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
 string Knn::getTaxonomy(Sequence* seq) {
 	try {
 		string tax;

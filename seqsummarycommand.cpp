@@ -250,7 +250,7 @@ int SeqSummaryCommand::execute(){
 				if (m->control_pressed) {  return 0; }
 		#else
 				ifstream inFASTA;
-				openInputFile(fastafileNames[s], inFASTA);
+				openInputFile(fastafile, inFASTA);
 				numSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
 				inFASTA.close();
 				

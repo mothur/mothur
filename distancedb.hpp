@@ -19,7 +19,7 @@ class DistanceDB : public Database {
 public:
 	
 	DistanceDB();
-	~DistanceDB() {}
+	~DistanceDB() { delete distCalculator; }
 	
 	void generateDB() {} //doesn't generate a search db 
 	void addSequence(Sequence);  

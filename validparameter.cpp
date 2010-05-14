@@ -262,12 +262,6 @@ void ValidParameters::initParameterRanges() {
 		string itersArray[] = {">=","10", "<","NA", "between"};
 		parameterRanges["iters"] = addParameters(itersArray, rangeSize);
 
-		string freqArray[] = {">=","1", "<","NA", "between"};
-		parameterRanges["freq"] = addParameters(freqArray, rangeSize);
-
-		//string lineArray[] = {">=","1", "<","NA", "between"};
-		//parameterRanges["line"] = addParameters(lineArray, rangeSize);
-
 		string abundArray[] = {">=","5", "<","NA", "between"};
 		parameterRanges["abund"] = addParameters(abundArray, rangeSize);
 		

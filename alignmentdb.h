@@ -27,8 +27,6 @@ public:
 	Sequence findClosestSequence(Sequence*);
 	float getSearchScore()  {  return search->getSearchScore();  }
 	int getLongestBase()	{  return longest;  }
-	int MPISend(int);
-	int MPIRecv(int);
 	
 private:
 	int numSeqs, longest;

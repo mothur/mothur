@@ -41,7 +41,7 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 				m->mothurOut("You must execute the read.tree command, before you may execute the phylo.diversity command."); m->mothurOutEndLine(); abort = true;  }
 
 			string temp;
-			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "0.10"; }
+			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
 			convert(temp, freq); 
 			
 			temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
@@ -73,7 +73,7 @@ void PhyloDiversityCommand::help(){
 		m->mothurOut("The phylo.diversity command parameters are groups, iters, freq and rarefy.  No parameters are required.\n");
 		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed. The group names are separated by dashes. By default all groups are used.\n");
 		m->mothurOut("The iters parameter allows you to specify the number of randomizations to preform, by default iters=1000, if you set rarefy to true.\n");
-		m->mothurOut("The freq parameter is used indicate when to output your data.  It is a percentage of the number of sequences.  By default it is set to 0.10, meaning 10%. \n");
+		m->mothurOut("The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n");
 		m->mothurOut("The rarefy parameter allows you to create a rarefaction curve. The default is false.\n");
 		m->mothurOut("The phylo.diversity command should be in the following format: phylo.diversity(groups=yourGroups, rarefy=yourRarefy, iters=yourIters).\n");
 		m->mothurOut("Example phylo.diversity(groups=A-B-C, rarefy=T, iters=500).\n");
@@ -132,7 +132,9 @@ int PhyloDiversityCommand::execute(){
 			numLeafNodes = randomLeaf.size();  //reset the number of leaf nodes you are using 
 			
 			//convert freq percentage to number
-			int increment = numLeafNodes * freq;
+			int increment = 100;
+			if (freq < 1.0) {  increment = numLeafNodes * freq;  }
+			else { increment = freq;  }
 			
 			//each group, each sampling, if no rarefy iters = 1;
 			vector< vector<float> > diversity;

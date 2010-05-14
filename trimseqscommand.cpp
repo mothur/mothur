@@ -266,13 +266,13 @@ int TrimSeqsCommand::execute(){
 				if (m->control_pressed) {  return 0; }
 		#else
 				ifstream inFASTA;
-				openInputFile(fastafileNames[s], inFASTA);
-				numSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+				openInputFile(fastaFile, inFASTA);
+				int numSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
 				inFASTA.close();
 				
 				lines.push_back(new linePair(0, numSeqs));
 				
-				driverCreateSummary(fastafile, qFileName, trimSeqFile, scrapSeqFile, groupFile, fastaFileNames, lines[0], lines[0]);
+				driverCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, groupFile, fastaFileNames, lines[0], lines[0]);
 				
 				if (m->control_pressed) {  return 0; }
 		#endif
@@ -331,7 +331,11 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 		if (oligoFile != "") {		
 			openOutputFile(groupFile, outGroups);   
 			for (int i = 0; i < fastaNames.size(); i++) {
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				fastaFileNames.push_back(new ofstream((fastaNames[i] + toString(getpid()) + ".temp").c_str(), ios::ate)); 
+			#else
+				fastaFileNames.push_back(new ofstream((fastaNames[i] + toString(i) + ".temp").c_str(), ios::ate)); 			
+			#endif
 			}
 		}
 		
@@ -674,12 +678,7 @@ int TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
 				}
 				oligo = oligo.substr(0,alnLength);
 				temp = temp.substr(0,alnLength);
-//				cout << "barcode = " << oligo << " raw = " << rawSequence.substr(0,alnLength) << " raw aligned = " << temp << endl;			
-				cout << seq.getName() << endl;
-				cout << temp << endl;
-				cout << oligo << endl;
-				cout << alnLength << endl;
-				cout << endl;
+//				
 				
 				int newStart=0;
 				int numDiff = countDiffs(oligo, temp);
@@ -789,13 +788,7 @@ int TrimSeqsCommand::stripForward(Sequence& seq){
 				}
 				oligo = oligo.substr(0,alnLength);
 				temp = temp.substr(0,alnLength);
-//				cout << "barcode = " << oligo << " raw = " << rawSequence.substr(0,alnLength) << " raw aligned = " << temp << endl;			
-				cout << seq.getName() << endl;
-				cout << temp << endl;
-				cout << oligo << endl;
-				cout << alnLength << endl;
-				cout << endl;
-				
+//								
 				int newStart=0;
 				int numDiff = countDiffs(oligo, temp);
 				if(numDiff < minDiff){

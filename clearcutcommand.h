@@ -11,7 +11,7 @@
  */
 
 #include "command.hpp"
-
+#include "globaldata.hpp"
 
 /* 
   Evans, J., L. Sheneman, and J.A. Foster (2006) Relaxed Neighbor-Joining: 
@@ -31,7 +31,7 @@ public:
 	
 private:
 	string outputDir, phylipfile, fastafile, matrixout, inputFile, seed, ntrees;
-	bool version, verbose, quiet, norandom, shuffle, neighbor, expblen, expdist, stdout, kimura, jukes, protein, DNA, stdin;
+	bool version, verbose, quiet, norandom, shuffle, neighbor, expblen, expdist, stdoutWanted, kimura, jukes, protein, DNA, stdinWanted;
 	bool abort;
 };
 
