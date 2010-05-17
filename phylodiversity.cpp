@@ -66,10 +66,11 @@ EstOutput PhyloDiversity::getValues(Tree* t, vector<int> treeNodes) {
 		
 	
 		for (int i=0; i<globaldata->Groups.size(); i++) {   
-			if (groupTotals[globaldata->Groups[i]] != 0.0) { //avoid divide by zero error
-				float percent = DScore[globaldata->Groups[i]] / groupTotals[globaldata->Groups[i]];
-				data.push_back(percent);  
-			}else {  data.push_back(0.0);  }
+			//if (groupTotals[globaldata->Groups[i]] != 0.0) { //avoid divide by zero error
+				//float percent = DScore[globaldata->Groups[i]] / groupTotals[globaldata->Groups[i]];
+			float percent = DScore[globaldata->Groups[i]]; 
+			data.push_back(percent);  
+			//}else {  data.push_back(0.0);  }
 		}
 		
 		return data;

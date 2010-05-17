@@ -113,7 +113,7 @@ int PhyloDiversityCommand::execute(){
 		
 			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} return 0; }
 			
-			phylo.setTotalGroupBranchLengths(trees[i]);
+			//phylo.setTotalGroupBranchLengths(trees[i]);
 			
 			string outFile = outputDir + getRootName(getSimpleName(globaldata->getTreeFile()))  + toString(i+1) + ".phylo.diversity";
 			if (rarefy) { outFile += ".rarefaction"; }
