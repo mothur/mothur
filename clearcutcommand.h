@@ -31,7 +31,7 @@ public:
 	
 private:
 	string outputDir, phylipfile, fastafile, matrixout, inputFile, seed, ntrees;
-	bool version, verbose, quiet, norandom, shuffle, neighbor, expblen, expdist, stdoutWanted, kimura, jukes, protein, DNA, stdinWanted;
+	bool version, verbose, quiet, norandom, shuffle, neighbor, expblen, expdist, stdoutWanted, kimura, jukes, protein, DNA;
 	bool abort;
 };
 

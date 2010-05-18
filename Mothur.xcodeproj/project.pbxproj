@@ -15,6 +15,8 @@
 		A72B3A7C118B4D1B004B9F8D /* phylodiversity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = phylodiversity.cpp; sourceTree = "<group>"; };
 		A73953DA11987ED100B0B160 /* chopseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chopseqscommand.h; sourceTree = "<group>"; };
 		A73953DB11987ED100B0B160 /* chopseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chopseqscommand.cpp; sourceTree = "<group>"; };
+		A73F163411A1951D0087CA57 /* splitabundcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = splitabundcommand.h; sourceTree = "<group>"; };
+		A73F163511A1951D0087CA57 /* splitabundcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = splitabundcommand.cpp; sourceTree = "<group>"; };
 		A747E79B1163442A00FB9042 /* chimeracheckcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeracheckcommand.h; sourceTree = "<group>"; };
 		A747E79C1163442A00FB9042 /* chimeracheckcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeracheckcommand.cpp; sourceTree = "<group>"; };
 		A747E81C116365E000FB9042 /* chimeraslayercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraslayercommand.h; sourceTree = "<group>"; };
@@ -764,6 +766,8 @@
 				A76C4A1111876BAF0009460B /* setlogfilecommand.cpp */,
 				A7DA2110113FECD400BF472F /* sharedcommand.h */,
 				A7DA210F113FECD400BF472F /* sharedcommand.cpp */,
+				A73F163411A1951D0087CA57 /* splitabundcommand.h */,
+				A73F163511A1951D0087CA57 /* splitabundcommand.cpp */,
 				A7DA2155113FECD400BF472F /* summarycommand.h */,
 				A7DA2154113FECD400BF472F /* summarycommand.cpp */,
 				A7DA2159113FECD400BF472F /* summarysharedcommand.h */,
