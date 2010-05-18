@@ -77,6 +77,7 @@
 #include "chopseqscommand.h"
 #include "clearcutcommand.h"
 #include "catchallcommand.h"
+#include "splitabundcommand.h"
 
 /*******************************************************/
 
@@ -161,6 +162,7 @@ CommandFactory::CommandFactory(){
 	commands["chop.seqs"]			= "chop.seqs";
 	commands["clearcut"]			= "clearcut";
 	commands["catchall"]			= "catchall";
+	commands["split.abund"]			= "split.abund";
 	commands["classify.seqs"]		= "MPIEnabled"; 
 	commands["dist.seqs"]			= "MPIEnabled";
 	commands["filter.seqs"]			= "MPIEnabled";
@@ -282,6 +284,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "chop.seqs")				{	command = new ChopSeqsCommand(optionString);				}
 		else if(commandName == "clearcut")				{	command = new ClearcutCommand(optionString);				}
 		else if(commandName == "catchall")				{	command = new CatchAllCommand(optionString);				}
+		else if(commandName == "split.abund")			{	command = new SplitAbundCommand(optionString);				}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;

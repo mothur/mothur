@@ -150,6 +150,7 @@ mothur : \
 		./chopseqscommand.o\
 		./clearcutcommand.o\
 		./catchallcommand.o\
+		./splitabundcommand.o\
 		./inputdata.o\
 		./jackknife.o\
 		./kmer.o\
@@ -355,6 +356,7 @@ mothur : \
 		./chopseqscommand.o\
 		./clearcutcommand.o\
 		./catchallcommand.o\
+		./splitabundcommand.o\
 		./inputdata.o\
 		./jackknife.o\
 		./kmer.o\
@@ -563,6 +565,7 @@ clean :
 		./chopseqscommand.o\
 		./clearcutcommand.o\
 		./catchallcommand.o\
+		./splitabundcommand.o\
 		./inputdata.o\
 		./jackknife.o\
 		./kmer.o\
@@ -1676,5 +1679,9 @@ install : mothur
 # Item # 204 -- catchallcommand --
 ./catchallcommand.o : catchallcommand.cpp
 	$(CC) $(CC_OPTIONS) catchallcommand.cpp -c $(INCLUDE) -o ./catchallcommand.o
+
+# Item # 205 -- catchallcommand --
+./splitabundcommand : splitabundcommand
+	$(CC) $(CC_OPTIONS) splitabundcommand -c $(INCLUDE) -o ./splitabundcommand
 
 ##### END RUN ####
