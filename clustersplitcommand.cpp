@@ -242,6 +242,12 @@ int ClusterSplitCommand::execute(){
 						dividedNames[(processToAssign-1)].push_back(distName[i]);
 					}
 					
+					//not lets reverse the order of ever other process, so we balance big files running with little ones
+					for (int i = 0; i < processors; i++) {
+						int remainder = ((i+1) % processors);
+						if (remainder) {  reverse(dividedNames[i].begin(), dividedNames[i].end());  }
+					}
+					
 					createProcesses(dividedNames);
 							
 					if (m->control_pressed) { return 0; }
