@@ -362,7 +362,7 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 		
 		#ifdef USE_MPI
 			
-			int pid, num, num2;
+			int pid, num, num2, processors;
 			vector<long> positions;
 			vector<long> positions2;
 			
@@ -370,6 +370,8 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 			MPI_File inMPI;
 			MPI_File inMPI2;
 			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+			MPI_Comm_size(MPI_COMM_WORLD, &processors);
+			int tag = 2001;
 
 			char inFileName[1024];
 			strcpy(inFileName, inNumName.c_str());
@@ -382,26 +384,24 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 
 			if (pid == 0) {
 				positions = setFilePosEachLine(inNumName, num);
-				
-				//send file positions to all processes
-				MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);  //send numSeqs
-				MPI_Bcast(&positions[0], (num+1), MPI_LONG, 0, MPI_COMM_WORLD); //send file pos	
-				
 				positions2 = setFilePosEachLine(inName, num2);
 				
-				//send file positions to all processes
-				MPI_Bcast(&num2, 1, MPI_INT, 0, MPI_COMM_WORLD);  //send numSeqs
-				MPI_Bcast(&positions2[0], (num2+1), MPI_LONG, 0, MPI_COMM_WORLD); //send file pos	
+				for(int i = 1; i < processors; i++) { 
+					MPI_Send(&num, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
+					MPI_Send(&positions[0], (num+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
+					
+					MPI_Send(&num2, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
+					MPI_Send(&positions2[0], (num2+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
+				}
 
 			}else{
-				MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD); //get numSeqs
-				positions.resize(num);
-				MPI_Bcast(&positions[0], (num+1), MPI_LONG, 0, MPI_COMM_WORLD); //get file positions
+				MPI_Recv(&num, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
+				positions.resize(num+1);
+				MPI_Recv(&positions[0], (num+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
 				
-				MPI_Bcast(&num2, 1, MPI_INT, 0, MPI_COMM_WORLD); //get numSeqs
-				positions2.resize(num2);
-				MPI_Bcast(&positions2[0], (num2+1), MPI_LONG, 0, MPI_COMM_WORLD); //get file positions
-
+				MPI_Recv(&num2, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
+				positions2.resize(num2+1);
+				MPI_Recv(&positions2[0], (num2+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
 			}
 		
 			//read numKmers
@@ -473,6 +473,7 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 				
 			}
 			MPI_File_close(&inMPI2);
+			MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 		#else
 		
 			in >> numKmers; gobble(in);

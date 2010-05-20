@@ -26,11 +26,6 @@ public:
 	vector<int> findClosestSequences(Sequence*, int);
 	vector<int> findClosestMegaBlast(Sequence*, int);
 	
-	#ifdef USE_MPI	
-	int MPISend(int); //just sends gapOpen, gapExtend, match and mismatch
-	int MPIRecv(int);
-	#endif
-	
 private:
 	string dbFileName;
 	string queryFileName;

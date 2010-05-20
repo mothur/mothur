@@ -16,6 +16,7 @@ public:
 	~InputData();
 	ListVector* getListVector();
 	ListVector* getListVector(string);  //pass the label you want
+	ListVector* getListVector(string, bool);  //pass the label you want, reset filepointer
 	SharedListVector* getSharedListVector();
 	SharedListVector* getSharedListVector(string);  //pass the label you want
 	OrderVector* getOrderVector(); 

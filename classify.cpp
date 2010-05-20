@@ -27,12 +27,14 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 		
 		m->mothurOut("Generating search database...    "); cout.flush();
 #ifdef USE_MPI	
-			int pid;
+			int pid, processors;
 			vector<long> positions;
+			int tag = 2001;
 		
 			MPI_Status status; 
 			MPI_File inMPI;
 			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+			MPI_Comm_size(MPI_COMM_WORLD, &processors);
 
 			//char* inFileName = new char[tempFile.length()];
 			//memcpy(inFileName, tempFile.c_str(), tempFile.length());
@@ -47,12 +49,14 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 				positions = setFilePosFasta(tempFile, numSeqs); //fills MPIPos, returns numSeqs
 
 				//send file positions to all processes
-				MPI_Bcast(&numSeqs, 1, MPI_INT, 0, MPI_COMM_WORLD);  //send numSeqs
-				MPI_Bcast(&positions[0], (numSeqs+1), MPI_LONG, 0, MPI_COMM_WORLD); //send file pos	
+				for(int i = 1; i < processors; i++) { 
+					MPI_Send(&numSeqs, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
+					MPI_Send(&positions[0], (numSeqs+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
+				}
 			}else{
-				MPI_Bcast(&numSeqs, 1, MPI_INT, 0, MPI_COMM_WORLD); //get numSeqs
-				positions.resize(numSeqs);
-				MPI_Bcast(&positions[0], (numSeqs+1), MPI_LONG, 0, MPI_COMM_WORLD); //get file positions
+				MPI_Recv(&numSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
+				positions.resize(numSeqs+1);
+				MPI_Recv(&positions[0], (numSeqs+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
 			}
 			
 			//create database
@@ -86,6 +90,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 			
 			database->generateDB();
 			MPI_File_close(&inMPI);
+			MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 	#else
 		
 		//need to know number of template seqs for suffixdb
@@ -171,12 +176,14 @@ int Classify::readTaxonomy(string file) {
 		m->mothurOut("Reading in the " + file + " taxonomy...\t");	cout.flush();
 
 #ifdef USE_MPI	
-		int pid, num;
+		int pid, num, processors;
 		vector<long> positions;
+		int tag = 2001;
 		
 		MPI_Status status; 
 		MPI_File inMPI;
 		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+		MPI_Comm_size(MPI_COMM_WORLD, &processors);
 
 		//char* inFileName = new char[file.length()];
 		//memcpy(inFileName, file.c_str(), file.length());
@@ -191,12 +198,14 @@ int Classify::readTaxonomy(string file) {
 			positions = setFilePosEachLine(file, num);
 			
 			//send file positions to all processes
-			MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);  //send numSeqs
-			MPI_Bcast(&positions[0], (num+1), MPI_LONG, 0, MPI_COMM_WORLD); //send file pos	
+			for(int i = 1; i < processors; i++) { 
+				MPI_Send(&num, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
+				MPI_Send(&positions[0], (num+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
+			}
 		}else{
-			MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD); //get numSeqs
-			positions.resize(num);
-			MPI_Bcast(&positions[0], (num+1), MPI_LONG, 0, MPI_COMM_WORLD); //get file positions
+			MPI_Recv(&num, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
+			positions.resize(num+1);
+			MPI_Recv(&positions[0], (num+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
 		}
 	
 		//read file 
@@ -218,6 +227,7 @@ int Classify::readTaxonomy(string file) {
 		}
 		
 		MPI_File_close(&inMPI);
+		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 #else				
 		ifstream inTax;
 		openInputFile(file, inTax);

@@ -300,6 +300,7 @@ int DistanceCommand::execute(){
 				MPI_Send(&size, 1, MPI_LONG, 0, tag, MPI_COMM_WORLD);
 			}
 		}
+		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 #else		
 				
 	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)

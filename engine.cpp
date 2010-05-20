@@ -73,6 +73,8 @@ bool InteractEngine::getInput(){
 					int pid;
 					MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
 					
+					MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
+				
 					if ((cFactory->MPIEnabled(commandName)) || (pid == 0)) {
 				#endif
 				//executes valid command
@@ -200,7 +202,9 @@ bool BatchEngine::getInput(){
 					#ifdef USE_MPI
 						int pid;
 						MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-					
+cout << pid << " is waiting " << commandName << endl;						
+						MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
+cout << pid << " is here " << commandName << endl;
 						if ((cFactory->MPIEnabled(commandName)) || (pid == 0)) {
 					#endif
 					//executes valid command
@@ -291,6 +295,8 @@ bool ScriptEngine::getInput(){
 				#ifdef USE_MPI
 					int pid;
 					MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+					
+					MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 					
 					if ((cFactory->MPIEnabled(commandName)) || (pid == 0)) {
 				#endif

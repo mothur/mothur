@@ -206,43 +206,6 @@ vector<int> KmerDB::getSequencesWithKmer(int kmer) {
 		exit(1);
 	}	
 }
-#ifdef USE_MPI	
-/**************************************************************************************************/
-int KmerDB::MPISend(int receiver) {
-	try {
-		
-		//send kmerSize - int
-		MPI_Send(&kmerSize, 1, MPI_INT, receiver, 2001, MPI_COMM_WORLD); 
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "KmerDB", "MPISend");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-int KmerDB::MPIRecv(int sender) {
-	try {
-		MPI_Status status;
-		
-		//receive kmerSize - int
-		MPI_Recv(&kmerSize, 1, MPI_INT, sender, 2001, MPI_COMM_WORLD, &status);
-		
-		//set maxKmer 
-		int power4s[14] = { 1, 4, 16, 64, 256, 1024, 4096, 16384, 65536, 262144, 1048576, 4194304, 16777216, 67108864 };
-		count = 0;
-		maxKmer = power4s[kmerSize];
-		kmerLocations.resize(maxKmer+1);
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "KmerDB", "MPIRecv");
-		exit(1);
-	}
-}
-#endif
 /**************************************************************************************************/
 
 

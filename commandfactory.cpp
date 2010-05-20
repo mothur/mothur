@@ -78,6 +78,7 @@
 #include "clearcutcommand.h"
 #include "catchallcommand.h"
 #include "splitabundcommand.h"
+#include "clustersplitcommand.h"
 
 /*******************************************************/
 
@@ -163,6 +164,7 @@ CommandFactory::CommandFactory(){
 	commands["clearcut"]			= "clearcut";
 	commands["catchall"]			= "catchall";
 	commands["split.abund"]			= "split.abund";
+	commands["cluster.split"]		= "cluster.split";
 	commands["classify.seqs"]		= "MPIEnabled"; 
 	commands["dist.seqs"]			= "MPIEnabled";
 	commands["filter.seqs"]			= "MPIEnabled";
@@ -285,6 +287,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "clearcut")				{	command = new ClearcutCommand(optionString);				}
 		else if(commandName == "catchall")				{	command = new CatchAllCommand(optionString);				}
 		else if(commandName == "split.abund")			{	command = new SplitAbundCommand(optionString);				}
+		else if(commandName == "cluster.split")			{	command = new ClusterSplitCommand(optionString);			}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;

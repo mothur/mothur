@@ -177,55 +177,6 @@ void BlastDB::generateDB() {
 		exit(1);
 	}
 }
-#ifdef USE_MPI	
-/**************************************************************************************************/
-int BlastDB::MPISend(int receiver) {
-	try {
-		
-		//send gapOpen - float
-		MPI_Send(&gapOpen, 1, MPI_FLOAT, receiver, 2001, MPI_COMM_WORLD); 
-
-		//send gapExtend - float
-		MPI_Send(&gapExtend, 1, MPI_FLOAT, receiver, 2001, MPI_COMM_WORLD); 
-		
-		//send match - float
-		MPI_Send(&match, 1, MPI_FLOAT, receiver, 2001, MPI_COMM_WORLD); 
-		
-		//send mismatch - float
-		MPI_Send(&misMatch, 1, MPI_FLOAT, receiver, 2001, MPI_COMM_WORLD); 
-									
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "BlastDB", "MPISend");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-int BlastDB::MPIRecv(int sender) {
-	try {
-		MPI_Status status;
-		
-		//receive gapOpen - float
-		MPI_Recv(&gapOpen, 1, MPI_FLOAT, sender, 2001, MPI_COMM_WORLD, &status);
-		
-		//receive gapExtend - float
-		MPI_Recv(&gapExtend, 1, MPI_FLOAT, sender, 2001, MPI_COMM_WORLD, &status);
-				
-		//receive match - float
-		MPI_Recv(&match, 1, MPI_FLOAT, sender, 2001, MPI_COMM_WORLD, &status);
-		
-		//receive mismatch - float
-		MPI_Recv(&misMatch, 1, MPI_FLOAT, sender, 2001, MPI_COMM_WORLD, &status);		
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "BlastDB", "MPIRecv");
-		exit(1);
-	}
-}
-#endif	
 /**************************************************************************************************/
 
 /**************************************************************************************************/
