@@ -419,8 +419,10 @@ int ClassifySeqsCommand::execute(){
 					MPIPos = setFilePosFasta(fastaFileNames[s], numFastaSeqs); //fills MPIPos, returns numSeqs
 					
 					//send file positions to all processes
-					MPI_Bcast(&numFastaSeqs, 1, MPI_INT, 0, MPI_COMM_WORLD);  //send numSeqs
-					MPI_Bcast(&MPIPos[0], (numFastaSeqs+1), MPI_LONG, 0, MPI_COMM_WORLD); //send file pos	
+					for(int i = 1; i < processors; i++) { 
+						MPI_Send(&numFastaSeqs, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
+						MPI_Send(&MPIPos[0], (numFastaSeqs+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
+					}
 					
 					//figure out how many sequences you have to align
 					numSeqsPerProcessor = numFastaSeqs / processors;
@@ -438,9 +440,9 @@ int ClassifySeqsCommand::execute(){
 						MPI_Recv(&done, 1, MPI_INT, i, tag, MPI_COMM_WORLD, &status);
 					}
 				}else{ //you are a child process
-					MPI_Bcast(&numFastaSeqs, 1, MPI_INT, 0, MPI_COMM_WORLD); //get numSeqs
+					MPI_Recv(&numFastaSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
 					MPIPos.resize(numFastaSeqs+1);
-					MPI_Bcast(&MPIPos[0], (numFastaSeqs+1), MPI_LONG, 0, MPI_COMM_WORLD); //get file positions
+					MPI_Recv(&MPIPos[0], (numFastaSeqs+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
 					
 					//figure out how many sequences you have to align
 					numSeqsPerProcessor = numFastaSeqs / processors;
@@ -461,6 +463,7 @@ int ClassifySeqsCommand::execute(){
 				MPI_File_close(&inMPI);
 				MPI_File_close(&outMPINewTax);
 				MPI_File_close(&outMPITempTax);
+				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 				
 #else
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)

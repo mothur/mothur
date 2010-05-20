@@ -310,7 +310,7 @@ int Bellerophon::getChimeras() {
 			
 			MPIBestSend.clear();
 		}
-		
+		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 	#else
 	
 		//divide breakpoints between processors

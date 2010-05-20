@@ -26,10 +26,10 @@ ifeq  ($(strip $(USEREADLINE)),yes)
       -L../readline-6.0
 endif
 
-USEMPI ?= no
-
+USEMPI ?= yes
 
 ifeq  ($(strip $(USEMPI)),yes)
+	CC = mpic++
     CC_OPTIONS += -DUSE_MPI
 endif
 
@@ -151,6 +151,8 @@ mothur : \
 		./clearcutcommand.o\
 		./catchallcommand.o\
 		./splitabundcommand.o\
+		./splitmatrix.o\
+		./clustersplitcommand.o\
 		./inputdata.o\
 		./jackknife.o\
 		./kmer.o\
@@ -357,6 +359,8 @@ mothur : \
 		./clearcutcommand.o\
 		./catchallcommand.o\
 		./splitabundcommand.o\
+		./splitmatrix.o\
+		./clustersplitcommand.o\
 		./inputdata.o\
 		./jackknife.o\
 		./kmer.o\
@@ -566,6 +570,8 @@ clean :
 		./clearcutcommand.o\
 		./catchallcommand.o\
 		./splitabundcommand.o\
+		./splitmatrix.o\
+		./clustersplitcommand.o\
 		./inputdata.o\
 		./jackknife.o\
 		./kmer.o\
@@ -1680,8 +1686,16 @@ install : mothur
 ./catchallcommand.o : catchallcommand.cpp
 	$(CC) $(CC_OPTIONS) catchallcommand.cpp -c $(INCLUDE) -o ./catchallcommand.o
 
-# Item # 205 -- catchallcommand --
+# Item # 205 -- splitabundcommand --
 ./splitabundcommand : splitabundcommand
 	$(CC) $(CC_OPTIONS) splitabundcommand -c $(INCLUDE) -o ./splitabundcommand
+	
+# Item # 206 -- splitmatrix --
+./splitmatrix : splitmatrix
+	$(CC) $(CC_OPTIONS) splitmatrix -c $(INCLUDE) -o ./splitmatrix
+	
+# Item # 207 -- splitmatrix --
+./clustersplitcommand : clustersplitcommand
+	$(CC) $(CC_OPTIONS) clustersplitcommand -c $(INCLUDE) -o ./clustersplitcommand
 
 ##### END RUN ####

@@ -191,8 +191,10 @@ int ChimeraCheckCommand::execute(){
 				MPIPos = setFilePosFasta(fastafile, numSeqs); //fills MPIPos, returns numSeqs
 				
 				//send file positions to all processes
-				MPI_Bcast(&numSeqs, 1, MPI_INT, 0, MPI_COMM_WORLD);  //send numSeqs
-				MPI_Bcast(&MPIPos[0], (numSeqs+1), MPI_LONG, 0, MPI_COMM_WORLD); //send file pos	
+				for(int i = 1; i < processors; i++) { 
+					MPI_Send(&numSeqs, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
+					MPI_Send(&MPIPos[0], (numSeqs+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
+				}	
 				
 				//figure out how many sequences you have to align
 				numSeqsPerProcessor = numSeqs / processors;
@@ -211,9 +213,9 @@ int ChimeraCheckCommand::execute(){
 					MPI_Recv(buf, 4, MPI_CHAR, i, tag, MPI_COMM_WORLD, &status); 
 				}
 			}else{ //you are a child process
-				MPI_Bcast(&numSeqs, 1, MPI_INT, 0, MPI_COMM_WORLD); //get numSeqs
+				MPI_Recv(&numSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
 				MPIPos.resize(numSeqs+1);
-				MPI_Bcast(&MPIPos[0], (numSeqs+1), MPI_LONG, 0, MPI_COMM_WORLD); //get file positions
+				MPI_Recv(&MPIPos[0], (numSeqs+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
 				
 				//figure out how many sequences you have to align
 				numSeqsPerProcessor = numSeqs / processors;
@@ -235,6 +237,7 @@ int ChimeraCheckCommand::execute(){
 			//close files 
 			MPI_File_close(&inMPI);
 			MPI_File_close(&outMPI);
+			MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 	#else
 		
 		//break up file

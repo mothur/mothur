@@ -209,8 +209,10 @@ string ValidParameters::validFile(map<string, string> container, string paramete
 			if(isFile == true) {
 			
 			#ifdef USE_MPI	
-				int pid;
+				int pid, processors;
+				MPI_Status status;
 				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+				MPI_Comm_size(MPI_COMM_WORLD, &processors);
 				
 				if (pid == 0) {
 			#endif
@@ -219,10 +221,14 @@ string ValidParameters::validFile(map<string, string> container, string paramete
 				in.close();
 
 			#ifdef USE_MPI	
-					MPI_Bcast(&ableToOpen, 1, MPI_INT, 0, MPI_COMM_WORLD);  //send ableToOPen
+					for(int i = 1; i < processors; i++) { 
+						MPI_Send(&ableToOpen, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
+					}
 				}else {
-					MPI_Bcast(&ableToOpen, 1, MPI_INT, 0, MPI_COMM_WORLD); //get ableToOPen
+					MPI_Recv(&ableToOpen, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
 				}
+				
+				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 			#endif
 			
 				if (ableToOpen == 1) { return "not open"; }

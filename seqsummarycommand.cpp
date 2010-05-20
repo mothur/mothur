@@ -144,11 +144,12 @@ int SeqSummaryCommand::execute(){
 						delete buf2;
 						
 						MPIPos = setFilePosFasta(fastafile, numSeqs); //fills MPIPos, returns numSeqs
+					
+						for(int i = 1; i < processors; i++) { 
+							MPI_Send(&numSeqs, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
+							MPI_Send(&MPIPos[0], (numSeqs+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
+						}
 						
-						//send file positions to all processes
-						MPI_Bcast(&numSeqs, 1, MPI_INT, 0, MPI_COMM_WORLD);  //send numSeqs
-						MPI_Bcast(&MPIPos[0], (numSeqs+1), MPI_LONG, 0, MPI_COMM_WORLD); //send file pos	
-								
 						//figure out how many sequences you have to do
 						numSeqsPerProcessor = numSeqs / processors;
 						int startIndex =  pid * numSeqsPerProcessor;
@@ -156,54 +157,55 @@ int SeqSummaryCommand::execute(){
 						
 						//do your part
 						MPICreateSummary(startIndex, numSeqsPerProcessor, startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, inMPI, outMPI, MPIPos);
-					
-						if (m->control_pressed) {  MPI_File_close(&inMPI); MPI_File_close(&outMPI);  return 0;  }
 						
-						//get the info from the child processes
-						for(int i = 1; i < processors; i++) { 
-							
-							int size;
-							MPI_Recv(&size, 1, MPI_INT, i, tag, MPI_COMM_WORLD, &status);
-
-							vector<int> temp; temp.resize(size+1);
-							
-							for(int j = 0; j < 5; j++) { 
-							
-								MPI_Recv(&temp[0], (size+1), MPI_INT, i, 2001, MPI_COMM_WORLD, &status); 
-								int receiveTag = temp[temp.size()-1];  //child process added a int to the end to indicate what count this is for
-								
-								if (receiveTag == startTag) { 
-									for (int k = 0; k < size; k++) {		startPosition.push_back(temp[k]);	}
-								}else if (receiveTag == endTag) { 
-									for (int k = 0; k < size; k++) {		endPosition.push_back(temp[k]);	}
-								}else if (receiveTag == lengthTag) { 
-									for (int k = 0; k < size; k++) {		seqLength.push_back(temp[k]);	}
-								}else if (receiveTag == baseTag) { 
-									for (int k = 0; k < size; k++) {		ambigBases.push_back(temp[k]);	}
-								}else if (receiveTag == lhomoTag) { 
-									for (int k = 0; k < size; k++) {		longHomoPolymer.push_back(temp[k]);	}
-								}
-							} 
-						
-						}
-
-												
 				}else { //i am the child process
 			
-					MPI_Bcast(&numSeqs, 1, MPI_INT, 0, MPI_COMM_WORLD); //get numSeqs
+					MPI_Recv(&numSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
 					MPIPos.resize(numSeqs+1);
-					MPI_Bcast(&MPIPos[0], (numSeqs+1), MPI_LONG, 0, MPI_COMM_WORLD); //get file positions
-					
+					MPI_Recv(&MPIPos[0], (numSeqs+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
+				
 					//figure out how many sequences you have to align
 					numSeqsPerProcessor = numSeqs / processors;
 					int startIndex =  pid * numSeqsPerProcessor;
 					if(pid == (processors - 1)){	numSeqsPerProcessor = numSeqs - pid * numSeqsPerProcessor; 	}
-					
+				
 					//do your part
 					MPICreateSummary(startIndex, numSeqsPerProcessor, startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, inMPI, outMPI, MPIPos);
-					
-					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI); return 0;  }
-					
+				}
+				
+				MPI_File_close(&inMPI);
+				MPI_File_close(&outMPI);
+				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
+				
+				if (pid == 0) {
+					//get the info from the child processes
+					for(int i = 1; i < processors; i++) { 
+						int size;
+						MPI_Recv(&size, 1, MPI_INT, i, tag, MPI_COMM_WORLD, &status);
+
+						vector<int> temp; temp.resize(size+1);
+						
+						for(int j = 0; j < 5; j++) { 
+						
+							MPI_Recv(&temp[0], (size+1), MPI_INT, i, 2001, MPI_COMM_WORLD, &status); 
+							int receiveTag = temp[temp.size()-1];  //child process added a int to the end to indicate what count this is for
+							
+							if (receiveTag == startTag) { 
+								for (int k = 0; k < size; k++) {		startPosition.push_back(temp[k]);	}
+							}else if (receiveTag == endTag) { 
+								for (int k = 0; k < size; k++) {		endPosition.push_back(temp[k]);	}
+							}else if (receiveTag == lengthTag) { 
+								for (int k = 0; k < size; k++) {		seqLength.push_back(temp[k]);	}
+							}else if (receiveTag == baseTag) { 
+								for (int k = 0; k < size; k++) {		ambigBases.push_back(temp[k]);	}
+							}else if (receiveTag == lhomoTag) { 
+								for (int k = 0; k < size; k++) {		longHomoPolymer.push_back(temp[k]);	}
+							}
+						} 
+					}
+
+				}else{
+				
 					//send my counts
 					int size = startPosition.size();
 					MPI_Send(&size, 1, MPI_INT, 0, tag, MPI_COMM_WORLD);
@@ -218,12 +220,9 @@ int SeqSummaryCommand::execute(){
 					ierr = MPI_Send(&(ambigBases[0]), (size+1), MPI_INT, 0, 2001, MPI_COMM_WORLD);
 					longHomoPolymer.push_back(lhomoTag);
 					ierr = MPI_Send(&(longHomoPolymer[0]), (size+1), MPI_INT, 0, 2001, MPI_COMM_WORLD);
-
 				}
 				
-				MPI_File_close(&inMPI);
-				MPI_File_close(&outMPI);
-				
+				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 #else
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				if(processors == 1){
@@ -363,7 +362,10 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 int SeqSummaryCommand::MPICreateSummary(int start, int num, vector<int>& startPosition, vector<int>& endPosition, vector<int>& seqLength, vector<int>& ambigBases, vector<int>& longHomoPolymer, MPI_File& inMPI, MPI_File& outMPI, vector<long>& MPIPos) {	
 	try {
 		
+		int pid;
 		MPI_Status status; 
+		MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+
 		
 		for(int i=0;i<num;i++){
 			
@@ -399,7 +401,7 @@ int SeqSummaryCommand::MPICreateSummary(int start, int num, vector<int>& startPo
 					
 				MPI_File_write_shared(outMPI, buf3, length, MPI_CHAR, &status);
 				delete buf3;
-			}						
+			}	
 		}
 		
 		return 0;

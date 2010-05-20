@@ -60,7 +60,7 @@ InputData::InputData(string fName, string orderFileName, string f) : format(f){
 
 ListVector* InputData::getListVector(){
 	try {
-		if(fileHandle){
+		if(!fileHandle.eof()){
 			if(format == "list") {
 				list = new ListVector(fileHandle);
 			}else{ list = NULL;  }
@@ -79,7 +79,6 @@ ListVector* InputData::getListVector(){
 }
 
 /***********************************************************************/
-
 ListVector* InputData::getListVector(string label){
 	try {
 		ifstream in;
@@ -115,7 +114,40 @@ ListVector* InputData::getListVector(string label){
 		exit(1);
 	}
 }
+/***********************************************************************/
+ListVector* InputData::getListVector(string label, bool resetFP){
+	try {
+		string  thisLabel;
+		fileHandle.clear();
+		fileHandle.seekg(0);
+		
+		if(fileHandle){
 
+			if (format == "list") {
+			
+				while (fileHandle.eof() != true) {
+					
+					list = new ListVector(fileHandle); gobble(fileHandle);
+					thisLabel = list->getLabel();
+					
+					//if you are at the last label
+					if (thisLabel == label) {  break;  }
+					//so you don't loose this memory
+					else {	delete list;	}
+				}
+			}else{ list = NULL;  }
+		
+			return list;
+		}
+		else{
+			return NULL;
+		}
+	}
+	catch(exception& e) {
+		m->errorOut(e, "InputData", "getListVector");
+		exit(1);
+	}
+}
 
 /***********************************************************************/
 

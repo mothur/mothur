@@ -82,36 +82,4 @@ void SuffixDB::addSequence(Sequence seq) {
 SuffixDB::~SuffixDB(){														
 	for (int i = (suffixForest.size()-1); i >= 0; i--) {  suffixForest.pop_back();  }
 }
-#ifdef USE_MPI	
-/**************************************************************************************************/
-int SuffixDB::MPISend(int receiver) {
-	try {
-		
-		//send numSeqs - int
-		MPI_Send(&numSeqs, 1, MPI_INT, receiver, 2001, MPI_COMM_WORLD); 
-									
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SuffixDB", "MPISend");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-int SuffixDB::MPIRecv(int sender) {
-	try {
-		MPI_Status status;
-		//receive numSeqs - int
-		MPI_Recv(&numSeqs, 1, MPI_INT, sender, 2001, MPI_COMM_WORLD, &status);
-		
-		suffixForest.resize(numSeqs);
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SuffixDB", "MPIRecv");
-		exit(1);
-	}
-}
-#endif	
 /**************************************************************************************************/

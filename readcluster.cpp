@@ -11,12 +11,14 @@
 
 /***********************************************************************/
 
-ReadCluster::ReadCluster(string distfile, float c, string o){
+ReadCluster::ReadCluster(string distfile, float c, string o, bool s){
 		globaldata = GlobalData::getInstance();
 		m = MothurOut::getInstance();
         distFile = distfile;
 		cutoff = c;
 		outputDir = o;
+		sortWanted = s;
+		list = NULL;
 }
 
 /***********************************************************************/
@@ -29,7 +31,8 @@ int ReadCluster::read(NameAssignment* nameMap){
 		
 		if (m->control_pressed) { return 0; }
 		
-		OutPutFile = sortFile(distFile, outputDir);
+		if (sortWanted) {  OutPutFile = sortFile(distFile, outputDir);  }
+		else {  OutPutFile = distFile;   } //for use by clusters splitMatrix to convert a phylip matrix to column
 		
 		return 0;
 			

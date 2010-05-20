@@ -122,12 +122,13 @@ PhyloTree::PhyloTree(string tfile){
 
 		
 		#ifdef USE_MPI
-			int pid, num;
+			int pid, num, processors;
 			vector<long> positions;
 			
 			MPI_Status status; 
 			MPI_File inMPI;
 			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+			MPI_Comm_size(MPI_COMM_WORLD, &processors);
 
 			char inFileName[1024];
 			strcpy(inFileName, tfile.c_str());
@@ -138,12 +139,14 @@ PhyloTree::PhyloTree(string tfile){
 				positions = setFilePosEachLine(tfile, num);
 				
 				//send file positions to all processes
-				MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);  //send numSeqs
-				MPI_Bcast(&positions[0], (num+1), MPI_LONG, 0, MPI_COMM_WORLD); //send file pos	
+				for(int i = 1; i < processors; i++) { 
+					MPI_Send(&num, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
+					MPI_Send(&positions[0], (num+1), MPI_LONG, i, 2001, MPI_COMM_WORLD);
+				}
 			}else{
-				MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD); //get numSeqs
-				positions.resize(num);
-				MPI_Bcast(&positions[0], (num+1), MPI_LONG, 0, MPI_COMM_WORLD); //get file positions
+				MPI_Recv(&num, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
+				positions.resize(num+1);
+				MPI_Recv(&positions[0], (num+1), MPI_LONG, 0, 2001, MPI_COMM_WORLD, &status);
 			}
 		
 			//read file 
@@ -164,6 +167,7 @@ PhyloTree::PhyloTree(string tfile){
 			}
 			
 			MPI_File_close(&inMPI);
+			MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 		
 		#else
 			ifstream in;

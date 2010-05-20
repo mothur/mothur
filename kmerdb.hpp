@@ -37,11 +37,6 @@ public:
 	vector<int> getSequencesWithKmer(int);  //returns vector of sequences that contain kmer passed in
 	int getMaxKmer() { return maxKmer; }
 	
-	#ifdef USE_MPI	
-	int MPISend(int); //just sends kmersize
-	int MPIRecv(int);
-	#endif
-	
 private:
 	
 	int kmerSize;

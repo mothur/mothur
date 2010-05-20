@@ -25,12 +25,14 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 		m->mothurOut("Reading in the " + fastaFileName + " template sequences...\t");	cout.flush();
 		
 		#ifdef USE_MPI	
-			int pid;
+			int pid, processors;
 			vector<long> positions;
 		
 			MPI_Status status; 
 			MPI_File inMPI;
 			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+			MPI_Comm_size(MPI_COMM_WORLD, &processors);
+			int tag = 2001;
 	
 			char inFileName[1024];
 			strcpy(inFileName, fastaFileName.c_str());
@@ -41,12 +43,14 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 				positions = setFilePosFasta(fastaFileName, numSeqs); //fills MPIPos, returns numSeqs
 
 				//send file positions to all processes
-				MPI_Bcast(&numSeqs, 1, MPI_INT, 0, MPI_COMM_WORLD);  //send numSeqs
-				MPI_Bcast(&positions[0], (numSeqs+1), MPI_LONG, 0, MPI_COMM_WORLD); //send file pos	
+				for(int i = 1; i < processors; i++) { 
+					MPI_Send(&numSeqs, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
+					MPI_Send(&positions[0], (numSeqs+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
+				}
 			}else{
-				MPI_Bcast(&numSeqs, 1, MPI_INT, 0, MPI_COMM_WORLD); //get numSeqs
+				MPI_Recv(&numSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
 				positions.resize(numSeqs+1);
-				MPI_Bcast(&positions[0], (numSeqs+1), MPI_LONG, 0, MPI_COMM_WORLD); //get file positions
+				MPI_Recv(&positions[0], (numSeqs+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
 			}
 		
 			//read file 
@@ -73,7 +77,9 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 					if (temp.getUnaligned().length() > longest)  { longest = temp.getUnaligned().length()+1; }
 				}
 			}
-		
+			
+			MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
+			
 			MPI_File_close(&inMPI);
 		
 	#else

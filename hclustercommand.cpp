@@ -192,7 +192,7 @@ int HClusterCommand::execute(){
 		time_t estart = time(NULL);
 		
 		if (!sorted) {
-			read = new ReadCluster(distfile, cutoff, outputDir); 	
+			read = new ReadCluster(distfile, cutoff, outputDir, true); 	
 			read->setFormat(format);
 			read->read(globaldata->nameMap);
 			

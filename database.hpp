@@ -56,11 +56,6 @@ public:
 	virtual vector<int> getSequencesWithKmer(int){ vector<int> filler; return filler; };  
 	virtual int getMaxKmer(){	return 1;	};
 	
-	#ifdef USE_MPI	
-	virtual int MPISend(int) = 0;
-	virtual int MPIRecv(int) = 0;
-	#endif
-	
 protected:
 	MothurOut* m;
 	int numSeqs, longest;

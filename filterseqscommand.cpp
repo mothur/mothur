@@ -282,8 +282,10 @@ int FilterSeqsCommand::filterSequences() {
 					numSeqs += num;
 					
 					//send file positions to all processes
-					MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);  //send numSeqs
-					MPI_Bcast(&MPIPos[0], (num+1), MPI_LONG, 0, MPI_COMM_WORLD); //send file pos	
+					for(int i = 1; i < processors; i++) { 
+						MPI_Send(&num, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
+						MPI_Send(&MPIPos[0], (num+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
+					}
 					
 					//figure out how many sequences you have to do
 					numSeqsPerProcessor = num / processors;
@@ -303,10 +305,10 @@ int FilterSeqsCommand::filterSequences() {
 					}
 					
 				}else { //you are a child process
-					MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD); //get numSeqs
-					numSeqs += num;
+					MPI_Recv(&num, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
 					MPIPos.resize(num+1);
-					MPI_Bcast(&MPIPos[0], (num+1), MPI_LONG, 0, MPI_COMM_WORLD); //get file positions
+					numSeqs += num;
+					MPI_Recv(&MPIPos[0], (num+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
 					
 					//figure out how many sequences you have to align
 					numSeqsPerProcessor = num / processors;
@@ -328,6 +330,7 @@ int FilterSeqsCommand::filterSequences() {
 				
 				MPI_File_close(&outMPI);
 				MPI_File_close(&inMPI);
+				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 				
 #else
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -543,7 +546,7 @@ string FilterSeqsCommand::createFilter() {
 		
 		F.setLength(alignmentLength);
 		
-		if(soft != 0 || isTrue(vertical)){
+		if(trump != '*' || isTrue(vertical) || soft != 0){
 			F.initialize();
 		}
 		
@@ -581,8 +584,10 @@ string FilterSeqsCommand::createFilter() {
 						numSeqs += num;
 						
 						//send file positions to all processes
-						MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD);  //send numSeqs
-						MPI_Bcast(&MPIPos[0], (num+1), MPI_LONG, 0, MPI_COMM_WORLD); //send file pos	
+						for(int i = 1; i < processors; i++) { 
+							MPI_Send(&num, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
+							MPI_Send(&MPIPos[0], (num+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
+						}
 								
 						//figure out how many sequences you have to do
 						numSeqsPerProcessor = num / processors;
@@ -596,11 +601,10 @@ string FilterSeqsCommand::createFilter() {
 						if (m->control_pressed) {  MPI_File_close(&inMPI);  return 0;  }
 												
 				}else { //i am the child process
-			
-					MPI_Bcast(&num, 1, MPI_INT, 0, MPI_COMM_WORLD); //get numSeqs
+					MPI_Recv(&num, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
 					MPIPos.resize(num+1);
 					numSeqs += num;
-					MPI_Bcast(&MPIPos[0], (num+1), MPI_LONG, 0, MPI_COMM_WORLD); //get file positions
+					MPI_Recv(&MPIPos[0], (num+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
 					
 					//figure out how many sequences you have to align
 					numSeqsPerProcessor = num / processors;
@@ -615,6 +619,7 @@ string FilterSeqsCommand::createFilter() {
 				}
 				
 				MPI_File_close(&inMPI);
+				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 				
 #else
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -668,20 +673,24 @@ string FilterSeqsCommand::createFilter() {
 				vector<int> temp; temp.resize(alignmentLength+1);
 								
 				//get the frequencies from the child processes
-				for(int i = 0; i < ((processors-1)*5); i++) { 
-					MPI_Recv(&temp[0], (alignmentLength+1), MPI_INT, MPI_ANY_SOURCE, 2001, MPI_COMM_WORLD, &status); 
-					int receiveTag = temp[temp.size()-1];  //child process added a int to the end to indicate what letter count this is for
+				for(int i = 1; i < processors; i++) { 
+				
+					for (int j = 0; j < 5; j++) {
 					
-					if (receiveTag == Atag) { //you are recieveing the A frequencies
-						for (int k = 0; k < alignmentLength; k++) {		F.a[k] += temp[k];	}
-					}else if (receiveTag == Ttag) { //you are recieveing the T frequencies
-						for (int k = 0; k < alignmentLength; k++) {		F.t[k] += temp[k];	}
-					}else if (receiveTag == Ctag) { //you are recieveing the C frequencies
-						for (int k = 0; k < alignmentLength; k++) {		F.c[k] += temp[k];	}
-					}else if (receiveTag == Gtag) { //you are recieveing the G frequencies
-						for (int k = 0; k < alignmentLength; k++) {		F.g[k] += temp[k];	}
-					}else if (receiveTag == Gaptag) { //you are recieveing the gap frequencies
-						for (int k = 0; k < alignmentLength; k++) {		F.gap[k] += temp[k];	}
+						MPI_Recv(&temp[0], (alignmentLength+1), MPI_INT, i, 2001, MPI_COMM_WORLD, &status); 
+						int receiveTag = temp[temp.size()-1];  //child process added a int to the end to indicate what letter count this is for
+						
+						if (receiveTag == Atag) { //you are recieveing the A frequencies
+							for (int k = 0; k < alignmentLength; k++) {		F.a[k] += temp[k];	}
+						}else if (receiveTag == Ttag) { //you are recieveing the T frequencies
+							for (int k = 0; k < alignmentLength; k++) {		F.t[k] += temp[k];	}
+						}else if (receiveTag == Ctag) { //you are recieveing the C frequencies
+							for (int k = 0; k < alignmentLength; k++) {		F.c[k] += temp[k];	}
+						}else if (receiveTag == Gtag) { //you are recieveing the G frequencies
+							for (int k = 0; k < alignmentLength; k++) {		F.g[k] += temp[k];	}
+						}else if (receiveTag == Gaptag) { //you are recieveing the gap frequencies
+							for (int k = 0; k < alignmentLength; k++) {		F.gap[k] += temp[k];	}
+						}
 					}
 				} 
 			}else{
@@ -701,6 +710,8 @@ string FilterSeqsCommand::createFilter() {
 			
 		}
 		
+		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
+		
 		if (pid == 0) { //only one process should output the filter
 #endif
 		F.setNumSeqs(numSeqs);
@@ -712,10 +723,14 @@ string FilterSeqsCommand::createFilter() {
 		
 #ifdef USE_MPI
 		//send filter string to kids
-		MPI_Bcast(&filterString[0], alignmentLength, MPI_CHAR, 0, MPI_COMM_WORLD); 
+		//for(int i = 1; i < processors; i++) { 
+		//	MPI_Send(&filterString[0], alignmentLength, MPI_CHAR, i, 2001, MPI_COMM_WORLD);
+		//}
+		MPI_Bcast(&filterString[0], alignmentLength, MPI_CHAR, 0, MPI_COMM_WORLD);
 	}else{
 		//recieve filterString
 		char* tempBuf = new char[alignmentLength];
+		//MPI_Recv(&tempBuf[0], alignmentLength, MPI_CHAR, 0, 2001, MPI_COMM_WORLD, &status);
 		MPI_Bcast(tempBuf, alignmentLength, MPI_CHAR, 0, MPI_COMM_WORLD);
 		
 		filterString = tempBuf;
@@ -725,8 +740,7 @@ string FilterSeqsCommand::createFilter() {
 	
 	MPI_Barrier(MPI_COMM_WORLD);
 #endif
-		
-		
+				
 		return filterString;
 	}
 	catch(exception& e) {
