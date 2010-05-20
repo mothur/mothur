@@ -177,15 +177,17 @@ int ClusterSplitCommand::execute(){
 		
 		//if user gave a phylip file convert to column file
 		if (format == "phylip") {
+	
 			ReadCluster* convert = new ReadCluster(distfile, cutoff, outputDir, false);
 			
 			NameAssignment* nameMap = NULL;
+			convert->setFormat("phylip");
 			convert->read(nameMap);
 			
 			if (m->control_pressed) {  delete convert;  return 0;  }
 			
-			string distfile = convert->getOutputFile();
-			
+			distfile = convert->getOutputFile();
+		
 			//if no names file given with phylip file, create it
 			ListVector* listToMakeNameFile =  convert->getListVector();
 			if (namefile == "") {  //you need to make a namefile for split matrix
@@ -201,7 +203,6 @@ int ClusterSplitCommand::execute(){
 			delete listToMakeNameFile;
 			delete convert;
 		}
-		
 		if (m->control_pressed) { return 0; }
 		
 		time_t estart = time(NULL);
@@ -372,6 +373,13 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, string singleton, 
 			//get the list info from each file
 			for (int k = 0; k < listNames.size(); k++) {
 	
+				if (m->control_pressed) {  
+					if (listSingle != NULL) { delete listSingle; remove(singleton.c_str());  }
+					for (int i = 0; i < listNames.size(); i++) {  delete inputs[i];  remove(listNames[i].c_str());  }
+					delete merged; merged = NULL;
+					return 0;
+				}
+				
 				ListVector* list = inputs[k]->getListVector();
 				
 				//this file has reached the end
@@ -413,6 +421,8 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, string singleton, 
 		if (listSingle != NULL) { delete listSingle; remove(singleton.c_str());  }
 		
 		for (int i = 0; i < listNames.size(); i++) {  delete inputs[i];  remove(listNames[i].c_str());  }
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterSplitCommand", "mergeLists");

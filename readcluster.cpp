@@ -54,7 +54,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
 		ofstream out;
 		string tempFile = distFile + ".column.temp";
 		
-		openInputFile(distFile, in);
+		openInputFile(distFile, in);  gobble(in);
 		openOutputFile(tempFile, out);
 		
 		float distance;
@@ -177,7 +177,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
 		list->setLabel("0");
 		in.close();
 		out.close();
-		
+	
 		if(nameMap == NULL){
 			nameMap = new NameAssignment();
 			for(int i=0;i<matrixNames.size();i++){
@@ -209,7 +209,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
 		
 		remove(tempFile.c_str());
 		distFile = outputFile;
-		
+	
 		if (m->control_pressed) {  remove(outputFile.c_str());  }
 
 		return 0;
