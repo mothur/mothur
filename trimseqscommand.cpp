@@ -364,7 +364,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 				return 0;
 			}
 			
-			bool success = 1;
+			int success = 1;
 			
 			Sequence currSeq(inFASTA);
 
@@ -385,7 +385,6 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			
 				if(barcodes.size() != 0){
 					success = stripBarcode(currSeq, group);
-//					cout << "here: " << success << endl;
 					if(success > bdiffs){	trashCode += 'b';	}
 					else{ currentSeqsDiffs += success;  }
 				}
@@ -419,7 +418,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 				if(flip){	currSeq.reverseComplement();	}		// should go last			
 				
 				if(trashCode.length() == 0){
-					currSeq.setAligned(currSeq.getUnaligned());  //this is because of a modification we made to the sequence class to fix a bug.  all seqs have an aligned version, which is the version that gets printed.
+					currSeq.setAligned(currSeq.getUnaligned());
 					currSeq.printSequence(outFASTA);
 					if(barcodes.size() != 0){
 						outGroups << currSeq.getName() << '\t' << groupVector[group] << endl;
@@ -432,6 +431,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 				else{
 					currSeq.setName(currSeq.getName() + '|' + trashCode);
 					currSeq.setUnaligned(origSeq);
+					currSeq.setAligned(origSeq);
 					currSeq.printSequence(scrapFASTA);
 				}
 			}
@@ -610,15 +610,16 @@ void TrimSeqsCommand::getOligos(vector<string>& outFASTAVec){ //vector<ofstream*
 
 int TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
 	try {
+		
 		string rawSequence = seq.getUnaligned();
-		bool success = bdiffs + 1;	//guilty until proven innocent
+		int success = bdiffs + 1;	//guilty until proven innocent
 		
 		//can you find the barcode
 		for(map<string,int>::iterator it=barcodes.begin();it!=barcodes.end();it++){
 			string oligo = it->first;
 			if(rawSequence.length() < oligo.length()){	//let's just assume that the barcodes are the same length
-				success = bdiffs + 1;
-				break;
+				success = bdiffs + 10;					//if the sequence is shorter than the barcode then bail out
+				break;	
 			}
 			
 			if(compareDNASeq(oligo, rawSequence.substr(0,oligo.length()))){
@@ -662,7 +663,7 @@ int TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
 //				int length = oligo.length();
 				
 				if(rawSequence.length() < maxLength){	//let's just assume that the barcodes are the same length
-					success = bdiffs + 1;
+					success = bdiffs + 10;
 					break;
 				}
 				
@@ -678,7 +679,6 @@ int TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
 				}
 				oligo = oligo.substr(0,alnLength);
 				temp = temp.substr(0,alnLength);
-//				
 				
 				int newStart=0;
 				int numDiff = countDiffs(oligo, temp);
@@ -698,17 +698,20 @@ int TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
 				}
 
 			}
-			if(minDiff > bdiffs){	success =  bdiffs + 1;	}
-			else if(minCount > 1)	{	success =  bdiffs + 1;	}
-			else{
+
+			if(minDiff > bdiffs)	{	success = minDiff;		}	//no good matches
+			else if(minCount > 1)	{	success = bdiffs + 100;	}	//can't tell the difference between multiple barcodes
+			else{													//use the best match
 				group = minGroup;
-				seq.setUnaligned("*" + rawSequence.substr(minPos));
+				seq.setUnaligned(rawSequence.substr(minPos));
 				success = minDiff;
 			}
 			
 			if (alignment != NULL) {  delete alignment;  }
 			
 		}
+//		cout << success << endl;
+		
 		return success;
 		
 	}
@@ -724,7 +727,7 @@ int TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
 int TrimSeqsCommand::stripForward(Sequence& seq){
 	try {
 		string rawSequence = seq.getUnaligned();
-		bool success = pdiffs + 1;	//guilty until proven innocent
+		int success = pdiffs + 1;	//guilty until proven innocent
 		
 		//can you find the primer
 		for(int i=0;i<numFPrimers;i++){
@@ -772,7 +775,7 @@ int TrimSeqsCommand::stripForward(Sequence& seq){
 				string oligo = forPrimer[i];
 				
 				if(rawSequence.length() < maxLength){	
-					success = pdiffs + 1;
+					success = pdiffs + 100;
 					break;
 				}
 				
@@ -788,7 +791,7 @@ int TrimSeqsCommand::stripForward(Sequence& seq){
 				}
 				oligo = oligo.substr(0,alnLength);
 				temp = temp.substr(0,alnLength);
-//								
+
 				int newStart=0;
 				int numDiff = countDiffs(oligo, temp);
 				if(numDiff < minDiff){
@@ -806,10 +809,10 @@ int TrimSeqsCommand::stripForward(Sequence& seq){
 				}
 
 			}
-			if(minDiff > pdiffs){	success =  pdiffs + 1;	}
-			else if(minCount > 1)	{	success =  pdiffs + 1;	}
+			if(minDiff > pdiffs)	{	success =  minDiff;		}
+			else if(minCount > 1)	{	success =  pdiffs + 10;	}
 			else{
-				seq.setUnaligned("*" + rawSequence.substr(minPos));
+				seq.setUnaligned(rawSequence.substr(minPos));
 				success = minDiff;
 			}
 			
