@@ -26,7 +26,7 @@ ifeq  ($(strip $(USEREADLINE)),yes)
       -L../readline-6.0
 endif
 
-USEMPI ?= yes
+USEMPI ?= no
 
 ifeq  ($(strip $(USEMPI)),yes)
 	CC = mpic++
@@ -459,7 +459,7 @@ mothur : \
 		./logsd.o\
 		./geom.o\
 		./setlogfilecommand.o\
-		-o ../Release/mothur
+		-o mothur
 
 clean : 
 		rm \

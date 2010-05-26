@@ -13,14 +13,8 @@
 		A72B3A63118B37FD004B9F8D /* phylodiversitycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = phylodiversitycommand.cpp; sourceTree = "<group>"; };
 		A72B3A7B118B4D1B004B9F8D /* phylodiversity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = phylodiversity.h; sourceTree = "<group>"; };
 		A72B3A7C118B4D1B004B9F8D /* phylodiversity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = phylodiversity.cpp; sourceTree = "<group>"; };
-		A730977D11A417BE00117C95 /* splitmatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = splitmatrix.h; sourceTree = SOURCE_ROOT; };
-		A730977E11A417BE00117C95 /* splitmatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = splitmatrix.cpp; sourceTree = SOURCE_ROOT; };
-		A73097B911A43E1300117C95 /* clustersplitcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clustersplitcommand.h; sourceTree = "<group>"; };
-		A73097BA11A43E1300117C95 /* clustersplitcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clustersplitcommand.cpp; sourceTree = "<group>"; };
 		A73953DA11987ED100B0B160 /* chopseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chopseqscommand.h; sourceTree = "<group>"; };
 		A73953DB11987ED100B0B160 /* chopseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chopseqscommand.cpp; sourceTree = "<group>"; };
-		A73F163411A1951D0087CA57 /* splitabundcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = splitabundcommand.h; sourceTree = "<group>"; };
-		A73F163511A1951D0087CA57 /* splitabundcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = splitabundcommand.cpp; sourceTree = "<group>"; };
 		A747E79B1163442A00FB9042 /* chimeracheckcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeracheckcommand.h; sourceTree = "<group>"; };
 		A747E79C1163442A00FB9042 /* chimeracheckcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeracheckcommand.cpp; sourceTree = "<group>"; };
 		A747E81C116365E000FB9042 /* chimeraslayercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraslayercommand.h; sourceTree = "<group>"; };
@@ -674,10 +668,8 @@
 				A7DA201D113FECD400BF472F /* classifyseqscommand.cpp */,
 				A7D215C811996C6E00F13F13 /* clearcutcommand.h */,
 				A7D215C911996C6E00F13F13 /* clearcutcommand.cpp */,
-				A7DA2022113FECD400BF472F /* clustercommand.h */,
 				A7DA2021113FECD400BF472F /* clustercommand.cpp */,
-				A73097B911A43E1300117C95 /* clustersplitcommand.h */,
-				A73097BA11A43E1300117C95 /* clustersplitcommand.cpp */,
+				A7DA2022113FECD400BF472F /* clustercommand.h */,
 				A7DA2025113FECD400BF472F /* collectcommand.cpp */,
 				A7DA2026113FECD400BF472F /* collectcommand.h */,
 				A7DA2029113FECD400BF472F /* collectsharedcommand.cpp */,
@@ -772,8 +764,6 @@
 				A76C4A1111876BAF0009460B /* setlogfilecommand.cpp */,
 				A7DA2110113FECD400BF472F /* sharedcommand.h */,
 				A7DA210F113FECD400BF472F /* sharedcommand.cpp */,
-				A73F163411A1951D0087CA57 /* splitabundcommand.h */,
-				A73F163511A1951D0087CA57 /* splitabundcommand.cpp */,
 				A7DA2155113FECD400BF472F /* summarycommand.h */,
 				A7DA2154113FECD400BF472F /* summarycommand.cpp */,
 				A7DA2159113FECD400BF472F /* summarysharedcommand.h */,
@@ -925,8 +915,6 @@
 				A7DA20ED113FECD400BF472F /* readphylip.h */,
 				A7DA20EE113FECD400BF472F /* readtree.cpp */,
 				A7DA20EF113FECD400BF472F /* readtree.h */,
-				A730977D11A417BE00117C95 /* splitmatrix.h */,
-				A730977E11A417BE00117C95 /* splitmatrix.cpp */,
 			);
 			name = read;
 			sourceTree = "<group>";
@@ -991,7 +979,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LINK_WITH_STANDARD_LIBRARIES = YES;
 				PREBINDING = NO;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.5.sdk";
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
 			};
 			name = Release;
 		};
