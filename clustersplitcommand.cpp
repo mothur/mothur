@@ -27,7 +27,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"phylip","column","name","cutoff","precision","method","showabund","timing","hard","processors","splitcutoff","outputdir","inputdir"};
+			string Array[] =  {"phylip","column","name","cutoff","precision","method","showabund","timing","hard","processors","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -121,11 +121,6 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			convert(temp, cutoff); 
 			if (!hard) {	cutoff += (5 / (precision * 10.0));  }
 			
-			temp = validParameter.validFile(parameters, "splitcutoff", false);
-			if (temp == "not found") { temp = "0.10"; }
-			convert(temp, splitcutoff); 
-			if (!hard) {	splitcutoff += (5 / (precision * 10.0));  }
-			
 			method = validParameter.validFile(parameters, "method", false);
 			if (method == "not found") { method = "furthest"; }
 			
@@ -208,7 +203,7 @@ int ClusterSplitCommand::execute(){
 		time_t estart = time(NULL);
 		
 		//split matrix into non-overlapping groups
-		SplitMatrix* split = new SplitMatrix(distfile, namefile, splitcutoff);
+		SplitMatrix* split = new SplitMatrix(distfile, namefile, cutoff);
 		split->split();
 		
 		if (m->control_pressed) { delete split; return 0; }

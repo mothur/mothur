@@ -32,6 +32,8 @@ PhyloTree::PhyloTree(ifstream& in, string filename){
 	try {
 		m = MothurOut::getInstance();
 		calcTotals = false;
+		numNodes = 0;
+		numSeqs = 0;
 		
 		#ifdef USE_MPI
 			MPI_File inMPI;
@@ -216,6 +218,7 @@ string PhyloTree::getNextTaxon(string& heirarchy){
 
 int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 	try {
+			
 		numSeqs++;
 		
 		map<string, int>::iterator childPointer;
@@ -235,6 +238,8 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 			//somehow the parent is getting one too many accnos
 			//use print to reassign the taxa id
 			taxon = getNextTaxon(seqTaxonomy);
+			
+			if (taxon == "") {  m->mothurOut(seqName + " has an error in the taxonomy.  This may be due to a ;;"); m->mothurOutEndLine(); if (currentNode != 0) {  uniqueTaxonomies[currentNode] = currentNode; } break;  }
 			
 			childPointer = tree[currentNode].children.find(taxon);
 			
@@ -260,7 +265,7 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 				//			tree[currentNode].childNumber = numChildren;
 				//			tree[currentNode].heirarchyID = heirarchyID + '.' + toString(tree[currentNode].childNumber);
 			}
-		
+	
 			if (seqTaxonomy == "") {   uniqueTaxonomies[currentNode] = currentNode;	}
 		}
 
@@ -520,7 +525,6 @@ void PhyloTree::printTreeNodes(string treefilename) {
 			for (it2=uniqueTaxonomies.begin(); it2!=uniqueTaxonomies.end(); it2++) {  outTree << it2->first << '\t' << tree[it2->first].accessions.size() << endl;	}
 			outTree << endl;
 			
-			
 			outTree.close();
 		
 		#ifdef USE_MPI
@@ -535,6 +539,93 @@ void PhyloTree::printTreeNodes(string treefilename) {
 	}
 }
 /**************************************************************************************************/
+TaxNode PhyloTree::get(int i ){
+	try {
+		if (i < tree.size()) {  return tree[i];	 }
+		else {  cout << i << '\t' << tree.size() << endl ; m->mothurOut("Mismatch with taxonomy and template files. Cannot continue."); m->mothurOutEndLine(); exit(1); }
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhyloTree", "get");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+TaxNode PhyloTree::get(string seqName){
+	try {
+		map<string, int>::iterator itFind = name2Taxonomy.find(seqName);
+	
+		if (itFind != name2Taxonomy.end()) {  return tree[name2Taxonomy[seqName]];  }
+		else { m->mothurOut("Cannot find " + seqName + ". Mismatch with taxonomy and template files. Cannot continue."); m->mothurOutEndLine(); exit(1);}
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhyloTree", "get");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+string PhyloTree::getName(int i ){
+	try {
+		if (i < tree.size()) {  return tree[i].name;	 }
+		else { m->mothurOut("Mismatch with taxonomy and template files. Cannot continue."); m->mothurOutEndLine(); exit(1); }
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhyloTree", "get");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+int PhyloTree::getIndex(string seqName){
+	try {
+		map<string, int>::iterator itFind = name2Taxonomy.find(seqName);
+	
+		if (itFind != name2Taxonomy.end()) {  return name2Taxonomy[seqName];  }
+		else { m->mothurOut("Cannot find " + seqName + ". Mismatch with taxonomy and template files. Cannot continue."); m->mothurOutEndLine(); exit(1);}
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhyloTree", "get");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+bool PhyloTree::ErrorCheck(vector<string> templateFileNames){
+	try {
+	
+		bool okay = true;
+		
+		map<string, int>::iterator itFind;
+		map<string, int> taxonomyFileNames = name2Taxonomy;
+		
+		for (int i = 0; i < templateFileNames.size(); i++) {
+			itFind = taxonomyFileNames.find(templateFileNames[i]);
+			
+			if (itFind != name2Taxonomy.end()) { //found it so erase it
+				taxonomyFileNames.erase(itFind);
+			}else {
+				m->mothurOut(templateFileNames[i] + " is in your template file and is not in your taxonomy file. Please correct."); m->mothurOutEndLine();
+				okay = false;
+			}
+			
+			templateFileNames.erase(templateFileNames.begin()+i);
+			i--;
+		}
+		
+		if (taxonomyFileNames.size() > 0) { //there are names in tax file that are not in template
+			okay = false;
+			
+			for (itFind = taxonomyFileNames.begin(); itFind != taxonomyFileNames.end(); itFind++) {
+				m->mothurOut(itFind->first + " is in your taxonomy file and is not in your template file. Please correct."); m->mothurOutEndLine();
+			}
+		}
+		
+		return okay;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhyloTree", "ErrorCheck");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+	
 
 
 	

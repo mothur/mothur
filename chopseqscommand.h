@@ -12,6 +12,7 @@
 
 
 #include "command.hpp"
+#include "sequence.hpp"
 
 class ChopSeqsCommand : public Command {
 	
@@ -25,7 +26,10 @@ class ChopSeqsCommand : public Command {
 	private:
 		string fastafile, outputDir;
 		bool abort;
-		int end;
+		int end, fromend;
+		
+		string getChoppedAligned(Sequence);
+		string getChoppedUnaligned(Sequence);
 };
 
 #endif

@@ -128,7 +128,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 				gobble(fastaFile);
 			
 				names.push_back(temp.getName());
-								
+							
 				database->addSequence(temp);	
 			}
 			fastaFile.close();
@@ -152,6 +152,11 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 		}
 #endif		
 		database->setNumSeqs(names.size());
+		
+		//sanity check
+		bool okay = phyloTree->ErrorCheck(names);
+		
+		if (!okay) { m->control_pressed = true; }
 		
 		m->mothurOut("DONE."); m->mothurOutEndLine();
 		m->mothurOut("It took " + toString(time(NULL) - start) + " seconds generate search database. "); m->mothurOutEndLine();

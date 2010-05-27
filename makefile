@@ -10,7 +10,7 @@
 # Macros
 #
 
-CC = g++
+CC = g++ 
 CC_OPTIONS = -O3
 
 # if you do not want to use the readline library set to no, default yes.
@@ -459,7 +459,7 @@ mothur : \
 		./logsd.o\
 		./geom.o\
 		./setlogfilecommand.o\
-		-o mothur
+		-o ../Release/mothur
 
 clean : 
 		rm \
@@ -1687,15 +1687,15 @@ install : mothur
 	$(CC) $(CC_OPTIONS) catchallcommand.cpp -c $(INCLUDE) -o ./catchallcommand.o
 
 # Item # 205 -- splitabundcommand --
-./splitabundcommand : splitabundcommand
-	$(CC) $(CC_OPTIONS) splitabundcommand -c $(INCLUDE) -o ./splitabundcommand
+./splitabundcommand.o : splitabundcommand.cpp
+	$(CC) $(CC_OPTIONS) splitabundcommand.cpp -c $(INCLUDE) -o ./splitabundcommand.o
 	
 # Item # 206 -- splitmatrix --
-./splitmatrix : splitmatrix
-	$(CC) $(CC_OPTIONS) splitmatrix -c $(INCLUDE) -o ./splitmatrix
+./splitmatrix.o : splitmatrix.o
+	$(CC) $(CC_OPTIONS) splitmatrix.cpp -c $(INCLUDE) -o ./splitmatrix.o
 	
 # Item # 207 -- splitmatrix --
-./clustersplitcommand : clustersplitcommand
-	$(CC) $(CC_OPTIONS) clustersplitcommand -c $(INCLUDE) -o ./clustersplitcommand
+./clustersplitcommand.o : clustersplitcommand.cpp
+	$(CC) $(CC_OPTIONS) clustersplitcommand.cpp -c $(INCLUDE) -o ./clustersplitcommand.o
 
 ##### END RUN ####
