@@ -999,13 +999,28 @@ bool TrimSeqsCommand::stripQualThreshold(Sequence& seq, ifstream& qFile){
 		int seqLength;  // = rawSequence.length();
 		string name, temp, temp2;
 		
-		qFile >> name >> temp;
+		qFile >> name;
+		
+		//get rest of line
+		temp = "";
+		while (!qFile.eof())	{	
+			char c = qFile.get(); 
+			if (c == 10 || c == 13){	break;	}	
+			else { temp += c; }
+		} 
 	
+		int pos = temp.find("length");
+		if (pos == temp.npos) { m->mothurOut("Cannot find length in qfile for " + seq.getName()); m->mothurOutEndLine();  seqLength = 0;  }
+		else {
+			string tempLength = temp.substr(pos);
+			istringstream iss (tempLength,istringstream::in);
+			iss >> temp;
+		}
+		
 		splitAtEquals(temp2, temp); //separates length=242, temp=length, temp2=242
 		convert(temp, seqLength); //converts string to int
 	
 		if (name.length() != 0) {  if(name.substr(1) != seq.getName())	{	m->mothurOut("sequence name mismatch btwn fasta and qual file"); m->mothurOutEndLine();	}  } 
-		while (!qFile.eof())	{	char c = qFile.get(); if (c == 10 || c == 13){	break;	}	}
 		
 		int score;
 		int end = seqLength;

@@ -93,8 +93,8 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
 			
-			if ((phylipfile == "") && (columnfile == "")) { m->mothurOut("When executing a hcluster command you must enter a phylip or a column."); m->mothurOutEndLine(); abort = true; }
-			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When executing a hcluster command you must enter ONLY ONE of the following: phylip or column."); m->mothurOutEndLine(); abort = true; }
+			if ((phylipfile == "") && (columnfile == "")) { m->mothurOut("When executing a cluster.split command you must enter a phylip or a column."); m->mothurOutEndLine(); abort = true; }
+			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When executing a cluster.split command you must enter ONLY ONE of the following: phylip or column."); m->mothurOutEndLine(); abort = true; }
 		
 			if (columnfile != "") {
 				if (namefile == "") {  cout << "You need to provide a namefile if you are going to use the column format." << endl; abort = true; }
