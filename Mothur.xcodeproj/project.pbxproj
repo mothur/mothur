@@ -9,6 +9,12 @@
 /* Begin PBXFileReference section */
 		A703FE931194645F002C397E /* makegroupcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = makegroupcommand.h; sourceTree = SOURCE_ROOT; };
 		A703FE941194645F002C397E /* makegroupcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = makegroupcommand.cpp; sourceTree = SOURCE_ROOT; };
+		A71D924211AEB42400D00CBC /* clustersplitcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clustersplitcommand.cpp; sourceTree = "<group>"; };
+		A71D924311AEB42400D00CBC /* clustersplitcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clustersplitcommand.h; sourceTree = "<group>"; };
+		A71D924411AEB42400D00CBC /* splitabundcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = splitabundcommand.cpp; sourceTree = "<group>"; };
+		A71D924511AEB42400D00CBC /* splitabundcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = splitabundcommand.h; sourceTree = "<group>"; };
+		A71D924611AEB42400D00CBC /* splitmatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = splitmatrix.cpp; sourceTree = "<group>"; };
+		A71D924711AEB42400D00CBC /* splitmatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = splitmatrix.h; sourceTree = "<group>"; };
 		A72B3A62118B37FD004B9F8D /* phylodiversitycommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = phylodiversitycommand.h; sourceTree = "<group>"; };
 		A72B3A63118B37FD004B9F8D /* phylodiversitycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = phylodiversitycommand.cpp; sourceTree = "<group>"; };
 		A72B3A7B118B4D1B004B9F8D /* phylodiversity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = phylodiversity.h; sourceTree = "<group>"; };
@@ -670,6 +676,8 @@
 				A7D215C911996C6E00F13F13 /* clearcutcommand.cpp */,
 				A7DA2021113FECD400BF472F /* clustercommand.cpp */,
 				A7DA2022113FECD400BF472F /* clustercommand.h */,
+				A71D924311AEB42400D00CBC /* clustersplitcommand.h */,
+				A71D924211AEB42400D00CBC /* clustersplitcommand.cpp */,
 				A7DA2025113FECD400BF472F /* collectcommand.cpp */,
 				A7DA2026113FECD400BF472F /* collectcommand.h */,
 				A7DA2029113FECD400BF472F /* collectsharedcommand.cpp */,
@@ -764,6 +772,8 @@
 				A76C4A1111876BAF0009460B /* setlogfilecommand.cpp */,
 				A7DA2110113FECD400BF472F /* sharedcommand.h */,
 				A7DA210F113FECD400BF472F /* sharedcommand.cpp */,
+				A71D924511AEB42400D00CBC /* splitabundcommand.h */,
+				A71D924411AEB42400D00CBC /* splitabundcommand.cpp */,
 				A7DA2155113FECD400BF472F /* summarycommand.h */,
 				A7DA2154113FECD400BF472F /* summarycommand.cpp */,
 				A7DA2159113FECD400BF472F /* summarysharedcommand.h */,
@@ -915,6 +925,8 @@
 				A7DA20ED113FECD400BF472F /* readphylip.h */,
 				A7DA20EE113FECD400BF472F /* readtree.cpp */,
 				A7DA20EF113FECD400BF472F /* readtree.h */,
+				A71D924711AEB42400D00CBC /* splitmatrix.h */,
+				A71D924611AEB42400D00CBC /* splitmatrix.cpp */,
 			);
 			name = read;
 			sourceTree = "<group>";
