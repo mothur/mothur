@@ -41,13 +41,15 @@ public:
 	vector<int> getGenusTotals();	
 	void setUp(string);  //used to create file needed for summary file if you use () constructor and add seqs manually instead of passing taxonomyfile
 		
-	TaxNode get(int i)				{	return tree[i];							}
-	TaxNode get(string seqName)		{	return tree[name2Taxonomy[seqName]];	}
-	int getIndex(string seqName)	{	return name2Taxonomy[seqName];			}
-	string getName(int i)			{	return tree[i].name;					}
+	TaxNode get(int i);				
+	TaxNode get(string seqName);
+	string getName(int i);			
+	int getIndex(string seqName);	
+			
 	string getFullTaxonomy(string);	 //pass a sequence name return taxonomy
 	int getMaxLevel()				{	return maxLevel;						}
 	int getNumSeqs()  {  return numSeqs;  }
+	bool ErrorCheck(vector<string>);
 	
 private:
 	string getNextTaxon(string&);

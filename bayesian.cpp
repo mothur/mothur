@@ -213,7 +213,7 @@ string Bayesian::getTaxonomy(Sequence* seq) {
 		int index = getMostProbableTaxonomy(queryKmers);
 		
 		if (m->control_pressed) { return tax; }
-					
+//cout << seq->getName() << '\t' << index << endl;					
 		//bootstrap - to set confidenceScore
 		int numToSelect = queryKmers.size() / 8;
 		tax = bootstrapResults(queryKmers, index, numToSelect);
@@ -249,10 +249,10 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 			
 			//get taxonomy
 			int newTax = getMostProbableTaxonomy(temp);
-			TaxNode taxonomy = phyloTree->get(newTax);
-			
+			TaxNode taxonomyTemp = phyloTree->get(newTax);
+	
 			//add to confidence results
-			while (taxonomy.level != 0) { //while you are not at the root
+			while (taxonomyTemp.level != 0) { //while you are not at the root
 				
 				itBoot2 = confidenceScores.find(newTax); //is this a classification we already have a count on
 				
@@ -262,8 +262,8 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 					confidenceScores[newTax]++;
 				}
 				
-				newTax = taxonomy.parent;
-				taxonomy = phyloTree->get(taxonomy.parent);
+				newTax = taxonomyTemp.parent;
+				taxonomyTemp = phyloTree->get(newTax);
 			}
 	
 		}
