@@ -8,19 +8,44 @@
  */
 
 #include "splitmatrix.h"
+#include "phylotree.h"
 
 /***********************************************************************/
 
-SplitMatrix::SplitMatrix(string distfile, string name, float c){
+SplitMatrix::SplitMatrix(string distfile, string name, string tax, float c, string t){
 	m = MothurOut::getInstance();
 	distFile = distfile;
 	cutoff = c;
 	namefile = name;
+	method = t;
+	taxFile = tax;
 }
 
 /***********************************************************************/
 
 int SplitMatrix::split(){
+	try {
+        
+		if (method == "distance") {  
+			splitDistance();
+		}else if (method == "classify") {
+			splitClassify();
+		}else {
+			m->mothurOut("Unknown splitting method, aborting split."); m->mothurOutEndLine();
+			map<string, string> temp;
+			temp[distFile] = namefile;
+			dists.push_back(temp);
+		}
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SplitMatrix", "split");
+		exit(1);
+	}
+}
+/***********************************************************************/
+int SplitMatrix::splitDistance(){
 	try {
         
 		vector<set<string> > groups;
@@ -36,6 +61,8 @@ int SplitMatrix::split(){
 
 			dFile >> seqA >> seqB >> dist;
 			
+			if (m->control_pressed) {  outFile.close(); dFile.close();  for(int i=0;i<numGroups;i++){	if(groups[i].size() > 0){  remove((distFile + "." + toString(i) + ".temp").c_str()); }  } return 0; }
+					
 			if(dist < cutoff){
 				//cout << "in cutoff: " << dist << endl;
 				int groupIDA = -1;
@@ -172,7 +199,7 @@ int SplitMatrix::split(){
 				smallNameFile.close();
 			}
 		}
-			
+		
 		//names of singletons
 		if (nameMap.size() != 0) {
 			singleton = namefile + ".extra.temp";
@@ -193,12 +220,160 @@ int SplitMatrix::split(){
 				dists.push_back(temp);
 			}
 		}
-				
+		
+		if (m->control_pressed)	 {  
+			for (int i = 0; i < dists.size(); i++) { 
+				remove((dists[i].begin()->first).c_str());
+				remove((dists[i].begin()->second).c_str());
+			}
+			dists.clear();
+		}
+		
 		return 0;
 			
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SplitMatrix", "split");
+		m->errorOut(e, "SplitMatrix", "splitDistance");
+		exit(1);
+	}
+}
+
+/***********************************************************************/
+int SplitMatrix::splitClassify(){
+	try {
+		map<string, int> seqGroup;
+		map<string, int>::iterator it;
+		map<string, int>::iterator it2;
+		
+		int numGroups = 0;
+		
+		//build tree from users taxonomy file
+		PhyloTree* phylo = new PhyloTree();
+		
+		ifstream in;
+		openInputFile(taxFile, in);
+			
+		//read in users taxonomy file and add sequences to tree
+		string seqname, tax;
+		while(!in.eof()){
+			in >> seqname >> tax; gobble(in);
+				
+			phylo->addSeqToTree(seqname, tax);
+		}
+		in.close();
+		
+		phylo->assignHeirarchyIDs(0);
+
+		//make sure the cutoff is not greater than maxlevel
+		if (cutoff > phylo->getMaxLevel()) { m->mothurOut("splitcutoff is greater than the longest taxonomy, using " + toString(phylo->getMaxLevel())); m->mothurOutEndLine(); cutoff = phylo->getMaxLevel(); }
+		
+		//for each node in tree
+		for (int i = 0; i < phylo->getNumNodes(); i++) {
+		
+			//is this node within the cutoff
+			TaxNode taxon = phylo->get(i);
+			
+			if (taxon.level == cutoff) {//if yes, then create group containing this nodes sequences
+				if (taxon.children.size() > 1) { //if this taxon just has one seq its a singleton
+					for (it = taxon.children.begin(); it != taxon.children.end(); it++) {
+						seqGroup[it->first] = numGroups;
+					}
+					numGroups++;
+				}
+			}
+		}
+
+		ifstream dFile;
+		openInputFile(distFile, dFile);
+		ofstream outFile;
+		
+		for (int i = 0; i < numGroups; i++) { //remove old temp files, just in case
+			remove((distFile + "." + toString(i) + ".temp").c_str());
+		}
+		
+		//for each distance
+		while(dFile){
+			string seqA, seqB;
+			float dist;
+			
+			if (m->control_pressed) { dFile.close(); for (int i = 0; i < numGroups; i++) { remove((distFile + "." + toString(i) + ".temp").c_str());	} }
+			
+			dFile >> seqA >> seqB >> dist;  gobble(dFile);
+			
+			//if both sequences are in the same group then they are within the cutoff
+			it = seqGroup.find(seqA);
+			it2 = seqGroup.find(seqB);
+			
+			if ((it != seqGroup.end()) && (it2 != seqGroup.end())) { //they are both not singletons 
+				if (it->second == it2->second) { //they are from the same group so add the distance
+					openOutputFileAppend((distFile + "." + toString(it->second) + ".temp"), outFile);
+					outFile << seqA << '\t' << seqB << '\t' << dist << endl;
+					outFile.close();
+				}
+			}
+		}
+		dFile.close();
+	
+		
+		for (int i = 0; i < numGroups; i++) { //remove old temp files, just in case
+			remove((namefile + "." + toString(i) + ".temp").c_str());
+		}
+		
+		ifstream bigNameFile;
+		openInputFile(namefile, bigNameFile);
+		
+		singleton = namefile + ".extra.temp";
+		ofstream remainingNames;
+		openOutputFile(singleton, remainingNames);
+		
+		bool wroteExtra = false;
+						
+		string name, nameList;
+		while(!bigNameFile.eof()){
+			bigNameFile >> name >> nameList;  gobble(bigNameFile);
+			
+			//did this sequence get assigned a group
+			it = seqGroup.find(name);
+			
+			if (it != seqGroup.end()) {  
+				openOutputFileAppend((namefile + "." + toString(it->second) + ".temp"), outFile);
+				outFile << name << '\t' << nameList << endl;
+				outFile.close();
+			}else{
+				wroteExtra = true;
+				remainingNames << name << '\t' << nameList << endl;
+			}
+		}
+		bigNameFile.close();
+		remainingNames.close();
+		
+		if (!wroteExtra) { 
+			remove(singleton.c_str());
+			singleton = "none";
+		}
+			
+		for(int i=0;i<numGroups;i++){
+			string tempNameFile = namefile + "." + toString(i) + ".temp";
+			string tempDistFile = distFile + "." + toString(i) + ".temp";
+				
+			map<string, string> temp;
+			temp[tempDistFile] = tempNameFile;
+			dists.push_back(temp);
+		}
+		
+		if (m->control_pressed)	 {  
+			for (int i = 0; i < dists.size(); i++) { 
+				remove((dists[i].begin()->first).c_str());
+				remove((dists[i].begin()->second).c_str());
+			}
+			dists.clear();
+		}
+		
+		return 0;
+			
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SplitMatrix", "splitClassify");
 		exit(1);
 	}
 }

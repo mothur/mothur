@@ -19,18 +19,21 @@ class SplitMatrix  {
 	
 	public:
 
-		SplitMatrix(string, string, float); //column formatted distance file, namesfile, cutoff
+		SplitMatrix(string, string, string, float, string); //column formatted distance file, namesfile, cutoff, method
 		~SplitMatrix();
 		int split();
 		vector< map<string, string> > getDistanceFiles();  //returns map of distance files -> namefile sorted by distance file size
 		string getSingletonNames() { return singleton; } //returns namesfile containing singletons
 	
 	private:
-		string distFile, namefile, singleton;
+		MothurOut* m;
+
+		string distFile, namefile, singleton, method, taxFile;
 		vector< map< string, string> > dists;
 		float cutoff;
-		
-		MothurOut* m;
+				
+		int splitDistance();
+		int splitClassify();
 };
 
 /******************************************************/

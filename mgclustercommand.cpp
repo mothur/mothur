@@ -20,7 +20,7 @@ MGClusterCommand::MGClusterCommand(string option) {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"blast", "method", "name", "cutoff", "precision", "length", "min", "penalty", "hcluster","merge","outputdir","inputdir"};
+			string Array[] =  {"blast", "method", "name", "hard", "cutoff", "precision", "length", "min", "penalty", "hcluster","merge","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -104,6 +104,9 @@ MGClusterCommand::MGClusterCommand(string option) {
 			
 			temp = validParameter.validFile(parameters, "hcluster", false);			if (temp == "not found") { temp = "false"; }
 			hclusterWanted = isTrue(temp); 
+			
+			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "F"; }
+			hard = isTrue(temp);
 		}
 
 	}
@@ -214,7 +217,13 @@ int MGClusterCommand::execute(){
 				}
 				
 				float dist = distMatrix->getSmallDist();
-				float rndDist = roundDist(dist, precision);
+				float rndDist;
+				if (hard) {
+					rndDist = ceilDist(dist, precision); 
+				}else{
+					rndDist = roundDist(dist, precision); 
+				}
+
 				
 				if(previousDist <= 0.0000 && dist != previousDist){
 					oldList.setLabel("unique");
@@ -329,7 +338,12 @@ int MGClusterCommand::execute(){
 							return 0; 
 						}
 	
-						float rndDist = roundDist(seqs[i].dist, precision);
+						float rndDist;
+						if (hard) {
+							rndDist = ceilDist(seqs[i].dist, precision); 
+						}else{
+							rndDist = roundDist(seqs[i].dist, precision); 
+						}
 												
 						if((previousDist <= 0.0000) && (seqs[i].dist != previousDist)){
 							oldList.setLabel("unique");

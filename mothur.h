@@ -255,6 +255,13 @@ inline float roundDist(float dist, int precision){
 	return int(dist * precision + 0.5)/float(precision);
 	
 }
+/***********************************************************************/
+
+inline float ceilDist(float dist, int precision){
+	
+	return int(ceil(dist * precision))/float(precision);
+	
+}
 
 /***********************************************************************/
 

@@ -1691,7 +1691,7 @@ install : mothur
 	$(CC) $(CC_OPTIONS) splitabundcommand.cpp -c $(INCLUDE) -o ./splitabundcommand.o
 	
 # Item # 206 -- splitmatrix --
-./splitmatrix.o : splitmatrix.o
+./splitmatrix.o : splitmatrix.cpp
 	$(CC) $(CC_OPTIONS) splitmatrix.cpp -c $(INCLUDE) -o ./splitmatrix.o
 	
 # Item # 207 -- splitmatrix --

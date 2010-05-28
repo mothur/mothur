@@ -27,7 +27,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"phylip","column","name","cutoff","precision","method","showabund","timing","hard","processors","outputdir","inputdir"};
+			string Array[] =  {"phylip","column","name","cutoff","precision","method","splitmethod","taxonomy","showabund","timing","hard","processors","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -76,6 +76,14 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
+				
+				it = parameters.find("taxonomy");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
+				}
 			}
 			
 			//check for required parameters
@@ -93,11 +101,15 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
 			
+			taxFile = validParameter.validFile(parameters, "taxonomy", true);
+			if (taxFile == "not open") { abort = true; }	
+			else if (taxFile == "not found") { taxFile = ""; }
+			
 			if ((phylipfile == "") && (columnfile == "")) { m->mothurOut("When executing a cluster.split command you must enter a phylip or a column."); m->mothurOutEndLine(); abort = true; }
 			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When executing a cluster.split command you must enter ONLY ONE of the following: phylip or column."); m->mothurOutEndLine(); abort = true; }
 		
 			if (columnfile != "") {
-				if (namefile == "") {  cout << "You need to provide a namefile if you are going to use the column format." << endl; abort = true; }
+				if (namefile == "") { m->mothurOut("You need to provide a namefile if you are going to use the column format."); m->mothurOutEndLine(); abort = true; }
 			}
 					
 			//check for optional parameter and set defaults
@@ -119,13 +131,19 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			temp = validParameter.validFile(parameters, "cutoff", false);
 			if (temp == "not found") { temp = "10"; }
 			convert(temp, cutoff); 
-			if (!hard) {	cutoff += (5 / (precision * 10.0));  }
+			cutoff += (5 / (precision * 10.0));  
 			
-			method = validParameter.validFile(parameters, "method", false);
-			if (method == "not found") { method = "furthest"; }
+			method = validParameter.validFile(parameters, "method", false);		if (method == "not found") { method = "furthest"; }
+			
+			splitmethod = validParameter.validFile(parameters, "splitmethod", false);		if (splitmethod == "not found") { method = "distance"; }
 			
 			if ((method == "furthest") || (method == "nearest") || (method == "average")) { }
 			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average."); m->mothurOutEndLine(); abort = true; }
+			
+			if ((splitmethod == "distance") || (splitmethod == "classify")) { }
+			else { m->mothurOut("Not a valid splitting method.  Valid splitting algorithms are distance or classify."); m->mothurOutEndLine(); abort = true; }
+			
+			if ((splitmethod == "classify") && (taxFile == "")) {  m->mothurOut("You need to provide a taxonomy file if you are going to use the classify splitmethod."); m->mothurOutEndLine(); abort = true;  }
 
 			showabund = validParameter.validFile(parameters, "showabund", false);
 			if (showabund == "not found") { showabund = "T"; }
@@ -145,11 +163,13 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 
 void ClusterSplitCommand::help(){
 	try {
-		m->mothurOut("The cluster command can only be executed after a successful read.dist command.\n");
-		m->mothurOut("The cluster command parameter options are method, cuttoff, hard, precision, showabund and timing. No parameters are required.\n");
-		m->mothurOut("The cluster command should be in the following format: \n");
-		m->mothurOut("cluster(method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n");
-		m->mothurOut("The acceptable cluster methods are furthest, nearest and average.  If no method is provided then furthest is assumed.\n\n");	
+		m->mothurOut("The cluster.split command parameter options are cutoff, splitcutoff, precision, method, splitmethod, phylip, column, name, showabund, timing. Phylip or column and name are required.\n");
+		m->mothurOut("The phylip and column parameter allow you to enter your distance file. \n");
+		m->mothurOut("The name parameter allows you to enter your name file and is required if your distance file is in column format. \n");
+		m->mothurOut("The cluster.split command should be in the following format: \n");
+		m->mothurOut("cluster.split(column=youDistanceFile, name=yourNameFile, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n");
+		m->mothurOut("Example: cluster.split(column=abrecovery.dist, name=abrecovery.names, method=furthest, cutoff=0.10, precision=1000, splitmethod=classify) \n");	
+
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterSplitCommand", "help");
@@ -203,7 +223,7 @@ int ClusterSplitCommand::execute(){
 		time_t estart = time(NULL);
 		
 		//split matrix into non-overlapping groups
-		SplitMatrix* split = new SplitMatrix(distfile, namefile, cutoff);
+		SplitMatrix* split = new SplitMatrix(distfile, namefile, taxFile, cutoff, splitmethod);
 		split->split();
 		
 		if (m->control_pressed) { delete split; return 0; }
@@ -212,10 +232,10 @@ int ClusterSplitCommand::execute(){
 		vector< map<string, string> > distName = split->getDistanceFiles();  //returns map of distance files -> namefile sorted by distance file size
 		delete split;
 		
+		if (m->control_pressed) { return 0; }
+		
 		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to split the distance file."); m->mothurOutEndLine();
 		estart = time(NULL);
-		
-		if (m->control_pressed) { return 0; }
 		
 		//****************** break up files between processes and cluster each file set ******************************//
 		vector<string> listFileNames;
@@ -586,7 +606,12 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
 				cluster->update(cutoff);
 	
 				float dist = matrix->getSmallDist();
-				float rndDist = roundDist(dist, precision);
+				float rndDist;
+				if (hard) {
+					rndDist = ceilDist(dist, precision); 
+				}else{
+					rndDist = roundDist(dist, precision); 
+				}
 
 				if(previousDist <= 0.0000 && dist != previousDist){
 					oldList.setLabel("unique");

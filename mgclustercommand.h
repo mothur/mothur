@@ -43,7 +43,7 @@ private:
 	double cutoff;
 	float penalty;
 	int precision, length, precisionLength;
-	bool abort, minWanted, hclusterWanted, merge;
+	bool abort, minWanted, hclusterWanted, merge, hard;
 	
 	void printData(ListVector*);
 	ListVector* mergeOPFs(map<string, int>, float);
