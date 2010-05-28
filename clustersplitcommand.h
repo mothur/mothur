@@ -34,7 +34,7 @@ private:
 
 	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, distfile, format, showabund, timing, splitmethod, taxFile;
 	double cutoff, splitcutoff;
-	int precision, length, processors;
+	int precision, length, processors, taxLevelCutoff;
 	bool print_start, abort, hard;
 	time_t start;
 	ofstream outList, outRabund, outSabund;

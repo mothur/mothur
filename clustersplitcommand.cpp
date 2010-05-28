@@ -27,7 +27,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"phylip","column","name","cutoff","precision","method","splitmethod","taxonomy","showabund","timing","hard","processors","outputdir","inputdir"};
+			string Array[] =  {"phylip","column","name","cutoff","precision","method","splitmethod","taxonomy","taxlevel","showabund","timing","hard","processors","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -128,14 +128,16 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = "1";				}
 			convert(temp, processors); 
 			
-			temp = validParameter.validFile(parameters, "cutoff", false);
-			if (temp == "not found") { temp = "10"; }
+			splitmethod = validParameter.validFile(parameters, "splitmethod", false);		if (splitmethod == "not found") { splitmethod = "distance"; }
+			
+			temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { temp = "10"; }
 			convert(temp, cutoff); 
 			cutoff += (5 / (precision * 10.0));  
 			
-			method = validParameter.validFile(parameters, "method", false);		if (method == "not found") { method = "furthest"; }
+			temp = validParameter.validFile(parameters, "taxlevel", false);		if (temp == "not found")  { temp = "1"; }
+			convert(temp, taxLevelCutoff); 
 			
-			splitmethod = validParameter.validFile(parameters, "splitmethod", false);		if (splitmethod == "not found") { method = "distance"; }
+			method = validParameter.validFile(parameters, "method", false);		if (method == "not found") { method = "furthest"; }
 			
 			if ((method == "furthest") || (method == "nearest") || (method == "average")) { }
 			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average."); m->mothurOutEndLine(); abort = true; }
@@ -163,12 +165,18 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 
 void ClusterSplitCommand::help(){
 	try {
-		m->mothurOut("The cluster.split command parameter options are cutoff, splitcutoff, precision, method, splitmethod, phylip, column, name, showabund, timing. Phylip or column and name are required.\n");
+		m->mothurOut("The cluster.split command parameter options are phylip, column, name, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, hard, processors. Phylip or column and name are required.\n");
 		m->mothurOut("The phylip and column parameter allow you to enter your distance file. \n");
 		m->mothurOut("The name parameter allows you to enter your name file and is required if your distance file is in column format. \n");
+		m->mothurOut("The cutoff parameter allow you to set the distance you want to cluster to, default is 10.0. \n");
+		m->mothurOut("The precision parameter allows you specify the precision of the precision of the distances outputted, default=100, meaning 2 decimal places. \n");
+		m->mothurOut("The method allows you to specify what clustering algorythm you want to use, default=furthest, option furthest, nearest, or average. \n");
+		m->mothurOut("The splitmethod parameter allows you to specify how you want to split your distance file before you cluster, default=distance, options distance or classify. \n");
+		m->mothurOut("The taxonomy parameter allows you to enter the taxonomy file for your sequences, this is only valid if you are using splitmethod=classify. Be sure your taxonomy file does not include the probability scores. \n");
+		m->mothurOut("The taxlevel parameter allows you to specify the taxonomy level you want to use to split the distance file, default=1. \n");
 		m->mothurOut("The cluster.split command should be in the following format: \n");
-		m->mothurOut("cluster.split(column=youDistanceFile, name=yourNameFile, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n");
-		m->mothurOut("Example: cluster.split(column=abrecovery.dist, name=abrecovery.names, method=furthest, cutoff=0.10, precision=1000, splitmethod=classify) \n");	
+		m->mothurOut("cluster.split(column=youDistanceFile, name=yourNameFile, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision, splitmethod=yourSplitmethod, taxonomy=yourTaxonomyfile, taxlevel=yourtaxlevel) \n");
+		m->mothurOut("Example: cluster.split(column=abrecovery.dist, name=abrecovery.names, method=furthest, cutoff=0.10, precision=1000, splitmethod=classify, taxonomy=abrecovery.silva.slv.taxonomy, taxlevel=5) \n");	
 
 	}
 	catch(exception& e) {
@@ -223,7 +231,10 @@ int ClusterSplitCommand::execute(){
 		time_t estart = time(NULL);
 		
 		//split matrix into non-overlapping groups
-		SplitMatrix* split = new SplitMatrix(distfile, namefile, taxFile, cutoff, splitmethod);
+		SplitMatrix* split;
+		if (splitmethod == "distance")	{	split = new SplitMatrix(distfile, namefile, taxFile, cutoff, splitmethod);			}
+		else							{	split = new SplitMatrix(distfile, namefile, taxFile, taxLevelCutoff, splitmethod);  }
+		
 		split->split();
 		
 		if (m->control_pressed) { delete split; return 0; }
@@ -334,7 +345,7 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, string singleton, 
 		outputNames.push_back(fileroot+ tag + ".sabund");
 		outputNames.push_back(fileroot+ tag + ".rabund");
 		outputNames.push_back(fileroot+ tag + ".list");
-			
+		
 		//read in singletons
 		ListVector* listSingle = NULL;
 		if (singleton != "none") {
@@ -365,7 +376,7 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, string singleton, 
 				it--;
 			}
 		}
-		
+	
 		//sort order
 		sort(orderFloat.begin(), orderFloat.end());
 
@@ -381,7 +392,7 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, string singleton, 
 			lastLabels.push_back(tempList.getLabel());
 			in.close();
 		}
-		
+	
 		ListVector* merged = NULL;
 				
 		//for each label needed
@@ -429,10 +440,12 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, string singleton, 
 			}
 			
 			//add in singletons
-			for (int j = 0; j < listSingle->getNumBins(); j++) {
-				merged->push_back(listSingle->get(j));
+			if (listSingle != NULL) {
+				for (int j = 0; j < listSingle->getNumBins(); j++) {
+					merged->push_back(listSingle->get(j));
+				}
 			}
-
+			
 			//print to files
 			printData(merged);
 			
@@ -640,7 +653,7 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
 				oldList.print(listFile);
 				if (labels.count(toString(rndPreviousDist,  length-1)) == 0) { labels.insert(toString(rndPreviousDist,  length-1)); }
 			}
-		
+	
 			delete matrix; delete list;	delete cluster; delete rabund; 
 			listFile.close();
 			
@@ -653,7 +666,7 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
 			remove(thisNamefile.c_str());
 		}
 		
-				
+					
 		return listFileNames;
 	
 	}
