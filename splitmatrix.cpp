@@ -241,6 +241,8 @@ int SplitMatrix::splitDistance(){
 /***********************************************************************/
 int SplitMatrix::splitClassify(){
 	try {
+		cutoff = int(cutoff);
+		
 		map<string, int> seqGroup;
 		map<string, int>::iterator it;
 		map<string, int>::iterator it2;
@@ -272,11 +274,11 @@ int SplitMatrix::splitClassify(){
 		
 			//is this node within the cutoff
 			TaxNode taxon = phylo->get(i);
-			
+		
 			if (taxon.level == cutoff) {//if yes, then create group containing this nodes sequences
-				if (taxon.children.size() > 1) { //if this taxon just has one seq its a singleton
-					for (it = taxon.children.begin(); it != taxon.children.end(); it++) {
-						seqGroup[it->first] = numGroups;
+				if (taxon.accessions.size() > 1) { //if this taxon just has one seq its a singleton
+					for (int j = 0; j < taxon.accessions.size(); j++) {
+						seqGroup[taxon.accessions[j]] = numGroups;
 					}
 					numGroups++;
 				}
