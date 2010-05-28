@@ -62,7 +62,7 @@ ClusterCommand::ClusterCommand(string option)  {
 			temp = validParameter.validFile(parameters, "cutoff", false);
 			if (temp == "not found") { temp = "10"; }
 			convert(temp, cutoff); 
-			if (!hard) {	cutoff += (5 / (precision * 10.0));  }
+			cutoff += (5 / (precision * 10.0));  
 			
 			method = validParameter.validFile(parameters, "method", false);
 			if (method == "not found") { method = "furthest"; }
@@ -181,7 +181,12 @@ int ClusterCommand::execute(){
 			cluster->update(cutoff);
 	
 			float dist = matrix->getSmallDist();
-			float rndDist = roundDist(dist, precision);
+			float rndDist;
+			if (hard) {
+				rndDist = ceilDist(dist, precision); 
+			}else{
+				rndDist = roundDist(dist, precision); 
+			}
 
 			if(previousDist <= 0.0000 && dist != previousDist){
 				printData("unique");

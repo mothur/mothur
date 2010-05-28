@@ -45,10 +45,12 @@ public:
 	TaxNode get(string seqName);
 	string getName(int i);			
 	int getIndex(string seqName);	
-			
 	string getFullTaxonomy(string);	 //pass a sequence name return taxonomy
-	int getMaxLevel()				{	return maxLevel;						}
-	int getNumSeqs()  {  return numSeqs;  }
+	
+	int getMaxLevel()		{	return maxLevel;	}
+	int getNumSeqs()		{	return numSeqs;		}
+	int getNumNodes()		{	return tree.size();	}
+	
 	bool ErrorCheck(vector<string>);
 	
 private:

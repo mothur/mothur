@@ -42,7 +42,7 @@ private:
 	string phylipfile, columnfile, namefile, groupfile, outputDir;
 	NameAssignment* nameMap;
 
-	bool abort, sim, hard;
+	bool abort, sim;
 
 };
 

@@ -110,7 +110,7 @@ HClusterCommand::HClusterCommand(string option)  {
 			temp = validParameter.validFile(parameters, "cutoff", false);
 			if (temp == "not found") { temp = "10"; }
 			convert(temp, cutoff); 
-			if (!hard) {  cutoff += (5 / (precision * 10.0));  }
+			cutoff += (5 / (precision * 10.0)); 
 			
 			method = validParameter.validFile(parameters, "method", false);
 			if (method == "not found") { method = "furthest"; }
@@ -163,7 +163,7 @@ void HClusterCommand::help(){
 		m->mothurOut("The name parameter allows you to enter your name file and is required if your distance file is in column format. \n");
 		m->mothurOut("The hcluster command should be in the following format: \n");
 		m->mothurOut("hcluster(column=youDistanceFile, name=yourNameFile, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n");
-		m->mothurOut("The acceptable hcluster methods are furthest and nearest, but we hope to add average in the future.\n\n");	
+		m->mothurOut("The acceptable hcluster methods are furthest, nearest and average.\n\n");	
 	}
 	catch(exception& e) {
 		m->errorOut(e, "HClusterCommand", "help");
@@ -279,8 +279,14 @@ int HClusterCommand::execute(){
 						return 0;  
 					}
 
-					
-					float rndDist = roundDist(seqs[i].dist, precision);
+			
+					float rndDist;
+					if (hard) {
+						rndDist = ceilDist(seqs[i].dist, precision); 
+					}else{
+						rndDist = roundDist(seqs[i].dist, precision); 
+					}
+
 					
 					if((previousDist <= 0.0000) && (seqs[i].dist != previousDist)){
 						printData("unique");
