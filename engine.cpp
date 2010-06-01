@@ -71,12 +71,6 @@ bool InteractEngine::getInput(){
 					#ifdef USE_MPI
 						int pid;
 						MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
-						
-						if ((pid != 0) && !(cFactory->MPIEnabled(commandName))) {
-cout << pid << " is waiting " << commandName << endl;						
-							char buf[4];
-							MPI_Bcast(buf, 4, MPI_CHAR, 0, MPI_COMM_WORLD); //make everyone wait - just in case
-						}
  
 cout << pid << " is here " << commandName << endl;
 						if ((cFactory->MPIEnabled(commandName)) || (pid == 0)) {
@@ -88,13 +82,6 @@ cout << pid << " is here " << commandName << endl;
 					mout->executing = false;
 										
 					#ifdef USE_MPI
-							if (!(cFactory->MPIEnabled(commandName))) {
-								char buf[4];
-								strcpy(buf, "done"); 
-
-								MPI_Bcast(buf, 4, MPI_CHAR, 0, MPI_COMM_WORLD); //make everyone wait - just in case
-				cout << pid << " is broadcasting " << endl;
-							}
 						}
 					#endif
 				}else {		
@@ -112,6 +99,10 @@ cout << pid << " is here " << commandName << endl;
 /***********************************************************************/
 string Engine::getCommand()  {
 	try {
+		#ifdef USE_MPI
+			MPI_Barrier(MPI_COMM_WORLD);
+		#endif
+	
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			#ifdef USE_READLINE
 				char* nextCommand = NULL;
@@ -187,11 +178,11 @@ bool BatchEngine::getInput(){
 		
 		//CommandFactory cFactory;
 		int quitCommandCalled = 0;
-	
+	    int count = 0;
 		while(quitCommandCalled == 0){
 	
-			if (inputBatchFile.eof()) { input = "quit()"; }
-			else { input = getline(inputBatchFile); }
+			input = getNextCommand(inputBatchFile);
+			count++;
 			
 			if (input[0] != '#') {
 				
@@ -214,13 +205,7 @@ bool BatchEngine::getInput(){
 						int pid;
 						MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
 						
-						if ((pid != 0) && !(cFactory->MPIEnabled(commandName))) {
-cout << pid << " is waiting " << commandName << endl;						
-							char buf[4];
-							MPI_Bcast(buf, 4, MPI_CHAR, 0, MPI_COMM_WORLD); //make everyone wait - just in case
-						}
- 
-cout << pid << " is here " << commandName << endl;
+cout << pid << " is here " << commandName << '\t' << count << endl;
 						if ((cFactory->MPIEnabled(commandName)) || (pid == 0)) {
 					#endif
 					//executes valid command
@@ -230,13 +215,6 @@ cout << pid << " is here " << commandName << endl;
 					mout->executing = false;
 										
 					#ifdef USE_MPI
-							if (!(cFactory->MPIEnabled(commandName))) {
-								char buf[4];
-								strcpy(buf, "done"); 
-
-								MPI_Bcast(buf, 4, MPI_CHAR, 0, MPI_COMM_WORLD); //make everyone wait - just in case
-				cout << pid << " is broadcasting " << endl;
-							}
 						}
 					#endif
 				}else {		
@@ -256,7 +234,27 @@ cout << pid << " is here " << commandName << endl;
 		exit(1);
 	}
 }
-
+/***********************************************************************/
+string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
+	try {
+		
+		#ifdef USE_MPI
+			int err = MPI_Barrier(MPI_COMM_WORLD);
+//cout << "barrier = " << err << '\t' << MPI_SUCCESS << endl;
+		#endif
+		
+		string nextcommand = "";
+		
+		if (inputBatchFile.eof()) { nextcommand = "quit()"; }
+		else { nextcommand = getline(inputBatchFile); }
+		
+		return nextcommand;
+	}
+	catch(exception& e) {
+		mout->errorOut(e, "BatchEngine", "getNextCommand");
+		exit(1);
+	}
+}
 
 /***********************************************************************/
 /***********************************************************************/
@@ -318,20 +316,9 @@ bool ScriptEngine::getInput(){
 					#ifdef USE_MPI
 						int pid, numProcesses;
 						MPI_Status status; 
-						//MPI_Request request;
 						
 						MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
 						MPI_Comm_size(MPI_COMM_WORLD, &numProcesses); 
-						
-						if ((pid != 0) && (!(cFactory->MPIEnabled(commandName)))) {
-cout << pid << " is waiting " << commandName << endl;						
-							char buf[12];
-							
-							MPI_Recv(buf, 12, MPI_CHAR, 0, 2001, MPI_COMM_WORLD, &status);  //make everyone wait - just in case
-							//MPI_Wait(&request, &status);
-					cout << pid << " received " << buf << endl;
-						}
-						
 					
 cout << pid << " is here " << commandName  << endl;
 						if ((cFactory->MPIEnabled(commandName)) || (pid == 0)) {
@@ -345,17 +332,6 @@ cout << pid << " is here " << commandName  << endl;
 									
 					#ifdef USE_MPI
 					cout << pid << " is done in execute" << endl;
-							if ((pid == 0) && (!(cFactory->MPIEnabled(commandName)))) {
-								char buf[12];
-								strcpy(buf, "command done"); 
-								
-								for(int i = 1; i < numProcesses; i++) { 
-									MPI_Send(buf, 12, MPI_CHAR, i, 2001, MPI_COMM_WORLD); //make everyone wait - just in case
-									//MPI_Wait(&request, &status);
-						cout << pid << " sent " << buf << endl;
-								}
-				cout << pid << " is sending " << endl;
-							}
 						}
 					#endif
 				}else {		
@@ -378,8 +354,7 @@ string ScriptEngine::getNextCommand(string& commandString) {
 	try {
 		
 		#ifdef USE_MPI
-		int ierr = MPI_Barrier(MPI_COMM_WORLD);
-cout << "barrier = " << ierr << endl;
+			MPI_Barrier(MPI_COMM_WORLD);
 		#endif
 		
 		string nextcommand = "";

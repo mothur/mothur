@@ -179,8 +179,15 @@ void PhyloSummary::print(ofstream& out){
 		
 		out << endl;
 		
+		int totalChildrenInTree = 0;
+		
+		map<string,int>::iterator it;
+		for(it=tree[0].children.begin();it!=tree[0].children.end();it++){   
+			if (tree[it->second].total != 0)  {   totalChildrenInTree++; }
+		}
+		
 		//print root
-		out << tree[0].level << "\t" << tree[0].rank << "\t" << tree[0].name << "\t" << tree[0].children.size() << "\t" << tree[0].total << "\t";
+		out << tree[0].level << "\t" << tree[0].rank << "\t" << tree[0].name << "\t" << totalChildrenInTree << "\t" << tree[0].total << "\t";
 		
 		map<string, int>::iterator itGroup;
 		if (groupmap != NULL) {
@@ -208,7 +215,15 @@ void PhyloSummary::print(int i, ofstream& out){
 		for(it=tree[i].children.begin();it!=tree[i].children.end();it++){
 			
 			if (tree[it->second].total != 0)  {
-				out << tree[it->second].level << "\t" << tree[it->second].rank << "\t" << tree[it->second].name << "\t" << tree[it->second].children.size() << "\t" << tree[it->second].total << "\t";
+			
+				int totalChildrenInTree = 0;
+		
+				map<string,int>::iterator it2;
+				for(it2=tree[it->second].children.begin();it2!=tree[it->second].children.end();it2++){   
+					if (tree[it2->second].total != 0)  {   totalChildrenInTree++; }
+				}
+			
+				out << tree[it->second].level << "\t" << tree[it->second].rank << "\t" << tree[it->second].name << "\t" << totalChildrenInTree << "\t" << tree[it->second].total << "\t";
 				
 				map<string, int>::iterator itGroup;
 				if (groupmap != NULL) {
