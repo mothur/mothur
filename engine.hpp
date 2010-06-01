@@ -49,6 +49,7 @@ public:
 private:
 	GlobalData* globaldata;
 	ifstream inputBatchFile;
+	string getNextCommand(ifstream&);
 
 };
 
