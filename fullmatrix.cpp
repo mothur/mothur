@@ -18,8 +18,9 @@ FullMatrix::FullMatrix(ifstream& filehandle) {
 		groupmap = globaldata->gGroupmap;
 		
 		string name, group;
-		filehandle >> numSeqs >> name;
 		
+		filehandle >> numSeqs >> name;
+	
 		//make the matrix filled with zeros
 		matrix.resize(numSeqs); 
 		for(int i = 0; i < numSeqs; i++) {
@@ -55,7 +56,7 @@ FullMatrix::FullMatrix(ifstream& filehandle) {
 				break;
 			}
 		}
-		
+	cout << "here" << endl;	
 		//read rest of matrix
 		if (square == true) {  readSquareMatrix(filehandle); }
 		else {  readLTMatrix(filehandle); }
@@ -73,7 +74,7 @@ FullMatrix::FullMatrix(ifstream& filehandle) {
 /**************************************************************************/
 int FullMatrix::readSquareMatrix(ifstream& filehandle) {
 	try {
-	
+	cout << "square" << endl;
 		Progress* reading;
 		reading = new Progress("Reading matrix:     ", numSeqs * numSeqs);
 		
@@ -116,6 +117,7 @@ int FullMatrix::readSquareMatrix(ifstream& filehandle) {
 /**************************************************************************/
 int FullMatrix::readLTMatrix(ifstream& filehandle) {
 	try {
+	cout << "lt" << endl;	
 		Progress* reading;
 		reading = new Progress("Reading matrix:     ", numSeqs * (numSeqs - 1) / 2);
 		
