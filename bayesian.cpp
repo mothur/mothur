@@ -17,9 +17,11 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 	try {
 					
 		/************calculate the probablity that each word will be in a specific taxonomy*************/
-		string phyloTreeName = tfile.substr(0,tfile.find_last_of(".")+1) + "tree.train";
-		string probFileName = tfile.substr(0,tfile.find_last_of(".")+1) + tempFile.substr(0,tempFile.find_last_of(".")+1) + char('0'+ kmerSize) + "mer.prob";
-		string probFileName2 = tfile.substr(0,tfile.find_last_of(".")+1) + tempFile.substr(0,tempFile.find_last_of(".")+1) + char('0'+ kmerSize) + "mer.numNonZero";
+		string tfileroot = tfile.substr(0,tfile.find_last_of(".")+1);
+		string tempfileroot = getRootName(getSimpleName(tempFile));
+		string phyloTreeName = tfileroot + "tree.train";
+		string probFileName = tfileroot + tempfileroot + char('0'+ kmerSize) + "mer.prob";
+		string probFileName2 = tfileroot + tempfileroot + char('0'+ kmerSize) + "mer.numNonZero";
 		
 		ofstream out;
 		ofstream out2;

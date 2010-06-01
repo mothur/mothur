@@ -324,7 +324,7 @@ int GetOTURepCommand::execute(){
 				
 		//set format to list so input can get listvector
 		globaldata->setFormat("list");
-
+	
 		//read list file
 		read = new ReadOTUFile(listfile);
 		read->read(&*globaldata); 
@@ -332,7 +332,7 @@ int GetOTURepCommand::execute(){
 		input = globaldata->ginput;
 		list = globaldata->gListVector;
 		string lastLabel = list->getLabel();
-		
+
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
@@ -382,7 +382,7 @@ int GetOTURepCommand::execute(){
 			}
 			
 			lastLabel = list->getLabel();
-			
+	
 			delete list;
 			list = input->getListVector();
 		}
@@ -390,8 +390,8 @@ int GetOTURepCommand::execute(){
 		//output error messages about any remaining user labels
 		bool needToRun = false;
 		for (set<string>::iterator it = userLabels.begin(); it != userLabels.end(); it++) {  
-			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(list->getLabel()) != 1) {
+			m->mothurOut("Your file does not include the label " + (*it)); 
+			if (processedLabels.count(lastLabel) != 1) {
 				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
 				needToRun = true;
 			}else {

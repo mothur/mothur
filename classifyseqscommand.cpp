@@ -635,7 +635,7 @@ int ClassifySeqsCommand::execute(){
 			rename(unclass.c_str(), newTaxonomyFile.c_str());
 			
 			m->mothurOutEndLine();
-			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create the summary file for  " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
+			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to create the summary file for " + toString(numFastaSeqs) + " sequences."); m->mothurOutEndLine(); m->mothurOutEndLine();
 			
 			#ifdef USE_MPI	
 				}

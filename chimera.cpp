@@ -31,6 +31,8 @@ string Chimera::createFilter(vector<Sequence*> seqs, float t) {
 			if (m->control_pressed) { return filterString; }
 		
 			string seqAligned = seqs[i]->getAligned();
+			
+			if (seqAligned.length() != filterString.length()) {  m->mothurOut(seqs[i]->getName() + " is not the same length as the template sequences. Aborting!\n");  exit(1); }
 		
 			for (int j = 0; j < seqAligned.length(); j++) {
 				//if this spot is a gap
