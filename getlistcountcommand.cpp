@@ -22,7 +22,7 @@ GetListCountCommand::GetListCountCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string AlignArray[] =  {"list","label","outputdir","inputdir"};
+			string AlignArray[] =  {"list","label","sort","outputdir","inputdir"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -64,6 +64,8 @@ GetListCountCommand::GetListCountCommand(string option)  {
 		
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
+			sort = validParameter.validFile(parameters, "sort", false);	  if (sort == "not found") { sort = "otu"; }
+			if ((sort != "otu") && (sort != "name")) { m->mothurOut( sort + " is not a valid sort option. Options are otu and name. I will use otu."); m->mothurOutEndLine(); sort = "otu"; }
 			
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
@@ -88,13 +90,16 @@ GetListCountCommand::GetListCountCommand(string option)  {
 
 void GetListCountCommand::help(){
 	try {
-		m->mothurOut("The get.listcount command can only be executed after a successful read.otu command of a listfile or providing a list file using the list parameter.\n");
-		m->mothurOut("The get.listcount command parameters are list and label.  No parameters are required.\n");
+		m->mothurOut("The get.otulist command can only be executed after a successful read.otu command of a listfile or providing a list file using the list parameter.\n");
+		m->mothurOut("The get.otulist command parameters are list, sort and label.  No parameters are required.\n");
 		m->mothurOut("The label parameter allows you to select what distance levels you would like a output files created for, and are separated by dashes.\n");
-		m->mothurOut("The get.listcount command should be in the following format: get.listcount(list=yourlistFile, label=yourLabels).\n");
-		m->mothurOut("Example get.listcount(list=amazon.fn.list, label=0.10).\n");
+		m->mothurOut("The sort parameter allows you to select how you want the output displayed. Options are otu and name.\n");
+		m->mothurOut("If otu is selected the output will be otu number followed by the list of names in that otu.\n");
+		m->mothurOut("If name is selected the output will be a sequence name followed by its otu number.\n");
+		m->mothurOut("The get.otulist command should be in the following format: get.otulist(list=yourlistFile, label=yourLabels).\n");
+		m->mothurOut("Example get.otulist(list=amazon.fn.list, label=0.10).\n");
 		m->mothurOut("The default value for label is all lines in your inputfile.\n");
-		m->mothurOut("The get.listcount command outputs a .otu file for each distance you specify listing the bin number and the names of the sequences in that bin.\n");
+		m->mothurOut("The get.otulist command outputs a .otu file for each distance you specify listing the bin number and the names of the sequences in that bin.\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n\n");
 	}
 	catch(exception& e) {
@@ -239,7 +244,7 @@ int GetListCountCommand::execute(){
 //return 1 if error, 0 otherwise
 void GetListCountCommand::process(ListVector* list) {
 	try {
-		string binnames, name, sequence;
+		string binnames;
 		if (outputDir == "") { outputDir += hasPath(listfile); }
 		string outputFileName = outputDir + getRootName(getSimpleName(listfile)) + list->getLabel() + ".otu";
 		openOutputFile(outputFileName, out);
@@ -252,7 +257,17 @@ void GetListCountCommand::process(ListVector* list) {
 			if (m->control_pressed) { break; }
 			
 			binnames = list->get(i);
-			out << i+1 << '\t' << binnames << endl;
+			
+			if (sort == "otu") {
+				out << i+1 << '\t' << binnames << endl;
+			}else{ //sort = name
+				vector<string> names;
+				splitAtComma(binnames, names);
+				
+				for (int j = 0; j < names.size(); j++) {
+					out << names[j] << '\t' << i+1 << endl;
+				}
+			}
 		}
 		
 		out.close();
