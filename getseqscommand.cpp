@@ -22,7 +22,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","name", "group", "alignreport", "accnos", "list","outputdir","inputdir"};
+			string Array[] =  {"fasta","name", "group", "alignreport", "accnos", "list","taxonomy","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -91,6 +91,14 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
+				
+				it = parameters.find("taxonomy");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
+				}
 			}
 
 			
@@ -119,13 +127,12 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 			if (listfile == "not open") { abort = true; }
 			else if (listfile == "not found") {  listfile = "";  }
 			
-			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, alignreport or listfile."); m->mothurOutEndLine(); abort = true; }
+			taxfile = validParameter.validFile(parameters, "taxonomy", true);
+			if (taxfile == "not open") { abort = true; }
+			else if (taxfile == "not found") {  taxfile = "";  }
+
 			
-			int okay = 2;
-			if (outputDir != "") { okay++; }
-			if (inputDir != "")	{ okay++; }
-			
-			if (parameters.size() > okay) { m->mothurOut("You may only enter one of the following: fasta, name, group, alignreport or listfile."); m->mothurOutEndLine(); abort = true;  }
+			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, alignreport, taxonomy or listfile."); m->mothurOutEndLine(); abort = true; }
 		}
 
 	}
@@ -138,9 +145,9 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 
 void GetSeqsCommand::help(){
 	try {
-		m->mothurOut("The get.seqs command reads an .accnos file and one of the following file types: fasta, name, group, list or alignreport file.\n");
+		m->mothurOut("The get.seqs command reads an .accnos file and any of the following file types: fasta, name, group, list, taxonomy or alignreport file.\n");
 		m->mothurOut("It outputs a file containing only the sequences in the .accnos file.\n");
-		m->mothurOut("The get.seqs command parameters are accnos, fasta, name, group, list and alignreport.  You must provide accnos and one of the other parameters.\n");
+		m->mothurOut("The get.seqs command parameters are accnos, fasta, name, group, list, taxonomy and alignreport.  You must provide accnos and at least one of the other parameters.\n");
 		m->mothurOut("The get.seqs command should be in the following format: get.seqs(accnos=yourAccnos, fasta=yourFasta).\n");
 		m->mothurOut("Example get.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
@@ -165,12 +172,13 @@ int GetSeqsCommand::execute(){
 		
 		//read through the correct file and output lines you want to keep
 		if (fastafile != "")		{		readFasta();	}
-		else if (namefile != "")	{		readName();		}
-		else if (groupfile != "")	{		readGroup();	}
-		else if (alignfile != "")	{		readAlign();	}
-		else if (listfile != "")	{		readList();		}
+		if (namefile != "")			{		readName();		}
+		if (groupfile != "")		{		readGroup();	}
+		if (alignfile != "")		{		readAlign();	}
+		if (listfile != "")			{		readList();		}
+		if (taxfile != "")			{		readTax();		}
 		
-		if (m->control_pressed) { return 0; }
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
 		
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
@@ -216,8 +224,6 @@ int GetSeqsCommand::readFasta(){
 					wroteSomething = true;
 					
 					currSeq.printSequence(out);
-					
-					names.erase(name);
 				}
 			}
 			gobble(in);
@@ -427,8 +433,6 @@ int GetSeqsCommand::readGroup(){
 				wroteSomething = true;
 				
 				out << name << '\t' << group << endl;
-				
-				names.erase(name);
 			}
 					
 			gobble(in);
@@ -449,7 +453,52 @@ int GetSeqsCommand::readGroup(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+int GetSeqsCommand::readTax(){
+	try {
+		if (outputDir == "") { outputDir += hasPath(taxfile); }
+		string outputFileName = outputDir + getRootName(getSimpleName(taxfile)) + "pick" + getExtension(taxfile);
+		ofstream out;
+		openOutputFile(outputFileName, out);
+		
+		ifstream in;
+		openInputFile(taxfile, in);
+		string name, tax;
+		
+		bool wroteSomething = false;
+		
+		while(!in.eof()){
 
+			if (m->control_pressed) { in.close(); out.close(); remove(outputFileName.c_str());  return 0; }
+
+			in >> name;				//read from first column
+			in >> tax;			//read from second column
+			
+			//if this name is in the accnos file
+			if (names.count(name) == 1) {
+				wroteSomething = true;
+				
+				out << name << '\t' << tax << endl;
+			}
+					
+			gobble(in);
+		}
+		in.close();
+		out.close();
+		
+		if (wroteSomething == false) {
+			m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();
+			remove(outputFileName.c_str()); 
+		}else {  outputNames.push_back(outputFileName); }
+		
+		return 0;
+
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetSeqsCommand", "readTax");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 //alignreport file has a column header line then all other lines contain 16 columns.  we just want the first column since that contains the name
 int GetSeqsCommand::readAlign(){
@@ -492,8 +541,6 @@ int GetSeqsCommand::readAlign(){
 					else			{	break;			}
 				}
 				out << endl;
-				
-				names.erase(name);
 				
 			}else {//still read just don't do anything with it
 				//read rest

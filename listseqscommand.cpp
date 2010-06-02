@@ -22,7 +22,7 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","name", "group", "alignreport","list","outputdir","inputdir"};
+			string Array[] =  {"fasta","name", "group", "alignreport","list","taxonomy","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -83,6 +83,14 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
+				
+				it = parameters.find("taxonomy");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
+				}
 			}
 
 			//check for required parameters
@@ -106,8 +114,11 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 			if (listfile == "not open") { abort = true; }
 			else if (listfile == "not found") {  listfile = "";  }
 
+			taxfile = validParameter.validFile(parameters, "taxonomy", true);
+			if (taxfile == "not open") { abort = true; }
+			else if (taxfile == "not found") {  taxfile = "";  }
 			
-			if ((fastafile == "") && (namefile == "") && (listfile == "") && (groupfile == "") && (alignfile == ""))  { m->mothurOut("You must provide a file."); m->mothurOutEndLine(); abort = true; }
+			if ((fastafile == "") && (namefile == "") && (listfile == "") && (groupfile == "") && (alignfile == "") && (taxfile == ""))  { m->mothurOut("You must provide a file."); m->mothurOutEndLine(); abort = true; }
 			
 			int okay = 1;
 			if (outputDir != "") { okay++; }
@@ -126,8 +137,8 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 
 void ListSeqsCommand::help(){
 	try {
-		m->mothurOut("The list.seqs command reads a fasta, name, group, list or alignreport file and outputs a .accnos file containing sequence names.\n");
-		m->mothurOut("The list.seqs command parameters are fasta, name, group and alignreport.  You must provide one of these parameters.\n");
+		m->mothurOut("The list.seqs command reads a fasta, name, group, list, taxonomy or alignreport file and outputs a .accnos file containing sequence names.\n");
+		m->mothurOut("The list.seqs command parameters are fasta, name, group, list, taxonomy and alignreport.  You must provide one of these parameters.\n");
 		m->mothurOut("The list.seqs command should be in the following format: list.seqs(fasta=yourFasta).\n");
 		m->mothurOut("Example list.seqs(fasta=amazon.fasta).\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
@@ -151,6 +162,7 @@ int ListSeqsCommand::execute(){
 		else if (groupfile != "")	{	inputFileName = groupfile;	readGroup();	}
 		else if (alignfile != "")	{	inputFileName = alignfile;	readAlign();	}
 		else if (listfile != "")	{	inputFileName = listfile;	readList();		}
+		else if (taxfile != "")		{	inputFileName = taxfile;	readTax();		}
 		
 		if (m->control_pressed) { return 0; }
 		
@@ -360,6 +372,35 @@ int ListSeqsCommand::readAlign(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ListSeqsCommand", "readAlign");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int ListSeqsCommand::readTax(){
+	try {
+		
+		ifstream in;
+		openInputFile(taxfile, in);
+		string name, firstCol, secondCol;
+		
+		while(!in.eof()){
+		
+			if (m->control_pressed) { in.close(); return 0; }
+
+			in >> firstCol;				
+			in >> secondCol;			
+			
+			names.push_back(firstCol);
+			
+			gobble(in);
+		}
+		in.close();
+		
+		return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ListSeqsCommand", "readTax");
 		exit(1);
 	}
 }
