@@ -22,7 +22,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","name", "group", "alignreport", "accnos", "list","outputdir","inputdir", "dups" };
+			string Array[] =  {"fasta","name", "group", "alignreport", "accnos", "list","taxonomy","outputdir","inputdir", "dups" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -91,6 +91,14 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
+				
+				it = parameters.find("taxonomy");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
+				}
 			}
 
 			
@@ -119,19 +127,18 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 			if (listfile == "not open") { abort = true; }
 			else if (listfile == "not found") {  listfile = "";  }
 			
+			taxfile = validParameter.validFile(parameters, "taxonomy", true);
+			if (taxfile == "not open") { abort = true; }
+			else if (taxfile == "not found") {  taxfile = "";  }
+
+			
 			string usedDups = "true";
 			string temp = validParameter.validFile(parameters, "dups", false);	if (temp == "not found") { temp = "false"; usedDups = ""; }
 			dups = isTrue(temp);
 			
-			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, alignreport or list."); m->mothurOutEndLine(); abort = true; }
+			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, group, taxonomy, alignreport or list."); m->mothurOutEndLine(); abort = true; }
 			
-			//int okay = 2;
-			//if (outputDir != "") { okay++; }
-			//if (usedDups != "") { okay++;  }
-			
-			if ((usedDups != "") && (namefile == "")) {  m->mothurOut("You may only use dups with the name option."); m->mothurOutEndLine();  abort = true; }
-			
-			//if (parameters.size() > okay) { m->mothurOut("You may only enter one of the following: fasta, name, group, alignreport, or list."); m->mothurOutEndLine(); abort = true;  }
+			if ((usedDups != "") && (namefile == "")) {  m->mothurOut("You may only use dups with the name option."); m->mothurOutEndLine();  abort = true; }			
 		}
 
 	}
@@ -144,9 +151,9 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 
 void RemoveSeqsCommand::help(){
 	try {
-		m->mothurOut("The remove.seqs command reads an .accnos file and one of the following file types: fasta, name, group, list or alignreport file.\n");
+		m->mothurOut("The remove.seqs command reads an .accnos file and at least one of the following file types: fasta, name, group, list, taxonomy or alignreport file.\n");
 		m->mothurOut("It outputs a file containing the sequences NOT in the .accnos file.\n");
-		m->mothurOut("The remove.seqs command parameters are accnos, fasta, name, group, list, alignreport and dups.  You must provide accnos and one of the file parameters.\n");
+		m->mothurOut("The remove.seqs command parameters are accnos, fasta, name, group, list, taxonomy, alignreport and dups.  You must provide accnos and at least one of the file parameters.\n");
 		m->mothurOut("The dups parameter allows you to remove the entire line from a name file if you remove any name from the line. default=false. If dups=true, then remove.seqs outputs a new .accnos file containing all the sequences removed. \n");
 		m->mothurOut("The remove.seqs command should be in the following format: remove.seqs(accnos=yourAccnos, fasta=yourFasta).\n");
 		m->mothurOut("Example remove.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n");
@@ -176,6 +183,7 @@ int RemoveSeqsCommand::execute(){
 		if (groupfile != "")		{		readGroup();	}
 		if (alignfile != "")		{		readAlign();	}
 		if (listfile != "")			{		readList();		}
+		if (taxfile != "")			{		readTax();		}
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
 		
@@ -221,7 +229,7 @@ int RemoveSeqsCommand::readFasta(){
 					wroteSomething = true;
 					
 					currSeq.printSequence(out);
-				}//else {		names.erase(name);		}
+				}
 			}
 			gobble(in);
 		}
@@ -435,7 +443,7 @@ int RemoveSeqsCommand::readGroup(){
 			if (names.count(name) == 0) {
 				wroteSomething = true;
 				out << name << '\t' << group << endl;
-			}//else {		names.erase(name);		}
+			}
 					
 			gobble(in);
 		}
@@ -454,7 +462,49 @@ int RemoveSeqsCommand::readGroup(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+int RemoveSeqsCommand::readTax(){
+	try {
+		if (outputDir == "") {  outputDir += hasPath(taxfile);  }
+		string outputFileName = outputDir + getRootName(getSimpleName(taxfile)) + "pick" + getExtension(taxfile);
+		ofstream out;
+		openOutputFile(outputFileName, out);
 
+		ifstream in;
+		openInputFile(taxfile, in);
+		string name, tax;
+		
+		bool wroteSomething = false;
+		
+		while(!in.eof()){
+			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
+			
+			in >> name;				//read from first column
+			in >> tax;			//read from second column
+			
+			//if this name is in the accnos file
+			if (names.count(name) == 0) {
+				wroteSomething = true;
+				out << name << '\t' << tax << endl;
+			}
+					
+			gobble(in);
+		}
+		in.close();
+		out.close();
+		
+		if (wroteSomething == false) {
+			m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();
+			remove(outputFileName.c_str()); 
+		}else { outputNames.push_back(outputFileName); }
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RemoveSeqsCommand", "readTax");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 //alignreport file has a column header line then all other lines contain 16 columns.  we just want the first column since that contains the name
 int RemoveSeqsCommand::readAlign(){
@@ -496,7 +546,6 @@ int RemoveSeqsCommand::readAlign(){
 				out << endl;
 				
 			}else {//still read just don't do anything with it
-				//names.erase(name);	
 				
 				//read rest
 				for (int i = 0; i < 15; i++) {  

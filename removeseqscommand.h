@@ -23,7 +23,7 @@ class RemoveSeqsCommand : public Command {
 		
 	private:
 		set<string> names;
-		string accnosfile, fastafile, namefile, groupfile, alignfile, listfile, outputDir;
+		string accnosfile, fastafile, namefile, groupfile, alignfile, listfile, taxfile, outputDir;
 		bool abort, dups;
 		vector<string> outputNames;
 		
@@ -33,6 +33,7 @@ class RemoveSeqsCommand : public Command {
 		int readAlign();
 		void readAccnos();
 		int readList();
+		int readTax();
 		
 };
 
