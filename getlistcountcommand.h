@@ -34,7 +34,7 @@ private:
 	
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used
-	string label, listfile, outputDir;
+	string label, listfile, outputDir, sort;
 	ofstream out;
 	vector<string> outputNames;
 	

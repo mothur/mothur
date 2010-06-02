@@ -181,7 +181,6 @@ int BinSeqCommand::execute(){
 			readNamesFile();
 		}
 		
-		
 		//read list file
 		read = new ReadOTUFile(globaldata->getListFile());	
 		read->read(&*globaldata); 
