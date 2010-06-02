@@ -26,7 +26,7 @@ ifeq  ($(strip $(USEREADLINE)),yes)
       -L../readline-6.0
 endif
 
-USEMPI ?= yes
+USEMPI ?= no
 
 ifeq  ($(strip $(USEMPI)),yes)
 	CC = mpic++
@@ -224,6 +224,7 @@ mothur : \
 		./taxonomyequalizer.o\
 		./phylotypecommand.o\
 		./classifyseqscommand.o\
+		./classifyotucommand.o\
 		./parsesffcommand.o\
 		./classify.o\
 		./phylotree.o\
@@ -432,6 +433,7 @@ mothur : \
 		./taxonomyequalizer.o\
 		./phylotypecommand.o\
 		./classifyseqscommand.o\
+		./classifyotucommand.o\
 		./parsesffcommand.o\
 		./classify.o\
 		./phylotree.o\
@@ -643,6 +645,7 @@ clean :
 		./taxonomyequalizer.o\
 		./phylotypecommand.o\
 		./classifyseqscommand.o\
+		./classifyotucommand.o\
 		./parsesffcommand.o\
 		./classify.o\
 		./phylotree.o\
@@ -1697,5 +1700,10 @@ install : mothur
 # Item # 207 -- splitmatrix --
 ./clustersplitcommand.o : clustersplitcommand.cpp
 	$(CC) $(CC_OPTIONS) clustersplitcommand.cpp -c $(INCLUDE) -o ./clustersplitcommand.o
+	
+# Item # 207 -- splitmatrix --
+./classifyotucommand.o : classifyotucommand.cpp
+	$(CC) $(CC_OPTIONS) classifyotucommand.cpp -c $(INCLUDE) -o ./classifyotucommand.o
+
 
 ##### END RUN ####

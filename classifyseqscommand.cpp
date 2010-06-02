@@ -320,7 +320,7 @@ void ClassifySeqsCommand::help(){
 		m->mothurOut("The gapextend parameter allows you to specify the penalty for extending a gap in an alignment.  The default is -1.0.\n");
 		m->mothurOut("The numwanted parameter allows you to specify the number of sequence matches you want with the knn method.  The default is 10.\n");
 		m->mothurOut("The cutoff parameter allows you to specify a bootstrap confidence threshold for your taxonomy.  The default is 0.\n");
-		m->mothurOut("The probs parameter shut off the bootstrapping results for the bayesian method. The default is true, meaning you want the bootstrapping to be run.\n");
+		m->mothurOut("The probs parameter shuts off the bootstrapping results for the bayesian method. The default is true, meaning you want the bootstrapping to be shown.\n");
 		m->mothurOut("The iters parameter allows you to specify how many iterations to do when calculating the bootstrap confidence score for your taxonomy with the bayesian method.  The default is 100.\n");
 		m->mothurOut("The classify.seqs command should be in the following format: \n");
 		m->mothurOut("classify.seqs(template=yourTemplateFile, fasta=yourFastaFile, method=yourClassificationMethod, search=yourSearchmethod, ksize=yourKmerSize, taxonomy=yourTaxonomyFile, processors=yourProcessors) \n");

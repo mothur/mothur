@@ -118,8 +118,8 @@ void ClassifyOtuCommand::help(){
 		m->mothurOut("The name parameter allows you add a names file with your taxonomy file.\n");
 		m->mothurOut("The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n");
 		m->mothurOut("The default value for label is all labels in your inputfile.\n");
-		m->mothurOut("The cutoff parameter allows you to specify a concensus confidence threshold for your taxonomy.  The default is 51, meaning 51%. Cutoff cannot be below 51.\n");
-		m->mothurOut("The probs parameter shuts off the outputting of the concensus confidence results. The default is true, meaning you want the confidence to be shown.\n");
+		m->mothurOut("The cutoff parameter allows you to specify a consensus confidence threshold for your taxonomy.  The default is 51, meaning 51%. Cutoff cannot be below 51.\n");
+		m->mothurOut("The probs parameter shuts off the outputting of the consensus confidence results. The default is true, meaning you want the confidence to be shown.\n");
 		m->mothurOut("The classify.otu command should be in the following format: classify.otu(taxonomy=yourTaxonomyFile, list=yourListFile, name=yourNamesFile, label=yourLabels).\n");
 		m->mothurOut("Example classify.otu(taxonomy=abrecovery.silva.full.taxonomy, list=abrecovery.fn.list, label=0.10).\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n\n");
@@ -293,7 +293,7 @@ int ClassifyOtuCommand::readTaxonomyFile() {
 	}
 }
 //**********************************************************************************************************************
-string ClassifyOtuCommand::findConcensusTaxonomy(int bin, ListVector* thisList, int& size) {
+string ClassifyOtuCommand::findConsensusTaxonomy(int bin, ListVector* thisList, int& size) {
 	try{
 		string conTax = "";
 		vector<string> names;
@@ -316,7 +316,7 @@ string ClassifyOtuCommand::findConcensusTaxonomy(int bin, ListVector* thisList, 
 			it = taxMap.find(names[i]);
 			
 			if (it == taxMap.end()) { //this name is not in taxonomy file, skip it
-				m->mothurOut(names[i] + " is not in your taxonomy file.  I will not include it in the concensus."); m->mothurOutEndLine();
+				m->mothurOut(names[i] + " is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine();
 			}else{
 				
 				//if namesfile include the names
@@ -325,7 +325,7 @@ string ClassifyOtuCommand::findConcensusTaxonomy(int bin, ListVector* thisList, 
 					it2 = nameMap.find(names[i]);
 					
 					if (it2 == nameMap.end()) { //this name is not in name file, skip it
-						m->mothurOut(names[i] + " is not in your name file.  I will not include it in the concensus."); m->mothurOutEndLine();
+						m->mothurOut(names[i] + " is not in your name file.  I will not include it in the consensus."); m->mothurOutEndLine();
 					}else{
 						
 						vector<string> nameFileNames;
@@ -371,11 +371,11 @@ string ClassifyOtuCommand::findConcensusTaxonomy(int bin, ListVector* thisList, 
 			}
 				
 			//is this taxonomy above cutoff
-			int concensusConfidence = ceil((bestChildSize / (float) size) * 100);
+			int consensusConfidence = ceil((bestChildSize / (float) size) * 100);
 			
-			if (concensusConfidence >= cutoff) { //if yes, add it
+			if (consensusConfidence >= cutoff) { //if yes, add it
 				if (probs) {
-					conTax += bestChild.name + "(" + toString(concensusConfidence) + ");";
+					conTax += bestChild.name + "(" + toString(consensusConfidence) + ");";
 				}else{
 					conTax += bestChild.name + ";";
 				}
@@ -396,7 +396,7 @@ string ClassifyOtuCommand::findConcensusTaxonomy(int bin, ListVector* thisList, 
 			
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ClassifyOtuCommand", "findConcensusTaxonomy");
+		m->errorOut(e, "ClassifyOtuCommand", "findConsensusTaxonomy");
 		exit(1);
 	}
 }
@@ -417,7 +417,7 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 		
 		//for each bin in the list vector
 		for (int i = 0; i < processList->getNumBins(); i++) {
-			conTax  = findConcensusTaxonomy(i, processList, size);
+			conTax  = findConsensusTaxonomy(i, processList, size);
 			
 			if (m->control_pressed) { out.close();  return 0; }
 			

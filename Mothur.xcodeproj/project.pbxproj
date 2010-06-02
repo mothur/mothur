@@ -36,6 +36,8 @@
 		A7825503116519F70002E2DD /* chimerabellerophoncommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimerabellerophoncommand.cpp; sourceTree = "<group>"; };
 		A78434881162224F00100BE0 /* chimeraccodecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraccodecommand.h; sourceTree = "<group>"; };
 		A78434891162224F00100BE0 /* chimeraccodecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeraccodecommand.cpp; sourceTree = "<group>"; };
+		A7BBDA7B11B5694E006E6551 /* classifyotucommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = classifyotucommand.h; sourceTree = "<group>"; };
+		A7BBDA7C11B5694E006E6551 /* classifyotucommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = classifyotucommand.cpp; sourceTree = "<group>"; };
 		A7D215C811996C6E00F13F13 /* clearcutcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clearcutcommand.h; sourceTree = "<group>"; };
 		A7D215C911996C6E00F13F13 /* clearcutcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clearcutcommand.cpp; sourceTree = "<group>"; };
 		A7D216061199C47F00F13F13 /* catchallcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = catchallcommand.h; sourceTree = "<group>"; };
@@ -672,6 +674,8 @@
 				A73953DB11987ED100B0B160 /* chopseqscommand.cpp */,
 				A7DA201E113FECD400BF472F /* classifyseqscommand.h */,
 				A7DA201D113FECD400BF472F /* classifyseqscommand.cpp */,
+				A7BBDA7B11B5694E006E6551 /* classifyotucommand.h */,
+				A7BBDA7C11B5694E006E6551 /* classifyotucommand.cpp */,
 				A7D215C811996C6E00F13F13 /* clearcutcommand.h */,
 				A7D215C911996C6E00F13F13 /* clearcutcommand.cpp */,
 				A7DA2021113FECD400BF472F /* clustercommand.cpp */,
@@ -696,8 +700,8 @@
 				A7DA205D113FECD400BF472F /* getlabelcommand.h */,
 				A7DA205E113FECD400BF472F /* getlistcountcommand.cpp */,
 				A7DA205F113FECD400BF472F /* getlistcountcommand.h */,
-				A7DA2060113FECD400BF472F /* getoturepcommand.cpp */,
 				A7DA2061113FECD400BF472F /* getoturepcommand.h */,
+				A7DA2060113FECD400BF472F /* getoturepcommand.cpp */,
 				A7DA2062113FECD400BF472F /* getrabundcommand.cpp */,
 				A7DA2063113FECD400BF472F /* getrabundcommand.h */,
 				A7DA2064113FECD400BF472F /* getsabundcommand.cpp */,
