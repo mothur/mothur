@@ -39,7 +39,7 @@ private:
 	int readTaxonomyFile();
 	void removeConfidences(string&);
 	int process(ListVector*);
-	string findConcensusTaxonomy(int, ListVector*, int&); 	// returns the name of the "representative" taxonomy of given bin
+	string findConsensusTaxonomy(int, ListVector*, int&); 	// returns the name of the "representative" taxonomy of given bin
 	
 												
 };
