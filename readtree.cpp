@@ -230,7 +230,7 @@ int ReadNewickTree::readTreeString() {
 
 			lc = readNewickInt(filehandle, n, T);
 			if (lc == -1) { m->mothurOut("error with lc"); m->mothurOutEndLine(); return -1; } //reports an error in reading
-		
+	
 			if(filehandle.peek()==','){							
 				readSpecialChar(filehandle,',',"comma");
 			}
@@ -291,6 +291,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 		if(c == '('){
 			int lc = readNewickInt(f, n, T);
 			if (lc == -1) { return -1; } //reports an error in reading
+			
 			readSpecialChar(f,',',"comma");
 
 			int rc = readNewickInt(f, n, T);

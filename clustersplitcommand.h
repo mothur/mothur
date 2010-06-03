@@ -42,7 +42,8 @@ private:
 	void printData(ListVector*);
 	int createProcesses(vector < vector < map<string, string> > >);
 	vector<string> cluster(vector< map<string, string> >, set<string>&);
-	int mergeLists(vector<string>, string, set<string>);
+	int mergeLists(vector<string>, map<float, int>, ListVector*);
+	map<float, int> completeListFile(vector<string>, string, set<string>, ListVector*&);
 };
 
 #endif

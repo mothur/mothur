@@ -77,7 +77,7 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 
 void ChopSeqsCommand::help(){
 	try {
-		m->mothurOut("The chop.seqs command reads a fasta file and outputs a .chop.fasta with sequences trimmed to the end position.\n");
+		m->mothurOut("The chop.seqs command reads a fasta file and outputs a .chop.fasta containing the trimmed sequences.\n");
 		m->mothurOut("The chop.seqs command parameters are fasta, end and fromend, fasta is required.\n");
 		m->mothurOut("The chop.seqs command should be in the following format: chop.seqs(fasta=yourFasta, end=yourEnd).\n");
 		m->mothurOut("The end parameter allows you to specify an end base position for your sequences, default = 0.\n");

@@ -313,8 +313,12 @@ int ClusterSplitCommand::execute(){
 		if (m->control_pressed) { for (int i = 0; i < listFileNames.size(); i++) { remove(listFileNames[i].c_str()); } return 0; }
 		
 		//****************** merge list file and create rabund and sabund files ******************************//
-				
-		mergeLists(listFileNames, singletonName, labels);
+		ListVector* listSingle;
+		map<float, int> labelBins = completeListFile(listFileNames, singletonName, labels, listSingle); //returns map of label to numBins
+		
+		if (m->control_pressed) { if (listSingle != NULL) { delete listSingle; } for (int i = 0; i < outputNames.size(); i++) { remove(outputNames[i].c_str()); } return 0; }
+		
+		mergeLists(listFileNames, labelBins, listSingle);
 
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { remove(outputNames[i].c_str()); } return 0; }
 		
@@ -333,7 +337,116 @@ int ClusterSplitCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-int ClusterSplitCommand::mergeLists(vector<string> listNames, string singleton, set<string> userLabels){
+map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, string singleton, set<string> userLabels, ListVector*& listSingle){
+	try {
+				
+		map<float, int> labelBin;
+		vector<float> orderFloat;
+		int numSingleBins;
+		
+		//read in singletons
+		if (singleton != "none") {
+			ifstream in;
+			openInputFile(singleton, in);
+				
+			string firstCol, secondCol;
+			listSingle = new ListVector();
+			while (!in.eof()) {
+				in >> firstCol >> secondCol; gobble(in);
+				listSingle->push_back(secondCol);
+			}
+			in.close();
+			remove(singleton.c_str());
+			
+			numSingleBins = listSingle->getNumBins();
+		}else{  listSingle = NULL; numSingleBins = 0;  }
+		
+		//go through users set and make them floats so we can sort them 
+		for(set<string>::iterator it = userLabels.begin(); it != userLabels.end(); ++it) {
+			float temp = -10.0;
+
+			if ((*it != "unique") && (convertTestFloat(*it, temp) == true))	{	convert(*it, temp);	}
+			else if (*it == "unique")										{	temp = -1.0;		}
+			
+			orderFloat.push_back(temp);
+			labelBin[temp] = numSingleBins; //initialize numbins 
+		}
+	
+		//sort order
+		sort(orderFloat.begin(), orderFloat.end());
+		userLabels.clear();
+			
+		//get the list info from each file
+		for (int k = 0; k < listNames.size(); k++) {
+	
+			if (m->control_pressed) {  
+				if (listSingle != NULL) { delete listSingle; listSingle = NULL; remove(singleton.c_str());  }
+				for (int i = 0; i < listNames.size(); i++) {   remove(listNames[i].c_str());  }
+				return labelBin;
+			}
+			
+			InputData* input = new InputData(listNames[k], "list");
+			ListVector* list = input->getListVector();
+			string lastLabel = list->getLabel();
+			
+			string filledInList = listNames[k] + "filledInTemp";
+			ofstream outFilled;
+			openOutputFile(filledInList, outFilled);
+	
+			//for each label needed
+			for(int l = 0; l < orderFloat.size(); l++){
+			
+				string thisLabel;
+				if (orderFloat[l] == -1) { thisLabel = "unique"; }
+				else { thisLabel = toString(orderFloat[l],  length-1);  } 
+
+				//this file has reached the end
+				if (list == NULL) { 
+					list = input->getListVector(lastLabel, true); 
+				}else{	//do you have the distance, or do you need to fill in
+						
+					float labelFloat;
+					if (list->getLabel() == "unique") {  labelFloat = -1.0;  }
+					else { convert(list->getLabel(), labelFloat); }
+
+					//check for missing labels
+					if (labelFloat > orderFloat[l]) { //you are missing the label, get the next smallest one
+						//if its bigger get last label, otherwise keep it
+						delete list;
+						list = input->getListVector(lastLabel, true);  //get last list vector to use, you actually want to move back in the file
+					}
+					lastLabel = list->getLabel();
+				}
+				
+				//print to new file
+				list->setLabel(thisLabel);
+				list->print(outFilled);
+		
+				//update labelBin
+				labelBin[orderFloat[l]] += list->getNumBins();
+									
+				delete list;
+									
+				list = input->getListVector();
+			}
+			
+			if (list != NULL) { delete list; }
+			delete input;
+			
+			outFilled.close();
+			remove(listNames[k].c_str());
+			rename(filledInList.c_str(), listNames[k].c_str());
+		}
+		
+		return labelBin;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterSplitCommand", "completeListFile");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> userLabels, ListVector* listSingle){
 	try {
 		if (outputDir == "") { outputDir += hasPath(distfile); }
 		fileroot = outputDir + getRootName(getSimpleName(distfile));
@@ -346,115 +459,64 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, string singleton, 
 		outputNames.push_back(fileroot+ tag + ".rabund");
 		outputNames.push_back(fileroot+ tag + ".list");
 		
-		//read in singletons
-		ListVector* listSingle = NULL;
-		if (singleton != "none") {
-			ifstream in;
-			openInputFile(singleton, in);
-				
-			string firstCol, secondCol;
-			listSingle = new ListVector();
-			while (!in.eof()) {
-				in >> firstCol >> secondCol; gobble(in);
-				listSingle->push_back(secondCol);
-			}
-			in.close();
-		}
-		
-		vector<float> orderFloat;
-	
-		//go through users set and make them floats so we can sort them 
-		for(set<string>::iterator it = userLabels.begin(); it != userLabels.end(); ++it) {
-			float temp;
+		map<float, int>::iterator itLabel;
 
-			if ((*it != "unique") && (convertTestFloat(*it, temp) == true)){
-				convert(*it, temp);
-				orderFloat.push_back(temp);
-			}else if (*it == "unique") { orderFloat.push_back(-1.0); }
-			else {
-				userLabels.erase(*it); 
-				it--;
-			}
-		}
-	
-		//sort order
-		sort(orderFloat.begin(), orderFloat.end());
-
-		vector<InputData*> inputs;
-		vector<string> lastLabels;
-		for (int i = 0; i < listNames.size(); i++) {
-			InputData* input = new InputData(listNames[i], "list");
-			inputs.push_back(input);
-			
-			ifstream in;
-			openInputFile(listNames[i], in);
-			ListVector tempList(in);
-			lastLabels.push_back(tempList.getLabel());
-			in.close();
-		}
-	
-		ListVector* merged = NULL;
-				
 		//for each label needed
-		for(int l = 0; l < orderFloat.size(); l++){
+		for(itLabel = userLabels.begin(); itLabel != userLabels.end(); itLabel++) {
 			
 			string thisLabel;
-			if (orderFloat[l] == -1) { thisLabel = "unique"; }
-			else { thisLabel = toString(orderFloat[l],  length-1);  } 
-	
-			//get the list info from each file
-			for (int k = 0; k < listNames.size(); k++) {
-	
-				if (m->control_pressed) {  
-					if (listSingle != NULL) { delete listSingle; remove(singleton.c_str());  }
-					for (int i = 0; i < listNames.size(); i++) {  delete inputs[i];  remove(listNames[i].c_str());  }
-					delete merged; merged = NULL;
-					return 0;
-				}
-				
-				ListVector* list = inputs[k]->getListVector();
-				
-				//this file has reached the end
-				if (list == NULL) { list = inputs[k]->getListVector(lastLabels[k], true); }	
-						
-				float labelFloat;
-				if (list->getLabel() == "unique") {  labelFloat = -1.0;  }
-				else { convert(list->getLabel(), labelFloat); }
-
-				//check for missing labels
-				if (labelFloat > orderFloat[l]) { //you are missing the label, get the next smallest one
-					//if its bigger get last label, otherwise keep it
-					delete list;
-					list = inputs[k]->getListVector(lastLabels[k], true); //get last list vector to use, you actually want to move back in the file
-				}
-				lastLabels[k] = list->getLabel();
-
-				//is this the first file
-				if (merged == NULL) {  merged = new ListVector();  merged->setLabel(thisLabel); }
-				
-				for (int j = 0; j < list->getNumBins(); j++) {
-					merged->push_back(list->get(j));
-				}
-				
-				delete list;
-			}
+			if (itLabel->first == -1) { thisLabel = "unique"; }
+			else { thisLabel = toString(itLabel->first,  length-1);  } 
 			
+			outList << thisLabel << '\t' << itLabel->second << '\t';
+
+			RAbundVector* rabund = new RAbundVector();
+			rabund->setLabel(thisLabel);
+
 			//add in singletons
 			if (listSingle != NULL) {
 				for (int j = 0; j < listSingle->getNumBins(); j++) {
-					merged->push_back(listSingle->get(j));
+					outList << listSingle->get(j) << '\t';
+					rabund->push_back(getNumNames(listSingle->get(j)));
 				}
 			}
 			
-			//print to files
-			printData(merged);
+			//get the list info from each file
+			for (int k = 0; k < listNames.size(); k++) {
+	
+				if (m->control_pressed) {  if (listSingle != NULL) { delete listSingle;   } for (int i = 0; i < listNames.size(); i++) { remove(listNames[i].c_str());  } delete rabund; return 0; }
+				
+				InputData* input = new InputData(listNames[k], "list");
+				ListVector* list = input->getListVector(thisLabel);
+				
+				//this file has reached the end
+				if (list == NULL) { m->mothurOut("Error merging listvectors in file " + listNames[k]); m->mothurOutEndLine();  }	
+				else {		
+					for (int j = 0; j < list->getNumBins(); j++) {
+						outList << list->get(j) << '\t';
+						rabund->push_back(getNumNames(list->get(j)));
+					}
+					delete list;
+				}
+				delete input;
+			}
 			
-			delete merged; merged = NULL;
+			SAbundVector sabund = rabund->getSAbundVector();
+			
+			sabund.print(outSabund);
+			rabund->print(outRabund);
+			outList << endl;
+			
+			delete rabund;
 		}
 		
-		if (listSingle != NULL) { delete listSingle; remove(singleton.c_str());  }
+		outList.close();
+		outRabund.close();
+		outSabund.close();
 		
-		for (int i = 0; i < listNames.size(); i++) {  delete inputs[i];  remove(listNames[i].c_str());  }
+		if (listSingle != NULL) { delete listSingle;  }
+		
+		for (int i = 0; i < listNames.size(); i++) {  remove(listNames[i].c_str());  }
 		
 		return 0;
 	}
@@ -463,6 +525,7 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, string singleton, 
 		exit(1);
 	}
 }
+
 //**********************************************************************************************************************
 
 void ClusterSplitCommand::printData(ListVector* oldList){
