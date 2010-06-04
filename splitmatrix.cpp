@@ -49,6 +49,13 @@ int SplitMatrix::splitDistance(){
 	try {
         
 		vector<set<string> > groups;
+		
+		//for buffering the io to improve speed
+		 //allow for 10 dists to be stored, then output.
+		vector<string> outputs;
+		vector<int> numOutputs;
+		vector<bool> wroteOutPut;
+		
 		int numGroups = 0;
 
 		ofstream outFile;
@@ -120,41 +127,149 @@ int SplitMatrix::splitDistance(){
 					string fileName = distFile + "." + toString(numGroups) + ".temp";
 					outFile.open(fileName.c_str(), ios::ate);
 
-					outFile << seqA << '\t' << seqB << '\t' << dist << endl;
+					string tempOut = seqA + '\t' + seqB + '\t' + toString(dist) + '\n';
+					outputs.push_back(tempOut);
+					numOutputs.push_back(1);
+					wroteOutPut.push_back(false);
+					
 					numGroups++;
 				}
 				else{
 					string fileName = distFile + "." + toString(groupID) + ".temp";
+					
 					if(groupID != prevGroupID){
 						outFile.close();
 						outFile.open(fileName.c_str(), ios::app);
 						prevGroupID	= groupID;
 					}
-					outFile << seqA << '\t' << seqB << '\t' << dist << endl;
+					
+					//have we reached the max buffer size
+					if (numOutputs[groupID] > 10) { //write out sequence
+						outFile << outputs[groupID] << seqA << '\t' << seqB << '\t' << dist << endl;
+						outputs[groupID] = "";
+						numOutputs[groupID] = 0;
+						wroteOutPut[groupID] = true;
+					}else {
+						outputs[groupID] +=  seqA + '\t' + seqB + '\t' + toString(dist)  + '\n';
+						numOutputs[groupID]++;
+					}
 					
 					if(groupIDA != -1 && groupIDB != -1){ //merge distance files of two groups you merged above
 						string row, column, distance;
 						if(groupIDA<groupIDB){
-							string fileName = distFile + "." + toString(groupIDB) + ".temp";
-							ifstream fileB(fileName.c_str());
-							while(fileB){
-								fileB >> row >> column >> distance;
-								outFile << row << '\t' << column << '\t' << distance << endl;
-								gobble(fileB);
+			
+							numOutputs[groupID] += numOutputs[groupIDB];
+							outputs[groupID] += outputs[groupIDB];
+							
+							if (wroteOutPut[groupIDB]) {
+								string fileName = distFile + "." + toString(groupIDB) + ".temp";
+								ifstream fileB(fileName.c_str(), ios::ate);
+								
+								long size;
+								char* memblock;
+
+								size = fileB.tellg();
+				
+								fileB.seekg (0, ios::beg);
+								
+								int numRead = size / 1024;
+								int lastRead = size % 1024;
+
+								for (int i = 0; i < numRead; i++) {
+				
+									memblock = new char [1024];
+								
+									fileB.read (memblock, 1024);
+									
+									string temp = memblock;
+									outFile << temp.substr(0, 1024);
+									
+									delete memblock;
+								}
+								
+								memblock = new char [lastRead];
+								
+								fileB.read (memblock, lastRead);
+								
+								//not sure why but it will read more than lastRead char...??
+								string temp = memblock;
+								outFile << temp.substr(0, lastRead);
+								delete memblock;
+								
+								fileB.close();
+								remove(fileName.c_str());
+								
+								wroteOutPut[groupID] = true;
+								wroteOutPut[groupIDB] = false;
 							}
-							fileB.close();
-							remove(fileName.c_str());
+							
+							if (numOutputs[groupID] != 0) {
+								outFile << outputs[groupID];
+								wroteOutPut[groupID] = true;
+								outputs[groupID] = "";
+								numOutputs[groupID] = 0;
+								
+								outputs[groupIDB] = "";
+								numOutputs[groupIDB] = 0;
+							}
+							
 						}
 						else{
-							string fileName = distFile + "." + toString(groupIDA) + ".temp";
-							ifstream fileA(fileName.c_str());
-							while(fileA){
-								fileA >> row >> column >> distance;
-								outFile << row << '\t' << column << '\t' << distance << endl;
-								gobble(fileA);
+							numOutputs[groupID] += numOutputs[groupIDA];
+							outputs[groupID] += outputs[groupIDA];
+							
+							if (wroteOutPut[groupIDA]) {
+								string fileName = distFile + "." + toString(groupIDA) + ".temp";
+								ifstream fileB(fileName.c_str(), ios::ate);
+								
+								long size;
+								char* memblock;
+
+								size = fileB.tellg();
+															
+								fileB.seekg (0, ios::beg);
+								
+								int numRead = size / 1024;
+								int lastRead = size % 1024;
+
+								for (int i = 0; i < numRead; i++) {
+				
+									memblock = new char [1024];
+								
+									fileB.read (memblock, 1024);
+									string temp = memblock;
+									outFile << temp.substr(0, 1024);
+									
+									delete memblock;
+								}
+								
+								memblock = new char [lastRead];
+								
+								fileB.read (memblock, lastRead);
+								
+								//not sure why but it will read more than lastRead char...??
+								string temp = memblock;
+								outFile << temp.substr(0, lastRead);
+									
+								delete memblock;
+								
+								fileB.close();
+								remove(fileName.c_str());
+								
+								wroteOutPut[groupID] = true;
+								wroteOutPut[groupIDA] = false;
 							}
-							fileA.close();
-							remove(fileName.c_str());
+							
+							if (numOutputs[groupID] != 0) {
+								outFile << outputs[groupID];
+								wroteOutPut[groupID] = true;
+								outputs[groupID] = "";
+								numOutputs[groupID] = 0;
+								
+								outputs[groupIDA] = "";
+								numOutputs[groupIDA] = 0;
+							}
+
 						}					
 					}
 				}
@@ -163,6 +278,15 @@ int SplitMatrix::splitDistance(){
 		}
 		outFile.close();
 		dFile.close();
+		
+		for (int i = 0; i < numGroups; i++) {
+			if (numOutputs[i] > 0) {
+				string fileName = distFile + "." + toString(i) + ".temp";
+				outFile.open(fileName.c_str(), ios::app);
+				outFile << outputs[i];
+				outFile.close();
+			}
+		}
 	
 		ifstream bigNameFile(namefile.c_str());
 		if(!bigNameFile){
@@ -188,7 +312,6 @@ int SplitMatrix::splitDistance(){
 				
 				for(set<string>::iterator gIt=groups[i].begin();gIt!=groups[i].end();gIt++){
 					map<string,string>::iterator nIt = nameMap.find(*gIt);
-					
 					if (nIt != nameMap.end()) {
 						smallNameFile << nIt->first << '\t' << nIt->second << endl;
 						nameMap.erase(nIt);
@@ -293,6 +416,12 @@ int SplitMatrix::splitClassify(){
 			remove((distFile + "." + toString(i) + ".temp").c_str());
 		}
 		
+		
+		//for buffering the io to improve speed
+		 //allow for 10 dists to be stored, then output.
+		vector<string> outputs;  outputs.resize(numGroups, "");
+		vector<int> numOutputs;	 numOutputs.resize(numGroups, 0);	
+		
 		//for each distance
 		while(dFile){
 			string seqA, seqB;
@@ -308,17 +437,32 @@ int SplitMatrix::splitClassify(){
 			
 			if ((it != seqGroup.end()) && (it2 != seqGroup.end())) { //they are both not singletons 
 				if (it->second == it2->second) { //they are from the same group so add the distance
-					openOutputFileAppend((distFile + "." + toString(it->second) + ".temp"), outFile);
-					outFile << seqA << '\t' << seqB << '\t' << dist << endl;
-					outFile.close();
+					if (numOutputs[it->second] > 10) {
+						openOutputFileAppend((distFile + "." + toString(it->second) + ".temp"), outFile);
+						outFile << outputs[it->second] << seqA << '\t' << seqB << '\t' << dist << endl;
+						outFile.close();
+						outputs[it->second] = "";
+						numOutputs[it->second] = 0;
+					}else{
+						outputs[it->second] += seqA + '\t' + seqB + '\t' + toString(dist)  + '\n';
+						numOutputs[it->second]++;
+					}
 				}
 			}
 		}
 		dFile.close();
 	
-		
 		for (int i = 0; i < numGroups; i++) { //remove old temp files, just in case
 			remove((namefile + "." + toString(i) + ".temp").c_str());
+			
+			//write out any remaining buffers
+			if (numOutputs[it->second] > 0) {
+				openOutputFileAppend((distFile + "." + toString(i) + ".temp"), outFile);
+				outFile << outputs[i];
+				outFile.close();
+				outputs[i] = "";
+				numOutputs[i] = 0;
+			}
 		}
 		
 		ifstream bigNameFile;

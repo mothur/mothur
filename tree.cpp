@@ -714,9 +714,9 @@ void Tree::parseTreeFile() {
 		}
 		filehandle.close();
 		
-		for (int i = 0; i < globaldata->Treenames.size(); i++) {
-cout << globaldata->Treenames[i] << endl; }
-cout << "done" << endl;
+		//for (int i = 0; i < globaldata->Treenames.size(); i++) {
+//cout << globaldata->Treenames[i] << endl; }
+//cout << globaldata->Treenames.size() << endl;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Tree", "parseTreeFile");
