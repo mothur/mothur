@@ -625,6 +625,8 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
 			globaldata->setNameFile(thisNamefile);
 			globaldata->setColumnFile(thisDistFile); globaldata->setFormat("column");
 			
+			m->mothurOutEndLine(); m->mothurOut("Reading " + thisDistFile); m->mothurOutEndLine();
+			
 			ReadMatrix* read = new ReadColumnMatrix(thisDistFile); 	
 			read->setCutoff(cutoff);
 

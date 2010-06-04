@@ -26,10 +26,10 @@ void TreeMap::readMap() {
 		while(fileHandle){
 			fileHandle >> seqName;			//read from first column
 			fileHandle >> seqGroup;			//read from second column
-			
+
 			namesOfSeqs.push_back(seqName);
 			setNamesOfGroups(seqGroup);
-						
+					
 			treemap[seqName].groupname = seqGroup;	//store data in map
 			
 			it2 = seqsPerGroup.find(seqGroup);

@@ -25,13 +25,13 @@
 int GroupMap::readMap() {
 		string seqName, seqGroup;
 		int error = 0;
-	
+
 		while(fileHandle){
 			fileHandle >> seqName;			//read from first column
 			fileHandle >> seqGroup;			//read from second column
 			
 			if (m->control_pressed) {  fileHandle.close();  return 1; }
-			
+	
 			setNamesOfGroups(seqGroup);
 			
 			it = groupmap.find(seqName);
