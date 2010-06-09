@@ -102,7 +102,7 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 				rightRoom = 0; leftRoom = 0;
 				
 				//	Part D of Fig. 2 from DeSantis et al.		//	template sequence and the official template sequence
-				for(leftIndex=i-1;leftIndex>0;leftIndex--){	//	then we've got problems...
+				for(leftIndex=i-1;leftIndex>0;leftIndex--){		//	then we've got problems...
 					if(!isalpha(candAln[leftIndex])){
 						leftRoom = 1;	//count how far it is to the nearest gap on the LEFT side of the anomaly
 						while(leftIndex-leftRoom>=0 && !isalpha(candAln[leftIndex-leftRoom]))	{	leftRoom++;		}
@@ -117,7 +117,7 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 						break;
 					}
 				}
-					
+								
 				int insertLength = 0;							//	figure out how long the anomaly is
 				while(!isalpha(newTemplateAlign[i + insertLength]))	{	insertLength++;	}
 				if(insertLength > maxInsertLength){	maxInsertLength = insertLength;	}
@@ -128,7 +128,6 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 					if((i-leftIndex) <= (rightIndex-i)){		//	the left gap is closer - > move stuff left there's
 	
 						if(leftRoom >= insertLength){			//	enough room to the left to move
-	
 							string leftTemplateString = newTemplateAlign.substr(0,i);
 							string rightTemplateString = newTemplateAlign.substr(i+insertLength);
 							newTemplateAlign = leftTemplateString + rightTemplateString;
@@ -154,7 +153,6 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 					}
 					else{										//	the right gap is closer - > move stuff right there's
 						if(rightRoom >= insertLength){			//	enough room to the right to move
-			
 							string leftTemplateString = newTemplateAlign.substr(0,i);
 							string rightTemplateString = newTemplateAlign.substr(i+insertLength);
 							newTemplateAlign = leftTemplateString + rightTemplateString;
@@ -165,8 +163,7 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 							candAln = leftCandidateString + rightCandidateString;	
 									
 						}
-						else{									//	not enough room to the right, have to steal some 
-			
+						else{									//	not enough room to the right, have to steal some 	
 							//	space to the left lets move left and then right...
 							string leftTemplateString = newTemplateAlign.substr(0,i);
 							string rightTemplateString = newTemplateAlign.substr(i+insertLength);
@@ -180,10 +177,13 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 									
 						}
 					}
+					i -= insertLength;
+
 				}
 				else{
-			//	there could be a case where there isn't enough room in
-					string leftTemplateString = newTemplateAlign.substr(0,i);			//	either direction to move stuff
+			//	there could be a case where there isn't enough room in either direction to move stuff
+
+					string leftTemplateString = newTemplateAlign.substr(0,i);	
 					string rightTemplateString = newTemplateAlign.substr(i+leftRoom+rightRoom);
 					newTemplateAlign = leftTemplateString + rightTemplateString;
 					longAlignmentLength = newTemplateAlign.length();
@@ -192,10 +192,11 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 					string insertString = candAln.substr(leftIndex+1,rightIndex-leftIndex-1);
 					string rightCandidateString = candAln.substr(rightIndex+rightRoom);
 					candAln = leftCandidateString + insertString + rightCandidateString;
-
+					
+					i -= (leftRoom + rightRoom);
 				}
 			
-				i -= insertLength;
+//				i -= insertLength;
 			} 
 		}
 	}
