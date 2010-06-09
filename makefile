@@ -1697,11 +1697,11 @@ install : mothur
 ./splitmatrix.o : splitmatrix.cpp
 	$(CC) $(CC_OPTIONS) splitmatrix.cpp -c $(INCLUDE) -o ./splitmatrix.o
 	
-# Item # 207 -- splitmatrix --
+# Item # 207 -- clustersplit --
 ./clustersplitcommand.o : clustersplitcommand.cpp
 	$(CC) $(CC_OPTIONS) clustersplitcommand.cpp -c $(INCLUDE) -o ./clustersplitcommand.o
 	
-# Item # 207 -- splitmatrix --
+# Item # 208 -- classifyotu --
 ./classifyotucommand.o : classifyotucommand.cpp
 	$(CC) $(CC_OPTIONS) classifyotucommand.cpp -c $(INCLUDE) -o ./classifyotucommand.o
 

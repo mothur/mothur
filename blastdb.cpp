@@ -54,21 +54,22 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 		vector<int> topMatches;
 		
 		ofstream queryFile;
-		openOutputFile(queryFileName, queryFile);
+		openOutputFile((queryFileName+seq->getName()), queryFile);
 		queryFile << '>' << seq->getName() << endl;
 		queryFile << seq->getUnaligned() << endl;
 		queryFile.close();
+
 				
 		//	the goal here is to quickly survey the database to find the closest match.  To do this we are using the default
 		//	wordsize used in megablast.  I'm sure we're sacrificing accuracy for speed, but anyother way would take way too
 		//	long.  With this setting, it seems comparable in speed to the suffix tree approach.
 		
 		string blastCommand = path + "blast/bin/blastall -p blastn -d " + dbFileName + " -m 8 -W 28 -v " + toString(n) + " -b " + toString(n);;
-		blastCommand += (" -i " + queryFileName + " -o " + blastFileName);
+		blastCommand += (" -i " + (queryFileName+seq->getName()) + " -o " + blastFileName+seq->getName());
 		system(blastCommand.c_str());
 		
 		ifstream m8FileHandle;
-		openInputFile(blastFileName, m8FileHandle);
+		openInputFile(blastFileName+seq->getName(), m8FileHandle, "no error");
 		
 		string dummy;
 		int templateAccession;
@@ -84,7 +85,9 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 			topMatches.push_back(templateAccession);
 		}
 		m8FileHandle.close();
-		
+		remove((queryFileName+seq->getName()).c_str());
+		remove((blastFileName+seq->getName()).c_str());
+
 		return topMatches;
 	}
 	catch(exception& e) {
@@ -100,7 +103,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n) {
 		vector<int> topMatches;
 		
 		ofstream queryFile;
-		openOutputFile(queryFileName, queryFile);
+		openOutputFile((queryFileName+seq->getName()), queryFile);
 		queryFile << '>' << seq->getName() << endl;
 		queryFile << seq->getUnaligned() << endl;
 		queryFile.close();
@@ -110,11 +113,11 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n) {
 		//	long.  With this setting, it seems comparable in speed to the suffix tree approach.
 	
 		string blastCommand = path + "blast/bin/megablast -e 1e-10 -d " + dbFileName + " -m 8 -b " + toString(n) + " -v " + toString(n); //-W 28 -p blastn
-		blastCommand += (" -i " + queryFileName + " -o " + blastFileName);
+		blastCommand += (" -i " + (queryFileName+seq->getName()) + " -o " + blastFileName+seq->getName());
 		system(blastCommand.c_str());
-		
+
 		ifstream m8FileHandle;
-		openInputFile(blastFileName, m8FileHandle, "no error");
+		openInputFile(blastFileName+seq->getName(), m8FileHandle, "no error");
 	
 		string dummy;
 		int templateAccession;
@@ -131,6 +134,8 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n) {
 //cout << templateAccession << endl;
 		}
 		m8FileHandle.close();
+		remove((queryFileName+seq->getName()).c_str());
+		remove((blastFileName+seq->getName()).c_str());
 //cout << "\n\n" ;		
 		return topMatches;
 	}

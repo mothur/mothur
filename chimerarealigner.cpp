@@ -24,19 +24,21 @@ void ChimeraReAligner::reAlign(Sequence* query, vector<results> parents) {
 			
 			string qAligned = query->getAligned();
 			string newQuery = "";
-		
+			
 			//sort parents by region start
 			sort(parents.begin(), parents.end(), compareRegionStart);
 
 			//make sure you don't cutoff beginning of query 
 			if (parents[0].nastRegionStart > 0) {  newQuery += qAligned.substr(0, parents[0].nastRegionStart);  }
 			int longest = 0;
+
 			//take query and break apart into pieces using breakpoints given by results of parents
 			for (int i = 0; i < parents.size(); i++) {
+			
 				int length = parents[i].nastRegionEnd - parents[i].nastRegionStart+1;
 				string q = qAligned.substr(parents[i].nastRegionStart, length);
 				Sequence* queryFrag = new Sequence(query->getName(), q);
-				
+
 				queryParts.push_back(queryFrag);
 			
 				Sequence* parent = getSequence(parents[i].parent);
@@ -46,26 +48,35 @@ void ChimeraReAligner::reAlign(Sequence* query, vector<results> parents) {
 				parent->setAligned(p);
 				
 				parentParts.push_back(parent);
-				
+
 				if (q.length() > longest)	{ longest = q.length(); }
 				if (p.length() > longest)	{ longest = p.length();	}
 			}
-											
+
 			//align each peice to correct parent from results
 			for (int i = 0; i < queryParts.size(); i++) {
 				alignment = new NeedlemanOverlap(-2.0, match, misMatch, longest+1); //default gapopen, match, mismatch, longestbase
 				Nast nast(alignment, queryParts[i], parentParts[i]);
 				delete alignment;
 			}
-												
+
 			//recombine pieces to form new query sequence
 			for (int i = 0; i < queryParts.size(); i++) {
+				//sometimes the parent regions do not meet, for example region 1 may end at 1000 and region 2 starts at 1100.  
+				//we don't want to loose length so in this case we will leave query alone
+				if (i != 0) {
+					int space = parents[i].nastRegionStart - parents[i-1].nastRegionEnd - 1;
+					if (space > 0) { //they don't meet and we need to add query piece
+						string q = qAligned.substr(parents[i-1].nastRegionEnd+1, space);
+						newQuery += q;
+					}
+				}
+
 				newQuery += queryParts[i]->getAligned();
 			}
 			
-			
 			//make sure you don't cutoff end of query 
-			if (parents[parents.size()-1].nastRegionEnd < qAligned.length()) {  newQuery += qAligned.substr(parents[parents.size()-1].nastRegionEnd);  }
+			if (parents[parents.size()-1].nastRegionEnd < (qAligned.length()-1)) {  newQuery += qAligned.substr(parents[parents.size()-1].nastRegionEnd+1);  }
 		
 			//set query to new aligned string
 			query->setAligned(newQuery);
