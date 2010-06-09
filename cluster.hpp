@@ -94,4 +94,17 @@ private:
 
 /***********************************************************************/
 
+class WeightedLinkage : public Cluster {
+public:
+	WeightedLinkage(RAbundVector*, ListVector*, SparseMatrix*, float, string);
+	bool updateDistance(MatData& colCell, MatData& rowCell);
+	string getTag();
+	
+private:
+	int saveRow;
+	int saveCol;	
+};
+
+/***********************************************************************/
+
 #endif
