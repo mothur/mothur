@@ -12,13 +12,14 @@
 
 /***********************************************************************/
 
-SplitMatrix::SplitMatrix(string distfile, string name, string tax, float c, string t){
+SplitMatrix::SplitMatrix(string distfile, string name, string tax, float c, string t, bool l){
 	m = MothurOut::getInstance();
 	distFile = distfile;
 	cutoff = c;
 	namefile = name;
 	method = t;
 	taxFile = tax;
+	large = l;
 }
 
 /***********************************************************************/
@@ -48,311 +49,8 @@ int SplitMatrix::split(){
 int SplitMatrix::splitDistance(){
 	try {
         
-		vector<set<string> > groups;
-		
-		//for buffering the io to improve speed
-		 //allow for 10 dists to be stored, then output.
-		vector<string> outputs;
-		vector<int> numOutputs;
-		vector<bool> wroteOutPut;
-		
-		int numGroups = 0;
-
-		ofstream outFile;
-		ifstream dFile;
-		openInputFile(distFile, dFile);
-	
-		while(dFile){
-			string seqA, seqB;
-			float dist;
-
-			dFile >> seqA >> seqB >> dist;
-			
-			if (m->control_pressed) {  outFile.close(); dFile.close();  for(int i=0;i<numGroups;i++){	if(groups[i].size() > 0){  remove((distFile + "." + toString(i) + ".temp").c_str()); }  } return 0; }
-					
-			if(dist < cutoff){
-				//cout << "in cutoff: " << dist << endl;
-				int groupIDA = -1;
-				int groupIDB = -1;
-				int groupID = -1;
-				int prevGroupID = -1;
-				
-				for(int i=0;i<numGroups;i++){
-					set<string>::iterator aIt = groups[i].find(seqA);
-					set<string>::iterator bIt = groups[i].find(seqB);
-					
-					if(groupIDA == -1 && aIt != groups[i].end()){//seqA is not already assigned to a group and is in group[i], so assign seqB to group[i]
-						groups[i].insert(seqB);
-						groupIDA = i;
-						groupID = groupIDA;
-
-						//cout << "in aIt: " << groupID << endl;
-	//					break;
-					}
-					else if(groupIDB == -1 && bIt != groups[i].end()){//seqB is not already assigned to a group and is in group[i], so assign seqA to group[i]
-						groups[i].insert(seqA);
-						groupIDB = i;
-						groupID = groupIDB;
-
-					//	cout << "in bIt: " << groupID << endl;
-	//					break;
-					}
-				
-					if(groupIDA != -1 && groupIDB != -1){//both ifs above have been executed, so we need to decide who to assign them to
-						if(groupIDA < groupIDB){
-						//	cout << "A: " << groupIDA << "\t" << groupIDB << endl;
-							groups[groupIDA].insert(groups[groupIDB].begin(), groups[groupIDB].end()); //merge two groups into groupIDA
-							groups[groupIDB].clear(); 
-							groupID = groupIDA;
-						}
-						else{
-						//	cout << "B: " << groupIDA << "\t" << groupIDB << endl;
-							groups[groupIDB].insert(groups[groupIDA].begin(), groups[groupIDA].end()); //merge two groups into groupIDB
-							groups[groupIDA].clear();  
-							groupID = groupIDB;
-						}
-						break;
-					}
-				}
-				
-	//windows is gonna gag on the reuse of outFile, will need to make it local...
-				
-				if(groupIDA == -1 && groupIDB == -1){ //we need a new group
-					set<string> newGroup;
-					newGroup.insert(seqA);
-					newGroup.insert(seqB);
-					groups.push_back(newGroup);
-									
-					outFile.close();
-					string fileName = distFile + "." + toString(numGroups) + ".temp";
-					outFile.open(fileName.c_str(), ios::ate);
-
-					string tempOut = seqA + '\t' + seqB + '\t' + toString(dist) + '\n';
-					outputs.push_back(tempOut);
-					numOutputs.push_back(1);
-					wroteOutPut.push_back(false);
-					
-					numGroups++;
-				}
-				else{
-					string fileName = distFile + "." + toString(groupID) + ".temp";
-					
-					if(groupID != prevGroupID){
-						outFile.close();
-						outFile.open(fileName.c_str(), ios::app);
-						prevGroupID	= groupID;
-					}
-					
-					//have we reached the max buffer size
-					if (numOutputs[groupID] > 10) { //write out sequence
-						outFile << outputs[groupID] << seqA << '\t' << seqB << '\t' << dist << endl;
-						outputs[groupID] = "";
-						numOutputs[groupID] = 0;
-						wroteOutPut[groupID] = true;
-					}else {
-						outputs[groupID] +=  seqA + '\t' + seqB + '\t' + toString(dist)  + '\n';
-						numOutputs[groupID]++;
-					}
-					
-					if(groupIDA != -1 && groupIDB != -1){ //merge distance files of two groups you merged above
-						string row, column, distance;
-						if(groupIDA<groupIDB){
-			
-							numOutputs[groupID] += numOutputs[groupIDB];
-							outputs[groupID] += outputs[groupIDB];
-							
-							if (wroteOutPut[groupIDB]) {
-								string fileName = distFile + "." + toString(groupIDB) + ".temp";
-								ifstream fileB(fileName.c_str(), ios::ate);
-								
-								long size;
-								char* memblock;
-
-								size = fileB.tellg();
-				
-								fileB.seekg (0, ios::beg);
-								
-								int numRead = size / 1024;
-								int lastRead = size % 1024;
-
-								for (int i = 0; i < numRead; i++) {
-				
-									memblock = new char [1024];
-								
-									fileB.read (memblock, 1024);
-									
-									string temp = memblock;
-									outFile << temp.substr(0, 1024);
-									
-									delete memblock;
-								}
-								
-								memblock = new char [lastRead];
-								
-								fileB.read (memblock, lastRead);
-								
-								//not sure why but it will read more than lastRead char...??
-								string temp = memblock;
-								outFile << temp.substr(0, lastRead);
-								delete memblock;
-								
-								fileB.close();
-								remove(fileName.c_str());
-								
-								wroteOutPut[groupID] = true;
-								wroteOutPut[groupIDB] = false;
-							}
-							
-							if (numOutputs[groupID] != 0) {
-								outFile << outputs[groupID];
-								wroteOutPut[groupID] = true;
-								outputs[groupID] = "";
-								numOutputs[groupID] = 0;
-								
-								outputs[groupIDB] = "";
-								numOutputs[groupIDB] = 0;
-							}
-							
-						}
-						else{
-							numOutputs[groupID] += numOutputs[groupIDA];
-							outputs[groupID] += outputs[groupIDA];
-							
-							if (wroteOutPut[groupIDA]) {
-								string fileName = distFile + "." + toString(groupIDA) + ".temp";
-								ifstream fileB(fileName.c_str(), ios::ate);
-								
-								long size;
-								char* memblock;
-
-								size = fileB.tellg();
-															
-								fileB.seekg (0, ios::beg);
-								
-								int numRead = size / 1024;
-								int lastRead = size % 1024;
-
-								for (int i = 0; i < numRead; i++) {
-				
-									memblock = new char [1024];
-								
-									fileB.read (memblock, 1024);
-									string temp = memblock;
-									outFile << temp.substr(0, 1024);
-									
-									delete memblock;
-								}
-								
-								memblock = new char [lastRead];
-								
-								fileB.read (memblock, lastRead);
-								
-								//not sure why but it will read more than lastRead char...??
-								string temp = memblock;
-								outFile << temp.substr(0, lastRead);
-									
-								delete memblock;
-								
-								fileB.close();
-								remove(fileName.c_str());
-								
-								wroteOutPut[groupID] = true;
-								wroteOutPut[groupIDA] = false;
-							}
-							
-							if (numOutputs[groupID] != 0) {
-								outFile << outputs[groupID];
-								wroteOutPut[groupID] = true;
-								outputs[groupID] = "";
-								numOutputs[groupID] = 0;
-								
-								outputs[groupIDA] = "";
-								numOutputs[groupIDA] = 0;
-							}
-
-						}					
-					}
-				}
-			}
-			gobble(dFile);
-		}
-		outFile.close();
-		dFile.close();
-		
-		for (int i = 0; i < numGroups; i++) {
-			if (numOutputs[i] > 0) {
-				string fileName = distFile + "." + toString(i) + ".temp";
-				outFile.open(fileName.c_str(), ios::app);
-				outFile << outputs[i];
-				outFile.close();
-			}
-		}
-	
-		ifstream bigNameFile(namefile.c_str());
-		if(!bigNameFile){
-			cerr << "Error: We can't open the name file\n";
-			exit(1);
-		}
-		
-		map<string, string> nameMap;
-		string name, nameList;
-		while(bigNameFile){
-			bigNameFile >> name >> nameList;
-			nameMap[name] = nameList;
-			gobble(bigNameFile);
-		}
-		bigNameFile.close();
-			
-		for(int i=0;i<numGroups;i++){  //parse names file to match distance files
-			int numSeqsInGroup = groups[i].size();
-			
-			if(numSeqsInGroup > 0){
-				string fileName = namefile + "." + toString(i) + ".temp";
-				ofstream smallNameFile(fileName.c_str(), ios::ate);
-				
-				for(set<string>::iterator gIt=groups[i].begin();gIt!=groups[i].end();gIt++){
-					map<string,string>::iterator nIt = nameMap.find(*gIt);
-					if (nIt != nameMap.end()) {
-						smallNameFile << nIt->first << '\t' << nIt->second << endl;
-						nameMap.erase(nIt);
-					}else{
-						m->mothurOut((*gIt) + " is in your distance file and not in your namefile.  Please correct."); m->mothurOutEndLine(); exit(1);
-					}
-				}
-				smallNameFile.close();
-			}
-		}
-		
-		//names of singletons
-		if (nameMap.size() != 0) {
-			singleton = namefile + ".extra.temp";
-			ofstream remainingNames(singleton.c_str(), ios::ate);
-			for(map<string,string>::iterator nIt=nameMap.begin();nIt!=nameMap.end();nIt++){
-				remainingNames << nIt->first << '\t' << nIt->second << endl;
-			}
-			remainingNames.close();
-		}else { singleton = "none"; }
-			
-		for(int i=0;i<numGroups;i++){
-			if(groups[i].size() > 0){
-				string tempNameFile = namefile + "." + toString(i) + ".temp";
-				string tempDistFile = distFile + "." + toString(i) + ".temp";
-				
-				map<string, string> temp;
-				temp[tempDistFile] = tempNameFile;
-				dists.push_back(temp);
-			}
-		}
-		
-		if (m->control_pressed)	 {  
-			for (int i = 0; i < dists.size(); i++) { 
-				remove((dists[i].begin()->first).c_str());
-				remove((dists[i].begin()->second).c_str());
-			}
-			dists.clear();
-		}
-		
-		return 0;
+		if (large)	{ splitDistanceLarge(); }
+		else		{ splitDistanceRAM();	}
 			
 	}
 	catch(exception& e) {
@@ -520,6 +218,448 @@ int SplitMatrix::splitClassify(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SplitMatrix", "splitClassify");
+		exit(1);
+	}
+}
+/***********************************************************************/
+int SplitMatrix::splitDistanceLarge(){
+	try {
+		vector<set<string> > groups;
+		
+		//for buffering the io to improve speed
+		 //allow for 30 dists to be stored, then output.
+		vector<string> outputs;
+		vector<int> numOutputs;
+		vector<bool> wroteOutPut;
+		
+		int numGroups = 0;
+
+		ofstream outFile;
+		ifstream dFile;
+		openInputFile(distFile, dFile);
+	
+		while(dFile){
+			string seqA, seqB;
+			float dist;
+
+			dFile >> seqA >> seqB >> dist;
+			
+			if (m->control_pressed) {   dFile.close();  for(int i=0;i<numGroups;i++){	if(groups[i].size() > 0){  remove((distFile + "." + toString(i) + ".temp").c_str()); }  } return 0; }
+					
+			if(dist < cutoff){
+				//cout << "in cutoff: " << dist << endl;
+				int groupIDA = -1;
+				int groupIDB = -1;
+				int groupID = -1;
+				
+				for(int i=0;i<numGroups;i++){
+					set<string>::iterator aIt = groups[i].find(seqA);
+					set<string>::iterator bIt = groups[i].find(seqB);
+					
+					if(groupIDA == -1 && aIt != groups[i].end()){//seqA is not already assigned to a group and is in group[i], so assign seqB to group[i]
+						groups[i].insert(seqB);
+						groupIDA = i;
+						groupID = groupIDA;
+
+						//cout << "in aIt: " << groupID << endl;
+	//					break;
+					}
+					else if(groupIDB == -1 && bIt != groups[i].end()){//seqB is not already assigned to a group and is in group[i], so assign seqA to group[i]
+						groups[i].insert(seqA);
+						groupIDB = i;
+						groupID = groupIDB;
+
+					//	cout << "in bIt: " << groupID << endl;
+	//					break;
+					}
+				
+					if(groupIDA != -1 && groupIDB != -1){//both ifs above have been executed, so we need to decide who to assign them to
+						if(groupIDA < groupIDB){
+						//	cout << "A: " << groupIDA << "\t" << groupIDB << endl;
+							groups[groupIDA].insert(groups[groupIDB].begin(), groups[groupIDB].end()); //merge two groups into groupIDA
+							groups[groupIDB].clear(); 
+							groupID = groupIDA;
+						}
+						else{
+						//	cout << "B: " << groupIDA << "\t" << groupIDB << endl;
+							groups[groupIDB].insert(groups[groupIDA].begin(), groups[groupIDA].end()); //merge two groups into groupIDB
+							groups[groupIDA].clear();  
+							groupID = groupIDB;
+						}
+						break;
+					}
+				}
+				
+	//windows is gonna gag on the reuse of outFile, will need to make it local...
+				
+				if(groupIDA == -1 && groupIDB == -1){ //we need a new group
+					set<string> newGroup;
+					newGroup.insert(seqA);
+					newGroup.insert(seqB);
+					groups.push_back(newGroup);
+									
+					string tempOut = seqA + '\t' + seqB + '\t' + toString(dist) + '\n';
+					outputs.push_back(tempOut);
+					numOutputs.push_back(1);
+					wroteOutPut.push_back(false);
+					
+					numGroups++;
+				}
+				else{
+					string fileName = distFile + "." + toString(groupID) + ".temp";
+											
+					//have we reached the max buffer size
+					if (numOutputs[groupID] > 60) { //write out sequence
+						outFile.open(fileName.c_str(), ios::app);
+						outFile << outputs[groupID] << seqA << '\t' << seqB << '\t' << dist << endl;
+						outFile.close();
+						
+						outputs[groupID] = "";
+						numOutputs[groupID] = 0;
+						wroteOutPut[groupID] = true;
+					}else {
+						outputs[groupID] +=  seqA + '\t' + seqB + '\t' + toString(dist)  + '\n';
+						numOutputs[groupID]++;
+					}
+					
+					if(groupIDA != -1 && groupIDB != -1){ //merge distance files of two groups you merged above
+						string row, column, distance;
+						if(groupIDA<groupIDB){
+							
+							//merge memory
+							numOutputs[groupID] += numOutputs[groupIDB];
+							outputs[groupID] += outputs[groupIDB];
+							
+							outputs[groupIDB] = "";
+							numOutputs[groupIDB] = 0;
+							
+							//if groupB is written to file it is above buffer size so read and write to new merged file
+							if (wroteOutPut[groupIDB]) {
+								string fileName2 = distFile + "." + toString(groupIDB) + ".temp";
+								ifstream fileB(fileName2.c_str(), ios::ate);
+								
+								outFile.open(fileName.c_str(), ios::app);
+								
+								long size;
+								char* memblock;
+
+								size = fileB.tellg();
+				
+								fileB.seekg (0, ios::beg);
+								
+								int numRead = size / 1024;
+								int lastRead = size % 1024;
+
+								for (int i = 0; i < numRead; i++) {
+				
+									memblock = new char [1024];
+								
+									fileB.read (memblock, 1024);
+									
+									string temp = memblock;
+									outFile << temp.substr(0, 1024);
+									
+									delete memblock;
+								}
+								
+								memblock = new char [lastRead];
+								
+								fileB.read (memblock, lastRead);
+								
+								//not sure why but it will read more than lastRead char...??
+								string temp = memblock;
+								outFile << temp.substr(0, lastRead);
+								delete memblock;
+								
+								fileB.close();
+								remove(fileName2.c_str());
+								
+								//write out the merged memory
+								if (numOutputs[groupID] > 60) {
+									outFile << outputs[groupID];
+									outputs[groupID] = "";
+									numOutputs[groupID] = 0;
+								}
+								
+								outFile.close();
+								
+								wroteOutPut[groupID] = true;
+								wroteOutPut[groupIDB] = false;
+							}else{ } //just merge b's memory with a's memory 
+						}
+						else{
+							numOutputs[groupID] += numOutputs[groupIDA];
+							outputs[groupID] += outputs[groupIDA];
+							
+							outputs[groupIDA] = "";
+							numOutputs[groupIDA] = 0;
+							
+							if (wroteOutPut[groupIDA]) {
+								string fileName2 = distFile + "." + toString(groupIDA) + ".temp";
+								ifstream fileB(fileName2.c_str(), ios::ate);
+								
+								outFile.open(fileName.c_str(), ios::app);
+								
+								long size;
+								char* memblock;
+
+								size = fileB.tellg();
+															
+								fileB.seekg (0, ios::beg);
+								
+								int numRead = size / 1024;
+								int lastRead = size % 1024;
+
+								for (int i = 0; i < numRead; i++) {
+				
+									memblock = new char [1024];
+								
+									fileB.read (memblock, 1024);
+									string temp = memblock;
+									outFile << temp.substr(0, 1024);
+									
+									delete memblock;
+								}
+								
+								memblock = new char [lastRead];
+								
+								fileB.read (memblock, lastRead);
+								
+								//not sure why but it will read more than lastRead char...??
+								string temp = memblock;
+								outFile << temp.substr(0, lastRead);
+									
+								delete memblock;
+								
+								fileB.close();
+								remove(fileName2.c_str());
+								
+								//write out the merged memory
+								if (numOutputs[groupID] > 60) {
+									outFile << outputs[groupID];
+									outputs[groupID] = "";
+									numOutputs[groupID] = 0;
+								}
+								
+								outFile.close();
+								
+								wroteOutPut[groupID] = true;
+								wroteOutPut[groupIDA] = false;
+							}else { } //just merge memory
+						}					
+					}
+				}
+			}
+			gobble(dFile);
+		}
+		dFile.close();
+		
+		for (int i = 0; i < numGroups; i++) {
+			if (numOutputs[i] > 0) {
+				string fileName = distFile + "." + toString(i) + ".temp";
+				outFile.open(fileName.c_str(), ios::app);
+				outFile << outputs[i];
+				outFile.close();
+			}
+		}
+
+		splitNames(groups);
+				
+		return 0;			
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SplitMatrix", "splitDistanceLarge");
+		exit(1);
+	}
+}
+//********************************************************************************************************************
+int SplitMatrix::splitNames(vector<set<string> >& groups){
+	try {
+		int numGroups = groups.size();
+	
+		ifstream bigNameFile(namefile.c_str());
+		if(!bigNameFile){
+			cerr << "Error: We can't open the name file\n";
+			exit(1);
+		}
+		
+		map<string, string> nameMap;
+		string name, nameList;
+		while(bigNameFile){
+			bigNameFile >> name >> nameList;
+			nameMap[name] = nameList;
+			gobble(bigNameFile);
+		}
+		bigNameFile.close();
+			
+		for(int i=0;i<numGroups;i++){  //parse names file to match distance files
+			int numSeqsInGroup = groups[i].size();
+			
+			if(numSeqsInGroup > 0){
+				string fileName = namefile + "." + toString(i) + ".temp";
+				ofstream smallNameFile(fileName.c_str(), ios::ate);
+				
+				for(set<string>::iterator gIt=groups[i].begin();gIt!=groups[i].end();gIt++){
+					map<string,string>::iterator nIt = nameMap.find(*gIt);
+					if (nIt != nameMap.end()) {
+						smallNameFile << nIt->first << '\t' << nIt->second << endl;
+						nameMap.erase(nIt);
+					}else{
+						m->mothurOut((*gIt) + " is in your distance file and not in your namefile.  Please correct."); m->mothurOutEndLine(); exit(1);
+					}
+				}
+				smallNameFile.close();
+			}
+		}
+		
+		//names of singletons
+		if (nameMap.size() != 0) {
+			singleton = namefile + ".extra.temp";
+			ofstream remainingNames(singleton.c_str(), ios::ate);
+			for(map<string,string>::iterator nIt=nameMap.begin();nIt!=nameMap.end();nIt++){
+				remainingNames << nIt->first << '\t' << nIt->second << endl;
+			}
+			remainingNames.close();
+		}else { singleton = "none"; }
+			
+		for(int i=0;i<numGroups;i++){
+			if(groups[i].size() > 0){
+				string tempNameFile = namefile + "." + toString(i) + ".temp";
+				string tempDistFile = distFile + "." + toString(i) + ".temp";
+				
+				map<string, string> temp;
+				temp[tempDistFile] = tempNameFile;
+				dists.push_back(temp);
+			}
+		}
+		
+		if (m->control_pressed)	 {  
+			for (int i = 0; i < dists.size(); i++) { 
+				remove((dists[i].begin()->first).c_str());
+				remove((dists[i].begin()->second).c_str());
+			}
+			dists.clear();
+		}
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SplitMatrix", "splitNames");
+		exit(1);
+	}
+}
+//********************************************************************************************************************
+int SplitMatrix::splitDistanceRAM(){
+	try {
+		vector<set<string> > groups;
+		vector<string> outputs;
+		
+		int numGroups = 0;
+
+		ifstream dFile;
+		openInputFile(distFile, dFile);
+
+		while(dFile){
+			string seqA, seqB;
+			float dist;
+
+			dFile >> seqA >> seqB >> dist;
+			
+			if (m->control_pressed) {   dFile.close();  for(int i=0;i<numGroups;i++){	if(groups[i].size() > 0){  remove((distFile + "." + toString(i) + ".temp").c_str()); }  } return 0; }
+					
+			if(dist < cutoff){
+				//cout << "in cutoff: " << dist << endl;
+				int groupIDA = -1;
+				int groupIDB = -1;
+				int groupID = -1;
+				
+				for(int i=0;i<numGroups;i++){
+					set<string>::iterator aIt = groups[i].find(seqA);
+					set<string>::iterator bIt = groups[i].find(seqB);
+					
+					if(groupIDA == -1 && aIt != groups[i].end()){//seqA is not already assigned to a group and is in group[i], so assign seqB to group[i]
+						groups[i].insert(seqB);
+						groupIDA = i;
+						groupID = groupIDA;
+
+						//cout << "in aIt: " << groupID << endl;
+	//					break;
+					}
+					else if(groupIDB == -1 && bIt != groups[i].end()){//seqB is not already assigned to a group and is in group[i], so assign seqA to group[i]
+						groups[i].insert(seqA);
+						groupIDB = i;
+						groupID = groupIDB;
+
+					//	cout << "in bIt: " << groupID << endl;
+	//					break;
+					}
+				
+					if(groupIDA != -1 && groupIDB != -1){//both ifs above have been executed, so we need to decide who to assign them to
+						if(groupIDA < groupIDB){
+						//	cout << "A: " << groupIDA << "\t" << groupIDB << endl;
+							groups[groupIDA].insert(groups[groupIDB].begin(), groups[groupIDB].end()); //merge two groups into groupIDA
+							groups[groupIDB].clear(); 
+							groupID = groupIDA;
+						}
+						else{
+						//	cout << "B: " << groupIDA << "\t" << groupIDB << endl;
+							groups[groupIDB].insert(groups[groupIDA].begin(), groups[groupIDA].end()); //merge two groups into groupIDB
+							groups[groupIDA].clear();  
+							groupID = groupIDB;
+						}
+						break;
+					}
+				}
+				
+	//windows is gonna gag on the reuse of outFile, will need to make it local...
+				
+				if(groupIDA == -1 && groupIDB == -1){ //we need a new group
+					set<string> newGroup;
+					newGroup.insert(seqA);
+					newGroup.insert(seqB);
+					groups.push_back(newGroup);
+									
+					string tempOut = seqA + '\t' + seqB + '\t' + toString(dist) + '\n';
+					outputs.push_back(tempOut);
+					numGroups++;
+				}
+				else{
+											
+					outputs[groupID] +=  seqA + '\t' + seqB + '\t' + toString(dist)  + '\n';
+					
+					if(groupIDA != -1 && groupIDB != -1){ //merge distance files of two groups you merged above
+						string row, column, distance;
+						if(groupIDA<groupIDB){
+							//merge memory
+							outputs[groupID] += outputs[groupIDB];
+							outputs[groupIDB] = "";
+						}else{
+							outputs[groupID] += outputs[groupIDA];
+							outputs[groupIDA] = "";
+						}					
+					}
+				}
+			}
+			gobble(dFile);
+		}
+		dFile.close();
+		
+		for (int i = 0; i < numGroups; i++) {
+			if (outputs[i] != "") {
+				ofstream outFile;
+				string fileName = distFile + "." + toString(i) + ".temp";
+				outFile.open(fileName.c_str(), ios::ate);
+				outFile << outputs[i];
+				outFile.close();
+			}
+		}
+
+		splitNames(groups);
+				
+		return 0;			
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SplitMatrix", "splitDistanceRAM");
 		exit(1);
 	}
 }

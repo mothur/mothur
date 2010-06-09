@@ -292,7 +292,6 @@ int ChimeraSlayerCommand::execute(){
 				int startIndex =  pid * numSeqsPerProcessor;
 				if(pid == (processors - 1)){	numSeqsPerProcessor = numSeqs - pid * numSeqsPerProcessor; 	}
 				
-				
 				//align your part
 				driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, MPIPos);
 				
@@ -376,7 +375,6 @@ int ChimeraSlayerCommand::execute(){
 					}
 					lines.push_back(new linePair(startPos, numSeqsPerProcessor));
 				}
-				
 				
 				createProcesses(outputFileName, fastafile, accnosFileName); 
 			

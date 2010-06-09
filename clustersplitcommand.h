@@ -35,7 +35,7 @@ private:
 	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, distfile, format, showabund, timing, splitmethod, taxFile;
 	double cutoff, splitcutoff;
 	int precision, length, processors, taxLevelCutoff;
-	bool print_start, abort, hard;
+	bool print_start, abort, hard, large;
 	time_t start;
 	ofstream outList, outRabund, outSabund;
 	
@@ -43,7 +43,7 @@ private:
 	int createProcesses(vector < vector < map<string, string> > >);
 	vector<string> cluster(vector< map<string, string> >, set<string>&);
 	int mergeLists(vector<string>, map<float, int>, ListVector*);
-	map<float, int> completeListFile(vector<string>, string, set<string>, ListVector*&);
+	map<float, int> completeListFile(vector<string>, string, set<string>&, ListVector*&);
 };
 
 #endif

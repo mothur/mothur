@@ -502,13 +502,13 @@ vector<Sequence*> Maligner::getBlastSeqs(Sequence* q, int num) {
 		string leftQuery = queryUnAligned.substr(0, int(queryUnAligned.length() * 0.33)); //first 1/3 of the sequence
 		string rightQuery = queryUnAligned.substr(int(queryUnAligned.length() * 0.66)); //last 1/3 of the sequence
 
-		Sequence* queryLeft = new Sequence(q->getName(), leftQuery);
-		Sequence* queryRight = new Sequence(q->getName(), rightQuery);
+		Sequence* queryLeft = new Sequence(q->getName()+"left", leftQuery);
+		Sequence* queryRight = new Sequence(q->getName()+"right", rightQuery);
 		
 		vector<int> tempIndexesRight = databaseLeft->findClosestMegaBlast(queryRight, num+1);
 		vector<int> tempIndexesLeft = databaseLeft->findClosestMegaBlast(queryLeft, num+1);
-		
-		//if ((tempIndexesRight.size() != (num+1)) || (tempIndexesLeft.size() != (num+1)))  {  m->mothurOut("megablast returned " + toString(tempIndexesRight.size()) + " results for the right end, and " + toString(tempIndexesLeft.size()) + " for the left end. Needed " + toString(num+1) + ". Unable to porcess sequence " + q->getName()); m->mothurOutEndLine(); return refResults; }
+			
+		//if ((tempIndexesRight.size() == 0) && (tempIndexesLeft.size() == 0))  {  m->mothurOut("megablast returned " + toString(tempIndexesRight.size()) + " results for the right end, and " + toString(tempIndexesLeft.size()) + " for the left end. Needed " + toString(num+1) + ". Unable to process sequence " + q->getName()); m->mothurOutEndLine(); return refResults; }
 		
 		vector<int> smaller;
 		vector<int> larger;

@@ -27,7 +27,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"phylip","column","name","cutoff","precision","method","splitmethod","taxonomy","taxlevel","showabund","timing","hard","processors","outputdir","inputdir"};
+			string Array[] =  {"phylip","column","name","cutoff","precision","method","splitmethod","taxonomy","taxlevel","large","showabund","timing","hard","processors","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -125,6 +125,9 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "F"; }
 			hard = isTrue(temp);
 			
+			temp = validParameter.validFile(parameters, "large", false);			if (temp == "not found") { temp = "F"; }
+			large = isTrue(temp);
+			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = "1";				}
 			convert(temp, processors); 
 			
@@ -165,7 +168,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 
 void ClusterSplitCommand::help(){
 	try {
-		m->mothurOut("The cluster.split command parameter options are phylip, column, name, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, hard, processors. Phylip or column and name are required.\n");
+		m->mothurOut("The cluster.split command parameter options are phylip, column, name, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, hard, large, processors. Phylip or column and name are required.\n");
 		m->mothurOut("The phylip and column parameter allow you to enter your distance file. \n");
 		m->mothurOut("The name parameter allows you to enter your name file and is required if your distance file is in column format. \n");
 		m->mothurOut("The cutoff parameter allow you to set the distance you want to cluster to, default is 10.0. \n");
@@ -174,6 +177,7 @@ void ClusterSplitCommand::help(){
 		m->mothurOut("The splitmethod parameter allows you to specify how you want to split your distance file before you cluster, default=distance, options distance or classify. \n");
 		m->mothurOut("The taxonomy parameter allows you to enter the taxonomy file for your sequences, this is only valid if you are using splitmethod=classify. Be sure your taxonomy file does not include the probability scores. \n");
 		m->mothurOut("The taxlevel parameter allows you to specify the taxonomy level you want to use to split the distance file, default=1. \n");
+		m->mothurOut("The large parameter allows you to indicate that your distance matrix is too large to fit in RAM.  The default value is false.\n");
 		m->mothurOut("The cluster.split command should be in the following format: \n");
 		m->mothurOut("cluster.split(column=youDistanceFile, name=yourNameFile, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision, splitmethod=yourSplitmethod, taxonomy=yourTaxonomyfile, taxlevel=yourtaxlevel) \n");
 		m->mothurOut("Example: cluster.split(column=abrecovery.dist, name=abrecovery.names, method=furthest, cutoff=0.10, precision=1000, splitmethod=classify, taxonomy=abrecovery.silva.slv.taxonomy, taxlevel=5) \n");	
@@ -229,11 +233,12 @@ int ClusterSplitCommand::execute(){
 		if (m->control_pressed) { return 0; }
 		
 		time_t estart = time(NULL);
+		m->mothurOut("Splitting the distance file..."); m->mothurOutEndLine();
 		
 		//split matrix into non-overlapping groups
 		SplitMatrix* split;
-		if (splitmethod == "distance")	{	split = new SplitMatrix(distfile, namefile, taxFile, cutoff, splitmethod);			}
-		else							{	split = new SplitMatrix(distfile, namefile, taxFile, taxLevelCutoff, splitmethod);  }
+		if (splitmethod == "distance")	{	split = new SplitMatrix(distfile, namefile, taxFile, cutoff, splitmethod, large);			}
+		else							{	split = new SplitMatrix(distfile, namefile, taxFile, taxLevelCutoff, splitmethod, large);   }
 		
 		split->split();
 		
@@ -284,6 +289,8 @@ int ClusterSplitCommand::execute(){
 						ifstream in;
 						openInputFile(filename, in);
 						
+						in >> tag; gobble(in);
+						
 						while(!in.eof()) {
 							string tempName;
 							in >> tempName; gobble(in);
@@ -299,7 +306,7 @@ int ClusterSplitCommand::execute(){
 						
 						while(!in2.eof()) {
 							string tempName;
-							in2 >> tempName; gobble(in);
+							in2 >> tempName; gobble(in2);
 							if (labels.count(tempName) == 0) { labels.insert(tempName); }
 						}
 						in2.close();
@@ -312,7 +319,12 @@ int ClusterSplitCommand::execute(){
 		
 		if (m->control_pressed) { for (int i = 0; i < listFileNames.size(); i++) { remove(listFileNames[i].c_str()); } return 0; }
 		
+		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster"); m->mothurOutEndLine();
+		
 		//****************** merge list file and create rabund and sabund files ******************************//
+		estart = time(NULL);
+		m->mothurOut("Merging the clustered files..."); m->mothurOutEndLine();
+		
 		ListVector* listSingle;
 		map<float, int> labelBins = completeListFile(listFileNames, singletonName, labels, listSingle); //returns map of label to numBins
 		
@@ -322,7 +334,7 @@ int ClusterSplitCommand::execute(){
 
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) { remove(outputNames[i].c_str()); } return 0; }
 		
-		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster"); m->mothurOutEndLine();
+		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to merge."); m->mothurOutEndLine();
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -337,7 +349,7 @@ int ClusterSplitCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, string singleton, set<string> userLabels, ListVector*& listSingle){
+map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, string singleton, set<string>& userLabels, ListVector*& listSingle){
 	try {
 				
 		map<float, int> labelBin;
@@ -367,7 +379,7 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
 
 			if ((*it != "unique") && (convertTestFloat(*it, temp) == true))	{	convert(*it, temp);	}
 			else if (*it == "unique")										{	temp = -1.0;		}
-			
+						
 			orderFloat.push_back(temp);
 			labelBin[temp] = numSingleBins; //initialize numbins 
 		}
@@ -571,6 +583,7 @@ int ClusterSplitCommand::createProcesses(vector < vector < map<string, string> >
 				string filename = toString(getpid()) + ".temp";
 				ofstream out;
 				openOutputFile(filename, out);
+				out << tag << endl;
 				for (int j = 0; j < listFileNames.size(); j++) { out << listFileNames[j] << endl;  }
 				out.close();
 				

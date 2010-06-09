@@ -34,18 +34,28 @@ public:
 
 	
 private:
-	int split(ListVector*);
-	int split(); //namefile
+	int splitList(ListVector*);
+	int splitNames(); //namefile
+	int writeNames(); 
+	int writeList(ListVector*); 
+	int writeAccnos(string); 
+	int parseGroup(string); 
+	int parseFasta(string); 
+	int readNamesFile(); //namefile
+	int createNameMap(ListVector*);
 	
 	vector<string> outputNames;
 	ListVector* list;
 	GroupMap* groupMap;
 	InputData* input;
 	
-	string outputDir, listfile, namefile, groupfile, label;
-	set<string> labels;
-	bool abort, allLines, accnos, wroteRareList, wroteAbundList;
+	string outputDir, listfile, namefile, groupfile, label, groups, fastafile, inputFile;
+	set<string> labels, rareNames, abundNames;
+	vector<string> Groups;
+	bool abort, allLines, accnos;
 	int cutoff;
+	map<string, bool> wroteListFile;
+	map<string, string> nameMap;
 	
 	
 
