@@ -24,7 +24,7 @@ void ChimeraReAligner::reAlign(Sequence* query, vector<results> parents) {
 			
 			string qAligned = query->getAligned();
 			string newQuery = "";
-			
+	//cout << qAligned.length() << endl;		
 			//sort parents by region start
 			sort(parents.begin(), parents.end(), compareRegionStart);
 
@@ -80,7 +80,7 @@ void ChimeraReAligner::reAlign(Sequence* query, vector<results> parents) {
 		
 			//set query to new aligned string
 			query->setAligned(newQuery);
-			
+	//cout << newQuery.length() << endl;		
 			//free memory
 			for (int i = 0; i < queryParts.size(); i++) { delete queryParts[i];  }
 			for (int i = 0; i < parentParts.size(); i++) { delete parentParts[i];  }
