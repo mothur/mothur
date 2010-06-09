@@ -235,7 +235,7 @@ void Cluster::update(double& cutOFF){
 					}		
 				}
 				//if not merged it you need it for warning 
-				if ((!merged) && (method == "average")) {  
+				if ((!merged) && (method == "average" || method == "weighted")) {  
 					//m->mothurOut("Warning: trying to merge cell " + toString(rowCells[i]->row+1) + " " + toString(rowCells[i]->column+1) + " distance " + toString(rowCells[i]->dist) + " with value above cutoff. Results may vary from using cutoff at cluster command instead of read.dist."); m->mothurOutEndLine(); 
 					if (cutOFF > rowCells[i]->dist) {  
 						cutOFF = rowCells[i]->dist;  
@@ -254,7 +254,7 @@ void Cluster::update(double& cutOFF){
 		// could be avoided
 		for (int i=nColCells-1;i>=0;i--) {
 			if (foundCol[i] == 0) {
-				if (method == "average") {
+				if (method == "average" || method == "weighted") {
 					if (!((colCells[i]->row == smallRow) && (colCells[i]->column == smallCol))) {
 						//m->mothurOut("Warning: merging cell " + toString(colCells[i]->row+1) + " " + toString(colCells[i]->column+1) + " distance " + toString(colCells[i]->dist) + " value above cutoff. Results may vary from using cutoff at cluster command instead of read.dist."); m->mothurOutEndLine();
 						if (cutOFF > colCells[i]->dist) {  

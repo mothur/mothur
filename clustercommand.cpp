@@ -67,8 +67,8 @@ ClusterCommand::ClusterCommand(string option)  {
 			method = validParameter.validFile(parameters, "method", false);
 			if (method == "not found") { method = "furthest"; }
 			
-			if ((method == "furthest") || (method == "nearest") || (method == "average")) { }
-			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average."); m->mothurOutEndLine(); abort = true; }
+			if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted")) { }
+			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average, and weighted."); m->mothurOutEndLine(); abort = true; }
 
 			showabund = validParameter.validFile(parameters, "showabund", false);
 			if (showabund == "not found") { showabund = "T"; }
@@ -91,6 +91,7 @@ ClusterCommand::ClusterCommand(string option)  {
 				if (method == "furthest")	{	cluster = new CompleteLinkage(rabund, list, matrix, cutoff, method); }
 				else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, matrix, cutoff, method); }
 				else if(method == "average"){	cluster = new AverageLinkage(rabund, list, matrix, cutoff, method);	}
+				else if(method == "weighted"){	cluster = new WeightedLinkage(rabund, list, matrix, cutoff, method);	}
 				tag = cluster->getTag();
 				
 				if (outputDir == "") { outputDir += hasPath(globaldata->inputFileName); }

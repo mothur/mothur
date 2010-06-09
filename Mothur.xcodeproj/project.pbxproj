@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		7EC61A0911BEA6AF00F668D9 /* weightedlinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = weightedlinkage.cpp; sourceTree = "<group>"; };
 		A703FE931194645F002C397E /* makegroupcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = makegroupcommand.h; sourceTree = SOURCE_ROOT; };
 		A703FE941194645F002C397E /* makegroupcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = makegroupcommand.cpp; sourceTree = SOURCE_ROOT; };
 		A71D924211AEB42400D00CBC /* clustersplitcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clustersplitcommand.cpp; sourceTree = "<group>"; };
@@ -640,6 +641,7 @@
 				A7DA2170113FECD400BF472F /* uvest.h */,
 				A7DA2179113FECD400BF472F /* weighted.cpp */,
 				A7DA217A113FECD400BF472F /* weighted.h */,
+				7EC61A0911BEA6AF00F668D9 /* weightedlinkage.cpp */,
 				A7DA217B113FECD400BF472F /* whittaker.cpp */,
 				A7DA217C113FECD400BF472F /* whittaker.h */,
 			);

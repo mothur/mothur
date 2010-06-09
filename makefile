@@ -153,6 +153,7 @@ mothur : \
 		./splitabundcommand.o\
 		./splitmatrix.o\
 		./clustersplitcommand.o\
+		./weightedlinkage.o\
 		./inputdata.o\
 		./jackknife.o\
 		./kmer.o\
@@ -362,6 +363,7 @@ mothur : \
 		./splitabundcommand.o\
 		./splitmatrix.o\
 		./clustersplitcommand.o\
+		./weightedlinkage.o\
 		./inputdata.o\
 		./jackknife.o\
 		./kmer.o\
@@ -461,7 +463,7 @@ mothur : \
 		./logsd.o\
 		./geom.o\
 		./setlogfilecommand.o\
-		-o ../Release/mothur
+		-o mothur
 
 clean : 
 		rm \
@@ -574,6 +576,7 @@ clean :
 		./splitabundcommand.o\
 		./splitmatrix.o\
 		./clustersplitcommand.o\
+		./weightedlinkage.o\
 		./inputdata.o\
 		./jackknife.o\
 		./kmer.o\
@@ -1705,5 +1708,8 @@ install : mothur
 ./classifyotucommand.o : classifyotucommand.cpp
 	$(CC) $(CC_OPTIONS) classifyotucommand.cpp -c $(INCLUDE) -o ./classifyotucommand.o
 
+# Item # 209 -- splitmatrix --
+./weightedlinkage.o : weightedlinkage.cpp
+	$(CC) $(CC_OPTIONS) weightedlinkage.cpp -c $(INCLUDE) -o ./weightedlinkage.o
 
 ##### END RUN ####
