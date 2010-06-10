@@ -311,11 +311,15 @@ int ReadBlast::readNames(NameAssignment* nameMap) {
 		ifstream in;
 		openInputFile(blastfile, in);
 		
+		ofstream outName;
+		openOutputFile("tempOutNames", outName);
+		
 		//read first line
 		in >> prevName;
+	
 		for (int i = 0; i < 11; i++) {  in >> hold;  }
 		gobble(in);
-		
+				
 		//save name in nameMap
 		nameMap->push_back(prevName);
 		
@@ -324,6 +328,7 @@ int ReadBlast::readNames(NameAssignment* nameMap) {
 			
 			//read line
 			in >> name;
+	
 			for (int i = 0; i < 11; i++) {  in >> hold;  }
 			gobble(in);
 			

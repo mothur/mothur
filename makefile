@@ -463,7 +463,7 @@ mothur : \
 		./logsd.o\
 		./geom.o\
 		./setlogfilecommand.o\
-		-o mothur
+		-o ../Release/mothur
 
 clean : 
 		rm \
@@ -1708,7 +1708,7 @@ install : mothur
 ./classifyotucommand.o : classifyotucommand.cpp
 	$(CC) $(CC_OPTIONS) classifyotucommand.cpp -c $(INCLUDE) -o ./classifyotucommand.o
 
-# Item # 209 -- splitmatrix --
+# Item # 209 -- weightedlinkage --
 ./weightedlinkage.o : weightedlinkage.cpp
 	$(CC) $(CC_OPTIONS) weightedlinkage.cpp -c $(INCLUDE) -o ./weightedlinkage.o
 
