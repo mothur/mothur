@@ -48,8 +48,8 @@ vector<int> DistanceDB::findClosestSequences(Sequence* query, int numWanted){
 		bool templateSameLength = true;
 		string sequence = query->getAligned();
 		vector<seqDist> dists;
-		
-		if (numWanted > data.size()) { m->mothurOut("numwanted is larger than the number of template sequences, using 10."); m->mothurOutEndLine(); numWanted = 10; }
+	
+		if (numWanted > data.size()) { m->mothurOut("numwanted is larger than the number of template sequences, using "+ toString(data.size()) + "."); m->mothurOutEndLine(); numWanted = data.size(); }
 		
 		if (sequence.length() != templateSeqsLength) { templateSameLength = false; }
 		

@@ -286,13 +286,13 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 		//referenceSeqs, numWanted, matchScore, misMatchPenalty, divR, minSimilarity
 		maligner = new Maligner(templateSeqs, numWanted, match, misMatch, divR, minSim, minCov, searchMethod, databaseLeft, databaseRight);
 		slayer = new Slayer(window, increment, minSim, divR, iters, minSNP);
-		
+	
 		if (m->control_pressed) {  return 0;  }
 		
 		string chimeraFlag = maligner->getResults(query, decalc);
 		if (m->control_pressed) {  return 0;  }
 		vector<results> Results = maligner->getOutput();
-				
+			
 		//found in testing realigning only made things worse
 		if (realign) {
 			ChimeraReAligner realigner(templateSeqs, match, misMatch);

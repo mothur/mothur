@@ -824,6 +824,8 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 			i++;
 		}
 
+		if (numWanted > dists.size()) { m->mothurOut("numwanted is larger than the number of template sequences, adjusting numwanted."); m->mothurOutEndLine(); numWanted = dists.size(); }
+
 //cout << numWanted << endl;
 		for (int i = 0; i < numWanted; i++) {
 //cout << dists[i].seq->getName() << '\t' << dists[i].dist << endl;

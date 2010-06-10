@@ -61,9 +61,9 @@ int Node::getIndex() { return vectorIndex; }
 //to be used by printTree in the Tree class to print the leaf info			
 void Node::printNode() {
 	try{
-		m->mothurOut(toString(parent) + " " + toString(lchild) + " " + toString(rchild) + " ");
+		m->mothurOut(name + " " + toString(parent) + " " + toString(lchild) + " " + toString(rchild) + " ");
 		
-		for (int i = 0; i < group.size(); i++) {  m->mothurOut( group[i] + " "); }
+		/*for (int i = 0; i < group.size(); i++) {  m->mothurOut( group[i] + " "); }
 		
 		//there is a branch length
 		if (branchLength != -1) { 
@@ -78,7 +78,7 @@ void Node::printNode() {
 		m->mothurOut(" |");
 		for(it=pcount.begin();it!=pcount.end();it++){
 			m->mothurOut(" " + it->first + ":" + toString(it->second));
-		}
+		}*/
 		m->mothurOutEndLine();
 		
 		
