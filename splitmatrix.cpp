@@ -9,6 +9,9 @@
 
 #include "splitmatrix.h"
 #include "phylotree.h"
+#include "sequencedb.h"
+#include "onegapdist.h"
+#include "dist.h"
 
 /***********************************************************************/
 
@@ -21,6 +24,15 @@ SplitMatrix::SplitMatrix(string distfile, string name, string tax, float c, stri
 	taxFile = tax;
 	large = l;
 }
+/***********************************************************************/
+
+SplitMatrix::SplitMatrix(string ffile, string tax, float c, string t){
+	m = MothurOut::getInstance();
+	fastafile = ffile;
+	taxFile = tax;
+	cutoff = c;
+	method = t;
+}
 
 /***********************************************************************/
 
@@ -29,7 +41,7 @@ int SplitMatrix::split(){
         
 		if (method == "distance") {  
 			splitDistance();
-		}else if (method == "classify") {
+		}else if ((method == "classify") || (method == "fasta")) {
 			splitClassify();
 		}else {
 			m->mothurOut("Unknown splitting method, aborting split."); m->mothurOutEndLine();
@@ -80,7 +92,6 @@ int SplitMatrix::splitClassify(){
 		string seqname, tax;
 		while(!in.eof()){
 			in >> seqname >> tax; gobble(in);
-				
 			phylo->addSeqToTree(seqname, tax);
 		}
 		in.close();
@@ -89,13 +100,13 @@ int SplitMatrix::splitClassify(){
 
 		//make sure the cutoff is not greater than maxlevel
 		if (cutoff > phylo->getMaxLevel()) { m->mothurOut("splitcutoff is greater than the longest taxonomy, using " + toString(phylo->getMaxLevel())); m->mothurOutEndLine(); cutoff = phylo->getMaxLevel(); }
-		
+	
 		//for each node in tree
 		for (int i = 0; i < phylo->getNumNodes(); i++) {
 		
 			//is this node within the cutoff
 			TaxNode taxon = phylo->get(i);
-		
+	
 			if (taxon.level == cutoff) {//if yes, then create group containing this nodes sequences
 				if (taxon.accessions.size() > 1) { //if this taxon just has one seq its a singleton
 					for (int j = 0; j < taxon.accessions.size(); j++) {
@@ -105,7 +116,71 @@ int SplitMatrix::splitClassify(){
 				}
 			}
 		}
-
+	
+		delete phylo;
+		
+		if (method == "classify") {
+			splitDistanceFileByTax(seqGroup, numGroups);
+		}else {
+			createDistanceFilesFromTax(seqGroup, numGroups);
+		}
+		
+				
+		return 0;
+			
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SplitMatrix", "splitClassify");
+		exit(1);
+	}
+}
+/***********************************************************************/
+int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numGroups){
+	try {
+		map<string, int>::iterator it;
+		map<string, int>::iterator it2;
+		map<string, int> seqIndexInFasta;
+				
+		//read fastafile
+		SequenceDB alignDB;
+		
+		ifstream filehandle;
+		openInputFile(fastafile, filehandle);
+		int numSeqs = 0;
+		while (!filehandle.eof()) {
+			//input sequence info into sequencedb
+			Sequence newSequence(filehandle);
+			
+			if (newSequence.getName() != "") {   
+				alignDB.push_back(newSequence);  
+				seqIndexInFasta[newSequence.getName()] = numSeqs;
+				numSeqs++;
+			}
+			
+			//takes care of white space
+			gobble(filehandle);
+		}
+		filehandle.close();
+		
+		Dist* distCalculator = new oneGapDist();
+		
+		
+//still not done....		
+		
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SplitMatrix", "createDistanceFilesFromTax");
+		exit(1);
+	}
+}
+/***********************************************************************/
+int SplitMatrix::splitDistanceFileByTax(map<string, int>& seqGroup, int numGroups){
+	try {
+		map<string, int>::iterator it;
+		map<string, int>::iterator it2;
+		
 		ifstream dFile;
 		openInputFile(distFile, dFile);
 		ofstream outFile;
@@ -114,11 +189,14 @@ int SplitMatrix::splitClassify(){
 			remove((distFile + "." + toString(i) + ".temp").c_str());
 		}
 		
-		
 		//for buffering the io to improve speed
 		 //allow for 10 dists to be stored, then output.
 		vector<string> outputs;  outputs.resize(numGroups, "");
 		vector<int> numOutputs;	 numOutputs.resize(numGroups, 0);	
+		
+		//you can have a group made, but their may be no distances in the file for this group if the taxonomy file and distance file don't match
+		//this can occur if we have converted the phylip to column, since we reduce the size at that step by using the cutoff value
+		vector<bool> validDistances;   validDistances.resize(numGroups, false); 
 		
 		//for each distance
 		while(dFile){
@@ -135,12 +213,13 @@ int SplitMatrix::splitClassify(){
 			
 			if ((it != seqGroup.end()) && (it2 != seqGroup.end())) { //they are both not singletons 
 				if (it->second == it2->second) { //they are from the same group so add the distance
-					if (numOutputs[it->second] > 10) {
+					if (numOutputs[it->second] > 30) {
 						openOutputFileAppend((distFile + "." + toString(it->second) + ".temp"), outFile);
 						outFile << outputs[it->second] << seqA << '\t' << seqB << '\t' << dist << endl;
 						outFile.close();
 						outputs[it->second] = "";
 						numOutputs[it->second] = 0;
+						validDistances[it->second] = true;
 					}else{
 						outputs[it->second] += seqA + '\t' + seqB + '\t' + toString(dist)  + '\n';
 						numOutputs[it->second]++;
@@ -154,12 +233,13 @@ int SplitMatrix::splitClassify(){
 			remove((namefile + "." + toString(i) + ".temp").c_str());
 			
 			//write out any remaining buffers
-			if (numOutputs[it->second] > 0) {
+			if (numOutputs[i] > 0) {
 				openOutputFileAppend((distFile + "." + toString(i) + ".temp"), outFile);
 				outFile << outputs[i];
 				outFile.close();
 				outputs[i] = "";
 				numOutputs[i] = 0;
+				validDistances[i] = true;
 			}
 		}
 		
@@ -195,14 +275,17 @@ int SplitMatrix::splitClassify(){
 			remove(singleton.c_str());
 			singleton = "none";
 		}
-			
+		
 		for(int i=0;i<numGroups;i++){
-			string tempNameFile = namefile + "." + toString(i) + ".temp";
-			string tempDistFile = distFile + "." + toString(i) + ".temp";
+			//if there are valid distances
+			if (validDistances[i]) {
+				string tempNameFile = namefile + "." + toString(i) + ".temp";
+				string tempDistFile = distFile + "." + toString(i) + ".temp";
 				
-			map<string, string> temp;
-			temp[tempDistFile] = tempNameFile;
-			dists.push_back(temp);
+				map<string, string> temp;
+				temp[tempDistFile] = tempNameFile;
+				dists.push_back(temp);
+			}
 		}
 		
 		if (m->control_pressed)	 {  
@@ -214,10 +297,9 @@ int SplitMatrix::splitClassify(){
 		}
 		
 		return 0;
-			
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SplitMatrix", "splitClassify");
+		m->errorOut(e, "SplitMatrix", "splitDistanceFileByTax");
 		exit(1);
 	}
 }

@@ -21,13 +21,14 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 	try{
 		globaldata = GlobalData::getInstance();
 		abort = false;
+		format = "";
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; }
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"phylip","column","name","cutoff","precision","method","splitmethod","taxonomy","taxlevel","large","showabund","timing","hard","processors","outputdir","inputdir"};
+			string Array[] =  {"fasta","phylip","column","name","cutoff","precision","method","splitmethod","taxonomy","taxlevel","large","showabund","timing","hard","processors","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -84,6 +85,14 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
+				
+				it = parameters.find("fasta");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
+				}
 			}
 			
 			//check for required parameters
@@ -101,15 +110,24 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
 			
+			fastafile = validParameter.validFile(parameters, "fasta", true);
+			if (fastafile == "not open") { abort = true; }	
+			else if (fastafile == "not found") { fastafile = ""; }
+			else { splitmethod = "fasta";  }
+			
 			taxFile = validParameter.validFile(parameters, "taxonomy", true);
 			if (taxFile == "not open") { abort = true; }	
 			else if (taxFile == "not found") { taxFile = ""; }
 			
-			if ((phylipfile == "") && (columnfile == "")) { m->mothurOut("When executing a cluster.split command you must enter a phylip or a column."); m->mothurOutEndLine(); abort = true; }
-			else if ((phylipfile != "") && (columnfile != "")) { m->mothurOut("When executing a cluster.split command you must enter ONLY ONE of the following: phylip or column."); m->mothurOutEndLine(); abort = true; }
+			if ((phylipfile == "") && (columnfile == "") && (fastafile == "")) { m->mothurOut("When executing a cluster.split command you must enter a phylip or a column or fastafile."); m->mothurOutEndLine(); abort = true; }
+			else if ((phylipfile != "") && (columnfile != "") && (fastafile != "")) { m->mothurOut("When executing a cluster.split command you must enter ONLY ONE of the following: fasta, phylip or column."); m->mothurOutEndLine(); abort = true; }
 		
 			if (columnfile != "") {
 				if (namefile == "") { m->mothurOut("You need to provide a namefile if you are going to use the column format."); m->mothurOutEndLine(); abort = true; }
+			}
+			
+			if (fastafile != "") {
+				if (taxFile == "") { m->mothurOut("You need to provide a taxonomy file if you are using a fasta file to generate the split."); m->mothurOutEndLine(); abort = true; }
 			}
 					
 			//check for optional parameter and set defaults
@@ -131,7 +149,11 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = "1";				}
 			convert(temp, processors); 
 			
-			splitmethod = validParameter.validFile(parameters, "splitmethod", false);		if (splitmethod == "not found") { splitmethod = "distance"; }
+			temp = validParameter.validFile(parameters, "splitmethod", false);	
+			if (splitmethod != "fasta") {
+				if (temp == "not found")  { splitmethod = "distance"; }
+				else {  splitmethod = temp; }
+			}
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);		if (temp == "not found")  { temp = "10"; }
 			convert(temp, cutoff); 
@@ -145,8 +167,8 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			if ((method == "furthest") || (method == "nearest") || (method == "average")) { }
 			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average."); m->mothurOutEndLine(); abort = true; }
 			
-			if ((splitmethod == "distance") || (splitmethod == "classify")) { }
-			else { m->mothurOut("Not a valid splitting method.  Valid splitting algorithms are distance or classify."); m->mothurOutEndLine(); abort = true; }
+			if ((splitmethod == "distance") || (splitmethod == "classify") || (splitmethod == "fasta")) { }
+			else { m->mothurOut(splitmethod + " is not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta."); m->mothurOutEndLine(); abort = true; }
 			
 			if ((splitmethod == "classify") && (taxFile == "")) {  m->mothurOut("You need to provide a taxonomy file if you are going to use the classify splitmethod."); m->mothurOutEndLine(); abort = true;  }
 
@@ -168,13 +190,20 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 
 void ClusterSplitCommand::help(){
 	try {
-		m->mothurOut("The cluster.split command parameter options are phylip, column, name, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, hard, large, processors. Phylip or column and name are required.\n");
+		m->mothurOut("The cluster.split command parameter options are fasta, phylip, column, name, cutoff, precision, method, splitmethod, taxonomy, taxlevel, showabund, timing, hard, large, processors. Fasta or Phylip or column and name are required.\n");
+		m->mothurOut("The cluster.split command can split your files in 3 ways. Splitting by distance file, by classification, or by classification also using a fasta file. \n");
+		m->mothurOut("For the distance file method, you need only provide your distance file and mothur will split the file into distinct groups. \n");
+		m->mothurOut("For the classification method, you need to provide your distance file and taxonomy file, and set the splitmethod to classify.  \n");
+		m->mothurOut("You will also need to set the taxlevel you want to split by. mothur will split the sequence into distinct taxonomy groups, and split the distance file based on those groups. \n");
+		m->mothurOut("For the classification method using a fasta file, you need to provide your fasta file and taxonomy file.  \n");
+		m->mothurOut("You will also need to set the taxlevel you want to split by. mothur will split the sequence into distinct taxonomy groups, and create distance files for each grouping. \n");
 		m->mothurOut("The phylip and column parameter allow you to enter your distance file. \n");
+		m->mothurOut("The fasta parameter allows you to enter your aligned fasta file. \n");
 		m->mothurOut("The name parameter allows you to enter your name file and is required if your distance file is in column format. \n");
 		m->mothurOut("The cutoff parameter allow you to set the distance you want to cluster to, default is 10.0. \n");
 		m->mothurOut("The precision parameter allows you specify the precision of the precision of the distances outputted, default=100, meaning 2 decimal places. \n");
 		m->mothurOut("The method allows you to specify what clustering algorythm you want to use, default=furthest, option furthest, nearest, or average. \n");
-		m->mothurOut("The splitmethod parameter allows you to specify how you want to split your distance file before you cluster, default=distance, options distance or classify. \n");
+		m->mothurOut("The splitmethod parameter allows you to specify how you want to split your distance file before you cluster, default=distance, options distance, classify or fasta. \n");
 		m->mothurOut("The taxonomy parameter allows you to enter the taxonomy file for your sequences, this is only valid if you are using splitmethod=classify. Be sure your taxonomy file does not include the probability scores. \n");
 		m->mothurOut("The taxlevel parameter allows you to specify the taxonomy level you want to use to split the distance file, default=1. \n");
 		m->mothurOut("The large parameter allows you to indicate that your distance matrix is too large to fit in RAM.  The default value is false.\n");
@@ -199,12 +228,14 @@ int ClusterSplitCommand::execute(){
 	try {
 	
 		if (abort == true) {	return 0;	}
-		
+		time_t estart;
 		//****************** file prep work ******************************//
 		
 		//if user gave a phylip file convert to column file
 		if (format == "phylip") {
-	
+			estart = time(NULL);
+			m->mothurOut("Converting to column format..."); m->mothurOutEndLine();
+			
 			ReadCluster* convert = new ReadCluster(distfile, cutoff, outputDir, false);
 			
 			NameAssignment* nameMap = NULL;
@@ -229,16 +260,20 @@ int ClusterSplitCommand::execute(){
 			}
 			delete listToMakeNameFile;
 			delete convert;
+			
+			m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to convert the distance file."); m->mothurOutEndLine();
 		}
 		if (m->control_pressed) { return 0; }
 		
-		time_t estart = time(NULL);
-		m->mothurOut("Splitting the distance file..."); m->mothurOutEndLine();
+		estart = time(NULL);
+		m->mothurOut("Splitting the file..."); m->mothurOutEndLine();
 		
 		//split matrix into non-overlapping groups
 		SplitMatrix* split;
-		if (splitmethod == "distance")	{	split = new SplitMatrix(distfile, namefile, taxFile, cutoff, splitmethod, large);			}
-		else							{	split = new SplitMatrix(distfile, namefile, taxFile, taxLevelCutoff, splitmethod, large);   }
+		if (splitmethod == "distance")			{	split = new SplitMatrix(distfile, namefile, taxFile, cutoff, splitmethod, large);			}
+		else if (splitmethod == "classify")		{	split = new SplitMatrix(distfile, namefile, taxFile, taxLevelCutoff, splitmethod, large);   }
+		else if (splitmethod == "fasta")		{	split = new SplitMatrix(fastafile, taxFile, taxLevelCutoff, splitmethod);					}
+		else { m->mothurOut("Not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta."); m->mothurOutEndLine(); return 0; }
 		
 		split->split();
 		
@@ -740,8 +775,8 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
 				listFileNames.clear(); return listFileNames;
 			}
 			
-			remove(thisDistFile.c_str());
-			remove(thisNamefile.c_str());
+			//remove(thisDistFile.c_str());
+			//remove(thisNamefile.c_str());
 		}
 		
 					

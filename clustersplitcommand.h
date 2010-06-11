@@ -32,7 +32,7 @@ private:
 	vector<int> processIDS;   //processid
 	vector<string> outputNames;
 
-	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, distfile, format, showabund, timing, splitmethod, taxFile;
+	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, distfile, format, showabund, timing, splitmethod, taxFile, fastafile;
 	double cutoff, splitcutoff;
 	int precision, length, processors, taxLevelCutoff;
 	bool print_start, abort, hard, large;
