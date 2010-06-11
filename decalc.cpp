@@ -428,7 +428,7 @@ vector< vector<quanMember> > DeCalculator::getQuantiles(vector<Sequence*> seqs, 
 				float de = calcDE(obsi, exp);
 								
 				float dist = calcDist(query, subject, front, back); 
-	//o << i << '\t' <<  j << '\t' << dist << '\t' << de << endl;			
+	//cout << i << '\t' <<  j << '\t' << dist << '\t' << de << endl;			
 				dist = ceil(dist);
 				
 				quanMember newScore(de, i, j);

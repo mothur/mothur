@@ -19,7 +19,9 @@ class SplitMatrix  {
 	
 	public:
 
-		SplitMatrix(string, string, string, float, string, bool); //column formatted distance file, namesfile, cutoff, method
+		SplitMatrix(string, string, string, float, string, bool); //column formatted distance file, namesfile, cutoff, method, large
+		SplitMatrix(string, string, float, string); //fastafile, taxFile, cutoff, method
+		
 		~SplitMatrix();
 		int split();
 		vector< map<string, string> > getDistanceFiles();  //returns map of distance files -> namefile sorted by distance file size
@@ -28,7 +30,7 @@ class SplitMatrix  {
 	private:
 		MothurOut* m;
 
-		string distFile, namefile, singleton, method, taxFile;
+		string distFile, namefile, singleton, method, taxFile, fastafile;
 		vector< map< string, string> > dists;
 		float cutoff;
 		bool large;
@@ -38,6 +40,8 @@ class SplitMatrix  {
 		int splitDistanceLarge();
 		int splitDistanceRAM();
 		int splitNames(vector<set<string> >& groups);
+		int splitDistanceFileByTax(map<string, int>&, int);
+		int createDistanceFilesFromTax(map<string, int>&, int);
 };
 
 /******************************************************/
