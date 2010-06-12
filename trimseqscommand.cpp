@@ -377,9 +377,11 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 				if(qFileName != ""){
 					if(qThreshold != 0)		{	success = stripQualThreshold(currSeq, qFile);	}
 					else if(qAverage != 0)	{	success = cullQualAverage(currSeq, qFile);		}
-					if ((!qtrim) && (origSeq.length() != currSeq.getUnaligned().length())) { 
+					
+					if (qtrim == 1 && (origSeq.length() != currSeq.getUnaligned().length())) { 
 						success = 0; //if you don't want to trim and the sequence does not meet quality requirements, move to scrap
 					}
+
 					if(!success)			{	trashCode += 'q';								}
 				}
 			
@@ -995,32 +997,42 @@ int TrimSeqsCommand::countDiffs(string oligo, string seq){
 
 bool TrimSeqsCommand::stripQualThreshold(Sequence& seq, ifstream& qFile){
 	try {
+//		string rawSequence = seq.getUnaligned();
+//		int seqLength;  // = rawSequence.length();
+//		string name, temp, temp2;
+//		
+//		qFile >> name;
+//		
+//		//get rest of line
+//		temp = "";
+//		while (!qFile.eof())	{	
+//			char c = qFile.get(); 
+//			if (c == 10 || c == 13){	break;	}	
+//			else { temp += c; }
+//		} 
+//	
+//		int pos = temp.find("length");
+//		if (pos == temp.npos) { m->mothurOut("Cannot find length in qfile for " + seq.getName()); m->mothurOutEndLine();  seqLength = 0;  }
+//		else {
+//			string tempLength = temp.substr(pos);
+//			istringstream iss (tempLength,istringstream::in);
+//			iss >> temp;
+//		}
+//		
+//		splitAtEquals(temp2, temp); //separates length=242, temp=length, temp2=242
+//		convert(temp, seqLength); //converts string to int
+//	
+//		if (name.length() != 0) {  if(name.substr(1) != seq.getName())	{	m->mothurOut("sequence name mismatch btwn fasta and qual file"); m->mothurOutEndLine();	}  } 
+		
 		string rawSequence = seq.getUnaligned();
-		int seqLength;  // = rawSequence.length();
-		string name, temp, temp2;
+		int seqLength = seq.getNumBases();
+		bool success = 0;	//guilty until proven innocent
+		string name;
 		
 		qFile >> name;
+		if (name[0] == '>') {  if(name.substr(1) != seq.getName())	{	m->mothurOut("sequence name mismatch btwn fasta: " + seq.getName() + " and qual file: " + name); m->mothurOutEndLine();	}  }
 		
-		//get rest of line
-		temp = "";
-		while (!qFile.eof())	{	
-			char c = qFile.get(); 
-			if (c == 10 || c == 13){	break;	}	
-			else { temp += c; }
-		} 
-	
-		int pos = temp.find("length");
-		if (pos == temp.npos) { m->mothurOut("Cannot find length in qfile for " + seq.getName()); m->mothurOutEndLine();  seqLength = 0;  }
-		else {
-			string tempLength = temp.substr(pos);
-			istringstream iss (tempLength,istringstream::in);
-			iss >> temp;
-		}
-		
-		splitAtEquals(temp2, temp); //separates length=242, temp=length, temp2=242
-		convert(temp, seqLength); //converts string to int
-	
-		if (name.length() != 0) {  if(name.substr(1) != seq.getName())	{	m->mothurOut("sequence name mismatch btwn fasta and qual file"); m->mothurOutEndLine();	}  } 
+		while (!qFile.eof())	{	char c = qFile.get(); if (c == 10 || c == 13){	break;	}	}
 		
 		int score;
 		int end = seqLength;
@@ -1028,7 +1040,7 @@ bool TrimSeqsCommand::stripQualThreshold(Sequence& seq, ifstream& qFile){
 		for(int i=0;i<seqLength;i++){
 			qFile >> score;
 			
-			if(score <= qThreshold){
+			if(score < qThreshold){
 				end = i;
 				break;
 			}
