@@ -130,9 +130,15 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 			taxfile = validParameter.validFile(parameters, "taxonomy", true);
 			if (taxfile == "not open") { abort = true; }
 			else if (taxfile == "not found") {  taxfile = "";  }
-
+			
+			string usedDups = "true";
+			string temp = validParameter.validFile(parameters, "dups", false);	if (temp == "not found") { temp = "false"; usedDups = ""; }
+			dups = isTrue(temp);
 			
 			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, alignreport, taxonomy or listfile."); m->mothurOutEndLine(); abort = true; }
+		
+			if ((usedDups != "") && (namefile == "")) {  m->mothurOut("You may only use dups with the name option."); m->mothurOutEndLine();  abort = true; }			
+
 		}
 
 	}
@@ -147,7 +153,8 @@ void GetSeqsCommand::help(){
 	try {
 		m->mothurOut("The get.seqs command reads an .accnos file and any of the following file types: fasta, name, group, list, taxonomy or alignreport file.\n");
 		m->mothurOut("It outputs a file containing only the sequences in the .accnos file.\n");
-		m->mothurOut("The get.seqs command parameters are accnos, fasta, name, group, list, taxonomy and alignreport.  You must provide accnos and at least one of the other parameters.\n");
+		m->mothurOut("The get.seqs command parameters are accnos, fasta, name, group, list, taxonomy, alignreport and dups.  You must provide accnos and at least one of the other parameters.\n");
+		m->mothurOut("The dups parameter allows you to add the entire line from a name file if you add any name from the line. default=false. \n");
 		m->mothurOut("The get.seqs command should be in the following format: get.seqs(accnos=yourAccnos, fasta=yourFasta).\n");
 		m->mothurOut("Example get.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
@@ -171,8 +178,8 @@ int GetSeqsCommand::execute(){
 		if (m->control_pressed) { return 0; }
 		
 		//read through the correct file and output lines you want to keep
-		if (fastafile != "")		{		readFasta();	}
 		if (namefile != "")			{		readName();		}
+		if (fastafile != "")		{		readFasta();	}
 		if (groupfile != "")		{		readGroup();	}
 		if (alignfile != "")		{		readAlign();	}
 		if (listfile != "")			{		readList();		}
@@ -220,7 +227,7 @@ int GetSeqsCommand::readFasta(){
 			
 			if (name != "") {
 				//if this name is in the accnos file
-				if (names.count(name) == 1) {
+				if (names.count(name) != 0) {
 					wroteSomething = true;
 					
 					currSeq.printSequence(out);
@@ -280,11 +287,11 @@ int GetSeqsCommand::readList(){
 					binnames = binnames.substr(binnames.find_first_of(',')+1, binnames.length());
 					
 					//if that name is in the .accnos file, add it
-					if (names.count(name) == 1) {  newNames += name + ",";  }
+					if (names.count(name) != 0) {  newNames += name + ",";  }
 				}
 			
 				//get last name
-				if (names.count(binnames) == 1) {  newNames += binnames + ",";  }
+				if (names.count(binnames) != 0) {  newNames += binnames + ",";  }
 
 				//if there are names in this bin add to new list
 				if (newNames != "") { 
@@ -338,7 +345,10 @@ int GetSeqsCommand::readName(){
 			if (m->control_pressed) { in.close(); out.close(); remove(outputFileName.c_str());  return 0; }
 
 			in >> firstCol;				
-			in >> secondCol;			
+			in >> secondCol;
+			
+			string hold = "";
+			if (dups) { hold = secondCol; }
 			
 			vector<string> parsedNames;
 			//parse second column saving each name
@@ -353,39 +363,43 @@ int GetSeqsCommand::readName(){
 			
 			vector<string> validSecond;
 			for (int i = 0; i < parsedNames.size(); i++) {
-				if (names.count(parsedNames[i]) == 1) {
+				if (names.count(parsedNames[i]) != 0) {
 					validSecond.push_back(parsedNames[i]);
 				}
 			}
 
-			
-			//if the name in the first column is in the set then print it and any other names in second column also in set
-			if (names.count(firstCol) == 1) {
-			
+			if ((dups) && (validSecond.size() != 0)) { //dups = true and we want to add someone, then add everyone
+				for (int i = 0; i < parsedNames.size(); i++) {  names.insert(parsedNames[i]);  }
+				out << firstCol << '\t' << hold << endl;
 				wroteSomething = true;
-				
-				out << firstCol << '\t';
-				
-				//you know you have at least one valid second since first column is valid
-				for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
-				out << validSecond[validSecond.size()-1] << endl;
-				
-			
-			//make first name in set you come to first column and then add the remaining names to second column
 			}else {
-				//you want part of this row
-				if (validSecond.size() != 0) {
+				//if the name in the first column is in the set then print it and any other names in second column also in set
+				if (names.count(firstCol) != 0) {
 				
 					wroteSomething = true;
 					
-					out << validSecond[0] << '\t';
-				
+					out << firstCol << '\t';
+					
 					//you know you have at least one valid second since first column is valid
 					for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
 					out << validSecond[validSecond.size()-1] << endl;
+					
+				
+				//make first name in set you come to first column and then add the remaining names to second column
+				}else {
+					//you want part of this row
+					if (validSecond.size() != 0) {
+					
+						wroteSomething = true;
+						
+						out << validSecond[0] << '\t';
+					
+						//you know you have at least one valid second since first column is valid
+						for (int i = 0; i < validSecond.size()-1; i++) {  out << validSecond[i] << ',';  }
+						out << validSecond[validSecond.size()-1] << endl;
+					}
 				}
 			}
-			
 			gobble(in);
 		}
 		in.close();
@@ -429,7 +443,7 @@ int GetSeqsCommand::readGroup(){
 			in >> group;			//read from second column
 			
 			//if this name is in the accnos file
-			if (names.count(name) == 1) {
+			if (names.count(name) != 0) {
 				wroteSomething = true;
 				
 				out << name << '\t' << group << endl;
@@ -475,7 +489,7 @@ int GetSeqsCommand::readTax(){
 			in >> tax;			//read from second column
 			
 			//if this name is in the accnos file
-			if (names.count(name) == 1) {
+			if (names.count(name) != 0) {
 				wroteSomething = true;
 				
 				out << name << '\t' << tax << endl;
@@ -530,7 +544,7 @@ int GetSeqsCommand::readAlign(){
 			in >> name;				//read from first column
 			
 			//if this name is in the accnos file
-			if (names.count(name) == 1) {
+			if (names.count(name) != 0) {
 				wroteSomething = true;
 				
 				out << name << '\t';
