@@ -50,8 +50,8 @@ class ChimeraSlayer : public Chimera {
 		int window, numWanted, kmerSize, match, misMatch, minSim, minCov, minBS, minSNP, parents, iters, increment;
 		float divR;
 	
-		void printBlock(data_struct, ostream&);
-		string getBlock(data_struct);
+		void printBlock(data_struct, string, ostream&);
+		string getBlock(data_struct, string);
 		
 };
 

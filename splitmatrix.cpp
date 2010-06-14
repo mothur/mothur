@@ -9,9 +9,7 @@
 
 #include "splitmatrix.h"
 #include "phylotree.h"
-#include "sequencedb.h"
-#include "onegapdist.h"
-#include "dist.h"
+#include "distancecommand.h"
 
 /***********************************************************************/
 
@@ -26,12 +24,14 @@ SplitMatrix::SplitMatrix(string distfile, string name, string tax, float c, stri
 }
 /***********************************************************************/
 
-SplitMatrix::SplitMatrix(string ffile, string tax, float c, string t){
+SplitMatrix::SplitMatrix(string ffile, string name, string tax, float c, string t, int p){
 	m = MothurOut::getInstance();
 	fastafile = ffile;
+	namefile = name;
 	taxFile = tax;
 	cutoff = c;
 	method = t;
+	processors = p;
 }
 
 /***********************************************************************/
@@ -125,7 +125,6 @@ int SplitMatrix::splitClassify(){
 			createDistanceFilesFromTax(seqGroup, numGroups);
 		}
 		
-				
 		return 0;
 			
 	}
@@ -137,36 +136,114 @@ int SplitMatrix::splitClassify(){
 /***********************************************************************/
 int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numGroups){
 	try {
+		map<string, int> copyGroups = seqGroup;
 		map<string, int>::iterator it;
-		map<string, int>::iterator it2;
-		map<string, int> seqIndexInFasta;
+		set<string> names;
 				
-		//read fastafile
-		SequenceDB alignDB;
-		
-		ifstream filehandle;
-		openInputFile(fastafile, filehandle);
-		int numSeqs = 0;
-		while (!filehandle.eof()) {
-			//input sequence info into sequencedb
-			Sequence newSequence(filehandle);
-			
-			if (newSequence.getName() != "") {   
-				alignDB.push_back(newSequence);  
-				seqIndexInFasta[newSequence.getName()] = numSeqs;
-				numSeqs++;
-			}
-			
-			//takes care of white space
-			gobble(filehandle);
+		for (int i = 0; i < numGroups; i++) { //remove old temp files, just in case
+			remove((fastafile + "." + toString(i) + ".temp").c_str());
 		}
-		filehandle.close();
+			
+		ifstream in;
+		openInputFile(fastafile, in);
+	
+		//parse fastafile
+		ofstream outFile;
+		while (!in.eof()) {
+			Sequence query(in); gobble(in);
+			if (query.getName() != "") {
 		
-		Dist* distCalculator = new oneGapDist();
+				it = seqGroup.find(query.getName());
+				
+				//save names in case no namefile is given
+				if (namefile == "") {  names.insert(query.getName()); }
+			
+				if (it != seqGroup.end()) { //not singleton 
+					openOutputFileAppend((fastafile + "." + toString(it->second) + ".temp"), outFile);
+					query.printSequence(outFile); 
+					outFile.close();
+					
+					copyGroups.erase(it);
+				}
+			}
+		}
+		in.close();
 		
+		//warn about sequence in groups that are not in fasta file
+		for(it = copyGroups.begin(); it != copyGroups.end(); it++) {
+			m->mothurOut("ERROR: " + it->first + " is missing from your fastafile. This could happen if your taxonomy file is not unique and your fastafile is, or it could indicate and error."); m->mothurOutEndLine();
+			exit(1);
+		}
 		
-//still not done....		
+		copyGroups.clear();
 		
+		//process each distance file
+		for (int i = 0; i < numGroups; i++) { 
+			
+			string options = "fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors);
+			
+			Command* command = new DistanceCommand(options);
+			command->execute();
+			delete command;
+			
+			remove((fastafile + "." + toString(i) + ".temp").c_str());
+			
+			//remove old names files just in case
+			remove((namefile + "." + toString(i) + ".temp").c_str());
+		}
+		
+		singleton = namefile + ".extra.temp";
+		ofstream remainingNames;
+		openOutputFile(singleton, remainingNames);
+		
+		bool wroteExtra = false;
+
+		ifstream bigNameFile;
+		openInputFile(namefile, bigNameFile);
+		
+		string name, nameList;
+		while(!bigNameFile.eof()){
+			bigNameFile >> name >> nameList;  gobble(bigNameFile);
+			
+			//did this sequence get assigned a group
+			it = seqGroup.find(name);
+			
+			if (it != seqGroup.end()) {  
+				openOutputFileAppend((namefile + "." + toString(it->second) + ".temp"), outFile);
+				outFile << name << '\t' << nameList << endl;
+				outFile.close();
+			}else{
+				wroteExtra = true;
+				remainingNames << name << '\t' << nameList << endl;
+			}
+		}
+		bigNameFile.close();
+		
+		remainingNames.close();
+		if (!wroteExtra) { 
+			remove(singleton.c_str());
+			singleton = "none";
+		}
+
+		for(int i=0;i<numGroups;i++){
+			string tempNameFile = namefile + "." + toString(i) + ".temp";
+			string tempDistFile = getRootName(getSimpleName((fastafile + "." + toString(i) + ".temp"))) + "dist";
+
+			//if there are valid distances
+			ifstream fileHandle;
+			fileHandle.open(tempDistFile.c_str());
+			if(fileHandle) 	{	
+				gobble(fileHandle);
+				if (!fileHandle.eof()) {  //check for blank file
+					map<string, string> temp;
+					temp[tempDistFile] = tempNameFile;
+					dists.push_back(temp);
+				}
+			}
+			fileHandle.close();
+		}
+		
+		if (m->control_pressed)	 {  for (int i = 0; i < dists.size(); i++) { remove((dists[i].begin()->first).c_str()); remove((dists[i].begin()->second).c_str()); } dists.clear(); }
 		
 		return 0;
 	}
@@ -269,25 +346,37 @@ int SplitMatrix::splitDistanceFileByTax(map<string, int>& seqGroup, int numGroup
 			}
 		}
 		bigNameFile.close();
+				
+		for(int i=0;i<numGroups;i++){
+			string tempNameFile = namefile + "." + toString(i) + ".temp";
+			string tempDistFile = distFile + "." + toString(i) + ".temp";
+
+			//if there are valid distances
+			if (validDistances[i]) {
+				map<string, string> temp;
+				temp[tempDistFile] = tempNameFile;
+				dists.push_back(temp);
+			}else{
+				ifstream in;
+				openInputFile(tempNameFile, in);
+				
+				while(!in.eof()) { 
+					in >> name >> nameList;  gobble(in);
+					wroteExtra = true;
+					remainingNames << name << '\t' << nameList << endl;
+				}
+				in.close();
+				remove(tempNameFile.c_str());
+			}
+		}
+		
 		remainingNames.close();
 		
 		if (!wroteExtra) { 
 			remove(singleton.c_str());
 			singleton = "none";
 		}
-		
-		for(int i=0;i<numGroups;i++){
-			//if there are valid distances
-			if (validDistances[i]) {
-				string tempNameFile = namefile + "." + toString(i) + ".temp";
-				string tempDistFile = distFile + "." + toString(i) + ".temp";
-				
-				map<string, string> temp;
-				temp[tempDistFile] = tempNameFile;
-				dists.push_back(temp);
-			}
-		}
-		
+
 		if (m->control_pressed)	 {  
 			for (int i = 0; i < dists.size(); i++) { 
 				remove((dists[i].begin()->first).c_str());

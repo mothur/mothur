@@ -196,7 +196,7 @@ int ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 				}
 			}
 			
-			printBlock(chimeraResults[0], out);
+			printBlock(chimeraResults[0], chimeraFlag, out);
 			out << endl;
 		}else {  out << querySeq->getName() << "\tno" << endl;  }
 		
@@ -240,7 +240,7 @@ int ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 				}
 			}
 			
-			outputString = getBlock(chimeraResults[0]);
+			outputString = getBlock(chimeraResults[0], chimeraFlag);
 			outputString += "\n";
 	//cout << outputString << endl;		
 			//write to output file
@@ -387,7 +387,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 	}
 }
 //***************************************************************************************************************
-void ChimeraSlayer::printBlock(data_struct data, ostream& out){
+void ChimeraSlayer::printBlock(data_struct data, string flag, ostream& out){
 	try {
 	//out << ":)\n";
 		
@@ -399,7 +399,7 @@ void ChimeraSlayer::printBlock(data_struct data, ostream& out){
 		out << data.divr_qla_qrb << '\t' << data.qla_qrb << '\t' << data.bsa << '\t';
 		out << data.divr_qlb_qra << '\t' << data.qlb_qra << '\t' << data.bsb << '\t';
 		
-		out << "yes\t" << spotMap[data.winLStart] << "-" << spotMap[data.winLEnd] << '\t' << spotMap[data.winRStart] << "-" << spotMap[data.winREnd] << '\t';
+		out << flag << '\t' << spotMap[data.winLStart] << "-" << spotMap[data.winLEnd] << '\t' << spotMap[data.winRStart] << "-" << spotMap[data.winREnd] << '\t';
 		
 		//out << "Similarity of parents: " << data.ab << endl;
 		//out << "Similarity of query to parentA: " << data.qa << endl;
@@ -422,7 +422,7 @@ void ChimeraSlayer::printBlock(data_struct data, ostream& out){
 	}
 }
 //***************************************************************************************************************
-string ChimeraSlayer::getBlock(data_struct data){
+string ChimeraSlayer::getBlock(data_struct data, string flag){
 	try {
 		
 		string outputString = "";
@@ -433,7 +433,7 @@ string ChimeraSlayer::getBlock(data_struct data){
 		outputString += toString(data.divr_qla_qrb) + "\t" + toString(data.qla_qrb) + "\t" + toString(data.bsa) + "\t";
 		outputString += toString(data.divr_qlb_qra) + "\t" + toString(data.qlb_qra) + "\t" + toString(data.bsb) + "\t";
 		
-		outputString += "yes\t" + toString(spotMap[data.winLStart]) + "-" + toString(spotMap[data.winLEnd]) + "\t" + toString(spotMap[data.winRStart]) + "-" + toString(spotMap[data.winREnd]) + "\t";
+		outputString += flag + "\t" + toString(spotMap[data.winLStart]) + "-" + toString(spotMap[data.winLEnd]) + "\t" + toString(spotMap[data.winRStart]) + "-" + toString(spotMap[data.winREnd]) + "\t";
 		
 		return outputString;
 	}

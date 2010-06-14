@@ -163,7 +163,7 @@ void TrimSeqsCommand::help(){
 		m->mothurOut("The trim.seqs command reads a fastaFile and creates .....\n");
 		m->mothurOut("The trim.seqs command parameters are fasta, flip, oligos, maxambig, maxhomop, minlength, maxlength, qfile, qthreshold, qaverage, diffs, qtrim and allfiles.\n");
 		m->mothurOut("The fasta parameter is required.\n");
-		m->mothurOut("The flip parameter .... The default is 0.\n");
+		m->mothurOut("The flip parameter will output the reverse compliment of your trimmed sequence. The default is false.\n");
 		m->mothurOut("The oligos parameter .... The default is "".\n");
 		m->mothurOut("The maxambig parameter .... The default is -1.\n");
 		m->mothurOut("The maxhomop parameter .... The default is 0.\n");

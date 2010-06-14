@@ -128,6 +128,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			
 			if (fastafile != "") {
 				if (taxFile == "") { m->mothurOut("You need to provide a taxonomy file if you are using a fasta file to generate the split."); m->mothurOutEndLine(); abort = true; }
+				if (namefile == "") { m->mothurOut("You need to provide a names file if you are using a fasta file to generate the split."); m->mothurOutEndLine(); abort = true; }
 			}
 					
 			//check for optional parameter and set defaults
@@ -195,7 +196,7 @@ void ClusterSplitCommand::help(){
 		m->mothurOut("For the distance file method, you need only provide your distance file and mothur will split the file into distinct groups. \n");
 		m->mothurOut("For the classification method, you need to provide your distance file and taxonomy file, and set the splitmethod to classify.  \n");
 		m->mothurOut("You will also need to set the taxlevel you want to split by. mothur will split the sequence into distinct taxonomy groups, and split the distance file based on those groups. \n");
-		m->mothurOut("For the classification method using a fasta file, you need to provide your fasta file and taxonomy file.  \n");
+		m->mothurOut("For the classification method using a fasta file, you need to provide your fasta file, names file and taxonomy file.  \n");
 		m->mothurOut("You will also need to set the taxlevel you want to split by. mothur will split the sequence into distinct taxonomy groups, and create distance files for each grouping. \n");
 		m->mothurOut("The phylip and column parameter allow you to enter your distance file. \n");
 		m->mothurOut("The fasta parameter allows you to enter your aligned fasta file. \n");
@@ -270,9 +271,9 @@ int ClusterSplitCommand::execute(){
 		
 		//split matrix into non-overlapping groups
 		SplitMatrix* split;
-		if (splitmethod == "distance")			{	split = new SplitMatrix(distfile, namefile, taxFile, cutoff, splitmethod, large);			}
-		else if (splitmethod == "classify")		{	split = new SplitMatrix(distfile, namefile, taxFile, taxLevelCutoff, splitmethod, large);   }
-		else if (splitmethod == "fasta")		{	split = new SplitMatrix(fastafile, taxFile, taxLevelCutoff, splitmethod);					}
+		if (splitmethod == "distance")			{	split = new SplitMatrix(distfile, namefile, taxFile, cutoff, splitmethod, large);					}
+		else if (splitmethod == "classify")		{	split = new SplitMatrix(distfile, namefile, taxFile, taxLevelCutoff, splitmethod, large);			}
+		else if (splitmethod == "fasta")		{	split = new SplitMatrix(fastafile, namefile, taxFile, taxLevelCutoff, splitmethod, processors);		}
 		else { m->mothurOut("Not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta."); m->mothurOutEndLine(); return 0; }
 		
 		split->split();
@@ -775,8 +776,8 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
 				listFileNames.clear(); return listFileNames;
 			}
 			
-			//remove(thisDistFile.c_str());
-			//remove(thisNamefile.c_str());
+			remove(thisDistFile.c_str());
+			remove(thisNamefile.c_str());
 		}
 		
 					
