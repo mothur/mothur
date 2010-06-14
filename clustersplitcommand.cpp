@@ -113,7 +113,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }	
 			else if (fastafile == "not found") { fastafile = ""; }
-			else { splitmethod = "fasta";  }
+			else { distfile = fastafile;  splitmethod = "fasta";  }
 			
 			taxFile = validParameter.validFile(parameters, "taxonomy", true);
 			if (taxFile == "not open") { abort = true; }	
@@ -271,10 +271,10 @@ int ClusterSplitCommand::execute(){
 		
 		//split matrix into non-overlapping groups
 		SplitMatrix* split;
-		if (splitmethod == "distance")			{	split = new SplitMatrix(distfile, namefile, taxFile, cutoff, splitmethod, large);					}
-		else if (splitmethod == "classify")		{	split = new SplitMatrix(distfile, namefile, taxFile, taxLevelCutoff, splitmethod, large);			}
-		else if (splitmethod == "fasta")		{	split = new SplitMatrix(fastafile, namefile, taxFile, taxLevelCutoff, splitmethod, processors);		}
-		else { m->mothurOut("Not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta."); m->mothurOutEndLine(); return 0; }
+		if (splitmethod == "distance")			{	split = new SplitMatrix(distfile, namefile, taxFile, cutoff, splitmethod, large);							}
+		else if (splitmethod == "classify")		{	split = new SplitMatrix(distfile, namefile, taxFile, taxLevelCutoff, splitmethod, large);					}
+		else if (splitmethod == "fasta")		{	split = new SplitMatrix(fastafile, namefile, taxFile, taxLevelCutoff, splitmethod, processors, outputDir);	}
+		else { m->mothurOut("Not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta."); m->mothurOutEndLine(); return 0;		}
 		
 		split->split();
 		
