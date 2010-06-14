@@ -147,7 +147,7 @@ int ReadTreeCommand::execute(){
 				delete globaldata->gTreemap;
 				return 0;
 			}
-			
+	
 			T[i]->assembleTree();
 		}
 

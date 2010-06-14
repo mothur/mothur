@@ -154,7 +154,7 @@ void RemoveSeqsCommand::help(){
 		m->mothurOut("The remove.seqs command reads an .accnos file and at least one of the following file types: fasta, name, group, list, taxonomy or alignreport file.\n");
 		m->mothurOut("It outputs a file containing the sequences NOT in the .accnos file.\n");
 		m->mothurOut("The remove.seqs command parameters are accnos, fasta, name, group, list, taxonomy, alignreport and dups.  You must provide accnos and at least one of the file parameters.\n");
-		m->mothurOut("The dups parameter allows you to remove the entire line from a name file if you remove any name from the line. default=false. If dups=true, then remove.seqs outputs a new .accnos file containing all the sequences removed. \n");
+		m->mothurOut("The dups parameter allows you to remove the entire line from a name file if you remove any name from the line. default=false. \n");
 		m->mothurOut("The remove.seqs command should be in the following format: remove.seqs(accnos=yourAccnos, fasta=yourFasta).\n");
 		m->mothurOut("Example remove.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
@@ -178,8 +178,8 @@ int RemoveSeqsCommand::execute(){
 		if (m->control_pressed) { return 0; }
 		
 		//read through the correct file and output lines you want to keep
-		if (fastafile != "")		{		readFasta();	}
 		if (namefile != "")			{		readName();		}
+		if (fastafile != "")		{		readFasta();	}
 		if (groupfile != "")		{		readGroup();	}
 		if (alignfile != "")		{		readAlign();	}
 		if (listfile != "")			{		readList();		}
@@ -325,12 +325,7 @@ int RemoveSeqsCommand::readName(){
 	try {
 		if (outputDir == "") {  outputDir += hasPath(namefile);  }
 		string outputFileName = outputDir + getRootName(getSimpleName(namefile)) + "pick" + getExtension(namefile);
-		string outputFileName2 = outputDir + getRootName(getSimpleName(namefile)) + "dups.accnos";
 
-		ofstream out2;
-		if (dups) {	 openOutputFile(outputFileName2, out2);	}
-		bool wroteDups = false;
-		
 		ofstream out;
 		openOutputFile(outputFileName, out);
 
@@ -341,7 +336,7 @@ int RemoveSeqsCommand::readName(){
 		bool wroteSomething = false;
 		
 		while(!in.eof()){
-			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str()); if (dups) { out2.close(); remove(outputFileName2.c_str()); } return 0; }
+			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
 
 			in >> firstCol;				
 			in >> secondCol;			
@@ -365,9 +360,8 @@ int RemoveSeqsCommand::readName(){
 				}
 			}
 			
-			if ((dups) && (validSecond.size() != parsedNames.size())) { 
-				wroteDups = true;
-				for (int i = 0; i < parsedNames.size(); i++) {  out2 << parsedNames[i] << endl;  }
+			if ((dups) && (validSecond.size() != parsedNames.size())) {  //if dups is true and we want to get rid of anyone, get rid of everyone
+				for (int i = 0; i < parsedNames.size(); i++) {  names.insert(parsedNames[i]);  }
 			}else {
 					//if the name in the first column is in the set then print it and any other names in second column also in set
 				if (names.count(firstCol) == 0) {
@@ -400,11 +394,6 @@ int RemoveSeqsCommand::readName(){
 		}
 		in.close();
 		out.close();
-		
-		if (dups) { out2.close();  }
-		if (wroteDups == false) {
-			remove(outputFileName2.c_str()); 
-		}else { outputNames.push_back(outputFileName2); }
 		
 		if (wroteSomething == false) {
 			m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();

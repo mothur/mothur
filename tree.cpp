@@ -736,20 +736,39 @@ int Tree::readTreeString(ifstream& filehandle)	{
 //cout << " at beginning of while " <<  k << endl;			
 			if(c == ')')  {    
 				//to pass over labels in trees
-				string label = readLabel(filehandle);
+				c=filehandle.get();
+				while((c!=',') && (c != -1) && (c!= ':') && (c!=';')){ c=filehandle.get(); }
+				filehandle.putback(c);
 			}
-			
 			if(c == ';') { return 0; }
 			if(c == -1) { return 0; }
-			
 			//if you are a name
 			if((c != '(') && (c != ')') && (c != ',') && (c != ':') && (c != '\n') && (c != '\t') && (c != 32)) { //32 is space
-				name = readName(filehandle);
+				name = "";
+				c = filehandle.get();
+			//k = c;
+//cout << k << endl;
+				while ((c != '(') && (c != ')') && (c != ',') && (c != ':') && (c != '\n') && (c != 32) && (c != '\t')) {			
+					name += c;
+					c = filehandle.get();
+			//k = c;
+//cout << " in name while " << k << endl;
+				}
+				
+//cout << "name = " << name << endl;
 				globaldata->Treenames.push_back(name);
+				filehandle.putback(c);
+//k = c;
+//cout << " after putback" <<  k << endl;
 			} 
 			
 			if(c  == ':') { //read until you reach the end of the branch length
-				string bl = readBranchLength(filehandle);
+				while ((c != '(') && (c != ')') && (c != ',') && (c != ';') && (c != '\n') && (c != '\t') && (c != 32)) {
+					c = filehandle.get();
+	//k = c;
+	//cout << " in branch while " << k << endl;
+				}
+				filehandle.putback(c);
 			}
 		
 			c = filehandle.get();
@@ -770,68 +789,6 @@ int Tree::readTreeString(ifstream& filehandle)	{
 }	
 
 /*******************************************************/
-string Tree::readLabel(ifstream& filehandle)	{
-	try {
-		
-		string label = "";
-		
-		//to pass over labels in trees
-		int c=filehandle.get();
-		while((c!=',') && (c != -1) && (c!= ':') && (c!=';')){ label += c; c=filehandle.get(); }
-		filehandle.putback(c);
-		
-		return label;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Tree", "readLabel");
-		exit(1);
-	}
-}	
-/*******************************************************/
-string Tree::readName(ifstream& filehandle)	{
-	try {
-		
-		string name = "";
-		int c = filehandle.get();
-		
-		while ((c != '(') && (c != ')') && (c != ',') && (c != ':') && (c != '\n') && (c != 32) && (c != '\t')) {			
-			name += c;
-			c = filehandle.get();
-		}
-				
-//cout << "name = " << name << endl;
-		filehandle.putback(c);
-		
-		return name;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Tree", "readName");
-		exit(1);
-	}
-}	
-/*******************************************************/
-string Tree::readBranchLength(ifstream& filehandle)	{
-	try {
-		
-		string br = "";
-		int c;
-		while ((c != '(') && (c != ')') && (c != ',') && (c != ';') && (c != '\n') && (c != '\t') && (c != 32)) {
-			br += c;
-			c = filehandle.get();
-		}
-		filehandle.putback(c);
-		
-		return br;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "Tree", "readBranchLength");
-		exit(1);
-	}
-}	
 
-/*******************************************************/
 /*******************************************************/
 
