@@ -24,7 +24,7 @@ SplitMatrix::SplitMatrix(string distfile, string name, string tax, float c, stri
 }
 /***********************************************************************/
 
-SplitMatrix::SplitMatrix(string ffile, string name, string tax, float c, string t, int p){
+SplitMatrix::SplitMatrix(string ffile, string name, string tax, float c, string t, int p, string output){
 	m = MothurOut::getInstance();
 	fastafile = ffile;
 	namefile = name;
@@ -32,6 +32,7 @@ SplitMatrix::SplitMatrix(string ffile, string name, string tax, float c, string 
 	cutoff = c;
 	method = t;
 	processors = p;
+	outputDir = output;
 }
 
 /***********************************************************************/
@@ -163,7 +164,7 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 					query.printSequence(outFile); 
 					outFile.close();
 					
-					copyGroups.erase(it);
+					copyGroups.erase(query.getName());
 				}
 			}
 		}
@@ -180,7 +181,7 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 		//process each distance file
 		for (int i = 0; i < numGroups; i++) { 
 			
-			string options = "fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors);
+			string options = "fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", cutoff=" + toString(cutoff);
 			
 			Command* command = new DistanceCommand(options);
 			command->execute();
@@ -219,30 +220,41 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 		}
 		bigNameFile.close();
 		
-		remainingNames.close();
-		if (!wroteExtra) { 
-			remove(singleton.c_str());
-			singleton = "none";
-		}
-
 		for(int i=0;i<numGroups;i++){
 			string tempNameFile = namefile + "." + toString(i) + ".temp";
-			string tempDistFile = getRootName(getSimpleName((fastafile + "." + toString(i) + ".temp"))) + "dist";
+			string tempDistFile = outputDir + getRootName(getSimpleName((fastafile + "." + toString(i) + ".temp"))) + "dist";
 
 			//if there are valid distances
 			ifstream fileHandle;
 			fileHandle.open(tempDistFile.c_str());
 			if(fileHandle) 	{	
 				gobble(fileHandle);
-				if (!fileHandle.eof()) {  //check for blank file
+				if (!fileHandle.eof()) {  //check for blank file - this could occur if all dists in group are above cutoff
 					map<string, string> temp;
 					temp[tempDistFile] = tempNameFile;
 					dists.push_back(temp);
+				}else {
+					ifstream in;
+					openInputFile(tempNameFile, in);
+				
+					while(!in.eof()) { 
+						in >> name >> nameList;  gobble(in);
+						wroteExtra = true;
+						remainingNames << name << '\t' << nameList << endl;
+					}
+					in.close();
+					remove(tempNameFile.c_str());
 				}
 			}
 			fileHandle.close();
 		}
 		
+		remainingNames.close();
+		if (!wroteExtra) { 
+			remove(singleton.c_str());
+			singleton = "none";
+		}
+
 		if (m->control_pressed)	 {  for (int i = 0; i < dists.size(); i++) { remove((dists[i].begin()->first).c_str()); remove((dists[i].begin()->second).c_str()); } dists.clear(); }
 		
 		return 0;
