@@ -24,12 +24,12 @@ class ChopSeqsCommand : public Command {
 		void help();	
 		
 	private:
-		string fastafile, outputDir;
+		string fastafile, outputDir, keep;
 		bool abort;
-		int end, fromend;
+		int numbases;
 		
-		string getChoppedAligned(Sequence);
-		string getChoppedUnaligned(Sequence);
+		string getChopped(Sequence);
+		
 };
 
 #endif
