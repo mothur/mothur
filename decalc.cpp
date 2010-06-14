@@ -150,7 +150,7 @@ vector<int>  DeCalculator::findWindows(Sequence* query, int front, int back, int
 */	
 		
 		//this follows wigeon, but we may want to consider that it chops off the end values if the sequence cannot be evenly divided into steps
-		for (int m = front; m < (back - size) ; m+=increment) {  win.push_back(m);  }
+		for (int i = front; i < (back - size) ; i+=increment) {  win.push_back(i);  }
 
 
 	
@@ -169,10 +169,10 @@ vector<float> DeCalculator::calcObserved(Sequence* query, Sequence* subject, vec
 		
 		vector<float> temp;	
 		//int gaps = 0;		
-		for (int m = 0; m < window.size(); m++) {
+		for (int i = 0; i < window.size(); i++) {
 						
-			string seqFrag = query->getAligned().substr(window[m], size);
-			string seqFragsub = subject->getAligned().substr(window[m], size);
+			string seqFrag = query->getAligned().substr(window[i], size);
+			string seqFragsub = subject->getAligned().substr(window[i], size);
 				
 			int diff = 0;
 			for (int b = 0; b < seqFrag.length(); b++) {
@@ -244,9 +244,9 @@ vector<float> DeCalculator::calcExpected(vector<float> qav, float coef) {
 		//for each window
 		vector<float> queryExpected;
 			
-		for (int m = 0; m < qav.size(); m++) {		
+		for (int j = 0; j < qav.size(); j++) {		
 				
-			float expected = qav[m] * coef;
+			float expected = qav[j] * coef;
 				
 			queryExpected.push_back(expected);	
 		}
@@ -264,12 +264,12 @@ float DeCalculator::calcDE(vector<float> obs, vector<float> exp) {
 	try {
 		
 		//for each window
-		float sum = 0.0;  //sum = sum from 1 to m of (oi-ei)^2
+		float sum = 0.0;  //sum = sum from 1 to i of (oi-ei)^2
 		int numZeros = 0;
-		for (int m = 0; m < obs.size(); m++) { 		
+		for (int j = 0; j < obs.size(); j++) { 		
 			
-			//if (obs[m] != 0.0) {
-				sum += ((obs[m] - exp[m]) * (obs[m] - exp[m]));	
+			//if (obs[j] != 0.0) {
+				sum += ((obs[j] - exp[j]) * (obs[j] - exp[j]));	
 			//}else {  numZeros++;   }
 			
 		}
@@ -321,7 +321,7 @@ vector<float> DeCalculator::calcFreq(vector<Sequence*> seqs, string filename) {
 			
 			//find base with highest frequency
 			int highest = 0;
-			for (int m = 0; m < freq.size(); m++) {   if (freq[m] > highest) {  highest = freq[m];  }		}
+			for (int j = 0; j < freq.size(); j++) {   if (freq[j] > highest) {  highest = freq[j];  }		}
 			
 			float highFreq = highest / (float) (seqs.size());	
 			
@@ -355,13 +355,13 @@ vector<float>  DeCalculator::findQav(vector<int> window, int size, vector<float>
 		vector<float>  averages; 
 				
 		//for each window find average
-		for (int m = 0; m < window.size(); m++) {
+		for (int i = 0; i < window.size(); i++) {
 				
 			float average = 0.0;
 				
 			//while you are in the window for this sequence
 			int count = 0;
-			for (int j = window[m]; j < (window[m]+size); j++) {   
+			for (int j = window[i]; j < (window[i]+size); j++) {   
 				average += probabilityProfile[j];
 				count++;
 			}
@@ -387,10 +387,7 @@ vector< vector<quanMember> > DeCalculator::getQuantiles(vector<Sequence*> seqs, 
 		
 		//percentage of mismatched pairs 1 to 100
 		quan.resize(100);
-//ofstream o;
-//string out = "getQuantiles.out";
-//openOutputFile(out, o);
-		
+
 		//for each sequence
 		for(int i = start; i < end; i++){
 		
@@ -434,12 +431,13 @@ vector< vector<quanMember> > DeCalculator::getQuantiles(vector<Sequence*> seqs, 
 				quanMember newScore(de, i, j);
 				
 				quan[dist].push_back(newScore);
-				
+
 				delete subject;
 			}
 			
 			delete query;
 		}
+	
 
 		return quan;
 						
@@ -460,23 +458,23 @@ void DeCalculator::removeObviousOutliers(vector< vector<quanMember> >& quantiles
 	try {
 						
 		for (int i = 0; i < quantiles.size(); i++) {
-		
+			
 			//find mean of this quantile score
 			sort(quantiles[i].begin(), quantiles[i].end(), compareQuanMembers);
 			
-			float high = quantiles[i][int(quantiles[i].size() * 0.99)].score;
-			float low =  quantiles[i][int(quantiles[i].size() * 0.01)].score;
-			
 			vector<quanMember> temp;
+			if (quantiles[i].size() != 0) {
+				float high = quantiles[i][int(quantiles[i].size() * 0.99)].score;
+				float low =  quantiles[i][int(quantiles[i].size() * 0.01)].score;
 			
-			//look at each value in quantiles to see if it is an outlier
-			for (int j = 0; j < quantiles[i].size(); j++) {
-				//is this score between 1 and 99%
-				if ((quantiles[i][j].score > low) && (quantiles[i][j].score < high)) {
-					temp.push_back(quantiles[i][j]);
+				//look at each value in quantiles to see if it is an outlier
+				for (int j = 0; j < quantiles[i].size(); j++) {
+					//is this score between 1 and 99%
+					if ((quantiles[i][j].score > low) && (quantiles[i][j].score < high)) {
+						temp.push_back(quantiles[i][j]);
+					}
 				}
 			}
-			
 			quantiles[i] = temp;
 		}
 
