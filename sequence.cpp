@@ -129,31 +129,37 @@ Sequence::Sequence(ifstream& fastaFile){
 		m = MothurOut::getInstance();
 		initialize();
 		fastaFile >> name;
-		name = name.substr(1);
-		string sequence;
+
+		if (name.length() != 0) { 
 		
-		//read comments
-		while ((name[0] == '#') && fastaFile) { 
-			while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-			sequence = getCommentString(fastaFile);
+			name = name.substr(1); 
 			
-			if (fastaFile) {  
-				fastaFile >> name;  
-				name = name.substr(1);	
-			}else { 
-				name = "";
-				break;
+			string sequence;
+		
+			//read comments
+			while ((name[0] == '#') && fastaFile) { 
+				while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+				sequence = getCommentString(fastaFile);
+				
+				if (fastaFile) {  
+					fastaFile >> name;  
+					name = name.substr(1);	
+				}else { 
+					name = "";
+					break;
+				}
 			}
+			
+			//read real sequence
+			while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+			
+			sequence = getSequenceString(fastaFile);		
+		
+			setAligned(sequence);	
+			//setUnaligned removes any gap characters for us						
+			setUnaligned(sequence);	
 		}
 		
-		//read real sequence
-		while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-		
-		sequence = getSequenceString(fastaFile);		
-		
-		setAligned(sequence);	
-		//setUnaligned removes any gap characters for us						
-		setUnaligned(sequence);	
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Sequence", "Sequence");

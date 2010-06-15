@@ -230,7 +230,7 @@ int SeqSummaryCommand::execute(){
 					openInputFile(fastafile, inFASTA);
 					numSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
 					inFASTA.close();
-					
+			cout << numSeqs << endl;		
 					lines.push_back(new linePair(0, numSeqs));
 					
 					driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, summaryFile, lines[0]);
@@ -334,6 +334,7 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 			if (m->control_pressed) { in.close(); outSummary.close(); return 1; }
 					
 			Sequence current(in);
+	
 			if (current.getName() != "") {
 				startPosition.push_back(current.getStartPos());
 				endPosition.push_back(current.getEndPos());
