@@ -334,7 +334,7 @@ int RemoveSeqsCommand::readName(){
 		string name, firstCol, secondCol;
 		
 		bool wroteSomething = false;
-	int numSeqsInNames = 0;	
+		
 		while(!in.eof()){
 			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
 
@@ -359,7 +359,7 @@ int RemoveSeqsCommand::readName(){
 					validSecond.push_back(parsedNames[i]);
 				}
 			}
-		numSeqsInNames += parsedNames.size();	
+			
 			if ((dups) && (validSecond.size() != parsedNames.size())) {  //if dups is true and we want to get rid of anyone, get rid of everyone
 				for (int i = 0; i < parsedNames.size(); i++) {  names.insert(parsedNames[i]);  }
 			}else {
@@ -394,7 +394,7 @@ int RemoveSeqsCommand::readName(){
 		}
 		in.close();
 		out.close();
-cout << "your names file contains " << numSeqsInNames << endl;		
+
 		if (wroteSomething == false) {
 			m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();
 			remove(outputFileName.c_str()); 
