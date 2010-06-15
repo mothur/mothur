@@ -228,9 +228,9 @@ int SeqSummaryCommand::execute(){
 				if(processors == 1){
 					ifstream inFASTA;
 					openInputFile(fastafile, inFASTA);
-					numSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
-					inFASTA.close();
-			cout << numSeqs << endl;		
+					getNumSeqs(inFASTA, numSeqs);
+					inFASTA.close();	
+						
 					lines.push_back(new linePair(0, numSeqs));
 					
 					driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, summaryFile, lines[0]);
@@ -250,7 +250,7 @@ int SeqSummaryCommand::execute(){
 		#else
 				ifstream inFASTA;
 				openInputFile(fastafile, inFASTA);
-				numSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+				getNumSeqs(inFASTA, numSeqs);
 				inFASTA.close();
 				
 				lines.push_back(new linePair(0, numSeqs));

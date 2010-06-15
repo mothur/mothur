@@ -295,7 +295,7 @@ int ScreenSeqsCommand::execute(){
 			if(processors == 1){
 				ifstream inFASTA;
 				openInputFile(fastafile, inFASTA);
-				numFastaSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+				getNumSeqs(inFASTA, numFastaSeqs);
 				inFASTA.close();
 				
 				lines.push_back(new linePair(0, numFastaSeqs));
@@ -369,7 +369,7 @@ int ScreenSeqsCommand::execute(){
 	#else
 			ifstream inFASTA;
 			openInputFile(fastafile, inFASTA);
-			numFastaSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+			getNumSeqs(inFASTA, numFastaSeqs);
 			inFASTA.close();
 			
 			lines.push_back(new linePair(0, numFastaSeqs));

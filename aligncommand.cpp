@@ -373,7 +373,7 @@ int AlignCommand::execute(){
 			if(processors == 1){
 				ifstream inFASTA;
 				openInputFile(candidateFileNames[s], inFASTA);
-				numFastaSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+				getNumSeqs(inFASTA, numFastaSeqs);
 				inFASTA.close();
 				
 				lines.push_back(new linePair(0, numFastaSeqs));
@@ -472,7 +472,7 @@ int AlignCommand::execute(){
 	#else
 			ifstream inFASTA;
 			openInputFile(candidateFileNames[s], inFASTA);
-			numFastaSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+			getNumSeqs(inFASTA, numFastaSeqs);
 			inFASTA.close();
 			
 			lines.push_back(new linePair(0, numFastaSeqs));

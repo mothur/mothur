@@ -304,7 +304,7 @@ int ChimeraCcodeCommand::execute(){
 			if(processors == 1){
 				ifstream inFASTA;
 				openInputFile(fastafile, inFASTA);
-				numSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+				getNumSeqs(inFASTA, numSeqs);
 				inFASTA.close();
 				
 				lines.push_back(new linePair(0, numSeqs));
@@ -393,7 +393,7 @@ int ChimeraCcodeCommand::execute(){
 		#else
 			ifstream inFASTA;
 			openInputFile(fastafile, inFASTA);
-			numSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+			getNumSeqs(inFASTA, numSeqs);
 			inFASTA.close();
 			lines.push_back(new linePair(0, numSeqs));
 			

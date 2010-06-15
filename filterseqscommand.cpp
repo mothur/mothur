@@ -336,8 +336,9 @@ int FilterSeqsCommand::filterSequences() {
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				if(processors == 1){
 					ifstream inFASTA;
+					int numFastaSeqs;
 					openInputFile(fastafileNames[s], inFASTA);
-					int numFastaSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+					getNumSeqs(inFASTA, numFastaSeqs);
 					inFASTA.close();
 					
 					lines.push_back(new linePair(0, numFastaSeqs));
@@ -361,8 +362,9 @@ int FilterSeqsCommand::filterSequences() {
 				if (m->control_pressed) {  return 1; }
 		#else
 				ifstream inFASTA;
+				int numFastaSeqs;
 				openInputFile(fastafileNames[s], inFASTA);
-				int numFastaSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+				getNumSeqs(inFASTA, numFastaSeqs);
 				inFASTA.close();
 					
 				lines.push_back(new linePair(0, numFastaSeqs));
@@ -625,8 +627,9 @@ string FilterSeqsCommand::createFilter() {
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				if(processors == 1){
 					ifstream inFASTA;
+					int numFastaSeqs;
 					openInputFile(fastafileNames[s], inFASTA);
-					int numFastaSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+					getNumSeqs(inFASTA, numFastaSeqs);
 					inFASTA.close();
 					
 					numSeqs += numFastaSeqs;
@@ -642,8 +645,9 @@ string FilterSeqsCommand::createFilter() {
 				if (m->control_pressed) {  return filterString; }
 		#else
 				ifstream inFASTA;
+				int numFastaSeqs;
 				openInputFile(fastafileNames[s], inFASTA);
-				int numFastaSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+				getNumSeqs(inFASTA, numFastaSeqs);
 				inFASTA.close();
 				
 				numSeqs += numFastaSeqs;

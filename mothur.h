@@ -633,6 +633,19 @@ inline int getNumSeqs(ifstream& file){
 
 }
 /***********************************************************************/
+inline void getNumSeqs(ifstream& file, int& numSeqs){
+	
+	string input;
+	numSeqs = 0;
+	while(!file.eof()){
+		input = getline(file);
+		if (input.length() != 0) {
+			if(input[0] == '>'){ numSeqs++;	}
+		}
+	}
+}
+
+/***********************************************************************/
 
 inline bool inVector(string member, vector<string> group){
 	
