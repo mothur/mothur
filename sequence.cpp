@@ -54,29 +54,34 @@ Sequence::Sequence(istringstream& fastaString){
 	
 		initialize();
 		fastaString >> name;
-		name = name.substr(1);
-		string sequence;
-	
-		//read comments
-		while ((name[0] == '#') && fastaString) { 
-			while (!fastaString.eof())	{	char c = fastaString.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-			sequence = getCommentString(fastaString);
-			
-			if (fastaString) {  
-				fastaString >> name;  
-				name = name.substr(1);	
-			}else { 
-				name = "";
-				break;
+		
+		if (name.length() != 0) { 
+		
+			name = name.substr(1);
+			string sequence;
+		
+			//read comments
+			while ((name[0] == '#') && fastaString) { 
+				while (!fastaString.eof())	{	char c = fastaString.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+				sequence = getCommentString(fastaString);
+				
+				if (fastaString) {  
+					fastaString >> name;  
+					name = name.substr(1);	
+				}else { 
+					name = "";
+					break;
+				}
 			}
-		}
-		
-		while (!fastaString.eof())	{	char c = fastaString.get();  if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-		
-		sequence = getSequenceString(fastaString);		
-		setAligned(sequence);	
-		//setUnaligned removes any gap characters for us						
-		setUnaligned(sequence);		
+			
+			while (!fastaString.eof())	{	char c = fastaString.get();  if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+			
+			sequence = getSequenceString(fastaString);		
+			setAligned(sequence);	
+			//setUnaligned removes any gap characters for us						
+			setUnaligned(sequence);		
+		}else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaString.tellg()) + ". Blank name."); m->mothurOutEndLine(); }
+
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Sequence", "Sequence");
@@ -91,29 +96,33 @@ Sequence::Sequence(istringstream& fastaString, string JustUnaligned){
 	
 		initialize();
 		fastaString >> name;
-		name = name.substr(1);
-		string sequence;
-	
-		//read comments
-		while ((name[0] == '#') && fastaString) { 
-			while (!fastaString.eof())	{	char c = fastaString.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-			sequence = getCommentString(fastaString);
-			
-			if (fastaString) {  
-				fastaString >> name;  
-				name = name.substr(1);	
-			}else { 
-				name = "";
-				break;
+		
+		if (name.length() != 0) { 
+		
+			name = name.substr(1);
+			string sequence;
+		
+			//read comments
+			while ((name[0] == '#') && fastaString) { 
+				while (!fastaString.eof())	{	char c = fastaString.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+				sequence = getCommentString(fastaString);
+				
+				if (fastaString) {  
+					fastaString >> name;  
+					name = name.substr(1);	
+				}else { 
+					name = "";
+					break;
+				}
 			}
-		}
-		
-		while (!fastaString.eof())	{	char c = fastaString.get();  if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-		
-		sequence = getSequenceString(fastaString);		
-		
-		//setUnaligned removes any gap characters for us						
-		setUnaligned(sequence);		
+			
+			while (!fastaString.eof())	{	char c = fastaString.get();  if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+			
+			sequence = getSequenceString(fastaString);		
+			
+			//setUnaligned removes any gap characters for us						
+			setUnaligned(sequence);		
+		}else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaString.tellg()) + ". Blank name."); m->mothurOutEndLine(); }
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Sequence", "Sequence");
@@ -158,7 +167,7 @@ Sequence::Sequence(ifstream& fastaFile){
 			setAligned(sequence);	
 			//setUnaligned removes any gap characters for us						
 			setUnaligned(sequence);	
-		}
+		}else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); }
 		
 	}
 	catch(exception& e) {
@@ -173,30 +182,34 @@ Sequence::Sequence(ifstream& fastaFile, string JustUnaligned){
 		m = MothurOut::getInstance();
 		initialize();
 		fastaFile >> name;
-		name = name.substr(1);
-		string sequence;
 		
-		//read comments
-		while ((name[0] == '#') && fastaFile) { 
-			while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-			sequence = getCommentString(fastaFile);
+		if (name.length() != 0) { 
+			name = name.substr(1);
+			string sequence;
 			
-			if (fastaFile) {  
-				fastaFile >> name;  
-				name = name.substr(1);	
-			}else { 
-				name = "";
-				break;
+			//read comments
+			while ((name[0] == '#') && fastaFile) { 
+				while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+				sequence = getCommentString(fastaFile);
+				
+				if (fastaFile) {  
+					fastaFile >> name;  
+					name = name.substr(1);	
+				}else { 
+					name = "";
+					break;
+				}
 			}
-		}
-		
-		//read real sequence
-		while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
-		
-		sequence = getSequenceString(fastaFile);		
-		
-		//setUnaligned removes any gap characters for us						
-		setUnaligned(sequence);	
+			
+			//read real sequence
+			while (!fastaFile.eof())	{	char c = fastaFile.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
+			
+			sequence = getSequenceString(fastaFile);		
+			
+			//setUnaligned removes any gap characters for us						
+			setUnaligned(sequence);	
+		}else{ m->mothurOut("Error in reading your fastafile, at position " + toString(fastaFile.tellg()) + ". Blank name."); m->mothurOutEndLine(); }
+
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Sequence", "Sequence");
