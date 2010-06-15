@@ -114,7 +114,7 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 
 void ClassifyOtuCommand::help(){
 	try {
-		m->mothurOut("The classify.otu command parameters are list, taxonomy, name, cutoff, and label.  The taxonomy and list parameters are required.\n");
+		m->mothurOut("The classify.otu command parameters are list, taxonomy, name, cutoff, label and probs.  The taxonomy and list parameters are required.\n");
 		m->mothurOut("The name parameter allows you add a names file with your taxonomy file.\n");
 		m->mothurOut("The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n");
 		m->mothurOut("The default value for label is all labels in your inputfile.\n");

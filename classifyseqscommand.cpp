@@ -470,7 +470,7 @@ int ClassifySeqsCommand::execute(){
 			if(processors == 1){
 				ifstream inFASTA;
 				openInputFile(fastaFileNames[s], inFASTA);
-				numFastaSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+				getNumSeqs(inFASTA, numFastaSeqs);
 				inFASTA.close();
 				
 				lines.push_back(new linePair(0, numFastaSeqs));
@@ -520,7 +520,7 @@ int ClassifySeqsCommand::execute(){
 	#else
 			ifstream inFASTA;
 			openInputFile(fastaFileNames[s], inFASTA);
-			numFastaSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+			getNumSeqs(inFASTA, numFastaSeqs);
 			inFASTA.close();
 			
 			lines.push_back(new linePair(0, numFastaSeqs));

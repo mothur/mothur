@@ -97,7 +97,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 		if (method == "suffix") {
 			ifstream inFASTA;
 			openInputFile(tempFile, inFASTA);
-			numSeqs = count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+			getNumSeqs(inFASTA, numSeqs);
 			inFASTA.close();
 		}
 

@@ -224,8 +224,9 @@ int TrimSeqsCommand::execute(){
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				if(processors == 1){
 					ifstream inFASTA;
+					int numSeqs;
 					openInputFile(fastaFile, inFASTA);
-					int numSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+					getNumSeqs(inFASTA, numSeqs);
 					inFASTA.close();
 					
 					lines.push_back(new linePair(0, numSeqs));
@@ -266,8 +267,9 @@ int TrimSeqsCommand::execute(){
 				if (m->control_pressed) {  return 0; }
 		#else
 				ifstream inFASTA;
+				int numSeqs;
 				openInputFile(fastaFile, inFASTA);
-				int numSeqs=count(istreambuf_iterator<char>(inFASTA),istreambuf_iterator<char>(), '>');
+				getNumSeqs(inFASTA, numSeqs);
 				inFASTA.close();
 				
 				lines.push_back(new linePair(0, numSeqs));
