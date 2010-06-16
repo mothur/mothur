@@ -138,7 +138,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 		}else if ((method == "kmer") && (!needToGenerate)) {	
 			ifstream kmerFileTest(kmerDBName.c_str());
 			database->readKmerDB(kmerFileTest);	
-			
+		
 			ifstream fastaFile;
 			openInputFile(tempFile, fastaFile);
 			
@@ -150,7 +150,8 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 			}
 			fastaFile.close();
 		}
-#endif		
+#endif	
+	
 		database->setNumSeqs(names.size());
 		
 		//sanity check
