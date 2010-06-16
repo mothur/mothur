@@ -20,7 +20,7 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"name","group","label","accnos","groups","fasta","cutoff","outputdir","inputdir"}; //"list",
+			string Array[] =  {"name","group","list","label","accnos","groups","fasta","cutoff","outputdir","inputdir"}; //
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);

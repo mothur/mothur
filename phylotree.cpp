@@ -598,7 +598,7 @@ bool PhyloTree::ErrorCheck(vector<string> templateFileNames){
 		for (int i = 0; i < templateFileNames.size(); i++) {
 			itFind = taxonomyFileNames.find(templateFileNames[i]);
 			
-			if (itFind != name2Taxonomy.end()) { //found it so erase it
+			if (itFind != taxonomyFileNames.end()) { //found it so erase it
 				taxonomyFileNames.erase(itFind);
 			}else {
 				m->mothurOut(templateFileNames[i] + " is in your template file and is not in your taxonomy file. Please correct."); m->mothurOutEndLine();
