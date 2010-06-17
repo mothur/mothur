@@ -196,20 +196,20 @@ int Pintail::doPrep() {
 					}
 				}else{
 					
-					sort(quantilesMembers[i].begin(), quantilesMembers[i].end(), compareQuanMembers);
+					sort(quantilesMembers[i].begin(), quantilesMembers[i].end());
 					
 					//save 10%
-					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.10)].score);
+					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.10)]);
 					//save 25%
-					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.25)].score);
+					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.25)]);
 					//save 50%
-					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.5)].score);
+					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.5)]);
 					//save 75%
-					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.75)].score);
+					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.75)]);
 					//save 95%
-					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.95)].score);
+					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.95)]);
 					//save 99%
-					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.99)].score);
+					temp.push_back(quantilesMembers[i][int(quantilesMembers[i].size() * 0.99)]);
 					
 				}
 				
@@ -223,6 +223,9 @@ int Pintail::doPrep() {
 			}
 			
 			printQuanFile(noOutliers, outputString);
+			
+			//free memory
+			quantilesMembers.clear();
 			
 			m->mothurOut("Done."); m->mothurOutEndLine();
 		}
@@ -544,7 +547,7 @@ void Pintail::createProcessesQuan() {
 				for (int i = 0; i < quantilesMembers.size(); i++) {
 					out << quantilesMembers[i].size() << '\t';
 					for (int j = 0; j < quantilesMembers[i].size(); j++) {
-						out << quantilesMembers[i][j].score << '\t' << quantilesMembers[i][j].member1 << '\t' << quantilesMembers[i][j].member2 << '\t';
+						out << quantilesMembers[i][j] << '\t';
 					}
 					out << endl;
 				}
@@ -567,25 +570,23 @@ void Pintail::createProcessesQuan() {
 			string s = toString(processIDS[i]) + ".temp";
 			openInputFile(s, in);
 			
-			vector< vector<quanMember> > quan; 
+			vector< vector<float> > quan; 
 			quan.resize(100);
 			
 			//get quantiles
-			for (int m = 0; m < quan.size(); m++) {
+			for (int h = 0; h < quan.size(); h++) {
 				int num;
 				in >> num; 
 				
 				gobble(in);
 
-				vector<quanMember> q;  float w; int b, n;
+				vector<float> q;  float w; 
 				for (int j = 0; j < num; j++) {
-					in >> w >> b >> n;
-	
-					quanMember newMember(w, b, n);
-					q.push_back(newMember);
+					in >> w;
+					q.push_back(w);
 				}
 
-				quan[m] = q;
+				quan[h] = q;
 				gobble(in);
 			}
 			
