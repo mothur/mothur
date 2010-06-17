@@ -47,7 +47,7 @@ class DeCalculator {
 		void runMask(Sequence*);
 		void trimSeqs(Sequence*, Sequence*, map<int, int>&);
 		map<int, int> trimSeqs(Sequence*, vector<Sequence*>);
-		void removeObviousOutliers(vector< vector<quanMember> >&, int);
+		void removeObviousOutliers(vector< vector<float> >&, int);
 		vector<float> calcFreq(vector<Sequence*>, string);
 		vector<int> findWindows(Sequence*, int, int, int&, int);
 		vector<float> calcObserved(Sequence*, Sequence*, vector<int>, int);
@@ -56,7 +56,7 @@ class DeCalculator {
 		float calcDE(vector<float>, vector<float>);
 		float calcDist(Sequence*, Sequence*, int, int);
 		float getCoef(vector<float>, vector<float>);
-		vector< vector<quanMember> > getQuantiles(vector<Sequence*>, vector<int>, int, vector<float>, int, int, int);
+		vector< vector<float> > getQuantiles(vector<Sequence*>, vector<int>, int, vector<float>, int, int, int);
 		
 		vector<int> returnObviousOutliers(vector< vector<quanMember> >, int);
 		

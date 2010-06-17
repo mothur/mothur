@@ -381,9 +381,9 @@ vector<float>  DeCalculator::findQav(vector<int> window, int size, vector<float>
 }
 //***************************************************************************************************************
 //seqs have already been masked
-vector< vector<quanMember> > DeCalculator::getQuantiles(vector<Sequence*> seqs, vector<int> windowSizesTemplate, int window, vector<float> probProfile, int increment, int start, int end) {
+vector< vector<float> > DeCalculator::getQuantiles(vector<Sequence*> seqs, vector<int> windowSizesTemplate, int window, vector<float> probProfile, int increment, int start, int end) {
 	try {
-		vector< vector<quanMember> > quan; 
+		vector< vector<float> > quan; 
 		
 		//percentage of mismatched pairs 1 to 100
 		quan.resize(100);
@@ -428,9 +428,9 @@ vector< vector<quanMember> > DeCalculator::getQuantiles(vector<Sequence*> seqs, 
 	//cout << i << '\t' <<  j << '\t' << dist << '\t' << de << endl;			
 				dist = ceil(dist);
 				
-				quanMember newScore(de, i, j);
+				//quanMember newScore(de, i, j);
 				
-				quan[dist].push_back(newScore);
+				quan[dist].push_back(de);
 
 				delete subject;
 			}
@@ -454,23 +454,23 @@ inline bool compareQuanMembers(quanMember left, quanMember right){
 } 
 //***************************************************************************************************************
 //this was going to be used by pintail to increase the sensitivity of the chimera detection, but it wasn't quite right.  may want to revisit in the future...
-void DeCalculator::removeObviousOutliers(vector< vector<quanMember> >& quantiles, int num) {
+void DeCalculator::removeObviousOutliers(vector< vector<float> >& quantiles, int num) {
 	try {
 						
 		for (int i = 0; i < quantiles.size(); i++) {
 			
 			//find mean of this quantile score
-			sort(quantiles[i].begin(), quantiles[i].end(), compareQuanMembers);
+			sort(quantiles[i].begin(), quantiles[i].end());
 			
-			vector<quanMember> temp;
+			vector<float> temp;
 			if (quantiles[i].size() != 0) {
-				float high = quantiles[i][int(quantiles[i].size() * 0.99)].score;
-				float low =  quantiles[i][int(quantiles[i].size() * 0.01)].score;
+				float high = quantiles[i][int(quantiles[i].size() * 0.99)];
+				float low =  quantiles[i][int(quantiles[i].size() * 0.01)];
 			
 				//look at each value in quantiles to see if it is an outlier
 				for (int j = 0; j < quantiles[i].size(); j++) {
 					//is this score between 1 and 99%
-					if ((quantiles[i][j].score > low) && (quantiles[i][j].score < high)) {
+					if ((quantiles[i][j] > low) && (quantiles[i][j] < high)) {
 						temp.push_back(quantiles[i][j]);
 					}
 				}
