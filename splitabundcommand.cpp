@@ -278,6 +278,9 @@ int SplitAbundCommand::execute(){
 			
 			for (map<string, bool>::iterator itBool = wroteListFile.begin(); itBool != wroteListFile.end(); itBool++) {
 				string filename = fileroot + itBool->first;
+				if ((itBool->first == "rare") || (itBool->first == "abund")) {
+					filename = fileroot + itBool->first + ".list";
+				}
 				if (itBool->second) { //we wrote to this file
 					outputNames.push_back(filename);
 				}else{
@@ -373,17 +376,17 @@ int SplitAbundCommand::writeList(ListVector* thisList) {
 			ofstream rout;
 			
 			if (rareNames.size() != 0) {
-				string rare = outputDir + getRootName(getSimpleName(listfile))  + ".rare.list";
+				string rare = outputDir + getRootName(getSimpleName(listfile))  + "rare.list";
 				wroteListFile["rare"] = true;
 				openOutputFileAppend(rare, rout);
 				rout << thisList->getLabel() << '\t' << numRareBins << '\t';
 			}
 			
 			if (abundNames.size() != 0) {
-				string abund = outputDir + getRootName(getSimpleName(listfile))  + ".abund.list";
+				string abund = outputDir + getRootName(getSimpleName(listfile))  + "abund.list";
 				wroteListFile["abund"] = true;
 				openOutputFileAppend(abund, aout);
-				rout << thisList->getLabel() << '\t' << numAbundBins << '\t';
+				aout << thisList->getLabel() << '\t' << numAbundBins << '\t';
 			}
 
 			for (int i = 0; i < thisList->getNumBins(); i++) {
