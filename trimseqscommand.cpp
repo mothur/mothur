@@ -652,7 +652,7 @@ int TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
 						maxLength = it->first.length();
 					}
 				}
-				alignment = new NeedlemanOverlap(-2.0, 1.0, -1.0, (maxLength+bdiffs+1));  
+				alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxLength+bdiffs+1));  
 
 			}else{ alignment = NULL; } 
 			
@@ -686,6 +686,9 @@ int TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
 				
 				int newStart=0;
 				int numDiff = countDiffs(oligo, temp);
+				
+//				cout << oligo << '\t' << temp << '\t' << numDiff << endl;				
+				
 				if(numDiff < minDiff){
 					minDiff = numDiff;
 					minCount = 1;
@@ -766,7 +769,7 @@ int TrimSeqsCommand::stripForward(Sequence& seq){
 						maxLength = forPrimer[i].length();
 					}
 				}
-				alignment = new NeedlemanOverlap(-2.0, 1.0, -1.0, (maxLength+pdiffs+1));  
+				alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxLength+pdiffs+1));  
 
 			}else{ alignment = NULL; } 
 			
