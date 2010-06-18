@@ -463,7 +463,7 @@ mothur : \
 		./logsd.o\
 		./geom.o\
 		./setlogfilecommand.o\
-		-o mothur
+		-o ../Release/mothur
 
 clean : 
 		rm \
