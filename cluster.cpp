@@ -17,6 +17,7 @@
 Cluster::Cluster(RAbundVector* rav, ListVector* lv, SparseMatrix* dm, float c, string f) :
 rabund(rav), list(lv), dMatrix(dm), method(f)
 {
+	try {
 /*
 	cout << "sizeof(MatData): " << sizeof(MatData) << endl;
 	cout << "sizeof(PCell*): " << sizeof(PCell*) << endl;
@@ -66,6 +67,12 @@ rabund(rav), list(lv), dMatrix(dm), method(f)
 	//save so you can modify as it changes in average neighbor
 	cutoff = c;
 	m = MothurOut::getInstance();
+	
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Cluster", "Cluster");
+		exit(1);
+	}
 }
 
 /***********************************************************************/

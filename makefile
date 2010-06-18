@@ -11,10 +11,17 @@
 #
 
 CC = g++ 
-CC_OPTIONS = -O3
+CC_OPTIONS = -O3 
 
 # if you do not want to use the readline library set to no, default yes.
 # make sure you have the library installed
+
+64BIT_VERSION ?= yes
+
+ifeq  ($(strip $(64BIT_VERSION)),yes)
+    CC_OPTIONS += -arch x86_64
+	LNK_OPTIONS += -arch x86_64
+endif
 
 USEREADLINE ?= yes
 
