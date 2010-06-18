@@ -591,7 +591,7 @@ void TrimSeqsCommand::getOligos(vector<string>& outFASTAVec){ //vector<ofstream*
 						outputNames.push_back((outputDir + getRootName(getSimpleName(fastaFile)) + toString(index) + "." + group + ".fasta"));
 						outFASTAVec.push_back((outputDir + getRootName(getSimpleName(fastaFile)) + toString(index) + "." + group + ".fasta"));
 					}
-				}
+				}else{	m->mothurOut(type + " is not recognized as a valid type. Choices are forward, reverse, and barcode. Ignoring " + oligo + "."); m->mothurOutEndLine();  }
 			}
 		}
 		

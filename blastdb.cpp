@@ -29,23 +29,38 @@ gapOpen(gO), gapExtend(gE), match(m), misMatch(mM) {
 /**************************************************************************************************/
 
 BlastDB::BlastDB() : Database() {
-	
-	globaldata = GlobalData::getInstance();
-	count = 0;
+	try {
+		globaldata = GlobalData::getInstance();
+		count = 0;
 
-	int randNumber = rand();
-	dbFileName = toString(randNumber) + ".template.unaligned.fasta";
-	queryFileName = toString(randNumber) + ".candidate.unaligned.fasta";
-	blastFileName = toString(randNumber) + ".blast";
-
+		int randNumber = rand();
+		dbFileName = toString(randNumber) + ".template.unaligned.fasta";
+		queryFileName = toString(randNumber) + ".candidate.unaligned.fasta";
+		blastFileName = toString(randNumber) + ".blast";
+	}
+	catch(exception& e) {
+		m->errorOut(e, "BlastDB", "BlastDB");
+		exit(1);
+	}
 }
 
 /**************************************************************************************************/
 
 BlastDB::~BlastDB(){
-	remove(queryFileName.c_str());				//	let's clean stuff up and remove the temp files
-	remove(dbFileName.c_str());					//	let's clean stuff up and remove the temp files
-	remove(blastFileName.c_str());				//	let's clean stuff up and remove the temp files
+	try{
+		remove(queryFileName.c_str());				//	let's clean stuff up and remove the temp files
+		remove(dbFileName.c_str());					//	let's clean stuff up and remove the temp files
+		remove((dbFileName+".nsq").c_str());					//	let's clean stuff up and remove the temp files
+		remove((dbFileName+".nsi").c_str());					//	let's clean stuff up and remove the temp files
+		remove((dbFileName+".nsd").c_str());					//	let's clean stuff up and remove the temp files
+		remove((dbFileName+".nin").c_str());					//	let's clean stuff up and remove the temp files
+		remove((dbFileName+".nhr").c_str());					//	let's clean stuff up and remove the temp files
+		remove(blastFileName.c_str());				//	let's clean stuff up and remove the temp files
+	}
+	catch(exception& e) {
+		m->errorOut(e, "BlastDB", "~BlastDB");
+		exit(1);
+	}
 }
 /**************************************************************************************************/
 //assumes you have added all the template sequences using the addSequence function and run generateDB.
