@@ -146,7 +146,7 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 void SplitAbundCommand::help(){
 	try {
 		m->mothurOut("The split.abund command reads a fasta file and a list or a names file splits the sequences into rare and abundant groups. \n");
-		m->mothurOut("The split.abund command parameters are list, name, cutoff, group, label, groups and accnos.\n");
+		m->mothurOut("The split.abund command parameters are fasta, list, name, cutoff, group, label, groups, cutoff and accnos.\n");
 		m->mothurOut("The fasta and a list or name parameter are required, and you must provide a cutoff value.\n");
 		m->mothurOut("The cutoff parameter is used to qualify what is abundant and rare.\n");
 		m->mothurOut("The group parameter allows you to parse a group file into rare and abundant groups.\n");
@@ -155,8 +155,8 @@ void SplitAbundCommand::help(){
 		m->mothurOut("The groups parameter allows you to parse the files into rare and abundant files by group.  \n");
 		m->mothurOut("For example if you set groups=A-B-C, you will get a .A.abund, .A.rare, .B.abund, .B.rare, .C.abund, .C.rare files.  \n");
 		m->mothurOut("If you want .abund and .rare files for all groups, set groups=all.  \n");
-		m->mothurOut("The split.abund command should be used in the following format: split.abund(list=yourListFile, group=yourGroupFile, label=yourLabels, cutoff=yourCutoff).\n");
-		m->mothurOut("Example: split.abundt(list=abrecovery.fn.list, group=abrecovery.groups, label=0.03, cutoff=2).\n");
+		m->mothurOut("The split.abund command should be used in the following format: split.abund(fasta=yourFasta, list=yourListFile, group=yourGroupFile, label=yourLabels, cutoff=yourCutoff).\n");
+		m->mothurOut("Example: split.abund(fasta=abrecovery.fasta, list=abrecovery.fn.list, group=abrecovery.groups, label=0.03, cutoff=2).\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListfile).\n\n");
 
 	}

@@ -283,10 +283,13 @@ int TrimSeqsCommand::execute(){
 		for(int i=0;i<fastaFileNames.size();i++){
 			ifstream inFASTA;
 			string seqName;
-			openInputFile(getRootName(fastaFile) + groupVector[i] + ".fasta", inFASTA);
+			//openInputFile(getRootName(fastaFile) +  groupVector[i] + ".fasta", inFASTA);
+			openInputFile(fastaFileNames[i], inFASTA);
 			ofstream outGroups;
-			openOutputFile(outputDir + getRootName(getSimpleName(fastaFile)) + groupVector[i] + ".groups", outGroups);
-			outputNames.push_back(outputDir + getRootName(getSimpleName(fastaFile)) + groupVector[i] + ".groups");
+			string outGroupFilename = outputDir + getRootName(getSimpleName(fastaFileNames[i])) + "groups";
+			openOutputFile(outGroupFilename, outGroups);
+			//openOutputFile(outputDir + getRootName(getSimpleName(fastaFile)) + groupVector[i] + ".groups", outGroups);
+			outputNames.push_back(outGroupFilename);
 			
 			while(!inFASTA.eof()){
 				if(inFASTA.get() == '>'){
@@ -353,15 +356,8 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 		for(int i=0;i<line->num;i++){
 				
 			if (m->control_pressed) { 
-				inFASTA.close(); 
-				outFASTA.close();
-				scrapFASTA.close();
-				if (oligoFile != "") {	 outGroups.close();   }
-				if(qFileName != "")	{	qFile.close();	}
-				for(int i=0;i<fastaFileNames.size();i++){
-					fastaFileNames[i]->close();
-					delete fastaFileNames[i];
-				}	
+				inFASTA.close(); outFASTA.close(); scrapFASTA.close(); if (oligoFile != "") {	 outGroups.close();   } if(qFileName != "")	{	qFile.close();	}
+				for(int i=0;i<fastaFileNames.size();i++){  fastaFileNames[i]->close(); delete fastaFileNames[i];  }	
 				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
 				return 0;
 			}
@@ -587,13 +583,13 @@ void TrimSeqsCommand::getOligos(vector<string>& outFASTAVec){ //vector<ofstream*
 				}
 				else if(type == "barcode"){
 					inOligos >> group;
-					barcodes[oligo]=index++;
+					barcodes[oligo]=index; index++;
 					groupVector.push_back(group);
 					
 					if(allFiles){
 						//outFASTAVec.push_back(new ofstream((outputDir + getRootName(getSimpleName(fastaFile)) + group + ".fasta").c_str(), ios::ate));
-						outputNames.push_back((outputDir + getRootName(getSimpleName(fastaFile)) + group + ".fasta"));
-						outFASTAVec.push_back((outputDir + getRootName(getSimpleName(fastaFile)) + group + ".fasta"));
+						outputNames.push_back((outputDir + getRootName(getSimpleName(fastaFile)) + toString(index) + "." + group + ".fasta"));
+						outFASTAVec.push_back((outputDir + getRootName(getSimpleName(fastaFile)) + toString(index) + "." + group + ".fasta"));
 					}
 				}
 			}
