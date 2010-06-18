@@ -34,9 +34,9 @@ void ChimeraReAligner::reAlign(Sequence* query, vector<results> parents) {
 
 			//take query and break apart into pieces using breakpoints given by results of parents
 			for (int i = 0; i < parents.size(); i++) {
-			
 				int length = parents[i].nastRegionEnd - parents[i].nastRegionStart+1;
 				string q = qAligned.substr(parents[i].nastRegionStart, length);
+	
 				Sequence* queryFrag = new Sequence(query->getName(), q);
 
 				queryParts.push_back(queryFrag);
@@ -55,10 +55,13 @@ void ChimeraReAligner::reAlign(Sequence* query, vector<results> parents) {
 
 			//align each peice to correct parent from results
 			for (int i = 0; i < queryParts.size(); i++) {
-				alignment = new NeedlemanOverlap(-2.0, match, misMatch, longest+1); //default gapopen, match, mismatch, longestbase
+				if ((queryParts[i]->getUnaligned() == "") || (parentParts[i]->getUnaligned() == "")) {;}
+				else {
+					alignment = new NeedlemanOverlap(-2.0, match, misMatch, longest+1); //default gapopen, match, mismatch, longestbase
 				
-				Nast nast(alignment, queryParts[i], parentParts[i]);
-				delete alignment;
+					Nast nast(alignment, queryParts[i], parentParts[i]);
+					delete alignment;
+				}
 			}
 
 			//recombine pieces to form new query sequence
@@ -78,7 +81,7 @@ void ChimeraReAligner::reAlign(Sequence* query, vector<results> parents) {
 			
 			//make sure you don't cutoff end of query 
 			if (parents[parents.size()-1].nastRegionEnd < (qAligned.length()-1)) {  newQuery += qAligned.substr(parents[parents.size()-1].nastRegionEnd+1);  }
-		
+			
 			//set query to new aligned string
 			query->setAligned(newQuery);
 
