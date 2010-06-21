@@ -46,8 +46,10 @@ private:
 	string fastafile, templatefile, namefile, outputDir;
 	int processors, increment, ksize, numSeqs, templateSeqsLength;
 	Chimera* chimera;
-	
-	
+	vector<string> fastaFileNames;
+	vector<string> nameFileNames;
+	vector<string> outputNames;
+		
 };
 
 /***********************************************************/

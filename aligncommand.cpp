@@ -267,26 +267,14 @@ int AlignCommand::execute(){
 				int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
 				int inMode=MPI_MODE_RDONLY; 
 				
-				//char* outAlignFilename = new char[alignFileName.length()];
-				//memcpy(outAlignFilename, alignFileName.c_str(), alignFileName.length());
-				
 				char outAlignFilename[1024];
 				strcpy(outAlignFilename, alignFileName.c_str());
-
-				//char* outReportFilename = new char[reportFileName.length()];
-				//memcpy(outReportFilename, reportFileName.c_str(), reportFileName.length());
 				
 				char outReportFilename[1024];
 				strcpy(outReportFilename, reportFileName.c_str());
-
-				//char* outAccnosFilename = new char[accnosFileName.length()];
-				//memcpy(outAccnosFilename, accnosFileName.c_str(), accnosFileName.length());
 				
 				char outAccnosFilename[1024];
 				strcpy(outAccnosFilename, accnosFileName.c_str());
-
-				//char* inFileName = new char[candidateFileNames[s].length()];
-				//memcpy(inFileName, candidateFileNames[s].c_str(), candidateFileNames[s].length());
 				
 				char inFileName[1024];
 				strcpy(inFileName, candidateFileNames[s].c_str());

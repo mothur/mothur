@@ -44,9 +44,11 @@ private:
 	#endif
 
 	bool abort, filter, MPIWroteAccnos;
-	string fastafile, templatefile, consfile, quanfile, maskfile, outputDir;
+	string fastafile, templatefile, consfile, quanfile, maskfile, outputDir, inputDir;
 	int processors, window, increment, numSeqs, templateSeqsLength;
 	Chimera* chimera;
+	vector<string> outputNames;
+	vector<string> fastaFileNames;
 	
 	
 };

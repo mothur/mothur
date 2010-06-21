@@ -48,6 +48,8 @@ private:
 	float divR;
 	Chimera* chimera;
 	
+	vector<string> outputNames;
+	vector<string> fastaFileNames;
 	
 };
 

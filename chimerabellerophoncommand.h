@@ -30,6 +30,8 @@ private:
 	string fastafile, outputDir;
 	int processors, window, increment, numSeqs;
 	Chimera* chimera;
+	vector<string> outputNames;
+	vector<string> fastaFileNames;
 };
 
 /***********************************************************/
