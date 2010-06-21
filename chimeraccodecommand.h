@@ -46,6 +46,8 @@ private:
 	string fastafile, templatefile, outputDir, maskfile;
 	int processors, window, numwanted, numSeqs, templateSeqsLength;
 	Chimera* chimera;
+	vector<string> fastaFileNames;
+	vector<string> outputNames;
 	
 	
 };

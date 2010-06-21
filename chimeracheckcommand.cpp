@@ -39,51 +39,128 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
-				string path;
-				it = parameters.find("fasta");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
-				}
-				
 				it = parameters.find("template");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					string path = hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["template"] = inputDir + it->second;		}
 				}
-				
-				it = parameters.find("name");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["name"] = inputDir + it->second;		}
-				}
 			}
-
 			
 			//check for required parameters
-			fastafile = validParameter.validFile(parameters, "fasta", true);
-			if (fastafile == "not open") { abort = true; }
-			else if (fastafile == "not found") { fastafile = ""; m->mothurOut("fasta is a required parameter for the chimera.check command."); m->mothurOutEndLine(); abort = true;  }	
+			fastafile = validParameter.validFile(parameters, "fasta", false);
+			if (fastafile == "not found") { fastafile = ""; m->mothurOut("fasta is a required parameter for the chimera.check command."); m->mothurOutEndLine(); abort = true;  }
+			else { 
+				splitAtDash(fastafile, fastaFileNames);
+				
+				//go through files and make sure they are good, if not, then disregard them
+				for (int i = 0; i < fastaFileNames.size(); i++) {
+					if (inputDir != "") {
+						string path = hasPath(fastaFileNames[i]);
+						//if the user has not given a path then, add inputdir. else leave path alone.
+						if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
+					}
+	
+					int ableToOpen;
+					ifstream in;
+					
+					#ifdef USE_MPI	
+						int pid;
+						MPI_Comm_size(MPI_COMM_WORLD, &processors); //set processors to the number of mpi processes running
+						MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+				
+						if (pid == 0) {
+					#endif
+
+					ableToOpen = openInputFile(fastaFileNames[i], in);
+					in.close();
+					
+					#ifdef USE_MPI	
+							for (int j = 1; j < processors; j++) {
+								MPI_Send(&ableToOpen, 1, MPI_INT, j, 2001, MPI_COMM_WORLD); 
+							}
+						}else{
+							MPI_Status status;
+							MPI_Recv(&ableToOpen, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
+						}
+						
+					#endif
+
+					if (ableToOpen == 1) { 
+						m->mothurOut(fastaFileNames[i] + " will be disregarded."); m->mothurOutEndLine(); 
+						//erase from file list
+						fastaFileNames.erase(fastaFileNames.begin()+i);
+						i--;
+					}
+				}
+				
+				//make sure there is at least one valid file left
+				if (fastaFileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
+			}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += hasPath(fastafile); //if user entered a file with a path then preserve it	
-			}
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
 
 			templatefile = validParameter.validFile(parameters, "template", true);
 			if (templatefile == "not open") { abort = true; }
 			else if (templatefile == "not found") { templatefile = "";  m->mothurOut("template is a required parameter for the chimera.check command."); m->mothurOutEndLine(); abort = true;  }	
 			
-			namefile = validParameter.validFile(parameters, "name", true);
-			if (namefile == "not open") { abort = true; }
-			else if (namefile == "not found") { namefile = "";  }
+			namefile = validParameter.validFile(parameters, "name", false);
+			if (namefile == "not found") { namefile = ""; }
+			else { 
+				splitAtDash(namefile, nameFileNames);
+				
+				//go through files and make sure they are good, if not, then disregard them
+				for (int i = 0; i < nameFileNames.size(); i++) {
+					if (inputDir != "") {
+						string path = hasPath(nameFileNames[i]);
+						//if the user has not given a path then, add inputdir. else leave path alone.
+						if (path == "") {	nameFileNames[i] = inputDir + nameFileNames[i];		}
+					}
+	
+					int ableToOpen;
+					ifstream in;
+					
+					#ifdef USE_MPI	
+						int pid;
+						MPI_Comm_size(MPI_COMM_WORLD, &processors); //set processors to the number of mpi processes running
+						MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+				
+						if (pid == 0) {
+					#endif
+
+					ableToOpen = openInputFile(nameFileNames[i], in);
+					in.close();
+					
+					#ifdef USE_MPI	
+							for (int j = 1; j < processors; j++) {
+								MPI_Send(&ableToOpen, 1, MPI_INT, j, 2001, MPI_COMM_WORLD); 
+							}
+						}else{
+							MPI_Status status;
+							MPI_Recv(&ableToOpen, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
+						}
+						
+					#endif
+
+					if (ableToOpen == 1) { 
+						m->mothurOut(nameFileNames[i] + " will be disregarded."); m->mothurOutEndLine(); 
+						//erase from file list
+						nameFileNames.erase(nameFileNames.begin()+i);
+						i--;
+					}
+					
+				}
+				
+				//make sure there is at least one valid file left
+				if (nameFileNames.size() != 0) {
+					if (nameFileNames.size() != fastaFileNames.size()) { 
+						 m->mothurOut("Different number of valid name files and fasta files, aborting command."); m->mothurOutEndLine(); 
+						 abort = true;
+					}
+				}
+			}
 
 			string temp = validParameter.validFile(parameters, "processors", false);		if (temp == "not found") { temp = "1"; }
 			convert(temp, processors);
@@ -93,6 +170,7 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "svg", false);				if (temp == "not found") { temp = "F"; }
 			svg = isTrue(temp);
+			if (nameFileNames.size() != 0) { svg = true; }
 			
 			temp = validParameter.validFile(parameters, "increment", false);		if (temp == "not found") { temp = "10"; }
 			convert(temp, increment);			
@@ -112,6 +190,7 @@ void ChimeraCheckCommand::help(){
 		m->mothurOut("This command was created using the algorythms described in CHIMERA_CHECK version 2.7 written by Niels Larsen. \n");
 		m->mothurOut("The chimera.check command parameters are fasta, template, processors, ksize, increment, svg and name.\n");
 		m->mothurOut("The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required. \n");
+		m->mothurOut("You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n");
 		m->mothurOut("The template parameter allows you to enter a template file containing known non-chimeric sequences, and is required. \n");
 		m->mothurOut("The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n");
 		#ifdef USE_MPI
@@ -121,6 +200,7 @@ void ChimeraCheckCommand::help(){
 		m->mothurOut("The ksize parameter allows you to input kmersize, default is 7. \n");
 		m->mothurOut("The svg parameter allows you to specify whether or not you would like a svg file outputted for each query sequence, default is False.\n");
 		m->mothurOut("The name parameter allows you to enter a file containing names of sequences you would like .svg files for.\n");
+		m->mothurOut("You may enter multiple name files by separating their names with dashes. ie. fasta=abrecovery.svg.names-amzon.svg.names \n");
 		m->mothurOut("The chimera.check command should be in the following format: \n");
 		m->mothurOut("chimera.check(fasta=yourFastaFile, template=yourTemplateFile, processors=yourProcessors, ksize=yourKmerSize) \n");
 		m->mothurOut("Example: chimera.check(fasta=AD.fasta, template=core_set_aligned,imputed.fasta, processors=4, ksize=8) \n");
@@ -143,197 +223,197 @@ int ChimeraCheckCommand::execute(){
 		
 		if (abort == true) { return 0; }
 		
-		int start = time(NULL);	
+		for (int i = 0; i < fastaFileNames.size(); i++) {
+				
+			m->mothurOut("Checking sequences from " + fastaFileNames[i] + " ..." ); m->mothurOutEndLine();
+			
+			int start = time(NULL);	
+			
+			string thisNameFile = "";
+			if (nameFileNames.size() != 0) { thisNameFile = nameFileNames[i]; }
+			
+			chimera = new ChimeraCheckRDP(fastaFileNames[i], templatefile, thisNameFile, svg, increment, ksize, outputDir);			
+
+			if (m->control_pressed) { delete chimera;	return 0;	}
+			
+			string outputFileName = outputDir + getRootName(getSimpleName(fastaFileNames[i]))  + "chimeracheck.chimeras";
+			outputNames.push_back(outputFileName);
+			
+		#ifdef USE_MPI
 		
-		chimera = new ChimeraCheckRDP(fastafile, templatefile, namefile, svg, increment, ksize, outputDir);			
-
-		if (m->control_pressed) { delete chimera;	return 0;	}
-		
-		string outputFileName = outputDir + getRootName(getSimpleName(fastafile))  + "chimeracheck.chimeras";
-		
-	#ifdef USE_MPI
-	
-			int pid, end, numSeqsPerProcessor; 
-			int tag = 2001;
-			vector<long> MPIPos;
-			
-			MPI_Status status; 
-			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-			MPI_Comm_size(MPI_COMM_WORLD, &processors); 
-
-			MPI_File inMPI;
-			MPI_File outMPI;
-						
-			int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
-			int inMode=MPI_MODE_RDONLY; 
-			
-			//char* outFilename = new char[outputFileName.length()];
-			//memcpy(outFilename, outputFileName.c_str(), outputFileName.length());
-			
-			char outFilename[1024];
-			strcpy(outFilename, outputFileName.c_str());
-
-			//char* inFileName = new char[fastafile.length()];
-			//memcpy(inFileName, fastafile.c_str(), fastafile.length());
-			
-			char inFileName[1024];
-			strcpy(inFileName, fastafile.c_str());
-
-			MPI_File_open(MPI_COMM_WORLD, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
-			MPI_File_open(MPI_COMM_WORLD, outFilename, outMode, MPI_INFO_NULL, &outMPI);
-			
-			//delete outFilename;
-			//delete inFileName;
-
-			if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);  delete chimera; return 0;  }
-			
-			if (pid == 0) { //you are the root process 
-				MPIPos = setFilePosFasta(fastafile, numSeqs); //fills MPIPos, returns numSeqs
+				int pid, end, numSeqsPerProcessor; 
+				int tag = 2001;
+				vector<long> MPIPos;
 				
-				//send file positions to all processes
-				for(int i = 1; i < processors; i++) { 
-					MPI_Send(&numSeqs, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-					MPI_Send(&MPIPos[0], (numSeqs+1), MPI_LONG, i, tag, MPI_COMM_WORLD);
-				}	
-				
-				//figure out how many sequences you have to align
-				numSeqsPerProcessor = numSeqs / processors;
-				int startIndex =  pid * numSeqsPerProcessor;
-				if(pid == (processors - 1)){	numSeqsPerProcessor = numSeqs - pid * numSeqsPerProcessor; 	}
-				
+				MPI_Status status; 
+				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+				MPI_Comm_size(MPI_COMM_WORLD, &processors); 
+
+				MPI_File inMPI;
+				MPI_File outMPI;
+							
+				int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
+				int inMode=MPI_MODE_RDONLY; 
+							
+				char outFilename[1024];
+				strcpy(outFilename, outputFileName.c_str());
 			
-				//align your part
-				driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, MPIPos);
+				char inFileName[1024];
+				strcpy(inFileName, fastaFileNames[i].c_str());
+
+				MPI_File_open(MPI_COMM_WORLD, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
+				MPI_File_open(MPI_COMM_WORLD, outFilename, outMode, MPI_INFO_NULL, &outMPI);
 				
-				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);  remove(outputFileName.c_str());  delete chimera; return 0;  }
+				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} delete chimera; return 0;  }
 				
-				//wait on chidren
-				for(int i = 1; i < processors; i++) { 
+				if (pid == 0) { //you are the root process 
+					MPIPos = setFilePosFasta(fastaFileNames[i], numSeqs); //fills MPIPos, returns numSeqs
+					
+					//send file positions to all processes
+					for(int j = 1; j < processors; j++) { 
+						MPI_Send(&numSeqs, 1, MPI_INT, j, tag, MPI_COMM_WORLD);
+						MPI_Send(&MPIPos[0], (numSeqs+1), MPI_LONG, j, tag, MPI_COMM_WORLD);
+					}	
+					
+					//figure out how many sequences you have to align
+					numSeqsPerProcessor = numSeqs / processors;
+					int startIndex =  pid * numSeqsPerProcessor;
+					if(pid == (processors - 1)){	numSeqsPerProcessor = numSeqs - pid * numSeqsPerProcessor; 	}
+					
+				
+					//align your part
+					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, MPIPos);
+					
+					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}   delete chimera; return 0;  }
+					
+					//wait on chidren
+					for(int j = 1; j < processors; j++) { 
+						char buf[4];
+						MPI_Recv(buf, 4, MPI_CHAR, j, tag, MPI_COMM_WORLD, &status); 
+					}
+				}else{ //you are a child process
+					MPI_Recv(&numSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
+					MPIPos.resize(numSeqs+1);
+					MPI_Recv(&MPIPos[0], (numSeqs+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
+					
+					//figure out how many sequences you have to align
+					numSeqsPerProcessor = numSeqs / processors;
+					int startIndex =  pid * numSeqsPerProcessor;
+					if(pid == (processors - 1)){	numSeqsPerProcessor = numSeqs - pid * numSeqsPerProcessor; 	}
+					
+					//align your part
+					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, MPIPos);
+					
+					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  delete chimera; return 0;  }
+					
+					//tell parent you are done.
 					char buf[4];
-					MPI_Recv(buf, 4, MPI_CHAR, i, tag, MPI_COMM_WORLD, &status); 
+					strcpy(buf, "done"); 
+					MPI_Send(buf, 4, MPI_CHAR, 0, tag, MPI_COMM_WORLD);
 				}
-			}else{ //you are a child process
-				MPI_Recv(&numSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
-				MPIPos.resize(numSeqs+1);
-				MPI_Recv(&MPIPos[0], (numSeqs+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
 				
-				//figure out how many sequences you have to align
-				numSeqsPerProcessor = numSeqs / processors;
-				int startIndex =  pid * numSeqsPerProcessor;
-				if(pid == (processors - 1)){	numSeqsPerProcessor = numSeqs - pid * numSeqsPerProcessor; 	}
-				
-				
-				//align your part
-				driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, MPIPos);
-				
-				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   delete chimera; return 0;  }
-				
-				//tell parent you are done.
-				char buf[4];
-				strcpy(buf, "done"); 
-				MPI_Send(buf, 4, MPI_CHAR, 0, tag, MPI_COMM_WORLD);
-			}
+				//close files 
+				MPI_File_close(&inMPI);
+				MPI_File_close(&outMPI);
+				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
+		#else
 			
-			//close files 
-			MPI_File_close(&inMPI);
-			MPI_File_close(&outMPI);
-			MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-	#else
-		
-		//break up file
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-			if(processors == 1){
+			//break up file
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				if(processors == 1){
+					ifstream inFASTA;
+					openInputFile(fastaFileNames[i], inFASTA);
+					getNumSeqs(inFASTA, numSeqs);
+					inFASTA.close();
+					
+					lines.push_back(new linePair(0, numSeqs));
+					
+					driver(lines[0], outputFileName, fastaFileNames[i]);
+					
+					if (m->control_pressed) { 
+						for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} 
+						for (int j = 0; j < lines.size(); j++) {  delete lines[j];  }  lines.clear();
+						delete chimera;
+						return 0;
+					}
+									
+				}else{
+					vector<int> positions;
+					processIDS.resize(0);
+					
+					ifstream inFASTA;
+					openInputFile(fastaFileNames[i], inFASTA);
+					
+					string input;
+					while(!inFASTA.eof()){
+						input = getline(inFASTA);
+						if (input.length() != 0) {
+							if(input[0] == '>'){	long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
+						}
+					}
+					inFASTA.close();
+					
+					numSeqs = positions.size();
+					
+					int numSeqsPerProcessor = numSeqs / processors;
+					
+					for (int j = 0; j < processors; j++) {
+						long int startPos = positions[ j * numSeqsPerProcessor ];
+						if(j == processors - 1){
+							numSeqsPerProcessor = numSeqs - j * numSeqsPerProcessor;
+						}
+						lines.push_back(new linePair(startPos, numSeqsPerProcessor));
+					}
+					
+					
+					createProcesses(outputFileName, fastaFileNames[i]); 
+				
+					rename((outputFileName + toString(processIDS[0]) + ".temp").c_str(), outputFileName.c_str());
+						
+					//append output files
+					for(int j=1;j<processors;j++){
+						appendFiles((outputFileName + toString(processIDS[j]) + ".temp"), outputFileName);
+						remove((outputFileName + toString(processIDS[j]) + ".temp").c_str());
+					}
+					
+					if (m->control_pressed) { 
+						for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} 
+						for (int j = 0; j < lines.size(); j++) {  delete lines[j];  }  lines.clear();
+						delete chimera;
+						return 0;
+					}
+				}
+
+			#else
 				ifstream inFASTA;
-				openInputFile(fastafile, inFASTA);
+				openInputFile(fastaFileNames[i], inFASTA);
 				getNumSeqs(inFASTA, numSeqs);
 				inFASTA.close();
-				
 				lines.push_back(new linePair(0, numSeqs));
 				
-				driver(lines[0], outputFileName, fastafile);
+				driver(lines[0], outputFileName, fastaFileNames[i]);
 				
 				if (m->control_pressed) { 
-					remove(outputFileName.c_str()); 
-					for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-					delete chimera;
-					return 0;
+						for (int j = 0; j < lines.size(); j++) {  delete lines[j];  }  lines.clear();
+						for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} 
+						delete chimera;
+						return 0;
 				}
-								
-			}else{
-				vector<int> positions;
-				processIDS.resize(0);
-				
-				ifstream inFASTA;
-				openInputFile(fastafile, inFASTA);
-				
-				string input;
-				while(!inFASTA.eof()){
-					input = getline(inFASTA);
-					if (input.length() != 0) {
-						if(input[0] == '>'){	long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
-					}
-				}
-				inFASTA.close();
-				
-				numSeqs = positions.size();
-				
-				int numSeqsPerProcessor = numSeqs / processors;
-				
-				for (int i = 0; i < processors; i++) {
-					long int startPos = positions[ i * numSeqsPerProcessor ];
-					if(i == processors - 1){
-						numSeqsPerProcessor = numSeqs - i * numSeqsPerProcessor;
-					}
-					lines.push_back(new linePair(startPos, numSeqsPerProcessor));
-				}
-				
-				
-				createProcesses(outputFileName, fastafile); 
+			#endif
+		#endif		
+			delete chimera;
+			for (int j = 0; j < lines.size(); j++) {  delete lines[j];  }  lines.clear();
 			
-				rename((outputFileName + toString(processIDS[0]) + ".temp").c_str(), outputFileName.c_str());
-					
-				//append output files
-				for(int i=1;i<processors;i++){
-					appendFiles((outputFileName + toString(processIDS[i]) + ".temp"), outputFileName);
-					remove((outputFileName + toString(processIDS[i]) + ".temp").c_str());
-				}
-				
-				if (m->control_pressed) { 
-					remove(outputFileName.c_str()); 
-					for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-					delete chimera;
-					return 0;
-				}
-			}
+			m->mothurOutEndLine(); m->mothurOut("This method does not determine if a sequence is chimeric, but allows you to make that determination based on the IS values."); m->mothurOutEndLine(); 
+			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine(); m->mothurOutEndLine();
 
-		#else
-			ifstream inFASTA;
-			openInputFile(fastafile, inFASTA);
-			getNumSeqs(inFASTA, numSeqs);
-			inFASTA.close();
-			lines.push_back(new linePair(0, numSeqs));
-			
-			driver(lines[0], outputFileName, fastafile);
-			
-			if (m->control_pressed) { 
-					remove(outputFileName.c_str()); 
-					for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-					delete chimera;
-					return 0;
-			}
-		#endif
-	#endif		
-		delete chimera;
-		for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-		
-		m->mothurOutEndLine(); m->mothurOut("This method does not determine if a sequence is chimeric, but allows you to make that determination based on the IS values."); m->mothurOutEndLine(); 
+		}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		m->mothurOut(outputFileName); m->mothurOutEndLine();	
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}	
 		m->mothurOutEndLine();
-		m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine();
-
+	
 		return 0;
 		
 	}
