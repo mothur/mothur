@@ -80,6 +80,7 @@
 #include "splitabundcommand.h"
 #include "clustersplitcommand.h"
 #include "classifyotucommand.h"
+#include "degapseqscommand.h"
 
 /*******************************************************/
 
@@ -167,6 +168,7 @@ CommandFactory::CommandFactory(){
 	commands["split.abund"]			= "split.abund";
 	commands["cluster.split"]		= "cluster.split";
 	commands["classify.otu"]		= "classify.otu";
+	commands["degap.seqs"]			= "degap.seqs";
 	commands["classify.seqs"]		= "MPIEnabled"; 
 	commands["dist.seqs"]			= "MPIEnabled";
 	commands["filter.seqs"]			= "MPIEnabled";
@@ -291,6 +293,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "split.abund")			{	command = new SplitAbundCommand(optionString);				}
 		else if(commandName == "cluster.split")			{	command = new ClusterSplitCommand(optionString);			}
 		else if(commandName == "classify.otu")			{	command = new ClassifyOtuCommand(optionString);				}
+		else if(commandName == "degap.seqs")			{	command = new DegapSeqsCommand(optionString);				}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
