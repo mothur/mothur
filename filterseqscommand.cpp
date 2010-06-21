@@ -102,6 +102,9 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 			// ...at some point should added some additional type checking...
 			
 			string temp;
+			hard = validParameter.validFile(parameters, "hard", true);				if (hard == "not found") { hard = ""; }
+			else if (hard == "not open") { hard = ""; abort = true; }	
+
 			temp = validParameter.validFile(parameters, "trump", false);			if (temp == "not found") { temp = "*"; }
 			trump = temp[0];
 			
@@ -111,13 +114,13 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = "1";				}
 			convert(temp, processors); 
 			
-			hard = validParameter.validFile(parameters, "hard", true);				if (hard == "not found") { hard = ""; }
-			else if (hard == "not open") { abort = true; }	
-			
-			vertical = validParameter.validFile(parameters, "vertical", false);		if (vertical == "not found") { vertical = "T"; }
+			vertical = validParameter.validFile(parameters, "vertical", false);		
+			if (vertical == "not found") { 
+				if ((hard == "") && (trump == '*')) { vertical = "T"; } //you have not given a hard file or set the trump char.
+				else { vertical = "F";  }
+			}
 			
 			numSeqs = 0;
-			
 		}
 		
 	}
@@ -138,11 +141,11 @@ void FilterSeqsCommand::help(){
 		m->mothurOut("For example: fasta=abrecovery.fasta-amazon.fasta \n");
 		m->mothurOut("The trump parameter .... The default is ...\n");
 		m->mothurOut("The soft parameter .... The default is ....\n");
-		m->mothurOut("The hard parameter .... The default is ....\n");
-		m->mothurOut("The vertical parameter .... The default is T.\n");
+		m->mothurOut("The hard parameter allows you to enter a file containing the filter you want to use.\n");
+		m->mothurOut("The vertical parameter removes columns where all sequences contain a gap character. The default is T.\n");
 		m->mothurOut("The filter.seqs command should be in the following format: \n");
-		m->mothurOut("filter.seqs(fasta=yourFastaFile, trump=yourTrump, soft=yourSoft, hard=yourHard, vertical=yourVertical) \n");
-		m->mothurOut("Example filter.seqs(fasta=abrecovery.fasta, trump=..., soft=..., hard=..., vertical=T).\n");
+		m->mothurOut("filter.seqs(fasta=yourFastaFile, trump=yourTrump) \n");
+		m->mothurOut("Example filter.seqs(fasta=abrecovery.fasta, trump=.).\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
 		
 	}
@@ -256,23 +259,14 @@ int FilterSeqsCommand::filterSequences() {
 				int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
 				int inMode=MPI_MODE_RDONLY; 
 				
-				//char* outFilename = new char[filteredFasta.length()];
-				//memcpy(outFilename, filteredFasta.c_str(), filteredFasta.length());
-				
 				char outFilename[1024];
 				strcpy(outFilename, filteredFasta.c_str());
-
-				//char* inFileName = new char[fastafileNames[s].length()];
-				//memcpy(inFileName, fastafileNames[s].c_str(), fastafileNames[s].length());
-				
+			
 				char inFileName[1024];
 				strcpy(inFileName, fastafileNames[s].c_str());
 				
 				MPI_File_open(MPI_COMM_WORLD, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
 				MPI_File_open(MPI_COMM_WORLD, outFilename, outMode, MPI_INFO_NULL, &outMPI);
-				
-				//delete inFileName;
-				//delete outFilename;
 
 				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);  return 0;  }
 

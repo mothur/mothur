@@ -131,6 +131,7 @@ mothur : \
 		./listseqscommand.o\
 		./getseqscommand.o\
 		./removeseqscommand.o\
+		./degapseqscommand.o\
 		./systemcommand.o\
 		./binsequencecommand.o\
 		./distancecommand.o\
@@ -341,6 +342,7 @@ mothur : \
 		./listseqscommand.o\
 		./getseqscommand.o\
 		./removeseqscommand.o\
+		./degapseqscommand.o\
 		./systemcommand.o\
 		./binsequencecommand.o\
 		./distancecommand.o\
@@ -554,6 +556,7 @@ clean :
 		./listseqscommand.o\
 		./getseqscommand.o\
 		./removeseqscommand.o\
+		./degapseqscommand.o\
 		./systemcommand.o\
 		./binsequencecommand.o\
 		./distancecommand.o\
@@ -1718,5 +1721,9 @@ install : mothur
 # Item # 209 -- weightedlinkage --
 ./weightedlinkage.o : weightedlinkage.cpp
 	$(CC) $(CC_OPTIONS) weightedlinkage.cpp -c $(INCLUDE) -o ./weightedlinkage.o
+	
+# Item # 210 -- degapseqscommand --
+./degapseqscommand.o : degapseqscommand.cpp
+	$(CC) $(CC_OPTIONS) degapseqscommand.cpp -c $(INCLUDE) -o ./degapseqscommand.o
 
 ##### END RUN ####

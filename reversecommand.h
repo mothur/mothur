@@ -10,7 +10,6 @@
  *
  */
 
-#include "mothur.h"
 #include "command.hpp"
 
 class ReverseSeqsCommand : public Command {

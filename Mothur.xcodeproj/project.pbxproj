@@ -10,6 +10,8 @@
 		7EC61A0911BEA6AF00F668D9 /* weightedlinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = weightedlinkage.cpp; sourceTree = "<group>"; };
 		A703FE931194645F002C397E /* makegroupcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = makegroupcommand.h; sourceTree = SOURCE_ROOT; };
 		A703FE941194645F002C397E /* makegroupcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = makegroupcommand.cpp; sourceTree = SOURCE_ROOT; };
+		A7118EE511CFCAC000CFDE03 /* degapseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = degapseqscommand.h; sourceTree = "<group>"; };
+		A7118EE611CFCAC000CFDE03 /* degapseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = degapseqscommand.cpp; sourceTree = "<group>"; };
 		A71D924211AEB42400D00CBC /* clustersplitcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clustersplitcommand.cpp; sourceTree = "<group>"; };
 		A71D924311AEB42400D00CBC /* clustersplitcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clustersplitcommand.h; sourceTree = "<group>"; };
 		A71D924411AEB42400D00CBC /* splitabundcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = splitabundcommand.cpp; sourceTree = "<group>"; };
@@ -690,6 +692,8 @@
 				A7DA202A113FECD400BF472F /* collectsharedcommand.h */,
 				A7DA2031113FECD400BF472F /* consensuscommand.cpp */,
 				A7DA2032113FECD400BF472F /* consensuscommand.h */,
+				A7118EE511CFCAC000CFDE03 /* degapseqscommand.h */,
+				A7118EE611CFCAC000CFDE03 /* degapseqscommand.cpp */,
 				A7DA203A113FECD400BF472F /* deconvolutecommand.cpp */,
 				A7DA203B113FECD400BF472F /* deconvolutecommand.h */,
 				A7DA203E113FECD400BF472F /* distancecommand.cpp */,
