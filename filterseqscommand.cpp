@@ -116,7 +116,7 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 			
 			vertical = validParameter.validFile(parameters, "vertical", false);		
 			if (vertical == "not found") { 
-				if ((hard == "") && (trump == '*')) { vertical = "T"; } //you have not given a hard file or set the trump char.
+				if ((hard == "") && (trump == '*') && (soft == 0)) { vertical = "T"; } //you have not given a hard file or set the trump char.
 				else { vertical = "F";  }
 			}
 			

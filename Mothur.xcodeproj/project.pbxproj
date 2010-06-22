@@ -12,6 +12,8 @@
 		A703FE941194645F002C397E /* makegroupcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = makegroupcommand.cpp; sourceTree = SOURCE_ROOT; };
 		A7118EE511CFCAC000CFDE03 /* degapseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = degapseqscommand.h; sourceTree = "<group>"; };
 		A7118EE611CFCAC000CFDE03 /* degapseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = degapseqscommand.cpp; sourceTree = "<group>"; };
+		A7118F0F11CFD5DC00CFDE03 /* getrelabundcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getrelabundcommand.h; sourceTree = "<group>"; };
+		A7118F1011CFD5DC00CFDE03 /* getrelabundcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getrelabundcommand.cpp; sourceTree = "<group>"; };
 		A71D924211AEB42400D00CBC /* clustersplitcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clustersplitcommand.cpp; sourceTree = "<group>"; };
 		A71D924311AEB42400D00CBC /* clustersplitcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clustersplitcommand.h; sourceTree = "<group>"; };
 		A71D924411AEB42400D00CBC /* splitabundcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = splitabundcommand.cpp; sourceTree = "<group>"; };
@@ -710,6 +712,8 @@
 				A7DA2060113FECD400BF472F /* getoturepcommand.cpp */,
 				A7DA2062113FECD400BF472F /* getrabundcommand.cpp */,
 				A7DA2063113FECD400BF472F /* getrabundcommand.h */,
+				A7118F0F11CFD5DC00CFDE03 /* getrelabundcommand.h */,
+				A7118F1011CFD5DC00CFDE03 /* getrelabundcommand.cpp */,
 				A7DA2064113FECD400BF472F /* getsabundcommand.cpp */,
 				A7DA2065113FECD400BF472F /* getsabundcommand.h */,
 				A7DA2067113FECD400BF472F /* getseqscommand.h */,
