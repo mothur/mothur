@@ -31,12 +31,13 @@ private:
 	InputData* input;
 	vector<SharedRAbundVector*> lookup;
 	
-	bool abort, allLines;
+	bool abort, allLines, pickedGroups;
 	set<string> labels; //holds labels to be used
 	string groups, label, outputDir, scale;
 	vector<string> Groups;
 	
-	int getRelAbundance(vector<SharedRAbundVector*>, ofstream&);
+	int getRelAbundance(vector<SharedRAbundVector*>&, ofstream&);
+	int eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup);
 
 };
 

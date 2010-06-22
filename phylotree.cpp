@@ -197,14 +197,22 @@ PhyloTree::PhyloTree(string tfile){
 
 /**************************************************************************************************/
 
-string PhyloTree::getNextTaxon(string& heirarchy){
+string PhyloTree::getNextTaxon(string& heirarchy, string seqname){
 	try {
 		string currentLevel = "";
 		if(heirarchy != ""){
 			int pos = heirarchy.find_first_of(';');
-			currentLevel=heirarchy.substr(0,pos);
-			if (pos != (heirarchy.length()-1)) {  heirarchy=heirarchy.substr(pos+1);  }
-			else { heirarchy = ""; }
+			
+			if (pos == -1) { //you can't find another ;
+				currentLevel = heirarchy;
+				heirarchy = "";
+				m->mothurOut(seqname + " is missing a ;, please check for other errors."); m->mothurOutEndLine();
+			}else{
+				currentLevel=heirarchy.substr(0,pos);
+				if (pos != (heirarchy.length()-1)) {  heirarchy=heirarchy.substr(pos+1);  }
+				else { heirarchy = ""; }
+			}
+			
 		}
 		return currentLevel;
 	}
@@ -228,16 +236,16 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 		
 		tree[0].accessions.push_back(seqName);
 		string taxon;// = getNextTaxon(seqTaxonomy);
-		
+	
 		while(seqTaxonomy != ""){
 			
 			level++;
-			
+		
 			if (m->control_pressed) { return 0; }
 			
 			//somehow the parent is getting one too many accnos
 			//use print to reassign the taxa id
-			taxon = getNextTaxon(seqTaxonomy);
+			taxon = getNextTaxon(seqTaxonomy, seqName);
 			
 			if (taxon == "") {  m->mothurOut(seqName + " has an error in the taxonomy.  This may be due to a ;;"); m->mothurOutEndLine(); if (currentNode != 0) {  uniqueTaxonomies[currentNode] = currentNode; } break;  }
 			
@@ -254,21 +262,13 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 				tree[currentNode].children[taxon] = numNodes-1;
 				tree[numNodes-1].parent = currentNode;
 				
-				//			int numChildren = tree[currentNode].children.size();
-				//			string heirarchyID = tree[currentNode].heirarchyID;
-				//			tree[currentNode].accessions.push_back(seqName);
-				
 				currentNode = tree[currentNode].children[taxon];
 				tree[currentNode].accessions.push_back(seqName);
 				name2Taxonomy[seqName] = currentNode;
-				//			tree[currentNode].level = level;
-				//			tree[currentNode].childNumber = numChildren;
-				//			tree[currentNode].heirarchyID = heirarchyID + '.' + toString(tree[currentNode].childNumber);
 			}
 	
 			if (seqTaxonomy == "") {   uniqueTaxonomies[currentNode] = currentNode;	}
 		}
-
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloTree", "addSeqToTree");

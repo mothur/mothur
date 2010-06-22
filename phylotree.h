@@ -54,7 +54,7 @@ public:
 	bool ErrorCheck(vector<string>);
 	
 private:
-	string getNextTaxon(string&);
+	string getNextTaxon(string&, string);
 	void print(ofstream&, vector<TaxNode>&); //used to create static reference taxonomy file
 	void fillOutTree(int, vector<TaxNode>&); //used to create static reference taxonomy file
 	void binUnclassified(string);

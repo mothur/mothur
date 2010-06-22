@@ -94,7 +94,7 @@ void GetRelAbundCommand::help(){
 		m->mothurOut("The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n");
 		m->mothurOut("The scale parameter allows you to select what scale you would like to use. Choices are totalgroup, totalotu, averagegroup, averageotu, default is totalgroup.\n");
 		m->mothurOut("The get.relabund command should be in the following format: get.relabund(groups=yourGroups, label=yourLabels).\n");
-		m->mothurOut("Example get.relabund(groups=A-B-C, scale=log10).\n");
+		m->mothurOut("Example get.relabund(groups=A-B-C, scale=averagegroup).\n");
 		m->mothurOut("The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n");
 		m->mothurOut("The get.relabund command outputs a .relabund file.\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
