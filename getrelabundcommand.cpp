@@ -63,15 +63,16 @@ GetRelAbundCommand::GetRelAbundCommand(string option) {
 			}
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
-			if (groups == "not found") { groups = ""; }
+			if (groups == "not found") { groups = ""; pickedGroups = false; }
 			else { 
+				pickedGroups = true;
 				splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 			}
 			
 			scale = validParameter.validFile(parameters, "scale", false);				if (scale == "not found") { scale = "totalgroup"; }
 			
-			if ((scale != "totalgroup") && (scale != "totalgroup") && (scale != "totalgroup") && (scale != "totalgroup")) {
+			if ((scale != "totalgroup") && (scale != "totalotu") && (scale != "averagegroup") && (scale != "averageotu")) {
 				m->mothurOut(scale + " is not a valid scaling option for the get.relabund command. Choices are totalgroup, totalotu, averagegroup, averageotu."); m->mothurOutEndLine(); abort = true; 
 			}
 		}
@@ -120,6 +121,7 @@ int GetRelAbundCommand::execute(){
 		string outputFileName = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + "relabund";
 		ofstream out;
 		openOutputFile(outputFileName, out);
+		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
 		read = new ReadOTUFile(globaldata->inputFileName);	
 		read->read(&*globaldata); 
@@ -164,7 +166,9 @@ int GetRelAbundCommand::execute(){
 			lastLabel = lookup[0]->getLabel();
 			//prevent memory leak
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
-						
+			
+			if (m->control_pressed) {  globaldata->Groups.clear(); delete read;  out.close(); remove(outputFileName.c_str()); return 0; }
+
 			//get next line to process
 			lookup = input->getSharedRAbundVectors();				
 		}
@@ -218,16 +222,104 @@ int GetRelAbundCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int GetRelAbundCommand::getRelAbundance(vector<SharedRAbundVector*> thisLookUp, ofstream& out){
+int GetRelAbundCommand::getRelAbundance(vector<SharedRAbundVector*>& thisLookUp, ofstream& out){
 	try {
+		if (pickedGroups) { eliminateZeroOTUS(thisLookUp); }
+
+		int totalNumSeqs = 0;
+		if ((scale == "totalgroup") || (scale == "averagegroup")) {
+			for (int i = 0; i < thisLookUp.size(); i++) {
+				//find total number of sequences in all samples
+				totalNumSeqs += thisLookUp[i]->getNumSeqs();
+			}
+		}
+		float averageNumSeqs = totalNumSeqs / (float) thisLookUp.size();
+		
+		 for (int i = 0; i < thisLookUp.size(); i++) {
+			out << thisLookUp[i]->getLabel() << '\t' << thisLookUp[i]->getGroup() << '\t' << thisLookUp[i]->getNumBins() << '\t';
+			
+			for (int j = 0; j < thisLookUp[i]->getNumBins(); j++) {
+			
+				if (m->control_pressed) { return 0; }
+			
+				int abund = thisLookUp[i]->getAbundance(j);
+				
+				float relabund = 0.0;
+				
+				if (scale == "totalgroup") {  //abund of this otu compared to total number of sequence in my group
+					relabund = abund / (float) totalNumSeqs;
+				}else if (scale == "totalotu") {
+					//calc the total in this otu
+					int totalOtu = 0;
+					for (int l = 0; l < thisLookUp.size(); l++) {  totalOtu += thisLookUp[l]->getAbundance(j); }
+					
+					relabund = abund / (float) totalOtu;
+				}else if (scale == "averagegroup") {
+					relabund = abund / (float) averageNumSeqs;
+				}else if (scale == "averageotu") {
+					//calc the total in this otu
+					int totalOtu = 0;
+					for (int l = 0; l < thisLookUp.size(); l++) {  totalOtu += thisLookUp[l]->getAbundance(j); }
+					float averageOtu = totalOtu / (float) thisLookUp.size();
+					
+					relabund = abund / (float) averageOtu;
+				}else{ m->mothurOut(scale + " is not a valid scaling option."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
+				
+				out << relabund << '\t';
+			}
+			out << endl;
+		 }
 	
-	
+		 return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetRelAbundCommand", "getRelAbundance");
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+int GetRelAbundCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
+	try {
+		
+		vector<SharedRAbundVector*> newLookup;
+		for (int i = 0; i < thislookup.size(); i++) {
+			SharedRAbundVector* temp = new SharedRAbundVector();
+			temp->setLabel(thislookup[i]->getLabel());
+			temp->setGroup(thislookup[i]->getGroup());
+			newLookup.push_back(temp);
+		}
+		
+		//for each bin
+		for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
+			if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
+		
+			//look at each sharedRabund and make sure they are not all zero
+			bool allZero = true;
+			for (int j = 0; j < thislookup.size(); j++) {
+				if (thislookup[j]->getAbundance(i) != 0) { allZero = false;  break;  }
+			}
+			
+			//if they are not all zero add this bin
+			if (!allZero) {
+				for (int j = 0; j < thislookup.size(); j++) {
+					newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
+				}
+			}
+		}
+
+		for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
+
+		thislookup = newLookup;
+		
+		return 0;
+ 
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetRelAbundCommand", "eliminateZeroOTUS");
+		exit(1);
+	}
+}
+
 //**********************************************************************************************************************
 
 
