@@ -8,7 +8,11 @@
  */
 
 #include "sharedcommand.h"
-
+//********************************************************************************************************************
+//sorts lowest to highest
+inline bool compareSharedRabunds(SharedRAbundVector* left, SharedRAbundVector* right){
+	return (left->getGroup() < right->getGroup());	
+} 
 //**********************************************************************************************************************
 
 SharedCommand::SharedCommand(string o) : outputDir(o) {
@@ -143,6 +147,7 @@ int SharedCommand::execute(){
 			if(globaldata->allLines == 1 || globaldata->labels.count(SharedList->getLabel()) == 1){
 					
 					lookup = SharedList->getSharedRAbundVector();
+					
 					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 					if (pickedGroups) { //check for otus with no seqs in them
 						eliminateZeroOTUS(lookup);
@@ -274,6 +279,8 @@ int SharedCommand::execute(){
 //**********************************************************************************************************************
 void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup) {
 	try {
+		
+		sort(thislookup.begin(), thislookup.end(), compareSharedRabunds);
 		
 		//initialize bin values
 		for (int i = 0; i < thislookup.size(); i++) {
