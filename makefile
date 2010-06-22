@@ -33,7 +33,7 @@ ifeq  ($(strip $(USEREADLINE)),yes)
       -L../readline-6.0
 endif
 
-USEMPI ?= yes
+USEMPI ?= no
 
 ifeq  ($(strip $(USEMPI)),yes)
 	CC = mpic++
@@ -228,6 +228,7 @@ mothur : \
 		./hclustercommand.o\
 		./hcluster.o\
 		./getlistcountcommand.o\
+		./getrelabundcommand.o\
 		./readcluster.o\
 		./ccode.o\
 		./taxonomyequalizer.o\
@@ -439,6 +440,7 @@ mothur : \
 		./hclustercommand.o\
 		./hcluster.o\
 		./getlistcountcommand.o\
+		./getrelabundcommand.o\
 		./readcluster.o\
 		./ccode.o\
 		./taxonomyequalizer.o\
@@ -653,6 +655,7 @@ clean :
 		./hclustercommand.o\
 		./hcluster.o\
 		./getlistcountcommand.o\
+		./getrelabundcommand.o\
 		./readcluster.o\
 		./ccode.o\
 		./taxonomyequalizer.o\
@@ -1725,5 +1728,9 @@ install : mothur
 # Item # 210 -- degapseqscommand --
 ./degapseqscommand.o : degapseqscommand.cpp
 	$(CC) $(CC_OPTIONS) degapseqscommand.cpp -c $(INCLUDE) -o ./degapseqscommand.o
+
+# Item # 211 -- getrelabundcommand --
+./getrelabundcommand.o : getrelabundcommand.cpp
+	$(CC) $(CC_OPTIONS) getrelabundcommand.cpp -c $(INCLUDE) -o ./getrelabundcommand.o
 
 ##### END RUN ####
