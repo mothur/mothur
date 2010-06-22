@@ -166,7 +166,6 @@ CommandFactory::CommandFactory(){
 	commands["clearcut"]			= "clearcut";
 	commands["catchall"]			= "catchall";
 	commands["split.abund"]			= "split.abund";
-	commands["cluster.split"]		= "cluster.split";
 	commands["classify.otu"]		= "classify.otu";
 	commands["degap.seqs"]			= "degap.seqs";
 	commands["classify.seqs"]		= "MPIEnabled"; 
@@ -181,6 +180,7 @@ CommandFactory::CommandFactory(){
 	commands["chimera.bellerophon"]	= "MPIEnabled";
 	commands["screen.seqs"]			= "MPIEnabled";
 	commands["summary.seqs"]		= "MPIEnabled";
+	commands["cluster.split"]		= "MPIEnabled";
 	commands["quit"]				= "MPIEnabled"; 
 
 }
