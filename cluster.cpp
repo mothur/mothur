@@ -205,7 +205,6 @@ void Cluster::clusterNames(){
 void Cluster::update(double& cutOFF){
 	try {
 		getRowColCells();	
-//cout << "got rowcells" << endl;
 
 		vector<int> foundCol(nColCells, 0);
 

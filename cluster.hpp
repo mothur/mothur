@@ -67,7 +67,7 @@ private:
 class SingleLinkage : public Cluster {
 public:
 	SingleLinkage(RAbundVector*, ListVector*, SparseMatrix*, float, string);
-    void update();
+    void update(double&);
 	bool updateDistance(MatData& colCell, MatData& rowCell);
 	string getTag();
 	
