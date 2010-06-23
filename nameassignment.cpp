@@ -87,16 +87,35 @@ void NameAssignment::print(ostream& out){
 //**********************************************************************************************************************
 
 int NameAssignment::get(string key){
-	
-	return	(*this)[key];	
-
+	try {
+		map<string, int>::iterator itGet = (*this).find(key);
+		
+		//if you can't find it
+		if (itGet == (*this).end()) { return -1; }
+		
+		return	(*this)[key];	
+	}
+	catch(exception& e) {
+		m->errorOut(e, "NameAssignment", "get");
+		exit(1);
+	}
 }
 //**********************************************************************************************************************
 
 string NameAssignment::get(int key){
+	try {
 	
-	return	reverse[key];	
-
+		map<int, string>::iterator itGet = reverse.find(key);
+	
+		if (itGet == reverse.end()) { return "not found"; }
+	
+		return	reverse[key];	
+	
+	}
+	catch(exception& e) {
+		m->errorOut(e, "NameAssignment", "get");
+		exit(1);
+	}
 }
 //**********************************************************************************************************************
 
