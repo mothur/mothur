@@ -18,7 +18,7 @@ string SingleLinkage::getTag() {
 
 /***********************************************************************/
 //This function clusters based on the single linkage method.
-void  SingleLinkage::update(){
+void  SingleLinkage::update(double& cutOFF){
 	try {
 		getRowColCells();	
 	
@@ -77,6 +77,7 @@ void  SingleLinkage::update(){
 		clusterBins();
 		clusterNames();
 		// remove also the cell with the smallest distance
+
 		removeCell(rowCells[rowInd], -1 , -1);
 	}
 	catch(exception& e) {
