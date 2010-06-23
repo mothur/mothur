@@ -169,6 +169,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 					map<int, float>::iterator itDist;
 					for(it=thisRowsBlastScores.begin(); it!=thisRowsBlastScores.end(); it++) {  
 						distance = 1.0 - (it->second / refScore);
+		
 						
 						//do we already have the distance calculated for b->a
 						map<string,int>::iterator itA = nameMap->find(currentRow);
@@ -176,10 +177,12 @@ int ReadBlast::read(NameAssignment* nameMap) {
 						
 						//if we have it then compare
 						if (itDist != dists[it->first].end()) {
+		if (distance < 0.0) { cout << currentRow << '\t' << nameMap->get(it->first) << '\t' << "score = " << it->second	<< " refscore = " << refScore << " distance = " << distance << " distance = " << itDist->second << endl;	}
+
 							//if you want the minimum blast score ratio, then pick max distance
 							if(minWanted) {	 distance = max(itDist->second, distance);  }
 							else{	distance = min(itDist->second, distance);  }
-							
+
 							//is this distance below cutoff
 							if (distance < cutoff) {
 								if (!hclusterWanted) {

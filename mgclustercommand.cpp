@@ -171,6 +171,8 @@ int MGClusterCommand::execute(){
 		
 		start = time(NULL);
 		oldList = *list;
+		map<string, int> Seq2Bin;
+		map<string, int> oldSeq2Bin;
 		
 		if (method == "furthest")		{ tag = "fn";  }
 		else if (method == "nearest")	{ tag = "nn";  }
@@ -198,6 +200,8 @@ int MGClusterCommand::execute(){
 			else if(method == "nearest"){	cluster = new SingleLinkage(rabund, list, distMatrix, cutoff, method); }
 			else if(method == "average"){	cluster = new AverageLinkage(rabund, list, distMatrix, cutoff, method);	}
 			cluster->setMapWanted(true);
+			Seq2Bin = cluster->getSeqtoBin();
+			oldSeq2Bin = Seq2Bin;
 			
 			if (m->control_pressed) { 
 				delete nameMap; delete distMatrix; delete list; delete rabund; delete cluster;
@@ -231,8 +235,8 @@ int MGClusterCommand::execute(){
 				}
 				else if(rndDist != rndPreviousDist){
 					if (merge) {
-						map<string, int> seq2Bin = cluster->getSeqtoBin();
-						ListVector* temp = mergeOPFs(seq2Bin, rndPreviousDist);
+						Seq2Bin = cluster->getSeqtoBin();
+						ListVector* temp = mergeOPFs(oldSeq2Bin, rndPreviousDist);
 						
 						if (m->control_pressed) { 
 							delete nameMap; delete distMatrix; delete list; delete rabund; delete cluster; delete temp;
@@ -250,8 +254,10 @@ int MGClusterCommand::execute(){
 				}
 				
 				previousDist = dist;
+	cout << "prev distance = " << previousDist << " dist = " << dist << endl;
 				rndPreviousDist = rndDist;
 				oldList = *list;
+				oldSeq2Bin = Seq2Bin;
 			}
 			
 			if(previousDist <= 0.0000){
@@ -260,8 +266,8 @@ int MGClusterCommand::execute(){
 			}
 			else if(rndPreviousDist<cutoff){
 				if (merge) {
-					map<string, int> seq2Bin = cluster->getSeqtoBin();
-					ListVector* temp = mergeOPFs(seq2Bin, rndPreviousDist);
+					Seq2Bin = cluster->getSeqtoBin();
+					ListVector* temp = mergeOPFs(oldSeq2Bin, rndPreviousDist);
 					
 					if (m->control_pressed) { 
 							delete nameMap; delete distMatrix; delete list; delete rabund; delete cluster; delete temp;
@@ -301,6 +307,8 @@ int MGClusterCommand::execute(){
 			//create cluster
 			hcluster = new HCluster(rabund, list, method, distFile, nameMap, cutoff);
 			hcluster->setMapWanted(true);
+			Seq2Bin = cluster->getSeqtoBin();
+			oldSeq2Bin = Seq2Bin;
 			
 			vector<seqDist> seqs; seqs.resize(1); // to start loop
 			//ifstream inHcluster;
@@ -351,8 +359,8 @@ int MGClusterCommand::execute(){
 						}
 						else if((rndDist != rndPreviousDist)){
 							if (merge) {
-								map<string, int> seq2Bin = hcluster->getSeqtoBin();
-								ListVector* temp = mergeOPFs(seq2Bin, rndPreviousDist);
+								Seq2Bin = hcluster->getSeqtoBin();
+								ListVector* temp = mergeOPFs(oldSeq2Bin, rndPreviousDist);
 								
 								if (m->control_pressed) { 
 									delete nameMap;  delete list; delete rabund; delete hcluster; delete temp;
@@ -374,6 +382,7 @@ int MGClusterCommand::execute(){
 						previousDist = seqs[i].dist;
 						rndPreviousDist = rndDist;
 						oldList = *list;
+						oldSeq2Bin = Seq2Bin;
 					}
 				}
 			}
@@ -385,8 +394,8 @@ int MGClusterCommand::execute(){
 			}
 			else if(rndPreviousDist<cutoff){
 				if (merge) {
-					map<string, int> seq2Bin = hcluster->getSeqtoBin();
-					ListVector* temp = mergeOPFs(seq2Bin, rndPreviousDist);
+					Seq2Bin = hcluster->getSeqtoBin();
+					ListVector* temp = mergeOPFs(oldSeq2Bin, rndPreviousDist);
 					
 					if (m->control_pressed) { 
 							delete nameMap; delete list; delete rabund; delete hcluster; delete temp;
@@ -406,8 +415,8 @@ int MGClusterCommand::execute(){
 			}
 			
 			delete hcluster;
-			remove(distFile.c_str());
-			remove(overlapFile.c_str());
+			//remove(distFile.c_str());
+			//remove(overlapFile.c_str());
 		}
 		
 		delete list; 
@@ -509,15 +518,22 @@ ListVector* MGClusterCommand::mergeOPFs(map<string, int> binInfo, float dist){
 				//get names of seqs that overlap
 				string name1 = nameMap->get(overlapNode.seq1);
 				string name2 = nameMap->get(overlapNode.seq2);
-				
+			
 				//use binInfo to find out if they are already in the same bin
-				int binKeep = binInfo[name1];
-				int binRemove = binInfo[name2];
+				map<string, int>::iterator itBin1 = binInfo.find(name1);
+				map<string, int>::iterator itBin2 = binInfo.find(name2);
+				
+				if(itBin1 == binInfo.end()){  cerr << "AAError: Sequence '" << name1 << "' does not have any bin info.\n"; exit(1);  }
+				if(itBin2 == binInfo.end()){  cerr << "ABError: Sequence '" << name2 << "' does not have any bin info.\n"; exit(1);  }
+
+				int binKeep = itBin1->second;
+				int binRemove = itBin2->second;
 				
 				//if not merge bins and update binInfo
 				if(binKeep != binRemove) {
+		
 					//save names in old bin
-					string names = list->get(binRemove);
+					string names = newList->get(binRemove);
 					
 					//merge bins into name1s bin
 					newList->set(binKeep, newList->get(binRemove)+','+newList->get(binKeep));

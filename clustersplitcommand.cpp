@@ -237,6 +237,7 @@ int ClusterSplitCommand::execute(){
 		vector<string> listFileNames;
 		set<string> labels;
 		string singletonName = "";
+		double saveCutoff = cutoff;
 
 		//****************** file prep work ******************************//
 		#ifdef USE_MPI
@@ -361,6 +362,10 @@ int ClusterSplitCommand::execute(){
 			for(int i = 1; i < processors; i++) { 
 				int num = dividedNames[i].size();
 				
+				double tempCutoff;
+				MPI_Recv(&tempCutoff, 1, MPI_DOUBLE, i, tag, MPI_COMM_WORLD, &status);
+				if (tempCutoff < cutoff) { cutoff = tempCutoff; }
+				
 				//send list filenames to root process
 				for (int j = 0; j < num; j++) {  
 					int lengthList = 0;
@@ -428,6 +433,9 @@ int ClusterSplitCommand::execute(){
 	
 			//process them
 			listFileNames = cluster(myNames, labels);
+			
+			//send cutoff
+			MPI_Send(&cutoff, 1, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD);
 			
 			//send list filenames to root process
 			for (int j = 0; j < num; j++) {  
@@ -506,6 +514,10 @@ int ClusterSplitCommand::execute(){
 						ifstream in2;
 						openInputFile(filename, in2);
 						
+						float tempCutoff;
+						in2 >> tempCutoff; gobble(in2);
+						if (tempCutoff < cutoff) { cutoff = tempCutoff; }
+						
 						while(!in2.eof()) {
 							string tempName;
 							in2 >> tempName; gobble(in2);
@@ -520,6 +532,8 @@ int ClusterSplitCommand::execute(){
 		#endif
 	#endif	
 		if (m->control_pressed) { for (int i = 0; i < listFileNames.size(); i++) { remove(listFileNames[i].c_str()); } return 0; }
+		
+		if (saveCutoff != cutoff) { m->mothurOut("Cutoff was " + toString(saveCutoff) + " changed cutoff to " + toString(cutoff)); m->mothurOutEndLine();  }
 		
 		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster"); m->mothurOutEndLine();
 		
@@ -592,9 +606,11 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
 
 			if ((*it != "unique") && (convertTestFloat(*it, temp) == true))	{	convert(*it, temp);	}
 			else if (*it == "unique")										{	temp = -1.0;		}
-						
-			orderFloat.push_back(temp);
-			labelBin[temp] = numSingleBins; //initialize numbins 
+			
+			if (temp <= cutoff) {
+				orderFloat.push_back(temp);
+				labelBin[temp] = numSingleBins; //initialize numbins 
+			}
 		}
 	
 		//sort order
@@ -804,7 +820,8 @@ int ClusterSplitCommand::createProcesses(vector < vector < map<string, string> >
 				ofstream outLabels;
 				filename = toString(getpid()) + ".temp.labels";
 				openOutputFile(filename, outLabels);
-		
+				
+				outLabels << cutoff << endl;
 				for (set<string>::iterator it = labels.begin(); it != labels.end(); it++) {
 					outLabels << (*it) << endl;
 				}
@@ -841,8 +858,11 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
 		
 		vector<string> listFileNames;
 		
+		double smallestCutoff = cutoff;
+		
 		//cluster each distance file
 		for (int i = 0; i < distNames.size(); i++) {
+			if (m->control_pressed) { return listFileNames; }
 			
 			string thisNamefile = distNames[i].begin()->second;
 			string thisDistFile = distNames[i].begin()->first;
@@ -925,7 +945,7 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
 					listFileNames.clear(); return listFileNames;
 				}
 		
-				cluster->update(cutoff);
+				cluster->update(saveCutoff);
 	
 				float dist = matrix->getSmallDist();
 				float rndDist;
@@ -973,8 +993,13 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
 			
 			remove(thisDistFile.c_str());
 			remove(thisNamefile.c_str());
+			
+			if (saveCutoff != cutoff) { m->mothurOut("Cutoff was " + toString(cutoff) + " changed cutoff to " + toString(saveCutoff)); m->mothurOutEndLine();  }
+			
+			if (saveCutoff < smallestCutoff) { smallestCutoff = saveCutoff;  }
 		}
 		
+		cutoff = smallestCutoff;
 					
 		return listFileNames;
 	
