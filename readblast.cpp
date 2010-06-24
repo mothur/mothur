@@ -177,8 +177,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 						
 						//if we have it then compare
 						if (itDist != dists[it->first].end()) {
-		if (distance < 0.0) { cout << currentRow << '\t' << nameMap->get(it->first) << '\t' << "score = " << it->second	<< " refscore = " << refScore << " distance = " << distance << " distance = " << itDist->second << endl;	}
-
+	
 							//if you want the minimum blast score ratio, then pick max distance
 							if(minWanted) {	 distance = max(itDist->second, distance);  }
 							else{	distance = min(itDist->second, distance);  }
@@ -314,8 +313,8 @@ int ReadBlast::readNames(NameAssignment* nameMap) {
 		ifstream in;
 		openInputFile(blastfile, in);
 		
-		ofstream outName;
-		openOutputFile("tempOutNames", outName);
+		//ofstream outName;
+		//openOutputFile((blastfile + ".tempOutNames"), outName);
 		
 		//read first line
 		in >> prevName;
@@ -351,6 +350,7 @@ int ReadBlast::readNames(NameAssignment* nameMap) {
 		//openOutputFile(outNames, out);
 		//nameMap->print(out);
 		//out.close();
+		
 		if (m->control_pressed) { return 0; }
 		
 		m->mothurOut(toString(num) + " names read."); m->mothurOutEndLine();

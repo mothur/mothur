@@ -253,7 +253,6 @@ int ChimeraPintailCommand::execute(){
 				outputFileName = outputDir + getRootName(getSimpleName(fastaFileNames[s]))  + "pintail.chimeras";
 				accnosFileName = outputDir + getRootName(getSimpleName(fastaFileNames[s]))  + "pintail.accnos";
 			}
-			bool hasAccnos = true;
 			
 			if (m->control_pressed) { delete chimera; for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  return 0;	}
 			
@@ -268,7 +267,6 @@ int ChimeraPintailCommand::execute(){
 			int pid, end, numSeqsPerProcessor; 
 				int tag = 2001;
 				vector<long> MPIPos;
-				MPIWroteAccnos = false;
 				
 				MPI_Status status; 
 				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
@@ -316,11 +314,6 @@ int ChimeraPintailCommand::execute(){
 					
 					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  remove(outputFileName.c_str());  remove(accnosFileName.c_str());  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  delete chimera; return 0;  }
 					
-					for (int i = 1; i < processors; i++) {
-						bool tempResult;
-						MPI_Recv(&tempResult, 1, MPI_INT, i, tag, MPI_COMM_WORLD, &status);
-						if (tempResult != 0) { MPIWroteAccnos = true; }
-					}
 				}else{ //you are a child process
 					MPI_Recv(&numSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
 					MPIPos.resize(numSeqs+1);
@@ -335,8 +328,6 @@ int ChimeraPintailCommand::execute(){
 					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, MPIPos);
 					
 					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  delete chimera; return 0;  }
-
-					MPI_Send(&MPIWroteAccnos, 1, MPI_INT, 0, tag, MPI_COMM_WORLD); 
 				}
 				
 				//close files 
@@ -344,15 +335,6 @@ int ChimeraPintailCommand::execute(){
 				MPI_File_close(&outMPI);
 				MPI_File_close(&outMPIAccnos);
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
-				
-				//delete accnos file if blank
-				if (pid == 0) {
-					if (!MPIWroteAccnos) { 
-						hasAccnos = false;	
-						remove(accnosFileName.c_str()); 
-					}
-				}
-
 		#else
 		
 			//break up file
@@ -376,9 +358,6 @@ int ChimeraPintailCommand::execute(){
 						return 0;
 					}
 					
-					//delete accnos file if its blank 
-					if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
-									
 				}else{
 					vector<int> positions;
 					processIDS.resize(0);
@@ -410,6 +389,7 @@ int ChimeraPintailCommand::execute(){
 					createProcesses(outputFileName, fastaFileNames[s], accnosFileName); 
 				
 					rename((outputFileName + toString(processIDS[0]) + ".temp").c_str(), outputFileName.c_str());
+					rename((accnosFileName + toString(processIDS[0]) + ".temp").c_str(), accnosFileName.c_str());
 						
 					//append output files
 					for(int i=1;i<processors;i++){
@@ -417,24 +397,12 @@ int ChimeraPintailCommand::execute(){
 						remove((outputFileName + toString(processIDS[i]) + ".temp").c_str());
 					}
 					
-					vector<string> nonBlankAccnosFiles;
-					//delete blank accnos files generated with multiple processes
-					for(int i=0;i<processors;i++){  
-						if (!(isBlank(accnosFileName + toString(processIDS[i]) + ".temp"))) {
-							nonBlankAccnosFiles.push_back(accnosFileName + toString(processIDS[i]) + ".temp");
-						}else { remove((accnosFileName + toString(processIDS[i]) + ".temp").c_str());  }
+					//append output files
+					for(int i=1;i<processors;i++){
+						appendFiles((accnosFileName + toString(processIDS[i]) + ".temp"), accnosFileName);
+						remove((accnosFileName + toString(processIDS[i]) + ".temp").c_str());
 					}
-					
-					//append accnos files
-					if (nonBlankAccnosFiles.size() != 0) { 
-						rename(nonBlankAccnosFiles[0].c_str(), accnosFileName.c_str());
-						
-						for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
-							appendFiles(nonBlankAccnosFiles[h], accnosFileName);
-							remove(nonBlankAccnosFiles[h].c_str());
-						}
-					}else{ hasAccnos = false;  }
-					
+										
 					if (m->control_pressed) { 
 						remove(outputFileName.c_str()); 
 						remove(accnosFileName.c_str());
@@ -462,9 +430,6 @@ int ChimeraPintailCommand::execute(){
 						delete chimera;
 						return 0;
 				}
-				
-				//delete accnos file if its blank 
-				if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
 			#endif
 			
 		#endif	
@@ -473,7 +438,7 @@ int ChimeraPintailCommand::execute(){
 			for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 			
 			outputNames.push_back(outputFileName);
-			if (hasAccnos) { outputNames.push_back(accnosFileName); }
+			outputNames.push_back(accnosFileName); 
 			
 			m->mothurOutEndLine();
 			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine();
@@ -584,7 +549,6 @@ int ChimeraPintailCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_Fi
 		
 					//print results
 					bool isChimeric = chimera->print(outMPI, outAccMPI);
-					if (isChimeric) { MPIWroteAccnos = true;  }
 				}
 			}
 			delete candidateSeq;

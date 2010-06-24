@@ -236,10 +236,8 @@ int RemoveSeqsCommand::readFasta(){
 		in.close();	
 		out.close();
 		
-		if (wroteSomething == false) {
-			m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();
-			remove(outputFileName.c_str()); 
-		}else { outputNames.push_back(outputFileName); }
+		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
+		outputNames.push_back(outputFileName); 
 		
 		return 0;
 		
@@ -307,11 +305,9 @@ int RemoveSeqsCommand::readList(){
 		in.close();	
 		out.close();
 		
-		if (wroteSomething == false) {
-			m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();
-			remove(outputFileName.c_str()); 
-		}else { outputNames.push_back(outputFileName); }
-		
+		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
+		outputNames.push_back(outputFileName); 
+				
 		return 0;
 
 	}
@@ -395,11 +391,9 @@ int RemoveSeqsCommand::readName(){
 		in.close();
 		out.close();
 
-		if (wroteSomething == false) {
-			m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();
-			remove(outputFileName.c_str()); 
-		}else { outputNames.push_back(outputFileName); }
-		
+		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
+		outputNames.push_back(outputFileName); 
+				
 		return 0;
 	}
 	catch(exception& e) {
@@ -439,10 +433,8 @@ int RemoveSeqsCommand::readGroup(){
 		in.close();
 		out.close();
 		
-		if (wroteSomething == false) {
-			m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();
-			remove(outputFileName.c_str()); 
-		}else { outputNames.push_back(outputFileName); }
+		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
+		outputNames.push_back(outputFileName); 
 		
 		return 0;
 	}
@@ -482,10 +474,8 @@ int RemoveSeqsCommand::readTax(){
 		in.close();
 		out.close();
 		
-		if (wroteSomething == false) {
-			m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();
-			remove(outputFileName.c_str()); 
-		}else { outputNames.push_back(outputFileName); }
+		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
+		outputNames.push_back(outputFileName); 
 		
 		return 0;
 	}
@@ -548,10 +538,8 @@ int RemoveSeqsCommand::readAlign(){
 		in.close();
 		out.close();
 		
-		if (wroteSomething == false) {
-			m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();
-			remove(outputFileName.c_str()); 
-		}else { outputNames.push_back(outputFileName); }
+		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
+		outputNames.push_back(outputFileName); 
 		
 		return 0;
 		

@@ -238,10 +238,8 @@ int GetSeqsCommand::readFasta(){
 		in.close();	
 		out.close();
 		
-		if (wroteSomething == false) {
-			m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();
-			remove(outputFileName.c_str()); 
-		}else {  outputNames.push_back(outputFileName); }
+		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
+		outputNames.push_back(outputFileName); 
 		
 		return 0;
 
@@ -311,10 +309,8 @@ int GetSeqsCommand::readList(){
 		in.close();	
 		out.close();
 		
-		if (wroteSomething == false) {
-			m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();
-			remove(outputFileName.c_str()); 
-		}else {  outputNames.push_back(outputFileName); }
+		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
+		outputNames.push_back(outputFileName); 
 		
 		return 0;
 
@@ -405,10 +401,8 @@ int GetSeqsCommand::readName(){
 		in.close();
 		out.close();
 		
-		if (wroteSomething == false) {
-			m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();
-			remove(outputFileName.c_str()); 
-		}else {  outputNames.push_back(outputFileName); }
+		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
+		outputNames.push_back(outputFileName); 
 		
 		return 0;
 		
@@ -454,10 +448,8 @@ int GetSeqsCommand::readGroup(){
 		in.close();
 		out.close();
 		
-		if (wroteSomething == false) {
-			m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();
-			remove(outputFileName.c_str()); 
-		}else {  outputNames.push_back(outputFileName); }
+		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
+		outputNames.push_back(outputFileName); 
 		
 		return 0;
 
@@ -500,11 +492,9 @@ int GetSeqsCommand::readTax(){
 		in.close();
 		out.close();
 		
-		if (wroteSomething == false) {
-			m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();
-			remove(outputFileName.c_str()); 
-		}else {  outputNames.push_back(outputFileName); }
-		
+		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
+		outputNames.push_back(outputFileName); 
+			
 		return 0;
 
 	}
@@ -569,10 +559,8 @@ int GetSeqsCommand::readAlign(){
 		in.close();
 		out.close();
 		
-		if (wroteSomething == false) {
-			m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();
-			remove(outputFileName.c_str()); 
-		}else {  outputNames.push_back(outputFileName); }
+		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
+		outputNames.push_back(outputFileName); 
 		
 		return 0;
 		
