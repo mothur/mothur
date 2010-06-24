@@ -577,7 +577,7 @@ inline int openInputFile(string fileName, ifstream& fileHandle){
 	else {
 		//check for blank file
 		gobble(fileHandle);
-		if (fileHandle.eof()) { cout << completeFileName << " is blank. Please correct." << endl;  return 1;  }
+		if (fileHandle.eof()) { cout << completeFileName << " is blank. Please correct." << endl;   }
 		
 		return 0;
 	}

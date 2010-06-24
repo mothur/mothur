@@ -76,6 +76,7 @@ void NameAssignment::print(ostream& out){
 //cout << (*this).size() << endl;
 		for(it = (*this).begin(); it!=(*this).end(); it++){
 			out << it->first << '\t' <<  it->second << endl;  //prints out keys and values of the map this.
+			//out << it->first << '\t' <<  it->first << endl;
 		}
 	}
 	catch(exception& e) {

@@ -164,7 +164,6 @@ int ChimeraBellerophonCommand::execute(){
 					
 			string outputFileName = outputDir + getRootName(getSimpleName(fastaFileNames[i])) +  "bellerophon.chimeras";
 			string accnosFileName = outputDir + getRootName(getSimpleName(fastaFileNames[i])) + "bellerophon.accnos";
-			bool hasAccnos = true;
 			
 			chimera->getChimeras();
 			
@@ -206,13 +205,10 @@ int ChimeraBellerophonCommand::execute(){
 			
 			if (m->control_pressed) { remove(accnosFileName.c_str()); remove(outputFileName.c_str()); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} delete chimera;	return 0;	}
 			
-			//delete accnos file if its blank 
-			if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
-			
 			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine(); m->mothurOutEndLine();
 			
 			outputNames.push_back(outputFileName);
-			if (hasAccnos) {  outputNames.push_back(accnosFileName);  }
+			outputNames.push_back(accnosFileName);
 			
 			delete chimera;
 		}

@@ -177,7 +177,7 @@ void ChimeraSlayerCommand::help(){
 		m->mothurOut("This command was modeled after the chimeraSlayer written by the Broad Institute.\n");
 		m->mothurOut("The chimera.slayer command parameters are fasta, template, processors, ksize, window, match, mismatch, divergence. minsim, mincov, minbs, minsnp, parents, search, iters, increment and numwanted.\n"); //realign,
 		m->mothurOut("The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required. \n");
-		m->mothurOut("You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n");
+		m->mothurOut("You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amazon.fasta \n");
 		m->mothurOut("The template parameter allows you to enter a template file containing known non-chimeric sequences, and is required. \n");
 		m->mothurOut("The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n");
 		#ifdef USE_MPI
@@ -230,7 +230,6 @@ int ChimeraSlayerCommand::execute(){
 							
 			string outputFileName = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + "slayer.chimeras";
 			string accnosFileName = outputDir + getRootName(getSimpleName(fastaFileNames[s]))  + "slayer.accnos";
-			bool hasAccnos = true;
 			
 			if (m->control_pressed) { delete chimera; for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  return 0;	}
 			
@@ -245,7 +244,6 @@ int ChimeraSlayerCommand::execute(){
 			int pid, end, numSeqsPerProcessor; 
 				int tag = 2001;
 				vector<long> MPIPos;
-				MPIWroteAccnos = false;
 				
 				MPI_Status status; 
 				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
@@ -306,11 +304,6 @@ int ChimeraSlayerCommand::execute(){
 					
 					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  remove(outputFileName.c_str());  remove(accnosFileName.c_str());  delete chimera; return 0;  }
 
-					for (int i = 1; i < processors; i++) {
-						bool tempResult;
-						MPI_Recv(&tempResult, 1, MPI_INT, i, tag, MPI_COMM_WORLD, &status);
-						if (tempResult != 0) { MPIWroteAccnos = true; }
-					}
 				}else{ //you are a child process
 					MPI_Recv(&numSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
 					MPIPos.resize(numSeqs+1);
@@ -325,8 +318,6 @@ int ChimeraSlayerCommand::execute(){
 					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, MPIPos);
 					
 					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  delete chimera; return 0;  }
-
-					MPI_Send(&MPIWroteAccnos, 1, MPI_INT, 0, tag, MPI_COMM_WORLD); 
 				}
 				
 				//close files 
@@ -335,14 +326,6 @@ int ChimeraSlayerCommand::execute(){
 				MPI_File_close(&outMPIAccnos);
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 				
-				//delete accnos file if blank
-				if (pid == 0) {
-					if (!MPIWroteAccnos) { 
-						hasAccnos = false;	
-						remove(accnosFileName.c_str()); 
-					}
-				}
-			
 		#else
 			ofstream outHeader;
 			string tempHeader = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + "slayer.chimeras.tempHeader";
@@ -373,9 +356,6 @@ int ChimeraSlayerCommand::execute(){
 						return 0;
 					}
 					
-					//delete accnos file if its blank 
-					if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
-									
 				}else{
 					vector<int> positions;
 					processIDS.resize(0);
@@ -407,6 +387,7 @@ int ChimeraSlayerCommand::execute(){
 					createProcesses(outputFileName, fastaFileNames[s], accnosFileName); 
 				
 					rename((outputFileName + toString(processIDS[0]) + ".temp").c_str(), outputFileName.c_str());
+					rename((accnosFileName + toString(processIDS[0]) + ".temp").c_str(), accnosFileName.c_str());
 						
 					//append output files
 					for(int i=1;i<processors;i++){
@@ -414,23 +395,11 @@ int ChimeraSlayerCommand::execute(){
 						remove((outputFileName + toString(processIDS[i]) + ".temp").c_str());
 					}
 					
-					vector<string> nonBlankAccnosFiles;
-					//delete blank accnos files generated with multiple processes
-					for(int i=0;i<processors;i++){  
-						if (!(isBlank(accnosFileName + toString(processIDS[i]) + ".temp"))) {
-							nonBlankAccnosFiles.push_back(accnosFileName + toString(processIDS[i]) + ".temp");
-						}else { remove((accnosFileName + toString(processIDS[i]) + ".temp").c_str());  }
+					//append output files
+					for(int i=1;i<processors;i++){
+						appendFiles((accnosFileName + toString(processIDS[i]) + ".temp"), accnosFileName);
+						remove((accnosFileName + toString(processIDS[i]) + ".temp").c_str());
 					}
-					
-					//append accnos files
-					if (nonBlankAccnosFiles.size() != 0) { 
-						rename(nonBlankAccnosFiles[0].c_str(), accnosFileName.c_str());
-						
-						for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
-							appendFiles(nonBlankAccnosFiles[h], accnosFileName);
-							remove(nonBlankAccnosFiles[h].c_str());
-						}
-					}else{ hasAccnos = false;  }
 					
 					if (m->control_pressed) { 
 						remove(outputFileName.c_str()); 
@@ -462,8 +431,6 @@ int ChimeraSlayerCommand::execute(){
 						return 0;
 				}
 				
-				//delete accnos file if its blank 
-				if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
 			#endif
 			
 			appendFiles(outputFileName, tempHeader);
@@ -478,10 +445,10 @@ int ChimeraSlayerCommand::execute(){
 			for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 			
 			outputNames.push_back(outputFileName);
-			if (hasAccnos) { outputNames.push_back(accnosFileName); }
+			outputNames.push_back(accnosFileName); 
 			
 			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine();
-			}
+		}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -589,8 +556,6 @@ int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_Fil
 		//cout << "about to print" << endl;
 					//print results
 					bool isChimeric = chimera->print(outMPI, outAccMPI);
-					if (isChimeric) { MPIWroteAccnos = true;  }
-	
 				}
 			}
 			delete candidateSeq;

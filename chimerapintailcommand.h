@@ -43,7 +43,7 @@ private:
 	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, vector<long>&);
 	#endif
 
-	bool abort, filter, MPIWroteAccnos;
+	bool abort, filter;
 	string fastafile, templatefile, consfile, quanfile, maskfile, outputDir, inputDir;
 	int processors, window, increment, numSeqs, templateSeqsLength;
 	Chimera* chimera;
