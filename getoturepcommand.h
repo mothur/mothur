@@ -53,13 +53,13 @@ private:
 	ReadMatrix* readMatrix;
 	FormatMatrix* formatMatrix;
 	NameAssignment* nameMap;
-	string filename, fastafile, listfile, namefile, groupfile, label, sorted, phylipfile, columnfile, distFile, format, outputDir;
+	string filename, fastafile, listfile, namefile, groupfile, label, sorted, phylipfile, columnfile, distFile, format, outputDir, groups;
 	ofstream out;
 	ifstream in, inNames, inRow;
 	bool abort, allLines, groupError, large;
 	set<string> labels; //holds labels to be used
 	map<string, int> nameToIndex;  //maps sequence name to index in sparsematrix
-	vector<string> outputNames;
+	vector<string> outputNames, Groups;
 	map<string, string> outputNameFiles;
 	float cutoff;
 	int precision;
@@ -70,7 +70,7 @@ private:
 	void readNamesFile();
 	int process(ListVector*);
 	SeqMap getMap(int);
-	string findRep(int, ListVector*); 	// returns the name of the "representative" sequence of given bin
+	string findRep(vector<string>); 	// returns the name of the "representative" sequence of given bin or subset of a bin, for groups
 	int processNames(string, string);
 												
 

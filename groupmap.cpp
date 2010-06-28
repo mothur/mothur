@@ -27,7 +27,7 @@ int GroupMap::readMap() {
 		int error = 0;
 
 		while(fileHandle){
-			fileHandle >> seqName;			//read from first column
+			fileHandle >> seqName;	gobble(fileHandle);		//read from first column
 			fileHandle >> seqGroup;			//read from second column
 			
 			if (m->control_pressed) {  fileHandle.close();  return 1; }

@@ -828,7 +828,13 @@ inline bool anyLabelsToProcess(string label, set<string>& userLabels, string err
 		
 		//unique is the smallest line
 		if (label == "unique") {  return false;  }
-		else { convert(label, labelFloat); }
+		else { 
+			if (convertTestFloat(label, labelFloat)) {
+				convert(label, labelFloat); 
+			}else { //cant convert 
+				return false;
+			}
+		}
 		
 		//go through users set and make them floats
 		for(it = userLabels.begin(); it != userLabels.end(); ++it) {
