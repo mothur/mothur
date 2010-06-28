@@ -166,13 +166,6 @@ int MGClusterCommand::execute(){
 		
 		list = new ListVector(nameMap->getListVector());
 		RAbundVector* rabund = new RAbundVector(list->getRAbundVector());
-for (int i = 0; i < list->getNumBins(); i++) {
-string bin = list->get(i);
-if(bin == "") {
-cout << "bin " << i << " is blank."<< endl;
-}
-}
-cout << "after outputting blank bins." << endl;
 		
 		if (m->control_pressed) { delete nameMap; delete read; delete list; delete rabund; return 0; }
 		
@@ -215,7 +208,7 @@ cout << "after outputting blank bins." << endl;
 				listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
 				return 0; 
 			}
-	int count = 0;		
+		
 			//cluster using cluster classes
 			while (distMatrix->getSmallDist() < cutoff && distMatrix->getNNodes() > 0){
 				
@@ -234,16 +227,13 @@ cout << "after outputting blank bins." << endl;
 				}else{
 					rndDist = roundDist(dist, precision); 
 				}
-cout << "here " << count << '\t' << dist << endl;
 				
 				if(previousDist <= 0.0000 && dist != previousDist){
 					oldList.setLabel("unique");
 					printData(&oldList);
-					Seq2Bin = cluster->getSeqtoBin();
 				}
 				else if(rndDist != rndPreviousDist){
 					if (merge) {
-						Seq2Bin = cluster->getSeqtoBin();
 						ListVector* temp = mergeOPFs(oldSeq2Bin, rndPreviousDist);
 						
 						if (m->control_pressed) { 
@@ -260,22 +250,20 @@ cout << "here " << count << '\t' << dist << endl;
 						printData(&oldList);
 					}
 				}
-	//cout << "after merge " << count << '\t' << dist << endl;	
-	count++;		
+	
 				previousDist = dist;
 				rndPreviousDist = rndDist;
 				oldList = *list;
+				Seq2Bin = cluster->getSeqtoBin();
 				oldSeq2Bin = Seq2Bin;
 			}
 			
 			if(previousDist <= 0.0000){
 				oldList.setLabel("unique");
 				printData(&oldList);
-				Seq2Bin = cluster->getSeqtoBin();
 			}
 			else if(rndPreviousDist<cutoff){
 				if (merge) {
-					Seq2Bin = cluster->getSeqtoBin();
 					ListVector* temp = mergeOPFs(oldSeq2Bin, rndPreviousDist);
 					
 					if (m->control_pressed) { 
@@ -365,11 +353,9 @@ cout << "here " << count << '\t' << dist << endl;
 						if((previousDist <= 0.0000) && (seqs[i].dist != previousDist)){
 							oldList.setLabel("unique");
 							printData(&oldList);
-							Seq2Bin = hcluster->getSeqtoBin();
 						}
 						else if((rndDist != rndPreviousDist)){
 							if (merge) {
-								Seq2Bin = hcluster->getSeqtoBin();
 								ListVector* temp = mergeOPFs(oldSeq2Bin, rndPreviousDist);
 								
 								if (m->control_pressed) { 
@@ -392,6 +378,7 @@ cout << "here " << count << '\t' << dist << endl;
 						previousDist = seqs[i].dist;
 						rndPreviousDist = rndDist;
 						oldList = *list;
+						Seq2Bin = cluster->getSeqtoBin();
 						oldSeq2Bin = Seq2Bin;
 					}
 				}
@@ -404,7 +391,6 @@ cout << "here " << count << '\t' << dist << endl;
 			}
 			else if(rndPreviousDist<cutoff){
 				if (merge) {
-					Seq2Bin = hcluster->getSeqtoBin();
 					ListVector* temp = mergeOPFs(oldSeq2Bin, rndPreviousDist);
 					
 					if (m->control_pressed) { 
@@ -485,16 +471,6 @@ ListVector* MGClusterCommand::mergeOPFs(map<string, int> binInfo, float dist){
 	try {
 		//create new listvector so you don't overwrite the clustering
 		ListVector* newList = new ListVector(oldList);
-for (int i = 0; i < newList->getNumBins(); i++) {
-string bin = newList->get(i);
-if(bin == "") {
-cout << "bin " << i << " is blank."<< endl;
-for (map<string, int>::iterator itBin = binInfo.begin(); itBin != binInfo.end(); itBin++) {
-	if (itBin->second == i) { cout << itBin->first << " maps to an empty bin." << endl; }
-}
-}
-}
-cout << "after outputting blank bins." << endl;		
 
 		bool done = false;
 		ifstream inOverlap;
@@ -546,17 +522,16 @@ cout << "after outputting blank bins." << endl;
 				
 				if(itBin1 == binInfo.end()){  cerr << "AAError: Sequence '" << name1 << "' does not have any bin info.\n"; exit(1);  }
 				if(itBin2 == binInfo.end()){  cerr << "ABError: Sequence '" << name2 << "' does not have any bin info.\n"; exit(1);  }
-cout << overlapNode.dist << '\t' << dist << endl;
+
 				int binKeep = itBin1->second;
 				int binRemove = itBin2->second;
 			
 				//if not merge bins and update binInfo
 				if(binKeep != binRemove) {
-	cout << "bin keep = " << binKeep << " bin remove = " << binRemove << endl;		
+		
 					//save names in old bin
 					string names = newList->get(binRemove);
-			cout << names << endl << endl << endl;	
-			cout << newList->get(binKeep) << endl << endl << endl;	
+		
 					//merge bins into name1s bin
 					newList->set(binKeep, newList->get(binRemove)+','+newList->get(binKeep));
 					newList->set(binRemove, "");	
