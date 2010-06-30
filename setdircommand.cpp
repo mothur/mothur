@@ -134,7 +134,7 @@ int SetDirectoryCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SetDirectoryCommand", "SetDirectoryCommand");
+		m->errorOut(e, "SetDirectoryCommand", "execute");
 		exit(1);
 	}
 }

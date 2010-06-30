@@ -33,7 +33,7 @@ private:
 	bool stripQualThreshold(Sequence&, ifstream&);
 	bool cullQualAverage(Sequence&, ifstream&);
 	int stripBarcode(Sequence&, int&);
-	int stripForward(Sequence&);
+	int stripForward(Sequence&, int&);
 	bool stripReverse(Sequence&);
 	bool cullLength(Sequence&);
 	bool cullHomoP(Sequence&);
@@ -45,10 +45,12 @@ private:
 	string fastaFile, oligoFile, qFileName, outputDir;
 	
 	bool flip, allFiles, qtrim;
-	int numFPrimers, numRPrimers, maxAmbig, maxHomoP, minLength, maxLength, qThreshold, qAverage, processors, tdiffs, bdiffs, pdiffs;
-	vector<string> forPrimer, revPrimer, outputNames;
+	int numFPrimers, numRPrimers, maxAmbig, maxHomoP, minLength, maxLength, qThreshold, qAverage, processors, tdiffs, bdiffs, pdiffs, comboStarts;
+	vector<string> revPrimer, outputNames;
 	map<string, int> barcodes;
 	vector<string> groupVector;
+	map<string, int> primers;
+	map<string, int> combos;
 	
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;

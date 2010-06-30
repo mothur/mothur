@@ -64,6 +64,9 @@
 #else
 	#include <conio.h> //allows unbuffered screen capture from stdin
 	#include <direct.h> //get cwd
+	#include <windows.h>
+	#include <psapi.h>
+
 #endif
 
 using namespace std;

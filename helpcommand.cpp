@@ -23,7 +23,6 @@ HelpCommand::~HelpCommand(){}
 //**********************************************************************************************************************
 
 int HelpCommand::execute(){
-
 	validCommands->printCommands(cout);
 	m->mothurOut("For more information about a specific command type 'commandName(help)' i.e. 'read.dist(help)'"); m->mothurOutEndLine();
 	
