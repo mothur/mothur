@@ -38,6 +38,8 @@ class MothurOut {
 
 		string logFileName;
 		ofstream out;
+		
+		int mem_usage(double&, double&);
 
 };
 /***********************************************/

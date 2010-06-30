@@ -16,6 +16,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 	try {
 		
 		abort = false;
+		comboStarts = 0;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; }
@@ -281,25 +282,36 @@ int TrimSeqsCommand::execute(){
 						
 										
 		for(int i=0;i<fastaFileNames.size();i++){
-			ifstream inFASTA;
-			string seqName;
-			//openInputFile(getRootName(fastaFile) +  groupVector[i] + ".fasta", inFASTA);
-			openInputFile(fastaFileNames[i], inFASTA);
-			ofstream outGroups;
-			string outGroupFilename = outputDir + getRootName(getSimpleName(fastaFileNames[i])) + "groups";
-			openOutputFile(outGroupFilename, outGroups);
-			//openOutputFile(outputDir + getRootName(getSimpleName(fastaFile)) + groupVector[i] + ".groups", outGroups);
-			outputNames.push_back(outGroupFilename);
-			
-			while(!inFASTA.eof()){
-				if(inFASTA.get() == '>'){
-					inFASTA >> seqName;
-					outGroups << seqName << '\t' << groupVector[i] << endl;
+			if (isBlank(fastaFileNames[i])) { remove(fastaFileNames[i].c_str()); }
+			else {
+				ifstream inFASTA;
+				string seqName;
+				//openInputFile(getRootName(fastaFile) +  groupVector[i] + ".fasta", inFASTA);
+				openInputFile(fastaFileNames[i], inFASTA);
+				ofstream outGroups;
+				string outGroupFilename = outputDir + getRootName(getSimpleName(fastaFileNames[i])) + "groups";
+				openOutputFile(outGroupFilename, outGroups);
+				//openOutputFile(outputDir + getRootName(getSimpleName(fastaFile)) + groupVector[i] + ".groups", outGroups);
+				outputNames.push_back(outGroupFilename);
+				
+				string thisGroup = "";
+				if (i > comboStarts) {
+					map<string, int>::iterator itCombo;
+					for(itCombo=combos.begin();itCombo!=combos.end(); itCombo++){
+						if(itCombo->second == i){	thisGroup = itCombo->first;	combos.erase(itCombo);  break;  }
+					}
+				}else{ thisGroup = groupVector[i]; }
+				
+				while(!inFASTA.eof()){
+					if(inFASTA.get() == '>'){
+						inFASTA >> seqName;
+						outGroups << seqName << '\t' << thisGroup << endl;
+					}
+					while (!inFASTA.eof())	{	char c = inFASTA.get(); if (c == 10 || c == 13){	break;	}	}
 				}
-				while (!inFASTA.eof())	{	char c = inFASTA.get(); if (c == 10 || c == 13){	break;	}	}
+				outGroups.close();
+				inFASTA.close();
 			}
-			outGroups.close();
-			inFASTA.close();
 		}
 		
 		if (m->control_pressed) { 
@@ -368,7 +380,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 
 			string origSeq = currSeq.getUnaligned();
 			if (origSeq != "") {
-				int group;
+				int groupBar, groupPrime;
 				string trashCode = "";
 				int currentSeqsDiffs = 0;
 				
@@ -384,13 +396,13 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 				}
 			
 				if(barcodes.size() != 0){
-					success = stripBarcode(currSeq, group);
+					success = stripBarcode(currSeq, groupBar);
 					if(success > bdiffs){	trashCode += 'b';	}
 					else{ currentSeqsDiffs += success;  }
 				}
 
 				if(numFPrimers != 0){
-					success = stripForward(currSeq);
+					success = stripForward(currSeq, groupPrime);
 					if(success > pdiffs){	trashCode += 'f';	}
 					else{ currentSeqsDiffs += success;  }
 				}
@@ -421,10 +433,19 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 					currSeq.setAligned(currSeq.getUnaligned());
 					currSeq.printSequence(outFASTA);
 					if(barcodes.size() != 0){
-						outGroups << currSeq.getName() << '\t' << groupVector[group] << endl;
+						string thisGroup = groupVector[groupBar];
+						int indexToFastaFile = groupBar;
+						if (primers.size() != 0){
+							//does this primer have a group
+							if (groupVector[groupPrime] != "") {  
+								thisGroup += "." + groupVector[groupPrime]; 
+								indexToFastaFile = combos[thisGroup];
+							}
+						}
+						outGroups << currSeq.getName() << '\t' << thisGroup << endl;
 						
 						if(allFiles){
-							currSeq.printSequence(*fastaFileNames[group]);					
+							currSeq.printSequence(*fastaFileNames[indexToFastaFile]);					
 						}
 					}
 				}
@@ -558,6 +579,7 @@ void TrimSeqsCommand::getOligos(vector<string>& outFASTAVec){ //vector<ofstream*
 		
 		string type, oligo, group;
 		int index=0;
+		//int indexPrimer = 0;
 		
 		while(!inOligos.eof()){
 			inOligos >> type;
@@ -574,7 +596,29 @@ void TrimSeqsCommand::getOligos(vector<string>& outFASTAVec){ //vector<ofstream*
 				}
 				
 				if(type == "forward"){
-					forPrimer.push_back(oligo);
+					group = "";
+					
+					// get rest of line in case there is a primer name
+					while (!inOligos.eof())	{	
+						char c = inOligos.get(); 
+						if (c == 10 || c == 13){	break;	}
+						else if (c == 32 || c == 9){;} //space or tab
+						else { 	group += c;  }
+					} 
+					
+					//check for repeat barcodes
+					map<string, int>::iterator itPrime = primers.find(oligo);
+					if (itPrime != primers.end()) { m->mothurOut("primer " + oligo + " is in your oligos file already."); m->mothurOutEndLine();  }
+					
+					primers[oligo]=index; index++;
+					groupVector.push_back(group);
+					
+					if(allFiles){
+						if (group != "") { //there is a group for this primer
+							outputNames.push_back((outputDir + getRootName(getSimpleName(fastaFile)) + toString(index) + "." + group + ".fasta"));
+							outFASTAVec.push_back((outputDir + getRootName(getSimpleName(fastaFile)) + toString(index) + "." + group + ".fasta"));
+						}
+					}
 				}
 				else if(type == "reverse"){
 					Sequence oligoRC("reverse", oligo);
@@ -583,21 +627,40 @@ void TrimSeqsCommand::getOligos(vector<string>& outFASTAVec){ //vector<ofstream*
 				}
 				else if(type == "barcode"){
 					inOligos >> group;
+					
+					//check for repeat barcodes
+					map<string, int>::iterator itBar = barcodes.find(oligo);
+					if (itBar != barcodes.end()) { m->mothurOut("barcode " + oligo + " is in your oligos file already."); m->mothurOutEndLine();  }
+					
 					barcodes[oligo]=index; index++;
 					groupVector.push_back(group);
 					
 					if(allFiles){
-						//outFASTAVec.push_back(new ofstream((outputDir + getRootName(getSimpleName(fastaFile)) + group + ".fasta").c_str(), ios::ate));
 						outputNames.push_back((outputDir + getRootName(getSimpleName(fastaFile)) + toString(index) + "." + group + ".fasta"));
 						outFASTAVec.push_back((outputDir + getRootName(getSimpleName(fastaFile)) + toString(index) + "." + group + ".fasta"));
 					}
 				}else{	m->mothurOut(type + " is not recognized as a valid type. Choices are forward, reverse, and barcode. Ignoring " + oligo + "."); m->mothurOutEndLine();  }
 			}
+			gobble(inOligos);
 		}
 		
 		inOligos.close();
 		
-		numFPrimers = forPrimer.size();
+		//add in potential combos
+		if(allFiles){
+			comboStarts = outFASTAVec.size()-1;
+			for (map<string, int>::iterator itBar = barcodes.begin(); itBar != barcodes.end(); itBar++) {
+				for (map<string, int>::iterator itPrime = primers.begin(); itPrime != primers.end(); itPrime++) {
+					if (groupVector[itPrime->second] != "") { //there is a group for this primer
+						outputNames.push_back((outputDir + getRootName(getSimpleName(fastaFile)) + toString(itBar->second) + "." + groupVector[itBar->second] + "." + toString(itPrime->second) + "." + groupVector[itPrime->second] + ".fasta"));
+						outFASTAVec.push_back((outputDir + getRootName(getSimpleName(fastaFile)) + toString(itBar->second) + "." + groupVector[itBar->second] + "." + toString(itPrime->second) + "." + groupVector[itPrime->second] + ".fasta"));
+						combos[(groupVector[itBar->second] + "." + groupVector[itPrime->second])] = outFASTAVec.size()-1;
+					}
+				}
+			}
+		}
+		
+		numFPrimers = primers.size();
 		numRPrimers = revPrimer.size();
 		
 	}
@@ -727,27 +790,27 @@ int TrimSeqsCommand::stripBarcode(Sequence& seq, int& group){
 
 //***************************************************************************************************************
 
-int TrimSeqsCommand::stripForward(Sequence& seq){
+int TrimSeqsCommand::stripForward(Sequence& seq, int& group){
 	try {
 		string rawSequence = seq.getUnaligned();
 		int success = pdiffs + 1;	//guilty until proven innocent
 		
 		//can you find the primer
-		for(int i=0;i<numFPrimers;i++){
-			string oligo = forPrimer[i];
-
-			if(rawSequence.length() < oligo.length()){	
-				success = pdiffs + 1;
-				break;
+		for(map<string,int>::iterator it=primers.begin();it!=primers.end();it++){
+			string oligo = it->first;
+			if(rawSequence.length() < oligo.length()){	//let's just assume that the primers are the same length
+				success = pdiffs + 10;					//if the sequence is shorter than the barcode then bail out
+				break;	
 			}
 			
 			if(compareDNASeq(oligo, rawSequence.substr(0,oligo.length()))){
+				group = it->second;
 				seq.setUnaligned(rawSequence.substr(oligo.length()));
 				success = 0;
 				break;
 			}
 		}
-		
+
 		//if you found the barcode or if you don't want to allow for diffs
 //		cout << success;
 		if ((pdiffs == 0) || (success == 0)) { return success;  }
@@ -758,11 +821,12 @@ int TrimSeqsCommand::stripForward(Sequence& seq){
 			int maxLength = 0;
 
 			Alignment* alignment;
-			if (numFPrimers > 0) {
+			if (primers.size() > 0) {
+				map<string,int>::iterator it=primers.begin();
 
-				for(int i=0;i<numFPrimers;i++){
-					if(forPrimer[i].length() > maxLength){
-						maxLength = forPrimer[i].length();
+				for(it;it!=primers.end();it++){
+					if(it->first.length() > maxLength){
+						maxLength = it->first.length();
 					}
 				}
 				alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (maxLength+pdiffs+1));  
@@ -772,10 +836,12 @@ int TrimSeqsCommand::stripForward(Sequence& seq){
 			//can you find the barcode
 			int minDiff = 1e6;
 			int minCount = 1;
+			int minGroup = -1;
 			int minPos = 0;
 			
-			for(int i=0;i<numFPrimers;i++){
-				string oligo = forPrimer[i];
+			for(map<string,int>::iterator it=primers.begin();it!=primers.end();it++){
+				string oligo = it->first;
+//				int length = oligo.length();
 				
 				if(rawSequence.length() < maxLength){	
 					success = pdiffs + 100;
@@ -794,12 +860,16 @@ int TrimSeqsCommand::stripForward(Sequence& seq){
 				}
 				oligo = oligo.substr(0,alnLength);
 				temp = temp.substr(0,alnLength);
-
+				
 				int newStart=0;
 				int numDiff = countDiffs(oligo, temp);
+				
+//				cout << oligo << '\t' << temp << '\t' << numDiff << endl;				
+				
 				if(numDiff < minDiff){
 					minDiff = numDiff;
 					minCount = 1;
+					minGroup = it->second;
 					minPos = 0;
 					for(int i=0;i<alnLength;i++){
 						if(temp[i] != '-'){
@@ -812,9 +882,11 @@ int TrimSeqsCommand::stripForward(Sequence& seq){
 				}
 
 			}
-			if(minDiff > pdiffs)	{	success =  minDiff;		}
-			else if(minCount > 1)	{	success =  pdiffs + 10;	}
-			else{
+
+			if(minDiff > pdiffs)	{	success = minDiff;		}	//no good matches
+			else if(minCount > 1)	{	success = pdiffs + 10;	}	//can't tell the difference between multiple primers
+			else{													//use the best match
+				group = minGroup;
 				seq.setUnaligned(rawSequence.substr(minPos));
 				success = minDiff;
 			}
@@ -822,6 +894,7 @@ int TrimSeqsCommand::stripForward(Sequence& seq){
 			if (alignment != NULL) {  delete alignment;  }
 			
 		}
+		
 		return success;
 
 	}

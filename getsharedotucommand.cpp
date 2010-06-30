@@ -334,7 +334,7 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 				//find group
 				string seqGroup = groupMap->getGroup(name);
 				if (output != "accnos") {
-					namesOfSeqsInThisBin.push_back((name + "\t" + seqGroup + "\t" + toString(i+1)));
+					namesOfSeqsInThisBin.push_back((name + "|" + seqGroup + "|" + toString(i+1)));
 				}else {  namesOfSeqsInThisBin.push_back(name);	}
 				
 				if (seqGroup == "not found") { m->mothurOut(name + " is not in your groupfile. Please correct."); m->mothurOutEndLine(); exit(1);  }
@@ -348,7 +348,7 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 			//get last name
 			string seqGroup = groupMap->getGroup(names);
 			if (output != "accnos") {
-				namesOfSeqsInThisBin.push_back((names + "\t" + seqGroup + "\t" + toString(i+1)));
+				namesOfSeqsInThisBin.push_back((names + "|" + seqGroup + "|" + toString(i+1)));
 			}else {  namesOfSeqsInThisBin.push_back(names);	}
 			
 			if (seqGroup == "not found") { m->mothurOut(names + " is not in your groupfile. Please correct."); m->mothurOutEndLine(); exit(1);  }
@@ -379,8 +379,8 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 					
 					if (fastafile != "") { 
 						if (output != "accnos") {
-							string seqName = namesOfSeqsInThisBin[j].substr(0,namesOfSeqsInThisBin[j].find_last_of('\t'));
-							seqName = seqName.substr(0,seqName.find_last_of('\t'));
+							string seqName = namesOfSeqsInThisBin[j].substr(0,namesOfSeqsInThisBin[j].find_last_of('|'));
+							seqName = seqName.substr(0,seqName.find_last_of('|'));
 							fastaMap[seqName] = namesOfSeqsInThisBin[j];  //fastaMap needs to contain just the seq name for output later
 						}else {
 							fastaMap[namesOfSeqsInThisBin[j]] = namesOfSeqsInThisBin[j];
