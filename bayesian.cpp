@@ -50,6 +50,9 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 			//create search database and names vector
 			generateDatabaseAndNames(tfile, tempFile, method, ksize, 0.0, 0.0, 0.0, 0.0);
 			
+			//prevents errors caused by creating shortcut files if you had an error in the sanity check.
+			if (m->control_pressed) {  remove(phyloTreeName.c_str());   }
+			
 			genusNodes = phyloTree->getGenusNodes(); 
 			genusTotals = phyloTree->getGenusTotals();
 			
