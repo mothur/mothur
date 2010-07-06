@@ -66,3 +66,4 @@ install : mothur
 
 clean :
 	@rm -f $(OBJECTS)
+
