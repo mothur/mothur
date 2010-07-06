@@ -82,6 +82,7 @@
 #include "classifyotucommand.h"
 #include "degapseqscommand.h"
 #include "getrelabundcommand.h"
+#include "sensspeccommand.h"
 
 /*******************************************************/
 
@@ -183,6 +184,7 @@ CommandFactory::CommandFactory(){
 	commands["screen.seqs"]			= "MPIEnabled";
 	commands["summary.seqs"]		= "MPIEnabled";
 	commands["cluster.split"]		= "MPIEnabled";
+	commands["sens.spec"]			= "sens.spec";
 	commands["quit"]				= "MPIEnabled"; 
 
 }
@@ -297,6 +299,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "classify.otu")			{	command = new ClassifyOtuCommand(optionString);				}
 		else if(commandName == "degap.seqs")			{	command = new DegapSeqsCommand(optionString);				}
 		else if(commandName == "get.relabund")			{	command = new GetRelAbundCommand(optionString);				}
+		else if(commandName == "sens.spec")				{	command = new SensSpecCommand(optionString);				}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;

@@ -378,7 +378,6 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			int success = 1;
 			
 			Sequence currSeq(inFASTA);
-	
 
 			string origSeq = currSeq.getUnaligned();
 			if (origSeq != "") {

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		7EA299BA11E384940022D8D3 /* sensspeccommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sensspeccommand.h; sourceTree = "<group>"; };
+		7EA299BB11E384940022D8D3 /* sensspeccommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sensspeccommand.cpp; sourceTree = "<group>"; };
 		7EC61A0911BEA6AF00F668D9 /* weightedlinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = weightedlinkage.cpp; sourceTree = "<group>"; };
 		A703FE931194645F002C397E /* makegroupcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = makegroupcommand.h; sourceTree = SOURCE_ROOT; };
 		A703FE941194645F002C397E /* makegroupcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = makegroupcommand.cpp; sourceTree = SOURCE_ROOT; };
@@ -655,6 +657,8 @@
 		A7CB593E11402F110010EB83 /* commands */ = {
 			isa = PBXGroup;
 			children = (
+				7EA299BA11E384940022D8D3 /* sensspeccommand.h */,
+				7EA299BB11E384940022D8D3 /* sensspeccommand.cpp */,
 				A7DA202B113FECD400BF472F /* command.hpp */,
 				A7DA1FEF113FECD400BF472F /* aligncommand.h */,
 				A7DA1FEE113FECD400BF472F /* aligncommand.cpp */,
