@@ -377,7 +377,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			int success = 1;
 			
 			Sequence currSeq(inFASTA);
-
+	cout << i << '\t' << currSeq.getName() << endl;
 			string origSeq = currSeq.getUnaligned();
 			if (origSeq != "") {
 				int groupBar, groupPrime;
@@ -583,11 +583,14 @@ void TrimSeqsCommand::getOligos(vector<string>& outFASTAVec){ //vector<ofstream*
 		
 		while(!inOligos.eof()){
 			inOligos >> type;
-			
+		 			
 			if(type[0] == '#'){
 				while (!inOligos.eof())	{	char c = inOligos.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
 			}
 			else{
+				//make type case insensitive
+				for(int i=0;i<type.length();i++){	type[i] = toupper(type[i]);  }
+				
 				inOligos >> oligo;
 				
 				for(int i=0;i<oligo.length();i++){
@@ -595,7 +598,7 @@ void TrimSeqsCommand::getOligos(vector<string>& outFASTAVec){ //vector<ofstream*
 					if(oligo[i] == 'U')	{	oligo[i] = 'T';	}
 				}
 				
-				if(type == "forward"){
+				if(type == "FORWARD"){
 					group = "";
 					
 					// get rest of line in case there is a primer name
@@ -619,13 +622,14 @@ void TrimSeqsCommand::getOligos(vector<string>& outFASTAVec){ //vector<ofstream*
 							outFASTAVec.push_back((outputDir + getRootName(getSimpleName(fastaFile)) + toString(index) + "." + group + ".fasta"));
 						}
 					}
+
 				}
-				else if(type == "reverse"){
+				else if(type == "REVERSE"){
 					Sequence oligoRC("reverse", oligo);
 					oligoRC.reverseComplement();
 					revPrimer.push_back(oligoRC.getUnaligned());
 				}
-				else if(type == "barcode"){
+				else if(type == "BARCODE"){
 					inOligos >> group;
 					
 					//check for repeat barcodes
