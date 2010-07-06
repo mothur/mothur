@@ -283,6 +283,7 @@ int TrimSeqsCommand::execute(){
 										
 		for(int i=0;i<fastaFileNames.size();i++){
 			if (isBlank(fastaFileNames[i])) { remove(fastaFileNames[i].c_str()); }
+			else if (filesToRemove.count(fastaFileNames[i]) > 0) { remove(fastaFileNames[i].c_str()); }
 			else {
 				ifstream inFASTA;
 				string seqName;
@@ -377,7 +378,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			int success = 1;
 			
 			Sequence currSeq(inFASTA);
-	cout << i << '\t' << currSeq.getName() << endl;
+	
 
 			string origSeq = currSeq.getUnaligned();
 			if (origSeq != "") {
@@ -444,7 +445,6 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 							}
 						}
 						outGroups << currSeq.getName() << '\t' << thisGroup << endl;
-						
 						if(allFiles){
 							currSeq.printSequence(*fastaFileNames[indexToFastaFile]);					
 						}
@@ -618,9 +618,11 @@ void TrimSeqsCommand::getOligos(vector<string>& outFASTAVec){ //vector<ofstream*
 					groupVector.push_back(group);
 					
 					if(allFiles){
-						if (group != "") { //there is a group for this primer
+						outFASTAVec.push_back((outputDir + getRootName(getSimpleName(fastaFile)) + toString(index) + "." + group + ".fasta"));
+						if (group == "") { //if there is not a group for this primer, then this file will not get written to, but we add it to keep the indexes correct
+							filesToRemove.insert((outputDir + getRootName(getSimpleName(fastaFile)) + toString(index) + "." + group + ".fasta"));
+						}else {
 							outputNames.push_back((outputDir + getRootName(getSimpleName(fastaFile)) + toString(index) + "." + group + ".fasta"));
-							outFASTAVec.push_back((outputDir + getRootName(getSimpleName(fastaFile)) + toString(index) + "." + group + ".fasta"));
 						}
 					}
 

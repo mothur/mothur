@@ -47,6 +47,7 @@ private:
 	bool flip, allFiles, qtrim;
 	int numFPrimers, numRPrimers, maxAmbig, maxHomoP, minLength, maxLength, qThreshold, qAverage, processors, tdiffs, bdiffs, pdiffs, comboStarts;
 	vector<string> revPrimer, outputNames;
+	set<string> filesToRemove;
 	map<string, int> barcodes;
 	vector<string> groupVector;
 	map<string, int> primers;
