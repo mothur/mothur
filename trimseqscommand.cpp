@@ -378,6 +378,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			
 			Sequence currSeq(inFASTA);
 	cout << i << '\t' << currSeq.getName() << endl;
+
 			string origSeq = currSeq.getUnaligned();
 			if (origSeq != "") {
 				int groupBar, groupPrime;
