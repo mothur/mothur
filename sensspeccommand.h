@@ -24,16 +24,20 @@ public:
 	
 private:
 	void processPhylip();
-///	void processColumn(map<string, int>);
+	void processColumn();
+	void setUpOutput();
+	void outputStatistics(string, string);
 	
-	string listFile, distFile, nameFile, outputDir;
+	string listFile, distFile, nameFile, sensSpecFileName;
+	string outputDir;
 	string format;
-//	int numSeqs, numDists;
-	int truePositives, falsePositives, trueNegatives, falseNegatives;
+
+	long int truePositives, falsePositives, trueNegatives, falseNegatives;
 	bool abort;
 	bool hard;
 	string lineLabel;
 	double cutoff;
+	int precision;
 };
 
 #endif
