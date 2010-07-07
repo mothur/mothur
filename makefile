@@ -17,7 +17,6 @@ CYGWIN_BUILD ?= no
 ifeq  ($(strip $(CYGWIN_BUILD)),yes)
     CXXFLAGS += -mno-cygwin
     LDFLAGS += -mno-cygwin 
-#-lpsapi
 endif
 
 64BIT_VERSION ?= yes
@@ -35,8 +34,7 @@ ifeq  ($(strip $(USEREADLINE)),yes)
     CXXFLAGS += -DUSE_READLINE
     LDFLAGS += \
       -lreadline\
-      -lncurses\
-      -L../readline-6.0
+      -lncurses
 endif
 
 USEMPI ?= no
@@ -63,6 +61,12 @@ mothur : $(OBJECTS)
 
 install : mothur
 	cp mothur ../Release/mothur
+
+%.o : %.cpp %.h
+	$(COMPILE.cpp) $(OUTPUT_OPTION) $<
+%.o : %.cpp %.hpp
+	$(COMPILE.cpp) $(OUTPUT_OPTION) $<
+
 
 clean :
 	@rm -f $(OBJECTS)
