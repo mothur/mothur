@@ -196,7 +196,7 @@ int SffInfoCommand::readCommonHeader(ifstream& in, CommonHeader*& header){
 			//read version
 			header->version = new char(4);
 			in.read(header->version, 4);
-			string tempBuf0 = header->version;
+			string tempBuf0 = header->version;  //this is in here because the read sometimes tacks on extra chars, not sure why?
 			if (tempBuf0.length() > 4) { tempBuf0 = tempBuf0.substr(0, 4);  strcpy(header->version, tempBuf0.c_str());  }
 			//memcpy(header->version, buffer+4, 4);
 	//cout << "here " << header->version  << '\t' << in.tellg() << endl;	
