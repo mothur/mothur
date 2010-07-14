@@ -167,9 +167,10 @@ int SffInfoCommand::extractSffInfo(string input, string output){
 			
 			//print data
 			printSeqData(out, read, true);
-	
+			
+			delete readheader;
+			delete read;
 		}
-		
 		
 		in.close();
 		out.close();
@@ -238,10 +239,10 @@ int SffInfoCommand::readCommonHeader(ifstream& in, CommonHeader*& header){
 			delete[] buffer;
 		//cout << "here " << header->numFlowsPerRead << '\t' << in.tellg() << endl;		
 			//read format code
-			buffer = new char(sizeof(header->flogramFormatCode));
-			in.read(buffer, sizeof(header->flogramFormatCode));
-			header->flogramFormatCode = be_int1(*(char *)(buffer));
-			delete[] buffer;
+			//buffer = new char(sizeof(header->flogramFormatCode));
+			in.read(&header->flogramFormatCode, 1);
+			header->flogramFormatCode = be_int1(*(char *)(&header->flogramFormatCode));
+			//delete[] buffer;
 	//cout << "here " << header->flogramFormatCode << '\t' << in.tellg() << endl;	
 	
 			//read flow chars
@@ -250,6 +251,8 @@ int SffInfoCommand::readCommonHeader(ifstream& in, CommonHeader*& header){
 			buffer = new char(header->numFlowsPerRead);
 	//cout << "here" << endl;
 			//in.read(header->flowChars, header->numFlowsPerRead); 
+			//string tempBuf1 = header->flowChars + '\0';  //this is in here because the read sometimes tacks on extra chars, not sure why?
+			//if (tempBuf0.length() > header->numFlowsPerRead) { tempBuf1 = tempBuf1.substr(0, header->numFlowsPerRead);  strcpy(header->flowChars, tempBuf1.c_str());  }
 			in.read(buffer, header->numFlowsPerRead); 
 			memcpy(header->flowChars, buffer, header->numFlowsPerRead);
 			delete[] buffer;
@@ -258,7 +261,7 @@ int SffInfoCommand::readCommonHeader(ifstream& in, CommonHeader*& header){
 	//cout << "here " << in.tellg() << endl;
 			//if (tempBuf1.length() > header->numFlowsPerRead) { tempBuf1 = tempBuf1.substr(0, header->numFlowsPerRead);  strcpy(header->flowChars, tempBuf1.c_str()); }
 			
-	//	cout << "here " << header->flowChars << '\t' << in.tellg() << endl;	
+		//cout << "here " << header->flowChars << '\t' << in.tellg() << endl;	
 			//read key
 			//header->keyLength = 4;
 	//char* myAlloc2 = new char(4); cout << "alloced" << endl;
@@ -374,8 +377,8 @@ int SffInfoCommand::readSeqData(ifstream& in, seqRead*& read, int numFlowReads, 
 				read->flowgram[i] = be_int2(*(unsigned short *)(buffer));
 				delete[] buffer;
 			}
-			
-			//read flowgram
+	
+			//read flowIndex
 			read->flowIndex.resize(numBases);
 			for (int i = 0; i < numBases; i++) {  
 				buffer = new char(1);
@@ -383,23 +386,21 @@ int SffInfoCommand::readSeqData(ifstream& in, seqRead*& read, int numFlowReads, 
 				read->flowgram[i] = be_int1(*(unsigned int *)(buffer));
 				delete[] buffer;
 			}
-			
+		
 			//read bases
 			read->bases = new char(numBases);
 			in.read(read->bases, numBases);
 			tempBuf = buffer;
 			if (tempBuf.length() > numBases) { tempBuf = tempBuf.substr(0, numBases); strcpy(read->bases, tempBuf.c_str());  }
-			
 
 			//read flowgram
 			read->qualScores.resize(numBases);
 			for (int i = 0; i < numBases; i++) {  
-				buffer = new char(1);
-				in.read(buffer, 1);
-				read->qualScores[i] = be_int1(*(unsigned int *)(buffer));
-				delete[] buffer;
+				char temp;
+				in.read(&temp, 1);
+				read->qualScores[i] = be_int1(*(unsigned int *)(&temp));
 			}
-			
+		
 			/* Pad to 8 chars */
 			int spotInFile = in.tellg();
 	cout << spotInFile << endl;
