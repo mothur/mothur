@@ -246,7 +246,7 @@ int Bellerophon::getChimeras() {
 		numSeqsPerProcessor = iters / processors;
 		
 		//each process hits this only once
-		int startPos = pid * numSeqsPerProcessor;
+		unsigned long int startPos = pid * numSeqsPerProcessor;
 		if(pid == processors - 1){
 				numSeqsPerProcessor = iters - pid * numSeqsPerProcessor;
 		}
@@ -326,7 +326,7 @@ int Bellerophon::getChimeras() {
 				int numSeqsPerProcessor = iters / processors;
 				
 				for (int i = 0; i < processors; i++) {
-					int startPos = i * numSeqsPerProcessor;
+					unsigned long int startPos = i * numSeqsPerProcessor;
 					if(i == processors - 1){
 						numSeqsPerProcessor = iters - i * numSeqsPerProcessor;
 					}

@@ -332,7 +332,7 @@ int ChimeraCcodeCommand::execute(){
 					}
 					
 				}else{
-					vector<int> positions;
+					vector<unsigned long int> positions;
 					processIDS.resize(0);
 					
 					ifstream inFASTA;
@@ -342,7 +342,7 @@ int ChimeraCcodeCommand::execute(){
 					while(!inFASTA.eof()){
 						input = getline(inFASTA);
 						if (input.length() != 0) {
-							if(input[0] == '>'){	long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
+							if(input[0] == '>'){	unsigned long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
 						}
 					}
 					inFASTA.close();
@@ -352,7 +352,7 @@ int ChimeraCcodeCommand::execute(){
 					int numSeqsPerProcessor = numSeqs / processors;
 					
 					for (int i = 0; i < processors; i++) {
-						long int startPos = positions[ i * numSeqsPerProcessor ];
+						unsigned long int startPos = positions[ i * numSeqsPerProcessor ];
 						if(i == processors - 1){
 							numSeqsPerProcessor = numSeqs - i * numSeqsPerProcessor;
 						}

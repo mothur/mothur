@@ -26,9 +26,9 @@ private:
 	int processors;
 	
 	struct linePair {
-		int start;
+		unsigned long int start;
 		int num;
-		linePair(long int i, long int j) : start(i), num(j) {}
+		linePair(unsigned long int i, long int j) : start(i), num(j) {}
 	};
 	vector<linePair*> lines;
 	vector<int> processIDS;

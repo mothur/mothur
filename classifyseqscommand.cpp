@@ -478,7 +478,7 @@ int ClassifySeqsCommand::execute(){
 				driver(lines[0], newTaxonomyFile, tempTaxonomyFile, fastaFileNames[s]);
 			}
 			else{
-				vector<int> positions;
+				vector<unsigned long int> positions;
 				processIDS.resize(0);
 				
 				ifstream inFASTA;
@@ -488,7 +488,7 @@ int ClassifySeqsCommand::execute(){
 				while(!inFASTA.eof()){
 					input = getline(inFASTA);
 					if (input.length() != 0) {
-						if(input[0] == '>'){	int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
+						if(input[0] == '>'){	unsigned long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
 					}
 				}
 				inFASTA.close();
@@ -496,9 +496,9 @@ int ClassifySeqsCommand::execute(){
 				numFastaSeqs = positions.size();
 				
 				int numSeqsPerProcessor = numFastaSeqs / processors;
-				
+	
 				for (int i = 0; i < processors; i++) {
-					int startPos = positions[ i * numSeqsPerProcessor ];
+					unsigned long int startPos = positions[ i * numSeqsPerProcessor ];
 					if(i == processors - 1){
 						numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor;
 					}
@@ -761,9 +761,9 @@ int ClassifySeqsCommand::driver(linePair* line, string taxFName, string tempTFNa
 
 		for(int i=0;i<line->numSeqs;i++){
 			if (m->control_pressed) { return 0; }
-			
-			Sequence* candidateSeq = new Sequence(inFASTA);
-			
+		
+			Sequence* candidateSeq = new Sequence(inFASTA); gobble(inFASTA);
+		
 			if (candidateSeq->getName() != "") {
 				taxonomy = classify->getTaxonomy(candidateSeq);
 				

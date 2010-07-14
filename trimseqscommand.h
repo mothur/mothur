@@ -24,9 +24,9 @@ public:
 private:
 
 	struct linePair {
-		int start;
+		unsigned long int start;
 		int num;
-		linePair(long int i, int j) : start(i), num(j) {}
+		linePair(unsigned long int i, int j) : start(i), num(j) {}
 	};
 
 	void getOligos(vector<string>&);

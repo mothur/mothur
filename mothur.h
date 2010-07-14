@@ -992,9 +992,9 @@ inline string sortFile(string distFile, string outputDir){
 	}	
 }
 /**************************************************************************************************/
-inline vector<long> setFilePosFasta(string filename, int& num) {
+inline vector<unsigned long int> setFilePosFasta(string filename, int& num) {
 
-			vector<long> positions;
+			vector<unsigned long int> positions;
 			ifstream inFASTA;
 			openInputFile(filename, inFASTA);
 				
@@ -1002,7 +1002,7 @@ inline vector<long> setFilePosFasta(string filename, int& num) {
 			while(!inFASTA.eof()){
 				input = getline(inFASTA); gobble(inFASTA);
 				if (input.length() != 0) {
-					if(input[0] == '>'){	long pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
+					if(input[0] == '>'){	unsigned long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
 				}
 			}
 			inFASTA.close();
@@ -1021,7 +1021,7 @@ inline vector<long> setFilePosFasta(string filename, int& num) {
 				fclose (pFile);
 			}*/
 			
-			long size = positions[(positions.size()-1)];
+			unsigned long int size = positions[(positions.size()-1)];
 			ifstream in;
 			openInputFile(filename, in);
 			
@@ -1038,18 +1038,18 @@ inline vector<long> setFilePosFasta(string filename, int& num) {
 			return positions;
 }
 /**************************************************************************************************/
-inline vector<long> setFilePosEachLine(string filename, int& num) {
+inline vector<unsigned long int> setFilePosEachLine(string filename, int& num) {
 
-			vector<long> positions;
+			vector<unsigned long int> positions;
 			ifstream in;
 			openInputFile(filename, in);
 				
 			string input;
 			while(!in.eof()){
-				long lastpos = in.tellg();
+				unsigned long int lastpos = in.tellg();
 				input = getline(in); gobble(in);
 				if (input.length() != 0) {
-					long pos = in.tellg(); 
+					unsigned long int pos = in.tellg(); 
 					if (pos != -1) { positions.push_back(pos - input.length() - 1);	}
 					else {  positions.push_back(lastpos);  }
 				}
@@ -1059,7 +1059,7 @@ inline vector<long> setFilePosEachLine(string filename, int& num) {
 			num = positions.size();
 		
 			FILE * pFile;
-			long size;
+			unsigned long int size;
 		
 			//get num bytes in file
 			pFile = fopen (filename.c_str(),"rb");

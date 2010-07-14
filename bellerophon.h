@@ -36,9 +36,9 @@ class Bellerophon : public Chimera {
 		
 	private:
 		struct linePair {
-			int start;
+			unsigned long int start;
 			int num;
-			linePair(long int i, int j) : start(i), num(j) {}
+			linePair(unsigned long int i, int j) : start(i), num(j) {}
 		};
 		
 		vector<linePair> lines;

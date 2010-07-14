@@ -172,6 +172,9 @@ void PhyloSummary::print(ofstream& out){
 		//print labels
 		out << "taxlevel\t rankID\t taxon\t daughterlevels\t total\t";
 		if (groupmap != NULL) {
+			//so the labels match the counts below, since the map sorts them automatically...
+			sort(groupmap->namesOfGroups.begin(), groupmap->namesOfGroups.end());
+			
 			for (int i = 0; i < groupmap->namesOfGroups.size(); i++) {
 				out << groupmap->namesOfGroups[i] << '\t';
 			}
