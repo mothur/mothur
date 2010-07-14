@@ -142,7 +142,7 @@ void MothurOut::mothurOutJustToLog(string output) {
 /*********************************************************************************************/
 void MothurOut::errorOut(exception& e, string object, string function) {
 	double vm, rss;
-	mem_usage(vm, rss);
+	//mem_usage(vm, rss);
 	
 	mothurOut("Error: ");
 	mothurOut(toString(e.what()));
