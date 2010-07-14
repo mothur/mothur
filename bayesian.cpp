@@ -368,8 +368,8 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 		#ifdef USE_MPI
 			
 			int pid, num, num2, processors;
-			vector<long> positions;
-			vector<long> positions2;
+			vector<unsigned long int> positions;
+			vector<unsigned long int> positions2;
 			
 			MPI_Status status; 
 			MPI_File inMPI;

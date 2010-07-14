@@ -35,9 +35,9 @@ public:
 	
 private:
 	struct linePair {
-		int start;
+		unsigned long int start;
 		int numSeqs;
-		linePair(int i, int j) : start(i), numSeqs(j) {}
+		linePair(unsigned long int i, int j) : start(i), numSeqs(j) {}
 	};
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;

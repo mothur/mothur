@@ -453,7 +453,7 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 int SeqSummaryCommand::setLines(string filename) {
 	try {
 		
-		vector<long int> positions;
+		vector<unsigned long int> positions;
 		
 		ifstream inFASTA;
 		openInputFile(filename, inFASTA);
@@ -463,7 +463,7 @@ int SeqSummaryCommand::setLines(string filename) {
 			input = getline(inFASTA);
 
 			if (input.length() != 0) {
-				if(input[0] == '>'){ long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
+				if(input[0] == '>'){ unsigned long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
 			}
 		}
 		inFASTA.close();
@@ -471,7 +471,7 @@ int SeqSummaryCommand::setLines(string filename) {
 		int numFastaSeqs = positions.size();
 	
 		FILE * pFile;
-		long size;
+		unsigned long int size;
 		
 		//get num bytes in file
 		pFile = fopen (filename.c_str(),"rb");
@@ -486,11 +486,11 @@ int SeqSummaryCommand::setLines(string filename) {
 		
 		for (int i = 0; i < processors; i++) {
 
-			long int startPos = positions[ i * numSeqsPerProcessor ];
+			unsigned long int startPos = positions[ i * numSeqsPerProcessor ];
 			if(i == processors - 1){
 				numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor;
 			}else{  
-				long int myEnd = positions[ (i+1) * numSeqsPerProcessor ];
+				unsigned long int myEnd = positions[ (i+1) * numSeqsPerProcessor ];
 			}
 			lines.push_back(new linePair(startPos, numSeqsPerProcessor));
 		}

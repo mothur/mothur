@@ -26,6 +26,8 @@
 		A72B3A63118B37FD004B9F8D /* phylodiversitycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = phylodiversitycommand.cpp; sourceTree = "<group>"; };
 		A72B3A7B118B4D1B004B9F8D /* phylodiversity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = phylodiversity.h; sourceTree = "<group>"; };
 		A72B3A7C118B4D1B004B9F8D /* phylodiversity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = phylodiversity.cpp; sourceTree = "<group>"; };
+		A732505E11E49EF100484B90 /* sffinfocommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sffinfocommand.h; sourceTree = "<group>"; };
+		A732505F11E49EF100484B90 /* sffinfocommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sffinfocommand.cpp; sourceTree = "<group>"; };
 		A73953DA11987ED100B0B160 /* chopseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chopseqscommand.h; sourceTree = "<group>"; };
 		A73953DB11987ED100B0B160 /* chopseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chopseqscommand.cpp; sourceTree = "<group>"; };
 		A747E79B1163442A00FB9042 /* chimeracheckcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeracheckcommand.h; sourceTree = "<group>"; };
@@ -37,6 +39,7 @@
 		A76AAD03117F322B003D8DA1 /* phylosummary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = phylosummary.cpp; sourceTree = "<group>"; };
 		A76C4A1011876BAF0009460B /* setlogfilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = setlogfilecommand.h; sourceTree = SOURCE_ROOT; };
 		A76C4A1111876BAF0009460B /* setlogfilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = setlogfilecommand.cpp; sourceTree = SOURCE_ROOT; };
+		A780E6CB11E7745D00BB5718 /* endiannessmacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = endiannessmacros.h; sourceTree = "<group>"; };
 		A78254461164D7790002E2DD /* chimerapintailcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimerapintailcommand.h; sourceTree = "<group>"; };
 		A78254471164D7790002E2DD /* chimerapintailcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimerapintailcommand.cpp; sourceTree = "<group>"; };
 		A7825502116519F70002E2DD /* chimerabellerophoncommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimerabellerophoncommand.h; sourceTree = "<group>"; };
@@ -480,6 +483,7 @@
 				A7DA203C113FECD400BF472F /* display.h */,
 				A7DA2042113FECD400BF472F /* dlibshuff.cpp */,
 				A7DA2043113FECD400BF472F /* dlibshuff.h */,
+				A780E6CB11E7745D00BB5718 /* endiannessmacros.h */,
 				A7DA2048113FECD400BF472F /* engine.cpp */,
 				A7DA2049113FECD400BF472F /* engine.hpp */,
 				A7DA204C113FECD400BF472F /* fileoutput.cpp */,
@@ -657,8 +661,6 @@
 		A7CB593E11402F110010EB83 /* commands */ = {
 			isa = PBXGroup;
 			children = (
-				7EA299BA11E384940022D8D3 /* sensspeccommand.h */,
-				7EA299BB11E384940022D8D3 /* sensspeccommand.cpp */,
 				A7DA202B113FECD400BF472F /* command.hpp */,
 				A7DA1FEF113FECD400BF472F /* aligncommand.h */,
 				A7DA1FEE113FECD400BF472F /* aligncommand.cpp */,
@@ -782,12 +784,16 @@
 				A7DA20F8113FECD400BF472F /* screenseqscommand.cpp */,
 				A7DA20FB113FECD400BF472F /* secondarystructurecommand.h */,
 				A7DA20FA113FECD400BF472F /* secondarystructurecommand.cpp */,
+				7EA299BA11E384940022D8D3 /* sensspeccommand.h */,
+				7EA299BB11E384940022D8D3 /* sensspeccommand.cpp */,
 				A7DA20FD113FECD400BF472F /* seqsummarycommand.h */,
 				A7DA20FC113FECD400BF472F /* seqsummarycommand.cpp */,
 				A7DA2103113FECD400BF472F /* setdircommand.h */,
 				A7DA2102113FECD400BF472F /* setdircommand.cpp */,
 				A76C4A1011876BAF0009460B /* setlogfilecommand.h */,
 				A76C4A1111876BAF0009460B /* setlogfilecommand.cpp */,
+				A732505E11E49EF100484B90 /* sffinfocommand.h */,
+				A732505F11E49EF100484B90 /* sffinfocommand.cpp */,
 				A7DA2110113FECD400BF472F /* sharedcommand.h */,
 				A7DA210F113FECD400BF472F /* sharedcommand.cpp */,
 				A71D924511AEB42400D00CBC /* splitabundcommand.h */,

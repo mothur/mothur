@@ -72,6 +72,14 @@ int main(int argc, char *argv[]){
 			m->mothurOutEndLine(); m->mothurOutEndLine();
 		#endif
 		
+		#ifdef BIT_VERSION
+			m->mothurOutJustToLog("Running 64Bit Version");
+			m->mothurOutEndLine(); m->mothurOutEndLine();
+		#else
+			m->mothurOutJustToLog("Running 32Bit Version");
+			m->mothurOutEndLine(); m->mothurOutEndLine();
+		#endif
+		
 		//header
 		m->mothurOut("mothur v.1.11.0");
 		m->mothurOutEndLine();		

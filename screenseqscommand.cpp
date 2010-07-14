@@ -305,7 +305,7 @@ int ScreenSeqsCommand::execute(){
 				if (m->control_pressed) { remove(goodSeqFile.c_str()); remove(badSeqFile.c_str()); return 0; }
 				
 			}else{
-				vector<int> positions;
+				vector<unsigned long int> positions;
 				processIDS.resize(0);
 				
 				ifstream inFASTA;
@@ -315,21 +315,22 @@ int ScreenSeqsCommand::execute(){
 				while(!inFASTA.eof()){
 					input = getline(inFASTA);
 					if (input.length() != 0) {
-						if(input[0] == '>'){	long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
+						if(input[0] == '>'){	unsigned long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
 					}
 				}
 				inFASTA.close();
 				
 				numFastaSeqs = positions.size();
-				
+			
 				int numSeqsPerProcessor = numFastaSeqs / processors;
-				
+					
 				for (int i = 0; i < processors; i++) {
-					long int startPos = positions[ i * numSeqsPerProcessor ];
+					unsigned long int startPos = positions[ i * numSeqsPerProcessor ];
 					if(i == processors - 1){
 						numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor;
 					}
 					lines.push_back(new linePair(startPos, numSeqsPerProcessor));
+		
 				}
 				
 				createProcesses(goodSeqFile, badSeqFile, badAccnosFile, fastafile, badSeqNames); 
@@ -708,7 +709,7 @@ int ScreenSeqsCommand::driver(linePair* line, string goodFName, string badFName,
 		inFASTA.seekg(line->start);
 	
 		for(int i=0;i<line->numSeqs;i++){
-			
+		
 			if (m->control_pressed) {  return 0; }
 			
 			Sequence currSeq(inFASTA);

@@ -77,9 +77,9 @@ struct sim {
 };
 
 struct linePair {
-			int start;
-			int end;
-			linePair(int i, int j) : start(i), end(j) {}
+			unsigned long int start;
+			unsigned long int end;
+			linePair(unsigned long int i, unsigned long int j) : start(i), end(j) {}
 			linePair(){}
 };
 

@@ -23,6 +23,7 @@ endif
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
     TARGET_ARCH += -arch x86_64
+	 CXXFLAGS += -DBIT_VERSION
 endif
 
 # if you do not want to use the readline library, set this to no.
