@@ -13,6 +13,7 @@
 #include "mothur.h"
 #include "command.hpp"
 #include "sequence.hpp"
+#include "qualityscores.h"
 
 class TrimSeqsCommand : public Command {
 public:
@@ -29,23 +30,23 @@ private:
 		linePair(unsigned long int i, int j) : start(i), num(j) {}
 	};
 
-	void getOligos(vector<string>&);
-	bool stripQualThreshold(Sequence&, ifstream&);
-	bool cullQualAverage(Sequence&, ifstream&);
-	int stripBarcode(Sequence&, int&);
-	int stripForward(Sequence&, int&);
-	bool stripReverse(Sequence&);
+	void getOligos(vector<string>&, vector<string>&);
+	int stripBarcode(Sequence&, QualityScores&, int&);
+	int stripForward(Sequence&, QualityScores&, int&);
+	bool stripReverse(Sequence&, QualityScores&);
 	bool cullLength(Sequence&);
 	bool cullHomoP(Sequence&);
 	bool cullAmbigs(Sequence&);
 	bool compareDNASeq(string, string);
-	int countDiffs(string, string);//, int, int&, int);
+	int countDiffs(string, string);
 
 	bool abort;
 	string fastaFile, oligoFile, qFileName, outputDir;
 	
 	bool flip, allFiles, qtrim;
-	int numFPrimers, numRPrimers, maxAmbig, maxHomoP, minLength, maxLength, qThreshold, qAverage, processors, tdiffs, bdiffs, pdiffs, comboStarts;
+	int numFPrimers, numRPrimers, maxAmbig, maxHomoP, minLength, maxLength, processors, tdiffs, bdiffs, pdiffs, comboStarts;
+	int qWindowSize, qWindowStep;
+	double qRollAverage, qThreshold, qWindowAverage, qAverage;
 	vector<string> revPrimer, outputNames;
 	set<string> filesToRemove;
 	map<string, int> barcodes;
@@ -57,8 +58,8 @@ private:
 	vector<linePair*> lines;
 	vector<linePair*> qLines;
 	
-	int driverCreateTrim(string, string, string, string, string, vector<string>, linePair*, linePair*);	
-	int createProcessesCreateTrim(string, string, string, string, string, vector<string>);
+	int driverCreateTrim(string, string, string, string, string, string, string, vector<string>, vector<string>, linePair*, linePair*);	
+	int createProcessesCreateTrim(string, string, string, string, string, string, string, vector<string>, vector<string>);
 	int setLines(string, vector<linePair*>&);
 	
 };

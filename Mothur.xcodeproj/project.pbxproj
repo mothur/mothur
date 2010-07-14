@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		7E85BD1C11EB5E9B00FD37C0 /* qualityscores.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = qualityscores.h; sourceTree = "<group>"; };
+		7E85BD1D11EB5E9B00FD37C0 /* qualityscores.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = qualityscores.cpp; sourceTree = "<group>"; };
 		7EA299BA11E384940022D8D3 /* sensspeccommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sensspeccommand.h; sourceTree = "<group>"; };
 		7EA299BB11E384940022D8D3 /* sensspeccommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sensspeccommand.cpp; sourceTree = "<group>"; };
 		7EC61A0911BEA6AF00F668D9 /* weightedlinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = weightedlinkage.cpp; sourceTree = "<group>"; };
@@ -821,6 +823,8 @@
 		A7CB594211402F430010EB83 /* containers */ = {
 			isa = PBXGroup;
 			children = (
+				7E85BD1C11EB5E9B00FD37C0 /* qualityscores.h */,
+				7E85BD1D11EB5E9B00FD37C0 /* qualityscores.cpp */,
 				A7DA1FF3113FECD400BF472F /* alignmentcell.hpp */,
 				A7DA1FF2113FECD400BF472F /* alignmentcell.cpp */,
 				A7DA1FF4113FECD400BF472F /* alignmentdb.cpp */,
