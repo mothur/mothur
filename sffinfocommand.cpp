@@ -183,95 +183,95 @@ int SffInfoCommand::extractSffInfo(string input, string output){
 	}
 }
 //**********************************************************************************************************************
-int SffInfoCommand::readCommonHeader(ifstream& in, CommonHeader*& header){
+int SffInfoCommand::readCommonHeader(ifstream& in, CommonHeader* header){
 	try {
 
 		if (!in.eof()) {
 		
 			//read magic number
-			char* buffer = new char(sizeof(header->magicNumber));
+			char buffer[sizeof(header->magicNumber)];
 			in.read(buffer, sizeof(header->magicNumber));
-			header->magicNumber = be_int4(*(unsigned int *)(buffer));
-			delete[] buffer;
-	//cout << "here " << header->magicNumber << '\t' << in.tellg() << endl;			
+			header->magicNumber = be_int4(*(unsigned int *)(&buffer));
+			//delete[] buffer;
+	cout << "here " << header->magicNumber << '\t' << in.tellg() << endl;			
 			//read version
 			header->version = new char(4);
 			in.read(header->version, 4);
 			string tempBuf0 = header->version;  //this is in here because the read sometimes tacks on extra chars, not sure why?
 			if (tempBuf0.length() > 4) { tempBuf0 = tempBuf0.substr(0, 4);  strcpy(header->version, tempBuf0.c_str());  }
 			//memcpy(header->version, buffer+4, 4);
-	//cout << "here " << header->version  << '\t' << in.tellg() << endl;	
+	cout << "here " << header->version  << '\t' << in.tellg() << endl;	
 			//read offset
-			buffer = new char(sizeof(header->indexOffset));
-			in.read(buffer, sizeof(header->indexOffset));
-			header->indexOffset =  be_int8(*(unsigned long int *)(buffer));
-			delete[] buffer;
-	//cout << "here " << header->indexOffset  << '\t' << in.tellg() << endl;		
+			char buffer2 [sizeof(header->indexOffset)];
+			in.read(buffer2, sizeof(header->indexOffset));
+			header->indexOffset =  be_int8(*(unsigned long int *)(&buffer2));
+			//delete[] buffer;
+	cout << "here " << header->indexOffset  << '\t' << in.tellg() << endl;		
 			//read index length
-			buffer = new char(sizeof(header->indexLength));
-			in.read(buffer, sizeof(header->indexLength));
-			header->indexLength =  be_int4(*(unsigned int *)(buffer));
-			delete[] buffer;
-	//cout << "here " << header->indexLength << '\t' << in.tellg() << endl;			
+			char buffer3 [sizeof(header->indexLength)];
+			in.read(buffer3, sizeof(header->indexLength));
+			header->indexLength =  be_int4(*(unsigned int *)(&buffer3));
+			//delete[] buffer;
+	cout << "here " << header->indexLength << '\t' << in.tellg() << endl;			
 			//read num reads
-			buffer = new char(sizeof(header->numReads));
-			in.read(buffer, sizeof(header->numReads));
-			header->numReads =  be_int4(*(unsigned int *)(buffer));
-			delete[] buffer;	
-	//cout << "here " << header->numReads << '\t' << in.tellg() << endl;			
+			char buffer4 [sizeof(header->numReads)];
+			in.read(buffer4, sizeof(header->numReads));
+			header->numReads =  be_int4(*(unsigned int *)(&buffer4));
+			//delete[] buffer;	
+	cout << "here " << header->numReads << '\t' << in.tellg() << endl;			
 			//read header length
-			buffer = new char(sizeof(header->headerLength));
-			in.read(buffer, sizeof(header->headerLength));
-			header->headerLength =  be_int2(*(unsigned short *)(buffer));
-			delete[] buffer;
-	//cout << "here " << header->headerLength << '\t' << in.tellg() << endl;			
+			char buffer5 [sizeof(header->headerLength)];
+			in.read(buffer5, sizeof(header->headerLength));
+			header->headerLength =  be_int2(*(unsigned short *)(&buffer5));
+			//delete[] buffer;
+	cout << "here " << header->headerLength << '\t' << in.tellg() << endl;			
 			//read key length
-			buffer = new char(sizeof(header->keyLength));
-			in.read(buffer, sizeof(header->keyLength));
-			header->keyLength = be_int2(*(unsigned short *)(buffer));
-			delete[] buffer;
+			char buffer6 [sizeof(header->keyLength)];
+			in.read(buffer6, sizeof(header->keyLength));
+			header->keyLength = be_int2(*(unsigned short *)(&buffer6));
+			//delete[] buffer;
 	
-//cout << "here " << header->keyLength << '\t' << in.tellg() << endl;
+cout << "here " << header->keyLength << '\t' << in.tellg() << endl;
 			//read number of flow reads
-			buffer = new char(sizeof(header->numFlowsPerRead));
-			in.read(buffer, sizeof(header->numFlowsPerRead));
-			header->numFlowsPerRead =  be_int2(*(unsigned short *)(buffer));
-			delete[] buffer;
-		//cout << "here " << header->numFlowsPerRead << '\t' << in.tellg() << endl;		
+			char buffer7 [sizeof(header->numFlowsPerRead)];
+			in.read(buffer7, sizeof(header->numFlowsPerRead));
+			header->numFlowsPerRead =  be_int2(*(unsigned short *)(&buffer7));
+			//delete[] buffer;
+		cout << "here " << header->numFlowsPerRead << '\t' << in.tellg() << endl;		
 			//read format code
 			//buffer = new char(sizeof(header->flogramFormatCode));
 			in.read(&header->flogramFormatCode, 1);
 			header->flogramFormatCode = be_int1(*(char *)(&header->flogramFormatCode));
 			//delete[] buffer;
-	//cout << "here " << header->flogramFormatCode << '\t' << in.tellg() << endl;	
+	cout << "here " << header->flogramFormatCode << '\t' << in.tellg() << endl;	
 	
 			//read flow chars
 			//header->numFlowsPerRead = 800;
 			header->flowChars = new char(header->numFlowsPerRead);
-			buffer = new char(header->numFlowsPerRead);
-	//cout << "here" << endl;
-			//in.read(header->flowChars, header->numFlowsPerRead); 
+			//buffer = new char(header->numFlowsPerRead);
+	cout << "here" << endl;
+			in.read(header->flowChars, header->numFlowsPerRead); 
 			//string tempBuf1 = header->flowChars + '\0';  //this is in here because the read sometimes tacks on extra chars, not sure why?
 			//if (tempBuf0.length() > header->numFlowsPerRead) { tempBuf1 = tempBuf1.substr(0, header->numFlowsPerRead);  strcpy(header->flowChars, tempBuf1.c_str());  }
-			in.read(buffer, header->numFlowsPerRead); 
-			memcpy(header->flowChars, buffer, header->numFlowsPerRead);
-			delete[] buffer;
+			//in.read(buffer, header->numFlowsPerRead); 
+			//memcpy(header->flowChars, buffer, header->numFlowsPerRead);
+			//delete[] buffer;
 	//cout << "here" << endl;
 			//string tempBuf1 = header->flowChars;
 	//cout << "here " << in.tellg() << endl;
 			//if (tempBuf1.length() > header->numFlowsPerRead) { tempBuf1 = tempBuf1.substr(0, header->numFlowsPerRead);  strcpy(header->flowChars, tempBuf1.c_str()); }
 			
-		//cout << "here " << header->flowChars << '\t' << in.tellg() << endl;	
+		cout << "here " << header->flowChars << '\t' << in.tellg() << endl;	
 			//read key
 			//header->keyLength = 4;
 	//char* myAlloc2 = new char(4); cout << "alloced" << endl;
 			header->keySequence = new char(header->keyLength);
 			//char* myAlloc = new char(4);
-	//	cout << "here " << endl;		
+		cout << "here " << endl;		
 			in.read(header->keySequence, header->keyLength);
 			string tempBuf2 = header->keySequence;
 			if (tempBuf2.length() > header->keyLength) { tempBuf2 = tempBuf2.substr(0, header->keyLength);  strcpy(header->keySequence, tempBuf2.c_str()); }
-	//cout << "here " << header->keySequence << '\t' << in.tellg() << endl;
+	cout << "here " << header->keySequence << '\t' << in.tellg() << endl;
 	
 			/* Pad to 8 chars */
 			int spotInFile = in.tellg();
@@ -294,7 +294,7 @@ int SffInfoCommand::readCommonHeader(ifstream& in, CommonHeader*& header){
 	}
 }
 //**********************************************************************************************************************
-int SffInfoCommand::readHeader(ifstream& in, Header*& header){
+int SffInfoCommand::readHeader(ifstream& in, Header* header){
 	try {
 	
 		if (!in.eof()) {
@@ -361,7 +361,7 @@ int SffInfoCommand::readHeader(ifstream& in, Header*& header){
 	}
 }
 //**********************************************************************************************************************
-int SffInfoCommand::readSeqData(ifstream& in, seqRead*& read, int numFlowReads, int numBases){
+int SffInfoCommand::readSeqData(ifstream& in, seqRead* read, int numFlowReads, int numBases){
 	try {
 	
 		if (!in.eof()) {
@@ -381,10 +381,11 @@ int SffInfoCommand::readSeqData(ifstream& in, seqRead*& read, int numFlowReads, 
 			//read flowIndex
 			read->flowIndex.resize(numBases);
 			for (int i = 0; i < numBases; i++) {  
-				buffer = new char(1);
-				in.read(buffer, 1);
-				read->flowgram[i] = be_int1(*(unsigned int *)(buffer));
-				delete[] buffer;
+				//buffer = new char(1);
+				char temp;
+				in.read(&temp, 1);
+				read->flowgram[i] = be_int1(*(unsigned int *)(&temp));
+				//delete[] buffer;
 			}
 		
 			//read bases

@@ -28,6 +28,9 @@ struct CommonHeader {
 	char flogramFormatCode;
 	char* flowChars; //length depends on number flow reads
 	char* keySequence; //length depends on key length
+	
+	CommonHeader(){ magicNumber=0; version=NULL; indexOffset=0; indexLength=0; numReads=0; headerLength=0; keyLength=0; numFlowsPerRead=0; flogramFormatCode='s'; flowChars=NULL; keySequence=NULL; }
+	~CommonHeader() { if (version != NULL) { delete [] version; } if (flowChars != NULL) { delete [] flowChars; } if (keySequence != NULL) { delete [] keySequence; } }
 };
 /**********************************************************/
 struct Header {
@@ -39,6 +42,9 @@ struct Header {
 	unsigned short clipAdapterLeft;
 	unsigned short clipAdapterRight;
 	char* name; //length depends on nameLength
+	
+	Header() { headerLength=0; nameLength=0; numBases=0; clipQualLeft=0; clipQualRight=0; clipAdapterLeft=0; clipAdapterRight=0; name=NULL; }
+	~Header() { if (name != NULL) { delete [] name; } }
 };
 /**********************************************************/
 struct seqRead {
@@ -46,6 +52,9 @@ struct seqRead {
 	vector<unsigned int> flowIndex;
 	char* bases;
 	vector<unsigned int> qualScores;
+	
+	seqRead() { bases=NULL; }
+	~seqRead() { if (bases != NULL) { delete [] bases; } }
 };
 /**********************************************************/
 
@@ -63,9 +72,9 @@ private:
 	bool abort;
 	
 	int extractSffInfo(string, string);
-	int readCommonHeader(ifstream&, CommonHeader*&);
-	int readHeader(ifstream&, Header*&);
-	int readSeqData(ifstream&, seqRead*&, int, int);
+	int readCommonHeader(ifstream&, CommonHeader*);
+	int readHeader(ifstream&, Header*);
+	int readSeqData(ifstream&, seqRead*, int, int);
 	
 	int printCommonHeader(ofstream&, CommonHeader*, bool); //bool is debug mode
 	int printHeader(ofstream&, Header*, bool);
