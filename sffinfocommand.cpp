@@ -102,16 +102,18 @@ int SffInfoCommand::execute(){
 			
 			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} return 0; }
 			
+			int start = time(NULL);
+			
 			m->mothurOut("Extracting info from " + filenames[s] + " ..." ); m->mothurOutEndLine();
 			
 			if (outputDir == "") {  outputDir += hasPath(filenames[s]); }
 			string outputFileName = outputDir + getRootName(getSimpleName(filenames[s])) + "sff.txt";
 						
-			extractSffInfo(filenames[s], outputFileName);
+			int numReads = extractSffInfo(filenames[s], outputFileName);
 			
 			outputNames.push_back(outputFileName);
 
-			m->mothurOut("Done."); m->mothurOutEndLine();
+			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to extract " + toString(numReads) + ".");
 		}
 		
 		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} return 0; }
@@ -132,50 +134,60 @@ int SffInfoCommand::execute(){
 //**********************************************************************************************************************
 int SffInfoCommand::extractSffInfo(string input, string output){
 	try {
+		
 		ofstream out;
 		openOutputFile(output, out);
+		
+		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
 		ifstream in;
 		in.open(input.c_str(), ios::binary);
 		
-		CommonHeader* header = new CommonHeader(); 
+		CommonHeader header; 
 		readCommonHeader(in, header);
 		
-		cout << strlen(header->flowChars) << endl;	
-		//cout << "magic = " << header->magicNumber << endl << "version = " << header->version << endl << "index offset = " << header->indexOffset << endl << "index length = "<< header->indexLength << endl << "numreads = " << header->numReads << endl << "header length = " << header->headerLength << endl << "key length = " << header->keyLength << endl;
-//cout << "numflowreads = "<< header->numFlowsPerRead << endl << "flow format code = "<< header->flogramFormatCode << endl << "flow chars = " << header->flowChars << endl << "key sequence = " << header->keySequence << endl << endl;		
-		cout << in.tellg() << endl;
+		int count = 0;
+		
+		//check magic number and version
+		if (header.magicNumber != 779314790) { m->mothurOut("Magic Number is not correct, not a valid .sff file"); m->mothurOutEndLine(); return count; }
+		if (header.version != "0001") { m->mothurOut("Version is not supported, only support version 0001."); m->mothurOutEndLine(); return count; }
+		
 		//read through the sff file
 		while (!in.eof()) {
 			//print common header
-			printCommonHeader(out, header, true);
+			printCommonHeader(out, header);
 
 			//read header
-			Header* readheader = new Header();
+			Header readheader;
 			readHeader(in, readheader);
-			
-			cout << in.tellg() << endl;
-			
+		
 			//print header
-			printHeader(out, readheader, true);
+			printHeader(out, readheader);
 			
 			//read data
-			seqRead* read = new seqRead(); 
-			readSeqData(in, read, header->numFlowsPerRead, readheader->numBases);
-			
-			cout << in.tellg() << endl;
-			
+			seqRead read; 
+			readSeqData(in, read, header.numFlowsPerRead, readheader.numBases);
+		
 			//print data
-			printSeqData(out, read, true);
+			printSeqData(out, read);
 			
-			delete readheader;
-			delete read;
+			count++;
+			
+			//report progress
+			if((count+1) % 500 == 0){	m->mothurOut(toString(count+1)); m->mothurOutEndLine();		}
+		
+			if (m->control_pressed) { count = 0; break;   }
+			
+			if (count >= header.numReads) { break; }
 		}
+		
+		//report progress
+		if (!m->control_pressed) {   if((count) % 500 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}  }
 		
 		in.close();
 		out.close();
 		
-		return 0;
+		return count;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SffInfoCommand", "extractSffInfo");
@@ -183,105 +195,74 @@ int SffInfoCommand::extractSffInfo(string input, string output){
 	}
 }
 //**********************************************************************************************************************
-int SffInfoCommand::readCommonHeader(ifstream& in, CommonHeader* header){
+int SffInfoCommand::readCommonHeader(ifstream& in, CommonHeader& header){
 	try {
 
 		if (!in.eof()) {
 		
 			//read magic number
-			char buffer[sizeof(header->magicNumber)];
-			in.read(buffer, sizeof(header->magicNumber));
-			header->magicNumber = be_int4(*(unsigned int *)(&buffer));
-			//delete[] buffer;
-	cout << "here " << header->magicNumber << '\t' << in.tellg() << endl;			
-			//read version
-			header->version = new char(4);
-			in.read(header->version, 4);
-			string tempBuf0 = header->version;  //this is in here because the read sometimes tacks on extra chars, not sure why?
-			if (tempBuf0.length() > 4) { tempBuf0 = tempBuf0.substr(0, 4);  strcpy(header->version, tempBuf0.c_str());  }
-			//memcpy(header->version, buffer+4, 4);
-	cout << "here " << header->version  << '\t' << in.tellg() << endl;	
-			//read offset
-			char buffer2 [sizeof(header->indexOffset)];
-			in.read(buffer2, sizeof(header->indexOffset));
-			header->indexOffset =  be_int8(*(unsigned long int *)(&buffer2));
-			//delete[] buffer;
-	cout << "here " << header->indexOffset  << '\t' << in.tellg() << endl;		
-			//read index length
-			char buffer3 [sizeof(header->indexLength)];
-			in.read(buffer3, sizeof(header->indexLength));
-			header->indexLength =  be_int4(*(unsigned int *)(&buffer3));
-			//delete[] buffer;
-	cout << "here " << header->indexLength << '\t' << in.tellg() << endl;			
-			//read num reads
-			char buffer4 [sizeof(header->numReads)];
-			in.read(buffer4, sizeof(header->numReads));
-			header->numReads =  be_int4(*(unsigned int *)(&buffer4));
-			//delete[] buffer;	
-	cout << "here " << header->numReads << '\t' << in.tellg() << endl;			
-			//read header length
-			char buffer5 [sizeof(header->headerLength)];
-			in.read(buffer5, sizeof(header->headerLength));
-			header->headerLength =  be_int2(*(unsigned short *)(&buffer5));
-			//delete[] buffer;
-	cout << "here " << header->headerLength << '\t' << in.tellg() << endl;			
-			//read key length
-			char buffer6 [sizeof(header->keyLength)];
-			in.read(buffer6, sizeof(header->keyLength));
-			header->keyLength = be_int2(*(unsigned short *)(&buffer6));
-			//delete[] buffer;
-	
-cout << "here " << header->keyLength << '\t' << in.tellg() << endl;
-			//read number of flow reads
-			char buffer7 [sizeof(header->numFlowsPerRead)];
-			in.read(buffer7, sizeof(header->numFlowsPerRead));
-			header->numFlowsPerRead =  be_int2(*(unsigned short *)(&buffer7));
-			//delete[] buffer;
-		cout << "here " << header->numFlowsPerRead << '\t' << in.tellg() << endl;		
-			//read format code
-			//buffer = new char(sizeof(header->flogramFormatCode));
-			in.read(&header->flogramFormatCode, 1);
-			header->flogramFormatCode = be_int1(*(char *)(&header->flogramFormatCode));
-			//delete[] buffer;
-	cout << "here " << header->flogramFormatCode << '\t' << in.tellg() << endl;	
-	
-			//read flow chars
-			//header->numFlowsPerRead = 800;
-			header->flowChars = new char(header->numFlowsPerRead);
-			//buffer = new char(header->numFlowsPerRead);
-	cout << "here" << endl;
-			in.read(header->flowChars, header->numFlowsPerRead); 
-			//string tempBuf1 = header->flowChars + '\0';  //this is in here because the read sometimes tacks on extra chars, not sure why?
-			//if (tempBuf0.length() > header->numFlowsPerRead) { tempBuf1 = tempBuf1.substr(0, header->numFlowsPerRead);  strcpy(header->flowChars, tempBuf1.c_str());  }
-			//in.read(buffer, header->numFlowsPerRead); 
-			//memcpy(header->flowChars, buffer, header->numFlowsPerRead);
-			//delete[] buffer;
-	//cout << "here" << endl;
-			//string tempBuf1 = header->flowChars;
-	//cout << "here " << in.tellg() << endl;
-			//if (tempBuf1.length() > header->numFlowsPerRead) { tempBuf1 = tempBuf1.substr(0, header->numFlowsPerRead);  strcpy(header->flowChars, tempBuf1.c_str()); }
+			char buffer[sizeof(header.magicNumber)];
+			in.read(buffer, sizeof(header.magicNumber));
+			header.magicNumber = be_int4(*(unsigned int *)(&buffer));
 			
-		cout << "here " << header->flowChars << '\t' << in.tellg() << endl;	
+			//read version
+			char buffer9[4];
+			in.read(buffer9, 4);
+			header.version = "";
+			for (int i = 0; i < 4; i++) {  header.version += toString((int)(buffer9[i])); }
+				
+			//read offset
+			char buffer2 [sizeof(header.indexOffset)];
+			in.read(buffer2, sizeof(header.indexOffset));
+			header.indexOffset =  be_int8(*(unsigned long int *)(&buffer2));
+			
+			//read index length
+			char buffer3 [sizeof(header.indexLength)];
+			in.read(buffer3, sizeof(header.indexLength));
+			header.indexLength =  be_int4(*(unsigned int *)(&buffer3));
+			
+			//read num reads
+			char buffer4 [sizeof(header.numReads)];
+			in.read(buffer4, sizeof(header.numReads));
+			header.numReads =  be_int4(*(unsigned int *)(&buffer4));
+				
+			//read header length
+			char buffer5 [sizeof(header.headerLength)];
+			in.read(buffer5, sizeof(header.headerLength));
+			header.headerLength =  be_int2(*(unsigned short *)(&buffer5));
+					
+			//read key length
+			char buffer6 [sizeof(header.keyLength)];
+			in.read(buffer6, sizeof(header.keyLength));
+			header.keyLength = be_int2(*(unsigned short *)(&buffer6));
+			
+			//read number of flow reads
+			char buffer7 [sizeof(header.numFlowsPerRead)];
+			in.read(buffer7, sizeof(header.numFlowsPerRead));
+			header.numFlowsPerRead =  be_int2(*(unsigned short *)(&buffer7));
+				
+			//read format code
+			char buffer8 [1];
+			in.read(buffer8, 1);
+			header.flogramFormatCode = (int)(buffer8[0]);
+			
+			//read flow chars
+			char tempBuffer [header.numFlowsPerRead];
+			in.read(tempBuffer, header.numFlowsPerRead); 
+			header.flowChars = tempBuffer;
+			if (header.flowChars.length() > header.numFlowsPerRead) { header.flowChars = header.flowChars.substr(0, header.numFlowsPerRead);  }
+			
 			//read key
-			//header->keyLength = 4;
-	//char* myAlloc2 = new char(4); cout << "alloced" << endl;
-			header->keySequence = new char(header->keyLength);
-			//char* myAlloc = new char(4);
-		cout << "here " << endl;		
-			in.read(header->keySequence, header->keyLength);
-			string tempBuf2 = header->keySequence;
-			if (tempBuf2.length() > header->keyLength) { tempBuf2 = tempBuf2.substr(0, header->keyLength);  strcpy(header->keySequence, tempBuf2.c_str()); }
-	cout << "here " << header->keySequence << '\t' << in.tellg() << endl;
-	
+			char myAlloc [header.keyLength];
+			in.read(myAlloc, header.keyLength);
+			header.keySequence = myAlloc;
+			if (header.keySequence.length() > header.keyLength) { header.keySequence = header.keySequence.substr(0, header.keyLength);  }
+				
 			/* Pad to 8 chars */
 			int spotInFile = in.tellg();
-	//cout << spotInFile << endl;
-			int spot = floor((spotInFile + 7) /(float) 8) * 8;
-	//cout << spot << endl;
+			int spot = (spotInFile + 7)& ~7;
 			in.seekg(spot);
-	
-	//exit(1);	
-
+			
 		}else{
 			m->mothurOut("Error reading sff common header."); m->mothurOutEndLine();
 		}
@@ -294,61 +275,57 @@ cout << "here " << header->keyLength << '\t' << in.tellg() << endl;
 	}
 }
 //**********************************************************************************************************************
-int SffInfoCommand::readHeader(ifstream& in, Header* header){
+int SffInfoCommand::readHeader(ifstream& in, Header& header){
 	try {
 	
 		if (!in.eof()) {
-			string tempBuf = "";
 			
 			//read header length
-			char* buffer = new char(sizeof(header->headerLength));
-			in.read(buffer, sizeof(header->headerLength));
-			header->headerLength = be_int2(*(unsigned short *)(buffer));
-			delete[] buffer;
+			char buffer [sizeof(header.headerLength)];
+			in.read(buffer, sizeof(header.headerLength));
+			header.headerLength = be_int2(*(unsigned short *)(&buffer));
 						
 			//read name length
-			buffer = new char(sizeof(header->nameLength));
-			in.read(buffer, sizeof(header->nameLength));
-			header->nameLength = be_int2(*(unsigned short *)(buffer));
-			delete[] buffer;
+			char buffer2 [sizeof(header.nameLength)];
+			in.read(buffer2, sizeof(header.nameLength));
+			header.nameLength = be_int2(*(unsigned short *)(&buffer2));
 
 			//read num bases
-			buffer = new char(sizeof(header->numBases));
-			in.read(buffer, sizeof(header->numBases));
-			header->numBases =  be_int4(*(unsigned int *)(buffer));
-			delete[] buffer;
+			char buffer3 [sizeof(header.numBases)];
+			in.read(buffer3, sizeof(header.numBases));
+			header.numBases =  be_int4(*(unsigned int *)(&buffer3));
 			
 			//read clip qual left
-			buffer = new char(sizeof(header->clipQualLeft));
-			in.read(buffer, sizeof(header->clipQualLeft));
-			header->clipQualLeft =  be_int2(*(unsigned short *)(buffer));
-			delete[] buffer;
+			char buffer4 [sizeof(header.clipQualLeft)];
+			in.read(buffer4, sizeof(header.clipQualLeft));
+			header.clipQualLeft =  be_int2(*(unsigned short *)(&buffer4));
 			
 			//read clip qual right
-			buffer = new char(sizeof(header->clipQualRight));
-			in.read(buffer, sizeof(header->clipQualRight));
-			header->clipQualRight =  be_int2(*(unsigned short *)(buffer));
-			delete[] buffer;
+			char buffer5 [sizeof(header.clipQualRight)];
+			in.read(buffer5, sizeof(header.clipQualRight));
+			header.clipQualRight =  be_int2(*(unsigned short *)(&buffer5));
 			
 			//read clipAdapterLeft
-			buffer = new char(sizeof(header->clipAdapterLeft));
-			in.read(buffer, sizeof(header->clipAdapterLeft));
-			header->clipAdapterLeft = be_int2(*(unsigned short *)(buffer));
-			delete[] buffer;
+			char buffer6 [sizeof(header.clipAdapterLeft)];
+			in.read(buffer6, sizeof(header.clipAdapterLeft));
+			header.clipAdapterLeft = be_int2(*(unsigned short *)(&buffer6));
 
 			//read clipAdapterRight
-			buffer = new char(sizeof(header->clipAdapterRight));
-			in.read(buffer, sizeof(header->clipAdapterRight));
-			header->clipAdapterRight =  be_int2(*(unsigned short *)(buffer));
-			delete[] buffer;
+			char buffer7 [sizeof(header.clipAdapterRight)];
+			in.read(buffer7, sizeof(header.clipAdapterRight));
+			header.clipAdapterRight = be_int2(*(unsigned short *)(&buffer7));
 		
 			//read name
-			header->name = new char(header->nameLength);
-			//buffer = new char(header->nameLength);
-			in.read(header->name, header->nameLength);
-			//memcpy(header->name, buffer, header->nameLength);
-			//delete[] buffer;
-
+			char tempBuffer [header.nameLength];
+			in.read(tempBuffer, header.nameLength);
+			header.name = tempBuffer;
+			if (header.name.length() > header.nameLength) { header.name = header.name.substr(0, header.nameLength);  }
+			
+			/* Pad to 8 chars */
+			int spotInFile = in.tellg();
+			int spot = (spotInFile + 7)& ~7;
+			in.seekg(spot);
+			
 		}else{
 			m->mothurOut("Error reading sff header info."); m->mothurOutEndLine();
 		}
@@ -361,52 +338,44 @@ int SffInfoCommand::readHeader(ifstream& in, Header* header){
 	}
 }
 //**********************************************************************************************************************
-int SffInfoCommand::readSeqData(ifstream& in, seqRead* read, int numFlowReads, int numBases){
+int SffInfoCommand::readSeqData(ifstream& in, seqRead& read, int numFlowReads, int numBases){
 	try {
 	
 		if (!in.eof()) {
-						
-			string tempBuf = "";
-			char* buffer;
-			
+	
 			//read flowgram
-			read->flowgram.resize(numFlowReads);
+			read.flowgram.resize(numFlowReads);
 			for (int i = 0; i < numFlowReads; i++) {  
-				buffer = new char((sizeof(unsigned short)));
+				char buffer [sizeof(unsigned short)];
 				in.read(buffer, (sizeof(unsigned short)));
-				read->flowgram[i] = be_int2(*(unsigned short *)(buffer));
-				delete[] buffer;
+				read.flowgram[i] = be_int2(*(unsigned short *)(&buffer));
 			}
 	
 			//read flowIndex
-			read->flowIndex.resize(numBases);
+			read.flowIndex.resize(numBases);
 			for (int i = 0; i < numBases; i++) {  
-				//buffer = new char(1);
-				char temp;
-				in.read(&temp, 1);
-				read->flowgram[i] = be_int1(*(unsigned int *)(&temp));
-				//delete[] buffer;
+				char temp[1];
+				in.read(temp, 1);
+				read.flowIndex[i] = be_int1(*(unsigned char *)(&temp));
 			}
 		
 			//read bases
-			read->bases = new char(numBases);
-			in.read(read->bases, numBases);
-			tempBuf = buffer;
-			if (tempBuf.length() > numBases) { tempBuf = tempBuf.substr(0, numBases); strcpy(read->bases, tempBuf.c_str());  }
+			char tempBuffer[numBases];
+			in.read(tempBuffer, numBases);
+			read.bases = tempBuffer;
+			if (read.bases.length() > numBases) { read.bases = read.bases.substr(0, numBases);  }
 
 			//read flowgram
-			read->qualScores.resize(numBases);
+			read.qualScores.resize(numBases);
 			for (int i = 0; i < numBases; i++) {  
-				char temp;
-				in.read(&temp, 1);
-				read->qualScores[i] = be_int1(*(unsigned int *)(&temp));
+				char temp[1];
+				in.read(temp, 1);
+				read.qualScores[i] = be_int1(*(unsigned char *)(&temp));
 			}
 		
 			/* Pad to 8 chars */
 			int spotInFile = in.tellg();
-	cout << spotInFile << endl;
-			int spot = floor((spotInFile + 7) /(float) 8) * 8;
-	cout << spot << endl;
+			int spot = (spotInFile + 7)& ~7;
 			in.seekg(spot);
 			
 		}else{
@@ -421,25 +390,20 @@ int SffInfoCommand::readSeqData(ifstream& in, seqRead* read, int numFlowReads, i
 	}
 }
 //**********************************************************************************************************************
-int SffInfoCommand::printCommonHeader(ofstream& out, CommonHeader* header, bool debug) {
+int SffInfoCommand::printCommonHeader(ofstream& out, CommonHeader& header) {
 	try {
 	
-		string output = "Common Header:\nMagic Number: ";
-		output += toString(header->magicNumber) + '\n';
-		output += "Version: " + toString(header->version) + '\n';
-		output += "Index Offset: " + toString(header->indexOffset) + '\n';
-		output += "Index Length: " + toString(header->indexLength) + '\n';	
-		output += "Number of Reads: " + toString(header->numReads) + '\n';
-		output += "Header Length: " + toString(header->headerLength) + '\n';
-		output += "Key Length: " + toString(header->keyLength) + '\n';
-		output += "Number of Flows: " + toString(header->numFlowsPerRead) + '\n';
-		output += "Format Code: " + toString(header->flogramFormatCode) + '\n';
-		output += "Flow Chars: " + toString(header->flowChars) + '\n';
-		output += "Key Sequence: " + toString(header->keySequence) + '\n';
-		
-		out << output << endl;
-		
-		if (debug) { cout << output << endl; }
+		out << "Common Header:\nMagic Number: " << header.magicNumber << endl;
+		out << "Version: " << header.version << endl;
+		out << "Index Offset: " << header.indexOffset << endl;
+		out << "Index Length: " << header.indexLength << endl;
+		out << "Number of Reads: " << header.numReads << endl;
+		out << "Header Length: " << header.headerLength << endl;
+		out << "Key Length: " << header.keyLength << endl;
+		out << "Number of Flows: " << header.numFlowsPerRead << endl;
+		out << "Format Code: " << header.flogramFormatCode << endl;
+		out << "Flow Chars: " << header.flowChars << endl;
+		out << "Key Sequence: " << header.keySequence << endl << endl;
 			
 		return 0;
 	}
@@ -449,21 +413,17 @@ int SffInfoCommand::printCommonHeader(ofstream& out, CommonHeader* header, bool 
 	}
 }
 //**********************************************************************************************************************
-int SffInfoCommand::printHeader(ofstream& out, Header* header, bool debug) {
+int SffInfoCommand::printHeader(ofstream& out, Header& header) {
 	try {
-		string name = header->name;
-		string output = ">" + name + "\nRead Header Length: " + toString(header->headerLength) + '\n';
-		output += "Name Length: " + toString(header->nameLength) + '\n';
-		output += "Number of Bases: " + toString(header->numBases) + '\n';
-		output += "Clip Qual Left: " + toString(header->clipQualLeft) + '\n';
-		output += "Clip Qual Right: " + toString(header->clipQualLeft) + '\n';
-		output += "Clip Adap Left: " + toString(header->clipQualLeft) + '\n';
-		output += "Clip Adap Right: " + toString(header->clipQualLeft) + '\n';
+		out << ">" << header.name << endl;
+		out << "Read Header Length: " << header.headerLength << endl;
+		out << "Name Length: " << header.nameLength << endl;
+		out << "Number of Bases: " << header.numBases << endl;
+		out << "Clip Qual Left: " << header.clipQualLeft << endl;
+		out << "Clip Qual Right: " << header.clipQualRight << endl;
+		out << "Clip Adap Left: " << header.clipAdapterLeft << endl;
+		out << "Clip Adap Right: " << header.clipAdapterRight << endl << endl;
 		
-		out << output << endl;
-		
-		if (debug) { cout << output << endl; }
-
 		return 0;
 	}
 	catch(exception& e) {
@@ -473,21 +433,19 @@ int SffInfoCommand::printHeader(ofstream& out, Header* header, bool debug) {
 }
 
 //**********************************************************************************************************************
-int SffInfoCommand::printSeqData(ofstream& out, seqRead* read, bool debug) {
+int SffInfoCommand::printSeqData(ofstream& out, seqRead& read) {
 	try {
-
-		string output = "FlowGram: ";
-		for (int i = 0; i < read->flowgram.size(); i++) {  output += toString(read->flowgram[i]) +'\t';  }
-		output += "\nFlow Indexes: ";
-		for (int i = 0; i < read->flowIndex.size(); i++) {  output += toString(read->flowIndex[i]) +'\t';  }
-		string bases = read->bases;
-		output += "\nBases: " + bases + '\n';
-		for (int i = 0; i < read->qualScores.size(); i++) {  output += toString(read->qualScores[i]) +'\t';  }
-		output += '\n';
 		
-		out << output << endl;
+		out << "FlowGram: ";
+		for (int i = 0; i < read.flowgram.size(); i++) { out << setprecision(2) << (read.flowgram[i]/(float)100) << '\t';  }
 		
-		if (debug) { cout << output << endl; }
+		out << endl <<  "Flow Indexes: ";
+		int sum = 0;
+		for (int i = 0; i < read.flowIndex.size(); i++) {  sum +=  read.flowIndex[i];  out << sum << '\t'; }
+		
+		out << endl <<  "Bases: " << read.bases << endl << "Quality Scores: ";
+		for (int i = 0; i < read.qualScores.size(); i++) {   out << read.qualScores[i] << '\t';  }
+		out << endl << endl;
 		
 		return 0;
 	}

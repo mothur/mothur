@@ -9,9 +9,13 @@
  *  Copyright 2010 Schloss Lab. All rights reserved.
  *
  */
-
+ 
 /*********************************************************************/
-// The following is copied from the staden io_lib-1.12.4 os.h
+/*********************************************************************/
+// The following is copied from the staden io_lib-1.12.4 os.h - thanks!
+/*********************************************************************/
+/*********************************************************************/
+
 /*
  * Author: 
  *         MRC Laboratory of Molecular Biology

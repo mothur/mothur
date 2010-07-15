@@ -72,7 +72,7 @@ bool InteractEngine::getInput(){
 						int pid;
 						MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
  
-cout << pid << " is here " << commandName << endl;
+//cout << pid << " is here " << commandName << endl;
 						if ((cFactory->MPIEnabled(commandName)) || (pid == 0)) {
 					#endif
 					//executes valid command
@@ -205,7 +205,7 @@ bool BatchEngine::getInput(){
 						int pid;
 						MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
 						
-cout << pid << " is here " << commandName << '\t' << count << endl;
+//cout << pid << " is here " << commandName << '\t' << count << endl;
 						if ((cFactory->MPIEnabled(commandName)) || (pid == 0)) {
 					#endif
 					//executes valid command
@@ -320,9 +320,9 @@ bool ScriptEngine::getInput(){
 						MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
 						MPI_Comm_size(MPI_COMM_WORLD, &numProcesses); 
 					
-cout << pid << " is here " << commandName  << endl;
+//cout << pid << " is here " << commandName  << endl;
 						if ((cFactory->MPIEnabled(commandName)) || (pid == 0)) {
-							cout << pid << " is in execute" << endl;	
+							//cout << pid << " is in execute" << endl;	
 					#endif
 					//executes valid command
 					Command* command = cFactory->getCommand(commandName, options);
