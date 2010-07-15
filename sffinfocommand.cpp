@@ -146,6 +146,9 @@ int SffInfoCommand::extractSffInfo(string input, string output){
 		CommonHeader header; 
 		readCommonHeader(in, header);
 		
+		//print common header
+		printCommonHeader(out, header);
+		
 		int count = 0;
 		
 		//check magic number and version
@@ -154,9 +157,7 @@ int SffInfoCommand::extractSffInfo(string input, string output){
 		
 		//read through the sff file
 		while (!in.eof()) {
-			//print common header
-			printCommonHeader(out, header);
-
+			
 			//read header
 			Header readheader;
 			readHeader(in, readheader);
@@ -253,14 +254,14 @@ int SffInfoCommand::readCommonHeader(ifstream& in, CommonHeader& header){
 			if (header.flowChars.length() > header.numFlowsPerRead) { header.flowChars = header.flowChars.substr(0, header.numFlowsPerRead);  }
 			
 			//read key
-			char myAlloc [header.keyLength];
-			in.read(myAlloc, header.keyLength);
-			header.keySequence = myAlloc;
+			char tempBuffer2 [header.keyLength];
+			in.read(tempBuffer2, header.keyLength);
+			header.keySequence = tempBuffer2;
 			if (header.keySequence.length() > header.keyLength) { header.keySequence = header.keySequence.substr(0, header.keyLength);  }
 				
 			/* Pad to 8 chars */
 			int spotInFile = in.tellg();
-			int spot = (spotInFile + 7)& ~7;
+			int spot = (spotInFile + 7)& ~7;  // ~ inverts
 			in.seekg(spot);
 			
 		}else{
@@ -416,9 +417,17 @@ int SffInfoCommand::printCommonHeader(ofstream& out, CommonHeader& header) {
 int SffInfoCommand::printHeader(ofstream& out, Header& header) {
 	try {
 		out << ">" << header.name << endl;
-		out << "Read Header Length: " << header.headerLength << endl;
+		out << "Run Prefix: " << endl;
+		out << "Region #:  " << endl;
+		out << "XY Location: " << endl << endl;
+		
+		out << "Run Name:  " << endl;
+		out << "Analysis Name:  " << endl;
+		out << "Full Path: " << endl << endl;
+		
+		out << "Read Header Len: " << header.headerLength << endl;
 		out << "Name Length: " << header.nameLength << endl;
-		out << "Number of Bases: " << header.numBases << endl;
+		out << "# of Bases: " << header.numBases << endl;
 		out << "Clip Qual Left: " << header.clipQualLeft << endl;
 		out << "Clip Qual Right: " << header.clipQualRight << endl;
 		out << "Clip Adap Left: " << header.clipAdapterLeft << endl;
