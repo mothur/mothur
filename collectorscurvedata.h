@@ -40,7 +40,7 @@ class SharedCollectorsCurveData : public Observable {
 public:
 	SharedCollectorsCurveData() { }; //: shared1(0), shared2(0)
 	
-	void registerDisplay(Display* o)		{	displays.insert(o);				};
+	void registerDisplay(Display* o)		{	displays.insert(o);			};
 	void removeDisplay(Display* o)			{	displays.erase(o);	delete o;	};
 	void SharedDataChanged()				{	notifyDisplays();				};
 	void updateSharedData(vector<SharedRAbundVector*> s, int numSeqs, int numGroupComb)	{	shared = s; NumSeqs = numSeqs; NumGroupComb = numGroupComb; SharedDataChanged();	};

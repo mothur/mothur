@@ -19,6 +19,7 @@ public:
 	virtual void close() = 0;
 	virtual bool isCalcMultiple() = 0;
 	virtual void setAll(bool){}
+	virtual bool hasLciHci(){ return false; }
 	virtual bool getAll()	{	bool a; return a;	}
 	virtual string getName() { return ""; };
 	virtual ~Display() {}

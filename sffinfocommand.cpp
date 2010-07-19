@@ -15,13 +15,14 @@
 SffInfoCommand::SffInfoCommand(string option)  {
 	try {
 		abort = false;
+		hasAccnos = false;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; }
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"sff","outputdir","inputdir", "outputdir"};
+			string Array[] =  {"sff","qfile","fasta","flow","trim","accnos","sfftxt","outputdir","inputdir", "outputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -67,6 +68,55 @@ SffInfoCommand::SffInfoCommand(string option)  {
 				//make sure there is at least one valid file left
 				if (filenames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
 			}
+			
+			accnosName = validParameter.validFile(parameters, "accnos", false);
+			if (accnosName == "not found") { accnosName = "";  }
+			else { 
+				hasAccnos = true;
+				splitAtDash(accnosName, accnosFileNames);
+				
+				//go through files and make sure they are good, if not, then disregard them
+				for (int i = 0; i < accnosFileNames.size(); i++) {
+					if (inputDir != "") {
+						string path = hasPath(accnosFileNames[i]);
+						//if the user has not given a path then, add inputdir. else leave path alone.
+						if (path == "") {	accnosFileNames[i] = inputDir + accnosFileNames[i];		}
+					}
+	
+					ifstream in;
+					int ableToOpen = openInputFile(accnosFileNames[i], in);
+					in.close();
+					
+					if (ableToOpen == 1) { 
+						m->mothurOut(accnosFileNames[i] + " will be disregarded."); m->mothurOutEndLine(); 
+						//erase from file list
+						accnosFileNames.erase(accnosFileNames.begin()+i);
+						i--;
+					}
+				}
+				
+				//make sure there is at least one valid file left
+				if (accnosFileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
+			}
+			
+			if (hasAccnos) {
+				if (accnosFileNames.size() != filenames.size()) { abort = true; m->mothurOut("If you provide a accnos file, you must have one for each sff file."); m->mothurOutEndLine(); }
+			}
+			
+			string temp = validParameter.validFile(parameters, "qfile", false);			if (temp == "not found"){	temp = "T";				}
+			qual = isTrue(temp); 
+			
+			temp = validParameter.validFile(parameters, "fasta", false);				if (temp == "not found"){	temp = "T";				}
+			fasta = isTrue(temp); 
+			
+			temp = validParameter.validFile(parameters, "flow", false);					if (temp == "not found"){	temp = "F";				}
+			flow = isTrue(temp); 
+			
+			temp = validParameter.validFile(parameters, "trim", false);					if (temp == "not found"){	temp = "T";				}
+			trim = isTrue(temp); 
+			
+			temp = validParameter.validFile(parameters, "sfftxt", false);				if (temp == "not found"){	temp = "F";				}
+			sfftxt = isTrue(temp); 
 		}
 	}
 	catch(exception& e) {
@@ -106,12 +156,10 @@ int SffInfoCommand::execute(){
 			
 			m->mothurOut("Extracting info from " + filenames[s] + " ..." ); m->mothurOutEndLine();
 			
-			if (outputDir == "") {  outputDir += hasPath(filenames[s]); }
-			string outputFileName = outputDir + getRootName(getSimpleName(filenames[s])) + "sff.txt";
-						
-			int numReads = extractSffInfo(filenames[s], outputFileName);
+			string accnos = "";
+			if (hasAccnos) { accnos = accnosFileNames[s]; }
 			
-			outputNames.push_back(outputFileName);
+			int numReads = extractSffInfo(filenames[s], accnos);
 
 			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to extract " + toString(numReads) + ".");
 		}
@@ -132,13 +180,30 @@ int SffInfoCommand::execute(){
 	}
 }
 //**********************************************************************************************************************
-int SffInfoCommand::extractSffInfo(string input, string output){
+int SffInfoCommand::extractSffInfo(string input, string accnos){
 	try {
 		
-		ofstream out;
-		openOutputFile(output, out);
+		if (outputDir == "") {  outputDir += hasPath(input); }
 		
-		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+		if (accnos != "")	{  readAccnosFile(accnos);  }
+		else				{	seqNames.clear();		}
+
+		ofstream outSfftxt, outFasta, outQual, outFlow;
+		string outFastaFileName, outQualFileName;
+		string sfftxtFileName = outputDir + getRootName(getSimpleName(input)) + "sff.txt";
+		string outFlowFileName = outputDir + getRootName(getSimpleName(input)) + "flow";
+		if (trim) {
+			outFastaFileName = outputDir + getRootName(getSimpleName(input)) + "fasta";
+			outQualFileName = outputDir + getRootName(getSimpleName(input)) + "qual";
+		}else{
+			outFastaFileName = outputDir + getRootName(getSimpleName(input)) + "raw.fasta";
+			outQualFileName = outputDir + getRootName(getSimpleName(input)) + "raw.qual";
+		}
+		
+		if (sfftxt) { openOutputFile(sfftxtFileName, outSfftxt); outSfftxt.setf(ios::fixed, ios::floatfield); outSfftxt.setf(ios::showpoint);  outputNames.push_back(sfftxtFileName); }
+		if (fasta)	{ openOutputFile(outFastaFileName, outFasta);	outputNames.push_back(outFastaFileName); }
+		if (qual)	{ openOutputFile(outQualFileName, outQual);		outputNames.push_back(outQualFileName);  }
+		if (flow)	{ openOutputFile(outFlowFileName, outFlow);		outputNames.push_back(outFlowFileName);  }
 		
 		ifstream in;
 		in.open(input.c_str(), ios::binary);
@@ -146,31 +211,38 @@ int SffInfoCommand::extractSffInfo(string input, string output){
 		CommonHeader header; 
 		readCommonHeader(in, header);
 		
-		//print common header
-		printCommonHeader(out, header);
-		
 		int count = 0;
 		
 		//check magic number and version
 		if (header.magicNumber != 779314790) { m->mothurOut("Magic Number is not correct, not a valid .sff file"); m->mothurOutEndLine(); return count; }
 		if (header.version != "0001") { m->mothurOut("Version is not supported, only support version 0001."); m->mothurOutEndLine(); return count; }
+	
+		//print common header
+		if (sfftxt) { printCommonHeader(outSfftxt, header); }
 		
 		//read through the sff file
 		while (!in.eof()) {
 			
+			bool print = true;
+			
 			//read header
 			Header readheader;
 			readHeader(in, readheader);
-		
-			//print header
-			printHeader(out, readheader);
 			
 			//read data
 			seqRead read; 
 			readSeqData(in, read, header.numFlowsPerRead, readheader.numBases);
-		
-			//print data
-			printSeqData(out, read);
+			
+			//if you have provided an accosfile and this seq is not in it, then dont print
+			if (seqNames.size() != 0) {   if (seqNames.count(readheader.name) == 0) { print = false; }  }
+			
+			//print 
+			if (print) {
+				if (sfftxt) { printHeader(outSfftxt, readheader); printSffTxtSeqData(outSfftxt, read); }
+				if (fasta)	{	printFastaSeqData(outFasta, read, readheader);	}
+				if (qual)	{	printQualSeqData(outQual, read, readheader);	}
+				if (flow)	{	printFlowSeqData(outFlow, read, readheader);	}
+			}
 			
 			count++;
 			
@@ -186,7 +258,11 @@ int SffInfoCommand::extractSffInfo(string input, string output){
 		if (!m->control_pressed) {   if((count) % 500 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}  }
 		
 		in.close();
-		out.close();
+		
+		if (sfftxt) {  outSfftxt.close();	}
+		if (fasta)	{  outFasta.close();	}
+		if (qual)	{  outQual.close();		}
+		if (flow)	{  outFlow.close();		}
 		
 		return count;
 	}
@@ -416,6 +492,7 @@ int SffInfoCommand::printCommonHeader(ofstream& out, CommonHeader& header) {
 //**********************************************************************************************************************
 int SffInfoCommand::printHeader(ofstream& out, Header& header) {
 	try {
+		
 		out << ">" << header.name << endl;
 		out << "Run Prefix: " << endl;
 		out << "Region #:  " << endl;
@@ -442,7 +519,7 @@ int SffInfoCommand::printHeader(ofstream& out, Header& header) {
 }
 
 //**********************************************************************************************************************
-int SffInfoCommand::printSeqData(ofstream& out, seqRead& read) {
+int SffInfoCommand::printSffTxtSeqData(ofstream& out, seqRead& read) {
 	try {
 		
 		out << "FlowGram: ";
@@ -459,7 +536,92 @@ int SffInfoCommand::printSeqData(ofstream& out, seqRead& read) {
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SffInfoCommand", "printSeqData");
+		m->errorOut(e, "SffInfoCommand", "printSffTxtSeqData");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int SffInfoCommand::printFastaSeqData(ofstream& out, seqRead& read, Header& header) {
+	try {
+		
+		string seq = read.bases;
+		
+		
+		if (trim) {
+			seq = seq.substr(header.clipQualLeft, (header.clipQualRight-header.clipQualLeft));
+		}
+		
+		out << ">" << header.name << endl;
+		out << seq << endl;
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SffInfoCommand", "printFastaSeqData");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
+int SffInfoCommand::printQualSeqData(ofstream& out, seqRead& read, Header& header) {
+	try {
+		
+		if (trim) {
+			out << ">" << header.name << " length=" << (header.clipQualRight-header.clipQualLeft) << endl;
+			for (int i = header.clipQualLeft; i < (header.clipQualRight-header.clipQualLeft); i++) {   out << read.qualScores[i] << '\t';  }
+		}else{
+			out << ">" << header.name << " length=" << read.qualScores.size() << endl;
+			for (int i = 0; i < read.qualScores.size(); i++) {   out << read.qualScores[i] << '\t';  }
+		}
+		
+		out << endl;
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SffInfoCommand", "printQualSeqData");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
+int SffInfoCommand::printFlowSeqData(ofstream& out, seqRead& read, Header& header) {
+	try {
+		
+		out << ">" << header.name << endl;
+		for (int i = 0; i < read.flowgram.size(); i++) { out << setprecision(2) << (read.flowgram[i]/(float)100) << '\t';  }
+		out << endl;
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SffInfoCommand", "printFlowSeqData");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int SffInfoCommand::readAccnosFile(string filename) {
+	try {
+		//remove old names
+		seqNames.clear();
+		
+		ifstream in;
+		openInputFile(filename, in);
+		string name;
+		
+		while(!in.eof()){
+			in >> name; gobble(in);
+						
+			seqNames.insert(name);
+			
+			if (m->control_pressed) { seqNames.clear(); break; }
+		}
+		in.close();		
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SffInfoCommand", "readAccnosFile");
 		exit(1);
 	}
 }

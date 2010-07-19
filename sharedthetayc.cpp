@@ -70,6 +70,10 @@ EstOutput ThetaYC::getValues(vector<SharedRAbundVector*> shared) {
 		data[1] = thetaYC - ci;
 		data[2] = thetaYC + ci;
 		
+		if (isnan(data[0]) || isinf(data[0])) { data[0] = 0; }
+		if (isnan(data[1]) || isinf(data[1])) { data[1] = 0; }
+		if (isnan(data[2]) || isinf(data[2])) { data[2] = 0; }
+		
 		return data;
 	}
 	catch(exception& e) {

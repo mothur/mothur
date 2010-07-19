@@ -88,16 +88,17 @@ try {
                 //initialize labels for output
                 //makes  'uniqueAB         uniqueAC  uniqueBC' if your groups are A, B, C
                 getGroupComb();
-                groupLabel = ""; 
-                for (int s = 0; s < groupComb.size(); s++) {
-                        groupLabel = groupLabel + label + groupComb[s] + "\t";
-                }
-				
-				//for multi displays
-				string groupLabelAll = groupLabel + label + "all\t";
 				
                 for(int i=0;i<displays.size();i++){
                         ccd->registerDisplay(displays[i]); //adds a display[i] to cdd
+						bool hasLciHci = displays[i]->hasLciHci();
+						groupLabel = "";
+						for (int s = 0; s < groupComb.size(); s++) {
+							if (hasLciHci) {  groupLabel = groupLabel + label + groupComb[s] + "\t" + label + groupComb[s] + "lci\t" + label + groupComb[s] + "hci\t"; }
+							else{  groupLabel = groupLabel + label + groupComb[s] + "\t";  }
+						}
+
+						string groupLabelAll = groupLabel + label + "all\t"; 
 						if ((displays[i]->isCalcMultiple() == true) && (displays[i]->getAll() == true)) {   displays[i]->init(groupLabelAll); }
 						else {  displays[i]->init(groupLabel);  }           
                 }

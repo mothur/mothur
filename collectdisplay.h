@@ -72,14 +72,19 @@ public:
 			output->output(numSeqs, groupData);	
 		}
 	};
-	
+									
 	void init(string s)		{	output->initFile(s);	};
 	void reset()			{	output->resetFile();	};
 	void close()			{	output->resetFile();	};
 	void setAll(bool a)		{	all = a;				}
 	bool getAll()			{	return all;				}
 	
-	bool isCalcMultiple() { return estimate->getMultiple(); }
+	
+	bool isCalcMultiple()	{ return estimate->getMultiple(); }
+	bool hasLciHci()	{
+		if (estimate->getCols() == 3) { return true; } 
+		else{ return false; } 
+	}
 	
 	string getName()	{  return estimate->getName();  }
 	
