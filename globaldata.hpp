@@ -58,6 +58,7 @@ public:
 	string getNameFile();	//do we need this?
 	string getGroupFile();	//do we need this?
 	string getOrderFile();
+	string getOrderGroupFile();
 	string getTreeFile();
 	string getSharedFile();
 	string getFormat();	//do we need this?
@@ -73,6 +74,7 @@ public:
 	void setSabundFile(string);
 	void setSharedFile(string);
 	void setOrderFile(string file);
+	void setOrderGroupFile(string file);
 	void setFormat(string);	//do we need this?
 	
 	NameAssignment* nameMap;
@@ -85,7 +87,7 @@ public:
 	
 private:
 	MothurOut* m;
-	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, treefile, sharedfile, format, distfile;
+	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, orderfile, treefile, sharedfile, format, distfile, ordergroup;
 
 	static GlobalData* _uniqueInstance;
 	GlobalData( const GlobalData& ); // Disable copy constructor

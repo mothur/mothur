@@ -148,9 +148,16 @@ SffInfoCommand::SffInfoCommand(string option)  {
 
 void SffInfoCommand::help(){
 	try {
-		m->mothurOut("The sffinfo command reads a sff file and outputs a .sff.txt file.\n");
-		
-		m->mothurOut("Example sffinfo(sff=...).\n");
+		m->mothurOut("The sffinfo command reads a sff file and extracts the sequence data.\n");
+		m->mothurOut("The sffinfo command parameters are sff, fasta, qfile, accnos, flow, sfftxt, and trim. sff is required. \n");
+		m->mothurOut("The sff parameter allows you to enter the sff file you would like to extract data from.  You may enter multiple files by separating them by -'s.\n");
+		m->mothurOut("The fasta parameter allows you to indicate if you would like a fasta formatted file generated.  Default=True. \n");
+		m->mothurOut("The qfile parameter allows you to indicate if you would like a quality file generated.  Default=True. \n");
+		m->mothurOut("The flow parameter allows you to indicate if you would like a flowgram file generated.  Default=False. \n");
+		m->mothurOut("The sfftxt parameter allows you to indicate if you would like a sff.txt file generated.  Default=False. \n");
+		m->mothurOut("The trim parameter allows you to indicate if you would like a sequences and quality scores trimmed to the clipQualLeft and clipQualRight values.  Default=True. \n");
+		m->mothurOut("The accnos parameter allows you to provide a accnos file containing the names of the sequences you would like extracted. You may enter multiple files by separating them by -'s. \n");
+		m->mothurOut("Example sffinfo(sff=mySffFile.sff, trim=F).\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. sff), '=' and parameters (i.e.yourSffFileName).\n\n");
 	}
 	catch(exception& e) {

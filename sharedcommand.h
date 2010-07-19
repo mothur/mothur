@@ -34,6 +34,7 @@ public:
 private:
 	void printSharedData(vector<SharedRAbundVector*>);
 	int createMisMatchFile();
+	int readOrderFile();
 	bool isValidGroup(string, vector<string>);
 	int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
 	
@@ -42,7 +43,7 @@ private:
 	SharedListVector* SharedList;
 	InputData* input;
 	GroupMap* groupMap;
-	vector<string> groups, outputNames;
+	vector<string> groups, outputNames, order;
 	ofstream out;
 	string filename, fileroot, outputDir;
 	bool firsttime, pickedGroups;

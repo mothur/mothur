@@ -26,6 +26,7 @@ string GlobalData::getSabundFile()		{	return sabundfile;		}
 string GlobalData::getNameFile()		{	return namefile;		}
 string GlobalData::getGroupFile()		{	return groupfile;		}
 string GlobalData::getOrderFile()		{	return orderfile;		}
+string GlobalData::getOrderGroupFile()	{	return ordergroup;		}
 string GlobalData::getTreeFile()		{	return treefile;		}
 string GlobalData::getSharedFile()		{	return sharedfile;		}	
 string GlobalData::getFormat()			{	return format;			}
@@ -40,6 +41,7 @@ void GlobalData::setGroupFile(string file)		{	groupfile = file;											}
 void GlobalData::setSharedFile(string file)		{	sharedfile = file;	inputFileName = file;					}
 void GlobalData::setNameFile(string file)		{	namefile = file;		}
 void GlobalData::setOrderFile(string file)		{	orderfile = file;		}
+void GlobalData::setOrderGroupFile(string file)	{	ordergroup = file;		}
 void GlobalData::setFormat(string Format)		{	format = Format;		}
 
 
@@ -77,6 +79,7 @@ void GlobalData::clear() {
 	namefile		=	""; //do we need this?
 	groupfile		=	""; //do we need this?
 	orderfile		=	"";
+	ordergroup		=	"";
 //	fastafile		=   ""; //do we need this?
 	treefile		=	"";
 	sharedfile		=	"";
