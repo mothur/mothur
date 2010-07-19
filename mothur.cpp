@@ -12,7 +12,6 @@
 #include "globaldata.hpp"
 #include "mothurout.h"
 
-
 /**************************************************************************************************/
 
 GlobalData* GlobalData::_uniqueInstance = 0;
@@ -69,6 +68,13 @@ int main(int argc, char *argv[]){
 		
 		#ifdef USE_READLINE
 			m->mothurOutJustToLog("Using ReadLine");
+			m->mothurOutEndLine(); m->mothurOutEndLine();
+		#endif
+		
+		#ifdef MOTHUR_FILES
+			string temp = MOTHUR_FILES; 
+			m->setDefaultPath(temp);
+			m->mothurOutJustToLog("Using default file location " + temp);
 			m->mothurOutEndLine(); m->mothurOutEndLine();
 		#endif
 		

@@ -72,11 +72,22 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 						if (path == "") {	fastafileNames[i] = inputDir + fastafileNames[i];		}
 					}
 
-					int ableToOpen;
 					ifstream in;
-					ableToOpen = openInputFile(fastafileNames[i], in);
+					int ableToOpen = openInputFile(fastafileNames[i], in, "noerror");
+				
+					//if you can't open it, try default location
+					if (ableToOpen == 1) {
+						if (m->getDefaultPath() != "") { //default path is set
+							string tryPath = m->getDefaultPath() + getSimpleName(fastafileNames[i]);
+							m->mothurOut("Unable to open " + fastafileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+							ableToOpen = openInputFile(tryPath, in, "noerror");
+							fastafileNames[i] = tryPath;
+						}
+					}
+					in.close();
+					
 					if (ableToOpen == 1) { 
-						m->mothurOut(fastafileNames[i] + " will be disregarded."); m->mothurOutEndLine(); 
+						m->mothurOut("Unable to open " + fastafileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();
 						//erase from file list
 						fastafileNames.erase(fastafileNames.begin()+i);
 						i--;

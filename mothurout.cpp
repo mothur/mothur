@@ -40,6 +40,26 @@ void MothurOut::setFileName(string filename)  {
 	}
 }
 /*********************************************************************************************/
+void MothurOut::setDefaultPath(string pathname)  {
+	try {
+	
+		//add / to name if needed
+		string lastChar = pathname.substr(pathname.length()-1);
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			if (lastChar != "/") { pathname += "/"; }
+		#else
+			if (lastChar != "\\") { pathname += "\\"; }	
+		#endif
+		
+		defaultPath = pathname;
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "setDefaultPath");
+		exit(1);
+	}
+}
+/*********************************************************************************************/
 void MothurOut::closeLog()  {
 	try {
 		

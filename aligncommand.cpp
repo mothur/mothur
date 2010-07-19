@@ -107,9 +107,18 @@ AlignCommand::AlignCommand(string option)  {
 						if (pid == 0) {
 					#endif
 
-					ableToOpen = openInputFile(candidateFileNames[i], in);
-					in.close();
-					
+					ableToOpen = openInputFile(candidateFileNames[i], in, "noerror");
+				
+					//if you can't open it, try default location
+					if (ableToOpen == 1) {
+						if (m->getDefaultPath() != "") { //default path is set
+							string tryPath = m->getDefaultPath() + getSimpleName(candidateFileNames[i]);
+							m->mothurOut("Unable to open " + candidateFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+							ableToOpen = openInputFile(tryPath, in, "noerror");
+							candidateFileNames[i] = tryPath;
+						}
+					}
+					in.close();					
 					#ifdef USE_MPI	
 							for (int j = 1; j < processors; j++) {
 								MPI_Send(&ableToOpen, 1, MPI_INT, j, 2001, MPI_COMM_WORLD); 
@@ -122,7 +131,7 @@ AlignCommand::AlignCommand(string option)  {
 					#endif
 
 					if (ableToOpen == 1) { 
-						m->mothurOut(candidateFileNames[i] + " will be disregarded."); m->mothurOutEndLine(); 
+						m->mothurOut("Unable to open " + candidateFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
 						//erase from file list
 						candidateFileNames.erase(candidateFileNames.begin()+i);
 						i--;
