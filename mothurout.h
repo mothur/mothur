@@ -25,18 +25,22 @@ class MothurOut {
 		void mothurOutJustToLog(string);
 		void errorOut(exception&, string, string);
 		void closeLog();
+		string getDefaultPath() { return defaultPath; }
+		void setDefaultPath(string);
 
 		int control_pressed;
 		bool executing;
+		
 
 	private:
 		static MothurOut* _uniqueInstance;
 		MothurOut( const MothurOut& ); // Disable copy constructor
 		void operator=( const MothurOut& ); // Disable assignment operator
-		MothurOut() { control_pressed = false; };
+		MothurOut() { control_pressed = false; defaultPath=""; };
 		~MothurOut();
 
 		string logFileName;
+		string defaultPath;
 		ofstream out;
 		
 		int mem_usage(double&, double&);

@@ -54,11 +54,21 @@ SffInfoCommand::SffInfoCommand(string option)  {
 					}
 	
 					ifstream in;
-					int ableToOpen = openInputFile(filenames[i], in);
+					int ableToOpen = openInputFile(filenames[i], in, "noerror");
+				
+					//if you can't open it, try default location
+					if (ableToOpen == 1) {
+						if (m->getDefaultPath() != "") { //default path is set
+							string tryPath = m->getDefaultPath() + getSimpleName(filenames[i]);
+							m->mothurOut("Unable to open " + filenames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+							ableToOpen = openInputFile(tryPath, in, "noerror");
+							filenames[i] = tryPath;
+						}
+					}
 					in.close();
 					
 					if (ableToOpen == 1) { 
-						m->mothurOut(filenames[i] + " will be disregarded."); m->mothurOutEndLine(); 
+						m->mothurOut("Unable to open " + filenames[i] + ". It will be disregarded."); m->mothurOutEndLine();
 						//erase from file list
 						filenames.erase(filenames.begin()+i);
 						i--;
@@ -84,11 +94,21 @@ SffInfoCommand::SffInfoCommand(string option)  {
 					}
 	
 					ifstream in;
-					int ableToOpen = openInputFile(accnosFileNames[i], in);
+					int ableToOpen = openInputFile(accnosFileNames[i], in, "noerror");
+				
+					//if you can't open it, try default location
+					if (ableToOpen == 1) {
+						if (m->getDefaultPath() != "") { //default path is set
+							string tryPath = m->getDefaultPath() + getSimpleName(accnosFileNames[i]);
+							m->mothurOut("Unable to open " + accnosFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+							ableToOpen = openInputFile(tryPath, in, "noerror");
+							accnosFileNames[i] = tryPath;
+						}
+					}
 					in.close();
 					
 					if (ableToOpen == 1) { 
-						m->mothurOut(accnosFileNames[i] + " will be disregarded."); m->mothurOutEndLine(); 
+						m->mothurOut("Unable to open " + accnosFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();
 						//erase from file list
 						accnosFileNames.erase(accnosFileNames.begin()+i);
 						i--;

@@ -107,7 +107,17 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 					#endif
 					
 					ifstream in;
-					ableToOpen = openInputFile(fastaFileNames[i], in);
+					ableToOpen = openInputFile(fastaFileNames[i], in, "noerror");
+				
+					//if you can't open it, try default location
+					if (ableToOpen == 1) {
+						if (m->getDefaultPath() != "") { //default path is set
+							string tryPath = m->getDefaultPath() + getSimpleName(fastaFileNames[i]);
+							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+							ableToOpen = openInputFile(tryPath, in, "noerror");
+							fastaFileNames[i] = tryPath;
+						}
+					}
 					in.close();
 					
 					#ifdef USE_MPI	
@@ -122,7 +132,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 					#endif
 					
 					if (ableToOpen == 1) { 
-						m->mothurOut(fastaFileNames[i] + " will be disregarded."); m->mothurOutEndLine(); 
+						m->mothurOut("Unable to open " + fastaFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
 						//erase from file list
 						fastaFileNames.erase(fastaFileNames.begin()+i);
 						i--;
@@ -168,7 +178,17 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 					#endif
 
 					ifstream in;
-					ableToOpen = openInputFile(namefileNames[i], in);
+					ableToOpen = openInputFile(namefileNames[i], in, "noerror");
+				
+					//if you can't open it, try default location
+					if (ableToOpen == 1) {
+						if (m->getDefaultPath() != "") { //default path is set
+							string tryPath = m->getDefaultPath() + getSimpleName(namefileNames[i]);
+							m->mothurOut("Unable to open " + namefileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+							ableToOpen = openInputFile(tryPath, in, "noerror");
+							namefileNames[i] = tryPath;
+						}
+					}
 					in.close();
 					
 					#ifdef USE_MPI	
@@ -181,8 +201,14 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 						}
 						
 					#endif
-					if (ableToOpen == 1) {  m->mothurOut("Unable to match name file with fasta file."); m->mothurOutEndLine(); abort = true;	}
 					
+					if (ableToOpen == 1) { 
+						m->mothurOut("Unable to open " + namefileNames[i] + ". It will be disregarded."); m->mothurOutEndLine();  abort = true;
+						//erase from file list
+						namefileNames.erase(namefileNames.begin()+i);
+						i--;
+					}
+
 				}
 			}
 
@@ -213,7 +239,17 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 					#endif
 
 					ifstream in;
-					ableToOpen = openInputFile(groupfileNames[i], in);
+					ableToOpen = openInputFile(groupfileNames[i], in, "noerror");
+				
+					//if you can't open it, try default location
+					if (ableToOpen == 1) {
+						if (m->getDefaultPath() != "") { //default path is set
+							string tryPath = m->getDefaultPath() + getSimpleName(groupfileNames[i]);
+							m->mothurOut("Unable to open " + groupfileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+							ableToOpen = openInputFile(tryPath, in, "noerror");
+							groupfileNames[i] = tryPath;
+						}
+					}
 					in.close();
 					
 					#ifdef USE_MPI	
@@ -226,8 +262,13 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 						}
 						
 					#endif
-					if (ableToOpen == 1) {  m->mothurOut("Unable to match group file with fasta file, not using " + groupfileNames[i] + "."); m->mothurOutEndLine(); groupfileNames[i] = "";	}
 					
+					if (ableToOpen == 1) { 
+						m->mothurOut("Unable to open " + groupfileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); groupfileNames[i] = "";
+						//erase from file list
+						groupfileNames.erase(groupfileNames.begin()+i);
+						i--;
+					}
 				}
 			}
 

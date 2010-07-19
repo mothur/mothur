@@ -77,7 +77,17 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 						if (pid == 0) {
 					#endif
 
-					ableToOpen = openInputFile(fastaFileNames[i], in);
+					ableToOpen = openInputFile(fastaFileNames[i], in, "noerror");
+				
+					//if you can't open it, try default location
+					if (ableToOpen == 1) {
+						if (m->getDefaultPath() != "") { //default path is set
+							string tryPath = m->getDefaultPath() + getSimpleName(fastaFileNames[i]);
+							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+							ableToOpen = openInputFile(tryPath, in, "noerror");
+							fastaFileNames[i] = tryPath;
+						}
+					}
 					in.close();
 					
 					#ifdef USE_MPI	
@@ -92,7 +102,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 					#endif
 
 					if (ableToOpen == 1) { 
-						m->mothurOut(fastaFileNames[i] + " will be disregarded."); m->mothurOutEndLine(); 
+						m->mothurOut("Unable to open " + fastaFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
 						//erase from file list
 						fastaFileNames.erase(fastaFileNames.begin()+i);
 						i--;

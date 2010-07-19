@@ -27,7 +27,7 @@ class ValidParameters {
 		bool isValidParameter(string, vector<string>, string);
 		vector <string> addParameters(string[], int);
 		void initParameterRanges();
-		string validFile(map<string, string>, string, bool); //container, parameter, isFile
+		string validFile(map<string, string>&, string, bool); //container, parameter, isFile
 
 	private:
 		map<string, string>::iterator it;

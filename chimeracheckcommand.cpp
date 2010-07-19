@@ -73,7 +73,17 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 						if (pid == 0) {
 					#endif
 
-					ableToOpen = openInputFile(fastaFileNames[i], in);
+					ableToOpen = openInputFile(fastaFileNames[i], in, "noerror");
+				
+					//if you can't open it, try default location
+					if (ableToOpen == 1) {
+						if (m->getDefaultPath() != "") { //default path is set
+							string tryPath = m->getDefaultPath() + getSimpleName(fastaFileNames[i]);
+							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+							ableToOpen = openInputFile(tryPath, in, "noerror");
+							fastaFileNames[i] = tryPath;
+						}
+					}
 					in.close();
 					
 					#ifdef USE_MPI	
@@ -88,7 +98,7 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 					#endif
 
 					if (ableToOpen == 1) { 
-						m->mothurOut(fastaFileNames[i] + " will be disregarded."); m->mothurOutEndLine(); 
+						m->mothurOut("Unable to open " + fastaFileNames[i] +". It will be disregarded."); m->mothurOutEndLine(); 
 						//erase from file list
 						fastaFileNames.erase(fastaFileNames.begin()+i);
 						i--;
@@ -130,7 +140,17 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 						if (pid == 0) {
 					#endif
 
-					ableToOpen = openInputFile(nameFileNames[i], in);
+					ableToOpen = openInputFile(nameFileNames[i], in, "noerror");
+				
+					//if you can't open it, try default location
+					if (ableToOpen == 1) {
+						if (m->getDefaultPath() != "") { //default path is set
+							string tryPath = m->getDefaultPath() + getSimpleName(nameFileNames[i]);
+							m->mothurOut("Unable to open " + nameFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+							ableToOpen = openInputFile(tryPath, in, "noerror");
+							nameFileNames[i] = tryPath;
+						}
+					}
 					in.close();
 					
 					#ifdef USE_MPI	
@@ -145,7 +165,7 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 					#endif
 
 					if (ableToOpen == 1) { 
-						m->mothurOut(nameFileNames[i] + " will be disregarded."); m->mothurOutEndLine(); 
+						m->mothurOut("Unable to open " + nameFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
 						//erase from file list
 						nameFileNames.erase(nameFileNames.begin()+i);
 						i--;

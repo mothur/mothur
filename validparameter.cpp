@@ -197,7 +197,7 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 
 /******************************************************/
 
-string ValidParameters::validFile(map<string, string> container, string parameter, bool isFile) {
+string ValidParameters::validFile(map<string, string>& container, string parameter, bool isFile) {
 	try {
 		int ableToOpen;
 		ifstream in;
@@ -217,7 +217,18 @@ string ValidParameters::validFile(map<string, string> container, string paramete
 				if (pid == 0) {
 			#endif
 
-				ableToOpen = openInputFile(it->second, in);
+				ableToOpen = openInputFile(it->second, in, "noerror");
+				
+				//if you can't open it, try default location
+				if (ableToOpen == 1) {
+					if (m->getDefaultPath() != "") { //default path is set
+						string tryPath = m->getDefaultPath() + getSimpleName(it->second);
+						m->mothurOut("Unable to open " + it->second + ". Trying default " + tryPath); m->mothurOutEndLine();
+						ableToOpen = openInputFile(tryPath, in, "noerror");
+						container[parameter] = tryPath;
+					}
+				}
+				
 				in.close();
 
 			#ifdef USE_MPI	
@@ -231,7 +242,10 @@ string ValidParameters::validFile(map<string, string> container, string paramete
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 			#endif
 			
-				if (ableToOpen == 1) { return "not open"; }
+				if (ableToOpen == 1) { 
+					m->mothurOut("Unable to open " + container[parameter]); m->mothurOutEndLine();
+					return "not open"; 
+				}
 			}
 		}else { return "not found"; }
 		
