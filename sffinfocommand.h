@@ -65,9 +65,10 @@ public:
 	void help();
 	
 private:
-	string sffFilename, outputDir;
-	vector<string> filenames, outputNames;
-	bool abort;
+	string sffFilename, outputDir, accnosName;
+	vector<string> filenames, outputNames, accnosFileNames;
+	bool abort, fasta, qual, trim, flow, sfftxt, hasAccnos;
+	set<string> seqNames;
 	
 	int extractSffInfo(string, string);
 	int readCommonHeader(ifstream&, CommonHeader&);
@@ -76,7 +77,11 @@ private:
 	
 	int printCommonHeader(ofstream&, CommonHeader&); 
 	int printHeader(ofstream&, Header&);
-	int printSeqData(ofstream&, seqRead&);
+	int printSffTxtSeqData(ofstream&, seqRead&);
+	int printFlowSeqData(ofstream&, seqRead&, Header&);
+	int printFastaSeqData(ofstream&, seqRead&, Header&);
+	int printQualSeqData(ofstream&, seqRead&, Header&);
+	int readAccnosFile(string);
 		
 };
 

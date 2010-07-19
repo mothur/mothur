@@ -24,6 +24,10 @@ endif
 ifeq  ($(strip $(64BIT_VERSION)),yes)
     TARGET_ARCH += -arch x86_64
 	 CXXFLAGS += -DBIT_VERSION
+	
+	#if you are using centos uncomment the following lines
+	#CC = g++44
+	#CXXFLAGS += -mtune=native -march=native -m64
 endif
 
 # if you do not want to use the readline library, set this to no.
