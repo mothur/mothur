@@ -84,6 +84,7 @@
 #include "getrelabundcommand.h"
 #include "sensspeccommand.h"
 #include "sffinfocommand.h"
+#include "seqerrorcommand.h"
 
 /*******************************************************/
 
@@ -187,6 +188,7 @@ CommandFactory::CommandFactory(){
 	commands["summary.seqs"]		= "MPIEnabled";
 	commands["cluster.split"]		= "MPIEnabled";
 	commands["sens.spec"]			= "sens.spec";
+	commands["seq.error"]			= "seq.error";
 	commands["quit"]				= "MPIEnabled"; 
 
 }
@@ -302,6 +304,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "degap.seqs")			{	command = new DegapSeqsCommand(optionString);				}
 		else if(commandName == "get.relabund")			{	command = new GetRelAbundCommand(optionString);				}
 		else if(commandName == "sens.spec")				{	command = new SensSpecCommand(optionString);				}
+		else if(commandName == "seq.error")				{	command = new SeqErrorCommand(optionString);				}
 		else if(commandName == "sffinfo")				{	command = new SffInfoCommand(optionString);					}
 		else											{	command = new NoCommand(optionString);						}
 

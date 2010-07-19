@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		7E84528511EF4BEB00564975 /* seqerrorcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = seqerrorcommand.h; sourceTree = "<group>"; };
+		7E84528611EF4BEB00564975 /* seqerrorcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = seqerrorcommand.cpp; sourceTree = "<group>"; };
 		7E85BD1C11EB5E9B00FD37C0 /* qualityscores.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = qualityscores.h; sourceTree = "<group>"; };
 		7E85BD1D11EB5E9B00FD37C0 /* qualityscores.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = qualityscores.cpp; sourceTree = "<group>"; };
 		7EA299BA11E384940022D8D3 /* sensspeccommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sensspeccommand.h; sourceTree = "<group>"; };
@@ -542,6 +544,8 @@
 				A7DA2174113FECD400BF472F /* validparameter.h */,
 				A7DA2175113FECD400BF472F /* venn.cpp */,
 				A7DA2176113FECD400BF472F /* venn.h */,
+				7E84528511EF4BEB00564975 /* seqerrorcommand.h */,
+				7E84528611EF4BEB00564975 /* seqerrorcommand.cpp */,
 			);
 			name = mothur;
 			sourceTree = "<group>";

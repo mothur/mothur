@@ -48,6 +48,7 @@ public:
 	int getEndPos();
 	int getAlignLength();
 	int getAmbigBases();
+	void removeAmbigBases();
 	int getLongHomoPolymer();
 	bool getIsAligned();
 	void printSequence(ostream&);

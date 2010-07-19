@@ -480,6 +480,18 @@ int Sequence::getAmbigBases(){
 
 //********************************************************************************************************************
 
+void Sequence::removeAmbigBases(){
+	
+	for(int j=0;j<alignmentLength;j++){
+		if(aligned[j] != 'A' && aligned[j] != 'T' && aligned[j] != 'G' && aligned[j] != 'C'){
+			aligned[j] = '-';
+		}
+	}
+	setUnaligned(aligned);
+}
+	
+//********************************************************************************************************************
+
 int Sequence::getLongHomoPolymer(){
 	if(longHomoPolymer == -1){
 		longHomoPolymer = 1;

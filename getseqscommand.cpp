@@ -22,7 +22,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","name", "group", "alignreport", "accnos", "list","taxonomy","outputdir","inputdir"};
+			string Array[] =  {"fasta","name", "group", "alignreport", "accnos", "dups", "list","taxonomy","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
