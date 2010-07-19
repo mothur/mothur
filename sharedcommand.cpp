@@ -71,6 +71,9 @@ int SharedCommand::execute(){
 		string errorOff = "no error";
 		//errorOff = "";
 		
+		//if user provided an order file containing the order the shared file should be in read it
+		if (globaldata->getOrderGroupFile() != "") { readOrderFile(); }
+		
 		//read in listfile
 		read = new ReadOTUFile(globaldata->inputFileName);	
 		read->read(&*globaldata); 
@@ -280,18 +283,46 @@ int SharedCommand::execute(){
 void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup) {
 	try {
 		
-		sort(thislookup.begin(), thislookup.end(), compareSharedRabunds);
-		
-		//initialize bin values
-		for (int i = 0; i < thislookup.size(); i++) {
-//cout << "in printData " << thislookup[i]->getLabel() << '\t' << thislookup[i]->getGroup() <<  endl;
-			out << thislookup[i]->getLabel() << '\t' << thislookup[i]->getGroup() << '\t';
-			thislookup[i]->print(out);
+		if (order.size() == 0) { //user has not specified an order so do aplabetically
+			sort(thislookup.begin(), thislookup.end(), compareSharedRabunds);
 			
-			RAbundVector rav = thislookup[i]->getRAbundVector();
-			openOutputFileAppend(fileroot + thislookup[i]->getGroup() + ".rabund", *(filehandles[thislookup[i]->getGroup()]));
-			rav.print(*(filehandles[thislookup[i]->getGroup()]));
-			(*(filehandles[thislookup[i]->getGroup()])).close();
+			//initialize bin values
+			for (int i = 0; i < thislookup.size(); i++) {
+				out << thislookup[i]->getLabel() << '\t' << thislookup[i]->getGroup() << '\t';
+				thislookup[i]->print(out);
+				
+				RAbundVector rav = thislookup[i]->getRAbundVector();
+				openOutputFileAppend(fileroot + thislookup[i]->getGroup() + ".rabund", *(filehandles[thislookup[i]->getGroup()]));
+				rav.print(*(filehandles[thislookup[i]->getGroup()]));
+				(*(filehandles[thislookup[i]->getGroup()])).close();
+			}
+		}else{
+			//create a map from groupName to each sharedrabund
+			map<string, SharedRAbundVector*> myMap;
+			map<string, SharedRAbundVector*>::iterator myIt;
+			
+			for (int i = 0; i < thislookup.size(); i++) {
+				myMap[thislookup[i]->getGroup()] = thislookup[i];
+			}
+			
+			
+			//loop through ordered list and print the rabund
+			for (int i = 0; i < order.size(); i++) {
+				myIt = myMap.find(order[i]);
+				
+				if(myIt != myMap.end()) { //we found it
+					out << (myIt->second)->getLabel() << '\t' << (myIt->second)->getGroup() << '\t';
+					(myIt->second)->print(out);
+				
+					RAbundVector rav = (myIt->second)->getRAbundVector();
+					openOutputFileAppend(fileroot + (myIt->second)->getGroup() + ".rabund", *(filehandles[(myIt->second)->getGroup()]));
+					rav.print(*(filehandles[(myIt->second)->getGroup()]));
+					(*(filehandles[(myIt->second)->getGroup()])).close();
+				}else{
+					m->mothurOut("Can't find shared info for " + order[i] + ", skipping."); m->mothurOutEndLine();
+				}
+			}
+		
 		}
  
 	}
@@ -458,7 +489,32 @@ SharedCommand::~SharedCommand(){
 	
 	
 }
-
+//**********************************************************************************************************************
+int SharedCommand::readOrderFile() {
+	try {
+		//remove old names
+		order.clear();
+		
+		ifstream in;
+		openInputFile(globaldata->getOrderGroupFile(), in);
+		string thisGroup;
+		
+		while(!in.eof()){
+			in >> thisGroup; gobble(in);
+						
+			order.push_back(thisGroup);
+			
+			if (m->control_pressed) { order.clear(); break; }
+		}
+		in.close();		
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SharedCommand", "readOrderFile");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 
 bool SharedCommand::isValidGroup(string groupname, vector<string> groups) {

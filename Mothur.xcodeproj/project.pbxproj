@@ -544,8 +544,6 @@
 				A7DA2174113FECD400BF472F /* validparameter.h */,
 				A7DA2175113FECD400BF472F /* venn.cpp */,
 				A7DA2176113FECD400BF472F /* venn.h */,
-				7E84528511EF4BEB00564975 /* seqerrorcommand.h */,
-				7E84528611EF4BEB00564975 /* seqerrorcommand.cpp */,
 			);
 			name = mothur;
 			sourceTree = "<group>";
@@ -792,6 +790,8 @@
 				A7DA20FA113FECD400BF472F /* secondarystructurecommand.cpp */,
 				7EA299BA11E384940022D8D3 /* sensspeccommand.h */,
 				7EA299BB11E384940022D8D3 /* sensspeccommand.cpp */,
+				7E84528511EF4BEB00564975 /* seqerrorcommand.h */,
+				7E84528611EF4BEB00564975 /* seqerrorcommand.cpp */,
 				A7DA20FD113FECD400BF472F /* seqsummarycommand.h */,
 				A7DA20FC113FECD400BF472F /* seqsummarycommand.cpp */,
 				A7DA2103113FECD400BF472F /* setdircommand.h */,
