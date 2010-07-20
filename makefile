@@ -13,7 +13,7 @@
 
 CXXFLAGS += -O3
 
-MOTHUR_FILES = "\"/Users/SarahsWork/desktop//Release\""
+MOTHUR_FILES = "\"/Users/SarahsWork/desktop/Release\""
 ifeq  ($(strip $(MOTHUR_FILES)),"\"Enter_your_default_path_here\"")
 else
 	CXXFLAGS += -DMOTHUR_FILES=${MOTHUR_FILES}

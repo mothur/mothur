@@ -25,7 +25,7 @@ public:
 	
 private:
 	CommandFactory* commandFactory;
-	string output, input;
+	string output, input, tempdefault;
 	bool abort;
 		
 };

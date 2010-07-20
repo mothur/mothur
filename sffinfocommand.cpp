@@ -363,8 +363,8 @@ int SffInfoCommand::readCommonHeader(ifstream& in, CommonHeader& header){
 			if (header.keySequence.length() > header.keyLength) { header.keySequence = header.keySequence.substr(0, header.keyLength);  }
 				
 			/* Pad to 8 chars */
-			int spotInFile = in.tellg();
-			int spot = (spotInFile + 7)& ~7;  // ~ inverts
+			unsigned long int spotInFile = in.tellg();
+			unsigned long int spot = (spotInFile + 7)& ~7;  // ~ inverts
 			in.seekg(spot);
 			
 		}else{
@@ -426,8 +426,8 @@ int SffInfoCommand::readHeader(ifstream& in, Header& header){
 			if (header.name.length() > header.nameLength) { header.name = header.name.substr(0, header.nameLength);  }
 			
 			/* Pad to 8 chars */
-			int spotInFile = in.tellg();
-			int spot = (spotInFile + 7)& ~7;
+			unsigned long int spotInFile = in.tellg();
+			unsigned long int spot = (spotInFile + 7)& ~7;
 			in.seekg(spot);
 			
 		}else{
@@ -478,8 +478,8 @@ int SffInfoCommand::readSeqData(ifstream& in, seqRead& read, int numFlowReads, i
 			}
 		
 			/* Pad to 8 chars */
-			int spotInFile = in.tellg();
-			int spot = (spotInFile + 7)& ~7;
+			unsigned long int spotInFile = in.tellg();
+			unsigned long int spot = (spotInFile + 7)& ~7;
 			in.seekg(spot);
 			
 		}else{
