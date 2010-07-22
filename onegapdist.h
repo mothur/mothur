@@ -38,6 +38,9 @@ public:
 
 		for(int i=start;i<alignLength;i++){
 			if((seqA[i] == '-' && seqB[i] == '-') || (seqA[i] == '.' && seqB[i] == '-') || (seqA[i] == '-' && seqB[i] == '.')){	;	}
+			else if(seqA[i] == '.' && seqB[i] == '.'){
+				break;
+			}
 			else if(seqB[i] != '-' && (seqA[i] == '-' || seqA[i] == '.')){
 				if(openGapA == 0){
 					difference++;
@@ -66,10 +69,6 @@ public:
 					openGapA = 0;
 					openGapB = 0;
 				}
-			}
-
-			else if(seqA[i] == '.' && seqB[i] == '.'){
-				break;
 			}
 		}
 	

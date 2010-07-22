@@ -262,13 +262,13 @@ int ConcensusCommand::getSets() {
 		while (nodePairsCopy.size() != 0) {
 			if (m->control_pressed) { return 1; }
 		
-			vector<string> small = getSmallest(nodePairsCopy);
+			vector<string> smallOne = getSmallest(nodePairsCopy);
 			
-			int subgrouprate = getSubgroupRating(small);
+			int subgrouprate = getSubgroupRating(smallOne);
 		
-			nodePairsInitialRate[small] = nodePairs[small] + subgrouprate;
+			nodePairsInitialRate[smallOne] = nodePairs[smallOne] + subgrouprate;
 			
-			nodePairsCopy.erase(small);
+			nodePairsCopy.erase(smallOne);
 		}
 		
 		return 0;

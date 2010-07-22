@@ -73,7 +73,18 @@ int main(int argc, char *argv[]){
 		
 		#ifdef MOTHUR_FILES
 			string temp = MOTHUR_FILES; 
+			
+			//add / to name if needed
+			string lastChar = temp.substr(temp.length()-1);
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				if (lastChar != "/") { temp += "/"; }
+			#else
+				if (lastChar != "\\") { temp += "\\"; }	
+			#endif
+			
+			temp = getFullPathName(temp);
 			m->setDefaultPath(temp);
+			
 			m->mothurOutJustToLog("Using default file location " + temp);
 			m->mothurOutEndLine(); m->mothurOutEndLine();
 		#endif

@@ -13,6 +13,7 @@
 #include "mothur.h"
 #include "command.hpp"
 #include "chimera.h"
+#include "chimeracheckrdp.h"
 
 
 /***********************************************************/

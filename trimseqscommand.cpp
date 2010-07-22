@@ -322,11 +322,20 @@ int TrimSeqsCommand::execute(){
 				openInputFile(fastaFile, inFASTA);
 				getNumSeqs(inFASTA, numSeqs);
 				inFASTA.close();
-				qFile.close();
+				
 				lines.push_back(new linePair(0, numSeqs));
 				
 				driverCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, groupFile, fastaFileNames, qualFileNames, lines[0], lines[0]);
 				
+				for (int j = 0; j < fastaFileNames.size(); j++) {
+					rename((fastaFileNames[j] + toString(j) + ".temp").c_str(), fastaFileNames[j].c_str());
+				}
+				if(qFileName != ""){
+					for (int j = 0; j < qualFileNames.size(); j++) {
+						rename((qualFileNames[j] + toString(j) + ".temp").c_str(), qualFileNames[j].c_str());
+					}
+				}
+									
 				if (m->control_pressed) {  return 0; }
 		#endif
 						
@@ -479,7 +488,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			Sequence currSeq(inFASTA);
 			QualityScores currQual;
 			if(qFileName != ""){
-				currQual = QualityScores(qFile);
+				currQual = QualityScores(qFile, currSeq.getNumBases());
 			}
 			
 			string origSeq = currSeq.getUnaligned();

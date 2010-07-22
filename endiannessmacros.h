@@ -27,40 +27,21 @@
  *
  */
 
-#include <limits.h>
-#include <inttypes.h>
-
-/*-----------------------------------------------------------------------------
- * Detection of endianness. The main part of this is done in autoconf, but
- * for the case of MacOS FAT binaries we fall back on auto-sensing based on
- * processor type too.
- */
-
-/* Set by autoconf */
-#define SP_LITTLE_ENDIAN
 
 /* Mac FAT binaries or unknown. Auto detect based on CPU type */
 #if !defined(SP_BIG_ENDIAN) && !defined(SP_LITTLE_ENDIAN)
-
+	
 /*
  * x86 equivalents
  */
-#if defined(__i386__) || defined(__i386) || defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__x86_64) || defined(__i686__) || defined(__i686)
-#  if defined(SP_BIG_ENDIAN)
-#    undef SP_BIG_ENDIAN
-#  endif
-#  define SP_LITTLE_ENDIAN
+#if  defined(__i386) || defined(__i386__) || defined(__ia64__) ||  defined(WIN32) || defined(__arm__) || (defined(__mips__) && defined(__MIPSEL__)) || defined(__SYMBIAN32__) || \
+     defined(__x86_64__) || defined(__x86_64) || defined(__i686__) || defined(__i686) || defined(__amd64__) || defined(__amd64) || defined(__LITTLE_ENDIAN__)
+#define SP_LITTLE_ENDIAN
+#else
+#define SP_BIG_ENDIAN
 #endif
 
-/*
- * DEC Alpha
- */
-#if defined(__alpha__) || defined(__alpha)
-#  if defined(SP_LITTLE_ENDIAN)
-#    undef SP_LITTLE_ENDIAN
-#  endif
-#  define SP_BIG_ENDIAN
-#endif
+
 
 /*
  * SUN Sparc
@@ -191,3 +172,4 @@
 #endif
 
 #endif
+

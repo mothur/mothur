@@ -246,7 +246,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos){
 	
 		//print common header
 		if (sfftxt) { printCommonHeader(outSfftxt, header); }
-		
+	
 		//read through the sff file
 		while (!in.eof()) {
 			
@@ -259,22 +259,22 @@ int SffInfoCommand::extractSffInfo(string input, string accnos){
 			//read data
 			seqRead read; 
 			readSeqData(in, read, header.numFlowsPerRead, readheader.numBases);
-			
+				
 			//if you have provided an accosfile and this seq is not in it, then dont print
 			if (seqNames.size() != 0) {   if (seqNames.count(readheader.name) == 0) { print = false; }  }
 			
 			//print 
 			if (print) {
-				if (sfftxt) { printHeader(outSfftxt, readheader); printSffTxtSeqData(outSfftxt, read); }
+				if (sfftxt) { printHeader(outSfftxt, readheader); printSffTxtSeqData(outSfftxt, read, readheader); }
 				if (fasta)	{	printFastaSeqData(outFasta, read, readheader);	}
 				if (qual)	{	printQualSeqData(outQual, read, readheader);	}
 				if (flow)	{	printFlowSeqData(outFlow, read, readheader);	}
 			}
 			
 			count++;
-			
+		
 			//report progress
-			if((count+1) % 500 == 0){	m->mothurOut(toString(count+1)); m->mothurOutEndLine();		}
+			if((count+1) % 10000 == 0){	m->mothurOut(toString(count+1)); m->mothurOutEndLine();		}
 		
 			if (m->control_pressed) { count = 0; break;   }
 			
@@ -282,7 +282,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos){
 		}
 		
 		//report progress
-		if (!m->control_pressed) {   if((count) % 500 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}  }
+		if (!m->control_pressed) {   if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}  }
 		
 		in.close();
 		
@@ -303,12 +303,12 @@ int SffInfoCommand::readCommonHeader(ifstream& in, CommonHeader& header){
 	try {
 
 		if (!in.eof()) {
-		
+
 			//read magic number
-			char buffer[sizeof(header.magicNumber)];
-			in.read(buffer, sizeof(header.magicNumber));
+			char buffer[4];
+			in.read(buffer, 4);
 			header.magicNumber = be_int4(*(unsigned int *)(&buffer));
-			
+		
 			//read version
 			char buffer9[4];
 			in.read(buffer9, 4);
@@ -316,33 +316,33 @@ int SffInfoCommand::readCommonHeader(ifstream& in, CommonHeader& header){
 			for (int i = 0; i < 4; i++) {  header.version += toString((int)(buffer9[i])); }
 				
 			//read offset
-			char buffer2 [sizeof(header.indexOffset)];
-			in.read(buffer2, sizeof(header.indexOffset));
+			char buffer2 [8];
+			in.read(buffer2, 8);
 			header.indexOffset =  be_int8(*(unsigned long int *)(&buffer2));
 			
 			//read index length
-			char buffer3 [sizeof(header.indexLength)];
-			in.read(buffer3, sizeof(header.indexLength));
+			char buffer3 [4];
+			in.read(buffer3, 4);
 			header.indexLength =  be_int4(*(unsigned int *)(&buffer3));
 			
 			//read num reads
-			char buffer4 [sizeof(header.numReads)];
-			in.read(buffer4, sizeof(header.numReads));
+			char buffer4 [4];
+			in.read(buffer4, 4);
 			header.numReads =  be_int4(*(unsigned int *)(&buffer4));
 				
 			//read header length
-			char buffer5 [sizeof(header.headerLength)];
-			in.read(buffer5, sizeof(header.headerLength));
+			char buffer5 [2];
+			in.read(buffer5, 2);
 			header.headerLength =  be_int2(*(unsigned short *)(&buffer5));
 					
 			//read key length
-			char buffer6 [sizeof(header.keyLength)];
-			in.read(buffer6, sizeof(header.keyLength));
+			char buffer6 [2];
+			in.read(buffer6, 2);
 			header.keyLength = be_int2(*(unsigned short *)(&buffer6));
 			
 			//read number of flow reads
-			char buffer7 [sizeof(header.numFlowsPerRead)];
-			in.read(buffer7, sizeof(header.numFlowsPerRead));
+			char buffer7 [2];
+			in.read(buffer7, 2);
 			header.numFlowsPerRead =  be_int2(*(unsigned short *)(&buffer7));
 				
 			//read format code
@@ -351,16 +351,18 @@ int SffInfoCommand::readCommonHeader(ifstream& in, CommonHeader& header){
 			header.flogramFormatCode = (int)(buffer8[0]);
 			
 			//read flow chars
-			char tempBuffer [header.numFlowsPerRead];
-			in.read(tempBuffer, header.numFlowsPerRead); 
+			char* tempBuffer = new char[header.numFlowsPerRead];
+			in.read(&(*tempBuffer), header.numFlowsPerRead); 
 			header.flowChars = tempBuffer;
 			if (header.flowChars.length() > header.numFlowsPerRead) { header.flowChars = header.flowChars.substr(0, header.numFlowsPerRead);  }
+			delete[] tempBuffer;
 			
 			//read key
-			char tempBuffer2 [header.keyLength];
-			in.read(tempBuffer2, header.keyLength);
+			char* tempBuffer2 = new char[header.keyLength];
+			in.read(&(*tempBuffer2), header.keyLength);
 			header.keySequence = tempBuffer2;
 			if (header.keySequence.length() > header.keyLength) { header.keySequence = header.keySequence.substr(0, header.keyLength);  }
+			delete[] tempBuffer2;
 				
 			/* Pad to 8 chars */
 			unsigned long int spotInFile = in.tellg();
@@ -385,45 +387,46 @@ int SffInfoCommand::readHeader(ifstream& in, Header& header){
 		if (!in.eof()) {
 			
 			//read header length
-			char buffer [sizeof(header.headerLength)];
-			in.read(buffer, sizeof(header.headerLength));
+			char buffer [2];
+			in.read(buffer, 2);
 			header.headerLength = be_int2(*(unsigned short *)(&buffer));
 						
 			//read name length
-			char buffer2 [sizeof(header.nameLength)];
-			in.read(buffer2, sizeof(header.nameLength));
+			char buffer2 [2];
+			in.read(buffer2, 2);
 			header.nameLength = be_int2(*(unsigned short *)(&buffer2));
 
 			//read num bases
-			char buffer3 [sizeof(header.numBases)];
-			in.read(buffer3, sizeof(header.numBases));
+			char buffer3 [4];
+			in.read(buffer3, 4);
 			header.numBases =  be_int4(*(unsigned int *)(&buffer3));
 			
 			//read clip qual left
-			char buffer4 [sizeof(header.clipQualLeft)];
-			in.read(buffer4, sizeof(header.clipQualLeft));
+			char buffer4 [2];
+			in.read(buffer4, 2);
 			header.clipQualLeft =  be_int2(*(unsigned short *)(&buffer4));
 			
 			//read clip qual right
-			char buffer5 [sizeof(header.clipQualRight)];
-			in.read(buffer5, sizeof(header.clipQualRight));
+			char buffer5 [2];
+			in.read(buffer5, 2);
 			header.clipQualRight =  be_int2(*(unsigned short *)(&buffer5));
 			
 			//read clipAdapterLeft
-			char buffer6 [sizeof(header.clipAdapterLeft)];
-			in.read(buffer6, sizeof(header.clipAdapterLeft));
+			char buffer6 [2];
+			in.read(buffer6, 2);
 			header.clipAdapterLeft = be_int2(*(unsigned short *)(&buffer6));
 
 			//read clipAdapterRight
-			char buffer7 [sizeof(header.clipAdapterRight)];
-			in.read(buffer7, sizeof(header.clipAdapterRight));
+			char buffer7 [2];
+			in.read(buffer7, 2);
 			header.clipAdapterRight = be_int2(*(unsigned short *)(&buffer7));
 		
 			//read name
-			char tempBuffer [header.nameLength];
-			in.read(tempBuffer, header.nameLength);
+			char* tempBuffer = new char[header.nameLength];
+			in.read(&(*tempBuffer), header.nameLength);
 			header.name = tempBuffer;
 			if (header.name.length() > header.nameLength) { header.name = header.name.substr(0, header.nameLength);  }
+			delete[] tempBuffer;
 			
 			/* Pad to 8 chars */
 			unsigned long int spotInFile = in.tellg();
@@ -450,8 +453,8 @@ int SffInfoCommand::readSeqData(ifstream& in, seqRead& read, int numFlowReads, i
 			//read flowgram
 			read.flowgram.resize(numFlowReads);
 			for (int i = 0; i < numFlowReads; i++) {  
-				char buffer [sizeof(unsigned short)];
-				in.read(buffer, (sizeof(unsigned short)));
+				char buffer [2];
+				in.read(buffer, 2);
 				read.flowgram[i] = be_int2(*(unsigned short *)(&buffer));
 			}
 	
@@ -462,21 +465,22 @@ int SffInfoCommand::readSeqData(ifstream& in, seqRead& read, int numFlowReads, i
 				in.read(temp, 1);
 				read.flowIndex[i] = be_int1(*(unsigned char *)(&temp));
 			}
-		
+	
 			//read bases
-			char tempBuffer[numBases];
-			in.read(tempBuffer, numBases);
+			char* tempBuffer = new char[numBases];
+			in.read(&(*tempBuffer), numBases);
 			read.bases = tempBuffer;
 			if (read.bases.length() > numBases) { read.bases = read.bases.substr(0, numBases);  }
+			delete[] tempBuffer;
 
-			//read flowgram
+			//read qual scores
 			read.qualScores.resize(numBases);
 			for (int i = 0; i < numBases; i++) {  
 				char temp[1];
 				in.read(temp, 1);
 				read.qualScores[i] = be_int1(*(unsigned char *)(&temp));
 			}
-		
+	
 			/* Pad to 8 chars */
 			unsigned long int spotInFile = in.tellg();
 			unsigned long int spot = (spotInFile + 7)& ~7;
@@ -546,7 +550,7 @@ int SffInfoCommand::printHeader(ofstream& out, Header& header) {
 }
 
 //**********************************************************************************************************************
-int SffInfoCommand::printSffTxtSeqData(ofstream& out, seqRead& read) {
+int SffInfoCommand::printSffTxtSeqData(ofstream& out, seqRead& read, Header& header) {
 	try {
 		
 		out << "FlowGram: ";
@@ -556,8 +560,15 @@ int SffInfoCommand::printSffTxtSeqData(ofstream& out, seqRead& read) {
 		int sum = 0;
 		for (int i = 0; i < read.flowIndex.size(); i++) {  sum +=  read.flowIndex[i];  out << sum << '\t'; }
 		
+		//make the bases you want to clip lowercase and the bases you want to keep upper case
+		for (int i = 0; i < header.clipQualLeft; i++) { read.bases[i] = tolower(read.bases[i]); }
+		for (int i = header.clipQualLeft; i < (header.clipQualRight-header.clipQualLeft); i++) {   read.bases[i] = toupper(read.bases[i]);  }
+		for (int i = (header.clipQualRight-header.clipQualLeft); i < read.bases.length(); i++) {   read.bases[i] = tolower(read.bases[i]);  }
+		
 		out << endl <<  "Bases: " << read.bases << endl << "Quality Scores: ";
 		for (int i = 0; i < read.qualScores.size(); i++) {   out << read.qualScores[i] << '\t';  }
+	
+		
 		out << endl << endl;
 		
 		return 0;
@@ -576,6 +587,14 @@ int SffInfoCommand::printFastaSeqData(ofstream& out, seqRead& read, Header& head
 		
 		if (trim) {
 			seq = seq.substr(header.clipQualLeft, (header.clipQualRight-header.clipQualLeft));
+		}else{
+			//if you wanted the sfftxt then you already converted the bases to the right case
+			if (!sfftxt) {
+				//make the bases you want to clip lowercase and the bases you want to keep upper case
+				for (int i = 0; i < header.clipQualLeft; i++) { seq[i] = tolower(seq[i]);  }
+				for (int i = header.clipQualLeft; i < (header.clipQualRight-header.clipQualLeft); i++) {   seq[i] = toupper(seq[i]);  }
+				for (int i = (header.clipQualRight-header.clipQualLeft); i < seq.length(); i++) {   seq[i] = tolower(seq[i]);  }
+			}
 		}
 		
 		out << ">" << header.name << endl;
