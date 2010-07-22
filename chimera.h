@@ -90,41 +90,13 @@ class Chimera {
 	public:
 	
 		Chimera(){ m = MothurOut::getInstance(); length = 0; unaligned = false; }
-		//Chimera(string) { m = MothurOut::getInstance(); }
-		//Chimera(string, bool, string) { m = MothurOut::getInstance(); }
-		//Chimera(string, string) { m = MothurOut::getInstance(); }
 		virtual ~Chimera(){	for (int i = 0; i < templateSeqs.size(); i++) { delete templateSeqs[i];  } };
-		//virtual void setFilter(bool f)			{	filter = f;	 		}
-		//virtual void setCorrection(bool c)		{	correction = c;		}
-		//virtual void setProcessors(int p)		{	processors = p;		}
-		//virtual void setWindow(int w)			{	window = w;			}
-		//virtual void setIncrement(int i)		{	increment = i;		}
-		//virtual void setNumWanted(int n)		{	numWanted = n;		}
-		//virtual void setKmerSize(int k)			{	kmerSize = k;		}
-		//virtual void setSVG(int s)				{	svg = s;			}
-		//virtual void setName(string n)			{	name = n;			}
-		//virtual void setMatch(int m)			{	match = m;			}
-		//virtual void setMisMatch(int m)			{	misMatch = m;		}
-		//virtual void setDivR(float d)			{	divR = d;			}
-		//virtual void setParents(int p)			{	parents = p;		}
-		//virtual void setMinSim(int s)			{	minSim = s;			}
-		//virtual void setMinCoverage(int c)		{	minCov = c;			}
-		//virtual void setMinBS(int b)			{	minBS = b;			}
-		//virtual void setMinSNP(int s)			{	minSNP = s;			}
-		//virtual void setIters(int i)			{	iters = i;			}
 		virtual bool getUnaligned()				{	return unaligned;			}
-		//virtual void setTemplateFile(string t)	{   templateFileName = t;	templateSeqs = readSeqs(t);  }
 		virtual int getLength()					{   return length;	}
-		
-		//virtual void setCons(string){};
-		//virtual void setQuantiles(string){};
-		//virtual int doPrep(){ return 0; }
 		virtual vector<Sequence*> readSeqs(string);
-		//virtual vector< vector<float> > readQuantiles();
 		virtual void setMask(string);
 		virtual map<int, int> runFilter(Sequence*);
 		virtual string createFilter(vector<Sequence*>, float);
-		
 		virtual void printHeader(ostream&){};
 		virtual int getChimeras(Sequence*){ return 0; }
 		virtual int getChimeras(){ return 0; }
@@ -138,10 +110,9 @@ class Chimera {
 	protected:
 		
 		vector<Sequence*> templateSeqs;
-		bool filter, unaligned; //  correction, svg,
-		int length; //processors, window, increment, numWanted, kmerSize, match, misMatch, minSim, minCov, minBS, minSNP, parents, iters,
-		//float divR;
-		string seqMask, filterString, outputDir, templateFileName; //quanfile, name, 
+		bool filter, unaligned; 
+		int length; 
+		string seqMask, filterString, outputDir, templateFileName; 
 		Sequence* getSequence(string);  //find sequence from name	
 		MothurOut* m;
 };

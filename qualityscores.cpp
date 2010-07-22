@@ -25,32 +25,39 @@ QualityScores::QualityScores(){
 
 /**************************************************************************************************/
 
-QualityScores::QualityScores(ifstream& qFile){
+QualityScores::QualityScores(ifstream& qFile, int l){
 	try {
 		
 		m = MothurOut::getInstance();
 
 		seqName = "";
-		seqLength = -1;
+		seqLength = l;
 		int score;
 		
 		string line;
-		getline(qFile, line);
+		getline(qFile, line); gobble(qFile);
 		istringstream nameStream(line);
 	
 		nameStream >> seqName;
 		seqName = seqName.substr(1); 
 
-		getline(qFile, line);
-		istringstream qualStream(line);
+		//getline(qFile, line);
+		//istringstream qualStream(line);
 	
-		while(qualStream){
-			qualStream >> score;
+		//while(qualStream){
+		//	qualStream >> score;
+		//	qScores.push_back(score);
+		//}
+		//qScores.pop_back();
+		
+		//seqLength = qScores.size();	
+		
+		for(int i=0;i<seqLength;i++){
+			qFile >> score;
 			qScores.push_back(score);
 		}
-		qScores.pop_back();
-		
-		seqLength = qScores.size();	
+		gobble(qFile);
+
 	}
 	catch(exception& e) {
 		m->errorOut(e, "QualityScores", "QualityScores");

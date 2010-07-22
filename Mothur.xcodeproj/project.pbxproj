@@ -827,8 +827,6 @@
 		A7CB594211402F430010EB83 /* containers */ = {
 			isa = PBXGroup;
 			children = (
-				7E85BD1C11EB5E9B00FD37C0 /* qualityscores.h */,
-				7E85BD1D11EB5E9B00FD37C0 /* qualityscores.cpp */,
 				A7DA1FF3113FECD400BF472F /* alignmentcell.hpp */,
 				A7DA1FF2113FECD400BF472F /* alignmentcell.cpp */,
 				A7DA1FF4113FECD400BF472F /* alignmentdb.cpp */,
@@ -856,8 +854,10 @@
 				A7DA20A3113FECD400BF472F /* nameassignment.hpp */,
 				A7DA20B6113FECD400BF472F /* ordervector.cpp */,
 				A7DA20B7113FECD400BF472F /* ordervector.hpp */,
-				A7DA20D2113FECD400BF472F /* rabundvector.cpp */,
+				7E85BD1C11EB5E9B00FD37C0 /* qualityscores.h */,
+				7E85BD1D11EB5E9B00FD37C0 /* qualityscores.cpp */,
 				A7DA20D3113FECD400BF472F /* rabundvector.hpp */,
+				A7DA20D2113FECD400BF472F /* rabundvector.cpp */,
 				A7DA20F6113FECD400BF472F /* sabundvector.cpp */,
 				A7DA20F7113FECD400BF472F /* sabundvector.hpp */,
 				A7DA20FE113FECD400BF472F /* sequence.cpp */,

@@ -315,25 +315,26 @@ int ChimeraCheckRDP::calcKmers(map<int, int> query, map<int, int> subject) {
 	try{
 		
 		int common = 0;
-		map<int, int>::iterator small;
-		map<int, int>::iterator large;
 		
+		map<int, int>::iterator smallone;
+		map<int, int>::iterator largeone;
+
 		if (query.size() < subject.size()) {
 		
-			for (small = query.begin(); small != query.end(); small++) {
-				large = subject.find(small->first);
+			for (smallone = query.begin(); smallone != query.end(); smallone++) {
+				largeone = subject.find(smallone->first);
 				
 				//if you found it they have that kmer in common
-				if (large != subject.end()) {	common++;	}
+				if (largeone != subject.end()) {	common++;	}
 			}
 			
 		}else { 
 		 
-			for (small = subject.begin(); small != subject.end(); small++) {
-				large = query.find(small->first);
+			for (smallone = subject.begin(); smallone != subject.end(); smallone++) {
+				largeone = query.find(smallone->first);
 				
 				//if you found it they have that kmer in common
-				if (large != query.end()) {		common++;	 }
+				if (largeone != query.end()) {		common++;	 }
 			}
 		}
 		

@@ -51,95 +51,108 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 			generateDatabaseAndNames(tfile, tempFile, method, ksize, 0.0, 0.0, 0.0, 0.0);
 			
 			//prevents errors caused by creating shortcut files if you had an error in the sanity check.
-			if (m->control_pressed) {  remove(phyloTreeName.c_str());   }
+			if (m->control_pressed) {  remove(phyloTreeName.c_str());  remove(probFileName.c_str()); remove(probFileName2.c_str()); }
+			else{ 
+				genusNodes = phyloTree->getGenusNodes(); 
+				genusTotals = phyloTree->getGenusTotals();
+				
+				m->mothurOut("Calculating template taxonomy tree...     "); cout.flush();
+				
+				phyloTree->printTreeNodes(phyloTreeName);
+							
+				m->mothurOut("DONE."); m->mothurOutEndLine();
+				
+				m->mothurOut("Calculating template probabilities...     "); cout.flush();
+				
+				numKmers = database->getMaxKmer() + 1;
 			
-			genusNodes = phyloTree->getGenusNodes(); 
-			genusTotals = phyloTree->getGenusTotals();
+				//initialze probabilities
+				wordGenusProb.resize(numKmers);
 			
-			m->mothurOut("Calculating template taxonomy tree...     "); cout.flush();
-			
-			phyloTree->printTreeNodes(phyloTreeName);
-						
-			m->mothurOut("DONE."); m->mothurOutEndLine();
-			
-			m->mothurOut("Calculating template probabilities...     "); cout.flush();
-			
-			numKmers = database->getMaxKmer() + 1;
-		
-			//initialze probabilities
-			wordGenusProb.resize(numKmers);
-		
-			for (int j = 0; j < wordGenusProb.size(); j++) {	wordGenusProb[j].resize(genusNodes.size());		}
-			
-			
-			#ifdef USE_MPI
-				int pid;
-				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-
-				if (pid == 0) {  
-			#endif
-
-			ofstream out;
-			openOutputFile(probFileName, out);
-			
-			out << numKmers << endl;
-			
-			ofstream out2;
-			openOutputFile(probFileName2, out2);
-			
-			#ifdef USE_MPI
-				}
-			#endif
-
-			
-			//for each word
-			for (int i = 0; i < numKmers; i++) {
-				if (m->control_pressed) { break; }
+				for (int j = 0; j < wordGenusProb.size(); j++) {	wordGenusProb[j].resize(genusNodes.size());		}
+				
 				
 				#ifdef USE_MPI
+					int pid;
 					MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
 
 					if (pid == 0) {  
 				#endif
 
-				out << i << '\t';
+				ofstream out;
+				openOutputFile(probFileName, out);
+				
+				out << numKmers << endl;
+				
+				ofstream out2;
+				openOutputFile(probFileName2, out2);
 				
 				#ifdef USE_MPI
 					}
 				#endif
-				
-				vector<int> seqsWithWordi = database->getSequencesWithKmer(i);
-				
-				map<int, int> count;
-				for (int k = 0; k < genusNodes.size(); k++) {  count[genusNodes[k]] = 0;  }			
-						
-				//for each sequence with that word
-				for (int j = 0; j < seqsWithWordi.size(); j++) {
-					int temp = phyloTree->getIndex(names[seqsWithWordi[j]]);
-					count[temp]++;  //increment count of seq in this genus who have this word
-				}
-				
-				//probabilityInTemplate = (# of seqs with that word in template + 0.05) / (total number of seqs in template + 1);
-				float probabilityInTemplate = (seqsWithWordi.size() + 0.50) / (float) (names.size() + 1);
-				
-				int numNotZero = 0;
-				for (int k = 0; k < genusNodes.size(); k++) {
-					//probabilityInThisTaxonomy = (# of seqs with that word in this taxonomy + probabilityInTemplate) / (total number of seqs in this taxonomy + 1);
-					wordGenusProb[i][k] = log((count[genusNodes[k]] + probabilityInTemplate) / (float) (genusTotals[k] + 1));  
-					if (count[genusNodes[k]] != 0) { 
-						#ifdef USE_MPI
-							MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-							if (pid == 0) {  
-						#endif
 
-						out << k << '\t' << wordGenusProb[i][k] << '\t'; 
-						
-						#ifdef USE_MPI
-							}
-						#endif
+				
+				//for each word
+				for (int i = 0; i < numKmers; i++) {
+					if (m->control_pressed) { break; }
+					
+					#ifdef USE_MPI
+						MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
 
-						numNotZero++;  
+						if (pid == 0) {  
+					#endif
+
+					out << i << '\t';
+					
+					#ifdef USE_MPI
+						}
+					#endif
+					
+					vector<int> seqsWithWordi = database->getSequencesWithKmer(i);
+					
+					map<int, int> count;
+					for (int k = 0; k < genusNodes.size(); k++) {  count[genusNodes[k]] = 0;  }			
+							
+					//for each sequence with that word
+					for (int j = 0; j < seqsWithWordi.size(); j++) {
+						int temp = phyloTree->getIndex(names[seqsWithWordi[j]]);
+						count[temp]++;  //increment count of seq in this genus who have this word
 					}
+					
+					//probabilityInTemplate = (# of seqs with that word in template + 0.05) / (total number of seqs in template + 1);
+					float probabilityInTemplate = (seqsWithWordi.size() + 0.50) / (float) (names.size() + 1);
+					
+					int numNotZero = 0;
+					for (int k = 0; k < genusNodes.size(); k++) {
+						//probabilityInThisTaxonomy = (# of seqs with that word in this taxonomy + probabilityInTemplate) / (total number of seqs in this taxonomy + 1);
+						wordGenusProb[i][k] = log((count[genusNodes[k]] + probabilityInTemplate) / (float) (genusTotals[k] + 1));  
+						if (count[genusNodes[k]] != 0) { 
+							#ifdef USE_MPI
+								MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+								if (pid == 0) {  
+							#endif
+
+							out << k << '\t' << wordGenusProb[i][k] << '\t'; 
+							
+							#ifdef USE_MPI
+								}
+							#endif
+
+							numNotZero++;  
+						}
+					}
+					
+					#ifdef USE_MPI
+						MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+						if (pid == 0) {  
+					#endif
+					
+					out << endl;
+					out2 << probabilityInTemplate << '\t' << numNotZero << endl;
+					
+					#ifdef USE_MPI
+						}
+					#endif
 				}
 				
 				#ifdef USE_MPI
@@ -147,31 +160,19 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 					if (pid == 0) {  
 				#endif
 				
-				out << endl;
-				out2 << probabilityInTemplate << '\t' << numNotZero << endl;
+				out.close();
+				out2.close();
 				
 				#ifdef USE_MPI
 					}
 				#endif
+				
+				//read in new phylotree with less info. - its faster
+				ifstream phyloTreeTest(phyloTreeName.c_str());
+				delete phyloTree;
+				
+				phyloTree = new PhyloTree(phyloTreeTest, phyloTreeName);
 			}
-			
-			#ifdef USE_MPI
-				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-				if (pid == 0) {  
-			#endif
-			
-			out.close();
-			out2.close();
-			
-			#ifdef USE_MPI
-				}
-			#endif
-			
-			//read in new phylotree with less info. - its faster
-			ifstream phyloTreeTest(phyloTreeName.c_str());
-			delete phyloTree;
-			
-			phyloTree = new PhyloTree(phyloTreeTest, phyloTreeName);
 		}
 	
 		m->mothurOut("DONE."); m->mothurOutEndLine();

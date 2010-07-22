@@ -517,14 +517,17 @@ ListVector* MGClusterCommand::mergeOPFs(map<string, int> binInfo, float dist){
 				string name2 = nameMap->get(overlapNode.seq2);
 			
 				//use binInfo to find out if they are already in the same bin
-				map<string, int>::iterator itBin1 = binInfo.find(name1);
-				map<string, int>::iterator itBin2 = binInfo.find(name2);
+				//map<string, int>::iterator itBin1 = binInfo.find(name1);
+				//map<string, int>::iterator itBin2 = binInfo.find(name2);
 				
-				if(itBin1 == binInfo.end()){  cerr << "AAError: Sequence '" << name1 << "' does not have any bin info.\n"; exit(1);  }
-				if(itBin2 == binInfo.end()){  cerr << "ABError: Sequence '" << name2 << "' does not have any bin info.\n"; exit(1);  }
+				//if(itBin1 == binInfo.end()){  cerr << "AAError: Sequence '" << name1 << "' does not have any bin info.\n"; exit(1);  }
+				//if(itBin2 == binInfo.end()){  cerr << "ABError: Sequence '" << name2 << "' does not have any bin info.\n"; exit(1);  }
 
-				int binKeep = itBin1->second;
-				int binRemove = itBin2->second;
+				//int binKeep = itBin1->second;
+				//int binRemove = itBin2->second;
+				
+				int binKeep = binInfo[name1];
+				int binRemove = binInfo[name2];
 			
 				//if not merge bins and update binInfo
 				if(binKeep != binRemove) {

@@ -77,7 +77,7 @@ private:
 	
 	int printCommonHeader(ofstream&, CommonHeader&); 
 	int printHeader(ofstream&, Header&);
-	int printSffTxtSeqData(ofstream&, seqRead&);
+	int printSffTxtSeqData(ofstream&, seqRead&, Header&);
 	int printFlowSeqData(ofstream&, seqRead&, Header&);
 	int printFastaSeqData(ofstream&, seqRead&, Header&);
 	int printQualSeqData(ofstream&, seqRead&, Header&);
