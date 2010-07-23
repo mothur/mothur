@@ -214,6 +214,7 @@ void GetOTURepCommand::help(){
 		m->mothurOut("The default value for label is all labels in your inputfile.\n");
 		m->mothurOut("The sorted parameter allows you to indicate you want the output sorted. You can sort by sequence name, bin number, bin size or group. The default is no sorting, but your options are name, number, size, or group.\n");
 		m->mothurOut("The large parameter allows you to indicate that your distance matrix is too large to fit in RAM.  The default value is false.\n");
+		m->mothurOut("The group parameter allows you provide a group file.\n");
 		m->mothurOut("The groups parameter allows you to indicate that you want representative sequences for each group specified for each OTU, group name should be separated by dashes. ex. groups=A-B-C.\n");
 		m->mothurOut("The get.oturep command outputs a .fastarep and .rep.names file for each distance you specify, selecting one OTU representative for each bin.\n");
 		m->mothurOut("If you provide a groupfile, then it also appends the names of the groups present in that bin.\n");

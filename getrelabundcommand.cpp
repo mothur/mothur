@@ -226,14 +226,6 @@ int GetRelAbundCommand::getRelAbundance(vector<SharedRAbundVector*>& thisLookUp,
 	try {
 		if (pickedGroups) { eliminateZeroOTUS(thisLookUp); }
 
-		int totalNumSeqs = 0;
-		if ((scale == "totalgroup") || (scale == "averagegroup")) {
-			for (int i = 0; i < thisLookUp.size(); i++) {
-				//find total number of sequences in all samples
-				totalNumSeqs += thisLookUp[i]->getNumSeqs();
-			}
-		}
-		float averageNumSeqs = totalNumSeqs / (float) thisLookUp.size();
 		
 		 for (int i = 0; i < thisLookUp.size(); i++) {
 			out << thisLookUp[i]->getLabel() << '\t' << thisLookUp[i]->getGroup() << '\t' << thisLookUp[i]->getNumBins() << '\t';
@@ -246,8 +238,8 @@ int GetRelAbundCommand::getRelAbundance(vector<SharedRAbundVector*>& thisLookUp,
 				
 				float relabund = 0.0;
 				
-				if (scale == "totalgroup") {  //abund of this otu compared to total number of sequence in my group
-					relabund = abund / (float) totalNumSeqs;
+				if (scale == "totalgroup") { 
+					relabund = abund / (float) thisLookUp[i]->getNumSeqs();
 				}else if (scale == "totalotu") {
 					//calc the total in this otu
 					int totalOtu = 0;
@@ -255,7 +247,7 @@ int GetRelAbundCommand::getRelAbundance(vector<SharedRAbundVector*>& thisLookUp,
 					
 					relabund = abund / (float) totalOtu;
 				}else if (scale == "averagegroup") {
-					relabund = abund / (float) averageNumSeqs;
+					relabund = abund / (float) (thisLookUp[i]->getNumSeqs() / (float) thisLookUp[i]->getNumBins());
 				}else if (scale == "averageotu") {
 					//calc the total in this otu
 					int totalOtu = 0;
