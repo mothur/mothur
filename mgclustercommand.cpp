@@ -500,13 +500,16 @@ ListVector* MGClusterCommand::mergeOPFs(map<string, int> binInfo, float dist){
 					float overlapDistance;
 					inOverlap >> firstName >> secondName >> overlapDistance; gobble(inOverlap);
 					
-					map<string,int>::iterator itA = nameMap->find(firstName);
-					map<string,int>::iterator itB = nameMap->find(secondName);
-					if(itA == nameMap->end()){  cerr << "AAError: Sequence '" << firstName << "' was not found in the names file, please correct\n"; exit(1);  }
-					if(itB == nameMap->end()){  cerr << "ABError: Sequence '" << secondName << "' was not found in the names file, please correct\n"; exit(1);  }
+					//commented out because we check this in readblast already
+					//map<string,int>::iterator itA = nameMap->find(firstName);
+					//map<string,int>::iterator itB = nameMap->find(secondName);
+					//if(itA == nameMap->end()){  cerr << "AAError: Sequence '" << firstName << "' was not found in the names file, please correct\n"; exit(1);  }
+					//if(itB == nameMap->end()){  cerr << "ABError: Sequence '" << secondName << "' was not found in the names file, please correct\n"; exit(1);  }
 					
-					overlapNode.seq1 = itA->second;
-					overlapNode.seq2 = itB->second;
+					//overlapNode.seq1 = itA->second;
+					//overlapNode.seq2 = itB->second;
+					overlapNode.seq1 = nameMap->get(firstName);
+					overlapNode.seq2 = nameMap->get(secondName);
 					overlapNode.dist = overlapDistance;
 				}else { inOverlap.close(); break; }
 			} 
