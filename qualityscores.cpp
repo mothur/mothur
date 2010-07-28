@@ -220,8 +220,8 @@ bool QualityScores::stripQualWindowAverage(Sequence& sequence, int stepSize, int
 		int seqLength = sequence.getNumBases();
 		
 		if(seqName != sequence.getName()){
-			m->mothurOut("sequence name mismatch btwn fasta: " + sequence.getName() + " and qual file: " + seqName);
-			m->mothurOutEndLine();	
+			m->mothurOut("sequence name mismatch between fasta: " + sequence.getName() + " and qual file: " + seqName);
+			m->mothurOutEndLine();
 		}
 		
 		int end = windowSize;
@@ -237,7 +237,7 @@ bool QualityScores::stripQualWindowAverage(Sequence& sequence, int stepSize, int
 			double windowAverage = windowSum / (double)(end-start);
 			
 			if(windowAverage < qThreshold){
-				end = start;
+				end = end - stepSize;
 				break;
 			}
 			start += stepSize;
