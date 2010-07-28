@@ -27,7 +27,7 @@ ChimeraBellerophonCommand::ChimeraBellerophonCommand(string option)  {
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
 			
-			ValidParameters validParameter;
+			ValidParameters validParameter("chimera.bellerophon");
 			map<string,string>::iterator it;
 			
 			//check to make sure all parameters are valid for command

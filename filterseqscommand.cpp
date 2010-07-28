@@ -28,7 +28,7 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
 			
-			ValidParameters validParameter;
+			ValidParameters validParameter("filter.seqs");
 			map<string,string>::iterator it;
 			
 			//check to make sure all parameters are valid for command
@@ -258,7 +258,7 @@ int FilterSeqsCommand::filterSequences() {
 #ifdef USE_MPI	
 				int pid, start, end, numSeqsPerProcessor, num; 
 				int tag = 2001;
-				vector<long>MPIPos;
+				vector<unsigned long int>MPIPos;
 						
 				MPI_Status status; 
 				MPI_Comm_size(MPI_COMM_WORLD, &processors); //set processors to the number of mpi processes running
@@ -393,7 +393,7 @@ int FilterSeqsCommand::filterSequences() {
 }
 #ifdef USE_MPI
 /**************************************************************************************/
-int FilterSeqsCommand::driverMPIRun(int start, int num, MPI_File& inMPI, MPI_File& outMPI, vector<long>& MPIPos) {	
+int FilterSeqsCommand::driverMPIRun(int start, int num, MPI_File& inMPI, MPI_File& outMPI, vector<unsigned long int>& MPIPos) {	
 	try {
 		string outputString = "";
 		int count = 0;
@@ -569,7 +569,7 @@ string FilterSeqsCommand::createFilter() {
 #ifdef USE_MPI	
 				int pid, numSeqsPerProcessor, num; 
 				int tag = 2001;
-				vector<long> MPIPos;
+				vector<unsigned long int> MPIPos;
 				
 				MPI_Status status; 
 				MPI_File inMPI; 
@@ -797,7 +797,7 @@ int FilterSeqsCommand::driverCreateFilter(Filters& F, string filename, linePair*
 }
 #ifdef USE_MPI
 /**************************************************************************************/
-int FilterSeqsCommand::MPICreateFilter(int start, int num, Filters& F, MPI_File& inMPI, vector<long>& MPIPos) {	
+int FilterSeqsCommand::MPICreateFilter(int start, int num, Filters& F, MPI_File& inMPI, vector<unsigned long int>& MPIPos) {	
 	try {
 		
 		MPI_Status status; 

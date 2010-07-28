@@ -755,7 +755,7 @@ int GetOTURepCommand::processNames(string filename, string label) {
 
 			if (sequence != "not found") {
 				if (sorted == "") { //print them out
-					rep = rep + "|" + toString(i+1);
+					rep = rep + "\t" + toString(i+1);
 					rep = rep + "|" + toString(binsize);
 					if (groupfile != "") {
 						rep = rep + "|" + group;
@@ -781,7 +781,7 @@ int GetOTURepCommand::processNames(string filename, string label) {
 			//print them
 			for (int i = 0; i < reps.size(); i++) {
 				string sequence = fasta->getSequence(reps[i].name);
-				string outputName = reps[i].name + "|" + toString(reps[i].bin);
+				string outputName = reps[i].name + "\t" + toString(reps[i].bin);
 				outputName = outputName + "|" + toString(reps[i].size);
 				if (groupfile != "") {
 					outputName = outputName + "|" + reps[i].group;
@@ -794,6 +794,7 @@ int GetOTURepCommand::processNames(string filename, string label) {
 		out.close();
 		out2.close();
 		
+		remove(filename.c_str());
 		rename(tempNameFile.c_str(), filename.c_str());
 		
 		return 0;

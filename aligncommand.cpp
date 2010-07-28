@@ -45,7 +45,7 @@ AlignCommand::AlignCommand(string option)  {
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters(); 
 			
-			ValidParameters validParameter;
+			ValidParameters validParameter("align.seqs");
 			map<string, string>::iterator it;
 			
 			//check to make sure all parameters are valid for command
@@ -261,7 +261,7 @@ int AlignCommand::execute(){
 #ifdef USE_MPI	
 				int pid, end, numSeqsPerProcessor; 
 				int tag = 2001;
-				vector<long> MPIPos;
+				vector<unsigned long int> MPIPos;
 				MPIWroteAccnos = false;
 				
 				MPI_Status status; 
@@ -646,7 +646,7 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName, 
 }
 //**********************************************************************************************************************
 #ifdef USE_MPI
-int AlignCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& alignFile, MPI_File& reportFile, MPI_File& accnosFile, vector<long>& MPIPos){
+int AlignCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& alignFile, MPI_File& reportFile, MPI_File& accnosFile, vector<unsigned long int>& MPIPos){
 	try {
 		string outputString = "";
 		MPI_Status statusReport; 

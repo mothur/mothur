@@ -38,7 +38,7 @@ private:
 	int createProcesses(string, string, string, string, set<string>&);
 	
 	#ifdef USE_MPI
-	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, vector<long>&, set<string>&);
+	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long int>&, set<string>&);
 	#endif
 
 	bool abort;

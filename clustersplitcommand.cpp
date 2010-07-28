@@ -34,7 +34,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
 			
-			ValidParameters validParameter;
+			ValidParameters validParameter("cluster.split");
 		
 			//check to make sure all parameters are valid for command
 			map<string,string>::iterator it;

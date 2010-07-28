@@ -26,7 +26,7 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
 			
-			ValidParameters validParameter;
+			ValidParameters validParameter("chimera.check");
 			map<string,string>::iterator it;
 			
 			//check to make sure all parameters are valid for command
@@ -262,7 +262,7 @@ int ChimeraCheckCommand::execute(){
 		
 				int pid, end, numSeqsPerProcessor; 
 				int tag = 2001;
-				vector<long> MPIPos;
+				vector<unsigned long int> MPIPos;
 				
 				MPI_Status status; 
 				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
@@ -490,7 +490,7 @@ int ChimeraCheckCommand::driver(linePair* line, string outputFName, string filen
 }
 //**********************************************************************************************************************
 #ifdef USE_MPI
-int ChimeraCheckCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& outMPI, vector<long>& MPIPos){
+int ChimeraCheckCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& outMPI, vector<unsigned long int>& MPIPos){
 	try {
 		MPI_File outAccMPI;
 		MPI_Status status; 

@@ -22,17 +22,19 @@ class ValidParameters {
 
 	public:
 		ValidParameters();
+		ValidParameters(string);
 		~ValidParameters();
 		//bool isValidParameter(string, string, string) {return true;}
 		bool isValidParameter(string, vector<string>, string);
 		vector <string> addParameters(string[], int);
 		void initParameterRanges();
-		string validFile(map<string, string>&, string, bool); //container, parameter, isFile
+		string validFile(map<string, string>&, string, bool); //container, parameter, isFile, commandName
 
 	private:
 		map<string, string>::iterator it;
 		map<string, vector<string> > parameterRanges;
 		MothurOut* m;
+		string commandName;
 
 };
 

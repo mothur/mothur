@@ -51,11 +51,12 @@ bool InteractEngine::getInput(){
 		
 		while(quitCommandCalled != 1){
 
+
 			mout->mothurOutEndLine();
 			
 			input = getCommand();	
 			mout->mothurOutEndLine();	
-			
+		
 			if (mout->control_pressed) { input = "quit()"; }
 			
 			//allow user to omit the () on the quit command
@@ -331,7 +332,7 @@ bool ScriptEngine::getInput(){
 					mout->executing = false;
 									
 					#ifdef USE_MPI
-					cout << pid << " is done in execute" << endl;
+					//cout << pid << " is done in execute" << endl;
 						}
 					#endif
 				}else {		

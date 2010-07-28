@@ -108,8 +108,10 @@ void ReadTreeCommand::help(){
 	try {
 		m->mothurOut("The read.tree command must be run before you execute a unifrac.weighted, unifrac.unweighted. \n");
 		m->mothurOut("It also must be run before using the parsimony command, unless you are using the randomtree parameter.\n");
+		m->mothurOut("The read.tree command parameters are tree, group and name.\n");
 		m->mothurOut("The read.tree command should be in the following format: read.tree(tree=yourTreeFile, group=yourGroupFile).\n");
 		m->mothurOut("The tree and group parameters are both required.\n");
+		m->mothurOut("The name parameter allows you to enter a namefile.\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. tree), '=' and parameters (i.e.yourTreefile).\n\n");
 	}
 	catch(exception& e) {

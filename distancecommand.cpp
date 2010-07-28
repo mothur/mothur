@@ -32,7 +32,7 @@ DistanceCommand::DistanceCommand(string option) {
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();
 			
-			ValidParameters validParameter;
+			ValidParameters validParameter("dist.seqs");
 			map<string, string>::iterator it2;
 		
 			//check to make sure all parameters are valid for command
