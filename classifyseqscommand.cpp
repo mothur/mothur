@@ -32,7 +32,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters(); 
 			
-			ValidParameters validParameter;
+			ValidParameters validParameter("classify.seqs");
 			map<string, string>::iterator it;
 			
 			//check to make sure all parameters are valid for command
@@ -414,7 +414,7 @@ int ClassifySeqsCommand::execute(){
 #ifdef USE_MPI	
 				int pid, end, numSeqsPerProcessor; 
 				int tag = 2001;
-				vector<long> MPIPos;
+				vector<unsigned long int> MPIPos;
 				
 				MPI_Status status; 
 				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
@@ -841,7 +841,7 @@ int ClassifySeqsCommand::driver(linePair* line, string taxFName, string tempTFNa
 }
 //**********************************************************************************************************************
 #ifdef USE_MPI
-int ClassifySeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& newFile, MPI_File& tempFile, vector<long>& MPIPos){
+int ClassifySeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& newFile, MPI_File& tempFile, vector<unsigned long int>& MPIPos){
 	try {
 		MPI_Status statusNew; 
 		MPI_Status statusTemp; 

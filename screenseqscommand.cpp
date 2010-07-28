@@ -28,7 +28,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
 			
-			ValidParameters validParameter;
+			ValidParameters validParameter("screen.seqs");
 			map<string,string>::iterator it;
 			
 			//check to make sure all parameters are valid for command
@@ -179,7 +179,7 @@ int ScreenSeqsCommand::execute(){
 #ifdef USE_MPI	
 			int pid, end, numSeqsPerProcessor; 
 			int tag = 2001;
-			vector<long> MPIPos;
+			vector<unsigned long int> MPIPos;
 			
 			MPI_Status status; 
 			MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
@@ -749,7 +749,7 @@ int ScreenSeqsCommand::driver(linePair* line, string goodFName, string badFName,
 }
 //**********************************************************************************************************************
 #ifdef USE_MPI
-int ScreenSeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& goodFile, MPI_File& badFile, MPI_File& badAccnosFile, vector<long>& MPIPos, set<string>& badSeqNames){
+int ScreenSeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& goodFile, MPI_File& badFile, MPI_File& badAccnosFile, vector<unsigned long int>& MPIPos, set<string>& badSeqNames){
 	try {
 		string outputString = "";
 		MPI_Status statusGood; 

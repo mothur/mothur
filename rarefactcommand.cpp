@@ -131,17 +131,18 @@ int RareFactCommand::execute(){
 		
 		vector<string> outputNames;
 		
+		string hadShared = "";
 		if ((globaldata->getFormat() != "sharedfile")) { inputFileNames.push_back(globaldata->inputFileName);  }
-		else {  inputFileNames = parseSharedFile(globaldata->getSharedFile());  globaldata->setFormat("rabund");  }
-		
-		if (m->control_pressed) { return 0; }
+		else { hadShared = globaldata->getSharedFile(); inputFileNames = parseSharedFile(globaldata->getSharedFile());  globaldata->setFormat("rabund");  }
+				
+		if (m->control_pressed) { if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } return 0; }
 		
 		for (int p = 0; p < inputFileNames.size(); p++) {
 			
 			string fileNameRoot = outputDir + getRootName(getSimpleName(inputFileNames[p]));
 			globaldata->inputFileName = inputFileNames[p];
 			
-			if (m->control_pressed) { return 0; }
+			if (m->control_pressed) { if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } return 0; }
 			
 			if (inputFileNames.size() > 1) {
 				m->mothurOutEndLine(); m->mothurOut("Processing group " + groups[p]); m->mothurOutEndLine(); m->mothurOutEndLine();
@@ -203,12 +204,12 @@ int RareFactCommand::execute(){
 			set<string> processedLabels;
 			set<string> userLabels = labels;
 			
-			if (m->control_pressed) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	} delete validCalculator; delete read; delete input; globaldata->ginput = NULL; delete order; globaldata->gorder = NULL; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+			if (m->control_pressed) { if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	} delete validCalculator; delete read; delete input; globaldata->ginput = NULL; delete order; globaldata->gorder = NULL; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
 			
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				
-				if (m->control_pressed) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	} delete validCalculator; delete read; delete input; globaldata->ginput = NULL; delete order; globaldata->gorder = NULL; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+				if (m->control_pressed) { if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	} delete validCalculator; delete read; delete input; globaldata->ginput = NULL; delete order; globaldata->gorder = NULL; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
 
 				
 				if(allLines == 1 || labels.count(order->getLabel()) == 1){
@@ -246,7 +247,7 @@ int RareFactCommand::execute(){
 				order = (input->getOrderVector());
 			}
 			
-			if (m->control_pressed) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	} delete validCalculator; delete read; delete input; globaldata->ginput = NULL; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }  return 0; }
+			if (m->control_pressed) { if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	} delete validCalculator; delete read; delete input; globaldata->ginput = NULL; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }  return 0; }
 
 			//output error messages about any remaining user labels
 			set<string>::iterator it;
@@ -261,7 +262,7 @@ int RareFactCommand::execute(){
 				}
 			}
 			
-			if (m->control_pressed) { for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	} delete validCalculator; delete read; delete input; globaldata->ginput = NULL;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+			if (m->control_pressed) { if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } for(int i=0;i<rDisplays.size();i++){	delete rDisplays[i];	} delete validCalculator; delete read; delete input; globaldata->ginput = NULL;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
 
 			//run last label if you need to
 			if (needToRun == true)  {
@@ -285,6 +286,8 @@ int RareFactCommand::execute(){
 			delete validCalculator;
 			
 		}
+		
+		if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  }
 		
 		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
 

@@ -128,8 +128,11 @@ VennCommand::VennCommand(string option)  {
 					}
 				}
 				
-				venn = new Venn(outputDir);
+				//if the users entered no valid calculators don't execute command
+				if (vennCalculators.size() == 0) { m->mothurOut("No valid calculators given, please correct."); m->mothurOutEndLine(); abort = true;  }
+				else {  venn = new Venn(outputDir);  }
 			}
+			
 		}
 
 		
@@ -187,9 +190,6 @@ int VennCommand::execute(){
 		
 		string lastLabel;
 		vector<string> outputNames;
-		
-		//if the users entered no valid calculators don't execute command
-		if (vennCalculators.size() == 0) { return 0; }
 		
 		if (format == "sharedfile") {
 			//you have groups

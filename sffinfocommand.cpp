@@ -553,7 +553,7 @@ int SffInfoCommand::printHeader(ofstream& out, Header& header) {
 int SffInfoCommand::printSffTxtSeqData(ofstream& out, seqRead& read, Header& header) {
 	try {
 		
-		out << "FlowGram: ";
+		out << "Flowgram: ";
 		for (int i = 0; i < read.flowgram.size(); i++) { out << setprecision(2) << (read.flowgram[i]/(float)100) << '\t';  }
 		
 		out << endl <<  "Flow Indexes: ";
@@ -561,9 +561,9 @@ int SffInfoCommand::printSffTxtSeqData(ofstream& out, seqRead& read, Header& hea
 		for (int i = 0; i < read.flowIndex.size(); i++) {  sum +=  read.flowIndex[i];  out << sum << '\t'; }
 		
 		//make the bases you want to clip lowercase and the bases you want to keep upper case
-		for (int i = 0; i < header.clipQualLeft; i++) { read.bases[i] = tolower(read.bases[i]); }
-		for (int i = header.clipQualLeft; i < (header.clipQualRight-header.clipQualLeft); i++) {   read.bases[i] = toupper(read.bases[i]);  }
-		for (int i = (header.clipQualRight-header.clipQualLeft); i < read.bases.length(); i++) {   read.bases[i] = tolower(read.bases[i]);  }
+		for (int i = 0; i < (header.clipQualLeft-1); i++) { read.bases[i] = tolower(read.bases[i]); }
+		for (int i = (header.clipQualLeft-1); i < (header.clipQualRight-1); i++) {   read.bases[i] = toupper(read.bases[i]);  }
+		for (int i = (header.clipQualRight-1); i < read.bases.length(); i++) {   read.bases[i] = tolower(read.bases[i]);  }
 		
 		out << endl <<  "Bases: " << read.bases << endl << "Quality Scores: ";
 		for (int i = 0; i < read.qualScores.size(); i++) {   out << read.qualScores[i] << '\t';  }
@@ -586,14 +586,14 @@ int SffInfoCommand::printFastaSeqData(ofstream& out, seqRead& read, Header& head
 		
 		
 		if (trim) {
-			seq = seq.substr(header.clipQualLeft, (header.clipQualRight-header.clipQualLeft));
+			seq = seq.substr((header.clipQualLeft-1), (header.clipQualRight-header.clipQualLeft+1));
 		}else{
 			//if you wanted the sfftxt then you already converted the bases to the right case
 			if (!sfftxt) {
 				//make the bases you want to clip lowercase and the bases you want to keep upper case
-				for (int i = 0; i < header.clipQualLeft; i++) { seq[i] = tolower(seq[i]);  }
-				for (int i = header.clipQualLeft; i < (header.clipQualRight-header.clipQualLeft); i++) {   seq[i] = toupper(seq[i]);  }
-				for (int i = (header.clipQualRight-header.clipQualLeft); i < seq.length(); i++) {   seq[i] = tolower(seq[i]);  }
+				for (int i = 0; i < (header.clipQualLeft-1); i++) { seq[i] = tolower(seq[i]);  }
+				for (int i = (header.clipQualLeft-1); i < (header.clipQualRight-1); i++)  {   seq[i] = toupper(seq[i]);  }
+				for (int i = (header.clipQualRight-1); i < seq.length(); i++) {   seq[i] = tolower(seq[i]);  }
 			}
 		}
 		
@@ -613,8 +613,8 @@ int SffInfoCommand::printQualSeqData(ofstream& out, seqRead& read, Header& heade
 	try {
 		
 		if (trim) {
-			out << ">" << header.name << " length=" << (header.clipQualRight-header.clipQualLeft) << endl;
-			for (int i = header.clipQualLeft; i < (header.clipQualRight-header.clipQualLeft); i++) {   out << read.qualScores[i] << '\t';  }
+			out << ">" << header.name << " length=" << (header.clipQualRight-header.clipQualLeft+1) << endl;
+			for (int i = (header.clipQualLeft-1); i < (header.clipQualRight-1); i++) {   out << read.qualScores[i] << '\t';  }
 		}else{
 			out << ">" << header.name << " length=" << read.qualScores.size() << endl;
 			for (int i = 0; i < read.qualScores.size(); i++) {   out << read.qualScores[i] << '\t';  }

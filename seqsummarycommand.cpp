@@ -27,7 +27,7 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
 			OptionParser parser(option);
 			map<string,string> parameters = parser.getParameters();
 			
-			ValidParameters validParameter;
+			ValidParameters validParameter("summary.seqs");
 			map<string,string>::iterator it;
 			
 			//check to make sure all parameters are valid for command
@@ -113,7 +113,7 @@ int SeqSummaryCommand::execute(){
 				int tag = 2001;
 				int startTag = 1; int endTag = 2; int lengthTag = 3; int baseTag = 4; int lhomoTag = 5;
 				int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
-				vector<long> MPIPos;
+				vector<unsigned long int> MPIPos;
 				
 				MPI_Status status; 
 				MPI_Status statusOut;
@@ -360,7 +360,7 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 }
 #ifdef USE_MPI
 /**************************************************************************************/
-int SeqSummaryCommand::MPICreateSummary(int start, int num, vector<int>& startPosition, vector<int>& endPosition, vector<int>& seqLength, vector<int>& ambigBases, vector<int>& longHomoPolymer, MPI_File& inMPI, MPI_File& outMPI, vector<long>& MPIPos) {	
+int SeqSummaryCommand::MPICreateSummary(int start, int num, vector<int>& startPosition, vector<int>& endPosition, vector<int>& seqLength, vector<int>& ambigBases, vector<int>& longHomoPolymer, MPI_File& inMPI, MPI_File& outMPI, vector<unsigned long int>& MPIPos) {	
 	try {
 		
 		int pid;

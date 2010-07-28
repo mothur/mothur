@@ -38,7 +38,7 @@ private:
 	int setLines(string);
 
 	#ifdef USE_MPI
-	int MPICreateSummary(int, int, vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, MPI_File&, MPI_File&, vector<long>&);	
+	int MPICreateSummary(int, int, vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, MPI_File&, MPI_File&, vector<unsigned long int>&);	
 	#endif
 
 

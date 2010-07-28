@@ -13,7 +13,7 @@
 
 CXXFLAGS += -O3
 
-MOTHUR_FILES = "\"Enter_your_default_path_here\""
+MOTHUR_FILES = "\"../Release\""
 ifeq  ($(strip $(MOTHUR_FILES)),"\"Enter_your_default_path_here\"")
 else
 	CXXFLAGS += -DMOTHUR_FILES=${MOTHUR_FILES}
@@ -39,7 +39,7 @@ endif
 # if you do not want to use the readline library, set this to no.
 # make sure you have the library installed
 
-USEREADLINE ?= yes
+USEREADLINE ?= no
 
 ifeq  ($(strip $(USEREADLINE)),yes)
     CXXFLAGS += -DUSE_READLINE
@@ -48,7 +48,7 @@ ifeq  ($(strip $(USEREADLINE)),yes)
       -lncurses
 endif
 
-USEMPI ?= no
+USEMPI ?= yes
 
 ifeq  ($(strip $(USEMPI)),yes)
     CXX = mpic++

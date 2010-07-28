@@ -137,12 +137,13 @@ int CollectCommand::execute(){
 		
 		vector<string> outputNames;
 		
+		string hadShared = "";
 		if ((globaldata->getFormat() != "sharedfile")) { inputFileNames.push_back(globaldata->inputFileName);  }
-		else {  inputFileNames = parseSharedFile(globaldata->getSharedFile());  globaldata->setFormat("rabund");  }
+		else { hadShared = globaldata->getSharedFile(); inputFileNames = parseSharedFile(globaldata->getSharedFile());  globaldata->setFormat("rabund");  }
 	
 		for (int p = 0; p < inputFileNames.size(); p++) {
 			
-			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  globaldata->Groups.clear(); return 0; }
+			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  globaldata->Groups.clear(); if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } return 0; }
 			
 			if (outputDir == "") { outputDir += hasPath(inputFileNames[p]); }
 			string fileNameRoot = outputDir + getRootName(getSimpleName(inputFileNames[p]));
@@ -221,7 +222,7 @@ int CollectCommand::execute(){
 			}
 		
 			//if the users entered no valid calculators don't execute command
-			if (cDisplays.size() == 0) { return 0; }
+			if (cDisplays.size() == 0) { if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } return 0; }
 			
 			read = new ReadOTUFile(inputFileNames[p]);	
 			read->read(&*globaldata); 
@@ -242,6 +243,7 @@ int CollectCommand::execute(){
 				delete order; globaldata->gorder = NULL;
 				delete validCalculator;
 				globaldata->Groups.clear();
+				if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  }
 				return 0;
 			}
 
@@ -256,6 +258,7 @@ int CollectCommand::execute(){
 					delete order; globaldata->gorder = NULL;
 					delete validCalculator;
 					globaldata->Groups.clear();
+					if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  }
 					return 0;
 				}
 
@@ -306,6 +309,7 @@ int CollectCommand::execute(){
 					delete read;
 					delete validCalculator;
 					globaldata->Groups.clear();
+					if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  }
 					return 0;
 			}
 				
@@ -341,6 +345,7 @@ int CollectCommand::execute(){
 					delete order; globaldata->gorder = NULL;
 					delete validCalculator;
 					globaldata->Groups.clear();
+					if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  }
 					return 0;
 				}
 				delete order;
@@ -354,8 +359,11 @@ int CollectCommand::execute(){
 			delete validCalculator;
 		}
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} return 0; }
+		//return to shared mode if you changed above
+		if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  }
 
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} return 0; }
+				
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}

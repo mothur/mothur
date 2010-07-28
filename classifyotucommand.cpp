@@ -250,7 +250,11 @@ int ClassifyOtuCommand::readNamesFile() {
 			inNames >> names;		//read from second column  A,B,C,D
 			gobble(inNames);
 			
-			nameMap[name] = names;
+			//parse names into vector
+			vector<string> theseNames;
+			splitAtComma(names, theseNames);
+
+			for (int i = 0; i < theseNames.size(); i++) {  nameMap[theseNames[i]] = name;  }
 			
 			if (m->control_pressed) { inNames.close(); nameMap.clear(); return 0; }
 		}
@@ -309,41 +313,46 @@ string ClassifyOtuCommand::findConsensusTaxonomy(int bin, ListVector* thisList, 
 		
 		size = 0;
 		for (int i = 0; i < names.size(); i++) {
-			
-			if (m->control_pressed) { delete phylo; return conTax; }
-			
-			//is this sequence in the taxonomy file
-			it = taxMap.find(names[i]);
-			
-			if (it == taxMap.end()) { //this name is not in taxonomy file, skip it
-				m->mothurOut(names[i] + " is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine();
-			}else{
+		
+			//if namesfile include the names
+			if (namefile != "") {
+				//is this sequence in the name file - namemap maps seqName -> repSeqName
+				it2 = nameMap.find(names[i]);
 				
-				//if namesfile include the names
-				if (namefile != "") {
-					//is this sequence in the name file
-					it2 = nameMap.find(names[i]);
+				if (it2 == nameMap.end()) { //this name is not in name file, skip it
+					m->mothurOut(names[i] + " is not in your name file.  I will not include it in the consensus."); m->mothurOutEndLine();
+				}else{
 					
-					if (it2 == nameMap.end()) { //this name is not in name file, skip it
-						m->mothurOut(names[i] + " is not in your name file.  I will not include it in the consensus."); m->mothurOutEndLine();
+					//is this sequence in the taxonomy file - look for repSeqName since we are assuming the taxonomy file is unique
+					it = taxMap.find(it2->second);
+			
+					if (it == taxMap.end()) { //this name is not in taxonomy file, skip it
+						if (names[i] != it->second) { m->mothurOut(names[i] + " is represented by " +  it2->second + " and is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine(); }
+						else {  m->mothurOut(names[i] + " is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine(); }
 					}else{
-						
-						vector<string> nameFileNames;
-						splitAtComma(it2->second, nameFileNames);
-						
-						for (int j = 0; j < nameFileNames.size(); j++) {
-							//add seq to tree
-							phylo->addSeqToTree(nameFileNames[j], it->second);
-							size++;
-						}
+				
+						//add seq to tree
+						phylo->addSeqToTree(names[i], it->second);
+						size++;
 					}
-					
+				}
+				
+			}else{
+				//is this sequence in the taxonomy file - look for repSeqName since we are assuming the taxonomy file is unique
+				it = taxMap.find(names[i]);
+		
+				if (it == taxMap.end()) { //this name is not in taxonomy file, skip it
+					m->mothurOut(names[i] + " is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine();
 				}else{
 					//add seq to tree
 					phylo->addSeqToTree(names[i], it->second);
 					size++;
 				}
 			}
+
+			
+			if (m->control_pressed) { delete phylo; return conTax; }
+			
 		}
 		
 		//build tree
