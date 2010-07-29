@@ -39,7 +39,7 @@ endif
 # if you do not want to use the readline library, set this to no.
 # make sure you have the library installed
 
-USEREADLINE ?= no
+USEREADLINE ?= yes
 
 ifeq  ($(strip $(USEREADLINE)),yes)
     CXXFLAGS += -DUSE_READLINE
