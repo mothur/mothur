@@ -405,12 +405,12 @@ int SffInfoCommand::readHeader(ifstream& in, Header& header){
 			char buffer4 [2];
 			in.read(buffer4, 2);
 			header.clipQualLeft =  be_int2(*(unsigned short *)(&buffer4));
+			header.clipQualLeft = 5;
 			
 			//read clip qual right
 			char buffer5 [2];
 			in.read(buffer5, 2);
 			header.clipQualRight =  be_int2(*(unsigned short *)(&buffer5));
-			if(header.clipQualRight == 0){	header.clipQualRight = header.numBases;	}
 			
 			//read clipAdapterLeft
 			char buffer6 [2];
@@ -586,11 +586,17 @@ int SffInfoCommand::printFastaSeqData(ofstream& out, seqRead& read, Header& head
 		string seq = read.bases;
 		
 		if (trim) {
-			seq = seq.substr((header.clipQualLeft-1), (header.clipQualRight-header.clipQualLeft+1));
+			if(header.clipQualRight != 0){
+				seq = seq.substr((header.clipQualLeft-1), (header.clipQualRight-header.clipQualLeft));
+			}
+			else {
+				seq = seq.substr(header.clipQualLeft-1);
+			}
 		}else{
 			//if you wanted the sfftxt then you already converted the bases to the right case
 			if (!sfftxt) {
 				//make the bases you want to clip lowercase and the bases you want to keep upper case
+				if(header.clipQualRight == 0){	header.clipQualRight = seq.length();	}
 				for (int i = 0; i < (header.clipQualLeft-1); i++) { seq[i] = tolower(seq[i]);  }
 				for (int i = (header.clipQualLeft-1); i < (header.clipQualRight-1); i++)  {   seq[i] = toupper(seq[i]);  }
 				for (int i = (header.clipQualRight-1); i < seq.length(); i++) {   seq[i] = tolower(seq[i]);  }
@@ -613,8 +619,14 @@ int SffInfoCommand::printQualSeqData(ofstream& out, seqRead& read, Header& heade
 	try {
 		
 		if (trim) {
-			out << ">" << header.name << " length=" << (header.clipQualRight-header.clipQualLeft+1) << endl;
-			for (int i = (header.clipQualLeft-1); i < (header.clipQualRight-1); i++) {   out << read.qualScores[i] << '\t';  }
+			if(header.clipQualRight != 0){
+				out << ">" << header.name << " length=" << (header.clipQualRight-header.clipQualLeft) << endl;
+				for (int i = (header.clipQualLeft-1); i < (header.clipQualRight-1); i++) {   out << read.qualScores[i] << '\t';	}
+			}
+			else{
+				out << ">" << header.name << " length=" << (header.clipQualRight-header.clipQualLeft) << endl;
+				for (int i = (header.clipQualLeft-1); i < read.qualScores.size(); i++) {   out << read.qualScores[i] << '\t';	}			
+			}
 		}else{
 			out << ">" << header.name << " length=" << read.qualScores.size() << endl;
 			for (int i = 0; i < read.qualScores.size(); i++) {   out << read.qualScores[i] << '\t';  }
