@@ -410,7 +410,7 @@ int SffInfoCommand::readHeader(ifstream& in, Header& header){
 			char buffer5 [2];
 			in.read(buffer5, 2);
 			header.clipQualRight =  be_int2(*(unsigned short *)(&buffer5));
-			if(header.clipQualRight == 0){	header.clipQualRight = numBases;	}
+			if(header.clipQualRight == 0){	header.clipQualRight = header.numBases;	}
 			
 			//read clipAdapterLeft
 			char buffer6 [2];
