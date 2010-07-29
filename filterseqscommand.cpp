@@ -263,7 +263,7 @@ int FilterSeqsCommand::filterSequences() {
 				MPI_Status status; 
 				MPI_Comm_size(MPI_COMM_WORLD, &processors); //set processors to the number of mpi processes running
 				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-				
+	cout << pid << "is in create filter " << endl;			
 				MPI_File outMPI;
 				MPI_File tempMPI;
 				MPI_File inMPI;

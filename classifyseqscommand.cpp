@@ -399,10 +399,15 @@ int ClassifySeqsCommand::execute(){
 		
 			m->mothurOut("Classifying sequences from " + fastaFileNames[s] + " ..." ); m->mothurOutEndLine();
 			
+			string RippedTaxName = getRootName(getSimpleName(taxonomyFileName));
+			RippedTaxName = getExtension(RippedTaxName.substr(0, RippedTaxName.length()-1));
+			if (RippedTaxName[0] == '.') { RippedTaxName = RippedTaxName.substr(1, RippedTaxName.length()); }
+			RippedTaxName +=  "."; 
+		
 			if (outputDir == "") { outputDir += hasPath(fastaFileNames[s]); }
-			string newTaxonomyFile = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + getRootName(getSimpleName(taxonomyFileName)) + "taxonomy";
+			string newTaxonomyFile = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + RippedTaxName + "taxonomy";
 			string tempTaxonomyFile = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + "taxonomy.temp";
-			string taxSummary = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + getRootName(getSimpleName(taxonomyFileName)) + "tax.summary";
+			string taxSummary = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + RippedTaxName + "tax.summary";
 			
 			outputNames.push_back(newTaxonomyFile);
 			outputNames.push_back(taxSummary);

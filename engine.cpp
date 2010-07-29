@@ -51,17 +51,50 @@ bool InteractEngine::getInput(){
 		
 		while(quitCommandCalled != 1){
 
-
+			#ifdef USE_MPI
+				int pid, processors;
+				MPI_Status status;
+				MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+				MPI_Comm_size(MPI_COMM_WORLD, &processors);
+				
+				if (pid == 0) {
+				
+			#endif
+			
 			mout->mothurOutEndLine();
 			
 			input = getCommand();	
 			mout->mothurOutEndLine();	
-		
+			
 			if (mout->control_pressed) { input = "quit()"; }
 			
 			//allow user to omit the () on the quit command
 			if (input == "quit") { input = "quit()"; }
+
 			
+			#ifdef USE_MPI
+				//send commandName
+				for(int i = 1; i < processors; i++) { 
+						int length = input.length();
+						MPI_Send(&length, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
+						MPI_Send(&input[0], length, MPI_CHAR, i, 2001, MPI_COMM_WORLD);
+	
+					}
+				}else {
+					int length;
+					MPI_Recv(&length, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
+					//recieve container
+					char* tempBuf = new char[length];
+					MPI_Recv(&tempBuf[0], length, MPI_CHAR, 0, 2001, MPI_COMM_WORLD, &status);
+					
+					input = tempBuf;
+					if (input.length() > length) { input = input.substr(0, length);  }
+					delete tempBuf;	
+				}
+
+			
+			#endif
+		
 			CommandOptionParser parser(input);
 			commandName = parser.getCommandString();
 	
@@ -72,9 +105,9 @@ bool InteractEngine::getInput(){
 					#ifdef USE_MPI
 						int pid;
 						MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
- 
-//cout << pid << " is here " << commandName << endl;
+						
 						if ((cFactory->MPIEnabled(commandName)) || (pid == 0)) {
+					//cout << pid << " is in execute " << commandName << endl;
 					#endif
 					//executes valid command
 					Command* command = cFactory->getCommand(commandName, options);
@@ -100,9 +133,6 @@ bool InteractEngine::getInput(){
 /***********************************************************************/
 string Engine::getCommand()  {
 	try {
-		#ifdef USE_MPI
-			MPI_Barrier(MPI_COMM_WORLD);
-		#endif
 	
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			#ifdef USE_READLINE
@@ -181,9 +211,44 @@ bool BatchEngine::getInput(){
 		int quitCommandCalled = 0;
 	    int count = 0;
 		while(quitCommandCalled == 0){
-	
+			
+			#ifdef USE_MPI
+				int pid, processors;
+				MPI_Status status;
+				MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+				MPI_Comm_size(MPI_COMM_WORLD, &processors);
+				
+				if (pid == 0) {
+				
+			#endif
+			
 			input = getNextCommand(inputBatchFile);
 			count++;
+			
+			#ifdef USE_MPI
+				//send commandName
+				for(int i = 1; i < processors; i++) { 
+						int length = input.length();
+						MPI_Send(&length, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
+						MPI_Send(&input[0], length, MPI_CHAR, i, 2001, MPI_COMM_WORLD);
+	
+					}
+				}else {
+					int length;
+					MPI_Recv(&length, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
+					//recieve container
+					char* tempBuf = new char[length];
+					MPI_Recv(&tempBuf[0], length, MPI_CHAR, 0, 2001, MPI_COMM_WORLD, &status);
+					
+					input = tempBuf;
+					if (input.length() > length) { input = input.substr(0, length);  }
+					delete tempBuf;	
+				}
+
+			
+			#endif
+
+			
 			
 			if (input[0] != '#') {
 				
@@ -239,11 +304,6 @@ bool BatchEngine::getInput(){
 string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
 	try {
 		
-		#ifdef USE_MPI
-			int err = MPI_Barrier(MPI_COMM_WORLD);
-//cout << "barrier = " << err << '\t' << MPI_SUCCESS << endl;
-		#endif
-		
 		string nextcommand = "";
 		
 		if (inputBatchFile.eof()) { nextcommand = "quit()"; }
@@ -294,7 +354,17 @@ bool ScriptEngine::getInput(){
 		int quitCommandCalled = 0;
 	
 		while(quitCommandCalled == 0){
-		
+			
+			#ifdef USE_MPI
+				int pid, processors;
+				MPI_Status status;
+				MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
+				MPI_Comm_size(MPI_COMM_WORLD, &processors);
+				
+				if (pid == 0) {
+				
+			#endif
+			
 			input = getNextCommand(listOfCommands);	
 			
 			if (input == "") { input = "quit()"; }
@@ -302,6 +372,30 @@ bool ScriptEngine::getInput(){
 			mout->mothurOutEndLine();
 			mout->mothurOut("mothur > " + input);
 			mout->mothurOutEndLine();
+			
+			#ifdef USE_MPI
+				//send commandName
+				for(int i = 1; i < processors; i++) { 
+						int length = input.length();
+						MPI_Send(&length, 1, MPI_INT, i, 2001, MPI_COMM_WORLD);
+						MPI_Send(&input[0], length, MPI_CHAR, i, 2001, MPI_COMM_WORLD);
+	
+					}
+				}else {
+					int length;
+					MPI_Recv(&length, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
+					//recieve container
+					char* tempBuf = new char[length];
+					MPI_Recv(&tempBuf[0], length, MPI_CHAR, 0, 2001, MPI_COMM_WORLD, &status);
+					
+					input = tempBuf;
+					if (input.length() > length) { input = input.substr(0, length);  }
+					delete tempBuf;	
+				}
+
+			
+			#endif
+			
 			
 			if (mout->control_pressed) { input = "quit()"; }
 				
@@ -353,10 +447,6 @@ bool ScriptEngine::getInput(){
 /***********************************************************************/
 string ScriptEngine::getNextCommand(string& commandString) {
 	try {
-		
-		#ifdef USE_MPI
-			MPI_Barrier(MPI_COMM_WORLD);
-		#endif
 		
 		string nextcommand = "";
 		int count = 0;

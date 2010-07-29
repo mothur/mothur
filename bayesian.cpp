@@ -71,6 +71,8 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 			
 				for (int j = 0; j < wordGenusProb.size(); j++) {	wordGenusProb[j].resize(genusNodes.size());		}
 				
+				ofstream out;
+				ofstream out2;
 				
 				#ifdef USE_MPI
 					int pid;
@@ -79,12 +81,11 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 					if (pid == 0) {  
 				#endif
 
-				ofstream out;
+				
 				openOutputFile(probFileName, out);
 				
 				out << numKmers << endl;
 				
-				ofstream out2;
 				openOutputFile(probFileName2, out2);
 				
 				#ifdef USE_MPI
@@ -94,7 +95,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 				
 				//for each word
 				for (int i = 0; i < numKmers; i++) {
-					if (m->control_pressed) { break; }
+					if (m->control_pressed) {  break; }
 					
 					#ifdef USE_MPI
 						MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
@@ -128,7 +129,9 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 						wordGenusProb[i][k] = log((count[genusNodes[k]] + probabilityInTemplate) / (float) (genusTotals[k] + 1));  
 						if (count[genusNodes[k]] != 0) { 
 							#ifdef USE_MPI
+								int pid;
 								MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+						
 								if (pid == 0) {  
 							#endif
 
@@ -144,6 +147,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 					
 					#ifdef USE_MPI
 						MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+				
 						if (pid == 0) {  
 					#endif
 					
@@ -157,6 +161,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 				
 				#ifdef USE_MPI
 					MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+				
 					if (pid == 0) {  
 				#endif
 				

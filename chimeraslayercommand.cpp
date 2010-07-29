@@ -150,7 +150,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			temp = validParameter.validFile(parameters, "minbs", false);			if (temp == "not found") { temp = "90"; }
 			convert(temp, minBS);
 			
-			temp = validParameter.validFile(parameters, "minsnp", false);			if (temp == "not found") { temp = "10"; }
+			temp = validParameter.validFile(parameters, "minsnp", false);			if (temp == "not found") { temp = "100"; }
 			convert(temp, minSNP);
 
 			temp = validParameter.validFile(parameters, "parents", false);			if (temp == "not found") { temp = "3"; }
@@ -205,7 +205,7 @@ void ChimeraSlayerCommand::help(){
 		m->mothurOut("The minsim parameter allows you to specify a minimum similarity with the parent fragments, default=90. \n");
 		m->mothurOut("The mincov parameter allows you to specify minimum coverage by closest matches found in template. Default is 70, meaning 70%. \n");
 		m->mothurOut("The minbs parameter allows you to specify minimum bootstrap support for calling a sequence chimeric. Default is 90, meaning 90%. \n");
-		m->mothurOut("The minsnp parameter allows you to specify percent of SNPs to sample on each side of breakpoint for computing bootstrap support (default: 10) \n");
+		m->mothurOut("The minsnp parameter allows you to specify percent of SNPs to sample on each side of breakpoint for computing bootstrap support (default: 100) \n");
 		m->mothurOut("The search parameter allows you to specify search method for finding the closest parent. Choices are distance, blast, and kmer, default distance. \n");
 		m->mothurOut("The realign parameter allows you to realign the query to the potential parents. Choices are true or false, default false.  \n");
 		m->mothurOut("The chimera.slayer command should be in the following format: \n");

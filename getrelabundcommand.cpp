@@ -244,7 +244,6 @@ int GetRelAbundCommand::getRelAbundance(vector<SharedRAbundVector*>& thisLookUp,
 					//calc the total in this otu
 					int totalOtu = 0;
 					for (int l = 0; l < thisLookUp.size(); l++) {  totalOtu += thisLookUp[l]->getAbundance(j); }
-					
 					relabund = abund / (float) totalOtu;
 				}else if (scale == "averagegroup") {
 					relabund = abund / (float) (thisLookUp[i]->getNumSeqs() / (float) thisLookUp[i]->getNumBins());
