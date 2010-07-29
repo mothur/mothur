@@ -584,16 +584,23 @@ int SffInfoCommand::printFastaSeqData(ofstream& out, seqRead& read, Header& head
 		
 		string seq = read.bases;
 		
-		
 		if (trim) {
-			seq = seq.substr((header.clipQualLeft-1), (header.clipQualRight-header.clipQualLeft+1));
+			if(header.clipQualRight != 0){
+				seq = seq.substr((header.clipQualLeft-1), (header.clipQualRight-header.clipQualLeft+1));
+			}
+			else{
+				seq = seq.substr(header.clipQualLeft-1);
+			}
 		}else{
 			//if you wanted the sfftxt then you already converted the bases to the right case
 			if (!sfftxt) {
 				//make the bases you want to clip lowercase and the bases you want to keep upper case
 				for (int i = 0; i < (header.clipQualLeft-1); i++) { seq[i] = tolower(seq[i]);  }
 				for (int i = (header.clipQualLeft-1); i < (header.clipQualRight-1); i++)  {   seq[i] = toupper(seq[i]);  }
-				for (int i = (header.clipQualRight-1); i < seq.length(); i++) {   seq[i] = tolower(seq[i]);  }
+				
+				if(header.clipQualRight != 0){
+					for (int i = (header.clipQualRight-1); i < seq.length(); i++) {   seq[i] = tolower(seq[i]);  }
+				}
 			}
 		}
 		

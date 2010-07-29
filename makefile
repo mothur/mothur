@@ -48,7 +48,7 @@ ifeq  ($(strip $(USEREADLINE)),yes)
       -lncurses
 endif
 
-USEMPI ?= yes
+USEMPI ?= no
 
 ifeq  ($(strip $(USEMPI)),yes)
     CXX = mpic++
