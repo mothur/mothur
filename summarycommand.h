@@ -35,7 +35,7 @@ private:
 	SAbundVector* sabund;
 	int abund, size;
 
-	bool abort, allLines;
+	bool abort, allLines, groupMode;
 	set<string> labels; //holds labels to be used
 	string label, calc, outputDir;
 	vector<string>  Estimators;
@@ -43,6 +43,7 @@ private:
 	vector<string> groups;
 	
 	vector<string> parseSharedFile(string);
+	string createGroupSummaryFile(int, int, vector<string>);
 
 
 };

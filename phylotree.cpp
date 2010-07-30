@@ -370,18 +370,18 @@ void PhyloTree::binUnclassified(string file){
 		map<string, int>::iterator childPointer;
 		
 		vector<TaxNode> copy = tree;
-				
+			
 		//fill out tree
 		fillOutTree(0, copy);
-		
-		//get leaf nodes that may need externsion
+	
+		//get leaf nodes that may need extension
 		for (int i = 0; i < copy.size(); i++) {  
 
 			if (copy[i].children.size() == 0) {
 				leafNodes[i] = i;
 			}
 		}
-		
+	//cout << "maxLevel = " << maxLevel << endl;	
 		int copyNodes = copy.size();
 		
 		//go through the seqs and if a sequence finest taxon is not the same level as the most finely defined taxon then classify it as unclassified where necessary
@@ -394,7 +394,7 @@ void PhyloTree::binUnclassified(string file){
 			int currentNode = itLeaf->second;
 			
 			//this sequence is unclassified at some levels
-			while(level <= maxLevel){
+			while(level < maxLevel){
 		
 				level++;
 			
@@ -434,19 +434,21 @@ void PhyloTree::fillOutTree(int index, vector<TaxNode>& copy) {
 	try {
 		map<string,int>::iterator it;
 		
-		it = copy[index].children.find("unclassified");
-		if (it == copy[index].children.end()) { //no unclassified at this level
-			string taxon = "unclassified";
-			copy.push_back(TaxNode(taxon));
-			copy[index].children[taxon] = copy.size()-1;
-			copy[copy.size()-1].parent = index;
-			copy[copy.size()-1].level = copy[index].level + 1;
-		}
+		if (copy[index].level < maxLevel) {
+			it = copy[index].children.find("unclassified");
+			if (it == copy[index].children.end()) { //no unclassified at this level
+				string taxon = "unclassified";
+				copy.push_back(TaxNode(taxon));
+				copy[index].children[taxon] = copy.size()-1;
+				copy[copy.size()-1].parent = index;
+				copy[copy.size()-1].level = copy[index].level + 1;
+			}
 		
-		if (tree[index].level <= maxLevel) {
-			for(it=tree[index].children.begin();it!=tree[index].children.end();it++){ //check your children
+			
+			for(it=copy[index].children.begin();it!=copy[index].children.end();it++){ //check your children
 				fillOutTree(it->second, copy);
 			}
+			
 		}
 		
 	}

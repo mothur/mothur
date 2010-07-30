@@ -98,9 +98,9 @@ int main(int argc, char *argv[]){
 		#endif
 		
 		//header
-		m->mothurOut("mothur v.1.12.1");
+		m->mothurOut("mothur v.1.12.2");
 		m->mothurOutEndLine();		
-		m->mothurOut("Last updated: 7/29/2010");
+		m->mothurOut("Last updated: 7/30/2010");
 		m->mothurOutEndLine();	
 		m->mothurOutEndLine();		
 		m->mothurOut("by");
