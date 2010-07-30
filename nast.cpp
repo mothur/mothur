@@ -132,51 +132,56 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 					if((i-leftIndex) <= (rightIndex-i)){		//	the left gap is closer - > move stuff left there's
 	
 						if(leftRoom >= insertLength){			//	enough room to the left to move
+			//cout << "lr newTemplateAlign = " << newTemplateAlign.length() << '\t' << i << '\t' << i+insertLength << endl;
 							string leftTemplateString = newTemplateAlign.substr(0,i);
-							string rightTemplateString = newTemplateAlign.substr(i+insertLength);
+							string rightTemplateString = newTemplateAlign.substr((i+insertLength));
 							newTemplateAlign = leftTemplateString + rightTemplateString;
 							longAlignmentLength = newTemplateAlign.length();
-							
-							string leftCandidateString = candAln.substr(0,leftIndex-insertLength+1);
-							string rightCandidateString = candAln.substr(leftIndex+1);
+			//cout << "lr candAln = " << candAln.length() << '\t' << leftIndex-insertLength+1 << '\t' << leftIndex+1 << endl;				
+							string leftCandidateString = candAln.substr(0,(leftIndex-insertLength+1));
+							string rightCandidateString = candAln.substr((leftIndex+1));
 							candAln = leftCandidateString + rightCandidateString;
 		
 						}
 						else{									//	not enough room to the left, have to steal some space to
+						
+			//cout << "in else lr newTemplateAlign = " << newTemplateAlign.length() << '\t' << i << '\t' << i+insertLength << endl;
 							string leftTemplateString = newTemplateAlign.substr(0,i);	//	the right
-							string rightTemplateString = newTemplateAlign.substr(i+insertLength);
+							string rightTemplateString = newTemplateAlign.substr((i+insertLength));
 							newTemplateAlign = leftTemplateString + rightTemplateString;
 							longAlignmentLength = newTemplateAlign.length();
-							
-							string leftCandidateString = candAln.substr(0,leftIndex-leftRoom+1);
-							string insertString = candAln.substr(leftIndex+1,rightIndex-leftIndex-1);
-							string rightCandidateString = candAln.substr(rightIndex+(insertLength-leftRoom));
+			//cout << " in else lr candAln = " << candAln.length() << '\t' << leftIndex-leftRoom+1 << '\t' << rightIndex-leftIndex-1 << '\t' << rightIndex+(insertLength-leftRoom) << endl;					
+							string leftCandidateString = candAln.substr(0,(leftIndex-leftRoom+1));
+							string insertString = candAln.substr((leftIndex+1),(rightIndex-leftIndex-1));
+							string rightCandidateString = candAln.substr((rightIndex+(insertLength-leftRoom)));
 							candAln = leftCandidateString + insertString + rightCandidateString;
 				
 						}
 					}
 					else{										//	the right gap is closer - > move stuff right there's
 						if(rightRoom >= insertLength){			//	enough room to the right to move
+			//cout << "rr newTemplateAlign = " << newTemplateAlign.length() << '\t' << i << '\t' << i+insertLength << endl;
 							string leftTemplateString = newTemplateAlign.substr(0,i);
-							string rightTemplateString = newTemplateAlign.substr(i+insertLength);
+							string rightTemplateString = newTemplateAlign.substr((i+insertLength));
 							newTemplateAlign = leftTemplateString + rightTemplateString;
 							longAlignmentLength = newTemplateAlign.length();
-							
+			//cout << "rr candAln = " << candAln.length() << '\t' << i << '\t' << rightIndex << '\t' << rightIndex+insertLength << endl;				
 							string leftCandidateString = candAln.substr(0,rightIndex);
-							string rightCandidateString = candAln.substr(rightIndex+insertLength);
+							string rightCandidateString = candAln.substr((rightIndex+insertLength));
 							candAln = leftCandidateString + rightCandidateString;	
 									
 						}
 						else{									//	not enough room to the right, have to steal some 	
 							//	space to the left lets move left and then right...
+					//cout << "in else rr newTemplateAlign = " << newTemplateAlign.length() << '\t' << i << '\t' << i+insertLength << endl;
 							string leftTemplateString = newTemplateAlign.substr(0,i);
-							string rightTemplateString = newTemplateAlign.substr(i+insertLength);
+							string rightTemplateString = newTemplateAlign.substr((i+insertLength));
 							newTemplateAlign = leftTemplateString + rightTemplateString;
 							longAlignmentLength = newTemplateAlign.length();
-									
-							string leftCandidateString = candAln.substr(0,leftIndex-(insertLength-rightRoom)+1);
-							string insertString = candAln.substr(leftIndex+1,rightIndex-leftIndex-1);
-							string rightCandidateString = candAln.substr(rightIndex+rightRoom);
+					//cout << "in else rr candAln = " << candAln.length() << '\t' << '\t' << (leftIndex-(insertLength-rightRoom)+1) << '\t' <<  (leftIndex+1,rightIndex-leftIndex-1) << '\t' << (rightIndex+rightRoom) << endl;				
+							string leftCandidateString = candAln.substr(0,(leftIndex-(insertLength-rightRoom)+1));
+							string insertString = candAln.substr((leftIndex+1),(rightIndex-leftIndex-1));
+							string rightCandidateString = candAln.substr((rightIndex+rightRoom));
 							candAln = leftCandidateString + insertString + rightCandidateString;	
 									
 						}
@@ -186,15 +191,16 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 				}
 				else{
 			//	there could be a case where there isn't enough room in either direction to move stuff
-
+//cout << "in else else newTemplateAlign = " << newTemplateAlign.length() << '\t' << i << '\t' << (i+leftRoom+rightRoom) << endl;
 					string leftTemplateString = newTemplateAlign.substr(0,i);	
-					string rightTemplateString = newTemplateAlign.substr(i+leftRoom+rightRoom);
+					string rightTemplateString = newTemplateAlign.substr((i+leftRoom+rightRoom));
 					newTemplateAlign = leftTemplateString + rightTemplateString;
 					longAlignmentLength = newTemplateAlign.length();
 							
-					string leftCandidateString = candAln.substr(0,leftIndex-leftRoom+1);
-					string insertString = candAln.substr(leftIndex+1,rightIndex-leftIndex-1);
-					string rightCandidateString = candAln.substr(rightIndex+rightRoom);
+		//cout << "in else else newTemplateAlign = " << candAln.length() << '\t' << (leftIndex-leftRoom+1) << '\t' << (leftIndex+1) << '\t' << (rightIndex-leftIndex-1) << '\t' << (rightIndex+rightRoom) << endl;	
+					string leftCandidateString = candAln.substr(0,(leftIndex-leftRoom+1));
+					string insertString = candAln.substr((leftIndex+1),(rightIndex-leftIndex-1));
+					string rightCandidateString = candAln.substr((rightIndex+rightRoom));
 					candAln = leftCandidateString + insertString + rightCandidateString;
 					
 					i -= (leftRoom + rightRoom);

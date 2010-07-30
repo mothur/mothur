@@ -88,19 +88,19 @@ int TaxEqualizer::getHighestLevel(ifstream& in) {
 		
 			//save sequences level
 			seqLevels[name] = thisLevel;
-		
+	
 			//is this the longest taxonomy?
 			if (thisLevel > level) {  
 				level = thisLevel;  
 				testTax = tax; //testTax is used to figure out if this file has confidences we need to strip out
-			}  
+			} 
 		}
 		
 		int pos = testTax.find_first_of('(');
 
 		//if there are '(' then there are confidences we need to take out
 		if (pos != -1) {  containsConfidence = true;  }
-		
+	
 		return level;
 					
 	}

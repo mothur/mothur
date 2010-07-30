@@ -405,7 +405,7 @@ int SffInfoCommand::readHeader(ifstream& in, Header& header){
 			char buffer4 [2];
 			in.read(buffer4, 2);
 			header.clipQualLeft =  be_int2(*(unsigned short *)(&buffer4));
-			header.clipQualLeft = 5;
+			header.clipQualLeft = 5; 
 			
 			//read clip qual right
 			char buffer5 [2];

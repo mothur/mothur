@@ -44,7 +44,7 @@ SummaryCommand::SummaryCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"label","calc","abund","size","outputdir","inputdir"};
+			string Array[] =  {"label","calc","abund","size","outputdir","groupmode","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -94,6 +94,10 @@ SummaryCommand::SummaryCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "size", false);			if (temp == "not found") { temp = "0"; }
 			convert(temp, size); 
+			
+			temp = validParameter.validFile(parameters, "groupmode", false);		if (temp == "not found") { temp = "F"; }
+			groupMode = isTrue(temp);
+			
 	
 		}
 	}
@@ -108,12 +112,13 @@ void SummaryCommand::help(){
 	try {
 		m->mothurOut("The summary.single command can only be executed after a successful read.otu WTIH ONE EXECEPTION.\n");
 		m->mothurOut("The summary.single command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster.\n");
-		m->mothurOut("The summary.single command parameters are label, calc, abund.  No parameters are required.\n");
+		m->mothurOut("The summary.single command parameters are label, calc, abund and groupmode.  No parameters are required.\n");
 		m->mothurOut("The summary.single command should be in the following format: \n");
 		m->mothurOut("summary.single(label=yourLabel, calc=yourEstimators).\n");
 		m->mothurOut("Example summary.single(label=unique-.01-.03, calc=sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson).\n");
 		validCalculator->printCalc("summary", cout);
 		m->mothurOut("The default value calc is sobs-chao-ace-jack-shannon-npshannon-simpson\n");
+		m->mothurOut("If you are running summary.single with a shared file and would like your summary results collated in one file, set groupmode=t. (Default=False).\n");
 		m->mothurOut("The label parameter is used to analyze specific labels in your input.\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabels).\n\n");
 	}
@@ -142,7 +147,13 @@ int SummaryCommand::execute(){
 		
 		if (m->control_pressed) { if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } return 0; }
 		
+		int numLines = 0;
+		int numCols = 0;
+		
 		for (int p = 0; p < inputFileNames.size(); p++) {
+			
+			numLines = 0;
+			numCols = 0;
 			
 			string fileNameRoot = outputDir + getRootName(getSimpleName(inputFileNames[p])) + "summary";
 			globaldata->inputFileName = inputFileNames[p];
@@ -221,9 +232,11 @@ int SummaryCommand::execute(){
 			for(int i=0;i<sumCalculators.size();i++){
 				if(sumCalculators[i]->getCols() == 1){
 					outputFileHandle << '\t' << sumCalculators[i]->getName();
+					numCols++;
 				}
 				else{
 					outputFileHandle << '\t' << sumCalculators[i]->getName() << "\t" << sumCalculators[i]->getName() << "_lci\t" << sumCalculators[i]->getName() << "_hci";
+					numCols += 3;
 				}
 			}
 			outputFileHandle << endl;
@@ -254,6 +267,7 @@ int SummaryCommand::execute(){
 						sumCalculators[i]->print(outputFileHandle);
 					}
 					outputFileHandle << endl;
+					numLines++;
 				}
 				
 				if ((anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
@@ -276,6 +290,7 @@ int SummaryCommand::execute(){
 						sumCalculators[i]->print(outputFileHandle);
 					}
 					outputFileHandle << endl;
+					numLines++;
 					
 					//restore real lastlabel to save below
 					sabund->setLabel(saveLabel);
@@ -318,6 +333,7 @@ int SummaryCommand::execute(){
 					sumCalculators[i]->print(outputFileHandle);
 				}
 				outputFileHandle << endl;
+				numLines++;
 				delete sabund;
 			}
 			
@@ -334,6 +350,11 @@ int SummaryCommand::execute(){
 		}
 		
 		if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  }
+		
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }  return 0;  }
+		
+		//create summary file containing all the groups data for each label - this function just combines the info from the files already created.
+		if ((hadShared != "") && (groupMode)) {   outputNames.push_back(createGroupSummaryFile(numLines, numCols, outputNames));  }
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }  return 0;  }
 		
@@ -405,6 +426,75 @@ vector<string> SummaryCommand::parseSharedFile(string filename) {
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SummaryCommand", "parseSharedFile");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string SummaryCommand::createGroupSummaryFile(int numLines, int numCols, vector<string> outputNames) {
+	try {
+		
+		ofstream out;
+		string combineFileName = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + "groups.summary";
+		
+		//open combined file
+		openOutputFile(combineFileName, out);
+		
+		//open each groups summary file
+		string newLabel = "";
+		ifstream* temp;
+		map<string, ifstream*> filehandles;
+		for (int i=0; i<outputNames.size(); i++) {
+			temp = new ifstream;
+			filehandles[outputNames[i]] = temp;
+			openInputFile(outputNames[i], *(temp));
+			
+			//read through first line - labels
+			string tempLabel;
+			if (i == 0) { //we want to save the labels to output below
+				for (int j = 0; j < numCols+1; j++) {  
+					*(temp) >> tempLabel; 
+					
+					if (j == 1) {  newLabel += "group\t" + tempLabel + '\t';
+					}else{  newLabel += tempLabel + '\t';	}
+				}
+			}else{  for (int j = 0; j < numCols+1; j++) {  *(temp) >> tempLabel;  }  }
+			
+			gobble(*(temp));
+		}
+		
+		//output label line to new file
+		out << newLabel << endl;
+		
+		//for each label
+		for (int i = 0; i < numLines; i++) {
+		
+			//grab summary data for each group
+			for (int i=0; i<outputNames.size(); i++) {
+				string tempLabel;
+				
+				for (int j = 0; j < numCols+1; j++) {  
+					*(filehandles[outputNames[i]]) >> tempLabel; 
+					
+					//print to combined file
+					if (j == 1) { out << groups[i] << '\t' << tempLabel << '\t';	}
+					else{  out << tempLabel << '\t';	}
+				}
+				
+				out << endl;
+				gobble(*(filehandles[outputNames[i]]));
+			}
+		}	
+		
+		//close each groups summary file
+		for (int i=0; i<outputNames.size(); i++) {  (*(filehandles[outputNames[i]])).close();  }
+		out.close();
+		
+		//return combine file name
+		return combineFileName;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SummaryCommand", "createGroupSummaryFile");
 		exit(1);
 	}
 }
