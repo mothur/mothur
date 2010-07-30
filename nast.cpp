@@ -99,7 +99,7 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 	
 		for(int i=0; i<longAlignmentLength; i++){				//	use the long alignment as the standard
 			int rightIndex, rightRoom, leftIndex, leftRoom;
-			
+	
 			//	Part C of Fig. 2 from DeSantis et al.
 			if((isalpha(newTemplateAlign[i]) != isalpha(tempAln[i]))){	//if there is a discrepancy between the regapped
 				
@@ -132,12 +132,12 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 					if((i-leftIndex) <= (rightIndex-i)){		//	the left gap is closer - > move stuff left there's
 	
 						if(leftRoom >= insertLength){			//	enough room to the left to move
-			//cout << "lr newTemplateAlign = " << newTemplateAlign.length() << '\t' << i << '\t' << i+insertLength << endl;
+			//cout << "lr newTemplateAlign = " << newTemplateAlign.length() << '\t' << i << '\t' << insertLength << endl;
 							string leftTemplateString = newTemplateAlign.substr(0,i);
 							string rightTemplateString = newTemplateAlign.substr((i+insertLength));
 							newTemplateAlign = leftTemplateString + rightTemplateString;
 							longAlignmentLength = newTemplateAlign.length();
-			//cout << "lr candAln = " << candAln.length() << '\t' << leftIndex-insertLength+1 << '\t' << leftIndex+1 << endl;				
+			//cout << "lr candAln = " << candAln.length() << '\t' << leftIndex << '\t'  << endl;				
 							string leftCandidateString = candAln.substr(0,(leftIndex-insertLength+1));
 							string rightCandidateString = candAln.substr((leftIndex+1));
 							candAln = leftCandidateString + rightCandidateString;
@@ -145,12 +145,12 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 						}
 						else{									//	not enough room to the left, have to steal some space to
 						
-			//cout << "in else lr newTemplateAlign = " << newTemplateAlign.length() << '\t' << i << '\t' << i+insertLength << endl;
+			//cout << "in else lr newTemplateAlign = " << newTemplateAlign.length() << '\t' << i << '\t' << insertLength << endl;
 							string leftTemplateString = newTemplateAlign.substr(0,i);	//	the right
 							string rightTemplateString = newTemplateAlign.substr((i+insertLength));
 							newTemplateAlign = leftTemplateString + rightTemplateString;
 							longAlignmentLength = newTemplateAlign.length();
-			//cout << " in else lr candAln = " << candAln.length() << '\t' << leftIndex-leftRoom+1 << '\t' << rightIndex-leftIndex-1 << '\t' << rightIndex+(insertLength-leftRoom) << endl;					
+			//cout << " in else lr candAln = " << candAln.length() << '\t' << " leftIndex = " << leftIndex << " leftroom = " << leftRoom << " rightIndex = " << rightIndex << '\t' << endl;					
 							string leftCandidateString = candAln.substr(0,(leftIndex-leftRoom+1));
 							string insertString = candAln.substr((leftIndex+1),(rightIndex-leftIndex-1));
 							string rightCandidateString = candAln.substr((rightIndex+(insertLength-leftRoom)));
@@ -187,6 +187,7 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 						}
 					}
 					i -= insertLength;
+	//if (i < 0) { cout << " we have a negative i = " << i << endl; }
 
 				}
 				else{
