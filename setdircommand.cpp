@@ -157,19 +157,8 @@ int SetDirectoryCommand::execute(){
 				if (lastChar != "\\") { tempdefault += "\\"; }	
 			#endif
 			
-			//test to make sure directory exists
-			tempdefault = getFullPathName(tempdefault);
-			string inTemp = tempdefault + "temp";
-			ofstream in;
-			in.open(inTemp.c_str(), ios::trunc);
-			if(!in) {
-				m->mothurOut(tempdefault + " directory does not exist or is not writable."); m->mothurOutEndLine(); 
-			}else{
-				in.close();
-				remove(inTemp.c_str());
-				m->mothurOut("Changing default directory to " + tempdefault); m->mothurOutEndLine();  
-				m->setDefaultPath(tempdefault);
-			}
+			m->mothurOut("Changing default directory to " + tempdefault); m->mothurOutEndLine();  
+			m->setDefaultPath(tempdefault);
 		}
 
 		return 0;

@@ -790,7 +790,8 @@ int GetOTURepCommand::processNames(string filename, string label) {
 				out << sequence << endl;
 			}
 		}
-			
+		
+		in.close();
 		out.close();
 		out2.close();
 		
