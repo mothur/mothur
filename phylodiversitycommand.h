@@ -31,7 +31,8 @@ class PhyloDiversityCommand : public Command {
 		string groups, outputDir;
 		vector<string> Groups, outputNames; //holds groups to be used, and outputFile names
 		
-		void printData(vector<int>&, vector< vector<float> >&, string);
+		void printData(set<int>&, map< string, vector<float> >&, string);
+		float calcBranchLength(Tree*, int);
 };
 
 #endif

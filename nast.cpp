@@ -187,7 +187,6 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 						}
 					}
 					i -= insertLength;
-	//if (i < 0) { cout << " we have a negative i = " << i << endl; }
 
 				}
 				else{
@@ -208,6 +207,9 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 				}
 			
 //				i -= insertLength;
+				
+				//if i is negative, we want to remove the extra gaps to the right
+				if (i < 0) { cout << "i is negative" << endl; }
 			} 
 		}
 	}

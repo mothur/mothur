@@ -15,7 +15,6 @@
 #include "globaldata.hpp"
 #include "mothurout.h"
 
-typedef vector<double> EstOutput; 
 
 /***********************************************************************/
 
@@ -25,15 +24,13 @@ class PhyloDiversity  {
 		PhyloDiversity(TreeMap* t) : tmap(t) { globaldata = GlobalData::getInstance();  m = MothurOut::getInstance(); }
 		~PhyloDiversity() {};
 		
-		EstOutput getValues(Tree*, vector<int>);
-		void setTotalGroupBranchLengths(Tree*);
+		//int getValues(Tree*, vector<int>, vector< vector< float> >&);
+		
 		
 	private:
 		GlobalData* globaldata;
 		MothurOut* m;
-		EstOutput data;
 		TreeMap* tmap;
-		map<string, float> groupTotals;
 };
 
 /***********************************************************************/
