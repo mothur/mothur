@@ -173,7 +173,7 @@ void PhyloSummary::print(ofstream& out){
 		out << "taxlevel\t rankID\t taxon\t daughterlevels\t total\t";
 		if (groupmap != NULL) {
 			//so the labels match the counts below, since the map sorts them automatically...
-			sort(groupmap->namesOfGroups.begin(), groupmap->namesOfGroups.end());
+			//sort(groupmap->namesOfGroups.begin(), groupmap->namesOfGroups.end());
 			
 			for (int i = 0; i < groupmap->namesOfGroups.size(); i++) {
 				out << groupmap->namesOfGroups[i] << '\t';
@@ -194,9 +194,10 @@ void PhyloSummary::print(ofstream& out){
 		
 		map<string, int>::iterator itGroup;
 		if (groupmap != NULL) {
-			for (itGroup = tree[0].groupCount.begin(); itGroup != tree[0].groupCount.end(); itGroup++) {
-				out << itGroup->second << '\t';
-			}
+			//for (itGroup = tree[0].groupCount.begin(); itGroup != tree[0].groupCount.end(); itGroup++) {
+			//	out << itGroup->second << '\t';
+			//}
+			for (int i = 0; i < groupmap->namesOfGroups.size(); i++) {  out << tree[0].groupCount[groupmap->namesOfGroups[i]] << '\t'; } 
 		}
 		out << endl;
 		
@@ -230,9 +231,10 @@ void PhyloSummary::print(int i, ofstream& out){
 				
 				map<string, int>::iterator itGroup;
 				if (groupmap != NULL) {
-					for (itGroup = tree[it->second].groupCount.begin(); itGroup != tree[it->second].groupCount.end(); itGroup++) {
-						out << itGroup->second << '\t';
-					}
+					//for (itGroup = tree[it->second].groupCount.begin(); itGroup != tree[it->second].groupCount.end(); itGroup++) {
+					//	out << itGroup->second << '\t';
+					//}
+					for (int i = 0; i < groupmap->namesOfGroups.size(); i++) {  out << tree[it->second].groupCount[groupmap->namesOfGroups[i]] << '\t'; } 
 				}
 				out << endl;
 			}

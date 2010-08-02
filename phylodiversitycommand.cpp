@@ -8,7 +8,6 @@
  */
 
 #include "phylodiversitycommand.h"
-#include "phylodiversity.h"
 
 //**********************************************************************************************************************
 PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
@@ -57,6 +56,7 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 				splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 			}
+			
 		}
 		
 	}
@@ -102,18 +102,13 @@ int PhyloDiversityCommand::execute(){
 		for (int i = 0; i < globaldata->Groups.size(); i++) { if (globaldata->Groups[i] == "xxx") { globaldata->Groups.erase(globaldata->Groups.begin()+i);  break; }  }
 		 
 		vector<string> outputNames;
-		
-		//diversity calculator
-		PhyloDiversity phylo(globaldata->gTreemap);
-		
+			
 		vector<Tree*> trees = globaldata->gTree;
 		
 		//for each of the users trees
 		for(int i = 0; i < trees.size(); i++) {
 		
 			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} return 0; }
-			
-			//phylo.setTotalGroupBranchLengths(trees[i]);
 			
 			string outFile = outputDir + getRootName(getSimpleName(globaldata->getTreeFile()))  + toString(i+1) + ".phylo.diversity";
 			if (rarefy) { outFile += ".rarefaction"; }
@@ -131,57 +126,86 @@ int PhyloDiversityCommand::execute(){
 			
 			numLeafNodes = randomLeaf.size();  //reset the number of leaf nodes you are using 
 			
-			//convert freq percentage to number
-			int increment = 100;
-			if (freq < 1.0) {  increment = numLeafNodes * freq;  }
-			else { increment = freq;  }
+			//each group, each sampling, if no rarefy iters = 1;
+			map<string, vector<float> > diversity;
 			
 			//each group, each sampling, if no rarefy iters = 1;
-			vector< vector<float> > diversity;
-			diversity.resize(globaldata->Groups.size());
+			map<string, vector<float> > sumDiversity;
+			
+			//find largest group total 
+			int largestGroup = 0;
+			for (int j = 0; j < globaldata->Groups.size(); j++) {  
+				if (globaldata->gTreemap->seqsPerGroup[globaldata->Groups[j]] > largestGroup) { largestGroup = globaldata->gTreemap->seqsPerGroup[globaldata->Groups[j]]; }
+				
+				//initialize diversity
+				diversity[globaldata->Groups[j]].resize(globaldata->gTreemap->seqsPerGroup[globaldata->Groups[j]]+1, 0.0);		//numSampled
+																											//groupA		0.0			0.0
+																											
+				//initialize sumDiversity
+				sumDiversity[globaldata->Groups[j]].resize(globaldata->gTreemap->seqsPerGroup[globaldata->Groups[j]]+1, 0.0);
+			}	
+
+			//convert freq percentage to number
+			int increment = 100;
+			if (freq < 1.0) {  increment = largestGroup * freq;  
+			}else { increment = freq;  }
 			
 			//initialize sampling spots
-			vector<int> numSampledList;
-			for(int k = 0; k < numLeafNodes; k++){  if((k == 0) || (k+1) % increment == 0){  numSampledList.push_back(k); }   }
-			if(numLeafNodes % increment != 0){	numSampledList.push_back(numLeafNodes);   }
+			set<int> numSampledList;
+			for(int k = 1; k <= largestGroup; k++){  if((k == 1) || (k % increment == 0)){  numSampledList.insert(k); }   }
+			if(largestGroup % increment != 0){	numSampledList.insert(largestGroup);   }
 			
-			//initialize diversity
-			for (int j = 0; j < diversity.size(); j++) {   diversity[j].resize(numSampledList.size(), 0.0);  }  //			10sampled	20 sampled ...
-																												//groupA		0.0			0.0
-																											//then for each iter you add to score and then when printing divide by iters to get average
+			//add other groups ending points
+			for (int j = 0; j < globaldata->Groups.size(); j++) {  
+				if (numSampledList.count(diversity[globaldata->Groups[j]].size()-1) == 0) {  numSampledList.insert(diversity[globaldata->Groups[j]].size()-1); }
+			}
+
 			for (int l = 0; l < iters; l++) {
 				random_shuffle(randomLeaf.begin(), randomLeaf.end());
 		
-				vector<int> leavesSampled;
-				EstOutput data;
-				int count = 0;
+				//initialize counts
+				map<string, int> counts;
+				for (int j = 0; j < globaldata->Groups.size(); j++) {  counts[globaldata->Groups[j]] = 0; }
+				
 				for(int k = 0; k < numLeafNodes; k++){
 						
 					if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} return 0; }
 					
-					leavesSampled.push_back(randomLeaf[k]);
-						
-					if((k == 0) || (k+1) % increment == 0){ //ready to calc?
-						
-						data = phylo.getValues(trees[i], leavesSampled);
-						
-						//datas results are in the same order as globaldatas groups
-						for (int h = 0; h < data.size(); h++) {  diversity[h][count] += data[h];  }
-						
-						count++;
+					//calc branch length of randomLeaf k
+					float br = calcBranchLength(trees[i], randomLeaf[k]);
+			
+					//for each group in the groups update the total branch length accounting for the names file
+					vector<string> groups = trees[i]->tree[randomLeaf[k]].getGroup();
+					for (int j = 0; j < groups.size(); j++) {
+						int numSeqsInGroupJ = 0;
+						map<string, int>::iterator it;
+						it = trees[i]->tree[randomLeaf[k]].pcount.find(groups[j]);
+						if (it != trees[i]->tree[randomLeaf[k]].pcount.end()) { //this leaf node contains seqs from group j
+							numSeqsInGroupJ = it->second;
+						}
+					
+						for (int s = (counts[groups[j]]+1); s <= (counts[groups[j]]+numSeqsInGroupJ); s++) {
+							diversity[groups[j]][s] = diversity[groups[j]][s-1] + (numSeqsInGroupJ * br);
+						}
+						counts[groups[j]] += numSeqsInGroupJ;
 					}
 				}
-		
-				if(numLeafNodes % increment != 0){	
-					
-					data = phylo.getValues(trees[i], leavesSampled);
-					
-					//datas results are in the same order as globaldatas groups
-					for (int h = 0; h < data.size(); h++) {  diversity[h][count] += data[h];  }
+				
+				if (rarefy) {
+					//add this diversity to the sum
+					for (int j = 0; j < globaldata->Groups.size(); j++) {  
+						for (int g = 0; g < diversity[globaldata->Groups[j]].size(); g++) {
+							sumDiversity[globaldata->Groups[j]][g] += diversity[globaldata->Groups[j]][g];
+						}
+					}
 				}
 			}
 			
-			printData(numSampledList, diversity, outFile);
+			if (rarefy) { 
+				printData(numSampledList, sumDiversity, outFile);
+			}else{
+				printData(numSampledList, diversity, outFile);
+			}
 
 		}
 		
@@ -203,7 +227,7 @@ int PhyloDiversityCommand::execute(){
 }
 //**********************************************************************************************************************
 
-void PhyloDiversityCommand::printData(vector<int>& num, vector< vector<float> >& div, string file){
+void PhyloDiversityCommand::printData(set<int>& num, map< string, vector<float> >& div, string file){
 	try {
 		ofstream out;
 		openOutputFile(file, out);
@@ -214,13 +238,16 @@ void PhyloDiversityCommand::printData(vector<int>& num, vector< vector<float> >&
 		
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
-		for (int i = 0; i < num.size(); i++) {	
-			if (i == (num.size()-1)) {  out << num[i] << '\t';  }
-			else {  out << (num[i]+1) << '\t';  }
+		for (set<int>::iterator it = num.begin(); it != num.end(); it++) {  
+			int numSampled = *it;
 			
-			for (int j = 0; j < div.size(); j++) {
-				float score = div[j][i] / (float)iters;
-				out << setprecision(6) << score << '\t';
+			out << numSampled << '\t';  
+			
+			for (int j = 0; j < globaldata->Groups.size(); j++) {
+				if (numSampled < div[globaldata->Groups[j]].size()) { 
+					float score = div[globaldata->Groups[j]][numSampled] / (float)iters;
+					out << setprecision(6) << score << '\t';
+				}else { out << "NA" << '\t'; }
 			}
 			out << endl;
 		}
@@ -234,4 +261,34 @@ void PhyloDiversityCommand::printData(vector<int>& num, vector< vector<float> >&
 	}
 }
 
+//**********************************************************************************************************************
+float PhyloDiversityCommand::calcBranchLength(Tree* t, int leaf){
+	try {
+
+		//calc the branch length
+		//while you aren't at root
+		float sum = 0.0;
+		int index = leaf;
+
+		while(t->tree[index].getParent() != -1){
+			
+			//if you have a BL
+			if(t->tree[index].getBranchLength() != -1){
+				sum += abs(t->tree[index].getBranchLength());
+			}
+			index = t->tree[index].getParent();
+		}
+			
+		//get last breanch length added
+		if(t->tree[index].getBranchLength() != -1){
+			sum += abs(t->tree[index].getBranchLength());
+		}
+		
+		return sum;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhyloDiversityCommand", "calcBranchLength");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
