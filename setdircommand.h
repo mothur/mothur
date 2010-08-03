@@ -12,6 +12,7 @@
 
 #include "command.hpp"
 #include "commandfactory.hpp"
+#include "globaldata.hpp"
 
 /**********************************************************/
 
