@@ -663,6 +663,29 @@ inline bool inVector(string member, vector<string> group){
 /***********************************************************************/
 
 //This function parses the estimator options and puts them in a vector
+inline void splitAtChar(string& estim, vector<string>& container, char symbol) {
+	try {
+		string individual;
+		
+		while (estim.find_first_of(symbol) != -1) {
+			individual = estim.substr(0,estim.find_first_of(symbol));
+			if ((estim.find_first_of(symbol)+1) <= estim.length()) { //checks to make sure you don't have dash at end of string
+				estim = estim.substr(estim.find_first_of(symbol)+1, estim.length());
+				container.push_back(individual);
+			}
+		}
+		//get last one
+		container.push_back(estim);
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the mothur.h function splitAtDash. Please contact Pat Schloss at mothur.bugs@gmail.com." << "\n";
+		exit(1);
+	}	
+}
+
+/***********************************************************************/
+
+//This function parses the estimator options and puts them in a vector
 inline void splitAtDash(string& estim, vector<string>& container) {
 	try {
 		string individual;
@@ -788,6 +811,7 @@ inline void splitAtEquals(string& key, string& value){
 		exit(1);
 	}	
 }
+
 /**************************************************************************************************/
 
 inline bool inUsersGroups(string groupname, vector<string> Groups) {

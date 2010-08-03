@@ -72,7 +72,7 @@ ClearcutCommand::ClearcutCommand(string option)  {
 
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = hasPath(inputFile);	}
 			
 			string temp;
 			temp = validParameter.validFile(parameters, "version", false);		if (temp == "not found"){	temp = "F";			}
@@ -182,13 +182,8 @@ int ClearcutCommand::execute() {
 		string path = globaldata->argv;
 		path = path.substr(0, (path.find_last_of('m')));
 		
-		string clearcutCommand = "";
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-			clearcutCommand = path + "clearcut/clearcut ";
-		#else
-			clearcutCommand = path + "clearcut\\clearcut ";
-		#endif
-		
+		string clearcutCommand = path + "clearcut ";
+				
 		//you gave us a distance matrix
 		if (phylipfile != "") { clearcutCommand += "--distance "; 	}
 		
