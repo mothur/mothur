@@ -21,7 +21,7 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","numbases","keep","outputdir","inputdir"};
+			string Array[] =  {"fasta","numbases","countgaps","keep","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -59,6 +59,9 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 			
 			string temp = validParameter.validFile(parameters, "numbases", false);	if (temp == "not found") { temp = "0"; } 
 			convert(temp, numbases);   
+			
+			temp = validParameter.validFile(parameters, "countgaps", false);	if (temp == "not found") { temp = "f"; } 
+			countGaps = isTrue(temp);   
 		
 			keep = validParameter.validFile(parameters, "keep", false);		if (keep == "not found") { keep = "front"; } 
 				
@@ -76,10 +79,11 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 void ChopSeqsCommand::help(){
 	try {
 		m->mothurOut("The chop.seqs command reads a fasta file and outputs a .chop.fasta containing the trimmed sequences.\n");
-		m->mothurOut("The chop.seqs command parameters are fasta, numbases, and keep. fasta and numbases are required required.\n");
+		m->mothurOut("The chop.seqs command parameters are fasta, numbases, countgaps and keep. fasta and numbases are required required.\n");
 		m->mothurOut("The chop.seqs command should be in the following format: chop.seqs(fasta=yourFasta, numbases=yourNum, keep=yourKeep).\n");
 		m->mothurOut("The numbases parameter allows you to specify the number of bases you want to keep.\n");
 		m->mothurOut("The keep parameter allows you to specify whether you want to keep the front or the back of your sequence, default=front.\n");
+		m->mothurOut("The countgaps parameter allows you to specify whether you want to count gaps as bases, default=false.\n");
 		m->mothurOut("Example chop.seqs(fasta=amazon.fasta, numbases=200, keep=front).\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
 	}
@@ -154,60 +158,109 @@ string ChopSeqsCommand::getChopped(Sequence seq) {
 	try {
 		string temp = seq.getAligned();
 		string tempUnaligned = seq.getUnaligned();
-				
-		//if needed trim sequence
-		if (keep == "front") {//you want to keep the beginning
-			int tempLength = tempUnaligned.length();
+		
+		if (countGaps) {
+			//if needed trim sequence
+			if (keep == "front") {//you want to keep the beginning
+				int tempLength = temp.length();
 
-			if (tempLength > numbases) { //you have enough bases to remove some
+				if (tempLength > numbases) { //you have enough bases to remove some
 				
-				int stopSpot = 0;
-				int numBasesCounted = 0;
-				
-				for (int i = 0; i < temp.length(); i++) {
-					//eliminate N's
-					if (toupper(temp[i]) == 'N') { 
-						temp[i] == '.'; 
-						tempLength--;
-						if (tempLength < numbases) { stopSpot = 0; break; }
-					}
+					int stopSpot = 0;
+					int numBasesCounted = 0;
 					
-					if(isalpha(temp[i])) { numBasesCounted++; }
-					
-					if (numBasesCounted >= numbases) { stopSpot = i; break; }
-				}
-				
-				if (stopSpot == 0) { temp = ""; }
-				else {  temp = temp.substr(0, stopSpot);  }
+					for (int i = 0; i < temp.length(); i++) {
+						//eliminate N's
+						if (toupper(temp[i]) == 'N') { temp[i] == '.'; }
 						
-			}else { temp = ""; } //sequence too short
-			
-		}else { //you are keeping the back
-			int tempLength = tempUnaligned.length();
-			if (tempLength > numbases) { //you have enough bases to remove some
-				
-				int stopSpot = 0;
-				int numBasesCounted = 0;
-				
-				for (int i = (temp.length()-1); i >= 0; i--) {
-					//eliminate N's
-					if (toupper(temp[i]) == 'N') { 
-						temp[i] == '.'; 
-						tempLength--;
-						if (tempLength < numbases) { stopSpot = 0; break; }
+						numBasesCounted++; 
+						
+						if (numBasesCounted >= numbases) { stopSpot = i; break; }
 					}
 					
-					if(isalpha(temp[i])) { numBasesCounted++; }
+					if (stopSpot == 0) { temp = ""; }
+					else {  temp = temp.substr(0, stopSpot);  }
+							
+				}else { temp = ""; } //sequence too short
+				
+			}else { //you are keeping the back
+				int tempLength = temp.length();
+				if (tempLength > numbases) { //you have enough bases to remove some
+					
+					int stopSpot = 0;
+					int numBasesCounted = 0;
+					
+					for (int i = (temp.length()-1); i >= 0; i--) {
+						//eliminate N's
+						if (toupper(temp[i]) == 'N') { temp[i] == '.'; }
+						
+						numBasesCounted++; 
 
-					if (numBasesCounted >= numbases) { stopSpot = i; break; }
+						if (numBasesCounted >= numbases) { stopSpot = i; break; }
+					}
+				
+					if (stopSpot == 0) { temp = ""; }
+					else {  temp = temp.substr(stopSpot+1);  }
 				}
-			
-				if (stopSpot == 0) { temp = ""; }
-				else {  temp = temp.substr(stopSpot+1);  }
+				else {  temp = ""; } //sequence too short
 			}
-			else {  temp = ""; } //sequence too short
-		}
 
+		}else{
+				
+			//if needed trim sequence
+			if (keep == "front") {//you want to keep the beginning
+				int tempLength = tempUnaligned.length();
+
+				if (tempLength > numbases) { //you have enough bases to remove some
+					
+					int stopSpot = 0;
+					int numBasesCounted = 0;
+					
+					for (int i = 0; i < temp.length(); i++) {
+						//eliminate N's
+						if (toupper(temp[i]) == 'N') { 
+							temp[i] == '.'; 
+							tempLength--;
+							if (tempLength < numbases) { stopSpot = 0; break; }
+						}
+						
+						if(isalpha(temp[i])) { numBasesCounted++; }
+						
+						if (numBasesCounted >= numbases) { stopSpot = i; break; }
+					}
+					
+					if (stopSpot == 0) { temp = ""; }
+					else {  temp = temp.substr(0, stopSpot);  }
+							
+				}else { temp = ""; } //sequence too short
+				
+			}else { //you are keeping the back
+				int tempLength = tempUnaligned.length();
+				if (tempLength > numbases) { //you have enough bases to remove some
+					
+					int stopSpot = 0;
+					int numBasesCounted = 0;
+					
+					for (int i = (temp.length()-1); i >= 0; i--) {
+						//eliminate N's
+						if (toupper(temp[i]) == 'N') { 
+							temp[i] == '.'; 
+							tempLength--;
+							if (tempLength < numbases) { stopSpot = 0; break; }
+						}
+						
+						if(isalpha(temp[i])) { numBasesCounted++; }
+
+						if (numBasesCounted >= numbases) { stopSpot = i; break; }
+					}
+				
+					if (stopSpot == 0) { temp = ""; }
+					else {  temp = temp.substr(stopSpot+1);  }
+				}
+				else {  temp = ""; } //sequence too short
+			}
+		}
+		
 		return temp;
 	}
 	catch(exception& e) {

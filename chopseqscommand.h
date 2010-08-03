@@ -25,7 +25,7 @@ class ChopSeqsCommand : public Command {
 		
 	private:
 		string fastafile, outputDir, keep;
-		bool abort;
+		bool abort, countGaps;
 		int numbases;
 		
 		string getChopped(Sequence);
