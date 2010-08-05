@@ -178,14 +178,14 @@ PhyloTree::PhyloTree(string tfile){
 			//read in users taxonomy file and add sequences to tree
 			while(!in.eof()){
 				in >> name >> tax; gobble(in);
-				
+			
 				addSeqToTree(name, tax);
 			}
 			in.close();
 		#endif
-		
+	
 		assignHeirarchyIDs(0);
-		
+	
 		//create file for summary if needed
 		setUp(tfile);
 	}
@@ -346,12 +346,7 @@ void PhyloTree::setUp(string tfile){
 			if (pid == 0) {  binUnclassified(taxFileNameTest);  }
 		
 		#else
-			//create file needed for summary if it doesn't exist
-			ifstream FileTest(taxFileNameTest.c_str());
-			
-			if (!FileTest) { 
-				binUnclassified(taxFileNameTest); 
-			}
+			binUnclassified(taxFileNameTest); 
 		#endif
 	}
 	catch(exception& e) {
@@ -381,9 +376,9 @@ void PhyloTree::binUnclassified(string file){
 				leafNodes[i] = i;
 			}
 		}
-	//cout << "maxLevel = " << maxLevel << endl;	
-		int copyNodes = copy.size();
 		
+		int copyNodes = copy.size();
+	
 		//go through the seqs and if a sequence finest taxon is not the same level as the most finely defined taxon then classify it as unclassified where necessary
 		map<int, int>::iterator itLeaf;
 		for (itLeaf = leafNodes.begin(); itLeaf != leafNodes.end(); itLeaf++) {
@@ -432,25 +427,24 @@ void PhyloTree::binUnclassified(string file){
 /**************************************************************************************************/
 void PhyloTree::fillOutTree(int index, vector<TaxNode>& copy) {
 	try {
+	
 		map<string,int>::iterator it;
 		
-		if (copy[index].level < maxLevel) {
-			it = copy[index].children.find("unclassified");
-			if (it == copy[index].children.end()) { //no unclassified at this level
-				string taxon = "unclassified";
-				copy.push_back(TaxNode(taxon));
-				copy[index].children[taxon] = copy.size()-1;
-				copy[copy.size()-1].parent = index;
-				copy[copy.size()-1].level = copy[index].level + 1;
-			}
-		
-			
-			for(it=copy[index].children.begin();it!=copy[index].children.end();it++){ //check your children
-				fillOutTree(it->second, copy);
-			}
-			
+		it = copy[index].children.find("unclassified");
+		if (it == copy[index].children.end()) { //no unclassified at this level
+			string taxon = "unclassified";
+			copy.push_back(TaxNode(taxon));
+			copy[index].children[taxon] = copy.size()-1;
+			copy[copy.size()-1].parent = index;
+			copy[copy.size()-1].level = copy[index].level + 1;
 		}
 		
+		if (tree[index].level < maxLevel) {
+			for(it=tree[index].children.begin();it!=tree[index].children.end();it++){ //check your children
+				fillOutTree(it->second, copy);
+			}
+		}
+
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloTree", "fillOutTree");
@@ -481,6 +475,8 @@ string PhyloTree::getFullTaxonomy(string seqName) {
 void PhyloTree::print(ofstream& out, vector<TaxNode>& copy){
 	try {
 		out << copy.size() << endl;
+		
+		out << maxLevel << endl;
 		
 		for (int i = 0; i < copy.size(); i++) {
 	

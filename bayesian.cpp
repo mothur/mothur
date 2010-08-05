@@ -20,6 +20,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 		string tfileroot = tfile.substr(0,tfile.find_last_of(".")+1);
 		string tempfileroot = getRootName(getSimpleName(tempFile));
 		string phyloTreeName = tfileroot + "tree.train";
+		string phyloTreeSumName = tfileroot + "tree.sum";
 		string probFileName = tfileroot + tempfileroot + char('0'+ kmerSize) + "mer.prob";
 		string probFileName2 = tfileroot + tempfileroot + char('0'+ kmerSize) + "mer.numNonZero";
 		
@@ -29,10 +30,11 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 		ifstream phyloTreeTest(phyloTreeName.c_str());
 		ifstream probFileTest2(probFileName2.c_str());
 		ifstream probFileTest(probFileName.c_str());
+		ifstream probFileTest3(phyloTreeSumName.c_str());
 		
 		int start = time(NULL);
 		
-		if(probFileTest && probFileTest2 && phyloTreeTest){	
+		if(probFileTest && probFileTest2 && phyloTreeTest && probFileTest3){	
 			m->mothurOut("Reading template taxonomy...     "); cout.flush();
 			
 			phyloTree = new PhyloTree(phyloTreeTest, phyloTreeName);

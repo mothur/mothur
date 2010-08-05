@@ -255,6 +255,8 @@ void PhyloSummary::readTreeStruct(ifstream& in){
 		in >> num; gobble(in);
 		
 		tree.resize(num);
+		
+		in >> maxLevel; gobble(in);
 	
 		//read the tree file
 		for (int i = 0; i < tree.size(); i++) {
@@ -280,7 +282,7 @@ void PhyloSummary::readTreeStruct(ifstream& in){
 			
 			gobble(in);
 			
-			if (tree[i].level > maxLevel) {  maxLevel = tree[i].level;  }
+			//if (tree[i].level > maxLevel) {  maxLevel = tree[i].level;  }
 		}
 
 	}
