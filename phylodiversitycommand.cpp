@@ -20,7 +20,7 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"freq","rarefy","iters","groups","outputdir","inputdir"};
+			string Array[] =  {"freq","rarefy","iters","groups","summary","collect","scale","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -34,7 +34,7 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 			}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = hasPath(globaldata->getTreeFile());		}
 			
 			if (globaldata->gTree.size() == 0) {//no trees were read
 				m->mothurOut("You must execute the read.tree command, before you may execute the phylo.diversity command."); m->mothurOutEndLine(); abort = true;  }
@@ -50,6 +50,15 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 			rarefy = isTrue(temp);
 			if (!rarefy) { iters = 1;  }
 			
+			temp = validParameter.validFile(parameters, "summary", false);			if (temp == "not found") { temp = "T"; }
+			summary = isTrue(temp);
+			
+			temp = validParameter.validFile(parameters, "scale", false);			if (temp == "not found") { temp = "F"; }
+			scale = isTrue(temp);
+			
+			temp = validParameter.validFile(parameters, "collect", false);			if (temp == "not found") { temp = "F"; }
+			collect = isTrue(temp);
+			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; Groups = globaldata->gTreemap->namesOfGroups;  globaldata->Groups = Groups;  }
 			else { 
@@ -57,6 +66,7 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 				globaldata->Groups = Groups;
 			}
 			
+			if ((!collect) && (!rarefy) && (!summary)) { m->mothurOut("No outputs selected. You must set either collect, rarefy or summary to true, summary=T by default."); m->mothurOutEndLine(); abort=true; }
 		}
 		
 	}
@@ -70,11 +80,14 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 void PhyloDiversityCommand::help(){
 	try {
 		m->mothurOut("The phylo.diversity command can only be executed after a successful read.tree command.\n");
-		m->mothurOut("The phylo.diversity command parameters are groups, iters, freq and rarefy.  No parameters are required.\n");
+		m->mothurOut("The phylo.diversity command parameters are groups, iters, freq, scale, rarefy, collect and summary.  No parameters are required.\n");
 		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed. The group names are separated by dashes. By default all groups are used.\n");
 		m->mothurOut("The iters parameter allows you to specify the number of randomizations to preform, by default iters=1000, if you set rarefy to true.\n");
 		m->mothurOut("The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n");
+		m->mothurOut("The scale parameter is used indicate that you want your ouptut scaled to the number of sequences sampled, default = false. \n");
 		m->mothurOut("The rarefy parameter allows you to create a rarefaction curve. The default is false.\n");
+		m->mothurOut("The collect parameter allows you to create a collectors curve. The default is false.\n");
+		m->mothurOut("The summary parameter allows you to create a .summary file. The default is true.\n");
 		m->mothurOut("The phylo.diversity command should be in the following format: phylo.diversity(groups=yourGroups, rarefy=yourRarefy, iters=yourIters).\n");
 		m->mothurOut("Example phylo.diversity(groups=A-B-C, rarefy=T, iters=500).\n");
 		m->mothurOut("The phylo.diversity command output two files: .phylo.diversity and if rarefy=T, .rarefaction.\n");
@@ -110,9 +123,14 @@ int PhyloDiversityCommand::execute(){
 		
 			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} return 0; }
 			
-			string outFile = outputDir + getRootName(getSimpleName(globaldata->getTreeFile()))  + toString(i+1) + ".phylo.diversity";
-			if (rarefy) { outFile += ".rarefaction"; }
-			outputNames.push_back(outFile);
+			ofstream outSum, outRare, outCollect;
+			string outSumFile = outputDir + getRootName(getSimpleName(globaldata->getTreeFile()))  + toString(i+1) + ".phylodiv.summary";
+			string outRareFile = outputDir + getRootName(getSimpleName(globaldata->getTreeFile()))  + toString(i+1) + ".phylodiv.rarefaction";
+			string outCollectFile = outputDir + getRootName(getSimpleName(globaldata->getTreeFile()))  + toString(i+1) + ".phylodiv";
+			
+			if (summary)	{ openOutputFile(outSumFile, outSum); outputNames.push_back(outSumFile);				}
+			if (rarefy)		{ openOutputFile(outRareFile, outRare); outputNames.push_back(outRareFile);				}
+			if (collect)	{ openOutputFile(outCollectFile, outCollect); outputNames.push_back(outCollectFile);	}
 			
 			int numLeafNodes = trees[i]->getNumLeaves();
 			
@@ -185,7 +203,7 @@ int PhyloDiversityCommand::execute(){
 						}
 					
 						for (int s = (counts[groups[j]]+1); s <= (counts[groups[j]]+numSeqsInGroupJ); s++) {
-							diversity[groups[j]][s] = diversity[groups[j]][s-1] + (numSeqsInGroupJ * br);
+							diversity[groups[j]][s] = diversity[groups[j]][s-1] + ((float) numSeqsInGroupJ * br);
 						}
 						counts[groups[j]] += numSeqsInGroupJ;
 					}
@@ -199,14 +217,12 @@ int PhyloDiversityCommand::execute(){
 						}
 					}
 				}
+				
+				if ((collect) && (l == 0)) {  printData(numSampledList, diversity, outCollect, 1);  }
+				if ((summary) && (l == 0)) {  printSumData(diversity, outSum, 1);  }
 			}
 			
-			if (rarefy) { 
-				printData(numSampledList, sumDiversity, outFile);
-			}else{
-				printData(numSampledList, diversity, outFile);
-			}
-
+			if (rarefy) {	printData(numSampledList, sumDiversity, outRare, iters);	}
 		}
 		
 	
@@ -227,10 +243,48 @@ int PhyloDiversityCommand::execute(){
 }
 //**********************************************************************************************************************
 
-void PhyloDiversityCommand::printData(set<int>& num, map< string, vector<float> >& div, string file){
+void PhyloDiversityCommand::printSumData(map< string, vector<float> >& div, ofstream& out, int numIters){
 	try {
-		ofstream out;
-		openOutputFile(file, out);
+		
+		out << "numSampled\t";
+		for (int i = 0; i < globaldata->Groups.size(); i++) { out << globaldata->Groups[i] << '\t';  }
+		out << endl;
+		
+		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+		
+		set<int> num;
+		//find end points to output
+		for (map<string, vector<float> >::iterator itEnds = div.begin(); itEnds != div.end(); itEnds++) {	num.insert(itEnds->second.size()-1);  }
+		
+		for (set<int>::iterator it = num.begin(); it != num.end(); it++) {  
+			int numSampled = *it;
+			
+			out << numSampled << '\t';  
+			
+			for (int j = 0; j < globaldata->Groups.size(); j++) {
+				if (numSampled < div[globaldata->Groups[j]].size()) { 
+					float score;
+					if (scale)	{  score = (div[globaldata->Groups[j]][numSampled] / (float)numIters) / (float)numSampled;	}
+					else		{	score = div[globaldata->Groups[j]][numSampled] / (float)numIters;	}
+					
+					out << setprecision(4) << score << '\t';
+				}else { out << "NA" << '\t'; }
+			}
+			out << endl;
+		}
+		
+		out.close();
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhyloDiversityCommand", "printSumData");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+
+void PhyloDiversityCommand::printData(set<int>& num, map< string, vector<float> >& div, ofstream& out, int numIters){
+	try {
 		
 		out << "numSampled\t";
 		for (int i = 0; i < globaldata->Groups.size(); i++) { out << globaldata->Groups[i] << '\t';  }
@@ -245,8 +299,11 @@ void PhyloDiversityCommand::printData(set<int>& num, map< string, vector<float> 
 			
 			for (int j = 0; j < globaldata->Groups.size(); j++) {
 				if (numSampled < div[globaldata->Groups[j]].size()) { 
-					float score = div[globaldata->Groups[j]][numSampled] / (float)iters;
-					out << setprecision(6) << score << '\t';
+					float score;
+					if (scale)	{  score = (div[globaldata->Groups[j]][numSampled] / (float)numIters) / (float)numSampled;	}
+					else		{	score = div[globaldata->Groups[j]][numSampled] / (float)numIters;	}
+
+					out << setprecision(4) << score << '\t';
 				}else { out << "NA" << '\t'; }
 			}
 			out << endl;
@@ -260,7 +317,6 @@ void PhyloDiversityCommand::printData(set<int>& num, map< string, vector<float> 
 		exit(1);
 	}
 }
-
 //**********************************************************************************************************************
 float PhyloDiversityCommand::calcBranchLength(Tree* t, int leaf){
 	try {
