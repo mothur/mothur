@@ -27,11 +27,12 @@ class PhyloDiversityCommand : public Command {
 		
 		float freq;
 		int iters;  
-		bool abort, rarefy;
+		bool abort, rarefy, summary, collect, scale;
 		string groups, outputDir;
 		vector<string> Groups, outputNames; //holds groups to be used, and outputFile names
 		
-		void printData(set<int>&, map< string, vector<float> >&, string);
+		void printData(set<int>&, map< string, vector<float> >&, ofstream&, int);
+		void printSumData(map< string, vector<float> >&, ofstream&, int);
 		float calcBranchLength(Tree*, int);
 };
 
