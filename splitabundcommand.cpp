@@ -176,6 +176,7 @@ int SplitAbundCommand::execute(){
 		if (abort == true) {	return 0;	}
 		
 		if (listfile != "") { //you are using a listfile to determine abundance
+			if (outputDir == "") { outputDir = hasPath(listfile); }
 		
 			//remove old files so you can append later....
 			string fileroot = outputDir + getRootName(getSimpleName(listfile));
@@ -292,7 +293,8 @@ int SplitAbundCommand::execute(){
 
 									
 		}else { //you are using the namefile to determine abundance
-
+			if (outputDir == "") { outputDir = hasPath(namefile); }
+			
 			splitNames(); 
 			writeNames();
 			
@@ -802,7 +804,7 @@ int SplitAbundCommand::parseGroup(string tag) { //namefile
 						if (rareNames.count(itName->first) != 0) { //you are a rare name
 							rout << names[i] << '\t' << group << endl;
 						}else{ //you are a abund name
-							rout << names[i] << '\t' << group << endl;
+							aout << names[i] << '\t' << group << endl;
 						}
 					}
 				}
