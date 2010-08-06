@@ -102,8 +102,14 @@ int ChimeraSlayer::doPrep() {
 			//leftside
 			kmerDBNameLeft = leftTemplateFileName.substr(0,leftTemplateFileName.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
 			ifstream kmerFileTestLeft(kmerDBNameLeft.c_str());
+			bool needToGenerateLeft = true;
 			
-			if(!kmerFileTestLeft){	
+			if(kmerFileTestLeft){	
+				bool GoodFile = checkReleaseVersion(kmerFileTestLeft, m->getVersion());
+				if (GoodFile) {  needToGenerateLeft = false;	}
+			}
+			
+			if(needToGenerateLeft){	
 			
 				for (int i = 0; i < templateSeqs.size(); i++) {
 					
@@ -127,8 +133,14 @@ int ChimeraSlayer::doPrep() {
 			//rightside
 			kmerDBNameRight = rightTemplateFileName.substr(0,rightTemplateFileName.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
 			ifstream kmerFileTestRight(kmerDBNameRight.c_str());
+			bool needToGenerateRight = true;
 			
-			if(!kmerFileTestRight){	
+			if(kmerFileTestRight){	
+				bool GoodFile = checkReleaseVersion(kmerFileTestRight, m->getVersion());
+				if (GoodFile) {  needToGenerateRight = false;	}
+			}
+			
+			if(needToGenerateRight){	
 			
 				for (int i = 0; i < templateSeqs.size(); i++) {
 					if (m->control_pressed) { return 0; } 

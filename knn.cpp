@@ -11,13 +11,27 @@
 
 /**************************************************************************************************/
 Knn::Knn(string tfile, string tempFile, string method, int kmerSize, float gapOpen, float gapExtend, float match, float misMatch, int n) 
-: Classify(), num(n)  {
+: Classify(), num(n), search(method) {
 	try {
 		//create search database and names vector
 		generateDatabaseAndNames(tfile, tempFile, method, kmerSize, gapOpen, gapExtend, match, misMatch);
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Knn", "Knn");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+void Knn::setDistName(string s) {
+	try {
+		outDistName = s;
+		ofstream outDistance;
+		openOutputFile(outDistName, outDistance);
+		outDistance << "Name\tBestMatch\tDistance" << endl;
+		outDistance.close();
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Knn", "setDistName");
 		exit(1);
 	}
 }
@@ -39,7 +53,9 @@ string Knn::getTaxonomy(Sequence* seq) {
 		
 		//use database to find closest seq
 		vector<int> closest = database->findClosestSequences(seq, num);
-		
+	
+		if (search == "distance") { ofstream outDistance; openOutputFileAppend(outDistName, outDistance); outDistance << seq->getName() << '\t' << database->getName(closest[0]) << '\t' << database->getSearchScore() << endl; outDistance.close();  }
+	
 		if (m->control_pressed) { return tax; }
 
 		vector<string> closestNames;

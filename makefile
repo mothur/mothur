@@ -14,6 +14,12 @@
 CXXFLAGS += -O3
 
 MOTHUR_FILES = "\"../Release\""
+
+RELEASE_DATE = "\"8/5/2010\""
+VERSION = "\"1.12.3\""
+
+CXXFLAGS += -DRELEASE_DATE=${RELEASE_DATE} -DVERSION=${VERSION}
+
 ifeq  ($(strip $(MOTHUR_FILES)),"\"Enter_your_default_path_here\"")
 else
 	CXXFLAGS += -DMOTHUR_FILES=${MOTHUR_FILES}

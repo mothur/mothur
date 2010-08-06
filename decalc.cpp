@@ -295,6 +295,8 @@ vector<float> DeCalculator::calcFreq(vector<Sequence*> seqs, string filename) {
 		
 		openOutputFile(freqfile, outFreq);
 		
+		outFreq << "#" << m->getVersion() << endl;
+		
 		string length = toString(seqs.size());  //if there are 5000 seqs in the template then set precision to 3
 		int precision = length.length() - 1;
 		

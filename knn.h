@@ -21,11 +21,14 @@ public:
 	Knn(string, string, string, int, float, float, float, float, int);
 	~Knn();
 	
+	void setDistName(string s);
 	string getTaxonomy(Sequence*);
 	
 private:
 	int num;
 	string findCommonTaxonomy(vector<string>);
+	string search, outDistName;
+	
 };
 
 /**************************************************************************************************/

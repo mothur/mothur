@@ -54,6 +54,9 @@ PhyloTree::PhyloTree(ifstream& in, string filename){
 			istringstream iss (tempBuf,istringstream::in);
 			delete buffer;
 			
+			//read version
+			getline(iss); gobble(iss);
+			
 			iss >> numNodes; gobble(iss);
 			
 			tree.resize(numNodes);
@@ -78,6 +81,9 @@ PhyloTree::PhyloTree(ifstream& in, string filename){
 			MPI_File_close(&inMPI);
 			
 		#else
+			//read version
+			string line = getline(in); gobble(in);
+			
 			in >> numNodes; gobble(in);
 			
 			tree.resize(numNodes);
@@ -474,6 +480,10 @@ string PhyloTree::getFullTaxonomy(string seqName) {
 
 void PhyloTree::print(ofstream& out, vector<TaxNode>& copy){
 	try {
+	
+		//output mothur version
+		out << "#" << m->getVersion() << endl;
+		
 		out << copy.size() << endl;
 		
 		out << maxLevel << endl;
@@ -510,6 +520,9 @@ void PhyloTree::printTreeNodes(string treefilename) {
 
 			ofstream outTree;
 			openOutputFile(treefilename, outTree);
+			
+			//output mothur version
+			outTree << "#" << m->getVersion() << endl;
 			
 			//print treenodes
 			outTree << tree.size() << endl;

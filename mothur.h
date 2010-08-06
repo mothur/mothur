@@ -222,6 +222,30 @@ inline void gobble(istream& f){
 }
 /***********************************************************************/
 
+inline string getline(istringstream& fileHandle) {
+	try {
+	
+		string line = "";
+		
+		while (!fileHandle.eof())	{
+			//get next character
+			char c = fileHandle.get(); 
+			
+			//are you at the end of the line
+			if ((c == '\n') || (c == '\r') || (c == '\f')){  break;	}	
+			else {		line += c;		}
+		}
+		
+		return line;
+		
+	}
+	catch(exception& e) {
+		cout << "Error in mothur function getline" << endl;
+		exit(1);
+	}
+}
+/***********************************************************************/
+
 inline string getline(ifstream& fileHandle) {
 	try {
 	
@@ -244,7 +268,6 @@ inline string getline(ifstream& fileHandle) {
 		exit(1);
 	}
 }
-
 /***********************************************************************/
 
 inline bool isTrue(string f){
@@ -1098,7 +1121,51 @@ inline vector<unsigned long int> setFilePosEachLine(string filename, int& num) {
 		
 			return positions;
 }
+/**************************************************************************************************/
+inline bool checkReleaseVersion(ifstream& file, string version) {
+	try {
+		
+		bool good = true;
+		
+		string line = getline(file);  
 
+		//before we added this check
+		if (line[0] != '#') {  good = false;  }
+		else {
+			//rip off #
+			line = line.substr(1);
+			
+			vector<string> versionVector;
+			splitAtChar(version, versionVector, '.');
+			
+			//check file version
+			vector<string> linesVector;
+			splitAtChar(line, linesVector, '.');
+			
+			if (versionVector.size() != linesVector.size()) { good = false; }
+			else {
+				for (int j = 0; j < versionVector.size(); j++) {
+					int num1, num2;
+					convert(versionVector[j], num1);
+					convert(linesVector[j], num2);
+					
+					//if mothurs version is newer than this files version, then we want to remake it
+					if (num1 > num2) {  good = false; break;  }
+				}
+			}
+			
+		}
+		
+		if (!good) {  file.close();  }
+		else { file.seekg(0);  }
+		
+		return good;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the mothur.h function checkReleaseVersion. Please contact Pat Schloss at mothur.bugs@gmail.com." << "\n";
+		exit(1);
+	}
+}
 /**************************************************************************************************/
 #endif
 

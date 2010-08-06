@@ -409,6 +409,11 @@ int ClassifySeqsCommand::execute(){
 			string tempTaxonomyFile = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + "taxonomy.temp";
 			string taxSummary = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + RippedTaxName + "tax.summary";
 			
+			if ((method == "knn") && (search == "distance")) { 
+				string DistName = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + "match.dist";
+				classify->setDistName(DistName);  outputNames.push_back(DistName);
+			}
+			
 			outputNames.push_back(newTaxonomyFile);
 			outputNames.push_back(taxSummary);
 			

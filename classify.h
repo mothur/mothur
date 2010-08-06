@@ -31,6 +31,7 @@ public:
 	virtual string getTaxonomy(Sequence*) = 0;
 	virtual string getSimpleTax()  { return simpleTax;	}
 	virtual void generateDatabaseAndNames(string, string, string, int, float, float, float, float);
+	virtual void setDistName(string s) {} //for knn, so if distance method is selected with knn you can create the smallest distance file in the right place.
 	
 protected:
 

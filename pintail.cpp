@@ -183,7 +183,7 @@ int Pintail::doPrep() {
 			
 			if (m->control_pressed) {  return 0;  }
 		
-			string outputString = "";
+			string outputString = "#" + m->getVersion() + "\n";
 			
 			//adjust quantiles
 			for (int i = 0; i < quantilesMembers.size(); i++) {
@@ -449,6 +449,9 @@ vector<float> Pintail::readFreq() {
 		if (tempBuf.length() > size) { tempBuf = tempBuf.substr(0, size);  }
 		istringstream iss (tempBuf,istringstream::in);
 		
+		//read version
+		string line = getline(iss); gobble(iss);
+		
 		while(!iss.eof()) {
 			iss >> pos >> num;
 	
@@ -472,6 +475,9 @@ vector<float> Pintail::readFreq() {
 
 		ifstream in;
 		openInputFile(consfile, in);
+		
+		//read version
+		string line = getline(in); gobble(in);
 				
 		while(!in.eof()){
 			
@@ -648,6 +654,9 @@ vector< vector<float> > Pintail::readQuantiles() {
 		istringstream iss (tempBuf,istringstream::in);
 		delete buffer;
 		
+		//read version
+		string line = getline(iss); gobble(iss);
+		
 		while(!iss.eof()) {
 			iss >> num >> ten >> twentyfive >> fifty >> seventyfive >> ninetyfive >> ninetynine; 
 			
@@ -671,6 +680,9 @@ vector< vector<float> > Pintail::readQuantiles() {
 
 		ifstream in;
 		openInputFile(quanfile, in);
+		
+		//read version
+		string line = getline(in); gobble(in);
 			
 		while(!in.eof()){
 			

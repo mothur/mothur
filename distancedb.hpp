@@ -22,7 +22,8 @@ public:
 	~DistanceDB() { delete distCalculator; }
 	
 	void generateDB() {} //doesn't generate a search db 
-	void addSequence(Sequence);  
+	void addSequence(Sequence); 
+	string getName(int i) { return data[i].getName(); } 
 	vector<int> findClosestSequences(Sequence*, int);  // returns indexes of n closest sequences to query
 	
 	#ifdef USE_MPI	

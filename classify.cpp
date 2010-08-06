@@ -108,7 +108,10 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 			
 			kmerDBName = tempFile.substr(0,tempFile.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
 			ifstream kmerFileTest(kmerDBName.c_str());
-			if(kmerFileTest){	needToGenerate = false;		}
+			if(kmerFileTest){	
+				bool GoodFile = checkReleaseVersion(kmerFileTest, m->getVersion());
+				if (GoodFile) {  needToGenerate = false;	}
+			}
 		}
 		else if(method == "suffix")		{	database = new SuffixDB(numSeqs);								}
 		else if(method == "blast")		{	database = new BlastDB(gapOpen, gapExtend, match, misMatch);	}

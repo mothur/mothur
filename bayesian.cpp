@@ -34,7 +34,13 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 		
 		int start = time(NULL);
 		
-		if(probFileTest && probFileTest2 && phyloTreeTest && probFileTest3){	
+		//if they are there make sure they were created after this release date
+		bool FilesGood = false;
+		if(probFileTest && probFileTest2 && phyloTreeTest && probFileTest3){
+			FilesGood = checkReleaseDate(probFileTest, probFileTest2, phyloTreeTest, probFileTest3);
+		}
+		
+		if(probFileTest && probFileTest2 && phyloTreeTest && probFileTest3 && FilesGood){	
 			m->mothurOut("Reading template taxonomy...     "); cout.flush();
 			
 			phyloTree = new PhyloTree(phyloTreeTest, phyloTreeName);
@@ -86,9 +92,15 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 				
 				openOutputFile(probFileName, out);
 				
+				//output mothur version
+				out << "#" << m->getVersion() << endl;
+				
 				out << numKmers << endl;
 				
 				openOutputFile(probFileName2, out2);
+				
+				//output mothur version
+				out2 << "#" << m->getVersion() << endl;
 				
 				#ifdef USE_MPI
 					}
@@ -416,12 +428,19 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 				positions2.resize(num2+1);
 				MPI_Recv(&positions2[0], (num2+1), MPI_LONG, 0, tag, MPI_COMM_WORLD, &status);
 			}
-		
-			//read numKmers
+			
+			//read version
 			int length = positions2[1] - positions2[0];
+			char* buf5 = new char[length];
+
+			MPI_File_read_at(inMPI2, positions2[0], buf5, length, MPI_CHAR, &status);
+			delete buf5;
+
+			//read numKmers
+			length = positions2[2] - positions2[1];
 			char* buf = new char[length];
 
-			MPI_File_read_at(inMPI2, positions2[0], buf, length, MPI_CHAR, &status);
+			MPI_File_read_at(inMPI2, positions2[1], buf, length, MPI_CHAR, &status);
 
 			string tempBuf = buf;
 			if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length); }
@@ -438,10 +457,17 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 			int kmer, name;  
 			vector<int> numbers; numbers.resize(numKmers);
 			float prob;
-			vector<float> zeroCountProb; zeroCountProb.resize(numKmers);		
+			vector<float> zeroCountProb; zeroCountProb.resize(numKmers);	
+			
+			//read version
+			length = positions[1] - positions[0];
+			char* buf6 = new char[length];
 
+			MPI_File_read_at(inMPI2, positions[0], buf6, length, MPI_CHAR, &status);
+			delete buf6;
+			
 			//read file 
-			for(int i=0;i<num;i++){
+			for(int i=1;i<num;i++){
 				//read next sequence
 				length = positions[i+1] - positions[i];
 				char* buf4 = new char[length];
@@ -458,7 +484,7 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 			
 			MPI_File_close(&inMPI);
 			
-			for(int i=1;i<num2;i++){
+			for(int i=2;i<num2;i++){
 				//read next sequence
 				length = positions2[i+1] - positions2[i];
 				char* buf4 = new char[length];
@@ -488,7 +514,9 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 			MPI_File_close(&inMPI2);
 			MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 		#else
-		
+			//read version
+			string line = getline(in); gobble(in);
+			
 			in >> numKmers; gobble(in);
 			
 			//initialze probabilities
@@ -500,7 +528,10 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 			vector<int> num; num.resize(numKmers);
 			float prob;
 			vector<float> zeroCountProb; zeroCountProb.resize(numKmers);		
-		
+			
+			//read version
+			string line2 = getline(inNum); gobble(inNum);
+			
 			while (inNum) {
 				inNum >> zeroCountProb[count] >> num[count];  
 				count++;
@@ -530,6 +561,61 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Bayesian", "readProbFile");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+bool Bayesian::checkReleaseDate(ifstream& file1, ifstream& file2, ifstream& file3, ifstream& file4) {
+	try {
+		
+		bool good = true;
+		
+		vector<string> lines;
+		lines.push_back(getline(file1));  
+		lines.push_back(getline(file2)); 
+		lines.push_back(getline(file3)); 
+		lines.push_back(getline(file4)); 
+
+		//before we added this check
+		if ((lines[0][0] != '#') || (lines[1][0] != '#') || (lines[2][0] != '#') || (lines[3][0] != '#')) {  good = false;  }
+		else {
+			//rip off #
+			for (int i = 0; i < lines.size(); i++) { lines[i] = lines[i].substr(1);  }
+			
+			//get mothurs current version
+			string version = m->getVersion();
+			
+			vector<string> versionVector;
+			splitAtChar(version, versionVector, '.');
+			
+			//check each files version
+			for (int i = 0; i < lines.size(); i++) { 
+				vector<string> linesVector;
+				splitAtChar(lines[i], linesVector, '.');
+			
+				if (versionVector.size() != linesVector.size()) { good = false; break; }
+				else {
+					for (int j = 0; j < versionVector.size(); j++) {
+						int num1, num2;
+						convert(versionVector[j], num1);
+						convert(linesVector[j], num2);
+						
+						//if mothurs version is newer than this files version, then we want to remake it
+						if (num1 > num2) {  good = false; break;  }
+					}
+				}
+				
+				if (!good) { break; }
+			}
+		}
+		
+		if (!good) {  file1.close(); file2.close(); file3.close(); file4.close();  }
+		else { file1.seekg(0);  file2.seekg(0);  file3.seekg(0);  file4.seekg(0);  }
+		
+		return good;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Bayesian", "checkReleaseDate");
 		exit(1);
 	}
 }

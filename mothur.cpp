@@ -97,10 +97,16 @@ int main(int argc, char *argv[]){
 			m->mothurOutEndLine(); m->mothurOutEndLine();
 		#endif
 		
+		//get releaseDate from Make
+		string releaseDate = RELEASE_DATE; 
+		string mothurVersion = VERSION; 
+		m->setReleaseDate(releaseDate);
+		m->setVersion(mothurVersion);
+		
 		//header
-		m->mothurOut("mothur v.1.12.2");
+		m->mothurOut("mothur v." + mothurVersion);
 		m->mothurOutEndLine();		
-		m->mothurOut("Last updated: 7/30/2010");
+		m->mothurOut("Last updated: " + releaseDate);
 		m->mothurOutEndLine();	
 		m->mothurOutEndLine();		
 		m->mothurOut("by");
