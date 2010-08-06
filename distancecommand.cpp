@@ -26,7 +26,7 @@ DistanceCommand::DistanceCommand(string option) {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "output", "calc", "countends", "cutoff", "processors", "outputdir","inputdir"};
+			string Array[] =  {"fasta","oldfasta","column", "output", "calc", "countends", "cutoff", "processors", "outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -52,6 +52,22 @@ DistanceCommand::DistanceCommand(string option) {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it2->second;		}
 				}
+				
+				it2 = parameters.find("oldfasta");
+				//user has given a template file
+				if(it2 != parameters.end()){ 
+					path = hasPath(it2->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["oldfasta"] = inputDir + it2->second;		}
+				}
+				
+				it2 = parameters.find("column");
+				//user has given a template file
+				if(it2 != parameters.end()){ 
+					path = hasPath(it2->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["column"] = inputDir + it2->second;		}
+				}
 			}
 
 			//check for required parameters
@@ -64,6 +80,14 @@ DistanceCommand::DistanceCommand(string option) {
 				alignDB = SequenceDB(inFASTA); 
 				inFASTA.close();
 			}
+			
+			oldfastafile = validParameter.validFile(parameters, "oldfasta", true);
+			if (oldfastafile == "not found") { oldfastafile = ""; }
+			else if (oldfastafile == "not open") { abort = true; }	
+			
+			column = validParameter.validFile(parameters, "column", true);
+			if (column == "not found") { column = ""; }
+			else if (column == "not open") { abort = true; }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -91,6 +115,10 @@ DistanceCommand::DistanceCommand(string option) {
 			convert(temp, processors); 
 			
 			output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "column"; }
+			
+			if (((column != "") && (oldfastafile == "")) || ((column == "") && (oldfastafile != ""))) { m->mothurOut("If you provide column or oldfasta, you must provide both."); m->mothurOutEndLine(); abort=true; }
+			
+			if ((column != "") && (oldfastafile != "") && (output != "column")) { m->mothurOut("You have provided column and oldfasta, indicating you want to append distances to your column file. Your output must be in column format to do so."); m->mothurOutEndLine(); abort=true; }
 			
 			if ((output != "column") && (output != "lt") && (output != "square")) { m->mothurOut(output + " is not a valid output form. Options are column, lt and square. I will use column."); m->mothurOutEndLine(); output = "column"; }
 			
@@ -138,8 +166,9 @@ DistanceCommand::~DistanceCommand(){
 void DistanceCommand::help(){
 	try {
 		m->mothurOut("The dist.seqs command reads a file containing sequences and creates a distance file.\n");
-		m->mothurOut("The dist.seqs command parameters are fasta, calc, countends, output, cutoff and processors.  \n");
+		m->mothurOut("The dist.seqs command parameters are fasta, oldfasta, column, calc, countends, output, cutoff and processors.  \n");
 		m->mothurOut("The fasta parameter is required.\n");
+		m->mothurOut("The oldfasta and column parameters allow you to append the distances calculated to the column file.\n");
 		m->mothurOut("The calc parameter allows you to specify the method of calculating the distances.  Your options are: nogaps, onegap or eachgap. The default is onegap.\n");
 		m->mothurOut("The countends parameter allows you to specify whether to include terminal gaps in distance.  Your options are: T or F. The default is T.\n");
 		m->mothurOut("The cutoff parameter allows you to specify maximum distance to keep. The default is 1.0.\n");
@@ -164,6 +193,14 @@ int DistanceCommand::execute(){
 		
 		int startTime = time(NULL);
 		
+		//save number of new sequence
+		numNewFasta = alignDB.getNumSeqs();
+		
+		//sanity check the oldfasta and column file as well as add oldfasta sequences to alignDB
+		if ((oldfastafile != "") && (column != ""))  {	if (!(sanityCheck())) { return 0; }  }
+		
+		if (m->control_pressed) { return 0; }
+		
 		int numSeqs = alignDB.getNumSeqs();
 		cutoff += 0.005;
 		
@@ -176,6 +213,13 @@ int DistanceCommand::execute(){
 			//output numSeqs to phylip formatted dist file
 		}else if (output == "column") { //user wants column format
 			outputFile = outputDir + getRootName(getSimpleName(fastafile)) + "dist";
+			
+			//so we don't accidentally overwrite
+			if (outputFile == column) { 
+				string tempcolumn = column + ".old"; 
+				rename(column.c_str(), tempcolumn.c_str());
+			}
+			
 			remove(outputFile.c_str());
 		}else { //assume square
 			outputFile = outputDir + getRootName(getSimpleName(fastafile)) + "square.dist";
@@ -349,6 +393,20 @@ int DistanceCommand::execute(){
 			gobble(fileHandle);
 			if (fileHandle.eof()) { m->mothurOut(outputFile + " is blank. This can result if there are no distances below your cutoff.");  m->mothurOutEndLine(); }
 		}
+		
+		//append the old column file to the new one
+		if ((oldfastafile != "") && (column != ""))  {
+			//we had to rename the column file so we didnt overwrite above, but we want to keep old name
+			if (outputFile == column) { 
+				string tempcolumn = column + ".old";
+				appendFiles(tempcolumn, outputFile);
+				remove(tempcolumn.c_str());
+			}else{
+				appendFiles(outputFile, column);
+				remove(outputFile.c_str());
+				outputFile = column;
+			}
+		}
 
 		
 		#ifdef USE_MPI
@@ -431,6 +489,10 @@ int DistanceCommand::driver(int startLine, int endLine, string dFileName, float 
 				
 				if (m->control_pressed) { outFile.close(); return 0;  }
 				
+				//if there was a column file given and we are appending, we don't want to calculate the distances that are already in the column file
+				//the alignDB contains the new sequences and then the old, so if i an oldsequence and j is an old sequence then break out of this loop
+				if ((i >= numNewFasta) && (j >= numNewFasta)) { break; }
+				
 				distCalculator->calcDist(alignDB.get(i), alignDB.get(j));
 				double dist = distCalculator->getDist();
 				
@@ -479,6 +541,10 @@ int DistanceCommand::driverMPI(int startLine, int endLine, MPI_File& outMPI, flo
 			for(int j=0;j<i;j++){
 				
 				if (m->control_pressed) {  return 0;  }
+				
+				//if there was a column file given and we are appending, we don't want to calculate the distances that are already in the column file
+				//the alignDB contains the new sequences and then the old, so if i an oldsequence and j is an old sequence then break out of this loop
+				if ((i >= numNewFasta) && (j >= numNewFasta)) { break; }
 				
 				distCalculator->calcDist(alignDB.get(i), alignDB.get(j));
 				double dist = distCalculator->getDist();
@@ -777,6 +843,97 @@ int DistanceCommand::convertToLowerTriangle(string outputFile) {
 		exit(1);
 	}
 }
+/**************************************************************************************************/
+//its okay if the column file does not contain all the names in the fasta file, since some distance may have been above a cutoff,
+//but no sequences can be in the column file that are not in oldfasta. also, if a distance is above the cutoff given then remove it.
+//also check to make sure the 2 files have the same alignment length.
+bool DistanceCommand::sanityCheck() {
+	try{
+		bool good = true;
+		
+		//make sure the 2 fasta files have the same alignment length
+		ifstream in;
+		openInputFile(fastafile, in);
+		int fastaAlignLength = 0;
+		if (in) { 
+			Sequence tempIn(in);
+			fastaAlignLength = tempIn.getAligned().length();
+		}
+		in.close();
+		
+		ifstream in2;
+		openInputFile(oldfastafile, in2);
+		int oldfastaAlignLength = 0;
+		if (in2) { 
+			Sequence tempIn2(in2);
+			oldfastaAlignLength = tempIn2.getAligned().length();
+		}
+		in2.close();
+		
+		if (fastaAlignLength != oldfastaAlignLength) { m->mothurOut("fasta files do not have the same alignment length."); m->mothurOutEndLine(); return false;  }
+		
+		//read fasta file and save names as well as adding them to the alignDB
+		set<string> namesOldFasta;
+		
+		ifstream inFasta;
+		openInputFile(oldfastafile, inFasta);
+		
+		while (!inFasta.eof()) {
+			if (m->control_pressed) {  inFasta.close(); return good;  }
+		
+			Sequence temp(inFasta);
+			
+			if (temp.getName() != "") {
+				namesOldFasta.insert(temp.getName());  //save name
+				alignDB.push_back(temp);  //add to DB
+			}
+			
+			gobble(inFasta);
+		}
+		
+		inFasta.close();
+		
+		//read through the column file checking names and removing distances above the cutoff
+		ifstream inDist;
+		openInputFile(column, inDist);
+		
+		ofstream outDist;
+		string outputFile = column + ".temp";
+		openOutputFile(outputFile, outDist);
+		
+		string name1, name2;
+		float dist;
+		while (!inDist.eof()) {
+			if (m->control_pressed) {  inDist.close(); outDist.close(); remove(outputFile.c_str()); return good;  }
+		
+			inDist >> name1 >> name2 >> dist; gobble(inDist);
+			
+			//both names are in fasta file and distance is below cutoff
+			if ((namesOldFasta.count(name1) == 0) || (namesOldFasta.count(name2) == 0)) {  good = false; break;  }
+			else{
+				if (dist <= cutoff) {
+					outDist << name1 << '\t' << name2 << '\t' << dist << endl;
+				}
+			}
+		}
+		
+		inDist.close();
+		outDist.close();
+		
+		if (good) {
+			remove(column.c_str());
+			rename(outputFile.c_str(), column.c_str());
+		}else{
+			remove(outputFile.c_str()); //temp file is bad because file mismatch above
+		}
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DistanceCommand", "appendFiles");
+		exit(1);
+	}
+}
+
 /**************************************************************************************************
 void DistanceCommand::appendFiles(string temp, string filename) {
 	try{

@@ -34,8 +34,8 @@ private:
 	Dist* distCalculator;
 	SequenceDB alignDB;
 
-	string countends, output, fastafile, calc, outputDir;
-	int processors;
+	string countends, output, fastafile, calc, outputDir, oldfastafile, column;
+	int processors, numNewFasta;
 	float cutoff;
 	map<int, int> processIDS;   //end line, processid
 	vector<linePair*> lines;
@@ -53,6 +53,7 @@ private:
 	#endif
 	
 	int convertMatrix(string);
+	bool sanityCheck();
 	int convertToLowerTriangle(string);
 
 };
