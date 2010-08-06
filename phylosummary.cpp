@@ -250,6 +250,10 @@ void PhyloSummary::print(int i, ofstream& out){
 /**************************************************************************************************/
 void PhyloSummary::readTreeStruct(ifstream& in){
 	try {
+	
+		//read version
+		string line = getline(in); gobble(in);
+		
 		int num;
 		
 		in >> num; gobble(in);

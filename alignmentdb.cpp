@@ -122,8 +122,11 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 			#else
 				kmerDBName = fastaFileName.substr(0,fastaFileName.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
 				ifstream kmerFileTest(kmerDBName.c_str());
-			
-				if(kmerFileTest){	needToGenerate = false;		}
+				
+				if(kmerFileTest){	
+					bool GoodFile = checkReleaseVersion(kmerFileTest, m->getVersion());
+					if (GoodFile) {  needToGenerate = false;	}
+				}
 			#endif
 		}
 		else if(method == "suffix")		{	search = new SuffixDB(numSeqs);								}

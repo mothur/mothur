@@ -173,12 +173,17 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 				//check for consfile
 				string tempConsFile = getRootName(inputDir + getSimpleName(templatefile)) + "freq";
 				ifstream FileTest(tempConsFile.c_str());
-				if(FileTest){	m->mothurOut("I found " + tempConsFile + " in your input file directory. I will use it to save time."); m->mothurOutEndLine();  consfile = tempConsFile;  FileTest.close();	}
+				if(FileTest){	
+					bool GoodFile = checkReleaseVersion(FileTest, m->getVersion());
+					if (GoodFile) {  
+						m->mothurOut("I found " + tempConsFile + " in your input file directory. I will use it to save time."); m->mothurOutEndLine();  consfile = tempConsFile;  FileTest.close();	
+					}
+				}
 			}	
 			
 			quanfile = validParameter.validFile(parameters, "quantile", true);
 			if (quanfile == "not open") { abort = true; }
-			else if (quanfile == "not found") { quanfile = "";  }
+			else if (quanfile == "not found") { quanfile = ""; }
 		}
 	}
 	catch(exception& e) {
@@ -251,7 +256,12 @@ int ChimeraPintailCommand::execute(){
 			}
 			
 			ifstream FileTest(tempQuan.c_str());
-			if(FileTest){	m->mothurOut("I found " + tempQuan + " in your input file directory. I will use it to save time."); m->mothurOutEndLine();  quanfile = tempQuan;  FileTest.close();	}
+			if(FileTest){	
+				bool GoodFile = checkReleaseVersion(FileTest, m->getVersion());
+				if (GoodFile) {  
+					m->mothurOut("I found " + tempQuan + " in your input file directory. I will use it to save time."); m->mothurOutEndLine();  quanfile = tempQuan;  FileTest.close();	
+				}
+			}
 			
 			chimera = new Pintail(fastaFileNames[s], templatefile, filter, processors, maskfile, consfile, quanfile, window, increment, outputDir);
 			

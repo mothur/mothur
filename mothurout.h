@@ -27,6 +27,12 @@ class MothurOut {
 		void closeLog();
 		string getDefaultPath() { return defaultPath; }
 		void setDefaultPath(string);
+		
+		string getReleaseDate() { return releaseDate; }
+		void setReleaseDate(string r) { releaseDate = r; }
+		string getVersion() { return version; }
+		void setVersion(string r) { version = r; }
+
 
 		int control_pressed;
 		bool executing;
@@ -41,6 +47,8 @@ class MothurOut {
 
 		string logFileName;
 		string defaultPath;
+		string releaseDate, version;
+		
 		ofstream out;
 		
 		int mem_usage(double&, double&);
