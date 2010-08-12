@@ -28,13 +28,13 @@ EstOutput Simpson::getValues(SAbundVector* rank){
 		if(sobs != 0){
 			double simnum=0.0000;
 		
-			for(int i=1;i<=maxRank;i++){
+			for(unsigned long int i=1;i<=maxRank;i++){
 				simnum += (double)(rank->get(i)*i*(i-1));
 			}
 			
 			simpson = simnum / (sampled*(sampled-1));
 		
-			for(int i=1;i<=maxRank;i++){
+			for(unsigned long int i=1;i<=maxRank;i++){
 				double piI = (double) i / (double)sampled;
 				firstTerm += rank->get(i) * pow(piI, 3);
 				secondTerm += rank->get(i) * pow(piI, 2);
