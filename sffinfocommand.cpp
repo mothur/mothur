@@ -587,7 +587,10 @@ int SffInfoCommand::printFastaSeqData(ofstream& out, seqRead& read, Header& head
 		string seq = read.bases;
 		
 		if (trim) {
-			if((header.clipQualRight != 0) && ((header.clipQualRight-header.clipQualLeft) >= 0)){
+			if(header.clipQualRight < header.clipQualLeft){
+				seq = "NNNN";
+			}
+			else if((header.clipQualRight != 0) && ((header.clipQualRight-header.clipQualLeft) >= 0)){
 				seq = seq.substr((header.clipQualLeft-1), (header.clipQualRight-header.clipQualLeft));
 			}
 			else {
@@ -620,7 +623,10 @@ int SffInfoCommand::printQualSeqData(ofstream& out, seqRead& read, Header& heade
 	try {
 		
 		if (trim) {
-			if((header.clipQualRight != 0) && ((header.clipQualRight-header.clipQualLeft) >= 0)){
+			if(header.clipQualRight < header.clipQualLeft){
+				out << "0\t0\t0\t0";
+			}
+			else if((header.clipQualRight != 0) && ((header.clipQualRight-header.clipQualLeft) >= 0)){
 				out << ">" << header.name << " length=" << (header.clipQualRight-header.clipQualLeft) << endl;
 				for (int i = (header.clipQualLeft-1); i < (header.clipQualRight-1); i++) {   out << read.qualScores[i] << '\t';	}
 			}
