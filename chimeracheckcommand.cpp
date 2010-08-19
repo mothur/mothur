@@ -299,55 +299,23 @@ int ChimeraCheckCommand::execute(){
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 		#else
 			
+			vector<unsigned long int> positions = divideFile(fastaFileNames[i], processors);
+				
+			for (int s = 0; s < (positions.size()-1); s++) {
+				lines.push_back(new linePair(positions[s], positions[(s+1)]));
+			}	
+			
 			//break up file
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				if(processors == 1){
-					ifstream inFASTA;
-					openInputFile(fastaFileNames[i], inFASTA);
-					getNumSeqs(inFASTA, numSeqs);
-					inFASTA.close();
+					numSeqs = driver(lines[0], outputFileName, fastaFileNames[i]);
 					
-					lines.push_back(new linePair(0, numSeqs));
-					
-					driver(lines[0], outputFileName, fastaFileNames[i]);
-					
-					if (m->control_pressed) { 
-						for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} 
-						for (int j = 0; j < lines.size(); j++) {  delete lines[j];  }  lines.clear();
-						delete chimera;
-						return 0;
-					}
+					if (m->control_pressed) { for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} for (int j = 0; j < lines.size(); j++) {  delete lines[j];  }  lines.clear(); delete chimera; return 0; }
 									
 				}else{
-					vector<unsigned long int> positions;
 					processIDS.resize(0);
 					
-					ifstream inFASTA;
-					openInputFile(fastaFileNames[i], inFASTA);
-					
-					string input;
-					while(!inFASTA.eof()){
-						input = getline(inFASTA);
-						if (input.length() != 0) {
-							if(input[0] == '>'){	unsigned long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
-						}
-					}
-					inFASTA.close();
-					
-					numSeqs = positions.size();
-					
-					int numSeqsPerProcessor = numSeqs / processors;
-					
-					for (int j = 0; j < processors; j++) {
-						unsigned long int startPos = positions[ j * numSeqsPerProcessor ];
-						if(j == processors - 1){
-							numSeqsPerProcessor = numSeqs - j * numSeqsPerProcessor;
-						}
-						lines.push_back(new linePair(startPos, numSeqsPerProcessor));
-					}
-					
-					
-					createProcesses(outputFileName, fastaFileNames[i]); 
+					numSeqs = createProcesses(outputFileName, fastaFileNames[i]); 
 				
 					rename((outputFileName + toString(processIDS[0]) + ".temp").c_str(), outputFileName.c_str());
 						
@@ -366,20 +334,9 @@ int ChimeraCheckCommand::execute(){
 				}
 
 			#else
-				ifstream inFASTA;
-				openInputFile(fastaFileNames[i], inFASTA);
-				getNumSeqs(inFASTA, numSeqs);
-				inFASTA.close();
-				lines.push_back(new linePair(0, numSeqs));
+				numSeqs = driver(lines[0], outputFileName, fastaFileNames[i]);
 				
-				driver(lines[0], outputFileName, fastaFileNames[i]);
-				
-				if (m->control_pressed) { 
-						for (int j = 0; j < lines.size(); j++) {  delete lines[j];  }  lines.clear();
-						for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} 
-						delete chimera;
-						return 0;
-				}
+				if (m->control_pressed) { for (int j = 0; j < lines.size(); j++) {  delete lines[j];  }  lines.clear(); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} delete chimera; return 0; }
 			#endif
 		#endif		
 			delete chimera;
@@ -405,7 +362,7 @@ int ChimeraCheckCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int ChimeraCheckCommand::driver(linePair* line, string outputFName, string filename){
+int ChimeraCheckCommand::driver(linePair* filePos, string outputFName, string filename){
 	try {
 		ofstream out;
 		openOutputFile(outputFName, out);
@@ -415,10 +372,13 @@ int ChimeraCheckCommand::driver(linePair* line, string outputFName, string filen
 		ifstream inFASTA;
 		openInputFile(filename, inFASTA);
 
-		inFASTA.seekg(line->start);
-		
-		for(int i=0;i<line->numSeqs;i++){
-		
+		inFASTA.seekg(filePos->start);
+
+		bool done = false;
+		int count = 0;
+	
+		while (!done) {
+
 			if (m->control_pressed) {	return 1;	}
 		
 			Sequence* candidateSeq = new Sequence(inFASTA);  gobble(inFASTA);
@@ -434,16 +394,19 @@ int ChimeraCheckCommand::driver(linePair* line, string outputFName, string filen
 			}
 			delete candidateSeq;
 			
+			unsigned long int pos = inFASTA.tellg();
+			if ((pos == -1) || (pos >= filePos->end)) { break; }
+			
 			//report progress
-			if((i+1) % 100 == 0){	m->mothurOut("Processing sequence: " + toString(i+1)); m->mothurOutEndLine();		}
+			if((count) % 100 == 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
 		}
 		//report progress
-		if((line->numSeqs) % 100 != 0){	m->mothurOut("Processing sequence: " + toString(line->numSeqs)); m->mothurOutEndLine();		}
+		if((count) % 100 != 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
 		
 		out.close();
 		inFASTA.close();
 				
-		return 0;
+		return count;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraCheckCommand", "driver");
@@ -506,7 +469,7 @@ int ChimeraCheckCommand::createProcesses(string outputFileName, string filename)
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 0;
-		//		processIDS.resize(0);
+		int num = 0;
 		
 		//loop through and create all the processes you want
 		while (process != processors) {
@@ -516,7 +479,15 @@ int ChimeraCheckCommand::createProcesses(string outputFileName, string filename)
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				driver(lines[process], outputFileName + toString(getpid()) + ".temp", filename);
+				num = driver(lines[process], outputFileName + toString(getpid()) + ".temp", filename);
+				
+				//pass numSeqs to parent
+				ofstream out;
+				string tempFile = toString(getpid()) + ".temp";
+				openOutputFile(tempFile, out);
+				out << num << endl;
+				out.close();
+				
 				exit(0);
 			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
 		}
@@ -527,7 +498,15 @@ int ChimeraCheckCommand::createProcesses(string outputFileName, string filename)
 			wait(&temp);
 		}
 		
-		return 0;
+		for (int i = 0; i < processIDS.size(); i++) {
+			ifstream in;
+			string tempFile =  toString(processIDS[i]) + ".temp";
+			openInputFile(tempFile, in);
+			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
+			in.close(); remove(tempFile.c_str());
+		}
+		
+		return num;
 #endif		
 	}
 	catch(exception& e) {

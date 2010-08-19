@@ -27,15 +27,15 @@ private:
 	
 	struct linePair {
 		unsigned long int start;
-		int num;
-		linePair(unsigned long int i, long int j) : start(i), num(j) {}
+		unsigned long int end;
+		linePair(unsigned long int i, unsigned long int j) : start(i), end(j) {}
 	};
+
 	vector<linePair*> lines;
 	vector<int> processIDS;
 	
 	int createProcessesCreateSummary(vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, string, string);
 	int driverCreateSummary(vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, string, string, linePair*);	
-	int setLines(string);
 
 	#ifdef USE_MPI
 	int MPICreateSummary(int, int, vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, MPI_File&, MPI_File&, vector<unsigned long int>&);	

@@ -460,45 +460,21 @@ int ClassifySeqsCommand::execute(){
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 				
 #else
+		
+			vector<unsigned long int> positions = divideFile(fastaFileNames[s], processors);
+				
+			for (int i = 0; i < (positions.size()-1); i++) {
+				lines.push_back(new linePair(positions[i], positions[(i+1)]));
+			}	
+			
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			if(processors == 1){
-				ifstream inFASTA;
-				openInputFile(fastaFileNames[s], inFASTA);
-				getNumSeqs(inFASTA, numFastaSeqs);
-				inFASTA.close();
-				
-				lines.push_back(new linePair(0, numFastaSeqs));
-				
-				driver(lines[0], newTaxonomyFile, tempTaxonomyFile, fastaFileNames[s]);
+				numFastaSeqs = driver(lines[0], newTaxonomyFile, tempTaxonomyFile, fastaFileNames[s]);
 			}
 			else{
-				vector<unsigned long int> positions;
 				processIDS.resize(0);
 				
-				ifstream inFASTA;
-				openInputFile(fastaFileNames[s], inFASTA);
-				
-				string input;
-				while(!inFASTA.eof()){
-					input = getline(inFASTA);
-					if (input.length() != 0) {
-						if(input[0] == '>'){	unsigned long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
-					}
-				}
-				inFASTA.close();
-				
-				numFastaSeqs = positions.size();
-				
-				int numSeqsPerProcessor = numFastaSeqs / processors;
-	
-				for (int i = 0; i < processors; i++) {
-					unsigned long int startPos = positions[ i * numSeqsPerProcessor ];
-					if(i == processors - 1){
-						numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor;
-					}
-					lines.push_back(new linePair(startPos, numSeqsPerProcessor));
-				}
-				createProcesses(newTaxonomyFile, tempTaxonomyFile, fastaFileNames[s]); 
+				numFastaSeqs = createProcesses(newTaxonomyFile, tempTaxonomyFile, fastaFileNames[s]); 
 				
 				rename((newTaxonomyFile + toString(processIDS[0]) + ".temp").c_str(), newTaxonomyFile.c_str());
 				rename((tempTaxonomyFile + toString(processIDS[0]) + ".temp").c_str(), tempTaxonomyFile.c_str());
@@ -512,14 +488,7 @@ int ClassifySeqsCommand::execute(){
 				
 			}
 	#else
-			ifstream inFASTA;
-			openInputFile(fastaFileNames[s], inFASTA);
-			getNumSeqs(inFASTA, numFastaSeqs);
-			inFASTA.close();
-			
-			lines.push_back(new linePair(0, numFastaSeqs));
-			
-			driver(lines[0], newTaxonomyFile, tempTaxonomyFile, fastaFileNames[s]);
+			numFastaSeqs = driver(lines[0], newTaxonomyFile, tempTaxonomyFile, fastaFileNames[s]);
 	#endif	
 #endif
 
@@ -681,11 +650,11 @@ string ClassifySeqsCommand::addUnclassifieds(string tax, int maxlevel) {
 
 /**************************************************************************************************/
 
-void ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile, string filename) {
+int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile, string filename) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 0;
-		//		processIDS.resize(0);
+		int num = 0;
 		
 		//loop through and create all the processes you want
 		while (process != processors) {
@@ -695,7 +664,15 @@ void ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				driver(lines[process], taxFileName + toString(getpid()) + ".temp", tempTaxFile + toString(getpid()) + ".temp", filename);
+				num = driver(lines[process], taxFileName + toString(getpid()) + ".temp", tempTaxFile + toString(getpid()) + ".temp", filename);
+				
+				//pass numSeqs to parent
+				ofstream out;
+				string tempFile = toString(getpid()) + ".temp";
+				openOutputFile(tempFile, out);
+				out << num << endl;
+				out.close();
+
 				exit(0);
 			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
 		}
@@ -705,6 +682,16 @@ void ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile
 			int temp = processIDS[i];
 			wait(&temp);
 		}
+		
+		for (int i = 0; i < processIDS.size(); i++) {
+			ifstream in;
+			string tempFile =  toString(processIDS[i]) + ".temp";
+			openInputFile(tempFile, in);
+			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
+			in.close(); remove(tempFile.c_str());
+		}
+		
+		return num;
 #endif		
 	}
 	catch(exception& e) {
@@ -738,7 +725,7 @@ void ClassifySeqsCommand::appendTaxFiles(string temp, string filename) {
 
 //**********************************************************************************************************************
 
-int ClassifySeqsCommand::driver(linePair* line, string taxFName, string tempTFName, string filename){
+int ClassifySeqsCommand::driver(linePair* filePos, string taxFName, string tempTFName, string filename){
 	try {
 		ofstream outTax;
 		openOutputFile(taxFName, outTax);
@@ -748,12 +735,15 @@ int ClassifySeqsCommand::driver(linePair* line, string taxFName, string tempTFNa
 	
 		ifstream inFASTA;
 		openInputFile(filename, inFASTA);
-
-		inFASTA.seekg(line->start);
 		
 		string taxonomy;
 
-		for(int i=0;i<line->numSeqs;i++){
+		inFASTA.seekg(filePos->start);
+
+		bool done = false;
+		int count = 0;
+	
+		while (!done) {
 			if (m->control_pressed) { return 0; }
 		
 			Sequence* candidateSeq = new Sequence(inFASTA); gobble(inFASTA);
@@ -773,19 +763,24 @@ int ClassifySeqsCommand::driver(linePair* line, string taxFName, string tempTFNa
 					
 					outTaxSimple << candidateSeq->getName() << '\t' << classify->getSimpleTax() << endl;
 				}
-			}				
+				count++;
+			}
 			delete candidateSeq;
 			
-			if((i+1) % 100 == 0){
-				m->mothurOut("Classifying sequence " + toString(i+1)); m->mothurOutEndLine();
-			}
+			unsigned long int pos = inFASTA.tellg();
+			if ((pos == -1) || (pos >= filePos->end)) { break; }
+			
+			//report progress
+			if((count) % 100 == 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
 		}
-		
+		//report progress
+		if((count) % 100 != 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
+				
 		inFASTA.close();
 		outTax.close();
 		outTaxSimple.close();
 		
-		return 1;
+		return count;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClassifySeqsCommand", "driver");

@@ -25,9 +25,10 @@ public:
 private:
 	struct linePair {
 		unsigned long int start;
-		int num;
-		linePair(unsigned long int i, long int j) : start(i), num(j) {}
+		unsigned long int end;
+		linePair(unsigned long int i, unsigned long int j) : start(i), end(j) {}
 	};
+
 	vector<linePair*> lines;
 	vector<int> processIDS;
 
@@ -52,8 +53,6 @@ private:
 	int driverMPIRun(int, int, MPI_File&, MPI_File&, vector<unsigned long int>&);
 	int MPICreateFilter(int, int, Filters&, MPI_File&, vector<unsigned long int>&);	
 	#endif
-	int setLines(string);
-	
 	
 };
 

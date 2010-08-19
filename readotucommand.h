@@ -29,7 +29,7 @@ private:
 	InputData* input;
 	Command* shared;
 	GroupMap* groupMap;
-	string filename, listfile, orderfile, sharedfile, label, groupfile, sabundfile, rabundfile, format, groups, outputDir, ordergroupfile;
+	string filename, listfile, orderfile, sharedfile, label, groupfile, sabundfile, rabundfile, format, groups, outputDir, ordergroupfile, relAbundfile;
 	vector<string> Groups;
 
 	bool abort, allLines;

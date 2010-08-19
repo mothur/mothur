@@ -1134,6 +1134,72 @@ inline vector<unsigned long int> setFilePosEachLine(string filename, int& num) {
 			return positions;
 }
 /**************************************************************************************************/
+
+inline vector<unsigned long int> divideFile(string filename, int& proc) {
+	try{
+	
+		vector<unsigned long int> filePos;
+		filePos.push_back(0);
+		
+		FILE * pFile;
+		unsigned long int size;
+		
+		//get num bytes in file
+		pFile = fopen (filename.c_str(),"rb");
+		if (pFile==NULL) perror ("Error opening file");
+		else{
+			fseek (pFile, 0, SEEK_END);
+			size=ftell (pFile);
+			fclose (pFile);
+		}
+	
+		//estimate file breaks
+		unsigned long int chunkSize = 0;
+		chunkSize = size / proc;
+		
+		//file to small to divide by processors
+		if (chunkSize == 0)  {  proc = 1;	filePos.push_back(size); return filePos;	}
+	
+		//for each process seekg to closest file break and search for next '>' char. make that the filebreak
+		for (int i = 0; i < proc; i++) {
+			unsigned long int spot = (i+1) * chunkSize;
+			
+			ifstream in;
+			openInputFile(filename, in);
+			in.seekg(spot);
+			
+			//look for next '>'
+			unsigned long int newSpot = spot;
+			while (!in.eof()) {
+			   char c = in.get();
+			   if (c == '>') {   in.putback(c); newSpot = in.tellg(); break;  }
+			}
+			
+			//there was not another sequence before the end of the file
+			if (newSpot == spot) {	break;  }
+			else {   filePos.push_back(newSpot);  }
+			
+			in.close();
+		}
+		
+		//save end pos
+		filePos.push_back(size);
+		
+		//sanity check filePos
+		for (int i = 0; i < (filePos.size()-1); i++) {
+			if (filePos[(i+1)] <= filePos[i]) {  filePos.erase(filePos.begin()+(i+1)); i--; }
+		}
+
+		proc = (filePos.size() - 1);
+		
+		return filePos;
+	}
+	catch(exception& e) {
+		cout << "Standard Error: " << e.what() << " has occurred in the mothur.h function divideFile. Please contact Pat Schloss at mothur.bugs@gmail.com." << "\n";
+		exit(1);
+	}
+}
+/**************************************************************************************************/
 inline bool checkReleaseVersion(ifstream& file, string version) {
 	try {
 		

@@ -36,9 +36,10 @@ public:
 private:
 	struct linePair {
 		unsigned long int start;
-		int numSeqs;
-		linePair(unsigned long int i, int j) : start(i), numSeqs(j) {}
+		unsigned long int end;
+		linePair(unsigned long int i, unsigned long int j) : start(i), end(j) {}
 	};
+
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;
 	vector<string> fastaFileNames;
@@ -56,7 +57,7 @@ private:
 	
 	int driver(linePair*, string, string, string);
 	void appendTaxFiles(string, string);
-	void createProcesses(string, string, string); 
+	int createProcesses(string, string, string); 
 	string addUnclassifieds(string, int);
 	
 	int MPIReadNamesFile(string);
