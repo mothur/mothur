@@ -224,19 +224,17 @@ int SeqSummaryCommand::execute(){
 				
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 #else
+			vector<unsigned long int> positions = divideFile(fastafile, processors);
+				
+			for (int i = 0; i < (positions.size()-1); i++) {
+				lines.push_back(new linePair(positions[i], positions[(i+1)]));
+			}	
+
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				if(processors == 1){
-					ifstream inFASTA;
-					openInputFile(fastafile, inFASTA);
-					getNumSeqs(inFASTA, numSeqs);
-					inFASTA.close();	
-						
-					lines.push_back(new linePair(0, numSeqs));
-					
-					driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, summaryFile, lines[0]);
+					numSeqs = driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, summaryFile, lines[0]);
 				}else{
-					numSeqs = setLines(fastafile);					
-					createProcessesCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, summaryFile); 
+					numSeqs = createProcessesCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, summaryFile); 
 					
 					rename((summaryFile + toString(processIDS[0]) + ".temp").c_str(), summaryFile.c_str());
 					//append files
@@ -248,14 +246,7 @@ int SeqSummaryCommand::execute(){
 				
 				if (m->control_pressed) {  return 0; }
 		#else
-				ifstream inFASTA;
-				openInputFile(fastafile, inFASTA);
-				getNumSeqs(inFASTA, numSeqs);
-				inFASTA.close();
-				
-				lines.push_back(new linePair(0, numSeqs));
-				
-				driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, summaryFile, lines[0]);
+				numSeqs = driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, summaryFile, lines[0]);
 				if (m->control_pressed) {  return 0; }
 		#endif
 #endif
@@ -313,27 +304,30 @@ int SeqSummaryCommand::execute(){
 	}
 }
 /**************************************************************************************/
-int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<int>& endPosition, vector<int>& seqLength, vector<int>& ambigBases, vector<int>& longHomoPolymer, string filename, string sumFile, linePair* line) {	
+int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<int>& endPosition, vector<int>& seqLength, vector<int>& ambigBases, vector<int>& longHomoPolymer, string filename, string sumFile, linePair* filePos) {	
 	try {
 		
 		ofstream outSummary;
 		openOutputFile(sumFile, outSummary);
 		
 		//print header if you are process 0
-		if (line->start == 0) {
+		if (filePos->start == 0) {
 			outSummary << "seqname\tstart\tend\tnbases\tambigs\tpolymer" << endl;	
 		}
 				
 		ifstream in;
 		openInputFile(filename, in);
 				
-		in.seekg(line->start);
-		
-		for(int i=0;i<line->num;i++){
+		in.seekg(filePos->start);
+
+		bool done = false;
+		int count = 0;
+	
+		while (!done) {
 				
 			if (m->control_pressed) { in.close(); outSummary.close(); return 1; }
 					
-			Sequence current(in);
+			Sequence current(in); gobble(in);
 	
 			if (current.getName() != "") {
 				startPosition.push_back(current.getStartPos());
@@ -346,12 +340,21 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 				outSummary << current.getStartPos() << '\t' << current.getEndPos() << '\t';
 				outSummary << current.getNumBases() << '\t' << current.getAmbigBases() << '\t';
 				outSummary << current.getLongHomoPolymer() << endl;
+				count++;
 			}
-			gobble(in);
+			
+			unsigned long int pos = in.tellg();
+			if ((pos == -1) || (pos >= filePos->end)) { break; }
+			
+			//report progress
+			if((count) % 100 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
 		}
+		//report progress
+		if((count) % 100 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+		
 		in.close();
 		
-		return 0;
+		return count;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SeqSummaryCommand", "driverCreateSummary");
@@ -418,18 +421,33 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 0;
-		int exitCommand = 1;
+		int num = 0;
 		processIDS.clear();
 		
 		//loop through and create all the processes you want
 		while (process != processors) {
-			int pid = vfork();
+			int pid = fork();
 			
 			if (pid > 0) {
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, sumFile + toString(getpid()) + ".temp", lines[process]);
+				num = driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, sumFile + toString(getpid()) + ".temp", lines[process]);
+				
+				//pass numSeqs to parent
+				ofstream out;
+				string tempFile = toString(getpid()) + ".temp";
+				openOutputFile(tempFile, out);
+				
+				out << num << endl;
+				for (int k = 0; k < startPosition.size(); k++)		{		out << startPosition[k] << '\t'; }  out << endl;
+				for (int k = 0; k < endPosition.size(); k++)		{		out << endPosition[k] << '\t'; }  out << endl;
+				for (int k = 0; k < seqLength.size(); k++)			{		out << seqLength[k] << '\t'; }  out << endl;
+				for (int k = 0; k < ambigBases.size(); k++)			{		out << ambigBases[k] << '\t'; }  out << endl;
+				for (int k = 0; k < longHomoPolymer.size(); k++)	{		out << longHomoPolymer[k] << '\t'; }  out << endl;
+				
+				out.close();
+				
 				exit(0);
 			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
 		}
@@ -440,65 +458,29 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 			wait(&temp);
 		}
 		
-		return exitCommand;
+		//parent reads in and combine Filter info
+		for (int i = 0; i < processIDS.size(); i++) {
+			string tempFilename = toString(processIDS[i]) + ".temp";
+			ifstream in;
+			openInputFile(tempFilename, in);
+			
+			int temp, tempNum;
+			in >> tempNum; gobble(in); num += tempNum;
+			for (int k = 0; k < tempNum; k++)			{		in >> temp; startPosition.push_back(temp);		}		gobble(in);
+			for (int k = 0; k < tempNum; k++)			{		in >> temp; endPosition.push_back(temp);		}		gobble(in);
+			for (int k = 0; k < tempNum; k++)			{		in >> temp; seqLength.push_back(temp);			}		gobble(in);
+			for (int k = 0; k < tempNum; k++)			{		in >> temp; ambigBases.push_back(temp);			}		gobble(in);
+			for (int k = 0; k < tempNum; k++)			{		in >> temp; longHomoPolymer.push_back(temp);	}		gobble(in);
+				
+			in.close();
+			remove(tempFilename.c_str());
+		}
+		
+		return num;
 #endif		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SeqSummaryCommand", "createProcessesCreateSummary");
-		exit(1);
-	}
-}
-/**************************************************************************************************/
-
-int SeqSummaryCommand::setLines(string filename) {
-	try {
-		
-		vector<unsigned long int> positions;
-		
-		ifstream inFASTA;
-		openInputFile(filename, inFASTA);
-			
-		string input;
-		while(!inFASTA.eof()){	
-			input = getline(inFASTA);
-
-			if (input.length() != 0) {
-				if(input[0] == '>'){ unsigned long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
-			}
-		}
-		inFASTA.close();
-		
-		int numFastaSeqs = positions.size();
-	
-		FILE * pFile;
-		unsigned long int size;
-		
-		//get num bytes in file
-		pFile = fopen (filename.c_str(),"rb");
-		if (pFile==NULL) perror ("Error opening file");
-		else{
-			fseek (pFile, 0, SEEK_END);
-			size=ftell (pFile);
-			fclose (pFile);
-		}
-		
-		int numSeqsPerProcessor = numFastaSeqs / processors;
-		
-		for (int i = 0; i < processors; i++) {
-
-			unsigned long int startPos = positions[ i * numSeqsPerProcessor ];
-			if(i == processors - 1){
-				numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor;
-			}else{  
-				unsigned long int myEnd = positions[ (i+1) * numSeqsPerProcessor ];
-			}
-			lines.push_back(new linePair(startPos, numSeqsPerProcessor));
-		}
-		
-		return numFastaSeqs;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SeqSummaryCommand", "setLines");
 		exit(1);
 	}
 }

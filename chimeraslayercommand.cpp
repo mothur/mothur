@@ -325,57 +325,23 @@ int ChimeraSlayerCommand::execute(){
 			chimera->printHeader(outHeader);
 			outHeader.close();
 			
+			vector<unsigned long int> positions = divideFile(fastaFileNames[s], processors);
+				
+			for (int i = 0; i < (positions.size()-1); i++) {
+				lines.push_back(new linePair(positions[i], positions[(i+1)]));
+			}	
+
 			//break up file
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				if(processors == 1){
-					ifstream inFASTA;
-					openInputFile(fastaFileNames[s], inFASTA);
-					getNumSeqs(inFASTA, numSeqs);
-					inFASTA.close();
+					numSeqs = driver(lines[0], outputFileName, fastaFileNames[s], accnosFileName);
 					
-					lines.push_back(new linePair(0, numSeqs));
-					
-					driver(lines[0], outputFileName, fastaFileNames[s], accnosFileName);
-					
-					if (m->control_pressed) { 
-						remove(outputFileName.c_str()); 
-						remove(tempHeader.c_str()); 
-						remove(accnosFileName.c_str());
-						for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} 
-						for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-						delete chimera;
-						return 0;
-					}
+					if (m->control_pressed) { remove(outputFileName.c_str()); remove(tempHeader.c_str()); remove(accnosFileName.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
 					
 				}else{
-					vector<unsigned long int> positions;
 					processIDS.resize(0);
 					
-					ifstream inFASTA;
-					openInputFile(fastaFileNames[s], inFASTA);
-					
-					string input;
-					while(!inFASTA.eof()){
-						input = getline(inFASTA);
-						if (input.length() != 0) {
-							if(input[0] == '>'){	unsigned long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
-						}
-					}
-					inFASTA.close();
-					
-					numSeqs = positions.size();
-					
-					int numSeqsPerProcessor = numSeqs / processors;
-					
-					for (int i = 0; i < processors; i++) {
-						unsigned long int startPos = positions[ i * numSeqsPerProcessor ];
-						if(i == processors - 1){
-							numSeqsPerProcessor = numSeqs - i * numSeqsPerProcessor;
-						}
-						lines.push_back(new linePair(startPos, numSeqsPerProcessor));
-					}
-					
-					createProcesses(outputFileName, fastaFileNames[s], accnosFileName); 
+					numSeqs = createProcesses(outputFileName, fastaFileNames[s], accnosFileName); 
 				
 					rename((outputFileName + toString(processIDS[0]) + ".temp").c_str(), outputFileName.c_str());
 					rename((accnosFileName + toString(processIDS[0]) + ".temp").c_str(), accnosFileName.c_str());
@@ -392,35 +358,13 @@ int ChimeraSlayerCommand::execute(){
 						remove((accnosFileName + toString(processIDS[i]) + ".temp").c_str());
 					}
 					
-					if (m->control_pressed) { 
-						remove(outputFileName.c_str()); 
-						remove(accnosFileName.c_str());
-						for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} 
-						for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-						delete chimera;
-						return 0;
-					}
-
+					if (m->control_pressed) { remove(outputFileName.c_str()); remove(accnosFileName.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
 				}
 
 			#else
-				ifstream inFASTA;
-				openInputFile(fastaFileNames[s], inFASTA);
-				getNumSeqs(inFASTA, numSeqs);
-				inFASTA.close();
-				lines.push_back(new linePair(0, numSeqs));
+				numSeqs = driver(lines[0], outputFileName, fastaFileNames[s], accnosFileName);
 				
-				driver(lines[0], outputFileName, fastaFileNames[s], accnosFileName);
-				
-				if (m->control_pressed) { 
-						remove(outputFileName.c_str()); 
-						remove(tempHeader.c_str()); 
-						remove(accnosFileName.c_str());
-						for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} 
-						for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
-						delete chimera;
-						return 0;
-				}
+				if (m->control_pressed) { remove(outputFileName.c_str()); remove(tempHeader.c_str()); remove(accnosFileName.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
 				
 			#endif
 			
@@ -456,7 +400,7 @@ int ChimeraSlayerCommand::execute(){
 }
 //**********************************************************************************************************************
 
-int ChimeraSlayerCommand::driver(linePair* line, string outputFName, string filename, string accnos){
+int ChimeraSlayerCommand::driver(linePair* filePos, string outputFName, string filename, string accnos){
 	try {
 		ofstream out;
 		openOutputFile(outputFName, out);
@@ -467,9 +411,12 @@ int ChimeraSlayerCommand::driver(linePair* line, string outputFName, string file
 		ifstream inFASTA;
 		openInputFile(filename, inFASTA);
 
-		inFASTA.seekg(line->start);
-		
-		for(int i=0;i<line->numSeqs;i++){
+		inFASTA.seekg(filePos->start);
+
+		bool done = false;
+		int count = 0;
+	
+		while (!done) {
 		
 			if (m->control_pressed) {	return 1;	}
 		
@@ -488,20 +435,24 @@ int ChimeraSlayerCommand::driver(linePair* line, string outputFName, string file
 					//print results
 					chimera->print(out, out2);
 				}
+			count++;
 			}
 			delete candidateSeq;
 			
+			unsigned long int pos = inFASTA.tellg();
+			if ((pos == -1) || (pos >= filePos->end)) { break; }
+			
 			//report progress
-			if((i+1) % 100 == 0){	m->mothurOut("Processing sequence: " + toString(i+1)); m->mothurOutEndLine();		}
+			if((count) % 100 == 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
 		}
 		//report progress
-		if((line->numSeqs) % 100 != 0){	m->mothurOut("Processing sequence: " + toString(line->numSeqs)); m->mothurOutEndLine();		}
+		if((count) % 100 != 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
 		
 		out.close();
 		out2.close();
 		inFASTA.close();
 				
-		return 0;
+		return count;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraSlayerCommand", "driver");
@@ -573,7 +524,7 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 0;
-		//		processIDS.resize(0);
+		int num = 0;
 		
 		//loop through and create all the processes you want
 		while (process != processors) {
@@ -583,7 +534,15 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				driver(lines[process], outputFileName + toString(getpid()) + ".temp", filename, accnos + toString(getpid()) + ".temp");
+				num = driver(lines[process], outputFileName + toString(getpid()) + ".temp", filename, accnos + toString(getpid()) + ".temp");
+				
+				//pass numSeqs to parent
+				ofstream out;
+				string tempFile = toString(getpid()) + ".temp";
+				openOutputFile(tempFile, out);
+				out << num << endl;
+				out.close();
+				
 				exit(0);
 			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
 		}
@@ -594,7 +553,15 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 			wait(&temp);
 		}
 		
-		return 0;
+		for (int i = 0; i < processIDS.size(); i++) {
+			ifstream in;
+			string tempFile =  toString(processIDS[i]) + ".temp";
+			openInputFile(tempFile, in);
+			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
+			in.close(); remove(tempFile.c_str());
+		}
+		
+		return num;
 #endif		
 	}
 	catch(exception& e) {

@@ -290,50 +290,22 @@ int ScreenSeqsCommand::execute(){
 			MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 					
 #else
-					
+			vector<unsigned long int> positions = divideFile(fastafile, processors);
+				
+			for (int i = 0; i < (positions.size()-1); i++) {
+				lines.push_back(new linePair(positions[i], positions[(i+1)]));
+			}	
+						
 	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			if(processors == 1){
-				ifstream inFASTA;
-				openInputFile(fastafile, inFASTA);
-				getNumSeqs(inFASTA, numFastaSeqs);
-				inFASTA.close();
-				
-				lines.push_back(new linePair(0, numFastaSeqs));
-				
-				driver(lines[0], goodSeqFile, badSeqFile, badAccnosFile, fastafile, badSeqNames);
+				numFastaSeqs = driver(lines[0], goodSeqFile, badSeqFile, badAccnosFile, fastafile, badSeqNames);
 				
 				if (m->control_pressed) { remove(goodSeqFile.c_str()); remove(badSeqFile.c_str()); return 0; }
 				
 			}else{
-				vector<unsigned long int> positions;
 				processIDS.resize(0);
 				
-				ifstream inFASTA;
-				openInputFile(fastafile, inFASTA);
-				
-				string input;
-				while(!inFASTA.eof()){
-					input = getline(inFASTA);
-					if (input.length() != 0) {
-						if(input[0] == '>'){	unsigned long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
-					}
-				}
-				inFASTA.close();
-				
-				numFastaSeqs = positions.size();
-			
-				int numSeqsPerProcessor = numFastaSeqs / processors;
-					
-				for (int i = 0; i < processors; i++) {
-					unsigned long int startPos = positions[ i * numSeqsPerProcessor ];
-					if(i == processors - 1){
-						numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor;
-					}
-					lines.push_back(new linePair(startPos, numSeqsPerProcessor));
-		
-				}
-				
-				createProcesses(goodSeqFile, badSeqFile, badAccnosFile, fastafile, badSeqNames); 
+				numFastaSeqs = createProcesses(goodSeqFile, badSeqFile, badAccnosFile, fastafile, badSeqNames); 
 				
 				rename((goodSeqFile + toString(processIDS[0]) + ".temp").c_str(), goodSeqFile.c_str());
 				rename((badSeqFile + toString(processIDS[0]) + ".temp").c_str(), badSeqFile.c_str());
@@ -368,14 +340,7 @@ int ScreenSeqsCommand::execute(){
 				}
 			}
 	#else
-			ifstream inFASTA;
-			openInputFile(fastafile, inFASTA);
-			getNumSeqs(inFASTA, numFastaSeqs);
-			inFASTA.close();
-			
-			lines.push_back(new linePair(0, numFastaSeqs));
-			
-			driver(lines[0], goodSeqFile, badSeqFile, badAccnosFile, fastafile, badSeqNames);
+			numFastaSeqs = driver(lines[0], goodSeqFile, badSeqFile, badAccnosFile, fastafile, badSeqNames);
 			
 			if (m->control_pressed) { remove(goodSeqFile.c_str()); remove(badSeqFile.c_str()); return 0; }
 			
@@ -692,7 +657,7 @@ int ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){
 }
 //**********************************************************************************************************************
 
-int ScreenSeqsCommand::driver(linePair* line, string goodFName, string badFName, string badAccnosFName, string filename, set<string>& badSeqNames){
+int ScreenSeqsCommand::driver(linePair* filePos, string goodFName, string badFName, string badAccnosFName, string filename, set<string>& badSeqNames){
 	try {
 		ofstream goodFile;
 		openOutputFile(goodFName, goodFile);
@@ -706,13 +671,16 @@ int ScreenSeqsCommand::driver(linePair* line, string goodFName, string badFName,
 		ifstream inFASTA;
 		openInputFile(filename, inFASTA);
 
-		inFASTA.seekg(line->start);
+		inFASTA.seekg(filePos->start);
+
+		bool done = false;
+		int count = 0;
 	
-		for(int i=0;i<line->numSeqs;i++){
+		while (!done) {
 		
 			if (m->control_pressed) {  return 0; }
 			
-			Sequence currSeq(inFASTA);
+			Sequence currSeq(inFASTA); gobble(inFASTA);
 			if (currSeq.getName() != "") {
 				bool goodSeq = 1;		//	innocent until proven guilty
 				if(goodSeq == 1 && startPos != -1 && startPos < currSeq.getStartPos())			{	goodSeq = 0;	}
@@ -730,9 +698,17 @@ int ScreenSeqsCommand::driver(linePair* line, string goodFName, string badFName,
 					badAccnosFile << currSeq.getName() << endl;
 					badSeqNames.insert(currSeq.getName());
 				}
+			count++;
 			}
-			gobble(inFASTA);
+			
+			unsigned long int pos = inFASTA.tellg();
+			if ((pos == -1) || (pos >= filePos->end)) { break; }
+			
+			//report progress
+			if((count) % 100 == 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
 		}
+		//report progress
+		if((count) % 100 != 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
 		
 			
 		goodFile.close();
@@ -740,7 +716,7 @@ int ScreenSeqsCommand::driver(linePair* line, string goodFName, string badFName,
 		badFile.close();
 		badAccnosFile.close();
 		
-		return 1;
+		return count;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ScreenSeqsCommand", "driver");
@@ -838,7 +814,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badFileName, 
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 0;
-		int exitCommand = 1;
+		int num = 0;
 		
 		//loop through and create all the processes you want
 		while (process != processors) {
@@ -848,7 +824,15 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badFileName, 
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				exitCommand = driver(lines[process], goodFileName + toString(getpid()) + ".temp", badFileName + toString(getpid()) + ".temp", badAccnos + toString(getpid()) + ".temp", filename, badSeqNames);
+				num = driver(lines[process], goodFileName + toString(getpid()) + ".temp", badFileName + toString(getpid()) + ".temp", badAccnos + toString(getpid()) + ".temp", filename, badSeqNames);
+				
+				//pass numSeqs to parent
+				ofstream out;
+				string tempFile = toString(getpid()) + ".temp";
+				openOutputFile(tempFile, out);
+				out << num << endl;
+				out.close();
+				
 				exit(0);
 			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
 		}
@@ -859,7 +843,15 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badFileName, 
 			wait(&temp);
 		}
 		
-		return exitCommand;
+		for (int i = 0; i < processIDS.size(); i++) {
+			ifstream in;
+			string tempFile =  toString(processIDS[i]) + ".temp";
+			openInputFile(tempFile, in);
+			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
+			in.close(); remove(tempFile.c_str());
+		}
+		
+		return num;
 #endif		
 	}
 	catch(exception& e) {

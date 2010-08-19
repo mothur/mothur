@@ -26,11 +26,10 @@ public:
 	
 		
 private:
-
 	struct linePair {
 		unsigned long int start;
-		int numSeqs;
-		linePair(unsigned long int i, int j) : start(i), numSeqs(j) {}
+		unsigned long int end;
+		linePair(unsigned long int i, unsigned long int j) : start(i), end(j) {}
 	};
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;

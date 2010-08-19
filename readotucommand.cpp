@@ -21,7 +21,7 @@ ReadOtuCommand::ReadOtuCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"list","order","shared", "label","group","sabund", "rabund","groups","ordergroup","outputdir","inputdir"};
+			string Array[] =  {"list","order","shared","relabund","label","group","sabund", "rabund","groups","ordergroup","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -97,7 +97,14 @@ ReadOtuCommand::ReadOtuCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["ordergroup"] = inputDir + it->second;		}
 				}
-
+				
+				it = parameters.find("relabund");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
+				}
 			}
 
 			
@@ -130,6 +137,12 @@ ReadOtuCommand::ReadOtuCommand(string option)  {
 			else if (sharedfile == "not found") { sharedfile = ""; }
 			else {  globaldata->setSharedFile(sharedfile); globaldata->setFormat("sharedfile");	}
 			
+			relAbundfile = validParameter.validFile(parameters, "relabund", true);
+			if (relAbundfile == "not open") { abort = true; }	
+			else if (relAbundfile == "not found") { relAbundfile = ""; }
+			else {  globaldata->setRelAbundFile(relAbundfile); globaldata->setFormat("relabund");	}
+
+			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }	
 			else if (groupfile == "not found") { groupfile = ""; }
@@ -154,8 +167,8 @@ ReadOtuCommand::ReadOtuCommand(string option)  {
 			if ((listfile != "") && (groupfile != "")) { globaldata->setFormat("shared"); }
 			
 			//you have not given a file
-			if ((listfile == "") && (sharedfile == "") && (rabundfile == "") && (sabundfile == "")) {
-				m->mothurOut("You must enter either a listfile, rabundfile, sabundfile or a sharedfile with the read.otu command. "); m->mothurOutEndLine(); abort = true; 
+			if ((listfile == "") && (sharedfile == "") && (rabundfile == "") && (sabundfile == "") && (relAbundfile == "")) {
+				m->mothurOut("You must enter either a listfile, rabundfile, sabundfile, relabund or a sharedfile with the read.otu command. "); m->mothurOutEndLine(); abort = true; 
 			}
 		
 			//check for optional parameter and set defaults
@@ -194,7 +207,7 @@ void ReadOtuCommand::help(){
 	try {
 		m->mothurOut("The read.otu command must be run before you execute a collect.single, rarefaction.single, summary.single, \n");
 		m->mothurOut("collect.shared, rarefaction.shared, summary.shared heatmap.bin, heatmap.sim or venn command.   Mothur will generate a .list, .rabund and .sabund upon completion of the cluster command \n");
-		m->mothurOut("or you may use your own. The read.otu command parameter options are list, rabund, sabund, shared, group, order, ordergroup, label and groups.\n");
+		m->mothurOut("or you may use your own. The read.otu command parameter options are list, rabund, sabund, shared, relabund, group, order, ordergroup, label and groups.\n");
 		m->mothurOut("The read.otu command can be used in two ways.  The first is to read a list, rabund or sabund and run the collect.single, rarefaction.single or summary.single.\n");
 		m->mothurOut("For this use the read.otu command should be in the following format: read.otu(list=yourListFile, order=yourOrderFile, label=yourLabels).\n");
 		m->mothurOut("The list, rabund or sabund parameter is required, but you may only use one of them.\n");

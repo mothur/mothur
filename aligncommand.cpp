@@ -292,7 +292,6 @@ int AlignCommand::execute(){
 					int startIndex =  pid * numSeqsPerProcessor;
 					if(pid == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - pid * numSeqsPerProcessor; 	}
 					
-				
 					//align your part
 					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPIAlign, outMPIReport, outMPIAccnos, MPIPos);
 					
@@ -347,24 +346,16 @@ int AlignCommand::execute(){
 				}
 				
 #else
-			
+		vector<unsigned long int> positions = divideFile(candidateFileNames[s], processors);
+				
+		for (int i = 0; i < (positions.size()-1); i++) {
+			lines.push_back(new linePair(positions[i], positions[(i+1)]));
+		}	
 	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			if(processors == 1){
-				ifstream inFASTA;
-				openInputFile(candidateFileNames[s], inFASTA);
-				getNumSeqs(inFASTA, numFastaSeqs);
-				inFASTA.close();
+				numFastaSeqs = driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s]);
 				
-				lines.push_back(new linePair(0, numFastaSeqs));
-				
-				driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s]);
-				
-				if (m->control_pressed) { 
-					remove(accnosFileName.c_str()); 
-					remove(alignFileName.c_str()); 
-					remove(reportFileName.c_str()); 
-					return 0; 
-				}
+				if (m->control_pressed) { remove(accnosFileName.c_str()); remove(alignFileName.c_str()); remove(reportFileName.c_str()); return 0; }
 				
 				//delete accnos file if its blank else report to user
 				if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
@@ -375,36 +366,10 @@ int AlignCommand::execute(){
 					}else{  m->mothurOut(" If the reverse compliment proved to be better it was reported.");  }
 					m->mothurOutEndLine();
 				}
-			}
-			else{
-				vector<unsigned long int> positions;
+			}else{
 				processIDS.resize(0);
 				
-				ifstream inFASTA;
-				openInputFile(candidateFileNames[s], inFASTA);
-				
-				string input;
-				while(!inFASTA.eof()){
-					input = getline(inFASTA);
-					if (input.length() != 0) {
-						if(input[0] == '>'){	unsigned long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
-					}
-				}
-				inFASTA.close();
-				
-				numFastaSeqs = positions.size();
-				
-				int numSeqsPerProcessor = numFastaSeqs / processors;
-				
-				for (int i = 0; i < processors; i++) {
-					unsigned long int startPos = positions[ i * numSeqsPerProcessor ];
-					if(i == processors - 1){
-						numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor;
-					}
-					lines.push_back(new linePair(startPos, numSeqsPerProcessor));
-				}
-				
-				createProcesses(alignFileName, reportFileName, accnosFileName, candidateFileNames[s]); 
+				numFastaSeqs = createProcesses(alignFileName, reportFileName, accnosFileName, candidateFileNames[s]); 
 				
 				rename((alignFileName + toString(processIDS[0]) + ".temp").c_str(), alignFileName.c_str());
 				rename((reportFileName + toString(processIDS[0]) + ".temp").c_str(), reportFileName.c_str());
@@ -441,29 +406,12 @@ int AlignCommand::execute(){
 					m->mothurOutEndLine();
 				}else{ hasAccnos = false;  }
 				
-				if (m->control_pressed) { 
-					remove(accnosFileName.c_str()); 
-					remove(alignFileName.c_str()); 
-					remove(reportFileName.c_str()); 
-					return 0; 
-				}
+				if (m->control_pressed) { remove(accnosFileName.c_str()); remove(alignFileName.c_str()); remove(reportFileName.c_str()); return 0; }
 			}
 	#else
-			ifstream inFASTA;
-			openInputFile(candidateFileNames[s], inFASTA);
-			getNumSeqs(inFASTA, numFastaSeqs);
-			inFASTA.close();
+			numFastaSeqs = driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s]);
 			
-			lines.push_back(new linePair(0, numFastaSeqs));
-			
-			driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s]);
-			
-			if (m->control_pressed) { 
-				remove(accnosFileName.c_str()); 
-				remove(alignFileName.c_str()); 
-				remove(reportFileName.c_str()); 
-				return 0; 
-			}
+			if (m->control_pressed) { remove(accnosFileName.c_str()); remove(alignFileName.c_str()); remove(reportFileName.c_str()); return 0; }
 			
 			//delete accnos file if its blank else report to user
 			if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
@@ -515,7 +463,7 @@ int AlignCommand::execute(){
 
 //**********************************************************************************************************************
 
-int AlignCommand::driver(linePair* line, string alignFName, string reportFName, string accnosFName, string filename){
+int AlignCommand::driver(linePair* filePos, string alignFName, string reportFName, string accnosFName, string filename){
 	try {
 		ofstream alignmentFile;
 		openOutputFile(alignFName, alignmentFile);
@@ -528,9 +476,12 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName, 
 		ifstream inFASTA;
 		openInputFile(filename, inFASTA);
 
-		inFASTA.seekg(line->start);
+		inFASTA.seekg(filePos->start);
+
+		bool done = false;
+		int count = 0;
 	
-		for(int i=0;i<line->numSeqs;i++){
+		while (!done) {
 			
 			if (m->control_pressed) {  return 0; }
 			
@@ -607,20 +558,26 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName, 
 				report.print();
 				delete nast;
 				if (needToDeleteCopy) {   delete copy;   }
+				
+				count++;
 			}
 			delete candidateSeq;
 			
+			unsigned long int pos = inFASTA.tellg();
+			if ((pos == -1) || (pos >= filePos->end)) { break; }
+			
 			//report progress
-			if((i+1) % 100 == 0){	m->mothurOut(toString(i+1)); m->mothurOutEndLine();		}
+			if((count) % 100 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+			
 		}
 		//report progress
-		if((line->numSeqs) % 100 != 0){	m->mothurOut(toString(line->numSeqs)); m->mothurOutEndLine();		}
+		if((count) % 100 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
 		
 		alignmentFile.close();
 		inFASTA.close();
 		accnosFile.close();
 		
-		return 1;
+		return count;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "AlignCommand", "driver");
@@ -796,7 +753,7 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 0;
-		int exitCommand = 1;
+		int num = 0;
 		//		processIDS.resize(0);
 		
 		//loop through and create all the processes you want
@@ -807,7 +764,15 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				exitCommand = driver(lines[process], alignFileName + toString(getpid()) + ".temp", reportFileName + toString(getpid()) + ".temp", accnosFName + toString(getpid()) + ".temp", filename);
+				num = driver(lines[process], alignFileName + toString(getpid()) + ".temp", reportFileName + toString(getpid()) + ".temp", accnosFName + toString(getpid()) + ".temp", filename);
+				
+				//pass numSeqs to parent
+				ofstream out;
+				string tempFile = toString(getpid()) + ".temp";
+				openOutputFile(tempFile, out);
+				out << num << endl;
+				out.close();
+				
 				exit(0);
 			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
 		}
@@ -818,7 +783,15 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 			wait(&temp);
 		}
 		
-		return exitCommand;
+		for (int i = 0; i < processIDS.size(); i++) {
+			ifstream in;
+			string tempFile =  toString(processIDS[i]) + ".temp";
+			openInputFile(tempFile, in);
+			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
+			in.close(); remove(tempFile.c_str());
+		}
+		
+		return num;
 #endif		
 	}
 	catch(exception& e) {
@@ -826,7 +799,6 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 		exit(1);
 	}
 }
-
 /**************************************************************************************************/
 
 void AlignCommand::appendAlignFiles(string temp, string filename) {
