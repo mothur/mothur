@@ -18,10 +18,10 @@ EstOutput SharedAce::getValues(vector<SharedRAbundVector*> shared) {
 		string label;
 		label = shared[0]->getLabel();
 
-		int fARare, fBRare, S12Rare, S12Abund, S12, f11, tempA, tempB, t10, t01, t11, t21, t12, t22, C12Numerator;
+		double fARare, fBRare, S12Rare, S12Abund, S12, f11, tempA, tempB, t10, t01, t11, t21, t12, t22, C12Numerator;
 		fARare = 0; fBRare = 0; S12Rare = 0; S12Abund = 0; S12 = 0; f11 = 0; t10 = 0; t01 = 0; t11= 0; t21= 0; t12= 0; t22= 0; C12Numerator = 0;
 	
-		float Sharedace, C12, part1, part2, part3, part4, part5, Gamma1, Gamma2, Gamma3;
+		double Sharedace, C12, part1, part2, part3, part4, part5, Gamma1, Gamma2, Gamma3;
 	
 		/*fARare = number of OTUs with one individual found in A and less than or equal to 10 in B. 
 		fBRare = number of OTUs with one individual found in B and less than or equal to 10 in A. 
@@ -89,7 +89,7 @@ EstOutput SharedAce::getValues(vector<SharedRAbundVector*> shared) {
 		if (isnan(Gamma3) || isinf(Gamma3)) { Gamma3 = 0; }
 		if (isnan(part1)  || isinf(part1))  { part1 = 0;  }
 		if (isnan(part2)  || isinf(part2))  { part2 = 0;  }
-			
+		
 		part3 = fARare * Gamma1;
 		part4 = fBRare * Gamma2;
 		part5 = f11 * Gamma3;

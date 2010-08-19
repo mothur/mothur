@@ -16,12 +16,12 @@ EstOutput Ace::getValues(SAbundVector* rank) {
 		data.resize(3,0);
 		double ace, acelci, acehci;
 	
-		int nrare = 0;
-		int srare = 0;
-		int sabund = 0;
+		double nrare = 0;
+		double srare = 0;
+		double sabund = 0;
 	
 		double Cace, term1, gamace;
-		int numsum = 0;
+		double numsum = 0;
 	
 		double maxRank = (double)rank->getMaxRank();
 	
@@ -33,7 +33,7 @@ EstOutput Ace::getValues(SAbundVector* rank) {
 			}
 			else if(i>abund)	{sabund += rank->get(i);}
 		}
-		int sobs = srare + sabund;
+		double sobs = srare + sabund;
 	
 		if (nrare == 0){ Cace = 0.0000; }
 		else { Cace = 1.0000 -(double)rank->get(1)/(double)nrare; }
@@ -62,7 +62,8 @@ EstOutput Ace::getValues(SAbundVector* rank) {
 		I have also added the forumlae to calculate the 95% confidence intervals.
 		*/
 	
-		int j,D_s=0,nn=0,ww=0,Max_Index=rank->getMaxRank()+1;
+		double j,D_s=0,nn=0,ww=0;
+		int Max_Index=rank->getMaxRank()+1;
 		double pp, temp1, temp2;
 		vector<double> Part_N_Part_F(Max_Index+1,0.0);
     

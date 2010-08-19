@@ -24,7 +24,7 @@ HeatMapCommand::HeatMapCommand(string option) {
 		
 		else {
 			//valid paramters for this command
-			string AlignArray[] =  {"groups","label","sorted","scale","outputdir","inputdir"};
+			string AlignArray[] =  {"groups","label","sorted","scale","fontsize","numotu","outputdir","inputdir"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -70,10 +70,22 @@ HeatMapCommand::HeatMapCommand(string option) {
 				globaldata->Groups = Groups;
 			}
 			
-			sorted = validParameter.validFile(parameters, "sorted", false);			if (sorted == "not found") { sorted = "T"; }
+			string temp = validParameter.validFile(parameters, "numotu", false);		if (temp == "not found") { temp = "0"; }
+			convert(temp, numOTU);
+			
+			temp = validParameter.validFile(parameters, "fontsize", false);				if (temp == "not found") { temp = "24"; }
+			convert(temp, fontSize);
+			
+			sorted = validParameter.validFile(parameters, "sorted", false);				
+			if (sorted == "not found") { 
+				//if numOTU is used change default
+				if (numOTU != 0) { sorted = "topotu"; }
+				else { sorted = "shared"; }
+			}
 		 
 			scale = validParameter.validFile(parameters, "scale", false);				if (scale == "not found") { scale = "log10"; }
 			
+			if ((sorted != "none") && (sorted != "shared") && (sorted != "topotu") && (sorted != "topgroup")) { m->mothurOut(sorted + " is not a valid sorting option. Sorted options are: none, shared, topotu, topgroup"); m->mothurOutEndLine(); abort=true;  }
 		}
 
 	}
@@ -88,15 +100,17 @@ HeatMapCommand::HeatMapCommand(string option) {
 void HeatMapCommand::help(){
 	try {
 		m->mothurOut("The heatmap.bin command can only be executed after a successful read.otu command.\n");
-		m->mothurOut("The heatmap.bin command parameters are groups, sorted, scale label.  No parameters are required.\n");
+		m->mothurOut("The heatmap.bin command parameters are groups, sorted, scale, numotu, fontsize and label.  No parameters are required.\n");
 		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included in your heatmap.\n");
-		m->mothurOut("The sorted parameter allows you to choose to see the file with the shared otus at the top or the otus in the order they appear in your input file. \n");
+		m->mothurOut("The sorted parameter allows you to order the otus displayed, default=shared, meaning display the shared otus first. Other options for sorted are none, meaning the exact representation of your otus, \n");
+		m->mothurOut("topotu, meaning the otus with the greatest abundance when totaled across groups, topgroup, meaning the top otus for each group. \n");
 		m->mothurOut("The scale parameter allows you to choose the range of color your bin information will be displayed with.\n");
+		m->mothurOut("The numotu parameter allows you to display only the top N otus, by default all the otus are displayed. You could choose to look at the top 10, by setting numotu=10. The default for sorted is topotu when numotu is used.\n");
 		m->mothurOut("The group names are separated by dashes. The label parameter allows you to select what distance levels you would like a heatmap created for, and are also separated by dashes.\n");
+		m->mothurOut("The fontsize parameter allows you to adjust the font size of the picture created, default=24.\n");
 		m->mothurOut("The heatmap.bin command should be in the following format: heatmap.bin(groups=yourGroups, sorted=yourSorted, label=yourLabels).\n");
 		m->mothurOut("Example heatmap.bin(groups=A-B-C, sorted=F, scale=log10).\n");
 		m->mothurOut("The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n");
-		m->mothurOut("The default value for sorted is T meaning you want the shared otus on top, you may change it to F meaning the exact representation of your input file.\n");
 		m->mothurOut("The default value for scale is log10; your other options are log2 and linear.\n");
 		m->mothurOut("The heatmap.bin command outputs a .svg file for each label you specify.\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
@@ -120,7 +134,7 @@ int HeatMapCommand::execute(){
 	
 		if (abort == true) { return 0; }
 		
-		heatmap = new HeatMap(sorted, scale, outputDir);
+		heatmap = new HeatMap(sorted, scale, numOTU, fontSize, outputDir);
 		format = globaldata->getFormat();
 
 		string lastLabel;

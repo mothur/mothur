@@ -2,7 +2,7 @@
  *  sharedkulczynski.cpp
  *  Mothur
  *
- *  Created by John Westcott on 3/24/09.
+ *  Created by Sarah Westcott on 3/24/09.
  *  Copyright 2009 Schloss Lab UMASS Amherst. All rights reserved.
  *
  */
@@ -13,7 +13,7 @@
 
 EstOutput Kulczynski::getValues(vector<SharedRAbundVector*> shared) {
 	try {
-		int S1, S2, S12, tempA, tempB;
+		double S1, S2, S12, tempA, tempB;
 		S1 = 0; S2 = 0; S12 = 0; tempA = 0; tempB = 0; 
 		
 		/*S1, S2 = number of OTUs observed or estimated in A and B 

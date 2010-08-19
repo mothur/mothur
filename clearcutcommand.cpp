@@ -92,7 +92,7 @@ ClearcutCommand::ClearcutCommand(string option)  {
 			temp = validParameter.validFile(parameters, "shuffle", false);		if (temp == "not found"){	temp = "F";			}
 			shuffle = isTrue(temp); 
 			
-			temp = validParameter.validFile(parameters, "neighbor", false);		if (temp == "not found"){	temp = "F";			}
+			temp = validParameter.validFile(parameters, "neighbor", false);		if (temp == "not found"){	temp = "T";			}
 			neighbor = isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "DNA", false);			if (temp == "not found"){	temp = "F";			}
@@ -146,7 +146,7 @@ void ClearcutCommand::help(){
 		m->mothurOut("The seed parameter allows you to explicitly set the PRNG seed to a specific value. \n");
 		m->mothurOut("The norandom parameter allows you to attempt joins deterministically, default=F. \n");
 		m->mothurOut("The shuffle parameter allows you to randomly shuffle the distance matrix, default=F. \n");
-		m->mothurOut("The neighbor parameter allows you to use traditional Neighbor-Joining algorithm, default=F. \n");
+		m->mothurOut("The neighbor parameter allows you to use traditional Neighbor-Joining algorithm, default=T. \n");
 		
 		m->mothurOut("The DNA parameter allows you to indicate your fasta file contains DNA sequences, default=F. \n");
 		m->mothurOut("The protein parameter allows you to indicate your fasta file contains protein sequences, default=F. \n");

@@ -15,7 +15,7 @@ EstOutput BrayCurtis::getValues(vector<SharedRAbundVector*> shared) {
 	try {	
 		data.resize(1,0);
 		
-		int sumSharedA, sumSharedB, sumSharedAB, tempA, tempB;
+		double sumSharedA, sumSharedB, sumSharedAB, tempA, tempB;
 		sumSharedA = 0; sumSharedB = 0; sumSharedAB = 0; 
 		
 		/*Xi, Yi = abundance of the ith shared OTU in A and B 

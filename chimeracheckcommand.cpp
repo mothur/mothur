@@ -64,14 +64,6 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 					int ableToOpen;
 					ifstream in;
 					
-					#ifdef USE_MPI	
-						int pid;
-						MPI_Comm_size(MPI_COMM_WORLD, &processors); //set processors to the number of mpi processes running
-						MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-				
-						if (pid == 0) {
-					#endif
-
 					ableToOpen = openInputFile(fastaFileNames[i], in, "noerror");
 				
 					//if you can't open it, try default location
@@ -85,17 +77,6 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 					}
 					in.close();
 					
-					#ifdef USE_MPI	
-							for (int j = 1; j < processors; j++) {
-								MPI_Send(&ableToOpen, 1, MPI_INT, j, 2001, MPI_COMM_WORLD); 
-							}
-						}else{
-							MPI_Status status;
-							MPI_Recv(&ableToOpen, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-						}
-						
-					#endif
-
 					if (ableToOpen == 1) { 
 						m->mothurOut("Unable to open " + fastaFileNames[i] +". It will be disregarded."); m->mothurOutEndLine(); 
 						//erase from file list
@@ -131,14 +112,6 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 					int ableToOpen;
 					ifstream in;
 					
-					#ifdef USE_MPI	
-						int pid;
-						MPI_Comm_size(MPI_COMM_WORLD, &processors); //set processors to the number of mpi processes running
-						MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-				
-						if (pid == 0) {
-					#endif
-
 					ableToOpen = openInputFile(nameFileNames[i], in, "noerror");
 				
 					//if you can't open it, try default location
@@ -152,17 +125,6 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 					}
 					in.close();
 					
-					#ifdef USE_MPI	
-							for (int j = 1; j < processors; j++) {
-								MPI_Send(&ableToOpen, 1, MPI_INT, j, 2001, MPI_COMM_WORLD); 
-							}
-						}else{
-							MPI_Status status;
-							MPI_Recv(&ableToOpen, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-						}
-						
-					#endif
-
 					if (ableToOpen == 1) { 
 						m->mothurOut("Unable to open " + nameFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
 						//erase from file list

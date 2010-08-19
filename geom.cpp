@@ -44,9 +44,9 @@ EstOutput Geom::getValues(SAbundVector* rank){
 		data.resize(3,0);
 		
 		rdata = getRAbundVector(rank);
-		int numInd = rdata.getNumSeqs();
-		int numSpec = rdata.getNumBins();
-		int min = rdata.get(rdata.size()-1);
+		double numInd = rdata.getNumSeqs();
+		double numSpec = rdata.getNumBins();
+		double min = rdata.get(rdata.size()-1);
 		double k = .5;
 		double step = .49999;
 		

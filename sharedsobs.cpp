@@ -16,7 +16,7 @@
 EstOutput SharedSobs::getValues(vector<SharedRAbundVector*> shared){
 	try {
 		data.resize(1,0);
-		int observed = 0;
+		double observed = 0;
 
 		//loop through the species in each group
 		for (int k = 0; k < shared[0]->size(); k++) {

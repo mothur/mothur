@@ -13,7 +13,7 @@
 
 EstOutput Lennon::getValues(vector<SharedRAbundVector*> shared) {
 	try {
-		int S1, S2, S12, tempA, tempB, min;
+		double S1, S2, S12, tempA, tempB, min;
 		S1 = 0; S2 = 0; S12 = 0; tempA = 0; tempB = 0; min = 0;
 		
 		/*S1, S2 = number of OTUs observed or estimated in A and B 

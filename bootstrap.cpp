@@ -16,8 +16,8 @@ EstOutput Bootstrap::getValues(SAbundVector* rank){
 		//vector<double> bootData(3,0);
 		data.resize(1,0);
 		double maxRank = (double)rank->getMaxRank();
-		int sampled = rank->getNumSeqs();
-		int sobs = rank->getNumBins();
+		double sampled = rank->getNumSeqs();
+		double sobs = rank->getNumBins();
 
 		double boot = (double)sobs;
 

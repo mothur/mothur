@@ -16,7 +16,7 @@
 EstOutput SharedSobsCS::getValues(vector<SharedRAbundVector*> shared){
 	try {
 		data.resize(1,0);
-		int observed = 0;
+		double observed = 0;
 		int numGroups = shared.size();
 
 		for (int i = 0; i < shared[0]->size(); i++) {

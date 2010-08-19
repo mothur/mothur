@@ -26,6 +26,16 @@ struct individual {
 		}
 };
 
+struct individualFloat {
+		string group;
+		int bin;
+		float abundance;
+		bool operator()(const individual& i1, const individual& i2) {
+		return (i1.abundance > i2.abundance);
+		}
+};
+
+
 #include "sabundvector.hpp"
 #include "rabundvector.hpp"
 #include "sharedrabundvector.h"

@@ -994,7 +994,12 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
 			remove(thisDistFile.c_str());
 			remove(thisNamefile.c_str());
 			
-			if (saveCutoff != cutoff) { m->mothurOut("Cutoff was " + toString(cutoff) + " changed cutoff to " + toString(saveCutoff)); m->mothurOutEndLine();  }
+			if (saveCutoff != cutoff) { 
+				if (hard)	{  saveCutoff = ceilDist(saveCutoff, precision);	}
+				else		{	saveCutoff = roundDist(saveCutoff, precision);  }
+			
+				m->mothurOut("Cutoff was " + toString(cutoff) + " changed cutoff to " + toString(saveCutoff)); m->mothurOutEndLine();  
+			}
 			
 			if (saveCutoff < smallestCutoff) { smallestCutoff = saveCutoff;  }
 		}

@@ -222,6 +222,16 @@ inline void gobble(istream& f){
 }
 /***********************************************************************/
 
+inline void gobble(istringstream& f){
+	
+	char d;
+    while(isspace(d=f.get()))		{;}
+	f.putback(d);
+	
+}
+
+/***********************************************************************/
+
 inline string getline(istringstream& fileHandle) {
 	try {
 	
@@ -1044,13 +1054,14 @@ inline vector<unsigned long int> setFilePosFasta(string filename, int& num) {
 			vector<unsigned long int> positions;
 			ifstream inFASTA;
 			openInputFile(filename, inFASTA);
-				
+						
 			string input;
 			while(!inFASTA.eof()){
-				input = getline(inFASTA); gobble(inFASTA);
+				input = getline(inFASTA); 
 				if (input.length() != 0) {
 					if(input[0] == '>'){	unsigned long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
 				}
+				gobble(inFASTA); //has to be here since windows line endings are 2 characters and mess up the positions
 			}
 			inFASTA.close();
 		
@@ -1094,12 +1105,13 @@ inline vector<unsigned long int> setFilePosEachLine(string filename, int& num) {
 			string input;
 			while(!in.eof()){
 				unsigned long int lastpos = in.tellg();
-				input = getline(in); gobble(in);
+				input = getline(in); 
 				if (input.length() != 0) {
 					unsigned long int pos = in.tellg(); 
 					if (pos != -1) { positions.push_back(pos - input.length() - 1);	}
 					else {  positions.push_back(lastpos);  }
 				}
+				gobble(in); //has to be here since windows line endings are 2 characters and mess up the positions
 			}
 			in.close();
 		

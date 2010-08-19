@@ -18,7 +18,7 @@ double BStick::invSum(int index, double numSpec)
 		sum += 1/(double)i;
 	return sum;
 }
-
+/***********************************************************************/
 RAbundVector BStick::getRAbundVector(SAbundVector* rank){
 		vector <int> rData;
 		int mr = 1;
@@ -26,7 +26,7 @@ RAbundVector BStick::getRAbundVector(SAbundVector* rank){
 		int ns = 0;
 		
 		for(int i = rank->size()-1; i > 0; i--) {
-			int cur = rank->get(i);
+			double cur = rank->get(i);
 			if(mr == 1 && cur > 0)
 				mr = i;
 			nb += cur;

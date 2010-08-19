@@ -15,24 +15,40 @@
 #include "globaldata.hpp"
 
 /***********************************************************************/
+struct binCount {
+		int bin;
+		int abund;
+		binCount(int i, int j) : bin(i), abund(j) {}
+};
+/***********************************************************************/
+//sorts highest abund to lowest
+inline bool comparebinCounts(binCount left, binCount right){
+	return (left.abund > right.abund);	
+}
+/***********************************************************************/
 
 class HeatMap {
 	
 	public:
-		HeatMap(string, string, string);
+		HeatMap(string, string, int, int, string);
 		~HeatMap(){};
 	
 		string getPic(RAbundVector*);
 		string getPic(vector<SharedRAbundVector*>);
 
 	private:
-		void sortSharedVectors(vector<SharedRAbundVector*>& );
+		int sortSharedVectors(vector<SharedRAbundVector*>& );
 		void printLegend(int, float);
 
 		GlobalData* globaldata;
 		string format, sorted, groupComb, scaler, outputDir;
 		ofstream outsvg;
 		MothurOut* m;
+		int numOTU, fontSize;
+		
+		map<int, int> orderTopGroup(vector<SharedRAbundVector*>&);
+		map<int, int> orderTopOtu(vector<SharedRAbundVector*>&);
+		map<int, int> orderShared(vector<SharedRAbundVector*>&);
 			
 };
 

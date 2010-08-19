@@ -154,7 +154,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 				ifstream kmerFileTest(kmerDBName.c_str());
 				search->readKmerDB(kmerFileTest);	
 			}
-			
+		
 			search->setNumSeqs(numSeqs);
 		}
 	}

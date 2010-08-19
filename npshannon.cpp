@@ -18,7 +18,7 @@ EstOutput NPShannon::getValues(SAbundVector* rank){
 		float npShannon = 0.0000;
 	
 		double maxRank = (double)rank->getMaxRank();
-		int sampled = rank->getNumSeqs();
+		double sampled = rank->getNumSeqs();
 	
 		double Chat = 1.0000 - (double)rank->get(1)/(double)sampled;
 	
