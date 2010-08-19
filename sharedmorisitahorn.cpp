@@ -14,9 +14,9 @@ EstOutput MorHorn::getValues(vector<SharedRAbundVector*> shared) {
 	try {	
 		data.resize(1,0);
 		
-		float Atotal, Btotal, tempA, tempB;
+		double Atotal, Btotal, tempA, tempB;
 		Atotal = 0; Btotal = 0; 
-		float  morhorn, sumSharedA, sumSharedB, a, b, d;
+		double  morhorn, sumSharedA, sumSharedB, a, b, d;
 		morhorn = 0.0; sumSharedA = 0.0; sumSharedB = 0.0; a = 0.0; b = 0.0; d = 0.0;
 		
 		//get the total values we need to calculate the theta denominator sums

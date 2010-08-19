@@ -67,7 +67,7 @@ EstOutput Jackknife::getValues(SAbundVector* rank){
 	
 		double jack, jacklci, jackhci;
 	
-		double maxRank = (double)rank->getMaxRank();
+		int maxRank = (double)rank->getMaxRank();
 		int S = rank->getNumBins();
 
 		double N[maxOrder+1];

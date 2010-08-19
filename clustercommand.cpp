@@ -232,7 +232,12 @@ int ClusterCommand::execute(){
 		rabundFile.close();
 		listFile.close();
 	
-		if (saveCutoff != cutoff) { m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine();  }
+		if (saveCutoff != cutoff) { 
+			if (hard)	{  saveCutoff = ceilDist(saveCutoff, precision);	}
+			else		{	saveCutoff = roundDist(saveCutoff, precision);  }
+
+			m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine(); 
+		}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

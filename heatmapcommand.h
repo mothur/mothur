@@ -41,6 +41,7 @@ private:
 	set<string> labels; //holds labels to be used
 	string format, groups, sorted, scale, label, outputDir;
 	vector<string> Groups, outputNames;
+	int numOTU, fontSize;
 
 
 };

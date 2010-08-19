@@ -31,8 +31,8 @@ EstOutput QStat::getValues(SAbundVector* rank){
 		int r3 = -1;
 		int r1Ind = 0;
 		int r3Ind = 0;
-		int sumSpec = 0;
-		int iqSum = 0;
+		double sumSpec = 0;
+		double iqSum = 0;
 		for(int i = 1; i < rank->size(); i++) {
 			if(r1 != -1 && r3 != -1)
 				i = rank->size();

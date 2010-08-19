@@ -50,6 +50,8 @@
 		A7825503116519F70002E2DD /* chimerabellerophoncommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimerabellerophoncommand.cpp; sourceTree = "<group>"; };
 		A78434881162224F00100BE0 /* chimeraccodecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraccodecommand.h; sourceTree = "<group>"; };
 		A78434891162224F00100BE0 /* chimeraccodecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeraccodecommand.cpp; sourceTree = "<group>"; };
+		A7AE6302121C3408001DE6FC /* sharedrabundfloatvector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedrabundfloatvector.h; sourceTree = "<group>"; };
+		A7AE6303121C3408001DE6FC /* sharedrabundfloatvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedrabundfloatvector.cpp; sourceTree = "<group>"; };
 		A7BBDA7B11B5694E006E6551 /* classifyotucommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = classifyotucommand.h; sourceTree = "<group>"; };
 		A7BBDA7C11B5694E006E6551 /* classifyotucommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = classifyotucommand.cpp; sourceTree = "<group>"; };
 		A7D215C811996C6E00F13F13 /* clearcutcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clearcutcommand.h; sourceTree = "<group>"; };
@@ -870,8 +872,10 @@
 				A7DA212B113FECD400BF472F /* sharedordervector.h */,
 				A7DA212C113FECD400BF472F /* sharedrabundvector.cpp */,
 				A7DA212D113FECD400BF472F /* sharedrabundvector.h */,
-				A7DA212E113FECD400BF472F /* sharedsabundvector.cpp */,
+				A7AE6302121C3408001DE6FC /* sharedrabundfloatvector.h */,
+				A7AE6303121C3408001DE6FC /* sharedrabundfloatvector.cpp */,
 				A7DA212F113FECD400BF472F /* sharedsabundvector.h */,
+				A7DA212E113FECD400BF472F /* sharedsabundvector.cpp */,
 				A7DA214C113FECD400BF472F /* sparsematrix.cpp */,
 				A7DA214D113FECD400BF472F /* sparsematrix.hpp */,
 				A7DA214E113FECD400BF472F /* suffixdb.cpp */,

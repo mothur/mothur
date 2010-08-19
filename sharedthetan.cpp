@@ -14,9 +14,9 @@ EstOutput ThetaN::getValues(vector<SharedRAbundVector*> shared) {
 	try {	
 		data.resize(1,0);
 		
-		int Atotal, Btotal, tempA, tempB;
+		double Atotal, Btotal, tempA, tempB;
 		Atotal = 0; Btotal = 0; 
-		float numerator, denominator, thetaN, sumSharedA, sumSharedB, a, b, d;
+		double numerator, denominator, thetaN, sumSharedA, sumSharedB, a, b, d;
 		numerator = 0.0; denominator = 0.0; thetaN = 0.0; sumSharedA = 0.0; sumSharedB = 0.0; a = 0.0; b = 0.0; d = 0.0;
 		
 		//get the total values we need to calculate the theta denominator sums

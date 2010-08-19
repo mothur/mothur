@@ -263,7 +263,7 @@ int FilterSeqsCommand::filterSequences() {
 				MPI_Status status; 
 				MPI_Comm_size(MPI_COMM_WORLD, &processors); //set processors to the number of mpi processes running
 				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-	cout << pid << "is in create filter " << endl;			
+				
 				MPI_File outMPI;
 				MPI_File tempMPI;
 				MPI_File inMPI;
@@ -494,7 +494,14 @@ int FilterSeqsCommand::driverRunFilter(string F, string outputFilename, string i
 					out << '>' << seq.getName() << endl << filterSeq << endl;
 				}
 				gobble(in);
+				
+			//report progress
+			if((i+1) % 100 == 0){	m->mothurOut(toString(i+1)); m->mothurOutEndLine();		}
 		}
+		
+		//report progress
+		if((line->num) % 100 != 0){	m->mothurOut(toString(line->num)); m->mothurOutEndLine();		}
+		
 		out.close();
 		in.close();
 		
@@ -853,13 +860,27 @@ int FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string filename) 
 		
 		//loop through and create all the processes you want
 		while (process != processors) {
-			int pid = vfork();
+			int pid = fork();
 			
 			if (pid > 0) {
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
 				driverCreateFilter(F, filename, lines[process]);
+				
+				//write out filter counts to file
+				filename += toString(getpid()) + "filterValues.temp";
+				ofstream out;
+				openOutputFile(filename, out);
+				
+				for (int k = 0; k < alignmentLength; k++) {		out << F.a[k] << '\t'; }  out << endl;
+				for (int k = 0; k < alignmentLength; k++) {		out << F.t[k] << '\t'; }  out << endl;
+				for (int k = 0; k < alignmentLength; k++) {		out << F.g[k] << '\t'; }  out << endl;
+				for (int k = 0; k < alignmentLength; k++) {		out << F.c[k] << '\t'; }  out << endl;
+				for (int k = 0; k < alignmentLength; k++) {		out << F.gap[k] << '\t'; }  out << endl;
+				
+				out.close();
+				
 				exit(0);
 			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
 		}
@@ -868,6 +889,23 @@ int FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string filename) 
 		for (int i=0;i<processors;i++) { 
 			int temp = processIDS[i];
 			wait(&temp);
+		}
+		
+		//parent reads in and combine Filter info
+		for (int i = 0; i < processIDS.size(); i++) {
+			string tempFilename = filename + toString(processIDS[i]) + "filterValues.temp";
+			ifstream in;
+			openInputFile(tempFilename, in);
+			
+			int temp;
+			for (int k = 0; k < alignmentLength; k++) {		in >> temp; F.a[k] += temp; }		gobble(in);
+			for (int k = 0; k < alignmentLength; k++) {		in >> temp; F.t[k] += temp; }		gobble(in);
+			for (int k = 0; k < alignmentLength; k++) {		in >> temp; F.g[k] += temp; }		gobble(in);
+			for (int k = 0; k < alignmentLength; k++) {		in >> temp; F.c[k] += temp; }		gobble(in);
+			for (int k = 0; k < alignmentLength; k++) {		in >> temp; F.gap[k] += temp; }	gobble(in);
+				
+			in.close();
+			remove(tempFilename.c_str());
 		}
 		
 		return exitCommand;

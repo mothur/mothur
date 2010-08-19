@@ -98,14 +98,6 @@ AlignCommand::AlignCommand(string option)  {
 	
 					int ableToOpen;
 					ifstream in;
-					
-					#ifdef USE_MPI	
-						int pid;
-						MPI_Comm_size(MPI_COMM_WORLD, &processors); //set processors to the number of mpi processes running
-						MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
-				
-						if (pid == 0) {
-					#endif
 
 					ableToOpen = openInputFile(candidateFileNames[i], in, "noerror");
 				
@@ -119,16 +111,6 @@ AlignCommand::AlignCommand(string option)  {
 						}
 					}
 					in.close();					
-					#ifdef USE_MPI	
-							for (int j = 1; j < processors; j++) {
-								MPI_Send(&ableToOpen, 1, MPI_INT, j, 2001, MPI_COMM_WORLD); 
-							}
-						}else{
-							MPI_Status status;
-							MPI_Recv(&ableToOpen, 1, MPI_INT, 0, 2001, MPI_COMM_WORLD, &status);
-						}
-						
-					#endif
 
 					if (ableToOpen == 1) { 
 						m->mothurOut("Unable to open " + candidateFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
@@ -263,7 +245,7 @@ int AlignCommand::execute(){
 				int tag = 2001;
 				vector<unsigned long int> MPIPos;
 				MPIWroteAccnos = false;
-				
+			
 				MPI_Status status; 
 				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
 				MPI_Comm_size(MPI_COMM_WORLD, &processors); 
@@ -580,7 +562,7 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName, 
 				//if there is a possibility that this sequence should be reversed
 				if (candidateSeq->getNumBases() < numBasesNeeded) {
 					
-					string wasBetter = "";
+					string wasBetter =  "";
 					//if the user wants you to try the reverse
 					if (flip) {
 						//get reverse compliment
@@ -602,8 +584,9 @@ int AlignCommand::driver(linePair* line, string alignFName, string reportFName, 
 							delete nast;
 							nast = nast2;
 							needToDeleteCopy = true;
+							wasBetter = "\treverse complement produced a better alignment, so mothur used the reverse complement.";
 						}else{  
-							wasBetter = "\treverse complement did NOT produce a better alignment, please check sequence.";
+							wasBetter = "\treverse complement did NOT produce a better alignment so it was not used, please check sequence.";
 							delete nast2;
 							delete copy;	
 						}
@@ -678,7 +661,7 @@ int AlignCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& align
 			int length = MPIPos[start+i+1] - MPIPos[start+i];
 
 			char* buf4 = new char[length];
-			memcpy(buf4, outputString.c_str(), length);
+			//memcpy(buf4, outputString.c_str(), length);
 
 			MPI_File_read_at(inMPI, MPIPos[start+i], buf4, length, MPI_CHAR, &status);
 			
@@ -687,9 +670,11 @@ int AlignCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& align
 			delete buf4;
 
 			if (tempBuf.length() > length) { tempBuf = tempBuf.substr(0, length);  }
-			istringstream iss (tempBuf,istringstream::in);
 	
+			istringstream iss (tempBuf,istringstream::in);
+
 			Sequence* candidateSeq = new Sequence(iss);  
+	
 			int origNumBases = candidateSeq->getNumBases();
 			string originalUnaligned = candidateSeq->getUnaligned();
 			int numBasesNeeded = origNumBases * threshold;

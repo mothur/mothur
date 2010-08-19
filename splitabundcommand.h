@@ -54,7 +54,7 @@ private:
 	vector<string> Groups;
 	bool abort, allLines, accnos;
 	int cutoff;
-	map<string, bool> wroteListFile;
+	//map<string, bool> wroteListFile;
 	map<string, string> nameMap;
 	
 	

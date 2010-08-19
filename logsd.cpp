@@ -14,6 +14,7 @@
 double LogSD::logS(double x){
 	return -(1-x)*log(1-x)/x;
 }
+/***********************************************************************/
 EstOutput LogSD::getValues(SAbundVector* rank){
 	try {
 		
@@ -29,8 +30,8 @@ EstOutput LogSD::getValues(SAbundVector* rank){
 		SAbundVector *rank = &rankw;*/
 		
 		data.resize(3,0);
-		int numInd = rank->getNumSeqs();
-		int numSpec = rank->getNumBins();
+		double numInd = rank->getNumSeqs();
+		double numSpec = rank->getNumBins();
 		double snRatio = (double)numSpec/numInd;
 		double x = .5;
 		double step = .4999999999;
@@ -44,7 +45,7 @@ EstOutput LogSD::getValues(SAbundVector* rank){
 		}
 		double alpha = numInd*(1-x)/x;
 
-		int oct = 1;
+		double oct = 1;
 		double octSumObs = 0;
 		double sumObs = 0;
 		double octSumExp = 0;
