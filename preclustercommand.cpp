@@ -123,59 +123,66 @@ int PreClusterCommand::execute(){
 		if (numSeqs == 0) { m->mothurOut("Error reading fasta file...please correct."); m->mothurOutEndLine(); return 0;  }
 		if (diffs > length) { m->mothurOut("Error: diffs is greater than your sequence length."); m->mothurOutEndLine(); return 0;  }
 		
-		//clear sizes since you only needed this info to build the alignSeqs seqPNode structs
-//		sizes.clear();
-	
-		//sort seqs by number of identical seqs
-		sort(alignSeqs.begin(), alignSeqs.end(), comparePriority);
-	
-		int count = 0;
-
-		//think about running through twice...
-		for (int i = 0; i < numSeqs; i++) {
-			
-			//are you active
-			//			itActive = active.find(alignSeqs[i].seq.getName());
-			
-			if (alignSeqs[i].active) {  //this sequence has not been merged yet
-				
-				//try to merge it with all smaller seqs
-				for (int j = i+1; j < numSeqs; j++) {
-					
-					if (m->control_pressed) { return 0; }
-					
-					if (alignSeqs[j].active) {  //this sequence has not been merged yet
-						//are you within "diff" bases
-						int mismatch = calcMisMatches(alignSeqs[i].seq.getAligned(), alignSeqs[j].seq.getAligned());
-						
-						if (mismatch <= diffs) {
-							//merge
-							alignSeqs[i].names += ',' + alignSeqs[j].names;
-							alignSeqs[i].numIdentical += alignSeqs[j].numIdentical;
-
-							alignSeqs[j].active = 0;
-							alignSeqs[j].numIdentical = 0;
-							count++;
-						}
-					}//end if j active
-				}//end if i != j
-			
-			//remove from active list 
-				alignSeqs[i].active = 0;
-			}//end if active i
-			if(i % 100 == 0)	{ cout << i << '\t' << numSeqs - count << '\t' << count << endl;	}
-		}
-		
 		string fileroot = outputDir + getRootName(getSimpleName(fastafile));
-		
 		string newFastaFile = fileroot + "precluster" + getExtension(fastafile);
 		string newNamesFile = fileroot + "precluster.names";
+		ofstream outFasta;
+		ofstream outNames;
 		
-		if (m->control_pressed) { return 0; }
+		openOutputFile(newFastaFile, outFasta);
+		openOutputFile(newNamesFile, outNames);
+
+		//sort seqs by number of identical seqs
+		alignSeqs.sort(comparePriority);
+	
+		int count = 0;
+		int i = 0;
+
+		//think about running through twice...
+		list<seqPNode>::iterator itList;
+		list<seqPNode>::iterator itList2;
+		for (itList = alignSeqs.begin(); itList != alignSeqs.end(); itList++) {			
+			//try to merge it with all smaller seqs
+			for (itList2 = alignSeqs.begin(); itList2 != alignSeqs.end(); itList2++) {
+					
+				if (m->control_pressed) { outFasta.close(); outNames.close(); remove(newFastaFile.c_str()); remove(newNamesFile.c_str());  return 0; }
+					
+				if ((*itList).seq.getName() != (*itList2).seq.getName()) { //you don't want to merge with yourself
+					//are you within "diff" bases
+					int mismatch = calcMisMatches((*itList).seq.getAligned(), (*itList2).seq.getAligned());
+						
+					if (mismatch <= diffs) {
+						//merge
+						(*itList).names += ',' + (*itList2).names;
+						(*itList).numIdentical += (*itList2).numIdentical;
+
+						alignSeqs.erase(itList2); itList2--;
+						count++;
+					}
+				}
+			}
+			
+			//ouptut this sequence
+			printData(outFasta, outNames, (*itList));
+			
+			//remove sequence
+			alignSeqs.erase(itList); itList--;
+			
+			i++;
+			
+			if(i % 100 == 0)	{ m->mothurOut(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)); m->mothurOutEndLine();	}
+		}
+				
+		if(i % 100 != 0)	{ m->mothurOut(toString(i) + "\t" + toString(numSeqs - count) + "\t" + toString(count)); m->mothurOutEndLine();	}
 		
-		m->mothurOut("Total number of sequences before precluster was " + toString(alignSeqs.size()) + "."); m->mothurOutEndLine();
+		outFasta.close();
+		outNames.close();
+		
+		if (m->control_pressed) {  remove(newFastaFile.c_str()); remove(newNamesFile.c_str());  return 0; }
+
+		
+		m->mothurOut("Total number of sequences before precluster was " + toString(numSeqs) + "."); m->mothurOutEndLine();
 		m->mothurOut("pre.cluster removed " + toString(count) + " sequences."); m->mothurOutEndLine(); 
-		printData(newFastaFile, newNamesFile);
 		
 		if (m->control_pressed) { remove(newFastaFile.c_str()); remove(newNamesFile.c_str()); return 0; }
 		
@@ -233,12 +240,12 @@ int PreClusterCommand::readFASTA(){
 					else{
 						seqPNode tempNode(itSize->second, seq, names[seq.getName()]);
 						alignSeqs.push_back(tempNode);
-						if (seq.getAligned().length() > length) {  length = alignSeqs[0].seq.getAligned().length();  }
+						if (seq.getAligned().length() > length) {  length = seq.getAligned().length();  }
 					}	
 				}else { //no names file, you are identical to yourself 
 					seqPNode tempNode(1, seq, seq.getName());
 					alignSeqs.push_back(tempNode);
-					if (seq.getAligned().length() > length) {  length = alignSeqs[0].seq.getAligned().length();  }
+					if (seq.getAligned().length() > length) {  length = seq.getAligned().length();  }
 				}
 			}
 		}
@@ -275,32 +282,16 @@ int PreClusterCommand::calcMisMatches(string seq1, string seq2){
 
 /**************************************************************************************************/
 
-void PreClusterCommand::printData(string newfasta, string newname){
+void PreClusterCommand::printData(ofstream& outFasta, ofstream& outNames, seqPNode thisSeq){
 	try {
-		ofstream outFasta;
-		ofstream outNames;
-		
-		openOutputFile(newfasta, outFasta);
-		openOutputFile(newname, outNames);
-				
-		
-		for (int i = 0; i < alignSeqs.size(); i++) {
-			if (alignSeqs[i].numIdentical != 0) {
-				alignSeqs[i].seq.printSequence(outFasta); 
-				outNames << alignSeqs[i].seq.getName() << '\t' << alignSeqs[i].names << endl;
-			}
-		}
-		
-		outFasta.close();
-		outNames.close();
-		
+		thisSeq.seq.printSequence(outFasta); 
+		outNames << thisSeq.seq.getName() << '\t' << thisSeq.names << endl;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PreClusterCommand", "printData");
 		exit(1);
 	}
 }
-
 /**************************************************************************************************/
 
 void PreClusterCommand::readNameFile(){

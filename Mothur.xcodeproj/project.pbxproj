@@ -456,6 +456,22 @@
 		A7DA217A113FECD400BF472F /* weighted.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = weighted.h; sourceTree = "<group>"; };
 		A7DA217B113FECD400BF472F /* whittaker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = whittaker.cpp; sourceTree = "<group>"; };
 		A7DA217C113FECD400BF472F /* whittaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = whittaker.h; sourceTree = "<group>"; };
+		A7DF0AD3121EBB14004A03EA /* clearcut.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = clearcut.c; sourceTree = "<group>"; };
+		A7DF0AD4121EBB14004A03EA /* clearcut.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clearcut.h; sourceTree = "<group>"; };
+		A7DF0AD5121EBB14004A03EA /* cmdargs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cmdargs.c; sourceTree = "<group>"; };
+		A7DF0AD6121EBB14004A03EA /* cmdargs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cmdargs.h; sourceTree = "<group>"; };
+		A7DF0AD7121EBB14004A03EA /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
+		A7DF0AD8121EBB14004A03EA /* dayhoff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dayhoff.h; sourceTree = "<group>"; };
+		A7DF0AD9121EBB14004A03EA /* distclearcut.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = distclearcut.c; sourceTree = "<group>"; };
+		A7DF0ADA121EBB14004A03EA /* distclearcut.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = distclearcut.h; sourceTree = "<group>"; };
+		A7DF0ADB121EBB14004A03EA /* dmat.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = dmat.c; sourceTree = "<group>"; };
+		A7DF0ADC121EBB14004A03EA /* dmat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dmat.h; sourceTree = "<group>"; };
+		A7DF0ADD121EBB14004A03EA /* fasta.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fasta.c; sourceTree = "<group>"; };
+		A7DF0ADE121EBB14004A03EA /* fasta.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fasta.h; sourceTree = "<group>"; };
+		A7DF0ADF121EBB14004A03EA /* getopt_long.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = getopt_long.c; sourceTree = "<group>"; };
+		A7DF0AE0121EBB14004A03EA /* getopt_long.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getopt_long.h; sourceTree = "<group>"; };
+		A7DF0AE1121EBB14004A03EA /* prng.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = prng.c; sourceTree = "<group>"; };
+		A7DF0AE2121EBB14004A03EA /* prng.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = prng.h; sourceTree = "<group>"; };
 		A7E8338B115BBDAA00739EC4 /* parsesffcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parsesffcommand.cpp; sourceTree = "<group>"; };
 		A7E8338C115BBDAA00739EC4 /* parsesffcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parsesffcommand.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -475,6 +491,7 @@
 				A7CB593B11402EF90010EB83 /* calculators */,
 				A7CB594A11402FB40010EB83 /* chimeras */,
 				A7CB594511402F6E0010EB83 /* classifers */,
+				A7DF0AE5121EBC26004A03EA /* clearcutsource */,
 				A7CB593E11402F110010EB83 /* commands */,
 				A7CB594211402F430010EB83 /* containers */,
 				A7DA2023113FECD400BF472F /* collect.cpp */,
@@ -965,6 +982,29 @@
 				A71D924611AEB42400D00CBC /* splitmatrix.cpp */,
 			);
 			name = read;
+			sourceTree = "<group>";
+		};
+		A7DF0AE5121EBC26004A03EA /* clearcutsource */ = {
+			isa = PBXGroup;
+			children = (
+				A7DF0AD4121EBB14004A03EA /* clearcut.h */,
+				A7DF0AD3121EBB14004A03EA /* clearcut.c */,
+				A7DF0AD6121EBB14004A03EA /* cmdargs.h */,
+				A7DF0AD7121EBB14004A03EA /* common.h */,
+				A7DF0AD8121EBB14004A03EA /* dayhoff.h */,
+				A7DF0AD5121EBB14004A03EA /* cmdargs.c */,
+				A7DF0AD9121EBB14004A03EA /* distclearcut.c */,
+				A7DF0ADA121EBB14004A03EA /* distclearcut.h */,
+				A7DF0ADB121EBB14004A03EA /* dmat.c */,
+				A7DF0ADC121EBB14004A03EA /* dmat.h */,
+				A7DF0ADD121EBB14004A03EA /* fasta.c */,
+				A7DF0ADE121EBB14004A03EA /* fasta.h */,
+				A7DF0ADF121EBB14004A03EA /* getopt_long.c */,
+				A7DF0AE0121EBB14004A03EA /* getopt_long.h */,
+				A7DF0AE2121EBB14004A03EA /* prng.h */,
+				A7DF0AE1121EBB14004A03EA /* prng.c */,
+			);
+			name = clearcutsource;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
