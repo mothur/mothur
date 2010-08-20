@@ -728,10 +728,8 @@ string FilterSeqsCommand::createFilter() {
 		if (pid == 0) { //only one process should output the filter
 #endif
 		F.setNumSeqs(numSeqs);
-				
 		if(isTrue(vertical) == 1)	{	F.doVertical();	}
 		if(soft != 0)				{	F.doSoft();		}
-			
 		filterString = F.getFilter();
 		
 #ifdef USE_MPI
@@ -781,8 +779,8 @@ int FilterSeqsCommand::driverCreateFilter(Filters& F, string filename, linePair*
 			if (seq.getName() != "") {
 					if (seq.getAligned().length() != alignmentLength) { m->mothurOut("Sequences are not all the same length, please correct."); m->mothurOutEndLine(); m->control_pressed = true;  }
 					
-					if(trump != '*'){	F.doTrump(seq);	}
-					if(isTrue(vertical) || soft != 0){	F.getFreqs(seq);	}
+					if(trump != '*')			{	F.doTrump(seq);		}
+					if(isTrue(vertical) || soft != 0)	{	F.getFreqs(seq);	}
 					cout.flush();
 					count++;
 			}
@@ -876,12 +874,14 @@ int FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string filename) 
 				openOutputFile(filename, out);
 				
 				out << num << endl;
+				out << F.getFilter() << endl;
 				for (int k = 0; k < alignmentLength; k++) {		out << F.a[k] << '\t'; }  out << endl;
 				for (int k = 0; k < alignmentLength; k++) {		out << F.t[k] << '\t'; }  out << endl;
 				for (int k = 0; k < alignmentLength; k++) {		out << F.g[k] << '\t'; }  out << endl;
 				for (int k = 0; k < alignmentLength; k++) {		out << F.c[k] << '\t'; }  out << endl;
 				for (int k = 0; k < alignmentLength; k++) {		out << F.gap[k] << '\t'; }  out << endl;
-				
+
+				cout << F.getFilter() << endl;
 				out.close();
 				
 				exit(0);
@@ -901,7 +901,13 @@ int FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string filename) 
 			openInputFile(tempFilename, in);
 			
 			int temp, tempNum;
+			string tempFilterString;
+
 			in >> tempNum; gobble(in); num += tempNum;
+
+			in >> tempFilterString;
+			F.mergeFilter(tempFilterString);
+
 			for (int k = 0; k < alignmentLength; k++) {		in >> temp; F.a[k] += temp; }		gobble(in);
 			for (int k = 0; k < alignmentLength; k++) {		in >> temp; F.t[k] += temp; }		gobble(in);
 			for (int k = 0; k < alignmentLength; k++) {		in >> temp; F.g[k] += temp; }		gobble(in);
