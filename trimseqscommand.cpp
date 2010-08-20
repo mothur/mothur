@@ -476,7 +476,9 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			
 			int success = 1;
 			
+
 			Sequence currSeq(inFASTA); gobble(inFASTA);
+
 			QualityScores currQual;
 			if(qFileName != ""){
 				currQual = QualityScores(qFile, currSeq.getNumBases());  gobble(qFile);
