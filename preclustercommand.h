@@ -20,9 +20,8 @@ struct seqPNode {
 	int numIdentical;
 	Sequence seq;
 	string names;
-	bool active;
 	seqPNode() {}
-	seqPNode(int n, Sequence s, string nm) : numIdentical(n), seq(s), names(nm), active(1) {}
+	seqPNode(int n, Sequence s, string nm) : numIdentical(n), seq(s), names(nm) {}
 	~seqPNode() {}
 };
 /************************************************************/
@@ -39,7 +38,7 @@ private:
 	int diffs, length;
 	bool abort;
 	string fastafile, namefile, outputDir;
-	vector<seqPNode> alignSeqs; //maps the number of identical seqs to a sequence
+	list<seqPNode> alignSeqs; //maps the number of identical seqs to a sequence
 	map<string, string> names; //represents the names file first column maps to second column
 	map<string, int> sizes;  //this map a seq name to the number of identical seqs in the names file
 	map<string, int>::iterator itSize; 
@@ -49,7 +48,7 @@ private:
 	void readNameFile();
 	//int readNamesFASTA();
 	int calcMisMatches(string, string);
-	void printData(string, string); //fasta filename, names file name
+	void printData(ofstream&, ofstream&, seqPNode); //fasta filename, names file name
 };
 
 /************************************************************/
