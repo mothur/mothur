@@ -26,8 +26,8 @@ private:
 
 	struct linePair {
 		unsigned long int start;
-		int num;
-		linePair(unsigned long int i, int j) : start(i), num(j) {}
+		unsigned long int end;
+		linePair(unsigned long int i, unsigned long int j) : start(i), end(j) {}
 	};
 
 	void getOligos(vector<string>&, vector<string>&);
@@ -60,7 +60,7 @@ private:
 	
 	int driverCreateTrim(string, string, string, string, string, string, string, vector<string>, vector<string>, linePair*, linePair*);	
 	int createProcessesCreateTrim(string, string, string, string, string, string, string, vector<string>, vector<string>);
-	int setLines(string, vector<linePair*>&);
+	int setLines(string, string, vector<unsigned long int>&, vector<unsigned long int>&);
 	
 };
 

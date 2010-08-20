@@ -235,21 +235,22 @@ int TrimSeqsCommand::execute(){
 			outputNames.push_back(groupFile);
 			getOligos(fastaFileNames, qualFileNames);
 		}
-		
-		if(qFileName != "")	{	setLines(qFileName, qLines);	}
 
+		vector<unsigned long int> fastaFilePos;
+		vector<unsigned long int> qFilePos;
+		
+		setLines(fastaFile, qFileName, fastaFilePos, qFilePos);
+		
+		for (int i = 0; i < (fastaFilePos.size()-1); i++) {
+			lines.push_back(new linePair(fastaFilePos[i], fastaFilePos[(i+1)]));
+			if (qFileName != "") {  qLines.push_back(new linePair(qFilePos[i], qFilePos[(i+1)]));  }
+		}	
+		if(qFileName == "")	{	qLines = lines;	} //files with duds
 		
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				if(processors == 1){
-					ifstream inFASTA;
-					int numSeqs;
-					openInputFile(fastaFile, inFASTA);
-					getNumSeqs(inFASTA, numSeqs);
-					inFASTA.close();
-					
-					lines.push_back(new linePair(0, numSeqs));
-					
-					driverCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, groupFile, fastaFileNames, qualFileNames, lines[0], lines[0]);
+										
+					driverCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, groupFile, fastaFileNames, qualFileNames, lines[0], qLines[0]);
 					
 					for (int j = 0; j < fastaFileNames.size(); j++) {
 						rename((fastaFileNames[j] + toString(getpid()) + ".temp").c_str(), fastaFileNames[j].c_str());
@@ -261,9 +262,6 @@ int TrimSeqsCommand::execute(){
 					}						
 
 				}else{
-					setLines(fastaFile, lines);	
-					if(qFileName == "")	{	qLines = lines;	}	
-								
 					createProcessesCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, groupFile, fastaFileNames, qualFileNames); 
 					
 					rename((trimSeqFile + toString(processIDS[0]) + ".temp").c_str(), trimSeqFile.c_str());
@@ -317,15 +315,7 @@ int TrimSeqsCommand::execute(){
 				
 				if (m->control_pressed) {  return 0; }
 		#else
-				ifstream inFASTA;
-				int numSeqs;
-				openInputFile(fastaFile, inFASTA);
-				getNumSeqs(inFASTA, numSeqs);
-				inFASTA.close();
-				
-				lines.push_back(new linePair(0, numSeqs));
-				
-				driverCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, groupFile, fastaFileNames, qualFileNames, lines[0], lines[0]);
+				driverCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, groupFile, fastaFileNames, qualFileNames, lines[0], qlines[0]);
 				
 				for (int j = 0; j < fastaFileNames.size(); j++) {
 					rename((fastaFileNames[j] + toString(j) + ".temp").c_str(), fastaFileNames[j].c_str());
@@ -459,14 +449,15 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 		
 		ifstream inFASTA;
 		openInputFile(filename, inFASTA);
-		
-		ifstream qFile;
-		if(qFileName != "")	{	openInputFile(qFileName, qFile);	}
-		
-		qFile.seekg(qline->start);
 		inFASTA.seekg(line->start);
 		
-		for(int i=0;i<line->num;i++){
+		ifstream qFile;
+		if(qFileName != "")	{	openInputFile(qFileName, qFile);	qFile.seekg(qline->start);  }
+		
+		bool done = false;
+		int count = 0;
+	
+		while (!done) {
 				
 			if (m->control_pressed) { 
 				inFASTA.close(); outFASTA.close(); scrapFASTA.close();
@@ -485,10 +476,10 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			
 			int success = 1;
 			
-			Sequence currSeq(inFASTA);
+			Sequence currSeq(inFASTA); gobble(inFASTA);
 			QualityScores currQual;
 			if(qFileName != ""){
-				currQual = QualityScores(qFile, currSeq.getNumBases());
+				currQual = QualityScores(qFile, currSeq.getNumBases());  gobble(qFile);
 			}
 			
 			string origSeq = currSeq.getUnaligned();
@@ -576,10 +567,19 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 					currSeq.printSequence(scrapFASTA);
 					currQual.printQScores(scrapQual);
 				}
+				count++;
 			}
-			gobble(inFASTA);
-			gobble(qFile);
+			
+			unsigned long int pos = inFASTA.tellg();
+			if ((pos == -1) || (pos >= line->end)) { break; }
+			
+			//report progress
+			if((count) % 1000 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+			
 		}
+		//report progress
+		if((count) % 1000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+
 		
 		inFASTA.close();
 		outFASTA.close();
@@ -599,7 +599,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			}		
 		}			
 		
-		return 0;
+		return count;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "TrimSeqsCommand", "driverCreateTrim");
@@ -646,33 +646,70 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 
 /**************************************************************************************************/
 
-int TrimSeqsCommand::setLines(string filename, vector<linePair*>& lines) {
+int TrimSeqsCommand::setLines(string filename, string qfilename, vector<unsigned long int>& fastaFilePos, vector<unsigned long int>& qfileFilePos) {
 	try {
 		
-		lines.clear();
+		//set file positions for fasta file
+		fastaFilePos = divideFile(filename, processors);
 		
-		vector<unsigned long int> positions;
+		if (qfilename == "") { return processors; }
 		
-		ifstream inFASTA;
-		openInputFile(filename, inFASTA);
+		//get name of first sequence in each chunk
+		map<string, int> firstSeqNames;
+		for (int i = 0; i < (fastaFilePos.size()-1); i++) {
+			ifstream in;
+			openInputFile(filename, in);
+			in.seekg(fastaFilePos[i]);
+		
+			Sequence temp(in); 
+			firstSeqNames[temp.getName()] = i;
+		
+			in.close();
+		}
+				
+		//seach for filePos of each first name in the qfile and save in qfileFilePos
+		ifstream inQual;
+		openInputFile(qfilename, inQual);
 			
 		string input;
-		while(!inFASTA.eof()){	
-			input = getline(inFASTA);
+		while(!inQual.eof()){	
+			input = getline(inQual);
 
 			if (input.length() != 0) {
-				if(input[0] == '>'){ unsigned long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
+				if(input[0] == '>'){ //this is a sequence name line
+					istringstream nameStream(input);
+					
+					string sname = "";  nameStream >> sname;
+					sname = sname.substr(1);
+					
+					map<string, int>::iterator it = firstSeqNames.find(sname);
+					
+					if(it != firstSeqNames.end()) { //this is the start of a new chunk
+						unsigned long int pos = inQual.tellg(); 
+						qfileFilePos.push_back(pos - input.length() - 1);	
+						firstSeqNames.erase(it);
+					}
+				}
 			}
+			
+			if (firstSeqNames.size() == 0) { break; }
 		}
-		inFASTA.close();
+		inQual.close();
 		
-		int numFastaSeqs = positions.size();
-	
+		if (firstSeqNames.size() != 0) { 
+			for (map<string, int>::iterator it = firstSeqNames.begin(); it != firstSeqNames.end(); it++) {
+				m->mothurOut(it->first + " is in your fasta file and not in your quality file, not using quality file."); m->mothurOutEndLine();
+			}
+			qFileName = "";
+			return processors;
+		}
+
+		//get last file position of qfile
 		FILE * pFile;
 		unsigned long int size;
 		
 		//get num bytes in file
-		pFile = fopen (filename.c_str(),"rb");
+		pFile = fopen (qfilename.c_str(),"rb");
 		if (pFile==NULL) perror ("Error opening file");
 		else{
 			fseek (pFile, 0, SEEK_END);
@@ -680,20 +717,9 @@ int TrimSeqsCommand::setLines(string filename, vector<linePair*>& lines) {
 			fclose (pFile);
 		}
 		
-		int numSeqsPerProcessor = numFastaSeqs / processors;
+		qfileFilePos.push_back(size);
 		
-		for (int i = 0; i < processors; i++) {
-
-			unsigned long int startPos = positions[ i * numSeqsPerProcessor ];
-			if(i == processors - 1){
-				numSeqsPerProcessor = numFastaSeqs - i * numSeqsPerProcessor;
-			}else{  
-				unsigned long int myEnd = positions[ (i+1) * numSeqsPerProcessor ];
-			}
-			lines.push_back(new linePair(startPos, numSeqsPerProcessor));
-		}
-		
-		return numFastaSeqs;
+		return processors;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "TrimSeqsCommand", "setLines");

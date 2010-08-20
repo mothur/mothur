@@ -34,12 +34,17 @@ QualityScores::QualityScores(ifstream& qFile, int l){
 		seqLength = l;
 		int score;
 		
-		string line;
-		getline(qFile, line); gobble(qFile);
-		istringstream nameStream(line);
+		//string line;
+		//getline(qFile, line); 
+		//istringstream nameStream(line);
 	
-		nameStream >> seqName;
-		seqName = seqName.substr(1); 
+		qFile >> seqName; 
+		while (!qFile.eof())	{	char c = qFile.get(); if (c == 10 || c == 13 || c == -1){	break;	}	} // get rest of line 
+		gobble(qFile);
+		if (seqName == "") { m->mothurOut("Error reading quality file, name blank at position, " + toString(qFile.tellg())); m->mothurOutEndLine(); }
+		else {
+			seqName = seqName.substr(1); 
+		}
 
 		//getline(qFile, line);
 		//istringstream qualStream(line);
