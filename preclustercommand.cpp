@@ -141,10 +141,10 @@ int PreClusterCommand::execute(){
 		//think about running through twice...
 		list<seqPNode>::iterator itList;
 		list<seqPNode>::iterator itList2;
-		for (itList = alignSeqs.begin(); itList != alignSeqs.end(); itList++) {
+		for (itList = alignSeqs.begin(); itList != alignSeqs.end();) {
 			
 			//try to merge it with all smaller seqs
-			for (itList2 = alignSeqs.begin(); itList2 != alignSeqs.end(); itList2++) {
+			for (itList2 = alignSeqs.begin(); itList2 != alignSeqs.end();) {
 				
 				if (m->control_pressed) { outFasta.close(); outNames.close(); remove(newFastaFile.c_str()); remove(newNamesFile.c_str());  return 0; }
 				
@@ -159,11 +159,11 @@ int PreClusterCommand::execute(){
 						(*itList).names += ',' + (*itList2).names;
 						(*itList).numIdentical += (*itList2).numIdentical;
 						
-						itList2 = alignSeqs.erase(itList2); 
+						alignSeqs.erase(itList2++); 
 
 						count++;
-					}
-				}
+					}else{ itList2++; }
+				}else{ itList2++; }
 
 			}
 
