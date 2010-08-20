@@ -134,39 +134,44 @@ int PreClusterCommand::execute(){
 
 		//sort seqs by number of identical seqs
 		alignSeqs.sort(comparePriority);
-	
+		
 		int count = 0;
 		int i = 0;
-
+		
 		//think about running through twice...
 		list<seqPNode>::iterator itList;
 		list<seqPNode>::iterator itList2;
-		for (itList = alignSeqs.begin(); itList != alignSeqs.end(); itList++) {			
+		for (itList = alignSeqs.begin(); itList != alignSeqs.end(); itList++) {
+			
 			//try to merge it with all smaller seqs
 			for (itList2 = alignSeqs.begin(); itList2 != alignSeqs.end(); itList2++) {
-					
+				
 				if (m->control_pressed) { outFasta.close(); outNames.close(); remove(newFastaFile.c_str()); remove(newNamesFile.c_str());  return 0; }
-					
-				if ((*itList).seq.getName() != (*itList2).seq.getName()) { //you don't want to merge with yourself
+				
+			
+				if (itList->seq.getName() != itList2->seq.getName()) { //you don't want to merge with yourself
 					//are you within "diff" bases
+					
 					int mismatch = calcMisMatches((*itList).seq.getAligned(), (*itList2).seq.getAligned());
-						
+									
 					if (mismatch <= diffs) {
 						//merge
 						(*itList).names += ',' + (*itList2).names;
 						(*itList).numIdentical += (*itList2).numIdentical;
+						
+						itList2 = alignSeqs.erase(itList2); 
 
-						alignSeqs.erase(itList2); itList2--;
 						count++;
 					}
 				}
+
 			}
-			
+
 			//ouptut this sequence
 			printData(outFasta, outNames, (*itList));
 			
 			//remove sequence
-			alignSeqs.erase(itList); itList--;
+			itList = alignSeqs.erase(itList); 
 			
 			i++;
 			
@@ -179,7 +184,6 @@ int PreClusterCommand::execute(){
 		outNames.close();
 		
 		if (m->control_pressed) {  remove(newFastaFile.c_str()); remove(newNamesFile.c_str());  return 0; }
-
 		
 		m->mothurOut("Total number of sequences before precluster was " + toString(numSeqs) + "."); m->mothurOutEndLine();
 		m->mothurOut("pre.cluster removed " + toString(count) + " sequences."); m->mothurOutEndLine(); 
