@@ -46,6 +46,14 @@ public:
 			if(a[i] < threshold && t[i] < threshold && g[i] < threshold && c[i] < threshold){	filter[i] = 0;	}
 		}
 	}
+
+	void mergeFilter(string newFilter){
+		for(int i=0;i<alignmentLength;i++){
+			if(newFilter[i] == '0'){
+				filter[i] = 0;
+			}
+		}
+	}
 	
 	void doVertical() {
 

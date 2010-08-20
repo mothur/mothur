@@ -134,10 +134,9 @@ int PreClusterCommand::execute(){
 
 		//sort seqs by number of identical seqs
 		alignSeqs.sort(comparePriority);
-		
+
 		int count = 0;
 		int i = 0;
-		
 		//think about running through twice...
 		list<seqPNode>::iterator itList;
 		list<seqPNode>::iterator itList2;
@@ -153,14 +152,13 @@ int PreClusterCommand::execute(){
 					//are you within "diff" bases
 					
 					int mismatch = calcMisMatches((*itList).seq.getAligned(), (*itList2).seq.getAligned());
-									
+
 					if (mismatch <= diffs) {
 						//merge
 						(*itList).names += ',' + (*itList2).names;
 						(*itList).numIdentical += (*itList2).numIdentical;
 						
-						alignSeqs.erase(itList2++); 
-
+						itList2 = alignSeqs.erase(itList2); //itList2--;
 						count++;
 					}else{ itList2++; }
 				}else{ itList2++; }
