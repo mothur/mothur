@@ -306,9 +306,9 @@ void PreClusterCommand::readNameFile(){
 			in >> firstCol >> secondCol; gobble(in);
 			names[firstCol] = secondCol;
 			int size = 1;
-			while (secondCol.find_first_of(',') != -1) { 
-				size++;
-				secondCol = secondCol.substr(secondCol.find_first_of(',')+1, secondCol.length());
+
+			for(int i=0;i<secondCol.size();i++){
+				if(secondCol[i] == ','){	size++;	}
 			}
 			sizes[firstCol] = size;
 		}

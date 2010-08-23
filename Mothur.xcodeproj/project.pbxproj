@@ -7,10 +7,20 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		7E4EBD43122018FB00D85E7B /* simpsoneven.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = simpsoneven.h; sourceTree = "<group>"; };
+		7E4EBD44122018FB00D85E7B /* simpsoneven.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = simpsoneven.cpp; sourceTree = "<group>"; };
+		7E5B28DC121FEFCC0005339C /* shannoneven.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shannoneven.h; sourceTree = "<group>"; };
+		7E5B28DD121FEFCC0005339C /* shannoneven.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shannoneven.cpp; sourceTree = "<group>"; };
+		7E5B2917121FF53C0005339C /* heip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = heip.h; sourceTree = "<group>"; };
+		7E5B2918121FF53C0005339C /* heip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = heip.cpp; sourceTree = "<group>"; };
+		7E5B294A121FFADC0005339C /* smithwilson.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = smithwilson.h; sourceTree = "<group>"; };
+		7E5B294B121FFADC0005339C /* smithwilson.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = smithwilson.cpp; sourceTree = "<group>"; };
 		7E84528511EF4BEB00564975 /* seqerrorcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = seqerrorcommand.h; sourceTree = "<group>"; };
 		7E84528611EF4BEB00564975 /* seqerrorcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = seqerrorcommand.cpp; sourceTree = "<group>"; };
 		7E85BD1C11EB5E9B00FD37C0 /* qualityscores.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = qualityscores.h; sourceTree = "<group>"; };
 		7E85BD1D11EB5E9B00FD37C0 /* qualityscores.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = qualityscores.cpp; sourceTree = "<group>"; };
+		7E962A40121F76B1007464B5 /* invsimpson.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = invsimpson.h; sourceTree = "<group>"; };
+		7E962A41121F76B1007464B5 /* invsimpson.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = invsimpson.cpp; sourceTree = "<group>"; };
 		7EA299BA11E384940022D8D3 /* sensspeccommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sensspeccommand.h; sourceTree = "<group>"; };
 		7EA299BB11E384940022D8D3 /* sensspeccommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sensspeccommand.cpp; sourceTree = "<group>"; };
 		7EC61A0911BEA6AF00F668D9 /* weightedlinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = weightedlinkage.cpp; sourceTree = "<group>"; };
@@ -480,6 +490,8 @@
 		08FB7794FE84155DC02AAC07 /* mothur */ = {
 			isa = PBXGroup;
 			children = (
+				7E5B28DC121FEFCC0005339C /* shannoneven.h */,
+				7E5B28DD121FEFCC0005339C /* shannoneven.cpp */,
 				A7639F8D1175DF35008F5578 /* makefile */,
 				A7DA1FF0113FECD400BF472F /* alignment.cpp */,
 				A7DA1FF1113FECD400BF472F /* alignment.hpp */,
@@ -570,6 +582,12 @@
 		A7CB593B11402EF90010EB83 /* calculators */ = {
 			isa = PBXGroup;
 			children = (
+				7E4EBD43122018FB00D85E7B /* simpsoneven.h */,
+				7E4EBD44122018FB00D85E7B /* simpsoneven.cpp */,
+				7E5B294A121FFADC0005339C /* smithwilson.h */,
+				7E5B294B121FFADC0005339C /* smithwilson.cpp */,
+				7E962A40121F76B1007464B5 /* invsimpson.h */,
+				7E962A41121F76B1007464B5 /* invsimpson.cpp */,
 				A7DA200B113FECD400BF472F /* calculator.cpp */,
 				A7DA200C113FECD400BF472F /* calculator.h */,
 				A7DA1FED113FECD400BF472F /* ace.h */,
@@ -684,6 +702,8 @@
 		A7CB593E11402F110010EB83 /* commands */ = {
 			isa = PBXGroup;
 			children = (
+				7E5B2917121FF53C0005339C /* heip.h */,
+				7E5B2918121FF53C0005339C /* heip.cpp */,
 				A7DA202B113FECD400BF472F /* command.hpp */,
 				A7DA1FEF113FECD400BF472F /* aligncommand.h */,
 				A7DA1FEE113FECD400BF472F /* aligncommand.cpp */,

@@ -14,8 +14,13 @@
 #include "chao1.h"
 #include "bootstrap.h"
 #include "simpson.h"
+#include "simpsoneven.h"
+#include "invsimpson.h"
 #include "npshannon.h"
 #include "shannon.h"
+#include "heip.h"
+#include "smithwilson.h"
+#include "shannoneven.h"
 #include "jackknife.h"
 #include "geom.h"
 #include "logsd.h"
@@ -193,10 +198,20 @@ int SummaryCommand::execute(){
 						sumCalculators.push_back(new Jackknife());
 					}else if(Estimators[i] == "shannon"){
 						sumCalculators.push_back(new Shannon());
+					}else if(Estimators[i] == "shannoneven"){
+						sumCalculators.push_back(new ShannonEven());
 					}else if(Estimators[i] == "npshannon"){
 						sumCalculators.push_back(new NPShannon());
+					}else if(Estimators[i] == "heip"){
+						sumCalculators.push_back(new Heip());
+					}else if(Estimators[i] == "smithwilson"){
+						sumCalculators.push_back(new SmithWilson());
 					}else if(Estimators[i] == "simpson"){
 						sumCalculators.push_back(new Simpson());
+					}else if(Estimators[i] == "simpsoneven"){
+						sumCalculators.push_back(new SimpsonEven());
+					}else if(Estimators[i] == "invsimpson"){
+						sumCalculators.push_back(new InvSimpson());
 					}else if(Estimators[i] == "bootstrap"){
 						sumCalculators.push_back(new Bootstrap());
 					}else if (Estimators[i] == "nseqs") { 
