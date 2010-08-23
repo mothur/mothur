@@ -527,7 +527,7 @@ int FilterSeqsCommand::createProcessesRunFilter(string F, string filename) {
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = toString(getpid()) + ".temp";
+				string tempFile = filename +  toString(getpid()) + ".num.temp";
 				openOutputFile(tempFile, out);
 				out << num << endl;
 				out.close();
@@ -544,7 +544,7 @@ int FilterSeqsCommand::createProcessesRunFilter(string F, string filename) {
 					
 		for (int i = 0; i < processIDS.size(); i++) {
 			ifstream in;
-			string tempFile =  toString(processIDS[i]) + ".temp";
+			string tempFile =  filename + toString(processIDS[i]) + ".num.temp";
 			openInputFile(tempFile, in);
 			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
 			in.close(); remove(tempFile.c_str());
@@ -881,7 +881,7 @@ int FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string filename) 
 				for (int k = 0; k < alignmentLength; k++) {		out << F.c[k] << '\t'; }  out << endl;
 				for (int k = 0; k < alignmentLength; k++) {		out << F.gap[k] << '\t'; }  out << endl;
 
-				cout << F.getFilter() << endl;
+				//cout << F.getFilter() << endl;
 				out.close();
 				
 				exit(0);

@@ -115,6 +115,8 @@ int PreClusterCommand::execute(){
 		
 		if (abort == true) { return 0; }
 		
+		int start = time(NULL);
+		
 		//reads fasta file and return number of seqs
 		int numSeqs = readFASTA(); //fills alignSeqs and makes all seqs active
 		
@@ -182,7 +184,8 @@ int PreClusterCommand::execute(){
 		outNames.close();
 		
 		if (m->control_pressed) {  remove(newFastaFile.c_str()); remove(newNamesFile.c_str());  return 0; }
-		
+
+		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to cluster " + toString(numSeqs) + " sequences.");
 		m->mothurOut("Total number of sequences before precluster was " + toString(numSeqs) + "."); m->mothurOutEndLine();
 		m->mothurOut("pre.cluster removed " + toString(count) + " sequences."); m->mothurOutEndLine(); 
 		

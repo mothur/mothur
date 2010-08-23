@@ -490,8 +490,6 @@
 		08FB7794FE84155DC02AAC07 /* mothur */ = {
 			isa = PBXGroup;
 			children = (
-				7E5B28DC121FEFCC0005339C /* shannoneven.h */,
-				7E5B28DD121FEFCC0005339C /* shannoneven.cpp */,
 				A7639F8D1175DF35008F5578 /* makefile */,
 				A7DA1FF0113FECD400BF472F /* alignment.cpp */,
 				A7DA1FF1113FECD400BF472F /* alignment.hpp */,
@@ -582,12 +580,6 @@
 		A7CB593B11402EF90010EB83 /* calculators */ = {
 			isa = PBXGroup;
 			children = (
-				7E4EBD43122018FB00D85E7B /* simpsoneven.h */,
-				7E4EBD44122018FB00D85E7B /* simpsoneven.cpp */,
-				7E5B294A121FFADC0005339C /* smithwilson.h */,
-				7E5B294B121FFADC0005339C /* smithwilson.cpp */,
-				7E962A40121F76B1007464B5 /* invsimpson.h */,
-				7E962A41121F76B1007464B5 /* invsimpson.cpp */,
 				A7DA200B113FECD400BF472F /* calculator.cpp */,
 				A7DA200C113FECD400BF472F /* calculator.h */,
 				A7DA1FED113FECD400BF472F /* ace.h */,
@@ -614,7 +606,11 @@
 				A7DA2059113FECD400BF472F /* geom.h */,
 				A7DA206C113FECD400BF472F /* goodscoverage.cpp */,
 				A7DA206D113FECD400BF472F /* goodscoverage.h */,
+				7E5B2917121FF53C0005339C /* heip.h */,
+				7E5B2918121FF53C0005339C /* heip.cpp */,
 				A7DA2080113FECD400BF472F /* ignoregaps.h */,
+				7E962A40121F76B1007464B5 /* invsimpson.h */,
+				7E962A41121F76B1007464B5 /* invsimpson.cpp */,
 				A7DA2083113FECD400BF472F /* jackknife.cpp */,
 				A7DA2084113FECD400BF472F /* jackknife.h */,
 				A7DA2093113FECD400BF472F /* logsd.cpp */,
@@ -632,6 +628,8 @@
 				A7DA20CF113FECD400BF472F /* qstat.h */,
 				A7DA2104113FECD400BF472F /* shannon.cpp */,
 				A7DA2105113FECD400BF472F /* shannon.h */,
+				7E5B28DC121FEFCC0005339C /* shannoneven.h */,
+				7E5B28DD121FEFCC0005339C /* shannoneven.cpp */,
 				A7DA2106113FECD400BF472F /* sharedace.cpp */,
 				A7DA2107113FECD400BF472F /* sharedace.h */,
 				A7DA2108113FECD400BF472F /* sharedanderberg.h */,
@@ -680,6 +678,10 @@
 				A7DA213D113FECD400BF472F /* sharedthetayc.h */,
 				A7DA2140113FECD400BF472F /* shen.cpp */,
 				A7DA2141113FECD400BF472F /* shen.h */,
+				7E4EBD43122018FB00D85E7B /* simpsoneven.h */,
+				7E4EBD44122018FB00D85E7B /* simpsoneven.cpp */,
+				7E5B294A121FFADC0005339C /* smithwilson.h */,
+				7E5B294B121FFADC0005339C /* smithwilson.cpp */,
 				A7DA2142113FECD400BF472F /* simpson.cpp */,
 				A7DA2143113FECD400BF472F /* simpson.h */,
 				A7DA2149113FECD400BF472F /* sobs.h */,
@@ -702,8 +704,6 @@
 		A7CB593E11402F110010EB83 /* commands */ = {
 			isa = PBXGroup;
 			children = (
-				7E5B2917121FF53C0005339C /* heip.h */,
-				7E5B2918121FF53C0005339C /* heip.cpp */,
 				A7DA202B113FECD400BF472F /* command.hpp */,
 				A7DA1FEF113FECD400BF472F /* aligncommand.h */,
 				A7DA1FEE113FECD400BF472F /* aligncommand.cpp */,
