@@ -347,7 +347,7 @@ int AlignCommand::execute(){
 				
 #else
 		vector<unsigned long int> positions = divideFile(candidateFileNames[s], processors);
-				
+							
 		for (int i = 0; i < (positions.size()-1); i++) {
 			lines.push_back(new linePair(positions[i], positions[(i+1)]));
 		}	

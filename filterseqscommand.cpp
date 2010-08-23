@@ -866,6 +866,13 @@ int FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string filename) 
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
+				//reset child's filter counts to 0;
+				F.a.clear(); F.a.resize(alignmentLength, 0);
+				F.t.clear(); F.t.resize(alignmentLength, 0);
+				F.g.clear(); F.g.resize(alignmentLength, 0);
+				F.c.clear(); F.c.resize(alignmentLength, 0);
+				F.gap.clear(); F.gap.resize(alignmentLength, 0);
+				
 				num = driverCreateFilter(F, filename, lines[process]);
 				
 				//write out filter counts to file

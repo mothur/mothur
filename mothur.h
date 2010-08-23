@@ -1163,7 +1163,7 @@ inline vector<unsigned long int> divideFile(string filename, int& proc) {
 		//for each process seekg to closest file break and search for next '>' char. make that the filebreak
 		for (int i = 0; i < proc; i++) {
 			unsigned long int spot = (i+1) * chunkSize;
-			
+					
 			ifstream in;
 			openInputFile(filename, in);
 			in.seekg(spot);
@@ -1174,9 +1174,10 @@ inline vector<unsigned long int> divideFile(string filename, int& proc) {
 			   char c = in.get();
 			   if (c == '>') {   in.putback(c); newSpot = in.tellg(); break;  }
 			}
-			
+				
 			//there was not another sequence before the end of the file
-			if (newSpot == spot) {	break;  }
+			unsigned long int sanityPos = in.tellg();
+			if (sanityPos == -1) {	break;  }
 			else {   filePos.push_back(newSpot);  }
 			
 			in.close();
