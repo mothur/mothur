@@ -14,7 +14,12 @@
 #include "chao1.h"
 #include "bootstrap.h"
 #include "simpson.h"
+#include "simpsoneven.h"
+#include "heip.h"
+#include "smithwilson.h"
+#include "invsimpson.h"
 #include "npshannon.h"
+#include "shannoneven.h"
 #include "shannon.h"
 #include "jackknife.h"
 #include "coverage.h"
@@ -170,12 +175,27 @@ int RareFactCommand::execute(){
 					}else if (Estimators[i] == "shannon") { 
 						rDisplays.push_back(new RareDisplay(new Shannon(), new ThreeColumnFile(fileNameRoot+"r_shannon")));
 						outputNames.push_back(fileNameRoot+"r_shannon");
+					}else if (Estimators[i] == "shannoneven") { 
+						rDisplays.push_back(new RareDisplay(new ShannonEven(), new ThreeColumnFile(fileNameRoot+"r_shannoneven")));
+						outputNames.push_back(fileNameRoot+"r_shannoneven");
+					}else if (Estimators[i] == "heip") { 
+						rDisplays.push_back(new RareDisplay(new Heip(), new ThreeColumnFile(fileNameRoot+"r_heip")));
+						outputNames.push_back(fileNameRoot+"r_heip");
+					}else if (Estimators[i] == "smithwilson") { 
+						rDisplays.push_back(new RareDisplay(new SmithWilson(), new ThreeColumnFile(fileNameRoot+"r_smithwilson")));
+						outputNames.push_back(fileNameRoot+"r_smithwilson");
 					}else if (Estimators[i] == "npshannon") { 
 						rDisplays.push_back(new RareDisplay(new NPShannon(), new ThreeColumnFile(fileNameRoot+"r_npshannon")));
 						outputNames.push_back(fileNameRoot+"r_npshannon");
 					}else if (Estimators[i] == "simpson") { 
 						rDisplays.push_back(new RareDisplay(new Simpson(), new ThreeColumnFile(fileNameRoot+"r_simpson")));
 						outputNames.push_back(fileNameRoot+"r_simpson");
+					}else if (Estimators[i] == "simpsoneven") { 
+						rDisplays.push_back(new RareDisplay(new SimpsonEven(), new ThreeColumnFile(fileNameRoot+"r_simpsoneven")));
+						outputNames.push_back(fileNameRoot+"r_simpsoneven");
+					}else if (Estimators[i] == "invsimpson") { 
+						rDisplays.push_back(new RareDisplay(new InvSimpson(), new ThreeColumnFile(fileNameRoot+"r_invsimpson")));
+						outputNames.push_back(fileNameRoot+"r_invsimpson");
 					}else if (Estimators[i] == "bootstrap") { 
 						rDisplays.push_back(new RareDisplay(new Bootstrap(), new ThreeColumnFile(fileNameRoot+"r_bootstrap")));
 						outputNames.push_back(fileNameRoot+"r_bootstrap");

@@ -14,8 +14,13 @@
 #include "chao1.h"
 #include "bootstrap.h"
 #include "simpson.h"
+#include "simpsoneven.h"
+#include "invsimpson.h"
 #include "npshannon.h"
 #include "shannon.h"
+#include "smithwilson.h"
+#include "heip.h"
+#include "shannoneven.h"
 #include "jackknife.h"
 #include "geom.h"
 #include "qstat.h"
@@ -178,12 +183,27 @@ int CollectCommand::execute(){
 					}else if (Estimators[i] == "shannon") { 
 						cDisplays.push_back(new CollectDisplay(new Shannon(), new ThreeColumnFile(fileNameRoot+"shannon")));
 						outputNames.push_back(fileNameRoot+"shannon");
+					}else if (Estimators[i] == "shannoneven") { 
+						cDisplays.push_back(new CollectDisplay(new ShannonEven(), new OneColumnFile(fileNameRoot+"shannoneven")));
+						outputNames.push_back(fileNameRoot+"shannoneven");
 					}else if (Estimators[i] == "npshannon") { 
 						cDisplays.push_back(new CollectDisplay(new NPShannon(), new OneColumnFile(fileNameRoot+"np_shannon")));
 						outputNames.push_back(fileNameRoot+"np_shannon");
+					}else if (Estimators[i] == "heip") { 
+						cDisplays.push_back(new CollectDisplay(new Heip(), new OneColumnFile(fileNameRoot+"heip")));
+						outputNames.push_back(fileNameRoot+"heip");
+					}else if (Estimators[i] == "smithwilson") { 
+						cDisplays.push_back(new CollectDisplay(new SmithWilson(), new OneColumnFile(fileNameRoot+"smithwilson")));
+						outputNames.push_back(fileNameRoot+"smithwilson");
 					}else if (Estimators[i] == "simpson") { 
 						cDisplays.push_back(new CollectDisplay(new Simpson(), new ThreeColumnFile(fileNameRoot+"simpson")));
 						outputNames.push_back(fileNameRoot+"simpson");
+					}else if (Estimators[i] == "simpsoneven") { 
+						cDisplays.push_back(new CollectDisplay(new SimpsonEven(), new OneColumnFile(fileNameRoot+"simpsoneven")));
+						outputNames.push_back(fileNameRoot+"simpsoneven");
+					}else if (Estimators[i] == "invsimpson") { 
+						cDisplays.push_back(new CollectDisplay(new InvSimpson(), new ThreeColumnFile(fileNameRoot+"invsimpson")));
+						outputNames.push_back(fileNameRoot+"invsimpson");
 					}else if (Estimators[i] == "bootstrap") { 
 						cDisplays.push_back(new CollectDisplay(new Bootstrap(), new OneColumnFile(fileNameRoot+"bootstrap")));
 						outputNames.push_back(fileNameRoot+"bootstrap");
