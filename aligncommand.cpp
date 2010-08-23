@@ -768,7 +768,7 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = toString(getpid()) + ".temp";
+				string tempFile = alignFileName + toString(getpid()) + ".num.temp";
 				openOutputFile(tempFile, out);
 				out << num << endl;
 				out.close();
@@ -785,7 +785,7 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 		
 		for (int i = 0; i < processIDS.size(); i++) {
 			ifstream in;
-			string tempFile =  toString(processIDS[i]) + ".temp";
+			string tempFile =  alignFileName + toString(processIDS[i]) + ".num.temp";
 			openInputFile(tempFile, in);
 			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
 			in.close(); remove(tempFile.c_str());

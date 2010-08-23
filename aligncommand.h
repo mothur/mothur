@@ -43,7 +43,7 @@ private:
 	void appendReportFiles(string, string);
 	
 	#ifdef USE_MPI
-	int driverMPI(MPI_File&, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long int>&);
+	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long int>&);
 	#endif
 	
 	string candidateFileName, templateFileName, distanceFileName, search, align, outputDir;

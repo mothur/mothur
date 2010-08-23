@@ -436,7 +436,7 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = toString(getpid()) + ".temp";
+				string tempFile = fastafile + toString(getpid()) + ".num.temp";
 				openOutputFile(tempFile, out);
 				
 				out << num << endl;
@@ -460,7 +460,7 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 		
 		//parent reads in and combine Filter info
 		for (int i = 0; i < processIDS.size(); i++) {
-			string tempFilename = toString(processIDS[i]) + ".temp";
+			string tempFilename = fastafile + toString(processIDS[i]) + ".num.temp";
 			ifstream in;
 			openInputFile(tempFilename, in);
 			

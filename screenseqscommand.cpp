@@ -828,7 +828,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badFileName, 
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = toString(getpid()) + ".temp";
+				string tempFile = filename + toString(getpid()) + ".num.temp";
 				openOutputFile(tempFile, out);
 				out << num << endl;
 				out.close();
@@ -845,7 +845,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badFileName, 
 		
 		for (int i = 0; i < processIDS.size(); i++) {
 			ifstream in;
-			string tempFile =  toString(processIDS[i]) + ".temp";
+			string tempFile =  filename + toString(processIDS[i]) + ".num.temp";
 			openInputFile(tempFile, in);
 			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
 			in.close(); remove(tempFile.c_str());
