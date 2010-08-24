@@ -14,7 +14,7 @@
 
 ReadColumnMatrix::ReadColumnMatrix(string df) : distFile(df){
 	
-	successOpen = openInputFile(distFile, fileHandle);
+	successOpen = m->openInputFile(distFile, fileHandle);
 	
 }
 
@@ -91,7 +91,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 				}
 				reading->update(itA->second * nseqs);
 			}
-			gobble(fileHandle);
+			m->gobble(fileHandle);
 		}
 
 		if(lt == 0){  // oops, it was square
@@ -99,7 +99,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 			fileHandle.close();  //let's start over
 			D->clear();  //let's start over
 		   
-			openInputFile(distFile, fileHandle);  //let's start over
+			m->openInputFile(distFile, fileHandle);  //let's start over
 
 			while(fileHandle){
 				fileHandle >> firstName >> secondName >> distance;
@@ -125,7 +125,7 @@ int ReadColumnMatrix::read(NameAssignment* nameMap){
 					reading->update(itA->second * nseqs);
 				}
 		
-				gobble(fileHandle);
+				m->gobble(fileHandle);
 			}
 		}
 		

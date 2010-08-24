@@ -39,7 +39,7 @@ GetRelAbundCommand::GetRelAbundCommand(string option) {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
 			}
 			
 			//make sure the user has already run the read.otu command
@@ -52,7 +52,7 @@ GetRelAbundCommand::GetRelAbundCommand(string option) {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
@@ -66,7 +66,7 @@ GetRelAbundCommand::GetRelAbundCommand(string option) {
 			if (groups == "not found") { groups = ""; pickedGroups = false; }
 			else { 
 				pickedGroups = true;
-				splitAtDash(groups, Groups);
+				m->splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 			}
 			
@@ -118,9 +118,9 @@ int GetRelAbundCommand::execute(){
 	
 		if (abort == true) { return 0; }
 		
-		string outputFileName = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + "relabund";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + "relabund";
 		ofstream out;
-		openOutputFile(outputFileName, out);
+		m->openOutputFile(outputFileName, out);
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
 		read = new ReadOTUFile(globaldata->inputFileName);	
@@ -147,7 +147,7 @@ int GetRelAbundCommand::execute(){
 				userLabels.erase(lookup[0]->getLabel());
 			}
 			
-			if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup[0]->getLabel();
 			
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  

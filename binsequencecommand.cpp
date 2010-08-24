@@ -39,7 +39,7 @@ BinSeqCommand::BinSeqCommand(string option) {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(globaldata->getListFile()); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(globaldata->getListFile()); //if user entered a file with a path then preserve it	
 			}
 
 			
@@ -58,7 +58,7 @@ BinSeqCommand::BinSeqCommand(string option) {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -66,7 +66,7 @@ BinSeqCommand::BinSeqCommand(string option) {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -74,7 +74,7 @@ BinSeqCommand::BinSeqCommand(string option) {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -92,7 +92,7 @@ BinSeqCommand::BinSeqCommand(string option) {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
@@ -111,7 +111,7 @@ BinSeqCommand::BinSeqCommand(string option) {
 			else if (groupfile == "not found") { groupfile = ""; }
 			
 			if (abort == false) { 
-//				openInputFile(fastafile, in);
+//				m->openInputFile(fastafile, in);
 				fasta = new FastaMap();
 				if (groupfile != "") {
 					groupMap = new GroupMap(groupfile);
@@ -209,7 +209,7 @@ int BinSeqCommand::execute(){
 				userLabels.erase(list->getLabel());
 			}
 			
-			if ((anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = list->getLabel();
 				
 				delete list;
@@ -277,7 +277,7 @@ int BinSeqCommand::execute(){
 void BinSeqCommand::readNamesFile() {
 	try {
 		vector<string> dupNames;
-		openInputFile(namesfile, inNames);
+		m->openInputFile(namesfile, inNames);
 		
 		string name, names, sequence;
 	
@@ -288,7 +288,7 @@ void BinSeqCommand::readNamesFile() {
 			dupNames.clear();
 			
 			//parse names into vector
-			splitAtComma(names, dupNames);
+			m->splitAtComma(names, dupNames);
 			
 			//store names in fasta map
 			sequence = fasta->getSequence(name);
@@ -296,7 +296,7 @@ void BinSeqCommand::readNamesFile() {
 				fasta->push_back(dupNames[i], sequence);
 			}
 		
-			gobble(inNames);
+			m->gobble(inNames);
 		}
 		inNames.close();
 
@@ -312,8 +312,8 @@ int BinSeqCommand::process(ListVector* list) {
 	try {
 				string binnames, name, sequence;
 				
-				string outputFileName = outputDir + getRootName(getSimpleName(globaldata->getListFile())) + list->getLabel() + ".fasta";
-				openOutputFile(outputFileName, out);
+				string outputFileName = outputDir + m->getRootName(m->getSimpleName(globaldata->getListFile())) + list->getLabel() + ".fasta";
+				m->openOutputFile(outputFileName, out);
 				
 				//save to output list of output file names
 				outputNames.push_back(outputFileName);

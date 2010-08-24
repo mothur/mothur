@@ -12,7 +12,7 @@
 
 /***********************************************************************/
 FormatPhylipMatrix::FormatPhylipMatrix(string df) : filename(df) {
-        openInputFile(filename, fileHandle);
+        m->openInputFile(filename, fileHandle);
 }
 /***********************************************************************/
 //not using nameMap
@@ -37,11 +37,11 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 					fileHandle.close();  //reset file
 					
 					//open and get through numSeqs, code below formats rest of file
-					openInputFile(filename, fileHandle);
-					fileHandle >> nseqs; gobble(fileHandle);
+					m->openInputFile(filename, fileHandle);
+					fileHandle >> nseqs; m->gobble(fileHandle);
 					
 					distFile = filename + ".rowFormatted";
-					openOutputFile(distFile, out);
+					m->openOutputFile(distFile, out);
 					break;
 				}
 				if(d == '\n'){
@@ -59,7 +59,7 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 				
 				ofstream outTemp;
 				string tempFile = filename + ".temp";
-				openOutputFile(tempFile, outTemp);
+				m->openOutputFile(tempFile, outTemp);
                 
 				//convert to square column matrix
 				for(int i=1;i<nseqs;i++){
@@ -88,7 +88,7 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 				
 				//format from square column to rowFormatted
 				//sort file by first column so the distances for each row are together
-				string outfile = getRootName(tempFile) + "sorted.dist.temp";
+				string outfile = m->getRootName(tempFile) + "sorted.dist.temp";
 				
 				//use the unix sort 
 				#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -103,10 +103,10 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 
 				//output to new file distance for each row and save positions in file where new row begins
 				ifstream in;
-				openInputFile(outfile, in);
+				m->openInputFile(outfile, in);
 				
 				distFile = outfile + ".rowFormatted";
-				openOutputFile(distFile, out);
+				m->openOutputFile(distFile, out);
 				
 				rowPos.resize(nseqs, -1);
 				int currentRow;
@@ -125,7 +125,7 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 				while(!in.eof()) {
 					if (m->control_pressed) { in.close(); out.close(); remove(tempFile.c_str()); remove(distFile.c_str()); remove(outfile.c_str());  delete reading; return 0; }
 
-					in >> first >> second >> dist; gobble(in);
+					in >> first >> second >> dist; m->gobble(in);
 					
 					if (first != currentRow) {
 						//save position in file of each new row
@@ -196,7 +196,7 @@ int FormatPhylipMatrix::read(NameAssignment* nameMap){
 						reading->update(index);
 					}
 					
-					gobble(fileHandle);
+					m->gobble(fileHandle);
 			
 					//save position in file of each new row
 					rowPos[i] = out.tellp();

@@ -48,7 +48,7 @@ DistanceCommand::DistanceCommand(string option) {
 				it2 = parameters.find("fasta");
 				//user has given a template file
 				if(it2 != parameters.end()){ 
-					path = hasPath(it2->second);
+					path = m->hasPath(it2->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it2->second;		}
 				}
@@ -56,7 +56,7 @@ DistanceCommand::DistanceCommand(string option) {
 				it2 = parameters.find("oldfasta");
 				//user has given a template file
 				if(it2 != parameters.end()){ 
-					path = hasPath(it2->second);
+					path = m->hasPath(it2->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["oldfasta"] = inputDir + it2->second;		}
 				}
@@ -64,7 +64,7 @@ DistanceCommand::DistanceCommand(string option) {
 				it2 = parameters.find("column");
 				//user has given a template file
 				if(it2 != parameters.end()){ 
-					path = hasPath(it2->second);
+					path = m->hasPath(it2->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["column"] = inputDir + it2->second;		}
 				}
@@ -76,7 +76,7 @@ DistanceCommand::DistanceCommand(string option) {
 			else if (fastafile == "not open") { abort = true; }	
 			else{
 				ifstream inFASTA;
-				openInputFile(fastafile, inFASTA);
+				m->openInputFile(fastafile, inFASTA);
 				alignDB = SequenceDB(inFASTA); 
 				inFASTA.close();
 			}
@@ -92,7 +92,7 @@ DistanceCommand::DistanceCommand(string option) {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(fastafile); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(fastafile); //if user entered a file with a path then preserve it	
 			}
 
 			//check for optional parameter and set defaults
@@ -102,7 +102,7 @@ DistanceCommand::DistanceCommand(string option) {
 			else { 
 				 if (calc == "default")  {  calc = "onegap";  }
 			}
-			splitAtDash(calc, Estimators);
+			m->splitAtDash(calc, Estimators);
 
 			string temp;
 			temp = validParameter.validFile(parameters, "countends", false);	if(temp == "not found"){	temp = "T";	}
@@ -124,7 +124,7 @@ DistanceCommand::DistanceCommand(string option) {
 			
 			ValidCalculators validCalculator;
 			
-			if (isTrue(countends) == true) {
+			if (m->isTrue(countends) == true) {
 				for (int i=0; i<Estimators.size(); i++) {
 					if (validCalculator.isValidCalculator("distance", Estimators[i]) == true) { 
 						if (Estimators[i] == "nogaps")			{	distCalculator = new ignoreGaps();	}
@@ -207,12 +207,12 @@ int DistanceCommand::execute(){
 		string outputFile;
 				
 		if (output == "lt") { //does the user want lower triangle phylip formatted file 
-			outputFile = outputDir + getRootName(getSimpleName(fastafile)) + "phylip.dist";
+			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "phylip.dist";
 			remove(outputFile.c_str());
 			
 			//output numSeqs to phylip formatted dist file
 		}else if (output == "column") { //user wants column format
-			outputFile = outputDir + getRootName(getSimpleName(fastafile)) + "dist";
+			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "dist";
 			
 			//so we don't accidentally overwrite
 			if (outputFile == column) { 
@@ -222,7 +222,7 @@ int DistanceCommand::execute(){
 			
 			remove(outputFile.c_str());
 		}else { //assume square
-			outputFile = outputDir + getRootName(getSimpleName(fastafile)) + "square.dist";
+			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "square.dist";
 			remove(outputFile.c_str());
 		}
 		
@@ -367,7 +367,7 @@ int DistanceCommand::execute(){
 			
 			//append and remove temp files
 			for (; it != processIDS.end(); it++) {
-				appendFiles((outputFile + toString(it->second) + ".temp"), outputFile);
+				m->appendFiles((outputFile + toString(it->second) + ".temp"), outputFile);
 				remove((outputFile + toString(it->second) + ".temp").c_str());
 			}
 		}
@@ -390,7 +390,7 @@ int DistanceCommand::execute(){
 		ifstream fileHandle;
 		fileHandle.open(outputFile.c_str());
 		if(fileHandle) {
-			gobble(fileHandle);
+			m->gobble(fileHandle);
 			if (fileHandle.eof()) { m->mothurOut(outputFile + " is blank. This can result if there are no distances below your cutoff.");  m->mothurOutEndLine(); }
 		}
 		
@@ -399,10 +399,10 @@ int DistanceCommand::execute(){
 			//we had to rename the column file so we didnt overwrite above, but we want to keep old name
 			if (outputFile == column) { 
 				string tempcolumn = column + ".old";
-				appendFiles(tempcolumn, outputFile);
+				m->appendFiles(tempcolumn, outputFile);
 				remove(tempcolumn.c_str());
 			}else{
-				appendFiles(outputFile, column);
+				m->appendFiles(outputFile, column);
 				remove(outputFile.c_str());
 				outputFile = column;
 			}
@@ -666,7 +666,7 @@ int DistanceCommand::convertMatrix(string outputFile) {
 	try{
 
 		//sort file by first column so the distances for each row are together
-		string outfile = getRootName(outputFile) + "sorted.dist.temp";
+		string outfile = m->getRootName(outputFile) + "sorted.dist.temp";
 		
 		//use the unix sort 
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -680,10 +680,10 @@ int DistanceCommand::convertMatrix(string outputFile) {
 
 		//output to new file distance for each row and save positions in file where new row begins
 		ifstream in;
-		openInputFile(outfile, in);
+		m->openInputFile(outfile, in);
 		
 		ofstream out;
-		openOutputFile(outputFile, out);
+		m->openOutputFile(outputFile, out);
 		
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 
@@ -701,12 +701,12 @@ int DistanceCommand::convertMatrix(string outputFile) {
 		rowDists[first] = 0.00; //distance to yourself is 0.0
 		
 		in.seekg(0);
-		//openInputFile(outfile, in);
+		//m->openInputFile(outfile, in);
 		
 		while(!in.eof()) {
 			if (m->control_pressed) { in.close(); remove(outfile.c_str()); out.close(); return 0; }
 			
-			in >> first >> second >> dist; gobble(in);
+			in >> first >> second >> dist; m->gobble(in);
 				
 			if (first != currentRow) {
 				//print out last row
@@ -754,7 +754,7 @@ int DistanceCommand::convertToLowerTriangle(string outputFile) {
 	try{
 
 		//sort file by first column so the distances for each row are together
-		string outfile = getRootName(outputFile) + "sorted.dist.temp";
+		string outfile = m->getRootName(outputFile) + "sorted.dist.temp";
 		
 		//use the unix sort 
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -768,10 +768,10 @@ int DistanceCommand::convertToLowerTriangle(string outputFile) {
 
 		//output to new file distance for each row and save positions in file where new row begins
 		ifstream in;
-		openInputFile(outfile, in);
+		m->openInputFile(outfile, in);
 		
 		ofstream out;
-		openOutputFile(outputFile, out);
+		m->openOutputFile(outputFile, out);
 		
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 
@@ -791,12 +791,12 @@ int DistanceCommand::convertToLowerTriangle(string outputFile) {
 		rowDists[first] = 0.00; //distance to yourself is 0.0
 		
 		in.seekg(0);
-		//openInputFile(outfile, in);
+		//m->openInputFile(outfile, in);
 		
 		while(!in.eof()) {
 			if (m->control_pressed) { in.close(); remove(outfile.c_str()); out.close(); return 0; }
 			
-			in >> first >> second >> dist; gobble(in);
+			in >> first >> second >> dist; m->gobble(in);
 				
 			if (first != currentRow) {
 				//print out last row
@@ -853,7 +853,7 @@ bool DistanceCommand::sanityCheck() {
 		
 		//make sure the 2 fasta files have the same alignment length
 		ifstream in;
-		openInputFile(fastafile, in);
+		m->openInputFile(fastafile, in);
 		int fastaAlignLength = 0;
 		if (in) { 
 			Sequence tempIn(in);
@@ -862,7 +862,7 @@ bool DistanceCommand::sanityCheck() {
 		in.close();
 		
 		ifstream in2;
-		openInputFile(oldfastafile, in2);
+		m->openInputFile(oldfastafile, in2);
 		int oldfastaAlignLength = 0;
 		if (in2) { 
 			Sequence tempIn2(in2);
@@ -876,7 +876,7 @@ bool DistanceCommand::sanityCheck() {
 		set<string> namesOldFasta;
 		
 		ifstream inFasta;
-		openInputFile(oldfastafile, inFasta);
+		m->openInputFile(oldfastafile, inFasta);
 		
 		while (!inFasta.eof()) {
 			if (m->control_pressed) {  inFasta.close(); return good;  }
@@ -888,25 +888,25 @@ bool DistanceCommand::sanityCheck() {
 				alignDB.push_back(temp);  //add to DB
 			}
 			
-			gobble(inFasta);
+			m->gobble(inFasta);
 		}
 		
 		inFasta.close();
 		
 		//read through the column file checking names and removing distances above the cutoff
 		ifstream inDist;
-		openInputFile(column, inDist);
+		m->openInputFile(column, inDist);
 		
 		ofstream outDist;
 		string outputFile = column + ".temp";
-		openOutputFile(outputFile, outDist);
+		m->openOutputFile(outputFile, outDist);
 		
 		string name1, name2;
 		float dist;
 		while (!inDist.eof()) {
 			if (m->control_pressed) {  inDist.close(); outDist.close(); remove(outputFile.c_str()); return good;  }
 		
-			inDist >> name1 >> name2 >> dist; gobble(inDist);
+			inDist >> name1 >> name2 >> dist; m->gobble(inDist);
 			
 			//both names are in fasta file and distance is below cutoff
 			if ((namesOldFasta.count(name1) == 0) || (namesOldFasta.count(name2) == 0)) {  good = false; break;  }
@@ -929,20 +929,20 @@ bool DistanceCommand::sanityCheck() {
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "DistanceCommand", "appendFiles");
+		m->errorOut(e, "DistanceCommand", "m->appendFiles");
 		exit(1);
 	}
 }
 
 /**************************************************************************************************
-void DistanceCommand::appendFiles(string temp, string filename) {
+void DistanceCommand::m->appendFiles(string temp, string filename) {
 	try{
 		ofstream output;
 		ifstream input;
 	
 		//open output file in append mode
-		openOutputFileAppend(filename, output);
-		openInputFile(temp, input);
+		m->openOutputFileAppend(filename, output);
+		m->openInputFile(temp, input);
 		
 		while(char c = input.get()){
 			if(input.eof())		{	break;			}
@@ -953,7 +953,7 @@ void DistanceCommand::appendFiles(string temp, string filename) {
 		output.close();
 	}
 	catch(exception& e) {
-		m->errorOut(e, "DistanceCommand", "appendFiles");
+		m->errorOut(e, "DistanceCommand", "m->appendFiles");
 		exit(1);
 	}
 }

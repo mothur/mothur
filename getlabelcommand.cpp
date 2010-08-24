@@ -59,7 +59,7 @@ int GetlabelCommand::execute(){
 		
 		filename = globaldata->inputFileName;
 		ifstream in;
-		openInputFile(filename, in);
+		m->openInputFile(filename, in);
 		string label;
 		int numBins = 0;
 		int count = -1;

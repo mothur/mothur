@@ -47,7 +47,7 @@ LibShuffCommand::LibShuffCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(globaldata->getPhylipFile()); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(globaldata->getPhylipFile()); //if user entered a file with a path then preserve it	
 			}
 			
 			//make sure the user has already run the read.dist command
@@ -61,7 +61,7 @@ LibShuffCommand::LibShuffCommand(string option)  {
 			if (groups == "not found") { groups = ""; savegroups = groups; }
 			else { 
 				savegroups = groups;
-				splitAtDash(groups, Groups);
+				m->splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 			}
 				
@@ -215,8 +215,8 @@ int LibShuffCommand::printCoverageFile() {
 	try {
 
 		ofstream outCov;
-		summaryFile = outputDir + getRootName(getSimpleName(globaldata->getPhylipFile())) + "libshuff.coverage";
-		openOutputFile(summaryFile, outCov);
+		summaryFile = outputDir + m->getRootName(m->getSimpleName(globaldata->getPhylipFile())) + "libshuff.coverage";
+		m->openOutputFile(summaryFile, outCov);
 		outputNames.push_back(summaryFile);
 		outCov.setf(ios::fixed, ios::floatfield); outCov.setf(ios::showpoint);
 		//cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
@@ -311,8 +311,8 @@ int LibShuffCommand::printSummaryFile() {
 	try {
 
 		ofstream outSum;
-		summaryFile = outputDir + getRootName(getSimpleName(globaldata->getPhylipFile())) + "libshuff.summary";
-		openOutputFile(summaryFile, outSum);
+		summaryFile = outputDir + m->getRootName(m->getSimpleName(globaldata->getPhylipFile())) + "libshuff.summary";
+		m->openOutputFile(summaryFile, outSum);
 		outputNames.push_back(summaryFile);
 
 		outSum.setf(ios::fixed, ios::floatfield); outSum.setf(ios::showpoint);

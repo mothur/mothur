@@ -35,18 +35,18 @@ QualityScores::QualityScores(ifstream& qFile, int l){
 		int score;
 		
 		//string line;
-		//getline(qFile, line); 
+		//m->getline(qFile, line); 
 		//istringstream nameStream(line);
 	
 		qFile >> seqName; 
 		while (!qFile.eof())	{	char c = qFile.get(); if (c == 10 || c == 13 || c == -1){	break;	}	} // get rest of line 
-		gobble(qFile);
+		m->gobble(qFile);
 		if (seqName == "") { m->mothurOut("Error reading quality file, name blank at position, " + toString(qFile.tellg())); m->mothurOutEndLine(); }
 		else {
 			seqName = seqName.substr(1); 
 		}
 
-		//getline(qFile, line);
+		//m->getline(qFile, line);
 		//istringstream qualStream(line);
 	
 		//while(qualStream){
@@ -61,7 +61,7 @@ QualityScores::QualityScores(ifstream& qFile, int l){
 			qFile >> score;
 			qScores.push_back(score);
 		}
-		gobble(qFile);
+		m->gobble(qFile);
 
 	}
 	catch(exception& e) {

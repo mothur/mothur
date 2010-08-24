@@ -19,7 +19,7 @@
 class Filters {
 
 public:
-	Filters() {};
+	Filters() { m = MothurOut::getInstance(); };
 	~Filters(){};
 		
 	string getFilter()			{	return filter;		}
@@ -77,7 +77,7 @@ public:
 
 	void doHard(string hard) {
 		ifstream fileHandle;
-		openInputFile(hard, fileHandle);
+		m->openInputFile(hard, fileHandle);
 	
 		fileHandle >> filter;
 	
@@ -102,6 +102,7 @@ protected:
 	int alignmentLength, numSeqs;
 	float soft;
 	char trump;
+	MothurOut* m;
 
 };
 

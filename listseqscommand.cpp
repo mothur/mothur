@@ -47,7 +47,7 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 				it = parameters.find("alignreport");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["alignreport"] = inputDir + it->second;		}
 				}
@@ -55,7 +55,7 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -63,7 +63,7 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -71,7 +71,7 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -79,7 +79,7 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -87,7 +87,7 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 				it = parameters.find("taxonomy");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
@@ -169,12 +169,12 @@ int ListSeqsCommand::execute(){
 		//sort in alphabetical order
 		sort(names.begin(), names.end());
 		
-		if (outputDir == "") {  outputDir += hasPath(inputFileName);  }
+		if (outputDir == "") {  outputDir += m->hasPath(inputFileName);  }
 		
-		string outputFileName = outputDir + getRootName(getSimpleName(inputFileName)) + "accnos";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + "accnos";
 
 		ofstream out;
-		openOutputFile(outputFileName, out);
+		m->openOutputFile(outputFileName, out);
 		
 		//output to .accnos file
 		for (int i = 0; i < names.size(); i++) {
@@ -206,7 +206,7 @@ int ListSeqsCommand::readFasta(){
 	try {
 		
 		ifstream in;
-		openInputFile(fastafile, in);
+		m->openInputFile(fastafile, in);
 		string name;
 		
 		while(!in.eof()){
@@ -218,7 +218,7 @@ int ListSeqsCommand::readFasta(){
 			
 			if (name != "") {  names.push_back(name);  }
 			
-			gobble(in);
+			m->gobble(in);
 		}
 		in.close();	
 		
@@ -234,7 +234,7 @@ int ListSeqsCommand::readFasta(){
 int ListSeqsCommand::readList(){
 	try {
 		ifstream in;
-		openInputFile(listfile, in);
+		m->openInputFile(listfile, in);
 		
 		if(!in.eof()){
 			//read in list vector
@@ -271,7 +271,7 @@ int ListSeqsCommand::readName(){
 	try {
 		
 		ifstream in;
-		openInputFile(namefile, in);
+		m->openInputFile(namefile, in);
 		string name, firstCol, secondCol;
 		
 		while(!in.eof()){
@@ -291,7 +291,7 @@ int ListSeqsCommand::readName(){
 			//get name after last ,
 			names.push_back(secondCol);
 			
-			gobble(in);
+			m->gobble(in);
 		}
 		in.close();
 		return 0;
@@ -308,7 +308,7 @@ int ListSeqsCommand::readGroup(){
 	try {
 	
 		ifstream in;
-		openInputFile(groupfile, in);
+		m->openInputFile(groupfile, in);
 		string name, group;
 		
 		while(!in.eof()){
@@ -320,7 +320,7 @@ int ListSeqsCommand::readGroup(){
 			
 			names.push_back(name);
 					
-			gobble(in);
+			m->gobble(in);
 		}
 		in.close();
 		return 0;
@@ -338,7 +338,7 @@ int ListSeqsCommand::readAlign(){
 	try {
 	
 		ifstream in;
-		openInputFile(alignfile, in);
+		m->openInputFile(alignfile, in);
 		string name, junk;
 		
 		//read column headers
@@ -362,7 +362,7 @@ int ListSeqsCommand::readAlign(){
 			
 			names.push_back(name);
 					
-			gobble(in);
+			m->gobble(in);
 		}
 		in.close();
 		
@@ -380,7 +380,7 @@ int ListSeqsCommand::readTax(){
 	try {
 		
 		ifstream in;
-		openInputFile(taxfile, in);
+		m->openInputFile(taxfile, in);
 		string name, firstCol, secondCol;
 		
 		while(!in.eof()){
@@ -392,7 +392,7 @@ int ListSeqsCommand::readTax(){
 			
 			names.push_back(firstCol);
 			
-			gobble(in);
+			m->gobble(in);
 		}
 		in.close();
 		

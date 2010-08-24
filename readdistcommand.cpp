@@ -46,7 +46,7 @@ ReadDistCommand::ReadDistCommand(string option) {
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
@@ -54,7 +54,7 @@ ReadDistCommand::ReadDistCommand(string option) {
 				it = parameters.find("column");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["column"] = inputDir + it->second;		}
 				}
@@ -62,7 +62,7 @@ ReadDistCommand::ReadDistCommand(string option) {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -70,7 +70,7 @@ ReadDistCommand::ReadDistCommand(string option) {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -123,7 +123,7 @@ ReadDistCommand::ReadDistCommand(string option) {
 			convert(temp, precision); 
 			
 			temp = validParameter.validFile(parameters, "sim", false);				if (temp == "not found") { temp = "F"; }
-			sim = isTrue(temp); 
+			sim = m->isTrue(temp); 
 			globaldata->sim = sim;
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "10"; }
@@ -212,7 +212,7 @@ int ReadDistCommand::execute(){
 		
 		if (format == "matrix") {
 			ifstream in;
-			openInputFile(distFileName, in);
+			m->openInputFile(distFileName, in);
 			matrix = new FullMatrix(in); //reads the matrix file
 			in.close();
 			
@@ -222,12 +222,12 @@ int ReadDistCommand::execute(){
 			if (matrix->getNumSeqs() < groupMap->getNumSeqs()) {  
 				m->mothurOut("Your distance file contains " + toString(matrix->getNumSeqs()) + " sequences, and your group file contains " + toString(groupMap->getNumSeqs()) + " sequences.");  m->mothurOutEndLine();				
 				//create new group file
-				if(outputDir == "") { outputDir += hasPath(groupfile); }
+				if(outputDir == "") { outputDir += m->hasPath(groupfile); }
 				
-				string newGroupFile = outputDir + getRootName(getSimpleName(groupfile)) + "editted.groups";
+				string newGroupFile = outputDir + m->getRootName(m->getSimpleName(groupfile)) + "editted.groups";
 				outputNames.push_back(newGroupFile);
 				ofstream outGroups;
-				openOutputFile(newGroupFile, outGroups);
+				m->openOutputFile(newGroupFile, outGroups);
 				
 				for (int i = 0; i < matrix->getNumSeqs(); i++) {
 					if (m->control_pressed) { delete groupMap; delete matrix; outGroups.close(); remove(newGroupFile.c_str()); return 0; }

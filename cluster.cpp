@@ -53,7 +53,7 @@ rabund(rav), list(lv), dMatrix(dm), method(f)
 	// sequence in the distance matrix.
 //ofstream outtemp;
 //string temp = "temp";
-//openOutputFile(temp, outtemp);	
+//m->openOutputFile(temp, outtemp);	
 //cout << lv->size() << endl;
 	seqVec = vector<MatVec>(lv->size());
 	for (MatData currentCell = dMatrix->begin(); currentCell != dMatrix->end(); currentCell++) {

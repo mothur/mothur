@@ -15,7 +15,7 @@
 void FastaMap::readFastaFile(string inFileName) {
 	try {
 		ifstream in;
-		openInputFile(inFileName, in);
+		m->openInputFile(inFileName, in);
 		string name, sequence, line;
 		sequence = "";
 		string temp;
@@ -41,7 +41,7 @@ void FastaMap::readFastaFile(string inFileName) {
 					//				data[sequence].groupnumber++;
 				}	
 			}
-			gobble(in);
+			m->gobble(in);
 		}
 		in.close();		
 	}
@@ -56,7 +56,7 @@ void FastaMap::readFastaFile(string inFileName) {
 void FastaMap::readFastaFile(string inFastaFile, string oldNameFileName){ //prints data
 	
 	ifstream oldNameFile;
-	openInputFile(oldNameFileName, oldNameFile);
+	m->openInputFile(oldNameFileName, oldNameFile);
 	
 	map<string,string> oldNameMap;
 	string name, list;
@@ -65,12 +65,12 @@ void FastaMap::readFastaFile(string inFastaFile, string oldNameFileName){ //prin
 		
 		oldNameFile >> name >> list;
 		oldNameMap[name] = list;
-		gobble(oldNameFile);
+		m->gobble(oldNameFile);
 	}
 	oldNameFile.close();
 	
 	ifstream inFASTA;
-	openInputFile(inFastaFile, inFASTA);
+	m->openInputFile(inFastaFile, inFASTA);
 	string sequence;
 	while(!inFASTA.eof()){
 		if (m->control_pressed) { break; }
@@ -93,7 +93,7 @@ void FastaMap::readFastaFile(string inFastaFile, string oldNameFileName){ //prin
 				//			data[sequence].groupnumber++;
 			}	
 		}
-		gobble(inFASTA);
+		m->gobble(inFASTA);
 	}
 	
 	
@@ -147,7 +147,7 @@ int FastaMap::sizeUnique(){ //returns datas size which is the number of unique s
 void FastaMap::printNamesFile(string outFileName){ //prints data
 	try {
 		ofstream outFile;
-		openOutputFile(outFileName, outFile);
+		m->openOutputFile(outFileName, outFile);
 		
 		// two column file created with groupname and them list of identical sequence names
 		for (map<string,group>::iterator it = data.begin(); it != data.end(); it++) {
@@ -167,7 +167,7 @@ void FastaMap::printNamesFile(string outFileName){ //prints data
 void FastaMap::printCondensedFasta(string outFileName){ //prints data
 	try {
 		ofstream out;
-		openOutputFile(outFileName, out);
+		m->openOutputFile(outFileName, out);
 		//creates a fasta file
 		for (map<string,group>::iterator it = data.begin(); it != data.end(); it++) {
 			if (m->control_pressed) { break; }

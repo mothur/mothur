@@ -47,7 +47,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 				it = parameters.find("alignreport");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["alignreport"] = inputDir + it->second;		}
 				}
@@ -55,7 +55,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -63,7 +63,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 				it = parameters.find("accnos");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["accnos"] = inputDir + it->second;		}
 				}
@@ -71,7 +71,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -79,7 +79,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -87,7 +87,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -95,7 +95,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 				it = parameters.find("taxonomy");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
@@ -133,7 +133,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 			
 			string usedDups = "true";
 			string temp = validParameter.validFile(parameters, "dups", false);	if (temp == "not found") { temp = "false"; usedDups = ""; }
-			dups = isTrue(temp);
+			dups = m->isTrue(temp);
 			
 			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, alignreport, taxonomy or listfile."); m->mothurOutEndLine(); abort = true; }
 		
@@ -206,14 +206,14 @@ int GetSeqsCommand::execute(){
 //**********************************************************************************************************************
 int GetSeqsCommand::readFasta(){
 	try {
-		if (outputDir == "") { outputDir += hasPath(fastafile); }
-		string outputFileName = outputDir + getRootName(getSimpleName(fastafile)) + "pick" +  getExtension(fastafile);
+		if (outputDir == "") { outputDir += m->hasPath(fastafile); }
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "pick" +  m->getExtension(fastafile);
 		ofstream out;
-		openOutputFile(outputFileName, out);
+		m->openOutputFile(outputFileName, out);
 		
 		
 		ifstream in;
-		openInputFile(fastafile, in);
+		m->openInputFile(fastafile, in);
 		string name;
 		
 		bool wroteSomething = false;
@@ -233,7 +233,7 @@ int GetSeqsCommand::readFasta(){
 					currSeq.printSequence(out);
 				}
 			}
-			gobble(in);
+			m->gobble(in);
 		}
 		in.close();	
 		out.close();
@@ -252,13 +252,13 @@ int GetSeqsCommand::readFasta(){
 //**********************************************************************************************************************
 int GetSeqsCommand::readList(){
 	try {
-		if (outputDir == "") { outputDir += hasPath(listfile); }
-		string outputFileName = outputDir + getRootName(getSimpleName(listfile)) + "pick" +  getExtension(listfile);
+		if (outputDir == "") { outputDir += m->hasPath(listfile); }
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + "pick" +  m->getExtension(listfile);
 		ofstream out;
-		openOutputFile(outputFileName, out);
+		m->openOutputFile(outputFileName, out);
 		
 		ifstream in;
-		openInputFile(listfile, in);
+		m->openInputFile(listfile, in);
 		
 		bool wroteSomething = false;
 		
@@ -304,7 +304,7 @@ int GetSeqsCommand::readList(){
 				newList.print(out);
 			}
 			
-			gobble(in);
+			m->gobble(in);
 		}
 		in.close();	
 		out.close();
@@ -323,14 +323,14 @@ int GetSeqsCommand::readList(){
 //**********************************************************************************************************************
 int GetSeqsCommand::readName(){
 	try {
-		if (outputDir == "") { outputDir += hasPath(namefile); }
-		string outputFileName = outputDir + getRootName(getSimpleName(namefile)) + "pick" +  getExtension(namefile);
+		if (outputDir == "") { outputDir += m->hasPath(namefile); }
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(namefile)) + "pick" +  m->getExtension(namefile);
 		ofstream out;
-		openOutputFile(outputFileName, out);
+		m->openOutputFile(outputFileName, out);
 		
 
 		ifstream in;
-		openInputFile(namefile, in);
+		m->openInputFile(namefile, in);
 		string name, firstCol, secondCol;
 		
 		bool wroteSomething = false;
@@ -396,7 +396,7 @@ int GetSeqsCommand::readName(){
 					}
 				}
 			}
-			gobble(in);
+			m->gobble(in);
 		}
 		in.close();
 		out.close();
@@ -416,14 +416,14 @@ int GetSeqsCommand::readName(){
 //**********************************************************************************************************************
 int GetSeqsCommand::readGroup(){
 	try {
-		if (outputDir == "") { outputDir += hasPath(groupfile); }
-		string outputFileName = outputDir + getRootName(getSimpleName(groupfile)) + "pick" + getExtension(groupfile);
+		if (outputDir == "") { outputDir += m->hasPath(groupfile); }
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(groupfile)) + "pick" + m->getExtension(groupfile);
 		ofstream out;
-		openOutputFile(outputFileName, out);
+		m->openOutputFile(outputFileName, out);
 		
 
 		ifstream in;
-		openInputFile(groupfile, in);
+		m->openInputFile(groupfile, in);
 		string name, group;
 		
 		bool wroteSomething = false;
@@ -443,7 +443,7 @@ int GetSeqsCommand::readGroup(){
 				out << name << '\t' << group << endl;
 			}
 					
-			gobble(in);
+			m->gobble(in);
 		}
 		in.close();
 		out.close();
@@ -462,13 +462,13 @@ int GetSeqsCommand::readGroup(){
 //**********************************************************************************************************************
 int GetSeqsCommand::readTax(){
 	try {
-		if (outputDir == "") { outputDir += hasPath(taxfile); }
-		string outputFileName = outputDir + getRootName(getSimpleName(taxfile)) + "pick" + getExtension(taxfile);
+		if (outputDir == "") { outputDir += m->hasPath(taxfile); }
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(taxfile)) + "pick" + m->getExtension(taxfile);
 		ofstream out;
-		openOutputFile(outputFileName, out);
+		m->openOutputFile(outputFileName, out);
 		
 		ifstream in;
-		openInputFile(taxfile, in);
+		m->openInputFile(taxfile, in);
 		string name, tax;
 		
 		bool wroteSomething = false;
@@ -487,7 +487,7 @@ int GetSeqsCommand::readTax(){
 				out << name << '\t' << tax << endl;
 			}
 					
-			gobble(in);
+			m->gobble(in);
 		}
 		in.close();
 		out.close();
@@ -507,14 +507,14 @@ int GetSeqsCommand::readTax(){
 //alignreport file has a column header line then all other lines contain 16 columns.  we just want the first column since that contains the name
 int GetSeqsCommand::readAlign(){
 	try {
-		if (outputDir == "") { outputDir += hasPath(alignfile); }
-		string outputFileName = outputDir + getRootName(getSimpleName(alignfile)) + "pick.align.report";
+		if (outputDir == "") { outputDir += m->hasPath(alignfile); }
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(alignfile)) + "pick.align.report";
 		ofstream out;
-		openOutputFile(outputFileName, out);
+		m->openOutputFile(outputFileName, out);
 		
 
 		ifstream in;
-		openInputFile(alignfile, in);
+		m->openInputFile(alignfile, in);
 		string name, junk;
 		
 		bool wroteSomething = false;
@@ -554,7 +554,7 @@ int GetSeqsCommand::readAlign(){
 				}
 			}
 			
-			gobble(in);
+			m->gobble(in);
 		}
 		in.close();
 		out.close();
@@ -576,7 +576,7 @@ int GetSeqsCommand::readAccnos(){
 	try {
 		
 		ifstream in;
-		openInputFile(accnosfile, in);
+		m->openInputFile(accnosfile, in);
 		string name;
 		
 		while(!in.eof()){
@@ -584,7 +584,7 @@ int GetSeqsCommand::readAccnos(){
 						
 			names.insert(name);
 			
-			gobble(in);
+			m->gobble(in);
 		}
 		in.close();	
 		

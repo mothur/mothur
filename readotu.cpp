@@ -13,7 +13,7 @@
 
 ReadOTUFile::ReadOTUFile(string pf): philFile(pf){
 	m = MothurOut::getInstance();
-	//openInputFile(philFile, fileHandle);
+	//m->openInputFile(philFile, fileHandle);
 }
 
 /***********************************************************************/

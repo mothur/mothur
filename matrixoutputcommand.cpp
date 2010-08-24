@@ -52,7 +52,7 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
 			}
 			
 			//make sure the user has already run the read.otu command
@@ -66,7 +66,7 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
@@ -82,7 +82,7 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
 			else { 
-				splitAtDash(groups, Groups);
+				m->splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 			}
 				
@@ -91,7 +91,7 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
 			else { 
 				 if (calc == "default")  {  calc = "jclass-thetayc";  }
 			}
-			splitAtDash(calc, Estimators);
+			m->splitAtDash(calc, Estimators);
 
 			if (abort == false) {
 			
@@ -209,7 +209,7 @@ int MatrixOutputCommand::execute(){
 				userLabels.erase(lookup[0]->getLabel());
 			}
 			
-			if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup[0]->getLabel();
 				
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
@@ -347,8 +347,8 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 						}
 					}
 					
-					exportFileName = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + "." + output + ".dist";
-					openOutputFile(exportFileName, out);
+					exportFileName = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + matrixCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + "." + output + ".dist";
+					m->openOutputFile(exportFileName, out);
 					outputNames.push_back(exportFileName);
 					
 					printSims(out);

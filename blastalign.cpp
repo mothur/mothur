@@ -72,7 +72,7 @@ void BlastAlignment::setPairwiseSeqs(){	//	This method call assigns the blast ge
 															//	to the pairwise entry in the Sequence class for the 
 															//	candidate and template Sequence objects
 	ifstream blastFile;
-	openInputFile(blastFileName, blastFile);
+	m->openInputFile(blastFileName, blastFile);
 	
 	seqAaln = "";
 	seqBaln = "";

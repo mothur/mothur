@@ -39,7 +39,7 @@ SequenceDB::SequenceDB(ifstream& filehandle) {
 			if (newSequence.getName() != "") {   data.push_back(newSequence);  }
 			
 			//takes care of white space
-			gobble(filehandle);
+			m->gobble(filehandle);
 		}
 
 		filehandle.close();

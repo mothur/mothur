@@ -48,12 +48,12 @@ void PhyloSummary::summarize(string userTfile){
 	try {
 		
 		ifstream in;
-		openInputFile(userTfile, in);
+		m->openInputFile(userTfile, in);
 		
 		//read in users taxonomy file and add sequences to tree
 		string name, tax;
 		while(!in.eof()){
-			in >> name >> tax; gobble(in);
+			in >> name >> tax; m->gobble(in);
 			
 			addSeqToTree(name, tax);
 			
@@ -252,15 +252,15 @@ void PhyloSummary::readTreeStruct(ifstream& in){
 	try {
 	
 		//read version
-		string line = getline(in); gobble(in);
+		string line = m->getline(in); m->gobble(in);
 		
 		int num;
 		
-		in >> num; gobble(in);
+		in >> num; m->gobble(in);
 		
 		tree.resize(num);
 		
-		in >> maxLevel; gobble(in);
+		in >> maxLevel; m->gobble(in);
 	
 		//read the tree file
 		for (int i = 0; i < tree.size(); i++) {
@@ -284,7 +284,7 @@ void PhyloSummary::readTreeStruct(ifstream& in){
 			
 			tree[i].total = 0;
 			
-			gobble(in);
+			m->gobble(in);
 			
 			//if (tree[i].level > maxLevel) {  maxLevel = tree[i].level;  }
 		}

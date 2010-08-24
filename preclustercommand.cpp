@@ -44,7 +44,7 @@ PreClusterCommand::PreClusterCommand(string option) {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -52,7 +52,7 @@ PreClusterCommand::PreClusterCommand(string option) {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -66,7 +66,7 @@ PreClusterCommand::PreClusterCommand(string option) {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(fastafile); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(fastafile); //if user entered a file with a path then preserve it	
 			}
 
 			//check for optional parameter and set defaults
@@ -125,14 +125,14 @@ int PreClusterCommand::execute(){
 		if (numSeqs == 0) { m->mothurOut("Error reading fasta file...please correct."); m->mothurOutEndLine(); return 0;  }
 		if (diffs > length) { m->mothurOut("Error: diffs is greater than your sequence length."); m->mothurOutEndLine(); return 0;  }
 		
-		string fileroot = outputDir + getRootName(getSimpleName(fastafile));
-		string newFastaFile = fileroot + "precluster" + getExtension(fastafile);
+		string fileroot = outputDir + m->getRootName(m->getSimpleName(fastafile));
+		string newFastaFile = fileroot + "precluster" + m->getExtension(fastafile);
 		string newNamesFile = fileroot + "precluster.names";
 		ofstream outFasta;
 		ofstream outNames;
 		
-		openOutputFile(newFastaFile, outFasta);
-		openOutputFile(newNamesFile, outNames);
+		m->openOutputFile(newFastaFile, outFasta);
+		m->openOutputFile(newNamesFile, outNames);
 
 		//sort seqs by number of identical seqs
 		alignSeqs.sort(comparePriority);
@@ -215,8 +215,8 @@ int PreClusterCommand::readFASTA(){
 		//ifstream inNames;
 		ifstream inFasta;
 		
-		//openInputFile(namefile, inNames);
-		openInputFile(fastafile, inFasta);
+		//m->openInputFile(namefile, inNames);
+		m->openInputFile(fastafile, inFasta);
 		
 		//string firstCol, secondCol, nameString;
 		length = 0;
@@ -228,14 +228,14 @@ int PreClusterCommand::readFASTA(){
 			//inNames >> firstCol >> secondCol;
 			//nameString = secondCol;
 			
-			//gobble(inNames);
+			//m->gobble(inNames);
 			//int size = 1;
 			//while (secondCol.find_first_of(',') != -1) { 
 			//	size++;
 			//	secondCol = secondCol.substr(secondCol.find_first_of(',')+1, secondCol.length());
 			//}
 			
-			Sequence seq(inFasta);  gobble(inFasta);
+			Sequence seq(inFasta);  m->gobble(inFasta);
 			
 			if (seq.getName() != "") {  //can get "" if commented line is at end of fasta file
 				if (namefile != "") {
@@ -302,11 +302,11 @@ void PreClusterCommand::printData(ofstream& outFasta, ofstream& outNames, seqPNo
 void PreClusterCommand::readNameFile(){
 	try {
 		ifstream in;
-		openInputFile(namefile, in);
+		m->openInputFile(namefile, in);
 		string firstCol, secondCol;
 				
 		while (!in.eof()) {
-			in >> firstCol >> secondCol; gobble(in);
+			in >> firstCol >> secondCol; m->gobble(in);
 			names[firstCol] = secondCol;
 			int size = 1;
 

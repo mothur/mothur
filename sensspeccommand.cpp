@@ -46,7 +46,7 @@ SensSpecCommand::SensSpecCommand(string option)  {
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -54,7 +54,7 @@ SensSpecCommand::SensSpecCommand(string option)  {
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
@@ -62,7 +62,7 @@ SensSpecCommand::SensSpecCommand(string option)  {
 				it = parameters.find("column");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["column"] = inputDir + it->second;		}
 				}
@@ -70,7 +70,7 @@ SensSpecCommand::SensSpecCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -94,15 +94,15 @@ SensSpecCommand::SensSpecCommand(string option)  {
 			outputDir = validParameter.validFile(parameters, "outputdir", false);
 			if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(listFile); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(listFile); //if user entered a file with a path then preserve it	
 			}
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			temp = validParameter.validFile(parameters, "hard", false);
 			if (temp == "not found"){	hard = 0;	}
-			else if(!isTrue(temp))	{	hard = 0;	}
-			else if(isTrue(temp))	{	hard = 1;	}
+			else if(!m->isTrue(temp))	{	hard = 0;	}
+			else if(m->isTrue(temp))	{	hard = 1;	}
 			
 //			temp = validParameter.validFile(parameters, "name", true);
 //			if (temp == "not found")	{	nameFile = "";		}
@@ -178,7 +178,7 @@ void SensSpecCommand::processPhylip(){
 		//probably need some checking to confirm that the names in the distance matrix are the same as those in the list file
 		
 		ifstream inputListFile;
-		openInputFile(listFile, inputListFile);
+		m->openInputFile(listFile, inputListFile);
 		
 		string origCutoff = "";
 		bool getCutoff = 0;
@@ -210,13 +210,13 @@ void SensSpecCommand::processPhylip(){
 				}
 				seqMap[seqName] = i;
 			}
-			gobble(inputListFile);
+			m->gobble(inputListFile);
 		
 			int lNumSeqs = seqMap.size();
 			int pNumSeqs = 0;
 
 			ifstream phylipFile;
-			openInputFile(distFile, phylipFile);
+			m->openInputFile(distFile, phylipFile);
 			phylipFile >> pNumSeqs;
 			if(pNumSeqs != lNumSeqs){	cout << "numSeq mismatch!" << endl;	}
 			
@@ -278,7 +278,7 @@ void SensSpecCommand::processPhylip(){
 void SensSpecCommand::processColumn(){
 	try{		
 		ifstream inputListFile;
-		openInputFile(listFile, inputListFile);
+		m->openInputFile(listFile, inputListFile);
 		
 		string origCutoff = "";
 		bool getCutoff = 0;
@@ -326,12 +326,12 @@ void SensSpecCommand::processColumn(){
 					}
 				}
 			}
-			gobble(inputListFile);
+			m->gobble(inputListFile);
 			
 			int numDists = (numSeqs * (numSeqs-1) / 2);
 
 			ifstream columnFile;
-			openInputFile(distFile, columnFile);
+			m->openInputFile(distFile, columnFile);
 			string seqNameA, seqNameB, seqPairString;
 			double distance;
 			
@@ -377,7 +377,7 @@ void SensSpecCommand::processColumn(){
 					seqPairSet.erase(it);	
 				}
 				
-				gobble(columnFile);
+				m->gobble(columnFile);
 			}
 			falsePositives += seqPairSet.size();
 			
@@ -395,7 +395,7 @@ void SensSpecCommand::processColumn(){
 void SensSpecCommand::setUpOutput(){
 	try{		
 		ofstream sensSpecFile;
-		openOutputFile(sensSpecFileName, sensSpecFile);
+		m->openOutputFile(sensSpecFileName, sensSpecFile);
 		
 		sensSpecFile << "label\tcutoff\ttp\ttn\tfp\tfn\tsensitivity\tspecificity\tppv\tnpv\tfdr\taccuracy\tmcc\tf1score\n";
 
@@ -440,7 +440,7 @@ void SensSpecCommand::outputStatistics(string label, string cutoff){
 		if(nPrime == 0)		{	negativePredictiveValue = 0;	matthewsCorrCoef = 0;							}
 		
 		ofstream sensSpecFile;
-		openOutputFileAppend(sensSpecFileName, sensSpecFile);
+		m->openOutputFileAppend(sensSpecFileName, sensSpecFile);
 		
 		sensSpecFile << label << '\t' << cutoff << '\t';
 		sensSpecFile << truePositives << '\t' << trueNegatives << '\t' << falsePositives << '\t' << falseNegatives << '\t';

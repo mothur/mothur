@@ -44,7 +44,7 @@ ReadTreeCommand::ReadTreeCommand(string option)  {
 				it = parameters.find("tree");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["tree"] = inputDir + it->second;		}
 				}
@@ -52,7 +52,7 @@ ReadTreeCommand::ReadTreeCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -60,7 +60,7 @@ ReadTreeCommand::ReadTreeCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -199,13 +199,13 @@ int ReadTreeCommand::readNamesFile() {
 		globaldata->names.clear();
 		
 		ifstream in;
-		openInputFile(namefile, in);
+		m->openInputFile(namefile, in);
 		
 		string first, second;
 		map<string, string>::iterator itNames;
 		
 		while(!in.eof()) {
-			in >> first >> second; gobble(in);
+			in >> first >> second; m->gobble(in);
 			
 			itNames = globaldata->names.find(first);
 			if (itNames == globaldata->names.end()) {  
@@ -213,7 +213,7 @@ int ReadTreeCommand::readNamesFile() {
 				
 				//we need a list of names in your namefile to use above when removing extra seqs above so we don't remove them
 				vector<string> dupNames;
-				splitAtComma(second, dupNames);
+				m->splitAtComma(second, dupNames);
 				
 				for (int i = 0; i < dupNames.size(); i++) {	nameMap[dupNames[i]] = dupNames[i];  }
 			}else {  m->mothurOut(first + " has already been seen in namefile, disregarding names file."); m->mothurOutEndLine(); in.close(); globaldata->names.clear(); return 1; }			

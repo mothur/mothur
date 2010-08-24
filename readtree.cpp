@@ -25,7 +25,7 @@ ReadTree::ReadTree() {
 int ReadTree::readSpecialChar(istream& f, char c, string name) {
     try {
 	
-		gobble(f);
+		m->gobble(f);
 		char d = f.get();
 	
 		if(d == EOF){
@@ -37,7 +37,7 @@ int ReadTree::readSpecialChar(istream& f, char c, string name) {
 			exit(1);
 		}
 		if(d == ')' && f.peek() == '\n'){
-			gobble(f);
+			m->gobble(f);
 		}	
 		return d;
 	}
@@ -51,7 +51,7 @@ int ReadTree::readSpecialChar(istream& f, char c, string name) {
 int ReadTree::readNodeChar(istream& f) {
 	try {
 //		while(isspace(d=f.get()))		{;}
-		gobble(f);
+		m->gobble(f);
 		char d = f.get();
 
 		if(d == EOF){
@@ -76,7 +76,7 @@ float ReadTree::readBranchLength(istream& f) {
 			m->mothurOut("Error: Missing branch length in input tree.\n");
 			exit(1);
 		}
-		gobble(f);
+		m->gobble(f);
 		return b;
 	}
 	catch(exception& e) {
@@ -125,7 +125,7 @@ int ReadNewickTree::read() {
 				
 				//save trees for later commands
 				globaldata->gTree.push_back(T); 
-				gobble(filehandle);
+				m->gobble(filehandle);
 			}
 		//if you are a nexus file
 		}else if ((c = filehandle.peek()) == '#') {

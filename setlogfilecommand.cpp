@@ -36,7 +36,7 @@ SetLogFileCommand::SetLogFileCommand(string option)  {
 			if (name == "not found") {  m->mothurOut("name is a required parameter for the set.logfile command."); abort = true; } 
 			
 			string temp = validParameter.validFile(parameters, "append", false);		if (temp == "not found") {  temp = "F";  }
-			append = isTrue(temp);
+			append = m->isTrue(temp);
 		}
 	}
 	catch(exception& e) {

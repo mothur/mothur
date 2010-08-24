@@ -55,9 +55,9 @@ EstOutput Weighted::getValues(Tree* t) {
 					}
 						
 					//is this sum from a sequence which is in one of the users groups
-					if (inUsersGroups(t->tree[v].getGroup(), globaldata->Groups) == true) {
+					if (m->inUsersGroups(t->tree[v].getGroup(), globaldata->Groups) == true) {
 						//is this sum from a sequence which is in this groupCombo
-						if (inUsersGroups(t->tree[v].getGroup(), groups)) {
+						if (m->inUsersGroups(t->tree[v].getGroup(), groups)) {
 							int numSeqsInGroupI, numSeqsInGroupL;
 							
 							map<string, int>::iterator it;
@@ -174,7 +174,7 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 				sum += abs(t->tree[index].getBranchLength());
 			}
 						
-			if (inUsersGroups(t->tree[v].getGroup(), groups)) {
+			if (m->inUsersGroups(t->tree[v].getGroup(), groups)) {
 				int numSeqsInGroupI, numSeqsInGroupL;
 							
 				map<string, int>::iterator it;

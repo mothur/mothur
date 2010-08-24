@@ -69,7 +69,7 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 		vector<int> topMatches;
 		
 		ofstream queryFile;
-		openOutputFile((queryFileName+seq->getName()), queryFile);
+		m->openOutputFile((queryFileName+seq->getName()), queryFile);
 		queryFile << '>' << seq->getName() << endl;
 		queryFile << seq->getUnaligned() << endl;
 		queryFile.close();
@@ -84,11 +84,11 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 		system(blastCommand.c_str());
 		
 		ifstream m8FileHandle;
-		openInputFile(blastFileName+seq->getName(), m8FileHandle, "no error");
+		m->openInputFile(blastFileName+seq->getName(), m8FileHandle, "no error");
 		
 		string dummy;
 		int templateAccession;
-		gobble(m8FileHandle);
+		m->gobble(m8FileHandle);
 		
 		while(!m8FileHandle.eof()){
 			m8FileHandle >> dummy >> templateAccession >> searchScore;
@@ -96,7 +96,7 @@ vector<int> BlastDB::findClosestSequences(Sequence* seq, int n) {
 			//get rest of junk in line
 			while (!m8FileHandle.eof())	{	char c = m8FileHandle.get(); if (c == 10 || c == 13){	break;	}	} 
 			
-			gobble(m8FileHandle);
+			m->gobble(m8FileHandle);
 			topMatches.push_back(templateAccession);
 		}
 		m8FileHandle.close();
@@ -118,7 +118,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n) {
 		vector<int> topMatches;
 		
 		ofstream queryFile;
-		openOutputFile((queryFileName+seq->getName()), queryFile);
+		m->openOutputFile((queryFileName+seq->getName()), queryFile);
 		queryFile << '>' << seq->getName() << endl;
 		queryFile << seq->getUnaligned() << endl;
 		queryFile.close();
@@ -132,11 +132,11 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n) {
 		system(blastCommand.c_str());
 
 		ifstream m8FileHandle;
-		openInputFile(blastFileName+seq->getName(), m8FileHandle, "no error");
+		m->openInputFile(blastFileName+seq->getName(), m8FileHandle, "no error");
 	
 		string dummy;
 		int templateAccession;
-		gobble(m8FileHandle);
+		m->gobble(m8FileHandle);
 		
 		while(!m8FileHandle.eof()){
 			m8FileHandle >> dummy >> templateAccession >> searchScore;
@@ -144,7 +144,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n) {
 			//get rest of junk in line
 			while (!m8FileHandle.eof())	{	char c = m8FileHandle.get(); if (c == 10 || c == 13){	break;	}	} 
 			
-			gobble(m8FileHandle);
+			m->gobble(m8FileHandle);
 			topMatches.push_back(templateAccession);
 //cout << templateAccession << endl;
 		}
@@ -164,7 +164,7 @@ void BlastDB::addSequence(Sequence seq) {
 	try {
 	
 		ofstream unalignedFastaFile;
-		openOutputFileAppend(dbFileName, unalignedFastaFile);				
+		m->openOutputFileAppend(dbFileName, unalignedFastaFile);				
 	
 		//	generating a fasta file with unaligned template
 		unalignedFastaFile << '>' << count << endl;					//	sequences, which will be input to formatdb

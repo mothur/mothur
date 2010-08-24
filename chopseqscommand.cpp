@@ -46,7 +46,7 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -61,7 +61,7 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 			convert(temp, numbases);   
 			
 			temp = validParameter.validFile(parameters, "countgaps", false);	if (temp == "not found") { temp = "f"; } 
-			countGaps = isTrue(temp);   
+			countGaps = m->isTrue(temp);   
 		
 			keep = validParameter.validFile(parameters, "keep", false);		if (keep == "not found") { keep = "front"; } 
 				
@@ -100,17 +100,17 @@ int ChopSeqsCommand::execute(){
 		
 		if (abort == true) { return 0; }
 		
-		string outputFileName = outputDir + getRootName(getSimpleName(fastafile)) + "chop.fasta";
-		string outputFileNameAccnos = outputDir + getRootName(getSimpleName(fastafile)) + "chop.accnos";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "chop.fasta";
+		string outputFileNameAccnos = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "chop.accnos";
 		
 		ofstream out;
-		openOutputFile(outputFileName, out);
+		m->openOutputFile(outputFileName, out);
 		
 		ofstream outAcc;
-		openOutputFile(outputFileNameAccnos, outAcc);
+		m->openOutputFile(outputFileNameAccnos, outAcc);
 		
 		ifstream in;
-		openInputFile(fastafile, in);
+		m->openInputFile(fastafile, in);
 		
 		bool wroteAccnos = false;
 		

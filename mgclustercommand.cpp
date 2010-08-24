@@ -42,7 +42,7 @@ MGClusterCommand::MGClusterCommand(string option) {
 				it = parameters.find("blast");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["blast"] = inputDir + it->second;		}
 				}
@@ -50,7 +50,7 @@ MGClusterCommand::MGClusterCommand(string option) {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -65,7 +65,7 @@ MGClusterCommand::MGClusterCommand(string option) {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(blastfile); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(blastfile); //if user entered a file with a path then preserve it	
 			}
 			
 			namefile = validParameter.validFile(parameters, "name", true);
@@ -97,16 +97,16 @@ MGClusterCommand::MGClusterCommand(string option) {
 			convert(temp, penalty); 
 			
 			temp = validParameter.validFile(parameters, "min", false);				if (temp == "not found") { temp = "true"; }
-			minWanted = isTrue(temp); 
+			minWanted = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "merge", false);			if (temp == "not found") { temp = "true"; }
-			merge = isTrue(temp); 
+			merge = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "hcluster", false);			if (temp == "not found") { temp = "false"; }
-			hclusterWanted = isTrue(temp); 
+			hclusterWanted = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "F"; }
-			hard = isTrue(temp);
+			hard = m->isTrue(temp);
 		}
 
 	}
@@ -153,7 +153,7 @@ int MGClusterCommand::execute(){
 			nameMap->readMap();
 		}else{ nameMap= new NameAssignment(); }
 		
-		string fileroot = outputDir + getRootName(getSimpleName(blastfile));
+		string fileroot = outputDir + m->getRootName(m->getSimpleName(blastfile));
 		string tag = "";
 		time_t start;
 		float previousDist = 0.00000;
@@ -179,9 +179,9 @@ int MGClusterCommand::execute(){
 		else							{ tag = "an";  }
 		
 		//open output files
-		openOutputFile(fileroot+ tag + ".list",  listFile);
-		openOutputFile(fileroot+ tag + ".rabund",  rabundFile);
-		openOutputFile(fileroot+ tag + ".sabund",  sabundFile);
+		m->openOutputFile(fileroot+ tag + ".list",  listFile);
+		m->openOutputFile(fileroot+ tag + ".rabund",  rabundFile);
+		m->openOutputFile(fileroot+ tag + ".sabund",  sabundFile);
 		
 		if (m->control_pressed) { 
 			delete nameMap; delete read; delete list; delete rabund; 
@@ -223,9 +223,9 @@ int MGClusterCommand::execute(){
 				float dist = distMatrix->getSmallDist();
 				float rndDist;
 				if (hard) {
-					rndDist = ceilDist(dist, precision); 
+					rndDist = m->ceilDist(dist, precision); 
 				}else{
-					rndDist = roundDist(dist, precision); 
+					rndDist = m->roundDist(dist, precision); 
 				}
 				
 				if(previousDist <= 0.0000 && dist != previousDist){
@@ -309,7 +309,7 @@ int MGClusterCommand::execute(){
 			
 			vector<seqDist> seqs; seqs.resize(1); // to start loop
 			//ifstream inHcluster;
-			//openInputFile(distFile, inHcluster);
+			//m->openInputFile(distFile, inHcluster);
 			
 			if (m->control_pressed) { 
 				delete nameMap;  delete list; delete rabund; delete hcluster;
@@ -345,9 +345,9 @@ int MGClusterCommand::execute(){
 	
 						float rndDist;
 						if (hard) {
-							rndDist = ceilDist(seqs[i].dist, precision); 
+							rndDist = m->ceilDist(seqs[i].dist, precision); 
 						}else{
-							rndDist = roundDist(seqs[i].dist, precision); 
+							rndDist = m->roundDist(seqs[i].dist, precision); 
 						}
 												
 						if((previousDist <= 0.0000) && (seqs[i].dist != previousDist)){
@@ -477,7 +477,7 @@ ListVector* MGClusterCommand::mergeOPFs(map<string, int> binInfo, float dist){
 		int count = 0;
 		
 		if (hclusterWanted) {  
-			openInputFile(overlapFile, inOverlap);  
+			m->openInputFile(overlapFile, inOverlap);  
 			if (inOverlap.eof()) {  done = true;  }
 		}else { if (overlapMatrix.size() == 0)  {  done = true;  } } 
 		
@@ -498,7 +498,7 @@ ListVector* MGClusterCommand::mergeOPFs(map<string, int> binInfo, float dist){
 				if (!inOverlap.eof()) {
 					string firstName, secondName;
 					float overlapDistance;
-					inOverlap >> firstName >> secondName >> overlapDistance; gobble(inOverlap);
+					inOverlap >> firstName >> secondName >> overlapDistance; m->gobble(inOverlap);
 					
 					//commented out because we check this in readblast already
 					//map<string,int>::iterator itA = nameMap->find(firstName);
@@ -571,12 +571,12 @@ ListVector* MGClusterCommand::mergeOPFs(map<string, int> binInfo, float dist){
 void MGClusterCommand::sortHclusterFiles(string unsortedDist, string unsortedOverlap) {
 	try {
 		//sort distFile
-		string sortedDistFile = sortFile(unsortedDist, outputDir);
+		string sortedDistFile = m->sortFile(unsortedDist, outputDir);
 		remove(unsortedDist.c_str());  //delete unsorted file
 		distFile = sortedDistFile;
 		
 		//sort overlap file
-		string sortedOverlapFile = sortFile(unsortedOverlap, outputDir);
+		string sortedOverlapFile = m->sortFile(unsortedOverlap, outputDir);
 		remove(unsortedOverlap.c_str());  //delete unsorted file
 		overlapFile = sortedOverlapFile;
 	}

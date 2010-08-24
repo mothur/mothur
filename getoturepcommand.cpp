@@ -70,7 +70,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -78,7 +78,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -86,7 +86,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
@@ -94,7 +94,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 				it = parameters.find("column");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["column"] = inputDir + it->second;		}
 				}
@@ -102,7 +102,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -110,7 +110,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -153,7 +153,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; allLines = 1;  }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
@@ -179,13 +179,13 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 					m->mothurOut("You must provide a groupfile to use groups."); m->mothurOutEndLine();
 					abort = true;
 				}else { 
-					splitAtDash(groups, Groups);
+					m->splitAtDash(groups, Groups);
 				}
 			}
 			globaldata->Groups = Groups;
 			
 			string temp = validParameter.validFile(parameters, "large", false);		if (temp == "not found") {	temp = "F";	}
-			large = isTrue(temp);
+			large = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "precision", false);			if (temp == "not found") { temp = "100"; }
 			convert(temp, precision); 
@@ -307,7 +307,7 @@ int GetOTURepCommand::execute(){
 			delete nameMap;
 			
 			//openfile for getMap to use
-			openInputFile(distFile, inRow);
+			m->openInputFile(distFile, inRow);
 			
 			if (m->control_pressed) { inRow.close(); remove(distFile.c_str()); return 0; }
 		}
@@ -322,7 +322,7 @@ int GetOTURepCommand::execute(){
 				names.clear();
 				binnames = globaldata->gListVector->get(i);
 				
-				splitAtComma(binnames, names);
+				m->splitAtComma(binnames, names);
 				
 				for (int j = 0; j < names.size(); j++) {
 					nameToIndex[names[j]] = i;
@@ -386,7 +386,7 @@ int GetOTURepCommand::execute(){
 					userLabels.erase(list->getLabel());
 			}
 			
-			if ((anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = list->getLabel();
 					
 					delete list;
@@ -489,7 +489,7 @@ int GetOTURepCommand::execute(){
 void GetOTURepCommand::readNamesFile() {
 	try {
 		vector<string> dupNames;
-		openInputFile(namefile, inNames);
+		m->openInputFile(namefile, inNames);
 		
 		string name, names, sequence;
 	
@@ -500,7 +500,7 @@ void GetOTURepCommand::readNamesFile() {
 			dupNames.clear();
 			
 			//parse names into vector
-			splitAtComma(names, dupNames);
+			m->splitAtComma(names, dupNames);
 			
 			//store names in fasta map
 			sequence = fasta->getSequence(name);
@@ -508,7 +508,7 @@ void GetOTURepCommand::readNamesFile() {
 				fasta->push_back(dupNames[i], sequence);
 			}
 		
-			gobble(inNames);
+			m->gobble(inNames);
 		}
 		inNames.close();
 
@@ -598,15 +598,15 @@ int GetOTURepCommand::process(ListVector* processList) {
 		string nameRep;
 
 		//create output file
-		if (outputDir == "") { outputDir += hasPath(listfile); }
+		if (outputDir == "") { outputDir += m->hasPath(listfile); }
 				
 		ofstream newNamesOutput;
 		string outputNamesFile;
 		map<string, ofstream*> filehandles;
 		
 		if (Groups.size() == 0) { //you don't want to use groups
-			outputNamesFile  = outputDir + getRootName(getSimpleName(listfile)) + processList->getLabel() + ".rep.names";
-			openOutputFile(outputNamesFile, newNamesOutput);
+			outputNamesFile  = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + ".rep.names";
+			m->openOutputFile(outputNamesFile, newNamesOutput);
 			outputNames.push_back(outputNamesFile);
 			outputNameFiles[outputNamesFile] = processList->getLabel();
 		}else{ //you want to use groups
@@ -614,9 +614,9 @@ int GetOTURepCommand::process(ListVector* processList) {
 			for (int i=0; i<Groups.size(); i++) {
 				temp = new ofstream;
 				filehandles[Groups[i]] = temp;
-				outputNamesFile = outputDir + getRootName(getSimpleName(listfile)) + processList->getLabel() + "." + Groups[i] + ".rep.names";
+				outputNamesFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + "." + Groups[i] + ".rep.names";
 				
-				openOutputFile(outputNamesFile, *(temp));
+				m->openOutputFile(outputNamesFile, *(temp));
 				outputNames.push_back(outputNamesFile);
 				outputNameFiles[outputNamesFile] = processList->getLabel() + "." + Groups[i];
 			}
@@ -639,7 +639,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 			
 			string temp = processList->get(i);
 			vector<string> namesInBin;
-			splitAtComma(temp, namesInBin);
+			m->splitAtComma(temp, namesInBin);
 			
 			if (Groups.size() == 0) {
 				nameRep = findRep(namesInBin);
@@ -655,7 +655,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 					
 					if (thisgroup == "not found") { m->mothurOut(namesInBin[j] + " is not in your groupfile, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
 					
-					if (inUsersGroups(thisgroup, Groups)) { //add this name to correct group
+					if (m->inUsersGroups(thisgroup, Groups)) { //add this name to correct group
 						NamesInGroup[thisgroup].push_back(namesInBin[j]);
 					}
 				}
@@ -701,27 +701,27 @@ int GetOTURepCommand::processNames(string filename, string label) {
 	try{
 
 		//create output file
-		if (outputDir == "") { outputDir += hasPath(listfile); }
-		string outputFileName = outputDir + getRootName(getSimpleName(listfile)) + label + ".rep.fasta";
-		openOutputFile(outputFileName, out);
+		if (outputDir == "") { outputDir += m->hasPath(listfile); }
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + label + ".rep.fasta";
+		m->openOutputFile(outputFileName, out);
 		vector<repStruct> reps;
 		outputNames.push_back(outputFileName);
 		
 		ofstream out2;
 		string tempNameFile = filename + ".temp";
-		openOutputFile(tempNameFile, out2);
+		m->openOutputFile(tempNameFile, out2);
 		
 		ifstream in;
-		openInputFile(filename, in);
+		m->openInputFile(filename, in);
 		
 		int i = 0;
 		while (!in.eof()) {
 			string rep, binnames;
-			in >> i >> rep >> binnames; gobble(in);
+			in >> i >> rep >> binnames; m->gobble(in);
 			out2 << rep << '\t' << binnames << endl;
 			
 			vector<string> names;
-			splitAtComma(binnames, names);
+			m->splitAtComma(binnames, names);
 			int binsize = names.size();
 			
 			//if you have a groupfile

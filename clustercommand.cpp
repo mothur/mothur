@@ -57,7 +57,7 @@ ClusterCommand::ClusterCommand(string option)  {
 			convert(temp, precision); 
 			
 			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "F"; }
-			hard = isTrue(temp);
+			hard = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);
 			if (temp == "not found") { temp = "10"; }
@@ -94,12 +94,12 @@ ClusterCommand::ClusterCommand(string option)  {
 				else if(method == "weighted"){	cluster = new WeightedLinkage(rabund, list, matrix, cutoff, method);	}
 				tag = cluster->getTag();
 				
-				if (outputDir == "") { outputDir += hasPath(globaldata->inputFileName); }
-				fileroot = outputDir + getRootName(getSimpleName(globaldata->inputFileName));
+				if (outputDir == "") { outputDir += m->hasPath(globaldata->inputFileName); }
+				fileroot = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName));
 			
-				openOutputFile(fileroot+ tag + ".sabund",	sabundFile);
-				openOutputFile(fileroot+ tag + ".rabund",	rabundFile);
-				openOutputFile(fileroot+ tag + ".list",		listFile);
+				m->openOutputFile(fileroot+ tag + ".sabund",	sabundFile);
+				m->openOutputFile(fileroot+ tag + ".rabund",	rabundFile);
+				m->openOutputFile(fileroot+ tag + ".list",		listFile);
 				
 				outputNames.push_back(fileroot+ tag + ".sabund");
 				outputNames.push_back(fileroot+ tag + ".rabund");
@@ -169,9 +169,9 @@ int ClusterCommand::execute(){
 				return 0;
 			}
 		
-			if (print_start && isTrue(timing)) {
+			if (print_start && m->isTrue(timing)) {
 				m->mothurOut("Clustering (" + tag + ") dist " + toString(matrix->getSmallDist()) + "/" 
-					+ toString(roundDist(matrix->getSmallDist(), precision)) 
+					+ toString(m->roundDist(matrix->getSmallDist(), precision)) 
 					+ "\t(precision: " + toString(precision) + ", Nodes: " + toString(matrix->getNNodes()) + ")");
 				cout.flush();
 				print_start = false;
@@ -184,9 +184,9 @@ int ClusterCommand::execute(){
 			float dist = matrix->getSmallDist();
 			float rndDist;
 			if (hard) {
-				rndDist = ceilDist(dist, precision); 
+				rndDist = m->ceilDist(dist, precision); 
 			}else{
-				rndDist = roundDist(dist, precision); 
+				rndDist = m->roundDist(dist, precision); 
 			}
 
 			if(previousDist <= 0.0000 && dist != previousDist){
@@ -202,7 +202,7 @@ int ClusterCommand::execute(){
 			oldList = *list;
 		}
 
-		if (print_start && isTrue(timing)) {
+		if (print_start && m->isTrue(timing)) {
 			m->mothurOut("Clustering (" + tag + ") for distance " + toString(previousDist) + "/" + toString(rndPreviousDist) 
 					 + "\t(precision: " + toString(precision) + ", Nodes: " + toString(matrix->getNNodes()) + ")");
 			cout.flush();
@@ -233,8 +233,8 @@ int ClusterCommand::execute(){
 		listFile.close();
 	
 		if (saveCutoff != cutoff) { 
-			if (hard)	{  saveCutoff = ceilDist(saveCutoff, precision);	}
-			else		{	saveCutoff = roundDist(saveCutoff, precision);  }
+			if (hard)	{  saveCutoff = m->ceilDist(saveCutoff, precision);	}
+			else		{	saveCutoff = m->roundDist(saveCutoff, precision);  }
 
 			m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine(); 
 		}
@@ -245,7 +245,7 @@ int ClusterCommand::execute(){
 		m->mothurOutEndLine();
 
 		
-		//if (isTrue(timing)) {
+		//if (m->isTrue(timing)) {
 			m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to cluster"); m->mothurOutEndLine();
 		//}
 		
@@ -262,7 +262,7 @@ int ClusterCommand::execute(){
 
 void ClusterCommand::printData(string label){
 	try {
-		if (isTrue(timing)) {
+		if (m->isTrue(timing)) {
 			m->mothurOut("\tTime: " + toString(time(NULL) - start) + "\tsecs for " + toString(oldRAbund.getNumBins()) 
 		     + "\tclusters. Updates: " + toString(loops)); m->mothurOutEndLine();
 		}
@@ -271,7 +271,7 @@ void ClusterCommand::printData(string label){
 		start = time(NULL);
 
 		oldRAbund.setLabel(label);
-		if (isTrue(showabund)) {
+		if (m->isTrue(showabund)) {
 			oldRAbund.getSAbundVector().print(cout);
 		}
 		oldRAbund.print(rabundFile);

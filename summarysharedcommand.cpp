@@ -69,7 +69,7 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(globaldata->getSharedFile()); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(globaldata->getSharedFile()); //if user entered a file with a path then preserve it	
 			}
 
 			//check for optional parameter and set defaults
@@ -77,7 +77,7 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
@@ -92,17 +92,17 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 			else { 
 				 if (calc == "default")  {  calc = "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan";  }
 			}
-			splitAtDash(calc, Estimators);
+			m->splitAtDash(calc, Estimators);
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
 			else { 
-				splitAtDash(groups, Groups);
+				m->splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 			}
 			
 			string temp = validParameter.validFile(parameters, "all", false);				if (temp == "not found") { temp = "false"; }
-			all = isTrue(temp);
+			all = m->isTrue(temp);
 			
 			if (abort == false) {
 			
@@ -157,8 +157,8 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 					}
 				}
 				
-				outputFileName = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + "shared.summary";
-				openOutputFile(outputFileName, outputFileHandle);
+				outputFileName = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + "shared.summary";
+				m->openOutputFile(outputFileName, outputFileHandle);
 				outputNames.push_back(outputFileName);
 				
 				mult = false;
@@ -239,8 +239,8 @@ int SummarySharedCommand::execute(){
 		
 		//create file and put column headers for multiple groups file
 		if (mult == true) {
-			outAllFileName = ((getRootName(globaldata->inputFileName)) + "sharedmultiple.summary");
-			openOutputFile(outAllFileName, outAll);
+			outAllFileName = ((m->getRootName(globaldata->inputFileName)) + "sharedmultiple.summary");
+			m->openOutputFile(outAllFileName, outAll);
 			outputNames.push_back(outAllFileName);
 			
 			outAll << "label" <<'\t' << "comparison" << '\t'; 
@@ -304,7 +304,7 @@ int SummarySharedCommand::execute(){
 				userLabels.erase(lookup[0]->getLabel());
 			}
 			
-			if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = lookup[0]->getLabel();
 					
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 

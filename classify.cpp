@@ -46,7 +46,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 			//delete inFileName;
 
 			if (pid == 0) { //only one process needs to scan file
-				positions = setFilePosFasta(tempFile, numSeqs); //fills MPIPos, returns numSeqs
+				positions = m->setFilePosFasta(tempFile, numSeqs); //fills MPIPos, returns numSeqs
 
 				//send file positions to all processes
 				for(int i = 1; i < processors; i++) { 
@@ -96,8 +96,8 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 		//need to know number of template seqs for suffixdb
 		if (method == "suffix") {
 			ifstream inFASTA;
-			openInputFile(tempFile, inFASTA);
-			getNumSeqs(inFASTA, numSeqs);
+			m->openInputFile(tempFile, inFASTA);
+			m->getNumSeqs(inFASTA, numSeqs);
 			inFASTA.close();
 		}
 
@@ -109,7 +109,7 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 			kmerDBName = tempFile.substr(0,tempFile.find_last_of(".")+1) + char('0'+ kmerSize) + "mer";
 			ifstream kmerFileTest(kmerDBName.c_str());
 			if(kmerFileTest){	
-				bool GoodFile = checkReleaseVersion(kmerFileTest, m->getVersion());
+				bool GoodFile = m->checkReleaseVersion(kmerFileTest, m->getVersion());
 				if (GoodFile) {  needToGenerate = false;	}
 			}
 		}
@@ -124,11 +124,11 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 		
 		if (needToGenerate) {
 			ifstream fastaFile;
-			openInputFile(tempFile, fastaFile);
+			m->openInputFile(tempFile, fastaFile);
 			
 			while (!fastaFile.eof()) {
 				Sequence temp(fastaFile);
-				gobble(fastaFile);
+				m->gobble(fastaFile);
 			
 				names.push_back(temp.getName());
 							
@@ -143,11 +143,11 @@ void Classify::generateDatabaseAndNames(string tfile, string tempFile, string me
 			database->readKmerDB(kmerFileTest);	
 		
 			ifstream fastaFile;
-			openInputFile(tempFile, fastaFile);
+			m->openInputFile(tempFile, fastaFile);
 			
 			while (!fastaFile.eof()) {
 				Sequence temp(fastaFile);
-				gobble(fastaFile);
+				m->gobble(fastaFile);
 
 				names.push_back(temp.getName());
 			}
@@ -204,7 +204,7 @@ int Classify::readTaxonomy(string file) {
 		//delete inFileName;
 
 		if (pid == 0) {
-			positions = setFilePosEachLine(file, num);
+			positions = m->setFilePosEachLine(file, num);
 			
 			//send file positions to all processes
 			for(int i = 1; i < processors; i++) { 
@@ -239,7 +239,7 @@ int Classify::readTaxonomy(string file) {
 		MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 #else				
 		ifstream inTax;
-		openInputFile(file, inTax);
+		m->openInputFile(file, inTax);
 	
 		//read template seqs and save
 		while (!inTax.eof()) {
@@ -249,7 +249,7 @@ int Classify::readTaxonomy(string file) {
 			
 			phyloTree->addSeqToTree(name, taxInfo);
 		
-			gobble(inTax);
+			m->gobble(inTax);
 		}
 		inTax.close();
 #endif	

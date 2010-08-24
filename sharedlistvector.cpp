@@ -52,9 +52,9 @@ SharedListVector::SharedListVector(ifstream& f) : DataVector(), maxRank(0), numB
 /***********************************************************************/
 void SharedListVector::set(int binNumber, string seqNames){
 	try {
-		int nNames_old = getNumNames(data[binNumber]);
+		int nNames_old = m->getNumNames(data[binNumber]);
 		data[binNumber] = seqNames;
-		int nNames_new = getNumNames(seqNames);
+		int nNames_new = m->getNumNames(seqNames);
 	
 		if(nNames_old == 0)			{	numBins++;				}
 		if(nNames_new == 0)			{	numBins--;				}
@@ -79,7 +79,7 @@ string SharedListVector::get(int index){
 void SharedListVector::push_back(string seqNames){
 	try {
 		data.push_back(seqNames);
-		int nNames = getNumNames(seqNames);
+		int nNames = m->getNumNames(seqNames);
 	
 		numBins++;
 	
@@ -141,7 +141,7 @@ RAbundVector SharedListVector::getRAbundVector(){
 		RAbundVector rav;
 	
 		for(int i=0;i<data.size();i++){
-			int binSize = getNumNames(data[i]);
+			int binSize = m->getNumNames(data[i]);
 			rav.push_back(binSize);
 		}
 	
@@ -171,7 +171,7 @@ SAbundVector SharedListVector::getSAbundVector(){
 		SAbundVector sav(maxRank+1);
 	
 		for(int i=0;i<data.size();i++){
-			int binSize = getNumNames(data[i]);	
+			int binSize = m->getNumNames(data[i]);	
 			sav.set(binSize, sav.get(binSize) + 1);	
 		}
 		sav.set(0, 0);
@@ -194,7 +194,7 @@ SharedOrderVector* SharedListVector::getSharedOrderVector(){
 		order->setLabel(label);
 	
 		for(int i=0;i<numBins;i++){
-			int binSize = getNumNames(get(i));	//find number of individual in given bin	
+			int binSize = m->getNumNames(get(i));	//find number of individual in given bin	
 			names = get(i);
 			while (names.find_first_of(',') != -1) { 
 				name = names.substr(0,names.find_first_of(','));
@@ -275,7 +275,7 @@ vector<SharedRAbundVector*> SharedListVector::getSharedRAbundVector() {
 			finder[globaldata->gGroupmap->namesOfGroups[i]] = temp;
 			finder[globaldata->gGroupmap->namesOfGroups[i]]->setLabel(label);
 			finder[globaldata->gGroupmap->namesOfGroups[i]]->setGroup(globaldata->gGroupmap->namesOfGroups[i]);
-			if (inVector(globaldata->gGroupmap->namesOfGroups[i], globaldata->Groups)) {  //if this group is in user groups
+			if (m->inUsersGroups(globaldata->gGroupmap->namesOfGroups[i], globaldata->Groups)) {  //if this group is in user groups
 				lookup.push_back(finder[globaldata->gGroupmap->namesOfGroups[i]]);
 			}
 		}
@@ -331,7 +331,7 @@ OrderVector SharedListVector::getOrderVector(map<string,int>* orderMap = NULL){
 			OrderVector ov;
 		
 			for(int i=0;i<data.size();i++){
-				int binSize = getNumNames(data[i]);		
+				int binSize = m->getNumNames(data[i]);		
 				for(int j=0;j<binSize;j++){
 					ov.push_back(i);
 				}

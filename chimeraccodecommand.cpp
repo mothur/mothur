@@ -43,7 +43,7 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 				it = parameters.find("template");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["template"] = inputDir + it->second;		}
 				}
@@ -53,12 +53,12 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 			fastafile = validParameter.validFile(parameters, "fasta", false);
 			if (fastafile == "not found") { fastafile = ""; m->mothurOut("fasta is a required parameter for the chimera.ccode command."); m->mothurOutEndLine(); abort = true;  }
 			else { 
-				splitAtDash(fastafile, fastaFileNames);
+				m->splitAtDash(fastafile, fastaFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < fastaFileNames.size(); i++) {
 					if (inputDir != "") {
-						string path = hasPath(fastaFileNames[i]);
+						string path = m->hasPath(fastaFileNames[i]);
 						//if the user has not given a path then, add inputdir. else leave path alone.
 						if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
 					}
@@ -66,14 +66,14 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 					int ableToOpen;
 					ifstream in;
 					
-					ableToOpen = openInputFile(fastaFileNames[i], in, "noerror");
+					ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
 				
 					//if you can't open it, try default location
 					if (ableToOpen == 1) {
 						if (m->getDefaultPath() != "") { //default path is set
-							string tryPath = m->getDefaultPath() + getSimpleName(fastaFileNames[i]);
+							string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
 							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = openInputFile(tryPath, in, "noerror");
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
 							fastaFileNames[i] = tryPath;
 						}
 					}
@@ -94,7 +94,7 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(fastafile); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(fastafile); //if user entered a file with a path then preserve it	
 			}
 
 			templatefile = validParameter.validFile(parameters, "template", true);
@@ -105,20 +105,20 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 			if (maskfile == "not found") { maskfile = "";  }	
 			else if (maskfile != "default")  { 
 				if (inputDir != "") {
-					string path = hasPath(maskfile);
+					string path = m->hasPath(maskfile);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	maskfile = inputDir + maskfile;		}
 				}
 
 				ifstream in;
-				int	ableToOpen = openInputFile(maskfile, in);
+				int	ableToOpen = m->openInputFile(maskfile, in);
 				if (ableToOpen == 1) { abort = true; }
 				in.close();
 			}
 			
 			string temp;
 			temp = validParameter.validFile(parameters, "filter", false);			if (temp == "not found") { temp = "F"; }
-			filter = isTrue(temp);
+			filter = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "processors", false);		if (temp == "not found") { temp = "1"; }
 			convert(temp, processors);
@@ -194,14 +194,14 @@ int ChimeraCcodeCommand::execute(){
 			
 			string outputFileName, accnosFileName;
 			if (maskfile != "") {
-				outputFileName = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + maskfile + ".ccode.chimeras";
-				accnosFileName = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + maskfile + ".ccode.accnos";
+				outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + maskfile + ".ccode.chimeras";
+				accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + maskfile + ".ccode.accnos";
 			}else {
-				outputFileName = outputDir + getRootName(getSimpleName(fastaFileNames[s]))  + "ccode.chimeras";
-				accnosFileName = outputDir + getRootName(getSimpleName(fastaFileNames[s]))  + "ccode.accnos";
+				outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "ccode.chimeras";
+				accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "ccode.accnos";
 			}
 
-			string mapInfo = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + "mapinfo";
+			string mapInfo = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "mapinfo";
 			
 			if (m->control_pressed) { delete chimera;  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  return 0;	}
 			
@@ -248,7 +248,7 @@ int ChimeraCcodeCommand::execute(){
 					MPI_File_write_shared(outMPI, buf2, length, MPI_CHAR, &status);
 					delete buf2;
 
-					MPIPos = setFilePosFasta(fastaFileNames[s], numSeqs); //fills MPIPos, returns numSeqs
+					MPIPos = m->setFilePosFasta(fastaFileNames[s], numSeqs); //fills MPIPos, returns numSeqs
 					
 					//send file positions to all processes
 					for(int i = 1; i < processors; i++) { 
@@ -293,14 +293,14 @@ int ChimeraCcodeCommand::execute(){
 					
 		#else
 			ofstream outHeader;
-			string tempHeader = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + maskfile + "ccode.chimeras.tempHeader";
-			openOutputFile(tempHeader, outHeader);
+			string tempHeader = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + maskfile + "ccode.chimeras.tempHeader";
+			m->openOutputFile(tempHeader, outHeader);
 			
 			outHeader << "For full window mapping info refer to " << mapInfo << endl << endl;
 
 			outHeader.close();
 			
-			vector<unsigned long int> positions = divideFile(fastaFileNames[s], processors);
+			vector<unsigned long int> positions = m->divideFile(fastaFileNames[s], processors);
 				
 			for (int i = 0; i < (positions.size()-1); i++) {
 				lines.push_back(new linePair(positions[i], positions[(i+1)]));
@@ -324,13 +324,13 @@ int ChimeraCcodeCommand::execute(){
 						
 					//append output files
 					for(int i=1;i<processors;i++){
-						appendFiles((outputFileName + toString(processIDS[i]) + ".temp"), outputFileName);
+						m->appendFiles((outputFileName + toString(processIDS[i]) + ".temp"), outputFileName);
 						remove((outputFileName + toString(processIDS[i]) + ".temp").c_str());
 					}
 					
 					//append output files
 					for(int i=1;i<processors;i++){
-						appendFiles((accnosFileName + toString(processIDS[i]) + ".temp"), accnosFileName);
+						m->appendFiles((accnosFileName + toString(processIDS[i]) + ".temp"), accnosFileName);
 						remove((accnosFileName + toString(processIDS[i]) + ".temp").c_str());
 					}
 					
@@ -352,7 +352,7 @@ int ChimeraCcodeCommand::execute(){
 				
 			#endif
 	
-			appendFiles(outputFileName, tempHeader);
+			m->appendFiles(outputFileName, tempHeader);
 		
 			remove(outputFileName.c_str());
 			rename(tempHeader.c_str(), outputFileName.c_str());
@@ -387,13 +387,13 @@ int ChimeraCcodeCommand::execute(){
 int ChimeraCcodeCommand::driver(linePair* filePos, string outputFName, string filename, string accnos){
 	try {
 		ofstream out;
-		openOutputFile(outputFName, out);
+		m->openOutputFile(outputFName, out);
 		
 		ofstream out2;
-		openOutputFile(accnos, out2);
+		m->openOutputFile(accnos, out2);
 		
 		ifstream inFASTA;
-		openInputFile(filename, inFASTA);
+		m->openInputFile(filename, inFASTA);
 
 		inFASTA.seekg(filePos->start);
 
@@ -404,7 +404,7 @@ int ChimeraCcodeCommand::driver(linePair* filePos, string outputFName, string fi
 		
 			if (m->control_pressed) {	return 1;	}
 		
-			Sequence* candidateSeq = new Sequence(inFASTA);  gobble(inFASTA);
+			Sequence* candidateSeq = new Sequence(inFASTA);  m->gobble(inFASTA);
 				
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
 				
@@ -468,7 +468,7 @@ int ChimeraCcodeCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File
 			istringstream iss (tempBuf,istringstream::in);
 			delete buf4;
 
-			Sequence* candidateSeq = new Sequence(iss);  gobble(iss);
+			Sequence* candidateSeq = new Sequence(iss);  m->gobble(iss);
 				
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
 				
@@ -523,7 +523,7 @@ int ChimeraCcodeCommand::createProcesses(string outputFileName, string filename,
 				//pass numSeqs to parent
 				ofstream out;
 				string tempFile = outputFileName + toString(getpid()) + ".num.temp";
-				openOutputFile(tempFile, out);
+				m->openOutputFile(tempFile, out);
 				out << num << endl;
 				out.close();
 
@@ -540,7 +540,7 @@ int ChimeraCcodeCommand::createProcesses(string outputFileName, string filename,
 		for (int i = 0; i < processIDS.size(); i++) {
 			ifstream in;
 			string tempFile =  outputFileName + toString(processIDS[i]) + ".num.temp";
-			openInputFile(tempFile, in);
+			m->openInputFile(tempFile, in);
 			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
 			in.close(); remove(tempFile.c_str());
 		}

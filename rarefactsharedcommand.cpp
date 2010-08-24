@@ -50,7 +50,7 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
 			}
 
 			
@@ -59,7 +59,7 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
@@ -74,12 +74,12 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 			else { 
 				 if (calc == "default")  {  calc = "sharedobserved";  }
 			}
-			splitAtDash(calc, Estimators);
+			m->splitAtDash(calc, Estimators);
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
 			else { 
-				splitAtDash(groups, Groups);
+				m->splitAtDash(groups, Groups);
 			}
 			globaldata->Groups = Groups;
 			
@@ -91,13 +91,13 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 			convert(temp, nIters); 
 			
 			temp = validParameter.validFile(parameters, "jumble", false);			if (temp == "not found") { temp = "T"; }
-			if (isTrue(temp)) { jumble = true; }
+			if (m->isTrue(temp)) { jumble = true; }
 			else { jumble = false; }
 			globaldata->jumble = jumble;
 			
 			if (abort == false) {
 			
-				string fileNameRoot = outputDir + getRootName(getSimpleName(globaldata->inputFileName));
+				string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName));
 //				format = globaldata->getFormat();
 
 				
@@ -214,7 +214,7 @@ int RareFactSharedCommand::execute(){
 				userLabels.erase(lookup[0]->getLabel());
 			}
 			
-			if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = lookup[0]->getLabel();
 			
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 

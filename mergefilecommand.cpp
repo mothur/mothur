@@ -40,7 +40,7 @@ MergeFileCommand::MergeFileCommand(string option)  {
 			
 			string fileList = validParameter.validFile(parameters, "input", false);			
 			if(fileList == "not found") { m->mothurOut("you must enter two or more file names"); m->mothurOutEndLine();  abort=true;  }
-			else{ 	splitAtDash(fileList, fileNames);	}
+			else{ 	m->splitAtDash(fileList, fileNames);	}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			string outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found")	{	outputDir = "";		}
@@ -55,19 +55,19 @@ MergeFileCommand::MergeFileCommand(string option)  {
 			else{
 				for(int i=0;i<numInputFiles;i++){
 					if (inputDir != "") {
-						string path = hasPath(fileNames[i]);
+						string path = m->hasPath(fileNames[i]);
 						//if the user has not given a path then, add inputdir. else leave path alone.
 						if (path == "") {	fileNames[i] = inputDir + fileNames[i];		}
 					}
 					
-					if(openInputFile(fileNames[i], testFile)){	abort = true;	}
+					if(m->openInputFile(fileNames[i], testFile)){	abort = true;	}
 					testFile.close();
 				}
 			}   
 			
 			outputFileName = validParameter.validFile(parameters, "output", false);			
 			if (outputFileName == "not found") { m->mothurOut("you must enter an output file name"); m->mothurOutEndLine();  abort=true;  }
-			else if (outputDir != "") { outputFileName = outputDir + getSimpleName(outputFileName); }
+			else if (outputDir != "") { outputFileName = outputDir + m->getSimpleName(outputFileName); }
 		}
 			
 	}
@@ -88,13 +88,13 @@ int MergeFileCommand::execute(){
 		if (abort == true) {	return 0;	}
 		
 		ofstream outputFile;
-		openOutputFile(outputFileName, outputFile);
+		m->openOutputFile(outputFileName, outputFile);
 		
 		char c;
 		for(int i=0;i<numInputFiles;i++){
 			ifstream inputFile; //declaration must be inside for loop of windows throws an error
 			
-			openInputFile(fileNames[i], inputFile);
+			m->openInputFile(fileNames[i], inputFile);
 			
 			while(!inputFile.eof()){	
 				if (m->control_pressed) { inputFile.close(); outputFile.close(); remove(outputFileName.c_str()); return 0;  }

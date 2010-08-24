@@ -52,7 +52,7 @@ VennCommand::VennCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
 			}
 
 			//check for optional parameter and set defaults
@@ -60,7 +60,7 @@ VennCommand::VennCommand(string option)  {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
@@ -73,7 +73,7 @@ VennCommand::VennCommand(string option)  {
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
 			else { 
-				splitAtDash(groups, Groups);
+				m->splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 			}
 			
@@ -89,7 +89,7 @@ VennCommand::VennCommand(string option)  {
 					else { calc = "sharedsobs"; }
 				}
 			}
-			splitAtDash(calc, Estimators);
+			m->splitAtDash(calc, Estimators);
 			
 			string temp;
 			temp = validParameter.validFile(parameters, "abund", false);		if (temp == "not found") { temp = "10"; }
@@ -240,7 +240,7 @@ int VennCommand::execute(){
 					for(int i = 0; i < outfilenames.size(); i++) { if (outfilenames[i] != "control" ) { outputNames.push_back(outfilenames[i]); }  }
 				}
 				
-				if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = lookup[0]->getLabel();
 					
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
@@ -342,7 +342,7 @@ int VennCommand::execute(){
 					userLabels.erase(sabund->getLabel());
 				}
 				
-				if ((anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((m->anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = sabund->getLabel();
 				
 					delete sabund;

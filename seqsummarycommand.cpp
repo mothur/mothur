@@ -43,7 +43,7 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -57,7 +57,7 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(fastafile); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(fastafile); //if user entered a file with a path then preserve it	
 			}
 			
 			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = "1";				}
@@ -98,7 +98,7 @@ int SeqSummaryCommand::execute(){
 		
 		if (abort == true) { return 0; }
 		
-		string summaryFile = outputDir + getSimpleName(fastafile) + ".summary";
+		string summaryFile = outputDir + m->getSimpleName(fastafile) + ".summary";
 				
 		int numSeqs = 0;
 		
@@ -143,7 +143,7 @@ int SeqSummaryCommand::execute(){
 						MPI_File_write_shared(outMPI, buf2, length, MPI_CHAR, &statusOut);
 						delete buf2;
 						
-						MPIPos = setFilePosFasta(fastafile, numSeqs); //fills MPIPos, returns numSeqs
+						MPIPos = m->setFilePosFasta(fastafile, numSeqs); //fills MPIPos, returns numSeqs
 					
 						for(int i = 1; i < processors; i++) { 
 							MPI_Send(&numSeqs, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
@@ -224,7 +224,7 @@ int SeqSummaryCommand::execute(){
 				
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 #else
-			vector<unsigned long int> positions = divideFile(fastafile, processors);
+			vector<unsigned long int> positions = m->divideFile(fastafile, processors);
 				
 			for (int i = 0; i < (positions.size()-1); i++) {
 				lines.push_back(new linePair(positions[i], positions[(i+1)]));
@@ -239,7 +239,7 @@ int SeqSummaryCommand::execute(){
 					rename((summaryFile + toString(processIDS[0]) + ".temp").c_str(), summaryFile.c_str());
 					//append files
 					for(int i=1;i<processors;i++){
-						appendFiles((summaryFile + toString(processIDS[i]) + ".temp"), summaryFile);
+						m->appendFiles((summaryFile + toString(processIDS[i]) + ".temp"), summaryFile);
 						remove((summaryFile + toString(processIDS[i]) + ".temp").c_str());
 					}
 				}
@@ -308,7 +308,7 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 	try {
 		
 		ofstream outSummary;
-		openOutputFile(sumFile, outSummary);
+		m->openOutputFile(sumFile, outSummary);
 		
 		//print header if you are process 0
 		if (filePos->start == 0) {
@@ -316,7 +316,7 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 		}
 				
 		ifstream in;
-		openInputFile(filename, in);
+		m->openInputFile(filename, in);
 				
 		in.seekg(filePos->start);
 
@@ -327,7 +327,7 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 				
 			if (m->control_pressed) { in.close(); outSummary.close(); return 1; }
 					
-			Sequence current(in); gobble(in);
+			Sequence current(in); m->gobble(in);
 	
 			if (current.getName() != "") {
 				startPosition.push_back(current.getStartPos());
@@ -437,7 +437,7 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 				//pass numSeqs to parent
 				ofstream out;
 				string tempFile = fastafile + toString(getpid()) + ".num.temp";
-				openOutputFile(tempFile, out);
+				m->openOutputFile(tempFile, out);
 				
 				out << num << endl;
 				for (int k = 0; k < startPosition.size(); k++)		{		out << startPosition[k] << '\t'; }  out << endl;
@@ -462,15 +462,15 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 		for (int i = 0; i < processIDS.size(); i++) {
 			string tempFilename = fastafile + toString(processIDS[i]) + ".num.temp";
 			ifstream in;
-			openInputFile(tempFilename, in);
+			m->openInputFile(tempFilename, in);
 			
 			int temp, tempNum;
-			in >> tempNum; gobble(in); num += tempNum;
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; startPosition.push_back(temp);		}		gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; endPosition.push_back(temp);		}		gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; seqLength.push_back(temp);			}		gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; ambigBases.push_back(temp);			}		gobble(in);
-			for (int k = 0; k < tempNum; k++)			{		in >> temp; longHomoPolymer.push_back(temp);	}		gobble(in);
+			in >> tempNum; m->gobble(in); num += tempNum;
+			for (int k = 0; k < tempNum; k++)			{		in >> temp; startPosition.push_back(temp);		}		m->gobble(in);
+			for (int k = 0; k < tempNum; k++)			{		in >> temp; endPosition.push_back(temp);		}		m->gobble(in);
+			for (int k = 0; k < tempNum; k++)			{		in >> temp; seqLength.push_back(temp);			}		m->gobble(in);
+			for (int k = 0; k < tempNum; k++)			{		in >> temp; ambigBases.push_back(temp);			}		m->gobble(in);
+			for (int k = 0; k < tempNum; k++)			{		in >> temp; longHomoPolymer.push_back(temp);	}		m->gobble(in);
 				
 			in.close();
 			remove(tempFilename.c_str());

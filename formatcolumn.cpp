@@ -12,7 +12,7 @@
 
 /***********************************************************************/
 FormatColumnMatrix::FormatColumnMatrix(string df) : filename(df){
-	openInputFile(filename, fileHandle);
+	m->openInputFile(filename, fileHandle);
 }
 /***********************************************************************/
 
@@ -35,7 +35,7 @@ int FormatColumnMatrix::read(NameAssignment* nameMap){
 		
 		ofstream out;
 		string tempOutFile = filename + ".temp";
-		openOutputFile(tempOutFile, out);
+		m->openOutputFile(tempOutFile, out);
 	
 		while(fileHandle && lt == 1){  //let's assume it's a triangular matrix...
 		
@@ -68,7 +68,7 @@ int FormatColumnMatrix::read(NameAssignment* nameMap){
 				
 				reading->update(itA->second * nseqs / 2);
 			}
-			gobble(fileHandle);
+			m->gobble(fileHandle);
 		}
 		out.close();
 		fileHandle.close();
@@ -79,7 +79,7 @@ int FormatColumnMatrix::read(NameAssignment* nameMap){
 		}else{ squareFile = tempOutFile; }
 		
 		//sort file by first column so the distances for each row are together
-		string outfile = getRootName(squareFile) + "sorted.dist.temp";
+		string outfile = m->getRootName(squareFile) + "sorted.dist.temp";
 		
 		//use the unix sort 
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -94,10 +94,10 @@ int FormatColumnMatrix::read(NameAssignment* nameMap){
 
 		//output to new file distance for each row and save positions in file where new row begins
 		ifstream in;
-		openInputFile(outfile, in);
+		m->openInputFile(outfile, in);
 		
 		distFile = outfile + ".rowFormatted";
-		openOutputFile(distFile, out);
+		m->openOutputFile(distFile, out);
 		
 		rowPos.resize(nseqs, -1);
 		int currentRow;
@@ -117,7 +117,7 @@ int FormatColumnMatrix::read(NameAssignment* nameMap){
 			
 			if (m->control_pressed) { in.close(); out.close(); remove(distFile.c_str()); remove(tempOutFile.c_str()); remove(outfile.c_str()); delete reading; return 0; }
 			
-			in >> first >> second >> dist; gobble(in);
+			in >> first >> second >> dist; m->gobble(in);
 			
 			if (first != currentRow) {
 				//save position in file of each new row

@@ -43,25 +43,25 @@ SffInfoCommand::SffInfoCommand(string option)  {
 			sffFilename = validParameter.validFile(parameters, "sff", false);
 			if (sffFilename == "not found") { m->mothurOut("sff is a required parameter for the sffinfo command."); m->mothurOutEndLine(); abort = true;  }
 			else { 
-				splitAtDash(sffFilename, filenames);
+				m->splitAtDash(sffFilename, filenames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < filenames.size(); i++) {
 					if (inputDir != "") {
-						string path = hasPath(filenames[i]);
+						string path = m->hasPath(filenames[i]);
 						//if the user has not given a path then, add inputdir. else leave path alone.
 						if (path == "") {	filenames[i] = inputDir + filenames[i];		}
 					}
 	
 					ifstream in;
-					int ableToOpen = openInputFile(filenames[i], in, "noerror");
+					int ableToOpen = m->openInputFile(filenames[i], in, "noerror");
 				
 					//if you can't open it, try default location
 					if (ableToOpen == 1) {
 						if (m->getDefaultPath() != "") { //default path is set
-							string tryPath = m->getDefaultPath() + getSimpleName(filenames[i]);
+							string tryPath = m->getDefaultPath() + m->getSimpleName(filenames[i]);
 							m->mothurOut("Unable to open " + filenames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = openInputFile(tryPath, in, "noerror");
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
 							filenames[i] = tryPath;
 						}
 					}
@@ -83,25 +83,25 @@ SffInfoCommand::SffInfoCommand(string option)  {
 			if (accnosName == "not found") { accnosName = "";  }
 			else { 
 				hasAccnos = true;
-				splitAtDash(accnosName, accnosFileNames);
+				m->splitAtDash(accnosName, accnosFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < accnosFileNames.size(); i++) {
 					if (inputDir != "") {
-						string path = hasPath(accnosFileNames[i]);
+						string path = m->hasPath(accnosFileNames[i]);
 						//if the user has not given a path then, add inputdir. else leave path alone.
 						if (path == "") {	accnosFileNames[i] = inputDir + accnosFileNames[i];		}
 					}
 	
 					ifstream in;
-					int ableToOpen = openInputFile(accnosFileNames[i], in, "noerror");
+					int ableToOpen = m->openInputFile(accnosFileNames[i], in, "noerror");
 				
 					//if you can't open it, try default location
 					if (ableToOpen == 1) {
 						if (m->getDefaultPath() != "") { //default path is set
-							string tryPath = m->getDefaultPath() + getSimpleName(accnosFileNames[i]);
+							string tryPath = m->getDefaultPath() + m->getSimpleName(accnosFileNames[i]);
 							m->mothurOut("Unable to open " + accnosFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = openInputFile(tryPath, in, "noerror");
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
 							accnosFileNames[i] = tryPath;
 						}
 					}
@@ -124,19 +124,19 @@ SffInfoCommand::SffInfoCommand(string option)  {
 			}
 			
 			string temp = validParameter.validFile(parameters, "qfile", false);			if (temp == "not found"){	temp = "T";				}
-			qual = isTrue(temp); 
+			qual = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "fasta", false);				if (temp == "not found"){	temp = "T";				}
-			fasta = isTrue(temp); 
+			fasta = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "flow", false);					if (temp == "not found"){	temp = "F";				}
-			flow = isTrue(temp); 
+			flow = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "trim", false);					if (temp == "not found"){	temp = "T";				}
-			trim = isTrue(temp); 
+			trim = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "sfftxt", false);				if (temp == "not found"){	temp = "F";				}
-			sfftxt = isTrue(temp); 
+			sfftxt = m->isTrue(temp); 
 		}
 	}
 	catch(exception& e) {
@@ -210,27 +210,27 @@ int SffInfoCommand::execute(){
 int SffInfoCommand::extractSffInfo(string input, string accnos){
 	try {
 		
-		if (outputDir == "") {  outputDir += hasPath(input); }
+		if (outputDir == "") {  outputDir += m->hasPath(input); }
 		
 		if (accnos != "")	{  readAccnosFile(accnos);  }
 		else				{	seqNames.clear();		}
 
 		ofstream outSfftxt, outFasta, outQual, outFlow;
 		string outFastaFileName, outQualFileName;
-		string sfftxtFileName = outputDir + getRootName(getSimpleName(input)) + "sff.txt";
-		string outFlowFileName = outputDir + getRootName(getSimpleName(input)) + "flow";
+		string sfftxtFileName = outputDir + m->getRootName(m->getSimpleName(input)) + "sff.txt";
+		string outFlowFileName = outputDir + m->getRootName(m->getSimpleName(input)) + "flow";
 		if (trim) {
-			outFastaFileName = outputDir + getRootName(getSimpleName(input)) + "fasta";
-			outQualFileName = outputDir + getRootName(getSimpleName(input)) + "qual";
+			outFastaFileName = outputDir + m->getRootName(m->getSimpleName(input)) + "fasta";
+			outQualFileName = outputDir + m->getRootName(m->getSimpleName(input)) + "qual";
 		}else{
-			outFastaFileName = outputDir + getRootName(getSimpleName(input)) + "raw.fasta";
-			outQualFileName = outputDir + getRootName(getSimpleName(input)) + "raw.qual";
+			outFastaFileName = outputDir + m->getRootName(m->getSimpleName(input)) + "raw.fasta";
+			outQualFileName = outputDir + m->getRootName(m->getSimpleName(input)) + "raw.qual";
 		}
 		
-		if (sfftxt) { openOutputFile(sfftxtFileName, outSfftxt); outSfftxt.setf(ios::fixed, ios::floatfield); outSfftxt.setf(ios::showpoint);  outputNames.push_back(sfftxtFileName); }
-		if (fasta)	{ openOutputFile(outFastaFileName, outFasta);	outputNames.push_back(outFastaFileName); }
-		if (qual)	{ openOutputFile(outQualFileName, outQual);		outputNames.push_back(outQualFileName);  }
-		if (flow)	{ openOutputFile(outFlowFileName, outFlow);		outputNames.push_back(outFlowFileName);  }
+		if (sfftxt) { m->openOutputFile(sfftxtFileName, outSfftxt); outSfftxt.setf(ios::fixed, ios::floatfield); outSfftxt.setf(ios::showpoint);  outputNames.push_back(sfftxtFileName); }
+		if (fasta)	{ m->openOutputFile(outFastaFileName, outFasta);	outputNames.push_back(outFastaFileName); }
+		if (qual)	{ m->openOutputFile(outQualFileName, outQual);		outputNames.push_back(outQualFileName);  }
+		if (flow)	{ m->openOutputFile(outFlowFileName, outFlow);		outputNames.push_back(outFlowFileName);  }
 		
 		ifstream in;
 		in.open(input.c_str(), ios::binary);
@@ -671,11 +671,11 @@ int SffInfoCommand::readAccnosFile(string filename) {
 		seqNames.clear();
 		
 		ifstream in;
-		openInputFile(filename, in);
+		m->openInputFile(filename, in);
 		string name;
 		
 		while(!in.eof()){
-			in >> name; gobble(in);
+			in >> name; m->gobble(in);
 						
 			seqNames.insert(name);
 			

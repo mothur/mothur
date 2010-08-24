@@ -47,7 +47,7 @@ HClusterCommand::HClusterCommand(string option)  {
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
@@ -55,7 +55,7 @@ HClusterCommand::HClusterCommand(string option)  {
 				it = parameters.find("column");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["column"] = inputDir + it->second;		}
 				}
@@ -63,7 +63,7 @@ HClusterCommand::HClusterCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -105,7 +105,7 @@ HClusterCommand::HClusterCommand(string option)  {
 			convert(temp, precision); 
 			
 			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "F"; }
-			hard = isTrue(temp);
+			hard = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);
 			if (temp == "not found") { temp = "10"; }
@@ -123,7 +123,7 @@ HClusterCommand::HClusterCommand(string option)  {
 			
 			sort = validParameter.validFile(parameters, "sorted", false);
 			if (sort == "not found") { sort = "F"; }
-			sorted = isTrue(sort);
+			sorted = m->isTrue(sort);
 
 			timing = validParameter.validFile(parameters, "timing", false);
 			if (timing == "not found") { timing = "F"; }
@@ -131,16 +131,16 @@ HClusterCommand::HClusterCommand(string option)  {
 				
 			if (abort == false) {
 				
-				if (outputDir == "") {  outputDir += hasPath(distfile); }
-				fileroot = outputDir + getRootName(getSimpleName(distfile));
+				if (outputDir == "") {  outputDir += m->hasPath(distfile); }
+				fileroot = outputDir + m->getRootName(m->getSimpleName(distfile));
 				
 				if (method == "furthest")		{ tag = "fn";  }
 				else if (method == "nearest")	{ tag = "nn";  }
 				else							{ tag = "an";  }
 			
-				openOutputFile(fileroot+ tag + ".sabund",	sabundFile);
-				openOutputFile(fileroot+ tag + ".rabund",	rabundFile);
-				openOutputFile(fileroot+ tag + ".list",		listFile);
+				m->openOutputFile(fileroot+ tag + ".sabund",	sabundFile);
+				m->openOutputFile(fileroot+ tag + ".rabund",	rabundFile);
+				m->openOutputFile(fileroot+ tag + ".list",		listFile);
 				
 				outputNames.push_back(fileroot+ tag + ".sabund");
 				outputNames.push_back(fileroot+ tag + ".rabund");
@@ -282,9 +282,9 @@ int HClusterCommand::execute(){
 			
 					float rndDist;
 					if (hard) {
-						rndDist = ceilDist(seqs[i].dist, precision); 
+						rndDist = m->ceilDist(seqs[i].dist, precision); 
 					}else{
-						rndDist = roundDist(seqs[i].dist, precision); 
+						rndDist = m->roundDist(seqs[i].dist, precision); 
 					}
 
 					
@@ -360,7 +360,7 @@ int HClusterCommand::execute(){
 
 void HClusterCommand::printData(string label){
 	try {
-		if (isTrue(timing)) {
+		if (m->isTrue(timing)) {
 			m->mothurOut("\tTime: " + toString(time(NULL) - start) + "\tsecs for " + toString(oldRAbund.getNumBins()) 
 		     + "\tclusters. Updates: " + toString(loops)); m->mothurOutEndLine();
 		}
@@ -369,7 +369,7 @@ void HClusterCommand::printData(string label){
 		start = time(NULL);
 
 		oldRAbund.setLabel(label);
-		if (isTrue(showabund)) {
+		if (m->isTrue(showabund)) {
 			oldRAbund.getSAbundVector().print(cout);
 		}
 		oldRAbund.print(rabundFile);

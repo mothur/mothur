@@ -12,7 +12,7 @@
 /***********************************************************************/
 void Jackknife::getAMatrix(void){
 	try {
-		vector<vector<double> > B = binomial(maxOrder);
+		vector<vector<double> > B = m->binomial(maxOrder);
 
 		aMat.resize(maxOrder+1);
 

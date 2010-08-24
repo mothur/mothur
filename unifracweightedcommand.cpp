@@ -40,7 +40,7 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
 			}
 																	
 			//check for optional parameter and set defaults
@@ -48,7 +48,7 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
 			else { 
-				splitAtDash(groups, Groups);
+				m->splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 			}
 				
@@ -56,10 +56,10 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 			convert(itersString, iters); 
 			
 			string temp = validParameter.validFile(parameters, "distance", false);			if (temp == "not found") { temp = "false"; }
-			phylip = isTrue(temp);
+			phylip = m->isTrue(temp);
 		
 			temp = validParameter.validFile(parameters, "random", false);					if (temp == "not found") { temp = "true"; }
-			random = isTrue(temp);
+			random = m->isTrue(temp);
 			
 			if (!random) {  iters = 0;  } //turn off random calcs
 
@@ -67,8 +67,8 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 			if (abort == false) {
 				T = globaldata->gTree;
 				tmap = globaldata->gTreemap;
-				sumFile = outputDir + getSimpleName(globaldata->getTreeFile()) + ".wsummary";
-				openOutputFile(sumFile, outSum);
+				sumFile = outputDir + m->getSimpleName(globaldata->getTreeFile()) + ".wsummary";
+				m->openOutputFile(sumFile, outSum);
 				outputNames.push_back(sumFile);
 				
 				util = new SharedUtil();
@@ -142,8 +142,8 @@ int UnifracWeightedCommand::execute() {
 			uScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
 			
 			if (random) {  
-				output = new ColumnFile(outputDir + getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".weighted", itersString);  
-				outputNames.push_back(outputDir + getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".weighted");
+				output = new ColumnFile(outputDir + m->getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".weighted", itersString);  
+				outputNames.push_back(outputDir + m->getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".weighted");
 			} 
 
 			userData = weighted->getValues(T[i]);  //userData[0] = weightedscore
@@ -348,10 +348,10 @@ void UnifracWeightedCommand::createPhylipFile() {
 		//for each tree
 		for (int i = 0; i < T.size(); i++) { 
 		
-			string phylipFileName = outputDir + getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".weighted.dist";
+			string phylipFileName = outputDir + m->getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".weighted.dist";
 			outputNames.push_back(phylipFileName);
 			ofstream out;
-			openOutputFile(phylipFileName, out);
+			m->openOutputFile(phylipFileName, out);
 			
 			//output numSeqs
 			out << globaldata->Groups.size() << endl;

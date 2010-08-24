@@ -48,7 +48,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 				it = parameters.find("query");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["query"] = inputDir + it->second;		}
 				}
@@ -56,7 +56,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 				it = parameters.find("reference");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["reference"] = inputDir + it->second;		}
 				}
@@ -64,7 +64,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -87,7 +87,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			outputDir = validParameter.validFile(parameters, "outputdir", false);
 			if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(queryFileName); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(queryFileName); //if user entered a file with a path then preserve it	
 			}
 			
 			//check for optional parameter and set defaults
@@ -96,7 +96,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			convert(temp, threshold);  
 						
 			errorFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".errors";
-			openOutputFile(errorFileName, errorFile);
+			m->openOutputFile(errorFileName, errorFile);
 			printErrorHeader();
 		}
 	}
@@ -140,7 +140,7 @@ int SeqErrorCommand::execute(){
 		if(namesFileName != ""){	weights = getWeights();	}
 		
 		ifstream queryFile;
-		openInputFile(queryFileName, queryFile);
+		m->openInputFile(queryFileName, queryFile);
 				
 		int totalBases = 0;
 		int totalMatches = 0;
@@ -194,7 +194,7 @@ int SeqErrorCommand::execute(){
 		
 		string errorCountFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".count";
 		ofstream errorCountFile;
-		openOutputFile(errorCountFileName, errorCountFile);
+		m->openOutputFile(errorCountFileName, errorCountFile);
 		
 		m->mothurOut("Overall error rate:\t" + toString((double)(totalBases - totalMatches) / (double)totalBases) + "\n\n");
 		m->mothurOut("Errors\tSequences\n");
@@ -220,7 +220,7 @@ void SeqErrorCommand::getReferences(){
 	try {
 		
 		ifstream referenceFile;
-		openInputFile(referenceFileName, referenceFile);
+		m->openInputFile(referenceFileName, referenceFile);
 		
 		while(referenceFile){
 			Sequence currentSeq(referenceFile);
@@ -231,7 +231,7 @@ void SeqErrorCommand::getReferences(){
 				currentSeq.removeAmbigBases();
 			}
 			referenceSeqs.push_back(currentSeq);
-			gobble(referenceFile);
+			m->gobble(referenceFile);
 		}
 		numRefs = referenceSeqs.size();
 		
@@ -335,7 +335,7 @@ Compare SeqErrorCommand::getErrors(Sequence query, Sequence reference){
 
 map<string, int> SeqErrorCommand::getWeights(){
 	ifstream nameFile;
-	openInputFile(namesFileName, nameFile);
+	m->openInputFile(namesFileName, nameFile);
 	
 	string seqName;
 	string redundantSeqs;
@@ -343,8 +343,8 @@ map<string, int> SeqErrorCommand::getWeights(){
 	
 	while(nameFile){
 		nameFile >> seqName >> redundantSeqs;
-		nameCountMap[seqName] = getNumNames(redundantSeqs); 
-		gobble(nameFile);
+		nameCountMap[seqName] = m->getNumNames(redundantSeqs); 
+		m->gobble(nameFile);
 	}
 	return nameCountMap;
 }

@@ -27,7 +27,7 @@ HCluster::HCluster(RAbundVector* rav, ListVector* lv, string ms, string d, NameA
 		}
 		
 		if (method != "average") {
-			openInputFile(distfile, filehandle);
+			m->openInputFile(distfile, filehandle);
 		}else{  
 			processFile();  
 		}
@@ -389,7 +389,7 @@ vector<seqDist> HCluster::getSeqsFNNN(){
 		//get entry
 		while (!filehandle.eof()) {
 			
-			filehandle >> firstName >> secondName >> distance;    gobble(filehandle); 
+			filehandle >> firstName >> secondName >> distance;    m->gobble(filehandle); 
 	
 			//save first one
 			if (prevDistance == -1) { prevDistance = distance; }
@@ -438,7 +438,7 @@ vector<seqDist> HCluster::getSeqsAN(){
 		vector<seqDist> sameSeqs;
 		prevDistance = -1;
 		
-		openInputFile(distfile, filehandle, "no error"); 
+		m->openInputFile(distfile, filehandle, "no error"); 
 		
 		//is the smallest value in mergedMin or the distfile?
 		float mergedMinDist = 10000;
@@ -446,7 +446,7 @@ vector<seqDist> HCluster::getSeqsAN(){
 		if (mergedMin.size() > 0) { mergedMinDist = mergedMin[0].dist;  }
 			
 		if (!filehandle.eof()) {  
-			filehandle >> firstName >> secondName >> distance;    gobble(filehandle);
+			filehandle >> firstName >> secondName >> distance;    m->gobble(filehandle);
 			//save first one
 			if (prevDistance == -1) { prevDistance = distance; } 
 			if (distance != -1) { //-1 means skip me
@@ -469,7 +469,7 @@ vector<seqDist> HCluster::getSeqsAN(){
 			//get entry
 			while (!filehandle.eof()) {
 				
-				filehandle >> firstName >> secondName >> distance;    gobble(filehandle); 
+				filehandle >> firstName >> secondName >> distance;    m->gobble(filehandle); 
 				
 				if (prevDistance == -1) { prevDistance = distance; }
 				
@@ -511,13 +511,13 @@ int HCluster::combineFile() {
 		
 		string tempDistFile = distfile + ".temp";
 		ofstream out;
-		openOutputFile(tempDistFile, out);
+		m->openOutputFile(tempDistFile, out);
 		
 		//FILE* in;
 		//in = fopen(distfile.c_str(), "rb");
 	
 		ifstream in;
-		openInputFile(distfile, in);
+		m->openInputFile(distfile, in);
 		
 		int first, second;
 		float dist;
@@ -550,7 +550,7 @@ int HCluster::combineFile() {
 			   //since file is sorted and mergedMin is sorted 
 			   //you can put the smallest distance from each through the code below and keep the file sorted
 			   
-			   in >> first >> second >> dist; gobble(in);
+			   in >> first >> second >> dist; m->gobble(in);
 			   
 			   if (m->control_pressed) { in.close(); out.close(); remove(tempDistFile.c_str()); return 0; }
 			   
@@ -688,7 +688,7 @@ seqDist HCluster::getNextDist(char* buffer, int& index, int size){
 			if ((buffer[index] == 10) || (buffer[index] == 13)) { //newline in unix or windows
 				gotDist = true;
 				
-				//gobble space
+				//m->gobble space
 				while (index < size) {		
 					if (isspace(buffer[index])) { index++; }
 					else { break; }		
@@ -741,17 +741,17 @@ int HCluster::processFile() {
 		float distance;
 		
 		ifstream in;
-		openInputFile(distfile, in);
+		m->openInputFile(distfile, in);
 		
 		ofstream out;
 		string outTemp = distfile + ".temp";
-		openOutputFile(outTemp, out);
+		m->openOutputFile(outTemp, out);
 	
 		//get entry
 		while (!in.eof()) {
 			if (m->control_pressed) { in.close(); out.close(); remove(outTemp.c_str()); return 0; }
 			
-			in >> firstName >> secondName >> distance;    gobble(in);		
+			in >> firstName >> secondName >> distance;    m->gobble(in);		
 			
 			map<string,int>::iterator itA = nameMap->find(firstName);
 			map<string,int>::iterator itB = nameMap->find(secondName);

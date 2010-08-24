@@ -46,7 +46,7 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 				it = parameters.find("taxonomy");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
@@ -54,7 +54,7 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -75,7 +75,7 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(taxonomyFileName); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(taxonomyFileName); //if user entered a file with a path then preserve it	
 			}
 			
 			string temp = validParameter.validFile(parameters, "cutoff", false);
@@ -85,7 +85,7 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; allLines = 1; }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
@@ -152,17 +152,17 @@ int PhylotypeCommand::execute(){
 		
 		if (m->control_pressed) { delete tree; return 0; }
 		
-		string fileroot = outputDir + getRootName(getSimpleName(taxonomyFileName));
+		string fileroot = outputDir + m->getRootName(m->getSimpleName(taxonomyFileName));
 		
 		ofstream outList;
 		string outputListFile = fileroot + "tx.list";
-		openOutputFile(outputListFile, outList);
+		m->openOutputFile(outputListFile, outList);
 		ofstream outSabund;
 		string outputSabundFile = fileroot + "tx.sabund";
-		openOutputFile(outputSabundFile, outSabund);
+		m->openOutputFile(outputSabundFile, outSabund);
 		ofstream outRabund;
 		string outputRabundFile = fileroot + "tx.rabund";
-		openOutputFile(outputRabundFile, outRabund);
+		m->openOutputFile(outputRabundFile, outRabund);
 		
 		outputNames.push_back(outputListFile);
 		outputNames.push_back(outputSabundFile);
@@ -270,13 +270,13 @@ int PhylotypeCommand::readNamesFile() {
 	try {
 				
 		ifstream in;
-		openInputFile(namefile, in);
+		m->openInputFile(namefile, in);
 		
 		string first, second;
 		map<string, string>::iterator itNames;
 		
 		while(!in.eof()) {
-			in >> first >> second; gobble(in);
+			in >> first >> second; m->gobble(in);
 			
 			itNames = namemap.find(first);
 			if (itNames == namemap.end()) {  

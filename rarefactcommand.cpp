@@ -56,7 +56,7 @@ RareFactCommand::RareFactCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
 			}
 
 			//make sure the user has already run the read.otu command
@@ -67,7 +67,7 @@ RareFactCommand::RareFactCommand(string option)  {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
@@ -82,7 +82,7 @@ RareFactCommand::RareFactCommand(string option)  {
 			else { 
 				 if (calc == "default")  {  calc = "sobs";  }
 			}
-			splitAtDash(calc, Estimators);
+			m->splitAtDash(calc, Estimators);
 
 			string temp;
 			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
@@ -144,7 +144,7 @@ int RareFactCommand::execute(){
 		
 		for (int p = 0; p < inputFileNames.size(); p++) {
 			
-			string fileNameRoot = outputDir + getRootName(getSimpleName(inputFileNames[p]));
+			string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p]));
 			globaldata->inputFileName = inputFileNames[p];
 			
 			if (m->control_pressed) { if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } return 0; }
@@ -243,7 +243,7 @@ int RareFactCommand::execute(){
 					userLabels.erase(order->getLabel());
 				}
 				
-				if ((anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((m->anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = order->getLabel();
 					
 					delete order;
@@ -339,7 +339,7 @@ vector<string> RareFactCommand::parseSharedFile(string filename) {
 		input = globaldata->ginput;
 		vector<SharedRAbundVector*> lookup = input->getSharedRAbundVectors();
 		
-		string sharedFileRoot = getRootName(filename);
+		string sharedFileRoot = m->getRootName(filename);
 		
 		//clears file before we start to write to it below
 		for (int i=0; i<lookup.size(); i++) {
@@ -358,7 +358,7 @@ vector<string> RareFactCommand::parseSharedFile(string filename) {
 		
 			for (int i = 0; i < lookup.size(); i++) {
 				RAbundVector rav = lookup[i]->getRAbundVector();
-				openOutputFileAppend(sharedFileRoot + lookup[i]->getGroup() + ".rabund", *(filehandles[lookup[i]->getGroup()]));
+				m->openOutputFileAppend(sharedFileRoot + lookup[i]->getGroup() + ".rabund", *(filehandles[lookup[i]->getGroup()]));
 				rav.print(*(filehandles[lookup[i]->getGroup()]));
 				(*(filehandles[lookup[i]->getGroup()])).close();
 			}

@@ -105,7 +105,7 @@ int ChimeraSlayer::doPrep() {
 			bool needToGenerateLeft = true;
 			
 			if(kmerFileTestLeft){	
-				bool GoodFile = checkReleaseVersion(kmerFileTestLeft, m->getVersion());
+				bool GoodFile = m->checkReleaseVersion(kmerFileTestLeft, m->getVersion());
 				if (GoodFile) {  needToGenerateLeft = false;	}
 			}
 			
@@ -136,7 +136,7 @@ int ChimeraSlayer::doPrep() {
 			bool needToGenerateRight = true;
 			
 			if(kmerFileTestRight){	
-				bool GoodFile = checkReleaseVersion(kmerFileTestRight, m->getVersion());
+				bool GoodFile = m->checkReleaseVersion(kmerFileTestRight, m->getVersion());
 				if (GoodFile) {  needToGenerateRight = false;	}
 			}
 			

@@ -16,7 +16,7 @@
 
 InputData::InputData(string fName, string f) : format(f){
 	m = MothurOut::getInstance();
-	openInputFile(fName, fileHandle);
+	m->openInputFile(fName, fileHandle);
 	filename = fName;
 	
 }
@@ -36,7 +36,7 @@ InputData::InputData(string fName, string orderFileName, string f) : format(f){
 	try {
 		m = MothurOut::getInstance();
 		ifstream ofHandle;
-		openInputFile(orderFileName, ofHandle);
+		m->openInputFile(orderFileName, ofHandle);
 		string name;
 
 		int count = 0;
@@ -45,11 +45,11 @@ InputData::InputData(string fName, string orderFileName, string f) : format(f){
 			ofHandle >> name;
 			orderMap[name] = count;
 			count++;
-			gobble(ofHandle);
+			m->gobble(ofHandle);
 		}
 		ofHandle.close();
 	
-		openInputFile(fName, fileHandle);
+		m->openInputFile(fName, fileHandle);
 	}
 	catch(exception& e) {
 		m->errorOut(e, "InputData", "InputData");
@@ -65,7 +65,7 @@ ListVector* InputData::getListVector(){
 				list = new ListVector(fileHandle);
 			}else{ list = NULL;  }
 					
-			gobble(fileHandle);
+			m->gobble(fileHandle);
 			return list;
 		}
 		else{
@@ -83,7 +83,7 @@ ListVector* InputData::getListVector(string label){
 	try {
 		ifstream in;
 		string  thisLabel;
-		openInputFile(filename, in);
+		m->openInputFile(filename, in);
 		
 		if(in){
 
@@ -98,7 +98,7 @@ ListVector* InputData::getListVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete list;	}
-					gobble(in);
+					m->gobble(in);
 				}
 			}else{ list = NULL;  }
 			
@@ -127,7 +127,7 @@ ListVector* InputData::getListVector(string label, bool resetFP){
 			
 				while (fileHandle.eof() != true) {
 					
-					list = new ListVector(fileHandle); gobble(fileHandle);
+					list = new ListVector(fileHandle); m->gobble(fileHandle);
 					thisLabel = list->getLabel();
 					
 					//if you are at the last label
@@ -158,7 +158,7 @@ SharedListVector* InputData::getSharedListVector(){
 				SharedList = new SharedListVector(fileHandle);
 			}else{ SharedList = NULL;  }
 					
-			gobble(fileHandle);
+			m->gobble(fileHandle);
 			return SharedList;
 		}
 		else{
@@ -176,7 +176,7 @@ SharedListVector* InputData::getSharedListVector(string label){
 	try {
 		ifstream in;
 		string  thisLabel;
-		openInputFile(filename, in);
+		m->openInputFile(filename, in);
 		
 		if(in){
 
@@ -191,7 +191,7 @@ SharedListVector* InputData::getSharedListVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete SharedList;	}
-					gobble(in);
+					m->gobble(in);
 				}
 
 			}else{ SharedList = NULL;  }
@@ -220,7 +220,7 @@ SharedOrderVector* InputData::getSharedOrderVector(){
 				SharedOrder = new SharedOrderVector(fileHandle);
 			}else{ SharedOrder = NULL;  }
 				
-			gobble(fileHandle);
+			m->gobble(fileHandle);
 			return SharedOrder;
 			
 		}else{
@@ -239,7 +239,7 @@ SharedOrderVector* InputData::getSharedOrderVector(string label){
 	try {
 		ifstream in;
 		string  thisLabel;
-		openInputFile(filename, in);
+		m->openInputFile(filename, in);
 		
 		if(in){
 
@@ -254,7 +254,7 @@ SharedOrderVector* InputData::getSharedOrderVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete SharedOrder;	}
-					gobble(in);
+					m->gobble(in);
 				}
 
 			}else{ SharedOrder = NULL;  }
@@ -295,7 +295,7 @@ OrderVector* InputData::getOrderVector(){
 				input = new SAbundVector(fileHandle);
 			}
 			
-			gobble(fileHandle);
+			m->gobble(fileHandle);
 			
 			output = new OrderVector();	
 			*output = (input->getOrderVector());
@@ -318,7 +318,7 @@ OrderVector* InputData::getOrderVector(string label){
 	
 		ifstream in;
 		string  thisLabel;
-		openInputFile(filename, in);
+		m->openInputFile(filename, in);
 		
 		if(in){
 			if((format == "list") || (format == "listorder")) {
@@ -332,7 +332,7 @@ OrderVector* InputData::getOrderVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					gobble(in);
+					m->gobble(in);
 				}
 			}
 			else if (format == "shared")  {
@@ -346,7 +346,7 @@ OrderVector* InputData::getOrderVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					gobble(in);
+					m->gobble(in);
 				}
 
 			}
@@ -361,7 +361,7 @@ OrderVector* InputData::getOrderVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					gobble(in);
+					m->gobble(in);
 				}
 
 			}
@@ -376,7 +376,7 @@ OrderVector* InputData::getOrderVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					gobble(in);
+					m->gobble(in);
 				}
 
 			}
@@ -391,7 +391,7 @@ OrderVector* InputData::getOrderVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					gobble(in);
+					m->gobble(in);
 					
 				}
 
@@ -431,7 +431,7 @@ vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(){
 					return SharedList->getSharedRAbundVector();
 				}
 			}
-			gobble(fileHandle);
+			m->gobble(fileHandle);
 		}
 				
 		//this is created to signal to calling function that the input file is at eof
@@ -450,7 +450,7 @@ vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(string label){
 		ifstream in;
 		string  thisLabel;
 		
-		openInputFile(filename, in);
+		m->openInputFile(filename, in);
 		
 		if(in){
 			if (format == "sharedfile")  {
@@ -468,7 +468,7 @@ vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(string label){
 							delete SharedRAbund;
 						}
 					}else{  break;  }
-					gobble(in);
+					m->gobble(in);
 					
 				}
 			}else if (format == "shared") {
@@ -484,7 +484,7 @@ vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(string label){
 							delete SharedList;
 						}
 					}else{  break;  }
-					gobble(in);
+					m->gobble(in);
 					
 				}
 			
@@ -525,7 +525,7 @@ SAbundVector* InputData::getSAbundVector(){
 				input = new SAbundVector(fileHandle);
 			}
 					
-			gobble(fileHandle);
+			m->gobble(fileHandle);
 
 			sabund = new SAbundVector();
 			*sabund = (input->getSAbundVector());
@@ -547,7 +547,7 @@ SAbundVector* InputData::getSAbundVector(string label){
 	
 		ifstream in;
 		string  thisLabel;
-		openInputFile(filename, in);
+		m->openInputFile(filename, in);
 		
 		if(in){
 			if (format == "list") {
@@ -561,7 +561,7 @@ SAbundVector* InputData::getSAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					gobble(in);
+					m->gobble(in);
 				}
 			}
 			else if (format == "shared")  {
@@ -575,7 +575,7 @@ SAbundVector* InputData::getSAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					gobble(in);
+					m->gobble(in);
 				}
 
 			}
@@ -590,7 +590,7 @@ SAbundVector* InputData::getSAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					gobble(in);
+					m->gobble(in);
 				}
 
 			}
@@ -605,7 +605,7 @@ SAbundVector* InputData::getSAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					gobble(in);
+					m->gobble(in);
 				}
 
 			}
@@ -620,7 +620,7 @@ SAbundVector* InputData::getSAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					gobble(in);
+					m->gobble(in);
 					
 				}
 
@@ -664,7 +664,7 @@ RAbundVector* InputData::getRAbundVector(){
 				input = new SAbundVector(fileHandle);
 			}
 					
-			gobble(fileHandle);
+			m->gobble(fileHandle);
 
 			rabund = new RAbundVector();
 			*rabund = (input->getRAbundVector());
@@ -686,7 +686,7 @@ RAbundVector* InputData::getRAbundVector(string label){
 	
 		ifstream in;
 		string  thisLabel;
-		openInputFile(filename, in);
+		m->openInputFile(filename, in);
 		
 		if(in){
 			if (format == "list") {
@@ -700,7 +700,7 @@ RAbundVector* InputData::getRAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					gobble(in);
+					m->gobble(in);
 				}
 			}
 			else if (format == "shared")  {
@@ -714,7 +714,7 @@ RAbundVector* InputData::getRAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					gobble(in);
+					m->gobble(in);
 				}
 
 			}
@@ -729,7 +729,7 @@ RAbundVector* InputData::getRAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					gobble(in);
+					m->gobble(in);
 				}
 
 			}
@@ -744,7 +744,7 @@ RAbundVector* InputData::getRAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					gobble(in);
+					m->gobble(in);
 				}
 
 			}
@@ -759,7 +759,7 @@ RAbundVector* InputData::getRAbundVector(string label){
 					if (thisLabel == label) {  break;  }
 					//so you don't loose this memory
 					else {	delete input;	}
-					gobble(in);
+					m->gobble(in);
 					
 				}
 

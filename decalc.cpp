@@ -290,10 +290,10 @@ vector<float> DeCalculator::calcFreq(vector<Sequence*> seqs, string filename) {
 	try {
 
 		vector<float> prob;
-		string freqfile = getRootName(filename) + "freq";
+		string freqfile = m->getRootName(filename) + "freq";
 		ofstream outFreq;
 		
-		openOutputFile(freqfile, outFreq);
+		m->openOutputFile(freqfile, outFreq);
 		
 		outFreq << "#" << m->getVersion() << endl;
 		

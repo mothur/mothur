@@ -253,7 +253,7 @@ string Sequence::getCommentString(ifstream& fastaFile) {
 		while(fastaFile){
 			letter=fastaFile.get();
 			if((letter == '\r') || (letter == '\n')){  
-				gobble(fastaFile);  //in case its a \r\n situation
+				m->gobble(fastaFile);  //in case its a \r\n situation
 				break;
 			}
 		}
@@ -302,7 +302,7 @@ string Sequence::getCommentString(istringstream& fastaFile) {
 		while(fastaFile){
 			letter=fastaFile.get();
 			if((letter == '\r') || (letter == '\n')){  
-				gobble(fastaFile);  //in case its a \r\n situation
+				m->gobble(fastaFile);  //in case its a \r\n situation
 				break;
 			}
 		}

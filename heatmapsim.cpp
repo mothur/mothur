@@ -36,8 +36,8 @@ vector<string> HeatMapSim::getPic(vector<SharedRAbundVector*> lookup, vector<Cal
 		
 			if (m->control_pressed) { return outputNames; }
 		
-			string filenamesvg = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + lookup[0]->getLabel() + calcs[k]->getName() + ".heatmap.sim.svg";
-			openOutputFile(filenamesvg, outsvg);
+			string filenamesvg = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + lookup[0]->getLabel() + calcs[k]->getName() + ".heatmap.sim.svg";
+			m->openOutputFile(filenamesvg, outsvg);
 			outputNames.push_back(filenamesvg);
 			
 			//svg image
@@ -114,8 +114,8 @@ string HeatMapSim::getPic(vector< vector<double> > dists, vector<string> groups)
 		
 		vector<double> sims;
 		
-		string filenamesvg = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + "heatmap.sim.svg";
-		openOutputFile(filenamesvg, outsvg);
+		string filenamesvg = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + "heatmap.sim.svg";
+		m->openOutputFile(filenamesvg, outsvg);
 			
 		//svg image
 		outsvg << "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 " + toString((dists.size() * 150) + 160) + " " + toString((dists.size() * 150) + 160)  + "\">\n";

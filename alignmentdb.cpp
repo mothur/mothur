@@ -40,7 +40,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 			MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
 			
 			if (pid == 0) {
-				positions = setFilePosFasta(fastaFileName, numSeqs); //fills MPIPos, returns numSeqs
+				positions = m->setFilePosFasta(fastaFileName, numSeqs); //fills MPIPos, returns numSeqs
 
 				//send file positions to all processes
 				for(int i = 1; i < processors; i++) { 
@@ -84,10 +84,10 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 		
 	#else
 		ifstream fastaFile;
-		openInputFile(fastaFileName, fastaFile);
+		m->openInputFile(fastaFileName, fastaFile);
 
 		while (!fastaFile.eof()) {
-			Sequence temp(fastaFile);  gobble(fastaFile);
+			Sequence temp(fastaFile);  m->gobble(fastaFile);
 			
 			if (m->control_pressed) {  templateSequences.clear(); break;  }
 			
@@ -124,7 +124,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 				ifstream kmerFileTest(kmerDBName.c_str());
 				
 				if(kmerFileTest){	
-					bool GoodFile = checkReleaseVersion(kmerFileTest, m->getVersion());
+					bool GoodFile = m->checkReleaseVersion(kmerFileTest, m->getVersion());
 					if (GoodFile) {  needToGenerate = false;	}
 				}
 			#endif

@@ -40,12 +40,12 @@ GetgroupCommand::GetgroupCommand(string option)  {
 			if (abort == false) {
 				//open shared file
 				sharedfile = globaldata->getSharedFile();
-				openInputFile(sharedfile, in);
+				m->openInputFile(sharedfile, in);
 		
 				//open output file
-				if (outputDir == "") { outputDir += hasPath(sharedfile); }
-				outputFile = outputDir + getRootName(getSimpleName(sharedfile)) + "bootGroups";
-				openOutputFile(outputFile, out);
+				if (outputDir == "") { outputDir += m->hasPath(sharedfile); }
+				outputFile = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "bootGroups";
+				m->openOutputFile(outputFile, out);
 
 			}
 		}

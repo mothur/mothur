@@ -50,7 +50,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -58,7 +58,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -66,7 +66,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -90,7 +90,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
@@ -101,7 +101,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 			if (groups == "not found") { groups = ""; }
 			else { 
 				userGroups = "unique." + groups;
-				splitAtDash(groups, Groups);
+				m->splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 				
 			}
@@ -110,7 +110,7 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 			if (groups == "not found") { groups = "";  }
 			else { 
 				userGroups = groups;
-				splitAtDash(groups, Groups);
+				m->splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 				unique = false;
 			}
@@ -188,12 +188,12 @@ int GetSharedOTUCommand::execute(){
 		
 		if (fastafile != "") {
 			ifstream inFasta;
-			openInputFile(fastafile, inFasta);
+			m->openInputFile(fastafile, inFasta);
 			
 			while(!inFasta.eof()) {
 				if (m->control_pressed) { inFasta.close(); delete groupMap; return 0; }
 				
-				Sequence seq(inFasta); gobble(inFasta);
+				Sequence seq(inFasta); m->gobble(inFasta);
 				if (seq.getName() != "") {  seqs.push_back(seq);   }
 			}
 			inFasta.close();
@@ -207,7 +207,7 @@ int GetSharedOTUCommand::execute(){
 		set<string> userLabels = labels;
 		
 		ifstream in;
-		openInputFile(listfile, in);
+		m->openInputFile(listfile, in);
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((!in.eof()) && ((allLines == 1) || (userLabels.size() != 0))) {
@@ -228,7 +228,7 @@ int GetSharedOTUCommand::execute(){
 				userLabels.erase(list->getLabel());
 			}
 			
-			if ((anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = list->getLabel();
 					
 					m->mothurOut(lastlist->getLabel()); 
@@ -302,13 +302,13 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 		ofstream outNames;
 		string outputFileNames;
 		
-		if (outputDir == "") { outputDir += hasPath(listfile); }
+		if (outputDir == "") { outputDir += m->hasPath(listfile); }
 		if (output != "accnos") {
-			outputFileNames = outputDir + getRootName(getSimpleName(listfile)) + shared->getLabel() + userGroups + ".shared.seqs";
+			outputFileNames = outputDir + m->getRootName(m->getSimpleName(listfile)) + shared->getLabel() + userGroups + ".shared.seqs";
 		}else {
-			outputFileNames = outputDir + getRootName(getSimpleName(listfile)) + shared->getLabel() + userGroups + ".accnos";
+			outputFileNames = outputDir + m->getRootName(m->getSimpleName(listfile)) + shared->getLabel() + userGroups + ".accnos";
 		}
-		openOutputFile(outputFileNames, outNames);
+		m->openOutputFile(outputFileNames, outNames);
 		
 		bool wroteSomething = false;
 		int num = 0;
@@ -410,10 +410,10 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 		
 		//if fasta file provided output new fasta file
 		if ((fastafile != "") && wroteSomething) {
-			if (outputDir == "") { outputDir += hasPath(fastafile); }
-			string outputFileFasta = outputDir + getRootName(getSimpleName(fastafile)) + shared->getLabel() + userGroups + ".shared.fasta";
+			if (outputDir == "") { outputDir += m->hasPath(fastafile); }
+			string outputFileFasta = outputDir + m->getRootName(m->getSimpleName(fastafile)) + shared->getLabel() + userGroups + ".shared.fasta";
 			ofstream outFasta;
-			openOutputFile(outputFileFasta, outFasta);
+			m->openOutputFile(outputFileFasta, outFasta);
 			outputNames.push_back(outputFileFasta);
 			
 			for (int k = 0; k < seqs.size(); k++) {

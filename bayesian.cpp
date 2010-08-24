@@ -18,7 +18,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 					
 		/************calculate the probablity that each word will be in a specific taxonomy*************/
 		string tfileroot = tfile.substr(0,tfile.find_last_of(".")+1);
-		string tempfileroot = getRootName(getSimpleName(tempFile));
+		string tempfileroot = m->getRootName(m->getSimpleName(tempFile));
 		string phyloTreeName = tfileroot + "tree.train";
 		string phyloTreeSumName = tfileroot + "tree.sum";
 		string probFileName = tfileroot + tempfileroot + char('0'+ kmerSize) + "mer.prob";
@@ -90,14 +90,14 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 				#endif
 
 				
-				openOutputFile(probFileName, out);
+				m->openOutputFile(probFileName, out);
 				
 				//output mothur version
 				out << "#" << m->getVersion() << endl;
 				
 				out << numKmers << endl;
 				
-				openOutputFile(probFileName2, out2);
+				m->openOutputFile(probFileName2, out2);
 				
 				//output mothur version
 				out2 << "#" << m->getVersion() << endl;
@@ -408,8 +408,8 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 			MPI_File_open(MPI_COMM_WORLD, inFileName2, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI2);  //comm, filename, mode, info, filepointer
 
 			if (pid == 0) {
-				positions = setFilePosEachLine(inNumName, num);
-				positions2 = setFilePosEachLine(inName, num2);
+				positions = m->setFilePosEachLine(inNumName, num);
+				positions2 = m->setFilePosEachLine(inName, num2);
 				
 				for(int i = 1; i < processors; i++) { 
 					MPI_Send(&num, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
@@ -515,9 +515,9 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 			MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 		#else
 			//read version
-			string line = getline(in); gobble(in);
+			string line = m->getline(in); m->gobble(in);
 			
-			in >> numKmers; gobble(in);
+			in >> numKmers; m->gobble(in);
 			
 			//initialze probabilities
 			wordGenusProb.resize(numKmers);
@@ -530,12 +530,12 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 			vector<float> zeroCountProb; zeroCountProb.resize(numKmers);		
 			
 			//read version
-			string line2 = getline(inNum); gobble(inNum);
+			string line2 = m->getline(inNum); m->gobble(inNum);
 			
 			while (inNum) {
 				inNum >> zeroCountProb[count] >> num[count];  
 				count++;
-				gobble(inNum);
+				m->gobble(inNum);
 			}
 			inNum.close();
 		
@@ -553,7 +553,7 @@ void Bayesian::readProbFile(ifstream& in, ifstream& inNum, string inName, string
 					wordGenusProb[kmer][name] = prob;
 				}
 				
-				gobble(in);
+				m->gobble(in);
 			}
 			in.close();
 			
@@ -571,10 +571,10 @@ bool Bayesian::checkReleaseDate(ifstream& file1, ifstream& file2, ifstream& file
 		bool good = true;
 		
 		vector<string> lines;
-		lines.push_back(getline(file1));  
-		lines.push_back(getline(file2)); 
-		lines.push_back(getline(file3)); 
-		lines.push_back(getline(file4)); 
+		lines.push_back(m->getline(file1));  
+		lines.push_back(m->getline(file2)); 
+		lines.push_back(m->getline(file3)); 
+		lines.push_back(m->getline(file4)); 
 
 		//before we added this check
 		if ((lines[0][0] != '#') || (lines[1][0] != '#') || (lines[2][0] != '#') || (lines[3][0] != '#')) {  good = false;  }
@@ -586,12 +586,12 @@ bool Bayesian::checkReleaseDate(ifstream& file1, ifstream& file2, ifstream& file
 			string version = m->getVersion();
 			
 			vector<string> versionVector;
-			splitAtChar(version, versionVector, '.');
+			m->splitAtChar(version, versionVector, '.');
 			
 			//check each files version
 			for (int i = 0; i < lines.size(); i++) { 
 				vector<string> linesVector;
-				splitAtChar(lines[i], linesVector, '.');
+				m->splitAtChar(lines[i], linesVector, '.');
 			
 				if (versionVector.size() != linesVector.size()) { good = false; break; }
 				else {

@@ -32,7 +32,56 @@ class MothurOut {
 		void setReleaseDate(string r) { releaseDate = r; }
 		string getVersion() { return version; }
 		void setVersion(string r) { version = r; }
-
+		
+		//functions from mothur.h
+		//file operations
+		vector<unsigned long int> divideFile(string, int&);
+		vector<unsigned long int> setFilePosEachLine(string, int&);
+		vector<unsigned long int> setFilePosFasta(string, int&);
+		string sortFile(string, string);
+		void appendFiles(string, string);
+		int renameFile(string, string); //oldname, newname
+		string getFullPathName(string);
+		string hasPath(string);
+		string getExtension(string);
+		string getPathName(string);
+		string getSimpleName(string);
+		string getRootName(string);
+		bool isBlank(string);
+		int openOutputFile(string, ofstream&);
+		int openOutputFileAppend(string, ofstream&);
+		int openInputFile(string, ifstream&);
+		int openInputFile(string, ifstream&, string); //no error given 
+		string getline(ifstream&);
+		string getline(istringstream&);
+		void gobble(istream&);
+		void gobble(istringstream&);
+		
+		//searchs and checks
+		bool checkReleaseVersion(ifstream&, string);
+		bool anyLabelsToProcess(string, set<string>&, string);
+		bool inUsersGroups(vector<string>, vector<string>);
+		bool inUsersGroups(string, vector<string>);
+		void getNumSeqs(ifstream&, int&);
+		int getNumSeqs(ifstream&);
+		int getNumNames(string);
+		bool isTrue(string);
+	
+		
+		//string manipulation
+		void splitAtEquals(string&, string&);
+		void splitAtComma(string&, string&);	
+		void splitAtComma(string&, vector<string>&);
+		void splitAtDash(string&, set<int>&);
+		void splitAtDash(string&, set<string>&);
+		void splitAtDash(string&, vector<string>&);
+		void splitAtChar(string&, vector<string>&, char);
+		
+		//math operation
+		int factorial(int num);
+		vector<vector<double> > binomial(int);
+		float ceilDist(float, int);
+		float roundDist(float, int);
 
 		int control_pressed;
 		bool executing;

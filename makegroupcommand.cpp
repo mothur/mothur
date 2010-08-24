@@ -50,25 +50,25 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 			fastaFileName = validParameter.validFile(parameters, "fasta", false);
 			if (fastaFileName == "not found") { m->mothurOut("fasta is a required parameter for the make.group command."); m->mothurOutEndLine(); abort = true;  }
 			else { 
-				splitAtDash(fastaFileName, fastaFileNames);
+				m->splitAtDash(fastaFileName, fastaFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < fastaFileNames.size(); i++) {
 					if (inputDir != "") {
-						string path = hasPath(fastaFileNames[i]);
+						string path = m->hasPath(fastaFileNames[i]);
 						//if the user has not given a path then, add inputdir. else leave path alone.
 						if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
 					}
 	
 					ifstream in;
-					int ableToOpen = openInputFile(fastaFileNames[i], in, "noerror");
+					int ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
 				
 					//if you can't open it, try default location
 					if (ableToOpen == 1) {
 						if (m->getDefaultPath() != "") { //default path is set
-							string tryPath = m->getDefaultPath() + getSimpleName(fastaFileNames[i]);
+							string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
 							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = openInputFile(tryPath, in, "noerror");
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
 							fastaFileNames[i] = tryPath;
 						}
 					}
@@ -79,7 +79,7 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 						//erase from file list
 						fastaFileNames.erase(fastaFileNames.begin()+i);
 						i--;
-					}else{  filename += getRootName(getSimpleName(fastaFileNames[i]));  }
+					}else{  filename += m->getRootName(m->getSimpleName(fastaFileNames[i]));  }
 				}
 				
 				filename += "groups";
@@ -90,7 +90,7 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { m->mothurOut("groups is a required parameter for the make.group command."); m->mothurOutEndLine(); abort = true;  }
-			else { splitAtDash(groups, groupsNames);	}
+			else { m->splitAtDash(groups, groupsNames);	}
 
 			if (groupsNames.size() != fastaFileNames.size()) { m->mothurOut("You do not have the same number of valid fastfile files as groups.  This could be because we could not open a fastafile."); m->mothurOutEndLine(); abort = true;  }
 		}
@@ -131,18 +131,18 @@ int MakeGroupCommand::execute(){
 		if (abort == true) {	return 0;	}
 		
 		ofstream out;
-		openOutputFile(filename, out);
+		m->openOutputFile(filename, out);
 		
 		for (int i = 0; i < fastaFileNames.size(); i++) {
 		
 			if (m->control_pressed) {  out.close(); remove(filename.c_str()); return 0; }
 			
 			ifstream in;
-			openInputFile(fastaFileNames[i], in);
+			m->openInputFile(fastaFileNames[i], in);
 			
 			while (!in.eof()) {
 				
-				Sequence seq(in, "no align"); gobble(in);
+				Sequence seq(in, "no align"); m->gobble(in);
 				
 				if (m->control_pressed) {  in.close(); out.close(); remove(filename.c_str()); return 0; }
 				

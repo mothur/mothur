@@ -82,7 +82,7 @@ int main(int argc, char *argv[]){
 				if (lastChar != "\\") { temp += "\\"; }	
 			#endif
 			
-			temp = getFullPathName(temp);
+			temp = m->getFullPathName(temp);
 			m->setDefaultPath(temp);
 			
 			m->mothurOutJustToLog("Using default file location " + temp);
@@ -192,11 +192,11 @@ int main(int argc, char *argv[]){
 
 			}else {
 				ofstream outNewLog;
-				openOutputFileAppend(newlogFileName, outNewLog);
+				m->openOutputFileAppend(newlogFileName, outNewLog);
 				outNewLog << endl << endl << "*********************************************************************************" << endl << endl;
 				outNewLog.close();
 				
-				appendFiles(logFileName, newlogFileName);
+				m->appendFiles(logFileName, newlogFileName);
 				remove(logFileName.c_str());
 			}
 		}else{  

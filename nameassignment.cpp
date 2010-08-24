@@ -6,7 +6,7 @@
 
 NameAssignment::NameAssignment(string nameMapFile){
 	m = MothurOut::getInstance();
-	openInputFile(nameMapFile, fileHandle);
+	m->openInputFile(nameMapFile, fileHandle);
 	
 }
 
@@ -34,7 +34,7 @@ void NameAssignment::readMap(){
 				
 			}else{	m->mothurOut(firstCol + " is already in namesfile. I will use first definition."); m->mothurOutEndLine();  }
 			
-			gobble(fileHandle);
+			m->gobble(fileHandle);
 		}
 		fileHandle.close();
 	

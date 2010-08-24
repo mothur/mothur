@@ -62,7 +62,7 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
@@ -70,7 +70,7 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 				it = parameters.find("column");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["column"] = inputDir + it->second;		}
 				}
@@ -78,7 +78,7 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -88,12 +88,12 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
 			if (phylipfile == "not open") { abort = true; }
 			else if (phylipfile == "not found") { phylipfile = ""; }	
-			else {  format = "phylip"; 	if (outputDir == "") { outputDir += hasPath(phylipfile); }  }
+			else {  format = "phylip"; 	if (outputDir == "") { outputDir += m->hasPath(phylipfile); }  }
 			
 			columnfile = validParameter.validFile(parameters, "column", true);
 			if (columnfile == "not open") { abort = true; }	
 			else if (columnfile == "not found") { columnfile = ""; }
-			else {  format = "column";	if (outputDir == "") { outputDir += hasPath(columnfile); } }
+			else {  format = "column";	if (outputDir == "") { outputDir += m->hasPath(columnfile); } }
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }	
@@ -113,12 +113,12 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
 			if (format == "shared") {
-				if (outputDir == "") { outputDir += hasPath(globaldata->getSharedFile()); }
+				if (outputDir == "") { outputDir += m->hasPath(globaldata->getSharedFile()); }
 				
 				label = validParameter.validFile(parameters, "label", false);			
 				if (label == "not found") { label = ""; }
 				else { 
-					if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+					if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 					else { allLines = 1;  }
 				}
 				
@@ -133,12 +133,12 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 				else { 
 					if (calc == "default")  {  calc = "jest-thetayc";  }
 				}
-				splitAtDash(calc, Estimators);
+				m->splitAtDash(calc, Estimators);
 				
 				groups = validParameter.validFile(parameters, "groups", false);			
 				if (groups == "not found") { groups = ""; }
 				else { 
-					splitAtDash(groups, Groups);
+					m->splitAtDash(groups, Groups);
 					globaldata->Groups = Groups;
 				}
 			}
@@ -292,7 +292,7 @@ int HeatMapSimCommand::runCommandShared() {
 				userLabels.erase(lookup[0]->getLabel());
 			}
 				
-			if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup[0]->getLabel();
 			
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
@@ -374,7 +374,7 @@ int HeatMapSimCommand::runCommandDist() {
 		//read distance file and create distance vector and names vector
 		if (format == "phylip") {
 			//read phylip file
-			openInputFile(phylipfile, in);
+			m->openInputFile(phylipfile, in);
 			
 			string name;
 			int numSeqs;
@@ -422,7 +422,7 @@ int HeatMapSimCommand::runCommandDist() {
 					if (m->control_pressed) { return 0; }
 					
 					for(int j=0;j<numSeqs;j++) { in >> matrix[i][j];  }
-					gobble(in);
+					m->gobble(in);
 				}
 			}else { 
 				double dist;
@@ -436,7 +436,7 @@ int HeatMapSimCommand::runCommandDist() {
 						in >> dist;
 						matrix[i][j] = dist;  matrix[j][i] = dist;
 					}
-					gobble(in);
+					m->gobble(in);
 				}
 			}
 			in.close();
@@ -459,10 +459,10 @@ int HeatMapSimCommand::runCommandDist() {
 			//read column file
 			string first, second;
 			double dist;
-			openInputFile(columnfile, in);
+			m->openInputFile(columnfile, in);
 			
 			while (!in.eof()) {
-				in >> first >> second >> dist; gobble(in);
+				in >> first >> second >> dist; m->gobble(in);
 				
 				if (m->control_pressed) { return 0; }
 				

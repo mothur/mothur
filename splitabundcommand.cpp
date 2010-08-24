@@ -42,7 +42,7 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -50,7 +50,7 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -58,7 +58,7 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -66,7 +66,7 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -109,7 +109,7 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 				if (groupfile != "") {  Groups = groupMap->namesOfGroups;  } 
 				else {  m->mothurOut("You cannot select groups without a valid groupfile, I will disregard your groups selection. "); m->mothurOutEndLine(); groups = "";   }
 			}else { 
-				splitAtDash(groups, Groups);
+				m->splitAtDash(groups, Groups);
 			}
 			
 			if ((groupfile == "") && (groups != "")) {  m->mothurOut("You cannot select groups without a valid groupfile, I will disregard your groups selection. "); m->mothurOutEndLine(); groups = "";  Groups.clear(); }
@@ -122,12 +122,12 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = "";  allLines = 1; }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
 			string temp = validParameter.validFile(parameters, "accnos", false);		if (temp == "not found") { temp = "F"; }
-			accnos = isTrue(temp); 
+			accnos = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "cutoff", false);				if (temp == "not found") { temp = "0"; }
 			convert(temp, cutoff); 
@@ -176,10 +176,10 @@ int SplitAbundCommand::execute(){
 		if (abort == true) {	return 0;	}
 		
 		if (listfile != "") { //you are using a listfile to determine abundance
-			if (outputDir == "") { outputDir = hasPath(listfile); }
+			if (outputDir == "") { outputDir = m->hasPath(listfile); }
 		
 			//remove old files so you can append later....
-			string fileroot = outputDir + getRootName(getSimpleName(listfile));
+			string fileroot = outputDir + m->getRootName(m->getSimpleName(listfile));
 			if (Groups.size() == 0) {
 				remove((fileroot + "rare.list").c_str());
 				remove((fileroot + "abund.list").c_str());
@@ -223,7 +223,7 @@ int SplitAbundCommand::execute(){
 						userLabels.erase(list->getLabel());
 				}
 				
-				if ((anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 						string saveLabel = list->getLabel();
 						
 						delete list;
@@ -280,7 +280,7 @@ int SplitAbundCommand::execute(){
 			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }	return 0;	}
 									
 		}else { //you are using the namefile to determine abundance
-			if (outputDir == "") { outputDir = hasPath(namefile); }
+			if (outputDir == "") { outputDir = m->hasPath(namefile); }
 			
 			splitNames(); 
 			writeNames();
@@ -316,7 +316,7 @@ int SplitAbundCommand::splitList(ListVector* thisList) {
 			string bin = thisList->get(i);
 						
 			vector<string> names;
-			splitAtComma(bin, names);  //parses bin into individual sequence names
+			m->splitAtComma(bin, names);  //parses bin into individual sequence names
 			int size = names.size();
 				
 			if (size <= cutoff) {
@@ -364,12 +364,12 @@ int SplitAbundCommand::writeList(ListVector* thisList) {
 			ofstream aout;
 			ofstream rout;
 			
-			string rare = outputDir + getRootName(getSimpleName(listfile))  + "rare.list";
-			openOutputFileAppend(rare, rout);
+			string rare = outputDir + m->getRootName(m->getSimpleName(listfile))  + "rare.list";
+			m->openOutputFileAppend(rare, rout);
 			outputNames.push_back(rare);
 			
-			string abund = outputDir + getRootName(getSimpleName(listfile))  + "abund.list";
-			openOutputFileAppend(abund, aout);
+			string abund = outputDir + m->getRootName(m->getSimpleName(listfile))  + "abund.list";
+			m->openOutputFileAppend(abund, aout);
 			outputNames.push_back(abund);
 
 			if (rareNames.size() != 0)	{  rout << thisList->getLabel() << '\t' << numRareBins << '\t';		}
@@ -380,7 +380,7 @@ int SplitAbundCommand::writeList(ListVector* thisList) {
 			
 				string bin = list->get(i); 
 			
-				int size = getNumNames(bin);
+				int size = m->getNumNames(bin);
 			
 				if (size <= cutoff) {  rout << bin << '\t';  }
 				else				{  aout << bin << '\t'; }
@@ -393,7 +393,7 @@ int SplitAbundCommand::writeList(ListVector* thisList) {
 			aout.close();
 			
 		}else{ //parse names by abundance and group
-			string fileroot =  outputDir + getRootName(getSimpleName(listfile));
+			string fileroot =  outputDir + m->getRootName(m->getSimpleName(listfile));
 			ofstream* temp;
 			ofstream* temp2;
 			//map<string, bool> wroteFile;
@@ -406,8 +406,8 @@ int SplitAbundCommand::writeList(ListVector* thisList) {
 				temp2 = new ofstream;
 				filehandles[Groups[i]+".abund"] = temp2;
 				
-				openOutputFileAppend(fileroot + Groups[i] + ".rare.list", *(filehandles[Groups[i]+".rare"]));
-				openOutputFileAppend(fileroot + Groups[i] + ".abund.list", *(filehandles[Groups[i]+".abund"]));
+				m->openOutputFileAppend(fileroot + Groups[i] + ".rare.list", *(filehandles[Groups[i]+".rare"]));
+				m->openOutputFileAppend(fileroot + Groups[i] + ".abund.list", *(filehandles[Groups[i]+".abund"]));
 			}
 			
 			map<string, string> groupVector;
@@ -426,7 +426,7 @@ int SplitAbundCommand::writeList(ListVector* thisList) {
 				string bin = list->get(i); 
 			
 				vector<string> names;
-				splitAtComma(bin, names);  //parses bin into individual sequence names
+				m->splitAtComma(bin, names);  //parses bin into individual sequence names
 			
 				//parse bin into list of sequences in each group
 				for (int j = 0; j < names.size(); j++) {
@@ -439,7 +439,7 @@ int SplitAbundCommand::writeList(ListVector* thisList) {
 					
 					string group = groupMap->getGroup(names[j]);
 				
-					if (inUsersGroups(group, Groups)) { //only add if this is in a group we want
+					if (m->inUsersGroups(group, Groups)) { //only add if this is in a group we want
 						itGroup = groupBins.find(group+rareAbund);
 						if(itGroup == groupBins.end()) {
 							groupBins[group+rareAbund] = names[j];  //add first name
@@ -483,17 +483,17 @@ int SplitAbundCommand::splitNames() { //namefile
 			
 		//open input file
 		ifstream in;
-		openInputFile(namefile, in);
+		m->openInputFile(namefile, in);
 		
 		while (!in.eof()) {
 			if (m->control_pressed) { break; }
 			
 			string firstCol, secondCol;
-			in >> firstCol >> secondCol; gobble(in);
+			in >> firstCol >> secondCol; m->gobble(in);
 			
 			nameMap[firstCol] = secondCol;
 			
-			int size = getNumNames(secondCol);
+			int size = m->getNumNames(secondCol);
 				
 			if (size <= cutoff) {
 				rareNames.insert(firstCol); 
@@ -516,13 +516,13 @@ int SplitAbundCommand::readNamesFile() {
 	try {
 		//open input file
 		ifstream in;
-		openInputFile(namefile, in);
+		m->openInputFile(namefile, in);
 		
 		while (!in.eof()) {
 			if (m->control_pressed) { break; }
 			
 			string firstCol, secondCol;
-			in >> firstCol >> secondCol; gobble(in);
+			in >> firstCol >> secondCol; m->gobble(in);
 			
 			nameMap[firstCol] = secondCol;
 		}
@@ -547,7 +547,7 @@ int SplitAbundCommand::createNameMap(ListVector* thisList) {
 				string bin = thisList->get(i);
 							
 				vector<string> names;
-				splitAtComma(bin, names);  //parses bin into individual sequence names
+				m->splitAtComma(bin, names);  //parses bin into individual sequence names
 				
 				for (int j = 0; j < names.size(); j++) {  nameMap[names[j]] = names[j];  }
 			}//end for
@@ -570,12 +570,12 @@ int SplitAbundCommand::writeNames() { //namefile
 			ofstream aout;
 			ofstream rout;
 			
-			string rare = outputDir + getRootName(getSimpleName(namefile))  + "rare.names";
-			openOutputFile(rare, rout);
+			string rare = outputDir + m->getRootName(m->getSimpleName(namefile))  + "rare.names";
+			m->openOutputFile(rare, rout);
 			outputNames.push_back(rare);
 			
-			string abund = outputDir + getRootName(getSimpleName(namefile))  + "abund.names";
-			openOutputFile(abund, aout);
+			string abund = outputDir + m->getRootName(m->getSimpleName(namefile))  + "abund.names";
+			m->openOutputFile(abund, aout);
 			outputNames.push_back(abund);
 			
 			if (rareNames.size() != 0) {
@@ -593,7 +593,7 @@ int SplitAbundCommand::writeNames() { //namefile
 			aout.close();
 			
 		}else{ //parse names by abundance and group
-			string fileroot =  outputDir + getRootName(getSimpleName(namefile));
+			string fileroot =  outputDir + m->getRootName(m->getSimpleName(namefile));
 			ofstream* temp;
 			ofstream* temp2;
 			map<string, ofstream*> filehandles;
@@ -605,13 +605,13 @@ int SplitAbundCommand::writeNames() { //namefile
 				temp2 = new ofstream;
 				filehandles[Groups[i]+".abund"] = temp2;
 				
-				openOutputFile(fileroot + Groups[i] + ".rare.names", *(filehandles[Groups[i]+".rare"]));
-				openOutputFile(fileroot + Groups[i] + ".abund.names", *(filehandles[Groups[i]+".abund"]));
+				m->openOutputFile(fileroot + Groups[i] + ".rare.names", *(filehandles[Groups[i]+".rare"]));
+				m->openOutputFile(fileroot + Groups[i] + ".abund.names", *(filehandles[Groups[i]+".abund"]));
 			}
 			
 			for (map<string, string>::iterator itName = nameMap.begin(); itName != nameMap.end(); itName++) {				
 				vector<string> names;
-				splitAtComma(itName->second, names);  //parses bin into individual sequence names
+				m->splitAtComma(itName->second, names);  //parses bin into individual sequence names
 				
 				string rareAbund;
 				if (rareNames.count(itName->first) != 0) { //you are a rare name
@@ -626,7 +626,7 @@ int SplitAbundCommand::writeNames() { //namefile
 					
 					string group = groupMap->getGroup(names[i]);
 					
-					if (inUsersGroups(group, Groups)) { //only add if this is in a group we want
+					if (m->inUsersGroups(group, Groups)) { //only add if this is in a group we want
 						itout = outputStrings.find(group+rareAbund);
 						if (itout == outputStrings.end()) {  
 							outputStrings[group+rareAbund] = names[i] + '\t' + names[i];
@@ -667,8 +667,8 @@ int SplitAbundCommand::writeAccnos(string tag) {
 			ofstream rout;
 			
 			
-			string rare = outputDir + getRootName(getSimpleName(inputFile))  + tag + "rare.accnos";
-			openOutputFile(rare, rout);
+			string rare = outputDir + m->getRootName(m->getSimpleName(inputFile))  + tag + "rare.accnos";
+			m->openOutputFile(rare, rout);
 			outputNames.push_back(rare);
 			
 			for (set<string>::iterator itRare = rareNames.begin(); itRare != rareNames.end(); itRare++) {
@@ -676,8 +676,8 @@ int SplitAbundCommand::writeAccnos(string tag) {
 			}
 			rout.close();
 		
-			string abund = outputDir + getRootName(getSimpleName(inputFile)) + tag  + "abund.accnos";
-			openOutputFile(abund, aout);
+			string abund = outputDir + m->getRootName(m->getSimpleName(inputFile)) + tag  + "abund.accnos";
+			m->openOutputFile(abund, aout);
 			outputNames.push_back(abund);
 			
 			for (set<string>::iterator itAbund = abundNames.begin(); itAbund != abundNames.end(); itAbund++) {
@@ -686,7 +686,7 @@ int SplitAbundCommand::writeAccnos(string tag) {
 			aout.close();
 			
 		}else{ //parse names by abundance and group
-			string fileroot =  outputDir + getRootName(getSimpleName(inputFile));
+			string fileroot =  outputDir + m->getRootName(m->getSimpleName(inputFile));
 			ofstream* temp;
 			ofstream* temp2;
 			map<string, ofstream*> filehandles;
@@ -698,15 +698,15 @@ int SplitAbundCommand::writeAccnos(string tag) {
 				temp2 = new ofstream;
 				filehandles[Groups[i]+".abund"] = temp2;
 				
-				openOutputFile(fileroot + tag + Groups[i] + ".rare.accnos", *(filehandles[Groups[i]+".rare"]));
-				openOutputFile(fileroot + tag + Groups[i] + ".abund.accnos", *(filehandles[Groups[i]+".abund"]));
+				m->openOutputFile(fileroot + tag + Groups[i] + ".rare.accnos", *(filehandles[Groups[i]+".rare"]));
+				m->openOutputFile(fileroot + tag + Groups[i] + ".abund.accnos", *(filehandles[Groups[i]+".abund"]));
 			}
 			
 			//write rare
 			for (set<string>::iterator itRare = rareNames.begin(); itRare != rareNames.end(); itRare++) {
 					string group = groupMap->getGroup(*itRare);
 					
-					if (inUsersGroups(group, Groups)) { //only add if this is in a group we want
+					if (m->inUsersGroups(group, Groups)) { //only add if this is in a group we want
 						*(filehandles[group+".rare"]) << *itRare << endl;
 					}
 			}
@@ -715,7 +715,7 @@ int SplitAbundCommand::writeAccnos(string tag) {
 			for (set<string>::iterator itAbund = abundNames.begin(); itAbund != abundNames.end(); itAbund++) {
 					string group = groupMap->getGroup(*itAbund);
 					
-					if (inUsersGroups(group, Groups)) { //only add if this is in a group we want
+					if (m->inUsersGroups(group, Groups)) { //only add if this is in a group we want
 						*(filehandles[group+".abund"]) << *itAbund << endl;
 					}
 			}
@@ -746,17 +746,17 @@ int SplitAbundCommand::parseGroup(string tag) { //namefile
 			ofstream aout;
 			ofstream rout;
 			
-			string rare = outputDir + getRootName(getSimpleName(groupfile))  + tag + "rare.groups";
-			openOutputFile(rare, rout);
+			string rare = outputDir + m->getRootName(m->getSimpleName(groupfile))  + tag + "rare.groups";
+			m->openOutputFile(rare, rout);
 			outputNames.push_back(rare);
 		
-			string abund = outputDir + getRootName(getSimpleName(groupfile))  + tag + "abund.groups";
-			openOutputFile(abund, aout);
+			string abund = outputDir + m->getRootName(m->getSimpleName(groupfile))  + tag + "abund.groups";
+			m->openOutputFile(abund, aout);
 			outputNames.push_back(abund);
 			
 			for (map<string, string>::iterator itName = nameMap.begin(); itName != nameMap.end(); itName++) {				
 				vector<string> names;
-				splitAtComma(itName->second, names);  //parses bin into individual sequence names
+				m->splitAtComma(itName->second, names);  //parses bin into individual sequence names
 				
 				for (int i = 0; i < names.size(); i++) {
 				
@@ -778,7 +778,7 @@ int SplitAbundCommand::parseGroup(string tag) { //namefile
 			aout.close(); 
 
 		}else{ //parse names by abundance and group
-			string fileroot =  outputDir + getRootName(getSimpleName(groupfile));
+			string fileroot =  outputDir + m->getRootName(m->getSimpleName(groupfile));
 			ofstream* temp;
 			ofstream* temp2;
 			map<string, ofstream*> filehandles;
@@ -790,13 +790,13 @@ int SplitAbundCommand::parseGroup(string tag) { //namefile
 				temp2 = new ofstream;
 				filehandles[Groups[i]+".abund"] = temp2;
 				
-				openOutputFile(fileroot + tag + Groups[i] + ".rare.groups", *(filehandles[Groups[i]+".rare"]));
-				openOutputFile(fileroot + tag + Groups[i] + ".abund.groups", *(filehandles[Groups[i]+".abund"]));
+				m->openOutputFile(fileroot + tag + Groups[i] + ".rare.groups", *(filehandles[Groups[i]+".rare"]));
+				m->openOutputFile(fileroot + tag + Groups[i] + ".abund.groups", *(filehandles[Groups[i]+".abund"]));
 			}
 			
 			for (map<string, string>::iterator itName = nameMap.begin(); itName != nameMap.end(); itName++) {				
 				vector<string> names;
-				splitAtComma(itName->second, names);  //parses bin into individual sequence names
+				m->splitAtComma(itName->second, names);  //parses bin into individual sequence names
 				
 				string rareAbund;
 				if (rareNames.count(itName->first) != 0) { //you are a rare name
@@ -809,7 +809,7 @@ int SplitAbundCommand::parseGroup(string tag) { //namefile
 				
 					string group = groupMap->getGroup(names[i]);
 									
-					if (inUsersGroups(group, Groups)) { //only add if this is in a group we want
+					if (m->inUsersGroups(group, Groups)) { //only add if this is in a group we want
 						*(filehandles[group+rareAbund]) << names[i] << '\t' << group << endl;
 					}
 				}
@@ -840,22 +840,22 @@ int SplitAbundCommand::parseFasta(string tag) { //namefile
 			ofstream aout;
 			ofstream rout;
 			
-			string rare = outputDir + getRootName(getSimpleName(fastafile))  + tag + "rare.fasta";
-			openOutputFile(rare, rout);
+			string rare = outputDir + m->getRootName(m->getSimpleName(fastafile))  + tag + "rare.fasta";
+			m->openOutputFile(rare, rout);
 			outputNames.push_back(rare);
 		
-			string abund = outputDir + getRootName(getSimpleName(fastafile))  + tag + "abund.fasta";
-			openOutputFile(abund, aout);
+			string abund = outputDir + m->getRootName(m->getSimpleName(fastafile))  + tag + "abund.fasta";
+			m->openOutputFile(abund, aout);
 			outputNames.push_back(abund);
 		
 			//open input file
 			ifstream in;
-			openInputFile(fastafile, in);
+			m->openInputFile(fastafile, in);
 	
 			while (!in.eof()) {
 				if (m->control_pressed) { break; }
 		
-				Sequence seq(in); gobble(in);
+				Sequence seq(in); m->gobble(in);
 				
 				if (seq.getName() != "") { 
 					
@@ -879,7 +879,7 @@ int SplitAbundCommand::parseFasta(string tag) { //namefile
 			aout.close(); 
 
 		}else{ //parse names by abundance and group
-			string fileroot =  outputDir + getRootName(getSimpleName(fastafile));
+			string fileroot =  outputDir + m->getRootName(m->getSimpleName(fastafile));
 			ofstream* temp;
 			ofstream* temp2;
 			map<string, ofstream*> filehandles;
@@ -891,18 +891,18 @@ int SplitAbundCommand::parseFasta(string tag) { //namefile
 				temp2 = new ofstream;
 				filehandles[Groups[i]+".abund"] = temp2;
 				
-				openOutputFile(fileroot + tag + Groups[i] + ".rare.fasta", *(filehandles[Groups[i]+".rare"]));
-				openOutputFile(fileroot + tag + Groups[i] + ".abund.fasta", *(filehandles[Groups[i]+".abund"]));
+				m->openOutputFile(fileroot + tag + Groups[i] + ".rare.fasta", *(filehandles[Groups[i]+".rare"]));
+				m->openOutputFile(fileroot + tag + Groups[i] + ".abund.fasta", *(filehandles[Groups[i]+".abund"]));
 			}
 			
 			//open input file
 			ifstream in;
-			openInputFile(fastafile, in);
+			m->openInputFile(fastafile, in);
 	
 			while (!in.eof()) {
 				if (m->control_pressed) { break; }
 		
-				Sequence seq(in); gobble(in);
+				Sequence seq(in); m->gobble(in);
 				
 				if (seq.getName() != "") { 
 					map<string, string>::iterator itNames = nameMap.find(seq.getName());
@@ -911,7 +911,7 @@ int SplitAbundCommand::parseFasta(string tag) { //namefile
 						m->mothurOut(seq.getName() + " is not in your namesfile, ignoring."); m->mothurOutEndLine();
 					}else{
 						vector<string> names;
-						splitAtComma(itNames->second, names);  //parses bin into individual sequence names
+						m->splitAtComma(itNames->second, names);  //parses bin into individual sequence names
 				
 						string rareAbund;
 						if (rareNames.count(itNames->first) != 0) { //you are a rare name
@@ -924,7 +924,7 @@ int SplitAbundCommand::parseFasta(string tag) { //namefile
 				
 							string group = groupMap->getGroup(seq.getName());
 					
-							if (inUsersGroups(group, Groups)) { //only add if this is in a group we want
+							if (m->inUsersGroups(group, Groups)) { //only add if this is in a group we want
 								seq.printSequence(*(filehandles[group+rareAbund]));
 							}else if(group == "not found") {
 								m->mothurOut(seq.getName() + " is not in your groupfile. Ignoring."); m->mothurOutEndLine();
