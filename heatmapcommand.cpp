@@ -44,8 +44,8 @@ HeatMapCommand::HeatMapCommand(string option) {
 			}
 			
 			//make sure the user has already run the read.otu command
-			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "") && (globaldata->getSharedFile() == "")) {
-				 m->mothurOut("You must read a list, rabund, sabund, or a list and a group, or a shared before you can use the heatmap.bin command."); m->mothurOutEndLine(); abort = true; 
+			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "") && (globaldata->getSharedFile() == "") && (globaldata->getRelAbundFile() == "")) {
+				 m->mothurOut("You must read a list, rabund, sabund, or a list and a group, shared, or relabund file before you can use the heatmap.bin command."); m->mothurOutEndLine(); abort = true; 
 			}
 
 			//check for optional parameter and set defaults
@@ -152,13 +152,17 @@ int HeatMapCommand::execute(){
 			//you are using just a list file and have only one group
 			rabund = globaldata->rabund;
 			lastLabel = rabund->getLabel();
+		}else if (format == "relabund") {
+			//you have groups
+			lookupFloat = input->getSharedRAbundFloatVectors();
+			lastLabel = lookupFloat[0]->getLabel();
 		}
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 
-		if ((format != "list") && (format != "rabund") && (format != "sabund")) {	
+		if (format == "sharedfile") {	
 		
 			//as long as you are not at the end of the file or done wih the lines you want
 			while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
@@ -235,7 +239,7 @@ int HeatMapCommand::execute(){
 			//reset groups parameter
 			globaldata->Groups.clear();  
 			
-		}else{
+		}else if ((format == "list") || (format == "rabund") || (format == "sabund")) {
 	
 			while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				if (m->control_pressed) {   
@@ -304,6 +308,83 @@ int HeatMapCommand::execute(){
 				delete rabund; globaldata->rabund = NULL;
 			}
 		
+		}else {
+		
+			//as long as you are not at the end of the file or done wih the lines you want
+			while((lookupFloat[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+				if (m->control_pressed) {
+					for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  }
+					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } }
+					globaldata->Groups.clear(); 
+					delete read; delete heatmap; return 0;
+				}
+		
+				if(allLines == 1 || labels.count(lookupFloat[0]->getLabel()) == 1){			
+	
+					m->mothurOut(lookupFloat[0]->getLabel()); m->mothurOutEndLine();
+					outputNames.push_back(heatmap->getPic(lookupFloat));
+					
+					processedLabels.insert(lookupFloat[0]->getLabel());
+					userLabels.erase(lookupFloat[0]->getLabel());
+				}
+				
+				if ((m->anyLabelsToProcess(lookupFloat[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+					string saveLabel = lookupFloat[0]->getLabel();
+				
+					for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  }  
+					lookupFloat = input->getSharedRAbundFloatVectors(lastLabel);
+					m->mothurOut(lookupFloat[0]->getLabel()); m->mothurOutEndLine();
+					
+					outputNames.push_back(heatmap->getPic(lookupFloat));
+					
+					processedLabels.insert(lookupFloat[0]->getLabel());
+					userLabels.erase(lookupFloat[0]->getLabel());
+					
+					//restore real lastlabel to save below
+					lookupFloat[0]->setLabel(saveLabel);
+				}
+				
+				lastLabel = lookupFloat[0]->getLabel();
+				//prevent memory leak
+				for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i]; lookupFloat[i] = NULL; }
+							
+				//get next line to process
+				lookupFloat = input->getSharedRAbundFloatVectors();				
+			}
+			
+			
+			if (m->control_pressed) {
+				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } }
+				globaldata->Groups.clear(); 
+				delete read; delete heatmap; return 0;
+			}
+
+			//output error messages about any remaining user labels
+			set<string>::iterator it;
+			bool needToRun = false;
+			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+				m->mothurOut("Your file does not include the label " + *it); 
+				if (processedLabels.count(lastLabel) != 1) {
+					m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+					needToRun = true;
+				}else {
+					m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+				}
+			}
+		
+			//run last label if you need to
+			if (needToRun == true)  {
+				for (int i = 0; i < lookupFloat.size(); i++) { if (lookupFloat[i] != NULL) { delete lookupFloat[i]; } }  
+				lookupFloat = input->getSharedRAbundFloatVectors(lastLabel);
+				
+				m->mothurOut(lookupFloat[0]->getLabel()); m->mothurOutEndLine();
+				outputNames.push_back(heatmap->getPic(lookupFloat));
+				for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  }
+			}
+		
+			//reset groups parameter
+			globaldata->Groups.clear();  
+
 		}
 		
 		globaldata->rabund = NULL;
@@ -318,7 +399,7 @@ int HeatMapCommand::execute(){
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 		m->mothurOutEndLine();
-		
+	
 		delete read;
 		delete heatmap;
 
