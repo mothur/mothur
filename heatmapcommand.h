@@ -35,6 +35,7 @@ private:
 	SharedListVector* SharedList;
 	RAbundVector* rabund;
 	vector<SharedRAbundVector*> lookup;
+	vector<SharedRAbundFloatVector*> lookupFloat;
 	HeatMap* heatmap;
 
 	bool abort, allLines;

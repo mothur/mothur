@@ -11,6 +11,7 @@
 
 #include "rabundvector.hpp"
 #include "sharedrabundvector.h"
+#include "sharedrabundfloatvector.h"
 #include "datavector.hpp"
 #include "globaldata.hpp"
 
@@ -21,8 +22,20 @@ struct binCount {
 		binCount(int i, int j) : bin(i), abund(j) {}
 };
 /***********************************************************************/
+struct binCountFloat {
+		int bin;
+		float abund;
+		binCountFloat(int i, float j) : bin(i), abund(j) {}
+};
+
+/***********************************************************************/
 //sorts highest abund to lowest
 inline bool comparebinCounts(binCount left, binCount right){
+	return (left.abund > right.abund);	
+}
+/***********************************************************************/
+//sorts highest abund to lowest
+inline bool comparebinFloatCounts(binCountFloat left, binCountFloat right){
 	return (left.abund > right.abund);	
 }
 /***********************************************************************/
@@ -35,9 +48,12 @@ class HeatMap {
 	
 		string getPic(RAbundVector*);
 		string getPic(vector<SharedRAbundVector*>);
+		string getPic(vector<SharedRAbundFloatVector*>);
 
 	private:
 		int sortSharedVectors(vector<SharedRAbundVector*>& );
+		int sortSharedVectors(vector<SharedRAbundFloatVector*>& );
+		int sortRabund(RAbundVector*&);
 		void printLegend(int, float);
 
 		GlobalData* globaldata;
@@ -49,6 +65,10 @@ class HeatMap {
 		map<int, int> orderTopGroup(vector<SharedRAbundVector*>&);
 		map<int, int> orderTopOtu(vector<SharedRAbundVector*>&);
 		map<int, int> orderShared(vector<SharedRAbundVector*>&);
+		map<int, int> orderTopGroup(vector<SharedRAbundFloatVector*>&);
+		map<int, int> orderTopOtu(vector<SharedRAbundFloatVector*>&);
+		map<int, int> orderShared(vector<SharedRAbundFloatVector*>&);
+
 			
 };
 

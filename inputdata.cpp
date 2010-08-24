@@ -503,7 +503,70 @@ vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(string label){
 	}
 }
 
-
+/***********************************************************************/
+//this is used when you don't need the order vector
+vector<SharedRAbundFloatVector*> InputData::getSharedRAbundFloatVectors(){
+	try {
+		if(fileHandle){
+			if (format == "relabund")  {
+				SharedRAbundFloatVector* SharedRelAbund = new SharedRAbundFloatVector(fileHandle);
+				if (SharedRelAbund != NULL) {
+					return SharedRelAbund->getSharedRAbundFloatVectors();
+				}
+			}
+			m->gobble(fileHandle);
+		}
+				
+		//this is created to signal to calling function that the input file is at eof
+		vector<SharedRAbundFloatVector*> null;  null.push_back(NULL);
+		return null;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "InputData", "getSharedRAbundFloatVectors");
+		exit(1);
+	}
+}
+/***********************************************************************/
+vector<SharedRAbundFloatVector*> InputData::getSharedRAbundFloatVectors(string label){
+	try {
+		ifstream in;
+		string  thisLabel;
+		
+		m->openInputFile(filename, in);
+		
+		if(in){
+			if (format == "sharedfile")  {
+				while (in.eof() != true) {
+					
+					SharedRAbundFloatVector* SharedRelAbund = new SharedRAbundFloatVector(in);
+					if (SharedRelAbund != NULL) {
+						thisLabel = SharedRelAbund->getLabel();
+						//if you are at the last label
+						if (thisLabel == label) {  in.close(); return SharedRelAbund->getSharedRAbundFloatVectors();  }
+						else {
+							//so you don't loose this memory
+							vector<SharedRAbundFloatVector*> lookup = SharedRelAbund->getSharedRAbundFloatVectors(); 
+							for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+							delete SharedRelAbund;
+						}
+					}else{  break;  }
+					m->gobble(in);
+				}
+			}
+		}
+				
+		//this is created to signal to calling function that the input file is at eof
+		vector<SharedRAbundFloatVector*> null;  null.push_back(NULL);
+		in.close();
+		return null;
+	
+	}
+	catch(exception& e) {
+		m->errorOut(e, "InputData", "getSharedRAbundFloatVectors");
+		exit(1);
+	}
+}
 /***********************************************************************/
 
 SAbundVector* InputData::getSAbundVector(){
