@@ -79,7 +79,7 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
@@ -94,12 +94,12 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 			else { 
 				 if (calc == "default")  {  calc = "sharedsobs-sharedchao-sharedace-jabund-sorabund-jclass-sorclass-jest-sorest-thetayc-thetan";  }
 			}
-			splitAtDash(calc, Estimators);
+			m->splitAtDash(calc, Estimators);
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
 			else { 
-				splitAtDash(groups, Groups);
+				m->splitAtDash(groups, Groups);
 			}
 			globaldata->Groups = Groups;
 			
@@ -108,12 +108,12 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 			convert(temp, freq); 
 			
 			temp = validParameter.validFile(parameters, "all", false);				if (temp == "not found") { temp = "false"; }
-			all = isTrue(temp);
+			all = m->isTrue(temp);
 						
 			if (abort == false) {
 				
-				if (outputDir == "") { outputDir += hasPath(globaldata->inputFileName); }
-				string fileNameRoot = outputDir + getRootName(getSimpleName(globaldata->inputFileName));
+				if (outputDir == "") { outputDir += m->hasPath(globaldata->inputFileName); }
+				string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName));
 				format = globaldata->getFormat();
 				int i;
 				
@@ -283,7 +283,7 @@ int CollectSharedCommand::execute(){
 			}
 			
 			//you have a label the user want that is smaller than this label and the last label has not already been processed
-			if ((anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = order->getLabel();
 				
 				delete order;

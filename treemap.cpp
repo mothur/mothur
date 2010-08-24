@@ -13,7 +13,7 @@
 
  TreeMap::TreeMap(string filename) {
 	groupFileName = filename;
-	openInputFile(filename, fileHandle);
+	m->openInputFile(filename, fileHandle);
 }
 
 /************************************************************/
@@ -39,7 +39,7 @@ void TreeMap::readMap() {
 				seqsPerGroup[seqGroup]++;
 			}
 
-			gobble(fileHandle);
+			m->gobble(fileHandle);
 		}
 		fileHandle.close();
 }

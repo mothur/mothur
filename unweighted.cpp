@@ -53,7 +53,7 @@ EstOutput Unweighted::getValues(Tree* t) {
 	
 					copyIpcount = t->tree[i].pcount;
 					for (it = copyIpcount.begin(); it != copyIpcount.end();) {
-						if (inUsersGroups(it->first, groups) != true) {	
+						if (m->inUsersGroups(it->first, groups) != true) {	
 							copyIpcount.erase(it++);	
 						}else { it++;  }
 					}
@@ -107,7 +107,7 @@ EstOutput Unweighted::getValues(Tree* t) {
 				
 				copyIpcount = t->tree[i].pcount;
 				for (it = copyIpcount.begin(); it != copyIpcount.end();) {
-					if (inUsersGroups(it->first, groups) != true) {	
+					if (m->inUsersGroups(it->first, groups) != true) {	
 						copyIpcount.erase(it++);	
 					}else {  it++;  }
 				}
@@ -197,7 +197,7 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 					//This section adds in all lengths that are non leaf
 					copyIpcount = copyTree->tree[i].pcount;
 					for (it = copyIpcount.begin(); it != copyIpcount.end();) {
-						if (inUsersGroups(it->first, groups) != true) {	
+						if (m->inUsersGroups(it->first, groups) != true) {	
 							copyIpcount.erase(it++);	
 						}else { it++;  }
 					}
@@ -257,7 +257,7 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 			
 				copyIpcount = copyTree->tree[i].pcount;
 				for (it = copyIpcount.begin(); it != copyIpcount.end();) {
-						if (inUsersGroups(it->first, groups) != true) {	
+						if (m->inUsersGroups(it->first, groups) != true) {	
 							copyIpcount.erase(it++);	
 						}else { it++;  }
 				}

@@ -78,7 +78,7 @@ void Tree::addNamesToCounts() {
 			if (itNames == globaldata->names.end()) { m->mothurOut(name + " is not in your name file, please correct."); m->mothurOutEndLine(); exit(1);  }
 			else {
 				vector<string> dupNames;
-				splitAtComma(globaldata->names[name], dupNames);
+				m->splitAtComma(globaldata->names[name], dupNames);
 				
 				map<string, int>::iterator itCounts;
 				int maxPars = 1;
@@ -292,14 +292,14 @@ map<string, int> Tree::mergeUserGroups(int i, vector<string> g) {
 		
 		//loop through nodes groups removing the ones the user doesn't want
 		for(it=tree[lc].pGroups.begin();it!=tree[lc].pGroups.end();){
-				if (inUsersGroups(it->first, g) != true) {
+				if (m->inUsersGroups(it->first, g) != true) {
 					tree[lc].pGroups.erase(it++);
 				}else { it++; }
 		}
 
 		//loop through nodes groups removing the ones the user doesn't want
 		for(it=tree[rc].pGroups.begin();it!=tree[rc].pGroups.end();){
-				if (inUsersGroups(it->first, g) != true) {
+				if (m->inUsersGroups(it->first, g) != true) {
 					tree[rc].pGroups.erase(it++);
 				}else { it++; }
 		}
@@ -381,8 +381,8 @@ void Tree::randomLabels(vector<string> g) {
 			//if either of the leaf nodes you are about to switch are not in the users groups then you don't want to switch them.
 			bool treez, treei;
 		
-			treez = inUsersGroups(tree[z].getGroup(), g);
-			treei = inUsersGroups(tree[i].getGroup(), g);
+			treez = m->inUsersGroups(tree[z].getGroup(), g);
+			treei = m->inUsersGroups(tree[i].getGroup(), g);
 			
 			if ((treez == true) && (treei == true)) {
 				//switches node i and node z's info.
@@ -542,10 +542,10 @@ void Tree::printForBoot(ostream& out) {
 void Tree::createNewickFile(string f) {
 	try {
 		int root = findRoot();
-		//filename = getRootName(globaldata->getTreeFile()) + "newick";
+		//filename = m->getRootName(globaldata->getTreeFile()) + "newick";
 		filename = f;
 
-		openOutputFile(filename, out);
+		m->openOutputFile(filename, out);
 		
 		printBranch(root, out, "branch");
 		
@@ -643,7 +643,7 @@ void Tree::parseTreeFile() {
 	try {
 		string filename = globaldata->getTreeFile();
 		ifstream filehandle;
-		openInputFile(filename, filehandle);
+		m->openInputFile(filename, filehandle);
 		int c, comment;
 		comment = 0;
 		int done = 1;

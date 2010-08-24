@@ -68,7 +68,7 @@ int ConcensusCommand::execute(){
 		
 		//open file for pairing not included in the tree
 		notIncluded = filename + ".cons.pairs";
-		openOutputFile(notIncluded, out2);
+		m->openOutputFile(notIncluded, out2);
 		
 		consensusTree = new Tree();
 		
@@ -151,7 +151,7 @@ int ConcensusCommand::execute(){
 		}
 		
 		outputFile = filename + ".cons.tre";
-		openOutputFile(outputFile, out);
+		m->openOutputFile(outputFile, out);
 		
 		consensusTree->printForBoot(out);
 		

@@ -31,7 +31,7 @@ int ReadCluster::read(NameAssignment* nameMap){
 		
 		if (m->control_pressed) { return 0; }
 		
-		if (sortWanted) {  OutPutFile = sortFile(distFile, outputDir);  }
+		if (sortWanted) {  OutPutFile = m->sortFile(distFile, outputDir);  }
 		else {  OutPutFile = distFile;   } //for use by clusters splitMatrix to convert a phylip matrix to column
 		
 		return 0;
@@ -54,8 +54,8 @@ int ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
 		ofstream out;
 		string tempFile = distFile + ".column.temp";
 		
-		openInputFile(distFile, in);  gobble(in);
-		openOutputFile(tempFile, out);
+		m->openInputFile(distFile, in);  m->gobble(in);
+		m->openOutputFile(tempFile, out);
 		
 		float distance;
 		int square, nseqs;
@@ -190,9 +190,9 @@ int ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
 		ifstream in2;
 		ofstream out2;
 		
-		string outputFile = getRootName(distFile) + "column.dist";
-		openInputFile(tempFile, in2);
-		openOutputFile(outputFile, out2);
+		string outputFile = m->getRootName(distFile) + "column.dist";
+		m->openInputFile(tempFile, in2);
+		m->openOutputFile(outputFile, out2);
 		
 		int first, second;
 		float dist;
@@ -202,7 +202,7 @@ int ReadCluster::convertPhylip2Column(NameAssignment* nameMap){
 			
 			in2 >> first >> second >> dist;
 			out2 << rowToName[first] << '\t' << rowToName[second] << '\t' << dist << endl;
-			gobble(in2);
+			m->gobble(in2);
 		}
 		in2.close();
 		out2.close();

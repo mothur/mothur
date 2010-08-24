@@ -40,7 +40,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 		if (m->control_pressed) { return 0; }
 
 		ifstream fileHandle;
-		openInputFile(blastfile, fileHandle);
+		m->openInputFile(blastfile, fileHandle);
 		
 		string firstName, secondName, eScore, currentRow;
 		string repeatName = "";
@@ -56,11 +56,11 @@ int ReadBlast::read(NameAssignment* nameMap) {
 		if (!hclusterWanted) {
 			matrix = new SparseMatrix();
 		}else{
-			overlapFile = getRootName(blastfile) + "overlap.dist";
-			distFile = getRootName(blastfile) + "hclusterDists.dist";
+			overlapFile = m->getRootName(blastfile) + "overlap.dist";
+			distFile = m->getRootName(blastfile) + "hclusterDists.dist";
 			
-			openOutputFile(overlapFile, outOverlap);
-			openOutputFile(distFile, outDist);
+			m->openOutputFile(overlapFile, outOverlap);
+			m->openOutputFile(distFile, outDist);
 		}
 		
 		if (m->control_pressed) { 
@@ -79,7 +79,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 		if (!fileHandle.eof()) {
 			//read in line from file
 			fileHandle >> firstName >> secondName >> percentId >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
-			gobble(fileHandle);
+			m->gobble(fileHandle);
 			
 			currentRow = firstName;
 			lengthThisSeq = numBases;
@@ -125,7 +125,7 @@ int ReadBlast::read(NameAssignment* nameMap) {
 			//read in line from file
 			fileHandle >> firstName >> secondName >> percentId >> numBases >> mismatch >> gap >> startQuery >> endQuery >> startRef >> endRef >> eScore >> score;
 			//cout << firstName << '\t' << secondName << '\t' << percentId << '\t' << numBases << '\t' << mismatch << '\t' << gap << '\t' << startQuery << '\t' << endQuery << '\t' << startRef << '\t' << endRef << '\t' << eScore << '\t' << score << endl;	
-			gobble(fileHandle);
+			m->gobble(fileHandle);
 			
 			string temp = firstName + secondName; //to check if this file has repeat lines, ie. is this a blast instead of a blscreen file
 			
@@ -311,16 +311,16 @@ int ReadBlast::readNames(NameAssignment* nameMap) {
 		int num = 1;
 		
 		ifstream in;
-		openInputFile(blastfile, in);
+		m->openInputFile(blastfile, in);
 		
 		//ofstream outName;
-		//openOutputFile((blastfile + ".tempOutNames"), outName);
+		//m->openOutputFile((blastfile + ".tempOutNames"), outName);
 		
 		//read first line
 		in >> prevName;
 	
 		for (int i = 0; i < 11; i++) {  in >> hold;  }
-		gobble(in);
+		m->gobble(in);
 				
 		//save name in nameMap
 		nameMap->push_back(prevName);
@@ -332,7 +332,7 @@ int ReadBlast::readNames(NameAssignment* nameMap) {
 			in >> name;
 	
 			for (int i = 0; i < 11; i++) {  in >> hold;  }
-			gobble(in);
+			m->gobble(in);
 			
 			//is this a new name?
 			if (name != prevName) {
@@ -345,9 +345,9 @@ int ReadBlast::readNames(NameAssignment* nameMap) {
 		in.close();
 		
 		//write out names file
-		//string outNames = getRootName(blastfile) + "names";
+		//string outNames = m->getRootName(blastfile) + "names";
 		//ofstream out;
-		//openOutputFile(outNames, out);
+		//m->openOutputFile(outNames, out);
 		//nameMap->print(out);
 		//out.close();
 		

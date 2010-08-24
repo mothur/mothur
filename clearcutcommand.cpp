@@ -42,7 +42,7 @@ ClearcutCommand::ClearcutCommand(string option)  {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -50,7 +50,7 @@ ClearcutCommand::ClearcutCommand(string option)  {
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
@@ -72,53 +72,53 @@ ClearcutCommand::ClearcutCommand(string option)  {
 
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = hasPath(inputFile);	}
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(inputFile);	}
 			
 			string temp;
 			temp = validParameter.validFile(parameters, "version", false);		if (temp == "not found"){	temp = "F";			}
-			version = isTrue(temp);
+			version = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "verbose", false);		if (temp == "not found"){	temp = "F";			}
-			verbose = isTrue(temp); 
+			verbose = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "quiet", false);		if (temp == "not found"){	temp = "F";			}
-			quiet = isTrue(temp); 
+			quiet = m->isTrue(temp); 
 			
 			seed = validParameter.validFile(parameters, "seed", false);			if (seed == "not found"){	seed = "*";			}
 			
 			temp = validParameter.validFile(parameters, "norandom", false);		if (temp == "not found"){	temp = "F";			}
-			norandom = isTrue(temp); 
+			norandom = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "shuffle", false);		if (temp == "not found"){	temp = "F";			}
-			shuffle = isTrue(temp); 
+			shuffle = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "neighbor", false);		if (temp == "not found"){	temp = "T";			}
-			neighbor = isTrue(temp); 
+			neighbor = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "DNA", false);			if (temp == "not found"){	temp = "F";			}
-			DNA = isTrue(temp);
+			DNA = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "protein", false);		if (temp == "not found"){	temp = "F";			}
-			protein = isTrue(temp);
+			protein = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "jukes", false);		if (temp == "not found"){	temp = "F";			}
-			jukes = isTrue(temp);
+			jukes = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "kimura", false);		if (temp == "not found"){	temp = "F";			}
-			kimura = isTrue(temp);
+			kimura = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "stdout", false);		if (temp == "not found"){	temp = "F";			}
-			stdoutWanted = isTrue(temp); 
+			stdoutWanted = m->isTrue(temp); 
 			
 			matrixout = validParameter.validFile(parameters, "matrixout", false);	if (matrixout == "not found"){	matrixout = "";		}
 			
 			ntrees = validParameter.validFile(parameters, "ntrees", false);		if (ntrees == "not found"){	ntrees = "1";		}
 			
 			temp = validParameter.validFile(parameters, "expblen", false);		if (temp == "not found"){	temp = "F";			}
-			expblen = isTrue(temp);
+			expblen = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "expdist", false);		if (temp == "not found"){	temp = "F";			}
-			expdist = isTrue(temp);
+			expdist = m->isTrue(temp);
 			
 			if ((fastafile != "") && ((!DNA) && (!protein))) { m->mothurOut("You must specify the type of sequences you are using: DNA or protein"); m->mothurOutEndLine(); abort=true; }
 		}
@@ -175,7 +175,7 @@ int ClearcutCommand::execute() {
 		if (abort == true) { return 0; }
 				
 		//prepare filename
-		string outputName = outputDir + getRootName(getSimpleName(inputFile)) + "tre";
+		string outputName = outputDir + m->getRootName(m->getSimpleName(inputFile)) + "tre";
 		
 		//get location of clearcut
 		GlobalData* globaldata = GlobalData::getInstance();

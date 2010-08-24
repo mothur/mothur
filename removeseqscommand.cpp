@@ -47,7 +47,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 				it = parameters.find("alignreport");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["alignreport"] = inputDir + it->second;		}
 				}
@@ -55,7 +55,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -63,7 +63,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 				it = parameters.find("accnos");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["accnos"] = inputDir + it->second;		}
 				}
@@ -71,7 +71,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -79,7 +79,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -87,7 +87,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -95,7 +95,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 				it = parameters.find("taxonomy");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
@@ -133,8 +133,12 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 
 			
 			string usedDups = "true";
-			string temp = validParameter.validFile(parameters, "dups", false);	if (temp == "not found") { temp = "false"; usedDups = ""; }
-			dups = isTrue(temp);
+			string temp = validParameter.validFile(parameters, "dups", false);	
+			if (temp == "not found") { 
+				if (namefile != "") {  temp = "true";					}
+				else				{  temp = "false"; usedDups = "";	}
+			}
+			dups = m->isTrue(temp);
 			
 			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, group, taxonomy, alignreport or list."); m->mothurOutEndLine(); abort = true; }
 			
@@ -154,7 +158,7 @@ void RemoveSeqsCommand::help(){
 		m->mothurOut("The remove.seqs command reads an .accnos file and at least one of the following file types: fasta, name, group, list, taxonomy or alignreport file.\n");
 		m->mothurOut("It outputs a file containing the sequences NOT in the .accnos file.\n");
 		m->mothurOut("The remove.seqs command parameters are accnos, fasta, name, group, list, taxonomy, alignreport and dups.  You must provide accnos and at least one of the file parameters.\n");
-		m->mothurOut("The dups parameter allows you to remove the entire line from a name file if you remove any name from the line. default=false. \n");
+		m->mothurOut("The dups parameter allows you to remove the entire line from a name file if you remove any name from the line. default=true. \n");
 		m->mothurOut("The remove.seqs command should be in the following format: remove.seqs(accnos=yourAccnos, fasta=yourFasta).\n");
 		m->mothurOut("Example remove.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
@@ -206,13 +210,13 @@ int RemoveSeqsCommand::execute(){
 //**********************************************************************************************************************
 int RemoveSeqsCommand::readFasta(){
 	try {
-		if (outputDir == "") {  outputDir += hasPath(fastafile);  }
-		string outputFileName = outputDir + getRootName(getSimpleName(fastafile)) + "pick" + getExtension(fastafile);
+		if (outputDir == "") {  outputDir += m->hasPath(fastafile);  }
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "pick" + m->getExtension(fastafile);
 		ofstream out;
-		openOutputFile(outputFileName, out);
+		m->openOutputFile(outputFileName, out);
 		
 		ifstream in;
-		openInputFile(fastafile, in);
+		m->openInputFile(fastafile, in);
 		string name;
 		
 		bool wroteSomething = false;
@@ -231,7 +235,7 @@ int RemoveSeqsCommand::readFasta(){
 					currSeq.printSequence(out);
 				}
 			}
-			gobble(in);
+			m->gobble(in);
 		}
 		in.close();	
 		out.close();
@@ -250,13 +254,13 @@ int RemoveSeqsCommand::readFasta(){
 //**********************************************************************************************************************
 int RemoveSeqsCommand::readList(){
 	try {
-		if (outputDir == "") {  outputDir += hasPath(listfile);  }
-		string outputFileName = outputDir + getRootName(getSimpleName(listfile)) + "pick" +  getExtension(listfile);
+		if (outputDir == "") {  outputDir += m->hasPath(listfile);  }
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + "pick" +  m->getExtension(listfile);
 		ofstream out;
-		openOutputFile(outputFileName, out);
+		m->openOutputFile(outputFileName, out);
 		
 		ifstream in;
-		openInputFile(listfile, in);
+		m->openInputFile(listfile, in);
 		
 		bool wroteSomething = false;
 		
@@ -300,7 +304,7 @@ int RemoveSeqsCommand::readList(){
 				newList.print(out);
 			}
 			
-			gobble(in);
+			m->gobble(in);
 		}
 		in.close();	
 		out.close();
@@ -319,14 +323,14 @@ int RemoveSeqsCommand::readList(){
 //**********************************************************************************************************************
 int RemoveSeqsCommand::readName(){
 	try {
-		if (outputDir == "") {  outputDir += hasPath(namefile);  }
-		string outputFileName = outputDir + getRootName(getSimpleName(namefile)) + "pick" + getExtension(namefile);
+		if (outputDir == "") {  outputDir += m->hasPath(namefile);  }
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(namefile)) + "pick" + m->getExtension(namefile);
 
 		ofstream out;
-		openOutputFile(outputFileName, out);
+		m->openOutputFile(outputFileName, out);
 
 		ifstream in;
-		openInputFile(namefile, in);
+		m->openInputFile(namefile, in);
 		string name, firstCol, secondCol;
 		
 		bool wroteSomething = false;
@@ -343,7 +347,6 @@ int RemoveSeqsCommand::readName(){
 				name = secondCol.substr(0,secondCol.find_first_of(','));
 				secondCol = secondCol.substr(secondCol.find_first_of(',')+1, secondCol.length());
 				parsedNames.push_back(name);
-
 			}
 			
 			//get name after last ,
@@ -386,7 +389,7 @@ int RemoveSeqsCommand::readName(){
 					}
 				}
 			}
-			gobble(in);
+			m->gobble(in);
 		}
 		in.close();
 		out.close();
@@ -405,13 +408,13 @@ int RemoveSeqsCommand::readName(){
 //**********************************************************************************************************************
 int RemoveSeqsCommand::readGroup(){
 	try {
-		if (outputDir == "") {  outputDir += hasPath(groupfile);  }
-		string outputFileName = outputDir + getRootName(getSimpleName(groupfile)) + "pick" + getExtension(groupfile);
+		if (outputDir == "") {  outputDir += m->hasPath(groupfile);  }
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(groupfile)) + "pick" + m->getExtension(groupfile);
 		ofstream out;
-		openOutputFile(outputFileName, out);
+		m->openOutputFile(outputFileName, out);
 
 		ifstream in;
-		openInputFile(groupfile, in);
+		m->openInputFile(groupfile, in);
 		string name, group;
 		
 		bool wroteSomething = false;
@@ -428,7 +431,7 @@ int RemoveSeqsCommand::readGroup(){
 				out << name << '\t' << group << endl;
 			}
 					
-			gobble(in);
+			m->gobble(in);
 		}
 		in.close();
 		out.close();
@@ -446,13 +449,13 @@ int RemoveSeqsCommand::readGroup(){
 //**********************************************************************************************************************
 int RemoveSeqsCommand::readTax(){
 	try {
-		if (outputDir == "") {  outputDir += hasPath(taxfile);  }
-		string outputFileName = outputDir + getRootName(getSimpleName(taxfile)) + "pick" + getExtension(taxfile);
+		if (outputDir == "") {  outputDir += m->hasPath(taxfile);  }
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(taxfile)) + "pick" + m->getExtension(taxfile);
 		ofstream out;
-		openOutputFile(outputFileName, out);
+		m->openOutputFile(outputFileName, out);
 
 		ifstream in;
-		openInputFile(taxfile, in);
+		m->openInputFile(taxfile, in);
 		string name, tax;
 		
 		bool wroteSomething = false;
@@ -469,7 +472,7 @@ int RemoveSeqsCommand::readTax(){
 				out << name << '\t' << tax << endl;
 			}
 					
-			gobble(in);
+			m->gobble(in);
 		}
 		in.close();
 		out.close();
@@ -488,13 +491,13 @@ int RemoveSeqsCommand::readTax(){
 //alignreport file has a column header line then all other lines contain 16 columns.  we just want the first column since that contains the name
 int RemoveSeqsCommand::readAlign(){
 	try {
-		if (outputDir == "") {  outputDir += hasPath(alignfile);  }
-		string outputFileName = outputDir + getRootName(getSimpleName(alignfile)) + "pick.align.report";
+		if (outputDir == "") {  outputDir += m->hasPath(alignfile);  }
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(alignfile)) + "pick.align.report";
 		ofstream out;
-		openOutputFile(outputFileName, out);
+		m->openOutputFile(outputFileName, out);
 
 		ifstream in;
-		openInputFile(alignfile, in);
+		m->openInputFile(alignfile, in);
 		string name, junk;
 		
 		bool wroteSomething = false;
@@ -533,7 +536,7 @@ int RemoveSeqsCommand::readAlign(){
 				}
 			}
 			
-			gobble(in);
+			m->gobble(in);
 		}
 		in.close();
 		out.close();
@@ -554,7 +557,7 @@ void RemoveSeqsCommand::readAccnos(){
 	try {
 		
 		ifstream in;
-		openInputFile(accnosfile, in);
+		m->openInputFile(accnosfile, in);
 		string name;
 		
 		while(!in.eof()){
@@ -562,7 +565,7 @@ void RemoveSeqsCommand::readAccnos(){
 						
 			names.insert(name);
 			
-			gobble(in);
+			m->gobble(in);
 		}
 		in.close();		
 

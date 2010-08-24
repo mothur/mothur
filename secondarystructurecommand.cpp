@@ -44,7 +44,7 @@ AlignCheckCommand::AlignCheckCommand(string option)  {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -52,7 +52,7 @@ AlignCheckCommand::AlignCheckCommand(string option)  {
 				it = parameters.find("map");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["map"] = inputDir + it->second;		}
 				}
@@ -70,7 +70,7 @@ AlignCheckCommand::AlignCheckCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(fastafile); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(fastafile); //if user entered a file with a path then preserve it	
 			}
 
 		}
@@ -109,11 +109,11 @@ int AlignCheckCommand::execute(){
 		readMap();
 		
 		ifstream in;
-		openInputFile(fastafile, in);
+		m->openInputFile(fastafile, in);
 		
 		ofstream out;
-		string outfile = outputDir + getRootName(getSimpleName(fastafile)) + "align.check";
-		openOutputFile(outfile, out);
+		string outfile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "align.check";
+		m->openOutputFile(outfile, out);
 		
 		out << "name" << '\t' << "pound" << '\t' << "dash" << '\t' << "plus" << '\t' << "equal" << '\t';
 		out << "loop" << '\t' << "tilde" << '\t' << "total" << endl;
@@ -122,7 +122,7 @@ int AlignCheckCommand::execute(){
 		while(!in.eof()){
 			if (m->control_pressed) { in.close(); out.close(); remove(outfile.c_str()); return 0; }
 			
-			Sequence seq(in);  gobble(in);
+			Sequence seq(in);  m->gobble(in);
 			if (seq.getName() != "") {
 				statData data = getStats(seq.getAligned());
 				
@@ -158,13 +158,13 @@ void AlignCheckCommand::readMap(){
 		structMap.resize(1, 0);
 		ifstream in;
 		
-		openInputFile(mapfile, in);
+		m->openInputFile(mapfile, in);
 		
 		while(!in.eof()){
 			int position;
 			in >> position;
 			structMap.push_back(position);	
-			gobble(in);
+			m->gobble(in);
 		}
 		in.close();
 

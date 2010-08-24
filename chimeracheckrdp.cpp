@@ -283,7 +283,7 @@ void ChimeraCheckRDP::readName(string namefile) {
 		delete buffer;
 		
 		while(!iss.eof()) {
-			iss >> name; gobble(iss);
+			iss >> name; m->gobble(iss);
 			names[name] = name;
 		}
 	
@@ -292,10 +292,10 @@ void ChimeraCheckRDP::readName(string namefile) {
 	#else	
 	
 		ifstream in;
-		openInputFile(namefile, in);
+		m->openInputFile(namefile, in);
 				
 		while (!in.eof()) {
-			in >> name; gobble(in);
+			in >> name; m->gobble(in);
 			names[name] = name;
 		}
 		in.close();
@@ -432,7 +432,7 @@ void ChimeraCheckRDP::makeSVGpic(vector<sim> info) {
 		
 		string file = outputDir + querySeq->getName() + ".chimeracheck.svg";
 		ofstream outsvg;
-		openOutputFile(file, outsvg);
+		m->openOutputFile(file, outsvg);
 		
 		int width = (info.size()*5) + 150;
 		

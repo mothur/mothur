@@ -21,12 +21,12 @@ SharedCommand::SharedCommand(string o) : outputDir(o) {
 		
 		//getting output filename
 		filename = globaldata->inputFileName;
-		if (outputDir == "") { outputDir += hasPath(filename); }
+		if (outputDir == "") { outputDir += m->hasPath(filename); }
 		
-		filename = outputDir + getRootName(getSimpleName(filename));
+		filename = outputDir + m->getRootName(m->getSimpleName(filename));
 		filename = filename + "shared";
 		
-		openOutputFile(filename, out);
+		m->openOutputFile(filename, out);
 		pickedGroups = false;
 		
 		groupMap = globaldata->gGroupmap;
@@ -48,7 +48,7 @@ SharedCommand::SharedCommand(string o) : outputDir(o) {
 		}
 		
 		//set fileroot
-		fileroot = outputDir + getRootName(getSimpleName(globaldata->getListFile()));
+		fileroot = outputDir + m->getRootName(m->getSimpleName(globaldata->getListFile()));
 		
 		//clears file before we start to write to it below
 		for (int i=0; i<groups.size(); i++) {
@@ -119,9 +119,9 @@ int SharedCommand::execute(){
 				groups += globaldata->Groups[i] + ".";
 			}
 		
-			string newGroupFile = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + groups + "groups";
+			string newGroupFile = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + groups + "groups";
 			ofstream outGroups;
-			openOutputFile(newGroupFile, outGroups);
+			m->openOutputFile(newGroupFile, outGroups);
 		
 			vector<string> names = groupMap->getNamesSeqs();
 			string groupName;
@@ -172,7 +172,7 @@ int SharedCommand::execute(){
 					userLabels.erase(SharedList->getLabel());
 			}
 			
-			if ((anyLabelsToProcess(SharedList->getLabel(), userLabels, errorOff) == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(SharedList->getLabel(), userLabels, errorOff) == true) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = SharedList->getLabel();
 					
 					delete SharedList;
@@ -292,7 +292,7 @@ void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup) {
 				thislookup[i]->print(out);
 				
 				RAbundVector rav = thislookup[i]->getRAbundVector();
-				openOutputFileAppend(fileroot + thislookup[i]->getGroup() + ".rabund", *(filehandles[thislookup[i]->getGroup()]));
+				m->openOutputFileAppend(fileroot + thislookup[i]->getGroup() + ".rabund", *(filehandles[thislookup[i]->getGroup()]));
 				rav.print(*(filehandles[thislookup[i]->getGroup()]));
 				(*(filehandles[thislookup[i]->getGroup()])).close();
 			}
@@ -315,7 +315,7 @@ void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup) {
 					(myIt->second)->print(out);
 				
 					RAbundVector rav = (myIt->second)->getRAbundVector();
-					openOutputFileAppend(fileroot + (myIt->second)->getGroup() + ".rabund", *(filehandles[(myIt->second)->getGroup()]));
+					m->openOutputFileAppend(fileroot + (myIt->second)->getGroup() + ".rabund", *(filehandles[(myIt->second)->getGroup()]));
 					rav.print(*(filehandles[(myIt->second)->getGroup()]));
 					(*(filehandles[(myIt->second)->getGroup()])).close();
 				}else{
@@ -377,14 +377,14 @@ int SharedCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
 int SharedCommand::createMisMatchFile() {
 	try {
 		ofstream outMisMatch;
-		string outputMisMatchName = outputDir + getRootName(getSimpleName(globaldata->inputFileName));
+		string outputMisMatchName = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName));
 		
 		//you have sequences in your list file that are not in your group file
 		if (SharedList->getNumSeqs() > groupMap->getNumSeqs()) { 
 			outputMisMatchName += "missing.group";
 			m->mothurOut("For a list of names that are in your list file and not in your group file, please refer to " + outputMisMatchName + "."); m->mothurOutEndLine();
 			
-			openOutputFile(outputMisMatchName, outMisMatch);
+			m->openOutputFile(outputMisMatchName, outMisMatch);
 			
 			map<string, string> listNames;
 			map<string, string>::iterator itList;
@@ -458,7 +458,7 @@ int SharedCommand::createMisMatchFile() {
 		
 			map<string, string>::iterator itMatch;
 			
-			openOutputFile(outputMisMatchName, outMisMatch);
+			m->openOutputFile(outputMisMatchName, outMisMatch);
 			
 			//loop through names in seqNames and if they aren't in namesIn list output them
 			for (int i = 0; i < seqNames.size(); i++) {
@@ -496,11 +496,11 @@ int SharedCommand::readOrderFile() {
 		order.clear();
 		
 		ifstream in;
-		openInputFile(globaldata->getOrderGroupFile(), in);
+		m->openInputFile(globaldata->getOrderGroupFile(), in);
 		string thisGroup;
 		
 		while(!in.eof()){
-			in >> thisGroup; gobble(in);
+			in >> thisGroup; m->gobble(in);
 						
 			order.push_back(thisGroup);
 			

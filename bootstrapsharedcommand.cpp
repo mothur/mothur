@@ -52,7 +52,7 @@ BootSharedCommand::BootSharedCommand(string option) {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
 			}
 
 			
@@ -67,7 +67,7 @@ BootSharedCommand::BootSharedCommand(string option) {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
@@ -80,7 +80,7 @@ BootSharedCommand::BootSharedCommand(string option) {
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
 			else { 
-				splitAtDash(groups, Groups);
+				m->splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 			}
 				
@@ -89,7 +89,7 @@ BootSharedCommand::BootSharedCommand(string option) {
 			else { 
 				 if (calc == "default")  {  calc = "jclass-thetayc";  }
 			}
-			splitAtDash(calc, Estimators);
+			m->splitAtDash(calc, Estimators);
 
 			string temp;
 			temp = validParameter.validFile(parameters, "iters", false);  if (temp == "not found") { temp = "1000"; }
@@ -232,7 +232,7 @@ int BootSharedCommand::execute(){
 			}
 			
 			//you have a label the user want that is smaller than this label and the last label has not already been processed
-			if ((anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = order->getLabel();
 				
 				delete order;
@@ -408,8 +408,8 @@ int BootSharedCommand::process(SharedOrderVector* order) {
 				//open an ostream for each calc to print to
 				for (int z = 0; z < treeCalculators.size(); z++) {
 					//create a new filename
-					outputFile = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + treeCalculators[z]->getName() + ".boot" + order->getLabel() + ".tre";
-					openOutputFile(outputFile, *(out[z]));
+					outputFile = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + treeCalculators[z]->getName() + ".boot" + order->getLabel() + ".tre";
+					m->openOutputFile(outputFile, *(out[z]));
 					outputNames.push_back(outputFile);
 				}
 				
@@ -487,7 +487,7 @@ int BootSharedCommand::process(SharedOrderVector* order) {
 					//set global data to calc trees
 					globaldata->gTree = trees[k];
 					
-					string filename = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + treeCalculators[k]->getName() + ".boot" + order->getLabel();
+					string filename = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + treeCalculators[k]->getName() + ".boot" + order->getLabel();
 					consensus = new ConcensusCommand(filename);
 					consensus->execute();
 					delete consensus;

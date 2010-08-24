@@ -55,24 +55,24 @@ PhyloTree::PhyloTree(ifstream& in, string filename){
 			delete buffer;
 			
 			//read version
-			getline(iss); gobble(iss);
+			m->getline(iss); m->gobble(iss);
 			
-			iss >> numNodes; gobble(iss);
+			iss >> numNodes; m->gobble(iss);
 			
 			tree.resize(numNodes);
 			
 			for (int i = 0; i < tree.size(); i++) {
-				iss >> tree[i].name >> tree[i].level >> tree[i].parent; gobble(iss);
+				iss >> tree[i].name >> tree[i].level >> tree[i].parent; m->gobble(iss);
 			}
 			
 			//read genus nodes
 			int numGenus = 0;
-			iss >> numGenus; gobble(iss);
+			iss >> numGenus; m->gobble(iss);
 			
 			int gnode, gsize;
 			totals.clear();
 			for (int i = 0; i < numGenus; i++) {
-				iss >> gnode >> gsize; gobble(iss);
+				iss >> gnode >> gsize; m->gobble(iss);
 				
 				uniqueTaxonomies[gnode] = gnode;
 				totals.push_back(gsize);
@@ -82,24 +82,24 @@ PhyloTree::PhyloTree(ifstream& in, string filename){
 			
 		#else
 			//read version
-			string line = getline(in); gobble(in);
+			string line = m->getline(in); m->gobble(in);
 			
-			in >> numNodes; gobble(in);
+			in >> numNodes; m->gobble(in);
 			
 			tree.resize(numNodes);
 			
 			for (int i = 0; i < tree.size(); i++) {
-				in >> tree[i].name >> tree[i].level >> tree[i].parent; gobble(in);
+				in >> tree[i].name >> tree[i].level >> tree[i].parent; m->gobble(in);
 			}
 			
 			//read genus nodes
 			int numGenus = 0;
-			in >> numGenus; gobble(in);
+			in >> numGenus; m->gobble(in);
 			
 			int gnode, gsize;
 			totals.clear();
 			for (int i = 0; i < numGenus; i++) {
-				in >> gnode >> gsize; gobble(in);
+				in >> gnode >> gsize; m->gobble(in);
 				
 				uniqueTaxonomies[gnode] = gnode;
 				totals.push_back(gsize);
@@ -144,7 +144,7 @@ PhyloTree::PhyloTree(string tfile){
 			MPI_File_open(MPI_COMM_WORLD, inFileName, MPI_MODE_RDONLY, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
 
 			if (pid == 0) {
-				positions = setFilePosEachLine(tfile, num);
+				positions = m->setFilePosEachLine(tfile, num);
 				
 				//send file positions to all processes
 				for(int i = 1; i < processors; i++) { 
@@ -179,11 +179,11 @@ PhyloTree::PhyloTree(string tfile){
 		
 		#else
 			ifstream in;
-			openInputFile(tfile, in);
+			m->openInputFile(tfile, in);
 			
 			//read in users taxonomy file and add sequences to tree
 			while(!in.eof()){
-				in >> name >> tax; gobble(in);
+				in >> name >> tax; m->gobble(in);
 			
 				addSeqToTree(name, tax);
 			}
@@ -365,7 +365,7 @@ void PhyloTree::binUnclassified(string file){
 	try {
 	
 		ofstream out;
-		openOutputFile(file, out);
+		m->openOutputFile(file, out);
 		
 		map<string, int>::iterator itBin;
 		map<string, int>::iterator childPointer;
@@ -519,7 +519,7 @@ void PhyloTree::printTreeNodes(string treefilename) {
 		#endif
 
 			ofstream outTree;
-			openOutputFile(treefilename, outTree);
+			m->openOutputFile(treefilename, outTree);
 			
 			//output mothur version
 			outTree << "#" << m->getVersion() << endl;

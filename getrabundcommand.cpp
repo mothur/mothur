@@ -39,7 +39,7 @@ GetRAbundCommand::GetRAbundCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			string outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
 			}
 			
 			//make sure the user has already run the read.otu command
@@ -50,12 +50,12 @@ GetRAbundCommand::GetRAbundCommand(string option)  {
 			
 			string temp;
 			temp = validParameter.validFile(parameters, "sorted", false);			if (temp == "not found") { temp = "T"; }
-			sorted = isTrue(temp);
+			sorted = m->isTrue(temp);
 			
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
@@ -66,8 +66,8 @@ GetRAbundCommand::GetRAbundCommand(string option)  {
 			}
 				
 			if (abort == false) {
-				filename = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + "rabund";
-				openOutputFile(filename, out);
+				filename = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + "rabund";
+				m->openOutputFile(filename, out);
 			}
 		}
 
@@ -141,7 +141,7 @@ int GetRAbundCommand::execute(){
 					userLabels.erase(list->getLabel());
 			}
 			
-			if ((anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = list->getLabel();
 					
 					delete list;

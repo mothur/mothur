@@ -14,7 +14,7 @@
  GroupMap::GroupMap(string filename) {
 	m = MothurOut::getInstance();
 	groupFileName = filename;
-	openInputFile(filename, fileHandle);
+	m->openInputFile(filename, fileHandle);
 	index = 0;
 }
 
@@ -27,7 +27,7 @@ int GroupMap::readMap() {
 		int error = 0;
 
 		while(fileHandle){
-			fileHandle >> seqName;	gobble(fileHandle);		//read from first column
+			fileHandle >> seqName;	m->gobble(fileHandle);		//read from first column
 			fileHandle >> seqGroup;			//read from second column
 			
 			if (m->control_pressed) {  fileHandle.close();  return 1; }
@@ -41,7 +41,7 @@ int GroupMap::readMap() {
 				groupmap[seqName] = seqGroup;	//store data in map
 				seqsPerGroup[seqGroup]++;  //increment number of seqs in that group
 			}
-			gobble(fileHandle);
+			m->gobble(fileHandle);
 		}
 		fileHandle.close();
 		return error;

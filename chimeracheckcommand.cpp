@@ -41,7 +41,7 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 				it = parameters.find("template");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					string path = hasPath(it->second);
+					string path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["template"] = inputDir + it->second;		}
 				}
@@ -51,12 +51,12 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 			fastafile = validParameter.validFile(parameters, "fasta", false);
 			if (fastafile == "not found") { fastafile = ""; m->mothurOut("fasta is a required parameter for the chimera.check command."); m->mothurOutEndLine(); abort = true;  }
 			else { 
-				splitAtDash(fastafile, fastaFileNames);
+				m->splitAtDash(fastafile, fastaFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < fastaFileNames.size(); i++) {
 					if (inputDir != "") {
-						string path = hasPath(fastaFileNames[i]);
+						string path = m->hasPath(fastaFileNames[i]);
 						//if the user has not given a path then, add inputdir. else leave path alone.
 						if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
 					}
@@ -64,14 +64,14 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 					int ableToOpen;
 					ifstream in;
 					
-					ableToOpen = openInputFile(fastaFileNames[i], in, "noerror");
+					ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
 				
 					//if you can't open it, try default location
 					if (ableToOpen == 1) {
 						if (m->getDefaultPath() != "") { //default path is set
-							string tryPath = m->getDefaultPath() + getSimpleName(fastaFileNames[i]);
+							string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
 							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = openInputFile(tryPath, in, "noerror");
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
 							fastaFileNames[i] = tryPath;
 						}
 					}
@@ -99,12 +99,12 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 			namefile = validParameter.validFile(parameters, "name", false);
 			if (namefile == "not found") { namefile = ""; }
 			else { 
-				splitAtDash(namefile, nameFileNames);
+				m->splitAtDash(namefile, nameFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < nameFileNames.size(); i++) {
 					if (inputDir != "") {
-						string path = hasPath(nameFileNames[i]);
+						string path = m->hasPath(nameFileNames[i]);
 						//if the user has not given a path then, add inputdir. else leave path alone.
 						if (path == "") {	nameFileNames[i] = inputDir + nameFileNames[i];		}
 					}
@@ -112,14 +112,14 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 					int ableToOpen;
 					ifstream in;
 					
-					ableToOpen = openInputFile(nameFileNames[i], in, "noerror");
+					ableToOpen = m->openInputFile(nameFileNames[i], in, "noerror");
 				
 					//if you can't open it, try default location
 					if (ableToOpen == 1) {
 						if (m->getDefaultPath() != "") { //default path is set
-							string tryPath = m->getDefaultPath() + getSimpleName(nameFileNames[i]);
+							string tryPath = m->getDefaultPath() + m->getSimpleName(nameFileNames[i]);
 							m->mothurOut("Unable to open " + nameFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = openInputFile(tryPath, in, "noerror");
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
 							nameFileNames[i] = tryPath;
 						}
 					}
@@ -150,7 +150,7 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 			convert(temp, ksize);
 			
 			temp = validParameter.validFile(parameters, "svg", false);				if (temp == "not found") { temp = "F"; }
-			svg = isTrue(temp);
+			svg = m->isTrue(temp);
 			if (nameFileNames.size() != 0) { svg = true; }
 			
 			temp = validParameter.validFile(parameters, "increment", false);		if (temp == "not found") { temp = "10"; }
@@ -217,7 +217,7 @@ int ChimeraCheckCommand::execute(){
 
 			if (m->control_pressed) { delete chimera;	return 0;	}
 			
-			string outputFileName = outputDir + getRootName(getSimpleName(fastaFileNames[i]))  + "chimeracheck.chimeras";
+			string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[i]))  + "chimeracheck.chimeras";
 			outputNames.push_back(outputFileName);
 			
 		#ifdef USE_MPI
@@ -248,7 +248,7 @@ int ChimeraCheckCommand::execute(){
 				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} delete chimera; return 0;  }
 				
 				if (pid == 0) { //you are the root process 
-					MPIPos = setFilePosFasta(fastaFileNames[i], numSeqs); //fills MPIPos, returns numSeqs
+					MPIPos = m->setFilePosFasta(fastaFileNames[i], numSeqs); //fills MPIPos, returns numSeqs
 					
 					//send file positions to all processes
 					for(int j = 1; j < processors; j++) { 
@@ -299,7 +299,7 @@ int ChimeraCheckCommand::execute(){
 				MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 		#else
 			
-			vector<unsigned long int> positions = divideFile(fastaFileNames[i], processors);
+			vector<unsigned long int> positions = m->divideFile(fastaFileNames[i], processors);
 				
 			for (int s = 0; s < (positions.size()-1); s++) {
 				lines.push_back(new linePair(positions[s], positions[(s+1)]));
@@ -321,7 +321,7 @@ int ChimeraCheckCommand::execute(){
 						
 					//append output files
 					for(int j=1;j<processors;j++){
-						appendFiles((outputFileName + toString(processIDS[j]) + ".temp"), outputFileName);
+						m->appendFiles((outputFileName + toString(processIDS[j]) + ".temp"), outputFileName);
 						remove((outputFileName + toString(processIDS[j]) + ".temp").c_str());
 					}
 					
@@ -365,12 +365,12 @@ int ChimeraCheckCommand::execute(){
 int ChimeraCheckCommand::driver(linePair* filePos, string outputFName, string filename){
 	try {
 		ofstream out;
-		openOutputFile(outputFName, out);
+		m->openOutputFile(outputFName, out);
 		
 		ofstream out2;
 		
 		ifstream inFASTA;
-		openInputFile(filename, inFASTA);
+		m->openInputFile(filename, inFASTA);
 
 		inFASTA.seekg(filePos->start);
 
@@ -381,7 +381,7 @@ int ChimeraCheckCommand::driver(linePair* filePos, string outputFName, string fi
 
 			if (m->control_pressed) {	return 1;	}
 		
-			Sequence* candidateSeq = new Sequence(inFASTA);  gobble(inFASTA);
+			Sequence* candidateSeq = new Sequence(inFASTA);  m->gobble(inFASTA);
 				
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
 				//find chimeras
@@ -437,7 +437,7 @@ int ChimeraCheckCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File
 			istringstream iss (tempBuf,istringstream::in);
 			delete buf4;
 
-			Sequence* candidateSeq = new Sequence(iss);  gobble(iss);
+			Sequence* candidateSeq = new Sequence(iss);  m->gobble(iss);
 				
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
 				//find chimeras
@@ -484,7 +484,7 @@ int ChimeraCheckCommand::createProcesses(string outputFileName, string filename)
 				//pass numSeqs to parent
 				ofstream out;
 				string tempFile = outputFileName + toString(getpid()) + ".num.temp";
-				openOutputFile(tempFile, out);
+				m->openOutputFile(tempFile, out);
 				out << num << endl;
 				out.close();
 				
@@ -501,7 +501,7 @@ int ChimeraCheckCommand::createProcesses(string outputFileName, string filename)
 		for (int i = 0; i < processIDS.size(); i++) {
 			ifstream in;
 			string tempFile =  outputFileName + toString(processIDS[i]) + ".num.temp";
-			openInputFile(tempFile, in);
+			m->openInputFile(tempFile, in);
 			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
 			in.close(); remove(tempFile.c_str());
 		}

@@ -1,5 +1,5 @@
 /*
- *  m->mothurOut.cpp
+ *  mothurOut.cpp
  *  Mothur
  *
  *  Created by westcott on 2/25/10.
@@ -161,10 +161,10 @@ void MothurOut::mothurOutJustToLog(string output) {
 }
 /*********************************************************************************************/
 void MothurOut::errorOut(exception& e, string object, string function) {
-	double vm, rss;
+	//double vm, rss;
 	//mem_usage(vm, rss);
 	
-	mothurOut("Error: ");
+	mothurOut("[ERROR]: ");
 	mothurOut(toString(e.what()));
 	mothurOut(" has occurred in the " + object + " class function " + function + ". Please contact Pat Schloss at mothur.bugs@gmail.com, and be sure to include the mothur.logFile with your inquiry.");
 	mothurOutEndLine();
@@ -252,8 +252,1148 @@ int MothurOut::mem_usage(double& vm_usage, double& resident_set) {
 
 	#endif
 }
-/*********************************************************************************************/
 
+
+/***********************************************************************/
+int MothurOut::openOutputFileAppend(string fileName, ofstream& fileHandle){
+	try {
+		fileHandle.open(fileName.c_str(), ios::app);
+		if(!fileHandle) {
+			mothurOut("[ERROR]: Could not open " + fileName); mothurOutEndLine();
+			return 1;
+		}
+		else {
+			return 0;
+		}
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "openOutputFileAppend");
+		exit(1);
+	}
+}
+/***********************************************************************/
+void MothurOut::gobble(istream& f){
+	try {
+		char d;
+		while(isspace(d=f.get()))		{;}
+		f.putback(d);
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "gobble");
+		exit(1);
+	}
+}
+/***********************************************************************/
+void MothurOut::gobble(istringstream& f){
+	try {
+		char d;
+		while(isspace(d=f.get()))		{;}
+		f.putback(d);
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "gobble");
+		exit(1);
+	}
+}
+
+/***********************************************************************/
+
+string MothurOut::getline(istringstream& fileHandle) {
+	try {
+	
+		string line = "";
+		
+		while (!fileHandle.eof())	{
+			//get next character
+			char c = fileHandle.get(); 
+			
+			//are you at the end of the line
+			if ((c == '\n') || (c == '\r') || (c == '\f')){  break;	}	
+			else {		line += c;		}
+		}
+		
+		return line;
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getline");
+		exit(1);
+	}
+}
+/***********************************************************************/
+
+string MothurOut::getline(ifstream& fileHandle) {
+	try {
+	
+		string line = "";
+		
+		while (!fileHandle.eof())	{
+			//get next character
+			char c = fileHandle.get(); 
+			
+			//are you at the end of the line
+			if ((c == '\n') || (c == '\r') || (c == '\f')){  break;	}	
+			else {		line += c;		}
+		}
+		
+		return line;
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getline");
+		exit(1);
+	}
+}
+/***********************************************************************/
+
+string MothurOut::getRootName(string longName){
+	try {
+	
+		string rootName = longName;
+		
+		if(longName.find_last_of(".") != longName.npos){
+			int pos = longName.find_last_of('.')+1;
+			rootName = longName.substr(0, pos);
+		}
+
+		return rootName;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getRootName");
+		exit(1);
+	}
+}
+/***********************************************************************/
+
+string MothurOut::getSimpleName(string longName){
+	try {
+		string simpleName = longName;
+		
+		size_t found;
+		found=longName.find_last_of("/\\");
+
+		if(found != longName.npos){
+			simpleName = longName.substr(found+1);
+		}
+		
+		return simpleName;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getSimpleName");
+		exit(1);
+	}
+}
+
+/***********************************************************************/
+
+string MothurOut::getPathName(string longName){
+	try {
+		string rootPathName = longName;
+		
+		if(longName.find_last_of("/\\") != longName.npos){
+			int pos = longName.find_last_of("/\\")+1;
+			rootPathName = longName.substr(0, pos);
+		}
+		
+		return rootPathName;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getPathName");
+		exit(1);
+	}	
+
+}
+/***********************************************************************/
+
+string MothurOut::hasPath(string longName){
+	try {
+		string path = "";
+		
+		size_t found;
+		found=longName.find_last_of("~/\\");
+
+		if(found != longName.npos){
+			path = longName.substr(0, found+1);
+		}
+		
+		return path;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "hasPath");
+		exit(1);
+	}	
+}
+
+/***********************************************************************/
+
+string MothurOut::getExtension(string longName){
+	try {
+		string extension = longName;
+		
+		if(longName.find_last_of('.') != longName.npos){
+			int pos = longName.find_last_of('.');
+			extension = longName.substr(pos, longName.length());
+		}
+		
+		return extension;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getExtension");
+		exit(1);
+	}	
+}
+/***********************************************************************/
+bool MothurOut::isBlank(string fileName){
+	try {
+		ifstream fileHandle;
+		fileHandle.open(fileName.c_str());
+		if(!fileHandle) {
+			mothurOut("[ERROR]: Could not open " + fileName); mothurOutEndLine();
+			return false;
+		}else {
+			//check for blank file
+			gobble(fileHandle);
+			if (fileHandle.eof()) { fileHandle.close(); return true;  }
+		}
+		return false;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "isBlank");
+		exit(1);
+	}	
+}
+/***********************************************************************/
+
+string MothurOut::getFullPathName(string fileName){
+	try{
+	
+	string path = hasPath(fileName);
+	string newFileName;
+	int pos;
+	
+	if (path == "") { return fileName; } //its a simple name
+	else { //we need to complete the pathname
+		// ex. ../../../filename 
+		// cwd = /user/work/desktop
+				
+		string cwd;
+		//get current working directory 
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)	
+			
+			if (path.find("~") != -1) { //go to home directory
+				string homeDir = getenv ("HOME");
+				newFileName = homeDir + fileName.substr(fileName.find("~")+1);
+				return newFileName;
+			}else { //find path
+				if (path.rfind("./") == -1) { return fileName; } //already complete name
+				else { newFileName = fileName.substr(fileName.rfind("./")+2); } //save the complete part of the name
+				
+				char* cwdpath = new char[1024];
+
+				size_t size;
+				cwdpath=getcwd(cwdpath,size);
+			
+				cwd = cwdpath;
+				
+				//rip off first '/'
+				string simpleCWD;
+				if (cwd.length() > 0) { simpleCWD = cwd.substr(1); }
+				
+				//break apart the current working directory
+				vector<string> dirs;
+				while (simpleCWD.find_first_of('/') != -1) {
+					string dir = simpleCWD.substr(0,simpleCWD.find_first_of('/'));
+					simpleCWD = simpleCWD.substr(simpleCWD.find_first_of('/')+1, simpleCWD.length());
+					dirs.push_back(dir);
+				}
+				//get last one              // ex. ../../../filename = /user/work/desktop/filename
+				dirs.push_back(simpleCWD);  //ex. dirs[0] = user, dirs[1] = work, dirs[2] = desktop
+				
+			
+				int index = dirs.size()-1;
+		
+				while((pos = path.rfind("./")) != -1) { //while you don't have a complete path
+					if (pos == 0) { break;  //you are at the end
+					}else if (path[(pos-1)] == '.') { //you want your parent directory ../
+						path = path.substr(0, pos-1);
+						index--;
+						if (index == 0) {  break; }
+					}else if (path[(pos-1)] == '/') { //you want the current working dir ./
+						path = path.substr(0, pos);
+					}else if (pos == 1) { break;  //you are at the end
+					}else { cout << "cannot resolve path for " <<  fileName << endl; return fileName; }
+				}
+			
+				for (int i = index; i >= 0; i--) {
+					newFileName = dirs[i] +  "/" + newFileName;		
+				}
+				
+				newFileName =  "/" +  newFileName;
+				return newFileName;
+			}	
+		#else
+			if (path.find("~") != -1) { //go to home directory
+				string homeDir = getenv ("HOMEPATH");
+				newFileName = homeDir + fileName.substr(fileName.find("~")+1);
+				return newFileName;
+			}else { //find path
+				if (path.rfind(".\\") == -1) { return fileName; } //already complete name
+				else { newFileName = fileName.substr(fileName.rfind(".\\")+2); } //save the complete part of the name
+							
+				char *cwdpath = NULL;
+				cwdpath = getcwd(NULL, 0); // or _getcwd
+				if ( cwdpath != NULL) { cwd = cwdpath; }
+				else { cwd = "";  }
+				
+				//break apart the current working directory
+				vector<string> dirs;
+				while (cwd.find_first_of('\\') != -1) {
+					string dir = cwd.substr(0,cwd.find_first_of('\\'));
+					cwd = cwd.substr(cwd.find_first_of('\\')+1, cwd.length());
+					dirs.push_back(dir);
+		
+				}
+				//get last one
+				dirs.push_back(cwd);  //ex. dirs[0] = user, dirs[1] = work, dirs[2] = desktop
+					
+				int index = dirs.size()-1;
+					
+				while((pos = path.rfind(".\\")) != -1) { //while you don't have a complete path
+					if (pos == 0) { break;  //you are at the end
+					}else if (path[(pos-1)] == '.') { //you want your parent directory ../
+						path = path.substr(0, pos-1);
+						index--;
+						if (index == 0) {  break; }
+					}else if (path[(pos-1)] == '\\') { //you want the current working dir ./
+						path = path.substr(0, pos);
+					}else if (pos == 1) { break;  //you are at the end
+					}else { cout << "cannot resolve path for " <<  fileName << endl; return fileName; }
+				}
+			
+				for (int i = index; i >= 0; i--) {
+					newFileName = dirs[i] +  "\\" + newFileName;		
+				}
+				
+				return newFileName;
+			}
+			
+		#endif
+	}
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getFullPathName");
+		exit(1);
+	}	
+}
+/***********************************************************************/
+
+int MothurOut::openInputFile(string fileName, ifstream& fileHandle, string m){
+	try {
+			//get full path name
+			string completeFileName = getFullPathName(fileName);
+
+			fileHandle.open(completeFileName.c_str());
+			if(!fileHandle) {
+				return 1;
+			}else {
+				//check for blank file
+				gobble(fileHandle);
+				return 0;
+			}
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "openInputFile - no Error");
+		exit(1);
+	}
+}
+/***********************************************************************/
+
+int MothurOut::openInputFile(string fileName, ifstream& fileHandle){
+	try {
+		//get full path name
+		string completeFileName = getFullPathName(fileName);
+
+		fileHandle.open(completeFileName.c_str());
+		if(!fileHandle) {
+			mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
+			return 1;
+		}
+		else {
+			//check for blank file
+			gobble(fileHandle);
+			if (fileHandle.eof()) { mothurOut("[ERROR]: " + completeFileName + " is blank. Please correct."); mothurOutEndLine();  }
+			
+			return 0;
+		}
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "openInputFile");
+		exit(1);
+	}	
+}
+/***********************************************************************/
+
+int MothurOut::renameFile(string oldName, string newName){
+	try {
+		ifstream inTest;
+		int exist = openInputFile(newName, inTest, "");
+		
+	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)		
+		if (exist == 0) { //you could open it so you want to delete it
+			inTest.close();
+			string command = "rm " + newName;
+			system(command.c_str());
+		}
+				
+		string command = "mv " + oldName + " " + newName;
+		system(command.c_str());
+	#else
+		remove(newName.c_str());
+		int renameOk = rename(oldName.c_str(), newName.c_str());
+	#endif
+		return 0;
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "renameFile");
+		exit(1);
+	}	
+}
+
+/***********************************************************************/
+
+int MothurOut::openOutputFile(string fileName, ofstream& fileHandle){
+	try { 
+	
+		string completeFileName = getFullPathName(fileName);
+		
+		fileHandle.open(completeFileName.c_str(), ios::trunc);
+		if(!fileHandle) {
+			mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
+			return 1;
+		}
+		else {
+			return 0;
+		}
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "openOutputFile");
+		exit(1);
+	}	
+
+}
+
+/**************************************************************************************************/
+void MothurOut::appendFiles(string temp, string filename) {
+	try{
+		ofstream output;
+		ifstream input;
+	
+		//open output file in append mode
+		openOutputFileAppend(filename, output);
+		int ableToOpen = openInputFile(temp, input, "no error");
+		
+		if (ableToOpen == 0) { //you opened it
+			while(char c = input.get()){
+				if(input.eof())		{	break;			}
+				else				{	output << c;	}
+			}
+			input.close();
+		}
+		
+		output.close();
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "appendFiles");
+		exit(1);
+	}	
+}
+
+/**************************************************************************************************/
+string MothurOut::sortFile(string distFile, string outputDir){
+	try {	
+	
+		//if (outputDir == "") {  outputDir += hasPath(distFile);  }
+		string outfile = getRootName(distFile) + "sorted.dist";
+
+		
+		//if you can, use the unix sort since its been optimized for years
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			string command = "sort -n -k +3 " + distFile + " -o " + outfile;
+			system(command.c_str());
+		#else //you are stuck with my best attempt...
+			//windows sort does not have a way to specify a column, only a character in the line
+			//since we cannot assume that the distance will always be at the the same character location on each line
+			//due to variable sequence name lengths, I chose to force the distance into first position, then sort and then put it back.
+		
+			//read in file line by file and put distance first
+			string tempDistFile = distFile + ".temp";
+			ifstream input;
+			ofstream output;
+			openInputFile(distFile, input);
+			openOutputFile(tempDistFile, output);
+
+			string firstName, secondName;
+			float dist;
+			while (input) {
+				input >> firstName >> secondName >> dist;
+				output << dist << '\t' << firstName << '\t' << secondName << endl;
+				gobble(input);
+			}
+			input.close();
+			output.close();
+		
+	
+			//sort using windows sort
+			string tempOutfile = outfile + ".temp";
+			string command = "sort " + tempDistFile + " /O " + tempOutfile;
+			system(command.c_str());
+		
+			//read in sorted file and put distance at end again
+			ifstream input2;
+			openInputFile(tempOutfile, input2);
+			openOutputFile(outfile, output);
+		
+			while (input2) {
+				input2 >> dist >> firstName >> secondName;
+				output << firstName << '\t' << secondName << '\t' << dist << endl;
+				gobble(input2);
+			}
+			input2.close();
+			output.close();
+		
+			//remove temp files
+			remove(tempDistFile.c_str());
+			remove(tempOutfile.c_str());
+		#endif
+		
+		return outfile;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "sortFile");
+		exit(1);
+	}	
+}
+/**************************************************************************************************/
+vector<unsigned long int> MothurOut::setFilePosFasta(string filename, int& num) {
+	try {
+			vector<unsigned long int> positions;
+			ifstream inFASTA;
+			openInputFile(filename, inFASTA);
+						
+			string input;
+			while(!inFASTA.eof()){
+				input = getline(inFASTA); 
+				if (input.length() != 0) {
+					if(input[0] == '>'){	unsigned long int pos = inFASTA.tellg(); positions.push_back(pos - input.length() - 1);	}
+				}
+				gobble(inFASTA); //has to be here since windows line endings are 2 characters and mess up the positions
+			}
+			inFASTA.close();
+		
+			num = positions.size();
+		
+			/*FILE * pFile;
+			long size;
+		
+			//get num bytes in file
+			pFile = fopen (filename.c_str(),"rb");
+			if (pFile==NULL) perror ("Error opening file");
+			else{
+				fseek (pFile, 0, SEEK_END);
+				size=ftell (pFile);
+				fclose (pFile);
+			}*/
+			
+			unsigned long int size = positions[(positions.size()-1)];
+			ifstream in;
+			openInputFile(filename, in);
+			
+			in.seekg(size);
+		
+			while(char c = in.get()){
+				if(in.eof())		{	break;	}
+				else				{	size++;	}
+			}
+			in.close();
+		
+			positions.push_back(size);
+		
+			return positions;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "setFilePosFasta");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+vector<unsigned long int> MothurOut::setFilePosEachLine(string filename, int& num) {
+	try {
+
+			vector<unsigned long int> positions;
+			ifstream in;
+			openInputFile(filename, in);
+				
+			string input;
+			while(!in.eof()){
+				unsigned long int lastpos = in.tellg();
+				input = getline(in); 
+				if (input.length() != 0) {
+					unsigned long int pos = in.tellg(); 
+					if (pos != -1) { positions.push_back(pos - input.length() - 1);	}
+					else {  positions.push_back(lastpos);  }
+				}
+				gobble(in); //has to be here since windows line endings are 2 characters and mess up the positions
+			}
+			in.close();
+		
+			num = positions.size();
+		
+			FILE * pFile;
+			unsigned long int size;
+		
+			//get num bytes in file
+			pFile = fopen (filename.c_str(),"rb");
+			if (pFile==NULL) perror ("Error opening file");
+			else{
+				fseek (pFile, 0, SEEK_END);
+				size=ftell (pFile);
+				fclose (pFile);
+			}
+		
+			positions.push_back(size);
+		
+			return positions;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "setFilePosEachLine");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+
+vector<unsigned long int> MothurOut::divideFile(string filename, int& proc) {
+	try{
+	
+		vector<unsigned long int> filePos;
+		filePos.push_back(0);
+		
+		FILE * pFile;
+		unsigned long int size;
+		
+		//get num bytes in file
+		pFile = fopen (filename.c_str(),"rb");
+		if (pFile==NULL) perror ("Error opening file");
+		else{
+			fseek (pFile, 0, SEEK_END);
+			size=ftell (pFile);
+			fclose (pFile);
+		}
+	
+		//estimate file breaks
+		unsigned long int chunkSize = 0;
+		chunkSize = size / proc;
+		
+		//file to small to divide by processors
+		if (chunkSize == 0)  {  proc = 1;	filePos.push_back(size); return filePos;	}
+	
+		//for each process seekg to closest file break and search for next '>' char. make that the filebreak
+		for (int i = 0; i < proc; i++) {
+			unsigned long int spot = (i+1) * chunkSize;
+			
+			ifstream in;
+			openInputFile(filename, in);
+			in.seekg(spot);
+			
+			//look for next '>'
+			unsigned long int newSpot = spot;
+			while (!in.eof()) {
+			   char c = in.get();
+			   if (c == '>') {   in.putback(c); newSpot = in.tellg(); break;  }
+			}
+			
+			//there was not another sequence before the end of the file
+			unsigned long int sanityPos = in.tellg();
+			if (sanityPos = -1) {	break;  }
+			else {   filePos.push_back(newSpot);  }
+			
+			in.close();
+		}
+		
+		//save end pos
+		filePos.push_back(size);
+		
+		//sanity check filePos
+		for (int i = 0; i < (filePos.size()-1); i++) {
+			if (filePos[(i+1)] <= filePos[i]) {  filePos.erase(filePos.begin()+(i+1)); i--; }
+		}
+
+		proc = (filePos.size() - 1);
+		
+		return filePos;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "divideFile");
+		exit(1);
+	}
+}
+
+/***********************************************************************/
+
+bool MothurOut::isTrue(string f){
+	try {
+		
+		for (int i = 0; i < f.length(); i++) { f[i] = toupper(f[i]); }
+		
+		if ((f == "TRUE") || (f == "T")) {	return true;	}
+		else {	return false;  }
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "isTrue");
+		exit(1);
+	}
+}
+
+/***********************************************************************/
+
+float MothurOut::roundDist(float dist, int precision){
+	try {
+		return int(dist * precision + 0.5)/float(precision);
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "roundDist");
+		exit(1);
+	}
+}
+/***********************************************************************/
+
+float MothurOut::ceilDist(float dist, int precision){
+	try {
+		return int(ceil(dist * precision))/float(precision);
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "ceilDist");
+		exit(1);
+	}
+}
+
+/***********************************************************************/
+
+int MothurOut::getNumNames(string names){
+	try {
+		int count = 0;
+		
+		if(names != ""){
+			count = 1;
+			for(int i=0;i<names.size();i++){
+				if(names[i] == ','){
+					count++;
+				}
+			}
+		}
+		
+		return count;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getNumNames");
+		exit(1);
+	}
+}
+
+/**************************************************************************************************/
+
+vector<vector<double> > MothurOut::binomial(int maxOrder){
+	try {
+	vector<vector<double> > binomial(maxOrder+1);
+	
+    for(int i=0;i<=maxOrder;i++){
+		binomial[i].resize(maxOrder+1);
+		binomial[i][0]=1;
+		binomial[0][i]=0;
+    }
+    binomial[0][0]=1;
+	
+    binomial[1][0]=1;
+    binomial[1][1]=1;
+	
+    for(int i=2;i<=maxOrder;i++){
+		binomial[1][i]=0;
+    }
+	
+    for(int i=2;i<=maxOrder;i++){
+		for(int j=1;j<=maxOrder;j++){
+			if(i==j){	binomial[i][j]=1;									}
+			if(j>i)	{	binomial[i][j]=0;									}
+			else	{	binomial[i][j]=binomial[i-1][j-1]+binomial[i-1][j];	}
+		}
+    }
+	
+	return binomial;
+	
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "binomial");
+		exit(1);
+	}
+}
+
+/***********************************************************************/
+
+int MothurOut::factorial(int num){
+	try {
+		int total = 1;
+		
+		for (int i = 1; i <= num; i++) {
+			total *= i;
+		}
+		
+		return total;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "factorial");
+		exit(1);
+	}
+}
+/***********************************************************************/
+
+int MothurOut::getNumSeqs(ifstream& file){
+	try {
+		int numSeqs = count(istreambuf_iterator<char>(file),istreambuf_iterator<char>(), '>');
+		file.seekg(0);
+		return numSeqs;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getNumSeqs");
+		exit(1);
+	}	
+}
+/***********************************************************************/
+void MothurOut::getNumSeqs(ifstream& file, int& numSeqs){
+	try {
+		string input;
+		numSeqs = 0;
+		while(!file.eof()){
+			input = getline(file);
+			if (input.length() != 0) {
+				if(input[0] == '>'){ numSeqs++;	}
+			}
+		}
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "getNumSeqs");
+		exit(1);
+	}	
+}
+/***********************************************************************/
+
+//This function parses the estimator options and puts them in a vector
+void MothurOut::splitAtChar(string& estim, vector<string>& container, char symbol) {
+	try {
+		string individual;
+		
+		while (estim.find_first_of(symbol) != -1) {
+			individual = estim.substr(0,estim.find_first_of(symbol));
+			if ((estim.find_first_of(symbol)+1) <= estim.length()) { //checks to make sure you don't have dash at end of string
+				estim = estim.substr(estim.find_first_of(symbol)+1, estim.length());
+				container.push_back(individual);
+			}
+		}
+		//get last one
+		container.push_back(estim);
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "splitAtChar");
+		exit(1);
+	}	
+}
+
+/***********************************************************************/
+
+//This function parses the estimator options and puts them in a vector
+void MothurOut::splitAtDash(string& estim, vector<string>& container) {
+	try {
+		string individual;
+		
+		while (estim.find_first_of('-') != -1) {
+			individual = estim.substr(0,estim.find_first_of('-'));
+			if ((estim.find_first_of('-')+1) <= estim.length()) { //checks to make sure you don't have dash at end of string
+				estim = estim.substr(estim.find_first_of('-')+1, estim.length());
+				container.push_back(individual);
+			}
+		}
+		//get last one
+		container.push_back(estim);
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "splitAtDash");
+		exit(1);
+	}	
+}
+
+/***********************************************************************/
+//This function parses the label options and puts them in a set
+void MothurOut::splitAtDash(string& estim, set<string>& container) {
+	try {
+		string individual;
+		
+		while (estim.find_first_of('-') != -1) {
+			individual = estim.substr(0,estim.find_first_of('-'));
+			if ((estim.find_first_of('-')+1) <= estim.length()) { //checks to make sure you don't have dash at end of string
+				estim = estim.substr(estim.find_first_of('-')+1, estim.length());
+				container.insert(individual);
+			}
+		}
+		//get last one
+		container.insert(estim);
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "splitAtDash");
+		exit(1);
+	}	
+}
+/***********************************************************************/
+//This function parses the line options and puts them in a set
+void MothurOut::splitAtDash(string& estim, set<int>& container) {
+	try {
+		string individual;
+		int lineNum;
+		
+		while (estim.find_first_of('-') != -1) {
+			individual = estim.substr(0,estim.find_first_of('-'));
+			if ((estim.find_first_of('-')+1) <= estim.length()) { //checks to make sure you don't have dash at end of string
+				estim = estim.substr(estim.find_first_of('-')+1, estim.length());
+				convert(individual, lineNum); //convert the string to int
+				container.insert(lineNum);
+			}
+		}
+		//get last one
+		convert(estim, lineNum); //convert the string to int
+		container.insert(lineNum);
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "splitAtDash");
+		exit(1);
+	}	
+}
+/***********************************************************************/
+//This function parses the a string and puts peices in a vector
+void MothurOut::splitAtComma(string& estim, vector<string>& container) {
+	try {
+		string individual;
+		
+		while (estim.find_first_of(',') != -1) {
+			individual = estim.substr(0,estim.find_first_of(','));
+			if ((estim.find_first_of(',')+1) <= estim.length()) { //checks to make sure you don't have comma at end of string
+				estim = estim.substr(estim.find_first_of(',')+1, estim.length());
+				container.push_back(individual);
+			}
+		}
+		//get last one
+		container.push_back(estim);
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "splitAtComma");
+		exit(1);
+	}	
+}
+/***********************************************************************/
+
+//This function splits up the various option parameters
+void MothurOut::splitAtComma(string& prefix, string& suffix){
+	try {
+		prefix = suffix.substr(0,suffix.find_first_of(','));
+		if ((suffix.find_first_of(',')+2) <= suffix.length()) {  //checks to make sure you don't have comma at end of string
+			suffix = suffix.substr(suffix.find_first_of(',')+1, suffix.length());
+			string space = " ";
+			while(suffix.at(0) == ' ')
+				suffix = suffix.substr(1, suffix.length());
+		}
+
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "splitAtComma");
+		exit(1);
+	}	
+}
+/***********************************************************************/
+
+//This function separates the key value from the option value i.e. dist=96_...
+void MothurOut::splitAtEquals(string& key, string& value){		
+	try {
+		if(value.find_first_of('=') != -1){
+			key = value.substr(0,value.find_first_of('='));
+			if ((value.find_first_of('=')+1) <= value.length()) {
+				value = value.substr(value.find_first_of('=')+1, value.length());
+			}
+		}else{
+			key = value;
+			value = 1;
+		}
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "splitAtEquals");
+		exit(1);
+	}	
+}
+
+/**************************************************************************************************/
+
+bool MothurOut::inUsersGroups(string groupname, vector<string> Groups) {
+	try {
+		for (int i = 0; i < Groups.size(); i++) {
+			if (groupname == Groups[i]) { return true; }
+		}
+		return false;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "inUsersGroups");
+		exit(1);
+	}	
+}
+/**************************************************************************************************/
+//returns true if any of the strings in first vector are in second vector
+bool MothurOut::inUsersGroups(vector<string> groupnames, vector<string> Groups) {
+	try {
+		
+		for (int i = 0; i < groupnames.size(); i++) {
+			if (inUsersGroups(groupnames[i], Groups)) { return true; }
+		}
+		return false;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "inUsersGroups");
+		exit(1);
+	}	
+}
+/***********************************************************************/
+//this function determines if the user has given us labels that are smaller than the given label.
+//if so then it returns true so that the calling function can run the previous valid distance.
+//it's a "smart" distance function.  It also checks for invalid labels.
+bool MothurOut::anyLabelsToProcess(string label, set<string>& userLabels, string errorOff) {
+	try {
+		
+		set<string>::iterator it;
+		vector<float> orderFloat;
+		map<string, float> userMap;  //the conversion process removes trailing 0's which we need to put back
+		map<string, float>::iterator it2;
+		float labelFloat;
+		bool smaller = false;
+		
+		//unique is the smallest line
+		if (label == "unique") {  return false;  }
+		else { 
+			if (convertTestFloat(label, labelFloat)) {
+				convert(label, labelFloat); 
+			}else { //cant convert 
+				return false;
+			}
+		}
+		
+		//go through users set and make them floats
+		for(it = userLabels.begin(); it != userLabels.end(); ++it) {
+			
+			float temp;
+			if ((*it != "unique") && (convertTestFloat(*it, temp) == true)){
+				convert(*it, temp);
+				orderFloat.push_back(temp);
+				userMap[*it] = temp;
+			}else if (*it == "unique") { 
+				orderFloat.push_back(-1.0);
+				userMap["unique"] = -1.0;
+			}else {
+				if (errorOff == "") {  cout << *it << " is not a valid label." << endl;  }
+				userLabels.erase(*it); 
+				it--;
+			}
+		}
+		
+		//sort order
+		sort(orderFloat.begin(), orderFloat.end());
+		
+		/*************************************************/
+		//is this label bigger than any of the users labels
+		/*************************************************/
+				
+		//loop through order until you find a label greater than label
+		for (int i = 0; i < orderFloat.size(); i++) {
+			if (orderFloat[i] < labelFloat) {
+				smaller = true;
+				if (orderFloat[i] == -1) { 
+					if (errorOff == "") { cout << "Your file does not include the label unique." << endl; }
+					userLabels.erase("unique");
+				}
+				else {  
+					if (errorOff == "") { cout << "Your file does not include the label " << endl; }
+					string s = "";
+					for (it2 = userMap.begin(); it2!= userMap.end(); it2++) {  
+						if (it2->second == orderFloat[i]) {  
+							s = it2->first;  
+							//remove small labels
+							userLabels.erase(s);
+							break;
+						}
+					}
+					if (errorOff == "") {cout << s <<  ". I will use the next smallest distance. " << endl; }
+				}
+			//since they are sorted once you find a bigger one stop looking
+			}else { break; }
+		}
+		
+		return smaller;
+						
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "anyLabelsToProcess");
+		exit(1);
+	}	
+}
+
+/**************************************************************************************************/
+bool MothurOut::checkReleaseVersion(ifstream& file, string version) {
+	try {
+		
+		bool good = true;
+		
+		string line = getline(file);  
+
+		//before we added this check
+		if (line[0] != '#') {  good = false;  }
+		else {
+			//rip off #
+			line = line.substr(1);
+			
+			vector<string> versionVector;
+			splitAtChar(version, versionVector, '.');
+			
+			//check file version
+			vector<string> linesVector;
+			splitAtChar(line, linesVector, '.');
+			
+			if (versionVector.size() != linesVector.size()) { good = false; }
+			else {
+				for (int j = 0; j < versionVector.size(); j++) {
+					int num1, num2;
+					convert(versionVector[j], num1);
+					convert(linesVector[j], num2);
+					
+					//if mothurs version is newer than this files version, then we want to remake it
+					if (num1 > num2) {  good = false; break;  }
+				}
+			}
+			
+		}
+		
+		if (!good) {  file.close();  }
+		else { file.seekg(0);  }
+		
+		return good;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "checkReleaseVersion");		
+		exit(1);
+	}
+}
+/**************************************************************************************************/
 
 
 

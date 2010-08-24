@@ -44,7 +44,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -52,7 +52,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -60,7 +60,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -68,7 +68,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 				it = parameters.find("alignreport");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["alignreport"] = inputDir + it->second;		}
 				}
@@ -94,7 +94,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(fastafile); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(fastafile); //if user entered a file with a path then preserve it	
 			}
 
 			//check for optional parameter and set defaults
@@ -168,9 +168,8 @@ int ScreenSeqsCommand::execute(){
 		
 		if (abort == true) { return 0; }
 				
-		string goodSeqFile = outputDir + getRootName(getSimpleName(fastafile)) + "good" + getExtension(fastafile);
-		string badSeqFile =  outputDir + getRootName(getSimpleName(fastafile)) + "bad" + getExtension(fastafile);
-		string badAccnosFile =  outputDir + getRootName(getSimpleName(fastafile)) + "bad.accnos";
+		string goodSeqFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "good" + m->getExtension(fastafile);
+		string badAccnosFile =  outputDir + m->getRootName(m->getSimpleName(fastafile)) + "bad.accnos";
 		
 		int numFastaSeqs = 0;
 		set<string> badSeqNames;
@@ -187,7 +186,6 @@ int ScreenSeqsCommand::execute(){
 
 			MPI_File inMPI;
 			MPI_File outMPIGood;
-			MPI_File outMPIBad;
 			MPI_File outMPIBadAccnos;
 			
 			int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
@@ -196,9 +194,6 @@ int ScreenSeqsCommand::execute(){
 			char outGoodFilename[1024];
 			strcpy(outGoodFilename, goodSeqFile.c_str());
 
-			char outBadFilename[1024];
-			strcpy(outBadFilename, badSeqFile.c_str());
-			
 			char outBadAccnosFilename[1024];
 			strcpy(outBadAccnosFilename, badAccnosFile.c_str());
 
@@ -207,14 +202,13 @@ int ScreenSeqsCommand::execute(){
 			
 			MPI_File_open(MPI_COMM_WORLD, inFileName, inMode, MPI_INFO_NULL, &inMPI);  //comm, filename, mode, info, filepointer
 			MPI_File_open(MPI_COMM_WORLD, outGoodFilename, outMode, MPI_INFO_NULL, &outMPIGood);
-			MPI_File_open(MPI_COMM_WORLD, outBadFilename, outMode, MPI_INFO_NULL, &outMPIBad);
 			MPI_File_open(MPI_COMM_WORLD, outBadAccnosFilename, outMode, MPI_INFO_NULL, &outMPIBadAccnos);
 			
-			if (m->control_pressed) { MPI_File_close(&inMPI);  MPI_File_close(&outMPIGood);  MPI_File_close(&outMPIBad); MPI_File_close(&outMPIBadAccnos); return 0; }
+			if (m->control_pressed) { MPI_File_close(&inMPI);  MPI_File_close(&outMPIGood); MPI_File_close(&outMPIBadAccnos); return 0; }
 			
 			if (pid == 0) { //you are the root process 
 				
-				MPIPos = setFilePosFasta(fastafile, numFastaSeqs); //fills MPIPos, returns numSeqs
+				MPIPos = m->setFilePosFasta(fastafile, numFastaSeqs); //fills MPIPos, returns numSeqs
 				
 				//send file positions to all processes
 				for(int i = 1; i < processors; i++) { 
@@ -228,9 +222,9 @@ int ScreenSeqsCommand::execute(){
 				if(pid == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - pid * numSeqsPerProcessor; 	}
 				
 				//align your part
-				driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPIGood, outMPIBad, outMPIBadAccnos, MPIPos, badSeqNames);
+				driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPIGood, outMPIBadAccnos, MPIPos, badSeqNames);
 
-				if (m->control_pressed) { MPI_File_close(&inMPI);  MPI_File_close(&outMPIGood);  MPI_File_close(&outMPIBadAccnos); MPI_File_close(&outMPIBad);  return 0; }
+				if (m->control_pressed) { MPI_File_close(&inMPI);  MPI_File_close(&outMPIGood);  MPI_File_close(&outMPIBadAccnos);  return 0; }
 
 				for (int i = 1; i < processors; i++) {
 				
@@ -261,9 +255,9 @@ int ScreenSeqsCommand::execute(){
 				if(pid == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - pid * numSeqsPerProcessor; 	}
 				
 				//align your part
-				driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPIGood, outMPIBad, outMPIBadAccnos, MPIPos, badSeqNames);
+				driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPIGood, outMPIBadAccnos, MPIPos, badSeqNames);
 
-				if (m->control_pressed) { MPI_File_close(&inMPI);  MPI_File_close(&outMPIGood);  MPI_File_close(&outMPIBad); MPI_File_close(&outMPIBadAccnos); return 0; }
+				if (m->control_pressed) { MPI_File_close(&inMPI);  MPI_File_close(&outMPIGood);  MPI_File_close(&outMPIBadAccnos); return 0; }
 				
 				//send bad list	
 				int badSize = badSeqNames.size();
@@ -285,12 +279,11 @@ int ScreenSeqsCommand::execute(){
 			//close files 
 			MPI_File_close(&inMPI);
 			MPI_File_close(&outMPIGood);
-			MPI_File_close(&outMPIBad);
 			MPI_File_close(&outMPIBadAccnos);
 			MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 					
 #else
-			vector<unsigned long int> positions = divideFile(fastafile, processors);
+			vector<unsigned long int> positions = m->divideFile(fastafile, processors);
 				
 			for (int i = 0; i < (positions.size()-1); i++) {
 				lines.push_back(new linePair(positions[i], positions[(i+1)]));
@@ -298,51 +291,47 @@ int ScreenSeqsCommand::execute(){
 						
 	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			if(processors == 1){
-				numFastaSeqs = driver(lines[0], goodSeqFile, badSeqFile, badAccnosFile, fastafile, badSeqNames);
+				numFastaSeqs = driver(lines[0], goodSeqFile, badAccnosFile, fastafile, badSeqNames);
 				
-				if (m->control_pressed) { remove(goodSeqFile.c_str()); remove(badSeqFile.c_str()); return 0; }
+				if (m->control_pressed) { remove(goodSeqFile.c_str()); return 0; }
 				
 			}else{
 				processIDS.resize(0);
 				
-				numFastaSeqs = createProcesses(goodSeqFile, badSeqFile, badAccnosFile, fastafile, badSeqNames); 
+				numFastaSeqs = createProcesses(goodSeqFile, badAccnosFile, fastafile, badSeqNames); 
 				
 				rename((goodSeqFile + toString(processIDS[0]) + ".temp").c_str(), goodSeqFile.c_str());
-				rename((badSeqFile + toString(processIDS[0]) + ".temp").c_str(), badSeqFile.c_str());
 				rename((badAccnosFile + toString(processIDS[0]) + ".temp").c_str(), badAccnosFile.c_str());
 				
 				//append alignment and report files
 				for(int i=1;i<processors;i++){
-					appendFiles((goodSeqFile + toString(processIDS[i]) + ".temp"), goodSeqFile);
+					m->appendFiles((goodSeqFile + toString(processIDS[i]) + ".temp"), goodSeqFile);
 					remove((goodSeqFile + toString(processIDS[i]) + ".temp").c_str());
-					
-					appendFiles((badSeqFile + toString(processIDS[i]) + ".temp"), badSeqFile);
-					remove((badSeqFile + toString(processIDS[i]) + ".temp").c_str());
-					
-					appendFiles((badAccnosFile + toString(processIDS[i]) + ".temp"), badAccnosFile);
+			
+					m->appendFiles((badAccnosFile + toString(processIDS[i]) + ".temp"), badAccnosFile);
 					remove((badAccnosFile + toString(processIDS[i]) + ".temp").c_str());
 				}
 				
-				if (m->control_pressed) { remove(goodSeqFile.c_str()); remove(badSeqFile.c_str()); return 0; }
+				if (m->control_pressed) { remove(goodSeqFile.c_str()); return 0; }
 				
 				//read badSeqs in because root process doesnt know what other "bad" seqs the children found
 				ifstream inBad;
-				int ableToOpen = openInputFile(badAccnosFile, inBad, "no error");
+				int ableToOpen = m->openInputFile(badAccnosFile, inBad, "no error");
 				
 				if (ableToOpen == 0) {
 					badSeqNames.clear();
 					string tempName;
 					while (!inBad.eof()) {
-						inBad >> tempName; gobble(inBad);
+						inBad >> tempName; m->gobble(inBad);
 						badSeqNames.insert(tempName);
 					}
 					inBad.close();
 				}
 			}
 	#else
-			numFastaSeqs = driver(lines[0], goodSeqFile, badSeqFile, badAccnosFile, fastafile, badSeqNames);
+			numFastaSeqs = driver(lines[0], goodSeqFile, badAccnosFile, fastafile, badSeqNames);
 			
-			if (m->control_pressed) { remove(goodSeqFile.c_str()); remove(badSeqFile.c_str()); return 0; }
+			if (m->control_pressed) { remove(goodSeqFile.c_str()); return 0; }
 			
 	#endif
 
@@ -376,24 +365,24 @@ int ScreenSeqsCommand::execute(){
 				badSeqNames.clear();
 				string tempName;
 				while (!iss.eof()) {
-					iss >> tempName; gobble(iss);
+					iss >> tempName; m->gobble(iss);
 					badSeqNames.insert(tempName);
 				}
 		#endif
 																					
 		if(namefile != "" && groupfile != "")	{	
 			screenNameGroupFile(badSeqNames);	
-			if (m->control_pressed) {  remove(goodSeqFile.c_str()); remove(badSeqFile.c_str()); return 0; }
+			if (m->control_pressed) {  remove(goodSeqFile.c_str()); return 0; }
 		}else if(namefile != "")	{	
 			screenNameGroupFile(badSeqNames);
-			if (m->control_pressed) {  remove(goodSeqFile.c_str()); remove(badSeqFile.c_str()); return 0; }	
+			if (m->control_pressed) {  remove(goodSeqFile.c_str());  return 0; }	
 		}else if(groupfile != "")				{	screenGroupFile(badSeqNames);		}	// this screens just the group
 		
-		if (m->control_pressed) { remove(goodSeqFile.c_str()); remove(badSeqFile.c_str()); return 0; }
+		if (m->control_pressed) { remove(goodSeqFile.c_str());  return 0; }
 
 		if(alignreport != "")					{	screenAlignReport(badSeqNames);		}
 		
-		if (m->control_pressed) { remove(goodSeqFile.c_str()); remove(badSeqFile.c_str()); return 0; }
+		if (m->control_pressed) { remove(goodSeqFile.c_str());  return 0; }
 		
 		#ifdef USE_MPI
 			}
@@ -402,7 +391,6 @@ int ScreenSeqsCommand::execute(){
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		m->mothurOut(goodSeqFile); m->mothurOutEndLine();	
-		m->mothurOut(badSeqFile); m->mothurOutEndLine();	
 		m->mothurOut(badAccnosFile); m->mothurOutEndLine();	
 		for (int i = 0; i < outputNames.size(); i++) { m->mothurOut(outputNames[i]); m->mothurOutEndLine(); }
 		m->mothurOutEndLine();
@@ -424,28 +412,25 @@ int ScreenSeqsCommand::execute(){
 int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 	try {
 		ifstream inputNames;
-		openInputFile(namefile, inputNames);
+		m->openInputFile(namefile, inputNames);
 		set<string> badSeqGroups;
 		string seqName, seqList, group;
 		set<string>::iterator it;
 
-		string goodNameFile = outputDir + getRootName(getSimpleName(namefile)) + "good" + getExtension(namefile);
-		string badNameFile = outputDir + getRootName(getSimpleName(namefile)) + "bad" + getExtension(namefile);
+		string goodNameFile = outputDir + m->getRootName(m->getSimpleName(namefile)) + "good" + m->getExtension(namefile);
+		outputNames.push_back(goodNameFile); 
 		
-		outputNames.push_back(goodNameFile);  outputNames.push_back(badNameFile);
-		
-		ofstream goodNameOut;	openOutputFile(goodNameFile, goodNameOut);
-		ofstream badNameOut;	openOutputFile(badNameFile, badNameOut);		
+		ofstream goodNameOut;	m->openOutputFile(goodNameFile, goodNameOut);
 		
 		while(!inputNames.eof()){
-			if (m->control_pressed) { goodNameOut.close(); badNameOut.close(); inputNames.close(); remove(goodNameFile.c_str()); remove(badNameFile.c_str()); return 0; }
+			if (m->control_pressed) { goodNameOut.close();  inputNames.close(); remove(goodNameFile.c_str());  return 0; }
 
 			inputNames >> seqName >> seqList;
 			it = badSeqNames.find(seqName);
 			
 			if(it != badSeqNames.end()){
 				badSeqNames.erase(it);
-				badNameOut << seqName << '\t' << seqList << endl;
+				
 				if(namefile != ""){
 					int start = 0;
 					for(int i=0;i<seqList.length();i++){
@@ -460,11 +445,10 @@ int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 			else{
 				goodNameOut << seqName << '\t' << seqList << endl;
 			}
-			gobble(inputNames);
+			m->gobble(inputNames);
 		}
 		inputNames.close();
 		goodNameOut.close();
-		badNameOut.close();
 		
 		//we were unable to remove some of the bad sequences
 		if (badSeqNames.size() != 0) {
@@ -477,18 +461,15 @@ int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 		if(groupfile != ""){
 			
 			ifstream inputGroups;
-			openInputFile(groupfile, inputGroups);
+			m->openInputFile(groupfile, inputGroups);
 
-			string goodGroupFile = outputDir + getRootName(getSimpleName(groupfile)) + "good" + getExtension(groupfile);
-			string badGroupFile = outputDir + getRootName(getSimpleName(groupfile)) + "bad" + getExtension(groupfile);
+			string goodGroupFile = outputDir + m->getRootName(m->getSimpleName(groupfile)) + "good" + m->getExtension(groupfile);
+			outputNames.push_back(goodGroupFile);  
 			
-			outputNames.push_back(goodGroupFile);  outputNames.push_back(badGroupFile);
-			
-			ofstream goodGroupOut;	openOutputFile(goodGroupFile, goodGroupOut);
-			ofstream badGroupOut;	openOutputFile(badGroupFile, badGroupOut);		
+			ofstream goodGroupOut;	m->openOutputFile(goodGroupFile, goodGroupOut);
 			
 			while(!inputGroups.eof()){
-				if (m->control_pressed) { goodGroupOut.close(); badGroupOut.close(); inputGroups.close(); remove(goodNameFile.c_str()); remove(badNameFile.c_str()); remove(goodGroupFile.c_str()); remove(badGroupFile.c_str()); return 0; }
+				if (m->control_pressed) { goodGroupOut.close(); inputGroups.close(); remove(goodNameFile.c_str());  remove(goodGroupFile.c_str()); return 0; }
 
 				inputGroups >> seqName >> group;
 
@@ -496,21 +477,19 @@ int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 				
 				if(it != badSeqGroups.end()){
 					badSeqGroups.erase(it);
-					badGroupOut << seqName << '\t' << group << endl;
 				}
 				else{
 					goodGroupOut << seqName << '\t' << group << endl;
 				}
-				gobble(inputGroups);
+				m->gobble(inputGroups);
 			}
 			inputGroups.close();
 			goodGroupOut.close();
-			badGroupOut.close();
 			
 			//we were unable to remove some of the bad sequences
 			if (badSeqGroups.size() != 0) {
 				for (it = badSeqGroups.begin(); it != badSeqGroups.end(); it++) {  
-					m->mothurOut("Your namefile does not include the sequence " + *it + " please correct."); 
+					m->mothurOut("Your groupfile does not include the sequence " + *it + " please correct."); 
 					m->mothurOutEndLine();
 				}
 			}
@@ -530,35 +509,30 @@ int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 int ScreenSeqsCommand::screenGroupFile(set<string> badSeqNames){
 	try {
 		ifstream inputGroups;
-		openInputFile(groupfile, inputGroups);
+		m->openInputFile(groupfile, inputGroups);
 		string seqName, group;
 		set<string>::iterator it;
 		
-		string goodGroupFile = outputDir + getRootName(getSimpleName(groupfile)) + "good" + getExtension(groupfile);
-		string badGroupFile = outputDir + getRootName(getSimpleName(groupfile)) + "bad" + getExtension(groupfile);
-		
-		outputNames.push_back(goodGroupFile);  outputNames.push_back(badGroupFile);
-		
-		ofstream goodGroupOut;	openOutputFile(goodGroupFile, goodGroupOut);
-		ofstream badGroupOut;	openOutputFile(badGroupFile, badGroupOut);		
+		string goodGroupFile = outputDir + m->getRootName(m->getSimpleName(groupfile)) + "good" + m->getExtension(groupfile);
+		outputNames.push_back(goodGroupFile); 
+		ofstream goodGroupOut;	m->openOutputFile(goodGroupFile, goodGroupOut);
 		
 		while(!inputGroups.eof()){
-			if (m->control_pressed) { goodGroupOut.close(); badGroupOut.close(); inputGroups.close(); remove(goodGroupFile.c_str()); remove(badGroupFile.c_str()); return 0; }
+			if (m->control_pressed) { goodGroupOut.close(); inputGroups.close(); remove(goodGroupFile.c_str()); return 0; }
 
 			inputGroups >> seqName >> group;
 			it = badSeqNames.find(seqName);
 			
 			if(it != badSeqNames.end()){
 				badSeqNames.erase(it);
-				badGroupOut << seqName << '\t' << group << endl;
 			}
 			else{
 				goodGroupOut << seqName << '\t' << group << endl;
 			}
-			gobble(inputGroups);
+			m->gobble(inputGroups);
 		}
 		
-		if (m->control_pressed) { goodGroupOut.close(); badGroupOut.close(); inputGroups.close(); remove(goodGroupFile.c_str()); remove(badGroupFile.c_str()); return 0; }
+		if (m->control_pressed) { goodGroupOut.close();  inputGroups.close(); remove(goodGroupFile.c_str());  return 0; }
 
 		//we were unable to remove some of the bad sequences
 		if (badSeqNames.size() != 0) {
@@ -570,10 +544,8 @@ int ScreenSeqsCommand::screenGroupFile(set<string> badSeqNames){
 		
 		inputGroups.close();
 		goodGroupOut.close();
-		badGroupOut.close();
 		
-		if (m->control_pressed) { remove(goodGroupFile.c_str()); remove(badGroupFile.c_str());  }
-
+		if (m->control_pressed) { remove(goodGroupFile.c_str());   }
 		
 		return 0;
 	
@@ -589,27 +561,22 @@ int ScreenSeqsCommand::screenGroupFile(set<string> badSeqNames){
 int ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){
 	try {
 		ifstream inputAlignReport;
-		openInputFile(alignreport, inputAlignReport);
+		m->openInputFile(alignreport, inputAlignReport);
 		string seqName, group;
 		set<string>::iterator it;
 		
-		string goodAlignReportFile = outputDir + getRootName(getSimpleName(alignreport)) + "good" + getExtension(alignreport);
-		string badAlignReportFile = outputDir + getRootName(getSimpleName(alignreport)) + "bad" + getExtension(alignreport);
-		
-		outputNames.push_back(goodAlignReportFile);  outputNames.push_back(badAlignReportFile);
-		
-		ofstream goodAlignReportOut;	openOutputFile(goodAlignReportFile, goodAlignReportOut);
-		ofstream badAlignReportOut;		openOutputFile(badAlignReportFile, badAlignReportOut);		
+		string goodAlignReportFile = outputDir + m->getRootName(m->getSimpleName(alignreport)) + "good" + m->getExtension(alignreport);
+		outputNames.push_back(goodAlignReportFile);  
+		ofstream goodAlignReportOut;	m->openOutputFile(goodAlignReportFile, goodAlignReportOut);
 
 		while (!inputAlignReport.eof())	{		//	need to copy header
 			char c = inputAlignReport.get();
 			goodAlignReportOut << c;
-			badAlignReportOut << c;
 			if (c == 10 || c == 13){	break;	}	
 		}
 
 		while(!inputAlignReport.eof()){
-			if (m->control_pressed) { goodAlignReportOut.close(); badAlignReportOut.close(); inputAlignReport.close(); remove(goodAlignReportFile.c_str()); remove(badAlignReportFile.c_str()); return 0; }
+			if (m->control_pressed) { goodAlignReportOut.close(); inputAlignReport.close(); remove(goodAlignReportFile.c_str()); return 0; }
 
 			inputAlignReport >> seqName;
 			it = badSeqNames.find(seqName);
@@ -622,29 +589,27 @@ int ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){
 			
 			if(it != badSeqNames.end()){
 				badSeqNames.erase(it);
-				badAlignReportOut << seqName << '\t' << line;
 			}
 			else{
 				goodAlignReportOut << seqName << '\t' << line;
 			}
-			gobble(inputAlignReport);
+			m->gobble(inputAlignReport);
 		}
 		
-		if (m->control_pressed) { goodAlignReportOut.close(); badAlignReportOut.close(); inputAlignReport.close(); remove(goodAlignReportFile.c_str()); remove(badAlignReportFile.c_str()); return 0; }
+		if (m->control_pressed) { goodAlignReportOut.close();  inputAlignReport.close(); remove(goodAlignReportFile.c_str());  return 0; }
 
 		//we were unable to remove some of the bad sequences
 		if (badSeqNames.size() != 0) {
 			for (it = badSeqNames.begin(); it != badSeqNames.end(); it++) {  
-				m->mothurOut("Your file does not include the sequence " + *it + " please correct."); 
+				m->mothurOut("Your alignreport file does not include the sequence " + *it + " please correct."); 
 				m->mothurOutEndLine();
 			}
 		}
 
 		inputAlignReport.close();
 		goodAlignReportOut.close();
-		badAlignReportOut.close();
 				
-		if (m->control_pressed) {  remove(goodAlignReportFile.c_str()); remove(badAlignReportFile.c_str()); return 0; }
+		if (m->control_pressed) {  remove(goodAlignReportFile.c_str());  return 0; }
 		
 		return 0;
 	
@@ -657,19 +622,16 @@ int ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){
 }
 //**********************************************************************************************************************
 
-int ScreenSeqsCommand::driver(linePair* filePos, string goodFName, string badFName, string badAccnosFName, string filename, set<string>& badSeqNames){
+int ScreenSeqsCommand::driver(linePair* filePos, string goodFName, string badAccnosFName, string filename, set<string>& badSeqNames){
 	try {
 		ofstream goodFile;
-		openOutputFile(goodFName, goodFile);
-		
-		ofstream badFile;
-		openOutputFile(badFName, badFile);
+		m->openOutputFile(goodFName, goodFile);
 		
 		ofstream badAccnosFile;
-		openOutputFile(badAccnosFName, badAccnosFile);
+		m->openOutputFile(badAccnosFName, badAccnosFile);
 		
 		ifstream inFASTA;
-		openInputFile(filename, inFASTA);
+		m->openInputFile(filename, inFASTA);
 
 		inFASTA.seekg(filePos->start);
 
@@ -680,7 +642,7 @@ int ScreenSeqsCommand::driver(linePair* filePos, string goodFName, string badFNa
 		
 			if (m->control_pressed) {  return 0; }
 			
-			Sequence currSeq(inFASTA); gobble(inFASTA);
+			Sequence currSeq(inFASTA); m->gobble(inFASTA);
 			if (currSeq.getName() != "") {
 				bool goodSeq = 1;		//	innocent until proven guilty
 				if(goodSeq == 1 && startPos != -1 && startPos < currSeq.getStartPos())			{	goodSeq = 0;	}
@@ -694,7 +656,6 @@ int ScreenSeqsCommand::driver(linePair* filePos, string goodFName, string badFNa
 					currSeq.printSequence(goodFile);	
 				}
 				else{
-					currSeq.printSequence(badFile);	
 					badAccnosFile << currSeq.getName() << endl;
 					badSeqNames.insert(currSeq.getName());
 				}
@@ -713,7 +674,6 @@ int ScreenSeqsCommand::driver(linePair* filePos, string goodFName, string badFNa
 			
 		goodFile.close();
 		inFASTA.close();
-		badFile.close();
 		badAccnosFile.close();
 		
 		return count;
@@ -725,11 +685,10 @@ int ScreenSeqsCommand::driver(linePair* filePos, string goodFName, string badFNa
 }
 //**********************************************************************************************************************
 #ifdef USE_MPI
-int ScreenSeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& goodFile, MPI_File& badFile, MPI_File& badAccnosFile, vector<unsigned long int>& MPIPos, set<string>& badSeqNames){
+int ScreenSeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& goodFile, MPI_File& badAccnosFile, vector<unsigned long int>& MPIPos, set<string>& badSeqNames){
 	try {
 		string outputString = "";
 		MPI_Status statusGood; 
-		MPI_Status statusBad; 
 		MPI_Status statusBadAccnos; 
 		MPI_Status status; 
 		int pid;
@@ -775,15 +734,6 @@ int ScreenSeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& 
 					delete buf2;
 				}
 				else{
-					outputString =  ">" + currSeq.getName() + "\n" + currSeq.getAligned() + "\n";
-				
-					//print bad seq to fasta
-					length = outputString.length();
-					char* buf2 = new char[length];
-					memcpy(buf2, outputString.c_str(), length);
-					
-					MPI_File_write_shared(badFile, buf2, length, MPI_CHAR, &statusBad);
-					delete buf2;
 
 					badSeqNames.insert(currSeq.getName());
 					
@@ -810,7 +760,7 @@ int ScreenSeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& 
 #endif
 /**************************************************************************************************/
 
-int ScreenSeqsCommand::createProcesses(string goodFileName, string badFileName, string badAccnos, string filename, set<string>& badSeqNames) {
+int ScreenSeqsCommand::createProcesses(string goodFileName, string badAccnos, string filename, set<string>& badSeqNames) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 0;
@@ -824,12 +774,12 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badFileName, 
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				num = driver(lines[process], goodFileName + toString(getpid()) + ".temp", badFileName + toString(getpid()) + ".temp", badAccnos + toString(getpid()) + ".temp", filename, badSeqNames);
+				num = driver(lines[process], goodFileName + toString(getpid()) + ".temp", badAccnos + toString(getpid()) + ".temp", filename, badSeqNames);
 				
 				//pass numSeqs to parent
 				ofstream out;
 				string tempFile = filename + toString(getpid()) + ".num.temp";
-				openOutputFile(tempFile, out);
+				m->openOutputFile(tempFile, out);
 				out << num << endl;
 				out.close();
 				
@@ -846,7 +796,7 @@ int ScreenSeqsCommand::createProcesses(string goodFileName, string badFileName, 
 		for (int i = 0; i < processIDS.size(); i++) {
 			ifstream in;
 			string tempFile =  filename + toString(processIDS[i]) + ".num.temp";
-			openInputFile(tempFile, in);
+			m->openInputFile(tempFile, in);
 			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
 			in.close(); remove(tempFile.c_str());
 		}

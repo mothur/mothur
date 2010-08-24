@@ -51,7 +51,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 				it = parameters.find("template");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["template"] = inputDir + it->second;		}
 				}
@@ -59,7 +59,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 				it = parameters.find("taxonomy");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
@@ -67,7 +67,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -86,12 +86,12 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			fastaFileName = validParameter.validFile(parameters, "fasta", false);
 			if (fastaFileName == "not found") { m->mothurOut("fasta is a required parameter for the classify.seqs command."); m->mothurOutEndLine(); abort = true;  }
 			else { 
-				splitAtDash(fastaFileName, fastaFileNames);
+				m->splitAtDash(fastaFileName, fastaFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < fastaFileNames.size(); i++) {
 					if (inputDir != "") {
-						string path = hasPath(fastaFileNames[i]);
+						string path = m->hasPath(fastaFileNames[i]);
 						//if the user has not given a path then, add inputdir. else leave path alone.
 						if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
 					}
@@ -99,14 +99,14 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 					int ableToOpen;
 					
 					ifstream in;
-					ableToOpen = openInputFile(fastaFileNames[i], in, "noerror");
+					ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
 				
 					//if you can't open it, try default location
 					if (ableToOpen == 1) {
 						if (m->getDefaultPath() != "") { //default path is set
-							string tryPath = m->getDefaultPath() + getSimpleName(fastaFileNames[i]);
+							string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
 							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = openInputFile(tryPath, in, "noerror");
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
 							fastaFileNames[i] = tryPath;
 						}
 					}
@@ -139,26 +139,26 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			if (namefile == "not found") { namefile = "";  }
 
 			else { 
-				splitAtDash(namefile, namefileNames);
+				m->splitAtDash(namefile, namefileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < namefileNames.size(); i++) {
 					if (inputDir != "") {
-						string path = hasPath(namefileNames[i]);
+						string path = m->hasPath(namefileNames[i]);
 						//if the user has not given a path then, add inputdir. else leave path alone.
 						if (path == "") {	namefileNames[i] = inputDir + namefileNames[i];		}
 					}
 					int ableToOpen;
 					
 					ifstream in;
-					ableToOpen = openInputFile(namefileNames[i], in, "noerror");
+					ableToOpen = m->openInputFile(namefileNames[i], in, "noerror");
 				
 					//if you can't open it, try default location
 					if (ableToOpen == 1) {
 						if (m->getDefaultPath() != "") { //default path is set
-							string tryPath = m->getDefaultPath() + getSimpleName(namefileNames[i]);
+							string tryPath = m->getDefaultPath() + m->getSimpleName(namefileNames[i]);
 							m->mothurOut("Unable to open " + namefileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = openInputFile(tryPath, in, "noerror");
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
 							namefileNames[i] = tryPath;
 						}
 					}
@@ -181,26 +181,26 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			groupfile = validParameter.validFile(parameters, "group", false);
 			if (groupfile == "not found") { groupfile = "";  }
 			else { 
-				splitAtDash(groupfile, groupfileNames);
+				m->splitAtDash(groupfile, groupfileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < groupfileNames.size(); i++) {
 					if (inputDir != "") {
-						string path = hasPath(groupfileNames[i]);
+						string path = m->hasPath(groupfileNames[i]);
 						//if the user has not given a path then, add inputdir. else leave path alone.
 						if (path == "") {	groupfileNames[i] = inputDir + groupfileNames[i];		}
 					}
 					int ableToOpen;
 					
 					ifstream in;
-					ableToOpen = openInputFile(groupfileNames[i], in, "noerror");
+					ableToOpen = m->openInputFile(groupfileNames[i], in, "noerror");
 				
 					//if you can't open it, try default location
 					if (ableToOpen == 1) {
 						if (m->getDefaultPath() != "") { //default path is set
-							string tryPath = m->getDefaultPath() + getSimpleName(groupfileNames[i]);
+							string tryPath = m->getDefaultPath() + m->getSimpleName(groupfileNames[i]);
 							m->mothurOut("Unable to open " + groupfileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = openInputFile(tryPath, in, "noerror");
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
 							groupfileNames[i] = tryPath;
 						}
 					}
@@ -253,7 +253,7 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			convert(temp, cutoff);
 			
 			temp = validParameter.validFile(parameters, "probs", false);		if (temp == "not found"){	temp = "true";			}
-			probs = isTrue(temp);
+			probs = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "iters", false);		if (temp == "not found") { temp = "100";			}
 			convert(temp, iters); 
@@ -342,18 +342,18 @@ int ClassifySeqsCommand::execute(){
 		
 			m->mothurOut("Classifying sequences from " + fastaFileNames[s] + " ..." ); m->mothurOutEndLine();
 			
-			string RippedTaxName = getRootName(getSimpleName(taxonomyFileName));
-			RippedTaxName = getExtension(RippedTaxName.substr(0, RippedTaxName.length()-1));
+			string RippedTaxName = m->getRootName(m->getSimpleName(taxonomyFileName));
+			RippedTaxName = m->getExtension(RippedTaxName.substr(0, RippedTaxName.length()-1));
 			if (RippedTaxName[0] == '.') { RippedTaxName = RippedTaxName.substr(1, RippedTaxName.length()); }
 			RippedTaxName +=  "."; 
 		
-			if (outputDir == "") { outputDir += hasPath(fastaFileNames[s]); }
-			string newTaxonomyFile = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + RippedTaxName + "taxonomy";
-			string tempTaxonomyFile = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + "taxonomy.temp";
-			string taxSummary = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + RippedTaxName + "tax.summary";
+			if (outputDir == "") { outputDir += m->hasPath(fastaFileNames[s]); }
+			string newTaxonomyFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + "taxonomy";
+			string tempTaxonomyFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "taxonomy.temp";
+			string taxSummary = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + RippedTaxName + "tax.summary";
 			
 			if ((method == "knn") && (search == "distance")) { 
-				string DistName = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + "match.dist";
+				string DistName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "match.dist";
 				classify->setDistName(DistName);  outputNames.push_back(DistName);
 			}
 			
@@ -410,7 +410,7 @@ int ClassifySeqsCommand::execute(){
 				
 				if (pid == 0) { //you are the root process 
 					
-					MPIPos = setFilePosFasta(fastaFileNames[s], numFastaSeqs); //fills MPIPos, returns numSeqs
+					MPIPos = m->setFilePosFasta(fastaFileNames[s], numFastaSeqs); //fills MPIPos, returns numSeqs
 					
 					//send file positions to all processes
 					for(int i = 1; i < processors; i++) { 
@@ -461,7 +461,7 @@ int ClassifySeqsCommand::execute(){
 				
 #else
 		
-			vector<unsigned long int> positions = divideFile(fastaFileNames[s], processors);
+			vector<unsigned long int> positions = m->divideFile(fastaFileNames[s], processors);
 				
 			for (int i = 0; i < (positions.size()-1); i++) {
 				lines.push_back(new linePair(positions[i], positions[(i+1)]));
@@ -510,14 +510,14 @@ int ClassifySeqsCommand::execute(){
 				nameMap.clear(); //remove old names
 				
 				ifstream inNames;
-				openInputFile(namefileNames[s], inNames);
+				m->openInputFile(namefileNames[s], inNames);
 				
 				string firstCol, secondCol;
 				while(!inNames.eof()) {
-					inNames >> firstCol >> secondCol; gobble(inNames);
+					inNames >> firstCol >> secondCol; m->gobble(inNames);
 					
 					vector<string> temp;
-					splitAtComma(secondCol, temp);
+					m->splitAtComma(secondCol, temp);
 			
 					nameMap[firstCol] = temp;  
 				}
@@ -537,13 +537,13 @@ int ClassifySeqsCommand::execute(){
 			if (namefile == "") {  taxaSum.summarize(tempTaxonomyFile);  }
 			else {
 				ifstream in;
-				openInputFile(tempTaxonomyFile, in);
+				m->openInputFile(tempTaxonomyFile, in);
 				
 				//read in users taxonomy file and add sequences to tree
 				string name, taxon;
 				
 				while(!in.eof()){
-					in >> name >> taxon; gobble(in);
+					in >> name >> taxon; m->gobble(in);
 					
 					itNames = nameMap.find(name);
 		
@@ -565,17 +565,17 @@ int ClassifySeqsCommand::execute(){
 			
 			//print summary file
 			ofstream outTaxTree;
-			openOutputFile(taxSummary, outTaxTree);
+			m->openOutputFile(taxSummary, outTaxTree);
 			taxaSum.print(outTaxTree);
 			outTaxTree.close();
 			
 			//output taxonomy with the unclassified bins added
 			ifstream inTax;
-			openInputFile(newTaxonomyFile, inTax);
+			m->openInputFile(newTaxonomyFile, inTax);
 			
 			ofstream outTax;
 			string unclass = newTaxonomyFile + ".unclass.temp";
-			openOutputFile(unclass, outTax);
+			m->openOutputFile(unclass, outTax);
 			
 			//get maxLevel from phylotree so you know how many 'unclassified's to add
 			int maxLevel = taxaSum.getMaxLevel();
@@ -585,7 +585,7 @@ int ClassifySeqsCommand::execute(){
 			while (!inTax.eof()) {
 				if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} remove(unclass.c_str()); delete classify; return 0; }
 
-				inTax >> name >> taxon; gobble(inTax);
+				inTax >> name >> taxon; m->gobble(inTax);
 				
 				string newTax = addUnclassifieds(taxon, maxLevel);
 				
@@ -669,7 +669,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 				//pass numSeqs to parent
 				ofstream out;
 				string tempFile = filename + toString(getpid()) + ".num.temp";
-				openOutputFile(tempFile, out);
+				m->openOutputFile(tempFile, out);
 				out << num << endl;
 				out.close();
 
@@ -686,7 +686,7 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 		for (int i = 0; i < processIDS.size(); i++) {
 			ifstream in;
 			string tempFile =  filename + toString(processIDS[i]) + ".num.temp";
-			openInputFile(tempFile, in);
+			m->openInputFile(tempFile, in);
 			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
 			in.close(); remove(tempFile.c_str());
 		}
@@ -706,8 +706,8 @@ void ClassifySeqsCommand::appendTaxFiles(string temp, string filename) {
 		
 		ofstream output;
 		ifstream input;
-		openOutputFileAppend(filename, output);
-		openInputFile(temp, input);
+		m->openOutputFileAppend(filename, output);
+		m->openInputFile(temp, input);
 		
 		while(char c = input.get()){
 			if(input.eof())		{	break;			}
@@ -728,13 +728,13 @@ void ClassifySeqsCommand::appendTaxFiles(string temp, string filename) {
 int ClassifySeqsCommand::driver(linePair* filePos, string taxFName, string tempTFName, string filename){
 	try {
 		ofstream outTax;
-		openOutputFile(taxFName, outTax);
+		m->openOutputFile(taxFName, outTax);
 		
 		ofstream outTaxSimple;
-		openOutputFile(tempTFName, outTaxSimple);
+		m->openOutputFile(tempTFName, outTaxSimple);
 	
 		ifstream inFASTA;
-		openInputFile(filename, inFASTA);
+		m->openInputFile(filename, inFASTA);
 		
 		string taxonomy;
 
@@ -746,7 +746,7 @@ int ClassifySeqsCommand::driver(linePair* filePos, string taxFName, string tempT
 		while (!done) {
 			if (m->control_pressed) { return 0; }
 		
-			Sequence* candidateSeq = new Sequence(inFASTA); gobble(inFASTA);
+			Sequence* candidateSeq = new Sequence(inFASTA); m->gobble(inFASTA);
 		
 			if (candidateSeq->getName() != "") {
 				taxonomy = classify->getTaxonomy(candidateSeq);
@@ -890,10 +890,10 @@ int ClassifySeqsCommand::MPIReadNamesFile(string nameFilename){
 		
 		string firstCol, secondCol;
 		while(!iss.eof()) {
-			iss >> firstCol >> secondCol; gobble(iss);
+			iss >> firstCol >> secondCol; m->gobble(iss);
 			
 			vector<string> temp;
-			splitAtComma(secondCol, temp);
+			m->splitAtComma(secondCol, temp);
 			
 			nameMap[firstCol] = temp;  
 		}

@@ -44,7 +44,7 @@ CatchAllCommand::CatchAllCommand(string option)  {
 				it = parameters.find("sabund");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["sabund"] = inputDir + it->second;		}
 				}
@@ -59,7 +59,7 @@ CatchAllCommand::CatchAllCommand(string option)  {
 			string label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 		
@@ -102,13 +102,13 @@ int CatchAllCommand::execute() {
 		vector<string> outputNames;
 		
 		//prepare full output directory
-		outputDir = getFullPathName(outputDir);
+		outputDir = m->getFullPathName(outputDir);
 		
 		//get location of catchall
 		GlobalData* globaldata = GlobalData::getInstance();
 		string path = globaldata->argv;
 		path = path.substr(0, (path.find_last_of('m')));
-		path = getFullPathName(path);
+		path = m->getFullPathName(path);
 
 		string catchAllCommandExe = ""; 
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -159,7 +159,7 @@ cout << catchAllCommand << endl;
 					userLabels.erase(sabund->getLabel());
 			}
 			
-			if ((anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = sabund->getLabel();
 					
 					delete sabund;		
@@ -264,11 +264,11 @@ cout << catchAllCommand << endl;
 //**********************************************************************************************************************
 string CatchAllCommand::process(SAbundVector* sabund) {
 	try {
-		string filename = outputDir + getRootName(getSimpleName(sabundfile)) + sabund->getLabel() + ".catchall";
-		filename = getFullPathName(filename);
+		string filename = outputDir + m->getRootName(m->getSimpleName(sabundfile)) + sabund->getLabel() + ".catchall";
+		filename = m->getFullPathName(filename);
 	
 		ofstream out;
-		openOutputFile(filename, out);
+		m->openOutputFile(filename, out);
 		
 		for (int i = 1; i <= sabund->getMaxRank(); i++) {
 			int temp = sabund->get(i);

@@ -101,7 +101,7 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 			
 		}
 		
-		gobble(f);
+		m->gobble(f);
 		
 		if (f.eof() != true) { f >> nextLabel; }
 		
@@ -128,7 +128,7 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 				lookup[count]->push_back(inputData, groupN); //abundance, bin, group
 			}
 			
-			gobble(f);
+			m->gobble(f);
 				
 			if (f.eof() != true) { f >> nextLabel; }
 		}

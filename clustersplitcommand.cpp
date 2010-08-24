@@ -57,7 +57,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
@@ -65,7 +65,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 				it = parameters.find("column");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["column"] = inputDir + it->second;		}
 				}
@@ -73,7 +73,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -81,7 +81,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 				it = parameters.find("taxonomy");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
@@ -89,7 +89,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -142,10 +142,10 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			convert(temp, precision); 
 			
 			temp = validParameter.validFile(parameters, "hard", false);			if (temp == "not found") { temp = "F"; }
-			hard = isTrue(temp);
+			hard = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "large", false);			if (temp == "not found") { temp = "F"; }
-			large = isTrue(temp);
+			large = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = "1";				}
 			convert(temp, processors); 
@@ -271,7 +271,7 @@ int ClusterSplitCommand::execute(){
 			if (namefile == "") {  //you need to make a namefile for split matrix
 				ofstream out;
 				namefile = phylipfile + ".names";
-				openOutputFile(namefile, out);
+				m->openOutputFile(namefile, out);
 				for (int i = 0; i < listToMakeNameFile->getNumBins(); i++) {
 					string bin = listToMakeNameFile->get(i);
 					out << bin << '\t' << bin << endl;
@@ -497,13 +497,13 @@ int ClusterSplitCommand::execute(){
 					for(int i=0;i<processors;i++){
 						string filename = toString(processIDS[i]) + ".temp";
 						ifstream in;
-						openInputFile(filename, in);
+						m->openInputFile(filename, in);
 						
-						in >> tag; gobble(in);
+						in >> tag; m->gobble(in);
 						
 						while(!in.eof()) {
 							string tempName;
-							in >> tempName; gobble(in);
+							in >> tempName; m->gobble(in);
 							listFileNames.push_back(tempName);
 						}
 						in.close();
@@ -512,15 +512,15 @@ int ClusterSplitCommand::execute(){
 						//get labels
 						filename = toString(processIDS[i]) + ".temp.labels";
 						ifstream in2;
-						openInputFile(filename, in2);
+						m->openInputFile(filename, in2);
 						
 						float tempCutoff;
-						in2 >> tempCutoff; gobble(in2);
+						in2 >> tempCutoff; m->gobble(in2);
 						if (tempCutoff < cutoff) { cutoff = tempCutoff; }
 						
 						while(!in2.eof()) {
 							string tempName;
-							in2 >> tempName; gobble(in2);
+							in2 >> tempName; m->gobble(in2);
 							if (labels.count(tempName) == 0) { labels.insert(tempName); }
 						}
 						in2.close();
@@ -586,12 +586,12 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
 		//read in singletons
 		if (singleton != "none") {
 			ifstream in;
-			openInputFile(singleton, in);
+			m->openInputFile(singleton, in);
 				
 			string firstCol, secondCol;
 			listSingle = new ListVector();
 			while (!in.eof()) {
-				in >> firstCol >> secondCol; gobble(in);
+				in >> firstCol >> secondCol; m->gobble(in);
 				listSingle->push_back(secondCol);
 			}
 			in.close();
@@ -632,7 +632,7 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
 			
 			string filledInList = listNames[k] + "filledInTemp";
 			ofstream outFilled;
-			openOutputFile(filledInList, outFilled);
+			m->openOutputFile(filledInList, outFilled);
 	
 			//for each label needed
 			for(int l = 0; l < orderFloat.size(); l++){
@@ -689,12 +689,12 @@ map<float, int> ClusterSplitCommand::completeListFile(vector<string> listNames, 
 //**********************************************************************************************************************
 int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> userLabels, ListVector* listSingle){
 	try {
-		if (outputDir == "") { outputDir += hasPath(distfile); }
-		fileroot = outputDir + getRootName(getSimpleName(distfile));
+		if (outputDir == "") { outputDir += m->hasPath(distfile); }
+		fileroot = outputDir + m->getRootName(m->getSimpleName(distfile));
 		
-		openOutputFile(fileroot+ tag + ".sabund",	outSabund);
-		openOutputFile(fileroot+ tag + ".rabund",	outRabund);
-		openOutputFile(fileroot+ tag + ".list",		outList);
+		m->openOutputFile(fileroot+ tag + ".sabund",	outSabund);
+		m->openOutputFile(fileroot+ tag + ".rabund",	outRabund);
+		m->openOutputFile(fileroot+ tag + ".list",		outList);
 				
 		outputNames.push_back(fileroot+ tag + ".sabund");
 		outputNames.push_back(fileroot+ tag + ".rabund");
@@ -718,7 +718,7 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
 			if (listSingle != NULL) {
 				for (int j = 0; j < listSingle->getNumBins(); j++) {
 					outList << listSingle->get(j) << '\t';
-					rabund->push_back(getNumNames(listSingle->get(j)));
+					rabund->push_back(m->getNumNames(listSingle->get(j)));
 				}
 			}
 			
@@ -735,7 +735,7 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
 				else {		
 					for (int j = 0; j < list->getNumBins(); j++) {
 						outList << list->get(j) << '\t';
-						rabund->push_back(getNumNames(list->get(j)));
+						rabund->push_back(m->getNumNames(list->get(j)));
 					}
 					delete list;
 				}
@@ -775,7 +775,7 @@ void ClusterSplitCommand::printData(ListVector* oldList){
 		RAbundVector oldRAbund = oldList->getRAbundVector();
 		
 		oldRAbund.setLabel(label);
-		if (isTrue(showabund)) {
+		if (m->isTrue(showabund)) {
 			oldRAbund.getSAbundVector().print(cout);
 		}
 		oldRAbund.print(outRabund);
@@ -811,7 +811,7 @@ int ClusterSplitCommand::createProcesses(vector < vector < map<string, string> >
 				//write out names to file
 				string filename = toString(getpid()) + ".temp";
 				ofstream out;
-				openOutputFile(filename, out);
+				m->openOutputFile(filename, out);
 				out << tag << endl;
 				for (int j = 0; j < listFileNames.size(); j++) { out << listFileNames[j] << endl;  }
 				out.close();
@@ -819,7 +819,7 @@ int ClusterSplitCommand::createProcesses(vector < vector < map<string, string> >
 				//print out labels
 				ofstream outLabels;
 				filename = toString(getpid()) + ".temp.labels";
-				openOutputFile(filename, outLabels);
+				m->openOutputFile(filename, outLabels);
 				
 				outLabels << cutoff << endl;
 				for (set<string>::iterator it = labels.begin(); it != labels.end(); it++) {
@@ -917,11 +917,11 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
 			else if(method == "average"){	cluster = new AverageLinkage(rabund, list, matrix, cutoff, method);	}
 			tag = cluster->getTag();
 		
-			if (outputDir == "") { outputDir += hasPath(thisDistFile); }
-			fileroot = outputDir + getRootName(getSimpleName(thisDistFile));
+			if (outputDir == "") { outputDir += m->hasPath(thisDistFile); }
+			fileroot = outputDir + m->getRootName(m->getSimpleName(thisDistFile));
 			
 			ofstream listFile;
-			openOutputFile(fileroot+ tag + ".list",	listFile);
+			m->openOutputFile(fileroot+ tag + ".list",	listFile);
 		
 			listFileNames.push_back(fileroot+ tag + ".list");
 		
@@ -950,9 +950,9 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
 				float dist = matrix->getSmallDist();
 				float rndDist;
 				if (hard) {
-					rndDist = ceilDist(dist, precision); 
+					rndDist = m->ceilDist(dist, precision); 
 				}else{
-					rndDist = roundDist(dist, precision); 
+					rndDist = m->roundDist(dist, precision); 
 				}
 
 				if(previousDist <= 0.0000 && dist != previousDist){
@@ -995,8 +995,8 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
 			remove(thisNamefile.c_str());
 			
 			if (saveCutoff != cutoff) { 
-				if (hard)	{  saveCutoff = ceilDist(saveCutoff, precision);	}
-				else		{	saveCutoff = roundDist(saveCutoff, precision);  }
+				if (hard)	{  saveCutoff = m->ceilDist(saveCutoff, precision);	}
+				else		{	saveCutoff = m->roundDist(saveCutoff, precision);  }
 			
 				m->mothurOut("Cutoff was " + toString(cutoff) + " changed cutoff to " + toString(saveCutoff)); m->mothurOutEndLine();  
 			}

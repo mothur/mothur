@@ -44,7 +44,7 @@ ParseSFFCommand::ParseSFFCommand(string option){
 				it = parameters.find("sff");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["sff"] = inputDir + it->second;		}
 				}
@@ -52,7 +52,7 @@ ParseSFFCommand::ParseSFFCommand(string option){
 				it = parameters.find("oligos");
 				//user has given an oligos file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["oligos"] = inputDir + it->second;		}
 				}
@@ -72,7 +72,7 @@ ParseSFFCommand::ParseSFFCommand(string option){
 			outputDir = validParameter.validFile(parameters, "outputdir", false);
 			if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(sffFile); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(sffFile); //if user entered a file with a path then preserve it	
 			}
 
 			//check for optional parameter and set defaults
@@ -103,7 +103,7 @@ int ParseSFFCommand::execute(){
 		if (abort == true) {	return 0;	}
 
 		ifstream inSFF;
-		openInputFile(sffFile, inSFF);
+		m->openInputFile(sffFile, inSFF);
 		
 		cout.setf(ios::fixed, ios::floatfield);
 		cout.setf(ios::showpoint);
@@ -114,8 +114,8 @@ int ParseSFFCommand::execute(){
 			getOligos(flowFileNames);
 		}
 		else{
-			flowFileNames.push_back(new ofstream((outputDir + getRootName(getSimpleName(sffFile)) + "flow").c_str(), ios::ate));
-			outputNames.push_back((outputDir + getRootName(getSimpleName(sffFile)) + "flow"));
+			flowFileNames.push_back(new ofstream((outputDir + m->getRootName(m->getSimpleName(sffFile)) + "flow").c_str(), ios::ate));
+			outputNames.push_back((outputDir + m->getRootName(m->getSimpleName(sffFile)) + "flow"));
 		}
 		
 		for(int i=0;i<flowFileNames.size();i++){
@@ -127,24 +127,24 @@ int ParseSFFCommand::execute(){
 		if (m->control_pressed) { for(int i=0;i<flowFileNames.size();i++){	flowFileNames[i]->close();  } return 0; }
 		
 //		ofstream fastaFile;
-//		openOutputFile(getRootName(sffFile) + "fasta", fastaFile);
+//		m->openOutputFile(m->getRootName(sffFile) + "fasta", fastaFile);
 
 //		ofstream qualFile;
-//		openOutputFile(getRootName(sffFile) + "qual", qualFile);
+//		m->openOutputFile(m->getRootName(sffFile) + "qual", qualFile);
 		
-		string commonHeader = getline(inSFF);
-		string magicNumber = getline(inSFF);		
-		string version = getline(inSFF);
-		string indexOffset = getline(inSFF);
-		string indexLength = getline(inSFF);
+		string commonHeader = m->getline(inSFF);
+		string magicNumber = m->getline(inSFF);		
+		string version = m->getline(inSFF);
+		string indexOffset = m->getline(inSFF);
+		string indexLength = m->getline(inSFF);
 		int numReads = parseHeaderLineToInt(inSFF);
-		string headerLength = getline(inSFF);
-		string keyLength = getline(inSFF);
+		string headerLength = m->getline(inSFF);
+		string keyLength = m->getline(inSFF);
 		int numFlows = parseHeaderLineToInt(inSFF);
-		string flowgramCode = getline(inSFF);
-		string flowChars = getline(inSFF);
-		string keySequence = getline(inSFF);
-		gobble(inSFF);
+		string flowgramCode = m->getline(inSFF);
+		string flowChars = m->getline(inSFF);
+		string keySequence = m->getline(inSFF);
+		m->gobble(inSFF);
 
 		string seqName;
 		bool good = 0;
@@ -155,17 +155,17 @@ int ParseSFFCommand::execute(){
 			
 			inSFF >> seqName;
 			seqName = seqName.substr(1);
-			gobble(inSFF);
+			m->gobble(inSFF);
 			
 			string runPrefix = parseHeaderLineToString(inSFF);
 			string regionNumber = parseHeaderLineToString(inSFF);
 			string xyLocation = parseHeaderLineToString(inSFF);
-			gobble(inSFF);
+			m->gobble(inSFF);
 			
 			string runName = parseHeaderLineToString(inSFF);
 			string analysisName = parseHeaderLineToString(inSFF);
 			string fullPath = parseHeaderLineToString(inSFF);
-			gobble(inSFF);
+			m->gobble(inSFF);
 			
 			string readHeaderLen = parseHeaderLineToString(inSFF);
 			string nameLength = parseHeaderLineToString(inSFF);
@@ -174,13 +174,13 @@ int ParseSFFCommand::execute(){
 			int clipQualRight = parseHeaderLineToInt(inSFF);
 			string clipAdapLeft = parseHeaderLineToString(inSFF);
 			string clipAdapRight = parseHeaderLineToString(inSFF);
-			gobble(inSFF);
+			m->gobble(inSFF);
 			
 			vector<float> flowVector = parseHeaderLineToFloatVector(inSFF, numFlows);
 			vector<int> flowIndices = parseHeaderLineToIntVector(inSFF, numBases);
 			string bases = parseHeaderLineToString(inSFF);
 			string qualityScores = parseHeaderLineToString(inSFF);
-			gobble(inSFF);
+			m->gobble(inSFF);
 			
 
 			
@@ -250,7 +250,7 @@ void ParseSFFCommand::getOligos(vector<ofstream*>& outSFFFlowVec){
 	try {
 
 		ifstream inOligos;
-		openInputFile(oligoFile, inOligos);
+		m->openInputFile(oligoFile, inOligos);
 		
 		string type, oligo, group;
 		
@@ -259,7 +259,7 @@ void ParseSFFCommand::getOligos(vector<ofstream*>& outSFFFlowVec){
 		while(!inOligos.eof()){
 			inOligos >> type;
 
-			if(type[0] == '#'){	getline(inOligos);	} // get rest of line if there's any crap there
+			if(type[0] == '#'){	m->getline(inOligos);	} // get rest of line if there's any crap there
 			else{
 				inOligos >> oligo;
 				
@@ -280,11 +280,11 @@ void ParseSFFCommand::getOligos(vector<ofstream*>& outSFFFlowVec){
 					barcodes[oligo]=index++;
 					groupVector.push_back(group);
 					
-					outSFFFlowVec.push_back(new ofstream((outputDir + getRootName(getSimpleName(sffFile)) + group + ".flow").c_str(), ios::ate));
-					outputNames.push_back((outputDir + getRootName(getSimpleName(sffFile)) + group + "flow"));
+					outSFFFlowVec.push_back(new ofstream((outputDir + m->getRootName(m->getSimpleName(sffFile)) + group + ".flow").c_str(), ios::ate));
+					outputNames.push_back((outputDir + m->getRootName(m->getSimpleName(sffFile)) + group + "flow"));
 				}
 			}
-			gobble(inOligos);
+			m->gobble(inOligos);
 		}
 		
 		inOligos.close();
@@ -315,7 +315,7 @@ int ParseSFFCommand::parseHeaderLineToInt(ifstream& file){
 		}
 		
 	}
-	gobble(file);
+	m->gobble(file);
 	return number;
 }
 
@@ -329,12 +329,12 @@ string ParseSFFCommand::parseHeaderLineToString(ifstream& file){
 		char c = file.get(); 
 		
 		if (c == ':'){
-			gobble(file);
-			text = getline(file);			
+			m->gobble(file);
+			text = m->getline(file);			
 			break;
 		}
 	}
-	gobble(file);
+	m->gobble(file);
 
 	return text;
 }
@@ -354,7 +354,7 @@ vector<float> ParseSFFCommand::parseHeaderLineToFloatVector(ifstream& file, int 
 			break;
 		}
 	}
-	gobble(file);	
+	m->gobble(file);	
 	return floatVector;
 }
 
@@ -373,7 +373,7 @@ vector<int> ParseSFFCommand::parseHeaderLineToIntVector(ifstream& file, int leng
 			break;
 		}
 	}
-	gobble(file);	
+	m->gobble(file);	
 	return intVector;
 }
 

@@ -665,7 +665,7 @@ int Bellerophon::writePrefs(string file, linePair tempLine) {
 	try {
 	
 		ofstream outTemp;
-		openOutputFile(file, outTemp);
+		m->openOutputFile(file, outTemp);
 		
 		//lets you know what part of the pref matrix you are writing
 		outTemp << tempLine.start << '\t' << tempLine.num << endl;
@@ -695,12 +695,12 @@ int Bellerophon::readPrefs(string file) {
 	try {
 	
 		ifstream inTemp;
-		openInputFile(file, inTemp);
+		m->openInputFile(file, inTemp);
 		
 		int start, num;
 		
 		//lets you know what part of the pref matrix you are writing
-		inTemp >> start >> num;  gobble(inTemp);
+		inTemp >> start >> num;  m->gobble(inTemp);
 		
 		for (int i = start; i < num; i++) {
 			
@@ -710,7 +710,7 @@ int Bellerophon::readPrefs(string file) {
 			
 				inTemp >> pref[i][j].name >> pref[i][j].leftParent >> pref[i][j].rightParent;
 				inTemp >> pref[i][j].score >> pref[i][j].closestLeft >> pref[i][j].closestRight >> pref[i][j].midpoint;
-				gobble(inTemp);
+				m->gobble(inTemp);
 			}
 		}
 		

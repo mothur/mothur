@@ -123,7 +123,7 @@ vector<Sequence*> Chimera::readSeqs(string file) {
 			//delete inFileName;
 
 			if (pid == 0) {
-				positions = setFilePosFasta(file, numSeqs); //fills MPIPos, returns numSeqs
+				positions = m->setFilePosFasta(file, numSeqs); //fills MPIPos, returns numSeqs
 
 				//send file positions to all processes
 				for(int i = 1; i < processors; i++) { 
@@ -167,14 +167,14 @@ vector<Sequence*> Chimera::readSeqs(string file) {
 	#else
 
 		ifstream in;
-		openInputFile(file, in);
+		m->openInputFile(file, in);
 		
 		//read in seqs and store in vector
 		while(!in.eof()){
 			
 			if (m->control_pressed) { return container; }
 			
-			Sequence* current = new Sequence(in);  gobble(in);
+			Sequence* current = new Sequence(in);  m->gobble(in);
 			
 			if (count == 0) {  length = current->getAligned().length();  count++;  } //gets first seqs length
 			else if (length != current->getAligned().length()) {	unaligned = true;	}
@@ -241,7 +241,7 @@ void Chimera::setMask(string filename) {
 	#else
 	
 			ifstream infile;
-			openInputFile(filename, infile);
+			m->openInputFile(filename, infile);
 			
 			if (!infile.eof()) {
 				Sequence temp(infile);

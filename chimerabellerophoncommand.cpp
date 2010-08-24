@@ -42,12 +42,12 @@ ChimeraBellerophonCommand::ChimeraBellerophonCommand(string option)  {
 			fastafile = validParameter.validFile(parameters, "fasta", false);
 			if (fastafile == "not found") { fastafile = ""; m->mothurOut("fasta is a required parameter for the chimera.bellerophon command."); m->mothurOutEndLine(); abort = true;  }
 			else { 
-				splitAtDash(fastafile, fastaFileNames);
+				m->splitAtDash(fastafile, fastaFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < fastaFileNames.size(); i++) {
 					if (inputDir != "") {
-						string path = hasPath(fastaFileNames[i]);
+						string path = m->hasPath(fastaFileNames[i]);
 						//if the user has not given a path then, add inputdir. else leave path alone.
 						if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
 					}
@@ -55,14 +55,14 @@ ChimeraBellerophonCommand::ChimeraBellerophonCommand(string option)  {
 					int ableToOpen;
 					ifstream in;
 
-					ableToOpen = openInputFile(fastaFileNames[i], in, "noerror");
+					ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
 				
 					//if you can't open it, try default location
 					if (ableToOpen == 1) {
 						if (m->getDefaultPath() != "") { //default path is set
-							string tryPath = m->getDefaultPath() + getSimpleName(fastaFileNames[i]);
+							string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
 							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = openInputFile(tryPath, in, "noerror");
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
 							fastaFileNames[i] = tryPath;
 						}
 					}
@@ -84,15 +84,15 @@ ChimeraBellerophonCommand::ChimeraBellerophonCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(fastafile); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(fastafile); //if user entered a file with a path then preserve it	
 			}
 
 			string temp;
 			temp = validParameter.validFile(parameters, "filter", false);			if (temp == "not found") { temp = "F"; }
-			filter = isTrue(temp);
+			filter = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "correction", false);		if (temp == "not found") { temp = "T"; }
-			correction = isTrue(temp);
+			correction = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "processors", false);		if (temp == "not found") { temp = "1"; }
 			convert(temp, processors);
@@ -153,8 +153,8 @@ int ChimeraBellerophonCommand::execute(){
 			
 			chimera = new Bellerophon(fastaFileNames[i], filter, correction, window, increment, processors, outputDir);	
 					
-			string outputFileName = outputDir + getRootName(getSimpleName(fastaFileNames[i])) +  "bellerophon.chimeras";
-			string accnosFileName = outputDir + getRootName(getSimpleName(fastaFileNames[i])) + "bellerophon.accnos";
+			string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[i])) +  "bellerophon.chimeras";
+			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[i])) + "bellerophon.accnos";
 			
 			chimera->getChimeras();
 			
@@ -183,10 +183,10 @@ int ChimeraBellerophonCommand::execute(){
 		#else
 		
 			ofstream out;
-			openOutputFile(outputFileName, out);
+			m->openOutputFile(outputFileName, out);
 			
 			ofstream out2;
-			openOutputFile(accnosFileName, out2);
+			m->openOutputFile(accnosFileName, out2);
 			
 			numSeqs = chimera->print(out, out2);
 			out.close();

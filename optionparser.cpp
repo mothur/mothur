@@ -19,13 +19,13 @@ OptionParser::OptionParser(string option) {
 			string key, value;		
 			//reads in parameters and values
 			while((option.find_first_of(',') != -1)) {  //while there are parameters
-				splitAtComma(value, option);
-				splitAtEquals(key, value);
+				m->splitAtComma(value, option);
+				m->splitAtEquals(key, value);
 				parameters[key] = value;
 			}
 			
 			//in case there is no comma and to get last parameter after comma
-			splitAtEquals(key, option);
+			m->splitAtEquals(key, option);
 			parameters[key] = option;
 		}
 	}

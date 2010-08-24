@@ -23,16 +23,16 @@ ThreeColumnFile::~ThreeColumnFile(){
 void ThreeColumnFile::initFile(string label){
 	try {
 		if(counter != 0){
-			openOutputFile(outName, outFile);
-			openInputFile(inName, inFile);
+			m->openOutputFile(outName, outFile);
+			m->openInputFile(inName, inFile);
 
 			string inputBuffer;
-			inputBuffer = getline(inFile);
+			inputBuffer = m->getline(inFile);
 		
 			outFile	<<  inputBuffer << '\t' << label << "\tlci\thci" << endl;
 		}
 		else{
-			openOutputFile(outName, outFile);
+			m->openOutputFile(outName, outFile);
 			outFile << "numsampled\t" << label << "\tlci\thci" << endl;
 		}
 
@@ -51,7 +51,7 @@ void ThreeColumnFile::output(int nSeqs, vector<double> data){
 	try {
 		if(counter != 0){		
 			string inputBuffer;
-			inputBuffer = getline(inFile);
+			inputBuffer = m->getline(inFile);
 		
 			outFile	<<  inputBuffer << setprecision(4) << '\t' << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
 		}
@@ -110,11 +110,11 @@ ColumnFile::~ColumnFile(){
 void ColumnFile::initFile(string label, vector<string> tags){
 	try {
 		if(counter != 0){
-			openOutputFile(outName, outFile);
-			openInputFile(inName, inFile);
+			m->openOutputFile(outName, outFile);
+			m->openInputFile(inName, inFile);
 
 			string inputBuffer;
-			inputBuffer = getline(inFile);
+			inputBuffer = m->getline(inFile);
 		
 			outFile	<<  inputBuffer << '\t'; 
 			for(int i = 0; i < tags.size(); i++) {
@@ -123,7 +123,7 @@ void ColumnFile::initFile(string label, vector<string> tags){
 			outFile << endl;
 		}
 		else{
-			openOutputFile(outName, outFile);
+			m->openOutputFile(outName, outFile);
 			for(int i = 0; i < tags.size(); i++) {
 				outFile << label + tags[i] << '\t';
 			}
@@ -146,7 +146,7 @@ void ColumnFile::output(vector<double> data){
 	
 		if(counter != 0){		
 			string inputBuffer;
-			inputBuffer = getline(inFile);
+			inputBuffer = m->getline(inFile);
 
 			outFile << inputBuffer << '\t' << setprecision(6) << data[0] << setprecision(iters.length());
 			for (int i = 1; i< data.size(); i++) {
@@ -214,16 +214,16 @@ SharedThreeColumnFile::~SharedThreeColumnFile(){
 void SharedThreeColumnFile::initFile(string label){
 	try {
 		if(counter != 0){
-			openOutputFile(outName, outFile);
-			openInputFile(inName, inFile);
+			m->openOutputFile(outName, outFile);
+			m->openInputFile(inName, inFile);
 
 			string inputBuffer;
-			inputBuffer = getline(inFile);
+			inputBuffer = m->getline(inFile);
 		
 			outFile	<<  inputBuffer << '\t' << label << "\tlci\thci" << endl;
 		}
 		else{
-			openOutputFile(outName, outFile);
+			m->openOutputFile(outName, outFile);
 			outFile << "numsampled\t" << groupLabel << '\t' << label << "\tlci\thci" << endl;
 		}
 
@@ -242,7 +242,7 @@ void SharedThreeColumnFile::output(int nSeqs, vector<double> data){
 	try {
 		if(counter != 0){		
 			string inputBuffer;
-			inputBuffer = getline(inFile);
+			inputBuffer = m->getline(inFile);
 		
 			outFile	<<  inputBuffer << setprecision(4) << '\t' << data[0] << '\t' << data[1] << '\t' << data[2] << endl;
 		}
@@ -303,16 +303,16 @@ OneColumnFile::~OneColumnFile(){
 void OneColumnFile::initFile(string label){
 	try {
 		if(counter != 0){
-			openOutputFile(outName, outFile);
-			openInputFile(inName, inFile);
+			m->openOutputFile(outName, outFile);
+			m->openInputFile(inName, inFile);
 		
 			string inputBuffer;
-			inputBuffer = getline(inFile);
+			inputBuffer = m->getline(inFile);
 		
 			outFile	<<  inputBuffer << '\t' << label << endl;
 		}
 		else{
-			openOutputFile(outName, outFile);
+			m->openOutputFile(outName, outFile);
 			outFile << "numsampled\t" << label << endl;
 		}
 	
@@ -331,7 +331,7 @@ void OneColumnFile::output(int nSeqs, vector<double> data){
 	try {	
 		if(counter != 0){		
 			string inputBuffer;
-			inputBuffer = getline(inFile);
+			inputBuffer = m->getline(inFile);
 		
 			outFile	<<  inputBuffer << setprecision(4) << '\t'  << data[0] << endl;
 		}
@@ -390,17 +390,17 @@ SharedOneColumnFile::~SharedOneColumnFile(){
 void SharedOneColumnFile::initFile(string label){
 	try {
 		if(counter != 0){
-			openOutputFile(outName, outFile);
-			openInputFile(inName, inFile);
+			m->openOutputFile(outName, outFile);
+			m->openInputFile(inName, inFile);
 		
 			string inputBuffer;
-			inputBuffer = getline(inFile);
+			inputBuffer = m->getline(inFile);
 		
 			outFile	<<  inputBuffer << '\t' << label  << endl;
 
 		}
 		else{
-			openOutputFile(outName, outFile);
+			m->openOutputFile(outName, outFile);
 			outFile << "sampled\t" << label << endl;
 		
 		}
@@ -427,7 +427,7 @@ void SharedOneColumnFile::output(int nSeqs, vector<double> data){
 			}
 			if(counter != 0){		
 				string inputBuffer;
-				inputBuffer = getline(inFile);
+				inputBuffer = m->getline(inFile);
 
 				outFile	<<  inputBuffer << setprecision(2) << '\t' << dataOutput << endl;
 			}

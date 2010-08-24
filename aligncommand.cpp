@@ -68,7 +68,7 @@ AlignCommand::AlignCommand(string option)  {
 
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["template"] = inputDir + it->second;		}
 				}
@@ -86,12 +86,12 @@ AlignCommand::AlignCommand(string option)  {
 			candidateFileName = validParameter.validFile(parameters, "candidate", false);
 			if (candidateFileName == "not found") { m->mothurOut("candidate is a required parameter for the align.seqs command."); m->mothurOutEndLine(); abort = true;  }
 			else { 
-				splitAtDash(candidateFileName, candidateFileNames);
+				m->splitAtDash(candidateFileName, candidateFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < candidateFileNames.size(); i++) {
 					if (inputDir != "") {
-						string path = hasPath(candidateFileNames[i]);
+						string path = m->hasPath(candidateFileNames[i]);
 						//if the user has not given a path then, add inputdir. else leave path alone.
 						if (path == "") {	candidateFileNames[i] = inputDir + candidateFileNames[i];		}
 					}
@@ -99,14 +99,14 @@ AlignCommand::AlignCommand(string option)  {
 					int ableToOpen;
 					ifstream in;
 
-					ableToOpen = openInputFile(candidateFileNames[i], in, "noerror");
+					ableToOpen = m->openInputFile(candidateFileNames[i], in, "noerror");
 				
 					//if you can't open it, try default location
 					if (ableToOpen == 1) {
 						if (m->getDefaultPath() != "") { //default path is set
-							string tryPath = m->getDefaultPath() + getSimpleName(candidateFileNames[i]);
+							string tryPath = m->getDefaultPath() + m->getSimpleName(candidateFileNames[i]);
 							m->mothurOut("Unable to open " + candidateFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = openInputFile(tryPath, in, "noerror");
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
 							candidateFileNames[i] = tryPath;
 						}
 					}
@@ -147,7 +147,7 @@ AlignCommand::AlignCommand(string option)  {
 			convert(temp, processors); 
 			
 			temp = validParameter.validFile(parameters, "flip", false);			if (temp == "not found"){	temp = "f";				}
-			flip = isTrue(temp); 
+			flip = m->isTrue(temp); 
 			
 			temp = validParameter.validFile(parameters, "threshold", false);	if (temp == "not found"){	temp = "0.50";			}
 			convert(temp, threshold); 
@@ -230,10 +230,10 @@ int AlignCommand::execute(){
 			
 			m->mothurOut("Aligning sequences from " + candidateFileNames[s] + " ..." ); m->mothurOutEndLine();
 			
-			if (outputDir == "") {  outputDir += hasPath(candidateFileNames[s]); }
-			string alignFileName = outputDir + getRootName(getSimpleName(candidateFileNames[s])) + "align";
-			string reportFileName = outputDir + getRootName(getSimpleName(candidateFileNames[s])) + "align.report";
-			string accnosFileName = outputDir + getRootName(getSimpleName(candidateFileNames[s])) + "flip.accnos";
+			if (outputDir == "") {  outputDir += m->hasPath(candidateFileNames[s]); }
+			string alignFileName = outputDir + m->getRootName(m->getSimpleName(candidateFileNames[s])) + "align";
+			string reportFileName = outputDir + m->getRootName(m->getSimpleName(candidateFileNames[s])) + "align.report";
+			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(candidateFileNames[s])) + "flip.accnos";
 			bool hasAccnos = true;
 			
 			int numFastaSeqs = 0;
@@ -279,7 +279,7 @@ int AlignCommand::execute(){
 				
 				if (pid == 0) { //you are the root process 
 					
-					MPIPos = setFilePosFasta(candidateFileNames[s], numFastaSeqs); //fills MPIPos, returns numSeqs
+					MPIPos = m->setFilePosFasta(candidateFileNames[s], numFastaSeqs); //fills MPIPos, returns numSeqs
 					
 					//send file positions to all processes
 					for(int i = 1; i < processors; i++) { 
@@ -346,8 +346,9 @@ int AlignCommand::execute(){
 				}
 				
 #else
-		vector<unsigned long int> positions = divideFile(candidateFileNames[s], processors);
-							
+
+		vector<unsigned long int> positions = m->divideFile(candidateFileNames[s], processors);
+				
 		for (int i = 0; i < (positions.size()-1); i++) {
 			lines.push_back(new linePair(positions[i], positions[(i+1)]));
 		}	
@@ -358,7 +359,7 @@ int AlignCommand::execute(){
 				if (m->control_pressed) { remove(accnosFileName.c_str()); remove(alignFileName.c_str()); remove(reportFileName.c_str()); return 0; }
 				
 				//delete accnos file if its blank else report to user
-				if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
+				if (m->isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
 				else { 
 					m->mothurOut("Some of you sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
 					if (!flip) {
@@ -386,7 +387,7 @@ int AlignCommand::execute(){
 				vector<string> nonBlankAccnosFiles;
 				//delete blank accnos files generated with multiple processes
 				for(int i=0;i<processors;i++){  
-					if (!(isBlank(accnosFileName + toString(processIDS[i]) + ".temp"))) {
+					if (!(m->isBlank(accnosFileName + toString(processIDS[i]) + ".temp"))) {
 						nonBlankAccnosFiles.push_back(accnosFileName + toString(processIDS[i]) + ".temp");
 					}else { remove((accnosFileName + toString(processIDS[i]) + ".temp").c_str());  }
 				}
@@ -414,7 +415,7 @@ int AlignCommand::execute(){
 			if (m->control_pressed) { remove(accnosFileName.c_str()); remove(alignFileName.c_str()); remove(reportFileName.c_str()); return 0; }
 			
 			//delete accnos file if its blank else report to user
-			if (isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
+			if (m->isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
 			else { 
 				m->mothurOut("Some of you sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
 				if (!flip) {
@@ -466,15 +467,15 @@ int AlignCommand::execute(){
 int AlignCommand::driver(linePair* filePos, string alignFName, string reportFName, string accnosFName, string filename){
 	try {
 		ofstream alignmentFile;
-		openOutputFile(alignFName, alignmentFile);
+		m->openOutputFile(alignFName, alignmentFile);
 		
 		ofstream accnosFile;
-		openOutputFile(accnosFName, accnosFile);
+		m->openOutputFile(accnosFName, accnosFile);
 		
 		NastReport report(reportFName);
 		
 		ifstream inFASTA;
-		openInputFile(filename, inFASTA);
+		m->openInputFile(filename, inFASTA);
 
 		inFASTA.seekg(filePos->start);
 
@@ -485,7 +486,7 @@ int AlignCommand::driver(linePair* filePos, string alignFName, string reportFNam
 			
 			if (m->control_pressed) {  return 0; }
 			
-			Sequence* candidateSeq = new Sequence(inFASTA);  gobble(inFASTA);
+			Sequence* candidateSeq = new Sequence(inFASTA);  m->gobble(inFASTA);
 	
 			int origNumBases = candidateSeq->getNumBases();
 			string originalUnaligned = candidateSeq->getUnaligned();
@@ -769,7 +770,7 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 				//pass numSeqs to parent
 				ofstream out;
 				string tempFile = alignFileName + toString(getpid()) + ".num.temp";
-				openOutputFile(tempFile, out);
+				m->openOutputFile(tempFile, out);
 				out << num << endl;
 				out.close();
 				
@@ -786,7 +787,7 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 		for (int i = 0; i < processIDS.size(); i++) {
 			ifstream in;
 			string tempFile =  alignFileName + toString(processIDS[i]) + ".num.temp";
-			openInputFile(tempFile, in);
+			m->openInputFile(tempFile, in);
 			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
 			in.close(); remove(tempFile.c_str());
 		}
@@ -806,8 +807,8 @@ void AlignCommand::appendAlignFiles(string temp, string filename) {
 		
 		ofstream output;
 		ifstream input;
-		openOutputFileAppend(filename, output);
-		openInputFile(temp, input);
+		m->openOutputFileAppend(filename, output);
+		m->openInputFile(temp, input);
 		
 		while(char c = input.get()){
 			if(input.eof())		{	break;			}
@@ -829,8 +830,8 @@ void AlignCommand::appendReportFiles(string temp, string filename) {
 		
 		ofstream output;
 		ifstream input;
-		openOutputFileAppend(filename, output);
-		openInputFile(temp, input);
+		m->openOutputFileAppend(filename, output);
+		m->openInputFile(temp, input);
 
 		while (!input.eof())	{	char c = input.get(); if (c == 10 || c == 13){	break;	}	} // get header line
 				

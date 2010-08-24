@@ -43,7 +43,7 @@ class ReadTree {
 class ReadNewickTree : public ReadTree {
 	
 public:
-	ReadNewickTree(string file) : treeFile(file) { openInputFile(file, filehandle); readOk = 0; } 
+	ReadNewickTree(string file) : treeFile(file) { m->openInputFile(file, filehandle); readOk = 0; } 
 	~ReadNewickTree() {};
 	int read();
 	

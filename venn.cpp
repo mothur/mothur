@@ -34,9 +34,9 @@ vector<string> Venn::getPic(SAbundVector* sabund, vector<Calculator*> vCalcs) {
 		vector<string> outputNames;
 		
 		for(int i=0;i<vCalcs.size();i++){
-			string filenamesvg = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + "." + sabund->getLabel() + "." + vCalcs[i]->getName() + ".svg";
+			string filenamesvg = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + "." + sabund->getLabel() + "." + vCalcs[i]->getName() + ".svg";
 			outputNames.push_back(filenamesvg);
-			openOutputFile(filenamesvg, outsvg);
+			m->openOutputFile(filenamesvg, outsvg);
 			
 			if (m->control_pressed) { outsvg.close(); return outputNames; }
 
@@ -88,9 +88,9 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 			
 			//make a file for each calculator
 			for(int i=0;i<vCalcs.size();i++){
-				string filenamesvg = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + lookup[0]->getGroup() + ".svg";
+				string filenamesvg = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + lookup[0]->getGroup() + ".svg";
 				outputNames.push_back(filenamesvg);
-				openOutputFile(filenamesvg, outsvg);
+				m->openOutputFile(filenamesvg, outsvg);
 				
 				if (m->control_pressed) { outsvg.close(); return outputNames; }
 				
@@ -140,10 +140,10 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 			
 			//make a file for each calculator
 			for(int i=0;i<vCalcs.size();i++){
-				string filenamesvg = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + lookup[0]->getGroup() + "-" + lookup[1]->getGroup() + ".svg";
+				string filenamesvg = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + lookup[0]->getGroup() + "-" + lookup[1]->getGroup() + ".svg";
 
 				outputNames.push_back(filenamesvg);
-				openOutputFile(filenamesvg, outsvg);
+				m->openOutputFile(filenamesvg, outsvg);
 				
 				if (m->control_pressed) { outsvg.close(); return outputNames; }
 				
@@ -215,10 +215,10 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 			//make a file for each calculator
 			for(int i=0;i<vCalcs.size();i++){
 			
-				string filenamesvg = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + lookup[0]->getGroup() + "-" + lookup[1]->getGroup() + "-" + lookup[2]->getGroup() + ".svg";
+				string filenamesvg = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + lookup[0]->getGroup() + "-" + lookup[1]->getGroup() + "-" + lookup[2]->getGroup() + ".svg";
 
 				outputNames.push_back(filenamesvg);
-				openOutputFile(filenamesvg, outsvg);
+				m->openOutputFile(filenamesvg, outsvg);
 				
 				if (m->control_pressed) { outsvg.close(); return outputNames; }
 				
@@ -477,9 +477,9 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 				
 				if ((vCalcs[i]->getName() != "sharedsobs") && (vCalcs[i]->getName() != "sharedchao")) { m->mothurOut(vCalcs[i]->getName() + " is not a valid calculator with four groups.  It will be disregarded. "); m->mothurOutEndLine(); }
 				else{
-					string filenamesvg = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + lookup[0]->getGroup() + "-" + lookup[1]->getGroup() + "-" + lookup[2]->getGroup() + "-" + lookup[3]->getGroup() + ".svg";
+					string filenamesvg = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + lookup[0]->getGroup() + "-" + lookup[1]->getGroup() + "-" + lookup[2]->getGroup() + "-" + lookup[3]->getGroup() + ".svg";
 					outputNames.push_back(filenamesvg);
-					openOutputFile(filenamesvg, outsvg);
+					m->openOutputFile(filenamesvg, outsvg);
 
 					if (m->control_pressed) { outsvg.close(); return outputNames; }
 					

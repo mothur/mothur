@@ -49,7 +49,7 @@ InteractEngine::InteractEngine(string path){
 		
 		//break apart path variable by ':'
 		vector<string> dirs;
-		splitAtChar(envPath, dirs, delim);
+		mout->splitAtChar(envPath, dirs, delim);
 		
 		//get path related to mothur
 		string mothurPath = "";
@@ -199,7 +199,7 @@ string Engine::getCommand()  {
 				string nextCommand = "";
 				
 				mout->mothurOut("mothur > ");
-				getline(cin, nextCommand);
+				m->getline(cin, nextCommand);
 				mout->mothurOutJustToLog(toString(nextCommand));
 				
 				return nextCommand;
@@ -218,7 +218,7 @@ BatchEngine::BatchEngine(string path, string batchFileName){
 	try {
 		globaldata = GlobalData::getInstance();
 	
-		openedBatch = openInputFile(batchFileName, inputBatchFile);
+		openedBatch = mout->openInputFile(batchFileName, inputBatchFile);
 		
 		string temppath = path.substr(0, (path.find_last_of('m')));
 	
@@ -237,7 +237,7 @@ BatchEngine::BatchEngine(string path, string batchFileName){
 			
 			//break apart path variable by ':'
 			vector<string> dirs;
-			splitAtChar(envPath, dirs, delim);
+			mout->splitAtChar(envPath, dirs, delim);
 			
 			//get path related to mothur
 			string mothurPath = "";
@@ -370,7 +370,7 @@ bool BatchEngine::getInput(){
 				}
 				
 			}
-			gobble(inputBatchFile);
+			mout->gobble(inputBatchFile);
 		}
 		
 		inputBatchFile.close();
@@ -388,7 +388,7 @@ string BatchEngine::getNextCommand(ifstream& inputBatchFile) {
 		string nextcommand = "";
 		
 		if (inputBatchFile.eof()) { nextcommand = "quit()"; }
-		else { nextcommand = getline(inputBatchFile); }
+		else { nextcommand = mout->getline(inputBatchFile); }
 		
 		return nextcommand;
 	}
@@ -425,7 +425,7 @@ ScriptEngine::ScriptEngine(string path, string commandString){
 			
 			//break apart path variable by ':'
 			vector<string> dirs;
-			splitAtChar(envPath, dirs, delim);
+			mout->splitAtChar(envPath, dirs, delim);
 			
 			//get path related to mothur
 			string mothurPath = "";

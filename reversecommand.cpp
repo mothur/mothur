@@ -44,7 +44,7 @@ ReverseSeqsCommand::ReverseSeqsCommand(string option)  {
 				it = parameters.find("fasta");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
@@ -58,7 +58,7 @@ ReverseSeqsCommand::ReverseSeqsCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(fasta); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(fasta); //if user entered a file with a path then preserve it	
 			}
 
 		}
@@ -96,16 +96,16 @@ int ReverseSeqsCommand::execute(){
 		if (abort == true) { return 0; }
 		
 		ifstream inFASTA;
-		openInputFile(fasta, inFASTA);
+		m->openInputFile(fasta, inFASTA);
 		
 		ofstream outFASTA;
-		string reverseFile = outputDir + getRootName(getSimpleName(fasta)) + "rc" + getExtension(fasta);
-		openOutputFile(reverseFile, outFASTA);
+		string reverseFile = outputDir + m->getRootName(m->getSimpleName(fasta)) + "rc" + m->getExtension(fasta);
+		m->openOutputFile(reverseFile, outFASTA);
 		
 		while(!inFASTA.eof()){
 			if (m->control_pressed) {  inFASTA.close();  outFASTA.close(); remove(reverseFile.c_str()); return 0; }
 			 
-			Sequence currSeq(inFASTA);  gobble(inFASTA);
+			Sequence currSeq(inFASTA);  m->gobble(inFASTA);
 			if (currSeq.getName() != "") {
 				currSeq.reverseComplement();
 				currSeq.printSequence(outFASTA);

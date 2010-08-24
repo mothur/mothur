@@ -16,7 +16,7 @@ TaxEqualizer::TaxEqualizer(string tfile, int c, string o) : cutoff(c), outputDir
 		containsConfidence = false;
 		
 		ifstream inTax;
-		openInputFile(tfile, inTax);
+		m->openInputFile(tfile, inTax);
 	
 		highestLevel = getHighestLevel(inTax);
 		
@@ -32,11 +32,11 @@ TaxEqualizer::TaxEqualizer(string tfile, int c, string o) : cutoff(c), outputDir
 			
 			inTax.close(); 
 			ifstream in; 
-			openInputFile(tfile, in);
+			m->openInputFile(tfile, in);
 			
 			ofstream out;
-			equalizedFile = outputDir + getRootName(getSimpleName(tfile)) + "equalized.taxonomy";
-			openOutputFile(equalizedFile, out);
+			equalizedFile = outputDir + m->getRootName(m->getSimpleName(tfile)) + "equalized.taxonomy";
+			m->openOutputFile(equalizedFile, out);
 			
 	
 			string name, tax;
@@ -44,7 +44,7 @@ TaxEqualizer::TaxEqualizer(string tfile, int c, string o) : cutoff(c), outputDir
 			
 				if (m->control_pressed) {  break; }
 				
-				in >> name >> tax;   gobble(in);
+				in >> name >> tax;   m->gobble(in);
 				
 				if (containsConfidence) {  removeConfidences(tax);	}
 				
@@ -78,7 +78,7 @@ int TaxEqualizer::getHighestLevel(ifstream& in) {
 		string name, tax;
 		
 		while (in) {
-			in >> name >> tax;   gobble(in);
+			in >> name >> tax;   m->gobble(in);
 		
 			//count levels in this taxonomy
 			int thisLevel = 0;

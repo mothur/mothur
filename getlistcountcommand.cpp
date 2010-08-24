@@ -46,7 +46,7 @@ GetListCountCommand::GetListCountCommand(string option)  {
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -70,7 +70,7 @@ GetListCountCommand::GetListCountCommand(string option)  {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
@@ -160,7 +160,7 @@ int GetListCountCommand::execute(){
 				userLabels.erase(list->getLabel());
 			}
 			
-			if ((anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = list->getLabel();
 				
 				delete list;
@@ -245,9 +245,9 @@ int GetListCountCommand::execute(){
 void GetListCountCommand::process(ListVector* list) {
 	try {
 		string binnames;
-		if (outputDir == "") { outputDir += hasPath(listfile); }
-		string outputFileName = outputDir + getRootName(getSimpleName(listfile)) + list->getLabel() + ".otu";
-		openOutputFile(outputFileName, out);
+		if (outputDir == "") { outputDir += m->hasPath(listfile); }
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + list->getLabel() + ".otu";
+		m->openOutputFile(outputFileName, out);
 		outputNames.push_back(outputFileName);
 		
 		m->mothurOut(list->getLabel()); m->mothurOutEndLine();
@@ -262,7 +262,7 @@ void GetListCountCommand::process(ListVector* list) {
 				out << i+1 << '\t' << binnames << endl;
 			}else{ //sort = name
 				vector<string> names;
-				splitAtComma(binnames, names);
+				m->splitAtComma(binnames, names);
 				
 				for (int j = 0; j < names.size(); j++) {
 					out << names[j] << '\t' << i+1 << endl;

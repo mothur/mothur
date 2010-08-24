@@ -42,7 +42,7 @@ ParseListCommand::ParseListCommand(string option)  {
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -50,7 +50,7 @@ ParseListCommand::ParseListCommand(string option)  {
 				it = parameters.find("group");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["group"] = inputDir + it->second;		}
 				}
@@ -83,7 +83,7 @@ ParseListCommand::ParseListCommand(string option)  {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = "";  allLines = 1; }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 		}
@@ -120,7 +120,7 @@ int ParseListCommand::execute(){
 		if (abort == true) {	return 0;	}
 		
 		//set fileroot
-		string fileroot = outputDir + getRootName(getSimpleName(listfile));
+		string fileroot = outputDir + m->getRootName(m->getSimpleName(listfile));
 		vector<string> outputNames;
 		
 		//fill filehandles with neccessary ofstreams
@@ -132,7 +132,7 @@ int ParseListCommand::execute(){
 			
 			string filename = fileroot +  groupMap->namesOfGroups[i] + ".list";
 			outputNames.push_back(filename);
-			openOutputFile(filename, *temp);
+			m->openOutputFile(filename, *temp);
 		}
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -168,7 +168,7 @@ int ParseListCommand::execute(){
 					userLabels.erase(list->getLabel());
 			}
 			
-			if ((anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = list->getLabel();
 					
 					delete list;
@@ -278,7 +278,7 @@ int ParseListCommand::parse(ListVector* thisList) {
 			string bin = list->get(i); 
 			
 			vector<string> names;
-			splitAtComma(bin, names);  //parses bin into individual sequence names
+			m->splitAtComma(bin, names);  //parses bin into individual sequence names
 			
 			//parse bin into list of sequences in each group
 			for (int j = 0; j < names.size(); j++) {

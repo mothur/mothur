@@ -34,7 +34,7 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 			}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = hasPath(globaldata->getTreeFile());		}
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(globaldata->getTreeFile());		}
 			
 			if (globaldata->gTree.size() == 0) {//no trees were read
 				m->mothurOut("You must execute the read.tree command, before you may execute the phylo.diversity command."); m->mothurOutEndLine(); abort = true;  }
@@ -47,22 +47,22 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 			convert(temp, iters); 
 			
 			temp = validParameter.validFile(parameters, "rarefy", false);			if (temp == "not found") { temp = "F"; }
-			rarefy = isTrue(temp);
+			rarefy = m->isTrue(temp);
 			if (!rarefy) { iters = 1;  }
 			
 			temp = validParameter.validFile(parameters, "summary", false);			if (temp == "not found") { temp = "T"; }
-			summary = isTrue(temp);
+			summary = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "scale", false);			if (temp == "not found") { temp = "F"; }
-			scale = isTrue(temp);
+			scale = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "collect", false);			if (temp == "not found") { temp = "F"; }
-			collect = isTrue(temp);
+			collect = m->isTrue(temp);
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; Groups = globaldata->gTreemap->namesOfGroups;  globaldata->Groups = Groups;  }
 			else { 
-				splitAtDash(groups, Groups);
+				m->splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 			}
 			
@@ -124,20 +124,20 @@ int PhyloDiversityCommand::execute(){
 			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} return 0; }
 			
 			ofstream outSum, outRare, outCollect;
-			string outSumFile = outputDir + getRootName(getSimpleName(globaldata->getTreeFile()))  + toString(i+1) + ".phylodiv.summary";
-			string outRareFile = outputDir + getRootName(getSimpleName(globaldata->getTreeFile()))  + toString(i+1) + ".phylodiv.rarefaction";
-			string outCollectFile = outputDir + getRootName(getSimpleName(globaldata->getTreeFile()))  + toString(i+1) + ".phylodiv";
+			string outSumFile = outputDir + m->getRootName(m->getSimpleName(globaldata->getTreeFile()))  + toString(i+1) + ".phylodiv.summary";
+			string outRareFile = outputDir + m->getRootName(m->getSimpleName(globaldata->getTreeFile()))  + toString(i+1) + ".phylodiv.rarefaction";
+			string outCollectFile = outputDir + m->getRootName(m->getSimpleName(globaldata->getTreeFile()))  + toString(i+1) + ".phylodiv";
 			
-			if (summary)	{ openOutputFile(outSumFile, outSum); outputNames.push_back(outSumFile);				}
-			if (rarefy)		{ openOutputFile(outRareFile, outRare); outputNames.push_back(outRareFile);				}
-			if (collect)	{ openOutputFile(outCollectFile, outCollect); outputNames.push_back(outCollectFile);	}
+			if (summary)	{ m->openOutputFile(outSumFile, outSum); outputNames.push_back(outSumFile);				}
+			if (rarefy)		{ m->openOutputFile(outRareFile, outRare); outputNames.push_back(outRareFile);				}
+			if (collect)	{ m->openOutputFile(outCollectFile, outCollect); outputNames.push_back(outCollectFile);	}
 			
 			int numLeafNodes = trees[i]->getNumLeaves();
 			
 			//create a vector containing indexes of leaf nodes, randomize it, select nodes to send to calculator
 			vector<int> randomLeaf;
 			for (int j = 0; j < numLeafNodes; j++) {  
-				if (inUsersGroups(trees[i]->tree[j].getGroup(), globaldata->Groups) == true) { //is this a node from the group the user selected.
+				if (m->inUsersGroups(trees[i]->tree[j].getGroup(), globaldata->Groups) == true) { //is this a node from the group the user selected.
 					randomLeaf.push_back(j); 
 				}
 			}

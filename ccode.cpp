@@ -25,7 +25,7 @@ Ccode::Ccode(string filename, string temp, bool f, string mask, int win, int num
 	distCalc = new eachGapDist();
 	decalc = new DeCalculator();
 	
-	mapInfo = outputDir + getRootName(getSimpleName(fastafile)) + "mapinfo";
+	mapInfo = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "mapinfo";
 	
 	#ifdef USE_MPI
 		
@@ -58,7 +58,7 @@ Ccode::Ccode(string filename, string temp, bool f, string mask, int win, int num
 	#else
 
 		ofstream out2;
-		openOutputFile(mapInfo, out2);
+		m->openOutputFile(mapInfo, out2);
 		
 		out2 << "Place in masked, filtered and trimmed sequence\tPlace in original alignment" << endl;
 		out2.close();
@@ -78,7 +78,7 @@ int Ccode::print(ostream& out, ostream& outAcc) {
 	try {
 		
 		ofstream out2;
-		openOutputFileAppend(mapInfo, out2);
+		m->openOutputFileAppend(mapInfo, out2);
 		
 		out2 << querySeq->getName() << endl;
 		for (it = spotMap.begin(); it!= spotMap.end(); it++) {

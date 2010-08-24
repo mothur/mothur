@@ -42,7 +42,7 @@ PCACommand::PCACommand(string option)  {
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
@@ -57,7 +57,7 @@ PCACommand::PCACommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(phylipfile); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(phylipfile); //if user entered a file with a path then preserve it	
 			}
 			
 			//error checking on files	
@@ -97,7 +97,7 @@ int PCACommand::execute(){
 		vector<string> names;
 		vector<vector<double> > D;
 	
-		fbase = outputDir + getRootName(getSimpleName(filename));
+		fbase = outputDir + m->getRootName(m->getSimpleName(filename));
 		
 		read(filename, names, D);
 		
@@ -219,11 +219,11 @@ int PCACommand::read_phylip(istream& f, int square_m, vector<string>& name_list,
 void PCACommand::read(string fname, vector<string>& names, vector<vector<double> >& D){
 	try {
 		ifstream f;
-		openInputFile(fname, f);
+		m->openInputFile(fname, f);
 			
 		//check whether matrix is square
 		char d;
-		int m = 1;
+		int q = 1;
 		int numSeqs;
 		string name;
 		
@@ -233,21 +233,21 @@ void PCACommand::read(string fname, vector<string>& names, vector<vector<double>
 			
 			//is d a number meaning its square
 			if(isalnum(d)){ 
-				m = 1; 
+				q = 1; 
 				break; 
 			}
 			
 			//is d a line return meaning its lower triangle
 			if(d == '\n'){
-				m = 2;
+				q = 2;
 				break;
 			}
 		}
 		f.close();
 		
 		//reopen to get back to beginning
-		openInputFile(fname, f);			
-		read_phylip(f, m, names, D);
+		m->openInputFile(fname, f);			
+		read_phylip(f, q, names, D);
 	}
 		catch(exception& e) {
 		m->errorOut(e, "PCACommand", "read");

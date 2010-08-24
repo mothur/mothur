@@ -28,7 +28,7 @@ ListVector::ListVector(string id, vector<string> lv) : DataVector(id), data(lv){
 	try {
 		for(int i=0;i<data.size();i++){
 			if(data[i] != ""){
-				int binSize = getNumNames(data[i]);
+				int binSize = m->getNumNames(data[i]);
 				numBins = i+1;
 				if(binSize > maxRank)	{	maxRank = binSize;	}
 				numSeqs += binSize;
@@ -56,7 +56,7 @@ ListVector::ListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numS
 			set(i, inputData);
 		}
 		
-		gobble(f);
+		m->gobble(f);
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ListVector", "ListVector");
@@ -68,9 +68,9 @@ ListVector::ListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numS
 
 void ListVector::set(int binNumber, string seqNames){
 	try {
-		int nNames_old = getNumNames(data[binNumber]);
+		int nNames_old = m->getNumNames(data[binNumber]);
 		data[binNumber] = seqNames;
-		int nNames_new = getNumNames(seqNames);
+		int nNames_new = m->getNumNames(seqNames);
 	
 		if(nNames_old == 0)			{	numBins++;				}
 		if(nNames_new == 0)			{	numBins--;				}
@@ -95,7 +95,7 @@ string ListVector::get(int index){
 void ListVector::push_back(string seqNames){
 	try {
 		data.push_back(seqNames);
-		int nNames = getNumNames(seqNames);
+		int nNames = m->getNumNames(seqNames);
 	
 		numBins++;
 	
@@ -157,7 +157,7 @@ RAbundVector ListVector::getRAbundVector(){
 		RAbundVector rav;
 	
 		for(int i=0;i<data.size();i++){
-			int binSize = getNumNames(data[i]);
+			int binSize = m->getNumNames(data[i]);
 			rav.push_back(binSize);
 		}
 	
@@ -187,7 +187,7 @@ SAbundVector ListVector::getSAbundVector(){
 		SAbundVector sav(maxRank+1);
 	
 		for(int i=0;i<data.size();i++){
-			int binSize = getNumNames(data[i]);	
+			int binSize = m->getNumNames(data[i]);	
 			sav.set(binSize, sav.get(binSize) + 1);	
 		}
 		sav.set(0, 0);
@@ -210,7 +210,7 @@ OrderVector ListVector::getOrderVector(map<string,int>* orderMap = NULL){
 			OrderVector ov;
 		
 			for(int i=0;i<data.size();i++){
-				int binSize = getNumNames(data[i]);		
+				int binSize = m->getNumNames(data[i]);		
 				for(int j=0;j<binSize;j++){
 					ov.push_back(i);
 				}

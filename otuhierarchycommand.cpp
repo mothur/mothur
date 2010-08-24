@@ -41,7 +41,7 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option) {
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -54,7 +54,7 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option) {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(listFile); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(listFile); //if user entered a file with a path then preserve it	
 			}
 			
 			//check for optional parameter and set defaults
@@ -62,7 +62,7 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option) {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { m->mothurOut("label is a required parameter for the otu.hierarchy command."); m->mothurOutEndLine(); abort = true; }
 			else { 
-				splitAtDash(label, labels);
+				m->splitAtDash(label, labels);
 				if (labels.size() != 2) { m->mothurOut("You must provide 2 labels."); m->mothurOutEndLine(); abort = true; }
 			}	
 			
@@ -142,8 +142,8 @@ int OtuHierarchyCommand::execute(){
 		}
 		
 		ofstream out;
-		string outputFileName = outputDir + getRootName(getSimpleName(listFile)) + lists[0].getLabel() + "-" + lists[1].getLabel() + ".otu.hierarchy";
-		openOutputFile(outputFileName, out);
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(listFile)) + lists[0].getLabel() + "-" + lists[1].getLabel() + ".otu.hierarchy";
+		m->openOutputFile(outputFileName, out);
 		
 		//go through each bin in "big" otu and output the bins in "little" otu which created it
 		for (int i = 0; i < lists[1].getNumBins(); i++) {
@@ -211,7 +211,7 @@ vector<ListVector> OtuHierarchyCommand::getListVectors() {
 
 		//open file
 		ifstream in;
-		openInputFile(listFile, in);
+		m->openInputFile(listFile, in);
 		
 		//get first list vector in file
 		ListVector* list = NULL;
@@ -220,7 +220,7 @@ vector<ListVector> OtuHierarchyCommand::getListVectors() {
 			pos = in.tellg();
 			lastPos = pos;
 			list = new ListVector(in);  
-			gobble(in);
+			m->gobble(in);
 			lastLabel = list->getLabel();
 		}
 		
@@ -240,7 +240,7 @@ vector<ListVector> OtuHierarchyCommand::getListVectors() {
 			}
 		
 			//you have a label the user want that is smaller than this label and the last label has not already been processed 
-			if ((anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = list->getLabel();
 				int savePos = in.tellg();
 				
@@ -271,7 +271,7 @@ vector<ListVector> OtuHierarchyCommand::getListVectors() {
 			if (!in.eof())	{	
 				pos = in.tellg();
 				list = new ListVector(in);  
-				gobble(in);
+				m->gobble(in);
 			}else { list = NULL; }
 		}
 		

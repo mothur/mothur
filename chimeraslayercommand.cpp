@@ -45,7 +45,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 				it = parameters.find("template");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["template"] = inputDir + it->second;		}
 				}
@@ -56,12 +56,12 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			fastafile = validParameter.validFile(parameters, "fasta", false);
 			if (fastafile == "not found") { fastafile = ""; m->mothurOut("fasta is a required parameter for the chimera.slayer command."); m->mothurOutEndLine(); abort = true;  }
 			else { 
-				splitAtDash(fastafile, fastaFileNames);
+				m->splitAtDash(fastafile, fastaFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < fastaFileNames.size(); i++) {
 					if (inputDir != "") {
-						string path = hasPath(fastaFileNames[i]);
+						string path = m->hasPath(fastaFileNames[i]);
 						//if the user has not given a path then, add inputdir. else leave path alone.
 						if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
 					}
@@ -69,14 +69,14 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 					int ableToOpen;
 					ifstream in;
 					
-					ableToOpen = openInputFile(fastaFileNames[i], in, "noerror");
+					ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
 				
 					//if you can't open it, try default location
 					if (ableToOpen == 1) {
 						if (m->getDefaultPath() != "") { //default path is set
-							string tryPath = m->getDefaultPath() + getSimpleName(fastaFileNames[i]);
+							string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
 							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = openInputFile(tryPath, in, "noerror");
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
 							fastaFileNames[i] = tryPath;
 						}
 					}
@@ -97,7 +97,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(fastafile); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(fastafile); //if user entered a file with a path then preserve it	
 			}
 
 			templatefile = validParameter.validFile(parameters, "template", true);
@@ -138,7 +138,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			convert(temp, parents); 
 			
 			temp = validParameter.validFile(parameters, "realign", false);			if (temp == "not found") { temp = "f"; }
-			realign = isTrue(temp); 
+			realign = m->isTrue(temp); 
 			
 			search = validParameter.validFile(parameters, "search", false);			if (search == "not found") { search = "distance"; }
 			
@@ -219,8 +219,8 @@ int ChimeraSlayerCommand::execute(){
 			
 			chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign);	
 							
-			string outputFileName = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + "slayer.chimeras";
-			string accnosFileName = outputDir + getRootName(getSimpleName(fastaFileNames[s]))  + "slayer.accnos";
+			string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "slayer.chimeras";
+			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "slayer.accnos";
 			
 			if (m->control_pressed) { delete chimera; for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  return 0;	}
 			
@@ -277,7 +277,7 @@ int ChimeraSlayerCommand::execute(){
 					MPI_File_write_shared(outMPI, buf2, length, MPI_CHAR, &status);
 					delete buf2;
 
-					MPIPos = setFilePosFasta(fastaFileNames[s], numSeqs); //fills MPIPos, returns numSeqs
+					MPIPos = m->setFilePosFasta(fastaFileNames[s], numSeqs); //fills MPIPos, returns numSeqs
 					
 					//send file positions to all processes
 					for(int i = 1; i < processors; i++) { 
@@ -319,13 +319,13 @@ int ChimeraSlayerCommand::execute(){
 				
 		#else
 			ofstream outHeader;
-			string tempHeader = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + "slayer.chimeras.tempHeader";
-			openOutputFile(tempHeader, outHeader);
+			string tempHeader = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "slayer.chimeras.tempHeader";
+			m->openOutputFile(tempHeader, outHeader);
 			
 			chimera->printHeader(outHeader);
 			outHeader.close();
 			
-			vector<unsigned long int> positions = divideFile(fastaFileNames[s], processors);
+			vector<unsigned long int> positions = m->divideFile(fastaFileNames[s], processors);
 				
 			for (int i = 0; i < (positions.size()-1); i++) {
 				lines.push_back(new linePair(positions[i], positions[(i+1)]));
@@ -348,13 +348,13 @@ int ChimeraSlayerCommand::execute(){
 						
 					//append output files
 					for(int i=1;i<processors;i++){
-						appendFiles((outputFileName + toString(processIDS[i]) + ".temp"), outputFileName);
+						m->appendFiles((outputFileName + toString(processIDS[i]) + ".temp"), outputFileName);
 						remove((outputFileName + toString(processIDS[i]) + ".temp").c_str());
 					}
 					
 					//append output files
 					for(int i=1;i<processors;i++){
-						appendFiles((accnosFileName + toString(processIDS[i]) + ".temp"), accnosFileName);
+						m->appendFiles((accnosFileName + toString(processIDS[i]) + ".temp"), accnosFileName);
 						remove((accnosFileName + toString(processIDS[i]) + ".temp").c_str());
 					}
 					
@@ -368,7 +368,7 @@ int ChimeraSlayerCommand::execute(){
 				
 			#endif
 			
-			appendFiles(outputFileName, tempHeader);
+			m->appendFiles(outputFileName, tempHeader);
 		
 			remove(outputFileName.c_str());
 			rename(tempHeader.c_str(), outputFileName.c_str());
@@ -403,13 +403,13 @@ int ChimeraSlayerCommand::execute(){
 int ChimeraSlayerCommand::driver(linePair* filePos, string outputFName, string filename, string accnos){
 	try {
 		ofstream out;
-		openOutputFile(outputFName, out);
+		m->openOutputFile(outputFName, out);
 		
 		ofstream out2;
-		openOutputFile(accnos, out2);
+		m->openOutputFile(accnos, out2);
 		
 		ifstream inFASTA;
-		openInputFile(filename, inFASTA);
+		m->openInputFile(filename, inFASTA);
 
 		inFASTA.seekg(filePos->start);
 
@@ -420,7 +420,7 @@ int ChimeraSlayerCommand::driver(linePair* filePos, string outputFName, string f
 		
 			if (m->control_pressed) {	return 1;	}
 		
-			Sequence* candidateSeq = new Sequence(inFASTA);  gobble(inFASTA);
+			Sequence* candidateSeq = new Sequence(inFASTA);  m->gobble(inFASTA);
 				
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
 				
@@ -483,7 +483,7 @@ int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_Fil
 
 			delete buf4;
 
-			Sequence* candidateSeq = new Sequence(iss);  gobble(iss);
+			Sequence* candidateSeq = new Sequence(iss);  m->gobble(iss);
 		
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
 				
@@ -539,7 +539,7 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 				//pass numSeqs to parent
 				ofstream out;
 				string tempFile = outputFileName + toString(getpid()) + ".num.temp";
-				openOutputFile(tempFile, out);
+				m->openOutputFile(tempFile, out);
 				out << num << endl;
 				out.close();
 				
@@ -556,7 +556,7 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 		for (int i = 0; i < processIDS.size(); i++) {
 			ifstream in;
 			string tempFile =  outputFileName + toString(processIDS[i]) + ".num.temp";
-			openInputFile(tempFile, in);
+			m->openInputFile(tempFile, in);
 			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
 			in.close(); remove(tempFile.c_str());
 		}

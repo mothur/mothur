@@ -87,12 +87,12 @@ int SplitMatrix::splitClassify(){
 		PhyloTree* phylo = new PhyloTree();
 		
 		ifstream in;
-		openInputFile(taxFile, in);
+		m->openInputFile(taxFile, in);
 			
 		//read in users taxonomy file and add sequences to tree
 		string seqname, tax;
 		while(!in.eof()){
-			in >> seqname >> tax; gobble(in);
+			in >> seqname >> tax; m->gobble(in);
 			phylo->addSeqToTree(seqname, tax);
 		}
 		in.close();
@@ -146,12 +146,12 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 		}
 			
 		ifstream in;
-		openInputFile(fastafile, in);
+		m->openInputFile(fastafile, in);
 	
 		//parse fastafile
 		ofstream outFile;
 		while (!in.eof()) {
-			Sequence query(in); gobble(in);
+			Sequence query(in); m->gobble(in);
 			if (query.getName() != "") {
 		
 				it = seqGroup.find(query.getName());
@@ -160,7 +160,7 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 				if (namefile == "") {  names.insert(query.getName()); }
 			
 				if (it != seqGroup.end()) { //not singleton 
-					openOutputFileAppend((fastafile + "." + toString(it->second) + ".temp"), outFile);
+					m->openOutputFileAppend((fastafile + "." + toString(it->second) + ".temp"), outFile);
 					query.printSequence(outFile); 
 					outFile.close();
 					
@@ -195,22 +195,22 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 		
 		singleton = namefile + ".extra.temp";
 		ofstream remainingNames;
-		openOutputFile(singleton, remainingNames);
+		m->openOutputFile(singleton, remainingNames);
 		
 		bool wroteExtra = false;
 
 		ifstream bigNameFile;
-		openInputFile(namefile, bigNameFile);
+		m->openInputFile(namefile, bigNameFile);
 		
 		string name, nameList;
 		while(!bigNameFile.eof()){
-			bigNameFile >> name >> nameList;  gobble(bigNameFile);
+			bigNameFile >> name >> nameList;  m->gobble(bigNameFile);
 			
 			//did this sequence get assigned a group
 			it = seqGroup.find(name);
 			
 			if (it != seqGroup.end()) {  
-				openOutputFileAppend((namefile + "." + toString(it->second) + ".temp"), outFile);
+				m->openOutputFileAppend((namefile + "." + toString(it->second) + ".temp"), outFile);
 				outFile << name << '\t' << nameList << endl;
 				outFile.close();
 			}else{
@@ -222,23 +222,23 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 		
 		for(int i=0;i<numGroups;i++){
 			string tempNameFile = namefile + "." + toString(i) + ".temp";
-			string tempDistFile = outputDir + getRootName(getSimpleName((fastafile + "." + toString(i) + ".temp"))) + "dist";
+			string tempDistFile = outputDir + m->getRootName(m->getSimpleName((fastafile + "." + toString(i) + ".temp"))) + "dist";
 
 			//if there are valid distances
 			ifstream fileHandle;
 			fileHandle.open(tempDistFile.c_str());
 			if(fileHandle) 	{	
-				gobble(fileHandle);
+				m->gobble(fileHandle);
 				if (!fileHandle.eof()) {  //check for blank file - this could occur if all dists in group are above cutoff
 					map<string, string> temp;
 					temp[tempDistFile] = tempNameFile;
 					dists.push_back(temp);
 				}else {
 					ifstream in;
-					openInputFile(tempNameFile, in);
+					m->openInputFile(tempNameFile, in);
 				
 					while(!in.eof()) { 
-						in >> name >> nameList;  gobble(in);
+						in >> name >> nameList;  m->gobble(in);
 						wroteExtra = true;
 						remainingNames << name << '\t' << nameList << endl;
 					}
@@ -271,7 +271,7 @@ int SplitMatrix::splitDistanceFileByTax(map<string, int>& seqGroup, int numGroup
 		map<string, int>::iterator it2;
 		
 		ifstream dFile;
-		openInputFile(distFile, dFile);
+		m->openInputFile(distFile, dFile);
 		ofstream outFile;
 		
 		for (int i = 0; i < numGroups; i++) { //remove old temp files, just in case
@@ -294,7 +294,7 @@ int SplitMatrix::splitDistanceFileByTax(map<string, int>& seqGroup, int numGroup
 			
 			if (m->control_pressed) { dFile.close(); for (int i = 0; i < numGroups; i++) { remove((distFile + "." + toString(i) + ".temp").c_str());	} }
 			
-			dFile >> seqA >> seqB >> dist;  gobble(dFile);
+			dFile >> seqA >> seqB >> dist;  m->gobble(dFile);
 			
 			//if both sequences are in the same group then they are within the cutoff
 			it = seqGroup.find(seqA);
@@ -303,7 +303,7 @@ int SplitMatrix::splitDistanceFileByTax(map<string, int>& seqGroup, int numGroup
 			if ((it != seqGroup.end()) && (it2 != seqGroup.end())) { //they are both not singletons 
 				if (it->second == it2->second) { //they are from the same group so add the distance
 					if (numOutputs[it->second] > 30) {
-						openOutputFileAppend((distFile + "." + toString(it->second) + ".temp"), outFile);
+						m->openOutputFileAppend((distFile + "." + toString(it->second) + ".temp"), outFile);
 						outFile << outputs[it->second] << seqA << '\t' << seqB << '\t' << dist << endl;
 						outFile.close();
 						outputs[it->second] = "";
@@ -323,7 +323,7 @@ int SplitMatrix::splitDistanceFileByTax(map<string, int>& seqGroup, int numGroup
 			
 			//write out any remaining buffers
 			if (numOutputs[i] > 0) {
-				openOutputFileAppend((distFile + "." + toString(i) + ".temp"), outFile);
+				m->openOutputFileAppend((distFile + "." + toString(i) + ".temp"), outFile);
 				outFile << outputs[i];
 				outFile.close();
 				outputs[i] = "";
@@ -333,23 +333,23 @@ int SplitMatrix::splitDistanceFileByTax(map<string, int>& seqGroup, int numGroup
 		}
 		
 		ifstream bigNameFile;
-		openInputFile(namefile, bigNameFile);
+		m->openInputFile(namefile, bigNameFile);
 		
 		singleton = namefile + ".extra.temp";
 		ofstream remainingNames;
-		openOutputFile(singleton, remainingNames);
+		m->openOutputFile(singleton, remainingNames);
 		
 		bool wroteExtra = false;
 						
 		string name, nameList;
 		while(!bigNameFile.eof()){
-			bigNameFile >> name >> nameList;  gobble(bigNameFile);
+			bigNameFile >> name >> nameList;  m->gobble(bigNameFile);
 			
 			//did this sequence get assigned a group
 			it = seqGroup.find(name);
 			
 			if (it != seqGroup.end()) {  
-				openOutputFileAppend((namefile + "." + toString(it->second) + ".temp"), outFile);
+				m->openOutputFileAppend((namefile + "." + toString(it->second) + ".temp"), outFile);
 				outFile << name << '\t' << nameList << endl;
 				outFile.close();
 			}else{
@@ -370,10 +370,10 @@ int SplitMatrix::splitDistanceFileByTax(map<string, int>& seqGroup, int numGroup
 				dists.push_back(temp);
 			}else{
 				ifstream in;
-				openInputFile(tempNameFile, in);
+				m->openInputFile(tempNameFile, in);
 				
 				while(!in.eof()) { 
-					in >> name >> nameList;  gobble(in);
+					in >> name >> nameList;  m->gobble(in);
 					wroteExtra = true;
 					remainingNames << name << '\t' << nameList << endl;
 				}
@@ -419,7 +419,7 @@ int SplitMatrix::splitDistanceLarge(){
 
 		ofstream outFile;
 		ifstream dFile;
-		openInputFile(distFile, dFile);
+		m->openInputFile(distFile, dFile);
 	
 		while(dFile){
 			string seqA, seqB;
@@ -633,7 +633,7 @@ int SplitMatrix::splitDistanceLarge(){
 					}
 				}
 			}
-			gobble(dFile);
+			m->gobble(dFile);
 		}
 		dFile.close();
 		
@@ -671,7 +671,7 @@ int SplitMatrix::splitNames(vector<set<string> >& groups){
 		while(bigNameFile){
 			bigNameFile >> name >> nameList;
 			nameMap[name] = nameList;
-			gobble(bigNameFile);
+			m->gobble(bigNameFile);
 		}
 		bigNameFile.close();
 			
@@ -740,7 +740,7 @@ int SplitMatrix::splitDistanceRAM(){
 		int numGroups = 0;
 
 		ifstream dFile;
-		openInputFile(distFile, dFile);
+		m->openInputFile(distFile, dFile);
 
 		while(dFile){
 			string seqA, seqB;
@@ -823,7 +823,7 @@ int SplitMatrix::splitDistanceRAM(){
 					}
 				}
 			}
-			gobble(dFile);
+			m->gobble(dFile);
 		}
 		dFile.close();
 		

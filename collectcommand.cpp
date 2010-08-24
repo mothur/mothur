@@ -73,7 +73,7 @@ CollectCommand::CollectCommand(string option)  {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
@@ -88,7 +88,7 @@ CollectCommand::CollectCommand(string option)  {
 			else { 
 				 if (calc == "default")  {  calc = "sobs-chao-ace-jack-shannon-npshannon-simpson";  }
 			}
-			splitAtDash(calc, Estimators);
+			m->splitAtDash(calc, Estimators);
 
 			string temp;
 			temp = validParameter.validFile(parameters, "freq", false);			if (temp == "not found") { temp = "100"; }
@@ -150,8 +150,8 @@ int CollectCommand::execute(){
 			
 			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  globaldata->Groups.clear(); if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } return 0; }
 			
-			if (outputDir == "") { outputDir += hasPath(inputFileNames[p]); }
-			string fileNameRoot = outputDir + getRootName(getSimpleName(inputFileNames[p]));
+			if (outputDir == "") { outputDir += m->hasPath(inputFileNames[p]); }
+			string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p]));
 			globaldata->inputFileName = inputFileNames[p];
 		
 			if (inputFileNames.size() > 1) {
@@ -296,7 +296,7 @@ int CollectCommand::execute(){
 					
 				}
 				//you have a label the user want that is smaller than this label and the last label has not already been processed 
-				if ((anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((m->anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = order->getLabel();
 					
 					delete order;
@@ -414,7 +414,7 @@ vector<string> CollectCommand::parseSharedFile(string filename) {
 		input = globaldata->ginput;
 		vector<SharedRAbundVector*> lookup = input->getSharedRAbundVectors();
 		
-		string sharedFileRoot = getRootName(filename);
+		string sharedFileRoot = m->getRootName(filename);
 		
 		//clears file before we start to write to it below
 		for (int i=0; i<lookup.size(); i++) {
@@ -433,7 +433,7 @@ vector<string> CollectCommand::parseSharedFile(string filename) {
 		
 			for (int i = 0; i < lookup.size(); i++) {
 				RAbundVector rav = lookup[i]->getRAbundVector();
-				openOutputFileAppend(sharedFileRoot + lookup[i]->getGroup() + ".rabund", *(filehandles[lookup[i]->getGroup()]));
+				m->openOutputFileAppend(sharedFileRoot + lookup[i]->getGroup() + ".rabund", *(filehandles[lookup[i]->getGroup()]));
 				rav.print(*(filehandles[lookup[i]->getGroup()]));
 				(*(filehandles[lookup[i]->getGroup()])).close();
 			}

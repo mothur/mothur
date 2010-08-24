@@ -17,7 +17,7 @@
 class RareCalc {
 
 public:
-	RareCalc(RAbundVector* b) : bins(b), numSeqs(b->getNumSeqs()), maxRank(b->getMaxRank()), numBins(b->getNumBins()) {	bMatrix = binomial(numSeqs+1); m = MothurOut::getInstance();	}
+	RareCalc(RAbundVector* b) : bins(b), numSeqs(b->getNumSeqs()), maxRank(b->getMaxRank()), numBins(b->getNumBins()) {	m = MothurOut::getInstance(); bMatrix = m->binomial(numSeqs+1); }
 	EstOutput getValues(int);
 	string getName()	{	return "rarecalc";	}
 private:

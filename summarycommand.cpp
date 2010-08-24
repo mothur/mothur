@@ -68,7 +68,7 @@ SummaryCommand::SummaryCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
 			}
 
 			//check for optional parameter and set defaults
@@ -76,7 +76,7 @@ SummaryCommand::SummaryCommand(string option)  {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
@@ -91,7 +91,7 @@ SummaryCommand::SummaryCommand(string option)  {
 			else { 
 				 if (calc == "default")  {  calc = "sobs-chao-ace-jack-shannon-npshannon-simpson";  }
 			}
-			splitAtDash(calc, Estimators);
+			m->splitAtDash(calc, Estimators);
 
 			string temp;
 			temp = validParameter.validFile(parameters, "abund", false);		if (temp == "not found") { temp = "10"; }
@@ -101,7 +101,7 @@ SummaryCommand::SummaryCommand(string option)  {
 			convert(temp, size); 
 			
 			temp = validParameter.validFile(parameters, "groupmode", false);		if (temp == "not found") { temp = "F"; }
-			groupMode = isTrue(temp);
+			groupMode = m->isTrue(temp);
 			
 	
 		}
@@ -160,7 +160,7 @@ int SummaryCommand::execute(){
 			numLines = 0;
 			numCols = 0;
 			
-			string fileNameRoot = outputDir + getRootName(getSimpleName(inputFileNames[p])) + "summary";
+			string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p])) + "summary";
 			globaldata->inputFileName = inputFileNames[p];
 			outputNames.push_back(fileNameRoot);
 			
@@ -234,7 +234,7 @@ int SummaryCommand::execute(){
 			if (sumCalculators.size() == 0) { if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } return 0; }
 			
 			ofstream outputFileHandle;
-			openOutputFile(fileNameRoot, outputFileHandle);
+			m->openOutputFile(fileNameRoot, outputFileHandle);
 			outputFileHandle << "label";
 			
 			read = new ReadOTUFile(globaldata->inputFileName);	
@@ -285,7 +285,7 @@ int SummaryCommand::execute(){
 					numLines++;
 				}
 				
-				if ((anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((m->anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = sabund->getLabel();
 					
 					delete sabund;
@@ -401,7 +401,7 @@ vector<string> SummaryCommand::parseSharedFile(string filename) {
 		input = globaldata->ginput;
 		vector<SharedRAbundVector*> lookup = input->getSharedRAbundVectors();
 		
-		string sharedFileRoot = getRootName(filename);
+		string sharedFileRoot = m->getRootName(filename);
 		
 		//clears file before we start to write to it below
 		for (int i=0; i<lookup.size(); i++) {
@@ -420,7 +420,7 @@ vector<string> SummaryCommand::parseSharedFile(string filename) {
 		
 			for (int i = 0; i < lookup.size(); i++) {
 				RAbundVector rav = lookup[i]->getRAbundVector();
-				openOutputFileAppend(sharedFileRoot + lookup[i]->getGroup() + ".rabund", *(filehandles[lookup[i]->getGroup()]));
+				m->openOutputFileAppend(sharedFileRoot + lookup[i]->getGroup() + ".rabund", *(filehandles[lookup[i]->getGroup()]));
 				rav.print(*(filehandles[lookup[i]->getGroup()]));
 				(*(filehandles[lookup[i]->getGroup()])).close();
 			}
@@ -449,10 +449,10 @@ string SummaryCommand::createGroupSummaryFile(int numLines, int numCols, vector<
 	try {
 		
 		ofstream out;
-		string combineFileName = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + "groups.summary";
+		string combineFileName = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + "groups.summary";
 		
 		//open combined file
-		openOutputFile(combineFileName, out);
+		m->openOutputFile(combineFileName, out);
 		
 		//open each groups summary file
 		string newLabel = "";
@@ -461,7 +461,7 @@ string SummaryCommand::createGroupSummaryFile(int numLines, int numCols, vector<
 		for (int i=0; i<outputNames.size(); i++) {
 			temp = new ifstream;
 			filehandles[outputNames[i]] = temp;
-			openInputFile(outputNames[i], *(temp));
+			m->openInputFile(outputNames[i], *(temp));
 			
 			//read through first line - labels
 			string tempLabel;
@@ -474,7 +474,7 @@ string SummaryCommand::createGroupSummaryFile(int numLines, int numCols, vector<
 				}
 			}else{  for (int j = 0; j < numCols+1; j++) {  *(temp) >> tempLabel;  }  }
 			
-			gobble(*(temp));
+			m->gobble(*(temp));
 		}
 		
 		//output label line to new file
@@ -496,7 +496,7 @@ string SummaryCommand::createGroupSummaryFile(int numLines, int numCols, vector<
 				}
 				
 				out << endl;
-				gobble(*(filehandles[outputNames[i]]));
+				m->gobble(*(filehandles[outputNames[i]]));
 			}
 		}	
 		

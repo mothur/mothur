@@ -40,7 +40,7 @@ HeatMapCommand::HeatMapCommand(string option) {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
 			}
 			
 			//make sure the user has already run the read.otu command
@@ -53,7 +53,7 @@ HeatMapCommand::HeatMapCommand(string option) {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
@@ -66,7 +66,7 @@ HeatMapCommand::HeatMapCommand(string option) {
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
 			else { 
-				splitAtDash(groups, Groups);
+				m->splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 			}
 			
@@ -178,7 +178,7 @@ int HeatMapCommand::execute(){
 					userLabels.erase(lookup[0]->getLabel());
 				}
 				
-				if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = lookup[0]->getLabel();
 				
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
@@ -252,7 +252,7 @@ int HeatMapCommand::execute(){
 					userLabels.erase(rabund->getLabel());
 				}
 				
-				if ((anyLabelsToProcess(rabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				if ((m->anyLabelsToProcess(rabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = rabund->getLabel();
 					
 					delete rabund;

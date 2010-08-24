@@ -57,7 +57,7 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a
 			}
 		}
 		
-		gobble(f); 
+		m->gobble(f); 
 		
 		if (f.eof() != true) { f >> nextLabel; }
 		
@@ -81,7 +81,7 @@ SharedOrderVector::SharedOrderVector(ifstream& f) : DataVector() {  //reads in a
 				}
 			}
 			
-			gobble(f);
+			m->gobble(f);
 				
 			if (f.eof() != true) { f >> nextLabel; }
 

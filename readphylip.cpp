@@ -14,7 +14,7 @@
 
 ReadPhylipMatrix::ReadPhylipMatrix(string distFile){
         
-        successOpen = openInputFile(distFile, fileHandle);
+        successOpen = m->openInputFile(distFile, fileHandle);
         
 }
 

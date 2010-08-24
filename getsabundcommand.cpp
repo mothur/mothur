@@ -39,7 +39,7 @@ GetSAbundCommand::GetSAbundCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			string outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
 			}
 
 			//make sure the user has already run the read.otu command
@@ -50,7 +50,7 @@ GetSAbundCommand::GetSAbundCommand(string option)  {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
@@ -61,8 +61,8 @@ GetSAbundCommand::GetSAbundCommand(string option)  {
 			}
 				
 			if (abort == false) {
-				filename = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + "sabund";
-				openOutputFile(filename, out);
+				filename = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + "sabund";
+				m->openOutputFile(filename, out);
 			}
 		}
 
@@ -133,7 +133,7 @@ int GetSAbundCommand::execute(){
 					userLabels.erase(order->getLabel());
 			}
 			
-			if ((anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(order->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = order->getLabel();
 					
 					delete order;		

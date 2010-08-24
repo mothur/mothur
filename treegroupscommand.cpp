@@ -58,7 +58,7 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 				it = parameters.find("phylip");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
@@ -66,7 +66,7 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 				it = parameters.find("column");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["column"] = inputDir + it->second;		}
 				}
@@ -74,7 +74,7 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -111,7 +111,7 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
@@ -124,7 +124,7 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; }
 			else { 
-				splitAtDash(groups, Groups);
+				m->splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 			}
 				
@@ -133,7 +133,7 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 			else { 
 				 if (calc == "default")  {  calc = "jclass-thetayc";  }
 			}
-			splitAtDash(calc, Estimators);
+			m->splitAtDash(calc, Estimators);
 
 			string temp;
 			temp = validParameter.validFile(parameters, "precision", false);			if (temp == "not found") { temp = "100"; }
@@ -146,7 +146,7 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
 			}
 
 				
@@ -322,7 +322,7 @@ int TreeGroupCommand::execute(){
 			if (m->control_pressed) { return 0; }
 
 			//create a new filename
-			outputFile = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + "tre";	
+			outputFile = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + "tre";	
 			outputNames.push_back(outputFile);
 				
 			createTree();
@@ -512,7 +512,7 @@ int TreeGroupCommand::makeSimsShared() {
 				userLabels.erase(lookup[0]->getLabel());
 			}
 			
-			if ((anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup[0]->getLabel();
 			
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
@@ -593,7 +593,7 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
 					for (int g = 0; g < numGroups; g++) {	index[g] = g;	}
 		
 					//create a new filename
-					outputFile = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".tre";				
+					outputFile = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".tre";				
 					outputNames.push_back(outputFile);
 												
 					for (int k = 0; k < thisLookup.size(); k++) { 

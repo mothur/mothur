@@ -43,25 +43,25 @@ DegapSeqsCommand::DegapSeqsCommand(string option)  {
 			fastafile = validParameter.validFile(parameters, "fasta", false);
 			if (fastafile == "not found") { fastafile = ""; m->mothurOut("fasta is a required parameter for the degap.seqs command."); m->mothurOutEndLine(); abort = true;  }
 			else { 
-				splitAtDash(fastafile, fastaFileNames);
+				m->splitAtDash(fastafile, fastaFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < fastaFileNames.size(); i++) {
 					if (inputDir != "") {
-						string path = hasPath(fastaFileNames[i]);
+						string path = m->hasPath(fastaFileNames[i]);
 						//if the user has not given a path then, add inputdir. else leave path alone.
 						if (path == "") {	fastaFileNames[i] = inputDir + fastaFileNames[i];		}
 					}
 	
 					ifstream in;
-					int ableToOpen = openInputFile(fastaFileNames[i], in, "noerror");
+					int ableToOpen = m->openInputFile(fastaFileNames[i], in, "noerror");
 				
 					//if you can't open it, try default location
 					if (ableToOpen == 1) {
 						if (m->getDefaultPath() != "") { //default path is set
-							string tryPath = m->getDefaultPath() + getSimpleName(fastaFileNames[i]);
+							string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
 							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = openInputFile(tryPath, in, "noerror");
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
 							fastaFileNames[i] = tryPath;
 						}
 					}
@@ -83,7 +83,7 @@ DegapSeqsCommand::DegapSeqsCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
-				outputDir += hasPath(fastafile); //if user entered a file with a path then preserve it	
+				outputDir += m->hasPath(fastafile); //if user entered a file with a path then preserve it	
 			}
 
 		}
@@ -128,16 +128,16 @@ int DegapSeqsCommand::execute(){
 				
 			m->mothurOut("Degapping sequences from " + fastaFileNames[s] + " ..." ); m->mothurOutEndLine();
 			ifstream inFASTA;
-			openInputFile(fastaFileNames[s], inFASTA);
+			m->openInputFile(fastaFileNames[s], inFASTA);
 			
 			ofstream outFASTA;
-			string degapFile = outputDir + getRootName(getSimpleName(fastaFileNames[s])) + "ng.fasta";
-			openOutputFile(degapFile, outFASTA);
+			string degapFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "ng.fasta";
+			m->openOutputFile(degapFile, outFASTA);
 			
 			while(!inFASTA.eof()){
 				if (m->control_pressed) {  inFASTA.close();  outFASTA.close(); remove(degapFile.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} return 0; }
 				 
-				Sequence currSeq(inFASTA);  gobble(inFASTA);
+				Sequence currSeq(inFASTA);  m->gobble(inFASTA);
 				if (currSeq.getName() != "") {
 					outFASTA << ">" << currSeq.getName() << endl;
 					outFASTA << currSeq.getUnaligned() << endl;

@@ -69,7 +69,7 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 		vector<string> range = parameterRanges[parameter];
 		
 		vector<string> values;
-		splitAtDash(value, values);
+		m->splitAtDash(value, values);
 		
 		for(int i = 0; i < values.size(); i++) {
 			value = values.at(i);
@@ -233,14 +233,14 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
 				if (pid == 0) {
 			#endif
 
-				ableToOpen = openInputFile(it->second, in, "noerror");
+				ableToOpen = m->openInputFile(it->second, in, "noerror");
 				
 				//if you can't open it, try default location
 				if (ableToOpen == 1) {
 					if (m->getDefaultPath() != "") { //default path is set
-						string tryPath = m->getDefaultPath() + getSimpleName(it->second);
+						string tryPath = m->getDefaultPath() + m->getSimpleName(it->second);
 						m->mothurOut("Unable to open " + it->second + ". Trying default " + tryPath); m->mothurOutEndLine();
-						ableToOpen = openInputFile(tryPath, in, "noerror");
+						ableToOpen = m->openInputFile(tryPath, in, "noerror");
 						container[parameter] = tryPath;
 					}
 				}

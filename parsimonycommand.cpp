@@ -50,7 +50,7 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = ""; globaldata->Groups.clear(); }
 			else { 
-				splitAtDash(groups, Groups);
+				m->splitAtDash(groups, Groups);
 				globaldata->Groups = Groups;
 			}
 				
@@ -64,20 +64,20 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 					T = globaldata->gTree;
 					tmap = globaldata->gTreemap;
 					
-					if(outputDir == "") { outputDir += hasPath(globaldata->getTreeFile()); }
-					output = new ColumnFile(outputDir + getSimpleName(globaldata->getTreeFile())  +  ".parsimony", itersString);
-					outputNames.push_back(outputDir + getSimpleName(globaldata->getTreeFile())  +  ".parsimony");
+					if(outputDir == "") { outputDir += m->hasPath(globaldata->getTreeFile()); }
+					output = new ColumnFile(outputDir + m->getSimpleName(globaldata->getTreeFile())  +  ".parsimony", itersString);
+					outputNames.push_back(outputDir + m->getSimpleName(globaldata->getTreeFile())  +  ".parsimony");
 					
-					sumFile = outputDir + getSimpleName(globaldata->getTreeFile()) + ".psummary";
-					openOutputFile(sumFile, outSum);
+					sumFile = outputDir + m->getSimpleName(globaldata->getTreeFile()) + ".psummary";
+					m->openOutputFile(sumFile, outSum);
 					outputNames.push_back(sumFile);
 				}else { //user wants random distribution
 					savetmap = globaldata->gTreemap;
 					getUserInput();
 					
-					if(outputDir == "") { outputDir += hasPath(randomtree); }
-					output = new ColumnFile(outputDir+ getSimpleName(randomtree), itersString);
-					outputNames.push_back(outputDir+ getSimpleName(randomtree));
+					if(outputDir == "") { outputDir += m->hasPath(randomtree); }
+					output = new ColumnFile(outputDir+ m->getSimpleName(randomtree), itersString);
+					outputNames.push_back(outputDir+ m->getSimpleName(randomtree));
 				}
 				
 				//set users groups to analyze

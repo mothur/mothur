@@ -63,8 +63,8 @@ string HeatMap::getPic(RAbundVector* rabund) {
 		}
 		
 		
-		string filenamesvg = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + rabund->getLabel() + ".heatmap.bin.svg";
-		openOutputFile(filenamesvg, outsvg);
+		string filenamesvg = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + rabund->getLabel() + ".heatmap.bin.svg";
+		m->openOutputFile(filenamesvg, outsvg);
 		
 		//svg image
 		outsvg << "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 " + toString(300) + " " + toString((rabund->getNumBins()*5 + 120))  + "\">\n";
@@ -148,8 +148,8 @@ string HeatMap::getPic(vector<SharedRAbundVector*> lookup) {
 			}
 		}
 
-		string filenamesvg = outputDir + getRootName(getSimpleName(globaldata->inputFileName)) + lookup[0]->getLabel() + ".heatmap.bin.svg";
-		openOutputFile(filenamesvg, outsvg);
+		string filenamesvg = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + lookup[0]->getLabel() + ".heatmap.bin.svg";
+		m->openOutputFile(filenamesvg, outsvg);
 		
 		//svg image
 		outsvg << "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 " + toString(lookup.size() * 300) + " " + toString((lookup[0]->getNumBins()*5 + 120))  + "\">\n";

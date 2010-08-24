@@ -45,7 +45,7 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 				it = parameters.find("list");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["list"] = inputDir + it->second;		}
 				}
@@ -53,7 +53,7 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 				it = parameters.find("name");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
 				}
@@ -61,7 +61,7 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 				it = parameters.find("taxonomy");
 				//user has given a template file
 				if(it != parameters.end()){ 
-					path = hasPath(it->second);
+					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
@@ -89,7 +89,7 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; allLines = 1;  }
 			else { 
-				if(label != "all") {  splitAtDash(label, labels);  allLines = 0;  }
+				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
 			
@@ -97,7 +97,7 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 			convert(temp, cutoff); 
 			
 			temp = validParameter.validFile(parameters, "probs", false);					if (temp == "not found"){	temp = "true";			}
-			probs = isTrue(temp);
+			probs = m->isTrue(temp);
 			
 			
 			if ((cutoff < 51) || (cutoff > 100)) { m->mothurOut("cutoff must be above 50, and no greater than 100."); m->mothurOutEndLine(); abort = true;  }
@@ -171,7 +171,7 @@ int ClassifyOtuCommand::execute(){
 					userLabels.erase(list->getLabel());
 			}
 			
-			if ((anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = list->getLabel();
 					
 					delete list;
@@ -241,18 +241,18 @@ int ClassifyOtuCommand::readNamesFile() {
 	try {
 		
 		ifstream inNames;
-		openInputFile(namefile, inNames);
+		m->openInputFile(namefile, inNames);
 		
 		string name, names;
 	
 		while(inNames){
 			inNames >> name;			//read from first column  A
 			inNames >> names;		//read from second column  A,B,C,D
-			gobble(inNames);
+			m->gobble(inNames);
 			
 			//parse names into vector
 			vector<string> theseNames;
-			splitAtComma(names, theseNames);
+			m->splitAtComma(names, theseNames);
 
 			for (int i = 0; i < theseNames.size(); i++) {  nameMap[theseNames[i]] = name;  }
 			
@@ -272,13 +272,13 @@ int ClassifyOtuCommand::readTaxonomyFile() {
 	try {
 		
 		ifstream in;
-		openInputFile(taxfile, in);
+		m->openInputFile(taxfile, in);
 		
 		string name, tax;
 	
 		while(!in.eof()){
 			in >> name >> tax;		
-			gobble(in);
+			m->gobble(in);
 			
 			//are there confidence scores, if so remove them
 			if (tax.find_first_of('(') != -1) {  removeConfidences(tax);	}
@@ -306,7 +306,7 @@ string ClassifyOtuCommand::findConsensusTaxonomy(int bin, ListVector* thisList, 
 
 		//parse names into vector
 		string binnames = thisList->get(bin);
-		splitAtComma(binnames, names);
+		m->splitAtComma(binnames, names);
 
 		//create a tree containing sequences from this bin
 		PhyloTree* phylo = new PhyloTree();
@@ -417,11 +417,11 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 		int size;
 		
 		//create output file
-		if (outputDir == "") { outputDir += hasPath(listfile); }
+		if (outputDir == "") { outputDir += m->hasPath(listfile); }
 				
 		ofstream out;
-		string outputFile = outputDir + getRootName(getSimpleName(listfile)) + processList->getLabel() + ".cons.taxonomy";
-		openOutputFile(outputFile, out);
+		string outputFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + ".cons.taxonomy";
+		m->openOutputFile(outputFile, out);
 		outputNames.push_back(outputFile);
 		
 		//for each bin in the list vector

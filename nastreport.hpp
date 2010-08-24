@@ -47,6 +47,7 @@ private:
 	int totalGapsInQuery, totalGapsInTemplate;
 	float similarityToTemplate;
 	ofstream candidateReportFile;
+	MothurOut* m;
 };
 
 /******************************************************************************************************************/

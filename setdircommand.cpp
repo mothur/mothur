@@ -106,7 +106,7 @@ int SetDirectoryCommand::execute(){
 			#endif
 			
 			//test to make sure directory exists
-			output = getFullPathName(output);
+			output = m->getFullPathName(output);
 			string outTemp = output + "temp";
 			ofstream out;
 			out.open(outTemp.c_str(), ios::trunc);
@@ -139,7 +139,7 @@ int SetDirectoryCommand::execute(){
 			#endif
 			
 			//test to make sure directory exists
-			input = getFullPathName(input);
+			input = m->getFullPathName(input);
 			string inTemp = input + "temp";
 			ofstream in;
 			in.open(inTemp.c_str(), ios::trunc);
