@@ -61,26 +61,28 @@ string GroupMap::getGroup(string sequenceName) {
 }
 
 /************************************************************/
+
 void GroupMap::setGroup(string sequenceName, string groupN) {
 	groupmap[sequenceName] = groupN;
 }
+
 /************************************************************/
 void GroupMap::setNamesOfGroups(string seqGroup) {
-			int i, count;
-			count = 0;
-			for (i=0; i<namesOfGroups.size(); i++) {
-				if (namesOfGroups[i] != seqGroup) {
-					count++; //you have not found this group
-				}else {
-					break; //you already have it
-				}
-			}
-			if (count == namesOfGroups.size()) {
-				namesOfGroups.push_back(seqGroup); //new group
-				seqsPerGroup[seqGroup] = 0;
-				groupIndex[seqGroup] = index;
-				index++;
-			}
+	int i, count;
+	count = 0;
+	for (i=0; i<namesOfGroups.size(); i++) {
+		if (namesOfGroups[i] != seqGroup) {
+			count++; //you have not found this group
+		}else {
+			break; //you already have it
+		}
+	}
+	if (count == namesOfGroups.size()) {
+		namesOfGroups.push_back(seqGroup); //new group
+		seqsPerGroup[seqGroup] = 0;
+		groupIndex[seqGroup] = index;
+		index++;
+	}
 }
 /************************************************************/
 bool GroupMap::isValidGroup(string groupname) {
