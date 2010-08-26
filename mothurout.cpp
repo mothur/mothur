@@ -1179,17 +1179,33 @@ void MothurOut::splitAtDash(string& estim, set<int>& container) {
 //This function parses the a string and puts peices in a vector
 void MothurOut::splitAtComma(string& estim, vector<string>& container) {
 	try {
-		string individual;
-		
-		while (estim.find_first_of(',') != -1) {
-			individual = estim.substr(0,estim.find_first_of(','));
-			if ((estim.find_first_of(',')+1) <= estim.length()) { //checks to make sure you don't have comma at end of string
-				estim = estim.substr(estim.find_first_of(',')+1, estim.length());
+		string individual = "";
+		int estimLength = estim.size();
+		for(int i=0;i<estimLength;i++){
+			if(estim[i] == ','){
 				container.push_back(individual);
+				individual = "";				
+			}
+			else{
+				individual += estim[i];
 			}
 		}
-		//get last one
-		container.push_back(estim);
+		container.push_back(individual);
+		
+		
+		
+		
+//		string individual;
+//		
+//		while (estim.find_first_of(',') != -1) {
+//			individual = estim.substr(0,estim.find_first_of(','));
+//			if ((estim.find_first_of(',')+1) <= estim.length()) { //checks to make sure you don't have comma at end of string
+//				estim = estim.substr(estim.find_first_of(',')+1, estim.length());
+//				container.push_back(individual);
+//			}
+//		}
+//		//get last one
+//		container.push_back(estim);
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "splitAtComma");
