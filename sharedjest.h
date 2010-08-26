@@ -20,7 +20,7 @@ It is a child of the calculator class. */
 class Jest : public Calculator  {
 	
 public:
-	Jest() :  Calculator("jest", 3, false) {};
+	Jest() :  Calculator("jest", 1, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(vector<SharedRAbundVector*>);
 private:

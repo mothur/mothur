@@ -310,7 +310,6 @@ getopt_long(int argc, char **argv,
     puts_argv(&argv[optind]);
     */
     opt = argv[optind];
-
     if (shortoptind == 0 && is_option(opt) == 1) {
         shortoptind++;
     }

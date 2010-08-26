@@ -234,6 +234,7 @@ int SummarySharedCommand::execute(){
 		outputFileHandle << "label" <<'\t' << "comparison" << '\t'; 
 		for(int i=0;i<sumCalculators.size();i++){
 			outputFileHandle << '\t' << sumCalculators[i]->getName();
+			if (sumCalculators[i]->getCols() == 3) {   outputFileHandle << "\tlci\thci";  }
 		}
 		outputFileHandle << endl;
 		

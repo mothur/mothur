@@ -1,3 +1,6 @@
+
+
+
 /*
  * clearcut.h
  *
@@ -47,9 +50,10 @@
 #ifndef _INC_CLEARCUT_H_
 #define _INC_CLEARCUT_H_ 1
 
+extern "C" {
+
 #include "common.h"
 #include "cmdargs.h"
-
 
 #define NJ_VERSION "1.0.9"
 
@@ -180,11 +184,8 @@ typedef struct _STRUCT_NJ_VERTEX {
 } NJ_VERTEX;
 
 
-
-
-
-
 /* some function prototypes */
+int clearcut_main(int, char**);  
 
 /* core function for performing Relaxed Neighbor Joining */
 NJ_TREE *
@@ -272,7 +273,10 @@ NJ_min_transform(DMAT *dmat,
 		 long int *ret_i,
 		 long int *ret_j);
 
+}
+
 #endif /* _INC_CLEARCUT_H_ */
+
 
 
 

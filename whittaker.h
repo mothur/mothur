@@ -18,7 +18,7 @@
 class Whittaker : public Calculator  {
 	
 public:
-	Whittaker() : Calculator("whittaker", 3, false) {};
+	Whittaker() : Calculator("whittaker", 1, false) {};
 	EstOutput getValues(SAbundVector*) {return data;};
 	EstOutput getValues(vector<SharedRAbundVector*>);
 
