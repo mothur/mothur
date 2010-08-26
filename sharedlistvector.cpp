@@ -283,21 +283,42 @@ vector<SharedRAbundVector*> SharedListVector::getSharedRAbundVector() {
 		//fill vectors
 		for(int i=0;i<numBins;i++){
 			names = get(i);  
-			while (names.find_first_of(',') != -1) { 
-				name = names.substr(0,names.find_first_of(','));
-				names = names.substr(names.find_first_of(',')+1, names.length());
-				group = groupmap->getGroup(name);
-				if(group == "not found") {	m->mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
-				finder[group]->set(i, finder[group]->getAbundance(i) + 1, group);  //i represents what bin you are in
-			}
+			int nameLength = names.size();
+			string seqName = "";
 			
-			//get last name
-			group = groupmap->getGroup(names);
-			if(group == "not found") {	m->mothurOut("Error: Sequence '" + names + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
+			for(int j=0;j<nameLength;j++){
+				if(names[j] == ','){
+					group = groupmap->getGroup(seqName);
+					if(group == "not found") {	m->mothurOut("Error: Sequence '" + seqName + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
+					finder[group]->set(i, finder[group]->getAbundance(i) + 1, group);  //i represents what bin you are in
+					
+					seqName = "";
+				}
+				else{
+					seqName += names[j];
+				}
+			}
+			group = groupmap->getGroup(seqName);
+			if(group == "not found") {	m->mothurOut("Error: Sequence '" + seqName + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
 			finder[group]->set(i, finder[group]->getAbundance(i) + 1, group);  //i represents what bin you are in
 			
+			
+			
+//			while (names.find_first_of(',') != -1) { 
+//				name = names.substr(0,names.find_first_of(','));
+//				names = names.substr(names.find_first_of(',')+1, names.length());
+//				group = groupmap->getGroup(name);
+//				if(group == "not found") {	m->mothurOut("Error: Sequence '" + name + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
+//				finder[group]->set(i, finder[group]->getAbundance(i) + 1, group);  //i represents what bin you are in
+//			}
+			
+			//get last name
+//			group = groupmap->getGroup(names);
+//			if(group == "not found") {	m->mothurOut("Error: Sequence '" + names + "' was not found in the group file, please correct."); m->mothurOutEndLine();  exit(1); }
+//			finder[group]->set(i, finder[group]->getAbundance(i) + 1, group);  //i represents what bin you are in
+			
 		}
-		
+
 		return lookup;
 	}
 	catch(exception& e) {
