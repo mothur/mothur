@@ -34,14 +34,14 @@ public:
 		for(int i=0;i<alignLength;i++){
 			if(seqA[i] != '.' && seqB[i] != '.' && seqA[i] != '-' && seqB[i] != '-' ){
 				start = i;
-				cout << "start: " << start << endl;
+//				cout << "start: " << start << endl;
 				break;
 			}
 		}
 		for(int i=alignLength-1;i>=0;i--){
 			if(seqA[i] != '.' && seqB[i] != '.' && seqA[i] != '-' && seqB[i] != '-' ){
 				end = i;
-				cout << "end: " << end << endl;
+//				cout << "end: " << end << endl;
 				break;
 			}
 		}
