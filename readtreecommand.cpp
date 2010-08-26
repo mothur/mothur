@@ -153,38 +153,46 @@ int ReadTreeCommand::execute(){
 			T[i]->assembleTree();
 		}
 
+		
+//		Sarah, isn't this checking already done when assigning the sequences to the groups?  it makes read.tree
+//		wicked slow...  For some reason my tree is coming in here eventhough the number of sequences in the tree
+//		agrees with the number of lines in the name file and the number of sequences represented by the name file
+//		agrees with the number of sequences in the group file
+
 		//output any names that are in group file but not in tree
-		if (globaldata->Treenames.size() < treeMap->getNumSeqs()) {
-			for (int i = 0; i < treeMap->namesOfSeqs.size(); i++) {
-				//is that name in the tree?
-				int count = 0;
-				for (int j = 0; j < globaldata->Treenames.size(); j++) {
-					if (treeMap->namesOfSeqs[i] == globaldata->Treenames[j]) { break; } //found it
-					count++;
-				}
-				
-				if (m->control_pressed) {  
-					for (int i = 0; i < T.size(); i++) {  delete T[i];  }
-					globaldata->gTree.clear();
-					delete globaldata->gTreemap;
-					return 0;
-				}
-				
-				//then you did not find it so report it 
-				if (count == globaldata->Treenames.size()) { 
-					//if it is in your namefile then don't remove
-					map<string, string>::iterator it = nameMap.find(treeMap->namesOfSeqs[i]);
-					
-					if (it == nameMap.end()) {
-						m->mothurOut(treeMap->namesOfSeqs[i] + " is in your groupfile and not in your tree. It will be disregarded."); m->mothurOutEndLine();
-						treeMap->removeSeq(treeMap->namesOfSeqs[i]);
-						i--; //need this because removeSeq removes name from namesOfSeqs
-					}
-				}
-			}
-			
-			globaldata->gTreemap = treeMap;
-		}
+		
+//		if (globaldata->Treenames.size() < treeMap->getNumSeqs()) {
+//			cout << "in here" << endl;
+//			for (int i = 0; i < treeMap->namesOfSeqs.size(); i++) {
+//				//is that name in the tree?
+//				int count = 0;
+//				for (int j = 0; j < globaldata->Treenames.size(); j++) {
+//					if (treeMap->namesOfSeqs[i] == globaldata->Treenames[j]) { break; } //found it
+//					count++;
+//				}
+//				
+//				if (m->control_pressed) {  
+//					for (int i = 0; i < T.size(); i++) {  delete T[i];  }
+//					globaldata->gTree.clear();
+//					delete globaldata->gTreemap;
+//					return 0;
+//				}
+//				
+//				//then you did not find it so report it 
+//				if (count == globaldata->Treenames.size()) { 
+//					//if it is in your namefile then don't remove
+//					map<string, string>::iterator it = nameMap.find(treeMap->namesOfSeqs[i]);
+//					
+//					if (it == nameMap.end()) {
+//						m->mothurOut(treeMap->namesOfSeqs[i] + " is in your groupfile and not in your tree. It will be disregarded."); m->mothurOutEndLine();
+//						treeMap->removeSeq(treeMap->namesOfSeqs[i]);
+//						i--; //need this because removeSeq removes name from namesOfSeqs
+//					}
+//				}
+//			}
+//			
+//			globaldata->gTreemap = treeMap;
+//		}
 		
 		return 0;
 	}

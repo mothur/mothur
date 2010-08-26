@@ -69,6 +69,9 @@ void Tree::addNamesToCounts() {
 
 				
 		//go through each leaf and update its pcounts and pgroups
+		
+		float A = clock();
+
 		for (int i = 0; i < numLeaves; i++) {
 
 			string name = tree[i].getName();
@@ -132,7 +135,11 @@ void Tree::addNamesToCounts() {
 				tree[i].setGroup(nodeGroups);
 				
 			}//end else
-		}//end for					
+		}//end for		
+		
+		float B = clock();
+		cout << "addNamesToCounts\t" << (B - A) / CLOCKS_PER_SEC << endl;	
+
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Tree", "addNamesToCounts");
@@ -168,7 +175,8 @@ void Tree::setIndex(string searchName, int index) {
 /*****************************************************************/
 int Tree::assembleTree() {
 	try {
-	
+		float A = clock();
+
 		//if user has given a names file we want to include that info in the pgroups and pcount info.
 		if(globaldata->names.size() != 0) {  addNamesToCounts();  }
 		
@@ -179,7 +187,8 @@ int Tree::assembleTree() {
 			tree[i].pGroups = (mergeGroups(i));
 			tree[i].pcount = (mergeGcounts(i));
 		}
-		
+		float B = clock();
+		cout << "assembleTree\t" << (B-A) / CLOCKS_PER_SEC << endl;
 		return 0;
 	}
 	catch(exception& e) {
