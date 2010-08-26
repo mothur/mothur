@@ -468,7 +468,7 @@
 		A7DA217B113FECD400BF472F /* whittaker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = whittaker.cpp; sourceTree = "<group>"; };
 		A7DA217C113FECD400BF472F /* whittaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = whittaker.h; sourceTree = "<group>"; };
 		A7DF0AD4121EBB14004A03EA /* clearcut.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clearcut.h; sourceTree = "<group>"; };
-		A7DF0AD5121EBB14004A03EA /* cmdargs.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = cmdargs.cpp; sourceTree = "<group>"; };
+		A7DF0AD5121EBB14004A03EA /* cmdargs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cmdargs.cpp; sourceTree = "<group>"; };
 		A7DF0AD6121EBB14004A03EA /* cmdargs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cmdargs.h; sourceTree = "<group>"; };
 		A7DF0AD7121EBB14004A03EA /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
 		A7DF0AD8121EBB14004A03EA /* dayhoff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dayhoff.h; sourceTree = "<group>"; };
