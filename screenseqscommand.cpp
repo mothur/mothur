@@ -421,7 +421,7 @@ int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 		outputNames.push_back(goodNameFile); 
 		
 		ofstream goodNameOut;	m->openOutputFile(goodNameFile, goodNameOut);
-		
+	
 		while(!inputNames.eof()){
 			if (m->control_pressed) { goodNameOut.close();  inputNames.close(); remove(goodNameFile.c_str());  return 0; }
 
@@ -449,7 +449,7 @@ int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 		}
 		inputNames.close();
 		goodNameOut.close();
-		
+	
 		//we were unable to remove some of the bad sequences
 		if (badSeqNames.size() != 0) {
 			for (it = badSeqNames.begin(); it != badSeqNames.end(); it++) {  

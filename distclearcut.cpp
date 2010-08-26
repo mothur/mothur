@@ -57,7 +57,7 @@
 #include "common.h"
 #include "dayhoff.h"
 #include "fasta.h"
-#include "dist.h"
+#include "distclearcut.h"
 
 
 

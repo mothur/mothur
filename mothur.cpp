@@ -35,8 +35,7 @@ void ctrlc_handler ( int sig ) {
 /***********************************************************************/
 int main(int argc, char *argv[]){
 	MothurOut* m = MothurOut::getInstance();
-	try {
-		
+	try {	
 		signal(SIGINT, ctrlc_handler );
 				
 		time_t ltime = time(NULL); /* calendar time */  
@@ -150,7 +149,7 @@ int main(int argc, char *argv[]){
 		Engine* mothur;
 		bool bail = 0;
 		string input;
-
+ 
 		if(argc>1){
 			input = argv[1];
 

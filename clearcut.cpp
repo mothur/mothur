@@ -1,3 +1,4 @@
+
 /*
  * clearcut.c
  *
@@ -58,7 +59,7 @@
 #include <sys/time.h>
 #include <float.h>
 
-#include "dist.h"
+#include "distclearcut.h"
 #include "dmat.h"
 #include "fasta.h"
 #include "cmdargs.h"
@@ -67,16 +68,13 @@
 #include "prng.h"
 
 
-
 /*
  * main() - 
  *
  * The entry point to the program.
  *
  */
-int
-main(int argc,
-     char *argv[]) {
+int clearcut_main(int argc, char *argv[]) {
 
   DMAT *dmat;         /* The working distance matrix */
   DMAT *dmat_backup = NULL;/* A backup distance matrix    */
@@ -91,6 +89,7 @@ main(int argc,
 
   /* check and parse supplied command-line arguments */
   nj_args = NJ_handle_args(argc, argv);
+
   if(!nj_args) {
     fprintf(stderr, "Clearcut: Error processing command-line arguments.\n");
     exit(-1);
@@ -232,7 +231,7 @@ main(int argc,
     }
   }
 
-  exit(0);
+  //exit(0);
 }
 
 
@@ -2151,6 +2150,8 @@ NJ_min_transform(DMAT *dmat,
   
   return(smallest);  /* return the min transformed distance */
 }
+
+
 
 
 

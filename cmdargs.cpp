@@ -130,12 +130,12 @@ NJ_handle_args(int argc,
   nj_args.expdist          = 0;
 
   while(1) {
+
     c = getopt_long(argc,
 		    argv,
 		    "i:o:s:m:n:vqduahVSIOrDPjkNeE",
 		    NJ_long_options,
 		    &option_index);
-    
     if(c == -1) {
       break;
     }
@@ -247,7 +247,7 @@ NJ_handle_args(int argc,
      exit(-1);
     }
   }
-  
+ 
   if(optind < argc) {
     fprintf(stderr, "Clearcut: Unknown command-line argument:\n  --> %s\n", argv[optind]);
     NJ_usage();
