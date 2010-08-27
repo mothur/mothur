@@ -43,7 +43,7 @@ private:
 	vector<string> groups;
 	
 	vector<string> parseSharedFile(string);
-	string createGroupSummaryFile(int, int, vector<string>);
+	string createGroupSummaryFile(int, int, vector<string>&);
 
 
 };

@@ -32,6 +32,7 @@ private:
 	map<string, string> nameMap;
 	
 	int readNamesFile();
+	int numUniquesInName;
 
 };
 

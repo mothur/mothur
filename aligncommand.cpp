@@ -90,6 +90,8 @@ AlignCommand::AlignCommand(string option)  {
 				
 				//go through files and make sure they are good, if not, then disregard them
 				for (int i = 0; i < candidateFileNames.size(); i++) {
+					//candidateFileNames[i] = m->getFullPathName(candidateFileNames[i]);
+					
 					if (inputDir != "") {
 						string path = m->hasPath(candidateFileNames[i]);
 						//if the user has not given a path then, add inputdir. else leave path alone.
@@ -348,7 +350,6 @@ int AlignCommand::execute(){
 #else
 
 		vector<unsigned long int> positions = m->divideFile(candidateFileNames[s], processors);
-				
 		for (int i = 0; i < (positions.size()-1); i++) {
 			lines.push_back(new linePair(positions[i], positions[(i+1)]));
 		}	

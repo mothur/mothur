@@ -259,6 +259,7 @@ int SharedCommand::execute(){
 		globaldata->setGroupFile("");
 		globaldata->setSharedFile(filename);
 		
+		
 		if (m->control_pressed) { 
 				delete input;  globaldata->ginput = NULL; 
 				remove(filename.c_str()); 
@@ -286,10 +287,14 @@ void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup) {
 		if (order.size() == 0) { //user has not specified an order so do aplabetically
 			sort(thislookup.begin(), thislookup.end(), compareSharedRabunds);
 			
+			globaldata->Groups.clear();
+			
 			//initialize bin values
 			for (int i = 0; i < thislookup.size(); i++) {
 				out << thislookup[i]->getLabel() << '\t' << thislookup[i]->getGroup() << '\t';
 				thislookup[i]->print(out);
+				
+				globaldata->Groups.push_back(thislookup[i]->getGroup());
 				
 				RAbundVector rav = thislookup[i]->getRAbundVector();
 				m->openOutputFileAppend(fileroot + thislookup[i]->getGroup() + ".rabund", *(filehandles[thislookup[i]->getGroup()]));
@@ -305,6 +310,7 @@ void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup) {
 				myMap[thislookup[i]->getGroup()] = thislookup[i];
 			}
 			
+			globaldata->Groups.clear();
 			
 			//loop through ordered list and print the rabund
 			for (int i = 0; i < order.size(); i++) {
@@ -313,6 +319,8 @@ void SharedCommand::printSharedData(vector<SharedRAbundVector*> thislookup) {
 				if(myIt != myMap.end()) { //we found it
 					out << (myIt->second)->getLabel() << '\t' << (myIt->second)->getGroup() << '\t';
 					(myIt->second)->print(out);
+					
+					globaldata->Groups.push_back((myIt->second)->getGroup());
 				
 					RAbundVector rav = (myIt->second)->getRAbundVector();
 					m->openOutputFileAppend(fileroot + (myIt->second)->getGroup() + ".rabund", *(filehandles[(myIt->second)->getGroup()]));

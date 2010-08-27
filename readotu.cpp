@@ -35,7 +35,7 @@ void ReadOTUFile::read(GlobalData* globaldata){
 		//memory leak prevention
 		//if (globaldata->ginput != NULL) { delete globaldata->ginput;  }
 		globaldata->ginput = input;	//saving to be used by collector and rarefact commands.
-	
+
 		if ((globaldata->getFormat() == "list") || (globaldata->getFormat() == "rabund") || (globaldata->getFormat() == "sabund")) {//you are reading a list, rabund or sabund file for collect, rarefaction or summary.
 
 //cout << input << '\t' << globaldata << endl;

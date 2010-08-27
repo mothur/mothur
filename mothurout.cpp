@@ -257,6 +257,8 @@ int MothurOut::mem_usage(double& vm_usage, double& resident_set) {
 /***********************************************************************/
 int MothurOut::openOutputFileAppend(string fileName, ofstream& fileHandle){
 	try {
+		fileName = getFullPathName(fileName);
+		
 		fileHandle.open(fileName.c_str(), ios::app);
 		if(!fileHandle) {
 			mothurOut("[ERROR]: Could not open " + fileName); mothurOutEndLine();
@@ -445,6 +447,9 @@ string MothurOut::getExtension(string longName){
 /***********************************************************************/
 bool MothurOut::isBlank(string fileName){
 	try {
+		
+		fileName = getFullPathName(fileName);
+		
 		ifstream fileHandle;
 		fileHandle.open(fileName.c_str());
 		if(!fileHandle) {
@@ -829,7 +834,8 @@ vector<unsigned long int> MothurOut::setFilePosFasta(string filename, int& num) 
 /**************************************************************************************************/
 vector<unsigned long int> MothurOut::setFilePosEachLine(string filename, int& num) {
 	try {
-
+			filename = getFullPathName(filename);
+			
 			vector<unsigned long int> positions;
 			ifstream in;
 			openInputFile(filename, in);
@@ -851,7 +857,7 @@ vector<unsigned long int> MothurOut::setFilePosEachLine(string filename, int& nu
 		
 			FILE * pFile;
 			unsigned long int size;
-		
+			
 			//get num bytes in file
 			pFile = fopen (filename.c_str(),"rb");
 			if (pFile==NULL) perror ("Error opening file");
@@ -881,6 +887,8 @@ vector<unsigned long int> MothurOut::divideFile(string filename, int& proc) {
 		FILE * pFile;
 		unsigned long int size;
 		
+		filename = getFullPathName(filename);
+		
 		//get num bytes in file
 		pFile = fopen (filename.c_str(),"rb");
 		if (pFile==NULL) perror ("Error opening file");
@@ -893,7 +901,7 @@ vector<unsigned long int> MothurOut::divideFile(string filename, int& proc) {
 		//estimate file breaks
 		unsigned long int chunkSize = 0;
 		chunkSize = size / proc;
-		
+	
 		//file to small to divide by processors
 		if (chunkSize == 0)  {  proc = 1;	filePos.push_back(size); return filePos;	}
 	
@@ -914,15 +922,16 @@ vector<unsigned long int> MothurOut::divideFile(string filename, int& proc) {
 			
 			//there was not another sequence before the end of the file
 			unsigned long int sanityPos = in.tellg();
-			if (sanityPos = -1) {	break;  }
-			else {   filePos.push_back(newSpot);  }
+
+			if (sanityPos == -1) {	break;  }
+			else {  filePos.push_back(newSpot);  }
 			
 			in.close();
 		}
 		
 		//save end pos
 		filePos.push_back(size);
-		
+
 		//sanity check filePos
 		for (int i = 0; i < (filePos.size()-1); i++) {
 			if (filePos[(i+1)] <= filePos[i]) {  filePos.erase(filePos.begin()+(i+1)); i--; }
@@ -1112,7 +1121,21 @@ void MothurOut::splitAtChar(string& estim, vector<string>& container, char symbo
 //This function parses the estimator options and puts them in a vector
 void MothurOut::splitAtDash(string& estim, vector<string>& container) {
 	try {
-		string individual;
+		string individual = "";
+		int estimLength = estim.size();
+		for(int i=0;i<estimLength;i++){
+			if(estim[i] == '-'){
+				container.push_back(individual);
+				individual = "";				
+			}
+			else{
+				individual += estim[i];
+			}
+		}
+		container.push_back(individual);
+
+	
+	/*	string individual;
 		
 		while (estim.find_first_of('-') != -1) {
 			individual = estim.substr(0,estim.find_first_of('-'));
@@ -1122,7 +1145,7 @@ void MothurOut::splitAtDash(string& estim, vector<string>& container) {
 			}
 		}
 		//get last one
-		container.push_back(estim);
+		container.push_back(estim); */
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "splitAtDash");
@@ -1134,17 +1157,31 @@ void MothurOut::splitAtDash(string& estim, vector<string>& container) {
 //This function parses the label options and puts them in a set
 void MothurOut::splitAtDash(string& estim, set<string>& container) {
 	try {
-		string individual;
-		
-		while (estim.find_first_of('-') != -1) {
-			individual = estim.substr(0,estim.find_first_of('-'));
-			if ((estim.find_first_of('-')+1) <= estim.length()) { //checks to make sure you don't have dash at end of string
-				estim = estim.substr(estim.find_first_of('-')+1, estim.length());
+		string individual = "";
+		int estimLength = estim.size();
+		for(int i=0;i<estimLength;i++){
+			if(estim[i] == '-'){
 				container.insert(individual);
+				individual = "";				
+			}
+			else{
+				individual += estim[i];
 			}
 		}
+		container.insert(individual);
+
+	//	string individual;
+		
+	//	while (estim.find_first_of('-') != -1) {
+	//		individual = estim.substr(0,estim.find_first_of('-'));
+	//		if ((estim.find_first_of('-')+1) <= estim.length()) { //checks to make sure you don't have dash at end of string
+	//			estim = estim.substr(estim.find_first_of('-')+1, estim.length());
+	//			container.insert(individual);
+	//		}
+	//	}
 		//get last one
-		container.insert(estim);
+	//	container.insert(estim);
+	
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "splitAtDash");
