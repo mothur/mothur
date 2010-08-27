@@ -44,6 +44,21 @@ void TreeMap::readMap() {
 		fileHandle.close();
 }
 /************************************************************/
+void TreeMap::addSeq(string seqName, string seqGroup) {
+	
+		namesOfSeqs.push_back(seqName);
+		setNamesOfGroups(seqGroup);
+					
+		treemap[seqName].groupname = seqGroup;	//store data in map
+			
+		it2 = seqsPerGroup.find(seqGroup);
+		if (it2 == seqsPerGroup.end()) { //if it's a new group
+			seqsPerGroup[seqGroup] = 1;
+		}else {//it's a group we already have
+			seqsPerGroup[seqGroup]++;
+		}
+}
+/************************************************************/
 void TreeMap::removeSeq(string seqName) {
 	
 	//erase name from namesOfSeqs

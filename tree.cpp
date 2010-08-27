@@ -9,7 +9,19 @@
 
 #include "tree.h"
 
-
+/*****************************************************************/
+Tree::Tree(string g) {
+	try {
+		globaldata = GlobalData::getInstance();
+		m = MothurOut::getInstance();
+		
+		parseTreeFile();  globaldata->runParse = false;  
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Tree", "Tree - just parse");
+		exit(1);
+	}
+}
 /*****************************************************************/
 Tree::Tree() {
 	try {

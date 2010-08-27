@@ -76,8 +76,20 @@ ReadTreeCommand::ReadTreeCommand(string option)  {
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
 			if (groupfile == "not open") { abort = true; }	
-			else if (groupfile == "not found") { groupfile = ""; m->mothurOut("group is a required parameter for the read.tree command."); m->mothurOutEndLine(); abort = true;	}
-			else {  
+			else if (groupfile == "not found") { 
+				groupfile = ""; 
+				
+				m->mothurOut("You have not provided a group file. I am assumming all sequence are from the same group."); m->mothurOutEndLine(); 	
+				
+				if (treefile != "") {  Tree* tree = new Tree(treefile); delete tree;  } //extracts names from tree to make faked out groupmap
+				
+				globaldata->setGroupFile(groupfile); 
+				//read in group map info.
+				treeMap = new TreeMap();
+				for (int i = 0; i < globaldata->Treenames.size(); i++) { treeMap->addSeq(globaldata->Treenames[i], "Group1"); }
+				globaldata->gTreemap = treeMap;
+					
+			}else {  
 				globaldata->setGroupFile(groupfile); 
 				//read in group map info.
 				treeMap = new TreeMap(groupfile);
@@ -227,7 +239,7 @@ int ReadTreeCommand::readNamesFile() {
 				vector<string> dupNames;
 				m->splitAtComma(second, dupNames);
 				
-				for (int i = 0; i < dupNames.size(); i++) {	nameMap[dupNames[i]] = dupNames[i];  }
+				for (int i = 0; i < dupNames.size(); i++) {	nameMap[dupNames[i]] = dupNames[i];  if ((groupfile == "") && (i != 0)) { globaldata->gTreemap->addSeq(dupNames[i], "Group1"); }  }
 			}else {  m->mothurOut(first + " has already been seen in namefile, disregarding names file."); m->mothurOutEndLine(); in.close(); globaldata->names.clear(); namefile = ""; return 1; }			
 		}
 		in.close();

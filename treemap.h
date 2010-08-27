@@ -36,6 +36,7 @@ public:
 	bool isValidGroup(string);  //return true if string is a valid group
 	void removeSeq(string);  //removes a sequence, this is to accomadate trees that do not contain all the seqs in your groupfile
 	string getGroup(string);
+	void addSeq(string, string);
 	vector<string> namesOfGroups;
 	vector<string> namesOfSeqs;
     map<string,int> seqsPerGroup;	//groupname, number of seqs in that group.
