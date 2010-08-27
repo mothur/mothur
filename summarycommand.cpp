@@ -445,7 +445,7 @@ vector<string> SummaryCommand::parseSharedFile(string filename) {
 	}
 }
 //**********************************************************************************************************************
-string SummaryCommand::createGroupSummaryFile(int numLines, int numCols, vector<string> outputNames) {
+string SummaryCommand::createGroupSummaryFile(int numLines, int numCols, vector<string>& outputNames) {
 	try {
 		
 		ofstream out;
@@ -501,7 +501,9 @@ string SummaryCommand::createGroupSummaryFile(int numLines, int numCols, vector<
 		}	
 		
 		//close each groups summary file
-		for (int i=0; i<outputNames.size(); i++) {  (*(filehandles[outputNames[i]])).close();  }
+		for (int i=0; i<outputNames.size(); i++) {  (*(filehandles[outputNames[i]])).close();  remove(outputNames[i].c_str());  }
+		outputNames.clear();
+		
 		out.close();
 		
 		//return combine file name

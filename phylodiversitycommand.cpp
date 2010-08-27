@@ -183,17 +183,19 @@ int PhyloDiversityCommand::execute(){
 		
 				//initialize counts
 				map<string, int> counts;
-				for (int j = 0; j < globaldata->Groups.size(); j++) {  counts[globaldata->Groups[j]] = 0; }
+				map< string, set<int> > countedBranch;  
+				for (int j = 0; j < globaldata->Groups.size(); j++) {  counts[globaldata->Groups[j]] = 0; countedBranch[globaldata->Groups[j]].insert(-2);  }  //add dummy index to initialize countedBranch sets
 				
 				for(int k = 0; k < numLeafNodes; k++){
 						
 					if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} return 0; }
 					
 					//calc branch length of randomLeaf k
-					float br = calcBranchLength(trees[i], randomLeaf[k]);
+					float br = calcBranchLength(trees[i], randomLeaf[k], countedBranch);
 			
 					//for each group in the groups update the total branch length accounting for the names file
 					vector<string> groups = trees[i]->tree[randomLeaf[k]].getGroup();
+					
 					for (int j = 0; j < groups.size(); j++) {
 						int numSeqsInGroupJ = 0;
 						map<string, int>::iterator it;
@@ -201,9 +203,11 @@ int PhyloDiversityCommand::execute(){
 						if (it != trees[i]->tree[randomLeaf[k]].pcount.end()) { //this leaf node contains seqs from group j
 							numSeqsInGroupJ = it->second;
 						}
-					
-						for (int s = (counts[groups[j]]+1); s <= (counts[groups[j]]+numSeqsInGroupJ); s++) {
-							diversity[groups[j]][s] = diversity[groups[j]][s-1] + ((float) numSeqsInGroupJ * br);
+						
+						if (numSeqsInGroupJ != 0) {	diversity[groups[j]][(counts[groups[j]]+1)] = diversity[groups[j]][counts[groups[j]]] + br;  }
+						
+						for (int s = (counts[groups[j]]+2); s <= (counts[groups[j]]+numSeqsInGroupJ); s++) {
+							diversity[groups[j]][s] = diversity[groups[j]][s-1];  //update counts, but don't add in redundant branch lengths
 						}
 						counts[groups[j]] += numSeqsInGroupJ;
 					}
@@ -268,6 +272,7 @@ void PhyloDiversityCommand::printSumData(map< string, vector<float> >& div, ofst
 					else		{	score = div[globaldata->Groups[j]][numSampled] / (float)numIters;	}
 					
 					out << setprecision(4) << score << '\t';
+	
 				}else { out << "NA" << '\t'; }
 			}
 			out << endl;
@@ -318,26 +323,34 @@ void PhyloDiversityCommand::printData(set<int>& num, map< string, vector<float> 
 	}
 }
 //**********************************************************************************************************************
-float PhyloDiversityCommand::calcBranchLength(Tree* t, int leaf){
+float PhyloDiversityCommand::calcBranchLength(Tree* t, int leaf, map< string, set<int> >& counted){
 	try {
 
 		//calc the branch length
 		//while you aren't at root
 		float sum = 0.0;
 		int index = leaf;
-
+		
+		vector<string> groups = t->tree[leaf].getGroup();
+					
 		while(t->tree[index].getParent() != -1){
 			
 			//if you have a BL
 			if(t->tree[index].getBranchLength() != -1){
-				sum += abs(t->tree[index].getBranchLength());
+				if (counted[groups[0]].count(index) == 0) { //you have not already counted this branch
+					sum += abs(t->tree[index].getBranchLength());
+					for (int j = 0; j < groups.size(); j++) {  counted[groups[j]].insert(index);  }
+				}
 			}
 			index = t->tree[index].getParent();
 		}
 			
 		//get last breanch length added
 		if(t->tree[index].getBranchLength() != -1){
-			sum += abs(t->tree[index].getBranchLength());
+			if (counted[groups[0]].count(index) == 0) { //you have not already counted this branch
+				sum += abs(t->tree[index].getBranchLength());
+				for (int j = 0; j < groups.size(); j++) {  counted[groups[j]].insert(index);  }
+			}
 		}
 		
 		return sum;

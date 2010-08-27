@@ -244,7 +244,8 @@ int TreeGroupCommand::execute(){
 		if (format == "sharedfile") {
 			//if the users entered no valid calculators don't execute command
 			if (treeCalculators.size() == 0) { m->mothurOut("You have given no valid calculators."); m->mothurOutEndLine(); return 0; }
-
+			
+			if (globaldata->gGroupmap != NULL) {  delete globaldata->gGroupmap;   globaldata->gGroupmap = NULL;  }
 			//you have groups
 			read = new ReadOTUFile(globaldata->inputFileName);	
 			read->read(&*globaldata); 
@@ -258,17 +259,17 @@ int TreeGroupCommand::execute(){
 			//used in tree constructor 
 			globaldata->runParse = false;
 			
-			//clear globaldatas old tree names if any
-			globaldata->Treenames.clear();
-		
-			//fills globaldatas tree names
-			globaldata->Treenames = globaldata->Groups;
-		
 			//create treemap class from groupmap for tree class to use
 			tmap = new TreeMap();
 			tmap->makeSim(globaldata->gGroupmap);
 			globaldata->gTreemap = tmap;
 			
+			//clear globaldatas old tree names if any
+			globaldata->Treenames.clear();
+			
+			//fills globaldatas tree names
+			globaldata->Treenames = globaldata->Groups;
+		
 			if (m->control_pressed) { return 0; }
 			
 			//create tree file
@@ -606,7 +607,7 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
 								subset.push_back(thisLookup[k]); subset.push_back(thisLookup[l]); 
 								
 								data = treeCalculators[i]->getValues(subset); //saves the calculator outputs
-								
+						//cout << thisLookup[k]->getGroup() << '\t' << thisLookup[l]->getGroup() << '\t' << (1.0 - data[0]) << endl;
 								if (m->control_pressed) { return 1; }
 								
 								//save values in similarity matrix

@@ -112,6 +112,7 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 			
 			if (globaldata->gGroupmap == NULL) { 
 				//save group in groupmap
+	
 				groupmap->namesOfGroups.push_back(groupN);
 				groupmap->groupIndex[groupN] = count;
 			}

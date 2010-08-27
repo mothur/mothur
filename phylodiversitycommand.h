@@ -33,7 +33,7 @@ class PhyloDiversityCommand : public Command {
 		
 		void printData(set<int>&, map< string, vector<float> >&, ofstream&, int);
 		void printSumData(map< string, vector<float> >&, ofstream&, int);
-		float calcBranchLength(Tree*, int);
+		float calcBranchLength(Tree*, int, map< string, set<int> >&);
 };
 
 #endif
