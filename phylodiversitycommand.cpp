@@ -250,34 +250,22 @@ int PhyloDiversityCommand::execute(){
 void PhyloDiversityCommand::printSumData(map< string, vector<float> >& div, ofstream& out, int numIters){
 	try {
 		
-		out << "numSampled\t";
-		for (int i = 0; i < globaldata->Groups.size(); i++) { out << globaldata->Groups[i] << '\t';  }
-		out << endl;
+		out << "Groups\tnumSampled\tphyloDiversity" << endl;
 		
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
-		
-		set<int> num;
-		//find end points to output
-		for (map<string, vector<float> >::iterator itEnds = div.begin(); itEnds != div.end(); itEnds++) {	num.insert(itEnds->second.size()-1);  }
-		
-		for (set<int>::iterator it = num.begin(); it != num.end(); it++) {  
-			int numSampled = *it;
 			
-			out << numSampled << '\t';  
-			
-			for (int j = 0; j < globaldata->Groups.size(); j++) {
-				if (numSampled < div[globaldata->Groups[j]].size()) { 
-					float score;
-					if (scale)	{  score = (div[globaldata->Groups[j]][numSampled] / (float)numIters) / (float)numSampled;	}
-					else		{	score = div[globaldata->Groups[j]][numSampled] / (float)numIters;	}
-					
-					out << setprecision(4) << score << '\t';
-	
-				}else { out << "NA" << '\t'; }
-			}
-			out << endl;
+		for (int j = 0; j < globaldata->Groups.size(); j++) {
+			int numSampled = (div[globaldata->Groups[j]].size()-1);
+			out << globaldata->Groups[j] << '\t' << numSampled << '\t';
+		
+			 
+			float score;
+			if (scale)	{  score = (div[globaldata->Groups[j]][numSampled] / (float)numIters) / (float)numSampled;	}
+			else		{	score = div[globaldata->Groups[j]][numSampled] / (float)numIters;	}
+				
+			out << setprecision(4) << score << endl;
 		}
-		
+					
 		out.close();
 		
 	}
