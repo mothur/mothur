@@ -18,6 +18,7 @@ class GlobalData;
 
 class Tree {
 public: 
+	Tree(string); 
 	Tree();		//to generate a tree from a file
 	~Tree();
 	
@@ -40,7 +41,8 @@ public:
 	int assembleTree();	
 	
 	vector<Node> tree;		//the first n nodes are the leaves, where n is the number of sequences.
-		
+	
+			
 private:
 	GlobalData* globaldata;
 	int numNodes, numLeaves;
@@ -64,7 +66,7 @@ private:
 	int readTreeString(ifstream&);
 		
 	MothurOut* m;
-	
+		
 };
 
 #endif
