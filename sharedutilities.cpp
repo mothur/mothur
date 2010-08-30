@@ -226,6 +226,7 @@ void SharedUtil::setGroups(vector<string>& userGroups, vector<string>& allGroups
 			}
 			//rip extra - off allgroups 
 			label = label.substr(0, label.length()-1);
+			if ((mode != "weighted") && (allGroups.size() > 10)) {  label = "merged";  }
 		}
 		
 		if (mode == "weighted") {
