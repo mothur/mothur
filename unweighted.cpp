@@ -19,9 +19,6 @@ EstOutput Unweighted::getValues(Tree* t) {
 		double UniqueBL;  //a branch length is unique if it's chidren are from the same group
 		double totalBL;	//all branch lengths
 		double UW;		//Unweighted Value = UniqueBL / totalBL;
-		map<string, int>::iterator it;  //iterator to traverse pgroups
-		map<string, int> copyIpcount;
-
 	
 		//if the users enters no groups then give them the score of all groups
 		int numGroups = globaldata->Groups.size();
@@ -43,7 +40,7 @@ EstOutput Unweighted::getValues(Tree* t) {
 				UniqueBL=0.0000;  //a branch length is unique if it's chidren are from the same group
 				totalBL = 0.00;	//all branch lengths
 				UW = 0.00;		//Unweighted Value = UniqueBL / totalBL;
-				copyIpcount.clear();
+				//copyIpcount.clear();
 				
 				//groups in this combo
 				groups.push_back(globaldata->Groups[a]); groups.push_back(globaldata->Groups[l]);
@@ -51,27 +48,25 @@ EstOutput Unweighted::getValues(Tree* t) {
 				for(int i=0;i<t->getNumNodes();i++){
 					if (m->control_pressed) {  return data; }
 	
-					copyIpcount = t->tree[i].pcount;
-					for (it = copyIpcount.begin(); it != copyIpcount.end();) {
-						if (m->inUsersGroups(it->first, groups) != true) {	
-							copyIpcount.erase(it++);	
-						}else { it++;  }
+					//pcountSize = 0, they are from a branch that is entirely from a group the user doesn't want
+					//pcountSize = 2, not unique to one group
+					//pcountSize = 1, unique to one group
+					
+					int pcountSize = 0;
+					for (int j = 0; j < groups.size(); j++) {
+						map<string, int>::iterator itGroup = t->tree[i].pcount.find(groups[j]);
+						if (itGroup != t->tree[i].pcount.end()) { pcountSize++; if (pcountSize > 1) { break; } } 
 					}
+					
+					if (pcountSize == 0) { }
+					else if ((t->tree[i].getBranchLength() != -1) && (pcountSize == 1)) {  UniqueBL += abs(t->tree[i].getBranchLength());	}
 			
-					//if i's children are from the same group then i's pcount size will be 1 
-					//if copyIpcount.size() = 0 they are from a branch that is entirely from a group the user doesn't want
-					if (copyIpcount.size() == 0) { }
-					else if ((t->tree[i].getBranchLength() != -1) && (copyIpcount.size() == 1)) {  UniqueBL += abs(t->tree[i].getBranchLength());	}
-			
-					//add i's BL to total if it is from the groups the user wants
-					if ((t->tree[i].getBranchLength() != -1) && (copyIpcount.size() != 0)) {  
+					if ((t->tree[i].getBranchLength() != -1) && (pcountSize != 0)) {  
 						totalBL += abs(t->tree[i].getBranchLength()); 
 					}
-			
 				}
 		
 				UW = (UniqueBL / totalBL);  
-		//cout << globaldata->Groups[a] << globaldata->Groups[l] << '\t' << UniqueBL << '\t' << totalBL << endl;
 	
 				if (isnan(UW) || isinf(UW)) { UW = 0; }
 	
@@ -99,29 +94,27 @@ EstOutput Unweighted::getValues(Tree* t) {
 			UniqueBL=0.0000;  //a branch length is unique if it's chidren are from the same group
 			totalBL = 0.00;	//all branch lengths
 			UW = 0.00;		//Unweighted Value = UniqueBL / totalBL;
-			copyIpcount.clear();
 				
 			for(int i=0;i<t->getNumNodes();i++){
 			
 				if (m->control_pressed) {  return data; }
 				
-				copyIpcount = t->tree[i].pcount;
-				for (it = copyIpcount.begin(); it != copyIpcount.end();) {
-					if (m->inUsersGroups(it->first, groups) != true) {	
-						copyIpcount.erase(it++);	
-					}else {  it++;  }
+				//pcountSize = 0, they are from a branch that is entirely from a group the user doesn't want
+				//pcountSize = 2, not unique to one group
+				//pcountSize = 1, unique to one group
+				
+				int pcountSize = 0;
+				for (int j = 0; j < groups.size(); j++) {
+					map<string, int>::iterator itGroup = t->tree[i].pcount.find(groups[j]);
+					if (itGroup != t->tree[i].pcount.end()) { pcountSize++; if (pcountSize > 1) { break; } } 
 				}
-			
-				//if i's children are from the same group then i's pcount size will be 1 
-				//if copyIpcount.size() = 0 they are from a branch that is entirely from a group the user doesn't want
-				if (copyIpcount.size() == 0) { }
-				else if ((t->tree[i].getBranchLength() != -1) && (copyIpcount.size() == 1)) {  UniqueBL += abs(t->tree[i].getBranchLength());	}
-			
-				//add i's BL to total if it is from the groups the user wants
-				if ((t->tree[i].getBranchLength() != -1) && (copyIpcount.size() != 0)) {  
+				
+				if (pcountSize == 0) { }
+				else if ((t->tree[i].getBranchLength() != -1) && (pcountSize == 1)) {  UniqueBL += abs(t->tree[i].getBranchLength());	}
+					
+				if ((t->tree[i].getBranchLength() != -1) && (pcountSize != 0)) {  
 					totalBL += abs(t->tree[i].getBranchLength()); 
 				}
-			
 			}
 		
 			UW = (UniqueBL / totalBL);  
@@ -150,8 +143,6 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 		double UniqueBL;  //a branch length is unique if it's chidren are from the same group
 		double totalBL;	//all branch lengths
 		double UW;		//Unweighted Value = UniqueBL / totalBL;
-		map<string, int>::iterator it;  //iterator to traverse pgroups
-		map<string, int> copyIpcount;
 		copyTree = new Tree;
 
 		//if the users enters no groups then give them the score of all groups
@@ -174,7 +165,6 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 				UniqueBL=0.0000;  //a branch length is unique if it's chidren are from the same group
 				totalBL = 0.00;	//all branch lengths
 				UW = 0.00;		//Unweighted Value = UniqueBL / totalBL;
-				copyIpcount.clear();
 				
 				//copy random tree passed in
 				copyTree->getCopy(t);
@@ -187,33 +177,29 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 				
 				if (m->control_pressed) { delete copyTree; return data; }
 				
-				//copyTree->createNewickFile("random"+groupA+toString(count));
-				
 				for(int i=0;i<copyTree->getNumNodes();i++){
+			
+					if (m->control_pressed) {  return data; }
 					
-					if (m->control_pressed) { delete copyTree; return data; }
+					//pcountSize = 0, they are from a branch that is entirely from a group the user doesn't want
+					//pcountSize = 2, not unique to one group
+					//pcountSize = 1, unique to one group
 					
-					/**********************************************************************/
-					//This section adds in all lengths that are non leaf
-					copyIpcount = copyTree->tree[i].pcount;
-					for (it = copyIpcount.begin(); it != copyIpcount.end();) {
-						if (m->inUsersGroups(it->first, groups) != true) {	
-							copyIpcount.erase(it++);	
-						}else { it++;  }
+					int pcountSize = 0;
+					for (int j = 0; j < groups.size(); j++) {
+						map<string, int>::iterator itGroup = copyTree->tree[i].pcount.find(groups[j]);
+						if (itGroup != copyTree->tree[i].pcount.end()) { pcountSize++; if (pcountSize > 1) { break; } } 
 					}
-			
-					//if i's children are from the same group then i's pcount size will be 1 
-					//if copyIpcount.size() = 0 they are from a branch that is entirely from a group the user doesn't want
-					if (copyIpcount.size() == 0) { }
-					else if ((copyTree->tree[i].getBranchLength() != -1) && (copyIpcount.size() == 1)) {  UniqueBL += abs(copyTree->tree[i].getBranchLength());	}
-			
-					//add i's BL to total if it is from the groups the user wants
-					if ((copyTree->tree[i].getBranchLength() != -1) && (copyIpcount.size() != 0)) {  
+					
+					if (pcountSize == 0) { }
+					else if ((copyTree->tree[i].getBranchLength() != -1) && (pcountSize == 1)) {  UniqueBL += abs(copyTree->tree[i].getBranchLength());	}
+						
+					if ((copyTree->tree[i].getBranchLength() != -1) && (pcountSize != 0)) {  
 						totalBL += abs(copyTree->tree[i].getBranchLength()); 
 					}
-			
 				}
-		
+
+				
 				UW = (UniqueBL / totalBL);  
 	
 				if (isnan(UW) || isinf(UW)) { UW = 0; }
@@ -242,7 +228,6 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 			UniqueBL=0.0000;  //a branch length is unique if it's chidren are from the same group
 			totalBL = 0.00;	//all branch lengths
 			UW = 0.00;		//Unweighted Value = UniqueBL / totalBL;
-			copyIpcount.clear();
 		
 			//copy random tree passed in
 			copyTree->getCopy(t);
@@ -253,25 +238,25 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 			if (m->control_pressed) { delete copyTree; return data; }
 
 			for(int i=0;i<copyTree->getNumNodes();i++){
-				if (m->control_pressed) { delete copyTree; return data; }
 			
-				copyIpcount = copyTree->tree[i].pcount;
-				for (it = copyIpcount.begin(); it != copyIpcount.end();) {
-						if (m->inUsersGroups(it->first, groups) != true) {	
-							copyIpcount.erase(it++);	
-						}else { it++;  }
+				if (m->control_pressed) {  return data; }
+				
+				//pcountSize = 0, they are from a branch that is entirely from a group the user doesn't want
+				//pcountSize = 2, not unique to one group
+				//pcountSize = 1, unique to one group
+				
+				int pcountSize = 0;
+				for (int j = 0; j < groups.size(); j++) {
+					map<string, int>::iterator itGroup = copyTree->tree[i].pcount.find(groups[j]);
+					if (itGroup != copyTree->tree[i].pcount.end()) { pcountSize++; if (pcountSize > 1) { break; } } 
 				}
-			
-				//if i's children are from the same group then i's pcount size will be 1 
-				//if copyIpcount.size() = 0 they are from a branch that is entirely from a group the user doesn't want
-				if (copyIpcount.size() == 0) { }
-				else if ((copyTree->tree[i].getBranchLength() != -1) && (copyIpcount.size() == 1)) {  abs(UniqueBL += copyTree->tree[i].getBranchLength());	}
-			
-				//add i's BL to total if it is from the groups the user wants
-				if ((copyTree->tree[i].getBranchLength() != -1) && (copyIpcount.size() != 0)) {  
+				
+				if (pcountSize == 0) { }
+				else if ((copyTree->tree[i].getBranchLength() != -1) && (pcountSize == 1)) {  UniqueBL += abs(copyTree->tree[i].getBranchLength());	}
+					
+				if ((copyTree->tree[i].getBranchLength() != -1) && (pcountSize != 0)) {  
 					totalBL += abs(copyTree->tree[i].getBranchLength()); 
 				}
-			
 			}
 		
 			UW = (UniqueBL / totalBL);  

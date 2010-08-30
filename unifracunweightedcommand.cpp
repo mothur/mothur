@@ -58,7 +58,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 			string temp = validParameter.validFile(parameters, "distance", false);			if (temp == "not found") { temp = "false"; }
 			phylip = m->isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "random", false);					if (temp == "not found") { temp = "true"; }
+			temp = validParameter.validFile(parameters, "random", false);					if (temp == "not found") { temp = "f"; }
 			random = m->isTrue(temp);
 			
 			if (!random) {  iters = 0;  } //turn off random calcs
@@ -105,7 +105,7 @@ void UnifracUnweightedCommand::help(){
 		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 1 valid group.\n");
 		m->mothurOut("The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree.\n");
 		m->mothurOut("The distance parameter allows you to create a distance file from the results. The default is false.\n");
-		m->mothurOut("The random parameter allows you to shut off the comparison to random trees. The default is true, meaning compare your trees with randomly generated trees.\n");
+		m->mothurOut("The random parameter allows you to shut off the comparison to random trees. The default is false, meaning compare don't your trees with randomly generated trees.\n");
 		m->mothurOut("The unifrac.unweighted command should be in the following format: unifrac.unweighted(groups=yourGroups, iters=yourIters).\n");
 		m->mothurOut("Example unifrac.unweighted(groups=A-B-C, iters=500).\n");
 		m->mothurOut("The default value for groups is all the groups in your groupfile, and iters is 1000.\n");
@@ -199,21 +199,23 @@ int UnifracUnweightedCommand::execute() {
 					validScores[randomData[k]] = randomData[k];
 				}
 			}
-		
+	
 			for(int a = 0; a < numComp; a++) {
 				float rcumul = 1.0000;
-				//this loop fills the cumulative maps and put 0.0000 in the score freq map to make it easier to print.
-				for (map<float,float>::iterator it = validScores.begin(); it != validScores.end(); it++) { 
-					//make rscoreFreq map and rCumul
-					map<float,float>::iterator it2 = rscoreFreq[a].find(it->first);
-					rCumul[a][it->first] = rcumul;
-					//get percentage of random trees with that info
-					if (it2 != rscoreFreq[a].end()) {  rscoreFreq[a][it->first] /= iters; rcumul-= it2->second;  }
-					else { rscoreFreq[a][it->first] = 0.0000; } //no random trees with that score
-				}
 				
-				if (random) {   UWScoreSig[a].push_back(rCumul[a][userData[a]]);	}
-				else		{	UWScoreSig[a].push_back(0.0);						}
+				if (random) {
+					//this loop fills the cumulative maps and put 0.0000 in the score freq map to make it easier to print.
+					for (map<float,float>::iterator it = validScores.begin(); it != validScores.end(); it++) { 
+						//make rscoreFreq map and rCumul
+						map<float,float>::iterator it2 = rscoreFreq[a].find(it->first);
+						rCumul[a][it->first] = rcumul;
+						//get percentage of random trees with that info
+						if (it2 != rscoreFreq[a].end()) {  rscoreFreq[a][it->first] /= iters; rcumul-= it2->second;  }
+						else { rscoreFreq[a][it->first] = 0.0000; } //no random trees with that score
+					}
+					UWScoreSig[a].push_back(rCumul[a][userData[a]]);
+				}else		{	UWScoreSig[a].push_back(0.0);						}
+	
 			}
 			
 			
