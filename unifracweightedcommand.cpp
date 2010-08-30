@@ -116,6 +116,8 @@ int UnifracWeightedCommand::execute() {
 	
 		if (abort == true) { return 0; }
 		
+		int start = time(NULL);
+		
 		Progress* reading;
 		if (random) {	reading = new Progress("Comparing to random:", iters);	}
 		
@@ -263,6 +265,8 @@ int UnifracWeightedCommand::execute() {
 			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
 			return 0; 
 		}
+		
+		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run unifrac.weighted."); m->mothurOutEndLine();
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

@@ -30,6 +30,8 @@ class Weighted : public TreeCalculator  {
 		TreeMap* tmap;
 		map<string, int>::iterator it;
 		map<string, double> WScore; //a score for each group combination i.e. AB, AC, BC.
+		
+		vector<double> getBranchLengthSums(Tree*);
 };
 
 /***********************************************************************/

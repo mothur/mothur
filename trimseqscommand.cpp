@@ -429,7 +429,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 		vector<ofstream*> fastaFileNames;
 		vector<ofstream*> qualFileNames;
 		
-		
+	cout << "here" << endl;	
 		if (oligoFile != "") {		
 			m->openOutputFile(groupFile, outGroups);   
 			for (int i = 0; i < fastaNames.size(); i++) {
@@ -446,17 +446,17 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			#endif
 			}
 		}
-		
+cout << "here " << filename << endl;		
 		ifstream inFASTA;
 		m->openInputFile(filename, inFASTA);
 		inFASTA.seekg(line->start);
-		
+	cout << "here " << qFileName << endl;	
 		ifstream qFile;
 		if(qFileName != "")	{	m->openInputFile(qFileName, qFile);	qFile.seekg(qline->start);  }
 		
 		bool done = false;
 		int count = 0;
-	
+	cout << "here" << endl;
 		while (!done) {
 				
 			if (m->control_pressed) { 
