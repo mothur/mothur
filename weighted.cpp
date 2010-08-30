@@ -18,6 +18,10 @@ EstOutput Weighted::getValues(Tree* t) {
 		vector<double> D;
 		
 		numGroups = globaldata->Groups.size();
+	
+		vector<double> sums = getBranchLengthSums(t);
+		
+		if (m->control_pressed) { return data; }
 		
 		//calculate number of comparisons i.e. with groups A,B,C = AB, AC, BC = 3;
 		int count = 0;
@@ -29,31 +33,33 @@ EstOutput Weighted::getValues(Tree* t) {
 				vector<string> groups; groups.push_back(globaldata->Groups[i]); groups.push_back(globaldata->Groups[l]);
 				
 				D.push_back(0.0000); //initialize a spot in D for each combination
+			
+				//adding the wieghted sums from group i
+				for (int j = 0; j < t->groupNodeInfo[groups[0]].size(); j++) { //the leaf nodes that have seqs from group i
+					map<string, int>::iterator it = t->tree[t->groupNodeInfo[groups[0]][j]].pcount.find(groups[0]);
+					int numSeqsInGroupI = it->second;
+					
+					double weightedSum = ((numSeqsInGroupI * sums[t->groupNodeInfo[groups[0]][j]]) / (double)tmap->seqsPerGroup[groups[0]]);
 				
-				/********************************************************/
+					D[count] += weightedSum;
+				}
+				
+				//adding the wieghted sums from group l
+				for (int j = 0; j < t->groupNodeInfo[groups[1]].size(); j++) { //the leaf nodes that have seqs from group l
+					map<string, int>::iterator it = t->tree[t->groupNodeInfo[groups[1]][j]].pcount.find(groups[1]);
+					int numSeqsInGroupL = it->second;
+					
+					double weightedSum = ((numSeqsInGroupL * sums[t->groupNodeInfo[groups[1]][j]]) / (double)tmap->seqsPerGroup[groups[1]]);
+				
+					D[count] += weightedSum;
+				}
+
+				/********************************************************
 				//calculate a D value for each group combo
 				for(int v=0;v<t->getNumLeaves();v++){
 				
 					if (m->control_pressed) { return data; }
 					
-					int index = v;
-					double sum = 0.0000;
-		
-					//while you aren't at root
-					while(t->tree[index].getParent() != -1){
-							
-						//if you have a BL
-						if(t->tree[index].getBranchLength() != -1){
-							sum += abs(t->tree[index].getBranchLength());
-						}
-						index = t->tree[index].getParent();
-					}
-						
-					//get last breanch length added
-					if(t->tree[index].getBranchLength() != -1){
-						sum += abs(t->tree[index].getBranchLength());
-					}
-						
 					//is this sum from a sequence which is in one of the users groups
 					if (m->inUsersGroups(t->tree[v].getGroup(), globaldata->Groups) == true) {
 						//is this sum from a sequence which is in this groupCombo
@@ -145,13 +151,38 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 		
 		data.clear(); //clear out old values
 		
+		vector<double> sums = getBranchLengthSums(t);
+		
+		if (m->control_pressed) { return data; }
+		
 		//initialize weighted score
 		WScore[(groupA+groupB)] = 0.0;
-		float D = 0.0;
+		double D = 0.0;
 		
 		vector<string> groups; groups.push_back(groupA); groups.push_back(groupB);
-						
-		/********************************************************/
+		
+		//adding the wieghted sums from groupA
+		for (int j = 0; j < t->groupNodeInfo[groupA].size(); j++) { //the leaf nodes that have seqs from group i
+			map<string, int>::iterator it = t->tree[j].pcount.find(groupA);
+			int numSeqsInGroupA = it->second;
+			
+			double weightedSum = ((numSeqsInGroupA * sums[j]) / (double)tmap->seqsPerGroup[groupA]);
+		
+			D += weightedSum;
+		}
+		
+		//adding the wieghted sums from groupB
+		for (int j = 0; j < t->groupNodeInfo[groupB].size(); j++) { //the leaf nodes that have seqs from group l
+			map<string, int>::iterator it = t->tree[j].pcount.find(groupB);
+			int numSeqsInGroupB = it->second;
+			
+			double weightedSum = ((numSeqsInGroupB * sums[j]) / (double)tmap->seqsPerGroup[groupB]);
+		
+			D += weightedSum;
+		}
+				
+														
+		/********************************************************
 		//calculate a D value for the group combo
 		for(int v=0;v<t->getNumLeaves();v++){
 			if (m->control_pressed) { return data; }
@@ -240,12 +271,45 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 		exit(1);
 	}
 }
-
-
-
-
-
-
+/**************************************************************************************************/
+vector<double> Weighted::getBranchLengthSums(Tree* t) { 
+	try {
+		
+		vector<double> sums;
+		
+		for(int v=0;v<t->getNumLeaves();v++){
+			
+			if (m->control_pressed) { return sums; }
+				
+			int index = v;
+			double sum = 0.0000;
+	
+			//while you aren't at root
+			while(t->tree[index].getParent() != -1){
+						
+				//if you have a BL
+				if(t->tree[index].getBranchLength() != -1){
+					sum += abs(t->tree[index].getBranchLength());
+				}
+				index = t->tree[index].getParent();
+			}
+					
+			//get last breanch length added
+			if(t->tree[index].getBranchLength() != -1){
+				sum += abs(t->tree[index].getBranchLength());
+			}
+			
+			sums.push_back(sum);
+		}
+		
+		return sums;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Weighted", "getBranchLengthSums");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
 
 
 

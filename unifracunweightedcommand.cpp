@@ -125,6 +125,8 @@ int UnifracUnweightedCommand::execute() {
 		
 		if (abort == true) { return 0; }
 		
+		int start = time(NULL);
+		
 		userData.resize(numComp,0);  //data[0] = unweightedscore 
 		randomData.resize(numComp,0); //data[0] = unweightedscore
 		//create new tree with same num nodes and leaves as users
@@ -238,6 +240,8 @@ int UnifracUnweightedCommand::execute() {
 		outSum.close();
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }	return 0; }
+		
+		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run unifrac.unweighted."); m->mothurOutEndLine();
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

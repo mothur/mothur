@@ -341,7 +341,7 @@ int ReadNewickTree::readNewickInt(istream& f, int& n, Tree* T) {
 			if(f.peek() == ':'){									      
 				readSpecialChar(f,':',"colon");	
 										
-				if(n >= numNodes){	m->mothurOut("Error: Too many nodes in input tree\n");  readOk = -1; return -1; }
+				if(n >= numNodes){ m->mothurOut("Error: Too many nodes in input tree\n");  readOk = -1; return -1; }
 				
 				T->tree[n].setBranchLength(readBranchLength(f));
 			}else{

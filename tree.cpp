@@ -34,17 +34,28 @@ Tree::Tree() {
 		numNodes = 2*numLeaves - 1;
 		
 		tree.resize(numNodes);
+		
+		//initialize groupNodeInfo
+		for (int i = 0; i < globaldata->gTreemap->namesOfGroups.size(); i++) {
+			groupNodeInfo[globaldata->gTreemap->namesOfGroups[i]].resize(0);
+		}
 
 		//initialize tree with correct number of nodes, name and group info.
 		for (int i = 0; i < numNodes; i++) {
 			//initialize leaf nodes
 			if (i <= (numLeaves-1)) {
 				tree[i].setName(globaldata->Treenames[i]);
-				vector<string> tempGroups; tempGroups.push_back(globaldata->gTreemap->getGroup(globaldata->Treenames[i]));
+				
+				//save group info
+				string group = globaldata->gTreemap->getGroup(globaldata->Treenames[i]);
+				vector<string> tempGroups; tempGroups.push_back(group);
 				tree[i].setGroup(tempGroups);
+				groupNodeInfo[group].push_back(i); 
+				
 				//set pcount and pGroup for groupname to 1.
-				tree[i].pcount[globaldata->gTreemap->getGroup(globaldata->Treenames[i])] = 1;
-				tree[i].pGroups[globaldata->gTreemap->getGroup(globaldata->Treenames[i])] = 1;
+				tree[i].pcount[group] = 1;
+				tree[i].pGroups[group] = 1;
+				
 				//Treemap knows name, group and index to speed up search
 				globaldata->gTreemap->setIndex(globaldata->Treenames[i], i);
 	
@@ -97,10 +108,14 @@ void Tree::addNamesToCounts() {
 				
 				map<string, int>::iterator itCounts;
 				int maxPars = 1;
+				set<string> groupsAddedForThisNode;
 				for (int j = 0; j < dupNames.size(); j++) {
-				
+					
+					string group = globaldata->gTreemap->getGroup(dupNames[j]);
+					
 					if (dupNames[j] != name) {//you already added yourself in the constructor
-						string group = globaldata->gTreemap->getGroup(dupNames[j]);
+				
+						if (groupsAddedForThisNode.count(group) == 0)  {  groupNodeInfo[group].push_back(i);  groupsAddedForThisNode.insert(group);  } //if you have not already added this node for this group, then add it
 						
 						//update pcounts
 						itCounts = tree[i].pcount.find(group);
@@ -122,7 +137,7 @@ void Tree::addNamesToCounts() {
 						if(tree[i].pGroups[group] > maxPars){
 							maxPars = tree[i].pGroups[group];
 						}
-					}//end if
+					}else {	 groupsAddedForThisNode.insert(group);  } //add it so you don't add it to groupNodeInfo again
 				}//end for
 				
 				if (maxPars > 1) { //then we have some more dominant groups
@@ -209,6 +224,27 @@ int Tree::assembleTree() {
 	}
 }
 /*****************************************************************/
+int Tree::assembleTree(string n) {
+	try {
+		
+		//build the pGroups in non leaf nodes to be used in the parsimony calcs.
+		for (int i = numLeaves; i < numNodes; i++) {
+			if (m->control_pressed) { return 1; }
+
+			tree[i].pGroups = (mergeGroups(i));
+			tree[i].pcount = (mergeGcounts(i));
+		}
+		//float B = clock();
+		//cout << "assembleTree\t" << (B-A) / CLOCKS_PER_SEC << endl;
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Tree", "assembleTree");
+		exit(1);
+	}
+}
+
+/*****************************************************************/
 void Tree::getCopy(Tree* copy) {
 	try {
 	
@@ -239,6 +275,8 @@ void Tree::getCopy(Tree* copy) {
 			//copy pcount
 			tree[i].pcount = copy->tree[i].pcount;
 		}
+		
+		groupNodeInfo = copy->groupNodeInfo;
 		
 	}
 	catch(exception& e) {
@@ -392,6 +430,11 @@ map<string,int> Tree::mergeGcounts(int position) {
 
 void Tree::randomLabels(vector<string> g) {
 	try {
+	
+		//initialize groupNodeInfo
+		for (int i = 0; i < globaldata->gTreemap->namesOfGroups.size(); i++) {
+			groupNodeInfo[globaldata->gTreemap->namesOfGroups[i]].resize(0);
+		}
 		
 		for(int i = 0; i < numLeaves; i++){
 			int z;
@@ -423,6 +466,9 @@ void Tree::randomLabels(vector<string> g) {
 				tree[z].pcount = (tree[i].pcount);
 				tree[i].pcount = (gcount_hold);
 			}
+			
+			for (int k = 0; k < (tree[i].getGroup()).size(); k++) {  groupNodeInfo[(tree[i].getGroup())[k]].push_back(i); }
+			for (int k = 0; k < (tree[z].getGroup()).size(); k++) {  groupNodeInfo[(tree[z].getGroup())[k]].push_back(z); }
 		}
 	}
 	catch(exception& e) {
@@ -479,14 +525,14 @@ void Tree::randomBlengths()  {
 /*************************************************************************************************/
 void Tree::assembleRandomUnifracTree(vector<string> g) {
 	randomLabels(g);
-	assembleTree();
+	assembleTree("noNameCounts");
 }
 /*************************************************************************************************/
 void Tree::assembleRandomUnifracTree(string groupA, string groupB) {
 
 	vector<string> temp; temp.push_back(groupA); temp.push_back(groupB);
 	randomLabels(temp);
-	assembleTree();
+	assembleTree("noNameCounts");
 }
 
 /*************************************************************************************************/

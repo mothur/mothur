@@ -39,9 +39,10 @@ public:
 	
 	//this function takes the leaf info and populates the non leaf nodes
 	int assembleTree();	
+	int assembleTree(string);	
 	
 	vector<Node> tree;		//the first n nodes are the leaves, where n is the number of sequences.
-	
+	map< string, vector<int> > groupNodeInfo;	//maps group to indexes of leaf nodes with that group, different groups may contain same node because of names file.
 			
 private:
 	GlobalData* globaldata;
