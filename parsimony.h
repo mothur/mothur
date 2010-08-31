@@ -23,7 +23,7 @@ class Parsimony : public TreeCalculator  {
 		Parsimony(TreeMap* t) : tmap(t) {};
 		~Parsimony() {};
 		EstOutput getValues(Tree*);
-		EstOutput getValues(Tree*, string, string) { return data; };
+		//EstOutput getValues(Tree*, string, string) { return data; }
 		
 	private:
 		GlobalData* globaldata;

@@ -21,7 +21,7 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"groups","iters","distance","random","outputdir","inputdir"};
+			string Array[] =  {"groups","iters","distance","random","processors","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -60,6 +60,9 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 		
 			temp = validParameter.validFile(parameters, "random", false);					if (temp == "not found") { temp = "F"; }
 			random = m->isTrue(temp);
+			
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = "1";				}
+			convert(temp, processors); 
 			
 			if (!random) {  iters = 0;  } //turn off random calcs
 
@@ -118,9 +121,6 @@ int UnifracWeightedCommand::execute() {
 		
 		int start = time(NULL);
 		
-		Progress* reading;
-		if (random) {	reading = new Progress("Comparing to random:", iters);	}
-		
 		//get weighted for users tree
 		userData.resize(numComp,0);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
 		randomData.resize(numComp,0); //data[0] = weightedscore AB, data[1] = weightedscore AC...
@@ -131,13 +131,7 @@ int UnifracWeightedCommand::execute() {
 		//get weighted scores for users trees
 		for (int i = 0; i < T.size(); i++) {
 			
-			if (m->control_pressed) { 
-				delete randT;
-				if (random) { delete reading; }
-				outSum.close();
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
-				return 0; 
-			}
+			if (m->control_pressed) { delete randT; outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
 
 			counter = 0;
 			rScores.resize(numComp);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
@@ -148,11 +142,11 @@ int UnifracWeightedCommand::execute() {
 				outputNames.push_back(outputDir + m->getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".weighted");
 			} 
 
-			userData = weighted->getValues(T[i]);  //userData[0] = weightedscore
+			userData = weighted->getValues(T[i], processors, outputDir);  //userData[0] = weightedscore
 			
 			if (m->control_pressed) { 
 				delete randT;
-				if (random) { delete reading; delete output; }
+				if (random) { delete output; }
 				outSum.close();
 				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
 				return 0; 
@@ -168,51 +162,54 @@ int UnifracWeightedCommand::execute() {
 				utreeScores.push_back(userData[s]);
 			}
 			
-			//get scores for random trees
-			for (int j = 0; j < iters; j++) {
-				int count = 0;
-				for (int r=0; r<numGroups; r++) { 
-					for (int l = r+1; l < numGroups; l++) {
-						//copy T[i]'s info.
-						randT->getCopy(T[i]);
-						 
-						//create a random tree with same topology as T[i], but different labels
-						randT->assembleRandomUnifracTree(globaldata->Groups[r], globaldata->Groups[l]);
-						
-						if (m->control_pressed) { 
-							delete randT;
-							if (random) { delete reading; delete output; }
-							outSum.close();
-							for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
-							return 0; 
-						}
-
-
-						//get wscore of random tree
-						randomData = weighted->getValues(randT, globaldata->Groups[r], globaldata->Groups[l]);
-						
-						if (m->control_pressed) { 
-							delete randT;
-							if (random) { delete reading; delete output; }
-							outSum.close();
-							for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
-							return 0; 
-						}
-						
-						//save scores
-						rScores[count].push_back(randomData[0]);
-						count++;
+			if (random) { 
+				vector<double> sums = weighted->getBranchLengthSums(T[i]); 
+			
+				//calculate number of comparisons i.e. with groups A,B,C = AB, AC, BC = 3;
+				vector< vector<string> > namesOfGroupCombos;
+				for (int a=0; a<numGroups; a++) { 
+					for (int l = a+1; l < numGroups; l++) {	
+						vector<string> groups; groups.push_back(globaldata->Groups[a]); groups.push_back(globaldata->Groups[l]);
+						namesOfGroupCombos.push_back(groups);
 					}
 				}
+			
+				#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+					if(processors != 1){
+						int numPairs = namesOfGroupCombos.size();
+						int numPairsPerProcessor = numPairs / processors;
+					
+						for (int i = 0; i < processors; i++) {
+							int startPos = i * numPairsPerProcessor;
+							if(i == processors - 1){
+								numPairsPerProcessor = numPairs - i * numPairsPerProcessor;
+							}
+							lines.push_back(new linePair(startPos, numPairsPerProcessor));
+						}
+					}
+				#endif
+
 				
-				//update progress bar
-				reading->update(j);
-
-			}
-
-			//removeValidScoresDuplicates(); 
-			//find the signifigance of the score for summary file
-			if (random) {
+				//get scores for random trees
+				for (int j = 0; j < iters; j++) {
+					int count = 0;
+					
+					#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+						if(processors == 1){
+							driver(T[i], randT, namesOfGroupCombos, 0, namesOfGroupCombos.size(), sums, rScores);
+						}else{
+							createProcesses(T[i], randT, namesOfGroupCombos, sums, rScores);
+							for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
+						}
+					#else
+						driver(T[i], randT, namesOfGroupCombos, 0, namesOfGroupCombos.size(), sums, rScores);
+					#endif
+					
+					if (m->control_pressed) { delete output; outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
+				}
+				
+				
+				//find the signifigance of the score for summary file
 				for (int f = 0; f < numComp; f++) {
 					//sort random scores
 					sort(rScores[f].begin(), rScores[f].end());
@@ -232,6 +229,7 @@ int UnifracWeightedCommand::execute() {
 				printWeightedFile();
 				
 				delete output;
+			
 			}
 			
 			//clear data
@@ -241,16 +239,7 @@ int UnifracWeightedCommand::execute() {
 		}
 		
 		
-		if (m->control_pressed) { 
-				delete randT;
-				if (random) { delete reading;  }
-				outSum.close();
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
-				return 0; 
-		}
-		
-		//finish progress bar
-		if (random) {	reading->finish();	delete reading;		}
+		if (m->control_pressed) { delete randT; outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0;  }
 		
 		printWSummaryFile();
 		
@@ -278,6 +267,138 @@ int UnifracWeightedCommand::execute() {
 	}
 	catch(exception& e) {
 		m->errorOut(e, "UnifracWeightedCommand", "execute");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+
+int UnifracWeightedCommand::createProcesses(Tree* t, Tree* randT, vector< vector<string> > namesOfGroupCombos, vector<double>& sums, vector< vector<double> >& scores) {
+	try {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		int process = 0;
+		int num = 0;
+		vector<int> processIDS;
+		
+		EstOutput results;
+		
+		//loop through and create all the processes you want
+		while (process != processors) {
+			int pid = fork();
+			
+			if (pid > 0) {
+				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+				process++;
+			}else if (pid == 0){
+				driver(t, randT, namesOfGroupCombos, lines[process]->start, lines[process]->num, sums, scores);
+				
+				m->mothurOut("Merging results."); m->mothurOutEndLine();
+				
+				//pass numSeqs to parent
+				ofstream out;
+				string tempFile = outputDir + toString(getpid()) + ".results.temp";
+				m->openOutputFile(tempFile, out);
+				out << results.size() << endl;
+				for (int i = lines[process]->start; i < (lines[process]->start + lines[process]->num); i++) {  out << results[i] << '\t';  } out << endl;
+				out.close();
+				
+				exit(0);
+			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
+		}
+		
+		//force parent to wait until all the processes are done
+		for (int i=0;i<processors;i++) { 
+			int temp = processIDS[i];
+			wait(&temp);
+		}
+	
+		//get data created by processes
+		for (int i=0;i<processors;i++) { 
+			ifstream in;
+			string s = outputDir + toString(processIDS[i]) + ".results.temp";
+			m->openInputFile(s, in);
+			
+			vector<double> r;
+			
+			//get quantiles
+			while (!in.eof()) {
+				int num;
+				in >> num; 
+				
+				m->gobble(in);
+
+				double w; 
+				for (int j = 0; j < num; j++) {
+					in >> w;
+					r.push_back(w);
+				}
+				m->gobble(in);
+			}
+			in.close();
+			remove(s.c_str());
+	
+			//save quan in quantiles
+			for (int j = 0; j < r.size(); j++) {
+				//put all values of r into results
+				results.push_back(r[j]);   
+			}
+		}
+		
+		m->mothurOut("DONE."); m->mothurOutEndLine(); m->mothurOutEndLine();
+		
+		return 0;
+#endif		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "UnifracWeightedCommand", "createProcesses");
+		exit(1);
+	}
+}
+
+/**************************************************************************************************/
+int UnifracWeightedCommand::driver(Tree* t, Tree* randT, vector< vector<string> > namesOfGroupCombos, int start, int num, vector<double>& sums, vector< vector<double> >& scores) { 
+ try {
+		int count = 0;
+		int total = start+num;
+		int twentyPercent = (total * 0.20);
+
+		for (int h = start; h < (start+num); h++) {
+		
+			if (m->control_pressed) { return 0; }
+		
+			//initialize weighted score
+			string groupA = namesOfGroupCombos[h][0]; 
+			string groupB = namesOfGroupCombos[h][1];
+			
+			//copy T[i]'s info.
+			randT->getCopy(t);
+			 
+			//create a random tree with same topology as T[i], but different labels
+			randT->assembleRandomUnifracTree(groupA, groupB);
+			
+			if (m->control_pressed) { delete randT;  return 0;  }
+
+
+			//get wscore of random tree
+			EstOutput randomData = weighted->getValues(randT, groupA, groupB, sums);
+			
+			if (m->control_pressed) { delete randT;  return 0;  }
+										
+			//save scores
+			scores[h].push_back(randomData[0]);
+			
+			count++;
+
+			//report progress
+			if((h) % twentyPercent == 0){	m->mothurOut("Random comparison percentage complete: " + toString(int((h / (float)total) * 100.0))); m->mothurOutEndLine();		}
+		}
+		
+		m->mothurOut("Random comparison percentage complete: 100"); m->mothurOutEndLine();
+		
+		return 0;
+
+	}
+	catch(exception& e) {
+		m->errorOut(e, "UnifracWeightedCommand", "driver");
 		exit(1);
 	}
 }

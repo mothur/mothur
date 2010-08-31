@@ -11,11 +11,15 @@
 
 /**************************************************************************************************/
 
-EstOutput Weighted::getValues(Tree* t) {
+EstOutput Weighted::getValues(Tree* t, int p, string o) {
     try {
 		globaldata = GlobalData::getInstance();
+		
+		data.clear(); //clear out old values
 		int numGroups;
 		vector<double> D;
+		processors = p;
+		outputDir = o;
 		
 		numGroups = globaldata->Groups.size();
 	
@@ -24,118 +28,40 @@ EstOutput Weighted::getValues(Tree* t) {
 		if (m->control_pressed) { return data; }
 		
 		//calculate number of comparisons i.e. with groups A,B,C = AB, AC, BC = 3;
-		int count = 0;
+		vector< vector<string> > namesOfGroupCombos;
 		for (int i=0; i<numGroups; i++) { 
 			for (int l = i+1; l < numGroups; l++) {	
 				//initialize weighted scores
-				WScore[globaldata->Groups[i]+globaldata->Groups[l]] = 0.0;
-				
+				//WScore[globaldata->Groups[i]+globaldata->Groups[l]] = 0.0;
 				vector<string> groups; groups.push_back(globaldata->Groups[i]); groups.push_back(globaldata->Groups[l]);
+				namesOfGroupCombos.push_back(groups);
+			}
+		}
+		
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			if(processors == 1){
+				data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size(), sums);
+			}else{
+				int numPairs = namesOfGroupCombos.size();
 				
-				D.push_back(0.0000); //initialize a spot in D for each combination
-			
-				//adding the wieghted sums from group i
-				for (int j = 0; j < t->groupNodeInfo[groups[0]].size(); j++) { //the leaf nodes that have seqs from group i
-					map<string, int>::iterator it = t->tree[t->groupNodeInfo[groups[0]][j]].pcount.find(groups[0]);
-					int numSeqsInGroupI = it->second;
-					
-					double weightedSum = ((numSeqsInGroupI * sums[t->groupNodeInfo[groups[0]][j]]) / (double)tmap->seqsPerGroup[groups[0]]);
+				int numPairsPerProcessor = numPairs / processors;
 				
-					D[count] += weightedSum;
-				}
-				
-				//adding the wieghted sums from group l
-				for (int j = 0; j < t->groupNodeInfo[groups[1]].size(); j++) { //the leaf nodes that have seqs from group l
-					map<string, int>::iterator it = t->tree[t->groupNodeInfo[groups[1]][j]].pcount.find(groups[1]);
-					int numSeqsInGroupL = it->second;
-					
-					double weightedSum = ((numSeqsInGroupL * sums[t->groupNodeInfo[groups[1]][j]]) / (double)tmap->seqsPerGroup[groups[1]]);
-				
-					D[count] += weightedSum;
+				for (int i = 0; i < processors; i++) {
+					int startPos = i * numPairsPerProcessor;
+					if(i == processors - 1){
+						numPairsPerProcessor = numPairs - i * numPairsPerProcessor;
+					}
+					lines.push_back(new linePair(startPos, numPairsPerProcessor));
 				}
 
-				/********************************************************
-				//calculate a D value for each group combo
-				for(int v=0;v<t->getNumLeaves();v++){
+				data = createProcesses(t, namesOfGroupCombos, sums);
 				
-					if (m->control_pressed) { return data; }
-					
-					//is this sum from a sequence which is in one of the users groups
-					if (m->inUsersGroups(t->tree[v].getGroup(), globaldata->Groups) == true) {
-						//is this sum from a sequence which is in this groupCombo
-						if (m->inUsersGroups(t->tree[v].getGroup(), groups)) {
-							int numSeqsInGroupI, numSeqsInGroupL;
-							
-							map<string, int>::iterator it;
-							it = t->tree[v].pcount.find(groups[0]);
-							if (it != t->tree[v].pcount.end()) { //this leaf node contains seqs from group i
-								numSeqsInGroupI = it->second;
-							}else{ numSeqsInGroupI = 0; }
-							
-							it = t->tree[v].pcount.find(groups[1]);
-							if (it != t->tree[v].pcount.end()) { //this leaf node contains seqs from group l
-								numSeqsInGroupL = it->second;
-							}else{ numSeqsInGroupL = 0; }
-							
-							double weightedSum = ((numSeqsInGroupI * sum) / (double)tmap->seqsPerGroup[groups[0]]) + ((numSeqsInGroupL * sum) / (double)tmap->seqsPerGroup[groups[1]]);
-
-							//sum /= (double)tmap->seqsPerGroup[t->tree[v].getGroup()];
-							
-							D[count] += weightedSum; 
-						}
-					}
-				}
-				/*********************************************************/
-				count++;
+				for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 			}
-		}
+		#else
+			data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size(), sums);
+		#endif
 		
-		data.clear(); //clear out old values
-	
-		for(int i=0;i<t->getNumNodes();i++){
-			//calculate weighted score for each of the group comb i.e. with groups A,B,C = AB, AC, BC.
-			for (int b=0; b<numGroups; b++) { 
-				for (int l = b+1; l < numGroups; l++) {
-				
-					if (m->control_pressed) { return data; }
-					
-					//calculate a u value for each combo
-					double u;
-					//does this node have descendants from group b-1
-					it = t->tree[i].pcount.find(globaldata->Groups[b]);
-					//if it does u = # of its descendants with a certain group / total number in tree with a certain group
-					if (it != t->tree[i].pcount.end()) {
-						u = (double) t->tree[i].pcount[globaldata->Groups[b]] / (double) tmap->seqsPerGroup[globaldata->Groups[b]];
-					}else { u = 0.00; }
-		
-					//does this node have descendants from group l
-					it = t->tree[i].pcount.find(globaldata->Groups[l]);
-					//if it does subtract their percentage from u
-					if (it != t->tree[i].pcount.end()) {
-						u -= (double) t->tree[i].pcount[globaldata->Groups[l]] / (double) tmap->seqsPerGroup[globaldata->Groups[l]];
-					}
-						
-					u = abs(u * t->tree[i].getBranchLength());
-					
-					//save groupcombs u value
-					WScore[globaldata->Groups[b]+globaldata->Groups[l]] += u;
-				/*********************************************************/
-				}
-			}
-		}
-  
-		//calculate weighted score for each group combination
-		double UN;	
-		count = 0;
-		for (int i=0; i<numGroups; i++) { 
-			for (int l = i+1; l < numGroups; l++) {
-				UN = (WScore[globaldata->Groups[i]+globaldata->Groups[l]] / D[count]);
-		
-				if (isnan(UN) || isinf(UN)) { UN = 0; } 
-				data.push_back(UN);
-				count++;
-			}
-		}
 		return data;
 	}
 	catch(exception& e) {
@@ -143,15 +69,203 @@ EstOutput Weighted::getValues(Tree* t) {
 		exit(1);
 	}
 }
-
 /**************************************************************************************************/
-EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) { 
+
+EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos, vector<double>& sums) {
+	try {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		int process = 0;
+		int num = 0;
+		vector<int> processIDS;
+		
+		EstOutput results;
+		
+		//loop through and create all the processes you want
+		while (process != processors) {
+			int pid = fork();
+			
+			if (pid > 0) {
+				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+				process++;
+			}else if (pid == 0){
+				results = driver(t, namesOfGroupCombos, lines[process]->start, lines[process]->num, sums);
+				
+				if (m->control_pressed) { exit(0); }
+				
+				m->mothurOut("Merging results."); m->mothurOutEndLine();
+				
+				//pass numSeqs to parent
+				ofstream out;
+				string tempFile = outputDir + toString(getpid()) + ".results.temp";
+				m->openOutputFile(tempFile, out);
+				out << results.size() << endl;
+				for (int i = 0; i < results.size(); i++) {  out << results[i] << '\t';  } out << endl;
+				out.close();
+				
+				exit(0);
+			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
+		}
+		
+		//force parent to wait until all the processes are done
+		for (int i=0;i<processors;i++) { 
+			int temp = processIDS[i];
+			wait(&temp);
+		}
+		
+		if (m->control_pressed) { return results; }
+		
+		//get data created by processes
+		for (int i=0;i<processors;i++) { 
+			ifstream in;
+			string s = outputDir + toString(processIDS[i]) + ".results.temp";
+			m->openInputFile(s, in);
+			
+			vector<double> r;
+			
+			//get quantiles
+			while (!in.eof()) {
+				int num;
+				in >> num; 
+				
+				if (m->control_pressed) { break; }
+				
+				m->gobble(in);
+
+				double w; 
+				for (int j = 0; j < num; j++) {
+					in >> w;
+					r.push_back(w);
+				}
+				m->gobble(in);
+			}
+			in.close();
+			remove(s.c_str());
+	
+			//save quan in quantiles
+			for (int j = 0; j < r.size(); j++) {
+				//put all values of r into results
+				results.push_back(r[j]);   
+			}
+		}
+		
+		m->mothurOut("DONE."); m->mothurOutEndLine(); m->mothurOutEndLine();
+		
+		return results;
+#endif		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Weighted", "createProcesses");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos, int start, int num, vector<double>& sums) { 
+ try {
+		globaldata = GlobalData::getInstance();
+		
+		EstOutput results;
+		vector<double> D;
+		
+		int count = 0;
+		int total = start+num;
+		int twentyPercent = (total * 0.20);
+
+		for (int h = start; h < (start+num); h++) {
+		
+			if (m->control_pressed) { return results; }
+		
+			//initialize weighted score
+			string groupA = namesOfGroupCombos[h][0]; 
+			string groupB = namesOfGroupCombos[h][1];
+			
+			WScore[groupA+groupB] = 0.0;
+			D.push_back(0.0000); //initialize a spot in D for each combination
+			
+			//adding the wieghted sums from group i
+			for (int j = 0; j < t->groupNodeInfo[groupA].size(); j++) { //the leaf nodes that have seqs from group i
+				map<string, int>::iterator it = t->tree[t->groupNodeInfo[groupA][j]].pcount.find(groupA);
+				int numSeqsInGroupI = it->second;
+				
+				double weightedSum = ((numSeqsInGroupI * sums[t->groupNodeInfo[groupA][j]]) / (double)tmap->seqsPerGroup[groupA]);
+			
+				D[count] += weightedSum;
+			}
+			
+			//adding the wieghted sums from group l
+			for (int j = 0; j < t->groupNodeInfo[groupB].size(); j++) { //the leaf nodes that have seqs from group l
+				map<string, int>::iterator it = t->tree[t->groupNodeInfo[groupB][j]].pcount.find(groupB);
+				int numSeqsInGroupL = it->second;
+				
+				double weightedSum = ((numSeqsInGroupL * sums[t->groupNodeInfo[groupB][j]]) / (double)tmap->seqsPerGroup[groupB]);
+			
+				D[count] += weightedSum;
+			}
+			count++;
+			
+			//report progress
+			if((h) % twentyPercent == 0){	m->mothurOut("Percentage complete: " + toString(int((h / (float)total) * 100.0))); m->mothurOutEndLine();		}
+		}
+		
+		m->mothurOut("Percentage complete: 100"); m->mothurOutEndLine();
+		
+		//calculate u for the group comb 
+		for(int i=0;i<t->getNumNodes();i++){
+			for (int h = start; h < (start+num); h++) {
+				
+				string groupA = namesOfGroupCombos[h][0]; 
+				string groupB = namesOfGroupCombos[h][1];
+
+				if (m->control_pressed) { return results; }
+				
+				double u;
+				//does this node have descendants from groupA
+				it = t->tree[i].pcount.find(groupA);
+				//if it does u = # of its descendants with a certain group / total number in tree with a certain group
+				if (it != t->tree[i].pcount.end()) {
+					u = (double) t->tree[i].pcount[groupA] / (double) tmap->seqsPerGroup[groupA];
+				}else { u = 0.00; }
+			
+							
+				//does this node have descendants from group l
+				it = t->tree[i].pcount.find(groupB);
+				//if it does subtract their percentage from u
+				if (it != t->tree[i].pcount.end()) {
+					u -= (double) t->tree[i].pcount[groupB] / (double) tmap->seqsPerGroup[groupB];
+				}
+							
+				u = abs(u * t->tree[i].getBranchLength());
+						
+				//save groupcombs u value
+				WScore[(groupA+groupB)] += u;
+			}
+		}
+		
+		/********************************************************/
+		
+		//calculate weighted score for the group combination
+		double UN;	
+		count = 0;
+		for (int h = start; h < (start+num); h++) {
+			UN = (WScore[namesOfGroupCombos[h][0]+namesOfGroupCombos[h][1]] / D[count]);
+		
+			if (isnan(UN) || isinf(UN)) { UN = 0; } 
+			results.push_back(UN);
+			count++;
+		}
+				
+		return results; 
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Weighted", "driver");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+EstOutput Weighted::getValues(Tree* t, string groupA, string groupB, vector<double>& sums) { 
  try {
 		globaldata = GlobalData::getInstance();
 		
 		data.clear(); //clear out old values
-		
-		vector<double> sums = getBranchLengthSums(t);
 		
 		if (m->control_pressed) { return data; }
 		
@@ -161,72 +275,25 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 		
 		vector<string> groups; groups.push_back(groupA); groups.push_back(groupB);
 		
-		//adding the wieghted sums from groupA
-		for (int j = 0; j < t->groupNodeInfo[groupA].size(); j++) { //the leaf nodes that have seqs from group i
-			map<string, int>::iterator it = t->tree[j].pcount.find(groupA);
-			int numSeqsInGroupA = it->second;
+		//adding the wieghted sums from group i
+		for (int j = 0; j < t->groupNodeInfo[groups[0]].size(); j++) { //the leaf nodes that have seqs from group i
+			map<string, int>::iterator it = t->tree[t->groupNodeInfo[groups[0]][j]].pcount.find(groups[0]);
+			int numSeqsInGroupI = it->second;
 			
-			double weightedSum = ((numSeqsInGroupA * sums[j]) / (double)tmap->seqsPerGroup[groupA]);
+			double weightedSum = ((numSeqsInGroupI * sums[t->groupNodeInfo[groups[0]][j]]) / (double)tmap->seqsPerGroup[groups[0]]);
 		
 			D += weightedSum;
 		}
 		
-		//adding the wieghted sums from groupB
-		for (int j = 0; j < t->groupNodeInfo[groupB].size(); j++) { //the leaf nodes that have seqs from group l
-			map<string, int>::iterator it = t->tree[j].pcount.find(groupB);
-			int numSeqsInGroupB = it->second;
+		//adding the wieghted sums from group l
+		for (int j = 0; j < t->groupNodeInfo[groups[1]].size(); j++) { //the leaf nodes that have seqs from group l
+			map<string, int>::iterator it = t->tree[t->groupNodeInfo[groups[1]][j]].pcount.find(groups[1]);
+			int numSeqsInGroupL = it->second;
 			
-			double weightedSum = ((numSeqsInGroupB * sums[j]) / (double)tmap->seqsPerGroup[groupB]);
+			double weightedSum = ((numSeqsInGroupL * sums[t->groupNodeInfo[groups[1]][j]]) / (double)tmap->seqsPerGroup[groups[1]]);
 		
 			D += weightedSum;
 		}
-				
-														
-		/********************************************************
-		//calculate a D value for the group combo
-		for(int v=0;v<t->getNumLeaves();v++){
-			if (m->control_pressed) { return data; }
-			
-			int index = v;
-			double sum = 0.0000;
-		
-			//while you aren't at root
-			while(t->tree[index].getParent() != -1){
-							
-				//if you have a BL
-				if(t->tree[index].getBranchLength() != -1){
-					sum += abs(t->tree[index].getBranchLength());
-				}
-				index = t->tree[index].getParent();
-			}
-						
-			//get last breanch length added
-			if(t->tree[index].getBranchLength() != -1){
-				sum += abs(t->tree[index].getBranchLength());
-			}
-						
-			if (m->inUsersGroups(t->tree[v].getGroup(), groups)) {
-				int numSeqsInGroupI, numSeqsInGroupL;
-							
-				map<string, int>::iterator it;
-				it = t->tree[v].pcount.find(groups[0]);
-				if (it != t->tree[v].pcount.end()) { //this leaf node contains seqs from group i
-					numSeqsInGroupI = it->second;
-				}else{ numSeqsInGroupI = 0; }
-				
-				it = t->tree[v].pcount.find(groups[1]);
-				if (it != t->tree[v].pcount.end()) { //this leaf node contains seqs from group l
-					numSeqsInGroupL = it->second;
-				}else{ numSeqsInGroupL = 0; }
-				
-				double weightedSum = ((numSeqsInGroupI * sum) / (double)tmap->seqsPerGroup[groups[0]]) + ((numSeqsInGroupL * sum) / (double)tmap->seqsPerGroup[groups[1]]);
-				
-				//sum /= (double)tmap->seqsPerGroup[t->tree[v].getGroup()];
-				
-				D += weightedSum; 
-			}
-		}
-		/********************************************************/				
 		
 		//calculate u for the group comb 
 		for(int i=0;i<t->getNumNodes();i++){
