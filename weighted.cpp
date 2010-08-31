@@ -74,7 +74,7 @@ EstOutput Weighted::getValues(Tree* t, int p, string o) {
 EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos, vector<double>& sums) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		int process = 0;
+		int process = 1;
 		int num = 0;
 		vector<int> processIDS;
 		
@@ -88,7 +88,8 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				results = driver(t, namesOfGroupCombos, lines[process]->start, lines[process]->num, sums);
+				EstOutput Myresults;
+				Myresults = driver(t, namesOfGroupCombos, lines[process]->start, lines[process]->num, sums);
 				
 				if (m->control_pressed) { exit(0); }
 				
@@ -96,18 +97,20 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = outputDir + toString(getpid()) + ".results.temp";
+				string tempFile = outputDir + toString(getpid()) + ".weighted.results.temp";
 				m->openOutputFile(tempFile, out);
-				out << results.size() << endl;
-				for (int i = 0; i < results.size(); i++) {  out << results[i] << '\t';  } out << endl;
+				out << Myresults.size() << endl;
+				for (int i = 0; i < Myresults.size(); i++) {  out << Myresults[i] << '\t';  } out << endl;
 				out.close();
 				
 				exit(0);
 			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
 		}
+	
+		results = driver(t, namesOfGroupCombos, lines[0]->start, lines[0]->num, sums);
 		
 		//force parent to wait until all the processes are done
-		for (int i=0;i<processors;i++) { 
+		for (int i=0;i<(processors-1);i++) { 
 			int temp = processIDS[i];
 			wait(&temp);
 		}
@@ -115,37 +118,27 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 		if (m->control_pressed) { return results; }
 		
 		//get data created by processes
-		for (int i=0;i<processors;i++) { 
+		for (int i=0;i<(processors-1);i++) { 
 			ifstream in;
-			string s = outputDir + toString(processIDS[i]) + ".results.temp";
+			string s = outputDir + toString(processIDS[i]) + ".weighted.results.temp";
 			m->openInputFile(s, in);
-			
-			vector<double> r;
 			
 			//get quantiles
 			while (!in.eof()) {
 				int num;
-				in >> num; 
+				in >> num; m->gobble(in);
 				
 				if (m->control_pressed) { break; }
-				
-				m->gobble(in);
 
 				double w; 
 				for (int j = 0; j < num; j++) {
 					in >> w;
-					r.push_back(w);
+					results.push_back(w);
 				}
 				m->gobble(in);
 			}
 			in.close();
 			remove(s.c_str());
-	
-			//save quan in quantiles
-			for (int j = 0; j < r.size(); j++) {
-				//put all values of r into results
-				results.push_back(r[j]);   
-			}
 		}
 		
 		m->mothurOut("DONE."); m->mothurOutEndLine(); m->mothurOutEndLine();
@@ -167,7 +160,7 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 		vector<double> D;
 		
 		int count = 0;
-		int total = start+num;
+		int total = num;
 		int twentyPercent = (total * 0.20);
 
 		for (int h = start; h < (start+num); h++) {
@@ -203,7 +196,7 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 			count++;
 			
 			//report progress
-			if((h) % twentyPercent == 0){	m->mothurOut("Percentage complete: " + toString(int((h / (float)total) * 100.0))); m->mothurOutEndLine();		}
+			if((count) % twentyPercent == 0){	m->mothurOut("Percentage complete: " + toString(int((count / (float)total) * 100.0))); m->mothurOutEndLine();		}
 		}
 		
 		m->mothurOut("Percentage complete: 100"); m->mothurOutEndLine();

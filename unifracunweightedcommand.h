@@ -36,7 +36,7 @@ class UnifracUnweightedCommand : public Command {
 		Unweighted* unweighted;
 		string sumFile, allGroups;
 		vector<string> groupComb; // AB. AC, BC...
-		int iters, numGroups, numComp, counter;
+		int iters, numGroups, numComp, counter, processors;
 		EstOutput userData;			//unweighted score info for user tree
 		EstOutput randomData;		//unweighted score info for random trees
 		vector< vector<float> > utreeScores; //scores for users trees for each comb.

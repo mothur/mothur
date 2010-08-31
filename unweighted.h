@@ -21,14 +21,26 @@ class Unweighted : public TreeCalculator  {
 	public:
 		Unweighted(TreeMap* t) : tmap(t) {};
 		~Unweighted() {};
-		EstOutput getValues(Tree*);
+		EstOutput getValues(Tree*, int, string);
 		EstOutput getValues(Tree*, string, string);
 		
 	private:
+		struct linePair {
+			int start;
+			int num;
+			linePair(int i, int j) : start(i), num(j) {}
+		};
+		vector<linePair*> lines;
+		
 		GlobalData* globaldata;
 		Tree* copyTree;
 		EstOutput data;
 		TreeMap* tmap;
+		int processors;
+		string outputDir;
+		
+		EstOutput driver(Tree*, vector< vector<string> >, int, int); 
+		EstOutput createProcesses(Tree*, vector< vector<string> >);
 
 };
 
