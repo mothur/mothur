@@ -21,17 +21,30 @@ class Weighted : public TreeCalculator  {
 	public:
 		Weighted(TreeMap* t) : tmap(t) {};
 		~Weighted() {};
-		EstOutput getValues(Tree*);
-		EstOutput getValues(Tree*, string, string);
+		
+		EstOutput getValues(Tree*, string, string, vector<double>&);
+		EstOutput getValues(Tree*, int, string);
+		
+		vector<double> getBranchLengthSums(Tree*);
 		
 	private:
+		struct linePair {
+			int start;
+			int num;
+			linePair(int i, int j) : start(i), num(j) {}
+		};
+		vector<linePair*> lines;
+
 		GlobalData* globaldata;
 		EstOutput data;
 		TreeMap* tmap;
 		map<string, int>::iterator it;
 		map<string, double> WScore; //a score for each group combination i.e. AB, AC, BC.
+		int processors;
+		string outputDir;
 		
-		vector<double> getBranchLengthSums(Tree*);
+		EstOutput driver(Tree*, vector< vector<string> >, int, int, vector<double>&); 
+		EstOutput createProcesses(Tree*, vector< vector<string> >, vector<double>&);
 };
 
 /***********************************************************************/

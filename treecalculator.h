@@ -25,11 +25,15 @@ class TreeCalculator {
 public:
 	TreeCalculator(){ m = MothurOut::getInstance(); }
 	TreeCalculator(string n) : name(n) {};
+	
 	virtual ~TreeCalculator(){};
-	virtual EstOutput getValues(Tree*) = 0;	
-	virtual EstOutput getValues(Tree*, string, string) = 0;
+	virtual EstOutput getValues(Tree*) { return data; }	
+	virtual EstOutput getValues(Tree*, int, string) { return data; }	
+	virtual EstOutput getValues(Tree*, string, string) { return data; }
+	virtual EstOutput getValues(Tree*, string, string, vector<double>&) { return data; }
 	
 	virtual string getName()		{	return name;	}
+	virtual vector<double> getBranchLengthSums(Tree*) {  vector<double> temp; return temp;  }
 		
 protected:
 	EstOutput data;

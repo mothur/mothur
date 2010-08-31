@@ -55,7 +55,7 @@ EstOutput Unweighted::getValues(Tree* t) {
 					int pcountSize = 0;
 					for (int j = 0; j < groups.size(); j++) {
 						map<string, int>::iterator itGroup = t->tree[i].pcount.find(groups[j]);
-						if (itGroup != t->tree[i].pcount.end()) { pcountSize++; if (pcountSize > 1) { break; } } 
+						if (itGroup != t->tree[i].pcount.end()) { pcountSize++; } 
 					}
 					
 					if (pcountSize == 0) { }
@@ -188,7 +188,7 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB) {
 					int pcountSize = 0;
 					for (int j = 0; j < groups.size(); j++) {
 						map<string, int>::iterator itGroup = copyTree->tree[i].pcount.find(groups[j]);
-						if (itGroup != copyTree->tree[i].pcount.end()) { pcountSize++; if (pcountSize > 1) { break; } } 
+						if (itGroup != copyTree->tree[i].pcount.end()) { pcountSize++; } 
 					}
 					
 					if (pcountSize == 0) { }

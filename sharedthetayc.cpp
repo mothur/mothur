@@ -31,8 +31,8 @@ EstOutput ThetaYC::getValues(vector<SharedRAbundVector*> shared) {
 		//get the total values we need to calculate the theta denominator sums
 		for (int i = 0; i < shared[0]->size(); i++) {
 			//store in temps to avoid multiple repetitive function calls
-			Atotal += (float)shared[0]->getAbundance(i);
-			Btotal += (float)shared[1]->getAbundance(i);
+			Atotal += (double)shared[0]->getAbundance(i);
+			Btotal += (double)shared[1]->getAbundance(i);
 		}
 		
 		//calculate the theta denominator sums

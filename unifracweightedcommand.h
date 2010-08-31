@@ -29,6 +29,13 @@ class UnifracWeightedCommand : public Command {
 		void help();
 	
 	private:
+		struct linePair {
+			int start;
+			int num;
+			linePair(int i, int j) : start(i), num(j) {}
+		};
+		vector<linePair*> lines;
+		
 		GlobalData* globaldata;
 		SharedUtil* util;
 		FileOutput* output;
@@ -52,6 +59,7 @@ class UnifracWeightedCommand : public Command {
 		bool abort, phylip, random;
 		string groups, itersString;
 		vector<string> Groups, outputNames; //holds groups to be used
+		int processors;
 
 		
 		ofstream outSum;
@@ -62,6 +70,8 @@ class UnifracWeightedCommand : public Command {
 		//void removeValidScoresDuplicates();
 		int findIndex(float, int);
 		void calculateFreqsCumuls();
+		int createProcesses(Tree*, Tree*, vector< vector<string> >, vector<double>&, vector< vector<double> >&);
+		int driver(Tree*, Tree*, vector< vector<string> >, int, int, vector<double>&, vector< vector<double> >&);
 		
 };
 
