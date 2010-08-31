@@ -21,7 +21,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"groups","iters","distance","random", "outputdir","inputdir"};
+			string Array[] =  {"groups","iters","distance","random", "processors","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -60,6 +60,9 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "random", false);					if (temp == "not found") { temp = "f"; }
 			random = m->isTrue(temp);
+			
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = "1";				}
+			convert(temp, processors); 
 			
 			if (!random) {  iters = 0;  } //turn off random calcs
 			
@@ -156,14 +159,9 @@ int UnifracUnweightedCommand::execute() {
 			utreeScores.resize(numComp);  
 			UWScoreSig.resize(numComp); 
 
-			userData = unweighted->getValues(T[i]);  //userData[0] = unweightedscore
+			userData = unweighted->getValues(T[i], processors, outputDir);  //userData[0] = unweightedscore
 			
-			if (m->control_pressed) { 
-				if (random) { delete output;  }
-				outSum.close();
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
-				return 0; 
-			}
+			if (m->control_pressed) { if (random) { delete output;  } outSum.close();  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }return 0; }
 			
 			//output scores for each combination
 			for(int k = 0; k < numComp; k++) {

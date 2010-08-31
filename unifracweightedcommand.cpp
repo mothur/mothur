@@ -275,7 +275,7 @@ int UnifracWeightedCommand::execute() {
 int UnifracWeightedCommand::createProcesses(Tree* t, Tree* randT, vector< vector<string> > namesOfGroupCombos, vector<double>& sums, vector< vector<double> >& scores) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		int process = 0;
+		int process = 1;
 		int num = 0;
 		vector<int> processIDS;
 		
@@ -295,52 +295,32 @@ int UnifracWeightedCommand::createProcesses(Tree* t, Tree* randT, vector< vector
 				
 				//pass numSeqs to parent
 				ofstream out;
-				string tempFile = outputDir + toString(getpid()) + ".results.temp";
+				string tempFile = outputDir + toString(getpid()) + ".weightedcommand.results.temp";
 				m->openOutputFile(tempFile, out);
-				out << results.size() << endl;
-				for (int i = lines[process]->start; i < (lines[process]->start + lines[process]->num); i++) {  out << results[i] << '\t';  } out << endl;
+				for (int i = lines[process]->start; i < (lines[process]->start + lines[process]->num); i++) {  out << scores[i][0] << '\t';  } out << endl;
 				out.close();
 				
 				exit(0);
 			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
 		}
 		
+		driver(t, randT, namesOfGroupCombos, lines[0]->start, lines[0]->num, sums, scores);
+		
 		//force parent to wait until all the processes are done
-		for (int i=0;i<processors;i++) { 
+		for (int i=0;i<(processors-1);i++) { 
 			int temp = processIDS[i];
 			wait(&temp);
 		}
 	
 		//get data created by processes
-		for (int i=0;i<processors;i++) { 
+		for (int i=0;i<(processors-1);i++) { 
 			ifstream in;
-			string s = outputDir + toString(processIDS[i]) + ".results.temp";
+			string s = outputDir + toString(processIDS[i]) + ".weightedcommand.results.temp";
 			m->openInputFile(s, in);
 			
-			vector<double> r;
-			
-			//get quantiles
-			while (!in.eof()) {
-				int num;
-				in >> num; 
-				
-				m->gobble(in);
-
-				double w; 
-				for (int j = 0; j < num; j++) {
-					in >> w;
-					r.push_back(w);
-				}
-				m->gobble(in);
-			}
+			for (int i = lines[process]->start; i < (lines[process]->start + lines[process]->num); i++) { in >> scores[i][0]; }
 			in.close();
 			remove(s.c_str());
-	
-			//save quan in quantiles
-			for (int j = 0; j < r.size(); j++) {
-				//put all values of r into results
-				results.push_back(r[j]);   
-			}
 		}
 		
 		m->mothurOut("DONE."); m->mothurOutEndLine(); m->mothurOutEndLine();
@@ -358,7 +338,7 @@ int UnifracWeightedCommand::createProcesses(Tree* t, Tree* randT, vector< vector
 int UnifracWeightedCommand::driver(Tree* t, Tree* randT, vector< vector<string> > namesOfGroupCombos, int start, int num, vector<double>& sums, vector< vector<double> >& scores) { 
  try {
 		int count = 0;
-		int total = start+num;
+		int total = num;
 		int twentyPercent = (total * 0.20);
 
 		for (int h = start; h < (start+num); h++) {
@@ -389,7 +369,7 @@ int UnifracWeightedCommand::driver(Tree* t, Tree* randT, vector< vector<string> 
 			count++;
 
 			//report progress
-			if((h) % twentyPercent == 0){	m->mothurOut("Random comparison percentage complete: " + toString(int((h / (float)total) * 100.0))); m->mothurOutEndLine();		}
+			if((count) % twentyPercent == 0){	m->mothurOut("Random comparison percentage complete: " + toString(int((count / (float)total) * 100.0))); m->mothurOutEndLine();		}
 		}
 		
 		m->mothurOut("Random comparison percentage complete: 100"); m->mothurOutEndLine();
