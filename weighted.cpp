@@ -88,17 +88,19 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
+	
 				EstOutput Myresults;
 				Myresults = driver(t, namesOfGroupCombos, lines[process]->start, lines[process]->num, sums);
-				
-				if (m->control_pressed) { exit(0); }
-				
+			
 				m->mothurOut("Merging results."); m->mothurOutEndLine();
 				
 				//pass numSeqs to parent
 				ofstream out;
+
 				string tempFile = outputDir + toString(getpid()) + ".weighted.results.temp";
+	
 				m->openOutputFile(tempFile, out);
+	
 				out << Myresults.size() << endl;
 				for (int i = 0; i < Myresults.size(); i++) {  out << Myresults[i] << '\t';  } out << endl;
 				out.close();
@@ -108,13 +110,13 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 		}
 	
 		results = driver(t, namesOfGroupCombos, lines[0]->start, lines[0]->num, sums);
-		
+	
 		//force parent to wait until all the processes are done
 		for (int i=0;i<(processors-1);i++) { 
 			int temp = processIDS[i];
 			wait(&temp);
 		}
-		
+	
 		if (m->control_pressed) { return results; }
 		
 		//get data created by processes
@@ -154,15 +156,10 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 /**************************************************************************************************/
 EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos, int start, int num, vector<double>& sums) { 
  try {
-		globaldata = GlobalData::getInstance();
-		
 		EstOutput results;
 		vector<double> D;
 		
 		int count = 0;
-		int total = num;
-		int twentyPercent = (total * 0.20);
-
 		for (int h = start; h < (start+num); h++) {
 		
 			if (m->control_pressed) { return results; }
@@ -194,14 +191,11 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 				D[count] += weightedSum;
 			}
 			count++;
-			
-			//report progress
-			if((count) % twentyPercent == 0){	m->mothurOut("Percentage complete: " + toString(int((count / (float)total) * 100.0))); m->mothurOutEndLine();		}
 		}
 		
-		m->mothurOut("Percentage complete: 100"); m->mothurOutEndLine();
-		
 		//calculate u for the group comb 
+		int total = t->getNumNodes();
+		int twentyPercent = (total * 0.20);
 		for(int i=0;i<t->getNumNodes();i++){
 			for (int h = start; h < (start+num); h++) {
 				
@@ -231,10 +225,13 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 				//save groupcombs u value
 				WScore[(groupA+groupB)] += u;
 			}
+			//report progress
+			if((i) % twentyPercent == 0){	m->mothurOut("Percentage complete: " + toString(int((i / (float)total) * 100.0))); m->mothurOutEndLine();		}
 		}
 		
-		/********************************************************/
+		m->mothurOut("Percentage complete: 100"); m->mothurOutEndLine();
 		
+		/********************************************************/
 		//calculate weighted score for the group combination
 		double UN;	
 		count = 0;

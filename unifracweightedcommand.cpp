@@ -192,22 +192,24 @@ int UnifracWeightedCommand::execute() {
 				
 				//get scores for random trees
 				for (int j = 0; j < iters; j++) {
-					int count = 0;
 					
 					#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 						if(processors == 1){
 							driver(T[i], randT, namesOfGroupCombos, 0, namesOfGroupCombos.size(), sums, rScores);
 						}else{
 							createProcesses(T[i], randT, namesOfGroupCombos, sums, rScores);
-							for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 						}
 					#else
 						driver(T[i], randT, namesOfGroupCombos, 0, namesOfGroupCombos.size(), sums, rScores);
 					#endif
 					
 					if (m->control_pressed) { delete output; outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
+					
+					//report progress
+					m->mothurOut("Iter: " + toString(j+1)); m->mothurOutEndLine();		
 				}
-				
+
+				for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 				
 				//find the signifigance of the score for summary file
 				for (int f = 0; f < numComp; f++) {
@@ -290,14 +292,12 @@ int UnifracWeightedCommand::createProcesses(Tree* t, Tree* randT, vector< vector
 				process++;
 			}else if (pid == 0){
 				driver(t, randT, namesOfGroupCombos, lines[process]->start, lines[process]->num, sums, scores);
-				
-				m->mothurOut("Merging results."); m->mothurOutEndLine();
-				
+			
 				//pass numSeqs to parent
 				ofstream out;
 				string tempFile = outputDir + toString(getpid()) + ".weightedcommand.results.temp";
 				m->openOutputFile(tempFile, out);
-				for (int i = lines[process]->start; i < (lines[process]->start + lines[process]->num); i++) {  out << scores[i][0] << '\t';  } out << endl;
+				for (int i = lines[process]->start; i < (lines[process]->start + lines[process]->num); i++) {  out << scores[i][(scores[i].size()-1)] << '\t';  } out << endl;
 				out.close();
 				
 				exit(0);
@@ -318,12 +318,11 @@ int UnifracWeightedCommand::createProcesses(Tree* t, Tree* randT, vector< vector
 			string s = outputDir + toString(processIDS[i]) + ".weightedcommand.results.temp";
 			m->openInputFile(s, in);
 			
-			for (int i = lines[process]->start; i < (lines[process]->start + lines[process]->num); i++) { in >> scores[i][0]; }
+			double tempScore;
+			for (int i = lines[process]->start; i < (lines[process]->start + lines[process]->num); i++) { in >> tempScore; scores[i].push_back(tempScore); }
 			in.close();
 			remove(s.c_str());
 		}
-		
-		m->mothurOut("DONE."); m->mothurOutEndLine(); m->mothurOutEndLine();
 		
 		return 0;
 #endif		
@@ -337,12 +336,9 @@ int UnifracWeightedCommand::createProcesses(Tree* t, Tree* randT, vector< vector
 /**************************************************************************************************/
 int UnifracWeightedCommand::driver(Tree* t, Tree* randT, vector< vector<string> > namesOfGroupCombos, int start, int num, vector<double>& sums, vector< vector<double> >& scores) { 
  try {
-		int count = 0;
-		int total = num;
-		int twentyPercent = (total * 0.20);
-
+	
 		for (int h = start; h < (start+num); h++) {
-		
+	cout << "doing " << h << endl;	
 			if (m->control_pressed) { return 0; }
 		
 			//initialize weighted score
@@ -365,14 +361,7 @@ int UnifracWeightedCommand::driver(Tree* t, Tree* randT, vector< vector<string> 
 										
 			//save scores
 			scores[h].push_back(randomData[0]);
-			
-			count++;
-
-			//report progress
-			if((count) % twentyPercent == 0){	m->mothurOut("Random comparison percentage complete: " + toString(int((count / (float)total) * 100.0))); m->mothurOutEndLine();		}
 		}
-		
-		m->mothurOut("Random comparison percentage complete: 100"); m->mothurOutEndLine();
 		
 		return 0;
 
