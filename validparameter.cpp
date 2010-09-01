@@ -309,7 +309,7 @@ void ValidParameters::initParameterRanges() {
 		string precisionArray[] = {">=","10", "<","NA", "between"};
 		parameterRanges["precision"] = addParameters(precisionArray, rangeSize);
 		
-		string itersArray[] = {">=","10", "<","NA", "between"};
+		string itersArray[] = {">=","1", "<","NA", "between"};
 		parameterRanges["iters"] = addParameters(itersArray, rangeSize);
 
 		string abundArray[] = {">=","5", "<","NA", "between"};
