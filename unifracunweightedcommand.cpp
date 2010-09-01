@@ -160,7 +160,7 @@ int UnifracUnweightedCommand::execute() {
 			UWScoreSig.resize(numComp); 
 
 			userData = unweighted->getValues(T[i], processors, outputDir);  //userData[0] = unweightedscore
-			
+		
 			if (m->control_pressed) { if (random) { delete output;  } outSum.close();  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }return 0; }
 			
 			//output scores for each combination
@@ -171,18 +171,14 @@ int UnifracUnweightedCommand::execute() {
 				//add users score to validscores
 				validScores[userData[k]] = userData[k];
 			}
-			
+		
 			//get unweighted scores for random trees - if random is false iters = 0
 			for (int j = 0; j < iters; j++) {
+		
 				//we need a different getValues because when we swap the labels we only want to swap those in each pairwise comparison
-				randomData = unweighted->getValues(T[i], "", "");
+				randomData = unweighted->getValues(T[i], "", "", processors, outputDir);
 				
-				if (m->control_pressed) { 
-					if (random) { delete output;  }
-					outSum.close();
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
-					return 0; 
-				}
+				if (m->control_pressed) { if (random) { delete output;  } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
 			
 				for(int k = 0; k < numComp; k++) {	
 					//add trees unweighted score to map of scores
@@ -196,6 +192,9 @@ int UnifracUnweightedCommand::execute() {
 					//add randoms score to validscores
 					validScores[randomData[k]] = randomData[k];
 				}
+				
+				//report progress
+				m->mothurOut("Iter: " + toString(j+1)); m->mothurOutEndLine();	
 			}
 	
 			for(int a = 0; a < numComp; a++) {
@@ -216,13 +215,7 @@ int UnifracUnweightedCommand::execute() {
 	
 			}
 			
-			
-			if (m->control_pressed) { 
-				if (random) { delete output;  }
-				outSum.close();
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
-				return 0; 
-			}
+			if (m->control_pressed) { if (random) { delete output;  } outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0;  }
 			
 			//print output files
 			printUWSummaryFile(i);
@@ -299,16 +292,16 @@ void UnifracUnweightedCommand::printUWSummaryFile(int i) {
 				if (UWScoreSig[a][0] > (1/(float)iters)) {
 					outSum << setprecision(6) << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(itersString.length()) << UWScoreSig[a][0] << endl;
 					cout << setprecision(6)  << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(itersString.length()) << UWScoreSig[a][0] << endl; 
-					m->mothurOutJustToLog(groupComb[a]  + "\t" + toString(utreeScores[a][0])  + "\t" + toString(UWScoreSig[a][0])); m->mothurOutEndLine(); 
+					m->mothurOutJustToLog(groupComb[a]  + "\t" + toString(utreeScores[a][0])  + "\t" + toString(UWScoreSig[a][0])+ "\n"); 
 				}else {
 					outSum << setprecision(6) << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(itersString.length()) << "<" << (1/float(iters)) << endl;
 					cout << setprecision(6)  << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << setprecision(itersString.length()) << "<" << (1/float(iters)) << endl; 
-					m->mothurOutJustToLog(groupComb[a]  + "\t" + toString(utreeScores[a][0])  + "\t<" + toString((1/float(iters)))); m->mothurOutEndLine();
+					m->mothurOutJustToLog(groupComb[a]  + "\t" + toString(utreeScores[a][0])  + "\t<" + toString((1/float(iters))) + "\n"); 
 				}
 			}else{
 				outSum << setprecision(6) << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << "0.00" << endl;
 				cout << setprecision(6)  << groupComb[a]  << '\t' << utreeScores[a][0] << '\t' << "0.00" << endl; 
-				m->mothurOutJustToLog(groupComb[a]  + "\t" + toString(utreeScores[a][0])  + "\t0.00"); m->mothurOutEndLine();
+				m->mothurOutJustToLog(groupComb[a]  + "\t" + toString(utreeScores[a][0])  + "\t0.00\n");
 			}
 		}
 		

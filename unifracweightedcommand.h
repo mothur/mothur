@@ -34,7 +34,7 @@ class UnifracWeightedCommand : public Command {
 			int num;
 			linePair(int i, int j) : start(i), num(j) {}
 		};
-		vector<linePair*> lines;
+		vector<linePair> lines;
 		
 		GlobalData* globaldata;
 		SharedUtil* util;
@@ -43,7 +43,6 @@ class UnifracWeightedCommand : public Command {
 		vector<double> utreeScores;  //user tree unweighted scores
 		vector<double> WScoreSig;  //tree weighted score signifigance when compared to random trees - percentage of random trees with that score or lower.
 		vector<string> groupComb; // AB. AC, BC...
-		Tree* randT;  //random tree
 		TreeMap* tmap;
 		Weighted* weighted;
 		string sumFile, outputDir;
@@ -70,8 +69,8 @@ class UnifracWeightedCommand : public Command {
 		//void removeValidScoresDuplicates();
 		int findIndex(float, int);
 		void calculateFreqsCumuls();
-		int createProcesses(Tree*, Tree*, vector< vector<string> >, vector<double>&, vector< vector<double> >&);
-		int driver(Tree*, Tree*, vector< vector<string> >, int, int, vector<double>&, vector< vector<double> >&);
+		int createProcesses(Tree*,  vector< vector<string> >, vector<double>&, vector< vector<double> >&);
+		int driver(Tree*, vector< vector<string> >, int, int, vector<double>&, vector< vector<double> >&);
 		
 };
 

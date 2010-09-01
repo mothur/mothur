@@ -46,15 +46,17 @@ private:
 	//void m->appendFiles(string, string);
 	void createProcesses(string);
 	int driver(/*Dist*, SequenceDB, */int, int, string, float);
+	int driver(int, int, string, string);
 	
 	#ifdef USE_MPI 
 	int driverMPI(int, int, MPI_File&, float);
-	int driverMPI(int, int, string, long&);
+	int driverMPI(int, int, string, unsigned long int&);
+	int driverMPI(int, int, string, unsigned long int&, string);
 	#endif
 	
-	int convertMatrix(string);
+	//int convertMatrix(string);
 	bool sanityCheck();
-	int convertToLowerTriangle(string);
+	//int convertToLowerTriangle(string);
 
 };
 

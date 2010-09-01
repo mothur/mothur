@@ -33,7 +33,7 @@ class Weighted : public TreeCalculator  {
 			int num;
 			linePair(int i, int j) : start(i), num(j) {}
 		};
-		vector<linePair*> lines;
+		vector<linePair> lines;
 
 		GlobalData* globaldata;
 		EstOutput data;
