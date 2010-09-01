@@ -51,12 +51,12 @@ EstOutput Weighted::getValues(Tree* t, int p, string o) {
 					if(i == processors - 1){
 						numPairsPerProcessor = numPairs - i * numPairsPerProcessor;
 					}
-					lines.push_back(new linePair(startPos, numPairsPerProcessor));
+					lines.push_back(linePair(startPos, numPairsPerProcessor));
 				}
 
 				data = createProcesses(t, namesOfGroupCombos, sums);
 				
-				for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
+				lines.clear();
 			}
 		#else
 			data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size(), sums);
@@ -90,7 +90,7 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 			}else if (pid == 0){
 	
 				EstOutput Myresults;
-				Myresults = driver(t, namesOfGroupCombos, lines[process]->start, lines[process]->num, sums);
+				Myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, sums);
 			
 				m->mothurOut("Merging results."); m->mothurOutEndLine();
 				
@@ -109,7 +109,7 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
 		}
 	
-		results = driver(t, namesOfGroupCombos, lines[0]->start, lines[0]->num, sums);
+		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, sums);
 	
 		//force parent to wait until all the processes are done
 		for (int i=0;i<(processors-1);i++) { 
@@ -196,6 +196,7 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 		//calculate u for the group comb 
 		int total = t->getNumNodes();
 		int twentyPercent = (total * 0.20);
+		
 		for(int i=0;i<t->getNumNodes();i++){
 			for (int h = start; h < (start+num); h++) {
 				
