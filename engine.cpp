@@ -199,7 +199,7 @@ string Engine::getCommand()  {
 				string nextCommand = "";
 				
 				mout->mothurOut("mothur > ");
-				m->getline(cin, nextCommand);
+				getline(cin, nextCommand);
 				mout->mothurOutJustToLog(toString(nextCommand));
 				
 				return nextCommand;

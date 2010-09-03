@@ -422,7 +422,8 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup) {
 	
 				int n = 1; 
 				vector<SharedRAbundVector*> subset;
-				for (int k = 0; k < (thisLookup.size() - 1); k++) { // pass cdd each set of groups to commpare
+				for (int k = 0; k < (thisLookup.size() - 1); k++) { // pass cdd each set of groups to compare
+	
 					for (int l = n; l < thisLookup.size(); l++) {
 						
 						outputFileHandle << thisLookup[0]->getLabel() << '\t';

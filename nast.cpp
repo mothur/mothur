@@ -223,7 +223,7 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 
 void Nast::regapSequences(){	//This is essentially part B in Fig 2. of DeSantis et al.
 	try { 
-	
+	//cout << candidateSeq->getName() << endl;
 		string candPair = candidateSeq->getPairwise();
 		string candAln = "";
 		
@@ -252,6 +252,7 @@ void Nast::regapSequences(){	//This is essentially part B in Fig 2. of DeSantis 
 		string lastLoop = "";
 		
 		while(pairwiseAlignIndex<pairwiseLength){
+	//cout << pairwiseAlignIndex << '\t' << fullAlignIndex << '\t' << pairwiseLength << endl;
 			if(isalpha(tempPair[pairwiseAlignIndex]) && isalpha(tempAln[fullAlignIndex])
 			   && isalpha(candPair[pairwiseAlignIndex])){
 				//  the template and candidate pairwise and template aligned have characters
@@ -358,6 +359,7 @@ void Nast::regapSequences(){	//This is essentially part B in Fig 2. of DeSantis 
 		}												//	2 of Desantis et al.
 
 		candidateSeq->setAligned(candAln);
+	//cout << "here" << endl;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Nast", "regapSequences");
