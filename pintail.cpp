@@ -92,7 +92,7 @@ int Pintail::doPrep() {
 		m->mothurOut("Getting conservation... "); cout.flush();
 		if (consfile == "") { 
 			m->mothurOut("Calculating probability of conservation for your template sequences.  This can take a while...  I will output the frequency of the highest base in each position to a .freq file so that you can input them using the conservation parameter next time you run this command.  Providing the .freq file will improve speed.    "); cout.flush();
-			probabilityProfile = decalc->calcFreq(templateSeqs, outputDir + m->getSimpleName(templateFileName)); 
+			probabilityProfile = decalc->calcFreq(templateSeqs, templateFileName); 
 			if (m->control_pressed) {  return 0;  }
 			m->mothurOut("Done."); m->mothurOutEndLine();
 		}else				{   probabilityProfile = readFreq();	m->mothurOut("Done.");		  }
@@ -170,13 +170,13 @@ int Pintail::doPrep() {
 			string noOutliers, outliers;
 			
 			if ((!filter) && (seqMask == "")) {
-				noOutliers = outputDir + m->getRootName(m->getSimpleName(templateFileName)) + "pintail.quan";
+				noOutliers = templateFileName + "pintail.quan";
 			}else if ((!filter) && (seqMask != "")) { 
-				noOutliers = outputDir + m->getRootName(m->getSimpleName(templateFileName)) + "pintail.masked.quan";
+				noOutliers =templateFileName + "pintail.masked.quan";
 			}else if ((filter) && (seqMask != "")) { 
-				noOutliers = outputDir + m->getRootName(m->getSimpleName(templateFileName)) + "pintail.filtered." + m->getSimpleName(m->getRootName(fastafile)) + "masked.quan";
+				noOutliers = templateFileName + "pintail.filtered." + m->getSimpleName(m->getRootName(fastafile)) + "masked.quan";
 			}else if ((filter) && (seqMask == "")) { 
-				noOutliers = outputDir + m->getRootName(m->getSimpleName(templateFileName)) + "pintail.filtered." + m->getSimpleName(m->getRootName(fastafile)) + "quan";
+				noOutliers = templateFileName + "pintail.filtered." + m->getSimpleName(m->getRootName(fastafile)) + "quan";
 			}
 
 			decalc->removeObviousOutliers(quantilesMembers, templateSeqs.size());

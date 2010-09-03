@@ -48,6 +48,7 @@ public:
 	set<string> labels; //holds labels to be used
 	vector<string> Treenames;
 	map<string, string> names;
+	string saveNextLabel;
 	
 	
 	string getPhylipFile();

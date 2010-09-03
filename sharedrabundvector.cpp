@@ -73,8 +73,12 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 		for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
 		lookup.clear();
 		
+		if (globaldata->saveNextLabel == "") {  f >> label;  }
+		else { label = globaldata->saveNextLabel; }
+		
 		//read in first row since you know there is at least 1 group.
-		f >> label >> groupN >> num;
+		f >> groupN >> num;
+
 		holdLabel = label;
 		
 		//add new vector to lookup
@@ -98,13 +102,12 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 			//numSeqs += inputData;
 			//numBins++;
 			if (inputData > maxRank) { maxRank = inputData; }
-			
 		}
 		
 		m->gobble(f);
 		
-		if (f.eof() != true) { f >> nextLabel; }
-		
+		if (!(f.eof())) { f >> nextLabel; }
+	
 		//read the rest of the groups info in
 		while ((nextLabel == holdLabel) && (f.eof() != true)) {
 			f >> groupN >> num;
@@ -133,9 +136,8 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 				
 			if (f.eof() != true) { f >> nextLabel; }
 		}
-		
-		//put file pointer back since you are now at a new distance label
-		for (int i = 0; i < nextLabel.length(); i++) { f.unget();  }
+	
+		globaldata->saveNextLabel = nextLabel;
 	
 		if (globaldata->gGroupmap == NULL) { globaldata->gGroupmap = groupmap;  }
 		

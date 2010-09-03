@@ -315,7 +315,7 @@ int TrimSeqsCommand::execute(){
 				
 				if (m->control_pressed) {  return 0; }
 		#else
-				driverCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, groupFile, fastaFileNames, qualFileNames, lines[0], qlines[0]);
+				driverCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, groupFile, fastaFileNames, qualFileNames, lines[0], qLines[0]);
 				
 				for (int j = 0; j < fastaFileNames.size(); j++) {
 					rename((fastaFileNames[j] + toString(j) + ".temp").c_str(), fastaFileNames[j].c_str());

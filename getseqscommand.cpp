@@ -206,8 +206,9 @@ int GetSeqsCommand::execute(){
 //**********************************************************************************************************************
 int GetSeqsCommand::readFasta(){
 	try {
-		if (outputDir == "") { outputDir += m->hasPath(fastafile); }
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "pick" +  m->getExtension(fastafile);
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + "pick" +  m->getExtension(fastafile);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -252,8 +253,9 @@ int GetSeqsCommand::readFasta(){
 //**********************************************************************************************************************
 int GetSeqsCommand::readList(){
 	try {
-		if (outputDir == "") { outputDir += m->hasPath(listfile); }
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + "pick" +  m->getExtension(listfile);
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(listfile)) + "pick" +  m->getExtension(listfile);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -323,8 +325,9 @@ int GetSeqsCommand::readList(){
 //**********************************************************************************************************************
 int GetSeqsCommand::readName(){
 	try {
-		if (outputDir == "") { outputDir += m->hasPath(namefile); }
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(namefile)) + "pick" +  m->getExtension(namefile);
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(namefile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(namefile)) + "pick" +  m->getExtension(namefile);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -416,8 +419,9 @@ int GetSeqsCommand::readName(){
 //**********************************************************************************************************************
 int GetSeqsCommand::readGroup(){
 	try {
-		if (outputDir == "") { outputDir += m->hasPath(groupfile); }
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(groupfile)) + "pick" + m->getExtension(groupfile);
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(groupfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(groupfile)) + "pick" + m->getExtension(groupfile);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -462,8 +466,9 @@ int GetSeqsCommand::readGroup(){
 //**********************************************************************************************************************
 int GetSeqsCommand::readTax(){
 	try {
-		if (outputDir == "") { outputDir += m->hasPath(taxfile); }
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(taxfile)) + "pick" + m->getExtension(taxfile);
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(taxfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(taxfile)) + "pick" + m->getExtension(taxfile);
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
@@ -507,8 +512,9 @@ int GetSeqsCommand::readTax(){
 //alignreport file has a column header line then all other lines contain 16 columns.  we just want the first column since that contains the name
 int GetSeqsCommand::readAlign(){
 	try {
-		if (outputDir == "") { outputDir += m->hasPath(alignfile); }
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(alignfile)) + "pick.align.report";
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(alignfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(alignfile)) + "pick.align.report";
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		

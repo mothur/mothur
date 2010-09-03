@@ -362,7 +362,7 @@ int FilterSeqsCommand::filterSequences() {
 				
 				if (m->control_pressed) {  return 1; }
 		#else
-				numFastaSeqs = driverRunFilter(filter, filteredFasta, fastafileNames[s], lines[0]);
+				int numFastaSeqs = driverRunFilter(filter, filteredFasta, fastafileNames[s], lines[0]);
 				numSeqs += numFastaSeqs;
 
 				if (m->control_pressed) {  return 1; }
@@ -662,7 +662,7 @@ string FilterSeqsCommand::createFilter() {
 				
 				if (m->control_pressed) {  return filterString; }
 		#else
-				numFastaSeqs = driverCreateFilter(F, fastafileNames[s], lines[0]);
+				int numFastaSeqs = driverCreateFilter(F, fastafileNames[s], lines[0]);
 				numSeqs += numFastaSeqs;
 				if (m->control_pressed) {  return filterString; }
 		#endif

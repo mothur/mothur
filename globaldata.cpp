@@ -67,6 +67,7 @@ GlobalData::GlobalData() {
 	gTreemap = NULL;
 	gSequenceDB = NULL;
 	nameMap = NULL;
+	saveNextLabel = "";
 }
 /*******************************************************/
 
@@ -87,6 +88,7 @@ void GlobalData::clear() {
 	sharedfile		=	"";
 	relAbundfile	=	"";
 	format = "";
+	saveNextLabel = "";
 }
 
 
