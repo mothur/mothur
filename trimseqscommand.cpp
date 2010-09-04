@@ -224,9 +224,8 @@ int TrimSeqsCommand::execute(){
 		string scrapSeqFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "scrap.fasta";
 		outputNames.push_back(scrapSeqFile);
 		string trimQualFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "trim.qual";
-		outputNames.push_back(trimQualFile);
 		string scrapQualFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "scrap.qual";
-		outputNames.push_back(scrapQualFile);
+		if (qFileName != "") {  outputNames.push_back(trimQualFile); outputNames.push_back(scrapQualFile);  }
 		string groupFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "groups";
 		
 		vector<string> fastaFileNames;
