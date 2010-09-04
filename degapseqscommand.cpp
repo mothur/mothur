@@ -131,7 +131,9 @@ int DegapSeqsCommand::execute(){
 			m->openInputFile(fastaFileNames[s], inFASTA);
 			
 			ofstream outFASTA;
-			string degapFile = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "ng.fasta";
+			string tempOutputDir = outputDir;
+			if (outputDir == "") { tempOutputDir = m->hasPath(fastaFileNames[s]); }
+			string degapFile = tempOutputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "ng.fasta";
 			m->openOutputFile(degapFile, outFASTA);
 			
 			while(!inFASTA.eof()){

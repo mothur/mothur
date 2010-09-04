@@ -50,8 +50,6 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
-			globaldata->newRead();
-			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
@@ -88,12 +86,12 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
 			if (phylipfile == "not open") { abort = true; }
 			else if (phylipfile == "not found") { phylipfile = ""; }	
-			else {  format = "phylip";  globaldata->setPhylipFile(phylipfile);	}
+			else {  globaldata->newRead(); format = "phylip";  globaldata->setPhylipFile(phylipfile);	}
 			
 			columnfile = validParameter.validFile(parameters, "column", true);
 			if (columnfile == "not open") { abort = true; }	
 			else if (columnfile == "not found") { columnfile = ""; }
-			else {  format = "column"; globaldata->setColumnFile(columnfile);	}
+			else {  globaldata->newRead(); format = "column"; globaldata->setColumnFile(columnfile);	}
 			
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }	

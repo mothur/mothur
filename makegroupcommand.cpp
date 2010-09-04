@@ -37,10 +37,6 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
-			
-
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
@@ -88,6 +84,9 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 				if (fastaFileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
 			}
 			
+			//if the user changes the output directory command factory will send this info to us in the output parameter 
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
+			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { m->mothurOut("groups is a required parameter for the make.group command."); m->mothurOutEndLine(); abort = true;  }
 			else { m->splitAtDash(groups, groupsNames);	}
@@ -129,6 +128,10 @@ void MakeGroupCommand::help(){
 int MakeGroupCommand::execute(){
 	try {
 		if (abort == true) {	return 0;	}
+		
+		if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[0]); }
+		
+		filename = outputDir + filename;
 		
 		ofstream out;
 		m->openOutputFile(filename, out);
