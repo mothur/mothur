@@ -517,7 +517,7 @@ int HCluster::combineFile() {
 		//in = fopen(distfile.c_str(), "rb");
 	
 		ifstream in;
-		m->openInputFile(distfile, in);
+		m->openInputFile(distfile, in, "no error");
 		
 		int first, second;
 		float dist;
@@ -741,7 +741,7 @@ int HCluster::processFile() {
 		float distance;
 		
 		ifstream in;
-		m->openInputFile(distfile, in);
+		m->openInputFile(distfile, in, "no error");
 		
 		ofstream out;
 		string outTemp = distfile + ".temp";

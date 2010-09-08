@@ -264,11 +264,11 @@ int HeatMapSimCommand::runCommandShared() {
 		//you have groups
 		read = new ReadOTUFile(globaldata->inputFileName);	
 		read->read(&*globaldata); 
-			
+				
 		input = globaldata->ginput;
 		lookup = input->getSharedRAbundVectors();
 		string lastLabel = lookup[0]->getLabel();
-		
+			
 		if (lookup.size() < 2) { m->mothurOut("You have not provided enough valid groups.  I cannot run the command."); m->mothurOutEndLine(); return 0;}
 				
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
@@ -315,7 +315,8 @@ int HeatMapSimCommand::runCommandShared() {
 
 			//get next line to process
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
-			lookup = input->getSharedRAbundVectors();				
+			lookup = input->getSharedRAbundVectors();
+
 		}
 		
 			
@@ -352,10 +353,10 @@ int HeatMapSimCommand::runCommandShared() {
 			
 		//reset groups parameter
 		globaldata->Groups.clear();  
-		
+			
 		delete input;  globaldata->ginput = NULL;
 		delete read;
-
+	
 		return 0;
 	}
 	catch(exception& e) {

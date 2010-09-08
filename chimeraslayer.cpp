@@ -67,10 +67,11 @@ int ChimeraSlayer::doPrep() {
 	
 		//generate the kmerdb to pass to maligner
 		if (searchMethod == "kmer") { 
-			string rightTemplateFileName = "right." + templateFileName;
+			string templatePath = m->hasPath(templateFileName);
+			string rightTemplateFileName = templatePath + "right." + m->getRootName(m->getSimpleName(templateFileName));
 			databaseRight = new KmerDB(rightTemplateFileName, kmerSize);
 				
-			string leftTemplateFileName = "left." + templateFileName;
+			string leftTemplateFileName = templatePath + "left." + m->getRootName(m->getSimpleName(templateFileName));
 			databaseLeft = new KmerDB(leftTemplateFileName, kmerSize);	
 		#ifdef USE_MPI
 			for (int i = 0; i < templateSeqs.size(); i++) {

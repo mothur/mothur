@@ -101,14 +101,15 @@ insert_argv(char **argv, int src, int dest)
 
     if (src > dest) {
         for (i = src; i > dest; i--)
-            argv[i] = argv[i-1];
+            argv[i] = argv[i-1];  //printf("%s\n", argv[i]);
     }
     if (src < dest) {
         for (i = src; i < dest; i++)
-            argv[i] = argv[i+1];
+            argv[i] = argv[i+1]; //printf("%s\n", argv[i]);
     }
 
     argv[dest] = tmp;
+	//printf("%s\n", argv[dest]);
 
     return 0;
 }
@@ -122,10 +123,13 @@ search_longopt(char *arg, struct option *longopts)
         ;
 
     for (i = 0; longopts[i].name; i++) {
+	//printf("%d\t%s\t", i, longopts[i].name); 
+	//printf("%s\n", arg);
         if (strncmp(arg, longopts[i].name, len) == 0) {
             if (found != -1)
                 return -1;      /* found some candidate */
             found = i;
+	//printf("found = %d\n", found);
         }
     }
     return found;

@@ -26,6 +26,8 @@ InputData::InputData(string fName, string f) : format(f){
 
 InputData::~InputData(){
 	fileHandle.close();
+	globaldata = GlobalData::getInstance();
+	globaldata->saveNextLabel = "";
 //	delete output;
 	
 }

@@ -366,11 +366,11 @@ int SplitAbundCommand::writeList(ListVector* thisList) {
 			
 			string rare = outputDir + m->getRootName(m->getSimpleName(listfile))  + "rare.list";
 			m->openOutputFileAppend(rare, rout);
-			outputNames.push_back(rare);
+			//outputNames.push_back(rare);
 			
 			string abund = outputDir + m->getRootName(m->getSimpleName(listfile))  + "abund.list";
 			m->openOutputFileAppend(abund, aout);
-			outputNames.push_back(abund);
+			//outputNames.push_back(abund);
 
 			if (rareNames.size() != 0)	{  rout << thisList->getLabel() << '\t' << numRareBins << '\t';		}
 			if (abundNames.size() != 0) {	aout << thisList->getLabel() << '\t' << numAbundBins << '\t';	}

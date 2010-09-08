@@ -70,6 +70,8 @@ NJ_handle_args(int argc,
   
   static NJ_ARGS nj_args;
   int option_index, c;
+  
+  optind = 0;  //neccasary to read in arguments if code is run more than once
 
   struct option NJ_long_options[] = {
 
@@ -139,7 +141,8 @@ NJ_handle_args(int argc,
     if(c == -1) {
       break;
     }
-
+//printf("%d\t%d\n", option_index, argc);
+//for (int red = 0; red < argc; red++) { printf("%s\n", argv[red]); }
     switch(c) {
 
     case 0:
