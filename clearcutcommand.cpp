@@ -231,7 +231,7 @@ int ClearcutCommand::execute() {
 		if (jukes)				{  char* temp = new char[7];  strcpy(temp, "--jukes");  cPara.push_back(temp);		}
 		if (kimura)				{ char* temp = new char[8];  strcpy(temp, "--kimura");  cPara.push_back(temp);		}
 		if (matrixout != "")	{  
-			string tempMatrix =  "--matrixout=" + matrixout; 
+			string tempMatrix =  "--matrixout=" + outputDir + matrixout; 
 			char* temp = new char[tempMatrix.length()];
 			strcpy(temp, tempMatrix.c_str());
 			cPara.push_back(temp);
@@ -262,7 +262,7 @@ int ClearcutCommand::execute() {
 			m->mothurOutEndLine();
 			m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 			m->mothurOut(outputName); m->mothurOutEndLine();
-			if (matrixout != "")	{  m->mothurOut(matrixout); m->mothurOutEndLine();  }
+			if (matrixout != "")	{  m->mothurOut(outputDir+matrixout); m->mothurOutEndLine();  }
 			m->mothurOutEndLine();
 		}
 

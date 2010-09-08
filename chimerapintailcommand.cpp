@@ -131,9 +131,21 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 				}
 
 				ifstream in;
-				int	ableToOpen = m->openInputFile(maskfile, in);
-				if (ableToOpen == 1) { abort = true; }
-				in.close();
+				int	ableToOpen = m->openInputFile(maskfile, in, "no error");
+				if (ableToOpen == 1) { 
+					if (m->getDefaultPath() != "") { //default path is set
+							string tryPath = m->getDefaultPath() + m->getSimpleName(maskfile);
+							m->mothurOut("Unable to open " + maskfile + ". Trying default " + tryPath); m->mothurOutEndLine();
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							maskfile = tryPath;
+					}
+				}
+					in.close();
+					
+				if (ableToOpen == 1) { 
+						m->mothurOut("Unable to open " + maskfile + "."); m->mothurOutEndLine(); 
+						abort = true;
+				}
 			}
 
 			
@@ -158,6 +170,15 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 					bool GoodFile = m->checkReleaseVersion(FileTest, m->getVersion());
 					if (GoodFile) {  
 						m->mothurOut("I found " + tempConsFile + " in your input file directory. I will use it to save time."); m->mothurOutEndLine();  consfile = tempConsFile;  FileTest.close();	
+					}
+				}else {
+					string tempConsFile = m->getDefaultPath() + m->getRootName(m->getSimpleName(templatefile)) + "freq";
+					ifstream FileTest2(tempConsFile.c_str());
+					if(FileTest2){	
+						bool GoodFile = m->checkReleaseVersion(FileTest2, m->getVersion());
+						if (GoodFile) {  
+							m->mothurOut("I found " + tempConsFile + " in your input file directory. I will use it to save time."); m->mothurOutEndLine();  consfile = tempConsFile;  FileTest2.close();	
+						}
 					}
 				}
 			}	
@@ -242,14 +263,34 @@ int ChimeraPintailCommand::execute(){
 				if (GoodFile) {  
 					m->mothurOut("I found " + tempQuan + " in your input file directory. I will use it to save time."); m->mothurOutEndLine();  quanfile = tempQuan;  FileTest.close();	
 				}
+			}else {
+				string tryPath = m->getDefaultPath();
+				string tempQuan = "";
+				if ((!filter) && (maskfile == "")) {
+					tempQuan = tryPath + m->getRootName(m->getSimpleName(templatefile)) + "pintail.quan";
+				}else if ((!filter) && (maskfile != "")) { 
+					tempQuan = tryPath + m->getRootName(m->getSimpleName(templatefile)) + "pintail.masked.quan";
+				}else if ((filter) && (maskfile != "")) { 
+					tempQuan = tryPath + m->getRootName(m->getSimpleName(templatefile)) + "pintail.filtered." + m->getSimpleName(m->getRootName(fastaFileNames[s])) + "masked.quan";
+				}else if ((filter) && (maskfile == "")) { 
+					tempQuan = tryPath + m->getRootName(m->getSimpleName(templatefile)) + "pintail.filtered." + m->getSimpleName(m->getRootName(fastaFileNames[s])) + "quan";
+				}
+				
+				ifstream FileTest2(tempQuan.c_str());
+				if(FileTest2){	
+					bool GoodFile = m->checkReleaseVersion(FileTest2, m->getVersion());
+					if (GoodFile) {  
+						m->mothurOut("I found " + tempQuan + " in your input file directory. I will use it to save time."); m->mothurOutEndLine();  quanfile = tempQuan;  FileTest2.close();	
+					}
+				}
 			}
 			
 			chimera = new Pintail(fastaFileNames[s], templatefile, filter, processors, maskfile, consfile, quanfile, window, increment, outputDir);
 			
 			string outputFileName, accnosFileName;
 			if (maskfile != "") {
-				outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + maskfile + ".pintail.chimeras";
-				accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + maskfile + ".pintail.accnos";
+				outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + m->getSimpleName(m->getRootName(maskfile)) + ".pintail.chimeras";
+				accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + m->getSimpleName(m->getRootName(maskfile)) + ".pintail.accnos";
 			}else {
 				outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "pintail.chimeras";
 				accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "pintail.accnos";
