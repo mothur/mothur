@@ -422,6 +422,13 @@ int DistanceCommand::execute(){
 				remove(outputFile.c_str());
 				outputFile = column;
 			}
+			
+			if (outputDir != "") { 
+				string newOutputName = outputDir + m->getSimpleName(outputFile);
+				rename(outputFile.c_str(), newOutputName.c_str());
+				remove(outputFile.c_str());
+				outputFile = newOutputName;
+			}
 		}
 
 		

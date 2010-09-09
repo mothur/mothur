@@ -174,7 +174,7 @@ int ClearcutCommand::execute() {
 	try {
 		
 		if (abort == true) { return 0; }
-				
+		
 		//prepare filename
 		string outputName = outputDir + m->getRootName(m->getSimpleName(inputFile)) + "tre";
 		
@@ -201,25 +201,14 @@ int ClearcutCommand::execute() {
 		if (shuffle)			{  char* temp = new char[9];  strcpy(temp, "--shuffle");  cPara.push_back(temp);	}
 		if (neighbor)			{  char* temp = new char[10];  strcpy(temp, "--neighbor");  cPara.push_back(temp);	}
 		
-		string tempIn = "";
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-			tempIn += "--in=" + inputFile; 
-		#else
-			tempIn += "--in=\"" + inputFile + "\"";  
-		#endif
-		
+		string tempIn = "--in=" + inputFile;  
 		char* tempI = new char[tempIn.length()];
 		strcpy(tempI, tempIn.c_str());
 		cPara.push_back(tempI);
 		
 		if (stdoutWanted)		{  char* temp = new char[8];  strcpy(temp, "--stdout");  cPara.push_back(temp);	}
 		else{  
-			string tempOut = "";
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-				tempOut += "--out=" + outputName;  
-			#else
-				tempOut += "--out=\"" + outputName + "\""; 
-			#endif
+			string tempOut = "--out=" + outputName;  
 			
 			char* temp = new char[tempOut.length()];
 			strcpy(temp, tempOut.c_str());

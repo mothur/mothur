@@ -465,7 +465,7 @@ NJ_parse_distance_matrix(NJ_ARGS *nj_args) {
     fp = stdin;
   } else {
     fp = fopen(nj_args->infilename, "r");
-    if(!fp) {
+    if(fp==NULL) {
       fprintf(stderr, "Clearcut: Could not open distance matrix: %s\n", nj_args->infilename);
       perror("Clearcut");
       goto XIT_BAD;
