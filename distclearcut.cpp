@@ -78,7 +78,7 @@ NJ_build_distance_matrix(NJ_ARGS *nj_args) {
   /* Read an alignment in FASTA format */
   alignment = 
     NJ_read_fasta(nj_args);
-  
+ 
   if(!alignment) {
     return(NULL);
   }
@@ -91,6 +91,7 @@ NJ_build_distance_matrix(NJ_ARGS *nj_args) {
    * From proteins, we may want to allow users to specify
    * a substitution matrix (feature)
    */
+
   dmat = 
     NJ_compute_dmat(nj_args,
 		    alignment);
@@ -100,7 +101,7 @@ NJ_build_distance_matrix(NJ_ARGS *nj_args) {
   if(!dmat) {
     fprintf(stderr, "Clearcut: Error computing distance matrix\n");
   }
-  
+ 
   /* now free the memory associated with the alignment */
   NJ_free_alignment(alignment);
 
@@ -156,6 +157,7 @@ NJ_compute_dmat(NJ_ARGS *nj_args,
 
   /* allocate val matrix in dmat */
   dmat->val = (float *)calloc(dmat->ntaxa*dmat->ntaxa, sizeof(float));
+
   if(!dmat->val) {
     fprintf(stderr, "Clearcut: Memory allocation error in NJ_compute_dmat()\n");
     return(NULL);
@@ -209,7 +211,7 @@ NJ_compute_dmat(NJ_ARGS *nj_args,
     fprintf(stderr, "Clearcut: Invalid distance correction model.\n");
     return(NULL);
   }
-  
+ 
   return(dmat);
 }
 

@@ -208,7 +208,7 @@ int ListSeqsCommand::readFasta(){
 		ifstream in;
 		m->openInputFile(fastafile, in);
 		string name;
-		
+	
 		while(!in.eof()){
 			
 			if (m->control_pressed) { in.close(); return 0; }

@@ -13,9 +13,9 @@
 
 CXXFLAGS += -O3
 
-MOTHUR_FILES = "\"../Release\""
+MOTHUR_FILES = "\"Enter_your_default_path_here\""
 
-RELEASE_DATE = "\"8/30/2010\""
+RELEASE_DATE = "\"9/9/2010\""
 VERSION = "\"1.13.0\""
 
 CXXFLAGS += -DRELEASE_DATE=${RELEASE_DATE} -DVERSION=${VERSION}
