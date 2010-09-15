@@ -28,6 +28,11 @@ public:
 	void help();
 	
 private:
+	struct linePair {
+		int start;
+		int end;
+	};
+	vector<linePair> lines;
 	GlobalData* globaldata;
 	ReadOTUFile* read;
 	vector<Calculator*> sumCalculators;	
@@ -39,9 +44,10 @@ private:
 	string label, calc, groups;
 	vector<string>  Estimators, Groups, outputNames;
 	vector<SharedRAbundVector*> lookup;
-	string outputFileName, format, outAllFileName, outputDir;
-	ofstream outputFileHandle, outAll;
-	int process(vector<SharedRAbundVector*>);
+	string format, outputDir;
+	int numGroups, processors;
+	int process(vector<SharedRAbundVector*>, string, string);
+	int driver(vector<SharedRAbundVector*>, int, int, string, string);
 
 };
 

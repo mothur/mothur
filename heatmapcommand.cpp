@@ -109,7 +109,7 @@ void HeatMapCommand::help(){
 		m->mothurOut("The group names are separated by dashes. The label parameter allows you to select what distance levels you would like a heatmap created for, and are also separated by dashes.\n");
 		m->mothurOut("The fontsize parameter allows you to adjust the font size of the picture created, default=24.\n");
 		m->mothurOut("The heatmap.bin command should be in the following format: heatmap.bin(groups=yourGroups, sorted=yourSorted, label=yourLabels).\n");
-		m->mothurOut("Example heatmap.bin(groups=A-B-C, sorted=F, scale=log10).\n");
+		m->mothurOut("Example heatmap.bin(groups=A-B-C, sorted=none, scale=log10).\n");
 		m->mothurOut("The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n");
 		m->mothurOut("The default value for scale is log10; your other options are log2 and linear.\n");
 		m->mothurOut("The heatmap.bin command outputs a .svg file for each label you specify.\n");
