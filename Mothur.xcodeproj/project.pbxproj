@@ -61,6 +61,8 @@
 		A7825503116519F70002E2DD /* chimerabellerophoncommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimerabellerophoncommand.cpp; sourceTree = "<group>"; };
 		A78434881162224F00100BE0 /* chimeraccodecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraccodecommand.h; sourceTree = "<group>"; };
 		A78434891162224F00100BE0 /* chimeraccodecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeraccodecommand.cpp; sourceTree = "<group>"; };
+		A798626D1240D91B005FC847 /* normalizesharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = normalizesharedcommand.h; sourceTree = "<group>"; };
+		A798626E1240D91B005FC847 /* normalizesharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = normalizesharedcommand.cpp; sourceTree = "<group>"; };
 		A7AE6302121C3408001DE6FC /* sharedrabundfloatvector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedrabundfloatvector.h; sourceTree = "<group>"; };
 		A7AE6303121C3408001DE6FC /* sharedrabundfloatvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedrabundfloatvector.cpp; sourceTree = "<group>"; };
 		A7BBDA7B11B5694E006E6551 /* classifyotucommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = classifyotucommand.h; sourceTree = "<group>"; };
@@ -468,7 +470,7 @@
 		A7DA217B113FECD400BF472F /* whittaker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = whittaker.cpp; sourceTree = "<group>"; };
 		A7DA217C113FECD400BF472F /* whittaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = whittaker.h; sourceTree = "<group>"; };
 		A7DF0AD4121EBB14004A03EA /* clearcut.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clearcut.h; sourceTree = "<group>"; };
-		A7DF0AD5121EBB14004A03EA /* cmdargs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cmdargs.cpp; sourceTree = "<group>"; };
+		A7DF0AD5121EBB14004A03EA /* cmdargs.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; path = cmdargs.cpp; sourceTree = "<group>"; };
 		A7DF0AD6121EBB14004A03EA /* cmdargs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cmdargs.h; sourceTree = "<group>"; };
 		A7DF0AD7121EBB14004A03EA /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
 		A7DF0AD8121EBB14004A03EA /* dayhoff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dayhoff.h; sourceTree = "<group>"; };
@@ -791,6 +793,8 @@
 				A7DA209D113FECD400BF472F /* mgclustercommand.h */,
 				A7DA20AC113FECD400BF472F /* nocommands.cpp */,
 				A7DA20AD113FECD400BF472F /* nocommands.h */,
+				A798626D1240D91B005FC847 /* normalizesharedcommand.h */,
+				A798626E1240D91B005FC847 /* normalizesharedcommand.cpp */,
 				A7DA20B8113FECD400BF472F /* otuhierarchycommand.cpp */,
 				A7DA20B9113FECD400BF472F /* otuhierarchycommand.h */,
 				A7DA20BC113FECD400BF472F /* parselistscommand.cpp */,

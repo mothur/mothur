@@ -85,6 +85,7 @@
 #include "sensspeccommand.h"
 #include "sffinfocommand.h"
 #include "seqerrorcommand.h"
+#include "normalizesharedcommand.h"
 
 /*******************************************************/
 
@@ -174,6 +175,7 @@ CommandFactory::CommandFactory(){
 	commands["degap.seqs"]			= "degap.seqs";
 	commands["get.relabund"]		= "get.relabund";
 	commands["sffinfo"]				= "sffinfo";
+	commands["normalize.shared"]	= "normalize.shared";
 	commands["classify.seqs"]		= "MPIEnabled"; 
 	commands["dist.seqs"]			= "MPIEnabled";
 	commands["filter.seqs"]			= "MPIEnabled";
@@ -306,6 +308,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "sens.spec")				{	command = new SensSpecCommand(optionString);				}
 		else if(commandName == "seq.error")				{	command = new SeqErrorCommand(optionString);				}
 		else if(commandName == "sffinfo")				{	command = new SffInfoCommand(optionString);					}
+		else if(commandName == "normalize.shared")		{	command = new NormalizeSharedCommand(optionString);			}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
