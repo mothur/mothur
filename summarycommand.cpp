@@ -100,7 +100,7 @@ SummaryCommand::SummaryCommand(string option)  {
 			temp = validParameter.validFile(parameters, "size", false);			if (temp == "not found") { temp = "0"; }
 			convert(temp, size); 
 			
-			temp = validParameter.validFile(parameters, "groupmode", false);		if (temp == "not found") { temp = "F"; }
+			temp = validParameter.validFile(parameters, "groupmode", false);		if (temp == "not found") { temp = "T"; }
 			groupMode = m->isTrue(temp);
 			
 	
@@ -123,7 +123,7 @@ void SummaryCommand::help(){
 		m->mothurOut("Example summary.single(label=unique-.01-.03, calc=sobs-chao-ace-jack-bootstrap-shannon-npshannon-simpson).\n");
 		validCalculator->printCalc("summary", cout);
 		m->mothurOut("The default value calc is sobs-chao-ace-jack-shannon-npshannon-simpson\n");
-		m->mothurOut("If you are running summary.single with a shared file and would like your summary results collated in one file, set groupmode=t. (Default=False).\n");
+		m->mothurOut("If you are running summary.single with a shared file and would like your summary results collated in one file, set groupmode=t. (Default=true).\n");
 		m->mothurOut("The label parameter is used to analyze specific labels in your input.\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabels).\n\n");
 	}

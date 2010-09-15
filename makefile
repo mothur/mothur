@@ -13,7 +13,7 @@
 
 CXXFLAGS += -O3
 
-MOTHUR_FILES = "\"Enter_your_default_path_here\""
+MOTHUR_FILES = "\"../Release\""
 
 RELEASE_DATE = "\"9/9/2010\""
 VERSION = "\"1.13.0\""
