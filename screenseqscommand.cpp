@@ -220,10 +220,10 @@ int ScreenSeqsCommand::execute(){
 				numSeqsPerProcessor = numFastaSeqs / processors;
 				int startIndex =  pid * numSeqsPerProcessor;
 				if(pid == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - pid * numSeqsPerProcessor; 	}
-				
+			cout << pid << '\t' << numSeqsPerProcessor << '\t' << 	startIndex << endl;
 				//align your part
 				driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPIGood, outMPIBadAccnos, MPIPos, badSeqNames);
-
+			cout << pid << " done" << endl;
 				if (m->control_pressed) { MPI_File_close(&inMPI);  MPI_File_close(&outMPIGood);  MPI_File_close(&outMPIBadAccnos);  return 0; }
 
 				for (int i = 1; i < processors; i++) {
@@ -253,10 +253,10 @@ int ScreenSeqsCommand::execute(){
 				numSeqsPerProcessor = numFastaSeqs / processors;
 				int startIndex =  pid * numSeqsPerProcessor;
 				if(pid == (processors - 1)){	numSeqsPerProcessor = numFastaSeqs - pid * numSeqsPerProcessor; 	}
-				
+		cout << pid << '\t' << numSeqsPerProcessor << '\t' << 	startIndex << endl;		
 				//align your part
 				driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPIGood, outMPIBadAccnos, MPIPos, badSeqNames);
-
+cout << pid << " done" << endl;
 				if (m->control_pressed) { MPI_File_close(&inMPI);  MPI_File_close(&outMPIGood);  MPI_File_close(&outMPIBadAccnos); return 0; }
 				
 				//send bad list	
