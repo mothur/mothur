@@ -347,10 +347,10 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 			if ((pos == -1) || (pos >= filePos->end)) { break; }
 			
 			//report progress
-			if((count) % 100 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+			//if((count) % 100 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
 		}
 		//report progress
-		if((count) % 100 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+		//if((count) % 100 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
 		
 		in.close();
 		

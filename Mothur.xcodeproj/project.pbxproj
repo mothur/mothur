@@ -486,6 +486,9 @@
 		A7DF0AE2121EBB14004A03EA /* prng.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = prng.h; sourceTree = "<group>"; };
 		A7E8338B115BBDAA00739EC4 /* parsesffcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parsesffcommand.cpp; sourceTree = "<group>"; };
 		A7E8338C115BBDAA00739EC4 /* parsesffcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parsesffcommand.h; sourceTree = "<group>"; };
+		A7F6C8E1124229F900299875 /* fisher2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fisher2.c; sourceTree = "<group>"; };
+		A7F6C8E2124229F900299875 /* fisher2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fisher2.h; sourceTree = "<group>"; };
+		A7F6C8E3124229F900299875 /* metastats2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = metastats2.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -537,6 +540,7 @@
 				A7DA2082113FECD400BF472F /* inputdata.h */,
 				A7DA208B113FECD400BF472F /* libshuff.cpp */,
 				A7DA208C113FECD400BF472F /* libshuff.h */,
+				A7F6C8DC1242299300299875 /* metastatsource */,
 				A7DA209E113FECD400BF472F /* mothur.cpp */,
 				A7DA209F113FECD400BF472F /* mothur.h */,
 				A7DA20A0113FECD400BF472F /* mothurout.cpp */,
@@ -1029,6 +1033,16 @@
 				A7DF0AE1121EBB14004A03EA /* prng.cpp */,
 			);
 			name = clearcutsource;
+			sourceTree = "<group>";
+		};
+		A7F6C8DC1242299300299875 /* metastatsource */ = {
+			isa = PBXGroup;
+			children = (
+				A7F6C8E2124229F900299875 /* fisher2.h */,
+				A7F6C8E1124229F900299875 /* fisher2.c */,
+				A7F6C8E3124229F900299875 /* metastats2.c */,
+			);
+			name = metastatsource;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

@@ -180,7 +180,9 @@ int ClearcutCommand::execute() {
 		
 		vector<char*> cPara;
 		
-		char* tempClearcut = new char[8];  strcpy(tempClearcut, "clearcut");  cPara.push_back(tempClearcut);
+		char* tempClearcut = new char[8];  
+		strcpy(tempClearcut, "clearcut"); 
+		cPara.push_back(tempClearcut);
 				
 		//you gave us a distance matrix
 		if (phylipfile != "") {  char* temp = new char[10];  strcpy(temp, "--distance");  cPara.push_back(temp);	}
