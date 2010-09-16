@@ -16,6 +16,7 @@
 
 InputData::InputData(string fName, string f) : format(f){
 	m = MothurOut::getInstance();
+	globaldata = GlobalData::getInstance();
 	m->openInputFile(fName, fileHandle);
 	filename = fName;
 	
@@ -37,6 +38,7 @@ InputData::~InputData(){
 InputData::InputData(string fName, string orderFileName, string f) : format(f){
 	try {
 		m = MothurOut::getInstance();
+		globaldata = GlobalData::getInstance();
 		ifstream ofHandle;
 		m->openInputFile(orderFileName, ofHandle);
 		string name;
@@ -453,7 +455,8 @@ vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(string label){
 		string  thisLabel;
 		
 		m->openInputFile(filename, in);
-		
+		globaldata->saveNextLabel = "";
+	
 		if(in){
 			if (format == "sharedfile")  {
 				while (in.eof() != true) {
@@ -461,6 +464,7 @@ vector<SharedRAbundVector*> InputData::getSharedRAbundVectors(string label){
 					SharedRAbundVector* SharedRAbund = new SharedRAbundVector(in);
 					if (SharedRAbund != NULL) {
 						thisLabel = SharedRAbund->getLabel();
+					
 						//if you are at the last label
 						if (thisLabel == label) {  in.close(); return SharedRAbund->getSharedRAbundVectors();  }
 						else {
@@ -536,6 +540,7 @@ vector<SharedRAbundFloatVector*> InputData::getSharedRAbundFloatVectors(string l
 		string  thisLabel;
 		
 		m->openInputFile(filename, in);
+		globaldata->saveNextLabel = "";
 		
 		if(in){
 			if (format == "sharedfile")  {

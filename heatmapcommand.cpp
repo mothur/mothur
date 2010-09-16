@@ -184,8 +184,9 @@ int HeatMapCommand::execute(){
 				
 				if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 					string saveLabel = lookup[0]->getLabel();
-				
+			
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
+			
 					lookup = input->getSharedRAbundVectors(lastLabel);
 					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 					

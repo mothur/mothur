@@ -493,12 +493,16 @@ string MothurOut::getFullPathName(string fileName){
 				if (path.rfind("./") == -1) { return fileName; } //already complete name
 				else { newFileName = fileName.substr(fileName.rfind("./")+2); } //save the complete part of the name
 				
-				char* cwdpath = new char[1024];
+				//char* cwdpath = new char[1024];
 
-				size_t size;
-				cwdpath=getcwd(cwdpath,size);
-			
-				cwd = cwdpath;
+				//size_t size;
+				//cwdpath=getcwd(cwdpath,size);
+				//cwd = cwdpath;
+				
+				char *cwdpath = NULL;
+				cwdpath = getcwd(NULL, 0); // or _getcwd
+				if ( cwdpath != NULL) { cwd = cwdpath; }
+				else { cwd = "";  }
 				
 				//rip off first '/'
 				string simpleCWD;
@@ -535,6 +539,7 @@ string MothurOut::getFullPathName(string fileName){
 				
 				newFileName =  "/" +  newFileName;
 				return newFileName;
+		
 			}	
 		#else
 			if (path.find("~") != -1) { //go to home directory
@@ -591,7 +596,7 @@ string MothurOut::getFullPathName(string fileName){
 	}	
 }
 /***********************************************************************/
-
+//no error open
 int MothurOut::openInputFile(string fileName, ifstream& fileHandle, string m){
 	try {
 			//get full path name
