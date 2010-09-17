@@ -343,8 +343,12 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 				count++;
 			}
 			
-			unsigned long int pos = in.tellg();
-			if ((pos == -1) || (pos >= filePos->end)) { break; }
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				unsigned long int pos = in.tellg();
+				if ((pos == -1) || (pos >= filePos->end)) { break; }
+			#else
+				if (in.eof()) { break; }
+			#endif
 			
 			//report progress
 			//if((count) % 100 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}

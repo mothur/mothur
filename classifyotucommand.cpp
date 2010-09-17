@@ -245,7 +245,7 @@ int ClassifyOtuCommand::readNamesFile() {
 		
 		string name, names;
 	
-		while(inNames){
+		while(!inNames.eof()){
 			inNames >> name;			//read from first column  A
 			inNames >> names;		//read from second column  A,B,C,D
 			m->gobble(inNames);
@@ -313,9 +313,10 @@ string ClassifyOtuCommand::findConsensusTaxonomy(int bin, ListVector* thisList, 
 		
 		size = 0;
 		for (int i = 0; i < names.size(); i++) {
-		
+	
 			//if namesfile include the names
 			if (namefile != "") {
+	
 				//is this sequence in the name file - namemap maps seqName -> repSeqName
 				it2 = nameMap.find(names[i]);
 				
@@ -327,7 +328,8 @@ string ClassifyOtuCommand::findConsensusTaxonomy(int bin, ListVector* thisList, 
 					it = taxMap.find(it2->second);
 			
 					if (it == taxMap.end()) { //this name is not in taxonomy file, skip it
-						if (names[i] != it->second) { m->mothurOut(names[i] + " is represented by " +  it2->second + " and is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine(); }
+					
+						if (names[i] != it2->second) { m->mothurOut(names[i] + " is represented by " +  it2->second + " and is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine(); }
 						else {  m->mothurOut(names[i] + " is not in your taxonomy file.  I will not include it in the consensus."); m->mothurOutEndLine(); }
 					}else{
 				
@@ -426,8 +428,9 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 		
 		//for each bin in the list vector
 		for (int i = 0; i < processList->getNumBins(); i++) {
+	
 			conTax  = findConsensusTaxonomy(i, processList, size);
-			
+		
 			if (m->control_pressed) { out.close();  return 0; }
 			
 			//output to new names file

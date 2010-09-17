@@ -439,8 +439,12 @@ int ChimeraSlayerCommand::driver(linePair* filePos, string outputFName, string f
 			}
 			delete candidateSeq;
 			
-			unsigned long int pos = inFASTA.tellg();
-			if ((pos == -1) || (pos >= filePos->end)) { break; }
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				unsigned long int pos = inFASTA.tellg();
+				if ((pos == -1) || (pos >= filePos->end)) { break; }
+			#else
+				if (inFASTA.eof()) { break; }
+			#endif
 			
 			//report progress
 			if((count) % 100 == 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
