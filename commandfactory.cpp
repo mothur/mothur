@@ -86,6 +86,7 @@
 #include "sffinfocommand.h"
 #include "seqerrorcommand.h"
 #include "normalizesharedcommand.h"
+#include "metastatscommand.h"
 
 /*******************************************************/
 
@@ -176,6 +177,7 @@ CommandFactory::CommandFactory(){
 	commands["get.relabund"]		= "get.relabund";
 	commands["sffinfo"]				= "sffinfo";
 	commands["normalize.shared"]	= "normalize.shared";
+	commands["metastats"]			= "metastats";
 	commands["classify.seqs"]		= "MPIEnabled"; 
 	commands["dist.seqs"]			= "MPIEnabled";
 	commands["filter.seqs"]			= "MPIEnabled";
@@ -309,6 +311,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "seq.error")				{	command = new SeqErrorCommand(optionString);				}
 		else if(commandName == "sffinfo")				{	command = new SffInfoCommand(optionString);					}
 		else if(commandName == "normalize.shared")		{	command = new NormalizeSharedCommand(optionString);			}
+		else if(commandName == "metastats")				{	command = new MetaStatsCommand(optionString);				}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;

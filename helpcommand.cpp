@@ -14,6 +14,7 @@
 HelpCommand::HelpCommand(string option)  {
 	
 	validCommands = CommandFactory::getInstance();
+	
 }
 
 //**********************************************************************************************************************

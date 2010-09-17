@@ -348,14 +348,29 @@ string MothurOut::getline(ifstream& fileHandle) {
 }
 /***********************************************************************/
 
+#ifdef USE_COMPRESSION
+inline bool endsWith(string s, const char * suffix){
+  size_t suffixLength = strlen(suffix);
+  return s.size() >= suffixLength && s.substr(s.size() - suffixLength, suffixLength).compare(suffix) == 0;
+}
+#endif
+
 string MothurOut::getRootName(string longName){
 	try {
 	
 		string rootName = longName;
-		
-		if(longName.find_last_of(".") != longName.npos){
-			int pos = longName.find_last_of('.')+1;
-			rootName = longName.substr(0, pos);
+
+#ifdef USE_COMPRESSION
+    if (endsWith(rootName, ".gz") || endsWith(rootName, ".bz2")) {
+      int pos = rootName.find_last_of('.');
+      rootName = rootName.substr(0, pos);
+      cerr << "shortening " << longName << " to " << rootName << "\n";
+    }
+#endif
+
+		if(rootName.find_last_of(".") != rootName.npos){
+			int pos = rootName.find_last_of('.')+1;
+			rootName = rootName.substr(0, pos);
 		}
 
 		return rootName;
@@ -493,16 +508,12 @@ string MothurOut::getFullPathName(string fileName){
 				if (path.rfind("./") == -1) { return fileName; } //already complete name
 				else { newFileName = fileName.substr(fileName.rfind("./")+2); } //save the complete part of the name
 				
-				//char* cwdpath = new char[1024];
+				char* cwdpath = new char[1024];
 
-				//size_t size;
-				//cwdpath=getcwd(cwdpath,size);
-				//cwd = cwdpath;
-				
-				char *cwdpath = NULL;
-				cwdpath = getcwd(NULL, 0); // or _getcwd
-				if ( cwdpath != NULL) { cwd = cwdpath; }
-				else { cwd = "";  }
+				size_t size;
+				cwdpath=getcwd(cwdpath,size);
+			
+				cwd = cwdpath;
 				
 				//rip off first '/'
 				string simpleCWD;
@@ -539,7 +550,6 @@ string MothurOut::getFullPathName(string fileName){
 				
 				newFileName =  "/" +  newFileName;
 				return newFileName;
-		
 			}	
 		#else
 			if (path.find("~") != -1) { //go to home directory
@@ -596,11 +606,34 @@ string MothurOut::getFullPathName(string fileName){
 	}	
 }
 /***********************************************************************/
-//no error open
+
 int MothurOut::openInputFile(string fileName, ifstream& fileHandle, string m){
 	try {
 			//get full path name
 			string completeFileName = getFullPathName(fileName);
+
+#ifdef USE_COMPRESSION
+      // check for gzipped or bzipped file
+      if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
+        string tempName = string(tmpnam(0));
+        mkfifo(tempName.c_str(), 0666);
+        int fork_result = fork();
+        if (fork_result < 0) {
+          cerr << "Error forking.\n";
+          exit(1);
+        } else if (fork_result == 0) {
+          string command = (endsWith(completeFileName, ".gz") ? "zcat " : "bzcat ") + completeFileName + string(" > ") + tempName;
+          cerr << "Decompressing " << completeFileName << " via temporary named pipe " << tempName << "\n";
+          system(command.c_str());
+          cerr << "Done decompressing " << completeFileName << "\n";
+          remove(tempName.c_str());
+          exit(EXIT_SUCCESS);
+        } else {
+          cerr << "waiting on child process " << fork_result << "\n";
+          completeFileName = tempName;
+        }
+      }
+#endif
 
 			fileHandle.open(completeFileName.c_str());
 			if(!fileHandle) {
@@ -620,8 +653,33 @@ int MothurOut::openInputFile(string fileName, ifstream& fileHandle, string m){
 
 int MothurOut::openInputFile(string fileName, ifstream& fileHandle){
 	try {
+
 		//get full path name
 		string completeFileName = getFullPathName(fileName);
+
+#ifdef USE_COMPRESSION
+  // check for gzipped or bzipped file
+  if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
+    string tempName = string(tmpnam(0));
+    mkfifo(tempName.c_str(), 0666);
+    int fork_result = fork();
+    if (fork_result < 0) {
+      cerr << "Error forking.\n";
+      exit(1);
+    } else if (fork_result == 0) {
+      string command = (endsWith(completeFileName, ".gz") ? "zcat " : "bzcat ") + completeFileName + string(" > ") + tempName;
+      cerr << "Decompressing " << completeFileName << " via temporary named pipe " << tempName << "\n";
+      system(command.c_str());
+      cerr << "Done decompressing " << completeFileName << "\n";
+      remove(tempName.c_str());
+      exit(EXIT_SUCCESS);
+    } else {
+      cerr << "waiting on child process " << fork_result << "\n";
+      completeFileName = tempName;
+    }
+  }
+#endif
+
 
 		fileHandle.open(completeFileName.c_str());
 		if(!fileHandle) {
@@ -676,7 +734,27 @@ int MothurOut::openOutputFile(string fileName, ofstream& fileHandle){
 	try { 
 	
 		string completeFileName = getFullPathName(fileName);
-		
+
+#ifdef USE_COMPRESSION
+    // check for gzipped file
+    if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
+      string tempName = string(tmpnam(0));
+      mkfifo(tempName.c_str(), 0666);
+      cerr << "Compressing " << completeFileName << " via temporary named pipe " << tempName << "\n";
+      int fork_result = fork();
+      if (fork_result < 0) {
+        cerr << "Error forking.\n";
+        exit(1);
+      } else if (fork_result == 0) {
+        string command = string(endsWith(completeFileName, ".gz") ?  "gzip" : "bzip2") + " -v > " + completeFileName + string(" < ") + tempName;
+        system(command.c_str());
+        exit(0);
+      } else {
+        completeFileName = tempName;
+      }
+    }
+#endif
+
 		fileHandle.open(completeFileName.c_str(), ios::trunc);
 		if(!fileHandle) {
 			mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();

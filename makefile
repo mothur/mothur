@@ -61,6 +61,15 @@ ifeq  ($(strip $(USEMPI)),yes)
     CXXFLAGS += -DUSE_MPI
 endif
 
+# if you want to enable reading and writing of compressed files, set to yes.
+# The default is no.  this may only work on unix-like systems.
+
+USECOMPRESSION ?= no
+
+ifeq  ($(strip $(USECOMPRESSION)),yes)
+  CXXFLAGS += -DUSE_COMPRESSION
+endif
+
 #
 # INCLUDE directories for mothur
 #
@@ -72,13 +81,16 @@ endif
 #
 
 OBJECTS=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
+OBJECTS+=$(patsubst %.c,%.o,$(wildcard *.c))
 
 mothur : $(OBJECTS)
 	$(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS)
 
 install : mothur
 	cp mothur ../Release/mothur
-
+	
+%.o : %.c %.h
+	$(COMPILE.c) $(OUTPUT_OPTION) $<
 %.o : %.cpp %.h
 	$(COMPILE.cpp) $(OUTPUT_OPTION) $<
 %.o : %.cpp %.hpp

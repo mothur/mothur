@@ -195,7 +195,7 @@ void ClusterSplitCommand::help(){
 		m->mothurOut("The cluster.split command can split your files in 3 ways. Splitting by distance file, by classification, or by classification also using a fasta file. \n");
 		m->mothurOut("For the distance file method, you need only provide your distance file and mothur will split the file into distinct groups. \n");
 		m->mothurOut("For the classification method, you need to provide your distance file and taxonomy file, and set the splitmethod to classify.  \n");
-		m->mothurOut("You will also need to set the taxlevel you want to split by. mothur will split the sequence into distinct taxonomy groups, and split the distance file based on those groups. \n");
+		m->mothurOut("You will also need to set the taxlevel you want to split by. mothur will split the sequences into distinct taxonomy groups, and split the distance file based on those groups. \n");
 		m->mothurOut("For the classification method using a fasta file, you need to provide your fasta file, names file and taxonomy file.  \n");
 		m->mothurOut("You will also need to set the taxlevel you want to split by. mothur will split the sequence into distinct taxonomy groups, and create distance files for each grouping. \n");
 		m->mothurOut("The phylip and column parameter allow you to enter your distance file. \n");

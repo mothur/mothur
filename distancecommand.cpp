@@ -26,7 +26,8 @@ DistanceCommand::DistanceCommand(string option) {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","oldfasta","column", "output", "calc", "countends", "cutoff", "processors", "outputdir","inputdir"};
+			string Array[] =  {"fasta","oldfasta","column", "output", "calc", "countends", "cutoff", "processors", "outputdir","inputdir","compress"};
+
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -114,6 +115,9 @@ DistanceCommand::DistanceCommand(string option) {
 			temp = validParameter.validFile(parameters, "processors", false);	if(temp == "not found"){	temp = "1"; }
 			convert(temp, processors); 
 			
+			temp = validParameter.validFile(parameters, "compress", false);		if(temp == "not found"){  temp = "F"; }
+			convert(temp, compress);
+
 			output = validParameter.validFile(parameters, "output", false);		if(output == "not found"){	output = "column"; }
 			
 			if (((column != "") && (oldfastafile == "")) || ((column == "") && (oldfastafile != ""))) { m->mothurOut("If you provide column or oldfasta, you must provide both."); m->mothurOutEndLine(); abort=true; }
@@ -166,7 +170,7 @@ DistanceCommand::~DistanceCommand(){
 void DistanceCommand::help(){
 	try {
 		m->mothurOut("The dist.seqs command reads a file containing sequences and creates a distance file.\n");
-		m->mothurOut("The dist.seqs command parameters are fasta, oldfasta, column, calc, countends, output, cutoff and processors.  \n");
+		m->mothurOut("The dist.seqs command parameters are fasta, oldfasta, column, calc, countends, output, compress, cutoff and processors.  \n");
 		m->mothurOut("The fasta parameter is required.\n");
 		m->mothurOut("The oldfasta and column parameters allow you to append the distances calculated to the column file.\n");
 		m->mothurOut("The calc parameter allows you to specify the method of calculating the distances.  Your options are: nogaps, onegap or eachgap. The default is onegap.\n");
@@ -174,6 +178,7 @@ void DistanceCommand::help(){
 		m->mothurOut("The cutoff parameter allows you to specify maximum distance to keep. The default is 1.0.\n");
 		m->mothurOut("The output parameter allows you to specify format of your distance matrix. Options are column, lt, and square. The default is column.\n");
 		m->mothurOut("The processors parameter allows you to specify number of processors to use.  The default is 1.\n");
+		m->mothurOut("The compress parameter allows you to indicate that you want the resulting distance file compressed.  The default is false.\n");
 		m->mothurOut("The dist.seqs command should be in the following format: \n");
 		m->mothurOut("dist.seqs(fasta=yourFastaFile, calc=yourCalc, countends=yourEnds, cutoff= yourCutOff, processors=yourProcessors) \n");
 		m->mothurOut("Example dist.seqs(fasta=amazon.fasta, calc=eachgap, countends=F, cutoff= 2.0, processors=3).\n");
@@ -445,6 +450,14 @@ int DistanceCommand::execute(){
 		m->mothurOut(outputFile); m->mothurOutEndLine();
 		m->mothurOutEndLine();
 		m->mothurOut("It took " + toString(time(NULL) - startTime) + " to calculate the distances for " + toString(numSeqs) + " sequences."); m->mothurOutEndLine();
+
+
+		if (m->isTrue(compress)) {
+			m->mothurOut("Compressing..."); m->mothurOutEndLine();
+			m->mothurOut("(Replacing " + outputFile + " with " + outputFile + ".gz)"); m->mothurOutEndLine();
+			system(("gzip -v " + outputFile).c_str());
+		}
+
 		return 0;
 		
 	}

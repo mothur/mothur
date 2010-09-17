@@ -25,6 +25,7 @@ public:
 private:
 	CommandFactory* validCommands;
 	
+	
 private:
 		
 };

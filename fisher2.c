@@ -1,14 +1,5 @@
-#include <stdlib.h>
-#include <stdio.h> 
-#include <math.h>
-//#include "ctest.h" 
+#include "fisher2.h"
 
-
-#include <limits.h> 
-#define SINT_MAX INT_MAX
-
-#define	max(a, b)		((a) < (b) ? (b) : (a))
-#define	min(a, b)		((a) > (b) ? (b) : (a))
 
 static void f2xact(int *nrow, int *ncol, double *table, int *ldtabl,
 		  double *expect, double *percnt, double *emin, double
@@ -34,17 +25,17 @@ static void f6xact(int *nrow, int *irow, int *iflag, int *kyy,
 		   int *key, int *ldkey, int *last, int *ipn);
 static void f7xact(int *nrow, int *imax, int *idif, int *k, int *ks,
 		   int *iflag);
-static void f8xact(int *irow, int *is, int *i1, int *izero, int *new);
+static void f8xact(int *irow, int *is, int *i1, int *izero, int *myNew);
 static double f9xact(int *n, int *mm, int *ir, double *fact);
 static void f10act(int *nrow, int *irow, int *ncol, int *icol,
 		  double *val, int *xmin, double *fact, int *nd,
 		  int *ne, int *m);
-static void f11act(int *irow, int *i1, int *i2, int *new);
+static void f11act(int *irow, int *i1, int *i2, int *myNew);
 static void prterr(int icode, char *mes);
 static int iwork(int iwkmax, int *iwkpt, int number, int itype);
 // void fexact(int *nrow, int *ncol, double *table, int *ldtabl,
 //       double *expect, double *percnt, double *emin, double *prt,
-//       double *pre, /* new in C : */ int *workspace);
+//       double *pre, /* myNew in C : */ int *workspace);
  static void isort(int *n, int *ix);
  static double gammds(double *y, double *p, int *ifault);
  static double alogam(double *x, int *ifault);
@@ -53,11 +44,9 @@ static int iwork(int iwkmax, int *iwkpt, int number, int itype);
 
 
 /* The only public function : */
-void
-fexact(int *nrow, int *ncol, double *table, int *ldtabl,
+void fexact(int *nrow, int *ncol, double *table, int *ldtabl,
        double *expect, double *percnt, double *emin, double *prt,
-       double *pre, /* new in C : */ int *workspace)
-{
+       double *pre, /* myNew in C : */ int *workspace) {
 
 /*
   ALGORITHM 643, COLLECTED ALGORITHMS FROM ACM.
@@ -324,7 +313,7 @@ f2xact(int *nrow, int *ncol, double *table, int *ldtabl,
 {
     /* IMAX is the largest representable int on the machine. */
     const int imax = SINT_MAX;
-//	const int imax = 2147483647; //xx: I DON´T like this, and
+//	const int imax = 2147483647; //xx: I DONÂ¥T like this, and
 // thanks to the hint from Jason Turner I don't do it anymore. (R.D-U).
 
     /* AMISS is a missing value indicator which is returned when the
@@ -1741,31 +1730,31 @@ f7xact(int *nrow, int *imax, int *idif, int *k, int *ks,
   */
 
 void
-f8xact(int *irow, int *is, int *i1, int *izero, int *new)
+f8xact(int *irow, int *is, int *i1, int *izero, int *myNew)
 {
     int i;
 
     /* Parameter adjustments */
-    --new;
+    --myNew;
     --irow;
 
     /* Function Body */
     for (i = 1; i < *i1; ++i)
-	new[i] = irow[i];
+	myNew[i] = irow[i];
 
     for (i = *i1; i <= *izero - 1; ++i) {
 	if (*is >= irow[i + 1])
 	    break;
-	new[i] = irow[i + 1];
+	myNew[i] = irow[i + 1];
     }
 
-    new[i] = *is;
+    myNew[i] = *is;
 
     for(;;) {
 	++i;
 	if (i > *izero)
 	    return;
-	new[i] = irow[i];
+	myNew[i] = irow[i];
     }
 }
 
@@ -1886,16 +1875,16 @@ f10act(int *nrow, int *irow, int *ncol, int *icol, double *val,
   -----------------------------------------------------------------------
   */
 void
-f11act(int *irow, int *i1, int *i2, int *new)
+f11act(int *irow, int *i1, int *i2, int *myNew)
 {
     int i;
 
     /* Parameter adjustments */
-    --new;
+    --myNew;
     --irow;
 
-    for (i = 1; i <= (*i1 - 1); ++i)	new[i] = irow[i];
-    for (i = *i1; i <= *i2; ++i)	new[i] = irow[i + 1];
+    for (i = 1; i <= (*i1 - 1); ++i)	myNew[i] = irow[i];
+    for (i = *i1; i <= *i2; ++i)	myNew[i] = irow[i + 1];
 
     return;
 }
@@ -2163,6 +2152,7 @@ L30:
     return(f + (y - .5) * log(y) - y + a1 +
 	   (((-a2 * z + a3) * z - a4) * z + a5) / y);
 }
+
 
 #endif /* not USING_R */
 
