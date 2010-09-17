@@ -34,7 +34,8 @@ private:
 	Dist* distCalculator;
 	SequenceDB alignDB;
 
-	string countends, output, fastafile, calc, outputDir, oldfastafile, column;
+	string countends, output, fastafile, calc, outputDir, oldfastafile, column, compress;
+
 	int processors, numNewFasta;
 	float cutoff;
 	map<int, int> processIDS;   //end line, processid

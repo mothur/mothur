@@ -1,131 +1,20 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <time.h>
-#include <math.h>
-#include "fisher2.h"
 
-void testp(double *permuted_ttests,int *B,double *permuted,double 
-	   *Imatrix,int *nc,int *nr,int *g,double *Tinitial,double *ps);
-void permute_matrix(double *Imatrix,int *nc,int *nr,double 
-		    *permuted,int *g,double *trial_ts,double *Tinitial,double 
-		    *counter);
-void permute_array(int *array, int n);
-void calc_twosample_ts(double *Pmatrix,int *g,int *nc,int *nr,double 
-		       *Ts,double *Tinitial,double *counter1);
-void meanvar(double *pmatrix,int *g,int *nr,int *nc,double *storage);
-void start(double *Imatrix,int *g,int *nr,int *nc,double *testing,
-			double storage[][9]);
+#include "metastats.h"
 
-int main (int argc, char *argv[]){
+int metastat_main (char* outputFileName, int numRows, int numCols, double threshold, int numPermutations, double** data, int secondGroupingStart){
   
-  int col=-1, row=-1, size,g=0,c=0,i=0,j=0,k,counter=0,lines=0, B=10000;
-  double placeholder=0,min=0, thresh=0.05;
-
-  char arr[10000], str[51], a;
-  char location[41]="jobj.txt", output[41]="out.txt";
+  int size,c=0,i=0,j=0,k,counter=0, bflag=0; 
+  int B=numPermutations;
+  int row = numRows;
+  int col = numCols;
+  int g = secondGroupingStart;
+  double thresh=threshold;
+  double placeholder=0,min=0; 
   
-  for(i=0;i<10000;i++){
-  	arr[i]='q';
-  }
+  char output[1024];
+  strcpy(output, outputFileName);
+  FILE *out;
   
-int u,rflag=0,cflag=0, bflag=0;
-char *filename;
-int numbers;
-double numb;
-extern char *optarg;
-extern int optind, optopt, opterr;
-
-while ((u = getopt(argc, argv, ":r:c:g:b:t:f:o:")) != -1) {
-    switch(u) {
-    case 'r':
-        numbers = atoi(optarg);
-        printf("The number of features/rows is %d.\n", numbers);
-        row = numbers;
-        rflag = 1;
-        break;
-    case 'c':
-        numbers = atoi(optarg);
-        printf("The number of samples/columns is %d.\n", numbers);
-        col = numbers;
-        cflag = 1;
-        break;
-    case 'g':
-        numbers = atoi(optarg);
-        printf("Your g-value is %d.\n", numbers);
-        g = numbers;
-        break;
-    case 'b':
-        numbers = atoi(optarg);
-        printf("The number of permutations is %d\n", numbers);
-        B = numbers;
-        break;
-    case 't':
-        numb = atof(optarg);
-        printf("Threshold is is %lf\n", numb);
-        thresh = numb;
-        break;        
-    case 'f':
-        filename = optarg;
-        printf("filename input is %s\n", filename);
-        strcpy(location,filename);
-        break;
-    case 'o':
-        filename = optarg;
-        printf("filename output %s\n", filename);
-        strcpy(output,filename);
-        break;
-    case ':':
-        printf("-%c without filename\n", optopt);
-        break;
-    case '?':
-        printf("unknown arg %c\n", optopt);
-        break;
-    }
-}
-  
-  FILE *jobj, *out;
-  jobj=fopen(location,"r");
-  
-  if(jobj == NULL){
-    printf("Please don't forget to save your matrix in the active");
-    printf(" directory as \"%s\".\n",location);
-    return 0;
-  }
- 
-  // Gets the first line of samples names and checks for user error.
-  fgets(arr,10000,jobj);
-  
-  for(i=0;i<10000;i++){
-    if(isspace(arr[i])){
-      counter++; }
-  }
-
-  if (cflag == 0) {
-      printf("You didn't tell us how many subjects there are!\n");
-      printf("But we'll still do the analysis as if there are %d subjects.\n\n",col=counter-1);
-  }
-  if (cflag == 1) {
-  	if (col != counter-1){
-  	  printf("We would expect %d subjects, but you said %d.\n",counter-1,col);
-    } 
-  }
-  
-  while((a = fgetc(jobj)) != EOF){
-    if(a == '\n'){
-      lines++; }
-  }
-  
-  if (rflag == 0) {
-      printf("You didn't specify the number of features!\n");
-      printf("But we'll still do the analysis assuming %d features.\n\n", row=lines-1);   
-  }
-  if (rflag == 1) {
-    if ( lines-1 != row ){
-     printf("We would expect %d features, but you said %d.\n",lines-1,row);
-    }
-  }
- 
   if (g>=col || g<=0){
   	printf("Check your g value\n");	
   }
@@ -141,27 +30,15 @@ while ((u = getopt(argc, argv, ":r:c:g:b:t:f:o:")) != -1) {
       storage[i][j]=0; 		
 	}	
   }
-  // Reset file below and create a separate matrix.
-  rewind(jobj);
-  fgets(arr,10000,jobj);
-  
+   
   for(i=0; i<row; i++){
-    fscanf(jobj,"%s",str); 	
     for(j=0; j<col;j++){
-      fscanf(jobj,"%lf",&placeholder);
-      matrix[i][j]=placeholder;
-      if(isalnum(placeholder)!=0){ // check for ""
-      	printf("Your matrix isn't set up properly!\n");
-      	return 0;
-		}
+      matrix[i][j]=data[i][j];
       pmatrix[c]=0; // initializing to zero
       permuted[c]=0;
       c++;
     }
   }
-  
-  fclose(jobj);
-
 
   // Produces the sum of each column
   double total[col],total1=0,total2=0;
@@ -430,22 +307,21 @@ while ((u = getopt(argc, argv, ":r:c:g:b:t:f:o:")) != -1) {
   t = time(NULL);
   local = localtime(&t);
   
-  jobj= fopen(location,"r");
-  fgets(arr,10000,jobj);
-  
-  out = fopen(output,"a+");
+  out = fopen(output,"w");
   
   fprintf(out,"Local time and date of test: %s\n", asctime(local));
   fprintf(out,"# rows = %d, # col = %d, g = %d\n\n",row,col,g);
   if (bflag == 1){
     fprintf(out,"%d permutations\n\n",B);	
   }
+  
+  //output column headings - not really sure... documentation labels 9 columns, there are 10 in the output file
+  //storage 0 = meanGroup1 - line 529, 1 = varGroup1 - line 532, 2 = err rate1 - line 534, 3 = mean of counts group1?? - line 291, 4 = meanGroup2 - line 536, 5 = varGroup2 - line 539, 6 = err rate2 - line 541, 7 = mean of counts group2?? - line 292, 8 = pvalues - line 293
+  fprintf(out, "OTU\tmean(group1)\tvariance(group1)\tstderr(group1)\tmean_of_counts(group1)\tmean(group2)\tvariance(group2)\tstderr(group2)\tmean_of_counts(group1)\tp-value\n");
+    
   for(i=0; i<row; i++){
-    fscanf(jobj,"%s",str); 	
-	fprintf(out,"%s",str);
-	for(k=0;k<col;k++){
-		fscanf(jobj,"%*lf",&placeholder);
-	}
+	fprintf(out,"%d",(i+1));
+	
     for(j=0; j<9;j++){
       fprintf(out,"\t%.12lf",storage[i][j]);
     }
@@ -454,7 +330,7 @@ while ((u = getopt(argc, argv, ":r:c:g:b:t:f:o:")) != -1) {
   
   fprintf(out,"\n \n");
   
-  fclose(jobj);
+ // fclose(jobj);
   fclose(out);
   
   return 0;
@@ -670,3 +546,7 @@ void start(double *Imatrix,int *g,int *nr,int *nc,double *initial,
     initial[i]=fabs(xbardiff/denom);
   }											
 }
+
+
+
+
