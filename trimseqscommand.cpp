@@ -571,9 +571,13 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 				count++;
 			}
 			
-			unsigned long int pos = inFASTA.tellg();
-			if ((pos == -1) || (pos >= line->end)) { break; }
-			
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				unsigned long int pos = inFASTA.tellg();
+				if ((pos == -1) || (pos >= line->end)) { break; }
+			#else
+				if (inFASTA.eof()) { break; }
+			#endif
+				
 			//report progress
 			if((count) % 1000 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
 			

@@ -485,8 +485,12 @@ int FilterSeqsCommand::driverRunFilter(string F, string outputFilename, string i
 				count++;
 			}
 			
-			unsigned long int pos = in.tellg();
-			if ((pos == -1) || (pos >= filePos->end)) { break; }
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				unsigned long int pos = in.tellg();
+				if ((pos == -1) || (pos >= filePos->end)) { break; }
+			#else
+				if (in.eof()) { break; }
+			#endif
 			
 			//report progress
 			if((count) % 100 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
@@ -786,8 +790,12 @@ int FilterSeqsCommand::driverCreateFilter(Filters& F, string filename, linePair*
 					count++;
 			}
 			
-			unsigned long int pos = in.tellg();
-			if ((pos == -1) || (pos >= filePos->end)) { break; }
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				unsigned long int pos = in.tellg();
+				if ((pos == -1) || (pos >= filePos->end)) { break; }
+			#else
+				if (in.eof()) { break; }
+			#endif
 			
 			//report progress
 			if((count) % 100 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}

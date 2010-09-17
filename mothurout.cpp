@@ -276,8 +276,9 @@ int MothurOut::openOutputFileAppend(string fileName, ofstream& fileHandle){
 /***********************************************************************/
 void MothurOut::gobble(istream& f){
 	try {
+		
 		char d;
-		while(isspace(d=f.get()))		{;}
+		while(isspace(d=f.get()))		{ ;}
 		f.putback(d);
 	}
 	catch(exception& e) {
@@ -984,7 +985,7 @@ vector<unsigned long int> MothurOut::divideFile(string filename, int& proc) {
 		//estimate file breaks
 		unsigned long int chunkSize = 0;
 		chunkSize = size / proc;
-	
+
 		//file to small to divide by processors
 		if (chunkSize == 0)  {  proc = 1;	filePos.push_back(size); return filePos;	}
 	
@@ -1002,7 +1003,7 @@ vector<unsigned long int> MothurOut::divideFile(string filename, int& proc) {
 			   char c = in.get();
 			   if (c == '>') {   in.putback(c); newSpot = in.tellg(); break;  }
 			}
-			
+		
 			//there was not another sequence before the end of the file
 			unsigned long int sanityPos = in.tellg();
 
@@ -1017,7 +1018,7 @@ vector<unsigned long int> MothurOut::divideFile(string filename, int& proc) {
 
 		//sanity check filePos
 		for (int i = 0; i < (filePos.size()-1); i++) {
-			if (filePos[(i+1)] <= filePos[i]) {  filePos.erase(filePos.begin()+(i+1)); i--; }
+			if (filePos[(i+1)] <= filePos[i]) {  cout << "erasing " << (i+1) << endl; filePos.erase(filePos.begin()+(i+1)); i--; }
 		}
 
 		proc = (filePos.size() - 1);

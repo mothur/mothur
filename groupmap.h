@@ -21,6 +21,7 @@ public:
 	GroupMap(string);
 	~GroupMap();
 	int readMap();
+	int readDesignMap();
 	int getNumGroups();
 	bool isValidGroup(string);  //return true if string is a valid group
 	string getGroup(string);
