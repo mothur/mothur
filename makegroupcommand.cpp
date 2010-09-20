@@ -78,7 +78,9 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 					}else{  filename += m->getRootName(m->getSimpleName(fastaFileNames[i]));  }
 				}
 				
-				filename += "groups";
+				//prevent giantic file name
+				if (fastaFileNames.size() > 3) { filename = outputDir + "merge.groups"; }
+				else {  filename += "groups";  }
 				
 				//make sure there is at least one valid file left
 				if (fastaFileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }

@@ -198,7 +198,11 @@ int FilterSeqsCommand::execute() {
 		
 		ofstream outFilter;
 		
-		string filterFile = outputDir + filterFileName + ".filter";
+		//prevent giantic file name
+		string filterFile;
+		if (fastafileNames.size() > 3) { filterFile = outputDir + "merge.filter"; }
+		else {  filterFile = outputDir + filterFileName + ".filter";  }
+		
 		m->openOutputFile(filterFile, outFilter);
 		outFilter << filter << endl;
 		outFilter.close();

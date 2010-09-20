@@ -1,6 +1,8 @@
 
 #include "metastats.h"
 
+//The following code has been modified using the original Metastats program from White, J.R., Nagarajan, N. & Pop, M. Statistical methods for detecting differentially abundant features in clinical metagenomic samples. PLoS Comput Biol 5, e1000352 (2009).
+
 int metastat_main (char* outputFileName, int numRows, int numCols, double threshold, int numPermutations, double** data, int secondGroupingStart){
   
   int size,c=0,i=0,j=0,k,counter=0, bflag=0; 

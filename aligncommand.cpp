@@ -182,7 +182,7 @@ AlignCommand::~AlignCommand(){
 void AlignCommand::help(){
 	try {
 		m->mothurOut("The align.seqs command reads a file containing sequences and creates an alignment file and a report file.\n");
-		m->mothurOut("The align.seqs command parameters are template, candidate, search, ksize, align, match, mismatch, gapopen and gapextend.\n");
+		m->mothurOut("The align.seqs command parameters are template, candidate, search, ksize, align, match, mismatch, gapopen, gapextend and processors.\n");
 		m->mothurOut("The template and candidate parameters are required. You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amzon.fasta \n");
 		m->mothurOut("The search parameter allows you to specify the method to find most similar template.  Your options are: suffix, kmer and blast. The default is kmer.\n");
 		m->mothurOut("The align parameter allows you to specify the alignment method to use.  Your options are: gotoh, needleman, blast and noalign. The default is needleman.\n");
