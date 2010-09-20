@@ -26,6 +26,13 @@ public:
 	void help();
 	
 private:
+	struct linePair {
+		int start;
+		int num;
+		linePair(int i, int j) : start(i), num(j) {}
+	};
+	vector<linePair> lines;
+	
 	GlobalData* globaldata;
 	GroupMap* designMap;
 	ReadOTUFile* read;
@@ -34,13 +41,15 @@ private:
 	
 	bool abort, allLines, pickedGroups;
 	set<string> labels; //holds labels to be used
-	string groups, label, outputDir, inputDir, designfile;
-	vector<string> Groups, outputNames;
-	int iters, g;
+	string groups, label, outputDir, inputDir, designfile, sets;
+	vector<string> Groups, outputNames, Sets;
+	vector< vector<string> > namesOfGroupCombos;
+	int iters, processors;
 	float threshold;
 	
 	int process(vector<SharedRAbundVector*>&);
 	int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
+	int driver(int, int, vector<SharedRAbundVector*>&);
 };
 
 #endif
