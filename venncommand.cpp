@@ -15,6 +15,7 @@
 #include "sharedsobscollectsummary.h"
 #include "sharedchao1.h"
 #include "sharedace.h"
+#include "nseqs.h"
 
 
 //**********************************************************************************************************************
@@ -111,6 +112,8 @@ VennCommand::VennCommand(string option)  {
 								if(abund < 5)
 									abund = 10;
 								vennCalculators.push_back(new Ace(abund));
+							}else if (Estimators[i] == "nseqs") { 
+								vennCalculators.push_back(new NSeqs());
 							}
 						}
 					}
@@ -123,6 +126,8 @@ VennCommand::VennCommand(string option)  {
 								vennCalculators.push_back(new SharedChao1());
 							}else if (Estimators[i] == "sharedace") { 
 								vennCalculators.push_back(new SharedAce());
+							}else if (Estimators[i] == "nseqs") { 
+								vennCalculators.push_back(new NSeqs());
 							}
 						}
 					}

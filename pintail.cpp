@@ -529,7 +529,7 @@ Sequence* Pintail::findPairs(Sequence* q) {
 void Pintail::createProcessesQuan() {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		int process = 0;
+		int process = 1;
 		vector<int> processIDS;
 				
 		//loop through and create all the processes you want
@@ -547,7 +547,6 @@ void Pintail::createProcessesQuan() {
 				ofstream out;
 				string s = toString(getpid()) + ".temp";
 				m->openOutputFile(s, out);
-				
 								
 				//output observed distances
 				for (int i = 0; i < quantilesMembers.size(); i++) {
@@ -564,14 +563,17 @@ void Pintail::createProcessesQuan() {
 			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
 		}
 		
+		//parent does its part
+		quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, templateLines[0]->start, templateLines[0]->end);
+		
 		//force parent to wait until all the processes are done
-		for (int i=0;i<processors;i++) { 
+		for (int i=0;i<(processors-1);i++) { 
 			int temp = processIDS[i];
 			wait(&temp);
 		}
 
 		//get data created by processes
-		for (int i=0;i<processors;i++) { 
+		for (int i=0;i<(processors-1);i++) { 
 			ifstream in;
 			string s = toString(processIDS[i]) + ".temp";
 			m->openInputFile(s, in);
@@ -607,7 +609,7 @@ void Pintail::createProcessesQuan() {
 			in.close();
 			remove(s.c_str());
 		}
-		
+
 #else
 		quantilesMembers = decalc->getQuantiles(templateSeqs, windowSizesTemplate, window, probabilityProfile, increment, 0, templateSeqs.size());
 #endif		

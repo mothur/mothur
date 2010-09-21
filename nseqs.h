@@ -25,7 +25,25 @@ public:
 		data[0] = (double)rank->getNumSeqs();
 		return data;
 	}
-	EstOutput getValues(vector<SharedRAbundVector*>) {return data;};
+	
+	EstOutput getValues(vector<SharedRAbundVector*> shared) { //return number of sequences in the sharedotus
+		
+		int numGroups = shared.size();
+		data.clear(); data.resize(numGroups,0);
+
+		for (int i = 0; i < shared[0]->size(); i++) {
+			//get bin values and set sharedByAll 
+			bool sharedByAll = true;
+			for (int j = 0; j < numGroups; j++) {
+				if (shared[j]->getAbundance(i) == 0) { sharedByAll = false; }
+			}
+			
+			//they are shared
+			if (sharedByAll == true) {  for (int j = 0; j < numGroups; j++) {  data[j] += shared[j]->getAbundance(i);  } }
+		}
+
+		return data;
+	}
 };
 
 /***********************************************************************/

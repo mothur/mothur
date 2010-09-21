@@ -867,7 +867,7 @@ int FilterSeqsCommand::MPICreateFilter(int start, int num, Filters& F, MPI_File&
 int FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string filename) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		int process = 0;
+		int process = 1;
 		int num = 0;
 		processIDS.clear();
 		
@@ -908,13 +908,16 @@ int FilterSeqsCommand::createProcessesCreateFilter(Filters& F, string filename) 
 			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
 		}
 		
+		//parent do your part
+		num = driverCreateFilter(F, filename, lines[0]);
+		
 		//force parent to wait until all the processes are done
-		for (int i=0;i<processors;i++) { 
+		for (int i=0;i<(processors-1);i++) { 
 			int temp = processIDS[i];
 			wait(&temp);
 		}
 		
-		//parent reads in and combine Filter info
+		//parent reads in and combines Filter info
 		for (int i = 0; i < processIDS.size(); i++) {
 			string tempFilename = filename + toString(processIDS[i]) + "filterValues.temp";
 			ifstream in;
