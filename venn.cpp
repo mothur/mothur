@@ -11,6 +11,7 @@
 #include "ace.h"
 #include "sobs.h"
 #include "chao1.h"
+#include "nseqs.h"
 #include "sharedchao1.h"
 #include "sharedsobscollectsummary.h"
 
@@ -101,6 +102,8 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					singleCalc = new Chao1();
 				}else if (vCalcs[i]->getName() == "sharedace") {
 					singleCalc = new Ace(10);
+				}else if (vCalcs[i]->getName() == "nseqs") {
+					singleCalc = new NSeqs();
 				}
 				
 				vector<double> data = singleCalc->getValues(sabund);
@@ -148,50 +151,63 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 				if (m->control_pressed) { outsvg.close(); return outputNames; }
 				
 				//get estimates for sharedAB
-				vector<double> shared = vCalcs[i]->getValues(subset);
+				vector<double> results = vCalcs[i]->getValues(subset);
 				
 				//in essence you want to run it like a single 
 				if (vCalcs[i]->getName() == "sharedsobs") {
 					singleCalc = new Sobs();
 				}else if (vCalcs[i]->getName() == "sharedchao") {
 					singleCalc = new Chao1();
+				}else if (vCalcs[i]->getName() == "nseqs") {
+					singleCalc = new NSeqs();
 				}//else if (vCalcs[i]->getName() == "sharedace") {
 					//singleCalc = new Ace(10);
 				//}
 				
 				//get estimates for numA
-				vector<double> numA = singleCalc->getValues(sabundA);
+				vector<double> resultsA = singleCalc->getValues(sabundA);
 
 				//get estimates for numB
-				vector<double> numB = singleCalc->getValues(sabundB);
+				vector<double> resultsB = singleCalc->getValues(sabundB);
+				
+				double numA, numB, shared;
+				if (vCalcs[i]->getName() == "nseqs") { 
+					shared = results[0] + results[1]; //add both groups sequences
+					numA = resultsA[0] - results[0]; //what's in A - the number of species in A that are in shared otus
+					numB = resultsB[0] - results[1]; //what's in B - the number of species in B that are in shared otus
+				}else{
+					shared = results[0];
+					numA = resultsA[0] - shared;
+					numB = resultsB[0] - shared;
+				}
 						
 				//image window
 				outsvg << "<svg xmlns:svg=\"http://www.w3.org/2000/svg\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"100%\" viewBox=\"0 0 " +  toString(width) + " " + toString(height) + " \" >\n";
 				outsvg << "<g>\n";
-
+				
 				//draw circles
 				outsvg << "<rect fill=\"white\" stroke=\"white\" x=\"0\" y=\"0\" width=\"" +  toString(width) +  "\" height=\"" +  toString(height) +  "\"/>"; 
 				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" +  toString(int(0.40 * width)) +  "\" y=\"" +  toString(int(0.05 * height)) +  "\">Venn Diagram at distance " + lookup[0]->getLabel() + "</text>\n";
 				outsvg << "<circle fill=\"rgb(255,0,0)\" opacity=\".3\" stroke=\"black\" cx=\"" +  toString(int(0.36 * width)) +  "\" cy=\"" +  toString(int(0.29 * height)) +  "\" r=\"" +  toString(int(0.22 * width)) +  "\"/>"; 
 				outsvg << "<circle fill=\"rgb(0,255,0)\" opacity=\".3\" stroke=\"black\" cx=\"" +  toString(int(0.62 * width)) +  "\" cy=\"" +  toString(int(0.29 * height)) +  "\" r=\"" +  toString(int(0.22 * width)) +  "\"/>"; 
-				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.29 * width) - ((int)toString(numA[0]).length() / 2)) + "\" y=\"" +  toString(int(0.28 * height)) +  "\">" + toString(numA[0] - shared[0]) + "</text>\n";
-				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.7 * width) - ((int)toString(numB[0]).length() / 2)) + "\" y=\"" +  toString(int(0.28 * height)) +  "\">" + toString(numB[0] - shared[0]) + "</text>\n"; 
+				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.29 * width) - ((int)toString(numA).length() / 2)) + "\" y=\"" +  toString(int(0.28 * height)) +  "\">" + toString(numA) + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.7 * width) - ((int)toString(numB).length() / 2)) + "\" y=\"" +  toString(int(0.28 * height)) +  "\">" + toString(numB) + "</text>\n"; 
 				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.29 * width) - ((int)lookup[0]->getGroup().length() / 2)) + "\" y=\"" +  toString(int(0.25 * height)) +  "\">" + lookup[0]->getGroup() + "</text>\n";
 				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.7 * width) - ((int)lookup[1]->getGroup().length() / 2)) + "\" y=\"" +  toString(int(0.25 * height)) +  "\">" + lookup[1]->getGroup() + "</text>\n"; 
-				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.5 * width) - ((int)toString(shared[0]).length() / 2)) + "\" y=\"" +  toString(int(0.28 * height)) +  "\">" + toString(shared[0]) + "</text>\n";  
-				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.66 * height)) +  "\">The number of species in group " + lookup[0]->getGroup() + " is " + toString(numA[0]);
-				if (numA.size() == 3) { 
-					outsvg << " the lci is " + toString(numA[1]) + " and the hci is " + toString(numA[2]) + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" + toString(int(0.5 * width) - ((int)toString(shared).length() / 2)) + "\" y=\"" +  toString(int(0.28 * height)) +  "\">" + toString(shared) + "</text>\n";  
+				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.66 * height)) +  "\">The number of species in group " + lookup[0]->getGroup() + " is " + toString(resultsA[0]);
+				if (resultsA.size() == 3) { 
+					outsvg << " the lci is " + toString(resultsA[1]) + " and the hci is " + toString(resultsA[2]) + "</text>\n";
 				}else { outsvg << "</text>\n"; }
 		
-				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.69 * height)) +  "\">The number of species in group " + lookup[1]->getGroup() + " is " + toString(numB[0]);
-				if (numB.size() == 3) { 
-					outsvg << " the lci is " + toString(numB[1]) + " and the hci is " + toString(numB[2]) + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.69 * height)) +  "\">The number of species in group " + lookup[1]->getGroup() + " is " + toString(resultsB[0]);
+				if (resultsB.size() == 3) { 
+					outsvg << " the lci is " + toString(resultsB[1]) + " and the hci is " + toString(resultsB[2]) + "</text>\n";
 				}else { outsvg << "</text>\n"; }
 
-				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.72 * height)) +  "\">The number of sepecies shared between groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString(shared[0]) + "</text>\n";
-				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.75 * height)) +  "\">Percentage of species that are shared in groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString((shared[0] / (float)(numA[0] + numB[0] - shared[0]))*100) + "</text>\n";
-				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.78 * height)) +  "\">The total richness for all groups is " + toString((float)(numA[0] + numB[0] - shared[0])) + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.72 * height)) +  "\">The number of species shared between groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString(shared) + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.75 * height)) +  "\">Percentage of species that are shared in groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString((shared / (float)(numA + numB + shared))*100) + "</text>\n";
+				outsvg << "<text fill=\"black\" class=\"seri\" font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.78 * height)) +  "\">The total richness for all groups is " + toString((float)(numA + numB + shared)) + "</text>\n";
 				
 				//close file
 				outsvg << "</g>\n</svg>\n";
@@ -254,7 +270,8 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					vector<double> sharedCwithAB;
 					
 					//find possible sharedABC values
-					float sharedABC1 = 0.0; float sharedABC2 = 0.0; float sharedABC3 = 0.0; float sharedABC = 0.0;
+					double sharedABC1 = 0.0; double sharedABC2 = 0.0; double sharedABC3 = 0.0; double sharedABC = 0.0;
+					vector<double> = resultsNseqs;
 
 					if (vCalcs[i]->getMultiple() == false) {
 						//merge BC and estimate with shared with A
@@ -305,10 +322,26 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 						else if ((sharedABC3 < sharedABC1) && (sharedABC3 < sharedABC2)) { sharedABC = sharedABC3; }	
 					}else{
 						vector<double> data = vCalcs[i]->getValues(lookup);
+						resultsNseqs = data;
 						sharedABC = data[0];
 						sharedAwithBC.push_back(sharedAB[0] + sharedAC[0] - sharedABC);
 						sharedBwithAC.push_back(sharedAB[0] + sharedBC[0] - sharedABC);
 						sharedCwithAB.push_back(sharedAC[0] + sharedBC[0] - sharedABC);
+					}
+					
+					double numA, numB, numC, numAB, numAC, numBC, numABC;
+					if (vCalcs[i]->getName() == "nseqs") { 
+						numABC = resultsNseqs[0] + resultsNseqs[1] + resultsNseqs[2];
+						numBC = sharedBC[0] + sharedBC[1] - (resultsNseqs[1] + resultsNseqs[2]);
+					
+					}else{
+						numABC = sharedABC;
+						numBC = sharedBC[0] - sharedABC;
+						numAB = sharedAB[0] - sharedABC;
+						numAC = sharedAC[0] - sharedABC;
+						numA = numA[0]-sharedAwithBC[0];
+						numB = numB[0]-sharedBwithAC[0];
+						numC = numC[0]-sharedCwithAB[0];
 					}
 					
 					//image window
@@ -475,7 +508,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 			//make a file for each calculator
 			for(int i=0;i<vCalcs.size();i++){
 				
-				if ((vCalcs[i]->getName() != "sharedsobs") && (vCalcs[i]->getName() != "sharedchao")) { m->mothurOut(vCalcs[i]->getName() + " is not a valid calculator with four groups.  It will be disregarded. "); m->mothurOutEndLine(); }
+				if ((vCalcs[i]->getName() != "sharedsobs") && (vCalcs[i]->getName() != "sharedchao") && (vCalcs[i]->getName() != "nseqs")) { m->mothurOut(vCalcs[i]->getName() + " is not a valid calculator with four groups.  It will be disregarded. "); m->mothurOutEndLine(); }
 				else{
 					string filenamesvg = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + lookup[0]->getLabel() + "." + vCalcs[i]->getName() + "." + lookup[0]->getGroup() + "-" + lookup[1]->getGroup() + "-" + lookup[2]->getGroup() + "-" + lookup[3]->getGroup() + ".svg";
 					outputNames.push_back(filenamesvg);
@@ -488,7 +521,10 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 						singleCalc = new Sobs();
 					}else if (vCalcs[i]->getName() == "sharedchao") {
 						singleCalc = new Chao1();
+					}else if (vCalcs[i]->getName() == "nseqs") {
+						singleCalc = new NSeqs();
 					}
+
 				
 					//get estimates for numA
 					data = singleCalc->getValues(sabundA);
