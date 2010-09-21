@@ -486,6 +486,8 @@
 		A7DF0AE2121EBB14004A03EA /* prng.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = prng.h; sourceTree = "<group>"; };
 		A7E8338B115BBDAA00739EC4 /* parsesffcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parsesffcommand.cpp; sourceTree = "<group>"; };
 		A7E8338C115BBDAA00739EC4 /* parsesffcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parsesffcommand.h; sourceTree = "<group>"; };
+		A7F139481247C3CB0033324C /* splitgroupscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = splitgroupscommand.h; sourceTree = "<group>"; };
+		A7F139491247C3CB0033324C /* splitgroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = splitgroupscommand.cpp; sourceTree = "<group>"; };
 		A7F6C8E1124229F900299875 /* fisher2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fisher2.c; sourceTree = "<group>"; };
 		A7F6C8E2124229F900299875 /* fisher2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fisher2.h; sourceTree = "<group>"; };
 		A7F6C8E3124229F900299875 /* metastats2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = metastats2.c; sourceTree = "<group>"; };
@@ -856,6 +858,8 @@
 				A7DA210F113FECD400BF472F /* sharedcommand.cpp */,
 				A71D924511AEB42400D00CBC /* splitabundcommand.h */,
 				A71D924411AEB42400D00CBC /* splitabundcommand.cpp */,
+				A7F139481247C3CB0033324C /* splitgroupscommand.h */,
+				A7F139491247C3CB0033324C /* splitgroupscommand.cpp */,
 				A7DA2155113FECD400BF472F /* summarycommand.h */,
 				A7DA2154113FECD400BF472F /* summarycommand.cpp */,
 				A7DA2159113FECD400BF472F /* summarysharedcommand.h */,

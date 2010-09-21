@@ -1182,7 +1182,20 @@ void MothurOut::getNumSeqs(ifstream& file, int& numSeqs){
 //This function parses the estimator options and puts them in a vector
 void MothurOut::splitAtChar(string& estim, vector<string>& container, char symbol) {
 	try {
-		string individual;
+		string individual = "";
+		int estimLength = estim.size();
+		for(int i=0;i<estimLength;i++){
+			if(estim[i] == symbol){
+				container.push_back(individual);
+				individual = "";				
+			}
+			else{
+				individual += estim[i];
+			}
+		}
+		container.push_back(individual);
+
+		/*
 		
 		while (estim.find_first_of(symbol) != -1) {
 			individual = estim.substr(0,estim.find_first_of(symbol));
@@ -1192,7 +1205,7 @@ void MothurOut::splitAtChar(string& estim, vector<string>& container, char symbo
 			}
 		}
 		//get last one
-		container.push_back(estim);
+		container.push_back(estim); */
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "splitAtChar");
