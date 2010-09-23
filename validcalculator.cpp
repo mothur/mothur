@@ -386,7 +386,6 @@ void ValidCalculators::initialVennSingle() {
 		vennsingle["chao"]		    = "chao";
 		vennsingle["ace"]			= "ace";
 		vennsingle["jack"]		    = "jack";
-		vennsingle["nseqs"]		    = "nseqs";
 		vennsingle["default"]		= "default";
 	}
 	catch(exception& e) {
@@ -401,7 +400,6 @@ void ValidCalculators::initialVennShared() {
 		vennshared["sharedsobs"]	= "sharedsobs";
 		vennshared["sharedchao"]	= "sharedchao";
 		vennshared["sharedace"]		= "sharedace";
-		vennshared["nseqs"]			= "nseqs";
 		vennshared["default"]		= "default";
 	}
 	catch(exception& e) {

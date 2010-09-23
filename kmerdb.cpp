@@ -110,7 +110,7 @@ void KmerDB::generateDB(){
 		m->openOutputFile(kmerDBName, kmerFile);					//	to a file
 		
 		//output version
-		kmerFile << m->getVersion() << endl;
+		kmerFile << "#" << m->getVersion() << endl;
 		
 		for(int i=0;i<maxKmer;i++){								//	step through all of the possible kmer numbers
 			kmerFile << i << ' ' << kmerLocations[i].size();	//	print the kmer number and the number of sequences with
