@@ -32,7 +32,7 @@ VennCommand::VennCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string AlignArray[] =  {"groups","label","calc", "abund","outputdir","inputdir"};
+			string AlignArray[] =  {"groups","label","calc", "abund","nseqs","outputdir","inputdir"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -95,6 +95,10 @@ VennCommand::VennCommand(string option)  {
 			string temp;
 			temp = validParameter.validFile(parameters, "abund", false);		if (temp == "not found") { temp = "10"; }
 			convert(temp, abund); 
+			
+			temp = validParameter.validFile(parameters, "nseqs", false);			if (temp == "not found"){	temp = "f";				}
+			nseqs = m->isTrue(temp); 
+
 
 			if (abort == false) {
 				validCalculator = new ValidCalculators();
@@ -112,8 +116,6 @@ VennCommand::VennCommand(string option)  {
 								if(abund < 5)
 									abund = 10;
 								vennCalculators.push_back(new Ace(abund));
-							}else if (Estimators[i] == "nseqs") { 
-								vennCalculators.push_back(new NSeqs());
 							}
 						}
 					}
@@ -126,8 +128,6 @@ VennCommand::VennCommand(string option)  {
 								vennCalculators.push_back(new SharedChao1());
 							}else if (Estimators[i] == "sharedace") { 
 								vennCalculators.push_back(new SharedAce());
-							}else if (Estimators[i] == "nseqs") { 
-								vennCalculators.push_back(new NSeqs());
 							}
 						}
 					}
@@ -135,7 +135,7 @@ VennCommand::VennCommand(string option)  {
 				
 				//if the users entered no valid calculators don't execute command
 				if (vennCalculators.size() == 0) { m->mothurOut("No valid calculators given, please correct."); m->mothurOutEndLine(); abort = true;  }
-				else {  venn = new Venn(outputDir);  }
+				else {  venn = new Venn(outputDir, nseqs);  }
 			}
 			
 		}
@@ -154,7 +154,7 @@ VennCommand::VennCommand(string option)  {
 void VennCommand::help(){
 	try {
 		m->mothurOut("The venn command can only be executed after a successful read.otu command.\n");
-		m->mothurOut("The venn command parameters are groups, calc, abund and label.  No parameters are required.\n");
+		m->mothurOut("The venn command parameters are groups, calc, abund, nseqs and label.  No parameters are required.\n");
 		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included in your venn diagram, you may only use a maximum of 4 groups.\n");
 		m->mothurOut("The group names are separated by dashes. The label allows you to select what distance levels you would like a venn diagram created for, and are also separated by dashes.\n");
 		m->mothurOut("The venn command should be in the following format: venn(groups=yourGroups, calc=yourCalcs, label=yourLabels, abund=yourAbund).\n");
@@ -162,7 +162,8 @@ void VennCommand::help(){
 		m->mothurOut("The default value for groups is all the groups in your groupfile up to 4, and all labels in your inputfile will be used.\n");
 		m->mothurOut("The default value for calc is sobs if you have only read a list file or if you have selected only one group, and sharedsobs if you have multiple groups.\n");
 		m->mothurOut("The default available estimators for calc are sobs, chao and ace if you have only read a list file, and sharedsobs, sharedchao and sharedace if you have read a list and group file or a shared file.\n");
-		m->mothurOut("The only estmiator available four 4 groups is sharedsobs.\n");
+		m->mothurOut("The nseqs parameter will output the number of sequences represented by the otus in the picture, default=F.\n");
+		m->mothurOut("The only estimators available four 4 groups are sharedsobs and sharedchao.\n");
 		m->mothurOut("The venn command outputs a .svg file for each calculator you specify at each distance you choose.\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
 	}

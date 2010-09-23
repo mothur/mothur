@@ -20,7 +20,7 @@
 
 class Venn {
 public:
-	Venn(string);
+	Venn(string, bool);
 	~Venn(){};
 
 	vector<string> getPic(SAbundVector*, vector<Calculator*>);
@@ -32,6 +32,7 @@ private:
 	string groupComb, outputDir;
 	ofstream outsvg;
 	MothurOut* m;
+	bool nseqs;
 };
 
 /***********************************************************************/

@@ -40,7 +40,7 @@ private:
 	SAbundVector* sabund;
 	int abund;
 	
-	bool abort, allLines;
+	bool abort, allLines, nseqs;
 	set<string> labels; //holds labels to be used
 	string format, groups, calc, label, outputDir;
 	vector<string> Estimators, Groups;

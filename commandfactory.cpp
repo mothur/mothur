@@ -88,6 +88,7 @@
 #include "normalizesharedcommand.h"
 #include "metastatscommand.h"
 #include "splitgroupscommand.h"
+#include "clusterfragmentscommand.h"
 
 /*******************************************************/
 
@@ -180,6 +181,7 @@ CommandFactory::CommandFactory(){
 	commands["normalize.shared"]	= "normalize.shared";
 	commands["metastats"]			= "metastats";
 	commands["split.groups"]		= "split.groups";
+	commands["cluster.fragments"]	= "cluster.fragments";
 	commands["classify.seqs"]		= "MPIEnabled"; 
 	commands["dist.seqs"]			= "MPIEnabled";
 	commands["filter.seqs"]			= "MPIEnabled";
@@ -315,6 +317,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "normalize.shared")		{	command = new NormalizeSharedCommand(optionString);			}
 		else if(commandName == "metastats")				{	command = new MetaStatsCommand(optionString);				}
 		else if(commandName == "split.groups")			{	command = new SplitGroupCommand(optionString);				}
+		else if(commandName == "cluster.fragments")		{	command = new ClusterFragmentsCommand(optionString);		}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;

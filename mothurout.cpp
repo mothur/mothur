@@ -502,19 +502,29 @@ string MothurOut::getFullPathName(string fileName){
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)	
 			
 			if (path.find("~") != -1) { //go to home directory
-				string homeDir = getenv ("HOME");
+				string homeDir;
+			
+				char *homepath = NULL;
+				homepath = getenv ("HOME");
+				if ( homepath != NULL) { homeDir = homepath; }
+				else { homeDir = "";  }
+
 				newFileName = homeDir + fileName.substr(fileName.find("~")+1);
 				return newFileName;
 			}else { //find path
 				if (path.rfind("./") == -1) { return fileName; } //already complete name
 				else { newFileName = fileName.substr(fileName.rfind("./")+2); } //save the complete part of the name
 				
-				char* cwdpath = new char[1024];
+				//char* cwdpath = new char[1024];
+				//size_t size;
+				//cwdpath=getcwd(cwdpath,size);
+				//cwd = cwdpath;
+				
+				char *cwdpath = NULL;
+				cwdpath = getcwd(NULL, 0); // or _getcwd
+				if ( cwdpath != NULL) { cwd = cwdpath; }
+				else { cwd = "";  }
 
-				size_t size;
-				cwdpath=getcwd(cwdpath,size);
-			
-				cwd = cwdpath;
 				
 				//rip off first '/'
 				string simpleCWD;
