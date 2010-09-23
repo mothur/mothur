@@ -275,9 +275,13 @@ void SharedUtil::getCombos(vector<string>& groupComb, vector<string> userGroups,
 		numComp = 0;
 		for (int i=0; i< userGroups.size(); i++) { 
 			numComp += i; 
-			for (int l = i+1; l < userGroups.size(); l++) {
-				//set group comparison labels
-				groupComb.push_back(userGroups[i] + "-" + userGroups[l]);
+			for (int l = 0; l < i; l++) {
+				if (userGroups[i] > userGroups[l]) {
+					//set group comparison labels
+					groupComb.push_back(userGroups[l] + "-" + userGroups[i]);
+				}else{
+					groupComb.push_back(userGroups[i] + "-" + userGroups[l]);
+				}
 			}
 		} 
 	}

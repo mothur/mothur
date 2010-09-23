@@ -24,7 +24,7 @@ EstOutput Unweighted::getValues(Tree* t, int p, string o) {
 		int numComp = 0;
 		vector< vector<string> > namesOfGroupCombos;
 		for (int r=0; r<numGroups; r++) { 
-			for (int l = r+1; l < numGroups; l++) {
+			for (int l = 0; l < r; l++) {
 				numComp++;
 				vector<string> groups; groups.push_back(globaldata->Groups[r]); groups.push_back(globaldata->Groups[l]);
 				namesOfGroupCombos.push_back(groups);
@@ -241,7 +241,7 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB, int p, st
 		int numComp = 0;
 		vector< vector<string> > namesOfGroupCombos;
 		for (int r=0; r<numGroups; r++) { 
-			for (int l = r+1; l < numGroups; l++) {
+			for (int l = 0; l < r; l++) {
 				numComp++;
 				vector<string> groups; groups.push_back(globaldata->Groups[r]); groups.push_back(globaldata->Groups[l]);
 				namesOfGroupCombos.push_back(groups);

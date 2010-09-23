@@ -177,7 +177,7 @@ int MetaStatsCommand::execute(){
 		
 		int numGroups = Sets.size();
 		for (int a=0; a<numGroups; a++) { 
-			for (int l = a+1; l < numGroups; l++) {	
+			for (int l = 0; l < a; l++) {	
 				vector<string> groups; groups.push_back(Sets[a]); groups.push_back(Sets[l]);
 				namesOfGroupCombos.push_back(groups);
 			}

@@ -158,7 +158,7 @@ int UnifracWeightedCommand::execute() {
 				//calculate number of comparisons i.e. with groups A,B,C = AB, AC, BC = 3;
 				vector< vector<string> > namesOfGroupCombos;
 				for (int a=0; a<numGroups; a++) { 
-					for (int l = a+1; l < numGroups; l++) {	
+					for (int l = 0; l < a; l++) {	
 						vector<string> groups; groups.push_back(globaldata->Groups[a]); groups.push_back(globaldata->Groups[l]);
 						namesOfGroupCombos.push_back(groups);
 					}
