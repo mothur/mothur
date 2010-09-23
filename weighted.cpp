@@ -30,7 +30,7 @@ EstOutput Weighted::getValues(Tree* t, int p, string o) {
 		//calculate number of comparisons i.e. with groups A,B,C = AB, AC, BC = 3;
 		vector< vector<string> > namesOfGroupCombos;
 		for (int i=0; i<numGroups; i++) { 
-			for (int l = i+1; l < numGroups; l++) {	
+			for (int l = 0; l < i; l++) {	
 				//initialize weighted scores
 				//WScore[globaldata->Groups[i]+globaldata->Groups[l]] = 0.0;
 				vector<string> groups; groups.push_back(globaldata->Groups[i]); groups.push_back(globaldata->Groups[l]);

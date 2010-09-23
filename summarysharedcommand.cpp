@@ -231,7 +231,7 @@ int SummarySharedCommand::execute(){
 		input = globaldata->ginput;
 		lookup = input->getSharedRAbundVectors();
 		string lastLabel = lookup[0]->getLabel();
-		
+	
 		/******************************************************/
 		//output headings for files
 		/******************************************************/
@@ -412,7 +412,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
 				
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				if(processors == 1){
-					driver(thisLookup, 0, numGroups, sumFileName, sumAllFileName);
+					driver(thisLookup, 0, numGroups, sumFileName+".temp", sumAllFileName+".temp");
 					m->appendFiles((sumFileName + ".temp"), sumFileName);
 					remove((sumFileName + ".temp").c_str());
 					if (mult) {
