@@ -64,6 +64,10 @@
 		A7825503116519F70002E2DD /* chimerabellerophoncommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimerabellerophoncommand.cpp; sourceTree = "<group>"; };
 		A78434881162224F00100BE0 /* chimeraccodecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraccodecommand.h; sourceTree = "<group>"; };
 		A78434891162224F00100BE0 /* chimeraccodecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeraccodecommand.cpp; sourceTree = "<group>"; };
+		A787A24F124CB46C0076EB84 /* getlineagecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getlineagecommand.h; sourceTree = "<group>"; };
+		A787A250124CB46C0076EB84 /* getlineagecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getlineagecommand.cpp; sourceTree = "<group>"; };
+		A787A28E124CE1470076EB84 /* removelineagecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = removelineagecommand.h; sourceTree = "<group>"; };
+		A787A28F124CE1470076EB84 /* removelineagecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removelineagecommand.cpp; sourceTree = "<group>"; };
 		A798626D1240D91B005FC847 /* normalizesharedcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = normalizesharedcommand.h; sourceTree = "<group>"; };
 		A798626E1240D91B005FC847 /* normalizesharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = normalizesharedcommand.cpp; sourceTree = "<group>"; };
 		A7AE6302121C3408001DE6FC /* sharedrabundfloatvector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedrabundfloatvector.h; sourceTree = "<group>"; };
@@ -772,6 +776,8 @@
 				A7DA205B113FECD400BF472F /* getgroupcommand.h */,
 				A7DA205C113FECD400BF472F /* getlabelcommand.cpp */,
 				A7DA205D113FECD400BF472F /* getlabelcommand.h */,
+				A787A24F124CB46C0076EB84 /* getlineagecommand.h */,
+				A787A250124CB46C0076EB84 /* getlineagecommand.cpp */,
 				A7DA205F113FECD400BF472F /* getlistcountcommand.h */,
 				A7DA205E113FECD400BF472F /* getlistcountcommand.cpp */,
 				A7DA2061113FECD400BF472F /* getoturepcommand.h */,
@@ -840,6 +846,8 @@
 				A7DA20EA113FECD400BF472F /* readotucommand.cpp */,
 				A7DA20F1113FECD400BF472F /* readtreecommand.h */,
 				A7DA20F0113FECD400BF472F /* readtreecommand.cpp */,
+				A787A28E124CE1470076EB84 /* removelineagecommand.h */,
+				A787A28F124CE1470076EB84 /* removelineagecommand.cpp */,
 				A7DA20F3113FECD400BF472F /* removeseqscommand.h */,
 				A7DA20F2113FECD400BF472F /* removeseqscommand.cpp */,
 				A7DA20F5113FECD400BF472F /* reversecommand.h */,
