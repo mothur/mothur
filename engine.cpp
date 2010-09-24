@@ -571,11 +571,16 @@ string ScriptEngine::getNextCommand(string& commandString) {
 		
 		string nextcommand = "";
 		int count = 0;
+		bool ignoreSemiColons = false;
 		
 		//go through string until you reach ; or end
 		while (count < commandString.length()) { 
 			
-			if (commandString[count] == ';') {  break;   }
+			 //you want to ignore any ; until you reach the next '
+			if ((commandString[count] == '\'') && (!ignoreSemiColons)) {  ignoreSemiColons = true;  } 
+			else if ((commandString[count] == '\'') && (ignoreSemiColons)) {  ignoreSemiColons = false;  } 
+				
+			if ((commandString[count] == ';') && (!ignoreSemiColons)) {  break;   }
 			else {		nextcommand += commandString[count];	}
 			
 			count++;

@@ -89,6 +89,8 @@
 #include "metastatscommand.h"
 #include "splitgroupscommand.h"
 #include "clusterfragmentscommand.h"
+#include "getlineagecommand.h"
+#include "removelineagecommand.h"
 
 /*******************************************************/
 
@@ -182,6 +184,8 @@ CommandFactory::CommandFactory(){
 	commands["metastats"]			= "metastats";
 	commands["split.groups"]		= "split.groups";
 	commands["cluster.fragments"]	= "cluster.fragments";
+	commands["get.lineage"]			= "get.lineage";
+	commands["remove.lineage"]		= "remove.lineage";
 	commands["classify.seqs"]		= "MPIEnabled"; 
 	commands["dist.seqs"]			= "MPIEnabled";
 	commands["filter.seqs"]			= "MPIEnabled";
@@ -318,6 +322,8 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "metastats")				{	command = new MetaStatsCommand(optionString);				}
 		else if(commandName == "split.groups")			{	command = new SplitGroupCommand(optionString);				}
 		else if(commandName == "cluster.fragments")		{	command = new ClusterFragmentsCommand(optionString);		}
+		else if(commandName == "get.lineage")			{	command = new GetLineageCommand(optionString);				}
+		else if(commandName == "remove.lineage")		{	command = new RemoveLineageCommand(optionString);			}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
