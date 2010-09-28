@@ -39,7 +39,7 @@ private:
 	InputData* input;
 	ValidCalculators* validCalculator;
 	
-	bool abort, allLines, mult, all;
+	bool abort, allLines, mult, all, createPhylip;
 	set<string> labels; //holds labels to be used
 	string label, calc, groups;
 	vector<string>  Estimators, Groups, outputNames;
@@ -47,7 +47,7 @@ private:
 	string format, outputDir;
 	int numGroups, processors;
 	int process(vector<SharedRAbundVector*>, string, string);
-	int driver(vector<SharedRAbundVector*>, int, int, string, string);
+	int driver(vector<SharedRAbundVector*>, int, int, string, string, vector< vector<seqDist> >&);
 
 };
 

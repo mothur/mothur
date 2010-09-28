@@ -34,11 +34,15 @@ endif
 64BIT_VERSION ?= yes
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
-    TARGET_ARCH += -arch x86_64
 	 CXXFLAGS += -DBIT_VERSION
 	
 	#if you are using centos uncomment the following lines
 	#CXX = g++44
+	
+	#if you are a mac user use the following line
+	TARGET_ARCH += -arch x86_64
+	
+	#if you are a linux user use the following line
 	#CXXFLAGS += -mtune=native -march=native -m64
 endif
 
