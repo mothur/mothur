@@ -401,7 +401,7 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 			double totalBL = 0.00;	//all branch lengths
 			double UW = 0.00;		//Unweighted Value = UniqueBL / totalBL;
 				
-			for(int i=0;i<t->getNumNodes();i++){
+			for(int i=0;i<copyTree->getNumNodes();i++){
 			
 				if (m->control_pressed) {  return data; }
 				
@@ -411,15 +411,15 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 				
 				int pcountSize = 0;
 				for (int j = 0; j < namesOfGroupCombos[h].size(); j++) {
-					map<string, int>::iterator itGroup = t->tree[i].pcount.find(namesOfGroupCombos[h][j]);
-					if (itGroup != t->tree[i].pcount.end()) { pcountSize++; if (pcountSize > 1) { break; } } 
+					map<string, int>::iterator itGroup = copyTree->tree[i].pcount.find(namesOfGroupCombos[h][j]);
+					if (itGroup != copyTree->tree[i].pcount.end()) { pcountSize++; if (pcountSize > 1) { break; } } 
 				}
 				
 				if (pcountSize == 0) { }
-				else if ((t->tree[i].getBranchLength() != -1) && (pcountSize == 1)) {  UniqueBL += abs(t->tree[i].getBranchLength());	}
+				else if ((copyTree->tree[i].getBranchLength() != -1) && (pcountSize == 1)) {  UniqueBL += abs(copyTree->tree[i].getBranchLength());	}
 					
-				if ((t->tree[i].getBranchLength() != -1) && (pcountSize != 0)) {  
-					totalBL += abs(t->tree[i].getBranchLength()); 
+				if ((copyTree->tree[i].getBranchLength() != -1) && (pcountSize != 0)) {  
+					totalBL += abs(copyTree->tree[i].getBranchLength()); 
 				}
 			}
 		

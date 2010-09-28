@@ -222,6 +222,7 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 		
 		for(int i=0;i<numGroups;i++){
 			string tempNameFile = namefile + "." + toString(i) + ".temp";
+			if (outputDir == "") { outputDir = m->hasPath(fastafile); }
 			string tempDistFile = outputDir + m->getRootName(m->getSimpleName((fastafile + "." + toString(i) + ".temp"))) + "dist";
 
 			//if there are valid distances

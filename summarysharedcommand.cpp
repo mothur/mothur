@@ -48,7 +48,7 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"label","calc","groups","all","outputdir","inputdir", "processors"};
+			string Array[] =  {"label","calc","groups","all","outputdir","distance","inputdir", "processors"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -103,6 +103,9 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 			
 			string temp = validParameter.validFile(parameters, "all", false);				if (temp == "not found") { temp = "false"; }
 			all = m->isTrue(temp);
+			
+			temp = validParameter.validFile(parameters, "distance", false);					if (temp == "not found") { temp = "false"; }
+			createPhylip = m->isTrue(temp);
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if(temp == "not found"){	temp = "1"; }
 			convert(temp, processors); 
@@ -396,6 +399,7 @@ int SummarySharedCommand::execute(){
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		m->mothurOut(outputFileName); m->mothurOutEndLine();	
 		if (mult) { m->mothurOut(outAllFileName); m->mothurOutEndLine();	}
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 		m->mothurOutEndLine();
 
 		return 0;
@@ -409,10 +413,12 @@ int SummarySharedCommand::execute(){
 /***********************************************************/
 int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string sumFileName, string sumAllFileName) {
 	try {
+			vector< vector<seqDist> > calcDists;  //vector containing vectors that contains the summary results for each group compare
+			calcDists.resize(sumCalculators.size()); //one for each calc, this will be used to make .dist files
 				
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				if(processors == 1){
-					driver(thisLookup, 0, numGroups, sumFileName+".temp", sumAllFileName+".temp");
+					driver(thisLookup, 0, numGroups, sumFileName+".temp", sumAllFileName+".temp", calcDists);
 					m->appendFiles((sumFileName + ".temp"), sumFileName);
 					remove((sumFileName + ".temp").c_str());
 					if (mult) {
@@ -420,7 +426,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
 						remove((sumAllFileName + ".temp").c_str());
 					}
 				}else{
-					int process = 0;
+					int process = 1;
 					vector<int> processIDS;
 		
 					//loop through and create all the processes you want
@@ -431,11 +437,34 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
 							processIDS.push_back(pid); 
 							process++;
 						}else if (pid == 0){
-							driver(thisLookup, lines[process].start, lines[process].end, sumFileName + toString(getpid()) + ".temp", sumAllFileName + toString(getpid()) + ".temp");   
+							driver(thisLookup, lines[process].start, lines[process].end, sumFileName + toString(getpid()) + ".temp", sumAllFileName + toString(getpid()) + ".temp", calcDists);   
+							
+							//only do this if you want a distance file
+							if (createPhylip) {
+								string tempdistFileName = m->getRootName(m->getSimpleName(sumFileName)) + toString(getpid()) + ".dist";
+								ofstream outtemp;
+								m->openOutputFile(tempdistFileName, outtemp);
+								
+								for (int i = 0; i < calcDists.size(); i++) {
+									outtemp << calcDists[i].size() << endl;
+									
+									for (int j = 0; j < calcDists[i].size(); j++) {
+										outtemp << calcDists[i][j].seq1 << '\t' << calcDists[i][j].seq2 << '\t' << calcDists[i][j].dist << endl;
+									}
+								}
+								outtemp.close();
+							}
+							
 							exit(0);
 						}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
 					}
-				
+					
+					//parent do your part
+					driver(thisLookup, lines[0].start, lines[0].end, sumFileName + toString(getpid()) + ".temp", sumAllFileName + toString(getpid()) + ".temp", calcDists);   
+					m->appendFiles((sumFileName + toString(getpid()) + ".temp"), sumFileName);
+					remove((sumFileName + toString(getpid()) + ".temp").c_str());
+					if (mult) { m->appendFiles((sumAllFileName + toString(getpid()) + ".temp"), sumAllFileName); }
+						
 					//force parent to wait until all the processes are done
 					for (int i = 0; i < processIDS.size(); i++) {
 						int temp = processIDS[i];
@@ -445,15 +474,36 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
 					for (int i = 0; i < processIDS.size(); i++) {
 						m->appendFiles((sumFileName + toString(processIDS[i]) + ".temp"), sumFileName);
 						remove((sumFileName + toString(processIDS[i]) + ".temp").c_str());
-						if (mult) {
-							if (i == 0) {  m->appendFiles((sumAllFileName + toString(processIDS[i]) + ".temp"), sumAllFileName);  }
-							remove((sumAllFileName + toString(processIDS[i]) + ".temp").c_str());
+						if (mult) {	remove((sumAllFileName + toString(processIDS[i]) + ".temp").c_str());	}
+						
+						if (createPhylip) {
+							string tempdistFileName = m->getRootName(m->getSimpleName(sumFileName)) + toString(processIDS[i]) +  ".dist";
+							ifstream intemp;
+							m->openInputFile(tempdistFileName, intemp);
+							
+							for (int i = 0; i < calcDists.size(); i++) {
+								int size = 0;
+								intemp >> size; m->gobble(intemp);
+									
+								for (int j = 0; j < size; j++) {
+									int seq1 = 0;
+									int seq2 = 0;
+									float dist = 1.0;
+									
+									intemp >> seq1 >> seq2 >> dist;   m->gobble(intemp);
+									
+									seqDist tempDist(seq1, seq2, dist);
+									calcDists[i].push_back(tempDist);
+								}
+							}
+							intemp.close();
+							remove(tempdistFileName.c_str());
 						}
 					}
 
 				}
 			#else
-				driver(thisLookup, 0, numGroups, (sumFileName + ".temp"), (sumAllFileName + ".temp"));
+				driver(thisLookup, 0, numGroups, (sumFileName + ".temp"), (sumAllFileName + ".temp"), calcDists);
 				m->appendFiles((sumFileName + ".temp"), sumFileName);
 				remove((sumFileName + ".temp").c_str());
 				if (mult) {
@@ -461,6 +511,50 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
 					remove((sumAllFileName + ".temp").c_str());
 				}
 			#endif
+			
+			if (createPhylip) {
+				for (int i = 0; i < calcDists.size(); i++) {
+					if (m->control_pressed) { break; }
+				
+					string distFileName = outputDir + m->getRootName(m->getSimpleName(sumFileName)) + sumCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".dist";
+					outputNames.push_back(distFileName);
+					ofstream outDist;
+					m->openOutputFile(distFileName, outDist);
+					outDist.setf(ios::fixed, ios::floatfield); outDist.setf(ios::showpoint);
+					
+					//initialize matrix
+					vector< vector<float> > matrix; //square matrix to represent the distance
+					matrix.resize(thisLookup.size());
+					for (int k = 0; k < thisLookup.size(); k++) {  matrix[k].resize(thisLookup.size(), 0.0); }
+					
+					
+					for (int j = 0; j < calcDists[i].size(); j++) {
+						int row = calcDists[i][j].seq1;
+						int column = calcDists[i][j].seq2;
+						float dist = calcDists[i][j].dist;
+						
+						matrix[row][column] = dist;
+						matrix[column][row] = dist;
+					}
+					
+					//output to file
+					outDist << thisLookup.size() << endl;
+					for (int r=0; r<thisLookup.size(); r++) { 
+						//output name
+						string name = thisLookup[r]->getGroup();
+						if (name.length() < 10) { //pad with spaces to make compatible
+							while (name.length() < 10) {  name += " ";  }
+						}
+						outDist << name << '\t';
+					
+						//output distances
+						for (int l = 0; l < r; l++) {	outDist  << matrix[r][l] << '\t';  }
+						outDist << endl;
+					}
+					
+					outDist.close();
+				}
+			}
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SummarySharedCommand", "process");
@@ -468,7 +562,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
 	}
 }
 /**************************************************************************************************/
-int SummarySharedCommand::driver(vector<SharedRAbundVector*> thisLookup, int start, int end, string sumFile, string sumAllFile) { 
+int SummarySharedCommand::driver(vector<SharedRAbundVector*> thisLookup, int start, int end, string sumFile, string sumAllFile, vector< vector<seqDist> >& calcDists) { 
 	try {
 		
 		//loop through calculators and add to file all for all calcs that can do mutiple groups
@@ -524,12 +618,15 @@ int SummarySharedCommand::driver(vector<SharedRAbundVector*> thisLookup, int sta
 				
 				for(int i=0;i<sumCalculators.size();i++) {
 
-					sumCalculators[i]->getValues(subset); //saves the calculator outputs
+					vector<double> tempdata = sumCalculators[i]->getValues(subset); //saves the calculator outputs
 					
 					if (m->control_pressed) { outputFileHandle.close(); return 1; }
 					
 					outputFileHandle << '\t';
 					sumCalculators[i]->print(outputFileHandle);
+					
+					seqDist temp(l, k, tempdata[0]);
+					calcDists[i].push_back(temp);
 				}
 				outputFileHandle << endl;
 			}
