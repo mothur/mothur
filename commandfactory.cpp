@@ -91,6 +91,7 @@
 #include "clusterfragmentscommand.h"
 #include "getlineagecommand.h"
 #include "removelineagecommand.h"
+#include "parsefastaqcommand.h"
 
 /*******************************************************/
 
@@ -186,6 +187,7 @@ CommandFactory::CommandFactory(){
 	commands["cluster.fragments"]	= "cluster.fragments";
 	commands["get.lineage"]			= "get.lineage";
 	commands["remove.lineage"]		= "remove.lineage";
+	commands["parse.fastaq"]		= "parse.fastaq";
 	commands["classify.seqs"]		= "MPIEnabled"; 
 	commands["dist.seqs"]			= "MPIEnabled";
 	commands["filter.seqs"]			= "MPIEnabled";
@@ -324,6 +326,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "cluster.fragments")		{	command = new ClusterFragmentsCommand(optionString);		}
 		else if(commandName == "get.lineage")			{	command = new GetLineageCommand(optionString);				}
 		else if(commandName == "remove.lineage")		{	command = new RemoveLineageCommand(optionString);			}
+		else if(commandName == "parse.fastaq")			{	command = new ParseFastaQCommand(optionString);				}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;

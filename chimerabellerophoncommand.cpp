@@ -82,10 +82,7 @@ ChimeraBellerophonCommand::ChimeraBellerophonCommand(string option)  {
 			}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += m->hasPath(fastafile); //if user entered a file with a path then preserve it	
-			}
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
 
 			string temp;
 			temp = validParameter.validFile(parameters, "filter", false);			if (temp == "not found") { temp = "F"; }
@@ -152,7 +149,8 @@ int ChimeraBellerophonCommand::execute(){
 			int start = time(NULL);	
 			
 			chimera = new Bellerophon(fastaFileNames[i], filter, correction, window, increment, processors, outputDir);	
-					
+			
+			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[i]);  }//if user entered a file with a path then preserve it		
 			string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[i])) +  "bellerophon.chimeras";
 			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[i])) + "bellerophon.accnos";
 			

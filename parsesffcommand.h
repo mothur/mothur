@@ -10,7 +10,7 @@
  *
  */
 
-#include "mothur.h"
+
 #include "command.hpp"
 
 class ParseSFFCommand : public Command {
