@@ -37,6 +37,8 @@
 		A71D924511AEB42400D00CBC /* splitabundcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = splitabundcommand.h; sourceTree = "<group>"; };
 		A71D924611AEB42400D00CBC /* splitmatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = splitmatrix.cpp; sourceTree = "<group>"; };
 		A71D924711AEB42400D00CBC /* splitmatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = splitmatrix.h; sourceTree = "<group>"; };
+		A724C2B61254961E006BB1C7 /* parsefastaqcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parsefastaqcommand.h; sourceTree = "<group>"; };
+		A724C2B71254961E006BB1C7 /* parsefastaqcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parsefastaqcommand.cpp; sourceTree = "<group>"; };
 		A72B3A62118B37FD004B9F8D /* phylodiversitycommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = phylodiversitycommand.h; sourceTree = "<group>"; };
 		A72B3A63118B37FD004B9F8D /* phylodiversitycommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = phylodiversitycommand.cpp; sourceTree = "<group>"; };
 		A72B3A7B118B4D1B004B9F8D /* phylodiversity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = phylodiversity.h; sourceTree = "<group>"; };
@@ -820,10 +822,12 @@
 				A798626E1240D91B005FC847 /* normalizesharedcommand.cpp */,
 				A7DA20B8113FECD400BF472F /* otuhierarchycommand.cpp */,
 				A7DA20B9113FECD400BF472F /* otuhierarchycommand.h */,
+				A724C2B61254961E006BB1C7 /* parsefastaqcommand.h */,
+				A724C2B71254961E006BB1C7 /* parsefastaqcommand.cpp */,
 				A7DA20BC113FECD400BF472F /* parselistscommand.cpp */,
 				A7DA20BD113FECD400BF472F /* parselistscommand.h */,
-				A7E8338B115BBDAA00739EC4 /* parsesffcommand.cpp */,
 				A7E8338C115BBDAA00739EC4 /* parsesffcommand.h */,
+				A7E8338B115BBDAA00739EC4 /* parsesffcommand.cpp */,
 				A7DA20C0113FECD400BF472F /* parsimonycommand.cpp */,
 				A7DA20C1113FECD400BF472F /* parsimonycommand.h */,
 				A7DA20C3113FECD400BF472F /* pcacommand.h */,

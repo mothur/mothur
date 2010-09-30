@@ -37,13 +37,17 @@ private:
 	vector<Calculator*> vennCalculators;	
 	ValidCalculators* validCalculator;
 	vector<SharedRAbundVector*> lookup;
+	set< set<int> > combosOfFour;
 	SAbundVector* sabund;
 	int abund;
 	
-	bool abort, allLines, nseqs;
+	bool abort, allLines, nseqs, perm;
 	set<string> labels; //holds labels to be used
 	string format, groups, calc, label, outputDir;
 	vector<string> Estimators, Groups;
+	
+	set< set<int> > findCombinations(int);
+	int getCombos(set<int>, set< set<int> >&);
 
 
 };

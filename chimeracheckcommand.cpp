@@ -217,6 +217,7 @@ int ChimeraCheckCommand::execute(){
 
 			if (m->control_pressed) { delete chimera;	return 0;	}
 			
+			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[i]);  }//if user entered a file with a path then preserve it
 			string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[i]))  + "chimeracheck.chimeras";
 			outputNames.push_back(outputFileName);
 			

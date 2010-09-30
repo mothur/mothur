@@ -92,10 +92,7 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 			}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
-				outputDir = "";	
-				outputDir += m->hasPath(fastafile); //if user entered a file with a path then preserve it	
-			}
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
 
 			templatefile = validParameter.validFile(parameters, "template", true);
 			if (templatefile == "not open") { abort = true; }
@@ -192,6 +189,7 @@ int ChimeraCcodeCommand::execute(){
 			if (chimera->getUnaligned()) { m->mothurOut("Your template sequences are different lengths, please correct."); m->mothurOutEndLine(); delete chimera; return 0; }
 			templateSeqsLength = chimera->getLength();
 			
+			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it
 			string outputFileName, accnosFileName;
 			if (maskfile != "") {
 				outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + maskfile + ".ccode.chimeras";

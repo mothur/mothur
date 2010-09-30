@@ -13,6 +13,21 @@
 
 CXXFLAGS += -O3
 
+64BIT_VERSION ?= yes
+
+ifeq  ($(strip $(64BIT_VERSION)),yes)
+	#if you are using centos uncomment the following lines
+	#CXX = g++44
+	
+	#if you are a mac user use the following line
+	TARGET_ARCH += -arch x86_64
+	
+	#if you are a linux user use the following line
+	#CXXFLAGS += -mtune=native -march=native -m64
+	
+	 CXXFLAGS += -DBIT_VERSION
+endif
+
 MOTHUR_FILES = "\"../Release\""
 
 RELEASE_DATE = "\"9/17/2010\""
@@ -29,21 +44,6 @@ CYGWIN_BUILD ?= no
 ifeq  ($(strip $(CYGWIN_BUILD)),yes)
     CXXFLAGS += -mno-cygwin
     LDFLAGS += -mno-cygwin 
-endif
-
-64BIT_VERSION ?= yes
-
-ifeq  ($(strip $(64BIT_VERSION)),yes)
-	 CXXFLAGS += -DBIT_VERSION
-	
-	#if you are using centos uncomment the following lines
-	#CXX = g++44
-	
-	#if you are a mac user use the following line
-	TARGET_ARCH += -arch x86_64
-	
-	#if you are a linux user use the following line
-	#CXXFLAGS += -mtune=native -march=native -m64
 endif
 
 # if you do not want to use the readline library, set this to no.
