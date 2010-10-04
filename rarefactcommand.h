@@ -36,7 +36,7 @@ private:
 	InputData* input;
 	ValidCalculators* validCalculator;
 	Rarefact* rCurve;
-	int nIters, abund;
+	int nIters, abund, processors;
 	float freq;
 	
 	bool abort, allLines;

@@ -17,6 +17,8 @@ public:
 	virtual void init(string) = 0;
 	virtual void reset() = 0;
 	virtual void close() = 0;
+	virtual void outputTempFiles(string) {}
+	virtual void inputTempFiles(string) {}
 	virtual bool isCalcMultiple() = 0;
 	virtual void setAll(bool){}
 	virtual bool hasLciHci(){ return false; }

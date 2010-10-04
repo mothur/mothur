@@ -399,7 +399,7 @@ string ClassifyOtuCommand::findConsensusTaxonomy(int bin, ListVector* thisList, 
 		}
 		
 				
-		if (conTax == "") {  conTax = "unclassified;";  }
+		if (conTax == "") {  conTax = "no_consensus;";  }
 		
 		delete phylo;	
 		

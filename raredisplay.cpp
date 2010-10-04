@@ -135,6 +135,55 @@ void RareDisplay::close(){
 		exit(1);
 	}
 }
+/***********************************************************************/
+
+void RareDisplay::inputTempFiles(string filename){
+	try {
+		ifstream in;
+		m->openInputFile(filename, in);
+		
+		int thisIters;
+		in >> thisIters; m->gobble(in);
+		
+		for (int i = 0; i < seqs.size(); i++) {
+			double tempresult, tempvar;
+			in >> tempresult >> tempvar; m->gobble(in);
+			
+			//find weighted result
+			results[i] = ((nIters * results[i]) + (thisIters * tempresult)) / (float)(nIters + thisIters);
+			
+			var[i] = ((nIters * var[i]) + (thisIters * tempvar)) / (float)(nIters + thisIters);
+		}
+		
+		in.close();
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RareDisplay", "inputTempFiles");
+		exit(1);
+	}
+}
+
+/***********************************************************************/
+
+void RareDisplay::outputTempFiles(string filename){
+	try {
+		ofstream out;
+		m->openOutputFile(filename, out);
+		
+		out << nIters << endl;
+		
+		for (int i = 0; i < seqs.size(); i++) {
+			out << results[i] << '\t' << var[i] << endl;
+		}
+		
+		out.close();
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RareDisplay", "outputTempFiles");
+		exit(1);
+	}
+}
+
 
 /***********************************************************************/
 

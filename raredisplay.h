@@ -20,6 +20,9 @@ public:
 	void close();
 	bool isCalcMultiple() { return estimate->getMultiple(); }
 	
+	void outputTempFiles(string);
+	void inputTempFiles(string);
+	
 private:
 	Calculator* estimate;
 	FileOutput* output;
