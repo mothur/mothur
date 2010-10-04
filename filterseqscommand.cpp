@@ -147,13 +147,14 @@ void FilterSeqsCommand::help(){
 	try {
 				
 		m->mothurOut("The filter.seqs command reads a file containing sequences and creates a .filter and .filter.fasta file.\n");
-		m->mothurOut("The filter.seqs command parameters are fasta, trump, soft, hard and vertical. \n");
+		m->mothurOut("The filter.seqs command parameters are fasta, trump, soft, hard, processors and vertical. \n");
 		m->mothurOut("The fasta parameter is required. You may enter several fasta files to build the filter from and filter, by separating their names with -'s.\n");
 		m->mothurOut("For example: fasta=abrecovery.fasta-amazon.fasta \n");
 		m->mothurOut("The trump parameter .... The default is ...\n");
 		m->mothurOut("The soft parameter .... The default is ....\n");
 		m->mothurOut("The hard parameter allows you to enter a file containing the filter you want to use.\n");
 		m->mothurOut("The vertical parameter removes columns where all sequences contain a gap character. The default is T.\n");
+		m->mothurOut("The processors parameter allows you to specify the number of processors to use. The default is 1.\n");
 		m->mothurOut("The filter.seqs command should be in the following format: \n");
 		m->mothurOut("filter.seqs(fasta=yourFastaFile, trump=yourTrump) \n");
 		m->mothurOut("Example filter.seqs(fasta=abrecovery.fasta, trump=.).\n");

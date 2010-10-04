@@ -104,11 +104,12 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 void UnifracUnweightedCommand::help(){
 	try {
 		m->mothurOut("The unifrac.unweighted command can only be executed after a successful read.tree command.\n");
-		m->mothurOut("The unifrac.unweighted command parameters are groups, iters, distance and random.  No parameters are required.\n");
+		m->mothurOut("The unifrac.unweighted command parameters are groups, iters, distance, processors and random.  No parameters are required.\n");
 		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 1 valid group.\n");
 		m->mothurOut("The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree.\n");
 		m->mothurOut("The distance parameter allows you to create a distance file from the results. The default is false.\n");
 		m->mothurOut("The random parameter allows you to shut off the comparison to random trees. The default is false, meaning compare don't your trees with randomly generated trees.\n");
+		m->mothurOut("The processors parameter allows you to specify the number of processors to use. The default is 1.\n");
 		m->mothurOut("The unifrac.unweighted command should be in the following format: unifrac.unweighted(groups=yourGroups, iters=yourIters).\n");
 		m->mothurOut("Example unifrac.unweighted(groups=A-B-C, iters=500).\n");
 		m->mothurOut("The default value for groups is all the groups in your groupfile, and iters is 1000.\n");

@@ -40,7 +40,7 @@ RareFactCommand::RareFactCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"iters","freq","label","calc","abund","outputdir","inputdir"};
+			string Array[] =  {"iters","freq","label","calc","abund","processors","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -93,6 +93,9 @@ RareFactCommand::RareFactCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "iters", false);			if (temp == "not found") { temp = "1000"; }
 			convert(temp, nIters); 
+			
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = "1";				}
+			convert(temp, processors);
 		}
 		
 	}
@@ -107,8 +110,9 @@ void RareFactCommand::help(){
 	try {
 		m->mothurOut("The rarefaction.single command can only be executed after a successful read.otu WTIH ONE EXECEPTION.\n");
 		m->mothurOut("The rarefaction.single command can be executed after a successful cluster command.  It will use the .list file from the output of the cluster.\n");
-		m->mothurOut("The rarefaction.single command parameters are label, iters, freq, calc and abund.  No parameters are required. \n");
+		m->mothurOut("The rarefaction.single command parameters are label, iters, freq, calc, processors and abund.  No parameters are required. \n");
 		m->mothurOut("The freq parameter is used indicate when to output your data, by default it is set to 100. But you can set it to a percentage of the number of sequence. For example freq=0.10, means 10%. \n");
+		m->mothurOut("The processors parameter allows you to specify the number of processors to use. The default is 1.\n");
 		m->mothurOut("The rarefaction.single command should be in the following format: \n");
 		m->mothurOut("rarefaction.single(label=yourLabel, iters=yourIters, freq=yourFreq, calc=yourEstimators).\n");
 		m->mothurOut("Example rarefaction.single(label=unique-.01-.03, iters=10000, freq=10, calc=sobs-rchao-race-rjack-rbootstrap-rshannon-rnpshannon-rsimpson).\n");
@@ -235,7 +239,7 @@ int RareFactCommand::execute(){
 				if(allLines == 1 || labels.count(order->getLabel()) == 1){
 					
 					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-					rCurve = new Rarefact(order, rDisplays);
+					rCurve = new Rarefact(order, rDisplays, processors);
 					rCurve->getCurve(freq, nIters);
 					delete rCurve;
 					
@@ -250,7 +254,7 @@ int RareFactCommand::execute(){
 					order = (input->getOrderVector(lastLabel));
 					
 					m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-					rCurve = new Rarefact(order, rDisplays);
+					rCurve = new Rarefact(order, rDisplays, processors);
 					rCurve->getCurve(freq, nIters);
 					delete rCurve;
 					
@@ -290,7 +294,7 @@ int RareFactCommand::execute(){
 				order = (input->getOrderVector(lastLabel));
 				
 				m->mothurOut(order->getLabel()); m->mothurOutEndLine();
-				rCurve = new Rarefact(order, rDisplays);
+				rCurve = new Rarefact(order, rDisplays, processors);
 				rCurve->getCurve(freq, nIters);
 				delete rCurve;
 				
