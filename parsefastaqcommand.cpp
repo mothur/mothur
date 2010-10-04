@@ -19,7 +19,7 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fastaq", "outputdir", "inputdir"};
+			string Array[] =  {"fastq", "outputdir", "inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -38,18 +38,18 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
 			if (inputDir == "not found"){	inputDir = "";		}
 			else {
 				string path;
-				it = parameters.find("fastaq");
+				it = parameters.find("fastq");
 				//user has given a template file
 				if(it != parameters.end()){ 
 					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["fastaq"] = inputDir + it->second;		}
+					if (path == "") {	parameters["fastq"] = inputDir + it->second;		}
 				}
 			}
 			
 			//check for required parameters
-			fastaQFile = validParameter.validFile(parameters, "fastaq", true);
-			if (fastaQFile == "not found") {	m->mothurOut("fastaq is a required parameter for the parse.fastaq command.");	m->mothurOutEndLine();	abort = true;	}
+			fastaQFile = validParameter.validFile(parameters, "fastq", true);
+			if (fastaQFile == "not found") {	m->mothurOut("fastq is a required parameter for the fastq.info command.");	m->mothurOutEndLine();	abort = true;	}
 			else if (fastaQFile == "not open")	{	fastaQFile = ""; abort = true;	}	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -66,11 +66,11 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
 
 void ParseFastaQCommand::help(){
 	try {
-		m->mothurOut("The parse.fastaq command reads a fastaQ file and creates a fasta and quality file.\n");
-		m->mothurOut("The parse.fastaq command parameter is fastaq, and it is required.\n");
-		m->mothurOut("The parse.fastaq command should be in the following format: parse.fastaq(fastaq=yourFastaQFile).\n");
-		m->mothurOut("Example parse.fastaq(fastaq=test.fastaq).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fastaq), '=' and yourFastaQFile.\n");
+		m->mothurOut("The fastq.info command reads a fastaQ file and creates a fasta and quality file.\n");
+		m->mothurOut("The fastq.info command parameter is fastq, and it is required.\n");
+		m->mothurOut("The fastq.info command should be in the following format: fastq.info(fastaq=yourFastaQFile).\n");
+		m->mothurOut("Example fastq.info(fastaq=test.fastaq).\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. fastq), '=' and yourFastQFile.\n");
 		m->mothurOutEndLine();
 	}
 	catch(exception& e) {
