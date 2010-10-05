@@ -276,8 +276,8 @@ int DistanceCommand::execute(){
 				for(int i = 1; i < processors; i++) { 
 					if (m->control_pressed) { MPI_File_close(&outMPI);  delete distCalculator;  return 0; }
 					
-					char buf[4];
-					MPI_Recv(buf, 4, MPI_CHAR, i, tag, MPI_COMM_WORLD, &status); 
+					char buf[5];
+					MPI_Recv(buf, 5, MPI_CHAR, i, tag, MPI_COMM_WORLD, &status); 
 				}
 			}else { //you are a child process
 				//do your part
@@ -285,10 +285,10 @@ int DistanceCommand::execute(){
 				
 				if (m->control_pressed) { MPI_File_close(&outMPI);  delete distCalculator;  return 0; }
 			
-				char buf[4];
+				char buf[5];
 				strcpy(buf, "done"); 
 				//tell parent you are done.
-				MPI_Send(buf, 4, MPI_CHAR, 0, tag, MPI_COMM_WORLD);
+				MPI_Send(buf, 5, MPI_CHAR, 0, tag, MPI_COMM_WORLD);
 			}
 			
 			MPI_File_close(&outMPI);

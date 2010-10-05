@@ -270,8 +270,8 @@ int ChimeraCheckCommand::execute(){
 					
 					//wait on chidren
 					for(int j = 1; j < processors; j++) { 
-						char buf[4];
-						MPI_Recv(buf, 4, MPI_CHAR, j, tag, MPI_COMM_WORLD, &status); 
+						char buf[5];
+						MPI_Recv(buf, 5, MPI_CHAR, j, tag, MPI_COMM_WORLD, &status); 
 					}
 				}else{ //you are a child process
 					MPI_Recv(&numSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
@@ -289,9 +289,9 @@ int ChimeraCheckCommand::execute(){
 					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  delete chimera; return 0;  }
 					
 					//tell parent you are done.
-					char buf[4];
+					char buf[5];
 					strcpy(buf, "done"); 
-					MPI_Send(buf, 4, MPI_CHAR, 0, tag, MPI_COMM_WORLD);
+					MPI_Send(buf, 5, MPI_CHAR, 0, tag, MPI_COMM_WORLD);
 				}
 				
 				//close files 

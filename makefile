@@ -53,7 +53,7 @@ USEREADLINE ?= yes
 
 ifeq  ($(strip $(USEREADLINE)),yes)
     CXXFLAGS += -DUSE_READLINE
-    LDFLAGS += \
+    LIBS = \
       -lreadline\
       -lncurses
 endif
@@ -88,7 +88,7 @@ OBJECTS=$(patsubst %.cpp,%.o,$(wildcard *.cpp))
 OBJECTS+=$(patsubst %.c,%.o,$(wildcard *.c))
 
 mothur : $(OBJECTS)
-	$(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS)
+	$(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
 
 install : mothur
 	cp mothur ../Release/mothur
