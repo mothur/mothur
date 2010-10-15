@@ -10,6 +10,54 @@
 #include "binsequencecommand.h"
 
 //**********************************************************************************************************************
+vector<string> BinSeqCommand::getValidParameters(){	
+	try {
+		string AlignArray[] =  {"fasta","label","name", "group","outputdir","inputdir"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "BinSeqCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> BinSeqCommand::getRequiredParameters(){	
+	try {
+		string AlignArray[] =  {"fasta"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "BinSeqCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> BinSeqCommand::getRequiredFiles(){	
+	try {
+		string AlignArray[] =  {"list"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "BinSeqCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+BinSeqCommand::BinSeqCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["fasta"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "BinSeqCommand", "BinSeqCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 BinSeqCommand::BinSeqCommand(string option) {
 	try {
 		globaldata = GlobalData::getInstance();
@@ -35,6 +83,10 @@ BinSeqCommand::BinSeqCommand(string option) {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["fasta"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -316,7 +368,7 @@ int BinSeqCommand::process(ListVector* list) {
 				m->openOutputFile(outputFileName, out);
 				
 				//save to output list of output file names
-				outputNames.push_back(outputFileName);
+				outputNames.push_back(outputFileName);  outputTypes["fasta"].push_back(outputFileName);
 
 				m->mothurOut(list->getLabel()); m->mothurOutEndLine();
 				

@@ -9,8 +9,57 @@
 
 #include "getsharedotucommand.h"
 
-//**********************************************************************************************************************
 
+//**********************************************************************************************************************
+vector<string> GetSharedOTUCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"label","unique","shared","fasta","list","group","output","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetSharedOTUCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+GetSharedOTUCommand::GetSharedOTUCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["fasta"] = tempOutNames;
+		outputTypes["accnos"] = tempOutNames;
+		outputTypes["sharedseqs"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetSharedOTUCommand", "GetSharedOTUCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> GetSharedOTUCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"list","group"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetSharedOTUCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> GetSharedOTUCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetSharedOTUCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 	try {
 	
@@ -38,6 +87,12 @@ GetSharedOTUCommand::GetSharedOTUCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["fasta"] = tempOutNames;
+			outputTypes["accnos"] = tempOutNames;
+			outputTypes["sharedseqs"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -191,7 +246,7 @@ int GetSharedOTUCommand::execute(){
 			m->openInputFile(fastafile, inFasta);
 			
 			while(!inFasta.eof()) {
-				if (m->control_pressed) { inFasta.close(); delete groupMap; return 0; }
+				if (m->control_pressed) { outputTypes.clear(); inFasta.close(); delete groupMap; return 0; }
 				
 				Sequence seq(inFasta); m->gobble(inFasta);
 				if (seq.getName() != "") {  seqs.push_back(seq);   }
@@ -214,7 +269,7 @@ int GetSharedOTUCommand::execute(){
 			
 			if (m->control_pressed) { 
 				if (lastlist != NULL) {		delete lastlist;	}
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }  
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }  outputTypes.clear();
 				delete groupMap; return 0;
 			}
 			
@@ -277,7 +332,7 @@ int GetSharedOTUCommand::execute(){
 		
 		if (lastlist != NULL) {		delete lastlist;	}
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }  delete groupMap; return 0; } 
+		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }  delete groupMap; return 0; } 
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -406,6 +461,8 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 		}else { 
 			m->mothurOut("\t" + toString(num)); m->mothurOutEndLine(); 
 			outputNames.push_back(outputFileNames);
+			if (output != "accnos") { outputTypes["sharedseqs"].push_back(outputFileNames); }
+			else { outputTypes["accnos"].push_back(outputFileNames); }
 		}
 		
 		//if fasta file provided output new fasta file
@@ -414,7 +471,7 @@ int GetSharedOTUCommand::process(ListVector* shared) {
 			string outputFileFasta = outputDir + m->getRootName(m->getSimpleName(fastafile)) + shared->getLabel() + userGroups + ".shared.fasta";
 			ofstream outFasta;
 			m->openOutputFile(outputFileFasta, outFasta);
-			outputNames.push_back(outputFileFasta);
+			outputNames.push_back(outputFileFasta); outputTypes["fasta"].push_back(outputFileFasta);
 			
 			for (int k = 0; k < seqs.size(); k++) {
 				if (m->control_pressed) { outFasta.close(); return 0; }

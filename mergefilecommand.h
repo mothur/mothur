@@ -16,12 +16,18 @@
 class MergeFileCommand : public Command {
 public:
 	MergeFileCommand(string);
+	MergeFileCommand();
 	~MergeFileCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();	
 
 private:
-	vector<string> fileNames;
+	vector<string> fileNames, outputNames;
+	map<string, vector<string> > outputTypes;
 	string outputFileName;
 	int numInputFiles;
 	bool abort;

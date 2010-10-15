@@ -24,7 +24,12 @@ class SplitGroupCommand : public Command {
 	
 public:
 	SplitGroupCommand(string);	
+	SplitGroupCommand();
 	~SplitGroupCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();	
 	void help();
 
@@ -34,6 +39,7 @@ private:
 	int splitFasta(); 
 	
 	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 	map<string, vector<string> > nameMap;
 	map<string, vector<string> >::iterator itNames;
 	GroupMap* groupMap;

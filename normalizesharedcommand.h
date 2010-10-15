@@ -21,7 +21,12 @@ class NormalizeSharedCommand : public Command {
 
 public:
 	NormalizeSharedCommand(string);
+	NormalizeSharedCommand();
 	~NormalizeSharedCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -35,7 +40,8 @@ private:
 	set<string> labels; //holds labels to be used
 	string groups, label, outputDir, method;
 	int norm;
-	vector<string> Groups;
+	vector<string> Groups, outputNames;
+	map<string, vector<string> > outputTypes;
 	
 	int normalize(vector<SharedRAbundVector*>&, ofstream&);
 	int eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup);

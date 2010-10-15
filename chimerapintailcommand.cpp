@@ -10,8 +10,54 @@
 #include "chimerapintailcommand.h"
 #include "pintail.h"
 
+//**********************************************************************************************************************
+vector<string> ChimeraPintailCommand::getValidParameters(){	
+	try {
+		string AlignArray[] =  {"fasta","filter","processors","window" ,"increment","template","conservation","quantile","mask","outputdir","inputdir"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraPintailCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+ChimeraPintailCommand::ChimeraPintailCommand(){	
+	try {
+		vector<string> tempOutNames;
+		outputTypes["chimera"] = tempOutNames;
+		outputTypes["accnos"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraPintailCommand", "ChimeraPintailCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ChimeraPintailCommand::getRequiredParameters(){	
+	try {
+		string AlignArray[] =  {"template","fasta"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraPintailCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ChimeraPintailCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraPintailCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 //***************************************************************************************************************
-
 ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 	try {
 		abort = false;
@@ -35,6 +81,10 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			vector<string> tempOutNames;
+			outputTypes["chimera"] = tempOutNames;
+			outputTypes["accnos"] = tempOutNames;
+		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
@@ -94,6 +144,16 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 							fastaFileNames[i] = tryPath;
 						}
 					}
+					
+					if (ableToOpen == 1) {
+						if (m->getOutputDir() != "") { //default path is set
+							string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
+							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							fastaFileNames[i] = tryPath;
+						}
+					}
+
 					in.close();
 					
 					if (ableToOpen == 1) { 
@@ -140,7 +200,17 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 							maskfile = tryPath;
 					}
 				}
-					in.close();
+				
+				if (ableToOpen == 1) {
+						if (m->getOutputDir() != "") { //default path is set
+							string tryPath = m->getOutputDir() + m->getSimpleName(maskfile);
+							m->mothurOut("Unable to open " + maskfile + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							maskfile = tryPath;
+						}
+				}
+				
+				in.close();
 					
 				if (ableToOpen == 1) { 
 						m->mothurOut("Unable to open " + maskfile + "."); m->mothurOutEndLine(); 
@@ -332,7 +402,7 @@ int ChimeraPintailCommand::execute(){
 				MPI_File_open(MPI_COMM_WORLD, outFilename, outMode, MPI_INFO_NULL, &outMPI);
 				MPI_File_open(MPI_COMM_WORLD, outAccnosFilename, outMode, MPI_INFO_NULL, &outMPIAccnos);
 				
-				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  delete chimera; return 0;  }
+				if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  delete chimera; return 0;  }
 
 				if (pid == 0) { //you are the root process 
 								
@@ -352,7 +422,7 @@ int ChimeraPintailCommand::execute(){
 					//do your part
 					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, MPIPos);
 					
-					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  remove(outputFileName.c_str());  remove(accnosFileName.c_str());  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  delete chimera; return 0;  }
+					if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  remove(outputFileName.c_str());  remove(accnosFileName.c_str());  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  delete chimera; return 0;  }
 					
 				}else{ //you are a child process
 					MPI_Recv(&numSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
@@ -367,7 +437,7 @@ int ChimeraPintailCommand::execute(){
 					//do your part
 					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, MPIPos);
 					
-					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  delete chimera; return 0;  }
+					if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  delete chimera; return 0;  }
 				}
 				
 				//close files 
@@ -388,7 +458,7 @@ int ChimeraPintailCommand::execute(){
 		
 					numSeqs = driver(lines[0], outputFileName, fastaFileNames[s], accnosFileName);
 					
-					if (m->control_pressed) { remove(outputFileName.c_str()); remove(accnosFileName.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
+					if (m->control_pressed) { outputTypes.clear(); remove(outputFileName.c_str()); remove(accnosFileName.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
 					
 				}else{
 					processIDS.resize(0);
@@ -413,7 +483,7 @@ int ChimeraPintailCommand::execute(){
 					if (m->control_pressed) { 
 						remove(outputFileName.c_str()); 
 						remove(accnosFileName.c_str());
-						for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} 
+						for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} outputTypes.clear();
 						for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 						delete chimera;
 						return 0;
@@ -423,7 +493,7 @@ int ChimeraPintailCommand::execute(){
 			#else
 				numSeqs = driver(lines[0], outputFileName, fastaFileNames[s], accnosFileName);
 				
-				if (m->control_pressed) { remove(outputFileName.c_str()); remove(accnosFileName.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
+				if (m->control_pressed) { outputTypes.clear(); remove(outputFileName.c_str()); remove(accnosFileName.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
 			#endif
 			
 		#endif	
@@ -431,8 +501,8 @@ int ChimeraPintailCommand::execute(){
 			delete chimera;
 			for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 			
-			outputNames.push_back(outputFileName);
-			outputNames.push_back(accnosFileName); 
+			outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
+			outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
 			
 			m->mothurOutEndLine();
 			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine();

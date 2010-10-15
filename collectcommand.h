@@ -38,7 +38,12 @@ class CollectCommand : public Command {
 	
 public:
 	CollectCommand(string);	
+	CollectCommand();
 	~CollectCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();	
 	void help();
 	
@@ -52,6 +57,8 @@ private:
 	vector<Display*> cDisplays;
 	int abund, size;
 	float freq;
+	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used

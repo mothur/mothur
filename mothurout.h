@@ -27,6 +27,8 @@ class MothurOut {
 		void closeLog();
 		string getDefaultPath() { return defaultPath; }
 		void setDefaultPath(string);
+		string getOutputDir() { return outputDir; }
+		void setOutputDir(string);
 		
 		string getReleaseDate() { return releaseDate; }
 		void setReleaseDate(string r) { releaseDate = r; }
@@ -95,7 +97,7 @@ class MothurOut {
 		~MothurOut();
 
 		string logFileName;
-		string defaultPath;
+		string defaultPath, outputDir;
 		string releaseDate, version;
 		
 		ofstream out;

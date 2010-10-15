@@ -9,6 +9,56 @@
 
 #include "unifracunweightedcommand.h"
 
+//**********************************************************************************************************************
+vector<string> UnifracUnweightedCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"groups","iters","distance","random", "processors","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "UnifracUnweightedCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+UnifracUnweightedCommand::UnifracUnweightedCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["unweighted"] = tempOutNames;
+		outputTypes["uwsummary"] = tempOutNames;
+		outputTypes["phylip"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "UnifracUnweightedCommand", "UnifracUnweightedCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> UnifracUnweightedCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "UnifracUnweightedCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> UnifracUnweightedCommand::getRequiredFiles(){	
+	try {
+		string Array[] =  {"tree","group"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "UnifracUnweightedCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 /***********************************************************/
 UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 	try {
@@ -33,6 +83,12 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["unweighted"] = tempOutNames;
+			outputTypes["uwsummary"] = tempOutNames;
+			outputTypes["phylip"] = tempOutNames;
 			
 			if (globaldata->gTree.size() == 0) {//no trees were read
 				m->mothurOut("You must execute the read.tree command, before you may execute the unifrac.unweighted command."); m->mothurOutEndLine(); abort = true;  }
@@ -77,7 +133,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 				T = globaldata->gTree;
 				tmap = globaldata->gTreemap;
 				sumFile = outputDir + m->getSimpleName(globaldata->getTreeFile()) + ".uwsummary";
-				outputNames.push_back(sumFile);
+				outputNames.push_back(sumFile); outputTypes["uwsummary"].push_back(sumFile);
 				m->openOutputFile(sumFile, outSum);
 				
 				util = new SharedUtil();
@@ -151,6 +207,7 @@ int UnifracUnweightedCommand::execute() {
 			if (random)  {  
 				output = new ColumnFile(outputDir + m->getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".unweighted", itersString);
 				outputNames.push_back(outputDir + m->getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".unweighted");
+				outputTypes["unweighted"].push_back(outputDir + m->getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".unweighted");
 			}
 			
 			
@@ -316,7 +373,7 @@ void UnifracUnweightedCommand::printUWSummaryFile(int i) {
 void UnifracUnweightedCommand::createPhylipFile(int i) {
 	try {
 		string phylipFileName = outputDir + m->getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".unweighted.dist";
-		outputNames.push_back(phylipFileName);
+		outputNames.push_back(phylipFileName); outputTypes["phylip"].push_back(phylipFileName); 
 		
 		ofstream out;
 		m->openOutputFile(phylipFileName, out);

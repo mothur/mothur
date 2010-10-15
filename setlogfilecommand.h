@@ -19,7 +19,12 @@ class SetLogFileCommand : public Command {
 	
 public:
 	SetLogFileCommand(string);
+	SetLogFileCommand() {}
 	~SetLogFileCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -27,6 +32,8 @@ private:
 	CommandFactory* commandFactory;
 	string name;
 	bool abort, append;
+	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 		
 };
 

@@ -10,6 +10,54 @@
 #include "readotucommand.h"
 
 //**********************************************************************************************************************
+vector<string> ReadOtuCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"list","order","shared","relabund","label","group","sabund", "rabund","groups","ordergroup","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ReadOtuCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+ReadOtuCommand::ReadOtuCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["rabund"] = tempOutNames;
+		outputTypes["shared"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ReadOtuCommand", "ReadOtuCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ReadOtuCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"list","shared","relabund","sabund","rabund","or"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChopSeqsCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ReadOtuCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ReadOtuCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 ReadOtuCommand::ReadOtuCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
@@ -34,7 +82,12 @@ ReadOtuCommand::ReadOtuCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
-	
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["rabund"] = tempOutNames;
+			outputTypes["shared"] = tempOutNames;
+			
 			globaldata->newRead();
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
@@ -254,6 +307,8 @@ int ReadOtuCommand::execute(){
 				//m->mothurOut(globaldata->getSharedFile()); m->mothurOutEndLine();	
 				//m->mothurOutEndLine();
 			}
+			
+			outputTypes = shared->getOutputFiles();
 			
 			delete shared;
 		}

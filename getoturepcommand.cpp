@@ -36,6 +36,54 @@ inline bool compareGroup(repStruct left, repStruct right){
 	return (left.group < right.group);	
 }
 //**********************************************************************************************************************
+GetOTURepCommand::GetOTURepCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["fasta"] = tempOutNames;
+		outputTypes["name"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetOTURepCommand", "GetOTURepCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> GetOTURepCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"fasta","list","label","name", "group", "sorted", "phylip","column","large","cutoff","precision","groups","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetOTURepCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> GetOTURepCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"fasta","list"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetOTURepCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> GetOTURepCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetOTURepCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 GetOTURepCommand::GetOTURepCommand(string option)  {
 	try{
 		globaldata = GlobalData::getInstance();
@@ -61,6 +109,11 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["fasta"] = tempOutNames;
+			outputTypes["name"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -378,7 +431,7 @@ int GetOTURepCommand::execute(){
 					
 					if (m->control_pressed) { 
 						if (large) {  inRow.close(); remove(distFile.c_str());  }
-						for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+						for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } outputTypes.clear();
 						delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
 					}
 					
@@ -397,7 +450,7 @@ int GetOTURepCommand::execute(){
 					
 					if (m->control_pressed) { 
 						if (large) {  inRow.close(); remove(distFile.c_str());  }
-						for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+						for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } outputTypes.clear();
 						delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
 					}
 					
@@ -437,7 +490,7 @@ int GetOTURepCommand::execute(){
 			
 			if (m->control_pressed) { 
 					if (large) {  inRow.close(); remove(distFile.c_str());  }
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } outputTypes.clear();
 					delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
 			}
 		}
@@ -607,7 +660,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 		if (Groups.size() == 0) { //you don't want to use groups
 			outputNamesFile  = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + ".rep.names";
 			m->openOutputFile(outputNamesFile, newNamesOutput);
-			outputNames.push_back(outputNamesFile);
+			outputNames.push_back(outputNamesFile); outputTypes["name"].push_back(outputNamesFile); 
 			outputNameFiles[outputNamesFile] = processList->getLabel();
 		}else{ //you want to use groups
 			ofstream* temp;
@@ -617,7 +670,7 @@ int GetOTURepCommand::process(ListVector* processList) {
 				outputNamesFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + "." + Groups[i] + ".rep.names";
 				
 				m->openOutputFile(outputNamesFile, *(temp));
-				outputNames.push_back(outputNamesFile);
+				outputNames.push_back(outputNamesFile); outputTypes["name"].push_back(outputNamesFile);
 				outputNameFiles[outputNamesFile] = processList->getLabel() + "." + Groups[i];
 			}
 		}
@@ -705,7 +758,7 @@ int GetOTURepCommand::processNames(string filename, string label) {
 		string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + label + ".rep.fasta";
 		m->openOutputFile(outputFileName, out);
 		vector<repStruct> reps;
-		outputNames.push_back(outputFileName);
+		outputNames.push_back(outputFileName); outputTypes["fasta"].push_back(outputFileName);
 		
 		ofstream out2;
 		string tempNameFile = filename + ".temp";

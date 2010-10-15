@@ -16,13 +16,19 @@ class ListSeqsCommand : public Command {
 	
 	public:
 	
-		ListSeqsCommand(string);	
-		~ListSeqsCommand(){};
+		ListSeqsCommand(string);
+		ListSeqsCommand();	
+		~ListSeqsCommand(){}
+		vector<string> getRequiredParameters();
+		vector<string> getValidParameters();
+		vector<string> getRequiredFiles();
+		map<string, vector<string> > getOutputFiles() { return outputTypes; }
 		int execute();
 		void help();	
 		
 	private:
-		vector<string> names;
+		vector<string> names, outputNames;
+		map<string, vector<string> > outputTypes;
 		string fastafile, namefile, groupfile, alignfile, inputFileName, outputDir, listfile, taxfile;
 		bool abort;
 		

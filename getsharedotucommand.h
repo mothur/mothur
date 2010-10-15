@@ -22,7 +22,12 @@ class GetSharedOTUCommand : public Command {
 	public:
 	
 		GetSharedOTUCommand(string);	
+		GetSharedOTUCommand();	
 		~GetSharedOTUCommand();
+		vector<string> getRequiredParameters();
+		vector<string> getValidParameters();
+		vector<string> getRequiredFiles();
+		map<string, vector<string> > getOutputFiles() { return outputTypes; }
 		int execute();
 		void help();	
 		
@@ -40,6 +45,7 @@ class GetSharedOTUCommand : public Command {
 		map<string, string>::iterator it;
 		vector<Sequence> seqs;
 		vector<string> outputNames;
+		map<string, vector<string> > outputTypes;
 		
 		int process(ListVector*);
 		

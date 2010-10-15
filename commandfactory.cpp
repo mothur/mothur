@@ -92,6 +92,7 @@
 #include "getlineagecommand.h"
 #include "removelineagecommand.h"
 #include "parsefastaqcommand.h"
+#include "pipelinepdscommand.h"
 
 /*******************************************************/
 
@@ -116,6 +117,8 @@ CommandFactory::CommandFactory(){
 	m = MothurOut::getInstance();
 	
 	command = new NoCommand(s);
+	shellcommand = new NoCommand(s);
+	pipecommand = new NoCommand(s);
 	
 	outputDir = ""; inputDir = "";
 	logFileName = "";
@@ -188,6 +191,7 @@ CommandFactory::CommandFactory(){
 	commands["get.lineage"]			= "get.lineage";
 	commands["remove.lineage"]		= "remove.lineage";
 	commands["fastq.info"]			= "fastq.info";
+	commands["pipeline.pds"]		= "MPIEnabled";
 	commands["classify.seqs"]		= "MPIEnabled"; 
 	commands["dist.seqs"]			= "MPIEnabled";
 	commands["filter.seqs"]			= "MPIEnabled";
@@ -223,6 +227,8 @@ bool CommandFactory::MPIEnabled(string commandName) {
 CommandFactory::~CommandFactory(){
 	_uniqueInstance = 0;
 	delete command;
+	delete shellcommand;
+	delete pipecommand;
 }
 
 /***********************************************************/
@@ -327,6 +333,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "get.lineage")			{	command = new GetLineageCommand(optionString);				}
 		else if(commandName == "remove.lineage")		{	command = new RemoveLineageCommand(optionString);			}
 		else if(commandName == "fastq.info")			{	command = new ParseFastaQCommand(optionString);				}
+		else if(commandName == "pipeline.pds")			{	command = new PipelineCommand(optionString);				}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -337,6 +344,216 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 	}
 }
 /***********************************************************/
+
+/***********************************************************/
+//This function calls the appropriate command fucntions based on user input.
+Command* CommandFactory::getCommand(string commandName, string optionString, string mode){
+	try {
+		delete pipecommand;   //delete the old command
+		
+		//user has opted to redirect output from dir where input files are located to some other place
+		if (outputDir != "") { 
+			if (optionString != "") { optionString += ", outputdir=" + outputDir; }
+			else { optionString += "outputdir=" + outputDir; }
+		}
+		
+		//user has opted to redirect input from dir where mothur.exe is located to some other place
+		if (inputDir != "") { 
+			if (optionString != "") { optionString += ", inputdir=" + inputDir; }
+			else { optionString += "inputdir=" + inputDir; }
+		}
+		
+		if(commandName == "read.dist")					{	pipecommand = new ReadDistCommand(optionString);				}
+		else if(commandName == "read.otu")				{	pipecommand = new ReadOtuCommand(optionString);					}
+		else if(commandName == "read.tree")				{	pipecommand = new ReadTreeCommand(optionString);				}
+		else if(commandName == "cluster")				{	pipecommand = new ClusterCommand(optionString);					}
+		else if(commandName == "unique.seqs")			{	pipecommand = new DeconvoluteCommand(optionString);				}
+		else if(commandName == "parsimony")				{	pipecommand = new ParsimonyCommand(optionString);				}
+		else if(commandName == "help")					{	pipecommand = new HelpCommand(optionString);					}
+		else if(commandName == "quit")					{	pipecommand = new QuitCommand(optionString);					}
+		else if(commandName == "collect.single")		{	pipecommand = new CollectCommand(optionString);					}
+		else if(commandName == "collect.shared")		{	pipecommand = new CollectSharedCommand(optionString);			}
+		else if(commandName == "rarefaction.single")	{	pipecommand = new RareFactCommand(optionString);				}
+		else if(commandName == "rarefaction.shared")	{	pipecommand = new RareFactSharedCommand(optionString);			}
+		else if(commandName == "summary.single")		{	pipecommand = new SummaryCommand(optionString);					}
+		else if(commandName == "summary.shared")		{	pipecommand = new SummarySharedCommand(optionString);			}
+		else if(commandName == "unifrac.weighted")		{	pipecommand = new UnifracWeightedCommand(optionString);			}
+		else if(commandName == "unifrac.unweighted")	{	pipecommand = new UnifracUnweightedCommand(optionString);		}
+		else if(commandName == "get.group")             {   pipecommand = new GetgroupCommand(optionString);				}
+		else if(commandName == "get.label")             {   pipecommand = new GetlabelCommand(optionString);				}
+		else if(commandName == "get.sabund")            {   pipecommand = new GetSAbundCommand(optionString);				}
+		else if(commandName == "get.rabund")            {   pipecommand = new GetRAbundCommand(optionString);				}
+		else if(commandName == "libshuff")              {   pipecommand = new LibShuffCommand(optionString);				}
+		else if(commandName == "heatmap.bin")			{   pipecommand = new HeatMapCommand(optionString);					}
+		else if(commandName == "heatmap.sim")			{   pipecommand = new HeatMapSimCommand(optionString);				}
+		else if(commandName == "filter.seqs")			{   pipecommand = new FilterSeqsCommand(optionString);				}
+		else if(commandName == "venn")					{   pipecommand = new VennCommand(optionString);					}
+		else if(commandName == "bin.seqs")				{   pipecommand = new BinSeqCommand(optionString);					}
+		else if(commandName == "get.oturep")			{   pipecommand = new GetOTURepCommand(optionString);				}
+		else if(commandName == "tree.shared")			{   pipecommand = new TreeGroupCommand(optionString);				}
+		else if(commandName == "dist.shared")			{   pipecommand = new MatrixOutputCommand(optionString);			}
+		else if(commandName == "bootstrap.shared")		{   pipecommand = new BootSharedCommand(optionString);				}
+		else if(commandName == "consensus")				{   pipecommand = new ConcensusCommand(optionString);				}
+		else if(commandName == "dist.seqs")				{   pipecommand = new DistanceCommand(optionString);				}
+		else if(commandName == "align.seqs")			{   pipecommand = new AlignCommand(optionString);					}
+		else if(commandName == "summary.seqs")			{	pipecommand = new SeqSummaryCommand(optionString);				}
+		else if(commandName == "screen.seqs")			{	pipecommand = new ScreenSeqsCommand(optionString);				}
+		else if(commandName == "reverse.seqs")			{	pipecommand = new ReverseSeqsCommand(optionString);				}
+		else if(commandName == "trim.seqs")				{	pipecommand = new TrimSeqsCommand(optionString);				}
+		else if(commandName == "chimera.seqs")			{	pipecommand = new ChimeraSeqsCommand(optionString);				}
+		else if(commandName == "list.seqs")				{	pipecommand = new ListSeqsCommand(optionString);				}
+		else if(commandName == "get.seqs")				{	pipecommand = new GetSeqsCommand(optionString);					}
+		else if(commandName == "remove.seqs")			{	pipecommand = new RemoveSeqsCommand(optionString);				}
+		else if(commandName == "merge.files")			{	pipecommand = new MergeFileCommand(optionString);				}
+		else if(commandName == "system")				{	pipecommand = new SystemCommand(optionString);					}
+		else if(commandName == "align.check")			{	pipecommand = new AlignCheckCommand(optionString);				}
+		else if(commandName == "get.sharedseqs")		{	pipecommand = new GetSharedOTUCommand(optionString);			}
+		else if(commandName == "get.otulist")			{	pipecommand = new GetListCountCommand(optionString);			}
+		else if(commandName == "hcluster")				{	pipecommand = new HClusterCommand(optionString);				}
+		else if(commandName == "classify.seqs")			{	pipecommand = new ClassifySeqsCommand(optionString);			}
+		else if(commandName == "chimera.ccode")			{	pipecommand = new ChimeraCcodeCommand(optionString);			}
+		else if(commandName == "chimera.check")			{	pipecommand = new ChimeraCheckCommand(optionString);			}
+		else if(commandName == "chimera.slayer")		{	pipecommand = new ChimeraSlayerCommand(optionString);			}
+		else if(commandName == "chimera.pintail")		{	pipecommand = new ChimeraPintailCommand(optionString);			}
+		else if(commandName == "chimera.bellerophon")	{	pipecommand = new ChimeraBellerophonCommand(optionString);		}
+		else if(commandName == "phylotype")				{	pipecommand = new PhylotypeCommand(optionString);				}
+		else if(commandName == "mgcluster")				{	pipecommand = new MGClusterCommand(optionString);				}
+		else if(commandName == "pre.cluster")			{	pipecommand = new PreClusterCommand(optionString);				}
+		else if(commandName == "pcoa")					{	pipecommand = new PCACommand(optionString);						}
+		else if(commandName == "otu.hierarchy")			{	pipecommand = new OtuHierarchyCommand(optionString);			}
+		else if(commandName == "set.dir")				{	pipecommand = new SetDirectoryCommand(optionString);			}
+		else if(commandName == "set.logfile")			{	pipecommand = new SetLogFileCommand(optionString);				}
+		else if(commandName == "parse.list")			{	pipecommand = new ParseListCommand(optionString);				}
+		else if(commandName == "parse.sff")				{	pipecommand = new ParseSFFCommand(optionString);				}
+		else if(commandName == "phylo.diversity")		{	pipecommand = new PhyloDiversityCommand(optionString);			}
+		else if(commandName == "make.group")			{	pipecommand = new MakeGroupCommand(optionString);				}
+		else if(commandName == "chop.seqs")				{	pipecommand = new ChopSeqsCommand(optionString);				}
+		else if(commandName == "clearcut")				{	pipecommand = new ClearcutCommand(optionString);				}
+		else if(commandName == "catchall")				{	pipecommand = new CatchAllCommand(optionString);				}
+		else if(commandName == "split.abund")			{	pipecommand = new SplitAbundCommand(optionString);				}
+		else if(commandName == "cluster.split")			{	pipecommand = new ClusterSplitCommand(optionString);			}
+		else if(commandName == "classify.otu")			{	pipecommand = new ClassifyOtuCommand(optionString);				}
+		else if(commandName == "degap.seqs")			{	pipecommand = new DegapSeqsCommand(optionString);				}
+		else if(commandName == "get.relabund")			{	pipecommand = new GetRelAbundCommand(optionString);				}
+		else if(commandName == "sens.spec")				{	pipecommand = new SensSpecCommand(optionString);				}
+		else if(commandName == "seq.error")				{	pipecommand = new SeqErrorCommand(optionString);				}
+		else if(commandName == "sffinfo")				{	pipecommand = new SffInfoCommand(optionString);					}
+		else if(commandName == "normalize.shared")		{	pipecommand = new NormalizeSharedCommand(optionString);			}
+		else if(commandName == "metastats")				{	pipecommand = new MetaStatsCommand(optionString);				}
+		else if(commandName == "split.groups")			{	pipecommand = new SplitGroupCommand(optionString);				}
+		else if(commandName == "cluster.fragments")		{	pipecommand = new ClusterFragmentsCommand(optionString);		}
+		else if(commandName == "get.lineage")			{	pipecommand = new GetLineageCommand(optionString);				}
+		else if(commandName == "remove.lineage")		{	pipecommand = new RemoveLineageCommand(optionString);			}
+		else if(commandName == "fastq.info")			{	pipecommand = new ParseFastaQCommand(optionString);				}
+		else											{	pipecommand = new NoCommand(optionString);						}
+
+		return pipecommand;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CommandFactory", "getCommand");
+		exit(1);
+	}
+}
+/***********************************************************/
+
+/***********************************************************/
+//This function calls the appropriate command fucntions based on user input, this is used by the pipeline command to check a users piepline for errors before running
+Command* CommandFactory::getCommand(string commandName){
+	try {
+		delete shellcommand;   //delete the old command
+		
+		if(commandName == "read.dist")					{	shellcommand = new ReadDistCommand();				}
+		else if(commandName == "read.otu")				{	shellcommand = new ReadOtuCommand();				}
+		else if(commandName == "read.tree")				{	shellcommand = new ReadTreeCommand();				}
+		else if(commandName == "cluster")				{	shellcommand = new ClusterCommand();				}
+		else if(commandName == "unique.seqs")			{	shellcommand = new DeconvoluteCommand();			}
+		else if(commandName == "parsimony")				{	shellcommand = new ParsimonyCommand();				}
+		else if(commandName == "help")					{	shellcommand = new HelpCommand();					}
+		else if(commandName == "quit")					{	shellcommand = new QuitCommand();					}
+		else if(commandName == "collect.single")		{	shellcommand = new CollectCommand();				}
+		else if(commandName == "collect.shared")		{	shellcommand = new CollectSharedCommand();			}
+		else if(commandName == "rarefaction.single")	{	shellcommand = new RareFactCommand();				}
+		else if(commandName == "rarefaction.shared")	{	shellcommand = new RareFactSharedCommand();			}
+		else if(commandName == "summary.single")		{	shellcommand = new SummaryCommand();				}
+		else if(commandName == "summary.shared")		{	shellcommand = new SummarySharedCommand();			}
+		else if(commandName == "unifrac.weighted")		{	shellcommand = new UnifracWeightedCommand();		}
+		else if(commandName == "unifrac.unweighted")	{	shellcommand = new UnifracUnweightedCommand();		}
+		else if(commandName == "get.group")             {   shellcommand = new GetgroupCommand();				}
+		else if(commandName == "get.label")             {   shellcommand = new GetlabelCommand();				}
+		else if(commandName == "get.sabund")            {   shellcommand = new GetSAbundCommand();				}
+		else if(commandName == "get.rabund")            {   shellcommand = new GetRAbundCommand();				}
+		else if(commandName == "libshuff")              {   shellcommand = new LibShuffCommand();				}
+		else if(commandName == "heatmap.bin")			{   shellcommand = new HeatMapCommand();				}
+		else if(commandName == "heatmap.sim")			{   shellcommand = new HeatMapSimCommand();				}
+		else if(commandName == "filter.seqs")			{   shellcommand = new FilterSeqsCommand();				}
+		else if(commandName == "venn")					{   shellcommand = new VennCommand();					}
+		else if(commandName == "bin.seqs")				{   shellcommand = new BinSeqCommand();					}
+		else if(commandName == "get.oturep")			{   shellcommand = new GetOTURepCommand();				}
+		else if(commandName == "tree.shared")			{   shellcommand = new TreeGroupCommand();				}
+		else if(commandName == "dist.shared")			{   shellcommand = new MatrixOutputCommand();			}
+		else if(commandName == "bootstrap.shared")		{   shellcommand = new BootSharedCommand();				}
+		else if(commandName == "consensus")				{   shellcommand = new ConcensusCommand();				}
+		else if(commandName == "dist.seqs")				{   shellcommand = new DistanceCommand();				}
+		else if(commandName == "align.seqs")			{   shellcommand = new AlignCommand();					}
+		else if(commandName == "summary.seqs")			{	shellcommand = new SeqSummaryCommand();				}
+		else if(commandName == "screen.seqs")			{	shellcommand = new ScreenSeqsCommand();				}
+		else if(commandName == "reverse.seqs")			{	shellcommand = new ReverseSeqsCommand();			}
+		else if(commandName == "trim.seqs")				{	shellcommand = new TrimSeqsCommand();				}
+		else if(commandName == "chimera.seqs")			{	shellcommand = new ChimeraSeqsCommand();			}
+		else if(commandName == "list.seqs")				{	shellcommand = new ListSeqsCommand();				}
+		else if(commandName == "get.seqs")				{	shellcommand = new GetSeqsCommand();				}
+		else if(commandName == "remove.seqs")			{	shellcommand = new RemoveSeqsCommand();				}
+		else if(commandName == "merge.files")			{	shellcommand = new MergeFileCommand();				}
+		else if(commandName == "system")				{	shellcommand = new SystemCommand();					}
+		else if(commandName == "align.check")			{	shellcommand = new AlignCheckCommand();				}
+		else if(commandName == "get.sharedseqs")		{	shellcommand = new GetSharedOTUCommand();			}
+		else if(commandName == "get.otulist")			{	shellcommand = new GetListCountCommand();			}
+		else if(commandName == "hcluster")				{	shellcommand = new HClusterCommand();				}
+		else if(commandName == "classify.seqs")			{	shellcommand = new ClassifySeqsCommand();			}
+		else if(commandName == "chimera.ccode")			{	shellcommand = new ChimeraCcodeCommand();			}
+		else if(commandName == "chimera.check")			{	shellcommand = new ChimeraCheckCommand();			}
+		else if(commandName == "chimera.slayer")		{	shellcommand = new ChimeraSlayerCommand();			}
+		else if(commandName == "chimera.pintail")		{	shellcommand = new ChimeraPintailCommand();			}
+		else if(commandName == "chimera.bellerophon")	{	shellcommand = new ChimeraBellerophonCommand();		}
+		else if(commandName == "phylotype")				{	shellcommand = new PhylotypeCommand();				}
+		else if(commandName == "mgcluster")				{	shellcommand = new MGClusterCommand();				}
+		else if(commandName == "pre.cluster")			{	shellcommand = new PreClusterCommand();				}
+		else if(commandName == "pcoa")					{	shellcommand = new PCACommand();					}
+		else if(commandName == "otu.hierarchy")			{	shellcommand = new OtuHierarchyCommand();			}
+		else if(commandName == "set.dir")				{	shellcommand = new SetDirectoryCommand();			}
+		else if(commandName == "set.logfile")			{	shellcommand = new SetLogFileCommand();				}
+		else if(commandName == "parse.list")			{	shellcommand = new ParseListCommand();				}
+		else if(commandName == "parse.sff")				{	shellcommand = new ParseSFFCommand();				}
+		else if(commandName == "phylo.diversity")		{	shellcommand = new PhyloDiversityCommand();			}
+		else if(commandName == "make.group")			{	shellcommand = new MakeGroupCommand();				}
+		else if(commandName == "chop.seqs")				{	shellcommand = new ChopSeqsCommand();				}
+		else if(commandName == "clearcut")				{	shellcommand = new ClearcutCommand();				}
+		else if(commandName == "catchall")				{	shellcommand = new CatchAllCommand();				}
+		else if(commandName == "split.abund")			{	shellcommand = new SplitAbundCommand();				}
+		else if(commandName == "cluster.split")			{	shellcommand = new ClusterSplitCommand();			}
+		else if(commandName == "classify.otu")			{	shellcommand = new ClassifyOtuCommand();			}
+		else if(commandName == "degap.seqs")			{	shellcommand = new DegapSeqsCommand();				}
+		else if(commandName == "get.relabund")			{	shellcommand = new GetRelAbundCommand();			}
+		else if(commandName == "sens.spec")				{	shellcommand = new SensSpecCommand();				}
+		else if(commandName == "seq.error")				{	shellcommand = new SeqErrorCommand();				}
+		else if(commandName == "sffinfo")				{	shellcommand = new SffInfoCommand();				}
+		else if(commandName == "normalize.shared")		{	shellcommand = new NormalizeSharedCommand();		}
+		else if(commandName == "metastats")				{	shellcommand = new MetaStatsCommand();				}
+		else if(commandName == "split.groups")			{	shellcommand = new SplitGroupCommand();				}
+		else if(commandName == "cluster.fragments")		{	shellcommand = new ClusterFragmentsCommand();		}
+		else if(commandName == "get.lineage")			{	shellcommand = new GetLineageCommand();				}
+		else if(commandName == "remove.lineage")		{	shellcommand = new RemoveLineageCommand();			}
+		else if(commandName == "fastq.info")			{	shellcommand = new ParseFastaQCommand();			}
+		else											{	shellcommand = new NoCommand();						}
+
+		return shellcommand;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CommandFactory", "getCommand");
+		exit(1);
+	}
+}
+/***********************************************************
 //This function is used to interrupt a command
 Command* CommandFactory::getCommand(){
 	try {
@@ -374,7 +591,23 @@ bool CommandFactory::isValidCommand(string command) {
 		exit(1);
 	}
 }
-
+/***********************************************************************/
+bool CommandFactory::isValidCommand(string command, string noError) {
+	try {	
+	
+		//is the command in the map
+		if ((commands.find(command)) != (commands.end())) {
+			return true;
+		}else{
+			return false;
+		}
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CommandFactory", "isValidCommand");
+		exit(1);
+	}
+}
 /***********************************************************************/
 void CommandFactory::printCommands(ostream& out) {
 	try {	

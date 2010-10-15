@@ -12,6 +12,42 @@
 #include "readcolumn.h"
 #include "readmatrix.hpp"
 
+//**********************************************************************************************************************
+vector<string> ReadDistCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"phylip", "column", "name", "cutoff", "precision", "group","outputdir","inputdir","sim"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ReadDistCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ReadDistCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"phylip","column","or"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ReadDistCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ReadDistCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ReadDistCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 ReadDistCommand::ReadDistCommand(string option) {
 	try {
 		globaldata = GlobalData::getInstance();
@@ -207,8 +243,6 @@ int ReadDistCommand::execute(){
 
 		time_t start = time(NULL);
 		size_t numDists = 0;
-		
-		vector<string> outputNames;
 		
 		if (format == "matrix") {
 			ifstream in;

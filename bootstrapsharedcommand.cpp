@@ -19,9 +19,54 @@
 #include "sharedmorisitahorn.h"
 #include "sharedbraycurtis.h"
 
-
 //**********************************************************************************************************************
-
+vector<string> BootSharedCommand::getValidParameters(){	
+	try {
+		string AlignArray[] =  {"label","calc","groups","iters","outputdir","inputdir"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "BootSharedCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+BootSharedCommand::BootSharedCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["tree"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "BootSharedCommand", "BootSharedCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> BootSharedCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "BootSharedCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> BootSharedCommand::getRequiredFiles(){	
+	try {
+		string AlignArray[] =  {"shared"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "BootSharedCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 BootSharedCommand::BootSharedCommand(string option) {
 	try {
 		globaldata = GlobalData::getInstance();
@@ -49,6 +94,10 @@ BootSharedCommand::BootSharedCommand(string option) {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["tree"] = tempOutNames;
+		
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
@@ -410,7 +459,7 @@ int BootSharedCommand::process(SharedOrderVector* order) {
 					//create a new filename
 					outputFile = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + treeCalculators[z]->getName() + ".boot" + order->getLabel() + ".tre";
 					m->openOutputFile(outputFile, *(out[z]));
-					outputNames.push_back(outputFile);
+					outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile);
 				}
 				
 				m->mothurOut("Generating bootstrap trees..."); cout.flush();

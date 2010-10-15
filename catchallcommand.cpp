@@ -10,6 +10,53 @@
 #include "catchallcommand.h"
 #include "globaldata.hpp"
 
+//**********************************************************************************************************************
+vector<string> CatchAllCommand::getValidParameters(){	
+	try {
+		string AlignArray[] =  {"sabund","label","inputdir","outputdir"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CatchAllCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+CatchAllCommand::CatchAllCommand(){	
+	try {
+		//initialize outputTypes
+		
+		//need to determine outputFIles and types
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CatchAllCommand", "CatchAllCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> CatchAllCommand::getRequiredParameters(){	
+	try {
+		string AlignArray[] =  {"sabund"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CatchAllCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> CatchAllCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CatchAllCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 /**************************************************************************************/
 CatchAllCommand::CatchAllCommand(string option)  {	
 	try {
@@ -36,6 +83,11 @@ CatchAllCommand::CatchAllCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			
+			//initialize outputTypes
+			//need to determine outputFIles and types
+			
+			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
@@ -53,7 +105,7 @@ CatchAllCommand::CatchAllCommand(string option)  {
 			//check for required parameters
 			sabundfile = validParameter.validFile(parameters, "sabund", true);
 			if (sabundfile == "not open") { sabundfile = ""; abort = true; }
-			else if (sabundfile == "not found") { sabundfile = "";  m->mothurOut("You must provide either a sabund file for the catchall command."); m->mothurOutEndLine(); abort=true; }
+			else if (sabundfile == "not found") { sabundfile = "";  m->mothurOut("You must provide a sabund file for the catchall command."); m->mothurOutEndLine(); abort=true; }
 			else { globaldata->setSabundFile(sabundfile); globaldata->setFormat("sabund"); }
 			
 			string label = validParameter.validFile(parameters, "label", false);			
@@ -98,8 +150,6 @@ int CatchAllCommand::execute() {
 	try {
 		
 		if (abort == true) { return 0; }
-		
-		vector<string> outputNames;
 		
 		//prepare full output directory
 		outputDir = m->getFullPathName(outputDir);

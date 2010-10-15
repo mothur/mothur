@@ -32,7 +32,53 @@
 #include "sharedjackknife.h"
 #include "whittaker.h"
 
-
+//**********************************************************************************************************************
+vector<string> SummarySharedCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"label","calc","groups","all","outputdir","distance","inputdir", "processors"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SummarySharedCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+SummarySharedCommand::SummarySharedCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["summary"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SummarySharedCommand", "SummarySharedCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SummarySharedCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SummarySharedCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SummarySharedCommand::getRequiredFiles(){	
+	try {
+		string Array[] =  {"shared"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SummarySharedCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 
 SummarySharedCommand::SummarySharedCommand(string option)  {
@@ -65,6 +111,10 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 			if (globaldata->getSharedFile() == "") {
 				 m->mothurOut("You must read a list and a group, or a shared before you can use the summary.shared command."); m->mothurOutEndLine(); abort = true; 
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["summary"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -398,8 +448,8 @@ int SummarySharedCommand::execute(){
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		m->mothurOut(outputFileName); m->mothurOutEndLine();	
-		if (mult) { m->mothurOut(outAllFileName); m->mothurOutEndLine();	}
-		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		if (mult) { m->mothurOut(outAllFileName); m->mothurOutEndLine();	outputTypes["summary"].push_back(outAllFileName); }
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	} outputTypes["summary"].push_back(outputFileName);
 		m->mothurOutEndLine();
 
 		return 0;

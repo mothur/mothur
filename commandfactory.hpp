@@ -18,11 +18,14 @@ class Command;
 class CommandFactory {
 public:
 	static CommandFactory* getInstance();
+	Command* getCommand(string, string, string);
 	Command* getCommand(string, string);
-	Command* getCommand();
+	Command* getCommand(string);
+	//Command* getCommand();
 	bool isValidCommand(string);
+	bool isValidCommand(string, string);
 	void printCommands(ostream&);
-	void setOutputDirectory(string o)		{	outputDir = o;		}
+	void setOutputDirectory(string o)		{	outputDir = o;	m->setOutputDir(o);	}
 	void setInputDirectory(string i)		{	inputDir = i;		}
 	void setLogfileName(string n, bool a)	{	logFileName = n;  append = a;		}
 	string getLogfileName()					{	return logFileName; 	}
@@ -32,6 +35,8 @@ public:
 
 private:
 	Command* command;
+	Command* shellcommand;
+	Command* pipecommand;
 	MothurOut* m;
 	map<string, string> commands;
 	map<string, string>::iterator it;

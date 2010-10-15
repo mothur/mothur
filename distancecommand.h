@@ -21,7 +21,12 @@ class DistanceCommand : public Command {
 
 public:
 	DistanceCommand(string);
+	DistanceCommand();
 	~DistanceCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();	
 	void help();
 	
@@ -42,7 +47,8 @@ private:
 	vector<linePair*> lines;
 	
 	bool abort;
-	vector<string>  Estimators; //holds estimators to be used
+	vector<string>  Estimators, outputNames; //holds estimators to be used
+	map<string, vector<string> > outputTypes;
 	
 	//void m->appendFiles(string, string);
 	void createProcesses(string);

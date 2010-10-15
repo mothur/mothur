@@ -12,7 +12,58 @@
 #include "listvector.hpp"
 
 //**********************************************************************************************************************
-
+vector<string> RemoveLineageCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"fasta","name", "group", "alignreport", "taxon", "dups", "list","taxonomy","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RemoveLineageCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+RemoveLineageCommand::RemoveLineageCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["fasta"] = tempOutNames;
+		outputTypes["taxonomy"] = tempOutNames;
+		outputTypes["name"] = tempOutNames;
+		outputTypes["group"] = tempOutNames;
+		outputTypes["alignreport"] = tempOutNames;
+		outputTypes["list"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RemoveLineageCommand", "RemoveLineageCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> RemoveLineageCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"taxonomy"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RemoveLineageCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> RemoveLineageCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RemoveLineageCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 RemoveLineageCommand::RemoveLineageCommand(string option)  {
 	try {
 		abort = false;
@@ -35,6 +86,15 @@ RemoveLineageCommand::RemoveLineageCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["fasta"] = tempOutNames;
+			outputTypes["taxonomy"] = tempOutNames;
+			outputTypes["name"] = tempOutNames;
+			outputTypes["group"] = tempOutNames;
+			outputTypes["alignreport"] = tempOutNames;
+			outputTypes["list"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -237,7 +297,7 @@ int RemoveLineageCommand::readFasta(){
 		out.close();
 		
 		if (wroteSomething == false) {  m->mothurOut("Your fasta file contains only sequences from " + taxons + "."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); 
+		outputTypes["fasta"].push_back(outputFileName); 
 		
 		return 0;
 		
@@ -308,7 +368,7 @@ int RemoveLineageCommand::readList(){
 		out.close();
 		
 		if (wroteSomething == false) {  m->mothurOut("Your list file contains only sequences from " + taxons + "."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); 
+		outputTypes["list"].push_back(outputFileName); 
 				
 		return 0;
 
@@ -394,7 +454,7 @@ int RemoveLineageCommand::readName(){
 		out.close();
 
 		if (wroteSomething == false) {  m->mothurOut("Your name file contains only sequences from " + taxons + "."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); 
+		outputTypes["name"].push_back(outputFileName);
 				
 		return 0;
 	}
@@ -438,7 +498,7 @@ int RemoveLineageCommand::readGroup(){
 		out.close();
 		
 		if (wroteSomething == false) {  m->mothurOut("Your group file contains only sequences from " + taxons + "."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); 
+		outputTypes["group"].push_back(outputFileName);
 		
 		return 0;
 	}
@@ -492,7 +552,7 @@ int RemoveLineageCommand::readTax(){
 		out.close();
 		
 		if (!wroteSomething) { m->mothurOut("Your taxonomy file contains only sequences from " + taxons + "."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); 
+		outputTypes["taxonomy"].push_back(outputFileName);
 			
 		return 0;
 
@@ -582,7 +642,7 @@ int RemoveLineageCommand::readAlign(){
 		out.close();
 		
 		if (wroteSomething == false) {  m->mothurOut("Your align file contains only sequences from " + taxons + "."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); 
+		outputTypes["alignreport"].push_back(outputFileName);
 		
 		return 0;
 		

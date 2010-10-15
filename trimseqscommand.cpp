@@ -10,6 +10,56 @@
 #include "trimseqscommand.h"
 #include "needlemanoverlap.hpp"
 
+//**********************************************************************************************************************
+vector<string> TrimSeqsCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"fasta", "flip", "oligos", "maxambig", "maxhomop", "minlength", "maxlength", "qfile", 
+									"qthreshold", "qwindowaverage", "qstepsize", "qwindowsize", "qaverage", "rollaverage", "allfiles", "qtrim","tdiffs", "pdiffs", "bdiffs", "processors", "outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TrimSeqsCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+TrimSeqsCommand::TrimSeqsCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["fasta"] = tempOutNames;
+		outputTypes["qual"] = tempOutNames;
+		outputTypes["group"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TrimSeqsCommand", "TrimSeqsCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> TrimSeqsCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"fasta"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TrimSeqsCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> TrimSeqsCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TrimSeqsCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 //***************************************************************************************************************
 
 TrimSeqsCommand::TrimSeqsCommand(string option)  {
@@ -38,6 +88,12 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["fasta"] = tempOutNames;
+			outputTypes["qual"] = tempOutNames;
+			outputTypes["group"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -72,7 +128,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			
 			//check for required parameters
 			fastaFile = validParameter.validFile(parameters, "fasta", true);
-			if (fastaFile == "not found") { m->mothurOut("fasta is a required parameter for the screen.seqs command."); m->mothurOutEndLine(); abort = true; }
+			if (fastaFile == "not found") { m->mothurOut("fasta is a required parameter for the trim.seqs command."); m->mothurOutEndLine(); abort = true; }
 			else if (fastaFile == "not open") { abort = true; }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -220,18 +276,18 @@ int TrimSeqsCommand::execute(){
 		numRPrimers = 0;
 		
 		string trimSeqFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "trim.fasta";
-		outputNames.push_back(trimSeqFile);
+		outputNames.push_back(trimSeqFile); outputTypes["fasta"].push_back(trimSeqFile);
 		string scrapSeqFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "scrap.fasta";
-		outputNames.push_back(scrapSeqFile);
+		outputNames.push_back(scrapSeqFile); outputTypes["fasta"].push_back(scrapSeqFile);
 		string trimQualFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "trim.qual";
 		string scrapQualFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "scrap.qual";
-		if (qFileName != "") {  outputNames.push_back(trimQualFile); outputNames.push_back(scrapQualFile);  }
+		if (qFileName != "") {  outputNames.push_back(trimQualFile); outputNames.push_back(scrapQualFile);  outputTypes["qual"].push_back(trimQualFile); outputTypes["qual"].push_back(scrapQualFile); }
 		string groupFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "groups";
 		
 		vector<string> fastaFileNames;
 		vector<string> qualFileNames;
 		if(oligoFile != ""){
-			outputNames.push_back(groupFile);
+			outputNames.push_back(groupFile); outputTypes["group"].push_back(groupFile);
 			getOligos(fastaFileNames, qualFileNames);
 		}
 
@@ -339,7 +395,7 @@ int TrimSeqsCommand::execute(){
 				ofstream outGroups;
 				string outGroupFilename = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[i])) + "groups";
 				m->openOutputFile(outGroupFilename, outGroups);
-				outputNames.push_back(outGroupFilename);
+				outputNames.push_back(outGroupFilename); outputTypes["group"].push_back(outGroupFilename);  
 				
 				string thisGroup = "";
 				if (i > comboStarts) {
@@ -791,8 +847,10 @@ void TrimSeqsCommand::getOligos(vector<string>& outFASTAVec, vector<string>& out
 							}
 						}else {
 							outputNames.push_back((outputDir + m->getRootName(m->getSimpleName(fastaFile)) + group + ".fasta"));
+							outputTypes["fasta"].push_back((outputDir + m->getRootName(m->getSimpleName(fastaFile)) + group + ".fasta"));
 							if(qFileName != ""){
 								outputNames.push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) + group + ".qual"));
+								outputTypes["qual"].push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) + group + ".qual"));
 							}							
 						}
 					}
@@ -815,10 +873,12 @@ void TrimSeqsCommand::getOligos(vector<string>& outFASTAVec, vector<string>& out
 					
 					if(allFiles){
 						outputNames.push_back((outputDir + m->getRootName(m->getSimpleName(fastaFile)) + group + ".fasta"));
+						outputNames.push_back((outputDir + m->getRootName(m->getSimpleName(fastaFile)) + group + ".fasta"));
 						outFASTAVec.push_back((outputDir + m->getRootName(m->getSimpleName(fastaFile)) + group + ".fasta"));
 						if(qFileName != ""){
 							outQualVec.push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) + group + ".qual"));
 							outputNames.push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) + group + ".qual"));
+							outputTypes["qual"].push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) + group + ".qual"));
 						}							
 					}
 				}else{	m->mothurOut(type + " is not recognized as a valid type. Choices are forward, reverse, and barcode. Ignoring " + oligo + "."); m->mothurOutEndLine();  }
@@ -835,12 +895,14 @@ void TrimSeqsCommand::getOligos(vector<string>& outFASTAVec, vector<string>& out
 				for (map<string, int>::iterator itPrime = primers.begin(); itPrime != primers.end(); itPrime++) {
 					if (groupVector[itPrime->second] != "") { //there is a group for this primer
 						outputNames.push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) + groupVector[itBar->second] + "." + groupVector[itPrime->second] + ".fasta"));
+						outputTypes["fasta"].push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) + groupVector[itBar->second] + "." + groupVector[itPrime->second] + ".fasta"));
 						outFASTAVec.push_back((outputDir + m->getRootName(m->getSimpleName(fastaFile)) + groupVector[itBar->second] + "." + groupVector[itPrime->second] + ".fasta"));
 						combos[(groupVector[itBar->second] + "." + groupVector[itPrime->second])] = outFASTAVec.size()-1;
 						
 						if(qFileName != ""){
 							outQualVec.push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) + groupVector[itBar->second] + "." + groupVector[itPrime->second] + ".qual"));
 							outputNames.push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) + groupVector[itBar->second] + "." + groupVector[itPrime->second] + ".qual"));
+							outputTypes["qual"].push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) + groupVector[itBar->second] + "." + groupVector[itPrime->second] + ".qual"));
 						}
 					}
 				}

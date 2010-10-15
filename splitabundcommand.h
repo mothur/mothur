@@ -28,7 +28,12 @@ class SplitAbundCommand : public Command {
 	
 public:
 	SplitAbundCommand(string);	
+	SplitAbundCommand();
 	~SplitAbundCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();	
 	void help();
 
@@ -45,6 +50,7 @@ private:
 	int createNameMap(ListVector*);
 	
 	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 	ListVector* list;
 	GroupMap* groupMap;
 	InputData* input;

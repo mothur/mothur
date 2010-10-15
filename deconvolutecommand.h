@@ -20,12 +20,19 @@ class DeconvoluteCommand : public Command {
 
 public:
 	DeconvoluteCommand(string);
-	~DeconvoluteCommand() { };
+	DeconvoluteCommand();
+	~DeconvoluteCommand() {}
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();	
 	
 private:
 	string inFastaName, oldNameMapFName, outputDir;
+	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 
 	bool abort;
 };

@@ -9,6 +9,56 @@
 
 #include "mgclustercommand.h"
 
+
+//**********************************************************************************************************************
+vector<string> MGClusterCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"blast", "method", "name", "hard", "cutoff", "precision", "length", "min", "penalty", "hcluster","merge","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MGClusterCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+MGClusterCommand::MGClusterCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["list"] = tempOutNames;
+		outputTypes["rabund"] = tempOutNames;
+		outputTypes["sabund"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MGClusterCommand", "MGClusterCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> MGClusterCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"blast"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MGClusterCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> MGClusterCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MGClusterCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 MGClusterCommand::MGClusterCommand(string option) {
 	try {
@@ -33,6 +83,12 @@ MGClusterCommand::MGClusterCommand(string option) {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["list"] = tempOutNames;
+			outputTypes["rabund"] = tempOutNames;
+			outputTypes["sabund"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -167,7 +223,7 @@ int MGClusterCommand::execute(){
 		list = new ListVector(nameMap->getListVector());
 		RAbundVector* rabund = new RAbundVector(list->getRAbundVector());
 		
-		if (m->control_pressed) { delete nameMap; delete read; delete list; delete rabund; return 0; }
+		if (m->control_pressed) { outputTypes.clear(); delete nameMap; delete read; delete list; delete rabund; return 0; }
 		
 		start = time(NULL);
 		oldList = *list;
@@ -186,6 +242,7 @@ int MGClusterCommand::execute(){
 		if (m->control_pressed) { 
 			delete nameMap; delete read; delete list; delete rabund; 
 			listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
+			outputTypes.clear();
 			return 0; 
 		}
 		
@@ -206,6 +263,7 @@ int MGClusterCommand::execute(){
 			if (m->control_pressed) { 
 				delete nameMap; delete distMatrix; delete list; delete rabund; delete cluster;
 				listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
+				outputTypes.clear();
 				return 0; 
 			}
 		
@@ -217,6 +275,7 @@ int MGClusterCommand::execute(){
 				if (m->control_pressed) { 
 					delete nameMap; delete distMatrix; delete list; delete rabund; delete cluster;
 					listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
+					outputTypes.clear();
 					return 0; 
 				}
 				
@@ -239,6 +298,7 @@ int MGClusterCommand::execute(){
 						if (m->control_pressed) { 
 							delete nameMap; delete distMatrix; delete list; delete rabund; delete cluster; delete temp;
 							listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
+							outputTypes.clear();
 							return 0; 
 						}
 						
@@ -269,6 +329,7 @@ int MGClusterCommand::execute(){
 					if (m->control_pressed) { 
 							delete nameMap; delete distMatrix; delete list; delete rabund; delete cluster; delete temp;
 							listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
+							outputTypes.clear();
 							return 0; 
 					}
 					
@@ -298,6 +359,7 @@ int MGClusterCommand::execute(){
 			if (m->control_pressed) { 
 				delete nameMap;  delete list; delete rabund; 
 				listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
+				outputTypes.clear();
 				return 0; 
 			}
 		
@@ -314,6 +376,7 @@ int MGClusterCommand::execute(){
 			if (m->control_pressed) { 
 				delete nameMap;  delete list; delete rabund; delete hcluster;
 				listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
+				outputTypes.clear();
 				return 0; 
 			}
 
@@ -326,6 +389,7 @@ int MGClusterCommand::execute(){
 					listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
 					remove(distFile.c_str());
 					remove(overlapFile.c_str());
+					outputTypes.clear();
 					return 0; 
 				}
 				
@@ -340,6 +404,7 @@ int MGClusterCommand::execute(){
 							listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
 							remove(distFile.c_str());
 							remove(overlapFile.c_str());
+							outputTypes.clear();
 							return 0; 
 						}
 	
@@ -363,6 +428,7 @@ int MGClusterCommand::execute(){
 									listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
 									remove(distFile.c_str());
 									remove(overlapFile.c_str());
+									outputTypes.clear();
 									return 0; 
 								}
 
@@ -398,6 +464,7 @@ int MGClusterCommand::execute(){
 							listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
 							remove(distFile.c_str());
 							remove(overlapFile.c_str());
+							outputTypes.clear();
 							return 0; 
 					}
 					
@@ -429,14 +496,15 @@ int MGClusterCommand::execute(){
 			listFile.close(); rabundFile.close(); sabundFile.close(); remove((fileroot+ tag + ".list").c_str()); remove((fileroot+ tag + ".rabund").c_str()); remove((fileroot+ tag + ".sabund").c_str());
 			globaldata->setListFile("");
 			globaldata->setFormat("");
+			outputTypes.clear();
 			return 0; 
 		}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		m->mothurOut(fileroot+ tag + ".list"); m->mothurOutEndLine();	
-		m->mothurOut(fileroot+ tag + ".rabund"); m->mothurOutEndLine();	
-		m->mothurOut(fileroot+ tag + ".sabund"); m->mothurOutEndLine();	
+		m->mothurOut(fileroot+ tag + ".list"); m->mothurOutEndLine();	outputNames.push_back(fileroot+ tag + ".list"); outputTypes["list"].push_back(fileroot+ tag + ".list");
+		m->mothurOut(fileroot+ tag + ".rabund"); m->mothurOutEndLine();	outputNames.push_back(fileroot+ tag + ".rabund"); outputTypes["rabund"].push_back(fileroot+ tag + ".rabund");
+		m->mothurOut(fileroot+ tag + ".sabund"); m->mothurOutEndLine();	outputNames.push_back(fileroot+ tag + ".sabund"); outputTypes["sabund"].push_back(fileroot+ tag + ".sabund");
 		m->mothurOutEndLine();
 		
 		m->mothurOut("It took " + toString(time(NULL) - start) + " seconds to cluster."); m->mothurOutEndLine();

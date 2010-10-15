@@ -12,6 +12,54 @@
 //**********************************************************************************************************************
 inline bool comparePriority(seqPNode first, seqPNode second) {  return (first.numIdentical > second.numIdentical); }
 //**********************************************************************************************************************
+vector<string> PreClusterCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"fasta", "name", "diffs", "outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PreClusterCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+PreClusterCommand::PreClusterCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["fasta"] = tempOutNames;
+		outputTypes["name"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PreClusterCommand", "PreClusterCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> PreClusterCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"fasta"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PreClusterCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> PreClusterCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PreClusterCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 
 PreClusterCommand::PreClusterCommand(string option) {
 	try {
@@ -36,6 +84,11 @@ PreClusterCommand::PreClusterCommand(string option) {
 				if (validParameter.isValidParameter(it2->first, myArray, it2->second) != true) {  abort = true;  }
 			}
 			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["fasta"] = tempOutNames;
+			outputTypes["name"] = tempOutNames;
+		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
@@ -189,8 +242,8 @@ int PreClusterCommand::execute(){
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		m->mothurOut(newFastaFile); m->mothurOutEndLine();	
-		m->mothurOut(newNamesFile); m->mothurOutEndLine();	
+		m->mothurOut(newFastaFile); m->mothurOutEndLine();	outputNames.push_back(newFastaFile); outputTypes["fasta"].push_back(newFastaFile);
+		m->mothurOut(newNamesFile); m->mothurOutEndLine();	outputNames.push_back(newNamesFile); outputTypes["name"].push_back(newNamesFile);
 		m->mothurOutEndLine();
 
 		return 0;

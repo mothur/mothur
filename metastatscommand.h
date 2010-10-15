@@ -21,7 +21,12 @@ class MetaStatsCommand : public Command {
 
 public:
 	MetaStatsCommand(string);
+	MetaStatsCommand();
 	~MetaStatsCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -38,6 +43,7 @@ private:
 	ReadOTUFile* read;
 	InputData* input;
 	vector<SharedRAbundVector*> lookup;
+	map<string, vector<string> > outputTypes;
 	
 	bool abort, allLines, pickedGroups;
 	set<string> labels; //holds labels to be used

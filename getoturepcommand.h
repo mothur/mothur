@@ -39,7 +39,12 @@ class GetOTURepCommand : public Command {
 
 public:
 	GetOTURepCommand(string);
+	GetOTURepCommand();
 	~GetOTURepCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 
@@ -66,6 +71,7 @@ private:
 	vector<SeqMap> seqVec;			// contains maps with sequence index and distance
 									// for all distances related to a certain sequence
 	vector<int> rowPositions;
+	map<string, vector<string> > outputTypes;
 
 	void readNamesFile();
 	int process(ListVector*);

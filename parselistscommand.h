@@ -19,8 +19,13 @@
 class ParseListCommand : public Command {
 	
 public:
-	ParseListCommand(string);	
+	ParseListCommand(string);
+	ParseListCommand();	
 	~ParseListCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();	
 	void help();
 	
@@ -35,6 +40,8 @@ private:
 	string outputDir, listfile, groupfile, label;
 	set<string> labels;
 	bool abort, allLines;
+	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 	
 	map<string, ofstream*> filehandles;
 	map<string, ofstream*>::iterator it3;

@@ -10,8 +10,55 @@
 #include "chimerabellerophoncommand.h"
 #include "bellerophon.h"
 
+//**********************************************************************************************************************
+vector<string> ChimeraBellerophonCommand::getValidParameters(){	
+	try {
+		string AlignArray[] =  {"fasta","filter","correction","processors","window","increment","outputdir","inputdir"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraBellerophonCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ChimeraBellerophonCommand::getRequiredParameters(){	
+	try {
+		string AlignArray[] =  {"fasta"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraBellerophonCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ChimeraBellerophonCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraBellerophonCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+ChimeraBellerophonCommand::ChimeraBellerophonCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["chimera"] = tempOutNames;
+		outputTypes["accnos"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraBellerophonCommand", "ChimeraBellerophonCommand");
+		exit(1);
+	}
+}
 //***************************************************************************************************************
-
 ChimeraBellerophonCommand::ChimeraBellerophonCommand(string option)  {
 	try {
 		abort = false;
@@ -35,6 +82,11 @@ ChimeraBellerophonCommand::ChimeraBellerophonCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["chimera"] = tempOutNames;
+			outputTypes["accnos"] = tempOutNames;
+		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
@@ -66,6 +118,17 @@ ChimeraBellerophonCommand::ChimeraBellerophonCommand(string option)  {
 							fastaFileNames[i] = tryPath;
 						}
 					}
+					
+					//if you can't open it, try default location
+					if (ableToOpen == 1) {
+						if (m->getOutputDir() != "") { //default path is set
+							string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
+							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							fastaFileNames[i] = tryPath;
+						}
+					}
+					
 					in.close();
 
 					if (ableToOpen == 1) { 
@@ -156,7 +219,7 @@ int ChimeraBellerophonCommand::execute(){
 			
 			chimera->getChimeras();
 			
-			if (m->control_pressed) { delete chimera; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} return 0;	}
+			if (m->control_pressed) { delete chimera; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} outputTypes.clear(); return 0;	}
 			
 		#ifdef USE_MPI
 			MPI_File outMPI;
@@ -192,12 +255,12 @@ int ChimeraBellerophonCommand::execute(){
 			
 		#endif
 			
-			if (m->control_pressed) { remove(accnosFileName.c_str()); remove(outputFileName.c_str()); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} delete chimera;	return 0;	}
+			if (m->control_pressed) { remove(accnosFileName.c_str()); remove(outputFileName.c_str()); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} outputTypes.clear(); delete chimera;	return 0;	}
 			
 			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine(); m->mothurOutEndLine();
 			
-			outputNames.push_back(outputFileName);
-			outputNames.push_back(accnosFileName);
+			outputNames.push_back(outputFileName);  outputTypes["chimera"].push_back(outputFileName);
+			outputNames.push_back(accnosFileName);  outputTypes["accnos"].push_back(accnosFileName);
 			
 			delete chimera;
 		}

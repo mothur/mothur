@@ -20,7 +20,12 @@ class AlignCommand : public Command {
 	
 public:
 	AlignCommand(string);	
+	AlignCommand();
 	~AlignCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute(); 
 	void help();	
 	
@@ -33,6 +38,7 @@ private:
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;
 	bool MPIWroteAccnos;
+	map<string, vector<string> > outputTypes;
 	
 	AlignmentDB* templateDB;
 	Alignment* alignment;
@@ -50,6 +56,7 @@ private:
 	float match, misMatch, gapOpen, gapExtend, threshold;
 	int processors, kmerSize;
 	vector<string> candidateFileNames;
+	vector<string> outputNames;
 	
 	bool abort, flip;
 };

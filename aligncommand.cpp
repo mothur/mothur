@@ -27,10 +27,57 @@
 
 
 //**********************************************************************************************************************
-
+vector<string> AlignCommand::getValidParameters(){	
+	try {
+		string AlignArray[] =  {"template","candidate","search","ksize","align","match","mismatch","gapopen","gapextend", "processors","flip","threshold","outputdir","inputdir"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "AlignCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> AlignCommand::getRequiredParameters(){	
+	try {
+		string AlignArray[] =  {"template","candidate"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "AlignCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> AlignCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "AlignCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+AlignCommand::AlignCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["fasta"] = tempOutNames;
+		outputTypes["alignreport"] = tempOutNames;
+		outputTypes["accnos"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "AlignCommand", "AlignCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 AlignCommand::AlignCommand(string option)  {
 	try {
-		
 		abort = false;
 	
 		//allow user to run help
@@ -52,7 +99,13 @@ AlignCommand::AlignCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
-
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["fasta"] = tempOutNames;
+			outputTypes["alignreport"] = tempOutNames;
+			outputTypes["accnos"] = tempOutNames;
+			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
 			
@@ -112,6 +165,17 @@ AlignCommand::AlignCommand(string option)  {
 							candidateFileNames[i] = tryPath;
 						}
 					}
+					
+					//if you can't open it, try default location
+					if (ableToOpen == 1) {
+						if (m->getOutputDir() != "") { //default path is set
+							string tryPath = m->getOutputDir() + m->getSimpleName(candidateFileNames[i]);
+							m->mothurOut("Unable to open " + candidateFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							candidateFileNames[i] = tryPath;
+						}
+					}
+					
 					in.close();					
 
 					if (ableToOpen == 1) { 
@@ -165,7 +229,6 @@ AlignCommand::AlignCommand(string option)  {
 		exit(1);
 	}
 }
-
 //**********************************************************************************************************************
 
 AlignCommand::~AlignCommand(){	
@@ -225,10 +288,9 @@ int AlignCommand::execute(){
 			m->mothurOutEndLine();
 			alignment = new NeedlemanOverlap(gapOpen, match, misMatch, longestBase);
 		}
-		vector<string> outputNames;
 		
 		for (int s = 0; s < candidateFileNames.size(); s++) {
-			if (m->control_pressed) { return 0; }
+			if (m->control_pressed) { outputTypes.clear(); return 0; }
 			
 			m->mothurOut("Aligning sequences from " + candidateFileNames[s] + " ..." ); m->mothurOutEndLine();
 			
@@ -277,7 +339,7 @@ int AlignCommand::execute(){
 				MPI_File_open(MPI_COMM_WORLD, outReportFilename, outMode, MPI_INFO_NULL, &outMPIReport);
 				MPI_File_open(MPI_COMM_WORLD, outAccnosFilename, outMode, MPI_INFO_NULL, &outMPIAccnos);
 				
-				if (m->control_pressed) { MPI_File_close(&inMPI);  MPI_File_close(&outMPIAlign);  MPI_File_close(&outMPIReport);  MPI_File_close(&outMPIAccnos); return 0; }
+				if (m->control_pressed) { MPI_File_close(&inMPI);  MPI_File_close(&outMPIAlign);  MPI_File_close(&outMPIReport);  MPI_File_close(&outMPIAccnos); outputTypes.clear(); return 0; }
 				
 				if (pid == 0) { //you are the root process 
 					
@@ -297,7 +359,7 @@ int AlignCommand::execute(){
 					//align your part
 					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPIAlign, outMPIReport, outMPIAccnos, MPIPos);
 					
-					if (m->control_pressed) { MPI_File_close(&inMPI);  MPI_File_close(&outMPIAlign);  MPI_File_close(&outMPIReport);  MPI_File_close(&outMPIAccnos); return 0; }
+					if (m->control_pressed) { MPI_File_close(&inMPI);  MPI_File_close(&outMPIAlign);  MPI_File_close(&outMPIReport);  MPI_File_close(&outMPIAccnos); outputTypes.clear(); return 0; }
 
 					for (int i = 1; i < processors; i++) {
 						bool tempResult;
@@ -319,7 +381,7 @@ int AlignCommand::execute(){
 					//align your part
 					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPIAlign, outMPIReport, outMPIAccnos, MPIPos);
 					
-					if (m->control_pressed) { MPI_File_close(&inMPI);  MPI_File_close(&outMPIAlign);  MPI_File_close(&outMPIReport);  MPI_File_close(&outMPIAccnos); return 0; }
+					if (m->control_pressed) { MPI_File_close(&inMPI);  MPI_File_close(&outMPIAlign);  MPI_File_close(&outMPIReport);  MPI_File_close(&outMPIAccnos); outputTypes.clear(); return 0; }
 
 					MPI_Send(&MPIWroteAccnos, 1, MPI_INT, 0, tag, MPI_COMM_WORLD); 
 				}
@@ -357,7 +419,7 @@ int AlignCommand::execute(){
 			if(processors == 1){
 				numFastaSeqs = driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s]);
 				
-				if (m->control_pressed) { remove(accnosFileName.c_str()); remove(alignFileName.c_str()); remove(reportFileName.c_str()); return 0; }
+				if (m->control_pressed) { remove(accnosFileName.c_str()); remove(alignFileName.c_str()); remove(reportFileName.c_str()); outputTypes.clear(); return 0; }
 				
 				//delete accnos file if its blank else report to user
 				if (m->isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
@@ -408,12 +470,12 @@ int AlignCommand::execute(){
 					m->mothurOutEndLine();
 				}else{ hasAccnos = false;  }
 				
-				if (m->control_pressed) { remove(accnosFileName.c_str()); remove(alignFileName.c_str()); remove(reportFileName.c_str()); return 0; }
+				if (m->control_pressed) { remove(accnosFileName.c_str()); remove(alignFileName.c_str()); remove(reportFileName.c_str()); outputTypes.clear(); return 0; }
 			}
 	#else
 			numFastaSeqs = driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s]);
 			
-			if (m->control_pressed) { remove(accnosFileName.c_str()); remove(alignFileName.c_str()); remove(reportFileName.c_str()); return 0; }
+			if (m->control_pressed) { remove(accnosFileName.c_str()); remove(alignFileName.c_str()); remove(reportFileName.c_str()); outputTypes.clear();  return 0; }
 			
 			//delete accnos file if its blank else report to user
 			if (m->isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
@@ -436,9 +498,9 @@ int AlignCommand::execute(){
 			if (pid == 0) { //only one process should output to screen
 		#endif
 
-			outputNames.push_back(alignFileName);
-			outputNames.push_back(reportFileName);
-			if (hasAccnos)	{	outputNames.push_back(accnosFileName);		}
+			outputNames.push_back(alignFileName); outputTypes["fasta"].push_back(alignFileName);
+			outputNames.push_back(reportFileName); outputTypes["alignreport"].push_back(reportFileName);
+			if (hasAccnos)	{	outputNames.push_back(accnosFileName);	outputTypes["accnos"].push_back(accnosFileName);  }
 			
 		#ifdef USE_MPI
 			}

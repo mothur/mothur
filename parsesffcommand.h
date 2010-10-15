@@ -16,7 +16,12 @@
 class ParseSFFCommand : public Command {
 public:
 	ParseSFFCommand(string);
+	ParseSFFCommand();
 	~ParseSFFCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();	
 	
@@ -42,6 +47,7 @@ private:
 	map<string, int> barcodes;
 	vector<string> groupVector;
 	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 
 //	string stripSeqQual(string, int, int);
 //	string stripQualQual(string, int, int);

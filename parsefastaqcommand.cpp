@@ -11,6 +11,54 @@
 #include "sequence.hpp"
 
 //**********************************************************************************************************************
+vector<string> ParseFastaQCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"fastq", "outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ParseFastaQCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+ParseFastaQCommand::ParseFastaQCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["fasta"] = tempOutNames;
+		outputTypes["qual"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ParseFastaQCommand", "ParseFastaQCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ParseFastaQCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"fastq"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ParseFastaQCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ParseFastaQCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ParseFastaQCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 ParseFastaQCommand::ParseFastaQCommand(string option){
 	try {
 		abort = false;
@@ -32,6 +80,11 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["fasta"] = tempOutNames;
+			outputTypes["qual"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -92,8 +145,8 @@ int ParseFastaQCommand::execute(){
 		string fastaFile = outputDir + m->getRootName(m->getSimpleName(fastaQFile)) + "fasta";
 		string qualFile = outputDir + m->getRootName(m->getSimpleName(fastaQFile)) + "qual";
 		ofstream outFasta, outQual;
-		m->openOutputFile(fastaFile, outFasta);  outputNames.push_back(fastaFile);
-		m->openOutputFile(qualFile, outQual);	outputNames.push_back(qualFile);
+		m->openOutputFile(fastaFile, outFasta);  outputNames.push_back(fastaFile); outputTypes["fasta"].push_back(fastaFile);
+		m->openOutputFile(qualFile, outQual);	outputNames.push_back(qualFile);  outputTypes["qual"].push_back(qualFile);
 		
 		ifstream in;
 		m->openInputFile(fastaQFile, in);
@@ -139,7 +192,7 @@ int ParseFastaQCommand::execute(){
 		outFasta.close();
 		outQual.close();
 		
-		if (m->control_pressed) { remove(fastaFile.c_str()); remove(qualFile.c_str()); return 0; }
+		if (m->control_pressed) { outputTypes.clear(); remove(fastaFile.c_str()); remove(qualFile.c_str()); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

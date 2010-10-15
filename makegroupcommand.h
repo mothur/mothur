@@ -15,8 +15,13 @@
 class MakeGroupCommand : public Command {
 	
 public:
-	MakeGroupCommand(string);	
+	MakeGroupCommand(string);
+	MakeGroupCommand();	
 	~MakeGroupCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute(); 
 	void help();	
 	
@@ -24,7 +29,8 @@ private:
 		
 	string fastaFileName, groups, outputDir, filename;
 	vector<string> fastaFileNames;
-	vector<string> groupsNames;
+	vector<string> groupsNames, outputNames;
+	map<string, vector<string> > outputTypes;
 	
 	bool abort;
 };

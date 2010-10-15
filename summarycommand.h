@@ -22,7 +22,12 @@ class SummaryCommand : public Command {
 
 public:
 	SummaryCommand(string);
+	SummaryCommand();
 	~SummaryCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -39,7 +44,8 @@ private:
 	set<string> labels; //holds labels to be used
 	string label, calc, outputDir;
 	vector<string>  Estimators;
-	vector<string> inputFileNames;
+	vector<string> inputFileNames, outputNames;
+	map<string, vector<string> > outputTypes;
 	vector<string> groups;
 	
 	vector<string> parseSharedFile(string);

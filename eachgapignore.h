@@ -23,6 +23,7 @@ public:
 		int length = 0;
 		int start = 0;
 		int end = 0;
+		bool overlap = false;
 		
 		string seqA = A.getAligned();
 		string seqB = B.getAligned();
@@ -32,6 +33,7 @@ public:
 			if(seqA[i] != '.' && seqB[i] != '.' && seqA[i] != '-' && seqB[i] != '-' ){
 				start = i;
 //				cout << "start: " << start << endl;
+				overlap = true;
 				break;
 			}
 		}
@@ -39,6 +41,7 @@ public:
 			if(seqA[i] != '.' && seqB[i] != '.' && seqA[i] != '-' && seqB[i] != '-' ){
 				end = i;
 //				cout << "end: " << end << endl;
+				overlap = true;
 				break;
 			}
 		}
@@ -54,6 +57,9 @@ public:
 				length++;
 			}
 		}
+		
+		//non-overlapping sequences
+		if (!overlap) { length = 0; }
 		
 		if(length == 0)	{	dist = 1.0000;								}
 		else			{	dist = ((double)diff  / (double)length);	}

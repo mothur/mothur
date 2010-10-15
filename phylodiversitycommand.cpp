@@ -10,6 +10,55 @@
 #include "phylodiversitycommand.h"
 
 //**********************************************************************************************************************
+vector<string> PhyloDiversityCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"freq","rarefy","iters","groups","processors","summary","collect","scale","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhyloDiversityCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+PhyloDiversityCommand::PhyloDiversityCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["phylodiv"] = tempOutNames;
+		outputTypes["rarefy"] = tempOutNames;
+		outputTypes["summary"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhyloDiversityCommand", "PhyloDiversityCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> PhyloDiversityCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhyloDiversityCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> PhyloDiversityCommand::getRequiredFiles(){	
+	try {
+		string Array[] =  {"tree","group"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhyloDiversityCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
@@ -32,6 +81,12 @@ PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["phylodiv"] = tempOutNames;
+			outputTypes["rarefy"] = tempOutNames;
+			outputTypes["summary"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(globaldata->getTreeFile());		}
@@ -132,9 +187,9 @@ int PhyloDiversityCommand::execute(){
 			string outRareFile = outputDir + m->getRootName(m->getSimpleName(globaldata->getTreeFile()))  + toString(i+1) + ".phylodiv.rarefaction";
 			string outCollectFile = outputDir + m->getRootName(m->getSimpleName(globaldata->getTreeFile()))  + toString(i+1) + ".phylodiv";
 			
-			if (summary)	{ m->openOutputFile(outSumFile, outSum); outputNames.push_back(outSumFile);				}
-			if (rarefy)		{ m->openOutputFile(outRareFile, outRare); outputNames.push_back(outRareFile);				}
-			if (collect)	{ m->openOutputFile(outCollectFile, outCollect); outputNames.push_back(outCollectFile);	}
+			if (summary)	{ m->openOutputFile(outSumFile, outSum); outputNames.push_back(outSumFile);		outputTypes["summary"].push_back(outSumFile);			}
+			if (rarefy)		{ m->openOutputFile(outRareFile, outRare); outputNames.push_back(outRareFile);	outputTypes["rarefy"].push_back(outRareFile);			}
+			if (collect)	{ m->openOutputFile(outCollectFile, outCollect); outputNames.push_back(outCollectFile);	 outputTypes["phylodiv"].push_back(outCollectFile);  }
 			
 			int numLeafNodes = trees[i]->getNumLeaves();
 			

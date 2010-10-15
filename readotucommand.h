@@ -20,7 +20,12 @@ class GlobalData;
 class ReadOtuCommand : public Command {
 public:
 	ReadOtuCommand(string);
+	ReadOtuCommand();
 	~ReadOtuCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -30,7 +35,8 @@ private:
 	Command* shared;
 	GroupMap* groupMap;
 	string filename, listfile, orderfile, sharedfile, label, groupfile, sabundfile, rabundfile, format, groups, outputDir, ordergroupfile, relAbundfile;
-	vector<string> Groups;
+	vector<string> Groups, outputNames;
+	map<string, vector<string> > outputTypes;
 
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used

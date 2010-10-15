@@ -31,7 +31,12 @@ class ClusterFragmentsCommand : public Command {
 	
 public:
 	ClusterFragmentsCommand(string);
+	ClusterFragmentsCommand();
 	~ClusterFragmentsCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();	
 	void help();
 	
@@ -42,6 +47,8 @@ private:
 	map<string, string> names; //represents the names file first column maps to second column
 	map<string, int> sizes;  //this map a seq name to the number of identical seqs in the names file
 	map<string, int>::iterator itSize; 
+	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 	
 	int readFASTA();
 	void readNameFile();

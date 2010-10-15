@@ -9,6 +9,53 @@
 
 #include "parsimonycommand.h"
 
+//**********************************************************************************************************************
+vector<string> ParsimonyCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"random","groups","iters","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ParsimonyCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+ParsimonyCommand::ParsimonyCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["parsimony"] = tempOutNames;
+		outputTypes["psummary"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ParsimonyCommand", "ParsimonyCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ParsimonyCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ParsimonyCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ParsimonyCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ParsimonyCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 /***********************************************************/
 ParsimonyCommand::ParsimonyCommand(string option)  {
 	try {
@@ -33,6 +80,11 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["parsimony"] = tempOutNames;
+			outputTypes["psummary"] = tempOutNames;
 			
 			randomtree = validParameter.validFile(parameters, "random", false);		if (randomtree == "not found") { randomtree = ""; }
 			
@@ -67,10 +119,12 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 					if(outputDir == "") { outputDir += m->hasPath(globaldata->getTreeFile()); }
 					output = new ColumnFile(outputDir + m->getSimpleName(globaldata->getTreeFile())  +  ".parsimony", itersString);
 					outputNames.push_back(outputDir + m->getSimpleName(globaldata->getTreeFile())  +  ".parsimony");
+					outputTypes["parsimony"].push_back(outputDir + m->getSimpleName(globaldata->getTreeFile())  +  ".parsimony");
 					
 					sumFile = outputDir + m->getSimpleName(globaldata->getTreeFile()) + ".psummary";
 					m->openOutputFile(sumFile, outSum);
 					outputNames.push_back(sumFile);
+					outputTypes["psummary"].push_back(sumFile);
 				}else { //user wants random distribution
 					savetmap = globaldata->gTreemap;
 					getUserInput();
@@ -78,6 +132,7 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 					if(outputDir == "") { outputDir += m->hasPath(randomtree); }
 					output = new ColumnFile(outputDir+ m->getSimpleName(randomtree), itersString);
 					outputNames.push_back(outputDir+ m->getSimpleName(randomtree));
+					outputTypes["parsimony"].push_back(outputDir+ m->getSimpleName(randomtree));
 				}
 				
 				//set users groups to analyze
@@ -134,7 +189,7 @@ int ParsimonyCommand::execute() {
 		if (m->control_pressed) { 
 			delete reading; delete pars; delete util; delete output;
 			if (randomtree == "") {  outSum.close();  }
-			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
 			globaldata->Groups.clear();
 			return 0;
 		}
@@ -158,7 +213,7 @@ int ParsimonyCommand::execute() {
 				if (m->control_pressed) { 
 					delete reading; delete pars; delete util; delete output;
 					if (randomtree == "") {  outSum.close();  }
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
 					globaldata->Groups.clear();
 					return 0;
 				}
@@ -196,7 +251,7 @@ int ParsimonyCommand::execute() {
 				if (m->control_pressed) { 
 					delete reading; delete pars; delete util; delete output; delete randT;
 					if (randomtree == "") {  outSum.close();  }
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
 					globaldata->Groups.clear();
 					return 0;
 				}
@@ -233,7 +288,7 @@ int ParsimonyCommand::execute() {
 				if (m->control_pressed) { 
 					delete reading; delete pars; delete util; delete output; delete randT;
 					globaldata->gTreemap = savetmap; 
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
 					globaldata->Groups.clear();
 					return 0;
 				}
@@ -245,7 +300,7 @@ int ParsimonyCommand::execute() {
 				if (m->control_pressed) { 
 					delete reading; delete pars; delete util; delete output; delete randT;
 					globaldata->gTreemap = savetmap; 
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
 					globaldata->Groups.clear();
 					return 0;
 				}
@@ -302,7 +357,7 @@ int ParsimonyCommand::execute() {
 				delete reading; delete pars; delete util; delete output;
 				if (randomtree == "") {  outSum.close();  }
 				else { globaldata->gTreemap = savetmap; }
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
 				globaldata->Groups.clear();
 				return 0;
 		}
@@ -327,7 +382,7 @@ int ParsimonyCommand::execute() {
 		
 		if (m->control_pressed) { 
 			delete pars; delete util; delete output;
-			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
 			return 0;
 		}
 		

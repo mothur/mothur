@@ -15,7 +15,12 @@
 class ReverseSeqsCommand : public Command {
 public:
 	ReverseSeqsCommand(string);
+	ReverseSeqsCommand();
 	~ReverseSeqsCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -23,6 +28,8 @@ private:
 
 	bool abort;
 	string fasta, outputDir;
+	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 	
 };
 

@@ -10,6 +10,58 @@
 #include "screenseqscommand.h"
 #include "sequence.hpp"
 
+//**********************************************************************************************************************
+vector<string> ScreenSeqsCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"fasta", "start", "end", "maxambig", "maxhomop","optimize","criteria", "minlength", "maxlength",
+									"name", "group", "alignreport","processors","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ScreenSeqsCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+ScreenSeqsCommand::ScreenSeqsCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["fasta"] = tempOutNames;
+		outputTypes["name"] = tempOutNames;
+		outputTypes["group"] = tempOutNames;
+		outputTypes["alignreport"] = tempOutNames;
+		outputTypes["accnos"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ScreenSeqsCommand", "ScreenSeqsCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ScreenSeqsCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"fasta"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ScreenSeqsCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ScreenSeqsCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ScreenSeqsCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 //***************************************************************************************************************
 
 ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
@@ -21,7 +73,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string AlignArray[] =  {"fasta", "start", "end", "maxambig", "maxhomop", "minlength", "maxlength",
+			string AlignArray[] =  {"fasta", "start", "end", "maxambig", "maxhomop","optimize","criteria", "minlength", "maxlength",
 									"name", "group", "alignreport","processors","outputdir","inputdir"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
@@ -35,6 +87,14 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["fasta"] = tempOutNames;
+			outputTypes["name"] = tempOutNames;
+			outputTypes["group"] = tempOutNames;
+			outputTypes["alignreport"] = tempOutNames;
+			outputTypes["accnos"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -120,7 +180,25 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = "1";				}
 			convert(temp, processors); 
-
+			
+			temp = validParameter.validFile(parameters, "optimize", false);	//optimizing trumps the optimized values original value
+			if (temp == "not found"){	temp = "";		}
+			else {  m->splitAtDash(temp, optimize);		}
+			
+			//check for invalid optimize options
+			set<string> validOptimizers;
+			validOptimizers.insert("start"); validOptimizers.insert("end"); validOptimizers.insert("maxambig"); validOptimizers.insert("maxhomop"); validOptimizers.insert("minlength"); validOptimizers.insert("maxlength");
+			
+			for (int i = 0; i < optimize.size(); i++) { 
+				if (validOptimizers.count(optimize[i]) == 0) { 
+					m->mothurOut(optimize[i] + " is not a valid optimizer. Valid options are start, end, maxambig, maxhomop, minlength and maxlength."); m->mothurOutEndLine();
+					optimize.erase(optimize.begin()+i);
+					i--;
+				}
+			}
+			
+			temp = validParameter.validFile(parameters, "criteria", false);	if (temp == "not found"){	temp = "90";				}
+			convert(temp, criteria); 
 		}
 
 	}
@@ -134,7 +212,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 void ScreenSeqsCommand::help(){
 	try {
 		m->mothurOut("The screen.seqs command reads a fastafile and creates .....\n");
-		m->mothurOut("The screen.seqs command parameters are fasta, start, end, maxambig, maxhomop, minlength, maxlength, name, group and processors.\n");
+		m->mothurOut("The screen.seqs command parameters are fasta, start, end, maxambig, maxhomop, minlength, maxlength, name, group, optimize, criteria and processors.\n");
 		m->mothurOut("The fasta parameter is required.\n");
 		m->mothurOut("The start parameter .... The default is -1.\n");
 		m->mothurOut("The end parameter .... The default is -1.\n");
@@ -143,6 +221,8 @@ void ScreenSeqsCommand::help(){
 		m->mothurOut("The minlength parameter .... The default is -1.\n");
 		m->mothurOut("The maxlength parameter .... The default is -1.\n");
 		m->mothurOut("The processors parameter allows you to specify the number of processors to use while running the command. The default is 1.\n");
+		m->mothurOut("The optimize and criteria parameters allow you set the start, end, maxabig, maxhomop, minlength and maxlength parameters relative to your set of sequences .\n");
+		m->mothurOut("For example optimize=start-end, criteria=90, would set the start and end values to the position 90% of your sequences started and ended.\n");
 		m->mothurOut("The name parameter allows you to provide a namesfile, and the group parameter allows you to provide a groupfile.\n");
 		m->mothurOut("The screen.seqs command should be in the following format: \n");
 		m->mothurOut("screen.seqs(fasta=yourFastaFile, name=youNameFile, group=yourGroupFIle, start=yourStart, end=yourEnd, maxambig=yourMaxambig,  \n");
@@ -167,6 +247,16 @@ int ScreenSeqsCommand::execute(){
 	try{
 		
 		if (abort == true) { return 0; }
+		
+		//if the user want to optimize we need to no the 90% mark
+		vector<unsigned long int> positions;
+		if (optimize.size() != 0) {  getSummary(positions); } //get summary is paralellized so we need to divideFile, no need to do this step twice so I moved it here
+		else { 
+			positions = m->divideFile(fastafile, processors);
+			for (int i = 0; i < (positions.size()-1); i++) {
+				lines.push_back(new linePair(positions[i], positions[(i+1)]));
+			}	
+		}
 				
 		string goodSeqFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "good" + m->getExtension(fastafile);
 		string badAccnosFile =  outputDir + m->getRootName(m->getSimpleName(fastafile)) + "bad.accnos";
@@ -283,11 +373,6 @@ int ScreenSeqsCommand::execute(){
 			MPI_Barrier(MPI_COMM_WORLD); //make everyone wait - just in case
 					
 #else
-			vector<unsigned long int> positions = m->divideFile(fastafile, processors);
-				
-			for (int i = 0; i < (positions.size()-1); i++) {
-				lines.push_back(new linePair(positions[i], positions[(i+1)]));
-			}	
 						
 	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			if(processors == 1){
@@ -390,8 +475,8 @@ int ScreenSeqsCommand::execute(){
 
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		m->mothurOut(goodSeqFile); m->mothurOutEndLine();	
-		m->mothurOut(badAccnosFile); m->mothurOutEndLine();	
+		m->mothurOut(goodSeqFile); m->mothurOutEndLine();	outputTypes["fasta"].push_back(goodSeqFile);
+		m->mothurOut(badAccnosFile); m->mothurOutEndLine();	 outputTypes["accnos"].push_back(badAccnosFile);
 		for (int i = 0; i < outputNames.size(); i++) { m->mothurOut(outputNames[i]); m->mothurOutEndLine(); }
 		m->mothurOutEndLine();
 		m->mothurOutEndLine();
@@ -418,7 +503,7 @@ int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 		set<string>::iterator it;
 
 		string goodNameFile = outputDir + m->getRootName(m->getSimpleName(namefile)) + "good" + m->getExtension(namefile);
-		outputNames.push_back(goodNameFile); 
+		outputNames.push_back(goodNameFile);  outputTypes["name"].push_back(goodNameFile);
 		
 		ofstream goodNameOut;	m->openOutputFile(goodNameFile, goodNameOut);
 	
@@ -464,7 +549,7 @@ int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 			m->openInputFile(groupfile, inputGroups);
 
 			string goodGroupFile = outputDir + m->getRootName(m->getSimpleName(groupfile)) + "good" + m->getExtension(groupfile);
-			outputNames.push_back(goodGroupFile);  
+			outputNames.push_back(goodGroupFile);   outputTypes["group"].push_back(goodGroupFile);
 			
 			ofstream goodGroupOut;	m->openOutputFile(goodGroupFile, goodGroupOut);
 			
@@ -503,6 +588,175 @@ int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 		exit(1);
 	}
 }
+//***************************************************************************************************************
+int ScreenSeqsCommand::getSummary(vector<unsigned long int>& positions){
+	try {
+		
+		vector<int> startPosition;
+		vector<int> endPosition;
+		vector<int> seqLength;
+		vector<int> ambigBases;
+		vector<int> longHomoPolymer;
+		
+		vector<unsigned long int> positions = m->divideFile(fastafile, processors);
+				
+		for (int i = 0; i < (positions.size()-1); i++) {
+			lines.push_back(new linePair(positions[i], positions[(i+1)]));
+		}	
+		
+		int numSeqs = 0;
+		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			if(processors == 1){
+				numSeqs = driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, lines[0]);
+			}else{
+				numSeqs = createProcessesCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile); 
+			}
+				
+			if (m->control_pressed) {  return 0; }
+		#else
+			numSeqs = driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, lines[0]);
+			if (m->control_pressed) {  return 0; }
+		#endif
+
+		sort(startPosition.begin(), startPosition.end());
+		sort(endPosition.begin(), endPosition.end());
+		sort(seqLength.begin(), seqLength.end());
+		sort(ambigBases.begin(), ambigBases.end());
+		sort(longHomoPolymer.begin(), longHomoPolymer.end());
+		
+		int criteriaPercentile	= int(numSeqs * (criteria / (float) 100));
+		
+		for (int i = 0; i < optimize.size(); i++) {
+			if (optimize[i] == "start") { startPos = startPosition[criteriaPercentile]; m->mothurOut("Optimizing start to " + toString(startPos) + "."); m->mothurOutEndLine(); }
+			else if (optimize[i] == "end") { int endcriteriaPercentile = int(numSeqs * ((100 - criteria) / (float) 100));  endPos = endPosition[endcriteriaPercentile]; m->mothurOut("Optimizing end to " + toString(endPos) + "."); m->mothurOutEndLine();}
+			else if (optimize[i] == "maxambig") { maxAmbig = ambigBases[criteriaPercentile]; m->mothurOut("Optimizing maxambig to " + toString(maxAmbig) + "."); m->mothurOutEndLine(); }
+			else if (optimize[i] == "maxhomop") { maxHomoP = longHomoPolymer[criteriaPercentile]; m->mothurOut("Optimizing maxhomop to " + toString(maxHomoP) + "."); m->mothurOutEndLine(); }
+			else if (optimize[i] == "minlength") { int mincriteriaPercentile = int(numSeqs * ((100 - criteria) / (float) 100)); minLength = seqLength[mincriteriaPercentile]; m->mothurOut("Optimizing minlength to " + toString(minLength) + "."); m->mothurOutEndLine(); }
+			else if (optimize[i] == "maxlength") { maxLength = seqLength[criteriaPercentile]; m->mothurOut("Optimizing maxlength to " + toString(maxLength) + "."); m->mothurOutEndLine(); }
+		}
+
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ScreenSeqsCommand", "getSummary");
+		exit(1);
+	}
+}
+/**************************************************************************************/
+int ScreenSeqsCommand::driverCreateSummary(vector<int>& startPosition, vector<int>& endPosition, vector<int>& seqLength, vector<int>& ambigBases, vector<int>& longHomoPolymer, string filename, linePair* filePos) {	
+	try {
+		
+		ifstream in;
+		m->openInputFile(filename, in);
+				
+		in.seekg(filePos->start);
+
+		bool done = false;
+		int count = 0;
+	
+		while (!done) {
+				
+			if (m->control_pressed) { in.close(); return 1; }
+					
+			Sequence current(in); m->gobble(in);
+	
+			if (current.getName() != "") {
+				startPosition.push_back(current.getStartPos());
+				endPosition.push_back(current.getEndPos());
+				seqLength.push_back(current.getNumBases());
+				ambigBases.push_back(current.getAmbigBases());
+				longHomoPolymer.push_back(current.getLongHomoPolymer());
+				count++;
+			}
+			
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				unsigned long int pos = in.tellg();
+				if ((pos == -1) || (pos >= filePos->end)) { break; }
+			#else
+				if (in.eof()) { break; }
+			#endif
+			
+		}
+		
+		in.close();
+		
+		return count;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ScreenSeqsCommand", "driverCreateSummary");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+int ScreenSeqsCommand::createProcessesCreateSummary(vector<int>& startPosition, vector<int>& endPosition, vector<int>& seqLength, vector<int>& ambigBases, vector<int>& longHomoPolymer, string filename) {
+	try {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		int process = 1;
+		int num = 0;
+		processIDS.clear();
+		
+		//loop through and create all the processes you want
+		while (process != processors) {
+			int pid = fork();
+			
+			if (pid > 0) {
+				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+				process++;
+			}else if (pid == 0){
+				num = driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, lines[process]);
+				
+				//pass numSeqs to parent
+				ofstream out;
+				string tempFile = fastafile + toString(getpid()) + ".num.temp";
+				m->openOutputFile(tempFile, out);
+				
+				out << num << endl;
+				for (int k = 0; k < startPosition.size(); k++)		{		out << startPosition[k] << '\t'; }  out << endl;
+				for (int k = 0; k < endPosition.size(); k++)		{		out << endPosition[k] << '\t'; }  out << endl;
+				for (int k = 0; k < seqLength.size(); k++)			{		out << seqLength[k] << '\t'; }  out << endl;
+				for (int k = 0; k < ambigBases.size(); k++)			{		out << ambigBases[k] << '\t'; }  out << endl;
+				for (int k = 0; k < longHomoPolymer.size(); k++)	{		out << longHomoPolymer[k] << '\t'; }  out << endl;
+				
+				out.close();
+				
+				exit(0);
+			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
+		}
+		
+		num = driverCreateSummary(startPosition, endPosition, seqLength, ambigBases, longHomoPolymer, fastafile, lines[0]);
+		
+		//force parent to wait until all the processes are done
+		for (int i=0;i<processIDS.size();i++) { 
+			int temp = processIDS[i];
+			wait(&temp);
+		}
+		
+		//parent reads in and combine Filter info
+		for (int i = 0; i < processIDS.size(); i++) {
+			string tempFilename = fastafile + toString(processIDS[i]) + ".num.temp";
+			ifstream in;
+			m->openInputFile(tempFilename, in);
+			
+			int temp, tempNum;
+			in >> tempNum; m->gobble(in); num += tempNum;
+			for (int k = 0; k < tempNum; k++)			{		in >> temp; startPosition.push_back(temp);		}		m->gobble(in);
+			for (int k = 0; k < tempNum; k++)			{		in >> temp; endPosition.push_back(temp);		}		m->gobble(in);
+			for (int k = 0; k < tempNum; k++)			{		in >> temp; seqLength.push_back(temp);			}		m->gobble(in);
+			for (int k = 0; k < tempNum; k++)			{		in >> temp; ambigBases.push_back(temp);			}		m->gobble(in);
+			for (int k = 0; k < tempNum; k++)			{		in >> temp; longHomoPolymer.push_back(temp);	}		m->gobble(in);
+				
+			in.close();
+			remove(tempFilename.c_str());
+		}
+		
+		return num;
+#endif		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ScreenSeqsCommand", "createProcessesCreateSummary");
+		exit(1);
+	}
+}
 
 //***************************************************************************************************************
 
@@ -514,7 +768,7 @@ int ScreenSeqsCommand::screenGroupFile(set<string> badSeqNames){
 		set<string>::iterator it;
 		
 		string goodGroupFile = outputDir + m->getRootName(m->getSimpleName(groupfile)) + "good" + m->getExtension(groupfile);
-		outputNames.push_back(goodGroupFile); 
+		outputNames.push_back(goodGroupFile);  outputTypes["group"].push_back(goodGroupFile);
 		ofstream goodGroupOut;	m->openOutputFile(goodGroupFile, goodGroupOut);
 		
 		while(!inputGroups.eof()){
@@ -566,7 +820,7 @@ int ScreenSeqsCommand::screenAlignReport(set<string> badSeqNames){
 		set<string>::iterator it;
 		
 		string goodAlignReportFile = outputDir + m->getRootName(m->getSimpleName(alignreport)) + "good" + m->getExtension(alignreport);
-		outputNames.push_back(goodAlignReportFile);  
+		outputNames.push_back(goodAlignReportFile);  outputTypes["alignreport"].push_back(goodAlignReportFile);
 		ofstream goodAlignReportOut;	m->openOutputFile(goodAlignReportFile, goodAlignReportOut);
 
 		while (!inputAlignReport.eof())	{		//	need to copy header

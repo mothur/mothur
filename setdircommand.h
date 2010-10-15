@@ -20,7 +20,12 @@ class SetDirectoryCommand : public Command {
 	
 public:
 	SetDirectoryCommand(string);
+	SetDirectoryCommand() {}
 	~SetDirectoryCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -28,6 +33,8 @@ private:
 	CommandFactory* commandFactory;
 	string output, input, tempdefault;
 	bool abort;
+	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 		
 };
 

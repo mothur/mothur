@@ -24,6 +24,7 @@ public:
 		int diff = 0;
 		int length = 0;
 		int start = 0;
+		bool overlap = false;
 		
 		string seqA = A.getAligned();
 		string seqB = B.getAligned();
@@ -32,6 +33,7 @@ public:
 		for(int i=0;i<alignLength;i++){
 			if(seqA[i] != '.' && seqB[i] != '.'){
 				start = i;
+				overlap = true;
 				break;
 			}
 		}
@@ -47,6 +49,9 @@ public:
 				length++;
 			}
 		}
+		
+		//non-overlapping sequences
+		if (!overlap) { length = 0; }
 
 		if(length == 0)		{	dist = 1.0000;								}
 		else				{	dist = ((double)diff  / (double)length);	}

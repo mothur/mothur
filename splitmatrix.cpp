@@ -24,12 +24,13 @@ SplitMatrix::SplitMatrix(string distfile, string name, string tax, float c, stri
 }
 /***********************************************************************/
 
-SplitMatrix::SplitMatrix(string ffile, string name, string tax, float c, string t, int p, string output){
+SplitMatrix::SplitMatrix(string ffile, string name, string tax, float c, float cu, string t, int p, string output){
 	m = MothurOut::getInstance();
 	fastafile = ffile;
 	namefile = name;
 	taxFile = tax;
-	cutoff = c;
+	cutoff = c;  //tax level cutoff
+	distCutoff = cu; //for fasta method if you are creating distance matrix you need a cutoff for that
 	method = t;
 	processors = p;
 	outputDir = output;
@@ -181,7 +182,7 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 		//process each distance file
 		for (int i = 0; i < numGroups; i++) { 
 			
-			string options = "fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", cutoff=" + toString(cutoff);
+			string options = "fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", cutoff=" + toString(distCutoff);
 			
 			Command* command = new DistanceCommand(options);
 			command->execute();

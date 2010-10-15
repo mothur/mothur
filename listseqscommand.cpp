@@ -12,6 +12,53 @@
 #include "listvector.hpp"
 
 //**********************************************************************************************************************
+vector<string> ListSeqsCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"fasta","name", "group", "alignreport","list","taxonomy","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ListSeqsCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+ListSeqsCommand::ListSeqsCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["accnos"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ListSeqsCommand", "ListSeqsCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ListSeqsCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"fasta","name", "group", "alignreport","list","taxonomy","or"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ListSeqsCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ListSeqsCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ListSeqsCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 
 ListSeqsCommand::ListSeqsCommand(string option)  {
 	try {
@@ -35,6 +82,10 @@ ListSeqsCommand::ListSeqsCommand(string option)  {
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["accnos"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -164,7 +215,7 @@ int ListSeqsCommand::execute(){
 		else if (listfile != "")	{	inputFileName = listfile;	readList();		}
 		else if (taxfile != "")		{	inputFileName = taxfile;	readTax();		}
 		
-		if (m->control_pressed) { return 0; }
+		if (m->control_pressed) { outputTypes.clear();  return 0; }
 		
 		//sort in alphabetical order
 		sort(names.begin(), names.end());
@@ -179,17 +230,17 @@ int ListSeqsCommand::execute(){
 		//output to .accnos file
 		for (int i = 0; i < names.size(); i++) {
 			
-			if (m->control_pressed) { out.close(); remove(outputFileName.c_str()); return 0; }
+			if (m->control_pressed) { outputTypes.clear(); out.close(); remove(outputFileName.c_str()); return 0; }
 			
 			out << names[i] << endl;
 		}
 		out.close();
 		
-		if (m->control_pressed) { remove(outputFileName.c_str()); return 0; }
+		if (m->control_pressed) { outputTypes.clear();  remove(outputFileName.c_str()); return 0; }
 
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
-		m->mothurOut(outputFileName); m->mothurOutEndLine();	
+		m->mothurOut(outputFileName); m->mothurOutEndLine();	outputNames.push_back(outputFileName); outputTypes["accnos"].push_back(outputFileName);
 		m->mothurOutEndLine();
 		
 		return 0;		

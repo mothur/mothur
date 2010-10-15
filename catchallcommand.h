@@ -26,7 +26,12 @@ class CatchAllCommand : public Command {
 public:
 
 	CatchAllCommand(string);
-	~CatchAllCommand() {};
+	CatchAllCommand();
+	~CatchAllCommand() {}
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map< string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();	
 	
@@ -39,6 +44,8 @@ private:
 	string outputDir, sabundfile, rabundfile, listfile, format;
 	bool abort, allLines;
 	set<string> labels;
+	vector<string> outputNames;
+	map< string, vector<string> > outputTypes;
 	
 	string process(SAbundVector*);
 };

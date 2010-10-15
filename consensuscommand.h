@@ -20,7 +20,12 @@ class ConcensusCommand : public Command {
 	
 public:
 	ConcensusCommand(string);	
+	ConcensusCommand();
 	~ConcensusCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();	
 	
@@ -43,6 +48,8 @@ private:
 	string outputFile, notIncluded, filename;
 	ofstream out, out2;
 	int numNodes, numLeaves, count;  //count is the next available spot in the tree vector
+	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 									 	
 	int getSets();
 	int getSubgroupRating(vector<string>);

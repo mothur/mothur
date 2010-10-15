@@ -13,6 +13,55 @@
 #include "rabundvector.hpp"
 #include "sabundvector.hpp"
 
+//**********************************************************************************************************************
+vector<string> PhylotypeCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"taxonomy","cutoff","label","name","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhylotypeCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+PhylotypeCommand::PhylotypeCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["list"] = tempOutNames;
+		outputTypes["sabund"] = tempOutNames;
+		outputTypes["rabund"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhylotypeCommand", "PhylotypeCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> PhylotypeCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"taxonomy"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhylotypeCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> PhylotypeCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PhylotypeCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 /**********************************************************************************************************************/
 PhylotypeCommand::PhylotypeCommand(string option)  {
 	try {
@@ -37,6 +86,12 @@ PhylotypeCommand::PhylotypeCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["list"] = tempOutNames;
+			outputTypes["sabund"] = tempOutNames;
+			outputTypes["rabund"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -127,8 +182,6 @@ int PhylotypeCommand::execute(){
 	
 		if (abort == true) { return 0; }
 		
-		vector<string> outputNames;
-		
 		//reads in taxonomy file and makes all the taxonomies the same length 
 		//by appending the last taxon to a given taxonomy as many times as needed to 
 		//make it as long as the longest taxonomy in the file 
@@ -164,9 +217,9 @@ int PhylotypeCommand::execute(){
 		string outputRabundFile = fileroot + "tx.rabund";
 		m->openOutputFile(outputRabundFile, outRabund);
 		
-		outputNames.push_back(outputListFile);
-		outputNames.push_back(outputSabundFile);
-		outputNames.push_back(outputRabundFile);
+		outputNames.push_back(outputListFile); outputTypes["list"].push_back(outputListFile);
+		outputNames.push_back(outputSabundFile); outputTypes["sabund"].push_back(outputSabundFile);
+		outputNames.push_back(outputRabundFile); outputTypes["rabund"].push_back(outputRabundFile);
 		
 		int count = 1;		
 		//start at leaves of tree and work towards root, processing the labels the user wants

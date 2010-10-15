@@ -10,6 +10,54 @@
 #include "parselistscommand.h"
 
 //**********************************************************************************************************************
+vector<string> ParseListCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"list","group", "label", "outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ParseListCommand", "getValidParameters");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
+ParseListCommand::ParseListCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["list"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ParseListCommand", "ParseListCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ParseListCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"list","group"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ParseListCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ParseListCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ParseListCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 ParseListCommand::ParseListCommand(string option)  {
 	try {
 		abort = false;
@@ -33,7 +81,11 @@ ParseListCommand::ParseListCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
-						
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["list"] = tempOutNames;			
+												
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
@@ -121,7 +173,6 @@ int ParseListCommand::execute(){
 		
 		//set fileroot
 		string fileroot = outputDir + m->getRootName(m->getSimpleName(listfile));
-		vector<string> outputNames;
 		
 		//fill filehandles with neccessary ofstreams
 		int i;
@@ -131,7 +182,7 @@ int ParseListCommand::execute(){
 			filehandles[groupMap->namesOfGroups[i]] = temp;
 			
 			string filename = fileroot +  groupMap->namesOfGroups[i] + ".list";
-			outputNames.push_back(filename);
+			outputNames.push_back(filename); outputTypes["list"].push_back(filename);
 			m->openOutputFile(filename, *temp);
 		}
 		
@@ -146,7 +197,7 @@ int ParseListCommand::execute(){
 		if (m->control_pressed) { 
 			delete input; delete list; delete groupMap;
 			for (i=0; i<groupMap->namesOfGroups.size(); i++) {  (*(filehandles[groupMap->namesOfGroups[i]])).close();  delete filehandles[groupMap->namesOfGroups[i]]; } 
-			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
 			return 0;
 		}
 		
@@ -155,7 +206,7 @@ int ParseListCommand::execute(){
 			if (m->control_pressed) { 
 				delete input; delete list; delete groupMap;
 				for (i=0; i<groupMap->namesOfGroups.size(); i++) {  (*(filehandles[groupMap->namesOfGroups[i]])).close();  delete filehandles[groupMap->namesOfGroups[i]]; } 
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
 				return 0;
 			}
 			
@@ -194,7 +245,7 @@ int ParseListCommand::execute(){
 		if (m->control_pressed) { 
 				delete input; delete groupMap;
 				for (i=0; i<groupMap->namesOfGroups.size(); i++) { (*(filehandles[groupMap->namesOfGroups[i]])).close();  delete filehandles[groupMap->namesOfGroups[i]]; } 
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
 				return 0;
 		}
 		
@@ -215,7 +266,7 @@ int ParseListCommand::execute(){
 		if (m->control_pressed) { 
 				delete input; delete groupMap;
 				for (i=0; i<groupMap->namesOfGroups.size(); i++) {  (*(filehandles[groupMap->namesOfGroups[i]])).close();  delete filehandles[groupMap->namesOfGroups[i]]; } 
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
 				return 0;
 		}
 		
@@ -240,7 +291,7 @@ int ParseListCommand::execute(){
 		delete input;
 		
 		if (m->control_pressed) { 
-			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
+			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } outputTypes.clear();
 			return 0;
 		}
 		

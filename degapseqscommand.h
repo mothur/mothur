@@ -16,7 +16,12 @@
 class DegapSeqsCommand : public Command {
 public:
 	DegapSeqsCommand(string);
+	DegapSeqsCommand();
 	~DegapSeqsCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -26,7 +31,7 @@ private:
 	string fastafile, outputDir;
 	vector<string> outputNames;
 	vector<string> fastaFileNames;
-	
+	map<string, vector<string> > outputTypes;
 };
 
 #endif

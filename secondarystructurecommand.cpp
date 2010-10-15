@@ -11,6 +11,53 @@
 #include "sequence.hpp"
 
 //**********************************************************************************************************************
+vector<string> AlignCheckCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"fasta","map", "outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "AlignCheckCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+AlignCheckCommand::AlignCheckCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["aligncheck"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "AlignCheckCommand", "AlignCheckCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> AlignCheckCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"fasta","map"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "AlignCheckCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> AlignCheckCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "AlignCheckCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 
 AlignCheckCommand::AlignCheckCommand(string option)  {
 	try {
@@ -35,6 +82,10 @@ AlignCheckCommand::AlignCheckCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["aligncheck"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -140,7 +191,7 @@ int AlignCheckCommand::execute(){
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
-		m->mothurOut(outfile); m->mothurOutEndLine();	
+		m->mothurOut(outfile); m->mothurOutEndLine();	outputNames.push_back(outfile); outputTypes["aligncheck"].push_back(outfile);
 		m->mothurOutEndLine();
 		
 		return 0;		

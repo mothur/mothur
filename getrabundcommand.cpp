@@ -10,7 +10,54 @@
 #include "getrabundcommand.h"
 
 //**********************************************************************************************************************
-
+vector<string> GetRAbundCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"label","sorted","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetRAbundCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+GetRAbundCommand::GetRAbundCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["rabund"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetRAbundCommand", "GetRAbundCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> GetRAbundCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetRAbundCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> GetRAbundCommand::getRequiredFiles(){	
+	try {
+		string Array[] =  {"list"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetRAbundCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 GetRAbundCommand::GetRAbundCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
@@ -41,6 +88,10 @@ GetRAbundCommand::GetRAbundCommand(string option)  {
 				outputDir = "";	
 				outputDir += m->hasPath(globaldata->inputFileName); //if user entered a file with a path then preserve it	
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["rabund"] = tempOutNames;
 			
 			//make sure the user has already run the read.otu command
 			if (globaldata->getListFile() == "") { m->mothurOut("You must read a listfile before you can use the get.rabund command."); m->mothurOutEndLine(); abort = true; }
@@ -120,7 +171,7 @@ int GetRAbundCommand::execute(){
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
-		if (m->control_pressed) {  out.close(); remove(filename.c_str());  delete list; globaldata->gListVector = NULL;  return 0; }
+		if (m->control_pressed) {  outputTypes.clear();  out.close(); remove(filename.c_str());  delete list; globaldata->gListVector = NULL;  return 0; }
 		
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
@@ -129,7 +180,7 @@ int GetRAbundCommand::execute(){
 					rabund = new RAbundVector();				
 					*rabund = (list->getRAbundVector());
 					
-					if (m->control_pressed) {  out.close(); remove(filename.c_str());  delete list; delete rabund; globaldata->gListVector = NULL;  return 0; }
+					if (m->control_pressed) {   outputTypes.clear(); out.close(); remove(filename.c_str());  delete list; delete rabund; globaldata->gListVector = NULL;  return 0; }
 
 					
 					if(sorted)	{   rabund->print(out);				}
@@ -151,7 +202,7 @@ int GetRAbundCommand::execute(){
 					rabund = new RAbundVector();
 					*rabund = (list->getRAbundVector());
 					
-					if (m->control_pressed) {  out.close(); remove(filename.c_str());  delete list; delete rabund; globaldata->gListVector = NULL;  return 0; }
+					if (m->control_pressed) {   outputTypes.clear(); out.close(); remove(filename.c_str());  delete list; delete rabund; globaldata->gListVector = NULL;  return 0; }
 					
 					if(sorted)	{   rabund->print(out);				}
 					else		{	rabund->nonSortedPrint(out);	}
@@ -193,7 +244,7 @@ int GetRAbundCommand::execute(){
 			rabund = new RAbundVector();
 			*rabund = (list->getRAbundVector());
 			
-			if (m->control_pressed) {  out.close(); remove(filename.c_str());  delete list; delete rabund; globaldata->gListVector = NULL;  return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); out.close(); remove(filename.c_str());  delete list; delete rabund; globaldata->gListVector = NULL;  return 0; }
 			
 			if(sorted)	{   rabund->print(out);				}
 			else		{	rabund->nonSortedPrint(out);	}
@@ -204,7 +255,7 @@ int GetRAbundCommand::execute(){
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
-		m->mothurOut(filename); m->mothurOutEndLine();	
+		m->mothurOut(filename); m->mothurOutEndLine();	outputNames.push_back(filename); outputTypes["rabund"].push_back(filename);
 		m->mothurOutEndLine();
 		
 		out.close(); 

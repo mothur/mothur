@@ -10,6 +10,53 @@
 #include "getlistcountcommand.h"
 
 //**********************************************************************************************************************
+vector<string> GetListCountCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"list","label","sort","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetListCountCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+GetListCountCommand::GetListCountCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["otu"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetListCountCommand", "GetListCountCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> GetListCountCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"list"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetListCountCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> GetListCountCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetListCountCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 GetListCountCommand::GetListCountCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
@@ -36,6 +83,10 @@ GetListCountCommand::GetListCountCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["otu"] = tempOutNames;
+		
 			string ranRead = globaldata->getListFile();
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
@@ -152,7 +203,7 @@ int GetListCountCommand::execute(){
 					delete input;
 					delete list;
 					globaldata->gListVector = NULL;  
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	}
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} outputTypes.clear();
 					return 0; 
 				}
 							
@@ -173,7 +224,7 @@ int GetListCountCommand::execute(){
 					delete input;
 					delete list;
 					globaldata->gListVector = NULL;  
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	}
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} outputTypes.clear();
 					return 0; 
 				}
 													
@@ -216,7 +267,7 @@ int GetListCountCommand::execute(){
 					delete input;
 					delete list;
 					globaldata->gListVector = NULL;  
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	}
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} outputTypes.clear();
 					return 0; 
 			}
 			
@@ -248,7 +299,7 @@ void GetListCountCommand::process(ListVector* list) {
 		if (outputDir == "") { outputDir += m->hasPath(listfile); }
 		string outputFileName = outputDir + m->getRootName(m->getSimpleName(listfile)) + list->getLabel() + ".otu";
 		m->openOutputFile(outputFileName, out);
-		outputNames.push_back(outputFileName);
+		outputNames.push_back(outputFileName); outputTypes["otu"].push_back(outputFileName);
 		
 		m->mothurOut(list->getLabel()); m->mothurOutEndLine();
 		

@@ -18,12 +18,19 @@
 class ChimeraSeqsCommand : public Command {
 public:
 	ChimeraSeqsCommand(string);
+	ChimeraSeqsCommand() {}
 	~ChimeraSeqsCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map< string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
 		
 private:
+	vector<string> outputNames;
+	map< string, vector<string> > outputTypes;
 
 };
 

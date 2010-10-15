@@ -10,8 +10,54 @@
 #include "degapseqscommand.h"
 #include "sequence.hpp"
 
+//**********************************************************************************************************************
+vector<string> DegapSeqsCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"fasta", "outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DegapSeqsCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+DegapSeqsCommand::DegapSeqsCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["fasta"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DegapSeqsCommand", "DegapSeqsCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> DegapSeqsCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"fasta"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DegapSeqsCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> DegapSeqsCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DegapSeqsCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 //***************************************************************************************************************
-
 DegapSeqsCommand::DegapSeqsCommand(string option)  {
 	try {
 		abort = false;
@@ -35,6 +81,11 @@ DegapSeqsCommand::DegapSeqsCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["fasta"] = tempOutNames;
+		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
@@ -65,6 +116,17 @@ DegapSeqsCommand::DegapSeqsCommand(string option)  {
 							fastaFileNames[i] = tryPath;
 						}
 					}
+					
+					//if you can't open it, try default location
+					if (ableToOpen == 1) {
+						if (m->getOutputDir() != "") { //default path is set
+							string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
+							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							fastaFileNames[i] = tryPath;
+						}
+					}
+					
 					in.close();
 					
 					if (ableToOpen == 1) { 
@@ -137,7 +199,7 @@ int DegapSeqsCommand::execute(){
 			m->openOutputFile(degapFile, outFASTA);
 			
 			while(!inFASTA.eof()){
-				if (m->control_pressed) {  inFASTA.close();  outFASTA.close(); remove(degapFile.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} return 0; }
+				if (m->control_pressed) {   outputTypes.clear(); inFASTA.close();  outFASTA.close(); remove(degapFile.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} return 0; }
 				 
 				Sequence currSeq(inFASTA);  m->gobble(inFASTA);
 				if (currSeq.getName() != "") {
@@ -148,9 +210,9 @@ int DegapSeqsCommand::execute(){
 			inFASTA.close();
 			outFASTA.close();
 			
-			outputNames.push_back(degapFile);
+			outputNames.push_back(degapFile); outputTypes["fasta"].push_back(degapFile);
 			
-			if (m->control_pressed) {  remove(degapFile.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); remove(degapFile.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} return 0; }
 		}
 		
 		m->mothurOutEndLine();

@@ -25,7 +25,12 @@ class BinSeqCommand : public Command {
 	
 public:
 	BinSeqCommand(string);	
+	BinSeqCommand();
 	~BinSeqCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();	
 	
@@ -42,6 +47,7 @@ private:
 	ofstream out;
 	ifstream in, inNames;
 	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 	
 	void readNamesFile();
 	int process(ListVector*);

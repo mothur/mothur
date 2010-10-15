@@ -41,7 +41,12 @@ struct Compare {
 class SeqErrorCommand : public Command {
 public:
 	SeqErrorCommand(string);
+	SeqErrorCommand();
 	~SeqErrorCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -58,6 +63,8 @@ private:
 	double threshold;
 	int numRefs;
 	ofstream errorFile;
+	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 	
 	vector<Sequence> referenceSeqs;
 };

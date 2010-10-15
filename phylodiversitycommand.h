@@ -18,7 +18,12 @@ class PhyloDiversityCommand : public Command {
 	
 	public:
 		PhyloDiversityCommand(string);
+		PhyloDiversityCommand();
 		~PhyloDiversityCommand();
+		vector<string> getRequiredParameters();
+		vector<string> getValidParameters();
+		vector<string> getRequiredFiles();
+		map<string, vector<string> > getOutputFiles() { return outputTypes; }
 		int execute();	
 		void help();
 	
@@ -30,6 +35,7 @@ class PhyloDiversityCommand : public Command {
 		bool abort, rarefy, summary, collect, scale;
 		string groups, outputDir;
 		vector<string> Groups, outputNames; //holds groups to be used, and outputFile names
+		map<string, vector<string> > outputTypes;
 		
 		void printData(set<int>&, map< string, vector<float> >&, ofstream&, int);
 		void printSumData(map< string, vector<float> >&, ofstream&, int);

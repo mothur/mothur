@@ -60,7 +60,12 @@ class SffInfoCommand : public Command {
 	
 public:
 	SffInfoCommand(string);
+	SffInfoCommand();
 	~SffInfoCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -69,6 +74,7 @@ private:
 	vector<string> filenames, outputNames, accnosFileNames;
 	bool abort, fasta, qual, trim, flow, sfftxt, hasAccnos;
 	set<string> seqNames;
+	map<string, vector<string> > outputTypes;
 	
 	int extractSffInfo(string, string);
 	int readCommonHeader(ifstream&, CommonHeader&);

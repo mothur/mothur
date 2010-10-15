@@ -17,7 +17,12 @@ class GetLineageCommand : public Command {
 	public:
 	
 		GetLineageCommand(string);
+		GetLineageCommand();
 		~GetLineageCommand(){};
+		vector<string> getRequiredParameters();
+		vector<string> getValidParameters();
+		vector<string> getRequiredFiles();
+		map<string, vector<string> > getOutputFiles() { return outputTypes; }
 		int execute();
 		void help();	
 		
@@ -26,6 +31,7 @@ class GetLineageCommand : public Command {
 		vector<string> outputNames;
 		string fastafile, namefile, groupfile, alignfile, listfile, taxfile, outputDir, taxons;
 		bool abort, dups;
+		map<string, vector<string> > outputTypes;
 		
 		int readFasta();
 		int readName();

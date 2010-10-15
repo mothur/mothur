@@ -16,7 +16,12 @@
 class SeqSummaryCommand : public Command {
 public:
 	SeqSummaryCommand(string);
+	SeqSummaryCommand();
 	~SeqSummaryCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -24,6 +29,8 @@ private:
 	bool abort;
 	string fastafile, outputDir;
 	int processors;
+	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 	
 	struct linePair {
 		unsigned long int start;

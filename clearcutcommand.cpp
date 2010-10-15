@@ -10,7 +10,54 @@
 #include "clearcutcommand.h"
 #include "clearcut.h"
 
-
+//**********************************************************************************************************************
+vector<string> ClearcutCommand::getValidParameters(){	
+	try {
+		string AlignArray[] =  {"fasta","phylip","version","verbose","quiet","seed","norandom","shuffle","neighbor","expblen",
+								"expdist","ntrees","matrixout","stdout","kimura","jukes","protein","DNA","outputdir","inputdir"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClearcutCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+ClearcutCommand::ClearcutCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["tree"] = tempOutNames;
+		outputTypes["matrixout"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClearcutCommand", "ClearcutCommand");
+		exit(1);
+	}
+}//**********************************************************************************************************************
+vector<string> ClearcutCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"fasta","phylip","or"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClearcutCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ClearcutCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClearcutCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 /**************************************************************************************/
 ClearcutCommand::ClearcutCommand(string option)  {	
 	try {
@@ -36,6 +83,11 @@ ClearcutCommand::ClearcutCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["tree"] = tempOutNames;
+			outputTypes["matrixout"] = tempOutNames;
+
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
@@ -177,6 +229,7 @@ int ClearcutCommand::execute() {
 		
 		//prepare filename
 		string outputName = outputDir + m->getRootName(m->getSimpleName(inputFile)) + "tre";
+		outputNames.push_back(outputName); outputTypes["tree"].push_back(outputName);
 		
 		vector<char*> cPara;
 		
@@ -226,6 +279,8 @@ int ClearcutCommand::execute() {
 			char* temp = new char[tempMatrix.length()];
 			strcpy(temp, tempMatrix.c_str());
 			cPara.push_back(temp);
+			outputNames.push_back((outputDir + matrixout));
+			outputTypes["matrixout"].push_back((outputDir + matrixout));
 		}
 
 		if (ntrees != "1")		{  
@@ -252,8 +307,7 @@ int ClearcutCommand::execute() {
 		if (!stdoutWanted) {	
 			m->mothurOutEndLine();
 			m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-			m->mothurOut(outputName); m->mothurOutEndLine();
-			if (matrixout != "")	{  m->mothurOut(outputDir+matrixout); m->mothurOutEndLine();  }
+			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 			m->mothurOutEndLine();
 		}
 
