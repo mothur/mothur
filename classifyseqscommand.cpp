@@ -14,8 +14,57 @@
 #include "phylosummary.h"
 #include "knn.h"
 
-//**********************************************************************************************************************
 
+//**********************************************************************************************************************
+vector<string> ClassifySeqsCommand::getValidParameters(){	
+	try {
+		string AlignArray[] =  {"template","fasta","name","group","search","ksize","method","processors","taxonomy","match","mismatch","gapopen","gapextend","numwanted","cutoff","probs","iters", "outputdir","inputdir"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClassifySeqsCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+ClassifySeqsCommand::ClassifySeqsCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["taxonomy"] = tempOutNames;
+		outputTypes["taxsummary"] = tempOutNames;
+		outputTypes["matchdist"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClassifySeqsCommand", "ClassifySeqsCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ClassifySeqsCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"fasta","template","taxonomy"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClassifySeqsCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ClassifySeqsCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClassifySeqsCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 	try {
 		abort = false;
@@ -39,6 +88,12 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["taxonomy"] = tempOutNames;
+			outputTypes["taxsummary"] = tempOutNames;
+			outputTypes["matchdist"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -110,6 +165,16 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 							fastaFileNames[i] = tryPath;
 						}
 					}
+					
+					if (ableToOpen == 1) {
+						if (m->getOutputDir() != "") { //default path is set
+							string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
+							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							fastaFileNames[i] = tryPath;
+						}
+					}
+					
 					in.close();
 					
 					if (ableToOpen == 1) { 
@@ -162,6 +227,15 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 							namefileNames[i] = tryPath;
 						}
 					}
+					
+					if (ableToOpen == 1) {
+						if (m->getOutputDir() != "") { //default path is set
+							string tryPath = m->getOutputDir() + m->getSimpleName(namefileNames[i]);
+							m->mothurOut("Unable to open " + namefileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							namefileNames[i] = tryPath;
+						}
+					}
 					in.close();
 					
 					if (ableToOpen == 1) { 
@@ -204,6 +278,16 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 							groupfileNames[i] = tryPath;
 						}
 					}
+					
+					if (ableToOpen == 1) {
+						if (m->getOutputDir() != "") { //default path is set
+							string tryPath = m->getOutputDir() + m->getSimpleName(groupfileNames[i]);
+							m->mothurOut("Unable to open " + groupfileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							groupfileNames[i] = tryPath;
+						}
+					}
+					
 					in.close();
 					
 					if (ableToOpen == 1) { 
@@ -336,7 +420,6 @@ int ClassifySeqsCommand::execute(){
 		
 		if (m->control_pressed) { delete classify; return 0; }
 		
-		vector<string> outputNames;
 				
 		for (int s = 0; s < fastaFileNames.size(); s++) {
 		
@@ -354,11 +437,11 @@ int ClassifySeqsCommand::execute(){
 			
 			if ((method == "knn") && (search == "distance")) { 
 				string DistName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "match.dist";
-				classify->setDistName(DistName);  outputNames.push_back(DistName);
+				classify->setDistName(DistName);  outputNames.push_back(DistName); outputTypes["matchdist"].push_back(DistName);
 			}
 			
-			outputNames.push_back(newTaxonomyFile);
-			outputNames.push_back(taxSummary);
+			outputNames.push_back(newTaxonomyFile); outputTypes["taxonomy"].push_back(newTaxonomyFile);
+			outputNames.push_back(taxSummary);	outputTypes["taxsummary"].push_back(taxSummary);
 			
 			int start = time(NULL);
 			int numFastaSeqs = 0;
@@ -380,20 +463,11 @@ int ClassifySeqsCommand::execute(){
 				int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
 				int inMode=MPI_MODE_RDONLY; 
 				
-				//char* outNewTax = new char[newTaxonomyFile.length()];
-				//memcpy(outNewTax, newTaxonomyFile.c_str(), newTaxonomyFile.length());
-				
 				char outNewTax[1024];
 				strcpy(outNewTax, newTaxonomyFile.c_str());
-
-				//char* outTempTax = new char[tempTaxonomyFile.length()];
-				//memcpy(outTempTax, tempTaxonomyFile.c_str(), tempTaxonomyFile.length());
 				
 				char outTempTax[1024];
 				strcpy(outTempTax, tempTaxonomyFile.c_str());
-
-				//char* inFileName = new char[fastaFileNames[s].length()];
-				//memcpy(inFileName, fastaFileNames[s].c_str(), fastaFileNames[s].length());
 				
 				char inFileName[1024];
 				strcpy(inFileName, fastaFileNames[s].c_str());
@@ -402,11 +476,7 @@ int ClassifySeqsCommand::execute(){
 				MPI_File_open(MPI_COMM_WORLD, outNewTax, outMode, MPI_INFO_NULL, &outMPINewTax);
 				MPI_File_open(MPI_COMM_WORLD, outTempTax, outMode, MPI_INFO_NULL, &outMPITempTax);
 				
-				//delete outNewTax;
-				//delete outTempTax;
-				//delete inFileName;
-
-				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPINewTax);   MPI_File_close(&outMPITempTax);  delete classify; return 0;  }
+				if (m->control_pressed) { outputTypes.clear(); MPI_File_close(&inMPI);  MPI_File_close(&outMPINewTax);   MPI_File_close(&outMPITempTax);  delete classify; return 0;  }
 				
 				if (pid == 0) { //you are the root process 
 					
@@ -427,7 +497,7 @@ int ClassifySeqsCommand::execute(){
 					//align your part
 					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPINewTax, outMPITempTax, MPIPos);
 					
-					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPINewTax);   MPI_File_close(&outMPITempTax);  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} delete classify; return 0;  }
+					if (m->control_pressed) {  outputTypes.clear(); MPI_File_close(&inMPI);  MPI_File_close(&outMPINewTax);   MPI_File_close(&outMPITempTax);  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} delete classify; return 0;  }
 					
 					for (int i = 1; i < processors; i++) {
 						int done;
@@ -447,7 +517,7 @@ int ClassifySeqsCommand::execute(){
 					//align your part
 					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPINewTax, outMPITempTax, MPIPos);
 					
-					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPINewTax);   MPI_File_close(&outMPITempTax);  delete classify; return 0;  }
+					if (m->control_pressed) {  outputTypes.clear(); MPI_File_close(&inMPI);  MPI_File_close(&outMPINewTax);   MPI_File_close(&outMPITempTax);  delete classify; return 0;  }
 
 					int done = 0;
 					MPI_Send(&done, 1, MPI_INT, 0, tag, MPI_COMM_WORLD); 
@@ -532,7 +602,7 @@ int ClassifySeqsCommand::execute(){
 			
 			PhyloSummary taxaSum(taxonomyFileName, group);
 			
-			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} delete classify; return 0; }
+			if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} delete classify; return 0; }
 		
 			if (namefile == "") {  taxaSum.summarize(tempTaxonomyFile);  }
 			else {
@@ -561,7 +631,7 @@ int ClassifySeqsCommand::execute(){
 			}
 			remove(tempTaxonomyFile.c_str());
 			
-			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} delete classify; return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} delete classify; return 0; }
 			
 			//print summary file
 			ofstream outTaxTree;
@@ -583,7 +653,7 @@ int ClassifySeqsCommand::execute(){
 			//read taxfile - this reading and rewriting is done to preserve the confidence scores.
 			string name, taxon;
 			while (!inTax.eof()) {
-				if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} remove(unclass.c_str()); delete classify; return 0; }
+				if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} remove(unclass.c_str()); delete classify; return 0; }
 
 				inTax >> name >> taxon; m->gobble(inTax);
 				

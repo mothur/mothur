@@ -33,9 +33,75 @@
 #include "whittaker.h"
 
 
-
 //**********************************************************************************************************************
-
+vector<string> CollectSharedCommand::getValidParameters(){	
+	try {
+		string AlignArray[] =  {"freq","label","calc","groups","all","outputdir","inputdir"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CollectSharedCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> CollectSharedCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CollectSharedCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> CollectSharedCommand::getRequiredFiles(){	
+	try {
+		string AlignArray[] =  {"shared"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CollectSharedCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+CollectSharedCommand::CollectSharedCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["sharedchao"] = tempOutNames;
+		outputTypes["sharedsobs"] = tempOutNames;
+		outputTypes["sharedace"] = tempOutNames;
+		outputTypes["jabund"] = tempOutNames;
+		outputTypes["sorabund"] = tempOutNames;
+		outputTypes["jclass"] = tempOutNames;
+		outputTypes["sorclass"] = tempOutNames;
+		outputTypes["jest"] = tempOutNames;
+		outputTypes["sorest"] = tempOutNames;
+		outputTypes["thetayc"] = tempOutNames;
+		outputTypes["thetan"] = tempOutNames;
+		outputTypes["kstest"] = tempOutNames;
+		outputTypes["whittaker"] = tempOutNames;
+		outputTypes["sharednseqs"] = tempOutNames;
+		outputTypes["ochiai"] = tempOutNames;
+		outputTypes["anderberg"] = tempOutNames;
+		outputTypes["skulczynski"] = tempOutNames;
+		outputTypes["kulczynskicody"] = tempOutNames;
+		outputTypes["lennon"] = tempOutNames;
+		outputTypes["morisitahorn"] = tempOutNames;
+		outputTypes["braycurtis"] = tempOutNames;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CollectSharedCommand", "CollectSharedCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 CollectSharedCommand::CollectSharedCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
@@ -62,6 +128,31 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["sharedchao"] = tempOutNames;
+			outputTypes["sharedsobs"] = tempOutNames;
+			outputTypes["sharedace"] = tempOutNames;
+			outputTypes["jabund"] = tempOutNames;
+			outputTypes["sorabund"] = tempOutNames;
+			outputTypes["jclass"] = tempOutNames;
+			outputTypes["sorclass"] = tempOutNames;
+			outputTypes["jest"] = tempOutNames;
+			outputTypes["sorest"] = tempOutNames;
+			outputTypes["thetayc"] = tempOutNames;
+			outputTypes["thetan"] = tempOutNames;
+			outputTypes["kstest"] = tempOutNames;
+			outputTypes["whittaker"] = tempOutNames;
+			outputTypes["sharednseqs"] = tempOutNames;
+			outputTypes["ochiai"] = tempOutNames;
+			outputTypes["anderberg"] = tempOutNames;
+			outputTypes["skulczynski"] = tempOutNames;
+			outputTypes["kulczynskicody"] = tempOutNames;
+			outputTypes["lennon"] = tempOutNames;
+			outputTypes["morisitahorn"] = tempOutNames;
+			outputTypes["braycurtis"] = tempOutNames;
+
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -124,67 +215,67 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 					if (validCalculator->isValidCalculator("shared", Estimators[i]) == true) { 
 						if (Estimators[i] == "sharedchao") { 
 							cDisplays.push_back(new CollectDisplay(new SharedChao1(), new SharedOneColumnFile(fileNameRoot+"shared.chao")));
-							outputNames.push_back(fileNameRoot+"shared.chao");
+							outputNames.push_back(fileNameRoot+"shared.chao"); outputTypes["sharedchao"].push_back(fileNameRoot+"shared.chao");
 						}else if (Estimators[i] == "sharedsobs") { 
 							cDisplays.push_back(new CollectDisplay(new SharedSobsCS(), new SharedOneColumnFile(fileNameRoot+"shared.sobs")));
-							outputNames.push_back(fileNameRoot+"shared.sobs");
+							outputNames.push_back(fileNameRoot+"shared.sobs"); outputTypes["sharedsobs"].push_back(fileNameRoot+"shared.sobs");
 						}else if (Estimators[i] == "sharedace") { 
 							cDisplays.push_back(new CollectDisplay(new SharedAce(), new SharedOneColumnFile(fileNameRoot+"shared.ace")));
-							outputNames.push_back(fileNameRoot+"shared.ace");
+							outputNames.push_back(fileNameRoot+"shared.ace"); outputTypes["sharedace"].push_back(fileNameRoot+"shared.ace");
 						}else if (Estimators[i] == "jabund") { 	
 							cDisplays.push_back(new CollectDisplay(new JAbund(), new SharedOneColumnFile(fileNameRoot+"jabund")));
-							outputNames.push_back(fileNameRoot+"jabund");
+							outputNames.push_back(fileNameRoot+"jabund"); outputTypes["jabund"].push_back(fileNameRoot+"jabund");
 						}else if (Estimators[i] == "sorabund") { 
 							cDisplays.push_back(new CollectDisplay(new SorAbund(), new SharedOneColumnFile(fileNameRoot+"sorabund")));
-							outputNames.push_back(fileNameRoot+"sorabund");
+							outputNames.push_back(fileNameRoot+"sorabund"); outputTypes["sorabund"].push_back(fileNameRoot+"sorabund");
 						}else if (Estimators[i] == "jclass") { 
 							cDisplays.push_back(new CollectDisplay(new Jclass(), new SharedOneColumnFile(fileNameRoot+"jclass")));
-							outputNames.push_back(fileNameRoot+"jclass");
+							outputNames.push_back(fileNameRoot+"jclass"); outputTypes["jclass"].push_back(fileNameRoot+"jclass");
 						}else if (Estimators[i] == "sorclass") { 
 							cDisplays.push_back(new CollectDisplay(new SorClass(), new SharedOneColumnFile(fileNameRoot+"sorclass")));
-							outputNames.push_back(fileNameRoot+"sorclass");
+							outputNames.push_back(fileNameRoot+"sorclass"); outputTypes["sorclass"].push_back(fileNameRoot+"sorclass");
 						}else if (Estimators[i] == "jest") { 
 							cDisplays.push_back(new CollectDisplay(new Jest(), new SharedOneColumnFile(fileNameRoot+"jest")));
-							outputNames.push_back(fileNameRoot+"jest");
+							outputNames.push_back(fileNameRoot+"jest"); outputTypes["jest"].push_back(fileNameRoot+"jest");
 						}else if (Estimators[i] == "sorest") { 
 							cDisplays.push_back(new CollectDisplay(new SorEst(), new SharedOneColumnFile(fileNameRoot+"sorest")));
-							outputNames.push_back(fileNameRoot+"sorest");
+							outputNames.push_back(fileNameRoot+"sorest"); outputTypes["sorest"].push_back(fileNameRoot+"sorest");
 						}else if (Estimators[i] == "thetayc") { 
 							cDisplays.push_back(new CollectDisplay(new ThetaYC(), new SharedOneColumnFile(fileNameRoot+"thetayc")));
-							outputNames.push_back(fileNameRoot+"thetayc");
+							outputNames.push_back(fileNameRoot+"thetayc"); outputTypes["thetayc"].push_back(fileNameRoot+"thetayc");
 						}else if (Estimators[i] == "thetan") { 
 							cDisplays.push_back(new CollectDisplay(new ThetaN(), new SharedOneColumnFile(fileNameRoot+"thetan")));
-							outputNames.push_back(fileNameRoot+"thetan");
+							outputNames.push_back(fileNameRoot+"thetan"); outputTypes["thetan"].push_back(fileNameRoot+"thetan");
 						}else if (Estimators[i] == "kstest") { 
 							cDisplays.push_back(new CollectDisplay(new KSTest(), new SharedOneColumnFile(fileNameRoot+"kstest")));
-							outputNames.push_back(fileNameRoot+"kstest");
+							outputNames.push_back(fileNameRoot+"kstest"); outputTypes["kstest"].push_back(fileNameRoot+"kstest");
 						}else if (Estimators[i] == "whittaker") { 
 							cDisplays.push_back(new CollectDisplay(new Whittaker(), new SharedOneColumnFile(fileNameRoot+"whittaker")));
-							outputNames.push_back(fileNameRoot+"whittaker");
+							outputNames.push_back(fileNameRoot+"whittaker"); outputTypes["whittaker"].push_back(fileNameRoot+"whittaker");
 						}else if (Estimators[i] == "sharednseqs") { 
 							cDisplays.push_back(new CollectDisplay(new SharedNSeqs(), new SharedOneColumnFile(fileNameRoot+"shared.nseqs")));
-							outputNames.push_back(fileNameRoot+"shared.nseqs");
+							outputNames.push_back(fileNameRoot+"shared.nseqs"); outputTypes["shared.nseqs"].push_back(fileNameRoot+"shared.nseqs");
 						}else if (Estimators[i] == "ochiai") { 
 							cDisplays.push_back(new CollectDisplay(new Ochiai(), new SharedOneColumnFile(fileNameRoot+"ochiai")));
-							outputNames.push_back(fileNameRoot+"ochiai");
+							outputNames.push_back(fileNameRoot+"ochiai"); outputTypes["ochiai"].push_back(fileNameRoot+"ochiai");
 						}else if (Estimators[i] == "anderberg") { 
 							cDisplays.push_back(new CollectDisplay(new Anderberg(), new SharedOneColumnFile(fileNameRoot+"anderberg")));
-							outputNames.push_back(fileNameRoot+"anderberg");
+							outputNames.push_back(fileNameRoot+"anderberg"); outputTypes["anderberg"].push_back(fileNameRoot+"anderberg");
 						}else if (Estimators[i] == "skulczynski") { 
 							cDisplays.push_back(new CollectDisplay(new Kulczynski(), new SharedOneColumnFile(fileNameRoot+"kulczynski")));
-							outputNames.push_back(fileNameRoot+"kulczynski");
+							outputNames.push_back(fileNameRoot+"kulczynski"); outputTypes["kulczynski"].push_back(fileNameRoot+"kulczynski");
 						}else if (Estimators[i] == "kulczynskicody") { 
 							cDisplays.push_back(new CollectDisplay(new KulczynskiCody(), new SharedOneColumnFile(fileNameRoot+"kulczynskicody")));
-							outputNames.push_back(fileNameRoot+"kulczynskicody");
+							outputNames.push_back(fileNameRoot+"kulczynskicody"); outputTypes["kulczynskicody"].push_back(fileNameRoot+"kulczynskicody");
 						}else if (Estimators[i] == "lennon") { 
 							cDisplays.push_back(new CollectDisplay(new Lennon(), new SharedOneColumnFile(fileNameRoot+"lennon")));
-							outputNames.push_back(fileNameRoot+"lennon");
+							outputNames.push_back(fileNameRoot+"lennon"); outputTypes["lennon"].push_back(fileNameRoot+"lennon");
 						}else if (Estimators[i] == "morisitahorn") { 
 							cDisplays.push_back(new CollectDisplay(new MorHorn(), new SharedOneColumnFile(fileNameRoot+"morisitahorn")));
-							outputNames.push_back(fileNameRoot+"morisitahorn");
+							outputNames.push_back(fileNameRoot+"morisitahorn"); outputTypes["morisitahorn"].push_back(fileNameRoot+"morisitahorn");
 						}else if (Estimators[i] == "braycurtis") { 
 							cDisplays.push_back(new CollectDisplay(new BrayCurtis(), new SharedOneColumnFile(fileNameRoot+"braycurtis")));
-							outputNames.push_back(fileNameRoot+"braycurtis");
+							outputNames.push_back(fileNameRoot+"braycurtis"); outputTypes["braycurtis"].push_back(fileNameRoot+"braycurtis");
 						}
 					}
 				}	
@@ -263,7 +354,7 @@ int CollectSharedCommand::execute(){
 
 		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			if (m->control_pressed) { 
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  outputTypes.clear();
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 					delete order; 
 					globaldata->Groups.clear();
@@ -311,7 +402,7 @@ int CollectSharedCommand::execute(){
 		}
 		
 		if (m->control_pressed) { 
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}   outputTypes.clear();
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 					globaldata->Groups.clear();
 					return 0;
@@ -341,7 +432,7 @@ int CollectSharedCommand::execute(){
 			delete cCurve;
 			
 			if (m->control_pressed) { 
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  outputTypes.clear();
 				for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
 				delete order; 
 				globaldata->Groups.clear();

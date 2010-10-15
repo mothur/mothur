@@ -18,8 +18,13 @@ class ChopSeqsCommand : public Command {
 	
 	public:
 	
-		ChopSeqsCommand(string);	
+		ChopSeqsCommand(string);
+		ChopSeqsCommand();	
 		~ChopSeqsCommand(){};
+		vector<string> getRequiredParameters();
+		vector<string> getValidParameters();
+		vector<string> getRequiredFiles();
+		map<string, vector<string> > getOutputFiles() { return outputTypes; }
 		int execute();
 		void help();	
 		
@@ -27,8 +32,11 @@ class ChopSeqsCommand : public Command {
 		string fastafile, outputDir, keep;
 		bool abort, countGaps;
 		int numbases;
+		vector<string> outputNames;
+		map<string, vector<string> > outputTypes;
 		
 		string getChopped(Sequence);
+		
 		
 };
 

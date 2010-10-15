@@ -10,7 +10,53 @@
 #include "reversecommand.h"
 #include "sequence.hpp"
 
-
+//**********************************************************************************************************************
+vector<string> ReverseSeqsCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"fasta", "outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ReverseSeqsCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+ReverseSeqsCommand::ReverseSeqsCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["fasta"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ReverseSeqsCommand", "ReverseSeqsCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ReverseSeqsCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"fasta"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ReverseSeqsCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ReverseSeqsCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ReverseSeqsCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 //***************************************************************************************************************
 
 ReverseSeqsCommand::ReverseSeqsCommand(string option)  {
@@ -35,6 +81,10 @@ ReverseSeqsCommand::ReverseSeqsCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["fasta"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -72,7 +122,7 @@ ReverseSeqsCommand::ReverseSeqsCommand(string option)  {
 
 void ReverseSeqsCommand::help(){
 	try {
-		m->mothurOut("The reverse.seqs command reads a fastafile and ....\n");
+		m->mothurOut("The reverse.seqs command reads a fastafile and outputs a fasta file containing the reverse compliment.\n");
 		m->mothurOut("The reverse.seqs command parameter is fasta and it is required.\n");
 		m->mothurOut("The reverse.seqs command should be in the following format: \n");
 		m->mothurOut("reverse.seqs(fasta=yourFastaFile) \n");	
@@ -118,7 +168,7 @@ int ReverseSeqsCommand::execute(){
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
-		m->mothurOut(reverseFile); m->mothurOutEndLine();	
+		m->mothurOut(reverseFile); m->mothurOutEndLine();	outputNames.push_back(reverseFile); outputTypes["fasta"].push_back(reverseFile);
 		m->mothurOutEndLine();
 
 		

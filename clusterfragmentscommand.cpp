@@ -25,6 +25,54 @@ inline bool comparePriority(seqRNode first, seqRNode second) {
 	return better; 
 }
 //**********************************************************************************************************************
+vector<string> ClusterFragmentsCommand::getValidParameters(){	
+	try {
+		string AlignArray[] =  {"fasta","name","outputdir","inputdir"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterFragmentsCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+ClusterFragmentsCommand::ClusterFragmentsCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["fasta"] = tempOutNames;
+		outputTypes["name"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterFragmentsCommand", "ClusterFragmentsCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ClusterFragmentsCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"fasta"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterFragmentsCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ClusterFragmentsCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterFragmentsCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
 	try {
 		abort = false;
@@ -47,6 +95,11 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
 			for (map<string, string>::iterator it2 = parameters.begin(); it2 != parameters.end(); it2++) { 
 				if (validParameter.isValidParameter(it2->first, myArray, it2->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["fasta"] = tempOutNames;
+			outputTypes["name"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -193,6 +246,7 @@ int ClusterFragmentsCommand::execute(){
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		m->mothurOut(newFastaFile); m->mothurOutEndLine();	
 		m->mothurOut(newNamesFile); m->mothurOutEndLine();	
+		outputNames.push_back(newFastaFile);  outputNames.push_back(newNamesFile); outputTypes["fasta"].push_back(newFastaFile); outputTypes["name"].push_back(newNamesFile);
 		m->mothurOutEndLine();
 
 		return 0;

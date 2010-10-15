@@ -29,7 +29,12 @@ class ClassifySeqsCommand : public Command {
 	
 public:
 	ClassifySeqsCommand(string);
+	ClassifySeqsCommand();
 	~ClassifySeqsCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute(); 
 	void help();	
 	
@@ -45,8 +50,10 @@ private:
 	vector<string> fastaFileNames;
 	vector<string> namefileNames;
 	vector<string> groupfileNames;
+	vector<string> outputNames;
 	map<string, vector<string> > nameMap;
 	map<string,  vector<string> >::iterator itNames;
+	map<string, vector<string> > outputTypes;
 	
 	Classify* classify;
 	

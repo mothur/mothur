@@ -33,7 +33,12 @@ class AlignCheckCommand : public Command {
 	public:
 	
 		AlignCheckCommand(string);	
-		~AlignCheckCommand(){};
+		AlignCheckCommand();
+		~AlignCheckCommand(){}
+		vector<string> getRequiredParameters();
+		vector<string> getValidParameters();
+		vector<string> getRequiredFiles();
+		map<string, vector<string> > getOutputFiles() { return outputTypes; }
 		int execute();
 		void help();	
 		
@@ -42,6 +47,8 @@ class AlignCheckCommand : public Command {
 		string mapfile, fastafile, outputDir;
 		bool abort;
 		int seqLength, haderror;
+		vector<string> outputNames;
+		map<string, vector<string> > outputTypes;
 		
 		void readMap();
 		statData getStats(string sequence);

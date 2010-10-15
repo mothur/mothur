@@ -10,6 +10,55 @@
 #include "clustercommand.h"
 
 //**********************************************************************************************************************
+vector<string> ClusterCommand::getValidParameters(){	
+	try {
+		string AlignArray[] =  {"cutoff","precision","method","showabund","timing","hard","outputdir","inputdir"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+ClusterCommand::ClusterCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["list"] = tempOutNames;
+		outputTypes["rabund"] = tempOutNames;
+		outputTypes["sabund"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterCommand", "ClusterCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ClusterCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray; 
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ClusterCommand::getRequiredFiles(){	
+	try {
+		string Array[] =  {"phylip","column","or"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 //This function checks to make sure the cluster command has no errors and then clusters based on the method chosen.
 ClusterCommand::ClusterCommand(string option)  {
 	try{
@@ -37,6 +86,12 @@ ClusterCommand::ClusterCommand(string option)  {
 				}
 			}
 			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["list"] = tempOutNames;
+			outputTypes["rabund"] = tempOutNames;
+			outputTypes["sabund"] = tempOutNames;
+		
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
 			
@@ -101,9 +156,9 @@ ClusterCommand::ClusterCommand(string option)  {
 				m->openOutputFile(fileroot+ tag + ".rabund",	rabundFile);
 				m->openOutputFile(fileroot+ tag + ".list",		listFile);
 				
-				outputNames.push_back(fileroot+ tag + ".sabund");
-				outputNames.push_back(fileroot+ tag + ".rabund");
-				outputNames.push_back(fileroot+ tag + ".list");
+				outputNames.push_back(fileroot+ tag + ".sabund"); outputTypes["sabund"].push_back(fileroot+ tag + ".sabund");
+				outputNames.push_back(fileroot+ tag + ".rabund"); outputTypes["rabund"].push_back(fileroot+ tag + ".rabund");
+				outputNames.push_back(fileroot+ tag + ".list"); outputTypes["list"].push_back(fileroot+ tag + ".list");
 			}
 		}
 	}
@@ -158,14 +213,14 @@ int ClusterCommand::execute(){
 		double saveCutoff = cutoff;
 		
 		while (matrix->getSmallDist() < cutoff && matrix->getNNodes() > 0){
-	cout << matrix->getSmallDist() << '\t' << cutoff << '\t' << matrix->getNNodes() << endl;	
+		
 			if (m->control_pressed) { //clean up
 				delete globaldata->gSparseMatrix;  globaldata->gSparseMatrix = NULL;
 				delete globaldata->gListVector;	 globaldata->gListVector = NULL;
 				if (globaldata->getFormat() == "phylip") { globaldata->setPhylipFile(""); }
 				else if (globaldata->getFormat() == "column") { globaldata->setColumnFile(""); }
 				sabundFile.close();rabundFile.close();listFile.close();
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} outputTypes.clear();
 				return 0;
 			}
 		

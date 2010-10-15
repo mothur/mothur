@@ -35,6 +35,53 @@
 #include "shen.h"
 
 //**********************************************************************************************************************
+vector<string> SummaryCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"label","calc","abund","size","outputdir","groupmode","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SummaryCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+SummaryCommand::SummaryCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["summary"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SummaryCommand", "SummaryCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SummaryCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SummaryCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SummaryCommand::getRequiredFiles(){	
+	try {
+		string AlignArray[] =  {"shared","list","rabund","sabund","or"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SummaryCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 
 SummaryCommand::SummaryCommand(string option)  {
 	try {
@@ -61,6 +108,10 @@ SummaryCommand::SummaryCommand(string option)  {
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["summary"] = tempOutNames;
 			
 			//make sure the user has already run the read.otu command
 			if ((globaldata->getSharedFile() == "") && (globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { m->mothurOut("You must read a list, sabund, rabund or shared file before you can use the summary.single command."); m->mothurOutEndLine(); abort = true; }
@@ -144,8 +195,6 @@ int SummaryCommand::execute(){
 	
 		if (abort == true) { return 0; }
 		
-		vector<string> outputNames;
-		
 		string hadShared = "";
 		if ((globaldata->getFormat() != "sharedfile")) { inputFileNames.push_back(globaldata->inputFileName);  }
 		else { hadShared = globaldata->getSharedFile(); inputFileNames = parseSharedFile(globaldata->getSharedFile());  globaldata->setFormat("rabund");  }
@@ -162,7 +211,7 @@ int SummaryCommand::execute(){
 			
 			string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p])) + "summary";
 			globaldata->inputFileName = inputFileNames[p];
-			outputNames.push_back(fileNameRoot);
+			outputNames.push_back(fileNameRoot); outputTypes["summary"].push_back(fileNameRoot);
 			
 			if (inputFileNames.size() > 1) {
 				m->mothurOutEndLine(); m->mothurOut("Processing group " + groups[p]); m->mothurOutEndLine(); m->mothurOutEndLine();

@@ -21,7 +21,12 @@ class GlobalData;
 class GetSAbundCommand : public Command {
 public:
 	GetSAbundCommand(string);
+	GetSAbundCommand();
 	~GetSAbundCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -33,6 +38,8 @@ private:
 	OrderVector* order;
 	InputData* input;
 	SAbundVector* sabund;
+	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used

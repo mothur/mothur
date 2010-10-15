@@ -16,7 +16,12 @@ class ScreenSeqsCommand : public Command {
 	
 public:
 	ScreenSeqsCommand(string);
+	ScreenSeqsCommand();
 	~ScreenSeqsCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -44,8 +49,14 @@ private:
 
 	bool abort;
 	string fastafile, namefile, groupfile, alignreport, outputDir;
-	int startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, processors;
+	int startPos, endPos, maxAmbig, maxHomoP, minLength, maxLength, processors, criteria;
 	vector<string> outputNames;
+	vector<string> optimize;
+	map<string, vector<string> > outputTypes;
+	
+	int getSummary(vector<unsigned long int>&);
+	int createProcessesCreateSummary(vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, string);
+	int driverCreateSummary(vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, string, linePair*);	
 };
 
 #endif

@@ -10,6 +10,39 @@
 #include "quitcommand.h"
 
 //**********************************************************************************************************************
+vector<string> QuitCommand::getValidParameters(){	
+	try {
+		vector<string> myArray; 
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "QuitCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> QuitCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "QuitCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> QuitCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "QuitCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 
 QuitCommand::QuitCommand(string option) {
 		abort = false;

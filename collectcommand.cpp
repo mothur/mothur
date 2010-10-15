@@ -34,7 +34,77 @@
 #include "shen.h"
 #include "coverage.h"
 
-
+//**********************************************************************************************************************
+vector<string> CollectCommand::getValidParameters(){	
+	try {
+		string AlignArray[] =  {"freq","label","calc","abund","size","outputdir","inputdir"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CollectCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> CollectCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CollectCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> CollectCommand::getRequiredFiles(){	
+	try {
+		string AlignArray[] =  {"shared","list","rabund","sabund","or"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CollectCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+CollectCommand::CollectCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["sobs"] = tempOutNames;
+		outputTypes["chao"] = tempOutNames;
+		outputTypes["nseqs"] = tempOutNames;
+		outputTypes["coverage"] = tempOutNames;
+		outputTypes["ace"] = tempOutNames;
+		outputTypes["jack"] = tempOutNames;
+		outputTypes["shannon"] = tempOutNames;
+		outputTypes["shannoneven"] = tempOutNames;
+		outputTypes["np_shannon"] = tempOutNames;
+		outputTypes["heip"] = tempOutNames;
+		outputTypes["smithwilson"] = tempOutNames;
+		outputTypes["simpson"] = tempOutNames;
+		outputTypes["simpsoneven"] = tempOutNames;
+		outputTypes["invsimpson"] = tempOutNames;
+		outputTypes["bootstrap"] = tempOutNames;
+		outputTypes["geometric"] = tempOutNames;
+		outputTypes["qstat"] = tempOutNames;
+		outputTypes["logseries"] = tempOutNames;
+		outputTypes["bergerparker"] = tempOutNames;
+		outputTypes["bstick"] = tempOutNames;
+		outputTypes["goodscoverage"] = tempOutNames;
+		outputTypes["efron"] = tempOutNames;
+		outputTypes["boneh"] = tempOutNames;
+		outputTypes["solow"] = tempOutNames;
+		outputTypes["shen"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CollectCommand", "CollectCommand");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 CollectCommand::CollectCommand(string option)  {
 	try {
@@ -61,6 +131,34 @@ CollectCommand::CollectCommand(string option)  {
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["sobs"] = tempOutNames;
+			outputTypes["chao"] = tempOutNames;
+			outputTypes["nseqs"] = tempOutNames;
+			outputTypes["coverage"] = tempOutNames;
+			outputTypes["ace"] = tempOutNames;
+			outputTypes["jack"] = tempOutNames;
+			outputTypes["shannon"] = tempOutNames;
+			outputTypes["shannoneven"] = tempOutNames;
+			outputTypes["np_shannon"] = tempOutNames;
+			outputTypes["heip"] = tempOutNames;
+			outputTypes["smithwilson"] = tempOutNames;
+			outputTypes["simpson"] = tempOutNames;
+			outputTypes["simpsoneven"] = tempOutNames;
+			outputTypes["invsimpson"] = tempOutNames;
+			outputTypes["bootstrap"] = tempOutNames;
+			outputTypes["geometric"] = tempOutNames;
+			outputTypes["qstat"] = tempOutNames;
+			outputTypes["logseries"] = tempOutNames;
+			outputTypes["bergerparker"] = tempOutNames;
+			outputTypes["bstick"] = tempOutNames;
+			outputTypes["goodscoverage"] = tempOutNames;
+			outputTypes["efron"] = tempOutNames;
+			outputTypes["boneh"] = tempOutNames;
+			outputTypes["solow"] = tempOutNames;
+			outputTypes["shen"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -140,15 +238,13 @@ int CollectCommand::execute(){
 		
 		if (abort == true) { return 0; }
 		
-		vector<string> outputNames;
-		
 		string hadShared = "";
 		if ((globaldata->getFormat() != "sharedfile")) { inputFileNames.push_back(globaldata->inputFileName);  }
 		else { hadShared = globaldata->getSharedFile(); inputFileNames = parseSharedFile(globaldata->getSharedFile());  globaldata->setFormat("rabund");  }
 	
 		for (int p = 0; p < inputFileNames.size(); p++) {
 			
-			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  globaldata->Groups.clear(); if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}  globaldata->Groups.clear(); if (hadShared != "") {  globaldata->setSharedFile(hadShared); globaldata->setFormat("sharedfile");  } return 0; }
 			
 			if (outputDir == "") { outputDir += m->hasPath(inputFileNames[p]); }
 			string fileNameRoot = outputDir + m->getRootName(m->getSimpleName(inputFileNames[p]));
@@ -164,79 +260,79 @@ int CollectCommand::execute(){
 				if (validCalculator->isValidCalculator("single", Estimators[i]) == true) { 
 					if (Estimators[i] == "sobs") { 
 						cDisplays.push_back(new CollectDisplay(new Sobs(), new OneColumnFile(fileNameRoot+"sobs")));
-						outputNames.push_back(fileNameRoot+"sobs");
+						outputNames.push_back(fileNameRoot+"sobs"); outputTypes["sobs"].push_back(fileNameRoot+"sobs");
 					}else if (Estimators[i] == "chao") { 
 						cDisplays.push_back(new CollectDisplay(new Chao1(), new ThreeColumnFile(fileNameRoot+"chao")));
-						outputNames.push_back(fileNameRoot+"chao");
+						outputNames.push_back(fileNameRoot+"chao"); outputTypes["chao"].push_back(fileNameRoot+"chao");
 					}else if (Estimators[i] == "nseqs") { 
 						cDisplays.push_back(new CollectDisplay(new NSeqs(), new OneColumnFile(fileNameRoot+"nseqs")));
-						outputNames.push_back(fileNameRoot+"nseqs");
+						outputNames.push_back(fileNameRoot+"nseqs"); outputTypes["nseqs"].push_back(fileNameRoot+"nseqs");
 					}else if (Estimators[i] == "coverage") { 
 						cDisplays.push_back(new CollectDisplay(new Coverage(), new OneColumnFile(fileNameRoot+"coverage")));
-						outputNames.push_back(fileNameRoot+"coverage");
+						outputNames.push_back(fileNameRoot+"coverage"); outputTypes["coverage"].push_back(fileNameRoot+"coverage");
 					}else if (Estimators[i] == "ace") { 
 						cDisplays.push_back(new CollectDisplay(new Ace(abund), new ThreeColumnFile(fileNameRoot+"ace")));
-						outputNames.push_back(fileNameRoot+"ace");
+						outputNames.push_back(fileNameRoot+"ace"); outputTypes["ace"].push_back(fileNameRoot+"ace");
 					}else if (Estimators[i] == "jack") { 
 						cDisplays.push_back(new CollectDisplay(new Jackknife(), new ThreeColumnFile(fileNameRoot+"jack")));
-						outputNames.push_back(fileNameRoot+"jack");
+						outputNames.push_back(fileNameRoot+"jack"); outputTypes["jack"].push_back(fileNameRoot+"jack");
 					}else if (Estimators[i] == "shannon") { 
 						cDisplays.push_back(new CollectDisplay(new Shannon(), new ThreeColumnFile(fileNameRoot+"shannon")));
-						outputNames.push_back(fileNameRoot+"shannon");
+						outputNames.push_back(fileNameRoot+"shannon"); outputTypes["shannon"].push_back(fileNameRoot+"shannon");
 					}else if (Estimators[i] == "shannoneven") { 
 						cDisplays.push_back(new CollectDisplay(new ShannonEven(), new OneColumnFile(fileNameRoot+"shannoneven")));
-						outputNames.push_back(fileNameRoot+"shannoneven");
+						outputNames.push_back(fileNameRoot+"shannoneven"); outputTypes["shannoneven"].push_back(fileNameRoot+"shannoneven");
 					}else if (Estimators[i] == "npshannon") { 
 						cDisplays.push_back(new CollectDisplay(new NPShannon(), new OneColumnFile(fileNameRoot+"np_shannon")));
-						outputNames.push_back(fileNameRoot+"np_shannon");
+						outputNames.push_back(fileNameRoot+"np_shannon"); outputTypes["np_shannon"].push_back(fileNameRoot+"np_shannon");
 					}else if (Estimators[i] == "heip") { 
 						cDisplays.push_back(new CollectDisplay(new Heip(), new OneColumnFile(fileNameRoot+"heip")));
-						outputNames.push_back(fileNameRoot+"heip");
+						outputNames.push_back(fileNameRoot+"heip"); outputTypes["heip"].push_back(fileNameRoot+"heip");
 					}else if (Estimators[i] == "smithwilson") { 
 						cDisplays.push_back(new CollectDisplay(new SmithWilson(), new OneColumnFile(fileNameRoot+"smithwilson")));
-						outputNames.push_back(fileNameRoot+"smithwilson");
+						outputNames.push_back(fileNameRoot+"smithwilson"); outputTypes["smithwilson"].push_back(fileNameRoot+"smithwilson");
 					}else if (Estimators[i] == "simpson") { 
 						cDisplays.push_back(new CollectDisplay(new Simpson(), new ThreeColumnFile(fileNameRoot+"simpson")));
-						outputNames.push_back(fileNameRoot+"simpson");
+						outputNames.push_back(fileNameRoot+"simpson"); outputTypes["simpson"].push_back(fileNameRoot+"simpson");
 					}else if (Estimators[i] == "simpsoneven") { 
 						cDisplays.push_back(new CollectDisplay(new SimpsonEven(), new OneColumnFile(fileNameRoot+"simpsoneven")));
-						outputNames.push_back(fileNameRoot+"simpsoneven");
+						outputNames.push_back(fileNameRoot+"simpsoneven"); outputTypes["simpsoneven"].push_back(fileNameRoot+"simpsoneven");
 					}else if (Estimators[i] == "invsimpson") { 
 						cDisplays.push_back(new CollectDisplay(new InvSimpson(), new ThreeColumnFile(fileNameRoot+"invsimpson")));
-						outputNames.push_back(fileNameRoot+"invsimpson");
+						outputNames.push_back(fileNameRoot+"invsimpson"); outputTypes["invsimpson"].push_back(fileNameRoot+"invsimpson");
 					}else if (Estimators[i] == "bootstrap") { 
 						cDisplays.push_back(new CollectDisplay(new Bootstrap(), new OneColumnFile(fileNameRoot+"bootstrap")));
-						outputNames.push_back(fileNameRoot+"bootstrap");
+						outputNames.push_back(fileNameRoot+"bootstrap"); outputTypes["bootstrap"].push_back(fileNameRoot+"bootstrap");
 					}else if (Estimators[i] == "geometric") { 
 						cDisplays.push_back(new CollectDisplay(new Geom(), new OneColumnFile(fileNameRoot+"geometric")));
-						outputNames.push_back(fileNameRoot+"geometric");
+						outputNames.push_back(fileNameRoot+"geometric"); outputTypes["geometric"].push_back(fileNameRoot+"geometric");
 					}else if (Estimators[i] == "qstat") { 
 						cDisplays.push_back(new CollectDisplay(new QStat(), new OneColumnFile(fileNameRoot+"qstat")));
-						outputNames.push_back(fileNameRoot+"qstat");
+						outputNames.push_back(fileNameRoot+"qstat"); outputTypes["qstat"].push_back(fileNameRoot+"qstat");
 					}else if (Estimators[i] == "logseries") { 
 						cDisplays.push_back(new CollectDisplay(new LogSD(), new OneColumnFile(fileNameRoot+"logseries")));
-						outputNames.push_back(fileNameRoot+"logseries");
+						outputNames.push_back(fileNameRoot+"logseries"); outputTypes["logseries"].push_back(fileNameRoot+"logseries");
 					}else if (Estimators[i] == "bergerparker") { 
 						cDisplays.push_back(new CollectDisplay(new BergerParker(), new OneColumnFile(fileNameRoot+"bergerparker")));
-						outputNames.push_back(fileNameRoot+"bergerparker");
+						outputNames.push_back(fileNameRoot+"bergerparker"); outputTypes["bergerparker"].push_back(fileNameRoot+"bergerparker");
 					}else if (Estimators[i] == "bstick") { 
 						cDisplays.push_back(new CollectDisplay(new BStick(), new ThreeColumnFile(fileNameRoot+"bstick")));
-						outputNames.push_back(fileNameRoot+"bstick");
+						outputNames.push_back(fileNameRoot+"bstick"); outputTypes["bstick"].push_back(fileNameRoot+"bstick");
 					}else if (Estimators[i] == "goodscoverage") { 
 						cDisplays.push_back(new CollectDisplay(new GoodsCoverage(), new OneColumnFile(fileNameRoot+"goodscoverage")));
-						outputNames.push_back(fileNameRoot+"goodscoverage");
+						outputNames.push_back(fileNameRoot+"goodscoverage"); outputTypes["goodscoverage"].push_back(fileNameRoot+"goodscoverage");
 					}else if (Estimators[i] == "efron") {
 						cDisplays.push_back(new CollectDisplay(new Efron(size), new OneColumnFile(fileNameRoot+"efron")));
-						outputNames.push_back(fileNameRoot+"efron");
+						outputNames.push_back(fileNameRoot+"efron"); outputTypes["efron"].push_back(fileNameRoot+"efron");
 					}else if (Estimators[i] == "boneh") {
 						cDisplays.push_back(new CollectDisplay(new Boneh(size), new OneColumnFile(fileNameRoot+"boneh")));
-						outputNames.push_back(fileNameRoot+"boneh");
+						outputNames.push_back(fileNameRoot+"boneh"); outputTypes["boneh"].push_back(fileNameRoot+"boneh");
 					}else if (Estimators[i] == "solow") {
 						cDisplays.push_back(new CollectDisplay(new Solow(size), new OneColumnFile(fileNameRoot+"solow")));
-						outputNames.push_back(fileNameRoot+"solow");
+						outputNames.push_back(fileNameRoot+"solow"); outputTypes["solow"].push_back(fileNameRoot+"solow");
 					}else if (Estimators[i] == "shen") {
 						cDisplays.push_back(new CollectDisplay(new Shen(size, abund), new OneColumnFile(fileNameRoot+"shen")));
-						outputNames.push_back(fileNameRoot+"shen");
+						outputNames.push_back(fileNameRoot+"shen"); outputTypes["shen"].push_back(fileNameRoot+"shen");
 					}
 				}
 			}
@@ -257,7 +353,7 @@ int CollectCommand::execute(){
 			
 			if (m->control_pressed) {  
 				for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} outputTypes.clear(); 
 				delete input;  globaldata->ginput = NULL;
 				delete read;
 				delete order; globaldata->gorder = NULL;
@@ -272,7 +368,7 @@ int CollectCommand::execute(){
 			
 				if (m->control_pressed) { 
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} outputTypes.clear(); 
 					delete input;  globaldata->ginput = NULL;
 					delete read;
 					delete order; globaldata->gorder = NULL;
@@ -324,7 +420,7 @@ int CollectCommand::execute(){
 			
 			if (m->control_pressed) { 
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} outputTypes.clear(); 
 					delete input;  globaldata->ginput = NULL;
 					delete read;
 					delete validCalculator;
@@ -359,7 +455,7 @@ int CollectCommand::execute(){
 				
 				if (m->control_pressed) { 
 					for(int i=0;i<cDisplays.size();i++){	delete cDisplays[i];	}
-					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	}
+					for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} outputTypes.clear(); 
 					delete input;  globaldata->ginput = NULL;
 					delete read;
 					delete order; globaldata->gorder = NULL;

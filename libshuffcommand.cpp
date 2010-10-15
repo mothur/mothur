@@ -19,6 +19,54 @@
 #include "dlibshuff.h"
 
 //**********************************************************************************************************************
+vector<string> LibShuffCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"iters","groups","step","form","cutoff","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "LibShuffCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+LibShuffCommand::LibShuffCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["coverage"] = tempOutNames;
+		outputTypes["libshuffsummary"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "LibShuffCommand", "LibShuffCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> LibShuffCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "LibShuffCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> LibShuffCommand::getRequiredFiles(){	
+	try {
+		string Array[] =  {"phylip","group"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "LibShuffCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 
 LibShuffCommand::LibShuffCommand(string option)  {
 	try {
@@ -43,6 +91,11 @@ LibShuffCommand::LibShuffCommand(string option)  {
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["coverage"] = tempOutNames;
+			outputTypes["libshuffsummary"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -147,14 +200,14 @@ int LibShuffCommand::execute(){
 			pValueCounts[i].assign(numGroups, 0);
 		}
 	
-		if (m->control_pressed) {  delete form; globaldata->Groups.clear(); delete globaldata->gMatrix;  globaldata->gMatrix = NULL; return 0; }
+		if (m->control_pressed) {  outputTypes.clear(); delete form; globaldata->Groups.clear(); delete globaldata->gMatrix;  globaldata->gMatrix = NULL; return 0; }
 				
 		Progress* reading = new Progress();
 		
 		for(int i=0;i<numGroups-1;i++) {
 			for(int j=i+1;j<numGroups;j++) {
 				
-				if (m->control_pressed) {  delete form; globaldata->Groups.clear(); delete globaldata->gMatrix;  globaldata->gMatrix = NULL; delete reading; return 0; }
+				if (m->control_pressed) {  outputTypes.clear();  delete form; globaldata->Groups.clear(); delete globaldata->gMatrix;  globaldata->gMatrix = NULL; delete reading; return 0; }
 
 				reading->newLine(groupNames[i]+'-'+groupNames[j], iters);
 				int spoti = globaldata->gGroupmap->groupIndex[groupNames[i]]; //neccessary in case user selects groups so you know where they are in the matrix
@@ -162,13 +215,13 @@ int LibShuffCommand::execute(){
 	
 				for(int p=0;p<iters;p++) {	
 					
-					if (m->control_pressed) {  delete form; globaldata->Groups.clear(); delete globaldata->gMatrix;  globaldata->gMatrix = NULL; delete reading; return 0; }
+					if (m->control_pressed) {  outputTypes.clear(); delete form; globaldata->Groups.clear(); delete globaldata->gMatrix;  globaldata->gMatrix = NULL; delete reading; return 0; }
 					
 					form->randomizeGroups(spoti,spotj); 
 					if(form->evaluatePair(spoti,spotj) >= savedDXYValues[spoti][spotj])	{	pValueCounts[i][j]++;	}
 					if(form->evaluatePair(spotj,spoti) >= savedDXYValues[spotj][spoti])	{	pValueCounts[j][i]++;	}
 					
-					if (m->control_pressed) {  delete form; globaldata->Groups.clear(); delete globaldata->gMatrix;  globaldata->gMatrix = NULL; delete reading; return 0; }
+					if (m->control_pressed) {  outputTypes.clear(); delete form; globaldata->Groups.clear(); delete globaldata->gMatrix;  globaldata->gMatrix = NULL; delete reading; return 0; }
 					
 					reading->update(p);			
 				}
@@ -177,7 +230,7 @@ int LibShuffCommand::execute(){
 			}
 		}
 		
-		if (m->control_pressed) {  delete form; globaldata->Groups.clear(); delete globaldata->gMatrix;  globaldata->gMatrix = NULL; delete reading; return 0; }
+		if (m->control_pressed) { outputTypes.clear();  delete form; globaldata->Groups.clear(); delete globaldata->gMatrix;  globaldata->gMatrix = NULL; delete reading; return 0; }
 	
 		reading->finish();
 		delete reading;
@@ -193,7 +246,7 @@ int LibShuffCommand::execute(){
 		//delete globaldata's copy of the gmatrix to free up memory
 		delete globaldata->gMatrix;  globaldata->gMatrix = NULL;
 		
-		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+		if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
 
 		
 		m->mothurOutEndLine();
@@ -217,7 +270,7 @@ int LibShuffCommand::printCoverageFile() {
 		ofstream outCov;
 		summaryFile = outputDir + m->getRootName(m->getSimpleName(globaldata->getPhylipFile())) + "libshuff.coverage";
 		m->openOutputFile(summaryFile, outCov);
-		outputNames.push_back(summaryFile);
+		outputNames.push_back(summaryFile); outputTypes["coverage"].push_back(summaryFile);
 		outCov.setf(ios::fixed, ios::floatfield); outCov.setf(ios::showpoint);
 		//cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
 		
@@ -313,7 +366,7 @@ int LibShuffCommand::printSummaryFile() {
 		ofstream outSum;
 		summaryFile = outputDir + m->getRootName(m->getSimpleName(globaldata->getPhylipFile())) + "libshuff.summary";
 		m->openOutputFile(summaryFile, outSum);
-		outputNames.push_back(summaryFile);
+		outputNames.push_back(summaryFile); outputTypes["libshuffsummary"].push_back(summaryFile);
 
 		outSum.setf(ios::fixed, ios::floatfield); outSum.setf(ios::showpoint);
 		cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);

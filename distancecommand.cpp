@@ -15,7 +15,54 @@
 #include "onegapignore.h"
 
 //**********************************************************************************************************************
-
+vector<string> DistanceCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"fasta","oldfasta","column", "output", "calc", "countends", "cutoff", "processors", "outputdir","inputdir","compress"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DistanceCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+DistanceCommand::DistanceCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["phylip"] = tempOutNames;
+		outputTypes["column"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DistanceCommand", "DistanceCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> DistanceCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"fasta"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChopSeqsCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> DistanceCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DistanceCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 DistanceCommand::DistanceCommand(string option) {
 	try {
 		abort = false;
@@ -41,6 +88,11 @@ DistanceCommand::DistanceCommand(string option) {
 				if (validParameter.isValidParameter(it2->first, myArray, it2->second) != true) {  abort = true;  }
 			}
 			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["phylip"] = tempOutNames;
+			outputTypes["column"] = tempOutNames;
+		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
@@ -213,11 +265,12 @@ int DistanceCommand::execute(){
 				
 		if (output == "lt") { //does the user want lower triangle phylip formatted file 
 			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "phylip.dist";
-			remove(outputFile.c_str());
+			remove(outputFile.c_str()); outputTypes["phylip"].push_back(outputFile);
 			
 			//output numSeqs to phylip formatted dist file
 		}else if (output == "column") { //user wants column format
 			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "dist";
+			outputTypes["column"].push_back(outputFile);
 			
 			//so we don't accidentally overwrite
 			if (outputFile == column) { 
@@ -229,6 +282,7 @@ int DistanceCommand::execute(){
 		}else { //assume square
 			outputFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "square.dist";
 			remove(outputFile.c_str());
+			outputTypes["phylip"].push_back(outputFile);
 		}
 		
 
@@ -270,11 +324,11 @@ int DistanceCommand::execute(){
 				
 				driverMPI(start, end, outMPI, cutoff); 
 				
-				if (m->control_pressed) { MPI_File_close(&outMPI);  delete distCalculator;  return 0; }
+				if (m->control_pressed) { outputTypes.clear(); MPI_File_close(&outMPI);  delete distCalculator;  return 0; }
 			
 				//wait on chidren
 				for(int i = 1; i < processors; i++) { 
-					if (m->control_pressed) { MPI_File_close(&outMPI);  delete distCalculator;  return 0; }
+					if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);  delete distCalculator;  return 0; }
 					
 					char buf[5];
 					MPI_Recv(buf, 5, MPI_CHAR, i, tag, MPI_COMM_WORLD, &status); 
@@ -283,7 +337,7 @@ int DistanceCommand::execute(){
 				//do your part
 				driverMPI(start, end, outMPI, cutoff); 
 				
-				if (m->control_pressed) { MPI_File_close(&outMPI);  delete distCalculator;  return 0; }
+				if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);  delete distCalculator;  return 0; }
 			
 				char buf[5];
 				strcpy(buf, "done"); 
@@ -303,7 +357,7 @@ int DistanceCommand::execute(){
 				if (output != "square"){ driverMPI(start, end, outputFile, mySize); }
 				else { driverMPI(start, end, outputFile, mySize, output); }
 	
-				if (m->control_pressed) {  delete distCalculator;  return 0; }
+				if (m->control_pressed) {  outputTypes.clear();  delete distCalculator;  return 0; }
 				
 				int amode=MPI_MODE_APPEND|MPI_MODE_WRONLY|MPI_MODE_CREATE; //
 				MPI_File outMPI;
@@ -322,7 +376,7 @@ int DistanceCommand::execute(){
 				for(int b = 1; b < processors; b++) { 
 					unsigned long int fileSize;
 					
-					if (m->control_pressed) { MPI_File_close(&outMPI);  delete distCalculator;  return 0; }
+					if (m->control_pressed) { outputTypes.clear();  MPI_File_close(&outMPI);  delete distCalculator;  return 0; }
 					
 					MPI_Recv(&fileSize, 1, MPI_LONG, b, tag, MPI_COMM_WORLD, &status); 
 					
@@ -398,7 +452,7 @@ int DistanceCommand::execute(){
 	#endif
 	
 #endif
-		if (m->control_pressed) { delete distCalculator; remove(outputFile.c_str()); return 0; }
+		if (m->control_pressed) { outputTypes.clear();  delete distCalculator; remove(outputFile.c_str()); return 0; }
 		
 		#ifdef USE_MPI
 			MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
@@ -441,7 +495,7 @@ int DistanceCommand::execute(){
 			}
 		#endif
 		
-		if (m->control_pressed) { delete distCalculator; remove(outputFile.c_str()); return 0; }
+		if (m->control_pressed) { outputTypes.clear();  delete distCalculator; remove(outputFile.c_str()); return 0; }
 		
 		delete distCalculator;
 		
@@ -456,7 +510,8 @@ int DistanceCommand::execute(){
 			m->mothurOut("Compressing..."); m->mothurOutEndLine();
 			m->mothurOut("(Replacing " + outputFile + " with " + outputFile + ".gz)"); m->mothurOutEndLine();
 			system(("gzip -v " + outputFile).c_str());
-		}
+			outputNames.push_back(outputFile + ".gz");
+		}else { outputNames.push_back(outputFile); }
 
 		return 0;
 		

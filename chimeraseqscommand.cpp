@@ -9,6 +9,39 @@
 
 #include "chimeraseqscommand.h"
 
+//**********************************************************************************************************************
+vector<string> ChimeraSeqsCommand::getValidParameters(){	
+	try {
+		vector<string> myArray; 
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraSeqsCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ChimeraSeqsCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray; 
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraSeqsCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ChimeraSeqsCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraSeqsCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 //***************************************************************************************************************
 
 ChimeraSeqsCommand::ChimeraSeqsCommand(string option)  {}

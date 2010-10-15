@@ -18,7 +18,12 @@
 class TrimSeqsCommand : public Command {
 public:
 	TrimSeqsCommand(string);
+	TrimSeqsCommand();
 	~TrimSeqsCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -39,6 +44,7 @@ private:
 	bool cullAmbigs(Sequence&);
 	bool compareDNASeq(string, string);
 	int countDiffs(string, string);
+	map<string, vector<string> > outputTypes;
 
 	bool abort;
 	string fastaFile, oligoFile, qFileName, outputDir;

@@ -10,7 +10,53 @@
 #include "getsabundcommand.h"
 
 //**********************************************************************************************************************
-
+vector<string> GetSAbundCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"label","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetSAbundCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+GetSAbundCommand::GetSAbundCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["sabund"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetSAbundCommand", "GetSAbundCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> GetSAbundCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetSAbundCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> GetSAbundCommand::getRequiredFiles(){	
+	try {
+		string Array[] =  {"list","rabund"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetSAbundCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 GetSAbundCommand::GetSAbundCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
@@ -36,6 +82,10 @@ GetSAbundCommand::GetSAbundCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["sabund"] = tempOutNames;
+		
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			string outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
@@ -115,7 +165,7 @@ int GetSAbundCommand::execute(){
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
-		if (m->control_pressed) {  out.close(); remove(filename.c_str());  delete order; globaldata->gorder = NULL;  return 0; }
+		if (m->control_pressed) {  outputTypes.clear(); out.close(); remove(filename.c_str());  delete order; globaldata->gorder = NULL;  return 0; }
 
 		
 		while((order != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
@@ -127,7 +177,7 @@ int GetSAbundCommand::execute(){
 					sabund->print(out);
 					delete sabund;
 					
-					if (m->control_pressed) {  out.close(); remove(filename.c_str());  delete order; globaldata->gorder = NULL;  return 0; }
+					if (m->control_pressed) { outputTypes.clear();  out.close(); remove(filename.c_str());  delete order; globaldata->gorder = NULL;  return 0; }
 
 					processedLabels.insert(order->getLabel());
 					userLabels.erase(order->getLabel());
@@ -145,7 +195,7 @@ int GetSAbundCommand::execute(){
 					sabund->print(out);
 					delete sabund;
 					
-					if (m->control_pressed) {  out.close(); remove(filename.c_str());  delete order; globaldata->gorder = NULL;  return 0; }
+					if (m->control_pressed) {  outputTypes.clear(); out.close(); remove(filename.c_str());  delete order; globaldata->gorder = NULL;  return 0; }
 
 					processedLabels.insert(order->getLabel());
 					userLabels.erase(order->getLabel());
@@ -185,7 +235,7 @@ int GetSAbundCommand::execute(){
 			sabund->print(out);
 			delete sabund;
 			
-			if (m->control_pressed) {  out.close(); remove(filename.c_str());  delete order; globaldata->gorder = NULL;  return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); out.close(); remove(filename.c_str());  delete order; globaldata->gorder = NULL;  return 0; }
 			
 			delete order;
 		}
@@ -195,7 +245,7 @@ int GetSAbundCommand::execute(){
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
-		m->mothurOut(filename); m->mothurOutEndLine();	
+		m->mothurOut(filename); m->mothurOutEndLine();	outputNames.push_back(filename); outputTypes["sabund"].push_back(filename);
 		m->mothurOutEndLine();
 		
 		return 0;		

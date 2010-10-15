@@ -17,13 +17,19 @@ class ParseFastaQCommand : public Command {
 
 public:
 	ParseFastaQCommand(string);
+	ParseFastaQCommand();
 	~ParseFastaQCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();	
 	
 private:
 
 	vector<string> outputNames;	
+	map<string, vector<string> > outputTypes;
 	string outputDir, fastaQFile;
 	bool abort;
 	

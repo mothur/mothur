@@ -10,8 +10,55 @@
 #include "chimeraccodecommand.h"
 #include "ccode.h"
 
+//**********************************************************************************************************************
+vector<string> ChimeraCcodeCommand::getValidParameters(){	
+	try {
+		string AlignArray[] =  {"fasta", "filter", "processors", "window", "template", "mask", "numwanted", "outputdir","inputdir" };
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraCcodeCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+ChimeraCcodeCommand::ChimeraCcodeCommand(){	
+	try {
+		vector<string> tempOutNames;
+		outputTypes["chimera"] = tempOutNames;
+		outputTypes["mapinfo"] = tempOutNames;
+		outputTypes["accnos"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraCcodeCommand", "ChimeraCcodeCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ChimeraCcodeCommand::getRequiredParameters(){	
+	try {
+		string AlignArray[] =  {"template","fasta"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraCcodeCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ChimeraCcodeCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraCcodeCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 //***************************************************************************************************************
-
 ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 	try {
 		abort = false;
@@ -21,7 +68,7 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "filter", "processors", "window", "template", "mask", "numwanted", "outputdir","inputdir", };
+			string Array[] =  {"fasta", "filter", "processors", "window", "template", "mask", "numwanted", "outputdir","inputdir" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -34,6 +81,11 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			vector<string> tempOutNames;
+			outputTypes["chimera"] = tempOutNames;
+			outputTypes["mapinfo"] = tempOutNames;
+			outputTypes["accnos"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -77,6 +129,17 @@ ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 							fastaFileNames[i] = tryPath;
 						}
 					}
+					
+					//if you can't open it, try default location
+					if (ableToOpen == 1) {
+						if (m->getOutputDir() != "") { //default path is set
+							string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
+							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							fastaFileNames[i] = tryPath;
+						}
+					}
+					
 					in.close();
 					
 					if (ableToOpen == 1) { 
@@ -201,7 +264,7 @@ int ChimeraCcodeCommand::execute(){
 
 			string mapInfo = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "mapinfo";
 			
-			if (m->control_pressed) { delete chimera;  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  return 0;	}
+			if (m->control_pressed) { delete chimera;  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} outputTypes.clear(); return 0;	}
 			
 		#ifdef USE_MPI
 		
@@ -233,7 +296,7 @@ int ChimeraCcodeCommand::execute(){
 				MPI_File_open(MPI_COMM_WORLD, outFilename, outMode, MPI_INFO_NULL, &outMPI);
 				MPI_File_open(MPI_COMM_WORLD, outAccnosFilename, outMode, MPI_INFO_NULL, &outMPIAccnos);
 
-				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  delete chimera; return 0;  }
+				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} outputTypes.clear();  delete chimera; return 0;  }
 			
 				if (pid == 0) { //you are the root process 
 					string outTemp = "For full window mapping info refer to " + mapInfo + "\n\n";
@@ -263,7 +326,7 @@ int ChimeraCcodeCommand::execute(){
 					//align your part
 					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, MPIPos);
 					
-					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  remove(outputFileName.c_str());  remove(accnosFileName.c_str());  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  delete chimera; return 0;  }
+					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  remove(outputFileName.c_str());  remove(accnosFileName.c_str());  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} outputTypes.clear();  delete chimera; return 0;  }
 
 				}else{ //you are a child process
 					MPI_Recv(&numSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
@@ -279,7 +342,7 @@ int ChimeraCcodeCommand::execute(){
 					//align your part
 					driverMPI(startIndex, numSeqsPerProcessor, inMPI, outMPI, outMPIAccnos, MPIPos);
 					
-					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  delete chimera; return 0;  }
+					if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	}  outputTypes.clear(); delete chimera; return 0;  }
 				}
 				
 				//close files 
@@ -310,7 +373,7 @@ int ChimeraCcodeCommand::execute(){
 										
 					numSeqs = driver(lines[0], outputFileName, fastaFileNames[s], accnosFileName);
 					
-					if (m->control_pressed) { remove(outputFileName.c_str()); remove(tempHeader.c_str()); remove(accnosFileName.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
+					if (m->control_pressed) { remove(outputFileName.c_str()); remove(tempHeader.c_str()); remove(accnosFileName.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  } outputTypes.clear();  lines.clear(); delete chimera; return 0; }
 					
 				}else{
 					processIDS.resize(0);
@@ -335,7 +398,7 @@ int ChimeraCcodeCommand::execute(){
 					if (m->control_pressed) { 
 						remove(outputFileName.c_str()); 
 						remove(accnosFileName.c_str());
-						for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} 
+						for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} outputTypes.clear();
 						for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 						delete chimera;
 						return 0;
@@ -346,7 +409,7 @@ int ChimeraCcodeCommand::execute(){
 			#else
 				numSeqs = driver(lines[0], outputFileName, fastaFileNames[s], accnosFileName);
 				
-				if (m->control_pressed) { remove(outputFileName.c_str()); remove(tempHeader.c_str()); remove(accnosFileName.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear(); delete chimera; return 0; }
+				if (m->control_pressed) { remove(outputFileName.c_str()); remove(tempHeader.c_str()); remove(accnosFileName.c_str()); for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} for (int i = 0; i < lines.size(); i++) {  delete lines[i];  } outputTypes.clear();  lines.clear(); delete chimera; return 0; }
 				
 			#endif
 	
@@ -358,10 +421,10 @@ int ChimeraCcodeCommand::execute(){
 		
 			delete chimera;
 			
-			outputNames.push_back(outputFileName);
-			outputNames.push_back(mapInfo);
-			outputNames.push_back(accnosFileName); 
-			
+			outputNames.push_back(outputFileName); outputTypes["chimera"].push_back(outputFileName);
+			outputNames.push_back(mapInfo);	outputTypes["mapinfo"].push_back(mapInfo);
+			outputNames.push_back(accnosFileName); outputTypes["accnos"].push_back(accnosFileName);
+			 
 			for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 			
 			m->mothurOutEndLine(); m->mothurOut("It took " + toString(time(NULL) - start) + " secs to check " + toString(numSeqs) + " sequences.");	m->mothurOutEndLine();

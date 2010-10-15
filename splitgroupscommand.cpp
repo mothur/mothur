@@ -11,6 +11,54 @@
 #include "sharedutilities.h"
 
 //**********************************************************************************************************************
+vector<string> SplitGroupCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"name","group","groups","fasta","outputdir","inputdir"}; 
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SplitGroupCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SplitGroupCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"fasta","group"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SplitGroupCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SplitGroupCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SplitGroupCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+SplitGroupCommand::SplitGroupCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["fasta"] = tempOutNames;
+		outputTypes["name"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SplitGroupCommand", "SplitGroupCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 SplitGroupCommand::SplitGroupCommand(string option)  {
 	try {
 		abort = false;
@@ -33,7 +81,12 @@ SplitGroupCommand::SplitGroupCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
-						
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["fasta"] = tempOutNames;
+			outputTypes["name"] = tempOutNames;
+		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
@@ -187,13 +240,13 @@ int SplitGroupCommand::splitFasta() {
 			temp = new ofstream;
 			filehandles[Groups[i]+"fasta"] = temp;
 			m->openOutputFile(filerootFasta + Groups[i] + ".fasta", *(filehandles[Groups[i]+"fasta"]));
-			outputNames.push_back(filerootFasta + Groups[i] + ".fasta");
+			outputNames.push_back(filerootFasta + Groups[i] + ".fasta"); outputTypes["fasta"].push_back(filerootFasta + Groups[i] + ".fasta");
 			
 			if (namefile != "") {
 				temp2 = new ofstream;
 				filehandles[Groups[i]+"name"] = temp2;
 				m->openOutputFile(filerootName + Groups[i] + ".names", *(filehandles[Groups[i]+"name"]));
-				outputNames.push_back(filerootName + Groups[i] + ".names");
+				outputNames.push_back(filerootName + Groups[i] + ".names"); outputTypes["name"].push_back(filerootFasta + Groups[i] + ".names");
 			}
 		}
 			

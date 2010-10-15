@@ -10,6 +10,41 @@
 #include "setlogfilecommand.h"
 
 //**********************************************************************************************************************
+vector<string> SetLogFileCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"name","append","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SetLogFileCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SetLogFileCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"name"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SetLogFileCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SetLogFileCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SetLogFileCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 
 SetLogFileCommand::SetLogFileCommand(string option)  {
 	try {

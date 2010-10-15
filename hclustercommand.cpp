@@ -10,6 +10,55 @@
 #include "hclustercommand.h"
 
 //**********************************************************************************************************************
+vector<string> HClusterCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"cutoff","hard","precision","method","phylip","column","name","sorted","showabund","timing","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "HClusterCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+HClusterCommand::HClusterCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["list"] = tempOutNames;
+		outputTypes["rabund"] = tempOutNames;
+		outputTypes["sabund"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "HClusterCommand", "HClusterCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> HClusterCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"phylip","column","or"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "HClusterCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> HClusterCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "HClusterCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 //This function checks to make sure the cluster command has no errors and then clusters based on the method chosen.
 HClusterCommand::HClusterCommand(string option)  {
 	try{
@@ -37,6 +86,12 @@ HClusterCommand::HClusterCommand(string option)  {
 				}
 			}
 			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["list"] = tempOutNames;
+			outputTypes["rabund"] = tempOutNames;
+			outputTypes["sabund"] = tempOutNames;
+		
 			globaldata->newRead();
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
@@ -142,9 +197,9 @@ HClusterCommand::HClusterCommand(string option)  {
 				m->openOutputFile(fileroot+ tag + ".rabund",	rabundFile);
 				m->openOutputFile(fileroot+ tag + ".list",		listFile);
 				
-				outputNames.push_back(fileroot+ tag + ".sabund");
-				outputNames.push_back(fileroot+ tag + ".rabund");
-				outputNames.push_back(fileroot+ tag + ".list");
+				outputNames.push_back(fileroot+ tag + ".sabund"); outputTypes["sabund"].push_back(fileroot+ tag + ".sabund");
+				outputNames.push_back(fileroot+ tag + ".rabund"); outputTypes["rabund"].push_back(fileroot+ tag + ".rabund");
+				outputNames.push_back(fileroot+ tag + ".list"); outputTypes["list"].push_back(fileroot+ tag + ".list");
 			}
 		}
 	}
@@ -201,7 +256,7 @@ int HClusterCommand::execute(){
 				sabundFile.close();
 				rabundFile.close();
 				listFile.close();
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } outputTypes.clear();
 				return 0;  
 			}
 			
@@ -217,7 +272,7 @@ int HClusterCommand::execute(){
 			sabundFile.close();
 			rabundFile.close();
 			listFile.close();
-			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } outputTypes.clear();
 			return 0;  
 		}
 
@@ -247,7 +302,7 @@ int HClusterCommand::execute(){
 				sabundFile.close();
 				rabundFile.close();
 				listFile.close();
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } outputTypes.clear();
 				return 0;  
 		}
 
@@ -261,7 +316,7 @@ int HClusterCommand::execute(){
 				sabundFile.close();
 				rabundFile.close();
 				listFile.close();
-				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } outputTypes.clear();
 				return 0;  
 			}
 
@@ -275,7 +330,7 @@ int HClusterCommand::execute(){
 						sabundFile.close();
 						rabundFile.close();
 						listFile.close();
-						for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+						for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } outputTypes.clear();
 						return 0;  
 					}
 
@@ -308,7 +363,7 @@ int HClusterCommand::execute(){
 			sabundFile.close();
 			rabundFile.close();
 			listFile.close();
-			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } outputTypes.clear();
 			return 0;  
 		}
 					
@@ -336,7 +391,7 @@ int HClusterCommand::execute(){
 		delete cluster;
 		
 		if (m->control_pressed) {  
-			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }
+			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } outputTypes.clear();
 			return 0;  
 		}
 

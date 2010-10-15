@@ -23,7 +23,12 @@ class UnifracUnweightedCommand : public Command {
 	
 	public:
 		UnifracUnweightedCommand(string);	
+		UnifracUnweightedCommand();
 		~UnifracUnweightedCommand() { globaldata->Groups.clear();  if (abort == false) { delete unweighted; delete util; } }
+		vector<string> getRequiredParameters();
+		vector<string> getValidParameters();
+		vector<string> getRequiredFiles();
+		map<string, vector<string> > getOutputFiles() { return outputTypes; }
 		int execute();
 		void help();	
 	
@@ -48,6 +53,7 @@ class UnifracUnweightedCommand : public Command {
 		bool abort, phylip, random;
 		string groups, itersString, outputDir;
 		vector<string> Groups, outputNames; //holds groups to be used
+		map<string, vector<string> > outputTypes;
 
 		ofstream outSum, out;
 		ifstream inFile;

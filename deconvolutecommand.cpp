@@ -9,6 +9,54 @@
 
 #include "deconvolutecommand.h"
 
+//**********************************************************************************************************************
+vector<string> DeconvoluteCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"fasta", "name","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DeconvoluteCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+DeconvoluteCommand::DeconvoluteCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["fasta"] = tempOutNames;
+		outputTypes["name"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DeconvoluteCommand", "DeconvoluteCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> DeconvoluteCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"fasta"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DeconvoluteCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> DeconvoluteCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "DeconvoluteCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 /**************************************************************************************/
 DeconvoluteCommand::DeconvoluteCommand(string option)  {	
 	try {
@@ -33,6 +81,11 @@ DeconvoluteCommand::DeconvoluteCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["fasta"] = tempOutNames;
+			outputTypes["name"] = tempOutNames;
+		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
@@ -115,12 +168,13 @@ int DeconvoluteCommand::execute() {
 		fastamap.printCondensedFasta(outFastaFile);
 		fastamap.printNamesFile(outNameFile);
 		
-		if (m->control_pressed) { remove(outFastaFile.c_str()); remove(outNameFile.c_str()); return 0; }
+		if (m->control_pressed) { outputTypes.clear(); remove(outFastaFile.c_str()); remove(outNameFile.c_str()); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		m->mothurOut(outFastaFile); m->mothurOutEndLine();	
 		m->mothurOut(outNameFile); m->mothurOutEndLine();
+		outputNames.push_back(outFastaFile);  outputNames.push_back(outNameFile); outputTypes["fasta"].push_back(outFastaFile);  outputTypes["name"].push_back(outNameFile); 
 		m->mothurOutEndLine();
 
 

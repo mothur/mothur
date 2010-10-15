@@ -12,6 +12,54 @@
 #include "sharednseqs.h"
 
 //**********************************************************************************************************************
+vector<string> RareFactSharedCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"iters","freq","label","calc","groups", "jumble","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RareFactSharedCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+RareFactSharedCommand::RareFactSharedCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["sharedrarefaction"] = tempOutNames;
+		outputTypes["sharedr_nseqs"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RareFactSharedCommand", "RareFactSharedCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> RareFactSharedCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RareFactSharedCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> RareFactSharedCommand::getRequiredFiles(){	
+	try {
+		string Array[] =  {"shared"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RareFactSharedCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 
 RareFactSharedCommand::RareFactSharedCommand(string option)  {
 	try {
@@ -40,6 +88,11 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["sharedrarefaction"] = tempOutNames;
+			outputTypes["sharedr_nseqs"] = tempOutNames;
 			
 			//make sure the user has already run the read.otu command
 			if (globaldata->getSharedFile() == "") {
@@ -107,10 +160,10 @@ RareFactSharedCommand::RareFactSharedCommand(string option)  {
 					if (validCalculator->isValidCalculator("sharedrarefaction", Estimators[i]) == true) { 
 						if (Estimators[i] == "sharedobserved") { 
 							rDisplays.push_back(new RareDisplay(new SharedSobs(), new SharedThreeColumnFile(fileNameRoot+"shared.rarefaction", "")));
-							outputNames.push_back(fileNameRoot+"shared.rarefaction");
+							outputNames.push_back(fileNameRoot+"shared.rarefaction"); outputTypes["sharedrarefaction"].push_back(fileNameRoot+"shared.rarefaction");
 						}else if (Estimators[i] == "sharednseqs") { 
 							rDisplays.push_back(new RareDisplay(new SharedNSeqs(), new SharedThreeColumnFile(fileNameRoot+"shared.r_nseqs", "")));
-							outputNames.push_back(fileNameRoot+"shared.r_nseqs");
+							outputNames.push_back(fileNameRoot+"shared.r_nseqs"); outputTypes["sharedr_nseqs"].push_back(fileNameRoot+"shared.r_nseqs");
 						}
 					}
 				}

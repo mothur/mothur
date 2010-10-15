@@ -11,6 +11,56 @@
 #include "endiannessmacros.h"
 
 //**********************************************************************************************************************
+vector<string> SffInfoCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"sff","qfile","fasta","flow","trim","accnos","sfftxt","outputdir","inputdir", "outputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SffInfoCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+SffInfoCommand::SffInfoCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["fasta"] = tempOutNames;
+		outputTypes["flow"] = tempOutNames;
+		outputTypes["sfftxt"] = tempOutNames;
+		outputTypes["qual"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SffInfoCommand", "SffInfoCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SffInfoCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"sff"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SffInfoCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SffInfoCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SffInfoCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 
 SffInfoCommand::SffInfoCommand(string option)  {
 	try {
@@ -33,6 +83,13 @@ SffInfoCommand::SffInfoCommand(string option)  {
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["fasta"] = tempOutNames;
+			outputTypes["flow"] = tempOutNames;
+			outputTypes["sfftxt"] = tempOutNames;
+			outputTypes["qual"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -65,6 +122,17 @@ SffInfoCommand::SffInfoCommand(string option)  {
 							filenames[i] = tryPath;
 						}
 					}
+					
+					//if you can't open it, try default location
+					if (ableToOpen == 1) {
+						if (m->getOutputDir() != "") { //default path is set
+							string tryPath = m->getOutputDir() + m->getSimpleName(filenames[i]);
+							m->mothurOut("Unable to open " + filenames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							filenames[i] = tryPath;
+						}
+					}
+					
 					in.close();
 					
 					if (ableToOpen == 1) { 
@@ -101,6 +169,15 @@ SffInfoCommand::SffInfoCommand(string option)  {
 						if (m->getDefaultPath() != "") { //default path is set
 							string tryPath = m->getDefaultPath() + m->getSimpleName(accnosFileNames[i]);
 							m->mothurOut("Unable to open " + accnosFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							accnosFileNames[i] = tryPath;
+						}
+					}
+					//if you can't open it, try default location
+					if (ableToOpen == 1) {
+						if (m->getOutputDir() != "") { //default path is set
+							string tryPath = m->getOutputDir() + m->getSimpleName(accnosFileNames[i]);
+							m->mothurOut("Unable to open " + accnosFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
 							ableToOpen = m->openInputFile(tryPath, in, "noerror");
 							accnosFileNames[i] = tryPath;
 						}
@@ -227,10 +304,10 @@ int SffInfoCommand::extractSffInfo(string input, string accnos){
 			outQualFileName = outputDir + m->getRootName(m->getSimpleName(input)) + "raw.qual";
 		}
 		
-		if (sfftxt) { m->openOutputFile(sfftxtFileName, outSfftxt); outSfftxt.setf(ios::fixed, ios::floatfield); outSfftxt.setf(ios::showpoint);  outputNames.push_back(sfftxtFileName); }
-		if (fasta)	{ m->openOutputFile(outFastaFileName, outFasta);	outputNames.push_back(outFastaFileName); }
-		if (qual)	{ m->openOutputFile(outQualFileName, outQual);		outputNames.push_back(outQualFileName);  }
-		if (flow)	{ m->openOutputFile(outFlowFileName, outFlow);		outputNames.push_back(outFlowFileName);  }
+		if (sfftxt) { m->openOutputFile(sfftxtFileName, outSfftxt); outSfftxt.setf(ios::fixed, ios::floatfield); outSfftxt.setf(ios::showpoint);  outputNames.push_back(sfftxtFileName);  outputTypes["sfftxt"].push_back(sfftxtFileName); }
+		if (fasta)	{ m->openOutputFile(outFastaFileName, outFasta);	outputNames.push_back(outFastaFileName); outputTypes["fasta"].push_back(outFastaFileName); }
+		if (qual)	{ m->openOutputFile(outQualFileName, outQual);		outputNames.push_back(outQualFileName); outputTypes["qual"].push_back(outQualFileName);  }
+		if (flow)	{ m->openOutputFile(outFlowFileName, outFlow);		outputNames.push_back(outFlowFileName);  outputTypes["flow"].push_back(outFlowFileName);  }
 		
 		ifstream in;
 		in.open(input.c_str(), ios::binary);

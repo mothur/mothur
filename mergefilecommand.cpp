@@ -10,6 +10,53 @@
 #include "mergefilecommand.h"
 
 //**********************************************************************************************************************
+vector<string> MergeFileCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"input", "output","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MergeFileCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+MergeFileCommand::MergeFileCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["merge"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MergeFileCommand", "MergeFileCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> MergeFileCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"input","output"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MergeFileCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> MergeFileCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MergeFileCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 
 MergeFileCommand::MergeFileCommand(string option)  {
 	try {
@@ -33,6 +80,10 @@ MergeFileCommand::MergeFileCommand(string option)  {
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["merge"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -67,7 +118,7 @@ MergeFileCommand::MergeFileCommand(string option)  {
 			
 			outputFileName = validParameter.validFile(parameters, "output", false);			
 			if (outputFileName == "not found") { m->mothurOut("you must enter an output file name"); m->mothurOutEndLine();  abort=true;  }
-			else if (outputDir != "") { outputFileName = outputDir + m->getSimpleName(outputFileName); }
+			else if (outputDir != "") { outputFileName = outputDir + m->getSimpleName(outputFileName);  }
 		}
 			
 	}
@@ -97,7 +148,7 @@ int MergeFileCommand::execute(){
 			m->openInputFile(fileNames[i], inputFile);
 			
 			while(!inputFile.eof()){	
-				if (m->control_pressed) { inputFile.close(); outputFile.close(); remove(outputFileName.c_str()); return 0;  }
+				if (m->control_pressed) { outputTypes.clear(); inputFile.close(); outputFile.close(); remove(outputFileName.c_str()); return 0;  }
 			
 				c = inputFile.get(); 
 				//-1 is eof char
@@ -109,11 +160,11 @@ int MergeFileCommand::execute(){
 		
 		outputFile.close();
 		
-		if (m->control_pressed) { remove(outputFileName.c_str()); return 0;  }
+		if (m->control_pressed) { outputTypes.clear();  remove(outputFileName.c_str()); return 0;  }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
-		m->mothurOut(outputFileName); m->mothurOutEndLine();	
+		m->mothurOut(outputFileName); m->mothurOutEndLine();	outputNames.push_back(outputFileName); outputTypes["merge"].push_back(outputFileName);
 		m->mothurOutEndLine();
 
 		return 0;

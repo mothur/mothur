@@ -60,6 +60,16 @@ void MothurOut::setDefaultPath(string pathname)  {
 	}
 }
 /*********************************************************************************************/
+void MothurOut::setOutputDir(string pathname)  {
+	try {
+		outputDir = pathname;
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "setOutputDir");
+		exit(1);
+	}
+}
+/*********************************************************************************************/
 void MothurOut::closeLog()  {
 	try {
 		

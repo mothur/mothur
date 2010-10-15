@@ -9,6 +9,53 @@
 
 #include "sensspeccommand.h"
 
+//**********************************************************************************************************************
+vector<string> SensSpecCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"list", "phylip", "column", "name", "hard", "label", "cutoff", "precision", "outputdir", "inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SensSpecCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+SensSpecCommand::SensSpecCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["sensspec"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SensSpecCommand", "SensSpecCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SensSpecCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"list","phylip","column","or"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SensSpecCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SensSpecCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SensSpecCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 //***************************************************************************************************************
 
 SensSpecCommand::SensSpecCommand(string option)  {
@@ -37,6 +84,10 @@ SensSpecCommand::SensSpecCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["sensspec"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -159,6 +210,7 @@ int SensSpecCommand::execute(){
 		if (abort == true) { return 0; }
 
 		setUpOutput();
+		outputNames.push_back(sensSpecFileName); outputTypes["sensspec"].push_back(sensSpecFileName);
 		if(format == "phylip")		{	processPhylip();	}
 		else if(format == "column")	{	processColumn();	}
 		

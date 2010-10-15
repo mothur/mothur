@@ -32,8 +32,13 @@
 class HClusterCommand : public Command {
 	
 public:
-	HClusterCommand(string);	
+	HClusterCommand(string);
+	HClusterCommand();	
 	~HClusterCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();	
 	void help();
 	
@@ -54,6 +59,7 @@ private:
 	time_t start;
 	unsigned long loops;
 	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 	
 	void printData(string label);
 };

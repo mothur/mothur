@@ -18,13 +18,20 @@ class SystemCommand : public Command {
 	public:
 	
 		SystemCommand(string);	
-		~SystemCommand(){};
+		SystemCommand() {}
+		~SystemCommand(){}
+		vector<string> getRequiredParameters();
+		vector<string> getValidParameters();
+		vector<string> getRequiredFiles();
+		map<string, vector<string> > getOutputFiles() { return outputTypes; }
 		int execute();
 		void help();	
 		
 	private:
 		string command;
 		bool abort;
+		vector<string> outputNames;
+		map<string, vector<string> > outputTypes;
 		
 };
 

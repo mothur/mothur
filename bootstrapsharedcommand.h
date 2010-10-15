@@ -27,7 +27,12 @@ class BootSharedCommand : public Command {
 	
 public:
 	BootSharedCommand(string);	
+	BootSharedCommand();
 	~BootSharedCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();	
 	void help();
 	
@@ -59,6 +64,7 @@ private:
 	string outputFile, calc, groups, label, outputDir;
 	int numGroups, iters;
 	vector<string>  Estimators, Groups, outputNames; //holds estimators to be used
+	map< string, vector<string> > outputTypes;
 
 };
 	

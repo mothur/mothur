@@ -31,7 +31,12 @@ class PreClusterCommand : public Command {
 	
 public:
 	PreClusterCommand(string);
+	PreClusterCommand();
 	~PreClusterCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();	
 	void help();
 	
@@ -44,6 +49,8 @@ private:
 	map<string, int> sizes;  //this map a seq name to the number of identical seqs in the names file
 	map<string, int>::iterator itSize; 
 //	map<string, bool> active; //maps sequence name to whether it has already been merged or not.
+	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 	
 	int readFASTA();
 	void readNameFile();

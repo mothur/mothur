@@ -9,7 +9,53 @@
 
 #include "heatmapcommand.h"
 
-
+//**********************************************************************************************************************
+vector<string> HeatMapCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"groups","label","sorted","scale","fontsize","numotu","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "HeatMapCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+HeatMapCommand::HeatMapCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["svg"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "HeatMapCommand", "HeatMapCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> HeatMapCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "HeatMapCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> HeatMapCommand::getRequiredFiles(){	
+	try {
+		string Array[] =  {"list","sabund","rabund","shared","relabund","or"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "HeatMapCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 
 HeatMapCommand::HeatMapCommand(string option) {
@@ -37,6 +83,10 @@ HeatMapCommand::HeatMapCommand(string option) {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["svg"] = tempOutNames;
+		
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
 				outputDir = "";	
@@ -168,7 +218,7 @@ int HeatMapCommand::execute(){
 			while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				if (m->control_pressed) {
 					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
-					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } }
+					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } } outputTypes.clear();
 					globaldata->Groups.clear(); 
 					delete read; delete heatmap; return 0;
 				}
@@ -176,7 +226,8 @@ int HeatMapCommand::execute(){
 				if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 	
 					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-					outputNames.push_back(heatmap->getPic(lookup));
+					string outputFileName = heatmap->getPic(lookup);
+					outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
 					
 					processedLabels.insert(lookup[0]->getLabel());
 					userLabels.erase(lookup[0]->getLabel());
@@ -190,7 +241,8 @@ int HeatMapCommand::execute(){
 					lookup = input->getSharedRAbundVectors(lastLabel);
 					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 					
-					outputNames.push_back(heatmap->getPic(lookup));
+					string outputFileName = heatmap->getPic(lookup);
+					outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
 					
 					processedLabels.insert(lookup[0]->getLabel());
 					userLabels.erase(lookup[0]->getLabel());
@@ -209,7 +261,7 @@ int HeatMapCommand::execute(){
 			
 			
 			if (m->control_pressed) {
-				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } }
+				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } } outputTypes.clear();
 				globaldata->Groups.clear(); 
 				delete read; delete heatmap; return 0;
 			}
@@ -233,7 +285,8 @@ int HeatMapCommand::execute(){
 				lookup = input->getSharedRAbundVectors(lastLabel);
 				
 				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-				outputNames.push_back(heatmap->getPic(lookup));
+				string outputFileName = heatmap->getPic(lookup);
+				outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
 			}
 		
@@ -244,14 +297,15 @@ int HeatMapCommand::execute(){
 	
 			while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				if (m->control_pressed) {   
-					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } }
+					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } } outputTypes.clear();
 					delete rabund;  delete read; delete heatmap; return 0;	
 				}
 
 				if(allLines == 1 || labels.count(rabund->getLabel()) == 1){			
 	
 					m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
-					outputNames.push_back(heatmap->getPic(rabund));
+					string outputFileName = heatmap->getPic(rabund);
+					outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
 					
 					processedLabels.insert(rabund->getLabel());
 					userLabels.erase(rabund->getLabel());
@@ -264,7 +318,8 @@ int HeatMapCommand::execute(){
 					rabund = input->getRAbundVector(lastLabel);
 					m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
 					
-					outputNames.push_back(heatmap->getPic(rabund));
+					string outputFileName = heatmap->getPic(rabund);
+					outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
 					
 					processedLabels.insert(rabund->getLabel());
 					userLabels.erase(rabund->getLabel());
@@ -281,7 +336,7 @@ int HeatMapCommand::execute(){
 			}
 			
 			if (m->control_pressed) {
-				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } }
+				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } } outputTypes.clear();
 				delete read; delete heatmap; return 0;
 			}
 
@@ -305,7 +360,8 @@ int HeatMapCommand::execute(){
 				rabund = input->getRAbundVector(lastLabel);
 				m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
 					
-				outputNames.push_back(heatmap->getPic(rabund));
+				string outputFileName = heatmap->getPic(rabund);
+				outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
 				delete rabund; globaldata->rabund = NULL;
 			}
 		
@@ -315,7 +371,7 @@ int HeatMapCommand::execute(){
 			while((lookupFloat[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 				if (m->control_pressed) {
 					for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  }
-					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } }
+					for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } } outputTypes.clear();
 					globaldata->Groups.clear(); 
 					delete read; delete heatmap; return 0;
 				}
@@ -323,7 +379,8 @@ int HeatMapCommand::execute(){
 				if(allLines == 1 || labels.count(lookupFloat[0]->getLabel()) == 1){			
 	
 					m->mothurOut(lookupFloat[0]->getLabel()); m->mothurOutEndLine();
-					outputNames.push_back(heatmap->getPic(lookupFloat));
+					string outputFileName = heatmap->getPic(lookupFloat);
+					outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
 					
 					processedLabels.insert(lookupFloat[0]->getLabel());
 					userLabels.erase(lookupFloat[0]->getLabel());
@@ -336,7 +393,8 @@ int HeatMapCommand::execute(){
 					lookupFloat = input->getSharedRAbundFloatVectors(lastLabel);
 					m->mothurOut(lookupFloat[0]->getLabel()); m->mothurOutEndLine();
 					
-					outputNames.push_back(heatmap->getPic(lookupFloat));
+					string outputFileName = heatmap->getPic(lookupFloat);
+					outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
 					
 					processedLabels.insert(lookupFloat[0]->getLabel());
 					userLabels.erase(lookupFloat[0]->getLabel());
@@ -355,7 +413,7 @@ int HeatMapCommand::execute(){
 			
 			
 			if (m->control_pressed) {
-				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } }
+				for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } } outputTypes.clear();
 				globaldata->Groups.clear(); 
 				delete read; delete heatmap; return 0;
 			}
@@ -379,7 +437,8 @@ int HeatMapCommand::execute(){
 				lookupFloat = input->getSharedRAbundFloatVectors(lastLabel);
 				
 				m->mothurOut(lookupFloat[0]->getLabel()); m->mothurOutEndLine();
-				outputNames.push_back(heatmap->getPic(lookupFloat));
+				string outputFileName = heatmap->getPic(lookupFloat);
+				outputNames.push_back(outputFileName); outputTypes["svg"].push_back(outputFileName);
 				for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  }
 			}
 		
@@ -392,7 +451,7 @@ int HeatMapCommand::execute(){
 		delete input; globaldata->ginput = NULL;
 		
 		if (m->control_pressed) {
-			for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } }
+			for (int i = 0; i < outputNames.size(); i++) {	if (outputNames[i] != "control") {  remove(outputNames[i].c_str());  } } outputTypes.clear();
 			delete read; delete heatmap; return 0;
 		}
 		

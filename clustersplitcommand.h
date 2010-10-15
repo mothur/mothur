@@ -23,7 +23,12 @@ class ClusterSplitCommand : public Command {
 	
 public:
 	ClusterSplitCommand(string);
+	ClusterSplitCommand();
 	~ClusterSplitCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();	
 	void help();
 	
@@ -31,6 +36,7 @@ private:
 	GlobalData* globaldata;
 	vector<int> processIDS;   //processid
 	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 
 	string method, fileroot, tag, outputDir, phylipfile, columnfile, namefile, distfile, format, showabund, timing, splitmethod, taxFile, fastafile;
 	double cutoff, splitcutoff;

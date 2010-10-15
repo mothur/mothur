@@ -9,6 +9,54 @@
 
 #include "seqerrorcommand.h"
 
+//**********************************************************************************************************************
+vector<string> SeqErrorCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"query", "reference", "name", "threshold", "inputdir", "outputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SeqErrorCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+SeqErrorCommand::SeqErrorCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["error"] = tempOutNames;
+		outputTypes["count"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SeqErrorCommand", "SeqErrorCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SeqErrorCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"query","reference"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SeqErrorCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SeqErrorCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SeqErrorCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 //***************************************************************************************************************
 
 SeqErrorCommand::SeqErrorCommand(string option)  {
@@ -23,7 +71,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			string temp;
 			
 			//valid paramters for this command
-			string AlignArray[] =  {"query", "reference", "name", "threshold"};
+			string AlignArray[] =  {"query", "reference", "name", "threshold", "inputdir", "outputdir"};
 			
 //need to implement name file option
 			
@@ -39,6 +87,11 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["error"] = tempOutNames;
+			outputTypes["count"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -97,6 +150,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 						
 			errorFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".errors";
 			m->openOutputFile(errorFileName, errorFile);
+			outputNames.push_back(errorFileName); outputTypes["error"].push_back(errorFileName);
 			printErrorHeader();
 		}
 	}
@@ -195,6 +249,7 @@ int SeqErrorCommand::execute(){
 		string errorCountFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".count";
 		ofstream errorCountFile;
 		m->openOutputFile(errorCountFileName, errorCountFile);
+		outputNames.push_back(errorCountFileName);  outputTypes["count"].push_back(errorCountFileName);
 		
 		m->mothurOut("Overall error rate:\t" + toString((double)(totalBases - totalMatches) / (double)totalBases) + "\n\n");
 		m->mothurOut("Errors\tSequences\n");

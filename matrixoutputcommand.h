@@ -26,8 +26,13 @@ class GlobalData;
 class MatrixOutputCommand : public Command {
 	
 public:
-	MatrixOutputCommand(string);	
+	MatrixOutputCommand(string);
+	MatrixOutputCommand();	
 	~MatrixOutputCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();	
 	void help();
 	
@@ -50,6 +55,7 @@ private:
 	set<string> labels; //holds labels to be used
 	string outputFile, calc, groups, label, outputDir;
 	vector<string>  Estimators, Groups, outputNames; //holds estimators to be used
+	map<string, vector<string> > outputTypes;
 	
 
 };

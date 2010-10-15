@@ -17,7 +17,12 @@ class RemoveSeqsCommand : public Command {
 	public:
 	
 		RemoveSeqsCommand(string);	
-		~RemoveSeqsCommand(){};
+		RemoveSeqsCommand();
+		~RemoveSeqsCommand(){}
+		vector<string> getRequiredParameters();
+		vector<string> getValidParameters();
+		vector<string> getRequiredFiles();
+		map<string, vector<string> > getOutputFiles() { return outputTypes; }
 		int execute();
 		void help();	
 		
@@ -26,6 +31,7 @@ class RemoveSeqsCommand : public Command {
 		string accnosfile, fastafile, namefile, groupfile, alignfile, listfile, taxfile, outputDir;
 		bool abort, dups;
 		vector<string> outputNames;
+		map<string, vector<string> > outputTypes;
 		
 		int readFasta();
 		int readName();

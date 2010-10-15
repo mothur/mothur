@@ -11,6 +11,53 @@
 #include "sequence.hpp"
 
 //**********************************************************************************************************************
+vector<string> ParseSFFCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"sff", "oligos", "minlength", "outputdir", "inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ParseSFFCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+ParseSFFCommand::ParseSFFCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["flow"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ParseSFFCommand", "ParseSFFCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ParseSFFCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"sff"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ParseSFFCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ParseSFFCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ParseSFFCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 
 ParseSFFCommand::ParseSFFCommand(string option){
 	try {
@@ -35,6 +82,10 @@ ParseSFFCommand::ParseSFFCommand(string option){
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["flow"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -115,7 +166,7 @@ int ParseSFFCommand::execute(){
 		}
 		else{
 			flowFileNames.push_back(new ofstream((outputDir + m->getRootName(m->getSimpleName(sffFile)) + "flow").c_str(), ios::ate));
-			outputNames.push_back((outputDir + m->getRootName(m->getSimpleName(sffFile)) + "flow"));
+			outputNames.push_back((outputDir + m->getRootName(m->getSimpleName(sffFile)) + "flow")); outputTypes["flow"].push_back((outputDir + m->getRootName(m->getSimpleName(sffFile)) + "flow"));
 		}
 		
 		for(int i=0;i<flowFileNames.size();i++){
@@ -124,7 +175,7 @@ int ParseSFFCommand::execute(){
 			*flowFileNames[i] << setprecision(2);
 		}			
 		
-		if (m->control_pressed) { for(int i=0;i<flowFileNames.size();i++){	flowFileNames[i]->close();  } return 0; }
+		if (m->control_pressed) { outputTypes.clear(); for(int i=0;i<flowFileNames.size();i++){	flowFileNames[i]->close();  } return 0; }
 		
 //		ofstream fastaFile;
 //		m->openOutputFile(m->getRootName(sffFile) + "fasta", fastaFile);
@@ -151,7 +202,7 @@ int ParseSFFCommand::execute(){
 		
 		for(int i=0;i<numReads;i++){
 			
-			if (m->control_pressed) { for(int i=0;i<flowFileNames.size();i++){	flowFileNames[i]->close();  } return 0; }
+			if (m->control_pressed) { outputTypes.clear(); for(int i=0;i<flowFileNames.size();i++){	flowFileNames[i]->close();  } return 0; }
 			
 			inSFF >> seqName;
 			seqName = seqName.substr(1);
@@ -282,6 +333,7 @@ void ParseSFFCommand::getOligos(vector<ofstream*>& outSFFFlowVec){
 					
 					outSFFFlowVec.push_back(new ofstream((outputDir + m->getRootName(m->getSimpleName(sffFile)) + group + ".flow").c_str(), ios::ate));
 					outputNames.push_back((outputDir + m->getRootName(m->getSimpleName(sffFile)) + group + "flow"));
+					outputTypes["flow"].push_back((outputDir + m->getRootName(m->getSimpleName(sffFile)) + group + "flow"));
 				}
 			}
 			m->gobble(inOligos);

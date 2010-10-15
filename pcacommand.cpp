@@ -11,6 +11,54 @@
 #include "pcacommand.h"
 
 //**********************************************************************************************************************
+vector<string> PCACommand::getValidParameters(){	
+	try {
+		string Array[] =  {"phylip", "outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PCACommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+PCACommand::PCACommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["pcoa"] = tempOutNames;
+		outputTypes["loadings"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PCACommand", "PCACommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> PCACommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"phylip"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PCACommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> PCACommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PCACommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 
 PCACommand::PCACommand(string option)  {
 	try {
@@ -47,7 +95,12 @@ PCACommand::PCACommand(string option)  {
 					if (path == "") {	parameters["phylip"] = inputDir + it->second;		}
 				}
 			}
-
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["pcoa"] = tempOutNames;
+			outputTypes["loadings"] = tempOutNames;
+			
 			//required parameters
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
 			if (phylipfile == "not open") { abort = true; }
@@ -516,11 +569,13 @@ void PCACommand::output(string fnameRoot, vector<string> name_list, vector<vecto
 		pcaData.setf(ios::fixed, ios::floatfield);
 		pcaData.setf(ios::showpoint);	
 		outputNames.push_back(fnameRoot+"pcoa");
+		outputTypes["pcoa"].push_back(fnameRoot+"pcoa");
 		
 		ofstream pcaLoadings((fnameRoot+"pcoa.loadings").c_str(), ios::trunc);
 		pcaLoadings.setf(ios::fixed, ios::floatfield);
 		pcaLoadings.setf(ios::showpoint);
-		outputNames.push_back(fnameRoot+"pcoa.loadings");	
+		outputNames.push_back(fnameRoot+"pcoa.loadings");
+		outputTypes["loadings"].push_back(fnameRoot+"pcoa.loadings");	
 		
 		pcaLoadings << "axis\tloading\n";
 		for(int i=0;i<rank;i++){

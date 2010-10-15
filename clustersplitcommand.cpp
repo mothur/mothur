@@ -15,6 +15,56 @@
 #include "readmatrix.hpp"
 #include "inputdata.h"
 
+
+//**********************************************************************************************************************
+vector<string> ClusterSplitCommand::getValidParameters(){	
+	try {
+		string AlignArray[] =  {"fasta","phylip","column","name","cutoff","precision","method","splitmethod","taxonomy","taxlevel","large","showabund","timing","hard","processors","outputdir","inputdir"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterSplitCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+ClusterSplitCommand::ClusterSplitCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["list"] = tempOutNames;
+		outputTypes["rabund"] = tempOutNames;
+		outputTypes["sabund"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterSplitCommand", "ClusterSplitCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ClusterSplitCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"fasta","phylip","column","or"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterSplitCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ClusterSplitCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterSplitCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 //This function checks to make sure the cluster command has no errors and then clusters based on the method chosen.
 ClusterSplitCommand::ClusterSplitCommand(string option)  {
@@ -43,6 +93,12 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 					abort = true;
 				}
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["list"] = tempOutNames;
+			outputTypes["rabund"] = tempOutNames;
+			outputTypes["sabund"] = tempOutNames;
 			
 			globaldata->newRead();
 			
@@ -292,7 +348,7 @@ int ClusterSplitCommand::execute(){
 		SplitMatrix* split;
 		if (splitmethod == "distance")			{	split = new SplitMatrix(distfile, namefile, taxFile, cutoff, splitmethod, large);							}
 		else if (splitmethod == "classify")		{	split = new SplitMatrix(distfile, namefile, taxFile, taxLevelCutoff, splitmethod, large);					}
-		else if (splitmethod == "fasta")		{	split = new SplitMatrix(fastafile, namefile, taxFile, taxLevelCutoff, splitmethod, processors, outputDir);	}
+		else if (splitmethod == "fasta")		{	split = new SplitMatrix(fastafile, namefile, taxFile, taxLevelCutoff, cutoff, splitmethod, processors, outputDir);	}
 		else { m->mothurOut("Not a valid splitting method.  Valid splitting algorithms are distance, classify or fasta."); m->mothurOutEndLine(); return 0;		}
 		
 		split->split();
@@ -696,9 +752,9 @@ int ClusterSplitCommand::mergeLists(vector<string> listNames, map<float, int> us
 		m->openOutputFile(fileroot+ tag + ".rabund",	outRabund);
 		m->openOutputFile(fileroot+ tag + ".list",		outList);
 				
-		outputNames.push_back(fileroot+ tag + ".sabund");
-		outputNames.push_back(fileroot+ tag + ".rabund");
-		outputNames.push_back(fileroot+ tag + ".list");
+		outputNames.push_back(fileroot+ tag + ".sabund");  outputTypes["list"].push_back(fileroot+ tag + ".list");
+		outputNames.push_back(fileroot+ tag + ".rabund");  outputTypes["rabund"].push_back(fileroot+ tag + ".rabund");
+		outputNames.push_back(fileroot+ tag + ".list");    outputTypes["sabund"].push_back(fileroot+ tag + ".sabund");
 		
 		map<float, int>::iterator itLabel;
 

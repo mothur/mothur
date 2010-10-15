@@ -35,7 +35,12 @@ class TreeGroupCommand : public Command {
 	
 public:
 	TreeGroupCommand(string);	
+	TreeGroupCommand();
 	~TreeGroupCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();	
 	void help();
 	
@@ -64,6 +69,7 @@ private:
 	int numGroups;
 	ofstream out;
 	float precision, cutoff;
+	map<string, vector<string> > outputTypes;
 
 	bool abort, allLines;
 	set<string> labels; //holds labels to be used

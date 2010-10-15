@@ -170,9 +170,11 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 		EstOutput results; results.resize(num);
 		
 		int count = 0;
+		int numLeaves = t->getNumLeaves();
 		int total = num;
 		int twentyPercent = (total * 0.20);
 		if (twentyPercent == 0) { twentyPercent = 1; }
+		
 		
 		for (int h = start; h < (start+num); h++) {
 		
@@ -181,6 +183,9 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 			double UniqueBL=0.0000;  //a branch length is unique if it's chidren are from the same group
 			double totalBL = 0.00;	//all branch lengths
 			double UW = 0.00;		//Unweighted Value = UniqueBL / totalBL;
+			map<int, double> tempTotals; //maps node to total Branch Length
+			map<int, int> nodePcountSize; //maps node to pcountSize
+			map<int, int>::iterator itCount;
 				
 			for(int i=0;i<t->getNumNodes();i++){
 			
@@ -195,15 +200,38 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 					map<string, int>::iterator itGroup = t->tree[i].pcount.find(namesOfGroupCombos[h][j]);
 					if (itGroup != t->tree[i].pcount.end()) { pcountSize++; if (pcountSize > 1) { break; } } 
 				}
+
+				nodePcountSize[i] = pcountSize;
 				
-				if (pcountSize == 0) { }
-				else if ((t->tree[i].getBranchLength() != -1) && (pcountSize == 1)) {  UniqueBL += abs(t->tree[i].getBranchLength());	}
+				if (pcountSize == 0) { ; }
+				else if ((t->tree[i].getBranchLength() != -1) && (pcountSize == 1)) {  UniqueBL += abs(t->tree[i].getBranchLength()); }
+								
+				//if you are a leaf from a users group add to total
+				if (i < numLeaves) {
+					if ((t->tree[i].getBranchLength() != -1) && pcountSize != 0) {  
+						totalBL += abs(t->tree[i].getBranchLength()); 
+					}
+					tempTotals[i] = 0.0;  //we don't care about you, or we have already added you
+				}else{ //if you are not a leaf 
+					//do both your chidren have have descendants from the users groups? 
+					int lc = t->tree[i].getLChild();
+					int rc = t->tree[i].getRChild();
 					
-				if ((t->tree[i].getBranchLength() != -1) && (pcountSize != 0)) {  
-					totalBL += abs(t->tree[i].getBranchLength()); 
+					//if yes, add to total your childrens branchLengths and your childrens tempTotals
+					if ((nodePcountSize[lc] != 0) && (nodePcountSize[rc] != 0)) {
+						totalBL += tempTotals[lc] + tempTotals[rc]; 
+						if (t->tree[i].getBranchLength() != -1) {
+							tempTotals[i] = abs(t->tree[i].getBranchLength());
+						}else {
+							tempTotals[i] = 0.0;
+						}
+						//tempTotals[i] = tempTotals[lc] + tempTotals[rc]; 
+					}else { //if no, your tempTotal is your childrens temp totals
+						tempTotals[i] = tempTotals[lc] + tempTotals[rc] + abs(t->tree[i].getBranchLength()); 
+					}
 				}
 			}
-	
+			
 			UW = (UniqueBL / totalBL);  
 	
 			if (isnan(UW) || isinf(UW)) { UW = 0; }
@@ -384,6 +412,7 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 		int count = 0;
 		int total = num;
 		int twentyPercent = (total * 0.20);
+		int numLeaves = t->getNumLeaves();
 		
 		Tree* copyTree = new Tree;
 		
@@ -400,6 +429,8 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 			double UniqueBL=0.0000;  //a branch length is unique if it's chidren are from the same group
 			double totalBL = 0.00;	//all branch lengths
 			double UW = 0.00;		//Unweighted Value = UniqueBL / totalBL;
+			map<int, double> tempTotals; //maps node to total Branch Length
+			map<int, int> nodePcountSize; //maps node to pcountSize
 				
 			for(int i=0;i<copyTree->getNumNodes();i++){
 			
@@ -415,12 +446,36 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 					if (itGroup != copyTree->tree[i].pcount.end()) { pcountSize++; if (pcountSize > 1) { break; } } 
 				}
 				
+				nodePcountSize[i] = pcountSize;
+				
 				if (pcountSize == 0) { }
 				else if ((copyTree->tree[i].getBranchLength() != -1) && (pcountSize == 1)) {  UniqueBL += abs(copyTree->tree[i].getBranchLength());	}
+				
+				//if you are a leaf from a users group add to total
+				if (i < numLeaves) {
+					if ((copyTree->tree[i].getBranchLength() != -1) && pcountSize != 0) {  
+						totalBL += abs(copyTree->tree[i].getBranchLength()); 
+					}
+					tempTotals[i] = 0.0;  //we don't care about you, or we have already added you
+				}else{ //if you are not a leaf 
+					//do both your chidren have have descendants from the users groups? 
+					int lc = copyTree->tree[i].getLChild();
+					int rc = copyTree->tree[i].getRChild();
 					
-				if ((copyTree->tree[i].getBranchLength() != -1) && (pcountSize != 0)) {  
-					totalBL += abs(copyTree->tree[i].getBranchLength()); 
+					//if yes, add to total your childrens branchLengths and your childrens tempTotals
+					if ((nodePcountSize[lc] != 0) && (nodePcountSize[rc] != 0)) {
+						totalBL += tempTotals[lc] + tempTotals[rc]; 
+						if (copyTree->tree[i].getBranchLength() != -1) {
+							tempTotals[i] = abs(copyTree->tree[i].getBranchLength());
+						}else {
+							tempTotals[i] = 0.0;
+						}
+						//tempTotals[i] = tempTotals[lc] + tempTotals[rc]; 
+					}else { //if no, your tempTotal is your childrens temp totals
+						tempTotals[i] = tempTotals[lc] + tempTotals[rc] + abs(copyTree->tree[i].getBranchLength()); 
+					}
 				}
+
 			}
 		
 			UW = (UniqueBL / totalBL);  

@@ -10,6 +10,53 @@
 #include "seqsummarycommand.h"
 #include "sequence.hpp"
 
+//**********************************************************************************************************************
+vector<string> SeqSummaryCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"fasta","processors","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SeqSummaryCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+SeqSummaryCommand::SeqSummaryCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["summary"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SeqSummaryCommand", "SeqSummaryCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SeqSummaryCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"fasta"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SeqSummaryCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SeqSummaryCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SeqSummaryCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 //***************************************************************************************************************
 
 SeqSummaryCommand::SeqSummaryCommand(string option)  {
@@ -48,6 +95,10 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["summary"] = tempOutNames;
 			
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", true);
@@ -289,7 +340,7 @@ int SeqSummaryCommand::execute(){
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
-		m->mothurOut(summaryFile); m->mothurOutEndLine();	
+		m->mothurOut(summaryFile); m->mothurOutEndLine();	outputNames.push_back(summaryFile); outputTypes["summary"].push_back(summaryFile);
 		m->mothurOutEndLine();
 		
 		#ifdef USE_MPI

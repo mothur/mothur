@@ -10,8 +10,55 @@
 #include "filterseqscommand.h"
 #include "sequence.hpp"
 
+//**********************************************************************************************************************
+vector<string> FilterSeqsCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"fasta", "trump", "soft", "hard", "vertical", "outputdir","inputdir", "processors"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "FilterSeqsCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+FilterSeqsCommand::FilterSeqsCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["fasta"] = tempOutNames;
+		outputTypes["filter"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "FilterSeqsCommand", "FilterSeqsCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> FilterSeqsCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"fasta"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "FilterSeqsCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> FilterSeqsCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "FilterSeqsCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 /**************************************************************************************/
-
 FilterSeqsCommand::FilterSeqsCommand(string option)  {
 	try {
 		abort = false;
@@ -36,6 +83,11 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["fasta"] = tempOutNames;
+			outputTypes["filter"] = tempOutNames;
+		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
@@ -84,6 +136,17 @@ FilterSeqsCommand::FilterSeqsCommand(string option)  {
 							fastafileNames[i] = tryPath;
 						}
 					}
+					
+					//if you can't open it, try default location
+					if (ableToOpen == 1) {
+						if (m->getOutputDir() != "") { //default path is set
+							string tryPath = m->getOutputDir() + m->getSimpleName(fastafileNames[i]);
+							m->mothurOut("Unable to open " + fastafileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							fastafileNames[i] = tryPath;
+						}
+					}
+					
 					in.close();
 					
 					if (ableToOpen == 1) { 
@@ -188,7 +251,7 @@ int FilterSeqsCommand::execute() {
 		
 		m->mothurOutEndLine();  m->mothurOutEndLine();
 		
-		if (m->control_pressed) { return 0; }
+		if (m->control_pressed) { outputTypes.clear(); return 0; }
 		
 		#ifdef USE_MPI
 			int pid;
@@ -207,7 +270,7 @@ int FilterSeqsCommand::execute() {
 		m->openOutputFile(filterFile, outFilter);
 		outFilter << filter << endl;
 		outFilter.close();
-		outputNames.push_back(filterFile);
+		outputNames.push_back(filterFile); outputTypes["filter"].push_back(filterFile);
 		
 		#ifdef USE_MPI
 			}
@@ -226,7 +289,7 @@ int FilterSeqsCommand::execute() {
 			if(filter[i] == '1'){	filteredLength++;	}
 		}
 		
-		if (m->control_pressed) {  for(int i = 0; i < outputNames.size(); i++) { remove(outputNames[i].c_str()); }  return 0; }
+		if (m->control_pressed) {  outputTypes.clear(); for(int i = 0; i < outputNames.size(); i++) { remove(outputNames[i].c_str()); }  return 0; }
 
 		
 		m->mothurOutEndLine();
@@ -373,7 +436,7 @@ int FilterSeqsCommand::filterSequences() {
 				if (m->control_pressed) {  return 1; }
 		#endif
 #endif
-			outputNames.push_back(filteredFasta);
+			outputNames.push_back(filteredFasta); outputTypes["fasta"].push_back(filteredFasta);
 		}
 
 		return 0;

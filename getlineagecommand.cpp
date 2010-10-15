@@ -11,8 +11,60 @@
 #include "sequence.hpp"
 #include "listvector.hpp"
 
-//**********************************************************************************************************************
 
+//**********************************************************************************************************************
+vector<string> GetLineageCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"fasta","name", "group", "alignreport", "taxon", "dups", "list","taxonomy","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetLineageCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+GetLineageCommand::GetLineageCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["fasta"] = tempOutNames;
+		outputTypes["taxonomy"] = tempOutNames;
+		outputTypes["name"] = tempOutNames;
+		outputTypes["group"] = tempOutNames;
+		outputTypes["alignreport"] = tempOutNames;
+		outputTypes["list"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetLineageCommand", "GetLineageCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> GetLineageCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"taxonomy"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetLineageCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> GetLineageCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetLineageCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 GetLineageCommand::GetLineageCommand(string option)  {
 	try {
 		abort = false;
@@ -36,6 +88,15 @@ GetLineageCommand::GetLineageCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["fasta"] = tempOutNames;
+			outputTypes["taxonomy"] = tempOutNames;
+			outputTypes["name"] = tempOutNames;
+			outputTypes["group"] = tempOutNames;
+			outputTypes["alignreport"] = tempOutNames;
+			outputTypes["list"] = tempOutNames;
+
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
 			
@@ -183,7 +244,7 @@ int GetLineageCommand::execute(){
 		if (listfile != "")			{		readList();		}
 		
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
+		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
 		
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
@@ -238,7 +299,7 @@ int GetLineageCommand::readFasta(){
 		out.close();
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); 
+		outputNames.push_back(outputFileName);  outputTypes["fasta"].push_back(outputFileName);
 		
 		return 0;
 
@@ -310,7 +371,7 @@ int GetLineageCommand::readList(){
 		out.close();
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); 
+		outputNames.push_back(outputFileName); outputTypes["list"].push_back(outputFileName);
 		
 		return 0;
 
@@ -403,7 +464,7 @@ int GetLineageCommand::readName(){
 		out.close();
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); 
+		outputNames.push_back(outputFileName);  outputTypes["name"].push_back(outputFileName);
 		
 		return 0;
 		
@@ -451,7 +512,7 @@ int GetLineageCommand::readGroup(){
 		out.close();
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); 
+		outputNames.push_back(outputFileName);  outputTypes["group"].push_back(outputFileName);
 		
 		return 0;
 
@@ -504,7 +565,7 @@ int GetLineageCommand::readTax(){
 		out.close();
 		
 		if (names.size() == 0) { m->mothurOut("Your taxonomy file does not contain any sequences from " + taxons + "."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); 
+		outputNames.push_back(outputFileName); outputTypes["taxonomy"].push_back(outputFileName);
 			
 		return 0;
 
@@ -595,7 +656,7 @@ int GetLineageCommand::readAlign(){
 		out.close();
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); 
+		outputNames.push_back(outputFileName); outputTypes["alignreport"].push_back(outputFileName);
 		
 		return 0;
 		

@@ -30,7 +30,12 @@ class ClusterCommand : public Command {
 	
 public:
 	ClusterCommand(string);
+	ClusterCommand();
 	~ClusterCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();	
 	void help();
 	
@@ -57,6 +62,7 @@ private:
 	
 	void printData(string label);
 	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 };
 
 #endif

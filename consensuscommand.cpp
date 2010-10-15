@@ -10,11 +10,63 @@
 #include "consensuscommand.h"
 
 //**********************************************************************************************************************
+vector<string> ConcensusCommand::getValidParameters(){	
+	try {
+		vector<string> myArray; 
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ConcensusCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ConcensusCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray; 
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ConcensusCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ConcensusCommand::getRequiredFiles(){	
+	try {
+		string AlignArray[] =  {"tree","group"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ConcensusCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+ConcensusCommand::ConcensusCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["tree"] = tempOutNames;
+		outputTypes["nodepairs"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ConcensusCommand", "ConcensusCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 
 ConcensusCommand::ConcensusCommand(string fileroot)  {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
+		
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["tree"] = tempOutNames;
+		outputTypes["nodepairs"] = tempOutNames;
 		
 		filename = fileroot;
 		
@@ -67,7 +119,7 @@ int ConcensusCommand::execute(){
 		if (m->control_pressed) { return 0; }
 		
 		//open file for pairing not included in the tree
-		notIncluded = filename + ".cons.pairs";
+		notIncluded = filename + ".cons.pairs"; outputNames.push_back(notIncluded);  outputTypes["nodepairs"].push_back(notIncluded);
 		m->openOutputFile(notIncluded, out2);
 		
 		consensusTree = new Tree();
@@ -150,7 +202,7 @@ int ConcensusCommand::execute(){
 			out2 << '\t' << it2->second << endl;
 		}
 		
-		outputFile = filename + ".cons.tre";
+		outputFile = filename + ".cons.tre";  outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile);
 		m->openOutputFile(outputFile, out);
 		
 		consensusTree->printForBoot(out);

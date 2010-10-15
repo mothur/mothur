@@ -11,6 +11,53 @@
 #include "sequence.hpp"
 
 //**********************************************************************************************************************
+vector<string> MakeGroupCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"fasta", "groups","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MakeGroupCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+MakeGroupCommand::MakeGroupCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["group"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MakeGroupCommand", "MakeGroupCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> MakeGroupCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"fasta","groups"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MakeGroupCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> MakeGroupCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MakeGroupCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 
 MakeGroupCommand::MakeGroupCommand(string option)  {
 	try {
@@ -36,7 +83,11 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
-
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["group"] = tempOutNames;
+		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
@@ -64,6 +115,16 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 						if (m->getDefaultPath() != "") { //default path is set
 							string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
 							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							fastaFileNames[i] = tryPath;
+						}
+					}
+					
+					//if you can't open it, try default location
+					if (ableToOpen == 1) {
+						if (m->getOutputDir() != "") { //default path is set
+							string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
+							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
 							ableToOpen = m->openInputFile(tryPath, in, "noerror");
 							fastaFileNames[i] = tryPath;
 						}
@@ -140,7 +201,7 @@ int MakeGroupCommand::execute(){
 		
 		for (int i = 0; i < fastaFileNames.size(); i++) {
 		
-			if (m->control_pressed) {  out.close(); remove(filename.c_str()); return 0; }
+			if (m->control_pressed) { outputTypes.clear(); out.close(); remove(filename.c_str()); return 0; }
 			
 			ifstream in;
 			m->openInputFile(fastaFileNames[i], in);
@@ -149,7 +210,7 @@ int MakeGroupCommand::execute(){
 				
 				Sequence seq(in, "no align"); m->gobble(in);
 				
-				if (m->control_pressed) {  in.close(); out.close(); remove(filename.c_str()); return 0; }
+				if (m->control_pressed) { outputTypes.clear();  in.close(); out.close(); remove(filename.c_str()); return 0; }
 				
 				if (seq.getName() != "") {	out << seq.getName() << '\t' << groupsNames[i] << endl;		}
 			}
@@ -159,7 +220,7 @@ int MakeGroupCommand::execute(){
 		out.close();
 		
 		m->mothurOutEndLine();
-		m->mothurOut("Output File Name: " + filename); m->mothurOutEndLine();
+		m->mothurOut("Output File Name: " + filename); m->mothurOutEndLine(); outputNames.push_back(filename); outputTypes["group"].push_back(filename); 
 		m->mothurOutEndLine();
 
 		return 0;

@@ -12,7 +12,58 @@
 #include "listvector.hpp"
 
 //**********************************************************************************************************************
-
+vector<string> GetSeqsCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"fasta","name", "group", "alignreport", "accnos", "dups", "list","taxonomy","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetSeqsCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+GetSeqsCommand::GetSeqsCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["fasta"] = tempOutNames;
+		outputTypes["taxonomy"] = tempOutNames;
+		outputTypes["name"] = tempOutNames;
+		outputTypes["group"] = tempOutNames;
+		outputTypes["alignreport"] = tempOutNames;
+		outputTypes["list"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetSeqsCommand", "GetSeqsCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> GetSeqsCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"accnos"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetSeqsCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> GetSeqsCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetSeqsCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 GetSeqsCommand::GetSeqsCommand(string option)  {
 	try {
 		abort = false;
@@ -35,6 +86,15 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["fasta"] = tempOutNames;
+			outputTypes["taxonomy"] = tempOutNames;
+			outputTypes["name"] = tempOutNames;
+			outputTypes["group"] = tempOutNames;
+			outputTypes["alignreport"] = tempOutNames;
+			outputTypes["list"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -185,7 +245,7 @@ int GetSeqsCommand::execute(){
 		if (listfile != "")			{		readList();		}
 		if (taxfile != "")			{		readTax();		}
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
+		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
 		
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
@@ -240,7 +300,7 @@ int GetSeqsCommand::readFasta(){
 		out.close();
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); 
+		outputNames.push_back(outputFileName);  outputTypes["fasta"].push_back(outputFileName); 
 		
 		return 0;
 
@@ -312,7 +372,7 @@ int GetSeqsCommand::readList(){
 		out.close();
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); 
+		outputNames.push_back(outputFileName); outputTypes["list"].push_back(outputFileName);
 		
 		return 0;
 
@@ -405,7 +465,7 @@ int GetSeqsCommand::readName(){
 		out.close();
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); 
+		outputNames.push_back(outputFileName); outputTypes["name"].push_back(outputFileName);
 		
 		return 0;
 		
@@ -453,7 +513,7 @@ int GetSeqsCommand::readGroup(){
 		out.close();
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); 
+		outputNames.push_back(outputFileName);  outputTypes["group"].push_back(outputFileName);
 		
 		return 0;
 
@@ -498,7 +558,7 @@ int GetSeqsCommand::readTax(){
 		out.close();
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); 
+		outputNames.push_back(outputFileName);  outputTypes["taxonomy"].push_back(outputFileName);
 			
 		return 0;
 
@@ -566,7 +626,7 @@ int GetSeqsCommand::readAlign(){
 		out.close();
 		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
-		outputNames.push_back(outputFileName); 
+		outputNames.push_back(outputFileName);  outputTypes["alignreport"].push_back(outputFileName);
 		
 		return 0;
 		

@@ -24,7 +24,12 @@ class VennCommand : public Command {
 
 public:
 	VennCommand(string);
+	VennCommand();
 	~VennCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -44,7 +49,8 @@ private:
 	bool abort, allLines, nseqs, perm;
 	set<string> labels; //holds labels to be used
 	string format, groups, calc, label, outputDir;
-	vector<string> Estimators, Groups;
+	vector<string> Estimators, Groups, outputNames;
+	map<string, vector<string> > outputTypes;
 	
 	set< set<int> > findCombinations(int);
 	int getCombos(set<int>, set< set<int> >&);

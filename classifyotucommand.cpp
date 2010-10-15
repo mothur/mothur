@@ -10,7 +10,53 @@
 #include "classifyotucommand.h"
 #include "phylotree.h"
 
-
+//**********************************************************************************************************************
+vector<string> ClassifyOtuCommand::getValidParameters(){	
+	try {
+		string AlignArray[] =  {"list","label","name","taxonomy","cutoff","probs","outputdir","inputdir"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClassifyOtuCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+ClassifyOtuCommand::ClassifyOtuCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["constaxonomy"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClassifyOtuCommand", "ClassifyOtuCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ClassifyOtuCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"list","taxonomy"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClassifyOtuCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ClassifyOtuCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClassifyOtuCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 	try{
@@ -37,6 +83,10 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["constaxonomy"] = tempOutNames;
+		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
@@ -157,7 +207,7 @@ int ClassifyOtuCommand::execute(){
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
-		if (m->control_pressed) { delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }  return 0; }
+		if (m->control_pressed) { outputTypes.clear(); delete input; delete list; for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  }  return 0; }
 	
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
@@ -165,7 +215,7 @@ int ClassifyOtuCommand::execute(){
 			
 					m->mothurOut(list->getLabel() + "\t" + toString(list->size())); m->mothurOutEndLine();
 					process(list);
-					if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } delete input; delete list; return 0; }
+					if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } delete input; delete list; return 0; }
 										
 					processedLabels.insert(list->getLabel());
 					userLabels.erase(list->getLabel());
@@ -180,7 +230,7 @@ int ClassifyOtuCommand::execute(){
 					process(list);
 				
 					
-					if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } delete input; delete list; return 0; }
+					if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } delete input; delete list; return 0; }
 										
 					processedLabels.insert(list->getLabel());
 					userLabels.erase(list->getLabel());
@@ -216,12 +266,12 @@ int ClassifyOtuCommand::execute(){
 			process(list);
 			delete list;
 			
-			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } delete input; delete list; return 0; }
+			if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } delete input; delete list; return 0; }
 		}
 		
 		delete input;  
 				
-		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
+		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -424,7 +474,9 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 		ofstream out;
 		string outputFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + ".cons.taxonomy";
 		m->openOutputFile(outputFile, out);
-		outputNames.push_back(outputFile);
+		outputNames.push_back(outputFile); outputTypes["constaxonomy"].push_back(outputFile);
+		
+		out << "OTU\tSize\tTaxonomy" << endl;
 		
 		//for each bin in the list vector
 		for (int i = 0; i < processList->getNumBins(); i++) {

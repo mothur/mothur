@@ -10,6 +10,57 @@
 #include "splitabundcommand.h"
 
 //**********************************************************************************************************************
+vector<string> SplitAbundCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"name","group","list","label","accnos","groups","fasta","cutoff","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SplitAbundCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+SplitAbundCommand::SplitAbundCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["list"] = tempOutNames;
+		outputTypes["name"] = tempOutNames;
+		outputTypes["accnos"] = tempOutNames;
+		outputTypes["group"] = tempOutNames;
+		outputTypes["fasta"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SplitAbundCommand", "SplitAbundCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SplitAbundCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"fasta","list","name","or"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SplitAbundCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SplitAbundCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SplitAbundCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 SplitAbundCommand::SplitAbundCommand(string option)  {
 	try {
 		abort = false;
@@ -33,7 +84,15 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
-						
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["list"] = tempOutNames;
+			outputTypes["name"] = tempOutNames;
+			outputTypes["accnos"] = tempOutNames;
+			outputTypes["group"] = tempOutNames;
+			outputTypes["fasta"] = tempOutNames;			
+												
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
@@ -186,6 +245,8 @@ int SplitAbundCommand::execute(){
 				
 				outputNames.push_back((fileroot + "rare.list"));
 				outputNames.push_back((fileroot + "abund.list"));
+				outputTypes["list"].push_back((fileroot + "rare.list"));
+				outputTypes["list"].push_back((fileroot + "abund.list"));
 			}else{
 				for (int i=0; i<Groups.size(); i++) {
 					remove((fileroot + Groups[i] + ".rare.list").c_str());
@@ -193,6 +254,8 @@ int SplitAbundCommand::execute(){
 					
 					outputNames.push_back((fileroot + Groups[i] + ".rare.list"));
 					outputNames.push_back((fileroot + Groups[i] + ".abund.list"));
+					outputTypes["list"].push_back((fileroot + Groups[i] + ".rare.list"));
+					outputTypes["list"].push_back((fileroot + Groups[i] + ".abund.list"));
 				}
 			}
 			
@@ -572,11 +635,11 @@ int SplitAbundCommand::writeNames() { //namefile
 			
 			string rare = outputDir + m->getRootName(m->getSimpleName(namefile))  + "rare.names";
 			m->openOutputFile(rare, rout);
-			outputNames.push_back(rare);
+			outputNames.push_back(rare); outputTypes["name"].push_back(rare);
 			
 			string abund = outputDir + m->getRootName(m->getSimpleName(namefile))  + "abund.names";
 			m->openOutputFile(abund, aout);
-			outputNames.push_back(abund);
+			outputNames.push_back(abund); outputTypes["name"].push_back(abund);
 			
 			if (rareNames.size() != 0) {
 				for (set<string>::iterator itRare = rareNames.begin(); itRare != rareNames.end(); itRare++) {
@@ -642,7 +705,7 @@ int SplitAbundCommand::writeNames() { //namefile
 			
 			for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) { 
 				(*(filehandles[it3->first])).close();
-				outputNames.push_back(fileroot + it3->first + ".names");  
+				outputNames.push_back(fileroot + it3->first + ".names");  outputTypes["name"].push_back(fileroot + it3->first + ".names");
 				delete it3->second;
 			}
 		}
@@ -669,7 +732,7 @@ int SplitAbundCommand::writeAccnos(string tag) {
 			
 			string rare = outputDir + m->getRootName(m->getSimpleName(inputFile))  + tag + "rare.accnos";
 			m->openOutputFile(rare, rout);
-			outputNames.push_back(rare);
+			outputNames.push_back(rare); outputTypes["accnos"].push_back(rare); 
 			
 			for (set<string>::iterator itRare = rareNames.begin(); itRare != rareNames.end(); itRare++) {
 				rout << (*itRare) << endl;
@@ -678,7 +741,7 @@ int SplitAbundCommand::writeAccnos(string tag) {
 		
 			string abund = outputDir + m->getRootName(m->getSimpleName(inputFile)) + tag  + "abund.accnos";
 			m->openOutputFile(abund, aout);
-			outputNames.push_back(abund);
+			outputNames.push_back(abund); outputTypes["accnos"].push_back(abund);
 			
 			for (set<string>::iterator itAbund = abundNames.begin(); itAbund != abundNames.end(); itAbund++) {
 				aout << (*itAbund) << endl;
@@ -723,7 +786,7 @@ int SplitAbundCommand::writeAccnos(string tag) {
 			//close files
 			for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) { 
 				(*(filehandles[it3->first])).close();
-				outputNames.push_back(fileroot + tag + it3->first + ".accnos");  
+				outputNames.push_back(fileroot + tag + it3->first + ".accnos");  outputTypes["accnos"].push_back(fileroot + tag + it3->first + ".accnos");
 				delete it3->second;
 			}
 		}
@@ -748,11 +811,11 @@ int SplitAbundCommand::parseGroup(string tag) { //namefile
 			
 			string rare = outputDir + m->getRootName(m->getSimpleName(groupfile))  + tag + "rare.groups";
 			m->openOutputFile(rare, rout);
-			outputNames.push_back(rare);
+			outputNames.push_back(rare); outputTypes["group"].push_back(rare);
 		
 			string abund = outputDir + m->getRootName(m->getSimpleName(groupfile))  + tag + "abund.groups";
 			m->openOutputFile(abund, aout);
-			outputNames.push_back(abund);
+			outputNames.push_back(abund); outputTypes["group"].push_back(abund);
 			
 			for (map<string, string>::iterator itName = nameMap.begin(); itName != nameMap.end(); itName++) {				
 				vector<string> names;
@@ -817,7 +880,7 @@ int SplitAbundCommand::parseGroup(string tag) { //namefile
 			
 			for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) { 
 				(*(filehandles[it3->first])).close();
-				outputNames.push_back(fileroot + tag + it3->first + ".groups");  
+				outputNames.push_back(fileroot + tag + it3->first + ".groups");  outputTypes["group"].push_back(fileroot + tag + it3->first + ".groups");
 				delete it3->second;
 			}
 		}
@@ -842,11 +905,11 @@ int SplitAbundCommand::parseFasta(string tag) { //namefile
 			
 			string rare = outputDir + m->getRootName(m->getSimpleName(fastafile))  + tag + "rare.fasta";
 			m->openOutputFile(rare, rout);
-			outputNames.push_back(rare);
+			outputNames.push_back(rare); outputTypes["fasta"].push_back(rare);
 		
 			string abund = outputDir + m->getRootName(m->getSimpleName(fastafile))  + tag + "abund.fasta";
 			m->openOutputFile(abund, aout);
-			outputNames.push_back(abund);
+			outputNames.push_back(abund); outputTypes["fasta"].push_back(abund);
 		
 			//open input file
 			ifstream in;
@@ -937,7 +1000,7 @@ int SplitAbundCommand::parseFasta(string tag) { //namefile
 			
 			for (it3 = filehandles.begin(); it3 != filehandles.end(); it3++) { 
 				(*(filehandles[it3->first])).close();
-				outputNames.push_back(fileroot + tag + it3->first + ".fasta");  
+				outputNames.push_back(fileroot + tag + it3->first + ".fasta");  outputTypes["fasta"].push_back(fileroot + tag + it3->first + ".fasta");
 				delete it3->second;
 			}
 		}

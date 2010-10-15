@@ -10,6 +10,41 @@
 #include "getlabelcommand.h"
 
 //**********************************************************************************************************************
+vector<string> GetlabelCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetlabelCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> GetlabelCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetlabelCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> GetlabelCommand::getRequiredFiles(){	
+	try {
+		string Array[] =  {"list","rabund","sabund", "or"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetlabelCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 
 GetlabelCommand::GetlabelCommand(string option)  {
 	try {

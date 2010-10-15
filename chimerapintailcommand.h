@@ -22,7 +22,12 @@ class ChimeraPintailCommand : public Command {
 public:
 
 	ChimeraPintailCommand(string);
+	ChimeraPintailCommand();
 	~ChimeraPintailCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -49,6 +54,7 @@ private:
 	int processors, window, increment, numSeqs, templateSeqsLength;
 	Chimera* chimera;
 	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 	vector<string> fastaFileNames;
 	
 	

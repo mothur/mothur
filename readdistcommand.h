@@ -27,7 +27,12 @@ class GlobalData;
 class ReadDistCommand : public Command {
 public:
 	ReadDistCommand(string);
+	ReadDistCommand() {}
 	~ReadDistCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -41,6 +46,8 @@ private:
 	string distFileName, format, method;
 	string phylipfile, columnfile, namefile, groupfile, outputDir;
 	NameAssignment* nameMap;
+	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 
 	bool abort, sim;
 

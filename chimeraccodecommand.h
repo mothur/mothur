@@ -20,7 +20,12 @@
 class ChimeraCcodeCommand : public Command {
 public:
 	ChimeraCcodeCommand(string);
+	ChimeraCcodeCommand();
 	~ChimeraCcodeCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -47,6 +52,7 @@ private:
 	Chimera* chimera;
 	vector<string> fastaFileNames;
 	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 	
 	
 };

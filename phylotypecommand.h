@@ -20,7 +20,12 @@ class PhylotypeCommand : public Command {
 	
 public:
 	PhylotypeCommand(string);	
+	PhylotypeCommand();
 	~PhylotypeCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute(); 
 	void help();	
 	
@@ -30,6 +35,8 @@ private:
 	set<string> labels; //holds labels to be used
 	int cutoff;
 	map<string, string> namemap;
+	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 	
 	map<int, int> currentNodes;
 	map<int, int> parentNodes;

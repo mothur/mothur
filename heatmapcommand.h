@@ -24,7 +24,12 @@ class HeatMapCommand : public Command {
 
 public:
 	HeatMapCommand(string);
+	HeatMapCommand();
 	~HeatMapCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -42,6 +47,7 @@ private:
 	set<string> labels; //holds labels to be used
 	string format, groups, sorted, scale, label, outputDir;
 	vector<string> Groups, outputNames;
+	map<string, vector<string> > outputTypes;
 	int numOTU, fontSize;
 
 

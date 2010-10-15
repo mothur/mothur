@@ -19,7 +19,52 @@
 #include "sharedmorisitahorn.h"
 #include "sharedbraycurtis.h"
 
-
+//**********************************************************************************************************************
+vector<string> HeatMapSimCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"groups","label", "calc","phylip","column","name","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "HeatMapSimCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+HeatMapSimCommand::HeatMapSimCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["svg"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "HeatMapSimCommand", "HeatMapSimCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> HeatMapSimCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "HeatMapSimCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> HeatMapSimCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "HeatMapSimCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 
 HeatMapSimCommand::HeatMapSimCommand(string option)  {
@@ -49,6 +94,10 @@ HeatMapSimCommand::HeatMapSimCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["svg"] = tempOutNames;
 			
 			format = "";
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -240,7 +289,7 @@ int HeatMapSimCommand::execute(){
 		delete heatmap;
 		delete validCalculator;
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } outputTypes.clear(); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -286,7 +335,7 @@ int HeatMapSimCommand::runCommandShared() {
 	
 				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 				vector<string> outfilenames = heatmap->getPic(lookup, heatCalculators);
-				for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); }
+				for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]);  outputTypes["svg"].push_back(outfilenames[i]); }
 					
 				processedLabels.insert(lookup[0]->getLabel());
 				userLabels.erase(lookup[0]->getLabel());
@@ -300,7 +349,7 @@ int HeatMapSimCommand::runCommandShared() {
 
 				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 				vector<string> outfilenames = heatmap->getPic(lookup, heatCalculators);
-				for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); }
+				for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); outputTypes["svg"].push_back(outfilenames[i]);  }
 					
 				processedLabels.insert(lookup[0]->getLabel());
 				userLabels.erase(lookup[0]->getLabel());
@@ -344,7 +393,7 @@ int HeatMapSimCommand::runCommandShared() {
 
 			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 			vector<string> outfilenames = heatmap->getPic(lookup, heatCalculators);
-			for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); }
+			for(int i = 0; i < outfilenames.size(); i++) { outputNames.push_back(outfilenames[i]); outputTypes["svg"].push_back(outfilenames[i]);  }
 			
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
 		}
@@ -482,8 +531,10 @@ int HeatMapSimCommand::runCommandDist() {
 			delete nameMap;
 		}
 		
-
-		outputNames.push_back(heatmap->getPic(matrix, names)); //vector<vector<double>>, vector<string>
+		
+		string outputFileName = heatmap->getPic(matrix, names);
+		outputNames.push_back(outputFileName); //vector<vector<double>>, vector<string>
+		outputTypes["svg"].push_back(outputFileName);
 		
 		return 0;
 	}

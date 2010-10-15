@@ -23,7 +23,12 @@ class ParsimonyCommand : public Command {
 
 public:
 	ParsimonyCommand(string);	
+	ParsimonyCommand();
 	~ParsimonyCommand() { if (abort == false) { delete pars; delete util; delete output; }  }
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();	
 	void help();
 
@@ -57,6 +62,7 @@ private:
 	bool abort;
 	string groups, itersString;
 	vector<string> Groups, outputNames; //holds groups to be used
+	map<string, vector<string> > outputTypes;
 
 	void printParsimonyFile();  
 	int printUSummaryFile();

@@ -10,6 +10,41 @@
 #include "readtreecommand.h"
 
 //**********************************************************************************************************************
+vector<string> ReadTreeCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"tree","group","name","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ReadTreeCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ReadTreeCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"tree"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ReadTreeCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ReadTreeCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ReadTreeCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 ReadTreeCommand::ReadTreeCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
@@ -122,7 +157,7 @@ void ReadTreeCommand::help(){
 		m->mothurOut("It also must be run before using the parsimony command, unless you are using the randomtree parameter.\n");
 		m->mothurOut("The read.tree command parameters are tree, group and name.\n");
 		m->mothurOut("The read.tree command should be in the following format: read.tree(tree=yourTreeFile, group=yourGroupFile).\n");
-		m->mothurOut("The tree and group parameters are both required.\n");
+		m->mothurOut("The tree and group parameters are both required, if no group file is given then one group is assumed.\n");
 		m->mothurOut("The name parameter allows you to enter a namefile.\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. tree), '=' and parameters (i.e.yourTreefile).\n\n");
 	}

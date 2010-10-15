@@ -20,8 +20,13 @@ class GlobalData;
 class LibShuffCommand : public Command {
 	
 public:
-	LibShuffCommand(string);	
+	LibShuffCommand(string);
+	LibShuffCommand();	
 	~LibShuffCommand(){};
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();	
 
@@ -45,6 +50,7 @@ private:
 	bool abort;
 	string outputFile, groups, userform, savegroups, outputDir;
 	vector<string> Groups, outputNames; //holds groups to be used
+	map<string, vector<string> > outputTypes;
 };
 
 #endif

@@ -10,6 +10,53 @@
 #include "normalizesharedcommand.h"
 
 //**********************************************************************************************************************
+vector<string> NormalizeSharedCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"groups","label","scale","outputdir","inputdir","norm"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "NormalizeSharedCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+NormalizeSharedCommand::NormalizeSharedCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["shared"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "NormalizeSharedCommand", "NormalizeSharedCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> NormalizeSharedCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "NormalizeSharedCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> NormalizeSharedCommand::getRequiredFiles(){	
+	try {
+		string Array[] =  {"shared"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "NormalizeSharedCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 
 NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 	try {
@@ -35,6 +82,10 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["shared"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -150,7 +201,7 @@ int NormalizeSharedCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } globaldata->Groups.clear(); delete read;  out.close(); remove(outputFileName.c_str()); return 0; }
+			if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } globaldata->Groups.clear(); delete read;  out.close(); remove(outputFileName.c_str()); return 0; }
 	
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 
@@ -181,13 +232,13 @@ int NormalizeSharedCommand::execute(){
 			//prevent memory leak
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
 			
-			if (m->control_pressed) {  globaldata->Groups.clear(); delete read;  out.close(); remove(outputFileName.c_str()); return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); globaldata->Groups.clear(); delete read;  out.close(); remove(outputFileName.c_str()); return 0; }
 
 			//get next line to process
 			lookup = input->getSharedRAbundVectors();				
 		}
 		
-		if (m->control_pressed) { globaldata->Groups.clear(); delete read;  out.close(); remove(outputFileName.c_str());  return 0; }
+		if (m->control_pressed) { outputTypes.clear(); globaldata->Groups.clear(); delete read;  out.close(); remove(outputFileName.c_str());  return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -220,11 +271,11 @@ int NormalizeSharedCommand::execute(){
 		delete read;
 		out.close();
 		
-		if (m->control_pressed) { remove(outputFileName.c_str()); return 0;}
+		if (m->control_pressed) { outputTypes.clear(); remove(outputFileName.c_str()); return 0;}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
-		m->mothurOut(outputFileName); m->mothurOutEndLine();
+		m->mothurOut(outputFileName); m->mothurOutEndLine(); outputNames.push_back(outputFileName); outputTypes["shared"].push_back(outputFileName);
 		m->mothurOutEndLine();
 		
 		return 0;

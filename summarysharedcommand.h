@@ -23,7 +23,12 @@ class SummarySharedCommand : public Command {
 
 public:
 	SummarySharedCommand(string);
+	SummarySharedCommand();
 	~SummarySharedCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -43,6 +48,7 @@ private:
 	set<string> labels; //holds labels to be used
 	string label, calc, groups;
 	vector<string>  Estimators, Groups, outputNames;
+	map<string, vector<string> > outputTypes;
 	vector<SharedRAbundVector*> lookup;
 	string format, outputDir;
 	int numGroups, processors;

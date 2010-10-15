@@ -27,7 +27,12 @@ class SharedCommand : public Command {
 	
 public:
 	SharedCommand(string);	
+	SharedCommand();
 	~SharedCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();	
 	void help() {}
 	
@@ -37,6 +42,7 @@ private:
 	int readOrderFile();
 	bool isValidGroup(string, vector<string>);
 	int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
+	map<string, vector<string> > outputTypes;
 	
 	GlobalData* globaldata;
 	ReadOTUFile* read;

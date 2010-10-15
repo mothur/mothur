@@ -24,7 +24,12 @@ class UnifracWeightedCommand : public Command {
 	
 	public:
 		UnifracWeightedCommand(string);
+		UnifracWeightedCommand();
 		~UnifracWeightedCommand() { if (abort == false) {  delete weighted; delete util; } }
+		vector<string> getRequiredParameters();
+		vector<string> getValidParameters();
+		vector<string> getRequiredFiles();
+		map<string, vector<string> > getOutputFiles() { return outputTypes; }
 		int execute();	
 		void help();
 	
@@ -58,6 +63,7 @@ class UnifracWeightedCommand : public Command {
 		bool abort, phylip, random;
 		string groups, itersString;
 		vector<string> Groups, outputNames; //holds groups to be used
+		map<string, vector<string> > outputTypes;
 		int processors;
 
 		

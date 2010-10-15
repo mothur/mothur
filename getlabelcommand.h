@@ -18,7 +18,12 @@ class GlobalData;
 class GetlabelCommand : public Command {
 public:
 	GetlabelCommand(string);
+	GetlabelCommand(){}
 	~GetlabelCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -26,6 +31,8 @@ private:
 	GlobalData* globaldata;
 	string filename;
 	bool abort;
+	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 };
 
 #endif

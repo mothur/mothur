@@ -9,6 +9,56 @@
 
 #include "unifracweightedcommand.h"
 
+//**********************************************************************************************************************
+vector<string> UnifracWeightedCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"groups","iters","distance","random","processors","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "UnifracWeightedCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+UnifracWeightedCommand::UnifracWeightedCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["weighted"] = tempOutNames;
+		outputTypes["wsummary"] = tempOutNames;
+		outputTypes["phylip"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "UnifracWeightedCommand", "UnifracWeightedCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> UnifracWeightedCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "UnifracWeightedCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> UnifracWeightedCommand::getRequiredFiles(){	
+	try {
+		string Array[] =  {"tree","group"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "UnifracWeightedCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 /***********************************************************/
 UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 	try {
@@ -33,6 +83,12 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["weighted"] = tempOutNames;
+			outputTypes["wsummary"] = tempOutNames;
+			outputTypes["phylip"] = tempOutNames;
 			
 			if (globaldata->gTree.size() == 0) {//no trees were read
 				m->mothurOut("You must execute the read.tree command, before you may execute the unifrac.weighted command."); m->mothurOutEndLine(); abort = true;  }
@@ -72,7 +128,7 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 				tmap = globaldata->gTreemap;
 				sumFile = outputDir + m->getSimpleName(globaldata->getTreeFile()) + ".wsummary";
 				m->openOutputFile(sumFile, outSum);
-				outputNames.push_back(sumFile);
+				outputNames.push_back(sumFile);  outputTypes["wsummary"].push_back(sumFile);
 				
 				util = new SharedUtil();
 				string s; //to make work with setgroups
@@ -138,6 +194,7 @@ int UnifracWeightedCommand::execute() {
 			if (random) {  
 				output = new ColumnFile(outputDir + m->getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".weighted", itersString);  
 				outputNames.push_back(outputDir + m->getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".weighted");
+				outputTypes["weighted"].push_back(outputDir + m->getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".weighted");
 			} 
 
 			userData = weighted->getValues(T[i], processors, outputDir);  //userData[0] = weightedscore
@@ -438,6 +495,7 @@ void UnifracWeightedCommand::createPhylipFile() {
 		
 			string phylipFileName = outputDir + m->getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".weighted.dist";
 			outputNames.push_back(phylipFileName);
+			outputTypes["phylip"].push_back(phylipFileName);
 			ofstream out;
 			m->openOutputFile(phylipFileName, out);
 			

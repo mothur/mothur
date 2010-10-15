@@ -18,7 +18,12 @@ class PCACommand : public Command {
 	
 public:
 	PCACommand(string);	
+	PCACommand();
 	~PCACommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();	
 	void help();
 	
@@ -28,6 +33,7 @@ private:
 	string phylipfile, columnfile, namefile, format, filename, fbase, outputDir;
 	float cutoff, precision;
 	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 	
 	void get_comment(istream&, char, char);
 	int read_phylip(istream&, int, vector<string>&, vector<vector<double> >&);

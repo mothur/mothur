@@ -19,7 +19,12 @@ class GlobalData;
 class ReadTreeCommand : public Command {
 public:
 	ReadTreeCommand(string);
+	ReadTreeCommand() {}
 	~ReadTreeCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -30,6 +35,8 @@ private:
 	string filename, treefile, groupfile, namefile;
 	bool abort;
 	map<string, string> nameMap;
+	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 	
 	int readNamesFile();
 	int numUniquesInName;

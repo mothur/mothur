@@ -18,7 +18,12 @@ class FilterSeqsCommand : public Command {
 
 public:
 	FilterSeqsCommand(string);
+	FilterSeqsCommand();
 	~FilterSeqsCommand() {};
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();	
 	void help();
 	
@@ -37,6 +42,7 @@ private:
 	int alignmentLength, processors;
 	vector<int> bufferSizes;
 	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 
 	char trump;
 	bool abort;

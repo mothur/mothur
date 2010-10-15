@@ -24,7 +24,12 @@ class MGClusterCommand : public Command {
 
 public:
 	MGClusterCommand(string);
+	MGClusterCommand();
 	~MGClusterCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();
 	
@@ -37,6 +42,8 @@ private:
 	ListVector* list;
 	ListVector oldList;
 	vector<seqDist> overlapMatrix;
+	vector<string> outputNames;
+	map<string, vector<string> > outputTypes;
 	
 	string blastfile, method, namefile, overlapFile, distFile, outputDir;
 	ofstream sabundFile, rabundFile, listFile;

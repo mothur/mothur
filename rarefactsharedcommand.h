@@ -22,7 +22,12 @@ class RareFactSharedCommand : public Command {
 	
 public:
 	RareFactSharedCommand(string);
+	RareFactSharedCommand();
 	~RareFactSharedCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();	
 	void help();
 	
@@ -42,6 +47,7 @@ private:
 	set<string> labels; //holds labels to be used
 	string label, calc, groups, outputDir;
 	vector<string>  Estimators, Groups, outputNames;
+	map<string, vector<string> > outputTypes;
 
 
 };

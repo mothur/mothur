@@ -12,6 +12,54 @@
 #include "sharedutilities.h"
 
 //**********************************************************************************************************************
+vector<string> MetaStatsCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"groups","label","outputdir","iters","threshold","g","design","sets","processors","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MetaStatsCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+MetaStatsCommand::MetaStatsCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["metastats"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MetaStatsCommand", "MetaStatsCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> MetaStatsCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"design"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MetaStatsCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> MetaStatsCommand::getRequiredFiles(){	
+	try {
+		string Array[] =  {"shared"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "MetaStatsCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 
 MetaStatsCommand::MetaStatsCommand(string option) {
 	try {
@@ -38,6 +86,10 @@ MetaStatsCommand::MetaStatsCommand(string option) {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["metastats"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -206,7 +258,7 @@ int MetaStatsCommand::execute(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
-			if (m->control_pressed) {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } globaldata->Groups.clear(); delete read;  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } globaldata->Groups.clear(); delete read;  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
 	
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 
@@ -237,13 +289,13 @@ int MetaStatsCommand::execute(){
 			//prevent memory leak
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
 			
-			if (m->control_pressed) {  globaldata->Groups.clear(); delete read;  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); globaldata->Groups.clear(); delete read;  delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
 
 			//get next line to process
 			lookup = input->getSharedRAbundVectors();				
 		}
 		
-		if (m->control_pressed) { globaldata->Groups.clear(); delete read; delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }  return 0; }
+		if (m->control_pressed) { outputTypes.clear(); globaldata->Groups.clear(); delete read; delete designMap;  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }  return 0; }
 
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -276,7 +328,7 @@ int MetaStatsCommand::execute(){
 		delete read;
 		delete designMap;
 		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0;}
+		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0;}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -350,7 +402,7 @@ int MetaStatsCommand::driver(int start, int num, vector<SharedRAbundVector*>& th
 			
 			//get filename
 			string outputFileName = outputDir +  m->getRootName(m->getSimpleName(globaldata->inputFileName)) + thisLookUp[0]->getLabel() + "." + setA + "-" + setB + ".metastats";
-			outputNames.push_back(outputFileName);
+			outputNames.push_back(outputFileName); outputTypes["metastats"].push_back(outputFileName);
 			int nameLength = outputFileName.length();
 			char * output = new char[nameLength];
 			strcpy(output, outputFileName.c_str());

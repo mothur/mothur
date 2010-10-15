@@ -10,6 +10,53 @@
 #include "getgroupcommand.h"
 
 //**********************************************************************************************************************
+vector<string> GetgroupCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetgroupCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+GetgroupCommand::GetgroupCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["bootgroup"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetgroupCommand", "GetgroupCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> GetgroupCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetgroupCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> GetgroupCommand::getRequiredFiles(){	
+	try {
+		string Array[] =  {"shared"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetgroupCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 GetgroupCommand::GetgroupCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
@@ -31,6 +78,10 @@ GetgroupCommand::GetgroupCommand(string option)  {
 			for (map<string,string>::iterator it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["bootgroup"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			string outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -102,13 +153,13 @@ int GetgroupCommand::execute(){
 			in >> inputData;
 		}
 		
-		if (m->control_pressed) { in.close();  out.close(); remove(outputFile.c_str());   return 0; }
+		if (m->control_pressed) { outputTypes.clear(); in.close();  out.close(); remove(outputFile.c_str());   return 0; }
 
 		if (in.eof() != true) { in >> nextLabel; }
 		
 		//read the rest of the groups info in
 		while ((nextLabel == holdLabel) && (in.eof() != true)) {
-			if (m->control_pressed) { in.close();  out.close(); remove(outputFile.c_str());   return 0; }
+			if (m->control_pressed) {  outputTypes.clear(); in.close();  out.close(); remove(outputFile.c_str());   return 0; }
 			
 			in >> groupN >> num;
 			count++;
@@ -132,7 +183,7 @@ int GetgroupCommand::execute(){
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
-		m->mothurOut(outputFile); m->mothurOutEndLine();	
+		m->mothurOut(outputFile); m->mothurOutEndLine();	outputNames.push_back(outputFile); outputTypes["bootgroup"].push_back(outputFile);
 		m->mothurOutEndLine();
 		
 		return 0;	

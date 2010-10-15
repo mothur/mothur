@@ -10,6 +10,40 @@
 #include "setdircommand.h"
 
 //**********************************************************************************************************************
+vector<string> SetDirectoryCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"output","input","tempdefault","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SetDirectoryCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SetDirectoryCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SetDirectoryCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SetDirectoryCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SetDirectoryCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 
 SetDirectoryCommand::SetDirectoryCommand(string option)  {
 	try {

@@ -14,10 +14,61 @@ inline bool compareSharedRabunds(SharedRAbundVector* left, SharedRAbundVector* r
 	return (left->getGroup() < right->getGroup());	
 } 
 //**********************************************************************************************************************
+vector<string> SharedCommand::getValidParameters(){	
+	try {
+		vector<string> myArray; 
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SharedCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+SharedCommand::SharedCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["rabund"] = tempOutNames;
+		outputTypes["shared"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SharedCommand", "SharedCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SharedCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SharedCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> SharedCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SharedCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 
 SharedCommand::SharedCommand(string o) : outputDir(o) {
 	try {
 		globaldata = GlobalData::getInstance();
+		
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["rabund"] = tempOutNames;
+		outputTypes["shared"] = tempOutNames;
 		
 		//getting output filename
 		filename = globaldata->inputFileName;
@@ -25,6 +76,7 @@ SharedCommand::SharedCommand(string o) : outputDir(o) {
 		
 		filename = outputDir + m->getRootName(m->getSimpleName(filename));
 		filename = filename + "shared";
+		outputTypes["shared"].push_back(filename);
 		
 		m->openOutputFile(filename, out);
 		pickedGroups = false;
@@ -54,6 +106,7 @@ SharedCommand::SharedCommand(string o) : outputDir(o) {
 		for (int i=0; i<groups.size(); i++) {
 			remove((fileroot + groups[i] + ".rabund").c_str());
 			outputNames.push_back((fileroot + groups[i] + ".rabund"));
+			outputTypes["rabund"].push_back((fileroot + groups[i] + ".rabund"));
 		}
 
 	}

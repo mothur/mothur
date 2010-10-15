@@ -10,6 +10,53 @@
 #include "otuhierarchycommand.h"
 
 //**********************************************************************************************************************
+vector<string> OtuHierarchyCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"list","label","output","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "OtuHierarchyCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+OtuHierarchyCommand::OtuHierarchyCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["otuheirarchy"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "OtuHierarchyCommand", "OtuHierarchyCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> OtuHierarchyCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"list","label"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "OtuHierarchyCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> OtuHierarchyCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "OtuHierarchyCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 OtuHierarchyCommand::OtuHierarchyCommand(string option) {
 	try {
 		abort = false;
@@ -32,6 +79,10 @@ OtuHierarchyCommand::OtuHierarchyCommand(string option) {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["otuheirarchy"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -110,7 +161,7 @@ int OtuHierarchyCommand::execute(){
 		//get listvectors that correspond to labels requested, (or use smart distancing to get closest listvector)
 		vector<ListVector> lists = getListVectors();
 		
-		if (m->control_pressed) { return 0; }
+		if (m->control_pressed) { outputTypes.clear(); return 0; }
 		
 		//determine which is little and which is big, putting little first
 		if (lists.size() == 2) {
@@ -148,7 +199,7 @@ int OtuHierarchyCommand::execute(){
 		//go through each bin in "big" otu and output the bins in "little" otu which created it
 		for (int i = 0; i < lists[1].getNumBins(); i++) {
 		
-			if (m->control_pressed) { out.close(); remove(outputFileName.c_str()); return 0; }
+			if (m->control_pressed) { outputTypes.clear(); out.close(); remove(outputFileName.c_str()); return 0; }
 			
 			string names = lists[1].get(i);
 			
@@ -181,11 +232,11 @@ int OtuHierarchyCommand::execute(){
 		
 		out.close();
 		
-		if (m->control_pressed) { remove(outputFileName.c_str()); return 0; }
+		if (m->control_pressed) { outputTypes.clear(); remove(outputFileName.c_str()); return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
-		m->mothurOut(outputFileName); m->mothurOutEndLine();	
+		m->mothurOut(outputFileName); m->mothurOutEndLine();	outputNames.push_back(outputFileName); outputTypes["otuheirarchy"].push_back(outputFileName); 
 		m->mothurOutEndLine();
 		
 		return 0;

@@ -11,7 +11,54 @@
 #include "sequence.hpp"
 
 //**********************************************************************************************************************
-
+vector<string> ChopSeqsCommand::getValidParameters(){	
+	try {
+		string AlignArray[] =  {"fasta","numbases","countgaps","keep","outputdir","inputdir"};
+		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChopSeqsCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+ChopSeqsCommand::ChopSeqsCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["fasta"] = tempOutNames;
+		outputTypes["accnos"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChopSeqsCommand", "ChopSeqsCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ChopSeqsCommand::getRequiredParameters(){	
+	try {
+		string Array[] =  {"fasta","numbases"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChopSeqsCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> ChopSeqsCommand::getRequiredFiles(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChopSeqsCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 ChopSeqsCommand::ChopSeqsCommand(string option)  {
 	try {
 		abort = false;
@@ -35,6 +82,11 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["fasta"] = tempOutNames;
+			outputTypes["accnos"] = tempOutNames;
+		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
@@ -118,7 +170,7 @@ int ChopSeqsCommand::execute(){
 			
 			Sequence seq(in);
 			
-			if (m->control_pressed) { in.close(); out.close(); outAcc.close(); remove(outputFileName.c_str()); remove(outputFileNameAccnos.c_str()); return 0;  }
+			if (m->control_pressed) { outputTypes.clear(); in.close(); out.close(); outAcc.close(); remove(outputFileName.c_str()); remove(outputFileNameAccnos.c_str()); return 0;  }
 			
 			if (seq.getName() != "") {
 				string newSeqString = getChopped(seq);
@@ -138,9 +190,9 @@ int ChopSeqsCommand::execute(){
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
-		m->mothurOut(outputFileName); m->mothurOutEndLine();	
+		m->mothurOut(outputFileName); m->mothurOutEndLine();	outputNames.push_back(outputFileName); outputTypes["fasta"].push_back(outputFileName);
 		
-		if (wroteAccnos) { m->mothurOut(outputFileNameAccnos); m->mothurOutEndLine();  }
+		if (wroteAccnos) { m->mothurOut(outputFileNameAccnos); m->mothurOutEndLine(); outputNames.push_back(outputFileNameAccnos); outputTypes["accnos"].push_back(outputFileNameAccnos); }
 		else {  remove(outputFileNameAccnos.c_str());  }
 		
 		m->mothurOutEndLine();

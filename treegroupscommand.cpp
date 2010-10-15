@@ -19,7 +19,53 @@
 #include "sharedmorisitahorn.h"
 #include "sharedbraycurtis.h"
 
-
+//**********************************************************************************************************************
+vector<string> TreeGroupCommand::getValidParameters(){	
+	try {
+		string Array[] =  {"label","calc","groups", "phylip", "column", "name", "precision","cutoff","outputdir","inputdir"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TreeGroupCommand", "getValidParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+TreeGroupCommand::TreeGroupCommand(){	
+	try {
+		//initialize outputTypes
+		vector<string> tempOutNames;
+		outputTypes["tree"] = tempOutNames;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TreeGroupCommand", "TreeGroupCommand");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> TreeGroupCommand::getRequiredParameters(){	
+	try {
+		vector<string> myArray;
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TreeGroupCommand", "getRequiredParameters");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+vector<string> TreeGroupCommand::getRequiredFiles(){	
+	try {
+		string Array[] =  {"phylip","column","shared","or"};
+		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+		return myArray;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TreeGroupCommand", "getRequiredFiles");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************
 
 TreeGroupCommand::TreeGroupCommand(string option)  {
@@ -49,6 +95,10 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 			for (it = parameters.begin(); it != parameters.end(); it++) { 
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
+			
+			//initialize outputTypes
+			vector<string> tempOutNames;
+			outputTypes["tree"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -324,7 +374,7 @@ int TreeGroupCommand::execute(){
 
 			//create a new filename
 			outputFile = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + "tre";	
-			outputNames.push_back(outputFile);
+			outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile);
 				
 			createTree();
 			
@@ -595,7 +645,7 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
 		
 					//create a new filename
 					outputFile = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".tre";				
-					outputNames.push_back(outputFile);
+					outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile); 
 												
 					for (int k = 0; k < thisLookup.size(); k++) { 
 						for (int l = k; l < thisLookup.size(); l++) {

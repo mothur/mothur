@@ -19,7 +19,9 @@ void FastaMap::readFastaFile(string inFileName) {
 		string name, sequence, line;
 		sequence = "";
 		string temp;
-
+		map<string, string>::iterator itName;
+		
+		
 		while(!in.eof()){
 			if (m->control_pressed) { break; }
 			
@@ -30,7 +32,10 @@ void FastaMap::readFastaFile(string inFileName) {
 				if(currSeq.getIsAligned())	{	sequence = currSeq.getAligned();	}
 				else						{	sequence = currSeq.getUnaligned();	}
 				
-				seqmap[name] = sequence;  
+				itName = seqmap.find(name);
+				if (itName == seqmap.end()) { seqmap[name] = sequence;  }
+				else { m->mothurOut("You already have a sequence named " + name + ", sequence names must be unique, please correct."); m->mothurOutEndLine(); }
+				
 				map<string,group>::iterator it = data.find(sequence);
 				if (it == data.end()) { 	//it's unique.
 					data[sequence].groupname = name;  //group name will be the name of the first duplicate sequence found.

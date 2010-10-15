@@ -245,6 +245,16 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
 					}
 				}
 				
+				//if you can't open it, try default location
+				if (ableToOpen == 1) {
+					if (m->getOutputDir() != "") { //default path is set
+						string tryPath = m->getOutputDir() + m->getSimpleName(it->second);
+						m->mothurOut("Unable to open " + it->second + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+						ableToOpen = m->openInputFile(tryPath, in, "noerror");
+						container[parameter] = tryPath;
+					}
+				}
+				
 				in.close();
 
 			#ifdef USE_MPI	

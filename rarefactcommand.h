@@ -23,8 +23,13 @@ class GlobalData;
 class RareFactCommand : public Command {
 	
 public:
-	RareFactCommand(string);	
+	RareFactCommand(string);
+	RareFactCommand();	
 	~RareFactCommand();
+	vector<string> getRequiredParameters();
+	vector<string> getValidParameters();
+	vector<string> getRequiredFiles();
+	map<string, vector<string> > getOutputFiles() { return outputTypes; }
 	int execute();
 	void help();	
 	
@@ -43,8 +48,9 @@ private:
 	set<string> labels; //holds labels to be used
 	string label, calc;
 	vector<string>  Estimators;
-	vector<string> inputFileNames;
+	vector<string> inputFileNames, outputNames;
 	vector<string> groups;
+	map<string, vector<string> > outputTypes;
 	string outputDir;
 	
 	vector<string> parseSharedFile(string);
