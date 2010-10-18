@@ -211,7 +211,6 @@ int UnifracWeightedCommand::execute() {
 			}
 			
 			if (random) { 
-				vector<double> sums = weighted->getBranchLengthSums(T[i]); 
 			
 				//calculate number of comparisons i.e. with groups A,B,C = AB, AC, BC = 3;
 				vector< vector<string> > namesOfGroupCombos;
@@ -245,12 +244,12 @@ int UnifracWeightedCommand::execute() {
 				
 					#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 						if(processors == 1){
-							driver(T[i],  namesOfGroupCombos, 0, namesOfGroupCombos.size(), sums, rScores);
+							driver(T[i],  namesOfGroupCombos, 0, namesOfGroupCombos.size(),  rScores);
 						}else{
-							createProcesses(T[i],  namesOfGroupCombos, sums, rScores);
+							createProcesses(T[i],  namesOfGroupCombos, rScores);
 						}
 					#else
-						driver(T[i], namesOfGroupCombos, 0, namesOfGroupCombos.size(), sums, rScores);
+						driver(T[i], namesOfGroupCombos, 0, namesOfGroupCombos.size(), rScores);
 					#endif
 					
 					if (m->control_pressed) { delete output; outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
@@ -322,7 +321,7 @@ int UnifracWeightedCommand::execute() {
 }
 /**************************************************************************************************/
 
-int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos, vector<double>& sums, vector< vector<double> >& scores) {
+int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos, vector< vector<double> >& scores) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 1;
@@ -339,7 +338,7 @@ int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > na
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, sums, scores);
+				driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, scores);
 			
 				//pass numSeqs to parent
 				ofstream out;
@@ -352,7 +351,7 @@ int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > na
 			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
 		}
 		
-		driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, sums, scores);
+		driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, scores);
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<(processors-1);i++) { 
@@ -383,7 +382,7 @@ int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > na
 }
 
 /**************************************************************************************************/
-int UnifracWeightedCommand::driver(Tree* t, vector< vector<string> > namesOfGroupCombos, int start, int num, vector<double>& sums, vector< vector<double> >& scores) { 
+int UnifracWeightedCommand::driver(Tree* t, vector< vector<string> > namesOfGroupCombos, int start, int num, vector< vector<double> >& scores) { 
  try {
 		Tree* randT = new Tree();
 
@@ -404,7 +403,7 @@ int UnifracWeightedCommand::driver(Tree* t, vector< vector<string> > namesOfGrou
 			if (m->control_pressed) { delete randT;  return 0;  }
 
 			//get wscore of random tree
-			EstOutput randomData = weighted->getValues(randT, groupA, groupB, sums);
+			EstOutput randomData = weighted->getValues(randT, groupA, groupB);
 		
 			if (m->control_pressed) { delete randT;  return 0;  }
 										

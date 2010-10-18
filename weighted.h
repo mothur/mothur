@@ -22,10 +22,8 @@ class Weighted : public TreeCalculator  {
 		Weighted(TreeMap* t) : tmap(t) {};
 		~Weighted() {};
 		
-		EstOutput getValues(Tree*, string, string, vector<double>&);
+		EstOutput getValues(Tree*, string, string);
 		EstOutput getValues(Tree*, int, string);
-		
-		vector<double> getBranchLengthSums(Tree*);
 		
 	private:
 		struct linePair {
@@ -43,8 +41,9 @@ class Weighted : public TreeCalculator  {
 		int processors;
 		string outputDir;
 		
-		EstOutput driver(Tree*, vector< vector<string> >, int, int, vector<double>&); 
-		EstOutput createProcesses(Tree*, vector< vector<string> >, vector<double>&);
+		EstOutput driver(Tree*, vector< vector<string> >, int, int); 
+		EstOutput createProcesses(Tree*, vector< vector<string> >);
+		double getLengthToRoot(Tree*, int, string, string);
 };
 
 /***********************************************************************/
