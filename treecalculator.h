@@ -33,7 +33,6 @@ public:
 	virtual EstOutput getValues(Tree*, string, string, vector<double>&) { return data; }
 	
 	virtual string getName()		{	return name;	}
-	virtual vector<double> getBranchLengthSums(Tree*) {  vector<double> temp; return temp;  }
 		
 protected:
 	EstOutput data;

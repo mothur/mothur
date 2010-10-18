@@ -75,8 +75,8 @@ class UnifracWeightedCommand : public Command {
 		//void removeValidScoresDuplicates();
 		int findIndex(float, int);
 		void calculateFreqsCumuls();
-		int createProcesses(Tree*,  vector< vector<string> >, vector<double>&, vector< vector<double> >&);
-		int driver(Tree*, vector< vector<string> >, int, int, vector<double>&, vector< vector<double> >&);
+		int createProcesses(Tree*,  vector< vector<string> >,  vector< vector<double> >&);
+		int driver(Tree*, vector< vector<string> >, int, int,  vector< vector<double> >&);
 		
 };
 

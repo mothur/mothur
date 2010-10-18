@@ -22,8 +22,6 @@ EstOutput Weighted::getValues(Tree* t, int p, string o) {
 		outputDir = o;
 		
 		numGroups = globaldata->Groups.size();
-	
-		vector<double> sums = getBranchLengthSums(t);
 		
 		if (m->control_pressed) { return data; }
 		
@@ -40,7 +38,7 @@ EstOutput Weighted::getValues(Tree* t, int p, string o) {
 		
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			if(processors == 1){
-				data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size(), sums);
+				data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size());
 			}else{
 				int numPairs = namesOfGroupCombos.size();
 				
@@ -54,12 +52,12 @@ EstOutput Weighted::getValues(Tree* t, int p, string o) {
 					lines.push_back(linePair(startPos, numPairsPerProcessor));
 				}
 
-				data = createProcesses(t, namesOfGroupCombos, sums);
+				data = createProcesses(t, namesOfGroupCombos);
 				
 				lines.clear();
 			}
 		#else
-			data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size(), sums);
+			data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size());
 		#endif
 		
 		return data;
@@ -71,7 +69,7 @@ EstOutput Weighted::getValues(Tree* t, int p, string o) {
 }
 /**************************************************************************************************/
 
-EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos, vector<double>& sums) {
+EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 1;
@@ -90,7 +88,7 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 			}else if (pid == 0){
 	
 				EstOutput Myresults;
-				Myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num, sums);
+				Myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num);
 			
 				m->mothurOut("Merging results."); m->mothurOutEndLine();
 				
@@ -109,7 +107,7 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
 		}
 	
-		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, sums);
+		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num);
 	
 		//force parent to wait until all the processes are done
 		for (int i=0;i<(processors-1);i++) { 
@@ -154,7 +152,7 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 	}
 }
 /**************************************************************************************************/
-EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos, int start, int num, vector<double>& sums) { 
+EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos, int start, int num) { 
  try {
 		EstOutput results;
 		vector<double> D;
@@ -168,6 +166,7 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 			string groupA = namesOfGroupCombos[h][0]; 
 			string groupB = namesOfGroupCombos[h][1];
 			
+			set<int> validBranches;
 			WScore[groupA+groupB] = 0.0;
 			D.push_back(0.0000); //initialize a spot in D for each combination
 			
@@ -176,7 +175,8 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 				map<string, int>::iterator it = t->tree[t->groupNodeInfo[groupA][j]].pcount.find(groupA);
 				int numSeqsInGroupI = it->second;
 				
-				double weightedSum = ((numSeqsInGroupI * sums[t->groupNodeInfo[groupA][j]]) / (double)tmap->seqsPerGroup[groupA]);
+				double sum = getLengthToRoot(t, t->groupNodeInfo[groupA][j], groupA, groupB);
+				double weightedSum = ((numSeqsInGroupI * sum) / (double)tmap->seqsPerGroup[groupA]);
 			
 				D[count] += weightedSum;
 			}
@@ -186,7 +186,8 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 				map<string, int>::iterator it = t->tree[t->groupNodeInfo[groupB][j]].pcount.find(groupB);
 				int numSeqsInGroupL = it->second;
 				
-				double weightedSum = ((numSeqsInGroupL * sums[t->groupNodeInfo[groupB][j]]) / (double)tmap->seqsPerGroup[groupB]);
+				double sum = getLengthToRoot(t, t->groupNodeInfo[groupB][j], groupA, groupB);
+				double weightedSum = ((numSeqsInGroupL * sum) / (double)tmap->seqsPerGroup[groupB]);
 			
 				D[count] += weightedSum;
 			}
@@ -194,43 +195,75 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 		}
 		
 		//calculate u for the group comb 
-		int total = t->getNumNodes();
-		int twentyPercent = (total * 0.20);
 		
-		for(int i=0;i<t->getNumNodes();i++){
-			for (int h = start; h < (start+num); h++) {
+		for (int h = start; h < (start+num); h++) {	
+			//report progress
+			m->mothurOut("Processing combo: " + toString(h)); m->mothurOutEndLine();
+			
+			int numLeaves = t->getNumLeaves();
+			map<int, double> tempTotals; //maps node to total Branch Length
+			map<int, int> nodePcountSize; //maps node to pcountSize
+			
+			string groupA = namesOfGroupCombos[h][0]; 
+			string groupB = namesOfGroupCombos[h][1];
+			
+			//calculate u for the group comb 
+			for(int i=0;i<t->getNumNodes();i++){
 				
-				string groupA = namesOfGroupCombos[h][0]; 
-				string groupB = namesOfGroupCombos[h][1];
-
-				if (m->control_pressed) { return results; }
+				if (m->control_pressed) { return data; }
 				
 				double u;
+				int pcountSize = 0;
 				//does this node have descendants from groupA
 				it = t->tree[i].pcount.find(groupA);
 				//if it does u = # of its descendants with a certain group / total number in tree with a certain group
 				if (it != t->tree[i].pcount.end()) {
 					u = (double) t->tree[i].pcount[groupA] / (double) tmap->seqsPerGroup[groupA];
+					pcountSize++;
 				}else { u = 0.00; }
-			
-							
+				
+				
 				//does this node have descendants from group l
 				it = t->tree[i].pcount.find(groupB);
 				//if it does subtract their percentage from u
 				if (it != t->tree[i].pcount.end()) {
 					u -= (double) t->tree[i].pcount[groupB] / (double) tmap->seqsPerGroup[groupB];
+					pcountSize++;
 				}
-							
+				
 				u = abs(u * t->tree[i].getBranchLength());
-						
-				//save groupcombs u value
-				WScore[(groupA+groupB)] += u;
+				
+				nodePcountSize[i] = pcountSize;
+				
+				//if you are a leaf from a users group add to total
+				if (i < numLeaves) {
+					if ((t->tree[i].getBranchLength() != -1) && pcountSize != 0) { 
+						//cout << "added to total" << endl; 
+						WScore[(groupA+groupB)] += u; 
+					}
+					tempTotals[i] = 0.0;  //we don't care about you, or we have already added you
+				}else{ //if you are not a leaf 
+					//do both your chidren have have descendants from the users groups? 
+					int lc = t->tree[i].getLChild();
+					int rc = t->tree[i].getRChild();
+					
+					//if yes, add your childrens tempTotals
+					if ((nodePcountSize[lc] != 0) && (nodePcountSize[rc] != 0)) {
+						WScore[(groupA+groupB)] += tempTotals[lc] + tempTotals[rc]; 
+						//cout << "added to total " << tempTotals[lc] << '\t' << tempTotals[rc] << endl;
+						if (t->tree[i].getBranchLength() != -1) {
+							tempTotals[i] = u;
+						}else {
+							tempTotals[i] = 0.0;
+						}
+					}else if ((nodePcountSize[lc] == 0) && (nodePcountSize[rc] == 0)) { tempTotals[i] = 0.0;  //we don't care about you
+					}else { //if no, your tempTotal is your childrens temp totals + your branch length
+						tempTotals[i] = tempTotals[lc] + tempTotals[rc] + u; 
+					}
+					//cout << "temptotal = "<< tempTotals[i] << endl;
+				}
 			}
-			//report progress
-			if((i) % twentyPercent == 0){	m->mothurOut("Percentage complete: " + toString(int((i / (float)total) * 100.0))); m->mothurOutEndLine();		}
 		}
-		
-		m->mothurOut("Percentage complete: 100"); m->mothurOutEndLine();
 		
 		/********************************************************/
 		//calculate weighted score for the group combination
@@ -252,7 +285,7 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 	}
 }
 /**************************************************************************************************/
-EstOutput Weighted::getValues(Tree* t, string groupA, string groupB, vector<double>& sums) { 
+EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) { 
  try {
 		globaldata = GlobalData::getInstance();
 		
@@ -263,6 +296,7 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB, vector<doub
 		//initialize weighted score
 		WScore[(groupA+groupB)] = 0.0;
 		double D = 0.0;
+		set<int> validBranches;
 		
 		vector<string> groups; groups.push_back(groupA); groups.push_back(groupB);
 		
@@ -271,7 +305,8 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB, vector<doub
 			map<string, int>::iterator it = t->tree[t->groupNodeInfo[groups[0]][j]].pcount.find(groups[0]);
 			int numSeqsInGroupI = it->second;
 			
-			double weightedSum = ((numSeqsInGroupI * sums[t->groupNodeInfo[groups[0]][j]]) / (double)tmap->seqsPerGroup[groups[0]]);
+			double sum = getLengthToRoot(t, t->groupNodeInfo[groups[0]][j], groups[0], groups[1]);
+			double weightedSum = ((numSeqsInGroupI * sum) / (double)tmap->seqsPerGroup[groups[0]]);
 		
 			D += weightedSum;
 		}
@@ -281,10 +316,15 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB, vector<doub
 			map<string, int>::iterator it = t->tree[t->groupNodeInfo[groups[1]][j]].pcount.find(groups[1]);
 			int numSeqsInGroupL = it->second;
 			
-			double weightedSum = ((numSeqsInGroupL * sums[t->groupNodeInfo[groups[1]][j]]) / (double)tmap->seqsPerGroup[groups[1]]);
+			double sum = getLengthToRoot(t, t->groupNodeInfo[groups[1]][j], groups[0], groups[1]);
+			double weightedSum = ((numSeqsInGroupL * sum) / (double)tmap->seqsPerGroup[groups[1]]);
 		
 			D += weightedSum;
 		}
+		
+		int numLeaves = t->getNumLeaves();
+		map<int, double> tempTotals; //maps node to total Branch Length
+		map<int, int> nodePcountSize; //maps node to pcountSize
 		
 		//calculate u for the group comb 
 		for(int i=0;i<t->getNumNodes();i++){
@@ -292,11 +332,13 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB, vector<doub
 			if (m->control_pressed) { return data; }
 			
 			double u;
+			int pcountSize = 0;
 			//does this node have descendants from groupA
 			it = t->tree[i].pcount.find(groupA);
 			//if it does u = # of its descendants with a certain group / total number in tree with a certain group
 			if (it != t->tree[i].pcount.end()) {
 				u = (double) t->tree[i].pcount[groupA] / (double) tmap->seqsPerGroup[groupA];
+				pcountSize++;
 			}else { u = 0.00; }
 		
 						
@@ -305,12 +347,40 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB, vector<doub
 			//if it does subtract their percentage from u
 			if (it != t->tree[i].pcount.end()) {
 				u -= (double) t->tree[i].pcount[groupB] / (double) tmap->seqsPerGroup[groupB];
+				pcountSize++;
 			}
 						
 			u = abs(u * t->tree[i].getBranchLength());
-					
-			//save groupcombs u value
-			WScore[(groupA+groupB)] += u;
+			
+			nodePcountSize[i] = pcountSize;
+				
+			//if you are a leaf from a users group add to total
+			if (i < numLeaves) {
+				if ((t->tree[i].getBranchLength() != -1) && pcountSize != 0) { 
+				//cout << "added to total" << endl; 
+					WScore[(groupA+groupB)] += u; 
+				}
+				tempTotals[i] = 0.0;  //we don't care about you, or we have already added you
+			}else{ //if you are not a leaf 
+				//do both your chidren have have descendants from the users groups? 
+				int lc = t->tree[i].getLChild();
+				int rc = t->tree[i].getRChild();
+				
+				//if yes, add your childrens tempTotals
+				if ((nodePcountSize[lc] != 0) && (nodePcountSize[rc] != 0)) {
+					WScore[(groupA+groupB)] += tempTotals[lc] + tempTotals[rc]; 
+					//cout << "added to total " << tempTotals[lc] << '\t' << tempTotals[rc] << endl;
+					if (t->tree[i].getBranchLength() != -1) {
+						tempTotals[i] = u;
+					}else {
+						tempTotals[i] = 0.0;
+					}
+				}else if ((nodePcountSize[lc] == 0) && (nodePcountSize[rc] == 0)) { tempTotals[i] = 0.0;  //we don't care about you
+				}else { //if no, your tempTotal is your childrens temp totals + your branch length
+					tempTotals[i] = tempTotals[lc] + tempTotals[rc] + u; 
+				}
+				//cout << "temptotal = "<< tempTotals[i] << endl;
+			}
 		}
 		
 		/********************************************************/
@@ -330,37 +400,77 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB, vector<doub
 	}
 }
 /**************************************************************************************************/
-vector<double> Weighted::getBranchLengthSums(Tree* t) { 
+double Weighted::getLengthToRoot(Tree* t, int v, string groupA, string groupB) { 
 	try {
 		
-		vector<double> sums;
-		
-		for(int v=0;v<t->getNumLeaves();v++){
-			
-			if (m->control_pressed) { return sums; }
-				
-			int index = v;
-			double sum = 0.0000;
+		double sum = 0.0;
+		map<int, double> tempTotals; //maps node to total Branch Length
+		map<int, int> nodePcountSize; //maps node to pcountSize
+		map<int, int>::iterator itCount;
+
+		int index = v;
 	
-			//while you aren't at root
-			while(t->tree[index].getParent() != -1){
-						
-				//if you have a BL
-				if(t->tree[index].getBranchLength() != -1){
-					sum += abs(t->tree[index].getBranchLength());
-				}
-				index = t->tree[index].getParent();
-			}
-					
-			//get last breanch length added
-			if(t->tree[index].getBranchLength() != -1){
-				sum += abs(t->tree[index].getBranchLength());
+		//you are a leaf
+		if(t->tree[index].getBranchLength() != -1){	sum += abs(t->tree[index].getBranchLength());	}
+		tempTotals[index] = 0.0;
+		index = t->tree[index].getParent();	
+			
+		//while you aren't at root
+		while(t->tree[index].getParent() != -1){
+
+			if (m->control_pressed) {  return sum; }
+				
+			int pcountSize = 0;
+			map<string, int>::iterator itGroup = t->tree[index].pcount.find(groupA);
+			if (itGroup != t->tree[index].pcount.end()) { pcountSize++;  } 
+			itGroup = t->tree[index].pcount.find(groupB);
+			if (itGroup != t->tree[index].pcount.end()) { pcountSize++;  } 
+		
+			nodePcountSize[index] = pcountSize;
+			
+			//do both your chidren have have descendants from the users groups? 
+			int lc = t->tree[index].getLChild();
+			int rc = t->tree[index].getRChild();
+			
+			itCount = nodePcountSize.find(lc); 
+			if (itCount == nodePcountSize.end()) { 
+				int LpcountSize = 0;
+				itGroup = t->tree[lc].pcount.find(groupA);
+				if (itGroup != t->tree[lc].pcount.end()) { LpcountSize++;  } 
+				itGroup = t->tree[lc].pcount.find(groupB);
+				if (itGroup != t->tree[lc].pcount.end()) { LpcountSize++;  } 
+				nodePcountSize[lc] = LpcountSize;
 			}
 			
-			sums.push_back(sum);
+			itCount = nodePcountSize.find(rc); 
+			if (itCount == nodePcountSize.end()) { 
+				int RpcountSize = 0;
+				itGroup = t->tree[rc].pcount.find(groupA);
+				if (itGroup != t->tree[rc].pcount.end()) { RpcountSize++;  } 
+				itGroup = t->tree[rc].pcount.find(groupB);
+				if (itGroup != t->tree[rc].pcount.end()) { RpcountSize++;  } 
+				nodePcountSize[rc] = RpcountSize;
+			}
+				
+			//if yes, add your childrens tempTotals
+			if ((nodePcountSize[lc] != 0) && (nodePcountSize[rc] != 0)) {
+				sum += tempTotals[lc] + tempTotals[rc]; 
+
+				//cout << "added to total " << tempTotals[lc] << '\t' << tempTotals[rc] << endl;
+				if (t->tree[index].getBranchLength() != -1) {
+					tempTotals[index] = abs(t->tree[index].getBranchLength());
+				}else {
+					tempTotals[index] = 0.0;
+				}
+			}else { //if no, your tempTotal is your childrens temp totals + your branch length
+				tempTotals[index] = tempTotals[lc] + tempTotals[rc] + abs(t->tree[index].getBranchLength()); 
+			}
+			//cout << "temptotal = "<< tempTotals[i] << endl;
+			
+			index = t->tree[index].getParent();	
 		}
-		
-		return sums;
+
+		return sum;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Weighted", "getBranchLengthSums");
