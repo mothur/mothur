@@ -177,7 +177,7 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 		
 		
 		for (int h = start; h < (start+num); h++) {
-		
+	//cout << namesOfGroupCombos[h][0] << '\t' << namesOfGroupCombos[h][1] << endl;		
 			if (m->control_pressed) { return results; }
 		
 			double UniqueBL=0.0000;  //a branch length is unique if it's chidren are from the same group
@@ -203,12 +203,14 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 
 				nodePcountSize[i] = pcountSize;
 				
-				if (pcountSize == 0) { ; }
+				//cout << i << '\t' << t->tree[i].getName() << " br = " << abs(t->tree[i].getBranchLength()) << '\t';		
+				if (pcountSize == 0) { }
 				else if ((t->tree[i].getBranchLength() != -1) && (pcountSize == 1)) {  UniqueBL += abs(t->tree[i].getBranchLength()); }
-								
+				
 				//if you are a leaf from a users group add to total
 				if (i < numLeaves) {
-					if ((t->tree[i].getBranchLength() != -1) && pcountSize != 0) {  
+					if ((t->tree[i].getBranchLength() != -1) && pcountSize != 0) { 
+					//cout << "added to total" << endl; 
 						totalBL += abs(t->tree[i].getBranchLength()); 
 					}
 					tempTotals[i] = 0.0;  //we don't care about you, or we have already added you
@@ -220,17 +222,21 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 					//if yes, add your childrens tempTotals
 					if ((nodePcountSize[lc] != 0) && (nodePcountSize[rc] != 0)) {
 						totalBL += tempTotals[lc] + tempTotals[rc]; 
+						//cout << "added to total " << tempTotals[lc] << '\t' << tempTotals[rc] << endl;
 						if (t->tree[i].getBranchLength() != -1) {
 							tempTotals[i] = abs(t->tree[i].getBranchLength());
 						}else {
 							tempTotals[i] = 0.0;
 						}
+					}else if ((nodePcountSize[lc] == 0) && (nodePcountSize[rc] == 0)) { tempTotals[i] = 0.0;  //we don't care about you
 					}else { //if no, your tempTotal is your childrens temp totals + your branch length
 						tempTotals[i] = tempTotals[lc] + tempTotals[rc] + abs(t->tree[i].getBranchLength()); 
 					}
+					//cout << "temptotal = "<< tempTotals[i] << endl;
 				}
+
 			}
-	cout << UniqueBL << '\t' << totalBL << endl;		
+	//cout << UniqueBL << '\t' << totalBL << endl;		
 			UW = (UniqueBL / totalBL);  
 	
 			if (isnan(UW) || isinf(UW)) { UW = 0; }
@@ -446,13 +452,13 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 				}
 				
 				nodePcountSize[i] = pcountSize;
-				
+			
 				if (pcountSize == 0) { }
-				else if ((copyTree->tree[i].getBranchLength() != -1) && (pcountSize == 1)) {  UniqueBL += abs(copyTree->tree[i].getBranchLength());	}
+				else if ((copyTree->tree[i].getBranchLength() != -1) && (pcountSize == 1)) {  UniqueBL += abs(copyTree->tree[i].getBranchLength());	 }
 				
 				//if you are a leaf from a users group add to total
 				if (i < numLeaves) {
-					if ((copyTree->tree[i].getBranchLength() != -1) && pcountSize != 0) {  
+					if ((copyTree->tree[i].getBranchLength() != -1) && pcountSize != 0) { 
 						totalBL += abs(copyTree->tree[i].getBranchLength()); 
 					}
 					tempTotals[i] = 0.0;  //we don't care about you, or we have already added you
@@ -464,14 +470,17 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 					//if yes, add your childrens tempTotals
 					if ((nodePcountSize[lc] != 0) && (nodePcountSize[rc] != 0)) {
 						totalBL += tempTotals[lc] + tempTotals[rc]; 
+						
 						if (copyTree->tree[i].getBranchLength() != -1) {
 							tempTotals[i] = abs(copyTree->tree[i].getBranchLength());
 						}else {
 							tempTotals[i] = 0.0;
 						}
+					}else if ((nodePcountSize[lc] == 0) && (nodePcountSize[rc] == 0)) { tempTotals[i] = 0.0;  //we don't care about you
 					}else { //if no, your tempTotal is your childrens temp totals + your branch length
 						tempTotals[i] = tempTotals[lc] + tempTotals[rc] + abs(copyTree->tree[i].getBranchLength()); 
 					}
+					
 				}
 
 			}
