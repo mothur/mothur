@@ -47,6 +47,10 @@
 #ifndef _INC_NJ_FASTA_H_
 #define _INC_NJ_FASTA_H_ 1
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "clearcut.h"
 
 #define NJ_INITIAL_BUFFER_SIZE   512
@@ -81,6 +85,10 @@ NJ_free_alignment(NJ_alignment *alignment);
 
 int
 NJ_taxaname_unique(NJ_alignment *alignment);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _INC_NJ_FASTA_H_ */
 

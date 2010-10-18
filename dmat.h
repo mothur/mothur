@@ -50,6 +50,10 @@
 #ifndef _INC_DMAT_H_
 #define _INC_DMAT_H_ 1
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "clearcut.h"
 
 
@@ -86,6 +90,9 @@ void
 NJ_output_matrix(NJ_ARGS *nj_args,
 		 DMAT *dmat);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _INC_DMAT_H_ */
 
