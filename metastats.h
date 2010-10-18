@@ -33,7 +33,7 @@ void meanvar(double *pmatrix,int *g,int *nr,int *nc,double *storage);
 void start(double *Imatrix,int *g,int *nr,int *nc,double *testing,
 			double storage[][9]);
 
-int metastat_main (char* outputFileName, int numRows, int numCols, double threshold, int numPermutations, double** data, int);
+int metastat_main (char*, int, int, double, int, double**, int);
 
 #ifdef __cplusplus	   
 }
