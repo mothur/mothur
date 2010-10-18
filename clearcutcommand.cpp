@@ -8,8 +8,13 @@
  */
 
 #include "clearcutcommand.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include "clearcut.h"
-
+#ifdef __cplusplus
+}
+#endif
 //**********************************************************************************************************************
 vector<string> ClearcutCommand::getValidParameters(){	
 	try {

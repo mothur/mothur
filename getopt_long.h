@@ -28,6 +28,10 @@
 
 #ifndef _GETOPT_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct option {
     const char *name;
     int has_arg;
@@ -48,5 +52,9 @@ int getopt_long(int argc, char **argv,
                 const char *shortopts,
                 struct option *longopts,
                 int *indexptr);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _GETOPT_H */

@@ -51,6 +51,11 @@
 #ifndef _INC_DIST_H_
 #define _INC_DIST_H_ 1
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "fasta.h"
 #include "clearcut.h"
 
@@ -112,6 +117,9 @@ NJ_DNA_count_tt(NJ_alignment *alignment,
 		long int *transversions,
 		long int *residues);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _INC_DIST_H_ */
 

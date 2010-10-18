@@ -51,6 +51,10 @@
 #ifndef _INC_PRNG_H_
 #define _INC_PRNG_H_ 1
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define NJ_RAND_MAX 0x7fffffffUL
 
 
@@ -82,6 +86,10 @@ genrand_res53(void);
 
 long int
 NJ_genrand_int31_top(long int top);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _INC_PRNG_H_ */
 
