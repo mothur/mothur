@@ -217,7 +217,7 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 					int lc = t->tree[i].getLChild();
 					int rc = t->tree[i].getRChild();
 					
-					//if yes, add to total your childrens branchLengths and your childrens tempTotals
+					//if yes, add your childrens tempTotals
 					if ((nodePcountSize[lc] != 0) && (nodePcountSize[rc] != 0)) {
 						totalBL += tempTotals[lc] + tempTotals[rc]; 
 						if (t->tree[i].getBranchLength() != -1) {
@@ -225,13 +225,12 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 						}else {
 							tempTotals[i] = 0.0;
 						}
-						//tempTotals[i] = tempTotals[lc] + tempTotals[rc]; 
-					}else { //if no, your tempTotal is your childrens temp totals
+					}else { //if no, your tempTotal is your childrens temp totals + your branch length
 						tempTotals[i] = tempTotals[lc] + tempTotals[rc] + abs(t->tree[i].getBranchLength()); 
 					}
 				}
 			}
-			
+	cout << UniqueBL << '\t' << totalBL << endl;		
 			UW = (UniqueBL / totalBL);  
 	
 			if (isnan(UW) || isinf(UW)) { UW = 0; }
@@ -462,7 +461,7 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 					int lc = copyTree->tree[i].getLChild();
 					int rc = copyTree->tree[i].getRChild();
 					
-					//if yes, add to total your childrens branchLengths and your childrens tempTotals
+					//if yes, add your childrens tempTotals
 					if ((nodePcountSize[lc] != 0) && (nodePcountSize[rc] != 0)) {
 						totalBL += tempTotals[lc] + tempTotals[rc]; 
 						if (copyTree->tree[i].getBranchLength() != -1) {
@@ -470,8 +469,7 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 						}else {
 							tempTotals[i] = 0.0;
 						}
-						//tempTotals[i] = tempTotals[lc] + tempTotals[rc]; 
-					}else { //if no, your tempTotal is your childrens temp totals
+					}else { //if no, your tempTotal is your childrens temp totals + your branch length
 						tempTotals[i] = tempTotals[lc] + tempTotals[rc] + abs(copyTree->tree[i].getBranchLength()); 
 					}
 				}

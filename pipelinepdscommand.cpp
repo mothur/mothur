@@ -590,42 +590,41 @@ void PipelineCommand::createPatsPipeline(){
 		
 		//sff.info command
 		string thisCommand = "sffinfo(sff=" + sffFile + ")";
-		commands.push_back(thisCommand);
+		//commands.push_back(thisCommand);
 		
 		//trim.seqs command
 		string fastaFile = m->getRootName(m->getSimpleName(sffFile)) + "fasta";
 		string qualFile = m->getRootName(m->getSimpleName(sffFile)) + "qual";
-		thisCommand = "trim.seqs(processors=" + toString(processors) + ", fasta=" + fastaFile + ", allfiles=F, maxambig=0, maxhomop=8, flip=T, bdiffs=1, pdiffs=2, qwindowaverage=35, qwindowsize=50, oligos=" + oligosFile + ", qfile=" + qualFile + ")";
-		commands.push_back(thisCommand);
+		//thisCommand = "trim.seqs(processors=" + toString(processors) + ", fasta=" + fastaFile + ", allfiles=F, maxambig=0, maxhomop=8, flip=T, bdiffs=1, pdiffs=2, qwindowaverage=35, qwindowsize=50, oligos=" + oligosFile + ", qfile=" + qualFile + ")";
+		//commands.push_back(thisCommand);
 		
 		//unique.seqs
 		string groupFile = m->getRootName(m->getSimpleName(fastaFile)) + "groups";
 		qualFile =  m->getRootName(m->getSimpleName(fastaFile)) + "trim.qual";
 		fastaFile =  m->getRootName(m->getSimpleName(fastaFile)) + "trim.fasta";
-		thisCommand = "unique.seqs(fasta=" + fastaFile + ")"; 
-		commands.push_back(thisCommand);
+		//thisCommand = "unique.seqs(fasta=" + fastaFile + ")"; 
+		//commands.push_back(thisCommand);
 		
 		//align.seqs
 		string nameFile = m->getRootName(m->getSimpleName(fastaFile)) + "names";
 		fastaFile = m->getRootName(m->getSimpleName(fastaFile)) + "unique" + m->getExtension(fastaFile);
-		thisCommand = "align.seqs(processors=" + toString(processors) + ", candidate=" + fastaFile + ", template=" + alignFile + ")";
-		commands.push_back(thisCommand);
+		//thisCommand = "align.seqs(processors=" + toString(processors) + ", candidate=" + fastaFile + ", template=" + alignFile + ")";
+		//commands.push_back(thisCommand);
 		
 		//screen.seqs
 		fastaFile = m->getRootName(m->getSimpleName(fastaFile)) + "align";
-		thisCommand = "screen.seqs(processors=" + toString(processors) + ", fasta=" + fastaFile + ", name=" + nameFile + "group=" + groupFile + ", optimize=end-minlength)";
-		commands.push_back(thisCommand);
+		//thisCommand = "screen.seqs(processors=" + toString(processors) + ", fasta=" + fastaFile + ", name=" + nameFile + ", group=" + groupFile + ", optimize=end-minlength)";
+	//	commands.push_back(thisCommand);
 		
 		//chimera.slayer
 		fastaFile = m->getRootName(m->getSimpleName(fastaFile)) + "good" + m->getExtension(fastaFile);
 		nameFile = m->getRootName(m->getSimpleName(nameFile)) + "good" + m->getExtension(nameFile);
 		groupFile = m->getRootName(m->getSimpleName(groupFile)) + "good" + m->getExtension(groupFile);
-		thisCommand = "chimera.slayer(processors=" + toString(processors) + ", fasta=" + fastaFile + ", template=" + chimeraFile + ")";
-		commands.push_back(thisCommand);
+		//thisCommand = "chimera.slayer(processors=" + toString(processors) + ", fasta=" + fastaFile + ", template=" + chimeraFile + ")";
+	//	commands.push_back(thisCommand);
 		
 		//remove.seqs
 		string accnosFile = m->getRootName(m->getSimpleName(fastaFile))  + "slayer.accnos";
-		fastaFile = m->getRootName(m->getSimpleName(fastaFile)) + "slayer.chimeras";
 		thisCommand = "remove.seqs(fasta=" + fastaFile + ", name=" + nameFile + ", group=" + groupFile + ", accnos=" + accnosFile + ", dups=T)";
 		commands.push_back(thisCommand);
 		
