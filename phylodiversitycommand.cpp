@@ -388,7 +388,7 @@ int PhyloDiversityCommand::driver(Tree* t, map< string, vector<float> >& div, ma
 					if (m->control_pressed) { return 0; }
 					
 					//calc branch length of randomLeaf k
-					float br = calcBranchLength(t, randomLeaf[k], countedBranch);
+					vector<float> br = calcBranchLength(t, randomLeaf[k], countedBranch);
 			
 					//for each group in the groups update the total branch length accounting for the names file
 					vector<string> groups = t->tree[randomLeaf[k]].getGroup();
@@ -401,7 +401,7 @@ int PhyloDiversityCommand::driver(Tree* t, map< string, vector<float> >& div, ma
 							numSeqsInGroupJ = it->second;
 						}
 						
-						if (numSeqsInGroupJ != 0) {	div[groups[j]][(counts[groups[j]]+1)] = div[groups[j]][counts[groups[j]]] + br;  }
+						if (numSeqsInGroupJ != 0) {	div[groups[j]][(counts[groups[j]]+1)] = div[groups[j]][counts[groups[j]]] + br[j];  }
 						
 						for (int s = (counts[groups[j]]+2); s <= (counts[groups[j]]+numSeqsInGroupJ); s++) {
 							div[groups[j]][s] = div[groups[j]][s-1];  //update counts, but don't add in redundant branch lengths
@@ -498,37 +498,92 @@ void PhyloDiversityCommand::printData(set<int>& num, map< string, vector<float> 
 	}
 }
 //**********************************************************************************************************************
-float PhyloDiversityCommand::calcBranchLength(Tree* t, int leaf, map< string, set<int> >& counted){
+//need a vector of floats one branch length for every group the node represents.
+vector<float> PhyloDiversityCommand::calcBranchLength(Tree* t, int leaf, map< string, set<int> >& counted){
 	try {
 
 		//calc the branch length
 		//while you aren't at root
-		float sum = 0.0;
+		vector<float> sums; 
 		int index = leaf;
 		
 		vector<string> groups = t->tree[leaf].getGroup();
-					
-		while(t->tree[index].getParent() != -1){
-			
-			//if you have a BL
-			if(t->tree[index].getBranchLength() != -1){
-				if (counted[groups[0]].count(index) == 0) { //you have not already counted this branch
-					sum += abs(t->tree[index].getBranchLength());
-					for (int j = 0; j < groups.size(); j++) {  counted[groups[j]].insert(index);  }
-				}
-			}
-			index = t->tree[index].getParent();
-		}
-			
-		//get last breanch length added
-		if(t->tree[index].getBranchLength() != -1){
-			if (counted[groups[0]].count(index) == 0) { //you have not already counted this branch
-				sum += abs(t->tree[index].getBranchLength());
-				for (int j = 0; j < groups.size(); j++) {  counted[groups[j]].insert(index);  }
+		sums.resize(groups.size(), 0.0);
+		
+		map<string, map<int, double> > tempTotals; //maps node to total Branch Length
+		map< string, set<int> > tempCounted;
+		set<int>::iterator it;
+	
+		//you are a leaf
+		if(t->tree[index].getBranchLength() != -1){	
+			for (int k = 0; k < groups.size(); k++) { 
+				sums[k] += abs(t->tree[index].getBranchLength());	
+				counted[groups[k]].insert(index);
 			}
 		}
 		
-		return sum;
+		for (int k = 0; k < groups.size(); k++) { 
+			tempTotals[groups[k]][index] = 0.0;	
+		}
+		
+		index = t->tree[index].getParent();	
+			
+		//while you aren't at root
+		while(t->tree[index].getParent() != -1){
+
+			if (m->control_pressed) {  return sums; }
+			
+			int pcountSize = 0;	
+			for (int k = 0; k < groups.size(); k++) {
+				map<string, int>::iterator itGroup = t->tree[index].pcount.find(groups[k]);
+				if (itGroup != t->tree[index].pcount.end()) { pcountSize++;  } 
+			
+				//do both your chidren have have descendants from the users groups? 
+				int lc = t->tree[index].getLChild();
+				int rc = t->tree[index].getRChild();
+			
+				int LpcountSize = 0;
+				itGroup = t->tree[lc].pcount.find(groups[k]);
+				if (itGroup != t->tree[lc].pcount.end()) { LpcountSize++;  } 
+							
+				int RpcountSize = 0;
+				itGroup = t->tree[rc].pcount.find(groups[k]);
+				if (itGroup != t->tree[rc].pcount.end()) { RpcountSize++;  } 
+								
+				//if yes, add your childrens tempTotals
+				if ((LpcountSize != 0) && (RpcountSize != 0)) {
+					sums[k] += tempTotals[groups[k]][lc] + tempTotals[groups[k]][rc]; 
+					
+					for (it = tempCounted[groups[k]].begin(); it != tempCounted[groups[k]].end(); it++) { counted[groups[k]].insert(*it); }
+
+					//cout << "added to total " << tempTotals[lc] << '\t' << tempTotals[rc] << endl;
+					if (t->tree[index].getBranchLength() != -1) {
+						if (counted[groups[k]].count(index) == 0) {
+							tempTotals[groups[k]][index] = abs(t->tree[index].getBranchLength());
+							tempCounted[groups[k]].insert(index);
+						}else{
+							tempTotals[groups[k]][index] = 0.0;
+						}
+					}else {
+						tempTotals[groups[k]][index] = 0.0;
+					}
+				}else { //if no, your tempTotal is your childrens temp totals + your branch length
+					tempTotals[groups[k]][index] = tempTotals[groups[k]][lc] + tempTotals[groups[k]][rc]; 
+									
+					if (counted[groups[k]].count(index) == 0) {
+						tempTotals[groups[k]][index] += abs(t->tree[index].getBranchLength());
+						tempCounted[groups[k]].insert(index);
+					}
+
+				}
+				//cout << "temptotal = "<< tempTotals[i] << endl;
+			}
+			
+			index = t->tree[index].getParent();	
+		}
+
+		return sums;
+
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloDiversityCommand", "calcBranchLength");
