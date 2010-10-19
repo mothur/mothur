@@ -481,22 +481,40 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 		}
 		
 		ofstream outGroups;
-		vector<ofstream*> fastaFileNames;
-		vector<ofstream*> qualFileNames;
+		//vector<ofstream*> fastaFileNames;
+		//vector<ofstream*> qualFileNames;
 		
 		if (oligoFile != "") {		
 			m->openOutputFile(groupFile, outGroups);   
 			for (int i = 0; i < fastaNames.size(); i++) {
 
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-				fastaFileNames.push_back(new ofstream((fastaNames[i] + toString(getpid()) + ".temp").c_str(), ios::ate)); 
+				fastaNames[i] = (fastaNames[i] + toString(getpid()) + ".temp");
+				//fastaFileNames.push_back(new ofstream((fastaNames[i] + toString(getpid()) + ".temp").c_str(), ios::ate)); 
+				//clear old file if it exists
+				ofstream temp;
+				m->openOutputFile(fastaNames[i], temp);
+				temp.close();
 				if(qFileName != ""){
-					qualFileNames.push_back(new ofstream((qualNames[i] + toString(getpid()) + ".temp").c_str(), ios::ate)); 
+					qualNames[i] = (qualNames[i] + toString(getpid()) + ".temp");
+					//qualFileNames.push_back(new ofstream((qualNames[i] + toString(getpid()) + ".temp").c_str(), ios::ate)); 
+					//clear old file if it exists
+					ofstream temp2;
+					m->openOutputFile(qualNames[i], temp2);
+					temp2.close();
 				}
 			#else
-				fastaFileNames.push_back(new ofstream((fastaNames[i] + toString(i) + ".temp").c_str(), ios::ate)); 			
+				//fastaFileNames.push_back(new ofstream((fastaNames[i] + toString(i) + ".temp").c_str(), ios::ate)); 
+				fastaNames[i] = (fastaNames[i] + toString(i) + ".temp");
+				ofstream temp;
+				m->openOutputFile(fastaNames[i], temp);
+				temp.close();			
 				if(qFileName != ""){
-					qualFileNames.push_back(new ofstream((qualNames[i] + toString(i) + ".temp").c_str(), ios::ate)); 			
+					//qualFileNames.push_back(new ofstream((qualNames[i] + toString(i) + ".temp").c_str(), ios::ate)); 	
+					qualNames[i] = (qualNames[i] + toString(i) + ".temp");
+					ofstream temp2;
+					m->openOutputFile(qualNames[i], temp2);
+					temp2.close();		
 				}
 			#endif
 			}
@@ -518,11 +536,11 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 				inFASTA.close(); outFASTA.close(); scrapFASTA.close();
 				if (oligoFile != "") {	 outGroups.close();   }
 				
-				for(int i=0;i<fastaFileNames.size();i++){  fastaFileNames[i]->close(); delete fastaFileNames[i];  }	
+				//for(int i=0;i<fastaFileNames.size();i++){  fastaFileNames[i]->close(); delete fastaFileNames[i];  }	
 
 				if(qFileName != ""){
 					qFile.close();
-					for(int i=0;i<qualFileNames.size();i++){  qualFileNames[i]->close(); delete qualFileNames[i];  }	
+					//for(int i=0;i<qualFileNames.size();i++){  qualFileNames[i]->close(); delete qualFileNames[i];  }	
 				}
 				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
 
@@ -609,10 +627,18 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 						}
 						outGroups << currSeq.getName() << '\t' << thisGroup << endl;
 						if(allFiles){
-							currSeq.printSequence(*fastaFileNames[indexToFastaFile]);
+							ofstream outTemp;
+							m->openOutputFileAppend(fastaNames[indexToFastaFile], outTemp);
+							//currSeq.printSequence(*fastaFileNames[indexToFastaFile]);
+							currSeq.printSequence(outTemp);
+							outTemp.close();
 							
 							if(qFileName != ""){
-								currQual.printQScores(*qualFileNames[indexToFastaFile]);							
+								//currQual.printQScores(*qualFileNames[indexToFastaFile]);
+								ofstream outTemp2;
+								m->openOutputFileAppend(qualNames[indexToFastaFile], outTemp2);
+								currQual.printQScores(outTemp2);
+								outTemp2.close();							
 							}
 						}
 					}
@@ -648,17 +674,17 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 		if (oligoFile != "") {	 outGroups.close();   }
 		if(qFileName != "")	{	qFile.close();	scrapQual.close(); outQual.close();	}
 		
-		for(int i=0;i<fastaFileNames.size();i++){
-			fastaFileNames[i]->close();
-			delete fastaFileNames[i];
-		}		
+		//for(int i=0;i<fastaFileNames.size();i++){
+		//	fastaFileNames[i]->close();
+		//	delete fastaFileNames[i];
+		//}		
 		
-		if(qFileName != ""){
-			for(int i=0;i<qualFileNames.size();i++){
-				qualFileNames[i]->close();
-				delete qualFileNames[i];
-			}		
-		}			
+		//if(qFileName != ""){
+			//for(int i=0;i<qualFileNames.size();i++){
+				//qualFileNames[i]->close();
+				//delete qualFileNames[i];
+			//}		
+		//}			
 		
 		return count;
 	}
