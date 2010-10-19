@@ -56,6 +56,8 @@
 		A74A9C03124B72DB000D5D25 /* clusterfragmentscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clusterfragmentscommand.h; sourceTree = "<group>"; };
 		A74A9C04124B72DB000D5D25 /* clusterfragmentscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clusterfragmentscommand.cpp; sourceTree = "<group>"; };
 		A7639F8D1175DF35008F5578 /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
+		A76714DD126DE45A003F359A /* deuniqueseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = deuniqueseqscommand.h; sourceTree = "<group>"; };
+		A76714DE126DE45A003F359A /* deuniqueseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = deuniqueseqscommand.cpp; sourceTree = "<group>"; };
 		A768D95D1248FEAA008AB1D0 /* mothur */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = mothur; sourceTree = "<group>"; };
 		A76AAD02117F322B003D8DA1 /* phylosummary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = phylosummary.h; sourceTree = "<group>"; };
 		A76AAD03117F322B003D8DA1 /* phylosummary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = phylosummary.cpp; sourceTree = "<group>"; };
@@ -774,6 +776,8 @@
 				A7DA203A113FECD400BF472F /* deconvolutecommand.cpp */,
 				A7DA203F113FECD400BF472F /* distancecommand.h */,
 				A7DA203E113FECD400BF472F /* distancecommand.cpp */,
+				A76714DD126DE45A003F359A /* deuniqueseqscommand.h */,
+				A76714DE126DE45A003F359A /* deuniqueseqscommand.cpp */,
 				A7DA2050113FECD400BF472F /* filterseqscommand.h */,
 				A7DA204F113FECD400BF472F /* filterseqscommand.cpp */,
 				A7DA205B113FECD400BF472F /* getgroupcommand.h */,

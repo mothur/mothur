@@ -590,13 +590,13 @@ void PipelineCommand::createPatsPipeline(){
 		
 		//sff.info command
 		string thisCommand = "sffinfo(sff=" + sffFile + ")";
-		commands.push_back(thisCommand);
+		//commands.push_back(thisCommand);
 		
 		//trim.seqs command
 		string fastaFile = m->getRootName(m->getSimpleName(sffFile)) + "fasta";
 		string qualFile = m->getRootName(m->getSimpleName(sffFile)) + "qual";
-		thisCommand = "trim.seqs(processors=" + toString(processors) + ", fasta=" + fastaFile + ", allfiles=T, maxambig=0, maxhomop=8, flip=T, bdiffs=1, pdiffs=2, qwindowaverage=35, qwindowsize=50, oligos=" + oligosFile + ", qfile=" + qualFile + ")";
-		commands.push_back(thisCommand);
+		//thisCommand = "trim.seqs(processors=" + toString(processors) + ", fasta=" + fastaFile + ", allfiles=T, maxambig=0, maxhomop=8, flip=T, bdiffs=1, pdiffs=2, qwindowaverage=35, qwindowsize=50, oligos=" + oligosFile + ", qfile=" + qualFile + ")";
+		//commands.push_back(thisCommand);
 		
 		//unique.seqs
 		string groupFile = m->getRootName(m->getSimpleName(fastaFile)) + "groups";
