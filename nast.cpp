@@ -25,8 +25,10 @@ Nast::Nast(Alignment* method, Sequence* cand, Sequence* temp) : alignment(method
 	try {
 		m = MothurOut::getInstance();
 		maxInsertLength = 0;
+	
 		pairwiseAlignSeqs();	//	This is part A in Fig. 2 of DeSantis et al.
 		regapSequences();		//	This is parts B-F in Fig. 2 of DeSantis et al.
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Nast", "Nast");

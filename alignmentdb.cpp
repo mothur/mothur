@@ -74,7 +74,7 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 				if (temp.getName() != "") {
 					templateSequences.push_back(temp);
 					//save longest base
-					if (temp.getUnaligned().length() > longest)  { longest = temp.getUnaligned().length()+1; }
+					if (temp.getUnaligned().length() >= longest)  { longest = temp.getUnaligned().length()+1; }
 				}
 			}
 			
@@ -94,11 +94,10 @@ AlignmentDB::AlignmentDB(string fastaFileName, string s, int kmerSize, float gap
 			if (temp.getName() != "") {
 				templateSequences.push_back(temp);
 				//save longest base
-				if (temp.getUnaligned().length() > longest)  { longest = temp.getUnaligned().length()+1; }
+				if (temp.getUnaligned().length() >= longest)  { longest = (temp.getUnaligned().length()+1); }
 			}
 		}
 		fastaFile.close();
-		
 	#endif
 	
 		numSeqs = templateSequences.size();

@@ -51,18 +51,21 @@ NeedlemanOverlap::~NeedlemanOverlap(){	/*	do nothing	*/	}
 
 void NeedlemanOverlap::align(string A, string B){
 	try {
+	
 		seqA = ' ' + A;	lA = seqA.length();		//	algorithm requires a dummy space at the beginning of each string
 		seqB = ' ' + B;	lB = seqB.length();		//	algorithm requires a dummy space at the beginning of each string
 
 		if (lA > nRows) { m->mothurOut("One of your candidate sequences is longer than you longest template sequence. Your longest template sequence is " + toString(nRows) + ". Your candidate is " + toString(lA) + "."); m->mothurOutEndLine();  }
 		
 		for(int i=1;i<lB;i++){					//	This code was largely translated from Perl code provided in Ex 3.1 
+		
 			for(int j=1;j<lA;j++){				//	of the O'Reilly BLAST book.  I found that the example output had a
+	
 				//	number of errors
 				float diagonal;
 				if(seqB[i] == seqA[j])	{	diagonal = alignment[i-1][j-1].cValue + match;		}
 				else					{	diagonal = alignment[i-1][j-1].cValue + mismatch;	}
-				
+			
 				float up	= alignment[i-1][j].cValue + gap;
 				float left	= alignment[i][j-1].cValue + gap;
 				

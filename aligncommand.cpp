@@ -562,10 +562,11 @@ int AlignCommand::driver(linePair* filePos, string alignFName, string reportFNam
 								
 				Sequence temp = templateDB->findClosestSequence(candidateSeq);
 				Sequence* templateSeq = &temp;
-				
+			
 				float searchScore = templateDB->getSearchScore();
 								
 				Nast* nast = new Nast(alignment, candidateSeq, templateSeq);
+		
 				Sequence* copy;
 				
 				Nast* nast2;
@@ -580,6 +581,7 @@ int AlignCommand::driver(linePair* filePos, string alignFName, string reportFNam
 					string wasBetter =  "";
 					//if the user wants you to try the reverse
 					if (flip) {
+				
 						//get reverse compliment
 						copy = new Sequence(candidateSeq->getName(), originalUnaligned);
 						copy->reverseComplement();
