@@ -94,6 +94,7 @@
 #include "parsefastaqcommand.h"
 #include "pipelinepdscommand.h"
 #include "deuniqueseqscommand.h"
+#include "pairwiseseqscommand.h"
 
 
 /*******************************************************/
@@ -194,6 +195,7 @@ CommandFactory::CommandFactory(){
 	commands["remove.lineage"]		= "remove.lineage";
 	commands["fastq.info"]			= "fastq.info";
 	commands["deunique.seqs"]		= "deunique.seqs";
+	commands["pairwise.seqs"]		= "MPIEnabled";
 	commands["pipeline.pds"]		= "MPIEnabled";
 	commands["classify.seqs"]		= "MPIEnabled"; 
 	commands["dist.seqs"]			= "MPIEnabled";
@@ -338,6 +340,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "fastq.info")			{	command = new ParseFastaQCommand(optionString);				}
 		else if(commandName == "pipeline.pds")			{	command = new PipelineCommand(optionString);				}
 		else if(commandName == "deunique.seqs")			{	command = new DeUniqueSeqsCommand(optionString);			}
+		else if(commandName == "pairwise.seqs")			{	command = new PairwiseSeqsCommand(optionString);			}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -450,6 +453,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "remove.lineage")		{	pipecommand = new RemoveLineageCommand(optionString);			}
 		else if(commandName == "fastq.info")			{	pipecommand = new ParseFastaQCommand(optionString);				}
 		else if(commandName == "deunique.seqs")			{	pipecommand = new DeUniqueSeqsCommand(optionString);			}
+		else if(commandName == "pairwise.seqs")			{	pipecommand = new PairwiseSeqsCommand(optionString);			}
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -550,6 +554,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "remove.lineage")		{	shellcommand = new RemoveLineageCommand();			}
 		else if(commandName == "fastq.info")			{	shellcommand = new ParseFastaQCommand();			}
 		else if(commandName == "deunique.seqs")			{	shellcommand = new DeUniqueSeqsCommand();			}
+		else if(commandName == "pairwise.seqs")			{	shellcommand = new PairwiseSeqsCommand();			}
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

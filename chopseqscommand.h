@@ -30,7 +30,7 @@ class ChopSeqsCommand : public Command {
 		
 	private:
 		string fastafile, outputDir, keep;
-		bool abort, countGaps;
+		bool abort, countGaps, Short;
 		int numbases;
 		vector<string> outputNames;
 		map<string, vector<string> > outputTypes;

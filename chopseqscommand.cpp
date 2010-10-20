@@ -13,7 +13,7 @@
 //**********************************************************************************************************************
 vector<string> ChopSeqsCommand::getValidParameters(){	
 	try {
-		string AlignArray[] =  {"fasta","numbases","countgaps","keep","outputdir","inputdir"};
+		string AlignArray[] =  {"fasta","short","numbases","countgaps","keep","outputdir","inputdir"};
 		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 		return myArray;
 	}
@@ -68,7 +68,7 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","numbases","countgaps","keep","outputdir","inputdir"};
+			string Array[] =  {"fasta","numbases","countgaps","keep","short","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -113,7 +113,10 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 			convert(temp, numbases);   
 			
 			temp = validParameter.validFile(parameters, "countgaps", false);	if (temp == "not found") { temp = "f"; } 
-			countGaps = m->isTrue(temp);   
+			countGaps = m->isTrue(temp);  
+			
+			temp = validParameter.validFile(parameters, "short", false);	if (temp == "not found") { temp = "f"; } 
+			Short = m->isTrue(temp);   
 		
 			keep = validParameter.validFile(parameters, "keep", false);		if (keep == "not found") { keep = "front"; } 
 				
@@ -136,6 +139,8 @@ void ChopSeqsCommand::help(){
 		m->mothurOut("The numbases parameter allows you to specify the number of bases you want to keep.\n");
 		m->mothurOut("The keep parameter allows you to specify whether you want to keep the front or the back of your sequence, default=front.\n");
 		m->mothurOut("The countgaps parameter allows you to specify whether you want to count gaps as bases, default=false.\n");
+		m->mothurOut("The short parameter allows you to specify you want to keep sequences that are too short to chop, default=false.\n");
+		m->mothurOut("For example, if you ran chop.seqs with numbases=200 and short=t, if a sequence had 100 bases mothur would keep the sequence rather than eliminate it.\n");
 		m->mothurOut("Example chop.seqs(fasta=amazon.fasta, numbases=200, keep=front).\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
 	}
@@ -233,8 +238,9 @@ string ChopSeqsCommand::getChopped(Sequence seq) {
 					if (stopSpot == 0) { temp = ""; }
 					else {  temp = temp.substr(0, stopSpot);  }
 							
-				}else { temp = ""; } //sequence too short
-				
+				}else { 
+					if (!Short) { temp = ""; } //sequence too short
+				}
 			}else { //you are keeping the back
 				int tempLength = temp.length();
 				if (tempLength > numbases) { //you have enough bases to remove some
@@ -253,8 +259,9 @@ string ChopSeqsCommand::getChopped(Sequence seq) {
 				
 					if (stopSpot == 0) { temp = ""; }
 					else {  temp = temp.substr(stopSpot+1);  }
+				}else { 
+					if (!Short) { temp = ""; } //sequence too short
 				}
-				else {  temp = ""; } //sequence too short
 			}
 
 		}else{
@@ -284,8 +291,9 @@ string ChopSeqsCommand::getChopped(Sequence seq) {
 					if (stopSpot == 0) { temp = ""; }
 					else {  temp = temp.substr(0, stopSpot);  }
 							
-				}else { temp = ""; } //sequence too short
-				
+				}else { 
+					if (!Short) { temp = ""; } //sequence too short
+				}				
 			}else { //you are keeping the back
 				int tempLength = tempUnaligned.length();
 				if (tempLength > numbases) { //you have enough bases to remove some
@@ -308,8 +316,9 @@ string ChopSeqsCommand::getChopped(Sequence seq) {
 				
 					if (stopSpot == 0) { temp = ""; }
 					else {  temp = temp.substr(stopSpot+1);  }
+				}else { 
+					if (!Short) { temp = ""; } //sequence too short
 				}
-				else {  temp = ""; } //sequence too short
 			}
 		}
 		

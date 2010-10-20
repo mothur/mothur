@@ -238,6 +238,8 @@ int PipelineCommand::execute(){
 	try {
 		if (abort == true) { return 0; }
 		
+		int start = time(NULL);
+		
 		if (pipeFilename == "") { 
 			createPatsPipeline(); 
 			
@@ -278,6 +280,8 @@ int PipelineCommand::execute(){
 		}else {  runUsersPipeline(); }
 		
 		if (m->control_pressed) { return 0; }
+		
+		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to run the pipeline analysis."); m->mothurOutEndLine(); m->mothurOutEndLine();
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

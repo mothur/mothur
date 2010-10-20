@@ -63,6 +63,8 @@
 		A76AAD03117F322B003D8DA1 /* phylosummary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = phylosummary.cpp; sourceTree = "<group>"; };
 		A76C4A1011876BAF0009460B /* setlogfilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = setlogfilecommand.h; sourceTree = SOURCE_ROOT; };
 		A76C4A1111876BAF0009460B /* setlogfilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = setlogfilecommand.cpp; sourceTree = SOURCE_ROOT; };
+		A77D787B126F387700F351BD /* pairwiseseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pairwiseseqscommand.h; sourceTree = "<group>"; };
+		A77D787C126F387700F351BD /* pairwiseseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pairwiseseqscommand.cpp; sourceTree = "<group>"; };
 		A780E6CB11E7745D00BB5718 /* endiannessmacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = endiannessmacros.h; sourceTree = "<group>"; };
 		A78254461164D7790002E2DD /* chimerapintailcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimerapintailcommand.h; sourceTree = "<group>"; };
 		A78254471164D7790002E2DD /* chimerapintailcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimerapintailcommand.cpp; sourceTree = "<group>"; };
@@ -828,6 +830,8 @@
 				A798626E1240D91B005FC847 /* normalizesharedcommand.cpp */,
 				A7DA20B9113FECD400BF472F /* otuhierarchycommand.h */,
 				A7DA20B8113FECD400BF472F /* otuhierarchycommand.cpp */,
+				A77D787B126F387700F351BD /* pairwiseseqscommand.h */,
+				A77D787C126F387700F351BD /* pairwiseseqscommand.cpp */,
 				A724C2B61254961E006BB1C7 /* parsefastaqcommand.h */,
 				A724C2B71254961E006BB1C7 /* parsefastaqcommand.cpp */,
 				A7DA20BD113FECD400BF472F /* parselistscommand.h */,

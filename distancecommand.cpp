@@ -324,7 +324,7 @@ int DistanceCommand::execute(){
 				
 				driverMPI(start, end, outMPI, cutoff); 
 				
-				if (m->control_pressed) { outputTypes.clear(); MPI_File_close(&outMPI);  delete distCalculator;  return 0; }
+				if (m->control_pressed) { outputTypes.clear(); MPI_File_close(&outMPI); delete distCalculator;  return 0; }
 			
 				//wait on chidren
 				for(int i = 1; i < processors; i++) { 
