@@ -750,6 +750,7 @@ int AlignCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& align
 							delete nast;
 							nast = nast2;
 							needToDeleteCopy = true;
+							wasBetter = "\treverse complement produced a better alignment, so mothur used the reverse complement.";
 						}else{  
 							wasBetter = "\treverse complement did NOT produce a better alignment, please check sequence.";
 							delete nast2;
