@@ -43,7 +43,7 @@ private:
 	void createPatsPipeline();
 	bool parseCommand(string, string&, string&);
 	bool checkForValidAndRequiredParameters(string, string, map<string, vector<string> >&);
-	bool fillInMothurMade(string&, map<string, vector<string> >);
+	bool fillInMothurMade(string&, map<string, vector<string> >&);
 };
 
 /****************************************************/
