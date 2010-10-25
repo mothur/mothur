@@ -356,6 +356,8 @@ bool PipelineCommand::parseCommand(string nextCommand, string& name, string& opt
 bool PipelineCommand::checkForValidAndRequiredParameters(string name, string options, map<string, vector<string> >& mothurMadeFiles){
 	try {
 		
+		if (name == "system") { return false; }
+		
 		//get shell of the command so we can check to make sure its valid without running it
 		Command* command = cFactory->getCommand(name);
 		
@@ -528,7 +530,7 @@ int PipelineCommand::runUsersPipeline(){
 	}
 }
 //**********************************************************************************************************************
-bool PipelineCommand::fillInMothurMade(string& options, map<string, vector<string> > mothurMadeFiles){
+bool PipelineCommand::fillInMothurMade(string& options, map<string, vector<string> >& mothurMadeFiles){
 	try {
 		OptionParser parser(options);
 		map<string, string> parameters = parser.getParameters(); 
@@ -540,8 +542,9 @@ bool PipelineCommand::fillInMothurMade(string& options, map<string, vector<strin
 		//fill in mothurmade filenames
 		for (it = parameters.begin(); it != parameters.end(); it++) { 
 			string paraType = it->first;
+			string tempOption = it->second;
 			
-			if (it->second == "mothurmade") {
+			if (tempOption == "mothurmade") {
 				
 				if (it->first == "candidate") {	paraType = "fasta"; }
 			
@@ -559,6 +562,7 @@ bool PipelineCommand::fillInMothurMade(string& options, map<string, vector<strin
 						for (int i = 0; i < temp.size(); i++) {
 							m->mothurOut(toString(i) + " - " + temp[i]); m->mothurOutEndLine();
 						}
+						
 						m->mothurOut("Please select the number of the file you would like to use: ");
 						int num = 0;
 						cin >> num;
@@ -566,23 +570,43 @@ bool PipelineCommand::fillInMothurMade(string& options, map<string, vector<strin
 						
 						if ((num < 0) || (num > (temp.size()-1))) { m->mothurOut("Not a valid response, quitting."); m->mothurOutEndLine(); return true; }
 						else {
-							parameters[paraType] = temp[num];
+							tempOption = temp[num];
 						}
 				
 						//clears buffer so next command doesn't have error
 						string s;	
 						getline(cin, s);
 						
+						vector<string> newTemp;
+						for (int i = 0; i < temp.size(); i++) {
+							if (i == num) { newTemp.push_back(temp[i]); }
+							else {
+								m->mothurOut("Would you like to remove " + temp[i] + " as an option for " + paraType + ", (y/n): "); m->mothurOutEndLine();
+								string response;
+								cin >> response;
+								m->mothurOutJustToLog(response); m->mothurOutEndLine();
+							
+								if (response == "n") {  newTemp.push_back(temp[i]); }
+							
+								//clears buffer so next command doesn't have error
+								string s;	
+								getline(cin, s);
+							}
+						}
+						
+						mothurMadeFiles[paraType] = newTemp;
+						
+						
 					}else if (temp.size() == 0){
 						m->mothurOut("Sorry, we seem to think you created a " + paraType + " file, but it seems mothur doesn't have a filename."); m->mothurOutEndLine();
 						return true;
 					}else{
-						parameters[paraType] = temp[0];
+						tempOption = temp[0];
 					}
 				}
 			}
 			
-			options += it->first + "=" + parameters[paraType] + ", ";
+			options += it->first + "=" + tempOption + ", ";
 		}
 		
 		//rip off extra comma
