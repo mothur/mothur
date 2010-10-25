@@ -375,8 +375,11 @@ bool PipelineCommand::checkForValidAndRequiredParameters(string name, string opt
 				itMade = mothurMadeFiles.find(it->first);
 				
 				if (itMade == mothurMadeFiles.end()) {  
-					m->mothurOut("You have the " + it->first + " listed as a mothurmade file for the " + name + " command, but it seems mothur will not make that file in your current pipeline, please correct."); m->mothurOutEndLine();
-					return true;
+					if ((name == "align.seqs") && (it->first == "candidate")) {} //do nothing about candidate
+					else {
+						m->mothurOut("You have the " + it->first + " listed as a mothurmade file for the " + name + " command, but it seems mothur will not make that file in your current pipeline, please correct."); m->mothurOutEndLine();
+						return true;
+					}
 				}
 			}
 		}
