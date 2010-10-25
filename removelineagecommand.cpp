@@ -297,7 +297,7 @@ int RemoveLineageCommand::readFasta(){
 		out.close();
 		
 		if (wroteSomething == false) {  m->mothurOut("Your fasta file contains only sequences from " + taxons + "."); m->mothurOutEndLine();  }
-		outputTypes["fasta"].push_back(outputFileName); 
+		outputNames.push_back(outputFileName); outputTypes["fasta"].push_back(outputFileName); 
 		
 		return 0;
 		
@@ -368,7 +368,7 @@ int RemoveLineageCommand::readList(){
 		out.close();
 		
 		if (wroteSomething == false) {  m->mothurOut("Your list file contains only sequences from " + taxons + "."); m->mothurOutEndLine();  }
-		outputTypes["list"].push_back(outputFileName); 
+		outputNames.push_back(outputFileName); outputTypes["list"].push_back(outputFileName); 
 				
 		return 0;
 
@@ -454,7 +454,7 @@ int RemoveLineageCommand::readName(){
 		out.close();
 
 		if (wroteSomething == false) {  m->mothurOut("Your name file contains only sequences from " + taxons + "."); m->mothurOutEndLine();  }
-		outputTypes["name"].push_back(outputFileName);
+		outputNames.push_back(outputFileName); outputTypes["name"].push_back(outputFileName);
 				
 		return 0;
 	}
@@ -498,7 +498,7 @@ int RemoveLineageCommand::readGroup(){
 		out.close();
 		
 		if (wroteSomething == false) {  m->mothurOut("Your group file contains only sequences from " + taxons + "."); m->mothurOutEndLine();  }
-		outputTypes["group"].push_back(outputFileName);
+		outputNames.push_back(outputFileName); outputTypes["group"].push_back(outputFileName);
 		
 		return 0;
 	}
@@ -552,7 +552,7 @@ int RemoveLineageCommand::readTax(){
 		out.close();
 		
 		if (!wroteSomething) { m->mothurOut("Your taxonomy file contains only sequences from " + taxons + "."); m->mothurOutEndLine();  }
-		outputTypes["taxonomy"].push_back(outputFileName);
+		outputNames.push_back(outputFileName); outputTypes["taxonomy"].push_back(outputFileName);
 			
 		return 0;
 
@@ -642,7 +642,7 @@ int RemoveLineageCommand::readAlign(){
 		out.close();
 		
 		if (wroteSomething == false) {  m->mothurOut("Your align file contains only sequences from " + taxons + "."); m->mothurOutEndLine();  }
-		outputTypes["alignreport"].push_back(outputFileName);
+		outputNames.push_back(outputFileName); outputTypes["alignreport"].push_back(outputFileName);
 		
 		return 0;
 		

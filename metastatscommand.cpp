@@ -118,7 +118,7 @@ MetaStatsCommand::MetaStatsCommand(string option) {
 			
 			//make sure the user has already run the read.otu command
 			if ((globaldata->getSharedFile() == "")) {
-				 m->mothurOut("You must read a list and a group, or a shared file before you can use the normalize.shared command."); m->mothurOutEndLine(); abort = true; 
+				 m->mothurOut("You must read a list and a group, or a shared file before you can use the metastats command."); m->mothurOutEndLine(); abort = true; 
 			}
 
 			//check for optional parameter and set defaults

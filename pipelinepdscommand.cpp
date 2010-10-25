@@ -536,18 +536,23 @@ bool PipelineCommand::fillInMothurMade(string& options, map<string, vector<strin
 		
 		//fill in mothurmade filenames
 		for (it = parameters.begin(); it != parameters.end(); it++) { 
+			string paraType = it->first;
+			
 			if (it->second == "mothurmade") {
-				itMade = mothurMadeFiles.find(it->first);
+				
+				if (it->first == "candidate") {	paraType = "fasta"; }
+			
+				itMade = mothurMadeFiles.find(paraType);
 				
 				if (itMade == mothurMadeFiles.end()) { 
-					m->mothurOut("Looking for a mothurmade " + it->first + " file, but it seems mothur has not made that file type in your current pipeline, please correct."); m->mothurOutEndLine();
+					m->mothurOut("Looking for a mothurmade " + paraType + " file, but it seems mothur has not made that file type in your current pipeline, please correct."); m->mothurOutEndLine();
 					return true;
 				}else{
 					vector<string> temp = itMade->second;
 					
 					if (temp.size() > 1) {
 						//ask user which file to use
-						m->mothurOut("More than one file has been created for the " + it->first + " parameter. "); m->mothurOutEndLine();
+						m->mothurOut("More than one file has been created for the " + paraType + " parameter. "); m->mothurOutEndLine();
 						for (int i = 0; i < temp.size(); i++) {
 							m->mothurOut(toString(i) + " - " + temp[i]); m->mothurOutEndLine();
 						}
@@ -558,7 +563,7 @@ bool PipelineCommand::fillInMothurMade(string& options, map<string, vector<strin
 						
 						if ((num < 0) || (num > (temp.size()-1))) { m->mothurOut("Not a valid response, quitting."); m->mothurOutEndLine(); return true; }
 						else {
-							parameters[it->first] = temp[num];
+							parameters[paraType] = temp[num];
 						}
 				
 						//clears buffer so next command doesn't have error
@@ -566,15 +571,15 @@ bool PipelineCommand::fillInMothurMade(string& options, map<string, vector<strin
 						getline(cin, s);
 						
 					}else if (temp.size() == 0){
-						m->mothurOut("Sorry, we seem to think you created a " + it->first + " file, but it seems mothur doesn't have a filename."); m->mothurOutEndLine();
+						m->mothurOut("Sorry, we seem to think you created a " + paraType + " file, but it seems mothur doesn't have a filename."); m->mothurOutEndLine();
 						return true;
 					}else{
-						parameters[it->first] = temp[0];
+						parameters[paraType] = temp[0];
 					}
 				}
 			}
 			
-			options += it->first + "=" + parameters[it->first] + ", ";
+			options += it->first + "=" + parameters[paraType] + ", ";
 		}
 		
 		//rip off extra comma
@@ -594,13 +599,13 @@ void PipelineCommand::createPatsPipeline(){
 		
 		//sff.info command
 		string thisCommand = "sffinfo(sff=" + sffFile + ")";
-		//commands.push_back(thisCommand);
+		commands.push_back(thisCommand);
 		
 		//trim.seqs command
 		string fastaFile = m->getRootName(m->getSimpleName(sffFile)) + "fasta";
 		string qualFile = m->getRootName(m->getSimpleName(sffFile)) + "qual";
-		//thisCommand = "trim.seqs(processors=" + toString(processors) + ", fasta=" + fastaFile + ", allfiles=T, maxambig=0, maxhomop=8, flip=T, bdiffs=1, pdiffs=2, qwindowaverage=35, qwindowsize=50, oligos=" + oligosFile + ", qfile=" + qualFile + ")";
-		//commands.push_back(thisCommand);
+		thisCommand = "trim.seqs(processors=" + toString(processors) + ", fasta=" + fastaFile + ", allfiles=T, maxambig=0, maxhomop=8, flip=T, bdiffs=1, pdiffs=2, qwindowaverage=35, qwindowsize=50, oligos=" + oligosFile + ", qfile=" + qualFile + ")";
+		commands.push_back(thisCommand);
 		
 		//unique.seqs
 		string groupFile = m->getRootName(m->getSimpleName(fastaFile)) + "groups";
