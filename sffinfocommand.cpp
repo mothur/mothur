@@ -118,7 +118,9 @@ SffInfoCommand::SffInfoCommand(string option)  {
 						if (m->getDefaultPath() != "") { //default path is set
 							string tryPath = m->getDefaultPath() + m->getSimpleName(filenames[i]);
 							m->mothurOut("Unable to open " + filenames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							ifstream in2;
+							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+							in2.close();
 							filenames[i] = tryPath;
 						}
 					}
@@ -128,7 +130,9 @@ SffInfoCommand::SffInfoCommand(string option)  {
 						if (m->getOutputDir() != "") { //default path is set
 							string tryPath = m->getOutputDir() + m->getSimpleName(filenames[i]);
 							m->mothurOut("Unable to open " + filenames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							ifstream in2;
+							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+							in2.close();
 							filenames[i] = tryPath;
 						}
 					}
@@ -169,7 +173,9 @@ SffInfoCommand::SffInfoCommand(string option)  {
 						if (m->getDefaultPath() != "") { //default path is set
 							string tryPath = m->getDefaultPath() + m->getSimpleName(accnosFileNames[i]);
 							m->mothurOut("Unable to open " + accnosFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							ifstream in2;
+							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+							in2.close();
 							accnosFileNames[i] = tryPath;
 						}
 					}
@@ -178,7 +184,9 @@ SffInfoCommand::SffInfoCommand(string option)  {
 						if (m->getOutputDir() != "") { //default path is set
 							string tryPath = m->getOutputDir() + m->getSimpleName(accnosFileNames[i]);
 							m->mothurOut("Unable to open " + accnosFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							ifstream in2;
+							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+							in2.close();
 							accnosFileNames[i] = tryPath;
 						}
 					}

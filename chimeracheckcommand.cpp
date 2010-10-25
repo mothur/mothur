@@ -119,7 +119,9 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 						if (m->getDefaultPath() != "") { //default path is set
 							string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
 							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							ifstream in2;
+							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+							in2.close();
 							fastaFileNames[i] = tryPath;
 						}
 					}
@@ -129,7 +131,9 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 						if (m->getOutputDir() != "") { //default path is set
 							string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
 							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							ifstream in2;
+							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+							in2.close();
 							fastaFileNames[i] = tryPath;
 						}
 					}
@@ -178,7 +182,9 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 						if (m->getDefaultPath() != "") { //default path is set
 							string tryPath = m->getDefaultPath() + m->getSimpleName(nameFileNames[i]);
 							m->mothurOut("Unable to open " + nameFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							ifstream in2;
+							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+							in2.close();
 							nameFileNames[i] = tryPath;
 						}
 					}
@@ -188,7 +194,9 @@ ChimeraCheckCommand::ChimeraCheckCommand(string option)  {
 						if (m->getOutputDir() != "") { //default path is set
 							string tryPath = m->getOutputDir() + m->getSimpleName(nameFileNames[i]);
 							m->mothurOut("Unable to open " + nameFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							ifstream in2;
+							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+							in2.close();
 							nameFileNames[i] = tryPath;
 						}
 					}

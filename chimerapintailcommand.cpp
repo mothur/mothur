@@ -140,7 +140,9 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 						if (m->getDefaultPath() != "") { //default path is set
 							string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
 							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							ifstream in2;
+							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+							in2.close();
 							fastaFileNames[i] = tryPath;
 						}
 					}
@@ -149,7 +151,9 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 						if (m->getOutputDir() != "") { //default path is set
 							string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
 							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							ifstream in2;
+							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+							in2.close();
 							fastaFileNames[i] = tryPath;
 						}
 					}
@@ -196,7 +200,9 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 					if (m->getDefaultPath() != "") { //default path is set
 							string tryPath = m->getDefaultPath() + m->getSimpleName(maskfile);
 							m->mothurOut("Unable to open " + maskfile + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							ifstream in2;
+							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+							in2.close();
 							maskfile = tryPath;
 					}
 				}
@@ -205,7 +211,9 @@ ChimeraPintailCommand::ChimeraPintailCommand(string option)  {
 						if (m->getOutputDir() != "") { //default path is set
 							string tryPath = m->getOutputDir() + m->getSimpleName(maskfile);
 							m->mothurOut("Unable to open " + maskfile + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							ifstream in2;
+							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+							in2.close();
 							maskfile = tryPath;
 						}
 				}

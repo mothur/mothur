@@ -44,7 +44,7 @@ GetLineageCommand::GetLineageCommand(){
 //**********************************************************************************************************************
 vector<string> GetLineageCommand::getRequiredParameters(){	
 	try {
-		string Array[] =  {"taxonomy"};
+		string Array[] =  {"taxonomy","taxon"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}

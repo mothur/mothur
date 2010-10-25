@@ -409,11 +409,11 @@ void permute_array(int *array, int n) {
   
   if (! seeded) {
     seeded = 1;
-    srandom(time(NULL));
+    srand(time(NULL));
   }
   
   for (i = 0; i < n; i++) {
-    int selection = random() % (n - i);
+    int selection = rand() % (n - i);
     int tmp = array[i + selection];
     array[i + selection] = array[i];
     array[i] = tmp;

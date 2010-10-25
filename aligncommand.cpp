@@ -153,15 +153,17 @@ AlignCommand::AlignCommand(string option)  {
 	
 					int ableToOpen;
 					ifstream in;
-
 					ableToOpen = m->openInputFile(candidateFileNames[i], in, "noerror");
-				
+					in.close();	
+					
 					//if you can't open it, try default location
 					if (ableToOpen == 1) {
 						if (m->getDefaultPath() != "") { //default path is set
 							string tryPath = m->getDefaultPath() + m->getSimpleName(candidateFileNames[i]);
 							m->mothurOut("Unable to open " + candidateFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							ifstream in2;
+							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+							in2.close();
 							candidateFileNames[i] = tryPath;
 						}
 					}
@@ -171,12 +173,14 @@ AlignCommand::AlignCommand(string option)  {
 						if (m->getOutputDir() != "") { //default path is set
 							string tryPath = m->getOutputDir() + m->getSimpleName(candidateFileNames[i]);
 							m->mothurOut("Unable to open " + candidateFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							ifstream in2;
+							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+							in2.close();
 							candidateFileNames[i] = tryPath;
 						}
 					}
 					
-					in.close();					
+									
 
 					if (ableToOpen == 1) { 
 						m->mothurOut("Unable to open " + candidateFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 

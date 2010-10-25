@@ -161,7 +161,9 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 						if (m->getDefaultPath() != "") { //default path is set
 							string tryPath = m->getDefaultPath() + m->getSimpleName(fastaFileNames[i]);
 							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							ifstream in2;
+							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+							in2.close();
 							fastaFileNames[i] = tryPath;
 						}
 					}
@@ -170,7 +172,9 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 						if (m->getOutputDir() != "") { //default path is set
 							string tryPath = m->getOutputDir() + m->getSimpleName(fastaFileNames[i]);
 							m->mothurOut("Unable to open " + fastaFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							ifstream in2;
+							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+							in2.close();
 							fastaFileNames[i] = tryPath;
 						}
 					}
@@ -223,7 +227,9 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 						if (m->getDefaultPath() != "") { //default path is set
 							string tryPath = m->getDefaultPath() + m->getSimpleName(namefileNames[i]);
 							m->mothurOut("Unable to open " + namefileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							ifstream in2;
+							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+							in2.close();
 							namefileNames[i] = tryPath;
 						}
 					}
@@ -232,7 +238,9 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 						if (m->getOutputDir() != "") { //default path is set
 							string tryPath = m->getOutputDir() + m->getSimpleName(namefileNames[i]);
 							m->mothurOut("Unable to open " + namefileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							ifstream in2;
+							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+							in2.close();
 							namefileNames[i] = tryPath;
 						}
 					}
@@ -274,7 +282,9 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 						if (m->getDefaultPath() != "") { //default path is set
 							string tryPath = m->getDefaultPath() + m->getSimpleName(groupfileNames[i]);
 							m->mothurOut("Unable to open " + groupfileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
-							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							ifstream in2;
+							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+							in2.close();
 							groupfileNames[i] = tryPath;
 						}
 					}
@@ -283,7 +293,9 @@ ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 						if (m->getOutputDir() != "") { //default path is set
 							string tryPath = m->getOutputDir() + m->getSimpleName(groupfileNames[i]);
 							m->mothurOut("Unable to open " + groupfileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-							ableToOpen = m->openInputFile(tryPath, in, "noerror");
+							ifstream in2;
+							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+							in2.close();
 							groupfileNames[i] = tryPath;
 						}
 					}

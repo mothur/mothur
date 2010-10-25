@@ -151,7 +151,7 @@ void NormalizeSharedCommand::help(){
 		m->mothurOut("The method parameter allows you to select what method you would like to use to normalize. The only choice is totalgroup. We hope to add more ways to normalize in the future, suggestions are welcome!\n");
 		m->mothurOut("The norm parameter allows you to number you would like to normalize to. By default this is set to the number of sequences in your smallest group.\n");
 		m->mothurOut("The normalize.shared command should be in the following format: normalize.shared(groups=yourGroups, label=yourLabels).\n");
-		m->mothurOut("Example normalize.shared(groups=A-B-C, scale=averagegroup).\n");
+		m->mothurOut("Example normalize.shared(groups=A-B-C, scale=totalgroup).\n");
 		m->mothurOut("The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n");
 		m->mothurOut("The normalize.shared command outputs a .norm.shared file.\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");

@@ -214,7 +214,7 @@ bool ValidParameters::isValidParameter(string parameter, vector<string> cParams,
 string ValidParameters::validFile(map<string, string>& container, string parameter, bool isFile) {
 	try {
 		int ableToOpen;
-		ifstream in;
+		
 		map<string, string>::iterator it;
 		
 		it = container.find(parameter);
@@ -232,15 +232,18 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
 				
 				if (pid == 0) {
 			#endif
-
+				ifstream in;
 				ableToOpen = m->openInputFile(it->second, in, "noerror");
+				in.close();
 				
 				//if you can't open it, try default location
 				if (ableToOpen == 1) {
 					if (m->getDefaultPath() != "") { //default path is set
 						string tryPath = m->getDefaultPath() + m->getSimpleName(it->second);
 						m->mothurOut("Unable to open " + it->second + ". Trying default " + tryPath); m->mothurOutEndLine();
-						ableToOpen = m->openInputFile(tryPath, in, "noerror");
+						ifstream in2;
+						ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+						in2.close();
 						container[parameter] = tryPath;
 					}
 				}
@@ -250,12 +253,14 @@ string ValidParameters::validFile(map<string, string>& container, string paramet
 					if (m->getOutputDir() != "") { //default path is set
 						string tryPath = m->getOutputDir() + m->getSimpleName(it->second);
 						m->mothurOut("Unable to open " + it->second + ". Trying output directory " + tryPath); m->mothurOutEndLine();
-						ableToOpen = m->openInputFile(tryPath, in, "noerror");
+						ifstream in2;
+						ableToOpen = m->openInputFile(tryPath, in2, "noerror");
 						container[parameter] = tryPath;
+						in2.close();
 					}
 				}
 				
-				in.close();
+				
 
 			#ifdef USE_MPI	
 					for(int i = 1; i < processors; i++) { 
