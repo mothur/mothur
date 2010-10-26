@@ -71,6 +71,7 @@ vector<string> CollectSharedCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 CollectSharedCommand::CollectSharedCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["sharedchao"] = tempOutNames;

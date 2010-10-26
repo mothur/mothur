@@ -38,6 +38,7 @@ inline bool compareGroup(repStruct left, repStruct right){
 //**********************************************************************************************************************
 GetOTURepCommand::GetOTURepCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;

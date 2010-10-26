@@ -39,6 +39,7 @@ vector<string> ClusterFragmentsCommand::getValidParameters(){
 //**********************************************************************************************************************
 ClusterFragmentsCommand::ClusterFragmentsCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;

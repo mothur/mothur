@@ -61,6 +61,7 @@ vector<string> PairwiseSeqsCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 PairwiseSeqsCommand::PairwiseSeqsCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["phylip"] = tempOutNames;

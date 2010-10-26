@@ -26,6 +26,7 @@ vector<string> MetaStatsCommand::getValidParameters(){
 //**********************************************************************************************************************
 MetaStatsCommand::MetaStatsCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["metastats"] = tempOutNames;

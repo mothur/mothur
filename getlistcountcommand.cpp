@@ -24,6 +24,7 @@ vector<string> GetListCountCommand::getValidParameters(){
 //**********************************************************************************************************************
 GetListCountCommand::GetListCountCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["otu"] = tempOutNames;

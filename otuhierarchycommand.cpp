@@ -24,6 +24,7 @@ vector<string> OtuHierarchyCommand::getValidParameters(){
 //**********************************************************************************************************************
 OtuHierarchyCommand::OtuHierarchyCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["otuheirarchy"] = tempOutNames;

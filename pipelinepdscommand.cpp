@@ -355,12 +355,12 @@ bool PipelineCommand::parseCommand(string nextCommand, string& name, string& opt
 
 bool PipelineCommand::checkForValidAndRequiredParameters(string name, string options, map<string, vector<string> >& mothurMadeFiles){
 	try {
-		
+				
 		if (name == "system") { return false; }
 		
 		//get shell of the command so we can check to make sure its valid without running it
 		Command* command = cFactory->getCommand(name);
-		
+			
 		//check to make sure all parameters are valid for command
 		vector<string> validParameters = command->getValidParameters();
 		
@@ -372,6 +372,7 @@ bool PipelineCommand::checkForValidAndRequiredParameters(string name, string opt
 		map<string, vector<string> >::iterator itMade;
 			
 		for (it = parameters.begin(); it != parameters.end(); it++) { 
+			
 			if (validParameter.isValidParameter(it->first, validParameters, it->second) != true) {  return true;  } // not valid
 			if (it->second == "mothurmade") {
 				itMade = mothurMadeFiles.find(it->first);
@@ -385,7 +386,7 @@ bool PipelineCommand::checkForValidAndRequiredParameters(string name, string opt
 				}
 			}
 		}
-		
+			
 		//is the command missing any required
 		vector<string> requiredParameters = command->getRequiredParameters();
 		
@@ -404,7 +405,7 @@ bool PipelineCommand::checkForValidAndRequiredParameters(string name, string opt
 				if (!hasOr) { m->mothurOut(name + " requires the " + requiredParameters[i] + " parameter, please correct."); m->mothurOutEndLine(); }
 			}
 		}
-		
+			
 		// if all are needed and not all are found
 		if ((!hasOr) && (numFound != requiredParameters.size())) { return true; }
 		//if one is needed and none are found
@@ -415,7 +416,7 @@ bool PipelineCommand::checkForValidAndRequiredParameters(string name, string opt
 		for (itMade = thisCommandsFile.begin(); itMade != thisCommandsFile.end(); itMade++) { 
 			mothurMadeFiles[itMade->first] = itMade->second; //adds any new types
 		}
-		
+			
 		return false;
 	}
 	catch(exception& e) {
@@ -440,8 +441,8 @@ int PipelineCommand::runUsersPipeline(){
 				CommandOptionParser parser(nextCommand);
 				string commandName = parser.getCommandString();
 				string options = parser.getOptionString();
-				
-				if (options != "") {
+					
+				if ((options != "") && (commandName != "system")) {
 					bool error = fillInMothurMade(options, mothurMadeFiles);
 					if (error) { in.close(); return 0; }
 				}
@@ -532,6 +533,7 @@ int PipelineCommand::runUsersPipeline(){
 //**********************************************************************************************************************
 bool PipelineCommand::fillInMothurMade(string& options, map<string, vector<string> >& mothurMadeFiles){
 	try {
+		
 		OptionParser parser(options);
 		map<string, string> parameters = parser.getParameters(); 
 		map<string, string>::iterator it;

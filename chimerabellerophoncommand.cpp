@@ -48,6 +48,7 @@ vector<string> ChimeraBellerophonCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 ChimeraBellerophonCommand::ChimeraBellerophonCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["chimera"] = tempOutNames;

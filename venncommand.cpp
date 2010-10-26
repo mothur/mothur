@@ -33,6 +33,7 @@ vector<string> VennCommand::getValidParameters(){
 //**********************************************************************************************************************
 VennCommand::VennCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["svg"] = tempOutNames;

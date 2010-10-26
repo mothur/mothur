@@ -25,6 +25,7 @@ vector<string> DegapSeqsCommand::getValidParameters(){
 //**********************************************************************************************************************
 DegapSeqsCommand::DegapSeqsCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;

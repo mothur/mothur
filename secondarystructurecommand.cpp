@@ -25,6 +25,7 @@ vector<string> AlignCheckCommand::getValidParameters(){
 //**********************************************************************************************************************
 AlignCheckCommand::AlignCheckCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["aligncheck"] = tempOutNames;

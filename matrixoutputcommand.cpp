@@ -34,6 +34,7 @@ vector<string> MatrixOutputCommand::getValidParameters(){
 //**********************************************************************************************************************
 MatrixOutputCommand::MatrixOutputCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["phylip"] = tempOutNames;

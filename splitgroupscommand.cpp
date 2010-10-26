@@ -48,6 +48,7 @@ vector<string> SplitGroupCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 SplitGroupCommand::SplitGroupCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;

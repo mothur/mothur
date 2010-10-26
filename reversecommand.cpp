@@ -25,6 +25,7 @@ vector<string> ReverseSeqsCommand::getValidParameters(){
 //**********************************************************************************************************************
 ReverseSeqsCommand::ReverseSeqsCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;

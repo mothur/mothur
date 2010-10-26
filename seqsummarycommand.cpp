@@ -25,6 +25,7 @@ vector<string> SeqSummaryCommand::getValidParameters(){
 //**********************************************************************************************************************
 SeqSummaryCommand::SeqSummaryCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["summary"] = tempOutNames;

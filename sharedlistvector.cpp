@@ -36,12 +36,12 @@ SharedListVector::SharedListVector(ifstream& f) : DataVector(), maxRank(0), numB
 		f >> label >> hold;
 	
 		data.assign(hold, "");
-	
+		
 		for(int i=0;i<hold;i++){
 			f >> inputData;
 			set(i, inputData);
 		}
-	
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SharedListVector", "SharedListVector");
@@ -61,6 +61,8 @@ void SharedListVector::set(int binNumber, string seqNames){
 		if(nNames_new > maxRank)	{	maxRank = nNames_new;	}
 	
 		numSeqs += (nNames_new - nNames_old);
+		
+			 
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SharedListVector", "set");

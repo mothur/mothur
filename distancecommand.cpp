@@ -29,6 +29,7 @@ vector<string> DistanceCommand::getValidParameters(){
 //**********************************************************************************************************************
 DistanceCommand::DistanceCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["phylip"] = tempOutNames;

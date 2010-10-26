@@ -25,6 +25,7 @@ vector<string> DeUniqueSeqsCommand::getValidParameters(){
 //**********************************************************************************************************************
 DeUniqueSeqsCommand::DeUniqueSeqsCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;

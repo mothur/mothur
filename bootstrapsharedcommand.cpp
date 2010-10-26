@@ -34,6 +34,7 @@ vector<string> BootSharedCommand::getValidParameters(){
 //**********************************************************************************************************************
 BootSharedCommand::BootSharedCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["tree"] = tempOutNames;

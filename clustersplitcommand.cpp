@@ -31,6 +31,7 @@ vector<string> ClusterSplitCommand::getValidParameters(){
 //**********************************************************************************************************************
 ClusterSplitCommand::ClusterSplitCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["list"] = tempOutNames;

@@ -46,6 +46,7 @@ vector<string> ConcensusCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 ConcensusCommand::ConcensusCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["tree"] = tempOutNames;

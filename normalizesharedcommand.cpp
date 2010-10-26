@@ -24,6 +24,7 @@ vector<string> NormalizeSharedCommand::getValidParameters(){
 //**********************************************************************************************************************
 NormalizeSharedCommand::NormalizeSharedCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["shared"] = tempOutNames;

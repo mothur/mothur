@@ -25,6 +25,7 @@ vector<string> ParseSFFCommand::getValidParameters(){
 //**********************************************************************************************************************
 ParseSFFCommand::ParseSFFCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["flow"] = tempOutNames;

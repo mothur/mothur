@@ -27,6 +27,7 @@ vector<string> GetLineageCommand::getValidParameters(){
 //**********************************************************************************************************************
 GetLineageCommand::GetLineageCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;

@@ -33,6 +33,7 @@ vector<string> LibShuffCommand::getValidParameters(){
 //**********************************************************************************************************************
 LibShuffCommand::LibShuffCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["coverage"] = tempOutNames;

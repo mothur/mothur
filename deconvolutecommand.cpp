@@ -24,6 +24,7 @@ vector<string> DeconvoluteCommand::getValidParameters(){
 //**********************************************************************************************************************
 DeconvoluteCommand::DeconvoluteCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;

@@ -28,6 +28,7 @@ vector<string> PhylotypeCommand::getValidParameters(){
 //**********************************************************************************************************************
 PhylotypeCommand::PhylotypeCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["list"] = tempOutNames;

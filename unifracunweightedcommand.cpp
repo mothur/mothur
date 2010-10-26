@@ -24,6 +24,8 @@ vector<string> UnifracUnweightedCommand::getValidParameters(){
 //**********************************************************************************************************************
 UnifracUnweightedCommand::UnifracUnweightedCommand(){	
 	try {
+		globaldata = GlobalData::getInstance();
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["unweighted"] = tempOutNames;

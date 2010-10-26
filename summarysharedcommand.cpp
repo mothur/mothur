@@ -47,6 +47,7 @@ vector<string> SummarySharedCommand::getValidParameters(){
 //**********************************************************************************************************************
 SummarySharedCommand::SummarySharedCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["summary"] = tempOutNames;

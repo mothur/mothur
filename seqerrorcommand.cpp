@@ -24,6 +24,7 @@ vector<string> SeqErrorCommand::getValidParameters(){
 //**********************************************************************************************************************
 SeqErrorCommand::SeqErrorCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["error"] = tempOutNames;
