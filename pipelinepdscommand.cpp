@@ -358,6 +358,8 @@ bool PipelineCommand::checkForValidAndRequiredParameters(string name, string opt
 				
 		if (name == "system") { return false; }
 		
+		if (name == "system") { return false; }
+		
 		//get shell of the command so we can check to make sure its valid without running it
 		Command* command = cFactory->getCommand(name);
 			
