@@ -26,6 +26,7 @@ vector<string> RemoveLineageCommand::getValidParameters(){
 //**********************************************************************************************************************
 RemoveLineageCommand::RemoveLineageCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;

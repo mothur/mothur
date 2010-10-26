@@ -31,6 +31,7 @@ vector<string> ClearcutCommand::getValidParameters(){
 //**********************************************************************************************************************
 ClearcutCommand::ClearcutCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["tree"] = tempOutNames;

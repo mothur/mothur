@@ -24,6 +24,7 @@ vector<string> PhyloDiversityCommand::getValidParameters(){
 //**********************************************************************************************************************
 PhyloDiversityCommand::PhyloDiversityCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["phylodiv"] = tempOutNames;

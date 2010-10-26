@@ -25,6 +25,7 @@ vector<string> ClassifyOtuCommand::getValidParameters(){
 //**********************************************************************************************************************
 ClassifyOtuCommand::ClassifyOtuCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["constaxonomy"] = tempOutNames;

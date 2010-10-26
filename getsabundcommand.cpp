@@ -24,6 +24,7 @@ vector<string> GetSAbundCommand::getValidParameters(){
 //**********************************************************************************************************************
 GetSAbundCommand::GetSAbundCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["sabund"] = tempOutNames;

@@ -26,6 +26,7 @@ vector<string> PreClusterCommand::getValidParameters(){
 //**********************************************************************************************************************
 PreClusterCommand::PreClusterCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;

@@ -24,6 +24,7 @@ vector<string> ParsimonyCommand::getValidParameters(){
 //**********************************************************************************************************************
 ParsimonyCommand::ParsimonyCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["parsimony"] = tempOutNames;

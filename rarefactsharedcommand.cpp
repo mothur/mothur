@@ -26,6 +26,7 @@ vector<string> RareFactSharedCommand::getValidParameters(){
 //**********************************************************************************************************************
 RareFactSharedCommand::RareFactSharedCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["sharedrarefaction"] = tempOutNames;

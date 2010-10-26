@@ -25,6 +25,7 @@ vector<string> PCACommand::getValidParameters(){
 //**********************************************************************************************************************
 PCACommand::PCACommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["pcoa"] = tempOutNames;

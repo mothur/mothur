@@ -30,6 +30,7 @@ vector<string> ClassifySeqsCommand::getValidParameters(){
 //**********************************************************************************************************************
 ClassifySeqsCommand::ClassifySeqsCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["taxonomy"] = tempOutNames;

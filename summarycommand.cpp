@@ -49,6 +49,7 @@ vector<string> SummaryCommand::getValidParameters(){
 //**********************************************************************************************************************
 SummaryCommand::SummaryCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["summary"] = tempOutNames;

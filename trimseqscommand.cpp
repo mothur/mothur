@@ -26,6 +26,7 @@ vector<string> TrimSeqsCommand::getValidParameters(){
 //**********************************************************************************************************************
 TrimSeqsCommand::TrimSeqsCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;

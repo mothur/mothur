@@ -25,6 +25,7 @@ vector<string> FilterSeqsCommand::getValidParameters(){
 //**********************************************************************************************************************
 FilterSeqsCommand::FilterSeqsCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;

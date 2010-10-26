@@ -25,6 +25,7 @@ vector<string> ParseListCommand::getValidParameters(){
 //**********************************************************************************************************************
 ParseListCommand::ParseListCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["list"] = tempOutNames;

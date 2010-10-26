@@ -25,6 +25,7 @@ vector<string> SffInfoCommand::getValidParameters(){
 //**********************************************************************************************************************
 SffInfoCommand::SffInfoCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;

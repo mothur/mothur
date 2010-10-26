@@ -24,6 +24,7 @@ vector<string> UnifracWeightedCommand::getValidParameters(){
 //**********************************************************************************************************************
 UnifracWeightedCommand::UnifracWeightedCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["weighted"] = tempOutNames;

@@ -24,6 +24,7 @@ vector<string> GetRelAbundCommand::getValidParameters(){
 //**********************************************************************************************************************
 GetRelAbundCommand::GetRelAbundCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["relabund"] = tempOutNames;

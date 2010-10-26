@@ -72,6 +72,7 @@ vector<string> CollectCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 CollectCommand::CollectCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["sobs"] = tempOutNames;

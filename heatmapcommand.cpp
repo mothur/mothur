@@ -24,6 +24,7 @@ vector<string> HeatMapCommand::getValidParameters(){
 //**********************************************************************************************************************
 HeatMapCommand::HeatMapCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["svg"] = tempOutNames;

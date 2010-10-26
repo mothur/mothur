@@ -24,6 +24,7 @@ vector<string> ClusterCommand::getValidParameters(){
 //**********************************************************************************************************************
 ClusterCommand::ClusterCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["list"] = tempOutNames;

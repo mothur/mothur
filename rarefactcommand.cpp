@@ -62,6 +62,7 @@ vector<string> RareFactCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 RareFactCommand::RareFactCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["rarefaction"] = tempOutNames;

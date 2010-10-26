@@ -34,6 +34,8 @@ vector<string> TreeGroupCommand::getValidParameters(){
 //**********************************************************************************************************************
 TreeGroupCommand::TreeGroupCommand(){	
 	try {
+		abort = true;
+		globaldata = GlobalData::getInstance();
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["tree"] = tempOutNames;

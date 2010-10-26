@@ -64,6 +64,7 @@ vector<string> AlignCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 AlignCommand::AlignCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;

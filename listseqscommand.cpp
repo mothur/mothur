@@ -26,6 +26,7 @@ vector<string> ListSeqsCommand::getValidParameters(){
 //**********************************************************************************************************************
 ListSeqsCommand::ListSeqsCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["accnos"] = tempOutNames;

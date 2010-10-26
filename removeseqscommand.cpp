@@ -26,6 +26,7 @@ vector<string> RemoveSeqsCommand::getValidParameters(){
 //**********************************************************************************************************************
 RemoveSeqsCommand::RemoveSeqsCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;

@@ -24,6 +24,7 @@ vector<string> GetRAbundCommand::getValidParameters(){
 //**********************************************************************************************************************
 GetRAbundCommand::GetRAbundCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["rabund"] = tempOutNames;

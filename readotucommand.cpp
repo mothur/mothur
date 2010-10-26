@@ -24,6 +24,7 @@ vector<string> ReadOtuCommand::getValidParameters(){
 //**********************************************************************************************************************
 ReadOtuCommand::ReadOtuCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["rabund"] = tempOutNames;

@@ -24,6 +24,7 @@ vector<string> MergeFileCommand::getValidParameters(){
 //**********************************************************************************************************************
 MergeFileCommand::MergeFileCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["merge"] = tempOutNames;

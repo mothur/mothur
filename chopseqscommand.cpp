@@ -25,6 +25,7 @@ vector<string> ChopSeqsCommand::getValidParameters(){
 //**********************************************************************************************************************
 ChopSeqsCommand::ChopSeqsCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;

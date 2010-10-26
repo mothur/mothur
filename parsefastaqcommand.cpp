@@ -25,6 +25,7 @@ vector<string> ParseFastaQCommand::getValidParameters(){
 //**********************************************************************************************************************
 ParseFastaQCommand::ParseFastaQCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;

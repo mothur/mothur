@@ -26,6 +26,7 @@ vector<string> ScreenSeqsCommand::getValidParameters(){
 //**********************************************************************************************************************
 ScreenSeqsCommand::ScreenSeqsCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;

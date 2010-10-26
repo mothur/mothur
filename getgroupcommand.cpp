@@ -24,6 +24,7 @@ vector<string> GetgroupCommand::getValidParameters(){
 //**********************************************************************************************************************
 GetgroupCommand::GetgroupCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["bootgroup"] = tempOutNames;

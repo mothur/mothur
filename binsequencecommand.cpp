@@ -48,6 +48,7 @@ vector<string> BinSeqCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 BinSeqCommand::BinSeqCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;

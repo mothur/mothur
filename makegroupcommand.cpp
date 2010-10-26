@@ -25,6 +25,7 @@ vector<string> MakeGroupCommand::getValidParameters(){
 //**********************************************************************************************************************
 MakeGroupCommand::MakeGroupCommand(){	
 	try {
+		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["group"] = tempOutNames;
