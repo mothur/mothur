@@ -404,7 +404,7 @@ int RemoveSeqsCommand::readName(){
 		while(!in.eof()){
 			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
 
-			in >> firstCol;				
+			in >> firstCol;		m->gobble(in);		
 			in >> secondCol;			
 
 			vector<string> parsedNames;

@@ -28,9 +28,9 @@ ifeq  ($(strip $(64BIT_VERSION)),yes)
 	 CXXFLAGS += -DBIT_VERSION
 endif
 
-MOTHUR_FILES = "\"../Release\""
+MOTHUR_FILES = "\"../release\""
 
-RELEASE_DATE = "\"10/22/2010\""
+RELEASE_DATE = "\"10/26/2010\""
 VERSION = "\"1.14.0\""
 
 CXXFLAGS += -DRELEASE_DATE=${RELEASE_DATE} -DVERSION=${VERSION}

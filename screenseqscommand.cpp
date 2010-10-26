@@ -1007,6 +1007,9 @@ int ScreenSeqsCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& 
 					delete buf3;
 				}
 			}
+			
+			//report progress
+			if((i) % 100 == 0){	m->mothurOut("Processing sequence: " + toString(i)); m->mothurOutEndLine();		}
 		}
 				
 		return 1;
