@@ -183,15 +183,14 @@ void PipelineCommand::help(){
 	try {
 		 m->mothurOut("The pipeline command is designed to guide you through your analysis using mothur.\n"); 
 		 m->mothurOut("The pipeline command parameters are pipeline, sff, oligos, align, chimera, classify, taxonomy and processors.\n"); 
-		 m->mothurOut("The sff parameter allows you to enter your sff file. It is required.\n"); 
-		 m->mothurOut("The oligos parameter allows you to enter your oligos file. It is required.\n"); 
-		 m->mothurOut("The align parameter allows you to enter a template to use with the aligner. It is required.\n"); 
-		 m->mothurOut("The chimera parameter allows you to enter a template to use for chimera detection. It is required.\n"); 
-		 m->mothurOut("The classify parameter allows you to enter a template to use for classification. It is required.\n"); 
-		 m->mothurOut("The taxonomy parameter allows you to enter a taxonomy file for the classify template to use for classification. It is required.\n"); 
+		 m->mothurOut("The sff parameter allows you to enter your sff file. It is required, if not using pipeline parameter.\n"); 
+		 m->mothurOut("The oligos parameter allows you to enter your oligos file. It is required, if not using pipeline parameter.\n"); 
+		 m->mothurOut("The align parameter allows you to enter a template to use with the aligner. It is required, if not using pipeline parameter.\n"); 
+		 m->mothurOut("The chimera parameter allows you to enter a template to use for chimera detection. It is required, if not using pipeline parameter.\n"); 
+		 m->mothurOut("The classify parameter allows you to enter a template to use for classification. It is required, if not using pipeline parameter.\n"); 
+		 m->mothurOut("The taxonomy parameter allows you to enter a taxonomy file for the classify template to use for classification. It is required, if not using pipeline parameter.\n"); 
 		 m->mothurOut("The processors parameter allows you to specify the number of processors to use. The default is 1.\n");
 		 m->mothurOut("The pipeline parameter allows you to enter your own pipeline file. This file should look like a mothur batchfile, but where you would be using a mothur generated file, you can use mothurmade instead.\n"); 
-		 m->mothurOut("First column contains the command name, and the second column contains the parameter options or 'defaults', meaning use defaults. You may leave out file options.\n");
 		 m->mothurOut("Example: trim.seqs(processors=8, allfiles=T, maxambig=0, maxhomop=8, flip=T, bdiffs=1, pdiffs=2, qwindowaverage=35, qwindowsize=50, fasta=may1.v13.fasta, oligos=may1.v13.oligos, qfile=may1.v13.qual)\n");
 		 m->mothurOut("then, you could enter unique.seqs(fasta=mothurmade), and mothur would use the .trim.fasta file from the trim.seqs command. \n");
 		 m->mothurOut("then you could enter align.seqs(candidate=mothurmade, template=silva.v13.align, processors=8). , and mothur would use the .trim.unique.fasta file from the unique.seqs command. \n");

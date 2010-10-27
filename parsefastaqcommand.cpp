@@ -120,7 +120,7 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
 
 void ParseFastaQCommand::help(){
 	try {
-		m->mothurOut("The fastq.info command reads a fastaQ file and creates a fasta and quality file.\n");
+		m->mothurOut("The fastq.info command reads a fastq file and creates a fasta and quality file.\n");
 		m->mothurOut("The fastq.info command parameter is fastq, and it is required.\n");
 		m->mothurOut("The fastq.info command should be in the following format: fastq.info(fastaq=yourFastaQFile).\n");
 		m->mothurOut("Example fastq.info(fastaq=test.fastaq).\n");
