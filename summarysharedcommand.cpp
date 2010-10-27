@@ -229,13 +229,14 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 void SummarySharedCommand::help(){
 	try {
 		m->mothurOut("The summary.shared command can only be executed after a successful read.otu command.\n");
-		m->mothurOut("The summary.shared command parameters are label, calc and all.  No parameters are required.\n");
+		m->mothurOut("The summary.shared command parameters are label, calc, distance and all.  No parameters are required.\n");
 		m->mothurOut("The summary.shared command should be in the following format: \n");
 		m->mothurOut("summary.shared(label=yourLabel, calc=yourEstimators, groups=yourGroups).\n");
 		m->mothurOut("Example summary.shared(label=unique-.01-.03, groups=B-C, calc=sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan).\n");
 		validCalculator->printCalc("sharedsummary", cout);
 		m->mothurOut("The default value for calc is sharedsobs-sharedchao-sharedace-jabund-sorensonabund-jclass-sorclass-jest-sorest-thetayc-thetan\n");
 		m->mothurOut("The default value for groups is all the groups in your groupfile.\n");
+		m->mothurOut("The distance parameter allows you to indicate you would like a distance file created for each calculator for each label, default=f.\n");
 		m->mothurOut("The label parameter is used to analyze specific labels in your input.\n");
 		m->mothurOut("The all parameter is used to specify if you want the estimate of all your groups together.  This estimate can only be made for sharedsobs and sharedchao calculators. The default is false.\n");
 		m->mothurOut("If you use sharedchao and run into memory issues, set all to false. \n");
