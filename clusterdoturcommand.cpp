@@ -13,7 +13,7 @@
 //**********************************************************************************************************************
 vector<string> ClusterDoturCommand::getValidParameters(){	
 	try {
-		string AlignArray[] =  {"phylip","cutoff","precision","method","outputdir","inputdir"};
+		string AlignArray[] =  {"phylip","name","hard","cutoff","precision","method","outputdir","inputdir"};
 		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 		return myArray;
 	}
@@ -72,7 +72,7 @@ ClusterDoturCommand::ClusterDoturCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"phylip","cutoff","precision","method","outputdir","inputdir"};
+			string Array[] =  {"phylip","name","cutoff","hard","precision","method","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
