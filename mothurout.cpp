@@ -1563,6 +1563,7 @@ bool MothurOut::checkReleaseVersion(ifstream& file, string version) {
 		exit(1);
 	}
 }
+
 /**************************************************************************************************/
 
 

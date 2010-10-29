@@ -45,6 +45,8 @@
 		A72B3A7C118B4D1B004B9F8D /* phylodiversity.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = phylodiversity.cpp; sourceTree = "<group>"; };
 		A72C66A1125B356F0058C2F9 /* pipelinepdscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pipelinepdscommand.h; sourceTree = "<group>"; };
 		A72C66A2125B356F0058C2F9 /* pipelinepdscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pipelinepdscommand.cpp; sourceTree = "<group>"; };
+		A72E295D127ADCE300905B79 /* clusterclassic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clusterclassic.h; sourceTree = "<group>"; };
+		A72E295E127ADCE300905B79 /* clusterclassic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clusterclassic.cpp; sourceTree = "<group>"; };
 		A732505E11E49EF100484B90 /* sffinfocommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sffinfocommand.h; sourceTree = "<group>"; };
 		A732505F11E49EF100484B90 /* sffinfocommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sffinfocommand.cpp; sourceTree = "<group>"; };
 		A73953DA11987ED100B0B160 /* chopseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chopseqscommand.h; sourceTree = "<group>"; };
@@ -56,6 +58,10 @@
 		A74A9C03124B72DB000D5D25 /* clusterfragmentscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clusterfragmentscommand.h; sourceTree = "<group>"; };
 		A74A9C04124B72DB000D5D25 /* clusterfragmentscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clusterfragmentscommand.cpp; sourceTree = "<group>"; };
 		A7639F8D1175DF35008F5578 /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
+		A7653CB112789EFD009D6C09 /* subsamplecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = subsamplecommand.h; sourceTree = "<group>"; };
+		A7653CB212789EFD009D6C09 /* subsamplecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = subsamplecommand.cpp; sourceTree = "<group>"; };
+		A7653D111278B09C009D6C09 /* clusterdoturcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clusterdoturcommand.h; sourceTree = "<group>"; };
+		A7653D121278B09C009D6C09 /* clusterdoturcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clusterdoturcommand.cpp; sourceTree = "<group>"; };
 		A76714DD126DE45A003F359A /* deuniqueseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = deuniqueseqscommand.h; sourceTree = "<group>"; };
 		A76714DE126DE45A003F359A /* deuniqueseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = deuniqueseqscommand.cpp; sourceTree = "<group>"; };
 		A768D95D1248FEAA008AB1D0 /* mothur */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = mothur; sourceTree = "<group>"; };
@@ -524,6 +530,8 @@
 				A7DA1FFF113FECD400BF472F /* blastalign.cpp */,
 				A7DA201F113FECD400BF472F /* cluster.cpp */,
 				A7DA2020113FECD400BF472F /* cluster.hpp */,
+				A72E295D127ADCE300905B79 /* clusterclassic.h */,
+				A72E295E127ADCE300905B79 /* clusterclassic.cpp */,
 				A7CB593B11402EF90010EB83 /* calculators */,
 				A7CB594A11402FB40010EB83 /* chimeras */,
 				A7CB594511402F6E0010EB83 /* classifers */,
@@ -762,6 +770,8 @@
 				A7D215C911996C6E00F13F13 /* clearcutcommand.cpp */,
 				A7DA2022113FECD400BF472F /* clustercommand.h */,
 				A7DA2021113FECD400BF472F /* clustercommand.cpp */,
+				A7653D111278B09C009D6C09 /* clusterdoturcommand.h */,
+				A7653D121278B09C009D6C09 /* clusterdoturcommand.cpp */,
 				A74A9C03124B72DB000D5D25 /* clusterfragmentscommand.h */,
 				A74A9C04124B72DB000D5D25 /* clusterfragmentscommand.cpp */,
 				A71D924311AEB42400D00CBC /* clustersplitcommand.h */,
@@ -890,6 +900,8 @@
 				A71D924411AEB42400D00CBC /* splitabundcommand.cpp */,
 				A7F139481247C3CB0033324C /* splitgroupscommand.h */,
 				A7F139491247C3CB0033324C /* splitgroupscommand.cpp */,
+				A7653CB112789EFD009D6C09 /* subsamplecommand.h */,
+				A7653CB212789EFD009D6C09 /* subsamplecommand.cpp */,
 				A7DA2155113FECD400BF472F /* summarycommand.h */,
 				A7DA2154113FECD400BF472F /* summarycommand.cpp */,
 				A7DA2159113FECD400BF472F /* summarysharedcommand.h */,
@@ -1112,7 +1124,6 @@
 			};
 			buildConfigurationList = 1DEB919308733D9F0010E9CD /* Build configuration list for PBXProject "Mothur" */;
 			compatibilityVersion = "Xcode 3.0";
-			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				English,
