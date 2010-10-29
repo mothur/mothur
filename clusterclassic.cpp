@@ -1,0 +1,476 @@
+/*
+ *  clusterclassic.cpp
+ *  Mothur
+ *
+ *  Created by westcott on 10/29/10.
+ *  Copyright 2010 Schloss Lab. All rights reserved.
+ *
+ */
+
+#include "clusterclassic.h"
+#include "progress.hpp"
+
+/***********************************************************************/
+ClusterClassic::ClusterClassic(float c, string f) : method(f), smallDist(1e6), nseqs(0) {
+	try {
+		mapWanted = false;  //set to true by mgcluster to speed up overlap merge
+	
+		//save so you can modify as it changes in average neighbor
+		cutoff = c;
+		m = MothurOut::getInstance();
+		globaldata = GlobalData::getInstance();
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterClassic", "ClusterClassic");
+		exit(1);
+	}
+}
+/***********************************************************************/
+int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
+	try {
+		double distance;
+		int square;
+		string name;
+		vector<string> matrixNames;
+		
+		ifstream fileHandle;
+		m->openInputFile(filename, fileHandle);
+		
+		fileHandle >> nseqs >> name;
+
+		matrixNames.push_back(name);
+
+		if(nameMap == NULL){
+				list = new ListVector(nseqs);
+				list->set(0, name);
+		}
+		else{
+				list = new ListVector(nameMap->getListVector());
+				if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); m->mothurOutEndLine(); }
+		}
+		
+		//initialize distance matrix to cutoff
+		dMatrix.resize(nseqs);
+		colDist temp(0, 0, cutoff);
+		rowSmallDists.resize(nseqs, temp);
+		for (int i = 1; i < nseqs; i++) {			
+			dMatrix[i].resize(i, cutoff);		
+		}												
+														
+		
+		char d;
+		while((d=fileHandle.get()) != EOF){
+
+				if(isalnum(d)){
+						square = 1;
+						fileHandle.putback(d);
+						for(int i=0;i<nseqs;i++){
+								fileHandle >> distance;
+						}
+						break;
+				}
+				if(d == '\n'){
+						square = 0;
+						break;
+				}
+		}
+
+		Progress* reading;
+
+		if(square == 0){
+
+				reading = new Progress("Reading matrix:     ", nseqs * (nseqs - 1) / 2);
+
+				int        index = 0;
+
+				for(int i=1;i<nseqs;i++){
+						if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+						
+						fileHandle >> name;
+						matrixNames.push_back(name);
+		
+
+						//there's A LOT of repeated code throughout this method...
+						if(nameMap == NULL){
+								list->set(i, name);
+						
+								for(int j=0;j<i;j++){
+								
+										if (m->control_pressed) { delete reading; fileHandle.close(); return 0;  }
+										
+										fileHandle >> distance;
+							
+										if (distance == -1) { distance = 1000000; }
+										else if (globaldata->sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+								
+										if(distance < cutoff){
+											dMatrix[i][j] = distance;
+											if (distance < smallDist) { smallDist = distance; }
+											if (rowSmallDists[i].dist > distance) {  rowSmallDists[i].dist = distance; rowSmallDists[i].col = j; rowSmallDists[i].row = i; }
+											if (rowSmallDists[j].dist > distance) {  rowSmallDists[j].dist = distance; rowSmallDists[j].col = i; rowSmallDists[j].row = j; }
+										}
+										index++;
+										reading->update(index);
+								}
+				
+						}
+						else{
+								if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); m->mothurOutEndLine(); }
+				
+								for(int j=0;j<i;j++){
+										fileHandle >> distance;
+										
+										if (m->control_pressed) { delete reading; fileHandle.close(); return 0;  }
+				
+										if (distance == -1) { distance = 1000000; }
+										else if (globaldata->sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+										
+										if(distance < cutoff){
+											if (distance < smallDist) { smallDist = distance; }
+											
+											int row = nameMap->get(matrixNames[i]);
+											int col = nameMap->get(matrixNames[j]);
+											
+											if (row < col) {  dMatrix[col][row] = distance; }
+											else { dMatrix[row][col] = distance; }
+											
+											if (rowSmallDists[row].dist > distance) {  rowSmallDists[row].dist = distance; rowSmallDists[row].col = col; rowSmallDists[row].row = row; }
+											if (rowSmallDists[col].dist > distance) {  rowSmallDists[col].dist = distance; rowSmallDists[col].col = row; rowSmallDists[col].row = col; }
+										}
+										index++;
+										reading->update(index);
+								}
+						}
+				}
+		}
+		else{
+
+				reading = new Progress("Reading matrix:     ", nseqs * nseqs);
+		
+				int index = nseqs;
+
+				for(int i=1;i<nseqs;i++){
+						fileHandle >> name;                
+						matrixNames.push_back(name);
+						
+						if(nameMap == NULL){
+								list->set(i, name);
+								for(int j=0;j<nseqs;j++){
+										fileHandle >> distance;
+										
+										if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+										
+										if (distance == -1) { distance = 1000000; }
+										else if (globaldata->sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
+										
+										if(distance < cutoff && j < i){
+											if (distance < smallDist) { smallDist = distance; }
+											
+											dMatrix[i][j] = distance;
+											if (rowSmallDists[i].dist > distance) {  rowSmallDists[i].dist = distance; rowSmallDists[i].col = j; rowSmallDists[i].row = i; }
+											if (rowSmallDists[j].dist > distance) {  rowSmallDists[j].dist = distance; rowSmallDists[j].col = i; rowSmallDists[j].row = j; }
+										}
+										index++;
+										reading->update(index);
+								}
+						
+						}
+						else{
+								if(nameMap->count(name)==0){        m->mothurOut("Error: Sequence '" + name + "' was not found in the names file, please correct"); m->mothurOutEndLine(); }
+				
+								for(int j=0;j<nseqs;j++){
+										fileHandle >> distance;
+										
+										if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+										
+									   if (distance == -1) { distance = 1000000; }
+										else if (globaldata->sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.                                                        
+										
+										if(distance < cutoff && j < i){
+											if (distance < smallDist) { smallDist = distance; }
+											
+											int row = nameMap->get(matrixNames[i]);
+											int col = nameMap->get(matrixNames[j]);
+											
+											if (row < col) {  dMatrix[col][row] = distance; }
+											else { dMatrix[row][col] = distance; }
+											
+											if (rowSmallDists[row].dist > distance) {  rowSmallDists[row].dist = distance; rowSmallDists[row].col = col; rowSmallDists[row].row = row; }
+											if (rowSmallDists[col].dist > distance) {  rowSmallDists[col].dist = distance; rowSmallDists[col].col = row; rowSmallDists[col].row = col; }
+										}
+										index++;
+										reading->update(index);
+								}
+						}
+				}
+		}
+		
+		if (m->control_pressed) {  fileHandle.close();  delete reading; return 0; }
+		
+		reading->finish();
+		delete reading;
+
+		list->setLabel("0");
+		rabund = new RAbundVector(list->getRAbundVector());
+		
+		fileHandle.close();
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterClassic", "readPhylipFile");
+		exit(1);
+	}
+
+}
+/***********************************************************************/
+//sets smallCol and smallRow, returns distance
+double ClusterClassic::getSmallCell() {
+	try {
+		
+		smallDist = cutoff;
+		smallRow = 1;
+		smallCol = 0;
+		
+		vector<colDist> mins;
+		
+		for(int i=0;i<nseqs;i++){ 
+
+			if (rowSmallDists[i].dist < smallDist) {
+				mins.clear();
+				mins.push_back(rowSmallDists[i]); 
+				smallDist = rowSmallDists[i].dist;
+			}else if (rowSmallDists[i].dist == smallDist) {
+				mins.push_back(rowSmallDists[i]);
+			}
+		}
+		
+		if (mins.size() > 0) {
+			int zrand = 0;
+			if (mins.size() > 1) {
+				//pick random number between 0 and mins.size()
+				zrand = (int)((float)(rand()) / (RAND_MAX / (mins.size()-1) + 1));
+			}
+			
+			smallRow = mins[zrand].row;
+			smallCol = mins[zrand].col;
+		
+		}
+	//cout << smallRow << '\t' << smallCol << '\t' << smallDist << endl;
+	
+		if (smallRow < smallCol) { dMatrix[smallCol][smallRow] = cutoff; }
+		else { dMatrix[smallRow][smallCol] = cutoff; }
+		
+		return smallDist;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterClassic", "getSmallCell");
+		exit(1);
+	}
+}
+/***********************************************************************/
+void ClusterClassic::clusterBins(){
+	try {
+	//	cout << smallCol << '\t' << smallRow << '\t' << smallDist << '\t' << rabund->get(smallRow) << '\t' << rabund->get(smallCol);
+
+		rabund->set(smallCol, rabund->get(smallRow)+rabund->get(smallCol));	
+		rabund->set(smallRow, 0);	
+		rabund->setLabel(toString(smallDist));
+
+	//	cout << '\t' << rabund->get(smallRow) << '\t' << rabund->get(smallCol) << endl;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterClassic", "clusterBins");
+		exit(1);
+	}
+}
+/***********************************************************************/
+void ClusterClassic::clusterNames(){
+	try {
+	//	cout << smallCol << '\t' << smallRow << '\t' << smallDist << '\t' << list->get(smallRow) << '\t' << list->get(smallCol);
+		if (mapWanted) {  updateMap();  }
+		
+		list->set(smallCol, list->get(smallRow)+','+list->get(smallCol));
+		list->set(smallRow, "");	
+		list->setLabel(toString(smallDist));
+	
+	//	cout << '\t' << list->get(smallRow) << '\t' << list->get(smallCol) << endl;
+    }
+	catch(exception& e) {
+		m->errorOut(e, "ClusterClassic", "clusterNames");
+		exit(1);
+	}
+}
+/***********************************************************************/
+void ClusterClassic::update(double& cutOFF){
+	try {
+//cout << "before update " << endl;
+//print();		
+		getSmallCell();
+		
+		int r, c;
+		//because we only store lt, we need to make sure we grab the right location
+		if (smallRow < smallCol) { c = smallRow; r = smallCol; } //smallRow is really our column value
+		else { r = smallRow; c = smallCol; } //smallRow is the row value
+		
+		//reset rows smallest distance
+		rowSmallDists[r].dist = cutoff; rowSmallDists[r].row = 0; rowSmallDists[r].col = 0;
+		rowSmallDists[c].dist = cutoff; rowSmallDists[c].row = 0; rowSmallDists[c].col = 0;
+		
+		//if your rows smallest distance is from smallRow or smallCol, reset
+		for(int i=0;i<nseqs;i++){
+			if ((rowSmallDists[i].row == r) || (rowSmallDists[i].row == c) || (rowSmallDists[i].col == r) || (rowSmallDists[i].col == c)) {
+				rowSmallDists[i].dist = cutoff; rowSmallDists[i].row = 0; rowSmallDists[i].col = 0;
+			}
+		}
+		
+		for(int i=0;i<nseqs;i++){
+			if(i != r && i != c){
+				double distRow, distCol, newDist;
+				if (i > r) { distRow = dMatrix[i][r]; }
+				else { distRow =  dMatrix[r][i]; }
+				
+				if (i > c) { distCol = dMatrix[i][c]; dMatrix[i][c] = cutoff; } //like removeCell
+				else { distCol =  dMatrix[c][i]; dMatrix[c][i] = cutoff; }
+					
+				if(method == "furthest"){
+					newDist = max(distRow, distCol);
+				}
+				else if (method == "average"){
+					if ((distRow == cutoff) && (distCol == cutoff)) { //you are merging with a value above cutoff
+						newDist = cutoff; //eliminate value
+					}else if ((distRow == cutoff) && (distCol != cutoff)) { //you are merging with a value above cutoff
+						newDist = cutoff; //eliminate value
+						if (cutOFF > distCol) { cutOFF = distCol; }
+					}else if ((distRow != cutoff) && (distCol == cutoff)) { //you are merging with a value above cutoff
+						newDist = cutoff; //eliminate value
+						if (cutOFF > distRow) { cutOFF = distRow; }
+					}else {
+						int rowBin = rabund->get(r);
+						int colBin = rabund->get(c);
+						newDist = (colBin * distCol + rowBin * distRow) / (rowBin + colBin);
+					}
+				}
+				else if (method == "weighted"){
+					if ((distRow == cutoff) && (distCol == cutoff)) { //you are merging with a value above cutoff
+						newDist = cutoff; //eliminate value
+					}else if ((distRow == cutoff) && (distCol != cutoff)) { //you are merging with a value above cutoff
+						newDist = cutoff; //eliminate value
+						if (cutOFF > distCol) { cutOFF = distCol; }
+					}else if ((distRow != cutoff) && (distCol == cutoff)) { //you are merging with a value above cutoff
+						newDist = cutoff; //eliminate value
+						if (cutOFF > distRow) { cutOFF = distRow; }
+					}else {
+						newDist = (distCol + distRow) / 2.0;
+					}
+				}
+				else if (method == "nearest"){
+					newDist = min(distRow, distCol);
+				}
+				
+				if (i > r) { dMatrix[i][r] = newDist; }
+				else { dMatrix[r][i] = newDist; }
+				
+				if (newDist < rowSmallDists[i].dist) {  rowSmallDists[i].dist = newDist; rowSmallDists[i].col = r; rowSmallDists[i].row = i;  }
+			}
+			//cout << "rowsmall = " << i << '\t' << rowSmallDists[i].dist << endl;	
+		}
+			
+		clusterBins();
+		clusterNames();
+	
+		//find new small for 2 rows we just merged
+		colDist temp(0,0,100.0);
+		rowSmallDists[r] = temp;
+
+		for (int i = 0; i < dMatrix[r].size(); i++) {
+			if (dMatrix[r][i] < rowSmallDists[r].dist) { rowSmallDists[r].dist = dMatrix[r][i]; rowSmallDists[r].col = r; rowSmallDists[r].row = i; }
+		}
+		for (int i = dMatrix[r].size()+1; i < dMatrix.size(); i++) {
+			if (dMatrix[i][dMatrix[r].size()] < rowSmallDists[r].dist) { rowSmallDists[r].dist = dMatrix[i][dMatrix[r].size()]; rowSmallDists[r].col = r; rowSmallDists[r].row = i; }
+		}
+		
+		rowSmallDists[c] = temp;
+		for (int i = 0; i < dMatrix[c].size(); i++) {
+			if (dMatrix[c][i] < rowSmallDists[c].dist) { rowSmallDists[c].dist = dMatrix[c][i]; rowSmallDists[c].col = c; rowSmallDists[c].row = i; }
+		}
+		for (int i = dMatrix[c].size()+1; i < dMatrix.size(); i++) {
+			if (dMatrix[i][dMatrix[c].size()] < rowSmallDists[c].dist) { rowSmallDists[c].dist = dMatrix[i][dMatrix[c].size()]; rowSmallDists[c].col = c; rowSmallDists[c].row = i; }
+		}
+		
+		//cout << "after update " << endl;
+		//print();
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterClassic", "update");
+		exit(1);
+	}
+}
+/***********************************************************************/
+void ClusterClassic::setMapWanted(bool f)  {  
+	try {
+		mapWanted = f;
+		
+		//initialize map
+		for (int i = 0; i < list->getNumBins(); i++) {
+			
+			//parse bin 
+			string names = list->get(i);
+			while (names.find_first_of(',') != -1) { 
+				//get name from bin
+				string name = names.substr(0,names.find_first_of(','));
+				//save name and bin number
+				seq2Bin[name] = i;
+				names = names.substr(names.find_first_of(',')+1, names.length());
+			}
+			
+			//get last name
+			seq2Bin[names] = i;
+		}
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterClassic", "setMapWanted");
+		exit(1);
+	}
+}
+/***********************************************************************/
+void ClusterClassic::updateMap() {
+try {
+		//update location of seqs in smallRow since they move to smallCol now
+		string names = list->get(smallRow);
+		while (names.find_first_of(',') != -1) { 
+			//get name from bin
+			string name = names.substr(0,names.find_first_of(','));
+			//save name and bin number
+			seq2Bin[name] = smallCol;
+			names = names.substr(names.find_first_of(',')+1, names.length());
+		}
+			
+		//get last name
+		seq2Bin[names] = smallCol;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterClassic", "updateMap");
+		exit(1);
+	}
+}
+/***********************************************************************/
+void ClusterClassic::print() {
+try {
+		//update location of seqs in smallRow since they move to smallCol now
+		for (int i = 0; i < dMatrix.size(); i++) {
+			cout << "row = " << i << '\t';
+			for (int j = 0; j < dMatrix[i].size(); j++) {
+				cout << dMatrix[i][j] << '\t';
+			}
+			cout << endl;
+		}
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterClassic", "updateMap");
+		exit(1);
+	}
+}
+/***********************************************************************/
+

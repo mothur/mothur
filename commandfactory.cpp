@@ -95,6 +95,7 @@
 #include "pipelinepdscommand.h"
 #include "deuniqueseqscommand.h"
 #include "pairwiseseqscommand.h"
+#include "clusterdoturcommand.h"
 
 
 /*******************************************************/
@@ -195,6 +196,7 @@ CommandFactory::CommandFactory(){
 	commands["remove.lineage"]		= "remove.lineage";
 	commands["fastq.info"]			= "fastq.info";
 	commands["deunique.seqs"]		= "deunique.seqs";
+	commands["cluster.classic"]		= "cluster.classic";
 	commands["pairwise.seqs"]		= "MPIEnabled";
 	commands["pipeline.pds"]		= "MPIEnabled";
 	commands["classify.seqs"]		= "MPIEnabled"; 
@@ -341,6 +343,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "pipeline.pds")			{	command = new PipelineCommand(optionString);				}
 		else if(commandName == "deunique.seqs")			{	command = new DeUniqueSeqsCommand(optionString);			}
 		else if(commandName == "pairwise.seqs")			{	command = new PairwiseSeqsCommand(optionString);			}
+		else if(commandName == "cluster.classic")		{	command = new ClusterDoturCommand(optionString);			}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -454,6 +457,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "fastq.info")			{	pipecommand = new ParseFastaQCommand(optionString);				}
 		else if(commandName == "deunique.seqs")			{	pipecommand = new DeUniqueSeqsCommand(optionString);			}
 		else if(commandName == "pairwise.seqs")			{	pipecommand = new PairwiseSeqsCommand(optionString);			}
+		else if(commandName == "cluster.classic")		{	pipecommand = new ClusterDoturCommand(optionString);			}
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -555,6 +559,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "fastq.info")			{	shellcommand = new ParseFastaQCommand();			}
 		else if(commandName == "deunique.seqs")			{	shellcommand = new DeUniqueSeqsCommand();			}
 		else if(commandName == "pairwise.seqs")			{	shellcommand = new PairwiseSeqsCommand();			}
+		else if(commandName == "cluster.classic")		{	shellcommand = new ClusterDoturCommand();			}
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

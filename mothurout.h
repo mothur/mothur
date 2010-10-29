@@ -12,6 +12,7 @@
 
 #include "mothur.h"
 
+
 /***********************************************/
 
 class MothurOut {
@@ -88,7 +89,6 @@ class MothurOut {
 		int control_pressed;
 		bool executing;
 		
-
 	private:
 		static MothurOut* _uniqueInstance;
 		MothurOut( const MothurOut& ); // Disable copy constructor
