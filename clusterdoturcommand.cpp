@@ -223,7 +223,7 @@ int ClusterDoturCommand::execute(){
 		oldRAbund = *rabund;
 		oldList = *list;
 
-		double saveCutoff = cutoff;
+		//double saveCutoff = cutoff;
 		
 		int estart = time(NULL);
 	
@@ -266,11 +266,11 @@ int ClusterDoturCommand::execute(){
 		
 		delete cluster; delete nameMap; delete list; delete rabund;
 	
-		if (saveCutoff != cutoff) { 
-			if (hard)	{  saveCutoff = m->ceilDist(saveCutoff, precision);	}
-			else		{	saveCutoff = m->roundDist(saveCutoff, precision);  }
-			m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine(); 
-		}
+		//if (saveCutoff != cutoff) { 
+		//	if (hard)	{  saveCutoff = m->ceilDist(saveCutoff, precision);	}
+		//	else		{	saveCutoff = m->roundDist(saveCutoff, precision);  }
+		//	m->mothurOut("changed cutoff to " + toString(cutoff)); m->mothurOutEndLine(); 
+		//}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

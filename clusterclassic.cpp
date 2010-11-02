@@ -17,7 +17,7 @@ ClusterClassic::ClusterClassic(float c, string f) : method(f), smallDist(1e6), n
 	
 		//save so you can modify as it changes in average neighbor
 		cutoff = c;
-		aboveCutoff = cutoff + 1.0;
+		aboveCutoff = cutoff + 10000.0;
 		m = MothurOut::getInstance();
 		globaldata = GlobalData::getInstance();
 	}
@@ -104,12 +104,12 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 										if (distance == -1) { distance = 1000000; }
 										else if (globaldata->sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
 								
-										if(distance < cutoff){
+										//if(distance < cutoff){
 											dMatrix[i][j] = distance;
 											if (distance < smallDist) { smallDist = distance; }
 											//if (rowSmallDists[i].dist > distance) {  rowSmallDists[i].dist = distance; rowSmallDists[i].col = j; rowSmallDists[i].row = i; }
 											//if (rowSmallDists[j].dist > distance) {  rowSmallDists[j].dist = distance; rowSmallDists[j].col = i; rowSmallDists[j].row = j; }
-										}
+										//}
 										index++;
 										reading->update(index);
 								}
@@ -126,7 +126,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 										if (distance == -1) { distance = 1000000; }
 										else if (globaldata->sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
 										
-										if(distance < cutoff){
+										//if(distance < cutoff){
 											if (distance < smallDist) { smallDist = distance; }
 											
 											int row = nameMap->get(matrixNames[i]);
@@ -137,7 +137,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 											
 											//if (rowSmallDists[row].dist > distance) {  rowSmallDists[row].dist = distance; rowSmallDists[row].col = col; rowSmallDists[row].row = row; }
 											//if (rowSmallDists[col].dist > distance) {  rowSmallDists[col].dist = distance; rowSmallDists[col].col = row; rowSmallDists[col].row = col; }
-										}
+										//}
 										index++;
 										reading->update(index);
 								}
@@ -164,7 +164,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 										if (distance == -1) { distance = 1000000; }
 										else if (globaldata->sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.
 										
-										if(distance < cutoff && j < i){
+										if(j < i){
 											if (distance < smallDist) { smallDist = distance; }
 											
 											dMatrix[i][j] = distance;
@@ -187,7 +187,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 									   if (distance == -1) { distance = 1000000; }
 										else if (globaldata->sim) { distance = 1.0 - distance;  }  //user has entered a sim matrix that we need to convert.                                                        
 										
-										if(distance < cutoff && j < i){
+										if(j < i){
 											if (distance < smallDist) { smallDist = distance; }
 											
 											int row = nameMap->get(matrixNames[i]);
@@ -342,32 +342,12 @@ void ClusterClassic::update(double& cutOFF){
 					newDist = max(distRow, distCol);
 				}
 				else if (method == "average"){
-					if ((distRow == aboveCutoff) && (distCol == aboveCutoff)) { //you are merging with a value above cutoff
-						newDist = aboveCutoff; //eliminate value
-					}else if ((distRow == aboveCutoff) && (distCol != aboveCutoff)) { //you are merging with a value above cutoff
-						newDist = aboveCutoff; //eliminate value
-						if (cutOFF > distCol) { cutOFF = distCol; }
-					}else if ((distRow != aboveCutoff) && (distCol == aboveCutoff)) { //you are merging with a value above cutoff
-						newDist = aboveCutoff; //eliminate value
-						if (cutOFF > distRow) { cutOFF = distRow; }
-					}else {
-						int rowBin = rabund->get(r);
-						int colBin = rabund->get(c);
-						newDist = (colBin * distCol + rowBin * distRow) / (rowBin + colBin);
-					}
+					int rowBin = rabund->get(r);
+					int colBin = rabund->get(c);
+					newDist = (colBin * distCol + rowBin * distRow) / (rowBin + colBin);
 				}
 				else if (method == "weighted"){
-					if ((distRow == aboveCutoff) && (distCol == aboveCutoff)) { //you are merging with a value above cutoff
-						newDist = aboveCutoff; //eliminate value
-					}else if ((distRow == aboveCutoff) && (distCol != aboveCutoff)) { //you are merging with a value above cutoff
-						newDist = aboveCutoff; //eliminate value
-						if (cutOFF > distCol) { cutOFF = distCol; }
-					}else if ((distRow != aboveCutoff) && (distCol == aboveCutoff)) { //you are merging with a value above cutoff
-						newDist = aboveCutoff; //eliminate value
-						if (cutOFF > distRow) { cutOFF = distRow; }
-					}else {
-						newDist = (distCol + distRow) / 2.0;
-					}
+					newDist = (distCol + distRow) / 2.0;
 				}
 				else if (method == "nearest"){
 					newDist = min(distRow, distCol);

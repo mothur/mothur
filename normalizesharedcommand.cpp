@@ -310,7 +310,8 @@ int NormalizeSharedCommand::normalize(vector<SharedRAbundVector*>& thisLookUp, o
 					float newNorm = relabund * norm;
 					//round to nearest int
 					finalNorm = (int) floor((newNorm + 0.5));
-					
+					//cout << thisLookUp[i]->getGroup() << '\t' << abund << '\t' << relabund << '\t' << norm << '\t' << newNorm << '\t' << finalNorm << endl;
+				
 				}else{ m->mothurOut(method + " is not a valid scaling option."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
 				
 				//cout << finalNorm << '\t';
