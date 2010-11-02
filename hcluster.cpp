@@ -26,7 +26,7 @@ HCluster::HCluster(RAbundVector* rav, ListVector* lv, string ms, string d, NameA
 			clusterArray.push_back(temp);
 		}
 		
-		if (method != "average") {
+		if ((method == "furthest") || (method == "nearest")) {
 			m->openInputFile(distfile, filehandle);
 		}else{  
 			processFile();  
@@ -273,7 +273,7 @@ bool HCluster::update(int row, int col, float distance){
 		//you don't want to cluster with yourself
 		if (smallRow != smallCol) {
 			
-			if (method != "average") {
+			if ((method == "furthest") || (method == "nearest")) {
 				//can we cluster???
 				if (method == "nearest") { cluster = true;  }
 				else{ //assume furthest
@@ -358,7 +358,7 @@ vector<seqDist> HCluster::getSeqs(){
 	try {
 		vector<seqDist> sameSeqs;
 		
-		if(method != "average") {
+		if ((method == "furthest") || (method == "nearest")) {
 			sameSeqs = getSeqsFNNN();
 		}else{
 			sameSeqs = getSeqsAN();	
@@ -638,9 +638,14 @@ int HCluster::combineFile() {
 			
 			float average;
 			if (it2Merge != smallRowColValues[1].end()) { //if yes, then average
-				//weighted average
-				int total = clusterArray[smallRow].numSeq + clusterArray[smallCol].numSeq;
-				average = ((clusterArray[smallRow].numSeq * itMerge->second) + (clusterArray[smallCol].numSeq * it2Merge->second)) / (float) total;
+				//average
+				if (method == "average") {
+					int total = clusterArray[smallRow].numSeq + clusterArray[smallCol].numSeq;
+					average = ((clusterArray[smallRow].numSeq * itMerge->second) + (clusterArray[smallCol].numSeq * it2Merge->second)) / (float) total;
+				}else { //weighted
+					average = ((itMerge->second * 1.0) + (it2Merge->second * 1.0)) / (float) 2.0;				
+				}
+				
 				smallRowColValues[1].erase(it2Merge);
 				
 				seqDist temp(clusterArray[smallRow].parent, itMerge->first, average);

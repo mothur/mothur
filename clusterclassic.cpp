@@ -17,6 +17,7 @@ ClusterClassic::ClusterClassic(float c, string f) : method(f), smallDist(1e6), n
 	
 		//save so you can modify as it changes in average neighbor
 		cutoff = c;
+		aboveCutoff = cutoff + 1.0;
 		m = MothurOut::getInstance();
 		globaldata = GlobalData::getInstance();
 	}
@@ -51,10 +52,10 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 		
 		//initialize distance matrix to cutoff
 		dMatrix.resize(nseqs);
-		colDist temp(0, 0, cutoff);
-		rowSmallDists.resize(nseqs, temp);
+		//colDist temp(0, 0, aboveCutoff);
+		//rowSmallDists.resize(nseqs, temp);
 		for (int i = 1; i < nseqs; i++) {			
-			dMatrix[i].resize(i, cutoff);		
+			dMatrix[i].resize(i, aboveCutoff);		
 		}												
 														
 		
@@ -106,8 +107,8 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 										if(distance < cutoff){
 											dMatrix[i][j] = distance;
 											if (distance < smallDist) { smallDist = distance; }
-											if (rowSmallDists[i].dist > distance) {  rowSmallDists[i].dist = distance; rowSmallDists[i].col = j; rowSmallDists[i].row = i; }
-											if (rowSmallDists[j].dist > distance) {  rowSmallDists[j].dist = distance; rowSmallDists[j].col = i; rowSmallDists[j].row = j; }
+											//if (rowSmallDists[i].dist > distance) {  rowSmallDists[i].dist = distance; rowSmallDists[i].col = j; rowSmallDists[i].row = i; }
+											//if (rowSmallDists[j].dist > distance) {  rowSmallDists[j].dist = distance; rowSmallDists[j].col = i; rowSmallDists[j].row = j; }
 										}
 										index++;
 										reading->update(index);
@@ -134,8 +135,8 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 											if (row < col) {  dMatrix[col][row] = distance; }
 											else { dMatrix[row][col] = distance; }
 											
-											if (rowSmallDists[row].dist > distance) {  rowSmallDists[row].dist = distance; rowSmallDists[row].col = col; rowSmallDists[row].row = row; }
-											if (rowSmallDists[col].dist > distance) {  rowSmallDists[col].dist = distance; rowSmallDists[col].col = row; rowSmallDists[col].row = col; }
+											//if (rowSmallDists[row].dist > distance) {  rowSmallDists[row].dist = distance; rowSmallDists[row].col = col; rowSmallDists[row].row = row; }
+											//if (rowSmallDists[col].dist > distance) {  rowSmallDists[col].dist = distance; rowSmallDists[col].col = row; rowSmallDists[col].row = col; }
 										}
 										index++;
 										reading->update(index);
@@ -167,8 +168,8 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 											if (distance < smallDist) { smallDist = distance; }
 											
 											dMatrix[i][j] = distance;
-											if (rowSmallDists[i].dist > distance) {  rowSmallDists[i].dist = distance; rowSmallDists[i].col = j; rowSmallDists[i].row = i; }
-											if (rowSmallDists[j].dist > distance) {  rowSmallDists[j].dist = distance; rowSmallDists[j].col = i; rowSmallDists[j].row = j; }
+											//if (rowSmallDists[i].dist > distance) {  rowSmallDists[i].dist = distance; rowSmallDists[i].col = j; rowSmallDists[i].row = i; }
+											//if (rowSmallDists[j].dist > distance) {  rowSmallDists[j].dist = distance; rowSmallDists[j].col = i; rowSmallDists[j].row = j; }
 										}
 										index++;
 										reading->update(index);
@@ -195,8 +196,8 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 											if (row < col) {  dMatrix[col][row] = distance; }
 											else { dMatrix[row][col] = distance; }
 											
-											if (rowSmallDists[row].dist > distance) {  rowSmallDists[row].dist = distance; rowSmallDists[row].col = col; rowSmallDists[row].row = row; }
-											if (rowSmallDists[col].dist > distance) {  rowSmallDists[col].dist = distance; rowSmallDists[col].col = row; rowSmallDists[col].row = col; }
+											//if (rowSmallDists[row].dist > distance) {  rowSmallDists[row].dist = distance; rowSmallDists[row].col = col; rowSmallDists[row].row = row; }
+											//if (rowSmallDists[col].dist > distance) {  rowSmallDists[col].dist = distance; rowSmallDists[col].col = row; rowSmallDists[col].row = col; }
 										}
 										index++;
 										reading->update(index);
@@ -226,20 +227,24 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 double ClusterClassic::getSmallCell() {
 	try {
 		
-		smallDist = cutoff;
+		smallDist = aboveCutoff;
 		smallRow = 1;
 		smallCol = 0;
 		
 		vector<colDist> mins;
 		
-		for(int i=0;i<nseqs;i++){ 
+		for(int i=1;i<nseqs;i++){
+			for(int j=0;j<i;j++){ 
+				if (dMatrix[i][j] < smallDist) {
+					mins.clear();
+					colDist temp(i, j, dMatrix[i][j]);
+					mins.push_back(temp); 
+					smallDist = dMatrix[i][j];
+				}else if (dMatrix[i][j] == smallDist) {
+					colDist temp(i, j, dMatrix[i][j]);
+					mins.push_back(temp); 
 
-			if (rowSmallDists[i].dist < smallDist) {
-				mins.clear();
-				mins.push_back(rowSmallDists[i]); 
-				smallDist = rowSmallDists[i].dist;
-			}else if (rowSmallDists[i].dist == smallDist) {
-				mins.push_back(rowSmallDists[i]);
+				}
 			}
 		}
 		
@@ -255,9 +260,9 @@ double ClusterClassic::getSmallCell() {
 		
 		}
 	//cout << smallRow << '\t' << smallCol << '\t' << smallDist << endl;
-	
-		if (smallRow < smallCol) { dMatrix[smallCol][smallRow] = cutoff; }
-		else { dMatrix[smallRow][smallCol] = cutoff; }
+		//eliminate smallCell
+		if (smallRow < smallCol) { dMatrix[smallCol][smallRow] = aboveCutoff; }
+		else { dMatrix[smallRow][smallCol] = aboveCutoff; }
 		
 		return smallDist;
 		
@@ -272,8 +277,8 @@ void ClusterClassic::clusterBins(){
 	try {
 	//	cout << smallCol << '\t' << smallRow << '\t' << smallDist << '\t' << rabund->get(smallRow) << '\t' << rabund->get(smallCol);
 
-		rabund->set(smallCol, rabund->get(smallRow)+rabund->get(smallCol));	
-		rabund->set(smallRow, 0);	
+		rabund->set(smallRow, rabund->get(smallRow)+rabund->get(smallCol));	
+		rabund->set(smallCol, 0);	
 		rabund->setLabel(toString(smallDist));
 
 	//	cout << '\t' << rabund->get(smallRow) << '\t' << rabund->get(smallCol) << endl;
@@ -289,8 +294,8 @@ void ClusterClassic::clusterNames(){
 	//	cout << smallCol << '\t' << smallRow << '\t' << smallDist << '\t' << list->get(smallRow) << '\t' << list->get(smallCol);
 		if (mapWanted) {  updateMap();  }
 		
-		list->set(smallCol, list->get(smallRow)+','+list->get(smallCol));
-		list->set(smallRow, "");	
+		list->set(smallRow, list->get(smallRow)+','+list->get(smallCol));
+		list->set(smallCol, "");	
 		list->setLabel(toString(smallDist));
 	
 	//	cout << '\t' << list->get(smallRow) << '\t' << list->get(smallCol) << endl;
@@ -308,20 +313,21 @@ void ClusterClassic::update(double& cutOFF){
 		getSmallCell();
 		
 		int r, c;
+		r = smallRow; c = smallCol;
 		//because we only store lt, we need to make sure we grab the right location
-		if (smallRow < smallCol) { c = smallRow; r = smallCol; } //smallRow is really our column value
-		else { r = smallRow; c = smallCol; } //smallRow is the row value
+		//if (smallRow < smallCol) { c = smallRow; r = smallCol; } //smallRow is really our column value
+		//else { r = smallRow; c = smallCol; } //smallRow is the row value
 		
 		//reset rows smallest distance
-		rowSmallDists[r].dist = cutoff; rowSmallDists[r].row = 0; rowSmallDists[r].col = 0;
-		rowSmallDists[c].dist = cutoff; rowSmallDists[c].row = 0; rowSmallDists[c].col = 0;
+		//rowSmallDists[r].dist = aboveCutoff; rowSmallDists[r].row = 0; rowSmallDists[r].col = 0;
+		//rowSmallDists[c].dist = aboveCutoff; rowSmallDists[c].row = 0; rowSmallDists[c].col = 0;
 		
 		//if your rows smallest distance is from smallRow or smallCol, reset
-		for(int i=0;i<nseqs;i++){
-			if ((rowSmallDists[i].row == r) || (rowSmallDists[i].row == c) || (rowSmallDists[i].col == r) || (rowSmallDists[i].col == c)) {
-				rowSmallDists[i].dist = cutoff; rowSmallDists[i].row = 0; rowSmallDists[i].col = 0;
-			}
-		}
+		//for(int i=0;i<nseqs;i++){
+			//if ((rowSmallDists[i].row == r) || (rowSmallDists[i].row == c) || (rowSmallDists[i].col == r) || (rowSmallDists[i].col == c)) {
+			//	rowSmallDists[i].dist = aboveCutoff; rowSmallDists[i].row = 0; rowSmallDists[i].col = 0;
+			//}
+		//}
 		
 		for(int i=0;i<nseqs;i++){
 			if(i != r && i != c){
@@ -329,20 +335,20 @@ void ClusterClassic::update(double& cutOFF){
 				if (i > r) { distRow = dMatrix[i][r]; }
 				else { distRow =  dMatrix[r][i]; }
 				
-				if (i > c) { distCol = dMatrix[i][c]; dMatrix[i][c] = cutoff; } //like removeCell
-				else { distCol =  dMatrix[c][i]; dMatrix[c][i] = cutoff; }
+				if (i > c) { distCol = dMatrix[i][c]; dMatrix[i][c] = aboveCutoff; } //like removeCell
+				else { distCol =  dMatrix[c][i]; dMatrix[c][i] = aboveCutoff; }
 					
 				if(method == "furthest"){
 					newDist = max(distRow, distCol);
 				}
 				else if (method == "average"){
-					if ((distRow == cutoff) && (distCol == cutoff)) { //you are merging with a value above cutoff
-						newDist = cutoff; //eliminate value
-					}else if ((distRow == cutoff) && (distCol != cutoff)) { //you are merging with a value above cutoff
-						newDist = cutoff; //eliminate value
+					if ((distRow == aboveCutoff) && (distCol == aboveCutoff)) { //you are merging with a value above cutoff
+						newDist = aboveCutoff; //eliminate value
+					}else if ((distRow == aboveCutoff) && (distCol != aboveCutoff)) { //you are merging with a value above cutoff
+						newDist = aboveCutoff; //eliminate value
 						if (cutOFF > distCol) { cutOFF = distCol; }
-					}else if ((distRow != cutoff) && (distCol == cutoff)) { //you are merging with a value above cutoff
-						newDist = cutoff; //eliminate value
+					}else if ((distRow != aboveCutoff) && (distCol == aboveCutoff)) { //you are merging with a value above cutoff
+						newDist = aboveCutoff; //eliminate value
 						if (cutOFF > distRow) { cutOFF = distRow; }
 					}else {
 						int rowBin = rabund->get(r);
@@ -351,13 +357,13 @@ void ClusterClassic::update(double& cutOFF){
 					}
 				}
 				else if (method == "weighted"){
-					if ((distRow == cutoff) && (distCol == cutoff)) { //you are merging with a value above cutoff
-						newDist = cutoff; //eliminate value
-					}else if ((distRow == cutoff) && (distCol != cutoff)) { //you are merging with a value above cutoff
-						newDist = cutoff; //eliminate value
+					if ((distRow == aboveCutoff) && (distCol == aboveCutoff)) { //you are merging with a value above cutoff
+						newDist = aboveCutoff; //eliminate value
+					}else if ((distRow == aboveCutoff) && (distCol != aboveCutoff)) { //you are merging with a value above cutoff
+						newDist = aboveCutoff; //eliminate value
 						if (cutOFF > distCol) { cutOFF = distCol; }
-					}else if ((distRow != cutoff) && (distCol == cutoff)) { //you are merging with a value above cutoff
-						newDist = cutoff; //eliminate value
+					}else if ((distRow != aboveCutoff) && (distCol == aboveCutoff)) { //you are merging with a value above cutoff
+						newDist = aboveCutoff; //eliminate value
 						if (cutOFF > distRow) { cutOFF = distRow; }
 					}else {
 						newDist = (distCol + distRow) / 2.0;
@@ -370,7 +376,7 @@ void ClusterClassic::update(double& cutOFF){
 				if (i > r) { dMatrix[i][r] = newDist; }
 				else { dMatrix[r][i] = newDist; }
 				
-				if (newDist < rowSmallDists[i].dist) {  rowSmallDists[i].dist = newDist; rowSmallDists[i].col = r; rowSmallDists[i].row = i;  }
+				//if (newDist < rowSmallDists[i].dist) {  rowSmallDists[i].dist = newDist; rowSmallDists[i].col = r; rowSmallDists[i].row = i;  }
 			}
 			//cout << "rowsmall = " << i << '\t' << rowSmallDists[i].dist << endl;	
 		}
@@ -379,23 +385,23 @@ void ClusterClassic::update(double& cutOFF){
 		clusterNames();
 	
 		//find new small for 2 rows we just merged
-		colDist temp(0,0,100.0);
-		rowSmallDists[r] = temp;
+		//colDist temp(0,0,100.0);
+		//rowSmallDists[r] = temp;
 
-		for (int i = 0; i < dMatrix[r].size(); i++) {
-			if (dMatrix[r][i] < rowSmallDists[r].dist) { rowSmallDists[r].dist = dMatrix[r][i]; rowSmallDists[r].col = r; rowSmallDists[r].row = i; }
-		}
-		for (int i = dMatrix[r].size()+1; i < dMatrix.size(); i++) {
-			if (dMatrix[i][dMatrix[r].size()] < rowSmallDists[r].dist) { rowSmallDists[r].dist = dMatrix[i][dMatrix[r].size()]; rowSmallDists[r].col = r; rowSmallDists[r].row = i; }
-		}
+		//for (int i = 0; i < dMatrix[r].size(); i++) {
+		//	if (dMatrix[r][i] < rowSmallDists[r].dist) { rowSmallDists[r].dist = dMatrix[r][i]; rowSmallDists[r].col = r; rowSmallDists[r].row = i; }
+		//}
+		//for (int i = dMatrix[r].size()+1; i < dMatrix.size(); i++) {
+		//	if (dMatrix[i][dMatrix[r].size()] < rowSmallDists[r].dist) { rowSmallDists[r].dist = dMatrix[i][dMatrix[r].size()]; rowSmallDists[r].col = r; rowSmallDists[r].row = i; }
+		//}
 		
-		rowSmallDists[c] = temp;
-		for (int i = 0; i < dMatrix[c].size(); i++) {
-			if (dMatrix[c][i] < rowSmallDists[c].dist) { rowSmallDists[c].dist = dMatrix[c][i]; rowSmallDists[c].col = c; rowSmallDists[c].row = i; }
-		}
-		for (int i = dMatrix[c].size()+1; i < dMatrix.size(); i++) {
-			if (dMatrix[i][dMatrix[c].size()] < rowSmallDists[c].dist) { rowSmallDists[c].dist = dMatrix[i][dMatrix[c].size()]; rowSmallDists[c].col = c; rowSmallDists[c].row = i; }
-		}
+		//rowSmallDists[c] = temp;
+		//for (int i = 0; i < dMatrix[c].size(); i++) {
+		//	if (dMatrix[c][i] < rowSmallDists[c].dist) { rowSmallDists[c].dist = dMatrix[c][i]; rowSmallDists[c].col = c; rowSmallDists[c].row = i; }
+		//}
+		//for (int i = dMatrix[c].size()+1; i < dMatrix.size(); i++) {
+		//	if (dMatrix[i][dMatrix[c].size()] < rowSmallDists[c].dist) { rowSmallDists[c].dist = dMatrix[i][dMatrix[c].size()]; rowSmallDists[c].col = c; rowSmallDists[c].row = i; }
+		//}
 		
 		//cout << "after update " << endl;
 		//print();

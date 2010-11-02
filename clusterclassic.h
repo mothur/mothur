@@ -43,19 +43,19 @@ private:
 		int col;
 		int row;
 		double dist;
-		colDist(int i, int r, double d) : row(r), col(i), dist(d) {}
+		colDist(int r, int c, double d) : row(r), col(c), dist(d) {}
 	};
 	
 	RAbundVector* rabund;
 	ListVector* list;
 	vector< vector<double> > dMatrix;	
-	vector<colDist> rowSmallDists;
+	//vector<colDist> rowSmallDists;
 	
 	int smallRow;
 	int smallCol, nseqs;
 	double smallDist;
 	bool mapWanted;
-	float cutoff;
+	double cutoff, aboveCutoff;
 	map<string, int> seq2Bin;
 	string method;
 	

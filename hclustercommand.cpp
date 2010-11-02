@@ -171,8 +171,8 @@ HClusterCommand::HClusterCommand(string option)  {
 			method = validParameter.validFile(parameters, "method", false);
 			if (method == "not found") { method = "furthest"; }
 			
-			if ((method == "furthest") || (method == "nearest") || (method == "average")) { }
-			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest or average."); m->mothurOutEndLine(); abort = true; }
+			if ((method == "furthest") || (method == "nearest") || (method == "average") || (method == "weighted")) { }
+			else { m->mothurOut("Not a valid clustering method.  Valid clustering algorithms are furthest, nearest, average or weighted."); m->mothurOutEndLine(); abort = true; }
 
 			showabund = validParameter.validFile(parameters, "showabund", false);
 			if (showabund == "not found") { showabund = "T"; }
@@ -192,6 +192,7 @@ HClusterCommand::HClusterCommand(string option)  {
 				
 				if (method == "furthest")		{ tag = "fn";  }
 				else if (method == "nearest")	{ tag = "nn";  }
+				else if (method == "weighted")	{ tag = "wn";  }
 				else							{ tag = "an";  }
 			
 				m->openOutputFile(fileroot+ tag + ".sabund",	sabundFile);
@@ -219,7 +220,7 @@ void HClusterCommand::help(){
 		m->mothurOut("The name parameter allows you to enter your name file and is required if your distance file is in column format. \n");
 		m->mothurOut("The hcluster command should be in the following format: \n");
 		m->mothurOut("hcluster(column=youDistanceFile, name=yourNameFile, method=yourMethod, cutoff=yourCutoff, precision=yourPrecision) \n");
-		m->mothurOut("The acceptable hcluster methods are furthest, nearest and average.\n\n");	
+		m->mothurOut("The acceptable hcluster methods are furthest, nearest, weighted and average.\n\n");	
 	}
 	catch(exception& e) {
 		m->errorOut(e, "HClusterCommand", "help");
