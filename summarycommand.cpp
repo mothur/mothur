@@ -506,52 +506,64 @@ string SummaryCommand::createGroupSummaryFile(int numLines, int numCols, vector<
 		
 		//open each groups summary file
 		string newLabel = "";
-		ifstream* temp;
-		map<string, ifstream*> filehandles;
+		map<string, vector<string> > files;
 		for (int i=0; i<outputNames.size(); i++) {
-			temp = new ifstream;
-			filehandles[outputNames[i]] = temp;
-			m->openInputFile(outputNames[i], *(temp));
+			vector<string> thisFilesLines;
+			
+			ifstream temp;
+			m->openInputFile(outputNames[i], temp);
 			
 			//read through first line - labels
 			string tempLabel;
 			if (i == 0) { //we want to save the labels to output below
 				for (int j = 0; j < numCols+1; j++) {  
-					*(temp) >> tempLabel; 
+					temp >> tempLabel; 
 					
 					if (j == 1) {  newLabel += "group\t" + tempLabel + '\t';
 					}else{  newLabel += tempLabel + '\t';	}
 				}
-			}else{  for (int j = 0; j < numCols+1; j++) {  *(temp) >> tempLabel;  }  }
+			}else{  for (int j = 0; j < numCols+1; j++) {  temp >> tempLabel;  }  }
 			
-			m->gobble(*(temp));
+			m->gobble(temp);
+			
+			//for each label
+			for (int k = 0; k < numLines; k++) {
+				
+				string thisLine = "";
+				string tempLabel;
+					
+				for (int j = 0; j < numCols+1; j++) {  
+					temp >> tempLabel; 
+						
+					//save for later
+					if (j == 1) { thisLine += groups[i] + "\t" + tempLabel + "\t";	}
+					else{  thisLine += tempLabel + "\t";	}
+				}
+					
+				thisLine += "\n";
+				
+				thisFilesLines.push_back(thisLine);
+					
+				m->gobble(temp);
+			}
+				
+			files[outputNames[i]] = thisFilesLines;
+			
+			temp.close();
 		}
 		
 		//output label line to new file
 		out << newLabel << endl;
 		
 		//for each label
-		for (int i = 0; i < numLines; i++) {
+		for (int k = 0; k < numLines; k++) {
 		
 			//grab summary data for each group
 			for (int i=0; i<outputNames.size(); i++) {
-				string tempLabel;
-				
-				for (int j = 0; j < numCols+1; j++) {  
-					*(filehandles[outputNames[i]]) >> tempLabel; 
-					
-					//print to combined file
-					if (j == 1) { out << groups[i] << '\t' << tempLabel << '\t';	}
-					else{  out << tempLabel << '\t';	}
-				}
-				
-				out << endl;
-				m->gobble(*(filehandles[outputNames[i]]));
+				out << files[outputNames[i]][k];
 			}
 		}	
 		
-		//close each groups summary file
-		for (int i=0; i<outputNames.size(); i++) {  (*(filehandles[outputNames[i]])).close();  remove(outputNames[i].c_str());  }
 		outputNames.clear();
 		
 		out.close();
