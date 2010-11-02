@@ -442,7 +442,6 @@ int MetaStatsCommand::driver(int start, int num, vector<SharedRAbundVector*>& th
 				}
 				
 				m->mothurOut("Comparing " + setA + " and " + setB + "..."); m->mothurOutEndLine(); 
-				
 				metastat_main(output, thisLookUp[0]->getNumBins(), subset.size(), threshold, iters, data, setACount);
 				
 				m->mothurOutEndLine(); 

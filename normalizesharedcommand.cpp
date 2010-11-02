@@ -12,7 +12,7 @@
 //**********************************************************************************************************************
 vector<string> NormalizeSharedCommand::getValidParameters(){	
 	try {
-		string Array[] =  {"groups","label","scale","outputdir","inputdir","norm"};
+		string Array[] =  {"groups","label","method","outputdir","inputdir","norm"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
@@ -71,7 +71,7 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 		
 		else {
 			//valid paramters for this command
-			string AlignArray[] =  {"groups","label","scale","outputdir","inputdir","norm"};
+			string AlignArray[] =  {"groups","label","method","outputdir","inputdir","norm"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -322,7 +322,7 @@ int NormalizeSharedCommand::normalize(vector<SharedRAbundVector*>& thisLookUp, o
 		 eliminateZeroOTUS(thisLookUp);
 		 
 		  for (int i = 0; i < thisLookUp.size(); i++) {
-			out << thisLookUp[i]->getLabel() << '\t' << thisLookUp[i]->getGroup() << '\t' << thisLookUp[i]->getNumBins() << '\t';
+			out << thisLookUp[i]->getLabel() << '\t' << thisLookUp[i]->getGroup() << '\t';
 			thisLookUp[i]->print(out);
 		 }
 		

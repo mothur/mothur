@@ -758,7 +758,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename, vector<unsigned
 		//seach for filePos of each first name in the qfile and save in qfileFilePos
 		ifstream inQual;
 		m->openInputFile(qfilename, inQual);
-			
+		
 		string input;
 		while(!inQual.eof()){	
 			input = m->getline(inQual);
@@ -783,6 +783,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename, vector<unsigned
 			if (firstSeqNames.size() == 0) { break; }
 		}
 		inQual.close();
+		
 		
 		if (firstSeqNames.size() != 0) { 
 			for (map<string, int>::iterator it = firstSeqNames.begin(); it != firstSeqNames.end(); it++) {

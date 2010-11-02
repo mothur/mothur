@@ -300,6 +300,7 @@ int GetSeqsCommand::readFasta(){
 		in.close();	
 		out.close();
 		
+		
 		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
 		outputNames.push_back(outputFileName);  outputTypes["fasta"].push_back(outputFileName); 
 		

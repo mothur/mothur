@@ -23,10 +23,11 @@ int metastat_main (char* outputFileName, int numRows, int numCols, double thresh
  
   // Initialize the matrices
   size = row*col;
+//printf("size = %d\n.", size);
   double matrix[row][col];
   double pmatrix[size],pmatrix2[size],permuted[size];  
   double storage[row][9];
-  
+//printf("here\n.", size);  
   for (i=0;i<row;i++){
   	for (j =0;j<9;j++){
       storage[i][j]=0; 		
