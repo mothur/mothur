@@ -131,11 +131,20 @@ void SharedRAbundFloatVector::set(int binNumber, float newBinSize, string groupn
 		numSeqs += (newBinSize - oldBinSize);
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SharedRAbundVector", "set");
+		m->errorOut(e, "SharedRAbundFloatVector", "set");
 		exit(1);
 	}
 }
+/***********************************************************************/
 
+void SharedRAbundFloatVector::clear(){
+	numBins = 0;
+	maxRank = 0;
+	numSeqs = 0;
+	data.clear();
+	for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
+	lookup.clear();
+}
 /***********************************************************************/
 float SharedRAbundFloatVector::getAbundance(int index){
 	return data[index].abundance;	

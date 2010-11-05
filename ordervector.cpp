@@ -73,7 +73,14 @@ int OrderVector::getMaxRank(){
 	if(needToUpdate == 1){	updateStats();	}
 	return maxRank;
 }
+/***********************************************************************/
 
+void OrderVector::clear(){
+	numBins = 0;
+	maxRank = 0;
+	numSeqs = 0;
+	data.clear();
+}
 /***********************************************************************/
 
 

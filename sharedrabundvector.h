@@ -55,6 +55,7 @@ public:
 	void pop_back();
 	void resize(int);
 	int size();
+	void clear();
 	vector<individual>::reverse_iterator rbegin();
 	vector<individual>::reverse_iterator rend();
 	

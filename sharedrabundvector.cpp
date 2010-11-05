@@ -205,6 +205,16 @@ vector <individual> SharedRAbundVector::getData(){
 }
 /***********************************************************************/
 
+void SharedRAbundVector::clear(){
+	numBins = 0;
+	maxRank = 0;
+	numSeqs = 0;
+	data.clear();
+	for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
+	lookup.clear();
+}
+/***********************************************************************/
+
 void SharedRAbundVector::push_back(int binSize, string groupName){
 	try {
 		individual newGuy;
@@ -486,15 +496,15 @@ SharedOrderVector SharedRAbundVector::getSharedOrderVector() {
 OrderVector SharedRAbundVector::getOrderVector(map<string,int>* nameMap = NULL) {
 	try {
 		OrderVector ov;
-	
-		for(int i=0;i<data.size();i++){
+		for(int i=0;i<numBins;i++){
 			for(int j=0;j<data[i].abundance;j++){
 				ov.push_back(i);
 			}
 		}
 		random_shuffle(ov.begin(), ov.end());
-
+		
 		ov.setLabel(label);	
+
 		return ov;
 	}
 	catch(exception& e) {

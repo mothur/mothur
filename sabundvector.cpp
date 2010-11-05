@@ -153,7 +153,13 @@ void SAbundVector::print(string prefix, ostream& output){
 	}
 	output << endl;
 }
-
+/***********************************************************************/
+void SAbundVector::clear(){
+	numBins = 0;
+	maxRank = 0;
+	numSeqs = 0;
+	data.clear();	
+}
 /***********************************************************************/
 void SAbundVector::print(ostream& output){
 	try {

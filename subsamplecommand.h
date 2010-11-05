@@ -11,11 +11,12 @@
  */
  
 #include "command.hpp"
-#include "inputdata.h"
-#include "readotu.h"
+#include "globaldata.hpp"
 #include "sharedrabundvector.h"
+#include "listvector.hpp"
+#include "rabundvector.hpp"
+#include "inputdata.h"
 
-class GlobalData;
 
 class SubSampleCommand : public Command {
 
@@ -32,21 +33,19 @@ public:
 	
 private:
 	GlobalData* globaldata;
-	ReadOTUFile* read;
-	InputData* input;
-	vector<SharedRAbundVector*> lookup;
-	ListVector* list;
-	RAbundVector* rabund;
-	SAbundVector* sabund;
 	
-	bool abort, allLines, pickedGroups;
+	bool abort, pickedGroups, allLines;
+	string listfile, groupfile, sharedfile, rabundfile, sabundfile, fastafile, namefile;
 	set<string> labels; //holds labels to be used
 	string groups, label, outputDir;
 	vector<string> Groups, outputNames;
 	map<string, vector<string> > outputTypes;
+	int size;
 	
 	int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
-	int getSubSampleShared(vector<SharedRAbundVector*>&, ofstream&);
+	int getSubSampleShared();
+	int processShared(vector<SharedRAbundVector*>&, ofstream&);
+	
 };
 
 #endif

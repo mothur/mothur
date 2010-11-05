@@ -41,6 +41,7 @@ public:
 	int sum();
 	int sum(int);
 	int numNZ();
+	void clear();
 	vector<int>::reverse_iterator rbegin();
 	vector<int>::reverse_iterator rend();
 	

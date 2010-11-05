@@ -51,6 +51,7 @@ public:
 	void push_back(float, string);  //abundance, groupname
 	void pop_back();
 	void resize(int);
+	void clear();
 	int size();
 	
 	void print(ostream&);

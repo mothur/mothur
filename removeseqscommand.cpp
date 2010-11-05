@@ -14,7 +14,7 @@
 //**********************************************************************************************************************
 vector<string> RemoveSeqsCommand::getValidParameters(){	
 	try {
-		string Array[] =  {"fasta","name", "group", "alignreport", "accnos", "list","taxonomy","outputdir","inputdir", "dups" };
+		string Array[] =  {"fasta","name", "group", "alignreport", "accnos", "qfile","list","taxonomy","outputdir","inputdir", "dups" };
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
@@ -35,6 +35,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(){
 		outputTypes["group"] = tempOutNames;
 		outputTypes["alignreport"] = tempOutNames;
 		outputTypes["list"] = tempOutNames;
+		outputTypes["qfile"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveSeqsCommand", "RemoveSeqsCommand");
@@ -74,7 +75,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","name", "group", "alignreport", "accnos", "list","taxonomy","outputdir","inputdir", "dups" };
+			string Array[] =  {"fasta","name", "group", "alignreport", "accnos", "qfile", "list","taxonomy","outputdir","inputdir", "dups" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -96,6 +97,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 			outputTypes["group"] = tempOutNames;
 			outputTypes["alignreport"] = tempOutNames;
 			outputTypes["list"] = tempOutNames;
+			outputTypes["qfile"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -160,6 +162,14 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
+				
+				it = parameters.find("qfile");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
+				}
 			}
 
 			
@@ -191,6 +201,10 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 			taxfile = validParameter.validFile(parameters, "taxonomy", true);
 			if (taxfile == "not open") { abort = true; }
 			else if (taxfile == "not found") {  taxfile = "";  }
+			
+			qualfile = validParameter.validFile(parameters, "qfile", true);
+			if (qualfile == "not open") { abort = true; }
+			else if (qualfile == "not found") {  qualfile = "";  }			
 
 			
 			string usedDups = "true";
@@ -201,7 +215,7 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 			}
 			dups = m->isTrue(temp);
 			
-			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, group, taxonomy, alignreport or list."); m->mothurOutEndLine(); abort = true; }
+			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (qualfile == ""))  { m->mothurOut("You must provide at least one of the following: fasta, name, group, taxonomy, quality, alignreport or list."); m->mothurOutEndLine(); abort = true; }
 			
 			if ((usedDups != "") && (namefile == "")) {  m->mothurOut("You may only use dups with the name option."); m->mothurOutEndLine();  abort = true; }			
 		}
@@ -216,9 +230,9 @@ RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 
 void RemoveSeqsCommand::help(){
 	try {
-		m->mothurOut("The remove.seqs command reads an .accnos file and at least one of the following file types: fasta, name, group, list, taxonomy or alignreport file.\n");
+		m->mothurOut("The remove.seqs command reads an .accnos file and at least one of the following file types: fasta, name, group, list, taxonomy, quality or alignreport file.\n");
 		m->mothurOut("It outputs a file containing the sequences NOT in the .accnos file.\n");
-		m->mothurOut("The remove.seqs command parameters are accnos, fasta, name, group, list, taxonomy, alignreport and dups.  You must provide accnos and at least one of the file parameters.\n");
+		m->mothurOut("The remove.seqs command parameters are accnos, fasta, name, group, list, taxonomy, qfile, alignreport and dups.  You must provide accnos and at least one of the file parameters.\n");
 		m->mothurOut("The dups parameter allows you to remove the entire line from a name file if you remove any name from the line. default=true. \n");
 		m->mothurOut("The remove.seqs command should be in the following format: remove.seqs(accnos=yourAccnos, fasta=yourFasta).\n");
 		m->mothurOut("Example remove.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n");
@@ -249,6 +263,7 @@ int RemoveSeqsCommand::execute(){
 		if (alignfile != "")		{		readAlign();	}
 		if (listfile != "")			{		readList();		}
 		if (taxfile != "")			{		readTax();		}
+		if (qualfile != "")			{		readQual();		}
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
 		
@@ -304,13 +319,78 @@ int RemoveSeqsCommand::readFasta(){
 		out.close();
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
-		outputTypes["fasta"].push_back(outputFileName); 
+		outputTypes["fasta"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
 		return 0;
 		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveSeqsCommand", "readFasta");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int RemoveSeqsCommand::readQual(){
+	try {
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(qualfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(qualfile)) + "pick" +  m->getExtension(qualfile);
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		
+		
+		ifstream in;
+		m->openInputFile(qualfile, in);
+		string name;
+		
+		bool wroteSomething = false;
+		
+		
+		while(!in.eof()){	
+			string saveName = "";
+			string name = "";
+			string scores = "";
+			
+			in >> name; 
+			
+			if (name.length() != 0) { 
+				saveName = name.substr(1);
+				while (!in.eof())	{	
+					char c = in.get(); 
+					if (c == 10 || c == 13){	break;	}
+					else { name += c; }	
+				} 
+				m->gobble(in);
+			}
+			
+			while(in){
+				char letter= in.get();
+				if(letter == '>'){	in.putback(letter);	break;	}
+				else{ scores += letter; }
+			}
+			
+			m->gobble(in);
+			
+			if (names.count(saveName) == 0) {
+				wroteSomething = true;
+				
+				out << name << endl << scores;
+			}
+			
+			m->gobble(in);
+		}
+		in.close();
+		out.close();
+		
+		
+		if (wroteSomething == false) { m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
+		outputNames.push_back(outputFileName);  outputTypes["qfile"].push_back(outputFileName); 
+		
+		return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RemoveSeqsCommand", "readQual");
 		exit(1);
 	}
 }
@@ -375,7 +455,7 @@ int RemoveSeqsCommand::readList(){
 		out.close();
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
-		outputTypes["list"].push_back(outputFileName); 
+		outputTypes["list"].push_back(outputFileName); outputNames.push_back(outputFileName);
 				
 		return 0;
 
@@ -461,7 +541,7 @@ int RemoveSeqsCommand::readName(){
 		out.close();
 
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
-		outputTypes["name"].push_back(outputFileName);
+		outputTypes["name"].push_back(outputFileName); outputNames.push_back(outputFileName);
 				
 		return 0;
 	}
@@ -505,7 +585,7 @@ int RemoveSeqsCommand::readGroup(){
 		out.close();
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
-		outputTypes["group"].push_back(outputFileName); 
+		outputTypes["group"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
 		return 0;
 	}
@@ -547,7 +627,7 @@ int RemoveSeqsCommand::readTax(){
 		out.close();
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
-		outputTypes["taxonomy"].push_back(outputFileName);
+		outputTypes["taxonomy"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
 		return 0;
 	}
@@ -613,7 +693,7 @@ int RemoveSeqsCommand::readAlign(){
 		out.close();
 		
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
-		outputTypes["alignreport"].push_back(outputFileName);
+		outputTypes["alignreport"].push_back(outputFileName); outputNames.push_back(outputFileName);
 		
 		return 0;
 		

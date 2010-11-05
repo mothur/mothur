@@ -31,7 +31,7 @@ void calc_twosample_ts(double *Pmatrix,int *g,int *nc,int *nr,double
 		       *Ts,double *Tinitial,double *counter1);
 void meanvar(double *pmatrix,int *g,int *nr,int *nc,double *storage);
 void start(double *Imatrix,int *g,int *nr,int *nc,double *testing,
-			double storage[][9]);
+			double**);
 
 int metastat_main (char*, int, int, double, int, double**, int);
 
