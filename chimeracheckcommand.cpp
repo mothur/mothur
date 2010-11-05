@@ -572,7 +572,11 @@ int ChimeraCheckCommand::createProcesses(string outputFileName, string filename)
 				out.close();
 				
 				exit(0);
-			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
+			}else { 
+				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+				exit(0);
+			}
 		}
 		
 		//force parent to wait until all the processes are done

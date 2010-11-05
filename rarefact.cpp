@@ -137,7 +137,11 @@ int Rarefact::createProcesses(vector<int>& procIters, RarefactionCurveData* rcd,
 					displays[i]->outputTempFiles(tempFile);
 				}
 				exit(0);
-			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
+			}else { 
+				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+				exit(0);
+			}
 		}
 		
 		driver(rcd, increment, procIters[0]);

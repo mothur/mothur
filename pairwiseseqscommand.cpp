@@ -536,7 +536,11 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
 				if (output != "square") {  driver(lines[process]->start, lines[process]->end, filename + toString(getpid()) + ".temp", cutoff); }
 				else { driver(lines[process]->start, lines[process]->end, filename + toString(getpid()) + ".temp", "square"); }
 				exit(0);
-			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
+			}else { 
+				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+				for (map<int, int>::iterator it = processIDS.begin(); it != processIDS.end(); it++) { int temp = it->second; kill (temp, SIGINT); }
+				exit(0);
+			}
 		}
 	
 		//force parent to wait until all the processes are done

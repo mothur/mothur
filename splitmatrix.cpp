@@ -77,7 +77,7 @@ int SplitMatrix::splitDistance(){
 int SplitMatrix::splitClassify(){
 	try {
 		cutoff = int(cutoff);
-		
+				
 		map<string, int> seqGroup;
 		map<string, int>::iterator it;
 		map<string, int>::iterator it2;
@@ -182,7 +182,7 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 		//process each distance file
 		for (int i = 0; i < numGroups; i++) { 
 			
-			string options = "fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", cutoff=" + toString(distCutoff);
+			string options = "fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(1) + ", cutoff=" + toString(distCutoff);
 			
 			Command* command = new DistanceCommand(options);
 			command->execute();

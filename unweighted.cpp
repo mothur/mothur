@@ -116,7 +116,11 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 				out.close();
 				
 				exit(0);
-			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
+			}else { 
+				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+				exit(0); 
+			}
 		}
 		
 		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num);
@@ -363,7 +367,11 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 				out.close();
 				
 				exit(0);
-			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
+			}else { 
+				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+				exit(0); 
+			}
 		}
 		
 		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, usingGroups);

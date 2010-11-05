@@ -423,6 +423,21 @@ int DistanceCommand::execute(){
 			else { driver(0, numSeqs, outputFile, "square");  }
 		}else{ //you have multiple processors
 			
+			unsigned long int numDists = 0;
+			
+			if (output == "square") {
+				 numDists = numSeqs * numSeqs;
+			}else {
+				for(int i=0;i<numSeqs;i++){
+					for(int j=0;j<i;j++){
+						numDists++;
+						if (numDists > processors) { break; }
+					}
+				}
+			}
+			
+			if (numDists < processors) { processors = numDists; }
+			
 			for (int i = 0; i < processors; i++) {
 				lines.push_back(new linePair());
 				if (output != "square") {
@@ -432,19 +447,10 @@ int DistanceCommand::execute(){
 					lines[i]->start = int ((float(i)/float(processors)) * numSeqs);
 					lines[i]->end = int ((float(i+1)/float(processors)) * numSeqs);
 				}
+				//cout << i << '\t' << lines[i]->start << '\t' << lines[i]->end << endl;
 			}
 
 			createProcesses(outputFile); 
-		
-			map<int, int>::iterator it = processIDS.begin();
-			rename((outputFile + toString(it->second) + ".temp").c_str(), outputFile.c_str());
-			it++;
-			
-			//append and remove temp files
-			for (; it != processIDS.end(); it++) {
-				m->appendFiles((outputFile + toString(it->second) + ".temp"), outputFile);
-				remove((outputFile + toString(it->second) + ".temp").c_str());
-			}
 		}
 	#else
 		//ifstream inFASTA;
@@ -526,7 +532,7 @@ int DistanceCommand::execute(){
 void DistanceCommand::createProcesses(string filename) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		int process = 0;
+		int process = 1;
 		processIDS.clear();
 		
 		//loop through and create all the processes you want
@@ -540,13 +546,28 @@ void DistanceCommand::createProcesses(string filename) {
 				if (output != "square") {  driver(lines[process]->start, lines[process]->end, filename + toString(getpid()) + ".temp", cutoff); }
 				else { driver(lines[process]->start, lines[process]->end, filename + toString(getpid()) + ".temp", "square"); }
 				exit(0);
-			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
+			}else { 
+				m->mothurOut("[ERROR]: unable to spawn the necessary processes. Error code: " + toString(pid)); m->mothurOutEndLine(); 
+				for (map<int, int>::iterator it = processIDS.begin(); it != processIDS.end(); it++) { int temp = it->second; kill (temp, SIGINT); }
+				exit(0);
+			}
 		}
-	
+		
+		//parent does its part
+		if (output != "square") {  driver(lines[0]->start, lines[0]->end, filename, cutoff); }
+		else { driver(lines[0]->start, lines[0]->end, filename, "square"); }
+		
+		
 		//force parent to wait until all the processes are done
 		for (map<int, int>::iterator it = processIDS.begin(); it != processIDS.end(); it++) { 
 			int temp = it->second;
 			wait(&temp);
+		}
+		
+		//append and remove temp files
+		for (map<int, int>::iterator it = processIDS.begin(); it != processIDS.end(); it++) {
+			m->appendFiles((filename + toString(it->second) + ".temp"), filename);
+			remove((filename + toString(it->second) + ".temp").c_str());
 		}
 #endif
 	}
