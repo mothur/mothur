@@ -349,7 +349,11 @@ int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > na
 				out.close();
 				
 				exit(0);
-			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
+			}else { 
+				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+				exit(0);
+			}
 		}
 		
 		driver(t, namesOfGroupCombos, lines[0].start, lines[0].num, scores);

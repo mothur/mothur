@@ -714,7 +714,11 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 			}else if (pid == 0){
 				driverCreateTrim(filename, qFileName, (trimFile + toString(getpid()) + ".temp"), (scrapFile + toString(getpid()) + ".temp"), (trimQFile + toString(getpid()) + ".temp"), (scrapQFile + toString(getpid()) + ".temp"), (groupFile + toString(getpid()) + ".temp"), fastaNames, qualNames, lines[process], qLines[process]);
 				exit(0);
-			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
+			}else { 
+				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+				exit(0);
+			}
 		}
 		
 		//force parent to wait until all the processes are done

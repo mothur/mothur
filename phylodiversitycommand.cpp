@@ -322,7 +322,11 @@ int PhyloDiversityCommand::createProcesses(vector<int>& procIters, Tree* t, map<
 				out.close();
 				
 				exit(0);
-			}else { m->mothurOut("unable to spawn the necessary processes."); m->mothurOutEndLine(); exit(0); }
+			}else { 
+				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+				exit(0);
+			}
 		}
 		
 		driver(t, div, sumDiv, procIters[0], increment, randomLeaf, numSampledList, outCollect, outSum, true);
