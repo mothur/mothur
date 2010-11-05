@@ -114,7 +114,15 @@ int RAbundVector::get(int index){
 	return data[index];
 	
 }
+/***********************************************************************/
 
+void RAbundVector::clear(){
+	numBins = 0;
+	maxRank = 0;
+	numSeqs = 0;
+	data.clear();
+	
+}
 /***********************************************************************/
 
 void RAbundVector::push_back(int binSize){

@@ -96,6 +96,7 @@
 #include "deuniqueseqscommand.h"
 #include "pairwiseseqscommand.h"
 #include "clusterdoturcommand.h"
+#include "subsamplecommand.h"
 
 
 /*******************************************************/
@@ -197,6 +198,7 @@ CommandFactory::CommandFactory(){
 	commands["fastq.info"]			= "fastq.info";
 	commands["deunique.seqs"]		= "deunique.seqs";
 	commands["cluster.classic"]		= "cluster.classic";
+	commands["sub.sample"]			= "sub.sample";
 	commands["pairwise.seqs"]		= "MPIEnabled";
 	commands["pipeline.pds"]		= "MPIEnabled";
 	commands["classify.seqs"]		= "MPIEnabled"; 
@@ -344,6 +346,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "deunique.seqs")			{	command = new DeUniqueSeqsCommand(optionString);			}
 		else if(commandName == "pairwise.seqs")			{	command = new PairwiseSeqsCommand(optionString);			}
 		else if(commandName == "cluster.classic")		{	command = new ClusterDoturCommand(optionString);			}
+		else if(commandName == "sub.sample")			{	command = new SubSampleCommand(optionString);				}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -458,6 +461,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "deunique.seqs")			{	pipecommand = new DeUniqueSeqsCommand(optionString);			}
 		else if(commandName == "pairwise.seqs")			{	pipecommand = new PairwiseSeqsCommand(optionString);			}
 		else if(commandName == "cluster.classic")		{	pipecommand = new ClusterDoturCommand(optionString);			}
+		else if(commandName == "sub.sample")			{	pipecommand = new SubSampleCommand(optionString);				}
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -560,6 +564,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "deunique.seqs")			{	shellcommand = new DeUniqueSeqsCommand();			}
 		else if(commandName == "pairwise.seqs")			{	shellcommand = new PairwiseSeqsCommand();			}
 		else if(commandName == "cluster.classic")		{	shellcommand = new ClusterDoturCommand();			}
+		else if(commandName == "sub.sample")			{	shellcommand = new SubSampleCommand();				}
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

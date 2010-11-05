@@ -22,18 +22,23 @@ int metastat_main (char* outputFileName, int numRows, int numCols, double thresh
   }
  
   // Initialize the matrices
-  size = row*col;
-//printf("size = %d\n.", size);
-  double matrix[row][col];
-  double pmatrix[size],pmatrix2[size],permuted[size];  
-  double storage[row][9];
-//printf("here\n.", size);  
-  for (i=0;i<row;i++){
-  	for (j =0;j<9;j++){
-      storage[i][j]=0; 		
-	}	
-  }
-   
+	size = row*col;
+	
+	double ** matrix, * pmatrix, * permuted, ** storage;
+	matrix = malloc(row*sizeof(double *));
+	storage =  malloc(row*sizeof(double *));
+	for (i = 0; i<row; i++){
+		matrix[i] = malloc(col*sizeof(double));
+	}
+	for (i = 0; i<row;i++){
+		storage[i] = malloc(9*sizeof(double));
+	}
+	
+	pmatrix = (double *) malloc(size*sizeof(double *));
+	permuted = (double *) malloc(size*sizeof(double *));
+	
+		
+	
   for(i=0; i<row; i++){
     for(j=0; j<col;j++){
       matrix[i][j]=data[i][j];
@@ -125,9 +130,12 @@ int metastat_main (char* outputFileName, int numRows, int numCols, double thresh
   
   permutes = &B;
   ptt_size = B*row;
-  
+
   //changing ptt_size to row
-  double permuted_ttests[row], pvalues[row], tinitial[row];
+  double * permuted_ttests, * pvalues, * tinitial;
+  permuted_ttests = (double *) malloc(size*sizeof(double *));
+  pvalues = (double *) malloc(size*sizeof(double *));
+  tinitial = (double *) malloc(size*sizeof(double *));
   
   for(i=0;i<row;i++){
     permuted_ttests[i]=0;}
@@ -137,13 +145,17 @@ int metastat_main (char* outputFileName, int numRows, int numCols, double thresh
     tinitial[i]=0; }
   
   // Find the initial values for the matrix.
+ 
   start(pmatrix,gvalue,nr,nc,tinitial,storage);
   
   // Start the calculations.
  
   if ( (col==2) || ((g-1)<8) || ((col-g+1) < 8) ){  
 
-  double fish[row], fish2[row];
+  double * fish, *fish2;
+  fish = (double *) malloc(size*sizeof(double *));
+  fish2 = (double *) malloc(size*sizeof(double *));
+	  
   for(i=0;i<row;i++){
   	fish[i]=0;
   	fish2[i]=0;}
@@ -173,7 +185,8 @@ int metastat_main (char* outputFileName, int numRows, int numCols, double thresh
 	//   f21   f22
 	
 	int *nr, *nc, *ldtabl, *work;
-	int nrow=2, ncol=2, ldtable=2, workspace=100000;
+	int nrow=2, ncol=2, ldtable=2;
+	int workspace=(row*sizeof(double *)+size*sizeof(double *));
 	double *expect, *prc, *emin,*prt,*pre;
 	double e=0, prc1=0, emin1=0, prt1=0, pre1=0;
 
@@ -187,7 +200,7 @@ int metastat_main (char* outputFileName, int numRows, int numCols, double thresh
 	emin=&emin1;
 	prt=&prt1;
 	pre=&pre1;
-	
+
 	fexact(nr,nc,data, ldtabl,expect,prc,emin,prt,pre,work);
 	
 	if (*pre>.999999999){
@@ -198,11 +211,14 @@ int metastat_main (char* outputFileName, int numRows, int numCols, double thresh
     }
   }
   else{
-  	 
+printf("here before testp\n");	  	 
   testp(permuted_ttests, permutes, permuted,pmatrix, nc, nr, gvalue,tinitial,pvalues);
   	 
   	       // Checks to make sure the matrix isn't sparse.
-  double sparse[row], sparse2[row];
+  double * sparse, * sparse2;
+  sparse = (double *) malloc(size*sizeof(double *));
+  sparse2 = (double *) malloc(size*sizeof(double *));
+	  
   for(i=0;i<row;i++){
   	sparse[i]=0;
   	sparse2[i]=0;}
@@ -256,7 +272,7 @@ int metastat_main (char* outputFileName, int numRows, int numCols, double thresh
 	emin=&emin1;
 	prt=&prt1;
 	pre=&pre1;
-	
+printf("here before fexact2\n");		
 	fexact(nr,nc,data, ldtabl,expect,prc,emin,prt,pre,work);
 	
 	if (*pre>.999999999){
@@ -271,8 +287,12 @@ int metastat_main (char* outputFileName, int numRows, int numCols, double thresh
   }
   
   // Calculates the mean of counts (not normalized)
-  double temp[row][2];
-  
+  double ** temp;
+  temp = malloc(row*sizeof(double *));
+  for (i = 0; i<row; i++){
+	 temp[i] = malloc(col*sizeof(double));
+  }
+printf("here\n");	  
   for(j=0;j<row;j++){
   	for(i=0;i<2;i++){
   		temp[j][i]=0;
@@ -512,42 +532,45 @@ void meanvar(double *pmatrix,int *g,int *nr,int *nc,double *store){
 }
 
 void start(double *Imatrix,int *g,int *nr,int *nc,double *initial,
-		double storage[][9]){
+		double** storage){
   int i, a = *nr;
   a*=4;
-  
+	
   double store[a], tool[a], C1[*nr][3], C2[*nr][3];
   double nrows,ncols,gvalue, xbardiff=0, denom=0;
-  
+ 
   nrows = (double) *nr;
   ncols = (double) *nc;
   gvalue= (double) *g;
-  
+   
   meanvar(Imatrix,g,nr,nc,store);
-  
+   
   for(i=0;i<=a-1;i++){
     tool[i]=store[i];
   }
-  for (i=0; i<*nr;i++){
+
+  for (i=0; i<*nr;i++){ 
     C1[i][0]=tool[i]; //mean group 1
     storage[i][0]=C1[i][0];
     C1[i][1]=tool[i+*nr+*nr]; // var group 1
     storage[i][1]=C1[i][1];
     C1[i][2]=C1[i][1]/(gvalue-1);
     storage[i][2]=sqrt(C1[i][2]);
-    
+    printf("here2\n"); 
     C2[i][0]=tool[i+*nr]; // mean group 2
-    storage[i][4]=C2[i][0];    
+    storage[i][4]=C2[i][0]; 
     C2[i][1]=tool[i+*nr+*nr+*nr]; // var group 2 
-    storage[i][5]=C2[i][1];        
-    C2[i][2]=C2[i][1]/(ncols-gvalue+1);
+    storage[i][5]=C2[i][1];  
+	C2[i][2]=C2[i][1]/(ncols-gvalue+1);
     storage[i][6]=sqrt(C2[i][2]);   
+	 
   }
+ 
   for (i=0; i<*nr; i++){
     xbardiff = C1[i][0]-C2[i][0];
     denom = sqrt(C1[i][2]+C2[i][2]);
     initial[i]=fabs(xbardiff/denom);
-  }											
+  }	 
 }
 
 

@@ -227,7 +227,7 @@ int ClusterDoturCommand::execute(){
 		
 		int estart = time(NULL);
 	
-		while ((cluster->getSmallDist() < cutoff) && (cluster->getNSeqs() > 0)){
+		while ((cluster->getSmallDist() < cutoff) && (cluster->getNSeqs() > 1)){
 			if (m->control_pressed) { delete cluster; delete list; delete rabund; sabundFile.close();rabundFile.close();listFile.close();  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} outputTypes.clear();  return 0;  }
 		
 			cluster->update(cutoff);

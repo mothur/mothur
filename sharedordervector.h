@@ -24,6 +24,7 @@ struct individual {
 		bool operator()(const individual& i1, const individual& i2) {
 		return (i1.abundance > i2.abundance);
 		}
+	individual() { group = ""; bin = 0; abundance = 0; }
 };
 
 struct individualFloat {
@@ -33,6 +34,7 @@ struct individualFloat {
 		bool operator()(const individual& i1, const individual& i2) {
 		return (i1.abundance > i2.abundance);
 		}
+	individualFloat() { group = ""; bin = 0; abundance = 0.0; }
 };
 
 
@@ -66,6 +68,7 @@ public:
 	vector<individual>::iterator end();
 	void push_back(int, int, string);  //OTU, abundance, group  MUST CALL UPDATE STATS AFTER PUSHBACK!!!
 	void updateStats();
+	void clear();
 
 	int getNumBins();
 	int getNumSeqs();

@@ -235,6 +235,15 @@ SharedOrderVector SharedSAbundVector::getSharedOrderVector() {
 	}
 }
 /***********************************************************************/
+
+void SharedSAbundVector::clear(){
+	numBins = 0;
+	maxRank = 0;
+	numSeqs = 0;
+	data.clear();
+}
+
+/***********************************************************************/
 OrderVector SharedSAbundVector::getOrderVector(map<string,int>* hold = NULL){
 	try {
 		OrderVector ov;

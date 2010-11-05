@@ -45,6 +45,7 @@ public:
 	void pop_back();
 	void resize(int);
 	int size();
+	void clear();
 
 	void print(ostream&);
 		

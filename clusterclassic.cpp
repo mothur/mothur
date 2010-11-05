@@ -226,7 +226,7 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 //sets smallCol and smallRow, returns distance
 double ClusterClassic::getSmallCell() {
 	try {
-		
+			
 		smallDist = aboveCutoff;
 		smallRow = 1;
 		smallCol = 0;
@@ -279,6 +279,10 @@ void ClusterClassic::clusterBins(){
 
 		rabund->set(smallRow, rabund->get(smallRow)+rabund->get(smallCol));	
 		rabund->set(smallCol, 0);	
+		for (int i = smallCol+1; i < rabund->size(); i++) {
+			rabund->set((i-1), rabund->get(i));
+		}
+		rabund->resize((rabund->size()-1));
 		rabund->setLabel(toString(smallDist));
 
 	//	cout << '\t' << rabund->get(smallRow) << '\t' << rabund->get(smallCol) << endl;
@@ -296,6 +300,10 @@ void ClusterClassic::clusterNames(){
 		
 		list->set(smallRow, list->get(smallRow)+','+list->get(smallCol));
 		list->set(smallCol, "");	
+		for (int i = smallCol+1; i < list->size(); i++) {
+			list->set((i-1), list->get(i));
+		}
+		list->resize((list->size()-1));
 		list->setLabel(toString(smallDist));
 	
 	//	cout << '\t' << list->get(smallRow) << '\t' << list->get(smallCol) << endl;
@@ -308,36 +316,21 @@ void ClusterClassic::clusterNames(){
 /***********************************************************************/
 void ClusterClassic::update(double& cutOFF){
 	try {
-//cout << "before update " << endl;
 //print();		
 		getSmallCell();
 		
 		int r, c;
 		r = smallRow; c = smallCol;
-		//because we only store lt, we need to make sure we grab the right location
-		//if (smallRow < smallCol) { c = smallRow; r = smallCol; } //smallRow is really our column value
-		//else { r = smallRow; c = smallCol; } //smallRow is the row value
-		
-		//reset rows smallest distance
-		//rowSmallDists[r].dist = aboveCutoff; rowSmallDists[r].row = 0; rowSmallDists[r].col = 0;
-		//rowSmallDists[c].dist = aboveCutoff; rowSmallDists[c].row = 0; rowSmallDists[c].col = 0;
-		
-		//if your rows smallest distance is from smallRow or smallCol, reset
-		//for(int i=0;i<nseqs;i++){
-			//if ((rowSmallDists[i].row == r) || (rowSmallDists[i].row == c) || (rowSmallDists[i].col == r) || (rowSmallDists[i].col == c)) {
-			//	rowSmallDists[i].dist = aboveCutoff; rowSmallDists[i].row = 0; rowSmallDists[i].col = 0;
-			//}
-		//}
-		
+				
 		for(int i=0;i<nseqs;i++){
 			if(i != r && i != c){
 				double distRow, distCol, newDist;
 				if (i > r) { distRow = dMatrix[i][r]; }
 				else { distRow =  dMatrix[r][i]; }
-				
+
 				if (i > c) { distCol = dMatrix[i][c]; dMatrix[i][c] = aboveCutoff; } //like removeCell
 				else { distCol =  dMatrix[c][i]; dMatrix[c][i] = aboveCutoff; }
-					
+				
 				if(method == "furthest"){
 					newDist = max(distRow, distCol);
 				}
@@ -352,39 +345,33 @@ void ClusterClassic::update(double& cutOFF){
 				else if (method == "nearest"){
 					newDist = min(distRow, distCol);
 				}
-				
+				//cout << "newDist = " << newDist << endl;	
 				if (i > r) { dMatrix[i][r] = newDist; }
 				else { dMatrix[r][i] = newDist; }
 				
-				//if (newDist < rowSmallDists[i].dist) {  rowSmallDists[i].dist = newDist; rowSmallDists[i].col = r; rowSmallDists[i].row = i;  }
 			}
-			//cout << "rowsmall = " << i << '\t' << rowSmallDists[i].dist << endl;	
 		}
 			
 		clusterBins();
 		clusterNames();
-	
-		//find new small for 2 rows we just merged
-		//colDist temp(0,0,100.0);
-		//rowSmallDists[r] = temp;
+		
+		//resize each row
+		for(int i=0;i<nseqs;i++){
+			for(int j=c+1;j<dMatrix[i].size();j++){
+				dMatrix[i][j-1]=dMatrix[i][j];
+			}
+		}			
+		
+		//resize each col
+		for(int i=c+1;i<nseqs;i++){
+			for(int j=0;j < dMatrix[i-1].size();j++){
+				dMatrix[i-1][j]=dMatrix[i][j];
+			}
+		}	
+		
+		nseqs--;
+		dMatrix.pop_back();
 
-		//for (int i = 0; i < dMatrix[r].size(); i++) {
-		//	if (dMatrix[r][i] < rowSmallDists[r].dist) { rowSmallDists[r].dist = dMatrix[r][i]; rowSmallDists[r].col = r; rowSmallDists[r].row = i; }
-		//}
-		//for (int i = dMatrix[r].size()+1; i < dMatrix.size(); i++) {
-		//	if (dMatrix[i][dMatrix[r].size()] < rowSmallDists[r].dist) { rowSmallDists[r].dist = dMatrix[i][dMatrix[r].size()]; rowSmallDists[r].col = r; rowSmallDists[r].row = i; }
-		//}
-		
-		//rowSmallDists[c] = temp;
-		//for (int i = 0; i < dMatrix[c].size(); i++) {
-		//	if (dMatrix[c][i] < rowSmallDists[c].dist) { rowSmallDists[c].dist = dMatrix[c][i]; rowSmallDists[c].col = c; rowSmallDists[c].row = i; }
-		//}
-		//for (int i = dMatrix[c].size()+1; i < dMatrix.size(); i++) {
-		//	if (dMatrix[i][dMatrix[c].size()] < rowSmallDists[c].dist) { rowSmallDists[c].dist = dMatrix[i][dMatrix[c].size()]; rowSmallDists[c].col = c; rowSmallDists[c].row = i; }
-		//}
-		
-		//cout << "after update " << endl;
-		//print();
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterClassic", "update");

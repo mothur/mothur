@@ -14,7 +14,7 @@
 //**********************************************************************************************************************
 vector<string> GetSeqsCommand::getValidParameters(){	
 	try {
-		string Array[] =  {"fasta","name", "group", "alignreport", "accnos", "dups", "list","taxonomy","outputdir","inputdir"};
+		string Array[] =  {"fasta","name", "group", "qfile","alignreport", "accnos", "dups", "list","taxonomy","outputdir","inputdir"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
@@ -35,6 +35,7 @@ GetSeqsCommand::GetSeqsCommand(){
 		outputTypes["group"] = tempOutNames;
 		outputTypes["alignreport"] = tempOutNames;
 		outputTypes["list"] = tempOutNames;
+		outputTypes["qfile"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetSeqsCommand", "GetSeqsCommand");
@@ -74,7 +75,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","name", "group", "alignreport", "accnos", "dups", "list","taxonomy","outputdir","inputdir"};
+			string Array[] =  {"fasta","name", "group", "alignreport", "qfile", "accnos", "dups", "list","taxonomy","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -96,6 +97,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 			outputTypes["group"] = tempOutNames;
 			outputTypes["alignreport"] = tempOutNames;
 			outputTypes["list"] = tempOutNames;
+			outputTypes["qfile"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -160,6 +162,14 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
+				
+				it = parameters.find("qfile");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
+				}
 			}
 
 			
@@ -192,11 +202,15 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 			if (taxfile == "not open") { abort = true; }
 			else if (taxfile == "not found") {  taxfile = "";  }
 			
+			qualfile = validParameter.validFile(parameters, "qfile", true);
+			if (qualfile == "not open") { abort = true; }
+			else if (qualfile == "not found") {  qualfile = "";  }
+			
 			string usedDups = "true";
 			string temp = validParameter.validFile(parameters, "dups", false);	if (temp == "not found") { temp = "false"; usedDups = ""; }
 			dups = m->isTrue(temp);
 			
-			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, alignreport, taxonomy or listfile."); m->mothurOutEndLine(); abort = true; }
+			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (qualfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, alignreport, taxonomy, quality or listfile."); m->mothurOutEndLine(); abort = true; }
 		
 			if ((usedDups != "") && (namefile == "")) {  m->mothurOut("You may only use dups with the name option."); m->mothurOutEndLine();  abort = true; }			
 
@@ -212,9 +226,9 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 
 void GetSeqsCommand::help(){
 	try {
-		m->mothurOut("The get.seqs command reads an .accnos file and any of the following file types: fasta, name, group, list, taxonomy or alignreport file.\n");
+		m->mothurOut("The get.seqs command reads an .accnos file and any of the following file types: fasta, name, group, list, taxonomy, quality or alignreport file.\n");
 		m->mothurOut("It outputs a file containing only the sequences in the .accnos file.\n");
-		m->mothurOut("The get.seqs command parameters are accnos, fasta, name, group, list, taxonomy, alignreport and dups.  You must provide accnos and at least one of the other parameters.\n");
+		m->mothurOut("The get.seqs command parameters are accnos, fasta, name, group, list, taxonomy, qfile, alignreport and dups.  You must provide accnos and at least one of the other parameters.\n");
 		m->mothurOut("The dups parameter allows you to add the entire line from a name file if you add any name from the line. default=false. \n");
 		m->mothurOut("The get.seqs command should be in the following format: get.seqs(accnos=yourAccnos, fasta=yourFasta).\n");
 		m->mothurOut("Example get.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n");
@@ -245,6 +259,7 @@ int GetSeqsCommand::execute(){
 		if (alignfile != "")		{		readAlign();	}
 		if (listfile != "")			{		readList();		}
 		if (taxfile != "")			{		readTax();		}
+		if (qualfile != "")			{		readQual();		}
 		
 		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
 		
@@ -309,6 +324,71 @@ int GetSeqsCommand::readFasta(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetSeqsCommand", "readFasta");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int GetSeqsCommand::readQual(){
+	try {
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(qualfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(qualfile)) + "pick" +  m->getExtension(qualfile);
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		
+		
+		ifstream in;
+		m->openInputFile(qualfile, in);
+		string name;
+		
+		bool wroteSomething = false;
+		
+		
+		while(!in.eof()){	
+			string saveName = "";
+			string name = "";
+			string scores = "";
+			
+			in >> name; 
+				
+			if (name.length() != 0) { 
+				saveName = name.substr(1);
+				while (!in.eof())	{	
+					char c = in.get(); 
+					if (c == 10 || c == 13){	break;	}
+					else { name += c; }	
+				} 
+				m->gobble(in);
+			}
+			
+			while(in){
+				char letter= in.get();
+				if(letter == '>'){	in.putback(letter);	break;	}
+				else{ scores += letter; }
+			}
+			
+			m->gobble(in);
+			
+			if (names.count(saveName) != 0) {
+				wroteSomething = true;
+						
+				out << name << endl << scores;
+			}
+			
+			m->gobble(in);
+		}
+		in.close();
+		out.close();
+		
+		
+		if (wroteSomething == false) { m->mothurOut("Your file does not contain any sequence from the .accnos file."); m->mothurOutEndLine();  }
+		outputNames.push_back(outputFileName);  outputTypes["qfile"].push_back(outputFileName); 
+		
+		return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetSeqsCommand", "readQual");
 		exit(1);
 	}
 }

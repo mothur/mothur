@@ -40,6 +40,7 @@ public:
 	int sum();
 	void resize(int);
 	int size();
+	void clear();
 
 	void print(ostream&);
 	void print(string, ostream&);

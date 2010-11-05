@@ -33,6 +33,7 @@ public:
 	virtual void resize(int) = 0;
 	virtual int size()	= 0;
 	virtual void print(ostream&) = 0;
+	virtual void clear() = 0;
 	
 	void setLabel(string l)		{	label = l;			}
 	string getLabel()			{	return label;		}

@@ -45,7 +45,7 @@ QualityScores::QualityScores(ifstream& qFile, int l){
 		else {
 			seqName = seqName.substr(1); 
 		}
-
+		
 		//m->getline(qFile, line);
 		//istringstream qualStream(line);
 	
@@ -56,6 +56,40 @@ QualityScores::QualityScores(ifstream& qFile, int l){
 		//qScores.pop_back();
 		
 		//seqLength = qScores.size();	
+		
+		/*while(!in.eof()){	
+			string saveName = "";
+			string name = "";
+			string scores = "";
+			
+			in >> name; 
+			//cout << name << endl;		
+			if (name.length() != 0) { 
+				saveName = name.substr(1);
+				while (!in.eof())	{	
+					char c = in.get(); 
+					if (c == 10 || c == 13){	break;	}
+					else { name += c; }	
+				} 
+				m->gobble(in);
+			}
+			
+			while(in){
+				char letter= in.get();
+				if(letter == '>'){	in.putback(letter);	break;	}
+				else{ scores += letter; }
+			}
+			
+		 //istringstream iss (scores,istringstream::in);
+		 
+		 //int count = 0; int tempScore;
+		 //while (iss) { iss >> tempScore; count++; }
+		 //cout << saveName << '\t' << count << endl;	
+			
+			m->gobble(in);
+		}*/		
+		
+		
 		
 		for(int i=0;i<seqLength;i++){
 			qFile >> score;
@@ -70,6 +104,7 @@ QualityScores::QualityScores(ifstream& qFile, int l){
 	}							
 
 }
+/**************************************************************************************************/
 
 /**************************************************************************************************/
 

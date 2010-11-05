@@ -35,6 +35,7 @@ public:
 	void push_back(int);
 	void resize(int);
 	int size();
+	void clear();
 	void print(string, ostream&);
 	vector<int>::iterator begin();
 	vector<int>::iterator end();

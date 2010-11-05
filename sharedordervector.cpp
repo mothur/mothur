@@ -171,7 +171,14 @@ void SharedOrderVector::print(ostream& output){
 	}
 }
 
+/***********************************************************************/
 
+void SharedOrderVector::clear(){
+	numBins = 0;
+	maxRank = 0;
+	numSeqs = 0;
+	data.clear();
+}
 /***********************************************************************/
 
 void SharedOrderVector::resize(int){
