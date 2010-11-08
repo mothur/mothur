@@ -658,6 +658,7 @@ int MothurOut::openInputFile(string fileName, ifstream& fileHandle, string m){
 
 			fileHandle.open(completeFileName.c_str());
 			if(!fileHandle) {
+				mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
 				return 1;
 			}else {
 				//check for blank file
@@ -801,6 +802,7 @@ void MothurOut::appendFiles(string temp, string filename) {
 		//open output file in append mode
 		openOutputFileAppend(filename, output);
 		int ableToOpen = openInputFile(temp, input, "no error");
+		//int ableToOpen = openInputFile(temp, input);
 		
 		if (ableToOpen == 0) { //you opened it
 			while(char c = input.get()){
@@ -1038,7 +1040,7 @@ vector<unsigned long int> MothurOut::divideFile(string filename, int& proc) {
 
 		//sanity check filePos
 		for (int i = 0; i < (filePos.size()-1); i++) {
-			if (filePos[(i+1)] <= filePos[i]) {  cout << "erasing " << (i+1) << endl; filePos.erase(filePos.begin()+(i+1)); i--; }
+			if (filePos[(i+1)] <= filePos[i]) {  filePos.erase(filePos.begin()+(i+1)); i--; }
 		}
 
 		proc = (filePos.size() - 1);

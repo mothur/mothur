@@ -43,7 +43,7 @@ private:
 
 	int processors, numNewFasta;
 	float cutoff;
-	map<int, int> processIDS;   //end line, processid
+	vector<int> processIDS;   //end line, processid
 	vector<linePair*> lines;
 	
 	bool abort;

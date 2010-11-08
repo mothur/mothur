@@ -540,7 +540,7 @@ void DistanceCommand::createProcesses(string filename) {
 			int pid = fork();
 			
 			if (pid > 0) {
-				processIDS[lines[process]->end] = pid;  //create map from line number to pid so you can append files in correct order later
+				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
 				if (output != "square") {  driver(lines[process]->start, lines[process]->end, filename + toString(getpid()) + ".temp", cutoff); }
@@ -548,7 +548,8 @@ void DistanceCommand::createProcesses(string filename) {
 				exit(0);
 			}else { 
 				m->mothurOut("[ERROR]: unable to spawn the necessary processes. Error code: " + toString(pid)); m->mothurOutEndLine(); 
-				for (map<int, int>::iterator it = processIDS.begin(); it != processIDS.end(); it++) { int temp = it->second; kill (temp, SIGINT); }
+				perror(" : ");
+				for (int i=0;i<processIDS.size();i++) {  int temp = processIDS[i]; kill (temp, SIGINT); }
 				exit(0);
 			}
 		}
@@ -559,15 +560,15 @@ void DistanceCommand::createProcesses(string filename) {
 		
 		
 		//force parent to wait until all the processes are done
-		for (map<int, int>::iterator it = processIDS.begin(); it != processIDS.end(); it++) { 
-			int temp = it->second;
+		for (int i=0;i<processIDS.size();i++) { 
+			int temp = processIDS[i];
 			wait(&temp);
 		}
 		
 		//append and remove temp files
-		for (map<int, int>::iterator it = processIDS.begin(); it != processIDS.end(); it++) {
-			m->appendFiles((filename + toString(it->second) + ".temp"), filename);
-			remove((filename + toString(it->second) + ".temp").c_str());
+		for (int i=0;i<processIDS.size();i++) { 
+			m->appendFiles((filename + toString(processIDS[i]) + ".temp"), filename);
+			remove((filename + toString(processIDS[i]) + ".temp").c_str());
 		}
 #endif
 	}

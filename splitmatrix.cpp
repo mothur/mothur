@@ -10,6 +10,7 @@
 #include "splitmatrix.h"
 #include "phylotree.h"
 #include "distancecommand.h"
+#include "seqsummarycommand.h"
 
 /***********************************************************************/
 
@@ -185,6 +186,7 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 			string options = "fasta=" + (fastafile + "." + toString(i) + ".temp") + ", processors=" + toString(processors) + ", cutoff=" + toString(distCutoff);
 			
 			Command* command = new DistanceCommand(options);
+			
 			command->execute();
 			delete command;
 			
@@ -193,7 +195,7 @@ int SplitMatrix::createDistanceFilesFromTax(map<string, int>& seqGroup, int numG
 			//remove old names files just in case
 			remove((namefile + "." + toString(i) + ".temp").c_str());
 		}
-		
+			
 		singleton = namefile + ".extra.temp";
 		ofstream remainingNames;
 		m->openOutputFile(singleton, remainingNames);
