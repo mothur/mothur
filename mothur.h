@@ -116,6 +116,17 @@ struct seqDist {
 	seqDist(int s1, int s2, float d) : seq1(s1), seq2(s2), dist(d) {}
 	~seqDist() {}
 };
+/************************************************************/
+struct distlinePair {
+	int start;
+	int end;
+	
+};
+/************************************************************/
+//sorts lowest to highest
+inline bool compareDistLinePairs(distlinePair left, distlinePair right){
+	return (left.end < right.end);	
+} 
 //********************************************************************************************************************
 //sorts lowest to highest
 inline bool compareSequenceDistance(seqDist left, seqDist right){

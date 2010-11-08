@@ -31,9 +31,10 @@ public:
 	void help();
 	
 private:
-	struct linePair {
+	struct distlinePair {
 		int start;
 		int end;
+		
 	};
 	
 	Dist* distCalculator;
@@ -44,7 +45,7 @@ private:
 	int processors, numNewFasta;
 	float cutoff;
 	vector<int> processIDS;   //end line, processid
-	vector<linePair*> lines;
+	vector<distlinePair> lines;
 	
 	bool abort;
 	vector<string>  Estimators, outputNames; //holds estimators to be used
