@@ -279,10 +279,10 @@ void ClusterClassic::clusterBins(){
 
 		rabund->set(smallRow, rabund->get(smallRow)+rabund->get(smallCol));	
 		rabund->set(smallCol, 0);	
-		for (int i = smallCol+1; i < rabund->size(); i++) {
+		/*for (int i = smallCol+1; i < rabund->size(); i++) {
 			rabund->set((i-1), rabund->get(i));
 		}
-		rabund->resize((rabund->size()-1));
+		rabund->resize((rabund->size()-1));*/
 		rabund->setLabel(toString(smallDist));
 
 	//	cout << '\t' << rabund->get(smallRow) << '\t' << rabund->get(smallCol) << endl;
@@ -300,10 +300,10 @@ void ClusterClassic::clusterNames(){
 		
 		list->set(smallRow, list->get(smallRow)+','+list->get(smallCol));
 		list->set(smallCol, "");	
-		for (int i = smallCol+1; i < list->size(); i++) {
+		/*for (int i = smallCol+1; i < list->size(); i++) {
 			list->set((i-1), list->get(i));
 		}
-		list->resize((list->size()-1));
+		list->resize((list->size()-1));*/
 		list->setLabel(toString(smallDist));
 	
 	//	cout << '\t' << list->get(smallRow) << '\t' << list->get(smallCol) << endl;
@@ -356,7 +356,7 @@ void ClusterClassic::update(double& cutOFF){
 		clusterNames();
 		
 		//resize each row
-		for(int i=0;i<nseqs;i++){
+		/*for(int i=0;i<nseqs;i++){
 			for(int j=c+1;j<dMatrix[i].size();j++){
 				dMatrix[i][j-1]=dMatrix[i][j];
 			}
@@ -370,7 +370,7 @@ void ClusterClassic::update(double& cutOFF){
 		}	
 		
 		nseqs--;
-		dMatrix.pop_back();
+		dMatrix.pop_back();*/
 
 	}
 	catch(exception& e) {

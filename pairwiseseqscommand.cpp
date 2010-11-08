@@ -442,27 +442,18 @@ int PairwiseSeqsCommand::execute(){
 			}else{ //you have multiple processors
 				
 				for (int i = 0; i < processors; i++) {
-					lines.push_back(new linePair());
+					distlinePair tempLine;
+					lines.push_back(tempLine);
 					if (output != "square") {
-						lines[i]->start = int (sqrt(float(i)/float(processors)) * numSeqs);
-						lines[i]->end = int (sqrt(float(i+1)/float(processors)) * numSeqs);
+						lines[i].start = int (sqrt(float(i)/float(processors)) * numSeqs);
+						lines[i].end = int (sqrt(float(i+1)/float(processors)) * numSeqs);
 					}else{
-						lines[i]->start = int ((float(i)/float(processors)) * numSeqs);
-						lines[i]->end = int ((float(i+1)/float(processors)) * numSeqs);
+						lines[i].start = int ((float(i)/float(processors)) * numSeqs);
+						lines[i].end = int ((float(i+1)/float(processors)) * numSeqs);
 					}
 				}
-
-				createProcesses(outputFile); 
-			
-				map<int, int>::iterator it = processIDS.begin();
-				rename((outputFile + toString(it->second) + ".temp").c_str(), outputFile.c_str());
-				it++;
 				
-				//append and remove temp files
-				for (; it != processIDS.end(); it++) {
-					m->appendFiles((outputFile + toString(it->second) + ".temp"), outputFile);
-					remove((outputFile + toString(it->second) + ".temp").c_str());
-				}
+				createProcesses(outputFile); 
 			}
 		#else
 			//ifstream inFASTA;
@@ -522,7 +513,7 @@ int PairwiseSeqsCommand::execute(){
 void PairwiseSeqsCommand::createProcesses(string filename) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		int process = 0;
+		int process = 1;
 		processIDS.clear();
 		
 		//loop through and create all the processes you want
@@ -530,23 +521,34 @@ void PairwiseSeqsCommand::createProcesses(string filename) {
 			int pid = fork();
 			
 			if (pid > 0) {
-				processIDS[lines[process]->end] = pid;  //create map from line number to pid so you can append files in correct order later
+				processIDS.push_back(pid); 
 				process++;
 			}else if (pid == 0){
-				if (output != "square") {  driver(lines[process]->start, lines[process]->end, filename + toString(getpid()) + ".temp", cutoff); }
-				else { driver(lines[process]->start, lines[process]->end, filename + toString(getpid()) + ".temp", "square"); }
+				if (output != "square") {  driver(lines[process].start, lines[process].end, filename + toString(getpid()) + ".temp", cutoff); }
+				else { driver(lines[process].start, lines[process].end, filename + toString(getpid()) + ".temp", "square"); }
 				exit(0);
 			}else { 
 				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-				for (map<int, int>::iterator it = processIDS.begin(); it != processIDS.end(); it++) { int temp = it->second; kill (temp, SIGINT); }
+				for (int i=0;i<processIDS.size();i++) { int temp = processIDS[i]; kill (temp, SIGINT); }
 				exit(0);
 			}
 		}
-	
+		
+		//parent do my part
+		if (output != "square") {  driver(lines[0].start, lines[0].end, filename, cutoff); }
+		else { driver(lines[0].start, lines[0].end, filename, "square"); }
+
+		
 		//force parent to wait until all the processes are done
-		for (map<int, int>::iterator it = processIDS.begin(); it != processIDS.end(); it++) { 
-			int temp = it->second;
+		for (int i=0;i<processIDS.size();i++) { 
+			int temp = processIDS[i];
 			wait(&temp);
+		}
+		
+		//append and remove temp files
+		for (int i=0;i<processIDS.size();i++) { 
+			m->appendFiles((filename + toString(processIDS[i]) + ".temp"), filename);
+			remove((filename + toString(processIDS[i]) + ".temp").c_str());
 		}
 #endif
 	}

@@ -32,12 +32,14 @@ public:
 	void help();	
 	
 private:
-	struct linePair {
+	struct distlinePair {
 		int start;
 		int end;
 	};
-	map<int, int> processIDS;   //end line, processid
-	vector<linePair*> lines;
+	
+	
+	vector<int> processIDS;   //end line, processid
+	vector<distlinePair> lines;
 	map<string, vector<string> > outputTypes;
 	
 	Alignment* alignment;

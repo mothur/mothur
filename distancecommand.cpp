@@ -14,6 +14,7 @@
 #include "onegapdist.h"
 #include "onegapignore.h"
 
+
 //**********************************************************************************************************************
 vector<string> DistanceCommand::getValidParameters(){	
 	try {
@@ -210,13 +211,7 @@ DistanceCommand::DistanceCommand(string option) {
 
 //**********************************************************************************************************************
 
-DistanceCommand::~DistanceCommand(){
-	
-	for(int i=0;i<lines.size();i++){
-		delete lines[i];
-	}
-	
-}
+DistanceCommand::~DistanceCommand(){}
 	
 //**********************************************************************************************************************
 
@@ -439,17 +434,18 @@ int DistanceCommand::execute(){
 			if (numDists < processors) { processors = numDists; }
 			
 			for (int i = 0; i < processors; i++) {
-				lines.push_back(new linePair());
+				distlinePair tempLine;
+				lines.push_back(tempLine);
 				if (output != "square") {
-					lines[i]->start = int (sqrt(float(i)/float(processors)) * numSeqs);
-					lines[i]->end = int (sqrt(float(i+1)/float(processors)) * numSeqs);
+					lines[i].start = int (sqrt(float(i)/float(processors)) * numSeqs);
+					lines[i].end = int (sqrt(float(i+1)/float(processors)) * numSeqs);
 				}else{
-					lines[i]->start = int ((float(i)/float(processors)) * numSeqs);
-					lines[i]->end = int ((float(i+1)/float(processors)) * numSeqs);
+					lines[i].start = int ((float(i)/float(processors)) * numSeqs);
+					lines[i].end = int ((float(i+1)/float(processors)) * numSeqs);
 				}
-				//cout << i << '\t' << lines[i]->start << '\t' << lines[i]->end << endl;
+				
 			}
-
+			
 			createProcesses(outputFile); 
 		}
 	#else
@@ -543,8 +539,8 @@ void DistanceCommand::createProcesses(string filename) {
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
-				if (output != "square") {  driver(lines[process]->start, lines[process]->end, filename + toString(getpid()) + ".temp", cutoff); }
-				else { driver(lines[process]->start, lines[process]->end, filename + toString(getpid()) + ".temp", "square"); }
+				if (output != "square") {  driver(lines[process].start, lines[process].end, filename + toString(getpid()) + ".temp", cutoff); }
+				else { driver(lines[process].start, lines[process].end, filename + toString(getpid()) + ".temp", "square"); }
 				exit(0);
 			}else { 
 				m->mothurOut("[ERROR]: unable to spawn the necessary processes. Error code: " + toString(pid)); m->mothurOutEndLine(); 
@@ -555,8 +551,8 @@ void DistanceCommand::createProcesses(string filename) {
 		}
 		
 		//parent does its part
-		if (output != "square") {  driver(lines[0]->start, lines[0]->end, filename, cutoff); }
-		else { driver(lines[0]->start, lines[0]->end, filename, "square"); }
+		if (output != "square") {  driver(lines[0].start, lines[0].end, filename, cutoff); }
+		else { driver(lines[0].start, lines[0].end, filename, "square"); }
 		
 		
 		//force parent to wait until all the processes are done
@@ -1157,7 +1153,7 @@ bool DistanceCommand::sanityCheck() {
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "DistanceCommand", "m->appendFiles");
+		m->errorOut(e, "DistanceCommand", "sanityCheck");
 		exit(1);
 	}
 }

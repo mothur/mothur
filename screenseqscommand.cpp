@@ -507,13 +507,13 @@ int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 		outputNames.push_back(goodNameFile);  outputTypes["name"].push_back(goodNameFile);
 		
 		ofstream goodNameOut;	m->openOutputFile(goodNameFile, goodNameOut);
-	
+		
 		while(!inputNames.eof()){
 			if (m->control_pressed) { goodNameOut.close();  inputNames.close(); remove(goodNameFile.c_str());  return 0; }
 
 			inputNames >> seqName >> seqList;
 			it = badSeqNames.find(seqName);
-			
+				
 			if(it != badSeqNames.end()){
 				badSeqNames.erase(it);
 				
@@ -558,7 +558,7 @@ int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 				if (m->control_pressed) { goodGroupOut.close(); inputGroups.close(); remove(goodNameFile.c_str());  remove(goodGroupFile.c_str()); return 0; }
 
 				inputGroups >> seqName >> group;
-
+				
 				it = badSeqGroups.find(seqName);
 				
 				if(it != badSeqGroups.end()){
@@ -580,7 +580,8 @@ int ScreenSeqsCommand::screenNameGroupFile(set<string> badSeqNames){
 				}
 			}
 		}
-			
+		
+		
 		return 0;
 	
 	}
