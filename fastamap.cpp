@@ -64,11 +64,13 @@ void FastaMap::readFastaFile(string inFastaFile, string oldNameFileName){ //prin
 	m->openInputFile(oldNameFileName, oldNameFile);
 	
 	map<string,string> oldNameMap;
+	map<string, string>::iterator itName;
 	string name, list;
 	while(!oldNameFile.eof()){
 		if (m->control_pressed) { break; }
 		
-		oldNameFile >> name >> list;
+		oldNameFile >> name; m->gobble(oldNameFile);
+		oldNameFile >> list;
 		oldNameMap[name] = list;
 		m->gobble(oldNameFile);
 	}
@@ -86,6 +88,10 @@ void FastaMap::readFastaFile(string inFastaFile, string oldNameFileName){ //prin
 		if (name != "") {
 			if(currSeq.getIsAligned())	{	sequence = currSeq.getAligned();	}
 			else						{	sequence = currSeq.getUnaligned();	}
+			
+			itName = seqmap.find(name);
+			if (itName == seqmap.end()) { seqmap[name] = sequence;  }
+			else { m->mothurOut("You already have a sequence named " + name + ", sequence names must be unique, please correct."); m->mothurOutEndLine(); }
 			
 			seqmap[name] = sequence;  
 			map<string,group>::iterator it = data.find(sequence);

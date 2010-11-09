@@ -367,7 +367,7 @@ int ListSeqsCommand::readGroup(){
 			
 			if (m->control_pressed) { in.close(); return 0; }
 			
-			in >> name;				//read from first column
+			in >> name;	m->gobble(in);			//read from first column
 			in >> group;			//read from second column
 			
 			names.push_back(name);

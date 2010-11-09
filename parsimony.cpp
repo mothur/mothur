@@ -34,7 +34,7 @@ EstOutput Parsimony::getValues(Tree* t) {
 		
 		int count = 0;
 		for (int a=0; a<numGroups; a++) { 
-			for (int l = a+1; l < numGroups; l++) {
+			for (int l = 0; l < a; l++) {
 				int score = 0;
 				
 				//groups in this combo

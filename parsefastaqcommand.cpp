@@ -175,7 +175,7 @@ int ParseFastaQCommand::execute(){
 			if (qual == "") {  m->mothurOut("[ERROR]: missing quality for " + name2); m->mothurOutEndLine(); m->control_pressed = true; break; }
 			
 			//sanity check sequence length and number of quality scores match
-			if (name != name2) { m->mothurOut("[ERROR]: names do not match. read " + name + " for fasta and " + name2 + " for quality."); m->mothurOutEndLine(); m->control_pressed = true; break; }
+			if (name2 != "") { if (name != name2) { m->mothurOut("[ERROR]: names do not match. read " + name + " for fasta and " + name2 + " for quality."); m->mothurOutEndLine(); m->control_pressed = true; break; } }
 			if (qual.length() != sequence.length()) { m->mothurOut("[ERROR]: lengths do not match. read " + toString(sequence.length()) + " characters for fasta and " + toString(qual.length()) + " characters for quality scores."); m->mothurOutEndLine(); m->control_pressed = true; break; }
 			
 			//convert quality scores

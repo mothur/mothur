@@ -8,6 +8,7 @@
  */
 
 #include "subsamplecommand.h"
+#include "sharedutilities.h"
 
 //**********************************************************************************************************************
 vector<string> SubSampleCommand::getValidParameters(){	
@@ -226,6 +227,9 @@ SubSampleCommand::SubSampleCommand(string option) {
 			if ((groupfile != "") && ((fastafile == "") && (listfile == ""))) { 
 				m->mothurOut("Group file only valid with listfile or fastafile."); m->mothurOutEndLine(); abort = true; }
 			
+			if ((groupfile != "") && ((fastafile != "") && (listfile != ""))) { 
+				m->mothurOut("A new group file can only be made from the subsample of a listfile or fastafile, not both. Please correct."); m->mothurOutEndLine(); abort = true; }
+			
 		}
 
 	}
@@ -270,10 +274,16 @@ int SubSampleCommand::execute(){
 		if (abort == true) { return 0; }
 		
 		if (sharedfile != "")	{   getSubSampleShared();	}
-		//if (listfile != "")		{   getSubSampleList();		}
+		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); return 0; } }
+		if (listfile != "")		{   getSubSampleList();		}
+		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); return 0; } }
 		//if (rabund != "")		{   getSubSampleRabund();	}
+		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); return 0; } }
 		//if (sabundfile != "")	{   getSubSampleSabund();	}
+		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); return 0; } }
 		//if (fastafile != "")	{   getSubSampleFasta();	}
+		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); return 0; } }
+			
 				
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -302,31 +312,31 @@ int SubSampleCommand::getSubSampleShared() {
 		InputData* input = new InputData(sharedfile, "sharedfile");
 		vector<SharedRAbundVector*> lookup = input->getSharedRAbundVectors();
 		string lastLabel = lookup[0]->getLabel();
-	
+		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> processedLabels;
 		set<string> userLabels = labels;
-
-	
+		
+		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->control_pressed) {  out.close(); return 0;  }
-	
+			if (m->control_pressed) {  delete input; out.close(); return 0;  }
+			
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
-
+				
 				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 				
 				processShared(lookup, out);
-																
+				
 				processedLabels.insert(lookup[0]->getLabel());
 				userLabels.erase(lookup[0]->getLabel());
 			}
 			
 			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
 				string saveLabel = lookup[0]->getLabel();
-		
+				
 				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
-		
+				
 				lookup = input->getSharedRAbundVectors(lastLabel);
 				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 				
@@ -342,14 +352,14 @@ int SubSampleCommand::getSubSampleShared() {
 			lastLabel = lookup[0]->getLabel();
 			//prevent memory leak
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
-						
+			
 			//get next line to process
 			lookup = input->getSharedRAbundVectors();				
 		}
 		
 		
 		if (m->control_pressed) {  out.close(); return 0;  }
-
+		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
 		bool needToRun = false;
@@ -362,7 +372,7 @@ int SubSampleCommand::getSubSampleShared() {
 				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
 			}
 		}
-	
+		
 		//run last label if you need to
 		if (needToRun == true)  {
 			for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }  
@@ -374,11 +384,12 @@ int SubSampleCommand::getSubSampleShared() {
 			
 			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
 		}
-	
+		
+		delete input;
 		out.close();  
-				
+		
 		return 0;
- 
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SubSampleCommand", "getSubSampleShared");
@@ -389,7 +400,7 @@ int SubSampleCommand::getSubSampleShared() {
 int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup, ofstream& out) {
 	try {
 		
-		if (pickedGroups) { eliminateZeroOTUS(thislookup); }
+		//if (pickedGroups) { eliminateZeroOTUS(thislookup); }
 		
 		if (size == 0) { //user has not set size, set size = smallest samples size
 			size = thislookup[0]->getNumSeqs();
@@ -403,11 +414,11 @@ int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup, ofs
 		int numBins = thislookup[0]->getNumBins();
 		for (int i = 0; i < thislookup.size(); i++) {		
 			int thisSize = thislookup[i]->getNumSeqs();
-				
+			
 			if (thisSize != size) {
 				
 				string thisgroup = thislookup[i]->getGroup();
-	
+				
 				OrderVector* order = new OrderVector();
 				for(int p=0;p<numBins;p++){
 					for(int j=0;j<thislookup[i]->getAbundance(p);j++){
@@ -425,6 +436,9 @@ int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup, ofs
 				
 				
 				for (int j = 0; j < size; j++) {
+					
+					if (m->control_pressed) { delete order; return 0; }
+					
 					//get random number to sample from order between 0 and thisSize-1.
 					int myrand = (int)((float)(rand()) / (RAND_MAX / (thisSize-1) + 1));
 					
@@ -440,6 +454,8 @@ int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup, ofs
 		//subsampling may have created some otus with no sequences in them
 		eliminateZeroOTUS(thislookup);
 		
+		if (m->control_pressed) { return 0; }
+		
 		for (int i = 0; i < thislookup.size(); i++) {
 			out << thislookup[i]->getLabel() << '\t' << thislookup[i]->getGroup() << '\t';
 			thislookup[i]->print(out);
@@ -449,7 +465,232 @@ int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup, ofs
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SubSampleCommand", "eliminateZeroOTUS");
+		m->errorOut(e, "SubSampleCommand", "processShared");
+		exit(1);
+	}
+}			
+//**********************************************************************************************************************
+int SubSampleCommand::getSubSampleList() {
+	try {
+		
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(listfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(listfile)) + "subsample" + m->getExtension(listfile);
+		
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		outputTypes["list"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+		
+		InputData* input;
+		//if you have a groupfile you want to read a shared list
+		if (groupfile != "") {
+			
+			GroupMap* groupMap = new GroupMap(groupfile);
+			groupMap->readMap();
+			
+			//takes care of user setting groupNames that are invalid or setting groups=all
+			SharedUtil* util = new SharedUtil();
+			util->setGroups(Groups, groupMap->namesOfGroups);
+			delete util;
+			
+			//create outputfiles
+			string groupOutputDir = outputDir;
+			if (outputDir == "") {  groupOutputDir += m->hasPath(groupfile);  }
+			string groupOutputFileName = groupOutputDir + m->getRootName(m->getSimpleName(groupfile)) + "subsample" + m->getExtension(groupfile);
+			
+			ofstream outGroup;
+			m->openOutputFile(groupOutputFileName, outGroup);
+			outputTypes["group"].push_back(groupOutputFileName);  outputNames.push_back(groupOutputFileName);
+			
+			globaldata->setGroupFile(groupfile); //shared list needs this
+			
+			input = new InputData(listfile, "list");
+			ListVector* list = input->getListVector();
+			string lastLabel = list->getLabel();
+			
+			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+			set<string> processedLabels;
+			set<string> userLabels = labels;
+			
+			//file mismatch quit
+			if (list->getNumSeqs() != groupMap->getNumSeqs()) { 
+				m->mothurOut("[ERROR]: your list file contains " + toString(list->getNumSeqs()) + " sequences, and your groupfile contains " + toString(groupMap->getNumSeqs()) + ", please correct."); 
+				m->mothurOutEndLine();
+				delete groupMap;
+				delete list;
+				delete input;
+				out.close();
+				outGroup.close();
+				return 0;
+			}
+			
+			//as long as you are not at the end of the file or done wih the lines you want
+			while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+				
+				if (m->control_pressed) {  delete list; delete input; delete groupMap; out.close(); outGroup.close(); return 0;  }
+				
+				if(allLines == 1 || labels.count(list->getLabel()) == 1){			
+					
+					m->mothurOut(list->getLabel()); m->mothurOutEndLine();
+					
+					processListGroup(list, groupMap, out, outGroup);
+					
+					processedLabels.insert(list->getLabel());
+					userLabels.erase(list->getLabel());
+				}
+				
+				if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+					string saveLabel = list->getLabel();
+					
+					delete list; 
+					
+					list = input->getListVector(lastLabel);
+					m->mothurOut(list->getLabel()); m->mothurOutEndLine();
+					
+					processListGroup(list, groupMap, out, outGroup);
+					
+					processedLabels.insert(list->getLabel());
+					userLabels.erase(list->getLabel());
+					
+					//restore real lastlabel to save below
+					list->setLabel(saveLabel);
+				}
+				
+				lastLabel = list->getLabel();
+				
+				delete list; list = NULL;
+				
+				//get next line to process
+				list = input->getListVector();				
+			}
+			
+			
+			if (m->control_pressed) {  if (list != NULL) { delete list; } delete input; delete groupMap; out.close(); outGroup.close(); return 0;  }
+			
+			//output error messages about any remaining user labels
+			set<string>::iterator it;
+			bool needToRun = false;
+			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+				m->mothurOut("Your file does not include the label " + *it); 
+				if (processedLabels.count(lastLabel) != 1) {
+					m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+					needToRun = true;
+				}else {
+					m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+				}
+			}
+			
+			//run last label if you need to
+			if (needToRun == true)  {
+				if (list != NULL) { delete list; }
+				
+				list = input->getListVector(lastLabel);
+				
+				m->mothurOut(list->getLabel()); m->mothurOutEndLine();
+				
+				processListGroup(list, groupMap, out, outGroup);
+				
+				delete list; list = NULL;
+			}
+			
+			out.close();  outGroup.close();
+			if (list != NULL) { delete list; }
+			delete groupMap;
+			
+		}else {
+			//need to complete
+		}
+		
+		
+		delete input;
+						
+		return 0;
+ 
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SubSampleCommand", "getSubSampleList");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int SubSampleCommand::processListGroup(ListVector*& list, GroupMap*& groupMap, ofstream& out, ofstream& outGroup) {
+	try {
+				
+		if (size == 0) { //user has not set size, set size = 10% samples size
+			size = int (list->getNumSeqs() * 0.10);
+		}
+		
+		int numBins = list->getNumBins();
+		int thisSize = list->getNumSeqs();
+		
+		if (size > thisSize) { m->mothurOut("Your list file only contains " + toString(thisSize) + " sequences. Setting size to " + toString(thisSize) + "."); m->mothurOutEndLine();
+			size = thisSize;
+		}
+		
+		vector<nameToBin> seqs;
+		for (int i = 0; i < numBins; i++) {
+			string names = list->get(i);
+			
+			//parse names
+			string individual = "";
+			int length = names.length();
+			for(int j=0;j<length;j++){
+				if(names[j] == ','){
+					nameToBin temp(individual, i);
+					seqs.push_back(temp);
+					individual = "";				
+				}
+				else{
+					individual += names[j];
+				}
+			}
+			nameToBin temp(individual, i);
+			seqs.push_back(temp);
+		}
+		
+					
+		ListVector* temp = new ListVector(numBins);
+		temp->setLabel(list->getLabel());
+		
+		delete list; 
+		list = temp;
+		
+		set<int> alreadySelected; //dont want repeat sequence names added
+		alreadySelected.insert(-1);
+		for (int j = 0; j < size; j++) {
+			
+			if (m->control_pressed) { return 0; }
+			
+			//get random sequence to add, making sure we have not already added it
+			int myrand = -1;
+			while (alreadySelected.count(myrand) != 0) {
+				myrand = (int)((float)(rand()) / (RAND_MAX / (thisSize-1) + 1));
+			}
+			alreadySelected.insert(myrand);
+			
+			//update new list
+			string oldNames = temp->get(seqs[myrand].bin);
+			if (oldNames == "") { oldNames += seqs[myrand].name; }
+			else { oldNames += "," + seqs[myrand].name; }
+			
+			temp->set(seqs[myrand].bin, oldNames);
+			
+			//update group file
+			string group = groupMap->getGroup(seqs[myrand].name);
+			if (group == "not found") { m->mothurOut("[ERROR]: " + seqs[myrand].name + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
+			
+			outGroup << seqs[myrand].name << '\t' << group << endl;
+		}	
+
+		if (m->control_pressed) { return 0; }
+		
+		list->print(out);
+		
+		return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SubSampleCommand", "processListGroup");
 		exit(1);
 	}
 }
