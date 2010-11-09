@@ -29,7 +29,7 @@ SharedListVector::SharedListVector(ifstream& f) : DataVector(), maxRank(0), numB
 
 		//set up groupmap for later.
 		groupmap = new GroupMap(globaldata->getGroupFile());
-		groupmap->readMap();
+		groupmap->readMap(); 
 
 		int hold;
 		string inputData;

@@ -522,7 +522,7 @@ string MothurOut::getFullPathName(string fileName){
 				newFileName = homeDir + fileName.substr(fileName.find("~")+1);
 				return newFileName;
 			}else { //find path
-				if (path.rfind("./") == -1) { return fileName; } //already complete name
+				if (path.rfind("./") == string::npos) { return fileName; } //already complete name
 				else { newFileName = fileName.substr(fileName.rfind("./")+2); } //save the complete part of the name
 				
 				//char* cwdpath = new char[1024];
@@ -542,7 +542,7 @@ string MothurOut::getFullPathName(string fileName){
 				
 				//break apart the current working directory
 				vector<string> dirs;
-				while (simpleCWD.find_first_of('/') != -1) {
+				while (simpleCWD.find_first_of('/') != string::npos) {
 					string dir = simpleCWD.substr(0,simpleCWD.find_first_of('/'));
 					simpleCWD = simpleCWD.substr(simpleCWD.find_first_of('/')+1, simpleCWD.length());
 					dirs.push_back(dir);
@@ -553,7 +553,7 @@ string MothurOut::getFullPathName(string fileName){
 			
 				int index = dirs.size()-1;
 		
-				while((pos = path.rfind("./")) != -1) { //while you don't have a complete path
+				while((pos = path.rfind("./")) != string::npos) { //while you don't have a complete path
 					if (pos == 0) { break;  //you are at the end
 					}else if (path[(pos-1)] == '.') { //you want your parent directory ../
 						path = path.substr(0, pos-1);
@@ -573,12 +573,12 @@ string MothurOut::getFullPathName(string fileName){
 				return newFileName;
 			}	
 		#else
-			if (path.find("~") != -1) { //go to home directory
+			if (path.find("~") != string::npos) { //go to home directory
 				string homeDir = getenv ("HOMEPATH");
 				newFileName = homeDir + fileName.substr(fileName.find("~")+1);
 				return newFileName;
 			}else { //find path
-				if (path.rfind(".\\") == -1) { return fileName; } //already complete name
+				if (path.rfind(".\\") == string::npos) { return fileName; } //already complete name
 				else { newFileName = fileName.substr(fileName.rfind(".\\")+2); } //save the complete part of the name
 							
 				char *cwdpath = NULL;
@@ -599,7 +599,7 @@ string MothurOut::getFullPathName(string fileName){
 					
 				int index = dirs.size()-1;
 					
-				while((pos = path.rfind(".\\")) != -1) { //while you don't have a complete path
+				while((pos = path.rfind(".\\")) != string::npos) { //while you don't have a complete path
 					if (pos == 0) { break;  //you are at the end
 					}else if (path[(pos-1)] == '.') { //you want your parent directory ../
 						path = path.substr(0, pos-1);
@@ -658,7 +658,7 @@ int MothurOut::openInputFile(string fileName, ifstream& fileHandle, string m){
 
 			fileHandle.open(completeFileName.c_str());
 			if(!fileHandle) {
-				mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
+				//mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
 				return 1;
 			}else {
 				//check for blank file

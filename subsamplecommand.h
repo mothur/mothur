@@ -32,6 +32,14 @@ public:
 	void help();
 	
 private:
+	
+	struct nameToBin {
+		string name;
+		int bin;
+		
+		nameToBin(string n, int b) : name(n), bin(b) {}
+	};
+	
 	GlobalData* globaldata;
 	
 	bool abort, pickedGroups, allLines;
@@ -44,7 +52,9 @@ private:
 	
 	int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
 	int getSubSampleShared();
+	int getSubSampleList();
 	int processShared(vector<SharedRAbundVector*>&, ofstream&);
+	int processListGroup(ListVector*&, GroupMap*&, ofstream&, ofstream&);
 	
 };
 
