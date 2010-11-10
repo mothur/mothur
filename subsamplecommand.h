@@ -32,14 +32,6 @@ public:
 	void help();
 	
 private:
-	
-	struct nameToBin {
-		string name;
-		int bin;
-		
-		nameToBin(string n, int b) : name(n), bin(b) {}
-	};
-	
 	GlobalData* globaldata;
 	
 	bool abort, pickedGroups, allLines;
@@ -49,12 +41,21 @@ private:
 	vector<string> Groups, outputNames;
 	map<string, vector<string> > outputTypes;
 	int size;
+	vector<string> names;
+	map<string, vector<string> > nameMap;
 	
 	int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
 	int getSubSampleShared();
 	int getSubSampleList();
+	int getSubSampleRabund();
+	int getSubSampleSabund();
+	int getSubSampleFasta();
 	int processShared(vector<SharedRAbundVector*>&, ofstream&);
-	int processListGroup(ListVector*&, GroupMap*&, ofstream&, ofstream&);
+	int processRabund(RAbundVector*&, ofstream&);
+	int processSabund(SAbundVector*&, ofstream&);
+	int processList(ListVector*&, ofstream&, set<string>&);
+	int getNames();
+	int readNames();
 	
 };
 

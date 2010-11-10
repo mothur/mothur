@@ -275,13 +275,17 @@ int SubSampleCommand::execute(){
 		
 		if (sharedfile != "")	{   getSubSampleShared();	}
 		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); return 0; } }
+		
 		if (listfile != "")		{   getSubSampleList();		}
 		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); return 0; } }
-		//if (rabund != "")		{   getSubSampleRabund();	}
+		
+		if (rabundfile != "")	{   getSubSampleRabund();	}
 		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); return 0; } }
-		//if (sabundfile != "")	{   getSubSampleSabund();	}
+		
+		if (sabundfile != "")	{   getSubSampleSabund();	}
 		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); return 0; } }
-		//if (fastafile != "")	{   getSubSampleFasta();	}
+		
+		if (fastafile != "")	{   getSubSampleFasta();	}
 		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); return 0; } }
 			
 				
@@ -297,6 +301,269 @@ int SubSampleCommand::execute(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+int SubSampleCommand::getSubSampleFasta() {
+	try {
+		
+		if (namefile != "") { readNames(); }	//fills names with all names in namefile.
+		else { getNames(); }//no name file, so get list of names to pick from
+		
+		GroupMap* groupMap;
+		if (groupfile != "") {
+			
+			groupMap = new GroupMap(groupfile);
+			groupMap->readMap();
+			
+			//takes care of user setting groupNames that are invalid or setting groups=all
+			SharedUtil* util = new SharedUtil();
+			util->setGroups(Groups, groupMap->namesOfGroups);
+			delete util;
+			
+			//file mismatch quit
+			if (names.size() != groupMap->getNumSeqs()) { 
+				m->mothurOut("[ERROR]: your fasta file contains " + toString(names.size()) + " sequences, and your groupfile contains " + toString(groupMap->getNumSeqs()) + ", please correct."); 
+				m->mothurOutEndLine();
+				delete groupMap;
+				return 0;
+			}			
+		}	
+		
+		if (m->control_pressed) { return 0; }
+		
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(fastafile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + "subsample" + m->getExtension(fastafile);
+		
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		outputTypes["fasta"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+		
+		//make sure that if your picked groups size is not too big
+		
+		if (pickedGroups) {
+			int total = 0;
+			for(int i = 0; i < Groups.size(); i++) {
+				total += groupMap->getNumSeqs(Groups[i]);
+			}
+			
+			if (size == 0) { //user has not set size, set size = 10% samples size
+				size = int (total * 0.10);
+			}
+			
+			if (total < size) { 
+				if (size != 0) { 
+					m->mothurOut("Your size is too large for the number of groups you selected. Adjusting to " + toString(int (total * 0.10)) + "."); m->mothurOutEndLine();
+				}
+				size = int (total * 0.10);
+			}
+			
+			m->mothurOut("Sampling " + toString(size) + " from " + toString(total) + "."); m->mothurOutEndLine();
+		}
+		
+		if (size == 0) { //user has not set size, set size = 10% samples size
+			size = int (names.size() * 0.10);
+		}
+		
+		int thisSize = names.size();
+		if (size > thisSize) { m->mothurOut("Your fasta file only contains " + toString(thisSize) + " sequences. Setting size to " + toString(thisSize) + "."); m->mothurOutEndLine();
+			size = thisSize;
+		}
+		
+		random_shuffle(names.begin(), names.end());
+		
+		if (!pickedGroups) { m->mothurOut("Sampling " + toString(size) + " from " + toString(thisSize) + "."); m->mothurOutEndLine(); }
+		
+		//randomly select a subset of those names to include in the subsample
+		set<string> subset; //dont want repeat sequence names added
+		for (int j = 0; j < size; j++) {
+			
+			if (m->control_pressed) { return 0; }
+			
+			//get random sequence to add, making sure we have not already added it
+			bool done = false;
+			int myrand;
+			while (!done) {
+				myrand = (int)((float)(rand()) / (RAND_MAX / (thisSize-1) + 1));
+				
+				if (subset.count(names[myrand]) == 0)  { 
+					
+					if (groupfile != "") { //if there is a groupfile given fill in group info
+						string group = groupMap->getGroup(names[myrand]);
+						if (group == "not found") { m->mothurOut("[ERROR]: " + names[myrand] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
+						
+						if (pickedGroups) { //if hte user picked groups, we only want to keep the names of sequences from those groups
+							if (m->inUsersGroups(group, Groups)) {
+								subset.insert(names[myrand]); break;
+							}
+						}else{
+							subset.insert(names[myrand]); break;
+						}
+					}else{ //save everyone, group
+						subset.insert(names[myrand]); break;
+					}					
+				}
+			}
+		}	
+		
+		//read through fasta file outputting only the names on the subsample list
+		ifstream in;
+		m->openInputFile(fastafile, in);
+		
+		string thisname;
+		int count = 0;
+		map<string, vector<string> >::iterator itNameMap;
+		
+		while(!in.eof()){
+			
+			if (m->control_pressed) { in.close(); out.close();  return 0; }
+			
+			Sequence currSeq(in);
+			thisname = currSeq.getName();
+			
+			if (thisname != "") {
+				
+				//does the subset contain a sequence that this sequence represents
+				itNameMap = nameMap.find(thisname);
+				if (itNameMap != nameMap.end()) {
+					vector<string> nameRepresents = itNameMap->second;
+				
+					for (int i = 0; i < nameRepresents.size(); i++){
+						if (subset.count(nameRepresents[i]) != 0) {
+							out << ">" << nameRepresents[i] << endl << currSeq.getAligned() << endl;
+							count++;
+						}
+					}
+				}else{
+					m->mothurOut("[ERROR]: " + thisname + " is not in your namefile, please correct."); m->mothurOutEndLine();
+				}
+			}
+			m->gobble(in);
+		}
+		in.close();	
+		out.close();
+		
+		if (count != subset.size()) {
+			m->mothurOut("[ERROR]: The subset selected contained " + toString(subset.size()) + " sequences, but I only found " + toString(count) + " of those in the fastafile."); m->mothurOutEndLine();
+		}
+		
+		//if a groupfile is provided read through the group file only outputting the names on the subsample list
+		if (groupfile != "") {
+			
+			string groupOutputDir = outputDir;
+			if (outputDir == "") {  groupOutputDir += m->hasPath(groupfile);  }
+			string groupOutputFileName = groupOutputDir + m->getRootName(m->getSimpleName(groupfile)) + "subsample" + m->getExtension(groupfile);
+			
+			ofstream outGroup;
+			m->openOutputFile(groupOutputFileName, outGroup);
+			outputTypes["group"].push_back(groupOutputFileName);  outputNames.push_back(groupOutputFileName);
+			
+			ifstream inGroup;
+			m->openInputFile(groupfile, inGroup);
+			string name, group;
+			
+			while(!inGroup.eof()){
+				
+				if (m->control_pressed) { inGroup.close(); outGroup.close(); return 0; }
+				
+				inGroup >> name;	m->gobble(inGroup);			//read from first column
+				inGroup >> group;			//read from second column
+				
+				//if this name is in the accnos file
+				if (subset.count(name) != 0) {
+					outGroup << name << '\t' << group << endl;
+					subset.erase(name);
+				}
+				
+				m->gobble(inGroup);
+			}
+			inGroup.close();
+			outGroup.close();	
+			
+			//sanity check
+			if (subset.size() != 0) {  
+				m->mothurOut("Your groupfile does not match your fasta file."); m->mothurOutEndLine();
+				for (set<string>::iterator it = subset.begin(); it != subset.end(); it++) {
+					m->mothurOut("[ERROR]: " + *it + " is missing from your groupfile."); m->mothurOutEndLine();
+				}
+			}
+		}
+			
+		return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SubSampleCommand", "getSubSampleFasta");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int SubSampleCommand::getNames() {
+	try {
+		
+		ifstream in;
+		m->openInputFile(fastafile, in);
+		
+		string thisname;
+		while(!in.eof()){
+			
+			if (m->control_pressed) { in.close(); return 0; }
+			
+			Sequence currSeq(in);
+			thisname = currSeq.getName();
+			
+			if (thisname != "") {
+				vector<string> temp; temp.push_back(thisname);
+				nameMap[thisname] = temp;
+				names.push_back(thisname);
+			}
+			m->gobble(in);
+		}
+		in.close();	
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SubSampleCommand", "getNames");
+		exit(1);
+	}
+}	
+//**********************************************************************************************************************
+int SubSampleCommand::readNames() {
+	try {
+		
+		ifstream in;
+		m->openInputFile(namefile, in);
+		
+		string thisname, repnames;
+		map<string, vector<string> >::iterator it;
+		
+		while(!in.eof()){
+			
+			if (m->control_pressed) { in.close(); return 0; }
+			
+			in >> thisname;		m->gobble(in);		//read from first column
+			in >> repnames;			//read from second column
+			
+			it = nameMap.find(thisname);
+			if (it == nameMap.end()) {
+				
+				vector<string> splitRepNames;
+				m->splitAtComma(repnames, splitRepNames);
+				
+				nameMap[thisname] = splitRepNames;	
+				for (int i = 0; i < splitRepNames.size(); i++) { names.push_back(splitRepNames[i]); }
+				
+			}else{	m->mothurOut(thisname + " is already in namesfile. I will use first definition."); m->mothurOutEndLine();  }
+			
+			m->gobble(in);
+		}
+		in.close();	
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SubSampleCommand", "readNames");
+		exit(1);
+	}
+}		
 //**********************************************************************************************************************
 int SubSampleCommand::getSubSampleShared() {
 	try {
@@ -317,10 +584,20 @@ int SubSampleCommand::getSubSampleShared() {
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
+		if (size == 0) { //user has not set size, set size = smallest samples size
+			size = lookup[0]->getNumSeqs();
+			for (int i = 1; i < lookup.size(); i++) {
+				int thisSize = lookup[i]->getNumSeqs();
+				
+				if (thisSize < size) {	size = thisSize;	}
+			}
+		}
+		
+		m->mothurOut("Sampling " + toString(size) + " from " + toString(lookup[0]->getNumSeqs()) + "."); m->mothurOutEndLine();
 		
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			if (m->control_pressed) {  delete input; out.close(); return 0;  }
+			if (m->control_pressed) {  delete input; for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; } out.close(); return 0;  }
 			
 			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
 				
@@ -400,17 +677,6 @@ int SubSampleCommand::getSubSampleShared() {
 int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup, ofstream& out) {
 	try {
 		
-		//if (pickedGroups) { eliminateZeroOTUS(thislookup); }
-		
-		if (size == 0) { //user has not set size, set size = smallest samples size
-			size = thislookup[0]->getNumSeqs();
-			for (int i = 1; i < thislookup.size(); i++) {
-				int thisSize = thislookup[i]->getNumSeqs();
-				
-				if (thisSize < size) {	size = thisSize;	}
-			}
-		}
-		
 		int numBins = thislookup[0]->getNumBins();
 		for (int i = 0; i < thislookup.size(); i++) {		
 			int thisSize = thislookup[i]->getNumSeqs();
@@ -481,11 +747,19 @@ int SubSampleCommand::getSubSampleList() {
 		m->openOutputFile(outputFileName, out);
 		outputTypes["list"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
-		InputData* input;
-		//if you have a groupfile you want to read a shared list
+		InputData* input = new InputData(listfile, "list");
+		ListVector* list = input->getListVector();
+		string lastLabel = list->getLabel();
+		
+		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+		set<string> processedLabels;
+		set<string> userLabels = labels;
+		
+		ofstream outGroup;
+		GroupMap* groupMap;
 		if (groupfile != "") {
 			
-			GroupMap* groupMap = new GroupMap(groupfile);
+			groupMap = new GroupMap(groupfile);
 			groupMap->readMap();
 			
 			//takes care of user setting groupNames that are invalid or setting groups=all
@@ -498,19 +772,8 @@ int SubSampleCommand::getSubSampleList() {
 			if (outputDir == "") {  groupOutputDir += m->hasPath(groupfile);  }
 			string groupOutputFileName = groupOutputDir + m->getRootName(m->getSimpleName(groupfile)) + "subsample" + m->getExtension(groupfile);
 			
-			ofstream outGroup;
 			m->openOutputFile(groupOutputFileName, outGroup);
 			outputTypes["group"].push_back(groupOutputFileName);  outputNames.push_back(groupOutputFileName);
-			
-			globaldata->setGroupFile(groupfile); //shared list needs this
-			
-			input = new InputData(listfile, "list");
-			ListVector* list = input->getListVector();
-			string lastLabel = list->getLabel();
-			
-			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-			set<string> processedLabels;
-			set<string> userLabels = labels;
 			
 			//file mismatch quit
 			if (list->getNumSeqs() != groupMap->getNumSeqs()) { 
@@ -522,86 +785,188 @@ int SubSampleCommand::getSubSampleList() {
 				out.close();
 				outGroup.close();
 				return 0;
+			}			
+		}
+		
+		//make sure that if your picked groups size is not too big
+		if (pickedGroups) {
+			int total = 0;
+			for(int i = 0; i < Groups.size(); i++) {
+				total += groupMap->getNumSeqs(Groups[i]);
 			}
 			
-			//as long as you are not at the end of the file or done wih the lines you want
-			while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-				
-				if (m->control_pressed) {  delete list; delete input; delete groupMap; out.close(); outGroup.close(); return 0;  }
-				
-				if(allLines == 1 || labels.count(list->getLabel()) == 1){			
-					
-					m->mothurOut(list->getLabel()); m->mothurOutEndLine();
-					
-					processListGroup(list, groupMap, out, outGroup);
-					
-					processedLabels.insert(list->getLabel());
-					userLabels.erase(list->getLabel());
-				}
-				
-				if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-					string saveLabel = list->getLabel();
-					
-					delete list; 
-					
-					list = input->getListVector(lastLabel);
-					m->mothurOut(list->getLabel()); m->mothurOutEndLine();
-					
-					processListGroup(list, groupMap, out, outGroup);
-					
-					processedLabels.insert(list->getLabel());
-					userLabels.erase(list->getLabel());
-					
-					//restore real lastlabel to save below
-					list->setLabel(saveLabel);
-				}
-				
-				lastLabel = list->getLabel();
-				
-				delete list; list = NULL;
-				
-				//get next line to process
-				list = input->getListVector();				
+			if (size == 0) { //user has not set size, set size = 10% samples size
+				size = int (total * 0.10);
 			}
 			
-			
-			if (m->control_pressed) {  if (list != NULL) { delete list; } delete input; delete groupMap; out.close(); outGroup.close(); return 0;  }
-			
-			//output error messages about any remaining user labels
-			set<string>::iterator it;
-			bool needToRun = false;
-			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-				m->mothurOut("Your file does not include the label " + *it); 
-				if (processedLabels.count(lastLabel) != 1) {
-					m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-					needToRun = true;
-				}else {
-					m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-				}
+			if (total < size) { 
+				m->mothurOut("Your size is too large for the number of groups you selected. Adjusting to " + toString(int (total * 0.10)) + "."); m->mothurOutEndLine();
+				size = int (total * 0.10);
 			}
 			
-			//run last label if you need to
-			if (needToRun == true)  {
-				if (list != NULL) { delete list; }
-				
-				list = input->getListVector(lastLabel);
-				
-				m->mothurOut(list->getLabel()); m->mothurOutEndLine();
-				
-				processListGroup(list, groupMap, out, outGroup);
-				
-				delete list; list = NULL;
+			m->mothurOut("Sampling " + toString(size) + " from " + toString(total) + "."); m->mothurOutEndLine();
+		}else{
+		
+			if (size == 0) { //user has not set size, set size = 10% samples size
+				size = int (list->getNumSeqs() * 0.10);
 			}
 			
-			out.close();  outGroup.close();
-			if (list != NULL) { delete list; }
-			delete groupMap;
+			int thisSize = list->getNumSeqs();
+			if (size > thisSize) { m->mothurOut("Your list file only contains " + toString(thisSize) + " sequences. Setting size to " + toString(thisSize) + "."); m->mothurOutEndLine();
+				size = thisSize;
+			}
 			
-		}else {
-			//need to complete
+			m->mothurOut("Sampling " + toString(size) + " from " + toString(list->getNumSeqs()) + "."); m->mothurOutEndLine();
 		}
 		
 		
+		for (int i = 0; i < list->getNumBins(); i++) {
+			string binnames = list->get(i);
+			
+			//parse names
+			string individual = "";
+			int length = binnames.length();
+			for(int j=0;j<length;j++){
+				if(binnames[j] == ','){
+					
+					if (groupfile != "") { //if there is a groupfile given fill in group info
+						string group = groupMap->getGroup(individual);
+						if (group == "not found") { m->mothurOut("[ERROR]: " + individual + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
+						
+						if (pickedGroups) { //if hte user picked groups, we only want to keep the names of sequences from those groups
+							if (m->inUsersGroups(group, Groups)) {
+								names.push_back(individual);
+							}
+						}else{
+							names.push_back(individual);
+						}
+					}else{ //save everyone, group
+						names.push_back(individual);
+					}
+					individual = "";				
+				}
+				else{
+					individual += binnames[j];
+				}
+			}
+			//save last name
+			if (groupfile != "") { //if there is a groupfile given fill in group info
+				string group = groupMap->getGroup(individual);
+				if (group == "not found") { m->mothurOut("[ERROR]: " + individual + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
+				
+				if (pickedGroups) { //if hte user picked groups, we only want to keep the names of sequences from those groups
+					if (m->inUsersGroups(group, Groups)) {
+						names.push_back(individual);
+					}
+				}else{
+					names.push_back(individual);
+				}
+			}else{ //save everyone, group
+				names.push_back(individual);
+			}
+		}
+		
+		random_shuffle(names.begin(), names.end());
+		
+		//randomly select a subset of those names to include in the subsample
+		set<string> subset; //dont want repeat sequence names added
+		for (int j = 0; j < size; j++) {
+			
+			if (m->control_pressed) { break; }
+			
+			//get random sequence to add, making sure we have not already added it
+			bool done = false;
+			int myrand;
+			while (!done) {
+				myrand = (int)((float)(rand()) / (RAND_MAX / (names.size()-1) + 1));
+				
+				if (subset.count(names[myrand]) == 0)  { subset.insert(names[myrand]); break;	}
+			}
+		}	
+		
+		if (groupfile != "") { 
+			//write out new groupfile
+			for (set<string>::iterator it = subset.begin(); it != subset.end(); it++) {
+				string group = groupMap->getGroup(*it);
+				if (group == "not found") { group = "NOTFOUND"; }
+				
+				outGroup << *it << '\t' << group << endl;
+			}
+			outGroup.close(); delete groupMap; 
+		}
+		
+						
+		//as long as you are not at the end of the file or done wih the lines you want
+		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+			
+			if (m->control_pressed) {  delete list; delete input; out.close();  return 0;  }
+			
+			if(allLines == 1 || labels.count(list->getLabel()) == 1){			
+				
+				m->mothurOut(list->getLabel()); m->mothurOutEndLine();
+				
+				processList(list, out, subset);
+				
+				processedLabels.insert(list->getLabel());
+				userLabels.erase(list->getLabel());
+			}
+			
+			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = list->getLabel();
+				
+				delete list; 
+				
+				list = input->getListVector(lastLabel);
+				m->mothurOut(list->getLabel()); m->mothurOutEndLine();
+				
+				processList(list, out, subset);
+				
+				processedLabels.insert(list->getLabel());
+				userLabels.erase(list->getLabel());
+				
+				//restore real lastlabel to save below
+				list->setLabel(saveLabel);
+			}
+			
+			lastLabel = list->getLabel();
+			
+			delete list; list = NULL;
+			
+			//get next line to process
+			list = input->getListVector();				
+		}
+		
+		
+		if (m->control_pressed) {  if (list != NULL) { delete list; } delete input; out.close(); return 0;  }
+		
+		//output error messages about any remaining user labels
+		set<string>::iterator it;
+		bool needToRun = false;
+		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+			m->mothurOut("Your file does not include the label " + *it); 
+			if (processedLabels.count(lastLabel) != 1) {
+				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+				needToRun = true;
+			}else {
+				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+			}
+		}
+		
+		//run last label if you need to
+		if (needToRun == true)  {
+			if (list != NULL) { delete list; }
+			
+			list = input->getListVector(lastLabel);
+			
+			m->mothurOut(list->getLabel()); m->mothurOutEndLine();
+			
+			processList(list, out, subset);
+			
+			delete list; list = NULL;
+		}
+		
+		out.close();  
+		if (list != NULL) { delete list; }
 		delete input;
 						
 		return 0;
@@ -613,75 +978,45 @@ int SubSampleCommand::getSubSampleList() {
 	}
 }
 //**********************************************************************************************************************
-int SubSampleCommand::processListGroup(ListVector*& list, GroupMap*& groupMap, ofstream& out, ofstream& outGroup) {
+int SubSampleCommand::processList(ListVector*& list, ofstream& out, set<string>& subset) {
 	try {
 				
-		if (size == 0) { //user has not set size, set size = 10% samples size
-			size = int (list->getNumSeqs() * 0.10);
-		}
-		
 		int numBins = list->getNumBins();
-		int thisSize = list->getNumSeqs();
+
+		ListVector* temp = new ListVector();
+		temp->setLabel(list->getLabel());
 		
-		if (size > thisSize) { m->mothurOut("Your list file only contains " + toString(thisSize) + " sequences. Setting size to " + toString(thisSize) + "."); m->mothurOutEndLine();
-			size = thisSize;
-		}
-		
-		vector<nameToBin> seqs;
 		for (int i = 0; i < numBins; i++) {
-			string names = list->get(i);
+			
+			if (m->control_pressed) { break; }
+			
+			string binnames = list->get(i);
 			
 			//parse names
 			string individual = "";
-			int length = names.length();
+			string newNames = "";
+			int length = binnames.length();
 			for(int j=0;j<length;j++){
-				if(names[j] == ','){
-					nameToBin temp(individual, i);
-					seqs.push_back(temp);
+				if(binnames[j] == ','){
+					if (subset.count(individual) != 0) {  newNames += individual + ",";  }
 					individual = "";				
-				}
-				else{
-					individual += names[j];
+				}else{
+					individual += binnames[j];
 				}
 			}
-			nameToBin temp(individual, i);
-			seqs.push_back(temp);
+			if (subset.count(individual) != 0) {  newNames += individual;  }
+			
+			
+			//if there are names in this bin add to new list
+			if (newNames != "") { 
+				newNames = newNames.substr(0, newNames.length()-1); //rip off extra comma
+				temp->push_back(newNames);
+			}
 		}
 		
-					
-		ListVector* temp = new ListVector(numBins);
-		temp->setLabel(list->getLabel());
-		
-		delete list; 
+		delete list;
 		list = temp;
 		
-		set<int> alreadySelected; //dont want repeat sequence names added
-		alreadySelected.insert(-1);
-		for (int j = 0; j < size; j++) {
-			
-			if (m->control_pressed) { return 0; }
-			
-			//get random sequence to add, making sure we have not already added it
-			int myrand = -1;
-			while (alreadySelected.count(myrand) != 0) {
-				myrand = (int)((float)(rand()) / (RAND_MAX / (thisSize-1) + 1));
-			}
-			alreadySelected.insert(myrand);
-			
-			//update new list
-			string oldNames = temp->get(seqs[myrand].bin);
-			if (oldNames == "") { oldNames += seqs[myrand].name; }
-			else { oldNames += "," + seqs[myrand].name; }
-			
-			temp->set(seqs[myrand].bin, oldNames);
-			
-			//update group file
-			string group = groupMap->getGroup(seqs[myrand].name);
-			if (group == "not found") { m->mothurOut("[ERROR]: " + seqs[myrand].name + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
-			
-			outGroup << seqs[myrand].name << '\t' << group << endl;
-		}	
-
 		if (m->control_pressed) { return 0; }
 		
 		list->print(out);
@@ -690,10 +1025,332 @@ int SubSampleCommand::processListGroup(ListVector*& list, GroupMap*& groupMap, o
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "SubSampleCommand", "processListGroup");
+		m->errorOut(e, "SubSampleCommand", "processList");
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+int SubSampleCommand::getSubSampleRabund() {
+	try {
+		
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(rabundfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(rabundfile)) + "subsample" + m->getExtension(rabundfile);
+		
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		outputTypes["rabund"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+		
+		InputData* input = new InputData(rabundfile, "rabund");
+		RAbundVector* rabund = input->getRAbundVector();
+		string lastLabel = rabund->getLabel();
+		
+		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+		set<string> processedLabels;
+		set<string> userLabels = labels;
+		
+		if (size == 0) { //user has not set size, set size = 10%
+			size = int((rabund->getNumSeqs()) * 0.10);
+		}
+		
+		m->mothurOut("Sampling " + toString(size) + " from " + toString(rabund->getNumSeqs()) + "."); m->mothurOutEndLine();
+		
+		//as long as you are not at the end of the file or done wih the lines you want
+		while((rabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+			if (m->control_pressed) {  delete input; delete rabund; out.close(); return 0;  }
+			
+			if(allLines == 1 || labels.count(rabund->getLabel()) == 1){			
+				
+				m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
+				
+				processRabund(rabund, out);
+				
+				processedLabels.insert(rabund->getLabel());
+				userLabels.erase(rabund->getLabel());
+			}
+			
+			if ((m->anyLabelsToProcess(rabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = rabund->getLabel();
+				
+				delete rabund; 
+				
+				rabund = input->getRAbundVector(lastLabel);
+				m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
+				
+				processRabund(rabund, out);
+				
+				processedLabels.insert(rabund->getLabel());
+				userLabels.erase(rabund->getLabel());
+				
+				//restore real lastlabel to save below
+				rabund->setLabel(saveLabel);
+			}
+			
+			lastLabel = rabund->getLabel();
+			
+			//prevent memory leak
+			delete rabund; rabund = NULL;
+			
+			//get next line to process
+			rabund = input->getRAbundVector();				
+		}
+		
+		
+		if (m->control_pressed) {  out.close(); return 0;  }
+		
+		//output error messages about any remaining user labels
+		set<string>::iterator it;
+		bool needToRun = false;
+		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+			m->mothurOut("Your file does not include the label " + *it); 
+			if (processedLabels.count(lastLabel) != 1) {
+				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+				needToRun = true;
+			}else {
+				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+			}
+		}
+		
+		//run last label if you need to
+		if (needToRun == true)  {
+			if (rabund != NULL) { delete rabund; }
+			
+			rabund = input->getRAbundVector(lastLabel);
+			
+			m->mothurOut(rabund->getLabel()); m->mothurOutEndLine();
+			
+			processRabund(rabund, out);
+			
+			delete rabund;
+		}
+		
+		delete input;
+		out.close();  
+		
+		return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SubSampleCommand", "getSubSampleRabund");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int SubSampleCommand::processRabund(RAbundVector*& rabund, ofstream& out) {
+	try {
+		
+		int numBins = rabund->getNumBins();
+		int thisSize = rabund->getNumSeqs();
+			
+		if (thisSize != size) {
+				
+			OrderVector* order = new OrderVector();
+			for(int p=0;p<numBins;p++){
+				for(int j=0;j<rabund->get(p);j++){
+					order->push_back(p);
+				}
+			}
+			random_shuffle(order->begin(), order->end());
+			
+			RAbundVector* temp = new RAbundVector(numBins);
+			temp->setLabel(rabund->getLabel());
+			
+			delete rabund;
+			rabund = temp;
+			
+			for (int j = 0; j < size; j++) {
+				
+				if (m->control_pressed) { delete order; return 0; }
+				
+				//get random number to sample from order between 0 and thisSize-1.
+				int myrand = (int)((float)(rand()) / (RAND_MAX / (thisSize-1) + 1));
+				
+				int bin = order->get(myrand);
+				
+				int abund = rabund->get(bin);
+				rabund->set(bin, (abund+1));
+			}
+			
+			delete order;
+		}
+		
+		if (m->control_pressed) { return 0; }
+		
+		rabund->print(out);
+		
+		return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SubSampleCommand", "processRabund");
+		exit(1);
+	}
+}	
+//**********************************************************************************************************************
+int SubSampleCommand::getSubSampleSabund() {
+	try {
+		
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(sabundfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sabundfile)) + "subsample" + m->getExtension(sabundfile);
+		
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		outputTypes["sabund"].push_back(outputFileName);  outputNames.push_back(outputFileName);
+		
+		InputData* input = new InputData(sabundfile, "sabund");
+		SAbundVector* sabund = input->getSAbundVector();
+		string lastLabel = sabund->getLabel();
+		
+		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+		set<string> processedLabels;
+		set<string> userLabels = labels;
+		
+		if (size == 0) { //user has not set size, set size = 10%
+			size = int((sabund->getNumSeqs()) * 0.10);
+		}
+		
+		m->mothurOut("Sampling " + toString(size) + " from " + toString(sabund->getNumSeqs()) + "."); m->mothurOutEndLine();
+		
+		//as long as you are not at the end of the file or done wih the lines you want
+		while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+			if (m->control_pressed) {  delete input; delete sabund; out.close(); return 0;  }
+			
+			if(allLines == 1 || labels.count(sabund->getLabel()) == 1){			
+				
+				m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
+				
+				processSabund(sabund, out);
+				
+				processedLabels.insert(sabund->getLabel());
+				userLabels.erase(sabund->getLabel());
+			}
+			
+			if ((m->anyLabelsToProcess(sabund->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = sabund->getLabel();
+				
+				delete sabund; 
+				
+				sabund = input->getSAbundVector(lastLabel);
+				m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
+				
+				processSabund(sabund, out);
+				
+				processedLabels.insert(sabund->getLabel());
+				userLabels.erase(sabund->getLabel());
+				
+				//restore real lastlabel to save below
+				sabund->setLabel(saveLabel);
+			}
+			
+			lastLabel = sabund->getLabel();
+			
+			//prevent memory leak
+			delete sabund; sabund = NULL;
+			
+			//get next line to process
+			sabund = input->getSAbundVector();				
+		}
+		
+		
+		if (m->control_pressed) {  out.close(); return 0;  }
+		
+		//output error messages about any remaining user labels
+		set<string>::iterator it;
+		bool needToRun = false;
+		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+			m->mothurOut("Your file does not include the label " + *it); 
+			if (processedLabels.count(lastLabel) != 1) {
+				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+				needToRun = true;
+			}else {
+				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+			}
+		}
+		
+		//run last label if you need to
+		if (needToRun == true)  {
+			if (sabund != NULL) { delete sabund; }
+			
+			sabund = input->getSAbundVector(lastLabel);
+			
+			m->mothurOut(sabund->getLabel()); m->mothurOutEndLine();
+			
+			processSabund(sabund, out);
+			
+			delete sabund;
+		}
+		
+		delete input;
+		out.close();  
+		
+		return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SubSampleCommand", "getSubSampleSabund");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int SubSampleCommand::processSabund(SAbundVector*& sabund, ofstream& out) {
+	try {
+		
+		RAbundVector* rabund = new RAbundVector();
+		*rabund = sabund->getRAbundVector();
+		
+		int numBins = rabund->getNumBins();
+		int thisSize = rabund->getNumSeqs();
+	
+		if (thisSize != size) {
+			
+			OrderVector* order = new OrderVector();
+			for(int p=0;p<numBins;p++){
+				for(int j=0;j<rabund->get(p);j++){
+					order->push_back(p);
+				}
+			}
+			random_shuffle(order->begin(), order->end());
+			
+			RAbundVector* temp = new RAbundVector(numBins);
+			temp->setLabel(rabund->getLabel());
+			
+			delete rabund;
+			rabund = temp;
+			
+			for (int j = 0; j < size; j++) {
+	
+				if (m->control_pressed) { delete order; return 0; }
+				
+				//get random number to sample from order between 0 and thisSize-1.
+				int myrand = (int)((float)(rand()) / (RAND_MAX / (thisSize-1) + 1));
+				
+				int bin = order->get(myrand);
+				
+				int abund = rabund->get(bin);
+				rabund->set(bin, (abund+1));
+			}
+			
+			delete order;
+		}
+		
+		if (m->control_pressed) { return 0; }
+
+		delete sabund;
+		sabund = new SAbundVector();
+		*sabund = rabund->getSAbundVector();
+		delete rabund;
+	
+		sabund->print(out);
+		
+		return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SubSampleCommand", "processSabund");
+		exit(1);
+	}
+}			
 //**********************************************************************************************************************
 int SubSampleCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
 	try {
