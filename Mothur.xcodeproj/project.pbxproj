@@ -57,6 +57,10 @@
 		A747E81D116365E000FB9042 /* chimeraslayercommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeraslayercommand.cpp; sourceTree = "<group>"; };
 		A74A9C03124B72DB000D5D25 /* clusterfragmentscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clusterfragmentscommand.h; sourceTree = "<group>"; };
 		A74A9C04124B72DB000D5D25 /* clusterfragmentscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clusterfragmentscommand.cpp; sourceTree = "<group>"; };
+		A751032A128AC93F00ABB831 /* removegroupscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = removegroupscommand.h; sourceTree = "<group>"; };
+		A751032B128AC93F00ABB831 /* removegroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removegroupscommand.cpp; sourceTree = "<group>"; };
+		A75103D6128AE34100ABB831 /* getgroupscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getgroupscommand.h; sourceTree = "<group>"; };
+		A75103D7128AE34100ABB831 /* getgroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getgroupscommand.cpp; sourceTree = "<group>"; };
 		A7639F8D1175DF35008F5578 /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
 		A7653CB112789EFD009D6C09 /* subsamplecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = subsamplecommand.h; sourceTree = "<group>"; };
 		A7653CB212789EFD009D6C09 /* subsamplecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = subsamplecommand.cpp; sourceTree = "<group>"; };
@@ -792,6 +796,8 @@
 				A76714DE126DE45A003F359A /* deuniqueseqscommand.cpp */,
 				A7DA2050113FECD400BF472F /* filterseqscommand.h */,
 				A7DA204F113FECD400BF472F /* filterseqscommand.cpp */,
+				A75103D6128AE34100ABB831 /* getgroupscommand.h */,
+				A75103D7128AE34100ABB831 /* getgroupscommand.cpp */,
 				A7DA205B113FECD400BF472F /* getgroupcommand.h */,
 				A7DA205A113FECD400BF472F /* getgroupcommand.cpp */,
 				A7DA205D113FECD400BF472F /* getlabelcommand.h */,
@@ -872,6 +878,8 @@
 				A7DA20EA113FECD400BF472F /* readotucommand.cpp */,
 				A7DA20F1113FECD400BF472F /* readtreecommand.h */,
 				A7DA20F0113FECD400BF472F /* readtreecommand.cpp */,
+				A751032A128AC93F00ABB831 /* removegroupscommand.h */,
+				A751032B128AC93F00ABB831 /* removegroupscommand.cpp */,
 				A787A28E124CE1470076EB84 /* removelineagecommand.h */,
 				A787A28F124CE1470076EB84 /* removelineagecommand.cpp */,
 				A7DA20F3113FECD400BF472F /* removeseqscommand.h */,

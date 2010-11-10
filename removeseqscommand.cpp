@@ -267,6 +267,8 @@ int RemoveSeqsCommand::execute(){
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
 		
+		m->mothurOut("Removed " + toString(names.size()) + " sequences."); m->mothurOutEndLine();
+		
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
 			m->mothurOut("Output File Names: "); m->mothurOutEndLine();

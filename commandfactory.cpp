@@ -97,6 +97,8 @@
 #include "pairwiseseqscommand.h"
 #include "clusterdoturcommand.h"
 #include "subsamplecommand.h"
+#include "removegroupscommand.h"
+#include "getgroupscommand.h"
 
 
 /*******************************************************/
@@ -199,6 +201,8 @@ CommandFactory::CommandFactory(){
 	commands["deunique.seqs"]		= "deunique.seqs";
 	commands["cluster.classic"]		= "cluster.classic";
 	commands["sub.sample"]			= "sub.sample";
+	commands["remove.groups"]		= "remove.groups";
+	commands["get.groups"]			= "get.groups";
 	commands["pairwise.seqs"]		= "MPIEnabled";
 	commands["pipeline.pds"]		= "MPIEnabled";
 	commands["classify.seqs"]		= "MPIEnabled"; 
@@ -341,6 +345,8 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "cluster.fragments")		{	command = new ClusterFragmentsCommand(optionString);		}
 		else if(commandName == "get.lineage")			{	command = new GetLineageCommand(optionString);				}
 		else if(commandName == "remove.lineage")		{	command = new RemoveLineageCommand(optionString);			}
+		else if(commandName == "get.groups")			{	command = new GetGroupsCommand(optionString);				}
+		else if(commandName == "remove.groups")			{	command = new RemoveGroupsCommand(optionString);			}
 		else if(commandName == "fastq.info")			{	command = new ParseFastaQCommand(optionString);				}
 		else if(commandName == "pipeline.pds")			{	command = new PipelineCommand(optionString);				}
 		else if(commandName == "deunique.seqs")			{	command = new DeUniqueSeqsCommand(optionString);			}
@@ -456,7 +462,9 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "split.groups")			{	pipecommand = new SplitGroupCommand(optionString);				}
 		else if(commandName == "cluster.fragments")		{	pipecommand = new ClusterFragmentsCommand(optionString);		}
 		else if(commandName == "get.lineage")			{	pipecommand = new GetLineageCommand(optionString);				}
+		else if(commandName == "get.groups")			{	pipecommand = new GetGroupsCommand(optionString);				}
 		else if(commandName == "remove.lineage")		{	pipecommand = new RemoveLineageCommand(optionString);			}
+		else if(commandName == "remove.groups")			{	pipecommand = new RemoveGroupsCommand(optionString);			}
 		else if(commandName == "fastq.info")			{	pipecommand = new ParseFastaQCommand(optionString);				}
 		else if(commandName == "deunique.seqs")			{	pipecommand = new DeUniqueSeqsCommand(optionString);			}
 		else if(commandName == "pairwise.seqs")			{	pipecommand = new PairwiseSeqsCommand(optionString);			}
@@ -560,6 +568,8 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "cluster.fragments")		{	shellcommand = new ClusterFragmentsCommand();		}
 		else if(commandName == "get.lineage")			{	shellcommand = new GetLineageCommand();				}
 		else if(commandName == "remove.lineage")		{	shellcommand = new RemoveLineageCommand();			}
+		else if(commandName == "get.groups")			{	shellcommand = new GetGroupsCommand();				}
+		else if(commandName == "remove.groups")			{	shellcommand = new RemoveGroupsCommand();			}
 		else if(commandName == "fastq.info")			{	shellcommand = new ParseFastaQCommand();			}
 		else if(commandName == "deunique.seqs")			{	shellcommand = new DeUniqueSeqsCommand();			}
 		else if(commandName == "pairwise.seqs")			{	shellcommand = new PairwiseSeqsCommand();			}
