@@ -263,6 +263,8 @@ int GetSeqsCommand::execute(){
 		
 		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
 		
+		m->mothurOut("Selected " + toString(names.size()) + " sequences."); m->mothurOutEndLine();
+		
 		if (outputNames.size() != 0) {
 			m->mothurOutEndLine();
 			m->mothurOut("Output File Names: "); m->mothurOutEndLine();
