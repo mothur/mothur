@@ -61,7 +61,7 @@ class UnifracWeightedCommand : public Command {
 		map<float, float>  validScores;  //map contains scores from random
 		
 		bool abort, phylip, random;
-		string groups, itersString;
+		string groups, itersString, outputForm;
 		vector<string> Groups, outputNames; //holds groups to be used
 		map<string, vector<string> > outputTypes;
 		int processors;

@@ -99,7 +99,8 @@
 #include "subsamplecommand.h"
 #include "removegroupscommand.h"
 #include "getgroupscommand.h"
-
+#include "getotuscommand.h"
+#include "removeotuscommand.h"
 
 /*******************************************************/
 
@@ -203,6 +204,8 @@ CommandFactory::CommandFactory(){
 	commands["sub.sample"]			= "sub.sample";
 	commands["remove.groups"]		= "remove.groups";
 	commands["get.groups"]			= "get.groups";
+	commands["get.otus"]			= "get.otus";
+	commands["remove.otus"]			= "remove.otus";
 	commands["pairwise.seqs"]		= "MPIEnabled";
 	commands["pipeline.pds"]		= "MPIEnabled";
 	commands["classify.seqs"]		= "MPIEnabled"; 
@@ -347,6 +350,8 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "remove.lineage")		{	command = new RemoveLineageCommand(optionString);			}
 		else if(commandName == "get.groups")			{	command = new GetGroupsCommand(optionString);				}
 		else if(commandName == "remove.groups")			{	command = new RemoveGroupsCommand(optionString);			}
+		else if(commandName == "get.otus")				{	command = new GetOtusCommand(optionString);					}
+		else if(commandName == "remove.otus")			{	command = new RemoveOtusCommand(optionString);				}
 		else if(commandName == "fastq.info")			{	command = new ParseFastaQCommand(optionString);				}
 		else if(commandName == "pipeline.pds")			{	command = new PipelineCommand(optionString);				}
 		else if(commandName == "deunique.seqs")			{	command = new DeUniqueSeqsCommand(optionString);			}
@@ -465,6 +470,8 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "get.groups")			{	pipecommand = new GetGroupsCommand(optionString);				}
 		else if(commandName == "remove.lineage")		{	pipecommand = new RemoveLineageCommand(optionString);			}
 		else if(commandName == "remove.groups")			{	pipecommand = new RemoveGroupsCommand(optionString);			}
+		else if(commandName == "get.otus")				{	pipecommand = new GetOtusCommand(optionString);					}
+		else if(commandName == "remove.otus")			{	pipecommand = new RemoveOtusCommand(optionString);				}
 		else if(commandName == "fastq.info")			{	pipecommand = new ParseFastaQCommand(optionString);				}
 		else if(commandName == "deunique.seqs")			{	pipecommand = new DeUniqueSeqsCommand(optionString);			}
 		else if(commandName == "pairwise.seqs")			{	pipecommand = new PairwiseSeqsCommand(optionString);			}
@@ -570,6 +577,8 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "remove.lineage")		{	shellcommand = new RemoveLineageCommand();			}
 		else if(commandName == "get.groups")			{	shellcommand = new GetGroupsCommand();				}
 		else if(commandName == "remove.groups")			{	shellcommand = new RemoveGroupsCommand();			}
+		else if(commandName == "get.otus")				{	shellcommand = new GetOtusCommand();				}
+		else if(commandName == "remove.otus")			{	shellcommand = new RemoveOtusCommand();				}
 		else if(commandName == "fastq.info")			{	shellcommand = new ParseFastaQCommand();			}
 		else if(commandName == "deunique.seqs")			{	shellcommand = new DeUniqueSeqsCommand();			}
 		else if(commandName == "pairwise.seqs")			{	shellcommand = new PairwiseSeqsCommand();			}

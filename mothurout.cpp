@@ -1462,20 +1462,21 @@ bool MothurOut::anyLabelsToProcess(string label, set<string>& userLabels, string
 		}
 		
 		//go through users set and make them floats
-		for(it = userLabels.begin(); it != userLabels.end(); ++it) {
+		for(it = userLabels.begin(); it != userLabels.end();) {
 			
 			float temp;
 			if ((*it != "unique") && (convertTestFloat(*it, temp) == true)){
 				convert(*it, temp);
 				orderFloat.push_back(temp);
 				userMap[*it] = temp;
+				it++;
 			}else if (*it == "unique") { 
 				orderFloat.push_back(-1.0);
 				userMap["unique"] = -1.0;
+				it++;
 			}else {
-				if (errorOff == "") {  cout << *it << " is not a valid label." << endl;  }
-				userLabels.erase(*it); 
-				it--;
+				if (errorOff == "") {  mothurOut(*it + " is not a valid label."); mothurOutEndLine();  }
+				userLabels.erase(it++); 
 			}
 		}
 		
@@ -1491,11 +1492,11 @@ bool MothurOut::anyLabelsToProcess(string label, set<string>& userLabels, string
 			if (orderFloat[i] < labelFloat) {
 				smaller = true;
 				if (orderFloat[i] == -1) { 
-					if (errorOff == "") { cout << "Your file does not include the label unique." << endl; }
+					if (errorOff == "") { mothurOut("Your file does not include the label unique."); mothurOutEndLine(); }
 					userLabels.erase("unique");
 				}
 				else {  
-					if (errorOff == "") { cout << "Your file does not include the label " << endl; }
+					if (errorOff == "") { mothurOut("Your file does not include the label "); mothurOutEndLine(); }
 					string s = "";
 					for (it2 = userMap.begin(); it2!= userMap.end(); it2++) {  
 						if (it2->second == orderFloat[i]) {  
@@ -1505,7 +1506,7 @@ bool MothurOut::anyLabelsToProcess(string label, set<string>& userLabels, string
 							break;
 						}
 					}
-					if (errorOff == "") {cout << s <<  ". I will use the next smallest distance. " << endl; }
+					if (errorOff == "") {mothurOut( s +  ". I will use the next smallest distance. "); mothurOutEndLine(); }
 				}
 			//since they are sorted once you find a bigger one stop looking
 			}else { break; }

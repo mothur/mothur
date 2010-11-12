@@ -31,6 +31,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(){
 		outputTypes["unweighted"] = tempOutNames;
 		outputTypes["uwsummary"] = tempOutNames;
 		outputTypes["phylip"] = tempOutNames;
+		outputTypes["column"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "UnifracUnweightedCommand", "UnifracUnweightedCommand");
@@ -91,6 +92,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 			outputTypes["unweighted"] = tempOutNames;
 			outputTypes["uwsummary"] = tempOutNames;
 			outputTypes["phylip"] = tempOutNames;
+			outputTypes["column"] = tempOutNames;
 			
 			if (globaldata->gTree.size() == 0) {//no trees were read
 				m->mothurOut("You must execute the read.tree command, before you may execute the unifrac.unweighted command."); m->mothurOutEndLine(); abort = true;  }
@@ -113,8 +115,12 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 			itersString = validParameter.validFile(parameters, "iters", false);				if (itersString == "not found") { itersString = "1000"; }
 			convert(itersString, iters); 
 			
-			string temp = validParameter.validFile(parameters, "distance", false);			if (temp == "not found") { temp = "false"; }
-			phylip = m->isTrue(temp);
+			string temp = validParameter.validFile(parameters, "distance", false);			
+			if (temp == "not found") { phylip = false; outputForm = ""; }
+			else{
+				if ((temp == "lt") || (temp == "column") || (temp == "square")) {  phylip = true;  outputForm = temp; }
+				else { m->mothurOut("Options for distance are: lt, square, or column. Using lt."); m->mothurOutEndLine(); phylip = true; outputForm = "lt"; }
+			}
 			
 			temp = validParameter.validFile(parameters, "random", false);					if (temp == "not found") { temp = "f"; }
 			random = m->isTrue(temp);
@@ -165,7 +171,7 @@ void UnifracUnweightedCommand::help(){
 		m->mothurOut("The unifrac.unweighted command parameters are groups, iters, distance, processors and random.  No parameters are required.\n");
 		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 1 valid group.\n");
 		m->mothurOut("The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree.\n");
-		m->mothurOut("The distance parameter allows you to create a distance file from the results. The default is false.\n");
+		m->mothurOut("The distance parameter allows you to create a distance file from the results. The default is false. You may set distance to lt, square or column.\n");
 		m->mothurOut("The random parameter allows you to shut off the comparison to random trees. The default is false, meaning compare don't your trees with randomly generated trees.\n");
 		m->mothurOut("The processors parameter allows you to specify the number of processors to use. The default is 1.\n");
 		m->mothurOut("The unifrac.unweighted command should be in the following format: unifrac.unweighted(groups=yourGroups, iters=yourIters).\n");
@@ -374,15 +380,23 @@ void UnifracUnweightedCommand::printUWSummaryFile(int i) {
 /***********************************************************/
 void UnifracUnweightedCommand::createPhylipFile(int i) {
 	try {
-		string phylipFileName = outputDir + m->getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".unweighted.dist";
-		outputNames.push_back(phylipFileName); outputTypes["phylip"].push_back(phylipFileName); 
+		string phylipFileName;
+		if ((outputForm == "lt") || (outputForm == "square")) {
+			phylipFileName = outputDir + m->getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".unweighted.phylip.dist";
+			outputNames.push_back(phylipFileName); outputTypes["phylip"].push_back(phylipFileName); 
+		}else { //column
+			phylipFileName = outputDir + m->getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".unweighted.column.dist";
+			outputNames.push_back(phylipFileName); outputTypes["column"].push_back(phylipFileName); 
+		}
 		
 		ofstream out;
 		m->openOutputFile(phylipFileName, out);
-			
-		//output numSeqs
-		out << globaldata->Groups.size() << endl;
-			
+		
+		if ((outputForm == "lt") || (outputForm == "square")) {
+			//output numSeqs
+			out << globaldata->Groups.size() << endl;
+		}
+		
 		//make matrix with scores in it
 		vector< vector<float> > dists;	dists.resize(globaldata->Groups.size());
 		for (int i = 0; i < globaldata->Groups.size(); i++) {
@@ -406,11 +420,30 @@ void UnifracUnweightedCommand::createPhylipFile(int i) {
 			if (name.length() < 10) { //pad with spaces to make compatible
 				while (name.length() < 10) {  name += " ";  }
 			}
-			out << name << '\t';
 			
-			//output distances
-			for (int l = 0; l < r; l++) {	out  << dists[r][l] << '\t';  }
-			out << endl;
+			if (outputForm == "lt") {
+				out << name << '\t';
+			
+				//output distances
+				for (int l = 0; l < r; l++) {	out  << dists[r][l] << '\t';  }
+				out << endl;
+			}else if (outputForm == "square") {
+				out << name << '\t';
+				
+				//output distances
+				for (int l = 0; l < globaldata->Groups.size(); l++) {	out  << dists[r][l] << '\t';  }
+				out << endl;
+			}else{
+				//output distances
+				for (int l = 0; l < r; l++) {	
+					string otherName = globaldata->Groups[l];
+					if (otherName.length() < 10) { //pad with spaces to make compatible
+						while (otherName.length() < 10) {  otherName += " ";  }
+					}
+					
+					out  << name << '\t' << otherName << dists[r][l] << endl;  
+				}
+			}
 		}
 		out.close();
 	}

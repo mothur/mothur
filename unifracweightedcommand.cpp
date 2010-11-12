@@ -30,6 +30,7 @@ UnifracWeightedCommand::UnifracWeightedCommand(){
 		outputTypes["weighted"] = tempOutNames;
 		outputTypes["wsummary"] = tempOutNames;
 		outputTypes["phylip"] = tempOutNames;
+		outputTypes["column"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "UnifracWeightedCommand", "UnifracWeightedCommand");
@@ -90,6 +91,7 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 			outputTypes["weighted"] = tempOutNames;
 			outputTypes["wsummary"] = tempOutNames;
 			outputTypes["phylip"] = tempOutNames;
+			outputTypes["column"] = tempOutNames;
 			
 			if (globaldata->gTree.size() == 0) {//no trees were read
 				m->mothurOut("You must execute the read.tree command, before you may execute the unifrac.weighted command."); m->mothurOutEndLine(); abort = true;  }
@@ -112,9 +114,13 @@ UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 			itersString = validParameter.validFile(parameters, "iters", false);			if (itersString == "not found") { itersString = "1000"; }
 			convert(itersString, iters); 
 			
-			string temp = validParameter.validFile(parameters, "distance", false);			if (temp == "not found") { temp = "false"; }
-			phylip = m->isTrue(temp);
-		
+			string temp = validParameter.validFile(parameters, "distance", false);			
+			if (temp == "not found") { phylip = false; outputForm = ""; }
+			else{
+				if ((temp == "lt") || (temp == "column") || (temp == "square")) {  phylip = true;  outputForm = temp; }
+				else { m->mothurOut("Options for distance are: lt, square, or column. Using lt."); m->mothurOutEndLine(); phylip = true; outputForm = "lt"; }
+			}
+			
 			temp = validParameter.validFile(parameters, "random", false);					if (temp == "not found") { temp = "F"; }
 			random = m->isTrue(temp);
 			
@@ -497,15 +503,23 @@ void UnifracWeightedCommand::createPhylipFile() {
 		//for each tree
 		for (int i = 0; i < T.size(); i++) { 
 		
-			string phylipFileName = outputDir + m->getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".weighted.dist";
-			outputNames.push_back(phylipFileName);
-			outputTypes["phylip"].push_back(phylipFileName);
+			string phylipFileName;
+			if ((outputForm == "lt") || (outputForm == "square")) {
+				phylipFileName = outputDir + m->getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".weighted.phylip.dist";
+				outputNames.push_back(phylipFileName); outputTypes["phylip"].push_back(phylipFileName); 
+			}else { //column
+				phylipFileName = outputDir + m->getSimpleName(globaldata->getTreeFile())  + toString(i+1) + ".weighted.column.dist";
+				outputNames.push_back(phylipFileName); outputTypes["column"].push_back(phylipFileName); 
+			}
+			
 			ofstream out;
 			m->openOutputFile(phylipFileName, out);
 			
-			//output numSeqs
-			out << globaldata->Groups.size() << endl;
-			
+			if ((outputForm == "lt") || (outputForm == "square")) {
+				//output numSeqs
+				out << globaldata->Groups.size() << endl;
+			}
+
 			//make matrix with scores in it
 			vector< vector<float> > dists;	dists.resize(globaldata->Groups.size());
 			for (int i = 0; i < globaldata->Groups.size(); i++) {
@@ -528,11 +542,30 @@ void UnifracWeightedCommand::createPhylipFile() {
 				if (name.length() < 10) { //pad with spaces to make compatible
 					while (name.length() < 10) {  name += " ";  }
 				}
-				out << name << '\t';
 				
-				//output distances
-				for (int l = 0; l < r; l++) {	out  << dists[r][l] << '\t';  }
-				out << endl;
+				if (outputForm == "lt") {
+					out << name << '\t';
+					
+					//output distances
+					for (int l = 0; l < r; l++) {	out  << dists[r][l] << '\t';  }
+					out << endl;
+				}else if (outputForm == "square") {
+					out << name << '\t';
+					
+					//output distances
+					for (int l = 0; l < globaldata->Groups.size(); l++) {	out  << dists[r][l] << '\t';  }
+					out << endl;
+				}else{
+					//output distances
+					for (int l = 0; l < r; l++) {	
+						string otherName = globaldata->Groups[l];
+						if (otherName.length() < 10) { //pad with spaces to make compatible
+							while (otherName.length() < 10) {  otherName += " ";  }
+						}
+						
+						out  << name << '\t' << otherName << dists[r][l] << endl;  
+					}
+				}
 			}
 			out.close();
 		}

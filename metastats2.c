@@ -186,9 +186,12 @@ int metastat_main (char* outputFileName, int numRows, int numCols, double thresh
 	
 	int *nr, *nc, *ldtabl, *work;
 	int nrow=2, ncol=2, ldtable=2;
-	int workspace=(row*sizeof(double *)+size*sizeof(double *));
+	int workspace = 2*(row*col*sizeof(double *)); 
 	double *expect, *prc, *emin,*prt,*pre;
 	double e=0, prc1=0, emin1=0, prt1=0, pre1=0;
+	  
+	prt = (double *) malloc(size*sizeof(double *));
+	prc = (double *) malloc(size*sizeof(double *));
 
 	nr = &nrow;
 	nc = &ncol;
@@ -258,7 +261,7 @@ printf("here before testp\n");
 	double data[] = {f11, f12, f21, f22};
 
 	int *nr, *nc, *ldtabl, *work;
-	int nrow=2, ncol=2, ldtable=2, workspace=10000000; // I added two zeros for larger data sets
+	int nrow=2, ncol=2, ldtable=2, workspace=INT_MAX; // I added two zeros for larger data sets
 	double *expect, *prc, *emin,*prt,*pre;
 	double e=0, prc1=0, emin1=0, prt1=0, pre1=0;
 

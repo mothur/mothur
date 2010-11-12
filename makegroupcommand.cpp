@@ -13,7 +13,7 @@
 //**********************************************************************************************************************
 vector<string> MakeGroupCommand::getValidParameters(){	
 	try {
-		string Array[] =  {"fasta", "groups","outputdir","inputdir"};
+		string Array[] =  {"fasta", "output","groups","outputdir","inputdir"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
@@ -71,7 +71,7 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 		else {
 			
 			//valid paramters for this command
-			string AlignArray[] =  {"fasta","groups","outputdir","inputdir"};
+			string AlignArray[] =  {"fasta","groups","output","outputdir","inputdir"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -92,8 +92,6 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
-			
-			filename = outputDir;
 
 			fastaFileName = validParameter.validFile(parameters, "fasta", false);
 			if (fastaFileName == "not found") { m->mothurOut("fasta is a required parameter for the make.group command."); m->mothurOutEndLine(); abort = true;  }
@@ -155,13 +153,17 @@ MakeGroupCommand::MakeGroupCommand(string option)  {
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
 			
+			output = validParameter.validFile(parameters, "output", false);			
+			if (output == "not found") { output = "";  }
+			else{ filename = output; }
+			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { m->mothurOut("groups is a required parameter for the make.group command."); m->mothurOutEndLine(); abort = true;  }
 			else { m->splitAtDash(groups, groupsNames);	}
 
 			if (groupsNames.size() != fastaFileNames.size()) { m->mothurOut("You do not have the same number of valid fastfile files as groups.  This could be because we could not open a fastafile."); m->mothurOutEndLine(); abort = true;  }
 		}
-		
+		cout << "here" << endl;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "MakeGroupCommand", "MakeGroupCommand");
@@ -178,9 +180,10 @@ MakeGroupCommand::~MakeGroupCommand(){	}
 void MakeGroupCommand::help(){
 	try {
 		m->mothurOut("The make.group command reads a fasta file or series of fasta files and creates a groupfile.\n");
-		m->mothurOut("The make.group command parameters are fasta and groups, both are required.\n");
+		m->mothurOut("The make.group command parameters are fasta, groups and output. Fasta and group are required.\n");
+		m->mothurOut("The output parameter allows you to specify the name of groupfile created. \n");
 		m->mothurOut("The make.group command should be in the following format: \n");
-		m->mothurOut("make.group(fasta=yourFastaFiles, groups=yourGroups. \n");
+		m->mothurOut("make.group(fasta=yourFastaFiles, groups=yourGroups). \n");
 		m->mothurOut("Example make.group(fasta=seqs1.fasta-seq2.fasta-seqs3.fasta, groups=A-B-C)\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFiles).\n\n");
 	}
@@ -195,10 +198,10 @@ void MakeGroupCommand::help(){
 
 int MakeGroupCommand::execute(){
 	try {
-		if (abort == true) {	return 0;	}
+		if (abort == true) { return 0;	}
 		
 		if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[0]); }
-		
+			
 		filename = outputDir + filename;
 		
 		ofstream out;
