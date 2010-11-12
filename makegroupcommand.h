@@ -27,7 +27,7 @@ public:
 	
 private:
 		
-	string fastaFileName, groups, outputDir, filename;
+	string fastaFileName, groups, outputDir, filename, output;
 	vector<string> fastaFileNames;
 	vector<string> groupsNames, outputNames;
 	map<string, vector<string> > outputTypes;

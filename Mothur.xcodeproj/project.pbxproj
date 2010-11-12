@@ -61,6 +61,8 @@
 		A751032B128AC93F00ABB831 /* removegroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removegroupscommand.cpp; sourceTree = "<group>"; };
 		A75103D6128AE34100ABB831 /* getgroupscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getgroupscommand.h; sourceTree = "<group>"; };
 		A75103D7128AE34100ABB831 /* getgroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getgroupscommand.cpp; sourceTree = "<group>"; };
+		A7510407128AFCC100ABB831 /* getotuscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getotuscommand.h; sourceTree = "<group>"; };
+		A7510408128AFCC100ABB831 /* getotuscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getotuscommand.cpp; sourceTree = "<group>"; };
 		A7639F8D1175DF35008F5578 /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
 		A7653CB112789EFD009D6C09 /* subsamplecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = subsamplecommand.h; sourceTree = "<group>"; };
 		A7653CB212789EFD009D6C09 /* subsamplecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = subsamplecommand.cpp; sourceTree = "<group>"; };
@@ -73,6 +75,8 @@
 		A76AAD03117F322B003D8DA1 /* phylosummary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = phylosummary.cpp; sourceTree = "<group>"; };
 		A76C4A1011876BAF0009460B /* setlogfilecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = setlogfilecommand.h; sourceTree = SOURCE_ROOT; };
 		A76C4A1111876BAF0009460B /* setlogfilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = setlogfilecommand.cpp; sourceTree = SOURCE_ROOT; };
+		A76D1451128D6A03005D4DFE /* removeotuscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = removeotuscommand.h; sourceTree = "<group>"; };
+		A76D1452128D6A03005D4DFE /* removeotuscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removeotuscommand.cpp; sourceTree = "<group>"; };
 		A77D787B126F387700F351BD /* pairwiseseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pairwiseseqscommand.h; sourceTree = "<group>"; };
 		A77D787C126F387700F351BD /* pairwiseseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pairwiseseqscommand.cpp; sourceTree = "<group>"; };
 		A780E6CB11E7745D00BB5718 /* endiannessmacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = endiannessmacros.h; sourceTree = "<group>"; };
@@ -796,16 +800,18 @@
 				A76714DE126DE45A003F359A /* deuniqueseqscommand.cpp */,
 				A7DA2050113FECD400BF472F /* filterseqscommand.h */,
 				A7DA204F113FECD400BF472F /* filterseqscommand.cpp */,
-				A75103D6128AE34100ABB831 /* getgroupscommand.h */,
-				A75103D7128AE34100ABB831 /* getgroupscommand.cpp */,
 				A7DA205B113FECD400BF472F /* getgroupcommand.h */,
 				A7DA205A113FECD400BF472F /* getgroupcommand.cpp */,
+				A75103D6128AE34100ABB831 /* getgroupscommand.h */,
+				A75103D7128AE34100ABB831 /* getgroupscommand.cpp */,
 				A7DA205D113FECD400BF472F /* getlabelcommand.h */,
 				A7DA205C113FECD400BF472F /* getlabelcommand.cpp */,
 				A787A24F124CB46C0076EB84 /* getlineagecommand.h */,
 				A787A250124CB46C0076EB84 /* getlineagecommand.cpp */,
 				A7DA205F113FECD400BF472F /* getlistcountcommand.h */,
 				A7DA205E113FECD400BF472F /* getlistcountcommand.cpp */,
+				A7510407128AFCC100ABB831 /* getotuscommand.h */,
+				A7510408128AFCC100ABB831 /* getotuscommand.cpp */,
 				A7DA2061113FECD400BF472F /* getoturepcommand.h */,
 				A7DA2060113FECD400BF472F /* getoturepcommand.cpp */,
 				A7DA2063113FECD400BF472F /* getrabundcommand.h */,
@@ -882,6 +888,8 @@
 				A751032B128AC93F00ABB831 /* removegroupscommand.cpp */,
 				A787A28E124CE1470076EB84 /* removelineagecommand.h */,
 				A787A28F124CE1470076EB84 /* removelineagecommand.cpp */,
+				A76D1451128D6A03005D4DFE /* removeotuscommand.h */,
+				A76D1452128D6A03005D4DFE /* removeotuscommand.cpp */,
 				A7DA20F3113FECD400BF472F /* removeseqscommand.h */,
 				A7DA20F2113FECD400BF472F /* removeseqscommand.cpp */,
 				A7DA20F5113FECD400BF472F /* reversecommand.h */,
