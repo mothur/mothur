@@ -55,7 +55,6 @@ ListVector::ListVector(ifstream& f) : DataVector(), maxRank(0), numBins(0), numS
 			f >> inputData;
 			set(i, inputData);
 		}
-		
 		m->gobble(f);
 	}
 	catch(exception& e) {

@@ -9,6 +9,7 @@
 
 #include "mothurout.h"
 
+
 /******************************************************/
 MothurOut* MothurOut::getInstance() {
 	if( _uniqueInstance == 0) {
@@ -359,11 +360,13 @@ string MothurOut::getline(ifstream& fileHandle) {
 }
 /***********************************************************************/
 
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 #ifdef USE_COMPRESSION
 inline bool endsWith(string s, const char * suffix){
   size_t suffixLength = strlen(suffix);
   return s.size() >= suffixLength && s.substr(s.size() - suffixLength, suffixLength).compare(suffix) == 0;
 }
+#endif
 #endif
 
 string MothurOut::getRootName(string longName){
@@ -371,6 +374,7 @@ string MothurOut::getRootName(string longName){
 	
 		string rootName = longName;
 
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 #ifdef USE_COMPRESSION
     if (endsWith(rootName, ".gz") || endsWith(rootName, ".bz2")) {
       int pos = rootName.find_last_of('.');
@@ -378,7 +382,7 @@ string MothurOut::getRootName(string longName){
       cerr << "shortening " << longName << " to " << rootName << "\n";
     }
 #endif
-
+#endif
 		if(rootName.find_last_of(".") != rootName.npos){
 			int pos = rootName.find_last_of('.')+1;
 			rootName = rootName.substr(0, pos);
@@ -632,7 +636,7 @@ int MothurOut::openInputFile(string fileName, ifstream& fileHandle, string m){
 	try {
 			//get full path name
 			string completeFileName = getFullPathName(fileName);
-
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 #ifdef USE_COMPRESSION
       // check for gzipped or bzipped file
       if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
@@ -655,7 +659,7 @@ int MothurOut::openInputFile(string fileName, ifstream& fileHandle, string m){
         }
       }
 #endif
-
+#endif
 			fileHandle.open(completeFileName.c_str());
 			if(!fileHandle) {
 				//mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();
@@ -678,7 +682,7 @@ int MothurOut::openInputFile(string fileName, ifstream& fileHandle){
 
 		//get full path name
 		string completeFileName = getFullPathName(fileName);
-
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 #ifdef USE_COMPRESSION
   // check for gzipped or bzipped file
   if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
@@ -701,7 +705,7 @@ int MothurOut::openInputFile(string fileName, ifstream& fileHandle){
     }
   }
 #endif
-
+#endif
 
 		fileHandle.open(completeFileName.c_str());
 		if(!fileHandle) {
@@ -756,7 +760,7 @@ int MothurOut::openOutputFile(string fileName, ofstream& fileHandle){
 	try { 
 	
 		string completeFileName = getFullPathName(fileName);
-
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 #ifdef USE_COMPRESSION
     // check for gzipped file
     if (endsWith(completeFileName, ".gz") || endsWith(completeFileName, ".bz2")) {
@@ -776,7 +780,7 @@ int MothurOut::openOutputFile(string fileName, ofstream& fileHandle){
       }
     }
 #endif
-
+#endif
 		fileHandle.open(completeFileName.c_str(), ios::trunc);
 		if(!fileHandle) {
 			mothurOut("[ERROR]: Could not open " + completeFileName); mothurOutEndLine();

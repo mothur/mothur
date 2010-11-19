@@ -49,7 +49,7 @@ vector<string> DistanceCommand::getRequiredParameters(){
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "ChopSeqsCommand", "getRequiredParameters");
+		m->errorOut(e, "DistanceCommand", "getRequiredParameters");
 		exit(1);
 	}
 }

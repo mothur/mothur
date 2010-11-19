@@ -206,7 +206,7 @@ int ConcensusCommand::execute(){
 		outputFile = filename + ".cons.tre";  outputNames.push_back(outputFile); outputTypes["tree"].push_back(outputFile);
 		m->openOutputFile(outputFile, out);
 		
-		consensusTree->printForBoot(out);
+		consensusTree->print(out, "boot");
 		
 		out.close(); out2.close();
 		

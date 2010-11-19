@@ -10,6 +10,22 @@
 #include "tree.h"
 
 /*****************************************************************/
+Tree::Tree(int num) {
+	try {
+		globaldata = GlobalData::getInstance();
+		m = MothurOut::getInstance();
+		
+		numLeaves = num;  
+		numNodes = 2*numLeaves - 1;
+		
+		tree.resize(numNodes);
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Tree", "Tree - numNodes");
+		exit(1);
+	}
+}
+/*****************************************************************/
 Tree::Tree(string g) {
 	try {
 		globaldata = GlobalData::getInstance();
@@ -129,7 +145,7 @@ void Tree::addNamesToCounts() {
 						itCounts = tree[i].pGroups.find(group);
 						if (itCounts == tree[i].pGroups.end()) { //new group, add it
 							tree[i].pGroups[group] = 1;
-						}else {
+						}else{
 							tree[i].pGroups[group]++;
 						}
 						
@@ -243,7 +259,180 @@ int Tree::assembleTree(string n) {
 		exit(1);
 	}
 }
+/*****************************************************************/
+void Tree::getSubTree(Tree* copy, vector<string> Groups) {
+	try {
+			
+		//we want to select some of the leaf nodes to create the output tree
+		//go through the input Tree starting at parents of leaves
+		for (int i = 0; i < numNodes; i++) {
+			
+			//initialize leaf nodes
+			if (i <= (numLeaves-1)) {
+				tree[i].setName(Groups[i]);
+					
+				//save group info
+				string group = globaldata->gTreemap->getGroup(Groups[i]);
+				vector<string> tempGroups; tempGroups.push_back(group);
+				tree[i].setGroup(tempGroups);
+				groupNodeInfo[group].push_back(i); 
+				
+				//set pcount and pGroup for groupname to 1.
+				tree[i].pcount[group] = 1;
+				tree[i].pGroups[group] = 1;
+				
+				//Treemap knows name, group and index to speed up search
+				globaldata->gTreemap->setIndex(Groups[i], i);
+				
+				//intialize non leaf nodes
+			}else if (i > (numLeaves-1)) {
+				tree[i].setName("");
+				vector<string> tempGroups;
+				tree[i].setGroup(tempGroups);
+			}
+		}
+		
+		set<int> removedLeaves;
+		for (int i = 0; i < copy->getNumLeaves(); i++) {
+			
+			if (removedLeaves.count(i) == 0) {
+			
+			//am I in the group
+			int parent = copy->tree[i].getParent();
+			
+			if (parent != -1) {
+				if (m->inUsersGroups(copy->tree[i].getName(), Groups)) {
+					//find my siblings name
+					int parentRC = copy->tree[parent].getRChild();
+					int parentLC = copy->tree[parent].getLChild();
+					
+					//if I am the right child, then my sib is the left child
+					int sibIndex = parentRC;
+					if (parentRC == i) { sibIndex = parentLC; }
+					
+					string sibsName = copy->tree[sibIndex].getName();
+					
+					//if yes, is my sibling
+					if ((m->inUsersGroups(sibsName, Groups)) || (sibsName == "")) {
+						//we both are okay no trimming required
+					}else{
+						//i am, my sib is not, so remove sib by setting my parent to my grandparent
+						int grandparent = copy->tree[parent].getParent();
+						int grandparentLC = copy->tree[grandparent].getLChild();
+						int grandparentRC = copy->tree[grandparent].getRChild();
+						
+						//whichever of my granparents children was my parent now equals me
+						if (grandparentLC == parent) { grandparentLC = i; }
+						else { grandparentRC = i; }
+						
+						copy->tree[i].setParent(grandparent);
+						copy->tree[i].setBranchLength((copy->tree[i].getBranchLength()+copy->tree[parent].getBranchLength()));
+						copy->tree[grandparent].setChildren(grandparentLC, grandparentRC);
+						removedLeaves.insert(sibIndex);
+					}
+				}else{
+					//find my siblings name
+					int parentRC = copy->tree[parent].getRChild();
+					int parentLC = copy->tree[parent].getLChild();
+					
+					//if I am the right child, then my sib is the left child
+					int sibIndex = parentRC;
+					if (parentRC == i) { sibIndex = parentLC; }
+					
+					string sibsName = copy->tree[sibIndex].getName();
+					
+					//if no is my sibling
+					if ((m->inUsersGroups(sibsName, Groups)) || (sibsName == "")) {
+						//i am not, but my sib is
+						int grandparent = copy->tree[parent].getParent();
+						int grandparentLC = copy->tree[grandparent].getLChild();
+						int grandparentRC = copy->tree[grandparent].getRChild();
+						
+						//whichever of my granparents children was my parent now equals my sib
+						if (grandparentLC == parent) { grandparentLC = sibIndex; }
+						else { grandparentRC = sibIndex; }
+						
+						copy->tree[sibIndex].setParent(grandparent);
+						copy->tree[sibIndex].setBranchLength((copy->tree[sibIndex].getBranchLength()+copy->tree[parent].getBranchLength()));
+						copy->tree[grandparent].setChildren(grandparentLC, grandparentRC);
+						removedLeaves.insert(i);
+					}else{
+						//neither of us are, so we want to eliminate ourselves and our parent
+						//so set our parents sib to our great-grandparent
+						int parent = copy->tree[i].getParent();
+						int grandparent = copy->tree[parent].getParent();
+						
+						if (grandparent != -1) {
+							int greatgrandparent = copy->tree[grandparent].getParent();
+							int greatgrandparentLC = copy->tree[greatgrandparent].getLChild();
+							int greatgrandparentRC = copy->tree[greatgrandparent].getRChild();
+							
+							int grandparentLC = copy->tree[grandparent].getLChild();
+							int grandparentRC = copy->tree[grandparent].getRChild();
+							
+							int parentsSibIndex = grandparentLC;
+							if (grandparentRC == parent) { parentsSibIndex = grandparentLC; }
 
+							//whichever of my greatgrandparents children was my grandparent
+							if (greatgrandparentLC == grandparent) { greatgrandparentLC = parentsSibIndex; }
+							else { greatgrandparentRC = parentsSibIndex; }
+							
+							copy->tree[parentsSibIndex].setParent(greatgrandparent);
+							copy->tree[parentsSibIndex].setBranchLength((copy->tree[parentsSibIndex].getBranchLength()+copy->tree[grandparent].getBranchLength()));
+							copy->tree[greatgrandparent].setChildren(greatgrandparentLC, greatgrandparentRC);
+						}else{
+							copy->tree[parent].setChildren(-1, -1);
+							cout << "issues with making subtree" << endl;
+						}
+						removedLeaves.insert(sibIndex);
+						removedLeaves.insert(i);
+					}
+				}
+			}
+			}
+		}
+		
+		int root = 0;
+		for (int i = 0; i < copy->getNumNodes(); i++) {
+			//you found the root
+			if (copy->tree[i].getParent() == -1) { root = i; break; }
+		}
+		
+		int nextSpot = numLeaves;
+		populateNewTree(copy->tree, root, nextSpot);
+		
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Tree", "getCopy");
+		exit(1);
+	}
+}
+/*****************************************************************/
+int Tree::populateNewTree(vector<Node>& oldtree, int node, int& index) {
+	try {
+		
+		if (oldtree[node].getLChild() != -1) {
+			int rc = populateNewTree(oldtree, oldtree[node].getLChild(), index);
+			int lc = populateNewTree(oldtree, oldtree[node].getRChild(), index);
+			
+			tree[index].setChildren(lc, rc);
+			index++;
+			
+			return (index-1);
+		}else { //you are a leaf
+			int indexInNewTree = globaldata->gTreemap->getIndex(oldtree[node].getName());
+			
+			tree[indexInNewTree].setParent(index);
+			return indexInNewTree;
+			
+		}
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Tree", "populateNewTree");
+		exit(1);
+	}
+}
 /*****************************************************************/
 void Tree::getCopy(Tree* copy) {
 	try {
@@ -592,18 +781,17 @@ void Tree::print(ostream& out) {
 	}
 }
 /*****************************************************************/
-void Tree::printForBoot(ostream& out) {
+void Tree::print(ostream& out, string mode) {
 	try {
 		int root = findRoot();
-		printBranch(root, out, "boot");
+		printBranch(root, out, mode);
 		out << ";" << endl;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "Tree", "printForBoot");
+		m->errorOut(e, "Tree", "print");
 		exit(1);
 	}
 }
-
 /*****************************************************************/
 // This prints out the tree in Newick form.
 void Tree::createNewickFile(string f) {
@@ -644,12 +832,11 @@ int Tree::findRoot() {
 		exit(1);
 	}
 }
-
 /*****************************************************************/
 void Tree::printBranch(int node, ostream& out, string mode) {
-	try {
-		
-		// you are not a leaf
+try {
+
+// you are not a leaf
 		if (tree[node].getLChild() != -1) {
 			out << "(";
 			printBranch(tree[node].getLChild(), out, mode);
@@ -666,20 +853,38 @@ void Tree::printBranch(int node, ostream& out, string mode) {
 				if (tree[node].getLabel() != -1) {
 					out << tree[node].getLabel();
 				}
+			}else if (mode == "both") {
+				if (tree[node].getLabel() != -1) {
+					out << tree[node].getLabel();
+				}
+				//if there is a branch length then print it
+				if (tree[node].getBranchLength() != -1) {
+					out << ":" << tree[node].getBranchLength();
+				}
 			}
 		}else { //you are a leaf
 			string leafGroup = globaldata->gTreemap->getGroup(tree[node].getName());
 			
-			out << leafGroup; 
 			if (mode == "branch") {
+				out << leafGroup; 
 				//if there is a branch length then print it
 				if (tree[node].getBranchLength() != -1) {
 					out << ":" << tree[node].getBranchLength();
 				}
 			}else if (mode == "boot") {
+				out << leafGroup; 
 				//if there is a label then print it
 				if (tree[node].getLabel() != -1) {
 					out << tree[node].getLabel();
+				}
+			}else if (mode == "both") {
+				out << tree[node].getName();
+				if (tree[node].getLabel() != -1) {
+					out << tree[node].getLabel();
+				}
+				//if there is a branch length then print it
+				if (tree[node].getBranchLength() != -1) {
+					out << ":" << tree[node].getBranchLength();
 				}
 			}
 		}
@@ -690,7 +895,7 @@ void Tree::printBranch(int node, ostream& out, string mode) {
 		exit(1);
 	}
 }
-
+									  
 /*****************************************************************/
 
 void Tree::printTree() {

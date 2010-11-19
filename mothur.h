@@ -56,6 +56,7 @@
 	#include <sys/wait.h>
 	#include <sys/time.h>
 	#include <sys/resource.h>
+	#include <sys/stat.h>
 	#include <unistd.h>
 	
 	#ifdef USE_READLINE
