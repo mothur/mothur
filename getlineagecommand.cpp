@@ -182,7 +182,11 @@ GetLineageCommand::GetLineageCommand(string option)  {
 			else if (taxfile == "not found") {  taxfile = ""; m->mothurOut("The taxonomy parameter is required for the get.lineage command."); m->mothurOutEndLine();  abort = true; }
 			
 			string usedDups = "true";
-			string temp = validParameter.validFile(parameters, "dups", false);	if (temp == "not found") { temp = "false"; usedDups = ""; }
+			string temp = validParameter.validFile(parameters, "dups", false);	
+			if (temp == "not found") { 
+				if (namefile != "") {  temp = "true";					}
+				else				{  temp = "false"; usedDups = "";	}
+			}
 			dups = m->isTrue(temp);
 			
 			taxons = validParameter.validFile(parameters, "taxon", false);	

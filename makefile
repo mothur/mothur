@@ -66,7 +66,7 @@ ifeq  ($(strip $(USEMPI)),yes)
 endif
 
 # if you want to enable reading and writing of compressed files, set to yes.
-# The default is no.  this may only work on unix-like systems.
+# The default is no.  this may only work on unix-like systems, not for windows.
 
 USECOMPRESSION ?= no
 

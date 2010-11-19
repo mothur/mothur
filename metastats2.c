@@ -186,7 +186,7 @@ int metastat_main (char* outputFileName, int numRows, int numCols, double thresh
 	
 	int *nr, *nc, *ldtabl, *work;
 	int nrow=2, ncol=2, ldtable=2;
-	int workspace = 2*(row*col*sizeof(double *)); 
+	int workspace = 6*(row*col*sizeof(double *)); 
 	double *expect, *prc, *emin,*prt,*pre;
 	double e=0, prc1=0, emin1=0, prt1=0, pre1=0;
 	  

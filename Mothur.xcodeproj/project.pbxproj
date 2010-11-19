@@ -77,6 +77,8 @@
 		A76C4A1111876BAF0009460B /* setlogfilecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = setlogfilecommand.cpp; sourceTree = SOURCE_ROOT; };
 		A76D1451128D6A03005D4DFE /* removeotuscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = removeotuscommand.h; sourceTree = "<group>"; };
 		A76D1452128D6A03005D4DFE /* removeotuscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removeotuscommand.cpp; sourceTree = "<group>"; };
+		A76D1473128D9DA2005D4DFE /* indicatorcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = indicatorcommand.h; sourceTree = "<group>"; };
+		A76D1474128D9DA2005D4DFE /* indicatorcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = indicatorcommand.cpp; sourceTree = "<group>"; };
 		A77D787B126F387700F351BD /* pairwiseseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pairwiseseqscommand.h; sourceTree = "<group>"; };
 		A77D787C126F387700F351BD /* pairwiseseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pairwiseseqscommand.cpp; sourceTree = "<group>"; };
 		A780E6CB11E7745D00BB5718 /* endiannessmacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = endiannessmacros.h; sourceTree = "<group>"; };
@@ -832,6 +834,8 @@
 				A7DA207C113FECD400BF472F /* heatmapsimcommand.cpp */,
 				A7DA207F113FECD400BF472F /* helpcommand.h */,
 				A7DA207E113FECD400BF472F /* helpcommand.cpp */,
+				A76D1473128D9DA2005D4DFE /* indicatorcommand.h */,
+				A76D1474128D9DA2005D4DFE /* indicatorcommand.cpp */,
 				A7DA208E113FECD400BF472F /* libshuffcommand.h */,
 				A7DA208D113FECD400BF472F /* libshuffcommand.cpp */,
 				A7DA2090113FECD400BF472F /* listseqscommand.h */,

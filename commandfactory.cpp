@@ -101,6 +101,7 @@
 #include "getgroupscommand.h"
 #include "getotuscommand.h"
 #include "removeotuscommand.h"
+#include "indicatorcommand.h"
 
 /*******************************************************/
 
@@ -206,6 +207,7 @@ CommandFactory::CommandFactory(){
 	commands["get.groups"]			= "get.groups";
 	commands["get.otus"]			= "get.otus";
 	commands["remove.otus"]			= "remove.otus";
+	commands["indicator"]			= "indicator";
 	commands["pairwise.seqs"]		= "MPIEnabled";
 	commands["pipeline.pds"]		= "MPIEnabled";
 	commands["classify.seqs"]		= "MPIEnabled"; 
@@ -358,6 +360,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "pairwise.seqs")			{	command = new PairwiseSeqsCommand(optionString);			}
 		else if(commandName == "cluster.classic")		{	command = new ClusterDoturCommand(optionString);			}
 		else if(commandName == "sub.sample")			{	command = new SubSampleCommand(optionString);				}
+		else if(commandName == "indicator")				{	command = new IndicatorCommand(optionString);				}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -477,6 +480,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "pairwise.seqs")			{	pipecommand = new PairwiseSeqsCommand(optionString);			}
 		else if(commandName == "cluster.classic")		{	pipecommand = new ClusterDoturCommand(optionString);			}
 		else if(commandName == "sub.sample")			{	pipecommand = new SubSampleCommand(optionString);				}
+		else if(commandName == "indicator")				{	pipecommand = new IndicatorCommand(optionString);				}
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -584,6 +588,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "pairwise.seqs")			{	shellcommand = new PairwiseSeqsCommand();			}
 		else if(commandName == "cluster.classic")		{	shellcommand = new ClusterDoturCommand();			}
 		else if(commandName == "sub.sample")			{	shellcommand = new SubSampleCommand();				}
+		else if(commandName == "indicator")				{	shellcommand = new IndicatorCommand();				}
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;
