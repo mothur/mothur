@@ -62,7 +62,7 @@ CatchAllCommand::CatchAllCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
-		allLines = 0;
+		allLines = 1;
 		
 		//allow user to run help
 		if(option == "help") { help(); abort = true; }
@@ -117,7 +117,7 @@ CatchAllCommand::CatchAllCommand(string option)  {
 		
 
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "./";	}
+			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = m->hasPath(sabundfile);	}
 		}
 
 	}
@@ -130,9 +130,10 @@ CatchAllCommand::CatchAllCommand(string option)  {
 
 void CatchAllCommand::help(){
 	try {
-		m->mothurOut("The catchall command interfaces mothur with the catchall program written by ...citation goes here...\n");
-		m->mothurOut("For more information about clearcut refer to http://catchall.cac.cornell.edu/ \n");
+		m->mothurOut("The catchall command interfaces mothur with the catchall program written by Linda Woodard, Sean Connolly and John Bunge.\n");
+		m->mothurOut("For more information about catchall refer to http://www.northeastern.edu/catchall/index.html \n");
 		m->mothurOut("The catchall executable must be in a folder called catchall in the same folder as your mothur executable, similar to mothur's requirements for using blast. \n");
+		m->mothurOut("If you are a MAC or Linux user you must also have installed mono, a link to mono is on the webpage. \n");
 		m->mothurOut("The catchall command parameters are sabund and label, sabund is required. \n");
 		m->mothurOut("The label parameter is used to analyze specific labels in your input.\n");
 		m->mothurOut("The catchall command should be in the following format: \n");
@@ -156,7 +157,7 @@ int CatchAllCommand::execute() {
 		
 		//get location of catchall
 		GlobalData* globaldata = GlobalData::getInstance();
-		string path = globaldata->argv;
+		path = globaldata->argv;
 		path = path.substr(0, (path.find_last_of('m')));
 		path = m->getFullPathName(path);
 
@@ -184,26 +185,27 @@ int CatchAllCommand::execute() {
 			if(allLines == 1 || labels.count(sabund->getLabel()) == 1){
 					m->mothurOut(sabund->getLabel());  m->mothurOutEndLine();
 					
-					//create list of output files catchall will make
-					//datasetname_Analysis.csv 
-					//datasetname_BestModelsAnalysis.csv
-					//datasetname_BestModelsFits.csv 
-					//datasetname_BubblePlot.csv 
-					//datasetname_Poisson_fits.csv 
-					//datasetname_SingleExp_fits.csv
-					//datasetname_ThreeMixedExp_fits.csv
-					//datasetname_TwoMixedExp_fits.csv
-
 					//create catchall input file from mothur's inputfile
 					string filename = process(sabund);
-	sabund->print(cout);							
+					string outputPath = m->getPathName(filename);
+				
 					//create system command
-					string catchAllCommand = catchAllCommandExe + filename + " " + path;
-cout << catchAllCommand << endl;
+					string catchAllCommand = catchAllCommandExe + filename + " " + outputPath + " 1";
+				
 					//run catchall
 					system(catchAllCommand.c_str());
+				
+					remove(filename.c_str());
+				
+					filename = m->getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
+				
+					outputNames.push_back(filename + "_Analysis.csv");
+					outputNames.push_back(filename + "_BestModelsAnalysis.csv");
+					outputNames.push_back(filename + "_BestModelsFits.csv");
+					outputNames.push_back(filename + "_BubblePlot.csv");
+				
 										
-					if (m->control_pressed) { delete read;  delete input; globaldata->ginput = NULL; delete sabund;  return 0; }
+					if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {remove(outputNames[i].c_str());	} delete read;  delete input; globaldata->ginput = NULL; delete sabund;  return 0; }
 
 					processedLabels.insert(sabund->getLabel());
 					userLabels.erase(sabund->getLabel());
@@ -217,27 +219,27 @@ cout << catchAllCommand << endl;
 					
 					m->mothurOut(sabund->getLabel());  m->mothurOutEndLine();
 					
-					//create list of output files catchall will make
-					//datasetname_Analysis.csv 
-					//datasetname_BestModelsAnalysis.csv
-					//datasetname_BestModelsFits.csv 
-					//datasetname_BubblePlot.csv 
-					//datasetname_Poisson_fits.csv 
-					//datasetname_SingleExp_fits.csv
-					//datasetname_ThreeMixedExp_fits.csv
-					//datasetname_TwoMixedExp_fits.csv
 
-					
 					//create catchall input file from mothur's inputfile
 					string filename = process(sabund);
-			
+					string outputPath = m->getPathName(filename);
+					
 					//create system command
-					string catchAllCommand = catchAllCommandExe + filename + " " + path;
-cout << catchAllCommand << endl;
+					string catchAllCommand = catchAllCommandExe + filename + " " + outputPath + " 1";
+
 					//run catchall
 					system(catchAllCommand.c_str());
+				
+					remove(filename.c_str());
+				
+					filename = m->getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
+				
+					outputNames.push_back(filename + "_Analysis.csv");
+					outputNames.push_back(filename + "_BestModelsAnalysis.csv");
+					outputNames.push_back(filename + "_BestModelsFits.csv");
+					outputNames.push_back(filename + "_BubblePlot.csv");
 
-					if (m->control_pressed) { delete read;  delete input; globaldata->ginput = NULL; delete sabund;  return 0; }
+					if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {remove(outputNames[i].c_str());	} delete read;  delete input; globaldata->ginput = NULL; delete sabund;  return 0; }
 
 					processedLabels.insert(sabund->getLabel());
 					userLabels.erase(sabund->getLabel());
@@ -272,31 +274,34 @@ cout << catchAllCommand << endl;
 			sabund = (input->getSAbundVector(lastLabel));
 			
 			m->mothurOut(sabund->getLabel());  m->mothurOutEndLine();
-			//create list of output files catchall will make
-			//datasetname_Analysis.csv 
-			//datasetname_BestModelsAnalysis.csv
-			//datasetname_BestModelsFits.csv 
-			//datasetname_BubblePlot.csv 
-			//datasetname_Poisson_fits.csv 
-			//datasetname_SingleExp_fits.csv
-			//datasetname_ThreeMixedExp_fits.csv
-			//datasetname_TwoMixedExp_fits.csv
-
+			
 			//create catchall input file from mothur's inputfile
 			string filename = process(sabund);
-
+			string outputPath = m->getPathName(filename);
+			
 			//create system command
-			string catchAllCommand = catchAllCommandExe + filename + " " + path;
-cout << catchAllCommand << endl;
+			string catchAllCommand = catchAllCommandExe + filename + " " + outputPath + " 1";
+			
 			//run catchall
 			system(catchAllCommand.c_str());
-	
+			
+			remove(filename.c_str());
+			
+			filename = m->getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
+			
+			outputNames.push_back(filename + "_Analysis.csv");
+			outputNames.push_back(filename + "_BestModelsAnalysis.csv");
+			outputNames.push_back(filename + "_BestModelsFits.csv");
+			outputNames.push_back(filename + "_BubblePlot.csv");
+			
 			
 			delete sabund;
 		}
 
 		delete read;
 		delete input; globaldata->ginput = NULL;
+		
+		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {remove(outputNames[i].c_str());	} return 0; }
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -314,7 +319,7 @@ cout << catchAllCommand << endl;
 //**********************************************************************************************************************
 string CatchAllCommand::process(SAbundVector* sabund) {
 	try {
-		string filename = outputDir + m->getRootName(m->getSimpleName(sabundfile)) + sabund->getLabel() + ".catchall";
+		string filename = outputDir + m->getRootName(m->getSimpleName(sabundfile)) + sabund->getLabel() + ".csv";
 		filename = m->getFullPathName(filename);
 	
 		ofstream out;

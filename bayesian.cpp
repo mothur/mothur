@@ -76,9 +76,9 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 			
 				//initialze probabilities
 				wordGenusProb.resize(numKmers);
-			cout << numKmers << '\t' << genusNodes.size() << endl;
+			//cout << numKmers << '\t' << genusNodes.size() << endl;
 				for (int j = 0; j < wordGenusProb.size(); j++) {	wordGenusProb[j].resize(genusNodes.size());		}
-			cout << numKmers << '\t' << genusNodes.size() << endl;	
+			//cout << numKmers << '\t' << genusNodes.size() << endl;	
 				ofstream out;
 				ofstream out2;
 				

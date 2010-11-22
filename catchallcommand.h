@@ -41,7 +41,7 @@ private:
 	ReadOTUFile* read;
 	InputData* input;
 	
-	string outputDir, sabundfile, rabundfile, listfile, format;
+	string outputDir, sabundfile, rabundfile, listfile, format, path;
 	bool abort, allLines;
 	set<string> labels;
 	vector<string> outputNames;
