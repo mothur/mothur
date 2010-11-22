@@ -13,7 +13,7 @@
 //**********************************************************************************************************************
 vector<string> TrimSeqsCommand::getValidParameters(){	
 	try {
-		string Array[] =  {"fasta", "flip", "oligos", "maxambig", "maxhomop", "minlength", "maxlength", "qfile", 
+		string Array[] =  {"fasta", "flip", "oligos", "maxambig", "maxhomop", "group","minlength", "maxlength", "qfile", 
 									"qthreshold", "qwindowaverage", "qstepsize", "qwindowsize", "qaverage", "rollaverage", "allfiles", "qtrim","tdiffs", "pdiffs", "bdiffs", "processors", "outputdir","inputdir"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
@@ -74,7 +74,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string AlignArray[] =  {"fasta", "flip", "oligos", "maxambig", "maxhomop", "minlength", "maxlength", "qfile", 
+			string AlignArray[] =  {"fasta", "flip", "group","oligos", "maxambig", "maxhomop", "minlength", "maxlength", "qfile", 
 									"qthreshold", "qwindowaverage", "qstepsize", "qwindowsize", "qaverage", "rollaverage", "allfiles", "qtrim","tdiffs", "pdiffs", "bdiffs", "processors", "outputdir","inputdir"};
 			
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
@@ -124,6 +124,14 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
 				}
+				
+				it = parameters.find("group");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["group"] = inputDir + it->second;		}
+				}
 			}
 
 			
@@ -150,6 +158,11 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			if (temp == "not found"){	oligoFile = "";		}
 			else if(temp == "not open"){	abort = true;	} 
 			else					{	oligoFile = temp;		}
+			
+			temp = validParameter.validFile(parameters, "group", true);
+			if (temp == "not found"){	groupfile = "";		}
+			else if(temp == "not open"){	abort = true;	} 
+			else					{	groupfile = temp;		}
 			
 			temp = validParameter.validFile(parameters, "maxambig", false);		if (temp == "not found") { temp = "-1"; }
 			convert(temp, maxAmbig);  
@@ -206,8 +219,13 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found") { temp = "1"; }
 			convert(temp, processors); 
 			
-			if(allFiles && oligoFile == ""){
-				m->mothurOut("You selected allfiles, but didn't enter an oligos file.  Ignoring the allfiles request."); m->mothurOutEndLine();
+			if ((oligoFile != "") && (groupfile != "")) {
+				m->mothurOut("You given both a oligos file and a groupfile, only one is allowed."); m->mothurOutEndLine(); abort = true;
+			}
+												
+			
+			if(allFiles && (oligoFile == "") && (groupfile == "")){
+				m->mothurOut("You selected allfiles, but didn't enter an oligos or group file.  Ignoring the allfiles request."); m->mothurOutEndLine();
 			}
 			if((qAverage != 0 && qThreshold != 0) && qFileName == ""){
 				m->mothurOut("You didn't provide a quality file name, quality criteria will be ignored."); m->mothurOutEndLine();
@@ -231,8 +249,9 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 void TrimSeqsCommand::help(){
 	try {
 		m->mothurOut("The trim.seqs command reads a fastaFile and creates .....\n");
-		m->mothurOut("The trim.seqs command parameters are fasta, flip, oligos, maxambig, maxhomop, minlength, maxlength, qfile, qthreshold, qaverage, diffs, qtrim and allfiles.\n");
+		m->mothurOut("The trim.seqs command parameters are fasta, flip, oligos, group, maxambig, maxhomop, minlength, maxlength, qfile, qthreshold, qaverage, diffs, qtrim and allfiles.\n");
 		m->mothurOut("The fasta parameter is required.\n");
+		m->mothurOut("The group parameter allows you to enter a group file for your fasta file.\n");
 		m->mothurOut("The flip parameter will output the reverse compliment of your trimmed sequence. The default is false.\n");
 		m->mothurOut("The oligos parameter .... The default is "".\n");
 		m->mothurOut("The maxambig parameter .... The default is -1.\n");
@@ -275,6 +294,8 @@ int TrimSeqsCommand::execute(){
 		
 		numFPrimers = 0;  //this needs to be initialized
 		numRPrimers = 0;
+		vector<string> fastaFileNames;
+		vector<string> qualFileNames;
 		
 		string trimSeqFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "trim.fasta";
 		outputNames.push_back(trimSeqFile); outputTypes["fasta"].push_back(trimSeqFile);
@@ -283,10 +304,35 @@ int TrimSeqsCommand::execute(){
 		string trimQualFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "trim.qual";
 		string scrapQualFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "scrap.qual";
 		if (qFileName != "") {  outputNames.push_back(trimQualFile); outputNames.push_back(scrapQualFile);  outputTypes["qual"].push_back(trimQualFile); outputTypes["qual"].push_back(scrapQualFile); }
-		string groupFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "groups";
+		string groupFile = "";
+		if (groupfile == "") { groupFile = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "groups"; }
+		else{
+			groupFile = outputDir + m->getRootName(m->getSimpleName(groupfile)) + "trim.groups";
+			outputNames.push_back(groupFile); outputTypes["group"].push_back(groupFile);
+			groupMap = new GroupMap(groupfile);
+			groupMap->readMap();
+			
+			if(allFiles){
+				for (int i = 0; i < groupMap->namesOfGroups.size(); i++) {
+					groupToIndex[groupMap->namesOfGroups[i]] = i;
+					groupVector.push_back(groupMap->namesOfGroups[i]);
+					fastaFileNames.push_back((outputDir + m->getRootName(m->getSimpleName(fastaFile)) +  groupMap->namesOfGroups[i] + ".fasta"));
+					
+					//we append later, so we want to clear file
+					ofstream outRemove;
+					m->openOutputFile(fastaFileNames[i], outRemove);
+					outRemove.close();
+					if(qFileName != ""){
+						qualFileNames.push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) +  groupMap->namesOfGroups[i] + ".qual"));
+						ofstream outRemove2;
+						m->openOutputFile(qualFileNames[i], outRemove2);
+						outRemove2.close();
+					}
+				}
+			}
+			comboStarts = fastaFileNames.size()-1;
+		}
 		
-		vector<string> fastaFileNames;
-		vector<string> qualFileNames;
 		if(oligoFile != ""){
 			outputNames.push_back(groupFile); outputTypes["group"].push_back(groupFile);
 			getOligos(fastaFileNames, qualFileNames);
@@ -384,7 +430,7 @@ int TrimSeqsCommand::execute(){
 									
 				if (m->control_pressed) {  return 0; }
 		#endif
-						
+					
 										
 		for(int i=0;i<fastaFileNames.size();i++){
 			if (m->isBlank(fastaFileNames[i])) { remove(fastaFileNames[i].c_str());	}
@@ -640,6 +686,32 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 								m->openOutputFileAppend(qualNames[indexToFastaFile], outTemp2);
 								currQual.printQScores(outTemp2);
 								outTemp2.close();							
+							}
+						}
+					}
+					
+					if (groupfile != "") {
+						string thisGroup = groupMap->getGroup(currSeq.getName());
+						
+						if (thisGroup != "not found") {
+							outGroups << currSeq.getName() << '\t' << thisGroup << endl;
+							if (allFiles) {
+								ofstream outTemp;
+								m->openOutputFileAppend(fastaNames[groupToIndex[thisGroup]], outTemp);
+								currSeq.printSequence(outTemp);
+								outTemp.close();
+								if(qFileName != ""){
+									ofstream outTemp2;
+									m->openOutputFileAppend(qualNames[groupToIndex[thisGroup]], outTemp2);
+									currQual.printQScores(outTemp2);
+									outTemp2.close();							
+								}
+							}
+						}else{
+							m->mothurOut(currSeq.getName() + " is not in your groupfile, adding to group XXX."); m->mothurOutEndLine();
+							outGroups << currSeq.getName() << '\t' << "XXX" << endl;
+							if (allFiles) {  
+								m->mothurOut("[ERROR]: " + currSeq.getName() + " will not be added to any .group.fasta or .group.qual file."); m->mothurOutEndLine();
 							}
 						}
 					}

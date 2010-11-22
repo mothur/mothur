@@ -14,6 +14,7 @@
 #include "command.hpp"
 #include "sequence.hpp"
 #include "qualityscores.h"
+#include "groupmap.h"
 
 class TrimSeqsCommand : public Command {
 public:
@@ -28,7 +29,9 @@ public:
 	void help();
 	
 private:
-
+	
+	GroupMap* groupMap;
+	
 	struct linePair {
 		unsigned long int start;
 		unsigned long int end;
@@ -47,7 +50,7 @@ private:
 	map<string, vector<string> > outputTypes;
 
 	bool abort;
-	string fastaFile, oligoFile, qFileName, outputDir;
+	string fastaFile, oligoFile, qFileName, groupfile, outputDir;
 	
 	bool flip, allFiles, qtrim;
 	int numFPrimers, numRPrimers, maxAmbig, maxHomoP, minLength, maxLength, processors, tdiffs, bdiffs, pdiffs, comboStarts;
@@ -59,6 +62,7 @@ private:
 	vector<string> groupVector;
 	map<string, int> primers;
 	map<string, int> combos;
+	map<string, int> groupToIndex;
 	
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;
