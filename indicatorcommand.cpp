@@ -164,13 +164,14 @@ IndicatorCommand::IndicatorCommand(string option)  {
 
 void IndicatorCommand::help(){
 	try {
-		/*m->mothurOut("The read.tree command must be run before you execute a unifrac.weighted, unifrac.unweighted. \n");
-		m->mothurOut("It also must be run before using the parsimony command, unless you are using the randomtree parameter.\n");
-		m->mothurOut("The read.tree command parameters are tree, group and name.\n");
-		m->mothurOut("The read.tree command should be in the following format: read.tree(tree=yourTreeFile, group=yourGroupFile).\n");
-		m->mothurOut("The tree and group parameters are both required, if no group file is given then one group is assumed.\n");
-		m->mothurOut("The name parameter allows you to enter a namefile.\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. tree), '=' and parameters (i.e.yourTreefile).\n\n"); */
+		m->mothurOut("The indicator command reads a shared or relabund file and a tree file, and outputs a .indicator.tre and .indicator.summary file. \n");
+		m->mothurOut("The new tree contains labels at each internal node.  The label is the OTU number of the indicator OTU.\n");
+		m->mothurOut("The summary file lists the indicator value for each OTU for each node.\n");
+		m->mothurOut("The indicator command parameters are tree, groups, shared, relabund and label. The tree and label parameter are required as well as either shared or relabund.\n");
+		m->mothurOut("The groups parameter allows you to specify which of the groups in your shared or relabund you would like analyzed.  The groups may be entered separated by dashes.\n");
+		m->mothurOut("The label parameter indicates at what distance your tree relates to the shared or relabund.\n");
+		m->mothurOut("The indicator command should be used in the following format: indicator(tree=test.tre, shared=test.shared, label=0.03)\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. tree), '=' and parameters (i.e.yourTreefile).\n\n"); 
 	}
 	catch(exception& e) {
 		m->errorOut(e, "IndicatorCommand", "help");	
