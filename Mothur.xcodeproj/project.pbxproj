@@ -37,6 +37,8 @@
 		A71D924511AEB42400D00CBC /* splitabundcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = splitabundcommand.h; sourceTree = "<group>"; };
 		A71D924611AEB42400D00CBC /* splitmatrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = splitmatrix.cpp; sourceTree = "<group>"; };
 		A71D924711AEB42400D00CBC /* splitmatrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = splitmatrix.h; sourceTree = "<group>"; };
+		A71FF438129BDC35004397E6 /* consensusseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = consensusseqscommand.h; sourceTree = "<group>"; };
+		A71FF439129BDC35004397E6 /* consensusseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = consensusseqscommand.cpp; sourceTree = "<group>"; };
 		A724C2B61254961E006BB1C7 /* parsefastaqcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parsefastaqcommand.h; sourceTree = "<group>"; };
 		A724C2B71254961E006BB1C7 /* parsefastaqcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parsefastaqcommand.cpp; sourceTree = "<group>"; };
 		A72B3A62118B37FD004B9F8D /* phylodiversitycommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = phylodiversitycommand.h; sourceTree = "<group>"; };
@@ -792,6 +794,8 @@
 				A7DA2029113FECD400BF472F /* collectsharedcommand.cpp */,
 				A7DA2032113FECD400BF472F /* consensuscommand.h */,
 				A7DA2031113FECD400BF472F /* consensuscommand.cpp */,
+				A71FF438129BDC35004397E6 /* consensusseqscommand.h */,
+				A71FF439129BDC35004397E6 /* consensusseqscommand.cpp */,
 				A7118EE511CFCAC000CFDE03 /* degapseqscommand.h */,
 				A7118EE611CFCAC000CFDE03 /* degapseqscommand.cpp */,
 				A7DA203B113FECD400BF472F /* deconvolutecommand.h */,

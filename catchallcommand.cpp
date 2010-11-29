@@ -26,8 +26,8 @@ vector<string> CatchAllCommand::getValidParameters(){
 CatchAllCommand::CatchAllCommand(){	
 	try {
 		//initialize outputTypes
-		
-		//need to determine outputFIles and types
+		vector<string> tempOutNames;
+		outputTypes["csv"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "CatchAllCommand", "CatchAllCommand");
@@ -83,10 +83,9 @@ CatchAllCommand::CatchAllCommand(string option)  {
 				if (validParameter.isValidParameter(it->first, myArray, it->second) != true) {  abort = true;  }
 			}
 			
-			
 			//initialize outputTypes
-			//need to determine outputFIles and types
-			
+			vector<string> tempOutNames;
+			outputTypes["csv"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -199,10 +198,10 @@ int CatchAllCommand::execute() {
 				
 					filename = m->getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
 				
-					outputNames.push_back(filename + "_Analysis.csv");
-					outputNames.push_back(filename + "_BestModelsAnalysis.csv");
-					outputNames.push_back(filename + "_BestModelsFits.csv");
-					outputNames.push_back(filename + "_BubblePlot.csv");
+					outputNames.push_back(filename + "_Analysis.csv"); outputTypes["csv"].push_back(filename + "_Analysis.csv");
+					outputNames.push_back(filename + "_BestModelsAnalysis.csv"); outputTypes["csv"].push_back(filename + "_BestModelsAnalysis.csv");
+					outputNames.push_back(filename + "_BestModelsFits.csv"); outputTypes["csv"].push_back(filename + "_BestModelsFits.csv");
+					outputNames.push_back(filename + "_BubblePlot.csv"); outputTypes["csv"].push_back(filename + "_BubblePlot.csv");
 				
 										
 					if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {remove(outputNames[i].c_str());	} delete read;  delete input; globaldata->ginput = NULL; delete sabund;  return 0; }
@@ -234,11 +233,11 @@ int CatchAllCommand::execute() {
 				
 					filename = m->getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
 				
-					outputNames.push_back(filename + "_Analysis.csv");
-					outputNames.push_back(filename + "_BestModelsAnalysis.csv");
-					outputNames.push_back(filename + "_BestModelsFits.csv");
-					outputNames.push_back(filename + "_BubblePlot.csv");
-
+					outputNames.push_back(filename + "_Analysis.csv"); outputTypes["csv"].push_back(filename + "_Analysis.csv");
+					outputNames.push_back(filename + "_BestModelsAnalysis.csv"); outputTypes["csv"].push_back(filename + "_BestModelsAnalysis.csv");
+					outputNames.push_back(filename + "_BestModelsFits.csv"); outputTypes["csv"].push_back(filename + "_BestModelsFits.csv");
+					outputNames.push_back(filename + "_BubblePlot.csv"); outputTypes["csv"].push_back(filename + "_BubblePlot.csv");
+				
 					if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {remove(outputNames[i].c_str());	} delete read;  delete input; globaldata->ginput = NULL; delete sabund;  return 0; }
 
 					processedLabels.insert(sabund->getLabel());
@@ -289,11 +288,10 @@ int CatchAllCommand::execute() {
 			
 			filename = m->getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
 			
-			outputNames.push_back(filename + "_Analysis.csv");
-			outputNames.push_back(filename + "_BestModelsAnalysis.csv");
-			outputNames.push_back(filename + "_BestModelsFits.csv");
-			outputNames.push_back(filename + "_BubblePlot.csv");
-			
+			outputNames.push_back(filename + "_Analysis.csv"); outputTypes["csv"].push_back(filename + "_Analysis.csv");
+			outputNames.push_back(filename + "_BestModelsAnalysis.csv"); outputTypes["csv"].push_back(filename + "_BestModelsAnalysis.csv");
+			outputNames.push_back(filename + "_BestModelsFits.csv"); outputTypes["csv"].push_back(filename + "_BestModelsFits.csv");
+			outputNames.push_back(filename + "_BubblePlot.csv"); outputTypes["csv"].push_back(filename + "_BubblePlot.csv");			
 			
 			delete sabund;
 		}

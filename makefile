@@ -89,6 +89,8 @@ OBJECTS+=$(patsubst %.c,%.o,$(wildcard *.c))
 
 mothur : $(OBJECTS)
 	$(CXX) $(LDFLAGS) $(TARGET_ARCH) -o $@ $(OBJECTS) $(LIBS)
+	
+	strip mothur
 
 install : mothur
 	cp mothur ../Release/mothur
