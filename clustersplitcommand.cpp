@@ -37,6 +37,7 @@ ClusterSplitCommand::ClusterSplitCommand(){
 		outputTypes["list"] = tempOutNames;
 		outputTypes["rabund"] = tempOutNames;
 		outputTypes["sabund"] = tempOutNames;
+		outputTypes["column"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterSplitCommand", "ClusterSplitCommand");
@@ -100,6 +101,7 @@ ClusterSplitCommand::ClusterSplitCommand(string option)  {
 			outputTypes["list"] = tempOutNames;
 			outputTypes["rabund"] = tempOutNames;
 			outputTypes["sabund"] = tempOutNames;
+			outputTypes["column"] = tempOutNames;
 			
 			globaldata->newRead();
 			
@@ -360,6 +362,10 @@ int ClusterSplitCommand::execute(){
 		vector< map<string, string> > distName = split->getDistanceFiles();  //returns map of distance files -> namefile sorted by distance file size
 		delete split;
 		
+		//output a merged distance file
+		if (splitmethod == "fasta")		{ createMergedDistanceFile(distName); }
+			
+				
 		if (m->control_pressed) { return 0; }
 		
 		m->mothurOut("It took " + toString(time(NULL) - estart) + " seconds to split the distance file."); m->mothurOutEndLine();
@@ -1077,5 +1083,45 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
 
 
 }
+//**********************************************************************************************************************
 
+int ClusterSplitCommand::createMergedDistanceFile(vector< map<string, string> > distNames) {
+	try{
+		
+#ifdef USE_MPI
+		int pid;
+		MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
+		
+		if (pid != 0) {
+#endif
+		
+		string thisOutputDir = outputDir;
+		if (outputDir == "") { thisOutputDir = m->hasPath(fastafile); }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(fastafile)) + "dist";
+		remove(outputFileName.c_str());
+		
+		
+		for (int i = 0; i < distNames.size(); i++) {
+			if (m->control_pressed) {  return 0; }
+			
+			string thisDistFile = distNames[i].begin()->first;
+			
+			m->appendFiles(thisDistFile, outputFileName);
+		}	
+			
+		outputTypes["column"].push_back(outputFileName); outputNames.push_back(outputFileName);
+			
+#ifdef USE_MPI
+		}
+#endif
+				
+			
+		
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterSplitCommand", "createMergedDistanceFile");
+		exit(1);
+	}
+}
 //**********************************************************************************************************************

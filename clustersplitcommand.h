@@ -50,6 +50,7 @@ private:
 	vector<string> cluster(vector< map<string, string> >, set<string>&);
 	int mergeLists(vector<string>, map<float, int>, ListVector*);
 	map<float, int> completeListFile(vector<string>, string, set<string>&, ListVector*&);
+	int createMergedDistanceFile(vector< map<string, string> >);
 };
 
 #endif

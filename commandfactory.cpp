@@ -102,6 +102,7 @@
 #include "getotuscommand.h"
 #include "removeotuscommand.h"
 #include "indicatorcommand.h"
+#include "consensusseqscommand.h"
 
 /*******************************************************/
 
@@ -208,6 +209,7 @@ CommandFactory::CommandFactory(){
 	commands["get.otus"]			= "get.otus";
 	commands["remove.otus"]			= "remove.otus";
 	commands["indicator"]			= "indicator";
+	commands["consensus.seqs"]		= "consensus.seqs";
 	commands["pairwise.seqs"]		= "MPIEnabled";
 	commands["pipeline.pds"]		= "MPIEnabled";
 	commands["classify.seqs"]		= "MPIEnabled"; 
@@ -361,6 +363,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "cluster.classic")		{	command = new ClusterDoturCommand(optionString);			}
 		else if(commandName == "sub.sample")			{	command = new SubSampleCommand(optionString);				}
 		else if(commandName == "indicator")				{	command = new IndicatorCommand(optionString);				}
+		else if(commandName == "consensus.seqs")		{	command = new ConsensusSeqsCommand(optionString);			}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -481,6 +484,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "cluster.classic")		{	pipecommand = new ClusterDoturCommand(optionString);			}
 		else if(commandName == "sub.sample")			{	pipecommand = new SubSampleCommand(optionString);				}
 		else if(commandName == "indicator")				{	pipecommand = new IndicatorCommand(optionString);				}
+		else if(commandName == "consensus.seqs")		{	pipecommand = new ConsensusSeqsCommand(optionString);			}
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -589,6 +593,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "cluster.classic")		{	shellcommand = new ClusterDoturCommand();			}
 		else if(commandName == "sub.sample")			{	shellcommand = new SubSampleCommand();				}
 		else if(commandName == "indicator")				{	shellcommand = new IndicatorCommand();				}
+		else if(commandName == "consensus.seqs")		{	shellcommand = new ConsensusSeqsCommand();			}
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

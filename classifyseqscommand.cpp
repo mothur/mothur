@@ -559,16 +559,6 @@ int ClassifySeqsCommand::execute(){
 				
 				numFastaSeqs = createProcesses(newTaxonomyFile, tempTaxonomyFile, fastaFileNames[s]); 
 				
-				rename((newTaxonomyFile + toString(processIDS[0]) + ".temp").c_str(), newTaxonomyFile.c_str());
-				rename((tempTaxonomyFile + toString(processIDS[0]) + ".temp").c_str(), tempTaxonomyFile.c_str());
-				
-				for(int i=1;i<processors;i++){
-					appendTaxFiles((newTaxonomyFile + toString(processIDS[i]) + ".temp"), newTaxonomyFile);
-					appendTaxFiles((tempTaxonomyFile + toString(processIDS[i]) + ".temp"), tempTaxonomyFile);
-					remove((newTaxonomyFile + toString(processIDS[i]) + ".temp").c_str());
-					remove((tempTaxonomyFile + toString(processIDS[i]) + ".temp").c_str());
-				}
-				
 			}
 	#else
 			numFastaSeqs = driver(lines[0], newTaxonomyFile, tempTaxonomyFile, fastaFileNames[s]);
@@ -736,7 +726,7 @@ string ClassifySeqsCommand::addUnclassifieds(string tax, int maxlevel) {
 int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile, string filename) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		int process = 0;
+		int process = 1;
 		int num = 0;
 		
 		//loop through and create all the processes you want
@@ -764,8 +754,11 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 			}
 		}
 		
+		//parent does its part
+		num = driver(lines[0], taxFileName, tempTaxFile, filename);
+		
 		//force parent to wait until all the processes are done
-		for (int i=0;i<processors;i++) { 
+		for (int i=0;i<processIDS.size();i++) { 
 			int temp = processIDS[i];
 			wait(&temp);
 		}
@@ -776,6 +769,13 @@ int ClassifySeqsCommand::createProcesses(string taxFileName, string tempTaxFile,
 			m->openInputFile(tempFile, in);
 			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
 			in.close(); remove(tempFile.c_str());
+		}
+		
+		for(int i=0;i<processIDS.size();i++){
+			appendTaxFiles((taxFileName + toString(processIDS[i]) + ".temp"), taxFileName);
+			appendTaxFiles((tempTaxFile + toString(processIDS[i]) + ".temp"), tempTaxFile);
+			remove((taxFileName + toString(processIDS[i]) + ".temp").c_str());
+			remove((tempTaxFile + toString(processIDS[i]) + ".temp").c_str());
 		}
 		
 		return num;
@@ -834,7 +834,7 @@ int ClassifySeqsCommand::driver(linePair* filePos, string taxFName, string tempT
 			if (m->control_pressed) { return 0; }
 		
 			Sequence* candidateSeq = new Sequence(inFASTA); m->gobble(inFASTA);
-		
+			
 			if (candidateSeq->getName() != "") {
 				taxonomy = classify->getTaxonomy(candidateSeq);
 				
@@ -863,6 +863,7 @@ int ClassifySeqsCommand::driver(linePair* filePos, string taxFName, string tempT
 			
 			//report progress
 			if((count) % 100 == 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
+			
 		}
 		//report progress
 		if((count) % 100 != 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
