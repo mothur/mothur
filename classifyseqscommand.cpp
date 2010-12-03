@@ -829,13 +829,14 @@ int ClassifySeqsCommand::driver(linePair* filePos, string taxFName, string tempT
 
 		bool done = false;
 		int count = 0;
-	
+		
 		while (!done) {
 			if (m->control_pressed) { return 0; }
 		
 			Sequence* candidateSeq = new Sequence(inFASTA); m->gobble(inFASTA);
 			
 			if (candidateSeq->getName() != "") {
+			
 				taxonomy = classify->getTaxonomy(candidateSeq);
 				
 				if (m->control_pressed) { delete candidateSeq; return 0; }
@@ -867,7 +868,7 @@ int ClassifySeqsCommand::driver(linePair* filePos, string taxFName, string tempT
 		}
 		//report progress
 		if((count) % 100 != 0){	m->mothurOut("Processing sequence: " + toString(count)); m->mothurOutEndLine();		}
-				
+			
 		inFASTA.close();
 		outTax.close();
 		outTaxSimple.close();

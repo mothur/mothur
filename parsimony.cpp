@@ -11,106 +11,200 @@
 
 /**************************************************************************************************/
 
-EstOutput Parsimony::getValues(Tree* t) {
+EstOutput Parsimony::getValues(Tree* t, int p, string o) {
 	try {
 		globaldata = GlobalData::getInstance();
-		vector<string> groups;
-		
-		copyTree = new Tree();
+		processors = p;
+		outputDir = o;
 		
 		//if the users enters no groups then give them the score of all groups
 		int numGroups = globaldata->Groups.size();
 		
 		//calculate number of comparsions
 		int numComp = 0;
+		vector< vector<string> > namesOfGroupCombos;
 		for (int r=0; r<numGroups; r++) { 
 			for (int l = r+1; l < numGroups; l++) {
 				numComp++;
+				vector<string> groups; groups.push_back(globaldata->Groups[r]); groups.push_back(globaldata->Groups[l]);
+				//cout << globaldata->Groups[r] << '\t' << globaldata->Groups[l] << endl;
+				namesOfGroupCombos.push_back(groups);
 			}
 		}
 
 		//numComp+1 for AB, AC, BC, ABC
-		data.resize(numComp+1,0);
-		
-		int count = 0;
-		for (int a=0; a<numGroups; a++) { 
-			for (int l = 0; l < a; l++) {
-				int score = 0;
-				
-				//groups in this combo
-				groups.push_back(globaldata->Groups[a]); groups.push_back(globaldata->Groups[l]);
-				
-				//copy users tree so that you can redo pgroups 
-				copyTree->getCopy(t);
-
-				//create pgroups that reflect the groups the user want to use
-				for(int i=copyTree->getNumLeaves();i<copyTree->getNumNodes();i++){
-					copyTree->tree[i].pGroups = (copyTree->mergeUserGroups(i, groups));
-				}
-		
-				for(int i=copyTree->getNumLeaves();i<copyTree->getNumNodes();i++){
-				
-					if (m->control_pressed) { return data; }
-					
-					int lc = copyTree->tree[i].getLChild();
-					int rc = copyTree->tree[i].getRChild();
-			
-					int iSize = copyTree->tree[i].pGroups.size();
-					int rcSize = copyTree->tree[rc].pGroups.size();
-					int lcSize = copyTree->tree[lc].pGroups.size();
-		
-					//if isize are 0 then that branch is to be ignored
-					if (iSize == 0) { }
-					else if ((rcSize == 0) || (lcSize == 0)) { }
-					//if you have more groups than either of your kids then theres been a change.
-					else if(iSize > rcSize || iSize > lcSize){
-						score++;
-					}
-				} 
-				
-				data[count] = score;
-				count++;
-				groups.clear();
-			}
-		}
-		
 		if (numComp != 1) {
+			vector<string> groups;
 			if (numGroups == 0) {
 				//get score for all users groups
 				for (int i = 0; i < tmap->namesOfGroups.size(); i++) {
 					if (tmap->namesOfGroups[i] != "xxx") {
 						groups.push_back(tmap->namesOfGroups[i]);
+						//cout << tmap->namesOfGroups[i] << endl;
 					}
 				}
+				namesOfGroupCombos.push_back(groups);
 			}else {
 				for (int i = 0; i < globaldata->Groups.size(); i++) {
 					groups.push_back(globaldata->Groups[i]);
+					//cout << globaldata->Groups[i] << endl;
 				}
+				namesOfGroupCombos.push_back(groups);
 			}
+		}
+		
+	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		if(processors == 1){
+			data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size());
+		}else{
+			lines.clear();
+			int numPairs = namesOfGroupCombos.size();
+			
+			int numPairsPerProcessor = numPairs / processors;
+			
+			for (int i = 0; i < processors; i++) {
+				int startPos = i * numPairsPerProcessor;
+				
+				if(i == processors - 1){
+					numPairsPerProcessor = numPairs - i * numPairsPerProcessor;
+				}
+				
+				lines.push_back(linePair(startPos, numPairsPerProcessor));
+			}
+			
+			data = createProcesses(t, namesOfGroupCombos);
+		}
+	#else
+		data = driver(t, namesOfGroupCombos, 0, namesOfGroupCombos.size());
+	#endif
+		
+		return data;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Parsimony", "getValues");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+
+EstOutput Parsimony::createProcesses(Tree* t, vector< vector<string> > namesOfGroupCombos) {
+	try {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		int process = 1;
+		int num = 0;
+		vector<int> processIDS;
+		
+		EstOutput results;
+		
+		//loop through and create all the processes you want
+		while (process != processors) {
+			int pid = fork();
+			
+			if (pid > 0) {
+				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+				process++;
+			}else if (pid == 0){
+				EstOutput myresults;
+				myresults = driver(t, namesOfGroupCombos, lines[process].start, lines[process].num);
+				
+				if (m->control_pressed) { exit(0); }
+				
+				//pass numSeqs to parent
+				ofstream out;
+				string tempFile = outputDir + toString(getpid()) + ".pars.results.temp";
+				m->openOutputFile(tempFile, out);
+				out << myresults.size() << endl;
+				for (int i = 0; i < myresults.size(); i++) {  out << myresults[i] << '\t';  } out << endl;
+				out.close();
+				
+				exit(0);
+			}else { 
+				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+				exit(0); 
+			}
+		}
+		
+		results = driver(t, namesOfGroupCombos, lines[0].start, lines[0].num);
+		
+		//force parent to wait until all the processes are done
+		for (int i=0;i<processIDS.size();i++) { 
+			int temp = processIDS[i];
+			wait(&temp);
+		}
+		
+		if (m->control_pressed) { return results; }
+			
+		//get data created by processes
+		for (int i=0;i<processIDS.size();i++) { 
+			ifstream in;
+			string s = outputDir + toString(processIDS[i]) + ".pars.results.temp";
+			m->openInputFile(s, in);
+			
+			//get scores
+			if (!in.eof()) {
+				int num;
+				in >> num; m->gobble(in);
+				
+				if (m->control_pressed) { break; }
+				
+				double w; 
+				for (int j = 0; j < num; j++) {
+					in >> w;
+					results.push_back(w);
+				}
+				m->gobble(in);
+			}
+			in.close();
+			remove(s.c_str());
+		}
+		
+		return results;
+#endif		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Parsimony", "createProcesses");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+EstOutput Parsimony::driver(Tree* t, vector< vector<string> > namesOfGroupCombos, int start, int num) { 
+	try {
+		
+		EstOutput results; results.resize(num);
+		
+		Tree* copyTree = new Tree();
+		int count = 0;
+		
+		for (int h = start; h < (start+num); h++) {
+					
+			if (m->control_pressed) { delete copyTree; return results; }
+	
+			int score = 0;
+			
+			//groups in this combo
+			vector<string> groups = namesOfGroupCombos[h];
 			
 			//copy users tree so that you can redo pgroups 
 			copyTree->getCopy(t);
-			int score = 0;
-		
+			
 			//create pgroups that reflect the groups the user want to use
 			for(int i=copyTree->getNumLeaves();i<copyTree->getNumNodes();i++){
 				copyTree->tree[i].pGroups = (copyTree->mergeUserGroups(i, groups));
 			}
-		
-//			map<string,int>::iterator it;
 			
 			for(int i=copyTree->getNumLeaves();i<copyTree->getNumNodes();i++){
-			
+				
 				if (m->control_pressed) { return data; }
 				
 				int lc = copyTree->tree[i].getLChild();
 				int rc = copyTree->tree[i].getRChild();
-			
+				
 				int iSize = copyTree->tree[i].pGroups.size();
 				int rcSize = copyTree->tree[rc].pGroups.size();
 				int lcSize = copyTree->tree[lc].pGroups.size();
 				
-					
 				//if isize are 0 then that branch is to be ignored
 				if (iSize == 0) { }
 				else if ((rcSize == 0) || (lcSize == 0)) { }
@@ -119,17 +213,17 @@ EstOutput Parsimony::getValues(Tree* t) {
 					score++;
 				}
 			} 
-		
-			data[count] = score;
-
+			
+			results[count] = score;
+			count++;
 		}
-		
+					
 		delete copyTree;
-		
-		return data;
+			
+		return results; 
 	}
 	catch(exception& e) {
-		m->errorOut(e, "Parsimony", "getValues");
+		m->errorOut(e, "Parsimony", "driver");
 		exit(1);
 	}
 }

@@ -22,15 +22,25 @@ class Parsimony : public TreeCalculator  {
 	public:
 		Parsimony(TreeMap* t) : tmap(t) {};
 		~Parsimony() {};
-		EstOutput getValues(Tree*);
+		EstOutput getValues(Tree*, int, string);
 		//EstOutput getValues(Tree*, string, string) { return data; }
 		
 	private:
+		struct linePair {
+			int start;
+			int num;
+			linePair(int i, int j) : start(i), num(j) {}
+		};
+		vector<linePair> lines;
+	
 		GlobalData* globaldata;
-		Tree* copyTree;
 		EstOutput data;
 		TreeMap* tmap;
-		map<string, int>::iterator it;
+		int processors;
+		string outputDir;
+	
+		EstOutput driver(Tree*, vector< vector<string> >, int, int); 
+		EstOutput createProcesses(Tree*, vector< vector<string> >);
 };
 
 /***********************************************************************/

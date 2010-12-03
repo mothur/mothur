@@ -12,7 +12,7 @@
 //**********************************************************************************************************************
 vector<string> ParsimonyCommand::getValidParameters(){	
 	try {
-		string Array[] =  {"random","groups","iters","outputdir","inputdir"};
+		string Array[] =  {"random","groups","iters","processors","outputdir","inputdir"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
@@ -69,7 +69,7 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"random","groups","iters","outputdir","inputdir"};
+			string Array[] =  {"random","groups","processors","iters","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -96,7 +96,7 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 			}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
-			string outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
+			string outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	if (randomtree == "")  { outputDir += m->hasPath(globaldata->inputFileName); } }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -109,6 +109,9 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 				
 			itersString = validParameter.validFile(parameters, "iters", false);			if (itersString == "not found") { itersString = "1000"; }
 			convert(itersString, iters); 
+			
+			string temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = "1";				}
+			convert(temp, processors); 
 						
 			if (abort == false) {
 				//randomtree will tell us if user had their own treefile or if they just want the random distribution
@@ -162,10 +165,11 @@ ParsimonyCommand::ParsimonyCommand(string option)  {
 void ParsimonyCommand::help(){
 	try {
 		m->mothurOut("The parsimony command can only be executed after a successful read.tree command, unless you use the random parameter.\n");
-		m->mothurOut("The parsimony command parameters are random, groups and iters.  No parameters are required.\n");
+		m->mothurOut("The parsimony command parameters are random, groups, processors and iters.  No parameters are required.\n");
 		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 1 valid group.\n");
 		m->mothurOut("The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree.\n");
 		m->mothurOut("The parsimony command should be in the following format: parsimony(random=yourOutputFilename, groups=yourGroups, iters=yourIters).\n");
+		m->mothurOut("The processors parameter allows you to specify the number of processors to use. The default is 1.\n");
 		m->mothurOut("Example parsimony(random=out, iters=500).\n");
 		m->mothurOut("The default value for random is "" (meaning you want to use the trees in your inputfile, randomtree=out means you just want the random distribution of trees outputted to out.rd_parsimony),\n");
 		m->mothurOut("and iters is 1000.  The parsimony command output two files: .parsimony and .psummary their descriptions are in the manual.\n");
@@ -209,7 +213,7 @@ int ParsimonyCommand::execute() {
 		if (randomtree == "") {
 			//get pscores for users trees
 			for (int i = 0; i < T.size(); i++) {
-				userData = pars->getValues(T[i]);  //data = AB, AC, BC, ABC.
+				userData = pars->getValues(T[i], processors, outputDir);  //data = AB, AC, BC, ABC.
 				
 				if (m->control_pressed) { 
 					delete reading; delete pars; delete util; delete output;
@@ -247,7 +251,7 @@ int ParsimonyCommand::execute() {
 				randT->assembleRandomTree();
 
 				//get pscore of random tree
-				randomData = pars->getValues(randT);
+				randomData = pars->getValues(randT, processors, outputDir);
 				
 				if (m->control_pressed) { 
 					delete reading; delete pars; delete util; delete output; delete randT;
@@ -296,7 +300,7 @@ int ParsimonyCommand::execute() {
 
 
 				//get pscore of random tree
-				randomData = pars->getValues(randT);
+				randomData = pars->getValues(randT, processors, outputDir);
 				
 				if (m->control_pressed) { 
 					delete reading; delete pars; delete util; delete output; delete randT;

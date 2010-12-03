@@ -40,6 +40,7 @@ class Weighted : public TreeCalculator  {
 		map<string, double> WScore; //a score for each group combination i.e. AB, AC, BC.
 		int processors;
 		string outputDir;
+		map< vector<string>, set<int> > rootForGrouping;  //maps a grouping combo to the root for that combo
 		
 		EstOutput driver(Tree*, vector< vector<string> >, int, int); 
 		EstOutput createProcesses(Tree*, vector< vector<string> >);

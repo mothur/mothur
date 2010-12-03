@@ -25,7 +25,7 @@ public:
 	
 private:
 	vector< vector<float> > wordGenusProb;	//vector of maps from genus to probability
-												//wordGenusProb[0][392] = probability that a sequence within genus that's index in the tree is 392 would contain kmer 0;
+										//wordGenusProb[0][392] = probability that a sequence within genus that's index in the tree is 392 would contain kmer 0;
 	
 	vector<int> genusTotals;
 	vector<int> genusNodes;  //indexes in phyloTree where genus' are located
