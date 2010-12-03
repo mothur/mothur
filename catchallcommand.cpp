@@ -28,6 +28,7 @@ CatchAllCommand::CatchAllCommand(){
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["csv"] = tempOutNames;
+		outputTypes["summary"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "CatchAllCommand", "CatchAllCommand");
@@ -86,6 +87,7 @@ CatchAllCommand::CatchAllCommand(string option)  {
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["csv"] = tempOutNames;
+			outputTypes["summary"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -203,6 +205,7 @@ int CatchAllCommand::execute() {
 					outputNames.push_back(filename + "_BestModelsFits.csv"); outputTypes["csv"].push_back(filename + "_BestModelsFits.csv");
 					outputNames.push_back(filename + "_BubblePlot.csv"); outputTypes["csv"].push_back(filename + "_BubblePlot.csv");
 				
+					createSummaryFile(filename + "_BestModelsAnalysis.csv", sabund->getLabel());
 										
 					if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {remove(outputNames[i].c_str());	} delete read;  delete input; globaldata->ginput = NULL; delete sabund;  return 0; }
 
@@ -237,6 +240,8 @@ int CatchAllCommand::execute() {
 					outputNames.push_back(filename + "_BestModelsAnalysis.csv"); outputTypes["csv"].push_back(filename + "_BestModelsAnalysis.csv");
 					outputNames.push_back(filename + "_BestModelsFits.csv"); outputTypes["csv"].push_back(filename + "_BestModelsFits.csv");
 					outputNames.push_back(filename + "_BubblePlot.csv"); outputTypes["csv"].push_back(filename + "_BubblePlot.csv");
+				
+					createSummaryFile(filename + "_BestModelsAnalysis.csv", sabund->getLabel());
 				
 					if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {remove(outputNames[i].c_str());	} delete read;  delete input; globaldata->ginput = NULL; delete sabund;  return 0; }
 
@@ -291,7 +296,9 @@ int CatchAllCommand::execute() {
 			outputNames.push_back(filename + "_Analysis.csv"); outputTypes["csv"].push_back(filename + "_Analysis.csv");
 			outputNames.push_back(filename + "_BestModelsAnalysis.csv"); outputTypes["csv"].push_back(filename + "_BestModelsAnalysis.csv");
 			outputNames.push_back(filename + "_BestModelsFits.csv"); outputTypes["csv"].push_back(filename + "_BestModelsFits.csv");
-			outputNames.push_back(filename + "_BubblePlot.csv"); outputTypes["csv"].push_back(filename + "_BubblePlot.csv");			
+			outputNames.push_back(filename + "_BubblePlot.csv"); outputTypes["csv"].push_back(filename + "_BubblePlot.csv");	
+			
+			createSummaryFile(filename + "_BestModelsAnalysis.csv", sabund->getLabel());
 			
 			delete sabund;
 		}
@@ -337,6 +344,55 @@ string CatchAllCommand::process(SAbundVector* sabund) {
 	}
 	catch(exception& e) {
 		m->errorOut(e, "CatchAllCommand", "process");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+string CatchAllCommand::createSummaryFile(string file1, string label) {
+	try {
+		string filename = outputDir + m->getRootName(m->getSimpleName(sabundfile)) + label + ".catchall.summary";
+		filename = m->getFullPathName(filename);
+		outputNames.push_back(filename); outputTypes["summary"].push_back(filename);
+		
+		ofstream out;
+		m->openOutputFile(filename, out);
+		
+		out << "group\tmodel\testimate\tlci\tuci" << endl;
+		
+		ifstream in;
+		m->openInputFile(file1, in);
+		
+		if (!in.eof()) {
+			
+			string header = m->getline(in); m->gobble(in);
+			
+			int pos = header.find("Total Number of Observed Species =");
+			cout << pos << '\t' << header.length() << endl;	exit(1);
+			if (pos == string::npos) { m->mothurOut("[ERROR]: cannot parse " + file1); m->mothurOutEndLine(); }
+			else {
+				//pos will be the position of the T in total, so we want to count to the position of =
+				pos += 34;
+				char c=header[pos];
+				string numString = "";
+				while (c != ','){
+					if (c != ' ') {
+						numString += c;
+					}
+				}
+				
+				int numOtus; convert(numString, numOtus);
+				cout << numOtus << endl;
+			}
+		}
+		
+		in.close();
+		out.close();
+		
+		return filename;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CatchAllCommand", "createSummaryFile");
 		exit(1);
 	}
 }

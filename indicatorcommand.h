@@ -35,7 +35,7 @@ private:
 	ReadTree* read;
 	TreeMap* treeMap;
 	string treefile, sharedfile, relabundfile, groups, label, inputFileName, outputDir;
-	bool abort, pickedGroups;
+	bool abort;
 	vector<string> outputNames, Groups;
 	map<string, vector<string> > outputTypes;
 	vector<SharedRAbundVector*> lookup;

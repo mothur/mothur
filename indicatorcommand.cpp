@@ -23,7 +23,7 @@ vector<string> IndicatorCommand::getValidParameters(){
 //**********************************************************************************************************************
 vector<string> IndicatorCommand::getRequiredParameters(){	
 	try {
-		string Array[] =  {"label","tree"};
+		string Array[] =  {"tree"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
@@ -139,15 +139,12 @@ IndicatorCommand::IndicatorCommand(string option)  {
 			else { inputFileName = relabundfile; }
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
-			if (groups == "not found") { groups = ""; pickedGroups = false; }
-			else { 
-				pickedGroups = true;
-				m->splitAtDash(groups, Groups);
-				globaldata->Groups = Groups;
-			}			
+			if (groups == "not found") { groups = "";  Groups.push_back("all"); }
+			else { m->splitAtDash(groups, Groups);	}			
+			globaldata->Groups = Groups;
 			
 			label = validParameter.validFile(parameters, "label", false);			
-			if (label == "not found") { label = ""; m->mothurOut("You must provide a label to process."); m->mothurOutEndLine(); abort = true; }	
+			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }	
 			
 			if ((relabundfile == "") && (sharedfile == "")) { m->mothurOut("You must provide either a shared or relabund file."); m->mothurOutEndLine(); abort = true;  }
 			
@@ -165,9 +162,9 @@ IndicatorCommand::IndicatorCommand(string option)  {
 void IndicatorCommand::help(){
 	try {
 		m->mothurOut("The indicator command reads a shared or relabund file and a tree file, and outputs a .indicator.tre and .indicator.summary file. \n");
-		m->mothurOut("The new tree contains labels at each internal node.  The label is the OTU number of the indicator OTU.\n");
+		m->mothurOut("The new tree contains labels at each internal node.  The label is the node number so you can relate the tree to the summary file.\n");
 		m->mothurOut("The summary file lists the indicator value for each OTU for each node.\n");
-		m->mothurOut("The indicator command parameters are tree, groups, shared, relabund and label. The tree and label parameter are required as well as either shared or relabund.\n");
+		m->mothurOut("The indicator command parameters are tree, groups, shared, relabund and label. The tree parameter is required as well as either shared or relabund.\n");
 		m->mothurOut("The groups parameter allows you to specify which of the groups in your shared or relabund you would like analyzed.  The groups may be entered separated by dashes.\n");
 		m->mothurOut("The label parameter indicates at what distance your tree relates to the shared or relabund.\n");
 		m->mothurOut("The indicator command should be used in the following format: indicator(tree=test.tre, shared=test.shared, label=0.03)\n");
@@ -252,17 +249,13 @@ int IndicatorCommand::execute(){
 		/***************************************************/
 		Tree* outputTree = new Tree(globaldata->Groups.size()); 
 		
-		if (pickedGroups) {
-			outputTree->getSubTree(T[0], globaldata->Groups);
-			outputTree->assembleTree();
-		}else{
-			outputTree->getCopy(T[0]);
-			outputTree->assembleTree();
-		}
-		
+		outputTree->getSubTree(T[0], globaldata->Groups);
+		outputTree->assembleTree();
+			
 		//no longer need original tree, we have output tree to use and label
 		for (int i = 0; i < T.size(); i++) {  delete T[i];  } globaldata->gTree.clear();
 		
+				
 		if (m->control_pressed) {  
 			if (sharedfile != "") {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } }
 			else { for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } }
@@ -299,6 +292,7 @@ int IndicatorCommand::execute(){
 //report all otu values to file
 int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 	try {
+		
 		string thisOutputDir = outputDir;
 		if (outputDir == "") {  thisOutputDir += m->hasPath(inputFileName);  }
 		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(inputFileName)) + "indicator.summary";
@@ -306,6 +300,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 		
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
+		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		out << "Node\tOTU#\tIndVal" << endl;
 		
 		string treeOutputDir = outputDir;
@@ -351,8 +346,25 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				//you are valid if you are not one of my descendants
 				//AND your distToLeaf is <= mine
 				//AND your distToLeaf is >= my smallest childs
-				//AND you were not added as part of a larger grouping
+				//AND you were not added as part of a larger groupings
+				
 				set<string> groupsAlreadyAdded;
+				//create a grouping with my grouping
+				vector<SharedRAbundVector*> subset;
+				int count = 0;
+				int doneCount = nodeToDescendants[i].size();
+				for (int k = 0; k < lookup.size(); k++) {
+					//is this descendant of i
+					if ((nodeToDescendants[i].count(lookup[k]->getGroup()) != 0)) { 
+						subset.push_back(lookup[k]);
+						groupsAlreadyAdded.insert(lookup[k]->getGroup());
+						count++;
+					}
+					if (count == doneCount) { break; } //quit once you get the rabunds for this grouping
+				}
+				if (subset.size() != 0) { groupings.push_back(subset); }
+				
+				
 				for (int j = (T->getNumNodes()-1); j >= 0; j--) {
 					if ((descendantNodes[i].count(j) == 0) && (distToLeaf[j] <= distToLeaf[i]) && ((distToLeaf[j] >= distToLeaf[T->tree[i].getLChild()]) || (distToLeaf[j] >= distToLeaf[T->tree[i].getRChild()]))) {
 						vector<SharedRAbundVector*> subset;
@@ -373,7 +385,10 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 					}
 				}
 				
-				if (groupsAlreadyAdded.size() != lookup.size()) { m->mothurOut("[ERROR]: could not make proper groupings."); m->mothurOutEndLine(); }
+				if (groupsAlreadyAdded.size() != lookup.size()) { cout << i << '\t' << groupsAlreadyAdded.size() << '\t' << lookup.size() << endl; m->mothurOut("[ERROR]: could not make proper groupings."); m->mothurOutEndLine(); }
+				for (int k = 0; k < lookup.size(); k++) {
+					if (groupsAlreadyAdded.count(lookup[k]->getGroup()) == 0) { cout << lookup[k]->getGroup() << endl; }
+				}
 				
 				indicatorValues = getValues(groupings);
 				
@@ -385,7 +400,23 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				//AND your distToLeaf is <= mine
 				//AND your distToLeaf is >= my smallest childs
 				//AND you were not added as part of a larger grouping
+				
 				set<string> groupsAlreadyAdded;
+				//create a grouping with my grouping
+				vector<SharedRAbundFloatVector*> subset;
+				int count = 0;
+				int doneCount = nodeToDescendants[i].size();
+				for (int k = 0; k < lookupFloat.size(); k++) {
+					//is this descendant of i
+					if ((nodeToDescendants[i].count(lookupFloat[k]->getGroup()) != 0)) { 
+						subset.push_back(lookupFloat[k]);
+						groupsAlreadyAdded.insert(lookupFloat[k]->getGroup());
+						count++;
+					}
+					if (count == doneCount) { break; } //quit once you get the rabunds for this grouping
+				}
+				if (subset.size() != 0) { groupings.push_back(subset); }
+				
 				for (int j = (T->getNumNodes()-1); j >= 0; j--) {
 					if ((descendantNodes[i].count(j) == 0) && (distToLeaf[j] <= distToLeaf[i]) && ((distToLeaf[j] >= distToLeaf[T->tree[i].getLChild()]) || (distToLeaf[j] >= distToLeaf[T->tree[i].getRChild()]))) {
 						vector<SharedRAbundFloatVector*> subset;
@@ -416,27 +447,14 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 			/******************************************************/
 			//output indicator values to table form + label tree  //
 			/*****************************************************/
-			vector<int> indicatorOTUs;
-			float largestValue = 0.0;
 			for (int j = 0; j < indicatorValues.size(); j++) {
 				
 				if (m->control_pressed) { out.close(); return 0; }
 				
 				out << (i+1) << '\t' << (j+1) << '\t' << indicatorValues[j] << endl;
-				
-				//show no favortism
-				if (indicatorValues[j] > largestValue) { 
-					largestValue = indicatorValues[j];
-					indicatorOTUs.clear();
-					indicatorOTUs.push_back(j+1);
-				}else if (indicatorValues[j] == largestValue) { 
-					indicatorOTUs.push_back(j+1);
-				}
-				
-				random_shuffle(indicatorOTUs.begin(), indicatorOTUs.end());
-				
-				T->tree[i].setLabel(indicatorOTUs[0]);
 			}
+			
+			T->tree[i].setLabel((i+1));
 			
 		}
 		out.close();
@@ -580,26 +598,33 @@ map<int, float> IndicatorCommand::getLengthToLeaf(Tree*& T){
 				if (lc == -1) { // you are a leaf
 					//if you are a leaf set you priliminary length to 1.0, this may adjust later
 					T->tree[i].setBranchLength(1.0);
-					dists[i] = 0.0;
+					dists[i] = 1.0;
 				}else{ // you are an internal node
 					//look at your children's length to leaf
 					float ldist = dists[lc];
 					float rdist = dists[rc];
 					
-					float greater;
-					if (rdist > greater) { greater = rdist; }
-					else { greater = ldist; }
+					float greater = ldist;
+					if (rdist > greater) { greater = rdist; dists[i] = ldist; }
+					else { dists[i] = rdist; }
 					
 					//branch length = difference + 1
 					T->tree[lc].setBranchLength((abs(ldist-greater) + 1.0));
 					T->tree[rc].setBranchLength((abs(rdist-greater) + 1.0));
-					
-					dists[i] = dists[lc] + (abs(ldist-greater) + 1.0);
 				}
 				
 			}else{
-				if (lc == -1) { dists[i] = 0.0; }
-				else { dists[i] = dists[lc] + T->tree[lc].getBranchLength(); }
+				if (lc == -1) { dists[i] = T->tree[i].getBranchLength(); }
+				else { //smaller of my two children distances plus my branch length
+					//look at your children's length to leaf
+					float ldist = dists[lc];
+					float rdist = dists[rc];
+					
+					float smaller = ldist;
+					if (rdist < smaller) { smaller = rdist;  }
+					
+					dists[i] = smaller + T->tree[i].getBranchLength(); 
+				}
 			}
 			
 		}
@@ -634,6 +659,8 @@ set<string> IndicatorCommand::getDescendantList(Tree*& T, int i, map<int, set<st
 			for (set<int>::iterator itNum = nodes[rc].begin(); itNum != nodes[rc].end(); itNum++) {
 				nodes[i].insert(*itNum);
 			}
+			//you are your own descendant
+			nodes[i].insert(i);
 		}
 		
 		return names;
@@ -649,6 +676,8 @@ int IndicatorCommand::getShared(){
 		InputData* input = new InputData(sharedfile, "sharedfile");
 		lookup = input->getSharedRAbundVectors();
 		string lastLabel = lookup[0]->getLabel();
+		
+		if (label == "") { label = lastLabel; delete input; return 0; }
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> labels; labels.insert(label);
@@ -723,6 +752,8 @@ int IndicatorCommand::getSharedFloat(){
 		InputData* input = new InputData(relabundfile, "relabund");
 		lookupFloat = input->getSharedRAbundFloatVectors();
 		string lastLabel = lookupFloat[0]->getLabel();
+		
+		if (label == "") { label = lastLabel; delete input; return 0; }
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> labels; labels.insert(label);
