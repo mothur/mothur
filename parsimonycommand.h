@@ -44,7 +44,7 @@ private:
 	Parsimony* pars;
 	vector<string> groupComb; // AB. AC, BC...
 	string sumFile, randomtree, allGroups, outputDir;
-	int iters, numGroups, numComp, counter;
+	int iters, numGroups, numComp, counter, processors;
 	vector<int> numEachGroup; //vector containing the number of sequences in each group the users wants for random distrib.
 	vector< vector<float> > userTreeScores; //scores for users trees for each comb.
 	vector< vector<float> > UScoreSig;  //tree score signifigance when compared to random trees - percentage of random trees with that score or lower.

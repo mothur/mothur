@@ -15,7 +15,7 @@
 Bayesian::Bayesian(string tfile, string tempFile, string method, int ksize, int cutoff, int i) : 
 Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 	try {
-					
+		
 		/************calculate the probablity that each word will be in a specific taxonomy*************/
 		string tfileroot = tfile.substr(0,tfile.find_last_of(".")+1);
 		string tempfileroot = m->getRootName(m->getSimpleName(tempFile));
@@ -205,6 +205,7 @@ Classify(), kmerSize(ksize), confidenceThreshold(cutoff), iters(i)  {
 /**************************************************************************************************/
 Bayesian::~Bayesian() {
 	try {
+		
 		 delete phyloTree; 
 		 if (database != NULL) {  delete database; }
 	}
@@ -223,7 +224,7 @@ string Bayesian::getTaxonomy(Sequence* seq) {
 		//get words contained in query
 		//getKmerString returns a string where the index in the string is hte kmer number 
 		//and the character at that index can be converted to be the number of times that kmer was seen
-
+		
 		string queryKmerString = kmer.getKmerString(seq->getUnaligned()); 
 
 		vector<int> queryKmers;
@@ -235,14 +236,16 @@ string Bayesian::getTaxonomy(Sequence* seq) {
 		
 		if (queryKmers.size() == 0) {  m->mothurOut(seq->getName() + "is bad."); m->mothurOutEndLine(); return "bad seq"; }
 		
+		
 		int index = getMostProbableTaxonomy(queryKmers);
 		
 		if (m->control_pressed) { return tax; }
-//cout << seq->getName() << '\t' << index << endl;					
+					
 		//bootstrap - to set confidenceScore
 		int numToSelect = queryKmers.size() / 8;
+	
 		tax = bootstrapResults(queryKmers, index, numToSelect);
-						
+				
 		return tax;	
 	}
 	catch(exception& e) {
@@ -255,6 +258,17 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 	try {
 				
 		map<int, int> confidenceScores; 
+		
+		//initialize confidences to 0 
+		int seqIndex = tax;
+		TaxNode seq = phyloTree->get(tax);
+		confidenceScores[tax] = 0;
+		
+		while (seq.level != 0) { //while you are not at the root
+			seqIndex = seq.parent;
+			confidenceScores[seqIndex] = 0;
+			seq = phyloTree->get(seq.parent);
+		}
 				
 		map<int, int>::iterator itBoot;
 		map<int, int>::iterator itBoot2;
@@ -264,7 +278,6 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 			if (m->control_pressed) { return "control"; }
 			
 			vector<int> temp;
-						
 			for (int j = 0; j < numToSelect; j++) {
 				int index = int(rand() % kmers.size());
 				
@@ -274,17 +287,15 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 			
 			//get taxonomy
 			int newTax = getMostProbableTaxonomy(temp);
+			//int newTax = 1;
 			TaxNode taxonomyTemp = phyloTree->get(newTax);
-	
+			
 			//add to confidence results
 			while (taxonomyTemp.level != 0) { //while you are not at the root
-				
 				itBoot2 = confidenceScores.find(newTax); //is this a classification we already have a count on
 				
-				if (itBoot2 == confidenceScores.end()) { //not already in confidence scores
-					confidenceScores[newTax] = 1;
-				}else{
-					confidenceScores[newTax]++;
+				if (itBoot2 != confidenceScores.end()) { //this is a classification we need a confidence for
+					(itBoot2->second)++;
 				}
 				
 				newTax = taxonomyTemp.parent;
@@ -305,7 +316,7 @@ string Bayesian::bootstrapResults(vector<int> kmers, int tax, int numToSelect) {
 				
 				int confidence = 0;
 				if (itBoot2 != confidenceScores.end()) { //already in confidence scores
-					confidence = confidenceScores[seqTaxIndex];
+					confidence = itBoot2->second;
 				}
 				
 				if (((confidence/(float)iters) * 100) >= confidenceThreshold) {
@@ -339,7 +350,7 @@ int Bayesian::getMostProbableTaxonomy(vector<int> queryKmer) {
 			for (int i = 0; i < queryKmer.size(); i++) {
 				prob += wordGenusProb[queryKmer[i]][k];
 			}
-		
+			
 			//is this the taxonomy with the greatest probability?
 			if (prob > maxProbability) { 
 				indexofGenus = genusNodes[k];
