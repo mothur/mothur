@@ -52,7 +52,7 @@ GetOTURepCommand::GetOTURepCommand(){
 //**********************************************************************************************************************
 vector<string> GetOTURepCommand::getValidParameters(){	
 	try {
-		string Array[] =  {"fasta","list","label","name", "group", "sorted", "phylip","column","large","cutoff","precision","groups","outputdir","inputdir"};
+		string Array[] =  {"fasta","list","label","name", "group", "weighted","sorted", "phylip","column","large","cutoff","precision","groups","outputdir","inputdir"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
@@ -97,7 +97,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			help(); abort = true;
 		} else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","list","label","name", "group", "sorted", "phylip","column","large","cutoff","precision","groups","outputdir","inputdir"};
+			string Array[] =  {"fasta","list","label","name","weighted", "group", "sorted", "phylip","column","large","cutoff","precision","groups","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -241,6 +241,11 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 			string temp = validParameter.validFile(parameters, "large", false);		if (temp == "not found") {	temp = "F";	}
 			large = m->isTrue(temp);
 			
+			temp = validParameter.validFile(parameters, "weighted", false);		if (temp == "not found") {	if (namefile == "") { temp = "F"; } else { temp = "t"; }	}
+			weighted = m->isTrue(temp);
+			
+			if ((weighted) && (namefile == "")) { m->mothurOut("You cannot set weighted to true unless you provide a namesfile."); m->mothurOutEndLine(); abort = true; }
+			
 			temp = validParameter.validFile(parameters, "precision", false);			if (temp == "not found") { temp = "100"; }
 			convert(temp, precision); 
 			
@@ -259,7 +264,7 @@ GetOTURepCommand::GetOTURepCommand(string option)  {
 
 void GetOTURepCommand::help(){
 	try {
-		m->mothurOut("The get.oturep command parameters are phylip, column, list, fasta, name, group, large, cutoff, precision, groups, sorted and label.  The fasta and list parameters are required, as well as phylip or column and name.\n");
+		m->mothurOut("The get.oturep command parameters are phylip, column, list, fasta, name, group, large, weighted, cutoff, precision, groups, sorted and label.  The fasta and list parameters are required, as well as phylip or column and name.\n");
 		m->mothurOut("The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n");
 		m->mothurOut("The phylip or column parameter is required, but only one may be used.  If you use a column file the name filename is required. \n");
 		m->mothurOut("If you do not provide a cutoff value 10.00 is assumed. If you do not provide a precision value then 100 is assumed.\n");
@@ -268,6 +273,11 @@ void GetOTURepCommand::help(){
 		m->mothurOut("The default value for label is all labels in your inputfile.\n");
 		m->mothurOut("The sorted parameter allows you to indicate you want the output sorted. You can sort by sequence name, bin number, bin size or group. The default is no sorting, but your options are name, number, size, or group.\n");
 		m->mothurOut("The large parameter allows you to indicate that your distance matrix is too large to fit in RAM.  The default value is false.\n");
+		m->mothurOut("The weighted parameter allows you to indicate that want to find the weighted representative. You must provide a namesfile to set weighted to true.  The default value is false with no namesfile and true when a name file is provided.\n");
+		m->mothurOut("The representative is found by selecting the sequence that has the smallest total distance to all other sequences in the OTU. If a tie occurs the smallest average distance is used.\n");
+		m->mothurOut("For weighted = false, mothur assumes the distance file contains only unique sequences, the list file may contain all sequences, but only the uniques are considered to become the representative. If your distance file contains all the sequences it would become weighted=true.\n");
+		m->mothurOut("For weighted = true, mothur assumes the distance file contains only unique sequences, the list file must contain all sequences, all sequences are considered to become the representative, but unique name will be used in the output for consistency.\n");
+		m->mothurOut("If your distance file contains all the sequence and you do not provide a name file, the weighted representative will be given, unless your listfile is unique. If you provide a namefile, then you can select weighted or unweighted.\n");
 		m->mothurOut("The group parameter allows you provide a group file.\n");
 		m->mothurOut("The groups parameter allows you to indicate that you want representative sequences for each group specified for each OTU, group name should be separated by dashes. ex. groups=A-B-C.\n");
 		m->mothurOut("The get.oturep command outputs a .fastarep and .rep.names file for each distance you specify, selecting one OTU representative for each bin.\n");
@@ -324,6 +334,9 @@ int GetOTURepCommand::execute(){
 				if (m->control_pressed) { delete readMatrix; return 0; }
 				seqVec[currentCell->row][currentCell->column] = currentCell->dist;
 			}
+			//add dummy map for unweighted calc
+			SeqMap dummy;
+			seqVec.push_back(dummy);
 			
 			delete matrix;
 			delete readMatrix;
@@ -356,6 +369,7 @@ int GetOTURepCommand::execute(){
 			//positions in file where the distances for each sequence begin
 			//rowPositions[1] = position in file where distance related to sequence 1 start.
 			rowPositions = formatMatrix->getRowPositions();
+			rowPositions.push_back(-1); //dummy row for unweighted calc
 			
 			delete formatMatrix;
 			delete nameMap;
@@ -422,7 +436,9 @@ int GetOTURepCommand::execute(){
 			if (large) {  inRow.close(); remove(distFile.c_str());  }
 			delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
 		}
-	
+		
+		if (!weighted) { readNamesFile(weighted); }
+		
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
 			if (allLines == 1 || labels.count(list->getLabel()) == 1){
@@ -506,6 +522,8 @@ int GetOTURepCommand::execute(){
 		delete input;  globaldata->ginput = NULL;
 		delete read;
 		
+		if (!weighted) { nameFileMap.clear(); }
+		
 		//read fastafile
 		fasta = new FastaMap();
 		fasta->readFastaFile(fastafile);
@@ -573,20 +591,84 @@ void GetOTURepCommand::readNamesFile() {
 	}
 }
 //**********************************************************************************************************************
+//read names file to find the weighted rep for each bin
+void GetOTURepCommand::readNamesFile(bool w) {
+	try {
+		vector<string> dupNames;
+		m->openInputFile(namefile, inNames);
+		
+		string name, names, sequence;
+		
+		while(inNames){
+			inNames >> name;	m->gobble(inNames);		//read from first column  A
+			inNames >> names;							//read from second column  A,B,C,D
+			
+			dupNames.clear();
+			
+			//parse names into vector
+			m->splitAtComma(names, dupNames);
+			
+			for (int i = 0; i < dupNames.size(); i++) {
+				nameFileMap[dupNames[i]] = name;
+			}
+			
+			m->gobble(inNames);
+		}
+		inNames.close();
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetOTURepCommand", "readNamesFile");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 string GetOTURepCommand::findRep(vector<string> names) {
 	try{
 		// if only 1 sequence in bin or processing the "unique" label, then 
 		// the first sequence of the OTU is the representative one
-		if ((names.size() == 2) || (names.size() == 1) || (list->getLabel() == "unique")) {
+		if ((names.size() == 1) || (list->getLabel() == "unique")) {
 			return names[0];
 		}else{
 			vector<int> seqIndex(names.size());
 			vector<float> max_dist(names.size());
 			vector<float> total_dist(names.size());
+			map<string, string>::iterator itNameFile;
+			map<string, int>::iterator itNameIndex;
 
 			//fill seqIndex and initialize sums
 			for (size_t i = 0; i < names.size(); i++) {
-				seqIndex[i] = nameToIndex[names[i]];
+				if (weighted) {
+					seqIndex[i] = nameToIndex[names[i]];
+				}else { 
+					if (namefile == "") {
+						itNameIndex = nameToIndex.find(names[i]);
+						
+						if (itNameIndex == nameToIndex.end()) { // you are not in the distance file and no namesfile, then assume you are not unique
+							if (large) {  seqIndex[i] = (rowPositions.size()-1); }
+							else {  seqIndex[i] = (seqVec.size()-1); }
+						}else {
+							seqIndex[i] = itNameIndex->second;
+						}
+						
+					}else {
+						itNameFile = nameFileMap.find(names[i]);
+						
+						if (itNameFile == nameFileMap.end()) {
+							m->mothurOut("[ERROR]: " + names[i] + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->control_pressed = true; 
+						}else{
+							string name1 = itNameFile->first;
+							string name2 = itNameFile->second;
+							
+							if (name1 == name2) { //then you are unique so add your real dists
+								seqIndex[i] = nameToIndex[names[i]];
+							}else { //add dummy
+								if (large) {  seqIndex[i] = (rowPositions.size()-1); }
+								else {  seqIndex[i] = (seqVec.size()-1); }
+							}
+						}
+					}
+				}
 				max_dist[i] = 0.0;
 				total_dist[i] = 0.0;
 			}

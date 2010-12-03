@@ -68,6 +68,7 @@ private:
 							//only takes names from the first tree in the tree file and assumes that all trees use the same names.
 	int readTreeString(ifstream&);
 	int populateNewTree(vector<Node>&, int, int&);
+	void printBranch(int, ostream&, string, vector<Node>&);
 		
 	MothurOut* m;
 		

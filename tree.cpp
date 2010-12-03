@@ -270,7 +270,7 @@ void Tree::getSubTree(Tree* copy, vector<string> Groups) {
 			//initialize leaf nodes
 			if (i <= (numLeaves-1)) {
 				tree[i].setName(Groups[i]);
-					
+				
 				//save group info
 				string group = globaldata->gTreemap->getGroup(Groups[i]);
 				vector<string> tempGroups; tempGroups.push_back(group);
@@ -301,6 +301,7 @@ void Tree::getSubTree(Tree* copy, vector<string> Groups) {
 			int parent = copy->tree[i].getParent();
 			
 			if (parent != -1) {
+				
 				if (m->inUsersGroups(copy->tree[i].getName(), Groups)) {
 					//find my siblings name
 					int parentRC = copy->tree[parent].getRChild();
@@ -361,7 +362,7 @@ void Tree::getSubTree(Tree* copy, vector<string> Groups) {
 						//so set our parents sib to our great-grandparent
 						int parent = copy->tree[i].getParent();
 						int grandparent = copy->tree[parent].getParent();
-						
+						int parentsSibIndex;
 						if (grandparent != -1) {
 							int greatgrandparent = copy->tree[grandparent].getParent();
 							int greatgrandparentLC = copy->tree[greatgrandparent].getLChild();
@@ -370,8 +371,8 @@ void Tree::getSubTree(Tree* copy, vector<string> Groups) {
 							int grandparentLC = copy->tree[grandparent].getLChild();
 							int grandparentRC = copy->tree[grandparent].getRChild();
 							
-							int parentsSibIndex = grandparentLC;
-							if (grandparentRC == parent) { parentsSibIndex = grandparentLC; }
+							parentsSibIndex = grandparentLC;
+							if (grandparentLC == parent) { parentsSibIndex = grandparentRC; }
 
 							//whichever of my greatgrandparents children was my grandparent
 							if (greatgrandparentLC == grandparent) { greatgrandparentLC = parentsSibIndex; }
@@ -401,7 +402,6 @@ void Tree::getSubTree(Tree* copy, vector<string> Groups) {
 		int nextSpot = numLeaves;
 		populateNewTree(copy->tree, root, nextSpot);
 		
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Tree", "getCopy");
@@ -415,17 +415,15 @@ int Tree::populateNewTree(vector<Node>& oldtree, int node, int& index) {
 		if (oldtree[node].getLChild() != -1) {
 			int rc = populateNewTree(oldtree, oldtree[node].getLChild(), index);
 			int lc = populateNewTree(oldtree, oldtree[node].getRChild(), index);
-			
+
 			tree[index].setChildren(lc, rc);
-			index++;
+			tree[rc].setParent(index);
+			tree[lc].setParent(index);
 			
-			return (index-1);
+			return (index++);
 		}else { //you are a leaf
 			int indexInNewTree = globaldata->gTreemap->getIndex(oldtree[node].getName());
-			
-			tree[indexInNewTree].setParent(index);
 			return indexInNewTree;
-			
 		}
 	}
 	catch(exception& e) {
@@ -895,7 +893,69 @@ try {
 		exit(1);
 	}
 }
-									  
+/*****************************************************************/
+void Tree::printBranch(int node, ostream& out, string mode, vector<Node>& theseNodes) {
+	try {
+		
+		// you are not a leaf
+		if (theseNodes[node].getLChild() != -1) {
+			out << "(";
+			printBranch(theseNodes[node].getLChild(), out, mode);
+			out << ",";
+			printBranch(theseNodes[node].getRChild(), out, mode);
+			out << ")";
+			if (mode == "branch") {
+				//if there is a branch length then print it
+				if (theseNodes[node].getBranchLength() != -1) {
+					out << ":" << theseNodes[node].getBranchLength();
+				}
+			}else if (mode == "boot") {
+				//if there is a label then print it
+				if (theseNodes[node].getLabel() != -1) {
+					out << theseNodes[node].getLabel();
+				}
+			}else if (mode == "both") {
+				if (theseNodes[node].getLabel() != -1) {
+					out << theseNodes[node].getLabel();
+				}
+				//if there is a branch length then print it
+				if (theseNodes[node].getBranchLength() != -1) {
+					out << ":" << theseNodes[node].getBranchLength();
+				}
+			}
+		}else { //you are a leaf
+			string leafGroup = globaldata->gTreemap->getGroup(theseNodes[node].getName());
+			
+			if (mode == "branch") {
+				out << leafGroup; 
+				//if there is a branch length then print it
+				if (theseNodes[node].getBranchLength() != -1) {
+					out << ":" << theseNodes[node].getBranchLength();
+				}
+			}else if (mode == "boot") {
+				out << leafGroup; 
+				//if there is a label then print it
+				if (theseNodes[node].getLabel() != -1) {
+					out << theseNodes[node].getLabel();
+				}
+			}else if (mode == "both") {
+				out << theseNodes[node].getName();
+				if (theseNodes[node].getLabel() != -1) {
+					out << theseNodes[node].getLabel();
+				}
+				//if there is a branch length then print it
+				if (theseNodes[node].getBranchLength() != -1) {
+					out << ":" << theseNodes[node].getBranchLength();
+				}
+			}
+		}
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Tree", "printBranch");
+		exit(1);
+	}
+}
 /*****************************************************************/
 
 void Tree::printTree() {

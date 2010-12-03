@@ -550,6 +550,7 @@ string SummaryCommand::createGroupSummaryFile(int numLines, int numCols, vector<
 			files[outputNames[i]] = thisFilesLines;
 			
 			temp.close();
+			remove(outputNames[i].c_str());
 		}
 		
 		//output label line to new file

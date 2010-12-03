@@ -61,9 +61,10 @@ private:
 	string filename, fastafile, listfile, namefile, groupfile, label, sorted, phylipfile, columnfile, distFile, format, outputDir, groups;
 	ofstream out;
 	ifstream in, inNames, inRow;
-	bool abort, allLines, groupError, large;
+	bool abort, allLines, groupError, large, weighted;
 	set<string> labels; //holds labels to be used
 	map<string, int> nameToIndex;  //maps sequence name to index in sparsematrix
+	map<string, string> nameFileMap;
 	vector<string> outputNames, Groups;
 	map<string, string> outputNameFiles;
 	float cutoff;
@@ -74,6 +75,7 @@ private:
 	map<string, vector<string> > outputTypes;
 
 	void readNamesFile();
+	void readNamesFile(bool);
 	int process(ListVector*);
 	SeqMap getMap(int);
 	string findRep(vector<string>); 	// returns the name of the "representative" sequence of given bin or subset of a bin, for groups
