@@ -1221,17 +1221,6 @@ void MothurOut::splitAtChar(string& estim, vector<string>& container, char symbo
 		}
 		container.push_back(individual);
 
-		/*
-		
-		while (estim.find_first_of(symbol) != -1) {
-			individual = estim.substr(0,estim.find_first_of(symbol));
-			if ((estim.find_first_of(symbol)+1) <= estim.length()) { //checks to make sure you don't have dash at end of string
-				estim = estim.substr(estim.find_first_of(symbol)+1, estim.length());
-				container.push_back(individual);
-			}
-		}
-		//get last one
-		container.push_back(estim); */
 	}
 	catch(exception& e) {
 		errorOut(e, "MothurOut", "splitAtChar");

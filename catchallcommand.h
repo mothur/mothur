@@ -48,7 +48,7 @@ private:
 	map< string, vector<string> > outputTypes;
 	
 	string process(SAbundVector*);
-	string createSummaryFile(string, string); 
+	int createSummaryFile(string, string, ofstream&); 
 };
 
 /****************************************************************************/
