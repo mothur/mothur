@@ -337,7 +337,7 @@ int TrimSeqsCommand::execute(){
 			outputNames.push_back(groupFile); outputTypes["group"].push_back(groupFile);
 			getOligos(fastaFileNames, qualFileNames);
 		}
-
+		cout << fastaFileNames.size() << '\t' << qualFileNames.size() << endl;
 		vector<unsigned long int> fastaFilePos;
 		vector<unsigned long int> qFilePos;
 		
@@ -351,90 +351,21 @@ int TrimSeqsCommand::execute(){
 		
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 				if(processors == 1){
-										
 					driverCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, groupFile, fastaFileNames, qualFileNames, lines[0], qLines[0]);
-					
-					for (int j = 0; j < fastaFileNames.size(); j++) {
-						rename((fastaFileNames[j] + toString(getpid()) + ".temp").c_str(), fastaFileNames[j].c_str());
-					}
-					if(qFileName != ""){
-						for (int j = 0; j < qualFileNames.size(); j++) {
-							rename((qualFileNames[j] + toString(getpid()) + ".temp").c_str(), qualFileNames[j].c_str());
-						}
-					}						
-
 				}else{
 					createProcessesCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, groupFile, fastaFileNames, qualFileNames); 
-					
-					rename((trimSeqFile + toString(processIDS[0]) + ".temp").c_str(), trimSeqFile.c_str());
-					rename((scrapSeqFile + toString(processIDS[0]) + ".temp").c_str(), scrapSeqFile.c_str());
-					rename((groupFile + toString(processIDS[0]) + ".temp").c_str(), groupFile.c_str());
-					
-					if(qFileName != ""){
-						rename((trimQualFile + toString(processIDS[0]) + ".temp").c_str(), trimQualFile.c_str());
-						rename((scrapQualFile + toString(processIDS[0]) + ".temp").c_str(), scrapQualFile.c_str());
-					}
-					
-					
-					for (int j = 0; j < fastaFileNames.size(); j++) {
-						rename((fastaFileNames[j] + toString(processIDS[0]) + ".temp").c_str(), fastaFileNames[j].c_str());
-					}
-					if(qFileName != ""){
-						for (int j = 0; j < qualFileNames.size(); j++) {
-							rename((qualFileNames[j] + toString(getpid()) + ".temp").c_str(), qualFileNames[j].c_str());
-						}
-					}						
-					
-					//append files
-					for(int i=1;i<processors;i++){
-						m->appendFiles((trimSeqFile + toString(processIDS[i]) + ".temp"), trimSeqFile);
-						remove((trimSeqFile + toString(processIDS[i]) + ".temp").c_str());
-						m->appendFiles((scrapSeqFile + toString(processIDS[i]) + ".temp"), scrapSeqFile);
-						remove((scrapSeqFile + toString(processIDS[i]) + ".temp").c_str());
-
-						m->appendFiles((trimQualFile + toString(processIDS[i]) + ".temp"), trimQualFile);
-						remove((trimQualFile + toString(processIDS[i]) + ".temp").c_str());
-						m->appendFiles((scrapQualFile + toString(processIDS[i]) + ".temp"), scrapQualFile);
-						remove((scrapQualFile + toString(processIDS[i]) + ".temp").c_str());
-						
-						m->appendFiles((groupFile + toString(processIDS[i]) + ".temp"), groupFile);
-						remove((groupFile + toString(processIDS[i]) + ".temp").c_str());
-						for (int j = 0; j < fastaFileNames.size(); j++) {
-							m->appendFiles((fastaFileNames[j] + toString(processIDS[i]) + ".temp"), fastaFileNames[j]);
-							remove((fastaFileNames[j] + toString(processIDS[i]) + ".temp").c_str());
-						}
-						
-						if(qFileName != ""){
-							for (int j = 0; j < qualFileNames.size(); j++) {
-								m->appendFiles((qualFileNames[j] + toString(processIDS[i]) + ".temp"), qualFileNames[j]);
-								remove((qualFileNames[j] + toString(processIDS[i]) + ".temp").c_str());
-							}
-						}						
-						
-						
-					}
-				}
-				
-				if (m->control_pressed) {  return 0; }
+				}	
 		#else
 				driverCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, groupFile, fastaFileNames, qualFileNames, lines[0], qLines[0]);
-				
-				for (int j = 0; j < fastaFileNames.size(); j++) {
-					rename((fastaFileNames[j] + toString(j) + ".temp").c_str(), fastaFileNames[j].c_str());
-				}
-				if(qFileName != ""){
-					for (int j = 0; j < qualFileNames.size(); j++) {
-						rename((qualFileNames[j] + toString(j) + ".temp").c_str(), qualFileNames[j].c_str());
-					}
-				}
-									
-				if (m->control_pressed) {  return 0; }
 		#endif
-					
-										
+		
+		if (m->control_pressed) {  return 0; }			
+		cout << "done with driver " << endl;									
 		for(int i=0;i<fastaFileNames.size();i++){
-			if (m->isBlank(fastaFileNames[i])) { remove(fastaFileNames[i].c_str());	}
-			else if (filesToRemove.count(fastaFileNames[i]) > 0) { remove(fastaFileNames[i].c_str()); }
+			cout << fastaFileNames[i] << endl;
+			
+			if (m->isBlank(fastaFileNames[i])) { cout << fastaFileNames[i] << " was blank" << endl; remove(fastaFileNames[i].c_str());	}
+			else if (filesToRemove.count(fastaFileNames[i]) > 0) { cout << fastaFileNames[i] << " was on the remove list" << endl; remove(fastaFileNames[i].c_str()); }
 			else {
 				ifstream inFASTA;
 				string seqName;
@@ -451,7 +382,7 @@ int TrimSeqsCommand::execute(){
 						if(itCombo->second == i){	thisGroup = itCombo->first;	combos.erase(itCombo);  break;  }
 					}
 				}else{ thisGroup = groupVector[i]; }
-				
+				cout << thisGroup << '\t' << i  << '\t' << comboStarts << endl;	
 				while(!inFASTA.eof()){
 					if(inFASTA.get() == '>'){
 						inFASTA >> seqName;
@@ -463,11 +394,12 @@ int TrimSeqsCommand::execute(){
 				inFASTA.close();
 			}
 		}
-		
+	cout << "done with fastaFileNames " << endl;		
 		if(qFileName != ""){
 			for(int i=0;i<qualFileNames.size();i++){
-				if (m->isBlank(qualFileNames[i])) { remove(qualFileNames[i].c_str());	}
-				else if (filesToRemove.count(qualFileNames[i]) > 0) { remove(qualFileNames[i].c_str()); }
+				cout << qualFileNames[i] << endl;
+				if (m->isBlank(qualFileNames[i])) { cout << qualFileNames[i] << " was blank" << endl; remove(qualFileNames[i].c_str());	}
+				else if (filesToRemove.count(qualFileNames[i]) > 0) { cout << qualFileNames[i] << " was on the remove list" << endl; remove(qualFileNames[i].c_str()); }
 				else {
 					ifstream inQual;
 					string seqName;
@@ -487,7 +419,7 @@ int TrimSeqsCommand::execute(){
 				}
 			}
 		}
-		
+		cout << "done with qualFileNames " << endl;
 		
 		if (m->control_pressed) { 
 			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
@@ -533,38 +465,6 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 		
 		if (oligoFile != "") {		
 			m->openOutputFile(groupFile, outGroups);   
-			for (int i = 0; i < fastaNames.size(); i++) {
-
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-				fastaNames[i] = (fastaNames[i] + toString(getpid()) + ".temp");
-				//fastaFileNames.push_back(new ofstream((fastaNames[i] + toString(getpid()) + ".temp").c_str(), ios::ate)); 
-				//clear old file if it exists
-				ofstream temp;
-				m->openOutputFile(fastaNames[i], temp);
-				temp.close();
-				if(qFileName != ""){
-					qualNames[i] = (qualNames[i] + toString(getpid()) + ".temp");
-					//qualFileNames.push_back(new ofstream((qualNames[i] + toString(getpid()) + ".temp").c_str(), ios::ate)); 
-					//clear old file if it exists
-					ofstream temp2;
-					m->openOutputFile(qualNames[i], temp2);
-					temp2.close();
-				}
-			#else
-				//fastaFileNames.push_back(new ofstream((fastaNames[i] + toString(i) + ".temp").c_str(), ios::ate)); 
-				fastaNames[i] = (fastaNames[i] + toString(i) + ".temp");
-				ofstream temp;
-				m->openOutputFile(fastaNames[i], temp);
-				temp.close();			
-				if(qFileName != ""){
-					//qualFileNames.push_back(new ofstream((qualNames[i] + toString(i) + ".temp").c_str(), ios::ate)); 	
-					qualNames[i] = (qualNames[i] + toString(i) + ".temp");
-					ofstream temp2;
-					m->openOutputFile(qualNames[i], temp2);
-					temp2.close();		
-				}
-			#endif
-			}
 		}
 		
 		ifstream inFASTA;
@@ -582,12 +482,9 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 			if (m->control_pressed) { 
 				inFASTA.close(); outFASTA.close(); scrapFASTA.close();
 				if (oligoFile != "") {	 outGroups.close();   }
-				
-				//for(int i=0;i<fastaFileNames.size();i++){  fastaFileNames[i]->close(); delete fastaFileNames[i];  }	
 
 				if(qFileName != ""){
 					qFile.close();
-					//for(int i=0;i<qualFileNames.size();i++){  qualFileNames[i]->close(); delete qualFileNames[i];  }	
 				}
 				for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
 
@@ -747,18 +644,6 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 		if (oligoFile != "") {	 outGroups.close();   }
 		if(qFileName != "")	{	qFile.close();	scrapQual.close(); outQual.close();	}
 		
-		//for(int i=0;i<fastaFileNames.size();i++){
-		//	fastaFileNames[i]->close();
-		//	delete fastaFileNames[i];
-		//}		
-		
-		//if(qFileName != ""){
-			//for(int i=0;i<qualFileNames.size();i++){
-				//qualFileNames[i]->close();
-				//delete qualFileNames[i];
-			//}		
-		//}			
-		
 		return count;
 	}
 	catch(exception& e) {
@@ -772,7 +657,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName, string trimFile, string scrapFile, string trimQFile, string scrapQFile, string groupFile, vector<string> fastaNames, vector<string> qualNames) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		int process = 0;
+		int process = 1;
 		int exitCommand = 1;
 		processIDS.clear();
 		
@@ -784,6 +669,21 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
 				process++;
 			}else if (pid == 0){
+				for (int i = 0; i < fastaNames.size(); i++) {
+					fastaNames[i] = (fastaNames[i] + toString(getpid()) + ".temp");
+					//clear old file if it exists
+					ofstream temp;
+					m->openOutputFile(fastaNames[i], temp);
+					temp.close();
+					if(qFileName != ""){
+						qualNames[i] = (qualNames[i] + toString(getpid()) + ".temp");
+						//clear old file if it exists
+						ofstream temp2;
+						m->openOutputFile(qualNames[i], temp2);
+						temp2.close();
+					}
+				}
+				
 				driverCreateTrim(filename, qFileName, (trimFile + toString(getpid()) + ".temp"), (scrapFile + toString(getpid()) + ".temp"), (trimQFile + toString(getpid()) + ".temp"), (scrapQFile + toString(getpid()) + ".temp"), (groupFile + toString(getpid()) + ".temp"), fastaNames, qualNames, lines[process], qLines[process]);
 				exit(0);
 			}else { 
@@ -793,12 +693,69 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 			}
 		}
 		
+		//parent do my part
+		for (int i = 0; i < fastaNames.size(); i++) {
+			//clear old file if it exists
+			ofstream temp;
+			m->openOutputFile(fastaNames[i], temp);
+			temp.close();
+			if(qFileName != ""){
+				//clear old file if it exists
+				ofstream temp2;
+				m->openOutputFile(qualNames[i], temp2);
+				temp2.close();
+			}
+		}
+		
+		driverCreateTrim(filename, qFileName, trimFile, scrapFile, trimQFile, scrapQFile, groupFile, fastaNames, qualNames, lines[0], qLines[0]);
+		
+		
 		//force parent to wait until all the processes are done
-		for (int i=0;i<processors;i++) { 
+		for (int i=0;i<processIDS.size();i++) { 
 			int temp = processIDS[i];
 			wait(&temp);
 		}
 		
+		//append files
+		for(int i=0;i<processIDS.size();i++){
+			m->mothurOut("Appending files from process " + processIDS[i]); m->mothurOutEndLine();
+			
+			m->appendFiles((trimFile + toString(processIDS[i]) + ".temp"), trimFile);
+			remove((trimFile + toString(processIDS[i]) + ".temp").c_str());
+			m->appendFiles((scrapFile + toString(processIDS[i]) + ".temp"), scrapFile);
+			remove((scrapFile + toString(processIDS[i]) + ".temp").c_str());
+			
+			m->mothurOut("Done with fasta files"); m->mothurOutEndLine();
+			
+			if(qFileName != ""){
+				m->appendFiles((trimQFile + toString(processIDS[i]) + ".temp"), trimQFile);
+				remove((trimQFile + toString(processIDS[i]) + ".temp").c_str());
+				m->appendFiles((scrapQFile + toString(processIDS[i]) + ".temp"), scrapQFile);
+				remove((scrapQFile + toString(processIDS[i]) + ".temp").c_str());
+			
+				m->mothurOut("Done with quality files"); m->mothurOutEndLine();
+			}
+			
+			m->appendFiles((groupFile + toString(processIDS[i]) + ".temp"), groupFile);
+			remove((groupFile + toString(processIDS[i]) + ".temp").c_str());
+			
+			m->mothurOut("Done with group file"); m->mothurOutEndLine();
+			
+			for (int j = 0; j < fastaNames.size(); j++) {
+				m->appendFiles((fastaNames[j] + toString(processIDS[i]) + ".temp"), fastaNames[j]);
+				remove((fastaNames[j] + toString(processIDS[i]) + ".temp").c_str());
+			}
+			
+			if(qFileName != ""){
+				for (int j = 0; j < qualNames.size(); j++) {
+					m->appendFiles((qualNames[j] + toString(processIDS[i]) + ".temp"), qualNames[j]);
+					remove((qualNames[j] + toString(processIDS[i]) + ".temp").c_str());
+				}
+			}
+			
+			if (allFiles) { m->mothurOut("Done with allfile"); m->mothurOutEndLine(); }
+		}
+	
 		return exitCommand;
 #endif		
 	}

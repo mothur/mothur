@@ -1155,7 +1155,90 @@ vector<vector<double> > MothurOut::binomial(int maxOrder){
 		exit(1);
 	}
 }
-
+/**************************************************************************************************/
+unsigned int MothurOut::fromBase36(string base36){
+	try {
+		unsigned int num = 0;
+		
+		map<char, int> converts;
+		converts['A'] = 0;
+		converts['a'] = 0;
+		converts['B'] = 1;
+		converts['b'] = 1;
+		converts['C'] = 2;
+		converts['c'] = 2;
+		converts['D'] = 3;
+		converts['d'] = 3;
+		converts['E'] = 4;
+		converts['e'] = 4;
+		converts['F'] = 5;
+		converts['f'] = 5;
+		converts['G'] = 6;
+		converts['g'] = 6;
+		converts['H'] = 7;
+		converts['h'] = 7;
+		converts['I'] = 8;
+		converts['i'] = 8;
+		converts['J'] = 9;
+		converts['j'] = 9;
+		converts['K'] = 10;
+		converts['k'] = 10;
+		converts['L'] = 11;
+		converts['l'] = 11;
+		converts['M'] = 12;
+		converts['m'] = 12;
+		converts['N'] = 13;
+		converts['n'] = 13;
+		converts['O'] = 14;
+		converts['o'] = 14;
+		converts['P'] = 15;
+		converts['p'] = 15;
+		converts['Q'] = 16;
+		converts['q'] = 16;
+		converts['R'] = 17;
+		converts['r'] = 17;
+		converts['S'] = 18;
+		converts['s'] = 18;
+		converts['T'] = 19;
+		converts['t'] = 19;
+		converts['U'] = 20;
+		converts['u'] = 20;
+		converts['V'] = 21;
+		converts['v'] = 21;
+		converts['W'] = 22;
+		converts['w'] = 22;
+		converts['X'] = 23;
+		converts['x'] = 23;
+		converts['Y'] = 24;
+		converts['y'] = 24;
+		converts['Z'] = 25;
+		converts['z'] = 25;
+		converts['0'] = 26;
+		converts['1'] = 27;
+		converts['2'] = 28;
+		converts['3'] = 29;
+		converts['4'] = 30;
+		converts['5'] = 31;
+		converts['6'] = 32;
+		converts['7'] = 33;
+		converts['8'] = 34;
+		converts['9'] = 35;		
+		
+		int i = 0;
+		while (i < base36.length()) {
+			char c = base36[i];
+			num = 36 * num + converts[c];
+			i++;
+		}
+		
+		return num;
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "fromBase36");
+		exit(1);
+	}
+}
 /***********************************************************************/
 
 int MothurOut::factorial(int num){

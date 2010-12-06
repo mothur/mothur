@@ -420,6 +420,10 @@ int Tree::populateNewTree(vector<Node>& oldtree, int node, int& index) {
 			tree[rc].setParent(index);
 			tree[lc].setParent(index);
 			
+			tree[index].setBranchLength(oldtree[node].getBranchLength());
+			tree[rc].setBranchLength(oldtree[oldtree[node].getLChild()].getBranchLength());
+			tree[lc].setBranchLength(oldtree[oldtree[node].getRChild()].getBranchLength());
+			
 			return (index++);
 		}else { //you are a leaf
 			int indexInNewTree = globaldata->gTreemap->getIndex(oldtree[node].getName());

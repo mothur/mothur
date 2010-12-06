@@ -301,8 +301,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
-		out << "Node\tOTU#\tIndVal" << endl;
-		
+				
 		string treeOutputDir = outputDir;
 		if (outputDir == "") {  treeOutputDir += m->hasPath(treefile);  }
 		string outputTreeFileName = treeOutputDir + m->getRootName(m->getSimpleName(treefile)) + "indicator.tre";
@@ -334,13 +333,6 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 			
 			if (sharedfile != "") {
 				vector< vector<SharedRAbundVector*> > groupings;
-				
-				/*groupings.resize(1);
-				groupings[0].push_back(lookup[0]);
-				groupings[0].push_back(lookup[1]);
-				groupings[0].push_back(lookup[2]);
-				groupings[0].push_back(lookup[3]);
-				groupings[0].push_back(lookup[4]);*/
 				
 				//get nodes that will be a valid grouping
 				//you are valid if you are not one of my descendants
@@ -444,15 +436,18 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 			
 			if (m->control_pressed) { out.close(); return 0; }
 			
+			
 			/******************************************************/
 			//output indicator values to table form + label tree  //
 			/*****************************************************/
+			out << (i+1) << '\t';
 			for (int j = 0; j < indicatorValues.size(); j++) {
 				
 				if (m->control_pressed) { out.close(); return 0; }
 				
-				out << (i+1) << '\t' << (j+1) << '\t' << indicatorValues[j] << endl;
+				out << indicatorValues[j] << '\t';
 			}
+			out << endl;
 			
 			T->tree[i].setLabel((i+1));
 			
@@ -587,14 +582,18 @@ map<int, float> IndicatorCommand::getLengthToLeaf(Tree*& T){
 	try {
 		map<int, float> dists;
 		
+		bool hasBranchLengths = false;
+		for (int i = 0; i < T->getNumNodes(); i++) { 
+			if (T->tree[i].getBranchLength() > 0.0) {  hasBranchLengths = true; break; }
+		}
+		
 		for (int i = 0; i < T->getNumNodes(); i++) {
 			
 			int lc = T->tree[i].getLChild();
 			int rc = T->tree[i].getRChild();
 				 
 			//if you have no branch length, set it then calc
-			if (T->tree[i].getBranchLength() <= 0.0) {
-				
+			if (!hasBranchLengths) {
 				if (lc == -1) { // you are a leaf
 					//if you are a leaf set you priliminary length to 1.0, this may adjust later
 					T->tree[i].setBranchLength(1.0);
@@ -605,8 +604,8 @@ map<int, float> IndicatorCommand::getLengthToLeaf(Tree*& T){
 					float rdist = dists[rc];
 					
 					float greater = ldist;
-					if (rdist > greater) { greater = rdist; dists[i] = ldist; }
-					else { dists[i] = rdist; }
+					if (rdist > greater) { greater = rdist; dists[i] = ldist + 1.0; }
+					else { dists[i] = rdist + 1.0; }
 					
 					//branch length = difference + 1
 					T->tree[lc].setBranchLength((abs(ldist-greater) + 1.0));
