@@ -179,6 +179,15 @@ int CatchAllCommand::execute() {
 		set<string> processedLabels;
 		set<string> userLabels = labels;
 		
+		string summaryfilename = outputDir + m->getRootName(m->getSimpleName(sabundfile)) + "catchall.summary";
+		summaryfilename = m->getFullPathName(summaryfilename);
+		outputNames.push_back(summaryfilename); outputTypes["summary"].push_back(summaryfilename);
+		
+		ofstream out;
+		m->openOutputFile(summaryfilename, out);	
+		
+		out << "label\tmodel\testimate\tlci\tuci" << endl;
+		
 		//for each label the user selected
 		while((sabund != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 
@@ -205,9 +214,9 @@ int CatchAllCommand::execute() {
 					outputNames.push_back(filename + "_BestModelsFits.csv"); outputTypes["csv"].push_back(filename + "_BestModelsFits.csv");
 					outputNames.push_back(filename + "_BubblePlot.csv"); outputTypes["csv"].push_back(filename + "_BubblePlot.csv");
 				
-					createSummaryFile(filename + "_BestModelsAnalysis.csv", sabund->getLabel());
+					createSummaryFile(filename + "_BestModelsAnalysis.csv", sabund->getLabel(), out);
 										
-					if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {remove(outputNames[i].c_str());	} delete read;  delete input; globaldata->ginput = NULL; delete sabund;  return 0; }
+					if (m->control_pressed) { out.close(); for (int i = 0; i < outputNames.size(); i++) {remove(outputNames[i].c_str());	} delete read;  delete input; globaldata->ginput = NULL; delete sabund;  return 0; }
 
 					processedLabels.insert(sabund->getLabel());
 					userLabels.erase(sabund->getLabel());
@@ -241,9 +250,9 @@ int CatchAllCommand::execute() {
 					outputNames.push_back(filename + "_BestModelsFits.csv"); outputTypes["csv"].push_back(filename + "_BestModelsFits.csv");
 					outputNames.push_back(filename + "_BubblePlot.csv"); outputTypes["csv"].push_back(filename + "_BubblePlot.csv");
 				
-					createSummaryFile(filename + "_BestModelsAnalysis.csv", sabund->getLabel());
+					createSummaryFile(filename + "_BestModelsAnalysis.csv", sabund->getLabel(), out);
 				
-					if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {remove(outputNames[i].c_str());	} delete read;  delete input; globaldata->ginput = NULL; delete sabund;  return 0; }
+					if (m->control_pressed) { out.close(); for (int i = 0; i < outputNames.size(); i++) {remove(outputNames[i].c_str());	} delete read;  delete input; globaldata->ginput = NULL; delete sabund;  return 0; }
 
 					processedLabels.insert(sabund->getLabel());
 					userLabels.erase(sabund->getLabel());
@@ -298,11 +307,12 @@ int CatchAllCommand::execute() {
 			outputNames.push_back(filename + "_BestModelsFits.csv"); outputTypes["csv"].push_back(filename + "_BestModelsFits.csv");
 			outputNames.push_back(filename + "_BubblePlot.csv"); outputTypes["csv"].push_back(filename + "_BubblePlot.csv");	
 			
-			createSummaryFile(filename + "_BestModelsAnalysis.csv", sabund->getLabel());
+			createSummaryFile(filename + "_BestModelsAnalysis.csv", sabund->getLabel(), out);
 			
 			delete sabund;
 		}
-
+		
+		out.close();
 		delete read;
 		delete input; globaldata->ginput = NULL;
 		
@@ -348,16 +358,8 @@ string CatchAllCommand::process(SAbundVector* sabund) {
 	}
 }
 //**********************************************************************************************************************
-string CatchAllCommand::createSummaryFile(string file1, string label) {
+int CatchAllCommand::createSummaryFile(string file1, string label, ofstream& out) {
 	try {
-		string filename = outputDir + m->getRootName(m->getSimpleName(sabundfile)) + label + ".catchall.summary";
-		filename = m->getFullPathName(filename);
-		outputNames.push_back(filename); outputTypes["summary"].push_back(filename);
-		
-		ofstream out;
-		m->openOutputFile(filename, out);
-		
-		out << "group\tmodel\testimate\tlci\tuci" << endl;
 		
 		ifstream in;
 		m->openInputFile(file1, in);
@@ -367,28 +369,56 @@ string CatchAllCommand::createSummaryFile(string file1, string label) {
 			string header = m->getline(in); m->gobble(in);
 			
 			int pos = header.find("Total Number of Observed Species =");
-			cout << pos << '\t' << header.length() << endl;	exit(1);
+			string numString = "";
+			
+			
 			if (pos == string::npos) { m->mothurOut("[ERROR]: cannot parse " + file1); m->mothurOutEndLine(); }
 			else {
 				//pos will be the position of the T in total, so we want to count to the position of =
 				pos += 34;
 				char c=header[pos];
-				string numString = "";
 				while (c != ','){
 					if (c != ' ') {
 						numString += c;
 					}
+					pos++;
+					c=header[pos];
+					
+					//sanity check
+					if (pos > header.length()) { m->mothurOut("Cannot find number of OTUs in " + file1); m->mothurOutEndLine(); in.close(); return 0; }
 				}
-				
-				int numOtus; convert(numString, numOtus);
-				cout << numOtus << endl;
 			}
+															  
+			string firstline = m->getline(in); m->gobble(in);
+			vector<string> values;
+			m->splitAtComma(firstline, values);
+			
+			values.pop_back(); //last value is always a blank string since the last character in the line is always a ','
+			
+			if (values.size() == 1) { //grab next line if firstline didn't have what you wanted
+				string secondline = m->getline(in); m->gobble(in);
+				values.clear();
+				m->splitAtComma(secondline, values);
+				
+				values.pop_back(); //last value is always a blank string since the last character in the line is always a ','
+			}
+			
+			if (values.size() == 1) { //still not what we wanted fill values with numOTUs
+				values.resize(8, "");
+				values[1] = "Sobs";
+				values[4] = numString;
+				values[6] = numString;
+				values[7] = numString;
+			}
+			
+			if (values.size() < 8) { values.resize(8, ""); }
+			
+			out << label << '\t' << values[1] << '\t' << values[4] << '\t' << values[6] << '\t' << values[7] << endl;
 		}
 		
 		in.close();
-		out.close();
 		
-		return filename;
+		return 0;
 		
 	}
 	catch(exception& e) {
