@@ -515,6 +515,9 @@ int SffInfoCommand::readHeader(ifstream& in, Header& header){
 			if (header.name.length() > header.nameLength) { header.name = header.name.substr(0, header.nameLength);  }
 			delete[] tempBuffer;
 			
+			//extract info from name
+			decodeName(header.timestamp, header.region, header.xy, header.name);
+			
 			/* Pad to 8 chars */
 			unsigned long int spotInFile = in.tellg();
 			unsigned long int spot = (spotInFile + 7)& ~7;
@@ -585,6 +588,43 @@ int SffInfoCommand::readSeqData(ifstream& in, seqRead& read, int numFlowReads, i
 	}
 }
 //**********************************************************************************************************************
+int SffInfoCommand::decodeName(string& timestamp, string& region, string& xy, string name) {
+	try {
+		
+		string time = name.substr(0, 6);
+		unsigned int timeNum = m->fromBase36(time);
+			
+		int q1 = timeNum / 60;
+		int sec = timeNum - 60 * q1;
+		int q2 = q1 / 60;
+		int minute = q1 - 60 * q2;
+		int q3 = q2 / 24;
+		int hr = q2 - 24 * q3;
+		int q4 = q3 / 32;
+		int day = q3 - 32 * q4;
+		int q5 = q4 / 13;
+		int mon = q4 - 13 * q5;
+		int year = 2000 + q5;
+		
+		timestamp = toString(year) + "_" + toString(mon) + "_" + toString(day) + "_" + toString(hr) + "_" + toString(minute) + "_" + toString(sec);
+		
+		region = name.substr(7, 2);
+		
+		string xyNum = name.substr(9);
+		unsigned int myXy = m->fromBase36(xyNum);
+		int x = myXy >> 12;
+		int y = myXy & 4095;
+		
+		xy = toString(x) + "_" + toString(y);
+			
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SffInfoCommand", "decodeName");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
 int SffInfoCommand::printCommonHeader(ofstream& out, CommonHeader& header) {
 	try {
 	
@@ -612,9 +652,9 @@ int SffInfoCommand::printHeader(ofstream& out, Header& header) {
 	try {
 		
 		out << ">" << header.name << endl;
-		out << "Run Prefix: " << endl;
-		out << "Region #:  " << endl;
-		out << "XY Location: " << endl << endl;
+		out << "Run Prefix: " << header.timestamp << endl;
+		out << "Region #:  " << header.region << endl;
+		out << "XY Location: " << header.xy << endl << endl;
 		
 		out << "Run Name:  " << endl;
 		out << "Analysis Name:  " << endl;
@@ -693,7 +733,7 @@ int SffInfoCommand::printFastaSeqData(ofstream& out, seqRead& read, Header& head
 			}
 		}
 		
-		out << ">" << header.name << endl;
+		out << ">" << header.name  << " xy=" << header.xy << endl;
 		out << seq << endl;
 		
 		return 0;
@@ -713,15 +753,15 @@ int SffInfoCommand::printQualSeqData(ofstream& out, seqRead& read, Header& heade
 				out << "0\t0\t0\t0";
 			}
 			else if((header.clipQualRight != 0) && ((header.clipQualRight-header.clipQualLeft) >= 0)){
-				out << ">" << header.name << " length=" << (header.clipQualRight-header.clipQualLeft) << endl;
+				out << ">" << header.name << " xy=" << header.xy << " length=" << (header.clipQualRight-header.clipQualLeft) << endl;
 				for (int i = (header.clipQualLeft-1); i < (header.clipQualRight-1); i++) {   out << read.qualScores[i] << '\t';	}
 			}
 			else{
-				out << ">" << header.name << " length=" << (header.clipQualRight-header.clipQualLeft) << endl;
+				out << ">" << header.name << " xy=" << header.xy << " length=" << (header.clipQualRight-header.clipQualLeft) << endl;
 				for (int i = (header.clipQualLeft-1); i < read.qualScores.size(); i++) {   out << read.qualScores[i] << '\t';	}			
 			}
 		}else{
-			out << ">" << header.name << " length=" << read.qualScores.size() << endl;
+			out << ">" << header.name << " xy=" << header.xy << " length=" << read.qualScores.size() << endl;
 			for (int i = 0; i < read.qualScores.size(); i++) {   out << read.qualScores[i] << '\t';  }
 		}
 		
@@ -739,7 +779,7 @@ int SffInfoCommand::printQualSeqData(ofstream& out, seqRead& read, Header& heade
 int SffInfoCommand::printFlowSeqData(ofstream& out, seqRead& read, Header& header) {
 	try {
 		
-		out << ">" << header.name << endl;
+		out << ">" << header.name << " xy=" << header.xy << endl;
 		for (int i = 0; i < read.flowgram.size(); i++) { out << setprecision(2) << (read.flowgram[i]/(float)100) << '\t';  }
 		out << endl;
 		

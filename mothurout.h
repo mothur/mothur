@@ -85,6 +85,7 @@ class MothurOut {
 		vector<vector<double> > binomial(int);
 		float ceilDist(float, int);
 		float roundDist(float, int);
+		unsigned int fromBase36(string);
 
 		int control_pressed;
 		bool executing;

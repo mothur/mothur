@@ -40,6 +40,9 @@ struct Header {
 	unsigned short clipAdapterLeft;
 	unsigned short clipAdapterRight;
 	string name; //length depends on nameLength
+	string timestamp;
+	string region;
+	string xy;
 	
 	Header() { headerLength=0; nameLength=0; numBases=0; clipQualLeft=0; clipQualRight=0; clipAdapterLeft=0; clipAdapterRight=0; }
 	~Header() { } 
@@ -80,6 +83,7 @@ private:
 	int readCommonHeader(ifstream&, CommonHeader&);
 	int readHeader(ifstream&, Header&);
 	int readSeqData(ifstream&, seqRead&, int, int);
+	int decodeName(string&, string&, string&, string);
 	
 	int printCommonHeader(ofstream&, CommonHeader&); 
 	int printHeader(ofstream&, Header&);
