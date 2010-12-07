@@ -16,7 +16,7 @@
 
 struct Compare {
 	int AA, AT, AG, AC,	TA, TT, TG, TC,	GA, GT, GG, GC,	CA, CT, CG, CC,	NA, NT, NG, NC, Ai, Ti, Gi, Ci, Ni, dA, dT, dG, dC;
-	string refName, queryName;
+	string refName, queryName, sequence;
 	double errorRate;
 	int weight, matches, mismatches, total;
 	
@@ -35,6 +35,7 @@ struct Compare {
 		mismatches = 0;
 		total = 0;
 		errorRate = 1.0000;
+		sequence = "";
 	}
 };
 
@@ -59,10 +60,10 @@ private:
 	void printErrorHeader();
 	void printErrorData(Compare);
 	
-	string queryFileName, referenceFileName, namesFileName, errorFileName, outputDir;
+	string queryFileName, referenceFileName, namesFileName, errorSummaryFileName, errorSeqFileName, outputDir;
 	double threshold;
 	int numRefs;
-	ofstream errorFile;
+	ofstream errorSummaryFile, errorSeqFile;
 	vector<string> outputNames;
 	map<string, vector<string> > outputTypes;
 	

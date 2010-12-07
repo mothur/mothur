@@ -149,10 +149,16 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			temp = validParameter.validFile(parameters, "threshold", false);	if (temp == "not found") { temp = "1.00"; }
 			convert(temp, threshold);  
 						
-			errorFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".errors";
-			m->openOutputFile(errorFileName, errorFile);
-			outputNames.push_back(errorFileName); outputTypes["error"].push_back(errorFileName);
+			errorSummaryFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.summary";
+			m->openOutputFile(errorSummaryFileName, errorSummaryFile);
+			outputNames.push_back(errorSummaryFileName); outputTypes["error.summary"].push_back(errorSummaryFileName);
 			printErrorHeader();
+
+			errorSeqFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.seq";
+			m->openOutputFile(errorSeqFileName, errorSeqFile);
+			outputNames.push_back(errorSeqFileName); outputTypes["error.seq"].push_back(errorSeqFileName);
+			printErrorHeader();
+			
 		}
 	}
 	catch(exception& e) {
@@ -181,7 +187,10 @@ void SeqErrorCommand::help(){
 
 //***************************************************************************************************************
 
-SeqErrorCommand::~SeqErrorCommand(){	errorFile.close();	}
+SeqErrorCommand::~SeqErrorCommand(){
+	errorSummaryFile.close();	
+	errorSeqFile.close();	
+}
 
 //***************************************************************************************************************
 
@@ -247,10 +256,10 @@ int SeqErrorCommand::execute(){
 		int total = 0;
 		
 		
-		string errorCountFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".count";
+		string errorCountFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.count";
 		ofstream errorCountFile;
 		m->openOutputFile(errorCountFileName, errorCountFile);
-		outputNames.push_back(errorCountFileName);  outputTypes["count"].push_back(errorCountFileName);
+		outputNames.push_back(errorCountFileName);  outputTypes["error.count"].push_back(errorCountFileName);
 		
 		m->mothurOut("Overall error rate:\t" + toString((double)(totalBases - totalMatches) / (double)totalBases) + "\n\n");
 		m->mothurOut("Errors\tSequences\n");
@@ -311,6 +320,7 @@ Compare SeqErrorCommand::getErrors(Sequence query, Sequence reference){
 		string q = query.getAligned();
 		string r = reference.getAligned();
 
+		
 		int started = 0;
 		Compare errors;
 
@@ -319,45 +329,45 @@ Compare SeqErrorCommand::getErrors(Sequence query, Sequence reference){
 				started = 1;
 				
 				if(q[i] == 'A'){
-					if(r[i] == 'A'){	errors.AA++;	errors.matches++;	}
-					if(r[i] == 'T'){	errors.AT++;	}
-					if(r[i] == 'G'){	errors.AG++;	}
-					if(r[i] == 'C'){	errors.AC++;	}
-					if(r[i] == '-'){	errors.Ai++;	}
+					if(r[i] == 'A'){	errors.AA++;	errors.matches++;	errors.sequence += 'm';	}
+					if(r[i] == 'T'){	errors.AT++;	errors.sequence += 's';	}
+					if(r[i] == 'G'){	errors.AG++;	errors.sequence += 's';	}
+					if(r[i] == 'C'){	errors.AC++;	errors.sequence += 's';	}
+					if(r[i] == '-'){	errors.Ai++;	errors.sequence += 'i';	}
 				}
 				else if(q[i] == 'T'){
-					if(r[i] == 'A'){	errors.TA++;	}
-					if(r[i] == 'T'){	errors.TT++;	errors.matches++;	}
-					if(r[i] == 'G'){	errors.TG++;	}
-					if(r[i] == 'C'){	errors.TC++;	}
-					if(r[i] == '-'){	errors.Ti++;	}
+					if(r[i] == 'A'){	errors.TA++;	errors.sequence += 's';	}
+					if(r[i] == 'T'){	errors.TT++;	errors.matches++;	errors.sequence += 'm';	}
+					if(r[i] == 'G'){	errors.TG++;	errors.sequence += 's';	}
+					if(r[i] == 'C'){	errors.TC++;	errors.sequence += 's';	}
+					if(r[i] == '-'){	errors.Ti++;	errors.sequence += 'i';	}
 				}
 				else if(q[i] == 'G'){
-					if(r[i] == 'A'){	errors.GA++;	}
-					if(r[i] == 'T'){	errors.GT++;	}
-					if(r[i] == 'G'){	errors.GG++;	errors.matches++;	}
-					if(r[i] == 'C'){	errors.GC++;	}
-					if(r[i] == '-'){	errors.Gi++;	}
+					if(r[i] == 'A'){	errors.GA++;	errors.sequence += 's';	}
+					if(r[i] == 'T'){	errors.GT++;	errors.sequence += 's';	}
+					if(r[i] == 'G'){	errors.GG++;	errors.matches++;	errors.sequence += 'm';	}
+					if(r[i] == 'C'){	errors.GC++;	errors.sequence += 's';	}
+					if(r[i] == '-'){	errors.Gi++;	errors.sequence += 'i';	}
 				}
 				else if(q[i] == 'C'){
-					if(r[i] == 'A'){	errors.CA++;	}
-					if(r[i] == 'T'){	errors.CT++;	}
-					if(r[i] == 'G'){	errors.CG++;	}
-					if(r[i] == 'C'){	errors.CC++;	errors.matches++;	}
-					if(r[i] == '-'){	errors.Ci++;	}
+					if(r[i] == 'A'){	errors.CA++;	errors.sequence += 's';	}
+					if(r[i] == 'T'){	errors.CT++;	errors.sequence += 's';	}
+					if(r[i] == 'G'){	errors.CG++;	errors.sequence += 's';	}
+					if(r[i] == 'C'){	errors.CC++;	errors.matches++;	errors.sequence += 'm';	}
+					if(r[i] == '-'){	errors.Ci++;	errors.sequence += 'i';	}
 				}
 				else if(q[i] == 'N'){
-					if(r[i] == 'A'){	errors.NA++;	}
-					if(r[i] == 'T'){	errors.NT++;	}
-					if(r[i] == 'G'){	errors.NG++;	}
-					if(r[i] == 'C'){	errors.NC++;	}
-					if(r[i] == '-'){	errors.Ni++;	}
+					if(r[i] == 'A'){	errors.NA++;	errors.sequence += 'a';	}
+					if(r[i] == 'T'){	errors.NT++;	errors.sequence += 'a';	}
+					if(r[i] == 'G'){	errors.NG++;	errors.sequence += 'a';	}
+					if(r[i] == 'C'){	errors.NC++;	errors.sequence += 'a';	}
+					if(r[i] == '-'){	errors.Ni++;	errors.sequence += 'a';	}
 				}
 				else if(q[i] == '-' && r[i] != '-'){
-					if(r[i] == 'A'){	errors.dA++;	}
-					if(r[i] == 'T'){	errors.dT++;	}
-					if(r[i] == 'G'){	errors.dG++;	}
-					if(r[i] == 'C'){	errors.dC++;	}
+					if(r[i] == 'A'){	errors.dA++;	errors.sequence += 'd';	}
+					if(r[i] == 'T'){	errors.dT++;	errors.sequence += 'd';	}
+					if(r[i] == 'G'){	errors.dG++;	errors.sequence += 'd';	}
+					if(r[i] == 'C'){	errors.dC++;	errors.sequence += 'd';	}
 				}
 				errors.total++;	
 				
@@ -410,12 +420,12 @@ map<string, int> SeqErrorCommand::getWeights(){
 
 void SeqErrorCommand::printErrorHeader(){
 	try {
-		errorFile << "query\treference\tweight\t";
-		errorFile << "AA\tAT\tAG\tAC\tTA\tTT\tTG\tTC\tGA\tGT\tGG\tGC\tCA\tCT\tCG\tCC\tNA\tNT\tNG\tNC\tAi\tTi\tGi\tCi\tNi\tdA\tdT\tdG\tdC\t";
-		errorFile << "insertions\tdeletions\tsubstitutions\tambig\tmatches\tmismatches\ttotal\terror\n";
+		errorSummaryFile << "query\treference\tweight\t";
+		errorSummaryFile << "AA\tAT\tAG\tAC\tTA\tTT\tTG\tTC\tGA\tGT\tGG\tGC\tCA\tCT\tCG\tCC\tNA\tNT\tNG\tNC\tAi\tTi\tGi\tCi\tNi\tdA\tdT\tdG\tdC\t";
+		errorSummaryFile << "insertions\tdeletions\tsubstitutions\tambig\tmatches\tmismatches\ttotal\terror\n";
 		
-		errorFile << setprecision(6);
-		errorFile.setf(ios::fixed);
+		errorSummaryFile << setprecision(6);
+		errorSummaryFile.setf(ios::fixed);
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SeqErrorCommand", "printErrorHeader");
@@ -427,21 +437,22 @@ void SeqErrorCommand::printErrorHeader(){
 
 void SeqErrorCommand::printErrorData(Compare error){
 	try {
-		errorFile << error.queryName << '\t' << error.refName << '\t' << error.weight << '\t';
-		errorFile << error.AA << '\t' << error.AT << '\t' << error.AG << '\t' << error.AC << '\t';
-		errorFile << error.TA << '\t' << error.TT << '\t' << error.TG << '\t' << error.TC << '\t';
-		errorFile << error.GA << '\t' << error.GT << '\t' << error.GG << '\t' << error.GC << '\t';
-		errorFile << error.CA << '\t' << error.CT << '\t' << error.CG << '\t' << error.CC << '\t';
-		errorFile << error.NA << '\t' << error.NT << '\t' << error.NG << '\t' << error.NC << '\t';
-		errorFile << error.Ai << '\t' << error.Ti << '\t' << error.Gi << '\t' << error.Ci << '\t' << error.Ni << '\t' ;
-		errorFile << error.dA << '\t' << error.dT << '\t' << error.dG << '\t' << error.dC << '\t';
+		errorSummaryFile << error.queryName << '\t' << error.refName << '\t' << error.weight << '\t';
+		errorSummaryFile << error.AA << '\t' << error.AT << '\t' << error.AG << '\t' << error.AC << '\t';
+		errorSummaryFile << error.TA << '\t' << error.TT << '\t' << error.TG << '\t' << error.TC << '\t';
+		errorSummaryFile << error.GA << '\t' << error.GT << '\t' << error.GG << '\t' << error.GC << '\t';
+		errorSummaryFile << error.CA << '\t' << error.CT << '\t' << error.CG << '\t' << error.CC << '\t';
+		errorSummaryFile << error.NA << '\t' << error.NT << '\t' << error.NG << '\t' << error.NC << '\t';
+		errorSummaryFile << error.Ai << '\t' << error.Ti << '\t' << error.Gi << '\t' << error.Ci << '\t' << error.Ni << '\t' ;
+		errorSummaryFile << error.dA << '\t' << error.dT << '\t' << error.dG << '\t' << error.dC << '\t';
 		
-		errorFile << error.Ai + error.Ti + error.Gi + error.Ci << '\t';			//insertions
-		errorFile << error.dA + error.dT + error.dG + error.dC << '\t';			//deletions
-		errorFile << error.mismatches - (error.Ai + error.Ti + error.Gi + error.Ci) - (error.dA + error.dT + error.dG + error.dC) - (error.NA + error.NT + error.NG + error.NC + error.Ni) << '\t';	//substitutions
-		errorFile << error.NA + error.NT + error.NG + error.NC + error.Ni << '\t';	//ambiguities
-		errorFile << error.matches << '\t' << error.mismatches << '\t' << error.total << '\t' << error.errorRate << endl;
+		errorSummaryFile << error.Ai + error.Ti + error.Gi + error.Ci << '\t';			//insertions
+		errorSummaryFile << error.dA + error.dT + error.dG + error.dC << '\t';			//deletions
+		errorSummaryFile << error.mismatches - (error.Ai + error.Ti + error.Gi + error.Ci) - (error.dA + error.dT + error.dG + error.dC) - (error.NA + error.NT + error.NG + error.NC + error.Ni) << '\t';	//substitutions
+		errorSummaryFile << error.NA + error.NT + error.NG + error.NC + error.Ni << '\t';	//ambiguities
+		errorSummaryFile << error.matches << '\t' << error.mismatches << '\t' << error.total << '\t' << error.errorRate << endl;
 		
+		errorSeqFile << '>' << error.queryName << "\tref:" << error.refName << '\n' << error.sequence << endl;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SeqErrorCommand", "printErrorData");
