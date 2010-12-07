@@ -337,7 +337,7 @@ int TrimSeqsCommand::execute(){
 			outputNames.push_back(groupFile); outputTypes["group"].push_back(groupFile);
 			getOligos(fastaFileNames, qualFileNames);
 		}
-		cout << fastaFileNames.size() << '\t' << qualFileNames.size() << endl;
+		
 		vector<unsigned long int> fastaFilePos;
 		vector<unsigned long int> qFilePos;
 		
@@ -362,7 +362,6 @@ int TrimSeqsCommand::execute(){
 		if (m->control_pressed) {  return 0; }			
 										
 		for(int i=0;i<fastaFileNames.size();i++){
-			cout << fastaFileNames[i] << endl;
 			
 			if (m->isBlank(fastaFileNames[i])) {  remove(fastaFileNames[i].c_str());	}
 			else if (filesToRemove.count(fastaFileNames[i]) > 0) { remove(fastaFileNames[i].c_str()); }
@@ -397,7 +396,6 @@ int TrimSeqsCommand::execute(){
 		
 		if(qFileName != ""){
 			for(int i=0;i<qualFileNames.size();i++){
-				cout << qualFileNames[i] << endl;
 				if (m->isBlank(qualFileNames[i])) {  remove(qualFileNames[i].c_str());	}
 				else if (filesToRemove.count(qualFileNames[i]) > 0) {  remove(qualFileNames[i].c_str()); }
 				else {
@@ -860,7 +858,7 @@ void TrimSeqsCommand::getOligos(vector<string>& outFASTAVec, vector<string>& out
 		//int indexPrimer = 0;
 		
 		while(!inOligos.eof()){
-			inOligos >> type;
+			inOligos >> type; m->gobble(inOligos);
 		 			
 			if(type[0] == '#'){
 				while (!inOligos.eof())	{	char c = inOligos.get(); if (c == 10 || c == 13){	break;	}	} // get rest of line if there's any crap there
@@ -891,29 +889,29 @@ void TrimSeqsCommand::getOligos(vector<string>& outFASTAVec, vector<string>& out
 					map<string, int>::iterator itPrime = primers.find(oligo);
 					if (itPrime != primers.end()) { m->mothurOut("primer " + oligo + " is in your oligos file already."); m->mothurOutEndLine();  }
 					
-					primers[oligo]=index; index++;
-					groupVector.push_back(group);
+						primers[oligo]=index; index++;
+						groupVector.push_back(group);
 					
-					if(allFiles){
-						outFASTAVec.push_back((outputDir + m->getRootName(m->getSimpleName(fastaFile)) + group + ".fasta"));
-						if(qFileName != ""){
-							outQualVec.push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) + group + ".qual"));
-						}
-						if (group == "") { //if there is not a group for this primer, then this file will not get written to, but we add it to keep the indexes correct
-							filesToRemove.insert((outputDir + m->getRootName(m->getSimpleName(fastaFile)) + group + ".fasta"));
+						if(allFiles){
+							outFASTAVec.push_back((outputDir + m->getRootName(m->getSimpleName(fastaFile)) + group + ".fasta"));
 							if(qFileName != ""){
-								filesToRemove.insert((outputDir + m->getRootName(m->getSimpleName(qFileName)) + group + ".qual"));
+								outQualVec.push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) + group + ".qual"));
 							}
-						}else {
-							outputNames.push_back((outputDir + m->getRootName(m->getSimpleName(fastaFile)) + group + ".fasta"));
-							outputTypes["fasta"].push_back((outputDir + m->getRootName(m->getSimpleName(fastaFile)) + group + ".fasta"));
-							if(qFileName != ""){
-								outputNames.push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) + group + ".qual"));
-								outputTypes["qual"].push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) + group + ".qual"));
-							}							
+							if (group == "") { //if there is not a group for this primer, then this file will not get written to, but we add it to keep the indexes correct
+								filesToRemove.insert((outputDir + m->getRootName(m->getSimpleName(fastaFile)) + group + ".fasta"));
+								if(qFileName != ""){
+									filesToRemove.insert((outputDir + m->getRootName(m->getSimpleName(qFileName)) + group + ".qual"));
+								}
+							}else {
+								outputNames.push_back((outputDir + m->getRootName(m->getSimpleName(fastaFile)) + group + ".fasta"));
+								outputTypes["fasta"].push_back((outputDir + m->getRootName(m->getSimpleName(fastaFile)) + group + ".fasta"));
+								if(qFileName != ""){
+									outputNames.push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) + group + ".qual"));
+									outputTypes["qual"].push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) + group + ".qual"));
+								}							
+							}
 						}
-					}
-
+					
 				}
 				else if(type == "REVERSE"){
 					Sequence oligoRC("reverse", oligo);
@@ -927,19 +925,20 @@ void TrimSeqsCommand::getOligos(vector<string>& outFASTAVec, vector<string>& out
 					map<string, int>::iterator itBar = barcodes.find(oligo);
 					if (itBar != barcodes.end()) { m->mothurOut("barcode " + oligo + " is in your oligos file already."); m->mothurOutEndLine();  }
 					
-					barcodes[oligo]=index; index++;
-					groupVector.push_back(group);
+						barcodes[oligo]=index; index++;
+						groupVector.push_back(group);
+						
+						if(allFiles){
+							outputNames.push_back((outputDir + m->getRootName(m->getSimpleName(fastaFile)) + group + ".fasta"));
+							outputNames.push_back((outputDir + m->getRootName(m->getSimpleName(fastaFile)) + group + ".fasta"));
+							outFASTAVec.push_back((outputDir + m->getRootName(m->getSimpleName(fastaFile)) + group + ".fasta"));
+							if(qFileName != ""){
+								outQualVec.push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) + group + ".qual"));
+								outputNames.push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) + group + ".qual"));
+								outputTypes["qual"].push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) + group + ".qual"));
+							}							
+						}
 					
-					if(allFiles){
-						outputNames.push_back((outputDir + m->getRootName(m->getSimpleName(fastaFile)) + group + ".fasta"));
-						outputNames.push_back((outputDir + m->getRootName(m->getSimpleName(fastaFile)) + group + ".fasta"));
-						outFASTAVec.push_back((outputDir + m->getRootName(m->getSimpleName(fastaFile)) + group + ".fasta"));
-						if(qFileName != ""){
-							outQualVec.push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) + group + ".qual"));
-							outputNames.push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) + group + ".qual"));
-							outputTypes["qual"].push_back((outputDir + m->getRootName(m->getSimpleName(qFileName)) + group + ".qual"));
-						}							
-					}
 				}else{	m->mothurOut(type + " is not recognized as a valid type. Choices are forward, reverse, and barcode. Ignoring " + oligo + "."); m->mothurOutEndLine();  }
 			}
 			m->gobble(inOligos);
