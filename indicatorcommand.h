@@ -47,7 +47,7 @@ private:
 	set<string> getDescendantList(Tree*&, int, map<int, set<string> >, map<int, set<int> >&);
 	vector<float> getValues(vector< vector<SharedRAbundVector*> >&);
 	vector<float> getValues(vector< vector<SharedRAbundFloatVector*> >&);
-	map<int, float> getLengthToLeaf(Tree*&);
+	map<int, float> getDistToRoot(Tree*&);
 	
 };
 
