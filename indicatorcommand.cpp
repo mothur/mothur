@@ -318,7 +318,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 		
 		//you need the distances to leaf to decide grouping below
 		//this will also set branch lengths if the tree does not include them
-		map<int, float> distToLeaf = getLengthToLeaf(T);
+		map<int, float> distToRoot = getDistToRoot(T);
 			
 		//for each node
 		for (int i = T->getNumLeaves(); i < T->getNumNodes(); i++) {
@@ -336,9 +336,8 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				
 				//get nodes that will be a valid grouping
 				//you are valid if you are not one of my descendants
-				//AND your distToLeaf is <= mine
-				//AND your distToLeaf is >= my smallest childs
-				//AND you were not added as part of a larger groupings
+				//AND your distToRoot is >= mine
+				//AND you were not added as part of a larger grouping. Largest nodes are added first.
 				
 				set<string> groupsAlreadyAdded;
 				//create a grouping with my grouping
@@ -358,7 +357,9 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				
 				
 				for (int j = (T->getNumNodes()-1); j >= 0; j--) {
-					if ((descendantNodes[i].count(j) == 0) && (distToLeaf[j] <= distToLeaf[i]) && ((distToLeaf[j] >= distToLeaf[T->tree[i].getLChild()]) || (distToLeaf[j] >= distToLeaf[T->tree[i].getRChild()]))) {
+	
+					
+					if ((descendantNodes[i].count(j) == 0) && (distToRoot[j] >= distToRoot[i])) { 
 						vector<SharedRAbundVector*> subset;
 						int count = 0;
 						int doneCount = nodeToDescendants[j].size();
@@ -377,10 +378,10 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 					}
 				}
 				
-				if (groupsAlreadyAdded.size() != lookup.size()) { cout << i << '\t' << groupsAlreadyAdded.size() << '\t' << lookup.size() << endl; m->mothurOut("[ERROR]: could not make proper groupings."); m->mothurOutEndLine(); }
-				for (int k = 0; k < lookup.size(); k++) {
-					if (groupsAlreadyAdded.count(lookup[k]->getGroup()) == 0) { cout << lookup[k]->getGroup() << endl; }
-				}
+				if (groupsAlreadyAdded.size() != lookup.size()) {  m->mothurOut("[ERROR]: could not make proper groupings."); m->mothurOutEndLine(); }
+				//for (int k = 0; k < lookup.size(); k++) {
+				//	if (groupsAlreadyAdded.count(lookup[k]->getGroup()) == 0) { cout << lookup[k]->getGroup() << endl; }
+				//}
 				
 				indicatorValues = getValues(groupings);
 				
@@ -389,9 +390,8 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				
 				//get nodes that will be a valid grouping
 				//you are valid if you are not one of my descendants
-				//AND your distToLeaf is <= mine
-				//AND your distToLeaf is >= my smallest childs
-				//AND you were not added as part of a larger grouping
+				//AND your distToRoot is >= mine
+				//AND you were not added as part of a larger grouping. Largest nodes are added first.
 				
 				set<string> groupsAlreadyAdded;
 				//create a grouping with my grouping
@@ -410,7 +410,7 @@ int IndicatorCommand::GetIndicatorSpecies(Tree*& T){
 				if (subset.size() != 0) { groupings.push_back(subset); }
 				
 				for (int j = (T->getNumNodes()-1); j >= 0; j--) {
-					if ((descendantNodes[i].count(j) == 0) && (distToLeaf[j] <= distToLeaf[i]) && ((distToLeaf[j] >= distToLeaf[T->tree[i].getLChild()]) || (distToLeaf[j] >= distToLeaf[T->tree[i].getRChild()]))) {
+					if ((descendantNodes[i].count(j) == 0) && (distToRoot[j] >= distToRoot[i])) {
 						vector<SharedRAbundFloatVector*> subset;
 						int count = 0;
 						int doneCount = nodeToDescendants[j].size();
@@ -576,9 +576,9 @@ vector<float> IndicatorCommand::getValues(vector< vector<SharedRAbundVector*> >&
 	}
 }
 //**********************************************************************************************************************
-//you need the distances to leaf to decide groupings
+//you need the distances to root to decide groupings
 //this will also set branch lengths if the tree does not include them
-map<int, float> IndicatorCommand::getLengthToLeaf(Tree*& T){
+map<int, float> IndicatorCommand::getDistToRoot(Tree*& T){
 	try {
 		map<int, float> dists;
 		
@@ -587,13 +587,13 @@ map<int, float> IndicatorCommand::getLengthToLeaf(Tree*& T){
 			if (T->tree[i].getBranchLength() > 0.0) {  hasBranchLengths = true; break; }
 		}
 		
-		for (int i = 0; i < T->getNumNodes(); i++) {
-			
-			int lc = T->tree[i].getLChild();
-			int rc = T->tree[i].getRChild();
-				 
-			//if you have no branch length, set it then calc
-			if (!hasBranchLengths) {
+		//set branchlengths if needed
+		if (!hasBranchLengths) { 
+			for (int i = 0; i < T->getNumNodes(); i++) {
+				
+				int lc = T->tree[i].getLChild();
+				int rc = T->tree[i].getRChild();
+				
 				if (lc == -1) { // you are a leaf
 					//if you are a leaf set you priliminary length to 1.0, this may adjust later
 					T->tree[i].setBranchLength(1.0);
@@ -604,28 +604,32 @@ map<int, float> IndicatorCommand::getLengthToLeaf(Tree*& T){
 					float rdist = dists[rc];
 					
 					float greater = ldist;
-					if (rdist > greater) { greater = rdist; dists[i] = ldist + 1.0; }
+					if (rdist > greater) { greater = rdist; dists[i] = ldist + 1.0;}
 					else { dists[i] = rdist + 1.0; }
+					
 					
 					//branch length = difference + 1
 					T->tree[lc].setBranchLength((abs(ldist-greater) + 1.0));
 					T->tree[rc].setBranchLength((abs(rdist-greater) + 1.0));
 				}
-				
-			}else{
-				if (lc == -1) { dists[i] = T->tree[i].getBranchLength(); }
-				else { //smaller of my two children distances plus my branch length
-					//look at your children's length to leaf
-					float ldist = dists[lc];
-					float rdist = dists[rc];
-					
-					float smaller = ldist;
-					if (rdist < smaller) { smaller = rdist;  }
-					
-					dists[i] = smaller + T->tree[i].getBranchLength(); 
+			}
+		}
+			
+		dists.clear();
+		
+		for (int i = 0; i < T->getNumNodes(); i++) {
+			
+			double sum = 0.0;
+			int index = i;
+			
+			while(T->tree[index].getParent() != -1){
+				if (T->tree[index].getBranchLength() != -1) {
+					sum += abs(T->tree[index].getBranchLength()); 
 				}
+				index = T->tree[index].getParent();
 			}
 			
+			dists[i] = sum;
 		}
 		
 		return dists;

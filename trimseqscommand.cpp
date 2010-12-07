@@ -360,12 +360,12 @@ int TrimSeqsCommand::execute(){
 		#endif
 		
 		if (m->control_pressed) {  return 0; }			
-		cout << "done with driver " << endl;									
+										
 		for(int i=0;i<fastaFileNames.size();i++){
 			cout << fastaFileNames[i] << endl;
 			
-			if (m->isBlank(fastaFileNames[i])) { cout << fastaFileNames[i] << " was blank" << endl; remove(fastaFileNames[i].c_str());	}
-			else if (filesToRemove.count(fastaFileNames[i]) > 0) { cout << fastaFileNames[i] << " was on the remove list" << endl; remove(fastaFileNames[i].c_str()); }
+			if (m->isBlank(fastaFileNames[i])) {  remove(fastaFileNames[i].c_str());	}
+			else if (filesToRemove.count(fastaFileNames[i]) > 0) { remove(fastaFileNames[i].c_str()); }
 			else {
 				ifstream inFASTA;
 				string seqName;
@@ -382,7 +382,7 @@ int TrimSeqsCommand::execute(){
 						if(itCombo->second == i){	thisGroup = itCombo->first;	combos.erase(itCombo);  break;  }
 					}
 				}else{ thisGroup = groupVector[i]; }
-				cout << thisGroup << '\t' << i  << '\t' << comboStarts << endl;	
+					
 				while(!inFASTA.eof()){
 					if(inFASTA.get() == '>'){
 						inFASTA >> seqName;
@@ -394,12 +394,12 @@ int TrimSeqsCommand::execute(){
 				inFASTA.close();
 			}
 		}
-	cout << "done with fastaFileNames " << endl;		
+		
 		if(qFileName != ""){
 			for(int i=0;i<qualFileNames.size();i++){
 				cout << qualFileNames[i] << endl;
-				if (m->isBlank(qualFileNames[i])) { cout << qualFileNames[i] << " was blank" << endl; remove(qualFileNames[i].c_str());	}
-				else if (filesToRemove.count(qualFileNames[i]) > 0) { cout << qualFileNames[i] << " was on the remove list" << endl; remove(qualFileNames[i].c_str()); }
+				if (m->isBlank(qualFileNames[i])) {  remove(qualFileNames[i].c_str());	}
+				else if (filesToRemove.count(qualFileNames[i]) > 0) {  remove(qualFileNames[i].c_str()); }
 				else {
 					ifstream inQual;
 					string seqName;
@@ -419,7 +419,7 @@ int TrimSeqsCommand::execute(){
 				}
 			}
 		}
-		cout << "done with qualFileNames " << endl;
+		
 		
 		if (m->control_pressed) { 
 			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
@@ -460,8 +460,6 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 		}
 		
 		ofstream outGroups;
-		//vector<ofstream*> fastaFileNames;
-		//vector<ofstream*> qualFileNames;
 		
 		if (oligoFile != "") {		
 			m->openOutputFile(groupFile, outGroups);   
@@ -753,7 +751,7 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 				}
 			}
 			
-			if (allFiles) { m->mothurOut("Done with allfile"); m->mothurOutEndLine(); }
+			if (allFiles) { m->mothurOut("Done with allfiles"); m->mothurOutEndLine(); }
 		}
 	
 		return exitCommand;
