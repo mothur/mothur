@@ -367,11 +367,17 @@ int RemoveOtusCommand::processList(ListVector*& list, GroupMap*& groupMap, ofstr
 				if (m->inUsersGroups(group, Groups)) {  removeBin = true; }
 				groupFileOutput += individual + "\t" + group + "\n";				
 				
-				//if there are no sequences from the groups we want to remove in this bin add to new list, output to groupfile
-				newList.push_back(binnames);	
-				outGroup << groupFileOutput;
+				if (!removeBin) {
+					//if there are no sequences from the groups we want to remove in this bin add to new list, output to groupfile
+					newList.push_back(binnames);	
+					outGroup << groupFileOutput;
+				}else {
+					numOtus++;
+				}
+			}else {
 				numOtus++;
 			}
+			
 		}
 		
 		//print new listvector

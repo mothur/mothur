@@ -245,6 +245,7 @@ void SubSampleCommand::help(){
 	try {
 		m->mothurOut("The sub.sample command is designed to be used as a way to normalize your data, or create a smaller set from your original set.\n");
 		m->mothurOut("The sub.sample command parameters are fasta, name, list, group, rabund, sabund, shared, groups, size and label.  You must provide a fasta, list, sabund, rabund or shared file as an input file.\n");
+		m->mothurOut("The namefile is only used with the fasta file, not with the listfile, because the list file should contain all sequences.\n");
 		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included. The group names are separated by dashes.\n");
 		m->mothurOut("The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n");
 		m->mothurOut("The size parameter allows you indicate the size of your subsample.\n");

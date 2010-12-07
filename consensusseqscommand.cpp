@@ -135,7 +135,7 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(string option)  {
 			
 			listfile = validParameter.validFile(parameters, "list", true);
 			if (listfile == "not open") { abort = true; }
-			else if (listfile == "not found") { listfile = ""; m->mothurOut("list is a required parameter for the consensus.seqs command."); m->mothurOutEndLine(); abort = true;  }	
+			else if (listfile == "not found") { listfile = "";  }	
 			
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
@@ -158,7 +158,7 @@ ConsensusSeqsCommand::ConsensusSeqsCommand(string option)  {
 
 void ConsensusSeqsCommand::help(){
 	try {
-		m->mothurOut("The consensus.seqs command reads a fastafile and listfile and creates a consensus sequence for each otu. Sequences must be aligned.\n");
+		m->mothurOut("The consensus.seqs command can be used in 2 ways: create a consensus sequence from a fastafile, or with a listfile create a consensus sequence for each otu. Sequences must be aligned.\n");
 		m->mothurOut("The consensus.seqs command parameters are fasta, list, name and label.\n");
 		m->mothurOut("The fasta parameter allows you to enter the fasta file containing your sequences, and is required. \n");
 		m->mothurOut("The list parameter allows you to enter a your list file. \n");
@@ -194,84 +194,175 @@ int ConsensusSeqsCommand::execute(){
 		
 		if (m->control_pressed) { return 0; }
 		
-		InputData* input = new InputData(listfile, "list");
-		ListVector* list = input->getListVector();
-		
-		string lastLabel = list->getLabel();
-		set<string> processedLabels;
-		set<string> userLabels = labels;
+				
+		if (listfile == "") {
+			
+			ofstream outSummary;
+			string outputSummaryFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "cons.summary";
+			m->openOutputFile(outputSummaryFile, outSummary);
+			outSummary.setf(ios::fixed, ios::floatfield); outSummary.setf(ios::showpoint);
+			outputNames.push_back(outputSummaryFile); outputTypes["summary"].push_back(outputSummaryFile);
+			
+			ofstream outFasta;
+			string outputFastaFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "cons.fasta";
+			m->openOutputFile(outputFastaFile, outFasta);
+			outputNames.push_back(outputFastaFile); outputTypes["fasta"].push_back(outputFastaFile);
+			
+			vector<string> seqs;
+			int seqLength = 0;
+			for (map<string, string>::iterator it = nameMap.begin(); it != nameMap.end(); it++) {
+				
+				if (m->control_pressed) { outSummary.close(); outFasta.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+				
+				string seq = fastaMap[it->second];
+				seqs.push_back(seq);
+				
+				if (seqLength == 0) { seqLength = seq.length(); }
+				else if (seqLength != seq.length()) { m->mothurOut("[ERROR]: sequence are not the same length, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
 
-		//as long as you are not at the end of the file or done wih the lines you want
-		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
-			
-			if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } delete list; delete input;  return 0;  }
-			
-			if(allLines == 1 || labels.count(list->getLabel()) == 1){			
-				
-				m->mothurOut(list->getLabel()); m->mothurOutEndLine();
-				
-				processList(list);
-				
-				processedLabels.insert(list->getLabel());
-				userLabels.erase(list->getLabel());
 			}
 			
-			if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = list->getLabel();
+			vector< vector<float> > percentages; percentages.resize(5);
+			for (int j = 0; j < percentages.size(); j++) { percentages[j].resize(seqLength, 0.0); }
+			
+			string consSeq = "";
+			//get counts
+			for (int j = 0; j < seqLength; j++) {
 				
-				delete list; 
+				if (m->control_pressed) { outSummary.close(); outFasta.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
+				
+				vector<int> counts; counts.resize(5, 0); //A,T,G,C,Gap
+				int numDots = 0;
+				
+				for (int i = 0; i < seqs.size(); i++) {
+					
+					if (seqs[i][j] == '.') { numDots++; }
+					
+					char base = toupper(seqs[i][j]);
+					if (base == 'A') { counts[0]++; }
+					else if (base == 'T') { counts[1]++; }
+					else if (base == 'G') { counts[2]++; }
+					else if (base == 'C') { counts[3]++; }
+					else { counts[4]++; }
+				}
+				
+				char conBase = '.';
+				if (numDots != seqs.size()) { conBase = getBase(counts); }
+				
+				consSeq += conBase;
+				
+				percentages[0][j] = counts[0] / (float) seqs.size();
+				percentages[1][j] = counts[1] / (float) seqs.size();
+				percentages[2][j] = counts[2] / (float) seqs.size();
+				percentages[3][j] = counts[3] / (float) seqs.size();
+				percentages[4][j] = counts[4] / (float) seqs.size();
+				
+			}
+			
+			outSummary << "A" << '\t';
+			for (int j = 0; j < seqLength; j++) { outSummary << percentages[0][j] << '\t'; }
+			outSummary << endl;
+			outSummary << "T" << '\t';
+			for (int j = 0; j < seqLength; j++) { outSummary << percentages[1][j] << '\t'; }
+			outSummary << endl;
+			outSummary << "G" << '\t';
+			for (int j = 0; j < seqLength; j++) { outSummary << percentages[2][j] << '\t'; }
+			outSummary << endl;
+			outSummary << "C" << '\t';
+			for (int j = 0; j < seqLength; j++) { outSummary << percentages[3][j] << '\t'; }
+			outSummary << endl;
+			outSummary << "Gap" << '\t';
+			for (int j = 0; j < seqLength; j++) { outSummary << percentages[4][j] << '\t'; }
+			outSummary << endl;
+			
+				
+			outFasta << ">conseq" << endl << consSeq << endl;
+			
+			outSummary.close(); outFasta.close();
+			
+		
+		}else {
+			
+						
+			InputData* input = new InputData(listfile, "list");
+			ListVector* list = input->getListVector();
+			
+			string lastLabel = list->getLabel();
+			set<string> processedLabels;
+			set<string> userLabels = labels;
+
+			//as long as you are not at the end of the file or done wih the lines you want
+			while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+				
+				if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } delete list; delete input;  return 0;  }
+				
+				if(allLines == 1 || labels.count(list->getLabel()) == 1){			
+					
+					m->mothurOut(list->getLabel()); m->mothurOutEndLine();
+					
+					processList(list);
+					
+					processedLabels.insert(list->getLabel());
+					userLabels.erase(list->getLabel());
+				}
+				
+				if ((m->anyLabelsToProcess(list->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+					string saveLabel = list->getLabel();
+					
+					delete list; 
+					
+					list = input->getListVector(lastLabel);
+					m->mothurOut(list->getLabel()); m->mothurOutEndLine();
+					
+					processList(list);
+					
+					processedLabels.insert(list->getLabel());
+					userLabels.erase(list->getLabel());
+					
+					//restore real lastlabel to save below
+					list->setLabel(saveLabel);
+				}
+				
+				lastLabel = list->getLabel();
+				
+				delete list; list = NULL;
+				
+				//get next line to process
+				list = input->getListVector();				
+			}
+			
+			
+			if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } if (list != NULL) { delete list; } delete input; return 0;  }
+			
+			//output error messages about any remaining user labels
+			set<string>::iterator it;
+			bool needToRun = false;
+			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+				m->mothurOut("Your file does not include the label " + *it); 
+				if (processedLabels.count(lastLabel) != 1) {
+					m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+					needToRun = true;
+				}else {
+					m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+				}
+			}
+			
+			//run last label if you need to
+			if (needToRun == true)  {
+				if (list != NULL) { delete list; }
 				
 				list = input->getListVector(lastLabel);
+				
 				m->mothurOut(list->getLabel()); m->mothurOutEndLine();
 				
 				processList(list);
 				
-				processedLabels.insert(list->getLabel());
-				userLabels.erase(list->getLabel());
-				
-				//restore real lastlabel to save below
-				list->setLabel(saveLabel);
+				delete list; list = NULL;
 			}
 			
-			lastLabel = list->getLabel();
-			
-			delete list; list = NULL;
-			
-			//get next line to process
-			list = input->getListVector();				
-		}
-		
-		
-		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } if (list != NULL) { delete list; } delete input; return 0;  }
-		
-		//output error messages about any remaining user labels
-		set<string>::iterator it;
-		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-			}
-		}
-		
-		//run last label if you need to
-		if (needToRun == true)  {
 			if (list != NULL) { delete list; }
-			
-			list = input->getListVector(lastLabel);
-			
-			m->mothurOut(list->getLabel()); m->mothurOutEndLine();
-			
-			processList(list);
-			
-			delete list; list = NULL;
+			delete input;
 		}
-		
-		if (list != NULL) { delete list; }
-		delete input;
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
