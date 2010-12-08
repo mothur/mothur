@@ -437,7 +437,7 @@ int GetOTURepCommand::execute(){
 			delete read; delete input; delete list; globaldata->gListVector = NULL; return 0; 
 		}
 		
-		if (!weighted) { readNamesFile(weighted); }
+		if ((!weighted) && (namefile != "")) { readNamesFile(weighted); }
 		
 		while((list != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
 			
@@ -565,7 +565,7 @@ void GetOTURepCommand::readNamesFile() {
 		
 		string name, names, sequence;
 	
-		while(inNames){
+		while(!inNames.eof()){
 			inNames >> name;			//read from first column  A
 			inNames >> names;		//read from second column  A,B,C,D
 			
@@ -599,7 +599,7 @@ void GetOTURepCommand::readNamesFile(bool w) {
 		
 		string name, names, sequence;
 		
-		while(inNames){
+		while(!inNames.eof()){
 			inNames >> name;	m->gobble(inNames);		//read from first column  A
 			inNames >> names;							//read from second column  A,B,C,D
 			

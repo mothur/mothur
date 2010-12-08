@@ -364,7 +364,7 @@ int TrimSeqsCommand::execute(){
 		for(int i=0;i<fastaFileNames.size();i++){
 			
 			if (m->isBlank(fastaFileNames[i])) {  remove(fastaFileNames[i].c_str());	}
-			else if (filesToRemove.count(fastaFileNames[i]) > 0) { remove(fastaFileNames[i].c_str()); }
+			else if (filesToRemove.count(fastaFileNames[i]) > 0) {  remove(fastaFileNames[i].c_str()); }
 			else {
 				ifstream inFASTA;
 				string seqName;
@@ -470,6 +470,19 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 		ifstream qFile;
 		if(qFileName != "")	{	m->openInputFile(qFileName, qFile);	qFile.seekg(qline->start);  }
 		
+		
+		for (int i = 0; i < fastaNames.size(); i++) { //clears old file
+			ofstream temp;
+			m->openOutputFile(fastaNames[i], temp);
+			temp.close();
+		}
+		for (int i = 0; i < qualNames.size(); i++) { //clears old file
+			ofstream temp;
+			m->openOutputFile(qualNames[i], temp);
+			temp.close();
+		}
+		
+			
 		bool done = false;
 		int count = 0;
 	
