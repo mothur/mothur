@@ -420,6 +420,7 @@ int RemoveGroupsCommand::readName(){
 				}
 			}
 			
+			
 			//if the name in the first column is in the set then print it and any other names in second column also in set
 			if (names.count(firstCol) == 0) {
 				

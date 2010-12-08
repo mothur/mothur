@@ -34,8 +34,8 @@ int metastat_main (char* outputFileName, int numRows, int numCols, double thresh
 		storage[i] = malloc(9*sizeof(double));
 	}
 	
-	pmatrix = (double *) malloc(size*sizeof(double *));
-	permuted = (double *) malloc(size*sizeof(double *));
+	pmatrix = (double *) malloc(size*sizeof(double));
+	permuted = (double *) malloc(size*sizeof(double));
 	
 		
 	
@@ -133,9 +133,9 @@ int metastat_main (char* outputFileName, int numRows, int numCols, double thresh
 
   //changing ptt_size to row
   double * permuted_ttests, * pvalues, * tinitial;
-  permuted_ttests = (double *) malloc(size*sizeof(double *));
-  pvalues = (double *) malloc(size*sizeof(double *));
-  tinitial = (double *) malloc(size*sizeof(double *));
+  permuted_ttests = (double *) malloc(size*sizeof(double));
+  pvalues = (double *) malloc(size*sizeof(double));
+  tinitial = (double *) malloc(size*sizeof(double));
   
   for(i=0;i<row;i++){
     permuted_ttests[i]=0;}
@@ -153,8 +153,8 @@ int metastat_main (char* outputFileName, int numRows, int numCols, double thresh
   if ( (col==2) || ((g-1)<8) || ((col-g+1) < 8) ){  
 
   double * fish, *fish2;
-  fish = (double *) malloc(size*sizeof(double *));
-  fish2 = (double *) malloc(size*sizeof(double *));
+  fish = (double *) malloc(size*sizeof(double));
+  fish2 = (double *) malloc(size*sizeof(double));
 	  
   for(i=0;i<row;i++){
   	fish[i]=0;
@@ -190,8 +190,8 @@ int metastat_main (char* outputFileName, int numRows, int numCols, double thresh
 	double *expect, *prc, *emin,*prt,*pre;
 	double e=0, prc1=0, emin1=0, prt1=0, pre1=0;
 	  
-	prt = (double *) malloc(size*sizeof(double *));
-	prc = (double *) malloc(size*sizeof(double *));
+	prt = (double *) malloc(size*sizeof(double));
+	prc = (double *) malloc(size*sizeof(double));
 
 	nr = &nrow;
 	nc = &ncol;
@@ -214,13 +214,13 @@ int metastat_main (char* outputFileName, int numRows, int numCols, double thresh
     }
   }
   else{
-printf("here before testp\n");	  	 
+	  	 
   testp(permuted_ttests, permutes, permuted,pmatrix, nc, nr, gvalue,tinitial,pvalues);
   	 
   	       // Checks to make sure the matrix isn't sparse.
   double * sparse, * sparse2;
-  sparse = (double *) malloc(size*sizeof(double *));
-  sparse2 = (double *) malloc(size*sizeof(double *));
+  sparse = (double *) malloc(size*sizeof(double));
+  sparse2 = (double *) malloc(size*sizeof(double));
 	  
   for(i=0;i<row;i++){
   	sparse[i]=0;
@@ -275,7 +275,7 @@ printf("here before testp\n");
 	emin=&emin1;
 	prt=&prt1;
 	pre=&pre1;
-printf("here before fexact2\n");		
+	
 	fexact(nr,nc,data, ldtabl,expect,prc,emin,prt,pre,work);
 	
 	if (*pre>.999999999){
@@ -295,7 +295,7 @@ printf("here before fexact2\n");
   for (i = 0; i<row; i++){
 	 temp[i] = malloc(col*sizeof(double));
   }
-printf("here\n");	  
+	  
   for(j=0;j<row;j++){
   	for(i=0;i<2;i++){
   		temp[j][i]=0;
@@ -558,8 +558,7 @@ void start(double *Imatrix,int *g,int *nr,int *nc,double *initial,
     C1[i][1]=tool[i+*nr+*nr]; // var group 1
     storage[i][1]=C1[i][1];
     C1[i][2]=C1[i][1]/(gvalue-1);
-    storage[i][2]=sqrt(C1[i][2]);
-    printf("here2\n"); 
+    storage[i][2]=sqrt(C1[i][2]); 
     C2[i][0]=tool[i+*nr]; // mean group 2
     storage[i][4]=C2[i][0]; 
     C2[i][1]=tool[i+*nr+*nr+*nr]; // var group 2 
