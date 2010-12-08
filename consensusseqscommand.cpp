@@ -203,6 +203,8 @@ int ConsensusSeqsCommand::execute(){
 			outSummary.setf(ios::fixed, ios::floatfield); outSummary.setf(ios::showpoint);
 			outputNames.push_back(outputSummaryFile); outputTypes["summary"].push_back(outputSummaryFile);
 			
+			outSummary << "PositioninAlignment\tA\tT\tG\tC\tGap\tNumberofSeqs\tConsensusBase" << endl;
+			
 			ofstream outFasta;
 			string outputFastaFile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "cons.fasta";
 			m->openOutputFile(outputFastaFile, outFasta);
@@ -259,21 +261,9 @@ int ConsensusSeqsCommand::execute(){
 				
 			}
 			
-			outSummary << "A" << '\t';
-			for (int j = 0; j < seqLength; j++) { outSummary << percentages[0][j] << '\t'; }
-			outSummary << endl;
-			outSummary << "T" << '\t';
-			for (int j = 0; j < seqLength; j++) { outSummary << percentages[1][j] << '\t'; }
-			outSummary << endl;
-			outSummary << "G" << '\t';
-			for (int j = 0; j < seqLength; j++) { outSummary << percentages[2][j] << '\t'; }
-			outSummary << endl;
-			outSummary << "C" << '\t';
-			for (int j = 0; j < seqLength; j++) { outSummary << percentages[3][j] << '\t'; }
-			outSummary << endl;
-			outSummary << "Gap" << '\t';
-			for (int j = 0; j < seqLength; j++) { outSummary << percentages[4][j] << '\t'; }
-			outSummary << endl;
+			for (int j = 0; j < seqLength; j++) { 
+				outSummary << (j+1) << '\t' << percentages[0][j] << '\t'<< percentages[1][j] << '\t'<< percentages[2][j] << '\t' << percentages[3][j] << '\t' << percentages[4][j] << '\t' << seqs.size() << '\t' << consSeq[j] << endl;
+			}
 			
 				
 			outFasta << ">conseq" << endl << consSeq << endl;
@@ -399,6 +389,8 @@ int ConsensusSeqsCommand::processList(ListVector*& list){
 		m->openOutputFile(outputFastaFile, outFasta);
 		outputNames.push_back(outputFastaFile); outputTypes["fasta"].push_back(outputFastaFile);
 		
+		outSummary << "OTU#\tPositioninAlignment\tA\tT\tG\tC\tGap\tNumberofSeqs\tConsensusBase" << endl;
+		
 		for (int i = 0; i < list->getNumBins(); i++) {
 			
 			if (m->control_pressed) { outSummary.close(); outName.close(); outFasta.close(); return 0; }
@@ -512,23 +504,9 @@ string ConsensusSeqsCommand::getConsSeq(string bin, ofstream& outSummary, string
 			
 		}
 		
-		outSummary << ">seq" << (binNumber + 1) << endl;
-		outSummary << "A" << '\t';
-		for (int j = 0; j < seqLength; j++) { outSummary << percentages[0][j] << '\t'; }
-		outSummary << endl;
-		outSummary << "T" << '\t';
-		for (int j = 0; j < seqLength; j++) { outSummary << percentages[1][j] << '\t'; }
-		outSummary << endl;
-		outSummary << "G" << '\t';
-		for (int j = 0; j < seqLength; j++) { outSummary << percentages[2][j] << '\t'; }
-		outSummary << endl;
-		outSummary << "C" << '\t';
-		for (int j = 0; j < seqLength; j++) { outSummary << percentages[3][j] << '\t'; }
-		outSummary << endl;
-		outSummary << "Gap" << '\t';
-		for (int j = 0; j < seqLength; j++) { outSummary << percentages[4][j] << '\t'; }
-		outSummary << endl;
-		
+		for (int j = 0; j < seqLength; j++) { 
+			outSummary << (binNumber + 1) << '\t' << (j+1) << '\t' << percentages[0][j] << '\t'<< percentages[1][j] << '\t'<< percentages[2][j] << '\t' << percentages[3][j] << '\t' << percentages[4][j] << '\t' << seqs.size() << '\t' << consSeq[j] << endl;
+		}
 		
 		return consSeq;
 		
