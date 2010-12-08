@@ -560,14 +560,15 @@ int GetOTURepCommand::execute(){
 //**********************************************************************************************************************
 void GetOTURepCommand::readNamesFile() {
 	try {
+		ifstream in;
 		vector<string> dupNames;
-		m->openInputFile(namefile, inNames);
+		m->openInputFile(namefile, in);
 		
 		string name, names, sequence;
 	
-		while(!inNames.eof()){
-			inNames >> name;			//read from first column  A
-			inNames >> names;		//read from second column  A,B,C,D
+		while(!in.eof()){
+			in >> name;			//read from first column  A
+			in >> names;		//read from second column  A,B,C,D
 			
 			dupNames.clear();
 			
@@ -580,9 +581,9 @@ void GetOTURepCommand::readNamesFile() {
 				fasta->push_back(dupNames[i], sequence);
 			}
 		
-			m->gobble(inNames);
+			m->gobble(in);
 		}
-		inNames.close();
+		in.close();
 
 	}
 	catch(exception& e) {
@@ -594,14 +595,15 @@ void GetOTURepCommand::readNamesFile() {
 //read names file to find the weighted rep for each bin
 void GetOTURepCommand::readNamesFile(bool w) {
 	try {
+		ifstream in;
 		vector<string> dupNames;
-		m->openInputFile(namefile, inNames);
+		m->openInputFile(namefile, in);
 		
 		string name, names, sequence;
 		
-		while(!inNames.eof()){
-			inNames >> name;	m->gobble(inNames);		//read from first column  A
-			inNames >> names;							//read from second column  A,B,C,D
+		while(!in.eof()){
+			in >> name;	m->gobble(in);		//read from first column  A
+			in >> names;							//read from second column  A,B,C,D
 			
 			dupNames.clear();
 			
@@ -612,9 +614,9 @@ void GetOTURepCommand::readNamesFile(bool w) {
 				nameFileMap[dupNames[i]] = name;
 			}
 			
-			m->gobble(inNames);
+			m->gobble(in);
 		}
-		inNames.close();
+		in.close();
 		
 	}
 	catch(exception& e) {
