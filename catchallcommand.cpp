@@ -448,6 +448,3 @@ int CatchAllCommand::createSummaryFile(string file1, string label, ofstream& out
 	}
 }
 /**************************************************************************************/
-
-
-
