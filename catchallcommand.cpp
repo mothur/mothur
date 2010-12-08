@@ -133,7 +133,7 @@ void CatchAllCommand::help(){
 	try {
 		m->mothurOut("The catchall command interfaces mothur with the catchall program written by Linda Woodard, Sean Connolly and John Bunge.\n");
 		m->mothurOut("For more information about catchall refer to http://www.northeastern.edu/catchall/index.html \n");
-		m->mothurOut("The catchall executable must be in a folder called catchall in the same folder as your mothur executable, similar to mothur's requirements for using blast. \n");
+		m->mothurOut("The catchall executable must be in the same folder as your mothur executable. \n");
 		m->mothurOut("If you are a MAC or Linux user you must also have installed mono, a link to mono is on the webpage. \n");
 		m->mothurOut("The catchall command parameters are sabund and label, sabund is required. \n");
 		m->mothurOut("The label parameter is used to analyze specific labels in your input.\n");
@@ -164,9 +164,9 @@ int CatchAllCommand::execute() {
 
 		string catchAllCommandExe = ""; 
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-			catchAllCommandExe += "mono " + path + "catchall/CatchAllcmdL.exe ";
+			catchAllCommandExe += "mono " + path + "CatchAllcmdL.exe ";
 		#else
-			catchAllCommandExe += path + "catchall/CatchAllcmdW.exe ";
+			catchAllCommandExe += "\"" + path + "CatchAllcmdW.exe\"" + " ";
 		#endif
 		
 		read = new ReadOTUFile(sabundfile);	
@@ -200,9 +200,16 @@ int CatchAllCommand::execute() {
 					string outputPath = m->getPathName(filename);
 				
 					//create system command
-					string catchAllCommand = catchAllCommandExe + filename + " " + outputPath + " 1";
-				
-					//run catchall
+					string catchAllCommand = "";
+					#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+						catchAllCommand += catchAllCommandExe + filename + " " + outputPath + " 1";
+					#else
+						if (outputPath.length() > 0) { outputPath = outputPath.substr(0, outputPath.length()-1); }
+						catchAllCommand += catchAllCommandExe + "\"" + filename + "\" \""  + outputPath + "\" 1";
+						//wrap entire string in ""
+						catchAllCommand = "\"" + catchAllCommand + "\"";
+					#endif
+									//run catchall
 					system(catchAllCommand.c_str());
 				
 					remove(filename.c_str());
@@ -236,7 +243,14 @@ int CatchAllCommand::execute() {
 					string outputPath = m->getPathName(filename);
 					
 					//create system command
-					string catchAllCommand = catchAllCommandExe + filename + " " + outputPath + " 1";
+					string catchAllCommand = "";
+					#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+						catchAllCommand += catchAllCommandExe + filename + " " + outputPath + " 1";
+					#else
+						if (outputPath.length() > 0) { outputPath = outputPath.substr(0, outputPath.length()-1); }
+						catchAllCommand += catchAllCommandExe + "\"" + filename + "\" \""  + outputPath + "\" 1";
+						catchAllCommand = "\"" + catchAllCommand + "\"";
+					#endif
 
 					//run catchall
 					system(catchAllCommand.c_str());
@@ -293,7 +307,14 @@ int CatchAllCommand::execute() {
 			string outputPath = m->getPathName(filename);
 			
 			//create system command
-			string catchAllCommand = catchAllCommandExe + filename + " " + outputPath + " 1";
+			string catchAllCommand = "";
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				catchAllCommand += catchAllCommandExe + filename + " " + outputPath + " 1";
+			#else
+				if (outputPath.length() > 0) { outputPath = outputPath.substr(0, outputPath.length()-1); }
+				catchAllCommand += catchAllCommandExe + "\"" + filename + "\" \""  + outputPath + "\" 1";
+				catchAllCommand = "\"" + catchAllCommand + "\"";
+			#endif
 			
 			//run catchall
 			system(catchAllCommand.c_str());
