@@ -37,8 +37,6 @@ int metastat_main (char* outputFileName, int numRows, int numCols, double thresh
 	pmatrix = (double *) malloc(size*sizeof(double));
 	permuted = (double *) malloc(size*sizeof(double));
 	
-		
-	
   for(i=0; i<row; i++){
     for(j=0; j<col;j++){
       matrix[i][j]=data[i][j];

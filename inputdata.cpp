@@ -543,7 +543,7 @@ vector<SharedRAbundFloatVector*> InputData::getSharedRAbundFloatVectors(string l
 		globaldata->saveNextLabel = "";
 		
 		if(in){
-			if (format == "sharedfile")  {
+			if (format == "relabund")  {
 				while (in.eof() != true) {
 					
 					SharedRAbundFloatVector* SharedRelAbund = new SharedRAbundFloatVector(in);
