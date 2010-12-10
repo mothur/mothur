@@ -38,17 +38,18 @@ public:
 private:
 
 	GlobalData* globaldata;
-	ReadOTUFile* read;
-	InputData* input;
 	
-	string outputDir, sabundfile, rabundfile, listfile, format, path;
+	string outputDir, sharedfile, sabundfile, rabundfile, listfile, format, path;
 	bool abort, allLines;
 	set<string> labels;
 	vector<string> outputNames;
 	map< string, vector<string> > outputTypes;
+	vector<string> groups;
 	
-	string process(SAbundVector*);
+	string process(SAbundVector*, string);
 	int createSummaryFile(string, string, ofstream&); 
+	vector<string> parseSharedFile(string);
+	string combineSummmary(vector<string>&);
 };
 
 /****************************************************************************/
