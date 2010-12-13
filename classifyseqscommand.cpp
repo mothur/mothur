@@ -652,7 +652,7 @@ int ClassifySeqsCommand::execute(){
 			
 			//get maxLevel from phylotree so you know how many 'unclassified's to add
 			int maxLevel = taxaSum.getMaxLevel();
-			
+							
 			//read taxfile - this reading and rewriting is done to preserve the confidence scores.
 			string name, taxon;
 			while (!inTax.eof()) {

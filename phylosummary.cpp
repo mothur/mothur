@@ -117,15 +117,15 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 					if (group == "not found") {  m->mothurOut(seqName + " is not in your groupfile, and will be included in the overall total, but not any group total."); m->mothurOutEndLine();  }
 					
 					//do you have a count for this group?
-					map<string, int>::iterator itGroup = tree[currentNode].groupCount.find(group);
+					map<string, int>::iterator itGroup = tree[childPointer->second].groupCount.find(group);
 					
 					//if yes, increment it - there should not be a case where we can't find it since we load group in read
-					if (itGroup != tree[currentNode].groupCount.end()) {
-						tree[currentNode].groupCount[group]++;
+					if (itGroup != tree[childPointer->second].groupCount.end()) {
+						tree[childPointer->second].groupCount[group]++;
 					}
 				}
 				
-				tree[currentNode].total++;
+				tree[childPointer->second].total++;
 
 				currentNode = childPointer->second;
 			}else{	//otherwise, error
