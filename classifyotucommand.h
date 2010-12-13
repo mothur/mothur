@@ -32,7 +32,7 @@ private:
 
 	ListVector* list;
 	InputData* input;
-	string listfile, namefile, taxfile, label, outputDir;
+	string listfile, namefile, taxfile, label, outputDir, refTaxonomy, groupfile, basis;
 	bool abort, allLines, probs;
 	int cutoff;
 	set<string> labels; //holds labels to be used
@@ -45,7 +45,7 @@ private:
 	int readTaxonomyFile();
 	void removeConfidences(string&);
 	int process(ListVector*);
-	string findConsensusTaxonomy(int, ListVector*, int&); 	// returns the name of the "representative" taxonomy of given bin
+	vector<string> findConsensusTaxonomy(int, ListVector*, int&, string&); 	// returns the name of the "representative" taxonomy of given bin
 	
 												
 };

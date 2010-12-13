@@ -9,11 +9,12 @@
 
 #include "classifyotucommand.h"
 #include "phylotree.h"
+#include "phylosummary.h"
 
 //**********************************************************************************************************************
 vector<string> ClassifyOtuCommand::getValidParameters(){	
 	try {
-		string AlignArray[] =  {"list","label","name","taxonomy","cutoff","probs","outputdir","inputdir"};
+		string AlignArray[] =  {"list","label","name","taxonomy","basis","cutoff","probs","group","reftaxonomy","outputdir","inputdir"};
 		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 		return myArray;
 	}
@@ -29,6 +30,7 @@ ClassifyOtuCommand::ClassifyOtuCommand(){
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["constaxonomy"] = tempOutNames;
+		outputTypes["taxsummary"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClassifyOtuCommand", "ClassifyOtuCommand");
@@ -70,7 +72,7 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 			help(); abort = true;
 		} else {
 			//valid paramters for this command
-			string Array[] =  {"list","label","name","taxonomy","cutoff","probs","outputdir","inputdir"};
+			string Array[] =  {"list","label","name","taxonomy","cutoff","probs","basis","reftaxonomy","group","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -87,6 +89,7 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["constaxonomy"] = tempOutNames;
+			outputTypes["taxsummary"] = tempOutNames;
 		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -116,6 +119,22 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["taxonomy"] = inputDir + it->second;		}
 				}
+				
+				it = parameters.find("reftaxonomy");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["reftaxonomy"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("group");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["group"] = inputDir + it->second;		}
+				}
 			}
 
 			
@@ -129,11 +148,19 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 			
 			taxfile = validParameter.validFile(parameters, "taxonomy", true);
 			if (taxfile == "not found") {  m->mothurOut("taxonomy is a required parameter for the classify.otu command."); m->mothurOutEndLine(); abort = true; }
-			else if (taxfile == "not open") { abort = true; }	
+			else if (taxfile == "not open") { abort = true; }
+			
+			refTaxonomy = validParameter.validFile(parameters, "reftaxonomy", true);
+			if (refTaxonomy == "not found") { refTaxonomy = ""; m->mothurOut("reftaxonomy is not required, but if given will keep the rankIDs in the summary file static."); m->mothurOutEndLine(); }
+			else if (refTaxonomy == "not open") { abort = true; }
 	
 			namefile = validParameter.validFile(parameters, "name", true);
 			if (namefile == "not open") { abort = true; }	
 			else if (namefile == "not found") { namefile = ""; }
+			
+			groupfile = validParameter.validFile(parameters, "group", true);
+			if (groupfile == "not open") { abort = true; }	
+			else if (groupfile == "not found") { groupfile = ""; }
 			
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -143,6 +170,11 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 				if(label != "all") {  m->splitAtDash(label, labels);  allLines = 0;  }
 				else { allLines = 1;  }
 			}
+			
+			basis = validParameter.validFile(parameters, "basis", false);
+			if (basis == "not found") { basis = "otu"; }	
+			
+			if ((basis != "otu") && (basis != "sequence")) { m->mothurOut("Invalid option for basis. basis options are otu and sequence, using otu."); m->mothurOutEndLine(); }
 			
 			string temp = validParameter.validFile(parameters, "cutoff", false);			if (temp == "not found") { temp = "51"; }
 			convert(temp, cutoff); 
@@ -165,8 +197,15 @@ ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 
 void ClassifyOtuCommand::help(){
 	try {
-		m->mothurOut("The classify.otu command parameters are list, taxonomy, name, cutoff, label and probs.  The taxonomy and list parameters are required.\n");
+		m->mothurOut("The classify.otu command parameters are list, taxonomy, reftaxonomy, name, group, cutoff, label, basis and probs.  The taxonomy and list parameters are required.\n");
+		m->mothurOut("The reftaxonomy parameter allows you give the name of the reference taxonomy file used when you classified your sequences. Providing it will keep the rankIDs in the summary file static.\n");
 		m->mothurOut("The name parameter allows you add a names file with your taxonomy file.\n");
+		m->mothurOut("The group parameter allows you provide a group file to use in creating the summary file breakdown.\n");
+		m->mothurOut("The basis parameter allows you indicate what you want the summary file to represent, options are otu and sequence. Default is otu.\n");
+		m->mothurOut("For example consider the following basis=sequence could give Clostridiales	3	105	16	43	46, where 105 is the total number of sequences whose otu classified to Clostridiales.\n");
+		m->mothurOut("16 is the number of sequences in the otus from groupA, 43 is the number of sequences in the otus from groupB, and 46 is the number of sequences in the otus from groupC.\n");
+		m->mothurOut("Now for basis=otu could give Clostridiales	3	7	6	1	2, where 7 is the number of otus that classified to Clostridiales.\n");
+		m->mothurOut("6 is the number of otus containing sequences from groupA, 1 is the number of otus containing sequences from groupB, and 2 is the number of otus containing sequences from groupC.\n");
 		m->mothurOut("The label parameter allows you to select what distance levels you would like a output files created for, and is separated by dashes.\n");
 		m->mothurOut("The default value for label is all labels in your inputfile.\n");
 		m->mothurOut("The cutoff parameter allows you to specify a consensus confidence threshold for your taxonomy.  The default is 51, meaning 51%. Cutoff cannot be below 51.\n");
@@ -348,10 +387,11 @@ int ClassifyOtuCommand::readTaxonomyFile() {
 	}
 }
 //**********************************************************************************************************************
-string ClassifyOtuCommand::findConsensusTaxonomy(int bin, ListVector* thisList, int& size) {
+vector<string> ClassifyOtuCommand::findConsensusTaxonomy(int bin, ListVector* thisList, int& size, string& conTax) {
 	try{
-		string conTax = "";
+		conTax = "";
 		vector<string> names;
+		vector<string> allNames;
 		map<string, string>::iterator it;
 		map<string, string>::iterator it2;
 
@@ -387,6 +427,7 @@ string ClassifyOtuCommand::findConsensusTaxonomy(int bin, ListVector* thisList, 
 						//add seq to tree
 						phylo->addSeqToTree(names[i], it->second);
 						size++;
+						allNames.push_back(names[i]);
 					}
 				}
 				
@@ -400,11 +441,12 @@ string ClassifyOtuCommand::findConsensusTaxonomy(int bin, ListVector* thisList, 
 					//add seq to tree
 					phylo->addSeqToTree(names[i], it->second);
 					size++;
+					allNames.push_back(names[i]);
 				}
 			}
 
 			
-			if (m->control_pressed) { delete phylo; return conTax; }
+			if (m->control_pressed) { delete phylo; return allNames; }
 			
 		}
 		
@@ -454,7 +496,7 @@ string ClassifyOtuCommand::findConsensusTaxonomy(int bin, ListVector* thisList, 
 		
 		delete phylo;	
 		
-		return conTax;
+		return allNames;
 			
 	}
 	catch(exception& e) {
@@ -477,20 +519,51 @@ int ClassifyOtuCommand::process(ListVector* processList) {
 		m->openOutputFile(outputFile, out);
 		outputNames.push_back(outputFile); outputTypes["constaxonomy"].push_back(outputFile);
 		
+		ofstream outSum;
+		string outputSumFile = outputDir + m->getRootName(m->getSimpleName(listfile)) + processList->getLabel() + ".cons.tax.summary";
+		m->openOutputFile(outputSumFile, outSum);
+		outputNames.push_back(outputSumFile); outputTypes["taxsummary"].push_back(outputSumFile);
+		
 		out << "OTU\tSize\tTaxonomy" << endl;
+		
+		PhyloSummary* taxaSum;
+		if (refTaxonomy != "") {
+			taxaSum = new PhyloSummary(refTaxonomy, groupfile);
+		}else {
+			taxaSum = new PhyloSummary(groupfile);
+		}
 		
 		//for each bin in the list vector
 		for (int i = 0; i < processList->getNumBins(); i++) {
-	
-			conTax  = findConsensusTaxonomy(i, processList, size);
+			
+			if (m->control_pressed) { break; }
+			
+			vector<string> names;
+			names = findConsensusTaxonomy(i, processList, size, conTax);
 		
 			if (m->control_pressed) { out.close();  return 0; }
 			
 			//output to new names file
 			out << (i+1) << '\t' << size << '\t' << conTax << endl;
+			
+			string noConfidenceConTax = conTax;
+			removeConfidences(noConfidenceConTax);
+			
+			//add this bins taxonomy to summary
+			if (basis == "sequence") {
+				for(int j = 0; j < names.size(); j++) {  taxaSum->addSeqToTree(names[j], noConfidenceConTax);  }
+			}else { //otu
+				taxaSum->addSeqToTree(noConfidenceConTax, names);
+			}
 		}
 
 		out.close();
+		
+		//print summary file
+		taxaSum->print(outSum);
+		outSum.close();
+		
+		delete taxaSum;
 		
 		return 0;
 
