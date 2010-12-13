@@ -36,6 +36,7 @@
 #include <map>
 #include <string>
 #include <list>
+#include <string.h>
 
 //math
 #include <cmath>

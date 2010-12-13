@@ -32,11 +32,13 @@ struct rawTaxNode {
 class PhyloSummary {
 
 public:
+	PhyloSummary(string);
 	PhyloSummary(string, string);
 	~PhyloSummary() { if (groupmap != NULL)  {  delete groupmap;  }  }
 	
 	void summarize(string);  //pass it a taxonomy file and a group file and it makes the tree
 	int addSeqToTree(string, string);
+	int addSeqToTree(string, vector<string>);
 	void print(ofstream&);
 	int getMaxLevel() { return maxLevel; }
 	
@@ -47,6 +49,7 @@ private:
 	void assignRank(int);
 	void readTreeStruct(ifstream&);
 	GroupMap* groupmap;
+	bool ignore;
 	
 	int numNodes;
 	int numSeqs;
