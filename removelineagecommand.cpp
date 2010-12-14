@@ -218,6 +218,8 @@ void RemoveLineageCommand::help(){
 		m->mothurOut("The remove.lineage command parameters are taxon, fasta, name, group, list, taxonomy, alignreport and dups.  You must provide taxonomy and taxon.\n");
 		m->mothurOut("The dups parameter allows you to add the entire line from a name file if you add any name from the line. default=false. \n");
 		m->mothurOut("The taxon parameter allows you to select the taxons you would like to remove.\n");
+		m->mothurOut("You may enter your taxons with confidence scores, doing so will remove only those sequences that belong to the taxonomy and whose cofidence scores fall below the scores you give.\n");
+		m->mothurOut("If they belong to the taxonomy and have confidences above those you provide the sequence will not be removed.\n");
 		m->mothurOut("The remove.lineage command should be in the following format: remove.lineage(taxonomy=yourTaxonomyFile, taxon=yourTaxons).\n");
 		m->mothurOut("Example remove.lineage(taxonomy=amazon.silva.taxonomy, taxon=Bacteria;Firmicutes;Bacilli;Lactobacillales;).\n");
 		m->mothurOut("Note: If you are running mothur in script mode you must wrap the taxon in ' characters so mothur will ignore the ; in the taxon.\n");
@@ -527,6 +529,17 @@ int RemoveLineageCommand::readTax(){
 		
 		bool wroteSomething = false;
 		
+		bool taxonsHasConfidence = false;
+		vector< map<string, int> > searchTaxons;
+		string noConfidenceTaxons = taxons;
+		int hasConPos = taxons.find_first_of('(');
+		if (hasConPos != string::npos) {  
+			taxonsHasConfidence = true; 
+			searchTaxons = getTaxons(taxons); 
+			noConfidenceTaxons = removeConfidences(taxons);
+		}
+		
+		
 		while(!in.eof()){
 
 			if (m->control_pressed) { in.close(); out.close(); remove(outputFileName.c_str());  return 0; }
@@ -536,20 +549,98 @@ int RemoveLineageCommand::readTax(){
 			
 			string newtax = tax;
 			
-			//if the users file contains confidence scores we want to ignore them when searching for the taxons
-			int hasConfidences = tax.find_first_of('(');
-			if (hasConfidences != string::npos) { 
-				newtax = removeConfidences(tax);
+			//if the users file contains confidence scores we want to ignore them when searching for the taxons, unless the taxon has them
+			if (!taxonsHasConfidence) {
+				int hasConfidences = tax.find_first_of('(');
+				if (hasConfidences != string::npos) { 
+					newtax = removeConfidences(tax);
+				}
+				
+				int pos = newtax.find(taxons);
+				
+				if (pos == string::npos) { 
+					wroteSomething = true;
+					out << name << '\t' << tax << endl;
+				}else{ //this sequence contains the taxon the user wants to remove
+					names.insert(name);
+				}
+				
+			}else{//if taxons has them and you don't them remove taxons
+				int hasConfidences = tax.find_first_of('(');
+				if (hasConfidences == string::npos) { 
+					
+					int pos = newtax.find(noConfidenceTaxons);
+					
+					if (pos == string::npos) { 
+						wroteSomething = true;
+						out << name << '\t' << tax << endl;
+					}else{ //this sequence contains the taxon the user wants to remove
+						names.insert(name);
+					}
+				}else { //both have confidences so we want to make sure the users confidences are greater then or equal to the taxons
+					//first remove confidences from both and see if the taxonomy exists
+					
+					string noNewTax = tax;
+					int hasConfidences = tax.find_first_of('(');
+					if (hasConfidences != string::npos) { 
+						noNewTax = removeConfidences(tax);
+					}
+					
+					int pos = noNewTax.find(noConfidenceTaxons);
+					
+					if (pos != string::npos) { //if yes, then are the confidences okay
+						
+						bool remove = false;
+						vector< map<string, int> > usersTaxon = getTaxons(newtax);
+						
+						//the usersTaxon is most likely longer than the searchTaxons, and searchTaxon[0] may relate to userTaxon[4]
+						//we want to "line them up", so we will find the the index where the searchstring starts
+						int index = 0;
+						for (int i = 0; i < usersTaxon.size(); i++) {
+							
+							if (usersTaxon[i].begin()->first == searchTaxons[0].begin()->first) { 
+								index = i;  
+								int spot = 0;
+								bool goodspot = true;
+								//is this really the start, or are we dealing with a taxon of the same name?
+								while ((spot < searchTaxons.size()) && ((i+spot) < usersTaxon.size())) {
+									if (usersTaxon[i+spot].begin()->first != searchTaxons[spot].begin()->first) { goodspot = false; break; }
+									else { spot++; }
+								}
+								
+								if (goodspot) { break; }
+							}
+						}
+						
+						for (int i = 0; i < searchTaxons.size(); i++) {
+							
+							if ((i+index) < usersTaxon.size()) { //just in case, should never be false
+								if (usersTaxon[i+index].begin()->second < searchTaxons[i].begin()->second) { //is the users cutoff less than the search taxons
+									remove = true;
+									break;
+								}
+							}else {
+								remove = true;
+								break;
+							}
+						}
+						
+						//passed the test so remove you
+						if (remove) {
+							names.insert(name);
+						}else {
+							wroteSomething = true;
+							out << name << '\t' << tax << endl;
+						}
+					}else {
+						wroteSomething = true;
+						out << name << '\t' << tax << endl;
+					}
+				}
 			}
 			
-			int pos = newtax.find(taxons);
 			
-			if (pos == string::npos) { 
-				wroteSomething = true;
-				out << name << '\t' << tax << endl;
-			}else{ //this sequence contains the taxon the user wants to remove
-				names.insert(name);
-			}
+			
 			
 			m->gobble(in);
 		}
@@ -564,6 +655,42 @@ int RemoveLineageCommand::readTax(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveLineageCommand", "readTax");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+vector< map<string, int> > RemoveLineageCommand::getTaxons(string tax) {
+	try {
+		
+		vector< map<string, int> > t;
+		string taxon = "";
+		int taxLength = tax.length();
+		for(int i=0;i<taxLength;i++){
+			if(tax[i] == ';'){
+				
+				int openParen = taxon.find_first_of('(');
+				int closeParen = taxon.find_last_of(')');
+				
+				string newtaxon = taxon.substr(0, openParen); //rip off confidence
+				string confidence = taxon.substr((openParen+1), (closeParen-openParen-1));  
+				int con = 0;
+				convert(confidence, con);
+				
+				map<string, int> temp;
+				temp[newtaxon] = con;
+				t.push_back(temp);
+				
+				taxon = "";
+			}
+			else{
+				taxon += tax[i];
+			}
+		}
+		
+		return t;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RemoveLineageCommand", "getTaxons");
 		exit(1);
 	}
 }
