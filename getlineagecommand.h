@@ -40,6 +40,7 @@ class GetLineageCommand : public Command {
 		int readList();
 		int readTax();	
 		string removeConfidences(string);
+		vector< map<string, int> > getTaxons(string);
 };
 
 #endif
