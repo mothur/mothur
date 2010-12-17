@@ -33,16 +33,22 @@
 #include "whittaker.h"
 #include "odum.h"
 #include "canberra.h"
-#include "stricteuclidean.h"
-#include "strictchord.h"
+#include "structeuclidean.h"
+#include "structchord.h"
 #include "hellinger.h"
 #include "manhattan.h"
-#include "strictpearson.h"
+#include "structpearson.h"
 #include "soergel.h"
 #include "spearman.h"
-#include "strictkulczynski.h"
+#include "structkulczynski.h"
+#include "structchi2.h"
 #include "speciesprofile.h"
 #include "hamming.h"
+#include "gower.h"
+#include "memchi2.h"
+#include "memchord.h"
+#include "memeuclidean.h"
+#include "mempearson.h"
 
 //**********************************************************************************************************************
 vector<string> SummarySharedCommand::getValidParameters(){	
@@ -226,26 +232,38 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 							sumCalculators.push_back(new Odum());
 						}else if (Estimators[i] == "canberra") { 
 							sumCalculators.push_back(new Canberra());
-						}else if (Estimators[i] == "stricteuclidean") { 
-							sumCalculators.push_back(new StrictEuclidean());
-						}else if (Estimators[i] == "strictchord") { 
-							sumCalculators.push_back(new StrictChord());
+						}else if (Estimators[i] == "structeuclidean") { 
+							sumCalculators.push_back(new StructEuclidean());
+						}else if (Estimators[i] == "structchord") { 
+							sumCalculators.push_back(new StructChord());
 						}else if (Estimators[i] == "hellinger") { 
 							sumCalculators.push_back(new Hellinger());
 						}else if (Estimators[i] == "manhattan") { 
 							sumCalculators.push_back(new Manhattan());
-						}else if (Estimators[i] == "strictpearson") { 
-							sumCalculators.push_back(new StrictPearson());
+						}else if (Estimators[i] == "structpearson") { 
+							sumCalculators.push_back(new StructPearson());
 						}else if (Estimators[i] == "soergel") { 
 							sumCalculators.push_back(new Soergel());
 						}else if (Estimators[i] == "spearman") { 
 							sumCalculators.push_back(new Spearman());
-						}else if (Estimators[i] == "strictkulczynski") { 
-							sumCalculators.push_back(new StrictKulczynski());
+						}else if (Estimators[i] == "structkulczynski") { 
+							sumCalculators.push_back(new StructKulczynski());
 						}else if (Estimators[i] == "speciesprofile") { 
 							sumCalculators.push_back(new SpeciesProfile());
 						}else if (Estimators[i] == "hamming") { 
 							sumCalculators.push_back(new Hamming());
+						}else if (Estimators[i] == "structchi2") { 
+							sumCalculators.push_back(new StructChi2());
+						}else if (Estimators[i] == "gower") { 
+							sumCalculators.push_back(new Gower());
+						}else if (Estimators[i] == "memchi2") { 
+							sumCalculators.push_back(new MemChi2());
+						}else if (Estimators[i] == "memchord") { 
+							sumCalculators.push_back(new MemChord());
+						}else if (Estimators[i] == "memeuclidean") { 
+							sumCalculators.push_back(new MemEuclidean());
+						}else if (Estimators[i] == "mempearson") { 
+							sumCalculators.push_back(new MemPearson());
 						}
 					}
 				}
@@ -709,7 +727,15 @@ int SummarySharedCommand::driver(vector<SharedRAbundVector*> thisLookup, int sta
 				}
 				
 				for(int i=0;i<sumCalculators.size();i++) {
-
+					
+					//if this calc needs all groups to calculate the pair load all groups
+					if (sumCalculators[i]->getNeedsAll()) { 
+						//load subset with rest of lookup for those calcs that need everyone to calc for a pair
+						for (int w = 0; w < thisLookup.size(); w++) {
+							if ((w != k) && (w != l)) { subset.push_back(thisLookup[w]); }
+						}
+					}
+					
 					vector<double> tempdata = sumCalculators[i]->getValues(subset); //saves the calculator outputs
 					
 					if (m->control_pressed) { outputFileHandle.close(); return 1; }
