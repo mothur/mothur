@@ -30,6 +30,7 @@ public:
 	map<string, int> groupIndex;  //groupname, vectorIndex in namesOfGroups. - used by collectdisplays and libshuff commands.
 	int getNumSeqs()  {  return groupmap.size();  }
 	vector<string> getNamesSeqs();
+	vector<string> getNamesSeqs(vector<string>); //get names of seqs belonging to a group or set of groups
 	int getNumSeqs(string); //return the number of seqs in a given group
 			
 private:

@@ -401,7 +401,7 @@ void Tree::getSubTree(Tree* copy, vector<string> Groups) {
 		
 		int nextSpot = numLeaves;
 		populateNewTree(copy->tree, root, nextSpot);
-		
+				
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Tree", "getCopy");

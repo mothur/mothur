@@ -34,7 +34,8 @@ private:
 	GlobalData* globaldata;
 	ReadTree* read;
 	TreeMap* treeMap;
-	string treefile, sharedfile, relabundfile, groups, label, inputFileName, outputDir;
+	GroupMap* designMap;
+	string treefile, sharedfile, relabundfile, groups, label, inputFileName, outputDir, designfile;
 	bool abort;
 	vector<string> outputNames, Groups;
 	map<string, vector<string> > outputTypes;

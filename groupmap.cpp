@@ -161,4 +161,25 @@ vector<string> GroupMap::getNamesSeqs(){
 	}
 }
 /************************************************************/
+vector<string> GroupMap::getNamesSeqs(vector<string> picked){
+	try {
+		
+		vector<string> names;
+		
+		for (it = groupmap.begin(); it != groupmap.end(); it++) {
+			//if you are belong to one the the groups in the picked vector add you
+			if (m->inUsersGroups(it->second, picked)) {
+				names.push_back(it->first);
+			}
+		}
+		
+		return names;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GroupMap", "getNamesSeqs");
+		exit(1);
+	}
+}
+
+/************************************************************/
 
