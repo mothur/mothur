@@ -21,9 +21,10 @@ typedef vector<double> EstOutput;
 class Calculator {
 
 public:
-	Calculator(){ m = MothurOut::getInstance();  }
+	Calculator(){ m = MothurOut::getInstance(); needsAll = false; }
 	virtual ~Calculator(){};
-	Calculator(string n, int c, bool f) : name(n), cols(c), multiple(f) {};
+	Calculator(string n, int c, bool f) : name(n), cols(c), multiple(f) { m = MothurOut::getInstance(); needsAll = false; };
+	Calculator(string n, int c, bool f, bool a) : name(n), cols(c), multiple(f), needsAll(a) { m = MothurOut::getInstance(); };
 	virtual EstOutput getValues(SAbundVector*) = 0;	
 	virtual EstOutput getValues(vector<SharedRAbundVector*>) = 0;
 	virtual void print(ostream& f)	{ f.setf(ios::fixed, ios::floatfield); f.setf(ios::showpoint);
@@ -31,12 +32,14 @@ public:
 	virtual string getName()		{	return name;	}
 	virtual int getCols()		{	return cols;	}
 	virtual bool getMultiple()  {   return multiple;   }
+	virtual bool getNeedsAll()  {   return needsAll;   }
 protected:
 	MothurOut* m;
 	EstOutput data;
 	string name;
 	int cols;
 	bool multiple;
+	bool needsAll;
 
 };
 

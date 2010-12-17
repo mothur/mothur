@@ -489,6 +489,7 @@ bool MothurOut::isBlank(string fileName){
 			//check for blank file
 			gobble(fileHandle);
 			if (fileHandle.eof()) { fileHandle.close(); return true;  }
+			fileHandle.close();
 		}
 		return false;
 	}

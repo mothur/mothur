@@ -260,6 +260,18 @@ void ValidCalculators::initialShared() {
 		shared["lennon"]				= "lennon";
 		shared["morisitahorn"]			= "morisitahorn";
 		shared["braycurtis"]			= "braycurtis";
+		shared["odum"]					= "odum";
+		shared["canberra"]				= "canberra";
+		shared["stricteuclidean"]		= "stricteuclidean";
+		shared["strictchord"]			= "strictchord";
+		shared["hellinger"]				= "hellinger";
+		shared["manhattan"]				= "manhattan";
+		shared["strictpearson"]			= "strictpearson";
+		shared["soergel"]				= "soergel";
+		shared["spearman"]				= "spearman";
+		shared["strictkulczynski"]		= "strictkulczynski";
+		shared["speciesprofile"]		= "speciesprofile";
+		shared["hamming"]				= "hamming";
 		shared["default"]	            = "default";
 	}
 	catch(exception& e) {
@@ -338,7 +350,7 @@ void ValidCalculators::initialSharedSummary() {
 		sharedsummary["sharedchao"]				= "sharedchao";
 		sharedsummary["sharedace"]				= "sharedace";
 		sharedsummary["jabund"]					= "jabund";
-		sharedsummary["sorabund"]			= "sorabund";
+		sharedsummary["sorabund"]				= "sorabund";
 		sharedsummary["jclass"]					= "jclass";
 		sharedsummary["sorclass"]				= "sorclass";
 		sharedsummary["jest"]					= "jest";
@@ -355,6 +367,18 @@ void ValidCalculators::initialSharedSummary() {
 		sharedsummary["lennon"]					= "lennon";
 		sharedsummary["morisitahorn"]			= "morisitahorn";
 		sharedsummary["braycurtis"]				= "braycurtis";
+		sharedsummary["odum"]					= "odum";
+		sharedsummary["canberra"]				= "canberra";
+		sharedsummary["stricteuclidean"]		= "stricteuclidean";
+		sharedsummary["strictchord"]			= "strictchord";
+		sharedsummary["hellinger"]				= "hellinger";
+		sharedsummary["manhattan"]				= "manhattan";
+		sharedsummary["strictpearson"]			= "strictpearson";
+		sharedsummary["strictkulczynski"]		= "strictkulczynski";
+		sharedsummary["soergel"]				= "soergel";
+		sharedsummary["spearman"]				= "spearman";
+		sharedsummary["speciesprofile"]			= "speciesprofile";
+		sharedsummary["hamming"]				= "hamming";
 		sharedsummary["default"]				= "default";
 	}
 	catch(exception& e) {

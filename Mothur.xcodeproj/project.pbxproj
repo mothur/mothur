@@ -53,6 +53,24 @@
 		A732505F11E49EF100484B90 /* sffinfocommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sffinfocommand.cpp; sourceTree = "<group>"; };
 		A73953DA11987ED100B0B160 /* chopseqscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chopseqscommand.h; sourceTree = "<group>"; };
 		A73953DB11987ED100B0B160 /* chopseqscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chopseqscommand.cpp; sourceTree = "<group>"; };
+		A7460A3F12B8EF1C00866BB6 /* strictchord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = strictchord.h; sourceTree = "<group>"; };
+		A7460A4012B8EF1C00866BB6 /* strictchord.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = strictchord.cpp; sourceTree = "<group>"; };
+		A7460A7312B8FCDC00866BB6 /* hellinger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hellinger.h; sourceTree = "<group>"; };
+		A7460A7412B8FCDC00866BB6 /* hellinger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = hellinger.cpp; sourceTree = "<group>"; };
+		A7460A9812B9061B00866BB6 /* manhattan.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = manhattan.h; sourceTree = "<group>"; };
+		A7460A9912B9061B00866BB6 /* manhattan.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = manhattan.cpp; sourceTree = "<group>"; };
+		A7460AC912B90C5600866BB6 /* strictpearson.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = strictpearson.h; sourceTree = "<group>"; };
+		A7460ACA12B90C5600866BB6 /* strictpearson.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = strictpearson.cpp; sourceTree = "<group>"; };
+		A7460ADB12B914B700866BB6 /* soergel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = soergel.h; sourceTree = "<group>"; };
+		A7460ADC12B914B700866BB6 /* soergel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = soergel.cpp; sourceTree = "<group>"; };
+		A7460AF712B9218400866BB6 /* spearman.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = spearman.h; sourceTree = "<group>"; };
+		A7460AF812B9218400866BB6 /* spearman.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = spearman.cpp; sourceTree = "<group>"; };
+		A7460B3612B9377400866BB6 /* strictkulczynski.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = strictkulczynski.h; sourceTree = "<group>"; };
+		A7460B3712B9377400866BB6 /* strictkulczynski.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = strictkulczynski.cpp; sourceTree = "<group>"; };
+		A7460B5912B93F1F00866BB6 /* speciesprofile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = speciesprofile.h; sourceTree = "<group>"; };
+		A7460B5A12B93F1F00866BB6 /* speciesprofile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = speciesprofile.cpp; sourceTree = "<group>"; };
+		A7460B7812B9444800866BB6 /* hamming.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hamming.h; sourceTree = "<group>"; };
+		A7460B7912B9444800866BB6 /* hamming.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = hamming.cpp; sourceTree = "<group>"; };
 		A747E79B1163442A00FB9042 /* chimeracheckcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeracheckcommand.h; sourceTree = "<group>"; };
 		A747E79C1163442A00FB9042 /* chimeracheckcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chimeracheckcommand.cpp; sourceTree = "<group>"; };
 		A747E81C116365E000FB9042 /* chimeraslayercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chimeraslayercommand.h; sourceTree = "<group>"; };
@@ -98,6 +116,8 @@
 		A798626E1240D91B005FC847 /* normalizesharedcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = normalizesharedcommand.cpp; sourceTree = "<group>"; };
 		A7AE6302121C3408001DE6FC /* sharedrabundfloatvector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sharedrabundfloatvector.h; sourceTree = "<group>"; };
 		A7AE6303121C3408001DE6FC /* sharedrabundfloatvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sharedrabundfloatvector.cpp; sourceTree = "<group>"; };
+		A7BB555212BB87F30041F26F /* strictchi2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = strictchi2.h; sourceTree = "<group>"; };
+		A7BB555312BB87F30041F26F /* strictchi2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = strictchi2.cpp; sourceTree = "<group>"; };
 		A7BBDA7B11B5694E006E6551 /* classifyotucommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = classifyotucommand.h; sourceTree = "<group>"; };
 		A7BBDA7C11B5694E006E6551 /* classifyotucommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = classifyotucommand.cpp; sourceTree = "<group>"; };
 		A7D215C811996C6E00F13F13 /* clearcutcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = clearcutcommand.h; sourceTree = "<group>"; };
@@ -519,6 +539,12 @@
 		A7DF0AE2121EBB14004A03EA /* prng.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = prng.h; sourceTree = "<group>"; };
 		A7E8338B115BBDAA00739EC4 /* parsesffcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parsesffcommand.cpp; sourceTree = "<group>"; };
 		A7E8338C115BBDAA00739EC4 /* parsesffcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parsesffcommand.h; sourceTree = "<group>"; };
+		A7F0C06412B7D64F0048BC64 /* odum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = odum.h; sourceTree = "<group>"; };
+		A7F0C06512B7D64F0048BC64 /* odum.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = odum.cpp; sourceTree = "<group>"; };
+		A7F0C08A12B7EAE80048BC64 /* canberra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = canberra.h; sourceTree = "<group>"; };
+		A7F0C08B12B7EAE80048BC64 /* canberra.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = canberra.cpp; sourceTree = "<group>"; };
+		A7F0C10112B80EEC0048BC64 /* stricteuclidean.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stricteuclidean.h; sourceTree = "<group>"; };
+		A7F0C10212B80EEC0048BC64 /* stricteuclidean.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stricteuclidean.cpp; sourceTree = "<group>"; };
 		A7F139481247C3CB0033324C /* splitgroupscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = splitgroupscommand.h; sourceTree = "<group>"; };
 		A7F139491247C3CB0033324C /* splitgroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = splitgroupscommand.cpp; sourceTree = "<group>"; };
 		A7F6C8E1124229F900299875 /* fisher2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fisher2.c; sourceTree = "<group>"; };
@@ -639,6 +665,8 @@
 				A7DA2006113FECD400BF472F /* bootstrap.h */,
 				A7DA2009113FECD400BF472F /* bstick.cpp */,
 				A7DA200A113FECD400BF472F /* bstick.h */,
+				A7F0C08A12B7EAE80048BC64 /* canberra.h */,
+				A7F0C08B12B7EAE80048BC64 /* canberra.cpp */,
 				A7DA200F113FECD400BF472F /* chao1.cpp */,
 				A7DA2010113FECD400BF472F /* chao1.h */,
 				A7DA2033113FECD400BF472F /* coverage.cpp */,
@@ -653,8 +681,12 @@
 				A7DA2059113FECD400BF472F /* geom.h */,
 				A7DA206C113FECD400BF472F /* goodscoverage.cpp */,
 				A7DA206D113FECD400BF472F /* goodscoverage.h */,
+				A7460B7812B9444800866BB6 /* hamming.h */,
+				A7460B7912B9444800866BB6 /* hamming.cpp */,
 				7E5B2917121FF53C0005339C /* heip.h */,
 				7E5B2918121FF53C0005339C /* heip.cpp */,
+				A7460A7312B8FCDC00866BB6 /* hellinger.h */,
+				A7460A7412B8FCDC00866BB6 /* hellinger.cpp */,
 				A7DA2080113FECD400BF472F /* ignoregaps.h */,
 				7E962A40121F76B1007464B5 /* invsimpson.h */,
 				7E962A41121F76B1007464B5 /* invsimpson.cpp */,
@@ -662,9 +694,13 @@
 				A7DA2084113FECD400BF472F /* jackknife.h */,
 				A7DA2093113FECD400BF472F /* logsd.cpp */,
 				A7DA2094113FECD400BF472F /* logsd.h */,
+				A7460A9812B9061B00866BB6 /* manhattan.h */,
+				A7460A9912B9061B00866BB6 /* manhattan.cpp */,
 				A7DA20AE113FECD400BF472F /* npshannon.cpp */,
 				A7DA20AF113FECD400BF472F /* npshannon.h */,
 				A7DA20B0113FECD400BF472F /* nseqs.h */,
+				A7F0C06412B7D64F0048BC64 /* odum.h */,
+				A7F0C06512B7D64F0048BC64 /* odum.cpp */,
 				A7DA20B2113FECD400BF472F /* onegapdist.h */,
 				A7DA20B3113FECD400BF472F /* onegapignore.h */,
 				A72B3A7B118B4D1B004B9F8D /* phylodiversity.h */,
@@ -729,11 +765,27 @@
 				7E4EBD44122018FB00D85E7B /* simpsoneven.cpp */,
 				7E5B294A121FFADC0005339C /* smithwilson.h */,
 				7E5B294B121FFADC0005339C /* smithwilson.cpp */,
-				A7DA2142113FECD400BF472F /* simpson.cpp */,
 				A7DA2143113FECD400BF472F /* simpson.h */,
+				A7DA2142113FECD400BF472F /* simpson.cpp */,
 				A7DA2149113FECD400BF472F /* sobs.h */,
+				A7460ADB12B914B700866BB6 /* soergel.h */,
+				A7460ADC12B914B700866BB6 /* soergel.cpp */,
 				A7DA214A113FECD400BF472F /* solow.cpp */,
 				A7DA214B113FECD400BF472F /* solow.h */,
+				A7460B5912B93F1F00866BB6 /* speciesprofile.h */,
+				A7460B5A12B93F1F00866BB6 /* speciesprofile.cpp */,
+				A7460AF712B9218400866BB6 /* spearman.h */,
+				A7460AF812B9218400866BB6 /* spearman.cpp */,
+				A7BB555212BB87F30041F26F /* strictchi2.h */,
+				A7BB555312BB87F30041F26F /* strictchi2.cpp */,
+				A7460A3F12B8EF1C00866BB6 /* strictchord.h */,
+				A7460A4012B8EF1C00866BB6 /* strictchord.cpp */,
+				A7F0C10112B80EEC0048BC64 /* stricteuclidean.h */,
+				A7F0C10212B80EEC0048BC64 /* stricteuclidean.cpp */,
+				A7460B3612B9377400866BB6 /* strictkulczynski.h */,
+				A7460B3712B9377400866BB6 /* strictkulczynski.cpp */,
+				A7460AC912B90C5600866BB6 /* strictpearson.h */,
+				A7460ACA12B90C5600866BB6 /* strictpearson.cpp */,
 				A7DA2160113FECD400BF472F /* treecalculator.h */,
 				A7DA216D113FECD400BF472F /* unweighted.cpp */,
 				A7DA216E113FECD400BF472F /* unweighted.h */,

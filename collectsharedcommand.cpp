@@ -31,7 +31,18 @@
 #include "sharedbraycurtis.h"
 #include "sharedjackknife.h"
 #include "whittaker.h"
-
+#include "odum.h"
+#include "canberra.h"
+#include "stricteuclidean.h"
+#include "strictchord.h"
+#include "hellinger.h"
+#include "manhattan.h"
+#include "strictpearson.h"
+#include "soergel.h"
+#include "spearman.h"
+#include "strictkulczynski.h"
+#include "speciesprofile.h"
+#include "hamming.h"
 
 //**********************************************************************************************************************
 vector<string> CollectSharedCommand::getValidParameters(){	
@@ -95,6 +106,18 @@ CollectSharedCommand::CollectSharedCommand(){
 		outputTypes["lennon"] = tempOutNames;
 		outputTypes["morisitahorn"] = tempOutNames;
 		outputTypes["braycurtis"] = tempOutNames;
+		outputTypes["odum"] = tempOutNames;
+		outputTypes["canberra"] = tempOutNames;
+		outputTypes["stricteuclidean"] = tempOutNames;
+		outputTypes["strictchord"] = tempOutNames;
+		outputTypes["hellinger"] = tempOutNames;
+		outputTypes["manhattan"] = tempOutNames;
+		outputTypes["strictpearson"] = tempOutNames;
+		outputTypes["soergel"] = tempOutNames;
+		outputTypes["spearman"] = tempOutNames;
+		outputTypes["strictkulczynski"] = tempOutNames;
+		outputTypes["speciesprofile"] = tempOutNames;
+		outputTypes["hamming"] = tempOutNames;
 		
 	}
 	catch(exception& e) {
@@ -153,6 +176,18 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 			outputTypes["lennon"] = tempOutNames;
 			outputTypes["morisitahorn"] = tempOutNames;
 			outputTypes["braycurtis"] = tempOutNames;
+			outputTypes["odum"] = tempOutNames;
+			outputTypes["canberra"] = tempOutNames;
+			outputTypes["stricteuclidean"] = tempOutNames;
+			outputTypes["strictchord"] = tempOutNames;
+			outputTypes["hellinger"] = tempOutNames;
+			outputTypes["manhattan"] = tempOutNames;
+			outputTypes["strictpearson"] = tempOutNames;
+			outputTypes["soergel"] = tempOutNames;
+			outputTypes["spearman"] = tempOutNames;
+			outputTypes["strictkulczynski"] = tempOutNames;
+			outputTypes["speciesprofile"] = tempOutNames;
+			outputTypes["hamming"] = tempOutNames;
 
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
@@ -277,7 +312,44 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 						}else if (Estimators[i] == "braycurtis") { 
 							cDisplays.push_back(new CollectDisplay(new BrayCurtis(), new SharedOneColumnFile(fileNameRoot+"braycurtis")));
 							outputNames.push_back(fileNameRoot+"braycurtis"); outputTypes["braycurtis"].push_back(fileNameRoot+"braycurtis");
+						}else if (Estimators[i] == "odum") { 
+							cDisplays.push_back(new CollectDisplay(new Odum(), new SharedOneColumnFile(fileNameRoot+"odum")));
+							outputNames.push_back(fileNameRoot+"odum"); outputTypes["odum"].push_back(fileNameRoot+"odum");
+						}else if (Estimators[i] == "canberra") { 
+							cDisplays.push_back(new CollectDisplay(new Canberra(), new SharedOneColumnFile(fileNameRoot+"canberra")));
+							outputNames.push_back(fileNameRoot+"canberra"); outputTypes["canberra"].push_back(fileNameRoot+"canberra");
+						}else if (Estimators[i] == "stricteuclidean") { 
+							cDisplays.push_back(new CollectDisplay(new StrictEuclidean(), new SharedOneColumnFile(fileNameRoot+"stricteuclidean")));
+							outputNames.push_back(fileNameRoot+"stricteuclidean"); outputTypes["stricteuclidean"].push_back(fileNameRoot+"stricteuclidean");
+						}else if (Estimators[i] == "strictchord") { 
+							cDisplays.push_back(new CollectDisplay(new StrictChord(), new SharedOneColumnFile(fileNameRoot+"strictchord")));
+							outputNames.push_back(fileNameRoot+"strictchord"); outputTypes["strictchord"].push_back(fileNameRoot+"strictchord");
+						}else if (Estimators[i] == "hellinger") { 
+							cDisplays.push_back(new CollectDisplay(new Hellinger(), new SharedOneColumnFile(fileNameRoot+"hellinger")));
+							outputNames.push_back(fileNameRoot+"hellinger"); outputTypes["hellinger"].push_back(fileNameRoot+"hellinger");
+						}else if (Estimators[i] == "manhattan") { 
+							cDisplays.push_back(new CollectDisplay(new Manhattan(), new SharedOneColumnFile(fileNameRoot+"manhattan")));
+							outputNames.push_back(fileNameRoot+"manhattan"); outputTypes["manhattan"].push_back(fileNameRoot+"manhattan");
+						}else if (Estimators[i] == "strictpearson") { 
+							cDisplays.push_back(new CollectDisplay(new StrictPearson(), new SharedOneColumnFile(fileNameRoot+"strictpearson")));
+							outputNames.push_back(fileNameRoot+"strictpearson"); outputTypes["strictpearson"].push_back(fileNameRoot+"strictpearson");
+						}else if (Estimators[i] == "soergel") { 
+							cDisplays.push_back(new CollectDisplay(new Soergel(), new SharedOneColumnFile(fileNameRoot+"soergel")));
+							outputNames.push_back(fileNameRoot+"soergel"); outputTypes["soergel"].push_back(fileNameRoot+"soergel");
+						}else if (Estimators[i] == "spearman") { 
+							cDisplays.push_back(new CollectDisplay(new Spearman(), new SharedOneColumnFile(fileNameRoot+"spearman")));
+							outputNames.push_back(fileNameRoot+"spearman"); outputTypes["spearman"].push_back(fileNameRoot+"spearman");
+						}else if (Estimators[i] == "strictkulczynski") { 
+							cDisplays.push_back(new CollectDisplay(new StrictKulczynski(), new SharedOneColumnFile(fileNameRoot+"strictkulczynski")));
+							outputNames.push_back(fileNameRoot+"strictkulczynski"); outputTypes["strictkulczynski"].push_back(fileNameRoot+"strictkulczynski");
+						}else if (Estimators[i] == "speciesprofile") { 
+							cDisplays.push_back(new CollectDisplay(new SpeciesProfile(), new SharedOneColumnFile(fileNameRoot+"speciesprofile")));
+							outputNames.push_back(fileNameRoot+"speciesprofile"); outputTypes["speciesprofile"].push_back(fileNameRoot+"speciesprofile");
+						}else if (Estimators[i] == "hamming") { 
+							cDisplays.push_back(new CollectDisplay(new Hamming(), new SharedOneColumnFile(fileNameRoot+"hamming")));
+							outputNames.push_back(fileNameRoot+"hamming"); outputTypes["hamming"].push_back(fileNameRoot+"hamming");
 						}
+						
 					}
 				}	
 			}

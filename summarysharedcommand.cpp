@@ -31,6 +31,18 @@
 #include "sharedbraycurtis.h"
 #include "sharedjackknife.h"
 #include "whittaker.h"
+#include "odum.h"
+#include "canberra.h"
+#include "stricteuclidean.h"
+#include "strictchord.h"
+#include "hellinger.h"
+#include "manhattan.h"
+#include "strictpearson.h"
+#include "soergel.h"
+#include "spearman.h"
+#include "strictkulczynski.h"
+#include "speciesprofile.h"
+#include "hamming.h"
 
 //**********************************************************************************************************************
 vector<string> SummarySharedCommand::getValidParameters(){	
@@ -210,6 +222,30 @@ SummarySharedCommand::SummarySharedCommand(string option)  {
 							sumCalculators.push_back(new BrayCurtis());
 						}else if (Estimators[i] == "whittaker") { 
 							sumCalculators.push_back(new Whittaker());
+						}else if (Estimators[i] == "odum") { 
+							sumCalculators.push_back(new Odum());
+						}else if (Estimators[i] == "canberra") { 
+							sumCalculators.push_back(new Canberra());
+						}else if (Estimators[i] == "stricteuclidean") { 
+							sumCalculators.push_back(new StrictEuclidean());
+						}else if (Estimators[i] == "strictchord") { 
+							sumCalculators.push_back(new StrictChord());
+						}else if (Estimators[i] == "hellinger") { 
+							sumCalculators.push_back(new Hellinger());
+						}else if (Estimators[i] == "manhattan") { 
+							sumCalculators.push_back(new Manhattan());
+						}else if (Estimators[i] == "strictpearson") { 
+							sumCalculators.push_back(new StrictPearson());
+						}else if (Estimators[i] == "soergel") { 
+							sumCalculators.push_back(new Soergel());
+						}else if (Estimators[i] == "spearman") { 
+							sumCalculators.push_back(new Spearman());
+						}else if (Estimators[i] == "strictkulczynski") { 
+							sumCalculators.push_back(new StrictKulczynski());
+						}else if (Estimators[i] == "speciesprofile") { 
+							sumCalculators.push_back(new SpeciesProfile());
+						}else if (Estimators[i] == "hamming") { 
+							sumCalculators.push_back(new Hamming());
 						}
 					}
 				}
