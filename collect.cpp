@@ -132,17 +132,25 @@ try {
 								//how many comparisons to make i.e. for group a, b, c = ab, ac, bc.
 
                                 int n = 1;
+								bool pair = true;
                                 for (int k = 0; k < (lookup.size() - 1); k++) { // pass cdd each set of groups to commpare
                                         for (int l = n; l < lookup.size(); l++) {
 												subset.clear(); //clear out old pair of sharedrabunds
 												//add new pair of sharedrabund vectors
 												subset.push_back(lookup[k]); subset.push_back(lookup[l]);
-                                                ccd->updateSharedData(subset, i+1, globaldata->Groups.size());
+											
+												//load subset with rest of lookup for those calcs that need everyone to calc for a pair
+												for (int w = 0; w < lookup.size(); w++) {
+													if ((w != k) && (w != l)) { subset.push_back(lookup[w]); }
+												}
+											
+                                                ccd->updateSharedData(subset, i+1, globaldata->Groups.size(), pair);
                                         }
                                         n++;
                                 }
 								//if this is a calculator that can do multiples then do them
-								ccd->updateSharedData(lookup, i+1, globaldata->Groups.size()); 
+								pair = false;
+								ccd->updateSharedData(lookup, i+1, globaldata->Groups.size(), pair); 
                         }
                         totalNumSeq = i+1;
                 }
@@ -151,17 +159,25 @@ try {
                 if(numSeqs % increment != 0){
                         //how many comparisons to make i.e. for group a, b, c = ab, ac, bc.
                         int n = 1;
+						bool pair = true;
                         for (int k = 0; k < (lookup.size() - 1); k++) { // pass cdd each set of groups to commpare
                                 for (int l = n; l < lookup.size(); l++) {
 										subset.clear(); //clear out old pair of sharedrabunds
 										//add new pair of sharedrabund vectors
 										subset.push_back(lookup[k]); subset.push_back(lookup[l]);
-										ccd->updateSharedData(subset, totalNumSeq, globaldata->Groups.size());
+									
+										//load subset with rest of lookup for those calcs that need everyone to calc for a pair
+										for (int w = 0; w < lookup.size(); w++) {
+											if ((w != k) && (w != l)) { subset.push_back(lookup[w]); }
+										}
+									
+										ccd->updateSharedData(subset, totalNumSeq, globaldata->Groups.size(), pair);
                                 }
                                 n++;
                         }
 						//if this is a calculator that can do multiples then do them
-						ccd->updateSharedData(lookup, totalNumSeq, globaldata->Groups.size()); 
+						pair = false;
+						ccd->updateSharedData(lookup, totalNumSeq, globaldata->Groups.size(), pair); 
                 }
                 
                 //resets output files

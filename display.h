@@ -23,6 +23,7 @@ public:
 	virtual void setAll(bool){}
 	virtual bool hasLciHci(){ return false; }
 	virtual bool getAll()	{	bool a; return a;	}
+	virtual bool calcNeedsAll()    { bool a; return a;	}
 	virtual string getName() { return ""; };
 	virtual ~Display() {}
 	Display() {  m = MothurOut::getInstance();  }

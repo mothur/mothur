@@ -81,6 +81,7 @@ public:
 	
 	
 	bool isCalcMultiple()	{ return estimate->getMultiple(); }
+	bool calcNeedsAll()     { return estimate->getNeedsAll(); }
 	bool hasLciHci()	{
 		if (estimate->getCols() == 3) { return true; } 
 		else{ return false; } 

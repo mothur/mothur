@@ -360,10 +360,10 @@ int TrimSeqsCommand::execute(){
 		#endif
 		
 		if (m->control_pressed) {  return 0; }			
-										
-		for(int i=0;i<fastaFileNames.size();i++){
 			
-			if (m->isBlank(fastaFileNames[i])) {  remove(fastaFileNames[i].c_str());	}
+		set<string> blanks;
+		for(int i=0;i<fastaFileNames.size();i++){
+			if (m->isBlank(fastaFileNames[i])) {   blanks.insert(fastaFileNames[i]);	}
 			else if (filesToRemove.count(fastaFileNames[i]) > 0) {  remove(fastaFileNames[i].c_str()); }
 			else {
 				ifstream inFASTA;
@@ -371,6 +371,10 @@ int TrimSeqsCommand::execute(){
 				m->openInputFile(fastaFileNames[i], inFASTA);
 				ofstream outGroups;
 				string outGroupFilename = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[i])) + "groups";
+				
+				//if the fastafile is on the blanks list then the groups file should be as well
+				if (blanks.count(fastaFileNames[i]) != 0) { blanks.insert(outGroupFilename); }
+				
 				m->openOutputFile(outGroupFilename, outGroups);
 				outputNames.push_back(outGroupFilename); outputTypes["group"].push_back(outGroupFilename);  
 				
@@ -394,30 +398,17 @@ int TrimSeqsCommand::execute(){
 			}
 		}
 		
+		for (set<string>::iterator itBlanks = blanks.begin(); itBlanks != blanks.end(); itBlanks++) {  remove((*(itBlanks)).c_str()); }
+		
+		blanks.clear();
 		if(qFileName != ""){
 			for(int i=0;i<qualFileNames.size();i++){
-				if (m->isBlank(qualFileNames[i])) {  remove(qualFileNames[i].c_str());	}
+				if (m->isBlank(qualFileNames[i])) {  blanks.insert(qualFileNames[i]);	}
 				else if (filesToRemove.count(qualFileNames[i]) > 0) {  remove(qualFileNames[i].c_str()); }
-				else {
-					ifstream inQual;
-					string seqName;
-					m->openInputFile(qualFileNames[i], inQual);
-//					ofstream outGroups;
-//					
-//					string thisGroup = "";
-//					if (i > comboStarts) {
-//						map<string, int>::iterator itCombo;
-//						for(itCombo=combos.begin();itCombo!=combos.end(); itCombo++){
-//							if(itCombo->second == i){	thisGroup = itCombo->first;	combos.erase(itCombo);  break;  }
-//						}
-//					}
-//					else{ thisGroup = groupVector[i]; }
-					
-					inQual.close();
-				}
 			}
 		}
 		
+		for (set<string>::iterator itBlanks = blanks.begin(); itBlanks != blanks.end(); itBlanks++) {  remove((*(itBlanks)).c_str()); }
 		
 		if (m->control_pressed) { 
 			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
