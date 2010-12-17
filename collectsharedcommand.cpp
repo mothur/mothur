@@ -33,16 +33,22 @@
 #include "whittaker.h"
 #include "odum.h"
 #include "canberra.h"
-#include "stricteuclidean.h"
-#include "strictchord.h"
+#include "structeuclidean.h"
+#include "structchord.h"
 #include "hellinger.h"
 #include "manhattan.h"
-#include "strictpearson.h"
+#include "structpearson.h"
 #include "soergel.h"
 #include "spearman.h"
-#include "strictkulczynski.h"
+#include "structkulczynski.h"
+#include "structchi2.h"
 #include "speciesprofile.h"
 #include "hamming.h"
+#include "gower.h"
+#include "memchi2.h"
+#include "memchord.h"
+#include "memeuclidean.h"
+#include "mempearson.h"
 
 //**********************************************************************************************************************
 vector<string> CollectSharedCommand::getValidParameters(){	
@@ -108,16 +114,22 @@ CollectSharedCommand::CollectSharedCommand(){
 		outputTypes["braycurtis"] = tempOutNames;
 		outputTypes["odum"] = tempOutNames;
 		outputTypes["canberra"] = tempOutNames;
-		outputTypes["stricteuclidean"] = tempOutNames;
-		outputTypes["strictchord"] = tempOutNames;
+		outputTypes["structeuclidean"] = tempOutNames;
+		outputTypes["structchord"] = tempOutNames;
 		outputTypes["hellinger"] = tempOutNames;
 		outputTypes["manhattan"] = tempOutNames;
-		outputTypes["strictpearson"] = tempOutNames;
+		outputTypes["structpearson"] = tempOutNames;
 		outputTypes["soergel"] = tempOutNames;
 		outputTypes["spearman"] = tempOutNames;
-		outputTypes["strictkulczynski"] = tempOutNames;
+		outputTypes["structkulczynski"] = tempOutNames;
+		outputTypes["structchi2"] = tempOutNames;
 		outputTypes["speciesprofile"] = tempOutNames;
 		outputTypes["hamming"] = tempOutNames;
+		outputTypes["gower"] = tempOutNames;
+		outputTypes["memchi2"] = tempOutNames;
+		outputTypes["memchord"] = tempOutNames;
+		outputTypes["memeuclidean"] = tempOutNames;
+		outputTypes["mempearson"] = tempOutNames;
 		
 	}
 	catch(exception& e) {
@@ -178,17 +190,22 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 			outputTypes["braycurtis"] = tempOutNames;
 			outputTypes["odum"] = tempOutNames;
 			outputTypes["canberra"] = tempOutNames;
-			outputTypes["stricteuclidean"] = tempOutNames;
-			outputTypes["strictchord"] = tempOutNames;
+			outputTypes["structeuclidean"] = tempOutNames;
+			outputTypes["structchord"] = tempOutNames;
 			outputTypes["hellinger"] = tempOutNames;
 			outputTypes["manhattan"] = tempOutNames;
-			outputTypes["strictpearson"] = tempOutNames;
+			outputTypes["structpearson"] = tempOutNames;
 			outputTypes["soergel"] = tempOutNames;
 			outputTypes["spearman"] = tempOutNames;
-			outputTypes["strictkulczynski"] = tempOutNames;
+			outputTypes["structkulczynski"] = tempOutNames;
 			outputTypes["speciesprofile"] = tempOutNames;
+			outputTypes["structchi2"] = tempOutNames;
 			outputTypes["hamming"] = tempOutNames;
-
+			outputTypes["gower"] = tempOutNames;
+			outputTypes["memchi2"] = tempOutNames;
+			outputTypes["memchord"] = tempOutNames;
+			outputTypes["memeuclidean"] = tempOutNames;
+			outputTypes["mempearson"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -318,36 +335,54 @@ CollectSharedCommand::CollectSharedCommand(string option)  {
 						}else if (Estimators[i] == "canberra") { 
 							cDisplays.push_back(new CollectDisplay(new Canberra(), new SharedOneColumnFile(fileNameRoot+"canberra")));
 							outputNames.push_back(fileNameRoot+"canberra"); outputTypes["canberra"].push_back(fileNameRoot+"canberra");
-						}else if (Estimators[i] == "stricteuclidean") { 
-							cDisplays.push_back(new CollectDisplay(new StrictEuclidean(), new SharedOneColumnFile(fileNameRoot+"stricteuclidean")));
-							outputNames.push_back(fileNameRoot+"stricteuclidean"); outputTypes["stricteuclidean"].push_back(fileNameRoot+"stricteuclidean");
-						}else if (Estimators[i] == "strictchord") { 
-							cDisplays.push_back(new CollectDisplay(new StrictChord(), new SharedOneColumnFile(fileNameRoot+"strictchord")));
-							outputNames.push_back(fileNameRoot+"strictchord"); outputTypes["strictchord"].push_back(fileNameRoot+"strictchord");
+						}else if (Estimators[i] == "structeuclidean") { 
+							cDisplays.push_back(new CollectDisplay(new StructEuclidean(), new SharedOneColumnFile(fileNameRoot+"structeuclidean")));
+							outputNames.push_back(fileNameRoot+"structeuclidean"); outputTypes["structeuclidean"].push_back(fileNameRoot+"structeuclidean");
+						}else if (Estimators[i] == "structchord") { 
+							cDisplays.push_back(new CollectDisplay(new StructChord(), new SharedOneColumnFile(fileNameRoot+"structchord")));
+							outputNames.push_back(fileNameRoot+"structchord"); outputTypes["structchord"].push_back(fileNameRoot+"structchord");
 						}else if (Estimators[i] == "hellinger") { 
 							cDisplays.push_back(new CollectDisplay(new Hellinger(), new SharedOneColumnFile(fileNameRoot+"hellinger")));
 							outputNames.push_back(fileNameRoot+"hellinger"); outputTypes["hellinger"].push_back(fileNameRoot+"hellinger");
 						}else if (Estimators[i] == "manhattan") { 
 							cDisplays.push_back(new CollectDisplay(new Manhattan(), new SharedOneColumnFile(fileNameRoot+"manhattan")));
 							outputNames.push_back(fileNameRoot+"manhattan"); outputTypes["manhattan"].push_back(fileNameRoot+"manhattan");
-						}else if (Estimators[i] == "strictpearson") { 
-							cDisplays.push_back(new CollectDisplay(new StrictPearson(), new SharedOneColumnFile(fileNameRoot+"strictpearson")));
-							outputNames.push_back(fileNameRoot+"strictpearson"); outputTypes["strictpearson"].push_back(fileNameRoot+"strictpearson");
+						}else if (Estimators[i] == "structpearson") { 
+							cDisplays.push_back(new CollectDisplay(new StructPearson(), new SharedOneColumnFile(fileNameRoot+"structpearson")));
+							outputNames.push_back(fileNameRoot+"structpearson"); outputTypes["structpearson"].push_back(fileNameRoot+"structpearson");
 						}else if (Estimators[i] == "soergel") { 
 							cDisplays.push_back(new CollectDisplay(new Soergel(), new SharedOneColumnFile(fileNameRoot+"soergel")));
 							outputNames.push_back(fileNameRoot+"soergel"); outputTypes["soergel"].push_back(fileNameRoot+"soergel");
 						}else if (Estimators[i] == "spearman") { 
 							cDisplays.push_back(new CollectDisplay(new Spearman(), new SharedOneColumnFile(fileNameRoot+"spearman")));
 							outputNames.push_back(fileNameRoot+"spearman"); outputTypes["spearman"].push_back(fileNameRoot+"spearman");
-						}else if (Estimators[i] == "strictkulczynski") { 
-							cDisplays.push_back(new CollectDisplay(new StrictKulczynski(), new SharedOneColumnFile(fileNameRoot+"strictkulczynski")));
-							outputNames.push_back(fileNameRoot+"strictkulczynski"); outputTypes["strictkulczynski"].push_back(fileNameRoot+"strictkulczynski");
+						}else if (Estimators[i] == "structkulczynski") { 
+							cDisplays.push_back(new CollectDisplay(new StructKulczynski(), new SharedOneColumnFile(fileNameRoot+"structkulczynski")));
+							outputNames.push_back(fileNameRoot+"structkulczynski"); outputTypes["structkulczynski"].push_back(fileNameRoot+"structkulczynski");
 						}else if (Estimators[i] == "speciesprofile") { 
 							cDisplays.push_back(new CollectDisplay(new SpeciesProfile(), new SharedOneColumnFile(fileNameRoot+"speciesprofile")));
 							outputNames.push_back(fileNameRoot+"speciesprofile"); outputTypes["speciesprofile"].push_back(fileNameRoot+"speciesprofile");
 						}else if (Estimators[i] == "hamming") { 
 							cDisplays.push_back(new CollectDisplay(new Hamming(), new SharedOneColumnFile(fileNameRoot+"hamming")));
 							outputNames.push_back(fileNameRoot+"hamming"); outputTypes["hamming"].push_back(fileNameRoot+"hamming");
+						}else if (Estimators[i] == "structchi2") { 
+							cDisplays.push_back(new CollectDisplay(new StructChi2(), new SharedOneColumnFile(fileNameRoot+"structchi2")));
+							outputNames.push_back(fileNameRoot+"structchi2"); outputTypes["structchi2"].push_back(fileNameRoot+"structchi2");
+						}else if (Estimators[i] == "gower") { 
+							cDisplays.push_back(new CollectDisplay(new Gower(), new SharedOneColumnFile(fileNameRoot+"gower")));
+							outputNames.push_back(fileNameRoot+"gower"); outputTypes["gower"].push_back(fileNameRoot+"gower");
+						}else if (Estimators[i] == "memchi2") { 
+							cDisplays.push_back(new CollectDisplay(new MemChi2(), new SharedOneColumnFile(fileNameRoot+"memchi2")));
+							outputNames.push_back(fileNameRoot+"memchi2"); outputTypes["memchi2"].push_back(fileNameRoot+"memchi2");
+						}else if (Estimators[i] == "memchord") { 
+							cDisplays.push_back(new CollectDisplay(new MemChord(), new SharedOneColumnFile(fileNameRoot+"memchord")));
+							outputNames.push_back(fileNameRoot+"memchord"); outputTypes["memchord"].push_back(fileNameRoot+"memchord");
+						}else if (Estimators[i] == "memeuclidean") { 
+							cDisplays.push_back(new CollectDisplay(new MemEuclidean(), new SharedOneColumnFile(fileNameRoot+"memeuclidean")));
+							outputNames.push_back(fileNameRoot+"memeuclidean"); outputTypes["memeuclidean"].push_back(fileNameRoot+"memeuclidean");
+						}else if (Estimators[i] == "mempearson") { 
+							cDisplays.push_back(new CollectDisplay(new MemPearson(), new SharedOneColumnFile(fileNameRoot+"mempearson")));
+							outputNames.push_back(fileNameRoot+"mempearson"); outputTypes["mempearson"].push_back(fileNameRoot+"mempearson");
 						}
 						
 					}

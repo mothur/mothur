@@ -262,16 +262,22 @@ void ValidCalculators::initialShared() {
 		shared["braycurtis"]			= "braycurtis";
 		shared["odum"]					= "odum";
 		shared["canberra"]				= "canberra";
-		shared["stricteuclidean"]		= "stricteuclidean";
-		shared["strictchord"]			= "strictchord";
+		shared["structeuclidean"]		= "structeuclidean";
+		shared["structchord"]			= "structchord";
 		shared["hellinger"]				= "hellinger";
 		shared["manhattan"]				= "manhattan";
-		shared["strictpearson"]			= "strictpearson";
+		shared["structpearson"]			= "structpearson";
 		shared["soergel"]				= "soergel";
 		shared["spearman"]				= "spearman";
-		shared["strictkulczynski"]		= "strictkulczynski";
+		shared["structkulczynski"]		= "structkulczynski";
+		shared["structchi2"]			= "structchi2";
 		shared["speciesprofile"]		= "speciesprofile";
 		shared["hamming"]				= "hamming";
+		shared["gower"]					= "gower";
+		shared["memchi2"]				= "memchi2";
+		shared["memchord"]				= "memchord";
+		shared["memeuclidean"]			= "memeuclidean";
+		shared["mempearson"]			= "mempearson";
 		shared["default"]	            = "default";
 	}
 	catch(exception& e) {
@@ -369,16 +375,22 @@ void ValidCalculators::initialSharedSummary() {
 		sharedsummary["braycurtis"]				= "braycurtis";
 		sharedsummary["odum"]					= "odum";
 		sharedsummary["canberra"]				= "canberra";
-		sharedsummary["stricteuclidean"]		= "stricteuclidean";
-		sharedsummary["strictchord"]			= "strictchord";
+		sharedsummary["structeuclidean"]		= "structeuclidean";
+		sharedsummary["structchord"]			= "structchord";
 		sharedsummary["hellinger"]				= "hellinger";
 		sharedsummary["manhattan"]				= "manhattan";
-		sharedsummary["strictpearson"]			= "strictpearson";
-		sharedsummary["strictkulczynski"]		= "strictkulczynski";
+		sharedsummary["structpearson"]			= "structpearson";
+		sharedsummary["structkulczynski"]		= "structkulczynski";
+		sharedsummary["structchi2"]				= "structchi2";
 		sharedsummary["soergel"]				= "soergel";
 		sharedsummary["spearman"]				= "spearman";
 		sharedsummary["speciesprofile"]			= "speciesprofile";
 		sharedsummary["hamming"]				= "hamming";
+		sharedsummary["gower"]					= "gower";
+		sharedsummary["memchi2"]				= "memchi2";
+		sharedsummary["memchord"]				= "memchord";
+		sharedsummary["memeuclidean"]			= "memeuclidean";
+		sharedsummary["mempearson"]				= "mempearson";
 		sharedsummary["default"]				= "default";
 	}
 	catch(exception& e) {
