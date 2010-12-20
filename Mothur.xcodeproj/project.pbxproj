@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		7E13BDD112BE3FEE004B8A53 /* reportfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = reportfile.h; sourceTree = "<group>"; };
+		7E13BDD212BE3FEF004B8A53 /* reportfile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = reportfile.cpp; sourceTree = "<group>"; };
 		7E4EBD43122018FB00D85E7B /* simpsoneven.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = simpsoneven.h; sourceTree = "<group>"; };
 		7E4EBD44122018FB00D85E7B /* simpsoneven.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = simpsoneven.cpp; sourceTree = "<group>"; };
 		7E5B28DC121FEFCC0005339C /* shannoneven.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shannoneven.h; sourceTree = "<group>"; };
@@ -656,6 +658,8 @@
 				A7DA2174113FECD400BF472F /* validparameter.h */,
 				A7DA2175113FECD400BF472F /* venn.cpp */,
 				A7DA2176113FECD400BF472F /* venn.h */,
+				7E13BDD112BE3FEE004B8A53 /* reportfile.h */,
+				7E13BDD212BE3FEF004B8A53 /* reportfile.cpp */,
 			);
 			name = mothur;
 			sourceTree = "<group>";

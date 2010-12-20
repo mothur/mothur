@@ -42,6 +42,9 @@ private:
 	int stripBarcode(Sequence&, QualityScores&, int&);
 	int stripForward(Sequence&, QualityScores&, int&);
 	bool stripReverse(Sequence&, QualityScores&);
+	bool keepFirstTrim(Sequence&, QualityScores&);
+	bool removeLastTrim(Sequence&, QualityScores&);
+
 	bool cullLength(Sequence&);
 	bool cullHomoP(Sequence&);
 	bool cullAmbigs(Sequence&);
@@ -54,7 +57,7 @@ private:
 	
 	bool flip, allFiles, qtrim;
 	int numFPrimers, numRPrimers, maxAmbig, maxHomoP, minLength, maxLength, processors, tdiffs, bdiffs, pdiffs, comboStarts;
-	int qWindowSize, qWindowStep;
+	int qWindowSize, qWindowStep, keepFirst, removeLast;
 	double qRollAverage, qThreshold, qWindowAverage, qAverage;
 	vector<string> revPrimer, outputNames;
 	set<string> filesToRemove;

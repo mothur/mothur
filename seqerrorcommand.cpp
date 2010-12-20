@@ -8,11 +8,13 @@
  */
 
 #include "seqerrorcommand.h"
+#include "reportfile.h"
+#include "qualityscores.h"
 
 //**********************************************************************************************************************
 vector<string> SeqErrorCommand::getValidParameters(){	
 	try {
-		string Array[] =  {"query", "reference", "name", "threshold", "inputdir", "outputdir"};
+		string Array[] =  {"query", "reference", "name", "qfile", "report", "threshold", "inputdir", "outputdir"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
@@ -72,7 +74,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			string temp;
 			
 			//valid paramters for this command
-			string AlignArray[] =  {"query", "reference", "name", "threshold", "inputdir", "outputdir"};
+			string AlignArray[] =  {"query", "reference", "name", "qfile", "report", "threshold", "inputdir", "outputdir"};
 			
 //need to implement name file option
 			
@@ -116,11 +118,27 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 				}
 				
 				it = parameters.find("name");
-				//user has given a template file
+				//user has given a names file
 				if(it != parameters.end()){ 
 					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["name"] = inputDir + it->second;		}
+				}
+
+				it = parameters.find("qfile");
+				//user has given a quality score file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("report");
+				//user has given a alignment report file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["report"] = inputDir + it->second;		}
 				}
 				
 			}
@@ -133,10 +151,24 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			if (referenceFileName == "not found") { m->mothurOut("reference is a required parameter for the seq.error command."); m->mothurOutEndLine(); abort = true; }
 			else if (referenceFileName == "not open") { abort = true; }	
 			
-			//if the user changes the output directory command factory will send this info to us in the output parameter 
+
+			//check for optional parameters
 			namesFileName = validParameter.validFile(parameters, "name", true);
 			if(namesFileName == "not found"){	namesFileName = "";	}
-			cout << namesFileName << endl;
+			
+			qualFileName = validParameter.validFile(parameters, "qfile", true);
+			if(qualFileName == "not found"){	qualFileName = "";	}
+
+			reportFileName = validParameter.validFile(parameters, "report", true);
+			if(reportFileName == "not found"){	reportFileName = "";	}
+			
+			if((reportFileName != "" && qualFileName == "") || (reportFileName == "" && qualFileName != "")){
+				m->mothurOut("if you use either a qual file or a report file, you have to have both.");
+				m->mothurOutEndLine();
+				abort = true; 
+			}
+			
+			
 			
 			outputDir = validParameter.validFile(parameters, "outputdir", false);
 			if (outputDir == "not found"){	
@@ -205,7 +237,18 @@ int SeqErrorCommand::execute(){
 		
 		ifstream queryFile;
 		m->openInputFile(queryFileName, queryFile);
-				
+		
+		ifstream reportFile;
+		ifstream qualFile;
+
+		ReportFile report;
+		QualityScores quality;
+
+		if(qualFileName != "" && reportFileName != ""){
+			m->openInputFile(qualFileName, qualFile);
+			report = ReportFile(reportFile, reportFileName);
+		}
+		
 		int totalBases = 0;
 		int totalMatches = 0;
 		
@@ -214,10 +257,14 @@ int SeqErrorCommand::execute(){
 		int numSeqs = 0;
 		
 		map<string, int>::iterator it;
+		map<char, vector<int> > qScoreErrorMap;
+		qScoreErrorMap['m'].assign(41, 0);
+		qScoreErrorMap['s'].assign(41, 0);
+		qScoreErrorMap['i'].assign(41, 0);
+		qScoreErrorMap['a'].assign(41, 0);
 		
 		while(queryFile){
 			Compare minCompare;
-			
 			Sequence query(queryFile);
 			
 			for(int i=0;i<numRefs;i++){
@@ -226,19 +273,27 @@ int SeqErrorCommand::execute(){
 				if(currCompare.errorRate < minCompare.errorRate){
 					minCompare = currCompare;
 				}
-				
 			}
 
 			if(namesFileName != ""){
 				it = weights.find(query.getName());
 				minCompare.weight = it->second;
 			}
-			else {
-				minCompare.weight = 1;
-			}
+			else	{	minCompare.weight = 1;	}
 
 			printErrorData(minCompare);
 
+			if(qualFileName != "" && reportFileName != ""){
+				report = ReportFile(reportFile);
+				
+				int origLength = report.getQueryLength();
+				int startBase = report.getQueryStart();
+				int endBase = report.getQueryEnd();
+
+				quality = QualityScores(qualFile, origLength);
+				quality.updateQScoreErrorMap(qScoreErrorMap, minCompare.sequence, startBase, endBase, minCompare.weight);
+			}			
+			
 			if(minCompare.errorRate < threshold){
 				totalBases += (minCompare.total * minCompare.weight);
 				totalMatches += minCompare.matches * minCompare.weight;
@@ -250,11 +305,23 @@ int SeqErrorCommand::execute(){
 				numSeqs++;
 			}
 			
+			
 		}
 		queryFile.close();
 		
 		int total = 0;
 		
+		if(qualFileName != "" && reportFileName != ""){
+			string errorQualityFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.quality";
+			ofstream errorQualityFile;
+			m->openOutputFile(errorQualityFileName, errorQualityFile);
+			outputNames.push_back(errorQualityFileName);  outputTypes["error.quality"].push_back(errorQualityFileName);
+			
+			errorQualityFile << "qscore\tmatches\tsubstitutions\tinsertions\tambiguous" << endl;
+			for(int i=0;i<41;i++){
+				errorQualityFile << i << '\t' << qScoreErrorMap['m'][i] << '\t' << qScoreErrorMap['s'][i] << '\t' << qScoreErrorMap['i'][i] << '\t'<< qScoreErrorMap['a'][i] << endl;
+			}
+		}
 		
 		string errorCountFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.count";
 		ofstream errorCountFile;

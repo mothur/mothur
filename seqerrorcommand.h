@@ -60,7 +60,7 @@ private:
 	void printErrorHeader();
 	void printErrorData(Compare);
 	
-	string queryFileName, referenceFileName, namesFileName, errorSummaryFileName, errorSeqFileName, outputDir;
+	string queryFileName, referenceFileName, qualFileName, reportFileName, namesFileName, errorSummaryFileName, errorSeqFileName, outputDir;
 	double threshold;
 	int numRefs;
 	ofstream errorSummaryFile, errorSeqFile;
