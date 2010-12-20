@@ -14,7 +14,9 @@
 vector<string> TrimSeqsCommand::getValidParameters(){	
 	try {
 		string Array[] =  {"fasta", "flip", "oligos", "maxambig", "maxhomop", "group","minlength", "maxlength", "qfile", 
-									"qthreshold", "qwindowaverage", "qstepsize", "qwindowsize", "qaverage", "rollaverage", "allfiles", "qtrim","tdiffs", "pdiffs", "bdiffs", "processors", "outputdir","inputdir"};
+									"qthreshold", "qwindowaverage", "qstepsize", "qwindowsize", "qaverage", "rollaverage",
+									"keepfirst", "removelast",
+									"allfiles", "qtrim","tdiffs", "pdiffs", "bdiffs", "processors", "outputdir","inputdir"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
@@ -74,8 +76,10 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string AlignArray[] =  {"fasta", "flip", "group","oligos", "maxambig", "maxhomop", "minlength", "maxlength", "qfile", 
-									"qthreshold", "qwindowaverage", "qstepsize", "qwindowsize", "qaverage", "rollaverage", "allfiles", "qtrim","tdiffs", "pdiffs", "bdiffs", "processors", "outputdir","inputdir"};
+			string AlignArray[] =  {	"fasta", "flip", "oligos", "maxambig", "maxhomop", "group","minlength", "maxlength", "qfile", 
+								"qthreshold", "qwindowaverage", "qstepsize", "qwindowsize", "qaverage", "rollaverage",
+								"keepfirst", "removelast",
+								"allfiles", "qtrim","tdiffs", "pdiffs", "bdiffs", "processors", "outputdir","inputdir"};
 			
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
@@ -204,14 +208,20 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "qwindowaverage", false);if (temp == "not found") { temp = "0"; }
 			convert(temp, qWindowAverage);
 
-			temp = validParameter.validFile(parameters, "qwindowsize", false);	if (temp == "not found") { temp = "100"; }
+			temp = validParameter.validFile(parameters, "qwindowsize", false);	if (temp == "not found") { temp = "50"; }
 			convert(temp, qWindowSize);
 
-			temp = validParameter.validFile(parameters, "qstepsize", false);		if (temp == "not found") { temp = "10"; }
+			temp = validParameter.validFile(parameters, "qstepsize", false);	if (temp == "not found") { temp = "1"; }
 			convert(temp, qWindowStep);
 
 			temp = validParameter.validFile(parameters, "qaverage", false);		if (temp == "not found") { temp = "0"; }
 			convert(temp, qAverage);
+
+			temp = validParameter.validFile(parameters, "keepfirst", false);	if (temp == "not found") { temp = "0"; }
+			convert(temp, keepFirst);
+
+			temp = validParameter.validFile(parameters, "removelast", false);	if (temp == "not found") { temp = "0"; }
+			convert(temp, removeLast);
 			
 			temp = validParameter.validFile(parameters, "allfiles", false);		if (temp == "not found") { temp = "F"; }
 			allFiles = m->isTrue(temp);
@@ -337,7 +347,7 @@ int TrimSeqsCommand::execute(){
 			outputNames.push_back(groupFile); outputTypes["group"].push_back(groupFile);
 			getOligos(fastaFileNames, qualFileNames);
 		}
-		
+
 		vector<unsigned long int> fastaFilePos;
 		vector<unsigned long int> qFilePos;
 		
@@ -507,25 +517,12 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 				string trashCode = "";
 				int currentSeqsDiffs = 0;
 
-				if(qFileName != ""){
-					if(qThreshold != 0)			{	success = currQual.stripQualThreshold(currSeq, qThreshold);			}
-					else if(qAverage != 0)		{	success = currQual.cullQualAverage(currSeq, qAverage);				}
-					else if(qRollAverage != 0)	{	success = currQual.stripQualRollingAverage(currSeq, qRollAverage);	}
-					else if(qWindowAverage != 0){	success = currQual.stripQualWindowAverage(currSeq, qWindowStep, qWindowSize, qWindowAverage);	}
-
-					if (qtrim == 1 && (origSeq.length() != currSeq.getUnaligned().length())) { 
-						success = 0; //if you don't want to trim and the sequence does not meet quality requirements, move to scrap
-					}
-
-					if(!success)				{	trashCode += 'q';	}
-				}
-			
 				if(barcodes.size() != 0){
 					success = stripBarcode(currSeq, currQual, groupBar);
 					if(success > bdiffs)		{	trashCode += 'b';	}
 					else{ currentSeqsDiffs += success;  }
 				}
-
+				
 				if(numFPrimers != 0){
 					success = stripForward(currSeq, currQual, groupPrime);
 					if(success > pdiffs)		{	trashCode += 'f';	}
@@ -533,11 +530,36 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 				}
 				
 				if (currentSeqsDiffs > tdiffs)	{	trashCode += 't';   }
-
+				
 				if(numRPrimers != 0){
 					success = stripReverse(currSeq, currQual);
 					if(!success)				{	trashCode += 'r';	}
 				}
+
+				if(keepFirst != 0){
+					success = keepFirstTrim(currSeq, currQual);
+				}
+				
+				if(removeLast != 0){
+					success = removeLastTrim(currSeq, currQual);
+					if(!success)				{	trashCode += 'l';	}
+				}
+
+				
+				if(qFileName != ""){
+					
+					if(qThreshold != 0)			{	success = currQual.stripQualThreshold(currSeq, qThreshold);			}
+					else if(qAverage != 0)		{	success = currQual.cullQualAverage(currSeq, qAverage);				}
+					else if(qRollAverage != 0)	{	success = currQual.stripQualRollingAverage(currSeq, qRollAverage);	}
+					else if(qWindowAverage != 0){	success = currQual.stripQualWindowAverage(currSeq, qWindowStep, qWindowSize, qWindowAverage);	}
+					else						{	success = 1;				}
+
+//					if (qtrim == 1 && (origSeq.length() != currSeq.getUnaligned().length())) { 
+//						success = 0; //if you don't want to trim and the sequence does not meet quality requirements, move to scrap
+//					}
+					
+					if(!success)				{	trashCode += 'q';	}
+				}				
 		
 				if(minLength > 0 || maxLength > 0){
 					success = cullLength(currSeq);
@@ -552,7 +574,10 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 					if(!success)				{	trashCode += 'n';	}
 				}
 				
-				if(flip){	currSeq.reverseComplement();		currQual.flipQScores();	}		// should go last			
+				if(flip){		// should go last			
+					currSeq.reverseComplement();
+					currQual.flipQScores();	
+				}
 				
 				if(trashCode.length() == 0){
 					currSeq.setAligned(currSeq.getUnaligned());
@@ -1128,7 +1153,6 @@ int TrimSeqsCommand::stripForward(Sequence& seq, QualityScores& qual, int& group
 				seq.setUnaligned(rawSequence.substr(oligo.length()));
 				if(qual.getName() != ""){
 					qual.trimQScores(oligo.length(), -1);
-					
 				}
 				success = 0;
 				break;
@@ -1266,6 +1290,52 @@ bool TrimSeqsCommand::stripReverse(Sequence& seq, QualityScores& qual){
 
 //***************************************************************************************************************
 
+bool TrimSeqsCommand::keepFirstTrim(Sequence& sequence, QualityScores& qscores){
+	try {
+		bool success = 1;
+		if(qscores.getName() != ""){
+			qscores.trimQScores(-1, keepFirst);
+		}
+		sequence.trim(keepFirst);
+		return success;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "keepFirstTrim", "countDiffs");
+		exit(1);
+	}
+	
+}	
+
+//***************************************************************************************************************
+
+bool TrimSeqsCommand::removeLastTrim(Sequence& sequence, QualityScores& qscores){
+	try {
+		bool success = 0;
+		
+		int length = sequence.getNumBases() - removeLast;
+		
+		if(length > 0){
+			if(qscores.getName() != ""){
+				qscores.trimQScores(-1, length);
+			}
+			sequence.trim(length);
+			success = 1;
+		}
+		else{
+			success = 0;
+		}
+
+		return success;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "removeLastTrim", "countDiffs");
+		exit(1);
+	}
+	
+}	
+
+//***************************************************************************************************************
+
 bool TrimSeqsCommand::cullLength(Sequence& seq){
 	try {
 	
@@ -1397,78 +1467,5 @@ int TrimSeqsCommand::countDiffs(string oligo, string seq){
 	}
 
 }
-//***************************************************************************************************************
-
-//bool TrimSeqsCommand::stripQualThreshold(Sequence& seq, ifstream& qFile){
-//	try {
-//		
-//		string rawSequence = seq.getUnaligned();
-//		int seqLength = seq.getNumBases();
-//		bool success = 0;	//guilty until proven innocent
-//		string name;
-//		
-//		qFile >> name;
-//		if (name[0] == '>') {  if(name.substr(1) != seq.getName())	{	m->mothurOut("sequence name mismatch btwn fasta: " + seq.getName() + " and qual file: " + name); m->mothurOutEndLine();	}  }
-//		
-//		while (!qFile.eof())	{	char c = qFile.get(); if (c == 10 || c == 13){	break;	}	}
-//		
-//		int score;
-//		int end = seqLength;
-//		
-//		for(int i=0;i<seqLength;i++){
-//			qFile >> score;
-//			
-//			if(score < qThreshold){
-//				end = i;
-//				break;
-//			}
-//		}
-//		for(int i=end+1;i<seqLength;i++){
-//			qFile >> score;
-//		}
-//		
-//		seq.setUnaligned(rawSequence.substr(0,end));
-//		
-//		return 1;
-//	}
-//	catch(exception& e) {
-//		m->errorOut(e, "TrimSeqsCommand", "stripQualThreshold");
-//		exit(1);
-//	}
-//}
-
-//***************************************************************************************************************
-
-//bool TrimSeqsCommand::cullQualAverage(Sequence& seq, ifstream& qFile){
-//	try {
-//		string rawSequence = seq.getUnaligned();
-//		int seqLength = seq.getNumBases();
-//		bool success = 0;	//guilty until proven innocent
-//		string name;
-//		
-//		qFile >> name;
-//		if (name[0] == '>') {  if(name.substr(1) != seq.getName())	{	m->mothurOut("sequence name mismatch btwn fasta: " + seq.getName() + " and qual file: " + name); m->mothurOutEndLine();	}  }
-//		
-//		while (!qFile.eof())	{	char c = qFile.get(); if (c == 10 || c == 13){	break;	}	}
-//		
-//		float score;	
-//		float average = 0;
-//		
-//		for(int i=0;i<seqLength;i++){
-//			qFile >> score;
-//			average += score;
-//		}
-//		average /= seqLength;
-//
-//		if(average >= qAverage)	{	success = 1;	}
-//		else					{	success = 0;	}
-//		
-//		return success;
-//	}
-//	catch(exception& e) {
-//		m->errorOut(e, "TrimSeqsCommand", "cullQualAverage");
-//		exit(1);
-//	}
-//}
 
 //***************************************************************************************************************

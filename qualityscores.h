@@ -29,6 +29,7 @@ public:
 	bool stripQualRollingAverage(Sequence&, double);
 	bool stripQualWindowAverage(Sequence&, int, int, double);
 	bool cullQualAverage(Sequence&, double);
+	void updateQScoreErrorMap(map<char, vector<int> >&, string, int, int, int);
 private:
 	
 	double calculateAverage();

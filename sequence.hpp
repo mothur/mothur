@@ -37,6 +37,7 @@ public:
 	void setAligned(string);
 	void setLength();
 	void reverseComplement();
+	void trim(int);
 	
 	string convert2ints();
 	string getName();

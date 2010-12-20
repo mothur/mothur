@@ -34,11 +34,8 @@ QualityScores::QualityScores(ifstream& qFile, int l){
 		seqLength = l;
 		int score;
 		
-		//string line;
-		//m->getline(qFile, line); 
-		//istringstream nameStream(line);
-	
 		qFile >> seqName; 
+
 		while (!qFile.eof())	{	char c = qFile.get(); if (c == 10 || c == 13 || c == -1){	break;	}	} // get rest of line 
 		m->gobble(qFile);
 		if (seqName == "") { m->mothurOut("Error reading quality file, name blank at position, " + toString(qFile.tellg())); m->mothurOutEndLine(); }
@@ -106,8 +103,6 @@ QualityScores::QualityScores(ifstream& qFile, int l){
 }
 /**************************************************************************************************/
 
-/**************************************************************************************************/
-
 string QualityScores::getName(){
 	
 	try {
@@ -151,8 +146,10 @@ void QualityScores::trimQScores(int start, int end){
 			qScores = hold;		
 		}
 		if(start == -1){
-			hold = vector<int>(qScores.begin(), qScores.begin()+end);	//not sure if indexing is correct
-			qScores = hold;		
+			if(qScores.size() > end){
+				hold = vector<int>(qScores.begin(), qScores.begin()+end);
+				qScores = hold;		
+			}
 		}
 
 		seqLength = qScores.size();
@@ -267,7 +264,8 @@ bool QualityScores::stripQualWindowAverage(Sequence& sequence, int stepSize, int
 		int end = windowSize;
 		int start = 0;
 		
-
+		if(seqLength < windowSize) {	return 0;	}
+		
 		while(start < seqLength){
 			double windowSum = 0.0000;
 
@@ -335,6 +333,27 @@ bool QualityScores::cullQualAverage(Sequence& sequence, double qAverage){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "TrimSeqsCommand", "cullQualAverage");
+		exit(1);
+	}
+}
+
+/**************************************************************************************************/
+
+void QualityScores::updateQScoreErrorMap(map<char, vector<int> >& qualErrorMap, string errorSeq, int start, int stop, int weight){
+	try {
+	
+		for(int i=start-1;i<stop;i++){
+			
+			if(errorSeq[i] == 'm')		{	qualErrorMap['m'][qScores[i]] += weight;	}
+			else if(errorSeq[i] == 's')	{	qualErrorMap['s'][qScores[i]] += weight;	}
+			else if(errorSeq[i] == 'i')	{	qualErrorMap['i'][qScores[i]] += weight;	}
+			else if(errorSeq[i] == 'a')	{	qualErrorMap['a'][qScores[i]] += weight;	}
+			else if(errorSeq[i] == 'd')	{	/*		nothing		*/						}
+
+		}	
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TrimSeqsCommand", "updateQScoreErrorMap");
 		exit(1);
 	}
 }

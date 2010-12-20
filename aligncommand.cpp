@@ -555,7 +555,8 @@ int AlignCommand::driver(linePair* filePos, string alignFName, string reportFNam
 			if (m->control_pressed) {  return 0; }
 			
 			Sequence* candidateSeq = new Sequence(inFASTA);  m->gobble(inFASTA);
-			
+			report.setCandidate(candidateSeq);
+
 			int origNumBases = candidateSeq->getNumBases();
 			string originalUnaligned = candidateSeq->getUnaligned();
 			int numBasesNeeded = origNumBases * threshold;
@@ -618,7 +619,6 @@ int AlignCommand::driver(linePair* filePos, string alignFName, string reportFNam
 					accnosFile << candidateSeq->getName() << wasBetter << endl;
 				}
 				
-				report.setCandidate(candidateSeq);
 				report.setTemplate(templateSeq);
 				report.setSearchParameters(search, searchScore);
 				report.setAlignmentParameters(align, alignment);
@@ -706,7 +706,8 @@ int AlignCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& align
 			istringstream iss (tempBuf,istringstream::in);
 
 			Sequence* candidateSeq = new Sequence(iss);  
-	
+			report.setCandidate(candidateSeq);
+
 			int origNumBases = candidateSeq->getNumBases();
 			string originalUnaligned = candidateSeq->getUnaligned();
 			int numBasesNeeded = origNumBases * threshold;
@@ -777,7 +778,6 @@ int AlignCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& align
 					MPIWroteAccnos = true;
 				}
 				
-				report.setCandidate(candidateSeq);
 				report.setTemplate(templateSeq);
 				report.setSearchParameters(search, searchScore);
 				report.setAlignmentParameters(align, alignment);
