@@ -76,8 +76,6 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			//valid paramters for this command
 			string AlignArray[] =  {"query", "reference", "name", "qfile", "report", "threshold", "inputdir", "outputdir"};
 			
-//need to implement name file option
-			
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -168,8 +166,6 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 				abort = true; 
 			}
 			
-			
-			
 			outputDir = validParameter.validFile(parameters, "outputdir", false);
 			if (outputDir == "not found"){	
 				outputDir = "";	
@@ -189,8 +185,9 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			errorSeqFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.seq";
 			m->openOutputFile(errorSeqFileName, errorSeqFile);
 			outputNames.push_back(errorSeqFileName); outputTypes["error.seq"].push_back(errorSeqFileName);
-			printErrorHeader();
 			
+			substitutionMatrix.resize(6);
+			for(int i=0;i<6;i++){	substitutionMatrix[i].assign(6,0);	}
 		}
 	}
 	catch(exception& e) {
@@ -221,7 +218,7 @@ void SeqErrorCommand::help(){
 
 SeqErrorCommand::~SeqErrorCommand(){
 	errorSummaryFile.close();	
-	errorSeqFile.close();	
+	errorSeqFile.close();
 }
 
 //***************************************************************************************************************
@@ -243,10 +240,19 @@ int SeqErrorCommand::execute(){
 
 		ReportFile report;
 		QualityScores quality;
-
+		vector<vector<int> > qualForwardMap;
+		vector<vector<int> > qualReverseMap;
+		
 		if(qualFileName != "" && reportFileName != ""){
 			m->openInputFile(qualFileName, qualFile);
 			report = ReportFile(reportFile, reportFileName);
+			
+			qualForwardMap.resize(1000);
+			qualReverseMap.resize(1000);
+			for(int i=0;i<1000;i++){
+				qualForwardMap[i].assign(100,0);
+				qualReverseMap[i].assign(100,0);
+			}				
 		}
 		
 		int totalBases = 0;
@@ -262,6 +268,24 @@ int SeqErrorCommand::execute(){
 		qScoreErrorMap['s'].assign(41, 0);
 		qScoreErrorMap['i'].assign(41, 0);
 		qScoreErrorMap['a'].assign(41, 0);
+		
+		
+		
+		map<char, vector<int> > errorForward;
+		errorForward['m'].assign(1000,0);
+		errorForward['s'].assign(1000,0);
+		errorForward['i'].assign(1000,0);
+		errorForward['d'].assign(1000,0);
+		errorForward['a'].assign(1000,0);
+		
+		map<char, vector<int> > errorReverse;
+		errorReverse['m'].assign(1000,0);
+		errorReverse['s'].assign(1000,0);
+		errorReverse['i'].assign(1000,0);
+		errorReverse['d'].assign(1000,0);
+		errorReverse['a'].assign(1000,0);
+		
+		
 		
 		while(queryFile){
 			Compare minCompare;
@@ -283,6 +307,12 @@ int SeqErrorCommand::execute(){
 
 			printErrorData(minCompare);
 
+			for(int i=0;i<minCompare.total;i++){
+				char letter = minCompare.sequence[i];
+				errorForward[letter][i] += minCompare.weight;
+				errorReverse[letter][minCompare.total-i-1] += minCompare.weight;				
+			}
+						
 			if(qualFileName != "" && reportFileName != ""){
 				report = ReportFile(reportFile);
 				
@@ -292,6 +322,8 @@ int SeqErrorCommand::execute(){
 
 				quality = QualityScores(qualFile, origLength);
 				quality.updateQScoreErrorMap(qScoreErrorMap, minCompare.sequence, startBase, endBase, minCompare.weight);
+				quality.updateForwardMap(qualForwardMap, startBase, endBase, minCompare.weight);
+				quality.updateReverseMap(qualReverseMap, startBase, endBase, minCompare.weight);
 			}			
 			
 			if(minCompare.errorRate < threshold){
@@ -321,22 +353,151 @@ int SeqErrorCommand::execute(){
 			for(int i=0;i<41;i++){
 				errorQualityFile << i << '\t' << qScoreErrorMap['m'][i] << '\t' << qScoreErrorMap['s'][i] << '\t' << qScoreErrorMap['i'][i] << '\t'<< qScoreErrorMap['a'][i] << endl;
 			}
+			errorQualityFile.close();
+			
+
+			
+			int lastRow = 0;
+			int lastColumn = 0;
+			
+			for(int i=0;i<qualForwardMap.size();i++){
+				for(int j=0;j<qualForwardMap[i].size();j++){
+					if(qualForwardMap[i][j] != 0){
+						if(lastRow < i)		{	lastRow = i+2;	}
+						if(lastColumn < j)	{	lastColumn = j+2;	}
+					}
+					
+				}
+			}
+
+			
+			string qualityForwardFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.qual.forward";
+			ofstream qualityForwardFile;
+			m->openOutputFile(qualityForwardFileName, qualityForwardFile);
+			outputNames.push_back(errorQualityFileName);  outputTypes["error.qual.forward"].push_back(qualityForwardFileName);
+			
+			for(int i=0;i<lastColumn;i++){	qualityForwardFile << '\t' << i;	}	qualityForwardFile << endl;
+			for(int i=0;i<lastRow;i++){
+				qualityForwardFile << i+1;
+				for(int j=0;j<lastColumn;j++){
+					qualityForwardFile << '\t' << qualForwardMap[i][j];
+				}
+				qualityForwardFile << endl;
+			}
+			qualityForwardFile.close();
+			
+			
+			string qualityReverseFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.qual.reverse";
+			ofstream qualityReverseFile;
+			m->openOutputFile(qualityReverseFileName, qualityReverseFile);
+			outputNames.push_back(errorQualityFileName);  outputTypes["error.qual.reverse"].push_back(qualityReverseFileName);
+
+			for(int i=0;i<lastColumn;i++){	qualityReverseFile << '\t' << i;	}	qualityReverseFile << endl;
+			for(int i=0;i<lastRow;i++){
+				qualityReverseFile << i+1;
+				for(int j=0;j<lastColumn;j++){
+					qualityReverseFile << '\t' << qualReverseMap[i][j];
+				}
+				qualityReverseFile << endl;
+			}
+			
 		}
+		
+		
+		string errorForwardFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.seq.forward";
+		ofstream errorForwardFile;
+		m->openOutputFile(errorForwardFileName, errorForwardFile);
+		outputNames.push_back(errorForwardFileName);  outputTypes["error.forward"].push_back(errorForwardFileName);
+		
+		errorForwardFile << "position\ttotalseqs\tmatch\tsubstitution\tinsertion\tdeletion\tambiguous" << endl;
+		for(int i=0;i<1000;i++){
+			float match = (float)errorForward['m'][i];
+			float subst = (float)errorForward['s'][i];
+			float insert = (float)errorForward['i'][i];
+			float del = (float)errorForward['d'][i];
+			float amb = (float)errorForward['a'][i];
+			float total = match + subst + insert + del + amb;
+			if(total == 0){	break;	}
+			errorForwardFile << i+1 << '\t' << total << '\t' << match/total  << '\t' << subst/total  << '\t' << insert/total  << '\t' << del/total  << '\t' << amb/total << endl;
+		}
+		errorForwardFile.close();
+
+		
+		string errorReverseFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.seq.reverse";
+		ofstream errorReverseFile;
+		m->openOutputFile(errorReverseFileName, errorReverseFile);
+		outputNames.push_back(errorReverseFileName);  outputTypes["error.reverse"].push_back(errorReverseFileName);
+		
+		errorReverseFile << "position\ttotalseqs\tmatch\tsubstitution\tinsertion\tdeletion\tambiguous" << endl;
+		for(int i=0;i<1000;i++){
+			float match = (float)errorReverse['m'][i];
+			float subst = (float)errorReverse['s'][i];
+			float insert = (float)errorReverse['i'][i];
+			float del = (float)errorReverse['d'][i];
+			float amb = (float)errorReverse['a'][i];
+			float total = match + subst + insert + del + amb;
+			if(total == 0){	break;	}
+			errorReverseFile << i+1 << '\t' << total << '\t' << match/total  << '\t' << subst/total  << '\t' << insert/total  << '\t' << del/total  << '\t' << amb/total << endl;
+		}
+		errorReverseFile.close();
+
+
 		
 		string errorCountFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.count";
 		ofstream errorCountFile;
 		m->openOutputFile(errorCountFileName, errorCountFile);
 		outputNames.push_back(errorCountFileName);  outputTypes["error.count"].push_back(errorCountFileName);
-		
 		m->mothurOut("Overall error rate:\t" + toString((double)(totalBases - totalMatches) / (double)totalBases) + "\n\n");
 		m->mothurOut("Errors\tSequences\n");
-		
-		errorCountFile << "Errors\tSequences\n";
-		
+		errorCountFile << "Errors\tSequences\n";		
 		for(int i=0;i<misMatchCounts.size();i++){
 			m->mothurOut(toString(i) + '\t' + toString(misMatchCounts[i]) + '\n');
 			errorCountFile << i << '\t' << misMatchCounts[i] << endl;
 		}
+		errorCountFile.close();
+
+
+		
+		
+		
+		string subMatrixFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.matrix";
+		ofstream subMatrixFile;
+		m->openOutputFile(subMatrixFileName, subMatrixFile);
+		outputNames.push_back(subMatrixFileName);  outputTypes["error.matrix"].push_back(subMatrixFileName);
+		vector<string> bases(6);
+		bases[0] = "A";
+		bases[1] = "T";
+		bases[2] = "G";
+		bases[3] = "C";
+		bases[4] = "Gap";
+		bases[5] = "N";
+		vector<int> refSums(5,1);
+		
+		for(int i=0;i<5;i++){
+			subMatrixFile << "\tr" << bases[i];
+			
+			for(int j=0;j<6;j++){
+				refSums[i] += substitutionMatrix[i][j];				
+			}
+			
+		}
+		subMatrixFile << endl;
+		
+		for(int i=0;i<6;i++){
+			subMatrixFile << 'q' << bases[i];
+			for(int j=0;j<5;j++){
+				subMatrixFile << '\t' << substitutionMatrix[j][i];				
+			}
+			subMatrixFile << endl;
+		}
+		subMatrixFile << "total";
+		for(int i=0;i<5;i++){
+			subMatrixFile << '\t' << refSums[i];
+		}
+		subMatrixFile << endl;
+		subMatrixFile.close();
+		
+		
 		
 		return 0;	
 	}
@@ -387,7 +548,6 @@ Compare SeqErrorCommand::getErrors(Sequence query, Sequence reference){
 		string q = query.getAligned();
 		string r = reference.getAligned();
 
-		
 		int started = 0;
 		Compare errors;
 
@@ -520,6 +680,45 @@ void SeqErrorCommand::printErrorData(Compare error){
 		errorSummaryFile << error.matches << '\t' << error.mismatches << '\t' << error.total << '\t' << error.errorRate << endl;
 		
 		errorSeqFile << '>' << error.queryName << "\tref:" << error.refName << '\n' << error.sequence << endl;
+		
+		
+		int a=0;		int t=1;		int g=2;		int c=3;
+		int gap=4;		int n=5;
+		
+		substitutionMatrix[a][a] += error.weight * error.AA;
+		substitutionMatrix[a][t] += error.weight * error.TA;
+		substitutionMatrix[a][g] += error.weight * error.GA;
+		substitutionMatrix[a][c] += error.weight * error.CA;
+		substitutionMatrix[a][gap] += error.weight * error.dA;
+		substitutionMatrix[a][n] += error.weight * error.NA;
+
+		substitutionMatrix[t][a] += error.weight * error.AT;
+		substitutionMatrix[t][t] += error.weight * error.TT;
+		substitutionMatrix[t][g] += error.weight * error.GT;
+		substitutionMatrix[t][c] += error.weight * error.CT;
+		substitutionMatrix[t][gap] += error.weight * error.dT;
+		substitutionMatrix[t][n] += error.weight * error.NT;
+
+		substitutionMatrix[g][a] += error.weight * error.AG;
+		substitutionMatrix[g][t] += error.weight * error.TG;
+		substitutionMatrix[g][g] += error.weight * error.GG;
+		substitutionMatrix[g][c] += error.weight * error.CG;
+		substitutionMatrix[g][gap] += error.weight * error.dG;
+		substitutionMatrix[g][n] += error.weight * error.NG;
+
+		substitutionMatrix[c][a] += error.weight * error.AC;
+		substitutionMatrix[c][t] += error.weight * error.TC;
+		substitutionMatrix[c][g] += error.weight * error.GC;
+		substitutionMatrix[c][c] += error.weight * error.CC;
+		substitutionMatrix[c][gap] += error.weight * error.dC;
+		substitutionMatrix[c][n] += error.weight * error.NC;
+
+		substitutionMatrix[gap][a] += error.weight * error.Ai;
+		substitutionMatrix[gap][t] += error.weight * error.Ti;
+		substitutionMatrix[gap][g] += error.weight * error.Gi;
+		substitutionMatrix[gap][c] += error.weight * error.Ci;
+		substitutionMatrix[gap][n] += error.weight * error.Ni;
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SeqErrorCommand", "printErrorData");
