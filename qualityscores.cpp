@@ -332,7 +332,7 @@ bool QualityScores::cullQualAverage(Sequence& sequence, double qAverage){
 		return success;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "TrimSeqsCommand", "cullQualAverage");
+		m->errorOut(e, "QualityScores", "cullQualAverage");
 		exit(1);
 	}
 }
@@ -341,19 +341,57 @@ bool QualityScores::cullQualAverage(Sequence& sequence, double qAverage){
 
 void QualityScores::updateQScoreErrorMap(map<char, vector<int> >& qualErrorMap, string errorSeq, int start, int stop, int weight){
 	try {
-	
-		for(int i=start-1;i<stop;i++){
+
+		int seqLength = errorSeq.size();
+		int qIndex = start - 1;
+		for(int i=0;i<seqLength;i++){
 			
-			if(errorSeq[i] == 'm')		{	qualErrorMap['m'][qScores[i]] += weight;	}
-			else if(errorSeq[i] == 's')	{	qualErrorMap['s'][qScores[i]] += weight;	}
-			else if(errorSeq[i] == 'i')	{	qualErrorMap['i'][qScores[i]] += weight;	}
-			else if(errorSeq[i] == 'a')	{	qualErrorMap['a'][qScores[i]] += weight;	}
-			else if(errorSeq[i] == 'd')	{	/*		nothing		*/						}
+			if(errorSeq[i] == 'm')		{	qualErrorMap['m'][qScores[qIndex]] += weight;	}
+			else if(errorSeq[i] == 's')	{	qualErrorMap['s'][qScores[qIndex]] += weight;	}
+			else if(errorSeq[i] == 'i')	{	qualErrorMap['i'][qScores[qIndex]] += weight;	}
+			else if(errorSeq[i] == 'a')	{	qualErrorMap['a'][qScores[qIndex]] += weight;	}
+			else if(errorSeq[i] == 'd')	{	/*	there are no qScores for deletions	*/		}
+
+			if(errorSeq[i] != 'd')		{	qIndex++;	}
 
 		}	
 	}
 	catch(exception& e) {
-		m->errorOut(e, "TrimSeqsCommand", "updateQScoreErrorMap");
+		m->errorOut(e, "QualityScores", "updateQScoreErrorMap");
+		exit(1);
+	}
+}
+
+/**************************************************************************************************/
+
+void QualityScores::updateForwardMap(vector<vector<int> >& forwardMap, int start, int stop, int weight){
+	try {
+		
+		int index = 0;
+		for(int i=start-1;i<stop;i++){
+			forwardMap[index++][qScores[i]] += weight;
+		}
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "QualityScores", "updateForwardMap");
+		exit(1);
+	}
+}
+
+/**************************************************************************************************/
+
+void QualityScores::updateReverseMap(vector<vector<int> >& reverseMap, int start, int stop, int weight){
+	try {
+		
+		int index = 0;
+		for(int i=stop-1;i>=start;i--){
+			reverseMap[index++][qScores[i]] += weight;
+		}
+		
+	}	
+	catch(exception& e) {
+		m->errorOut(e, "QualityScores", "updateForwardMap");
 		exit(1);
 	}
 }

@@ -30,6 +30,9 @@ public:
 	bool stripQualWindowAverage(Sequence&, int, int, double);
 	bool cullQualAverage(Sequence&, double);
 	void updateQScoreErrorMap(map<char, vector<int> >&, string, int, int, int);
+	void updateForwardMap(vector<vector<int> >&, int, int, int);
+	void updateReverseMap(vector<vector<int> >&, int, int, int);
+	
 private:
 	
 	double calculateAverage();
