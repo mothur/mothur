@@ -71,6 +71,9 @@ string Maligner::chimeraMaligner(int chimeraPenalty, DeCalculator* decalc) {
 		
 		//trims seqs to first non gap char in all seqs and last non gap char in all seqs
 		spotMap = decalc->trimSeqs(query, refSeqs);
+		
+		//you trimmed the whole sequence, skip
+		if (query->getAligned() == "") { return "no"; }
 
 		vector<Sequence*> temp = refSeqs;
 		temp.push_back(query);

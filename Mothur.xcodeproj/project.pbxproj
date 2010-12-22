@@ -136,6 +136,8 @@
 		A7D215C911996C6E00F13F13 /* clearcutcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clearcutcommand.cpp; sourceTree = "<group>"; };
 		A7D216061199C47F00F13F13 /* catchallcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = catchallcommand.h; sourceTree = "<group>"; };
 		A7D216071199C47F00F13F13 /* catchallcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = catchallcommand.cpp; sourceTree = "<group>"; };
+		A7D9006D12C2544A00D8F543 /* corraxescommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = corraxescommand.h; sourceTree = "<group>"; };
+		A7D9006E12C2544A00D8F543 /* corraxescommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = corraxescommand.cpp; sourceTree = "<group>"; };
 		A7DA1FEC113FECD400BF472F /* ace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ace.cpp; sourceTree = "<group>"; };
 		A7DA1FED113FECD400BF472F /* ace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ace.h; sourceTree = "<group>"; };
 		A7DA1FEE113FECD400BF472F /* aligncommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = aligncommand.cpp; sourceTree = "<group>"; };
@@ -872,6 +874,8 @@
 				A7DA2031113FECD400BF472F /* consensuscommand.cpp */,
 				A71FF438129BDC35004397E6 /* consensusseqscommand.h */,
 				A71FF439129BDC35004397E6 /* consensusseqscommand.cpp */,
+				A7D9006D12C2544A00D8F543 /* corraxescommand.h */,
+				A7D9006E12C2544A00D8F543 /* corraxescommand.cpp */,
 				A7118EE511CFCAC000CFDE03 /* degapseqscommand.h */,
 				A7118EE611CFCAC000CFDE03 /* degapseqscommand.cpp */,
 				A7DA203B113FECD400BF472F /* deconvolutecommand.h */,
