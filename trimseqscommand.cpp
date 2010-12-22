@@ -743,7 +743,8 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 		
 		//append files
 		for(int i=0;i<processIDS.size();i++){
-			m->mothurOut("Appending files from process " + processIDS[i]); m->mothurOutEndLine();
+			
+			m->mothurOut("Appending files from process " + toString(processIDS[i])); m->mothurOutEndLine();
 			
 			m->appendFiles((trimFile + toString(processIDS[i]) + ".temp"), trimFile);
 			remove((trimFile + toString(processIDS[i]) + ".temp").c_str());
