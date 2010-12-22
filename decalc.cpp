@@ -947,28 +947,35 @@ map<int, int> DeCalculator::trimSeqs(Sequence* query, vector<Sequence*> topMatch
 		
 		//save this spot if it is the farthest
 		if (pos < rearPos) { rearPos = pos; }
-
-		//check to make sure that is not whole seq
-		if ((rearPos - frontPos - 1) <= 0) {  m->mothurOut("Error, when I trim your sequences, the entire sequence is trimmed."); m->mothurOutEndLine(); exit(1);  }
-//cout << query->getName() << " front = " << frontPos << " rear = " << rearPos << endl;		
-		//trim query
-		string newAligned = query->getAligned();
-		newAligned = newAligned.substr(frontPos, (rearPos-frontPos+1));
-		query->setAligned(newAligned);
-		
-		//trim topMatches
-		for (int i = 0; i < topMatches.size(); i++) {
-			newAligned = topMatches[i]->getAligned();
-			newAligned = newAligned.substr(frontPos, (rearPos-frontPos+1));
-			topMatches[i]->setAligned(newAligned);
-		}
 		
 		map<int, int> trimmedPos;
-		
-		for (int i = 0; i < newAligned.length(); i++) {
-			trimmedPos[i] = i+frontPos;
+		//check to make sure that is not whole seq
+		if ((rearPos - frontPos - 1) <= 0) {  
+			m->mothurOut("[ERROR]: when I trim your sequences, the entire sequence is trimmed."); m->mothurOutEndLine();  
+			query->setAligned("");
+			//trim topMatches
+			for (int i = 0; i < topMatches.size(); i++) {
+				topMatches[i]->setAligned("");
+			}
+			
+		}else {
+
+			//trim query
+			string newAligned = query->getAligned();
+			newAligned = newAligned.substr(frontPos, (rearPos-frontPos+1));
+			query->setAligned(newAligned);
+			
+			//trim topMatches
+			for (int i = 0; i < topMatches.size(); i++) {
+				newAligned = topMatches[i]->getAligned();
+				newAligned = newAligned.substr(frontPos, (rearPos-frontPos+1));
+				topMatches[i]->setAligned(newAligned);
+			}
+			
+			for (int i = 0; i < newAligned.length(); i++) {
+				trimmedPos[i] = i+frontPos;
+			}
 		}
-		
 		return trimmedPos;
 	}
 	catch(exception& e) {
