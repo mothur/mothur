@@ -688,6 +688,7 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 		indexes.clear();
 		
 		vector<Sequence*> seqsMatches;  
+		
 		vector<SeqDist> distsLeft;
 		vector<SeqDist> distsRight;
 		
@@ -759,14 +760,14 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 			float distRight = distcalculator->getDist();
 			
 			SeqDist subjectLeft;
-			subjectLeft.seq = db[j];
+			subjectLeft.seq = NULL;
 			subjectLeft.dist = distLeft;
 			subjectLeft.index = j;
 			
 			distsLeft.push_back(subjectLeft);
 			
 			SeqDist subjectRight;
-			subjectRight.seq = db[j];
+			subjectRight.seq = NULL;
 			subjectRight.dist = distRight;
 			subjectRight.index = j;
 			
@@ -790,18 +791,18 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 		int lasti = 0;
 		for (int i = 0; i < distsLeft.size(); i++) {
 			//add left if you havent already
-			it = seen.find(distsLeft[i].seq->getName());
+			it = seen.find(db[distsLeft[i].index]->getName());
 			if (it == seen.end()) {  
 				dists.push_back(distsLeft[i]);
-				seen[distsLeft[i].seq->getName()] = distsLeft[i].seq->getName();
+				seen[db[distsLeft[i].index]->getName()] = db[distsLeft[i].index]->getName();
 				lastLeft =  distsLeft[i].dist;
 			}
 
 			//add right if you havent already
-			it = seen.find(distsRight[i].seq->getName());
+			it = seen.find(db[distsRight[i].index]->getName());
 			if (it == seen.end()) {  
 				dists.push_back(distsRight[i]);
-				seen[distsRight[i].seq->getName()] = distsRight[i].seq->getName();
+				seen[db[distsRight[i].index]->getName()] = db[distsRight[i].index]->getName();
 				lastRight =  distsRight[i].dist;
 			}
 			
@@ -829,10 +830,12 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 //cout << numWanted << endl;
 		for (int i = 0; i < numWanted; i++) {
 //cout << dists[i].seq->getName() << '\t' << dists[i].dist << endl;
-			Sequence* temp = new Sequence(dists[i].seq->getName(), dists[i].seq->getAligned()); //have to make a copy so you can trim and filter without stepping on eachother.
+			Sequence* temp = new Sequence(db[dists[i].index]->getName(), db[dists[i].index]->getAligned()); //have to make a copy so you can trim and filter without stepping on eachother.
 			seqsMatches.push_back(temp);
 			indexes.push_back(dists[i].index);
 		}
+		
+		dists.clear(); distsLeft.clear(); distsRight.clear();
 		
 		return seqsMatches;
 	}
@@ -951,7 +954,7 @@ map<int, int> DeCalculator::trimSeqs(Sequence* query, vector<Sequence*> topMatch
 		map<int, int> trimmedPos;
 		//check to make sure that is not whole seq
 		if ((rearPos - frontPos - 1) <= 0) {  
-			m->mothurOut("[ERROR]: when I trim your sequences, the entire sequence is trimmed."); m->mothurOutEndLine();  
+			m->mothurOut("[ERROR]: when I trim " + query->getName() + ", the entire sequence is trimmed. Skipping."); m->mothurOutEndLine();  
 			query->setAligned("");
 			//trim topMatches
 			for (int i = 0; i < topMatches.size(); i++) {
