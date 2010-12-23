@@ -835,8 +835,6 @@ vector<Sequence*> DeCalculator::findClosest(Sequence* querySeq, vector<Sequence*
 			indexes.push_back(dists[i].index);
 		}
 		
-		dists.clear(); distsLeft.clear(); distsRight.clear();
-		
 		return seqsMatches;
 	}
 	catch(exception& e) {

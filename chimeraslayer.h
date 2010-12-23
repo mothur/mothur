@@ -38,8 +38,6 @@ class ChimeraSlayer : public Chimera {
 	private:
 		Sequence* querySeq;
 		DeCalculator* decalc;
-		Maligner* maligner;
-		Slayer* slayer;
 		map<int, int>  spotMap;
 		Database* databaseRight;
 		Database* databaseLeft;
