@@ -9,6 +9,10 @@
 /* Begin PBXFileReference section */
 		7E13BDD112BE3FEE004B8A53 /* reportfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = reportfile.h; sourceTree = "<group>"; };
 		7E13BDD212BE3FEF004B8A53 /* reportfile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = reportfile.cpp; sourceTree = "<group>"; };
+		7E1CA7D712C2A384003F10B2 /* flowdata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = flowdata.h; sourceTree = "<group>"; };
+		7E1CA7D812C2A384003F10B2 /* flowdata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = flowdata.cpp; sourceTree = "<group>"; };
+		7E1CA7D912C2A425003F10B2 /* trimflowscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trimflowscommand.h; sourceTree = "<group>"; };
+		7E1CA7DA12C2A425003F10B2 /* trimflowscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = trimflowscommand.cpp; sourceTree = "<group>"; };
 		7E4EBD43122018FB00D85E7B /* simpsoneven.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = simpsoneven.h; sourceTree = "<group>"; };
 		7E4EBD44122018FB00D85E7B /* simpsoneven.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = simpsoneven.cpp; sourceTree = "<group>"; };
 		7E5B28DC121FEFCC0005339C /* shannoneven.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shannoneven.h; sourceTree = "<group>"; };
@@ -662,6 +666,8 @@
 				A7DA2176113FECD400BF472F /* venn.h */,
 				7E13BDD112BE3FEE004B8A53 /* reportfile.h */,
 				7E13BDD212BE3FEF004B8A53 /* reportfile.cpp */,
+				7E1CA7D712C2A384003F10B2 /* flowdata.h */,
+				7E1CA7D812C2A384003F10B2 /* flowdata.cpp */,
 			);
 			name = mothur;
 			sourceTree = "<group>";
@@ -829,6 +835,8 @@
 		A7CB593E11402F110010EB83 /* commands */ = {
 			isa = PBXGroup;
 			children = (
+				7E1CA7D912C2A425003F10B2 /* trimflowscommand.h */,
+				7E1CA7DA12C2A425003F10B2 /* trimflowscommand.cpp */,
 				A7DA202B113FECD400BF472F /* command.hpp */,
 				A7DA1FEF113FECD400BF472F /* aligncommand.h */,
 				A7DA1FEE113FECD400BF472F /* aligncommand.cpp */,

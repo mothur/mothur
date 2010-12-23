@@ -316,7 +316,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos){
 		if (sfftxt) { m->openOutputFile(sfftxtFileName, outSfftxt); outSfftxt.setf(ios::fixed, ios::floatfield); outSfftxt.setf(ios::showpoint);  outputNames.push_back(sfftxtFileName);  outputTypes["sfftxt"].push_back(sfftxtFileName); }
 		if (fasta)	{ m->openOutputFile(outFastaFileName, outFasta);	outputNames.push_back(outFastaFileName); outputTypes["fasta"].push_back(outFastaFileName); }
 		if (qual)	{ m->openOutputFile(outQualFileName, outQual);		outputNames.push_back(outQualFileName); outputTypes["qual"].push_back(outQualFileName);  }
-		if (flow)	{ m->openOutputFile(outFlowFileName, outFlow);		outputNames.push_back(outFlowFileName);  outputTypes["flow"].push_back(outFlowFileName);  }
+		if (flow)	{ m->openOutputFile(outFlowFileName, outFlow);		outputNames.push_back(outFlowFileName);  outFlow.setf(ios::fixed, ios::floatfield); outFlow.setf(ios::showpoint); outputTypes["flow"].push_back(outFlowFileName);  }
 		
 		ifstream in;
 		in.open(input.c_str(), ios::binary);
@@ -778,10 +778,12 @@ int SffInfoCommand::printQualSeqData(ofstream& out, seqRead& read, Header& heade
 //**********************************************************************************************************************
 int SffInfoCommand::printFlowSeqData(ofstream& out, seqRead& read, Header& header) {
 	try {
+		if(header.clipQualRight > header.clipQualLeft){
+			out << ">" << header.name << " xy=" << header.xy << " length=" << (header.clipQualRight-header.clipQualLeft) << " numflows=" << read.flowgram.size() << endl;
+			for (int i = 0; i < read.flowgram.size(); i++) { out << setprecision(2) << (read.flowgram[i]/(float)100) << ' ';  }
+			out << endl;
+		}
 		
-		out << ">" << header.name << " xy=" << header.xy << endl;
-		for (int i = 0; i < read.flowgram.size(); i++) { out << setprecision(2) << (read.flowgram[i]/(float)100) << '\t';  }
-		out << endl;
 		
 		return 0;
 	}
