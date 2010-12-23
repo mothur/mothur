@@ -178,6 +178,8 @@ vector<Sequence*> Maligner::minCoverageFilter(vector<Sequence*> ref){
 			//if coverage above minimum
 			if (coverage > minCoverage) {
 				newRefs.push_back(ref[i]);
+			}else {
+				delete ref[i];
 			}
 		}
 		

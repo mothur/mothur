@@ -297,14 +297,14 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 		querySeq = query;
 		
 		//referenceSeqs, numWanted, matchScore, misMatchPenalty, divR, minSimilarity
-		maligner = new Maligner(templateSeqs, numWanted, match, misMatch, divR, minSim, minCov, searchMethod, databaseLeft, databaseRight);
-		slayer = new Slayer(window, increment, minSim, divR, iters, minSNP);
+		Maligner maligner(templateSeqs, numWanted, match, misMatch, divR, minSim, minCov, searchMethod, databaseLeft, databaseRight);
+		Slayer slayer(window, increment, minSim, divR, iters, minSNP);
 	
 		if (m->control_pressed) {  return 0;  }
 		
-		string chimeraFlag = maligner->getResults(query, decalc);
+		string chimeraFlag = maligner.getResults(query, decalc);
 		if (m->control_pressed) {  return 0;  }
-		vector<results> Results = maligner->getOutput();
+		vector<results> Results = maligner.getOutput();
 			
 		//found in testing realigning only made things worse
 		if (realign) {
@@ -381,16 +381,16 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 			if (m->control_pressed) {  for (int k = 0; k < seqs.size(); k++) {  delete seqs[k].seq;   }  return 0;  }
 			
 			//send to slayer
-			chimeraFlags = slayer->getResults(query, seqsForSlayer);
+			chimeraFlags = slayer.getResults(query, seqsForSlayer);
 			if (m->control_pressed) {  return 0;  }
-			chimeraResults = slayer->getOutput();
+			chimeraResults = slayer.getOutput();
 			
 			//free memory
 			for (int k = 0; k < seqs.size(); k++) {  delete seqs[k].seq;   }
 		}
 		
-		delete maligner;
-		delete slayer;
+		//delete maligner;
+		//delete slayer;
 		
 		return 0;
 	}
