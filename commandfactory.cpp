@@ -103,6 +103,7 @@
 #include "removeotuscommand.h"
 #include "indicatorcommand.h"
 #include "consensusseqscommand.h"
+#include "corraxescommand.h"
 
 /*******************************************************/
 
@@ -210,6 +211,7 @@ CommandFactory::CommandFactory(){
 	commands["remove.otus"]			= "remove.otus";
 	commands["indicator"]			= "indicator";
 	commands["consensus.seqs"]		= "consensus.seqs";
+	commands["corr.axes"]			= "corr.axes";
 	commands["pairwise.seqs"]		= "MPIEnabled";
 	commands["pipeline.pds"]		= "MPIEnabled";
 	commands["classify.seqs"]		= "MPIEnabled"; 
@@ -364,6 +366,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "sub.sample")			{	command = new SubSampleCommand(optionString);				}
 		else if(commandName == "indicator")				{	command = new IndicatorCommand(optionString);				}
 		else if(commandName == "consensus.seqs")		{	command = new ConsensusSeqsCommand(optionString);			}
+		else if(commandName == "corr.axes")				{	command = new CorrAxesCommand(optionString);				}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -485,6 +488,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "sub.sample")			{	pipecommand = new SubSampleCommand(optionString);				}
 		else if(commandName == "indicator")				{	pipecommand = new IndicatorCommand(optionString);				}
 		else if(commandName == "consensus.seqs")		{	pipecommand = new ConsensusSeqsCommand(optionString);			}
+		else if(commandName == "corr.axes")				{	pipecommand = new CorrAxesCommand(optionString);				}
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -594,6 +598,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "sub.sample")			{	shellcommand = new SubSampleCommand();				}
 		else if(commandName == "indicator")				{	shellcommand = new IndicatorCommand();				}
 		else if(commandName == "consensus.seqs")		{	shellcommand = new ConsensusSeqsCommand();			}
+		else if(commandName == "corr.axes")				{	shellcommand = new CorrAxesCommand();				}
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

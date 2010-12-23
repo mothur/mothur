@@ -12,7 +12,7 @@
 //**********************************************************************************************************************
 vector<string> CorrAxesCommand::getValidParameters(){	
 	try {
-		string Array[] =  {"axes","shared","relabund","numaxes","label","groups","method","metastats","outputdir","inputdir"};
+		string Array[] =  {"axes","shared","relabund","numaxes","label","groups","method","metadata","outputdir","inputdir"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
@@ -69,7 +69,7 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"axes","shared","relabund","numaxes","label","groups","method","metastats","outputdir","inputdir"};
+			string Array[] =  {"axes","shared","relabund","numaxes","label","groups","method","metadata","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -114,6 +114,14 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["relabund"] = inputDir + it->second;		}
 				}
+				
+				it = parameters.find("metadata");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["metadata"] = inputDir + it->second;		}
+				}
 			}
 			
 			
@@ -131,6 +139,10 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 			if (relabundfile == "not open") { abort = true; }
 			else if (relabundfile == "not found") { relabundfile = ""; }
 			else { inputFileName = relabundfile; }
+			
+			metadatafile = validParameter.validFile(parameters, "metadata", true);
+			if (metadatafile == "not open") { abort = true; }
+			else if (metadatafile == "not found") { metadatafile = ""; }
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "";  pickedGroups = false;  }
@@ -233,13 +245,23 @@ int CorrAxesCommand::execute(){
 		
 		if (m->control_pressed) {  for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } return 0; }
 		
+		/*************************************************************************************/
+		// calc the r values																//
+		/************************************************************************************/
+		
 		string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + "corr.axes";
 		outputNames.push_back(outputFileName); outputTypes["corr.axes"].push_back(outputFileName);	
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
+		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+		
+		//output headings
+		out << "OTU\t";
+		for (int i = 0; i < numaxes; i++) { out << "axis" << (i+1) << '\t'; }
+		out << endl;
 		
 		if (method == "pearson")		{  calcPearson(axes, out);	}
-		//else if (method == "spearman")	{  calcSpearman(axes, out); }
+		else if (method == "spearman")	{  calcSpearman(axes, out); }
 		//else if (method == "kendall")	{  calcKendal(axes, out);	}
 		//else { m->mothurOut("[ERROR]: Invalid method."); m->mothurOutEndLine(); }
 		
@@ -278,6 +300,8 @@ int CorrAxesCommand::calcPearson(map<string, vector<float> >& axes, ofstream& ou
 	   //for each otu
 	   for (int i = 0; i < lookupFloat[0]->getNumBins(); i++) {
 		   
+		   out << i+1 << '\t';
+		   
 		   //find the averages this otu - Y
 		   float sumOtu = 0.0;
 		   for (int j = 0; j < lookupFloat.size(); j++) {
@@ -285,7 +309,30 @@ int CorrAxesCommand::calcPearson(map<string, vector<float> >& axes, ofstream& ou
 		   }
 		   float Ybar = sumOtu / (float) lookupFloat.size();
 		   
-		   //find the average
+		   //find r value for each axis
+		   for (int k = 0; k < averageAxes.size(); k++) {
+			   
+			   double r = 0.0;
+			   double numerator = 0.0;
+			   double denomTerm1 = 0.0;
+			   double denomTerm2 = 0.0;
+			   for (int j = 0; j < lookupFloat.size(); j++) {
+				   float Yi = lookupFloat[j]->getAbundance(i);
+				   float Xi = axes[lookupFloat[j]->getGroup()][k];
+				   
+				   numerator += ((Xi - averageAxes[k]) * (Yi - Ybar));
+				   denomTerm1 += ((Xi - averageAxes[k]) * (Xi - averageAxes[k]));
+				   denomTerm2 += ((Yi - Ybar) * (Yi - Ybar));
+			   }
+			   
+			   double denom = (sqrt(denomTerm1) * sqrt(denomTerm2));
+			   
+			   r = numerator / denom;
+			   
+			   out << r << '\t'; 
+		   }
+		   
+		   out << endl;
 	   }
 	   	   
 	   return 0;
@@ -294,6 +341,66 @@ int CorrAxesCommand::calcPearson(map<string, vector<float> >& axes, ofstream& ou
 	   m->errorOut(e, "CorrAxesCommand", "calcPearson");
 	   exit(1);
    }
+}
+//**********************************************************************************************************************
+int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& out) {
+	try {
+		
+		//find average of each axis - X
+		vector<float> averageAxes; averageAxes.resize(numaxes, 0.0);
+		for (map<string, vector<float> >::iterator it = axes.begin(); it != axes.end(); it++) {
+			vector<float> temp = it->second;
+			for (int i = 0; i < temp.size(); i++) {
+				averageAxes[i] += temp[i];  
+			}
+		}
+		
+		for (int i = 0; i < averageAxes.size(); i++) {  averageAxes[i] = averageAxes[i] / (float) axes.size(); }
+		
+		//for each otu
+		for (int i = 0; i < lookupFloat[0]->getNumBins(); i++) {
+			
+			out << i+1 << '\t';
+			
+			//find the averages this otu - Y
+			float sumOtu = 0.0;
+			for (int j = 0; j < lookupFloat.size(); j++) {
+				sumOtu += lookupFloat[j]->getAbundance(i);
+			}
+			float Ybar = sumOtu / (float) lookupFloat.size();
+			
+			//find r value for each axis
+			for (int k = 0; k < averageAxes.size(); k++) {
+				
+				double r = 0.0;
+				double numerator = 0.0;
+				double denomTerm1 = 0.0;
+				double denomTerm2 = 0.0;
+				for (int j = 0; j < lookupFloat.size(); j++) {
+					float Yi = lookupFloat[j]->getAbundance(i);
+					float Xi = axes[lookupFloat[j]->getGroup()][k];
+					
+					numerator += ((Xi - averageAxes[k]) * (Yi - Ybar));
+					denomTerm1 += ((Xi - averageAxes[k]) * (Xi - averageAxes[k]));
+					denomTerm2 += ((Yi - Ybar) * (Yi - Ybar));
+				}
+				
+				double denom = (sqrt(denomTerm1 * denomTerm2));
+				
+				r = numerator / denom;
+				
+				out << r << '\t'; 
+			}
+			
+			out << endl;
+		}
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CorrAxesCommand", "calcSpearman");
+		exit(1);
+	}
 }
 //**********************************************************************************************************************
 int CorrAxesCommand::getShared(){
@@ -547,7 +654,6 @@ map<string, vector<float> > CorrAxesCommand::readAxes(){
 				headerLine = headerLine.substr(pos+4);
 			}else { done = true; }
 		}
-		cout << "count = " << count << endl;	
 		
 		while (!in.eof()) {
 			

@@ -29,7 +29,7 @@ public:
 	
 private:
 	GlobalData* globaldata;
-	string axesfile, sharedfile, relabundfile, groups, label, inputFileName, outputDir, method;
+	string axesfile, sharedfile, relabundfile, metadatafile, groups, label, inputFileName, outputDir, method;
 	bool abort, pickedGroups;
 	int numaxes;
 	set<string> names;
@@ -45,6 +45,7 @@ private:
 	int eliminateZeroOTUS(vector<SharedRAbundFloatVector*>&);
 	map<string, vector<float> > readAxes();
 	int calcPearson(map<string, vector<float> >&, ofstream&);
+	int calcSpearman(map<string, vector<float> >&, ofstream&);
 	
 };
 
