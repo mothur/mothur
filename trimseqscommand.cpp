@@ -11,6 +11,7 @@
 #include "needlemanoverlap.hpp"
 
 //**********************************************************************************************************************
+
 vector<string> TrimSeqsCommand::getValidParameters(){	
 	try {
 		string Array[] =  {"fasta", "flip", "oligos", "maxambig", "maxhomop", "group","minlength", "maxlength", "qfile", 
@@ -25,7 +26,9 @@ vector<string> TrimSeqsCommand::getValidParameters(){
 		exit(1);
 	}
 }
+
 //**********************************************************************************************************************
+
 TrimSeqsCommand::TrimSeqsCommand(){	
 	try {
 		abort = true;
@@ -40,7 +43,9 @@ TrimSeqsCommand::TrimSeqsCommand(){
 		exit(1);
 	}
 }
+
 //**********************************************************************************************************************
+
 vector<string> TrimSeqsCommand::getRequiredParameters(){	
 	try {
 		string Array[] =  {"fasta"};
@@ -52,7 +57,9 @@ vector<string> TrimSeqsCommand::getRequiredParameters(){
 		exit(1);
 	}
 }
+
 //**********************************************************************************************************************
+
 vector<string> TrimSeqsCommand::getRequiredFiles(){	
 	try {
 		vector<string> myArray;
@@ -63,6 +70,7 @@ vector<string> TrimSeqsCommand::getRequiredFiles(){
 		exit(1);
 	}
 }
+
 //***************************************************************************************************************
 
 TrimSeqsCommand::TrimSeqsCommand(string option)  {
@@ -254,6 +262,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 		exit(1);
 	}
 }
+
 //**********************************************************************************************************************
 
 void TrimSeqsCommand::help(){
@@ -1433,6 +1442,7 @@ bool TrimSeqsCommand::compareDNASeq(string oligo, string seq){
 	}
 
 }
+
 //***************************************************************************************************************
 
 int TrimSeqsCommand::countDiffs(string oligo, string seq){

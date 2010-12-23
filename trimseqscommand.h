@@ -37,11 +37,12 @@ private:
 		unsigned long int end;
 		linePair(unsigned long int i, unsigned long int j) : start(i), end(j) {}
 	};
-
+	
 	void getOligos(vector<string>&, vector<string>&);
 	int stripBarcode(Sequence&, QualityScores&, int&);
 	int stripForward(Sequence&, QualityScores&, int&);
 	bool stripReverse(Sequence&, QualityScores&);
+	
 	bool keepFirstTrim(Sequence&, QualityScores&);
 	bool removeLastTrim(Sequence&, QualityScores&);
 
@@ -74,7 +75,6 @@ private:
 	int driverCreateTrim(string, string, string, string, string, string, string, vector<string>, vector<string>, linePair*, linePair*);	
 	int createProcessesCreateTrim(string, string, string, string, string, string, string, vector<string>, vector<string>);
 	int setLines(string, string, vector<unsigned long int>&, vector<unsigned long int>&);
-	
 };
 
 #endif
