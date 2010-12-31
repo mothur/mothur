@@ -314,7 +314,7 @@ int DistanceCommand::execute(){
 			//delete filename;
 
 			if (pid == 0) { //you are the root process 
-			
+				
 				//do your part
 				string outputMyPart;
 				

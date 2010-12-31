@@ -331,8 +331,9 @@ int SffInfoCommand::extractSffInfo(string input, string accnos){
 		if (header.version != "0001") { m->mothurOut("Version is not supported, only support version 0001."); m->mothurOutEndLine(); return count; }
 	
 		//print common header
-		if (sfftxt) { printCommonHeader(outSfftxt, header); }
-	
+		if (sfftxt) {	printCommonHeader(outSfftxt, header);		}
+		if (flow)	{	outFlow << header.numFlowsPerRead << endl;	}
+			
 		//read through the sff file
 		while (!in.eof()) {
 			
@@ -779,8 +780,12 @@ int SffInfoCommand::printQualSeqData(ofstream& out, seqRead& read, Header& heade
 int SffInfoCommand::printFlowSeqData(ofstream& out, seqRead& read, Header& header) {
 	try {
 		if(header.clipQualRight > header.clipQualLeft){
-			out << ">" << header.name << " xy=" << header.xy << " length=" << (header.clipQualRight-header.clipQualLeft) << " numflows=" << read.flowgram.size() << endl;
-			for (int i = 0; i < read.flowgram.size(); i++) { out << setprecision(2) << (read.flowgram[i]/(float)100) << ' ';  }
+			
+			int rightIndex = 0;
+			for (int i = 0; i < header.clipQualRight; i++) {  rightIndex +=  read.flowIndex[i];	}
+
+			out << header.name << ' ' << rightIndex;
+			for (int i = 0; i < read.flowgram.size(); i++) { out << setprecision(2) << ' ' << (read.flowgram[i]/(float)100);  }
 			out << endl;
 		}
 		

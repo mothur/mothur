@@ -105,6 +105,7 @@
 #include "consensusseqscommand.h"
 #include "trimflowscommand.h"
 #include "corraxescommand.h"
+#include "shhhercommand.h"
 
 /*******************************************************/
 
@@ -229,6 +230,7 @@ CommandFactory::CommandFactory(){
 	commands["screen.seqs"]			= "MPIEnabled";
 	commands["summary.seqs"]		= "MPIEnabled";
 	commands["cluster.split"]		= "MPIEnabled";
+	commands["shhh.seqs"]			= "MPIEnabled";
 	commands["sens.spec"]			= "sens.spec";
 	commands["seq.error"]			= "seq.error";
 	commands["quit"]				= "MPIEnabled"; 
@@ -313,6 +315,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "reverse.seqs")			{	command = new ReverseSeqsCommand(optionString);				}
 		else if(commandName == "trim.seqs")				{	command = new TrimSeqsCommand(optionString);				}
 		else if(commandName == "trim.flows")			{	command = new TrimFlowsCommand(optionString);				}
+		else if(commandName == "shhh.seqs")				{	command = new ShhherCommand(optionString);					}
 		else if(commandName == "chimera.seqs")			{	command = new ChimeraSeqsCommand(optionString);				}
 		else if(commandName == "list.seqs")				{	command = new ListSeqsCommand(optionString);				}
 		else if(commandName == "get.seqs")				{	command = new GetSeqsCommand(optionString);					}
@@ -437,6 +440,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "reverse.seqs")			{	pipecommand = new ReverseSeqsCommand(optionString);				}
 		else if(commandName == "trim.seqs")				{	pipecommand = new TrimSeqsCommand(optionString);				}
 		else if(commandName == "trim.flows")			{	pipecommand = new TrimFlowsCommand(optionString);				}
+		else if(commandName == "shhh.seqs")				{	pipecommand = new ShhherCommand(optionString);					}
 		else if(commandName == "chimera.seqs")			{	pipecommand = new ChimeraSeqsCommand(optionString);				}
 		else if(commandName == "list.seqs")				{	pipecommand = new ListSeqsCommand(optionString);				}
 		else if(commandName == "get.seqs")				{	pipecommand = new GetSeqsCommand(optionString);					}
@@ -548,6 +552,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "reverse.seqs")			{	shellcommand = new ReverseSeqsCommand();			}
 		else if(commandName == "trim.seqs")				{	shellcommand = new TrimSeqsCommand();				}
 		else if(commandName == "trim.flows")			{	shellcommand = new TrimFlowsCommand();				}
+		else if(commandName == "shhh.seqs")				{	shellcommand = new ShhherCommand();					}
 		else if(commandName == "chimera.seqs")			{	shellcommand = new ChimeraSeqsCommand();			}
 		else if(commandName == "list.seqs")				{	shellcommand = new ListSeqsCommand();				}
 		else if(commandName == "get.seqs")				{	shellcommand = new GetSeqsCommand();				}

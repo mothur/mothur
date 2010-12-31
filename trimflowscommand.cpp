@@ -17,11 +17,11 @@ vector<string> TrimFlowsCommand::getValidParameters(){
 		string Array[] =  {"flow", "totalflows", "minflows",
 			"fasta", "minlength", "maxlength", "maxhomop", "signal", "noise"
 			"oligos", "pdiffs", "bdiffs", "tdiffs", 
-			"allfiles",
+			"allfiles", "processors",
+
 
 			
 //			"group",
-//			"processors",
 			"outputdir","inputdir"
 		
 		};
@@ -112,10 +112,9 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			string AlignArray[] =  {"flow", "totalflows", "minflows",
 				"fasta", "minlength", "maxlength", "maxhomop", "signal", "noise",
 				"oligos", "pdiffs", "bdiffs", "tdiffs", 
-				"allfiles",
+				"allfiles", "processors",
 		
 				//			"group",
-				//			"processors",
 				"outputdir","inputdir"
 				
 			};
@@ -136,8 +135,7 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["flow"] = tempOutNames;
-			//		outputTypes["fasta"] = tempOutNames;
-			//		outputTypes["group"] = tempOutNames;
+			outputTypes["fasta"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -152,13 +150,13 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 					if (path == "") {	parameters["flow"] = inputDir + it->second;		}
 				}
 				
-//				it = parameters.find("oligos");
-//				//user has given a template file
-//				if(it != parameters.end()){ 
-//					path = m->hasPath(it->second);
-//					//if the user has not given a path then, add inputdir. else leave path alone.
-//					if (path == "") {	parameters["oligos"] = inputDir + it->second;		}
-//				}
+				it = parameters.find("oligos");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["oligos"] = inputDir + it->second;		}
+				}
 				
 				
 //				it = parameters.find("group");
@@ -223,21 +221,21 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "pdiffs", false);		if (temp == "not found"){	temp = "0";		}
 			convert(temp, pdiffs);
 			
-			temp = validParameter.validFile(parameters, "tdiffs", false);		if (temp == "not found"){ int tempTotal = pdiffs + bdiffs;  temp = toString(tempTotal); }
+			temp = validParameter.validFile(parameters, "tdiffs", false);
+			if (temp == "not found"){ int tempTotal = pdiffs + bdiffs;  temp = toString(tempTotal); }
 			convert(temp, tdiffs);
 			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs;	}
 			
 			temp = validParameter.validFile(parameters, "allfiles", false);		if (temp == "not found") { temp = "T";		}
 			allFiles = m->isTrue(temp);
 			
-//			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found") { temp = "1"; }
-//			convert(temp, processors); 
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found") { temp = "1"; }
+			convert(temp, processors); 
 			
-			if(allFiles && oligoFileName == ""){
-				m->mothurOut("You selected allfiles, but didn't enter an oligos file.  Ignoring the allfiles request."); m->mothurOutEndLine();
-				allFiles = 0;
-			}
+			if(oligoFileName == ""){	allFiles = 0;		}
 
+			numFPrimers = 0;
+			numRPrimers = 0;
 		}
 		
 	}
@@ -265,9 +263,68 @@ int TrimFlowsCommand::execute(){
 			outputNames.push_back(fastaFileName); outputTypes["fasta"].push_back(fastaFileName);
 		}
 		
-		driverCreateTrim(flowFileName, trimFlowFileName, scrapFlowFileName, fastaFileName);
+		vector<unsigned long int> flowFilePos = getFlowFileBreaks();
+		for (int i = 0; i < (flowFilePos.size()-1); i++) {
+			lines.push_back(new linePair(flowFilePos[i], flowFilePos[(i+1)]));
+		}	
+
+		vector<vector<string> > barcodePrimerComboFileNames;
+		if(oligoFileName != ""){
+			getOligos(barcodePrimerComboFileNames);	
+		}
 		
-		return 0;			
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		if(processors == 1){
+			driverCreateTrim(flowFileName, trimFlowFileName, scrapFlowFileName, fastaFileName, barcodePrimerComboFileNames, lines[0]);
+		}else{
+			createProcessesCreateTrim(flowFileName, trimFlowFileName, scrapFlowFileName, fastaFileName, barcodePrimerComboFileNames); 
+		}	
+#else
+		driverCreateTrim(flowFileName, trimFlowFileName, scrapFlowFileName, fastaFileName, barcodePrimerComboFileNames, lines[0]);
+#endif
+		
+		if (m->control_pressed) {  return 0; }			
+		
+		if(allFiles){
+			
+			ofstream output;
+			string flowFilesFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + "flow.files";
+			m->openOutputFile(flowFilesFileName, output);
+
+			for(int i=0;i<barcodePrimerComboFileNames.size();i++){
+				for(int j=0;j<barcodePrimerComboFileNames[0].size();j++){
+					
+					FILE * pFile;
+					unsigned long int size;
+					
+					//get num bytes in file
+					pFile = fopen (barcodePrimerComboFileNames[i][j].c_str(),"rb");
+					if (pFile==NULL) perror ("Error opening file");
+					else{
+						fseek (pFile, 0, SEEK_END);
+						size=ftell (pFile);
+						fclose (pFile);
+					}
+
+					if(size < 10){
+//						m->mothurOut("deleting: " + barcodePrimerComboFileNames[i][j] + '\n');
+						remove(barcodePrimerComboFileNames[i][j].c_str());
+					}
+					else{
+//						m->mothurOut("saving: " + barcodePrimerComboFileNames[i][j] + '\n');
+						output << barcodePrimerComboFileNames[i][j] << endl;
+					}
+				}
+			}
+			output.close();
+		}
+		
+		m->mothurOutEndLine();
+		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
+		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
+		m->mothurOutEndLine();
+		
+		return 0;	
 	}
 	catch(exception& e) {
 		m->errorOut(e, "TrimSeqsCommand", "execute");
@@ -277,7 +334,7 @@ int TrimFlowsCommand::execute(){
 
 //***************************************************************************************************************
 
-int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileName, string scrapFlowFileName, string fastaFileName){
+int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileName, string scrapFlowFileName, string fastaFileName, vector<vector<string> > barcodePrimerComboFileNames, linePair* line){
 	
 	try {
 		
@@ -288,41 +345,51 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 		ofstream scrapFlowFile;
 		m->openOutputFile(scrapFlowFileName, scrapFlowFile);
 		scrapFlowFile.setf(ios::fixed, ios::floatfield); scrapFlowFile.setf(ios::showpoint);
-	
-		ifstream flowFile;
-		m->openInputFile(flowFileName, flowFile);
+
+		if(line->start == 4){
+			scrapFlowFile << totalFlows << endl;
+			trimFlowFile << totalFlows << endl;
+			for(int i=0;i<barcodePrimerComboFileNames.size();i++){
+				for(int j=0;j<barcodePrimerComboFileNames[0].size();j++){
+					//				barcodePrimerComboFileNames[i][j] += toString(getpid()) + ".temp";
+					ofstream temp;
+					m->openOutputFile(barcodePrimerComboFileNames[i][j], temp);
+					temp << totalFlows << endl;
+					temp.close();
+				}
+			}			
+		}
+		
+		FlowData flowData(numFlows, signal, noise, maxHomoP);
 		
 		ofstream fastaFile;
 		if(fasta){	m->openOutputFile(fastaFileName, fastaFile);	}
 		
-		vector<vector<string> > barcodePrimerCombos;	
-		if(oligoFileName != ""){	getOligos(barcodePrimerCombos);	}
+		ifstream flowFile;
+		m->openInputFile(flowFileName, flowFile);
 		
-//		inFASTA.seekg(line->start);
-		
-//		bool done = false;
+		flowFile.seekg(line->start);
+
 		int count = 0;
+		bool moreSeqs = 1;
 		
-		while (flowFile) {
+		while(moreSeqs) {
 			
 			int success = 1;
 			int currentSeqDiffs = 0;
-			
 			string trashCode = "";
-
-			FlowData currFlow(flowFile, signal, noise, maxHomoP);
-			m->gobble(flowFile);
-			currFlow.capFlows(totalFlows);	
-			Sequence currSeq = currFlow.getSequence();
 			
+			flowData.getNext(flowFile);
+			flowData.capFlows(totalFlows);	
 			
-			if(!currFlow.hasMinFlows(minFlows)){		//screen to see if sequence is of a minimum number of flows
+			Sequence currSeq = flowData.getSequence();
+			if(!flowData.hasMinFlows(minFlows)){	//screen to see if sequence is of a minimum number of flows
 				success = 0;
 				trashCode += 'l';
 			}
 			
-			if(minLength > 0 || maxLength > 0){			//screen to see if sequence is above and below a specific number of bases
-				int seqLength = currFlow.getSeqLength();
+			if(minLength > 0 || maxLength > 0){	//screen to see if sequence is above and below a specific number of bases
+				int seqLength = currSeq.getNumBases();
 				if(seqLength < minLength || seqLength > maxLength){
 					success = 0;
 					trashCode += 'l';
@@ -330,6 +397,7 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 			}
 			
 			int primerIndex, barcodeIndex;
+			
 			if(barcodes.size() != 0){
 				success = stripBarcode(currSeq, barcodeIndex);
 				if(success > bdiffs)		{	trashCode += 'b';	}
@@ -351,73 +419,48 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 						
 				
 			if(trashCode.length() == 0){
-				currFlow.printFlows(trimFlowFile);
+				flowData.printFlows(trimFlowFile);
 				
 				if(fasta){
-					currFlow.printFASTA(fastaFile);
+					currSeq.printSequence(fastaFile);
 				}
 				
 				if(barcodes.size() != 0 || primers.size() != 0){
-					string fileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + barcodePrimerCombos[barcodeIndex][primerIndex] + ".flow";
+//					string fileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + barcodePrimerCombos[barcodeIndex][primerIndex] + ".flow";
 					ofstream output;
-					m->openOutputFileAppend(fileName, output);
-					currFlow.printFlows(output);
+					m->openOutputFileAppend(barcodePrimerComboFileNames[barcodeIndex][primerIndex], output);
+					output.setf(ios::fixed, ios::floatfield); trimFlowFile.setf(ios::showpoint);
+					
+					flowData.printFlows(output);
 					output.close();
 				}
 				
 			}
 			else{
-				currFlow.printFlows(scrapFlowFile, trashCode);
+				flowData.printFlows(scrapFlowFile, trashCode);
 			}
 				
-//				if(barcodes.size() != 0){
-//					string thisGroup = groupVector[groupBar];
-//					int indexToFastaFile = groupBar;
-//					if (primers.size() != 0){
-//						//does this primer have a group
-//						if (groupVector[groupPrime] != "") {  
-//							thisGroup += "." + groupVector[groupPrime]; 
-//							indexToFastaFile = combos[thisGroup];
-//						}
-//					}
-//					outGroups << currSeq.getName() << '\t' << thisGroup << endl;
-//					if(allFiles){
-//						ofstream outTemp;
-//						m->openOutputFileAppend(fastaNames[indexToFastaFile], outTemp);
-//						//currSeq.printSequence(*fastaFileNames[indexToFastaFile]);
-//						currSeq.printSequence(outTemp);
-//						outTemp.close();
-//						
-//						if(qFileName != ""){
-//							//currQual.printQScores(*qualFileNames[indexToFastaFile]);
-//							ofstream outTemp2;
-//							m->openOutputFileAppend(qualNames[indexToFastaFile], outTemp2);
-//							currQual.printQScores(outTemp2);
-//							outTemp2.close();							
-//						}
-//					}
-//				}
-//			}
-//			else{
-//				currSeq.setName(currSeq.getName() + '|' + trashCode);
-//				currSeq.setUnaligned(origSeq);
-//				currSeq.setAligned(origSeq);
-//				currSeq.printSequence(scrapFASTA);
-//			}
-
 			count++;
 						
 			//report progress
-			if((count) % 1000 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+			if((count) % 10000 == 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
+
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			unsigned long int pos = flowFile.tellg();
+
+			if ((pos == -1) || (pos >= line->end)) { break; }
+#else
+			if (flowFile.eof()) { break; }
+#endif
 			
 		}
 		//report progress
-		if((count) % 1000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
-		
+		if((count) % 10000 != 0){	m->mothurOut(toString(count)); m->mothurOutEndLine();		}
 		
 		trimFlowFile.close();
 		scrapFlowFile.close();
 		flowFile.close();
+		if(fasta){	fastaFile.close();	}
 		
 		return count;
 	}
@@ -526,7 +569,7 @@ void TrimFlowsCommand::getOligos(vector<vector<string> >& outFlowFileNames){
 					
 					outputNames.push_back(fileName);
 					outputTypes["flow"].push_back(fileName);
-					outFlowFileNames[itBar->second][itPrimer->second] = comboGroupName;
+					outFlowFileNames[itBar->second][itPrimer->second] = fileName;
 					
 					ofstream temp;
 					m->openOutputFile(fileName, temp);
@@ -571,11 +614,9 @@ int TrimFlowsCommand::stripBarcode(Sequence& seq, int& group){
 		}
 		
 		//if you found the barcode or if you don't want to allow for diffs
-		//		cout << success;
 		if ((bdiffs == 0) || (success == 0)) { return success;  }
 		
 		else { //try aligning and see if you can find it
-			//			cout << endl;
 			
 			int maxLength = 0;
 			
@@ -687,11 +728,9 @@ int TrimFlowsCommand::stripForward(Sequence& seq, int& group){
 		}
 		
 		//if you found the barcode or if you don't want to allow for diffs
-		//		cout << success;
 		if ((pdiffs == 0) || (success == 0)) { return success;  }
 		
 		else { //try aligning and see if you can find it
-			//			cout << endl;
 			
 			int maxLength = 0;
 			
@@ -738,8 +777,6 @@ int TrimFlowsCommand::stripForward(Sequence& seq, int& group){
 				
 				int newStart=0;
 				int numDiff = countDiffs(oligo, temp);
-				
-				//				cout << oligo << '\t' << temp << '\t' << numDiff << endl;				
 				
 				if(numDiff < minDiff){
 					minDiff = numDiff;
@@ -887,17 +924,184 @@ int TrimFlowsCommand::countDiffs(string oligo, string seq){
 	
 }
 
+/**************************************************************************************************/
+
+vector<unsigned long int> TrimFlowsCommand::getFlowFileBreaks() {
+
+	try{
+			
+		vector<unsigned long int> filePos;
+		filePos.push_back(0);
+					
+		FILE * pFile;
+		unsigned long int size;
+		
+		//get num bytes in file
+		pFile = fopen (flowFileName.c_str(),"rb");
+		if (pFile==NULL) perror ("Error opening file");
+		else{
+			fseek (pFile, 0, SEEK_END);
+			size=ftell (pFile);
+			fclose (pFile);
+		}
+				
+		//estimate file breaks
+		unsigned long int chunkSize = 0;
+		chunkSize = size / processors;
+
+		//file too small to divide by processors
+		if (chunkSize == 0)  {  processors = 1;	filePos.push_back(size); return filePos;	}
+		
+		//for each process seekg to closest file break and search for next '>' char. make that the filebreak
+		for (int i = 0; i < processors; i++) {
+			unsigned long int spot = (i+1) * chunkSize;
+			
+			ifstream in;
+			m->openInputFile(flowFileName, in);
+			in.seekg(spot);
+			
+			unsigned long int newSpot = spot;
+			string dummy = m->getline(in);
+			
+			
+			//there was not another sequence before the end of the file
+			unsigned long int sanityPos = in.tellg();
+			
+//			if (sanityPos == -1) {	break;  }
+//			else {  filePos.push_back(newSpot);  }
+			if (sanityPos == -1) {	break;  }
+			else {  filePos.push_back(sanityPos);  }
+			
+			in.close();
+		}
+		
+		//save end pos
+		filePos.push_back(size);
+		
+		//sanity check filePos
+		for (int i = 0; i < (filePos.size()-1); i++) {
+			if (filePos[(i+1)] <= filePos[i]) {  filePos.erase(filePos.begin()+(i+1)); i--; }
+		}
+
+		ifstream in;
+		m->openInputFile(flowFileName, in);
+		in >> numFlows;
+		m->gobble(in);
+		unsigned long int spot = in.tellg();
+		filePos[0] = spot;
+		in.close();
+		
+		processors = (filePos.size() - 1);
+		
+		return filePos;	
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TrimSeqsCommand", "getFlowFileBreaks");
+		exit(1);
+	}
+}
+
+/**************************************************************************************************/
+
+int TrimFlowsCommand::createProcessesCreateTrim(string flowFileName, string trimFlowFileName, string scrapFlowFileName, string fastaFileName, vector<vector<string> > barcodePrimerComboFileNames){
+
+	try {
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		int process = 1;
+		int exitCommand = 1;
+		processIDS.clear();
+		
+		//loop through and create all the processes you want
+		while (process != processors) {
+			int pid = fork();
+			
+			if (pid > 0) {
+				processIDS.push_back(pid);  //create map from line number to pid so you can append files in correct order later
+				process++;
+			}else if (pid == 0){
+				
+				vector<vector<string> > tempBarcodePrimerComboFileNames = barcodePrimerComboFileNames;
+				for(int i=0;i<tempBarcodePrimerComboFileNames.size();i++){
+					for(int j=0;j<tempBarcodePrimerComboFileNames[0].size();j++){
+						tempBarcodePrimerComboFileNames[i][j] += toString(getpid()) + ".temp";
+						ofstream temp;
+						m->openOutputFile(tempBarcodePrimerComboFileNames[i][j], temp);
+						temp.close();
+						
+					}
+				}
+						
+				driverCreateTrim(flowFileName,
+								 (trimFlowFileName + toString(getpid()) + ".temp"),
+								 (scrapFlowFileName + toString(getpid()) + ".temp"),
+								 (fastaFileName + toString(getpid()) + ".temp"),
+								 tempBarcodePrimerComboFileNames, lines[process]);
+
+				exit(0);
+			}else { 
+				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+				for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+				exit(0);
+			}
+		}
+		
+		//parent do my part
+		ofstream temp;
+		m->openOutputFile(trimFlowFileName, temp);
+		temp.close();
+
+		m->openOutputFile(scrapFlowFileName, temp);
+		temp.close();
+		
+		if(fasta){
+			m->openOutputFile(fastaFileName, temp);
+			temp.close();
+		}
+		
+		driverCreateTrim(flowFileName, trimFlowFileName, scrapFlowFileName, fastaFileName, barcodePrimerComboFileNames, lines[0]);
+
+		//force parent to wait until all the processes are done
+		for (int i=0;i<processIDS.size();i++) { 
+			int temp = processIDS[i];
+			wait(&temp);
+		}
+		
+		//append files
+		m->mothurOutEndLine();
+		for(int i=0;i<processIDS.size();i++){
+			
+			m->mothurOut("Appending files from process " + toString(processIDS[i])); m->mothurOutEndLine();
+			
+			m->appendFiles((trimFlowFileName + toString(processIDS[i]) + ".temp"), trimFlowFileName);
+			remove((trimFlowFileName + toString(processIDS[i]) + ".temp").c_str());
+//			m->mothurOut("\tDone with trim.flow file"); m->mothurOutEndLine();
+
+			m->appendFiles((scrapFlowFileName + toString(processIDS[i]) + ".temp"), scrapFlowFileName);
+			remove((scrapFlowFileName + toString(processIDS[i]) + ".temp").c_str());
+//			m->mothurOut("\tDone with scrap.flow file"); m->mothurOutEndLine();
+
+			if(fasta){
+				m->appendFiles((fastaFileName + toString(processIDS[i]) + ".temp"), fastaFileName);
+				remove((fastaFileName + toString(processIDS[i]) + ".temp").c_str());
+//				m->mothurOut("\tDone with flow.fasta file"); m->mothurOutEndLine();
+			}
+			if(allFiles){						
+				for (int j = 0; j < barcodePrimerComboFileNames.size(); j++) {
+					for (int k = 0; k < barcodePrimerComboFileNames[0].size(); k++) {
+						m->appendFiles((barcodePrimerComboFileNames[j][k] + toString(processIDS[i]) + ".temp"), barcodePrimerComboFileNames[j][k]);
+						remove((barcodePrimerComboFileNames[j][k] + toString(processIDS[i]) + ".temp").c_str());
+					}
+				}
+			}
+		}
+		
+		return exitCommand;
+#endif		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "TrimFlowsCommand", "createProcessesCreateTrim");
+		exit(1);
+	}
+}
+
 //***************************************************************************************************************
-
-
-
-
-
-
-
-
-
-
-
-
-

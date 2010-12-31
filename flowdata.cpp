@@ -15,40 +15,20 @@ FlowData::FlowData(){}
 
 //**********************************************************************************************************************
 
-FlowData::FlowData(ifstream& flowFile, float signal, float noise, int maxHomoP){
+FlowData::~FlowData(){	/*	do nothing	*/	}
+
+//**********************************************************************************************************************
+
+FlowData::FlowData(int numFlows, float signal, float noise, int maxHomoP) : 
+			numFlows(numFlows), signalIntensity(signal), noiseIntensity(noise), maxHomoP(maxHomoP){
 
 	try {
 		m = MothurOut::getInstance();
 
+		flowData.assign(numFlows, 0);
 		baseFlow = "TACG";
 		seqName = "";
-		numFlows = 0;
 		locationString = "";
-		seqLength = 0;
-		
-		string lengthString;
-		string flowString;
-		
-		flowFile >> seqName >> locationString >> lengthString >> flowString;
-
-		convert(lengthString.substr(7), seqLength);
-		convert(flowString.substr(9), numFlows);
-
-		flowData.resize(numFlows);
-		
-		if (seqName == "") {
-			m->mothurOut("Error reading quality file, name blank at position, " + toString(flowFile.tellg()));
-			m->mothurOutEndLine(); 
-		}
-		else{
-			seqName = seqName.substr(1);
-			for(int i=0;i<numFlows;i++)	{	flowFile >> flowData[i];	}
-		}
-		
-		findDeadSpot(signal, noise, maxHomoP);
-		translateFlow();
-		
-		m->gobble(flowFile);
 	}
 	catch(exception& e) {
 		m->errorOut(e, "FlowData", "FlowData");
@@ -59,19 +39,46 @@ FlowData::FlowData(ifstream& flowFile, float signal, float noise, int maxHomoP){
 
 //**********************************************************************************************************************
 
-void FlowData::findDeadSpot(float signalIntensity, float noiseIntensity, int maxHomoP){
+bool FlowData::getNext(ifstream& flowFile){
+	
+	try {
+		
+		string lengthString;
+		string flowString;
+		
+		flowFile >> seqName >> endFlow;		
+		for(int i=0;i<numFlows;i++)	{	flowFile >> flowData[i];	}
+		
+		updateEndFlow();
+		translateFlow();
+		
+		m->gobble(flowFile);
+		if(flowFile){	return 1;	}
+		else		{	return 0;	}
+	}
+	catch(exception& e) {
+		m->errorOut(e, "FlowData", "getNext");
+		exit(1);
+	}
+	
+}
+
+//**********************************************************************************************************************
+
+void FlowData::updateEndFlow(){
 	try{
 		
 		int currLength = 0;
 		float maxIntensity = (float) maxHomoP + 0.49;
 		
-		deadSpot = 0;
-		while(currLength < seqLength + 4){
+		int deadSpot = 0;
+				
+		while(deadSpot < endFlow){
 			int signal = 0;
 			int noise = 0;
 			
 			for(int i=0;i<4;i++){
-				float intensity = flowData[i + 4 * deadSpot];
+				float intensity = flowData[i + deadSpot];
 				if(intensity > signalIntensity){
 					signal++;
 
@@ -79,18 +86,16 @@ void FlowData::findDeadSpot(float signalIntensity, float noiseIntensity, int max
 						noise++;
 					}
 				}
-				currLength += (int)(intensity+0.5);
 			}
 
 			if(noise > 0 || signal == 0){
 				break;
 			}
 		
-			deadSpot++;
+			deadSpot += 4;
 		}
-		deadSpot *= 4;
-		seqLength = currLength;
-		
+		endFlow = deadSpot;
+
 	}
 	catch(exception& e) {
 		m->errorOut(e, "FlowData", "findDeadSpot");
@@ -104,7 +109,7 @@ void FlowData::translateFlow(){
 	
 	try{
 		sequence = "";
-		for(int i=0;i<deadSpot;i++){
+		for(int i=0;i<endFlow;i++){
 			int intensity = (int)(flowData[i] + 0.5);
 			char base = baseFlow[i % 4];
 			
@@ -128,12 +133,12 @@ void FlowData::translateFlow(){
 
 //**********************************************************************************************************************
 
-void FlowData::capFlows(int maxFlows){
+void FlowData::capFlows(int mF){
 	
 	try{
 		
-		numFlows = maxFlows;
-		if(deadSpot > maxFlows){	deadSpot = maxFlows;	}
+		maxFlows = mF;
+		if(endFlow > maxFlows){	endFlow = maxFlows;	}		
 		
 	}
 	catch(exception& e) {
@@ -148,8 +153,8 @@ bool FlowData::hasMinFlows(int minFlows){
 	
 	try{
 		bool pastMin = 0;
-		
-		if(deadSpot >= minFlows){	pastMin = 1;	}
+		if(endFlow >= minFlows){	pastMin = 1;	}
+
 		return pastMin;
 	}
 	catch(exception& e) {
@@ -173,25 +178,12 @@ Sequence FlowData::getSequence(){
 
 //**********************************************************************************************************************
 
-int FlowData::getSeqLength(){
-	
-	try{
-		return seqLength;		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "FlowData", "getSeqLength");
-		exit(1);
-	}
-}
-
-//**********************************************************************************************************************
-
 void FlowData::printFlows(ofstream& outFlowFile){
 	try{
-	//	outFlowFile << '>' << seqName << locationString << " length=" << seqLength << " numflows=" << maxFlows << endl;
-		outFlowFile << seqName << ' ' << deadSpot << ' ' << setprecision(2);
+//	outFlowFile << '>' << seqName << locationString << " length=" << seqLength << " numflows=" << maxFlows << endl;
+		outFlowFile << seqName << ' ' << endFlow << ' ' << setprecision(2);
 
-		for(int i=0;i<numFlows;i++){
+		for(int i=0;i<maxFlows;i++){
 			outFlowFile << flowData[i] << ' ';
 		}
 		outFlowFile << endl;
@@ -206,10 +198,7 @@ void FlowData::printFlows(ofstream& outFlowFile){
 
 void FlowData::printFlows(ofstream& outFlowFile, string scrapCode){
 	try{
-	
-	//	outFlowFile << '>' << seqName << locationString << " length=" << seqLength << " numflows=" << maxFlows << endl;
-
-		outFlowFile << seqName << '|' << scrapCode << ' ' << deadSpot << ' ' << setprecision(2);
+		outFlowFile << seqName << '|' << scrapCode << ' ' << endFlow << ' ' << setprecision(2);
 		
 		for(int i=0;i<numFlows;i++){
 			outFlowFile << flowData[i] << ' ';
@@ -221,21 +210,5 @@ void FlowData::printFlows(ofstream& outFlowFile, string scrapCode){
 		exit(1);
 	}
 }
-
-//**********************************************************************************************************************
-
-void FlowData::printFASTA(ofstream& outFASTA){
-	try{
-		
-		outFASTA << '>' << seqName << endl;
-		outFASTA << sequence << endl;
-
-	}
-	catch(exception& e) {
-		m->errorOut(e, "FlowData", "printFlows");
-		exit(1);
-	}
-}
-
 
 //**********************************************************************************************************************

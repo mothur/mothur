@@ -31,8 +31,6 @@ public:
 private:
 	bool abort;
 
-//	GroupMap* groupMap;
-	
 	struct linePair {
 		unsigned long int start;
 		unsigned long int end;
@@ -41,11 +39,16 @@ private:
 	int comboStarts;
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;
-	vector<linePair*> qLines;
+
+	vector<unsigned long int> getFlowFileBreaks();
+	int createProcessesCreateTrim(string, string, string, string, vector<vector<string> >); 
+	int driverCreateTrim(string, string, string, string, vector<vector<string> >, linePair*);
+
+	
 	map<string, vector<string> > outputTypes;
 	vector<string> outputNames;
 	set<string> filesToRemove;
-
+	
 	
 	
 	void getOligos(vector<vector<string> >&);		//a rewrite of what is in trimseqscommand.h
@@ -54,12 +57,12 @@ private:
 	bool stripReverse(Sequence&);					//largely redundant with trimseqscommand.h
 	bool compareDNASeq(string, string);				//largely redundant with trimseqscommand.h
 	int countDiffs(string, string);					//largely redundant with trimseqscommand.h
-
 	
 	bool allFiles;
-//	int processors;
+	int processors;
 	int numFPrimers, numRPrimers;
 	int totalFlows, minFlows, minLength, maxLength, maxHomoP, tdiffs, bdiffs, pdiffs;
+	int numFlows;
 	float signal, noise;
 	bool fasta;
 	
@@ -76,12 +79,6 @@ private:
 
 	map<string, int> combos;			//needed here?
 	map<string, int> groupToIndex;		//needed here?
-	
-	
-	int driverCreateTrim(string, string, string, string);
-	
-//	int createProcessesCreateTrim(string, string, string, string, string, string, string, vector<string>, vector<string>){};
-	int setLines(string, string, vector<unsigned long int>&, vector<unsigned long int>&){};
 	
 };
 
