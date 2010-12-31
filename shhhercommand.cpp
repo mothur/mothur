@@ -1006,7 +1006,7 @@ void ShhherCommand::flowDistParentFork(string distFileName, int startSeq, int st
 		m->mothurOut("\t" + toString((clock()-begClock)/CLOCKS_PER_SEC));
 		m->mothurOutEndLine();
 		
-		ofstream distFile((distFileName + "temp." + toString(pid)).c_str());
+		ofstream distFile(distFileName.c_str());
 		distFile << outStream.str();		
 		distFile.close();
 	}
