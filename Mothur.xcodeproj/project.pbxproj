@@ -27,6 +27,10 @@
 		7E85BD1D11EB5E9B00FD37C0 /* qualityscores.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = qualityscores.cpp; sourceTree = "<group>"; };
 		7E962A40121F76B1007464B5 /* invsimpson.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = invsimpson.h; sourceTree = "<group>"; };
 		7E962A41121F76B1007464B5 /* invsimpson.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = invsimpson.cpp; sourceTree = "<group>"; };
+		7E99CA1312C8B0970041246B /* shhhercommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shhhercommand.h; sourceTree = "<group>"; };
+		7E99CA1412C8B0970041246B /* shhhercommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = shhhercommand.cpp; sourceTree = "<group>"; };
+		7E99D77C12CBAD780041246B /* untitled.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = untitled.h; path = ../untitled.h; sourceTree = SOURCE_ROOT; };
+		7E99D77D12CBAD780041246B /* untitled.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = untitled.cpp; path = ../untitled.cpp; sourceTree = SOURCE_ROOT; };
 		7EA299BA11E384940022D8D3 /* sensspeccommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sensspeccommand.h; sourceTree = "<group>"; };
 		7EA299BB11E384940022D8D3 /* sensspeccommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sensspeccommand.cpp; sourceTree = "<group>"; };
 		7EC61A0911BEA6AF00F668D9 /* weightedlinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = weightedlinkage.cpp; sourceTree = "<group>"; };
@@ -577,6 +581,8 @@
 		08FB7794FE84155DC02AAC07 /* mothur */ = {
 			isa = PBXGroup;
 			children = (
+				7E99D77C12CBAD780041246B /* untitled.h */,
+				7E99D77D12CBAD780041246B /* untitled.cpp */,
 				A768D95D1248FEAA008AB1D0 /* mothur */,
 				A7639F8D1175DF35008F5578 /* makefile */,
 				A7DA1FF0113FECD400BF472F /* alignment.cpp */,
@@ -675,6 +681,8 @@
 		A7CB593B11402EF90010EB83 /* calculators */ = {
 			isa = PBXGroup;
 			children = (
+				7E99CA1312C8B0970041246B /* shhhercommand.h */,
+				7E99CA1412C8B0970041246B /* shhhercommand.cpp */,
 				A7DA200B113FECD400BF472F /* calculator.cpp */,
 				A7DA200C113FECD400BF472F /* calculator.h */,
 				A7DA1FED113FECD400BF472F /* ace.h */,

@@ -58,7 +58,7 @@ ifeq  ($(strip $(USEREADLINE)),yes)
       -lncurses
 endif
 
-USEMPI ?= no
+USEMPI ?= yes
 
 ifeq  ($(strip $(USEMPI)),yes)
     CXX = mpic++
@@ -93,7 +93,7 @@ mothur : $(OBJECTS)
 	strip mothur
 
 install : mothur
-	cp mothur ../Release/mothur
+#	cp mothur ../Release/mothur
 	
 %.o : %.c %.h
 	$(COMPILE.c) $(OUTPUT_OPTION) $<

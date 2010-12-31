@@ -883,6 +883,7 @@ int TrimSeqsCommand::setLines(string filename, string qfilename, vector<unsigned
 		exit(1);
 	}
 }
+
 //***************************************************************************************************************
 
 void TrimSeqsCommand::getOligos(vector<string>& outFASTAVec, vector<string>& outQualVec){

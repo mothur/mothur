@@ -18,24 +18,25 @@ class FlowData {
 
 public:
 	FlowData();
-	FlowData(ifstream&, float, float, int);
-	~FlowData(){};
+	FlowData(int, float, float, int);
+	~FlowData();
+	bool getNext(ifstream&);
+
 	void capFlows(int);
 	bool hasMinFlows(int);
 	Sequence getSequence();
-	
-	int getSeqLength();
+
 	void printFlows(ofstream&);
 	void printFlows(ofstream&, string);
-	void printFASTA(ofstream&);
 private:
 	MothurOut* m;
-
-	void findDeadSpot(float, float, int);
-	void translateFlow();
 	
+	void updateEndFlow();
+	void translateFlow();
+	float signalIntensity, noiseIntensity;
+	int maxHomoP;
 	string seqName, locationString, sequence, baseFlow;
-	int numFlows, seqLength, deadSpot;
+	int numFlows, maxFlows, endFlow;
 	vector<float> flowData;
 };
 
