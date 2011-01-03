@@ -139,7 +139,7 @@ Sequence::Sequence(ifstream& fastaFile){
 		m = MothurOut::getInstance();
 		initialize();
 		fastaFile >> name;
-
+		
 		if (name.length() != 0) { 
 		
 			name = name.substr(1); 

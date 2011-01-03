@@ -14,7 +14,7 @@
 //**********************************************************************************************************************
 vector<string> GetSeqsCommand::getValidParameters(){	
 	try {
-		string Array[] =  {"fasta","name", "group", "qfile","alignreport", "accnos", "dups", "list","taxonomy","outputdir","inputdir"};
+		string Array[] =  {"fasta","name", "group", "qfile","alignreport", "accnos", "accnos2","dups", "list","taxonomy","outputdir","inputdir"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
@@ -36,6 +36,7 @@ GetSeqsCommand::GetSeqsCommand(){
 		outputTypes["alignreport"] = tempOutNames;
 		outputTypes["list"] = tempOutNames;
 		outputTypes["qfile"] = tempOutNames;
+		outputTypes["accnosreport"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetSeqsCommand", "GetSeqsCommand");
@@ -75,7 +76,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","name", "group", "alignreport", "qfile", "accnos", "dups", "list","taxonomy","outputdir","inputdir"};
+			string Array[] =  {"fasta","name", "group", "alignreport", "qfile", "accnos", "accnos2","dups", "list","taxonomy","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -98,6 +99,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 			outputTypes["alignreport"] = tempOutNames;
 			outputTypes["list"] = tempOutNames;
 			outputTypes["qfile"] = tempOutNames;
+			outputTypes["accnosreport"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -129,6 +131,14 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 					path = m->hasPath(it->second);
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["accnos"] = inputDir + it->second;		}
+				}
+				
+				it = parameters.find("accnos2");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["accnos2"] = inputDir + it->second;		}
 				}
 				
 				it = parameters.find("list");
@@ -178,6 +188,9 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 			if (accnosfile == "not open") { abort = true; }
 			else if (accnosfile == "not found") {  accnosfile = "";  m->mothurOut("You must provide an accnos file."); m->mothurOutEndLine(); abort = true; }	
 			
+			accnosfile2 = validParameter.validFile(parameters, "accnos2", true);
+			if (accnosfile2 == "not open") { abort = true; }
+			
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
 			else if (fastafile == "not found") {  fastafile = "";  }	
@@ -210,7 +223,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 			string temp = validParameter.validFile(parameters, "dups", false);	if (temp == "not found") { temp = "false"; usedDups = ""; }
 			dups = m->isTrue(temp);
 			
-			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (qualfile == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, alignreport, taxonomy, quality or listfile."); m->mothurOutEndLine(); abort = true; }
+			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (qualfile == "") && (accnosfile2 == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, alignreport, taxonomy, quality or listfile."); m->mothurOutEndLine(); abort = true; }
 		
 			if ((usedDups != "") && (namefile == "")) {  m->mothurOut("You may only use dups with the name option."); m->mothurOutEndLine();  abort = true; }			
 
@@ -253,13 +266,14 @@ int GetSeqsCommand::execute(){
 		if (m->control_pressed) { return 0; }
 		
 		//read through the correct file and output lines you want to keep
-		if (namefile != "")			{		readName();		}
-		if (fastafile != "")		{		readFasta();	}
-		if (groupfile != "")		{		readGroup();	}
-		if (alignfile != "")		{		readAlign();	}
-		if (listfile != "")			{		readList();		}
-		if (taxfile != "")			{		readTax();		}
-		if (qualfile != "")			{		readQual();		}
+		if (namefile != "")			{		readName();			}
+		if (fastafile != "")		{		readFasta();		}
+		if (groupfile != "")		{		readGroup();		}
+		if (alignfile != "")		{		readAlign();		}
+		if (listfile != "")			{		readList();			}
+		if (taxfile != "")			{		readTax();			}
+		if (qualfile != "")			{		readQual();			}
+		if (accnosfile2 != "")		{		compareAccnos();	}
 		
 		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
 		
@@ -746,6 +760,73 @@ int GetSeqsCommand::readAccnos(){
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+
+int GetSeqsCommand::compareAccnos(){
+	try {
+		
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(accnosfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(accnosfile)) + "accnos.report";
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		
+		ifstream in;
+		m->openInputFile(accnosfile2, in);
+		string name;
+		
+		set<string> namesAccnos2;
+		set<string> namesDups;
+		set<string> namesAccnos = names;
+		
+		while(!in.eof()){
+			in >> name;
+			
+			if (namesAccnos.count(name) == 0){ //name unique to accnos2
+				namesAccnos2.insert(name);
+			}else { //you are in both so erase
+				namesAccnos.erase(name);
+				namesDups.insert(name);
+			}
+			
+			m->gobble(in);
+		}
+		in.close();	
+		
+		out << "Names in both files : " + toString(namesDups.size()) << endl;
+		m->mothurOut("Names in both files : " + toString(namesDups.size())); m->mothurOutEndLine();
+		
+		for (set<string>::iterator it = namesDups.begin(); it != namesDups.end(); it++) {
+			out << (*it) << endl;
+		}
+		
+		out << "Names unique to " + accnosfile + " : " + toString(namesAccnos.size()) << endl;
+		m->mothurOut("Names unique to " + accnosfile + " : " + toString(namesAccnos.size())); m->mothurOutEndLine();
+		
+		for (set<string>::iterator it = namesAccnos.begin(); it != namesAccnos.end(); it++) {
+			out << (*it) << endl;
+		}
+		
+		out << "Names unique to " + accnosfile2 + " : " + toString(namesAccnos2.size()) << endl;
+		m->mothurOut("Names unique to " + accnosfile2 + " : " + toString(namesAccnos2.size())); m->mothurOutEndLine();
+		
+		for (set<string>::iterator it = namesAccnos2.begin(); it != namesAccnos2.end(); it++) {
+			out << (*it) << endl;
+		}
+
+		out.close(); 
+		
+		outputNames.push_back(outputFileName);  outputTypes["accnosreport"].push_back(outputFileName);
+		
+		return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "GetSeqsCommand", "readAccnos");
+		exit(1);
+	}
+}
+
 
 //**********************************************************************************************************************
 

@@ -49,7 +49,7 @@ private:
 	#endif
 
 	bool abort, realign;
-	string fastafile, templatefile, outputDir, search;
+	string fastafile, templatefile, outputDir, search, namefile;
 	int processors, window, iters, increment, numwanted, ksize, match, mismatch, parents, minSimilarity, minCoverage, minBS, minSNP, numSeqs, templateSeqsLength;
 	float divR;
 	Chimera* chimera;
@@ -57,6 +57,7 @@ private:
 	vector<string> outputNames;
 	map<string, vector<string> > outputTypes;
 	vector<string> fastaFileNames;
+	vector<string> nameFileNames;
 	
 };
 
