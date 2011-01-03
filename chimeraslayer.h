@@ -15,6 +15,8 @@
 #include "maligner.h"
 #include "slayer.h"
 
+
+
 //***********************************************************************/
 //This class was modeled after the chimeraSlayer written by the Broad Institute
 /***********************************************************************/
@@ -24,6 +26,8 @@ class ChimeraSlayer : public Chimera {
 	
 	public:
 		ChimeraSlayer(string, string, string, int, int, int, int, float, int, int, int, int, int, int, int, int, bool);
+		ChimeraSlayer(string, string, string, string, int, int, int, int, float, int, int, int, int, int, int, int, int, bool);
+
 		~ChimeraSlayer();
 		
 		int getChimeras(Sequence*);
@@ -41,6 +45,7 @@ class ChimeraSlayer : public Chimera {
 		map<int, int>  spotMap;
 		Database* databaseRight;
 		Database* databaseLeft;
+		map<string, vector<string> > nameMapRank;  //sequence name to rank so you can construct a template of the abundant sequences if the user uses itself as template
 		
 		vector<data_struct>  chimeraResults;
 		string chimeraFlags, searchMethod, fastafile;
@@ -50,6 +55,8 @@ class ChimeraSlayer : public Chimera {
 	
 		void printBlock(data_struct, string, ostream&);
 		string getBlock(data_struct, string);
+		int readNameFile(string);
+		vector<Sequence*> getTemplate(Sequence*);
 		
 };
 

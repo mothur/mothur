@@ -15,6 +15,15 @@
 #include "sharedrabundfloatvector.h"
 #include "inputdata.h"
 
+/***************************************************************/
+struct spearmanRank {
+	string name;
+	float score;
+	
+	spearmanRank(string n, float s) : name(n), score(s) {}
+};
+/***************************************************************/
+
 class CorrAxesCommand : public Command {
 public:
 	CorrAxesCommand(string);
@@ -28,6 +37,8 @@ public:
 	void help();
 	
 private:
+	
+	
 	GlobalData* globaldata;
 	string axesfile, sharedfile, relabundfile, metadatafile, groups, label, inputFileName, outputDir, method;
 	bool abort, pickedGroups;
@@ -46,6 +57,7 @@ private:
 	map<string, vector<float> > readAxes();
 	int calcPearson(map<string, vector<float> >&, ofstream&);
 	int calcSpearman(map<string, vector<float> >&, ofstream&);
+	int calcKendall(map<string, vector<float> >&, ofstream&);
 	
 };
 

@@ -9,11 +9,12 @@
 
 #include "chimeraslayercommand.h"
 #include "chimeraslayer.h"
+#include "deconvolutecommand.h"
 
 //**********************************************************************************************************************
 vector<string> ChimeraSlayerCommand::getValidParameters(){	
 	try {
-		string AlignArray[] =  {"fasta", "processors", "window", "template","numwanted", "ksize", "match","mismatch", 
+		string AlignArray[] =  {"fasta", "processors", "name","window", "template","numwanted", "ksize", "match","mismatch", 
 			"divergence", "minsim","mincov","minbs", "minsnp","parents", "iters","outputdir","inputdir", "search","realign" };
 		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 		return myArray;
@@ -68,7 +69,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "processors", "window", "template","numwanted", "ksize", "match","mismatch", 
+			string Array[] =  {"fasta", "processors","name", "window", "template","numwanted", "ksize", "match","mismatch", 
 			"divergence", "minsim","mincov","minbs", "minsnp","parents", "iters","outputdir","inputdir", "search","realign" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
@@ -90,21 +91,10 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
 			if (inputDir == "not found"){	inputDir = "";		}
-			else {
-				string path;
-				it = parameters.find("template");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["template"] = inputDir + it->second;		}
-				}
-			}
-
-			
+						
 			//check for required parameters
 			fastafile = validParameter.validFile(parameters, "fasta", false);
-			if (fastafile == "not found") { fastafile = ""; m->mothurOut("fasta is a required parameter for the chimera.slayer command."); m->mothurOutEndLine(); abort = true;  }
+			if (fastafile == "not found") { fastafile = ""; m->mothurOut("[ERROR]: fasta is a required parameter for the chimera.slayer command."); m->mothurOutEndLine(); abort = true;  }
 			else { 
 				m->splitAtDash(fastafile, fastaFileNames);
 				
@@ -155,16 +145,89 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 				}
 				
 				//make sure there is at least one valid file left
-				if (fastaFileNames.size() == 0) { m->mothurOut("no valid files."); m->mothurOutEndLine(); abort = true; }
+				if (fastaFileNames.size() == 0) { m->mothurOut("[ERROR]: no valid files."); m->mothurOutEndLine(); abort = true; }
 			}
+			
+			
+			//check for required parameters
+			bool hasName = true;
+			namefile = validParameter.validFile(parameters, "name", false);
+			if (namefile == "not found") { namefile = "";  hasName = false; }
+			else { 
+				m->splitAtDash(namefile, nameFileNames);
+				
+				//go through files and make sure they are good, if not, then disregard them
+				for (int i = 0; i < nameFileNames.size(); i++) {
+					if (inputDir != "") {
+						string path = m->hasPath(nameFileNames[i]);
+						//if the user has not given a path then, add inputdir. else leave path alone.
+						if (path == "") {	nameFileNames[i] = inputDir + nameFileNames[i];		}
+					}
+					
+					int ableToOpen;
+					ifstream in;
+					
+					ableToOpen = m->openInputFile(nameFileNames[i], in, "noerror");
+					
+					//if you can't open it, try default location
+					if (ableToOpen == 1) {
+						if (m->getDefaultPath() != "") { //default path is set
+							string tryPath = m->getDefaultPath() + m->getSimpleName(nameFileNames[i]);
+							m->mothurOut("Unable to open " + nameFileNames[i] + ". Trying default " + tryPath); m->mothurOutEndLine();
+							ifstream in2;
+							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+							in2.close();
+							nameFileNames[i] = tryPath;
+						}
+					}
+					
+					if (ableToOpen == 1) {
+						if (m->getOutputDir() != "") { //default path is set
+							string tryPath = m->getOutputDir() + m->getSimpleName(nameFileNames[i]);
+							m->mothurOut("Unable to open " + nameFileNames[i] + ". Trying output directory " + tryPath); m->mothurOutEndLine();
+							ifstream in2;
+							ableToOpen = m->openInputFile(tryPath, in2, "noerror");
+							in2.close();
+							nameFileNames[i] = tryPath;
+						}
+					}
+					
+					in.close();
+					
+					if (ableToOpen == 1) { 
+						m->mothurOut("Unable to open " + nameFileNames[i] + ". It will be disregarded."); m->mothurOutEndLine(); 
+						//erase from file list
+						nameFileNames.erase(nameFileNames.begin()+i);
+						i--;
+					}
+				}
+				
+				//make sure there is at least one valid file left
+				if (nameFileNames.size() == 0) { m->mothurOut("[ERROR]: no valid name files."); m->mothurOutEndLine(); abort = true; }
+			}
+			
+			if (hasName && (nameFileNames.size() != fastaFileNames.size())) { m->mothurOut("[ERROR]: The number of namefiles does not match the number of fastafiles, please correct."); m->mothurOutEndLine(); abort=true; }
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
-
-			templatefile = validParameter.validFile(parameters, "template", true);
-			if (templatefile == "not open") { abort = true; }
-			else if (templatefile == "not found") { templatefile = "";  m->mothurOut("template is a required parameter for the chimera.slayer command."); m->mothurOutEndLine(); abort = true;  }	
-						
+			
+			
+			string path;
+			it = parameters.find("template");
+			//user has given a template file
+			if(it != parameters.end()){ 
+				if (it->second == "self") { templatefile = "self"; }
+				else {
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["template"] = inputDir + it->second;		}
+					
+					templatefile = validParameter.validFile(parameters, "template", true);
+					if (templatefile == "not open") { abort = true; }
+					else if (templatefile == "not found") { templatefile = "";  m->mothurOut("template is a required parameter for the chimera.slayer command."); m->mothurOutEndLine(); abort = true;  }	
+				}
+			}
+			
 			string temp = validParameter.validFile(parameters, "processors", false);		if (temp == "not found") { temp = "1"; }
 			convert(temp, processors);
 			
@@ -227,10 +290,11 @@ void ChimeraSlayerCommand::help(){
 	
 		m->mothurOut("The chimera.slayer command reads a fastafile and templatefile and outputs potentially chimeric sequences.\n");
 		m->mothurOut("This command was modeled after the chimeraSlayer written by the Broad Institute.\n");
-		m->mothurOut("The chimera.slayer command parameters are fasta, template, processors, ksize, window, match, mismatch, divergence. minsim, mincov, minbs, minsnp, parents, search, iters, increment and numwanted.\n"); //realign,
+		m->mothurOut("The chimera.slayer command parameters are fasta, name, template, processors, ksize, window, match, mismatch, divergence. minsim, mincov, minbs, minsnp, parents, search, iters, increment and numwanted.\n"); //realign,
 		m->mothurOut("The fasta parameter allows you to enter the fasta file containing your potentially chimeric sequences, and is required. \n");
+		m->mothurOut("The name parameter allows you to provide a name file, if you are using template=self. \n");
 		m->mothurOut("You may enter multiple fasta files by separating their names with dashes. ie. fasta=abrecovery.fasta-amazon.fasta \n");
-		m->mothurOut("The template parameter allows you to enter a template file containing known non-chimeric sequences, and is required. \n");
+		m->mothurOut("The template parameter allows you to enter a template file containing known non-chimeric sequences, and is required. You may also set template=self, in this case the abundant sequences will be used as potential parents. \n");
 		m->mothurOut("The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n");
 		#ifdef USE_MPI
 		m->mothurOut("When using MPI, the processors parameter is set to the number of MPI processes running. \n");
@@ -278,8 +342,36 @@ int ChimeraSlayerCommand::execute(){
 		
 			int start = time(NULL);	
 			
-			chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign);	
+			if (templatefile != "self") { //you want to run slayer with a refernce template
+				chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign);	
+			}else {
+				if (nameFileNames.size() != 0) { //you provided a namefile and we don't need to create one
+					chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, nameFileNames[s], search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign);	
+				}else {
+					
+					m->mothurOutEndLine(); m->mothurOut("No namesfile given, running unique.seqs command to generate one."); m->mothurOutEndLine(); m->mothurOutEndLine();
+					
+					//use unique.seqs to create new name and fastafile
+					string inputString = "fasta=" + fastaFileNames[s];
+					m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
+					m->mothurOut("Running command: unique.seqs(" + inputString + ")"); m->mothurOutEndLine(); 
+								 
+					Command* uniqueCommand = new DeconvoluteCommand(inputString);
+					uniqueCommand->execute();
+					
+					map<string, vector<string> > filenames = uniqueCommand->getOutputFiles();
+					
+					delete uniqueCommand;
+					
+					m->mothurOut("/******************************************/"); m->mothurOutEndLine(); 
+					
+					string nameFile = filenames["name"][0];
+					fastaFileNames[s] = filenames["fasta"][0];
 			
+					chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, nameFile, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign);	
+				}
+			}
+				
 			if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[s]);  }//if user entered a file with a path then preserve it				
 			string outputFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s])) + "slayer.chimeras";
 			string accnosFileName = outputDir + m->getRootName(m->getSimpleName(fastaFileNames[s]))  + "slayer.accnos";

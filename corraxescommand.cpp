@@ -9,6 +9,11 @@
 
 #include "corraxescommand.h"
 
+//********************************************************************************************************************
+//sorts highes to lowest
+inline bool compareSpearman(spearmanRank left, spearmanRank right){
+	return (left.score > right.score);	
+} 
 //**********************************************************************************************************************
 vector<string> CorrAxesCommand::getValidParameters(){	
 	try {
@@ -262,8 +267,8 @@ int CorrAxesCommand::execute(){
 		
 		if (method == "pearson")		{  calcPearson(axes, out);	}
 		else if (method == "spearman")	{  calcSpearman(axes, out); }
-		//else if (method == "kendall")	{  calcKendal(axes, out);	}
-		//else { m->mothurOut("[ERROR]: Invalid method."); m->mothurOutEndLine(); }
+		else if (method == "kendall")	{  calcKendall(axes, out);	}
+		else { m->mothurOut("[ERROR]: Invalid method."); m->mothurOutEndLine(); }
 		
 		out.close();
 		for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  }
@@ -346,51 +351,105 @@ int CorrAxesCommand::calcPearson(map<string, vector<float> >& axes, ofstream& ou
 int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& out) {
 	try {
 		
-		//find average of each axis - X
-		vector<float> averageAxes; averageAxes.resize(numaxes, 0.0);
+		//format data
+		vector< vector<spearmanRank> > scores; scores.resize(numaxes);
 		for (map<string, vector<float> >::iterator it = axes.begin(); it != axes.end(); it++) {
 			vector<float> temp = it->second;
 			for (int i = 0; i < temp.size(); i++) {
-				averageAxes[i] += temp[i];  
+				spearmanRank member(it->first, temp[i]);
+				scores[i].push_back(member);  
 			}
 		}
 		
-		for (int i = 0; i < averageAxes.size(); i++) {  averageAxes[i] = averageAxes[i] / (float) axes.size(); }
+		//sort each axis
+		for (int i = 0; i < numaxes; i++) {  sort(scores[i].begin(), scores[i].end(), compareSpearman); }
+		
+		//find ranks of xi in each axis
+		map<string, vector<float> > rankAxes;
+		for (int i = 0; i < numaxes; i++) {
+			
+			vector<spearmanRank> ties;
+			int rankTotal = 0;
+			for (int j = 0; j < scores[i].size(); j++) {
+				rankTotal += j;
+				ties.push_back(scores[i][j]);
+				
+				if (j != scores.size()-1) { // you are not the last so you can look ahead
+					if (scores[i][j].score != scores[i][j+1].score) { // you are done with ties, rank them and continue
+						for (int k = 0; k < ties.size(); k++) {
+							float thisrank = rankTotal / (float) ties.size();
+  							rankAxes[ties[k].name].push_back(thisrank);
+						}
+						ties.clear();
+						rankTotal = 0;
+					}
+				}else { // you are the last one
+					for (int k = 0; k < ties.size(); k++) {
+						float thisrank = rankTotal / (float) ties.size();
+						rankAxes[ties[k].name].push_back(thisrank);
+					}
+				}
+			}
+		}
+		
+				
 		
 		//for each otu
 		for (int i = 0; i < lookupFloat[0]->getNumBins(); i++) {
 			
 			out << i+1 << '\t';
 			
-			//find the averages this otu - Y
-			float sumOtu = 0.0;
+			//find the ranks of this otu - Y
+			vector<spearmanRank> otuScores;
 			for (int j = 0; j < lookupFloat.size(); j++) {
-				sumOtu += lookupFloat[j]->getAbundance(i);
+				spearmanRank member(lookupFloat[j]->getGroup(), lookupFloat[j]->getAbundance(i));
+				otuScores.push_back(member);
 			}
-			float Ybar = sumOtu / (float) lookupFloat.size();
 			
-			//find r value for each axis
-			for (int k = 0; k < averageAxes.size(); k++) {
+			sort(otuScores.begin(), otuScores.end(), compareSpearman);
+			
+			map<string, float> rankOtus;
+			vector<spearmanRank> ties;
+			int rankTotal = 0;
+			for (int j = 0; j < otuScores.size(); j++) {
+				rankTotal += j;
+				ties.push_back(otuScores[j]);
 				
-				double r = 0.0;
-				double numerator = 0.0;
-				double denomTerm1 = 0.0;
-				double denomTerm2 = 0.0;
-				for (int j = 0; j < lookupFloat.size(); j++) {
-					float Yi = lookupFloat[j]->getAbundance(i);
-					float Xi = axes[lookupFloat[j]->getGroup()][k];
+				if (j != scores.size()-1) { // you are not the last so you can look ahead
+					if (otuScores[j].score != otuScores[j+1].score) { // you are done with ties, rank them and continue
+						for (int k = 0; k < ties.size(); k++) {
+							float thisrank = rankTotal / (float) ties.size();
+  							rankOtus[ties[k].name] = thisrank;
+						}
+						ties.clear();
+						rankTotal = 0;
+					}
+				}else { // you are the last one
+					for (int k = 0; k < ties.size(); k++) {
+						float thisrank = rankTotal / (float) ties.size();
+						rankOtus[ties[k].name] = thisrank;
+					}
+				}
+			}
+			
+			//calc spearman ranks for each axis for this otu
+			for (int j = 0; j < numaxes; j++) {
+				
+				double di = 0.0;
+				for (int k = 0; k < lookupFloat.size(); k++) {
 					
-					numerator += ((Xi - averageAxes[k]) * (Yi - Ybar));
-					denomTerm1 += ((Xi - averageAxes[k]) * (Xi - averageAxes[k]));
-					denomTerm2 += ((Yi - Ybar) * (Yi - Ybar));
+					float xi = rankAxes[lookupFloat[k]->getGroup()][j];
+					float yi = rankOtus[lookupFloat[k]->getGroup()];
+					
+					di += ((xi - yi) * (xi - yi));
 				}
 				
-				double denom = (sqrt(denomTerm1 * denomTerm2));
+				int n = lookupFloat.size();
+				double p = 1.0 - ((6 * di) / (float) (n * ((n*n) - 1)));
 				
-				r = numerator / denom;
-				
-				out << r << '\t'; 
+				out << p << '\t';
 			}
+			
 			
 			out << endl;
 		}
@@ -399,6 +458,132 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 	}
 	catch(exception& e) {
 		m->errorOut(e, "CorrAxesCommand", "calcSpearman");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& out) {
+	try {
+		
+		//format data
+		vector< vector<spearmanRank> > scores; scores.resize(numaxes);
+		for (map<string, vector<float> >::iterator it = axes.begin(); it != axes.end(); it++) {
+			vector<float> temp = it->second;
+			for (int i = 0; i < temp.size(); i++) {
+				spearmanRank member(it->first, temp[i]);
+				scores[i].push_back(member);  
+			}
+		}
+		
+		//sort each axis
+		for (int i = 0; i < numaxes; i++) {  sort(scores[i].begin(), scores[i].end(), compareSpearman); }
+		
+		//find ranks of xi in each axis
+		map<string, vector<float> > rankAxes;
+		for (int i = 0; i < numaxes; i++) {
+			
+			vector<spearmanRank> ties;
+			int rankTotal = 0;
+			for (int j = 0; j < scores[i].size(); j++) {
+				rankTotal += j;
+				ties.push_back(scores[i][j]);
+				
+				if (j != scores.size()-1) { // you are not the last so you can look ahead
+					if (scores[i][j].score != scores[i][j+1].score) { // you are done with ties, rank them and continue
+						for (int k = 0; k < ties.size(); k++) {
+							float thisrank = rankTotal / (float) ties.size();
+  							rankAxes[ties[k].name].push_back(thisrank);
+						}
+						ties.clear();
+						rankTotal = 0;
+					}
+				}else { // you are the last one
+					for (int k = 0; k < ties.size(); k++) {
+						float thisrank = rankTotal / (float) ties.size();
+						rankAxes[ties[k].name].push_back(thisrank);
+					}
+				}
+			}
+		}
+		
+		
+		
+		//for each otu
+		for (int i = 0; i < lookupFloat[0]->getNumBins(); i++) {
+			
+			out << i+1 << '\t';
+			
+			//find the ranks of this otu - Y
+			vector<spearmanRank> otuScores;
+			for (int j = 0; j < lookupFloat.size(); j++) {
+				spearmanRank member(lookupFloat[j]->getGroup(), lookupFloat[j]->getAbundance(i));
+				otuScores.push_back(member);
+			}
+			
+			sort(otuScores.begin(), otuScores.end(), compareSpearman);
+			
+			map<string, float> rankOtus;
+			vector<spearmanRank> ties;
+			int rankTotal = 0;
+			for (int j = 0; j < otuScores.size(); j++) {
+				rankTotal += j;
+				ties.push_back(otuScores[j]);
+				
+				if (j != scores.size()-1) { // you are not the last so you can look ahead
+					if (otuScores[j].score != otuScores[j+1].score) { // you are done with ties, rank them and continue
+						for (int k = 0; k < ties.size(); k++) {
+							float thisrank = rankTotal / (float) ties.size();
+  							rankOtus[ties[k].name] = thisrank;
+						}
+						ties.clear();
+						rankTotal = 0;
+					}
+				}else { // you are the last one
+					for (int k = 0; k < ties.size(); k++) {
+						float thisrank = rankTotal / (float) ties.size();
+						rankOtus[ties[k].name] = thisrank;
+					}
+				}
+			}
+			
+			//calc kendall coeffient for each axis for this otu
+			for (int j = 0; j < numaxes; j++) {
+				
+				int numConcordant = 0;
+				int numDiscordant = 0;
+				
+				for (int f = 0; f < j; f++) {
+					
+					for (int k = 0; k < lookupFloat.size(); k++) {
+						
+						float xi = rankAxes[lookupFloat[k]->getGroup()][j];
+						float yi = rankOtus[lookupFloat[k]->getGroup()];
+						
+						for (int h = 0; h < k; h++) {
+							
+							float xj = rankAxes[lookupFloat[k]->getGroup()][f];
+							float yj = rankOtus[lookupFloat[h]->getGroup()];
+							
+							if ( ((xi > xj) && (yi < yj)) || ((xi < xj) && (yi > yj)) ){  numDiscordant++;  }
+							if ( ((xi > xj) && (yi > yj)) || ((xi < xj) && (yi < yj)) ){  numConcordant++;  }
+						}
+					}
+				}
+				
+				int n = lookupFloat.size();
+				double p = (numConcordant - numDiscordant) / (float) (0.5 * n * (n - 1));
+				
+				out << p << '\t';
+			}
+			
+			
+			out << endl;
+		}
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CorrAxesCommand", "calcKendall");
 		exit(1);
 	}
 }
