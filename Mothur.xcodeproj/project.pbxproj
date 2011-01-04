@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		8DD76FB00486AB0100D96B5E /* mothur.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6A0FF2C0290799A04C91782 /* mothur.1 */; };
+		A70332B712D3A13400761E33 /* makefile in Sources */ = {isa = PBXBuildFile; fileRef = A70332B512D3A13400761E33 /* makefile */; };
 		A7E9B88112D37EC400DA6239 /* ace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B64F12D37EC300DA6239 /* ace.cpp */; };
 		A7E9B88212D37EC400DA6239 /* aligncommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65112D37EC300DA6239 /* aligncommand.cpp */; };
 		A7E9B88312D37EC400DA6239 /* alignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65312D37EC300DA6239 /* alignment.cpp */; };
@@ -295,7 +296,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		8DD76FB20486AB0100D96B5E /* mothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = mothur; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DD76FB20486AB0100D96B5E /* Mothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Mothur; sourceTree = BUILT_PRODUCTS_DIR; };
+		A70332B512D3A13400761E33 /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
 		A7E9B64F12D37EC300DA6239 /* ace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ace.cpp; sourceTree = "<group>"; };
 		A7E9B65012D37EC300DA6239 /* ace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ace.h; sourceTree = "<group>"; };
 		A7E9B65112D37EC300DA6239 /* aligncommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = aligncommand.cpp; sourceTree = "<group>"; };
@@ -885,6 +887,7 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				A70332B512D3A13400761E33 /* makefile */,
 				A7E9B65912D37EC300DA6239 /* averagelinkage.cpp */,
 				A7E9BA4F12D398D700DA6239 /* clearcut */,
 				A7E9B69812D37EC400DA6239 /* cluster.cpp */,
@@ -980,7 +983,7 @@
 		1AB674ADFE9D54B511CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8DD76FB20486AB0100D96B5E /* mothur */,
+				8DD76FB20486AB0100D96B5E /* Mothur */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1534,9 +1537,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		8DD76FA90486AB0100D96B5E /* mothur */ = {
+		8DD76FA90486AB0100D96B5E /* Mothur */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1DEB928508733DD80010E9CD /* Build configuration list for PBXNativeTarget "mothur" */;
+			buildConfigurationList = 1DEB928508733DD80010E9CD /* Build configuration list for PBXNativeTarget "Mothur" */;
 			buildPhases = (
 				8DD76FAB0486AB0100D96B5E /* Sources */,
 				8DD76FAD0486AB0100D96B5E /* Frameworks */,
@@ -1546,10 +1549,10 @@
 			);
 			dependencies = (
 			);
-			name = mothur;
+			name = Mothur;
 			productInstallPath = "$(HOME)/bin";
 			productName = mothur;
-			productReference = 8DD76FB20486AB0100D96B5E /* mothur */;
+			productReference = 8DD76FB20486AB0100D96B5E /* Mothur */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -1571,7 +1574,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8DD76FA90486AB0100D96B5E /* mothur */,
+				8DD76FA90486AB0100D96B5E /* Mothur */,
 			);
 		};
 /* End PBXProject section */
@@ -1852,6 +1855,7 @@
 				A7E9B98D12D37EC400DA6239 /* weighted.cpp in Sources */,
 				A7E9B98E12D37EC400DA6239 /* weightedlinkage.cpp in Sources */,
 				A7E9B98F12D37EC400DA6239 /* whittaker.cpp in Sources */,
+				A70332B712D3A13400761E33 /* makefile in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1868,7 +1872,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
-				PRODUCT_NAME = mothur;
+				PRODUCT_NAME = Mothur;
 			};
 			name = Debug;
 		};
@@ -1881,7 +1885,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_WARN_UNUSED_VALUE = YES;
 				INSTALL_PATH = ./;
-				PRODUCT_NAME = mothur;
+				PRODUCT_NAME = Mothur;
 			};
 			name = Release;
 		};
@@ -1952,7 +1956,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1DEB928508733DD80010E9CD /* Build configuration list for PBXNativeTarget "mothur" */ = {
+		1DEB928508733DD80010E9CD /* Build configuration list for PBXNativeTarget "Mothur" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1DEB928608733DD80010E9CD /* Debug */,
