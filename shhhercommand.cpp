@@ -16,6 +16,7 @@
 #include "listvector.hpp"
 #include "cluster.hpp"
 #include "sparsematrix.hpp"
+#include <cfloat>
 
 //**********************************************************************************************************************
 
@@ -183,7 +184,7 @@ ShhherCommand::ShhherCommand(string option) {
 			// ...at some point should added some additional type checking...
 			string temp;
 			temp = validParameter.validFile(parameters, "lookup", true);
-			if (temp == "not found")	{	lookupFileName = "LookUp_E123.pat";	}
+			if (temp == "not found")	{	lookupFileName = "LookUp_Titanium.pat";	}
 			else if(temp == "not open")	{	abort = true;			} 
 			else						{	lookupFileName = temp;	}
 			
@@ -259,7 +260,7 @@ int ShhherCommand::execute(){
 			cout << "\nGetting preliminary data..." << endl;
 			getSingleLookUp();
 			getJointLookUp();
-						
+			
 			vector<string> flowFileVector;
 			if(flowFilesFileName != "not found"){
 				string fName;
@@ -655,8 +656,7 @@ int ShhherCommand::execute(){
 		
 		getSingleLookUp();
 		getJointLookUp();
-		
-		
+				
 		vector<string> flowFileVector;
 		if(flowFilesFileName != "not found"){
 			string fName;
@@ -1505,7 +1505,7 @@ double ShhherCommand::getLikelihood(){
 	
 	try{
 		
-		vector<double> P(numSeqs, 0);
+		vector<long double> P(numSeqs, 0);
 		int effNumOTUs = 0;
 		
 		for(int i=0;i<numOTUs;i++){
@@ -1514,6 +1514,7 @@ double ShhherCommand::getLikelihood(){
 			}
 		}
 		
+		string hold;
 		for(int i=0;i<numOTUs;i++){
 			for(int j=0;j<nSeqsPerOTU[i];j++){
 				int index = cumNumSeqs[i] + j;
@@ -1523,14 +1524,15 @@ double ShhherCommand::getLikelihood(){
 				P[nI] += weight[i] * exp(-singleDist * sigma);
 			}
 		}
-		
 		double nLL = 0.00;
 		for(int i=0;i<numSeqs;i++){
+			if(P[i] == 0){	P[i] = DBL_EPSILON;	}
+
 			nLL += -log(P[i]);
 		}
 		
 		nLL = nLL -(double)numSeqs * log(sigma);
-		
+
 		return nLL; 
 	}
 	catch(exception& e) {
