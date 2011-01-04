@@ -68,7 +68,7 @@ bool FlowData::getNext(ifstream& flowFile){
 void FlowData::updateEndFlow(){
 	try{
 		
-		int currLength = 0;
+		//int currLength = 0;
 		float maxIntensity = (float) maxHomoP + 0.49;
 		
 		int deadSpot = 0;

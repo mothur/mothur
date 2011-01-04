@@ -535,7 +535,7 @@ int Bellerophon::createSparseMatrix(int startSeq, int endSeq, SparseMatrix* spar
 int Bellerophon::generatePreferences(vector<SeqMap> left, vector<SeqMap> right, int mid){
 	try {
 		
-		float dme = 0.0;
+		//float dme = 0.0;
 		SeqMap::iterator itR;
 		SeqMap::iterator itL;
 		
