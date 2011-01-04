@@ -775,7 +775,6 @@ int TrimFlowsCommand::stripForward(Sequence& seq, int& group){
 				oligo = oligo.substr(0,alnLength);
 				temp = temp.substr(0,alnLength);
 				
-				int newStart=0;
 				int numDiff = countDiffs(oligo, temp);
 				
 				if(numDiff < minDiff){

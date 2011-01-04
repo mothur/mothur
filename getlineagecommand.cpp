@@ -542,7 +542,7 @@ int GetLineageCommand::readTax(){
 		m->openInputFile(taxfile, in);
 		string name, tax;
 		
-		bool wroteSomething = false;
+		//bool wroteSomething = false;
 		
 		bool taxonsHasConfidence = false;
 		vector< map<string, int> > searchTaxons;

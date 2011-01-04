@@ -355,9 +355,7 @@ int SeqErrorCommand::execute(){
 			
 		}
 		queryFile.close();
-		
-		int total = 0;
-		
+				
 		if(qualFileName != "" && reportFileName != ""){
 			string errorQualityFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.quality";
 			ofstream errorQualityFile;

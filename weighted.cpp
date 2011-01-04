@@ -73,7 +73,6 @@ EstOutput Weighted::createProcesses(Tree* t, vector< vector<string> > namesOfGro
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 1;
-		int num = 0;
 		vector<int> processIDS;
 		
 		EstOutput results;
@@ -204,9 +203,7 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 		for (int h = start; h < (start+num); h++) {	
 			//report progress
 			m->mothurOut("Processing combo: " + toString(h)); m->mothurOutEndLine();
-			
-			int numLeaves = t->getNumLeaves();
-			
+						
 			string groupA = namesOfGroupCombos[h][0]; 
 			string groupB = namesOfGroupCombos[h][1];
 			

@@ -927,7 +927,7 @@ vector<unsigned long int> MothurOut::setFilePosFasta(string filename, int& num) 
 			
 			in.seekg(size);
 		
-			while(char c = in.get()){
+			while(in.get()){
 				if(in.eof())		{	break;	}
 				else				{	size++;	}
 			}

@@ -538,7 +538,6 @@ int ClusterSplitCommand::execute(){
 					
 					//for each file group figure out which process will complete it
 					//want to divide the load intelligently so the big files are spread between processes
-					int count = 1;
 					for (int i = 0; i < distName.size(); i++) { 
 						int processToAssign = (i+1) % processors; 
 						if (processToAssign == 0) { processToAssign = processors; }
@@ -991,9 +990,7 @@ vector<string> ClusterSplitCommand::cluster(vector< map<string, string> > distNa
 			m->openOutputFile(fileroot+ tag + ".list",	listFile);
 		
 			listFileNames.push_back(fileroot+ tag + ".list");
-		
-			time_t estart = time(NULL);
-			
+				
 			float previousDist = 0.00000;
 			float rndPreviousDist = 0.00000;
 			
