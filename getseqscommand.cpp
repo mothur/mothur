@@ -779,6 +779,30 @@ int GetSeqsCommand::compareAccnos(){
 		set<string> namesDups;
 		set<string> namesAccnos = names;
 		
+		map<string, int> nameCount;
+		
+		if (namefile != "") {
+			ifstream inName;
+			m->openInputFile(namefile, inName);
+			
+			
+			while(!inName.eof()){
+				
+				if (m->control_pressed) { inName.close(); return 0; }
+				
+				string thisname, repnames;
+				
+				inName >> thisname;		m->gobble(inName);		//read from first column
+				inName >> repnames;			//read from second column
+				
+				int num = m->getNumNames(repnames);
+				nameCount[thisname] = num;
+				
+				m->gobble(inName);
+			}
+			inName.close();	
+		}
+		
 		while(!in.eof()){
 			in >> name;
 			
@@ -797,21 +821,27 @@ int GetSeqsCommand::compareAccnos(){
 		m->mothurOut("Names in both files : " + toString(namesDups.size())); m->mothurOutEndLine();
 		
 		for (set<string>::iterator it = namesDups.begin(); it != namesDups.end(); it++) {
-			out << (*it) << endl;
+			out << (*it);
+			if (namefile != "") { out << '\t' << nameCount[(*it)]; }
+			out << endl;
 		}
 		
 		out << "Names unique to " + accnosfile + " : " + toString(namesAccnos.size()) << endl;
 		m->mothurOut("Names unique to " + accnosfile + " : " + toString(namesAccnos.size())); m->mothurOutEndLine();
 		
 		for (set<string>::iterator it = namesAccnos.begin(); it != namesAccnos.end(); it++) {
-			out << (*it) << endl;
+			out << (*it);
+			if (namefile != "") { out << '\t' << nameCount[(*it)]; }
+			out << endl;
 		}
 		
 		out << "Names unique to " + accnosfile2 + " : " + toString(namesAccnos2.size()) << endl;
 		m->mothurOut("Names unique to " + accnosfile2 + " : " + toString(namesAccnos2.size())); m->mothurOutEndLine();
 		
 		for (set<string>::iterator it = namesAccnos2.begin(); it != namesAccnos2.end(); it++) {
-			out << (*it) << endl;
+			out << (*it);
+			if (namefile != "") { out << '\t' << nameCount[(*it)]; }
+			out << endl;
 		}
 
 		out.close(); 

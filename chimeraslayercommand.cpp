@@ -14,7 +14,7 @@
 //**********************************************************************************************************************
 vector<string> ChimeraSlayerCommand::getValidParameters(){	
 	try {
-		string AlignArray[] =  {"fasta", "processors", "name","window", "template","numwanted", "ksize", "match","mismatch", 
+		string AlignArray[] =  {"fasta", "processors", "name","window", "include","template","numwanted", "ksize", "match","mismatch", 
 			"divergence", "minsim","mincov","minbs", "minsnp","parents", "iters","outputdir","inputdir", "search","realign" };
 		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 		return myArray;
@@ -69,7 +69,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "processors","name", "window", "template","numwanted", "ksize", "match","mismatch", 
+			string Array[] =  {"fasta", "processors","name", "include","window", "template","numwanted", "ksize", "match","mismatch", 
 			"divergence", "minsim","mincov","minbs", "minsnp","parents", "iters","outputdir","inputdir", "search","realign" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
@@ -231,6 +231,9 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			string temp = validParameter.validFile(parameters, "processors", false);		if (temp == "not found") { temp = "1"; }
 			convert(temp, processors);
 			
+			includeAbunds = validParameter.validFile(parameters, "include", false);		if (includeAbunds == "not found") { includeAbunds = "greater"; }
+			if ((includeAbunds != "greater") && (includeAbunds != "greaterequal") && (includeAbunds != "all")) { includeAbunds = "greater"; m->mothurOut("Invalid include setting. options are greater, greaterequal or all. using greater."); m->mothurOutEndLine(); }
+			
 			temp = validParameter.validFile(parameters, "ksize", false);			if (temp == "not found") { temp = "7"; }
 			convert(temp, ksize);
 						
@@ -346,7 +349,7 @@ int ChimeraSlayerCommand::execute(){
 				chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign);	
 			}else {
 				if (nameFileNames.size() != 0) { //you provided a namefile and we don't need to create one
-					chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, nameFileNames[s], search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign);	
+					chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, nameFileNames[s], search, includeAbunds, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign);	
 				}else {
 					
 					m->mothurOutEndLine(); m->mothurOut("No namesfile given, running unique.seqs command to generate one."); m->mothurOutEndLine(); m->mothurOutEndLine();
@@ -368,7 +371,7 @@ int ChimeraSlayerCommand::execute(){
 					string nameFile = filenames["name"][0];
 					fastaFileNames[s] = filenames["fasta"][0];
 			
-					chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, nameFile, search, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign);	
+					chimera = new ChimeraSlayer(fastaFileNames[s], templatefile, nameFile, search, includeAbunds, ksize, match, mismatch, window, divR, minSimilarity, minCoverage, minBS, minSNP, parents, iters, increment, numwanted, realign);	
 				}
 			}
 				
