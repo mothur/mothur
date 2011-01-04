@@ -185,7 +185,17 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 
 void CorrAxesCommand::help(){
 	try {
-
+		m->mothurOut("The corr.axes command reads a shared or relabund file as well as a pcoa file and calculates the correlation coefficient.\n");
+		m->mothurOut("The corr.axes command parameters are shared, relabund, axes, metadata, groups, method, numaxes and label.  The shared or relabund and axes parameters are required.  If shared is given the relative abundance is calculated.\n");
+		m->mothurOut("The metadata parameter.....\n");
+		m->mothurOut("The groups parameter allows you to specify which of the groups you would like included. The group names are separated by dashes.\n");
+		m->mothurOut("The label parameter allows you to select what distance level you would like used, if none is given the first distance is used.\n");
+		m->mothurOut("The method parameter allows you to select what method you would like to use. Options are pearson, spearman and kendall. Default=pearson.\n");
+		m->mothurOut("The numaxes parameter allows you to select the number of axes you would like to use. Default=3.\n");
+		m->mothurOut("The corr.axes command should be in the following format: corr.axes(axes=yourPcoaFile, shared=yourSharedFile, method=yourMethod).\n");
+		m->mothurOut("Example corr.axes(axes=genus.pool.thetayc.genus.lt.pcoa, shared=genus.pool.shared, method=kendall).\n");
+		m->mothurOut("The corr.axes command outputs a .corr.axes file.\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
 	}
 	catch(exception& e) {
 		m->errorOut(e, "CorrAxesCommand", "help");	
@@ -254,7 +264,7 @@ int CorrAxesCommand::execute(){
 		// calc the r values																//
 		/************************************************************************************/
 		
-		string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + "corr.axes";
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(inputFileName)) + method + ".corr.axes";
 		outputNames.push_back(outputFileName); outputTypes["corr.axes"].push_back(outputFileName);	
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
@@ -478,21 +488,20 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 		//sort each axis
 		for (int i = 0; i < numaxes; i++) {  sort(scores[i].begin(), scores[i].end(), compareSpearman); }
 		
-		//find ranks of xi in each axis
-		map<string, vector<float> > rankAxes;
+		//convert scores to ranks of xi in each axis
 		for (int i = 0; i < numaxes; i++) {
 			
-			vector<spearmanRank> ties;
+			vector<spearmanRank*> ties;
 			int rankTotal = 0;
 			for (int j = 0; j < scores[i].size(); j++) {
 				rankTotal += j;
-				ties.push_back(scores[i][j]);
+				ties.push_back(&(scores[i][j]));
 				
 				if (j != scores.size()-1) { // you are not the last so you can look ahead
 					if (scores[i][j].score != scores[i][j+1].score) { // you are done with ties, rank them and continue
 						for (int k = 0; k < ties.size(); k++) {
 							float thisrank = rankTotal / (float) ties.size();
-  							rankAxes[ties[k].name].push_back(thisrank);
+  							(*ties[k]).score = thisrank;
 						}
 						ties.clear();
 						rankTotal = 0;
@@ -500,17 +509,15 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 				}else { // you are the last one
 					for (int k = 0; k < ties.size(); k++) {
 						float thisrank = rankTotal / (float) ties.size();
-						rankAxes[ties[k].name].push_back(thisrank);
+						(*ties[k]).score = thisrank;
 					}
 				}
 			}
 		}
 		
-		
-		
 		//for each otu
 		for (int i = 0; i < lookupFloat[0]->getNumBins(); i++) {
-			
+		
 			out << i+1 << '\t';
 			
 			//find the ranks of this otu - Y
@@ -519,7 +526,7 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 				spearmanRank member(lookupFloat[j]->getGroup(), lookupFloat[j]->getAbundance(i));
 				otuScores.push_back(member);
 			}
-			
+						
 			sort(otuScores.begin(), otuScores.end(), compareSpearman);
 			
 			map<string, float> rankOtus;
@@ -546,36 +553,35 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 				}
 			}
 			
-			//calc kendall coeffient for each axis for this otu
+			//calc spearman ranks for each axis for this otu
 			for (int j = 0; j < numaxes; j++) {
+			
+				int P = 0;
+				//assemble otus ranks in same order as axis ranks
+				vector<spearmanRank> otus; 
+				for (int l = 0; l < scores[j].size(); l++) {   
+					spearmanRank member(scores[j][l].name, rankOtus[scores[j][l].name]);
+					otus.push_back(member);
+				}
 				
-				int numConcordant = 0;
-				int numDiscordant = 0;
-				
-				for (int f = 0; f < j; f++) {
+				for (int l = 0; l < scores[j].size(); l++) {
 					
-					for (int k = 0; k < lookupFloat.size(); k++) {
-						
-						float xi = rankAxes[lookupFloat[k]->getGroup()][j];
-						float yi = rankOtus[lookupFloat[k]->getGroup()];
-						
-						for (int h = 0; h < k; h++) {
-							
-							float xj = rankAxes[lookupFloat[k]->getGroup()][f];
-							float yj = rankOtus[lookupFloat[h]->getGroup()];
-							
-							if ( ((xi > xj) && (yi < yj)) || ((xi < xj) && (yi > yj)) ){  numDiscordant++;  }
-							if ( ((xi > xj) && (yi > yj)) || ((xi < xj) && (yi < yj)) ){  numConcordant++;  }
-						}
+					int numWithHigherRank = 0;
+					float thisrank = otus[l].score;
+					
+					for (int u = l; u < scores[j].size(); u++) {
+						if (otus[u].score > thisrank) { numWithHigherRank++; }
 					}
+					
+					P += numWithHigherRank;
 				}
 				
 				int n = lookupFloat.size();
-				double p = (numConcordant - numDiscordant) / (float) (0.5 * n * (n - 1));
+				
+				double p = ( (4 * P) / (float) (n * (n - 1)) ) - 1.0;
 				
 				out << p << '\t';
 			}
-			
 			
 			out << endl;
 		}
@@ -839,6 +845,8 @@ map<string, vector<float> > CorrAxesCommand::readAxes(){
 				headerLine = headerLine.substr(pos+4);
 			}else { done = true; }
 		}
+		
+		if (numaxes > count) { m->mothurOut("You requested " + toString(numaxes) + " axes, but your file only includes " + toString(count) + ". Using " + toString(count) + "."); m->mothurOutEndLine(); numaxes = count; }
 		
 		while (!in.eof()) {
 			

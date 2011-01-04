@@ -41,7 +41,7 @@ SffInfoCommand::SffInfoCommand(){
 //**********************************************************************************************************************
 vector<string> SffInfoCommand::getRequiredParameters(){	
 	try {
-		string Array[] =  {"sff"};
+		string Array[] =  {"sff", "sfftxt", "or"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
@@ -99,7 +99,7 @@ SffInfoCommand::SffInfoCommand(string option)  {
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);	  if (inputDir == "not found"){	inputDir = "";		}
 
 			sffFilename = validParameter.validFile(parameters, "sff", false);
-			if (sffFilename == "not found") { m->mothurOut("sff is a required parameter for the sffinfo command."); m->mothurOutEndLine(); abort = true;  }
+			if (sffFilename == "not found") { sffFilename = "";  }
 			else { 
 				m->splitAtDash(sffFilename, filenames);
 				
@@ -221,8 +221,27 @@ SffInfoCommand::SffInfoCommand(string option)  {
 			temp = validParameter.validFile(parameters, "trim", false);					if (temp == "not found"){	temp = "T";				}
 			trim = m->isTrue(temp); 
 			
-			temp = validParameter.validFile(parameters, "sfftxt", false);				if (temp == "not found"){	temp = "F";				}
-			sfftxt = m->isTrue(temp); 
+			temp = validParameter.validFile(parameters, "sfftxt", false);				
+			if (temp == "not found")	{	temp = "F";	 sfftxt = false; sfftxtFilename = "";		}
+			else if (m->isTrue(temp))	{	sfftxt = true;		sfftxtFilename = "";				}
+			else {
+				//you are a filename
+				if (inputDir != "") {
+					map<string,string>::iterator it = parameters.find("sfftxt");
+					//user has given a template file
+					if(it != parameters.end()){ 
+						string path = m->hasPath(it->second);
+						//if the user has not given a path then, add inputdir. else leave path alone.
+						if (path == "") {	parameters["sfftxt"] = inputDir + it->second;		}
+					}
+				}
+				
+				sfftxtFilename = validParameter.validFile(parameters, "sfftxt", true);
+				if (sfftxtFilename == "not found") { sfftxtFilename = "";  }
+				else if (sfftxtFilename == "not open") { sfftxtFilename = "";  }
+			}
+			
+			if ((sfftxtFilename == "") && (filenames.size() == 0)) {  m->mothurOut("[ERROR]: you must provide a valid sff or sfftxt file."); m->mothurOutEndLine(); abort=true; }
 		}
 	}
 	catch(exception& e) {
@@ -234,13 +253,14 @@ SffInfoCommand::SffInfoCommand(string option)  {
 
 void SffInfoCommand::help(){
 	try {
-		m->mothurOut("The sffinfo command reads a sff file and extracts the sequence data.\n");
+		m->mothurOut("The sffinfo command reads a sff file and extracts the sequence data, or you can use it to parse a sfftxt file..\n");
 		m->mothurOut("The sffinfo command parameters are sff, fasta, qfile, accnos, flow, sfftxt, and trim. sff is required. \n");
 		m->mothurOut("The sff parameter allows you to enter the sff file you would like to extract data from.  You may enter multiple files by separating them by -'s.\n");
 		m->mothurOut("The fasta parameter allows you to indicate if you would like a fasta formatted file generated.  Default=True. \n");
 		m->mothurOut("The qfile parameter allows you to indicate if you would like a quality file generated.  Default=True. \n");
 		m->mothurOut("The flow parameter allows you to indicate if you would like a flowgram file generated.  Default=False. \n");
 		m->mothurOut("The sfftxt parameter allows you to indicate if you would like a sff.txt file generated.  Default=False. \n");
+		m->mothurOut("If you want to parse an existing sfftxt file into flow, fasta and quality file, enter the file name using the sfftxt parameter. \n");
 		m->mothurOut("The trim parameter allows you to indicate if you would like a sequences and quality scores trimmed to the clipQualLeft and clipQualRight values.  Default=True. \n");
 		m->mothurOut("The accnos parameter allows you to provide a accnos file containing the names of the sequences you would like extracted. You may enter multiple files by separating them by -'s. \n");
 		m->mothurOut("Example sffinfo(sff=mySffFile.sff, trim=F).\n");
@@ -276,6 +296,8 @@ int SffInfoCommand::execute(){
 
 			m->mothurOut("It took " + toString(time(NULL) - start) + " secs to extract " + toString(numReads) + ".");
 		}
+		
+		if (sfftxtFilename != "") {  parseSffTxt(); }
 		
 		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} return 0; }
 		
@@ -823,4 +845,233 @@ int SffInfoCommand::readAccnosFile(string filename) {
 		exit(1);
 	}
 }
-//**********************************************************************************************************************/
+//**********************************************************************************************************************
+int SffInfoCommand::parseSffTxt() {
+	try {
+		
+		ifstream inSFF;
+		m->openInputFile(sfftxtFilename, inSFF);
+		
+		if (outputDir == "") {  outputDir += m->hasPath(sfftxtFilename); }
+		
+		//output file names
+		ofstream outFasta, outQual, outFlow;
+		string outFastaFileName, outQualFileName;
+		string outFlowFileName = outputDir + m->getRootName(m->getSimpleName(sfftxtFilename)) + "flow";
+		if (trim) {
+			outFastaFileName = outputDir + m->getRootName(m->getSimpleName(sfftxtFilename)) + "fasta";
+			outQualFileName = outputDir + m->getRootName(m->getSimpleName(sfftxtFilename)) + "qual";
+		}else{
+			outFastaFileName = outputDir + m->getRootName(m->getSimpleName(sfftxtFilename)) + "raw.fasta";
+			outQualFileName = outputDir + m->getRootName(m->getSimpleName(sfftxtFilename)) + "raw.qual";
+		}
+		
+		if (fasta)	{ m->openOutputFile(outFastaFileName, outFasta);	outputNames.push_back(outFastaFileName); outputTypes["fasta"].push_back(outFastaFileName); }
+		if (qual)	{ m->openOutputFile(outQualFileName, outQual);		outputNames.push_back(outQualFileName); outputTypes["qual"].push_back(outQualFileName);  }
+		if (flow)	{ m->openOutputFile(outFlowFileName, outFlow);		outputNames.push_back(outFlowFileName);  outFlow.setf(ios::fixed, ios::floatfield); outFlow.setf(ios::showpoint); outputTypes["flow"].push_back(outFlowFileName);  }
+		
+		//read common header
+		string commonHeader = m->getline(inSFF);
+		string magicNumber = m->getline(inSFF);	
+		string version = m->getline(inSFF);
+		string indexOffset = m->getline(inSFF);
+		string indexLength = m->getline(inSFF);
+		int numReads = parseHeaderLineToInt(inSFF);
+		string headerLength = m->getline(inSFF);
+		string keyLength = m->getline(inSFF);
+		int numFlows = parseHeaderLineToInt(inSFF);
+		string flowgramCode = m->getline(inSFF);
+		string flowChars = m->getline(inSFF);
+		string keySequence = m->getline(inSFF);
+		m->gobble(inSFF);
+		
+		string seqName;
+		
+		if (flow)	{	outFlow << numFlows << endl;	}
+		
+		for(int i=0;i<numReads;i++){
+			
+			//sanity check
+			if (inSFF.eof()) { m->mothurOut("[ERROR]: Expected " + toString(numReads) + " but reached end of file at " + toString(i+1) + "."); m->mothurOutEndLine(); break; }
+			
+			Header header;
+			
+			//parse read header
+			inSFF >> seqName;
+			seqName = seqName.substr(1);
+			m->gobble(inSFF);
+			header.name = seqName;
+			
+			string runPrefix = parseHeaderLineToString(inSFF);		header.timestamp = runPrefix;
+			string regionNumber = parseHeaderLineToString(inSFF);	header.region = regionNumber;
+			string xyLocation = parseHeaderLineToString(inSFF);		header.xy = xyLocation;
+			m->gobble(inSFF);
+				
+			string runName = parseHeaderLineToString(inSFF);
+			string analysisName = parseHeaderLineToString(inSFF);
+			string fullPath = parseHeaderLineToString(inSFF);
+			m->gobble(inSFF);
+			
+			string readHeaderLen = parseHeaderLineToString(inSFF);  convert(readHeaderLen, header.headerLength);
+			string nameLength = parseHeaderLineToString(inSFF);		convert(nameLength, header.nameLength);
+			int numBases = parseHeaderLineToInt(inSFF);				header.numBases = numBases;
+			string clipQualLeft = parseHeaderLineToString(inSFF);	convert(clipQualLeft, header.clipQualLeft);
+			int clipQualRight = parseHeaderLineToInt(inSFF);		header.clipQualRight = clipQualRight;
+			string clipAdapLeft = parseHeaderLineToString(inSFF);	convert(clipAdapLeft, header.clipAdapterLeft);
+			string clipAdapRight = parseHeaderLineToString(inSFF);	convert(clipAdapRight, header.clipAdapterRight);
+			m->gobble(inSFF);
+				
+			seqRead read;
+			
+			//parse read
+			vector<unsigned short> flowVector = parseHeaderLineToFloatVector(inSFF, numFlows);	read.flowgram = flowVector;
+			vector<unsigned int> flowIndices = parseHeaderLineToIntVector(inSFF, numBases);	
+			
+			//adjust for print
+			vector<unsigned int> flowIndicesAdjusted; flowIndicesAdjusted.push_back(flowIndices[0]);
+			for (int j = 1; j < flowIndices.size(); j++) {   flowIndicesAdjusted.push_back(flowIndices[j] - flowIndices[j-1]);   }
+			read.flowIndex = flowIndicesAdjusted;
+			
+			string bases = parseHeaderLineToString(inSFF);										read.bases = bases;
+			vector<unsigned int> qualityScores = parseHeaderLineToIntVector(inSFF, numBases);	read.qualScores = qualityScores;
+			m->gobble(inSFF);
+					
+			//if you have provided an accosfile and this seq is not in it, then dont print
+			bool print = true;
+			if (seqNames.size() != 0) {   if (seqNames.count(header.name) == 0) { print = false; }  }
+			
+			//print 
+			if (print) {
+				if (fasta)	{	printFastaSeqData(outFasta, read, header);	}
+				if (qual)	{	printQualSeqData(outQual, read, header);	}
+				if (flow)	{	printFlowSeqData(outFlow, read, header);	}
+			}
+			
+			//report progress
+			if((i+1) % 10000 == 0){	m->mothurOut(toString(i+1)); m->mothurOutEndLine();		}
+			
+			if (m->control_pressed) {  break;  }
+		}
+		
+		//report progress
+		if (!m->control_pressed) {   if((numReads) % 10000 != 0){	m->mothurOut(toString(numReads)); m->mothurOutEndLine();		}  }
+		
+		inSFF.close();
+		
+		if (fasta)	{  outFasta.close();	}
+		if (qual)	{  outQual.close();		}
+		if (flow)	{  outFlow.close();		}
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SffInfoCommand", "parseSffTxt");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+
+int SffInfoCommand::parseHeaderLineToInt(ifstream& file){
+	try {
+		int number;
+		
+		while (!file.eof())	{
+			
+			char c = file.get(); 
+			if (c == ':'){
+				file >> number;
+				break;
+			}
+			
+		}
+		m->gobble(file);
+		return number;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SffInfoCommand", "parseHeaderLineToInt");
+		exit(1);
+	}
+	
+}
+
+//**********************************************************************************************************************
+
+string SffInfoCommand::parseHeaderLineToString(ifstream& file){
+	try {
+		string text;
+		
+		while (!file.eof())	{
+			char c = file.get(); 
+			
+			if (c == ':'){
+				//m->gobble(file);
+				//text = m->getline(file);	
+				file >> text;
+				break;
+			}
+		}
+		m->gobble(file);
+		
+		return text;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SffInfoCommand", "parseHeaderLineToString");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
+
+vector<unsigned short> SffInfoCommand::parseHeaderLineToFloatVector(ifstream& file, int length){
+	try {
+		vector<unsigned short> floatVector(length);
+		
+		while (!file.eof())	{
+			char c = file.get(); 
+			if (c == ':'){
+				float temp;
+				for(int i=0;i<length;i++){
+					file >> temp;
+					floatVector[i] = temp * 100;
+				}
+				break;
+			}
+		}
+		m->gobble(file);	
+		return floatVector;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SffInfoCommand", "parseHeaderLineToFloatVector");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
+
+vector<unsigned int> SffInfoCommand::parseHeaderLineToIntVector(ifstream& file, int length){
+	try {
+		vector<unsigned int> intVector(length);
+		
+		while (!file.eof())	{
+			char c = file.get(); 
+			if (c == ':'){
+				for(int i=0;i<length;i++){
+					file >> intVector[i];
+				}
+				break;
+			}
+		}
+		m->gobble(file);	
+		return intVector;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SffInfoCommand", "parseHeaderLineToIntVector");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************
+
+
+				
+				

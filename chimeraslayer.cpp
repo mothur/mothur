@@ -44,7 +44,7 @@ int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int num
 	}
 }
 //***************************************************************************************************************
-ChimeraSlayer::ChimeraSlayer(string file, string temp, string name, string mode, int k, int ms, int mms, int win, float div, 
+ChimeraSlayer::ChimeraSlayer(string file, string temp, string name, string mode, string abunds, int k, int ms, int mms, int win, float div, 
 							 int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r) : Chimera()  {  	
 	try {
 		fastafile = file; templateSeqs = readSeqs(fastafile);
@@ -64,6 +64,7 @@ ChimeraSlayer::ChimeraSlayer(string file, string temp, string name, string mode,
 		increment = inc;
 		numWanted = numw;
 		realign = r; 
+		includeAbunds = abunds;
 		
 		//read name file and create nameMapRank
 		readNameFile(name);
@@ -283,10 +284,26 @@ vector<Sequence*> ChimeraSlayer::getTemplate(Sequence* q) {
 		//create list of names we want to put into the template
 		set<string> namesToAdd;
 		for (itRank = nameMapRank.begin(); itRank != nameMapRank.end(); itRank++) {
-			if ((itRank->second).size() > thisRank) {
-				//you are more abundant than me
-				for (int i = 0; i < (itRank->second).size(); i++) {
-					namesToAdd.insert((itRank->second)[i]);
+			if (itRank->first != thisName) {
+				if (includeAbunds == "greaterequal") {
+					if ((itRank->second).size() >= thisRank) {
+						//you are more abundant than me or equal to my abundance
+						for (int i = 0; i < (itRank->second).size(); i++) {
+							namesToAdd.insert((itRank->second)[i]);
+						}
+					}
+				}else if (includeAbunds == "greater") {
+					if ((itRank->second).size() > thisRank) {
+						//you are more abundant than me
+						for (int i = 0; i < (itRank->second).size(); i++) {
+							namesToAdd.insert((itRank->second)[i]);
+						}
+					}
+				}else if (includeAbunds == "all") {
+					//add everyone
+					for (int i = 0; i < (itRank->second).size(); i++) {
+						namesToAdd.insert((itRank->second)[i]);
+					}
 				}
 			}
 		}

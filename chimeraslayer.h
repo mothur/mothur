@@ -26,7 +26,7 @@ class ChimeraSlayer : public Chimera {
 	
 	public:
 		ChimeraSlayer(string, string, string, int, int, int, int, float, int, int, int, int, int, int, int, int, bool);
-		ChimeraSlayer(string, string, string, string, int, int, int, int, float, int, int, int, int, int, int, int, int, bool);
+		ChimeraSlayer(string, string, string, string, string, int, int, int, int, float, int, int, int, int, int, int, int, int, bool);
 
 		~ChimeraSlayer();
 		
@@ -48,7 +48,7 @@ class ChimeraSlayer : public Chimera {
 		map<string, vector<string> > nameMapRank;  //sequence name to rank so you can construct a template of the abundant sequences if the user uses itself as template
 		
 		vector<data_struct>  chimeraResults;
-		string chimeraFlags, searchMethod, fastafile;
+		string chimeraFlags, searchMethod, fastafile, includeAbunds;
 		bool realign;
 		int window, numWanted, kmerSize, match, misMatch, minSim, minCov, minBS, minSNP, parents, iters, increment;
 		float divR;
