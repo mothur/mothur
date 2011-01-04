@@ -296,7 +296,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		8DD76FB20486AB0100D96B5E /* Mothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Mothur; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DD76FB20486AB0100D96B5E /* mothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = mothur; sourceTree = BUILT_PRODUCTS_DIR; };
 		A70332B512D3A13400761E33 /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
 		A7E9B64F12D37EC300DA6239 /* ace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ace.cpp; sourceTree = "<group>"; };
 		A7E9B65012D37EC300DA6239 /* ace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ace.h; sourceTree = "<group>"; };
@@ -983,7 +983,7 @@
 		1AB674ADFE9D54B511CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8DD76FB20486AB0100D96B5E /* Mothur */,
+				8DD76FB20486AB0100D96B5E /* mothur */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1537,9 +1537,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		8DD76FA90486AB0100D96B5E /* Mothur */ = {
+		8DD76FA90486AB0100D96B5E /* mothur */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1DEB928508733DD80010E9CD /* Build configuration list for PBXNativeTarget "Mothur" */;
+			buildConfigurationList = 1DEB928508733DD80010E9CD /* Build configuration list for PBXNativeTarget "mothur" */;
 			buildPhases = (
 				8DD76FAB0486AB0100D96B5E /* Sources */,
 				8DD76FAD0486AB0100D96B5E /* Frameworks */,
@@ -1549,10 +1549,10 @@
 			);
 			dependencies = (
 			);
-			name = Mothur;
+			name = mothur;
 			productInstallPath = "$(HOME)/bin";
 			productName = mothur;
-			productReference = 8DD76FB20486AB0100D96B5E /* Mothur */;
+			productReference = 8DD76FB20486AB0100D96B5E /* mothur */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -1574,7 +1574,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8DD76FA90486AB0100D96B5E /* Mothur */,
+				8DD76FA90486AB0100D96B5E /* mothur */,
 			);
 		};
 /* End PBXProject section */
@@ -1872,7 +1872,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
-				PRODUCT_NAME = Mothur;
+				PRODUCT_NAME = mothur;
 			};
 			name = Debug;
 		};
@@ -1885,7 +1885,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_WARN_UNUSED_VALUE = YES;
 				INSTALL_PATH = ./;
-				PRODUCT_NAME = Mothur;
+				PRODUCT_NAME = mothur;
 			};
 			name = Release;
 		};
@@ -1956,7 +1956,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1DEB928508733DD80010E9CD /* Build configuration list for PBXNativeTarget "Mothur" */ = {
+		1DEB928508733DD80010E9CD /* Build configuration list for PBXNativeTarget "mothur" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1DEB928608733DD80010E9CD /* Debug */,
