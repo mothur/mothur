@@ -8,60 +8,61 @@
  *
  */
 
-#include "pcacommand.h"
+#include "pcoacommand.h"
 
 //**********************************************************************************************************************
-vector<string> PCACommand::getValidParameters(){	
+vector<string> PCOACommand::getValidParameters(){	
 	try {
-		string Array[] =  {"phylip", "outputdir","inputdir"};
+		string Array[] =  {"phylip", "metric","outputdir","inputdir"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PCACommand", "getValidParameters");
+		m->errorOut(e, "PCOACommand", "getValidParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-PCACommand::PCACommand(){	
+PCOACommand::PCOACommand(){	
 	try {
 		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["pcoa"] = tempOutNames;
 		outputTypes["loadings"] = tempOutNames;
+		outputTypes["corr"] = tempOutNames;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PCACommand", "PCACommand");
+		m->errorOut(e, "PCOACommand", "PCOACommand");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-vector<string> PCACommand::getRequiredParameters(){	
+vector<string> PCOACommand::getRequiredParameters(){	
 	try {
 		string Array[] =  {"phylip"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PCACommand", "getRequiredParameters");
+		m->errorOut(e, "PCOACommand", "getRequiredParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-vector<string> PCACommand::getRequiredFiles(){	
+vector<string> PCOACommand::getRequiredFiles(){	
 	try {
 		vector<string> myArray;
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PCACommand", "getRequiredFiles");
+		m->errorOut(e, "PCOACommand", "getRequiredFiles");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 
-PCACommand::PCACommand(string option)  {
+PCOACommand::PCOACommand(string option)  {
 	try {
 		abort = false;
 		
@@ -70,7 +71,7 @@ PCACommand::PCACommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"phylip","outputdir", "inputdir"};
+			string Array[] =  {"phylip","metric","outputdir", "inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -101,6 +102,7 @@ PCACommand::PCACommand(string option)  {
 			vector<string> tempOutNames;
 			outputTypes["pcoa"] = tempOutNames;
 			outputTypes["loadings"] = tempOutNames;
+			outputTypes["corr"] = tempOutNames;
 			
 			//required parameters
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
@@ -115,30 +117,37 @@ PCACommand::PCACommand(string option)  {
 			}
 			
 			//error checking on files	
-			if (phylipfile == "")	{ m->mothurOut("You must provide a distance file before running the pca command."); m->mothurOutEndLine(); abort = true; }		
+			if (phylipfile == "")	{ m->mothurOut("You must provide a distance file before running the pcoa command."); m->mothurOutEndLine(); abort = true; }		
+		
+			string temp = validParameter.validFile(parameters, "metric", false);	if (temp == "not found"){	temp = "T";				}
+			metric = m->isTrue(temp); 
 		}
 
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PCACommand", "PCACommand");
+		m->errorOut(e, "PCOACommand", "PCOACommand");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-void PCACommand::help(){
+void PCOACommand::help(){
 	try {
 	
-		m->mothurOut("The pca command..."); m->mothurOutEndLine();
+		m->mothurOut("The pcoa command parameters are phylip and metric"); m->mothurOutEndLine();
+		m->mothurOut("The phylip parameter allows you to enter your distance file."); m->mothurOutEndLine();
+		m->mothurOut("The metric parameter allows indicate you if would like the pearson correlation coefficient calculated. Default=True"); m->mothurOutEndLine();
+		m->mothurOut("Example pcoa(phylip=yourDistanceFile).\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. phylip), '=' and parameters (i.e.yourDistanceFile).\n\n");
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PCACommand", "help");
+		m->errorOut(e, "PCOACommand", "help");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-PCACommand::~PCACommand(){}
+PCOACommand::~PCOACommand(){}
 //**********************************************************************************************************************
-int PCACommand::execute(){
+int PCOACommand::execute(){
 	try {
 	
 		if (abort == true) { return 0; }
@@ -164,7 +173,7 @@ int PCACommand::execute(){
 		vector<vector<double> > copy_G;
 		//int rank = D.size();
 		
-		m->mothurOut("\nProcessing...\n");
+		m->mothurOut("\nProcessing...\n\n");
 		
 		for(int count=0;count<2;count++){
 			recenter(offset, D, G);		if (m->control_pressed) { return 0; }
@@ -180,6 +189,22 @@ int PCACommand::execute(){
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
 		
+		if (metric) {   
+			
+			for (int i = 1; i < 4; i++) {
+							
+				vector< vector<double> > EuclidDists = calculateEuclidianDistance(G, i); //G is the pcoa file
+				
+				if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
+				
+				double corr = calcPearson(EuclidDists, D); //G is the pcoa file, D is the users distance matrix
+				
+				m->mothurOut("Pearson's coefficient using " + toString(i) + " axis: " + toString(corr)); m->mothurOutEndLine();
+				
+				if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
+			}
+		}
+		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
@@ -188,7 +213,115 @@ int PCACommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PCACommand", "execute");
+		m->errorOut(e, "PCOACommand", "execute");
+		exit(1);
+	}
+}
+/*********************************************************************************************************************************/
+vector< vector<double> > PCOACommand::calculateEuclidianDistance(vector< vector<double> >& axes, int dimensions){
+	try {
+		//make square matrix
+		vector< vector<double> > dists; dists.resize(axes.size());
+		for (int i = 0; i < dists.size(); i++) {  dists[i].resize(axes.size(), 0.0); }
+			
+		if (dimensions == 1) { //one dimension calc = abs(x-y)
+			
+			for (int i = 0; i < dists.size(); i++) {
+				
+				if (m->control_pressed) { return dists; }
+				
+				for (int j = 0; j < i; j++) {
+					dists[i][j] = abs(axes[i][0] - axes[j][0]);
+					dists[j][i] = dists[i][j];
+				}
+			}
+			
+		}else if (dimensions == 2) { //two dimension calc = sqrt ((x1 - y1)^2 + (x2 - y2)^2)
+			
+			for (int i = 0; i < dists.size(); i++) {
+				
+				if (m->control_pressed) { return dists; }
+				
+				for (int j = 0; j < i; j++) {
+					double firstDim = ((axes[i][0] - axes[j][0]) * (axes[i][0] - axes[j][0]));
+					double secondDim = ((axes[i][1] - axes[j][1]) * (axes[i][1] - axes[j][1]));
+
+					dists[i][j] = sqrt((firstDim + secondDim));
+					dists[j][i] = dists[i][j];
+				}
+			}
+			
+		}else if (dimensions == 3) { //two dimension calc = sqrt ((x1 - y1)^2 + (x2 - y2)^2 + (x3 - y3)^2)
+			
+			for (int i = 0; i < dists.size(); i++) {
+				
+				if (m->control_pressed) { return dists; }
+				
+				for (int j = 0; j < i; j++) {
+					double firstDim = ((axes[i][0] - axes[j][0]) * (axes[i][0] - axes[j][0]));
+					double secondDim = ((axes[i][1] - axes[j][1]) * (axes[i][1] - axes[j][1]));
+					double thirdDim = ((axes[i][2] - axes[j][2]) * (axes[i][2] - axes[j][2]));
+					
+					dists[i][j] = sqrt((firstDim + secondDim + thirdDim));
+					dists[j][i] = dists[i][j];
+				}
+			}
+			
+		}else { m->mothurOut("[ERROR]: too many dimensions, aborting."); m->mothurOutEndLine(); m->control_pressed = true; }
+		
+		return dists;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PCOACommand", "calculateEuclidianDistance");
+		exit(1);
+	}
+}
+/*********************************************************************************************************************************/
+double PCOACommand::calcPearson(vector< vector<double> >& euclidDists, vector< vector<double> >& userDists){
+	try {
+		
+		//find average for - X
+		vector<float> averageEuclid; averageEuclid.resize(euclidDists.size(), 0.0);
+		for (int i = 0; i < euclidDists.size(); i++) {
+			for (int j = 0; j < euclidDists[i].size(); j++) {
+				averageEuclid[i] += euclidDists[i][j];  
+			}
+		}
+		for (int i = 0; i < averageEuclid.size(); i++) {  averageEuclid[i] = averageEuclid[i] / (float) euclidDists.size();   }
+		
+		//find average for - Y
+		vector<float> averageUser; averageUser.resize(userDists.size(), 0.0);
+		for (int i = 0; i < userDists.size(); i++) {
+			for (int j = 0; j < userDists[i].size(); j++) {
+				averageUser[i] += userDists[i][j];  
+			}
+		}
+		for (int i = 0; i < averageUser.size(); i++) {  averageUser[i] = averageUser[i] / (float) userDists.size();  }
+		
+		double numerator = 0.0;
+		double denomTerm1 = 0.0;
+		double denomTerm2 = 0.0;
+		
+		for (int i = 0; i < euclidDists.size(); i++) {
+			
+			for (int k = 0; k < i; k++) {
+				
+				float Yi = userDists[i][k];
+				float Xi = euclidDists[i][k];
+					
+				numerator += ((Xi - averageEuclid[k]) * (Yi - averageUser[k]));
+				denomTerm1 += ((Xi - averageEuclid[k]) * (Xi - averageEuclid[k]));
+				denomTerm2 += ((Yi - averageUser[k]) * (Yi - averageUser[k]));
+			}
+		}
+		
+		double denom = (sqrt(denomTerm1) * sqrt(denomTerm2));
+		double r = numerator / denom;
+		
+		return r;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "PCOACommand", "calculateEuclidianDistance");
 		exit(1);
 	}
 }
@@ -201,21 +334,21 @@ inline double SIGN(const double a, const double b)
 
 /*********************************************************************************************************************************/
 
-void PCACommand::get_comment(istream& f, char begin, char end){
+void PCOACommand::get_comment(istream& f, char begin, char end){
 	try {
 		char d=f.get();
 		while(d != end){	d = f.get();	}
 		d = f.peek();
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PCACommand", "get_comment");
+		m->errorOut(e, "PCOACommand", "get_comment");
 		exit(1);
 	}
 }	
 
 /*********************************************************************************************************************************/
 
-int PCACommand::read_phylip(istream& f, int square_m, vector<string>& name_list, vector<vector<double> >& d){
+int PCOACommand::read_phylip(istream& f, int square_m, vector<string>& name_list, vector<vector<double> >& d){
 	try {
 		//     int count1=0;
 		//     int count2=0;
@@ -262,7 +395,7 @@ int PCACommand::read_phylip(istream& f, int square_m, vector<string>& name_list,
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PCACommand", "read_phylip");
+		m->errorOut(e, "PCOACommand", "read_phylip");
 		exit(1);
 	}
 
@@ -270,7 +403,7 @@ int PCACommand::read_phylip(istream& f, int square_m, vector<string>& name_list,
 
 /*********************************************************************************************************************************/
 
-void PCACommand::read(string fname, vector<string>& names, vector<vector<double> >& D){
+void PCOACommand::read(string fname, vector<string>& names, vector<vector<double> >& D){
 	try {
 		ifstream f;
 		m->openInputFile(fname, f);
@@ -304,18 +437,18 @@ void PCACommand::read(string fname, vector<string>& names, vector<vector<double>
 		read_phylip(f, q, names, D);
 	}
 		catch(exception& e) {
-		m->errorOut(e, "PCACommand", "read");
+		m->errorOut(e, "PCOACommand", "read");
 		exit(1);
 	}
 }
 
 /*********************************************************************************************************************************/
 
-double PCACommand::pythag(double a, double b)	{	return(pow(a*a+b*b,0.5));	}
+double PCOACommand::pythag(double a, double b)	{	return(pow(a*a+b*b,0.5));	}
 
 /*********************************************************************************************************************************/
 
-void PCACommand::matrix_mult(vector<vector<double> > first, vector<vector<double> > second, vector<vector<double> >& product){
+void PCOACommand::matrix_mult(vector<vector<double> > first, vector<vector<double> > second, vector<vector<double> >& product){
 	try {
 		int first_rows = first.size();
 		int first_cols = first[0].size();
@@ -336,7 +469,7 @@ void PCACommand::matrix_mult(vector<vector<double> > first, vector<vector<double
 		}
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PCACommand", "matrix_mult");
+		m->errorOut(e, "PCOACommand", "matrix_mult");
 		exit(1);
 	}
 
@@ -344,7 +477,7 @@ void PCACommand::matrix_mult(vector<vector<double> > first, vector<vector<double
 
 /*********************************************************************************************************************************/
 
-void PCACommand::recenter(double offset, vector<vector<double> > D, vector<vector<double> >& G){
+void PCOACommand::recenter(double offset, vector<vector<double> > D, vector<vector<double> >& G){
 	try {
 		int rank = D.size();
 		
@@ -370,7 +503,7 @@ void PCACommand::recenter(double offset, vector<vector<double> > D, vector<vecto
 		matrix_mult(A,C,G);
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PCACommand", "recenter");
+		m->errorOut(e, "PCOACommand", "recenter");
 		exit(1);
 	}
 
@@ -380,7 +513,7 @@ void PCACommand::recenter(double offset, vector<vector<double> > D, vector<vecto
 
 //  This function is taken from Numerical Recipes in C++ by Press et al., 2nd edition, pg. 479
 
-void PCACommand::tred2(vector<vector<double> >& a, vector<double>& d, vector<double>& e){
+void PCOACommand::tred2(vector<vector<double> >& a, vector<double>& d, vector<double>& e){
 	try {
 		double scale, hh, h, g, f;
 		
@@ -463,7 +596,7 @@ void PCACommand::tred2(vector<vector<double> >& a, vector<double>& d, vector<dou
 		}
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PCACommand", "tred2");
+		m->errorOut(e, "PCOACommand", "tred2");
 		exit(1);
 	}
 
@@ -473,7 +606,7 @@ void PCACommand::tred2(vector<vector<double> >& a, vector<double>& d, vector<dou
 
 //  This function is taken from Numerical Recipes in C++ by Press et al., 2nd edition, pg. 479
 
-void PCACommand::qtli(vector<double>& d, vector<double>& e, vector<vector<double> >& z) {
+void PCOACommand::qtli(vector<double>& d, vector<double>& e, vector<vector<double> >& z) {
 	try {
 		int m, i, iter;
 		double s, r, p, g, f, dd, c, b;
@@ -547,14 +680,14 @@ void PCACommand::qtli(vector<double>& d, vector<double>& e, vector<vector<double
 		}
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PCACommand", "qtli");
+		m->errorOut(e, "PCOACommand", "qtli");
 		exit(1);
 	}
 }
 
 /*********************************************************************************************************************************/
 
-void PCACommand::output(string fnameRoot, vector<string> name_list, vector<vector<double> > G, vector<double> d) {
+void PCOACommand::output(string fnameRoot, vector<string> name_list, vector<vector<double> >& G, vector<double> d) {
 	try {
 		int rank = name_list.size();
 		double dsum = 0.0000;
@@ -598,7 +731,7 @@ void PCACommand::output(string fnameRoot, vector<string> name_list, vector<vecto
 		}
 	}
 	catch(exception& e) {
-		m->errorOut(e, "PCACommand", "output");
+		m->errorOut(e, "PCOACommand", "output");
 		exit(1);
 	}
 }
