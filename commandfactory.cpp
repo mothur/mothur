@@ -61,7 +61,7 @@
 #include "phylotypecommand.h"
 #include "mgclustercommand.h"
 #include "preclustercommand.h"
-#include "pcacommand.h"
+#include "pcoacommand.h"
 #include "otuhierarchycommand.h"
 #include "setdircommand.h"
 #include "parselistscommand.h"
@@ -333,7 +333,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "phylotype")				{	command = new PhylotypeCommand(optionString);				}
 		else if(commandName == "mgcluster")				{	command = new MGClusterCommand(optionString);				}
 		else if(commandName == "pre.cluster")			{	command = new PreClusterCommand(optionString);				}
-		else if(commandName == "pcoa")					{	command = new PCACommand(optionString);						}
+		else if(commandName == "pcoa")					{	command = new PCOACommand(optionString);						}
 		else if(commandName == "otu.hierarchy")			{	command = new OtuHierarchyCommand(optionString);			}
 		else if(commandName == "set.dir")				{	command = new SetDirectoryCommand(optionString);			}
 		else if(commandName == "set.logfile")			{	command = new SetLogFileCommand(optionString);				}
@@ -457,7 +457,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "phylotype")				{	pipecommand = new PhylotypeCommand(optionString);				}
 		else if(commandName == "mgcluster")				{	pipecommand = new MGClusterCommand(optionString);				}
 		else if(commandName == "pre.cluster")			{	pipecommand = new PreClusterCommand(optionString);				}
-		else if(commandName == "pcoa")					{	pipecommand = new PCACommand(optionString);						}
+		else if(commandName == "pcoa")					{	pipecommand = new PCOACommand(optionString);						}
 		else if(commandName == "otu.hierarchy")			{	pipecommand = new OtuHierarchyCommand(optionString);			}
 		else if(commandName == "set.dir")				{	pipecommand = new SetDirectoryCommand(optionString);			}
 		else if(commandName == "set.logfile")			{	pipecommand = new SetLogFileCommand(optionString);				}
@@ -568,7 +568,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "phylotype")				{	shellcommand = new PhylotypeCommand();				}
 		else if(commandName == "mgcluster")				{	shellcommand = new MGClusterCommand();				}
 		else if(commandName == "pre.cluster")			{	shellcommand = new PreClusterCommand();				}
-		else if(commandName == "pcoa")					{	shellcommand = new PCACommand();					}
+		else if(commandName == "pcoa")					{	shellcommand = new PCOACommand();					}
 		else if(commandName == "otu.hierarchy")			{	shellcommand = new OtuHierarchyCommand();			}
 		else if(commandName == "set.dir")				{	shellcommand = new SetDirectoryCommand();			}
 		else if(commandName == "set.logfile")			{	shellcommand = new SetLogFileCommand();				}
