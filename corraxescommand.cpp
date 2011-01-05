@@ -8,6 +8,7 @@
  */
 
 #include "corraxescommand.h"
+#include "sharedutilities.h"
 
 //********************************************************************************************************************
 //sorts highes to lowest
@@ -148,6 +149,7 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 			metadatafile = validParameter.validFile(parameters, "metadata", true);
 			if (metadatafile == "not open") { abort = true; }
 			else if (metadatafile == "not found") { metadatafile = ""; }
+			else { inputFileName = metadatafile; }
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
 			if (groups == "not found") { groups = "";  pickedGroups = false;  }
@@ -162,10 +164,13 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 			label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); label=""; }	
 			
-			if ((relabundfile == "") && (sharedfile == "")) { m->mothurOut("You must provide either a shared or relabund file."); m->mothurOutEndLine(); abort = true;  }
+			if ((relabundfile == "") && (sharedfile == "") && (metadatafile == "")) { m->mothurOut("You must provide either a shared, relabund, or metadata file."); m->mothurOutEndLine(); abort = true;  }
 			
-			if ((relabundfile != "") && (sharedfile != "")) { m->mothurOut("You may not use both a shared and relabund file."); m->mothurOutEndLine(); abort = true;  }
-			
+			if (metadatafile != "") {
+				if ((relabundfile != "") || (sharedfile != "")) { m->mothurOut("You may only use one of the following : shared, relabund or metadata file."); m->mothurOutEndLine(); abort = true;  }
+			}else {
+				if ((relabundfile != "") && (sharedfile != "")) { m->mothurOut("You may only use one of the following : shared, relabund or metadata file."); m->mothurOutEndLine(); abort = true;  }
+			}
 			string temp;
 			temp = validParameter.validFile(parameters, "numaxes", false);		if (temp == "not found"){	temp = "3";				}
 			convert(temp, numaxes); 
@@ -186,8 +191,7 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 void CorrAxesCommand::help(){
 	try {
 		m->mothurOut("The corr.axes command reads a shared or relabund file as well as a pcoa file and calculates the correlation coefficient.\n");
-		m->mothurOut("The corr.axes command parameters are shared, relabund, axes, metadata, groups, method, numaxes and label.  The shared or relabund and axes parameters are required.  If shared is given the relative abundance is calculated.\n");
-		m->mothurOut("The metadata parameter.....\n");
+		m->mothurOut("The corr.axes command parameters are shared, relabund, axes, metadata, groups, method, numaxes and label.  The shared, relabund or metadata and axes parameters are required.  If shared is given the relative abundance is calculated.\n");
 		m->mothurOut("The groups parameter allows you to specify which of the groups you would like included. The group names are separated by dashes.\n");
 		m->mothurOut("The label parameter allows you to select what distance level you would like used, if none is given the first distance is used.\n");
 		m->mothurOut("The method parameter allows you to select what method you would like to use. Options are pearson, spearman and kendall. Default=pearson.\n");
@@ -225,14 +229,23 @@ int CorrAxesCommand::execute(){
 			//fills lookupFloat with relative abundance values from lookup
 			convertToRelabund();
 			
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
-		}else { 
+			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+			
+		}else if (relabundfile != "") { 
 			getSharedFloat(); 
 			if (m->control_pressed) {  for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } return 0; }
 			if (lookupFloat[0] == NULL) { m->mothurOut("[ERROR] reading relabund file."); m->mothurOutEndLine(); return 0; }
 			
 			if (pickedGroups) { eliminateZeroOTUS(lookupFloat); }
-		}
+			
+		}else if (metadatafile != "") { 
+			getMetadata();  //reads metadata file and store in lookupFloat, saves column headings in metadataLabels for later
+			if (m->control_pressed) {  for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } return 0; }
+			if (lookupFloat[0] == NULL) { m->mothurOut("[ERROR] reading metadata file."); m->mothurOutEndLine(); return 0; }
+			
+			if (pickedGroups) { eliminateZeroOTUS(lookupFloat); }
+			
+		}else {	m->mothurOut("[ERROR]: no file given."); m->mothurOutEndLine(); return 0; }
 		
 		if (m->control_pressed) {  for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } return 0; }
 		
@@ -271,7 +284,9 @@ int CorrAxesCommand::execute(){
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
 		//output headings
-		out << "OTU\t";
+		if (metadatafile == "") {  out << "OTU\t";	}
+		else {  out << "Feature\t";						}
+
 		for (int i = 0; i < numaxes; i++) { out << "axis" << (i+1) << '\t'; }
 		out << endl;
 		
@@ -315,7 +330,8 @@ int CorrAxesCommand::calcPearson(map<string, vector<float> >& axes, ofstream& ou
 	   //for each otu
 	   for (int i = 0; i < lookupFloat[0]->getNumBins(); i++) {
 		   
-		   out << i+1 << '\t';
+		   if (metadatafile == "") {  out << i+1 << '\t';	}
+		   else {  out << metadataLabels[i] << '\t';		}
 		   
 		   //find the averages this otu - Y
 		   float sumOtu = 0.0;
@@ -407,7 +423,8 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 		//for each otu
 		for (int i = 0; i < lookupFloat[0]->getNumBins(); i++) {
 			
-			out << i+1 << '\t';
+			if (metadatafile == "") {  out << i+1 << '\t';	}
+			else {  out << metadataLabels[i] << '\t';		}
 			
 			//find the ranks of this otu - Y
 			vector<spearmanRank> otuScores;
@@ -518,7 +535,8 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 		//for each otu
 		for (int i = 0; i < lookupFloat[0]->getNumBins(); i++) {
 		
-			out << i+1 << '\t';
+			if (metadatafile == "") {  out << i+1 << '\t';	}
+			else {  out << metadataLabels[i] << '\t';		}
 			
 			//find the ranks of this otu - Y
 			vector<spearmanRank> otuScores;
@@ -882,7 +900,79 @@ map<string, vector<float> > CorrAxesCommand::readAxes(){
 		return axes;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "CorrAxesCommand", "convertToRelabund");	
+		m->errorOut(e, "CorrAxesCommand", "readAxes");	
+		exit(1);
+	}
+}
+/*****************************************************************/
+int CorrAxesCommand::getMetadata(){
+	try {
+		vector<string> groupNames;
+		
+		ifstream in;
+		m->openInputFile(axesfile, in);
+		
+		string headerLine = m->getline(in); m->gobble(in);
+		istringstream iss (headerLine,istringstream::in);
+		
+		//read the first label, because it refers to the groups
+		string columnLabel;
+		iss >> columnLabel; m->gobble(iss); 
+		
+		//save names of columns you are reading
+		while (!iss.eof()) {
+			iss >> columnLabel; m->gobble(iss);
+			metadataLabels.push_back(columnLabel);
+		}
+		int count = metadataLabels.size();
+		
+		//read rest of file
+		while (!in.eof()) {
+			
+			if (m->control_pressed) { in.close(); return 0; }
+			
+			string group = "";
+			in >> group; m->gobble(in);
+			groupNames.push_back(group);
+			
+			SharedRAbundFloatVector* tempLookup = new SharedRAbundFloatVector();
+			tempLookup->setGroup(group);
+			tempLookup->setLabel("1");
+			
+			for (int i = 0; i < count; i++) {
+				float temp = 0.0;
+				in >> temp; 
+				
+				tempLookup->push_back(temp, group);
+			}
+			
+			lookupFloat.push_back(tempLookup);
+			
+			m->gobble(in);
+		}
+		in.close();
+		
+		//remove any groups the user does not want, and set globaldata->groups with only valid groups
+		SharedUtil* util;
+		util = new SharedUtil();
+		
+		util->setGroups(globaldata->Groups, groupNames);
+		
+		for (int i = 0; i < lookupFloat.size(); i++) {
+			//if this sharedrabund is not from a group the user wants then delete it.
+			if (util->isValidGroup(lookupFloat[i]->getGroup(), globaldata->Groups) == false) { 
+				delete lookupFloat[i]; lookupFloat[i] = NULL;
+				lookupFloat.erase(lookupFloat.begin()+i); 
+				i--; 
+			}
+		}
+		
+		delete util;
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "CorrAxesCommand", "getMetadata");	
 		exit(1);
 	}
 }
