@@ -87,7 +87,6 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 1;
-		int num = 0;
 		vector<int> processIDS;
 		
 		EstOutput results;
@@ -340,7 +339,6 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 1;
-		int num = 0;
 		vector<int> processIDS;
 		
 		EstOutput results;
@@ -423,8 +421,6 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 		EstOutput results; results.resize(num);
 		
 		int count = 0;
-		int total = num;
-		int twentyPercent = (total * 0.20);
 		int numLeaves = t->getNumLeaves();
 		
 		Tree* copyTree = new Tree;

@@ -588,6 +588,8 @@ int RemoveGroupsCommand::fillNames(){
 				names.insert(seqs[i]);
 			}
 		}
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveGroupsCommand", "fillNames");

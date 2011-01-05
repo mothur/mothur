@@ -388,6 +388,7 @@ int RemoveOtusCommand::processList(ListVector*& list, GroupMap*& groupMap, ofstr
 		
 		m->mothurOut(newList.getLabel() + " - removed " + toString(numOtus) + " of the " + toString(list->getNumBins()) + " OTUs."); m->mothurOutEndLine();
 		
+		return 0;
 		
 	}
 	catch(exception& e) {

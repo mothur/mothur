@@ -1160,7 +1160,6 @@ string ShhherCommand::cluster(string distFileName, string namesFileName){
 		double clusterCutoff = cutoff;
 		while (matrix->getSmallDist() <= clusterCutoff && matrix->getNNodes() > 0){
 			cluster->update(clusterCutoff);
-			float dist = matrix->getSmallDist();
 		}
 		
 		list->setLabel(toString(cutoff));
@@ -1411,7 +1410,6 @@ void ShhherCommand::calcCentroidsDriver(int start, int finish){
 				for(int j=0;j<nSeqsPerOTU[i];j++){
 					int index = cumNumSeqs[i] + j;
 					int nI = seqIndex[index];
-					int nIU = mapSeqToUnique[nI];
 					
 					double tauValue = singleTau[seqNumber[index]];
 					
@@ -1483,7 +1481,6 @@ double ShhherCommand::getNewWeights(){
 			
 			for(int j=0;j<nSeqsPerOTU[i];j++){
 				int index = cumNumSeqs[i] + j;
-				int nI = seqIndex[index];
 				double tauValue = singleTau[seqNumber[index]];
 				weight[i] += tauValue;
 			}
@@ -1902,7 +1899,6 @@ void ShhherCommand::writeQualities(vector<int> otuCounts){
 		vector<vector<int> > qualities(numOTUs);
 		vector<double> pr(HOMOPS, 0);
 		
-		int index = 0;
 		
 		for(int i=0;i<numOTUs;i++){
 			int index = 0;

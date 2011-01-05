@@ -381,7 +381,7 @@ int GetOtusCommand::processList(ListVector*& list, GroupMap*& groupMap, ofstream
 		
 		m->mothurOut(newList.getLabel() + " - selected " + toString(numOtus) + " of the " + toString(list->getNumBins()) + " OTUs."); m->mothurOutEndLine();
 	
-		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "GetOtusCommand", "processList");

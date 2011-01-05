@@ -181,7 +181,7 @@ string Engine::getCommand()  {
 				
 				if(nextCommand != NULL) {  add_history(nextCommand);  }	
 				else{ //^D causes null string and we want it to quit mothur
-					nextCommand = "quit"; 
+					strcpy(nextCommand, "quit"); 
 					mout->mothurOut(nextCommand);
 				}	
 				

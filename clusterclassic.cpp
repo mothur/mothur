@@ -215,6 +215,8 @@ int ClusterClassic::readPhylipFile(string filename, NameAssignment* nameMap) {
 		rabund = new RAbundVector(list->getRAbundVector());
 		
 		fileHandle.close();
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ClusterClassic", "readPhylipFile");

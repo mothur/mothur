@@ -455,7 +455,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 	try {
 		
 		ofstream outFASTA;
-		int able = m->openOutputFile(trimFile, outFASTA);
+		m->openOutputFile(trimFile, outFASTA);
 		
 		ofstream scrapFASTA;
 		m->openOutputFile(scrapFile, scrapFASTA);
@@ -1095,7 +1095,6 @@ int TrimSeqsCommand::stripBarcode(Sequence& seq, QualityScores& qual, int& group
 				oligo = oligo.substr(0,alnLength);
 				temp = temp.substr(0,alnLength);
 				
-				int newStart=0;
 				int numDiff = countDiffs(oligo, temp);
 				
 //				cout << oligo << '\t' << temp << '\t' << numDiff << endl;				
@@ -1220,7 +1219,6 @@ int TrimSeqsCommand::stripForward(Sequence& seq, QualityScores& qual, int& group
 				oligo = oligo.substr(0,alnLength);
 				temp = temp.substr(0,alnLength);
 				
-				int newStart=0;
 				int numDiff = countDiffs(oligo, temp);
 				
 //				cout << oligo << '\t' << temp << '\t' << numDiff << endl;				

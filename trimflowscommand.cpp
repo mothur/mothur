@@ -661,7 +661,6 @@ int TrimFlowsCommand::stripBarcode(Sequence& seq, int& group){
 				oligo = oligo.substr(0,alnLength);
 				temp = temp.substr(0,alnLength);
 				
-				int newStart=0;
 				int numDiff = countDiffs(oligo, temp);
 				
 				if(numDiff < minDiff){
@@ -959,9 +958,7 @@ vector<unsigned long int> TrimFlowsCommand::getFlowFileBreaks() {
 			m->openInputFile(flowFileName, in);
 			in.seekg(spot);
 			
-			unsigned long int newSpot = spot;
 			string dummy = m->getline(in);
-			
 			
 			//there was not another sequence before the end of the file
 			unsigned long int sanityPos = in.tellg();

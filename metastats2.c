@@ -5,13 +5,13 @@
 
 int metastat_main (char* outputFileName, int numRows, int numCols, double threshold, int numPermutations, double** data, int secondGroupingStart){
 	
-	int size,c=0,i=0,j=0,k,counter=0, bflag=0; 
+	int size,c=0,i=0,j=0,counter=0, bflag=0; 
 	int B=numPermutations;
 	int row = numRows;
 	int col = numCols;
 	int g = secondGroupingStart;
 	double thresh=threshold;
-	double placeholder=0,min=0; 
+	double min=0; 
 	
 	char output[1024];
 	strcpy(output, outputFileName);
@@ -24,7 +24,7 @@ int metastat_main (char* outputFileName, int numRows, int numCols, double thresh
 	// Initialize the matrices
 	size = row*col;
 	double matrix[row][col];
-	double pmatrix[size],pmatrix2[size],permuted[size];  
+	double pmatrix[size],permuted[size];  
 	double storage[row][9];
 	
 	for (i=0;i<row;i++){
@@ -343,7 +343,7 @@ void testp(double *permuted_ttests,int *B,double *permuted,
 		   *ps) {
 	
 	double Tvalues[*nr];
-	int a, b, n, i, j,k=0;
+	int a, b, n, j;
 	
 	a = *B;
 	b = *nr;

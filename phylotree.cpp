@@ -275,6 +275,8 @@ int PhyloTree::addSeqToTree(string seqName, string seqTaxonomy){
 	
 			if (seqTaxonomy == "") {   uniqueTaxonomies[currentNode] = currentNode;	}
 		}
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloTree", "addSeqToTree");

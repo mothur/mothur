@@ -521,6 +521,8 @@ int SubSampleCommand::getNames() {
 		}
 		in.close();	
 		
+		return 0;
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SubSampleCommand", "getNames");
@@ -558,6 +560,8 @@ int SubSampleCommand::readNames() {
 			m->gobble(in);
 		}
 		in.close();	
+		
+		return 0;
 		
 	}
 	catch(exception& e) {
