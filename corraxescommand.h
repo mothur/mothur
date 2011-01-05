@@ -49,9 +49,11 @@ private:
 	map<string, vector<string> > outputTypes;
 	vector<SharedRAbundVector*> lookup;
 	vector<SharedRAbundFloatVector*> lookupFloat;
+	vector<string> metadataLabels;
 	
 	int getShared();
 	int getSharedFloat();
+	int getMetadata();
 	int convertToRelabund();
 	int eliminateZeroOTUS(vector<SharedRAbundFloatVector*>&);
 	map<string, vector<float> > readAxes();
