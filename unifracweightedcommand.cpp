@@ -332,7 +332,6 @@ int UnifracWeightedCommand::createProcesses(Tree* t, vector< vector<string> > na
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 		int process = 1;
-		int num = 0;
 		vector<int> processIDS;
 		
 		EstOutput results;

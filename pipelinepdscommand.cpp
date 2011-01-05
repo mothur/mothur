@@ -525,6 +525,8 @@ int PipelineCommand::runUsersPipeline(){
 		}
 		
 		in.close();
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PipelineCommand", "runUsersPipeline");

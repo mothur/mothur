@@ -230,8 +230,8 @@ int clearcut_main(int argc, char *argv[]) {
       printf("Relaxed NJ tree(s) in %s\n", nj_args->outfilename);
     }
   }
-
-  //exit(0);
+  
+	return 0;
 }
 
 

@@ -1112,7 +1112,7 @@ int ClusterSplitCommand::createMergedDistanceFile(vector< map<string, string> > 
 		}
 #endif
 				
-			
+		return 0;	
 		
 		
 	}

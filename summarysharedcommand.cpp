@@ -665,6 +665,7 @@ int SummarySharedCommand::process(vector<SharedRAbundVector*> thisLookup, string
 					outDist.close();
 				}
 			}
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SummarySharedCommand", "process");

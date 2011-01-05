@@ -1151,6 +1151,8 @@ bool DistanceCommand::sanityCheck() {
 			remove(outputFile.c_str()); //temp file is bad because file mismatch above
 		}
 		
+		return good;
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "DistanceCommand", "sanityCheck");

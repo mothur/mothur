@@ -294,9 +294,7 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 		
 			D += weightedSum;
 		}
-		
-		int numLeaves = t->getNumLeaves();
-		
+				
 		//calculate u for the group comb 
 		for(int i=0;i<t->getNumNodes();i++){
 		 

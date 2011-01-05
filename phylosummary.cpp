@@ -200,7 +200,7 @@ int PhyloSummary::addSeqToTree(string seqName, string seqTaxonomy){
 				for (int k = level; k < maxLevel; k++) {  seqTaxonomy += "unclassified;";   }
 			}
 		}
-
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloSummary", "addSeqToTree");
@@ -310,7 +310,7 @@ int PhyloSummary::addSeqToTree(string seqTaxonomy, vector<string> names){
 				for (int k = level; k < maxLevel; k++) {  seqTaxonomy += "unclassified;";   }
 			}
 		}
-		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PhyloSummary", "addSeqToTree");

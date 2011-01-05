@@ -66,6 +66,8 @@ int SplitMatrix::splitDistance(){
         
 		if (large)	{ splitDistanceLarge(); }
 		else		{ splitDistanceRAM();	}
+		
+		return 0;
 			
 	}
 	catch(exception& e) {
