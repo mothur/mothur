@@ -25,22 +25,23 @@
 class ChimeraSlayer : public Chimera {
 	
 	public:
-		ChimeraSlayer(string, string, string, int, int, int, int, float, int, int, int, int, int, int, int, int, bool);
-		ChimeraSlayer(string, string, string, string, string, int, int, int, int, float, int, int, int, int, int, int, int, int, bool);
+		ChimeraSlayer(string, string, bool, string, int, int, int, int, float, int, int, int, int, int, int, int, int, bool);
+		ChimeraSlayer(string, string, bool, string, string, string, int, int, int, int, float, int, int, int, int, int, int, int, int, bool);
 
 		~ChimeraSlayer();
 		
 		int getChimeras(Sequence*);
-		int print(ostream&, ostream&);
+		Sequence* print(ostream&, ostream&);
 		void printHeader(ostream&);
 		int doPrep();
 		
 		#ifdef USE_MPI
-		int print(MPI_File&, MPI_File&);
+		Sequence* print(MPI_File&, MPI_File&);
 		#endif
 		
 	private:
 		Sequence* querySeq;
+		Sequence* trimQuery;
 		DeCalculator* decalc;
 		map<int, int>  spotMap;
 		Database* databaseRight;
@@ -49,7 +50,7 @@ class ChimeraSlayer : public Chimera {
 		
 		vector<data_struct>  chimeraResults;
 		string chimeraFlags, searchMethod, fastafile, includeAbunds;
-		bool realign;
+		bool realign, trimChimera;
 		int window, numWanted, kmerSize, match, misMatch, minSim, minCov, minBS, minSNP, parents, iters, increment;
 		float divR;
 	

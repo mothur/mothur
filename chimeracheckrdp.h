@@ -29,10 +29,10 @@ class ChimeraCheckRDP : public Chimera {
 		~ChimeraCheckRDP();
 		
 		int getChimeras(Sequence*);
-		int print(ostream&, ostream&);
+		Sequence* print(ostream&, ostream&);
 		
 		#ifdef USE_MPI
-		int print(MPI_File&, MPI_File&);
+		Sequence* print(MPI_File&, MPI_File&);
 		#endif
 		
 	private:

@@ -272,7 +272,7 @@ int ChimeraCcodeCommand::execute(){
 			
 		#ifdef USE_MPI
 		
-				int pid, end, numSeqsPerProcessor; 
+				int pid, numSeqsPerProcessor; 
 				int tag = 2001;
 				vector<unsigned long int> MPIPos;
 								
@@ -550,7 +550,7 @@ int ChimeraCcodeCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File
 					if (m->control_pressed) {	delete candidateSeq; return 1;	}
 		
 					//print results
-					bool isChimeric = chimera->print(outMPI, outAccMPI);
+					chimera->print(outMPI, outAccMPI);
 				}
 			}
 			delete candidateSeq;

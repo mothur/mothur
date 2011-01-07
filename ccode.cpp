@@ -74,7 +74,7 @@ Ccode::~Ccode() {
 	#endif
 }	
 //***************************************************************************************************************
-int Ccode::print(ostream& out, ostream& outAcc) {
+Sequence* Ccode::print(ostream& out, ostream& outAcc) {
 	try {
 		
 		ofstream out2;
@@ -155,7 +155,7 @@ int Ccode::print(ostream& out, ostream& outAcc) {
 		//free memory
 		for (int i = 0; i < closest.size(); i++) {  delete closest[i].seq;  }
 
-		return results;
+		return NULL;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Ccode", "print");
@@ -164,7 +164,7 @@ int Ccode::print(ostream& out, ostream& outAcc) {
 }
 #ifdef USE_MPI
 //***************************************************************************************************************
-int Ccode::print(MPI_File& out, MPI_File& outAcc) {
+Sequence* Ccode::print(MPI_File& out, MPI_File& outAcc) {
 	try {
 		
 		string outMapString = "";
@@ -263,7 +263,7 @@ int Ccode::print(MPI_File& out, MPI_File& outAcc) {
 		//free memory
 		for (int i = 0; i < closest.size(); i++) {  delete closest[i].seq;  }
 
-		return results;
+		return NULL;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Ccode", "print");
@@ -280,6 +280,8 @@ int Ccode::printMapping(string& output) {
 				
 			MPI_File_write_shared(outMap, buf, length, MPI_CHAR, &status);
 			delete buf;
+			
+			return 0;
 
 	}
 	catch(exception& e) {

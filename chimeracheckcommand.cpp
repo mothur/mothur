@@ -301,7 +301,7 @@ int ChimeraCheckCommand::execute(){
 			
 		#ifdef USE_MPI
 		
-				int pid, end, numSeqsPerProcessor; 
+				int pid, numSeqsPerProcessor; 
 				int tag = 2001;
 				vector<unsigned long int> MPIPos;
 				

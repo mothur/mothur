@@ -53,6 +53,7 @@ ChimeraBellerophonCommand::ChimeraBellerophonCommand(){
 		vector<string> tempOutNames;
 		outputTypes["chimera"] = tempOutNames;
 		outputTypes["accnos"] = tempOutNames;
+		outputTypes["fasta"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraBellerophonCommand", "ChimeraBellerophonCommand");
@@ -87,6 +88,7 @@ ChimeraBellerophonCommand::ChimeraBellerophonCommand(string option)  {
 			vector<string> tempOutNames;
 			outputTypes["chimera"] = tempOutNames;
 			outputTypes["accnos"] = tempOutNames;
+			outputTypes["fasta"] = tempOutNames;
 		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -241,7 +243,7 @@ int ChimeraBellerophonCommand::execute(){
 			MPI_File_open(MPI_COMM_WORLD, FileName, outMode, MPI_INFO_NULL, &outMPI);  //comm, filename, mode, info, filepointer
 			MPI_File_open(MPI_COMM_WORLD, outFilename, outMode, MPI_INFO_NULL, &outMPIAccnos);
 	
-			numSeqs = chimera->print(outMPI, outMPIAccnos);
+			numSeqs = chimera->print(outMPI, outMPIAccnos, "");
 			
 			MPI_File_close(&outMPI);
 			MPI_File_close(&outMPIAccnos);
@@ -254,7 +256,7 @@ int ChimeraBellerophonCommand::execute(){
 			ofstream out2;
 			m->openOutputFile(accnosFileName, out2);
 			
-			numSeqs = chimera->print(out, out2);
+			numSeqs = chimera->print(out, out2, "");
 			out.close();
 			out2.close(); 
 			

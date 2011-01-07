@@ -101,10 +101,12 @@ class Chimera {
 		virtual void printHeader(ostream&){};
 		virtual int getChimeras(Sequence*){ return 0; }
 		virtual int getChimeras(){ return 0; }
-		virtual int print(ostream&, ostream&){  return 0; }
+		virtual Sequence* print(ostream&, ostream&){  return NULL; }
+		virtual int print(ostream&, ostream&, string){  return 0; }
 		
 		#ifdef USE_MPI
-		virtual int print(MPI_File&, MPI_File&){  return 0; }
+		virtual Sequence* print(MPI_File&, MPI_File&){  return 0; }
+		virtual int print(MPI_File&, MPI_File&, string){  return 0; }
 		#endif
 		
 		
