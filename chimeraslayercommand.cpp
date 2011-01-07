@@ -690,6 +690,7 @@ int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_Fil
 					
 					if (trim) {  
 						string outputString = ">" + trimmed->getName() + "\n" + trimmed->getAligned() + "\n";
+						delete trimmed;
 						
 						//write to accnos file
 						int length = outputString.length();

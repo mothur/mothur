@@ -34,7 +34,7 @@ public:
 private:
 	GlobalData* globaldata;
 	
-	bool abort, pickedGroups, allLines;
+	bool abort, pickedGroups, allLines, persample;
 	string listfile, groupfile, sharedfile, rabundfile, sabundfile, fastafile, namefile;
 	set<string> labels; //holds labels to be used
 	string groups, label, outputDir;

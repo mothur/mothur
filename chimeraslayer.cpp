@@ -419,7 +419,7 @@ void ChimeraSlayer::printHeader(ostream& out) {
 Sequence* ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 	try {
 		Sequence* trim = NULL;
-		if (trimChimera) { trim = new Sequence(trimQuery->getName(), trimQuery->getAligned()); }
+		if (trimChimera) { trim = trimQuery; }
 		
 		if (chimeraFlags == "yes") {
 			string chimeraFlag = "no";
@@ -472,7 +472,7 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 		string outputString = "";
 		
 		Sequence* trim = NULL;
-		if (trimChimera) { trim = new Sequence(trimQuery->getName(), trimQuery->getAligned()); }
+		if (trimChimera) { trim = trimQuery; }
 		
 		if (chimeraFlags == "yes") {
 			string chimeraFlag = "no";
@@ -546,7 +546,7 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 //***************************************************************************************************************
 int ChimeraSlayer::getChimeras(Sequence* query) {
 	try {
-		trimQuery = query;
+		if (trimChimera) { trimQuery = new Sequence(query->getName(), query->getAligned());  }
 		
 		chimeraFlags = "no";
 
