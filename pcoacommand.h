@@ -11,6 +11,7 @@
  */
  
 #include "command.hpp"
+#include "linearalgebra.h"
 
 
 /*****************************************************************/
@@ -34,15 +35,12 @@ private:
 	float cutoff, precision;
 	vector<string> outputNames;
 	map<string, vector<string> > outputTypes;
+	LinearAlgebra linearCalc;
 	
 	void get_comment(istream&, char, char);
 	int read_phylip(istream&, int, vector<string>&, vector<vector<double> >&);
 	void read(string, vector<string>&, vector<vector<double> >&);
-	double pythag(double, double);
-	void matrix_mult(vector<vector<double> >, vector<vector<double> >, vector<vector<double> >&);
 	void recenter(double, vector<vector<double> >, vector<vector<double> >&);
-	void tred2(vector<vector<double> >&, vector<double>&, vector<double>&);
-	void qtli(vector<double>&, vector<double>&, vector<vector<double> >&);
 	void output(string, vector<string>, vector<vector<double> >&, vector<double>);
 	vector< vector<double> > calculateEuclidianDistance(vector<vector<double> >&, int);
 	double calcPearson(vector<vector<double> >&, vector<vector<double> >&);

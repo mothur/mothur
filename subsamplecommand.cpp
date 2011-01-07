@@ -13,7 +13,7 @@
 //**********************************************************************************************************************
 vector<string> SubSampleCommand::getValidParameters(){	
 	try {
-		string Array[] =  {"fasta", "group", "list","shared","rabund", "name","sabund","size","groups","label","outputdir","inputdir"};
+		string Array[] =  {"fasta", "group", "list","shared","rabund","persample", "name","sabund","size","groups","label","outputdir","inputdir"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
@@ -77,7 +77,7 @@ SubSampleCommand::SubSampleCommand(string option) {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "group", "list","shared","rabund", "sabund","name","size","groups","label","outputdir","inputdir"};
+			string Array[] =  {"fasta", "group", "list","shared","rabund","persample", "sabund","name","size","groups","label","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -216,6 +216,11 @@ SubSampleCommand::SubSampleCommand(string option) {
 			string temp = validParameter.validFile(parameters, "size", false);		if (temp == "not found"){	temp = "0";		}
 			convert(temp, size);  
 			
+			temp = validParameter.validFile(parameters, "persample", false);		if (temp == "not found"){	temp = "f";		}
+			persample = m->isTrue(temp);
+			
+			if (groupfile == "") { persample = false; }
+			
 			if ((namefile != "") && (fastafile == "")) { m->mothurOut("You may only use a namefile with a fastafile."); m->mothurOutEndLine(); abort = true; }
 			
 			if ((fastafile == "") && (listfile == "") && (sabundfile == "") && (rabundfile == "") && (sharedfile == "")) {
@@ -244,12 +249,14 @@ SubSampleCommand::SubSampleCommand(string option) {
 void SubSampleCommand::help(){
 	try {
 		m->mothurOut("The sub.sample command is designed to be used as a way to normalize your data, or create a smaller set from your original set.\n");
-		m->mothurOut("The sub.sample command parameters are fasta, name, list, group, rabund, sabund, shared, groups, size and label.  You must provide a fasta, list, sabund, rabund or shared file as an input file.\n");
+		m->mothurOut("The sub.sample command parameters are fasta, name, list, group, rabund, sabund, shared, groups, size, persample and label.  You must provide a fasta, list, sabund, rabund or shared file as an input file.\n");
 		m->mothurOut("The namefile is only used with the fasta file, not with the listfile, because the list file should contain all sequences.\n");
 		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included. The group names are separated by dashes.\n");
 		m->mothurOut("The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n");
 		m->mothurOut("The size parameter allows you indicate the size of your subsample.\n");
-		m->mothurOut("The size parameter is not set: with shared file size=number of seqs in smallest sample, with all other files, 10% of number of seqs.\n");
+		m->mothurOut("The persample parameter allows you indicate you want to select subsample of the same size from each of your groups, default=false. It is only used with the list and fasta files if a groupfile is given.\n");
+		m->mothurOut("persample=false will select a random set of sequences of the size you select, but the number of seqs from each group may differ.\n");
+		m->mothurOut("The size parameter is not set: with shared file size=number of seqs in smallest sample, with all other files if a groupfile is given and persample=true, then size=number of seqs in smallest sample, otherwise size=10% of number of seqs.\n");
 		m->mothurOut("The sub.sample command should be in the following format: sub.sample(list=yourListFile, group=yourGroupFile, groups=yourGroups, label=yourLabels).\n");
 		m->mothurOut("Example sub.sample(list=abrecovery.fn.list, group=abrecovery.groups, groups=B-C, size=20).\n");
 		m->mothurOut("The default value for groups is all the groups in your groupfile, and all labels in your inputfile will be used.\n");
@@ -340,72 +347,117 @@ int SubSampleCommand::getSubSampleFasta() {
 		outputTypes["fasta"].push_back(outputFileName);  outputNames.push_back(outputFileName);
 		
 		//make sure that if your picked groups size is not too big
-		
-		if (pickedGroups) {
-			int total = 0;
-			for(int i = 0; i < Groups.size(); i++) {
-				total += groupMap->getNumSeqs(Groups[i]);
+		int thisSize = names.size();
+		if (persample) { 
+			if (size == 0) { //user has not set size, set size = smallest samples size
+				size = groupMap->getNumSeqs(Groups[0]);
+				for (int i = 1; i < Groups.size(); i++) {
+					int thisSize = groupMap->getNumSeqs(Groups[i]);
+					
+					if (thisSize < size) {	size = thisSize;	}
+				}
+			}else { //make sure size is not too large
+				int smallestSize = groupMap->getNumSeqs(Groups[0]);
+				for (int i = 1; i < Groups.size(); i++) {
+					int thisSize = groupMap->getNumSeqs(Groups[i]);
+					
+					if (thisSize < smallestSize) {	smallestSize = thisSize;	}
+				}
+				if (smallestSize < size) { size = smallestSize; m->mothurOut("You have selected a size that is larger than your smallest sample, using your samllest sample size, " + toString(smallestSize) + "."); m->mothurOutEndLine(); }
+			}
+			
+			m->mothurOut("Sampling " + toString(size) + " from each group."); m->mothurOutEndLine();			
+		}else {
+			if (pickedGroups) {
+				int total = 0;
+				for(int i = 0; i < Groups.size(); i++) {
+					total += groupMap->getNumSeqs(Groups[i]);
+				}
+				
+				if (size == 0) { //user has not set size, set size = 10% samples size
+					size = int (total * 0.10);
+				}
+				
+				if (total < size) { 
+					if (size != 0) { 
+						m->mothurOut("Your size is too large for the number of groups you selected. Adjusting to " + toString(int (total * 0.10)) + "."); m->mothurOutEndLine();
+					}
+					size = int (total * 0.10);
+				}
+				
+				m->mothurOut("Sampling " + toString(size) + " from " + toString(total) + "."); m->mothurOutEndLine();
 			}
 			
 			if (size == 0) { //user has not set size, set size = 10% samples size
-				size = int (total * 0.10);
+				size = int (names.size() * 0.10);
 			}
 			
-			if (total < size) { 
-				if (size != 0) { 
-					m->mothurOut("Your size is too large for the number of groups you selected. Adjusting to " + toString(int (total * 0.10)) + "."); m->mothurOutEndLine();
-				}
-				size = int (total * 0.10);
+			if (size > thisSize) { m->mothurOut("Your fasta file only contains " + toString(thisSize) + " sequences. Setting size to " + toString(thisSize) + "."); m->mothurOutEndLine();
+				size = thisSize;
 			}
 			
-			m->mothurOut("Sampling " + toString(size) + " from " + toString(total) + "."); m->mothurOutEndLine();
+			if (!pickedGroups) { m->mothurOut("Sampling " + toString(size) + " from " + toString(thisSize) + "."); m->mothurOutEndLine(); }
+
 		}
-		
-		if (size == 0) { //user has not set size, set size = 10% samples size
-			size = int (names.size() * 0.10);
-		}
-		
-		int thisSize = names.size();
-		if (size > thisSize) { m->mothurOut("Your fasta file only contains " + toString(thisSize) + " sequences. Setting size to " + toString(thisSize) + "."); m->mothurOutEndLine();
-			size = thisSize;
-		}
-		
 		random_shuffle(names.begin(), names.end());
 		
-		if (!pickedGroups) { m->mothurOut("Sampling " + toString(size) + " from " + toString(thisSize) + "."); m->mothurOutEndLine(); }
-		
-		//randomly select a subset of those names to include in the subsample
 		set<string> subset; //dont want repeat sequence names added
-		for (int j = 0; j < size; j++) {
-			
-			if (m->control_pressed) { return 0; }
-			
-			//get random sequence to add, making sure we have not already added it
-			bool done = false;
-			int myrand;
-			while (!done) {
-				myrand = (int)((float)(rand()) / (RAND_MAX / (thisSize-1) + 1));
+		if (persample) {
+			for (int i = 0; i < Groups.size(); i++) {
 				
-				if (subset.count(names[myrand]) == 0)  { 
+				//randomly select a subset of those names from this group to include in the subsample
+				for (int j = 0; j < size; j++) {
 					
-					if (groupfile != "") { //if there is a groupfile given fill in group info
-						string group = groupMap->getGroup(names[myrand]);
-						if (group == "not found") { m->mothurOut("[ERROR]: " + names[myrand] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
+					if (m->control_pressed) { return 0; }
+					
+					//get random sequence to add, making sure we have not already added it
+					bool done = false;
+					int myrand;
+					while (!done) {
+						myrand = (int)((float)(rand()) / (RAND_MAX / (thisSize-1) + 1));
 						
-						if (pickedGroups) { //if hte user picked groups, we only want to keep the names of sequences from those groups
-							if (m->inUsersGroups(group, Groups)) {
-								subset.insert(names[myrand]); break;
-							}
-						}else{
-							subset.insert(names[myrand]); break;
+						if (subset.count(names[myrand]) == 0)  { 
+							
+							string group = groupMap->getGroup(names[myrand]);
+							if (group == "not found") { m->mothurOut("[ERROR]: " + names[myrand] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
+								
+							if (group == Groups[i]) {	subset.insert(names[myrand]); break;	}
 						}
-					}else{ //save everyone, group
-						subset.insert(names[myrand]); break;
-					}					
+					}
 				}
 			}
-		}	
-		
+		}else {
+			//randomly select a subset of those names to include in the subsample
+			for (int j = 0; j < size; j++) {
+				
+				if (m->control_pressed) { return 0; }
+				
+				//get random sequence to add, making sure we have not already added it
+				bool done = false;
+				int myrand;
+				while (!done) {
+					myrand = (int)((float)(rand()) / (RAND_MAX / (thisSize-1) + 1));
+					
+					if (subset.count(names[myrand]) == 0)  { 
+						
+						if (groupfile != "") { //if there is a groupfile given fill in group info
+							string group = groupMap->getGroup(names[myrand]);
+							if (group == "not found") { m->mothurOut("[ERROR]: " + names[myrand] + " is not in your groupfile. please correct."); m->mothurOutEndLine(); group = "NOTFOUND"; }
+							
+							if (pickedGroups) { //if hte user picked groups, we only want to keep the names of sequences from those groups
+								if (m->inUsersGroups(group, Groups)) {
+									subset.insert(names[myrand]); break;
+								}
+							}else{
+								subset.insert(names[myrand]); break;
+							}
+						}else{ //save everyone, group
+							subset.insert(names[myrand]); break;
+						}					
+					}
+				}
+			}	
+		}
 		//read through fasta file outputting only the names on the subsample list
 		ifstream in;
 		m->openInputFile(fastafile, in);
@@ -794,37 +846,59 @@ int SubSampleCommand::getSubSampleList() {
 		}
 		
 		//make sure that if your picked groups size is not too big
-		if (pickedGroups) {
-			int total = 0;
-			for(int i = 0; i < Groups.size(); i++) {
-				total += groupMap->getNumSeqs(Groups[i]);
+		if (persample) {
+			if (size == 0) { //user has not set size, set size = smallest samples size
+				size = groupMap->getNumSeqs(Groups[0]);
+				for (int i = 1; i < Groups.size(); i++) {
+					int thisSize = groupMap->getNumSeqs(Groups[i]);
+					
+					if (thisSize < size) {	size = thisSize;	}
+				}
+			}else { //make sure size is not too large
+				int smallestSize = groupMap->getNumSeqs(Groups[0]);
+				for (int i = 1; i < Groups.size(); i++) {
+					int thisSize = groupMap->getNumSeqs(Groups[i]);
+					
+					if (thisSize < smallestSize) {	smallestSize = thisSize;	}
+				}
+				if (smallestSize < size) { size = smallestSize; m->mothurOut("You have selected a size that is larger than your smallest sample, using your samllest sample size, " + toString(smallestSize) + "."); m->mothurOutEndLine(); }
 			}
 			
-			if (size == 0) { //user has not set size, set size = 10% samples size
-				size = int (total * 0.10);
-			}
-			
-			if (total < size) { 
-				m->mothurOut("Your size is too large for the number of groups you selected. Adjusting to " + toString(int (total * 0.10)) + "."); m->mothurOutEndLine();
-				size = int (total * 0.10);
-			}
-			
-			m->mothurOut("Sampling " + toString(size) + " from " + toString(total) + "."); m->mothurOutEndLine();
+			m->mothurOut("Sampling " + toString(size) + " from each group."); m->mothurOutEndLine();	
 		}else{
-		
-			if (size == 0) { //user has not set size, set size = 10% samples size
-				size = int (list->getNumSeqs() * 0.10);
+			if (pickedGroups) {
+				int total = 0;
+				for(int i = 0; i < Groups.size(); i++) {
+					total += groupMap->getNumSeqs(Groups[i]);
+				}
+				
+				if (size == 0) { //user has not set size, set size = 10% samples size
+					size = int (total * 0.10);
+				}
+				
+				if (total < size) { 
+					m->mothurOut("Your size is too large for the number of groups you selected. Adjusting to " + toString(int (total * 0.10)) + "."); m->mothurOutEndLine();
+					size = int (total * 0.10);
+				}
+				
+				m->mothurOut("Sampling " + toString(size) + " from " + toString(total) + "."); m->mothurOutEndLine();
+			}else{
+				
+				if (size == 0) { //user has not set size, set size = 10% samples size
+					size = int (list->getNumSeqs() * 0.10);
+				}
+				
+				int thisSize = list->getNumSeqs();
+				if (size > thisSize) { m->mothurOut("Your list file only contains " + toString(thisSize) + " sequences. Setting size to " + toString(thisSize) + "."); m->mothurOutEndLine();
+					size = thisSize;
+				}
+				
+				m->mothurOut("Sampling " + toString(size) + " from " + toString(list->getNumSeqs()) + "."); m->mothurOutEndLine();
 			}
-			
-			int thisSize = list->getNumSeqs();
-			if (size > thisSize) { m->mothurOut("Your list file only contains " + toString(thisSize) + " sequences. Setting size to " + toString(thisSize) + "."); m->mothurOutEndLine();
-				size = thisSize;
-			}
-			
-			m->mothurOut("Sampling " + toString(size) + " from " + toString(list->getNumSeqs()) + "."); m->mothurOutEndLine();
 		}
 		
 		
+		//fill names
 		for (int i = 0; i < list->getNumBins(); i++) {
 			string binnames = list->get(i);
 			
@@ -872,22 +946,43 @@ int SubSampleCommand::getSubSampleList() {
 		}
 		
 		random_shuffle(names.begin(), names.end());
-		
+			
 		//randomly select a subset of those names to include in the subsample
 		set<string> subset; //dont want repeat sequence names added
-		for (int j = 0; j < size; j++) {
-			
-			if (m->control_pressed) { break; }
-			
-			//get random sequence to add, making sure we have not already added it
-			bool done = false;
-			int myrand;
-			while (!done) {
-				myrand = (int)((float)(rand()) / (RAND_MAX / (names.size()-1) + 1));
+		if (persample) {
+			for (int i = 0; i < Groups.size(); i++) {
 				
-				if (subset.count(names[myrand]) == 0)  { subset.insert(names[myrand]); break;	}
+				for (int j = 0; j < size; j++) {
+					
+					if (m->control_pressed) { break; }
+					
+					//get random sequence to add, making sure we have not already added it
+					bool done = false;
+					int myrand;
+					while (!done) {
+						myrand = (int)((float)(rand()) / (RAND_MAX / (names.size()-1) + 1));
+						
+						if (subset.count(names[myrand]) == 0) { //you are not already added
+							if (groupMap->getGroup(names[myrand]) == Groups[i])  { subset.insert(names[myrand]); break;	}
+						}
+					}
+				}
 			}
-		}	
+		}else{
+			for (int j = 0; j < size; j++) {
+				
+				if (m->control_pressed) { break; }
+				
+				//get random sequence to add, making sure we have not already added it
+				bool done = false;
+				int myrand;
+				while (!done) {
+					myrand = (int)((float)(rand()) / (RAND_MAX / (names.size()-1) + 1));
+					
+					if (subset.count(names[myrand]) == 0)  { subset.insert(names[myrand]); break;	}
+				}
+			}	
+		}
 		
 		if (groupfile != "") { 
 			//write out new groupfile

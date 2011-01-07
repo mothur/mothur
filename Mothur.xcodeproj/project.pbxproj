@@ -280,6 +280,7 @@
 		A7E9B98D12D37EC400DA6239 /* weighted.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B87C12D37EC400DA6239 /* weighted.cpp */; };
 		A7E9B98E12D37EC400DA6239 /* weightedlinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B87E12D37EC400DA6239 /* weightedlinkage.cpp */; };
 		A7E9B98F12D37EC400DA6239 /* whittaker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B87F12D37EC400DA6239 /* whittaker.cpp */; };
+		A7FC480E12D788F20055BC5C /* linearalgebra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FC480D12D788F20055BC5C /* linearalgebra.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -860,6 +861,8 @@
 		A7E9B87E12D37EC400DA6239 /* weightedlinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = weightedlinkage.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B87F12D37EC400DA6239 /* whittaker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = whittaker.cpp; sourceTree = "<group>"; };
 		A7E9B88012D37EC400DA6239 /* whittaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = whittaker.h; sourceTree = "<group>"; };
+		A7FC480C12D788F20055BC5C /* linearalgebra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = linearalgebra.h; sourceTree = "<group>"; };
+		A7FC480D12D788F20055BC5C /* linearalgebra.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = linearalgebra.cpp; sourceTree = "<group>"; };
 		C6A0FF2C0290799A04C91782 /* mothur.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = mothur.1; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -930,6 +933,8 @@
 				A7E9B72D12D37EC400DA6239 /* inputdata.cpp */,
 				A7E9B73912D37EC400DA6239 /* libshuff.cpp */,
 				A7E9B73A12D37EC400DA6239 /* libshuff.h */,
+				A7FC480C12D788F20055BC5C /* linearalgebra.h */,
+				A7FC480D12D788F20055BC5C /* linearalgebra.cpp */,
 				A7E9BA5612D39BD800DA6239 /* metastats */,
 				A7E9B75B12D37EC400DA6239 /* mothur.cpp */,
 				A7E9B75C12D37EC400DA6239 /* mothur.h */,
@@ -1856,6 +1861,7 @@
 				A7E9B98E12D37EC400DA6239 /* weightedlinkage.cpp in Sources */,
 				A7E9B98F12D37EC400DA6239 /* whittaker.cpp in Sources */,
 				A70332B712D3A13400761E33 /* makefile in Sources */,
+				A7FC480E12D788F20055BC5C /* linearalgebra.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
