@@ -41,14 +41,14 @@ private:
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;
 	
-	int driver(linePair*, string, string, string);
-	int createProcesses(string, string, string);
+	int driver(linePair*, string, string, string, string);
+	int createProcesses(string, string, string, string);
 		
 	#ifdef USE_MPI
-	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long int>&);
+	int driverMPI(int, int, MPI_File&, MPI_File&, MPI_File&, MPI_File&, vector<unsigned long int>&);
 	#endif
 
-	bool abort, realign;
+	bool abort, realign, trim;
 	string fastafile, templatefile, outputDir, search, namefile, includeAbunds;
 	int processors, window, iters, increment, numwanted, ksize, match, mismatch, parents, minSimilarity, minCoverage, minBS, minSNP, numSeqs, templateSeqsLength;
 	float divR;

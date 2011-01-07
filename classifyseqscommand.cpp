@@ -461,7 +461,7 @@ int ClassifySeqsCommand::execute(){
 			for (int i = 0; i < lines.size(); i++) {  delete lines[i];  }  lines.clear();
 			
 #ifdef USE_MPI	
-				int pid, end, numSeqsPerProcessor; 
+				int pid, numSeqsPerProcessor; 
 				int tag = 2001;
 				vector<unsigned long int> MPIPos;
 				

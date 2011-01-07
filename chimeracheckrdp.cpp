@@ -47,7 +47,7 @@ ChimeraCheckRDP::~ChimeraCheckRDP() {
 	}
 }	
 //***************************************************************************************************************
-int ChimeraCheckRDP::print(ostream& out, ostream& outAcc) {
+Sequence* ChimeraCheckRDP::print(ostream& out, ostream& outAcc) {
 	try {
 		
 		m->mothurOut("Processing: " + querySeq->getName()); m->mothurOutEndLine();
@@ -72,7 +72,7 @@ int ChimeraCheckRDP::print(ostream& out, ostream& outAcc) {
 			}
 		}
 		
-		return 0;
+		return NULL;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraCheckRDP", "print");
@@ -81,7 +81,7 @@ int ChimeraCheckRDP::print(ostream& out, ostream& outAcc) {
 }
 #ifdef USE_MPI
 //***************************************************************************************************************
-int ChimeraCheckRDP::print(MPI_File& out, MPI_File& outAcc) {
+Sequence* ChimeraCheckRDP::print(MPI_File& out, MPI_File& outAcc) {
 	try {
 		
 		cout << "Processing: " << querySeq->getName() << endl; 
@@ -115,7 +115,7 @@ int ChimeraCheckRDP::print(MPI_File& out, MPI_File& outAcc) {
 			}
 		}
 		
-		return 0;
+		return NULL;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraCheckRDP", "print");

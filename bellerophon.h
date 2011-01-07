@@ -28,10 +28,10 @@ class Bellerophon : public Chimera {
 		~Bellerophon() { delete distCalculator; for (int i = 0; i < seqs.size(); i++) { delete seqs[i];  }  seqs.clear(); }
 		
 		int getChimeras();
-		int print(ostream&, ostream&);
+		int print(ostream&, ostream&, string);
 		
 		#ifdef USE_MPI
-		int print(MPI_File&, MPI_File&);
+		int print(MPI_File&, MPI_File&, string);
 		#endif
 		
 	private:

@@ -28,13 +28,13 @@ class Pintail : public Chimera {
 		~Pintail();
 		
 		int getChimeras(Sequence*);
-		int print(ostream&, ostream&);
+		Sequence* print(ostream&, ostream&);
 		
 		void setCons(string c)		{ consfile = c;  }
 		void setQuantiles(string q) { quanfile = q;  }
 		
 		#ifdef USE_MPI
-		int print(MPI_File&, MPI_File&);
+		Sequence* print(MPI_File&, MPI_File&);
 		#endif
 		
 	private:

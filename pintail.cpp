@@ -249,8 +249,9 @@ int Pintail::doPrep() {
 	}
 }
 //***************************************************************************************************************
-int Pintail::print(ostream& out, ostream& outAcc) {
+Sequence* Pintail::print(ostream& out, ostream& outAcc) {
 	try {
+		
 		int index = ceil(deviation);
 		
 		//is your DE value higher than the 95%
@@ -279,7 +280,7 @@ int Pintail::print(ostream& out, ostream& outAcc) {
 		for (int m = 0; m < expectedDistance.size(); m++) {  out << expectedDistance[m] << '\t';  }
 		out << endl;
 		
-		return 0;
+		return NULL;
 		
 	}
 	catch(exception& e) {
@@ -289,9 +290,9 @@ int Pintail::print(ostream& out, ostream& outAcc) {
 }
 #ifdef USE_MPI
 //***************************************************************************************************************
-int Pintail::print(MPI_File& out, MPI_File& outAcc) {
+Sequence* Pintail::print(MPI_File& out, MPI_File& outAcc) {
 	try {
-		bool results = false;
+		
 		string outputString = "";
 		int index = ceil(deviation);
 		
@@ -319,7 +320,7 @@ int Pintail::print(MPI_File& out, MPI_File& outAcc) {
 			MPI_File_write_shared(outAcc, buf, length, MPI_CHAR, &statusAcc);
 			delete buf;
 
-			results = true;
+			return NULL;
 		}
 		outputString += "Observed\t";
 		
@@ -339,7 +340,7 @@ int Pintail::print(MPI_File& out, MPI_File& outAcc) {
 		MPI_File_write_shared(out, buf2, length, MPI_CHAR, &status);
 		delete buf2;
 		
-		return results;
+		return NULL;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Pintail", "print");

@@ -531,7 +531,6 @@ bool ScriptEngine::getInput(){
 					mout->executing = true;
 					#ifdef USE_MPI
 						int pid, numProcesses;
-						MPI_Status status; 
 						
 						MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
 						MPI_Comm_size(MPI_COMM_WORLD, &numProcesses); 

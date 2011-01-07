@@ -770,7 +770,7 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsi
 
 		MPI_File_open(MPI_COMM_SELF, filename, amode, MPI_INFO_NULL, &outMPI);
 
-		int startTime = time(NULL);
+		
 		
 		string outputString = "";
 		size = 0;
@@ -846,7 +846,7 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsi
 
 		MPI_File_open(MPI_COMM_SELF, filename, amode, MPI_INFO_NULL, &outMPI);
 		
-		int startTime = time(NULL);
+		
 		
 		string outputString = "";
 		size = 0;

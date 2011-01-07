@@ -329,7 +329,7 @@ int FilterSeqsCommand::filterSequences() {
 				
 				string filteredFasta = outputDir + m->getRootName(m->getSimpleName(fastafileNames[s])) + "filter.fasta";
 #ifdef USE_MPI	
-				int pid, start, end, numSeqsPerProcessor, num; 
+				int pid, numSeqsPerProcessor, num; 
 				int tag = 2001;
 				vector<unsigned long int>MPIPos;
 						
@@ -338,7 +338,6 @@ int FilterSeqsCommand::filterSequences() {
 				MPI_Comm_rank(MPI_COMM_WORLD, &pid); //find out who we are
 				
 				MPI_File outMPI;
-				MPI_File tempMPI;
 				MPI_File inMPI;
 				int outMode=MPI_MODE_CREATE|MPI_MODE_WRONLY; 
 				int inMode=MPI_MODE_RDONLY; 

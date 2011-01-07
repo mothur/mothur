@@ -75,7 +75,7 @@ Bellerophon::Bellerophon(string name, bool filterSeqs,  bool c, int win, int inc
 }
 
 //***************************************************************************************************************
-int Bellerophon::print(ostream& out, ostream& outAcc) {
+int Bellerophon::print(ostream& out, ostream& outAcc, string s) {
 	try {
 		int above1 = 0;
 		
@@ -130,7 +130,7 @@ int Bellerophon::print(ostream& out, ostream& outAcc) {
 }
 #ifdef USE_MPI
 //***************************************************************************************************************
-int Bellerophon::print(MPI_File& out, MPI_File& outAcc) {
+int Bellerophon::print(MPI_File& out, MPI_File& outAcc, string s) {
 	try {
 	
 		int pid;
@@ -535,7 +535,6 @@ int Bellerophon::createSparseMatrix(int startSeq, int endSeq, SparseMatrix* spar
 int Bellerophon::generatePreferences(vector<SeqMap> left, vector<SeqMap> right, int mid){
 	try {
 		
-		//float dme = 0.0;
 		SeqMap::iterator itR;
 		SeqMap::iterator itL;
 		

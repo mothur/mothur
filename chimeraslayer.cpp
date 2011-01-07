@@ -13,7 +13,7 @@
 #include "blastdb.hpp"
 
 //***************************************************************************************************************
-ChimeraSlayer::ChimeraSlayer(string file, string temp, string mode, int k, int ms, int mms, int win, float div, 
+ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, string mode, int k, int ms, int mms, int win, float div, 
 int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r) : Chimera()  {  	
 	try {
 		fastafile = file;
@@ -33,6 +33,7 @@ int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int num
 		increment = inc;
 		numWanted = numw;
 		realign = r; 
+		trimChimera = trim;
 	
 		decalc = new DeCalculator();	
 		
@@ -44,7 +45,7 @@ int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int num
 	}
 }
 //***************************************************************************************************************
-ChimeraSlayer::ChimeraSlayer(string file, string temp, string name, string mode, string abunds, int k, int ms, int mms, int win, float div, 
+ChimeraSlayer::ChimeraSlayer(string file, string temp, bool trim, string name, string mode, string abunds, int k, int ms, int mms, int win, float div, 
 							 int minsim, int mincov, int minbs, int minsnp, int par, int it, int inc, int numw, bool r) : Chimera()  {  	
 	try {
 		fastafile = file; templateSeqs = readSeqs(fastafile);
@@ -65,6 +66,7 @@ ChimeraSlayer::ChimeraSlayer(string file, string temp, string name, string mode,
 		numWanted = numw;
 		realign = r; 
 		includeAbunds = abunds;
+		trimChimera = trim;
 		
 		//read name file and create nameMapRank
 		readNameFile(name);
@@ -414,8 +416,11 @@ void ChimeraSlayer::printHeader(ostream& out) {
 	out << "Name\tLeftParent\tRightParent\tDivQLAQRB\tPerIDQLAQRB\tBootStrapA\tDivQLBQRA\tPerIDQLBQRA\tBootStrapB\tFlag\tLeftWindow\tRightWindow\n";
 }
 //***************************************************************************************************************
-int ChimeraSlayer::print(ostream& out, ostream& outAcc) {
+Sequence* ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 	try {
+		Sequence* trim = NULL;
+		if (trimChimera) { trim = new Sequence(trimQuery->getName(), trimQuery->getAligned()); }
+		
 		if (chimeraFlags == "yes") {
 			string chimeraFlag = "no";
 			if(  (chimeraResults[0].bsa >= minBS && chimeraResults[0].divr_qla_qrb >= divR)
@@ -427,6 +432,21 @@ int ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 				if ((chimeraResults[0].bsa >= minBS) || (chimeraResults[0].bsb >= minBS)) {
 					m->mothurOut(querySeq->getName() + "\tyes"); m->mothurOutEndLine();
 					outAcc << querySeq->getName() << endl;
+					
+					if (trimChimera) {  
+						int lengthLeft = spotMap[chimeraResults[0].winLEnd] - spotMap[chimeraResults[0].winLStart];
+						int lengthRight = spotMap[chimeraResults[0].winREnd] - spotMap[chimeraResults[0].winRStart];
+						
+						string newAligned = trim->getAligned();
+
+						if (lengthLeft > lengthRight) { //trim right
+							for (int i = (spotMap[chimeraResults[0].winRStart]-1); i < newAligned.length(); i++) { newAligned[i] = '.'; }
+						}else { //trim left
+							for (int i = 0; i < spotMap[chimeraResults[0].winLEnd]; i++) { newAligned[i] = '.'; }
+						}
+						trim->setAligned(newAligned);
+					}
+						
 				}
 			}
 			
@@ -434,7 +454,7 @@ int ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 			out << endl;
 		}else {  out << querySeq->getName() << "\tno" << endl;  }
 		
-		return 0;
+		return trim;
 		
 	}
 	catch(exception& e) {
@@ -444,12 +464,15 @@ int ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 }
 #ifdef USE_MPI
 //***************************************************************************************************************
-int ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
+Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 	try {
 		MPI_Status status;
 		bool results = false;
 		string outAccString = "";
 		string outputString = "";
+		
+		Sequence* trim = NULL;
+		if (trimChimera) { trim = new Sequence(trimQuery->getName(), trimQuery->getAligned()); }
 		
 		if (chimeraFlags == "yes") {
 			string chimeraFlag = "no";
@@ -471,6 +494,19 @@ int ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 				
 					MPI_File_write_shared(outAcc, buf2, length, MPI_CHAR, &status);
 					delete buf2;
+					
+					if (trimChimera) {  
+						int lengthLeft = spotMap[chimeraResults[0].winLEnd] - spotMap[chimeraResults[0].winLStart];
+						int lengthRight = spotMap[chimeraResults[0].winREnd] - spotMap[chimeraResults[0].winRStart];
+						
+						string newAligned = trim->getAligned();
+						if (lengthLeft > lengthRight) { //trim right
+							for (int i = (spotMap[chimeraResults[0].winRStart]-1); i < newAligned.length(); i++) { newAligned[i] = '.'; }
+						}else { //trim left
+							for (int i = 0; i < (spotMap[chimeraResults[0].winLEnd]-1); i++) { newAligned[i] = '.'; }
+						}
+						trim->setAligned(newAligned);	
+					}
 				}
 			}
 			
@@ -498,7 +534,7 @@ int ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 		}
 		
 		
-		return results;
+		return trim;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraSlayer", "print");
@@ -510,6 +546,8 @@ int ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 //***************************************************************************************************************
 int ChimeraSlayer::getChimeras(Sequence* query) {
 	try {
+		trimQuery = query;
+		
 		chimeraFlags = "no";
 
 		//filter query

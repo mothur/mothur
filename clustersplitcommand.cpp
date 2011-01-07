@@ -380,7 +380,6 @@ int ClusterSplitCommand::execute(){
 					
 			//for each file group figure out which process will complete it
 			//want to divide the load intelligently so the big files are spread between processes
-			int count = 1;
 			for (int i = 0; i < distName.size(); i++) { 
 				int processToAssign = (i+1) % processors; 
 				if (processToAssign == 0) { processToAssign = processors; }
