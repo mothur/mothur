@@ -16,6 +16,7 @@ class SharedListVector;
 class SharedOrderVector;
 class SharedSAbundVector;
 class SharedRAbundVector;
+class SharedRAbundFloatVector;
 
 class DataVector {
 	

@@ -42,8 +42,6 @@ private:
 	void read(string, vector<string>&, vector<vector<double> >&);
 	void recenter(double, vector<vector<double> >, vector<vector<double> >&);
 	void output(string, vector<string>, vector<vector<double> >&, vector<double>);
-	vector< vector<double> > calculateEuclidianDistance(vector<vector<double> >&, int);
-	double calcPearson(vector<vector<double> >&, vector<vector<double> >&);
 	
 };
 	

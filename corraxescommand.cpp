@@ -222,21 +222,20 @@ int CorrAxesCommand::execute(){
 		// use smart distancing to get right sharedRabund and convert to relabund if needed  //
 		/************************************************************************************/
 		if (sharedfile != "") {  
-			getShared(); 
-			if (m->control_pressed) {  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } return 0; }
-			if (lookup[0] == NULL) { m->mothurOut("[ERROR] reading shared file."); m->mothurOutEndLine(); return 0; }
+			InputData* input = new InputData(sharedfile, "sharedfile");
+			getSharedFloat(input); 
+			delete input;
 			
-			//fills lookupFloat with relative abundance values from lookup
-			convertToRelabund();
-			
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
-			
-		}else if (relabundfile != "") { 
-			getSharedFloat(); 
 			if (m->control_pressed) {  for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } return 0; }
 			if (lookupFloat[0] == NULL) { m->mothurOut("[ERROR] reading relabund file."); m->mothurOutEndLine(); return 0; }
 			
-			if (pickedGroups) { eliminateZeroOTUS(lookupFloat); }
+		}else if (relabundfile != "") { 
+			InputData* input = new InputData(relabundfile, "relabund");
+			getSharedFloat(input); 
+			delete input;
+			
+			if (m->control_pressed) {  for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } return 0; }
+			if (lookupFloat[0] == NULL) { m->mothurOut("[ERROR] reading relabund file."); m->mothurOutEndLine(); return 0; }
 			
 		}else if (metadatafile != "") { 
 			getMetadata();  //reads metadata file and store in lookupFloat, saves column headings in metadataLabels for later
@@ -612,89 +611,12 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 	}
 }
 //**********************************************************************************************************************
-int CorrAxesCommand::getShared(){
+int CorrAxesCommand::getSharedFloat(InputData* input){
 	try {
-		InputData* input = new InputData(sharedfile, "sharedfile");
-		lookup = input->getSharedRAbundVectors();
-		string lastLabel = lookup[0]->getLabel();
-		
-		if (label == "") { label = lastLabel; delete input; return 0; }
-		
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> labels; labels.insert(label);
-		set<string> processedLabels;
-		set<string> userLabels = labels;
-		
-		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && (userLabels.size() != 0)) {
-			if (m->control_pressed) {  delete input; return 0;  }
-			
-			if(labels.count(lookup[0]->getLabel()) == 1){
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
-				break;
-			}
-			
-			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookup[0]->getLabel();
-				
-				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
-				lookup = input->getSharedRAbundVectors(lastLabel);
-				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
-				
-				//restore real lastlabel to save below
-				lookup[0]->setLabel(saveLabel);
-				break;
-			}
-			
-			lastLabel = lookup[0]->getLabel();			
-			
-			//get next line to process
-			//prevent memory leak
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
-			lookup = input->getSharedRAbundVectors();
-		}
-		
-		
-		if (m->control_pressed) { delete input; return 0;  }
-		
-		//output error messages about any remaining user labels
-		set<string>::iterator it;
-		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
-			}
-		}
-		
-		//run last label if you need to
-		if (needToRun == true)  {
-			for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {	delete lookup[i];	} } 
-			lookup = input->getSharedRAbundVectors(lastLabel);
-		}	
-		
-		delete input;
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CorrAxesCommand", "getShared");	
-		exit(1);
-	}
-}
-//**********************************************************************************************************************
-int CorrAxesCommand::getSharedFloat(){
-	try {
-		InputData* input = new InputData(relabundfile, "relabund");
 		lookupFloat = input->getSharedRAbundFloatVectors();
 		string lastLabel = lookupFloat[0]->getLabel();
 		
-		if (label == "") { label = lastLabel; delete input; return 0; }
+		if (label == "") { label = lastLabel;  return 0; }
 		
 		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 		set<string> labels; labels.insert(label);
@@ -704,7 +626,7 @@ int CorrAxesCommand::getSharedFloat(){
 		//as long as you are not at the end of the file or done wih the lines you want
 		while((lookupFloat[0] != NULL) && (userLabels.size() != 0)) {
 			
-			if (m->control_pressed) {  delete input; return 0;  }
+			if (m->control_pressed) {  return 0;  }
 			
 			if(labels.count(lookupFloat[0]->getLabel()) == 1){
 				processedLabels.insert(lookupFloat[0]->getLabel());
@@ -735,7 +657,7 @@ int CorrAxesCommand::getSharedFloat(){
 		}
 		
 		
-		if (m->control_pressed) { delete input; return 0;  }
+		if (m->control_pressed) { return 0;  }
 		
 		//output error messages about any remaining user labels
 		set<string>::iterator it;
@@ -756,48 +678,10 @@ int CorrAxesCommand::getSharedFloat(){
 			lookupFloat = input->getSharedRAbundFloatVectors(lastLabel);
 		}	
 		
-		delete input;
 		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "CorrAxesCommand", "getSharedFloat");	
-		exit(1);
-	}
-}
-/*****************************************************************/
-int CorrAxesCommand::convertToRelabund(){
-	try {
-		
-		vector<SharedRAbundFloatVector*> newLookup;
-		for (int i = 0; i < lookup.size(); i++) {
-			SharedRAbundFloatVector* temp = new SharedRAbundFloatVector();
-			temp->setLabel(lookup[i]->getLabel());
-			temp->setGroup(lookup[i]->getGroup());
-			newLookup.push_back(temp);
-		}
-		
-		for (int i = 0; i < lookup.size(); i++) {
-			
-			for (int j = 0; j < lookup[i]->getNumBins(); j++) {
-				
-				if (m->control_pressed) { return 0; }
-				
-				int abund = lookup[i]->getAbundance(j);
-				
-				float relabund = abund / (float) lookup[i]->getNumSeqs();
-				
-				newLookup[i]->push_back(relabund, lookup[i]->getGroup());
-			}
-		}
-		
-		if (pickedGroups) { eliminateZeroOTUS(newLookup); }
-		
-		lookupFloat = newLookup;
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "CorrAxesCommand", "convertToRelabund");	
 		exit(1);
 	}
 }

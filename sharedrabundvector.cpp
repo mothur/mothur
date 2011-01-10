@@ -70,8 +70,7 @@ SharedRAbundVector::SharedRAbundVector(ifstream& f) : DataVector(), maxRank(0), 
 		string holdLabel, nextLabel, groupN;
 		individual newguy;
 		
-		for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
-		lookup.clear();
+		for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }  lookup.clear();
 		
 		if (globaldata->saveNextLabel == "") {  f >> label;  }
 		else { label = globaldata->saveNextLabel; }
@@ -372,10 +371,12 @@ vector<SharedRAbundVector*> SharedRAbundVector::getSharedRAbundVectors(){
 		util = new SharedUtil();
 		
 		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups);
-
+		
+		bool remove = false;
 		for (int i = 0; i < lookup.size(); i++) {
 			//if this sharedrabund is not from a group the user wants then delete it.
 			if (util->isValidGroup(lookup[i]->getGroup(), globaldata->Groups) == false) { 
+				remove = true;
 				delete lookup[i]; lookup[i] = NULL;
 				lookup.erase(lookup.begin()+i); 
 				i--; 
@@ -383,8 +384,85 @@ vector<SharedRAbundVector*> SharedRAbundVector::getSharedRAbundVectors(){
 		}
 		
 		delete util;
+		
+		if (remove) { eliminateZeroOTUS(lookup); }
 	
 		return lookup;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SharedRAbundVector", "getSharedRAbundVectors");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int SharedRAbundVector::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
+		try {
+			
+			vector<SharedRAbundVector*> newLookup;
+			for (int i = 0; i < thislookup.size(); i++) {
+				SharedRAbundVector* temp = new SharedRAbundVector();
+				temp->setLabel(thislookup[i]->getLabel());
+				temp->setGroup(thislookup[i]->getGroup());
+				newLookup.push_back(temp);
+			}
+			
+			//for each bin
+			for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
+				if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
+				
+				//look at each sharedRabund and make sure they are not all zero
+				bool allZero = true;
+				for (int j = 0; j < thislookup.size(); j++) {
+					if (thislookup[j]->getAbundance(i) != 0) { allZero = false;  break;  }
+				}
+				
+				//if they are not all zero add this bin
+				if (!allZero) {
+					for (int j = 0; j < thislookup.size(); j++) {
+						newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
+					}
+				}
+			}
+			
+			for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
+			
+			thislookup = newLookup;
+			
+			return 0;
+			
+		}
+		catch(exception& e) {
+			m->errorOut(e, "SharedRAbundVector", "eliminateZeroOTUS");
+			exit(1);
+		}
+	}
+	
+/***********************************************************************/
+vector<SharedRAbundFloatVector*> SharedRAbundVector::getSharedRAbundFloatVectors(vector<SharedRAbundVector*> thislookup){
+	try {
+		vector<SharedRAbundFloatVector*> newLookupFloat;	
+		for (int i = 0; i < lookup.size(); i++) {
+			SharedRAbundFloatVector* temp = new SharedRAbundFloatVector();
+			temp->setLabel(thislookup[i]->getLabel());
+			temp->setGroup(thislookup[i]->getGroup());
+			newLookupFloat.push_back(temp);
+		}
+		
+		for (int i = 0; i < thislookup.size(); i++) {
+			
+			for (int j = 0; j < thislookup[i]->getNumBins(); j++) {
+				
+				if (m->control_pressed) { return newLookupFloat; }
+				
+				int abund = thislookup[i]->getAbundance(j);
+				
+				float relabund = abund / (float) thislookup[i]->getNumSeqs();
+				
+				newLookupFloat[i]->push_back(relabund, thislookup[i]->getGroup());
+			}
+		}
+		
+		return newLookupFloat;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SharedRAbundVector", "getSharedRAbundVectors");

@@ -11,7 +11,6 @@
  */
 
 #include "command.hpp"
-#include "sharedrabundvector.h"
 #include "sharedrabundfloatvector.h"
 #include "inputdata.h"
 
@@ -47,14 +46,11 @@ private:
 	
 	vector<string> outputNames, Groups;
 	map<string, vector<string> > outputTypes;
-	vector<SharedRAbundVector*> lookup;
 	vector<SharedRAbundFloatVector*> lookupFloat;
 	vector<string> metadataLabels;
 	
-	int getShared();
-	int getSharedFloat();
+	int getSharedFloat(InputData*);
 	int getMetadata();
-	int convertToRelabund();
 	int eliminateZeroOTUS(vector<SharedRAbundFloatVector*>&);
 	map<string, vector<float> > readAxes();
 	int calcPearson(map<string, vector<float> >&, ofstream&);

@@ -275,8 +275,6 @@ int GetRelAbundCommand::execute(){
 
 int GetRelAbundCommand::getRelAbundance(vector<SharedRAbundVector*>& thisLookUp, ofstream& out){
 	try {
-		if (pickedGroups) { eliminateZeroOTUS(thisLookUp); }
-
 		
 		 for (int i = 0; i < thisLookUp.size(); i++) {
 			out << thisLookUp[i]->getLabel() << '\t' << thisLookUp[i]->getGroup() << '\t' << thisLookUp[i]->getNumBins() << '\t';
@@ -319,49 +317,6 @@ int GetRelAbundCommand::getRelAbundance(vector<SharedRAbundVector*>& thisLookUp,
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
-int GetRelAbundCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup) {
-	try {
-		
-		vector<SharedRAbundVector*> newLookup;
-		for (int i = 0; i < thislookup.size(); i++) {
-			SharedRAbundVector* temp = new SharedRAbundVector();
-			temp->setLabel(thislookup[i]->getLabel());
-			temp->setGroup(thislookup[i]->getGroup());
-			newLookup.push_back(temp);
-		}
-		
-		//for each bin
-		for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
-			if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
-		
-			//look at each sharedRabund and make sure they are not all zero
-			bool allZero = true;
-			for (int j = 0; j < thislookup.size(); j++) {
-				if (thislookup[j]->getAbundance(i) != 0) { allZero = false;  break;  }
-			}
-			
-			//if they are not all zero add this bin
-			if (!allZero) {
-				for (int j = 0; j < thislookup.size(); j++) {
-					newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
-				}
-			}
-		}
-
-		for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
-
-		thislookup = newLookup;
-		
-		return 0;
- 
-	}
-	catch(exception& e) {
-		m->errorOut(e, "GetRelAbundCommand", "eliminateZeroOTUS");
-		exit(1);
-	}
-}
-
 //**********************************************************************************************************************
 
 
