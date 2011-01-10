@@ -27,7 +27,7 @@ vector<vector<double> > LinearAlgebra::matrix_mult(vector<vector<double> > first
 		
 		product.resize(first_rows);
 		for(int i=0;i<first_rows;i++){
-			product[i].resize(first_cols);
+			product[i].resize(second_cols);
 		}
 		
 		for(int i=0;i<first_rows;i++){
@@ -172,7 +172,7 @@ int LinearAlgebra::qtli(vector<double>& d, vector<double>& e, vector<vector<doub
 					if(fabs(e[myM])+dd == dd) break;
 				}
 				if(myM != l){
-					if(iter++ == 30) cerr << "Too many iterations in tqli\n";
+					if(iter++ == 3000) cerr << "Too many iterations in tqli\n";
 					g = (d[l+1]-d[l]) / (2.0 * e[l]);
 					r = pythag(g, 1.0);
 					g = d[myM] - d[l] + e[l] / (g + SIGN(r,g));
