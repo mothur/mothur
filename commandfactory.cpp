@@ -105,6 +105,7 @@
 #include "trimflowscommand.h"
 #include "corraxescommand.h"
 #include "shhhercommand.h"
+#include "pcacommand.h"
 
 /*******************************************************/
 
@@ -213,6 +214,7 @@ CommandFactory::CommandFactory(){
 	commands["indicator"]			= "indicator";
 	commands["consensus.seqs"]		= "consensus.seqs";
 	commands["corr.axes"]			= "corr.axes";
+	commands["pca"]					= "pca";
 	commands["pairwise.seqs"]		= "MPIEnabled";
 	commands["pipeline.pds"]		= "MPIEnabled";
 	commands["classify.seqs"]		= "MPIEnabled"; 
@@ -333,7 +335,8 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "phylotype")				{	command = new PhylotypeCommand(optionString);				}
 		else if(commandName == "mgcluster")				{	command = new MGClusterCommand(optionString);				}
 		else if(commandName == "pre.cluster")			{	command = new PreClusterCommand(optionString);				}
-		else if(commandName == "pcoa")					{	command = new PCOACommand(optionString);						}
+		else if(commandName == "pcoa")					{	command = new PCOACommand(optionString);					}
+		else if(commandName == "pca")					{	command = new PCACommand(optionString);						}
 		else if(commandName == "otu.hierarchy")			{	command = new OtuHierarchyCommand(optionString);			}
 		else if(commandName == "set.dir")				{	command = new SetDirectoryCommand(optionString);			}
 		else if(commandName == "set.logfile")			{	command = new SetLogFileCommand(optionString);				}
@@ -457,7 +460,8 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "phylotype")				{	pipecommand = new PhylotypeCommand(optionString);				}
 		else if(commandName == "mgcluster")				{	pipecommand = new MGClusterCommand(optionString);				}
 		else if(commandName == "pre.cluster")			{	pipecommand = new PreClusterCommand(optionString);				}
-		else if(commandName == "pcoa")					{	pipecommand = new PCOACommand(optionString);						}
+		else if(commandName == "pcoa")					{	pipecommand = new PCOACommand(optionString);					}
+		else if(commandName == "pca")					{	pipecommand = new PCACommand(optionString);						}
 		else if(commandName == "otu.hierarchy")			{	pipecommand = new OtuHierarchyCommand(optionString);			}
 		else if(commandName == "set.dir")				{	pipecommand = new SetDirectoryCommand(optionString);			}
 		else if(commandName == "set.logfile")			{	pipecommand = new SetLogFileCommand(optionString);				}
@@ -569,6 +573,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "mgcluster")				{	shellcommand = new MGClusterCommand();				}
 		else if(commandName == "pre.cluster")			{	shellcommand = new PreClusterCommand();				}
 		else if(commandName == "pcoa")					{	shellcommand = new PCOACommand();					}
+		else if(commandName == "pca")					{	shellcommand = new PCACommand();					}
 		else if(commandName == "otu.hierarchy")			{	shellcommand = new OtuHierarchyCommand();			}
 		else if(commandName == "set.dir")				{	shellcommand = new SetDirectoryCommand();			}
 		else if(commandName == "set.logfile")			{	shellcommand = new SetLogFileCommand();				}

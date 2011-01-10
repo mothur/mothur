@@ -75,6 +75,8 @@ private:
 	float numSeqs;
 	string group;
 	int index;	
+	
+	int eliminateZeroOTUS(vector<SharedRAbundFloatVector*>&);
 };
 
 

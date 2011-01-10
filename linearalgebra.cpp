@@ -27,7 +27,7 @@ vector<vector<double> > LinearAlgebra::matrix_mult(vector<vector<double> > first
 		
 		product.resize(first_rows);
 		for(int i=0;i<first_rows;i++){
-			product[i].resize(second_cols);
+			product[i].resize(first_cols);
 		}
 		
 		for(int i=0;i<first_rows;i++){
@@ -230,6 +230,114 @@ int LinearAlgebra::qtli(vector<double>& d, vector<double>& e, vector<vector<doub
 	}
 	catch(exception& e) {
 		m->errorOut(e, "LinearAlgebra", "qtli");
+		exit(1);
+	}
+}
+/*********************************************************************************************************************************/
+vector< vector<double> > LinearAlgebra::calculateEuclidianDistance(vector< vector<double> >& axes, int dimensions){
+	try {
+		//make square matrix
+		vector< vector<double> > dists; dists.resize(axes.size());
+		for (int i = 0; i < dists.size(); i++) {  dists[i].resize(axes.size(), 0.0); }
+		
+		if (dimensions == 1) { //one dimension calc = abs(x-y)
+			
+			for (int i = 0; i < dists.size(); i++) {
+				
+				if (m->control_pressed) { return dists; }
+				
+				for (int j = 0; j < i; j++) {
+					dists[i][j] = abs(axes[i][0] - axes[j][0]);
+					dists[j][i] = dists[i][j];
+				}
+			}
+			
+		}else if (dimensions == 2) { //two dimension calc = sqrt ((x1 - y1)^2 + (x2 - y2)^2)
+			
+			for (int i = 0; i < dists.size(); i++) {
+				
+				if (m->control_pressed) { return dists; }
+				
+				for (int j = 0; j < i; j++) {
+					double firstDim = ((axes[i][0] - axes[j][0]) * (axes[i][0] - axes[j][0]));
+					double secondDim = ((axes[i][1] - axes[j][1]) * (axes[i][1] - axes[j][1]));
+					
+					dists[i][j] = sqrt((firstDim + secondDim));
+					dists[j][i] = dists[i][j];
+				}
+			}
+			
+		}else if (dimensions == 3) { //two dimension calc = sqrt ((x1 - y1)^2 + (x2 - y2)^2 + (x3 - y3)^2)
+			
+			for (int i = 0; i < dists.size(); i++) {
+				
+				if (m->control_pressed) { return dists; }
+				
+				for (int j = 0; j < i; j++) {
+					double firstDim = ((axes[i][0] - axes[j][0]) * (axes[i][0] - axes[j][0]));
+					double secondDim = ((axes[i][1] - axes[j][1]) * (axes[i][1] - axes[j][1]));
+					double thirdDim = ((axes[i][2] - axes[j][2]) * (axes[i][2] - axes[j][2]));
+					
+					dists[i][j] = sqrt((firstDim + secondDim + thirdDim));
+					dists[j][i] = dists[i][j];
+				}
+			}
+			
+		}else { m->mothurOut("[ERROR]: too many dimensions, aborting."); m->mothurOutEndLine(); m->control_pressed = true; }
+		
+		return dists;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "calculateEuclidianDistance");
+		exit(1);
+	}
+}
+/*********************************************************************************************************************************/
+double LinearAlgebra::calcPearson(vector< vector<double> >& euclidDists, vector< vector<double> >& userDists){
+	try {
+		
+		//find average for - X
+		vector<float> averageEuclid; averageEuclid.resize(euclidDists.size(), 0.0);
+		for (int i = 0; i < euclidDists.size(); i++) {
+			for (int j = 0; j < euclidDists[i].size(); j++) {
+				averageEuclid[i] += euclidDists[i][j];  
+			}
+		}
+		for (int i = 0; i < averageEuclid.size(); i++) {  averageEuclid[i] = averageEuclid[i] / (float) euclidDists.size();   }
+		
+		//find average for - Y
+		vector<float> averageUser; averageUser.resize(userDists.size(), 0.0);
+		for (int i = 0; i < userDists.size(); i++) {
+			for (int j = 0; j < userDists[i].size(); j++) {
+				averageUser[i] += userDists[i][j];  
+			}
+		}
+		for (int i = 0; i < averageUser.size(); i++) {  averageUser[i] = averageUser[i] / (float) userDists.size();  }
+		
+		double numerator = 0.0;
+		double denomTerm1 = 0.0;
+		double denomTerm2 = 0.0;
+		
+		for (int i = 0; i < euclidDists.size(); i++) {
+			
+			for (int k = 0; k < i; k++) {
+				
+				float Yi = userDists[i][k];
+				float Xi = euclidDists[i][k];
+				
+				numerator += ((Xi - averageEuclid[k]) * (Yi - averageUser[k]));
+				denomTerm1 += ((Xi - averageEuclid[k]) * (Xi - averageEuclid[k]));
+				denomTerm2 += ((Yi - averageUser[k]) * (Yi - averageUser[k]));
+			}
+		}
+		
+		double denom = (sqrt(denomTerm1) * sqrt(denomTerm2));
+		double r = numerator / denom;
+		
+		return r;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "calculateEuclidianDistance");
 		exit(1);
 	}
 }

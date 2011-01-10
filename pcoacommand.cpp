@@ -30,7 +30,6 @@ PCOACommand::PCOACommand(){
 		vector<string> tempOutNames;
 		outputTypes["pcoa"] = tempOutNames;
 		outputTypes["loadings"] = tempOutNames;
-		outputTypes["corr"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PCOACommand", "PCOACommand");
@@ -102,7 +101,6 @@ PCOACommand::PCOACommand(string option)  {
 			vector<string> tempOutNames;
 			outputTypes["pcoa"] = tempOutNames;
 			outputTypes["loadings"] = tempOutNames;
-			outputTypes["corr"] = tempOutNames;
 			
 			//required parameters
 			phylipfile = validParameter.validFile(parameters, "phylip", true);
@@ -192,11 +190,11 @@ int PCOACommand::execute(){
 			
 			for (int i = 1; i < 4; i++) {
 							
-				vector< vector<double> > EuclidDists = calculateEuclidianDistance(G, i); //G is the pcoa file
+				vector< vector<double> > EuclidDists = linearCalc.calculateEuclidianDistance(G, i); //G is the pcoa file
 				
 				if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
 				
-				double corr = calcPearson(EuclidDists, D); //G is the pcoa file, D is the users distance matrix
+				double corr = linearCalc.calcPearson(EuclidDists, D); //G is the pcoa file, D is the users distance matrix
 				
 				m->mothurOut("Pearson's coefficient using " + toString(i) + " axis: " + toString(corr)); m->mothurOutEndLine();
 				
@@ -213,114 +211,6 @@ int PCOACommand::execute(){
 	}
 	catch(exception& e) {
 		m->errorOut(e, "PCOACommand", "execute");
-		exit(1);
-	}
-}
-/*********************************************************************************************************************************/
-vector< vector<double> > PCOACommand::calculateEuclidianDistance(vector< vector<double> >& axes, int dimensions){
-	try {
-		//make square matrix
-		vector< vector<double> > dists; dists.resize(axes.size());
-		for (int i = 0; i < dists.size(); i++) {  dists[i].resize(axes.size(), 0.0); }
-			
-		if (dimensions == 1) { //one dimension calc = abs(x-y)
-			
-			for (int i = 0; i < dists.size(); i++) {
-				
-				if (m->control_pressed) { return dists; }
-				
-				for (int j = 0; j < i; j++) {
-					dists[i][j] = abs(axes[i][0] - axes[j][0]);
-					dists[j][i] = dists[i][j];
-				}
-			}
-			
-		}else if (dimensions == 2) { //two dimension calc = sqrt ((x1 - y1)^2 + (x2 - y2)^2)
-			
-			for (int i = 0; i < dists.size(); i++) {
-				
-				if (m->control_pressed) { return dists; }
-				
-				for (int j = 0; j < i; j++) {
-					double firstDim = ((axes[i][0] - axes[j][0]) * (axes[i][0] - axes[j][0]));
-					double secondDim = ((axes[i][1] - axes[j][1]) * (axes[i][1] - axes[j][1]));
-
-					dists[i][j] = sqrt((firstDim + secondDim));
-					dists[j][i] = dists[i][j];
-				}
-			}
-			
-		}else if (dimensions == 3) { //two dimension calc = sqrt ((x1 - y1)^2 + (x2 - y2)^2 + (x3 - y3)^2)
-			
-			for (int i = 0; i < dists.size(); i++) {
-				
-				if (m->control_pressed) { return dists; }
-				
-				for (int j = 0; j < i; j++) {
-					double firstDim = ((axes[i][0] - axes[j][0]) * (axes[i][0] - axes[j][0]));
-					double secondDim = ((axes[i][1] - axes[j][1]) * (axes[i][1] - axes[j][1]));
-					double thirdDim = ((axes[i][2] - axes[j][2]) * (axes[i][2] - axes[j][2]));
-					
-					dists[i][j] = sqrt((firstDim + secondDim + thirdDim));
-					dists[j][i] = dists[i][j];
-				}
-			}
-			
-		}else { m->mothurOut("[ERROR]: too many dimensions, aborting."); m->mothurOutEndLine(); m->control_pressed = true; }
-		
-		return dists;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PCOACommand", "calculateEuclidianDistance");
-		exit(1);
-	}
-}
-/*********************************************************************************************************************************/
-double PCOACommand::calcPearson(vector< vector<double> >& euclidDists, vector< vector<double> >& userDists){
-	try {
-		
-		//find average for - X
-		vector<float> averageEuclid; averageEuclid.resize(euclidDists.size(), 0.0);
-		for (int i = 0; i < euclidDists.size(); i++) {
-			for (int j = 0; j < euclidDists[i].size(); j++) {
-				averageEuclid[i] += euclidDists[i][j];  
-			}
-		}
-		for (int i = 0; i < averageEuclid.size(); i++) {  averageEuclid[i] = averageEuclid[i] / (float) euclidDists.size();   }
-		
-		//find average for - Y
-		vector<float> averageUser; averageUser.resize(userDists.size(), 0.0);
-		for (int i = 0; i < userDists.size(); i++) {
-			for (int j = 0; j < userDists[i].size(); j++) {
-				averageUser[i] += userDists[i][j];  
-			}
-		}
-		for (int i = 0; i < averageUser.size(); i++) {  averageUser[i] = averageUser[i] / (float) userDists.size();  }
-		
-		double numerator = 0.0;
-		double denomTerm1 = 0.0;
-		double denomTerm2 = 0.0;
-		
-		for (int i = 0; i < euclidDists.size(); i++) {
-			
-			for (int k = 0; k < i; k++) {
-				
-				float Yi = userDists[i][k];
-				float Xi = euclidDists[i][k];
-					
-				numerator += ((Xi - averageEuclid[k]) * (Yi - averageUser[k]));
-				denomTerm1 += ((Xi - averageEuclid[k]) * (Xi - averageEuclid[k]));
-				denomTerm2 += ((Yi - averageUser[k]) * (Yi - averageUser[k]));
-			}
-		}
-		
-		double denom = (sqrt(denomTerm1) * sqrt(denomTerm2));
-		double r = numerator / denom;
-		
-		return r;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PCOACommand", "calculateEuclidianDistance");
 		exit(1);
 	}
 }

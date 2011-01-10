@@ -13,6 +13,7 @@
 #include "datavector.hpp"
 #include "sharedordervector.h"
 #include "sharedsabundvector.h"
+#include "sharedrabundfloatvector.h"
 #include "rabundvector.hpp"
 #include "groupmap.h"
 
@@ -69,6 +70,7 @@ public:
 	SharedSAbundVector getSharedSAbundVector();
 	SharedRAbundVector getSharedRAbundVector();
 	vector<SharedRAbundVector*> getSharedRAbundVectors();
+	vector<SharedRAbundFloatVector*> getSharedRAbundFloatVectors(vector<SharedRAbundVector*>);
 	
 private:
 	vector<individual>  data; 
@@ -80,6 +82,8 @@ private:
 	int numSeqs;
 	string group;
 	int index;	
+	
+	int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
 };
 
 

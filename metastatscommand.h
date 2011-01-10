@@ -54,7 +54,6 @@ private:
 	float threshold;
 	
 	int process(vector<SharedRAbundVector*>&);
-	int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
 	int driver(int, int, vector<SharedRAbundVector*>&);
 };
 

@@ -43,7 +43,6 @@ private:
 	map<string, vector<string> > outputTypes;
 	
 	int getRelAbundance(vector<SharedRAbundVector*>&, ofstream&);
-	int eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup);
 
 };
 

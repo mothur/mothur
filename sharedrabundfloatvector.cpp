@@ -288,17 +288,21 @@ vector<SharedRAbundFloatVector*> SharedRAbundFloatVector::getSharedRAbundFloatVe
 		util = new SharedUtil();
 		
 		util->setGroups(globaldata->Groups, globaldata->gGroupmap->namesOfGroups);
-
+		
+		bool remove = false;
 		for (int i = 0; i < lookup.size(); i++) {
 			//if this sharedrabund is not from a group the user wants then delete it.
 			if (util->isValidGroup(lookup[i]->getGroup(), globaldata->Groups) == false) { 
 				delete lookup[i]; lookup[i] = NULL;
 				lookup.erase(lookup.begin()+i); 
 				i--; 
+				remove = true;
 			}
 		}
 		
 		delete util;
+		
+		if (remove) { eliminateZeroOTUS(lookup); }
 	
 		return lookup;
 	}
@@ -409,6 +413,47 @@ OrderVector SharedRAbundFloatVector::getOrderVector(map<string,int>* nameMap = N
 		exit(1);
 	}
 }
-
+//**********************************************************************************************************************
+int SharedRAbundFloatVector::eliminateZeroOTUS(vector<SharedRAbundFloatVector*>& thislookup) {
+	try {
+		
+		vector<SharedRAbundFloatVector*> newLookup;
+		for (int i = 0; i < thislookup.size(); i++) {
+			SharedRAbundFloatVector* temp = new SharedRAbundFloatVector();
+			temp->setLabel(thislookup[i]->getLabel());
+			temp->setGroup(thislookup[i]->getGroup());
+			newLookup.push_back(temp);
+		}
+		
+		//for each bin
+		for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
+			if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
+			
+			//look at each sharedRabund and make sure they are not all zero
+			bool allZero = true;
+			for (int j = 0; j < thislookup.size(); j++) {
+				if (thislookup[j]->getAbundance(i) != 0) { allZero = false;  break;  }
+			}
+			
+			//if they are not all zero add this bin
+			if (!allZero) {
+				for (int j = 0; j < thislookup.size(); j++) {
+					newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
+				}
+			}
+		}
+		
+		for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
+		
+		thislookup = newLookup;
+		
+		return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SharedRAbundFloatVector", "eliminateZeroOTUS");
+		exit(1);
+	}
+}
 /***********************************************************************/
 
