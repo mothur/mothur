@@ -31,15 +31,12 @@ public:
 private:
 
 	bool abort, metric;
-	string phylipfile, columnfile, namefile, format, filename, fbase, outputDir;
-	float cutoff, precision;
+	string phylipfile, filename, fbase, outputDir;
 	vector<string> outputNames;
 	map<string, vector<string> > outputTypes;
 	LinearAlgebra linearCalc;
 	
 	void get_comment(istream&, char, char);
-	int read_phylip(istream&, int, vector<string>&, vector<vector<double> >&);
-	void read(string, vector<string>&, vector<vector<double> >&);
 	void recenter(double, vector<vector<double> >, vector<vector<double> >&);
 	void output(string, vector<string>, vector<vector<double> >&, vector<double>);
 	

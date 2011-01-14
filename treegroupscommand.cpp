@@ -669,6 +669,21 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
 						}
 					}
 					
+					//createdistance file from simMatrix
+					/*string o = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + treeCalculators[i]->getName() + "." + thisLookup[0]->getLabel() + ".dist";
+					ofstream outDist;
+					m->openOutputFile(o, outDist);
+					outDist << simMatrix.size() << endl;
+					for (int k = 0; k < simMatrix.size(); k++) {
+						outDist << thisLookup[k]->getGroup() << '\t';
+						for (int l = 0; l < k; l++) {
+							outDist << (1.0-simMatrix[k][l]) << '\t';
+						}
+						outDist << endl;
+					}
+					outDist.close();*/
+
+					
 					if (m->control_pressed) { return 1; }
 					//creates tree from similarity matrix and write out file
 					createTree();

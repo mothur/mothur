@@ -47,7 +47,7 @@ vector<int> DistanceDB::findClosestSequences(Sequence* query, int numWanted){
 		vector<int> topMatches;
 		bool templateSameLength = true;
 		string sequence = query->getAligned();
-		vector<seqDist> dists;
+		vector<seqDist> dists; 
 		
 		searchScore = -1.0;
 	
@@ -56,24 +56,46 @@ vector<int> DistanceDB::findClosestSequences(Sequence* query, int numWanted){
 		if (sequence.length() != templateSeqsLength) { templateSameLength = false; }
 		
 		if (templateSameLength && templateAligned) {
-			//calc distance from this sequence to every sequence in the template
-			for (int i = 0; i < data.size(); i++) {
-				distCalculator->calcDist(*query, data[i]);
-				float dist = distCalculator->getDist();
+			if (numWanted != 1) {
 				
-				//save distance to each template sequence
-				seqDist temp(-1, i, dist);
-				dists.push_back(temp);
-			}
-			
-			sort(dists.begin(), dists.end(), compareSequenceDistance);  //sorts by distance lowest to highest
-			
-			//save distance of best match
-			searchScore = dists[0].dist;
-			
-			//fill topmatches with numwanted closest sequences indexes
-			for (int i = 0; i < numWanted; i++) {
-				topMatches.push_back(dists[i].seq2);
+				dists.resize(data.size());
+				
+				//calc distance from this sequence to every sequence in the template
+				for (int i = 0; i < data.size(); i++) {
+					distCalculator->calcDist(*query, data[i]);
+					float dist = distCalculator->getDist();
+					
+					//save distance to each template sequence
+					dists[i].seq1 = -1;
+					dists[i].seq2 = i;
+					dists[i].dist = dist;
+				}
+				
+				sort(dists.begin(), dists.end(), compareSequenceDistance);  //sorts by distance lowest to highest
+				
+				//save distance of best match
+				searchScore = dists[0].dist;
+				
+				//fill topmatches with numwanted closest sequences indexes
+				for (int i = 0; i < numWanted; i++) {
+					topMatches.push_back(dists[i].seq2);
+				}
+			}else {
+				int bestIndex = 0;
+				float smallDist = 100000;
+				for (int i = 0; i < data.size(); i++) {
+					distCalculator->calcDist(*query, data[i]);
+					float dist = distCalculator->getDist();
+					
+					//are you smaller?
+					if (dist < smallDist) {
+						bestIndex = i;
+						smallDist = dist;
+					}
+				}
+				
+				searchScore = smallDist;
+				topMatches.push_back(bestIndex);
 			}
 		
 		}else{

@@ -16,6 +16,7 @@ QualityScores::QualityScores(){
 		m = MothurOut::getInstance();
 		seqName = "";
 		seqLength = -1;
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "QualityScores", "QualityScores");
@@ -197,9 +198,12 @@ bool QualityScores::stripQualThreshold(Sequence& sequence, double qThreshold){
 			}
 		}
 		
+		//every score passed
+		if (end == (seqLength-1)) { end = seqLength; }
+		
 		sequence.setUnaligned(rawSequence.substr(0,end));
 		trimQScores(-1, end);
-	
+		
 		return 1;
 	}
 	catch(exception& e) {
@@ -237,8 +241,10 @@ bool QualityScores::stripQualRollingAverage(Sequence& sequence, double qThreshol
 		
 		if(end == -1){	end = seqLength;	}
 		
+		
 		sequence.setUnaligned(rawSequence.substr(0,end));
 		trimQScores(-1, end);
+		
 		
 		return 1;
 	}
@@ -285,6 +291,7 @@ bool QualityScores::stripQualWindowAverage(Sequence& sequence, int stepSize, int
 		
 		
 		if(end == -1){	end = seqLength;	}
+		
 		
 		sequence.setUnaligned(rawSequence.substr(0,end));
 		trimQScores(-1, end);

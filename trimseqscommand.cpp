@@ -556,16 +556,16 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 
 				
 				if(qFileName != ""){
+					int origLength = currSeq.getNumBases();
 					
 					if(qThreshold != 0)			{	success = currQual.stripQualThreshold(currSeq, qThreshold);			}
 					else if(qAverage != 0)		{	success = currQual.cullQualAverage(currSeq, qAverage);				}
 					else if(qRollAverage != 0)	{	success = currQual.stripQualRollingAverage(currSeq, qRollAverage);	}
 					else if(qWindowAverage != 0){	success = currQual.stripQualWindowAverage(currSeq, qWindowStep, qWindowSize, qWindowAverage);	}
 					else						{	success = 1;				}
-
-//					if (qtrim == 1 && (origSeq.length() != currSeq.getUnaligned().length())) { 
-//						success = 0; //if you don't want to trim and the sequence does not meet quality requirements, move to scrap
-//					}
+					
+					//you don't want to trim, if it fails above then scrap it
+					if ((!qtrim) && (origLength != currSeq.getNumBases())) { success = 0; }
 					
 					if(!success)				{	trashCode += 'q';	}
 				}				
