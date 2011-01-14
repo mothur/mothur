@@ -9,6 +9,7 @@
  */
 
 #include "pcoacommand.h"
+#include "readphylipvector.h"
 
 //**********************************************************************************************************************
 vector<string> PCOACommand::getValidParameters(){	
@@ -160,7 +161,8 @@ int PCOACommand::execute(){
 	
 		fbase = outputDir + m->getRootName(m->getSimpleName(filename));
 		
-		read(filename, names, D);
+		ReadPhylipVector readFile(filename);
+		names = readFile.read(D);
 		
 		if (m->control_pressed) { return 0; }
    	
@@ -227,103 +229,6 @@ void PCOACommand::get_comment(istream& f, char begin, char end){
 		exit(1);
 	}
 }	
-
-/*********************************************************************************************************************************/
-
-int PCOACommand::read_phylip(istream& f, int square_m, vector<string>& name_list, vector<vector<double> >& d){
-	try {
-		//     int count1=0;
-		//     int count2=0;
-		
-		int rank;
-		f >> rank;
-		
-		name_list.resize(rank);
-		d.resize(rank);
-		if(square_m == 1){
-			for(int i=0;i<rank;i++)
-				d[i].resize(rank);
-			for(int i=0;i<rank;i++) {
-				f >> name_list[i];
-				//			cout << i << "\t" << name_list[i] << endl;
-				for(int j=0;j<rank;j++) {
-					if (m->control_pressed) { return 0; }
-					
-					f >> d[i][j];
-					if (d[i][j] == -0.0000)
-						d[i][j] = 0.0000;
-				}
-			}
-		}
-		else if(square_m == 2){
-			for(int i=0;i<rank;i++){
-				d[i].resize(rank);
-			}
-			d[0][0] = 0.0000;
-			f >> name_list[0];
-			for(int i=1;i<rank;i++){
-				f >> name_list[i];
-				d[i][i]=0.0000;
-				for(int j=0;j<i;j++){
-					if (m->control_pressed) { return 0; }
-					f >> d[i][j];
-					if (d[i][j] == -0.0000)
-						d[i][j] = 0.0000;
-					d[j][i]=d[i][j];
-				}
-			}
-		}
-		
-		return 0;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PCOACommand", "read_phylip");
-		exit(1);
-	}
-
-}
-
-/*********************************************************************************************************************************/
-
-void PCOACommand::read(string fname, vector<string>& names, vector<vector<double> >& D){
-	try {
-		ifstream f;
-		m->openInputFile(fname, f);
-			
-		//check whether matrix is square
-		char d;
-		int q = 1;
-		int numSeqs;
-		string name;
-		
-		f >> numSeqs >> name; 
-		
-		while((d=f.get()) != EOF){
-			
-			//is d a number meaning its square
-			if(isalnum(d)){ 
-				q = 1; 
-				break; 
-			}
-			
-			//is d a line return meaning its lower triangle
-			if(d == '\n'){
-				q = 2;
-				break;
-			}
-		}
-		f.close();
-		
-		//reopen to get back to beginning
-		m->openInputFile(fname, f);			
-		read_phylip(f, q, names, D);
-	}
-		catch(exception& e) {
-		m->errorOut(e, "PCOACommand", "read");
-		exit(1);
-	}
-}
-
 /*********************************************************************************************************************************/
 
 void PCOACommand::recenter(double offset, vector<vector<double> > D, vector<vector<double> >& G){

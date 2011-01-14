@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		8DD76FB00486AB0100D96B5E /* mothur.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6A0FF2C0290799A04C91782 /* mothur.1 */; };
 		A70332B712D3A13400761E33 /* makefile in Sources */ = {isa = PBXBuildFile; fileRef = A70332B512D3A13400761E33 /* makefile */; };
+		A713EBAC12DC7613000092AC /* readphylipvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A713EBAB12DC7613000092AC /* readphylipvector.cpp */; };
+		A713EBED12DC7C5E000092AC /* nmdscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A713EBEC12DC7C5E000092AC /* nmdscommand.cpp */; };
 		A7E9B88112D37EC400DA6239 /* ace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B64F12D37EC300DA6239 /* ace.cpp */; };
 		A7E9B88212D37EC400DA6239 /* aligncommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65112D37EC300DA6239 /* aligncommand.cpp */; };
 		A7E9B88312D37EC400DA6239 /* alignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65312D37EC300DA6239 /* alignment.cpp */; };
@@ -300,6 +302,10 @@
 /* Begin PBXFileReference section */
 		8DD76FB20486AB0100D96B5E /* Mothur */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Mothur; sourceTree = BUILT_PRODUCTS_DIR; };
 		A70332B512D3A13400761E33 /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
+		A713EBAA12DC7613000092AC /* readphylipvector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = readphylipvector.h; sourceTree = "<group>"; };
+		A713EBAB12DC7613000092AC /* readphylipvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readphylipvector.cpp; sourceTree = "<group>"; };
+		A713EBEB12DC7C5E000092AC /* nmdscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nmdscommand.h; sourceTree = "<group>"; };
+		A713EBEC12DC7C5E000092AC /* nmdscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nmdscommand.cpp; sourceTree = "<group>"; };
 		A7E9B64F12D37EC300DA6239 /* ace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ace.cpp; sourceTree = "<group>"; };
 		A7E9B65012D37EC300DA6239 /* ace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ace.h; sourceTree = "<group>"; };
 		A7E9B65112D37EC300DA6239 /* aligncommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = aligncommand.cpp; sourceTree = "<group>"; };
@@ -1108,6 +1114,8 @@
 				A7E9B76912D37EC400DA6239 /* nocommands.cpp */,
 				A7E9B76B12D37EC400DA6239 /* normalizesharedcommand.cpp */,
 				A7E9B76C12D37EC400DA6239 /* normalizesharedcommand.h */,
+				A713EBEB12DC7C5E000092AC /* nmdscommand.h */,
+				A713EBEC12DC7C5E000092AC /* nmdscommand.cpp */,
 				A7E9B77912D37EC400DA6239 /* otuhierarchycommand.cpp */,
 				A7E9B77A12D37EC400DA6239 /* otuhierarchycommand.h */,
 				A7E9B77D12D37EC400DA6239 /* pairwiseseqscommand.cpp */,
@@ -1521,6 +1529,8 @@
 				A7E9B7BE12D37EC400DA6239 /* readphylip.h */,
 				A7E9B7BF12D37EC400DA6239 /* readtree.cpp */,
 				A7E9B7C012D37EC400DA6239 /* readtree.h */,
+				A713EBAA12DC7613000092AC /* readphylipvector.h */,
+				A713EBAB12DC7613000092AC /* readphylipvector.cpp */,
 				A7E9B84312D37EC400DA6239 /* splitmatrix.cpp */,
 				A7E9B84412D37EC400DA6239 /* splitmatrix.h */,
 			);
@@ -1868,6 +1878,8 @@
 				A70332B712D3A13400761E33 /* makefile in Sources */,
 				A7FC480E12D788F20055BC5C /* linearalgebra.cpp in Sources */,
 				A7FC486712D795D60055BC5C /* pcacommand.cpp in Sources */,
+				A713EBAC12DC7613000092AC /* readphylipvector.cpp in Sources */,
+				A713EBED12DC7C5E000092AC /* nmdscommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

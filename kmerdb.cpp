@@ -75,24 +75,39 @@ vector<int> KmerDB::findClosestSequences(Sequence* candidateSeq, int num){
 			}
 			timesKmerFound[kmerNumber] = 1;						//	ok, we've seen the kmer now
 		}
-	
-		vector<seqMatch> seqMatches;
-		for(int i=0;i<numSeqs;i++){		
-			seqMatch temp(i, matches[i]);
-			seqMatches.push_back(temp);
+		
+		if (num != 1) {
+			vector<seqMatch> seqMatches; seqMatches.resize(numSeqs);
+			for(int i=0;i<numSeqs;i++){		
+				seqMatches[i].seq = i;
+				seqMatches[i].match = matches[i];
+			}
+			
+			//sorts putting largest matches first
+			sort(seqMatches.begin(), seqMatches.end(), compareSeqMatches);
+			
+			searchScore = seqMatches[0].match;
+			searchScore = 100 * searchScore / (float) numKmers;		//	return the Sequence object corresponding to the db
+		
+			//save top matches
+			for (int i = 0; i < num; i++) {
+				topMatches.push_back(seqMatches[i].seq);
+			}
+		}else{
+			int bestIndex = 0;
+			int bestMatch = -1;
+			for(int i=0;i<numSeqs;i++){	
+				
+				if (matches[i] > bestMatch) {
+					bestIndex = i;
+					bestMatch = matches[i];
+				}
+			}
+			
+			searchScore = bestMatch;
+			searchScore = 100 * searchScore / (float) numKmers;		//	return the Sequence object corresponding to the db
+			topMatches.push_back(bestIndex);
 		}
-		
-		//sorts putting largest matches first
-		sort(seqMatches.begin(), seqMatches.end(), compareSeqMatches);
-		
-		searchScore = seqMatches[0].match;
-		searchScore = 100 * searchScore / (float) numKmers;		//	return the Sequence object corresponding to the db
-	
-		//save top matches
-		for (int i = 0; i < num; i++) {
-			topMatches.push_back(seqMatches[i].seq);
-		}
-		
 		return topMatches;		
 	}
 	catch(exception& e) {

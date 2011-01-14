@@ -190,6 +190,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 			
 			accnosfile2 = validParameter.validFile(parameters, "accnos2", true);
 			if (accnosfile2 == "not open") { abort = true; }
+			if (accnosfile2 == "not found") { accnosfile2 = ""; }
 			
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }

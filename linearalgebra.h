@@ -21,7 +21,8 @@ public:
 	vector<vector<double> > matrix_mult(vector<vector<double> >, vector<vector<double> >);
 	int tred2(vector<vector<double> >&, vector<double>&, vector<double>&);
 	int qtli(vector<double>&, vector<double>&, vector<vector<double> >&);
-	vector< vector<double> > calculateEuclidianDistance(vector<vector<double> >&, int);
+	vector< vector<double> > calculateEuclidianDistance(vector<vector<double> >&, int); //pass in axes and number of dimensions
+	vector< vector<double> > calculateEuclidianDistance(vector<vector<double> >&); //pass in axes
 	double calcPearson(vector<vector<double> >&, vector<vector<double> >&);
 	
 private:

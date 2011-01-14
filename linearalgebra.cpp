@@ -234,6 +234,7 @@ int LinearAlgebra::qtli(vector<double>& d, vector<double>& e, vector<vector<doub
 	}
 }
 /*********************************************************************************************************************************/
+//groups by dimension
 vector< vector<double> > LinearAlgebra::calculateEuclidianDistance(vector< vector<double> >& axes, int dimensions){
 	try {
 		//make square matrix
@@ -252,38 +253,70 @@ vector< vector<double> > LinearAlgebra::calculateEuclidianDistance(vector< vecto
 				}
 			}
 			
-		}else if (dimensions == 2) { //two dimension calc = sqrt ((x1 - y1)^2 + (x2 - y2)^2)
+		}else if (dimensions > 1) { //two dimension calc = sqrt ((x1 - y1)^2 + (x2 - y2)^2)...
 			
 			for (int i = 0; i < dists.size(); i++) {
 				
 				if (m->control_pressed) { return dists; }
 				
 				for (int j = 0; j < i; j++) {
-					double firstDim = ((axes[i][0] - axes[j][0]) * (axes[i][0] - axes[j][0]));
-					double secondDim = ((axes[i][1] - axes[j][1]) * (axes[i][1] - axes[j][1]));
+					double sum = 0.0;
+					for (int k = 0; k < dimensions; k++) {
+						sum += ((axes[i][k] - axes[j][k]) * (axes[i][k] - axes[j][k]));
+					}
 					
-					dists[i][j] = sqrt((firstDim + secondDim));
+					dists[i][j] = sqrt(sum);
 					dists[j][i] = dists[i][j];
 				}
 			}
 			
-		}else if (dimensions == 3) { //two dimension calc = sqrt ((x1 - y1)^2 + (x2 - y2)^2 + (x3 - y3)^2)
+		}
+		
+		return dists;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "calculateEuclidianDistance");
+		exit(1);
+	}
+}
+/*********************************************************************************************************************************/
+//returns groups by dimensions from dimensions by groups
+vector< vector<double> > LinearAlgebra::calculateEuclidianDistance(vector< vector<double> >& axes){
+	try {
+		//make square matrix
+		vector< vector<double> > dists; dists.resize(axes[0].size());
+		for (int i = 0; i < dists.size(); i++) {  dists[i].resize(axes[0].size(), 0.0); }
+		
+		if (axes.size() == 1) { //one dimension calc = abs(x-y)
 			
 			for (int i = 0; i < dists.size(); i++) {
 				
 				if (m->control_pressed) { return dists; }
 				
 				for (int j = 0; j < i; j++) {
-					double firstDim = ((axes[i][0] - axes[j][0]) * (axes[i][0] - axes[j][0]));
-					double secondDim = ((axes[i][1] - axes[j][1]) * (axes[i][1] - axes[j][1]));
-					double thirdDim = ((axes[i][2] - axes[j][2]) * (axes[i][2] - axes[j][2]));
-					
-					dists[i][j] = sqrt((firstDim + secondDim + thirdDim));
+					dists[i][j] = abs(axes[0][i] - axes[0][j]);
 					dists[j][i] = dists[i][j];
 				}
 			}
 			
-		}else { m->mothurOut("[ERROR]: too many dimensions, aborting."); m->mothurOutEndLine(); m->control_pressed = true; }
+		}else if (axes.size() > 1) { //two dimension calc = sqrt ((x1 - y1)^2 + (x2 - y2)^2)...
+			
+			for (int i = 0; i < dists[0].size(); i++) {
+				
+				if (m->control_pressed) { return dists; }
+				
+				for (int j = 0; j < i; j++) {
+					double sum = 0.0;
+					for (int k = 0; k < axes.size(); k++) {
+						sum += ((axes[k][i] - axes[k][j]) * (axes[k][i] - axes[k][j]));
+					}
+					
+					dists[i][j] = sqrt(sum);
+					dists[j][i] = dists[i][j];
+				}
+			}
+			
+		}
 		
 		return dists;
 	}
