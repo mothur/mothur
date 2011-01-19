@@ -13,7 +13,7 @@
 //**********************************************************************************************************************
 vector<string> NMDSCommand::getValidParameters(){	
 	try {
-		string Array[] =  {"phylip","axes","mindim","maxdim","iters","maxiters","trace","epsilon","outputdir","inputdir"};
+		string Array[] =  {"phylip","axes","mindim","maxdim","iters","maxiters","epsilon","outputdir","inputdir"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
@@ -70,7 +70,7 @@ NMDSCommand::NMDSCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"phylip","axes","mindim","maxdim","iters","maxiters","trace","epsilon","outputdir", "inputdir"};
+			string Array[] =  {"phylip","axes","mindim","maxdim","iters","maxiters","epsilon","outputdir", "inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -140,9 +140,6 @@ NMDSCommand::NMDSCommand(string option)  {
 			temp = validParameter.validFile(parameters, "epsilon", false);	if (temp == "not found") {	temp = "0.000000000001";	}
 			convert(temp, epsilon); 
 			
-			temp = validParameter.validFile(parameters, "trace", false);	if (temp == "not found") {	temp = "F";	}
-			trace = m->isTrue(temp);
-			
 			if (mindim < 1) { m->mothurOut("mindim must be at least 1."); m->mothurOutEndLine(); abort = true; }
 			if (maxdim < mindim) { m->mothurOut("maxdim must be greater than mindim."); m->mothurOutEndLine(); abort = true; }
 		}
@@ -157,7 +154,7 @@ NMDSCommand::NMDSCommand(string option)  {
 void NMDSCommand::help(){
 	try {
 		m->mothurOut("The nmds command is modelled after the nmds code written in R by Sarah Goslee, using Non-metric multidimensional scaling function using the majorization algorithm from Borg & Groenen 1997, Modern Multidimensional Scaling."); m->mothurOutEndLine();
-		m->mothurOut("The nmds command parameters are phylip, axes, mindim, maxdim, maxiters, iters, epsilon and trace."); m->mothurOutEndLine();
+		m->mothurOut("The nmds command parameters are phylip, axes, mindim, maxdim, maxiters, iters and epsilon."); m->mothurOutEndLine();
 		m->mothurOut("The phylip parameter allows you to enter your distance file."); m->mothurOutEndLine();
 		m->mothurOut("The axes parameter allows you to enter a file containing a starting configuration."); m->mothurOutEndLine();
 		m->mothurOut("The maxdim parameter allows you to select how maximum dimensions to use. Default=2"); m->mothurOutEndLine();
@@ -165,7 +162,6 @@ void NMDSCommand::help(){
 		m->mothurOut("The maxiters parameter allows you to select the maximum number of iters to try with each random configuration. Default=500"); m->mothurOutEndLine();
 		m->mothurOut("The iters parameter allows you to select the number of random configuration to try. Default=10"); m->mothurOutEndLine();
 		m->mothurOut("The epsilon parameter allows you to select set an acceptable stopping point. Default=1e-12."); m->mothurOutEndLine();
-		m->mothurOut("The trace parameter allows you to see the output after each iter. Default=F"); m->mothurOutEndLine();
 		m->mothurOut("Example nmds(phylip=yourDistanceFile).\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. phylip), '=' and parameters (i.e.yourDistanceFile).\n\n");
 	}
@@ -217,7 +213,7 @@ int NMDSCommand::execute(){
 			out2 << "Iter\tStress\tCorr" << endl;
 			
 			for (int j = 0; j < iters; j++) {
-				if (trace) { m->mothurOut(toString(j+1)); m->mothurOutEndLine(); }
+				m->mothurOut(toString(j+1)); m->mothurOutEndLine(); 
 				
 				//get configuration - either randomly generate or resize to this dimension
 				vector< vector<double> > thisConfig;
@@ -281,8 +277,6 @@ vector< vector<double> > NMDSCommand::nmdsCalc(vector< vector<double> >& matrix,
 		double stress2 = calculateStress(matrix, euclid);
 		stress1 = stress2 + 1.0 + epsilon;
 		
-		if (trace) { m->mothurOutEndLine(); m->mothurOut("Iter\tStress"); m->mothurOutEndLine(); }
-		
 		int count = 0;
 		while ((count < maxIters) && (abs(stress1 - stress2) > epsilon)) {
 			count++;
@@ -323,9 +317,6 @@ vector< vector<double> > NMDSCommand::nmdsCalc(vector< vector<double> >& matrix,
 			euclid = linearCalc.calculateEuclidianDistance(newConfig);
 			
 			stress2 = calculateStress(matrix, euclid);
-			
-			if (trace) { m->mothurOut(count + "\t" + toString(stress1)); m->mothurOutEndLine(); }
-			
 		}
 		
 		return newConfig;
@@ -558,253 +549,7 @@ vector< vector<double> > NMDSCommand::readAxes(vector<string> names){
 		exit(1);
 	}
 }
-/**********************************************************************************************************************
- vector< vector<double> > NMDSCommand::calculateStressGradientVector(vector<seqDist>& eDists, vector<seqDist>& D, double rawStress, double stress, vector< vector<double> >& axes) {
- try {
- vector< vector<double> > gradient; gradient.resize(dimension);
- for (int i = 0; i < gradient.size(); i++) { gradient[i].resize(axes[0].size(), 0.0); }
- 
- double sumDij = 0.0;
- for (int i = 0; i < eDists.size(); i++) {  sumDij += (eDists[i].dist * eDists[i].dist); }
- 
- for (int i = 0; i < eDists.size(); i++) {
- 
- for (int j = 0; j < dimension; j++) {
- 
- if (m->control_pressed) { return gradient; }
- 
- double firstTerm1 = (stress / rawStress) * (eDists[i].dist - D[i].dist);
- double firstTerm2 = (stress / sumDij) * eDists[i].dist;
- double firstTerm = firstTerm1 - firstTerm2;
- 
- float r = (dimension-1.0);
- double temp = 1.0 / (pow(eDists[i].dist, r));
- float absTemp = abs(axes[j][eDists[i].seq1] - axes[j][eDists[i].seq2]);
- double secondTerm = pow(absTemp, r) * temp; 
- 
- double sigNum = 1.0;
- if ((axes[j][eDists[i].seq1] - axes[j][eDists[i].seq2]) == 0) { sigNum = 0.0; }
- else if ((axes[j][eDists[i].seq1] - axes[j][eDists[i].seq2]) < 0) { sigNum = -1.0; }
- 
- double results = (firstTerm * secondTerm * sigNum);
- cout << i << '\t' << j << '\t' << "results = " << results << endl;	
- gradient[j][eDists[i].seq1] += results;
- gradient[j][eDists[i].seq2] -= results;
- }
- }
- 
- return gradient;
- }
- catch(exception& e) {
- m->errorOut(e, "NMDSCommand", "calculateStressGradientVector");
- exit(1);
- }
- }
- //**********************************************************************************************************************
- double NMDSCommand::calculateMagnitude(vector< vector<double> >& gradient) {
- try {
- double magnitude = 0.0;
- 
- double sum = 0.0;
- for (int i = 0; i < gradient.size(); i++) {
- for (int j = 0; j < gradient[i].size(); j++) {
- sum += (gradient[i][j] * gradient[i][j]);
- }
- }
- 
- magnitude = sqrt(((1.0/(float)gradient[0].size()) * sum));
- 
- return magnitude;
- }
- catch(exception& e) {
- m->errorOut(e, "NMDSCommand", "calculateMagnitude");
- exit(1);
- }
- }
- //**********************************************************************************************************************
- //described in Kruskal paper page 121 + 122
- double NMDSCommand::calculateStep(vector< vector<double> >& prevGrad, vector< vector<double> >& grad, vector<double>& prevStress) {
- try {
- double newStep = step;
- 
- //calc the cos theta
- double sumNum = 0.0;
- double sumDenom1 = 0.0;
- double sumDenom2 = 0.0;
- for (int i = 0; i < prevGrad.size(); i++) {
- for (int j = 0; j < prevGrad[i].size(); j++) {
- sumDenom1 += (grad[i][j] * grad[i][j]);
- sumDenom2 += (prevGrad[i][j] * prevGrad[i][j]);
- sumNum += (grad[i][j] * prevGrad[i][j]);
- }
- }
- 
- double cosTheta = sumNum / (sqrt(sumDenom1) * sqrt(sumDenom2));
- cosTheta *= cosTheta;
- 
- //calc angle factor
- double angle = pow(4.0, cosTheta);
- 
- //calc 5 step ratio
- double currentStress = prevStress[prevStress.size()-1];
- double lastStress = prevStress[0];
- if (prevStress.size() > 1) {  lastStress = prevStress[prevStress.size()-2];		}
- double fivePrevStress = prevStress[0];
- if (prevStress.size() > 5) {  fivePrevStress = prevStress[prevStress.size()-6]; }
- 
- double fiveStepRatio = min(1.0, (currentStress / fivePrevStress));
- 
- //calc relaxation factor
- double relaxation = 1.3 / (1.0 + pow(fiveStepRatio, 5.0));
- 
- //calc good luck factor
- double goodLuck = min(1.0, (currentStress / lastStress));
- 
- //calc newStep
- //cout << "\ncos = " << cosTheta << " step = " << step << " angle = " << angle << " relaxation = " << relaxation << " goodluck = " << goodLuck << endl;
- newStep = step * angle * relaxation * goodLuck;
- 
- return newStep;
- }
- catch(exception& e) {
- m->errorOut(e, "NMDSCommand", "calculateStep");
- exit(1);
- }
- }
- //**********************************************************************************************************************
- vector< vector<double> > NMDSCommand::calculateNewConfiguration(double magnitude, vector< vector<double> >& axes, vector< vector<double> >& gradient) {
- try {
- 
- vector< vector<double> > newAxes = axes;
- 
- for (int i = 0; i < newAxes.size(); i++) {
- 
- if (m->control_pressed) { return newAxes; }
- 
- for (int j = 0; j < newAxes[i].size(); j++) {
- newAxes[i][j] = axes[i][j] + ((step / magnitude) * gradient[i][j]);
- }
- }
- 
- return newAxes;
- }
- catch(exception& e) {
- m->errorOut(e, "NMDSCommand", "calculateNewConfiguration");
- exit(1);
- }
- }*/
-/**********************************************************************************************************************
- //adjust eDists so that it creates monotonically increasing series of succesive values that increase or stay the same, but never decrease
- vector<seqDist> NMDSCommand::satisfyMonotonicity(vector<seqDist> eDists, vector<int> partitions) {
- try {
- 
- //find averages of each partitions
- vector<double> sums; sums.resize(partitions.size(), 0.0);
- vector<int> sizes; sizes.resize(partitions.size(), 0);
- 
- for (int i = 0; i < partitions.size(); i++) {
- //i is not the last one
- int start = partitions[i];
- int end;
- if (i != (partitions.size()-1)) {  end = partitions[i+1];   }
- else{	end = eDists.size();	}
- 
- for (int j = start; j < end; j++) {   sums[i] += eDists[j].dist;  }
- 
- sizes[i] = (end - start);
- }
- 
- 
- vector<seqDist> D = eDists;
- 
- //i represents the "active block"
- int i = 0;
- while (i < partitions.size()) {
- 
- if (m->control_pressed) { return D; }
- 
- bool upActive = true;
- bool upSatisfied = false;
- bool downSatisfied = false;
- 
- //while we are not done with this block
- while ((!upSatisfied) || (!downSatisfied)) {
- 
- if (upActive) {
- 
- //are we are upSatisfied? - is the average of the next block greater than mine?
- if (i != (partitions.size()-1))  { //if we are the last guy then we are upsatisfied
- if ((sums[i+1]/(float)sizes[i+1]) >= (sums[i]/(float)sizes[i])) {
- upSatisfied = true;
- upActive = false;
- }else {
- //find new weighted average
- double newSum = sums[i] + sums[i+1];
- 
- //merge blocks - putting everything in i
- sums[i] = newSum;
- sizes[i] += sizes[i+1];
- partitions[i] = partitions[i+1];
- 
- sums.erase(sums.begin()+(i+1));
- sizes.erase(sizes.begin()+(i+1));
- partitions.erase(partitions.begin()+(i+1));
- 
- upActive = false;
- }
- }else { upSatisfied = true; upActive = false; }
- 
- }else { //downActive
- 
- //are we are DownSatisfied? - is the average of the previous block less than mine?
- if (i != 0)  { //if we are the first guy then we are downSatisfied
- if ((sums[i-1]/(float)sizes[i-1]) <= (sums[i]/(float)sizes[i])) {
- downSatisfied = true;
- upActive = true;
- }else {
- //find new weighted average
- double newSum = sums[i] + sums[i-1];;
- 
- //merge blocks - putting everything in i-1
- sums[i-1] = newSum;
- sizes[i-1] += sizes[i];
- 
- sums.erase(sums.begin()+i);
- sizes.erase(sizes.begin()+i);
- partitions.erase(partitions.begin()+i);
- i--;
- 
- upActive = true;
- }
- }else { downSatisfied = true; upActive = true; }					
- }
- }
- 
- i++; // go to next block
- }
- 
- //sanity check - for rounding errors
- vector<double> averages; averages.resize(sums.size(), 0.0);
- for (int i = 0; i < sums.size(); i++) { averages[i] = sums[i] / (float) sizes[i];	}
- for (int i = 0; i < averages.size(); i++) { if (averages[i+1] < averages[i]) {  averages[i+1] = averages[i]; }	}
- 
- //fill D
- int placeHolder = 0;
- for (int i = 0; i < averages.size(); i++) {
- for (int j = 0; j < sizes[i]; j++) {
- D[placeHolder].dist = averages[i];
- placeHolder++;
- }
- }
- 
- return D;
- }
- catch(exception& e) {
- m->errorOut(e, "NMDSCommand", "satisfyMonotonicity");
- exit(1);
- }
- }*/
+/**********************************************************************************************************************/
 
-//**********************************************************************************************************************
 
 

@@ -42,7 +42,7 @@ public:
 	
 private:
 	
-	bool abort, trace;
+	bool abort;
 	string phylipfile, outputDir, axesfile;
 	int maxdim, mindim, maxIters, iters;
 	double epsilon;
@@ -56,14 +56,7 @@ private:
 	int normalizeConfiguration(vector< vector<double> >&, int, int);
 	double calculateStress(vector< vector<double> >&, vector< vector<double> >&);
 	vector< vector<double> > readAxes(vector<string>);
-	int output(vector< vector<double> >&, vector<string>&, ofstream&);
-
-	//vector<seqDist> satisfyMonotonicity(vector<seqDist>, vector<int>);
-	//vector< vector<double> > calculateStressGradientVector(vector<seqDist>&, vector<seqDist>&, double, double, vector< vector<double> >&);
-	//double calculateMagnitude(vector< vector<double> >&);
-	//double calculateStep(vector< vector<double> >&, vector< vector<double> >&, vector<double>&);
-	//vector< vector<double> > calculateNewConfiguration(double, vector< vector<double> >&, vector< vector<double> >&);
-	
+	int output(vector< vector<double> >&, vector<string>&, ofstream&);	
 };
 
 /*****************************************************************/
