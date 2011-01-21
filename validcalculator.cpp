@@ -447,6 +447,9 @@ void ValidCalculators::initialVennShared() {
 /********************************************************************/
 void ValidCalculators::initialTreeGroups() {
 	try {	
+		treegroup["sharedsobs"]				= "sharedsobs";
+		treegroup["sharedchao"]				= "sharedchao";
+		treegroup["sharedace"]				= "sharedace";
 		treegroup["jabund"]					= "jabund";
 		treegroup["sorabund"]				= "sorabund";
 		treegroup["jclass"]					= "jclass";
@@ -455,8 +458,35 @@ void ValidCalculators::initialTreeGroups() {
 		treegroup["sorest"]					= "sorest";
 		treegroup["thetayc"]				= "thetayc";
 		treegroup["thetan"]					= "thetan";
+		treegroup["kstest"]					= "kstest";
+		treegroup["whittaker"]				= "whittaker";
+		treegroup["sharednseqs"]			= "sharednseqs";
+		treegroup["ochiai"]					= "ochiai";
+		treegroup["anderberg"]				= "anderberg";
+		treegroup["kulczynski"]				= "kulczynski";
+		treegroup["kulczynskicody"]			= "kulczynskicody";
+		treegroup["lennon"]					= "lennon";
 		treegroup["morisitahorn"]			= "morisitahorn";
 		treegroup["braycurtis"]				= "braycurtis";
+		treegroup["odum"]					= "odum";
+		treegroup["canberra"]				= "canberra";
+		treegroup["structeuclidean"]		= "structeuclidean";
+		treegroup["structchord"]			= "structchord";
+		treegroup["hellinger"]				= "hellinger";
+		treegroup["manhattan"]				= "manhattan";
+		treegroup["structpearson"]			= "structpearson";
+		treegroup["structkulczynski"]		= "structkulczynski";
+		treegroup["structchi2"]				= "structchi2";
+		treegroup["soergel"]				= "soergel";
+		treegroup["spearman"]				= "spearman";
+		treegroup["speciesprofile"]			= "speciesprofile";
+		treegroup["hamming"]				= "hamming";
+		treegroup["gower"]					= "gower";
+		treegroup["memchi2"]				= "memchi2";
+		treegroup["memchord"]				= "memchord";
+		treegroup["memeuclidean"]			= "memeuclidean";
+		treegroup["mempearson"]				= "mempearson";
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ValidCalculator", "initialTreeGroups");

@@ -107,6 +107,7 @@
 #include "shhhercommand.h"
 #include "pcacommand.h"
 #include "nmdscommand.h"
+#include "removerarecommand.h"
 
 /*******************************************************/
 
@@ -217,6 +218,7 @@ CommandFactory::CommandFactory(){
 	commands["corr.axes"]			= "corr.axes";
 	commands["pca"]					= "pca";
 	commands["nmds"]				= "nmds";
+	commands["remove.rare"]			= "remove.rare";
 	commands["pairwise.seqs"]		= "MPIEnabled";
 	commands["pipeline.pds"]		= "MPIEnabled";
 	commands["classify.seqs"]		= "MPIEnabled"; 
@@ -376,6 +378,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "indicator")				{	command = new IndicatorCommand(optionString);				}
 		else if(commandName == "consensus.seqs")		{	command = new ConsensusSeqsCommand(optionString);			}
 		else if(commandName == "corr.axes")				{	command = new CorrAxesCommand(optionString);				}
+		else if(commandName == "remove.rare")			{	command = new RemoveRareCommand(optionString);				}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -501,6 +504,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "indicator")				{	pipecommand = new IndicatorCommand(optionString);				}
 		else if(commandName == "consensus.seqs")		{	pipecommand = new ConsensusSeqsCommand(optionString);			}
 		else if(commandName == "corr.axes")				{	pipecommand = new CorrAxesCommand(optionString);				}
+		else if(commandName == "remove.rare")			{	pipecommand = new RemoveRareCommand(optionString);				}
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -614,6 +618,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "indicator")				{	shellcommand = new IndicatorCommand();				}
 		else if(commandName == "consensus.seqs")		{	shellcommand = new ConsensusSeqsCommand();			}
 		else if(commandName == "corr.axes")				{	shellcommand = new CorrAxesCommand();				}
+		else if(commandName == "remove.rare")			{	shellcommand = new RemoveRareCommand();				}
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

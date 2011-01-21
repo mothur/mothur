@@ -10,8 +10,6 @@
  *
  */
 
-
-
 #include "command.hpp"
 #include "groupmap.h"
 #include "listvector.hpp"

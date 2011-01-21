@@ -8,6 +8,10 @@
  */
 
 #include "treegroupscommand.h"
+#include "sharedsobscollectsummary.h"
+#include "sharedchao1.h"
+#include "sharedace.h"
+#include "sharednseqs.h"
 #include "sharedjabund.h"
 #include "sharedsorabund.h"
 #include "sharedjclass.h"
@@ -16,8 +20,35 @@
 #include "sharedsorest.h"
 #include "sharedthetayc.h"
 #include "sharedthetan.h"
+#include "sharedkstest.h"
+#include "whittaker.h"
+#include "sharedochiai.h"
+#include "sharedanderbergs.h"
+#include "sharedkulczynski.h"
+#include "sharedkulczynskicody.h"
+#include "sharedlennon.h"
 #include "sharedmorisitahorn.h"
 #include "sharedbraycurtis.h"
+#include "sharedjackknife.h"
+#include "whittaker.h"
+#include "odum.h"
+#include "canberra.h"
+#include "structeuclidean.h"
+#include "structchord.h"
+#include "hellinger.h"
+#include "manhattan.h"
+#include "structpearson.h"
+#include "soergel.h"
+#include "spearman.h"
+#include "structkulczynski.h"
+#include "structchi2.h"
+#include "speciesprofile.h"
+#include "hamming.h"
+#include "gower.h"
+#include "memchi2.h"
+#include "memchord.h"
+#include "memeuclidean.h"
+#include "mempearson.h"
 
 //**********************************************************************************************************************
 vector<string> TreeGroupCommand::getValidParameters(){	
@@ -210,7 +241,13 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 					int i;
 					for (i=0; i<Estimators.size(); i++) {
 						if (validCalculator->isValidCalculator("treegroup", Estimators[i]) == true) { 
-							if (Estimators[i] == "jabund") { 	
+							if (Estimators[i] == "sharedsobs") { 
+								treeCalculators.push_back(new SharedSobsCS());
+							}else if (Estimators[i] == "sharedchao") { 
+								treeCalculators.push_back(new SharedChao1());
+							}else if (Estimators[i] == "sharedace") { 
+								treeCalculators.push_back(new SharedAce());
+							}else if (Estimators[i] == "jabund") { 	
 								treeCalculators.push_back(new JAbund());
 							}else if (Estimators[i] == "sorabund") { 
 								treeCalculators.push_back(new SorAbund());
@@ -226,10 +263,62 @@ TreeGroupCommand::TreeGroupCommand(string option)  {
 								treeCalculators.push_back(new ThetaYC());
 							}else if (Estimators[i] == "thetan") { 
 								treeCalculators.push_back(new ThetaN());
+							}else if (Estimators[i] == "kstest") { 
+								treeCalculators.push_back(new KSTest());
+							}else if (Estimators[i] == "sharednseqs") { 
+								treeCalculators.push_back(new SharedNSeqs());
+							}else if (Estimators[i] == "ochiai") { 
+								treeCalculators.push_back(new Ochiai());
+							}else if (Estimators[i] == "anderberg") { 
+								treeCalculators.push_back(new Anderberg());
+							}else if (Estimators[i] == "kulczynski") { 
+								treeCalculators.push_back(new Kulczynski());
+							}else if (Estimators[i] == "kulczynskicody") { 
+								treeCalculators.push_back(new KulczynskiCody());
+							}else if (Estimators[i] == "lennon") { 
+								treeCalculators.push_back(new Lennon());
 							}else if (Estimators[i] == "morisitahorn") { 
 								treeCalculators.push_back(new MorHorn());
 							}else if (Estimators[i] == "braycurtis") { 
 								treeCalculators.push_back(new BrayCurtis());
+							}else if (Estimators[i] == "whittaker") { 
+								treeCalculators.push_back(new Whittaker());
+							}else if (Estimators[i] == "odum") { 
+								treeCalculators.push_back(new Odum());
+							}else if (Estimators[i] == "canberra") { 
+								treeCalculators.push_back(new Canberra());
+							}else if (Estimators[i] == "structeuclidean") { 
+								treeCalculators.push_back(new StructEuclidean());
+							}else if (Estimators[i] == "structchord") { 
+								treeCalculators.push_back(new StructChord());
+							}else if (Estimators[i] == "hellinger") { 
+								treeCalculators.push_back(new Hellinger());
+							}else if (Estimators[i] == "manhattan") { 
+								treeCalculators.push_back(new Manhattan());
+							}else if (Estimators[i] == "structpearson") { 
+								treeCalculators.push_back(new StructPearson());
+							}else if (Estimators[i] == "soergel") { 
+								treeCalculators.push_back(new Soergel());
+							}else if (Estimators[i] == "spearman") { 
+								treeCalculators.push_back(new Spearman());
+							}else if (Estimators[i] == "structkulczynski") { 
+								treeCalculators.push_back(new StructKulczynski());
+							}else if (Estimators[i] == "speciesprofile") { 
+								treeCalculators.push_back(new SpeciesProfile());
+							}else if (Estimators[i] == "hamming") { 
+								treeCalculators.push_back(new Hamming());
+							}else if (Estimators[i] == "structchi2") { 
+								treeCalculators.push_back(new StructChi2());
+							}else if (Estimators[i] == "gower") { 
+								treeCalculators.push_back(new Gower());
+							}else if (Estimators[i] == "memchi2") { 
+								treeCalculators.push_back(new MemChi2());
+							}else if (Estimators[i] == "memchord") { 
+								treeCalculators.push_back(new MemChord());
+							}else if (Estimators[i] == "memeuclidean") { 
+								treeCalculators.push_back(new MemEuclidean());
+							}else if (Estimators[i] == "mempearson") { 
+								treeCalculators.push_back(new MemPearson());
 							}
 						}
 					}

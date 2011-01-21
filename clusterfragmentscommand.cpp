@@ -166,7 +166,7 @@ void ClusterFragmentsCommand::help(){
 		m->mothurOut("The cluster.fragments command parameters are fasta, name, diffs and percent. The fasta parameter is required. \n");
 		m->mothurOut("The names parameter allows you to give a list of seqs that are identical. This file is 2 columns, first column is name or representative sequence, second column is a list of its identical sequences separated by commas.\n");
 		m->mothurOut("The diffs parameter allows you to set the number of differences allowed, default=0. \n");
-		m->mothurOut("The percent parameter allows you to set percentage of differences allowed, default=0. percent=2 means if the number of difference is less than two percent of the length of the fragment, then cluster.\n");
+		m->mothurOut("The percent parameter allows you to set percentage of differences allowed, default=0. percent=2 means if the number of difference is less than or equal to two percent of the length of the fragment, then cluster.\n");
 		m->mothurOut("You may use diffs and percent at the same time to say something like: If the number or differences is greater than 1 or more than 2% of the fragment length, don't merge. \n");
 		m->mothurOut("The cluster.fragments command should be in the following format: \n");
 		m->mothurOut("cluster.fragments(fasta=yourFastaFile, names=yourNamesFile) \n");

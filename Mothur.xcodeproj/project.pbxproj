@@ -11,6 +11,7 @@
 		A70332B712D3A13400761E33 /* makefile in Sources */ = {isa = PBXBuildFile; fileRef = A70332B512D3A13400761E33 /* makefile */; };
 		A713EBAC12DC7613000092AC /* readphylipvector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A713EBAB12DC7613000092AC /* readphylipvector.cpp */; };
 		A713EBED12DC7C5E000092AC /* nmdscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A713EBEC12DC7C5E000092AC /* nmdscommand.cpp */; };
+		A727864412E9E28C00F86ABA /* removerarecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A727864312E9E28C00F86ABA /* removerarecommand.cpp */; };
 		A7E9B88112D37EC400DA6239 /* ace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B64F12D37EC300DA6239 /* ace.cpp */; };
 		A7E9B88212D37EC400DA6239 /* aligncommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65112D37EC300DA6239 /* aligncommand.cpp */; };
 		A7E9B88312D37EC400DA6239 /* alignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65312D37EC300DA6239 /* alignment.cpp */; };
@@ -306,6 +307,8 @@
 		A713EBAB12DC7613000092AC /* readphylipvector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = readphylipvector.cpp; sourceTree = "<group>"; };
 		A713EBEB12DC7C5E000092AC /* nmdscommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nmdscommand.h; sourceTree = "<group>"; };
 		A713EBEC12DC7C5E000092AC /* nmdscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nmdscommand.cpp; sourceTree = "<group>"; };
+		A727864212E9E28C00F86ABA /* removerarecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = removerarecommand.h; sourceTree = "<group>"; };
+		A727864312E9E28C00F86ABA /* removerarecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removerarecommand.cpp; sourceTree = "<group>"; };
 		A7E9B64F12D37EC300DA6239 /* ace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ace.cpp; sourceTree = "<group>"; };
 		A7E9B65012D37EC300DA6239 /* ace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ace.h; sourceTree = "<group>"; };
 		A7E9B65112D37EC300DA6239 /* aligncommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = aligncommand.cpp; sourceTree = "<group>"; };
@@ -1156,6 +1159,8 @@
 				A7E9B7C612D37EC400DA6239 /* removelineagecommand.h */,
 				A7E9B7C712D37EC400DA6239 /* removeotuscommand.cpp */,
 				A7E9B7C812D37EC400DA6239 /* removeotuscommand.h */,
+				A727864212E9E28C00F86ABA /* removerarecommand.h */,
+				A727864312E9E28C00F86ABA /* removerarecommand.cpp */,
 				A7E9B7C912D37EC400DA6239 /* removeseqscommand.cpp */,
 				A7E9B7CA12D37EC400DA6239 /* removeseqscommand.h */,
 				A7E9B7CD12D37EC400DA6239 /* reversecommand.cpp */,
@@ -1880,6 +1885,7 @@
 				A7FC486712D795D60055BC5C /* pcacommand.cpp in Sources */,
 				A713EBAC12DC7613000092AC /* readphylipvector.cpp in Sources */,
 				A713EBED12DC7C5E000092AC /* nmdscommand.cpp in Sources */,
+				A727864412E9E28C00F86ABA /* removerarecommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
