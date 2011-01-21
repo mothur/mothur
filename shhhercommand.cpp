@@ -838,7 +838,7 @@ void ShhherCommand::getJointLookUp(){
 		for(int i=0;i<NUMBINS;i++){
 			for(int j=0;j<NUMBINS;j++){		
 				
-				double minSum = 10000000000;
+				double minSum = 100000000;
 				
 				for(int k=0;k<HOMOPS;k++){
 					double sum = singleLookUp[k * NUMBINS + i] + singleLookUp[k * NUMBINS + j];
@@ -857,9 +857,11 @@ void ShhherCommand::getJointLookUp(){
 
 /**************************************************************************************************/
 
-float ShhherCommand::getProbIntensity(int intIntensity){                          
+double ShhherCommand::getProbIntensity(int intIntensity){                          
 	try{
-		double minNegLogProb = 10000000000; 
+
+		double minNegLogProb = 100000000; 
+
 		
 		for(int i=0;i<HOMOPS;i++){//loop signal strength
 			float negLogProb = singleLookUp[i * NUMBINS + intIntensity];
