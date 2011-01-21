@@ -30,6 +30,7 @@ NMDSCommand::NMDSCommand(){
 		vector<string> tempOutNames;
 		outputTypes["nmds"] = tempOutNames;
 		outputTypes["stress"] = tempOutNames;
+		outputTypes["iters"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "NMDSCommand", "NMDSCommand");
@@ -108,6 +109,7 @@ NMDSCommand::NMDSCommand(string option)  {
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["nmds"] = tempOutNames;
+			outputTypes["iters"] = tempOutNames;
 			outputTypes["stress"] = tempOutNames;
 			
 			//required parameters
@@ -193,24 +195,27 @@ int NMDSCommand::execute(){
 		vector< vector<double> > axes;
 		if (axesfile != "") {  axes = readAxes(names);		}
 		
+		string outputFileName = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "nmds.iters";
+		string stressFileName = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "stress.nmds";
+		outputNames.push_back(outputFileName); outputTypes["iters"].push_back(outputFileName);
+		outputNames.push_back(stressFileName); outputTypes["stress"].push_back(stressFileName);
+		
+		ofstream out, out2;
+		m->openOutputFile(outputFileName, out);
+		m->openOutputFile(stressFileName, out2);
+		
+		out2.setf(ios::fixed, ios::floatfield);
+		out2.setf(ios::showpoint);
+		out.setf(ios::fixed, ios::floatfield);
+		out.setf(ios::showpoint);
+		
+		out2 << "Dimension\tIter\tStress\tCorr" << endl;
+		
+		double bestStress = 10000000;
+		vector< vector<double> > bestConfig;
+		
 		for (int i = mindim; i <= maxdim; i++) {
 			m->mothurOut("Processing Dimension: " + toString(i)); m->mothurOutEndLine();
-			
-			string outputFileName = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "dim" + toString(i) + ".nmds";
-			string stressFileName = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "dim" + toString(i) + ".stress.nmds";
-			outputNames.push_back(outputFileName); outputTypes["nmds"].push_back(outputFileName);
-			outputNames.push_back(stressFileName); outputTypes["stress"].push_back(stressFileName);
-			
-			ofstream out, out2;
-			m->openOutputFile(outputFileName, out);
-			m->openOutputFile(stressFileName, out2);
-			
-			out2.setf(ios::fixed, ios::floatfield);
-			out2.setf(ios::showpoint);
-			out.setf(ios::fixed, ios::floatfield);
-			out.setf(ios::showpoint);
-			
-			out2 << "Iter\tStress\tCorr" << endl;
 			
 			for (int j = 0; j < iters; j++) {
 				m->mothurOut(toString(j+1)); m->mothurOutEndLine(); 
@@ -231,24 +236,46 @@ int NMDSCommand::execute(){
 				if (m->control_pressed) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	remove(outputNames[k].c_str());	} return 0; }
 				
 				//calc correlation between original distances and euclidean distances from this config
-				double corr = linearCalc.calcPearson(matrix, newEuclid);
+				double corr = linearCalc.calcPearson(newEuclid, matrix);
 				corr *= corr;
 				if (m->control_pressed) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	remove(outputNames[k].c_str());	} return 0; }
 				
 				//output results
 				out << "Config" << (j+1) << '\t';
-				for (int k = 0; k < i; k++) { out << "X" << (k+1) << '\t'; }
+				for (int k = 0; k < i; k++) { out << "axis" << (k+1) << '\t'; }
 				out << endl;
-				out2 << (j+1) << '\t' << stress << '\t' << corr << endl;
+				out2 << i << '\t' << (j+1) << '\t' << stress << '\t' << corr << endl;
 				
 				output(endConfig, names, out);
 				
+				//save best
+				if (stress < bestStress) {
+					bestStress = stress;
+					bestConfig = endConfig;
+				}
+				
 				if (m->control_pressed) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	remove(outputNames[k].c_str());	} return 0; }
-
 			}
-			
-			out.close(); out2.close();
 		}
+		
+		out.close(); out2.close();
+		
+		//output best config
+		string BestFileName = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "nmds.axes";
+		outputNames.push_back(BestFileName); outputTypes["nmds"].push_back(BestFileName);
+		
+		ofstream outBest;
+		m->openOutputFile(BestFileName, outBest);
+		outBest.setf(ios::fixed, ios::floatfield);
+		outBest.setf(ios::showpoint);
+		
+		outBest << '\t';
+		for (int k = 0; k < bestConfig.size(); k++) { outBest << "axis" << (k+1) << '\t'; }
+		outBest << endl;
+		
+		output(bestConfig, names, outBest);
+		
+		outBest.close();
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());	} return 0; }
 		
