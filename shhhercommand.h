@@ -70,7 +70,7 @@ private:
 	void getJointLookUp();
 	void getFlowData();
 	void getUniques();
-	float getProbIntensity(int);
+	double getProbIntensity(int);
 	float calcPairwiseDist(int, int);
 	void flowDistParentFork(string, int, int);
 	
