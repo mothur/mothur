@@ -326,59 +326,31 @@ vector< vector<double> > LinearAlgebra::calculateEuclidianDistance(vector< vecto
 	}
 }
 /*********************************************************************************************************************************/
+//assumes both matrices are square and the same size
 double LinearAlgebra::calcPearson(vector< vector<double> >& euclidDists, vector< vector<double> >& userDists){
 	try {
 		
-	/*	euclidDists.clear();
-		userDists.clear();
-		
-		euclidDists.resize(1);
-		userDists.resize(1);
-		
-		userDists[0].push_back(0.3070833);
-		userDists[0].push_back(0.3244475);
-		userDists[0].push_back(0.6055993);
-		userDists[0].push_back(0.3372481);
-		userDists[0].push_back(0.9151715);
-		userDists[0].push_back(0.6182255);
-		userDists[0].push_back(0.7748142);
-		userDists[0].push_back(0.08554735);
-		userDists[0].push_back(0.6343481);
-		userDists[0].push_back(0.4049274);
-		
-		euclidDists[0].push_back(0.3342815);
-		euclidDists[0].push_back(0.3173829);
-		euclidDists[0].push_back(0.6852404);
-		euclidDists[0].push_back(0.7819186);
-		euclidDists[0].push_back(0.5705242);
-		euclidDists[0].push_back(0.8007263);
-		euclidDists[0].push_back(0.8561724);
-		euclidDists[0].push_back(0.4901089);
-		euclidDists[0].push_back(0.7027247);
-		euclidDists[0].push_back(0.7669696);*/
-		
-		
 		//find average for - X
 		int count = 0;
-		vector<float> averageEuclid; averageEuclid.resize(euclidDists.size(), 0.0);
+		float averageEuclid = 0.0; 
 		for (int i = 0; i < euclidDists.size(); i++) {
-			for (int j = 0; j < euclidDists[i].size(); j++) {
-				averageEuclid[i] += euclidDists[i][j];  
+			for (int j = 0; j < i; j++) {
+				averageEuclid += euclidDists[i][j];  
 				count++;
 			}
 		}
-		for (int i = 0; i < averageEuclid.size(); i++) {  averageEuclid[i] = averageEuclid[i] / (float) count;   }
+		averageEuclid = averageEuclid / (float) count;   
 			
 		//find average for - Y
 		count = 0;
-		vector<float> averageUser; averageUser.resize(userDists.size(), 0.0);
+		float averageUser = 0.0; 
 		for (int i = 0; i < userDists.size(); i++) {
-			for (int j = 0; j < userDists[i].size(); j++) {
-				averageUser[i] += userDists[i][j]; 
+			for (int j = 0; j < i; j++) {
+				averageUser += userDists[i][j]; 
 				count++;
 			}
 		}
-		for (int i = 0; i < averageUser.size(); i++) {  averageUser[i] = averageUser[i] / (float) count;  }
+		averageUser = averageUser / (float) count;  
 
 		double numerator = 0.0;
 		double denomTerm1 = 0.0;
@@ -386,20 +358,20 @@ double LinearAlgebra::calcPearson(vector< vector<double> >& euclidDists, vector<
 		
 		for (int i = 0; i < euclidDists.size(); i++) {
 			
-			for (int k = 0; k < euclidDists[i].size(); k++) {
+			for (int k = 0; k < i; k++) { //just lt dists
 				
 				float Yi = userDists[i][k];
 				float Xi = euclidDists[i][k];
 				
-				numerator += ((Xi - averageEuclid[i]) * (Yi - averageUser[i]));
-				denomTerm1 += ((Xi - averageEuclid[i]) * (Xi - averageEuclid[i]));
-				denomTerm2 += ((Yi - averageUser[i]) * (Yi - averageUser[i]));
+				numerator += ((Xi - averageEuclid) * (Yi - averageUser));
+				denomTerm1 += ((Xi - averageEuclid) * (Xi - averageEuclid));
+				denomTerm2 += ((Yi - averageUser) * (Yi - averageUser));
 			}
 		}
 		
 		double denom = (sqrt(denomTerm1) * sqrt(denomTerm2));
 		double r = numerator / denom;
-
+		
 		return r;
 		
 	}
