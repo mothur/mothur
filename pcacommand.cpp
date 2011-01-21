@@ -364,11 +364,11 @@ void PCACommand::output(string fnameRoot, vector<string> name_list, vector<vecto
 			}
 		}
 		
-		ofstream pcaData((fnameRoot+".pca").c_str(), ios::trunc);
+		ofstream pcaData((fnameRoot+".pca.axes").c_str(), ios::trunc);
 		pcaData.setf(ios::fixed, ios::floatfield);
 		pcaData.setf(ios::showpoint);	
-		outputNames.push_back(fnameRoot+".pca");
-		outputTypes["pca"].push_back(fnameRoot+".pca");
+		outputNames.push_back(fnameRoot+".pca.axes");
+		outputTypes["pca"].push_back(fnameRoot+".pca.axes");
 		
 		ofstream pcaLoadings((fnameRoot+".pca.loadings").c_str(), ios::trunc);
 		pcaLoadings.setf(ios::fixed, ios::floatfield);

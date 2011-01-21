@@ -277,11 +277,11 @@ void PCOACommand::output(string fnameRoot, vector<string> name_list, vector<vect
 			}
 		}
 		
-		ofstream pcaData((fnameRoot+"pcoa").c_str(), ios::trunc);
+		ofstream pcaData((fnameRoot+"pcoa.axes").c_str(), ios::trunc);
 		pcaData.setf(ios::fixed, ios::floatfield);
 		pcaData.setf(ios::showpoint);	
-		outputNames.push_back(fnameRoot+"pcoa");
-		outputTypes["pcoa"].push_back(fnameRoot+"pcoa");
+		outputNames.push_back(fnameRoot+"pcoa.axes");
+		outputTypes["pcoa"].push_back(fnameRoot+"pcoa.axes");
 		
 		ofstream pcaLoadings((fnameRoot+"pcoa.loadings").c_str(), ios::trunc);
 		pcaLoadings.setf(ios::fixed, ios::floatfield);
