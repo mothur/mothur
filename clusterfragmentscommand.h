@@ -43,6 +43,7 @@ public:
 private:
 	bool abort;
 	string fastafile, namefile, outputDir;
+	int diffs, percent;
 	vector<seqRNode> alignSeqs; 
 	map<string, string> names; //represents the names file first column maps to second column
 	map<string, int> sizes;  //this map a seq name to the number of identical seqs in the names file
@@ -53,6 +54,7 @@ private:
 	int readFASTA();
 	void readNameFile();
 	void printData(string, string); //fasta filename, names file name
+	bool isFragment(string, string);
 	
 };
 

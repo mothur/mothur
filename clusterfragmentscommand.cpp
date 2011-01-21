@@ -8,6 +8,7 @@
  */
 
 #include "clusterfragmentscommand.h"
+#include "needlemanoverlap.hpp"
 
 //**********************************************************************************************************************
 //sort by unaligned
@@ -27,7 +28,7 @@ inline bool comparePriority(seqRNode first, seqRNode second) {
 //**********************************************************************************************************************
 vector<string> ClusterFragmentsCommand::getValidParameters(){	
 	try {
-		string AlignArray[] =  {"fasta","name","outputdir","inputdir"};
+		string AlignArray[] =  {"fasta","name","diffs","percent","outputdir","inputdir"};
 		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 		return myArray;
 	}
@@ -83,7 +84,7 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","name","outputdir","inputdir"};
+			string Array[] =  {"fasta","name","diffs","percent","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -138,6 +139,14 @@ ClusterFragmentsCommand::ClusterFragmentsCommand(string option) {
 			if (namefile == "not found") { namefile =  "";  }
 			else if (namefile == "not open") { abort = true; }	
 			else {  readNameFile();  }
+			
+			string temp;
+			temp = validParameter.validFile(parameters, "diffs", false);		if (temp == "not found"){	temp = "0";				}
+			convert(temp, diffs); 
+			
+			temp = validParameter.validFile(parameters, "percent", false);		if (temp == "not found"){	temp = "0";				}
+			convert(temp, percent);
+			
 		}
 				
 	}
@@ -154,8 +163,11 @@ void ClusterFragmentsCommand::help(){
 	try {
 		m->mothurOut("The cluster.fragments command groups sequences that are part of a larger sequence.\n");
 		m->mothurOut("The cluster.fragments command outputs a new fasta and name file.\n");
-		m->mothurOut("The cluster.fragments command parameters are fasta and name. The fasta parameter is required. \n");
+		m->mothurOut("The cluster.fragments command parameters are fasta, name, diffs and percent. The fasta parameter is required. \n");
 		m->mothurOut("The names parameter allows you to give a list of seqs that are identical. This file is 2 columns, first column is name or representative sequence, second column is a list of its identical sequences separated by commas.\n");
+		m->mothurOut("The diffs parameter allows you to set the number of differences allowed, default=0. \n");
+		m->mothurOut("The percent parameter allows you to set percentage of differences allowed, default=0. percent=2 means if the number of difference is less than two percent of the length of the fragment, then cluster.\n");
+		m->mothurOut("You may use diffs and percent at the same time to say something like: If the number or differences is greater than 1 or more than 2% of the fragment length, don't merge. \n");
 		m->mothurOut("The cluster.fragments command should be in the following format: \n");
 		m->mothurOut("cluster.fragments(fasta=yourFastaFile, names=yourNamesFile) \n");
 		m->mothurOut("Example cluster.fragments(fasta=amazon.fasta).\n");
@@ -201,10 +213,8 @@ int ClusterFragmentsCommand::execute(){
 					if (alignSeqs[j].active) {  //this sequence has not been merged yet
 						
 						string jBases = alignSeqs[j].seq.getUnaligned();
-						
-						int pos = iBases.find(jBases);
 												
-						if (pos != string::npos) {
+						if (isFragment(iBases, jBases)) {
 							//merge
 							alignSeqs[i].names += ',' + alignSeqs[j].names;
 							alignSeqs[i].numIdentical += alignSeqs[j].numIdentical;
@@ -258,7 +268,62 @@ int ClusterFragmentsCommand::execute(){
 		exit(1);
 	}
 }
-
+//***************************************************************************************************************
+bool ClusterFragmentsCommand::isFragment(string seq1, string seq2){
+	try {
+		bool fragment = false;
+		
+		//exact match
+		int pos = seq1.find(seq2);
+		if (pos != string::npos) { return true; }
+		//no match, no diffs wanted
+		else if ((diffs == 0) && (percent == 0)) { return false; }
+		else { //try aligning and see if you can find it
+			
+			//find number of acceptable differences for this sequence fragment
+			int totalDiffs;
+			if (diffs == 0) { //you didnt set diffs you want a percentage
+				totalDiffs = floor((seq2.length() * (percent / 100.0)));
+			}else if (percent == 0) { //you didn't set percent you want diffs
+				totalDiffs = diffs;
+			}else if ((percent != 0) && (diffs != 0)) { //you want both, set total diffs to smaller of 2
+				totalDiffs = diffs;
+				int percentDiff = floor((seq2.length() * (percent / 100.0)));
+				if (percentDiff < totalDiffs) { totalDiffs = percentDiff; }
+			}
+				
+			Alignment* alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (seq1.length()+totalDiffs+1));
+							
+			//use needleman to align 
+			alignment->align(seq2, seq1);
+			string tempSeq2 = alignment->getSeqAAln();
+			string temp = alignment->getSeqBAln();
+			
+			delete alignment;
+			
+			//chop gap ends
+			int startPos = 0;
+			int endPos = tempSeq2.length()-1;
+			for (int i = 0; i < tempSeq2.length(); i++) {  if (isalpha(tempSeq2[i])) { startPos = i; break; } }
+			for (int i = tempSeq2.length()-1; i >= 0; i--) {  if (isalpha(tempSeq2[i])) { endPos = i; break; } }
+			
+			//count number of diffs
+			int numDiffs = 0;
+			for (int i = startPos; i <= endPos; i++) {
+				if (tempSeq2[i] != temp[i]) { numDiffs++; }
+			}
+			
+			if (numDiffs <= totalDiffs) { fragment = true; }
+		}
+		
+		return fragment;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ClusterFragmentsCommand", "isFragment");
+		exit(1);
+	}
+}
 /**************************************************************************************************/
 int ClusterFragmentsCommand::readFASTA(){
 	try {
