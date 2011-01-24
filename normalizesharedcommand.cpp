@@ -12,7 +12,7 @@
 //**********************************************************************************************************************
 vector<string> NormalizeSharedCommand::getValidParameters(){	
 	try {
-		string Array[] =  {"groups","label","method","outputdir","inputdir","norm"};
+		string Array[] =  {"groups","label","method","makerelabund","outputdir","inputdir","norm"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
@@ -71,7 +71,7 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 		
 		else {
 			//valid paramters for this command
-			string AlignArray[] =  {"groups","label","method","outputdir","inputdir","norm"};
+			string AlignArray[] =  {"groups","label","method","makerelabund","outputdir","inputdir","norm"};
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -95,9 +95,14 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 			}
 			
 			//make sure the user has already run the read.otu command
-			if ((globaldata->getSharedFile() == "")) {
-				 m->mothurOut("You must read a list and a group, or a shared file before you can use the normalize.shared command."); m->mothurOutEndLine(); abort = true; 
+			if ((globaldata->getSharedFile() == "") && (globaldata->getRelAbundFile() == "")) {
+				 m->mothurOut("You must read a list and a group, shared or relabund file before you can use the normalize.shared command."); m->mothurOutEndLine(); abort = true; 
 			}
+			
+			if ((globaldata->getSharedFile() != "") && (globaldata->getRelAbundFile() != "")) {
+				m->mothurOut("You may not use both a shared and relabund file as input for normalize.shared command."); m->mothurOutEndLine(); abort = true; 
+			}
+			
 
 			//check for optional parameter and set defaults
 			// ...at some point should added some additional type checking...
@@ -123,7 +128,7 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 			}
 			
 			method = validParameter.validFile(parameters, "method", false);				if (method == "not found") { method = "totalgroup"; }
-			if (method != "totalgroup") {  m->mothurOut(method + " is not a valid scaling option for the normalize.shared command. The only choice is totalgroup. We hope to add more ways to normalize in the future, suggestions are welcome!"); m->mothurOutEndLine(); abort = true; }
+			if ((method != "totalgroup") && (method != "zscore")) {  m->mothurOut(method + " is not a valid scaling option for the normalize.shared command. The options are totalgroup and zscore. We hope to add more ways to normalize in the future, suggestions are welcome!"); m->mothurOutEndLine(); abort = true; }
 		
 			string temp = validParameter.validFile(parameters, "norm", false);				
 			if (temp == "not found") {  
@@ -132,6 +137,12 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 				convert(temp, norm);
 				if (norm < 0) { m->mothurOut("norm must be positive."); m->mothurOutEndLine(); abort=true; }
 			}
+			
+			temp = validParameter.validFile(parameters, "makerelabund", false);	if (temp == "") { temp = "f"; }
+			makeRelabund = m->isTrue(temp);
+			
+			if ((globaldata->getFormat() != "sharedfile") && makeRelabund) { m->mothurOut("makerelabund can only be used with a shared file."); m->mothurOutEndLine(); }
+			
 		}
 
 	}
@@ -145,11 +156,12 @@ NormalizeSharedCommand::NormalizeSharedCommand(string option) {
 
 void NormalizeSharedCommand::help(){
 	try {
-		m->mothurOut("The normalize.shared command can only be executed after a successful read.otu command of a list and group or shared file.\n");
-		m->mothurOut("The normalize.shared command parameters are groups, method, norm and label.  No parameters are required.\n");
+		m->mothurOut("The normalize.shared command can only be executed after a successful read.otu command of a list and group, shared or relabund file.\n");
+		m->mothurOut("The normalize.shared command parameters are groups, method, norm, makerelabund and label.  No parameters are required.\n");
 		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like included. The group names are separated by dashes.\n");
 		m->mothurOut("The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n");
-		m->mothurOut("The method parameter allows you to select what method you would like to use to normalize. The only choice is totalgroup. We hope to add more ways to normalize in the future, suggestions are welcome!\n");
+		m->mothurOut("The method parameter allows you to select what method you would like to use to normalize. The options are totalgroup and zscore. We hope to add more ways to normalize in the future, suggestions are welcome!\n");
+		m->mothurOut("The makerelabund parameter allows you to convert a shared file to a relabund file before you normalize. default=f.\n");
 		m->mothurOut("The norm parameter allows you to number you would like to normalize to. By default this is set to the number of sequences in your smallest group.\n");
 		m->mothurOut("The normalize.shared command should be in the following format: normalize.shared(groups=yourGroups, label=yourLabels).\n");
 		m->mothurOut("Example normalize.shared(groups=A-B-C, scale=totalgroup).\n");
@@ -179,97 +191,188 @@ int NormalizeSharedCommand::execute(){
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
 		
-		read = new ReadOTUFile(globaldata->inputFileName);	
-		read->read(&*globaldata); 
-		input = globaldata->ginput;
-		lookup = input->getSharedRAbundVectors();
-		string lastLabel = lookup[0]->getLabel();
-		
-		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
-		set<string> processedLabels;
-		set<string> userLabels = labels;
-		
-		//set norm to smallest group number
-		if (norm == 0) { 
-			norm = lookup[0]->getNumSeqs();
-			for (int i = 1; i < lookup.size(); i++) {
-				if (lookup[i]->getNumSeqs() < norm) { norm = lookup[i]->getNumSeqs();  }
-			}  
-		}
-		
-		m->mothurOut("Normalizing to " + toString(norm) + "."); m->mothurOutEndLine();
+		if (globaldata->getFormat() == "sharedfile") {  input = new InputData(globaldata->inputFileName, "sharedfile"); }
+		else { input = new InputData(globaldata->inputFileName, "relabund"); }
 
-		//as long as you are not at the end of the file or done wih the lines you want
-		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+		//you are reading a sharedfile and you do not want to make relabund
+		if ((globaldata->getFormat() == "sharedfile") && (!makeRelabund)) {
+			lookup = input->getSharedRAbundVectors();
+			string lastLabel = lookup[0]->getLabel();
 			
-			if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } globaldata->Groups.clear(); delete read;  out.close(); remove(outputFileName.c_str()); return 0; }
-	
-			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
-
-				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-				normalize(lookup, out);
+			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+			set<string> processedLabels;
+			set<string> userLabels = labels;
+			
+			if (method == "totalgroup") {
+				//set norm to smallest group number
+				if (norm == 0) { 
+					norm = lookup[0]->getNumSeqs();
+					for (int i = 1; i < lookup.size(); i++) {
+						if (lookup[i]->getNumSeqs() < norm) { norm = lookup[i]->getNumSeqs();  }
+					}  
+				}
 				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+				m->mothurOut("Normalizing to " + toString(norm) + "."); m->mothurOutEndLine();
 			}
 			
-			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
-				string saveLabel = lookup[0]->getLabel();
+			//as long as you are not at the end of the file or done wih the lines you want
+			while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+				
+				if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } globaldata->Groups.clear();   out.close(); remove(outputFileName.c_str()); return 0; }
+				
+				if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
+					
+					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+					normalize(lookup, out);
+					
+					processedLabels.insert(lookup[0]->getLabel());
+					userLabels.erase(lookup[0]->getLabel());
+				}
+				
+				if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+					string saveLabel = lookup[0]->getLabel();
+					
+					for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
+					lookup = input->getSharedRAbundVectors(lastLabel);
+					m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+					
+					normalize(lookup, out);
+					
+					processedLabels.insert(lookup[0]->getLabel());
+					userLabels.erase(lookup[0]->getLabel());
+					
+					//restore real lastlabel to save below
+					lookup[0]->setLabel(saveLabel);
+				}
+				
+				lastLabel = lookup[0]->getLabel();
+				//prevent memory leak
+				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
+				
+				if (m->control_pressed) {  outputTypes.clear(); globaldata->Groups.clear();  out.close(); remove(outputFileName.c_str()); return 0; }
+				
+				//get next line to process
+				lookup = input->getSharedRAbundVectors();				
+			}
 			
-				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  
+			if (m->control_pressed) { outputTypes.clear(); globaldata->Groups.clear();  out.close(); remove(outputFileName.c_str());  return 0; }
+			
+			//output error messages about any remaining user labels
+			set<string>::iterator it;
+			bool needToRun = false;
+			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+				m->mothurOut("Your file does not include the label " + *it); 
+				if (processedLabels.count(lastLabel) != 1) {
+					m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+					needToRun = true;
+				}else {
+					m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+				}
+			}
+			
+			//run last label if you need to
+			if (needToRun == true)  {
+				for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }  
 				lookup = input->getSharedRAbundVectors(lastLabel);
+				
 				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
 				
 				normalize(lookup, out);
 				
-				processedLabels.insert(lookup[0]->getLabel());
-				userLabels.erase(lookup[0]->getLabel());
+				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
+			}
+			
+		}else{ //relabund values
+			lookupFloat = input->getSharedRAbundFloatVectors();
+			string lastLabel = lookupFloat[0]->getLabel();
+			
+			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+			set<string> processedLabels;
+			set<string> userLabels = labels;
+			
+			//set norm to smallest group number
+			if (method == "totalgroup") {
+				if (norm == 0) { 
+					norm = lookupFloat[0]->getNumSeqs();
+					for (int i = 1; i < lookupFloat.size(); i++) {
+						if (lookupFloat[i]->getNumSeqs() < norm) { norm = lookupFloat[i]->getNumSeqs();  }
+					}  
+				}
 				
-				//restore real lastlabel to save below
-				lookup[0]->setLabel(saveLabel);
+				m->mothurOut("Normalizing to " + toString(norm) + "."); m->mothurOutEndLine();
 			}
 			
-			lastLabel = lookup[0]->getLabel();
-			//prevent memory leak
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i]; lookup[i] = NULL; }
-			
-			if (m->control_pressed) {  outputTypes.clear(); globaldata->Groups.clear(); delete read;  out.close(); remove(outputFileName.c_str()); return 0; }
-
-			//get next line to process
-			lookup = input->getSharedRAbundVectors();				
-		}
-		
-		if (m->control_pressed) { outputTypes.clear(); globaldata->Groups.clear(); delete read;  out.close(); remove(outputFileName.c_str());  return 0; }
-
-		//output error messages about any remaining user labels
-		set<string>::iterator it;
-		bool needToRun = false;
-		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
-			m->mothurOut("Your file does not include the label " + *it); 
-			if (processedLabels.count(lastLabel) != 1) {
-				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
-				needToRun = true;
-			}else {
-				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+			//as long as you are not at the end of the file or done wih the lines you want
+			while((lookupFloat[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+				
+				if (m->control_pressed) { outputTypes.clear();  for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  } globaldata->Groups.clear();   out.close(); remove(outputFileName.c_str()); return 0; }
+				
+				if(allLines == 1 || labels.count(lookupFloat[0]->getLabel()) == 1){			
+					
+					m->mothurOut(lookupFloat[0]->getLabel()); m->mothurOutEndLine();
+					normalize(lookupFloat, out);
+					
+					processedLabels.insert(lookupFloat[0]->getLabel());
+					userLabels.erase(lookupFloat[0]->getLabel());
+				}
+				
+				if ((m->anyLabelsToProcess(lookupFloat[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+					string saveLabel = lookupFloat[0]->getLabel();
+					
+					for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  }  
+					lookupFloat = input->getSharedRAbundFloatVectors(lastLabel);
+					m->mothurOut(lookupFloat[0]->getLabel()); m->mothurOutEndLine();
+					
+					normalize(lookupFloat, out);
+					
+					processedLabels.insert(lookupFloat[0]->getLabel());
+					userLabels.erase(lookupFloat[0]->getLabel());
+					
+					//restore real lastlabel to save below
+					lookupFloat[0]->setLabel(saveLabel);
+				}
+				
+				lastLabel = lookupFloat[0]->getLabel();
+				//prevent memory leak
+				for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i]; lookupFloat[i] = NULL; }
+				
+				if (m->control_pressed) {  outputTypes.clear(); globaldata->Groups.clear();  out.close(); remove(outputFileName.c_str()); return 0; }
+				
+				//get next line to process
+				lookupFloat = input->getSharedRAbundFloatVectors();				
 			}
+			
+			if (m->control_pressed) { outputTypes.clear(); globaldata->Groups.clear();  out.close(); remove(outputFileName.c_str());  return 0; }
+			
+			//output error messages about any remaining user labels
+			set<string>::iterator it;
+			bool needToRun = false;
+			for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+				m->mothurOut("Your file does not include the label " + *it); 
+				if (processedLabels.count(lastLabel) != 1) {
+					m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+					needToRun = true;
+				}else {
+					m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+				}
+			}
+			
+			//run last label if you need to
+			if (needToRun == true)  {
+				for (int i = 0; i < lookupFloat.size(); i++) { if (lookupFloat[i] != NULL) { delete lookupFloat[i]; } }  
+				lookupFloat = input->getSharedRAbundFloatVectors(lastLabel);
+				
+				m->mothurOut(lookupFloat[0]->getLabel()); m->mothurOutEndLine();
+				
+				normalize(lookupFloat, out);
+				
+				for (int i = 0; i < lookupFloat.size(); i++) {  delete lookupFloat[i];  }
+			}
+			
 		}
-	
-		//run last label if you need to
-		if (needToRun == true)  {
-			for (int i = 0; i < lookup.size(); i++) { if (lookup[i] != NULL) { delete lookup[i]; } }  
-			lookup = input->getSharedRAbundVectors(lastLabel);
-			
-			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
-			
-			normalize(lookup, out);
-			
-			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }
-		}
-	
 		//reset groups parameter
 		globaldata->Groups.clear();  
-		delete input; globaldata->ginput = NULL;
-		delete read;
+		delete input;
 		out.close();
 		
 		if (m->control_pressed) { outputTypes.clear(); remove(outputFileName.c_str()); return 0;}
@@ -291,43 +394,135 @@ int NormalizeSharedCommand::execute(){
 int NormalizeSharedCommand::normalize(vector<SharedRAbundVector*>& thisLookUp, ofstream& out){
 	try {
 		if (pickedGroups) { eliminateZeroOTUS(thisLookUp); }
-
-		
-		 for (int i = 0; i < thisLookUp.size(); i++) {
-			//cout << thisLookUp[i]->getLabel() << '\t' << thisLookUp[i]->getGroup() << '\t' << thisLookUp[i]->getNumBins() << '\t';
+				
+		if (method == "totalgroup") { 
+					
+			for (int j = 0; j < thisLookUp[0]->getNumBins(); j++) {
+						
+					for (int i = 0; i < thisLookUp.size(); i++) {
+							
+						if (m->control_pressed) { return 0; }
+							
+						int abund = thisLookUp[i]->getAbundance(j);
+							
+						float relabund = relabund = abund / (float) thisLookUp[i]->getNumSeqs();
+						float newNorm = relabund * norm;
+						
+						//round to nearest int
+						int finalNorm = (int) floor((newNorm + 0.5));
+						
+						thisLookUp[i]->set(j, finalNorm, thisLookUp[i]->getGroup());
+					}
+				}
+					
+		}else if (method == "zscore") {
 			
-			for (int j = 0; j < thisLookUp[i]->getNumBins(); j++) {
-			
+			for (int j = 0; j < thisLookUp[0]->getNumBins(); j++) {
+				
 				if (m->control_pressed) { return 0; }
-			
-				int abund = thisLookUp[i]->getAbundance(j);
 				
-				float relabund = 0.0;
-				int finalNorm = 0;
+				//calc mean
+				float mean = 0.0;
+				for (int i = 0; i < thisLookUp.size(); i++) {  mean += thisLookUp[i]->getAbundance(j); }
+				mean /= (float) thisLookUp.size();
+					
+				//calc standard deviation
+				float sumSquared = 0.0;
+				for (int i = 0; i < thisLookUp.size(); i++) { sumSquared += (((float)thisLookUp[i]->getAbundance(j) - mean) * ((float)thisLookUp[i]->getAbundance(j) - mean)); }
+				sumSquared /= (float) thisLookUp.size();
 				
-				if (method == "totalgroup") { 
-					relabund = abund / (float) thisLookUp[i]->getNumSeqs();
-					float newNorm = relabund * norm;
-					//round to nearest int
-					finalNorm = (int) floor((newNorm + 0.5));
-					//cout << thisLookUp[i]->getGroup() << '\t' << abund << '\t' << relabund << '\t' << norm << '\t' << newNorm << '\t' << finalNorm << endl;
-				
-				}else{ m->mothurOut(method + " is not a valid scaling option."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
-				
-				//cout << finalNorm << '\t';
-				thisLookUp[i]->set(j, finalNorm, thisLookUp[i]->getGroup());
+				float standardDev = sqrt(sumSquared);
+					
+				for (int i = 0; i < thisLookUp.size(); i++) {
+					int finalNorm = 0;
+					if (standardDev != 0) { // stop divide by zero
+						float newNorm = ((float)thisLookUp[i]->getAbundance(j) - mean) / standardDev;
+						//round to nearest int
+						finalNorm = (int) floor((newNorm + 0.5));
+					}
+					
+					thisLookUp[i]->set(j, finalNorm, thisLookUp[i]->getGroup());
+				}
 			}
-			//cout << endl;
-		 }
-		
-		 eliminateZeroOTUS(thisLookUp);
+						
+		}else{ m->mothurOut(method + " is not a valid scaling option."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
+				
+				
+						
+		eliminateZeroOTUS(thisLookUp);
 		 
-		  for (int i = 0; i < thisLookUp.size(); i++) {
+		for (int i = 0; i < thisLookUp.size(); i++) {
 			out << thisLookUp[i]->getLabel() << '\t' << thisLookUp[i]->getGroup() << '\t';
 			thisLookUp[i]->print(out);
-		 }
+		}
 		
-		 return 0;
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "NormalizeSharedCommand", "normalize");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+
+int NormalizeSharedCommand::normalize(vector<SharedRAbundFloatVector*>& thisLookUp, ofstream& out){
+	try {
+		if (pickedGroups) { eliminateZeroOTUS(thisLookUp); }
+		
+		if (method == "totalgroup") { 
+			
+			for (int j = 0; j < thisLookUp[0]->getNumBins(); j++) {
+				
+				for (int i = 0; i < thisLookUp.size(); i++) {
+					
+					if (m->control_pressed) { return 0; }
+					
+					float abund = thisLookUp[i]->getAbundance(j);
+					
+					float relabund = relabund = abund / (float) thisLookUp[i]->getNumSeqs();
+					float newNorm = relabund * norm;
+					
+					thisLookUp[i]->set(j, newNorm, thisLookUp[i]->getGroup());
+				}
+			}
+			
+		}else if (method == "zscore") {
+			for (int j = 0; j < thisLookUp[0]->getNumBins(); j++) {
+				
+				if (m->control_pressed) { return 0; }
+				
+				//calc mean
+				float mean = 0.0;
+				for (int i = 0; i < thisLookUp.size(); i++) {  mean += thisLookUp[i]->getAbundance(j); }
+				mean /= (float) thisLookUp.size();
+				
+				//calc standard deviation
+				float sumSquared = 0.0;
+				for (int i = 0; i < thisLookUp.size(); i++) { sumSquared += ((thisLookUp[i]->getAbundance(j) - mean) * (thisLookUp[i]->getAbundance(j) - mean)); }
+				sumSquared /= (float) thisLookUp.size();
+				
+				float standardDev = sqrt(sumSquared);
+				
+				for (int i = 0; i < thisLookUp.size(); i++) {
+					float newNorm = 0.0;
+					if (standardDev != 0) { // stop divide by zero
+						newNorm = (thisLookUp[i]->getAbundance(j) - mean) / standardDev;
+					}
+					thisLookUp[i]->set(j, newNorm, thisLookUp[i]->getGroup());
+				}
+			}			
+			
+		}else{ m->mothurOut(method + " is not a valid scaling option."); m->mothurOutEndLine(); m->control_pressed = true; return 0; }
+		
+		
+		eliminateZeroOTUS(thisLookUp);
+		
+		for (int i = 0; i < thisLookUp.size(); i++) {
+			out << thisLookUp[i]->getLabel() << '\t' << thisLookUp[i]->getGroup() << '\t';
+			thisLookUp[i]->print(out);
+		}
+		
+		return 0;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "NormalizeSharedCommand", "normalize");
@@ -376,4 +571,47 @@ int NormalizeSharedCommand::eliminateZeroOTUS(vector<SharedRAbundVector*>& thisl
 		exit(1);
 	}
 }
+//**********************************************************************************************************************
+int NormalizeSharedCommand::eliminateZeroOTUS(vector<SharedRAbundFloatVector*>& thislookup) {
+	try {
+		
+		vector<SharedRAbundFloatVector*> newLookup;
+		for (int i = 0; i < thislookup.size(); i++) {
+			SharedRAbundFloatVector* temp = new SharedRAbundFloatVector();
+			temp->setLabel(thislookup[i]->getLabel());
+			temp->setGroup(thislookup[i]->getGroup());
+			newLookup.push_back(temp);
+		}
+		
+		//for each bin
+		for (int i = 0; i < thislookup[0]->getNumBins(); i++) {
+			if (m->control_pressed) { for (int j = 0; j < newLookup.size(); j++) {  delete newLookup[j];  } return 0; }
+			
+			//look at each sharedRabund and make sure they are not all zero
+			bool allZero = true;
+			for (int j = 0; j < thislookup.size(); j++) {
+				if (thislookup[j]->getAbundance(i) != 0) { allZero = false;  break;  }
+			}
+			
+			//if they are not all zero add this bin
+			if (!allZero) {
+				for (int j = 0; j < thislookup.size(); j++) {
+					newLookup[j]->push_back(thislookup[j]->getAbundance(i), thislookup[j]->getGroup());
+				}
+			}
+		}
+		
+		for (int j = 0; j < thislookup.size(); j++) {  delete thislookup[j];  }
+		
+		thislookup = newLookup;
+		
+		return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "NormalizeSharedCommand", "eliminateZeroOTUS");
+		exit(1);
+	}
+}
+
 //**********************************************************************************************************************

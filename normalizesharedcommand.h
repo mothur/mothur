@@ -12,7 +12,6 @@
  
 #include "command.hpp"
 #include "inputdata.h"
-#include "readotu.h"
 #include "sharedrabundvector.h"
 
 class GlobalData;
@@ -32,11 +31,11 @@ public:
 	
 private:
 	GlobalData* globaldata;
-	ReadOTUFile* read;
 	InputData* input;
 	vector<SharedRAbundVector*> lookup;
+	vector<SharedRAbundFloatVector*> lookupFloat;
 	
-	bool abort, allLines, pickedGroups;
+	bool abort, allLines, pickedGroups, makeRelabund;
 	set<string> labels; //holds labels to be used
 	string groups, label, outputDir, method;
 	int norm;
@@ -44,7 +43,9 @@ private:
 	map<string, vector<string> > outputTypes;
 	
 	int normalize(vector<SharedRAbundVector*>&, ofstream&);
-	int eliminateZeroOTUS(vector<SharedRAbundVector*>& thislookup);
+	int normalize(vector<SharedRAbundFloatVector*>&, ofstream&);
+	int eliminateZeroOTUS(vector<SharedRAbundVector*>&);
+	int eliminateZeroOTUS(vector<SharedRAbundFloatVector*>&);
 
 };
 
