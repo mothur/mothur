@@ -16,7 +16,7 @@
 //**********************************************************************************************************************
 vector<string> RemoveRareCommand::getValidParameters(){	
 	try {
-		string Array[] =  {"rabund","sabund", "group", "list", "shared", "nseqs","groups","label","outputdir","inputdir"};
+		string Array[] =  {"rabund","sabund", "group", "list", "shared","bygroup","nseqs","groups","label","outputdir","inputdir"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
@@ -68,6 +68,7 @@ vector<string> RemoveRareCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 RemoveRareCommand::RemoveRareCommand(string option)  {
 	try {
+		globaldata = GlobalData::getInstance();
 		abort = false;
 		allLines = 1;
 		
@@ -76,7 +77,7 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"rabund","sabund", "group", "list", "shared", "nseqs","groups","label","outputdir","inputdir"};
+			string Array[] =  {"rabund","sabund", "group", "list", "shared", "bygroup", "nseqs","groups","label","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -162,11 +163,11 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 			else if (rabundfile == "not found") {  rabundfile = "";  }				
 			
 			groupfile = validParameter.validFile(parameters, "group", true);
-			if (groupfile == "not open") { abort = true; }
+			if (groupfile == "not open") { groupfile = ""; abort = true; }
 			else if (groupfile == "not found") {  groupfile = "";  }	
 			
 			sharedfile = validParameter.validFile(parameters, "shared", true);
-			if (sharedfile == "not open") { abort = true; }
+			if (sharedfile == "not open") { sharedfile = "";  abort = true; }
 			else if (sharedfile == "not found") {  sharedfile = "";  }
 			
 			if ((sabundfile == "") && (rabundfile == "")  && (sharedfile == "") && (listfile == ""))  { m->mothurOut("You must provide at least one of the following: rabund, sabund, shared or list."); m->mothurOutEndLine(); abort = true; }
@@ -185,6 +186,13 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 			string temp = validParameter.validFile(parameters, "nseqs", false);	 
 			if (temp == "not found") { m->mothurOut("nseqs is a required parameter."); m->mothurOutEndLine(); abort = true; }
 			else { convert(temp, nseqs); }
+			
+			temp = validParameter.validFile(parameters, "bygroup", false);	 if (temp == "not found") { temp = "f"; }
+			byGroup = m->isTrue(temp);
+			
+			if (byGroup && (sharedfile == "")) { m->mothurOut("The byGroup parameter is only valid with a shared file."); m->mothurOutEndLine(); }
+			
+			if ((groupfile != "") && (listfile == "")) { m->mothurOut("A groupfile is only valid with a list file."); m->mothurOutEndLine(); groupfile = ""; }
 		}
 		
 	}
@@ -197,13 +205,16 @@ RemoveRareCommand::RemoveRareCommand(string option)  {
 
 void RemoveRareCommand::help(){
 	try {
-		//m->mothurOut("The remove.seqs command reads an .accnos file and at least one of the following file types: fasta, name, group, list, taxonomy, quality or alignreport file.\n");
-		//m->mothurOut("It outputs a file containing the sequences NOT in the .accnos file.\n");
-		//m->mothurOut("The remove.seqs command parameters are accnos, fasta, name, group, list, taxonomy, qfile, alignreport and dups.  You must provide accnos and at least one of the file parameters.\n");
-		//m->mothurOut("The dups parameter allows you to remove the entire line from a name file if you remove any name from the line. default=true. \n");
-		//m->mothurOut("The remove.seqs command should be in the following format: remove.seqs(accnos=yourAccnos, fasta=yourFasta).\n");
-		//m->mothurOut("Example remove.seqs(accnos=amazon.accnos, fasta=amazon.fasta).\n");
-		//m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
+		m->mothurOut("The remove.rare command parameters are list, rabund, sabund, shared, group, label, groups, bygroup and nseqs.\n");
+		m->mothurOut("The remove.rare command reads one of the following file types: list, rabund, sabund or shared file. It outputs a new file after removing the rare otus.\n");
+		m->mothurOut("The groups parameter allows you to specify which of the groups you would like analyzed.  Default=all. You may separate group names with dashes.\n");
+		m->mothurOut("The label parameter is used to analyze specific labels in your input. default=all. You may separate label names with dashes.\n");
+		m->mothurOut("The bygroup parameter is only valid with the shared file. default=f, meaning remove any OTU that has nseqs or fewer sequences across all groups.\n");
+		m->mothurOut("bygroups=T means remove any OTU that has nseqs or fewer sequences in each group (if groupA has 1 sequence and group B has 100 sequences in OTUZ and nseqs=1, then set the groupA count for OTUZ to 0 and keep groupB's count at 100.) \n");
+		m->mothurOut("The nseqs parameter allows you to set the cutoff for an otu to be deemed rare. It is required.\n");
+		m->mothurOut("The remove.rare command should be in the following format: remove.rare(shared=yourSharedFile, nseqs=yourRareCutoff).\n");
+		m->mothurOut("Example remove.rare(shared=amazon.fn.shared, nseqs=2).\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. shared), '=' and parameters (i.e.yourSharedFile).\n\n");
 	}
 	catch(exception& e) {
 		m->errorOut(e, "RemoveRareCommand", "help");
@@ -224,7 +235,7 @@ int RemoveRareCommand::execute(){
 		if (sabundfile != "")		{		processSabund();	}
 		if (rabundfile != "")		{		processRabund();	}
 		if (listfile != "")			{		processList();		}
-		//if (sharedfile != "")		{		processShared();	}
+		if (sharedfile != "")		{		processShared();	}
 		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
 			
@@ -565,7 +576,162 @@ int RemoveRareCommand::processRabund(){
 		return 0;
 	}
 	catch(exception& e) {
+		m->errorOut(e, "RemoveRareCommand", "processRabund");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int RemoveRareCommand::processShared(){
+	try {
+		globaldata->Groups = Groups;
+		
+		string thisOutputDir = outputDir;
+		if (outputDir == "") {  thisOutputDir += m->hasPath(sharedfile);  }
+		string outputFileName = thisOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + "pick" +  m->getExtension(sharedfile);
+		outputTypes["shared"].push_back(outputFileName); outputNames.push_back(outputFileName);
+		
+		ofstream out;
+		m->openOutputFile(outputFileName, out);
+		
+		//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
+		InputData input(sharedfile, "sharedfile");
+		vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
+		string lastLabel = lookup[0]->getLabel();
+		set<string> processedLabels;
+		set<string> userLabels = labels;
+		
+		while((lookup[0] != NULL) && ((allLines == 1) || (userLabels.size() != 0))) {
+			
+			if (m->control_pressed) { for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  }  out.close(); return 0; }
+			
+			if(allLines == 1 || labels.count(lookup[0]->getLabel()) == 1){			
+				
+				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+				processedLabels.insert(lookup[0]->getLabel());
+				userLabels.erase(lookup[0]->getLabel());
+				
+				processLookup(lookup, out);
+			}
+			
+			if ((m->anyLabelsToProcess(lookup[0]->getLabel(), userLabels, "") == true) && (processedLabels.count(lastLabel) != 1)) {
+				string saveLabel = lookup[0]->getLabel();
+				
+				for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+				lookup = input.getSharedRAbundVectors(lastLabel);
+				
+				m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+				processedLabels.insert(lookup[0]->getLabel());
+				userLabels.erase(lookup[0]->getLabel());
+				
+				processLookup(lookup, out);			
+				
+				//restore real lastlabel to save below
+				lookup[0]->setLabel(saveLabel);
+			}		
+			
+			lastLabel = lookup[0]->getLabel();			
+			
+			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+			lookup = input.getSharedRAbundVectors();
+		}
+		
+		if (m->control_pressed) {  out.close(); return 0; }	
+		
+		//output error messages about any remaining user labels
+		set<string>::iterator it;
+		bool needToRun = false;
+		for (it = userLabels.begin(); it != userLabels.end(); it++) {  
+			m->mothurOut("Your file does not include the label " + *it); 
+			if (processedLabels.count(lastLabel) != 1) {
+				m->mothurOut(". I will use " + lastLabel + "."); m->mothurOutEndLine();
+				needToRun = true;
+			}else {
+				m->mothurOut(". Please refer to " + lastLabel + "."); m->mothurOutEndLine();
+			}
+		}
+		
+		//run last label if you need to
+		if (needToRun == true)  {
+			for (int i = 0; i < lookup.size(); i++) {  if (lookup[i] != NULL) {	delete lookup[i];	}  }
+			lookup = input.getSharedRAbundVectors(lastLabel);
+			
+			m->mothurOut(lookup[0]->getLabel()); m->mothurOutEndLine();
+			
+			processLookup(lookup, out);	
+			
+			for (int i = 0; i < lookup.size(); i++) {  delete lookup[i];  } 
+		}
+		
+		return 0;
+	}
+	catch(exception& e) {
 		m->errorOut(e, "RemoveRareCommand", "processSabund");
+		exit(1);
+	}
+}
+//**********************************************************************************************************************
+int RemoveRareCommand::processLookup(vector<SharedRAbundVector*>& lookup, ofstream& out){
+	try {
+		
+		vector<SharedRAbundVector> newRabunds;  newRabunds.resize(lookup.size());
+		for (int i = 0; i < lookup.size(); i++) {  
+			newRabunds[i].setGroup(lookup[i]->getGroup());
+			newRabunds[i].setLabel(lookup[i]->getLabel());
+		}
+		
+		if (byGroup) {
+			
+			//for each otu
+			for (int i = 0; i < lookup[0]->getNumBins(); i++) {
+				bool allZero = true;
+				
+				if (m->control_pressed) { return 0; }
+				
+				//for each group
+				for (int j = 0; j < lookup.size(); j++) {
+					
+					//are you rare?
+					if (lookup[j]->getAbundance(i) > nseqs) {
+						newRabunds[j].push_back(lookup[j]->getAbundance(i), newRabunds[j].getGroup());
+						allZero = false;
+					}else {
+						newRabunds[j].push_back(0, newRabunds[j].getGroup());
+					}
+				}
+				
+				//eliminates zero otus
+				if (allZero) { for (int j = 0; j < newRabunds.size(); j++) {  newRabunds[j].pop_back(); } }
+			}
+		}else {
+			//for each otu
+			for (int i = 0; i < lookup[0]->getNumBins(); i++) {
+				
+				if (m->control_pressed) { return 0; }
+				
+				int totalAbund = 0;
+				//get total otu abundance
+				for (int j = 0; j < lookup.size(); j++) {
+					newRabunds[j].push_back(lookup[j]->getAbundance(i), newRabunds[j].getGroup());
+					totalAbund += lookup[j]->getAbundance(i);
+				}
+				
+				//eliminates otus below rare cutoff
+				if (totalAbund <= nseqs) { for (int j = 0; j < newRabunds.size(); j++) {  newRabunds[j].pop_back(); } }
+			}
+		}
+		
+		//do we have any otus above the rare cutoff
+		if (newRabunds[0].getNumBins() != 0) { 
+			for (int j = 0; j < newRabunds.size(); j++) { 
+				out << newRabunds[j].getLabel() << '\t' << newRabunds[j].getGroup() << '\t';
+				newRabunds[j].print(out); 
+			}
+		}
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "RemoveRareCommand", "processLookup");
 		exit(1);
 	}
 }

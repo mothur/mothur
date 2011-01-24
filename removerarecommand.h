@@ -13,6 +13,7 @@
 
 #include "command.hpp"
 #include "listvector.hpp"
+#include "globaldata.hpp"
 
 class RemoveRareCommand : public Command {
 	
@@ -29,6 +30,7 @@ public:
 	void help();	
 	
 private:
+	GlobalData* globaldata;
 	string sabundfile, rabundfile, sharedfile, groupfile, listfile, outputDir, groups, label;
 	int nseqs, allLines;
 	bool abort, byGroup;
@@ -40,6 +42,7 @@ private:
 	int processRabund();
 	int processList();
 	int processShared();
+	int processLookup(vector<SharedRAbundVector*>&, ofstream&);
 	
 };
 
