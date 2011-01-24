@@ -516,16 +516,46 @@ void ValidCalculators::initialHeat() {
 /********************************************************************/
 void ValidCalculators::initialMatrix() {
 	try {	
-		matrix["jabund"]				= "jabund";
+		matrix["sharedsobs"]				= "sharedsobs";
+		matrix["sharedchao"]				= "sharedchao";
+		matrix["sharedace"]				= "sharedace";
+		matrix["jabund"]					= "jabund";
 		matrix["sorabund"]				= "sorabund";
-		matrix["jclass"]				= "jclass";
+		matrix["jclass"]					= "jclass";
 		matrix["sorclass"]				= "sorclass";
 		matrix["jest"]					= "jest";
-		matrix["sorest"]				= "sorest";
+		matrix["sorest"]					= "sorest";
 		matrix["thetayc"]				= "thetayc";
-		matrix["thetan"]				= "thetan";
+		matrix["thetan"]					= "thetan";
+		matrix["kstest"]					= "kstest";
+		matrix["whittaker"]				= "whittaker";
+		matrix["sharednseqs"]			= "sharednseqs";
+		matrix["ochiai"]					= "ochiai";
+		matrix["anderberg"]				= "anderberg";
+		matrix["kulczynski"]				= "kulczynski";
+		matrix["kulczynskicody"]			= "kulczynskicody";
+		matrix["lennon"]					= "lennon";
 		matrix["morisitahorn"]			= "morisitahorn";
-		matrix["braycurtis"]			= "braycurtis";
+		matrix["braycurtis"]				= "braycurtis";
+		matrix["odum"]					= "odum";
+		matrix["canberra"]				= "canberra";
+		matrix["structeuclidean"]		= "structeuclidean";
+		matrix["structchord"]			= "structchord";
+		matrix["hellinger"]				= "hellinger";
+		matrix["manhattan"]				= "manhattan";
+		matrix["structpearson"]			= "structpearson";
+		matrix["structkulczynski"]		= "structkulczynski";
+		matrix["structchi2"]				= "structchi2";
+		matrix["soergel"]				= "soergel";
+		matrix["spearman"]				= "spearman";
+		matrix["speciesprofile"]			= "speciesprofile";
+		matrix["hamming"]				= "hamming";
+		matrix["gower"]					= "gower";
+		matrix["memchi2"]				= "memchi2";
+		matrix["memchord"]				= "memchord";
+		matrix["memeuclidean"]			= "memeuclidean";
+		matrix["mempearson"]				= "mempearson";
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ValidCalculator", "initialMatrix");

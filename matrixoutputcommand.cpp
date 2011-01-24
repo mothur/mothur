@@ -8,6 +8,10 @@
  */
 
 #include "matrixoutputcommand.h"
+#include "sharedsobscollectsummary.h"
+#include "sharedchao1.h"
+#include "sharedace.h"
+#include "sharednseqs.h"
 #include "sharedjabund.h"
 #include "sharedsorabund.h"
 #include "sharedjclass.h"
@@ -16,9 +20,35 @@
 #include "sharedsorest.h"
 #include "sharedthetayc.h"
 #include "sharedthetan.h"
+#include "sharedkstest.h"
+#include "whittaker.h"
+#include "sharedochiai.h"
+#include "sharedanderbergs.h"
+#include "sharedkulczynski.h"
+#include "sharedkulczynskicody.h"
+#include "sharedlennon.h"
 #include "sharedmorisitahorn.h"
 #include "sharedbraycurtis.h"
-
+#include "sharedjackknife.h"
+#include "whittaker.h"
+#include "odum.h"
+#include "canberra.h"
+#include "structeuclidean.h"
+#include "structchord.h"
+#include "hellinger.h"
+#include "manhattan.h"
+#include "structpearson.h"
+#include "soergel.h"
+#include "spearman.h"
+#include "structkulczynski.h"
+#include "structchi2.h"
+#include "speciesprofile.h"
+#include "hamming.h"
+#include "gower.h"
+#include "memchi2.h"
+#include "memchord.h"
+#include "memeuclidean.h"
+#include "mempearson.h"
 //**********************************************************************************************************************
 vector<string> MatrixOutputCommand::getValidParameters(){	
 	try {
@@ -151,7 +181,13 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
 				int i;
 				for (i=0; i<Estimators.size(); i++) {
 					if (validCalculator->isValidCalculator("matrix", Estimators[i]) == true) { 
-						if (Estimators[i] == "jabund") { 	
+						if (Estimators[i] == "sharedsobs") { 
+							matrixCalculators.push_back(new SharedSobsCS());
+						}else if (Estimators[i] == "sharedchao") { 
+							matrixCalculators.push_back(new SharedChao1());
+						}else if (Estimators[i] == "sharedace") { 
+							matrixCalculators.push_back(new SharedAce());
+						}else if (Estimators[i] == "jabund") { 	
 							matrixCalculators.push_back(new JAbund());
 						}else if (Estimators[i] == "sorabund") { 
 							matrixCalculators.push_back(new SorAbund());
@@ -167,10 +203,62 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
 							matrixCalculators.push_back(new ThetaYC());
 						}else if (Estimators[i] == "thetan") { 
 							matrixCalculators.push_back(new ThetaN());
+						}else if (Estimators[i] == "kstest") { 
+							matrixCalculators.push_back(new KSTest());
+						}else if (Estimators[i] == "sharednseqs") { 
+							matrixCalculators.push_back(new SharedNSeqs());
+						}else if (Estimators[i] == "ochiai") { 
+							matrixCalculators.push_back(new Ochiai());
+						}else if (Estimators[i] == "anderberg") { 
+							matrixCalculators.push_back(new Anderberg());
+						}else if (Estimators[i] == "kulczynski") { 
+							matrixCalculators.push_back(new Kulczynski());
+						}else if (Estimators[i] == "kulczynskicody") { 
+							matrixCalculators.push_back(new KulczynskiCody());
+						}else if (Estimators[i] == "lennon") { 
+							matrixCalculators.push_back(new Lennon());
 						}else if (Estimators[i] == "morisitahorn") { 
 							matrixCalculators.push_back(new MorHorn());
 						}else if (Estimators[i] == "braycurtis") { 
 							matrixCalculators.push_back(new BrayCurtis());
+						}else if (Estimators[i] == "whittaker") { 
+							matrixCalculators.push_back(new Whittaker());
+						}else if (Estimators[i] == "odum") { 
+							matrixCalculators.push_back(new Odum());
+						}else if (Estimators[i] == "canberra") { 
+							matrixCalculators.push_back(new Canberra());
+						}else if (Estimators[i] == "structeuclidean") { 
+							matrixCalculators.push_back(new StructEuclidean());
+						}else if (Estimators[i] == "structchord") { 
+							matrixCalculators.push_back(new StructChord());
+						}else if (Estimators[i] == "hellinger") { 
+							matrixCalculators.push_back(new Hellinger());
+						}else if (Estimators[i] == "manhattan") { 
+							matrixCalculators.push_back(new Manhattan());
+						}else if (Estimators[i] == "structpearson") { 
+							matrixCalculators.push_back(new StructPearson());
+						}else if (Estimators[i] == "soergel") { 
+							matrixCalculators.push_back(new Soergel());
+						}else if (Estimators[i] == "spearman") { 
+							matrixCalculators.push_back(new Spearman());
+						}else if (Estimators[i] == "structkulczynski") { 
+							matrixCalculators.push_back(new StructKulczynski());
+						}else if (Estimators[i] == "speciesprofile") { 
+							matrixCalculators.push_back(new SpeciesProfile());
+						}else if (Estimators[i] == "hamming") { 
+							matrixCalculators.push_back(new Hamming());
+						}else if (Estimators[i] == "structchi2") { 
+							matrixCalculators.push_back(new StructChi2());
+						}else if (Estimators[i] == "gower") { 
+							matrixCalculators.push_back(new Gower());
+						}else if (Estimators[i] == "memchi2") { 
+							matrixCalculators.push_back(new MemChi2());
+						}else if (Estimators[i] == "memchord") { 
+							matrixCalculators.push_back(new MemChord());
+						}else if (Estimators[i] == "memeuclidean") { 
+							matrixCalculators.push_back(new MemEuclidean());
+						}else if (Estimators[i] == "mempearson") { 
+							matrixCalculators.push_back(new MemPearson());
 						}
 					}
 				}
@@ -389,6 +477,14 @@ int MatrixOutputCommand::process(vector<SharedRAbundVector*> thisLookup){
 								subset.clear(); //clear out old pair of sharedrabunds
 								//add new pair of sharedrabunds
 								subset.push_back(thisLookup[k]); subset.push_back(thisLookup[l]); 
+								
+								//if this calc needs all groups to calculate the pair load all groups
+								if (matrixCalculators[i]->getNeedsAll()) { 
+									//load subset with rest of lookup for those calcs that need everyone to calc for a pair
+									for (int w = 0; w < thisLookup.size(); w++) {
+										if ((w != k) && (w != l)) { subset.push_back(thisLookup[w]); }
+									}
+								}
 								
 								data = matrixCalculators[i]->getValues(subset); //saves the calculator outputs
 								//save values in similarity matrix

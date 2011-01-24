@@ -747,6 +747,14 @@ int TreeGroupCommand::process(vector<SharedRAbundVector*> thisLookup) {
 								//add new pair of sharedrabunds
 								subset.push_back(thisLookup[k]); subset.push_back(thisLookup[l]); 
 								
+								//if this calc needs all groups to calculate the pair load all groups
+								if (treeCalculators[i]->getNeedsAll()) { 
+									//load subset with rest of lookup for those calcs that need everyone to calc for a pair
+									for (int w = 0; w < thisLookup.size(); w++) {
+										if ((w != k) && (w != l)) { subset.push_back(thisLookup[w]); }
+									}
+								}
+								
 								data = treeCalculators[i]->getValues(subset); //saves the calculator outputs
 						//cout << thisLookup[k]->getGroup() << '\t' << thisLookup[l]->getGroup() << '\t' << (1.0 - data[0]) << endl;
 								if (m->control_pressed) { return 1; }
