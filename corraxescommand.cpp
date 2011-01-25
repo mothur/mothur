@@ -190,7 +190,7 @@ CorrAxesCommand::CorrAxesCommand(string option)  {
 
 void CorrAxesCommand::help(){
 	try {
-		m->mothurOut("The corr.axes command reads a shared or relabund file as well as a pcoa file and calculates the correlation coefficient.\n");
+		m->mothurOut("The corr.axes command reads a shared, relabund or metadata file as well as an axes file and calculates the correlation coefficient.\n");
 		m->mothurOut("The corr.axes command parameters are shared, relabund, axes, metadata, groups, method, numaxes and label.  The shared, relabund or metadata and axes parameters are required.  If shared is given the relative abundance is calculated.\n");
 		m->mothurOut("The groups parameter allows you to specify which of the groups you would like included. The group names are separated by dashes.\n");
 		m->mothurOut("The label parameter allows you to select what distance level you would like used, if none is given the first distance is used.\n");

@@ -111,7 +111,7 @@ PCACommand::PCACommand(string option)  {
 			metric = m->isTrue(temp); 
 			
 			label = validParameter.validFile(parameters, "label", false);			
-			if (label == "not found") { label = ""; m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine();  }	
+			if (label == "not found") { label = ""; labels = globaldata->labels; if(labels.size() == 0) {  m->mothurOut("You did not provide a label, I will use the first label in your inputfile."); m->mothurOutEndLine(); } }
 			else { m->splitAtDash(label, labels); }
 			
 			groups = validParameter.validFile(parameters, "groups", false);			
@@ -130,7 +130,7 @@ PCACommand::PCACommand(string option)  {
 //**********************************************************************************************************************
 void PCACommand::help(){
 	try {
-		m->mothurOut("The pca command can only be run after a successful read.otu command."); m->mothurOutEndLine();
+		m->mothurOut("The pca command can only be run after a successful read.otu command of a shared or relabund file."); m->mothurOutEndLine();
 		m->mothurOut("The pca command parameters are label, groups and metric. No parameters are required."); m->mothurOutEndLine();
 		m->mothurOut("The label parameter is used to analyze specific labels in your input. Default is the first label in your shared or relabund file. Multpile labels may be separated by dashes.\n");
 		m->mothurOut("The groups parameter allows you to specify which groups you would like analyzed. Groupnames are separated by dashes.\n");

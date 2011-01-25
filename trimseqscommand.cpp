@@ -267,24 +267,31 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 
 void TrimSeqsCommand::help(){
 	try {
-		m->mothurOut("The trim.seqs command reads a fastaFile and creates .....\n");
-		m->mothurOut("The trim.seqs command parameters are fasta, flip, oligos, group, maxambig, maxhomop, minlength, maxlength, qfile, qthreshold, qaverage, diffs, qtrim and allfiles.\n");
+		m->mothurOut("The trim.seqs command reads a fastaFile and creates 2 new fasta files, .trim.fasta and scrap.fasta, as well as group files if you provide and oligos file.\n");
+		m->mothurOut("The .trim.fasta contains sequences that meet your requirements, and the .scrap.fasta contains those which don't.\n");
+		m->mothurOut("The trim.seqs command parameters are fasta, flip, oligos, group, maxambig, maxhomop, minlength, maxlength, qfile, qthreshold, qaverage, diffs, qtrim, keepfirst, removelast and allfiles.\n");
 		m->mothurOut("The fasta parameter is required.\n");
 		m->mothurOut("The group parameter allows you to enter a group file for your fasta file.\n");
 		m->mothurOut("The flip parameter will output the reverse compliment of your trimmed sequence. The default is false.\n");
-		m->mothurOut("The oligos parameter .... The default is "".\n");
-		m->mothurOut("The maxambig parameter .... The default is -1.\n");
-		m->mothurOut("The maxhomop parameter .... The default is 0.\n");
-		m->mothurOut("The minlength parameter .... The default is 0.\n");
-		m->mothurOut("The maxlength parameter .... The default is 0.\n");
+		m->mothurOut("The oligos parameter allows you to provide an oligos file.\n");
+		m->mothurOut("The maxambig parameter allows you to set the maximum number of ambigious bases allowed. The default is -1.\n");
+		m->mothurOut("The maxhomop parameter allows you to set a maximum homopolymer length. \n");
+		m->mothurOut("The minlength parameter allows you to set and minimum sequence length. \n");
+		m->mothurOut("The maxlength parameter allows you to set and maximum sequence length. \n");
 		m->mothurOut("The tdiffs parameter is used to specify the total number of differences allowed in the sequence. The default is pdiffs + bdiffs.\n");
 		m->mothurOut("The bdiffs parameter is used to specify the number of differences allowed in the barcode. The default is 0.\n");
 		m->mothurOut("The pdiffs parameter is used to specify the number of differences allowed in the primer. The default is 0.\n");
-		m->mothurOut("The qfile parameter .....\n");
-		m->mothurOut("The qthreshold parameter .... The default is 0.\n");
-		m->mothurOut("The qaverage parameter .... The default is 0.\n");
-		m->mothurOut("The allfiles parameter .... The default is F.\n");
-		m->mothurOut("The qtrim parameter .... The default is F.\n");
+		m->mothurOut("The qfile parameter allows you to provide a quality file.\n");
+		m->mothurOut("The qthreshold parameter allows you to set a minimum quality score allowed. \n");
+		m->mothurOut("The qaverage parameter allows you to set a minimum average quality score allowed. \n");
+		m->mothurOut("The qwindowsize parameter allows you to set a number of bases in a window. Default=50.\n");
+		m->mothurOut("The qwindowaverage parameter allows you to set a minimum average quality score allowed over a window. \n");
+		m->mothurOut("The rollaverage parameter allows you to set a minimum rolling average quality score allowed over a window. \n");
+		m->mothurOut("The qstepsize parameter allows you to set a number of bases to move the window over. Default=1.\n");
+		m->mothurOut("The allfiles parameter will create separate group and fasta file for each grouping. The default is F.\n");
+		m->mothurOut("The qtrim parameter will trim sequence from the point that they fall below the qthreshold and put it in the .trim file if set to true. The default is F.\n");
+		m->mothurOut("The keepfirst parameter trims the sequence to the first keepfirst number of bases after the barcode or primers are removed, before the sequence is checked to see if it meets the other requirements. \n");
+		m->mothurOut("The removelast removes the last removelast number of bases after the barcode or primers are removed, before the sequence is checked to see if it meets the other requirements.\n");
 		m->mothurOut("The trim.seqs command should be in the following format: \n");
 		m->mothurOut("trim.seqs(fasta=yourFastaFile, flip=yourFlip, oligos=yourOligos, maxambig=yourMaxambig,  \n");
 		m->mothurOut("maxhomop=yourMaxhomop, minlength=youMinlength, maxlength=yourMaxlength)  \n");	
