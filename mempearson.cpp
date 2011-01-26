@@ -24,10 +24,11 @@ EstOutput MemPearson::getValues(vector<SharedRAbundVector*> shared) {
 			if (shared[1]->getAbundance(i) != 0) { nonZeroB++; }
 		}
 		
-		double numTerm1 = 0.0;
-		double numTerm2 = 0.0;
+		double numTerm = 0.0;
 		double denomTerm1 = 0.0;
 		double denomTerm2 = 0.0;
+		double averageA = nonZeroA / (float) numOTUS;
+		double averageB = nonZeroB / (float) numOTUS;
 		
 		for (int i = 0; i < shared[0]->getNumBins(); i++) { 
 			int Aij =  shared[0]->getAbundance(i);
@@ -36,21 +37,18 @@ EstOutput MemPearson::getValues(vector<SharedRAbundVector*> shared) {
 			if (Aij > 0) { Aij = 1; }
 			if (Bij > 0) { Bij = 1; }
 			
-			numTerm1 += (Aij - (nonZeroA / (float) numOTUS));
-			numTerm2 += (Bij - (nonZeroB / (float) numOTUS));
-			
-			denomTerm1 += ((Aij - (nonZeroA / (float) numOTUS)) * (Aij - (nonZeroA / (float) numOTUS)));
-			denomTerm2 += ((Bij - (nonZeroB / (float) numOTUS)) * (Bij - (nonZeroB / (float) numOTUS)));
+			numTerm += ((Aij - averageA) * (Bij - averageB));
+			denomTerm1 += ((Aij - averageA) * (Aij - averageA));
+			denomTerm2 += ((Bij - averageB) * (Bij - averageB));
 		}
 		
 		denomTerm1 = sqrt(denomTerm1);
 		denomTerm2 = sqrt(denomTerm2);
 		
 		double denom = denomTerm1 * denomTerm2;
-		double numerator = numTerm1 * numTerm2;
 		
 		if (denom != 0) { 
-			data[0] = 1.0 - (numerator / denom);
+			data[0] = 1.0 - (numTerm / denom);
 		}else {
 			data[0] = 1.0;
 		}
