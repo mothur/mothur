@@ -551,6 +551,7 @@ int RemoveLineageCommand::readTax(){
 			
 			//if the users file contains confidence scores we want to ignore them when searching for the taxons, unless the taxon has them
 			if (!taxonsHasConfidence) {
+				
 				int hasConfidences = tax.find_first_of('(');
 				if (hasConfidences != string::npos) { 
 					newtax = removeConfidences(tax);
@@ -568,7 +569,7 @@ int RemoveLineageCommand::readTax(){
 			}else{//if taxons has them and you don't them remove taxons
 				int hasConfidences = tax.find_first_of('(');
 				if (hasConfidences == string::npos) { 
-					
+				
 					int pos = newtax.find(noConfidenceTaxons);
 					
 					if (pos == string::npos) { 
@@ -579,7 +580,7 @@ int RemoveLineageCommand::readTax(){
 					}
 				}else { //both have confidences so we want to make sure the users confidences are greater then or equal to the taxons
 					//first remove confidences from both and see if the taxonomy exists
-					
+				
 					string noNewTax = tax;
 					int hasConfidences = tax.find_first_of('(');
 					if (hasConfidences != string::npos) { 
@@ -671,8 +672,14 @@ vector< map<string, int> > RemoveLineageCommand::getTaxons(string tax) {
 				int openParen = taxon.find_first_of('(');
 				int closeParen = taxon.find_last_of(')');
 				
-				string newtaxon = taxon.substr(0, openParen); //rip off confidence
-				string confidence = taxon.substr((openParen+1), (closeParen-openParen-1));  
+				string newtaxon, confidence;
+				if ((openParen != string::npos) && (closeParen != string::npos)) {
+					newtaxon = taxon.substr(0, openParen); //rip off confidence
+					confidence = taxon.substr((openParen+1), (closeParen-openParen-1));  
+				}else{
+					newtaxon = taxon;
+					confidence = "0";
+				}
 				int con = 0;
 				convert(confidence, con);
 				

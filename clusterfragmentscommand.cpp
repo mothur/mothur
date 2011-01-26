@@ -213,7 +213,7 @@ int ClusterFragmentsCommand::execute(){
 					if (alignSeqs[j].active) {  //this sequence has not been merged yet
 						
 						string jBases = alignSeqs[j].seq.getUnaligned();
-												
+													
 						if (isFragment(iBases, jBases)) {
 							//merge
 							alignSeqs[i].names += ',' + alignSeqs[j].names;
@@ -291,7 +291,7 @@ bool ClusterFragmentsCommand::isFragment(string seq1, string seq2){
 				int percentDiff = floor((seq2.length() * (percent / 100.0)));
 				if (percentDiff < totalDiffs) { totalDiffs = percentDiff; }
 			}
-				
+			
 			Alignment* alignment = new NeedlemanOverlap(-1.0, 1.0, -1.0, (seq1.length()+totalDiffs+1));
 							
 			//use needleman to align 
@@ -314,6 +314,7 @@ bool ClusterFragmentsCommand::isFragment(string seq1, string seq2){
 			}
 			
 			if (numDiffs <= totalDiffs) { fragment = true; }
+			
 		}
 		
 		return fragment;
