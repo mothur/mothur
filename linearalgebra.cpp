@@ -372,6 +372,9 @@ double LinearAlgebra::calcPearson(vector< vector<double> >& euclidDists, vector<
 		double denom = (sqrt(denomTerm1) * sqrt(denomTerm2));
 		double r = numerator / denom;
 		
+		//divide by zero error
+		if (isnan(r) || isinf(r)) { r = 0.0; }
+		
 		return r;
 		
 	}

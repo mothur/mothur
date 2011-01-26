@@ -677,8 +677,14 @@ vector< map<string, int> > GetLineageCommand::getTaxons(string tax) {
 				int openParen = taxon.find_first_of('(');
 				int closeParen = taxon.find_last_of(')');
 				
-				string newtaxon = taxon.substr(0, openParen); //rip off confidence
-				string confidence = taxon.substr((openParen+1), (closeParen-openParen-1));  
+				string newtaxon, confidence;
+				if ((openParen != string::npos) && (closeParen != string::npos)) {
+					newtaxon = taxon.substr(0, openParen); //rip off confidence
+					confidence = taxon.substr((openParen+1), (closeParen-openParen-1));  
+				}else{
+					newtaxon = taxon;
+					confidence = "0";
+				} 
 				int con = 0;
 				convert(confidence, con);
 				

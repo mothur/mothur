@@ -24,7 +24,7 @@ EstOutput Odum::getValues(vector<SharedRAbundVector*> shared) {
 			int Bij = shared[1]->getAbundance(i);
 			
 			sumNum += abs(Aij - Bij);
-			sumDenom += Aij + Bij;
+			sumDenom += (Aij + Bij);
 		}
 		
 		data[0] = sumNum / sumDenom;

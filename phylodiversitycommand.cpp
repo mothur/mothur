@@ -596,3 +596,6 @@ vector<float> PhyloDiversityCommand::calcBranchLength(Tree* t, int leaf, map< st
 	}
 }
 //**********************************************************************************************************************
+
+
+
