@@ -188,8 +188,6 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 			if (accnosfile == "not open") { abort = true; }
 			else if (accnosfile == "not found") {  accnosfile = "";  m->mothurOut("You must provide an accnos file."); m->mothurOutEndLine(); abort = true; }	
 			
-			accnosfile2 = validParameter.validFile(parameters, "accnos2", true);
-			if (accnosfile2 == "not open") { abort = true; }
 			if (accnosfile2 == "not found") { accnosfile2 = ""; }
 			
 			fastafile = validParameter.validFile(parameters, "fasta", true);

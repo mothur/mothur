@@ -283,11 +283,11 @@ int CorrAxesCommand::execute(){
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
 		//output headings
-		if (metadatafile == "") {  out << "OTU\t";	}
-		else {  out << "Feature\t";						}
+		if (metadatafile == "") {  out << "OTU";	}
+		else {  out << "Feature";						}
 
-		for (int i = 0; i < numaxes; i++) { out << "axis" << (i+1) << '\t'; }
-		out << endl;
+		for (int i = 0; i < numaxes; i++) { out << '\t' << "axis" << (i+1); }
+		out << "\tlength" << endl;
 		
 		if (method == "pearson")		{  calcPearson(axes, out);	}
 		else if (method == "spearman")	{  calcSpearman(axes, out); }
@@ -329,9 +329,9 @@ int CorrAxesCommand::calcPearson(map<string, vector<float> >& axes, ofstream& ou
 	   //for each otu
 	   for (int i = 0; i < lookupFloat[0]->getNumBins(); i++) {
 		   
-		   if (metadatafile == "") {  out << i+1 << '\t';	}
-		   else {  out << metadataLabels[i] << '\t';		}
-		   
+		   if (metadatafile == "") {  out << i+1;	}
+		   else {  out << metadataLabels[i];		}
+		   		   
 		   //find the averages this otu - Y
 		   float sumOtu = 0.0;
 		   for (int j = 0; j < lookupFloat.size(); j++) {
@@ -339,6 +339,8 @@ int CorrAxesCommand::calcPearson(map<string, vector<float> >& axes, ofstream& ou
 		   }
 		   float Ybar = sumOtu / (float) lookupFloat.size();
 		   
+		   vector<float> rValues(averageAxes.size());
+
 		   //find r value for each axis
 		   for (int k = 0; k < averageAxes.size(); k++) {
 			   
@@ -358,11 +360,15 @@ int CorrAxesCommand::calcPearson(map<string, vector<float> >& axes, ofstream& ou
 			   double denom = (sqrt(denomTerm1) * sqrt(denomTerm2));
 			   
 			   r = numerator / denom;
-			   
-			   out << r << '\t'; 
+			   rValues[k] = r;
+			   out << '\t' << r; 
 		   }
 		   
-		   out << endl;
+		   double sum = 0;
+		   for(int k=0;k<rValues.size();k++){
+			   sum += rValues[k] * rValues[k];
+		   }
+		   out << '\t' << sqrt(sum) << endl;
 	   }
 	   	   
 	   return 0;
@@ -422,8 +428,8 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 		//for each otu
 		for (int i = 0; i < lookupFloat[0]->getNumBins(); i++) {
 			
-			if (metadatafile == "") {  out << i+1 << '\t';	}
-			else {  out << metadataLabels[i] << '\t';		}
+			if (metadatafile == "") {  out << i+1;	}
+			else {  out << metadataLabels[i];		}
 			
 			//find the ranks of this otu - Y
 			vector<spearmanRank> otuScores;
@@ -458,6 +464,7 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 				}
 			}
 			
+			vector<double> pValues(numaxes);
 			//calc spearman ranks for each axis for this otu
 			for (int j = 0; j < numaxes; j++) {
 				
@@ -473,11 +480,16 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 				int n = lookupFloat.size();
 				double p = 1.0 - ((6 * di) / (float) (n * ((n*n) - 1)));
 				
-				out << p << '\t';
+				out  << '\t' << p;
+				pValues[j] = p;
+
 			}
-			
-			
-			out << endl;
+
+			double sum = 0;
+			for(int k=0;k<numaxes;k++){
+				sum += pValues[k] * pValues[k];
+			}
+			out << '\t' << sqrt(sum) << endl;
 		}
 		
 		return 0;
@@ -534,8 +546,8 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 		//for each otu
 		for (int i = 0; i < lookupFloat[0]->getNumBins(); i++) {
 		
-			if (metadatafile == "") {  out << i+1 << '\t';	}
-			else {  out << metadataLabels[i] << '\t';		}
+			if (metadatafile == "") {  out << i+1;	}
+			else {  out << metadataLabels[i];		}
 			
 			//find the ranks of this otu - Y
 			vector<spearmanRank> otuScores;
@@ -569,6 +581,7 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 					}
 				}
 			}
+			vector<double> pValues(numaxes);
 			
 			//calc spearman ranks for each axis for this otu
 			for (int j = 0; j < numaxes; j++) {
@@ -597,10 +610,16 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 				
 				double p = ( (4 * P) / (float) (n * (n - 1)) ) - 1.0;
 				
-				out << p << '\t';
+				out << '\t' << p;
+				pValues[j] = p;
+
 			}
 			
-			out << endl;
+			double sum = 0;
+			for(int k=0;k<numaxes;k++){
+				sum += pValues[k] * pValues[k];
+			}
+			out << '\t' << sqrt(sum) << endl;
 		}
 		
 		return 0;

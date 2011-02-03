@@ -49,8 +49,6 @@ public:
 		
 		if(length == 0)	{	dist = 1.0000;								}
 		else			{	dist = ((double)diff  / (double)length);	}
-
-		
 	}
 };
 
