@@ -382,6 +382,8 @@ int CorrAxesCommand::calcPearson(map<string, vector<float> >& axes, ofstream& ou
 int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& out) {
 	try {
 		
+		bool hasTies = false;
+		
 		//format data
 		vector< vector<spearmanRank> > scores; scores.resize(numaxes);
 		for (map<string, vector<float> >::iterator it = axes.begin(); it != axes.end(); it++) {
@@ -396,6 +398,7 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 		for (int i = 0; i < numaxes; i++) {  sort(scores[i].begin(), scores[i].end(), compareSpearman); }
 		
 		//find ranks of xi in each axis
+		vector<float> averageX; averageX.resize(numaxes, 0.0);
 		map<string, vector<float> > rankAxes;
 		for (int i = 0; i < numaxes; i++) {
 			
@@ -407,6 +410,8 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 				
 				if (j != scores.size()-1) { // you are not the last so you can look ahead
 					if (scores[i][j].score != scores[i][j+1].score) { // you are done with ties, rank them and continue
+						if (ties.size() > 1) { hasTies = true; }
+						averageX[i] += rankTotal;
 						for (int k = 0; k < ties.size(); k++) {
 							float thisrank = rankTotal / (float) ties.size();
   							rankAxes[ties[k].name].push_back(thisrank);
@@ -415,12 +420,16 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 						rankTotal = 0;
 					}
 				}else { // you are the last one
+					if (ties.size() > 1) { hasTies = true; }
+					averageX[i] += rankTotal;
 					for (int k = 0; k < ties.size(); k++) {
 						float thisrank = rankTotal / (float) ties.size();
 						rankAxes[ties[k].name].push_back(thisrank);
 					}
 				}
 			}
+			
+			averageX[i] /= (float) scores[i].size();
 		}
 		
 				
@@ -442,6 +451,7 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 			
 			map<string, float> rankOtus;
 			vector<spearmanRank> ties;
+			float averageY = 0.0;
 			int rankTotal = 0;
 			for (int j = 0; j < otuScores.size(); j++) {
 				rankTotal += j;
@@ -449,6 +459,8 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 				
 				if (j != scores.size()-1) { // you are not the last so you can look ahead
 					if (otuScores[j].score != otuScores[j+1].score) { // you are done with ties, rank them and continue
+						if (ties.size() > 1) { hasTies = true; }
+						averageY += rankTotal;
 						for (int k = 0; k < ties.size(); k++) {
 							float thisrank = rankTotal / (float) ties.size();
   							rankOtus[ties[k].name] = thisrank;
@@ -457,6 +469,8 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 						rankTotal = 0;
 					}
 				}else { // you are the last one
+					if (ties.size() > 1) { hasTies = true; }
+					averageY += rankTotal;
 					for (int k = 0; k < ties.size(); k++) {
 						float thisrank = rankTotal / (float) ties.size();
 						rankOtus[ties[k].name] = thisrank;
@@ -464,32 +478,44 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 				}
 			}
 			
-			vector<double> pValues(numaxes);
+
+			averageY /= (float) otuScores.size();
+			//hasTies = false;		
+
 			//calc spearman ranks for each axis for this otu
 			for (int j = 0; j < numaxes; j++) {
 				
 				double di = 0.0;
+				double denom1 = 0.0;
+				double denom2 = 0.0;
 				for (int k = 0; k < lookupFloat.size(); k++) {
 					
 					float xi = rankAxes[lookupFloat[k]->getGroup()][j];
 					float yi = rankOtus[lookupFloat[k]->getGroup()];
 					
-					di += ((xi - yi) * (xi - yi));
+					if (hasTies) {
+						di += ((xi - averageX[j]) * (yi - averageY));
+						denom1 += ((xi - averageX[j]) * (xi - averageX[j]));
+						denom2 += ((yi - averageY) * (yi - averageY));
+					}else {
+						di += ((xi - yi) * (xi - yi));
+					}
 				}
 				
-				int n = lookupFloat.size();
-				double p = 1.0 - ((6 * di) / (float) (n * ((n*n) - 1)));
+				double p = 0.0;
+				
+				if (hasTies) {
+					double denom = sqrt((denom1 * denom2));
+					p = di / denom;
+				}else {
+					int n = lookupFloat.size();
+					p = 1.0 - ((6 * di) / (float) (n * ((n*n) - 1)));
+				}
 				
 				out  << '\t' << p;
-				pValues[j] = p;
-
 			}
 
-			double sum = 0;
-			for(int k=0;k<numaxes;k++){
-				sum += pValues[k] * pValues[k];
-			}
-			out << '\t' << sqrt(sum) << endl;
+			out << endl;
 		}
 		
 		return 0;

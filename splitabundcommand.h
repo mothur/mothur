@@ -42,7 +42,7 @@ private:
 	int splitList(ListVector*);
 	int splitNames(); //namefile
 	int writeNames(); 
-	int writeList(ListVector*); 
+	int writeList(ListVector*, string); 
 	int writeAccnos(string); 
 	int parseGroup(string); 
 	int parseFasta(string); 

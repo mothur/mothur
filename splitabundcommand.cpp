@@ -237,28 +237,6 @@ int SplitAbundCommand::execute(){
 		
 		if (listfile != "") { //you are using a listfile to determine abundance
 			if (outputDir == "") { outputDir = m->hasPath(listfile); }
-		
-			//remove old files so you can append later....
-			string fileroot = outputDir + m->getRootName(m->getSimpleName(listfile));
-			if (Groups.size() == 0) {
-				remove((fileroot + "rare.list").c_str());
-				remove((fileroot + "abund.list").c_str());
-				
-				outputNames.push_back((fileroot + "rare.list"));
-				outputNames.push_back((fileroot + "abund.list"));
-				outputTypes["list"].push_back((fileroot + "rare.list"));
-				outputTypes["list"].push_back((fileroot + "abund.list"));
-			}else{
-				for (int i=0; i<Groups.size(); i++) {
-					remove((fileroot + Groups[i] + ".rare.list").c_str());
-					remove((fileroot + Groups[i] + ".abund.list").c_str());
-					
-					outputNames.push_back((fileroot + Groups[i] + ".rare.list"));
-					outputNames.push_back((fileroot + Groups[i] + ".abund.list"));
-					outputTypes["list"].push_back((fileroot + Groups[i] + ".rare.list"));
-					outputTypes["list"].push_back((fileroot + Groups[i] + ".abund.list"));
-				}
-			}
 			
 			//if the users enters label "0.06" and there is no "0.06" in their file use the next lowest label.
 			set<string> processedLabels;
@@ -390,9 +368,11 @@ int SplitAbundCommand::splitList(ListVector* thisList) {
 			}
 		}//end for
 
-		writeList(thisList);
 		
 		string tag = thisList->getLabel() + ".";
+		
+		writeList(thisList, tag);
+		
 		if (groupfile != "")				{  parseGroup(tag);		}
 		if (accnos)							{  writeAccnos(tag);	}
 		if (fastafile != "")				{  parseFasta(tag);		}
@@ -406,7 +386,7 @@ int SplitAbundCommand::splitList(ListVector* thisList) {
 	}
 }
 /**********************************************************************************************************************/
-int SplitAbundCommand::writeList(ListVector* thisList) { 
+int SplitAbundCommand::writeList(ListVector* thisList, string tag) { 
 	try {
 		
 		map<string, ofstream*> filehandles;
@@ -428,13 +408,13 @@ int SplitAbundCommand::writeList(ListVector* thisList) {
 			ofstream aout;
 			ofstream rout;
 			
-			string rare = outputDir + m->getRootName(m->getSimpleName(listfile))  + "rare.list";
-			m->openOutputFileAppend(rare, rout);
-			//outputNames.push_back(rare);
+			string rare = outputDir + m->getRootName(m->getSimpleName(listfile)) + tag + "rare.list";
+			m->openOutputFile(rare, rout);
+			outputNames.push_back(rare); outputTypes["list"].push_back(rare);
 			
-			string abund = outputDir + m->getRootName(m->getSimpleName(listfile))  + "abund.list";
-			m->openOutputFileAppend(abund, aout);
-			//outputNames.push_back(abund);
+			string abund = outputDir + m->getRootName(m->getSimpleName(listfile)) + tag + "abund.list";
+			m->openOutputFile(abund, aout);
+			outputNames.push_back(abund); outputTypes["list"].push_back(abund);
 
 			if (rareNames.size() != 0)	{  rout << thisList->getLabel() << '\t' << numRareBins << '\t';		}
 			if (abundNames.size() != 0) {	aout << thisList->getLabel() << '\t' << numAbundBins << '\t';	}
@@ -470,8 +450,10 @@ int SplitAbundCommand::writeList(ListVector* thisList) {
 				temp2 = new ofstream;
 				filehandles[Groups[i]+".abund"] = temp2;
 				
-				m->openOutputFileAppend(fileroot + Groups[i] + ".rare.list", *(filehandles[Groups[i]+".rare"]));
-				m->openOutputFileAppend(fileroot + Groups[i] + ".abund.list", *(filehandles[Groups[i]+".abund"]));
+				m->openOutputFile(fileroot + Groups[i] + tag + ".rare.list", *(filehandles[Groups[i]+".rare"]));
+				m->openOutputFile(fileroot + Groups[i] + tag + ".abund.list", *(filehandles[Groups[i]+".abund"]));
+				outputNames.push_back(fileroot + Groups[i] + tag + ".rare.list"); outputTypes["list"].push_back(fileroot + Groups[i] + tag + ".rare.list");
+				outputNames.push_back(fileroot + Groups[i] + tag + ".abund.list"); outputTypes["list"].push_back(fileroot + Groups[i] + tag + ".abund.list");
 			}
 			
 			map<string, string> groupVector;
