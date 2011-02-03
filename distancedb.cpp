@@ -11,14 +11,14 @@
 #include "database.hpp"
 #include "sequence.hpp"
 #include "distancedb.hpp"
-#include "eachgapdist.h"
+#include "onegapignore.h"
 
 /**************************************************************************************************/
 DistanceDB::DistanceDB() { 
 	try {
 		templateAligned = true;  
 		templateSeqsLength = 0; 
-		distCalculator = new eachGapDist();
+		distCalculator = new oneGapIgnoreTermGapDist();
 	}
 	catch(exception& e) {
 		m->errorOut(e, "DistanceDB", "DistanceDB");
@@ -29,7 +29,11 @@ DistanceDB::DistanceDB() {
 void DistanceDB::addSequence(Sequence seq) {
 	try {
 		//are the template sequences aligned
-		if (!isAligned(seq.getAligned())) { templateAligned = false; m->mothurOut(seq.getName() + " is not aligned. Sequences must be aligned to use the distance method."); m->mothurOutEndLine(); }
+		if (!isAligned(seq.getAligned())) {
+			templateAligned = false;
+			m->mothurOut(seq.getName() + " is not aligned. Sequences must be aligned to use the distance method.");
+			m->mothurOutEndLine(); 
+		}
 		
 		if (templateSeqsLength == 0) { templateSeqsLength = seq.getAligned().length(); }
 				
@@ -51,7 +55,11 @@ vector<int> DistanceDB::findClosestSequences(Sequence* query, int numWanted){
 		
 		searchScore = -1.0;
 	
-		if (numWanted > data.size()) { m->mothurOut("numwanted is larger than the number of template sequences, using "+ toString(data.size()) + "."); m->mothurOutEndLine(); numWanted = data.size(); }
+		if (numWanted > data.size()){
+			m->mothurOut("numwanted is larger than the number of template sequences, using "+ toString(data.size()) + ".");
+			m->mothurOutEndLine();
+			numWanted = data.size();
+		}
 		
 		if (sequence.length() != templateSeqsLength) { templateSameLength = false; }
 		
@@ -93,13 +101,13 @@ vector<int> DistanceDB::findClosestSequences(Sequence* query, int numWanted){
 						smallDist = dist;
 					}
 				}
-				
 				searchScore = smallDist;
 				topMatches.push_back(bestIndex);
 			}
 		
 		}else{
-			m->mothurOut("cannot find closest matches using distance method for " + query->getName() + " without aligned template sequences of the same length."); m->mothurOutEndLine();
+			m->mothurOut("cannot find closest matches using distance method for " + query->getName() + " without aligned template sequences of the same length.");
+			m->mothurOutEndLine();
 			exit(1);
 		}
 		

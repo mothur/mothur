@@ -58,10 +58,15 @@ private:
 	map<string,int> getWeights();
 	Compare getErrors(Sequence, Sequence);
 	void printErrorHeader();
-	void printErrorData(Compare);
-	
-	string queryFileName, referenceFileName, qualFileName, reportFileName, namesFileName, errorSummaryFileName, errorSeqFileName, outputDir;
+	void printErrorData(Compare, int);
+	void printSubMatrix();
+	void printErrorFRFile(map<char, vector<int> >, map<char, vector<int> >);
+	void printErrorQuality(map<char, vector<int> >);
+	void printQualityFR(vector<vector<int> >, vector<vector<int> >);
+
+	string queryFileName, referenceFileName, qualFileName, reportFileName, namesFileName, outputDir;
 	double threshold;
+	bool ignoreChimeras;
 	int numRefs;
 	ofstream errorSummaryFile, errorSeqFile;
 	vector<string> outputNames;
