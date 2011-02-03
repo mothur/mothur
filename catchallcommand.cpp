@@ -121,6 +121,11 @@ CatchAllCommand::CatchAllCommand(string option)  {
 			if (sharedfile == "not open") { sharedfile = ""; abort = true; }
 			else if (sharedfile == "not found") { sharedfile = "";   }
 			
+			//check for shared file loaded during read.otu
+			if (sharedfile == "") {
+				if (globaldata->getSharedFile() != "") { sharedfile = globaldata->getSharedFile(); }
+			}
+			
 			string label = validParameter.validFile(parameters, "label", false);			
 			if (label == "not found") { label = ""; }
 			else { 

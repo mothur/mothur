@@ -958,6 +958,12 @@
 				A7E9B75C12D37EC400DA6239 /* mothur.h */,
 				A7E9B75D12D37EC400DA6239 /* mothurout.cpp */,
 				A7E9B75E12D37EC400DA6239 /* mothurout.h */,
+				A7E9B76112D37EC400DA6239 /* nast.cpp */,
+				A7E9B76212D37EC400DA6239 /* nast.hpp */,
+				A7E9B76312D37EC400DA6239 /* nastreport.cpp */,
+				A7E9B76412D37EC400DA6239 /* nastreport.hpp */,
+				A7E9B76712D37EC400DA6239 /* noalign.cpp */,
+				A7E9B76812D37EC400DA6239 /* noalign.hpp */,
 				A7E9B76512D37EC400DA6239 /* needlemanoverlap.cpp */,
 				A7E9B76612D37EC400DA6239 /* needlemanoverlap.hpp */,
 				A7E9B77012D37EC400DA6239 /* observable.h */,
@@ -974,13 +980,9 @@
 				A7E9B7A912D37EC400DA6239 /* rarefact.cpp */,
 				A7E9B7AA12D37EC400DA6239 /* rarefact.h */,
 				A7E9B7AD12D37EC400DA6239 /* rarefactioncurvedata.h */,
+				7E6BE10812F710D8007ADDBE /* refchimeratest.h */,
+				7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */,
 				A7E9BA5312D39A5E00DA6239 /* read */,
-				A7E9B76112D37EC400DA6239 /* nast.cpp */,
-				A7E9B76212D37EC400DA6239 /* nast.hpp */,
-				A7E9B76312D37EC400DA6239 /* nastreport.cpp */,
-				A7E9B76412D37EC400DA6239 /* nastreport.hpp */,
-				A7E9B76712D37EC400DA6239 /* noalign.cpp */,
-				A7E9B76812D37EC400DA6239 /* noalign.hpp */,
 				A7E9B82312D37EC400DA6239 /* sharedutilities.cpp */,
 				A7E9B82412D37EC400DA6239 /* sharedutilities.h */,
 				A7E9B82D12D37EC400DA6239 /* singlelinkage.cpp */,
@@ -1014,8 +1016,6 @@
 		A7E9BA3812D3956100DA6239 /* commands */ = {
 			isa = PBXGroup;
 			children = (
-				7E6BE10812F710D8007ADDBE /* refchimeratest.h */,
-				7E6BE10912F710D8007ADDBE /* refchimeratest.cpp */,
 				A7E9B6AE12D37EC400DA6239 /* command.hpp */,
 				A7E9B65112D37EC300DA6239 /* aligncommand.cpp */,
 				A7E9B65212D37EC300DA6239 /* aligncommand.h */,
@@ -1598,7 +1598,7 @@
 			attributes = {
 				ORGANIZATIONNAME = "Schloss Lab";
 			};
-			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "Mothur" */;
+			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "mothur" */;
 			compatibilityVersion = "Xcode 3.1";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
@@ -2016,7 +2016,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "Mothur" */ = {
+		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "mothur" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1DEB928A08733DD80010E9CD /* Debug */,
