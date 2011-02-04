@@ -279,7 +279,7 @@ void AlignCommand::help(){
 
 int AlignCommand::execute(){
 	try {
-		if (abort == true) {	return 0;	}
+		if (abort == true) { return 0;	}
 
 		templateDB = new AlignmentDB(templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch);
 		int longestBase = templateDB->getLongestBase();

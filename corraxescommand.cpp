@@ -11,9 +11,14 @@
 #include "sharedutilities.h"
 
 //********************************************************************************************************************
-//sorts highes to lowest
+//sorts highest to lowest
 inline bool compareSpearman(spearmanRank left, spearmanRank right){
 	return (left.score > right.score);	
+} 
+//********************************************************************************************************************
+//sorts lowest to highest
+inline bool compareSpearmanReverse(spearmanRank left, spearmanRank right){
+	return (left.score < right.score);	
 } 
 //**********************************************************************************************************************
 vector<string> CorrAxesCommand::getValidParameters(){	
@@ -463,30 +468,7 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 			}
 		}
 		
-		/*cout << endl;	
-		lookupFloat.clear();
-		lookupFloat.resize(15);
-		for (int i = 0; i < lookupFloat.size(); i++) {
-			lookupFloat[i] = new SharedRAbundFloatVector();
-		}
-		lookupFloat[0]->push_back(0.2288227, "1a");  lookupFloat[0]->setGroup("1a");
-		lookupFloat[1]->push_back(0.7394062, "1b");  lookupFloat[1]->setGroup("1b");
-		lookupFloat[2]->push_back(0.4521187, "1c");  lookupFloat[2]->setGroup("1c");
-		lookupFloat[3]->push_back(0.1598630, "2a");  lookupFloat[3]->setGroup("2a");
-		lookupFloat[4]->push_back(0.09588156, "2b");  lookupFloat[4]->setGroup("2b");
-		
-		lookupFloat[5]->push_back(0.933174, "2c");  lookupFloat[5]->setGroup("2c");
-		lookupFloat[6]->push_back(0.3958304, "3a");  lookupFloat[6]->setGroup("3a");;
-		lookupFloat[7]->push_back(0.2364419, "3b");  lookupFloat[7]->setGroup("3b");
-		lookupFloat[8]->push_back(0.1697712, "3c");  lookupFloat[8]->setGroup("3c");
-		lookupFloat[9]->push_back(0.4077173, "4a");  lookupFloat[9]->setGroup("4a");
-		
-		lookupFloat[10]->push_back(0.6116547, "4b");  lookupFloat[10]->setGroup("4b");
-		lookupFloat[11]->push_back(0.9374322, "4c");  lookupFloat[11]->setGroup("4c");
-		lookupFloat[12]->push_back(0.852184, "5a");  lookupFloat[12]->setGroup("5a");
-		lookupFloat[13]->push_back(0.845094, "5b");  lookupFloat[13]->setGroup("5b");
-		lookupFloat[14]->push_back(0.5795778, "5c");  lookupFloat[14]->setGroup("5c");*/
-		
+				
 		//for each otu
 		for (int i = 0; i < lookupFloat[0]->getNumBins(); i++) {
 			
@@ -589,6 +571,25 @@ int CorrAxesCommand::calcSpearman(map<string, vector<float> >& axes, ofstream& o
 int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& out) {
 	try {
 		
+		numaxes = 1;
+		axes.clear();
+		 axes["1a"].push_back(1);
+		 axes["1b"].push_back(1);
+		 axes["1c"].push_back(1);
+		 axes["2a"].push_back(2);
+		 axes["2b"].push_back(2);
+		 axes["2c"].push_back(2);
+		 axes["3a"].push_back(3);
+		 axes["3b"].push_back(3);
+		 axes["3c"].push_back(3);
+		 axes["4a"].push_back(4);
+		 axes["4b"].push_back(4);
+		 axes["4c"].push_back(4);
+		 axes["5a"].push_back(5);
+		 axes["5b"].push_back(5);
+		 axes["5c"].push_back(5);
+		
+		
 		//format data
 		vector< vector<spearmanRank> > scores; scores.resize(numaxes);
 		for (map<string, vector<float> >::iterator it = axes.begin(); it != axes.end(); it++) {
@@ -628,6 +629,32 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 				}
 			}
 		}
+		cout << "axes ranks = ";
+		for(int i = 0; i < scores[0].size(); i++) {  cout << scores[0][i].score << '\t'; }
+		cout << endl;	
+		 lookupFloat.clear();
+		 lookupFloat.resize(15);
+		 for (int i = 0; i < lookupFloat.size(); i++) {
+		 lookupFloat[i] = new SharedRAbundFloatVector();
+		 }
+		 lookupFloat[0]->push_back(0.2288227, "1a");  lookupFloat[0]->setGroup("1a");
+		 lookupFloat[1]->push_back(0.7394062, "1b");  lookupFloat[1]->setGroup("1b");
+		 lookupFloat[2]->push_back(0.4521187, "1c");  lookupFloat[2]->setGroup("1c");
+		 lookupFloat[3]->push_back(0.1598630, "2a");  lookupFloat[3]->setGroup("2a");
+		 lookupFloat[4]->push_back(0.09588156, "2b");  lookupFloat[4]->setGroup("2b");
+		 
+		 lookupFloat[5]->push_back(0.933174, "2c");  lookupFloat[5]->setGroup("2c");
+		 lookupFloat[6]->push_back(0.3958304, "3a");  lookupFloat[6]->setGroup("3a");;
+		 lookupFloat[7]->push_back(0.2364419, "3b");  lookupFloat[7]->setGroup("3b");
+		 lookupFloat[8]->push_back(0.1697712, "3c");  lookupFloat[8]->setGroup("3c");
+		 lookupFloat[9]->push_back(0.4077173, "4a");  lookupFloat[9]->setGroup("4a");
+		 
+		 lookupFloat[10]->push_back(0.6116547, "4b");  lookupFloat[10]->setGroup("4b");
+		 lookupFloat[11]->push_back(0.9374322, "4c");  lookupFloat[11]->setGroup("4c");
+		 lookupFloat[12]->push_back(0.852184, "5a");  lookupFloat[12]->setGroup("5a");
+		 lookupFloat[13]->push_back(0.845094, "5b");  lookupFloat[13]->setGroup("5b");
+		 lookupFloat[14]->push_back(0.5795778, "5c");  lookupFloat[14]->setGroup("5c");
+		
 		
 		//for each otu
 		for (int i = 0; i < lookupFloat[0]->getNumBins(); i++) {
@@ -667,35 +694,73 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 					}
 				}
 			}
+			
+			
 			vector<double> pValues(numaxes);
 			
 			//calc spearman ranks for each axis for this otu
 			for (int j = 0; j < numaxes; j++) {
 			
-				int P = 0;
-				//assemble otus ranks in same order as axis ranks
+				int numCoor = 0;
+				int numDisCoor = 0;
+				
+				//assemble otus ranks in same order as axis ranks, if ties, put in the best order possible
+				//NOTE: after this ordering the scores[j] indexes may not match the otus indexes within tied sections
+				//since we do not use the axes ranks except to order the otu ranks, I did not take the time to reorder the axes ranks
 				vector<spearmanRank> otus; 
+				vector<spearmanRank> otusTemp;
 				for (int l = 0; l < scores[j].size(); l++) {   
 					spearmanRank member(scores[j][l].name, rankOtus[scores[j][l].name]);
-					otus.push_back(member);
+					otusTemp.push_back(member);
+					
+					if (l != (scores[j].size()-1)) { // you are not the last so you can look ahead
+						if (scores[j][l].score != scores[j][l+1].score) { // you are done with ties, order them and continue
+							//order otus within tied section in the best way possible to make coor pairs
+							sort(otusTemp.begin(), otusTemp.end(), compareSpearmanReverse);
+							
+							//save order in otus
+							for (int h = 0; h < otusTemp.size(); h++) { ; otus.push_back(otusTemp[h]); }
+							
+							otusTemp.clear();
+						}
+					}else { // you are the last one
+						//order otus within tied section in the best way possible to make coor pairs
+						sort(otusTemp.begin(), otusTemp.end(), compareSpearmanReverse);
+					
+						//save order in otus
+						for (int h = 0; h < otusTemp.size(); h++) {  otus.push_back(otusTemp[h]); }
+					}
 				}
 				
+				cout << "otu ranks = ";
+				for (int h = 0; h < otus.size(); h++ ) { cout << otus[h].score << '\t'; }
+				cout << endl;
+				
+				int count = 0;
 				for (int l = 0; l < scores[j].size(); l++) {
 					
 					int numWithHigherRank = 0;
+					int numWithLowerRank = 0;
 					float thisrank = otus[l].score;
 					
 					for (int u = l; u < scores[j].size(); u++) {
 						if (otus[u].score > thisrank) { numWithHigherRank++; }
+						else if (otus[u].score < thisrank) { numWithLowerRank++; }
+						count++;
 					}
 					
-					P += numWithHigherRank;
+					numCoor += numWithHigherRank;
+					numDisCoor += numWithLowerRank;
 				}
 				
-				int n = lookupFloat.size();
+				//sample size
+				//int n = lookupFloat.size();
+				//comparing to yourself
+				count -= lookupFloat.size();
 				
-				double p = ( (4 * P) / (float) (n * (n - 1)) ) - 1.0;
-				
+				//double p = ( (4 * P) / (float) ((n * (n - 1)) - numTies) ) - 1.0;
+				double p = (numCoor - numDisCoor) / (float) count;
+				cout << "numCoor = " << numCoor << " numDisCoor = " << numDisCoor << " p = " << p << " count = " << count << endl;
 				out << '\t' << p;
 				pValues[j] = p;
 
