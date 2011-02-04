@@ -30,8 +30,8 @@ RefChimeraTest::RefChimeraTest(vector<Sequence>& refs, string chimeraReportFileN
 	
 	alignLength = referenceSeqs[0].length();
 
-	chimeraReportFile << "queryName\tbestRef\tbestSequenceMismatch\tleftParentChi,rightParentChi\tbreakPointChi\tminMismatchToChimera\t";
-	chimeraReportFile << "leftParentChi,middleParentTri,rightParentChi\tbreakPointTriA,breakPointTriB\tminMismatchToTrimera\tdistToBestMera\tnMera" << endl;
+	chimeraReportFile << "queryName\tbestRef\tbestSequenceMismatch\tleftParentChi,rightParentChi\tbreakPointChi\tminMismatchToChimera\tdistToBestMera\tnumParents";
+//	chimeraReportFile << "leftParentTri,middleParentTri,rightParentTri\tbreakPointTriA,breakPointTriB\tminMismatchToTrimera\tdistToBestMera\tnMera" << endl;
 
 }
 
@@ -54,8 +54,8 @@ int RefChimeraTest::analyzeQuery(string queryName, string querySeq){
 	int leftParentBi, rightParentBi, breakPointBi;
 	int minMismatchToChimera = getChimera(left, right, leftParentBi, rightParentBi, breakPointBi, singleLeft, bestLeft, singleRight, bestRight);
 	
-	int minMismatchToTrimera = MAXINT;
-	int leftParentTri, middleParentTri, rightParentTri, breakPointTriA, breakPointTriB;
+//	int minMismatchToTrimera = MAXINT;
+//	int leftParentTri, middleParentTri, rightParentTri, breakPointTriA, breakPointTriB;
 	
 	int nMera = 0;
 	string chimeraRefSeq = "";
@@ -65,17 +65,20 @@ int RefChimeraTest::analyzeQuery(string queryName, string querySeq){
 		chimeraRefSeq = referenceSeqs[bestMatch];
 	}
 	else {
-		
-		minMismatchToTrimera = getTrimera(left, right, leftParentTri, middleParentTri, rightParentTri, breakPointTriA, breakPointTriB, singleLeft, bestLeft, singleRight, bestRight);
 
-		if(minMismatchToChimera - minMismatchToTrimera <= 3){
-			nMera = 2;
-			chimeraRefSeq = stitchBimera(leftParentBi, rightParentBi, breakPointBi);
-		}
-		else{			
-			nMera = 3;
-			chimeraRefSeq = stitchTrimera(leftParentTri, middleParentTri, rightParentTri, breakPointTriA, breakPointTriB);
-		}
+		nMera = 2;
+		chimeraRefSeq = stitchBimera(leftParentBi, rightParentBi, breakPointBi);
+		
+//		minMismatchToTrimera = getTrimera(left, right, leftParentTri, middleParentTri, rightParentTri, breakPointTriA, breakPointTriB, singleLeft, bestLeft, singleRight, bestRight);
+//
+//		if(minMismatchToChimera - minMismatchToTrimera <= 3){
+//			nMera = 2;
+//			chimeraRefSeq = stitchBimera(leftParentBi, rightParentBi, breakPointBi);
+//		}
+//		else{			
+//			nMera = 3;
+//			chimeraRefSeq = stitchTrimera(leftParentTri, middleParentTri, rightParentTri, breakPointTriA, breakPointTriB);
+//		}
 		
 	}
 	double distToChimera = calcDistToChimera(querySeq, chimeraRefSeq);
@@ -86,12 +89,12 @@ int RefChimeraTest::analyzeQuery(string queryName, string querySeq){
 	chimeraReportFile << referenceNames[leftParentBi] << ',' << referenceNames[rightParentBi] << '\t' << breakPointBi << '\t';
 	chimeraReportFile << minMismatchToChimera << '\t';
 	
-	if(nMera == 1){
-		chimeraReportFile << "NA" << '\t' << "NA" << '\t' << "NA";
-	}
-	else{
-		chimeraReportFile << referenceNames[leftParentTri] << ',' << referenceNames[middleParentTri] << ',' << referenceNames[rightParentTri] << '\t' << breakPointTriA << ',' << breakPointTriB << '\t' << minMismatchToTrimera;	
-	}
+//	if(nMera == 1){
+//		chimeraReportFile << "NA" << '\t' << "NA" << '\t' << "NA";
+//	}
+//	else{
+//		chimeraReportFile << referenceNames[leftParentTri] << ',' << referenceNames[middleParentTri] << ',' << referenceNames[rightParentTri] << '\t' << breakPointTriA << ',' << breakPointTriB << '\t' << minMismatchToTrimera;	
+//	}
 	
 	chimeraReportFile << '\t' << distToChimera << '\t' << nMera << endl;
 		
