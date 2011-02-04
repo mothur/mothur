@@ -500,8 +500,10 @@ int CatchAllCommand::createSummaryFile(string file1, string label, ofstream& out
 	try {
 		
 		ifstream in;
-		m->openInputFile(file1, in);
+		int able = m->openInputFile(file1, in, "noerror");
 		
+		if (able == 1) {  m->mothurOut("[ERROR]: the catchall program did not run properly. Please check to make sure it is located in the same folder as your mothur executable.");m->mothurOutEndLine();  m->control_pressed = true; return 0; }
+			
 		if (!in.eof()) {
 			
 			string header = m->getline(in); m->gobble(in);

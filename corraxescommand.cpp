@@ -608,10 +608,10 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 			vector<spearmanRank*> ties;
 			int rankTotal = 0;
 			for (int j = 0; j < scores[i].size(); j++) {
-				rankTotal += j;
+				rankTotal += (j+1);
 				ties.push_back(&(scores[i][j]));
 				
-				if (j != scores.size()-1) { // you are not the last so you can look ahead
+				if (j != scores[i].size()-1) { // you are not the last so you can look ahead
 					if (scores[i][j].score != scores[i][j+1].score) { // you are done with ties, rank them and continue
 						for (int k = 0; k < ties.size(); k++) {
 							float thisrank = rankTotal / (float) ties.size();
@@ -648,10 +648,10 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 			vector<spearmanRank> ties;
 			int rankTotal = 0;
 			for (int j = 0; j < otuScores.size(); j++) {
-				rankTotal += j;
+				rankTotal += (j+1);
 				ties.push_back(otuScores[j]);
 				
-				if (j != scores.size()-1) { // you are not the last so you can look ahead
+				if (j != otuScores.size()-1) { // you are not the last so you can look ahead
 					if (otuScores[j].score != otuScores[j+1].score) { // you are done with ties, rank them and continue
 						for (int k = 0; k < ties.size(); k++) {
 							float thisrank = rankTotal / (float) ties.size();
