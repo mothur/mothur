@@ -321,6 +321,15 @@ int SplitGroupCommand::splitFasta() {
 			(*(filehandles[it3->first])).close();
 			delete it3->second;
 		}
+		
+		vector<string> newOutputNames;
+		//remove blank files
+		for (int i = 0; i < outputNames.size(); i++) {
+			if (m->isBlank(outputNames[i])) {
+				remove(outputNames[i].c_str());
+			}else { newOutputNames.push_back(outputNames[i]); }
+		}
+		outputNames = newOutputNames;
 				
 		return 0;
 
