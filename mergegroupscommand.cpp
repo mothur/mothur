@@ -153,14 +153,14 @@ MergeGroupsCommand::MergeGroupsCommand(string option) {
 void MergeGroupsCommand::help(){
 	try {
 		m->mothurOut("The merge.groups command reads a shared file and a design file and merges the groups in the shared file that are in the same grouping in the design file.\n");
-		m->mothurOut("The metastats command outputs a .shared file. \n");
-		m->mothurOut("The metastats command parameters are shared, groups, label and design.  The design and shared parameter are required.\n");
+		m->mothurOut("The merge.groups command outputs a .shared file. \n");
+		m->mothurOut("The merge.groups command parameters are shared, groups, label and design.  The design and shared parameter are required.\n");
 		m->mothurOut("The design parameter allows you to assign your groups to sets when you are running metastat. mothur will run all pairwise comparisons of the sets. It is required. \n");
 		m->mothurOut("The design file looks like the group file.  It is a 2 column tab delimited file, where the first column is the group name and the second column is the set the group belongs to.\n");
 		m->mothurOut("The groups parameter allows you to specify which of the groups in your shared you would like included. The group names are separated by dashes.\n");
 		m->mothurOut("The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n");
-		m->mothurOut("The merge.groups command should be in the following format: metastats(design=yourDesignFile, shared=yourSharedFile).\n");
-		m->mothurOut("Example metastats(design=temp.design, groups=A-B-C, shared=temp.shared).\n");
+		m->mothurOut("The merge.groups command should be in the following format: merge.groups(design=yourDesignFile, shared=yourSharedFile).\n");
+		m->mothurOut("Example merge.groups(design=temp.design, groups=A-B-C, shared=temp.shared).\n");
 		m->mothurOut("The default value for groups is all the groups in your sharedfile, and all labels in your inputfile will be used.\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
 		

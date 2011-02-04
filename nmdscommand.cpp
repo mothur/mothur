@@ -159,8 +159,8 @@ void NMDSCommand::help(){
 		m->mothurOut("The nmds command parameters are phylip, axes, mindim, maxdim, maxiters, iters and epsilon."); m->mothurOutEndLine();
 		m->mothurOut("The phylip parameter allows you to enter your distance file."); m->mothurOutEndLine();
 		m->mothurOut("The axes parameter allows you to enter a file containing a starting configuration."); m->mothurOutEndLine();
-		m->mothurOut("The maxdim parameter allows you to select how maximum dimensions to use. Default=2"); m->mothurOutEndLine();
-		m->mothurOut("The mindim parameter allows you to select how minimum dimensions to use. Default=2"); m->mothurOutEndLine();
+		m->mothurOut("The maxdim parameter allows you to select the maximum dimensions to use. Default=2"); m->mothurOutEndLine();
+		m->mothurOut("The mindim parameter allows you to select the minimum dimensions to use. Default=2"); m->mothurOutEndLine();
 		m->mothurOut("The maxiters parameter allows you to select the maximum number of iters to try with each random configuration. Default=500"); m->mothurOutEndLine();
 		m->mothurOut("The iters parameter allows you to select the number of random configuration to try. Default=10"); m->mothurOutEndLine();
 		m->mothurOut("The epsilon parameter allows you to select set an acceptable stopping point. Default=1e-12."); m->mothurOutEndLine();

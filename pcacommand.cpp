@@ -132,7 +132,7 @@ void PCACommand::help(){
 	try {
 		m->mothurOut("The pca command can only be run after a successful read.otu command of a shared or relabund file."); m->mothurOutEndLine();
 		m->mothurOut("The pca command parameters are label, groups and metric. No parameters are required."); m->mothurOutEndLine();
-		m->mothurOut("The label parameter is used to analyze specific labels in your input. Default is the first label in your shared or relabund file. Multpile labels may be separated by dashes.\n");
+		m->mothurOut("The label parameter is used to analyze specific labels in your input. Default is the first label in your shared or relabund file. Multiple labels may be separated by dashes.\n");
 		m->mothurOut("The groups parameter allows you to specify which groups you would like analyzed. Groupnames are separated by dashes.\n");
 		m->mothurOut("The metric parameter allows indicate you if would like the pearson correlation coefficient calculated. Default=True"); m->mothurOutEndLine();
 		m->mothurOut("Example pca(groups=yourGroups).\n");
