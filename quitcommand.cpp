@@ -45,10 +45,10 @@ vector<string> QuitCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 
 QuitCommand::QuitCommand(string option) {
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 
 }
 //**********************************************************************************************************************

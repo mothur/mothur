@@ -34,8 +34,7 @@ vector<string> BootSharedCommand::getValidParameters(){
 //**********************************************************************************************************************
 BootSharedCommand::BootSharedCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["tree"] = tempOutNames;
 	}
@@ -71,14 +70,14 @@ vector<string> BootSharedCommand::getRequiredFiles(){
 BootSharedCommand::BootSharedCommand(string option) {
 	try {
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		allLines = 1;
 		labels.clear();
 		Groups.clear();
 		Estimators.clear();
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -235,7 +234,7 @@ BootSharedCommand::~BootSharedCommand(){
 int BootSharedCommand::execute(){
 	try {
 	
-		if (abort == true) {	return 0;	}
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 	
 		util = new SharedUtil();	
 	

@@ -19,7 +19,7 @@ class SetLogFileCommand : public Command {
 	
 public:
 	SetLogFileCommand(string);
-	SetLogFileCommand() {}
+	SetLogFileCommand() { abort = true; calledHelp = true; }
 	~SetLogFileCommand();
 	vector<string> getRequiredParameters();
 	vector<string> getValidParameters();

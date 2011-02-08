@@ -31,6 +31,7 @@ class Command {
 		virtual ~Command() { }
 	protected:
 		MothurOut* m;
+		bool calledHelp;
 };
 
 #endif

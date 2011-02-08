@@ -20,7 +20,7 @@ class PipelineCommand : public Command {
 	
 public:
 	PipelineCommand(string);
-	PipelineCommand() {}
+	PipelineCommand() { abort = true; calledHelp = true; }
 	~PipelineCommand();
 	vector<string> getRequiredParameters();
 	vector<string> getValidParameters();

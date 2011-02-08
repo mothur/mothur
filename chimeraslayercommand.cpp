@@ -27,6 +27,7 @@ vector<string> ChimeraSlayerCommand::getValidParameters(){
 //**********************************************************************************************************************
 ChimeraSlayerCommand::ChimeraSlayerCommand(){	
 	try {
+		abort = true; calledHelp = true;
 		vector<string> tempOutNames;
 		outputTypes["chimera"] = tempOutNames;
 		outputTypes["accnos"] = tempOutNames;
@@ -63,10 +64,10 @@ vector<string> ChimeraSlayerCommand::getRequiredFiles(){
 //***************************************************************************************************************
 ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 	try {
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -343,7 +344,7 @@ ChimeraSlayerCommand::~ChimeraSlayerCommand(){	/*	do nothing	*/	}
 int ChimeraSlayerCommand::execute(){
 	try{
 		
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		for (int s = 0; s < fastaFileNames.size(); s++) {
 				

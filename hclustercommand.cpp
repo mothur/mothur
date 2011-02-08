@@ -24,8 +24,7 @@ vector<string> HClusterCommand::getValidParameters(){
 //**********************************************************************************************************************
 HClusterCommand::HClusterCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["list"] = tempOutNames;
 		outputTypes["rabund"] = tempOutNames;
@@ -64,10 +63,10 @@ vector<string> HClusterCommand::getRequiredFiles(){
 HClusterCommand::HClusterCommand(string option)  {
 	try{
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -237,7 +236,7 @@ HClusterCommand::~HClusterCommand(){}
 int HClusterCommand::execute(){
 	try {
 	
-		if (abort == true) {	return 0;	}
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		if(namefile != ""){	
 			globaldata->nameMap = new NameAssignment(namefile);

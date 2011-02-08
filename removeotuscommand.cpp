@@ -27,8 +27,7 @@ vector<string> RemoveOtusCommand::getValidParameters(){
 //**********************************************************************************************************************
 RemoveOtusCommand::RemoveOtusCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["group"] = tempOutNames;
 		outputTypes["list"] = tempOutNames;
@@ -64,10 +63,10 @@ vector<string> RemoveOtusCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 RemoveOtusCommand::RemoveOtusCommand(string option)  {
 	try {
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -182,7 +181,7 @@ void RemoveOtusCommand::help(){
 int RemoveOtusCommand::execute(){
 	try {
 		
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		groupMap = new GroupMap(groupfile);
 		groupMap->readMap();

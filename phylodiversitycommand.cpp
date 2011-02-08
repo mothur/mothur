@@ -24,8 +24,7 @@ vector<string> PhyloDiversityCommand::getValidParameters(){
 //**********************************************************************************************************************
 PhyloDiversityCommand::PhyloDiversityCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["phylodiv"] = tempOutNames;
 		outputTypes["rarefy"] = tempOutNames;
@@ -63,10 +62,10 @@ vector<string> PhyloDiversityCommand::getRequiredFiles(){
 PhyloDiversityCommand::PhyloDiversityCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -169,7 +168,7 @@ PhyloDiversityCommand::~PhyloDiversityCommand(){}
 int PhyloDiversityCommand::execute(){
 	try {
 		
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//incase the user had some mismatches between the tree and group files we don't want group xxx to be analyzed
 		for (int i = 0; i < globaldata->Groups.size(); i++) { if (globaldata->Groups[i] == "xxx") { globaldata->Groups.erase(globaldata->Groups.begin()+i);  break; }  }

@@ -64,8 +64,7 @@ vector<string> MatrixOutputCommand::getValidParameters(){
 //**********************************************************************************************************************
 MatrixOutputCommand::MatrixOutputCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["phylip"] = tempOutNames;
 	}
@@ -102,14 +101,14 @@ vector<string> MatrixOutputCommand::getRequiredFiles(){
 MatrixOutputCommand::MatrixOutputCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		allLines = 1;
 		labels.clear();
 		Groups.clear();
 		Estimators.clear();
 		
 		//allow user to run help
-		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; }
+		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -312,7 +311,7 @@ MatrixOutputCommand::~MatrixOutputCommand(){
 int MatrixOutputCommand::execute(){
 	try {
 		
-		if (abort == true) {	return 0;	}
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 			
 		//if the users entered no valid calculators don't execute command
 		if (matrixCalculators.size() == 0) { m->mothurOut("No valid calculators."); m->mothurOutEndLine();  return 0; }

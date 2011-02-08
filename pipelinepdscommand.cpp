@@ -49,10 +49,10 @@ vector<string> PipelineCommand::getRequiredFiles(){
 PipelineCommand::PipelineCommand(string option) {
 	try {
 		cFactory = CommandFactory::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			
@@ -235,7 +235,7 @@ PipelineCommand::~PipelineCommand(){}
 
 int PipelineCommand::execute(){
 	try {
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		int start = time(NULL);
 		

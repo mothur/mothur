@@ -24,8 +24,7 @@ vector<string> ParsimonyCommand::getValidParameters(){
 //**********************************************************************************************************************
 ParsimonyCommand::ParsimonyCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["parsimony"] = tempOutNames;
 		outputTypes["psummary"] = tempOutNames;
@@ -61,11 +60,11 @@ vector<string> ParsimonyCommand::getRequiredFiles(){
 ParsimonyCommand::ParsimonyCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		Groups.clear();
 			
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -186,7 +185,7 @@ void ParsimonyCommand::help(){
 int ParsimonyCommand::execute() {
 	try {
 	
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 	
 		Progress* reading;
 		reading = new Progress("Comparing to random:", iters);

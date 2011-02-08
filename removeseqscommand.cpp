@@ -26,8 +26,7 @@ vector<string> RemoveSeqsCommand::getValidParameters(){
 //**********************************************************************************************************************
 RemoveSeqsCommand::RemoveSeqsCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["taxonomy"] = tempOutNames;
@@ -68,10 +67,10 @@ vector<string> RemoveSeqsCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 RemoveSeqsCommand::RemoveSeqsCommand(string option)  {
 	try {
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -249,7 +248,7 @@ void RemoveSeqsCommand::help(){
 int RemoveSeqsCommand::execute(){
 	try {
 		
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//get names you want to keep
 		readAccnos();

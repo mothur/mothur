@@ -24,8 +24,7 @@ vector<string> ClusterCommand::getValidParameters(){
 //**********************************************************************************************************************
 ClusterCommand::ClusterCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["list"] = tempOutNames;
 		outputTypes["rabund"] = tempOutNames;
@@ -65,10 +64,10 @@ ClusterCommand::ClusterCommand(string option)  {
 	try{
 		globaldata = GlobalData::getInstance();
 		
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -199,7 +198,7 @@ ClusterCommand::~ClusterCommand(){
 int ClusterCommand::execute(){
 	try {
 	
-		if (abort == true) {	return 0;	}
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		time_t estart = time(NULL);
 		//int ndist = matrix->getNNodes();

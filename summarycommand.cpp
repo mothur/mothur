@@ -49,8 +49,7 @@ vector<string> SummaryCommand::getValidParameters(){
 //**********************************************************************************************************************
 SummaryCommand::SummaryCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["summary"] = tempOutNames;
 	}
@@ -87,13 +86,13 @@ vector<string> SummaryCommand::getRequiredFiles(){
 SummaryCommand::SummaryCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		allLines = 1;
 		labels.clear();
 		Estimators.clear();
 		
 		//allow user to run help
-		if(option == "help") { validCalculator = new ValidCalculators(); help(); delete validCalculator; abort = true; }
+		if(option == "help") { validCalculator = new ValidCalculators(); help(); delete validCalculator; abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -194,7 +193,7 @@ SummaryCommand::~SummaryCommand(){}
 int SummaryCommand::execute(){
 	try {
 	
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		string hadShared = "";
 		if ((globaldata->getFormat() != "sharedfile")) { inputFileNames.push_back(globaldata->inputFileName);  }

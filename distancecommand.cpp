@@ -30,8 +30,7 @@ vector<string> DistanceCommand::getValidParameters(){
 //**********************************************************************************************************************
 DistanceCommand::DistanceCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["phylip"] = tempOutNames;
 		outputTypes["column"] = tempOutNames;
@@ -67,11 +66,11 @@ vector<string> DistanceCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 DistanceCommand::DistanceCommand(string option) {
 	try {
-		abort = false;
+		abort = false; calledHelp = false;   
 		Estimators.clear();
 				
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -242,7 +241,7 @@ void DistanceCommand::help(){
 int DistanceCommand::execute(){
 	try {
 		
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		int startTime = time(NULL);
 		

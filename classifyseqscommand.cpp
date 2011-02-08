@@ -30,8 +30,7 @@ vector<string> ClassifySeqsCommand::getValidParameters(){
 //**********************************************************************************************************************
 ClassifySeqsCommand::ClassifySeqsCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["taxonomy"] = tempOutNames;
 		outputTypes["taxsummary"] = tempOutNames;
@@ -68,10 +67,10 @@ vector<string> ClassifySeqsCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 ClassifySeqsCommand::ClassifySeqsCommand(string option)  {
 	try {
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			
@@ -421,7 +420,7 @@ void ClassifySeqsCommand::help(){
 
 int ClassifySeqsCommand::execute(){
 	try {
-		if (abort == true) {	return 0;	}
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		if(method == "bayesian"){	classify = new Bayesian(taxonomyFileName, templateFileName, search, kmerSize, cutoff, iters);		}
 		else if(method == "knn"){	classify = new Knn(taxonomyFileName, templateFileName, search, kmerSize, gapOpen, gapExtend, match, misMatch, numWanted);				}

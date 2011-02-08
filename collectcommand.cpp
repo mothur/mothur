@@ -72,8 +72,7 @@ vector<string> CollectCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 CollectCommand::CollectCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["sobs"] = tempOutNames;
 		outputTypes["chao"] = tempOutNames;
@@ -110,7 +109,7 @@ CollectCommand::CollectCommand(){
 CollectCommand::CollectCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		allLines = 1;
 		labels.clear();
 		Estimators.clear();
@@ -237,7 +236,7 @@ CollectCommand::~CollectCommand(){}
 int CollectCommand::execute(){
 	try {
 		
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		string hadShared = "";
 		if ((globaldata->getFormat() != "sharedfile")) { inputFileNames.push_back(globaldata->inputFileName);  }

@@ -25,8 +25,7 @@ vector<string> DeUniqueSeqsCommand::getValidParameters(){
 //**********************************************************************************************************************
 DeUniqueSeqsCommand::DeUniqueSeqsCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 	}
@@ -61,10 +60,10 @@ vector<string> DeUniqueSeqsCommand::getRequiredFiles(){
 /**************************************************************************************/
 DeUniqueSeqsCommand::DeUniqueSeqsCommand(string option)  {	
 	try {
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -153,7 +152,7 @@ void DeUniqueSeqsCommand::help(){
 int DeUniqueSeqsCommand::execute() {	
 	try {
 		
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 
 		//prepare filenames and open files
 		ofstream out;

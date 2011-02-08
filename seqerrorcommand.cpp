@@ -27,8 +27,7 @@ vector<string> SeqErrorCommand::getValidParameters(){
 //**********************************************************************************************************************
 SeqErrorCommand::SeqErrorCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["error.summary"] = tempOutNames;
 		outputTypes["error.seq"] = tempOutNames;
@@ -73,10 +72,10 @@ vector<string> SeqErrorCommand::getRequiredFiles(){
 SeqErrorCommand::SeqErrorCommand(string option)  {
 	try {
 		
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			string temp;
@@ -231,7 +230,7 @@ SeqErrorCommand::~SeqErrorCommand(){
 
 int SeqErrorCommand::execute(){
 	try{
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 
 		string errorSummaryFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.summary";
 		m->openOutputFile(errorSummaryFileName, errorSummaryFile);

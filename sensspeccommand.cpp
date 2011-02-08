@@ -24,8 +24,7 @@ vector<string> SensSpecCommand::getValidParameters(){
 //**********************************************************************************************************************
 SensSpecCommand::SensSpecCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["sensspec"] = tempOutNames;
 	}
@@ -62,10 +61,10 @@ vector<string> SensSpecCommand::getRequiredFiles(){
 SensSpecCommand::SensSpecCommand(string option)  {
 	try {
 		
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			string temp;
@@ -208,7 +207,7 @@ SensSpecCommand::~SensSpecCommand(){	/*	do nothing	*/	}
 
 int SensSpecCommand::execute(){
 	try{
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 
 		setUpOutput();
 		outputNames.push_back(sensSpecFileName); outputTypes["sensspec"].push_back(sensSpecFileName);

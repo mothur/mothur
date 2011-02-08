@@ -28,8 +28,7 @@ vector<string> PhylotypeCommand::getValidParameters(){
 //**********************************************************************************************************************
 PhylotypeCommand::PhylotypeCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["list"] = tempOutNames;
 		outputTypes["sabund"] = tempOutNames;
@@ -66,10 +65,10 @@ vector<string> PhylotypeCommand::getRequiredFiles(){
 /**********************************************************************************************************************/
 PhylotypeCommand::PhylotypeCommand(string option)  {
 	try {
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			
@@ -181,7 +180,7 @@ PhylotypeCommand::~PhylotypeCommand(){}
 int PhylotypeCommand::execute(){
 	try {
 	
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//reads in taxonomy file and makes all the taxonomies the same length 
 		//by appending the last taxon to a given taxonomy as many times as needed to 

@@ -33,8 +33,7 @@ vector<string> LibShuffCommand::getValidParameters(){
 //**********************************************************************************************************************
 LibShuffCommand::LibShuffCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["coverage"] = tempOutNames;
 		outputTypes["libshuffsummary"] = tempOutNames;
@@ -72,11 +71,11 @@ vector<string> LibShuffCommand::getRequiredFiles(){
 LibShuffCommand::LibShuffCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		Groups.clear();
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -189,7 +188,7 @@ void LibShuffCommand::help(){
 int LibShuffCommand::execute(){
 	try {
 		
-		if (abort == true) {	return 0;	}
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 	
 		savedDXYValues = form->evaluateAll();
 		savedMinValues = form->getSavedMins();

@@ -46,8 +46,7 @@ vector<string> ConcensusCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 ConcensusCommand::ConcensusCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["tree"] = tempOutNames;
 		outputTypes["nodepairs"] = tempOutNames;
@@ -62,7 +61,7 @@ ConcensusCommand::ConcensusCommand(){
 ConcensusCommand::ConcensusCommand(string fileroot)  {
 	try {
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//initialize outputTypes
 		vector<string> tempOutNames;
@@ -108,7 +107,7 @@ ConcensusCommand::~ConcensusCommand(){}
 int ConcensusCommand::execute(){
 	try {
 		
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		else {  
 			numNodes = t[0]->getNumNodes();
 			numLeaves = t[0]->getNumLeaves();

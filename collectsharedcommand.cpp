@@ -88,8 +88,7 @@ vector<string> CollectSharedCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 CollectSharedCommand::CollectSharedCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["sharedchao"] = tempOutNames;
 		outputTypes["sharedsobs"] = tempOutNames;
@@ -141,14 +140,14 @@ CollectSharedCommand::CollectSharedCommand(){
 CollectSharedCommand::CollectSharedCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		allLines = 1;
 		labels.clear();
 		Estimators.clear();
 		Groups.clear();
 		
 		//allow user to run help
-		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; }
+		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -439,7 +438,7 @@ CollectSharedCommand::~CollectSharedCommand(){
 int CollectSharedCommand::execute(){
 	try {
 		
-		if (abort == true) {	return 0;	}
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//if the users entered no valid calculators don't execute command
 		if (cDisplays.size() == 0) { return 0; }

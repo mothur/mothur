@@ -19,7 +19,7 @@ class GlobalData;
 class ReadTreeCommand : public Command {
 public:
 	ReadTreeCommand(string);
-	ReadTreeCommand() {}
+	ReadTreeCommand() { abort = true; calledHelp = true; }
 	~ReadTreeCommand();
 	vector<string> getRequiredParameters();
 	vector<string> getValidParameters();

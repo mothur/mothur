@@ -25,8 +25,7 @@ vector<string> PCACommand::getValidParameters(){
 //**********************************************************************************************************************
 PCACommand::PCACommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["pca"] = tempOutNames;
 		outputTypes["loadings"] = tempOutNames;
@@ -63,12 +62,12 @@ vector<string> PCACommand::getRequiredFiles(){
 
 PCACommand::PCACommand(string option)  {
 	try {
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		globaldata = GlobalData::getInstance();
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -150,7 +149,7 @@ PCACommand::~PCACommand(){}
 int PCACommand::execute(){
 	try {
 		
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		cout.setf(ios::fixed, ios::floatfield);
 		cout.setf(ios::showpoint);

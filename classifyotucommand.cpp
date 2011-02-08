@@ -26,8 +26,7 @@ vector<string> ClassifyOtuCommand::getValidParameters(){
 //**********************************************************************************************************************
 ClassifyOtuCommand::ClassifyOtuCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["constaxonomy"] = tempOutNames;
 		outputTypes["taxsummary"] = tempOutNames;
@@ -63,13 +62,13 @@ vector<string> ClassifyOtuCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 ClassifyOtuCommand::ClassifyOtuCommand(string option)  {
 	try{
-		abort = false;
+		abort = false; calledHelp = false;   
 		allLines = 1;
 		labels.clear();
 				
 		//allow user to run help
 		if (option == "help") { 
-			help(); abort = true;
+			help(); abort = true; calledHelp = true;
 		} else {
 			//valid paramters for this command
 			string Array[] =  {"list","label","name","taxonomy","cutoff","probs","basis","reftaxonomy","group","outputdir","inputdir"};
@@ -229,7 +228,7 @@ ClassifyOtuCommand::~ClassifyOtuCommand(){}
 int ClassifyOtuCommand::execute(){
 	try {
 	
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//if user gave a namesfile then use it
 		if (namefile != "") {	readNamesFile();	}

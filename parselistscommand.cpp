@@ -25,8 +25,7 @@ vector<string> ParseListCommand::getValidParameters(){
 //**********************************************************************************************************************
 ParseListCommand::ParseListCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["list"] = tempOutNames;
 	}
@@ -61,11 +60,11 @@ vector<string> ParseListCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 ParseListCommand::ParseListCommand(string option)  {
 	try {
-		abort = false;
+		abort = false; calledHelp = false;   
 		allLines = 1;
 			
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -170,7 +169,7 @@ ParseListCommand::~ParseListCommand(){}
 int ParseListCommand::execute(){
 	try {
 	
-		if (abort == true) {	return 0;	}
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//set fileroot
 		string fileroot = outputDir + m->getRootName(m->getSimpleName(listfile));

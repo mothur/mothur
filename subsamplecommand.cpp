@@ -25,8 +25,7 @@ vector<string> SubSampleCommand::getValidParameters(){
 //**********************************************************************************************************************
 SubSampleCommand::SubSampleCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["shared"] = tempOutNames;
 		outputTypes["list"] = tempOutNames;
@@ -68,12 +67,12 @@ vector<string> SubSampleCommand::getRequiredFiles(){
 SubSampleCommand::SubSampleCommand(string option) {
 	try {
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		allLines = 1;
 		labels.clear();
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -279,7 +278,7 @@ SubSampleCommand::~SubSampleCommand(){}
 int SubSampleCommand::execute(){
 	try {
 	
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		if (sharedfile != "")	{   getSubSampleShared();	}
 		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); return 0; } }

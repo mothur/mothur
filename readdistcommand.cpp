@@ -51,10 +51,10 @@ vector<string> ReadDistCommand::getRequiredFiles(){
 ReadDistCommand::ReadDistCommand(string option) {
 	try {
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -239,7 +239,7 @@ ReadDistCommand::~ReadDistCommand(){
 int ReadDistCommand::execute(){
 	try {
 		
-		if (abort == true) {	return 0;	}
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 
 		time_t start = time(NULL);
 		size_t numDists = 0;

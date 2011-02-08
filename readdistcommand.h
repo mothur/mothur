@@ -27,7 +27,7 @@ class GlobalData;
 class ReadDistCommand : public Command {
 public:
 	ReadDistCommand(string);
-	ReadDistCommand() {}
+	ReadDistCommand() { abort = true; calledHelp = true; }
 	~ReadDistCommand();
 	vector<string> getRequiredParameters();
 	vector<string> getValidParameters();

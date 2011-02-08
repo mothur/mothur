@@ -27,7 +27,7 @@ vector<string> SharedCommand::getValidParameters(){
 //**********************************************************************************************************************
 SharedCommand::SharedCommand(){	
 	try {		
-
+		
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["rabund"] = tempOutNames;

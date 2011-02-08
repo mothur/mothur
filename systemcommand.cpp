@@ -46,10 +46,10 @@ vector<string> SystemCommand::getRequiredFiles(){
 
 SystemCommand::SystemCommand(string option)  {
 	try {
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			if (option == "") { m->mothurOut("You must enter a command to run."); m->mothurOutEndLine(); abort = true; }
@@ -92,7 +92,7 @@ void SystemCommand::help(){
 int SystemCommand::execute(){
 	try {
 		
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		system(command.c_str());
 		
