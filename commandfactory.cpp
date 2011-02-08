@@ -110,6 +110,7 @@
 #include "removerarecommand.h"
 #include "mergegroupscommand.h"
 #include "amovacommand.h"
+#include "homovacommand.h"
 
 /*******************************************************/
 
@@ -222,6 +223,7 @@ CommandFactory::CommandFactory(){
 	commands["nmds"]				= "nmds";
 	commands["remove.rare"]			= "remove.rare";
 	commands["amova"]				= "amova";
+	commands["homova"]				= "homova";
 	commands["merge.groups"]		= "merge.groups";
 	commands["pairwise.seqs"]		= "MPIEnabled";
 	commands["pipeline.pds"]		= "MPIEnabled";
@@ -385,6 +387,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "remove.rare")			{	command = new RemoveRareCommand(optionString);				}
 		else if(commandName == "merge.groups")			{	command = new MergeGroupsCommand(optionString);				}
 		else if(commandName == "amova")					{	command = new AmovaCommand(optionString);					}
+		else if(commandName == "homova")				{	command = new HomovaCommand(optionString);					}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -513,6 +516,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "remove.rare")			{	pipecommand = new RemoveRareCommand(optionString);				}
 		else if(commandName == "merge.groups")			{	pipecommand = new MergeGroupsCommand(optionString);				}
 		else if(commandName == "amova")					{	pipecommand = new AmovaCommand(optionString);					}
+		else if(commandName == "homova")				{	pipecommand = new HomovaCommand(optionString);					}
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -629,6 +633,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "remove.rare")			{	shellcommand = new RemoveRareCommand();				}
 		else if(commandName == "merge.groups")			{	shellcommand = new MergeGroupsCommand();			}
 		else if(commandName == "amova")					{	shellcommand = new AmovaCommand();					}
+		else if(commandName == "homova")				{	shellcommand = new HomovaCommand();					}
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

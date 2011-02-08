@@ -14,6 +14,7 @@
 		A713EBED12DC7C5E000092AC /* nmdscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A713EBEC12DC7C5E000092AC /* nmdscommand.cpp */; };
 		A71FE12C12EDF72400963CA7 /* mergegroupscommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A71FE12B12EDF72400963CA7 /* mergegroupscommand.cpp */; };
 		A727864412E9E28C00F86ABA /* removerarecommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A727864312E9E28C00F86ABA /* removerarecommand.cpp */; };
+		A75790591301749D00A30DAB /* homovacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A75790581301749D00A30DAB /* homovacommand.cpp */; };
 		A7A61F2D130062E000E05B6B /* amovacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A61F2C130062E000E05B6B /* amovacommand.cpp */; };
 		A7E9B88112D37EC400DA6239 /* ace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B64F12D37EC300DA6239 /* ace.cpp */; };
 		A7E9B88212D37EC400DA6239 /* aligncommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65112D37EC300DA6239 /* aligncommand.cpp */; };
@@ -316,6 +317,8 @@
 		A71FE12B12EDF72400963CA7 /* mergegroupscommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mergegroupscommand.cpp; sourceTree = "<group>"; };
 		A727864212E9E28C00F86ABA /* removerarecommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = removerarecommand.h; sourceTree = "<group>"; };
 		A727864312E9E28C00F86ABA /* removerarecommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = removerarecommand.cpp; sourceTree = "<group>"; };
+		A75790571301749D00A30DAB /* homovacommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = homovacommand.h; sourceTree = "<group>"; };
+		A75790581301749D00A30DAB /* homovacommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = homovacommand.cpp; sourceTree = "<group>"; };
 		A7A61F1A130035C800E05B6B /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		A7A61F2B130062E000E05B6B /* amovacommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = amovacommand.h; sourceTree = "<group>"; };
 		A7A61F2C130062E000E05B6B /* amovacommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = amovacommand.cpp; sourceTree = "<group>"; };
@@ -1112,6 +1115,8 @@
 				A7E9B72312D37EC400DA6239 /* heatmapsimcommand.h */,
 				A7E9B72812D37EC400DA6239 /* helpcommand.cpp */,
 				A7E9B72912D37EC400DA6239 /* helpcommand.h */,
+				A75790571301749D00A30DAB /* homovacommand.h */,
+				A75790581301749D00A30DAB /* homovacommand.cpp */,
 				A7E9B72B12D37EC400DA6239 /* indicatorcommand.cpp */,
 				A7E9B72C12D37EC400DA6239 /* indicatorcommand.h */,
 				A7E9B73B12D37EC400DA6239 /* libshuffcommand.cpp */,
@@ -1909,6 +1914,7 @@
 				A71FE12C12EDF72400963CA7 /* mergegroupscommand.cpp in Sources */,
 				7E6BE10A12F710D8007ADDBE /* refchimeratest.cpp in Sources */,
 				A7A61F2D130062E000E05B6B /* amovacommand.cpp in Sources */,
+				A75790591301749D00A30DAB /* homovacommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

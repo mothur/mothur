@@ -1,13 +1,13 @@
 /*
- *  amovacommand.cpp
+ *  homovacommand.cpp
  *  mothur
  *
- *  Created by westcott on 2/7/11.
+ *  Created by westcott on 2/8/11.
  *  Copyright 2011 Schloss Lab. All rights reserved.
  *
  */
 
-#include "amovacommand.h"
+#include "homovacommand.h"
 #include "sharedutilities.h"
 #include "sharedsobscollectsummary.h"
 #include "sharedchao1.h"
@@ -52,57 +52,57 @@
 #include "mempearson.h"
 
 //**********************************************************************************************************************
-vector<string> AmovaCommand::getValidParameters(){	
+vector<string> HomovaCommand::getValidParameters(){	
 	try {
 		string Array[] =  {"groups","label","outputdir","iters","phylip","design","sets","processors","inputdir"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "AmovaCommand", "getValidParameters");
+		m->errorOut(e, "HomovaCommand", "getValidParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-AmovaCommand::AmovaCommand(){	
+HomovaCommand::HomovaCommand(){	
 	try {
 		abort = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
-		outputTypes["amova"] = tempOutNames;
+		outputTypes["homova"] = tempOutNames;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "AmovaCommand", "AmovaCommand");
+		m->errorOut(e, "HomovaCommand", "HomovaCommand");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-vector<string> AmovaCommand::getRequiredParameters(){	
+vector<string> HomovaCommand::getRequiredParameters(){	
 	try {
 		string Array[] =  {"design"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "AmovaCommand", "getRequiredParameters");
+		m->errorOut(e, "HomovaCommand", "getRequiredParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-vector<string> AmovaCommand::getRequiredFiles(){	
+vector<string> HomovaCommand::getRequiredFiles(){	
 	try {
 		string Array[] =  {};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "AmovaCommand", "getRequiredFiles");
+		m->errorOut(e, "HomovaCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 
-AmovaCommand::AmovaCommand(string option) {
+HomovaCommand::HomovaCommand(string option) {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false;
@@ -130,7 +130,7 @@ AmovaCommand::AmovaCommand(string option) {
 			
 			//initialize outputTypes
 			vector<string> tempOutNames;
-			outputTypes["amova"] = tempOutNames;
+			outputTypes["homova"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
@@ -170,10 +170,10 @@ AmovaCommand::AmovaCommand(string option) {
 			//make sure the user has already run the read.otu command
 			if ((globaldata->getSharedFile() == "")) {
 				if ((phylipfile == "")) {
-					m->mothurOut("You must read a list and a group, a shared file or provide a distance matrix before you can use the amova command."); m->mothurOutEndLine(); abort = true; 
+					m->mothurOut("You must read a list and a group, a shared file or provide a distance matrix before you can use the homova command."); m->mothurOutEndLine(); abort = true; 
 				}
 			}else { sharedfile = globaldata->getSharedFile(); } 
-				
+			
 			//use distance matrix if one is provided
 			if ((sharedfile != "") && (phylipfile != "")) { sharedfile = ""; }
 			
@@ -217,7 +217,7 @@ AmovaCommand::AmovaCommand(string option) {
 			calc = validParameter.validFile(parameters, "calc", false);			
 			if (calc == "not found") { calc = "morisitahorn";  }
 			m->splitAtDash(calc, Estimators);
-				
+			
 			if (abort == false) {
 				
 				ValidCalculators* validCalculator = new ValidCalculators();
@@ -310,18 +310,18 @@ AmovaCommand::AmovaCommand(string option) {
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "AmovaCommand", "AmovaCommand");
+		m->errorOut(e, "HomovaCommand", "HomovaCommand");
 		exit(1);
 	}
 }
 
 //**********************************************************************************************************************
 
-void AmovaCommand::help(){
+void HomovaCommand::help(){
 	try {
-		m->mothurOut("The amova command can only be executed after a successful read.otu command of a list and group or shared file, or by providing a phylip formatted distance matrix.\n");
-		m->mothurOut("The amova command outputs a .amova file. \n");
-		m->mothurOut("The amova command parameters are phylip, iters, groups, label, design, sets and processors.  The design parameter is required.\n");
+		m->mothurOut("The homova command can only be executed after a successful read.otu command of a list and group or shared file, or by providing a phylip formatted distance matrix.\n");
+		m->mothurOut("The homova command outputs a .homova file. \n");
+		m->mothurOut("The homova command parameters are phylip, iters, groups, label, design, sets and processors.  The design parameter is required.\n");
 		m->mothurOut("The design parameter allows you to assign your groups to sets when you are running amova. It is required. \n");
 		m->mothurOut("The design file looks like the group file.  It is a 2 column tab delimited file, where the first column is the group name and the second column is the set the group belongs to.\n");
 		m->mothurOut("The sets parameter allows you to specify which of the sets in your designfile you would like to analyze. The set names are separated by dashes. THe default is all sets in the designfile. To run the pairwise comparisons of all sets use sets=all.\n");
@@ -329,24 +329,24 @@ void AmovaCommand::help(){
 		m->mothurOut("The groups parameter allows you to specify which of the groups you would like included. The group names are separated by dashes. groups=all will find all pairwise comparisons. \n");
 		m->mothurOut("The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n");
 		m->mothurOut("The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n");
-		m->mothurOut("The amova command should be in the following format: amova(design=yourDesignFile).\n");
+		m->mothurOut("The homova command should be in the following format: homova(design=yourDesignFile).\n");
 		m->mothurOut("Example amova(design=temp.design, groups=A-B-C).\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "AmovaCommand", "help");
+		m->errorOut(e, "HomovaCommand", "help");
 		exit(1);
 	}
 }
 
 //**********************************************************************************************************************
 
-AmovaCommand::~AmovaCommand(){}
+HomovaCommand::~HomovaCommand(){}
 
 //**********************************************************************************************************************
 
-int AmovaCommand::execute(){
+int HomovaCommand::execute(){
 	try {
 		
 		if (abort == true) { return 0; }
@@ -379,20 +379,20 @@ int AmovaCommand::execute(){
 		if (numGroups == 2) { processors = 1; }
 		else if (numGroups < 2)	{ m->mothurOut("Not enough sets, I need at least 2 valid sets. Unable to complete command."); m->mothurOutEndLine(); m->control_pressed = true; }
 		
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-			if(processors != 1){
-				int numPairs = namesOfGroupCombos.size();
-				int numPairsPerProcessor = numPairs / processors;
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+		if(processors != 1){
+			int numPairs = namesOfGroupCombos.size();
+			int numPairsPerProcessor = numPairs / processors;
 			
-				for (int i = 0; i < processors; i++) {
-					int startPos = i * numPairsPerProcessor;
-					if(i == processors - 1){
-						numPairsPerProcessor = numPairs - i * numPairsPerProcessor;
-					}
-					lines.push_back(linePair(startPos, numPairsPerProcessor));
+			for (int i = 0; i < processors; i++) {
+				int startPos = i * numPairsPerProcessor;
+				if(i == processors - 1){
+					numPairsPerProcessor = numPairs - i * numPairsPerProcessor;
 				}
+				lines.push_back(linePair(startPos, numPairsPerProcessor));
 			}
-		#endif
+		}
+#endif
 		
 		if (sharedfile != "") { //create distance matrix for each label
 			
@@ -403,12 +403,12 @@ int AmovaCommand::execute(){
 				
 				//create a new filename
 				ofstream out;
-				string outputFile = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + calculators[i]->getName() + ".amova";				
+				string outputFile = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + calculators[i]->getName() + ".homova";				
 				m->openOutputFile(outputFile, out);
-				outputNames.push_back(outputFile); outputTypes["amova"].push_back(outputFile);
+				outputNames.push_back(outputFile); outputTypes["homova"].push_back(outputFile);
 				
 				//print headers
-				out << "label\tgroupsCompared\tMeanSquaredWithin\tMeanSquaredAmong\tFstatistic\tpValue" << endl;  
+				out << "label\tgroupsCompared\tBValue\tpValue" << endl;  
 				out.close();
 			}
 			
@@ -501,72 +501,72 @@ int AmovaCommand::execute(){
 		}else { //user provided distance matrix
 			
 			if (outputDir == "") { outputDir = m->hasPath(phylipfile); }
-					
+			
 			//create a new filename
 			ofstream out;
-			string outputFile = outputDir + m->getRootName(m->getSimpleName(phylipfile))  + "amova";				
+			string outputFile = outputDir + m->getRootName(m->getSimpleName(phylipfile))  + "homova";				
 			m->openOutputFile(outputFile, out);
-			outputNames.push_back(outputFile); outputTypes["amova"].push_back(outputFile);
+			outputNames.push_back(outputFile); outputTypes["homova"].push_back(outputFile);
 			
 			//print headers
-			out << "groupsCompared\tMeanSquaredWithin\tMeanSquaredAmong\tFstatistic\tpValue" << endl;  
+			out << "groupsCompared\tBValue\tpValue" << endl;  
 			out.close();
 			
 			ReadPhylipVector readMatrix(phylipfile);
 			vector< vector<double> > completeMatrix;
 			vector<string> names = readMatrix.read(completeMatrix);
 			
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-				if(processors == 1){
-					driver(0, namesOfGroupCombos.size(), names, "", completeMatrix);
-				}else{
-					int process = 1;
-					vector<int> processIDS;
-					
-					//loop through and create all the processes you want
-					while (process != processors) {
-						int pid = fork();
-						
-						if (pid > 0) {
-							processIDS.push_back(pid);  
-							process++;
-						}else if (pid == 0){
-							driver(lines[process].start, lines[process].num, names, toString(getpid()), completeMatrix);
-							exit(0);
-						}else { 
-							m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
-							for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
-							exit(0);
-						}
-					}
-					
-					//do my part
-					driver(lines[0].start, lines[0].num, names, "", completeMatrix);
-					
-					//force parent to wait until all the processes are done
-					for (int i=0;i<(processors-1);i++) { 
-						int temp = processIDS[i];
-						wait(&temp);
-					}
-					
-					//append files
-					string outputFile = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "amova";				
-					for (int j = 0; j < processIDS.size(); j++) {
-						m->appendFiles((outputFile + toString(processIDS[j])), outputFile);
-						remove((outputFile + toString(processIDS[j])).c_str());
-					}
-					
-				}
-			#else
+#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+			if(processors == 1){
 				driver(0, namesOfGroupCombos.size(), names, "", completeMatrix);
-			#endif
+			}else{
+				int process = 1;
+				vector<int> processIDS;
+				
+				//loop through and create all the processes you want
+				while (process != processors) {
+					int pid = fork();
+					
+					if (pid > 0) {
+						processIDS.push_back(pid);  
+						process++;
+					}else if (pid == 0){
+						driver(lines[process].start, lines[process].num, names, toString(getpid()), completeMatrix);
+						exit(0);
+					}else { 
+						m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
+						for (int i = 0; i < processIDS.size(); i++) { kill (processIDS[i], SIGINT); }
+						exit(0);
+					}
+				}
+				
+				//do my part
+				driver(lines[0].start, lines[0].num, names, "", completeMatrix);
+				
+				//force parent to wait until all the processes are done
+				for (int i=0;i<(processors-1);i++) { 
+					int temp = processIDS[i];
+					wait(&temp);
+				}
+				
+				//append files
+				string outputFile = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "homova";				
+				for (int j = 0; j < processIDS.size(); j++) {
+					m->appendFiles((outputFile + toString(processIDS[j])), outputFile);
+					remove((outputFile + toString(processIDS[j])).c_str());
+				}
+				
+			}
+#else
+			driver(0, namesOfGroupCombos.size(), names, "", completeMatrix);
+#endif
 			
 		}
 		
 		delete designMap;
-	 
+		
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
-
+		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
@@ -575,13 +575,13 @@ int AmovaCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "AmovaCommand", "execute");
+		m->errorOut(e, "HomovaCommand", "execute");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 
-int AmovaCommand::process(vector<SharedRAbundVector*> thisLookup) {
+int HomovaCommand::process(vector<SharedRAbundVector*> thisLookup) {
 	try{
 		
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -619,8 +619,8 @@ int AmovaCommand::process(vector<SharedRAbundVector*> thisLookup) {
 			
 			//append files
 			for(int i = 0 ; i < calculators.size(); i++) {
-				string outputFile = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + calculators[i]->getName() + ".amova";				
-
+				string outputFile = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + calculators[i]->getName() + ".homova";				
+				
 				for (int j = 0; j < processIDS.size(); j++) {
 					m->appendFiles((outputFile + toString(processIDS[j])), outputFile);
 					remove((outputFile + toString(processIDS[j])).c_str());
@@ -630,17 +630,17 @@ int AmovaCommand::process(vector<SharedRAbundVector*> thisLookup) {
 #else
 		driver(0, namesOfGroupCombos.size(), thisLookUp, "");
 #endif
-			
+		
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "AmovaCommand", "process");
+		m->errorOut(e, "HomovaCommand", "process");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 
-int AmovaCommand::driver(int start, int num, vector<SharedRAbundVector*> thisLookup, string pidValue) {
+int HomovaCommand::driver(int start, int num, vector<SharedRAbundVector*> thisLookup, string pidValue) {
 	try {
 		vector<SharedRAbundVector*> subset;
 		EstOutput data;
@@ -650,7 +650,7 @@ int AmovaCommand::driver(int start, int num, vector<SharedRAbundVector*> thisLoo
 			
 			//create a new filename
 			ofstream out;
-			string outputFile = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + calculators[i]->getName() + ".amova" + pidValue;				
+			string outputFile = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + calculators[i]->getName() + ".homova" + pidValue;				
 			m->openOutputFileAppend(outputFile, out);
 			out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 			
@@ -677,7 +677,7 @@ int AmovaCommand::driver(int start, int num, vector<SharedRAbundVector*> thisLoo
 				}
 				
 				int numGroups = thisCombosLookup.size();
-			
+				
 				//calc the distance matrix
 				matrix.clear();
 				matrix.resize(numGroups);
@@ -719,8 +719,8 @@ int AmovaCommand::driver(int start, int num, vector<SharedRAbundVector*> thisLoo
 						}
 					}
 					
-					//calc amova
-					calcAmova(out, setNames.size(), thisCombosLookupSets);
+					//calc homova
+					calcHomova(out, setNames.size(), thisCombosLookupSets);
 				}
 			}
 			
@@ -731,18 +731,18 @@ int AmovaCommand::driver(int start, int num, vector<SharedRAbundVector*> thisLoo
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "AmovaCommand", "driver");
+		m->errorOut(e, "HomovaCommand", "driver");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 
-int AmovaCommand::driver(int start, int num, vector<string> names, string pidValue, vector< vector<double> >& completeMatrix) {
+int HomovaCommand::driver(int start, int num, vector<string> names, string pidValue, vector< vector<double> >& completeMatrix) {
 	try {
 		
 		//create a new filename
 		ofstream out;
-		string outputFile = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "amova" + pidValue;				
+		string outputFile = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "homova" + pidValue;				
 		m->openOutputFileAppend(outputFile, out);
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
 		
@@ -798,31 +798,58 @@ int AmovaCommand::driver(int start, int num, vector<string> names, string pidVal
 					}
 				}
 				
-				//calc amova
-				calcAmova(out, setNames.size(), thisCombosSets);
+				//calc homova
+				calcHomova(out, setNames.size(), thisCombosSets);
 			}
 		}
 		
 		out.close();
 		
-	
+		
 		return 0;
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "AmovaCommand", "driver");
+		m->errorOut(e, "HomovaCommand", "driver");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-int AmovaCommand::calcAmova(ofstream& out, int numTreatments, vector<string> thisCombosLookupSets) {
+int HomovaCommand::calcHomova(ofstream& out, int numTreatments, vector<string> thisCombosLookupSets) {
 	try {
 		
-		double SSWithin, SSTotal, SSAmoung, MSWithin, MSAmoung, FStatistic, pValue;
+		double SSTotal, BValue, pValue;
+		map<string, double> SSWithin;
+		map<string, double>::iterator it;
 		
-		SSWithin = calcWithin(matrix, numTreatments, thisCombosLookupSets);
+		//SSTotal = 0.0;
 		SSTotal = calcTotal(numTreatments);
+		cout << "sstotal = " << SSTotal << " (n-P) = " << (matrix.size() - numTreatments) << endl;
+		int numSamples = matrix.size();
 		
+		//calc BValue
+		map<string, int> counts;
+		SSWithin = calcWithin(matrix, numTreatments, thisCombosLookupSets, counts);
+				
+		double sum = 0.0;
+		double sumDenom = 0.0;
+		for (it = SSWithin.begin(); it != SSWithin.end(); it++) {
+			cout << it->first << '\t' << it->second << '\t' << (counts[it->first] - numTreatments) << endl;
+			double temp2 = (it->second) / (double) (counts[it->first] - 1);
+			cout << "sumTerm = " << temp2 << '\t' << "ln sumTerm = " << log(temp2) << endl;
+			sum += ((counts[it->first] - 1) * log(temp2));
+			sumDenom += ((1 / (double) (counts[it->first] - 1)) - ( 1 / (double) (numSamples - numTreatments) ));
+		}
+		
+		double temp = SSTotal / (double) (numSamples - numTreatments);
+		double numeratorTerm1 = (numSamples - numTreatments) * log(temp);
+		double numerator = numeratorTerm1 - sum;
+		double denom = 1 + ((1 / (double) (3 * (numTreatments - 1))) * sumDenom);
+		
+		BValue = numerator / denom;
+		cout << "numeratorTerm1 = " << numeratorTerm1 << " sum = " << sum << " sumDenom = " << sumDenom << " numerator = " << numerator << " denom = " << denom << " B = " << BValue << endl;	
+		
+		//calc Pvalue
 		int count = 0;
 		for (int i = 0; i < iters; i++) {
 			if (m->control_pressed) { break; }
@@ -831,31 +858,56 @@ int AmovaCommand::calcAmova(ofstream& out, int numTreatments, vector<string> thi
 			vector<string> copyNames = thisCombosLookupSets;
 			random_shuffle(copyNames.begin(), copyNames.end());
 			
-			double randomSSWithin = calcWithin(matrix, numTreatments, copyNames);
+			counts.clear();
+			map<string, double> randomSSWithin = calcWithin(matrix, numTreatments, copyNames, counts);
 			
-			if (randomSSWithin <= SSWithin) { count++; }
+			sum = 0.0;
+			sumDenom = 0.0;
+			for (it = randomSSWithin.begin(); it != randomSSWithin.end(); it++) {
+				double temp2 = (it->second) / (double) (counts[it->first] - numTreatments);
+				sum += ((counts[it->first] - 1) * log(temp2));
+				sumDenom += ((1 / (double) (counts[it->first] - 1)) - ( 1 / (double) (numSamples - numTreatments) ));
+			}
+			
+			numerator = numeratorTerm1 - sum;
+			denom = 1 + ((1 / (double) (3 * (numTreatments - 1))) * sumDenom);
+			
+			double randomBValue = numerator / denom;
+			
+			if (randomBValue >= BValue) { count++; }
 		}
-		
-		SSAmoung = SSTotal - SSWithin;
-		MSWithin = SSWithin / (double) (matrix.size() - numTreatments);
-		MSAmoung = SSAmoung / (double) (numTreatments - 1);
-		FStatistic = MSAmoung / MSWithin;
-		
+				
 		pValue = count / (float) iters;
 		
-		out << MSWithin << '\t' << MSAmoung << '\t' << FStatistic << '\t' << pValue << endl;
-		//cout << "ssAmong = " << SSAmoung << '\t' << "sswithin = " << SSWithin << '\t' << "ssTotal = " << SSTotal << '\t' << "pvalue = " << pValue << endl;	
+		out << BValue << '\t' << pValue << endl;
+
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "AmovaCommand", "calcAmova");
+		m->errorOut(e, "HomovaCommand", "calcHomova");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-double AmovaCommand::calcWithin(vector< vector<double> >& thisMatrix, int numTreatments, vector<string> thisCombosLookupSets) {
+map<string, double> HomovaCommand::calcWithin(vector< vector<double> >& thisMatrix, int numTreatments, vector<string> thisCombosLookupSets, map<string, int>& count) {
 	try {
-		double within = 0.0;
+		map<string, double> within; //maps treatment to within value
+		map<string, double>::iterator it;
+		map<string, int>::iterator itCount;
+		
+		for (int i = 0; i < thisCombosLookupSets.size(); i++) {
+			itCount = count.find(thisCombosLookupSets[i]);
+			
+			if (itCount == count.end()) { //first time we have seen this treatment
+				count[thisCombosLookupSets[i]] = 1; 
+			}else {
+				count[thisCombosLookupSets[i]]++;
+			}
+			
+			//initialize within
+			within[thisCombosLookupSets[i]] = 0.0;
+		}
+			
 		
 		//traverse lower triangle
 		for (int k = 0; k < thisMatrix.size(); k++) { 
@@ -863,23 +915,25 @@ double AmovaCommand::calcWithin(vector< vector<double> >& thisMatrix, int numTre
 				
 				//if you are from the same treatment then eij is 1 so add, else eij = 0
 				if (thisCombosLookupSets[k] == thisCombosLookupSets[l]) { 
-					within += (thisMatrix[k][l] * thisMatrix[k][l]); //dij^2
+					within[thisCombosLookupSets[k]] += (thisMatrix[k][l] * thisMatrix[k][l]); //dij^2
 				}
 			}
 		}
 		
-		//1 / (numSamples / numTreatments)
-		within *= (1.0 / (float) (thisMatrix.size() / (float) numTreatments));
+		//1 / (numSamples in this treatment)
+		for (it = within.begin(); it != within.end(); it++) {
+			(it->second) *= (1.0 / (float) count[it->first]);
+		}
 		
 		return within;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "AmovaCommand", "calcWithin");
+		m->errorOut(e, "HomovaCommand", "calcWithin");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-double AmovaCommand::calcTotal(int numTreatments) {
+double HomovaCommand::calcTotal(int numTreatments) {
 	try {
 		double total = 0.0;
 		
@@ -896,9 +950,10 @@ double AmovaCommand::calcTotal(int numTreatments) {
 		return total;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "AmovaCommand", "calcTotal");
+		m->errorOut(e, "HomovaCommand", "calcTotal");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+
 
