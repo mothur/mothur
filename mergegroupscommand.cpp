@@ -25,8 +25,7 @@ vector<string> MergeGroupsCommand::getValidParameters(){
 //**********************************************************************************************************************
 MergeGroupsCommand::MergeGroupsCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["shared"] = tempOutNames;
 	}
@@ -64,12 +63,12 @@ vector<string> MergeGroupsCommand::getRequiredFiles(){
 MergeGroupsCommand::MergeGroupsCommand(string option) {
 	try {
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		allLines = 1;
 		labels.clear();
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -180,7 +179,7 @@ MergeGroupsCommand::~MergeGroupsCommand(){}
 int MergeGroupsCommand::execute(){
 	try {
 		
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		if (outputDir == "") {  outputDir += m->hasPath(sharedfile);  }
 		string outputFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "merge" +  m->getExtension(sharedfile);

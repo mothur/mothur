@@ -25,6 +25,7 @@ vector<string> CatchAllCommand::getValidParameters(){
 //**********************************************************************************************************************
 CatchAllCommand::CatchAllCommand(){	
 	try {
+		abort = true; calledHelp = true;
 		//initialize outputTypes
 		vector<string> tempOutNames;
 		outputTypes["csv"] = tempOutNames;
@@ -62,11 +63,11 @@ vector<string> CatchAllCommand::getRequiredFiles(){
 CatchAllCommand::CatchAllCommand(string option)  {	
 	try {
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		allLines = 1;
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -173,7 +174,7 @@ void CatchAllCommand::help(){
 int CatchAllCommand::execute() {	
 	try {
 		
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//prepare full output directory
 		outputDir = m->getFullPathName(outputDir);

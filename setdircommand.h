@@ -20,7 +20,7 @@ class SetDirectoryCommand : public Command {
 	
 public:
 	SetDirectoryCommand(string);
-	SetDirectoryCommand() {}
+	SetDirectoryCommand() { abort = true; calledHelp = true; }
 	~SetDirectoryCommand();
 	vector<string> getRequiredParameters();
 	vector<string> getValidParameters();

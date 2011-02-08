@@ -25,8 +25,7 @@ vector<string> NMDSCommand::getValidParameters(){
 //**********************************************************************************************************************
 NMDSCommand::NMDSCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["nmds"] = tempOutNames;
 		outputTypes["stress"] = tempOutNames;
@@ -64,10 +63,10 @@ vector<string> NMDSCommand::getRequiredFiles(){
 
 NMDSCommand::NMDSCommand(string option)  {
 	try {
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -178,7 +177,7 @@ NMDSCommand::~NMDSCommand(){}
 int NMDSCommand::execute(){
 	try {
 		
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		cout.setf(ios::fixed, ios::floatfield);
 		cout.setf(ios::showpoint);

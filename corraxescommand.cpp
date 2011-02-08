@@ -47,8 +47,7 @@ vector<string> CorrAxesCommand::getRequiredParameters(){
 //**********************************************************************************************************************
 CorrAxesCommand::CorrAxesCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["corr.axes"] = tempOutNames;
 	}
@@ -72,11 +71,11 @@ vector<string> CorrAxesCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 CorrAxesCommand::CorrAxesCommand(string option)  {
 	try {
-		abort = false;
+		abort = false; calledHelp = false;   
 		globaldata = GlobalData::getInstance();
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -221,7 +220,7 @@ CorrAxesCommand::~CorrAxesCommand(){}
 int CorrAxesCommand::execute(){
 	try {
 		
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		/*************************************************************************************/
 		// use smart distancing to get right sharedRabund and convert to relabund if needed  //

@@ -62,8 +62,7 @@ vector<string> RareFactCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 RareFactCommand::RareFactCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["rarefaction"] = tempOutNames;
 		outputTypes["r_chao"] = tempOutNames;
@@ -90,13 +89,13 @@ RareFactCommand::RareFactCommand(){
 RareFactCommand::RareFactCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		allLines = 1;
 		labels.clear();
 		Estimators.clear();
 				
 		//allow user to run help
-		if(option == "help") { validCalculator = new ValidCalculators(); help(); delete validCalculator; abort = true; }
+		if(option == "help") { validCalculator = new ValidCalculators(); help(); delete validCalculator; abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -214,7 +213,7 @@ RareFactCommand::~RareFactCommand(){}
 int RareFactCommand::execute(){
 	try {
 	
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		string hadShared = "";
 		if ((globaldata->getFormat() != "sharedfile")) { inputFileNames.push_back(globaldata->inputFileName);  }

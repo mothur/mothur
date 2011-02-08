@@ -26,8 +26,7 @@ vector<string> MetaStatsCommand::getValidParameters(){
 //**********************************************************************************************************************
 MetaStatsCommand::MetaStatsCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["metastats"] = tempOutNames;
 	}
@@ -65,12 +64,12 @@ vector<string> MetaStatsCommand::getRequiredFiles(){
 MetaStatsCommand::MetaStatsCommand(string option) {
 	try {
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		allLines = 1;
 		labels.clear();
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -206,7 +205,7 @@ MetaStatsCommand::~MetaStatsCommand(){}
 int MetaStatsCommand::execute(){
 	try {
 	
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		designMap = new GroupMap(designfile);
 		designMap->readDesignMap();

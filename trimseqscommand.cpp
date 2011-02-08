@@ -31,8 +31,7 @@ vector<string> TrimSeqsCommand::getValidParameters(){
 
 TrimSeqsCommand::TrimSeqsCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["qual"] = tempOutNames;
@@ -76,11 +75,11 @@ vector<string> TrimSeqsCommand::getRequiredFiles(){
 TrimSeqsCommand::TrimSeqsCommand(string option)  {
 	try {
 		
-		abort = false;
+		abort = false; calledHelp = false;   
 		comboStarts = 0;
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -316,7 +315,7 @@ TrimSeqsCommand::~TrimSeqsCommand(){	/*	do nothing	*/	}
 int TrimSeqsCommand::execute(){
 	try{
 	
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		numFPrimers = 0;  //this needs to be initialized
 		numRPrimers = 0;

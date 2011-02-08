@@ -58,7 +58,8 @@ private:
 	vector<string> candidateFileNames;
 	vector<string> outputNames;
 	
-	bool abort, flip;
+	bool abort, flip, calledHelp;
+
 };
 
 #endif

@@ -26,8 +26,7 @@ vector<string> PreClusterCommand::getValidParameters(){
 //**********************************************************************************************************************
 PreClusterCommand::PreClusterCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["name"] = tempOutNames;
@@ -64,10 +63,10 @@ vector<string> PreClusterCommand::getRequiredFiles(){
 
 PreClusterCommand::PreClusterCommand(string option) {
 	try {
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -167,7 +166,7 @@ void PreClusterCommand::help(){
 int PreClusterCommand::execute(){
 	try {
 		
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		int start = time(NULL);
 		

@@ -25,8 +25,7 @@ vector<string> MGClusterCommand::getValidParameters(){
 //**********************************************************************************************************************
 MGClusterCommand::MGClusterCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["list"] = tempOutNames;
 		outputTypes["rabund"] = tempOutNames;
@@ -64,10 +63,10 @@ vector<string> MGClusterCommand::getRequiredFiles(){
 MGClusterCommand::MGClusterCommand(string option) {
 	try {
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -202,7 +201,7 @@ MGClusterCommand::~MGClusterCommand(){}
 int MGClusterCommand::execute(){
 	try {
 		
-		if (abort == true) {	return 0;	}
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//read names file
 		if (namefile != "") {

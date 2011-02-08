@@ -25,6 +25,7 @@ vector<string> ChimeraCcodeCommand::getValidParameters(){
 //**********************************************************************************************************************
 ChimeraCcodeCommand::ChimeraCcodeCommand(){	
 	try {
+		abort = true; calledHelp = true;
 		vector<string> tempOutNames;
 		outputTypes["chimera"] = tempOutNames;
 		outputTypes["mapinfo"] = tempOutNames;
@@ -61,10 +62,10 @@ vector<string> ChimeraCcodeCommand::getRequiredFiles(){
 //***************************************************************************************************************
 ChimeraCcodeCommand::ChimeraCcodeCommand(string option)  {
 	try {
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -239,7 +240,7 @@ ChimeraCcodeCommand::~ChimeraCcodeCommand(){	/*	do nothing	*/	}
 int ChimeraCcodeCommand::execute(){
 	try{
 		
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		for (int s = 0; s < fastaFileNames.size(); s++) {
 				

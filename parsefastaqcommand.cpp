@@ -25,8 +25,7 @@ vector<string> ParseFastaQCommand::getValidParameters(){
 //**********************************************************************************************************************
 ParseFastaQCommand::ParseFastaQCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["qual"] = tempOutNames;
@@ -62,9 +61,9 @@ vector<string> ParseFastaQCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 ParseFastaQCommand::ParseFastaQCommand(string option){
 	try {
-		abort = false;
+		abort = false; calledHelp = false;   
 		
-		if(option == "help") {	help(); abort = true; }
+		if(option == "help") {	help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -140,7 +139,7 @@ ParseFastaQCommand::~ParseFastaQCommand()	{	/*	do nothing	*/	}
 
 int ParseFastaQCommand::execute(){
 	try {
-		if (abort == true) {	return 0;	}
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//open Output Files
 		string fastaFile = outputDir + m->getRootName(m->getSimpleName(fastaQFile)) + "fasta";

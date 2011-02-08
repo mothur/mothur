@@ -49,10 +49,10 @@ vector<string> GetlabelCommand::getRequiredFiles(){
 GetlabelCommand::GetlabelCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			if ((globaldata->getListFile() == "") && (globaldata->getRabundFile() == "") && (globaldata->getSabundFile() == "")) { m->mothurOut("You must read a list, sabund or rabund before you can use the get.label command."); m->mothurOutEndLine(); abort = true; }				
@@ -90,7 +90,7 @@ GetlabelCommand::~GetlabelCommand(){
 int GetlabelCommand::execute(){
 	try {
 		
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		filename = globaldata->inputFileName;
 		ifstream in;

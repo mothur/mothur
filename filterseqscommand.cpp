@@ -25,8 +25,7 @@ vector<string> FilterSeqsCommand::getValidParameters(){
 //**********************************************************************************************************************
 FilterSeqsCommand::FilterSeqsCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["filter"] = tempOutNames;
@@ -62,11 +61,11 @@ vector<string> FilterSeqsCommand::getRequiredFiles(){
 /**************************************************************************************/
 FilterSeqsCommand::FilterSeqsCommand(string option)  {
 	try {
-		abort = false;
+		abort = false; calledHelp = false;   
 		filterFileName = "";
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -240,7 +239,7 @@ void FilterSeqsCommand::help(){
 int FilterSeqsCommand::execute() {	
 	try {
 	
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		ifstream inFASTA;
 		m->openInputFile(fastafileNames[0], inFASTA);

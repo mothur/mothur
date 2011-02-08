@@ -65,8 +65,7 @@ vector<string> TrimFlowsCommand::getRequiredFiles(){
 
 TrimFlowsCommand::TrimFlowsCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["flow"] = tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
@@ -101,11 +100,11 @@ void TrimFlowsCommand::help(){
 TrimFlowsCommand::TrimFlowsCommand(string option)  {
 	try {
 		
-		abort = false;
+		abort = false; calledHelp = false;   
 		comboStarts = 0;
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -250,7 +249,7 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 int TrimFlowsCommand::execute(){
 	try{
 		
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 
 		string trimFlowFileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + "trim.flow";
 		outputNames.push_back(trimFlowFileName); outputTypes["flow"].push_back(trimFlowFileName);

@@ -61,8 +61,7 @@ vector<string> PairwiseSeqsCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 PairwiseSeqsCommand::PairwiseSeqsCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["phylip"] = tempOutNames;
 		outputTypes["column"] = tempOutNames;
@@ -75,10 +74,10 @@ PairwiseSeqsCommand::PairwiseSeqsCommand(){
 //**********************************************************************************************************************
 PairwiseSeqsCommand::PairwiseSeqsCommand(string option)  {
 	try {
-		abort = false;
+		abort = false; calledHelp = false;   
 	
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			
@@ -268,7 +267,7 @@ void PairwiseSeqsCommand::help(){
 
 int PairwiseSeqsCommand::execute(){
 	try {
-		if (abort == true) {	return 0;	}
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		int longestBase = 2000; //will need to update this in driver if we find sequences with more bases.  hardcoded so we don't have the pre-read user fasta file.
 		

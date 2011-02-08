@@ -25,8 +25,7 @@ vector<string> SeqSummaryCommand::getValidParameters(){
 //**********************************************************************************************************************
 SeqSummaryCommand::SeqSummaryCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["summary"] = tempOutNames;
 	}
@@ -62,10 +61,10 @@ vector<string> SeqSummaryCommand::getRequiredFiles(){
 
 SeqSummaryCommand::SeqSummaryCommand(string option)  {
 	try {
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -148,7 +147,7 @@ SeqSummaryCommand::~SeqSummaryCommand(){	/*	do nothing	*/	}
 int SeqSummaryCommand::execute(){
 	try{
 		
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		string summaryFile = outputDir + m->getSimpleName(fastafile) + ".summary";
 				

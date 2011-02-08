@@ -31,8 +31,7 @@ vector<string> ClearcutCommand::getValidParameters(){
 //**********************************************************************************************************************
 ClearcutCommand::ClearcutCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["tree"] = tempOutNames;
 		outputTypes["matrixout"] = tempOutNames;
@@ -67,10 +66,10 @@ vector<string> ClearcutCommand::getRequiredFiles(){
 /**************************************************************************************/
 ClearcutCommand::ClearcutCommand(string option)  {	
 	try {
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -231,7 +230,7 @@ void ClearcutCommand::help(){
 int ClearcutCommand::execute() {	
 	try {
 		
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//prepare filename
 		string outputName = outputDir + m->getRootName(m->getSimpleName(inputFile)) + "tre";

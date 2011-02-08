@@ -31,8 +31,7 @@ vector<string> ClusterSplitCommand::getValidParameters(){
 //**********************************************************************************************************************
 ClusterSplitCommand::ClusterSplitCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["list"] = tempOutNames;
 		outputTypes["rabund"] = tempOutNames;
@@ -72,11 +71,11 @@ vector<string> ClusterSplitCommand::getRequiredFiles(){
 ClusterSplitCommand::ClusterSplitCommand(string option)  {
 	try{
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		format = "";
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -290,7 +289,7 @@ ClusterSplitCommand::~ClusterSplitCommand(){}
 int ClusterSplitCommand::execute(){
 	try {
 	
-		if (abort == true) {	return 0;	}
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		time_t estart;
 		vector<string> listFileNames;

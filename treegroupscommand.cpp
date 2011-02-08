@@ -65,7 +65,7 @@ vector<string> TreeGroupCommand::getValidParameters(){
 //**********************************************************************************************************************
 TreeGroupCommand::TreeGroupCommand(){	
 	try {
-		abort = true;
+		abort = true; calledHelp = true;
 		globaldata = GlobalData::getInstance();
 		//initialize outputTypes
 		vector<string> tempOutNames;
@@ -104,14 +104,14 @@ vector<string> TreeGroupCommand::getRequiredFiles(){
 TreeGroupCommand::TreeGroupCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		allLines = 1;
 		labels.clear();
 		Groups.clear();
 		Estimators.clear();
 		
 		//allow user to run help
-		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; }
+		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -380,7 +380,7 @@ TreeGroupCommand::~TreeGroupCommand(){
 int TreeGroupCommand::execute(){
 	try {
 	
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		if (format == "sharedfile") {
 			//if the users entered no valid calculators don't execute command

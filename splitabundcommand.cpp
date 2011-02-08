@@ -24,8 +24,7 @@ vector<string> SplitAbundCommand::getValidParameters(){
 //**********************************************************************************************************************
 SplitAbundCommand::SplitAbundCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["list"] = tempOutNames;
 		outputTypes["name"] = tempOutNames;
@@ -64,11 +63,11 @@ vector<string> SplitAbundCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 SplitAbundCommand::SplitAbundCommand(string option)  {
 	try {
-		abort = false;
+		abort = false; calledHelp = false;   
 		allLines = 1;
 			
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -233,7 +232,7 @@ SplitAbundCommand::~SplitAbundCommand(){
 int SplitAbundCommand::execute(){
 	try {
 	
-		if (abort == true) {	return 0;	}
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		if (listfile != "") { //you are using a listfile to determine abundance
 			if (outputDir == "") { outputDir = m->hasPath(listfile); }

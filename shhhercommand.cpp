@@ -48,7 +48,7 @@ vector<string> ShhherCommand::getValidParameters(){
 
 ShhherCommand::ShhherCommand(){	
 	try {
-		abort = true;
+		abort = true; calledHelp = true;
 		
 		//initialize outputTypes
 		vector<string> tempOutNames;
@@ -101,11 +101,11 @@ ShhherCommand::ShhherCommand(string option) {
 #endif
 		
 		
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			
@@ -237,6 +237,8 @@ void ShhherCommand::help(){
 #ifdef USE_MPI
 int ShhherCommand::execute(){
 	try {
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
+		
 		int tag = 1976;
 		MPI_Status status; 
 

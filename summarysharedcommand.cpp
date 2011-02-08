@@ -65,8 +65,7 @@ vector<string> SummarySharedCommand::getValidParameters(){
 //**********************************************************************************************************************
 SummarySharedCommand::SummarySharedCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["summary"] = tempOutNames;
 	}
@@ -103,13 +102,13 @@ vector<string> SummarySharedCommand::getRequiredFiles(){
 SummarySharedCommand::SummarySharedCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		allLines = 1;
 		labels.clear();
 		Estimators.clear();
 		
 		//allow user to run help
-		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; }
+		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -317,7 +316,7 @@ SummarySharedCommand::~SummarySharedCommand(){
 int SummarySharedCommand::execute(){
 	try {
 	
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		ofstream outputFileHandle, outAll;
 		string outputFileName = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + "shared.summary";

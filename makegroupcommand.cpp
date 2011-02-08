@@ -25,8 +25,7 @@ vector<string> MakeGroupCommand::getValidParameters(){
 //**********************************************************************************************************************
 MakeGroupCommand::MakeGroupCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["group"] = tempOutNames;
 	}
@@ -63,10 +62,10 @@ vector<string> MakeGroupCommand::getRequiredFiles(){
 MakeGroupCommand::MakeGroupCommand(string option)  {
 	try {
 		
-		abort = false;
+		abort = false; calledHelp = false;   
 	
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			
@@ -198,7 +197,7 @@ void MakeGroupCommand::help(){
 
 int MakeGroupCommand::execute(){
 	try {
-		if (abort == true) { return 0;	}
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		if (outputDir == "") { outputDir = m->hasPath(fastaFileNames[0]); }
 			

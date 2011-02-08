@@ -18,7 +18,7 @@ class SystemCommand : public Command {
 	public:
 	
 		SystemCommand(string);	
-		SystemCommand() {}
+		SystemCommand() { abort = true; calledHelp = true; }
 		~SystemCommand(){}
 		vector<string> getRequiredParameters();
 		vector<string> getValidParameters();

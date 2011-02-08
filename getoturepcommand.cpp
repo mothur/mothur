@@ -38,8 +38,7 @@ inline bool compareGroup(repStruct left, repStruct right){
 //**********************************************************************************************************************
 GetOTURepCommand::GetOTURepCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["name"] = tempOutNames;
@@ -88,13 +87,13 @@ vector<string> GetOTURepCommand::getRequiredFiles(){
 GetOTURepCommand::GetOTURepCommand(string option)  {
 	try{
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		allLines = 1;
 		labels.clear();
 				
 		//allow user to run help
 		if (option == "help") { 
-			help(); abort = true;
+			help(); abort = true; calledHelp = true;
 		} else {
 			//valid paramters for this command
 			string Array[] =  {"fasta","list","label","name","weighted", "group", "sorted", "phylip","column","large","cutoff","precision","groups","outputdir","inputdir"};
@@ -299,7 +298,7 @@ GetOTURepCommand::~GetOTURepCommand(){}
 int GetOTURepCommand::execute(){
 	try {
 	
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		int error;
 		
 		if (!large) {

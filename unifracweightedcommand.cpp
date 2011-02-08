@@ -24,8 +24,7 @@ vector<string> UnifracWeightedCommand::getValidParameters(){
 //**********************************************************************************************************************
 UnifracWeightedCommand::UnifracWeightedCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["weighted"] = tempOutNames;
 		outputTypes["wsummary"] = tempOutNames;
@@ -65,11 +64,11 @@ vector<string> UnifracWeightedCommand::getRequiredFiles(){
 UnifracWeightedCommand::UnifracWeightedCommand(string option) {
 	try {
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		Groups.clear();
 			
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -181,7 +180,7 @@ void UnifracWeightedCommand::help(){
 int UnifracWeightedCommand::execute() {
 	try {
 	
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		int start = time(NULL);
 		

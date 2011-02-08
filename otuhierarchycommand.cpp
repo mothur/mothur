@@ -24,8 +24,7 @@ vector<string> OtuHierarchyCommand::getValidParameters(){
 //**********************************************************************************************************************
 OtuHierarchyCommand::OtuHierarchyCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["otuheirarchy"] = tempOutNames;
 	}
@@ -60,10 +59,10 @@ vector<string> OtuHierarchyCommand::getRequiredFiles(){
 //**********************************************************************************************************************
 OtuHierarchyCommand::OtuHierarchyCommand(string option) {
 	try {
-		abort = false;
+		abort = false; calledHelp = false;   
 		
 		//allow user to run help
-		if(option == "help") {  help(); abort = true; }
+		if(option == "help") {  help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -157,7 +156,7 @@ OtuHierarchyCommand::~OtuHierarchyCommand(){}
 int OtuHierarchyCommand::execute(){
 	try {
 		
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//get listvectors that correspond to labels requested, (or use smart distancing to get closest listvector)
 		vector<ListVector> lists = getListVectors();

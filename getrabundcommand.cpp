@@ -24,8 +24,7 @@ vector<string> GetRAbundCommand::getValidParameters(){
 //**********************************************************************************************************************
 GetRAbundCommand::GetRAbundCommand(){	
 	try {
-		abort = true;
-		//initialize outputTypes
+		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["rabund"] = tempOutNames;
 	}
@@ -62,12 +61,12 @@ vector<string> GetRAbundCommand::getRequiredFiles(){
 GetRAbundCommand::GetRAbundCommand(string option)  {
 	try {
 		globaldata = GlobalData::getInstance();
-		abort = false;
+		abort = false; calledHelp = false;   
 		allLines = 1;
 		labels.clear();
 		
 		//allow user to run help
-		if(option == "help") { help(); abort = true; }
+		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
 			//valid paramters for this command
@@ -158,7 +157,7 @@ GetRAbundCommand::~GetRAbundCommand(){}
 int GetRAbundCommand::execute(){
 	try {
 	
-		if (abort == true) { return 0; }
+		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
 		//read first line
 		read = new ReadOTUFile(globaldata->inputFileName);	

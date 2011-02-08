@@ -152,6 +152,10 @@ bool InteractEngine::getInput(){
 					//executes valid command
 					Command* command = cFactory->getCommand(commandName, options);
 					quitCommandCalled = command->execute();
+							
+					//if we aborted command
+					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + "."); mout->mothurOutEndLine(); }
+
 					mout->control_pressed = 0;
 					mout->executing = false;
 										
@@ -291,7 +295,7 @@ bool BatchEngine::getInput(){
 		//CommandFactory cFactory;
 		int quitCommandCalled = 0;
 	    int count = 0;
-		while(quitCommandCalled == 0){
+		while(quitCommandCalled != 1){
 			
 			#ifdef USE_MPI
 				int pid, processors;
@@ -358,6 +362,10 @@ bool BatchEngine::getInput(){
 					//executes valid command
 					Command* command = cFactory->getCommand(commandName, options);
 					quitCommandCalled = command->execute();
+							
+					//if we aborted command
+					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + "."); mout->mothurOutEndLine(); }
+
 					mout->control_pressed = 0;
 					mout->executing = false;
 										
@@ -474,7 +482,7 @@ bool ScriptEngine::getInput(){
 		//CommandFactory cFactory;
 		int quitCommandCalled = 0;
 	
-		while(quitCommandCalled == 0){
+		while(quitCommandCalled != 1){
 			
 			#ifdef USE_MPI
 				int pid, processors;
@@ -542,6 +550,10 @@ bool ScriptEngine::getInput(){
 					//executes valid command
 					Command* command = cFactory->getCommand(commandName, options);
 					quitCommandCalled = command->execute();
+					
+					//if we aborted command
+					if (quitCommandCalled == 2) {  mout->mothurOut("[ERROR]: did not complete " + commandName + "."); mout->mothurOutEndLine(); }
+							
 					mout->control_pressed = 0;
 					mout->executing = false;
 									
