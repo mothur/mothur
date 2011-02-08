@@ -21,7 +21,7 @@ public:
 	FlowData(int, float, float, int);
 	~FlowData();
 	bool getNext(ifstream&);
-
+	string getName();
 	void capFlows(int);
 	bool hasMinFlows(int);
 	Sequence getSequence();

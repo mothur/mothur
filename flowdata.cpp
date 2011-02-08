@@ -212,3 +212,16 @@ void FlowData::printFlows(ofstream& outFlowFile, string scrapCode){
 }
 
 //**********************************************************************************************************************
+
+string FlowData::getName(){
+	
+	try{
+		return seqName;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "FlowData", "getSequence");
+		exit(1);
+	}
+}
+
+//**********************************************************************************************************************

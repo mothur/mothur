@@ -61,7 +61,7 @@ private:
 	bool allFiles;
 	int processors;
 	int numFPrimers, numRPrimers;
-	int totalFlows, minFlows, minLength, maxLength, maxHomoP, tdiffs, bdiffs, pdiffs;
+	int maxFlows, minFlows, minLength, maxLength, maxHomoP, tdiffs, bdiffs, pdiffs;
 	int numFlows;
 	float signal, noise;
 	bool fasta;
