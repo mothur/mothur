@@ -109,6 +109,7 @@
 #include "nmdscommand.h"
 #include "removerarecommand.h"
 #include "mergegroupscommand.h"
+#include "amovacommand.h"
 
 /*******************************************************/
 
@@ -220,6 +221,7 @@ CommandFactory::CommandFactory(){
 	commands["pca"]					= "pca";
 	commands["nmds"]				= "nmds";
 	commands["remove.rare"]			= "remove.rare";
+	commands["amova"]				= "amova";
 	commands["merge.groups"]		= "merge.groups";
 	commands["pairwise.seqs"]		= "MPIEnabled";
 	commands["pipeline.pds"]		= "MPIEnabled";
@@ -382,6 +384,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "corr.axes")				{	command = new CorrAxesCommand(optionString);				}
 		else if(commandName == "remove.rare")			{	command = new RemoveRareCommand(optionString);				}
 		else if(commandName == "merge.groups")			{	command = new MergeGroupsCommand(optionString);				}
+		else if(commandName == "amova")					{	command = new AmovaCommand(optionString);					}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -509,6 +512,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "corr.axes")				{	pipecommand = new CorrAxesCommand(optionString);				}
 		else if(commandName == "remove.rare")			{	pipecommand = new RemoveRareCommand(optionString);				}
 		else if(commandName == "merge.groups")			{	pipecommand = new MergeGroupsCommand(optionString);				}
+		else if(commandName == "amova")					{	pipecommand = new AmovaCommand(optionString);					}
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -624,6 +628,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "corr.axes")				{	shellcommand = new CorrAxesCommand();				}
 		else if(commandName == "remove.rare")			{	shellcommand = new RemoveRareCommand();				}
 		else if(commandName == "merge.groups")			{	shellcommand = new MergeGroupsCommand();			}
+		else if(commandName == "amova")					{	shellcommand = new AmovaCommand();					}
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;
