@@ -173,7 +173,7 @@ AmovaCommand::AmovaCommand(string option) {
 					m->mothurOut("You must read a list and a group, a shared file or provide a distance matrix before you can use the amova command."); m->mothurOutEndLine(); abort = true; 
 				}
 			}else { sharedfile = globaldata->getSharedFile(); } 
-			
+				
 			//use distance matrix if one is provided
 			if ((sharedfile != "") && (phylipfile != "")) { sharedfile = ""; }
 			
@@ -412,7 +412,7 @@ int AmovaCommand::execute(){
 				out.close();
 			}
 			
-			InputData input("sharedfile", sharedfile);
+			InputData input(sharedfile, "sharedfile");
 			vector<SharedRAbundVector*> lookup = input.getSharedRAbundVectors();
 			string lastLabel = lookup[0]->getLabel();
 			
