@@ -57,7 +57,8 @@ private:
 	int driver(int, int, vector<string>, string, vector< vector<double> >&);
 	int process(vector<SharedRAbundVector*>);
 	int calcHomova(ofstream&, int, vector<string>);
-	map<string, double> calcWithin(vector< vector<double> >&, int, vector<string>, map<string, int>&);
+	map<string, double> calcWithinEach(vector< vector<double> >&, int, vector<string>, map<string, int>&);
+	double calcWithin(vector< vector<double> >&, int, vector<string>);
 	double calcTotal(int);
 };
 

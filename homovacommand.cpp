@@ -822,21 +822,17 @@ int HomovaCommand::calcHomova(ofstream& out, int numTreatments, vector<string> t
 		map<string, double> SSWithin;
 		map<string, double>::iterator it;
 		
-		//SSTotal = 0.0;
-		SSTotal = calcTotal(numTreatments);
-		cout << "sstotal = " << SSTotal << " (n-P) = " << (matrix.size() - numTreatments) << endl;
+		SSTotal = calcWithin(matrix, numTreatments, thisCombosLookupSets);
 		int numSamples = matrix.size();
 		
 		//calc BValue
 		map<string, int> counts;
-		SSWithin = calcWithin(matrix, numTreatments, thisCombosLookupSets, counts);
+		SSWithin = calcWithinEach(matrix, numTreatments, thisCombosLookupSets, counts);
 				
 		double sum = 0.0;
 		double sumDenom = 0.0;
 		for (it = SSWithin.begin(); it != SSWithin.end(); it++) {
-			cout << it->first << '\t' << it->second << '\t' << (counts[it->first] - numTreatments) << endl;
 			double temp2 = (it->second) / (double) (counts[it->first] - 1);
-			cout << "sumTerm = " << temp2 << '\t' << "ln sumTerm = " << log(temp2) << endl;
 			sum += ((counts[it->first] - 1) * log(temp2));
 			sumDenom += ((1 / (double) (counts[it->first] - 1)) - ( 1 / (double) (numSamples - numTreatments) ));
 		}
@@ -847,7 +843,6 @@ int HomovaCommand::calcHomova(ofstream& out, int numTreatments, vector<string> t
 		double denom = 1 + ((1 / (double) (3 * (numTreatments - 1))) * sumDenom);
 		
 		BValue = numerator / denom;
-		cout << "numeratorTerm1 = " << numeratorTerm1 << " sum = " << sum << " sumDenom = " << sumDenom << " numerator = " << numerator << " denom = " << denom << " B = " << BValue << endl;	
 		
 		//calc Pvalue
 		int count = 0;
@@ -858,8 +853,10 @@ int HomovaCommand::calcHomova(ofstream& out, int numTreatments, vector<string> t
 			vector<string> copyNames = thisCombosLookupSets;
 			random_shuffle(copyNames.begin(), copyNames.end());
 			
+			SSTotal = calcWithin(matrix, numTreatments, copyNames);
+			
 			counts.clear();
-			map<string, double> randomSSWithin = calcWithin(matrix, numTreatments, copyNames, counts);
+			map<string, double> randomSSWithin = calcWithinEach(matrix, numTreatments, copyNames, counts);
 			
 			sum = 0.0;
 			sumDenom = 0.0;
@@ -869,12 +866,14 @@ int HomovaCommand::calcHomova(ofstream& out, int numTreatments, vector<string> t
 				sumDenom += ((1 / (double) (counts[it->first] - 1)) - ( 1 / (double) (numSamples - numTreatments) ));
 			}
 			
+			temp = SSTotal / (double) (numSamples - numTreatments);
+			numeratorTerm1 = (numSamples - numTreatments) * log(temp);
 			numerator = numeratorTerm1 - sum;
 			denom = 1 + ((1 / (double) (3 * (numTreatments - 1))) * sumDenom);
 			
 			double randomBValue = numerator / denom;
 			
-			if (randomBValue >= BValue) { count++; }
+			if (randomBValue <= BValue) { count++; }
 		}
 				
 		pValue = count / (float) iters;
@@ -889,7 +888,7 @@ int HomovaCommand::calcHomova(ofstream& out, int numTreatments, vector<string> t
 	}
 }
 //**********************************************************************************************************************
-map<string, double> HomovaCommand::calcWithin(vector< vector<double> >& thisMatrix, int numTreatments, vector<string> thisCombosLookupSets, map<string, int>& count) {
+map<string, double> HomovaCommand::calcWithinEach(vector< vector<double> >& thisMatrix, int numTreatments, vector<string> thisCombosLookupSets, map<string, int>& count) {
 	try {
 		map<string, double> within; //maps treatment to within value
 		map<string, double>::iterator it;
@@ -928,29 +927,33 @@ map<string, double> HomovaCommand::calcWithin(vector< vector<double> >& thisMatr
 		return within;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "HomovaCommand", "calcWithin");
+		m->errorOut(e, "HomovaCommand", "calcWithinEach");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-double HomovaCommand::calcTotal(int numTreatments) {
+double HomovaCommand::calcWithin(vector< vector<double> >& thisMatrix, int numTreatments, vector<string> thisCombosLookupSets) {
 	try {
 		double total = 0.0;
 		
 		//traverse lower triangle
-		for (int k = 0; k < matrix.size(); k++) { 
-			for (int l = k; l < matrix[k].size(); l++) {
-				total += (matrix[k][l] * matrix[k][l]); //dij^2
+		for (int k = 0; k < thisMatrix.size(); k++) { 
+			for (int l = k; l < thisMatrix[k].size(); l++) {
+				
+				//if you are from the same treatment then eij is 1 so add, else eij = 0
+				if (thisCombosLookupSets[k] == thisCombosLookupSets[l]) { 
+					total += (thisMatrix[k][l] * thisMatrix[k][l]); //dij^2
+				}
 			}
 		}
 		
-		//1 / numSamples
-		total *= (1.0 / (float) matrix.size());
+		//1 / (numSamples / numTreatments)
+		total *= (1.0 / (float) (thisMatrix.size() / (float) numTreatments));
 		
 		return total;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "HomovaCommand", "calcTotal");
+		m->errorOut(e, "HomovaCommand", "calcWithin");
 		exit(1);
 	}
 }
