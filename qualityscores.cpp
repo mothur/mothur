@@ -271,12 +271,12 @@ bool QualityScores::stripQualWindowAverage(Sequence& sequence, int stepSize, int
 		int start = 0;
 		
 		if(seqLength < windowSize) {	return 0;	}
-		
+			
 		while(start < seqLength){
 			double windowSum = 0.0000;
 
 			for(int i=start;i<end;i++){
-				windowSum += qScores[i];				
+				windowSum += qScores[i];
 			}
 			double windowAverage = windowSum / (double)(end-start);
 			
@@ -289,9 +289,7 @@ bool QualityScores::stripQualWindowAverage(Sequence& sequence, int stepSize, int
 			if(end >= seqLength){	end = seqLength - 1;	}
 		}
 		
-		
 		if(end == -1){	end = seqLength;	}
-		
 		
 		sequence.setUnaligned(rawSequence.substr(0,end));
 		trimQScores(-1, end);

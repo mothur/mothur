@@ -207,7 +207,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "qthreshold", false);	if (temp == "not found") { temp = "0"; }
 			convert(temp, qThreshold);
 			
-			temp = validParameter.validFile(parameters, "qtrim", false);		if (temp == "not found") { temp = "F"; }
+			temp = validParameter.validFile(parameters, "qtrim", false);		if (temp == "not found") { temp = "t"; }
 			qtrim = m->isTrue(temp);
 
 			temp = validParameter.validFile(parameters, "rollaverage", false);	if (temp == "not found") { temp = "0"; }
@@ -289,7 +289,7 @@ void TrimSeqsCommand::help(){
 		m->mothurOut("The rollaverage parameter allows you to set a minimum rolling average quality score allowed over a window. \n");
 		m->mothurOut("The qstepsize parameter allows you to set a number of bases to move the window over. Default=1.\n");
 		m->mothurOut("The allfiles parameter will create separate group and fasta file for each grouping. The default is F.\n");
-		m->mothurOut("The qtrim parameter will trim sequence from the point that they fall below the qthreshold and put it in the .trim file if set to true. The default is F.\n");
+		m->mothurOut("The qtrim parameter will trim sequence from the point that they fall below the qthreshold and put it in the .trim file if set to true. The default is T.\n");
 		m->mothurOut("The keepfirst parameter trims the sequence to the first keepfirst number of bases after the barcode or primers are removed, before the sequence is checked to see if it meets the other requirements. \n");
 		m->mothurOut("The removelast removes the last removelast number of bases after the barcode or primers are removed, before the sequence is checked to see if it meets the other requirements.\n");
 		m->mothurOut("The trim.seqs command should be in the following format: \n");
@@ -572,7 +572,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 					else						{	success = 1;				}
 					
 					//you don't want to trim, if it fails above then scrap it
-					if ((!qtrim) && (origLength != currSeq.getNumBases())) { success = 0; }
+					if ((!qtrim) && (origLength != currSeq.getNumBases())) {  success = 0; }
 					
 					if(!success)				{	trashCode += 'q';	}
 				}				
