@@ -222,89 +222,86 @@ AmovaCommand::AmovaCommand(string option) {
 				
 				ValidCalculators* validCalculator = new ValidCalculators();
 				
-				if (sharedfile != "") {
-					
-					for (int i=0; i<Estimators.size(); i++) {
-						if (validCalculator->isValidCalculator("treegroup", Estimators[i]) == true) { 
-							if (Estimators[i] == "sharedsobs") { 
-								calculators.push_back(new SharedSobsCS());
-							}else if (Estimators[i] == "sharedchao") { 
-								calculators.push_back(new SharedChao1());
-							}else if (Estimators[i] == "sharedace") { 
-								calculators.push_back(new SharedAce());
-							}else if (Estimators[i] == "jabund") { 	
-								calculators.push_back(new JAbund());
-							}else if (Estimators[i] == "sorabund") { 
-								calculators.push_back(new SorAbund());
-							}else if (Estimators[i] == "jclass") { 
-								calculators.push_back(new Jclass());
-							}else if (Estimators[i] == "sorclass") { 
-								calculators.push_back(new SorClass());
-							}else if (Estimators[i] == "jest") { 
-								calculators.push_back(new Jest());
-							}else if (Estimators[i] == "sorest") { 
-								calculators.push_back(new SorEst());
-							}else if (Estimators[i] == "thetayc") { 
-								calculators.push_back(new ThetaYC());
-							}else if (Estimators[i] == "thetan") { 
-								calculators.push_back(new ThetaN());
-							}else if (Estimators[i] == "kstest") { 
-								calculators.push_back(new KSTest());
-							}else if (Estimators[i] == "sharednseqs") { 
-								calculators.push_back(new SharedNSeqs());
-							}else if (Estimators[i] == "ochiai") { 
-								calculators.push_back(new Ochiai());
-							}else if (Estimators[i] == "anderberg") { 
-								calculators.push_back(new Anderberg());
-							}else if (Estimators[i] == "kulczynski") { 
-								calculators.push_back(new Kulczynski());
-							}else if (Estimators[i] == "kulczynskicody") { 
-								calculators.push_back(new KulczynskiCody());
-							}else if (Estimators[i] == "lennon") { 
-								calculators.push_back(new Lennon());
-							}else if (Estimators[i] == "morisitahorn") { 
-								calculators.push_back(new MorHorn());
-							}else if (Estimators[i] == "braycurtis") { 
-								calculators.push_back(new BrayCurtis());
-							}else if (Estimators[i] == "whittaker") { 
-								calculators.push_back(new Whittaker());
-							}else if (Estimators[i] == "odum") { 
-								calculators.push_back(new Odum());
-							}else if (Estimators[i] == "canberra") { 
-								calculators.push_back(new Canberra());
-							}else if (Estimators[i] == "structeuclidean") { 
-								calculators.push_back(new StructEuclidean());
-							}else if (Estimators[i] == "structchord") { 
-								calculators.push_back(new StructChord());
-							}else if (Estimators[i] == "hellinger") { 
-								calculators.push_back(new Hellinger());
-							}else if (Estimators[i] == "manhattan") { 
-								calculators.push_back(new Manhattan());
-							}else if (Estimators[i] == "structpearson") { 
-								calculators.push_back(new StructPearson());
-							}else if (Estimators[i] == "soergel") { 
-								calculators.push_back(new Soergel());
-							}else if (Estimators[i] == "spearman") { 
-								calculators.push_back(new Spearman());
-							}else if (Estimators[i] == "structkulczynski") { 
-								calculators.push_back(new StructKulczynski());
-							}else if (Estimators[i] == "speciesprofile") { 
-								calculators.push_back(new SpeciesProfile());
-							}else if (Estimators[i] == "hamming") { 
-								calculators.push_back(new Hamming());
-							}else if (Estimators[i] == "structchi2") { 
-								calculators.push_back(new StructChi2());
-							}else if (Estimators[i] == "gower") { 
-								calculators.push_back(new Gower());
-							}else if (Estimators[i] == "memchi2") { 
-								calculators.push_back(new MemChi2());
-							}else if (Estimators[i] == "memchord") { 
-								calculators.push_back(new MemChord());
-							}else if (Estimators[i] == "memeuclidean") { 
-								calculators.push_back(new MemEuclidean());
-							}else if (Estimators[i] == "mempearson") { 
-								calculators.push_back(new MemPearson());
-							}
+				for (int i=0; i<Estimators.size(); i++) {
+					if (validCalculator->isValidCalculator("treegroup", Estimators[i]) == true) { 
+						if (Estimators[i] == "sharedsobs") { 
+							calculators.push_back(new SharedSobsCS());
+						}else if (Estimators[i] == "sharedchao") { 
+							calculators.push_back(new SharedChao1());
+						}else if (Estimators[i] == "sharedace") { 
+							calculators.push_back(new SharedAce());
+						}else if (Estimators[i] == "jabund") { 	
+							calculators.push_back(new JAbund());
+						}else if (Estimators[i] == "sorabund") { 
+							calculators.push_back(new SorAbund());
+						}else if (Estimators[i] == "jclass") { 
+							calculators.push_back(new Jclass());
+						}else if (Estimators[i] == "sorclass") { 
+							calculators.push_back(new SorClass());
+						}else if (Estimators[i] == "jest") { 
+							calculators.push_back(new Jest());
+						}else if (Estimators[i] == "sorest") { 
+							calculators.push_back(new SorEst());
+						}else if (Estimators[i] == "thetayc") { 
+							calculators.push_back(new ThetaYC());
+						}else if (Estimators[i] == "thetan") { 
+							calculators.push_back(new ThetaN());
+						}else if (Estimators[i] == "kstest") { 
+							calculators.push_back(new KSTest());
+						}else if (Estimators[i] == "sharednseqs") { 
+							calculators.push_back(new SharedNSeqs());
+						}else if (Estimators[i] == "ochiai") { 
+							calculators.push_back(new Ochiai());
+						}else if (Estimators[i] == "anderberg") { 
+							calculators.push_back(new Anderberg());
+						}else if (Estimators[i] == "kulczynski") { 
+							calculators.push_back(new Kulczynski());
+						}else if (Estimators[i] == "kulczynskicody") { 
+							calculators.push_back(new KulczynskiCody());
+						}else if (Estimators[i] == "lennon") { 
+							calculators.push_back(new Lennon());
+						}else if (Estimators[i] == "morisitahorn") { 
+							calculators.push_back(new MorHorn());
+						}else if (Estimators[i] == "braycurtis") { 
+							calculators.push_back(new BrayCurtis());
+						}else if (Estimators[i] == "whittaker") { 
+							calculators.push_back(new Whittaker());
+						}else if (Estimators[i] == "odum") { 
+							calculators.push_back(new Odum());
+						}else if (Estimators[i] == "canberra") { 
+							calculators.push_back(new Canberra());
+						}else if (Estimators[i] == "structeuclidean") { 
+							calculators.push_back(new StructEuclidean());
+						}else if (Estimators[i] == "structchord") { 
+							calculators.push_back(new StructChord());
+						}else if (Estimators[i] == "hellinger") { 
+							calculators.push_back(new Hellinger());
+						}else if (Estimators[i] == "manhattan") { 
+							calculators.push_back(new Manhattan());
+						}else if (Estimators[i] == "structpearson") { 
+							calculators.push_back(new StructPearson());
+						}else if (Estimators[i] == "soergel") { 
+							calculators.push_back(new Soergel());
+						}else if (Estimators[i] == "spearman") { 
+							calculators.push_back(new Spearman());
+						}else if (Estimators[i] == "structkulczynski") { 
+							calculators.push_back(new StructKulczynski());
+						}else if (Estimators[i] == "speciesprofile") { 
+							calculators.push_back(new SpeciesProfile());
+						}else if (Estimators[i] == "hamming") { 
+							calculators.push_back(new Hamming());
+						}else if (Estimators[i] == "structchi2") { 
+							calculators.push_back(new StructChi2());
+						}else if (Estimators[i] == "gower") { 
+							calculators.push_back(new Gower());
+						}else if (Estimators[i] == "memchi2") { 
+							calculators.push_back(new MemChi2());
+						}else if (Estimators[i] == "memchord") { 
+							calculators.push_back(new MemChord());
+						}else if (Estimators[i] == "memeuclidean") { 
+							calculators.push_back(new MemEuclidean());
+						}else if (Estimators[i] == "mempearson") { 
+							calculators.push_back(new MemPearson());
 						}
 					}
 				}
@@ -502,19 +499,18 @@ int AmovaCommand::execute(){
 			
 			
 		}else { //user provided distance matrix
-				
-			//for each calculator
-			for(int i = 0 ; i < calculators.size(); i++) {
-				//create a new filename
-				ofstream out;
-				string outputFile = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + calculators[i]->getName() + ".amova";				
-				m->openOutputFile(outputFile, out);
-				outputNames.push_back(outputFile); outputTypes["amova"].push_back(outputFile);
-				
-				//print headers
-				out << "groupsCompared\tMeanSquaredWithin\tMeanSquaredAmong\tFstatistic\tpValue" << endl;  
-				out.close();
-			}
+			
+			if (outputDir == "") { outputDir = m->hasPath(phylipfile); }
+					
+			//create a new filename
+			ofstream out;
+			string outputFile = outputDir + m->getRootName(m->getSimpleName(phylipfile))  + "amova";				
+			m->openOutputFile(outputFile, out);
+			outputNames.push_back(outputFile); outputTypes["amova"].push_back(outputFile);
+			
+			//print headers
+			out << "groupsCompared\tMeanSquaredWithin\tMeanSquaredAmong\tFstatistic\tpValue" << endl;  
+			out.close();
 			
 			ReadPhylipVector readMatrix(phylipfile);
 			vector< vector<double> > completeMatrix;
@@ -554,14 +550,12 @@ int AmovaCommand::execute(){
 					}
 					
 					//append files
-					for(int i = 0 ; i < calculators.size(); i++) {
-						string outputFile = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + calculators[i]->getName() + ".amova";				
-						
-						for (int j = 0; j < processIDS.size(); j++) {
-							m->appendFiles((outputFile + toString(processIDS[j])), outputFile);
-							remove((outputFile + toString(processIDS[j])).c_str());
-						}
+					string outputFile = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "amova";				
+					for (int j = 0; j < processIDS.size(); j++) {
+						m->appendFiles((outputFile + toString(processIDS[j])), outputFile);
+						remove((outputFile + toString(processIDS[j])).c_str());
 					}
+					
 				}
 			#else
 				driver(0, namesOfGroupCombos.size(), names, "", completeMatrix);
@@ -689,7 +683,7 @@ int AmovaCommand::driver(int start, int num, vector<SharedRAbundVector*> thisLoo
 				matrix.resize(numGroups);
 				for (int k = 0; k < matrix.size(); k++)	{	for (int j = 0; j < matrix.size(); j++)	{	matrix[k].push_back(1.0);	}	}
 				
-				if (thisCombosLookup.size() != 0)  { 
+				if (thisCombosLookup.size() == 0)  { 
 					m->mothurOut("[ERROR]: Missing shared info for sets. Skipping comparison."); m->mothurOutEndLine(); 
 				}else{
 					
@@ -746,74 +740,72 @@ int AmovaCommand::driver(int start, int num, vector<SharedRAbundVector*> thisLoo
 int AmovaCommand::driver(int start, int num, vector<string> names, string pidValue, vector< vector<double> >& completeMatrix) {
 	try {
 		
-		//for each calculator
-		for(int i = 0 ; i < calculators.size(); i++) {
+		//create a new filename
+		ofstream out;
+		string outputFile = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "amova" + pidValue;				
+		m->openOutputFileAppend(outputFile, out);
+		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+		
+		//for each combo
+		for (int c = start; c < (start+num); c++) {
 			
-			//create a new filename
-			ofstream out;
-			string outputFile = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + calculators[i]->getName() + ".amova" + pidValue;				
-			m->openOutputFileAppend(outputFile, out);
-			out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+			if (m->control_pressed) { out.close(); return 0; }
 			
-			//for each combo
-			for (int c = start; c < (start+num); c++) {
-				
-				if (m->control_pressed) { out.close(); return 0; }
-				
-				//get set names
-				vector<string> setNames;
-				for (int j = 0; j < namesOfGroupCombos[c].size(); j++) { setNames.push_back(namesOfGroupCombos[c][j]); }
-				
-				vector<string> thisCombosSets; //what set each line in the distance matrix is from to be used when calculating SSWithin
-				set<int> indexes;
-				for (int k = 0; k < names.size(); k++) {
-					//is this group for a set we want to compare??
-					if (m->inUsersGroups(designMap->getGroup(names[k]), setNames)) {  
-						thisCombosSets.push_back(designMap->getGroup(names[k]));	
-						indexes.insert(k); //save indexes of valid rows in matrix for submatrix
-					}
-				}
-				
-				int numGroups = thisCombosSets.size();
-				
-				//calc the distance matrix
-				matrix.clear();
-				matrix.resize(numGroups);
-				for (int k = 0; k < matrix.size(); k++)	{	for (int j = 0; j < matrix.size(); j++)	{	matrix[k].push_back(1.0);	}	}
-				
-				if (thisCombosSets.size() != 0)  { 
-					m->mothurOut("[ERROR]: Missing distance info for sets. Skipping comparison."); m->mothurOutEndLine(); 
-				}else{
-					
-					if (setNames.size() == 2) { out << setNames[0] << "-" << setNames[1] << '\t'; }
-					else { out << "all" << '\t'; }
-					
-					//fill submatrix
-					int rowCount = 0;
-					int columnCount = 0;
-					for (int j = 0; j < completeMatrix.size(); j++) {
-						
-						if (indexes.count(j) != 0) { //we want at least part of this row
-							for (int k = 0; k < completeMatrix[j].size(); k++) {
-								
-								if (indexes.count(k) != 0) { //we want this distance
-									matrix[rowCount][columnCount] = completeMatrix[j][k];
-									matrix[columnCount][rowCount] = completeMatrix[j][k];
-									columnCount++;
-								}
-							}
-							rowCount++;
-						}
-					}
-					
-					//calc amova
-					calcAmova(out, setNames.size(), thisCombosSets);
+			//get set names
+			vector<string> setNames;
+			for (int j = 0; j < namesOfGroupCombos[c].size(); j++) { setNames.push_back(namesOfGroupCombos[c][j]); }
+			
+			vector<string> thisCombosSets; //what set each line in the distance matrix is from to be used when calculating SSWithin
+			set<int> indexes;
+			for (int k = 0; k < names.size(); k++) {
+				//is this group for a set we want to compare??
+				if (m->inUsersGroups(designMap->getGroup(names[k]), setNames)) {  
+					thisCombosSets.push_back(designMap->getGroup(names[k]));	
+					indexes.insert(k); //save indexes of valid rows in matrix for submatrix
 				}
 			}
 			
-			out.close();
-		}		
+			int numGroups = thisCombosSets.size();
+			
+			//calc the distance matrix
+			matrix.clear();
+			matrix.resize(numGroups);
+			
+			for (int k = 0; k < matrix.size(); k++)	{	for (int j = 0; j < matrix.size(); j++)	{	matrix[k].push_back(1.0);	}	}
+			
+			if (thisCombosSets.size() == 0)  { 
+				m->mothurOut("[ERROR]: Missing distance info for sets. Skipping comparison."); m->mothurOutEndLine(); 
+			}else{
+				
+				if (setNames.size() == 2) { out << setNames[0] << "-" << setNames[1] << '\t'; }
+				else { out << "all" << '\t'; }
+				
+				//fill submatrix
+				int rowCount = 0;
+				for (int j = 0; j < completeMatrix.size(); j++) {
+					
+					if (indexes.count(j) != 0) { //we want at least part of this row
+						int columnCount = 0;
+						for (int k = 0; k < completeMatrix[j].size(); k++) {
+							
+							if (indexes.count(k) != 0) { //we want this distance
+								matrix[rowCount][columnCount] = completeMatrix[j][k];
+								matrix[columnCount][rowCount] = completeMatrix[j][k];
+								columnCount++;
+							}
+						}
+						rowCount++;
+					}
+				}
+				
+				//calc amova
+				calcAmova(out, setNames.size(), thisCombosSets);
+			}
+		}
 		
+		out.close();
+		
+	
 		return 0;
 		
 	}
@@ -852,7 +844,7 @@ int AmovaCommand::calcAmova(ofstream& out, int numTreatments, vector<string> thi
 		pValue = count / (float) iters;
 		
 		out << MSWithin << '\t' << MSAmoung << '\t' << FStatistic << '\t' << pValue << endl;
-		
+		//cout << "ssAmong = " << SSAmoung << '\t' << "sswithin = " << SSWithin << '\t' << "ssTotal = " << SSTotal << '\t' << "pvalue = " << pValue << endl;	
 		return 0;
 	}
 	catch(exception& e) {
