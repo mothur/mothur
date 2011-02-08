@@ -744,7 +744,7 @@ int SummarySharedCommand::driver(vector<SharedRAbundVector*> thisLookup, int sta
 					outputFileHandle << '\t';
 					sumCalculators[i]->print(outputFileHandle);
 					
-					seqDist temp(l, k, tempdata[0]);
+					seqDist temp(l, k, (1.0 - tempdata[0]));
 					calcDists[i].push_back(temp);
 				}
 				outputFileHandle << endl;

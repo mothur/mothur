@@ -307,7 +307,7 @@ void ChimeraSlayerCommand::help(){
 		#ifdef USE_MPI
 		m->mothurOut("When using MPI, the processors parameter is set to the number of MPI processes running. \n");
 		#endif
-		m->mothurOut("The trim parameter allows you to output a new fasta file containing your sequences with the chimeric ones trimmed to include only their longest peice, default=F. \n");
+		m->mothurOut("The trim parameter allows you to output a new fasta file containing your sequences with the chimeric ones trimmed to include only their longest piece, default=F. \n");
 		m->mothurOut("The window parameter allows you to specify the window size for searching for chimeras, default=50. \n");
 		m->mothurOut("The increment parameter allows you to specify how far you move each window while finding chimeric sequences, default=5.\n");
 		m->mothurOut("The numwanted parameter allows you to specify how many sequences you would each query sequence compared with, default=15.\n");
