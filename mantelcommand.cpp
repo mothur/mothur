@@ -136,9 +136,11 @@ MantelCommand::MantelCommand(string option)  {
 
 void MantelCommand::help(){
 	try {
+		m->mothurOut("Sokal, R. R., & Rohlf, F. J. (1995). Biometry, 3rd edn. New York: Freeman.\n");
 		m->mothurOut("The mantel command reads two distance matrices and calculates the mantel correlation coefficient.\n");
-		m->mothurOut("The mantel command parameters are phylip1, phylip2 and method.  The phylip1 and phylip2 parameters are required.  Matrices must be the same size and contain the same names.\n");
+		m->mothurOut("The mantel command parameters are phylip1, phylip2, iters and method.  The phylip1 and phylip2 parameters are required.  Matrices must be the same size and contain the same names.\n");
 		m->mothurOut("The method parameter allows you to select what method you would like to use. Options are pearson, spearman and kendall. Default=pearson.\n");
+		m->mothurOut("The iters parameter allows you to set number of randomization for the P value.  The default is 1000. \n");
 		m->mothurOut("The mantel command should be in the following format: mantel(phylip1=veg.dist, phylip2=env.dist).\n");
 		m->mothurOut("The mantel command outputs a .mantel file.\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. phylip1), '=' and parameters (i.e. veg.dist).\n\n");
@@ -173,82 +175,19 @@ int MantelCommand::execute(){
 		
 		//read phylip2
 		ReadPhylipVector readMatrix2(phylipfile2);
-		vector<seqDist> temp; //seqDist - int, int, float
-		vector<string> names2 = readMatrix2.read(temp);
+		vector< vector<double> > matrix2;
+		vector<string> names2 = readMatrix2.read(matrix2);
 		
 		if (m->control_pressed) { return 0; }
 		
-		//fill matrix2 making sure to make sure the distances are in the same order as matrix1
-		vector< vector<double> > matrix2;
+		//make sure matrix2 and matrix1 are in the same order
 		if (names1 == names2) { //then everything is in same order and same size
-			
-			//initialize space
-			matrix2.resize(names2.size());
-			for (int i = 0; i < matrix2.size(); i++) { matrix2[i].resize(names2.size(), 0.0); }
-			
-			//fill matrix2
-			for (int i = 0; i < temp.size(); i++) {
-				matrix2[temp[i].seq1][temp[i].seq2] = temp[i].dist;
-				matrix2[temp[i].seq2][temp[i].seq1] = temp[i].dist;
-			}
-			
 		}else if (names1.size() != names2.size()) { //wrong size no need to order, abort
 			m->mothurOut("[ERROR]: distance matrices are not the same size, aborting."); m->mothurOutEndLine();
 			m->control_pressed = true;
 		}else { //sizes are the same, but either the names are different or they are in different order
-			
-			//map location of name in names1 to location of name in names2
-			map<string, int> names1Map;
-			map<string, int>::iterator it;
-			for (int i = 0; i < names1.size(); i++) {  names1Map[names1[i]] = i; }
-			
-			map<string, int> names2Map;
-			bool nameError = false;
-			for (int i = 0; i < names2.size(); i++) {  
-				
-				//if you find one name error stop looking
-				if (!nameError) {
-					it = names1Map.find(names2[i]);
-					if (it == names1Map.end()) { nameError = true; }
-				}
-				
-				//are names different
-				names2Map[names2[i]] = i; 
-			}
-			
-			//initialize space
-			matrix2.resize(names2.size());
-			for (int i = 0; i < matrix2.size(); i++) { matrix2[i].resize(names2.size(), 0.0); }
-			
-			//fill matrix2
-			//are we comparing apples to apples?
-			if (nameError) { 
-				m->mothurOut("[WARNING]: Names do not match between distance files. Comparing based on order in files."); m->mothurOutEndLine();
-				
-				for (int i = 0; i < temp.size(); i++) {
-					matrix2[temp[i].seq1][temp[i].seq2] = temp[i].dist;
-					matrix2[temp[i].seq2][temp[i].seq1] = temp[i].dist;
-				}
-				
-			}else { //no name error just different orders, so reorder
-				
-				for (int i = 0; i < temp.size(); i++) {
-					
-					//what's the location of this distance comparison in matrix1
-					string matrix2NameI = names2[temp[i].seq1];
-					string matrix2NameJ = names2[temp[i].seq2];
-					int locationI = names1Map[matrix2NameI];
-					int locationJ = names1Map[matrix2NameJ];
-					
-					matrix2[locationI][locationJ] = temp[i].dist;
-					matrix2[locationJ][locationI] = temp[i].dist;
-				}
-			}
-			
-		}
-		
-		//frees up space
-		temp.clear();
+			m->mothurOut("[WARNING]: Names do not match between distance files. Comparing based on order in files."); m->mothurOutEndLine();
+		}	
 		
 		if (m->control_pressed) { return 0; }
 		

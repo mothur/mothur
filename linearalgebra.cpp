@@ -637,7 +637,7 @@ double LinearAlgebra::calcKendall(vector< vector<double> >& euclidDists, vector<
 			int numWithLowerRank = 0;
 			float thisrank = user[l].score;
 					
-			for (int u = l; u < scores.size(); u++) {
+			for (int u = l+1; u < scores.size(); u++) {
 				if (user[u].score > thisrank) { numWithHigherRank++; }
 				else if (user[u].score < thisrank) { numWithLowerRank++; }
 				count++;
@@ -646,9 +646,6 @@ double LinearAlgebra::calcKendall(vector< vector<double> >& euclidDists, vector<
 			numCoor += numWithHigherRank;
 			numDisCoor += numWithLowerRank;
 		}
-				
-		//comparing to yourself
-		count -= userDists.size();
 				
 		r = (numCoor - numDisCoor) / (float) count;
 		

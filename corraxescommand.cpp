@@ -645,7 +645,7 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 					int numWithLowerRank = 0;
 					float thisrank = otus[l].score;
 					
-					for (int u = l; u < scores[j].size(); u++) {
+					for (int u = l+1; u < scores[j].size(); u++) {
 						if (otus[u].score > thisrank) { numWithHigherRank++; }
 						else if (otus[u].score < thisrank) { numWithLowerRank++; }
 						count++;
@@ -654,9 +654,6 @@ int CorrAxesCommand::calcKendall(map<string, vector<float> >& axes, ofstream& ou
 					numCoor += numWithHigherRank;
 					numDisCoor += numWithLowerRank;
 				}
-				
-				//comparing to yourself
-				count -= lookupFloat.size();
 				
 				double p = (numCoor - numDisCoor) / (float) count;
 
