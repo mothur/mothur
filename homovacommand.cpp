@@ -318,6 +318,7 @@ HomovaCommand::HomovaCommand(string option) {
 
 void HomovaCommand::help(){
 	try {
+		m->mothurOut("Referenced: Stewart CN, Excoffier L (1996). Assessing population genetic structure and variability with RAPD data: Application to Vaccinium macrocarpon (American Cranberry). J Evol Biol 9: 153-71.\n");
 		m->mothurOut("The homova command can only be executed after a successful read.otu command of a list and group or shared file, or by providing a phylip formatted distance matrix.\n");
 		m->mothurOut("The homova command outputs a .homova file. \n");
 		m->mothurOut("The homova command parameters are phylip, iters, groups, label, design, sets and processors.  The design parameter is required.\n");

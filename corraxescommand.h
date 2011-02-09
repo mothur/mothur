@@ -14,14 +14,6 @@
 #include "sharedrabundfloatvector.h"
 #include "inputdata.h"
 
-/***************************************************************/
-struct spearmanRank {
-	string name;
-	float score;
-	
-	spearmanRank(string n, float s) : name(n), score(s) {}
-};
-/***************************************************************/
 
 class CorrAxesCommand : public Command {
 public:

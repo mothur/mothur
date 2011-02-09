@@ -12,6 +12,7 @@
 
 #include "mothurout.h"
 
+
 class LinearAlgebra {
 	
 public:
@@ -24,6 +25,8 @@ public:
 	vector< vector<double> > calculateEuclidianDistance(vector<vector<double> >&, int); //pass in axes and number of dimensions
 	vector< vector<double> > calculateEuclidianDistance(vector<vector<double> >&); //pass in axes
 	double calcPearson(vector<vector<double> >&, vector<vector<double> >&);
+	double calcSpearman(vector<vector<double> >&, vector<vector<double> >&);
+	double calcKendall(vector<vector<double> >&, vector<vector<double> >&);
 	
 private:
 	MothurOut* m;

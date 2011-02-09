@@ -287,6 +287,7 @@
 		A7E9B98D12D37EC400DA6239 /* weighted.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B87C12D37EC400DA6239 /* weighted.cpp */; };
 		A7E9B98E12D37EC400DA6239 /* weightedlinkage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B87E12D37EC400DA6239 /* weightedlinkage.cpp */; };
 		A7E9B98F12D37EC400DA6239 /* whittaker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B87F12D37EC400DA6239 /* whittaker.cpp */; };
+		A7FA10021302E097003860FE /* mantelcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FA10011302E096003860FE /* mantelcommand.cpp */; };
 		A7FC480E12D788F20055BC5C /* linearalgebra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FC480D12D788F20055BC5C /* linearalgebra.cpp */; };
 		A7FC486712D795D60055BC5C /* pcacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FC486612D795D60055BC5C /* pcacommand.cpp */; };
 /* End PBXBuildFile section */
@@ -884,6 +885,8 @@
 		A7E9B87E12D37EC400DA6239 /* weightedlinkage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = weightedlinkage.cpp; sourceTree = SOURCE_ROOT; };
 		A7E9B87F12D37EC400DA6239 /* whittaker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = whittaker.cpp; sourceTree = "<group>"; };
 		A7E9B88012D37EC400DA6239 /* whittaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = whittaker.h; sourceTree = "<group>"; };
+		A7FA10001302E096003860FE /* mantelcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mantelcommand.h; sourceTree = "<group>"; };
+		A7FA10011302E096003860FE /* mantelcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mantelcommand.cpp; sourceTree = "<group>"; };
 		A7FC480C12D788F20055BC5C /* linearalgebra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = linearalgebra.h; sourceTree = "<group>"; };
 		A7FC480D12D788F20055BC5C /* linearalgebra.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = linearalgebra.cpp; sourceTree = "<group>"; };
 		A7FC486512D795D60055BC5C /* pcacommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pcacommand.h; sourceTree = "<group>"; };
@@ -1123,6 +1126,8 @@
 				A7E9B73C12D37EC400DA6239 /* libshuffcommand.h */,
 				A7E9B73D12D37EC400DA6239 /* listseqscommand.cpp */,
 				A7E9B73E12D37EC400DA6239 /* listseqscommand.h */,
+				A7FA10001302E096003860FE /* mantelcommand.h */,
+				A7FA10011302E096003860FE /* mantelcommand.cpp */,
 				A7E9B74312D37EC400DA6239 /* makegroupcommand.cpp */,
 				A7E9B74412D37EC400DA6239 /* makegroupcommand.h */,
 				A7E9B74912D37EC400DA6239 /* matrixoutputcommand.cpp */,
@@ -1610,7 +1615,7 @@
 			attributes = {
 				ORGANIZATIONNAME = "Schloss Lab";
 			};
-			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "Mothur" */;
+			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "mothur" */;
 			compatibilityVersion = "Xcode 3.1";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
@@ -1915,6 +1920,7 @@
 				7E6BE10A12F710D8007ADDBE /* refchimeratest.cpp in Sources */,
 				A7A61F2D130062E000E05B6B /* amovacommand.cpp in Sources */,
 				A75790591301749D00A30DAB /* homovacommand.cpp in Sources */,
+				A7FA10021302E097003860FE /* mantelcommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2030,7 +2036,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "Mothur" */ = {
+		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "mothur" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1DEB928A08733DD80010E9CD /* Debug */,

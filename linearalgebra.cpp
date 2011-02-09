@@ -379,10 +379,291 @@ double LinearAlgebra::calcPearson(vector< vector<double> >& euclidDists, vector<
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "LinearAlgebra", "calculateEuclidianDistance");
+		m->errorOut(e, "LinearAlgebra", "calcPearson");
 		exit(1);
 	}
 }
+/*********************************************************************************************************************************/
+//assumes both matrices are square and the same size
+double LinearAlgebra::calcSpearman(vector< vector<double> >& euclidDists, vector< vector<double> >& userDists){
+	try {
+		double r; 
+		
+		//format data
+		map<float, int> tableX; 
+		map<float, int>::iterator itTable;
+		vector<spearmanRank> scores; 
+		
+		for (int i = 0; i < euclidDists.size(); i++) {
+			for (int j = 0; j < i; j++) {
+				spearmanRank member(toString(scores.size()), euclidDists[i][j]);
+				scores.push_back(member);  
+				
+				//count number of repeats
+				itTable = tableX.find(euclidDists[i][j]);
+				if (itTable == tableX.end()) { 
+					tableX[euclidDists[i][j]] = 1;
+				}else {
+					tableX[euclidDists[i][j]]++;
+				}
+			}
+		}
+		
+		//sort scores
+		sort(scores.begin(), scores.end(), compareSpearman); 
+
+		//calc LX
+		double Lx = 0.0; 
+		for (itTable = tableX.begin(); itTable != tableX.end(); itTable++) {
+			double tx = (double) itTable->second;
+			Lx += ((pow(tx, 3.0) - tx) / 12.0);
+		}
+		
+		//find ranks of xi
+		map<string, float> rankEuclid;
+		vector<spearmanRank> ties;
+		int rankTotal = 0;
+		for (int j = 0; j < scores.size(); j++) {
+			rankTotal += (j+1);
+			ties.push_back(scores[j]);
+			
+			if (j != (scores.size()-1)) { // you are not the last so you can look ahead
+				if (scores[j].score != scores[j+1].score) { // you are done with ties, rank them and continue
+					
+					for (int k = 0; k < ties.size(); k++) {
+						float thisrank = rankTotal / (float) ties.size();
+						rankEuclid[ties[k].name] = thisrank;
+					}
+					ties.clear();
+					rankTotal = 0;
+				}
+			}else { // you are the last one
+				
+				for (int k = 0; k < ties.size(); k++) {
+					float thisrank = rankTotal / (float) ties.size();
+					rankEuclid[ties[k].name] = thisrank;
+				}
+			}
+		}
+		
+		
+		//format data
+		map<float, int> tableY; 
+		scores.clear(); 
+		
+		for (int i = 0; i < userDists.size(); i++) {
+			for (int j = 0; j < i; j++) {
+				spearmanRank member(toString(scores.size()), userDists[i][j]);
+				scores.push_back(member);  
+				
+				//count number of repeats
+				itTable = tableY.find(userDists[i][j]);
+				if (itTable == tableY.end()) { 
+					tableY[userDists[i][j]] = 1;
+				}else {
+					tableY[userDists[i][j]]++;
+				}
+			}
+		}
+		
+		//sort scores
+		sort(scores.begin(), scores.end(), compareSpearman); 
+		
+		//calc LX
+		double Ly = 0.0; 
+		for (itTable = tableY.begin(); itTable != tableY.end(); itTable++) {
+			double ty = (double) itTable->second;
+			Ly += ((pow(ty, 3.0) - ty) / 12.0);
+		}
+		
+		//find ranks of yi
+		map<string, float> rankUser;
+		ties.clear();
+		rankTotal = 0;
+		for (int j = 0; j < scores.size(); j++) {
+			rankTotal += (j+1);
+			ties.push_back(scores[j]);
+			
+			if (j != (scores.size()-1)) { // you are not the last so you can look ahead
+				if (scores[j].score != scores[j+1].score) { // you are done with ties, rank them and continue
+					
+					for (int k = 0; k < ties.size(); k++) {
+						float thisrank = rankTotal / (float) ties.size();
+						rankUser[ties[k].name] = thisrank;
+					}
+					ties.clear();
+					rankTotal = 0;
+				}
+			}else { // you are the last one
+				
+				for (int k = 0; k < ties.size(); k++) {
+					float thisrank = rankTotal / (float) ties.size();
+					rankUser[ties[k].name] = thisrank;
+				}
+			}
+		}
+		
+			
+		double di = 0.0;	
+		int count = 0;
+		for (int i = 0; i < userDists.size(); i++) {
+			for (int j = 0; j < i; j++) {
+			
+				float xi = rankEuclid[toString(count)];
+				float yi = rankUser[toString(count)];
+			
+				di += ((xi - yi) * (xi - yi));
+				
+				count++;
+			}
+		}
+		
+		double n = (double) count;
+		
+		double SX2 = ((pow(n, 3.0) - n) / 12.0) - Lx;
+		double SY2 = ((pow(n, 3.0) - n) / 12.0) - Ly;
+		
+		r = (SX2 + SY2 - di) / (2.0 * sqrt((SX2*SY2)));
+		
+		//divide by zero error
+		if (isnan(r) || isinf(r)) { r = 0.0; }
+	
+		return r;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "calcSpearman");
+		exit(1);
+	}
+}
+
+/*********************************************************************************************************************************/
+//assumes both matrices are square and the same size
+double LinearAlgebra::calcKendall(vector< vector<double> >& euclidDists, vector< vector<double> >& userDists){
+	try {
+		double r;
+		
+		//format data
+		vector<spearmanRank> scores; 
+		for (int i = 0; i < euclidDists.size(); i++) {
+			for (int j = 0; j < i; j++) {
+				spearmanRank member(toString(scores.size()), euclidDists[i][j]);
+				scores.push_back(member);
+			}
+		}
+			
+		//sort scores
+		sort(scores.begin(), scores.end(), compareSpearman); 	
+		
+		//find ranks of xi
+		map<string, float> rankEuclid;
+		vector<spearmanRank> ties;
+		int rankTotal = 0;
+		for (int j = 0; j < scores.size(); j++) {
+			rankTotal += (j+1);
+			ties.push_back(scores[j]);
+			
+			if (j != (scores.size()-1)) { // you are not the last so you can look ahead
+				if (scores[j].score != scores[j+1].score) { // you are done with ties, rank them and continue
+					
+					for (int k = 0; k < ties.size(); k++) {
+						float thisrank = rankTotal / (float) ties.size();
+						rankEuclid[ties[k].name] = thisrank;
+					}
+					ties.clear();
+					rankTotal = 0;
+				}
+			}else { // you are the last one
+				
+				for (int k = 0; k < ties.size(); k++) {
+					float thisrank = rankTotal / (float) ties.size();
+					rankEuclid[ties[k].name] = thisrank;
+				}
+			}
+		}
+		
+		vector<spearmanRank> scoresUser; 
+		for (int i = 0; i < userDists.size(); i++) {
+			for (int j = 0; j < i; j++) {
+				spearmanRank member(toString(scoresUser.size()), userDists[i][j]);
+				scoresUser.push_back(member);  
+			}
+		}
+		
+		//sort scores
+		sort(scoresUser.begin(), scoresUser.end(), compareSpearman); 	
+		
+		//find ranks of yi
+		map<string, float> rankUser;
+		ties.clear();
+		rankTotal = 0;
+		for (int j = 0; j < scoresUser.size(); j++) {
+			rankTotal += (j+1);
+			ties.push_back(scoresUser[j]);
+			
+			if (j != (scoresUser.size()-1)) { // you are not the last so you can look ahead
+				if (scoresUser[j].score != scoresUser[j+1].score) { // you are done with ties, rank them and continue
+					
+					for (int k = 0; k < ties.size(); k++) {
+						float thisrank = rankTotal / (float) ties.size();
+						rankUser[ties[k].name] = thisrank;
+					}
+					ties.clear();
+					rankTotal = 0;
+				}
+			}else { // you are the last one
+				
+				for (int k = 0; k < ties.size(); k++) {
+					float thisrank = rankTotal / (float) ties.size();
+					rankUser[ties[k].name] = thisrank;
+				}
+			}
+		}
+		
+		int numCoor = 0;
+		int numDisCoor = 0;
+		
+		//order user ranks
+		vector<spearmanRank> user; 
+		for (int l = 0; l < scores.size(); l++) {   
+			spearmanRank member(scores[l].name, rankUser[scores[l].name]);
+			user.push_back(member);
+		}
+				
+		int count = 0;
+		for (int l = 0; l < scores.size(); l++) {
+					
+			int numWithHigherRank = 0;
+			int numWithLowerRank = 0;
+			float thisrank = user[l].score;
+					
+			for (int u = l; u < scores.size(); u++) {
+				if (user[u].score > thisrank) { numWithHigherRank++; }
+				else if (user[u].score < thisrank) { numWithLowerRank++; }
+				count++;
+			}
+					
+			numCoor += numWithHigherRank;
+			numDisCoor += numWithLowerRank;
+		}
+				
+		//comparing to yourself
+		count -= userDists.size();
+				
+		r = (numCoor - numDisCoor) / (float) count;
+		
+		//divide by zero error
+		if (isnan(r) || isinf(r)) { r = 0.0; }
+		
+		return r;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "calcKendall");
+		exit(1);
+	}
+}
+
 /*********************************************************************************************************************************/
 
 
