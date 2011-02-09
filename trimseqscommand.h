@@ -38,7 +38,7 @@ private:
 		linePair(unsigned long int i, unsigned long int j) : start(i), end(j) {}
 	};
 	
-	void getOligos(vector<string>&, vector<string>&);
+	void getOligos(vector<vector<string> >&, vector<vector<string> >&);
 	int stripBarcode(Sequence&, QualityScores&, int&);
 	int stripForward(Sequence&, QualityScores&, int&);
 	bool stripReverse(Sequence&, QualityScores&);
@@ -67,13 +67,15 @@ private:
 	map<string, int> primers;
 	map<string, int> combos;
 	map<string, int> groupToIndex;
-	
+	vector<string> primerNameVector;	//needed here?
+	vector<string> barcodeNameVector;	//needed here?
+
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;
 	vector<linePair*> qLines;
 	
-	int driverCreateTrim(string, string, string, string, string, string, string, vector<string>, vector<string>, linePair*, linePair*);	
-	int createProcessesCreateTrim(string, string, string, string, string, string, string, vector<string>, vector<string>);
+	int driverCreateTrim(string, string, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >, linePair*, linePair*);	
+	int createProcessesCreateTrim(string, string, string, string, string, string, string, vector<vector<string> >, vector<vector<string> >);
 	int setLines(string, string, vector<unsigned long int>&, vector<unsigned long int>&);
 };
 

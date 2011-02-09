@@ -14,7 +14,7 @@
 
 vector<string> TrimSeqsCommand::getValidParameters(){	
 	try {
-		string Array[] =  {"fasta", "flip", "oligos", "maxambig", "maxhomop", "group","minlength", "maxlength", "qfile", 
+		string Array[] =  {"fasta", "flip", "oligos", "maxambig", "maxhomop","minlength", "maxlength", "qfile", 
 									"qthreshold", "qwindowaverage", "qstepsize", "qwindowsize", "qaverage", "rollaverage",
 									"keepfirst", "removelast",
 									"allfiles", "qtrim","tdiffs", "pdiffs", "bdiffs", "processors", "outputdir","inputdir"};
@@ -35,7 +35,6 @@ TrimSeqsCommand::TrimSeqsCommand(){
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["qual"] = tempOutNames;
-		outputTypes["group"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "TrimSeqsCommand", "TrimSeqsCommand");
@@ -83,7 +82,7 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string AlignArray[] =  {	"fasta", "flip", "oligos", "maxambig", "maxhomop", "group","minlength", "maxlength", "qfile", 
+			string AlignArray[] =  {	"fasta", "flip", "oligos", "maxambig", "maxhomop", "minlength", "maxlength", "qfile", 
 								"qthreshold", "qwindowaverage", "qstepsize", "qwindowsize", "qaverage", "rollaverage",
 								"keepfirst", "removelast",
 								"allfiles", "qtrim","tdiffs", "pdiffs", "bdiffs", "processors", "outputdir","inputdir"};
@@ -105,7 +104,6 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			vector<string> tempOutNames;
 			outputTypes["fasta"] = tempOutNames;
 			outputTypes["qual"] = tempOutNames;
-			outputTypes["group"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -136,13 +134,6 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 					if (path == "") {	parameters["qfile"] = inputDir + it->second;		}
 				}
 				
-				it = parameters.find("group");
-				//user has given a template file
-				if(it != parameters.end()){ 
-					path = m->hasPath(it->second);
-					//if the user has not given a path then, add inputdir. else leave path alone.
-					if (path == "") {	parameters["group"] = inputDir + it->second;		}
-				}
 			}
 
 			
@@ -170,10 +161,6 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			else if(temp == "not open"){	abort = true;	} 
 			else					{	oligoFile = temp;		}
 			
-			temp = validParameter.validFile(parameters, "group", true);
-			if (temp == "not found"){	groupfile = "";		}
-			else if(temp == "not open"){	abort = true;	} 
-			else					{	groupfile = temp;		}
 			
 			temp = validParameter.validFile(parameters, "maxambig", false);		if (temp == "not found") { temp = "-1"; }
 			convert(temp, maxAmbig);  
@@ -268,9 +255,8 @@ void TrimSeqsCommand::help(){
 	try {
 		m->mothurOut("The trim.seqs command reads a fastaFile and creates 2 new fasta files, .trim.fasta and scrap.fasta, as well as group files if you provide and oligos file.\n");
 		m->mothurOut("The .trim.fasta contains sequences that meet your requirements, and the .scrap.fasta contains those which don't.\n");
-		m->mothurOut("The trim.seqs command parameters are fasta, flip, oligos, group, maxambig, maxhomop, minlength, maxlength, qfile, qthreshold, qaverage, diffs, qtrim, keepfirst, removelast and allfiles.\n");
+		m->mothurOut("The trim.seqs command parameters are fasta, flip, oligos, maxambig, maxhomop, minlength, maxlength, qfile, qthreshold, qaverage, diffs, qtrim, keepfirst, removelast and allfiles.\n");
 		m->mothurOut("The fasta parameter is required.\n");
-		m->mothurOut("The group parameter allows you to enter a group file for your fasta file.\n");
 		m->mothurOut("The flip parameter will output the reverse compliment of your trimmed sequence. The default is false.\n");
 		m->mothurOut("The oligos parameter allows you to provide an oligos file.\n");
 		m->mothurOut("The maxambig parameter allows you to set the maximum number of ambigious bases allowed. The default is -1.\n");
