@@ -505,7 +505,7 @@ Compare SeqErrorCommand::getErrors(Sequence query, Sequence reference){
 				if(started == 1){	break;	}
 			}
 			else if(q[i] != '.' && r[i] == '.'){		//	query extends beyond reference
-				m->mothurOut("Warning: " + toString(query.getName()) + " extend beyond " + toString(reference.getName()) + ".  Ignoring the extra bases in the query\n");
+//				m->mothurOut("Warning: " + toString(query.getName()) + " extend beyond " + toString(reference.getName()) + ".  Ignoring the extra bases in the query\n");
 				if(started == 1){	break;	}
 			}
 			else if(q[i] == '.' && r[i] == '.'){		//	both are missing data

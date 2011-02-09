@@ -994,10 +994,10 @@ void ShhherCommand::flowDistParentFork(string distFileName, int startSeq, int st
 				float flowDistance = calcPairwiseDist(mapUniqueToSeq[i], mapUniqueToSeq[j]);
 
 				if(flowDistance < 1e-6){
-					outStream << seqNameVector[mapUniqueToSeq[i]] << '\t' << seqNameVector[mapUniqueToSeq[j]] << '\t' << 0.000000 << endl;
+					outStream << mapUniqueToSeq[i] << '\t' << mapUniqueToSeq[j] << '\t' << 0.000000 << endl;
 				}
 				else if(flowDistance <= cutoff){
-					outStream << seqNameVector[mapUniqueToSeq[i]] << '\t' << seqNameVector[mapUniqueToSeq[j]] << '\t' << flowDistance << endl;
+					outStream << mapUniqueToSeq[i] << '\t' << mapUniqueToSeq[j] << '\t' << flowDistance << endl;
 				}
 			}
 			if(i % 100 == 0){
