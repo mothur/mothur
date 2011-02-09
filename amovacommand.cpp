@@ -318,6 +318,7 @@ AmovaCommand::AmovaCommand(string option) {
 
 void AmovaCommand::help(){
 	try {
+		m->mothurOut("Referenced: Anderson MJ (2001). A new method for non-parametric multivariate analysis of variance. Austral Ecol 26: 32-46.\n");
 		m->mothurOut("The amova command can only be executed after a successful read.otu command of a list and group or shared file, or by providing a phylip formatted distance matrix.\n");
 		m->mothurOut("The amova command outputs a .amova file. \n");
 		m->mothurOut("The amova command parameters are phylip, iters, groups, label, design, sets and processors.  The design parameter is required.\n");

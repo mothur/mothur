@@ -10,16 +10,6 @@
 #include "corraxescommand.h"
 #include "sharedutilities.h"
 
-//********************************************************************************************************************
-//sorts highest to lowest
-inline bool compareSpearman(spearmanRank left, spearmanRank right){
-	return (left.score > right.score);	
-} 
-//********************************************************************************************************************
-//sorts lowest to highest
-inline bool compareSpearmanReverse(spearmanRank left, spearmanRank right){
-	return (left.score < right.score);	
-} 
 //**********************************************************************************************************************
 vector<string> CorrAxesCommand::getValidParameters(){	
 	try {

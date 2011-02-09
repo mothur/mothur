@@ -111,6 +111,7 @@
 #include "mergegroupscommand.h"
 #include "amovacommand.h"
 #include "homovacommand.h"
+#include "mantelcommand.h"
 
 /*******************************************************/
 
@@ -224,6 +225,7 @@ CommandFactory::CommandFactory(){
 	commands["remove.rare"]			= "remove.rare";
 	commands["amova"]				= "amova";
 	commands["homova"]				= "homova";
+	commands["mantel"]				= "mantel";
 	commands["merge.groups"]		= "merge.groups";
 	commands["pairwise.seqs"]		= "MPIEnabled";
 	commands["pipeline.pds"]		= "MPIEnabled";
@@ -388,6 +390,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "merge.groups")			{	command = new MergeGroupsCommand(optionString);				}
 		else if(commandName == "amova")					{	command = new AmovaCommand(optionString);					}
 		else if(commandName == "homova")				{	command = new HomovaCommand(optionString);					}
+		else if(commandName == "mantel")				{	command = new MantelCommand(optionString);					}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -517,6 +520,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "merge.groups")			{	pipecommand = new MergeGroupsCommand(optionString);				}
 		else if(commandName == "amova")					{	pipecommand = new AmovaCommand(optionString);					}
 		else if(commandName == "homova")				{	pipecommand = new HomovaCommand(optionString);					}
+		else if(commandName == "mantel")				{	pipecommand = new MantelCommand(optionString);					}
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -634,6 +638,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "merge.groups")			{	shellcommand = new MergeGroupsCommand();			}
 		else if(commandName == "amova")					{	shellcommand = new AmovaCommand();					}
 		else if(commandName == "homova")				{	shellcommand = new HomovaCommand();					}
+		else if(commandName == "mantel")				{	shellcommand = new MantelCommand();					}
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;

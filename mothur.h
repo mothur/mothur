@@ -124,6 +124,23 @@ struct distlinePair {
 	int end;
 	
 };
+/***************************************************************/
+struct spearmanRank {
+	string name;
+	float score;
+	
+	spearmanRank(string n, float s) : name(n), score(s) {}
+};
+//********************************************************************************************************************
+//sorts highest to lowest
+inline bool compareSpearman(spearmanRank left, spearmanRank right){
+	return (left.score > right.score);	
+} 
+//********************************************************************************************************************
+//sorts lowest to highest
+inline bool compareSpearmanReverse(spearmanRank left, spearmanRank right){
+	return (left.score < right.score);	
+} 
 /************************************************************/
 //sorts lowest to highest
 inline bool compareDistLinePairs(distlinePair left, distlinePair right){
