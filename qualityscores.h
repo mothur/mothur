@@ -20,7 +20,7 @@
 class QualityScores {
 public:
 	QualityScores();
-	QualityScores(ifstream&, int);
+	QualityScores(ifstream&);
 	string getName();
 	void printQScores(ofstream&);
 	void trimQScores(int, int);

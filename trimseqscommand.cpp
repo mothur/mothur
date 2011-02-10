@@ -460,7 +460,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 
 			QualityScores currQual;
 			if(qFileName != ""){
-				currQual = QualityScores(qFile, currSeq.getNumBases());  m->gobble(qFile);
+				currQual = QualityScores(qFile);  m->gobble(qFile);
 			}
 
 			string origSeq = currSeq.getUnaligned();
