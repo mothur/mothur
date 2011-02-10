@@ -343,7 +343,7 @@ int SeqErrorCommand::execute(){
 				int startBase = report.getQueryStart();
 				int endBase = report.getQueryEnd();
 
-				quality = QualityScores(qualFile, origLength);
+				quality = QualityScores(qualFile);
 
 				if(!ignoreSeq){
 					quality.updateQScoreErrorMap(qScoreErrorMap, minCompare.sequence, startBase, endBase, minCompare.weight);

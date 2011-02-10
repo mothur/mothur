@@ -27,7 +27,7 @@ public:
 private:
 
 	bool abort;
-	string fasta, outputDir;
+	string fastaFileName, qualFileName, outputDir;
 	vector<string> outputNames;
 	map<string, vector<string> > outputTypes;
 	
