@@ -171,7 +171,15 @@ ShhherCommand::ShhherCommand(string option) {
 				m->mothurOutEndLine();
 				abort = true; 
 			}
-			else if (flowFileName == "not open" || flowFilesFileName == "not open") { abort = true; }	
+			else if (flowFileName == "not open" || flowFilesFileName == "not open") { abort = true; }
+			
+			if(flowFileName != "not found"){	compositeFASTAFileName = "";	}
+			else{
+				compositeFASTAFileName = flowFilesFileName.substr(0, flowFilesFileName.length()-10) + "pn.fasta";
+				ofstream temp;
+				m->openOutputFile(compositeFASTAFileName, temp);
+				temp.close();
+			}
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -326,9 +334,7 @@ int ShhherCommand::execute(){
 				
 				cout << "\nClustering flowgrams..." << endl;
 				string listFileName = cluster(distFileName, namesFileName);
-	//			string listFileName = "PriestPot_C7.pn.list";
-	//			string listFileName = "test.mock_rep3.v69.pn.list";
-			
+
 				getOTUData(listFileName);
 				initPyroCluster();
 
@@ -1992,7 +1998,6 @@ void ShhherCommand::writeQualities(vector<int> otuCounts){
 
 void ShhherCommand::writeSequences(vector<int> otuCounts){
 	try {
-		
 		string bases = "TACG";
 		
 		string fastaFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".pn.fasta";
@@ -2018,6 +2023,10 @@ void ShhherCommand::writeSequences(vector<int> otuCounts){
 			}
 		}
 		fastaFile.close();
+		
+		if(compositeFASTAFileName != ""){
+			m->appendFiles(fastaFileName, compositeFASTAFileName);
+		}
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ShhherCommand", "writeSequences");
