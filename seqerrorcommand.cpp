@@ -417,20 +417,22 @@ void SeqErrorCommand::getReferences(){
 		ifstream referenceFile;
 		m->openInputFile(referenceFileName, referenceFile);
 		
+		int numAmbigSeqs = 0;
+		
 		while(referenceFile){
 			Sequence currentSeq(referenceFile);
 			int numAmbigs = currentSeq.getAmbigBases();
-			
-			if(numAmbigs != 0){
-				m->mothurOut("Warning: " + toString(currentSeq.getName()) + " has " + toString(numAmbigs) + " ambiguous bases, these bases will be removed\n");
-				currentSeq.removeAmbigBases();
-			}
+			if(numAmbigs > 0){	numAmbigSeqs++;	}
 			referenceSeqs.push_back(currentSeq);
 			m->gobble(referenceFile);
 		}
-		numRefs = referenceSeqs.size();
-		
 		referenceFile.close();
+		
+		if(numAmbigSeqs != 0){
+			m->mothurOut("Warning: " + toString(numAmbigSeqs) + " reference sequences have ambiguous bases, these bases will be ignored\n");
+		}
+		
+		numRefs = referenceSeqs.size();
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SeqErrorCommand", "getReferences");
@@ -454,7 +456,7 @@ Compare SeqErrorCommand::getErrors(Sequence query, Sequence reference){
 		Compare errors;
 
 		for(int i=0;i<alignLength;i++){
-			if(q[i] != '.' && r[i] != '.' && (q[i] != '-' || r[i] != '-')){			//	no missing data and no double gaps
+			if(q[i] != 'N' && q[i] != '.' && r[i] != '.' && (q[i] != '-' || r[i] != '-')){			//	no missing data and no double gaps
 				started = 1;
 				
 				if(q[i] == 'A'){
