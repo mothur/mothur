@@ -221,10 +221,10 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			convert(temp, tdiffs);
 			if(tdiffs == 0){	tdiffs = bdiffs + pdiffs;	}
 			
-			temp = validParameter.validFile(parameters, "allfiles", false);		if (temp == "not found") { temp = "T";		}
+			temp = validParameter.validFile(parameters, "allfiles", false);		if (temp == "not found"){ temp = "T";		}
 			allFiles = m->isTrue(temp);
 			
-			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found") { temp = "1"; }
+			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){ temp = "1";		}
 			convert(temp, processors); 
 			
 			if(oligoFileName == ""){	allFiles = 0;		}
@@ -322,6 +322,7 @@ int TrimFlowsCommand::execute(){
 			output.close();
 		}
 		outputTypes["flow.files"].push_back(flowFilesFileName);
+		outputNames.push_back(flowFileName);
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -431,15 +432,13 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 				if(fasta)	{	currSeq.printSequence(fastaFile);	}
 				
 				if(allFiles){
-//					string fileName = outputDir + m->getRootName(m->getSimpleName(flowFileName)) + barcodePrimerCombos[barcodeIndex][primerIndex] + ".flow";
 					ofstream output;
 					m->openOutputFileAppend(barcodePrimerComboFileNames[barcodeIndex][primerIndex], output);
 					output.setf(ios::fixed, ios::floatfield); trimFlowFile.setf(ios::showpoint);
 					
 					flowData.printFlows(output);
 					output.close();
-				}
-				
+				}				
 			}
 			else{
 				flowData.printFlows(scrapFlowFile, trashCode);

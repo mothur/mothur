@@ -33,7 +33,8 @@ private:
 	int abort;
 	map<string, vector<string> > outputTypes;
 	
-	string outputDir, flowFileName, flowFilesFileName, lookupFileName;
+	string outputDir, flowFileName, flowFilesFileName, lookupFileName, compositeFASTAFileName;
+
 	int processors, maxIters;
 	float cutoff, sigma, minDelta;
 	
