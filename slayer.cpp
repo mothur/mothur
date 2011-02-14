@@ -27,7 +27,7 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 				Sequence* q = new Sequence(query->getName(), query->getAligned());
 				Sequence* leftParent = new Sequence(refSeqs[i]->getName(), refSeqs[i]->getAligned());
 				Sequence* rightParent = new Sequence(refSeqs[j]->getName(), refSeqs[j]->getAligned());
-				
+
 				map<int, int> spots;  //map from spot in original sequence to spot in filtered sequence for query and both parents
 				vector<data_struct> divs = runBellerophon(q, leftParent, rightParent, spots);
 				
@@ -37,10 +37,10 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 					delete rightParent;
 					return "no"; 
 				}
-				
+					
 				vector<data_struct> selectedDivs;
 				for (int k = 0; k < divs.size(); k++) {
-				
+					
 					vector<snps> snpsLeft = getSNPS(divs[k].parentA.getAligned(), divs[k].querySeq.getAligned(), divs[k].parentB.getAligned(), divs[k].winLStart, divs[k].winLEnd);
 					vector<snps> snpsRight = getSNPS(divs[k].parentA.getAligned(), divs[k].querySeq.getAligned(), divs[k].parentB.getAligned(), divs[k].winRStart, divs[k].winREnd);
 					
@@ -105,7 +105,6 @@ string Slayer::getResults(Sequence* query, vector<Sequence*> refSeqs) {
 			}
 		}
 		
-
 		// compute bootstrap support
 		if (all.size() > 0) {
 			//sort them
@@ -143,13 +142,13 @@ vector<data_struct> Slayer::runBellerophon(Sequence* q, Sequence* pA, Sequence* 
 		string parentA = pA->getAligned();
 		string parentB = pB->getAligned();
 		int length = query.length();
-//cout << q->getName() << endl << q->getAligned() << endl << endl;	
-//cout << pA->getName() << endl << pA->getAligned() << endl << endl;		
-//cout << pB->getName() << endl << pB->getAligned() << endl << endl;	
-//cout << " length = " << length << endl;
-//cout << q->getName() << endl;
-//cout << pA->getName() << '\t';
-//cout << pB->getName() << endl;
+/*cout << q->getName() << endl << q->getAligned() << endl << endl;	
+cout << pA->getName() << endl << pA->getAligned() << endl << endl;		
+cout << pB->getName() << endl << pB->getAligned() << endl << endl;	
+cout << " length = " << length << endl;
+cout << q->getName() << endl;
+cout << pA->getName() << '\t';
+cout << pB->getName() << endl;*/
 	
 		//check window size
 		if (length < (2*windowSize+windowStep)) { 

@@ -25,19 +25,12 @@ Engine::Engine(){
 		exit(1);
 	}
 }
-
 /***********************************************************************/
-
-InteractEngine::InteractEngine(string path){
-
-	globaldata = GlobalData::getInstance();
-	
-	string temppath = path.substr(0, (path.find_last_of('m')));
-	
-	//this will happen if you set the path variable to contain mothur's exe location
-	if (temppath == "") { 
-	
+string Engine::findMothursPath(){
+	try { 
+		
 		string envPath = getenv("PATH");
+		string mothurPath = "";
 		
 		//delimiting path char
 		char delim;
@@ -52,7 +45,6 @@ InteractEngine::InteractEngine(string path){
 		mout->splitAtChar(envPath, dirs, delim);
 		
 		//get path related to mothur
-		string mothurPath = "";
 		for (int i = 0; i < dirs.size(); i++) {
 			//to lower so we can find it
 			string tempLower = "";
@@ -62,15 +54,53 @@ InteractEngine::InteractEngine(string path){
 			if (tempLower.find("mothur") != -1) {  mothurPath = dirs[i]; break;  }
 		}
 		
-		//add mothur so it looks like what argv would look like
-		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-			mothurPath += "/mothur";
-		#else
-			mothurPath += "\\mothur";
-		#endif
+		if (mothurPath != "") {
+			//add mothur so it looks like what argv would look like
+			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+				mothurPath += "/mothur";
+			#else
+				mothurPath += "\\mothur";
+			#endif
+		}else {
+			//okay mothur is not in the path, so the folder mothur is in must be in the path
+			//lets find out which one
+			
+			//get path related to mothur
+			for (int i = 0; i < dirs.size(); i++) {
+								
+				//is this mothurs path?
+				ifstream in;
+				string tempIn = dirs[i];
+				#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
+					tempIn += "/mothur";
+				#else
+					tempIn += "\\mothur";
+				#endif
+				mout->openInputFile(tempIn, in, "");
+				
+				//if this file exists
+				if (in) { in.close(); mothurPath = tempIn;  break;  }
+			}
+		}
 		
-		path = mothurPath;
+		return mothurPath;
+		
 	}
+	catch(exception& e) {
+		mout->errorOut(e, "Engine", "findMothursPath");
+		exit(1);
+	}
+}
+/***********************************************************************/
+
+InteractEngine::InteractEngine(string path){
+
+	globaldata = GlobalData::getInstance();
+	
+	string temppath = path.substr(0, (path.find_last_of("othur")-5));
+	
+	//this will happen if you set the path variable to contain mothur's exe location
+	if (temppath == "") { path = findMothursPath(); }
 	
 	globaldata->argv = path;
 }
@@ -224,46 +254,11 @@ BatchEngine::BatchEngine(string path, string batchFileName){
 	
 		openedBatch = mout->openInputFile(batchFileName, inputBatchFile);
 		
-		string temppath = path.substr(0, (path.find_last_of('m')));
+		string temppath = path.substr(0, (path.find_last_of("othur")-5));
 	
 		//this will happen if you set the path variable to contain mothur's exe location
-		if (temppath == "") { 
+		if (temppath == "") { path = findMothursPath(); }
 		
-			string envPath = getenv("PATH");
-			
-			//delimiting path char
-			char delim;
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-				delim = ':';
-			#else
-				delim = ';';
-			#endif
-			
-			//break apart path variable by ':'
-			vector<string> dirs;
-			mout->splitAtChar(envPath, dirs, delim);
-			
-			//get path related to mothur
-			string mothurPath = "";
-			for (int i = 0; i < dirs.size(); i++) {
-				//to lower so we can find it
-				string tempLower = "";
-				for (int j = 0; j < dirs[i].length(); j++) {  tempLower += tolower(dirs[i][j]);  }
-				
-				//is this mothurs path?
-				if (tempLower.find("mothur") != -1) {  mothurPath = dirs[i]; break;  }
-			}
-			
-			//add mothur so it looks like what argv would look like
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-				mothurPath += "/mothur";
-			#else
-				mothurPath += "\\mothur";
-			#endif
-			
-			path = mothurPath;
-		}
-
 		globaldata->argv = path;
 				
 	}
@@ -416,46 +411,11 @@ ScriptEngine::ScriptEngine(string path, string commandString){
 		//remove quotes
 		listOfCommands = commandString.substr(1, (commandString.length()-1));
 		
-		string temppath = path.substr(0, (path.find_last_of('m')));
-	
-		//this will happen if you set the path variable to contain mothur's exe location
-		if (temppath == "") { 
-		
-			string envPath = getenv("PATH");
-			
-			//delimiting path char
-			char delim;
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-				delim = ':';
-			#else
-				delim = ';';
-			#endif
-			
-			//break apart path variable by ':'
-			vector<string> dirs;
-			mout->splitAtChar(envPath, dirs, delim);
-			
-			//get path related to mothur
-			string mothurPath = "";
-			for (int i = 0; i < dirs.size(); i++) {
-				//to lower so we can find it
-				string tempLower = "";
-				for (int j = 0; j < dirs[i].length(); j++) {  tempLower += tolower(dirs[i][j]);  }
-				
-				//is this mothurs path?
-				if (tempLower.find("mothur") != -1) {  mothurPath = dirs[i]; break;  }
-			}
-			
-			//add mothur so it looks like what argv would look like
-			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-				mothurPath += "/mothur";
-			#else
-				mothurPath += "\\mothur";
-			#endif
-			
-			path = mothurPath;
-		}
+		string temppath = path.substr(0, (path.find_last_of("othur")-5));
 
+		//this will happen if you set the path variable to contain mothur's exe location
+		if (temppath == "") { path = findMothursPath(); }
+		
 		globaldata->argv = path;
 				
 	}

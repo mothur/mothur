@@ -13,7 +13,52 @@
 
 #include "mothur.h"
 #include "sequence.hpp"
-
+/***********************************************************************/
+struct data_struct { 
+	float divr_qla_qrb;
+	float divr_qlb_qra;
+	float qla_qrb;
+	float qlb_qra;
+	float qla;
+	float qrb;
+	float ab; 
+	float qa;
+	float qb; 
+	float lab; 
+	float rab; 
+	float qra; 
+	float qlb; 
+	int winLStart;
+	int winLEnd; 
+	int winRStart; 
+	int winREnd; 
+	Sequence querySeq; 
+	Sequence parentA;
+	Sequence parentB;
+	float bsa;
+	float bsb;
+	float bsMax;
+	float chimeraMax;
+	
+};
+/***********************************************************************/
+struct data_results {
+	vector<data_struct> results;
+	string flag;
+	map<int, int> spotMap;
+	Sequence trimQuery;
+	
+	data_results(vector<data_struct> d, string f, map<int, int> s, Sequence t) : results(d), flag(f), spotMap(s), trimQuery(t) {}
+	data_results() {}
+};
+/***********************************************************************/
+//sorts lowest to highest first by bsMax, then if tie by chimeraMax
+inline bool compareDataStruct(data_struct left, data_struct right){
+	if (left.bsMax < right.bsMax) { return true; }
+	else if (left.bsMax == right.bsMax) {
+		return (left.chimeraMax < right.chimeraMax);
+	}else { return false;	}
+} 
 /***********************************************************************/
 struct Preference {
 		string name;
@@ -102,7 +147,9 @@ class Chimera {
 		virtual int getChimeras(Sequence*){ return 0; }
 		virtual int getChimeras(){ return 0; }
 		virtual Sequence* print(ostream&, ostream&){  return NULL; }
+		virtual Sequence* print(ostream&, ostream&, data_results, data_results) { return NULL; }
 		virtual int print(ostream&, ostream&, string){  return 0; }
+		virtual data_results getResults() { data_results results; return results; }
 		
 		#ifdef USE_MPI
 		virtual Sequence* print(MPI_File&, MPI_File&){  return 0; }
