@@ -1097,7 +1097,7 @@ string ShhherCommand::createDistFile(int processors){
 
 		m->mothurOutEndLine();
 		
-		m-mothurOut("Total time: " + toString(time(NULL) - begTime) + '\t' + toString((clock() - begClock)/CLOCKS_PER_SEC) + '\n');
+		m->mothurOut("Total time: " + toString(time(NULL) - begTime) + '\t' + toString((clock() - begClock)/CLOCKS_PER_SEC) + '\n');
 		
 
 		return fDistFileName;
