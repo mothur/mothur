@@ -22,6 +22,7 @@ public:
 	QualityScores();
 	QualityScores(ifstream&);
 	string getName();
+	vector<int> getQualityScores() { return qScores; }
 	void printQScores(ofstream&);
 	void trimQScores(int, int);
 	void flipQScores();
