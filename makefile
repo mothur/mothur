@@ -9,11 +9,17 @@
 # Macros
 #
 
-# Optimize to level 3:
-
-CXXFLAGS += -O3
-
+USEMPI ?= yes
 64BIT_VERSION ?= yes
+USEREADLINE ?= yes
+CYGWIN_BUILD ?= no
+USECOMPRESSION ?= no
+MOTHUR_FILES = "\"../release\""
+RELEASE_DATE = "\"2/7/2011\""
+VERSION = "\"1.16.0\""
+
+# Optimize to level 3:
+CXXFLAGS += -O3
 
 ifeq  ($(strip $(64BIT_VERSION)),yes)
 	#if you are using centos uncomment the following lines
@@ -28,10 +34,6 @@ ifeq  ($(strip $(64BIT_VERSION)),yes)
 	 CXXFLAGS += -DBIT_VERSION
 endif
 
-MOTHUR_FILES = "\"../release\""
-
-RELEASE_DATE = "\"2/7/2011\""
-VERSION = "\"1.16.0\""
 
 CXXFLAGS += -DRELEASE_DATE=${RELEASE_DATE} -DVERSION=${VERSION}
 
@@ -40,7 +42,6 @@ else
 	CXXFLAGS += -DMOTHUR_FILES=${MOTHUR_FILES}
 endif
 
-CYGWIN_BUILD ?= no
 ifeq  ($(strip $(CYGWIN_BUILD)),yes)
     CXXFLAGS += -mno-cygwin
     LDFLAGS += -mno-cygwin 
@@ -49,7 +50,6 @@ endif
 # if you do not want to use the readline library, set this to no.
 # make sure you have the library installed
 
-USEREADLINE ?= yes
 
 ifeq  ($(strip $(USEREADLINE)),yes)
     CXXFLAGS += -DUSE_READLINE
@@ -58,7 +58,6 @@ ifeq  ($(strip $(USEREADLINE)),yes)
       -lncurses
 endif
 
-USEMPI ?= no
 
 ifeq  ($(strip $(USEMPI)),yes)
     CXX = mpic++
@@ -68,7 +67,6 @@ endif
 # if you want to enable reading and writing of compressed files, set to yes.
 # The default is no.  this may only work on unix-like systems, not for windows.
 
-USECOMPRESSION ?= no
 
 ifeq  ($(strip $(USECOMPRESSION)),yes)
   CXXFLAGS += -DUSE_COMPRESSION
