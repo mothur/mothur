@@ -252,11 +252,6 @@ int ShhherCommand::execute(){
 
 		double begClock = clock();
 		unsigned long int begTime = time(NULL);
-
-		cout.setf(ios::fixed, ios::floatfield);
-		cout.setf(ios::showpoint);
-		cout << setprecision(2);
-		
 		
 		if(pid == 0){
 
@@ -267,7 +262,7 @@ int ShhherCommand::execute(){
 
 			processors = ncpus;
 			
-			cout << "\nGetting preliminary data..." << endl;
+			m->mothurOut("\nGetting preliminary data...\n");
 			getSingleLookUp();
 			getJointLookUp();
 			
@@ -295,13 +290,14 @@ int ShhherCommand::execute(){
 			for(int i=0;i<numFiles;i++){
 				flowFileName = flowFileVector[i];
 			
-				cout << "\n>>>>>\tProcessing " << flowFileName << " (file " << i+1 << " of " << numFiles << ")\t<<<<<" << endl;
-				cout << "Reading flowgrams..." << endl;
+				m->mothurOut("\n>>>>>\tProcessing " + flowFileName + " (file " + toString(i+1) + " of " + toString(numFiles) + ")\t<<<<<\n");
+				m->mothurOut("Reading flowgrams...\n");
+				
 				getFlowData();
-				cout << "Identifying unique flowgrams..." << endl;
+				m->mothurOut("Identifying unique flowgrams...\n");
 				getUniques();
 
-				cout << "Calculating distances between flowgrams..." << endl;
+				m->mothurOut("Calculating distances between flowgrams...\n");
 				char fileName[1024];
 				strcpy(fileName, flowFileName.c_str());
 
@@ -332,7 +328,7 @@ int ShhherCommand::execute(){
 
 				string namesFileName = createNamesFile();
 				
-				cout << "\nClustering flowgrams..." << endl;
+				m->mothurOut("\nClustering flowgrams...\n");
 				string listFileName = cluster(distFileName, namesFileName);
 
 				getOTUData(listFileName);
@@ -351,9 +347,8 @@ int ShhherCommand::execute(){
 				
 				int numOTUsOnCPU = numOTUs / ncpus;
 				int numSeqsOnCPU = numSeqs / ncpus;
-				
-				cout << "\nDenoising flowgrams..." << endl;
-				cout << "iter\tmaxDelta\tnLL\t\tcycletime" << endl;
+				m->mothurOut("\nDenoising flowgrams...\n");
+				m->mothurOut("iter\tmaxDelta\tnLL\t\tcycletime\n");
 				
 				while((maxIters == 0 && maxDelta > minDelta) || iter < MIN_ITER || (maxDelta > minDelta && iter < maxIters)){
 
@@ -454,7 +449,7 @@ int ShhherCommand::execute(){
 					
 					iter++;
 					
-					cout << iter << '\t' << maxDelta << '\t' << setprecision(2) << nLL << '\t' << time(NULL) - cycTime << '\t' << setprecision(6) << (clock() - cycClock)/(double)CLOCKS_PER_SEC << endl;			
+					m->mothurOut(toString(iter) + '\t' + toString(maxDelta) + '\t' + toString(nLL) + '\t' + toString(time(NULL) - cycTime) + '\t' + toString((clock() - cycClock)/(double)CLOCKS_PER_SEC) + '\n');			
 
 					if((maxIters == 0 && maxDelta > minDelta) || iter < MIN_ITER || (maxDelta > minDelta && iter < maxIters)){
 						int live = 1;
@@ -471,7 +466,7 @@ int ShhherCommand::execute(){
 					
 				}	
 				
-				cout << "\nFinalizing..." << endl;
+				m->mothurOut("\nFinalizing...\n");
 				fill();
 				setOTUs();
 				vector<int> otuCounts(numOTUs, 0);
@@ -486,10 +481,9 @@ int ShhherCommand::execute(){
 				remove(distFileName.c_str());
 				remove(namesFileName.c_str());
 				remove(listFileName.c_str());
-				
-				cout << "Total time to process " << flowFileName << ":\t" << time(NULL) - begTime << '\t' << setprecision(6) << (clock() - begClock)/(double)CLOCKS_PER_SEC << endl;			
+								 
+				m->mothurOut("Total time to process " + toString(flowFileName) + ":\t" + toString(time(NULL) - begTime) + '\t' + toString((clock() - begClock)/(double)CLOCKS_PER_SEC) + '\n');			
 			}
-
 		}
 		else{
 			int abort = 1;
@@ -632,10 +626,11 @@ string ShhherCommand::flowDistMPI(int startSeq, int stopSeq){
 				}
 			}
 			if(i % 100 == 0){
-				cout << i << "\t" << (time(NULL) - begTime) << "\t" << (clock()-begClock)/CLOCKS_PER_SEC << endl;
+				m->mothurOut(toString(i) + '\t' + toString(time(NULL) - begTime) + '\t' + toString((clock()-begClock)/CLOCKS_PER_SEC) + '\n');
 			}
 		}
-		cout << stopSeq << "\t" << (time(NULL) - begTime) << "\t" << (clock()-begClock)/CLOCKS_PER_SEC << endl;
+		
+		m->mothurOut(toString(stopSeq) + '\t' + toString(time(NULL) - begTime) + '\t' + toString((clock()-begClock)/CLOCKS_PER_SEC) + '\n');
 		
 		string fDistFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".pn.dist";
 		if(pid != 0){	fDistFileName += ".temp." + toString(pid);	}
@@ -658,9 +653,6 @@ string ShhherCommand::flowDistMPI(int startSeq, int stopSeq){
 int ShhherCommand::execute(){
 	try {
 		if (abort == true) { return 0; }
-		
-		cout.setf(ios::fixed, ios::floatfield);
-		cout.setf(ios::showpoint);
 		
 		getSingleLookUp();
 		getJointLookUp();
@@ -686,18 +678,19 @@ int ShhherCommand::execute(){
 		for(int i=0;i<numFiles;i++){
 			flowFileName = flowFileVector[i];
 
-			cout << "\n>>>>>\tProcessing " << flowFileName << " (file " << i+1 << " of " << numFiles << ")\t<<<<<" << endl;
-			cout << "Reading flowgrams..." << endl;
+			m->mothurOut("\n>>>>>\tProcessing " + flowFileName + " (file " + toString(i+1) + " of " + toString(numFiles) + ")\t<<<<<\n");
+			m->mothurOut("Reading flowgrams...\n");
 			getFlowData();
-			cout << "Identifying unique flowgrams..." << endl;
+			
+			m->mothurOut("Identifying unique flowgrams...\n");
 			getUniques();
 			
 			
-			cout << "Calculating distances between flowgrams..." << endl;			
+			m->mothurOut("Calculating distances between flowgrams...\n");
 			string distFileName = createDistFile(processors);
 			string namesFileName = createNamesFile();
-			
-			cout << "\nClustering flowgrams..." << endl;
+				
+			m->mothurOut("\nClustering flowgrams...\n");
 			string listFileName = cluster(distFileName, namesFileName);
 			getOTUData(listFileName);
 			
@@ -709,8 +702,8 @@ int ShhherCommand::execute(){
 			double begClock = clock();
 			unsigned long int begTime = time(NULL);
 
-			cout << "\nDenoising flowgrams..." << endl;
-			cout << "iter\tmaxDelta\tnLL\t\tcycletime" << endl;
+			m->mothurOut("\nDenoising flowgrams...\n");
+			m->mothurOut("iter\tmaxDelta\tnLL\t\tcycletime\n");
 			
 			while((maxIters == 0 && maxDelta > minDelta) || iter < MIN_ITER || (maxDelta > minDelta && iter < maxIters)){
 				
@@ -728,10 +721,11 @@ int ShhherCommand::execute(){
 
 				iter++;
 				
-				cout << iter << '\t' << maxDelta << '\t' << setprecision(2) << nLL << '\t' << time(NULL) - cycTime << '\t' << setprecision(6) << (clock() - cycClock)/(double)CLOCKS_PER_SEC << endl;			
+				m->mothurOut(toString(iter) + '\t' + toString(maxDelta) + '\t' + toString(nLL) + '\t' + toString(time(NULL) - cycTime) + '\t' + toString((clock() - cycClock)/(double)CLOCKS_PER_SEC) + '\n');
+
 			}	
 			
-			cout << "\nFinalizing..." << endl;
+			m->mothurOut("\nFinalizing...\n");
 			fill();
 			setOTUs();
 			
@@ -749,7 +743,7 @@ int ShhherCommand::execute(){
 			remove(namesFileName.c_str());
 			remove(listFileName.c_str());
 			
-			cout << "Total time to process " << flowFileName << ":\t" << time(NULL) - begTime << '\t' << setprecision(6) << (clock() - begClock)/(double)CLOCKS_PER_SEC << endl;			
+			m->mothurOut("Total time to process " + flowFileName + ":\t" + toString(time(NULL) - begTime) + '\t' + toString((clock() - begClock)/(double)CLOCKS_PER_SEC) + '\n');
 		}
 		return 0;
 	}
@@ -903,13 +897,19 @@ void ShhherCommand::getUniques(){
 			int index = 0;
 			
 			vector<short> current(numFlowCells);
-			for(int j=0;j<numFlowCells;j++){	current[j] = short(((flowDataIntI[i * numFlowCells + j] + 50.0)/100.0));	}
+			for(int j=0;j<numFlowCells;j++){
+				current[j] = short(((flowDataIntI[i * numFlowCells + j] + 50.0)/100.0));
+			}
 						
 			for(int j=0;j<numUniques;j++){
 				int offset = j * numFlowCells;
 				bool toEnd = 1;
 				
-				for(int k=0;k<numFlowCells;k++){
+				int shorterLength;
+				if(lengths[i] < uniqueLengths[j])	{	shorterLength = lengths[i];			}
+				else								{	shorterLength = uniqueLengths[j];	}
+
+				for(int k=0;k<shorterLength;k++){
 					if(current[k] != uniqueFlowgrams[offset + k]){
 						toEnd = 0;
 						break;
@@ -920,6 +920,7 @@ void ShhherCommand::getUniques(){
 					mapSeqToUnique[i] = j;
 					uniqueCount[j]++;
 					index = j;
+					if(lengths[i] > uniqueLengths[j])	{	uniqueLengths[j] = lengths[i];	}
 					break;
 				}
 				index++;
@@ -1096,7 +1097,8 @@ string ShhherCommand::createDistFile(int processors){
 
 		m->mothurOutEndLine();
 		
-		cout << "Total time: " << (time(NULL) - begTime) << "\t"  << (clock() - begClock)/CLOCKS_PER_SEC << endl;;
+		m-mothurOut("Total time: " + toString(time(NULL) - begTime) + '\t' + toString((clock() - begClock)/CLOCKS_PER_SEC) + '\n');
+		
 
 		return fDistFileName;
 	}
@@ -1141,9 +1143,6 @@ string ShhherCommand::createNamesFile(){
 string ShhherCommand::cluster(string distFileName, string namesFileName){
 	try {
 		
-		SparseMatrix* matrix;
-		ListVector* list;
-		RAbundVector* rabund;
 		
 		globaldata->setNameFile(namesFileName);
 		globaldata->setColumnFile(distFileName);
@@ -1156,13 +1155,13 @@ string ShhherCommand::cluster(string distFileName, string namesFileName){
 		clusterNameMap->readMap();
 		read->read(clusterNameMap);
 		
-		list = read->getListVector();
-		matrix = read->getMatrix();
+		ListVector* list = read->getListVector();
+		SparseMatrix* matrix = read->getMatrix();
 		
 		delete read; 
 		delete clusterNameMap; 
 				
-		rabund = new RAbundVector(list->getRAbundVector());
+		RAbundVector* rabund = new RAbundVector(list->getRAbundVector());
 		
 		Cluster* cluster = new CompleteLinkage(rabund, list, matrix, cutoff, "furthest"); 
 		string tag = cluster->getTag();
