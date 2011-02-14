@@ -14,7 +14,7 @@
 //**********************************************************************************************************************
 vector<string> ChimeraSlayerCommand::getValidParameters(){	
 	try {
-		string AlignArray[] =  {"fasta", "processors","trim", "name","window", "include","template","numwanted", "ksize", "match","mismatch", 
+		string AlignArray[] =  {"fasta", "processors","trim","trimera", "name","window", "include","template","numwanted", "ksize", "match","mismatch", 
 			"divergence", "minsim","mincov","minbs", "minsnp","parents", "iters","outputdir","inputdir", "search","realign" };
 		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 		return myArray;
@@ -71,7 +71,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "processors","name", "include","trim", "window", "template","numwanted", "ksize", "match","mismatch", 
+			string Array[] =  {"fasta", "processors","name", "include","trim", "trimera","window", "template","numwanted", "ksize", "match","mismatch", 
 			"divergence", "minsim","mincov","minbs", "minsnp","parents", "iters","outputdir","inputdir", "search","realign" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
@@ -273,8 +273,8 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			temp = validParameter.validFile(parameters, "trim", false);				if (temp == "not found") { temp = "f"; }
 			trim = m->isTrue(temp); 
 			
-			//temp = validParameter.validFile(parameters, "trimera", false);				if (temp == "not found") { temp = "f"; }
-			//trimera = m->isTrue(temp); 
+			temp = validParameter.validFile(parameters, "trimera", false);				if (temp == "not found") { temp = "f"; }
+			trimera = m->isTrue(temp); 
 			
 			search = validParameter.validFile(parameters, "search", false);			if (search == "not found") { search = "distance"; }
 			
@@ -312,7 +312,7 @@ void ChimeraSlayerCommand::help(){
 		m->mothurOut("When using MPI, the processors parameter is set to the number of MPI processes running. \n");
 		#endif
 		m->mothurOut("The trim parameter allows you to output a new fasta file containing your sequences with the chimeric ones trimmed to include only their longest piece, default=F. \n");
-		//m->mothurOut("The trimera parameter allows you to check both peices of a chimeric sequence for chimeras, thus looking for trimeras and quadmeras. default=F. \n");
+		m->mothurOut("The trimera parameter allows you to check both peices of non-chimeric sequence for chimeras, thus looking for trimeras and quadmeras. default=F. \n");
 		m->mothurOut("The window parameter allows you to specify the window size for searching for chimeras, default=50. \n");
 		m->mothurOut("The increment parameter allows you to specify how far you move each window while finding chimeric sequences, default=5.\n");
 		m->mothurOut("The numwanted parameter allows you to specify how many sequences you would each query sequence compared with, default=15.\n");
@@ -608,6 +608,7 @@ int ChimeraSlayerCommand::driver(linePair* filePos, string outputFName, string f
 			if (m->control_pressed) {	out.close(); out2.close(); if (trim) { out3.close(); } inFASTA.close(); return 1;	}
 		
 			Sequence* candidateSeq = new Sequence(inFASTA);  m->gobble(inFASTA);
+			string candidateAligned = candidateSeq->getAligned();
 				
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
 				
@@ -618,14 +619,63 @@ int ChimeraSlayerCommand::driver(linePair* filePos, string outputFName, string f
 					chimera->getChimeras(candidateSeq);
 					
 					if (m->control_pressed) {	delete candidateSeq; return 1;	}
-		
-					//print results
-					Sequence* trimmed = chimera->print(out, out2);
-					
-					if (trim) { trimmed->printSequence(out3); delete trimmed; }
 					
 					//do you want to check both pieces for chimeras
-					//if (trimera) {}
+					if (trimera) {
+						
+						//if you are not chimeric, then check each half
+						data_results wholeResults = chimera->getResults();
+						
+						//determine if we need to split
+						bool isChimeric = false;
+						
+						if (wholeResults.flag == "yes") {
+							string chimeraFlag = "no";
+							if(  (wholeResults.results[0].bsa >= minBS && wholeResults.results[0].divr_qla_qrb >= divR)
+							   ||
+							   (wholeResults.results[0].bsb >= minBS && wholeResults.results[0].divr_qlb_qra >= divR) ) { chimeraFlag = "yes"; }
+							
+								
+							if (chimeraFlag == "yes") {	
+								if ((wholeResults.results[0].bsa >= minBS) || (wholeResults.results[0].bsb >= minBS)) { isChimeric = true; }
+							}
+						}
+						
+						if (!isChimeric) {
+							
+							//split sequence in half by bases
+							string leftQuery, rightQuery;
+							Sequence tempSeq(candidateSeq->getName(), candidateAligned);
+							divideInHalf(tempSeq, leftQuery, rightQuery);
+								
+							//run chimeraSlayer on each piece
+							Sequence* left = new Sequence(candidateSeq->getName(), leftQuery);
+							Sequence* right = new Sequence(candidateSeq->getName(), rightQuery);
+
+							//find chimeras
+							chimera->getChimeras(left);
+							data_results leftResults = chimera->getResults();
+							
+							chimera->getChimeras(right);
+							data_results rightResults = chimera->getResults();
+								
+							//if either piece is chimeric then report
+							Sequence* trimmed = chimera->print(out, out2, leftResults, rightResults);
+							if (trim) { trimmed->printSequence(out3); delete trimmed; }
+							
+							delete left; delete right;
+							
+						}else { //already chimeric
+							//print results
+							Sequence* trimmed = chimera->print(out, out2);
+							if (trim) { trimmed->printSequence(out3); delete trimmed; }
+						}
+					}else {
+						//print results
+						Sequence* trimmed = chimera->print(out, out2);
+						if (trim) { trimmed->printSequence(out3); delete trimmed; }
+					}
+					
 				}
 			count++;
 			}
@@ -681,6 +731,7 @@ int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_Fil
 			delete buf4;
 
 			Sequence* candidateSeq = new Sequence(iss);  m->gobble(iss);
+			string candidateAligned = candidateSeq->getAligned();
 		
 			if (candidateSeq->getName() != "") { //incase there is a commented sequence at the end of a file
 				
@@ -692,26 +743,97 @@ int ChimeraSlayerCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_Fil
 					chimera->getChimeras(candidateSeq);
 			
 					if (m->control_pressed) {	delete candidateSeq; return 1;	}
-		
-					//print results
-					Sequence* trimmed = chimera->print(outMPI, outAccMPI);
-					
-					if (trim) {  
-						string outputString = ">" + trimmed->getName() + "\n" + trimmed->getAligned() + "\n";
-						delete trimmed;
-						
-						//write to accnos file
-						int length = outputString.length();
-						char* buf2 = new char[length];
-						memcpy(buf2, outputString.c_str(), length);
-						
-						MPI_File_write_shared(outFastaMPI, buf2, length, MPI_CHAR, &status);
-						delete buf2;
-					}
 					
 					//do you want to check both pieces for chimeras
-					//if (trimera) {}
+					if (trimera) {
 						
+						//if you are not chimeric, then check each half
+						data_results wholeResults = chimera->getResults();
+						
+						//determine if we need to split
+						bool isChimeric = false;
+						
+						if (wholeResults.flag == "yes") {
+							string chimeraFlag = "no";
+							if(  (wholeResults.results[0].bsa >= minBS && wholeResults.results[0].divr_qla_qrb >= divR)
+							   ||
+							   (wholeResults.results[0].bsb >= minBS && wholeResults.results[0].divr_qlb_qra >= divR) ) { chimeraFlag = "yes"; }
+							
+							
+							if (chimeraFlag == "yes") {	
+								if ((wholeResults.results[0].bsa >= minBS) || (wholeResults.results[0].bsb >= minBS)) { isChimeric = true; }
+							}
+						}
+						
+						if (!isChimeric) {							
+							//split sequence in half by bases
+							string leftQuery, rightQuery;
+							Sequence tempSeq(candidateSeq->getName(), candidateAligned);
+							divideInHalf(tempSeq, leftQuery, rightQuery);
+							
+							//run chimeraSlayer on each piece
+							Sequence* left = new Sequence(candidateSeq->getName(), leftQuery);
+							Sequence* right = new Sequence(candidateSeq->getName(), rightQuery);
+							
+							//find chimeras
+							chimera->getChimeras(left);
+							data_results leftResults = chimera->getResults();
+							
+							chimera->getChimeras(right);
+							data_results rightResults = chimera->getResults();
+							
+							//if either piece is chimeric then report
+							Sequence* trimmed = chimera->print(outMPI, outAccMPI, leftResults, rightResults);
+							if (trim) {  
+								string outputString = ">" + trimmed->getName() + "\n" + trimmed->getAligned() + "\n";
+								delete trimmed;
+								
+								//write to accnos file
+								int length = outputString.length();
+								char* buf2 = new char[length];
+								memcpy(buf2, outputString.c_str(), length);
+								
+								MPI_File_write_shared(outFastaMPI, buf2, length, MPI_CHAR, &status);
+								delete buf2;
+							}
+							
+							delete left; delete right;
+							
+						}else { //already chimeric
+							//print results
+							Sequence* trimmed = chimera->print(outMPI, outAccMPI);
+							
+							if (trim) {  
+								string outputString = ">" + trimmed->getName() + "\n" + trimmed->getAligned() + "\n";
+								delete trimmed;
+								
+								//write to accnos file
+								int length = outputString.length();
+								char* buf2 = new char[length];
+								memcpy(buf2, outputString.c_str(), length);
+								
+								MPI_File_write_shared(outFastaMPI, buf2, length, MPI_CHAR, &status);
+								delete buf2;
+							}
+						}
+					}else {
+						//print results
+						Sequence* trimmed = chimera->print(outMPI, outAccMPI);
+						
+						if (trim) {  
+							string outputString = ">" + trimmed->getName() + "\n" + trimmed->getAligned() + "\n";
+							delete trimmed;
+							
+							//write to accnos file
+							int length = outputString.length();
+							char* buf2 = new char[length];
+							memcpy(buf2, outputString.c_str(), length);
+							
+							MPI_File_write_shared(outFastaMPI, buf2, length, MPI_CHAR, &status);
+							delete buf2;
+						}
+					}
+					
 				}
 			}
 			delete candidateSeq;
@@ -790,4 +912,42 @@ int ChimeraSlayerCommand::createProcesses(string outputFileName, string filename
 
 /**************************************************************************************************/
 
+int ChimeraSlayerCommand::divideInHalf(Sequence querySeq, string& leftQuery, string& rightQuery) {
+	try {
+		
+		string queryUnAligned = querySeq.getUnaligned();
+		int numBases = int(queryUnAligned.length() * 0.5);
+		
+		string queryAligned = querySeq.getAligned();
+		leftQuery = querySeq.getAligned();
+		rightQuery = querySeq.getAligned();
+		
+		int baseCount = 0;
+		int leftSpot = 0;
+		for (int i = 0; i < queryAligned.length(); i++) {
+			//if you are a base
+			if (isalpha(queryAligned[i])) {		
+				baseCount++; 
+			}
+			
+			//if you have half
+			if (baseCount >= numBases) {  leftSpot = i; break; } //first half
+		}
+		
+		//blank out right side
+		for (int i = leftSpot; i < leftQuery.length(); i++) { leftQuery[i] = '.'; }
+		
+		//blank out left side
+		for (int i = 0; i < leftSpot; i++) { rightQuery[i] = '.'; }
+		
+		return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraSlayerCommand", "divideInHalf");
+		exit(1);
+	}
+}
+
+/**************************************************************************************************/
 

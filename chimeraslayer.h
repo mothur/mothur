@@ -19,7 +19,6 @@
 //This class was modeled after the chimeraSlayer written by the Broad Institute
 /***********************************************************************/
 
-
 class ChimeraSlayer : public Chimera {
 	
 	public:
@@ -30,11 +29,14 @@ class ChimeraSlayer : public Chimera {
 		
 		int getChimeras(Sequence*);
 		Sequence* print(ostream&, ostream&);
+		Sequence* print(ostream&, ostream&, data_results, data_results);
 		void printHeader(ostream&);
 		int doPrep();
+		data_results getResults() { return printResults; }
 		
 		#ifdef USE_MPI
 		Sequence* print(MPI_File&, MPI_File&);
+		Sequence* print(MPI_File&, MPI_File&, data_results, data_results);
 		#endif
 		
 	private:
@@ -47,13 +49,16 @@ class ChimeraSlayer : public Chimera {
 		map<string, vector<string> > nameMapRank;  //sequence name to rank so you can construct a template of the abundant sequences if the user uses itself as template
 		
 		vector<data_struct>  chimeraResults;
+		data_results printResults;
 		string chimeraFlags, searchMethod, fastafile, includeAbunds;
 		bool realign, trimChimera;
 		int window, numWanted, kmerSize, match, misMatch, minSim, minCov, minBS, minSNP, parents, iters, increment;
 		float divR;
 	
 		void printBlock(data_struct, string, ostream&);
+		void printBlock(data_results, data_results, bool, bool, string, ostream&);
 		string getBlock(data_struct, string);
+		string getBlock(data_results, data_results, bool, bool, string);
 		int readNameFile(string);
 		vector<Sequence*> getTemplate(Sequence*);
 		

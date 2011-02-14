@@ -462,7 +462,240 @@ Sequence* ChimeraSlayer::print(ostream& out, ostream& outAcc) {
 		exit(1);
 	}
 }
+//***************************************************************************************************************
+Sequence* ChimeraSlayer::print(ostream& out, ostream& outAcc, data_results leftPiece, data_results rightPiece) {
+	try {
+		Sequence* trim = NULL;
+				
+		if (trimChimera) { 
+			string aligned = leftPiece.trimQuery.getAligned() + rightPiece.trimQuery.getAligned();
+			trim = new Sequence(leftPiece.trimQuery.getName(), aligned); 
+		}
+		
+		if ((leftPiece.flag == "yes") || (rightPiece.flag == "yes")) {
+			
+			string chimeraFlag = "no";
+			if (leftPiece.flag == "yes") {
+				
+				if(  (leftPiece.results[0].bsa >= minBS && leftPiece.results[0].divr_qla_qrb >= divR)
+					||
+					(leftPiece.results[0].bsb >= minBS && leftPiece.results[0].divr_qlb_qra >= divR) ) { chimeraFlag = "yes"; }
+			}
+			
+			if (rightPiece.flag == "yes") {
+				if ( (rightPiece.results[0].bsa >= minBS && rightPiece.results[0].divr_qla_qrb >= divR)
+				 ||
+				 (rightPiece.results[0].bsb >= minBS && rightPiece.results[0].divr_qlb_qra >= divR) ) { chimeraFlag = "yes"; }
+			}
+			
+			bool rightChimeric = false;
+			bool leftChimeric = false;
+			
+			if (chimeraFlag == "yes") {	
+				//which peice is chimeric or are both
+				if (rightPiece.flag == "yes") { if ((rightPiece.results[0].bsa >= minBS) || (rightPiece.results[0].bsb >= minBS)) { rightChimeric = true; } }
+				if (leftPiece.flag == "yes") { if ((leftPiece.results[0].bsa >= minBS) || (leftPiece.results[0].bsb >= minBS))	{ leftChimeric = true;	} }
+				
+				if (rightChimeric || leftChimeric) {
+					m->mothurOut(querySeq->getName() + "\tyes"); m->mothurOutEndLine();
+					outAcc << querySeq->getName() << endl;
+					
+					if (trimChimera) {  
+						string newAligned = trim->getAligned();
+												
+						//right side is fine so keep that
+						if ((leftChimeric) && (!rightChimeric)) {
+							for (int i = 0; i < leftPiece.spotMap[leftPiece.results[0].winREnd]; i++) { newAligned[i] = '.'; } 
+						}else if ((!leftChimeric) && (rightChimeric)) { //leftside is fine so keep that
+							for (int i = (rightPiece.spotMap[rightPiece.results[0].winLStart]-1); i < newAligned.length(); i++) { newAligned[i] = '.'; }
+						}else { //both sides are chimeric, keep longest piece
+							
+							int lengthLeftLeft = leftPiece.spotMap[leftPiece.results[0].winLStart] - leftPiece.spotMap[leftPiece.results[0].winLEnd];
+							int lengthLeftRight = leftPiece.spotMap[leftPiece.results[0].winRStart] - leftPiece.spotMap[leftPiece.results[0].winREnd];
+							
+							int longest = 1; // leftleft = 1, leftright = 2, rightleft = 3 rightright = 4
+							int length = lengthLeftLeft;
+							if (lengthLeftLeft < lengthLeftRight) { longest = 2;  length = lengthLeftRight; }
+							
+							int lengthRightLeft = rightPiece.spotMap[rightPiece.results[0].winLStart] - rightPiece.spotMap[rightPiece.results[0].winLEnd];
+							int lengthRightRight = rightPiece.spotMap[rightPiece.results[0].winRStart] - rightPiece.spotMap[rightPiece.results[0].winREnd];
+							
+							if (lengthRightLeft > length) { longest = 3; length = lengthRightLeft;  }
+							if (lengthRightRight > length) { longest = 4; }
+							
+							if (longest == 1) { //leftleft
+								for (int i = (leftPiece.spotMap[leftPiece.results[0].winRStart]-1); i < newAligned.length(); i++) { newAligned[i] = '.'; }
+							}else if (longest == 2) { //leftright
+								//get rid of leftleft
+								for (int i = (leftPiece.spotMap[leftPiece.results[0].winLStart]-1); i < (leftPiece.spotMap[leftPiece.results[0].winLEnd]-1); i++) { newAligned[i] = '.'; }
+								//get rid of right
+								for (int i = (rightPiece.spotMap[rightPiece.results[0].winLStart]-1); i < newAligned.length(); i++) { newAligned[i] = '.'; }
+							}else if (longest == 3) { //rightleft
+								//get rid of left
+								for (int i = 0; i < leftPiece.spotMap[leftPiece.results[0].winREnd]; i++) { newAligned[i] = '.'; } 
+								//get rid of rightright
+								for (int i = (rightPiece.spotMap[rightPiece.results[0].winRStart]-1); i < newAligned.length(); i++) { newAligned[i] = '.'; }
+							}else { //rightright
+								//get rid of left
+								for (int i = 0; i < leftPiece.spotMap[leftPiece.results[0].winREnd]; i++) { newAligned[i] = '.'; } 
+								//get rid of rightleft
+								for (int i = (rightPiece.spotMap[rightPiece.results[0].winLStart]-1); i < (rightPiece.spotMap[rightPiece.results[0].winLEnd]-1); i++) { newAligned[i] = '.'; }
+							}
+						}
+							
+						trim->setAligned(newAligned);
+					}
+					
+				}
+			}
+			
+			printBlock(leftPiece, rightPiece, leftChimeric, rightChimeric, chimeraFlag, out);
+			out << endl;
+		}else {  out << querySeq->getName() << "\tno" << endl;  }
+		
+		return trim;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraSlayer", "print");
+		exit(1);
+	}
+}
+
 #ifdef USE_MPI
+//***************************************************************************************************************
+Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc, data_results leftPiece, data_results rightPiece) {
+	try {
+		MPI_Status status;
+		bool results = false;
+		string outAccString = "";
+		string outputString = "";
+		
+		Sequence* trim = NULL;
+		
+		if (trimChimera) { 
+			string aligned = leftPiece.trimQuery.getAligned() + rightPiece.trimQuery.getAligned();
+			trim = new Sequence(leftPiece.trimQuery.getName(), aligned); 
+		}
+		
+		
+		if ((leftPiece.flag == "yes") || (rightPiece.flag == "yes")) {
+			
+			string chimeraFlag = "no";
+			if (leftPiece.flag == "yes") {
+				
+				if(  (leftPiece.results[0].bsa >= minBS && leftPiece.results[0].divr_qla_qrb >= divR)
+				   ||
+				   (leftPiece.results[0].bsb >= minBS && leftPiece.results[0].divr_qlb_qra >= divR) ) { chimeraFlag = "yes"; }
+			}
+			
+			if (rightPiece.flag == "yes") {
+				if ( (rightPiece.results[0].bsa >= minBS && rightPiece.results[0].divr_qla_qrb >= divR)
+					||
+					(rightPiece.results[0].bsb >= minBS && rightPiece.results[0].divr_qlb_qra >= divR) ) { chimeraFlag = "yes"; }
+			}
+			
+			bool rightChimeric = false;
+			bool leftChimeric = false;
+			
+			if (chimeraFlag == "yes") {	
+				//which peice is chimeric or are both
+				if (rightPiece.flag == "yes") { if ((rightPiece.results[0].bsa >= minBS) || (rightPiece.results[0].bsb >= minBS)) { rightChimeric = true; } }
+				if (leftPiece.flag == "yes") { if ((leftPiece.results[0].bsa >= minBS) || (leftPiece.results[0].bsb >= minBS))	{ leftChimeric = true;	} }
+				
+				if (rightChimeric || leftChimeric) {
+					cout << querySeq->getName() <<  "\tyes" << endl;
+					outAccString += querySeq->getName() + "\n";
+					results = true;
+					
+					//write to accnos file
+					int length = outAccString.length();
+					char* buf2 = new char[length];
+					memcpy(buf2, outAccString.c_str(), length);
+				
+					MPI_File_write_shared(outAcc, buf2, length, MPI_CHAR, &status);
+					delete buf2;
+					
+					if (trimChimera) {  
+						string newAligned = trim->getAligned();
+						
+						//right side is fine so keep that
+						if ((leftChimeric) && (!rightChimeric)) {
+							for (int i = 0; i < leftPiece.spotMap[leftPiece.results[0].winREnd]; i++) { newAligned[i] = '.'; } 
+						}else if ((!leftChimeric) && (rightChimeric)) { //leftside is fine so keep that
+							for (int i = (rightPiece.spotMap[rightPiece.results[0].winLStart]-1); i < newAligned.length(); i++) { newAligned[i] = '.'; }
+						}else { //both sides are chimeric, keep longest piece
+							
+							int lengthLeftLeft = leftPiece.spotMap[leftPiece.results[0].winLStart] - leftPiece.spotMap[leftPiece.results[0].winLEnd];
+							int lengthLeftRight = leftPiece.spotMap[leftPiece.results[0].winRStart] - leftPiece.spotMap[leftPiece.results[0].winREnd];
+							
+							int longest = 1; // leftleft = 1, leftright = 2, rightleft = 3 rightright = 4
+							int length = lengthLeftLeft;
+							if (lengthLeftLeft < lengthLeftRight) { longest = 2;  length = lengthLeftRight; }
+							
+							int lengthRightLeft = rightPiece.spotMap[rightPiece.results[0].winLStart] - rightPiece.spotMap[rightPiece.results[0].winLEnd];
+							int lengthRightRight = rightPiece.spotMap[rightPiece.results[0].winRStart] - rightPiece.spotMap[rightPiece.results[0].winREnd];
+							
+							if (lengthRightLeft > length) { longest = 3; length = lengthRightLeft;  }
+							if (lengthRightRight > length) { longest = 4; }
+							
+							if (longest == 1) { //leftleft
+								for (int i = (leftPiece.spotMap[leftPiece.results[0].winRStart]-1); i < newAligned.length(); i++) { newAligned[i] = '.'; }
+							}else if (longest == 2) { //leftright
+								//get rid of leftleft
+								for (int i = (leftPiece.spotMap[leftPiece.results[0].winLStart]-1); i < (leftPiece.spotMap[leftPiece.results[0].winLEnd]-1); i++) { newAligned[i] = '.'; }
+								//get rid of right
+								for (int i = (rightPiece.spotMap[rightPiece.results[0].winLStart]-1); i < newAligned.length(); i++) { newAligned[i] = '.'; }
+							}else if (longest == 3) { //rightleft
+								//get rid of left
+								for (int i = 0; i < leftPiece.spotMap[leftPiece.results[0].winREnd]; i++) { newAligned[i] = '.'; } 
+								//get rid of rightright
+								for (int i = (rightPiece.spotMap[rightPiece.results[0].winRStart]-1); i < newAligned.length(); i++) { newAligned[i] = '.'; }
+							}else { //rightright
+								//get rid of left
+								for (int i = 0; i < leftPiece.spotMap[leftPiece.results[0].winREnd]; i++) { newAligned[i] = '.'; } 
+								//get rid of rightleft
+								for (int i = (rightPiece.spotMap[rightPiece.results[0].winLStart]-1); i < (rightPiece.spotMap[rightPiece.results[0].winLEnd]-1); i++) { newAligned[i] = '.'; }
+							}
+						}
+						
+						trim->setAligned(newAligned);
+					}
+					
+				}
+			}
+			
+			outputString = getBlock(leftPiece, rightPiece, leftChimeric, rightChimeric, chimeraFlag);
+			outputString += "\n";
+		
+			//write to output file
+			int length = outputString.length();
+			char* buf = new char[length];
+			memcpy(buf, outputString.c_str(), length);
+				
+			MPI_File_write_shared(out, buf, length, MPI_CHAR, &status);
+			delete buf;
+
+		}else {  
+			outputString += querySeq->getName() + "\tno\n";  
+	
+			//write to output file
+			int length = outputString.length();
+			char* buf = new char[length];
+			memcpy(buf, outputString.c_str(), length);
+				
+			MPI_File_write_shared(out, buf, length, MPI_CHAR, &status);
+			delete buf;
+		}
+		
+		
+		return trim;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraSlayer", "print");
+		exit(1);
+	}
+}
 //***************************************************************************************************************
 Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 	try {
@@ -491,7 +724,7 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 					int length = outAccString.length();
 					char* buf2 = new char[length];
 					memcpy(buf2, outAccString.c_str(), length);
-				
+					
 					MPI_File_write_shared(outAcc, buf2, length, MPI_CHAR, &status);
 					delete buf2;
 					
@@ -512,27 +745,26 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 			
 			outputString = getBlock(chimeraResults[0], chimeraFlag);
 			outputString += "\n";
-	//cout << outputString << endl;		
+			
 			//write to output file
 			int length = outputString.length();
 			char* buf = new char[length];
 			memcpy(buf, outputString.c_str(), length);
-				
+			
 			MPI_File_write_shared(out, buf, length, MPI_CHAR, &status);
 			delete buf;
-
+			
 		}else {  
 			outputString += querySeq->getName() + "\tno\n";  
-	//cout << outputString << endl;
+			
 			//write to output file
 			int length = outputString.length();
 			char* buf = new char[length];
 			memcpy(buf, outputString.c_str(), length);
-				
+			
 			MPI_File_write_shared(out, buf, length, MPI_CHAR, &status);
 			delete buf;
 		}
-		
 		
 		return trim;
 	}
@@ -546,12 +778,14 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc) {
 //***************************************************************************************************************
 int ChimeraSlayer::getChimeras(Sequence* query) {
 	try {
-		if (trimChimera) { trimQuery = new Sequence(query->getName(), query->getAligned());  }
+		if (trimChimera) { trimQuery = new Sequence(query->getName(), query->getAligned()); printResults.trimQuery = *trimQuery; }
 		
 		chimeraFlags = "no";
+		printResults.flag = "no";
 
 		//filter query
 		spotMap = runFilter(query);	
+		printResults.spotMap = spotMap;
 		
 		querySeq = query;
 		
@@ -574,11 +808,11 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 		}
 	
 		if (m->control_pressed) {  return 0;  }
-		
+
 		string chimeraFlag = maligner.getResults(query, decalc);
 		if (m->control_pressed) {  return 0;  }
 		vector<results> Results = maligner.getOutput();
-			
+	
 		//found in testing realigning only made things worse
 		if (realign) {
 			ChimeraReAligner realigner(thisTemplate, match, misMatch);
@@ -607,9 +841,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 			}
 			
 			for (itDup = removeDups.begin(); itDup != removeDups.end(); itDup++) {
-				//Sequence* seq = getSequence(itDup->first); //makes copy so you can filter and mask and not effect template
 				itSeq = parentNameSeq.find(itDup->first);
-//cout << itDup->first << itSeq->second << endl;
 				Sequence* seq = new Sequence(itDup->first, itSeq->second);
 				
 				SeqDist member;
@@ -634,6 +866,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 			
 			//put seqs into vector to send to slayer
 			vector<Sequence*> seqsForSlayer;
+			
 			for (int k = 0; k < seqs.size(); k++) {  seqsForSlayer.push_back(seqs[k].seq);	}
 			
 			//mask then send to slayer...
@@ -652,7 +885,7 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 			}
 			
 			if (m->control_pressed) {  for (int k = 0; k < seqs.size(); k++) {  delete seqs[k].seq;   }  return 0;  }
-			
+
 			//send to slayer
 			chimeraFlags = slayer.getResults(query, seqsForSlayer);
 			if (m->control_pressed) {  return 0;  }
@@ -660,10 +893,11 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 			
 			//free memory
 			for (int k = 0; k < seqs.size(); k++) {  delete seqs[k].seq;   }
+			
+			printResults.spotMap = spotMap;
+			printResults.flag = chimeraFlags;
+			printResults.results = chimeraResults;
 		}
-		
-		//delete maligner;
-		//delete slayer;
 		
 		return 0;
 	}
@@ -675,35 +909,125 @@ int ChimeraSlayer::getChimeras(Sequence* query) {
 //***************************************************************************************************************
 void ChimeraSlayer::printBlock(data_struct data, string flag, ostream& out){
 	try {
-	//out << ":)\n";
-		
 		out << querySeq->getName() << '\t';
 		out << data.parentA.getName() << "\t" << data.parentB.getName()  << '\t';
-		//out << "Left Window: " << spotMap[data.winLStart] << " " << spotMap[data.winLEnd] << endl;
-		//out << "Right Window: " << spotMap[data.winRStart] << " " << spotMap[data.winREnd] << endl;
-		
+	
 		out << data.divr_qla_qrb << '\t' << data.qla_qrb << '\t' << data.bsa << '\t';
 		out << data.divr_qlb_qra << '\t' << data.qlb_qra << '\t' << data.bsb << '\t';
 		
 		out << flag << '\t' << spotMap[data.winLStart] << "-" << spotMap[data.winLEnd] << '\t' << spotMap[data.winRStart] << "-" << spotMap[data.winREnd] << '\t';
 		
-		//out << "Similarity of parents: " << data.ab << endl;
-		//out << "Similarity of query to parentA: " << data.qa << endl;
-		//out << "Similarity of query to parentB: " << data.qb << endl;
-		
-		
-		//out << "Per_id(QL,A): " << data.qla << endl;
-		//out << "Per_id(QL,B): " << data.qlb << endl;
-		//out << "Per_id(QR,A): " << data.qra << endl;
-		//out << "Per_id(QR,B): " << data.qrb << endl;
-
-		
-		//out << "DeltaL: " << (data.qla - data.qlb) << endl;
-		//out << "DeltaR: " << (data.qra - data.qrb) << endl;
-
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraSlayer", "printBlock");
+		exit(1);
+	}
+}
+//***************************************************************************************************************
+void ChimeraSlayer::printBlock(data_results leftdata, data_results rightdata, bool leftChimeric, bool rightChimeric, string flag, ostream& out){
+	try {
+		
+		if ((leftChimeric) && (!rightChimeric)) { //print left
+			out << querySeq->getName() << '\t';
+			out << leftdata.results[0].parentA.getName() << "\t" << leftdata.results[0].parentB.getName()  << '\t';
+			
+			out << leftdata.results[0].divr_qla_qrb << '\t' << leftdata.results[0].qla_qrb << '\t' << leftdata.results[0].bsa << '\t';
+			out << leftdata.results[0].divr_qlb_qra << '\t' << leftdata.results[0].qlb_qra << '\t' << leftdata.results[0].bsb << '\t';
+		
+			out << flag << '\t' << leftdata.spotMap[leftdata.results[0].winLStart] << "-" << leftdata.spotMap[leftdata.results[0].winLEnd] << '\t' << leftdata.spotMap[leftdata.results[0].winRStart] << "-" << leftdata.spotMap[leftdata.results[0].winREnd] << '\t';
+		
+		}else if ((!leftChimeric) && (rightChimeric)) {  //print right
+			out << querySeq->getName() << '\t';
+			out << rightdata.results[0].parentA.getName() << "\t" << rightdata.results[0].parentB.getName()  << '\t';
+			
+			out << rightdata.results[0].divr_qla_qrb << '\t' << rightdata.results[0].qla_qrb << '\t' << rightdata.results[0].bsa << '\t';
+			out << rightdata.results[0].divr_qlb_qra << '\t' << rightdata.results[0].qlb_qra << '\t' << rightdata.results[0].bsb << '\t';
+			
+			out << flag << '\t' << rightdata.spotMap[rightdata.results[0].winLStart] << "-" << rightdata.spotMap[rightdata.results[0].winLEnd] << '\t' << rightdata.spotMap[rightdata.results[0].winRStart] << "-" << rightdata.spotMap[rightdata.results[0].winREnd] << '\t';			
+			
+		}else  { //print both results
+			if (leftdata.flag == "yes") {
+				out << querySeq->getName() + "_LEFT" << '\t';
+				out << leftdata.results[0].parentA.getName() << "\t" << leftdata.results[0].parentB.getName()  << '\t';
+				
+				out << leftdata.results[0].divr_qla_qrb << '\t' << leftdata.results[0].qla_qrb << '\t' << leftdata.results[0].bsa << '\t';
+				out << leftdata.results[0].divr_qlb_qra << '\t' << leftdata.results[0].qlb_qra << '\t' << leftdata.results[0].bsb << '\t';
+				
+				out << flag << '\t' << leftdata.spotMap[leftdata.results[0].winLStart] << "-" << leftdata.spotMap[leftdata.results[0].winLEnd] << '\t' << leftdata.spotMap[leftdata.results[0].winRStart] << "-" << leftdata.spotMap[leftdata.results[0].winREnd] << '\t';
+			}
+			
+			if (rightdata.flag == "yes") {
+				if (leftdata.flag == "yes") { out << endl; }
+				
+				out << querySeq->getName() + "_RIGHT"<< '\t';
+				out << rightdata.results[0].parentA.getName() << "\t" << rightdata.results[0].parentB.getName()  << '\t';
+				
+				out << rightdata.results[0].divr_qla_qrb << '\t' << rightdata.results[0].qla_qrb << '\t' << rightdata.results[0].bsa << '\t';
+				out << rightdata.results[0].divr_qlb_qra << '\t' << rightdata.results[0].qlb_qra << '\t' << rightdata.results[0].bsb << '\t';
+				
+				out << flag << '\t' << rightdata.spotMap[rightdata.results[0].winLStart] << "-" << rightdata.spotMap[rightdata.results[0].winLEnd] << '\t' << rightdata.spotMap[rightdata.results[0].winRStart] << "-" << rightdata.spotMap[rightdata.results[0].winREnd] << '\t';			
+		
+			}
+		}
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraSlayer", "printBlock");
+		exit(1);
+	}
+}
+//***************************************************************************************************************
+string ChimeraSlayer::getBlock(data_results leftdata, data_results rightdata, bool leftChimeric, bool rightChimeric, string flag){
+	try {
+		
+		string out = "";
+		
+		if ((leftChimeric) && (!rightChimeric)) { //get left
+			out += querySeq->getName() + "\t";
+			out += leftdata.results[0].parentA.getName() + "\t" + leftdata.results[0].parentB.getName() + "\t";
+			
+			out += toString(leftdata.results[0].divr_qla_qrb) + "\t" + toString(leftdata.results[0].qla_qrb) + "\t" + toString(leftdata.results[0].bsa) + "\t";
+			out += toString(leftdata.results[0].divr_qlb_qra) + "\t" + toString(leftdata.results[0].qlb_qra) + "\t" + toString(leftdata.results[0].bsb) + "\t";
+			
+			out += flag + "\t" + toString(leftdata.spotMap[leftdata.results[0].winLStart]) + "-" + toString(leftdata.spotMap[leftdata.results[0].winLEnd]) + "\t" + toString(leftdata.spotMap[leftdata.results[0].winRStart]) + "-" + toString(leftdata.spotMap[leftdata.results[0].winREnd]) + "\t";
+			
+		}else if ((!leftChimeric) && (rightChimeric)) {  //print right
+			out += querySeq->getName() + "\t";
+			out += rightdata.results[0].parentA.getName() + "\t" + rightdata.results[0].parentB.getName()  + "\t";
+			
+			out += toString(rightdata.results[0].divr_qla_qrb) + "\t" + toString(rightdata.results[0].qla_qrb) + "\t" + toString(rightdata.results[0].bsa) + "\t";
+			out += toString(rightdata.results[0].divr_qlb_qra) + "\t" + toString(rightdata.results[0].qlb_qra) + "\t" + toString(rightdata.results[0].bsb) + "\t";
+			
+			out += flag + "\t" + toString(rightdata.spotMap[rightdata.results[0].winLStart]) + "-" + toString(rightdata.spotMap[rightdata.results[0].winLEnd]) + "\t" + toString(rightdata.spotMap[rightdata.results[0].winRStart]) + "-" + toString(rightdata.spotMap[rightdata.results[0].winREnd]) + "\t";			
+			
+		}else  { //print both results
+			
+			if (leftdata.flag == "yes") {
+				out += querySeq->getName() + "_LEFT\t";
+				out += leftdata.results[0].parentA.getName() + "\t" + leftdata.results[0].parentB.getName() + "\t";
+				
+				out += toString(leftdata.results[0].divr_qla_qrb) + "\t" + toString(leftdata.results[0].qla_qrb) + "\t" + toString(leftdata.results[0].bsa) + "\t";
+				out += toString(leftdata.results[0].divr_qlb_qra) + "\t" + toString(leftdata.results[0].qlb_qra) + "\t" + toString(leftdata.results[0].bsb) + "\t";
+				
+				out += flag + "\t" + toString(leftdata.spotMap[leftdata.results[0].winLStart]) + "-" + toString(leftdata.spotMap[leftdata.results[0].winLEnd]) + "\t" + toString(leftdata.spotMap[leftdata.results[0].winRStart]) + "-" + toString(leftdata.spotMap[leftdata.results[0].winREnd]) + "\t";
+			}
+			
+			if (rightdata.flag == "yes") {
+				if (leftdata.flag == "yes") { out += "\n"; }
+				out +=  querySeq->getName() + "_RIGHT\t";
+				out += rightdata.results[0].parentA.getName() + "\t" + rightdata.results[0].parentB.getName()  + "\t";
+				
+				out += toString(rightdata.results[0].divr_qla_qrb) + "\t" + toString(rightdata.results[0].qla_qrb) + "\t" + toString(rightdata.results[0].bsa) + "\t";
+				out += toString(rightdata.results[0].divr_qlb_qra) + "\t" + toString(rightdata.results[0].qlb_qra) + "\t" + toString(rightdata.results[0].bsb) + "\t";
+				
+				out += flag + "\t" + toString(rightdata.spotMap[rightdata.results[0].winLStart]) + "-" + toString(rightdata.spotMap[rightdata.results[0].winLEnd]) + "\t" + toString(rightdata.spotMap[rightdata.results[0].winRStart]) + "-" + toString(rightdata.spotMap[rightdata.results[0].winREnd]) + "\t";			
+			}
+		}
+		
+		return out;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "ChimeraSlayer", "getBlock");
 		exit(1);
 	}
 }

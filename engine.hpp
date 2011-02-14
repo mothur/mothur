@@ -36,6 +36,7 @@ protected:
 	vector<string> options;
 	CommandFactory* cFactory;
 	MothurOut* mout;
+	string findMothursPath();
 };
 
 

@@ -176,21 +176,23 @@ int CatchAllCommand::execute() {
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		//prepare full output directory
-		outputDir = m->getFullPathName(outputDir);
-		
 		//get location of catchall
 		GlobalData* globaldata = GlobalData::getInstance();
 		path = globaldata->argv;
-		path = path.substr(0, (path.find_last_of('m')));
+		path = path.substr(0, (path.find_last_of("othur")-5));
 		path = m->getFullPathName(path);
-
+		
 		string catchAllCommandExe = ""; 
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			catchAllCommandExe += "mono " + path + "CatchAllcmdL.exe ";
+			if (outputDir == "") { outputDir = "./"; } //force full pathname to be created for catchall, this is necessary because if catchall is in the path it will look for input file whereever the exe is and not the cwd.
 		#else
 			catchAllCommandExe += "\"" + path + "CatchAllcmdW.exe\"" + " ";
+			if (outputDir == "") { outputDir = ".\\"; } //force full pathname to be created for catchall, this is necessary because if catchall is in the path it will look for input file whereever the exe is and not the cwd.
 		#endif
+		
+		//prepare full output directory
+		outputDir = m->getFullPathName(outputDir);
 		
 		vector<string> inputFileNames;
 		if (sharedfile != "") { inputFileNames = parseSharedFile(sharedfile);  globaldata->setFormat("sabund");  }
@@ -237,7 +239,8 @@ int CatchAllCommand::execute() {
 							//wrap entire string in ""
 							catchAllCommand = "\"" + catchAllCommand + "\"";
 						#endif
-										//run catchall
+					
+						//run catchall
 						system(catchAllCommand.c_str());
 					
 						remove(filename.c_str());

@@ -624,7 +624,7 @@ vector<Sequence*> Maligner::getKmerSeqs(Sequence* q, int num) {
 		return refResults;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "Maligner", "getBlastSeqs");
+		m->errorOut(e, "Maligner", "getKmerSeqs");
 		exit(1);
 	}
 }
