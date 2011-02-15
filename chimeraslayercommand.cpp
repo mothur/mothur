@@ -14,7 +14,7 @@
 //**********************************************************************************************************************
 vector<string> ChimeraSlayerCommand::getValidParameters(){	
 	try {
-		string AlignArray[] =  {"fasta", "processors","trim","trimera", "name","window", "include","template","numwanted", "ksize", "match","mismatch", 
+		string AlignArray[] =  {"fasta", "processors","trim","split", "name","window", "include","template","numwanted", "ksize", "match","mismatch", 
 			"divergence", "minsim","mincov","minbs", "minsnp","parents", "iters","outputdir","inputdir", "search","realign" };
 		vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
 		return myArray;
@@ -71,7 +71,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta", "processors","name", "include","trim", "trimera","window", "template","numwanted", "ksize", "match","mismatch", 
+			string Array[] =  {"fasta", "processors","name", "include","trim", "split","window", "template","numwanted", "ksize", "match","mismatch", 
 			"divergence", "minsim","mincov","minbs", "minsnp","parents", "iters","outputdir","inputdir", "search","realign" };
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
@@ -273,7 +273,7 @@ ChimeraSlayerCommand::ChimeraSlayerCommand(string option)  {
 			temp = validParameter.validFile(parameters, "trim", false);				if (temp == "not found") { temp = "f"; }
 			trim = m->isTrue(temp); 
 			
-			temp = validParameter.validFile(parameters, "trimera", false);				if (temp == "not found") { temp = "f"; }
+			temp = validParameter.validFile(parameters, "split", false);				if (temp == "not found") { temp = "f"; }
 			trimera = m->isTrue(temp); 
 			
 			search = validParameter.validFile(parameters, "search", false);			if (search == "not found") { search = "distance"; }
@@ -312,7 +312,7 @@ void ChimeraSlayerCommand::help(){
 		m->mothurOut("When using MPI, the processors parameter is set to the number of MPI processes running. \n");
 		#endif
 		m->mothurOut("The trim parameter allows you to output a new fasta file containing your sequences with the chimeric ones trimmed to include only their longest piece, default=F. \n");
-		m->mothurOut("The trimera parameter allows you to check both peices of non-chimeric sequence for chimeras, thus looking for trimeras and quadmeras. default=F. \n");
+		m->mothurOut("The split parameter allows you to check both pieces of non-chimeric sequence for chimeras, thus looking for trimeras and quadmeras. default=F. \n");
 		m->mothurOut("The window parameter allows you to specify the window size for searching for chimeras, default=50. \n");
 		m->mothurOut("The increment parameter allows you to specify how far you move each window while finding chimeric sequences, default=5.\n");
 		m->mothurOut("The numwanted parameter allows you to specify how many sequences you would each query sequence compared with, default=15.\n");

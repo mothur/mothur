@@ -510,15 +510,15 @@ Sequence* ChimeraSlayer::print(ostream& out, ostream& outAcc, data_results leftP
 							for (int i = (rightPiece.spotMap[rightPiece.results[0].winLStart]-1); i < newAligned.length(); i++) { newAligned[i] = '.'; }
 						}else { //both sides are chimeric, keep longest piece
 							
-							int lengthLeftLeft = leftPiece.spotMap[leftPiece.results[0].winLStart] - leftPiece.spotMap[leftPiece.results[0].winLEnd];
-							int lengthLeftRight = leftPiece.spotMap[leftPiece.results[0].winRStart] - leftPiece.spotMap[leftPiece.results[0].winREnd];
+							int lengthLeftLeft = leftPiece.spotMap[leftPiece.results[0].winLEnd] - leftPiece.spotMap[leftPiece.results[0].winLStart];
+							int lengthLeftRight = leftPiece.spotMap[leftPiece.results[0].winREnd] - leftPiece.spotMap[leftPiece.results[0].winRStart];
 							
 							int longest = 1; // leftleft = 1, leftright = 2, rightleft = 3 rightright = 4
 							int length = lengthLeftLeft;
 							if (lengthLeftLeft < lengthLeftRight) { longest = 2;  length = lengthLeftRight; }
 							
-							int lengthRightLeft = rightPiece.spotMap[rightPiece.results[0].winLStart] - rightPiece.spotMap[rightPiece.results[0].winLEnd];
-							int lengthRightRight = rightPiece.spotMap[rightPiece.results[0].winRStart] - rightPiece.spotMap[rightPiece.results[0].winREnd];
+							int lengthRightLeft = rightPiece.spotMap[rightPiece.results[0].winLEnd] - rightPiece.spotMap[rightPiece.results[0].winLStart];
+							int lengthRightRight = rightPiece.spotMap[rightPiece.results[0].winREnd] - rightPiece.spotMap[rightPiece.results[0].winRStart];
 							
 							if (lengthRightLeft > length) { longest = 3; length = lengthRightLeft;  }
 							if (lengthRightRight > length) { longest = 4; }
@@ -626,15 +626,15 @@ Sequence* ChimeraSlayer::print(MPI_File& out, MPI_File& outAcc, data_results lef
 							for (int i = (rightPiece.spotMap[rightPiece.results[0].winLStart]-1); i < newAligned.length(); i++) { newAligned[i] = '.'; }
 						}else { //both sides are chimeric, keep longest piece
 							
-							int lengthLeftLeft = leftPiece.spotMap[leftPiece.results[0].winLStart] - leftPiece.spotMap[leftPiece.results[0].winLEnd];
-							int lengthLeftRight = leftPiece.spotMap[leftPiece.results[0].winRStart] - leftPiece.spotMap[leftPiece.results[0].winREnd];
+							int lengthLeftLeft = leftPiece.spotMap[leftPiece.results[0].winLEnd] - leftPiece.spotMap[leftPiece.results[0].winLStart];
+							int lengthLeftRight = leftPiece.spotMap[leftPiece.results[0].winREnd] - leftPiece.spotMap[leftPiece.results[0].winRStart];
 							
 							int longest = 1; // leftleft = 1, leftright = 2, rightleft = 3 rightright = 4
 							int length = lengthLeftLeft;
 							if (lengthLeftLeft < lengthLeftRight) { longest = 2;  length = lengthLeftRight; }
 							
-							int lengthRightLeft = rightPiece.spotMap[rightPiece.results[0].winLStart] - rightPiece.spotMap[rightPiece.results[0].winLEnd];
-							int lengthRightRight = rightPiece.spotMap[rightPiece.results[0].winRStart] - rightPiece.spotMap[rightPiece.results[0].winREnd];
+							int lengthRightLeft = rightPiece.spotMap[rightPiece.results[0].winLEnd] - rightPiece.spotMap[rightPiece.results[0].winLStart];
+							int lengthRightRight = rightPiece.spotMap[rightPiece.results[0].winREnd] - rightPiece.spotMap[rightPiece.results[0].winRStart];
 							
 							if (lengthRightLeft > length) { longest = 3; length = lengthRightLeft;  }
 							if (lengthRightRight > length) { longest = 4; }
