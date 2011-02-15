@@ -57,6 +57,7 @@
 	#include <sys/wait.h>
 	#include <sys/time.h>
 	#include <sys/resource.h>
+	#include <sys/types.h>
 	#include <sys/stat.h>
 	#include <unistd.h>
 	
@@ -70,7 +71,7 @@
 	#include <direct.h> //get cwd
 	#include <windows.h>
 	#include <psapi.h>
-
+	#include <direct.h>
 #endif
 
 using namespace std;

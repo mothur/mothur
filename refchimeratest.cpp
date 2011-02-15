@@ -30,7 +30,7 @@ RefChimeraTest::RefChimeraTest(vector<Sequence>& refs, string chimeraReportFileN
 	
 	alignLength = referenceSeqs[0].length();
 
-	chimeraReportFile << "queryName\tbestRef\tbestSequenceMismatch\tleftParentChi,rightParentChi\tbreakPointChi\tminMismatchToChimera\tdistToBestMera\tnumParents";
+	chimeraReportFile << "queryName\tbestRef\tbestSequenceMismatch\tleftParentChi,rightParentChi\tbreakPointChi\tminMismatchToChimera\tdistToBestMera\tnumParents" << endl;
 //	chimeraReportFile << "leftParentTri,middleParentTri,rightParentTri\tbreakPointTriA,breakPointTriB\tminMismatchToTrimera\tdistToBestMera\tnMera" << endl;
 
 }
@@ -111,7 +111,8 @@ int RefChimeraTest::getMismatches(string& querySeq, vector<vector<int> >& left, 
 		
 		int lDiffs = 0;
 		for(int l=0;l<alignLength;l++){
-			if(querySeq[l] != '.' && querySeq[l] != referenceSeqs[i][l]){
+//			if(querySeq[l] != '.' && querySeq[l] != referenceSeqs[i][l]){
+			if(querySeq[l] != '.' && referenceSeqs[i][l] != '.' && querySeq[l] != referenceSeqs[i][l]){
 				lDiffs++;
 			}
 			left[i][l] = lDiffs;
@@ -120,7 +121,8 @@ int RefChimeraTest::getMismatches(string& querySeq, vector<vector<int> >& left, 
 		int rDiffs = 0;
 		int index = 0;
 		for(int l=alignLength-1;l>=0;l--){
-			if(querySeq[l] != '.' && querySeq[l] != referenceSeqs[i][l]){
+//			if(querySeq[l] != '.' && querySeq[l] != referenceSeqs[i][l]){
+			if(querySeq[l] != '.' && referenceSeqs[i][l] != '.' && querySeq[l] != referenceSeqs[i][l]){
 				rDiffs++;
 			}			
 			right[i][index++] = rDiffs;
@@ -254,7 +256,8 @@ double RefChimeraTest::calcDistToChimera(string& querySeq, string& chimeraRefSeq
 	int mismatch = 0;
 	
 	for(int i=0;i<alignLength;i++){
-		if(querySeq[i] != '.' && chimeraRefSeq[i] != '.'){
+//		if(querySeq[i] != '.' && chimeraRefSeq[i] != '.'){
+		if(chimeraRefSeq[i] != '.'){
 			if(querySeq[i] == '-' && chimeraRefSeq[i] == '-'){	/*	do nothing	*/	}
 			else if(querySeq[i] == chimeraRefSeq[i]){
 				match++;
