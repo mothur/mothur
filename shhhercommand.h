@@ -40,19 +40,20 @@ private:
 	
 	vector<int> nSeqsBreaks;
 	vector<int> nOTUsBreaks;
-	vector<double> flowDataPrI;
-	vector<short> flowDataIntI;
-	vector<int> lengths;
-	vector<string> seqNameVector;
 	vector<double> singleLookUp;
 	vector<double> jointLookUp;
+	
+	vector<string> seqNameVector;
+	vector<int> lengths;
+	vector<short> flowDataIntI;
+	vector<double> flowDataPrI;
 	map<string, int> nameMap;
 	vector<int> otuData;
 	vector<int> cumNumSeqs;
 	vector<int> nSeqsPerOTU;
 	vector<vector<int> > aaP;	//tMaster->aanP:	each row is a different otu / each col contains the sequence indices
-	vector<int> seqNumber;		//tMaster->anP:		the sequence id number sorted by OTU
 	vector<vector<int> > aaI;	//tMaster->aanI:	that are in each otu - can't differentiate between aaP and aaI 
+	vector<int> seqNumber;		//tMaster->anP:		the sequence id number sorted by OTU
 	vector<int> seqIndex;		//tMaster->anI;		the index that corresponds to seqNumber
 	vector<double> dist;		//adDist - distance of sequences to centroids
 	vector<short> change;		//did the centroid sequence change? 0 = no; 1 = yes
@@ -61,9 +62,9 @@ private:
 	vector<double> singleTau;	//tMaster->adTau:	1-D Tau vector (1xnumSeqs)
 	vector<short> uniqueFlowgrams;
 	vector<int> uniqueCount;
-	vector<int> uniqueLengths;
 	vector<int> mapSeqToUnique;
 	vector<int> mapUniqueToSeq;
+	vector<int> uniqueLengths;
 	
 	int numSeqs, numUniques, numOTUs, numFlowCells;
 	

@@ -289,7 +289,9 @@ int ShhherCommand::execute(){
 			
 			for(int i=0;i<numFiles;i++){
 				flowFileName = flowFileVector[i];
-			
+
+				
+				
 				m->mothurOut("\n>>>>>\tProcessing " + flowFileName + " (file " + toString(i+1) + " of " + toString(numFiles) + ")\t<<<<<\n");
 				m->mothurOut("Reading flowgrams...\n");
 				
@@ -761,6 +763,11 @@ void ShhherCommand::getFlowData(){
 		m->openInputFile(flowFileName, flowFile);
 		
 		string seqName;
+		seqNameVector.clear();
+		lengths.clear();
+		flowDataIntI.clear();
+		nameMap.clear();
+		
 		
 		int currentNumFlowCells;
 		
@@ -943,7 +950,7 @@ void ShhherCommand::getUniques(){
 		uniqueFlowDataIntI.resize(numFlowCells * numUniques);
 		uniqueLengths.resize(numUniques);	
 		
-		flowDataPrI.assign(numSeqs * numFlowCells, 0);
+		flowDataPrI.resize(numSeqs * numFlowCells, 0);
 		for(int i=0;i<flowDataPrI.size();i++)	{	flowDataPrI[i] = getProbIntensity(flowDataIntI[i]);		}
 	}
 	catch(exception& e) {
@@ -1204,6 +1211,10 @@ void ShhherCommand::getOTUData(string listFileName){
 		cumNumSeqs.assign(numOTUs, 0);
 		nSeqsPerOTU.assign(numOTUs, 0);
 		aaP.resize(numOTUs);
+		
+		seqNumber.clear();
+		aaI.clear();
+		seqIndex.clear();
 		
 		string singleOTU = "";
 		
@@ -1673,9 +1684,9 @@ void ShhherCommand::calcNewDistancesChildMPI(int startSeq, int stopSeq, vector<i
 	try{
 		vector<double> newTau(numOTUs,0);
 		vector<double> norms(numSeqs, 0);
-		otuIndex.resize(0);
-		seqIndex.resize(0);
-		singleTau.resize(0);
+		otuIndex.clear();
+		seqIndex.clear();
+		singleTau.clear();
 		
 		
 		
