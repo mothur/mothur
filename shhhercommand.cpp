@@ -250,9 +250,6 @@ int ShhherCommand::execute(){
 		int tag = 1976;
 		MPI_Status status; 
 
-		double begClock = clock();
-		unsigned long int begTime = time(NULL);
-		
 		if(pid == 0){
 
 			for(int i=1;i<ncpus;i++){
@@ -288,9 +285,10 @@ int ShhherCommand::execute(){
 			}
 			
 			for(int i=0;i<numFiles;i++){
-				flowFileName = flowFileVector[i];
+				double begClock = clock();
+				unsigned long int begTime = time(NULL);
 
-				
+				flowFileName = flowFileVector[i];
 				
 				m->mothurOut("\n>>>>>\tProcessing " + flowFileName + " (file " + toString(i+1) + " of " + toString(numFiles) + ")\t<<<<<\n");
 				m->mothurOut("Reading flowgrams...\n");
@@ -370,7 +368,7 @@ int ShhherCommand::execute(){
 						MPI_Send(&nSeqsPerOTU[0], numOTUs, MPI_INT, i, tag, MPI_COMM_WORLD);
 						MPI_Send(&cumNumSeqs[0], numOTUs, MPI_INT, i, tag, MPI_COMM_WORLD);
 					}
-				
+					
 					calcCentroidsDriver(0, numOTUsOnCPU);
 					
 					for(int i=1;i<ncpus;i++){
@@ -489,7 +487,6 @@ int ShhherCommand::execute(){
 		}
 		else{
 			int abort = 1;
-			bool live = 1;
 
 			MPI_Recv(&abort, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
 			if(abort){	return 0;	}
@@ -499,6 +496,8 @@ int ShhherCommand::execute(){
 
 			for(int i=0;i<numFiles;i++){
 				//Now into the pyrodist part
+				bool live = 1;
+
 				char fileName[1024];
 				MPI_Recv(&fileName, 1024, MPI_CHAR, 0, tag, MPI_COMM_WORLD, &status);
 				MPI_Recv(&numSeqs, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
@@ -554,12 +553,12 @@ int ShhherCommand::execute(){
 				int total;
 
 				while(live){
-
+					
 					MPI_Recv(&total, 1, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
 					singleTau.assign(total, 0.0000);
 					seqNumber.assign(total, 0);
 					seqIndex.assign(total, 0);
-					
+
 					MPI_Recv(&change[0], numOTUs, MPI_SHORT, 0, tag, MPI_COMM_WORLD, &status);
 					MPI_Recv(&centroids[0], numOTUs, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
 					MPI_Recv(&singleTau[0], total, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, &status);
@@ -567,13 +566,12 @@ int ShhherCommand::execute(){
 					MPI_Recv(&seqIndex[0], total, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
 					MPI_Recv(&nSeqsPerOTU[0], total, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
 					MPI_Recv(&cumNumSeqs[0], numOTUs, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
-					
+
 					calcCentroidsDriver(startOTU, endOTU);
 
 					MPI_Send(&centroids[0], numOTUs, MPI_INT, 0, tag, MPI_COMM_WORLD);
 					MPI_Send(&change[0], numOTUs, MPI_SHORT, 0, tag, MPI_COMM_WORLD);
 
-					
 					MPI_Recv(&centroids[0], numOTUs, MPI_INT, 0, tag, MPI_COMM_WORLD, &status);
 					MPI_Recv(&weight[0], numOTUs, MPI_DOUBLE, 0, tag, MPI_COMM_WORLD, &status);
 					MPI_Recv(&change[0], numOTUs, MPI_SHORT, 0, tag, MPI_COMM_WORLD, &status);
@@ -592,8 +590,8 @@ int ShhherCommand::execute(){
 				}
 			}
 		}		
-
 		MPI_Barrier(MPI_COMM_WORLD);
+
 		return 0;
 
 	}
@@ -704,7 +702,6 @@ int ShhherCommand::execute(){
 			double begClock = clock();
 			unsigned long int begTime = time(NULL);
 
-			
 			m->mothurOut("\nDenoising flowgrams...\n");
 			m->mothurOut("iter\tmaxDelta\tnLL\t\tcycletime\n");
 			
