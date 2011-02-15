@@ -32,7 +32,7 @@
 vector<string> ShhherCommand::getValidParameters(){	
 	try {
 		string Array[] =  {	
-			"file", "flow", "lookup", "cutoff", "sigma", "outputdir","inputdir", "processors"	
+			"file", "flow", "lookup", "cutoff", "sigma", "outputdir","inputdir", "processors", "maxiter", "mindelta"	
 		};
 		
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
@@ -111,7 +111,7 @@ ShhherCommand::ShhherCommand(string option) {
 			
 			//valid paramters for this command
 			string AlignArray[] =  {
-				"file", "flow", "lookup", "cutoff", "sigma", "outputdir","inputdir", "processors"	
+				"file", "flow", "lookup", "cutoff", "sigma", "outputdir","inputdir", "processors", "maxiter", "mindelta"	
 			};
 			
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
@@ -294,8 +294,8 @@ int ShhherCommand::execute(){
 				
 				m->mothurOut("\n>>>>>\tProcessing " + flowFileName + " (file " + toString(i+1) + " of " + toString(numFiles) + ")\t<<<<<\n");
 				m->mothurOut("Reading flowgrams...\n");
-				
 				getFlowData();
+
 				m->mothurOut("Identifying unique flowgrams...\n");
 				getUniques();
 
@@ -704,6 +704,10 @@ int ShhherCommand::execute(){
 			double begClock = clock();
 			unsigned long int begTime = time(NULL);
 
+			
+			cout << numOTUs << endl;
+			
+			
 			m->mothurOut("\nDenoising flowgrams...\n");
 			m->mothurOut("iter\tmaxDelta\tnLL\t\tcycletime\n");
 			
@@ -1210,7 +1214,7 @@ void ShhherCommand::getOTUData(string listFileName){
 		otuData.assign(numSeqs, 0);
 		cumNumSeqs.assign(numOTUs, 0);
 		nSeqsPerOTU.assign(numOTUs, 0);
-		aaP.resize(numOTUs);
+		aaP.clear();aaP.resize(numOTUs);
 		
 		seqNumber.clear();
 		aaI.clear();
@@ -1266,6 +1270,8 @@ void ShhherCommand::getOTUData(string listFileName){
 			for(int j=nSeqsPerOTU[i];j<numSeqs;j++){
 				aaP[i].push_back(0);
 			}
+			
+			
 		}
 		
 		for(int i=1;i<numOTUs;i++){
@@ -1275,6 +1281,13 @@ void ShhherCommand::getOTUData(string listFileName){
 		seqIndex = seqNumber;
 		
 		listFile.close();	
+		
+		for(int i=0;i<seqNumber.size();i++){
+			cout << seqNumber[i] << ' ';
+		}
+		cout << endl;
+		
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ShhherCommand", "getOTUData");
@@ -1295,6 +1308,8 @@ void ShhherCommand::initPyroCluster(){
 		nSeqsBreaks.assign(processors+1, 0);
 		nOTUsBreaks.assign(processors+1, 0);
 
+		cout << numSeqs << '\t' << numOTUs << '\t' << processors << endl;
+		
 		nSeqsBreaks[0] = 0;
 		for(int i=0;i<processors;i++){
 			nSeqsBreaks[i+1] = nSeqsBreaks[i] + (int)((double) numSeqs / (double) processors);
@@ -1393,6 +1408,10 @@ void ShhherCommand::calcCentroidsDriver(int start, int finish){
 	
 	try{
 		
+//		for(int i=0;i<seqNumber.size();i++){
+//			cout << seqNumber[i] << ' ';
+//		}cout << endl;
+		
 		for(int i=start;i<finish;i++){
 			
 			double count = 0;
@@ -1404,7 +1423,7 @@ void ShhherCommand::calcCentroidsDriver(int start, int finish){
 			for(int j=0;j<nSeqsPerOTU[i];j++){
 				count += singleTau[seqNumber[cumNumSeqs[i] + j]];
 			}
-			
+
 			if(nSeqsPerOTU[i] > 0 && count > MIN_COUNT){
 				vector<double> adF(nSeqsPerOTU[i]);
 				vector<int> anL(nSeqsPerOTU[i]);
