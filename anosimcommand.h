@@ -57,8 +57,7 @@ private:
 	int driver(int, int, vector<string>, string, vector< vector<double> >&);
 	int process(vector<SharedRAbundVector*>);
 	int calcAnosim(ofstream&, int, vector<string>);
-	double calcWithin(vector<seqDist>&, vector<string>);
-	double calcBetween(vector<seqDist>&);
+	double calcWithinBetween(vector<seqDist>&, vector<string>, double&);
 	vector<seqDist> convertToRanks();
 };
 

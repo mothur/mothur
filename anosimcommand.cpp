@@ -822,18 +822,18 @@ int AnosimCommand::driver(int start, int num, vector<string> names, string pidVa
 //**********************************************************************************************************************
 int AnosimCommand::calcAnosim(ofstream& out, int numTreatments, vector<string> thisCombosLookupSets) {
 	try {
-		
+		//rank distances
 		vector<seqDist> rankMatrix = convertToRanks();
 		
 		double meanBetween, meanWithin, RValue, pValue;
 		
-		meanWithin = calcWithin(rankMatrix, thisCombosLookupSets);
-		meanBetween = calcBetween(rankMatrix);
+		meanWithin = calcWithinBetween(rankMatrix, thisCombosLookupSets, meanBetween);
 		
 		int N = matrix.size();
-		
+		int div = (N * (N-1) / 4);
+	
 		//calc RValue
-		RValue = (meanBetween - meanWithin) / (double) (N * (N-1) / 4.0);
+		RValue = (meanBetween - meanWithin) / (double) div;
 		
 		//calc Pvalue
 		int count = 0;
@@ -844,12 +844,12 @@ int AnosimCommand::calcAnosim(ofstream& out, int numTreatments, vector<string> t
 			vector<string> copyNames = thisCombosLookupSets;
 			random_shuffle(copyNames.begin(), copyNames.end());
 			
-			meanWithin = calcWithin(rankMatrix, thisCombosLookupSets);
-			meanBetween = calcBetween(rankMatrix);
+			meanWithin = calcWithinBetween(rankMatrix, copyNames, meanBetween);
 			
 			//calc RValue
-			double randomRValue = (meanBetween - meanWithin) / (double) (N * (N-1) / 4.0);			
-			if (randomRValue <= RValue) { count++; }
+			double randomRValue = (meanBetween - meanWithin) / (double) div;	
+			
+			if (randomRValue >= RValue) { count++; }
 		}
 		
 		pValue = count / (float) iters;
@@ -866,46 +866,35 @@ int AnosimCommand::calcAnosim(ofstream& out, int numTreatments, vector<string> t
 	}
 }
 //**********************************************************************************************************************
-double AnosimCommand::calcWithin(vector<seqDist>& thisMatrix, vector<string> thisCombosLookupSets) {
+double AnosimCommand::calcWithinBetween(vector<seqDist>& thisMatrix, vector<string> thisCombosLookupSets, double& between) {
 	try {
 		double within = 0.0;
 		int count = 0;
+		int count2 = 0;
+		between = 0.0;
 		
 		for (int l = 0; l < thisMatrix.size(); l++) {
 			//if you are from the same treatment 
 			if (thisCombosLookupSets[thisMatrix[l].seq1] == thisCombosLookupSets[thisMatrix[l].seq2]) { 
 				within += thisMatrix[l].dist; //rank of this distance
 				count++;
+			}else { //different treatments
+				between += thisMatrix[l].dist; //rank of this distance
+				count2++;
 			}
 		}
 		
 		within /= (float) count;
+		between /= (float) count2;
 		
 		return within;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "AnosimCommand", "calcWithin");
+		m->errorOut(e, "AnosimCommand", "calcWithinBetween");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-double AnosimCommand::calcBetween(vector<seqDist>& thisMatrix) {
-	try {
-		double total = 0.0;
-		
-		for (int l = 0; l < thisMatrix.size(); l++) {
-			total += thisMatrix[l].dist; //rank of this distance
-		}
-		
-		total /= (float) thisMatrix.size();
-		
-		return total;
-	}
-	catch(exception& e) {
-		m->errorOut(e, "AnosimCommand", "calcBetween");
-		exit(1);
-	}
-}//**********************************************************************************************************************
 vector<seqDist> AnosimCommand::convertToRanks() {
 	try {
 		vector<seqDist> ranks;
