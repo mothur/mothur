@@ -44,9 +44,12 @@ public:
 	string getAligned();
 	string getPairwise();
 	string getUnaligned();
+	string getInlineSeq();
 	int getNumBases();
 	int getStartPos();
 	int getEndPos();
+	void padToPos(int);
+	void padFromPos(int);
 	int getAlignLength();
 	int getAmbigBases();
 	void removeAmbigBases();

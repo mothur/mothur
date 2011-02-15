@@ -222,9 +222,7 @@ void SeqErrorCommand::help(){
 
 //***************************************************************************************************************
 
-SeqErrorCommand::~SeqErrorCommand(){
-
-}
+SeqErrorCommand::~SeqErrorCommand(){	/*	void	*/	}
 
 //***************************************************************************************************************
 
@@ -302,6 +300,8 @@ int SeqErrorCommand::execute(){
 		RefChimeraTest chimeraTest(referenceSeqs, errorChimeraFileName);
 		outputNames.push_back(errorChimeraFileName); outputTypes["error.chimera"].push_back(errorChimeraFileName);
 		
+		vector<string> megaAlignVector(numRefs, "");
+				
 		int index = 0;
 		bool ignoreSeq = 0;
 		
@@ -327,7 +327,8 @@ int SeqErrorCommand::execute(){
 			else	{	minCompare.weight = 1;	}
 
 			printErrorData(minCompare, numParentSeqs);
-
+			
+			
 			if(!ignoreSeq){
 				for(int i=0;i<minCompare.total;i++){
 					char letter = minCompare.sequence[i];
@@ -339,7 +340,7 @@ int SeqErrorCommand::execute(){
 			if(qualFileName != "" && reportFileName != ""){
 				report = ReportFile(reportFile);
 				
-				int origLength = report.getQueryLength();
+//				int origLength = report.getQueryLength();
 				int startBase = report.getQueryStart();
 				int endBase = report.getQueryEnd();
 
@@ -361,6 +362,9 @@ int SeqErrorCommand::execute(){
 				}				
 				misMatchCounts[minCompare.mismatches] += minCompare.weight;
 				numSeqs++;
+				
+				
+				megaAlignVector[closestRefIndex] += query.getInlineSeq() + '\n';
 			}
 			
 			index++;
@@ -396,6 +400,16 @@ int SeqErrorCommand::execute(){
 
 		printSubMatrix();
 				
+		string megAlignmentFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".ref-query";
+		ofstream megAlignmentFile;
+		m->openOutputFile(megAlignmentFileName, megAlignmentFile);
+		
+		for(int i=0;i<numRefs;i++){
+			megAlignmentFile << referenceSeqs[i].getInlineSeq() << endl;
+			megAlignmentFile << megaAlignVector[i] << endl;
+		}
+		
+		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) { m->mothurOut(outputNames[i]); m->mothurOutEndLine(); }
@@ -419,20 +433,34 @@ void SeqErrorCommand::getReferences(){
 		
 		int numAmbigSeqs = 0;
 		
+		int maxStartPos = 0;
+		int minEndPos = 100000;
+		
 		while(referenceFile){
 			Sequence currentSeq(referenceFile);
 			int numAmbigs = currentSeq.getAmbigBases();
 			if(numAmbigs > 0){	numAmbigSeqs++;	}
+			
+			int startPos = currentSeq.getStartPos();
+			if(startPos > maxStartPos)	{	maxStartPos = startPos;	}
+
+			int endPos = currentSeq.getEndPos();
+			if(endPos < minEndPos)		{	minEndPos = endPos;		}
 			referenceSeqs.push_back(currentSeq);
 			m->gobble(referenceFile);
 		}
 		referenceFile.close();
+		numRefs = referenceSeqs.size();
+
+		for(int i=0;i<numRefs;i++){
+			referenceSeqs[i].padToPos(maxStartPos);
+			referenceSeqs[i].padFromPos(minEndPos);
+		}
 		
 		if(numAmbigSeqs != 0){
 			m->mothurOut("Warning: " + toString(numAmbigSeqs) + " reference sequences have ambiguous bases, these bases will be ignored\n");
-		}
+		}		
 		
-		numRefs = referenceSeqs.size();
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SeqErrorCommand", "getReferences");
@@ -507,7 +535,6 @@ Compare SeqErrorCommand::getErrors(Sequence query, Sequence reference){
 				if(started == 1){	break;	}
 			}
 			else if(q[i] != '.' && r[i] == '.'){		//	query extends beyond reference
-//				m->mothurOut("Warning: " + toString(query.getName()) + " extend beyond " + toString(reference.getName()) + ".  Ignoring the extra bases in the query\n");
 				if(started == 1){	break;	}
 			}
 			else if(q[i] == '.' && r[i] == '.'){		//	both are missing data

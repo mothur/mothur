@@ -429,6 +429,13 @@ string Sequence::getAligned(){
 
 //********************************************************************************************************************
 
+string Sequence::getInlineSeq(){
+	return name + '\t' + aligned;	
+}
+
+
+//********************************************************************************************************************
+
 string Sequence::getPairwise(){
 	return pairwise;
 }
@@ -514,7 +521,7 @@ int Sequence::getLongHomoPolymer(){
 //********************************************************************************************************************
 
 int Sequence::getStartPos(){
-	if(endPos == -1){
+	if(startPos == -1){
 		for(int j = 0; j < alignmentLength; j++) {
 			if(aligned[j] != '.'){
 				startPos = j + 1;
@@ -525,6 +532,17 @@ int Sequence::getStartPos(){
 	if(isAligned == 0){	startPos = 1;	}
 
 	return startPos;
+}
+
+//********************************************************************************************************************
+
+void Sequence::padToPos(int start){
+
+	for(int j = startPos-1; j < start-1; j++) {
+		aligned[j] = '.';
+	}
+	startPos = start;
+
 }
 
 //********************************************************************************************************************
@@ -541,6 +559,17 @@ int Sequence::getEndPos(){
 	if(isAligned == 0){	endPos = numBases;	}
 	
 	return endPos;
+}
+
+//********************************************************************************************************************
+
+void Sequence::padFromPos(int end){
+	
+	for(int j = end; j < endPos; j++) {
+		aligned[j] = '.';
+	}
+	endPos = end;
+	
 }
 
 //********************************************************************************************************************
