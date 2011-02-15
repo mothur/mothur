@@ -1,13 +1,13 @@
 /*
- *  homovacommand.cpp
+ *  anosimcommand.cpp
  *  mothur
  *
- *  Created by westcott on 2/8/11.
+ *  Created by westcott on 2/14/11.
  *  Copyright 2011 Schloss Lab. All rights reserved.
  *
  */
 
-#include "homovacommand.h"
+#include "anosimcommand.h"
 #include "sharedutilities.h"
 #include "sharedsobscollectsummary.h"
 #include "sharedchao1.h"
@@ -52,56 +52,56 @@
 #include "mempearson.h"
 
 //**********************************************************************************************************************
-vector<string> HomovaCommand::getValidParameters(){	
+vector<string> AnosimCommand::getValidParameters(){	
 	try {
 		string Array[] =  {"groups","label","outputdir","iters","phylip","design","sets","processors","inputdir"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "HomovaCommand", "getValidParameters");
+		m->errorOut(e, "AnosimCommand", "getValidParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-HomovaCommand::HomovaCommand(){	
+AnosimCommand::AnosimCommand(){	
 	try {
 		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
-		outputTypes["homova"] = tempOutNames;
+		outputTypes["anosim"] = tempOutNames;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "HomovaCommand", "HomovaCommand");
+		m->errorOut(e, "AnosimCommand", "AnosimCommand");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-vector<string> HomovaCommand::getRequiredParameters(){	
+vector<string> AnosimCommand::getRequiredParameters(){	
 	try {
 		string Array[] =  {"design"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "HomovaCommand", "getRequiredParameters");
+		m->errorOut(e, "AnosimCommand", "getRequiredParameters");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-vector<string> HomovaCommand::getRequiredFiles(){	
+vector<string> AnosimCommand::getRequiredFiles(){	
 	try {
 		string Array[] =  {};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "HomovaCommand", "getRequiredFiles");
+		m->errorOut(e, "AnosimCommand", "getRequiredFiles");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 
-HomovaCommand::HomovaCommand(string option) {
+AnosimCommand::AnosimCommand(string option) {
 	try {
 		globaldata = GlobalData::getInstance();
 		abort = false; calledHelp = false;   
@@ -129,7 +129,7 @@ HomovaCommand::HomovaCommand(string option) {
 			
 			//initialize outputTypes
 			vector<string> tempOutNames;
-			outputTypes["homova"] = tempOutNames;
+			outputTypes["anosim"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";	}
@@ -169,7 +169,7 @@ HomovaCommand::HomovaCommand(string option) {
 			//make sure the user has already run the read.otu command
 			if ((globaldata->getSharedFile() == "")) {
 				if ((phylipfile == "")) {
-					m->mothurOut("You must read a list and a group, a shared file or provide a distance matrix before you can use the homova command."); m->mothurOutEndLine(); abort = true; 
+					m->mothurOut("You must read a list and a group, a shared file or provide a distance matrix before you can use the anosim command."); m->mothurOutEndLine(); abort = true; 
 				}
 			}else { sharedfile = globaldata->getSharedFile(); } 
 			
@@ -309,44 +309,43 @@ HomovaCommand::HomovaCommand(string option) {
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "HomovaCommand", "HomovaCommand");
+		m->errorOut(e, "AnosimCommand", "AnosimCommand");
 		exit(1);
 	}
 }
 
 //**********************************************************************************************************************
 
-void HomovaCommand::help(){
+void AnosimCommand::help(){
 	try {
-		m->mothurOut("Referenced: Stewart CN, Excoffier L (1996). Assessing population genetic structure and variability with RAPD data: Application to Vaccinium macrocarpon (American Cranberry). J Evol Biol 9: 153-71.\n");
-		m->mothurOut("The homova command can only be executed after a successful read.otu command of a list and group or shared file, or by providing a phylip formatted distance matrix.\n");
-		m->mothurOut("The homova command outputs a .homova file. \n");
-		m->mothurOut("The homova command parameters are phylip, iters, groups, label, design, sets and processors.  The design parameter is required.\n");
-		m->mothurOut("The design parameter allows you to assign your groups to sets when you are running homova. It is required. \n");
+		m->mothurOut("The anosim command can only be executed after a successful read.otu command of a list and group or shared file, or by providing a phylip formatted distance matrix.\n");
+		m->mothurOut("The anosim command outputs a .anosim file. \n");
+		m->mothurOut("The anosim command parameters are phylip, iters, groups, label, design, sets and processors.  The design parameter is required.\n");
+		m->mothurOut("The design parameter allows you to assign your groups to sets when you are running anosim. It is required. \n");
 		m->mothurOut("The design file looks like the group file.  It is a 2 column tab delimited file, where the first column is the group name and the second column is the set the group belongs to.\n");
 		m->mothurOut("The sets parameter allows you to specify which of the sets in your designfile you would like to analyze. The set names are separated by dashes. THe default is all sets in the designfile. To run the pairwise comparisons of all sets use sets=all.\n");
 		m->mothurOut("The iters parameter allows you to set number of randomization for the P value.  The default is 1000. \n");
 		m->mothurOut("The groups parameter allows you to specify which of the groups you would like included. The group names are separated by dashes. groups=all will find all pairwise comparisons. \n");
 		m->mothurOut("The label parameter allows you to select what distance levels you would like, and are also separated by dashes.\n");
 		m->mothurOut("The processors parameter allows you to specify how many processors you would like to use.  The default is 1. \n");
-		m->mothurOut("The homova command should be in the following format: homova(design=yourDesignFile).\n");
-		m->mothurOut("Example amova(design=temp.design, groups=A-B-C).\n");
+		m->mothurOut("The anosim command should be in the following format: anosim(design=yourDesignFile).\n");
+		m->mothurOut("Example anosim(design=temp.design, groups=A-B-C).\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n");
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "HomovaCommand", "help");
+		m->errorOut(e, "AnosimCommand", "help");
 		exit(1);
 	}
 }
 
 //**********************************************************************************************************************
 
-HomovaCommand::~HomovaCommand(){}
+AnosimCommand::~AnosimCommand(){}
 
 //**********************************************************************************************************************
 
-int HomovaCommand::execute(){
+int AnosimCommand::execute(){
 	try {
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
@@ -403,12 +402,13 @@ int HomovaCommand::execute(){
 				
 				//create a new filename
 				ofstream out;
-				string outputFile = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + calculators[i]->getName() + ".homova";				
+				string outputFile = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + calculators[i]->getName() + ".anosim";				
 				m->openOutputFile(outputFile, out);
-				outputNames.push_back(outputFile); outputTypes["homova"].push_back(outputFile);
+				outputNames.push_back(outputFile); outputTypes["anosim"].push_back(outputFile);
 				
 				//print headers
-				out << "label\tgroupsCompared\tBValue\tpValue" << endl;  
+				out << "label\tgroupsCompared\tRValue\tpValue" << endl;  
+				m->mothurOut("label\tgroupsCompared\tRValue\tpValue"); m->mothurOutEndLine();  
 				out.close();
 			}
 			
@@ -504,12 +504,13 @@ int HomovaCommand::execute(){
 			
 			//create a new filename
 			ofstream out;
-			string outputFile = outputDir + m->getRootName(m->getSimpleName(phylipfile))  + "homova";				
+			string outputFile = outputDir + m->getRootName(m->getSimpleName(phylipfile))  + "anosim";				
 			m->openOutputFile(outputFile, out);
-			outputNames.push_back(outputFile); outputTypes["homova"].push_back(outputFile);
+			outputNames.push_back(outputFile); outputTypes["anosim"].push_back(outputFile);
 			
 			//print headers
-			out << "groupsCompared\tBValue\tpValue" << endl;  
+			out << "groupsCompared\tRValue\tpValue" << endl; 
+			m->mothurOut("groupsCompared\tRValue\tpValue"); m->mothurOutEndLine();  
 			out.close();
 			
 			ReadPhylipVector readMatrix(phylipfile);
@@ -550,7 +551,7 @@ int HomovaCommand::execute(){
 				}
 				
 				//append files
-				string outputFile = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "homova";				
+				string outputFile = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "anosim";				
 				for (int j = 0; j < processIDS.size(); j++) {
 					m->appendFiles((outputFile + toString(processIDS[j])), outputFile);
 					remove((outputFile + toString(processIDS[j])).c_str());
@@ -575,13 +576,13 @@ int HomovaCommand::execute(){
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "HomovaCommand", "execute");
+		m->errorOut(e, "AnosimCommand", "execute");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 
-int HomovaCommand::process(vector<SharedRAbundVector*> thisLookup) {
+int AnosimCommand::process(vector<SharedRAbundVector*> thisLookup) {
 	try{
 		
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -619,7 +620,7 @@ int HomovaCommand::process(vector<SharedRAbundVector*> thisLookup) {
 			
 			//append files
 			for(int i = 0 ; i < calculators.size(); i++) {
-				string outputFile = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + calculators[i]->getName() + ".homova";				
+				string outputFile = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + calculators[i]->getName() + ".anosim";				
 				
 				for (int j = 0; j < processIDS.size(); j++) {
 					m->appendFiles((outputFile + toString(processIDS[j])), outputFile);
@@ -634,13 +635,13 @@ int HomovaCommand::process(vector<SharedRAbundVector*> thisLookup) {
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "HomovaCommand", "process");
+		m->errorOut(e, "AnosimCommand", "process");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 
-int HomovaCommand::driver(int start, int num, vector<SharedRAbundVector*> thisLookup, string pidValue) {
+int AnosimCommand::driver(int start, int num, vector<SharedRAbundVector*> thisLookup, string pidValue) {
 	try {
 		vector<SharedRAbundVector*> subset;
 		EstOutput data;
@@ -650,9 +651,10 @@ int HomovaCommand::driver(int start, int num, vector<SharedRAbundVector*> thisLo
 			
 			//create a new filename
 			ofstream out;
-			string outputFile = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + calculators[i]->getName() + ".homova" + pidValue;				
+			string outputFile = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + calculators[i]->getName() + ".anosim" + pidValue;				
 			m->openOutputFileAppend(outputFile, out);
 			out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+			cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
 			
 			//for each combo
 			for (int c = start; c < (start+num); c++) {
@@ -688,8 +690,9 @@ int HomovaCommand::driver(int start, int num, vector<SharedRAbundVector*> thisLo
 				}else{
 					
 					out << thisLookup[0]->getLabel() << '\t';
-					if (setNames.size() == 2) { out << setNames[0] << "-" << setNames[1] << '\t'; }
-					else { out << "all" << '\t'; }
+					m->mothurOut(thisLookup[0]->getLabel() + "\t");
+					if (setNames.size() == 2) { out << setNames[0] << "-" << setNames[1] << '\t'; m->mothurOut(setNames[0] + "-" + setNames[1] + "\t");  }
+					else { out << "all" << '\t'; m->mothurOut("all\t"); }
 					
 					for (int k = 0; k < thisCombosLookup.size(); k++) { 
 						for (int l = k; l < thisCombosLookup.size(); l++) {
@@ -719,8 +722,8 @@ int HomovaCommand::driver(int start, int num, vector<SharedRAbundVector*> thisLo
 						}
 					}
 					
-					//calc homova
-					calcHomova(out, setNames.size(), thisCombosLookupSets);
+					//calc anosim
+					calcAnosim(out, setNames.size(), thisCombosLookupSets);
 				}
 			}
 			
@@ -731,20 +734,21 @@ int HomovaCommand::driver(int start, int num, vector<SharedRAbundVector*> thisLo
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "HomovaCommand", "driver");
+		m->errorOut(e, "AnosimCommand", "driver");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
 
-int HomovaCommand::driver(int start, int num, vector<string> names, string pidValue, vector< vector<double> >& completeMatrix) {
+int AnosimCommand::driver(int start, int num, vector<string> names, string pidValue, vector< vector<double> >& completeMatrix) {
 	try {
 		
 		//create a new filename
 		ofstream out;
-		string outputFile = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "homova" + pidValue;				
+		string outputFile = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "anosim" + pidValue;				
 		m->openOutputFileAppend(outputFile, out);
 		out.setf(ios::fixed, ios::floatfield); out.setf(ios::showpoint);
+		cout.setf(ios::fixed, ios::floatfield); cout.setf(ios::showpoint);
 		
 		//for each combo
 		for (int c = start; c < (start+num); c++) {
@@ -777,8 +781,8 @@ int HomovaCommand::driver(int start, int num, vector<string> names, string pidVa
 				m->mothurOut("[ERROR]: Missing distance info for sets. Skipping comparison."); m->mothurOutEndLine(); 
 			}else{
 				
-				if (setNames.size() == 2) { out << setNames[0] << "-" << setNames[1] << '\t'; }
-				else { out << "all" << '\t'; }
+				if (setNames.size() == 2) { out << setNames[0] << "-" << setNames[1] << '\t'; m->mothurOut(setNames[0] + "-" + setNames[1] + "\t");  }
+				else { out << "all" << '\t'; m->mothurOut("all\t"); }
 				
 				//fill submatrix
 				int rowCount = 0;
@@ -798,8 +802,9 @@ int HomovaCommand::driver(int start, int num, vector<string> names, string pidVa
 					}
 				}
 				
-				//calc homova
-				calcHomova(out, setNames.size(), thisCombosSets);
+				
+				//calc anosim
+				calcAnosim(out, setNames.size(), thisCombosSets);
 			}
 		}
 		
@@ -810,39 +815,25 @@ int HomovaCommand::driver(int start, int num, vector<string> names, string pidVa
 		
 	}
 	catch(exception& e) {
-		m->errorOut(e, "HomovaCommand", "driver");
+		m->errorOut(e, "AnosimCommand", "driver");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-int HomovaCommand::calcHomova(ofstream& out, int numTreatments, vector<string> thisCombosLookupSets) {
+int AnosimCommand::calcAnosim(ofstream& out, int numTreatments, vector<string> thisCombosLookupSets) {
 	try {
 		
-		double SSTotal, BValue, pValue;
-		map<string, double> SSWithin;
-		map<string, double>::iterator it;
+		vector<seqDist> rankMatrix = convertToRanks();
 		
-		SSTotal = calcWithin(matrix, numTreatments, thisCombosLookupSets);
-		int numSamples = matrix.size();
+		double meanBetween, meanWithin, RValue, pValue;
 		
-		//calc BValue
-		map<string, int> counts;
-		SSWithin = calcWithinEach(matrix, numTreatments, thisCombosLookupSets, counts);
-				
-		double sum = 0.0;
-		double sumDenom = 0.0;
-		for (it = SSWithin.begin(); it != SSWithin.end(); it++) {
-			double temp2 = (it->second) / (double) (counts[it->first] - 1);
-			sum += ((counts[it->first] - 1) * log(temp2));
-			sumDenom += ((1 / (double) (counts[it->first] - 1)) - ( 1 / (double) (numSamples - numTreatments) ));
-		}
+		meanWithin = calcWithin(rankMatrix, thisCombosLookupSets);
+		meanBetween = calcBetween(rankMatrix);
 		
-		double temp = SSTotal / (double) (numSamples - numTreatments);
-		double numeratorTerm1 = (numSamples - numTreatments) * log(temp);
-		double numerator = numeratorTerm1 - sum;
-		double denom = 1 + ((1 / (double) (3 * (numTreatments - 1))) * sumDenom);
+		int N = matrix.size();
 		
-		BValue = numerator / denom;
+		//calc RValue
+		RValue = (meanBetween - meanWithin) / (double) (N * (N-1) / 4.0);
 		
 		//calc Pvalue
 		int count = 0;
@@ -853,110 +844,116 @@ int HomovaCommand::calcHomova(ofstream& out, int numTreatments, vector<string> t
 			vector<string> copyNames = thisCombosLookupSets;
 			random_shuffle(copyNames.begin(), copyNames.end());
 			
-			SSTotal = calcWithin(matrix, numTreatments, copyNames);
+			meanWithin = calcWithin(rankMatrix, thisCombosLookupSets);
+			meanBetween = calcBetween(rankMatrix);
 			
-			counts.clear();
-			map<string, double> randomSSWithin = calcWithinEach(matrix, numTreatments, copyNames, counts);
-			
-			sum = 0.0;
-			sumDenom = 0.0;
-			for (it = randomSSWithin.begin(); it != randomSSWithin.end(); it++) {
-				double temp2 = (it->second) / (double) (counts[it->first] - numTreatments);
-				sum += ((counts[it->first] - 1) * log(temp2));
-				sumDenom += ((1 / (double) (counts[it->first] - 1)) - ( 1 / (double) (numSamples - numTreatments) ));
-			}
-			
-			temp = SSTotal / (double) (numSamples - numTreatments);
-			numeratorTerm1 = (numSamples - numTreatments) * log(temp);
-			numerator = numeratorTerm1 - sum;
-			denom = 1 + ((1 / (double) (3 * (numTreatments - 1))) * sumDenom);
-			
-			double randomBValue = numerator / denom;
-			
-			if (randomBValue <= BValue) { count++; }
+			//calc RValue
+			double randomRValue = (meanBetween - meanWithin) / (double) (N * (N-1) / 4.0);			
+			if (randomRValue <= RValue) { count++; }
 		}
-				
+		
 		pValue = count / (float) iters;
 		
-		out << BValue << '\t' << pValue << endl;
-
+		out << RValue << '\t' << pValue << endl;
+		cout << RValue << '\t' << pValue << endl;
+		m->mothurOutJustToLog(toString(RValue) + "\t" + toString(pValue) + "\n");
+		
 		return 0;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "HomovaCommand", "calcHomova");
+		m->errorOut(e, "AnosimCommand", "calcAnisom");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-map<string, double> HomovaCommand::calcWithinEach(vector< vector<double> >& thisMatrix, int numTreatments, vector<string> thisCombosLookupSets, map<string, int>& count) {
+double AnosimCommand::calcWithin(vector<seqDist>& thisMatrix, vector<string> thisCombosLookupSets) {
 	try {
-		map<string, double> within; //maps treatment to within value
-		map<string, double>::iterator it;
-		map<string, int>::iterator itCount;
+		double within = 0.0;
+		int count = 0;
 		
-		for (int i = 0; i < thisCombosLookupSets.size(); i++) {
-			itCount = count.find(thisCombosLookupSets[i]);
-			
-			if (itCount == count.end()) { //first time we have seen this treatment
-				count[thisCombosLookupSets[i]] = 1; 
-			}else {
-				count[thisCombosLookupSets[i]]++;
-			}
-			
-			//initialize within
-			within[thisCombosLookupSets[i]] = 0.0;
-		}
-			
-		
-		//traverse lower triangle
-		for (int k = 0; k < thisMatrix.size(); k++) { 
-			for (int l = k; l < thisMatrix[k].size(); l++) {
-				
-				//if you are from the same treatment then eij is 1 so add, else eij = 0
-				if (thisCombosLookupSets[k] == thisCombosLookupSets[l]) { 
-					within[thisCombosLookupSets[k]] += (thisMatrix[k][l] * thisMatrix[k][l]); //dij^2
-				}
+		for (int l = 0; l < thisMatrix.size(); l++) {
+			//if you are from the same treatment 
+			if (thisCombosLookupSets[thisMatrix[l].seq1] == thisCombosLookupSets[thisMatrix[l].seq2]) { 
+				within += thisMatrix[l].dist; //rank of this distance
+				count++;
 			}
 		}
 		
-		//1 / (numSamples in this treatment)
-		for (it = within.begin(); it != within.end(); it++) {
-			(it->second) *= (1.0 / (float) count[it->first]);
-		}
+		within /= (float) count;
 		
 		return within;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "HomovaCommand", "calcWithinEach");
+		m->errorOut(e, "AnosimCommand", "calcWithin");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
-double HomovaCommand::calcWithin(vector< vector<double> >& thisMatrix, int numTreatments, vector<string> thisCombosLookupSets) {
+double AnosimCommand::calcBetween(vector<seqDist>& thisMatrix) {
 	try {
 		double total = 0.0;
 		
-		//traverse lower triangle
-		for (int k = 0; k < thisMatrix.size(); k++) { 
-			for (int l = k; l < thisMatrix[k].size(); l++) {
-				
-				//if you are from the same treatment then eij is 1 so add, else eij = 0
-				if (thisCombosLookupSets[k] == thisCombosLookupSets[l]) { 
-					total += (thisMatrix[k][l] * thisMatrix[k][l]); //dij^2
-				}
-			}
+		for (int l = 0; l < thisMatrix.size(); l++) {
+			total += thisMatrix[l].dist; //rank of this distance
 		}
 		
-		//1 / (numSamples / numTreatments)
-		total *= (1.0 / (float) (thisMatrix.size() / (float) numTreatments));
+		total /= (float) thisMatrix.size();
 		
 		return total;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "HomovaCommand", "calcWithin");
+		m->errorOut(e, "AnosimCommand", "calcBetween");
+		exit(1);
+	}
+}//**********************************************************************************************************************
+vector<seqDist> AnosimCommand::convertToRanks() {
+	try {
+		vector<seqDist> ranks;
+		
+		for (int i = 0; i < matrix.size(); i++) {
+			for (int j = 0; j < i; j++) {
+				seqDist member(i, j, matrix[i][j]);
+				ranks.push_back(member);
+			}
+		}
+		
+		//sort distances
+		sort(ranks.begin(), ranks.end(), compareSequenceDistance); 	
+		
+		//find ranks of distances
+		vector<seqDist*> ties;
+		int rankTotal = 0;
+		for (int j = 0; j < ranks.size(); j++) {
+			rankTotal += (j+1);
+			ties.push_back(&ranks[j]);
+			
+			if (j != (ranks.size()-1)) { // you are not the last so you can look ahead
+				if (ranks[j].dist != ranks[j+1].dist) { // you are done with ties, rank them and continue
+					
+					for (int k = 0; k < ties.size(); k++) {
+						float thisrank = rankTotal / (float) ties.size();
+						(*ties[k]).dist = thisrank;
+					}
+					ties.clear();
+					rankTotal = 0;
+				}
+			}else { // you are the last one
+				
+				for (int k = 0; k < ties.size(); k++) {
+					float thisrank = rankTotal / (float) ties.size();
+					(*ties[k]).dist = thisrank;
+				}
+			}
+		}
+		
+		return ranks;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "AnosimCommand", "convertToRanks");
 		exit(1);
 	}
 }
 //**********************************************************************************************************************
+
 
 
