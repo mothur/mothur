@@ -206,8 +206,8 @@ void GetGroupsCommand::help(){
 		m->mothurOut("You must also provide an accnos containing the list of groups to get or set the groups parameter to the groups you wish to select.\n");
 		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like.  You can separate group names with dashes.\n");
 		m->mothurOut("The get.groups command should be in the following format: get.groups(accnos=yourAccnos, fasta=yourFasta, group=yourGroupFile).\n");
-		m->mothurOut("Example get.seqs(accnos=amazon.accnos, fasta=amazon.fasta, group=amazon.groups).\n");
-		m->mothurOut("or get.seqs(groups=pasture, fasta=amazon.fasta, amazon.groups).\n");
+		m->mothurOut("Example get.groups(accnos=amazon.accnos, fasta=amazon.fasta, group=amazon.groups).\n");
+		m->mothurOut("or get.groups(groups=pasture, fasta=amazon.fasta, group=amazon.groups).\n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
 	}
 	catch(exception& e) {
