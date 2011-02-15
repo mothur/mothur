@@ -142,15 +142,12 @@ MakeFastQCommand::MakeFastQCommand(string option)  {
 
 void MakeFastQCommand::help(){
 	try {
-		/*m->mothurOut("The get.groups command selects sequences from a specfic group or set of groups from the following file types: fasta, name, group, list, taxonomy.\n");
-		m->mothurOut("It outputs a file containing the sequences in the those specified groups.\n");
-		m->mothurOut("The get.groups command parameters are accnos, fasta, name, group, list, taxonomy and groups. The group parameter is required.\n");
+		m->mothurOut("The make.fastq command read a fasta and quality file and creates a fastq file.\n");
+		m->mothurOut("The make.fastq command parameters are fasta and qfile, both are required.\n");
 		m->mothurOut("You must also provide an accnos containing the list of groups to get or set the groups parameter to the groups you wish to select.\n");
-		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like.  You can separate group names with dashes.\n");
-		m->mothurOut("The get.groups command should be in the following format: get.groups(accnos=yourAccnos, fasta=yourFasta, group=yourGroupFile).\n");
-		m->mothurOut("Example get.seqs(accnos=amazon.accnos, fasta=amazon.fasta, group=amazon.groups).\n");
-		m->mothurOut("or get.seqs(groups=pasture, fasta=amazon.fasta, amazon.groups).\n");
-		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");*/
+		m->mothurOut("The make.fastq command should be in the following format: make.fastq(qfile=yourQualityFile, fasta=yourFasta).\n");
+		m->mothurOut("Example make.fastq(fasta=amazon.fasta, qfile=amazon.qual).\n");
+		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n\n");
 	}
 	catch(exception& e) {
 		m->errorOut(e, "MakeFastQCommand", "help");
