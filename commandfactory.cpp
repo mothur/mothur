@@ -113,6 +113,7 @@
 #include "homovacommand.h"
 #include "mantelcommand.h"
 #include "makefastqcommand.h"
+#include "anosimcommand.h"
 
 /*******************************************************/
 
@@ -227,6 +228,7 @@ CommandFactory::CommandFactory(){
 	commands["amova"]				= "amova";
 	commands["homova"]				= "homova";
 	commands["mantel"]				= "mantel";
+	commands["anosim"]				= "anosim";
 	commands["make.fastq"]			= "make.fastq";
 	commands["merge.groups"]		= "merge.groups";
 	commands["pairwise.seqs"]		= "MPIEnabled";
@@ -394,6 +396,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "homova")				{	command = new HomovaCommand(optionString);					}
 		else if(commandName == "mantel")				{	command = new MantelCommand(optionString);					}
 		else if(commandName == "make.fastq")			{	command = new MakeFastQCommand(optionString);				}
+		else if(commandName == "anosim")				{	command = new AnosimCommand(optionString);					}
 		else											{	command = new NoCommand(optionString);						}
 
 		return command;
@@ -524,6 +527,7 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "amova")					{	pipecommand = new AmovaCommand(optionString);					}
 		else if(commandName == "homova")				{	pipecommand = new HomovaCommand(optionString);					}
 		else if(commandName == "mantel")				{	pipecommand = new MantelCommand(optionString);					}
+		else if(commandName == "anosim")				{	pipecommand = new AnosimCommand(optionString);					}
 		else if(commandName == "make.fastq")			{	pipecommand = new MakeFastQCommand(optionString);				}
 		else											{	pipecommand = new NoCommand(optionString);						}
 
@@ -643,6 +647,7 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "amova")					{	shellcommand = new AmovaCommand();					}
 		else if(commandName == "homova")				{	shellcommand = new HomovaCommand();					}
 		else if(commandName == "mantel")				{	shellcommand = new MantelCommand();					}
+		else if(commandName == "anosim")				{	shellcommand = new AnosimCommand();					}
 		else if(commandName == "make.fastq")			{	shellcommand = new MakeFastQCommand();				}
 		else											{	shellcommand = new NoCommand();						}
 
