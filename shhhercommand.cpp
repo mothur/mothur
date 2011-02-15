@@ -705,9 +705,6 @@ int ShhherCommand::execute(){
 			unsigned long int begTime = time(NULL);
 
 			
-			cout << numOTUs << endl;
-			
-			
 			m->mothurOut("\nDenoising flowgrams...\n");
 			m->mothurOut("iter\tmaxDelta\tnLL\t\tcycletime\n");
 			
@@ -1282,12 +1279,6 @@ void ShhherCommand::getOTUData(string listFileName){
 		
 		listFile.close();	
 		
-		for(int i=0;i<seqNumber.size();i++){
-			cout << seqNumber[i] << ' ';
-		}
-		cout << endl;
-		
-		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ShhherCommand", "getOTUData");
@@ -1308,8 +1299,6 @@ void ShhherCommand::initPyroCluster(){
 		nSeqsBreaks.assign(processors+1, 0);
 		nOTUsBreaks.assign(processors+1, 0);
 
-		cout << numSeqs << '\t' << numOTUs << '\t' << processors << endl;
-		
 		nSeqsBreaks[0] = 0;
 		for(int i=0;i<processors;i++){
 			nSeqsBreaks[i+1] = nSeqsBreaks[i] + (int)((double) numSeqs / (double) processors);
@@ -1408,10 +1397,7 @@ void ShhherCommand::calcCentroidsDriver(int start, int finish){
 	
 	try{
 		
-//		for(int i=0;i<seqNumber.size();i++){
-//			cout << seqNumber[i] << ' ';
-//		}cout << endl;
-		
+	
 		for(int i=start;i<finish;i++){
 			
 			double count = 0;
