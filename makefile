@@ -9,7 +9,7 @@
 # Macros
 #
 
-USEMPI ?= yes
+USEMPI ?= no
 64BIT_VERSION ?= yes
 USEREADLINE ?= yes
 CYGWIN_BUILD ?= no

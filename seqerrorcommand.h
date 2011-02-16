@@ -74,7 +74,6 @@ private:
 	
 	vector<Sequence> referenceSeqs;
 	vector<vector<int> > substitutionMatrix;
-	int a,t,g,c,gap,n;
 };
 
 #endif
