@@ -196,7 +196,7 @@ SeqErrorCommand::SeqErrorCommand(string option)  {
 			convert(temp, ignoreChimeras);  
 
 			substitutionMatrix.resize(6);
-			for(int i=0;i<6;i++){	substitutionMatrix[i].assign(6,0);	}
+			for(int i=0;i<6;i++){	substitutionMatrix[i].resize(6,0);	}
 		}
 	}
 	catch(exception& e) {
@@ -301,22 +301,21 @@ int SeqErrorCommand::execute(){
 		outputNames.push_back(errorChimeraFileName); outputTypes["error.chimera"].push_back(errorChimeraFileName);
 		
 		vector<string> megaAlignVector(numRefs, "");
-				
+
 		int index = 0;
 		bool ignoreSeq = 0;
 		
 		while(queryFile){
-			
+
 			if (m->control_pressed) { errorSummaryFile.close();	errorSeqFile.close(); for (int i = 0; i < outputNames.size(); i++) { remove(outputNames[i].c_str()); } return 0; }
 		
 			Sequence query(queryFile);
-						
+			
 			int numParentSeqs = chimeraTest.analyzeQuery(query.getName(), query.getAligned());
 			int closestRefIndex = chimeraTest.getClosestRefIndex();
 
 			if(numParentSeqs > 1 && ignoreChimeras == 1)	{	ignoreSeq = 1;	}
 			else											{	ignoreSeq = 0;	}
-
 
 			Compare minCompare = getErrors(query, referenceSeqs[closestRefIndex]);
 			
@@ -324,19 +323,20 @@ int SeqErrorCommand::execute(){
 				it = weights.find(query.getName());
 				minCompare.weight = it->second;
 			}
-			else	{	minCompare.weight = 1;	}
+			else{	minCompare.weight = 1;	}
 
 			printErrorData(minCompare, numParentSeqs);
-			
-			
+
 			if(!ignoreSeq){
+				
 				for(int i=0;i<minCompare.total;i++){
 					char letter = minCompare.sequence[i];
+
 					errorForward[letter][i] += minCompare.weight;
 					errorReverse[letter][minCompare.total-i-1] += minCompare.weight;				
 				}
 			}
-			
+
 			if(qualFileName != "" && reportFileName != ""){
 				report = ReportFile(reportFile);
 				
@@ -352,7 +352,7 @@ int SeqErrorCommand::execute(){
 					quality.updateReverseMap(qualReverseMap, startBase, endBase, minCompare.weight);
 				}
 			}			
-			
+
 			if(minCompare.errorRate < threshold && !ignoreSeq){
 				totalBases += (minCompare.total * minCompare.weight);
 				totalMatches += minCompare.matches * minCompare.weight;
@@ -363,10 +363,9 @@ int SeqErrorCommand::execute(){
 				misMatchCounts[minCompare.mismatches] += minCompare.weight;
 				numSeqs++;
 				
-				
 				megaAlignVector[closestRefIndex] += query.getInlineSeq() + '\n';
 			}
-			
+
 			index++;
 			if(index % 1000 == 0){	cout << index << endl;	}
 		}
@@ -400,9 +399,10 @@ int SeqErrorCommand::execute(){
 
 		printSubMatrix();
 				
-		string megAlignmentFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".ref-query";
+		string megAlignmentFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.ref-query";
 		ofstream megAlignmentFile;
 		m->openOutputFile(megAlignmentFileName, megAlignmentFile);
+		outputNames.push_back(megAlignmentFileName);  outputTypes["error.ref-query"].push_back(megAlignmentFileName);
 		
 		for(int i=0;i<numRefs;i++){
 			megAlignmentFile << referenceSeqs[i].getInlineSeq() << endl;
@@ -452,6 +452,7 @@ void SeqErrorCommand::getReferences(){
 		referenceFile.close();
 		numRefs = referenceSeqs.size();
 
+		
 		for(int i=0;i<numRefs;i++){
 			referenceSeqs[i].padToPos(maxStartPos);
 			referenceSeqs[i].padFromPos(minEndPos);
@@ -484,7 +485,7 @@ Compare SeqErrorCommand::getErrors(Sequence query, Sequence reference){
 		Compare errors;
 
 		for(int i=0;i<alignLength;i++){
-			if(q[i] != 'N' && q[i] != '.' && r[i] != '.' && (q[i] != '-' || r[i] != '-')){			//	no missing data and no double gaps
+			if(r[i] != 'N' && q[i] != '.' && r[i] != '.' && (q[i] != '-' || r[i] != '-')){			//	no missing data and no double gaps
 				started = 1;
 				
 				if(q[i] == 'A'){
@@ -595,13 +596,14 @@ void SeqErrorCommand::printErrorHeader(){
 
 void SeqErrorCommand::printErrorData(Compare error, int numParentSeqs){
 	try {
+
 		errorSummaryFile << error.queryName << '\t' << error.refName << '\t' << error.weight << '\t';
 		errorSummaryFile << error.AA << '\t' << error.AT << '\t' << error.AG << '\t' << error.AC << '\t';
 		errorSummaryFile << error.TA << '\t' << error.TT << '\t' << error.TG << '\t' << error.TC << '\t';
 		errorSummaryFile << error.GA << '\t' << error.GT << '\t' << error.GG << '\t' << error.GC << '\t';
 		errorSummaryFile << error.CA << '\t' << error.CT << '\t' << error.CG << '\t' << error.CC << '\t';
 		errorSummaryFile << error.NA << '\t' << error.NT << '\t' << error.NG << '\t' << error.NC << '\t';
-		errorSummaryFile << error.Ai << '\t' << error.Ti << '\t' << error.Gi << '\t' << error.Ci << '\t' << error.Ni << '\t' ;
+		errorSummaryFile << error.Ai << '\t' << error.Ti << '\t' << error.Gi << '\t' << error.Ci << '\t' << error.Ni << '\t';
 		errorSummaryFile << error.dA << '\t' << error.dT << '\t' << error.dG << '\t' << error.dC << '\t';
 		
 		errorSummaryFile << error.Ai + error.Ti + error.Gi + error.Ci << '\t';			//insertions
@@ -609,12 +611,12 @@ void SeqErrorCommand::printErrorData(Compare error, int numParentSeqs){
 		errorSummaryFile << error.mismatches - (error.Ai + error.Ti + error.Gi + error.Ci) - (error.dA + error.dT + error.dG + error.dC) - (error.NA + error.NT + error.NG + error.NC + error.Ni) << '\t';	//substitutions
 		errorSummaryFile << error.NA + error.NT + error.NG + error.NC + error.Ni << '\t';	//ambiguities
 		errorSummaryFile << error.matches << '\t' << error.mismatches << '\t' << error.total << '\t' << error.errorRate << '\t' << numParentSeqs << endl;
-		
+
 		errorSeqFile << '>' << error.queryName << "\tref:" << error.refName << '\n' << error.sequence << endl;
-		
 		
 		int a=0;		int t=1;		int g=2;		int c=3;
 		int gap=4;		int n=5;
+
 		if(numParentSeqs == 1 || ignoreChimeras == 0){
 			substitutionMatrix[a][a] += error.weight * error.AA;
 			substitutionMatrix[a][t] += error.weight * error.TA;
@@ -622,7 +624,7 @@ void SeqErrorCommand::printErrorData(Compare error, int numParentSeqs){
 			substitutionMatrix[a][c] += error.weight * error.CA;
 			substitutionMatrix[a][gap] += error.weight * error.dA;
 			substitutionMatrix[a][n] += error.weight * error.NA;
-
+			
 			substitutionMatrix[t][a] += error.weight * error.AT;
 			substitutionMatrix[t][t] += error.weight * error.TT;
 			substitutionMatrix[t][g] += error.weight * error.GT;
