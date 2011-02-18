@@ -187,6 +187,8 @@ int UnifracWeightedCommand::execute() {
 		//get weighted for users tree
 		userData.resize(numComp,0);  //data[0] = weightedscore AB, data[1] = weightedscore AC...
 		randomData.resize(numComp,0); //data[0] = weightedscore AB, data[1] = weightedscore AC...
+		
+		if (numComp < processors) { processors = numComp; }
 				
 		//get weighted scores for users trees
 		for (int i = 0; i < T.size(); i++) {

@@ -198,6 +198,8 @@ int UnifracUnweightedCommand::execute() {
 		randomData.resize(numComp,0); //data[0] = unweightedscore
 		//create new tree with same num nodes and leaves as users
 		
+		if (numComp < processors) { processors = numComp;  }
+		
 		outSum << "Tree#" << '\t' << "Groups" << '\t'  <<  "UWScore" <<'\t' << "UWSig" <<  endl;
 		m->mothurOut("Tree#\tGroups\tUWScore\tUWSig"); m->mothurOutEndLine();
 		
