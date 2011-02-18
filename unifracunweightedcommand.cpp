@@ -259,7 +259,7 @@ int UnifracUnweightedCommand::execute() {
 				}
 				
 				//report progress
-				m->mothurOut("Iter: " + toString(j+1)); m->mothurOutEndLine();	
+//				m->mothurOut("Iter: " + toString(j+1)); m->mothurOutEndLine();	
 			}
 	
 			for(int a = 0; a < numComp; a++) {

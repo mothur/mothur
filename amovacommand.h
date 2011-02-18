@@ -32,32 +32,39 @@ public:
 	void help();
 	
 private:
-	struct linePair {
-		int start;
-		int num;
-		linePair(int i, int j) : start(i), num(j) {}
-	};
-	vector<linePair> lines;
+	double runAMOVA(ofstream&, map<string, vector<int> >, double);
+	double calcSSWithin(map<string, vector<int> >&);
+	double calcSSTotal(map<string, vector<int> >&);
+	map<string, vector<int> > getRandomizedGroups(map<string, vector<int> >);
+
 	
+	bool abort;
 	GlobalData* globaldata;
-	GroupMap* designMap;
 	map<string, vector<string> > outputTypes;
+	vector<string> outputNames;
+
+	string outputDir, inputDir, designFileName, phylipFileName;
+	GroupMap* designMap;
+	vector< vector<double> > distanceMatrix;
+	int iters;
+	double experimentwiseAlpha;
 	
-	vector< vector<double> > matrix;
-	bool abort, allLines, pickedGroups;
-	set<string> labels; //holds labels to be used
-	string format, groups, label, outputDir, inputDir, designfile, sets, phylipfile, calc, sharedfile;
-	vector<string> Groups, outputNames, Sets;
-	vector< vector<string> > namesOfGroupCombos;
-	int iters, processors;
-	vector<Calculator*> calculators;
-	
-	int driver(int, int, vector<SharedRAbundVector*>, string);
-	int driver(int, int, vector<string>, string, vector< vector<double> >&);
-	int process(vector<SharedRAbundVector*>);
-	int calcAmova(ofstream&, int, vector<string>);
-	double calcWithin(vector< vector<double> >&, int, vector<string>);
-	double calcTotal(int);
+//	struct linePair {
+//		int start;
+//		int num;
+//		linePair(int i, int j) : start(i), num(j) {}
+//	};
+//	vector<linePair> lines;
+//
+//	vector< vector<string> > namesOfGroupCombos;
+//	vector<string> Groups, outputNames, Sets;
+//	int processors;
+//	string groups, sets, calc, sharedfile, label, allLines, pickedGroups;
+//	vector<Calculator*> calculators;
+//	set<string> labels; //holds labels to be used
+//	int driver(int, int, vector<SharedRAbundVector*>, string);
+//	int driver(int, int, vector<string>, string, vector< vector<double> >&);
+//	int process(vector<SharedRAbundVector*>);	
 };
 
 #endif

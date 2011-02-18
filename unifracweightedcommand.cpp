@@ -261,7 +261,7 @@ int UnifracWeightedCommand::execute() {
 					if (m->control_pressed) { delete output; outSum.close(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
 					
 					//report progress
-					m->mothurOut("Iter: " + toString(j+1)); m->mothurOutEndLine();		
+//					m->mothurOut("Iter: " + toString(j+1)); m->mothurOutEndLine();		
 				}
 				lines.clear();
 			
