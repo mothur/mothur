@@ -408,7 +408,7 @@ int AnosimCommand::execute(){
 				
 				//print headers
 				out << "label\tgroupsCompared\tRValue\tpValue" << endl;  
-				m->mothurOut("label\tgroupsCompared\tRValue\tpValue"); m->mothurOutEndLine();  
+				m->mothurOut("\nlabel\tgroupsCompared\tRValue\tpValue"); m->mothurOutEndLine();  
 				out.close();
 			}
 			
@@ -510,7 +510,7 @@ int AnosimCommand::execute(){
 			
 			//print headers
 			out << "groupsCompared\tRValue\tpValue" << endl; 
-			m->mothurOut("groupsCompared\tRValue\tpValue"); m->mothurOutEndLine();  
+			m->mothurOut("\ngroupsCompared\tRValue\tpValue"); m->mothurOutEndLine();  
 			out.close();
 			
 			ReadPhylipVector readMatrix(phylipfile);

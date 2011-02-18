@@ -186,7 +186,7 @@ int GetOtusCommand::execute(){
 		groupMap = new GroupMap(groupfile);
 		groupMap->readMap();
 		
-		//get groups you want to remove
+		//get groups you want to get
 		if (accnosfile != "") { readAccnos(); }
 		
 		//make sure groups are valid

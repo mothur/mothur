@@ -413,7 +413,7 @@ int SubSampleCommand::getSubSampleFasta() {
 					bool done = false;
 					int myrand;
 					while (!done) {
-						myrand = (int)((float)(rand()) / (RAND_MAX / (thisSize-1) + 1));
+						myrand = int((float)(thisSize) * (float)(rand()) / ((float)RAND_MAX+1.0));
 						
 						if (subset.count(names[myrand]) == 0)  { 
 							
@@ -426,6 +426,7 @@ int SubSampleCommand::getSubSampleFasta() {
 				}
 			}
 		}else {
+			
 			//randomly select a subset of those names to include in the subsample
 			for (int j = 0; j < size; j++) {
 				
@@ -435,7 +436,7 @@ int SubSampleCommand::getSubSampleFasta() {
 				bool done = false;
 				int myrand;
 				while (!done) {
-					myrand = (int)((float)(rand()) / (RAND_MAX / (thisSize-1) + 1));
+					myrand = int((float)(thisSize) * (float)(rand()) / ((float)RAND_MAX+1.0));
 					
 					if (subset.count(names[myrand]) == 0)  { 
 						
@@ -762,7 +763,7 @@ int SubSampleCommand::processShared(vector<SharedRAbundVector*>& thislookup, ofs
 					if (m->control_pressed) { delete order; return 0; }
 					
 					//get random number to sample from order between 0 and thisSize-1.
-					int myrand = (int)((float)(rand()) / (RAND_MAX / (thisSize-1) + 1));
+					int myrand = int((float)(thisSize) * (float)(rand()) / ((float)RAND_MAX+1.0));
 					
 					int bin = order->get(myrand);
 					
@@ -959,7 +960,7 @@ int SubSampleCommand::getSubSampleList() {
 					bool done = false;
 					int myrand;
 					while (!done) {
-						myrand = (int)((float)(rand()) / (RAND_MAX / (names.size()-1) + 1));
+						myrand = int((float)(names.size()) * (float)(rand()) / ((float)RAND_MAX+1.0));
 						
 						if (subset.count(names[myrand]) == 0) { //you are not already added
 							if (groupMap->getGroup(names[myrand]) == Groups[i])  { subset.insert(names[myrand]); break;	}
@@ -976,7 +977,7 @@ int SubSampleCommand::getSubSampleList() {
 				bool done = false;
 				int myrand;
 				while (!done) {
-					myrand = (int)((float)(rand()) / (RAND_MAX / (names.size()-1) + 1));
+					myrand = int((float)(names.size()) * (float)(rand()) / ((float)RAND_MAX+1.0));
 					
 					if (subset.count(names[myrand]) == 0)  { subset.insert(names[myrand]); break;	}
 				}
@@ -1262,7 +1263,7 @@ int SubSampleCommand::processRabund(RAbundVector*& rabund, ofstream& out) {
 				if (m->control_pressed) { delete order; return 0; }
 				
 				//get random number to sample from order between 0 and thisSize-1.
-				int myrand = (int)((float)(rand()) / (RAND_MAX / (thisSize-1) + 1));
+				int myrand = int((float)(thisSize) * (float)(rand()) / ((float)RAND_MAX+1.0));
 				
 				int bin = order->get(myrand);
 				
@@ -1422,7 +1423,7 @@ int SubSampleCommand::processSabund(SAbundVector*& sabund, ofstream& out) {
 				if (m->control_pressed) { delete order; return 0; }
 				
 				//get random number to sample from order between 0 and thisSize-1.
-				int myrand = (int)((float)(rand()) / (RAND_MAX / (thisSize-1) + 1));
+				int myrand = int((float)(thisSize) * (float)(rand()) / ((float)RAND_MAX+1.0));
 				
 				int bin = order->get(myrand);
 				

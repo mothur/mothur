@@ -66,7 +66,6 @@ EstOutput Unweighted::getValues(Tree* t, int p, string o) {
 		
 					lines.push_back(linePair(startPos, numPairsPerProcessor));
 				}
-
 				data = createProcesses(t, namesOfGroupCombos);
 				lines.clear();
 			}
@@ -317,7 +316,7 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB, int p, st
 					}
 					lines.push_back(linePair(startPos, numPairsPerProcessor));
 				}
-
+					
 				data = createProcesses(t, namesOfGroupCombos, true);
 				
 				lines.clear();
@@ -392,12 +391,13 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 			if (!in.eof()) {
 				int num;
 				in >> num; m->gobble(in);
-				
+					
 				if (m->control_pressed) { break; }
 				
 				double w; 
 				for (int j = 0; j < num; j++) {
 					in >> w;
+					
 					results.push_back(w);
 				}
 				m->gobble(in);

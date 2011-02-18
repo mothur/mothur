@@ -196,7 +196,7 @@ void GetSharedOTUCommand::help(){
 		m->mothurOut("The output parameter allows you to output the list of names without the group and bin number added. \n");
 		m->mothurOut("With this option you can use the names file as an input in get.seqs and remove.seqs commands. To do this enter output=accnos. \n");
 		m->mothurOut("The get.sharedseqs command outputs a .names file for each distance level containing a list of sequences in the OTUs shared by the groups specified.\n");
-		m->mothurOut("The get.sharedseqs command should be in the following format: get.sabund(label=yourLabels, groups=yourGroups, fasta=yourFastafile, output=yourOutput).\n");
+		m->mothurOut("The get.sharedseqs command should be in the following format: get.sharedseqs(label=yourLabels, groups=yourGroups, fasta=yourFastafile, output=yourOutput).\n");
 		m->mothurOut("Example get.sharedseqs(list=amazon.fn.list, label=unique-0.01, group=forest-pasture, fasta=amazon.fasta, output=accnos).\n");
 		m->mothurOut("The output to the screen is the distance and the number of otus at that distance for the groups you specified.\n");
 		m->mothurOut("The default value for label is all labels in your inputfile. The default for groups is all groups in your file.\n");
