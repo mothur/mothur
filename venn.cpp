@@ -33,7 +33,7 @@ vector<string> Venn::getPic(SAbundVector* sabund, vector<Calculator*> vCalcs) {
 	try {
 		
 		vector<string> outputNames;
-		
+
 		for(int i=0;i<vCalcs.size();i++){
 			string filenamesvg = outputDir + m->getRootName(m->getSimpleName(globaldata->inputFileName)) + "." + sabund->getLabel() + "." + vCalcs[i]->getName() + ".svg";
 			outputNames.push_back(filenamesvg);
@@ -78,7 +78,7 @@ vector<string> Venn::getPic(SAbundVector* sabund, vector<Calculator*> vCalcs) {
 //**********************************************************************************************************************
 vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculator*> vCalcs) {
 	try {
-		
+
 		vector<SharedRAbundVector*> subset;
 		vector<string> outputNames;
 		
@@ -168,14 +168,16 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					//singleCalc = new Ace(10);
 				//}
 				
-				int sharedVal, numSeqsA, numSeqsB;
+				int sharedVal, numSeqsA, numSeqsB, uniqSeqsToA, uniqSeqsToB;
 				if (nseqs) {
 					NSeqs* nseqsCalc = new NSeqs();
 					vector<double> data = nseqsCalc->getValues(lookup);
-					
+					cout << data[0] << '\t' << data[1] << endl;
 					sharedVal = data[0] + data[1];
 					numSeqsA = sabundA->getNumSeqs();
 					numSeqsB = sabundB->getNumSeqs();
+					uniqSeqsToA = numSeqsA-data[0];
+					uniqSeqsToB = numSeqsB-data[1];
 					
 					delete nseqsCalc;
 				}
@@ -205,21 +207,22 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 				if (numA.size() == 3) { 
 					outsvg << " the lci is " + toString(numA[1]) + " and the hci is " + toString(numA[2]);
 				}
-				if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsA);  }  
+				if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsA) + "; " + toString(uniqSeqsToA) + " sequences are not shared";  }  
 				outsvg << "</text>\n";
 		
 				outsvg << "<text fill=\"black\" class=\"seri\"   font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.69 * height)) +  "\">The number of species in group " + lookup[1]->getGroup() + " is " + toString(numB[0]);
 				if (numB.size() == 3) { 
 					outsvg << " the lci is " + toString(numB[1]) + " and the hci is " + toString(numB[2]);
 				}
-				if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsB);  }  
+				if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsB) + "; " + toString(uniqSeqsToB) + " sequences are not shared";  }  
 				outsvg << "</text>\n";
 
 				outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.72 * height)) +  "\">The number of sepecies shared between groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString(shared[0]);
-				if (nseqs) {  outsvg << ", and the number of squences is " + toString(sharedVal);  }  
+				if (nseqs) {  outsvg << ", and the number of squences is " + toString(sharedVal) + "; " + toString((sharedVal / (float)(numSeqsA + numSeqsB))*100) + "% of these sequences are shared";  }  
 				outsvg << "</text>\n";
 				
 				outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.75 * height)) +  "\">Percentage of species that are shared in groups " + lookup[0]->getGroup() + " and " + lookup[1]->getGroup() + " is " + toString((shared[0] / (float)(numA[0] + numB[0] - shared[0]))*100) + "</text>\n";
+				
 				outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.78 * height)) +  "\">The total richness for all groups is " + toString((float)(numA[0] + numB[0] - shared[0]))+ "</text>\n";;
 				
 				
@@ -254,7 +257,7 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 				
 				if (m->control_pressed) { outsvg.close(); return outputNames; }
 				
-				int sharedVal, sharedABVal, sharedACVal, sharedBCVal, numSeqsA, numSeqsB, numSeqsC;
+				int sharedVal, sharedABVal, sharedACVal, sharedBCVal, numSeqsA, numSeqsB, numSeqsC, uniqSeqsToA, uniqSeqsToB, uniqSeqsToC;
 				
 				if (nseqs) {
 					NSeqs* nseqsCalc = new NSeqs();
@@ -276,6 +279,9 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					numSeqsA = sabundA->getNumSeqs();
 					numSeqsB = sabundB->getNumSeqs();
 					numSeqsC = sabundC->getNumSeqs();
+					uniqSeqsToA = numSeqsA-sharedData[0];
+					uniqSeqsToB = numSeqsC-sharedData[1];
+					uniqSeqsToC = numSeqsB-sharedData[1];
 
 					delete nseqsCalc;
 				}
@@ -409,21 +415,21 @@ vector<string> Venn::getPic(vector<SharedRAbundVector*> lookup, vector<Calculato
 					if (numA.size() == 3) { 
 						outsvg << " the lci is " + toString(numA[1]) + " and the hci is " + toString(numA[2]);
 					} 
-					if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsA);  }  
+					if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsA) + "; " + toString(uniqSeqsToA) + " sequences are not shared";  }  
 					outsvg << "</text>\n";
 			
 					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.75 * height)) +  "\">The number of species in group " + lookup[1]->getGroup() + " is " + toString(numB[0]);
 					if (numB.size() == 3) { 
 						outsvg << " the lci is " + toString(numB[1]) + " and the hci is " + toString(numB[2]);
 					}
-					if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsB);  }  
+					if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsB) + "; " + toString(uniqSeqsToB) + " sequences are not shared";  }  
 					outsvg << "</text>\n";
 					
 					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.775 * height)) +  "\">The number of species in group " + lookup[2]->getGroup() + " is " + toString(numC[0]);
 					if (numC.size() == 3) { 
 						outsvg << " the lci is " + toString(numC[1]) + " and the hci is " + toString(numC[2]);
 					}
-					if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsC);  }  
+					if (nseqs) {  outsvg << ", and the number of squences is " + toString(numSeqsC) + "; " + toString(uniqSeqsToC) + " sequences are not shared";  }  
 					outsvg << "</text>\n";
 
 					outsvg << "<text fill=\"black\" class=\"seri\"  font-size=\"24\" x=\"" +  toString(int(0.25 * width)) +  "\" y=\"" +  toString(int(0.80 * height)) +  "\">The total richness of all the groups is " + toString(numA[0] + numB[0] + numC[0] - sharedAB[0] - sharedAC[0] - sharedBC[0] + sharedABC) + "</text>\n";

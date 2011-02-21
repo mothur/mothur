@@ -11,12 +11,9 @@
  */
 
 #include "command.hpp"
-#include "inputdata.h"
-#include "sharedrabundvector.h"
-#include "validcalculator.h"
-#include "readphylipvector.h"
 
-class GlobalData;
+//class GlobalData;
+class GroupMap;
 
 class AmovaCommand : public Command {
 	
@@ -39,7 +36,6 @@ private:
 
 	
 	bool abort;
-	GlobalData* globaldata;
 	map<string, vector<string> > outputTypes;
 	vector<string> outputNames;
 
@@ -48,23 +44,6 @@ private:
 	vector< vector<double> > distanceMatrix;
 	int iters;
 	double experimentwiseAlpha;
-	
-//	struct linePair {
-//		int start;
-//		int num;
-//		linePair(int i, int j) : start(i), num(j) {}
-//	};
-//	vector<linePair> lines;
-//
-//	vector< vector<string> > namesOfGroupCombos;
-//	vector<string> Groups, outputNames, Sets;
-//	int processors;
-//	string groups, sets, calc, sharedfile, label, allLines, pickedGroups;
-//	vector<Calculator*> calculators;
-//	set<string> labels; //holds labels to be used
-//	int driver(int, int, vector<SharedRAbundVector*>, string);
-//	int driver(int, int, vector<string>, string, vector< vector<double> >&);
-//	int process(vector<SharedRAbundVector*>);	
 };
 
 #endif
