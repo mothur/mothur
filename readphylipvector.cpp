@@ -94,6 +94,7 @@ vector<string> ReadPhylipVector::read(vector< vector<double> >& matrix) {
 				}
 			}
 		}
+		f.close();
 		
 		return names;
 	}
@@ -171,6 +172,7 @@ vector<string> ReadPhylipVector::read(vector<seqDist>& matrix) {
 				}
 			}
 		}
+		f.close();
 		
 		return names;
 	}

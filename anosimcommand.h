@@ -12,12 +12,8 @@
 
 
 #include "command.hpp"
-#include "inputdata.h"
-#include "sharedrabundvector.h"
-#include "validcalculator.h"
-#include "readphylipvector.h"
 
-class GlobalData;
+class GroupMap;
 
 class AnosimCommand : public Command {
 	
@@ -33,32 +29,23 @@ public:
 	void help();
 	
 private:
-	struct linePair {
-		int start;
-		int num;
-		linePair(int i, int j) : start(i), num(j) {}
-	};
-	vector<linePair> lines;
-	
-	GlobalData* globaldata;
+	bool abort;
 	GroupMap* designMap;
 	map<string, vector<string> > outputTypes;
+	string outputDir, inputDir, designFileName, phylipFileName;
 	
-	vector< vector<double> > matrix;
-	bool abort, allLines, pickedGroups;
-	set<string> labels; //holds labels to be used
-	string format, groups, label, outputDir, inputDir, designfile, sets, phylipfile, calc, sharedfile;
-	vector<string> Groups, outputNames, Sets;
+	vector<vector<double> > convertToRanks(vector<vector<double> >);
+	double calcR(vector<vector<double> >, map<string, vector<int> >);
+	map<string, vector<int> > getRandomizedGroups(map<string, vector<int> >);
+	double runANOSIM(ofstream&, vector<vector<double> >, map<string, vector<int> >, double);
+	
+	vector< vector<double> > distanceMatrix;
+	vector<string> outputNames;
+	int iters;
+	double experimentwiseAlpha;
 	vector< vector<string> > namesOfGroupCombos;
-	int iters, processors;
-	vector<Calculator*> calculators;
 	
-	int driver(int, int, vector<SharedRAbundVector*>, string);
-	int driver(int, int, vector<string>, string, vector< vector<double> >&);
-	int process(vector<SharedRAbundVector*>);
-	int calcAnosim(ofstream&, int, vector<string>);
-	double calcWithinBetween(vector<seqDist>&, vector<string>, double&);
-	vector<seqDist> convertToRanks();
+	
 };
 
 #endif
