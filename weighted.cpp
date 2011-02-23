@@ -183,7 +183,7 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 			
 				D[count] += weightedSum;
 			}
-
+			
 			//adding the wieghted sums from group l
 			for (int j = 0; j < t->groupNodeInfo[groupB].size(); j++) { //the leaf nodes that have seqs from group l
 				map<string, int>::iterator it = t->tree[t->groupNodeInfo[groupB][j]].pcount.find(groupB);
@@ -194,15 +194,13 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 			
 				D[count] += weightedSum;
 			}
-			
 			count++;
 		}
-		
+	 
 		//calculate u for the group comb 
-		
 		for (int h = start; h < (start+num); h++) {	
 			//report progress
-			m->mothurOut("Processing combo: " + toString(h)); m->mothurOutEndLine();
+			//m->mothurOut("Processing combo: " + toString(h)); m->mothurOutEndLine();
 						
 			string groupA = namesOfGroupCombos[h][0]; 
 			string groupB = namesOfGroupCombos[h][1];
@@ -224,6 +222,7 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 				
 				//does this node have descendants from group l
 				it = t->tree[i].pcount.find(groupB);
+				
 				//if it does subtract their percentage from u
 				if (it != t->tree[i].pcount.end()) {
 					u -= (double) t->tree[i].pcount[groupB] / (double) tmap->seqsPerGroup[groupB];
@@ -236,9 +235,8 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 						WScore[(groupA+groupB)] += u; 
 					}
 				}
-				
-				
 			}
+			
 		}
 		
 		/********************************************************/
@@ -372,7 +370,7 @@ double Weighted::getLengthToRoot(Tree* t, int v, string groupA, string groupB) {
 			
 			int sib = lc;
 			if (lc == index) { sib = rc; }
-			
+						
 			map<string, int>::iterator itGroup;
 			int pcountSize = 0;
 			itGroup = t->tree[sib].pcount.find(groupA);
@@ -402,12 +400,12 @@ double Weighted::getLengthToRoot(Tree* t, int v, string groupA, string groupB) {
 		
 		//get all nodes above the root to add so we don't add their u values above
 		index = *(rootForGrouping[grouping].begin());
+		
 		while(t->tree[index].getParent() != -1){
 			int parent = t->tree[index].getParent();
 			rootForGrouping[grouping].insert(parent);
 			index = parent;
 		}
-		
 		return sum;
 	}
 	catch(exception& e) {

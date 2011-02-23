@@ -129,7 +129,10 @@ int ReadNewickTree::read() {
 			}
 		//if you are a nexus file
 		}else if ((c = filehandle.peek()) == '#') {
-			holder = nexusTranslation();  //reads file through the translation and updates treemap
+			//get right number of seqs from nexus file.
+			Tree* temp = new Tree();  delete temp;
+			
+			nexusTranslation();  //reads file through the translation and updates treemap
 			while((c = filehandle.peek()) != EOF) { 
 				// get past comments
 				while ((c = filehandle.peek()) != EOF) {	
@@ -179,7 +182,7 @@ string ReadNewickTree::nexusTranslation() {
 	try {
 		
 		holder = "";
-		//int numSeqs = globaldata->gTreemap->getNumSeqs(); //must save this some when we clear old names we can still know how many sequences there were
+		int numSeqs = globaldata->Treenames.size(); //must save this some when we clear old names we can still know how many sequences there were
 		int comment = 0;
 		
 		// get past comments
@@ -197,7 +200,7 @@ string ReadNewickTree::nexusTranslation() {
 		//update treemap
 		globaldata->gTreemap->namesOfSeqs.clear();
 		
-		char c;
+		/*char c;
 		string number, name;
 		while ((c = filehandle.peek()) != EOF) {	
 			
@@ -213,7 +216,15 @@ string ReadNewickTree::nexusTranslation() {
 			if ((name == "tree") || (name == ";") ) {  break;  }
 			
 			if (lastChar == ',') {  name.erase(name.end()-1); } //erase the comma
-				
+			*/	
+		cout << "numseqs = " << numSeqs << endl;
+		string number, name;
+		for(int i=0;i<numSeqs;i++){
+			
+			filehandle >> number;
+			filehandle >> name;
+			name.erase(name.end()-1);  //erase the comma
+			
 			//insert new one with new name
 			string group = globaldata->gTreemap->getGroup(name);
 			globaldata->gTreemap->treemap[toString(number)].groupname = group;

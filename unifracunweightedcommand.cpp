@@ -432,7 +432,7 @@ void UnifracUnweightedCommand::createPhylipFile(int i) {
 				out << name << '\t';
 				
 				//output distances
-				for (int l = 0; l < globaldata->Groups.size(); l++) {	out << setprecision(11) << dists[r][l] << '\t';  }
+				for (int l = 0; l < globaldata->Groups.size(); l++) {	out << dists[r][l] << '\t';  }
 				out << endl;
 			}else{
 				//output distances

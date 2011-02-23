@@ -330,7 +330,9 @@ void Tree::getSubTree(Tree* copy, vector<string> Groups) {
 						
 						copy->tree[i].setParent(grandparent);
 						copy->tree[i].setBranchLength((copy->tree[i].getBranchLength()+copy->tree[parent].getBranchLength()));
-						copy->tree[grandparent].setChildren(grandparentLC, grandparentRC);
+						if (grandparent != -1) {
+							copy->tree[grandparent].setChildren(grandparentLC, grandparentRC);
+						}
 						removedLeaves.insert(sibIndex);
 					}
 				}else{
@@ -357,7 +359,9 @@ void Tree::getSubTree(Tree* copy, vector<string> Groups) {
 						
 						copy->tree[sibIndex].setParent(grandparent);
 						copy->tree[sibIndex].setBranchLength((copy->tree[sibIndex].getBranchLength()+copy->tree[parent].getBranchLength()));
-						copy->tree[grandparent].setChildren(grandparentLC, grandparentRC);
+						if (grandparent != -1) {
+							copy->tree[grandparent].setChildren(grandparentLC, grandparentRC);
+						}
 						removedLeaves.insert(i);
 					}else{
 						//neither of us are, so we want to eliminate ourselves and our parent
@@ -367,8 +371,11 @@ void Tree::getSubTree(Tree* copy, vector<string> Groups) {
 						int parentsSibIndex;
 						if (grandparent != -1) {
 							int greatgrandparent = copy->tree[grandparent].getParent();
-							int greatgrandparentLC = copy->tree[greatgrandparent].getLChild();
-							int greatgrandparentRC = copy->tree[greatgrandparent].getRChild();
+							int greatgrandparentLC, greatgrandparentRC;
+							if (greatgrandparent != -1) {
+								greatgrandparentLC = copy->tree[greatgrandparent].getLChild();
+								greatgrandparentRC = copy->tree[greatgrandparent].getRChild();
+							}
 							
 							int grandparentLC = copy->tree[grandparent].getLChild();
 							int grandparentRC = copy->tree[grandparent].getRChild();
@@ -382,10 +389,12 @@ void Tree::getSubTree(Tree* copy, vector<string> Groups) {
 							
 							copy->tree[parentsSibIndex].setParent(greatgrandparent);
 							copy->tree[parentsSibIndex].setBranchLength((copy->tree[parentsSibIndex].getBranchLength()+copy->tree[grandparent].getBranchLength()));
-							copy->tree[greatgrandparent].setChildren(greatgrandparentLC, greatgrandparentRC);
+							if (greatgrandparent != -1) {
+								copy->tree[greatgrandparent].setChildren(greatgrandparentLC, greatgrandparentRC);
+							}
 						}else{
-							copy->tree[parent].setChildren(-1, -1);
-							cout << "issues with making subtree" << endl;
+							copy->tree[parent].setParent(-1);
+							//cout << "issues with making subtree" << endl;
 						}
 						removedLeaves.insert(sibIndex);
 						removedLeaves.insert(i);
@@ -403,7 +412,6 @@ void Tree::getSubTree(Tree* copy, vector<string> Groups) {
 		
 		int nextSpot = numLeaves;
 		populateNewTree(copy->tree, root, nextSpot);
-				
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Tree", "getCopy");

@@ -260,7 +260,6 @@ EstOutput Unweighted::getValues(Tree* t, string groupA, string groupB, int p, st
 		processors = p;
 		outputDir = o;
 		
-		
 		//if the users enters no groups then give them the score of all groups
 		int numGroups = globaldata->Groups.size();
 		
