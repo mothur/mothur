@@ -349,7 +349,7 @@ int TrimSeqsCommand::execute(){
 					createProcessesCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, outputGroupFileName, fastaFileNames, qualFileNames); 
 				}	
 		#else
-				driverCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, outputGroupFile, fastaFileNames, qualFileNames, lines[0], qLines[0]);
+				driverCreateTrim(fastaFile, qFileName, trimSeqFile, scrapSeqFile, trimQualFile, scrapQualFile, outputGroupFileName, fastaFileNames, qualFileNames, lines[0], qLines[0]);
 		#endif
 		
 		if (m->control_pressed) {  return 0; }			

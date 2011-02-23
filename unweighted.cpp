@@ -232,7 +232,11 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 						}
 					}else if ((nodePcountSize[lc] == 0) && (nodePcountSize[rc] == 0)) { tempTotals[i] = 0.0;  //we don't care about you
 					}else { //if no, your tempTotal is your childrens temp totals + your branch length
-						tempTotals[i] = tempTotals[lc] + tempTotals[rc] + abs(t->tree[i].getBranchLength()); 
+						if (t->tree[i].getBranchLength() != -1) {
+							tempTotals[i] = tempTotals[lc] + tempTotals[rc] + abs(t->tree[i].getBranchLength()); 
+						}else {
+							tempTotals[i] = tempTotals[lc] + tempTotals[rc];
+						}
 					}
 					//cout << "temptotal = "<< tempTotals[i] << endl;
 				}
@@ -482,7 +486,11 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 						}
 					}else if ((nodePcountSize[lc] == 0) && (nodePcountSize[rc] == 0)) { tempTotals[i] = 0.0;  //we don't care about you
 					}else { //if no, your tempTotal is your childrens temp totals + your branch length
-						tempTotals[i] = tempTotals[lc] + tempTotals[rc] + abs(copyTree->tree[i].getBranchLength()); 
+						if (t->tree[i].getBranchLength() != -1) {
+							tempTotals[i] = tempTotals[lc] + tempTotals[rc] + abs(copyTree->tree[i].getBranchLength()); 
+						}else {
+							tempTotals[i] = tempTotals[lc] + tempTotals[rc];
+						}
 					}
 					
 				}
