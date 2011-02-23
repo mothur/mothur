@@ -50,12 +50,12 @@ Tree::Tree() {
 		numNodes = 2*numLeaves - 1;
 		
 		tree.resize(numNodes);
-		
+			
 		//initialize groupNodeInfo
 		for (int i = 0; i < globaldata->gTreemap->namesOfGroups.size(); i++) {
 			groupNodeInfo[globaldata->gTreemap->namesOfGroups[i]].resize(0);
 		}
-
+		
 		//initialize tree with correct number of nodes, name and group info.
 		for (int i = 0; i < numNodes; i++) {
 			//initialize leaf nodes
@@ -64,6 +64,7 @@ Tree::Tree() {
 				
 				//save group info
 				string group = globaldata->gTreemap->getGroup(globaldata->Treenames[i]);
+				
 				vector<string> tempGroups; tempGroups.push_back(group);
 				tree[i].setGroup(tempGroups);
 				groupNodeInfo[group].push_back(i); 
@@ -82,6 +83,7 @@ Tree::Tree() {
 				tree[i].setGroup(tempGroups);
 			}
 		}
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Tree", "Tree");

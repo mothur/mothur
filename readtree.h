@@ -51,7 +51,7 @@ private:
 	Tree* T;
 	int readNewickInt(istream&, int&, Tree*);
 	int readTreeString();
-	void nexusTranslation();
+	string nexusTranslation();
 	ifstream filehandle;
 	string treeFile;
 	string holder;
