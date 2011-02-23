@@ -231,9 +231,12 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 				
 				//if this is not the root then add it
 				if (rootForGrouping[namesOfGroupCombos[h]].count(i) == 0) {
-					u = abs(u * t->tree[i].getBranchLength());
-					WScore[(groupA+groupB)] += u; 
+					if (t->tree[i].getBranchLength() != -1) {
+						u = abs(u * t->tree[i].getBranchLength());
+						WScore[(groupA+groupB)] += u; 
+					}
 				}
+				
 				
 			}
 		}
@@ -244,7 +247,6 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 		count = 0;
 		for (int h = start; h < (start+num); h++) {
 			UN = (WScore[namesOfGroupCombos[h][0]+namesOfGroupCombos[h][1]] / D[count]);
-		
 			if (isnan(UN) || isinf(UN)) { UN = 0; } 
 			results.push_back(UN);
 			count++;
@@ -319,12 +321,14 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 			
 			//if this is not the root then add it
 			if (rootForGrouping[groups].count(i) == 0) {
-				u = abs(u * t->tree[i].getBranchLength());
-				WScore[(groupA+groupB)] += u; 
+				if (t->tree[i].getBranchLength() != -1) {
+					u = abs(u * t->tree[i].getBranchLength());
+					WScore[(groupA+groupB)] += u;
+				}
 			}
 		}		
 		/********************************************************/
-		
+	 
 		//calculate weighted score for the group combination
 		double UN;	
 		UN = (WScore[(groupA+groupB)] / D);
