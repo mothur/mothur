@@ -168,7 +168,8 @@ EstOutput Unweighted::createProcesses(Tree* t, vector< vector<string> > namesOfG
 /**************************************************************************************************/
 EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos, int start, int num) { 
  try {
-		
+	
+	 
 		EstOutput results; results.resize(num);
 		
 		int count = 0;
@@ -178,7 +179,7 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 	 
 			
 		for (int h = start; h < (start+num); h++) {
-	//cout << namesOfGroupCombos[h][0] << '\t' << namesOfGroupCombos[h][1] << endl;		
+				
 			if (m->control_pressed) { return results; }
 		
 			double UniqueBL=0.0000;  //a branch length is unique if it's chidren are from the same group
@@ -214,7 +215,7 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 						map<string, int>::iterator itGroup = t->tree[i].pcount.find(namesOfGroupCombos[h][j]);
 						if (itGroup != t->tree[i].pcount.end()) { pcountSize++; if (pcountSize > 1) { break; } } 
 					}
-					//
+										
 					//unique calc
 					if (pcountSize == 0) { }
 					else if ((t->tree[i].getBranchLength() != -1) && (pcountSize == 1) && (rootForGrouping[namesOfGroupCombos[h]].count(i) == 0)) { //you have a unique branch length and you are not the root 
@@ -228,7 +229,7 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 					}
 					
 				}
-	cout << UniqueBL << '\t' << totalBL << endl;		
+	//cout << UniqueBL << '\t' << totalBL << endl;		
 				UW = (UniqueBL / totalBL);  
 	
 				if (isnan(UW) || isinf(UW)) { UW = 0; }
@@ -238,11 +239,11 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 			count++;
 
 			//report progress
-			if((count % twentyPercent) == 0) {	float tempOut = (count / (float)total); if (isnan(tempOut) || isinf(tempOut)) { tempOut = 0.0; } m->mothurOut("Percentage complete: " + toString((int(tempOut) * 100.0))); m->mothurOutEndLine();	}
+			//if((count % twentyPercent) == 0) {	float tempOut = (count / (float)total); if (isnan(tempOut) || isinf(tempOut)) { tempOut = 0.0; } m->mothurOut("Percentage complete: " + toString((int(tempOut) * 100.0))); m->mothurOutEndLine();	}
 		}
 		
 		//report progress
-		if((count % twentyPercent) != 0) {	float tempOut = (count / (float)total); if (isnan(tempOut) || isinf(tempOut)) { tempOut = 0.0; } m->mothurOut("Percentage complete: " + toString((int(tempOut) * 100.0))); m->mothurOutEndLine();	}
+		//if((count % twentyPercent) != 0) {	float tempOut = (count / (float)total); if (isnan(tempOut) || isinf(tempOut)) { tempOut = 0.0; } m->mothurOut("Percentage complete: " + toString((int(tempOut) * 100.0))); m->mothurOutEndLine();	}
 		
 		return results; 
 	}
@@ -536,7 +537,7 @@ int Unweighted::getRoot(Tree* t, int v, vector<string> grouping) {
 		while(t->tree[index].getParent() != -1){
 			int parent = t->tree[index].getParent();
 			rootForGrouping[grouping].insert(parent);
-			cout << parent << " in root" << endl;
+			//cout << parent << " in root" << endl;
 			index = parent;
 		}
 		
