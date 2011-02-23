@@ -172,12 +172,11 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 		EstOutput results; results.resize(num);
 		
 		int count = 0;
-		int numLeaves = t->getNumLeaves();
 		int total = num;
 		int twentyPercent = (total * 0.20);
 		if (twentyPercent == 0) { twentyPercent = 1; }
-		
-		
+	 
+			
 		for (int h = start; h < (start+num); h++) {
 	//cout << namesOfGroupCombos[h][0] << '\t' << namesOfGroupCombos[h][1] << endl;		
 			if (m->control_pressed) { return results; }
@@ -185,69 +184,57 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 			double UniqueBL=0.0000;  //a branch length is unique if it's chidren are from the same group
 			double totalBL = 0.00;	//all branch lengths
 			double UW = 0.00;		//Unweighted Value = UniqueBL / totalBL;
-			map<int, double> tempTotals; //maps node to total Branch Length
-			map<int, int> nodePcountSize; //maps node to pcountSize
-			map<int, int>::iterator itCount;
-				
-			for(int i=0;i<t->getNumNodes();i++){
+						
+			//find a node that belongs to one of the groups in this combo
+			int nodeBelonging = -1;
+			for (int g = 0; g < namesOfGroupCombos[h].size(); g++) {
+				if (t->groupNodeInfo[namesOfGroupCombos[h][g]].size() != 0) { nodeBelonging = t->groupNodeInfo[namesOfGroupCombos[h][g]][0]; break; }
+			}
 			
-				if (m->control_pressed) {  return data; }
+			//sanity check
+			if (nodeBelonging == -1) {
+				m->mothurOut("[WARNING]: cannot find a nodes in the tree from grouping "); 
+				for (int g = 0; g < namesOfGroupCombos[h].size()-1; g++) { m->mothurOut(namesOfGroupCombos[h][g] + "-"); }
+				m->mothurOut(namesOfGroupCombos[h][namesOfGroupCombos[h].size()-1]);
+				m->mothurOut(", skipping."); m->mothurOutEndLine(); results[count] = UW;
+			}else{
+			
+				getRoot(t, nodeBelonging, namesOfGroupCombos[h]);
 				
-				//pcountSize = 0, they are from a branch that is entirely from a group the user doesn't want
-				//pcountSize = 2, not unique to one group
-				//pcountSize = 1, unique to one group
-				
-				int pcountSize = 0;
-				for (int j = 0; j < namesOfGroupCombos[h].size(); j++) {
-					map<string, int>::iterator itGroup = t->tree[i].pcount.find(namesOfGroupCombos[h][j]);
-					if (itGroup != t->tree[i].pcount.end()) { pcountSize++; if (pcountSize > 1) { break; } } 
-				}
-
-				nodePcountSize[i] = pcountSize;
-				
-				//cout << i << '\t' << t->tree[i].getName() << " br = " << abs(t->tree[i].getBranchLength()) << '\t';		
-				if (pcountSize == 0) { }
-				else if ((t->tree[i].getBranchLength() != -1) && (pcountSize == 1)) {  UniqueBL += abs(t->tree[i].getBranchLength()); }
-				
-				//if you are a leaf from a users group add to total
-				if (i < numLeaves) {
-					if ((t->tree[i].getBranchLength() != -1) && pcountSize != 0) { 
-					//cout << "added to total" << endl; 
+				for(int i=0;i<t->getNumNodes();i++){
+					
+					if (m->control_pressed) {  return data; }
+					
+					//pcountSize = 0, they are from a branch that is entirely from a group the user doesn't want
+					//pcountSize = 2, not unique to one group
+					//pcountSize = 1, unique to one group
+					
+					int pcountSize = 0;
+					for (int j = 0; j < namesOfGroupCombos[h].size(); j++) {
+						map<string, int>::iterator itGroup = t->tree[i].pcount.find(namesOfGroupCombos[h][j]);
+						if (itGroup != t->tree[i].pcount.end()) { pcountSize++; if (pcountSize > 1) { break; } } 
+					}
+					//
+					//unique calc
+					if (pcountSize == 0) { }
+					else if ((t->tree[i].getBranchLength() != -1) && (pcountSize == 1) && (rootForGrouping[namesOfGroupCombos[h]].count(i) == 0)) { //you have a unique branch length and you are not the root 
+						UniqueBL += abs(t->tree[i].getBranchLength()); 
+					}
+					
+					//total calc
+					if (pcountSize == 0) { }
+					else if ((t->tree[i].getBranchLength() != -1) && (pcountSize != 0) && (rootForGrouping[namesOfGroupCombos[h]].count(i) == 0)) { //you have a branch length and you are not the root 
 						totalBL += abs(t->tree[i].getBranchLength()); 
 					}
-					tempTotals[i] = 0.0;  //we don't care about you, or we have already added you
-				}else{ //if you are not a leaf 
-					//do both your chidren have have descendants from the users groups? 
-					int lc = t->tree[i].getLChild();
-					int rc = t->tree[i].getRChild();
 					
-					//if yes, add your childrens tempTotals
-					if ((nodePcountSize[lc] != 0) && (nodePcountSize[rc] != 0)) {
-						totalBL += tempTotals[lc] + tempTotals[rc]; 
-						//cout << "added to total " << tempTotals[lc] << '\t' << tempTotals[rc] << endl;
-						if (t->tree[i].getBranchLength() != -1) {
-							tempTotals[i] = abs(t->tree[i].getBranchLength());
-						}else {
-							tempTotals[i] = 0.0;
-						}
-					}else if ((nodePcountSize[lc] == 0) && (nodePcountSize[rc] == 0)) { tempTotals[i] = 0.0;  //we don't care about you
-					}else { //if no, your tempTotal is your childrens temp totals + your branch length
-						if (t->tree[i].getBranchLength() != -1) {
-							tempTotals[i] = tempTotals[lc] + tempTotals[rc] + abs(t->tree[i].getBranchLength()); 
-						}else {
-							tempTotals[i] = tempTotals[lc] + tempTotals[rc];
-						}
-					}
-					//cout << "temptotal = "<< tempTotals[i] << endl;
 				}
-
+	cout << UniqueBL << '\t' << totalBL << endl;		
+				UW = (UniqueBL / totalBL);  
+	
+				if (isnan(UW) || isinf(UW)) { UW = 0; }
+	
+				results[count] = UW;
 			}
-	//cout << UniqueBL << '\t' << totalBL << endl;		
-			UW = (UniqueBL / totalBL);  
-	
-			if (isnan(UW) || isinf(UW)) { UW = 0; }
-	
-			results[count] = UW;
 			count++;
 
 			//report progress
@@ -425,7 +412,6 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 		EstOutput results; results.resize(num);
 		
 		int count = 0;
-		int numLeaves = t->getNumLeaves();
 		
 		Tree* copyTree = new Tree;
 		
@@ -442,68 +428,58 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 			double UniqueBL=0.0000;  //a branch length is unique if it's chidren are from the same group
 			double totalBL = 0.00;	//all branch lengths
 			double UW = 0.00;		//Unweighted Value = UniqueBL / totalBL;
-			map<int, double> tempTotals; //maps node to total Branch Length
-			map<int, int> nodePcountSize; //maps node to pcountSize
-				
-			for(int i=0;i<copyTree->getNumNodes();i++){
+			//find a node that belongs to one of the groups in this combo
+			int nodeBelonging = -1;
+			for (int g = 0; g < namesOfGroupCombos[h].size(); g++) {
+				if (copyTree->groupNodeInfo[namesOfGroupCombos[h][g]].size() != 0) { nodeBelonging = copyTree->groupNodeInfo[namesOfGroupCombos[h][g]][0]; break; }
+			}
 			
-				if (m->control_pressed) {  return data; }
+			//sanity check
+			if (nodeBelonging == -1) {
+				m->mothurOut("[WARNING]: cannot find a nodes in the tree from grouping "); 
+				for (int g = 0; g < namesOfGroupCombos[h].size()-1; g++) { m->mothurOut(namesOfGroupCombos[h][g] + "-"); }
+				m->mothurOut(namesOfGroupCombos[h][namesOfGroupCombos[h].size()-1]);
+				m->mothurOut(", skipping."); m->mothurOutEndLine(); results[count] = UW;
+			}else{
 				
-				//pcountSize = 0, they are from a branch that is entirely from a group the user doesn't want
-				//pcountSize = 2, not unique to one group
-				//pcountSize = 1, unique to one group
+				getRoot(copyTree, nodeBelonging, namesOfGroupCombos[h]);
 				
-				int pcountSize = 0;
-				for (int j = 0; j < namesOfGroupCombos[h].size(); j++) {
-					map<string, int>::iterator itGroup = copyTree->tree[i].pcount.find(namesOfGroupCombos[h][j]);
-					if (itGroup != copyTree->tree[i].pcount.end()) { pcountSize++; if (pcountSize > 1) { break; } } 
-				}
-				
-				nodePcountSize[i] = pcountSize;
-			
-				if (pcountSize == 0) { }
-				else if ((copyTree->tree[i].getBranchLength() != -1) && (pcountSize == 1)) {  UniqueBL += abs(copyTree->tree[i].getBranchLength());	 }
-				
-				//if you are a leaf from a users group add to total
-				if (i < numLeaves) {
-					if ((copyTree->tree[i].getBranchLength() != -1) && pcountSize != 0) { 
+				for(int i=0;i<copyTree->getNumNodes();i++){
+					
+					if (m->control_pressed) {  return data; }
+					
+					//pcountSize = 0, they are from a branch that is entirely from a group the user doesn't want
+					//pcountSize = 2, not unique to one group
+					//pcountSize = 1, unique to one group
+					
+					int pcountSize = 0;
+					for (int j = 0; j < namesOfGroupCombos[h].size(); j++) {
+						map<string, int>::iterator itGroup = copyTree->tree[i].pcount.find(namesOfGroupCombos[h][j]);
+						if (itGroup != copyTree->tree[i].pcount.end()) { pcountSize++; if (pcountSize > 1) { break; } } 
+					}
+					
+					//unique calc
+					if (pcountSize == 0) { }
+					else if ((copyTree->tree[i].getBranchLength() != -1) && (pcountSize == 1) && (rootForGrouping[namesOfGroupCombos[h]].count(i) == 0)) { //you have a unique branch length and you are not the root 
+						UniqueBL += abs(copyTree->tree[i].getBranchLength()); 
+					}
+					
+					//total calc
+					if (pcountSize == 0) { }
+					else if ((copyTree->tree[i].getBranchLength() != -1) && (pcountSize != 0) && (rootForGrouping[namesOfGroupCombos[h]].count(i) == 0)) { //you have a branch length and you are not the root 
 						totalBL += abs(copyTree->tree[i].getBranchLength()); 
 					}
-					tempTotals[i] = 0.0;  //we don't care about you, or we have already added you
-				}else{ //if you are not a leaf 
-					//do both your chidren have have descendants from the users groups? 
-					int lc = copyTree->tree[i].getLChild();
-					int rc = copyTree->tree[i].getRChild();
-					
-					//if yes, add your childrens tempTotals
-					if ((nodePcountSize[lc] != 0) && (nodePcountSize[rc] != 0)) {
-						totalBL += tempTotals[lc] + tempTotals[rc]; 
-						
-						if (copyTree->tree[i].getBranchLength() != -1) {
-							tempTotals[i] = abs(copyTree->tree[i].getBranchLength());
-						}else {
-							tempTotals[i] = 0.0;
-						}
-					}else if ((nodePcountSize[lc] == 0) && (nodePcountSize[rc] == 0)) { tempTotals[i] = 0.0;  //we don't care about you
-					}else { //if no, your tempTotal is your childrens temp totals + your branch length
-						if (t->tree[i].getBranchLength() != -1) {
-							tempTotals[i] = tempTotals[lc] + tempTotals[rc] + abs(copyTree->tree[i].getBranchLength()); 
-						}else {
-							tempTotals[i] = tempTotals[lc] + tempTotals[rc];
-						}
-					}
 					
 				}
-
+				//cout << UniqueBL << '\t' << totalBL << endl;		
+				UW = (UniqueBL / totalBL);  
+				
+				if (isnan(UW) || isinf(UW)) { UW = 0; }
+				
+				results[count] = UW;
 			}
-		
-			UW = (UniqueBL / totalBL);  
-	
-			if (isnan(UW) || isinf(UW)) { UW = 0; }
-	
-			results[count] = UW;
 			count++;
-
+			
 		}
 		
 		delete copyTree;
@@ -512,6 +488,62 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Unweighted", "driver");
+		exit(1);
+	}
+}
+/**************************************************************************************************/
+int Unweighted::getRoot(Tree* t, int v, vector<string> grouping) { 
+	try {
+		//you are a leaf so get your parent
+		int index = t->tree[index].getParent();
+		
+		//my parent is a potential root
+		rootForGrouping[grouping].insert(index);
+		
+		//while you aren't at root
+		while(t->tree[index].getParent() != -1){
+			
+			if (m->control_pressed) {  return 0; }
+			
+			//am I the root for this grouping? if so I want to stop "early"
+			//does my sibling have descendants from the users groups? 
+			//if so I am not the root
+			int parent = t->tree[index].getParent();
+			int lc = t->tree[parent].getLChild();
+			int rc = t->tree[parent].getRChild();
+			
+			int sib = lc;
+			if (lc == index) { sib = rc; }
+			
+			map<string, int>::iterator itGroup;
+			int pcountSize = 0;
+			for (int j = 0; j < grouping.size(); j++) {
+				map<string, int>::iterator itGroup = t->tree[sib].pcount.find(grouping[j]);
+				if (itGroup != t->tree[sib].pcount.end()) { pcountSize++; if (pcountSize > 1) { break; } } 
+			}
+			
+			//if yes, I am not the root
+			if (pcountSize != 0) {
+				rootForGrouping[grouping].clear();
+				rootForGrouping[grouping].insert(parent);
+			}
+			
+			index = parent;	
+		}
+		
+		//get all nodes above the root to add so we don't add their u values above
+		index = *(rootForGrouping[grouping].begin());
+		while(t->tree[index].getParent() != -1){
+			int parent = t->tree[index].getParent();
+			rootForGrouping[grouping].insert(parent);
+			cout << parent << " in root" << endl;
+			index = parent;
+		}
+		
+		return 0;
+	}
+	catch(exception& e) {
+		m->errorOut(e, "Unweighted", "getRoot");
 		exit(1);
 	}
 }

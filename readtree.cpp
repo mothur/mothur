@@ -129,7 +129,7 @@ int ReadNewickTree::read() {
 			}
 		//if you are a nexus file
 		}else if ((c = filehandle.peek()) == '#') {
-			nexusTranslation();  //reads file through the translation and updates treemap
+			holder = nexusTranslation();  //reads file through the translation and updates treemap
 			while((c = filehandle.peek()) != EOF) { 
 				// get past comments
 				while ((c = filehandle.peek()) != EOF) {	
@@ -175,11 +175,11 @@ int ReadNewickTree::read() {
 }
 /**************************************************************************************************/
 //This function read the file through the translation of the sequences names and updates treemap.
-void ReadNewickTree::nexusTranslation() {
+string ReadNewickTree::nexusTranslation() {
 	try {
 		
 		holder = "";
-		int numSeqs = globaldata->gTreemap->getNumSeqs(); //must save this some when we clear old names we can still know how many sequences there were
+		//int numSeqs = globaldata->gTreemap->getNumSeqs(); //must save this some when we clear old names we can still know how many sequences there were
 		int comment = 0;
 		
 		// get past comments
@@ -191,23 +191,39 @@ void ReadNewickTree::nexusTranslation() {
 				comment = 0;
 			}
 			filehandle >> holder; 
-			if(holder == "tree" && comment != 1){return;}
+			if(holder == "tree" && comment != 1){return holder;}
 		}
 		
 		//update treemap
 		globaldata->gTreemap->namesOfSeqs.clear();
-		for(int i=0;i<numSeqs;i++){
-			string number, name;
-			filehandle >> number;
-			filehandle >> name;
-			name.erase(name.end()-1);  //erase the comma
+		
+		char c;
+		string number, name;
+		while ((c = filehandle.peek()) != EOF) {	
+			
+			filehandle >> number; 
+			
+			if ((number == "tree") || (number == ";") ) {  name = number; break;  }
+			
+			filehandle >> name; 
+			
+			char lastChar;
+			if (name.length() != 0) { lastChar = name[name.length()-1]; }
+			
+			if ((name == "tree") || (name == ";") ) {  break;  }
+			
+			if (lastChar == ',') {  name.erase(name.end()-1); } //erase the comma
+				
 			//insert new one with new name
-			globaldata->gTreemap->treemap[toString(number)].groupname = globaldata->gTreemap->treemap[name].groupname;
-			globaldata->gTreemap->treemap[toString(number)].vectorIndex = globaldata->gTreemap->treemap[name].vectorIndex;
+			string group = globaldata->gTreemap->getGroup(name);
+			globaldata->gTreemap->treemap[toString(number)].groupname = group;
+			globaldata->gTreemap->treemap[toString(number)].vectorIndex = globaldata->gTreemap->getIndex(name);
 			//erase old one.  so treemap[sarah].groupnumber is now treemap[1].groupnumber. if number is 1 and name is sarah.
 			globaldata->gTreemap->treemap.erase(name);
 			globaldata->gTreemap->namesOfSeqs.push_back(number);
 		}
+		
+		return name;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ReadNewickTree", "nexusTranslation");
