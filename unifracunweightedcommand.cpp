@@ -12,7 +12,7 @@
 //**********************************************************************************************************************
 vector<string> UnifracUnweightedCommand::getValidParameters(){	
 	try {
-		string Array[] =  {"groups","iters","distance","random", "processors","outputdir","inputdir"};
+		string Array[] =  {"groups","iters","distance","random","root", "processors","outputdir","inputdir"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
@@ -73,7 +73,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"groups","iters","distance","random", "processors","outputdir","inputdir"};
+			string Array[] =  {"groups","iters","distance","random","root", "processors","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -124,6 +124,9 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 			temp = validParameter.validFile(parameters, "random", false);					if (temp == "not found") { temp = "f"; }
 			random = m->isTrue(temp);
 			
+			temp = validParameter.validFile(parameters, "root", false);					if (temp == "not found") { temp = "F"; }
+			includeRoot = m->isTrue(temp);
+			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){	temp = "1";				}
 			convert(temp, processors); 
 			
@@ -149,7 +152,7 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 				
 				if (numGroups == 1) { numComp++; groupComb.push_back(allGroups); }
 				
-				unweighted = new Unweighted(tmap);
+				unweighted = new Unweighted(tmap, includeRoot);
 				
 			}
 			
@@ -167,11 +170,12 @@ UnifracUnweightedCommand::UnifracUnweightedCommand(string option)  {
 void UnifracUnweightedCommand::help(){
 	try {
 		m->mothurOut("The unifrac.unweighted command can only be executed after a successful read.tree command.\n");
-		m->mothurOut("The unifrac.unweighted command parameters are groups, iters, distance, processors and random.  No parameters are required.\n");
+		m->mothurOut("The unifrac.unweighted command parameters are groups, iters, distance, processors, root and random.  No parameters are required.\n");
 		m->mothurOut("The groups parameter allows you to specify which of the groups in your groupfile you would like analyzed.  You must enter at least 1 valid group.\n");
 		m->mothurOut("The group names are separated by dashes.  The iters parameter allows you to specify how many random trees you would like compared to your tree.\n");
 		m->mothurOut("The distance parameter allows you to create a distance file from the results. The default is false. You may set distance to lt, square or column.\n");
 		m->mothurOut("The random parameter allows you to shut off the comparison to random trees. The default is false, meaning compare don't your trees with randomly generated trees.\n");
+		m->mothurOut("The root parameter allows you to include the entire root in your calculations. The default is false, meaning stop at the root for this comparision instead of the root of the entire tree.\n");
 		m->mothurOut("The processors parameter allows you to specify the number of processors to use. The default is 1.\n");
 		m->mothurOut("The unifrac.unweighted command should be in the following format: unifrac.unweighted(groups=yourGroups, iters=yourIters).\n");
 		m->mothurOut("Example unifrac.unweighted(groups=A-B-C, iters=500).\n");
