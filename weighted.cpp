@@ -228,11 +228,18 @@ EstOutput Weighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombos,
 					u -= (double) t->tree[i].pcount[groupB] / (double) tmap->seqsPerGroup[groupB];
 				}
 				
-				//if this is not the root then add it
-				if (rootForGrouping[namesOfGroupCombos[h]].count(i) == 0) {
+				if (includeRoot) {
 					if (t->tree[i].getBranchLength() != -1) {
 						u = abs(u * t->tree[i].getBranchLength());
 						WScore[(groupA+groupB)] += u; 
+					}
+				}else {
+					//if this is not the root then add it
+					if (rootForGrouping[namesOfGroupCombos[h]].count(i) == 0) {
+						if (t->tree[i].getBranchLength() != -1) {
+							u = abs(u * t->tree[i].getBranchLength());
+							WScore[(groupA+groupB)] += u; 
+						}
 					}
 				}
 			}
@@ -317,11 +324,18 @@ EstOutput Weighted::getValues(Tree* t, string groupA, string groupB) {
 				u -= (double) t->tree[i].pcount[groupB] / (double) tmap->seqsPerGroup[groupB];
 			}
 			
-			//if this is not the root then add it
-			if (rootForGrouping[groups].count(i) == 0) {
+			if (includeRoot) {
 				if (t->tree[i].getBranchLength() != -1) {
 					u = abs(u * t->tree[i].getBranchLength());
 					WScore[(groupA+groupB)] += u;
+				}
+			}else{
+				//if this is not the root then add it
+				if (rootForGrouping[groups].count(i) == 0) {
+					if (t->tree[i].getBranchLength() != -1) {
+						u = abs(u * t->tree[i].getBranchLength());
+						WScore[(groupA+groupB)] += u;
+					}
 				}
 			}
 		}		
@@ -361,37 +375,43 @@ double Weighted::getLengthToRoot(Tree* t, int v, string groupA, string groupB) {
 		while(t->tree[index].getParent() != -1){
 
 			if (m->control_pressed) {  return sum; }
-				
-			//am I the root for this grouping? if so I want to stop "early"
-			//does my sibling have descendants from the users groups? 
-			int parent = t->tree[index].getParent();
-			int lc = t->tree[parent].getLChild();
-			int rc = t->tree[parent].getRChild();
 			
-			int sib = lc;
-			if (lc == index) { sib = rc; }
-						
-			map<string, int>::iterator itGroup;
-			int pcountSize = 0;
-			itGroup = t->tree[sib].pcount.find(groupA);
-			if (itGroup != t->tree[sib].pcount.end()) { pcountSize++;  } 
-			itGroup = t->tree[sib].pcount.find(groupB);
-			if (itGroup != t->tree[sib].pcount.end()) { pcountSize++;  } 
-							
-			//if yes, I am not the root so add me
-			if (pcountSize != 0) {
-				if (t->tree[index].getBranchLength() != -1) {
-					sum += abs(t->tree[index].getBranchLength()) + tempTotal;
-					tempTotal = 0.0;
-				}else {
-					sum += tempTotal;
-					tempTotal = 0.0;
-				}
-				rootForGrouping[grouping].clear();
-				rootForGrouping[grouping].insert(parent);
-			}else { //if no, I may be the root so add my br to tempTotal until I am proven innocent
-				if (t->tree[index].getBranchLength() != -1) {
-					tempTotal += abs(t->tree[index].getBranchLength()); 
+			int parent = t->tree[index].getParent();
+			
+			if (includeRoot) { //add everyone
+				if(t->tree[index].getBranchLength() != -1){	sum += abs(t->tree[index].getBranchLength());	}
+			}else {
+				
+				//am I the root for this grouping? if so I want to stop "early"
+				//does my sibling have descendants from the users groups? 
+				int lc = t->tree[parent].getLChild();
+				int rc = t->tree[parent].getRChild();
+				
+				int sib = lc;
+				if (lc == index) { sib = rc; }
+				
+				map<string, int>::iterator itGroup;
+				int pcountSize = 0;
+				itGroup = t->tree[sib].pcount.find(groupA);
+				if (itGroup != t->tree[sib].pcount.end()) { pcountSize++;  } 
+				itGroup = t->tree[sib].pcount.find(groupB);
+				if (itGroup != t->tree[sib].pcount.end()) { pcountSize++;  } 
+				
+				//if yes, I am not the root so add me
+				if (pcountSize != 0) {
+					if (t->tree[index].getBranchLength() != -1) {
+						sum += abs(t->tree[index].getBranchLength()) + tempTotal;
+						tempTotal = 0.0;
+					}else {
+						sum += tempTotal;
+						tempTotal = 0.0;
+					}
+					rootForGrouping[grouping].clear();
+					rootForGrouping[grouping].insert(parent);
+				}else { //if no, I may be the root so add my br to tempTotal until I am proven innocent
+					if (t->tree[index].getBranchLength() != -1) {
+						tempTotal += abs(t->tree[index].getBranchLength()); 
+					}
 				}
 			}
 			

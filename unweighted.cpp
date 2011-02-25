@@ -199,7 +199,8 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 				m->mothurOut(namesOfGroupCombos[h][namesOfGroupCombos[h].size()-1]);
 				m->mothurOut(", skipping."); m->mothurOutEndLine(); results[count] = UW;
 			}else{
-			
+				
+				//if including the root this clears rootForGrouping[namesOfGroupCombos[h]]
 				getRoot(t, nodeBelonging, namesOfGroupCombos[h]);
 				
 				for(int i=0;i<t->getNumNodes();i++){
@@ -215,19 +216,19 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 						map<string, int>::iterator itGroup = t->tree[i].pcount.find(namesOfGroupCombos[h][j]);
 						if (itGroup != t->tree[i].pcount.end()) { pcountSize++; if (pcountSize > 1) { break; } } 
 					}
-										
+					
+					
 					//unique calc
 					if (pcountSize == 0) { }
 					else if ((t->tree[i].getBranchLength() != -1) && (pcountSize == 1) && (rootForGrouping[namesOfGroupCombos[h]].count(i) == 0)) { //you have a unique branch length and you are not the root 
 						UniqueBL += abs(t->tree[i].getBranchLength()); 
 					}
-					
+						
 					//total calc
 					if (pcountSize == 0) { }
 					else if ((t->tree[i].getBranchLength() != -1) && (pcountSize != 0) && (rootForGrouping[namesOfGroupCombos[h]].count(i) == 0)) { //you have a branch length and you are not the root 
 						totalBL += abs(t->tree[i].getBranchLength()); 
 					}
-					
 				}
 	//cout << UniqueBL << '\t' << totalBL << endl;		
 				UW = (UniqueBL / totalBL);  
@@ -442,6 +443,7 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 				m->mothurOut(", skipping."); m->mothurOutEndLine(); results[count] = UW;
 			}else{
 				
+				//if including the root this clears rootForGrouping[namesOfGroupCombos[h]]
 				getRoot(copyTree, nodeBelonging, namesOfGroupCombos[h]);
 				
 				for(int i=0;i<copyTree->getNumNodes();i++){
@@ -497,47 +499,51 @@ int Unweighted::getRoot(Tree* t, int v, vector<string> grouping) {
 		//you are a leaf so get your parent
 		int index = t->tree[index].getParent();
 		
-		//my parent is a potential root
-		rootForGrouping[grouping].insert(index);
-		
-		//while you aren't at root
-		while(t->tree[index].getParent() != -1){
+		if (includeRoot) { 
+			rootForGrouping[grouping].clear();
+		}else {
+			//my parent is a potential root
+			rootForGrouping[grouping].insert(index);
 			
-			if (m->control_pressed) {  return 0; }
-			
-			//am I the root for this grouping? if so I want to stop "early"
-			//does my sibling have descendants from the users groups? 
-			//if so I am not the root
-			int parent = t->tree[index].getParent();
-			int lc = t->tree[parent].getLChild();
-			int rc = t->tree[parent].getRChild();
-			
-			int sib = lc;
-			if (lc == index) { sib = rc; }
-			
-			map<string, int>::iterator itGroup;
-			int pcountSize = 0;
-			for (int j = 0; j < grouping.size(); j++) {
-				map<string, int>::iterator itGroup = t->tree[sib].pcount.find(grouping[j]);
-				if (itGroup != t->tree[sib].pcount.end()) { pcountSize++; if (pcountSize > 1) { break; } } 
+			//while you aren't at root
+			while(t->tree[index].getParent() != -1){
+				
+				if (m->control_pressed) {  return 0; }
+				
+				//am I the root for this grouping? if so I want to stop "early"
+				//does my sibling have descendants from the users groups? 
+				//if so I am not the root
+				int parent = t->tree[index].getParent();
+				int lc = t->tree[parent].getLChild();
+				int rc = t->tree[parent].getRChild();
+				
+				int sib = lc;
+				if (lc == index) { sib = rc; }
+				
+				map<string, int>::iterator itGroup;
+				int pcountSize = 0;
+				for (int j = 0; j < grouping.size(); j++) {
+					map<string, int>::iterator itGroup = t->tree[sib].pcount.find(grouping[j]);
+					if (itGroup != t->tree[sib].pcount.end()) { pcountSize++; if (pcountSize > 1) { break; } } 
+				}
+				
+				//if yes, I am not the root
+				if (pcountSize != 0) {
+					rootForGrouping[grouping].clear();
+					rootForGrouping[grouping].insert(parent);
+				}
+				
+				index = parent;	
 			}
 			
-			//if yes, I am not the root
-			if (pcountSize != 0) {
-				rootForGrouping[grouping].clear();
+			//get all nodes above the root to add so we don't add their u values above
+			index = *(rootForGrouping[grouping].begin());
+			while(t->tree[index].getParent() != -1){
+				int parent = t->tree[index].getParent();
 				rootForGrouping[grouping].insert(parent);
+				//cout << parent << " in root" << endl;
+				index = parent;
 			}
-			
-			index = parent;	
-		}
-		
-		//get all nodes above the root to add so we don't add their u values above
-		index = *(rootForGrouping[grouping].begin());
-		while(t->tree[index].getParent() != -1){
-			int parent = t->tree[index].getParent();
-			rootForGrouping[grouping].insert(parent);
-			//cout << parent << " in root" << endl;
-			index = parent;
 		}
 		
 		return 0;

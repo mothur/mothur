@@ -19,7 +19,7 @@
 class Unweighted : public TreeCalculator  {
 	
 	public:
-		Unweighted(TreeMap* t) : tmap(t) {};
+		Unweighted(TreeMap* t, bool r) : tmap(t), includeRoot(r) {};
 		~Unweighted() {};
 		EstOutput getValues(Tree*, int, string);
 		EstOutput getValues(Tree*, string, string, int, string);
@@ -38,6 +38,7 @@ class Unweighted : public TreeCalculator  {
 		int processors;
 		string outputDir;
 		map< vector<string>, set<int> > rootForGrouping;  //maps a grouping combo to the roots for that combo
+		bool includeRoot;
 		
 		EstOutput driver(Tree*, vector< vector<string> >, int, int); 
 		EstOutput createProcesses(Tree*, vector< vector<string> >);
