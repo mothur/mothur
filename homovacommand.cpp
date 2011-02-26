@@ -216,8 +216,8 @@ int HomovaCommand::execute(){
 		m->openOutputFile(HOMOVAFileName, HOMOVAFile);
 		outputNames.push_back(HOMOVAFileName); outputTypes["homova"].push_back(HOMOVAFileName);
 		
-		HOMOVAFile << "HOMOVA\tBValue\tP-value\tSSwithin_values" << endl;
-		m->mothurOut("HOMOVA\tBValue\tP-value\tSSwithin_values\n");
+		HOMOVAFile << "HOMOVA\tBValue\tP-value\tSSwithin/(Ni-1)_values" << endl;
+		m->mothurOut("HOMOVA\tBValue\tP-value\tSSwithin/(Ni-1)_values\n");
 		
 		double fullHOMOVAPValue = runHOMOVA(HOMOVAFile, origGroupSampleMap, experimentwiseAlpha);
 
@@ -231,8 +231,7 @@ int HomovaCommand::execute(){
 			
 			for(itA=origGroupSampleMap.begin();itA!=origGroupSampleMap.end();itA++){
 				itB = itA;itB++;
-				for(itB;itB!=origGroupSampleMap.end();itB++){
-					
+				for(;itB!=origGroupSampleMap.end();itB++){
 					map<string, vector<int> > pairwiseGroupSampleMap;
 					pairwiseGroupSampleMap[itA->first] = itA->second;
 					pairwiseGroupSampleMap[itB->first] = itB->second;
@@ -296,7 +295,7 @@ double HomovaCommand::runHOMOVA(ofstream& HOMOVAFile, map<string, vector<int> > 
 		HOMOVAFile << it->first;
 		m->mothurOut(it->first);
 		it++;
-		for(it;it!=groupSampleMap.end();it++){
+		for(;it!=groupSampleMap.end();it++){
 			HOMOVAFile << '-' << it->first;
 			m->mothurOut('-' + it->first);
 		}
@@ -379,6 +378,8 @@ double HomovaCommand::calcBValue(map<string, vector<int> > groupSampleMap, vecto
 			
 			secondTermSum += (numSamplesInGroup - 1) * log(ssWithinVector[index] / (double)(numSamplesInGroup - 1));
 			inverseOneMinusSum += 1.0 / (double)(numSamplesInGroup - 1);
+			
+			ssWithinVector[index] /= (double)(numSamplesInGroup - 1); //this line is only for output purposes to scale SSw by the number of samples in the group
 			index++;
 		}
 		
