@@ -195,7 +195,7 @@ int NMDSCommand::execute(){
 		if (axesfile != "") {  axes = readAxes(names);		}
 		
 		string outputFileName = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "nmds.iters";
-		string stressFileName = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "stress.nmds";
+		string stressFileName = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "nmds.stress";
 		outputNames.push_back(outputFileName); outputTypes["iters"].push_back(outputFileName);
 		outputNames.push_back(stressFileName); outputTypes["stress"].push_back(stressFileName);
 		
@@ -208,10 +208,12 @@ int NMDSCommand::execute(){
 		out.setf(ios::fixed, ios::floatfield);
 		out.setf(ios::showpoint);
 		
-		out2 << "Dimension\tIter\tStress\tCorr" << endl;
+		out2 << "Dimension\tIter\tStress\tRsq" << endl;
 		
 		double bestStress = 10000000;
+		double bestR2 = 10000000;
 		vector< vector<double> > bestConfig;
+		int bestDim = 0;
 		
 		for (int i = mindim; i <= maxdim; i++) {
 			m->mothurOut("Processing Dimension: " + toString(i)); m->mothurOutEndLine();
@@ -235,21 +237,23 @@ int NMDSCommand::execute(){
 				if (m->control_pressed) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	remove(outputNames[k].c_str());	} return 0; }
 				
 				//calc correlation between original distances and euclidean distances from this config
-				double corr = linearCalc.calcPearson(newEuclid, matrix);
-				corr *= corr;
+				double rsquared = linearCalc.calcPearson(newEuclid, matrix);
+				rsquared *= rsquared;
 				if (m->control_pressed) { out.close(); out2.close(); for (int k = 0; k < outputNames.size(); k++) {	remove(outputNames[k].c_str());	} return 0; }
 				
 				//output results
 				out << "Config" << (j+1) << '\t';
 				for (int k = 0; k < i; k++) { out << "axis" << (k+1) << '\t'; }
 				out << endl;
-				out2 << i << '\t' << (j+1) << '\t' << stress << '\t' << corr << endl;
+				out2 << i << '\t' << (j+1) << '\t' << stress << '\t' << rsquared << endl;
 				
 				output(endConfig, names, out);
 				
 				//save best
 				if (stress < bestStress) {
+					bestDim = i;
 					bestStress = stress;
+					bestR2 = rsquared;
 					bestConfig = endConfig;
 				}
 				
@@ -262,6 +266,10 @@ int NMDSCommand::execute(){
 		//output best config
 		string BestFileName = outputDir + m->getRootName(m->getSimpleName(phylipfile)) + "nmds.axes";
 		outputNames.push_back(BestFileName); outputTypes["nmds"].push_back(BestFileName);
+		
+		m->mothurOut("\nNumber of dimensions:\t" + toString(bestDim) + "\n");
+		m->mothurOut("Lowest stress :\t" + toString(bestStress) + "\n");
+		m->mothurOut("R-squared for configuration:\t" + toString(bestR2) + "\n");
 		
 		ofstream outBest;
 		m->openOutputFile(BestFileName, outBest);

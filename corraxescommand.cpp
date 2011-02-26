@@ -860,7 +860,7 @@ int CorrAxesCommand::getMetadata(){
 		vector<string> groupNames;
 		
 		ifstream in;
-		m->openInputFile(axesfile, in);
+		m->openInputFile(metadatafile, in);
 		
 		string headerLine = m->getline(in); m->gobble(in);
 		istringstream iss (headerLine,istringstream::in);
@@ -868,7 +868,7 @@ int CorrAxesCommand::getMetadata(){
 		//read the first label, because it refers to the groups
 		string columnLabel;
 		iss >> columnLabel; m->gobble(iss); 
-		
+
 		//save names of columns you are reading
 		while (!iss.eof()) {
 			iss >> columnLabel; m->gobble(iss);

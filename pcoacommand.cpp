@@ -197,7 +197,7 @@ int PCOACommand::execute(){
 				
 				double corr = linearCalc.calcPearson(EuclidDists, D); //G is the pcoa file, D is the users distance matrix
 				
-				m->mothurOut("Pearson's coefficient using " + toString(i) + " axis: " + toString(corr)); m->mothurOutEndLine();
+				m->mothurOut("Rsq " + toString(i) + " axis: " + toString(corr * corr)); m->mothurOutEndLine();
 				
 				if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
 			}
