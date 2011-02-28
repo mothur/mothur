@@ -217,7 +217,7 @@ string ReadNewickTree::nexusTranslation() {
 			
 			if (lastChar == ',') {  name.erase(name.end()-1); } //erase the comma
 			*/	
-		cout << "numseqs = " << numSeqs << endl;
+		
 		string number, name;
 		for(int i=0;i<numSeqs;i++){
 			
