@@ -1625,7 +1625,7 @@
 			attributes = {
 				ORGANIZATIONNAME = "Schloss Lab";
 			};
-			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "Mothur" */;
+			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "mothur" */;
 			compatibilityVersion = "Xcode 3.1";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
@@ -1950,6 +1950,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
 				PRODUCT_NAME = Mothur;
+				SDKROOT = macosx10.6;
 			};
 			name = Debug;
 		};
@@ -2048,7 +2049,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "Mothur" */ = {
+		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "mothur" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1DEB928A08733DD80010E9CD /* Debug */,

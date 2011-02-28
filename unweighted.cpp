@@ -199,14 +199,14 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 				m->mothurOut(namesOfGroupCombos[h][namesOfGroupCombos[h].size()-1]);
 				m->mothurOut(", skipping."); m->mothurOutEndLine(); results[count] = UW;
 			}else{
-				
+				//cout << "trying to get root" << endl;	
 				//if including the root this clears rootForGrouping[namesOfGroupCombos[h]]
 				getRoot(t, nodeBelonging, namesOfGroupCombos[h]);
-				
+				//cout << "here" << endl;	
 				for(int i=0;i<t->getNumNodes();i++){
 					
 					if (m->control_pressed) {  return data; }
-					
+					//cout << i << endl;	
 					//pcountSize = 0, they are from a branch that is entirely from a group the user doesn't want
 					//pcountSize = 2, not unique to one group
 					//pcountSize = 1, unique to one group
@@ -497,17 +497,18 @@ EstOutput Unweighted::driver(Tree* t, vector< vector<string> > namesOfGroupCombo
 int Unweighted::getRoot(Tree* t, int v, vector<string> grouping) { 
 	try {
 		//you are a leaf so get your parent
-		int index = t->tree[index].getParent();
+		int index = t->tree[v].getParent();
 		
 		if (includeRoot) { 
 			rootForGrouping[grouping].clear();
 		}else {
+			
 			//my parent is a potential root
 			rootForGrouping[grouping].insert(index);
 			
 			//while you aren't at root
 			while(t->tree[index].getParent() != -1){
-				
+				//cout << index << endl;	
 				if (m->control_pressed) {  return 0; }
 				
 				//am I the root for this grouping? if so I want to stop "early"
