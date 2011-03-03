@@ -230,6 +230,8 @@ int SeqErrorCommand::execute(){
 	try{
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 
+		maxLength = 2000;
+		
 		string errorSummaryFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.summary";
 		m->openOutputFile(errorSummaryFileName, errorSummaryFile);
 		outputNames.push_back(errorSummaryFileName); outputTypes["error.summary"].push_back(errorSummaryFileName);
@@ -259,11 +261,11 @@ int SeqErrorCommand::execute(){
 			m->openInputFile(qualFileName, qualFile);
 			report = ReportFile(reportFile, reportFileName);
 			
-			qualForwardMap.resize(1000);
-			qualReverseMap.resize(1000);
-			for(int i=0;i<1000;i++){
-				qualForwardMap[i].assign(100,0);
-				qualReverseMap[i].assign(100,0);
+			qualForwardMap.resize(maxLength);
+			qualReverseMap.resize(maxLength);
+			for(int i=0;i<maxLength;i++){
+				qualForwardMap[i].assign(maxLength,0);
+				qualReverseMap[i].assign(maxLength,0);
 			}				
 		}
 		
@@ -282,18 +284,18 @@ int SeqErrorCommand::execute(){
 		qScoreErrorMap['a'].assign(41, 0);
 		
 		map<char, vector<int> > errorForward;
-		errorForward['m'].assign(1000,0);
-		errorForward['s'].assign(1000,0);
-		errorForward['i'].assign(1000,0);
-		errorForward['d'].assign(1000,0);
-		errorForward['a'].assign(1000,0);
+		errorForward['m'].assign(maxLength,0);
+		errorForward['s'].assign(maxLength,0);
+		errorForward['i'].assign(maxLength,0);
+		errorForward['d'].assign(maxLength,0);
+		errorForward['a'].assign(maxLength,0);
 		
 		map<char, vector<int> > errorReverse;
-		errorReverse['m'].assign(1000,0);
-		errorReverse['s'].assign(1000,0);
-		errorReverse['i'].assign(1000,0);
-		errorReverse['d'].assign(1000,0);
-		errorReverse['a'].assign(1000,0);	
+		errorReverse['m'].assign(maxLength,0);
+		errorReverse['s'].assign(maxLength,0);
+		errorReverse['i'].assign(maxLength,0);
+		errorReverse['d'].assign(maxLength,0);
+		errorReverse['a'].assign(maxLength,0);	
 		
 
 		string errorChimeraFileName = queryFileName.substr(0,queryFileName.find_last_of('.')) + ".error.chimera";
@@ -716,7 +718,7 @@ void SeqErrorCommand::printErrorFRFile(map<char, vector<int> > errorForward, map
 		outputNames.push_back(errorForwardFileName);  outputTypes["error.forward"].push_back(errorForwardFileName);
 
 		errorForwardFile << "position\ttotalseqs\tmatch\tsubstitution\tinsertion\tdeletion\tambiguous" << endl;
-		for(int i=0;i<1000;i++){
+		for(int i=0;i<maxLength;i++){
 			float match = (float)errorForward['m'][i];
 			float subst = (float)errorForward['s'][i];
 			float insert = (float)errorForward['i'][i];
@@ -734,7 +736,7 @@ void SeqErrorCommand::printErrorFRFile(map<char, vector<int> > errorForward, map
 		outputNames.push_back(errorReverseFileName);  outputTypes["error.reverse"].push_back(errorReverseFileName);
 
 		errorReverseFile << "position\ttotalseqs\tmatch\tsubstitution\tinsertion\tdeletion\tambiguous" << endl;
-		for(int i=0;i<1000;i++){
+		for(int i=0;i<maxLength;i++){
 			float match = (float)errorReverse['m'][i];
 			float subst = (float)errorReverse['s'][i];
 			float insert = (float)errorReverse['i'][i];

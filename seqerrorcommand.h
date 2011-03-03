@@ -68,6 +68,7 @@ private:
 	double threshold;
 	bool ignoreChimeras;
 	int numRefs;
+	int maxLength;
 	ofstream errorSummaryFile, errorSeqFile;
 	vector<string> outputNames;
 	map<string, vector<string> > outputTypes;
