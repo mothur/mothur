@@ -308,7 +308,6 @@ void QualityScores::updateQScoreErrorMap(map<char, vector<int> >& qualErrorMap, 
 	try {
 
 		int seqLength = errorSeq.size();
-		cout << start << '\t' << stop << '\t' << seqLength << endl;
 		
 		int qIndex = start - 1;
 		for(int i=0;i<seqLength;i++){
