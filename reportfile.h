@@ -11,8 +11,6 @@
  */
 
 
-#include "mothur.h"
-#include "mothurout.h"
 
 /**************************************************************************************************/
 
@@ -46,7 +44,7 @@ private:
 	
 	MothurOut* m;
 		
-	string queryName, templateName, searchMethod, alignmentMethod;
+	string queryName, templateName, searchMethod, alignmentMethod, dummySearchScore;
 	int queryLength, templateLength, queryStart, queryEnd, templateStart, templateEnd, pairwiseAlignmentLength, gapsInQuery, gapsInTemplate, longestInsert;
 	float searchScore, simBtwnQueryAndTemplate;
 	
