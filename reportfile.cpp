@@ -7,6 +7,8 @@
  *
  */
 
+#include "mothur.h"
+#include "mothurout.h"
 #include "reportfile.h"
 
 /**************************************************************************************************/
@@ -49,7 +51,7 @@ ReportFile::ReportFile(ifstream& repFile){
 		repFile >> templateName;
 		repFile >> templateLength;
 		repFile >> searchMethod;
-		repFile >> searchScore;
+		repFile >> dummySearchScore;
 		repFile >> alignmentMethod;
 		repFile >> queryStart;
 		repFile >> queryEnd;
@@ -61,6 +63,14 @@ ReportFile::ReportFile(ifstream& repFile){
 		repFile >> longestInsert;
 		repFile >> simBtwnQueryAndTemplate;
 
+		if(dummySearchScore != "nan"){
+			istringstream stream(dummySearchScore);
+			stream >> searchScore;
+		}
+		else{
+			searchScore = 0;
+		}
+		
 		m->gobble(repFile);		
 	}
 	catch(exception& e) {

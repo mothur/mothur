@@ -310,6 +310,7 @@ int SeqErrorCommand::execute(){
 			if (m->control_pressed) { errorSummaryFile.close();	errorSeqFile.close(); for (int i = 0; i < outputNames.size(); i++) { remove(outputNames[i].c_str()); } return 0; }
 		
 			Sequence query(queryFile);
+			cout << "gotQuery" << endl;
 			
 			int numParentSeqs = chimeraTest.analyzeQuery(query.getName(), query.getAligned());
 			int closestRefIndex = chimeraTest.getClosestRefIndex();
@@ -339,17 +340,23 @@ int SeqErrorCommand::execute(){
 
 			if(qualFileName != "" && reportFileName != ""){
 				report = ReportFile(reportFile);
+				cout << "gotReport" << endl;
 				
 //				int origLength = report.getQueryLength();
 				int startBase = report.getQueryStart();
 				int endBase = report.getQueryEnd();
 
 				quality = QualityScores(qualFile);
+				cout << "gotQuality" << endl;
 
 				if(!ignoreSeq){
+					cout << "not ignoring" << endl;
 					quality.updateQScoreErrorMap(qScoreErrorMap, minCompare.sequence, startBase, endBase, minCompare.weight);
+					cout << "updateQScoreErrorMap" << endl;
 					quality.updateForwardMap(qualForwardMap, startBase, endBase, minCompare.weight);
+					cout << "updateForwardMap" << endl;
 					quality.updateReverseMap(qualReverseMap, startBase, endBase, minCompare.weight);
+					cout << "updateReverseMap" << endl;
 				}
 			}			
 
@@ -367,6 +374,8 @@ int SeqErrorCommand::execute(){
 			}
 
 			index++;
+			cout << "end of loop:\t" << index << endl;
+			
 			if(index % 1000 == 0){	cout << index << endl;	}
 		}
 		queryFile.close();
