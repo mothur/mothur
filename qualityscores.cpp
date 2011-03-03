@@ -194,7 +194,6 @@ bool QualityScores::stripQualRollingAverage(Sequence& sequence, double qThreshol
 			
 			if(rollingSum / (double)(i+1) < qThreshold){
 				end = i;
-//				cout << i+1 << '\t' << seqName << '\t' << rollingSum / (double)(i+1) << endl;
 				break;
 			}
 		}
@@ -310,7 +309,7 @@ void QualityScores::updateQScoreErrorMap(map<char, vector<int> >& qualErrorMap, 
 		int seqLength = errorSeq.size();
 		
 		int qIndex = start - 1;
-		cout << start << '\t' << stop << '\t' << seqLength << endl;
+
 		for(int i=0;i<seqLength;i++){
 			
 			if(errorSeq[i] == 'm')		{	qualErrorMap['m'][qScores[qIndex]] += weight;	}
