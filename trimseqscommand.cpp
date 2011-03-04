@@ -322,7 +322,6 @@ int TrimSeqsCommand::execute(){
 		}
 		
 		string outputGroupFileName;
-
 		if(oligoFile != ""){
 			outputGroupFileName = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "groups";
 			outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName);
@@ -352,28 +351,68 @@ int TrimSeqsCommand::execute(){
 		
 		if (m->control_pressed) {  return 0; }			
 			
-				
 		if(allFiles){
+			//clear out all old group files
+			map<string, string> uniqueFastaNames;// so we don't add the same groupfile multiple times
+			map<string, string>::iterator it;
+			set<string> namesToRemove;
 			for(int i=0;i<fastaFileNames.size();i++){
 				for(int j=0;j<fastaFileNames[0].size();j++){
-					if(m->isBlank(fastaFileNames[i][j])){
-						remove(fastaFileNames[i][j].c_str());
-
-						if(qFileName != ""){
+					if (fastaFileNames[i][j] != "") {
+						if(m->isBlank(fastaFileNames[i][j])){
 							remove(fastaFileNames[i][j].c_str());
+							namesToRemove.insert(fastaFileNames[i][j]);
+							
+							if(qFileName != ""){
+								remove(qualFileNames[i][j].c_str());
+								namesToRemove.insert(qualFileNames[i][j]);
+							}
+						}else{	
+							it = uniqueFastaNames.find(fastaFileNames[i][j]);
+							if (it == uniqueFastaNames.end()) {	
+								uniqueFastaNames[fastaFileNames[i][j]] = barcodeNameVector[i];	
+							}	
 						}
-
 					}
 				}
 			}
+			
+			//remove names for outputFileNames, just cleans up the output
+			vector<string> outputNames2;
+			for(int i = 0; i < outputNames.size(); i++) { if (namesToRemove.count(outputNames[i]) == 0) { outputNames2.push_back(outputNames[i]); } }
+			outputNames = outputNames2;
+			
+			for (it = uniqueFastaNames.begin(); it != uniqueFastaNames.end(); it++) {
+				ifstream in;
+				m->openInputFile(it->first, in);
+				
+				ofstream out;
+				string thisGroupName = outputDir + m->getRootName(m->getSimpleName(it->first)) + "groups";
+				outputNames.push_back(thisGroupName); outputTypes["group"].push_back(thisGroupName);
+				m->openOutputFile(thisGroupName, out);
+				
+				while (!in.eof()){
+					if (m->control_pressed) { break; }
+					
+					Sequence currSeq(in); m->gobble(in);
+					out << currSeq.getName() << '\t' << it->second << endl;
+				}
+				in.close();
+				out.close();
+			}
 		}
 		
-		
-		
-		if (m->control_pressed) { 
-			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }
-			return 0;
+		if (m->control_pressed) {	for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0;	}
+
+		//output group counts
+		m->mothurOutEndLine();
+		int total = 0;
+		for (int i = 0; i < barcodeNameVector.size(); i++) {
+			if ((barcodeNameVector[i] != "") && (groupCounts[i] != 0)) { total += groupCounts[i]; m->mothurOut("Group " + barcodeNameVector[i] + " contains " + toString(groupCounts[i]) + " sequences."); m->mothurOutEndLine(); }
 		}
+		if (total != 0) { m->mothurOut("Total of all groups is " + toString(total)); m->mothurOutEndLine(); }
+		
+			if (m->control_pressed) {	for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0;	}
 
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -410,14 +449,15 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 		
 		ofstream outGroupsFile;
 		if (oligoFile != ""){	m->openOutputFile(groupFileName, outGroupsFile);   }
-		
 		if(allFiles){
 			for (int i = 0; i < fastaFileNames.size(); i++) { //clears old file
 				for (int j = 0; j < fastaFileNames[i].size(); j++) { //clears old file
-					ofstream temp;
-					m->openOutputFile(fastaFileNames[i][j], temp);			temp.close();
-					if(qFileName != ""){
-						m->openOutputFile(qualFileNames[i][j], temp);			temp.close();
+					if (fastaFileNames[i][j] != "") {
+						ofstream temp;
+						m->openOutputFile(fastaFileNames[i][j], temp);			temp.close();
+						if(qFileName != ""){
+							m->openOutputFile(qualFileNames[i][j], temp);			temp.close();
+						}
 					}
 				}
 			}
@@ -541,6 +581,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 					
 					if(barcodes.size() != 0){
 						outGroupsFile << currSeq.getName() << '\t' << barcodeNameVector[barcodeIndex] << endl;
+						groupCounts[barcodeIndex]++;
 					}
 					
 					
@@ -624,12 +665,14 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 
 					for(int i=0;i<tempFASTAFileNames.size();i++){
 						for(int j=0;j<tempFASTAFileNames[i].size();j++){
-							tempFASTAFileNames[i][j] += toString(getpid()) + ".temp";
-							m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
+							if (tempFASTAFileNames[i][j] != "") {
+								tempFASTAFileNames[i][j] += toString(getpid()) + ".temp";
+								m->openOutputFile(tempFASTAFileNames[i][j], temp);			temp.close();
 
-							if(qFileName != ""){
-								tempPrimerQualFileNames[i][j] += toString(getpid()) + ".temp";
-								m->openOutputFile(tempPrimerQualFileNames[i][j], temp);		temp.close();
+								if(qFileName != ""){
+									tempPrimerQualFileNames[i][j] += toString(getpid()) + ".temp";
+									m->openOutputFile(tempPrimerQualFileNames[i][j], temp);		temp.close();
+								}
 							}
 						}
 					}
@@ -647,6 +690,15 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 								 lines[process],
 								 qLines[process]);
 				
+				//pass groupCounts to parent
+				ofstream out;
+				string tempFile = filename + toString(getpid()) + ".num.temp";
+				m->openOutputFile(tempFile, out);
+				for(int i = 0; i < groupCounts.size(); i++) {
+					out << groupCounts[i] << endl;
+				}
+				out.close();
+				
 				exit(0);
 			}else { 
 				m->mothurOut("[ERROR]: unable to spawn the necessary processes."); m->mothurOutEndLine(); 
@@ -662,10 +714,7 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 		m->openOutputFile(trimQualFileName, temp);		temp.close();
 		m->openOutputFile(scrapQualFileName, temp);		temp.close();
 
-		
-		
 		driverCreateTrim(filename, qFileName, trimFASTAFileName, scrapFASTAFileName, trimQualFileName, scrapQualFileName, groupFile, fastaFileNames, qualFileNames, lines[0], qLines[0]);
-		
 		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processIDS.size();i++) { 
@@ -697,16 +746,30 @@ int TrimSeqsCommand::createProcessesCreateTrim(string filename, string qFileName
 			if(allFiles){
 				for(int j=0;j<fastaFileNames.size();j++){
 					for(int k=0;k<fastaFileNames[j].size();k++){
-						m->appendFiles((fastaFileNames[j][k] + toString(processIDS[i]) + ".temp"), fastaFileNames[j][k]);
-						remove((fastaFileNames[j][k] + toString(processIDS[i]) + ".temp").c_str());
-						
-						if(qFileName != ""){
-							m->appendFiles((qualFileNames[j][k] + toString(processIDS[i]) + ".temp"), qualFileNames[j][k]);
-							remove((qualFileNames[j][k] + toString(processIDS[i]) + ".temp").c_str());
+						if (fastaFileNames[j][k] != "") {
+							m->appendFiles((fastaFileNames[j][k] + toString(processIDS[i]) + ".temp"), fastaFileNames[j][k]);
+							remove((fastaFileNames[j][k] + toString(processIDS[i]) + ".temp").c_str());
+							
+							if(qFileName != ""){
+								m->appendFiles((qualFileNames[j][k] + toString(processIDS[i]) + ".temp"), qualFileNames[j][k]);
+								remove((qualFileNames[j][k] + toString(processIDS[i]) + ".temp").c_str());
+							}
 						}
 					}
 				}
 			}
+			
+			ifstream in;
+			string tempFile =  filename + toString(processIDS[i]) + ".num.temp";
+			m->openInputFile(tempFile, in);
+			int count = 0; 
+			int tempNum;
+			while (!in.eof()) { 
+				in >> tempNum; m->gobble(in);
+				groupCounts[count] += tempNum; 
+				count++;
+			}
+			in.close(); remove(tempFile.c_str());
 			
 		}
 	
@@ -894,6 +957,7 @@ void TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 		if(qFileName != ""){	qualFileNames = fastaFileNames;	}
 		
 		if(allFiles){
+			set<string> uniqueNames; //used to cleanup outputFileNames
 			for(map<string, int>::iterator itBar = barcodes.begin();itBar != barcodes.end();itBar++){
 				for(map<string, int>::iterator itPrimer = primers.begin();itPrimer != primers.end(); itPrimer++){
 					
@@ -918,15 +982,22 @@ void TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 
 					ofstream temp;
 					fastaFileName = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + comboGroupName + ".fasta";
-					outputNames.push_back(fastaFileName);
-					outputTypes["fasta"].push_back(fastaFileName);
+					if (uniqueNames.count(fastaFileName) == 0) {
+						outputNames.push_back(fastaFileName);
+						outputTypes["fasta"].push_back(fastaFileName);
+						uniqueNames.insert(fastaFileName);
+					}
+					
 					fastaFileNames[itBar->second][itPrimer->second] = fastaFileName;
 					m->openOutputFile(fastaFileName, temp);		temp.close();
 
 					if(qFileName != ""){
 						qualFileName = outputDir + m->getRootName(m->getSimpleName(qFileName)) + comboGroupName + ".qual";
-						outputNames.push_back(qualFileName);
-						outputTypes["qfile"].push_back(qualFileName);
+						if (uniqueNames.count(fastaFileName) == 0) {
+							outputNames.push_back(qualFileName);
+							outputTypes["qfile"].push_back(qualFileName);
+						}
+						
 						qualFileNames[itBar->second][itPrimer->second] = qualFileName;
 						m->openOutputFile(qualFileName, temp);		temp.close();
 					}
@@ -935,6 +1006,7 @@ void TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 		}
 		numFPrimers = primers.size();
 		numRPrimers = revPrimer.size();
+		groupCounts.resize(barcodeNameVector.size(), 0);
 
 	}
 	catch(exception& e) {
