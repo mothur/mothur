@@ -31,7 +31,7 @@ QualityScores::QualityScores(ifstream& qFile){
 		
 		m = MothurOut::getInstance();
 		
-		seqName = "";
+		/*seqName = "";
 		int score;
 		
 		qFile >> seqName; 
@@ -44,16 +44,64 @@ QualityScores::QualityScores(ifstream& qFile){
 		else{
 			seqName = seqName.substr(1);
 		}
-		
+		cout << seqName << endl;	
 		string qScoreString = m->getline(qFile);
-		
+		cout << qScoreString << endl;	
 		istringstream qScoreStringStream(qScoreString);
+		int count = 0;
 		while(!qScoreStringStream.eof()){
+			if (m->control_pressed) { break; }
+			qScoreStringStream >> score;
+			qScores.push_back(score);
+			cout << score << '\t' << count << endl;
+			count++;
+		}
+		qScores.pop_back();*/
+		string scores = "";
+		
+		while(!qFile.eof()){	
+			
+			qFile >> seqName; 
+			
+			//get name
+			if (seqName.length() != 0) { 
+				seqName = seqName.substr(1);
+				while (!qFile.eof())	{	
+					char c = qFile.get(); 
+					//gobble junk on line
+					if (c == 10 || c == 13){	break;	}
+				} 
+				m->gobble(qFile);
+			}
+			
+			//get scores
+			while(qFile){
+				char letter=qFile.get();
+				if((letter == '>')){	qFile.putback(letter);	break;	}
+				else if (isprint(letter)) { scores += letter; }
+			}
+			
+			m->gobble(qFile);
+			
+			break;
+		}
+		
+		//convert scores string to qScores
+		istringstream qScoreStringStream(scores);
+		
+		int score;
+		while(!qScoreStringStream.eof()){
+			
+			if (m->control_pressed) { break; }
+			
 			qScoreStringStream >> score;
 			qScores.push_back(score);
 		}
+		
 		qScores.pop_back();
 		seqLength = qScores.size();
+		
+		
 	}
 	catch(exception& e) {
 		m->errorOut(e, "QualityScores", "QualityScores");

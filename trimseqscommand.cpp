@@ -34,7 +34,8 @@ TrimSeqsCommand::TrimSeqsCommand(){
 		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
-		outputTypes["qual"] = tempOutNames;
+		outputTypes["qfile"] = tempOutNames;
+		outputTypes["group"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "TrimSeqsCommand", "TrimSeqsCommand");
@@ -103,7 +104,8 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["fasta"] = tempOutNames;
-			outputTypes["qual"] = tempOutNames;
+			outputTypes["qfile"] = tempOutNames;
+			outputTypes["group"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -223,13 +225,9 @@ TrimSeqsCommand::TrimSeqsCommand(string option)  {
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found") { temp = "1"; }
 			convert(temp, processors); 
 			
-			if ((oligoFile != "") && (groupfile != "")) {
-				m->mothurOut("You given both a oligos file and a groupfile, only one is allowed."); m->mothurOutEndLine(); abort = true;
-			}
-												
 			
-			if(allFiles && (oligoFile == "") && (groupfile == "")){
-				m->mothurOut("You selected allfiles, but didn't enter an oligos or group file.  Ignoring the allfiles request."); m->mothurOutEndLine();
+			if(allFiles && (oligoFile == "")){
+				m->mothurOut("You selected allfiles, but didn't enter an oligos.  Ignoring the allfiles request."); m->mothurOutEndLine();
 			}
 			if((qAverage != 0 && qThreshold != 0) && qFileName == ""){
 				m->mothurOut("You didn't provide a quality file name, quality criteria will be ignored."); m->mothurOutEndLine();
@@ -319,15 +317,15 @@ int TrimSeqsCommand::execute(){
 		if (qFileName != "") {
 			outputNames.push_back(trimQualFile);
 			outputNames.push_back(scrapQualFile);
-			outputTypes["qual"].push_back(trimQualFile);
-			outputTypes["qual"].push_back(scrapQualFile); 
+			outputTypes["qfile"].push_back(trimQualFile);
+			outputTypes["qfile"].push_back(scrapQualFile); 
 		}
 		
 		string outputGroupFileName;
 
 		if(oligoFile != ""){
 			outputGroupFileName = outputDir + m->getRootName(m->getSimpleName(fastaFile)) + "groups";
-			outputNames.push_back(outputGroupFileName); outputTypes["groups"].push_back(outputGroupFileName);
+			outputNames.push_back(outputGroupFileName); outputTypes["group"].push_back(outputGroupFileName);
 			getOligos(fastaFileNames, qualFileNames);
 		}
 
@@ -928,7 +926,7 @@ void TrimSeqsCommand::getOligos(vector<vector<string> >& fastaFileNames, vector<
 					if(qFileName != ""){
 						qualFileName = outputDir + m->getRootName(m->getSimpleName(qFileName)) + comboGroupName + ".qual";
 						outputNames.push_back(qualFileName);
-						outputTypes["qual"].push_back(qualFileName);
+						outputTypes["qfile"].push_back(qualFileName);
 						qualFileNames[itBar->second][itPrimer->second] = qualFileName;
 						m->openOutputFile(qualFileName, temp);		temp.close();
 					}

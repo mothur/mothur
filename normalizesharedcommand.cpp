@@ -404,7 +404,7 @@ int NormalizeSharedCommand::normalize(vector<SharedRAbundVector*>& thisLookUp, o
 							
 						int abund = thisLookUp[i]->getAbundance(j);
 							
-						float relabund = relabund = abund / (float) thisLookUp[i]->getNumSeqs();
+						float relabund = abund / (float) thisLookUp[i]->getNumSeqs();
 						float newNorm = relabund * norm;
 						
 						//round to nearest int
@@ -478,7 +478,7 @@ int NormalizeSharedCommand::normalize(vector<SharedRAbundFloatVector*>& thisLook
 					
 					float abund = thisLookUp[i]->getAbundance(j);
 					
-					float relabund = relabund = abund / (float) thisLookUp[i]->getNumSeqs();
+					float relabund = abund / (float) thisLookUp[i]->getNumSeqs();
 					float newNorm = relabund * norm;
 					
 					thisLookUp[i]->set(j, newNorm, thisLookUp[i]->getGroup());
