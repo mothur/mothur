@@ -352,7 +352,6 @@ int TrimSeqsCommand::execute(){
 		if (m->control_pressed) {  return 0; }			
 			
 		if(allFiles){
-			//clear out all old group files
 			map<string, string> uniqueFastaNames;// so we don't add the same groupfile multiple times
 			map<string, string>::iterator it;
 			set<string> namesToRemove;
