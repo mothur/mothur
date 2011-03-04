@@ -259,7 +259,7 @@ int ListSeqsCommand::readFasta(){
 		ifstream in;
 		m->openInputFile(fastafile, in);
 		string name;
-	
+		
 		while(!in.eof()){
 			
 			if (m->control_pressed) { in.close(); return 0; }
@@ -444,6 +444,7 @@ int ListSeqsCommand::readTax(){
 			names.push_back(firstCol);
 			
 			m->gobble(in);
+			
 		}
 		in.close();
 		
