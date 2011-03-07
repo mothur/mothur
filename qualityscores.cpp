@@ -44,7 +44,6 @@ QualityScores::QualityScores(ifstream& qFile){
 		else{
 			seqName = seqName.substr(1);
 		}
-		cout << seqName << endl;
 		string qScoreString = m->getline(qFile);
 		while(qFile.peek() != '>' && qFile.peek() != EOF){
 			qScoreString += ' ' + m->getline(qFile);
@@ -56,7 +55,6 @@ QualityScores::QualityScores(ifstream& qFile){
 			if (m->control_pressed) { break; }
 			qScoreStringStream >> score;
 			qScores.push_back(score);
-			cout << score << '\t' << count << endl;
 			count++;
 		}
 		qScores.pop_back();
