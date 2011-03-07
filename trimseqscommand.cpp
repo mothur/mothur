@@ -406,10 +406,10 @@ int TrimSeqsCommand::execute(){
 		//output group counts
 		m->mothurOutEndLine();
 		int total = 0;
-		for (int i = 0; i < barcodeNameVector.size(); i++) {
-			if ((barcodeNameVector[i] != "") && (groupCounts[i] != 0)) { total += groupCounts[i]; m->mothurOut("Group " + barcodeNameVector[i] + " contains " + toString(groupCounts[i]) + " sequences."); m->mothurOutEndLine(); }
-		}
-		if (total != 0) { m->mothurOut("Total of all groups is " + toString(total)); m->mothurOutEndLine(); }
+//		for (int i = 0; i < barcodeNameVector.size(); i++) {
+//			if ((barcodeNameVector[i] != "") && (groupCounts[i] != 0)) { total += groupCounts[i]; m->mothurOut("Group " + barcodeNameVector[i] + " contains " + toString(groupCounts[i]) + " sequences."); m->mothurOutEndLine(); }
+//		}
+//		if (total != 0) { m->mothurOut("Total of all groups is " + toString(total)); m->mothurOutEndLine(); }
 		
 			if (m->control_pressed) {	for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0;	}
 
