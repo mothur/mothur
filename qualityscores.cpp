@@ -82,7 +82,6 @@ QualityScores::QualityScores(ifstream& qFile){
 //				if((letter == '>')){	qFile.putback(letter);	break;	}
 //				else if (isprint(letter)) { scores += letter; }
 //			}
-//			cout << scores << endl;
 //			m->gobble(qFile);
 //			
 //			break;
@@ -118,7 +117,6 @@ QualityScores::QualityScores(ifstream& qFile){
 string QualityScores::getName(){
 	
 	try {
-		cout << qScores.size() << '\t';
 		return seqName;
 	}
 	catch(exception& e) {
@@ -153,9 +151,7 @@ void QualityScores::printQScores(ofstream& qFile){
 void QualityScores::trimQScores(int start, int end){
 	try {
 		vector<int> hold;
-		
-		cout << seqName << '\t' << qScores.size() << '\t' << start << '\t' << end << endl;
-		
+			
 		if(end == -1){		
 			hold = vector<int>(qScores.begin()+start, qScores.end());
 			qScores = hold;		
