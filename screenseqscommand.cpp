@@ -144,7 +144,7 @@ ScreenSeqsCommand::ScreenSeqsCommand(string option)  {
 			else if (groupfile == "not found") { groupfile = ""; }
 			
 			namefile = validParameter.validFile(parameters, "name", true);
-			if (namefile == "not open") { abort = true; }
+			if (namefile == "not open") { namefile = ""; abort = true; }
 			else if (namefile == "not found") { namefile = ""; }	
 
 			alignreport = validParameter.validFile(parameters, "alignreport", true);
@@ -248,9 +248,13 @@ int ScreenSeqsCommand::execute(){
 		
 		if (abort == true) { if (calledHelp) { return 0; }  return 2;	}
 		
-		//if the user want to optimize we need to no the 90% mark
+		//if the user want to optimize we need to know the 90% mark
 		vector<unsigned long int> positions;
-		if (optimize.size() != 0) {  getSummary(positions); } //get summary is paralellized so we need to divideFile, no need to do this step twice so I moved it here
+		if (optimize.size() != 0) {  //get summary is paralellized so we need to divideFile, no need to do this step twice so I moved it here
+			//use the namefile to optimize correctly
+			if (namefile != "") { nameMap = m->readNames(namefile); }
+			getSummary(positions); 
+		} 
 		else { 
 			positions = m->divideFile(fastafile, processors);
 			for (int i = 0; i < (positions.size()-1); i++) {
@@ -625,7 +629,8 @@ int ScreenSeqsCommand::getSummary(vector<unsigned long int>& positions){
 		sort(ambigBases.begin(), ambigBases.end());
 		sort(longHomoPolymer.begin(), longHomoPolymer.end());
 		
-		int criteriaPercentile	= int(numSeqs * (criteria / (float) 100));
+		//numSeqs is the number of unique seqs, startPosition.size() is the total number of seqs, we want to optimize using all seqs
+		int criteriaPercentile	= int(startPosition.size() * (criteria / (float) 100));
 		
 		for (int i = 0; i < optimize.size(); i++) {
 			if (optimize[i] == "start") { startPos = startPosition[criteriaPercentile]; m->mothurOut("Optimizing start to " + toString(startPos) + "."); m->mothurOutEndLine(); }
@@ -662,11 +667,24 @@ int ScreenSeqsCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 			Sequence current(in); m->gobble(in);
 	
 			if (current.getName() != "") {
-				startPosition.push_back(current.getStartPos());
-				endPosition.push_back(current.getEndPos());
-				seqLength.push_back(current.getNumBases());
-				ambigBases.push_back(current.getAmbigBases());
-				longHomoPolymer.push_back(current.getLongHomoPolymer());
+				int num = 1;
+				if (namefile != "") {
+					//make sure this sequence is in the namefile, else error 
+					map<string, int>::iterator it = nameMap.find(current.getName());
+					
+					if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + current.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+					else { num = it->second; }
+				}
+				
+				//for each sequence this sequence represents
+				for (int i = 0; i < num; i++) {
+					startPosition.push_back(current.getStartPos());
+					endPosition.push_back(current.getEndPos());
+					seqLength.push_back(current.getNumBases());
+					ambigBases.push_back(current.getAmbigBases());
+					longHomoPolymer.push_back(current.getLongHomoPolymer());
+				}
+				
 				count++;
 			}
 			
@@ -712,6 +730,7 @@ int ScreenSeqsCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 				m->openOutputFile(tempFile, out);
 				
 				out << num << endl;
+				out << startPosition.size() << endl;
 				for (int k = 0; k < startPosition.size(); k++)		{		out << startPosition[k] << '\t'; }  out << endl;
 				for (int k = 0; k < endPosition.size(); k++)		{		out << endPosition[k] << '\t'; }  out << endl;
 				for (int k = 0; k < seqLength.size(); k++)			{		out << seqLength[k] << '\t'; }  out << endl;
@@ -744,6 +763,7 @@ int ScreenSeqsCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 			
 			int temp, tempNum;
 			in >> tempNum; m->gobble(in); num += tempNum;
+			in >> tempNum; m->gobble(in);
 			for (int k = 0; k < tempNum; k++)			{		in >> temp; startPosition.push_back(temp);		}		m->gobble(in);
 			for (int k = 0; k < tempNum; k++)			{		in >> temp; endPosition.push_back(temp);		}		m->gobble(in);
 			for (int k = 0; k < tempNum; k++)			{		in >> temp; seqLength.push_back(temp);			}		m->gobble(in);

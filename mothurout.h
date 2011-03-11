@@ -59,6 +59,7 @@ class MothurOut {
 		string getline(istringstream&);
 		void gobble(istream&);
 		void gobble(istringstream&);
+		map<string, int> readNames(string);
 		
 		//searchs and checks
 		bool checkReleaseVersion(ifstream&, string);

@@ -1096,6 +1096,36 @@ float MothurOut::ceilDist(float dist, int precision){
 		exit(1);
 	}
 }
+/**********************************************************************************************************************/
+map<string, int> MothurOut::readNames(string namefile) { 
+	try {
+		
+		map<string, int> nameMap;
+		
+		//open input file
+		ifstream in;
+		openInputFile(namefile, in);
+		
+		while (!in.eof()) {
+			if (control_pressed) { break; }
+			
+			string firstCol, secondCol;
+			in >> firstCol >> secondCol; gobble(in);
+			
+			int num = getNumNames(secondCol);
+			
+			nameMap[firstCol] = num;
+		}
+		in.close();
+		
+		return nameMap;
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "readNames");
+		exit(1);
+	}
+}
 
 /***********************************************************************/
 

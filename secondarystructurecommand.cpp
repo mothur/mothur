@@ -13,7 +13,7 @@
 //**********************************************************************************************************************
 vector<string> AlignCheckCommand::getValidParameters(){	
 	try {
-		string Array[] =  {"fasta","map", "outputdir","inputdir"};
+		string Array[] =  {"fasta", "name","map", "outputdir","inputdir"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
@@ -69,7 +69,7 @@ AlignCheckCommand::AlignCheckCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","map", "outputdir","inputdir"};
+			string Array[] =  {"fasta","name","map", "outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -107,6 +107,14 @@ AlignCheckCommand::AlignCheckCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["map"] = inputDir + it->second;		}
 				}
+				
+				it = parameters.find("name");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["name"] = inputDir + it->second;		}
+				}
 			}
 
 			//check for required parameters
@@ -117,6 +125,10 @@ AlignCheckCommand::AlignCheckCommand(string option)  {
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
 			else if (fastafile == "not found") {  fastafile = "";  m->mothurOut("You must provide an fasta file."); m->mothurOutEndLine(); abort = true;  }	
+			
+			namefile = validParameter.validFile(parameters, "name", true);
+			if (namefile == "not open") { namefile = ""; abort = true; }
+			else if (namefile == "not found") { namefile = "";  }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -159,6 +171,10 @@ int AlignCheckCommand::execute(){
 		//get secondary structure info.
 		readMap();
 		
+		if (namefile != "") { nameMap = m->readNames(namefile); }
+		
+		if (m->control_pressed) { return 0; }
+		
 		ifstream in;
 		m->openInputFile(fastafile, in);
 		
@@ -166,8 +182,9 @@ int AlignCheckCommand::execute(){
 		string outfile = outputDir + m->getRootName(m->getSimpleName(fastafile)) + "align.check";
 		m->openOutputFile(outfile, out);
 		
+				
 		out << "name" << '\t' << "pound" << '\t' << "dash" << '\t' << "plus" << '\t' << "equal" << '\t';
-		out << "loop" << '\t' << "tilde" << '\t' << "total" << endl;
+		out << "loop" << '\t' << "tilde" << '\t' << "total"  << '\t' << "numseqs" << endl;
 
 		
 		while(!in.eof()){
@@ -179,8 +196,17 @@ int AlignCheckCommand::execute(){
 				
 				if (haderror == 1) { break; }
 				
+				int num = 1;
+				if (namefile != "") {
+					//make sure this sequence is in the namefile, else error 
+					map<string, int>::iterator it = nameMap.find(seq.getName());
+					
+					if (it == nameMap.end()) { cout << "[ERROR]: " << seq.getName() << " is not in your namefile, please correct." << endl; m->control_pressed = true; }
+					else { num = it->second; }
+				}
+				
 				out << seq.getName() << '\t' << data.pound << '\t' << data.dash << '\t' << data.plus << '\t' << data.equal << '\t';
-				out << data.loop << '\t' << data.tilde << '\t' << data.total << endl;
+				out << data.loop << '\t' << data.tilde << '\t' << data.total << '\t' << num << endl;
 			}
 		}
 
@@ -305,6 +331,4 @@ statData AlignCheckCommand::getStats(string sequence){
 		exit(1);
 	}
 }
-
-
 //**********************************************************************************************************************

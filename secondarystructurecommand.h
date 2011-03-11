@@ -44,11 +44,12 @@ class AlignCheckCommand : public Command {
 		
 	private:
 		vector<int> structMap;
-		string mapfile, fastafile, outputDir;
+		string mapfile, fastafile, outputDir, namefile;
 		bool abort;
 		int seqLength, haderror;
 		vector<string> outputNames;
 		map<string, vector<string> > outputTypes;
+		map<string, int> nameMap;
 		
 		void readMap();
 		statData getStats(string sequence);
