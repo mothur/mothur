@@ -738,7 +738,7 @@ int TrimFlowsCommand::stripForward(Sequence& seq, int& group){
 		
 		string rawSequence = seq.getUnaligned();
 		int success = pdiffs + 1;	//guilty until proven innocent
-		
+
 		//can you find the primer
 		for(map<string,int>::iterator it=primers.begin();it!=primers.end();it++){
 			string oligo = it->first;

@@ -32,7 +32,7 @@
 vector<string> ShhherCommand::getValidParameters(){	
 	try {
 		string Array[] =  {	
-			"file", "flow", "lookup", "cutoff", "sigma", "outputdir","inputdir", "processors", "maxiter", "mindelta"	
+			"file", "flow", "lookup", "cutoff", "sigma", "outputdir","inputdir", "processors", "maxiter", "mindelta", "order"	
 		};
 		
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
@@ -111,7 +111,7 @@ ShhherCommand::ShhherCommand(string option) {
 			
 			//valid paramters for this command
 			string AlignArray[] =  {
-				"file", "flow", "lookup", "cutoff", "sigma", "outputdir","inputdir", "processors", "maxiter", "mindelta"	
+				"file", "flow", "lookup", "cutoff", "sigma", "outputdir","inputdir", "processors", "maxiter", "mindelta", "order"	
 			};
 			
 			vector<string> myArray (AlignArray, AlignArray+(sizeof(AlignArray)/sizeof(string)));
@@ -210,6 +210,12 @@ ShhherCommand::ShhherCommand(string option) {
 
 			temp = validParameter.validFile(parameters, "sigma", false);if (temp == "not found")	{	temp = "60";		}
 			convert(temp, sigma); 
+			
+			flowOrder = validParameter.validFile(parameters, "order", false);
+			if (flowOrder == "not found"){ flowOrder = "TACG";		}
+			else if(flowOrder.length() != 4){
+				m->mothurOut("The value of the order option must be four bases long\n");
+			}
 			
 			globaldata = GlobalData::getInstance();
 		}
@@ -2010,7 +2016,7 @@ void ShhherCommand::writeQualities(vector<int> otuCounts){
 
 void ShhherCommand::writeSequences(vector<int> otuCounts){
 	try {
-		string bases = "TACG";
+		flowOrder = "TACG";
 		
 		string fastaFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".pn.fasta";
 		ofstream fastaFile;
@@ -2026,7 +2032,7 @@ void ShhherCommand::writeSequences(vector<int> otuCounts){
 				
 				for(int j=8;j<numFlowCells;j++){
 					
-					char base = bases[j % 4];
+					char base = flowOrder[j % 4];
 					for(int k=0;k<uniqueFlowgrams[index * numFlowCells + j];k++){
 						fastaFile << base;
 					}
