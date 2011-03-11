@@ -27,10 +27,11 @@ public:
 	
 private:
 	bool abort;
-	string fastafile, outputDir;
+	string fastafile, outputDir, namefile;
 	int processors;
 	vector<string> outputNames;
 	map<string, vector<string> > outputTypes;
+	map<string, int> nameMap;
 	
 	struct linePair {
 		unsigned long int start;
@@ -43,6 +44,7 @@ private:
 	
 	int createProcessesCreateSummary(vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, string, string);
 	int driverCreateSummary(vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, string, string, linePair*);	
+	int readNames();
 
 	#ifdef USE_MPI
 	int MPICreateSummary(int, int, vector<int>&, vector<int>&, vector<int>&, vector<int>&, vector<int>&, MPI_File&, MPI_File&, vector<unsigned long int>&);	

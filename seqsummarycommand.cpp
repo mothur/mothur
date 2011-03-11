@@ -13,7 +13,7 @@
 //**********************************************************************************************************************
 vector<string> SeqSummaryCommand::getValidParameters(){	
 	try {
-		string Array[] =  {"fasta","processors","outputdir","inputdir"};
+		string Array[] =  {"fasta","name","processors","outputdir","inputdir"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}
@@ -68,7 +68,7 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
 		
 		else {
 			//valid paramters for this command
-			string Array[] =  {"fasta","processors","outputdir","inputdir"};
+			string Array[] =  {"fasta","name","processors","outputdir","inputdir"};
 			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 			
 			OptionParser parser(option);
@@ -94,6 +94,14 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
 					//if the user has not given a path then, add inputdir. else leave path alone.
 					if (path == "") {	parameters["fasta"] = inputDir + it->second;		}
 				}
+				
+				it = parameters.find("name");
+				//user has given a template file
+				if(it != parameters.end()){ 
+					path = m->hasPath(it->second);
+					//if the user has not given a path then, add inputdir. else leave path alone.
+					if (path == "") {	parameters["name"] = inputDir + it->second;		}
+				}
 			}
 			
 			//initialize outputTypes
@@ -104,6 +112,10 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
 			fastafile = validParameter.validFile(parameters, "fasta", true);
 			if (fastafile == "not open") { abort = true; }
 			else if (fastafile == "not found") { fastafile = ""; m->mothurOut("fasta is a required parameter for the summary.seqs command."); m->mothurOutEndLine(); abort = true;  }	
+			
+			namefile = validParameter.validFile(parameters, "name", true);
+			if (namefile == "not open") { namefile = ""; abort = true; }
+			else if (namefile == "not found") { namefile = "";  }	
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	
@@ -127,7 +139,8 @@ SeqSummaryCommand::SeqSummaryCommand(string option)  {
 void SeqSummaryCommand::help(){
 	try {
 		m->mothurOut("The summary.seqs command reads a fastafile and summarizes the sequences.\n");
-		m->mothurOut("The summary.seqs command parameters are fasta and processors, fasta is required.\n");
+		m->mothurOut("The summary.seqs command parameters are fasta, name and processors, fasta is required.\n");
+		m->mothurOut("The name parameter allows you to enter a name file associated with your fasta file. \n");
 		m->mothurOut("The summary.seqs command should be in the following format: \n");
 		m->mothurOut("summary.seqs(fasta=yourFastaFile, processors=2) \n");
 		m->mothurOut("Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n");	
@@ -158,6 +171,10 @@ int SeqSummaryCommand::execute(){
 		vector<int> seqLength;
 		vector<int> ambigBases;
 		vector<int> longHomoPolymer;
+		
+		if (namefile != "") { readNames(); }
+		
+		if (m->control_pressed) { return 0; }
 			
 #ifdef USE_MPI	
 				int pid, numSeqsPerProcessor; 
@@ -186,7 +203,7 @@ int SeqSummaryCommand::execute(){
 				
 				if (pid == 0) { //you are the root process
 						//print header
-						string outputString = "seqname\tstart\tend\tnbases\tambigs\tpolymer\n";	
+						string outputString = "seqname\tstart\tend\tnbases\tambigs\tpolymer\tnumSeqs\n";	
 						int length = outputString.length();
 						char* buf2 = new char[length];
 						memcpy(buf2, outputString.c_str(), length);
@@ -334,7 +351,8 @@ int SeqSummaryCommand::execute(){
 		m->mothurOut("75%-tile:\t" + toString(startPosition[ptile75]) + "\t" + toString(endPosition[ptile75]) + "\t" + toString(seqLength[ptile75]) + "\t" + toString(ambigBases[ptile75]) + "\t" + toString(longHomoPolymer[ptile75])); m->mothurOutEndLine();
 		m->mothurOut("97.5%-tile:\t" + toString(startPosition[ptile97_5]) + "\t" + toString(endPosition[ptile97_5]) + "\t" + toString(seqLength[ptile97_5]) + "\t" + toString(ambigBases[ptile97_5]) + "\t" + toString(longHomoPolymer[ptile97_5])); m->mothurOutEndLine();
 		m->mothurOut("Maximum:\t" + toString(startPosition[ptile100]) + "\t" + toString(endPosition[ptile100]) + "\t" + toString(seqLength[ptile100]) + "\t" + toString(ambigBases[ptile100]) + "\t" + toString(longHomoPolymer[ptile100])); m->mothurOutEndLine();
-		m->mothurOut("# of Seqs:\t" + toString(numSeqs)); m->mothurOutEndLine();
+		if (namefile == "") {  m->mothurOut("# of Seqs:\t" + toString(numSeqs)); m->mothurOutEndLine(); }
+		else { m->mothurOut("# of unique seqs:\t" + toString(numSeqs)); m->mothurOutEndLine(); m->mothurOut("total # of seqs:\t" + toString(startPosition.size())); m->mothurOutEndLine(); }
 		
 		if (m->control_pressed) {  remove(summaryFile.c_str()); return 0; }
 		
@@ -363,7 +381,7 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 		
 		//print header if you are process 0
 		if (filePos->start == 0) {
-			outSummary << "seqname\tstart\tend\tnbases\tambigs\tpolymer" << endl;	
+			outSummary << "seqname\tstart\tend\tnbases\tambigs\tpolymer\tnumSeqs" << endl;	
 		}
 				
 		ifstream in;
@@ -381,17 +399,30 @@ int SeqSummaryCommand::driverCreateSummary(vector<int>& startPosition, vector<in
 			Sequence current(in); m->gobble(in);
 	
 			if (current.getName() != "") {
-				startPosition.push_back(current.getStartPos());
-				endPosition.push_back(current.getEndPos());
-				seqLength.push_back(current.getNumBases());
-				ambigBases.push_back(current.getAmbigBases());
-				longHomoPolymer.push_back(current.getLongHomoPolymer());
 				
+				int num = 1;
+				if (namefile != "") {
+					//make sure this sequence is in the namefile, else error 
+					map<string, int>::iterator it = nameMap.find(current.getName());
+					
+					if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + current.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+					else { num = it->second; }
+				}
+				
+				//for each sequence this sequence represents
+				for (int i = 0; i < num; i++) {
+					startPosition.push_back(current.getStartPos());
+					endPosition.push_back(current.getEndPos());
+					seqLength.push_back(current.getNumBases());
+					ambigBases.push_back(current.getAmbigBases());
+					longHomoPolymer.push_back(current.getLongHomoPolymer());
+				}
+				
+				count++;
 				outSummary << current.getName() << '\t';
 				outSummary << current.getStartPos() << '\t' << current.getEndPos() << '\t';
 				outSummary << current.getNumBases() << '\t' << current.getAmbigBases() << '\t';
-				outSummary << current.getLongHomoPolymer() << endl;
-				count++;
+				outSummary << current.getLongHomoPolymer() << '\t' << num << endl;
 			}
 			
 			#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
@@ -425,7 +456,6 @@ int SeqSummaryCommand::MPICreateSummary(int start, int num, vector<int>& startPo
 		MPI_Status status; 
 		MPI_Comm_rank(MPI_COMM_WORLD, &pid); 
 
-		
 		for(int i=0;i<num;i++){
 			
 			if (m->control_pressed) { return 0; }
@@ -444,14 +474,27 @@ int SeqSummaryCommand::MPICreateSummary(int start, int num, vector<int>& startPo
 			Sequence current(iss);  
 
 			if (current.getName() != "") {
-				startPosition.push_back(current.getStartPos());
-				endPosition.push_back(current.getEndPos());
-				seqLength.push_back(current.getNumBases());
-				ambigBases.push_back(current.getAmbigBases());
-				longHomoPolymer.push_back(current.getLongHomoPolymer());
+				
+				int num = 1;
+				if (namefile != "") {
+					//make sure this sequence is in the namefile, else error 
+					map<string, int>::iterator it = nameMap.find(current.getName());
+					
+					if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + current.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+					else { num = it->second; }
+				}
+				
+				//for each sequence this sequence represents
+				for (int i = 0; i < num; i++) {
+					startPosition.push_back(current.getStartPos());
+					endPosition.push_back(current.getEndPos());
+					seqLength.push_back(current.getNumBases());
+					ambigBases.push_back(current.getAmbigBases());
+					longHomoPolymer.push_back(current.getLongHomoPolymer());
+				}
 				
 				string outputString = current.getName() + "\t" + toString(current.getStartPos()) + "\t" + toString(current.getEndPos()) + "\t";
-				outputString += toString(current.getNumBases()) + "\t" + toString(current.getAmbigBases()) + "\t" + toString(current.getLongHomoPolymer()) + "\n";
+				outputString += toString(current.getNumBases()) + "\t" + toString(current.getAmbigBases()) + "\t" + toString(current.getLongHomoPolymer()) + "\t" + toString(num) + "\n";
 				
 				//output to file
 				length = outputString.length();
@@ -495,6 +538,7 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 				m->openOutputFile(tempFile, out);
 				
 				out << num << endl;
+				out << startPosition.size() << endl;
 				for (int k = 0; k < startPosition.size(); k++)		{		out << startPosition[k] << '\t'; }  out << endl;
 				for (int k = 0; k < endPosition.size(); k++)		{		out << endPosition[k] << '\t'; }  out << endl;
 				for (int k = 0; k < seqLength.size(); k++)			{		out << seqLength[k] << '\t'; }  out << endl;
@@ -525,6 +569,7 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 			
 			int temp, tempNum;
 			in >> tempNum; m->gobble(in); num += tempNum;
+			in >> tempNum; m->gobble(in);
 			for (int k = 0; k < tempNum; k++)			{		in >> temp; startPosition.push_back(temp);		}		m->gobble(in);
 			for (int k = 0; k < tempNum; k++)			{		in >> temp; endPosition.push_back(temp);		}		m->gobble(in);
 			for (int k = 0; k < tempNum; k++)			{		in >> temp; seqLength.push_back(temp);			}		m->gobble(in);
@@ -543,6 +588,35 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 		exit(1);
 	}
 }
-//***************************************************************************************************************
+/**********************************************************************************************************************/
+int SeqSummaryCommand::readNames() { 
+	try {
+		//open input file
+		ifstream in;
+		m->openInputFile(namefile, in);
+		
+		while (!in.eof()) {
+			if (m->control_pressed) { break; }
+			
+			string firstCol, secondCol;
+			in >> firstCol >> secondCol; m->gobble(in);
+			
+			int num = m->getNumNames(secondCol);
+			
+			nameMap[firstCol] = num;
+		}
+		in.close();
+		
+		return 0;
+		
+	}
+	catch(exception& e) {
+		m->errorOut(e, "SeqSummaryCommand", "readNames");
+		exit(1);
+	}
+}
+
+/**********************************************************************************************************************/
+
 
 
