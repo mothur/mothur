@@ -172,7 +172,7 @@ int SeqSummaryCommand::execute(){
 		vector<int> ambigBases;
 		vector<int> longHomoPolymer;
 		
-		if (namefile != "") { readNames(); }
+		if (namefile != "") { nameMap = m->readNames(namefile); }
 		
 		if (m->control_pressed) { return 0; }
 			
@@ -480,7 +480,7 @@ int SeqSummaryCommand::MPICreateSummary(int start, int num, vector<int>& startPo
 					//make sure this sequence is in the namefile, else error 
 					map<string, int>::iterator it = nameMap.find(current.getName());
 					
-					if (it == nameMap.end()) { m->mothurOut("[ERROR]: " + current.getName() + " is not in your namefile, please correct."); m->mothurOutEndLine(); m->control_pressed = true; }
+					if (it == nameMap.end()) { cout << "[ERROR]: " << current.getName() << " is not in your namefile, please correct." << endl; m->control_pressed = true; }
 					else { num = it->second; }
 				}
 				
@@ -588,34 +588,6 @@ int SeqSummaryCommand::createProcessesCreateSummary(vector<int>& startPosition, 
 		exit(1);
 	}
 }
-/**********************************************************************************************************************/
-int SeqSummaryCommand::readNames() { 
-	try {
-		//open input file
-		ifstream in;
-		m->openInputFile(namefile, in);
-		
-		while (!in.eof()) {
-			if (m->control_pressed) { break; }
-			
-			string firstCol, secondCol;
-			in >> firstCol >> secondCol; m->gobble(in);
-			
-			int num = m->getNumNames(secondCol);
-			
-			nameMap[firstCol] = num;
-		}
-		in.close();
-		
-		return 0;
-		
-	}
-	catch(exception& e) {
-		m->errorOut(e, "SeqSummaryCommand", "readNames");
-		exit(1);
-	}
-}
-
 /**********************************************************************************************************************/
 
 
