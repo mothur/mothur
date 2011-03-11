@@ -328,13 +328,14 @@ int SeqSummaryCommand::execute(){
 		sort(seqLength.begin(), seqLength.end());
 		sort(ambigBases.begin(), ambigBases.end());
 		sort(longHomoPolymer.begin(), longHomoPolymer.end());
-		
-		int ptile0_25	= int(numSeqs * 0.025);
-		int ptile25		= int(numSeqs * 0.250);
-		int ptile50		= int(numSeqs * 0.500);
-		int ptile75		= int(numSeqs * 0.750);
-		int ptile97_5	= int(numSeqs * 0.975);
-		int ptile100	= numSeqs - 1;
+		int size = startPosition.size();
+				
+		int ptile0_25	= int(size * 0.025);
+		int ptile25		= int(size * 0.250);
+		int ptile50		= int(size * 0.500);
+		int ptile75		= int(size * 0.750);
+		int ptile97_5	= int(size * 0.975);
+		int ptile100	= size - 1;
 		
 		//to compensate for blank sequences that would result in startPosition and endPostion equalling -1
 		if (startPosition[0] == -1) {  startPosition[0] = 0;	}

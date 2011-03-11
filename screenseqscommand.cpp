@@ -634,10 +634,10 @@ int ScreenSeqsCommand::getSummary(vector<unsigned long int>& positions){
 		
 		for (int i = 0; i < optimize.size(); i++) {
 			if (optimize[i] == "start") { startPos = startPosition[criteriaPercentile]; m->mothurOut("Optimizing start to " + toString(startPos) + "."); m->mothurOutEndLine(); }
-			else if (optimize[i] == "end") { int endcriteriaPercentile = int(numSeqs * ((100 - criteria) / (float) 100));  endPos = endPosition[endcriteriaPercentile]; m->mothurOut("Optimizing end to " + toString(endPos) + "."); m->mothurOutEndLine();}
+			else if (optimize[i] == "end") { int endcriteriaPercentile = int(endPosition.size() * ((100 - criteria) / (float) 100));  endPos = endPosition[endcriteriaPercentile]; m->mothurOut("Optimizing end to " + toString(endPos) + "."); m->mothurOutEndLine();}
 			else if (optimize[i] == "maxambig") { maxAmbig = ambigBases[criteriaPercentile]; m->mothurOut("Optimizing maxambig to " + toString(maxAmbig) + "."); m->mothurOutEndLine(); }
 			else if (optimize[i] == "maxhomop") { maxHomoP = longHomoPolymer[criteriaPercentile]; m->mothurOut("Optimizing maxhomop to " + toString(maxHomoP) + "."); m->mothurOutEndLine(); }
-			else if (optimize[i] == "minlength") { int mincriteriaPercentile = int(numSeqs * ((100 - criteria) / (float) 100)); minLength = seqLength[mincriteriaPercentile]; m->mothurOut("Optimizing minlength to " + toString(minLength) + "."); m->mothurOutEndLine(); }
+			else if (optimize[i] == "minlength") { int mincriteriaPercentile = int(seqLength.size() * ((100 - criteria) / (float) 100)); minLength = seqLength[mincriteriaPercentile]; m->mothurOut("Optimizing minlength to " + toString(minLength) + "."); m->mothurOutEndLine(); }
 			else if (optimize[i] == "maxlength") { maxLength = seqLength[criteriaPercentile]; m->mothurOut("Optimizing maxlength to " + toString(maxLength) + "."); m->mothurOutEndLine(); }
 		}
 

@@ -186,7 +186,15 @@ int AlignCheckCommand::execute(){
 		out << "name" << '\t' << "pound" << '\t' << "dash" << '\t' << "plus" << '\t' << "equal" << '\t';
 		out << "loop" << '\t' << "tilde" << '\t' << "total"  << '\t' << "numseqs" << endl;
 
+		vector<int> pound;
+		vector<int> dash;
+		vector<int> plus;
+		vector<int> equal;
+		vector<int> loop;
+		vector<int> tilde;
+		vector<int> total;
 		
+		int count = 0;
 		while(!in.eof()){
 			if (m->control_pressed) { in.close(); out.close(); remove(outfile.c_str()); return 0; }
 			
@@ -194,7 +202,7 @@ int AlignCheckCommand::execute(){
 			if (seq.getName() != "") {
 				statData data = getStats(seq.getAligned());
 				
-				if (haderror == 1) { break; }
+				if (haderror == 1) { m->control_pressed = true; break; }
 				
 				int num = 1;
 				if (namefile != "") {
@@ -205,6 +213,18 @@ int AlignCheckCommand::execute(){
 					else { num = it->second; }
 				}
 				
+				//for each sequence this sequence represents
+				for (int i = 0; i < num; i++) {
+					pound.push_back(data.pound);
+					dash.push_back(data.dash);
+					plus.push_back(data.plus);
+					equal.push_back(data.equal);
+					loop.push_back(data.loop);
+					tilde.push_back(data.tilde);
+					total.push_back(data.total);
+				}	
+				count++;
+				
 				out << seq.getName() << '\t' << data.pound << '\t' << data.dash << '\t' << data.plus << '\t' << data.equal << '\t';
 				out << data.loop << '\t' << data.tilde << '\t' << data.total << '\t' << num << endl;
 			}
@@ -214,6 +234,37 @@ int AlignCheckCommand::execute(){
 		out.close();
 		
 		if (m->control_pressed) {  remove(outfile.c_str()); return 0; }
+		
+		sort(pound.begin(), pound.end());
+		sort(dash.begin(), dash.end());
+		sort(plus.begin(), plus.end());
+		sort(equal.begin(), equal.end());
+		sort(loop.begin(), loop.end());
+		sort(tilde.begin(), tilde.end());
+		sort(total.begin(), total.end());
+		int size = pound.size();
+		
+		int ptile0_25	= int(size * 0.025);
+		int ptile25		= int(size * 0.250);
+		int ptile50		= int(size * 0.500);
+		int ptile75		= int(size * 0.750);
+		int ptile97_5	= int(size * 0.975);
+		int ptile100	= size - 1;
+		
+		if (m->control_pressed) {  remove(outfile.c_str()); return 0; }
+		
+		m->mothurOutEndLine();
+		m->mothurOut("\t\tPound\tDash\tPlus\tEqual\tLoop\tTilde\tTotal"); m->mothurOutEndLine();
+		m->mothurOut("Minimum:\t" + toString(pound[0]) + "\t" + toString(dash[0]) + "\t" + toString(plus[0]) + "\t" + toString(equal[0]) + "\t" + toString(loop[0]) + "\t" + toString(tilde[0]) + "\t" + toString(total[0])); m->mothurOutEndLine();
+		m->mothurOut("2.5%-tile:\t" + toString(pound[ptile0_25]) + "\t" + toString(dash[ptile0_25]) + "\t" + toString(plus[ptile0_25]) + "\t" + toString(equal[ptile0_25]) + "\t"+ toString(loop[ptile0_25]) + "\t"+ toString(tilde[ptile0_25]) + "\t"+ toString(total[ptile0_25])); m->mothurOutEndLine();
+		m->mothurOut("25%-tile:\t" + toString(pound[ptile25]) + "\t" + toString(dash[ptile25]) + "\t" + toString(plus[ptile25]) + "\t" + toString(equal[ptile25]) + "\t" + toString(loop[ptile25]) + "\t" + toString(tilde[ptile25]) + "\t" + toString(total[ptile25])); m->mothurOutEndLine();
+		m->mothurOut("Median: \t" + toString(pound[ptile50]) + "\t" + toString(dash[ptile50]) + "\t" + toString(plus[ptile50]) + "\t" + toString(equal[ptile50]) + "\t" + toString(loop[ptile50]) + "\t" + toString(tilde[ptile50]) + "\t" + toString(total[ptile50])); m->mothurOutEndLine();
+		m->mothurOut("75%-tile:\t" + toString(pound[ptile75]) + "\t" + toString(dash[ptile75]) + "\t" + toString(plus[ptile75]) + "\t" + toString(equal[ptile75]) + "\t" + toString(loop[ptile75]) + "\t" + toString(tilde[ptile75]) + "\t" + toString(total[ptile75])); m->mothurOutEndLine();
+		m->mothurOut("97.5%-tile:\t" + toString(pound[ptile97_5]) + "\t" + toString(dash[ptile97_5]) + "\t" + toString(plus[ptile97_5]) + "\t" + toString(equal[ptile97_5]) + "\t" + toString(loop[ptile97_5]) + "\t" + toString(tilde[ptile97_5]) + "\t" + toString(total[ptile97_5])); m->mothurOutEndLine();
+		m->mothurOut("Maximum:\t" + toString(pound[ptile100]) + "\t" + toString(dash[ptile100]) + "\t" + toString(plus[ptile100]) + "\t" + toString(equal[ptile100]) + "\t" + toString(loop[ptile100]) + "\t" + toString(tilde[ptile100]) + "\t" + toString(total[ptile100])); m->mothurOutEndLine();
+		if (namefile == "") {  m->mothurOut("# of Seqs:\t" + toString(count)); m->mothurOutEndLine(); }
+		else { m->mothurOut("# of unique seqs:\t" + toString(count)); m->mothurOutEndLine(); m->mothurOut("total # of seqs:\t" + toString(size)); m->mothurOutEndLine(); }
+		
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
