@@ -18,7 +18,7 @@ class FlowData {
 
 public:
 	FlowData();
-	FlowData(int, float, float, int);
+	FlowData(int, float, float, int, string);
 	~FlowData();
 	bool getNext(ifstream&);
 	string getName();

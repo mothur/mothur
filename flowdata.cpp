@@ -19,14 +19,14 @@ FlowData::~FlowData(){	/*	do nothing	*/	}
 
 //**********************************************************************************************************************
 
-FlowData::FlowData(int numFlows, float signal, float noise, int maxHomoP) : 
-			numFlows(numFlows), signalIntensity(signal), noiseIntensity(noise), maxHomoP(maxHomoP){
+FlowData::FlowData(int numFlows, float signal, float noise, int maxHomoP, string baseFlow) : 
+			numFlows(numFlows), signalIntensity(signal), noiseIntensity(noise), maxHomoP(maxHomoP), baseFlow(baseFlow){
 
 	try {
 		m = MothurOut::getInstance();
 
 		flowData.assign(numFlows, 0);
-		baseFlow = "TACG";
+//		baseFlow = "TACG";
 		seqName = "";
 		locationString = "";
 	}
@@ -219,7 +219,7 @@ string FlowData::getName(){
 		return seqName;
 	}
 	catch(exception& e) {
-		m->errorOut(e, "FlowData", "getSequence");
+		m->errorOut(e, "FlowData", "getName");
 		exit(1);
 	}
 }
