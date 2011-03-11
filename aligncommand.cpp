@@ -422,62 +422,12 @@ int AlignCommand::execute(){
 	#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			if(processors == 1){
 				numFastaSeqs = driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s]);
-				
-				if (m->control_pressed) { remove(accnosFileName.c_str()); remove(alignFileName.c_str()); remove(reportFileName.c_str()); outputTypes.clear(); return 0; }
-				
-				//delete accnos file if its blank else report to user
-				if (m->isBlank(accnosFileName)) {  remove(accnosFileName.c_str());  hasAccnos = false; }
-				else { 
-					m->mothurOut("Some of you sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
-					if (!flip) {
-						m->mothurOut(" If you set the flip parameter to true mothur will try aligning the reverse compliment as well."); 
-					}else{  m->mothurOut(" If the reverse compliment proved to be better it was reported.");  }
-					m->mothurOutEndLine();
-				}
 			}else{
-				processIDS.resize(0);
-				
 				numFastaSeqs = createProcesses(alignFileName, reportFileName, accnosFileName, candidateFileNames[s]); 
-				
-				rename((alignFileName + toString(processIDS[0]) + ".temp").c_str(), alignFileName.c_str());
-				rename((reportFileName + toString(processIDS[0]) + ".temp").c_str(), reportFileName.c_str());
-				
-				//append alignment and report files
-				for(int i=1;i<processors;i++){
-					appendAlignFiles((alignFileName + toString(processIDS[i]) + ".temp"), alignFileName);
-					remove((alignFileName + toString(processIDS[i]) + ".temp").c_str());
-					
-					appendReportFiles((reportFileName + toString(processIDS[i]) + ".temp"), reportFileName);
-					remove((reportFileName + toString(processIDS[i]) + ".temp").c_str());
-				}
-				
-				vector<string> nonBlankAccnosFiles;
-				//delete blank accnos files generated with multiple processes
-				for(int i=0;i<processors;i++){  
-					if (!(m->isBlank(accnosFileName + toString(processIDS[i]) + ".temp"))) {
-						nonBlankAccnosFiles.push_back(accnosFileName + toString(processIDS[i]) + ".temp");
-					}else { remove((accnosFileName + toString(processIDS[i]) + ".temp").c_str());  }
-				}
-				
-				//append accnos files
-				if (nonBlankAccnosFiles.size() != 0) { 
-					rename(nonBlankAccnosFiles[0].c_str(), accnosFileName.c_str());
-					
-					for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
-						appendAlignFiles(nonBlankAccnosFiles[h], accnosFileName);
-						remove(nonBlankAccnosFiles[h].c_str());
-					}
-					m->mothurOut("Some of you sequences generated alignments that eliminated too many bases, a list is provided in " + accnosFileName + ".");
-					if (!flip) {
-						m->mothurOut(" If you set the flip parameter to true mothur will try aligning the reverse compliment as well."); 
-					}else{  m->mothurOut(" If the reverse compliment proved to be better it was reported.");  }
-					m->mothurOutEndLine();
-				}else{ hasAccnos = false;  }
-				
-				if (m->control_pressed) { remove(accnosFileName.c_str()); remove(alignFileName.c_str()); remove(reportFileName.c_str()); outputTypes.clear(); return 0; }
 			}
 	#else
 			numFastaSeqs = driver(lines[0], alignFileName, reportFileName, accnosFileName, candidateFileNames[s]);
+	#endif
 			
 			if (m->control_pressed) { remove(accnosFileName.c_str()); remove(alignFileName.c_str()); remove(reportFileName.c_str()); outputTypes.clear();  return 0; }
 			
@@ -490,8 +440,6 @@ int AlignCommand::execute(){
 				}else{  m->mothurOut(" If the reverse compliment proved to be better it was reported.");  }
 				m->mothurOutEndLine();
 			}
-			
-	#endif
 
 #endif		
 
@@ -827,7 +775,8 @@ int AlignCommand::driverMPI(int start, int num, MPI_File& inMPI, MPI_File& align
 int AlignCommand::createProcesses(string alignFileName, string reportFileName, string accnosFName, string filename) {
 	try {
 #if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
-		int process = 0;
+		processIDS.resize(0);
+		int process = 1;
 		int num = 0;
 		//		processIDS.resize(0);
 		
@@ -856,18 +805,50 @@ int AlignCommand::createProcesses(string alignFileName, string reportFileName, s
 			}
 		}
 		
+		//do my part
+		num = driver(lines[0], alignFileName, reportFileName, accnosFName, filename);
+		
 		//force parent to wait until all the processes are done
 		for (int i=0;i<processors;i++) { 
 			int temp = processIDS[i];
 			wait(&temp);
 		}
 		
+		vector<string> nonBlankAccnosFiles;
+		if (!(m->isBlank(accnosFName))) { nonBlankAccnosFiles.push_back(accnosFName); }
+		else { remove(accnosFName.c_str()); } //remove so other files can be renamed to it
+			
 		for (int i = 0; i < processIDS.size(); i++) {
 			ifstream in;
 			string tempFile =  alignFileName + toString(processIDS[i]) + ".num.temp";
 			m->openInputFile(tempFile, in);
 			if (!in.eof()) { int tempNum = 0; in >> tempNum; num += tempNum; }
 			in.close(); remove(tempFile.c_str());
+			
+			appendAlignFiles((alignFileName + toString(processIDS[i]) + ".temp"), alignFileName);
+			remove((alignFileName + toString(processIDS[i]) + ".temp").c_str());
+			
+			appendReportFiles((reportFileName + toString(processIDS[i]) + ".temp"), reportFileName);
+			remove((reportFileName + toString(processIDS[i]) + ".temp").c_str());
+			
+			if (!(m->isBlank(accnosFName + toString(processIDS[i]) + ".temp"))) {
+				nonBlankAccnosFiles.push_back(accnosFName + toString(processIDS[i]) + ".temp");
+			}else { remove((accnosFName + toString(processIDS[i]) + ".temp").c_str());  }
+			
+		}
+		
+		//append accnos files
+		if (nonBlankAccnosFiles.size() != 0) { 
+			rename(nonBlankAccnosFiles[0].c_str(), accnosFName.c_str());
+			
+			for (int h=1; h < nonBlankAccnosFiles.size(); h++) {
+				appendAlignFiles(nonBlankAccnosFiles[h], accnosFName);
+				remove(nonBlankAccnosFiles[h].c_str());
+			}
+		}else { //recreate the accnosfile if needed
+			ofstream out;
+			m->openOutputFile(accnosFName, out);
+			out.close();
 		}
 		
 		return num;
