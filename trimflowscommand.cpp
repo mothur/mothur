@@ -16,7 +16,7 @@ vector<string> TrimFlowsCommand::getValidParameters(){
 	try {
 		string Array[] =  {"flow", "maxflows", "minflows",
 			"fasta", "minlength", "maxlength", "maxhomop", "signal", "noise"
-			"oligos", "pdiffs", "bdiffs", "tdiffs", 
+			"oligos", "pdiffs", "bdiffs", "tdiffs",  "order",
 			"allfiles", "processors",
 			"outputdir","inputdir"
 		
@@ -106,7 +106,7 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			//valid paramters for this command
 			string AlignArray[] =  {"flow", "maxflows", "minflows",
 				"fasta", "minlength", "maxlength", "maxhomop", "signal", "noise",
-				"oligos", "pdiffs", "bdiffs", "tdiffs", 
+				"oligos", "pdiffs", "bdiffs", "tdiffs", "order",
 				"allfiles", "processors",
 		
 				//			"group",
@@ -226,7 +226,13 @@ TrimFlowsCommand::TrimFlowsCommand(string option)  {
 			
 			temp = validParameter.validFile(parameters, "processors", false);	if (temp == "not found"){ temp = "1";		}
 			convert(temp, processors); 
-			
+	
+			flowOrder = validParameter.validFile(parameters, "order", false);
+			if (flowOrder == "not found"){ flowOrder = "TACG";		}
+			else if(flowOrder.length() != 4){
+				m->mothurOut("The value of the order option must be four bases long\n");
+			}
+
 			if(oligoFileName == ""){	allFiles = 0;		}
 
 			numFPrimers = 0;
@@ -367,7 +373,7 @@ int TrimFlowsCommand::driverCreateTrim(string flowFileName, string trimFlowFileN
 			}
 		}
 		
-		FlowData flowData(numFlows, signal, noise, maxHomoP);
+		FlowData flowData(numFlows, signal, noise, maxHomoP, flowOrder);
 		
 		ofstream fastaFile;
 		if(fasta){	m->openOutputFile(fastaFileName, fastaFile);	}

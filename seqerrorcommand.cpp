@@ -15,7 +15,7 @@
 //**********************************************************************************************************************
 vector<string> SeqErrorCommand::getValidParameters(){	
 	try {
-		string Array[] =  {"query", "reference", "name", "qfile", "report", "threshold", "inputdir", "outputdir"};
+		string Array[] =  {"query", "reference", "name", "qfile", "report", "threshold", "ignorechimeras", "inputdir", "outputdir"};
 		vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
 		return myArray;
 	}

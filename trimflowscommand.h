@@ -65,7 +65,7 @@ private:
 	int numFlows;
 	float signal, noise;
 	bool fasta;
-	
+	string flowOrder;	
 	
 	string flowFileName, oligoFileName, outputDir;
 
