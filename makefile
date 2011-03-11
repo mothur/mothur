@@ -14,7 +14,7 @@ USEMPI ?= no
 USEREADLINE ?= yes
 CYGWIN_BUILD ?= no
 USECOMPRESSION ?= no
-MOTHUR_FILES = "\"../release\""
+MOTHUR_FILES="\"../release\""
 RELEASE_DATE = "\"2/7/2011\""
 VERSION = "\"1.16.0\""
 
