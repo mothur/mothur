@@ -37,6 +37,7 @@ private:
 
 	int processors, maxIters;
 	float cutoff, sigma, minDelta;
+	string flowOrder;
 	
 	vector<int> nSeqsBreaks;
 	vector<int> nOTUsBreaks;
