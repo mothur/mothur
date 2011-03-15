@@ -17,11 +17,12 @@
 #include "optionparser.h"
 #include "validparameter.h"
 #include "mothurout.h"
+#include "currentfile.h"
 
 class Command {
 	
 	public:
-		Command() {  m = MothurOut::getInstance();  }
+		Command() {  m = MothurOut::getInstance(); currentFiles = CurrentFile::getInstance();  }
 		virtual vector<string> getValidParameters() = 0;
 		virtual vector<string> getRequiredParameters() = 0; //adding "or" as the last element indicates one of the previous is needed
 		virtual vector<string> getRequiredFiles() = 0; //adding "or" as the last element indicates one of the previous is needed
@@ -31,7 +32,10 @@ class Command {
 		virtual ~Command() { }
 	protected:
 		MothurOut* m;
+		CurrentFile* currentFiles;
 		bool calledHelp;
+	
+		map<string, vector<string> >::iterator itTypes;
 };
 
 #endif

@@ -551,9 +551,9 @@ vector<Sequence*> Maligner::getBlastSeqs(Sequence* q, int num) {
 		}
 		
 		if (mergedResults.size() < numWanted) { numWanted = mergedResults.size(); }
-//cout << q->getName() <<  endl;		
+//cout << q->getName() << " merged results size = " << mergedResults.size() << '\t' << "numwanted = " << numWanted <<  endl;		
 		for (int i = 0; i < numWanted; i++) {
-//cout << db[mergedResults[i]]->getName() << endl;	
+//cout << db[mergedResults[i]]->getName()  << '\t' << mergedResults[i] << endl;	
 			if (db[mergedResults[i]]->getName() != q->getName()) { 
 				Sequence* temp = new Sequence(db[mergedResults[i]]->getName(), db[mergedResults[i]]->getAligned());
 				refResults.push_back(temp);
@@ -561,7 +561,7 @@ vector<Sequence*> Maligner::getBlastSeqs(Sequence* q, int num) {
 			}
 //cout << mergedResults[i] << endl;
 		}
-//cout << endl;		
+//cout << "done " << q->getName()  << endl;		
 		delete queryRight;
 		delete queryLeft;
 			

@@ -137,8 +137,11 @@ AlignCommand::AlignCommand(string option)  {
 			}else if (templateFileName == "not open") { abort = true; }	
 			
 			candidateFileName = validParameter.validFile(parameters, "candidate", false);
-			if (candidateFileName == "not found") { m->mothurOut("candidate is a required parameter for the align.seqs command."); m->mothurOutEndLine(); abort = true;  }
-			else { 
+			if (candidateFileName == "not found") { 
+				//check currentFiles for a fasta file
+				if (currentFiles->getFastaFile() != "") {  candidateFileName = currentFiles->getFastaFile(); m->mothurOut("Using " + candidateFileName + " as candidate file."); m->mothurOutEndLine();
+				}else { m->mothurOut("candidate is a required parameter for the align.seqs command."); m->mothurOutEndLine(); abort = true;  }
+			}else { 
 				m->splitAtDash(candidateFileName, candidateFileNames);
 				
 				//go through files and make sure they are good, if not, then disregard them
@@ -168,7 +171,7 @@ AlignCommand::AlignCommand(string option)  {
 						}
 					}
 					
-					//if you can't open it, try default location
+					//if you can't open it, try output location
 					if (ableToOpen == 1) {
 						if (m->getOutputDir() != "") { //default path is set
 							string tryPath = m->getOutputDir() + m->getSimpleName(candidateFileNames[i]);
@@ -463,7 +466,14 @@ int AlignCommand::execute(){
 			m->mothurOutEndLine();
 		}
 		
-		
+		//set align file as new current fastafile
+		string currentFasta = "";
+		itTypes = outputTypes.find("fasta");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { currentFasta = (itTypes->second)[0]; }
+		}
+		currentFiles->setFastaFile(currentFasta);
+		cout << "current fasta = " << currentFiles->getFastaFile() << endl;
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
