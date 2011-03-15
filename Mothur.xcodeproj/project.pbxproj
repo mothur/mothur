@@ -18,6 +18,7 @@
 		A75790591301749D00A30DAB /* homovacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A75790581301749D00A30DAB /* homovacommand.cpp */; };
 		A799F5B91309A3E000AEEFA0 /* makefastqcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A799F5B81309A3E000AEEFA0 /* makefastqcommand.cpp */; };
 		A7A61F2D130062E000E05B6B /* amovacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A61F2C130062E000E05B6B /* amovacommand.cpp */; };
+		A7AACFBC132FE008003D6C4D /* currentfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7AACFBB132FE008003D6C4D /* currentfile.cpp */; };
 		A7E9B88112D37EC400DA6239 /* ace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B64F12D37EC300DA6239 /* ace.cpp */; };
 		A7E9B88212D37EC400DA6239 /* aligncommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65112D37EC300DA6239 /* aligncommand.cpp */; };
 		A7E9B88312D37EC400DA6239 /* alignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65312D37EC300DA6239 /* alignment.cpp */; };
@@ -329,6 +330,8 @@
 		A7A61F1A130035C800E05B6B /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		A7A61F2B130062E000E05B6B /* amovacommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = amovacommand.h; sourceTree = "<group>"; };
 		A7A61F2C130062E000E05B6B /* amovacommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = amovacommand.cpp; sourceTree = "<group>"; };
+		A7AACFBA132FE008003D6C4D /* currentfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = currentfile.h; sourceTree = "<group>"; };
+		A7AACFBB132FE008003D6C4D /* currentfile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = currentfile.cpp; sourceTree = "<group>"; };
 		A7E9B64F12D37EC300DA6239 /* ace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ace.cpp; sourceTree = "<group>"; };
 		A7E9B65012D37EC300DA6239 /* ace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ace.h; sourceTree = "<group>"; };
 		A7E9B65112D37EC300DA6239 /* aligncommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = aligncommand.cpp; sourceTree = "<group>"; };
@@ -946,6 +949,8 @@
 				A7E9B6B212D37EC400DA6239 /* commandoptionparser.hpp */,
 				A7E9B6B412D37EC400DA6239 /* completelinkage.cpp */,
 				A7E9BA4212D3960D00DA6239 /* containers */,
+				A7AACFBA132FE008003D6C4D /* currentfile.h */,
+				A7AACFBB132FE008003D6C4D /* currentfile.cpp */,
 				A7E9B6C912D37EC400DA6239 /* display.h */,
 				A7E9B6D112D37EC400DA6239 /* dlibshuff.cpp */,
 				A7E9B6D212D37EC400DA6239 /* dlibshuff.h */,
@@ -1933,6 +1938,7 @@
 				A7FA10021302E097003860FE /* mantelcommand.cpp in Sources */,
 				A799F5B91309A3E000AEEFA0 /* makefastqcommand.cpp in Sources */,
 				A71CB160130B04A2001E7287 /* anosimcommand.cpp in Sources */,
+				A7AACFBC132FE008003D6C4D /* currentfile.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

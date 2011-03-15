@@ -140,6 +140,7 @@ vector<int> BlastDB::findClosestMegaBlast(Sequence* seq, int n) {
 		
 		while(!m8FileHandle.eof()){
 			m8FileHandle >> dummy >> templateAccession >> searchScore;
+			//cout << templateAccession << '\t' << searchScore << endl;
 			
 			//get rest of junk in line
 			while (!m8FileHandle.eof())	{	char c = m8FileHandle.get(); if (c == 10 || c == 13){	break;	}	} 
