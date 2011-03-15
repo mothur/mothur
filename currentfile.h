@@ -10,6 +10,7 @@
  *
  */
 
+#include "mothurout.h"
 #include "mothur.h"
 
 /***********************************************/
@@ -39,31 +40,33 @@ public:
 	string getOligosFile()		{ return oligosfile;		}
 	
 	
-	void setListFile(string f)			{ listfile = f;				}
-	void setTreeFile(string f)			{ treefile = f;				}
-	void setGroupFile(string f)			{ groupfile = f;			}		
-	void setPhylipFile(string f)		{ phylipfile = f;			}
-	void setColumnFile(string f)		{ columnfile = f;			}
-	void setNameFile(string f)			{ namefile = f;				}	
-	void setRabundFile(string f)		{ rabundfile = f;			}
-	void setSabundFile(string f)		{ sabundfile = f;			}
-	void setSharedFile(string f)		{ sharedfile = f;			}
-	void setRelAbundFile(string f)		{ relabundfile = f;			}
-	void setOrderFile(string f)			{ orderfile = f;			}
-	void setOrderGroupFile(string f)	{ ordergroupfile = f;		}
-	void setDesignFile(string f)		{ designfile = f;			}
-	void setFastaFile(string f)			{ fastafile = f;			}
-	void setSFFFile(string f)			{ sfffile = f;				}
-	void setQualFile(string f)			{ qualfile = f;				}
-	void setOligosFile(string f)		{ oligosfile = f;			}
+	void setListFile(string f)			{ listfile = m->getFullPathName(f);				}
+	void setTreeFile(string f)			{ treefile = m->getFullPathName(f);				}
+	void setGroupFile(string f)			{ groupfile = m->getFullPathName(f);			}		
+	void setPhylipFile(string f)		{ phylipfile = m->getFullPathName(f);			}
+	void setColumnFile(string f)		{ columnfile = m->getFullPathName(f);			}
+	void setNameFile(string f)			{ namefile = m->getFullPathName(f);				}	
+	void setRabundFile(string f)		{ rabundfile = m->getFullPathName(f);			}
+	void setSabundFile(string f)		{ sabundfile = m->getFullPathName(f);			}
+	void setSharedFile(string f)		{ sharedfile = m->getFullPathName(f);			}
+	void setRelAbundFile(string f)		{ relabundfile = m->getFullPathName(f);			}
+	void setOrderFile(string f)			{ orderfile = m->getFullPathName(f);			}
+	void setOrderGroupFile(string f)	{ ordergroupfile = m->getFullPathName(f);		}
+	void setDesignFile(string f)		{ designfile = m->getFullPathName(f);			}
+	void setFastaFile(string f)			{ fastafile = m->getFullPathName(f);			}
+	void setSFFFile(string f)			{ sfffile = m->getFullPathName(f);				}
+	void setQualFile(string f)			{ qualfile = m->getFullPathName(f);				}
+	void setOligosFile(string f)		{ oligosfile = m->getFullPathName(f);			}
 	
 private:
+	
 	static CurrentFile* _uniqueInstance;
 	CurrentFile( const CurrentFile& ); // Disable copy constructor
 	void operator=( const CurrentFile& ); // Disable assignment operator
 	CurrentFile();
 	~CurrentFile();
 	
+	MothurOut* m;
 	string phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile;
 	string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile;
 	

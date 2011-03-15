@@ -18,6 +18,8 @@ CurrentFile* CurrentFile::getInstance() {
 }
 /*********************************************************************************************/
 CurrentFile::CurrentFile() { 
+	m = MothurOut::getInstance();
+	
 	phylipfile = "";
 	columnfile = "";
 	listfile = "";
