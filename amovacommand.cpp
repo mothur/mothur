@@ -119,8 +119,8 @@ AmovaCommand::AmovaCommand(string option) {
 				phylipFileName = ""; 
 				
 				//check currentFiles for a phylip file
-				if (currentFiles->getPhylipFile() != "") {  phylipFileName = currentFiles->getPhylipFile(); m->mothurOut("Using " + phylipFileName + " as phylip file."); m->mothurOutEndLine();
-				}else { m->mothurOut("You must provide an phylip file."); m->mothurOutEndLine(); abort = true;  }
+				//if (currentFiles->getPhylipFile() != "") {  phylipFileName = currentFiles->getPhylipFile(); m->mothurOut("Using " + phylipFileName + " as phylip file."); m->mothurOutEndLine();
+				//}else { m->mothurOut("You must provide an phylip file."); m->mothurOutEndLine(); abort = true;  }
 			}	
 			
 			//check for required parameters
@@ -130,8 +130,8 @@ AmovaCommand::AmovaCommand(string option) {
 				designFileName = "";
 				
 				//check currentFiles for a design file
-				if (currentFiles->getDesignFile() != "") {  designFileName = currentFiles->getPhylipFile(); m->mothurOut("Using " + designFileName + " as phylip file."); m->mothurOutEndLine();
-				}else { m->mothurOut("You must provide an design file."); m->mothurOutEndLine(); abort = true;  }
+				//if (currentFiles->getDesignFile() != "") {  designFileName = currentFiles->getDesignFile(); m->mothurOut("Using " + designFileName + " as design file."); m->mothurOutEndLine();
+				//}else { m->mothurOut("You must provide an design file."); m->mothurOutEndLine(); abort = true;  }
 			}	
 
 			string temp = validParameter.validFile(parameters, "iters", false);

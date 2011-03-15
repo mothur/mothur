@@ -79,6 +79,7 @@ AlignCommand::AlignCommand(){
 AlignCommand::AlignCommand(string option)  {
 	try {
 		abort = false; calledHelp = false;   
+		currentFiles = CurrentFile::getInstance();
 	
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true;}
