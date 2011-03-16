@@ -182,6 +182,7 @@ int CatchAllCommand::execute() {
 		path = path.substr(0, (path.find_last_of("othur")-5));
 		path = m->getFullPathName(path);
 		
+		savedOutputDir = outputDir;
 		string catchAllCommandExe = ""; 
 		#if defined (__APPLE__) || (__MACH__) || (linux) || (__linux)
 			catchAllCommandExe += "mono " + path + "CatchAllcmdL.exe ";
@@ -246,6 +247,7 @@ int CatchAllCommand::execute() {
 						remove(filename.c_str());
 					
 						filename = m->getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
+						if (savedOutputDir == "") { filename = m->getSimpleName(filename); }
 					
 						outputNames.push_back(filename + "_Analysis.csv"); outputTypes["csv"].push_back(filename + "_Analysis.csv");
 						outputNames.push_back(filename + "_BestModelsAnalysis.csv"); outputTypes["csv"].push_back(filename + "_BestModelsAnalysis.csv");
@@ -289,6 +291,7 @@ int CatchAllCommand::execute() {
 						remove(filename.c_str());
 					
 						filename = m->getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
+						if (savedOutputDir == "") { filename = m->getSimpleName(filename); }
 					
 						outputNames.push_back(filename + "_Analysis.csv"); outputTypes["csv"].push_back(filename + "_Analysis.csv");
 						outputNames.push_back(filename + "_BestModelsAnalysis.csv"); outputTypes["csv"].push_back(filename + "_BestModelsAnalysis.csv");
@@ -353,6 +356,7 @@ int CatchAllCommand::execute() {
 				remove(filename.c_str());
 				
 				filename = m->getRootName(filename); filename = filename.substr(0, filename.length()-1); //rip off extra .
+				if (savedOutputDir == "") { filename = m->getSimpleName(filename); }
 				
 				outputNames.push_back(filename + "_Analysis.csv"); outputTypes["csv"].push_back(filename + "_Analysis.csv");
 				outputNames.push_back(filename + "_BestModelsAnalysis.csv"); outputTypes["csv"].push_back(filename + "_BestModelsAnalysis.csv");
@@ -372,7 +376,7 @@ int CatchAllCommand::execute() {
 		}
 		
 		if (sharedfile == "") {  
-			string summaryfilename = outputDir + m->getRootName(m->getSimpleName(inputFileNames[0])) + "catchall.summary";
+			string summaryfilename = savedOutputDir + m->getRootName(m->getSimpleName(inputFileNames[0])) + "catchall.summary";
 			summaryfilename = m->getFullPathName(summaryfilename);
 			outputNames.push_back(summaryfilename); outputTypes["summary"].push_back(summaryfilename);
 		}else { //combine summaries
@@ -430,7 +434,7 @@ string CatchAllCommand::combineSummmary(vector<string>& outputNames) {
 	try {
 		
 		ofstream out;
-		string combineFileName = outputDir + m->getRootName(m->getSimpleName(sharedfile)) + "catchall.summary";
+		string combineFileName = savedOutputDir + m->getRootName(m->getSimpleName(sharedfile)) + "catchall.summary";
 		
 		//open combined file
 		m->openOutputFile(combineFileName, out);

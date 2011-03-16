@@ -39,7 +39,7 @@ private:
 
 	GlobalData* globaldata;
 	
-	string outputDir, sharedfile, sabundfile, rabundfile, listfile, format, path;
+	string outputDir, sharedfile, sabundfile, rabundfile, listfile, format, path, savedOutputDir;
 	bool abort, allLines;
 	set<string> labels;
 	vector<string> outputNames;
