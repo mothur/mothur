@@ -382,6 +382,8 @@ int CatchAllCommand::execute() {
 			}
 			string summaryfilename = combineSummmary(sumNames);
 			outputNames.push_back(summaryfilename); outputTypes["summary"].push_back(summaryfilename);
+			
+			globaldata->setSharedFile(sharedfile); globaldata->setFormat("sharedfile");
 		}
 		
 		m->mothurOutEndLine();
