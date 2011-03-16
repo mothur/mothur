@@ -215,6 +215,13 @@ int DeUniqueSeqsCommand::execute() {
 		outputNames.push_back(outFastaFile);  outputTypes["fasta"].push_back(outFastaFile);  
 		m->mothurOutEndLine();
 		
+		//set fasta file as new current fastafile
+		string current = "";
+		itTypes = outputTypes.find("fasta");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+		}
+		
 		return 0;
 	}
 	catch(exception& e) {

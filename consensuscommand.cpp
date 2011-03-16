@@ -211,6 +211,13 @@ int ConcensusCommand::execute(){
 		
 		delete consensusTree; 
 		
+		//set first tree file as new current treefile
+		string currentTree = "";
+		itTypes = outputTypes.find("tree");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { currentTree = (itTypes->second)[0]; m->setTreeFile(currentTree); }
+		}
+		
 		return 0;
 	}
 	catch(exception& e) {

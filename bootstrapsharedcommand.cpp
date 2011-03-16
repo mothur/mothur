@@ -340,6 +340,13 @@ int BootSharedCommand::execute(){
 		//reset groups parameter
 		globaldata->Groups.clear();  
 		
+		//set first tree file as new current treefile
+		string currentTree = "";
+		itTypes = outputTypes.find("tree");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { currentTree = (itTypes->second)[0]; m->setTreeFile(currentTree); }
+		}
+		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}

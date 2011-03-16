@@ -334,6 +334,20 @@ int GetSharedOTUCommand::execute(){
 		
 		if (m->control_pressed) { outputTypes.clear(); for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); }  delete groupMap; return 0; } 
 		
+		//set fasta file as new current fastafile
+		string current = "";
+		itTypes = outputTypes.find("fasta");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+		}
+		
+		if (output == "accnos") {
+			itTypes = outputTypes.find("accnos");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setAccnosFile(current); }
+			}
+		}
+		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}

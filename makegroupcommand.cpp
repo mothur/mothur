@@ -229,7 +229,14 @@ int MakeGroupCommand::execute(){
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: " + filename); m->mothurOutEndLine(); outputNames.push_back(filename); outputTypes["group"].push_back(filename); 
 		m->mothurOutEndLine();
-
+		
+		//set group file as new current groupfile
+		string current = "";
+		itTypes = outputTypes.find("group");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setGroupFile(current); }
+		}
+		
 		return 0;
 	}
 	catch(exception& e) {

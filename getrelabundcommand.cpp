@@ -263,6 +263,13 @@ int GetRelAbundCommand::execute(){
 		m->mothurOut(outputFileName); m->mothurOutEndLine(); outputNames.push_back(outputFileName); outputTypes["relabund"].push_back(outputFileName);
 		m->mothurOutEndLine();
 		
+		//set relabund file as new current relabundfile
+		string current = "";
+		itTypes = outputTypes.find("relabund");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setRelAbundFile(current); }
+		}
+		
 		return 0;
 	}
 	catch(exception& e) {

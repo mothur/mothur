@@ -30,7 +30,7 @@ SffInfoCommand::SffInfoCommand(){
 		outputTypes["fasta"] = tempOutNames;
 		outputTypes["flow"] = tempOutNames;
 		outputTypes["sfftxt"] = tempOutNames;
-		outputTypes["qual"] = tempOutNames;
+		outputTypes["qfile"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "SffInfoCommand", "SffInfoCommand");
@@ -89,7 +89,7 @@ SffInfoCommand::SffInfoCommand(string option)  {
 			outputTypes["fasta"] = tempOutNames;
 			outputTypes["flow"] = tempOutNames;
 			outputTypes["sfftxt"] = tempOutNames;
-			outputTypes["qual"] = tempOutNames;
+			outputTypes["qfile"] = tempOutNames;
 			
 			//if the user changes the output directory command factory will send this info to us in the output parameter 
 			outputDir = validParameter.validFile(parameters, "outputdir", false);		if (outputDir == "not found"){	outputDir = "";		}
@@ -300,6 +300,18 @@ int SffInfoCommand::execute(){
 		
 		if (m->control_pressed) {  for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); 	} return 0; }
 		
+		//set fasta file as new current fastafile
+		string current = "";
+		itTypes = outputTypes.find("fasta");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+		}
+		
+		itTypes = outputTypes.find("qfile");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setQualFile(current); }
+		}	
+		
 		//report output filenames
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
@@ -336,7 +348,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos){
 		
 		if (sfftxt) { m->openOutputFile(sfftxtFileName, outSfftxt); outSfftxt.setf(ios::fixed, ios::floatfield); outSfftxt.setf(ios::showpoint);  outputNames.push_back(sfftxtFileName);  outputTypes["sfftxt"].push_back(sfftxtFileName); }
 		if (fasta)	{ m->openOutputFile(outFastaFileName, outFasta);	outputNames.push_back(outFastaFileName); outputTypes["fasta"].push_back(outFastaFileName); }
-		if (qual)	{ m->openOutputFile(outQualFileName, outQual);		outputNames.push_back(outQualFileName); outputTypes["qual"].push_back(outQualFileName);  }
+		if (qual)	{ m->openOutputFile(outQualFileName, outQual);		outputNames.push_back(outQualFileName); outputTypes["qfile"].push_back(outQualFileName);  }
 		if (flow)	{ m->openOutputFile(outFlowFileName, outFlow);		outputNames.push_back(outFlowFileName);  outFlow.setf(ios::fixed, ios::floatfield); outFlow.setf(ios::showpoint); outputTypes["flow"].push_back(outFlowFileName);  }
 		
 		ifstream in;

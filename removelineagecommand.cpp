@@ -256,6 +256,33 @@ int RemoveLineageCommand::execute(){
 			m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 			m->mothurOutEndLine();
+			
+			//set fasta file as new current fastafile
+			string current = "";
+			itTypes = outputTypes.find("fasta");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+			}
+			
+			itTypes = outputTypes.find("name");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setNameFile(current); }
+			}
+			
+			itTypes = outputTypes.find("group");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setGroupFile(current); }
+			}
+			
+			itTypes = outputTypes.find("list");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setListFile(current); }
+			}
+			
+			itTypes = outputTypes.find("taxonomy");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTaxonomyFile(current); }
+			}
 		}
 		
 		return 0;		

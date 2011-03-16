@@ -91,17 +91,86 @@ class MothurOut {
 		int control_pressed;
 		bool executing;
 		
+		//current files - if you add a new type you must edit optionParser->getParameters, get.current command and mothurOut->printCurrentFiles/clearCurrentFiles.
+		string getPhylipFile()		{ return phylipfile;		}
+		string getColumnFile()		{ return columnfile;		}
+		string getListFile()		{ return listfile;			}
+		string getRabundFile()		{ return rabundfile;		}
+		string getSabundFile()		{ return sabundfile;		}
+		string getNameFile()		{ return namefile;			}	
+		string getGroupFile()		{ return groupfile;			}	
+		string getOrderFile()		{ return orderfile;			}
+		string getOrderGroupFile()	{ return ordergroupfile;	}
+		string getTreeFile()		{ return treefile;			}
+		string getSharedFile()		{ return sharedfile;		}
+		string getRelAbundFile()	{ return relabundfile;		}
+		string getDesignFile()		{ return designfile;		}
+		string getFastaFile()		{ return fastafile;			}
+		string getSFFFile()			{ return sfffile;			}
+		string getQualFile()		{ return qualfile;			}
+		string getOligosFile()		{ return oligosfile;		}
+		string getAccnosFile()		{ return accnosfile;		}
+		string getTaxonomyFile()	{ return taxonomyfile;		}
+		
+		void setListFile(string f)			{ listfile = getFullPathName(f);			}
+		void setTreeFile(string f)			{ treefile = getFullPathName(f);			}
+		void setGroupFile(string f)			{ groupfile = getFullPathName(f);			}		
+		void setPhylipFile(string f)		{ phylipfile = getFullPathName(f);			}
+		void setColumnFile(string f)		{ columnfile = getFullPathName(f);			}
+		void setNameFile(string f)			{ namefile = getFullPathName(f);			}	
+		void setRabundFile(string f)		{ rabundfile = getFullPathName(f);			}
+		void setSabundFile(string f)		{ sabundfile = getFullPathName(f);			}
+		void setSharedFile(string f)		{ sharedfile = getFullPathName(f);			}
+		void setRelAbundFile(string f)		{ relabundfile = getFullPathName(f);		}
+		void setOrderFile(string f)			{ orderfile = getFullPathName(f);			}
+		void setOrderGroupFile(string f)	{ ordergroupfile = getFullPathName(f);		}
+		void setDesignFile(string f)		{ designfile = getFullPathName(f);			}
+		void setFastaFile(string f)			{ fastafile = getFullPathName(f);			}
+		void setSFFFile(string f)			{ sfffile = getFullPathName(f);				}
+		void setQualFile(string f)			{ qualfile = getFullPathName(f);			}
+		void setOligosFile(string f)		{ oligosfile = getFullPathName(f);			}
+		void setAccnosFile(string f)		{ accnosfile = getFullPathName(f);			}
+		void setTaxonomyFile(string f)		{ taxonomyfile = getFullPathName(f);		}
+		
+		void printCurrentFiles();
+		void clearCurrentFiles();
+		
 	private:
 		static MothurOut* _uniqueInstance;
 		MothurOut( const MothurOut& ); // Disable copy constructor
 		void operator=( const MothurOut& ); // Disable assignment operator
-		MothurOut() { control_pressed = false; defaultPath=""; };
+		MothurOut() { 
+			control_pressed = false; defaultPath=""; 
+			phylipfile = "";
+			columnfile = "";
+			listfile = "";
+			rabundfile = "";
+			sabundfile = "";
+			namefile = "";
+			groupfile = "";
+			designfile = "";
+			orderfile = "";
+			treefile = "";
+			sharedfile = "";
+			ordergroupfile = "";
+			relabundfile = "";
+			fastafile = "";
+			qualfile = "";
+			sfffile = "";
+			oligosfile = "";
+			accnosfile = "";
+			taxonomyfile = "";
+		};
 		~MothurOut();
 
 		string logFileName;
 		string defaultPath, outputDir;
 		string releaseDate, version;
-		
+	
+		string accnosfile, phylipfile, columnfile, listfile, rabundfile, sabundfile, namefile, groupfile, designfile, taxonomyfile;
+		string orderfile, treefile, sharedfile, ordergroupfile, relabundfile, fastafile, qualfile, sfffile, oligosfile;
+
+	
 		ofstream out;
 		
 		int mem_usage(double&, double&);

@@ -387,7 +387,7 @@ int BinSeqCommand::process(ListVector* list) {
 						if (sequence != "not found") {
 							//if you don't have groups
 							if (groupfile == "") {
-								name = name + "|" + toString(i+1);
+								name = name + "\t" + toString(i+1);
 								out << ">" << name << endl;
 								out << sequence << endl;
 							}else {//if you do have groups
@@ -396,7 +396,7 @@ int BinSeqCommand::process(ListVector* list) {
 									m->mothurOut(name + " is missing from your group file. Please correct. ");  m->mothurOutEndLine();
 									return 1;
 								}else{
-									name = name + "|" + group + "|" + toString(i+1);
+									name = name + "\t" + group + "\t" + toString(i+1);
 									out << ">" << name << endl;
 									out << sequence << endl;
 								}
@@ -413,7 +413,7 @@ int BinSeqCommand::process(ListVector* list) {
 					if (sequence != "not found") {
 						//if you don't have groups
 						if (groupfile == "") {
-							binnames = binnames + "|" + toString(i+1);
+							binnames = binnames + "\t" + toString(i+1);
 							out << ">" << binnames << endl;
 							out << sequence << endl;
 						}else {//if you do have groups
@@ -422,7 +422,7 @@ int BinSeqCommand::process(ListVector* list) {
 								m->mothurOut(binnames + " is missing from your group file. Please correct. "); m->mothurOutEndLine();
 								return 1;
 							}else{
-								binnames = binnames + "|" + group + "|" + toString(i+1);
+								binnames = binnames + "\t" + group + "\t" + toString(i+1);
 								out << ">" << binnames << endl;
 								out << sequence << endl;
 							}

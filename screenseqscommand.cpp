@@ -484,6 +484,23 @@ int ScreenSeqsCommand::execute(){
 		for (int i = 0; i < outputNames.size(); i++) { m->mothurOut(outputNames[i]); m->mothurOutEndLine(); }
 		m->mothurOutEndLine();
 		m->mothurOutEndLine();
+		
+		//set fasta file as new current fastafile
+		string current = "";
+		itTypes = outputTypes.find("fasta");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+		}
+		
+		itTypes = outputTypes.find("name");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setNameFile(current); }
+		}
+		
+		itTypes = outputTypes.find("group");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setGroupFile(current); }
+		}
 
 		m->mothurOut("It took " + toString(time(NULL) - start) + " secs to screen " + toString(numFastaSeqs) + " sequences.");
 		m->mothurOutEndLine();

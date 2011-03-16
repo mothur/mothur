@@ -245,7 +245,19 @@ int PreClusterCommand::execute(){
 		m->mothurOut(newFastaFile); m->mothurOutEndLine();	outputNames.push_back(newFastaFile); outputTypes["fasta"].push_back(newFastaFile);
 		m->mothurOut(newNamesFile); m->mothurOutEndLine();	outputNames.push_back(newNamesFile); outputTypes["name"].push_back(newNamesFile);
 		m->mothurOutEndLine();
-
+		
+		//set fasta file as new current fastafile
+		string current = "";
+		itTypes = outputTypes.find("fasta");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+		}
+		
+		itTypes = outputTypes.find("name");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setNameFile(current); }
+		}
+		
 		return 0;
 		
 	}

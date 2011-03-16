@@ -321,6 +321,18 @@ int SharedCommand::execute(){
 				return 1; 
 		}
 		
+		//set rabund file as new current rabundfile
+		string current = "";
+		itTypes = outputTypes.find("rabund");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setRabundFile(current); }
+		}
+		
+		itTypes = outputTypes.find("shared");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSharedFile(current); }
+		}	
+		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}

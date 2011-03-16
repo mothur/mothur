@@ -476,7 +476,14 @@ int TreeGroupCommand::execute(){
 		}
 				
 		//reset groups parameter
-		globaldata->Groups.clear();  
+		globaldata->Groups.clear(); 
+		
+		//set tree file as new current treefile
+		string current = "";
+		itTypes = outputTypes.find("tree");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTreeFile(current); }
+		}
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

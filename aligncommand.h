@@ -15,7 +15,6 @@
 #include "database.hpp"
 #include "alignment.hpp"
 #include "alignmentdb.h"
-#include "mothurfiles.h"
 
 class AlignCommand : public Command {
 	
@@ -60,7 +59,6 @@ private:
 	vector<string> outputNames;
 	
 	bool abort, flip, calledHelp;
-	CurrentFile* currentFiles;
 
 };
 

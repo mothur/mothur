@@ -79,7 +79,6 @@ AlignCommand::AlignCommand(){
 AlignCommand::AlignCommand(string option)  {
 	try {
 		abort = false; calledHelp = false;   
-		currentFiles = CurrentFile::getInstance();
 	
 		//allow user to run help
 		if(option == "help") { help(); abort = true; calledHelp = true;}
@@ -139,9 +138,6 @@ AlignCommand::AlignCommand(string option)  {
 			
 			candidateFileName = validParameter.validFile(parameters, "candidate", false);
 			if (candidateFileName == "not found") { 
-				//check currentFiles for a fasta file
-				if (currentFiles->getFastaFile() != "") {  candidateFileName = currentFiles->getFastaFile(); m->mothurOut("Using " + candidateFileName + " as candidate file."); m->mothurOutEndLine();
-				}else { m->mothurOut("candidate is a required parameter for the align.seqs command."); m->mothurOutEndLine(); abort = true;  }
 			}else { 
 				m->splitAtDash(candidateFileName, candidateFileNames);
 				
@@ -471,10 +467,9 @@ int AlignCommand::execute(){
 		string currentFasta = "";
 		itTypes = outputTypes.find("fasta");
 		if (itTypes != outputTypes.end()) {
-			if ((itTypes->second).size() != 0) { currentFasta = (itTypes->second)[0]; }
+			if ((itTypes->second).size() != 0) { currentFasta = (itTypes->second)[0]; m->setFastaFile(currentFasta); }
 		}
-		currentFiles->setFastaFile(currentFasta);
-		cout << "current fasta = " << currentFiles->getFastaFile() << endl;
+		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}

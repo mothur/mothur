@@ -682,6 +682,13 @@ int ClassifySeqsCommand::execute(){
 			m->mothurOutEndLine();
 		}
 		
+		//set taxonomy file as new current taxonomyfile
+		string current = "";
+		itTypes = outputTypes.find("taxonomy");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTaxonomyFile(current); }
+		}
+		
 		delete classify;
 		return 0;
 	}

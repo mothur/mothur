@@ -325,6 +325,13 @@ int IndicatorCommand::execute(){
 			delete outputTree; delete globaldata->gTreemap;  return 0; 
 		}
 		
+		//set tree file as new current treefile
+		string current = "";
+		itTypes = outputTypes.find("tree");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setTreeFile(current); }
+		}
+		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}

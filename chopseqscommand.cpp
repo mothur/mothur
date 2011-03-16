@@ -133,7 +133,7 @@ ChopSeqsCommand::ChopSeqsCommand(string option)  {
 
 void ChopSeqsCommand::help(){
 	try {
-		m->mothurOut("The chop.seqs command reads a fasta file and outputs a .chop.fasta containing the trimmed sequences.\n");
+		m->mothurOut("The chop.seqs command reads a fasta file and outputs a .chop.fasta containing the trimmed sequences. Note: If a sequence is completely 'chopped', an accnos file will be created with the names of the sequences removed. \n");
 		m->mothurOut("The chop.seqs command parameters are fasta, numbases, countgaps and keep. fasta and numbases are required required.\n");
 		m->mothurOut("The chop.seqs command should be in the following format: chop.seqs(fasta=yourFasta, numbases=yourNum, keep=yourKeep).\n");
 		m->mothurOut("The numbases parameter allows you to specify the number of bases you want to keep.\n");
@@ -201,6 +201,21 @@ int ChopSeqsCommand::execute(){
 		else {  remove(outputFileNameAccnos.c_str());  }
 		
 		m->mothurOutEndLine();
+		
+		//set fasta file as new current fastafile
+		string current = "";
+		itTypes = outputTypes.find("fasta");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+		}
+		
+		if (wroteAccnos) { //set accnos file as new current accnosfile
+			itTypes = outputTypes.find("accnos");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setAccnosFile(current); }
+			}
+		}
+		
 		
 		return 0;		
 	}
