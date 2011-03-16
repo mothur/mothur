@@ -52,7 +52,6 @@ ChimeraBellerophonCommand::ChimeraBellerophonCommand(){
 		vector<string> tempOutNames;
 		outputTypes["chimera"] = tempOutNames;
 		outputTypes["accnos"] = tempOutNames;
-		outputTypes["fasta"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ChimeraBellerophonCommand", "ChimeraBellerophonCommand");
@@ -87,7 +86,6 @@ ChimeraBellerophonCommand::ChimeraBellerophonCommand(string option)  {
 			vector<string> tempOutNames;
 			outputTypes["chimera"] = tempOutNames;
 			outputTypes["accnos"] = tempOutNames;
-			outputTypes["fasta"] = tempOutNames;
 		
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -269,6 +267,13 @@ int ChimeraBellerophonCommand::execute(){
 			outputNames.push_back(accnosFileName);  outputTypes["accnos"].push_back(accnosFileName);
 			
 			delete chimera;
+		}
+		
+		//set accnos file as new current accnosfile
+		string current = "";
+		itTypes = outputTypes.find("accnos");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setAccnosFile(current); }
 		}
 		
 		m->mothurOutEndLine();

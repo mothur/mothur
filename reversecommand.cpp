@@ -181,7 +181,7 @@ int ReverseSeqsCommand::execute(){
 			}
 			inFASTA.close();
 			outFASTA.close();
-			outputNames.push_back(fastaReverseFileName);
+			outputNames.push_back(fastaReverseFileName); outputTypes["fasta"].push_back(fastaReverseFileName);
 		}
 		
 		string qualReverseFileName;
@@ -204,8 +204,23 @@ int ReverseSeqsCommand::execute(){
 			}
 			inQual.close();
 			outQual.close();
-			outputNames.push_back(qualReverseFileName);
+			outputNames.push_back(qualReverseFileName); outputTypes["qfile"].push_back(qualReverseFileName);
 		}
+		
+		if (m->control_pressed) {  remove(qualReverseFileName.c_str()); remove(fastaReverseFileName.c_str()); return 0; }
+		
+		//set fasta file as new current fastafile
+		string current = "";
+		itTypes = outputTypes.find("fasta");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+		}
+		
+		itTypes = outputTypes.find("qfile");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setQualFile(current); }
+		}
+		
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
@@ -213,6 +228,8 @@ int ReverseSeqsCommand::execute(){
 			m->mothurOut(outputNames[i]);
 			m->mothurOutEndLine();
 		}
+		
+		
 		
 		return 0;
 	}

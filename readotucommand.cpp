@@ -310,8 +310,22 @@ int ReadOtuCommand::execute(){
 			
 			outputTypes = shared->getOutputFiles();
 			
+			//set rabund file as new current rabundfile
+			string current = "";
+			itTypes = outputTypes.find("rabund");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setRabundFile(current); }
+			}
+			
+			itTypes = outputTypes.find("shared");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSharedFile(current); }
+			}			
+			
 			delete shared;
 		}
+		
+				
 		return 0;
 	}
 	catch(exception& e) {

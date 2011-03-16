@@ -381,6 +381,13 @@ int NormalizeSharedCommand::execute(){
 		m->mothurOut(outputFileName); m->mothurOutEndLine(); outputNames.push_back(outputFileName); outputTypes["shared"].push_back(outputFileName);
 		m->mothurOutEndLine();
 		
+		//set shared file as new current sharedfile
+		string current = "";
+		itTypes = outputTypes.find("shared");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSharedFile(current); }
+		}
+		
 		return 0;
 	}
 	catch(exception& e) {

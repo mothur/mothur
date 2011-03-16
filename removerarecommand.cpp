@@ -243,6 +243,33 @@ int RemoveRareCommand::execute(){
 			m->mothurOut("Output File Names: "); m->mothurOutEndLine();
 			for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}
 			m->mothurOutEndLine();
+			
+			//set rabund file as new current rabundfile
+			string current = "";
+			itTypes = outputTypes.find("rabund");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setRabundFile(current); }
+			}
+			
+			itTypes = outputTypes.find("sabund");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSabundFile(current); }
+			}
+			
+			itTypes = outputTypes.find("group");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setGroupFile(current); }
+			}
+			
+			itTypes = outputTypes.find("list");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setListFile(current); }
+			}
+			
+			itTypes = outputTypes.find("shared");
+			if (itTypes != outputTypes.end()) {
+				if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSharedFile(current); }
+			}
 		}
 		
 		return 0;		

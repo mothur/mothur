@@ -28,7 +28,7 @@ ParseFastaQCommand::ParseFastaQCommand(){
 		abort = true; calledHelp = true; 
 		vector<string> tempOutNames;
 		outputTypes["fasta"] = tempOutNames;
-		outputTypes["qual"] = tempOutNames;
+		outputTypes["qfile"] = tempOutNames;
 	}
 	catch(exception& e) {
 		m->errorOut(e, "ParseFastaQCommand", "ParseFastaQCommand");
@@ -84,7 +84,7 @@ ParseFastaQCommand::ParseFastaQCommand(string option){
 			//initialize outputTypes
 			vector<string> tempOutNames;
 			outputTypes["fasta"] = tempOutNames;
-			outputTypes["qual"] = tempOutNames;
+			outputTypes["qfile"] = tempOutNames;
 			
 			//if the user changes the input directory command factory will send this info to us in the output parameter 
 			string inputDir = validParameter.validFile(parameters, "inputdir", false);		
@@ -146,7 +146,7 @@ int ParseFastaQCommand::execute(){
 		string qualFile = outputDir + m->getRootName(m->getSimpleName(fastaQFile)) + "qual";
 		ofstream outFasta, outQual;
 		m->openOutputFile(fastaFile, outFasta);  outputNames.push_back(fastaFile); outputTypes["fasta"].push_back(fastaFile);
-		m->openOutputFile(qualFile, outQual);	outputNames.push_back(qualFile);  outputTypes["qual"].push_back(qualFile);
+		m->openOutputFile(qualFile, outQual);	outputNames.push_back(qualFile);  outputTypes["qfile"].push_back(qualFile);
 		
 		ifstream in;
 		m->openInputFile(fastaQFile, in);
@@ -193,6 +193,18 @@ int ParseFastaQCommand::execute(){
 		outQual.close();
 		
 		if (m->control_pressed) { outputTypes.clear(); remove(fastaFile.c_str()); remove(qualFile.c_str()); return 0; }
+		
+		//set fasta file as new current fastafile
+		string current = "";
+		itTypes = outputTypes.find("fasta");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+		}
+		
+		itTypes = outputTypes.find("qfile");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setQualFile(current); }
+		}		
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

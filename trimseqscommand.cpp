@@ -405,13 +405,30 @@ int TrimSeqsCommand::execute(){
 
 		//output group counts
 		m->mothurOutEndLine();
-		int total = 0;
+		//int total = 0;
 //		for (int i = 0; i < barcodeNameVector.size(); i++) {
 //			if ((barcodeNameVector[i] != "") && (groupCounts[i] != 0)) { total += groupCounts[i]; m->mothurOut("Group " + barcodeNameVector[i] + " contains " + toString(groupCounts[i]) + " sequences."); m->mothurOutEndLine(); }
 //		}
 //		if (total != 0) { m->mothurOut("Total of all groups is " + toString(total)); m->mothurOutEndLine(); }
 		
 			if (m->control_pressed) {	for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0;	}
+
+		//set fasta file as new current fastafile
+		string current = "";
+		itTypes = outputTypes.find("fasta");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+		}
+		
+		itTypes = outputTypes.find("qfile");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setQualFile(current); }
+		}
+		
+		itTypes = outputTypes.find("group");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setGroupFile(current); }
+		}
 
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

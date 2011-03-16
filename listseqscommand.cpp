@@ -226,6 +226,7 @@ int ListSeqsCommand::execute(){
 
 		ofstream out;
 		m->openOutputFile(outputFileName, out);
+		outputNames.push_back(outputFileName); outputTypes["accnos"].push_back(outputFileName);
 		
 		//output to .accnos file
 		for (int i = 0; i < names.size(); i++) {
@@ -237,11 +238,20 @@ int ListSeqsCommand::execute(){
 		out.close();
 		
 		if (m->control_pressed) { outputTypes.clear();  remove(outputFileName.c_str()); return 0; }
-
+		
+		m->setAccnosFile(outputFileName);
+		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
-		m->mothurOut(outputFileName); m->mothurOutEndLine();	outputNames.push_back(outputFileName); outputTypes["accnos"].push_back(outputFileName);
+		m->mothurOut(outputFileName); m->mothurOutEndLine();	
 		m->mothurOutEndLine();
+		
+		//set accnos file as new current accnosfile
+		string current = "";
+		itTypes = outputTypes.find("accnos");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setAccnosFile(current); }
+		}
 		
 		return 0;		
 	}

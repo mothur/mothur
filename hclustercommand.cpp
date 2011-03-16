@@ -395,7 +395,26 @@ int HClusterCommand::execute(){
 			for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } outputTypes.clear();
 			return 0;  
 		}
-
+		
+		//set list file as new current listfile
+		string current = "";
+		itTypes = outputTypes.find("list");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setListFile(current); }
+		}
+		
+		//set rabund file as new current rabundfile
+		itTypes = outputTypes.find("rabund");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setRabundFile(current); }
+		}
+		
+		//set sabund file as new current sabundfile
+		itTypes = outputTypes.find("sabund");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSabundFile(current); }
+		}
+		
 		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Names: "); m->mothurOutEndLine();

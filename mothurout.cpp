@@ -18,6 +18,63 @@ MothurOut* MothurOut::getInstance() {
 	return _uniqueInstance;
 }
 /*********************************************************************************************/
+void MothurOut::printCurrentFiles()  {
+	try {
+		if (accnosfile != "")		{  mothurOut("accnos=" + accnosfile); mothurOutEndLine();			}
+		if (columnfile != "")		{  mothurOut("column=" + columnfile); mothurOutEndLine();			}
+		if (designfile != "")		{  mothurOut("design=" + designfile); mothurOutEndLine();			}
+		if (fastafile != "")		{  mothurOut("fasta=" + fastafile); mothurOutEndLine();				}
+		if (groupfile != "")		{  mothurOut("group=" + groupfile); mothurOutEndLine();				}
+		if (listfile != "")			{  mothurOut("list=" + listfile); mothurOutEndLine();				}
+		if (namefile != "")			{  mothurOut("name=" + namefile); mothurOutEndLine();				}
+		if (oligosfile != "")		{  mothurOut("oligos=" + oligosfile); mothurOutEndLine();			}
+		if (orderfile != "")		{  mothurOut("order=" + orderfile); mothurOutEndLine();				}
+		if (ordergroupfile != "")	{  mothurOut("ordergroup=" + ordergroupfile); mothurOutEndLine();	}
+		if (phylipfile != "")		{  mothurOut("phylip=" + phylipfile); mothurOutEndLine();			}
+		if (qualfile != "")			{  mothurOut("qfile=" + qualfile); mothurOutEndLine();				}
+		if (rabundfile != "")		{  mothurOut("rabund=" + rabundfile); mothurOutEndLine();			}
+		if (relabundfile != "")		{  mothurOut("relabund=" + relabundfile); mothurOutEndLine();		}
+		if (sabundfile != "")		{  mothurOut("sabund=" + sabundfile); mothurOutEndLine();			}
+		if (sfffile != "")			{  mothurOut("sff=" + sfffile); mothurOutEndLine();					}
+		if (sharedfile != "")		{  mothurOut("shared=" + sharedfile); mothurOutEndLine();			}
+		if (taxonomyfile != "")		{  mothurOut("taxonomy=" + taxonomyfile); mothurOutEndLine();		}
+		if (treefile != "")			{  mothurOut("tree=" + treefile); mothurOutEndLine();				}
+		
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "printCurrentFiles");
+		exit(1);
+	}
+}
+/*********************************************************************************************/
+void MothurOut::clearCurrentFiles()  {
+	try {
+		phylipfile = "";
+		columnfile = "";
+		listfile = "";
+		rabundfile = "";
+		sabundfile = "";
+		namefile = "";
+		groupfile = "";
+		designfile = "";
+		orderfile = "";
+		treefile = "";
+		sharedfile = "";
+		ordergroupfile = "";
+		relabundfile = "";
+		fastafile = "";
+		qualfile = "";
+		sfffile = "";
+		oligosfile = "";
+		accnosfile = "";
+		taxonomyfile = "";		
+	}
+	catch(exception& e) {
+		errorOut(e, "MothurOut", "clearCurrentFiles");
+		exit(1);
+	}
+}
+/*********************************************************************************************/
 void MothurOut::setFileName(string filename)  {
 	try {
 		logFileName = filename;

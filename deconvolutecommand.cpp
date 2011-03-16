@@ -177,7 +177,17 @@ int DeconvoluteCommand::execute() {
 		outputNames.push_back(outFastaFile);  outputNames.push_back(outNameFile); outputTypes["fasta"].push_back(outFastaFile);  outputTypes["name"].push_back(outNameFile); 
 		m->mothurOutEndLine();
 
-
+		//set fasta file as new current fastafile
+		string current = "";
+		itTypes = outputTypes.find("fasta");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setFastaFile(current); }
+		}
+		
+		itTypes = outputTypes.find("name");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setNameFile(current); }
+		}
 		
 		return 0;
 	}

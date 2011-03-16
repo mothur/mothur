@@ -507,6 +507,26 @@ int MGClusterCommand::execute(){
 		m->mothurOut(fileroot+ tag + ".sabund"); m->mothurOutEndLine();	outputNames.push_back(fileroot+ tag + ".sabund"); outputTypes["sabund"].push_back(fileroot+ tag + ".sabund");
 		m->mothurOutEndLine();
 		
+		//set list file as new current listfile
+		string current = "";
+		itTypes = outputTypes.find("list");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setListFile(current); }
+		}
+		
+		//set rabund file as new current rabundfile
+		itTypes = outputTypes.find("rabund");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setRabundFile(current); }
+		}
+		
+		//set sabund file as new current sabundfile
+		itTypes = outputTypes.find("sabund");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSabundFile(current); }
+		}
+		
+		
 		m->mothurOut("It took " + toString(time(NULL) - start) + " seconds to cluster."); m->mothurOutEndLine();
 			
 		return 0;

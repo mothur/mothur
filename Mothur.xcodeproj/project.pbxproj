@@ -18,7 +18,6 @@
 		A75790591301749D00A30DAB /* homovacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A75790581301749D00A30DAB /* homovacommand.cpp */; };
 		A799F5B91309A3E000AEEFA0 /* makefastqcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A799F5B81309A3E000AEEFA0 /* makefastqcommand.cpp */; };
 		A7A61F2D130062E000E05B6B /* amovacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7A61F2C130062E000E05B6B /* amovacommand.cpp */; };
-		A7AACFBC132FE008003D6C4D /* currentfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7AACFBB132FE008003D6C4D /* currentfile.cpp */; };
 		A7E9B88112D37EC400DA6239 /* ace.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B64F12D37EC300DA6239 /* ace.cpp */; };
 		A7E9B88212D37EC400DA6239 /* aligncommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65112D37EC300DA6239 /* aligncommand.cpp */; };
 		A7E9B88312D37EC400DA6239 /* alignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7E9B65312D37EC300DA6239 /* alignment.cpp */; };
@@ -293,6 +292,8 @@
 		A7FA10021302E097003860FE /* mantelcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FA10011302E096003860FE /* mantelcommand.cpp */; };
 		A7FC480E12D788F20055BC5C /* linearalgebra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FC480D12D788F20055BC5C /* linearalgebra.cpp */; };
 		A7FC486712D795D60055BC5C /* pcacommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FC486612D795D60055BC5C /* pcacommand.cpp */; };
+		A7FE7C401330EA1000F7B327 /* getcurrentcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FE7C3F1330EA1000F7B327 /* getcurrentcommand.cpp */; };
+		A7FE7E6D13311EA400F7B327 /* setcurrentcommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A7FE7E6C13311EA400F7B327 /* setcurrentcommand.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -331,7 +332,6 @@
 		A7A61F2B130062E000E05B6B /* amovacommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = amovacommand.h; sourceTree = "<group>"; };
 		A7A61F2C130062E000E05B6B /* amovacommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = amovacommand.cpp; sourceTree = "<group>"; };
 		A7AACFBA132FE008003D6C4D /* currentfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = currentfile.h; sourceTree = "<group>"; };
-		A7AACFBB132FE008003D6C4D /* currentfile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = currentfile.cpp; sourceTree = "<group>"; };
 		A7E9B64F12D37EC300DA6239 /* ace.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ace.cpp; sourceTree = "<group>"; };
 		A7E9B65012D37EC300DA6239 /* ace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ace.h; sourceTree = "<group>"; };
 		A7E9B65112D37EC300DA6239 /* aligncommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = aligncommand.cpp; sourceTree = "<group>"; };
@@ -900,6 +900,10 @@
 		A7FC480D12D788F20055BC5C /* linearalgebra.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = linearalgebra.cpp; sourceTree = "<group>"; };
 		A7FC486512D795D60055BC5C /* pcacommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pcacommand.h; sourceTree = "<group>"; };
 		A7FC486612D795D60055BC5C /* pcacommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pcacommand.cpp; sourceTree = "<group>"; };
+		A7FE7C3E1330EA1000F7B327 /* getcurrentcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = getcurrentcommand.h; sourceTree = "<group>"; };
+		A7FE7C3F1330EA1000F7B327 /* getcurrentcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = getcurrentcommand.cpp; sourceTree = "<group>"; };
+		A7FE7E6B13311EA400F7B327 /* setcurrentcommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = setcurrentcommand.h; sourceTree = "<group>"; };
+		A7FE7E6C13311EA400F7B327 /* setcurrentcommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = setcurrentcommand.cpp; sourceTree = "<group>"; };
 		C6A0FF2C0290799A04C91782 /* mothur.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = mothur.1; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -950,7 +954,6 @@
 				A7E9B6B412D37EC400DA6239 /* completelinkage.cpp */,
 				A7E9BA4212D3960D00DA6239 /* containers */,
 				A7AACFBA132FE008003D6C4D /* currentfile.h */,
-				A7AACFBB132FE008003D6C4D /* currentfile.cpp */,
 				A7E9B6C912D37EC400DA6239 /* display.h */,
 				A7E9B6D112D37EC400DA6239 /* dlibshuff.cpp */,
 				A7E9B6D212D37EC400DA6239 /* dlibshuff.h */,
@@ -1099,6 +1102,8 @@
 				A7E9B6CC12D37EC400DA6239 /* distancecommand.h */,
 				A7E9B6E312D37EC400DA6239 /* filterseqscommand.cpp */,
 				A7E9B6E412D37EC400DA6239 /* filterseqscommand.h */,
+				A7FE7C3E1330EA1000F7B327 /* getcurrentcommand.h */,
+				A7FE7C3F1330EA1000F7B327 /* getcurrentcommand.cpp */,
 				A7E9B6F212D37EC400DA6239 /* getgroupcommand.cpp */,
 				A7E9B6F312D37EC400DA6239 /* getgroupcommand.h */,
 				A7E9B6F412D37EC400DA6239 /* getgroupscommand.cpp */,
@@ -1217,6 +1222,8 @@
 				A7E9B7D812D37EC400DA6239 /* seqerrorcommand.h */,
 				A7E9B7D912D37EC400DA6239 /* seqsummarycommand.cpp */,
 				A7E9B7DA12D37EC400DA6239 /* seqsummarycommand.h */,
+				A7FE7E6B13311EA400F7B327 /* setcurrentcommand.h */,
+				A7FE7E6C13311EA400F7B327 /* setcurrentcommand.cpp */,
 				A7E9B7DF12D37EC400DA6239 /* setdircommand.cpp */,
 				A7E9B7E012D37EC400DA6239 /* setdircommand.h */,
 				A7E9B7E112D37EC400DA6239 /* setlogfilecommand.cpp */,
@@ -1938,7 +1945,8 @@
 				A7FA10021302E097003860FE /* mantelcommand.cpp in Sources */,
 				A799F5B91309A3E000AEEFA0 /* makefastqcommand.cpp in Sources */,
 				A71CB160130B04A2001E7287 /* anosimcommand.cpp in Sources */,
-				A7AACFBC132FE008003D6C4D /* currentfile.cpp in Sources */,
+				A7FE7C401330EA1000F7B327 /* getcurrentcommand.cpp in Sources */,
+				A7FE7E6D13311EA400F7B327 /* setcurrentcommand.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

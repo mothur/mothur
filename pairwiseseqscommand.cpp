@@ -494,6 +494,19 @@ int PairwiseSeqsCommand::execute(){
 			
 		delete distCalculator;
 		
+		//set phylip file as new current phylipfile
+		string current = "";
+		itTypes = outputTypes.find("phylip");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setPhylipFile(current); }
+		}
+		
+		//set column file as new current columnfile
+		itTypes = outputTypes.find("column");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setColumnFile(current); }
+		}
+		
 		m->mothurOutEndLine();
 		m->mothurOut("Output File Name: "); m->mothurOutEndLine();
 		for (int i = 0; i < outputNames.size(); i++) {	m->mothurOut(outputNames[i]); m->mothurOutEndLine();	}

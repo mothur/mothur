@@ -248,6 +248,13 @@ int GetSAbundCommand::execute(){
 		m->mothurOut(filename); m->mothurOutEndLine();	outputNames.push_back(filename); outputTypes["sabund"].push_back(filename);
 		m->mothurOutEndLine();
 		
+		//set sabund file as new current sabundfile
+		string current = "";
+		itTypes = outputTypes.find("sabund");
+		if (itTypes != outputTypes.end()) {
+			if ((itTypes->second).size() != 0) { current = (itTypes->second)[0]; m->setSabundFile(current); }
+		}
+		
 		return 0;		
 	}
 

@@ -114,6 +114,8 @@
 #include "mantelcommand.h"
 #include "makefastqcommand.h"
 #include "anosimcommand.h"
+#include "getcurrentcommand.h"
+#include "setcurrentcommand.h"
 
 /*******************************************************/
 
@@ -231,6 +233,8 @@ CommandFactory::CommandFactory(){
 	commands["anosim"]				= "anosim";
 	commands["make.fastq"]			= "make.fastq";
 	commands["merge.groups"]		= "merge.groups";
+	commands["get.current"]			= "get.current";
+	commands["set.current"]			= "set.current";
 	commands["pairwise.seqs"]		= "MPIEnabled";
 	commands["pipeline.pds"]		= "MPIEnabled";
 	commands["classify.seqs"]		= "MPIEnabled"; 
@@ -396,6 +400,8 @@ Command* CommandFactory::getCommand(string commandName, string optionString){
 		else if(commandName == "homova")				{	command = new HomovaCommand(optionString);					}
 		else if(commandName == "mantel")				{	command = new MantelCommand(optionString);					}
 		else if(commandName == "make.fastq")			{	command = new MakeFastQCommand(optionString);				}
+		else if(commandName == "get.current")			{	command = new GetCurrentCommand(optionString);				}
+		else if(commandName == "set.current")			{	command = new SetCurrentCommand(optionString);				}
 		else if(commandName == "anosim")				{	command = new AnosimCommand(optionString);					}
 		else											{	command = new NoCommand(optionString);						}
 
@@ -529,6 +535,8 @@ Command* CommandFactory::getCommand(string commandName, string optionString, str
 		else if(commandName == "mantel")				{	pipecommand = new MantelCommand(optionString);					}
 		else if(commandName == "anosim")				{	pipecommand = new AnosimCommand(optionString);					}
 		else if(commandName == "make.fastq")			{	pipecommand = new MakeFastQCommand(optionString);				}
+		else if(commandName == "get.current")			{	pipecommand = new GetCurrentCommand(optionString);				}
+		else if(commandName == "set.current")			{	pipecommand = new SetCurrentCommand(optionString);				}
 		else											{	pipecommand = new NoCommand(optionString);						}
 
 		return pipecommand;
@@ -649,6 +657,8 @@ Command* CommandFactory::getCommand(string commandName){
 		else if(commandName == "mantel")				{	shellcommand = new MantelCommand();					}
 		else if(commandName == "anosim")				{	shellcommand = new AnosimCommand();					}
 		else if(commandName == "make.fastq")			{	shellcommand = new MakeFastQCommand();				}
+		else if(commandName == "get.current")			{	shellcommand = new GetCurrentCommand();				}
+		else if(commandName == "set.current")			{	shellcommand = new SetCurrentCommand();				}
 		else											{	shellcommand = new NoCommand();						}
 
 		return shellcommand;
