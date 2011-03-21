@@ -14,7 +14,6 @@
 #include "needlemanoverlap.hpp"
 #include "blastalign.hpp"
 #include "noalign.hpp"
-#include "nast.hpp"
 
 #include "ignoregaps.h"
 #include "eachgapdist.h"
@@ -605,15 +604,15 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, fl
 					alignment->resize(alignDB.get(j).getUnaligned().length()+1);
 				}
 				
-				Sequence* seqI = new Sequence(alignDB.get(i).getName(), alignDB.get(i).getAligned());
-				Sequence* seqJ = new Sequence(alignDB.get(j).getName(), alignDB.get(j).getAligned());
+				Sequence seqI(alignDB.get(i).getName(), alignDB.get(i).getAligned());
+				Sequence seqJ(alignDB.get(j).getName(), alignDB.get(j).getAligned());
 				
-				Nast(alignment, seqI, seqJ);
+				alignment->align(seqI.getUnaligned(), seqJ.getUnaligned());
+				seqI.setAligned(alignment->getSeqAAln());
+				seqJ.setAligned(alignment->getSeqBAln());
 				
-				distCalculator->calcDist(*seqI, *seqJ);
+				distCalculator->calcDist(seqI, seqJ);
 				double dist = distCalculator->getDist();
-				
-				delete seqI; delete seqJ;
 				
 				if(dist <= cutoff){
 					if (output == "column") { outFile << alignDB.get(i).getName() << ' ' << alignDB.get(j).getName() << ' ' << dist << endl; }
@@ -673,15 +672,15 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, st
 					alignment->resize(alignDB.get(j).getUnaligned().length()+1);
 				}
 				
-				Sequence* seqI = new Sequence(alignDB.get(i).getName(), alignDB.get(i).getAligned());
-				Sequence* seqJ = new Sequence(alignDB.get(j).getName(), alignDB.get(j).getAligned());
+				Sequence seqI(alignDB.get(i).getName(), alignDB.get(i).getAligned());
+				Sequence seqJ(alignDB.get(j).getName(), alignDB.get(j).getAligned());
 				
-				Nast(alignment, seqI, seqJ);
+				alignment->align(seqI.getUnaligned(), seqJ.getUnaligned());
+				seqI.setAligned(alignment->getSeqAAln());
+				seqJ.setAligned(alignment->getSeqBAln());
 				
-				distCalculator->calcDist(*seqI, *seqJ);
+				distCalculator->calcDist(seqI, seqJ);
 				double dist = distCalculator->getDist();
-				
-				delete seqI; delete seqJ;
 								
 				outFile << dist << '\t'; 
 			}
@@ -728,15 +727,15 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, MPI_File& outMPI,
 					alignment->resize(alignDB.get(j).getUnaligned().length()+1);
 				}
 				
-				Sequence* seqI = new Sequence(alignDB.get(i).getName(), alignDB.get(i).getAligned());
-				Sequence* seqJ = new Sequence(alignDB.get(j).getName(), alignDB.get(j).getAligned());
+				Sequence seqI(alignDB.get(i).getName(), alignDB.get(i).getAligned());
+				Sequence seqJ(alignDB.get(j).getName(), alignDB.get(j).getAligned());
 				
-				Nast(alignment, seqI, seqJ);
+				alignment->align(seqI.getUnaligned(), seqJ.getUnaligned());
+				seqI.setAligned(alignment->getSeqAAln());
+				seqJ.setAligned(alignment->getSeqBAln());
 				
-				distCalculator->calcDist(*seqI, *seqJ);
+				distCalculator->calcDist(seqI, seqJ);
 				double dist = distCalculator->getDist();
-				
-				delete seqI; delete seqJ;
 				
 				if(dist <= cutoff){
 					 outputString += (alignDB.get(i).getName() + ' ' + alignDB.get(j).getName() + ' ' + toString(dist) + '\n'); 
@@ -809,15 +808,15 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsi
 					alignment->resize(alignDB.get(j).getUnaligned().length()+1);
 				}
 				
-				Sequence* seqI = new Sequence(alignDB.get(i).getName(), alignDB.get(i).getAligned());
-				Sequence* seqJ = new Sequence(alignDB.get(j).getName(), alignDB.get(j).getAligned());
+				Sequence seqI(alignDB.get(i).getName(), alignDB.get(i).getAligned());
+				Sequence seqJ(alignDB.get(j).getName(), alignDB.get(j).getAligned());
 				
-				Nast(alignment, seqI, seqJ);
+				alignment->align(seqI.getUnaligned(), seqJ.getUnaligned());
+				seqI.setAligned(alignment->getSeqAAln());
+				seqJ.setAligned(alignment->getSeqBAln());
 				
-				distCalculator->calcDist(*seqI, *seqJ);
+				distCalculator->calcDist(seqI, seqJ);
 				double dist = distCalculator->getDist();
-				
-				delete seqI; delete seqJ;
 				
 				outputString += toString(dist) + "\t"; 
 			}
@@ -885,15 +884,15 @@ int PairwiseSeqsCommand::driverMPI(int startLine, int endLine, string file, unsi
 					alignment->resize(alignDB.get(j).getUnaligned().length()+1);
 				}
 				
-				Sequence* seqI = new Sequence(alignDB.get(i).getName(), alignDB.get(i).getAligned());
-				Sequence* seqJ = new Sequence(alignDB.get(j).getName(), alignDB.get(j).getAligned());
+				Sequence seqI(alignDB.get(i).getName(), alignDB.get(i).getAligned());
+				Sequence seqJ(alignDB.get(j).getName(), alignDB.get(j).getAligned());
 				
-				Nast(alignment, seqI, seqJ);
+				alignment->align(seqI.getUnaligned(), seqJ.getUnaligned());
+				seqI.setAligned(alignment->getSeqAAln());
+				seqJ.setAligned(alignment->getSeqBAln());
 				
-				distCalculator->calcDist(*seqI, *seqJ);
+				distCalculator->calcDist(seqI, seqJ);
 				double dist = distCalculator->getDist();
-				
-				delete seqI; delete seqJ;
 				
 				outputString += toString(dist) + "\t"; 
 			}
