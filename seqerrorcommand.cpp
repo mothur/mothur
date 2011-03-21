@@ -264,8 +264,8 @@ int SeqErrorCommand::execute(){
 			qualForwardMap.resize(maxLength);
 			qualReverseMap.resize(maxLength);
 			for(int i=0;i<maxLength;i++){
-				qualForwardMap[i].assign(maxLength,0);
-				qualReverseMap[i].assign(maxLength,0);
+				qualForwardMap[i].assign(41,0);
+				qualReverseMap[i].assign(41,0);
 			}				
 		}
 		
@@ -780,17 +780,15 @@ void SeqErrorCommand::printErrorQuality(map<char, vector<int> > qScoreErrorMap){
 //***************************************************************************************************************
 
 void SeqErrorCommand::printQualityFR(vector<vector<int> > qualForwardMap, vector<vector<int> > qualReverseMap){
+
 	try{
-
-
-		int lastRow = 0;
-		int lastColumn = 0;
+		int numRows = 0;
+		int numColumns = qualForwardMap[0].size();
 
 		for(int i=0;i<qualForwardMap.size();i++){
-			for(int j=0;j<qualForwardMap[i].size();j++){
+			for(int j=0;j<numColumns;j++){
 				if(qualForwardMap[i][j] != 0){
-					if(lastRow < i)		{	lastRow = i+2;		}
-					if(lastColumn < j)	{	lastColumn = j+2;	}
+					if(numRows < i)		{	numRows = i+20;		}
 				}
 			}
 		}
@@ -800,11 +798,11 @@ void SeqErrorCommand::printQualityFR(vector<vector<int> > qualForwardMap, vector
 		m->openOutputFile(qualityForwardFileName, qualityForwardFile);
 		outputNames.push_back(qualityForwardFileName);  outputTypes["error.qual.forward"].push_back(qualityForwardFileName);
 
-		for(int i=0;i<lastColumn;i++){	qualityForwardFile << '\t' << i;	}	qualityForwardFile << endl;
+		for(int i=0;i<numColumns;i++){	qualityForwardFile << '\t' << i;	}	qualityForwardFile << endl;
 
-		for(int i=0;i<lastRow;i++){
+		for(int i=0;i<numRows;i++){
 			qualityForwardFile << i+1;
-			for(int j=0;j<lastColumn;j++){
+			for(int j=0;j<numColumns;j++){
 				qualityForwardFile << '\t' << qualForwardMap[i][j];
 			}
 
@@ -818,11 +816,11 @@ void SeqErrorCommand::printQualityFR(vector<vector<int> > qualForwardMap, vector
 		m->openOutputFile(qualityReverseFileName, qualityReverseFile);
 		outputNames.push_back(qualityReverseFileName);  outputTypes["error.qual.reverse"].push_back(qualityReverseFileName);
 		
-		for(int i=0;i<lastColumn;i++){	qualityReverseFile << '\t' << i;	}	qualityReverseFile << endl;
-		for(int i=0;i<lastRow;i++){
+		for(int i=0;i<numColumns;i++){	qualityReverseFile << '\t' << i;	}	qualityReverseFile << endl;
+		for(int i=0;i<numRows;i++){
 			
 			qualityReverseFile << i+1;
-			for(int j=0;j<lastColumn;j++){
+			for(int j=0;j<numColumns;j++){
 				qualityReverseFile << '\t' << qualReverseMap[i][j];
 			}
 			qualityReverseFile << endl;
@@ -833,7 +831,7 @@ void SeqErrorCommand::printQualityFR(vector<vector<int> > qualForwardMap, vector
 		m->errorOut(e, "SeqErrorCommand", "printErrorFRFile");
 		exit(1);
 	}
+	
 }
-
 
 //***************************************************************************************************************

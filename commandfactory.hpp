@@ -12,6 +12,7 @@
 
 #include "mothur.h"
 #include "mothurout.h"
+#include "currentfile.h"
 
 class Command;
 
@@ -37,7 +38,10 @@ private:
 	Command* command;
 	Command* shellcommand;
 	Command* pipecommand;
+	
 	MothurOut* m;
+	CurrentFile* currentFile;
+	
 	map<string, string> commands;
 	map<string, string>::iterator it;
 	string outputDir, inputDir, logFileName;
