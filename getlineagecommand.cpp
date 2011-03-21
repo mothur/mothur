@@ -571,7 +571,7 @@ int GetLineageCommand::readTax(){
 		//bool wroteSomething = false;
 		
 		bool taxonsHasConfidence = false;
-		vector< map<string, int> > searchTaxons;
+		vector< map<string, float> > searchTaxons;
 		string noConfidenceTaxons = taxons;
 		int hasConPos = taxons.find_first_of('(');
 		if (hasConPos != string::npos) {  
@@ -629,7 +629,7 @@ int GetLineageCommand::readTax(){
 					if (pos != string::npos) { //if yes, then are the confidences okay
 						
 						bool good = true;
-						vector< map<string, int> > usersTaxon = getTaxons(newtax);
+						vector< map<string, float> > usersTaxon = getTaxons(newtax);
 						
 						//the usersTaxon is most likely longer than the searchTaxons, and searchTaxon[0] may relate to userTaxon[4]
 						//we want to "line them up", so we will find the the index where the searchstring starts
@@ -691,10 +691,10 @@ int GetLineageCommand::readTax(){
 	}
 }
 /**************************************************************************************************/
-vector< map<string, int> > GetLineageCommand::getTaxons(string tax) {
+vector< map<string, float> > GetLineageCommand::getTaxons(string tax) {
 	try {
 		
-		vector< map<string, int> > t;
+		vector< map<string, float> > t;
 		string taxon = "";
 		int taxLength = tax.length();
 		for(int i=0;i<taxLength;i++){
@@ -711,10 +711,10 @@ vector< map<string, int> > GetLineageCommand::getTaxons(string tax) {
 					newtaxon = taxon;
 					confidence = "0";
 				} 
-				int con = 0;
+				float con = 0;
 				convert(confidence, con);
 				
-				map<string, int> temp;
+				map<string, float> temp;
 				temp[newtaxon] = con;
 				t.push_back(temp);
 				
