@@ -259,6 +259,7 @@ int ChimeraSlayer::doPrep() {
 		
 			//generate blastdb
 			databaseLeft = new BlastDB(-1.0, -1.0, 1, -3);
+
 			for (int i = 0; i < templateSeqs.size(); i++) { 	databaseLeft->addSequence(*templateSeqs[i]);	}
 			databaseLeft->generateDB();
 			databaseLeft->setNumSeqs(templateSeqs.size());
@@ -385,6 +386,7 @@ vector<Sequence*> ChimeraSlayer::getTemplate(Sequence* q) {
 			
 			//generate blastdb
 			databaseLeft = new BlastDB(-1.0, -1.0, 1, -3);
+
 			for (int i = 0; i < thisTemplate.size(); i++) { if (m->control_pressed) { return thisTemplate; }  databaseLeft->addSequence(*thisTemplate[i]);	}
 			databaseLeft->generateDB();
 			databaseLeft->setNumSeqs(thisTemplate.size());

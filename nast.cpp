@@ -45,7 +45,7 @@ void Nast::pairwiseAlignSeqs(){	//	Here we call one of the pairwise alignment me
 
 		string candAln = alignment->getSeqAAln();
 		string tempAln = alignment->getSeqBAln();
-
+	
 		if(candAln == ""){
 
 			candidateSeq->setPairwise("");
@@ -78,6 +78,7 @@ void Nast::pairwiseAlignSeqs(){	//	Here we call one of the pairwise alignment me
 
 		candidateSeq->setPairwise(candAln);					//	set the pairwise sequences in the Sequence objects for
 		templateSeq->setPairwise(tempAln);					//	the candidate and template sequences
+
 	}
 	catch(exception& e) {
 		m->errorOut(e, "Nast", "pairwiseAlignSeqs");
@@ -91,11 +92,6 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 
 //	here we do steps C-F of Fig. 2 from DeSantis et al.
 	try {
-	
-		//cout << candAln << endl;
-		//cout << tempAln << endl;
-		//cout << newTemplateAlign << endl;
-		//cout << endl;
 		
 		int longAlignmentLength = newTemplateAlign.length();	
 	

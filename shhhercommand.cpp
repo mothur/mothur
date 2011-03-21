@@ -2016,7 +2016,6 @@ void ShhherCommand::writeQualities(vector<int> otuCounts){
 
 void ShhherCommand::writeSequences(vector<int> otuCounts){
 	try {
-		flowOrder = "TACG";
 		
 		string fastaFileName = flowFileName.substr(0,flowFileName.find_last_of('.')) + ".pn.fasta";
 		ofstream fastaFile;
@@ -2030,14 +2029,17 @@ void ShhherCommand::writeSequences(vector<int> otuCounts){
 			if(otuCounts[i] > 0){
 				fastaFile << '>' << seqNameVector[aaI[i][0]] << endl;
 				
-				for(int j=8;j<numFlowCells;j++){
+				string newSeq = "";
+				
+				for(int j=0;j<numFlowCells;j++){
 					
 					char base = flowOrder[j % 4];
 					for(int k=0;k<uniqueFlowgrams[index * numFlowCells + j];k++){
-						fastaFile << base;
+						newSeq += base;
 					}
 				}
-				fastaFile << endl;
+				
+				fastaFile << newSeq.substr(4) << endl;
 			}
 		}
 		fastaFile.close();
@@ -2107,7 +2109,7 @@ void ShhherCommand::writeClusters(vector<int> otuCounts){
 		ofstream otuCountsFile;
 		m->openOutputFile(otuCountsFileName, otuCountsFile);
 		
-		string bases = "TACG";
+		string bases = flowOrder;
 		
 		for(int i=0;i<numOTUs;i++){
 			//output the translated version of the centroid sequence for the otu
@@ -2127,15 +2129,18 @@ void ShhherCommand::writeClusters(vector<int> otuCounts){
 					int sequence = aaI[i][j];
 					otuCountsFile << seqNameVector[sequence] << '\t';
 					
-					for(int k=8;k<lengths[sequence];k++){
+					string newSeq = "";
+					
+					for(int k=0;k<lengths[sequence];k++){
 						char base = bases[k % 4];
 						int freq = int(0.01 * (double)flowDataIntI[sequence * numFlowCells + k] + 0.5);
-						
+							
 						for(int s=0;s<freq;s++){
-							otuCountsFile << base;
+							newSeq += base;
+							//otuCountsFile << base;
 						}
 					}
-					otuCountsFile << endl;
+					otuCountsFile << newSeq.substr(4) << endl;
 				}
 				otuCountsFile << endl;
 			}

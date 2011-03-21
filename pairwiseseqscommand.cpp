@@ -610,6 +610,7 @@ int PairwiseSeqsCommand::driver(int startLine, int endLine, string dFileName, fl
 				alignment->align(seqI.getUnaligned(), seqJ.getUnaligned());
 				seqI.setAligned(alignment->getSeqAAln());
 				seqJ.setAligned(alignment->getSeqBAln());
+
 				
 				distCalculator->calcDist(seqI, seqJ);
 				double dist = distCalculator->getDist();
