@@ -625,32 +625,36 @@ int SffInfoCommand::readSeqData(ifstream& in, seqRead& read, int numFlowReads, i
 int SffInfoCommand::decodeName(string& timestamp, string& region, string& xy, string name) {
 	try {
 		
-		string time = name.substr(0, 6);
-		unsigned int timeNum = m->fromBase36(time);
+		if (name.length() >= 6) {
+			string time = name.substr(0, 6);
+			unsigned int timeNum = m->fromBase36(time);
 			
-		int q1 = timeNum / 60;
-		int sec = timeNum - 60 * q1;
-		int q2 = q1 / 60;
-		int minute = q1 - 60 * q2;
-		int q3 = q2 / 24;
-		int hr = q2 - 24 * q3;
-		int q4 = q3 / 32;
-		int day = q3 - 32 * q4;
-		int q5 = q4 / 13;
-		int mon = q4 - 13 * q5;
-		int year = 2000 + q5;
+			int q1 = timeNum / 60;
+			int sec = timeNum - 60 * q1;
+			int q2 = q1 / 60;
+			int minute = q1 - 60 * q2;
+			int q3 = q2 / 24;
+			int hr = q2 - 24 * q3;
+			int q4 = q3 / 32;
+			int day = q3 - 32 * q4;
+			int q5 = q4 / 13;
+			int mon = q4 - 13 * q5;
+			int year = 2000 + q5;
 		
-		timestamp = toString(year) + "_" + toString(mon) + "_" + toString(day) + "_" + toString(hr) + "_" + toString(minute) + "_" + toString(sec);
+			timestamp = toString(year) + "_" + toString(mon) + "_" + toString(day) + "_" + toString(hr) + "_" + toString(minute) + "_" + toString(sec);
+		}
 		
-		region = name.substr(7, 2);
+		if (name.length() >= 9) {
+			region = name.substr(7, 2);
 		
-		string xyNum = name.substr(9);
-		unsigned int myXy = m->fromBase36(xyNum);
-		int x = myXy >> 12;
-		int y = myXy & 4095;
+			string xyNum = name.substr(9);
+			unsigned int myXy = m->fromBase36(xyNum);
+			int x = myXy >> 12;
+			int y = myXy & 4095;
 		
-		xy = toString(x) + "_" + toString(y);
-			
+			xy = toString(x) + "_" + toString(y);
+		}
+		
 		return 0;
 	}
 	catch(exception& e) {
