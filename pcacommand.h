@@ -39,7 +39,7 @@ private:
 	map<string, vector<string> > outputTypes;
 	LinearAlgebra linearCalc;
 	
-	vector< vector<double> > createMatrix(vector<SharedRAbundFloatVector*>);
+	//vector< vector<double> > createMatrix(vector<SharedRAbundFloatVector*>);
 	int process(vector<SharedRAbundFloatVector*>&);
 	void output(string, vector<string>, vector<vector<double> >&, vector<double>);
 	
