@@ -259,12 +259,12 @@ NJ_handle_args(int argc,
   
   if(nj_args.version) {
     printf("Clearcut Version: %s\n", NJ_VERSION);
-    exit(0);
+   //exit(0);
   }
   
   if(nj_args.help) {
     NJ_usage();
-    exit(0);
+    //exit(0);
   }
   
   /* if stdin & explicit filename are specified for input */
