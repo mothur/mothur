@@ -69,7 +69,7 @@ private:
 	map<string, int> groupToIndex;
 	vector<string> primerNameVector;	//needed here?
 	vector<string> barcodeNameVector;	//needed here?
-	vector<int> groupCounts;  //same order as barcodeNameVector
+	map<string, int> groupCounts;  
 
 	vector<int> processIDS;   //processid
 	vector<linePair*> lines;
