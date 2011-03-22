@@ -256,7 +256,7 @@ int PCACommand::execute(){
 		exit(1);
 	}
 }
-//**********************************************************************************************************************
+/**********************************************************************************************************************
 vector< vector<double> > PCACommand::createMatrix(vector<SharedRAbundFloatVector*> lookupFloat){
 	try {
 		vector< vector<double> > matrix; matrix.resize(lookupFloat.size());
@@ -283,7 +283,7 @@ vector< vector<double> > PCACommand::createMatrix(vector<SharedRAbundFloatVector
 		m->errorOut(e, "PCACommand", "createMatrix");	
 		exit(1);
 	}
-}
+}*/
 //**********************************************************************************************************************
 int PCACommand::process(vector<SharedRAbundFloatVector*>& lookupFloat){
 	try {
@@ -291,31 +291,51 @@ int PCACommand::process(vector<SharedRAbundFloatVector*>& lookupFloat){
 		
 		vector< vector<double> > matrix; matrix.resize(lookupFloat.size());
 		
+		ofstream out;
+		string temp = outputDir + "matrix.transpose.out";
+		m->openOutputFile(temp, out);
+		out << "matrix" << endl;
+		
 		//fill matrix with shared files relative abundances
 		for (int i = 0; i < lookupFloat.size(); i++) {
 			for (int j = 0; j < lookupFloat[i]->getNumBins(); j++) {
 				matrix[i].push_back(lookupFloat[i]->getAbundance(j));
+				out << lookupFloat[i]->getAbundance(j) << '\t';
 			}
+			out << endl;
 		}
-		
+		out << endl << endl << "transpose" << endl;
 		vector< vector<double> > transposeMatrix; transposeMatrix.resize(matrix[0].size());
 		for (int i = 0; i < transposeMatrix.size(); i++) {
 			for (int j = 0; j < matrix.size(); j++) {
 				transposeMatrix[i].push_back(matrix[j][i]);
+				out << matrix[j][i] << '\t';
 			}
+			out << endl;
 		}
 		
-		matrix = linearCalc.matrix_mult(matrix, transposeMatrix);		
+		//matrix = linearCalc.matrix_mult(matrix, transposeMatrix);	
+		
+		out << endl << endl << "matrix mult" << endl;
+		for (int i = 0; i < matrix.size(); i++) {
+			for (int j = 0; j < matrix[i].size(); j++) {
+				out << matrix[i][j] << '\t';
+			}
+		    out << endl;
+		}
+		out.close();
+			
 		
 		double offset = 0.0000;
 		vector<double> d;
 		vector<double> e;
 		vector<vector<double> > G = matrix;
-		vector<vector<double> > copy_G;
+		//vector<vector<double> > copy_G;
 			
 		for(int count=0;count<2;count++){
-			linearCalc.tred2(G, d, e);				if (m->control_pressed) { return 0; }
-			linearCalc.qtli(d, e, G);				if (m->control_pressed) { return 0; }
+			linearCalc.recenter(offset, matrix, G);		if (m->control_pressed) { return 0; }
+			linearCalc.tred2(G, d, e);					if (m->control_pressed) { return 0; }
+			linearCalc.qtli(d, e, G);					if (m->control_pressed) { return 0; }
 			offset = d[d.size()-1];
 			if(offset > 0.0) break;
 		} 
@@ -330,13 +350,15 @@ int PCACommand::process(vector<SharedRAbundFloatVector*>& lookupFloat){
 			
 			for (int i = 1; i < 4; i++) {
 				
-				vector< vector<double> > EuclidDists = linearCalc.calculateEuclidianDistance(G, i); //G is the pcoa file
+				vector< vector<double> > EuclidDists = linearCalc.calculateEuclidianDistance(G, i); //G is the pca file
 				
 				if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
 				
-				double corr = linearCalc.calcPearson(EuclidDists, matrix); //G is the pcoa file, D is the users distance matrix
+				double corr = linearCalc.calcPearson(EuclidDists, matrix); //G is the pca file, D is the users distance matrix
 				
 				m->mothurOut("Pearson's coefficient using " + toString(i) + " axis: " + toString(corr)); m->mothurOutEndLine();
+				
+				m->mothurOut("Rsq " + toString(i) + " axis: " + toString(corr * corr)); m->mothurOutEndLine();
 				
 				if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str());  } return 0; }
 			}
