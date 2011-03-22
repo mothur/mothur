@@ -250,7 +250,7 @@ int GetGroupsCommand::execute(){
 		if (m->control_pressed) { for (int i = 0; i < outputNames.size(); i++) {	remove(outputNames[i].c_str()); } return 0; }
 		
 		m->mothurOut("Selected " + toString(names.size()) + " sequences. From the groups: "); m->mothurOutEndLine();
-		for (int i = 0; i < Groups.size(); i++) {	m->mothurOut(Groups[i]); m->mothurOut(" contains " + toString(groupMap->getNumSeqs(Groups[i]))); m->mothurOutEndLine();	}
+		for (int i = 0; i < Groups.size(); i++) {	m->mothurOut(Groups[i]); m->mothurOut(" contains " + toString(groupMap->getNumSeqs(Groups[i])) + " sequences."); m->mothurOutEndLine();	}
 		m->mothurOutEndLine();
 		
 		
