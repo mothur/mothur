@@ -53,6 +53,39 @@ vector<vector<double> > LinearAlgebra::matrix_mult(vector<vector<double> > first
 
 /*********************************************************************************************************************************/
 
+void LinearAlgebra::recenter(double offset, vector<vector<double> > D, vector<vector<double> >& G){
+	try {
+		int rank = D.size();
+		
+		vector<vector<double> > A(rank);
+		vector<vector<double> > C(rank);
+		for(int i=0;i<rank;i++){
+			A[i].resize(rank);
+			C[i].resize(rank);
+		}
+		
+		double scale = -1.0000 / (double) rank;
+		
+		for(int i=0;i<rank;i++){
+			A[i][i] = 0.0000;
+			C[i][i] = 1.0000 + scale;
+			for(int j=i+1;j<rank;j++){
+				A[i][j] = A[j][i] = -0.5 * D[i][j] * D[i][j] + offset;
+				C[i][j] = C[j][i] = scale;
+			}
+		}
+		
+		A = matrix_mult(C,A);
+		G = matrix_mult(A,C);
+	}
+	catch(exception& e) {
+		m->errorOut(e, "LinearAlgebra", "recenter");
+		exit(1);
+	}
+	
+}
+/*********************************************************************************************************************************/
+
 //  This function is taken from Numerical Recipes in C++ by Press et al., 2nd edition, pg. 479
 
 int LinearAlgebra::tred2(vector<vector<double> >& a, vector<double>& d, vector<double>& e){

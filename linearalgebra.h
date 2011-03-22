@@ -20,6 +20,7 @@ public:
 	~LinearAlgebra() {}
 	
 	vector<vector<double> > matrix_mult(vector<vector<double> >, vector<vector<double> >);
+	void recenter(double, vector<vector<double> >, vector<vector<double> >&);
 	int tred2(vector<vector<double> >&, vector<double>&, vector<double>&);
 	int qtli(vector<double>&, vector<double>&, vector<vector<double> >&);
 	vector< vector<double> > calculateEuclidianDistance(vector<vector<double> >&, int); //pass in axes and number of dimensions

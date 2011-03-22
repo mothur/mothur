@@ -314,7 +314,7 @@ int PCACommand::process(vector<SharedRAbundFloatVector*>& lookupFloat){
 			out << endl;
 		}
 		
-		//matrix = linearCalc.matrix_mult(matrix, transposeMatrix);	
+		matrix = linearCalc.matrix_mult(matrix, transposeMatrix);	
 		
 		out << endl << endl << "matrix mult" << endl;
 		for (int i = 0; i < matrix.size(); i++) {

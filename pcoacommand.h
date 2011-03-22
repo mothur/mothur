@@ -37,7 +37,6 @@ private:
 	LinearAlgebra linearCalc;
 	
 	void get_comment(istream&, char, char);
-	void recenter(double, vector<vector<double> >, vector<vector<double> >&);
 	void output(string, vector<string>, vector<vector<double> >&, vector<double>);
 	
 };

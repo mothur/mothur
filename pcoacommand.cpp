@@ -169,12 +169,12 @@ int PCOACommand::execute(){
 		vector<double> d;
 		vector<double> e;
 		vector<vector<double> > G = D;
-		vector<vector<double> > copy_G;
+		//vector<vector<double> > copy_G;
 				
 		m->mothurOut("\nProcessing...\n\n");
 		
 		for(int count=0;count<2;count++){
-			recenter(offset, D, G);					if (m->control_pressed) { return 0; }
+			linearCalc.recenter(offset, D, G);		if (m->control_pressed) { return 0; }
 			linearCalc.tred2(G, d, e);				if (m->control_pressed) { return 0; }
 			linearCalc.qtli(d, e, G);				if (m->control_pressed) { return 0; }
 			offset = d[d.size()-1];
@@ -228,40 +228,6 @@ void PCOACommand::get_comment(istream& f, char begin, char end){
 		exit(1);
 	}
 }	
-/*********************************************************************************************************************************/
-
-void PCOACommand::recenter(double offset, vector<vector<double> > D, vector<vector<double> >& G){
-	try {
-		int rank = D.size();
-		
-		vector<vector<double> > A(rank);
-		vector<vector<double> > C(rank);
-		for(int i=0;i<rank;i++){
-			A[i].resize(rank);
-			C[i].resize(rank);
-		}
-		
-		double scale = -1.0000 / (double) rank;
-		
-		for(int i=0;i<rank;i++){
-			A[i][i] = 0.0000;
-			C[i][i] = 1.0000 + scale;
-			for(int j=i+1;j<rank;j++){
-				A[i][j] = A[j][i] = -0.5 * D[i][j] * D[i][j] + offset;
-				C[i][j] = C[j][i] = scale;
-			}
-		}
-		
-		A = linearCalc.matrix_mult(C,A);
-		G = linearCalc.matrix_mult(A,C);
-	}
-	catch(exception& e) {
-		m->errorOut(e, "PCOACommand", "recenter");
-		exit(1);
-	}
-
-}
-
 /*********************************************************************************************************************************/
 
 void PCOACommand::output(string fnameRoot, vector<string> name_list, vector<vector<double> >& G, vector<double> d) {
