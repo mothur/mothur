@@ -60,12 +60,8 @@ int RefChimeraTest::analyzeQuery(string queryName, string querySeq){
 	int nMera = 0;
 	string chimeraRefSeq = "";
 	
-	if(bestSequenceMismatch - minMismatchToChimera <= 3){
-		nMera = 1;
-		chimeraRefSeq = referenceSeqs[bestMatch];
-	}
-	else {
-
+	if(bestSequenceMismatch - minMismatchToChimera > 3 || (minMismatchToChimera == 0 && bestSequenceMismatch != 0)){
+	
 		nMera = 2;
 		chimeraRefSeq = stitchBimera(leftParentBi, rightParentBi, breakPointBi);
 		
@@ -81,6 +77,12 @@ int RefChimeraTest::analyzeQuery(string queryName, string querySeq){
 //		}
 		
 	}
+	else{
+		nMera = 1;
+		chimeraRefSeq = referenceSeqs[bestMatch];
+	}
+	
+	
 	double distToChimera = calcDistToChimera(querySeq, chimeraRefSeq);
 	
 //	double loonIndex = calcLoonIndex(querySeq, referenceSeqs[leftParentBi], referenceSeqs[rightParentBi], breakPointBi, binMatrix);		
