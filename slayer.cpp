@@ -152,7 +152,7 @@ cout << pB->getName() << endl;*/
 	
 		//check window size
 		if (length < (2*windowSize+windowStep)) { 
-			m->mothurOut("Your window size is too large for " + q->getName() + ". I will make the window size " + toString(length/4) + " which is 1/4 the filtered length."); m->mothurOutEndLine();	
+//			m->mothurOut("Your window size is too large for " + q->getName() + ". I will make the window size " + toString(length/4) + " which is 1/4 the filtered length."); m->mothurOutEndLine();	
 			windowSize = length / 4;
 		}
 		
