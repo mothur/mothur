@@ -76,6 +76,7 @@ private:
 	string sffFilename, sfftxtFilename, outputDir, accnosName;
 	vector<string> filenames, outputNames, accnosFileNames;
 	bool abort, fasta, qual, trim, flow, sfftxt, hasAccnos;
+	int mycount;
 	set<string> seqNames;
 	map<string, vector<string> > outputTypes;
 	

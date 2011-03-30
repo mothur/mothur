@@ -597,7 +597,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 					
 					if(barcodes.size() != 0){
 						string thisGroup = barcodeNameVector[barcodeIndex];
-						if (primers.size() != 0) { thisGroup += "." + primerNameVector[primerIndex]; }
+						if (primers.size() != 0) {  if (primerNameVector[primerIndex] != "") { thisGroup += "." + primerNameVector[primerIndex]; } }
 						
 						outGroupsFile << currSeq.getName() << '\t' << thisGroup << endl;
 						

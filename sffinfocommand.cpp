@@ -356,8 +356,9 @@ int SffInfoCommand::extractSffInfo(string input, string accnos){
 		
 		CommonHeader header; 
 		readCommonHeader(in, header);
-		
+	
 		int count = 0;
+		mycount = 0;
 		
 		//check magic number and version
 		if (header.magicNumber != 779314790) { m->mothurOut("Magic Number is not correct, not a valid .sff file"); m->mothurOutEndLine(); return count; }
@@ -392,6 +393,7 @@ int SffInfoCommand::extractSffInfo(string input, string accnos){
 			}
 			
 			count++;
+			mycount++;
 		
 			//report progress
 			if((count+1) % 10000 == 0){	m->mothurOut(toString(count+1)); m->mothurOutEndLine();		}
@@ -788,6 +790,7 @@ int SffInfoCommand::printQualSeqData(ofstream& out, seqRead& read, Header& heade
 		
 		if (trim) {
 			if(header.clipQualRight < header.clipQualLeft){
+				out << ">" << header.name << " xy=" << header.xy << endl;
 				out << "0\t0\t0\t0";
 			}
 			else if((header.clipQualRight != 0) && ((header.clipQualRight-header.clipQualLeft) >= 0)){
