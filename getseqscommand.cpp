@@ -218,7 +218,7 @@ GetSeqsCommand::GetSeqsCommand(string option)  {
 			else if (qualfile == "not found") {  qualfile = "";  }
 			
 			string usedDups = "true";
-			string temp = validParameter.validFile(parameters, "dups", false);	if (temp == "not found") { temp = "false"; usedDups = ""; }
+			string temp = validParameter.validFile(parameters, "dups", false);	if (temp == "not found") { temp = "true"; usedDups = ""; }
 			dups = m->isTrue(temp);
 			
 			if ((fastafile == "") && (namefile == "") && (groupfile == "") && (alignfile == "") && (listfile == "") && (taxfile == "") && (qualfile == "") && (accnosfile2 == ""))  { m->mothurOut("You must provide one of the following: fasta, name, group, alignreport, taxonomy, quality or listfile."); m->mothurOutEndLine(); abort = true; }
