@@ -434,16 +434,8 @@ int RemoveLineageCommand::readName(){
 			in >> secondCol;			
 
 			vector<string> parsedNames;
-			//parse second column saving each name
-			while (secondCol.find_first_of(',') != -1) { 
-				name = secondCol.substr(0,secondCol.find_first_of(','));
-				secondCol = secondCol.substr(secondCol.find_first_of(',')+1, secondCol.length());
-				parsedNames.push_back(name);
-			}
+			m->splitAtComma(secondCol, parsedNames);
 			
-			//get name after last ,
-			parsedNames.push_back(secondCol);
-
 			vector<string> validSecond;  validSecond.clear();
 			for (int i = 0; i < parsedNames.size(); i++) {
 				if (names.count(parsedNames[i]) == 0) {

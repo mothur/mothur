@@ -539,15 +539,7 @@ int GetSeqsCommand::readName(){
 			if (dups) { hold = secondCol; }
 			
 			vector<string> parsedNames;
-			//parse second column saving each name
-			while (secondCol.find_first_of(',') != -1) { 
-				name = secondCol.substr(0,secondCol.find_first_of(','));
-				secondCol = secondCol.substr(secondCol.find_first_of(',')+1, secondCol.length());
-				parsedNames.push_back(name);
-			}
-			
-			//get name after last ,
-			parsedNames.push_back(secondCol);
+			m->splitAtComma(secondCol, parsedNames);
 			
 			vector<string> validSecond;
 			for (int i = 0; i < parsedNames.size(); i++) {
