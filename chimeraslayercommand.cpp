@@ -684,7 +684,7 @@ int ChimeraSlayerCommand::driver(linePair* filePos, string outputFName, string f
 					
 					
 				}
-			count++;
+				count++;
 			}
 			delete candidateSeq;
 			

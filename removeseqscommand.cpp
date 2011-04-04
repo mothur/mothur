@@ -513,24 +513,17 @@ int RemoveSeqsCommand::readName(){
 		string name, firstCol, secondCol;
 		
 		bool wroteSomething = false;
+				
 		
 		while(!in.eof()){
 			if (m->control_pressed) { in.close();  out.close();  remove(outputFileName.c_str());  return 0; }
-
+			
 			in >> firstCol;		m->gobble(in);		
 			in >> secondCol;			
-
-			vector<string> parsedNames;
-			//parse second column saving each name
-			while (secondCol.find_first_of(',') != -1) { 
-				name = secondCol.substr(0,secondCol.find_first_of(','));
-				secondCol = secondCol.substr(secondCol.find_first_of(',')+1, secondCol.length());
-				parsedNames.push_back(name);
-			}
 			
-			//get name after last ,
-			parsedNames.push_back(secondCol);
-
+			vector<string> parsedNames;
+			m->splitAtComma(secondCol, parsedNames);
+			
 			vector<string> validSecond;  validSecond.clear();
 			for (int i = 0; i < parsedNames.size(); i++) {
 				if (names.count(parsedNames[i]) == 0) {
@@ -541,7 +534,7 @@ int RemoveSeqsCommand::readName(){
 			if ((dups) && (validSecond.size() != parsedNames.size())) {  //if dups is true and we want to get rid of anyone, get rid of everyone
 				for (int i = 0; i < parsedNames.size(); i++) {  names.insert(parsedNames[i]);  }
 			}else {
-					//if the name in the first column is in the set then print it and any other names in second column also in set
+				//if the name in the first column is in the set then print it and any other names in second column also in set
 				if (names.count(firstCol) == 0) {
 					
 					wroteSomething = true;
@@ -572,10 +565,10 @@ int RemoveSeqsCommand::readName(){
 		}
 		in.close();
 		out.close();
-
+		
 		if (wroteSomething == false) {  m->mothurOut("Your file contains only sequences from the .accnos file."); m->mothurOutEndLine();  }
 		outputTypes["name"].push_back(outputFileName); outputNames.push_back(outputFileName);
-				
+		
 		return 0;
 	}
 	catch(exception& e) {

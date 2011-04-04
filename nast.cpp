@@ -139,24 +139,22 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 							string leftCandidateString = candAln.substr(0,(leftIndex-insertLength+1));
 							string rightCandidateString = candAln.substr((leftIndex+1));
 							candAln = leftCandidateString + rightCandidateString;
-		
-						}
-						else{									//	not enough room to the left, have to steal some space to
+							
+						}else{									//	not enough room to the left, have to steal some space to the right
 						
 			//cout << "in else lr newTemplateAlign = " << newTemplateAlign.length() << '\t' << i << '\t' << insertLength << endl;
-							string leftTemplateString = newTemplateAlign.substr(0,i);	//	the right
+							string leftTemplateString = newTemplateAlign.substr(0,i);	
 							string rightTemplateString = newTemplateAlign.substr((i+insertLength));
 							newTemplateAlign = leftTemplateString + rightTemplateString;
 							longAlignmentLength = newTemplateAlign.length();
-			//cout << " in else lr candAln = " << candAln.length() << '\t' << " leftIndex = " << leftIndex << " leftroom = " << leftRoom << " rightIndex = " << rightIndex << '\t' << endl;					
+			//cout << " in else lr candAln = " << candAln.length() << '\t' << " leftIndex = " << leftIndex << " leftroom = " << leftRoom << " rightIndex = " << rightIndex << '\t' << " rightroom = " << rightRoom << '\t' << endl;					
 							string leftCandidateString = candAln.substr(0,(leftIndex-leftRoom+1));
 							string insertString = candAln.substr((leftIndex+1),(rightIndex-leftIndex-1));
 							string rightCandidateString = candAln.substr((rightIndex+(insertLength-leftRoom)));
 							candAln = leftCandidateString + insertString + rightCandidateString;
 				
 						}
-					}
-					else{										//	the right gap is closer - > move stuff right there's
+					}else{										//	the right gap is closer - > move stuff right there's
 						if(rightRoom >= insertLength){			//	enough room to the right to move
 			//cout << "rr newTemplateAlign = " << newTemplateAlign.length() << '\t' << i << '\t' << i+insertLength << endl;
 							string leftTemplateString = newTemplateAlign.substr(0,i);
@@ -184,7 +182,9 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 									
 						}
 					}
-					i -= insertLength;
+					
+					if ((i - insertLength) < 0) {  i = 0; }
+					else { i -= insertLength; }
 
 				}
 				else{
@@ -207,7 +207,7 @@ void Nast::removeExtraGaps(string& candAln, string tempAln, string newTemplateAl
 //				i -= insertLength;
 				
 				//if i is negative, we want to remove the extra gaps to the right
-				if (i < 0) { cout << "i is negative" << endl; }
+				if (i < 0) { m->mothurOut("i is negative"); m->mothurOutEndLine(); } 
 			} 
 		}
 	}
