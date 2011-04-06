@@ -84,9 +84,7 @@ SplitAbundCommand::SplitAbundCommand(string option)  {
 		if(option == "help") { help(); abort = true; calledHelp = true; }
 		
 		else {
-			//valid paramters for this command
-			string Array[] =  {"name","group","list","label","accnos","groups","fasta","cutoff","outputdir","inputdir"}; //
-			vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			vector<string> myArray = setParameters();
 			
 			OptionParser parser(option);
 			map<string, string> parameters = parser.getParameters();

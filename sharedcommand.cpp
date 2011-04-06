@@ -75,9 +75,7 @@ SharedCommand::SharedCommand(string option)  {
 		
 		else {
 			
-			 //valid paramters for this command
-			 string Array[] =  {"list","label","group","groups","ordergroup","outputdir","inputdir"};
-			 vector<string> myArray (Array, Array+(sizeof(Array)/sizeof(string)));
+			 vector<string> myArray = setParameters();
 			 
 			 OptionParser parser(option);
 			 map<string, string> parameters = parser.getParameters();
