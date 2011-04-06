@@ -55,7 +55,7 @@ string DistanceCommand::getHelpString(){
 		helpString += "The dist.seqs command should be in the following format: \n";
 		helpString += "dist.seqs(fasta=yourFastaFile, calc=yourCalc, countends=yourEnds, cutoff= yourCutOff, processors=yourProcessors) \n";
 		helpString += "Example dist.seqs(fasta=amazon.fasta, calc=eachgap, countends=F, cutoff= 2.0, processors=3).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. calc), '=' and parameters (i.e.yourCalc).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. calc), '=' and parameters (i.e.yourCalc).\n";
 		return helpString;
 	}
 	catch(exception& e) {

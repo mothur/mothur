@@ -39,7 +39,7 @@ string GetRAbundCommand::getHelpString(){
 		helpString += "Example get.rabund(sorted=F).\n";
 		helpString += "The default value for label is all labels in your inputfile.\n";
 		helpString += "The get.rabund command outputs a .rabund file containing the lines you selected.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabels).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabels).\n";
 		return helpString;
 	}
 	catch(exception& e) {

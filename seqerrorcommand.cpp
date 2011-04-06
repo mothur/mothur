@@ -41,7 +41,7 @@ string SeqErrorCommand::getHelpString(){
 		helpString += "The seq.error command reads a query alignment file and a reference alignment file and creates .....\n";
 		helpString += "Example seq.error(...).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
-		helpString += "For more details please check out the wiki http://www.mothur.org/wiki/seq.error .\n\n";
+		helpString += "For more details please check out the wiki http://www.mothur.org/wiki/seq.error .\n";
 		return helpString;
 	}
 	catch(exception& e) {
@@ -374,7 +374,7 @@ int SeqErrorCommand::execute(){
 		ofstream errorCountFile;
 		m->openOutputFile(errorCountFileName, errorCountFile);
 		outputNames.push_back(errorCountFileName);  outputTypes["error.count"].push_back(errorCountFileName);
-		m->mothurOut("Overall error rate:\t" + toString((double)(totalBases - totalMatches) / (double)totalBases) + "\n\n");
+		m->mothurOut("Overall error rate:\t" + toString((double)(totalBases - totalMatches) / (double)totalBases) + "\n");
 		m->mothurOut("Errors\tSequences\n");
 		errorCountFile << "Errors\tSequences\n";		
 		for(int i=0;i<misMatchCounts.size();i++){

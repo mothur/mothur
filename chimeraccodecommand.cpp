@@ -52,7 +52,7 @@ string ChimeraCcodeCommand::getHelpString(){
 		helpString += "The chimera.ccode command should be in the following format: \n";
 		helpString += "chimera.ccode(fasta=yourFastaFile, reference=yourTemplate) \n";
 		helpString += "Example: chimera.ccode(fasta=AD.align, reference=core_set_aligned.imputed.fasta) \n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n";	
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n";	
 		return helpString;
 	}
 	catch(exception& e) {
@@ -287,7 +287,7 @@ int ChimeraCcodeCommand::execute(){
 				if (m->control_pressed) {  MPI_File_close(&inMPI);  MPI_File_close(&outMPI);   MPI_File_close(&outMPIAccnos);  for (int j = 0; j < outputNames.size(); j++) {	remove(outputNames[j].c_str());	} outputTypes.clear();  delete chimera; return 0;  }
 			
 				if (pid == 0) { //you are the root process 
-					string outTemp = "For full window mapping info refer to " + mapInfo + "\n\n";
+					string outTemp = "For full window mapping info refer to " + mapInfo + "\n";
 					
 					//print header
 					int length = outTemp.length();

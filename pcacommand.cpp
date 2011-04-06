@@ -40,7 +40,7 @@ string PCACommand::getHelpString(){
 		helpString += "The metric parameter allows indicate you if would like the pearson correlation coefficient calculated. Default=True";
 		helpString += "Example pca(groups=yourGroups).\n";
 		helpString += "Example pca(groups=A-B-C).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n";
 		return helpString;
 	}
 	catch(exception& e) {

@@ -74,6 +74,7 @@ vector<string> MatrixOutputCommand::setParameters(){
 string MatrixOutputCommand::getHelpString(){	
 	try {
 		string helpString = "";
+		ValidCalculators validCalculator;
 		helpString += "The dist.shared command parameters are shared, groups, calc, output and label.  shared is a required, unless you have a valid current file.\n";
 		helpString += "The groups parameter allows you to specify which of the groups in your groupfile you would like included used.\n";
 		helpString += "The group names are separated by dashes. The label parameter allows you to select what distance levels you would like distance matrices created for, and is also separated by dashes.\n";
@@ -82,9 +83,9 @@ string MatrixOutputCommand::getHelpString(){
 		helpString += "Example dist.shared(groups=A-B-C, calc=jabund-sorabund).\n";
 		helpString += "The default value for groups is all the groups in your groupfile.\n";
 		helpString += "The default value for calc is jclass and thetayc.\n";
-		helpString += validCalculator->printCalc("matrix");
+		helpString += validCalculator.printCalc("matrix");
 		helpString += "The dist.shared command outputs a .dist file for each calculator you specify at each distance you choose.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. groups), '=' and parameters (i.e.yourGroups).\n";
 		return helpString;
 	}
 	catch(exception& e) {
@@ -113,7 +114,7 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
 		allLines = 1;
 				
 		//allow user to run help
-		if(option == "help") { validCalculator = new ValidCalculators(); help(); abort = true; calledHelp = true; }
+		if(option == "help") {  help(); abort = true; calledHelp = true; }
 		
 		else {
 			vector<string> myArray = setParameters();
@@ -189,11 +190,11 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
 
 			if (abort == false) {
 			
-				validCalculator = new ValidCalculators();
+				ValidCalculators validCalculator;
 				
 				int i;
 				for (i=0; i<Estimators.size(); i++) {
-					if (validCalculator->isValidCalculator("matrix", Estimators[i]) == true) { 
+					if (validCalculator.isValidCalculator("matrix", Estimators[i]) == true) { 
 						if (Estimators[i] == "sharedsobs") { 
 							matrixCalculators.push_back(new SharedSobsCS());
 						}else if (Estimators[i] == "sharedchao") { 
@@ -288,11 +289,7 @@ MatrixOutputCommand::MatrixOutputCommand(string option)  {
 
 //**********************************************************************************************************************
 
-MatrixOutputCommand::~MatrixOutputCommand(){
-	if (abort == false) {
-		delete validCalculator;
-	}
-}
+MatrixOutputCommand::~MatrixOutputCommand(){}
 
 //**********************************************************************************************************************
 

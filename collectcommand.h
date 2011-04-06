@@ -47,7 +47,6 @@ private:
 	OrderVector* order;
 	InputData* input;
 	Collect* cCurve;
-	ValidCalculators* validCalculator;
 	vector<Display*> cDisplays;
 	int abund, size;
 	float freq;

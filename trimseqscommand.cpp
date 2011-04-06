@@ -80,7 +80,7 @@ string TrimSeqsCommand::getHelpString(){
 		helpString += "maxhomop=yourMaxhomop, minlength=youMinlength, maxlength=yourMaxlength)  \n";	
 		helpString += "Example trim.seqs(fasta=abrecovery.fasta, flip=..., oligos=..., maxambig=..., maxhomop=..., minlength=..., maxlength=...).\n";
 		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFasta).\n";
-		helpString += "For more details please check out the wiki http://www.mothur.org/wiki/Trim.seqs .\n\n";
+		helpString += "For more details please check out the wiki http://www.mothur.org/wiki/Trim.seqs .\n";
 		return helpString;
 	}
 	catch(exception& e) {
@@ -583,7 +583,7 @@ int TrimSeqsCommand::driverCreateTrim(string filename, string qFileName, string 
 					
 					if(barcodes.size() != 0){
 						string thisGroup = barcodeNameVector[barcodeIndex];
-						if (primers.size() != 0) {  if (primerNameVector[primerIndex] != "") { thisGroup += "." + primerNameVector[primerIndex]; } }
+						if (primers.size() != 0) { thisGroup += "." + primerNameVector[primerIndex]; }
 						
 						outGroupsFile << currSeq.getName() << '\t' << thisGroup << endl;
 						

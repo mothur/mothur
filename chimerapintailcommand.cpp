@@ -57,7 +57,7 @@ string ChimeraPintailCommand::getHelpString(){
 		helpString += "The chimera.pintail command should be in the following format: \n";
 		helpString += "chimera.pintail(fasta=yourFastaFile, reference=yourTemplate) \n";
 		helpString += "Example: chimera.pintail(fasta=AD.align, reference=silva.bacteria.fasta) \n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n";	
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n";	
 		return helpString;
 	}
 	catch(exception& e) {

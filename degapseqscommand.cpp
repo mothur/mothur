@@ -37,7 +37,7 @@ string DegapSeqsCommand::getHelpString(){
 		helpString += "The degap.seqs command should be in the following format: \n";
 		helpString += "degap.seqs(fasta=yourFastaFile) \n";	
 		helpString += "Example: degap.seqs(fasta=abrecovery.align) \n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n";	
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n";	
 		return helpString;
 	}
 	catch(exception& e) {

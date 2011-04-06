@@ -33,7 +33,8 @@ public:
 	bool getAppend()						{	return append;			}
 	string getOutputDir()					{	return outputDir;		}
 	bool MPIEnabled(string);
-
+	map<string, string> getListCommands()	{	return commands;		}
+	
 private:
 	Command* command;
 	Command* shellcommand;

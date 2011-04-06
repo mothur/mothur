@@ -32,7 +32,7 @@ string ConcensusCommand::getHelpString(){
 		helpString += "The .consensus.tre file contains the consensus tree of the trees in your input file.\n";
 		helpString += "The branch lengths are the percentage of trees in your input file that had the given pair.\n";
 		helpString += "The .consensuspairs file contains a list of the internal nodes in your tree.  For each node, the pair that was used in the consensus tree \n";
-		helpString += "is reported with its percentage, as well as the other pairs that were seen for that node but not used and their percentages.\n\n";		
+		helpString += "is reported with its percentage, as well as the other pairs that were seen for that node but not used and their percentages.\n";		
 		return helpString;
 	}
 	catch(exception& e) {

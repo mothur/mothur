@@ -35,14 +35,14 @@ vector<string> AmovaCommand::setParameters(){
 string AmovaCommand::getHelpString(){	
 	try {
 		string helpString = "";
-		helpString += "Referenced: Anderson MJ (2001). A new method for non-parametric multivariate analysis of variance. Austral Ecol 26: 32-46.\n";
-		helpString += "The amova command outputs a .amova file. \n";
-		helpString += "The amova command parameters are phylip, iters, and alpha.  The phylip and design parameters are required, unless you have valid current files.\n";
-		helpString += "The design parameter allows you to assign your samples to groups when you are running amova. It is required. \n";
-		helpString += "The design file looks like the group file.  It is a 2 column tab delimited file, where the first column is the sample name and the second column is the group the sample belongs to.\n";
-		helpString += "The iters parameter allows you to set number of randomization for the P value.  The default is 1000. \n";
-		helpString += "The amova command should be in the following format: amova(phylip=file.dist, design=file.design).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. iters), '=' and parameters (i.e. 1000).\n\n";
+		helpString += "Referenced: Anderson MJ (2001). A new method for non-parametric multivariate analysis of variance. Austral Ecol 26: 32-46.";
+		helpString += "The amova command outputs a .amova file.";
+		helpString += "The amova command parameters are phylip, iters, and alpha.  The phylip and design parameters are required, unless you have valid current files.";
+		helpString += "The design parameter allows you to assign your samples to groups when you are running amova. It is required.";
+		helpString += "The design file looks like the group file.  It is a 2 column tab delimited file, where the first column is the sample name and the second column is the group the sample belongs to.";
+		helpString += "The iters parameter allows you to set number of randomization for the P value.  The default is 1000.";
+		helpString += "The amova command should be in the following format: amova(phylip=file.dist, design=file.design).";
+		helpString += "Note: No spaces between parameter labels (i.e. iters), '=' and parameters (i.e. 1000).";
 		return helpString;
 	}
 	catch(exception& e) {
@@ -282,7 +282,7 @@ double AmovaCommand::runAMOVA(ofstream& AMOVAFile, map<string, vector<int> > gro
 		m->mothurOut("df\t" + toString(dfAmong) + '\t' + toString(dfWithin) + '\t' + toString(dfTotal) + '\n');
 
 		AMOVAFile << "MS\t" << MSAmong << '\t' << MSWithin << endl << endl;
-		m->mothurOut("MS\t" + toString(MSAmong) + '\t' + toString(MSWithin) + "\n\n");
+		m->mothurOut("MS\t" + toString(MSAmong) + '\t' + toString(MSWithin) + "\n");
 
 		AMOVAFile << "Fs:\t" << Fs << endl;
 		m->mothurOut("Fs:\t" + toString(Fs) + '\n');

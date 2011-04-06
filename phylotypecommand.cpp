@@ -45,7 +45,7 @@ string PhylotypeCommand::getHelpString(){
 		helpString += "For the label parameter, levels count down from the root to keep the output similiar to mothur's other commands which report information from finer resolution to coarser resolutions.\n";
 		helpString += "The phylotype command should be in the following format: \n";
 		helpString += "phylotype(taxonomy=yourTaxonomyFile, cutoff=yourCutoff, label=yourLabels) \n";
-		helpString += "Eaxample: phylotype(taxonomy=amazon.taxonomy, cutoff=5, label=1-3-5).\n\n";
+		helpString += "Eaxample: phylotype(taxonomy=amazon.taxonomy, cutoff=5, label=1-3-5).\n";
 		return helpString;
 	}
 	catch(exception& e) {

@@ -76,7 +76,7 @@ string ClassifySeqsCommand::getHelpString(){
 		helpString += "Example classify.seqs(fasta=amazon.fasta, reference=core.filtered, method=knn, search=gotoh, ksize=8, processors=2)\n";
 		helpString += "The .taxonomy file consists of 2 columns: 1 = your sequence name, 2 = the taxonomy for your sequence. \n";
 		helpString += "The .tax.summary is a summary of the different taxonomies represented in your fasta file. \n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n";
 		return helpString;
 	}
 	catch(exception& e) {

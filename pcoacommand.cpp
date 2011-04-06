@@ -37,7 +37,7 @@ string PCOACommand::getHelpString(){
 		helpString += "The phylip parameter allows you to enter your distance file.";
 		helpString += "The metric parameter allows indicate you if would like the pearson correlation coefficient calculated. Default=True"; 
 		helpString += "Example pcoa(phylip=yourDistanceFile).\n";
-		helpString += "Note: No spaces between parameter labels (i.e. phylip), '=' and parameters (i.e.yourDistanceFile).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. phylip), '=' and parameters (i.e.yourDistanceFile).\n";
 		return helpString;
 	}
 	catch(exception& e) {
@@ -157,7 +157,7 @@ int PCOACommand::execute(){
 		vector<vector<double> > G = D;
 		//vector<vector<double> > copy_G;
 				
-		m->mothurOut("\nProcessing...\n\n");
+		m->mothurOut("\nProcessing...\n");
 		
 		for(int count=0;count<2;count++){
 			linearCalc.recenter(offset, D, G);		if (m->control_pressed) { return 0; }

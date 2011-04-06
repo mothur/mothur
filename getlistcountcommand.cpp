@@ -40,7 +40,7 @@ string GetListCountCommand::getHelpString(){
 		helpString += "Example get.otulist(list=amazon.fn.list, label=0.10).\n";
 		helpString += "The default value for label is all lines in your inputfile.\n";
 		helpString += "The get.otulist command outputs a .otu file for each distance you specify listing the bin number and the names of the sequences in that bin.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n";
 		return helpString;
 	}
 	catch(exception& e) {

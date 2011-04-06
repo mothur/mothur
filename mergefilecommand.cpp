@@ -33,7 +33,7 @@ string MergeFileCommand::getHelpString(){
 		helpString += "The merge.file command takes a list of files separated by dashes and merges them into one file."; 
 		helpString += "The merge.file command parameters are input and output."; 
 		helpString += "Example merge.file(input=small.fasta-large.fasta, output=all.fasta).";
-		helpString += "Note: No spaces between parameter labels (i.e. output), '=' and parameters (i.e.yourOutputFileName).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. output), '=' and parameters (i.e.yourOutputFileName).\n";
 		return helpString;
 	}
 	catch(exception& e) {

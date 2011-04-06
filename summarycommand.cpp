@@ -71,7 +71,7 @@ string SummaryCommand::getHelpString(){
 		helpString += "The default value calc is sobs-chao-ace-jack-shannon-npshannon-simpson\n";
 		helpString += "If you are running summary.single with a shared file and would like your summary results collated in one file, set groupmode=t. (Default=true).\n";
 		helpString += "The label parameter is used to analyze specific labels in your input.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabels).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. label), '=' and parameters (i.e.yourLabels).\n";
 		return helpString;
 	}
 	catch(exception& e) {

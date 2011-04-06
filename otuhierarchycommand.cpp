@@ -38,7 +38,7 @@ string OtuHierarchyCommand::getHelpString(){
 		helpString += "otu.hierarchy(list=yourListFile, label=yourLabels).\n";
 		helpString += "Example otu.hierarchy(list=amazon.fn.list, label=0.01-0.03).\n";
 		helpString += "The otu.hierarchy command outputs a .otu.hierarchy file which is described on the wiki.\n";
-		helpString += "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n\n";
+		helpString += "Note: No spaces between parameter labels (i.e. list), '=' and parameters (i.e.yourListFile).\n";
 		return helpString;
 	}
 	catch(exception& e) {

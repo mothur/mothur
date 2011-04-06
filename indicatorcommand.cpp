@@ -44,7 +44,7 @@ string IndicatorCommand::getHelpString(){
 		helpString += "The groups parameter allows you to specify which of the groups in your shared or relabund you would like analyzed, or if you provide a design file the groups in your design file.  The groups may be entered separated by dashes.\n";
 		helpString += "The label parameter indicates at what distance your tree relates to the shared or relabund.\n";
 		helpString += "The indicator command should be used in the following format: indicator(tree=test.tre, shared=test.shared, label=0.03)\n";
-		helpString += "Note: No spaces between parameter labels (i.e. tree), '=' and parameters (i.e.yourTreefile).\n\n"; 
+		helpString += "Note: No spaces between parameter labels (i.e. tree), '=' and parameters (i.e.yourTreefile).\n"; 
 		return helpString;
 	}
 	catch(exception& e) {

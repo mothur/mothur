@@ -36,7 +36,7 @@ string SeqSummaryCommand::getHelpString(){
 		helpString += "The name parameter allows you to enter a name file associated with your fasta file. \n";
 		helpString += "The summary.seqs command should be in the following format: \n";
 		helpString += "summary.seqs(fasta=yourFastaFile, processors=2) \n";
-		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n\n";	
+		helpString += "Note: No spaces between parameter labels (i.e. fasta), '=' and parameters (i.e.yourFastaFile).\n";	
 		return helpString;
 	}
 	catch(exception& e) {
